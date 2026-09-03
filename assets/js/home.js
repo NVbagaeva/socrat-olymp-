@@ -140,9 +140,28 @@
     host.appendChild(Site.fragment(picked.map(window.materialCard).join('')));
   }
 
+  /* ---- Портрет ----------------------------------------------------------- */
+
+  function renderPortrait(site) {
+    var photo = document.getElementById('hero-portrait');
+    var monogram = document.getElementById('hero-monogram');
+    if (!photo || !monogram) return;
+
+    if (site.person && site.person.photo) {
+      photo.alt = site.person.photoAlt || site.person.fullName;
+      return;
+    }
+
+    /* Фото ещё не прислали — остаётся монограмма. */
+    photo.hidden = true;
+    monogram.hidden = false;
+    monogram.textContent = site.person.initials;
+  }
+
   /* ---- Запуск ----------------------------------------------------------- */
 
   Site.load('data/site.json').then(function (site) {
+    renderPortrait(site);
     renderServices(site);
     renderFaq(site);
     renderContacts(site);

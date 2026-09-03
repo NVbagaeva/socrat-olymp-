@@ -1,0 +1,46 @@
+{
+  "grade": 9,
+  "title": "9 класс",
+  "summary": "Подготовка к ОГЭ: вторая часть, геометрия с нуля, вероятность и статистика.",
+  "sample": true,
+  "submitTo": null,
+  "homework": [
+    {
+      "id": "hw-9-1",
+      "title": "Пробник ОГЭ: вторая часть",
+      "topic": "ОГЭ",
+      "description": "Задания 20–25 из ноябрьского пробника. Записывать полное решение, не только ответ.",
+      "assigned": "2026-09-01",
+      "deadline": "2026-09-07",
+      "file": null,
+      "notes": null
+    }
+  ],
+  "theory": [
+    {
+      "id": "t-9-1",
+      "section": "ОГЭ",
+      "title": "Геометрия с нуля",
+      "description": "Программа курса: от определений и признаков до второй части экзамена.",
+      "href": "https://ege-study.ru/raspisanie-intensivov/geometriya-s-nulya-na-oge/",
+      "file": null
+    },
+    {
+      "id": "t-9-2",
+      "section": "ОГЭ",
+      "title": "Разбор ноябрьского пробника",
+      "description": "Запись трансляции с полным разбором варианта, включая вторую часть.",
+      "href": "https://vk.com/video-37711765_456242042",
+      "file": null
+    }
+  ],
+  "files": [
+    {
+      "id": "f-9-1",
+      "title": "Тренировочные варианты ОГЭ",
+      "description": "TODO: положите PDF в assets/files/classes/9/ и укажите путь в поле file.",
+      "href": null,
+      "file": null
+    }
+  ]
+}

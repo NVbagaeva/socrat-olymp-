@@ -400,16 +400,46 @@ li { margin-bottom: var(--space-2); }
   box-shadow: var(--shadow);
 }
 .hero__portrait {
-  width: 96px; height: 96px;
+  width: 108px; height: 108px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-sm);
+  margin-bottom: var(--space-4);
+}
+/* [hidden] должен побеждать display у любого варианта портрета. */
+.hero__portrait[hidden] { display: none; }
+.hero__portrait--mono {
   display: grid;
   place-items: center;
   background: linear-gradient(140deg, var(--ink) 0%, #24456d 100%);
   color: #f4dfba;
   font-family: var(--font-display);
-  font-size: 1.9rem;
+  font-size: 2rem;
   letter-spacing: 0.02em;
-  margin-bottom: var(--space-4);
+  border: none;
+  box-shadow: none;
+}
+@media (min-width: 900px) {
+  .hero__portrait { width: 132px; height: 132px; }
+}
+
+/* Портрет в развороте «Обо мне» */
+.portrait-figure { margin: 0; }
+.portrait-figure img {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.portrait-figure figcaption {
+  margin-top: var(--space-3);
+  font-size: 0.86rem;
+  color: var(--ink-muted);
+  max-width: 380px;
 }
 .hero__aside-title { font-family: var(--font-display); font-size: 1.25rem; margin-bottom: var(--space-2); }
 .hero__aside-role { color: var(--ink-muted); font-size: 0.92rem; margin-bottom: var(--space-4); }
@@ -1009,3 +1039,170 @@ table.data tbody tr:last-child td { border-bottom: none; }
   }
   .js .reveal { opacity: 1; transform: none; }
 }
+
+/* --------------------------------------------------------------------------
+   Разделы классов
+   -------------------------------------------------------------------------- */
+
+.class-card {
+  text-decoration: none;
+  color: inherit;
+  gap: var(--space-2);
+}
+.class-card:hover { border-color: var(--accent); }
+.class-card__grade {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  line-height: 1;
+  margin: 0 0 var(--space-2);
+}
+.class-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+/* Форма ввода кода */
+.gate {
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  max-width: 520px;
+}
+.gate__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-3);
+}
+.gate__row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.gate__input {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 13px var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.gate__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(184, 121, 15, 0.12);
+}
+.gate__error {
+  margin: var(--space-3) 0 0;
+  color: #a3312f;
+  font-size: 0.92rem;
+}
+.gate__hint {
+  margin: var(--space-4) 0 0;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+}
+
+/* Бейджи сроков */
+.due {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.due--soon { background: var(--accent-wash); border-color: #e8d3a8; color: var(--accent-deep); }
+.due--today { background: #fdf0e6; border-color: #f0c9a6; color: #a85a1b; font-weight: 600; }
+.due--late { background: #fdeceb; border-color: #f3c9c7; color: #a3312f; }
+.due--done { background: #eaf3ee; border-color: #c9e0d3; color: var(--success); }
+
+/* Карточка домашнего задания */
+.hw-list { display: grid; gap: var(--space-4); }
+.hw {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.hw--done { opacity: 0.72; border-left-color: var(--success); }
+.hw__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.hw__head .due { margin-left: auto; }
+.hw__title { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+.hw--done .hw__title { text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.hw__text { margin: 0; color: var(--ink-soft); font-size: 0.97rem; }
+.hw__notes {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--accent-wash);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.hw__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+.hw__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.hw__check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: auto;
+}
+.hw__check input { width: 18px; height: 18px; accent-color: var(--success); cursor: pointer; }
+
+/* Теория по разделам */
+.theory-section { margin-bottom: var(--space-7); }
+.theory-section:last-child { margin-bottom: 0; }
+.theory-section__title {
+  font-size: 1.05rem;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Строка ресурса: конспект, файл, ссылка */
+.res-list { display: grid; gap: var(--space-3); }
+.res {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.res:hover { border-color: var(--line-strong); }
+.res__title { font-family: var(--font-display); font-size: 1.08rem; margin: 0 0 var(--space-1); }
+.res__text { margin: 0; font-size: 0.92rem; color: var(--ink-soft); max-width: 62ch; }
+.res__soon { font-size: 0.85rem; color: var(--ink-muted); white-space: nowrap; }

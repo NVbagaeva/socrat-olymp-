@@ -8,8 +8,10 @@
     "city": "Москва",
     "since": 2018,
     "category": "Высшая квалификационная категория",
-    "photo": null,
-    "photoTodo": "Положите портрет в assets/img/portrait.jpg и укажите путь в поле photo"
+    "photo": "assets/img/portrait.jpg",
+    "photo2x": "assets/img/portrait@2x.jpg",
+    "photoSquare": "assets/img/portrait-square.jpg",
+    "photoAlt": "Наталия Багаева, учитель математики"
   },
   "contacts": {
     "telegram": {"label": "Telegram", "value": "TODO: @username", "href": null},
