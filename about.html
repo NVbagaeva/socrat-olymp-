@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Обо мне — Наталия Багаева, учитель математики</title>
+<meta name="description" content="Опыт, образование и подход к преподаванию: школы № 1195 и № 1589, центр «ОЛМАТ», «ЕГЭ-студия», гимназия «Сократ». Как строятся занятия и какие результаты дают ученики.">
+<meta name="theme-color" content="#10233a">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Обо мне — Наталия Багаева">
+<meta property="og:description" content="Опыт, образование и подход к преподаванию математики.">
+<meta property="og:image" content="assets/img/og-image.svg">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержанию</a>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="logo" href="index.html">
+      <span class="logo__mark" aria-hidden="true">НБ</span>
+      <span class="logo__text">
+        <span class="logo__name">Наталия Багаева</span>
+        <span class="logo__role">учитель математики</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul class="nav__list">
+        <li><a class="nav__link" href="index.html#directions">Направления</a></li>
+        <li><a class="nav__link" href="index.html#results">Результаты</a></li>
+        <li><a class="nav__link" href="index.html#reviews">Отзывы</a></li>
+        <li><a class="nav__link" href="materials.html">Материалы</a></li>
+        <li><a class="nav__link" href="classes.html">Ученикам</a></li>
+        <li><a class="nav__link" href="about.html">Обо мне</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--primary btn--sm header__cta" href="index.html#contacts">Записаться</a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-nav" id="mobile-nav">
+    <div class="container">
+      <ul>
+        <li><a href="index.html#directions">Направления</a></li>
+        <li><a href="index.html#results">Результаты</a></li>
+        <li><a href="index.html#reviews">Отзывы</a></li>
+        <li><a href="materials.html">Материалы</a></li>
+        <li><a href="classes.html">Ученикам</a></li>
+        <li><a href="about.html">Обо мне</a></li>
+        <li><a href="classes.html">Ученикам</a>
+      <a href="essay.html">Педагогическая философия</a></li>
+      </ul>
+      <a class="btn btn--primary" href="index.html#contacts">Записаться</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="grid grid--2" style="align-items: start; gap: 48px;">
+        <figure class="portrait-figure">
+          <img src="assets/img/portrait.jpg"
+               srcset="assets/img/portrait.jpg 900w, assets/img/portrait@2x.jpg 1400w"
+               sizes="(min-width: 900px) 380px, 100vw"
+               width="380" height="475"
+               alt="Наталия Багаева, учитель математики">
+          <figcaption>Наталия Витальевна Багаева, учитель математики гимназии «Сократ»</figcaption>
+        </figure>
+        <div>
+        <span class="section__eyebrow">Обо мне</span>
+        <h1>Восемь лет между школьным уроком и олимпиадной задачей</h1>
+        <p class="section__lead">
+          Я пришла в математику не сразу: во втором классе плакала над задачами Петерсон,
+          а в пятом — записалась в заочную физматшколу при МФТИ и проиграла первую олимпиаду
+          со счётом 7 баллов из 42. Ругать меня никто не стал, и это, кажется, определило всё:
+          я знаю, как выглядит путь от «у меня не получается» до решённой задачи, потому что
+          прошла его сама.
+        </p>
+        <p><a class="card__link" href="essay.html">Прочитать эссе «Моя педагогическая философия»</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper" aria-labelledby="path-title">
+    <div class="container">
+      <div class="grid grid--2">
+        <div>
+          <span class="section__eyebrow">Опыт</span>
+          <h2 id="path-title">Где я работала</h2>
+          <ul class="timeline" id="experience"></ul>
+        </div>
+        <div>
+          <span class="section__eyebrow">Образование</span>
+          <h2>Чему училась сама</h2>
+          <ul class="timeline" id="education"></ul>
+          <div style="margin-top: 32px;">
+            <h3>Что преподаю</h3>
+            <div class="tag-row" id="subjects"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="methods-title">
+    <div class="container">
+      <div class="section__head">
+        <span class="section__eyebrow">Подход</span>
+        <h2 id="methods-title">Как устроены мои занятия</h2>
+        <p class="section__lead">
+          Пять приёмов, которые я использую постоянно, — и то, что они дают на практике.
+        </p>
+      </div>
+      <div class="grid grid--3" id="methods"></div>
+    </div>
+  </section>
+
+  <section class="section section--paper" aria-labelledby="quality-title">
+    <div class="container">
+      <div class="section__head">
+        <span class="section__eyebrow">Динамика</span>
+        <h2 id="quality-title">Качество знаний по итогам мониторингов</h2>
+        <p class="section__lead">
+          Каждая линия — класс, который я вела несколько лет подряд. Показатель считается
+          по школьным мониторингам: доля учеников, которые заканчивают период обучения на «4» и «5».
+        </p>
+      </div>
+
+      <figure class="chart" style="margin: 0;">
+        <div class="chart__legend" id="chart-legend"></div>
+        <p class="chart__hint">График прокручивается вбок — или разверните таблицу с теми же числами под ним.</p>
+        <div class="chart__scroll" id="chart-host"></div>
+        <figcaption id="chart-caption"></figcaption>
+      </figure>
+
+      <details style="margin-top: 24px;">
+        <summary style="cursor: pointer; font-weight: 600;">Показать те же данные таблицей</summary>
+        <div class="table-wrap" style="margin-top: 16px;" id="quality-table"></div>
+      </details>
+
+      <div style="margin-top: 40px;">
+        <h3>Независимые диагностики</h3>
+        <div class="results" id="monitoring"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="community-title">
+    <div class="container">
+      <div class="section__head">
+        <span class="section__eyebrow">Помимо уроков</span>
+        <h2 id="community-title">Работа с коллегами и экзаменами</h2>
+      </div>
+      <div class="grid grid--2" id="community"></div>
+    </div>
+  </section>
+
+  <section class="section section--ink section--tight">
+    <div class="container">
+      <div class="contact-grid">
+        <div>
+          <span class="section__eyebrow">Дальше</span>
+          <h2>Посмотрите материалы или напишите мне</h2>
+          <p class="section__lead">В открытом доступе — разработки, интенсивы и видеоразборы. А если нужен разбор конкретной темы, напишите.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <a class="btn btn--light" href="materials.html">База материалов</a>
+          <a class="btn btn--accent" href="index.html#contacts">Записаться</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <div style="color:#fff; font-family: var(--font-display); font-size: 1.05rem;">Наталия Багаева</div>
+      <div>Учитель математики · Москва</div>
+    </div>
+    <nav class="footer__nav" aria-label="Навигация в подвале">
+      <a href="index.html">Главная</a>
+      <a href="materials.html">Материалы</a>
+      <a href="essay.html">Педагогическая философия</a>
+      <a href="index.html#contacts">Контакты</a>
+    </nav>
+    <div>© <span data-year>2025</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script src="assets/js/about.js"></script>
+<script src="assets/js/chart.js"></script>
+</body>
+</html>

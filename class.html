@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Раздел класса | Наталия Багаева</title>
+<meta name="description" content="Теория, рабочие файлы и домашние задания класса. Вход по коду, который выдаёт учитель.">
+<meta name="theme-color" content="#10233a">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержанию</a>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="logo" href="index.html">
+      <span class="logo__mark" aria-hidden="true">НБ</span>
+      <span class="logo__text">
+        <span class="logo__name">Наталия Багаева</span>
+        <span class="logo__role">учитель математики</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul class="nav__list">
+        <li><a class="nav__link" href="materials.html">Материалы</a></li>
+        <li><a class="nav__link" href="classes.html">Все классы</a></li>
+        <li><a class="nav__link" href="about.html">Обо мне</a></li>
+      </ul>
+    </nav>
+    <button class="btn btn--ghost btn--sm header__cta" type="button" id="logout" hidden>Выйти</button>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-nav" id="mobile-nav">
+    <div class="container">
+      <ul>
+        <li><a href="classes.html">Все классы</a></li>
+        <li><a href="materials.html">Материалы</a></li>
+        <li><a href="about.html">Обо мне</a></li>
+        <li><a href="index.html#contacts">Контакты</a></li>
+      </ul>
+      <button class="btn btn--ghost" type="button" id="logout-mobile" hidden style="width: 100%;">Выйти из раздела</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Экран ввода кода -->
+  <section class="section section--tight" id="gate" hidden>
+    <div class="container container--narrow">
+      <span class="section__eyebrow">Ученикам</span>
+      <h1 id="gate-title">Раздел класса</h1>
+      <p class="section__lead" id="gate-summary"></p>
+
+      <form class="gate" id="gate-form">
+        <label class="gate__label" for="code">Код доступа</label>
+        <div class="gate__row">
+          <input class="gate__input" type="password" id="code" name="code" autocomplete="off"
+                 autocapitalize="off" spellcheck="false" placeholder="Код с занятия" required>
+          <button class="btn btn--primary" type="submit">Войти</button>
+        </div>
+        <p class="gate__error" id="gate-error" role="alert" hidden></p>
+        <p class="gate__hint">
+          Код одинаковый для всего класса и не меняется в течение года.
+          Забыли — <a href="index.html#contacts">напишите мне</a>.
+        </p>
+      </form>
+
+      <p style="margin-top: 32px;"><a class="card__link" href="classes.html">Другие классы</a></p>
+    </div>
+  </section>
+
+  <!-- Содержимое класса -->
+  <div id="room" hidden>
+    <section class="section section--tight">
+      <div class="container">
+        <span class="section__eyebrow">Ученикам</span>
+        <h1 id="room-title">Класс</h1>
+        <p class="section__lead" id="room-summary"></p>
+        <p id="room-sample" hidden style="margin-top: 16px;">
+          <span class="todo">Пример наполнения</span>
+          Материалы этого класса ещё не заполнены — то, что ниже, показано как образец.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight section--paper" aria-labelledby="hw-title">
+      <div class="container">
+        <div class="section__head" style="margin-bottom: 24px;">
+          <h2 id="hw-title">Домашние задания</h2>
+          <p class="section__lead" id="hw-summary"></p>
+        </div>
+
+        <div class="toolbar" style="margin-bottom: 24px;">
+          <p class="toolbar__count" id="hw-count"></p>
+          <div class="chips" role="group" aria-label="Показывать задания">
+            <label class="chip"><input type="radio" name="hw-filter" value="active" checked><span>Актуальные</span></label>
+            <label class="chip"><input type="radio" name="hw-filter" value="all"><span>Все</span></label>
+          </div>
+        </div>
+
+        <div class="hw-list" id="hw-list"></div>
+
+        <div class="empty" id="hw-empty" hidden>
+          <h3>Заданий нет</h3>
+          <p>Всё сдано или новые ещё не выданы — загляните после занятия.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight" aria-labelledby="theory-title">
+      <div class="container">
+        <div class="section__head" style="margin-bottom: 24px;">
+          <h2 id="theory-title">Теория</h2>
+          <p class="section__lead">Конспекты и разборы по темам курса — можно возвращаться к ним в любой момент.</p>
+        </div>
+        <div id="theory-list"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight section--paper" aria-labelledby="files-title">
+      <div class="container">
+        <div class="section__head" style="margin-bottom: 24px;">
+          <h2 id="files-title">Рабочие файлы</h2>
+          <p class="section__lead">Подборки задач, варианты и бланки для занятий.</p>
+        </div>
+        <div class="res-list" id="files-list"></div>
+      </div>
+    </section>
+
+    <section class="section section--ink section--tight">
+      <div class="container">
+        <div class="contact-grid">
+          <div>
+            <span class="section__eyebrow">Вопросы</span>
+            <h2>Что-то не получается?</h2>
+            <p class="section__lead">
+              Не молчите до занятия: напишите, на каком шаге застряли, — отвечу и подскажу,
+              что посмотреть.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <a class="btn btn--light" href="index.html#contacts">Написать учителю</a>
+            <a class="btn btn--ghost" href="classes.html" style="border-color: rgba(255,255,255,.35); color: #fff;">Другие классы</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Класс не найден -->
+  <section class="section" id="missing" hidden>
+    <div class="container container--narrow" style="text-align: center;">
+      <h1>Такого класса нет</h1>
+      <p class="section__lead" style="margin-inline: auto;">Выберите класс из списка — от пятого до одиннадцатого.</p>
+      <p style="margin-top: 24px;"><a class="btn btn--primary" href="classes.html">К списку классов</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <div style="color:#fff; font-family: var(--font-display); font-size: 1.05rem;">Наталия Багаева</div>
+      <div>Учитель математики · Москва</div>
+    </div>
+    <nav class="footer__nav" aria-label="Навигация в подвале">
+      <a href="index.html">Главная</a>
+      <a href="classes.html">Все классы</a>
+      <a href="materials.html">Материалы</a>
+      <a href="index.html#contacts">Контакты</a>
+    </nav>
+    <div>© <span data-year>2025</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script src="assets/js/deadlines.js"></script>
+<script src="assets/js/classroom.js"></script>
+</body>
+</html>

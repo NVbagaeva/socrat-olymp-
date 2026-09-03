@@ -1,0 +1,46 @@
+{
+  "grade": 6,
+  "title": "6 класс",
+  "summary": "Обыкновенные и десятичные дроби, отношения и проценты, диаграммы, моделирование.",
+  "sample": true,
+  "submitTo": null,
+  "homework": [
+    {
+      "id": "hw-6-1",
+      "title": "Проценты в жизни",
+      "topic": "Проценты",
+      "description": "Пять задач на скидки и наценки. К каждой — короткое пояснение, от чего считаем процент.",
+      "assigned": "2026-09-01",
+      "deadline": "2026-09-08",
+      "file": null,
+      "notes": null
+    }
+  ],
+  "theory": [
+    {
+      "id": "t-6-1",
+      "section": "Проценты",
+      "title": "Три типа задач на проценты",
+      "description": "Найти процент от числа, число по проценту и процентное отношение.",
+      "href": null,
+      "file": null
+    },
+    {
+      "id": "t-6-2",
+      "section": "Вероятность",
+      "title": "После радости неприятности по теории вероятности",
+      "description": "Материалы открытого урока: первые вероятностные модели через игру и эксперимент.",
+      "href": "https://drive.google.com/file/d/1hIbhalcPZ1bzFHK2MYeCkjypV7cW1QP-/view?usp=sharing",
+      "file": null
+    }
+  ],
+  "files": [
+    {
+      "id": "f-6-1",
+      "title": "Карточки на отработку процентов",
+      "description": "TODO: положите PDF в assets/files/classes/6/ и укажите путь в поле file.",
+      "href": null,
+      "file": null
+    }
+  ]
+}
