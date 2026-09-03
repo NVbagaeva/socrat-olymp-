@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>База методических материалов — Наталия Багаева</title>
+<meta name="description" content="Авторские методические материалы учителя математики: конспекты, разработки, интенсивы по ЕГЭ и ОГЭ, открытые уроки, видеоразборы и интерактивные модели. Поиск по темам, классам и типу материала.">
+<meta name="theme-color" content="#10233a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="База методических материалов — Наталия Багаева">
+<meta property="og:description" content="Конспекты, интенсивы, открытые уроки и видеоразборы по математике с поиском и фильтрами.">
+<meta property="og:image" content="assets/img/og-image.svg">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержанию</a>
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="logo" href="index.html">
+      <span class="logo__mark" aria-hidden="true">НБ</span>
+      <span class="logo__text">
+        <span class="logo__name">Наталия Багаева</span>
+        <span class="logo__role">учитель математики</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <ul class="nav__list">
+        <li><a class="nav__link" href="index.html#directions">Направления</a></li>
+        <li><a class="nav__link" href="index.html#results">Результаты</a></li>
+        <li><a class="nav__link" href="index.html#reviews">Отзывы</a></li>
+        <li><a class="nav__link" href="materials.html">Материалы</a></li>
+        <li><a class="nav__link" href="about.html">Обо мне</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--primary btn--sm header__cta" href="index.html#contacts">Записаться</a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Меню">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-nav" id="mobile-nav">
+    <div class="container">
+      <ul>
+        <li><a href="index.html#directions">Направления</a></li>
+        <li><a href="index.html#results">Результаты</a></li>
+        <li><a href="index.html#reviews">Отзывы</a></li>
+        <li><a href="materials.html">Материалы</a></li>
+        <li><a href="about.html">Обо мне</a></li>
+        <li><a href="essay.html">Педагогическая философия</a></li>
+      </ul>
+      <a class="btn btn--primary" href="index.html#contacts">Записаться</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section__head">
+        <span class="section__eyebrow">Методическая копилка</span>
+        <h1>База методических материалов</h1>
+        <p class="section__lead">
+          Авторские разработки, материалы интенсивов, открытые уроки, видеоразборы и интерактивные модели.
+          Ищите по названию и теме или сузьте выборку фильтрами — ссылку с выбранными фильтрами можно
+          отправить ученику.
+        </p>
+      </div>
+
+      <div class="catalog">
+        <div>
+          <button class="filters-toggle" type="button" id="filters-toggle" aria-expanded="false" aria-controls="filters">
+            <span>Фильтры</span>
+            <span class="filters-toggle__count" id="filters-count" hidden></span>
+          </button>
+          <form class="filters" id="filters" aria-label="Фильтры материалов">
+          <fieldset class="filters__group" style="border: none; margin-inline: 0; padding: 0;">
+            <legend class="filters__legend">Направление</legend>
+            <div class="chips" data-group="track"></div>
+          </fieldset>
+          <fieldset class="filters__group" style="border: none; margin-inline: 0; padding: 0;">
+            <legend class="filters__legend">Класс</legend>
+            <div class="chips" data-group="grade"></div>
+          </fieldset>
+          <fieldset class="filters__group" style="border: none; margin-inline: 0; padding: 0;">
+            <legend class="filters__legend">Тип материала</legend>
+            <div class="chips" data-group="type"></div>
+          </fieldset>
+          <fieldset class="filters__group" style="border: none; margin-inline: 0; padding: 0;">
+            <legend class="filters__legend">Уровень</legend>
+            <div class="chips" data-group="level"></div>
+          </fieldset>
+            <button class="btn btn--ghost btn--sm" type="button" id="reset" style="width: 100%;">Сбросить фильтры</button>
+          </form>
+        </div>
+
+        <div>
+          <label class="search" for="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+            </svg>
+            <input type="search" id="search" placeholder="Поиск по названию, описанию и темам" autocomplete="off">
+            <button type="button" id="search-clear" hidden aria-label="Очистить поиск">&times;</button>
+          </label>
+
+          <div class="toolbar">
+            <p class="toolbar__count" id="count" aria-live="polite"></p>
+            <label class="visually-hidden" for="sort">Сортировка</label>
+            <select class="select" id="sort">
+              <option value="year">Сначала новые</option>
+              <option value="title">По названию</option>
+              <option value="grade">По классу</option>
+            </select>
+          </div>
+
+          <div class="material-grid" id="grid"></div>
+
+          <div class="empty" id="empty" hidden>
+            <h3>Ничего не нашлось</h3>
+            <p>Попробуйте изменить запрос или снять часть фильтров.</p>
+            <button class="btn btn--ghost btn--sm" type="button" data-reset>Сбросить фильтры</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ink section--tight">
+    <div class="container">
+      <div class="contact-grid">
+        <div>
+          <span class="section__eyebrow">Нужен разбор</span>
+          <h2>Не нашли нужную тему?</h2>
+          <p class="section__lead">Напишите, какая тема буксует, — подберу материал или разберём её на занятии.</p>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <a class="btn btn--light" href="index.html#contacts">Написать мне</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <div style="color:#fff; font-family: var(--font-display); font-size: 1.05rem;">Наталия Багаева</div>
+      <div>Учитель математики · Москва</div>
+    </div>
+    <nav class="footer__nav" aria-label="Навигация в подвале">
+      <a href="index.html">Главная</a>
+      <a href="about.html">Обо мне</a>
+      <a href="essay.html">Педагогическая философия</a>
+      <a href="index.html#contacts">Контакты</a>
+    </nav>
+    <div>© <span data-year>2025</span></div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script src="assets/js/material-card.js"></script>
+<script src="assets/js/materials.js"></script>
+</body>
+</html>

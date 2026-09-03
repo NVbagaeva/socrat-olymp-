@@ -1,0 +1,76 @@
+{
+  "ege": {
+    "year": "2023",
+    "highlights": [
+      {"score": "100", "student": "Михаил Л.", "caption": "баллов на профильном ЕГЭ", "gold": true},
+      {"score": "99", "student": "Юлия К.", "caption": "балла на профильном ЕГЭ"},
+      {"score": "99", "student": "Алина М.", "caption": "балла на профильном ЕГЭ"}
+    ],
+    "note": "Результаты выпуска 2023 года. Первый выпущенный девятый класс сдал ОГЭ полностью на «4» и «5»."
+  },
+  "olympiads": [
+    {
+      "year": "2023",
+      "title": "Всероссийская олимпиада школьников по математике",
+      "stage": "Заключительный этап",
+      "detail": "Участник — Гашпар А.",
+      "href": "https://olympiads.mccme.ru/vmo/2023/final/results.pdf"
+    },
+    {
+      "year": "2021—2023",
+      "title": "Всероссийская олимпиада школьников по математике",
+      "stage": "Региональный этап",
+      "detail": "2 призёра (Кригер Ю., Гашпар А.) из 4 участников",
+      "href": "https://reg.cpm.moscow/register/russia-olympiad-math-2023-3-protocol/olympiad-protocol-static"
+    },
+    {
+      "year": "2021",
+      "title": "Олимпиада школьников «Физтех» по математике",
+      "stage": "Заключительный этап, II уровень перечня",
+      "detail": "Победитель — Фёдоров В., 5 участников",
+      "href": "https://olymp.mipt.ru/olympiad/math2021"
+    },
+    {
+      "year": "2025",
+      "title": "Московская математическая олимпиада",
+      "stage": "Городской уровень",
+      "detail": "Призёр — Сапегина В., 6 участников",
+      "href": "https://mmo.mccme.ru/2025/dipl/32386906.pdf"
+    },
+    {
+      "year": "2024",
+      "title": "Московская олимпиада по вероятности и статистике",
+      "stage": "Городской уровень",
+      "detail": "Призёр — Сапегина В., 5 участников",
+      "href": "https://diploma.cpm.moscow/files/rsosh-diplomas-static/compiled-storage-mos2024/by-code/358295312893/color.pdf"
+    },
+    {
+      "year": "2023",
+      "title": "Отраслевая олимпиада «Росатом» по математике",
+      "stage": "Перечневая олимпиада",
+      "detail": "Призёр — Ляпин А., 3 участника",
+      "href": null
+    },
+    {
+      "year": "2024",
+      "title": "Математический праздник",
+      "stage": "Городской уровень",
+      "detail": "Призёр, 5 участников",
+      "href": "https://diploma.cpm.moscow/files/rsosh-diplomas-static/compiled-storage-mos2024/by-code/362276918733/color.pdf"
+    },
+    {
+      "year": "2023",
+      "title": "Математическая регата, 7 класс",
+      "stage": "Городской уровень, очный финал",
+      "detail": "4 призёра",
+      "href": "https://t.me/math_vertical/758"
+    },
+    {
+      "year": "2023",
+      "title": "Математическая регата, 11 класс",
+      "stage": "Городской уровень, очный финал",
+      "detail": "4 участника",
+      "href": "https://olympiads.mccme.ru/regata/20232024/reg11.htm"
+    }
+  ]
+}
