@@ -12,42 +12,43 @@
 <style>
 /* ==========================================================================
    ЕГЭ · часть 1 — страница выбора задания
-   Направление «Цифра»: номер задания — главный носитель характера.
-   Тонкие линии вместо теней, бумажный фон, оранжевый строго дозирован.
+   Форма «Закладка»: горизонтальная плашка, полоса-закладка слева,
+   номер и текст в две колонки. Объём — мягким светом, не тенью.
    ========================================================================== */
 
 :root{
-  /* --- Поверхности и бумага --- */
-  --paper:            #FAF8F4;   /* фон страницы, тёплый, не белый */
-  --surface:          #FFFFFF;   /* открытое задание */
-  --surface-quiet:    #F5F2EB;   /* задание «скоро» */
+  /* --- Поверхности --- */
+  --paper:            #FAF8F4;
+  --surface:          #FFFFFF;
+  --surface-quiet:    #F5F2EB;
 
   /* --- Текст --- */
   --text-strong:      #16211B;
   --text:             #1F2A24;
   --text-muted:       #5A665E;
-  --text-faint:       #7E7768;   /* только для крупных цифр (AA large) */
+  --text-faint:       #7E7768;   /* только крупные цифры (AA large) */
 
   /* --- Линии --- */
   --border:           #E4DED2;
   --border-strong:    #C7BFAE;
+  --highlight:        rgba(255,255,255,.9);   /* блик по верхней грани */
 
-  /* --- Зелёный: 4 ступени --- */
-  --brand-darkest:    #0E2E12;
-  --brand-deep:       #133F17;
-  --brand:            #1B5E20;
-  --brand-mid:        #4C8A50;
-  --brand-wash:       #E9F0E8;
+  /* --- Изумруд: тёмный для текста, средний как акцент, светлые под фоны --- */
+  --brand-darkest:    #0F4D26;
+  --brand-dark:       #14602F;
+  --brand:            #1B7A3E;
+  --brand-mid:        #34955A;
+  --brand-soft:       #CFE7D8;
+  --brand-wash:       #EAF4EE;
 
-  /* --- Тёплый акцент: 4 ступени. Базовый #E07A2F не проходит AA
-         как текст (2.83:1), поэтому текстом идёт только --accent-ink. --- */
+  /* --- Тёплый акцент, второй и в малых дозах.
+         #E07A2F не проходит AA как текст (2.83:1) — текстом только --accent-ink --- */
   --accent-ink:       #9A4E16;
-  --accent-deep:      #8F4715;
   --accent:           #E07A2F;
   --accent-line:      #EFC49B;
   --accent-wash:      #FBEEE2;
 
-  /* --- Модульная шкала, шаг 1.25 (большая терция) --- */
+  /* --- Модульная шкала, шаг 1.25 --- */
   --fs-2xs:  10.25px;
   --fs-xs:   12.8px;
   --fs-sm:   14px;
@@ -55,14 +56,15 @@
   --fs-md:   20px;
   --fs-lg:   25px;
   --fs-xl:   31.25px;
+  --fs-2xl:  39.06px;
+  --fs-3xl:  48.83px;
 
   /* --- Ритм, кратно 4 --- */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 20px;
   --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px; --s-16: 64px;
-  --s-20: 80px; --s-24: 96px;
+  --s-20: 80px;
 
-  /* --- Форма и движение --- */
-  --radius: 4px;
+  --radius: 10px;
   --ease: cubic-bezier(.2,.6,.3,1);
   --dur: 170ms;
 
@@ -81,17 +83,17 @@ body{
   font-family:var(--font-text);
   font-size:var(--fs-base);
   line-height:1.55;
-  font-feature-settings:"kern" 1;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
 
+/* Ширина шапки, сетки и подвала — одна и та же: 1100px содержимого. */
 .wrap{
-  max-width:1128px;
+  max-width:1148px;
   margin:0 auto;
   padding-left:var(--s-6);
   padding-right:var(--s-6);
-  padding-block:var(--s-20) var(--s-16);
+  padding-block:var(--s-16) var(--s-12);
 }
 
 /* --------------------------------------------------------------------------
@@ -99,13 +101,13 @@ body{
    -------------------------------------------------------------------------- */
 
 .masthead{
-  padding-bottom:var(--s-12);
-  margin-bottom:var(--s-16);
+  padding-bottom:var(--s-8);
+  margin-bottom:var(--s-10);
   border-bottom:1px solid var(--border);
 }
 
 .masthead__eyebrow{
-  margin:0 0 var(--s-5);
+  margin:0 0 var(--s-4);
   font-size:var(--fs-xs);
   font-weight:600;
   line-height:1.2;
@@ -115,12 +117,12 @@ body{
 }
 
 .masthead__title{
-  margin:0 0 var(--s-5);
+  margin:0 0 var(--s-4);
   font-family:var(--font-display);
-  font-size:clamp(44px, 2.5rem + 3.4vw, 92px);
+  font-size:clamp(40px, 2rem + 2.6vw, 68px);
   font-weight:600;
-  line-height:.98;
-  letter-spacing:-.032em;
+  line-height:1;
+  letter-spacing:-.03em;
   color:var(--text-strong);
 }
 
@@ -135,15 +137,14 @@ body{
 }
 
 /* --------------------------------------------------------------------------
-   Сетка: 8 колонок по 2 на плашку → 4 в ряд.
-   Тринадцатая встаёт в центральные колонки последнего ряда.
+   Сетка. Четыре в ряд; тринадцатая — в центральные колонки последнего ряда.
+   При 1148px и шире плашка ровно 260px и шире не становится.
    -------------------------------------------------------------------------- */
 
 .grid{
   display:grid;
   grid-template-columns:repeat(8,1fr);
-  grid-auto-rows:1fr;
-  gap:var(--s-4);
+  gap:var(--s-5);
   margin:0;
 }
 
@@ -152,60 +153,55 @@ body{
    -------------------------------------------------------------------------- */
 
 .tile{
-  --rule: var(--border);
+  --stripe: var(--border-strong);
   grid-column:span 2;
   position:relative;
   display:grid;
-  grid-template-rows:auto 1fr auto;
-  min-height:232px;     /* общий пол высоты: все плашки строго одной высоты.
-                           aspect-ratio здесь не годится — вместе с min-height
-                           он раздувает 1fr-колонки и сбивает центровку */
+  grid-template-rows:auto 1fr auto;   /* номер / название / статус */
+  min-height:176px;                   /* 260×176 ≈ 3:2 */                       /* 260×168 ≈ 3:2 */
   min-width:0;
-  padding:var(--s-5) var(--s-5) var(--s-4);
+  padding:var(--s-5) var(--s-5) var(--s-5) var(--s-6);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  background:var(--surface-quiet);
+  background-color:var(--surface-quiet);
+  /* очень лёгкий вертикальный свет: верх чуть светлее низа */
+  background-image:linear-gradient(180deg, rgba(255,255,255,.55), rgba(22,33,27,.022));
+  box-shadow:inset var(--s-1) 0 0 0 var(--stripe),   /* полоса-закладка */
+             inset 0 1px 0 0 var(--highlight),        /* блик по верхней грани */
+             0 1px 1px rgba(22,33,27,.03),
+             0 2px 4px rgba(22,33,27,.04);
   color:inherit;
   text-decoration:none;
 }
 
 .tile--last{grid-column:4/span 2}
 
-/* Номер — герой страницы. Свисает влево на оптическую компенсацию. */
 .tile__num{
+  justify-self:start;                 /* коробка по цифре, чтобы метка не пересекалась */
   font-family:var(--font-display);
-  font-size:clamp(56px, 3rem + 3.4vw, 100px);
+  font-size:var(--fs-3xl);
   font-weight:600;
-  line-height:.8;
-  letter-spacing:-.05em;
-  margin-left:-.055em;
+  line-height:.85;
+  letter-spacing:-.03em;
   color:var(--text-faint);
   font-variant-numeric:lining-nums tabular-nums;
 }
 
 .tile__title{
-  align-self:end;
-  position:relative;
-  padding-top:var(--s-4);
+  align-self:start;
+  margin-top:var(--s-2);
   font-size:var(--fs-base);
   font-weight:500;
   line-height:1.3;
   letter-spacing:-.006em;
   color:var(--text-muted);
-  text-wrap:balance;
-}
-
-/* Короткая линия над названием — носитель состояния */
-.tile__title::before{
-  content:"";
-  position:absolute;
-  top:0; left:0;
-  width:24px; height:2px;
-  background:var(--rule);
+  text-wrap:pretty;
 }
 
 .tile__status{
-  margin-top:var(--s-4);
+  align-self:end;
+  justify-self:start;
+  margin-top:var(--s-2);
   font-size:var(--fs-2xs);
   font-weight:600;
   line-height:1.2;
@@ -215,32 +211,31 @@ body{
   font-variant-numeric:lining-nums tabular-nums;
 }
 
-/* --- Открытое задание ---
-   Единственная залитая плашка в поле тихих: контраст с фоном 11.3:1
-   против 1.05:1 у остальных — взгляд попадает на неё первой.
-   Тёплый акцент здесь ровно в двух местах: кант сверху и строка статуса. */
+/* --- Открытое задание --- */
 .tile--active{
-  --rule: var(--accent-line);
-  background:var(--brand-deep);
-  border-color:var(--brand-darkest);
-  box-shadow:inset 0 3px 0 0 var(--accent),
-             0 1px 2px rgba(14,46,18,.10),
-             0 8px 20px rgba(14,46,18,.10);
+  --stripe: var(--brand);
+  background-color:var(--surface);
+  border-color:var(--brand-soft);
+  box-shadow:inset var(--s-2) 0 0 0 var(--stripe),
+             inset 0 1px 0 0 var(--highlight),
+             0 1px 2px rgba(22,33,27,.05),
+             0 4px 10px rgba(22,33,27,.06);
   cursor:pointer;
   transition:transform var(--dur) var(--ease),
              border-color var(--dur) var(--ease),
              box-shadow var(--dur) var(--ease);
 }
-.tile--active .tile__num{color:var(--paper)}
-.tile--active .tile__title{color:var(--surface);font-weight:600}
-.tile--active .tile__status{color:var(--accent-line)}
+.tile--active .tile__num{color:var(--brand)}
+.tile--active .tile__title{color:var(--text);font-weight:600}
+.tile--active .tile__status{color:var(--brand-dark)}
 
 .tile--active:hover{
   transform:translateY(-2px);
-  border-color:var(--brand);
-  box-shadow:inset 0 3px 0 0 var(--accent),
-             0 2px 4px rgba(14,46,18,.12),
-             0 14px 30px rgba(14,46,18,.16);
+  border-color:var(--brand-mid);
+  box-shadow:inset var(--s-2) 0 0 0 var(--stripe),
+             inset 0 1px 0 0 var(--highlight),
+             0 2px 4px rgba(22,33,27,.06),
+             0 8px 18px rgba(22,33,27,.09);
 }
 
 .tile--active:focus-visible{
@@ -248,16 +243,15 @@ body{
   outline-offset:4px;
 }
 
-/* --- Задание «скоро»: тихое, но не сломанное --- */
 .tile--soon{cursor:default}
 
-/* --- Метка «новое» --- */
+/* --- Метка «новое» — в свободный нижний правый угол --- */
 .tile__new{
   position:absolute;
   top:var(--s-4); right:var(--s-4);
-  padding:4px 8px;
+  padding:var(--s-1) var(--s-2);
   border:1px solid var(--border-strong);
-  border-radius:2px;
+  border-radius:3px;
   background:transparent;
   color:var(--text-muted);
   font-size:var(--fs-2xs);
@@ -267,9 +261,9 @@ body{
   text-transform:uppercase;
 }
 .tile--active .tile__new{
-  border-color:var(--accent);
-  background:transparent;
-  color:var(--accent-line);
+  border-color:var(--accent-line);
+  background:var(--accent-wash);
+  color:var(--accent-ink);
 }
 
 /* --------------------------------------------------------------------------
@@ -277,8 +271,8 @@ body{
    -------------------------------------------------------------------------- */
 
 .notes{
-  margin-top:var(--s-16);
-  padding-top:var(--s-8);
+  margin-top:var(--s-10);
+  padding-top:var(--s-6);
   border-top:1px solid var(--border);
 }
 
@@ -301,40 +295,42 @@ body{
 }
 
 /* --------------------------------------------------------------------------
-   Адаптив
+   Адаптив. Ширины подобраны так, чтобы плашка не выходила из 200–320px.
    -------------------------------------------------------------------------- */
 
-/* 641–900: четыре в ряд уже тесно для квадрата — идём по три.
-   12 колонок по 4 на плашку, тринадцатая в колонки 5–8, ровно по центру. */
-@media (max-width:900px){
-  .wrap{padding-block:var(--s-16) var(--s-12)}
-  .masthead{padding-bottom:var(--s-10);margin-bottom:var(--s-12)}
+/* три в ряд */
+@media (max-width:907px){
   .grid{grid-template-columns:repeat(12,1fr)}
-  .tile{grid-column:span 4;min-height:224px}
+  .tile{grid-column:span 4}
   .tile--last{grid-column:5/span 4}
 }
 
-@media (max-width:640px){
-  .wrap{
-    padding-left:var(--s-5); padding-right:var(--s-5);
-    padding-block:var(--s-12) var(--s-10);
-  }
-  .masthead__eyebrow{margin-bottom:var(--s-4);letter-spacing:.16em}
-  .masthead__sub{font-size:17px}
-  .grid{grid-template-columns:repeat(4,1fr);gap:var(--s-3)}
-  .tile{grid-column:span 2;padding:var(--s-4);min-height:0;aspect-ratio:1/1.08}
+/* две в ряд */
+@media (max-width:700px){
+  .wrap{padding-block:var(--s-12) var(--s-10)}
+  .grid{grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
+  .tile{grid-column:span 2}
   .tile--last{grid-column:2/span 2}
-  .tile__num{font-size:clamp(48px, 11vw, 68px)}
-  .tile__title{padding-top:var(--s-3);font-size:15px}
-  .tile__status{margin-top:var(--s-3)}
-  .tile__new{top:var(--s-3);right:var(--s-3)}
-  .notes{margin-top:var(--s-12)}
 }
 
-/* очень узкие экраны (320) — ужимаем шкалу, чтобы длинные названия влезали */
+/* телефон: колонки слишком узки для двух колонок внутри — складываем в стопку */
+@media (max-width:479px){
+  .wrap{
+    padding-left:var(--s-5); padding-right:var(--s-5);
+    padding-block:var(--s-10) var(--s-8);
+  }
+  .masthead{padding-bottom:var(--s-6);margin-bottom:var(--s-8)}
+  .masthead__sub{font-size:17px}
+  .grid{gap:var(--s-3)}
+  .tile{min-height:160px;padding:var(--s-4) var(--s-4) var(--s-4) var(--s-5)}
+  .tile__num{font-size:var(--fs-2xl)}
+  .tile__title{font-size:15px}
+  .tile__new{top:var(--s-3);right:var(--s-3)}   /* в стопке низ занят текстом */
+  .notes{margin-top:var(--s-8)}
+}
+
 @media (max-width:360px){
-  .tile{aspect-ratio:1/1.16}
-  .tile__num{font-size:44px}
+  .tile__num{font-size:var(--fs-xl)}
   .tile__title{font-size:14px}
 }
 
@@ -343,7 +339,7 @@ body{
   .tile--active:hover{transform:none}
 }
 </style>
-</head>
+
 <body>
 
 <main class="wrap">
