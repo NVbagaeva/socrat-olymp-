@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЕГЭ по математике, профильный уровень — часть 1</title>
+<meta name="description" content="Задания части 1 профильного ЕГЭ по математике: все прототипы открытого банка ФИПИ, разбитые по темам.">
+<meta name="theme-color" content="#10233a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#10233a;
+  --ink-soft:#3d5470;
+  --ink-muted:#6b7f96;
+  --paper:#fbfaf7;
+  --paper-warm:#f4f1ea;
+  --surface:#ffffff;
+  --accent:#b8790f;
+  --accent-deep:#8f5c07;
+  --accent-wash:#fdf5e6;
+  --line:#e2ddd2;
+  --line-strong:#cfc7b6;
+
+  --font-display:"Playfair Display","PT Serif",Georgia,"Times New Roman",serif;
+  --font-body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+
+  --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px;
+  --space-6:32px; --space-7:48px; --space-8:64px;
+
+  --radius-sm:4px; --radius:8px; --radius-lg:16px;
+  --shadow-sm:0 1px 2px rgba(16,35,58,.06), 0 2px 8px rgba(16,35,58,.04);
+  --shadow:0 4px 12px rgba(16,35,58,.08), 0 12px 32px rgba(16,35,58,.06);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html{-webkit-text-size-adjust:100%}
+
+body{
+  margin:0;
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.65;
+  color:var(--ink);
+  background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+.wrap{
+  max-width:1120px;
+  margin:0 auto;
+  padding-block:var(--space-8) var(--space-7);
+  padding-left:var(--space-5);
+  padding-right:var(--space-5);
+}
+
+/* ---------- Шапка ---------- */
+
+.masthead{
+  border-bottom:1px solid var(--line);
+  padding-bottom:var(--space-6);
+  margin-bottom:var(--space-7);
+}
+
+.masthead__eyebrow{
+  margin:0 0 var(--space-3);
+  font-size:.8rem;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--accent-deep);
+}
+
+.masthead__title{
+  font-family:var(--font-display);
+  font-weight:600;
+  line-height:1.1;
+  letter-spacing:-.01em;
+  font-size:clamp(2.2rem,1.5rem + 3.2vw,3.6rem);
+  margin:0 0 var(--space-4);
+}
+
+.masthead__sub{
+  margin:0;
+  max-width:56ch;
+  color:var(--ink-soft);
+  font-size:clamp(1rem,.96rem + .2vw,1.1rem);
+}
+
+/* ---------- Сетка плашек ---------- */
+
+/* 8 колонок, плашка занимает 2 → 4 в ряд.
+   Тринадцатая встаёт в колонки 4–5, ровно по центру. */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-auto-rows:1fr;          /* все ряды одной высоты, даже если заголовок длиннее */
+  gap:var(--space-4);
+  margin:0;
+}
+
+.tile{
+  grid-column:span 2;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  aspect-ratio:1/.94;
+  min-height:150px;
+  padding:var(--space-4);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  background:var(--surface);
+  text-decoration:none;
+  color:inherit;
+}
+
+.tile--last{grid-column:4/span 2}
+
+.tile__num{
+  font-family:var(--font-display);
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.02em;
+  font-size:clamp(1.9rem,1.2rem + 2vw,2.9rem);
+  color:var(--ink);
+}
+
+.tile__title{
+  margin-top:var(--space-3);
+  font-size:clamp(.88rem,.82rem + .25vw,1rem);
+  font-weight:500;
+  line-height:1.35;
+  color:var(--ink);
+  text-wrap:balance;
+}
+
+.tile__status{
+  margin-top:auto;
+  padding-top:var(--space-3);
+  font-size:.78rem;
+  letter-spacing:.02em;
+  color:var(--ink-muted);
+}
+
+.tile__new{
+  position:absolute;
+  top:var(--space-3);
+  right:var(--space-3);
+  padding:2px 7px;
+  border-radius:999px;
+  background:var(--accent-wash);
+  border:1px solid var(--line-strong);
+  color:var(--accent-deep);
+  font-size:.62rem;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  line-height:1.6;
+}
+
+/* Активная плашка */
+.tile--active{
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+  border-color:var(--line-strong);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+.tile--active .tile__num{color:var(--accent-deep)}
+.tile--active .tile__status{color:var(--accent-deep);font-weight:500}
+
+.tile--active:hover,
+.tile--active:focus-visible{
+  transform:translateY(-3px);
+  box-shadow:var(--shadow);
+  border-color:var(--accent);
+  background:var(--accent-wash);
+}
+.tile--active:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* Неактивная плашка */
+.tile--soon{
+  cursor:default;
+  box-shadow:none;
+  background:var(--paper-warm);
+  border-color:var(--line);
+}
+.tile--soon .tile__num,
+.tile--soon .tile__title,
+.tile--soon .tile__status{color:var(--ink-muted)}
+.tile--soon .tile__new{
+  background:transparent;
+  color:var(--ink-muted);
+  border-color:var(--line-strong);
+}
+
+/* ---------- Подвал ---------- */
+
+.notes{
+  margin-top:var(--space-7);
+  padding-top:var(--space-5);
+  border-top:1px solid var(--line);
+}
+
+.notes__lead{
+  margin:0 0 var(--space-3);
+  max-width:70ch;
+  color:var(--ink-soft);
+  font-size:.95rem;
+}
+
+.notes__fine{
+  margin:0;
+  max-width:70ch;
+  color:var(--ink-muted);
+  font-size:.8rem;
+  line-height:1.55;
+}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .wrap{padding-block:var(--space-6) var(--space-6)}
+  .grid{grid-template-columns:repeat(4,1fr);gap:var(--space-3)}
+  .tile{grid-column:span 2}
+  .tile--last{grid-column:2/span 2}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .tile--active{transition:none}
+  .tile--active:hover,.tile--active:focus-visible{transform:none}
+}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <header class="masthead">
+    <p class="masthead__eyebrow">ЕГЭ, профильный уровень · 2027</p>
+    <h1 class="masthead__title">Математика</h1>
+    <p class="masthead__sub">Часть 1. Задания с кратким ответом. Все прототипы открытого банка ФИПИ</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer class="notes">
+    <p class="notes__lead">Часть 1 даёт 13 первичных баллов из 33. Задания взяты из открытого банка ФИПИ и будут пополняться.</p>
+    <p class="notes__fine">Структура — по проекту демоверсии ЕГЭ‑2027; итоговые документы ФИПИ утверждаются к ноябрю 2026 года.</p>
+  </footer>
+
+</main>
+
+<script>
+/* Чтобы открыть новое задание, достаточно поправить эту таблицу:
+   href — относительная ссылка (null = плашка неактивна), isNew — метка «новое». */
+var TASKS = [
+  {num:1,  title:'Планиметрия',                     href:null,  status:'скоро',    isNew:false},
+  {num:2,  title:'Векторы',                         href:null,  status:'скоро',    isNew:false},
+  {num:3,  title:'Стереометрия',                    href:'3/',  status:'56 задач', isNew:false},
+  {num:4,  title:'Вероятность: простая',            href:null,  status:'скоро',    isNew:false},
+  {num:5,  title:'Вероятность: сложная',            href:null,  status:'скоро',    isNew:false},
+  {num:6,  title:'Случайные величины и статистика', href:null,  status:'скоро',    isNew:true},
+  {num:7,  title:'Уравнения и неравенства',         href:null,  status:'скоро',    isNew:false},
+  {num:8,  title:'Вычисления и преобразования',     href:null,  status:'скоро',    isNew:false},
+  {num:9,  title:'Производная и первообразная',     href:null,  status:'скоро',    isNew:false},
+  {num:10, title:'Прикладная задача',               href:null,  status:'скоро',    isNew:false},
+  {num:11, title:'Текстовая задача',                href:null,  status:'скоро',    isNew:false},
+  {num:12, title:'Формулы и графики функций',       href:null,  status:'скоро',    isNew:false},
+  {num:13, title:'Финансовая грамотность',          href:null,  status:'скоро',    isNew:true}
+];
+
+(function render(){
+  var grid = document.getElementById('grid');
+  var frag = document.createDocumentFragment();
+
+  TASKS.forEach(function(task, i){
+    var active = Boolean(task.href);
+    var tile = document.createElement(active ? 'a' : 'div');
+    tile.className = 'tile ' + (active ? 'tile--active' : 'tile--soon') +
+                     (i === TASKS.length - 1 ? ' tile--last' : '');
+
+    if (active) {
+      tile.href = task.href;
+      tile.setAttribute('aria-label', 'Задание ' + task.num + '. ' + task.title + ' — ' + task.status);
+    } else {
+      tile.setAttribute('aria-disabled', 'true');
+    }
+
+    if (task.isNew) {
+      var badge = document.createElement('span');
+      badge.className = 'tile__new';
+      badge.textContent = 'новое';
+      tile.appendChild(badge);
+    }
+
+    var num = document.createElement('span');
+    num.className = 'tile__num';
+    num.textContent = task.num;
+    tile.appendChild(num);
+
+    var title = document.createElement('span');
+    title.className = 'tile__title';
+    title.textContent = task.title;
+    tile.appendChild(title);
+
+    var status = document.createElement('span');
+    status.className = 'tile__status';
+    status.textContent = task.status;
+    tile.appendChild(status);
+
+    frag.appendChild(tile);
+  });
+
+  grid.appendChild(frag);
+})();
+</script>
+
+</body>
+</html>
