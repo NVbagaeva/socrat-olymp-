@@ -158,7 +158,6 @@ body{
 
 .tile{
   --stripe: var(--border-strong);
-  --stripe-w: var(--s-1);
   grid-column:span 2;
   position:relative;
   display:grid;
@@ -171,7 +170,7 @@ body{
   background-color:var(--surface-quiet);
   /* очень лёгкий вертикальный свет: верх чуть светлее низа */
   background-image:linear-gradient(180deg, rgba(255,255,255,.55), rgba(22,33,27,.022));
-  box-shadow:inset var(--stripe-w) 0 0 0 var(--stripe),   /* полоса-закладка */
+  box-shadow:inset var(--s-1) 0 0 0 var(--stripe),   /* полоса-закладка */
              inset 0 1px 0 0 var(--highlight),        /* блик по верхней грани */
              0 1px 1px rgba(22,33,27,.03),
              0 2px 4px rgba(22,33,27,.04);
@@ -201,7 +200,7 @@ body{
   letter-spacing:-.006em;
   color:var(--text-muted);
   text-wrap:pretty;
-  hyphens:auto;
+  hyphens:auto;              /* страховка: длинное слово переносится, а не вылезает */
   -webkit-hyphens:auto;
   overflow-wrap:break-word;
 }
@@ -222,10 +221,9 @@ body{
 /* --- Открытое задание --- */
 .tile--active{
   --stripe: var(--brand);
-  --stripe-w: var(--s-2);
   background-color:var(--surface-active);
   border-color:var(--brand-soft);
-  box-shadow:inset var(--stripe-w) 0 0 0 var(--stripe),
+  box-shadow:inset var(--s-2) 0 0 0 var(--stripe),
              inset 0 1px 0 0 var(--highlight),
              0 1px 2px rgba(22,33,27,.05),
              0 4px 10px rgba(22,33,27,.06);
@@ -241,10 +239,9 @@ body{
 
 .tile--active:hover{
   transform:translateY(-2px);
-  --stripe-w: var(--s-3);
   background-color:var(--surface-active-h);
   border-color:var(--brand-mid);
-  box-shadow:inset var(--stripe-w) 0 0 0 var(--stripe),
+  box-shadow:inset var(--s-3) 0 0 0 var(--stripe),
              inset 0 1px 0 0 var(--highlight),
              0 2px 4px rgba(22,33,27,.06),
              0 8px 18px rgba(22,33,27,.09);
@@ -325,17 +322,14 @@ body{
   .tile__new{top:var(--s-3);right:var(--s-3)}
 }
 
-/* небольшой планшет */
+/* две в ряд */
 @media (max-width:620px){
-  .grid{gap:var(--s-3)}
-  .tile{min-height:124px;padding:var(--s-3) var(--s-2) var(--s-3) var(--s-4)}
-  .tile__num{font-size:30px}
-  .tile__title{margin-top:var(--s-1);font-size:13px;line-height:1.25}
-  .tile__status{margin-top:var(--s-1);font-size:10px;letter-spacing:.1em}
-  .tile__new{top:var(--s-2);right:var(--s-2);font-size:10px}
+  .grid{grid-template-columns:repeat(4,1fr)}
+  .tile{grid-column:span 2}
+  .tile--last{grid-column:2/span 2}
 }
 
-/* телефон: те же три в ряд, но плашка совсем компактная */
+/* телефон: 13 плашек должны пролистываться быстро — плашка низкая и плотная */
 @media (max-width:480px){
   .wrap{
     padding-left:var(--s-4); padding-right:var(--s-4);
@@ -345,21 +339,20 @@ body{
   .masthead__eyebrow{margin-bottom:var(--s-3);font-size:11px;letter-spacing:.16em}
   .masthead__title{font-size:32px;margin-bottom:var(--s-3)}
   .masthead__sub{font-size:15px;line-height:1.45}
-  .grid{gap:var(--s-2)}
-  .tile{min-height:112px;padding:var(--s-3) var(--s-2) var(--s-3) var(--s-3)}
-  .tile--active{--stripe-w:var(--s-1)}   /* на узкой плашке 8px закладки — перебор */
-  .tile__num{font-size:24px}
-  .tile__title{font-size:12px;line-height:1.2}
-  .tile__status{font-size:9px;letter-spacing:.08em}
-  .tile__new{top:var(--s-2);right:var(--s-2);padding:var(--s-1);font-size:8px;letter-spacing:.05em}
+  .grid{gap:var(--s-3)}
+  .tile{min-height:128px;padding:var(--s-3) var(--s-3) var(--s-3) var(--s-5)}
+  .tile__num{font-size:30px}
+  .tile__title{margin-top:var(--s-1);font-size:14px;line-height:1.25}
+  .tile__status{margin-top:var(--s-1);font-size:10px;letter-spacing:.1em}
+  .tile__new{top:var(--s-2);right:var(--s-2);font-size:10px}
   .notes{margin-top:var(--s-6);padding-top:var(--s-5)}
   .notes__lead{font-size:13px}
   .notes__fine{font-size:12px}
 }
 
 @media (max-width:360px){
-  .tile__num{font-size:22px}
-  .tile__title{font-size:11px}
+  .tile__num{font-size:28px}
+  .tile__title{font-size:13px}
 }
 
 @media (prefers-reduced-motion:reduce){
