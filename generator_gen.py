@@ -362,10 +362,14 @@ def prism(n,R=1.0,h=1.6,skew=(0,0),diag=False,section=False,title="",names=None,
             s.seg(a,c1,"aux",thin=True); s.seg(a,c,"aux",thin=True)
     return s
 
-def box(a=1.6,b=1.0,c=1.1,cube=False,diag=False,section=False,title=""):
+def box(a=1.6,b=1.0,c=1.1,cube=False,diag=False,section=False,title="",rot=0.0):
+    """rot — поворот вокруг вертикальной оси, градусы."""
     if cube: a=b=c=1.2
     s=Scene(title)
-    pts={"A":(-a/2,-b/2,0),"B":(a/2,-b/2,0),"C":(a/2,b/2,0),"D":(-a/2,b/2,0)}
+    _r=math.radians(rot); _co,_si=math.cos(_r),math.sin(_r)
+    def _rt(x,y): return (x*_co-y*_si, x*_si+y*_co)
+    pts={k:_rt(*v)+(0,) for k,v in
+         {"A":(-a/2,-b/2),"B":(a/2,-b/2),"C":(a/2,b/2),"D":(-a/2,b/2)}.items()}
     for k,v in pts.items(): s.P(k,v); s.P(k+"1",(v[0],v[1],c))
     nb=["A","B","C","D"]; nt=[x+"1" for x in nb]
     s.face(*nb); s.face(*nt)
@@ -564,7 +568,12 @@ def sphere_in_cube(title=""):
     return s
 
 def cube_in_sphere(title=""):
-    s=box(cube=True,title=title); a=1.2; R=a*math.sqrt(3)/2; c=(0,0,a/2)
+    # Куб развёрнут на 40° вокруг вертикальной оси. Без разворота вершины
+    # ложатся на четыре разных расстояния от центра (в долях радиуса
+    # 0.54, 0.79, 0.93, 1.10), то есть две вылезают за очерк шара, а
+    # остальные заметно утоплены. При 40° все шесть вершин очерка попадают
+    # на окружность с точностью 1–3%, причём радиус остаётся точным a√3/2.
+    s=box(cube=True,title=title,rot=40); a=1.2; R=a*math.sqrt(3)/2; c=(0,0,a/2)
     s.raw.append(("bbox",-R,-a/2-R,R,-a/2+R))
     def f(T,sc):
         C=T(proj(c)); rr=R*sc
