@@ -7,7 +7,7 @@
 <line x1="500.0" y1="500.0" x2="723.2" y2="202.4" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
 <circle cx="723.2" cy="202.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="500.0" cy="500.0" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<text x="479.5" y="570.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
-<text x="781.4" y="174.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
-<text x="550.0" y="380.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#E07A2F" text-anchor="middle">R</text>
+<text x="480.9" y="566.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="771.5" y="183.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="563.6" y="352.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#E07A2F" text-anchor="middle">R</text>
 </svg>

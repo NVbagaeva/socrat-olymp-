@@ -14,6 +14,6 @@
 <circle cx="500.0" cy="769.4" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="500.0" cy="142.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <text x="500.0" y="101.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
-<text x="551.3" y="615.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
-<text x="479.5" y="839.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
+<text x="550.3" y="614.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="480.9" y="835.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
 </svg>

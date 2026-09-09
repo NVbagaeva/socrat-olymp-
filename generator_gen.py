@@ -3,7 +3,7 @@
 Стиль: изумрудные рёбра, штриховые невидимые, зелёная заливка, точки-вершины, жирные serif-подписи.
 Вспомогательные построения (высота, апофема, ось, радиус, сечения) — терракотовые.
 Проекция: кабинетная (x вправо, z вверх, y «вглубь» под 45° с коэффициентом 0.5)."""
-import math, os, json
+import math, os, json, re
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.varLib.instancer import instantiateVariableFont
@@ -183,15 +183,17 @@ def _render(scene,outline=False):
     for k in sorted(s.point_marks):
         p=T(pts2[k]); rr=PT_R*(0.8 if k in s.small else 1)
         out.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="{rr}" fill="{C_VERTEX}" stroke="#fff" stroke-width="2.5"/>')
-    # подписи
+    # подписи: место подбирается так, чтобы буква ни на что не наезжала
+    segs=_segments_of("\n".join(out))
+    boxes=[]
     for k,txt in s.labels.items():
         p=T(pts2[k]); fs=FS_SMALL if k in s.small else FS
         if k in s.label_dir: dx,dy=s.label_dir[k]
         else:
             dx,dy=pts2[k][0]-c2[0],pts2[k][1]-c2[1]; L=math.hypot(dx,dy) or 1; dx,dy=dx/L,dy/L
-        d=fs*0.95
-        x=p[0]+dx*d; y=p[1]+dy*d+fs*0.35
         base,idx=sub_label(txt)
+        x,y,box=_place(p[0],p[1],(dx,dy),fs,_label_w(base,idx,fs),segs,boxes)
+        boxes.append(box)
         col = C_AUX_LABEL if k.startswith("_") else C_LABEL   # h, l, r, R — вспомогательные
         if outline:
             out.append(text_path(base,x,y,fs,color=col))
@@ -212,6 +214,73 @@ def right_angle(s,O,dirA,dirB,size=0.09):
         pa,pb,pc=T(proj(a)),T(proj(b)),T(proj(c))
         return f'<polyline points="{pa[0]:.1f},{pa[1]:.1f} {pc[0]:.1f},{pc[1]:.1f} {pb[0]:.1f},{pb[1]:.1f}" fill="none" stroke="{C_AUX}" stroke-width="3"/>'
     s.raw.append(("svgtop",f))
+
+# ---------- расстановка подписей ----------
+# Ширина знаков Lora Bold в долях кегля. Нужна, чтобы прикинуть габарит
+# подписи БЕЗ обращения к шрифту: тогда <text> и контурная версия расставляют
+# буквы одинаково. Считать 0.62 на любой знак нельзя — «M» почти вдвое шире «l».
+_ADV={"A":0.668,"B":0.661,"C":0.688,"D":0.759,"E":0.624,"F":0.571,"G":0.754,
+      "H":0.807,"S":0.598,"O":0.769,"M":0.972,"h":0.621,"l":0.312,"r":0.48,
+      "R":0.686,"0":0.636,"1":0.406,"2":0.533,"3":0.56,"4":0.547,"5":0.54,
+      "6":0.575,"7":0.469,"8":0.572,"9":0.576}
+def _label_w(base,idx,fs):
+    w=sum(_ADV.get(c,0.7) for c in base)*fs
+    return w + sum(_ADV.get(c,0.7) for c in idx)*fs*0.6
+
+def _segments_of(svg):
+    """Отрезки всего, что уже нарисовано: линии, эллипсы, дуги, многоугольники.
+    Разбираем собственный вывод — так подписи видят и то, что рисуют
+    сырые вставки тел вращения."""
+    segs=[]
+    for m in re.finditer(r'<line x1="([-\d.]+)" y1="([-\d.]+)" x2="([-\d.]+)" y2="([-\d.]+)"',svg):
+        a,b,c,d=map(float,m.groups()); segs.append(((a,b),(c,d)))
+    for m in re.finditer(r'<ellipse cx="([-\d.]+)" cy="([-\d.]+)" rx="([\d.]+)" ry="([\d.]+)"',svg):
+        cx,cy,rx,ry=map(float,m.groups())
+        P=[(cx+rx*math.cos(2*math.pi*i/72), cy+ry*math.sin(2*math.pi*i/72)) for i in range(73)]
+        segs+=list(zip(P,P[1:]))
+    for m in re.finditer(r'<path d="M ([-\d.]+) ([-\d.]+) A ([\d.]+) ([\d.]+) 0 0 ([01]) ([-\d.]+) ([-\d.]+)"',svg):
+        x1,y1,rx,ry,sw,x2,_=(float(m.group(1)),float(m.group(2)),float(m.group(3)),
+                             float(m.group(4)),m.group(5),float(m.group(6)),m.group(7))
+        cx=(x1+x2)/2
+        P=[]
+        for i in range(37):
+            t=math.pi*i/36
+            a=math.pi-t if sw=='0' else math.pi+t
+            P.append((cx+rx*math.cos(a), y1+ry*math.sin(a)))
+        segs+=list(zip(P,P[1:]))
+    for m in re.finditer(r'<polygon points="([^"]+)"',svg):
+        pts=[tuple(map(float,q.split(','))) for q in m.group(1).split()]
+        segs+=list(zip(pts,pts[1:]+pts[:1]))
+    return segs
+
+def _hits(box,segs,boxes):
+    x0,y0,x1,y1=box
+    for (a,b) in segs:
+        if max(a[0],b[0])<x0 or min(a[0],b[0])>x1 or max(a[1],b[1])<y0 or min(a[1],b[1])>y1:
+            continue
+        for i in range(21):
+            t=i/20.0; px=a[0]+(b[0]-a[0])*t; py=a[1]+(b[1]-a[1])*t
+            if x0<=px<=x1 and y0<=py<=y1: return True
+    for c in boxes:
+        if min(x1,c[2])-max(x0,c[0])>0 and min(y1,c[3])-max(y0,c[1])>0: return True
+    return False
+
+def _place(px,py,pref,fs,w,segs,boxes):
+    """Предпочтительное направление пробуем первым; отходим по кругу, только
+    если там уже что-то нарисовано. Чертежи без конфликтов не меняются."""
+    a0=math.atan2(pref[1],pref[0])
+    cands=[0.0]
+    for k in range(1,13): cands += [k*math.pi/12, -k*math.pi/12]
+    best=None
+    for mul in (1.0,1.25,1.55):
+        for da in cands:
+            a=a0+da; d=fs*0.95*mul
+            x=px+math.cos(a)*d; y=py+math.sin(a)*d+fs*0.35
+            box=(x-w/2-3, y-0.72*fs-3, x+w/2+3, y+0.06*fs+3)
+            if not (0<box[0] and box[2]<CANVAS and 0<box[1] and box[3]<CANVAS): continue
+            if not _hits(box,segs,boxes): return x,y,box
+            if best is None: best=(x,y,box)
+    return best
 
 def unit(v):
     L=math.sqrt(dot(v,v)); return tuple(x/L for x in v)

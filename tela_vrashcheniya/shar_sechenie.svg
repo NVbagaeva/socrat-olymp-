@@ -12,8 +12,8 @@
 <circle cx="810.7" cy="295.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="500.0" cy="500.0" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="500.0" cy="295.4" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<text x="479.5" y="570.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
-<text x="474.4" y="263.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
-<text x="875.3" y="299.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
-<text x="711.8" y="442.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#E07A2F" text-anchor="middle">R</text>
+<text x="480.9" y="566.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="477.1" y="268.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
+<text x="872.6" y="300.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="702.1" y="437.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#E07A2F" text-anchor="middle">R</text>
 </svg>

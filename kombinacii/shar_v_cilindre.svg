@@ -11,5 +11,5 @@
 <path d="M 226.5 500.0 A 273.5 98.5 0 0 1 773.5 500.0" fill="none" stroke="#8CC6A3" stroke-width="4" stroke-dasharray="18,12" stroke-linecap="round"/>
 <path d="M 226.5 500.0 A 273.5 98.5 0 0 0 773.5 500.0" fill="none" stroke="#1B7A3E" stroke-width="4" stroke-linecap="round"/>
 <circle cx="500.0" cy="500.0" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<text x="525.6" y="570.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="522.9" y="564.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
 </svg>
