@@ -1,0 +1,6 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Каталог, куда generator_gen.py пишет по умолчанию
+out/
