@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Шар, вписанный в цилиндр</title>
+<polygon points="500.0,500.0" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 226.5 773.5 L 226.5 226.5 A 273.5 98.5 0 1 1 773.5 226.5 L 773.5 773.5 A 273.5 98.5 0 0 1 226.5 773.5 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 226.5 773.5 A 273.5 98.5 0 0 0 773.5 773.5" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 226.5 773.5 A 273.5 98.5 0 0 1 773.5 773.5" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<ellipse cx="500.0" cy="226.5" rx="273.5" ry="98.5" fill="none" stroke="#6a1fb5" stroke-width="6"/>
+<line x1="226.5" y1="773.5" x2="226.5" y2="226.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="773.5" y1="773.5" x2="773.5" y2="226.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<circle cx="500.0" cy="500.0" r="273.5" fill="#6a1fb5" fill-opacity="0.08" stroke="#6a1fb5" stroke-width="4"/>
+<path d="M 226.5 500.0 A 273.5 98.5 0 0 0 773.5 500.0" fill="none" stroke="#b48ee0" stroke-width="4" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 226.5 500.0 A 273.5 98.5 0 0 1 773.5 500.0" fill="none" stroke="#6a1fb5" stroke-width="4" stroke-linecap="round"/>
+<circle cx="500.0" cy="500.0" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<path transform="translate(504.9,570.2) scale(0.05400,-0.05400)" d="M383 -16Q288 -16 221.5 16.0Q155 48 114.0 101.5Q73 155 54.0 220.0Q35 285 35 350Q35 413 56.5 477.5Q78 542 121.5 596.0Q165 650 231.0 683.0Q297 716 386 716Q477 716 543.0 683.0Q609 650 651.0 595.5Q693 541 713.5 477.0Q734 413 734 350Q734 288 712.5 224.0Q691 160 647.5 105.5Q604 51 538.0 17.5Q472 -16 383 -16ZM394 57Q446 57 481.0 82.5Q516 108 537.0 149.0Q558 190 567.0 238.5Q576 287 576 333Q576 402 564.0 459.0Q552 516 527.0 557.5Q502 599 463.5 621.5Q425 644 373 643Q322 642 287.0 615.5Q252 589 231.0 547.5Q210 506 201.0 457.0Q192 408 192 362Q192 315 202.5 262.0Q213 209 236.0 162.0Q259 115 298.0 86.0Q337 57 394 57Z" fill="#1c1b2e"/>
+</svg>

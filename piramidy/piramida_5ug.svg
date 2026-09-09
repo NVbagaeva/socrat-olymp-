@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Пятиугольная пирамида</title>
+<polygon points="128.0,843.5 140.3,691.5 464.1,156.5 872.0,691.5 580.2,843.5" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<line x1="872.0" y1="691.5" x2="600.1" y2="597.5" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="600.1" y1="597.5" x2="140.3" y2="691.5" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="600.1" y1="597.5" x2="464.1" y2="156.5" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="140.3" y1="691.5" x2="128.0" y2="843.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="140.3" y1="691.5" x2="464.1" y2="156.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="843.5" x2="580.2" y2="843.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="843.5" x2="464.1" y2="156.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="580.2" y1="843.5" x2="872.0" y2="691.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="580.2" y1="843.5" x2="464.1" y2="156.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="691.5" x2="464.1" y2="156.5" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<circle cx="128.0" cy="843.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="580.2" cy="843.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="140.3" cy="691.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="600.1" cy="597.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="691.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="464.1" cy="156.5" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<text x="76.6" y="725.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
+<text x="72.9" y="901.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">B</text>
+<text x="611.9" y="923.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">C</text>
+<text x="936.1" y="723.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">D</text>
+<text x="662.1" y="603.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">E</text>
+<text x="464.1" y="115.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">S</text>
+</svg>

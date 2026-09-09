@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Цилиндр с осью, радиусом и образующей</title>
+<polygon points="216.0,230.2 784.0,230.2 784.0,769.8 216.0,769.8" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 216.0 769.8 L 216.0 230.2 A 284.0 102.2 0 1 1 784.0 230.2 L 784.0 769.8 A 284.0 102.2 0 0 1 216.0 769.8 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 216.0 769.8 A 284.0 102.2 0 0 0 784.0 769.8" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 216.0 769.8 A 284.0 102.2 0 0 1 784.0 769.8" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<ellipse cx="500.0" cy="230.2" rx="284.0" ry="102.2" fill="none" stroke="#6a1fb5" stroke-width="6"/>
+<line x1="216.0" y1="769.8" x2="216.0" y2="230.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="784.0" y1="769.8" x2="784.0" y2="230.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="500.0" y1="769.8" x2="500.0" y2="230.2" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
+<line x1="500.0" y1="769.8" x2="784.0" y2="769.8" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
+<circle cx="784.0" cy="769.8" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="784.0" cy="230.2" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="769.8" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="230.2" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<text x="484.6" y="840.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O</text>
+<text x="500.0" y="197.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
+<text x="848.6" y="825.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
+<text x="848.6" y="234.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="642.0" y="732.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">r</text>
+<text x="840.4" y="518.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">l</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Шар, вписанный в конус</title>
+<polygon points="500.0,142.2 500.0,769.4" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 214.9 769.4 L 500.0 142.2 L 785.1 769.4 A 285.1 102.6 0 0 1 214.9 769.4 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
+<path d="M 214.9 769.4 A 285.1 102.6 0 0 0 785.1 769.4" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 214.9 769.4 A 285.1 102.6 0 0 1 785.1 769.4" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="214.9" y1="769.4" x2="500.0" y2="142.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<line x1="785.1" y1="769.4" x2="500.0" y2="142.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<circle cx="500.0" cy="585.8" r="183.6" fill="#6a1fb5" fill-opacity="0.08" stroke="#6a1fb5" stroke-width="4"/>
+<path d="M 316.4 585.8 A 183.6 66.1 0 0 0 683.6 585.8" fill="none" stroke="#b48ee0" stroke-width="4" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 316.4 585.8 A 183.6 66.1 0 0 1 683.6 585.8" fill="none" stroke="#6a1fb5" stroke-width="4" stroke-linecap="round"/>
+<line x1="500.0" y1="769.4" x2="500.0" y2="142.2" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
+<circle cx="500.0" cy="769.4" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="142.2" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="585.8" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
+<text x="500.0" y="101.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">S</text>
+<text x="551.3" y="615.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O</text>
+<text x="479.5" y="839.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
+</svg>
