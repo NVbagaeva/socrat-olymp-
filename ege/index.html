@@ -20,7 +20,9 @@
   /* --- Поверхности --- */
   --paper:            #FAF8F4;
   --surface:          #FFFFFF;
-  --surface-quiet:    #F5F2EB;
+  --surface-quiet:    #F1ECE1;   /* плотнее страницы — карточка читается объектом */
+  --surface-active:   #F5FAF7;   /* ~4% насыщенности изумруда, «живая», но не залитая */
+  --surface-active-h: #EAF4EE;
 
   /* --- Текст --- */
   --text-strong:      #16211B;
@@ -29,8 +31,8 @@
   --text-faint:       #7E7768;   /* только крупные цифры (AA large) */
 
   /* --- Линии --- */
-  --border:           #E4DED2;
-  --border-strong:    #C7BFAE;
+  --border:           #E4DED2;   /* линейки шапки и подвала */
+  --border-strong:    #BDB4A1;   /* граница плашки и бледная закладка */
   --highlight:        rgba(255,255,255,.9);   /* блик по верхней грани */
 
   /* --- Изумруд: тёмный для текста, средний как акцент, светлые под фоны --- */
@@ -43,7 +45,9 @@
 
   /* --- Тёплый акцент, второй и в малых дозах.
          #E07A2F не проходит AA как текст (2.83:1) — текстом только --accent-ink --- */
-  --accent-ink:       #9A4E16;
+  /* #E07A2F как текст даёт 2.63:1 — не проходит AA, поэтому текстом метки
+     идёт ближайшая проходящая терракота, а сам #E07A2F держит рамку */
+  --accent-ink:       #A85517;
   --accent:           #E07A2F;
   --accent-line:      #EFC49B;
   --accent-wash:      #FBEEE2;
@@ -161,7 +165,7 @@ body{
   min-height:176px;                   /* 260×176 ≈ 3:2 */                       /* 260×168 ≈ 3:2 */
   min-width:0;
   padding:var(--s-5) var(--s-5) var(--s-5) var(--s-6);
-  border:1px solid var(--border);
+  border:1px solid var(--border-strong);
   border-radius:var(--radius);
   background-color:var(--surface-quiet);
   /* очень лёгкий вертикальный свет: верх чуть светлее низа */
@@ -214,7 +218,7 @@ body{
 /* --- Открытое задание --- */
 .tile--active{
   --stripe: var(--brand);
-  background-color:var(--surface);
+  background-color:var(--surface-active);
   border-color:var(--brand-soft);
   box-shadow:inset var(--s-2) 0 0 0 var(--stripe),
              inset 0 1px 0 0 var(--highlight),
@@ -222,17 +226,19 @@ body{
              0 4px 10px rgba(22,33,27,.06);
   cursor:pointer;
   transition:transform var(--dur) var(--ease),
+             background-color var(--dur) var(--ease),
              border-color var(--dur) var(--ease),
              box-shadow var(--dur) var(--ease);
 }
 .tile--active .tile__num{color:var(--brand)}
 .tile--active .tile__title{color:var(--text);font-weight:600}
-.tile--active .tile__status{color:var(--brand-dark)}
+.tile--active .tile__status{color:var(--brand)}
 
 .tile--active:hover{
   transform:translateY(-2px);
+  background-color:var(--surface-active-h);
   border-color:var(--brand-mid);
-  box-shadow:inset var(--s-2) 0 0 0 var(--stripe),
+  box-shadow:inset var(--s-3) 0 0 0 var(--stripe),
              inset 0 1px 0 0 var(--highlight),
              0 2px 4px rgba(22,33,27,.06),
              0 8px 18px rgba(22,33,27,.09);
@@ -250,10 +256,10 @@ body{
   position:absolute;
   top:var(--s-4); right:var(--s-4);
   padding:var(--s-1) var(--s-2);
-  border:1px solid var(--border-strong);
+  border:1px solid var(--accent);
   border-radius:3px;
-  background:transparent;
-  color:var(--text-muted);
+  background:var(--accent-wash);
+  color:var(--accent-ink);
   font-size:var(--fs-2xs);
   font-weight:600;
   line-height:1.3;
@@ -261,9 +267,7 @@ body{
   text-transform:uppercase;
 }
 .tile--active .tile__new{
-  border-color:var(--accent-line);
-  background:var(--accent-wash);
-  color:var(--accent-ink);
+  border-color:var(--accent);
 }
 
 /* --------------------------------------------------------------------------
@@ -305,33 +309,47 @@ body{
   .tile--last{grid-column:5/span 4}
 }
 
-/* две в ряд */
-@media (max-width:700px){
+/* планшет: размеры промежуточные */
+@media (max-width:768px){
   .wrap{padding-block:var(--s-12) var(--s-10)}
-  .grid{grid-template-columns:repeat(4,1fr);gap:var(--s-4)}
+  .grid{gap:var(--s-4)}
+  .tile{min-height:160px;padding:var(--s-4) var(--s-4) var(--s-4) var(--s-5)}
+  .tile__num{font-size:var(--fs-2xl)}
+  .tile__title{font-size:15px}
+  .tile__new{top:var(--s-3);right:var(--s-3)}
+}
+
+/* две в ряд */
+@media (max-width:620px){
+  .grid{grid-template-columns:repeat(4,1fr)}
   .tile{grid-column:span 2}
   .tile--last{grid-column:2/span 2}
 }
 
-/* телефон: колонки слишком узки для двух колонок внутри — складываем в стопку */
-@media (max-width:479px){
+/* телефон: 13 плашек должны пролистываться быстро — плашка низкая и плотная */
+@media (max-width:480px){
   .wrap{
-    padding-left:var(--s-5); padding-right:var(--s-5);
-    padding-block:var(--s-10) var(--s-8);
+    padding-left:var(--s-4); padding-right:var(--s-4);
+    padding-block:var(--s-8) var(--s-8);
   }
-  .masthead{padding-bottom:var(--s-6);margin-bottom:var(--s-8)}
-  .masthead__sub{font-size:17px}
+  .masthead{padding-bottom:var(--s-5);margin-bottom:var(--s-6)}
+  .masthead__eyebrow{margin-bottom:var(--s-3);font-size:11px;letter-spacing:.16em}
+  .masthead__title{font-size:32px;margin-bottom:var(--s-3)}
+  .masthead__sub{font-size:15px;line-height:1.45}
   .grid{gap:var(--s-3)}
-  .tile{min-height:160px;padding:var(--s-4) var(--s-4) var(--s-4) var(--s-5)}
-  .tile__num{font-size:var(--fs-2xl)}
-  .tile__title{font-size:15px}
-  .tile__new{top:var(--s-3);right:var(--s-3)}   /* в стопке низ занят текстом */
-  .notes{margin-top:var(--s-8)}
+  .tile{min-height:128px;padding:var(--s-3) var(--s-3) var(--s-3) var(--s-5)}
+  .tile__num{font-size:30px}
+  .tile__title{margin-top:var(--s-1);font-size:14px;line-height:1.25}
+  .tile__status{margin-top:var(--s-1);font-size:10px;letter-spacing:.1em}
+  .tile__new{top:var(--s-2);right:var(--s-2);font-size:10px}
+  .notes{margin-top:var(--s-6);padding-top:var(--s-5)}
+  .notes__lead{font-size:13px}
+  .notes__fine{font-size:12px}
 }
 
 @media (max-width:360px){
-  .tile__num{font-size:var(--fs-xl)}
-  .tile__title{font-size:14px}
+  .tile__num{font-size:28px}
+  .tile__title{font-size:13px}
 }
 
 @media (prefers-reduced-motion:reduce){
