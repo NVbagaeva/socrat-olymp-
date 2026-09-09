@@ -21,12 +21,12 @@
 <circle cx="704.6" cy="230.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="322.3" cy="575.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
 <circle cx="402.3" cy="230.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<text x="77.1" y="833.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
-<text x="711.3" y="848.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
-<text x="934.5" y="615.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
-<text x="265.6" y="630.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
-<text x="242.2" y="324.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="634.5" y="308.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="704.6" y="189.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="402.3" y="189.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="65.5" y="809.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="734.4" y="824.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="934.5" y="582.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="265.6" y="568.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="232.9" y="377.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="654.4" y="392.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="767.1" y="237.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="345.6" y="223.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
 </svg>

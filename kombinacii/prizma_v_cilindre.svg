@@ -1,51 +1,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Призма, вписанная в цилиндр</title>
-<polygon points="166.1,260.2 389.1,154.7 723.0,137.9 833.9,226.7 833.9,739.8 610.9,845.3 277.0,862.1 166.1,773.3" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<polygon points="182.8,260.5 300.4,153.1 617.5,136.0 817.2,226.4 817.2,739.5 699.6,846.9 382.5,864.0 182.8,773.6" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
 <path d="M 179.3 756.6 A 320.7 115.5 0 0 1 820.7 756.6" fill="none" stroke="#8CC6A3" stroke-width="4" stroke-dasharray="18,12" stroke-linecap="round"/>
 <path d="M 179.3 756.6 A 320.7 115.5 0 0 0 820.7 756.6" fill="none" stroke="#1B7A3E" stroke-width="4" stroke-linecap="round"/>
 <ellipse cx="500.0" cy="243.4" rx="320.7" ry="115.5" fill="none" stroke="#1B7A3E" stroke-width="4"/>
 <line x1="179.3" y1="756.6" x2="179.3" y2="243.4" stroke="#1B7A3E" stroke-width="4"/>
 <line x1="820.7" y1="756.6" x2="820.7" y2="243.4" stroke="#1B7A3E" stroke-width="4"/>
-<line x1="833.9" y1="739.8" x2="723.0" y2="651.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="723.0" y1="651.1" x2="389.1" y2="667.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="723.0" y1="651.1" x2="723.0" y2="137.9" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="389.1" y1="667.8" x2="166.1" y2="773.3" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="389.1" y1="667.8" x2="389.1" y2="154.7" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="166.1" y1="773.3" x2="277.0" y2="862.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="166.1" y1="260.2" x2="277.0" y2="348.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="166.1" y1="773.3" x2="166.1" y2="260.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="277.0" y1="862.1" x2="610.9" y2="845.3" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="277.0" y1="348.9" x2="610.9" y2="332.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="277.0" y1="862.1" x2="277.0" y2="348.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="610.9" y1="845.3" x2="833.9" y2="739.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="610.9" y1="332.2" x2="833.9" y2="226.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="610.9" y1="845.3" x2="610.9" y2="332.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="833.9" y1="226.7" x2="723.0" y2="137.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="833.9" y1="739.8" x2="833.9" y2="226.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="723.0" y1="137.9" x2="389.1" y2="154.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<line x1="389.1" y1="154.7" x2="166.1" y2="260.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
-<circle cx="166.1" cy="773.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="166.1" cy="260.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="277.0" cy="862.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="277.0" cy="348.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="610.9" cy="845.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="610.9" cy="332.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="833.9" cy="739.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="833.9" cy="226.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="723.0" cy="651.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="723.0" cy="137.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="389.1" cy="667.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<circle cx="389.1" cy="154.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
-<text x="116.1" y="838.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
-<text x="243.1" y="940.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
-<text x="630.7" y="930.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
-<text x="886.4" y="801.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
-<text x="776.5" y="711.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E</text>
-<text x="353.5" y="745.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F</text>
-<text x="113.6" y="246.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="223.5" y="336.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="646.5" y="302.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="883.9" y="209.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="756.9" y="106.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="369.3" y="117.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<line x1="817.2" y1="739.5" x2="617.5" y2="649.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="617.5" y1="649.1" x2="300.4" y2="666.2" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="617.5" y1="649.1" x2="617.5" y2="136.0" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="300.4" y1="666.2" x2="182.8" y2="773.6" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="300.4" y1="666.2" x2="300.4" y2="153.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="182.8" y1="773.6" x2="382.5" y2="864.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="182.8" y1="260.5" x2="382.5" y2="350.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="182.8" y1="773.6" x2="182.8" y2="260.5" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="382.5" y1="864.0" x2="699.6" y2="846.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="382.5" y1="350.9" x2="699.6" y2="333.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="382.5" y1="864.0" x2="382.5" y2="350.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="699.6" y1="846.9" x2="817.2" y2="739.5" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="699.6" y1="333.8" x2="817.2" y2="226.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="699.6" y1="846.9" x2="699.6" y2="333.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="817.2" y1="226.4" x2="617.5" y2="136.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="817.2" y1="739.5" x2="817.2" y2="226.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="617.5" y1="136.0" x2="300.4" y2="153.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="300.4" y1="153.1" x2="182.8" y2="260.5" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<circle cx="182.8" cy="773.6" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="182.8" cy="260.5" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="382.5" cy="864.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="382.5" cy="350.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="699.6" cy="846.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="699.6" cy="333.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="817.2" cy="739.5" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="817.2" cy="226.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="617.5" cy="649.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="617.5" cy="136.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="300.4" cy="666.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="300.4" cy="153.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="133.9" y="839.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="362.6" y="949.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="731.9" y="926.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="868.7" y="802.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="657.5" y="723.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E</text>
+<text x="250.7" y="731.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F</text>
+<text x="131.3" y="245.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="342.5" y="323.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="749.3" y="316.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="866.1" y="208.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="637.4" y="98.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="268.1" y="120.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
 </svg>

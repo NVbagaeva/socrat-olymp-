@@ -218,8 +218,8 @@ def unit(v):
 
 # ---------- ФИГУРЫ ----------
 LET="ABCDEFGH"
-def pyramid(n,R=1.0,h=1.5,names=None,build=None,title=""):
-    s=Scene(title); base=regular_polygon(n,R)
+def pyramid(n,R=1.0,h=1.5,names=None,build=None,title="",base_pts=None):
+    s=Scene(title); base=base_pts or regular_polygon(n,R)
     names=names or list(LET[:n])
     for nm,p in zip(names,base): s.P(nm,p)
     s.P("S",(0,0,h),ldir=(0,-1))
@@ -254,9 +254,16 @@ def pyramid_edge_perp(n=4,R=1.0,h=1.5,title=""):
 def frustum(n,R1=1.0,R2=0.55,h=1.0,title=""):
     s=Scene(title); b=regular_polygon(n,R1); t=regular_polygon(n,R2,h)
     nb=list(LET[:n]); nt=[x+"1" for x in nb]
-    for nm,p in zip(nb,b): s.P(nm,p)
-    front=min(range(n),key=lambda i:t[i][1])
-    for i,(nm,p) in enumerate(zip(nt,t)): s.P(nm,p,ldir=(-1.1,0.3) if (n%2==1 and i==front) else ((0,-1) if p[1]>0 else None))
+    # Подписи разводим радиально от центра СВОЕЙ грани: у усечённой пирамиды
+    # верхние вершины кучкуются около общего центра фигуры, и подписи наезжали.
+    def radial(pts3,centre3):
+        c=proj(centre3); out=[]
+        for q in pts3:
+            e=proj(q); dx,dy=e[0]-c[0],e[1]-c[1]; L=math.hypot(dx,dy) or 1
+            out.append((dx/L,dy/L))
+        return out
+    for nm,p,d in zip(nb,b,radial(b,(0,0,0))): s.P(nm,p,ldir=d)
+    for nm,p,d in zip(nt,t,radial(t,(0,0,h))): s.P(nm,p,ldir=d)
     s.face(*nb); s.face(*nt)
     for i in range(n):
         j=(i+1)%n; s.face(nb[i],nb[j],nt[j],nt[i]); s.seg(nb[i],nb[j]); s.seg(nt[i],nt[j]); s.seg(nb[i],nt[i])
@@ -266,8 +273,8 @@ def tetrahedron(title=""):
     R=1.0; h=R*math.sqrt(2)  # правильный тетраэдр: ребро a=R√3, высота a√(2/3)
     return pyramid(3,R,h,title=title)
 
-def prism(n,R=1.0,h=1.6,skew=(0,0),diag=False,section=False,title="",names=None):
-    s=Scene(title); b=regular_polygon(n,R); t=[(p[0]+skew[0],p[1]+skew[1],h) for p in b]
+def prism(n,R=1.0,h=1.6,skew=(0,0),diag=False,section=False,title="",names=None,base_pts=None):
+    s=Scene(title); b=base_pts or regular_polygon(n,R); t=[(p[0]+skew[0],p[1]+skew[1],h) for p in b]
     nb=names or list(LET[:n]); nt=[x+"1" for x in nb]
     for nm,p in zip(nb,b): s.P(nm,p)
     for nm,p in zip(nt,t): s.P(nm,p)
@@ -330,6 +337,24 @@ def truncated_prism(title=""):
 
 # ---------- тела вращения (2D, эллипсы с отношением осей 0.36) ----------
 EL=0.36
+
+def polygon_on_base_ellipse(n,R,z=0,start=None):
+    """Вершины правильного n-угольника, лежащие РОВНО на той кривой, которой
+    рисуется основание тела вращения.
+
+    Основание рисуется условным эллипсом (оси по экрану, ry = rx*EL), а
+    настоящая проекция горизонтальной окружности — эллипс, наклонённый примерно
+    на 7° и на 6% более широкий. Поэтому вершины, посчитанные через proj(),
+    с нарисованной кривой расходились до 22px на холсте 1000. Здесь берём точки,
+    проекция которых попадает точно на условный эллипс."""
+    st = {3:150,4:225,5:173,6:188.5,8:202.5}.get(n,180) if start is None else start
+    Kc=K*math.cos(ANG); Ks=K*math.sin(ANG); k=EL/Ks
+    pts=[]
+    for i in range(n):
+        a=math.radians(st+360*i/n)
+        pts.append((R*math.cos(a)-Kc*k*R*math.sin(a), k*R*math.sin(a), z))
+    return pts
+
 def ellipse_arc(cx,cy,rx,ry,front,w=W):
     """Половина эллипса от левой точки к правой.
     front=True  — БЛИЖНЯЯ к зрителю половина: сплошная, цветом рёбер.
@@ -433,7 +458,12 @@ def sphere(build=None,title=""):
         o.append(ellipse_arc(C[0],C[1],rr,rr*EL,False)); o.append(ellipse_arc(C[0],C[1],rr,rr*EL,True))
         if build=="section":
             zc=0.55*R; rs=math.sqrt(R*R-zc*zc); Cs=T(proj((0,0,zc)))
-            o.append(f'<ellipse cx="{Cs[0]:.1f}" cy="{Cs[1]:.1f}" rx="{rs*sc:.1f}" ry="{rs*sc*EL:.1f}" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="{C_AUX}" stroke-width="{W_THIN}"/>')
+            # Эллипс сечения центрально-симметричен, а касательные окружности шара
+            # на концах хорды зеркальны — совпасть они не могут, и эллипс вылезал
+            # за контур на ~8px. Обрезаем сечение по шару: геометрия точная,
+            # а стык приходится ровно на очерк.
+            o.append(f'<clipPath id="sph"><circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}"/></clipPath>')
+            o.append(f'<g clip-path="url(#sph)"><ellipse cx="{Cs[0]:.1f}" cy="{Cs[1]:.1f}" rx="{rs*sc:.1f}" ry="{rs*sc*EL:.1f}" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="{C_AUX}" stroke-width="{W_THIN}"/></g>')
             o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{Cs[0]:.1f}" y2="{Cs[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
             A=T(proj((rs,0,zc)))
             o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
@@ -510,7 +540,8 @@ def sphere_in_cone(title=""):
     return s
 
 def pyramid_in_cone(title=""):
-    s=pyramid(4,1.0,1.9,title=title); r=1.0; h=1.9
+    r=1.0; h=1.9
+    s=pyramid(4,1.0,h,title=title,base_pts=polygon_on_base_ellipse(4,r))
     def f(T,sc):
         L,R_=T(proj((-r,0,0))),T(proj((r,0,0))); rx=(R_[0]-L[0])/2; ry=rx*EL; cx,cy=(L[0]+R_[0])/2,L[1]; S=T(proj((0,0,h)))
         return "\n".join([ellipse_arc(cx,cy,rx,ry,False,W_THIN),ellipse_arc(cx,cy,rx,ry,True,W_THIN),
@@ -519,7 +550,8 @@ def pyramid_in_cone(title=""):
     return s
 
 def prism_in_cylinder(title=""):
-    s=prism(6,1.0,1.6,title=title); r,h=1.0,1.6
+    r,h=1.0,1.6
+    s=prism(6,r,h,title=title,base_pts=polygon_on_base_ellipse(6,r))
     def f(T,sc):
         L,R_,TL,TR=T(proj((-r,0,0))),T(proj((r,0,0))),T(proj((-r,0,h))),T(proj((r,0,h))); rx=(R_[0]-L[0])/2; ry=rx*EL
         cxb,cyb=(L[0]+R_[0])/2,L[1]; cxt,cyt=(TL[0]+TR[0])/2,TL[1]
