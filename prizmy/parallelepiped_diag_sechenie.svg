@@ -1,35 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Диагональное сечение параллелепипеда</title>
-<polygon points="128.0,357.9 262.6,223.2 872.0,223.2 872.0,642.1 737.4,776.8 128.0,776.8" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<polygon points="128.0,776.8 872.0,642.1 872.0,223.2 128.0,357.9" fill="#6a1fb5" fill-opacity="0.13" stroke="none"/>
-<line x1="872.0" y1="642.1" x2="262.6" y2="642.1" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="262.6" y1="642.1" x2="128.0" y2="776.8" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="262.6" y1="642.1" x2="262.6" y2="223.2" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="128.0" y1="776.8" x2="872.0" y2="642.1" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
-<line x1="128.0" y1="357.9" x2="872.0" y2="223.2" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
-<line x1="128.0" y1="776.8" x2="737.4" y2="776.8" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="128.0" y1="357.9" x2="737.4" y2="357.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="128.0" y1="776.8" x2="128.0" y2="357.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="737.4" y1="776.8" x2="872.0" y2="642.1" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="737.4" y1="357.9" x2="872.0" y2="223.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="737.4" y1="776.8" x2="737.4" y2="357.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="872.0" y1="223.2" x2="262.6" y2="223.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="872.0" y1="642.1" x2="872.0" y2="223.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="262.6" y1="223.2" x2="128.0" y2="357.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<circle cx="872.0" cy="223.2" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="737.4" cy="776.8" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="128.0" cy="357.9" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="872.0" cy="642.1" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="128.0" cy="776.8" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="262.6" cy="223.2" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="262.6" cy="642.1" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="737.4" cy="357.9" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<text x="76.1" y="839.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
-<text x="67.6" y="358.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="779.4" y="849.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">B</text>
-<text x="792.8" y="348.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="932.4" y="689.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">C</text>
-<text x="923.9" y="208.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
-<text x="207.2" y="699.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">D</text>
-<text x="220.6" y="198.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<polygon points="128.0,357.9 262.6,223.2 872.0,223.2 872.0,642.1 737.4,776.8 128.0,776.8" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<polygon points="128.0,776.8 872.0,642.1 872.0,223.2 128.0,357.9" fill="#E07A2F" fill-opacity="0.12" stroke="none"/>
+<line x1="872.0" y1="642.1" x2="262.6" y2="642.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="262.6" y1="642.1" x2="128.0" y2="776.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="262.6" y1="642.1" x2="262.6" y2="223.2" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="128.0" y1="776.8" x2="737.4" y2="776.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="357.9" x2="737.4" y2="357.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="776.8" x2="128.0" y2="357.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="737.4" y1="776.8" x2="872.0" y2="642.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="737.4" y1="357.9" x2="872.0" y2="223.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="737.4" y1="776.8" x2="737.4" y2="357.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="223.2" x2="262.6" y2="223.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="642.1" x2="872.0" y2="223.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="262.6" y1="223.2" x2="128.0" y2="357.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="776.8" x2="872.0" y2="642.1" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
+<line x1="128.0" y1="357.9" x2="872.0" y2="223.2" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
+<circle cx="128.0" cy="776.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="128.0" cy="357.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="737.4" cy="776.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="737.4" cy="357.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="642.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="223.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="262.6" cy="642.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="262.6" cy="223.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="76.1" y="839.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="67.6" y="358.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="779.4" y="849.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="792.8" y="348.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="932.4" y="689.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="923.9" y="208.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="207.2" y="699.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="220.6" y="198.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
 </svg>

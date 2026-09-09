@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Шар с центром и радиусом</title>
-<polygon points="500.0,500.0 723.2,202.4" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<circle cx="500.0" cy="500.0" r="372.0" fill="#6a1fb5" fill-opacity="0.1" stroke="#6a1fb5" stroke-width="6"/>
-<path d="M 128.0 500.0 A 372.0 133.9 0 0 0 872.0 500.0" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<path d="M 128.0 500.0 A 372.0 133.9 0 0 1 872.0 500.0" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="500.0" y1="500.0" x2="723.2" y2="202.4" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
-<circle cx="500.0" cy="500.0" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="723.2" cy="202.4" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<text x="479.5" y="570.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O</text>
-<text x="781.4" y="174.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
-<text x="550.0" y="380.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">R</text>
+<polygon points="500.0,500.0 723.2,202.4" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<circle cx="500.0" cy="500.0" r="372.0" fill="#1B7A3E" fill-opacity="0.09" stroke="#1B7A3E" stroke-width="6"/>
+<path d="M 128.0 500.0 A 372.0 133.9 0 0 1 872.0 500.0" fill="none" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 128.0 500.0 A 372.0 133.9 0 0 0 872.0 500.0" fill="none" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="500.0" y1="500.0" x2="723.2" y2="202.4" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<circle cx="723.2" cy="202.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="500.0" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="479.5" y="570.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="781.4" y="174.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="550.0" y="380.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#E07A2F" text-anchor="middle">R</text>
 </svg>

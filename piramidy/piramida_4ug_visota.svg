@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Четырёхугольная пирамида с высотой</title>
-<polygon points="128.0,840.1 500.0,159.9 872.0,645.8 677.7,840.1" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<line x1="872.0" y1="645.8" x2="322.3" y2="645.8" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="322.3" y1="645.8" x2="128.0" y2="840.1" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="322.3" y1="645.8" x2="500.0" y2="159.9" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<line x1="500.0" y1="159.9" x2="500.0" y2="742.9" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
-<line x1="500.0" y1="742.9" x2="128.0" y2="840.1" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
-<line x1="128.0" y1="840.1" x2="677.7" y2="840.1" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="128.0" y1="840.1" x2="500.0" y2="159.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="677.7" y1="840.1" x2="872.0" y2="645.8" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="677.7" y1="840.1" x2="500.0" y2="159.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="872.0" y1="645.8" x2="500.0" y2="159.9" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<polyline points="500.0,708.0 466.5,716.7 466.5,751.7" fill="none" stroke="#b48ee0" stroke-width="3"/>
-<circle cx="677.7" cy="840.1" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="500.0" cy="742.9" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="872.0" cy="645.8" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="128.0" cy="840.1" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="322.3" cy="645.8" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="500.0" cy="159.9" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<text x="70.7" y="893.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
-<text x="721.3" y="911.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">B</text>
-<text x="936.6" y="669.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">C</text>
-<text x="257.7" y="669.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">D</text>
-<text x="500.0" y="119.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">S</text>
-<text x="551.3" y="792.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O</text>
+<polygon points="128.0,840.1 500.0,159.9 872.0,645.8 677.7,840.1" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<line x1="872.0" y1="645.8" x2="322.3" y2="645.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="322.3" y1="645.8" x2="128.0" y2="840.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="322.3" y1="645.8" x2="500.0" y2="159.9" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="128.0" y1="840.1" x2="677.7" y2="840.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="840.1" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="677.7" y1="840.1" x2="872.0" y2="645.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="677.7" y1="840.1" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="645.8" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="500.0" y1="159.9" x2="500.0" y2="742.9" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
+<line x1="500.0" y1="742.9" x2="128.0" y2="840.1" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
+<polyline points="500.0,708.0 466.5,716.7 466.5,751.7" fill="none" stroke="#E07A2F" stroke-width="3"/>
+<circle cx="128.0" cy="840.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="677.7" cy="840.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="645.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="322.3" cy="645.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="742.9" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="159.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="70.7" y="893.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="721.3" y="911.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="936.6" y="669.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="257.7" y="669.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="500.0" y="119.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
+<text x="551.3" y="792.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
 </svg>

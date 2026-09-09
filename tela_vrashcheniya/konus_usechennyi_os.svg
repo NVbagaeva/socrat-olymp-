@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Усечённый конус с осью</title>
-<polygon points="500.0,237.7 686.0,237.7 872.0,646.9 500.0,646.9" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 128.0 646.9 L 314.0 237.7 A 186.0 67.0 0 1 1 686.0 237.7 L 872.0 646.9 A 372.0 133.9 0 0 1 128.0 646.9 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 128.0 646.9 A 372.0 133.9 0 0 0 872.0 646.9" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<path d="M 128.0 646.9 A 372.0 133.9 0 0 1 872.0 646.9" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<ellipse cx="500.0" cy="237.7" rx="186.0" ry="67.0" fill="none" stroke="#6a1fb5" stroke-width="6"/>
-<line x1="128.0" y1="646.9" x2="314.0" y2="237.7" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="872.0" y1="646.9" x2="686.0" y2="237.7" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="500.0" y1="646.9" x2="500.0" y2="237.7" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
-<line x1="500.0" y1="646.9" x2="872.0" y2="646.9" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
-<line x1="500.0" y1="237.7" x2="686.0" y2="237.7" stroke="#b48ee0" stroke-width="4" stroke-dasharray="14,10"/>
-<circle cx="872.0" cy="646.9" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="686.0" cy="237.7" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="500.0" cy="646.9" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<circle cx="500.0" cy="237.7" r="7.2" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<text x="484.6" y="717.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O</text>
-<text x="479.5" y="205.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#1c1b2e" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
-<text x="936.6" y="696.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A</text>
-<text x="750.6" y="235.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#1c1b2e" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<polygon points="500.0,237.7 686.0,237.7 872.0,646.9 500.0,646.9" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 128.0 646.9 L 314.0 237.7 A 186.0 67.0 0 1 1 686.0 237.7 L 872.0 646.9 A 372.0 133.9 0 0 1 128.0 646.9 Z" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 128.0 646.9 A 372.0 133.9 0 0 1 872.0 646.9" fill="none" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 128.0 646.9 A 372.0 133.9 0 0 0 872.0 646.9" fill="none" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<ellipse cx="500.0" cy="237.7" rx="186.0" ry="67.0" fill="none" stroke="#1B7A3E" stroke-width="6"/>
+<line x1="128.0" y1="646.9" x2="314.0" y2="237.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="646.9" x2="686.0" y2="237.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="500.0" y1="646.9" x2="500.0" y2="237.7" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<line x1="500.0" y1="646.9" x2="872.0" y2="646.9" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<line x1="500.0" y1="237.7" x2="686.0" y2="237.7" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<circle cx="872.0" cy="646.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="686.0" cy="237.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="646.9" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="237.7" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="484.6" y="717.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="479.5" y="205.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O<tspan font-size="32" baseline-shift="-25%">1</tspan></text>
+<text x="936.6" y="696.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="750.6" y="235.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
 </svg>

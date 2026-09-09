@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Цилиндр</title>
-<polygon points="216.0,230.2 784.0,230.2 784.0,769.8 216.0,769.8" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 216.0 769.8 L 216.0 230.2 A 284.0 102.2 0 1 1 784.0 230.2 L 784.0 769.8 A 284.0 102.2 0 0 1 216.0 769.8 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 216.0 769.8 A 284.0 102.2 0 0 0 784.0 769.8" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<path d="M 216.0 769.8 A 284.0 102.2 0 0 1 784.0 769.8" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<ellipse cx="500.0" cy="230.2" rx="284.0" ry="102.2" fill="none" stroke="#6a1fb5" stroke-width="6"/>
-<line x1="216.0" y1="769.8" x2="216.0" y2="230.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="784.0" y1="769.8" x2="784.0" y2="230.2" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
+<polygon points="216.0,230.2 784.0,230.2 784.0,769.8 216.0,769.8" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 216.0 769.8 L 216.0 230.2 A 284.0 102.2 0 1 1 784.0 230.2 L 784.0 769.8 A 284.0 102.2 0 0 1 216.0 769.8 Z" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 216.0 769.8 A 284.0 102.2 0 0 1 784.0 769.8" fill="none" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 216.0 769.8 A 284.0 102.2 0 0 0 784.0 769.8" fill="none" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<ellipse cx="500.0" cy="230.2" rx="284.0" ry="102.2" fill="none" stroke="#1B7A3E" stroke-width="6"/>
+<line x1="216.0" y1="769.8" x2="216.0" y2="230.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="784.0" y1="769.8" x2="784.0" y2="230.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
 </svg>

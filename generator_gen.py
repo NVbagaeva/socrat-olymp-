@@ -1,23 +1,41 @@
 # -*- coding: utf-8 -*-
 """Генератор чертежей по стереометрии (SVG). Багаева Н.В. / гимназия «Сократ».
-Стиль: фиолетовые рёбра, штриховые невидимые, сиреневая заливка, точки-вершины, жирные serif-подписи.
+Стиль: изумрудные рёбра, штриховые невидимые, зелёная заливка, точки-вершины, жирные serif-подписи.
+Вспомогательные построения (высота, апофема, ось, радиус, сечения) — терракотовые.
 Проекция: кабинетная (x вправо, z вверх, y «вглубь» под 45° с коэффициентом 0.5)."""
 import math, os, json
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.varLib.instancer import instantiateVariableFont
 
-# ---------- стиль ----------
-C_EDGE="#6a1fb5"; C_HID="#b48ee0"; C_FILL="#6a1fb5"; FILL_OP=0.10; C_PT="#5b3fd6"; C_TXT="#1c1b2e"
+# ---------- ПАЛИТРА ----------
+# Тело фигуры — зелёная гамма
+C_EDGE      = "#1B7A3E"   # видимые рёбра: самая уверенная линия
+C_HIDDEN    = "#8CC6A3"   # невидимые рёбра: тот же зелёный, осветлённый, пунктиром
+C_FILL      = "#1B7A3E"   # заливка граней
+FILL_OP     = 0.09        # прозрачность заливки граней
+C_VERTEX    = "#14532D"   # точки-вершины
+C_LABEL     = "#14231A"   # подписи вершин
+
+# Вспомогательные построения — терракотовый акцент
+C_AUX       = "#E07A2F"   # высота, апофема, ось вращения, радиус, знак прямого угла
+C_AUX_FILL  = "#E07A2F"   # заливка сечений
+AUX_FILL_OP = 0.12        # прозрачность заливки сечений
+C_AUX_LABEL = "#E07A2F"   # подписи вспомогательных величин: h, l, r, R
+
+# ---------- метрика ----------
 W=6; W_THIN=4; DASH="18,12"; DASH_THIN="14,10"; PT_R=9; FS=68; FS_SMALL=54
 CANVAS=1000; PAD=0.10
 K=0.5; ANG=math.radians(45)
-FONT_PATH="/usr/share/fonts/truetype/google-fonts/Lora-Variable.ttf"
+# путь к Lora можно переопределить переменной окружения LORA_TTF
+FONT_PATH=os.environ.get("LORA_TTF","/usr/share/fonts/truetype/google-fonts/Lora-Variable.ttf")
 _font=None
 def font():
     global _font
     if _font is None:
-        _font=instantiateVariableFont(TTFont(FONT_PATH),{"wght":700})
+        f=TTFont(FONT_PATH)
+        try: _font=instantiateVariableFont(f,{"wght":700})   # вариативная Lora
+        except Exception: _font=f                            # статическое начертание
     return _font
 
 # ---------- проекция ----------
@@ -25,6 +43,12 @@ def proj(p):
     x,y,z=p
     return (x+K*math.cos(ANG)*y, -(z+K*math.sin(ANG)*y))
 VIEW=(K*math.cos(ANG),-1,K*math.sin(ANG))  # вектор к наблюдателю
+def set_projection_angle(a):
+    """Угол «глубины» кабинетной проекции. Обычно 45°, но отдельным фигурам
+    его приходится менять: при 45° cos=sin, и диагональ куба AC1 ложится
+    ровно на ребро AD (см. box)."""
+    global ANG,VIEW
+    ANG=a; VIEW=(K*math.cos(ANG),-1,K*math.sin(ANG))
 
 def sub(a,b): return tuple(a[i]-b[i] for i in range(3))
 def cross(a,b): return (a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0])
@@ -32,7 +56,11 @@ def dot(a,b): return sum(a[i]*b[i] for i in range(3))
 def mid(a,b): return tuple((a[i]+b[i])/2 for i in range(len(a)))
 
 def regular_polygon(n,R,z=0):
-    start={3:150,4:225,5:162,6:180,8:202.5}.get(n,180)
+    # Угол разворота основания вокруг вертикальной оси.
+    # 5 и 6 развёрнуты относительно «круглых» 162° и 180°: при них кабинетная
+    # проекция клала ребро основания ровно на боковое (шестиугольник) или на
+    # вертикальное (пятиугольник) ребро — линии совпадали полностью.
+    start={3:150,4:225,5:173,6:188.5,8:202.5}.get(n,180)
     return [(R*math.cos(math.radians(start+360*i/n)),R*math.sin(math.radians(start+360*i/n)),z) for i in range(n)]
 
 def sub_label(name):
@@ -46,6 +74,7 @@ class Scene:
     def __init__(s,title):
         s.title=title; s.pts={}; s.faces=[]; s.edges=[]; s.extra=[]; s.labels={}; s.raw=[]; s.fillpoly=None
         s.point_marks=set(); s.small=set(); s.label_dir={}
+        s.ang=None   # None — общий угол проекции; иначе свой для этой фигуры
     def P(s,name,p,label=True,small=False,ldir=None):
         s.pts[name]=p
         if label: s.labels[name]=name
@@ -54,7 +83,8 @@ class Scene:
         if ldir: s.label_dir[name]=ldir
     def face(s,*names): s.faces.append(list(names))
     def seg(s,a,b,kind="auto",thin=False):
-        """kind: auto (по видимости граней), 'dash' (всегда штрих), 'solid'"""
+        """kind: 'auto' — по видимости граней, 'solid', 'dash' — всегда штрих,
+        'aux' — вспомогательное построение (терракотовый штрих поверх рёбер)"""
         s.edges.append((a,b,kind,thin))
     def hull2d(s):
         P=[proj(s.pts[k]) for k in s.pts if k in s.hull_names] if hasattr(s,'hull_names') else [proj(s.pts[k]) for k in s.pts]
@@ -91,7 +121,7 @@ class Scene:
         return False
 
 # ---------- SVG ----------
-def text_path(txt,x,y,size,anchor="middle"):
+def text_path(txt,x,y,size,anchor="middle",color=None):
     f=font(); gs=f.getGlyphSet(); cmap=f.getBestCmap(); upem=f['head'].unitsPerEm
     sc=size/upem; adv=0; paths=[]
     for ch in txt:
@@ -101,10 +131,16 @@ def text_path(txt,x,y,size,anchor="middle"):
     width=adv*sc; x0=x-width/2 if anchor=="middle" else (x-width if anchor=="end" else x)
     out=[]
     for d,a in paths:
-        out.append(f'<path transform="translate({x0+a*sc:.1f},{y:.1f}) scale({sc:.5f},{-sc:.5f})" d="{d}" fill="{C_TXT}"/>')
+        out.append(f'<path transform="translate({x0+a*sc:.1f},{y:.1f}) scale({sc:.5f},{-sc:.5f})" d="{d}" fill="{color or C_LABEL}"/>')
     return "".join(out)
 
 def render(scene,outline=False):
+    prev=ANG
+    if getattr(scene,"ang",None) is not None: set_projection_angle(scene.ang)
+    try: return _render(scene,outline)
+    finally: set_projection_angle(prev)
+
+def _render(scene,outline=False):
     s=scene; vis=s.visible_faces()
     pts2={k:proj(v) for k,v in s.pts.items()}
     if not pts2: pts2={'_c':proj((0,0,0))}
@@ -126,22 +162,27 @@ def render(scene,outline=False):
     for r in s.raw:
         if r[0]=="svg": out.append(r[1](T,sc))
     # рёбра: сначала штриховые, потом сплошные
-    solid=[]; dashed=[]
+    solid=[]; dashed=[]; aux=[]
     for a,b,kind,thin in s.edges:
+        if kind=="aux": aux.append((a,b,thin)); continue
         v = kind=="solid" or (kind=="auto" and s.edge_visible(a,b,vis))
         (solid if v else dashed).append((a,b,thin))
     for a,b,thin in dashed:
         p,q=T(pts2[a]),T(pts2[b]); wd=W_THIN if thin else W
-        out.append(f'<line x1="{p[0]:.1f}" y1="{p[1]:.1f}" x2="{q[0]:.1f}" y2="{q[1]:.1f}" stroke="{C_HID}" stroke-width="{wd}" stroke-dasharray="{DASH_THIN if thin else DASH}" stroke-linecap="round"/>')
+        out.append(f'<line x1="{p[0]:.1f}" y1="{p[1]:.1f}" x2="{q[0]:.1f}" y2="{q[1]:.1f}" stroke="{C_HIDDEN}" stroke-width="{wd}" stroke-dasharray="{DASH_THIN if thin else DASH}" stroke-linecap="round"/>')
     for a,b,thin in solid:
         p,q=T(pts2[a]),T(pts2[b]); wd=W_THIN if thin else W
         out.append(f'<line x1="{p[0]:.1f}" y1="{p[1]:.1f}" x2="{q[0]:.1f}" y2="{q[1]:.1f}" stroke="{C_EDGE}" stroke-width="{wd}" stroke-linecap="round"/>')
+    # вспомогательные линии рисуются последними, чтобы не тонуть под рёбрами
+    for a,b,thin in aux:
+        p,q=T(pts2[a]),T(pts2[b]); wd=W_THIN if thin else W
+        out.append(f'<line x1="{p[0]:.1f}" y1="{p[1]:.1f}" x2="{q[0]:.1f}" y2="{q[1]:.1f}" stroke="{C_AUX}" stroke-width="{wd}" stroke-dasharray="{DASH_THIN if thin else DASH}" stroke-linecap="round"/>')
     for r in s.raw:
         if r[0]=="svgtop": out.append(r[1](T,sc))
     # точки
-    for k in s.point_marks:
+    for k in sorted(s.point_marks):
         p=T(pts2[k]); rr=PT_R*(0.8 if k in s.small else 1)
-        out.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="{rr}" fill="{C_PT}" stroke="#fff" stroke-width="2.5"/>')
+        out.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="{rr}" fill="{C_VERTEX}" stroke="#fff" stroke-width="2.5"/>')
     # подписи
     for k,txt in s.labels.items():
         p=T(pts2[k]); fs=FS_SMALL if k in s.small else FS
@@ -151,11 +192,12 @@ def render(scene,outline=False):
         d=fs*0.95
         x=p[0]+dx*d; y=p[1]+dy*d+fs*0.35
         base,idx=sub_label(txt)
+        col = C_AUX_LABEL if k.startswith("_") else C_LABEL   # h, l, r, R — вспомогательные
         if outline:
-            out.append(text_path(base,x,y,fs))
-            if idx: out.append(text_path(idx,x+fs*0.42,y+fs*0.22,fs*0.6,"start"))
+            out.append(text_path(base,x,y,fs,color=col))
+            if idx: out.append(text_path(idx,x+fs*0.42,y+fs*0.22,fs*0.6,"start",color=col))
         else:
-            t=f'<text x="{x:.1f}" y="{y:.1f}" font-family="Lora, Georgia, serif" font-weight="700" font-size="{fs}" fill="{C_TXT}" text-anchor="middle">{base}'
+            t=f'<text x="{x:.1f}" y="{y:.1f}" font-family="Lora, Georgia, serif" font-weight="700" font-size="{fs}" fill="{col}" text-anchor="middle">{base}'
             if idx: t+=f'<tspan font-size="{fs*0.6:.0f}" baseline-shift="-25%">{idx}</tspan>'
             out.append(t+'</text>')
     out.append('</svg>')
@@ -168,7 +210,7 @@ def right_angle(s,O,dirA,dirB,size=0.09):
     def f(T,sc):
         a=tuple(o[i]+dirA[i]*size for i in range(3)); b=tuple(o[i]+dirB[i]*size for i in range(3)); c=tuple(o[i]+(dirA[i]+dirB[i])*size for i in range(3))
         pa,pb,pc=T(proj(a)),T(proj(b)),T(proj(c))
-        return f'<polyline points="{pa[0]:.1f},{pa[1]:.1f} {pc[0]:.1f},{pc[1]:.1f} {pb[0]:.1f},{pb[1]:.1f}" fill="none" stroke="{C_HID}" stroke-width="3"/>'
+        return f'<polyline points="{pa[0]:.1f},{pa[1]:.1f} {pc[0]:.1f},{pc[1]:.1f} {pb[0]:.1f},{pb[1]:.1f}" fill="none" stroke="{C_AUX}" stroke-width="3"/>'
     s.raw.append(("svgtop",f))
 
 def unit(v):
@@ -185,17 +227,17 @@ def pyramid(n,R=1.0,h=1.5,names=None,build=None,title=""):
     for i in range(n): s.face(names[i],names[(i+1)%n],"S")
     for i in range(n): s.seg(names[i],names[(i+1)%n]); s.seg(names[i],"S")
     if build:
-        s.P("O",(0,0,0),small=True,ldir=(1,0.6)); s.seg("S","O","dash",thin=True)
+        s.P("O",(0,0,0),small=True,ldir=(1,0.6)); s.seg("S","O","aux",thin=True)
         if "apothem" in build:
             fi=n//2 if n%2==0 else (0 if n==3 else 1)
             # передняя грань: ребро с минимальной y
             j=min(range(n),key=lambda i:(base[i][1]+base[(i+1)%n][1]))
-            m=mid(base[j],base[(j+1)%n]); s.P("M",m,small=True,ldir=(0.3,1)); s.seg("S","M","dash",thin=True); s.seg("O","M","dash",thin=True)
+            m=mid(base[j],base[(j+1)%n]); s.P("M",m,small=True,ldir=(0.3,1)); s.seg("S","M","aux",thin=True); s.seg("O","M","aux",thin=True)
             right_angle(s,"O",(0,0,1),unit(sub(m,(0,0,0))))
             right_angle(s,"M",unit(sub((0,0,h),m)),unit(sub(base[(j+1)%n],m)),0.07)
         elif "height" in build:
             right_angle(s,"O",(0,0,1),unit(sub(base[0],(0,0,0))))
-            s.seg("O",names[0],"dash",thin=True)
+            s.seg("O",names[0],"aux",thin=True)
     return s
 
 def pyramid_edge_perp(n=4,R=1.0,h=1.5,title=""):
@@ -235,13 +277,13 @@ def prism(n,R=1.0,h=1.6,skew=(0,0),diag=False,section=False,title="",names=None)
     if diag or section:
         k=n//2; a,c=nb[0],nb[k]; a1,c1=nt[0],nt[k]
         if section:
-            s.seg(a,c,"dash",thin=True); s.seg(a1,c1,"dash",thin=True); s.seg(a,c1,"dash",thin=True)
+            s.seg(a,c,"aux",thin=True); s.seg(a1,c1,"aux",thin=True); s.seg(a,c1,"aux",thin=True)
             def f(T,sc):
                 P=[T(proj(s.pts[x])) for x in (a,c,c1,a1)]
-                return '<polygon points="'+" ".join(f"{p[0]:.1f},{p[1]:.1f}" for p in P)+f'" fill="{C_EDGE}" fill-opacity="0.13" stroke="none"/>'
+                return '<polygon points="'+" ".join(f"{p[0]:.1f},{p[1]:.1f}" for p in P)+f'" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="none"/>'
             s.raw.append(("svg",f))
         else:
-            s.seg(a,c1,"dash",thin=True); s.seg(a,c,"dash",thin=True)
+            s.seg(a,c1,"aux",thin=True); s.seg(a,c,"aux",thin=True)
     return s
 
 def box(a=1.6,b=1.0,c=1.1,cube=False,diag=False,section=False,title=""):
@@ -254,13 +296,15 @@ def box(a=1.6,b=1.0,c=1.1,cube=False,diag=False,section=False,title=""):
     for i in range(4):
         j=(i+1)%4; s.face(nb[i],nb[j],nt[j],nt[i]); s.seg(nb[i],nb[j]); s.seg(nt[i],nt[j]); s.seg(nb[i],nt[i])
     if section:
-        s.seg("A","C","dash",thin=True); s.seg("A1","C1","dash",thin=True)
+        s.seg("A","C","aux",thin=True); s.seg("A1","C1","aux",thin=True)
         def f(T,sc):
             P=[T(proj(s.pts[x])) for x in ("A","C","C1","A1")]
-            return '<polygon points="'+" ".join(f"{p[0]:.1f},{p[1]:.1f}" for p in P)+f'" fill="{C_EDGE}" fill-opacity="0.13" stroke="none"/>'
+            return '<polygon points="'+" ".join(f"{p[0]:.1f},{p[1]:.1f}" for p in P)+f'" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="none"/>'
         s.raw.append(("svg",f))
     if diag:
-        s.seg("A","C1","dash",thin=True); s.seg("A","C","dash",thin=True)
+        s.seg("A","C1","aux",thin=True); s.seg("A","C","aux",thin=True)
+        # у куба a=c, и при 45° диагональ AC1 совпадает с ребром AD — разводим углом
+        if cube: s.ang=math.radians(60)
         right_angle(s,"C",(0,0,1),unit(sub(s.pts["A"],s.pts["C"])),0.1)
     return s
 
@@ -286,10 +330,19 @@ def truncated_prism(title=""):
 
 # ---------- тела вращения (2D, эллипсы с отношением осей 0.36) ----------
 EL=0.36
-def ellipse_arc(cx,cy,rx,ry,front,sc_):
-    """front=True: нижняя (видимая) половина"""
-    return (f'<path d="M {cx-rx:.1f} {cy:.1f} A {rx:.1f} {ry:.1f} 0 0 {1 if front else 0} {cx+rx:.1f} {cy:.1f}" fill="none" '
-            + (f'stroke="{C_EDGE}" stroke-width="{W}"' if front else f'stroke="{C_HID}" stroke-width="{W}" stroke-dasharray="{DASH}"') + ' stroke-linecap="round"/>')
+def ellipse_arc(cx,cy,rx,ry,front,w=W):
+    """Половина эллипса от левой точки к правой.
+    front=True  — БЛИЖНЯЯ к зрителю половина: сплошная, цветом рёбер.
+    front=False — ДАЛЬНЯЯ половина: пунктир цветом невидимых рёбер.
+
+    Ось y на экране направлена вниз, а точки, удалённые от зрителя, проекция
+    поднимает выше. Значит дальняя половина — ВЕРХНЯЯ, и рисует её sweep=1
+    (дуга идёт через верх), а ближнюю, нижнюю, — sweep=0."""
+    sweep = 0 if front else 1
+    style = (f'stroke="{C_EDGE}" stroke-width="{w}"' if front
+             else f'stroke="{C_HIDDEN}" stroke-width="{w}" stroke-dasharray="{DASH}"')
+    return (f'<path d="M {cx-rx:.1f} {cy:.1f} A {rx:.1f} {ry:.1f} 0 0 {sweep} {cx+rx:.1f} {cy:.1f}" fill="none" '
+            + style + ' stroke-linecap="round"/>')
 
 def cylinder(build=None,title=""):
     s=Scene(title); r,h=1.0,1.9
@@ -301,17 +354,17 @@ def cylinder(build=None,title=""):
         L,R,TL,TR=T(proj((-r,0,0))),T(proj((r,0,0))),T(proj((-r,0,h))),T(proj((r,0,h)))
         rx=(R[0]-L[0])/2; ry=rx*EL; cxb,cyb=(L[0]+R[0])/2,L[1]; cxt,cyt=(TL[0]+TR[0])/2,TL[1]
         o=[f'<path d="M {L[0]:.1f} {L[1]:.1f} L {TL[0]:.1f} {TL[1]:.1f} A {rx:.1f} {ry:.1f} 0 1 1 {TR[0]:.1f} {TR[1]:.1f} L {R[0]:.1f} {R[1]:.1f} A {rx:.1f} {ry:.1f} 0 0 1 {L[0]:.1f} {L[1]:.1f} Z" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="none"/>']
-        o.append(ellipse_arc(cxb,cyb,rx,ry,False,sc)); o.append(ellipse_arc(cxb,cyb,rx,ry,True,sc))
+        o.append(ellipse_arc(cxb,cyb,rx,ry,False)); o.append(ellipse_arc(cxb,cyb,rx,ry,True))
         o.append(f'<ellipse cx="{cxt:.1f}" cy="{cyt:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" fill="none" stroke="{C_EDGE}" stroke-width="{W}"/>')
         o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{TL[0]:.1f}" y2="{TL[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
         o.append(f'<line x1="{R[0]:.1f}" y1="{R[1]:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
         if build=="section":
-            o.append(f'<polygon points="{L[0]:.1f},{L[1]:.1f} {R[0]:.1f},{R[1]:.1f} {TR[0]:.1f},{TR[1]:.1f} {TL[0]:.1f},{TL[1]:.1f}" fill="{C_EDGE}" fill-opacity="0.13" stroke="none"/>')
-            o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<polygon points="{L[0]:.1f},{L[1]:.1f} {R[0]:.1f},{R[1]:.1f} {TR[0]:.1f},{TR[1]:.1f} {TL[0]:.1f},{TL[1]:.1f}" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="none"/>')
+            o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         if build in ("axis","section"):
-            o.append(f'<line x1="{cxb:.1f}" y1="{cyb:.1f}" x2="{cxt:.1f}" y2="{cyt:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<line x1="{cxb:.1f}" y1="{cyb:.1f}" x2="{cxt:.1f}" y2="{cyt:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         if build=="axis":
-            o.append(f'<line x1="{cxb:.1f}" y1="{cyb:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<line x1="{cxb:.1f}" y1="{cyb:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         return "\n".join(o)
     s.raw.append(("svg",body))
     if build in ("axis","section"):
@@ -334,27 +387,27 @@ def cone(build=None,truncated=False,title=""):
         if truncated:
             TL,TR=T(proj((-r2,0,h2))),T(proj((r2,0,h2))); rx2=(TR[0]-TL[0])/2; ry2=rx2*EL; cxt,cyt=(TL[0]+TR[0])/2,TL[1]
             o.append(f'<path d="M {L[0]:.1f} {L[1]:.1f} L {TL[0]:.1f} {TL[1]:.1f} A {rx2:.1f} {ry2:.1f} 0 1 1 {TR[0]:.1f} {TR[1]:.1f} L {R[0]:.1f} {R[1]:.1f} A {rx:.1f} {ry:.1f} 0 0 1 {L[0]:.1f} {L[1]:.1f} Z" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="none"/>')
-            o.append(ellipse_arc(cx,cy,rx,ry,False,sc)); o.append(ellipse_arc(cx,cy,rx,ry,True,sc))
+            o.append(ellipse_arc(cx,cy,rx,ry,False)); o.append(ellipse_arc(cx,cy,rx,ry,True))
             o.append(f'<ellipse cx="{cxt:.1f}" cy="{cyt:.1f}" rx="{rx2:.1f}" ry="{ry2:.1f}" fill="none" stroke="{C_EDGE}" stroke-width="{W}"/>')
             o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{TL[0]:.1f}" y2="{TL[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
             o.append(f'<line x1="{R[0]:.1f}" y1="{R[1]:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
             if build=="axis":
-                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{cxt:.1f}" y2="{cyt:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
-                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
-                o.append(f'<line x1="{cxt:.1f}" y1="{cyt:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{cxt:.1f}" y2="{cyt:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<line x1="{cxt:.1f}" y1="{cyt:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         else:
             S=T(proj((0,0,h)))
             o.append(f'<path d="M {L[0]:.1f} {L[1]:.1f} L {S[0]:.1f} {S[1]:.1f} L {R[0]:.1f} {R[1]:.1f} A {rx:.1f} {ry:.1f} 0 0 1 {L[0]:.1f} {L[1]:.1f} Z" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="none"/>')
-            o.append(ellipse_arc(cx,cy,rx,ry,False,sc)); o.append(ellipse_arc(cx,cy,rx,ry,True,sc))
+            o.append(ellipse_arc(cx,cy,rx,ry,False)); o.append(ellipse_arc(cx,cy,rx,ry,True))
             o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
             o.append(f'<line x1="{R[0]:.1f}" y1="{R[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>')
             if build=="section":
-                o.append(f'<polygon points="{L[0]:.1f},{L[1]:.1f} {R[0]:.1f},{R[1]:.1f} {S[0]:.1f},{S[1]:.1f}" fill="{C_EDGE}" fill-opacity="0.13" stroke="none"/>')
-                o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<polygon points="{L[0]:.1f},{L[1]:.1f} {R[0]:.1f},{R[1]:.1f} {S[0]:.1f},{S[1]:.1f}" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="none"/>')
+                o.append(f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
             if build in ("axis","section"):
-                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
             if build=="axis":
-                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+                o.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{R[0]:.1f}" y2="{R[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         return "\n".join(o)
     s.raw.append(("svg",body))
     if truncated:
@@ -377,17 +430,17 @@ def sphere(build=None,title=""):
     def body(T,sc):
         C=T(proj((0,0,0))); rr=R*sc
         o=[f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="{C_EDGE}" stroke-width="{W}"/>']
-        o.append(ellipse_arc(C[0],C[1],rr,rr*EL,False,sc)); o.append(ellipse_arc(C[0],C[1],rr,rr*EL,True,sc))
+        o.append(ellipse_arc(C[0],C[1],rr,rr*EL,False)); o.append(ellipse_arc(C[0],C[1],rr,rr*EL,True))
         if build=="section":
             zc=0.55*R; rs=math.sqrt(R*R-zc*zc); Cs=T(proj((0,0,zc)))
-            o.append(f'<ellipse cx="{Cs[0]:.1f}" cy="{Cs[1]:.1f}" rx="{rs*sc:.1f}" ry="{rs*sc*EL:.1f}" fill="{C_EDGE}" fill-opacity="0.13" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>')
-            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{Cs[0]:.1f}" y2="{Cs[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<ellipse cx="{Cs[0]:.1f}" cy="{Cs[1]:.1f}" rx="{rs*sc:.1f}" ry="{rs*sc*EL:.1f}" fill="{C_AUX_FILL}" fill-opacity="{AUX_FILL_OP}" stroke="{C_AUX}" stroke-width="{W_THIN}"/>')
+            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{Cs[0]:.1f}" y2="{Cs[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
             A=T(proj((rs,0,zc)))
-            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
-            o.append(f'<line x1="{Cs[0]:.1f}" y1="{Cs[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<line x1="{Cs[0]:.1f}" y1="{Cs[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         if build=="radius":
             A=T(proj((R*0.6,0,R*0.8)))
-            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
+            o.append(f'<line x1="{C[0]:.1f}" y1="{C[1]:.1f}" x2="{A[0]:.1f}" y2="{A[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>')
         return "\n".join(o)
     s.raw.append(("svg",body))
     if build:
@@ -407,7 +460,7 @@ def sphere_in_cube(title=""):
     def f(T,sc):
         C=T(proj(c)); rr=R*sc
         return (f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_EDGE}" fill-opacity="0.08" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>'
-                + ellipse_arc(C[0],C[1],rr,rr*EL,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"') + ellipse_arc(C[0],C[1],rr,rr*EL,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'))
+                + ellipse_arc(C[0],C[1],rr,rr*EL,False,W_THIN) + ellipse_arc(C[0],C[1],rr,rr*EL,True,W_THIN))
     s.raw.append(("svgtop",f)); s.P("O",c,small=True,ldir=(0.4,1))
     return s
 
@@ -416,8 +469,9 @@ def cube_in_sphere(title=""):
     s.raw.append(("bbox",-R,-a/2-R,R,-a/2+R))
     def f(T,sc):
         C=T(proj(c)); rr=R*sc
-        return f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_FILL}" fill-opacity="0.06" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>'+ellipse_arc(C[0],C[1],rr,rr*EL,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"')+ellipse_arc(C[0],C[1],rr,rr*EL,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"')
-    s.raw.insert(0,("svg",f)); s.P("O",c,small=True,ldir=(0.4,1)); s.seg("A","C1","dash",thin=True)
+        return f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_FILL}" fill-opacity="0.06" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>'+ellipse_arc(C[0],C[1],rr,rr*EL,False,W_THIN)+ellipse_arc(C[0],C[1],rr,rr*EL,True,W_THIN)
+    s.raw.insert(0,("svg",f)); s.P("O",c,small=True,ldir=(0.4,1)); s.seg("A","C1","aux",thin=True)
+    s.ang=math.radians(60)   # та же причина, что и в box(cube=True,diag=True)
     return s
 
 def sphere_in_cylinder(title=""):
@@ -429,12 +483,12 @@ def sphere_in_cylinder(title=""):
         rx=(R_[0]-L[0])/2; ry=rx*EL; cxb,cyb=(L[0]+R_[0])/2,L[1]; cxt,cyt=(TL[0]+TR[0])/2,TL[1]
         C=T(proj((0,0,r))); rr=r*sc
         o=[f'<path d="M {L[0]:.1f} {L[1]:.1f} L {TL[0]:.1f} {TL[1]:.1f} A {rx:.1f} {ry:.1f} 0 1 1 {TR[0]:.1f} {TR[1]:.1f} L {R_[0]:.1f} {R_[1]:.1f} A {rx:.1f} {ry:.1f} 0 0 1 {L[0]:.1f} {L[1]:.1f} Z" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="none"/>',
-           ellipse_arc(cxb,cyb,rx,ry,False,sc),ellipse_arc(cxb,cyb,rx,ry,True,sc),
+           ellipse_arc(cxb,cyb,rx,ry,False),ellipse_arc(cxb,cyb,rx,ry,True),
            f'<ellipse cx="{cxt:.1f}" cy="{cyt:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" fill="none" stroke="{C_EDGE}" stroke-width="{W}"/>',
            f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{TL[0]:.1f}" y2="{TL[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>',
            f'<line x1="{R_[0]:.1f}" y1="{R_[1]:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>',
            f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_EDGE}" fill-opacity="0.08" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>',
-           ellipse_arc(C[0],C[1],rr,rr*EL,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),ellipse_arc(C[0],C[1],rr,rr*EL,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"')]
+           ellipse_arc(C[0],C[1],rr,rr*EL,False,W_THIN),ellipse_arc(C[0],C[1],rr,rr*EL,True,W_THIN)]
         return "\n".join(o)
     s.raw.append(("svg",body)); s.P("O",(0,0,r),small=True,ldir=(0.5,1))
     return s
@@ -445,12 +499,12 @@ def sphere_in_cone(title=""):
     def body(T,sc):
         L,R_=T(proj((-r,0,0))),T(proj((r,0,0))); rx=(R_[0]-L[0])/2; ry=rx*EL; cx,cy=(L[0]+R_[0])/2,L[1]; S=T(proj((0,0,h))); C=T(proj((0,0,rho))); rr=rho*sc
         o=[f'<path d="M {L[0]:.1f} {L[1]:.1f} L {S[0]:.1f} {S[1]:.1f} L {R_[0]:.1f} {R_[1]:.1f} A {rx:.1f} {ry:.1f} 0 0 1 {L[0]:.1f} {L[1]:.1f} Z" fill="{C_FILL}" fill-opacity="{FILL_OP}" stroke="none"/>',
-           ellipse_arc(cx,cy,rx,ry,False,sc),ellipse_arc(cx,cy,rx,ry,True,sc),
+           ellipse_arc(cx,cy,rx,ry,False),ellipse_arc(cx,cy,rx,ry,True),
            f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>',
            f'<line x1="{R_[0]:.1f}" y1="{R_[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W}" stroke-linecap="round"/>',
            f'<circle cx="{C[0]:.1f}" cy="{C[1]:.1f}" r="{rr:.1f}" fill="{C_EDGE}" fill-opacity="0.08" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>',
-           ellipse_arc(C[0],C[1],rr,rr*EL,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),ellipse_arc(C[0],C[1],rr,rr*EL,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),
-           f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_HID}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>']
+           ellipse_arc(C[0],C[1],rr,rr*EL,False,W_THIN),ellipse_arc(C[0],C[1],rr,rr*EL,True,W_THIN),
+           f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_AUX}" stroke-width="{W_THIN}" stroke-dasharray="{DASH_THIN}"/>']
         return "\n".join(o)
     s.raw.append(("svg",body)); s.P("S",(0,0,h),ldir=(0,-1)); s.P("O",(0,0,rho),small=True,ldir=(1,0.2)); s.P("O1",(0,0,0),small=True,ldir=(-0.4,1))
     return s
@@ -459,9 +513,9 @@ def pyramid_in_cone(title=""):
     s=pyramid(4,1.0,1.9,title=title); r=1.0; h=1.9
     def f(T,sc):
         L,R_=T(proj((-r,0,0))),T(proj((r,0,0))); rx=(R_[0]-L[0])/2; ry=rx*EL; cx,cy=(L[0]+R_[0])/2,L[1]; S=T(proj((0,0,h)))
-        return "\n".join([ellipse_arc(cx,cy,rx,ry,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),ellipse_arc(cx,cy,rx,ry,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),
+        return "\n".join([ellipse_arc(cx,cy,rx,ry,False,W_THIN),ellipse_arc(cx,cy,rx,ry,True,W_THIN),
             f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>',f'<line x1="{R_[0]:.1f}" y1="{R_[1]:.1f}" x2="{S[0]:.1f}" y2="{S[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>'])
-    s.raw.append(("svg",f)); s.raw.append(("bbox",-r,-h,r,r*EL)); s.P("O",(0,0,0),small=True,ldir=(0.6,1)); s.seg("S","O","dash",thin=True)
+    s.raw.append(("svg",f)); s.raw.append(("bbox",-r,-h,r,r*EL)); s.P("O",(0,0,0),small=True,ldir=(0.6,1)); s.seg("S","O","aux",thin=True)
     return s
 
 def prism_in_cylinder(title=""):
@@ -469,7 +523,7 @@ def prism_in_cylinder(title=""):
     def f(T,sc):
         L,R_,TL,TR=T(proj((-r,0,0))),T(proj((r,0,0))),T(proj((-r,0,h))),T(proj((r,0,h))); rx=(R_[0]-L[0])/2; ry=rx*EL
         cxb,cyb=(L[0]+R_[0])/2,L[1]; cxt,cyt=(TL[0]+TR[0])/2,TL[1]
-        return "\n".join([ellipse_arc(cxb,cyb,rx,ry,False,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),ellipse_arc(cxb,cyb,rx,ry,True,sc).replace(f'stroke-width="{W}"',f'stroke-width="{W_THIN}"'),
+        return "\n".join([ellipse_arc(cxb,cyb,rx,ry,False,W_THIN),ellipse_arc(cxb,cyb,rx,ry,True,W_THIN),
             f'<ellipse cx="{cxt:.1f}" cy="{cyt:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" fill="none" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>',
             f'<line x1="{L[0]:.1f}" y1="{L[1]:.1f}" x2="{TL[0]:.1f}" y2="{TL[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>',f'<line x1="{R_[0]:.1f}" y1="{R_[1]:.1f}" x2="{TR[0]:.1f}" y2="{TR[1]:.1f}" stroke="{C_EDGE}" stroke-width="{W_THIN}"/>'])
     s.raw.append(("svg",f)); s.raw.append(("bbox",-r,-h-r*EL,r,r*EL))

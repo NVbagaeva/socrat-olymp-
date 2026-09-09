@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
 <title>Конус</title>
-<polygon points="500.0,143.4" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 191.3 760.9 L 500.0 143.4 L 808.7 760.9 A 308.7 111.1 0 0 1 191.3 760.9 Z" fill="#6a1fb5" fill-opacity="0.1" stroke="none"/>
-<path d="M 191.3 760.9 A 308.7 111.1 0 0 0 808.7 760.9" fill="none" stroke="#b48ee0" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
-<path d="M 191.3 760.9 A 308.7 111.1 0 0 1 808.7 760.9" fill="none" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="191.3" y1="760.9" x2="500.0" y2="143.4" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<line x1="808.7" y1="760.9" x2="500.0" y2="143.4" stroke="#6a1fb5" stroke-width="6" stroke-linecap="round"/>
-<circle cx="500.0" cy="143.4" r="9" fill="#5b3fd6" stroke="#fff" stroke-width="2.5"/>
-<path transform="translate(479.7,102.6) scale(0.06800,-0.06800)" d="M454 476Q445 532 422.0 569.5Q399 607 363.5 626.0Q328 645 281 644Q238 644 205.5 620.0Q173 596 173 558Q173 527 190.5 504.0Q208 481 244.0 461.0Q280 441 335 418Q373 403 413.0 383.0Q453 363 487.0 335.5Q521 308 542.0 271.5Q563 235 563 186Q563 127 531.0 81.0Q499 35 441.5 9.5Q384 -16 307 -16Q267 -16 220.5 -3.5Q174 9 133 33L136 -9H59V225H125Q139 141 189.5 98.5Q240 56 310 56Q346 56 373.0 69.0Q400 82 415.0 103.5Q430 125 430 150Q430 185 405.5 208.0Q381 231 344.5 247.0Q308 263 270 278Q222 298 180.5 320.5Q139 343 108.0 372.0Q77 401 60.0 438.5Q43 476 43 525Q43 556 55.0 589.5Q67 623 94.0 651.5Q121 680 166.0 698.0Q211 716 277 716Q317 716 364.5 704.0Q412 692 446 668L442 709H520V476Z" fill="#1c1b2e"/>
+<polygon points="500.0,143.4" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 191.3 760.9 L 500.0 143.4 L 808.7 760.9 A 308.7 111.1 0 0 1 191.3 760.9 Z" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 191.3 760.9 A 308.7 111.1 0 0 1 808.7 760.9" fill="none" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 191.3 760.9 A 308.7 111.1 0 0 0 808.7 760.9" fill="none" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="191.3" y1="760.9" x2="500.0" y2="143.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="808.7" y1="760.9" x2="500.0" y2="143.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<circle cx="500.0" cy="143.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<path transform="translate(479.7,102.6) scale(0.06800,-0.06800)" d="M454 476Q445 532 422 570Q399 607 364 626Q328 645 281 644Q238 644 206 620Q173 596 173 558Q173 527 190 504Q208 481 244 461Q280 441 335 418Q373 403 413 383Q453 363 487 336Q521 308 542 272Q563 235 563 186Q563 127 531 81Q499 35 442 10Q384 -16 307 -16Q267 -16 220 -4Q174 9 133 33L136 -9L59 -9L59 225L125 225Q139 141 190 98Q240 56 310 56Q346 56 373 69Q400 82 415 104Q430 125 430 150Q430 185 406 208Q381 231 344 247Q308 263 270 278Q222 298 180 320Q139 343 108 372Q77 401 60 438Q43 476 43 525Q43 556 55 590Q67 623 94 652Q121 680 166 698Q211 716 277 716Q317 716 364 704Q412 692 446 668L442 709L520 709L520 476L454 476Z" fill="#14231A"/>
 </svg>
