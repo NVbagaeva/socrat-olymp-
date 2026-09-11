@@ -79,7 +79,7 @@
 
       /* Подпись графика: жирное математическое начертание —
          антиква с курсивом, как набирают формулы в учебниках.              */
-      curveLabel:       17,
+      curveLabel:       21,
       curveLabelFamily: "var(--font-math, 'STIX Two Text', 'Cambria', 'Charter', Georgia, serif)",
       curveLabelWeight: 700,
       curveLabelStyle:  'italic',
