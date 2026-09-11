@@ -14,6 +14,8 @@ var fs = require('fs');
 var path = require('path');
 var renderer = require('./renderer.js');
 var generator = require('./generate.js');
+var Line = require('./families/line.js');
+var Triangle = require('./triangle.js');
 
 var ROOT = __dirname;
 
@@ -554,6 +556,29 @@ function checkTask(set, task) {
     errors.push(where + ': меньше двух опорных точек с целыми координатами');
   }
   if (!task.answer) { errors.push(where + ': пустой ответ'); }
+
+  /* Разбор строится на треугольнике наклона: он обязан существовать
+     и целиком помещаться в окне у каждого варианта с чертежом. */
+  if (hasChart) {
+    var lines = meta.lines && meta.lines.length
+      ? meta.lines
+      : [{ k: meta.k, b: meta.b, kFraction: meta.kFraction, bFraction: meta.bFraction }];
+
+    lines.forEach(function (item, index) {
+      if (item.k === 0) { return; }     /* у горизонтали наклон не строится */
+      /* Коэффициенты берём точными дробями: у −1/3 запись double
+         не восстанавливается обратно в дробь. */
+      var line = Line.create(item.kFraction || item.k, item.bFraction || item.b);
+      var triangle = Triangle.build(line, meta.window, index === 0 ? meta.points : null);
+      if (!triangle) {
+        errors.push(where + ': треугольник наклона не помещается в окне для прямой ' +
+          (index + 1) + ' (k = ' + item.k + ', b = ' + item.b + ')');
+      } else if (triangle.dx <= 0) {
+        errors.push(where + ': вырожденный треугольник наклона у прямой ' + (index + 1));
+      }
+    });
+  }
+
   return errors;
 }
 

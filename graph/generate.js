@@ -846,7 +846,8 @@ function taskResult(set, task, built, seed, index) {
       query: built.query || null,
       intersection: built.intersection || null,
       lines: built.parts.map(function (part) {
-        return { k: part.line.kValue, b: part.line.bValue, kFraction: part.line.k };
+        return { k: part.line.kValue, b: part.line.bValue,
+                 kFraction: part.line.k, bFraction: part.line.b };
       }),
       level: task.level || null
     }

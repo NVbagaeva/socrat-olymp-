@@ -35,16 +35,20 @@
      в системе он означает ошибку и риск.
      ══════════════════════════════════════════════════════════ */
   var THEME = {
+    /* Цвета берутся из токенов дизайн-системы через CSS-переменные.
+       Хекс стоит только запасным значением: без него отдельный .svg
+       вне страницы, где переменных нет, рисовался бы чёрным. */
     colors: {
-      bg:          '#FFFFFF',   /* белый фон чертежа                          */
-      grid:        '#C3D3E6',   /* светло-серый, но клетки уверенно читаются  */
-      axis:        '#101728',   /* grey-900 — самый тёмный нейтральный токен  */
-      label:       '#101728',   /* подписи — тот же цвет, что оси             */
-      lineA:       '#1F5FD0',   /* blue-600, основной                         */
-      lineB:       '#E07A2F',   /* терракотовый, вторая прямая                */
-      pointFill:   null,        /* null — цвет своей кривой                   */
-      pointStroke: '#FFFFFF',   /* белая обводка точек                        */
-      halo:        '#FFFFFF'    /* подложка под текст                         */
+      bg:          'var(--color-surface, #FFFFFF)',
+      grid:        'var(--graph-grid, #C3D3E6)',
+      axis:        'var(--graph-axis, #101728)',
+      label:       'var(--graph-axis, #101728)',
+      lineA:       'var(--color-primary, #1F5FD0)',
+      lineB:       'var(--graph-accent, #E07A2F)',
+      accent:      'var(--graph-accent, #E07A2F)',   /* треугольник наклона   */
+      pointFill:   null,                             /* null — цвет кривой    */
+      pointStroke: 'var(--color-surface, #FFFFFF)',
+      halo:        'var(--color-surface, #FFFFFF)'
     },
 
     /* Иерархия толщин: каждая ступень различима на глаз.
@@ -54,8 +58,19 @@
       tick:        1.6,
       axis:        2.2,
       curve:       3.2,
+      helper:      2,          /* катеты треугольника — тоньше графика        */
+      helperMark:  1.6,        /* квадратик прямого угла и дуга               */
       pointStroke: 2.6,
       halo:        3                     /* тонкая белая обводка под текстом */
+    },
+
+    /* Треугольник наклона: вспомогательный, график не перебивает. */
+    helper: {
+      dash:          '6 5',
+      fillOpacity:   0.12,
+      rightAngle:    0.42,     /* сторона квадратика, в клетках              */
+      arcRadius:     1.15,     /* радиус дуги угла, в клетках                */
+      labelGap:      11
     },
 
     geometry: {
@@ -265,6 +280,7 @@
     var gridLayer = [];
     var axisLayer = [];
     var labelLayer = [];
+    var shapeLayer = [];
     var curveLayer = [];
     var pointLayer = [];
     var curveLabelLayer = [];
@@ -328,6 +344,12 @@
     }
     axisLayer.push('<path d="' + ticks.join('') + '" fill="none" stroke="' + THEME.colors.axis +
       '" stroke-width="' + THEME.width.tick + '" stroke-linecap="butt"/>');
+
+    /* Вспомогательные фигуры (треугольник наклона): под графиком,
+       чтобы синяя прямая осталась самым заметным элементом. ------------- */
+    (scene.shapes || []).forEach(function (shape) {
+      shapeLayer.push(renderShape(shape, sx, sy, cell));
+    });
 
     /* Кривые: поверх осей, обрезаны ровно по границе поля --------------- */
     var drawn = [];
@@ -431,7 +453,7 @@
       curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes));
     });
 
-    var body = gridLayer.concat(axisLayer);
+    var body = gridLayer.concat(axisLayer, shapeLayer);
     if (THEME.layers.labelsOnTop) {
       body = body.concat(curveLayer, pointLayer, labelLayer);
     } else {
@@ -512,6 +534,74 @@
       { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
 
     return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Вспомогательные фигуры сцены
+     Рендерер не знает, что это треугольник наклона: он рисует
+     отрезок, многоугольник, метку прямого угла, дугу и подпись.
+     Геометрию считает graph/triangle.js, движение — graph/animate.js;
+     id нужен, чтобы анимация могла найти фигуру в готовом SVG.
+     ══════════════════════════════════════════════════════════ */
+  function renderShape(shape, sx, sy, cell) {
+    var stroke = color(shape.color || 'accent');
+    var id = shape.id ? ' id="' + esc(shape.id) + '"' : '';
+    var dash = shape.style === 'dashed' ? ' stroke-dasharray="' + THEME.helper.dash + '"' : '';
+
+    if (shape.type === 'segment') {
+      return '<line' + id + ' x1="' + px(sx(shape.from[0])) + '" y1="' + px(sy(shape.from[1])) +
+        '" x2="' + px(sx(shape.to[0])) + '" y2="' + px(sy(shape.to[1])) +
+        '" stroke="' + stroke + '" stroke-width="' + THEME.width.helper +
+        '" stroke-linecap="round"' + dash + '/>';
+    }
+
+    if (shape.type === 'polygon') {
+      return '<polygon' + id + ' points="' + shape.points.map(function (point) {
+        return px(sx(point[0])) + ',' + px(sy(point[1]));
+      }).join(' ') + '" fill="' + stroke + '" fill-opacity="' +
+        (shape.fillOpacity === undefined ? THEME.helper.fillOpacity : shape.fillOpacity) +
+        '" stroke="none"/>';
+    }
+
+    /* Квадратик прямого угла: две стороны, внутрь треугольника. */
+    if (shape.type === 'rightAngle') {
+      var size = shape.size === undefined ? THEME.helper.rightAngle : shape.size;
+      var ax = shape.at[0] + Math.sign(shape.toward[0] - shape.at[0]) * size;
+      var ay = shape.at[1] + Math.sign(shape.toward[1] - shape.at[1]) * size;
+      return '<path' + id + ' d="M' + px(sx(ax)) + ' ' + px(sy(shape.at[1])) +
+        'L' + px(sx(ax)) + ' ' + px(sy(ay)) + 'L' + px(sx(shape.at[0])) + ' ' + px(sy(ay)) +
+        '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helperMark + '"/>';
+    }
+
+    /* Дуга угла наклона у левой опорной точки. */
+    if (shape.type === 'arc') {
+      var r = (shape.radius === undefined ? THEME.helper.arcRadius : shape.radius) * cell;
+      var cx = sx(shape.at[0]);
+      var cy = sy(shape.at[1]);
+      var a1 = -shape.from * Math.PI / 180;
+      var a2 = -shape.to * Math.PI / 180;
+      var large = Math.abs(shape.to - shape.from) > 180 ? 1 : 0;
+      var sweep = shape.to > shape.from ? 0 : 1;
+      return '<path' + id + ' d="M' + px(cx + r * Math.cos(a1)) + ' ' + px(cy + r * Math.sin(a1)) +
+        'A' + px(r) + ' ' + px(r) + ' 0 ' + large + ' ' + sweep + ' ' +
+        px(cx + r * Math.cos(a2)) + ' ' + px(cy + r * Math.sin(a2)) +
+        '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helperMark + '"/>';
+    }
+
+    if (shape.type === 'label') {
+      var offset = shape.offset || [0, 0];
+      return '<g' + id + '>' + svgText(shape.text,
+        sx(shape.at[0]) + offset[0], sy(shape.at[1]) + offset[1],
+        shape.anchor || 'middle', {
+          size:   shape.size || THEME.font.pointLabel,
+          family: THEME.font.curveLabelFamily,
+          weight: THEME.font.pointLabelWeight,
+          math:   true,
+          fill:   stroke
+        }) + '</g>';
+    }
+
+    throw new Error('renderer: неизвестная фигура «' + shape.type + '»');
   }
 
   /* Свободное место для короткой подписи рядом с точкой.
