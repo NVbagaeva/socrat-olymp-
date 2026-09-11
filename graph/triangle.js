@@ -145,10 +145,10 @@
       thirdForHorizontal: thirdForHorizontal,
       thirdForVertical: thirdForVertical,
 
-      /* На чертеже плюс не пишется: горизонтальный катет и вертикальный
-         у возрастающей подписаны просто числом клеток. Минус у убывающей
-         остаётся — он несёт смысл, а не оформление. */
-      labels: { dx: String(dx), dy: (rising ? '' : MINUS) + dy },
+      /* На чертеже у катетов стоит только число клеток, без знаков:
+         катет — длина. Знак приращения разбирается в блоке решения,
+         для него хранятся values. */
+      labels: { dx: String(dx), dy: String(dy) },
       values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + dy },
 
       angleDeg: Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI,
