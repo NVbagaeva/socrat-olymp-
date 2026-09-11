@@ -1,0 +1,509 @@
+{
+  "kind": "prototype",
+  "id": "12.A",
+  "task": 12,
+  "title": "12.A · значение функции",
+  "subtitle": "Дан график функции. Найдите значение в точке за пределами окна",
+  "seed": 12010,
+  "family": "line",
+  "axisLabels": "minimal",
+  "maxSlopeRepeat": 3,
+  "maxInterceptRepeat": 2,
+  "uniqueAnswers": true,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка.",
+  "composition": {
+    "count": 20,
+    "levels": {
+      "lucky": 14,
+      "unlucky": 6
+    },
+    "levelOrder": true,
+    "unluckyReasons": {
+      "b-offscreen": 2,
+      "fraction-k": 2,
+      "fraction-b": 1
+    },
+    "maxFractionVariants": 6,
+    "minDistinctK": 8,
+    "maxSlopeRepeat": 3,
+    "minIncreasing": 8,
+    "minDecreasing": 8,
+    "minFractionK": 4,
+    "fractionDenominators": [
+      2,
+      3,
+      4
+    ],
+    "minDistinctIntercepts": 9,
+    "maxZeroIntercept": 2,
+    "uniqueAnswers": true,
+    "minNonIntegerAnswers": 6,
+    "queryOutsideWindow": true,
+    "minPerSide": 4,
+    "uniquePairs": true,
+    "maxInterceptRepeat": 2
+  },
+  "tasks": [
+    {
+      "id": "12.A-01",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-02",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-03",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-04",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 2,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-05",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 3,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-06",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-07",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-08",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-09",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-10",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 2,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-11",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 3,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-12",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-13",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-14",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 1,
+        "bInside": true,
+        "bMax": 7,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.A-15",
+      "level": "unlucky",
+      "levelReason": "b-offscreen",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bOffscreen": true,
+        "bMax": 14,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-16",
+      "level": "unlucky",
+      "levelReason": "b-offscreen",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bOffscreen": true,
+        "bMax": 14,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-17",
+      "level": "unlucky",
+      "levelReason": "fraction-k",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "denominators": [
+          2
+        ],
+        "bInside": true,
+        "bMax": 6,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-18",
+      "level": "unlucky",
+      "levelReason": "fraction-k",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "denominators": [
+          3
+        ],
+        "bInside": true,
+        "bMax": 6,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    },
+    {
+      "id": "12.A-19",
+      "level": "unlucky",
+      "levelReason": "fraction-k",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "denominators": [
+          4
+        ],
+        "bInside": true,
+        "bMax": 6,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "right"
+        }
+      }
+    },
+    {
+      "id": "12.A-20",
+      "level": "unlucky",
+      "levelReason": "fraction-b",
+      "question": "На рисунке изображён график функции $f(x) = kx + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bInside": true,
+        "bMax": 6,
+        "query": {
+          "type": "value-at",
+          "gapMin": 2,
+          "gapMax": 12,
+          "allowHalf": true,
+          "decimals": 1,
+          "side": "left"
+        }
+      }
+    }
+  ]
+}

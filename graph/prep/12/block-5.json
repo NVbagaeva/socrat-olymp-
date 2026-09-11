@@ -1,0 +1,264 @@
+{
+  "kind": "prep",
+  "id": "P12-5",
+  "block": 5,
+  "title": "Подстановка без графика",
+  "subtitle": "Проверить принадлежность точки вычислением",
+  "seed": 1205,
+  "family": "line",
+  "uniqueIntercepts": "nonzero",
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "allChoice": 2,
+    "optionsDistinct": true,
+    "yesCount": 5,
+    "probeOffsetMax": 2,
+    "noChart": true,
+    "noAlternatingAnswers": true,
+    "minFractionK": 5,
+    "uniquePairs": true
+  },
+  "tasks": [
+    {
+      "id": "P12-5-01",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Подставь абсциссу точки в формулу и сравни результат с её ординатой.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 0.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-02",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Считай по порядку: сначала kx, потом прибавь $b$.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-03",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Дробный коэффициент умножай аккуратно — ошибка на единицу здесь решает всё.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 1.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-04",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Отрицательный дробный $k$: знак минуса относится ко всему произведению.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 0.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            2
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-05",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Здесь все числа целые — проверка в одно действие.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 3,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-06",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Расхождение может быть дробным, так что округлять по дороге нельзя.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 1.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1.5
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-07",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Умножь абсциссу на коэффициент, потом учти свободный член по его знаку.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 2.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-08",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "При отрицательном $k$ значение убывает с ростом $x$ — следи за знаком.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            2
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-09",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Половина абсциссы плюс свободный член: сравни с ординатой точки.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 0.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    },
+    {
+      "id": "P12-5-10",
+      "question": "Дана линейная функция ${equation}$. Принадлежит ли точка ${point}$ её графику?",
+      "hint": "Проверяй точно: расхождение может быть меньше единицы.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "noChart": true,
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 2.5,
+        "bNonZero": true,
+        "bMax": 8,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            0.5
+          ],
+          "integerY": false,
+          "xRange": 8,
+          "minAbsX": 2
+        }
+      }
+    }
+  ]
+}
