@@ -1,0 +1,470 @@
+/* Только то, что специфично для главной страницы.
+   Перенос блока стилей из design-reference/index.html: значения не менялись,
+   цвета переведены с хексов на семантические переменные. */
+
+/* ══════════════════════════════════════════════
+   ПЕРВЫЙ ЭКРАН
+   Слева изображение во всю высоту от края окна, справа текст.
+   ══════════════════════════════════════════════ */
+
+.hero {
+  /* Ширина левой колонки. Ограничение 836px — половина натуральных 1672px
+     исходника: шире стекло замыливается. Колонка сужается, картинка
+     не растягивается. */
+  --hero-media: min(45%, 836px);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--hero-media) minmax(0, 1fr);
+  align-items: center;
+  min-height: calc(100dvh - var(--h-site-head));
+  background: var(--color-bg);
+  /* Обрезает всё, что вытекает за левую границу окна. */
+  overflow: hidden;
+}
+
+.hero__media {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  min-height: 0;
+}
+
+.hero__art {
+  display: block;
+  width: 100%;
+  max-width: 836px;
+  height: 100%;
+  /* Выше натуральных 941px кадр не растягивается: стекло замылится.
+     На высоком экране он просто стоит по центру колонки — фон у кадра
+     прозрачный, поэтому стыка не видно. */
+  max-height: 941px;
+  object-fit: cover;
+  /* Кадр отражён и обрезан при сборке. Прижимаем его правым краем
+     к стыку колонок: там у кадра прозрачная кромка, и каустика не
+     выглядит обрубленной. Лишнее уходит за левую границу окна. */
+  object-position: right center;
+}
+
+/* Линии построений уходят под изображение и выходят на светлый фон справа. */
+.hero__lines {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: var(--hero-media);
+  transform: translate(-52%, -50%);
+  width: 640px;
+  height: 760px;
+  max-width: none;
+  pointer-events: none;
+}
+.hero__lines-stroke {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1;
+  opacity: 0.15;
+}
+.hero__lines-node {
+  fill: var(--color-primary);
+  opacity: 0.3;
+}
+
+.hero__body {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-12) var(--space-8);
+  max-width: 712px;
+  /* Полоса показателей решает свою раскладку по ширине этой колонки,
+     а не по ширине окна: в две колонки окно широкое, а места мало. */
+  container-type: inline-size;
+}
+
+.hero__eyebrow {
+  /* Прописными и в разрядку — по прямому указанию к первому экрану.
+     В самой дизайн-системе метка идёт обычным регистром. */
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-5);
+}
+
+.hero__title {
+  /* Верхняя ступень шкалы — 64px. Ниже кегль убавляется по ширине колонки,
+     чтобы ручной перенос держался и строка не ломалась сама.
+     Коэффициент: длинная строка «Учителю учителю —» занимает 9.83 кегля,
+     10cqi оставляет запас около 1.7%. */
+  font-size: clamp(30px, 10cqi, 64px);
+  line-height: 1.08;
+  margin-bottom: var(--space-6);
+}
+.hero__title span {
+  display: block;
+  /* Перенос только там, где он задан в контенте. */
+  white-space: nowrap;
+}
+
+.hero__lead {
+  /* Не приглушённый до неразличимости: 4.54:1 к фону секции. */
+  color: var(--color-text-secondary);
+  font-size: 18px;
+  line-height: 28px;
+  max-width: 60ch;
+}
+
+.hero__actions {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.hero__note {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.hero__metrics {
+  /* Ровно по числу показателей: пустых ячеек не бывает.
+     Правило перебивает общий свёрток .metric-row на 900px. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-10);
+}
+.hero__metrics .metric {
+  padding: var(--space-4);
+}
+.hero__metrics .metric__val {
+  font-size: 32px;
+  line-height: 40px;
+}
+.hero__metrics .metric__lbl {
+  white-space: nowrap;
+}
+
+section.band {
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--color-border);
+}
+section.band--soft {
+  background: var(--color-surface);
+}
+.band__head {
+  max-width: 62ch;
+  margin-bottom: var(--space-12);
+}
+.band__head h2 {
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.band__head p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+.step {
+  padding-top: var(--space-5);
+  border-top: 2px solid var(--color-primary);
+}
+.step:nth-child(n + 2) {
+  border-top-color: var(--color-border-strong);
+}
+.step b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+}
+.step h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.step p {
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--color-text-secondary);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-16);
+  align-items: center;
+}
+.split h3 {
+  font-size: 30px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-4);
+}
+.split p {
+  font-size: 17px;
+  line-height: 27px;
+  color: var(--color-text-secondary);
+  max-width: 46ch;
+}
+.split__actions {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.checklist {
+  margin-top: var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+}
+.checklist li {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 15px;
+  line-height: 23px;
+}
+.checklist svg {
+  flex: none;
+  margin-top: 5px;
+  color: var(--color-primary);
+}
+
+/* Карточка результата диагностики: отступы из эталона. */
+.diag__score {
+  margin: 2px 0 var(--space-6);
+}
+.diag__unit {
+  font-size: 20px;
+  font-weight: 500;
+}
+.diag__weak-label {
+  margin-bottom: var(--space-3);
+}
+.diag__action {
+  margin-top: var(--space-6);
+}
+.topic-list--roomy .topic {
+  padding: 8px 0;
+}
+
+.teachers__note {
+  margin-top: var(--space-4);
+}
+
+.dirs {
+  border-top: 1px solid var(--color-border);
+}
+.dir {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 120px;
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--dur-hover) var(--ease);
+}
+.dir:hover {
+  background: var(--color-surface-2);
+}
+.dir__no {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.dir__nm {
+  font-size: 16px;
+}
+.dirs__note {
+  margin-top: var(--space-6);
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+
+.cta {
+  background: var(--color-surface-brand);
+  border-radius: var(--radius-xl);
+  padding: var(--space-16) var(--space-12);
+  color: var(--color-text-inverse);
+  position: relative;
+  overflow: hidden;
+}
+.cta h2 {
+  font-size: 44px;
+  line-height: 52px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+  position: relative;
+}
+.cta p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-on-brand-text);
+  max-width: 44ch;
+  margin-top: var(--space-5);
+  position: relative;
+}
+.cta__actions {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  position: relative;
+}
+.cta .btn--primary {
+  background: var(--color-surface);
+  color: var(--color-surface-brand);
+}
+.cta .btn--secondary {
+  background: transparent;
+  color: var(--color-text-inverse);
+  box-shadow: inset 0 0 0 1px var(--color-on-brand-outline);
+}
+.cta .btn--secondary:hover {
+  background: var(--color-on-brand-wash);
+}
+.cta__art {
+  position: absolute;
+  right: -40px;
+  bottom: -30px;
+  opacity: 0.5;
+  pointer-events: none;
+  color: var(--color-on-brand-accent);
+}
+.cta__block {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+@media (max-width: 1024px) {
+  .split {
+    /* minmax(0, 1fr) вместо 1fr: иначе колонка не может стать уже
+       своего содержимого и на узком экране страница едет вбок. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Первый экран на узком экране ──
+   Колонки складываются до 1024px, а не до 768: на планшете в портрете
+   левая колонка выходит 346×950, и кадр режется в узкую полосу —
+   объект перестаёт читаться. Изображение сверху, под ним текст. */
+@media (max-width: 1023.98px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    min-height: 0;
+    overflow: visible;
+  }
+  .hero__media {
+    align-self: auto;
+  }
+  .hero__art {
+    /* Кадр показывается целиком, без обрезки. */
+    width: 100%;
+    max-width: 836px;
+    height: auto;
+    object-fit: fill;
+    object-position: center;
+    margin-inline: auto;
+  }
+  /* Мелкая графика на маленьком экране превращается в мусор. */
+  .hero__lines {
+    display: none;
+  }
+  .hero__body {
+    max-width: none;
+    padding: var(--space-8) var(--space-5) var(--space-12);
+  }
+  .hero__lead {
+    font-size: 17px;
+    line-height: 27px;
+  }
+  .hero__actions {
+    margin-top: var(--space-6);
+  }
+  .hero__actions .btn {
+    width: 100%;
+  }
+}
+
+/* На планшете широкий кадр иначе съедает весь экран и выталкивает
+   заголовок за нижнюю кромку. На телефоне кадр вертикальный
+   и идёт во всю ширину — там ограничение не нужно. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .hero__art {
+    max-height: 44dvh;
+    object-fit: contain;
+  }
+}
+
+/* Ниже 768px picture отдаёт вертикальный кадр: у него свой предел. */
+@media (max-width: 767.98px) {
+  .hero__art {
+    max-width: 561px;
+  }
+}
+
+/* Три ячейки в строку, пока помещаются; иначе столбец
+   с горизонтальными разделителями. Порог — по самой длинной подписи
+   «заданий первой части» с полями ячейки. */
+@container (max-width: 554px) {
+  .hero__metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero__metrics .metric {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .hero__metrics .metric:first-child {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  section.band {
+    padding: var(--space-12) 0;
+  }
+  .band__head h2 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .split h3 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .dir {
+    grid-template-columns: 36px 1fr;
+    gap: var(--space-3);
+  }
+  .dir__tag {
+    display: none;
+  }
+  .cta {
+    padding: var(--space-10) var(--space-6);
+  }
+  .cta h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+}

@@ -1,0 +1,243 @@
+/* Оболочка публичных страниц: контейнер, шапка, подвал.
+   Переносится из design-reference/index.html без изменения значений.
+   Живёт отдельно от лендинга — этим пользуются все публичные страницы. */
+
+.wrap {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--color-bg-translucent-strong);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+}
+.site-head__in {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  height: var(--h-site-head);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--color-text);
+}
+.logo i {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  display: block;
+  position: relative;
+  flex: none;
+}
+.logo i::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  width: 12px;
+  height: 7px;
+  border-left: 2px solid var(--color-text-inverse);
+  border-bottom: 2px solid var(--color-text-inverse);
+  transform: skewY(-32deg);
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-6);
+  margin-left: var(--space-6);
+}
+.site-nav a {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.site-nav a:hover {
+  color: var(--color-primary);
+}
+.site-head__cta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ── Бургер и полноэкранное меню узкой шапки ── */
+
+.burger {
+  display: none;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  flex: none;
+  place-items: center;
+}
+.burger:hover {
+  background: var(--color-surface-2);
+}
+.burger__bar {
+  position: absolute;
+  left: 12px;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-text);
+  transition:
+    transform var(--dur-menu) var(--ease),
+    opacity var(--dur-menu) var(--ease);
+}
+.burger__bar:nth-child(1) {
+  transform: translateY(-6px);
+}
+.burger__bar:nth-child(3) {
+  transform: translateY(6px);
+}
+/* Крестик: крайние полоски сходятся и поворачиваются, средняя исчезает. */
+.burger[aria-expanded='true'] .burger__bar:nth-child(1) {
+  transform: translateY(0) rotate(45deg);
+}
+.burger[aria-expanded='true'] .burger__bar:nth-child(2) {
+  opacity: 0;
+}
+.burger[aria-expanded='true'] .burger__bar:nth-child(3) {
+  transform: translateY(0) rotate(-45deg);
+}
+
+.site-menu {
+  position: fixed;
+  inset: 0;
+  /* Ниже шапки (30): бургер остаётся видимым и превращается в крестик. */
+  z-index: 25;
+}
+.site-menu__panel {
+  position: absolute;
+  inset: 0;
+  /* Сплошная поверхность: ни прозрачности, ни размытия — на слабых
+     телефонах backdrop-filter заметно тормозит. */
+  background: var(--color-surface);
+  padding: calc(var(--h-site-head) + var(--space-8)) var(--space-5) var(--space-8);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.site-menu[data-state='open'] .site-menu__panel {
+  animation: menu-in var(--dur-menu) var(--ease) both;
+}
+.site-menu[data-state='closing'] .site-menu__panel {
+  animation: menu-out var(--dur-menu) var(--ease) both;
+}
+@keyframes menu-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes menu-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.site-menu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.site-menu__item {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.site-menu__item:hover {
+  color: var(--color-primary);
+}
+/* «Войти» отделён от разделов сайта. */
+.site-menu__item--apart {
+  margin-top: var(--space-4);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+/* Каскад: пункты выходят снизу вверх вслед за панелью. */
+.site-menu[data-state='open'] .site-menu__item {
+  animation: menu-item-in var(--dur-menu) var(--ease) both;
+  animation-delay: calc(var(--dur-menu) + var(--i) * var(--dur-menu-stagger));
+}
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Бургер показывается везде, где спрятано меню: иначе на планшете
+   и небольшом ноутбуке навигации не остаётся вовсе. */
+@media (max-width: 939.98px) {
+  .burger {
+    display: grid;
+  }
+}
+
+/* Ниже 460px в шапке не помещаются и «Войти», и бургер.
+   «Войти» уходит в меню, «Начать бесплатно» остаётся: слово
+   «бесплатно» работает на конверсию и не сокращается. */
+@media (max-width: 459.98px) {
+  .site-head__cta .btn--ghost {
+    display: none;
+  }
+  .site-head__in {
+    gap: var(--space-4);
+  }
+}
+
+.site-foot {
+  padding: var(--space-12) 0;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+.site-foot__in {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.site-foot a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.site-foot a:hover {
+  color: var(--color-primary);
+}
+.site-foot__links {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* Шапка с меню требует 936px: логотип, четыре пункта, «Войти»
+   и «Начать бесплатно». Ниже меню прячется, иначе страница едет вбок.
+   Остальные правила оболочки остаются на эталонном пороге 760px. */
+@media (max-width: 939.98px) {
+  .site-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .wrap,
+  .site-head__in {
+    padding: 0 var(--space-5);
+  }
+}

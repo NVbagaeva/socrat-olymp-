@@ -1,0 +1,14 @@
+/* Точка входа стилей. Порядок слоёв фиксирован, чтобы утилиты Tailwind
+   всегда перебивали компонентный слой, а не наоборот. */
+@layer theme, base, components, utilities;
+
+/* Preflight не подключаем: сброс живёт в base.css и повторяет эталон. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import './tokens.css';
+@import './base.css' layer(base);
+@import './components.css' layer(components);
+@import './site.css' layer(components);
+
+@source '../**/*.{ts,tsx}';
