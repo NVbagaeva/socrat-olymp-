@@ -1,12 +1,19 @@
 /* graph/triangle.js — треугольник наклона.
 
-   Гипотенуза — отрезок между двумя жирными опорными точками прямой.
-   Катеты — горизонталь из левой точки и вертикаль до правой.
-   Вершина прямого угла выбирается детерминированно: пересечение
-   горизонтали из ЛЕВОЙ опорной точки и вертикали из ПРАВОЙ.
+   Гипотенуза — отрезок между двумя жирными опорными точками:
+   A — левая, B — правая. Вершина прямого угла C зависит от направления:
+
+     возрастающая (k > 0)  C = (xB, yA) — прямой угол внизу справа,
+                           построение читается «вправо, затем вверх»;
+     убывающая    (k < 0)  C = (xA, yB) — прямой угол внизу слева,
+                           построение читается «вниз, затем вправо».
+
+   Треугольник обязан целиком помещаться в окне при выбранной вершине;
+   не помещается — берётся другая пара опорных точек, нет подходящей —
+   вариант бракуется на генерации.
 
    Слой геометрии: знает про клетки и координаты, не знает ни про SVG,
-   ни про анимацию. Рендерер получает от него готовые фигуры сцены,
+   ни про анимацию. Рендерер получает готовые фигуры сцены,
    graph/animate.js — их идентификаторы и порядок шагов.
 */
 
@@ -31,124 +38,225 @@
     alpha:      'slope-alpha'
   };
 
+  var RULES = {
+    rightAnglePx:  13,     /* сторона квадратика в пикселях: клетка разного
+                              размера при разных окнах, квадратик — нет     */
+    arcMaxPx:      34,     /* потолок радиуса дуги                          */
+    arcLegShare:   1 / 3,  /* и не больше трети кратчайшего катета          */
+    alphaGapPx:    12,     /* насколько α отстоит от дуги                   */
+    labelGapPx:    13,     /* насколько подпись катета отстоит от него      */
+    labelZoneCells: 3      /* короче этого крайний кусок прямой не годится
+                              под подпись y = f(x)                          */
+  };
+
   function inside(point, win) {
     return point.x >= win.xmin && point.x <= win.xmax &&
            point.y >= win.ymin && point.y <= win.ymax;
   }
 
-  /* Треугольник целиком помещается в окне: обе опорные точки и вершина. */
+  /* Вершина прямого угла по правилу направления. */
+  function vertexFor(left, right) {
+    return right.y > left.y ? { x: right.x, y: left.y }    /* возрастающая */
+                            : { x: left.x,  y: right.y };  /* убывающая    */
+  }
+
   function fits(left, right, win) {
-    return inside(left, win) && inside(right, win) &&
-           inside({ x: right.x, y: left.y }, win);
+    return inside(left, win) && inside(right, win) && inside(vertexFor(left, right), win);
   }
 
   /* Пара опорных точек: сначала пробуем ту, что уже отмечена на чертеже,
-     иначе перебираем остальные пары целых точек прямой. Если ни одна
-     не даёт помещающийся треугольник — null, и вариант бракуется. */
+     иначе перебираем остальные пары целых точек прямой. */
   function choosePair(line, win, preferred) {
+    function ordered(pair) {
+      return pair[0].x <= pair[1].x ? [pair[0], pair[1]] : [pair[1], pair[0]];
+    }
+
     if (preferred && preferred.length === 2) {
-      var a = preferred[0].x <= preferred[1].x ? preferred[0] : preferred[1];
-      var b = preferred[0].x <= preferred[1].x ? preferred[1] : preferred[0];
-      if (a.x !== b.x && fits(a, b, win) && b.x !== 0 && a.y !== 0) { return [a, b]; }
+      var pair = ordered(preferred);
+      if (pair[0].x !== pair[1].x && fits(pair[0], pair[1], win) &&
+          !onAxis(pair[0], pair[1])) {
+        return pair;
+      }
     }
 
     var points = Line.integerPoints(line, win);
     var best = null;
     for (var i = 0; i < points.length; i++) {
       for (var j = i + 1; j < points.length; j++) {
-        var left = points[i].x <= points[j].x ? points[i] : points[j];
-        var right = points[i].x <= points[j].x ? points[j] : points[i];
-        if (left.x === right.x || !fits(left, right, win)) { continue; }
-        /* Катет, легший на ось, сливается с каркасом чертежа,
-           а его подпись попадает в числа на оси. */
-        var onAxis = (right.x === 0 ? 1 : 0) + (left.y === 0 ? 1 : 0);
-        var score = Math.min(Math.abs(right.x - left.x), 4) -
-          0.1 * (Math.abs(left.x) + Math.abs(right.x)) - onAxis * 1.5;
-        if (!best || score > best.score + 1e-9) { best = { pair: [left, right], score: score }; }
+        var candidate = ordered([points[i], points[j]]);
+        var a = candidate[0];
+        var b = candidate[1];
+        if (a.x === b.x || !fits(a, b, win)) { continue; }
+
+        var score = Math.min(Math.abs(b.x - a.x), 4) -
+          0.1 * (Math.abs(a.x) + Math.abs(b.x)) -
+          (onAxis(a, b) ? 1.5 : 0);
+        if (!best || score > best.score + 1e-9) { best = { pair: candidate, score: score }; }
       }
     }
     return best ? best.pair : null;
   }
 
-  /* Построение треугольника. Возвращает null, если построить нельзя. */
+  /* Катет, легший на ось, сливается с каркасом чертежа, а дуга и подпись
+     α у опорной точки на оси попадают прямо на неё и на числа. */
+  function onAxis(left, right) {
+    var vertex = vertexFor(left, right);
+    var legOnAxis = (vertex.x === 0 && (left.x === 0 || right.x === 0)) ||
+                    (vertex.y === 0 && (left.y === 0 || right.y === 0));
+    var cornerOnAxis = left.x === 0 || left.y === 0;
+    return legOnAxis || cornerOnAxis;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Построение
+     ══════════════════════════════════════════════════════════ */
   function build(line, win, preferred) {
     var pair = choosePair(line, win, preferred);
     if (!pair) { return null; }
 
-    var left = pair[0];
-    var right = pair[1];
-    var vertex = { x: right.x, y: left.y };
+    var A = pair[0];
+    var B = pair[1];
+    var C = vertexFor(A, B);
+    var rising = B.y > A.y;
 
-    var dx = right.x - left.x;            /* катет — длина, всегда больше нуля */
-    var dy = right.y - left.y;            /* приращение функции, со знаком     */
-    var rising = dy > 0;
+    var dx = Math.abs(B.x - A.x);
+    var dy = Math.abs(B.y - A.y);
+    if (dx === 0 || dy === 0) { return null; }
 
-    /* На чертеже у катетов стоит только число клеток — длина, всегда
-       положительная. Знак приращения на чертёж не выносится: разбор
-       знака идёт в блоке решения, где у убывающей прямой появляется
-       отдельная строка про отрицательное приращение. Поэтому labels —
-       для чертежа, values — со знаком, для решения. */
+    /* Катеты. У возрастающей путь идёт «вправо, затем вверх»,
+       у убывающей — «вниз, затем вправо»; поэтому у них разные
+       начала и разный порядок в анимации. */
+    var horizontal = rising ? { from: A, to: C } : { from: C, to: B };
+    var vertical   = rising ? { from: C, to: B } : { from: A, to: C };
+
+    /* Третья вершина относительно каждого катета: по ней определяется,
+       с какой стороны снаружи треугольника ставить подпись. */
+    var thirdForHorizontal = rising ? B : A;
+    var thirdForVertical   = rising ? A : B;
+
     return {
-      left: left, right: right, vertex: vertex,
-      dx: dx, dy: dy, rising: rising,
-      k: dy / dx,
-      values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + Math.abs(dy) },
-      labels: { dx: String(dx), dy: String(Math.abs(dy)) },
-      angleDeg: Math.atan2(dy, dx) * 180 / Math.PI,
+      A: A, B: B, C: C,
+      left: A, right: B, vertex: C,
+      rising: rising,
+      dx: dx, dy: dy,
+      k: (B.y - A.y) / (B.x - A.x),
+      horizontal: horizontal,
+      vertical: vertical,
+      thirdForHorizontal: thirdForHorizontal,
+      thirdForVertical: thirdForVertical,
+
+      /* На чертеже катеты подписаны со знаком: горизонтальный всегда «+»,
+         вертикальный «+» у возрастающей и «−» у убывающей. */
+      labels: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + dy },
+      values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + dy },
+
+      angleDeg: Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI,
+      order: rising ? ['horizontal', 'vertical'] : ['vertical', 'horizontal'],
       ids: IDS
     };
   }
 
-  var ARC_RADIUS = 1.15;      /* радиус дуги угла, в клетках            */
-  var ALPHA_GAP  = 0.6;       /* насколько подпись α отстоит от дуги    */
-
-  function bisector(triangle) {
-    return (triangle.angleDeg / 2) * Math.PI / 180;
+  /* Радиус дуги: не больше трети кратчайшего катета. Потолок в пикселях
+     ставит рендерер — клетка у него, а не здесь. */
+  function arcRadius(t) {
+    return Math.min(t.dx, t.dy) * RULES.arcLegShare;
   }
 
-  /* У короткого катета дуга радиусом в клетку вылезает за треугольник,
-     а подпись угла садится на соседнюю подпись. Радиус ужимается
-     по меньшему катету. */
-  function arcRadius(triangle) {
-    return Math.min(ARC_RADIUS, triangle.dx * 0.7, Math.abs(triangle.dy) * 0.7);
-  }
-
-  /* Фигуры сцены. Рендерер рисует их как есть, ничего не зная о наклоне. */
+  /* ══════════════════════════════════════════════════════════
+     Фигуры сцены
+     ══════════════════════════════════════════════════════════ */
   function shapes(triangle) {
     var t = triangle;
-    var topY = Math.max(t.left.y, t.right.y);
-    var midX = (t.left.x + t.right.x) / 2;
-    var midY = (t.vertex.y + t.right.y) / 2;
+    var list = [];
 
-    return [
-      { type: 'polygon', id: IDS.fill,
-        points: [[t.left.x, t.left.y], [t.vertex.x, t.vertex.y], [t.right.x, t.right.y]] },
+    list.push({ type: 'polygon', id: IDS.fill,
+      points: [[t.A.x, t.A.y], [t.C.x, t.C.y], [t.B.x, t.B.y]] });
 
-      { type: 'segment', id: IDS.legX, style: 'dashed',
-        from: [t.left.x, t.left.y], to: [t.vertex.x, t.vertex.y] },
+    list.push({ type: 'segment', id: IDS.legX, style: 'dashed',
+      from: [t.horizontal.from.x, t.horizontal.from.y],
+      to:   [t.horizontal.to.x,   t.horizontal.to.y] });
 
-      { type: 'segment', id: IDS.legY, style: 'dashed',
-        from: [t.vertex.x, t.vertex.y], to: [t.right.x, t.right.y] },
+    list.push({ type: 'segment', id: IDS.legY, style: 'dashed',
+      from: [t.vertical.from.x, t.vertical.from.y],
+      to:   [t.vertical.to.x,   t.vertical.to.y] });
 
-      /* Подпись горизонтального катета — над ним, вертикального — сбоку. */
-      { type: 'label', id: IDS.labelX, at: [midX, t.left.y], offset: [0, -12], text: t.labels.dx },
-      { type: 'label', id: IDS.labelY, at: [t.vertex.x, midY], offset: [14, 4],
-        anchor: 'start', text: t.labels.dy },
+    /* Подписи катетов — снаружи треугольника, со стороны, противоположной
+       гипотенузе. Сторона считается из ориентации, а не задана заранее. */
+    var hy = t.horizontal.from.y;
+    var hOut = t.thirdForHorizontal.y > hy ? 1 : -1;     /* +1 — вниз по экрану */
+    list.push({ type: 'label', id: IDS.labelX, text: t.labels.dx, slide: 'x',
+      at: [ (t.horizontal.from.x + t.horizontal.to.x) / 2, hy ],
+      offset: [0, hOut * RULES.labelGapPx], gap: RULES.labelGapPx });
 
-      { type: 'rightAngle', id: IDS.rightAngle,
-        at: [t.vertex.x, t.vertex.y], toward: [t.left.x, topY] },
+    var vx = t.vertical.from.x;
+    var vOut = t.thirdForVertical.x > vx ? -1 : 1;       /* +1 — вправо по экрану */
+    list.push({ type: 'label', id: IDS.labelY, text: t.labels.dy, slide: 'y',
+      at: [ vx, (t.vertical.from.y + t.vertical.to.y) / 2 ],
+      offset: [vOut * RULES.labelGapPx, 0], gap: RULES.labelGapPx });
 
-      /* Дуга угла наклона у левой опорной точки, между горизонталью и прямой. */
-      { type: 'arc', id: IDS.arc, at: [t.left.x, t.left.y],
-        radius: arcRadius(t), from: 0, to: t.angleDeg },
+    /* Квадратик прямого угла — внутрь треугольника, вдоль обоих катетов.
+       Направления берутся из знаков разностей координат: четыре
+       ориентации обрабатываются одним и тем же вычислением. */
+    list.push({ type: 'rightAngle', id: IDS.rightAngle,
+      at: [t.C.x, t.C.y],
+      alongX: Math.sign(otherEnd(t.horizontal, t.C).x - t.C.x),
+      alongY: Math.sign(otherEnd(t.vertical, t.C).y - t.C.y),
+      sizePx: RULES.rightAnglePx });
 
-      /* Подпись угла ставится на биссектрисе за дугой, а не у самой
-         вершины: у вершины её перечёркивает прямая. */
-      { type: 'label', id: IDS.alpha, gap: 5, text: 'α',
-        at: [ t.left.x + (arcRadius(t) + ALPHA_GAP) * Math.cos(bisector(t)),
-              t.left.y + (arcRadius(t) + ALPHA_GAP) * Math.sin(bisector(t)) ] }
-    ];
+    /* Дуга угла наклона — только у возрастающей прямой.
+       У убывающей угол с положительным направлением оси x тупой,
+       а острый угол треугольника равен 180° − α: подписать его как α
+       значит заложить ошибку. Там смысл несёт знак подписи катета. */
+    if (t.rising) {
+      var r = arcRadius(t);
+      list.push({ type: 'arc', id: IDS.arc, at: [t.A.x, t.A.y],
+        radius: r, maxRadiusPx: RULES.arcMaxPx, from: 0, to: t.angleDeg });
+
+      /* Подпись угла ищется по биссектрисе на нескольких расстояниях:
+         у самой дуги места может не быть. */
+      var bisector = (t.angleDeg / 2) * Math.PI / 180;
+      var anchors = [1, 1.35, 1.75, 2.2].map(function (scale) {
+        return [ t.A.x + r * scale * Math.cos(bisector), t.A.y + r * scale * Math.sin(bisector) ];
+      });
+      list.push({ type: 'label', id: IDS.alpha, text: 'α', gap: RULES.alphaGapPx,
+        at: anchors[0], anchors: anchors,
+        offset: [Math.cos(bisector) * RULES.alphaGapPx, -Math.sin(bisector) * RULES.alphaGapPx] });
+    }
+
+    return list;
   }
 
-  return { build: build, choosePair: choosePair, shapes: shapes, IDS: IDS };
+  function otherEnd(leg, point) {
+    return (leg.from.x === point.x && leg.from.y === point.y) ? leg.to : leg.from;
+  }
+
+  /* Где на прямой можно поставить подпись y = f(x): на самой длинной
+     из крайних частей — левее A или правее B, но никогда между ними.
+     Считать по краям окна нельзя: прямая может выходить из окна
+     через верх или низ, и «крайняя часть» окажется невидимой.
+     Обе части короче трёх клеток — подписи не будет вовсе:
+     пустое место лучше слипшихся надписей. */
+  function labelZone(triangle, line, win) {
+    var visible = Line.visiblePart(line, win);
+    if (!visible || visible.x1 === undefined) { return null; }
+
+    var leftPart  = triangle.A.x - visible.x1;
+    var rightPart = visible.x2 - triangle.B.x;
+    var best = leftPart >= rightPart
+      ? { from: visible.x1, to: triangle.A.x, length: leftPart }
+      : { from: triangle.B.x, to: visible.x2, length: rightPart };
+
+    return best.length >= RULES.labelZoneCells ? [best.from, best.to] : null;
+  }
+
+  return {
+    RULES: RULES,
+    build: build,
+    choosePair: choosePair,
+    vertexFor: vertexFor,
+    arcRadius: arcRadius,
+    shapes: shapes,
+    labelZone: labelZone,
+    IDS: IDS
+  };
 });

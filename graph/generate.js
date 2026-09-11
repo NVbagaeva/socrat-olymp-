@@ -18,6 +18,7 @@ var path = require('path');
 var renderer = require('./renderer.js');
 var math = require('./math.js');
 var Line = require('./families/line.js');
+var Triangle = require('./triangle.js');
 
 var ROOT = __dirname;
 var FAMILIES = { line: Line };
@@ -874,6 +875,36 @@ function generateSet(setId, seed) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Сцена разбора: тот же чертёж плюс треугольник наклона.
+   Один источник для validate.js и для анимации — иначе проверка
+   проверяет не то, что видит ученик.
+   ══════════════════════════════════════════════════════════ */
+function analysis(id, seed) {
+  var task = generate(id, seed);
+  if (!task.svg || !task.meta.window) { return null; }
+
+  var line = Line.create(task.meta.kFraction, task.meta.bFraction);
+  var triangle = Triangle.build(line, task.meta.window, task.meta.points);
+  if (!triangle) { return null; }
+
+  var zone = Triangle.labelZone(triangle, line, task.meta.window);
+  var scene = {
+    window: task.meta.window,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: task.meta.axisLabels || 'minimal',
+    curves: [ { type: 'line', k: task.meta.k, b: task.meta.b, color: 'lineA',
+                label: 'y = f(x)', labelZone: zone } ],
+    points: [ { x: triangle.A.x, y: triangle.A.y, style: 'solid', color: 'lineA' },
+              { x: triangle.B.x, y: triangle.B.y, style: 'solid', color: 'lineA' } ],
+    shapes: Triangle.shapes(triangle),
+    alt: 'Разбор: треугольник наклона'
+  };
+
+  return { task: task, line: line, triangle: triangle, zone: zone, scene: scene };
+}
+
+/* ══════════════════════════════════════════════════════════
    Ответы: отдельный файл, не вперемешку с условиями.
    Подготовка и прототипы — разными разделами.
    ══════════════════════════════════════════════════════════ */
@@ -908,6 +939,7 @@ function writeAnswers() {
 }
 
 module.exports = {
+  analysis: analysis,
   taskCandidates: taskCandidates,
   equationText: equationText,
   generate: generate,

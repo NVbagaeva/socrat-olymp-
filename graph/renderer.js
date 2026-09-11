@@ -68,9 +68,11 @@
     helper: {
       dash:          '6 5',
       fillOpacity:   0.12,
-      rightAngle:    0.42,     /* сторона квадратика, в клетках              */
+      rightAnglePx:  13,       /* сторона квадратика, в пикселях             */
       arcRadius:     1.15,     /* радиус дуги угла, в клетках                */
-      labelGap:      11
+      labelGap:      11,
+      slideReachPx:  46,       /* насколько подпись катета ходит вдоль него  */
+      slideStepPx:    6
     },
 
     geometry: {
@@ -254,7 +256,10 @@
   /* ══════════════════════════════════════════════════════════
      Рендер
      ══════════════════════════════════════════════════════════ */
-  function renderGraph(scene) {
+  /* Второй аргумент — отчёт о размещении: рендерер складывает туда
+     реальные прямоугольники подписей и фигур. По нему validate.js
+     проверяет наложения на том же, что видит ученик, а не на догадках. */
+  function renderGraph(scene, report) {
     var win = scene.window;
     var problems = checkWindow(win);
     if (problems.length) { throw new Error('renderer: ' + problems.join('; ')); }
@@ -290,6 +295,7 @@
       (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">');
     if (scene.alt) { head.push('<title>' + esc(scene.alt) + '</title>'); }
+    if (report) { report.cell = cell; report.sx = sx; report.sy = sy; }
     head.push('<rect x="0" y="0" width="' + px(size) + '" height="' + px(size) + '" fill="' +
       THEME.colors.bg + '"/>');
 
@@ -350,8 +356,14 @@
        элементом, а подписи — поверх, со своим подбором места. -------- */
     var shapeLabels = [];
     (scene.shapes || []).forEach(function (shape) {
-      if (shape.type === 'label') { shapeLabels.push(shape); }
-      else { shapeLayer.push(renderShape(shape, sx, sy, cell)); }
+      if (shape.type === 'label') { shapeLabels.push(shape); return; }
+      shapeLayer.push(renderShape(shape, sx, sy, cell));
+
+      if (report) {
+        if (!report.shapes) { report.shapes = []; }
+        report.shapes.push({ type: shape.type, id: shape.id, shape: shape, cell: cell,
+          at: shape.at ? [sx(shape.at[0]), sy(shape.at[1])] : null });
+      }
     });
 
     /* Кривые: поверх осей, обрезаны ровно по границе поля --------------- */
@@ -394,6 +406,8 @@
       var textX = fmt(lx);
       labelLayer.push(numberText(textX, sx(lx), axisX + THEME.gap.axisLabelX, 'middle'));
       boxFor(textX, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
+      collect(report, 'axisLabel', null, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35,
+        textWidth(textX, THEME.font.axisLabel) / 2, THEME.font.axisLabel * 0.62);
     }
     for (var ly = Math.ceil(win.ymin); ly <= win.ymax + EPS; ly++) {
       if (!labelled(ly)) { continue; }
@@ -401,6 +415,8 @@
       var half = textWidth(textY, THEME.font.axisLabel) / 2;
       labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(ly) + 4.5, 'end'));
       boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(ly));
+      collect(report, 'axisLabel', null, axisY - THEME.gap.axisLabelY - half, sy(ly),
+        half, THEME.font.axisLabel * 0.62);
     }
     if (pick(axes.origin, '0') !== null) {
       /* Подпись начала координат уходит в свободную четверть: если
@@ -435,12 +451,22 @@
       var cloud = obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX },
         { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) },
         labelBoxes);
-      var spot = bestLabelSpot(sx(shape.at[0]), sy(shape.at[1]), halfW, halfH,
-        shape.gap === undefined ? THEME.helper.labelGap : shape.gap, cloud,
-        { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) },
-        prefer);
+      var field = { left: sx(win.xmin), right: sx(win.xmax),
+                    top: sy(win.ymax), bottom: sy(win.ymin) };
+      var spot;
+      if (shape.slide) {
+        spot = slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field);
+      } else {
+        /* Якорей может быть несколько: берём лучший из всех. */
+        (shape.anchors || [shape.at]).forEach(function (anchor) {
+          var candidate = bestLabelSpot(sx(anchor[0]), sy(anchor[1]), halfW, halfH,
+            shape.gap === undefined ? THEME.helper.labelGap : shape.gap, cloud, field, prefer);
+          if (!spot || candidate.score > spot.score + 1e-9) { spot = candidate; }
+        });
+      }
 
       labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+      collect(report, 'shapeLabel', shape.id, spot.x, spot.y, halfW, halfH);
       shapeLabelLayer.push(svgText(shape.text, spot.x, spot.y + halfH * 0.55, 'middle', {
         size:   size,
         family: THEME.font.curveLabelFamily,
@@ -472,6 +498,7 @@
         THEME.gap.pointLabel + g.pointRadius, cloud, field);
 
       labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+      collect(report, 'pointLabel', null, spot.x, spot.y, halfW, halfH);
       pointLayer.push(labelText(point.label, spot.x, spot.y + halfH * 0.55, 'middle',
         THEME.font.pointLabel, color(point.color)));
     });
@@ -480,7 +507,9 @@
        от точек и пересечений с осями. -------------------------------------*/
     drawn.forEach(function (item) {
       if (!item.curve.label) { return; }
-      curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes));
+      /* Зона может быть пустой: тогда места под подпись нет и её не рисуем. */
+      if (item.curve.labelZone === null) { return; }
+      curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes, report, cell));
     });
 
     var body = gridLayer.concat(axisLayer, shapeLayer);
@@ -499,7 +528,10 @@
      самих графиков, осей и отмеченных точек — и берём лучшее место.
      Не нашлось — сдвигаемся вдоль линии, но никогда не вращаем.
      ══════════════════════════════════════════════════════════ */
-  function curveLabel(item, scene, win, sx, sy, all, labelBoxes) {
+  function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
+    /* Зона задаётся снаружи: подпись ставится только на той части
+       прямой, что лежит за треугольником. Пустая зона — подписи нет. */
+    var zone = item.curve.labelZone;
     var piece = item.pieces[0];
     for (var i = 1; i < item.pieces.length; i++) {
       if (item.pieces[i].length > piece.length) { piece = item.pieces[i]; }
@@ -536,6 +568,15 @@
            отойти нужно заметно дальше, чем у пологой.                    */
         var cx = lx + nx * side * offset;
         var cy = ly + ny * side * offset;
+        /* Зона задаётся снаружи и проверяется по итоговому положению
+           подписи: у крутой прямой сдвиг по нормали почти горизонтален
+           и уводит подпись из зоны, даже если точка на линии была в ней. */
+        if (zone) {
+          var mathX = win.xmin + (cx - sx(win.xmin)) / cell;
+          if (mathX < Math.min(zone[0], zone[1]) - 0.5 ||
+              mathX > Math.max(zone[0], zone[1]) + 0.5) { continue; }
+        }
+
         if (cx - halfW < labelField.left + THEME.curveLabelEdge) { continue; }
         if (cx + halfW > labelField.right - THEME.curveLabelEdge) { continue; }
         if (cy - halfH < labelField.top + THEME.curveLabelEdge) { continue; }
@@ -560,8 +601,15 @@
       }
     }
 
+    /* Зона задана, а места в ней не нашлось — подписи не будет:
+       ставить её вне зоны значит вернуть её к треугольнику. */
+    if (zone && !best && !fallback) { return ''; }
+
     var spot = best || fallback ||
       { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
+
+    labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+    collect(report, 'curveLabel', 'curve-label', spot.x, spot.y, halfW, halfH);
 
     return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke);
   }
@@ -593,19 +641,26 @@
         '" stroke="none"/>';
     }
 
-    /* Квадратик прямого угла: две стороны, внутрь треугольника. */
+    /* Квадратик прямого угла: две стороны внутрь треугольника.
+       Сторона задана в пикселях — клетка при разных окнах разная,
+       а квадратик обязан выглядеть одинаково. Направления приходят
+       знаками, поэтому все четыре ориентации считаются одинаково. */
     if (shape.type === 'rightAngle') {
-      var size = shape.size === undefined ? THEME.helper.rightAngle : shape.size;
-      var ax = shape.at[0] + Math.sign(shape.toward[0] - shape.at[0]) * size;
-      var ay = shape.at[1] + Math.sign(shape.toward[1] - shape.at[1]) * size;
-      return '<path' + id + ' d="M' + px(sx(ax)) + ' ' + px(sy(shape.at[1])) +
-        'L' + px(sx(ax)) + ' ' + px(sy(ay)) + 'L' + px(sx(shape.at[0])) + ' ' + px(sy(ay)) +
+      var side = shape.sizePx === undefined ? THEME.helper.rightAnglePx : shape.sizePx;
+      var cx0 = sx(shape.at[0]);
+      var cy0 = sy(shape.at[1]);
+      var stepX = (shape.alongX || 1) * side;
+      var stepY = -(shape.alongY || 1) * side;      /* ось y на экране вниз */
+      return '<path' + id + ' d="M' + px(cx0 + stepX) + ' ' + px(cy0) +
+        'L' + px(cx0 + stepX) + ' ' + px(cy0 + stepY) +
+        'L' + px(cx0) + ' ' + px(cy0 + stepY) +
         '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helperMark + '"/>';
     }
 
     /* Дуга угла наклона у левой опорной точки. */
     if (shape.type === 'arc') {
       var r = (shape.radius === undefined ? THEME.helper.arcRadius : shape.radius) * cell;
+      if (shape.maxRadiusPx !== undefined) { r = Math.min(r, shape.maxRadiusPx); }
       var cx = sx(shape.at[0]);
       var cy = sy(shape.at[1]);
       var a1 = -shape.from * Math.PI / 180;
@@ -632,6 +687,36 @@
     }
 
     throw new Error('renderer: неизвестная фигура «' + shape.type + '»');
+  }
+
+  /* Подпись катета стоит снаружи треугольника и двигается только вдоль
+     своего катета: внутрь она заходить не должна, а наложение на ось,
+     точку или соседнюю подпись снимается сдвигом. */
+  function slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field) {
+    var offset = shape.offset || [0, 0];
+    var baseX = sx(shape.at[0]) + offset[0];
+    var baseY = sy(shape.at[1]) + offset[1];
+    var alongX = shape.slide === 'x';
+    var reach = THEME.helper.slideReachPx;
+    var step = THEME.helper.slideStepPx;
+    var best = null;
+
+    for (var shift = -reach; shift <= reach + 1e-9; shift += step) {
+      var cx = baseX + (alongX ? shift : 0);
+      var cy = baseY + (alongX ? 0 : shift);
+      if (cx - halfW < field.left || cx + halfW > field.right) { continue; }
+      if (cy - halfH < field.top || cy + halfH > field.bottom) { continue; }
+
+      var clear = Infinity;
+      for (var c = 0; c < cloud.length; c++) {
+        clear = Math.min(clear, rectDist(cloud[c], cx, cy, halfW, halfH));
+        if (clear <= 0) { break; }
+      }
+      /* При равном зазоре ближе к середине катета. */
+      var score = clear - Math.abs(shift) * 0.05;
+      if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
+    }
+    return best || { x: baseX, y: baseY };
   }
 
   /* Свободное место для короткой подписи рядом с точкой.
@@ -707,6 +792,28 @@
       cloud.push({ x: sx(point.x), y: sy(point.y) });
     });
 
+    /* Вспомогательные фигуры — тоже препятствия: подпись графика
+       не должна ложиться на треугольник наклона и его разметку. */
+    (scene.shapes || []).forEach(function (shape) {
+      function line(x1, y1, x2, y2) {
+        var steps = Math.max(1, Math.ceil(dist(x1, y1, x2, y2) / stepPx));
+        for (var i = 0; i <= steps; i++) {
+          cloud.push({ x: x1 + (x2 - x1) * i / steps, y: y1 + (y2 - y1) * i / steps });
+        }
+      }
+
+      if (shape.type === 'segment') {
+        line(sx(shape.from[0]), sy(shape.from[1]), sx(shape.to[0]), sy(shape.to[1]));
+      } else if (shape.type === 'polygon') {
+        shape.points.forEach(function (point, i) {
+          var next = shape.points[(i + 1) % shape.points.length];
+          line(sx(point[0]), sy(point[1]), sx(next[0]), sy(next[1]));
+        });
+      } else if (shape.at) {
+        cloud.push({ x: sx(shape.at[0]), y: sy(shape.at[1]) });
+      }
+    });
+
     (labelBoxes || []).forEach(function (box) {
       cloud.push({ x: box.x, y: box.y });
       cloud.push({ x: box.x - box.halfW, y: box.y - box.halfH });
@@ -725,6 +832,13 @@
   }
 
   function dist(x1, y1, x2, y2) { return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
+
+  /* Запись прямоугольника в отчёт о размещении. */
+  function collect(report, kind, id, x, y, halfW, halfH) {
+    if (!report) { return; }
+    if (!report.boxes) { report.boxes = []; }
+    report.boxes.push({ kind: kind, id: id, x: x, y: y, halfW: halfW, halfH: halfH });
+  }
 
   /* Оценка ширины строки: по умолчанию символ примерно 0,56 кегля. */
   function textWidth(value, size, track) {

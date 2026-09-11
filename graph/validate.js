@@ -13,6 +13,7 @@
 var fs = require('fs');
 var path = require('path');
 var renderer = require('./renderer.js');
+var THEME = renderer.THEME;
 var generator = require('./generate.js');
 var Line = require('./families/line.js');
 var Triangle = require('./triangle.js');
@@ -31,6 +32,176 @@ function checkWindow(win, where) {
 function checkScene(scene, where) {
   var errors = checkWindow(scene.window, where);
   if (!scene.curves || !scene.curves.length) { errors.push(where + ': на чертеже нет ни одной кривой'); }
+  return errors;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Геометрия для проверки наложений (в пикселях чертежа)
+   ══════════════════════════════════════════════════════════ */
+function boxesOverlap(a, b) {
+  return Math.abs(a.x - b.x) < (a.halfW + b.halfW) &&
+         Math.abs(a.y - b.y) < (a.halfH + b.halfH);
+}
+
+function boxHitsSegment(box, x1, y1, x2, y2) {
+  /* Отрезок режется по прямоугольнику алгоритмом Лианга — Барски. */
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  var t0 = 0, t1 = 1;
+  var p = [-dx, dx, -dy, dy];
+  var q = [x1 - (box.x - box.halfW), (box.x + box.halfW) - x1,
+           y1 - (box.y - box.halfH), (box.y + box.halfH) - y1];
+
+  for (var i = 0; i < 4; i++) {
+    if (Math.abs(p[i]) < 1e-9) { if (q[i] < 0) { return false; } continue; }
+    var t = q[i] / p[i];
+    if (p[i] < 0) { if (t > t1) { return false; } if (t > t0) { t0 = t; } }
+    else { if (t < t0) { return false; } if (t < t1) { t1 = t; } }
+  }
+  return t1 >= t0;
+}
+
+function pointInTriangle(point, a, b, c) {
+  function side(p, q, r) { return (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x); }
+  var d1 = side(a, b, point), d2 = side(b, c, point), d3 = side(c, a, point);
+  var hasNegative = d1 < 0 || d2 < 0 || d3 < 0;
+  var hasPositive = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(hasNegative && hasPositive);
+}
+
+function boxHitsTriangle(box, a, b, c) {
+  if (pointInTriangle({ x: box.x, y: box.y }, a, b, c)) { return true; }
+  var edges = [[a, b], [b, c], [c, a]];
+  for (var i = 0; i < edges.length; i++) {
+    if (boxHitsSegment(box, edges[i][0].x, edges[i][0].y, edges[i][1].x, edges[i][1].y)) { return true; }
+  }
+  return false;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Разбор: треугольник наклона и его подписи (§6 уточнения)
+   Проверяется то, что реально нарисовано: рендерер отдаёт
+   отчёт о размещении, и наложения считаются по нему.
+   ══════════════════════════════════════════════════════════ */
+var analysisChecked = 0;
+
+function checkAnalysis(set, task) {
+  var where = set.id + '/' + task.id;
+  var errors = [];
+
+  var single = !task.meta.lines || task.meta.lines.length === 1;
+  if (!task.svg || !single || task.meta.k === 0) { return errors; }
+  analysisChecked++;
+
+  var analysis;
+  try { analysis = generator.analysis(task.id); }
+  catch (error) { return [where + ': разбор не строится — ' + error.message]; }
+  if (!analysis) { return [where + ': треугольник наклона не построен']; }
+
+  var t = analysis.triangle;
+  var win = analysis.scene.window;
+  var report = {};
+  renderer.renderGraph(analysis.scene, report);
+  var sx = report.sx, sy = report.sy, cell = report.cell;
+
+  /* 1. Вершина прямого угла по правилу направления. */
+  var expected = t.rising ? { x: t.B.x, y: t.A.y } : { x: t.A.x, y: t.B.y };
+  if (t.C.x !== expected.x || t.C.y !== expected.y) {
+    errors.push(where + ': вершина прямого угла (' + t.C.x + '; ' + t.C.y + '), а по правилу ' +
+      (t.rising ? 'возрастающей' : 'убывающей') + ' прямой должна быть (' +
+      expected.x + '; ' + expected.y + ')');
+  }
+
+  /* 2. Треугольник целиком внутри окна. */
+  [['A', t.A], ['B', t.B], ['C', t.C]].forEach(function (item) {
+    var point = item[1];
+    if (point.x < win.xmin || point.x > win.xmax || point.y < win.ymin || point.y > win.ymax) {
+      errors.push(where + ': вершина ' + item[0] + ' (' + point.x + '; ' + point.y + ') вне окна');
+    }
+  });
+
+  var pxA = { x: sx(t.A.x), y: sy(t.A.y) };
+  var pxB = { x: sx(t.B.x), y: sy(t.B.y) };
+  var pxC = { x: sx(t.C.x), y: sy(t.C.y) };
+
+  /* 3. Центр квадратика прямого угла — внутри треугольника. */
+  var mark = (report.shapes || []).filter(function (item) { return item.type === 'rightAngle'; })[0];
+  if (!mark) { errors.push(where + ': нет квадратика прямого угла'); }
+  else {
+    var side = mark.shape.sizePx;
+    var center = { x: pxC.x + (mark.shape.alongX || 1) * side / 2,
+                   y: pxC.y - (mark.shape.alongY || 1) * side / 2 };
+    if (!pointInTriangle(center, pxA, pxB, pxC)) {
+      errors.push(where + ': квадратик прямого угла построен наружу треугольника');
+    }
+  }
+
+  /* 4. Дуга — только у возрастающей прямой. */
+  var arc = (report.shapes || []).filter(function (item) { return item.type === 'arc'; })[0];
+  var alpha = (report.boxes || []).filter(function (box) { return box.id === 'slope-alpha'; })[0];
+  if (t.rising && (!arc || !alpha)) { errors.push(where + ': у возрастающей прямой нет дуги угла с подписью α'); }
+  if (!t.rising && (arc || alpha)) { errors.push(where + ': у убывающей прямой нарисована дуга α'); }
+
+  /* 5. Радиус дуги — не больше трети кратчайшего катета. */
+  if (arc) {
+    var limit = Math.min(t.dx, t.dy) / 3;
+    if (arc.shape.radius > limit + 1e-9) {
+      errors.push(where + ': радиус дуги ' + arc.shape.radius.toFixed(2) +
+        ' клетки, допустимо не больше ' + limit.toFixed(2));
+    }
+  }
+
+  /* 6. Подписи не налезают друг на друга, на ось и на опорные точки. */
+  var labels = (report.boxes || []).filter(function (box) {
+    return box.kind === 'shapeLabel' || box.kind === 'curveLabel' || box.kind === 'pointLabel';
+  });
+  var axisLabels = (report.boxes || []).filter(function (box) { return box.kind === 'axisLabel'; });
+  var dots = [
+    { x: pxA.x, y: pxA.y, halfW: THEME.geometry.pointRadius, halfH: THEME.geometry.pointRadius },
+    { x: pxB.x, y: pxB.y, halfW: THEME.geometry.pointRadius, halfH: THEME.geometry.pointRadius }
+  ];
+
+  labels.forEach(function (box, i) {
+    labels.slice(i + 1).forEach(function (other) {
+      if (boxesOverlap(box, other)) {
+        errors.push(where + ': подписи ' + (box.id || box.kind) + ' и ' +
+          (other.id || other.kind) + ' налезают друг на друга');
+      }
+    });
+    axisLabels.forEach(function (other) {
+      if (boxesOverlap(box, other)) {
+        errors.push(where + ': подпись ' + (box.id || box.kind) + ' налезает на число на оси');
+      }
+    });
+    dots.forEach(function (dot) {
+      if (boxesOverlap(box, dot)) {
+        errors.push(where + ': подпись ' + (box.id || box.kind) + ' налезает на опорную точку');
+      }
+    });
+    /* Ось: подпись не должна ложиться на сами оси. */
+    if (boxHitsSegment(box, sx(0), sy(win.ymin), sx(0), sy(win.ymax)) ||
+        boxHitsSegment(box, sx(win.xmin), sy(0), sx(win.xmax), sy(0))) {
+      errors.push(where + ': подпись ' + (box.id || box.kind) + ' легла на ось');
+    }
+  });
+
+  /* 7. Подпись y = f(x) не пересекается с треугольником и его разметкой. */
+  var curveLabel = (report.boxes || []).filter(function (box) { return box.kind === 'curveLabel'; })[0];
+  if (curveLabel) {
+    if (boxHitsTriangle(curveLabel, pxA, pxB, pxC)) {
+      errors.push(where + ': подпись y = f(x) пересекает треугольник');
+    }
+    if (analysis.zone) {
+      var mathX = (curveLabel.x - sx(0)) / cell;
+      var low = Math.min(analysis.zone[0], analysis.zone[1]);
+      var high = Math.max(analysis.zone[0], analysis.zone[1]);
+      if (mathX < low - 0.75 || mathX > high + 0.75) {
+        errors.push(where + ': подпись y = f(x) стоит вне разрешённой зоны [' +
+          low + '; ' + high + ']');
+      }
+    }
+  }
+
   return errors;
 }
 
@@ -622,12 +793,16 @@ function run() {
       errors.push(set.id + ': ' + error.message);
       return;
     }
-    tasks.forEach(function (task) { errors = errors.concat(checkTask(set, task)); });
+    tasks.forEach(function (task) {
+      errors = errors.concat(checkTask(set, task));
+      errors = errors.concat(checkAnalysis(set, task));
+    });
     errors = errors.concat(checkComposition(set, tasks));
     report.push('  ' + set.id + ' «' + set.title + '»: собрано ' + tasks.length +
       ', ответы: ' + tasks.map(function (t) { return t.answer; }).join(', '));
   });
 
+  report.push('разбор: треугольник и подписи проверены на ' + analysisChecked + ' вариантах');
   return { errors: errors, report: report };
 }
 
