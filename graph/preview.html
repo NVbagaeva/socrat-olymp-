@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Задание №12 · визуальный контроль</title>
+<link rel="stylesheet" href="graph.css">
+<style>
+  /* Служебная страница: контроль чертежей, состава наборов и разбора.
+     Оформление намеренно скромное — это инструмент, не витрина. */
+  :root {
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --color-bg: #F5F9FF;
+    --color-surface: #FFFFFF;
+    --color-border: #E4EBF3;
+    --color-text: #101728;
+    --color-text-secondary: #667389;
+    --color-text-tertiary: #97A1B0;
+    --color-primary: #1F5FD0;
+    --color-surface-2: #F7F9FC;
+    --radius: 12px;
+    --space: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-text);
+         font-family: var(--font); font-size: 14px; }
+
+  header { position: sticky; top: 0; z-index: 5; background: var(--color-surface);
+           border-bottom: 1px solid var(--color-border); padding: 12px 20px;
+           display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 15px; margin: 0 16px 0 0; }
+  label { font-size: 12px; color: var(--color-text-secondary); display: flex; gap: 6px; align-items: center; }
+  select, input { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px;
+                  border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
+  input[type="number"] { width: 96px; }
+  button { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+           border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
+  button.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  button[hidden] { display: none; }
+
+  .counts { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); text-align: right; }
+
+  main { padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+  @media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+
+  .card { background: var(--color-surface); border: 1px solid var(--color-border);
+          border-radius: var(--radius); padding: 12px; cursor: pointer; }
+  .card:hover { border-color: var(--color-primary); }
+  .card.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(31,95,208,.15); }
+  .card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .card-id { font-size: 12px; color: var(--color-text-secondary); }
+  .badge { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .badge.lucky { background: #EFF3F8; color: var(--color-text-secondary); }
+  .badge.unlucky { background: var(--color-primary); color: #fff; }
+  .card svg { display: block; width: 100%; height: auto; }
+  .card .question { font-size: 13px; margin: 8px 0 4px; line-height: 1.4; }
+  .card .answer { font-size: 13px; color: var(--color-primary); font-weight: 600; }
+  .card .options { font-size: 13px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .card .options li { padding: 1px 0; color: var(--color-text-secondary); }
+  .card .options li.right { color: var(--color-primary); font-weight: 600; }
+  .nochart { height: 44px; display: grid; place-items: center; color: var(--color-text-tertiary);
+             font-size: 12px; border: 1px dashed var(--color-border); border-radius: 8px; }
+
+  /* ── Панель разбора ─────────────────────────────────────── */
+  aside { position: sticky; top: 68px; background: var(--color-surface);
+          border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
+  aside h2 { font-size: 14px; margin: 0 0 4px; }
+  aside .hint { font-size: 12px; color: var(--color-text-secondary); margin: 8px 0 0; }
+  aside svg { display: block; width: 100%; height: auto; margin: 10px 0; }
+
+  .attempt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .verdict { font-size: 13px; margin: 8px 0 0; }
+  .verdict.right { color: #16A34A; }
+  .verdict.wrong { color: var(--color-text-secondary); }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .steps { font-size: 12px; color: var(--color-text-tertiary); margin-top: 8px; }
+
+  .solution { margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 12px; }
+  .solution-line { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+  .solution-line:last-child { margin-bottom: 0; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Задание №12 · визуальный контроль</h1>
+
+  <label>Раздел
+    <select id="mode">
+      <option value="prep">Подготовка</option>
+      <option value="prototypes">Прототипы</option>
+    </select>
+  </label>
+
+  <label>Набор <select id="set"></select></label>
+  <label>Seed <input id="seed" type="number" step="1"></label>
+  <button id="rebuild">Пересобрать</button>
+
+  <div class="counts" id="counts"></div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+
+  <aside id="panel">
+    <h2>Разбор</h2>
+    <p class="hint" id="panel-hint">Выберите задачу слева.</p>
+  </aside>
+</main>
+
+<script src="math.js"></script>
+<script src="katex-boot.js"></script>
+<script src="renderer.js"></script>
+<script src="families/line.js"></script>
+<script src="triangle.js"></script>
+<script src="generate.js"></script>
+<script src="animate.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* Тексты уровней — одной константой: формулировку меняют здесь. */
+  var LEVEL_LABELS = { lucky: 'повезло', unlucky: 'не повезло' };
+
+  /* Статического списка файлов не избежать: на GitHub Pages нет
+     оглавления папки, а сборки в проекте нет. */
+  var FILES = {
+    prep: ['prep/12/block-1.json', 'prep/12/block-2.json', 'prep/12/block-3.json',
+           'prep/12/block-4.json', 'prep/12/block-5.json'],
+    prototypes: ['prototypes/12/12-A.json', 'prototypes/12/12-B.json',
+                 'prototypes/12/12-C.json', 'prototypes/12/12-D.json']
+  };
+
+  var sets = { prep: [], prototypes: [] };
+  var current = { mode: 'prep', setId: null, seed: null, taskId: null };
+  var player = null;
+
+  var el = {
+    mode: document.getElementById('mode'),
+    set: document.getElementById('set'),
+    seed: document.getElementById('seed'),
+    rebuild: document.getElementById('rebuild'),
+    grid: document.getElementById('grid'),
+    panel: document.getElementById('panel'),
+    counts: document.getElementById('counts')
+  };
+
+  function load() {
+    var all = FILES.prep.concat(FILES.prototypes);
+    return Promise.all(all.map(function (file) {
+      return fetch(file).then(function (response) { return response.json(); });
+    })).then(function (list) {
+      sets.prep = list.slice(0, FILES.prep.length);
+      sets.prototypes = list.slice(FILES.prep.length);
+      GraphGenerate.setSets(sets);
+    });
+  }
+
+  function counts() {
+    var prep = sets.prep.reduce(function (sum, set) { return sum + set.tasks.length; }, 0);
+    var proto = sets.prototypes.reduce(function (sum, set) { return sum + set.tasks.length; }, 0);
+    /* Два счётчика, и они нигде не складываются. */
+    el.counts.innerHTML = 'прототипов ФИПИ: <b>' + proto + '</b><br>подготовка: ' + prep +
+      ' (в покрытие не входит)';
+  }
+
+  function fillSets() {
+    var list = sets[current.mode];
+    el.set.innerHTML = list.map(function (set) {
+      return '<option value="' + set.id + '">' + set.id + ' · ' + set.title + '</option>';
+    }).join('');
+    current.setId = list.length ? list[0].id : null;
+    syncSeed();
+  }
+
+  function activeSet() {
+    return sets[current.mode].filter(function (set) { return set.id === current.setId; })[0];
+  }
+
+  function syncSeed() {
+    var set = activeSet();
+    if (set) { el.seed.value = set.seed; current.seed = set.seed; }
+  }
+
+  function render() {
+    var set = activeSet();
+    if (!set) { return; }
+
+    var tasks;
+    try { tasks = GraphGenerate.generateSet(set.id, current.seed); }
+    catch (error) {
+      el.grid.innerHTML = '<p>Набор не собрался: ' + error.message + '</p>';
+      return;
+    }
+
+    el.grid.innerHTML = tasks.map(function (task, i) {
+      var options = task.options ? '<ul class="options">' + task.options.map(function (option) {
+        return '<li class="' + (option.number === task.answer ? 'right' : '') + '">' +
+          option.number + ') ' + option.html + '</li>';
+      }).join('') + '</ul>' : '';
+
+      return '<article class="card" data-id="' + task.id + '">' +
+        '<div class="card-head"><span class="card-id">' + (i + 1) + ' · ' + task.id + '</span>' +
+        (task.level ? '<span class="badge ' + task.level + '">' + LEVEL_LABELS[task.level] + '</span>' : '') +
+        '</div>' +
+        (task.svg || '<div class="nochart">без чертежа</div>') +
+        '<p class="question">' + task.questionHtml + '</p>' +
+        options +
+        (task.answerHtml ? '<p class="answer">Ответ: ' + task.answerHtml + '</p>'
+                         : '<p class="answer">Верный: №' + task.answer + '</p>') +
+        '</article>';
+    }).join('');
+
+    GraphKatex.upgrade(el.grid);
+    if (current.taskId) { markActive(); }
+  }
+
+  function markActive() {
+    Array.prototype.forEach.call(el.grid.querySelectorAll('.card'), function (card) {
+      card.classList.toggle('active', card.getAttribute('data-id') === current.taskId);
+    });
+  }
+
+  /* ── Разбор ───────────────────────────────────────────────
+     Правило: кнопка «Показать разбор» не появляется, пока ученик
+     не сделал попытку — ввёл ответ или честно нажал «Не знаю».
+     Это относится и к подготовке, и к прототипам. */
+  function openTask(id) {
+    current.taskId = id;
+    markActive();
+    player = null;
+
+    var task = GraphGenerate.generate(id, current.seed);
+    var analysis = GraphGenerate.analysis(id, current.seed);
+
+    el.panel.innerHTML =
+      '<h2>' + task.id + (task.level ? ' · ' + LEVEL_LABELS[task.level] : '') + '</h2>' +
+      '<p class="question">' + task.questionHtml + '</p>' +
+      (analysis ? GraphRenderer.renderGraph(analysis.scene) : (task.svg || '')) +
+      (task.hintHtml ? '<p class="hint">Подсказка: ' + task.hintHtml + '</p>' : '') +
+      '<div class="attempt">' +
+        (task.options
+          ? '<select id="answer">' + task.options.map(function (option) {
+              return '<option value="' + option.number + '">' + option.number + ') ' + option.text + '</option>';
+            }).join('') + '</select>'
+          : '<input id="answer" placeholder="ответ">') +
+        '<button id="check" class="primary">Проверить</button>' +
+        '<button id="giveup">Не знаю, показать решение</button>' +
+      '</div>' +
+      '<p class="verdict" id="verdict"></p>' +
+      '<div class="controls">' +
+        '<button id="show" hidden class="primary">Показать разбор</button>' +
+        '<button id="pause" hidden>Пауза</button>' +
+        '<button id="next" hidden>Дальше</button>' +
+      '</div>' +
+      '<p class="steps" id="steps"></p>' +
+      '<div class="solution" id="solution" hidden></div>';
+
+    GraphKatex.upgrade(el.panel);
+    bindPanel(task, analysis);
+  }
+
+  function bindPanel(task, analysis) {
+    var answer = document.getElementById('answer');
+    var verdict = document.getElementById('verdict');
+    var show = document.getElementById('show');
+    var pause = document.getElementById('pause');
+    var next = document.getElementById('next');
+    var steps = document.getElementById('steps');
+    var solution = document.getElementById('solution');
+
+    function attemptMade(text, right) {
+      verdict.textContent = text;
+      verdict.className = 'verdict ' + (right ? 'right' : 'wrong');
+      show.hidden = false;
+    }
+
+    document.getElementById('check').addEventListener('click', function () {
+      var value = (answer.value || '').trim().replace('.', ',');
+      var right = value === task.answer;
+      attemptMade(right ? 'Верно.' : 'Неверно. Правильный ответ: ' + task.answer, right);
+    });
+
+    document.getElementById('giveup').addEventListener('click', function () {
+      /* Честный выход: считается попыткой без ответа. */
+      attemptMade('Засчитано как попытка без ответа: прототип не решён самостоятельно.', false);
+    });
+
+    if (!analysis) {
+      show.addEventListener('click', function () {
+        solution.hidden = false;
+        solution.innerHTML = '<p class="solution-line">Для этой задачи разбор с чертежом не строится.</p>';
+      });
+      return;
+    }
+
+    /* Формулы в строках решения набираются так же, как в условии:
+       куски в долларах — математикой, остальное — шрифтом интерфейса. */
+    var lines = GraphTriangle.solution(analysis.triangle, task.answer).map(function (line) {
+      return {
+        id: line.id,
+        html: line.formula ? GraphMath.html(line.text) : GraphGenerate.typeset(line.text)
+      };
+    });
+
+    show.addEventListener('click', function () {
+      solution.hidden = false;
+      if (!player) {
+        player = GraphAnimate.create({
+          svg: el.panel.querySelector('svg'),
+          triangle: analysis.triangle,
+          lines: lines,
+          solutionEl: solution,
+          onState: function (state) {
+            steps.textContent = 'шаг ' + state.step + ' из ' + state.total +
+              (state.instant ? ' · движение отключено в системе' : '');
+            pause.hidden = state.instant || !state.playing;
+            next.hidden = state.instant || state.finished;
+            show.textContent = state.finished ? 'Показать заново' : 'Показать разбор';
+            show.hidden = state.playing;
+            GraphKatex.upgrade(solution);
+          }
+        });
+        player.play();
+      } else {
+        player.restart();
+      }
+    });
+
+    pause.addEventListener('click', function () {
+      player.pause();
+      pause.hidden = true;
+      show.hidden = false;
+      show.textContent = 'Продолжить';
+    });
+
+    next.addEventListener('click', function () { player.next(); });
+  }
+
+  /* ── События ──────────────────────────────────────────── */
+  el.mode.addEventListener('change', function () {
+    current.mode = el.mode.value;
+    fillSets();
+    render();
+  });
+  el.set.addEventListener('change', function () {
+    current.setId = el.set.value;
+    syncSeed();
+    render();
+  });
+  el.seed.addEventListener('change', function () { current.seed = Number(el.seed.value); });
+  el.rebuild.addEventListener('click', function () { current.seed = Number(el.seed.value); render(); });
+  el.grid.addEventListener('click', function (event) {
+    var card = event.target.closest('.card');
+    if (card) { openTask(card.getAttribute('data-id')); }
+  });
+
+  /* Ссылка вида preview.html#task=P12-1-01&auto=1 открывает задачу
+     и сразу запускает разбор: так его удобно смотреть и снимать. */
+  function openFromHash() {
+    var hash = (location.hash || '').replace('#', '');
+    if (!hash) { return; }
+    var params = {};
+    hash.split('&').forEach(function (pair) {
+      var parts = pair.split('=');
+      params[parts[0]] = decodeURIComponent(parts[1] || '');
+    });
+    if (!params.task) { return; }
+
+    var setId = params.task.indexOf('P12-') === 0
+      ? params.task.slice(0, params.task.lastIndexOf('-'))
+      : params.task.split('-')[0];
+    var mode = params.task.indexOf('P12-') === 0 ? 'prep' : 'prototypes';
+
+    current.mode = mode;
+    el.mode.value = mode;
+    fillSets();
+    current.setId = setId;
+    el.set.value = setId;
+    syncSeed();
+    if (params.seed) { current.seed = Number(params.seed); el.seed.value = params.seed; }
+    render();
+    openTask(params.task);
+
+    /* only=panel — служебный режим: на странице остаётся только разбор.
+       Нужен, чтобы снимать анимацию по шагам. */
+    if (params.only === 'panel') {
+      document.querySelector('header').style.display = 'none';
+      el.grid.style.display = 'none';
+      document.querySelector('main').style.gridTemplateColumns = 'minmax(0, 1fr)';
+      el.panel.style.position = 'static';
+    }
+
+    if (params.auto === '1') {
+      document.getElementById('giveup').click();
+      document.getElementById('show').click();
+    }
+  }
+
+  load().then(function () {
+    counts();
+    fillSets();
+    render();
+    GraphKatex.load({ base: '' });
+    openFromHash();
+  }).catch(function (error) {
+    el.grid.innerHTML = '<p>Не удалось загрузить наборы: ' + error.message +
+      '. Страница читает JSON через fetch — откройте её с локального сервера: python3 -m http.server</p>';
+  });
+})();
+</script>
+</body>
+</html>

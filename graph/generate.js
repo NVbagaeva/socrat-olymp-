@@ -13,14 +13,19 @@
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var renderer = require('./renderer.js');
-var math = require('./math.js');
-var Line = require('./families/line.js');
-var Triangle = require('./triangle.js');
+/* Модуль работает и в Node, и в браузере. В Node наборы читаются
+   с диска, в браузере страница загружает их сама (fetch) и отдаёт
+   через setSets: своей файловой системы у неё нет. */
+var inNode = typeof module === 'object' && module.exports;
 
-var ROOT = __dirname;
+var fs = inNode ? require('fs') : null;
+var path = inNode ? require('path') : null;
+var renderer = inNode ? require('./renderer.js') : window.GraphRenderer;
+var math = inNode ? require('./math.js') : window.GraphMath;
+var Line = inNode ? require('./families/line.js') : window.GraphLine;
+var Triangle = inNode ? require('./triangle.js') : window.GraphTriangle;
+
+var ROOT = inNode ? __dirname : '';
 var FAMILIES = { line: Line };
 
 /* ══════════════════════════════════════════════════════════
@@ -60,10 +65,18 @@ function shuffled(list, random) {
    ══════════════════════════════════════════════════════════ */
 var cache = null;
 
+/* Наборы, загруженные страницей: { prep: [...], prototypes: [...] }. */
+function setSets(sets) {
+  cache = { prep: (sets && sets.prep) || [], prototypes: (sets && sets.prototypes) || [] };
+  placesCache = {};
+  return cache;
+}
+
 function loadSets() {
   if (cache) { return cache; }
-  cache = { prep: [], prototypes: [] };
+  if (!inNode) { throw new Error('generate: наборы не загружены, вызовите setSets'); }
 
+  cache = { prep: [], prototypes: [] };
   [['prep', 'prep/12'], ['prototypes', 'prototypes/12']].forEach(function (pair) {
     var dir = path.join(ROOT, pair[1]);
     if (!fs.existsSync(dir)) { return; }
@@ -938,7 +951,9 @@ function writeAnswers() {
            prototypes: Object.keys(answers.prototypes).length };
 }
 
-module.exports = {
+var api = {
+  setSets: setSets,
+  typeset: typesetText,
   analysis: analysis,
   taskCandidates: taskCandidates,
   equationText: equationText,
@@ -946,11 +961,14 @@ module.exports = {
   generateSet: generateSet,
   loadSets: loadSets,
   buildAnswers: buildAnswers,
-  writeAnswers: writeAnswers,
+  writeAnswers: inNode ? writeAnswers : null,
   answerText: answerText
 };
 
-if (require.main === module) {
+if (inNode) { module.exports = api; }
+else { window.GraphGenerate = api; }
+
+if (inNode && require.main === module) {
   var args = process.argv.slice(2);
   if (args[0] === 'build') {
     var info = writeAnswers();

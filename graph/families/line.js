@@ -9,6 +9,11 @@
    должны получаться без накопления ошибки double.
 */
 
+(function (root, factory) {
+  'use strict';
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.GraphLine = factory(); }
+})(typeof self !== 'undefined' ? self : this, function () {
 'use strict';
 
 /* ══════════════════════════════════════════════════════════
@@ -223,7 +228,7 @@ function referencePoints(line, win, opts) {
   return best ? best.pair : null;
 }
 
-module.exports = {
+return {
   RULES: RULES,
   frac: frac, toFrac: toFrac, add: add, sub: sub, mul: mul, div: div,
   num: num, isInt: isInt, isZero: isZero,
@@ -241,3 +246,5 @@ module.exports = {
   distinguishable: distinguishable,
   windowFor: windowFor
 };
+
+});

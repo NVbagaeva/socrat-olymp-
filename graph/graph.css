@@ -54,3 +54,18 @@
 
 /* Формула в тексте условия не растягивает строку. */
 .task-question .katex { line-height: 1.1; }
+
+/* ── Блок решения ──────────────────────────────────────────
+   Строки появляются по одной; начальное состояние задаёт
+   graph/animate.js, здесь — только оформление. */
+.solution-line {
+  margin: 0 0 var(--space-2, 8px);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.solution-line:last-child { margin-bottom: 0; font-weight: 600; }
+
+/* Строка про знак приращения у убывающей прямой — не вывод,
+   а пояснение, поэтому тише остальных. */
+.solution-line[data-line="sign"] { color: var(--color-text-secondary, #667389); }

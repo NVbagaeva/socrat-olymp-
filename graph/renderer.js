@@ -473,13 +473,14 @@
 
       labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
       collect(report, 'shapeLabel', shape.id, spot.x, spot.y, halfW, halfH);
-      shapeLabelLayer.push(svgText(shape.text, spot.x, spot.y + halfH * 0.55, 'middle', {
-        size:   size,
-        family: THEME.font.curveLabelFamily,
-        weight: THEME.font.pointLabelWeight,
-        math:   true,
-        fill:   color(shape.color || 'accent')
-      }));
+      shapeLabelLayer.push('<g' + (shape.id ? ' id="' + esc(shape.id) + '"' : '') + '>' +
+        svgText(shape.text, spot.x, spot.y + halfH * 0.55, 'middle', {
+          size:   size,
+          family: THEME.font.curveLabelFamily,
+          weight: THEME.font.pointLabelWeight,
+          math:   true,
+          fill:   color(shape.color || 'accent')
+        }) + '</g>');
     });
 
     /* Точки и их подписи: подпись уходит в свободную сторону,
@@ -632,10 +633,12 @@
     var id = shape.id ? ' id="' + esc(shape.id) + '"' : '';
     var dash = shape.style === 'dashed' ? ' stroke-dasharray="' + THEME.helper.dash + '"' : '';
 
+    /* Отрезок рисуется как path: анимация берёт у него длину
+       и прочерчивает штрихом, у line длины нет. */
     if (shape.type === 'segment') {
-      return '<line' + id + ' x1="' + px(sx(shape.from[0])) + '" y1="' + px(sy(shape.from[1])) +
-        '" x2="' + px(sx(shape.to[0])) + '" y2="' + px(sy(shape.to[1])) +
-        '" stroke="' + stroke + '" stroke-width="' + THEME.width.helper +
+      return '<path' + id + ' d="M' + px(sx(shape.from[0])) + ' ' + px(sy(shape.from[1])) +
+        'L' + px(sx(shape.to[0])) + ' ' + px(sy(shape.to[1])) +
+        '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helper +
         '" stroke-linecap="round"' + dash + '/>';
     }
 
