@@ -43,7 +43,8 @@
                               размера при разных окнах, квадратик — нет     */
     arcMaxPx:      34,     /* потолок радиуса дуги                          */
     arcLegShare:   1 / 3,  /* и не больше трети кратчайшего катета          */
-    alphaGapPx:    12,     /* насколько α отстоит от дуги                   */
+    alphaGapPx:     5,     /* насколько α отстоит от дуги: она подписывает
+                              угол и должна стоять вплотную к нему         */
     labelGapPx:    13,     /* насколько подпись катета отстоит от него      */
     labelZoneCells: 3      /* короче этого крайний кусок прямой не годится
                               под подпись y = f(x)                          */
@@ -103,8 +104,12 @@
     var vertex = vertexFor(left, right);
     var legOnAxis = (vertex.x === 0 && (left.x === 0 || right.x === 0)) ||
                     (vertex.y === 0 && (left.y === 0 || right.y === 0));
-    var cornerOnAxis = left.x === 0 || left.y === 0;
-    return legOnAxis || cornerOnAxis;
+
+    /* Дуга и подпись α занимают кружок радиусом около полутора клеток
+       вокруг точки A. Проходит через него ось — подпись сядет на неё
+       или на числа, поэтому такая пара опорных точек штрафуется. */
+    var cornerNearAxis = Math.abs(left.x) <= 1 || Math.abs(left.y) <= 1;
+    return legOnAxis || cornerNearAxis;
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -213,12 +218,20 @@
       list.push({ type: 'arc', id: IDS.arc, at: [t.A.x, t.A.y],
         radius: r, maxRadiusPx: RULES.arcMaxPx, from: 0, to: t.angleDeg });
 
-      /* Подпись угла ищется по биссектрисе на нескольких расстояниях:
-         у самой дуги места может не быть. */
+      /* Подпись угла остаётся у самого угла: места перебираются веером
+         внутри угла — по биссектрисе и чуть ближе к каждой из сторон,
+         на нескольких расстояниях. Так она уходит с оси и с чисел,
+         не отрываясь от вершины. */
       var bisector = (t.angleDeg / 2) * Math.PI / 180;
-      var anchors = [1, 1.35, 1.75, 2.2].map(function (scale) {
-        return [ t.A.x + r * scale * Math.cos(bisector), t.A.y + r * scale * Math.sin(bisector) ];
+      var anchors = [];
+      [1.12, 1.45, 1.8].forEach(function (scale) {
+        [0.5, 0.34, 0.66].forEach(function (share) {
+          var theta = t.angleDeg * share * Math.PI / 180;
+          anchors.push([ t.A.x + r * scale * Math.cos(theta),
+                         t.A.y + r * scale * Math.sin(theta) ]);
+        });
       });
+
       list.push({ type: 'label', id: IDS.alpha, text: 'α', gap: RULES.alphaGapPx,
         at: anchors[0], anchors: anchors,
         offset: [Math.cos(bisector) * RULES.alphaGapPx, -Math.sin(bisector) * RULES.alphaGapPx] });

@@ -71,8 +71,10 @@
       rightAnglePx:  13,       /* сторона квадратика, в пикселях             */
       arcRadius:     1.15,     /* радиус дуги угла, в клетках                */
       labelGap:      11,
-      slideReachPx:  46,       /* насколько подпись катета ходит вдоль него  */
-      slideStepPx:    6
+      slideReachPx:  62,       /* насколько подпись катета ходит вдоль него  */
+      slideStepPx:    6,
+      anchorPenalty:  3.5,     /* плата за уход от ближнего места подписи    */
+      overlapPenalty: 1000     /* занятое место проигрывает любому свободному */
     },
 
     geometry: {
@@ -458,10 +460,13 @@
       if (shape.slide) {
         spot = slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field);
       } else {
-        /* Якорей может быть несколько: берём лучший из всех. */
-        (shape.anchors || [shape.at]).forEach(function (anchor) {
+        /* Якорей может быть несколько, но они перечислены по удалению
+           от того места, где подпись уместнее всего: дальний берётся,
+           только если ближний заметно хуже. */
+        (shape.anchors || [shape.at]).forEach(function (anchor, index) {
           var candidate = bestLabelSpot(sx(anchor[0]), sy(anchor[1]), halfW, halfH,
             shape.gap === undefined ? THEME.helper.labelGap : shape.gap, cloud, field, prefer);
+          candidate.score -= index * THEME.helper.anchorPenalty;
           if (!spot || candidate.score > spot.score + 1e-9) { spot = candidate; }
         });
       }
@@ -714,7 +719,8 @@
         if (clear <= 0) { break; }
       }
       /* При равном зазоре ближе к середине катета. */
-      var score = clear - Math.abs(shift) * 0.05;
+      var score = (clear > 0 ? clear : clear - THEME.helper.overlapPenalty) -
+        Math.abs(shift) * 0.05;
       if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
     }
     return best || { x: baseX, y: baseY };
@@ -758,7 +764,9 @@
         clear = Math.min(clear, rectDist(cloud[c], cx, cy, halfW, halfH));
         if (clear <= 0) { break; }
       }
-      var score = clear - penalty;
+      /* Наложение дисквалифицирует место: любое свободное положение
+         лучше любого занятого, каким бы привычным оно ни было. */
+      var score = (clear > 0 ? clear : clear - THEME.helper.overlapPenalty) - penalty;
       if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
     });
     return best;
