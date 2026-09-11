@@ -91,8 +91,9 @@
          фолбэк нужен для отдельного .svg-файла вне страницы.               */
       family:    "var(--font, 'Inter', system-ui, -apple-system, sans-serif)",
       axisLabel:  12,       /* числа на осях — заметно мельче подписей осей  */
-      axisName:   17,       /* x, y, 0 — курсив                              */
-      pointLabel: 13,
+      axisName:    17,      /* x, y, 0 — курсив                              */
+      pointLabel:  13,
+      helperLabel: 19,      /* числа у катетов треугольника наклона           */
 
       /* Подпись графика: жирное математическое начертание —
          антиква с курсивом, как набирают формулы в учебниках.              */
@@ -443,7 +444,7 @@
        на подсказку от того, кто фигуру построил. ---------------------- */
     var shapeLabelLayer = [];
     shapeLabels.forEach(function (shape) {
-      var size = shape.size || THEME.font.pointLabel;
+      var size = shape.size || THEME.font.helperLabel;
       var halfW = textWidth(shape.text, size, THEME.font.curveLabelTrack) / 2;
       var halfH = size * 0.62;
       var offset = shape.offset || [0, 0];
