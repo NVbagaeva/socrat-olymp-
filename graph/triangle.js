@@ -83,26 +83,34 @@
     var dy = right.y - left.y;            /* приращение функции, со знаком     */
     var rising = dy > 0;
 
-    /* Катет — это длина, она всегда положительна, и подписывать его
-       длиной нельзя: у убывающей прямой ученик запомнит «k — отношение
-       катетов» и потеряет минус. Поэтому подписываются не катеты,
-       а приращения Δx и Δy — со знаком, как они входят в k = Δy / Δx. */
+    /* На чертеже у катетов стоит только число клеток — длина, всегда
+       положительная. Знак приращения на чертёж не выносится: разбор
+       знака идёт в блоке решения, где у убывающей прямой появляется
+       отдельная строка про отрицательное приращение. Поэтому labels —
+       для чертежа, values — со знаком, для решения. */
     return {
       left: left, right: right, vertex: vertex,
       dx: dx, dy: dy, rising: rising,
       k: dy / dx,
       values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + Math.abs(dy) },
-      labels: { dx: 'Δx = +' + dx,
-                dy: 'Δy = ' + (rising ? '+' : MINUS) + Math.abs(dy) },
+      labels: { dx: String(dx), dy: String(Math.abs(dy)) },
       angleDeg: Math.atan2(dy, dx) * 180 / Math.PI,
       ids: IDS
     };
   }
 
-  var alphaRadius = 1.75;     /* где стоит подпись α, в клетках */
+  var ARC_RADIUS = 1.15;      /* радиус дуги угла, в клетках            */
+  var ALPHA_GAP  = 0.6;       /* насколько подпись α отстоит от дуги    */
 
   function bisector(triangle) {
     return (triangle.angleDeg / 2) * Math.PI / 180;
+  }
+
+  /* У короткого катета дуга радиусом в клетку вылезает за треугольник,
+     а подпись угла садится на соседнюю подпись. Радиус ужимается
+     по меньшему катету. */
+  function arcRadius(triangle) {
+    return Math.min(ARC_RADIUS, triangle.dx * 0.7, Math.abs(triangle.dy) * 0.7);
   }
 
   /* Фигуры сцены. Рендерер рисует их как есть, ничего не зная о наклоне. */
@@ -132,13 +140,13 @@
 
       /* Дуга угла наклона у левой опорной точки, между горизонталью и прямой. */
       { type: 'arc', id: IDS.arc, at: [t.left.x, t.left.y],
-        from: 0, to: t.angleDeg },
+        radius: arcRadius(t), from: 0, to: t.angleDeg },
 
       /* Подпись угла ставится на биссектрисе за дугой, а не у самой
          вершины: у вершины её перечёркивает прямая. */
-      { type: 'label', id: IDS.alpha, gap: 2, text: 'α',
-        at: [ t.left.x + alphaRadius * Math.cos(bisector(t)),
-              t.left.y + alphaRadius * Math.sin(bisector(t)) ] }
+      { type: 'label', id: IDS.alpha, gap: 5, text: 'α',
+        at: [ t.left.x + (arcRadius(t) + ALPHA_GAP) * Math.cos(bisector(t)),
+              t.left.y + (arcRadius(t) + ALPHA_GAP) * Math.sin(bisector(t)) ] }
     ];
   }
 
