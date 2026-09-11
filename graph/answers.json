@@ -391,5 +391,246 @@
       ]
     }
   },
-  "prototypes": {}
+  "prototypes": {
+    "12.A-01": {
+      "answer": "12,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-02": {
+      "answer": "13,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-03": {
+      "answer": "20",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-04": {
+      "answer": "28",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-05": {
+      "answer": "23,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-06": {
+      "answer": "44,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-07": {
+      "answer": "17",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-08": {
+      "answer": "7",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-09": {
+      "answer": "22",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-10": {
+      "answer": "11",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-11": {
+      "answer": "30",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-12": {
+      "answer": "28,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-13": {
+      "answer": "18,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-14": {
+      "answer": "17,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12010
+    },
+    "12.A-15": {
+      "answer": "14",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.A-16": {
+      "answer": "27",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.A-17": {
+      "answer": "16",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.A-18": {
+      "answer": "9",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.A-19": {
+      "answer": "3,5",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.A-20": {
+      "answer": "19,5",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12010
+    },
+    "12.B-01": {
+      "answer": "19,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-02": {
+      "answer": "-19,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-03": {
+      "answer": "11",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-04": {
+      "answer": "-11,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-05": {
+      "answer": "17",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-06": {
+      "answer": "-10,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-07": {
+      "answer": "13,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-08": {
+      "answer": "-10",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-09": {
+      "answer": "10",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-10": {
+      "answer": "-16",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-11": {
+      "answer": "12,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-12": {
+      "answer": "-15,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-13": {
+      "answer": "11,5",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-14": {
+      "answer": "-12",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12020
+    },
+    "12.B-15": {
+      "answer": "14,5",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    },
+    "12.B-16": {
+      "answer": "-15",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    },
+    "12.B-17": {
+      "answer": "19",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    },
+    "12.B-18": {
+      "answer": "-13,5",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    },
+    "12.B-19": {
+      "answer": "16",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    },
+    "12.B-20": {
+      "answer": "-18",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12020
+    }
+  }
 }

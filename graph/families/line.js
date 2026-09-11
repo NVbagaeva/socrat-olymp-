@@ -51,7 +51,8 @@ var RULES = {
   minAbsK:        1 / 3,   /* наклон читаем: |k| от 1/3 до 3          */
   maxAbsK:        3,
   minIntPoints:   2,       /* две целые точки внутри окна             */
-  minSpanCells:   6,       /* размах по горизонтали, клеток           */
+  minSpanCells:   6,       /* длина видимой части, клеток             */
+  spanRatio:      0.6,     /* доля наибольшего возможного размаха по x */
   windowDefault:  8,
   windowSteep:    5,       /* при |k| >= 2                            */
   steepK:         2,
@@ -151,11 +152,20 @@ function maxSpanX(line, win) {
   return k < 1e-12 ? full : Math.min(full, (win.ymax - win.ymin) / k);
 }
 
-/* Прямая проходит окно насквозь, а не задевает угол. */
+/* Прямая проходит окно насквозь, а не задевает угол.
+
+   ТЗ требует размах не меньше шести клеток по горизонтали. У крутой
+   прямой столько физически не бывает: при |k| = 3 в окне ±5 весь
+   возможный размах — 3⅓ клетки. Поэтому правило двухчастное:
+   видимая часть длиннее шести клеток (это отсекает касание угла)
+   и занимает заметную долю того размаха по горизонтали, какой при
+   таком наклоне вообще возможен. Требовать весь возможный размах
+   нельзя: тогда прямая обязана проходить ровно через центр,
+   и вариант «b за кадром» становится невозможным. */
 function crossesWindow(line, win) {
   var part = visiblePart(line, win);
   if (part.length < RULES.minSpanCells - 1e-9) { return false; }
-  var need = Math.min(RULES.minSpanCells, maxSpanX(line, win) - 1e-9);
+  var need = Math.min(RULES.minSpanCells, maxSpanX(line, win) * RULES.spanRatio);
   return part.spanX >= need - 1e-9;
 }
 

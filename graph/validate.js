@@ -267,6 +267,138 @@ function checkComposition(set, tasks) {
     });
   }
 
+  /* ── Прототипы: уровни, разнообразие и запрос за окном (§9, §10) ── */
+  if (rules.levels) {
+    Object.keys(rules.levels).forEach(function (level) {
+      var got = tasks.filter(function (task) { return task.level === level; }).length;
+      if (got !== rules.levels[level]) {
+        errors.push(where + ': вариантов уровня «' + level + '» — ' + got +
+          ', нужно ровно ' + rules.levels[level]);
+      }
+    });
+  }
+
+  if (rules.levelOrder) {
+    var seenUnlucky = false;
+    tasks.forEach(function (task) {
+      if (task.level === 'unlucky') { seenUnlucky = true; }
+      else if (seenUnlucky) {
+        errors.push(where + '/' + task.id + ': «повезло» стоит после «не повезло», ' +
+          'порядок набора идёт по возрастанию сложности');
+      }
+    });
+  }
+
+  if (rules.unluckyReasons) {
+    Object.keys(rules.unluckyReasons).forEach(function (reason) {
+      var got = tasks.filter(function (task) { return task.levelReason === reason; }).length;
+      need(got, rules.unluckyReasons[reason], 'вариантов «не повезло» с причиной «' + reason + '»');
+    });
+  }
+
+  var fractionTasks = tasks.filter(function (task) {
+    return !Number.isInteger(task.meta.k) || !Number.isInteger(task.meta.b);
+  });
+  if (rules.maxFractionVariants !== undefined && fractionTasks.length > rules.maxFractionVariants) {
+    errors.push(where + ': вариантов с дробным коэффициентом — ' + fractionTasks.length +
+      ', допустимо не больше ' + rules.maxFractionVariants);
+  }
+
+  if (rules.minDistinctK !== undefined) {
+    var distinctK = {};
+    ks.forEach(function (k) { distinctK[k] = true; });
+    need(Object.keys(distinctK).length, rules.minDistinctK, 'различных k');
+  }
+
+  function repeats(values, limit, what) {
+    var counts = {};
+    values.forEach(function (value) { counts[value] = (counts[value] || 0) + 1; });
+    Object.keys(counts).forEach(function (value) {
+      if (counts[value] > limit) {
+        errors.push(where + ': ' + what + ' ' + value + ' повторяется ' + counts[value] +
+          ' раз, допустимо не больше ' + limit);
+      }
+    });
+  }
+  if (rules.maxSlopeRepeat !== undefined) { repeats(ks, rules.maxSlopeRepeat, 'наклон'); }
+  if (rules.maxInterceptRepeat !== undefined) { repeats(bs, rules.maxInterceptRepeat, 'свободный член'); }
+
+  if (rules.fractionDenominators) {
+    var denominators = {};
+    tasks.forEach(function (task) {
+      if (task.meta.kFraction && task.meta.kFraction.q > 1) { denominators[task.meta.kFraction.q] = true; }
+    });
+    rules.fractionDenominators.forEach(function (q) {
+      if (!denominators[q]) {
+        errors.push(where + ': среди дробных наклонов нет знаменателя ' + q);
+      }
+    });
+  }
+
+  if (rules.maxZeroIntercept !== undefined) {
+    var zeroB = bs.filter(function (b) { return b === 0; }).length;
+    if (zeroB > rules.maxZeroIntercept) {
+      errors.push(where + ': b = 0 встречается ' + zeroB + ' раз, допустимо не больше ' +
+        rules.maxZeroIntercept);
+    }
+  }
+
+  if (rules.uniqueAnswers) {
+    var answers = {};
+    tasks.forEach(function (task) {
+      if (answers[task.answer]) { errors.push(where + ': ответ ' + task.answer + ' повторяется'); }
+      answers[task.answer] = true;
+    });
+  }
+
+  if (rules.minNonIntegerAnswers !== undefined) {
+    var nonInteger = tasks.filter(function (task) { return /[,\/]/.test(task.answer); }).length;
+    need(nonInteger, rules.minNonIntegerAnswers, 'нецелых ответов');
+  }
+
+  /* §8 — суть прототипа: спрашиваемая точка лежит строго вне окна,
+     иначе ответ снимается с рисунка и уравнение не нужно.
+     Заодно ответ пересчитывается независимо от генератора: по k и b
+     с чертежа, а не по тому, что сказала сборка. */
+  if (rules.queryOutsideWindow) {
+    tasks.forEach(function (task) {
+      var query = task.meta.query;
+      var at = where + '/' + task.id;
+      if (!query) { errors.push(at + ': не задан запрос за пределами окна'); return; }
+      if (Math.abs(query.x0) <= task.meta.window.xmax) {
+        errors.push(at + ': запрошенная абсцисса ' + query.x0 + ' попала внутрь окна ±' +
+          task.meta.window.xmax);
+      }
+
+      var source = (set.tasks || []).filter(function (item) { return item.id === task.id; })[0];
+      var rule = source && source.answerRule;
+      var answer = Number(String(task.answer).replace(',', '.'));
+      var expected = null;
+
+      if (rule === 'value-at') { expected = task.meta.k * query.x0 + task.meta.b; }
+      else if (rule === 'argument-for') { expected = (query.y0 - task.meta.b) / task.meta.k; }
+
+      if (expected !== null && Math.abs(expected - answer) > 1e-9) {
+        errors.push(at + ': ответ ' + task.answer + ' не сходится с пересчётом по чертежу (' +
+          Math.round(expected * 100) / 100 + ')');
+      }
+
+      /* И показанное в условии число, и ответ пишутся как в бланке. */
+      [query.x0, query.y0, answer].forEach(function (value) {
+        if (Math.abs(value * 10 - Math.round(value * 10)) > 1e-9) {
+          errors.push(at + ': число ' + value + ' не записывается одним знаком после запятой');
+        }
+      });
+    });
+  }
+
+  if (rules.minPerSide !== undefined) {
+    var left = tasks.filter(function (task) { return task.meta.query && task.meta.query.x0 < 0; }).length;
+    var right = tasks.filter(function (task) { return task.meta.query && task.meta.query.x0 > 0; }).length;
+    need(left, rules.minPerSide, 'запросов слева от окна');
+    need(right, rules.minPerSide, 'запросов справа от окна');
+  }
+
   if (rules.uniquePairs) {
     var pairs = {};
     tasks.forEach(function (task) {

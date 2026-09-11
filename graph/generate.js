@@ -144,12 +144,15 @@ function slopeCandidates(constraints) {
 function interceptCandidates(constraints) {
   var list = [];
   var limit = constraints.bMax === undefined ? 6 : constraints.bMax;
-  for (var b = -limit; b <= limit; b++) {
+  var step = constraints.bKind === 'half' ? 0.5 : 1;
+
+  for (var b = -limit; b <= limit + 1e-9; b += step) {
+    if (constraints.bKind === 'half' && Number.isInteger(b)) { continue; }
     if (constraints.bNonZero && b === 0) { continue; }
     if (constraints.bSign === 'positive' && b <= 0) { continue; }
     if (constraints.bSign === 'negative' && b >= 0) { continue; }
     if (constraints.b !== undefined && b !== constraints.b) { continue; }
-    list.push(b);
+    list.push(Math.round(b * 10) / 10);
   }
   return list;
 }
@@ -201,6 +204,57 @@ function chooseProbe(line, win, probe, random) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Запрос за пределами окна (§8, прототипы 12.A и 12.B)
+   constraints.query = {
+     type:     'value-at' | 'argument-for',
+     gapMin:   2,           // не ближе этого к границе окна
+     gapMax:   12,
+     allowHalf: true,       // абсцисса может быть с половиной
+     decimals: 1,           // ответ — целое или один знак после запятой
+     side:     'left' | 'right'
+   }
+   Суть прототипа: ответ нельзя снять с рисунка, он получается
+   из уравнения прямой. Попал внутрь окна — вариант бракуется.
+   ══════════════════════════════════════════════════════════ */
+function decimalsOk(value, decimals) {
+  var scale = Math.pow(10, decimals === undefined ? 1 : decimals);
+  return (scale % value.q) === 0;
+}
+
+function queryCandidates(line, win, query) {
+  var gapMin = query.gapMin === undefined ? 2 : query.gapMin;
+  var gapMax = query.gapMax === undefined ? 12 : query.gapMax;
+  var step = query.allowHalf ? 0.5 : 1;
+  var found = [];
+
+  for (var mag = win.xmax + gapMin; mag <= win.xmax + gapMax + 1e-9; mag += step) {
+    [mag, -mag].forEach(function (value) {
+      if (query.side === 'right' && value < 0) { return; }
+      if (query.side === 'left' && value > 0) { return; }
+
+      var x0 = Line.toFrac(value);
+      var y0 = Line.yAt(line, value);
+
+      /* И показанное в условии число, и ответ должны быть записаны
+         так, как их пишут в бланке: целое или один знак после запятой. */
+      if (!decimalsOk(x0, query.decimals) || !decimalsOk(y0, query.decimals)) { return; }
+      if (Math.abs(Line.num(x0)) <= win.xmax) { return; }
+
+      /* Набор из двадцати вариантов обязан содержать нецелые ответы,
+         поэтому часть вариантов просит их явно. */
+      var answerFrac = query.type === 'argument-for' ? x0 : y0;
+      if (query.answerKind === 'half' && Line.isInt(answerFrac)) { return; }
+      if (query.answerKind === 'integer' && !Line.isInt(answerFrac)) { return; }
+
+      /* Ответ — то, что спрашивают: в 12.A это f(x₀), в 12.B — сам x. */
+      found.push({ x0: Line.num(x0), y0: Line.num(y0),
+                   answer: query.type === 'argument-for' ? Line.num(x0) : Line.num(y0) });
+    });
+  }
+  return found;
+}
+
+/* ══════════════════════════════════════════════════════════
    Правила вычисления ответа. Реестр расширяется под новые
    формулировки без правок остального кода.
    ══════════════════════════════════════════════════════════ */
@@ -208,7 +262,19 @@ var ANSWER_RULES = {
   k: function (ctx) { return ctx.line.k; },
   b: function (ctx) { return ctx.line.b; },
   'equation-choice': function (ctx) { return equationChoice(ctx); },
-  'point-choice': function (ctx) { return pointChoice(ctx); }
+  'point-choice': function (ctx) { return pointChoice(ctx); },
+
+  /* 12.A — дан график, найдите f(x₀). */
+  'value-at': function (ctx) {
+    if (!ctx.query) { throw new Error('generate: у ' + ctx.task.id + ' не выбран запрос'); }
+    return Line.toFrac(ctx.query.y0);
+  },
+
+  /* 12.B — дан график, найдите x, при котором f(x) = y₀. */
+  'argument-for': function (ctx) {
+    if (!ctx.query) { throw new Error('generate: у ' + ctx.task.id + ' не выбран запрос'); }
+    return Line.toFrac(ctx.query.x0);
+  }
 };
 
 /* Да / нет: принадлежит ли точка графику. Порядок вариантов
@@ -366,6 +432,15 @@ function taskCandidates(task, set, seed) {
         if (!points) { continue; }
       }
 
+      /* 12.A и 12.B — запрос за пределами окна. */
+      var query = null;
+      if (constraints.query) {
+        var queries = queryCandidates(line, win, constraints.query);
+        if (!queries.length) { continue; }
+        query = shuffled(queries, rng(set.id + ':' + task.id + ':' + seed + ':query:' +
+          line.kValue + ':' + line.bValue))[0];
+      }
+
       /* Блоки 4 и 5 — проверяемая точка. */
       var probe = null;
       if (constraints.probe) {
@@ -374,12 +449,18 @@ function taskCandidates(task, set, seed) {
         if (!probe) { continue; }
       }
 
+      /* Уровень «повезло»: точка (0, b) видна на чертеже.
+         Уровень «не повезло», причина «b за кадром»: наоборот, не видна. */
+      if (constraints.bInside && win && Math.abs(line.bValue) > win.ymax - 1) { continue; }
+      if (constraints.bOffscreen && win && Math.abs(line.bValue) <= win.ymax) { continue; }
+
       /* Блок 2: точка (0, b) видна и не жмётся к границе. */
       if (constraints.bVisible && win &&
           Math.abs(line.bValue) > win.ymax - Line.RULES.bEdgeGap) { continue; }
 
       found.push({
-        line: line, window: win, points: points, probe: probe,
+        line: line, window: win, points: points, probe: probe, query: query,
+        answerKey: query ? 'ans:' + query.answer : null,
         /* Без чертежа читаемость оценивать не по чему: порядок кандидатов
            задаётся seed, иначе во всём блоке окажется один и тот же b. */
         score: win ? balanceScore(line, win, points)
@@ -444,17 +525,26 @@ function assemble(set, seed) {
   var chosen = new Array(tasks.length);
   var budget = SEARCH_BUDGET;
 
+  function count(key) { return used[key] || 0; }
+
   function conflicts(candidate) {
-    if (used[candidate.pairKey]) { return true; }                       /* §4.6 */
-    if (set.uniqueSlopes && used[candidate.slopeKey]) { return true; }
-    if (dedupeIntercept(set, candidate) && used[candidate.interceptKey]) { return true; }
+    if (count(candidate.pairKey)) { return true; }                      /* §4.6 */
+    if (set.uniqueSlopes && count(candidate.slopeKey)) { return true; }
+    if (dedupeIntercept(set, candidate) && count(candidate.interceptKey)) { return true; }
+
+    /* В наборе из двадцати вариантов один и тот же наклон не должен
+       становиться фоном: целых наклонов в диапазоне |k| ≤ 3 всего шесть. */
+    if (set.maxSlopeRepeat && count(candidate.slopeKey) >= set.maxSlopeRepeat) { return true; }
+    if (set.maxInterceptRepeat && count(candidate.interceptKey) >= set.maxInterceptRepeat) { return true; }
+    if (set.uniqueAnswers && candidate.answerKey && count(candidate.answerKey)) { return true; }
     return false;
   }
 
-  function mark(candidate, value) {
-    used[candidate.pairKey] = value;
-    if (set.uniqueSlopes) { used[candidate.slopeKey] = value; }
-    if (dedupeIntercept(set, candidate)) { used[candidate.interceptKey] = value; }
+  function mark(candidate, delta) {
+    used[candidate.pairKey] = count(candidate.pairKey) + delta;
+    used[candidate.slopeKey] = count(candidate.slopeKey) + delta;
+    used[candidate.interceptKey] = count(candidate.interceptKey) + delta;
+    if (candidate.answerKey) { used[candidate.answerKey] = count(candidate.answerKey) + delta; }
   }
 
   function step(i) {
@@ -466,10 +556,10 @@ function assemble(set, seed) {
           ') не собрался за отведённый перебор');
       }
       if (conflicts(pool[c])) { continue; }
-      mark(pool[c], true);
+      mark(pool[c], 1);
       chosen[i] = pool[c];
       if (step(i + 1)) { return true; }
-      mark(pool[c], false);
+      mark(pool[c], -1);
     }
     return false;
   }
@@ -545,7 +635,8 @@ function taskResult(set, task, built, seed, index) {
   if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
 
   var value = rule({ line: built.line, window: built.window, points: built.points,
-                     probe: built.probe, task: task, set: set, seed: seed, index: index });
+                     probe: built.probe, query: built.query,
+                     task: task, set: set, seed: seed, index: index });
   var choice = value && value.type === 'choice' ? value : null;
 
   var values = {
@@ -553,23 +644,20 @@ function taskResult(set, task, built, seed, index) {
     k: numberText(built.line.kValue),
     b: numberText(built.line.bValue),
     point: built.probe ? pointText(task.pointName || 'A', built.probe.x, built.probe.y) : '',
+    x0: built.query ? numberText(built.query.x0) : '',
+    y0: built.query ? numberText(built.query.y0) : '',
     x: built.probe ? numberText(built.probe.x) : '',
     y: built.probe ? numberText(built.probe.y) : ''
   };
-
-  /* Формулы внутри условия набираются математически; окружающий текст
-     остаётся в основном шрифте страницы. */
-  var typeset = {};
-  Object.keys(values).forEach(function (key) {
-    typeset[key] = values[key] === '' ? '' : math.html(values[key]);
-  });
 
   return {
     id: task.id,
     kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
     svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    /* Значения подставляются обычным текстом, и только потом
+       размеченные долларами куски набираются как формулы. */
     question: plainText(fillTemplate(task.question, values)),
-    questionHtml: typesetText(fillTemplate(task.question, typeset)),
+    questionHtml: typesetText(fillTemplate(task.question, values)),
     hint: task.hint ? plainText(task.hint) : null,
     hintHtml: task.hint ? typesetText(task.hint) : null,
     answer: choice ? choice.answer : answerText(value),
@@ -581,6 +669,7 @@ function taskResult(set, task, built, seed, index) {
     }) : null,
     answerType: task.answerType || 'number',
     level: task.level || null,
+    levelReason: task.levelReason || null,
     meta: {
       set: set.id,
       seed: seed,
@@ -590,7 +679,9 @@ function taskResult(set, task, built, seed, index) {
       bFraction: built.line.b,
       window: built.window,
       points: built.points,
-      probe: built.probe || null
+      probe: built.probe || null,
+      query: built.query || null,
+      level: task.level || null
     }
   };
 }
@@ -631,8 +722,10 @@ function buildAnswers() {
   });
   sets.prototypes.forEach(function (set) {
     generateSet(set.id).forEach(function (task) {
-      out.prototypes[task.id] = { answer: task.answer, answerType: task.answerType,
-                                  level: task.level, seed: task.meta.seed };
+      var record = { answer: task.answer, answerType: task.answerType,
+                     level: task.level, seed: task.meta.seed };
+      if (task.options) { record.options = task.options.map(function (o) { return o.text; }); }
+      out.prototypes[task.id] = record;
     });
   });
   return out;
