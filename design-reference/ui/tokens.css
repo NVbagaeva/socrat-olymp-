@@ -1,0 +1,57 @@
+/* Будет на ЕГЭ — design tokens.
+   Примитивы менять можно, семантику — только вместе с дизайн-системой.
+   Компоненты используют ТОЛЬКО семантические переменные. */
+/* ══════════════════════════════════════════════════════════
+   1. ПРИМИТИВЫ — не использовать в компонентах напрямую
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --navy-900:#0B1F45; --navy-800:#0E2350; --navy-700:#16326B; --navy-600:#1E407F;
+  --blue-800:#163F8C; --blue-700:#1A4FB0; --blue-600:#1F5FD0; --blue-500:#3D79E0;
+  --blue-300:#9BC0F2; --blue-100:#E8F0FC; --blue-50:#F2F7FE;
+  --ice:#F5F9FF; --white:#FFFFFF;
+  --grey-50:#F7F9FC; --grey-100:#EFF3F8; --grey-200:#E4EBF3; --grey-300:#CFDAE8;
+  --grey-500:#97A1B0; --grey-700:#667389; --grey-900:#101728;
+  --green-600:#16A34A; --green-50:#E7F6EC;
+  --amber-600:#D97D0B; --amber-50:#FEF4E3;
+  --red-600:#DC2626;   --red-50:#FCECEC;
+  --heat-1:#EEF4FD; --heat-2:#D5E4FA; --heat-3:#A9C8F3; --heat-4:#6098E6; --heat-5:#1F5FD0;
+
+/* ══════════════════════════════════════════════════════════
+   2. СЕМАНТИЧЕСКИЕ ТОКЕНЫ — только их используют компоненты
+   ══════════════════════════════════════════════════════════ */
+  --color-bg:var(--ice);
+  --color-surface:var(--white);
+  --color-surface-2:var(--grey-50);
+  --color-surface-brand:var(--navy-800);
+  --color-surface-soft:var(--blue-100);
+  --color-primary:var(--blue-600);
+  --color-primary-hover:var(--blue-700);
+  --color-primary-active:var(--blue-800);
+  --color-text:var(--grey-900);
+  --color-text-secondary:var(--grey-700);
+  --color-text-tertiary:var(--grey-500);
+  --color-text-inverse:var(--white);
+  --color-border:var(--grey-200);
+  --color-border-strong:var(--grey-300);
+  --color-success:var(--green-600); --color-success-soft:var(--green-50);
+  --color-warning:var(--amber-600); --color-warning-soft:var(--amber-50);
+  --color-error:var(--red-600);     --color-error-soft:var(--red-50);
+
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px;
+
+  --radius-sm:6px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px; --radius-pill:999px;
+
+  --shadow-xs:0 1px 2px rgba(16,23,40,.04);
+  --shadow-sm:0 2px 6px rgba(16,23,40,.05);
+  --shadow-md:0 8px 24px rgba(16,23,40,.06);
+  --shadow-lg:0 16px 40px rgba(16,23,40,.10);
+
+  --h-control-sm:36px; --h-control:44px; --h-control-lg:52px;
+  --w-sidebar:240px; --w-sidebar-collapsed:72px; --h-topbar:64px; --w-container:1280px;
+
+  --dur-hover:120ms; --dur-switch:180ms; --dur-state:240ms; --dur-reveal:320ms;
+  --ease:cubic-bezier(.2,0,0,1);
+}
