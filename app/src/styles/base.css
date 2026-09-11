@@ -43,6 +43,11 @@ table {
   font-variant-numeric: tabular-nums lining-nums;
 }
 
+ul,
+ol {
+  list-style: none;
+}
+
 img,
 svg {
   display: block;
