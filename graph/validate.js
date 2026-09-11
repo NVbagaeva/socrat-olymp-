@@ -296,9 +296,21 @@ function checkComposition(set, tasks) {
     });
   }
 
+  /* В наборах с двумя прямыми дробным считается вариант, где дробна
+     хотя бы одна из них. */
+  function linesOf(task) {
+    return task.meta.lines && task.meta.lines.length ? task.meta.lines
+                                                     : [{ k: task.meta.k, b: task.meta.b }];
+  }
+
   var fractionTasks = tasks.filter(function (task) {
-    return !Number.isInteger(task.meta.k) || !Number.isInteger(task.meta.b);
+    return linesOf(task).some(function (line) {
+      return !Number.isInteger(line.k) || !Number.isInteger(line.b);
+    });
   });
+  if (rules.minFractionVariants !== undefined) {
+    need(fractionTasks.length, rules.minFractionVariants, 'вариантов с дробной прямой');
+  }
   if (rules.maxFractionVariants !== undefined && fractionTasks.length > rules.maxFractionVariants) {
     errors.push(where + ': вариантов с дробным коэффициентом — ' + fractionTasks.length +
       ', допустимо не больше ' + rules.maxFractionVariants);
@@ -399,11 +411,109 @@ function checkComposition(set, tasks) {
     need(right, rules.minPerSide, 'запросов справа от окна');
   }
 
+  /* ── 12.C и 12.D: две прямые, точка пересечения (§8, §10) ── */
+  if (rules.intersectionInside !== undefined || rules.intersectionOffscreen !== undefined) {
+    var inside = tasks.filter(function (task) {
+      return task.meta.intersection && task.meta.intersection.inside;
+    });
+    var offscreen = tasks.filter(function (task) {
+      return task.meta.intersection && !task.meta.intersection.inside;
+    });
+
+    if (rules.intersectionInside !== undefined && inside.length !== rules.intersectionInside) {
+      errors.push(where + ': пересечений внутри окна — ' + inside.length +
+        ', нужно ровно ' + rules.intersectionInside);
+    }
+    if (rules.intersectionOffscreen !== undefined && offscreen.length !== rules.intersectionOffscreen) {
+      errors.push(where + ': пересечений за кадром — ' + offscreen.length +
+        ', нужно ровно ' + rules.intersectionOffscreen);
+    }
+
+    var margin = rules.intersectionMargin === undefined ? 1 : rules.intersectionMargin;
+    inside.forEach(function (task) {
+      var point = task.meta.intersection;
+      var limit = task.meta.window.xmax - margin;
+      if (Math.abs(point.x) > limit || Math.abs(point.y) > limit) {
+        errors.push(where + '/' + task.id + ': точка пересечения (' + point.x + '; ' + point.y +
+          ') ближе ' + margin + ' клетки к границе окна ±' + task.meta.window.xmax);
+      }
+    });
+
+    /* §8 — у варианта с пересечением за кадром обе прямые обязаны
+       иметь по две целые опорные точки внутри окна. */
+    offscreen.forEach(function (task) {
+      var pointsPerLine = (task.meta.points || []).length;
+      if (pointsPerLine < 2) {
+        errors.push(where + '/' + task.id + ': у прямой меньше двух опорных точек');
+      }
+      var win = task.meta.window;
+      if (Math.abs(task.meta.intersection.x) <= win.xmax &&
+          Math.abs(task.meta.intersection.y) <= win.ymax) {
+        errors.push(where + '/' + task.id + ': пересечение помечено «за кадром», но попадает в окно');
+      }
+    });
+
+    /* Ответ пересчитывается независимо: по двум уравнениям с чертежа. */
+    tasks.forEach(function (task) {
+      var lines = linesOf(task);
+      if (lines.length < 2) { return; }
+      var source = (set.tasks || []).filter(function (item) { return item.id === task.id; })[0];
+      var rule = source && source.answerRule;
+      var x = (lines[1].b - lines[0].b) / (lines[0].k - lines[1].k);
+      var y = lines[0].k * x + lines[0].b;
+      var expected = rule === 'intersection-y' ? y : x;
+      var answer = Number(String(task.answer).replace(',', '.'));
+      if (Math.abs(expected - answer) > 1e-9) {
+        errors.push(where + '/' + task.id + ': ответ ' + task.answer +
+          ' не сходится с решением системы (' + Math.round(expected * 100) / 100 + ')');
+      }
+    });
+  }
+
+  if (rules.minBothIncreasing !== undefined || rules.minMixedDirections !== undefined) {
+    var bothUp = 0, bothDown = 0, mixed = 0;
+    tasks.forEach(function (task) {
+      var lines = linesOf(task);
+      if (lines.length < 2) { return; }
+      if (lines[0].k > 0 && lines[1].k > 0) { bothUp++; }
+      else if (lines[0].k < 0 && lines[1].k < 0) { bothDown++; }
+      else { mixed++; }
+    });
+    need(bothUp, rules.minBothIncreasing || 0, 'вариантов, где обе прямые возрастают');
+    need(bothDown, rules.minBothDecreasing || 0, 'вариантов, где обе убывают');
+    need(mixed, rules.minMixedDirections || 0, 'вариантов с разнонаправленными прямыми');
+  }
+
+  if (rules.minNearRightAngle !== undefined || rules.minShallowAngle !== undefined) {
+    var nearRight = 0, shallow = 0;
+    tasks.forEach(function (task) {
+      var angle = task.meta.intersection && task.meta.intersection.angle;
+      if (angle === undefined || angle === null) { return; }
+      if (Math.abs(angle - 90) <= 20) { nearRight++; }
+      if (angle <= 30) { shallow++; }
+    });
+    need(nearRight, rules.minNearRightAngle || 0, 'пересечений под углом, близким к прямому');
+    need(shallow, rules.minShallowAngle || 0, 'пологих, но различимых пересечений');
+  }
+
+  if (rules.uniqueSlopePairs) {
+    var seenPairs = {};
+    tasks.forEach(function (task) {
+      var lines = linesOf(task);
+      if (lines.length < 2) { return; }
+      var key = lines[0].k + '|' + lines[1].k;
+      if (seenPairs[key]) { errors.push(where + ': пара наклонов (' + key.replace('|', '; ') + ') повторяется'); }
+      seenPairs[key] = true;
+    });
+  }
+
+  /* Пара (k, b) не повторяется. В наборах с двумя прямыми
+     сравнивается весь чертёж: обе прямые целиком. */
   if (rules.uniquePairs) {
     var pairs = {};
     tasks.forEach(function (task) {
-      var key = task.meta.k + '@' + task.meta.b;
-      if (pairs[key]) { errors.push(where + ': пара (k, b) = (' + key.replace('@', ', ') + ') повторяется'); }
+      var key = linesOf(task).map(function (line) { return line.k + '@' + line.b; }).join(' и ');
+      if (pairs[key]) { errors.push(where + '/' + task.id + ': чертёж (' + key + ') повторяется'); }
       pairs[key] = true;
     });
   }

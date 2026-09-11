@@ -1,0 +1,671 @@
+{
+  "kind": "prototype",
+  "id": "12.D",
+  "task": 12,
+  "title": "12.D · ордината пересечения",
+  "subtitle": "Даны два графика. Найдите ординату точки пересечения",
+  "seed": 12040,
+  "family": "line",
+  "axisLabels": "minimal",
+  "uniqueSlopes": true,
+  "uniqueAnswers": true,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка.",
+  "composition": {
+    "count": 20,
+    "levels": {
+      "lucky": 12,
+      "unlucky": 8
+    },
+    "levelOrder": true,
+    "unluckyReasons": {
+      "b-offscreen": 2,
+      "fraction-k": 2,
+      "fraction-b": 1
+    },
+    "intersectionInside": 12,
+    "intersectionOffscreen": 8,
+    "intersectionMargin": 1,
+    "minBothIncreasing": 5,
+    "minBothDecreasing": 5,
+    "minMixedDirections": 6,
+    "minNearRightAngle": 4,
+    "minShallowAngle": 4,
+    "minFractionVariants": 6,
+    "maxFractionVariants": 6,
+    "uniqueSlopePairs": true,
+    "uniqueAnswers": true,
+    "minNonIntegerAnswers": 6,
+    "uniquePairs": true
+  },
+  "tasks": [
+    {
+      "id": "12.D-01",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "right",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.D-02",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "right",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.D-03",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "right"
+        }
+      }
+    },
+    {
+      "id": "12.D-04",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "right"
+        }
+      }
+    },
+    {
+      "id": "12.D-05",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "shallow"
+        }
+      }
+    },
+    {
+      "id": "12.D-06",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "shallow"
+        }
+      }
+    },
+    {
+      "id": "12.D-07",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "shallow"
+        }
+      }
+    },
+    {
+      "id": "12.D-08",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "angle": "shallow"
+        }
+      }
+    },
+    {
+      "id": "12.D-09",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "12.D-10",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "12.D-11",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.D-12",
+      "level": "lucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": true,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "answerKind": "half"
+        }
+      }
+    },
+    {
+      "id": "12.D-13",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bOffscreen": true,
+            "bMax": 12
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "b-offscreen",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-14",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bOffscreen": true,
+            "bMax": 12
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "b-offscreen",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-15",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "up",
+            "denominators": [
+              2
+            ],
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "answerKind": "half"
+        }
+      },
+      "levelReason": "fraction-k",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-16",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "down",
+            "denominators": [
+              3
+            ],
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y",
+          "answerKind": "half"
+        }
+      },
+      "levelReason": "fraction-k",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-17",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "up",
+            "denominators": [
+              4
+            ],
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "fraction-k",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-18",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "down",
+            "denominators": [
+              2
+            ],
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "fraction-k",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-19",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "up",
+            "denominators": [
+              3
+            ],
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "fraction-k",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-20",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики двух линейных функций. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "lines": [
+          {
+            "slope": "fraction",
+            "direction": "down",
+            "denominators": [
+              2
+            ],
+            "bKind": "half",
+            "bInside": true,
+            "bMax": 6
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bInside": true,
+            "bMax": 6
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "marginCells": 1,
+          "decimals": 1,
+          "axis": "y"
+        }
+      },
+      "levelReason": "fraction-b",
+      "intersectionOffscreen": true
+    }
+  ]
+}

@@ -94,9 +94,11 @@ function findSet(taskId) {
    Кандидаты коэффициентов
    ══════════════════════════════════════════════════════════ */
 var MINUS = '\u2212';         /* типографский минус в формулах вариантов        */
-var CANDIDATE_POOL = 48;
+var CANDIDATE_POOL = 72;
+var LINE_POOL = 40;           /* сколько прямых перебирается на каждую сторону пары */
+var POOL_PER_SLOPE = 12;       /* сколько вариантов с одним наклоном держим в пуле      */
 var PROBE_POOL = 10;          /* из скольких читаемых точек выбирается проверяемая */      /* сколько лучших кандидатов держим на задачу      */
-var SEARCH_BUDGET = 200000;   /* потолок перебора с возвратом                    */
+var SEARCH_BUDGET = 4000000;  /* потолок перебора с возвратом                    */
 var INTEGER_K = [1, 2, 3];
 var FRACTION_K = [[1, 2], [1, 3], [2, 3], [3, 2], [1, 4], [3, 4], [5, 2]];
 
@@ -204,6 +206,123 @@ function chooseProbe(line, win, probe, random) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Пара прямых (§8, прототипы 12.C и 12.D)
+
+   Две прямые живут в одном окне, поэтому окно подбирается сразу
+   под обе: каждая обязана проходить его насквозь и иметь внутри
+   две целые опорные точки. Точка пересечения либо внутри окна
+   и не ближе клетки к границе, либо заведомо за кадром —
+   тогда ответ получается только решением системы.
+   ══════════════════════════════════════════════════════════ */
+function lineCandidates(constraints, random) {
+  var slopes = shuffled(slopeCandidates(constraints), random);
+  var intercepts = shuffled(interceptCandidates(constraints), random);
+  var out = [];
+
+  slopes.forEach(function (k) {
+    intercepts.forEach(function (b) {
+      var line = Line.create(k, b);
+      if (!Line.slopeReadable(line, constraints)) { return; }
+      if (Line.isZero(line.k) && Line.isZero(line.b)) { return; }
+      out.push(line);
+    });
+  });
+  return out.slice(0, LINE_POOL);
+}
+
+/* Окно, годное сразу для обеих прямых. */
+function sharedWindow(lines, constraints) {
+  var start = Line.RULES.windowDefault;
+  lines.forEach(function (line) {
+    if (Math.abs(line.kValue) >= Line.RULES.steepK) { start = Math.min(start, Line.RULES.windowSteep); }
+  });
+  if (constraints && constraints.window) { start = constraints.window; }
+
+  for (var n = start; n >= Line.RULES.windowMin; n--) {
+    var win = { xmin: -n, xmax: n, ymin: -n, ymax: n };
+    var ok = lines.every(function (line) {
+      return Line.crossesWindow(line, win) &&
+             Line.integerPoints(line, win).length >= Line.RULES.minIntPoints;
+    });
+    if (ok) { return win; }
+  }
+  return null;
+}
+
+/* Угол между прямыми в градусах — по нему проверяется различимость
+   и состав набора: близкие к прямому и пологие пересечения. */
+function angleBetween(a, b) {
+  return Math.abs(Math.atan(a.kValue) - Math.atan(b.kValue)) * 180 / Math.PI;
+}
+
+function pairCandidates(task, set, seed) {
+  var constraints = task.constraints || {};
+  var spec = constraints.lines || [];
+  var random = rng(set.id + ':' + task.id + ':' + seed + ':pair');
+  var first = lineCandidates(spec[0] || {}, random);
+  var second = lineCandidates(spec[1] || {}, random);
+  var wanted = constraints.intersection || {};
+  var found = [];
+
+  for (var i = 0; i < first.length; i++) {
+    for (var j = 0; j < second.length; j++) {
+      var a = first[i];
+      var b = second[j];
+
+      /* §4.4 — угол между прямыми должен быть различим на глаз. */
+      if (!Line.distinguishable(a, b)) { continue; }
+
+      var win = sharedWindow([a, b], constraints);
+      if (!win) { continue; }
+
+      var cross = Line.intersect(a, b);
+      if (!cross) { continue; }
+      var cx = Line.num(cross.x);
+      var cy = Line.num(cross.y);
+
+      /* Состав набора требует и пересечений, близких к прямому углу,
+         и пологих, но различимых. Угол — часть условия варианта. */
+      var angle = angleBetween(a, b);
+      if (wanted.angle === 'right' && Math.abs(angle - 90) > (wanted.angleTolerance || 20)) { continue; }
+      if (wanted.angle === 'shallow' && angle > (wanted.shallowMax || 30)) { continue; }
+
+      var margin = wanted.marginCells === undefined ? 1 : wanted.marginCells;
+      var inside = Math.abs(cx) <= win.xmax - margin && Math.abs(cy) <= win.ymax - margin;
+      var outside = Math.abs(cx) > win.xmax || Math.abs(cy) > win.ymax;
+
+      if (wanted.inside === true && !inside) { continue; }
+      if (wanted.inside === false && !outside) { continue; }
+
+      /* Ответ пишется как в бланке: целое или один знак после запятой. */
+      if (!decimalsOk(cross.x, wanted.decimals) || !decimalsOk(cross.y, wanted.decimals)) { continue; }
+      if (wanted.answerKind === 'half' &&
+          Line.isInt(wanted.axis === 'y' ? cross.y : cross.x)) { continue; }
+
+      var pointsA = Line.referencePoints(a, win);
+      var pointsB = Line.referencePoints(b, win);
+      if (!pointsA || !pointsB) { continue; }
+
+      var answer = wanted.axis === 'y' ? cy : cx;
+      found.push({
+        parts: [ { line: a, color: 'lineA', points: pointsA },
+                 { line: b, color: 'lineB', points: pointsB } ],
+        line: a, window: win, points: pointsA,
+        intersection: { x: cx, y: cy, inside: inside, angle: angle },
+        score: (balanceScore(a, win, pointsA) + balanceScore(b, win, pointsB)) / 2,
+        pairKey: 'kb2:' + a.kValue + '@' + a.bValue + '|' + b.kValue + '@' + b.bValue,
+        slopeKey: 'kk:' + a.kValue + '|' + b.kValue,
+        interceptKey: 'bb:' + a.bValue + '|' + b.bValue,
+        answerKey: 'ans:' + answer,
+        zeroIntercept: Line.isZero(a.b) && Line.isZero(b.b)
+      });
+    }
+  }
+
+  found.sort(function (x, y) { return y.score - x.score || x.pairKey.localeCompare(y.pairKey); });
+  return trimPool(found);
+}
+
+/* ══════════════════════════════════════════════════════════
    Запрос за пределами окна (§8, прототипы 12.A и 12.B)
    constraints.query = {
      type:     'value-at' | 'argument-for',
@@ -268,6 +387,18 @@ var ANSWER_RULES = {
   'value-at': function (ctx) {
     if (!ctx.query) { throw new Error('generate: у ' + ctx.task.id + ' не выбран запрос'); }
     return Line.toFrac(ctx.query.y0);
+  },
+
+  /* 12.C — даны два графика, найдите абсциссу точки пересечения. */
+  'intersection-x': function (ctx) {
+    if (!ctx.intersection) { throw new Error('generate: у ' + ctx.task.id + ' нет точки пересечения'); }
+    return Line.toFrac(ctx.intersection.x);
+  },
+
+  /* 12.D — то же, но ордината. */
+  'intersection-y': function (ctx) {
+    if (!ctx.intersection) { throw new Error('generate: у ' + ctx.task.id + ' нет точки пересечения'); }
+    return Line.toFrac(ctx.intersection.y);
   },
 
   /* 12.B — дан график, найдите x, при котором f(x) = y₀. */
@@ -398,6 +529,7 @@ function answerText(value) {
    ══════════════════════════════════════════════════════════ */
 function taskCandidates(task, set, seed) {
   var constraints = task.constraints || {};
+  if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
   var slopes = shuffled(slopeCandidates(constraints), random);
   var intercepts = shuffled(interceptCandidates(constraints), random);
@@ -459,6 +591,7 @@ function taskCandidates(task, set, seed) {
           Math.abs(line.bValue) > win.ymax - Line.RULES.bEdgeGap) { continue; }
 
       found.push({
+        parts: [ { line: line, color: 'lineA', points: points, label: true } ],
         line: line, window: win, points: points, probe: probe, query: query,
         answerKey: query ? 'ans:' + query.answer : null,
         /* Без чертежа читаемость оценивать не по чему: порядок кандидатов
@@ -476,7 +609,7 @@ function taskCandidates(task, set, seed) {
 
   /* Сначала самые читаемые чертежи; порядок детерминирован. */
   found.sort(function (a, b) { return b.score - a.score || a.pairKey.localeCompare(b.pairKey); });
-  return found.slice(0, CANDIDATE_POOL);
+  return trimPool(found);
 }
 
 /* Из годных кандидатов выбираем самый читаемый чертёж: прямая идёт
@@ -497,6 +630,23 @@ function balanceScore(line, win, points) {
   var throughOrigin = Line.isZero(line.b) ? 0.35 : 0;
 
   return length - balance * 0.5 + spread - throughOrigin;
+}
+
+/* Пул кандидатов не должен состоять из одного наклона с разными b:
+   тогда соседняя задача с теми же условиями упирается в запрет
+   повторов, и перебор с возвратом разбирает тупик вслепую. */
+function trimPool(found) {
+  var perSlope = {};
+  var pool = [];
+
+  found.forEach(function (candidate) {
+    if (pool.length >= CANDIDATE_POOL) { return; }
+    var used = perSlope[candidate.slopeKey] || 0;
+    if (used >= POOL_PER_SLOPE) { return; }
+    perSlope[candidate.slopeKey] = used + 1;
+    pool.push(candidate);
+  });
+  return pool;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -525,6 +675,10 @@ function assemble(set, seed) {
   var chosen = new Array(tasks.length);
   var budget = SEARCH_BUDGET;
 
+  /* Задачи разбираются в своём порядке: он же порядок возрастания
+     сложности, и решение находится рядом с задуманным составом. */
+  var order = tasks.map(function (task, i) { return i; });
+
   function count(key) { return used[key] || 0; }
 
   function conflicts(candidate) {
@@ -547,8 +701,9 @@ function assemble(set, seed) {
     if (candidate.answerKey) { used[candidate.answerKey] = count(candidate.answerKey) + delta; }
   }
 
-  function step(i) {
-    if (i === tasks.length) { return true; }
+  function step(depth) {
+    if (depth === order.length) { return true; }
+    var i = order[depth];
     var pool = pools[i];
     for (var c = 0; c < pool.length; c++) {
       if (--budget < 0) {
@@ -558,7 +713,7 @@ function assemble(set, seed) {
       if (conflicts(pool[c])) { continue; }
       mark(pool[c], 1);
       chosen[i] = pool[c];
-      if (step(i + 1)) { return true; }
+      if (step(depth + 1)) { return true; }
       mark(pool[c], -1);
     }
     return false;
@@ -603,27 +758,35 @@ function pointText(name, x, y) {
 }
 
 function sceneFor(built, task, set) {
+  var single = built.parts.length === 1;
+
   return {
     window: built.window,
     grid: { step: 1, show: true },
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
     axisLabels: task.axisLabels || set.axisLabels || 'minimal',
-    curves: [ {
-      type: 'line',
-      k: built.line.kValue,
-      b: built.line.bValue,
-      color: 'lineA',
-      label: task.curveLabel === null ? null : (task.curveLabel || set.curveLabel || 'y = f(x)')
-    } ],
-    points: built.points.map(function (point) {
-      return { x: point.x, y: point.y, style: 'solid', color: 'lineA' };
-    }).concat(built.probe ? [ {
+
+    curves: built.parts.map(function (part) {
+      /* §5 — одиночная прямая подписывается, две различаются цветом. */
+      var label = single ? (task.curveLabel === null ? null
+                                                     : (task.curveLabel || set.curveLabel || 'y = f(x)'))
+                         : null;
+      return { type: 'line', k: part.line.kValue, b: part.line.bValue, color: part.color, label: label };
+    }),
+
+    points: built.parts.reduce(function (all, part) {
+      /* Каждая прямая несёт собственные опорные точки своего цвета. */
+      return all.concat(part.points.map(function (point) {
+        return { x: point.x, y: point.y, style: 'solid', color: part.color };
+      }));
+    }, []).concat(built.probe ? [ {
       /* Проверяемая точка — терракотовая и подписана координатами:
          её нельзя спутать с опорными точками самой прямой. */
       x: built.probe.x, y: built.probe.y, style: 'solid', color: 'lineB',
       label: pointText(task.pointName || 'A', built.probe.x, built.probe.y)
     } ] : []),
-    alt: 'График линейной функции'
+
+    alt: single ? 'График линейной функции' : 'Графики двух линейных функций'
   };
 }
 
@@ -635,8 +798,8 @@ function taskResult(set, task, built, seed, index) {
   if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
 
   var value = rule({ line: built.line, window: built.window, points: built.points,
-                     probe: built.probe, query: built.query,
-                     task: task, set: set, seed: seed, index: index });
+                     probe: built.probe, query: built.query, intersection: built.intersection,
+                     parts: built.parts, task: task, set: set, seed: seed, index: index });
   var choice = value && value.type === 'choice' ? value : null;
 
   var values = {
@@ -681,6 +844,10 @@ function taskResult(set, task, built, seed, index) {
       points: built.points,
       probe: built.probe || null,
       query: built.query || null,
+      intersection: built.intersection || null,
+      lines: built.parts.map(function (part) {
+        return { k: part.line.kValue, b: part.line.bValue, kFraction: part.line.k };
+      }),
       level: task.level || null
     }
   };
@@ -740,6 +907,7 @@ function writeAnswers() {
 }
 
 module.exports = {
+  taskCandidates: taskCandidates,
   equationText: equationText,
   generate: generate,
   generateSet: generateSet,
