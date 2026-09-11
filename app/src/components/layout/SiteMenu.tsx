@@ -10,8 +10,8 @@ type MenuState = 'open' | 'closing';
 
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
-/** Ширина, ниже которой шапка сворачивается в бургер. Совпадает с site.css. */
-const NARROW = '(max-width: 413.98px)';
+/** Ширина, ниже которой меню уезжает в бургер. Совпадает с site.css. */
+const NARROW = '(max-width: 939.98px)';
 
 /**
  * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,

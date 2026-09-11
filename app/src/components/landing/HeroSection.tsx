@@ -19,6 +19,8 @@ export function HeroSection() {
       </div>
 
       <div className="hero__body">
+        <p className="hero__eyebrow">{hero.eyebrow}</p>
+
         <h1 className="t-display hero__title">
           {hero.titleLines.map((line) => (
             <span key={line}>{line}</span>

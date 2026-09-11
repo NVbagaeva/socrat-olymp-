@@ -73,17 +73,30 @@
   position: relative;
   z-index: 2;
   padding: var(--space-12) var(--space-8);
-  max-width: 700px;
+  max-width: 712px;
   /* Полоса показателей решает свою раскладку по ширине этой колонки,
      а не по ширине окна: в две колонки окно широкое, а места мало. */
   container-type: inline-size;
 }
 
+.hero__eyebrow {
+  /* Прописными и в разрядку — по прямому указанию к первому экрану.
+     В самой дизайн-системе метка идёт обычным регистром. */
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-5);
+}
+
 .hero__title {
   /* Верхняя ступень шкалы — 64px. Ниже кегль убавляется по ширине колонки,
      чтобы ручной перенос держался и строка не ломалась сама.
-     Коэффициент: длинная строка занимает 9.41 кегля, 10.4cqi даёт запас. */
-  font-size: clamp(30px, 10.4cqi, 64px);
+     Коэффициент: длинная строка «Учителю учителю —» занимает 9.83 кегля,
+     10cqi оставляет запас около 1.7%. */
+  font-size: clamp(30px, 10cqi, 64px);
   line-height: 1.08;
   margin-bottom: var(--space-6);
 }

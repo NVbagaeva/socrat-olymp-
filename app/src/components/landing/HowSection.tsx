@@ -8,7 +8,6 @@ export function HowSection() {
       <div className="wrap">
         <div className="band__head">
           <h2>{how.title}</h2>
-          <p>{how.lead}</p>
         </div>
         <ol className="steps">
           {how.steps.map((step) => (

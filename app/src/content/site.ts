@@ -15,9 +15,10 @@ export const site = {
   /** Пока это якоря лендинга. Станут маршрутами, когда появятся страницы. */
   nav: [
     { label: 'Как это работает', href: '/#how' },
-    { label: 'Траектория', href: '/#path' },
     { label: 'Банк заданий', href: '/#bank' },
     { label: 'Учителям', href: '/#teachers' },
+    /* Раздела с тарифами на странице пока нет — ссылка ждёт его. */
+    { label: 'Тарифы', href: '#' },
   ] satisfies SiteLink[],
 
   headerActions: {
