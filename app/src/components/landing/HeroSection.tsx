@@ -1,6 +1,5 @@
-import { Badge } from '@/components/ui';
 import { landing } from '@/content/landing';
-import { HeroChart } from './HeroChart';
+import { HeroImage } from './HeroImage';
 
 const { hero, facts } = landing;
 
@@ -22,14 +21,7 @@ export function HeroSection() {
           <p className="hero__note">{hero.note}</p>
         </div>
 
-        <div className="hero__chart">
-          <div className="hero__chart-head">
-            <span className="hero__chart-title">{hero.chart.title}</span>
-            <Badge tone="info">{hero.chart.badge}</Badge>
-          </div>
-          <HeroChart alt={hero.chart.alt} />
-          <p className="hero__chart-note">{hero.chart.caption}</p>
-        </div>
+        <HeroImage />
       </div>
 
       <ul className="facts">
