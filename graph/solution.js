@@ -56,6 +56,17 @@
   function fracTex(top, bottom) { return '\\dfrac{' + tex(top) + '}{' + tex(bottom) + '}'; }
 
   function text(html) { return { type: 'text', html: html }; }
+
+  /* Формула внутри текста — той же разметкой, что и отдельная:
+     KaTeX заменит её вёрсткой. Внутри лежит исходная запись —
+     она видна, только пока KaTeX не отработал. */
+  function math(tx, plain) {
+    return '<span class="math" data-tex="' + escapeAttr(tx) + '">' + (plain || '') + '</span>';
+  }
+
+  function escapeAttr(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
   function formula(tx) { return { type: 'formula', tex: tx }; }
   function note(html) { return { type: 'note', html: html }; }
   function key(value) { return '<b class="key">' + num(value) + '</b>'; }
@@ -67,9 +78,11 @@
     var blocks = [ text('Сначала спросим себя: прямая идёт вверх или вниз?') ];
 
     if (t.rising) {
-      blocks.push(text('Слева направо линия поднимается. Значит <b class="key">k &gt; 0</b>.'));
+      blocks.push(text('Слева направо линия поднимается. Значит ' +
+        '<b class="key">' + math('k > 0', 'k &gt; 0') + '</b>.'));
     } else {
-      blocks.push(text('Слева направо линия опускается. Значит <b class="key">k &lt; 0</b>.'));
+      blocks.push(text('Слева направо линия опускается. Значит ' +
+        '<b class="key">' + math('k < 0', 'k &lt; 0') + '</b>.'));
       blocks.push(text('Знак минус мы уже знаем — запишем его сразу, чтобы потом не потерять.'));
     }
 
@@ -81,25 +94,25 @@
      ══════════════════════════════════════════════════════════ */
   function stepSlope(t, k) {
     var blocks = [
-      text('k — это тангенс угла наклона. Угол α отсчитывается от положительного ' +
-           'направления оси x до прямой.'),
+      text(math('k', 'k') + ' — это тангенс угла наклона. Угол ' + math('\\alpha', 'α') +
+           ' отсчитывается от положительного направления оси ' + math('x', 'x') + ' до прямой.'),
       formula('k = \\operatorname{tg} \\alpha')
     ];
 
     if (t.rising) {
-      blocks.push(text('Угол α острый — он весь помещается в прямоугольный треугольник, ' +
-        'который мы построили.'));
+      blocks.push(text('Угол ' + math('\\alpha', 'α') + ' острый — он весь помещается ' +
+        'в прямоугольный треугольник, который мы построили.'));
       blocks.push(text('Напомним: тангенс острого угла в прямоугольном треугольнике — ' +
         'это отношение противолежащего катета к прилежащему.'));
       blocks.push(text('Противолежащий катет — вертикальный, ' + key(t.dy) + ' кл. ' +
         'Прилежащий катет — горизонтальный, ' + key(t.dx) + ' кл.'));
       blocks.push(formula('k = ' + fracTex(t.dy, t.dx) + ' = ' + tex(k)));
     } else {
-      blocks.push(text('Угол α здесь тупой: прямая наклонена влево. А прямоугольного ' +
-        'треугольника с тупым углом не бывает — значит напрямую посчитать ' +
-        '<span class="math" data-tex="\\operatorname{tg} \\alpha">tg α</span> нельзя.'));
-      blocks.push(text('Выход: берём смежный острый угол. Он равен 180° − α, и именно он ' +
-        'лежит в нашем треугольнике.'));
+      blocks.push(text('Угол ' + math('\\alpha', 'α') + ' здесь тупой: прямая наклонена влево. ' +
+        'А прямоугольного треугольника с тупым углом не бывает — значит напрямую ' +
+        'посчитать ' + math('\\operatorname{tg} \\alpha', 'tg α') + ' нельзя.'));
+      blocks.push(text('Выход: берём смежный острый угол. Он равен ' +
+        math('180^\\circ - \\alpha', '180° − α') + ', и именно он лежит в нашем треугольнике.'));
       blocks.push(text('Связь между ними такая:'));
       blocks.push(formula('\\operatorname{tg} \\alpha = -\\operatorname{tg}(180^\\circ - \\alpha)'));
       blocks.push(text('Поэтому считаем тангенс острого угла и ставим минус.'));
@@ -114,8 +127,8 @@
 
     blocks.push({ type: 'callout', id: 'simpler', title: 'Можно проще', blocks: [
       text('На самом деле всё это можно не считать каждый раз. Достаточно запомнить:'),
-      text('<b class="key">k &gt; 0</b> — прямая идёт вверх, ' +
-           '<b class="key">k &lt; 0</b> — прямая идёт вниз.'),
+      text('<b class="key">' + math('k > 0', 'k &gt; 0') + '</b> — прямая идёт вверх, ' +
+           '<b class="key">' + math('k < 0', 'k &lt; 0') + '</b> — прямая идёт вниз.'),
       text('Поэтому у убывающей прямой сразу ставим минус, а дальше спокойно считаем ' +
            'по треугольнику.')
     ] });
@@ -183,7 +196,8 @@
 
     return [
       { type: 'scene', scene: scene },
-      text('Углы симметричны относительно оси y, поэтому их тангенсы противоположны по знаку.')
+      text('Углы симметричны относительно оси ' + math('y', 'y') +
+           ', поэтому их тангенсы противоположны по знаку.')
     ];
   }
 
@@ -195,9 +209,11 @@
     var blocks = [];
 
     if (visible) {
-      blocks.push(text('b — это значение y в точке, где прямая пересекает ось Oy.'));
-      blocks.push(text('Смотрим на чертёж: пересечение в точке (0; ' + key(b) + '). ' +
-        'Значит b = ' + key(b) + '.'));
+      blocks.push(text(math('b', 'b') + ' — это значение ' + math('y', 'y') +
+        ' в точке, где прямая пересекает ось ' + math('Oy', 'Oy') + '.'));
+      blocks.push(text('Смотрим на чертёж: пересечение в точке ' +
+        '<b class="key">' + math('(0;\\, ' + tex(b) + ')', '(0; ' + num(b) + ')') + '</b>. Значит ' +
+        '<b class="key">' + math('b = ' + tex(b), 'b = ' + num(b)) + '</b>.'));
       return { title: 'Находим b', highlight: { x: 0, y: b }, blocks: blocks };
     }
 
@@ -205,14 +221,15 @@
     var base = t.A;
     var product = k * base.x;
 
-    blocks.push(text('Пересечение с осью Oy за пределами чертежа — или попадает ' +
-      'не в узел сетки. Угадывать нельзя.'));
+    blocks.push(text('Пересечение с осью ' + math('Oy', 'Oy') + ' за пределами чертежа — ' +
+      'или попадает не в узел сетки. Угадывать нельзя.'));
     blocks.push(text('Может показаться, что там примерно полтора или примерно два — ' +
       'но «примерно» в ответе не бывает. Это лотерея, а в лотерею мы не играем: ' +
       'угадать шесть чисел из сорока пяти — примерно один шанс на восемь миллионов.'));
     blocks.push(text('Считаем честно. Берём любую точку, которая точно лежит на прямой ' +
-      'и имеет целые координаты — например, (' + key(base.x) + '; ' + key(base.y) + '). ' +
-      'Подставляем её в уравнение вместо x и y:'));
+      'и имеет целые координаты — например, <b class="key">' +
+      math('(' + tex(base.x) + ';\\, ' + tex(base.y) + ')', '(' + num(base.x) + '; ' + num(base.y) + ')') +
+      '</b>. Подставляем её в уравнение вместо ' + math('x', 'x') + ' и ' + math('y', 'y') + ':'));
     blocks.push(formula(tex(base.y) + ' = ' + tex(k) + ' \\cdot ' + texNegative(base.x) + ' + b'));
     blocks.push(formula(tex(base.y) + ' = ' + texNegative(product) + ' + b'));
     blocks.push(formula('b = ' + tex(base.y) + ' - ' + texNegative(product) + ' = ' + tex(b)));
@@ -249,12 +266,14 @@
 
     if (rule === 'value-at' && task.query) {
       var x0 = task.query.x0;
-      blocks.push(text('Нужно найти f(' + key(x0) + '). Подставляем:'));
+      blocks.push(text('Нужно найти <b class="key">' +
+        math('f(' + tex(x0) + ')', 'f(' + num(x0) + ')') + '</b>. Подставляем:'));
       blocks.push(formula('f(' + texNegative(x0) + ') = ' + tex(k) + ' \\cdot ' + texNegative(x0) +
         ' + ' + texNegative(b) + ' = ' + tex(k * x0 + b)));
     } else if (rule === 'argument-for' && task.query) {
       var y0 = task.query.y0;
-      blocks.push(text('Нужно найти x, при котором f(x) = ' + key(y0) + '. Решаем уравнение:'));
+      blocks.push(text('Нужно найти ' + math('x', 'x') + ', при котором <b class="key">' +
+        math('f(x) = ' + tex(y0), 'f(x) = ' + num(y0)) + '</b>. Решаем уравнение:'));
       blocks.push(formula(slopeTex(k) + 'x + ' + texNegative(b) + ' = ' + tex(y0)));
       blocks.push(formula(slopeTex(k) + 'x = ' + tex(y0 - b)));
       blocks.push(formula('x = ' + fracTex(y0 - b, k) + ' = ' + tex((y0 - b) / k)));
@@ -272,7 +291,7 @@
       blocks.push(text('Подставляем координаты точки в формулу и сравниваем с её ординатой:'));
       blocks.push(formula('f(' + texNegative(task.probe.x) + ') = ' + tex(k) + ' \\cdot ' +
         texNegative(task.probe.x) + ' + ' + texNegative(b) + ' = ' + tex(k * task.probe.x + b)));
-      blocks.push(text('У точки ордината ' + key(task.probe.y) + '. ' +
+      blocks.push(text('У точки ордината <b class="key">' + num(task.probe.y) + '</b>. ' +
         (Math.abs(k * task.probe.x + b - task.probe.y) < 1e-9
           ? 'Значения совпали — точка лежит на прямой.'
           : 'Значения разные — точка на прямой не лежит.')));

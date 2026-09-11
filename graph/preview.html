@@ -6,9 +6,12 @@
 <title>Задание №12 · визуальный контроль</title>
 <link rel="stylesheet" href="graph.css">
 
-<!-- Автономная страница: открывается без сборки, поэтому KaTeX берётся
-     с CDN прямо здесь. В приложении он ставится пакетом (pnpm add katex)
-     и импортируется в коде — тогда эти две строки не нужны. -->
+<!-- ВРЕМЕННОЕ РЕШЕНИЕ, только для этой страницы.
+     preview.html — служебный файл, который открывают без сборки,
+     поэтому KaTeX подтягивается с CDN. В приложении (app/, Next.js)
+     KaTeX подключается обычным импортом через graph/katex.js,
+     и эти две строки не нужны. Когда модуль переедет в app/,
+     превью станет страницей проекта и CDN уйдёт вместе с ним. -->
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -121,7 +124,7 @@
 </main>
 
 <script src="math.js"></script>
-<script src="katex-boot.js"></script>
+<script src="katex-upgrade.js"></script>
 <script src="renderer.js"></script>
 <script src="families/line.js"></script>
 <script src="triangle.js"></script>
@@ -224,7 +227,7 @@
         '</article>';
     }).join('');
 
-    GraphKatex.upgrade(el.grid);
+    katexUpgrade(el.grid);
     if (current.taskId) { markActive(); }
   }
 
@@ -269,7 +272,7 @@
       '<p class="steps" id="steps"></p>' +
       '<div class="solution" id="solution" hidden></div>';
 
-    GraphKatex.upgrade(el.panel);
+    katexUpgrade(el.panel);
     bindPanel(task, analysis);
   }
 
@@ -324,7 +327,7 @@
       if (!player) {
         solution.innerHTML = '<div class="solution-steps">' +
           steps.map(stepMarkup).join('') + '</div>';
-        GraphKatex.upgrade(solution);
+        katexUpgrade(solution);
         bindDetails(solution);
 
         player = GraphAnimate.create({
@@ -339,7 +342,7 @@
             next.hidden = state.instant || state.finished;
             show.textContent = state.finished ? 'Показать заново' : 'Показать разбор';
             show.hidden = state.playing;
-            GraphKatex.upgrade(solution);
+            katexUpgrade(solution);
           }
         });
         player.play();
@@ -356,6 +359,21 @@
     });
 
     next.addEventListener('click', function () { player.next(); });
+  }
+
+  /* KaTeX приходит с CDN и может опоздать к первой отрисовке. */
+  function katexUpgrade(root) {
+    if (window.katex) { GraphKatexUpgrade.upgrade(root, window.katex); }
+    else { whenKatexReady(function () { GraphKatexUpgrade.upgrade(root, window.katex); }); }
+  }
+
+  function whenKatexReady(done) {
+    if (window.katex) { return done(); }
+    var waited = 0;
+    var timer = setInterval(function () {
+      waited += 50;
+      if (window.katex || waited > 4000) { clearInterval(timer); done(); }
+    }, 50);
   }
 
   /* ── Разметка шагов разбора ──────────────────────────────
@@ -514,8 +532,9 @@
     counts();
     fillSets();
     render();
-    /* KaTeX подключён самой страницей — ждём его и подставляем вёрстку. */
-    GraphKatex.load();
+    /* KaTeX подключён строкой выше (временно, с CDN): дожидаемся
+       загрузки и подставляем его вёрстку вместо исходной разметки. */
+    whenKatexReady(function () { GraphKatexUpgrade.upgrade(document, window.katex); });
     openFromHash();
   }).catch(function (error) {
     el.grid.innerHTML = '<p>Не удалось загрузить наборы: ' + error.message +
