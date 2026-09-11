@@ -1,0 +1,166 @@
+/* Будет на ЕГЭ — дизайн-токены.
+   Перенос design-reference/ui/tokens.css. Значения не изменены.
+   Примитивы менять можно, семантику — только вместе с дизайн-системой.
+   Компоненты используют ТОЛЬКО семантические переменные. */
+
+/* ══════════════════════════════════════════════════════════
+   1. ПРИМИТИВЫ — не использовать в компонентах напрямую.
+   Намеренно не попадают в @theme: утилиты вида bg-blue-600 не существуют.
+   ══════════════════════════════════════════════════════════ */
+:root {
+  --navy-900: #0b1f45;
+  --navy-800: #0e2350;
+  --navy-700: #16326b;
+  --navy-600: #1e407f;
+  --blue-800: #163f8c;
+  --blue-700: #1a4fb0;
+  --blue-600: #1f5fd0;
+  --blue-500: #3d79e0;
+  --blue-300: #9bc0f2;
+  --blue-100: #e8f0fc;
+  --blue-50: #f2f7fe;
+  --ice: #f5f9ff;
+  --white: #ffffff;
+  --grey-50: #f7f9fc;
+  --grey-100: #eff3f8;
+  --grey-200: #e4ebf3;
+  --grey-300: #cfdae8;
+  --grey-500: #97a1b0;
+  --grey-700: #667389;
+  --grey-900: #101728;
+  --green-600: #16a34a;
+  --green-50: #e7f6ec;
+  --amber-600: #d97d0b;
+  --amber-50: #fef4e3;
+  --red-600: #dc2626;
+  --red-50: #fcecec;
+  --heat-1: #eef4fd;
+  --heat-2: #d5e4fa;
+  --heat-3: #a9c8f3;
+  --heat-4: #6098e6;
+  --heat-5: #1f5fd0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   2. СЕМАНТИЧЕСКИЕ ТОКЕНЫ — только их используют компоненты.
+   Живут в @theme, поэтому одновременно доступны как var(--color-primary)
+   и как утилиты Tailwind (bg-primary, text-secondary, rounded-lg).
+   static — чтобы переменные попадали в :root даже там, где Tailwind
+   не видит их использования: компонентный слой написан обычным CSS.
+   ══════════════════════════════════════════════════════════ */
+@theme static {
+  /* Свои пространства имён заводим с нуля: палитра, радиусы, тени,
+     шрифты, размеры текста и брейкпоинты Tailwind по умолчанию выключены,
+     чтобы мимо дизайн-системы нельзя было написать ни одной утилиты. */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --breakpoint-*: initial;
+
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-bg: var(--ice);
+  --color-surface: var(--white);
+  --color-surface-2: var(--grey-50);
+  --color-surface-brand: var(--navy-800);
+  --color-surface-soft: var(--blue-100);
+  --color-primary: var(--blue-600);
+  --color-primary-hover: var(--blue-700);
+  --color-primary-active: var(--blue-800);
+  --color-text: var(--grey-900);
+  --color-text-secondary: var(--grey-700);
+  --color-text-tertiary: var(--grey-500);
+  --color-text-inverse: var(--white);
+  --color-border: var(--grey-200);
+  --color-border-strong: var(--grey-300);
+  --color-success: var(--green-600);
+  --color-success-soft: var(--green-50);
+  --color-warning: var(--amber-600);
+  --color-warning-soft: var(--amber-50);
+  --color-error: var(--red-600);
+  --color-error-soft: var(--red-50);
+
+  /* Короткие псевдонимы для утилит: text-secondary, bg-inverse.
+     Отдельных значений не вводят — ссылаются на те же токены. */
+  --color-secondary: var(--color-text-secondary);
+  --color-tertiary: var(--color-text-tertiary);
+  --color-inverse: var(--color-text-inverse);
+
+  /* ── Токены, которых в эталонном файле не было: там эти значения стояли
+     примитивами и хексами прямо в компонентах и в SVG. Значения те же,
+     изменилось только имя — иначе палитра перестаёт меняться одним файлом. ── */
+  --color-border-hover: var(--grey-500); /* input:hover */
+  --color-focus-ring: var(--blue-100); /* подсветка вокруг поля */
+  --color-track: var(--grey-100); /* дорожка прогресса, сетка графиков */
+  --color-skeleton: var(--grey-100); /* скелет: основа */
+  --color-skeleton-sheen: var(--grey-50); /* скелет: блик */
+  --color-surface-inverse: var(--navy-900); /* тултип, тост */
+  --color-surface-info: var(--blue-50); /* непрочитанное уведомление */
+  --color-accent-soft: var(--blue-300); /* наведение на карточку, линия цели */
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+  --color-heat-5: var(--heat-5);
+  /* Белый с прозрачностью на тёмном сайдбаре */
+  --color-on-brand: rgba(255, 255, 255, 0.62);
+  --color-on-brand-strong: rgba(255, 255, 255, 0.75);
+  --color-on-brand-hover: rgba(255, 255, 255, 0.06);
+  --color-on-brand-border: rgba(255, 255, 255, 0.1);
+  --color-on-brand-surface: rgba(255, 255, 255, 0.14);
+  --color-spinner-track: rgba(255, 255, 255, 0.35);
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Шаг сетки 4px: p-1 = 4px, p-4 = 16px, p-6 = 24px. */
+  --spacing: 4px;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(16, 23, 40, 0.04);
+  --shadow-sm: 0 2px 6px rgba(16, 23, 40, 0.05);
+  --shadow-md: 0 8px 24px rgba(16, 23, 40, 0.06);
+  --shadow-lg: 0 16px 40px rgba(16, 23, 40, 0.1);
+
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Имена из эталона, которыми пользуется компонентный слой.
+   @theme их не создаёт: шкала отступов там задана через --spacing. */
+:root {
+  --font: var(--font-sans);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --h-control-sm: 36px;
+  --h-control: 44px;
+  --h-control-lg: 52px;
+  --w-sidebar: 240px;
+  --w-sidebar-collapsed: 72px;
+  --h-topbar: 64px;
+  --w-container: 1280px;
+
+  --dur-hover: 120ms;
+  --dur-switch: 180ms;
+  --dur-state: 240ms;
+  --dur-reveal: 320ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
