@@ -1,0 +1,227 @@
+[
+ {
+  "folder": "piramidy",
+  "name": "piramida_3ug",
+  "title": "Треугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_3ug_visota",
+  "title": "Треугольная пирамида с высотой SO"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_3ug_apofema",
+  "title": "Правильная треугольная пирамида с апофемой SM"
+ },
+ {
+  "folder": "piramidy",
+  "name": "tetraedr",
+  "title": "Правильный тетраэдр"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_4ug",
+  "title": "Правильная четырёхугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_4ug_visota",
+  "title": "Четырёхугольная пирамида с высотой SO"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_4ug_apofema",
+  "title": "Четырёхугольная пирамида с высотой и апофемой"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_4ug_rebro_perp",
+  "title": "Пирамида, боковое ребро SD ⟂ основанию"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_5ug",
+  "title": "Правильная пятиугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_5ug_visota",
+  "title": "Пятиугольная пирамида с высотой SO"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_6ug",
+  "title": "Правильная шестиугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_6ug_apofema",
+  "title": "Шестиугольная пирамида с высотой и апофемой"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_usech_3ug",
+  "title": "Усечённая треугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_usech_4ug",
+  "title": "Усечённая четырёхугольная пирамида"
+ },
+ {
+  "folder": "piramidy",
+  "name": "piramida_usech_6ug",
+  "title": "Усечённая шестиугольная пирамида"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_3ug_pryamaya",
+  "title": "Прямая треугольная призма"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_3ug_naklonnaya",
+  "title": "Наклонная треугольная призма"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_4ug_pryamaya",
+  "title": "Прямая четырёхугольная призма"
+ },
+ {
+  "folder": "prizmy",
+  "name": "parallelepiped_pryamougolnyi",
+  "title": "Прямоугольный параллелепипед"
+ },
+ {
+  "folder": "prizmy",
+  "name": "parallelepiped_diagonal",
+  "title": "Прямоугольный параллелепипед с диагональю AC₁"
+ },
+ {
+  "folder": "prizmy",
+  "name": "parallelepiped_diag_sechenie",
+  "title": "Диагональное сечение ACC₁A₁"
+ },
+ {
+  "folder": "prizmy",
+  "name": "parallelepiped_naklonnyi",
+  "title": "Наклонный параллелепипед"
+ },
+ {
+  "folder": "prizmy",
+  "name": "kub",
+  "title": "Куб"
+ },
+ {
+  "folder": "prizmy",
+  "name": "kub_diagonal",
+  "title": "Куб с диагональю AC₁"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_5ug",
+  "title": "Правильная пятиугольная призма"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_6ug",
+  "title": "Правильная шестиугольная призма"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_6ug_diag_sechenie",
+  "title": "Шестиугольная призма, сечение ADD₁A₁"
+ },
+ {
+  "folder": "prizmy",
+  "name": "prizma_usechennaya",
+  "title": "Усечённая треугольная призма"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "cilindr",
+  "title": "Цилиндр"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "cilindr_os_radius",
+  "title": "Цилиндр: ось OO₁, радиус r, образующая l"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "cilindr_osevoe_sechenie",
+  "title": "Осевое сечение цилиндра ABB₁A₁"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "konus",
+  "title": "Конус"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "konus_visota_obrazuyushchaya",
+  "title": "Конус: высота h, образующая l"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "konus_osevoe_sechenie",
+  "title": "Осевое сечение конуса SAB"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "konus_usechennyi",
+  "title": "Усечённый конус"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "konus_usechennyi_os",
+  "title": "Усечённый конус с осью и радиусами"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "shar",
+  "title": "Шар"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "shar_radius",
+  "title": "Шар с центром O и радиусом R"
+ },
+ {
+  "folder": "tela_vrashcheniya",
+  "name": "shar_sechenie",
+  "title": "Сечение шара плоскостью"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "shar_v_kube",
+  "title": "Шар, вписанный в куб"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "kub_v_share",
+  "title": "Куб, вписанный в шар"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "shar_v_cilindre",
+  "title": "Шар, вписанный в цилиндр"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "shar_v_konuse",
+  "title": "Шар, вписанный в конус"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "piramida_v_konuse",
+  "title": "Пирамида, вписанная в конус"
+ },
+ {
+  "folder": "kombinacii",
+  "name": "prizma_v_cilindre",
+  "title": "Призма, вписанная в цилиндр"
+ }
+]

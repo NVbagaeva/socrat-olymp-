@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Усечённая шестиугольная пирамида</title>
+<polygon points="128.0,653.0 295.4,323.1 432.0,258.4 636.7,248.1 704.6,302.5 872.0,615.7 623.6,733.2 251.5,751.9" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<line x1="872.0" y1="615.7" x2="748.5" y2="516.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="748.5" y1="516.8" x2="376.4" y2="535.5" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="748.5" y1="516.8" x2="636.7" y2="248.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="376.4" y1="535.5" x2="128.0" y2="653.0" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="376.4" y1="535.5" x2="432.0" y2="258.4" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="128.0" y1="653.0" x2="251.5" y2="751.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="295.4" y1="323.1" x2="363.3" y2="377.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="653.0" x2="295.4" y2="323.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="251.5" y1="751.9" x2="623.6" y2="733.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="363.3" y1="377.4" x2="568.0" y2="367.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="251.5" y1="751.9" x2="363.3" y2="377.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="623.6" y1="733.2" x2="872.0" y2="615.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="568.0" y1="367.2" x2="704.6" y2="302.5" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="623.6" y1="733.2" x2="568.0" y2="367.2" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="704.6" y1="302.5" x2="636.7" y2="248.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="615.7" x2="704.6" y2="302.5" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="636.7" y1="248.1" x2="432.0" y2="258.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="432.0" y1="258.4" x2="295.4" y2="323.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<circle cx="128.0" cy="653.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="295.4" cy="323.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="251.5" cy="751.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="363.3" cy="377.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="623.6" cy="733.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="568.0" cy="367.2" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="615.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="704.6" cy="302.5" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="748.5" cy="516.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="636.7" cy="248.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="376.4" cy="535.5" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="432.0" cy="258.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="63.5" y="680.0" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="193.1" y="803.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="674.0" y="797.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="936.5" y="636.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="760.0" y="604.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E</text>
+<text x="416.8" y="508.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F</text>
+<text x="230.9" y="350.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="304.9" y="428.8" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="618.4" y="431.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="769.1" y="323.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="695.1" y="244.3" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">E<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+<text x="381.6" y="241.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">F<tspan font-size="41" baseline-shift="-25%">1</tspan></text>
+</svg>

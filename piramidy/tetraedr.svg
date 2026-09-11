@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Правильный тетраэдр</title>
+<polygon points="135.5,648.8 425.6,128.0 864.5,648.8 276.8,872.0" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<line x1="864.5" y1="648.8" x2="135.5" y2="648.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="135.5" y1="648.8" x2="276.8" y2="872.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="135.5" y1="648.8" x2="425.6" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="276.8" y1="872.0" x2="864.5" y2="648.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="276.8" y1="872.0" x2="425.6" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="864.5" y1="648.8" x2="425.6" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<circle cx="135.5" cy="648.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="276.8" cy="872.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="864.5" cy="648.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="425.6" cy="128.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="72.9" y="688.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="247.9" y="953.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="928.2" y="683.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="425.6" y="87.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
+</svg>
