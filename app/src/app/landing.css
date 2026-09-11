@@ -39,6 +39,23 @@
   color: var(--color-text-tertiary);
   margin-top: var(--space-5);
 }
+/* Исходники не растягиваются выше половины натуральной ширины:
+   1672 → 836 и 1122 → 561. При двойной плотности это пиксель-в-пиксель,
+   выше — стекло замыливается. */
+.hero__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 561px;
+  margin-inline: auto;
+}
+@media (min-width: 768px) {
+  .hero__art {
+    max-width: 836px;
+    margin-inline: 0;
+  }
+}
+
 .hero__chart {
   background: linear-gradient(
     160deg,

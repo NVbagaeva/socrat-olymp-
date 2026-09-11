@@ -1,4 +1,5 @@
 export { HeroSection } from './HeroSection';
+export { HeroImage, type HeroImageProps } from './HeroImage';
 export { HowSection } from './HowSection';
 export { DiagnosticsSection } from './DiagnosticsSection';
 export { PathSection } from './PathSection';

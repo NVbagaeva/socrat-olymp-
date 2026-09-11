@@ -60,6 +60,9 @@ export const landing = {
     primaryAction: { label: 'Начать бесплатно', href: '#' },
     secondaryAction: { label: 'Узнать больше', href: '/#how' },
     note: 'Диагностика доступна без регистрации',
+    image: {
+      alt: 'Стеклянная усечённая пирамида с геометрическими построениями внутри',
+    },
     chart: {
       title: 'Путь к цели',
       badge: 'Прогноз',
