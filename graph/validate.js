@@ -13,6 +13,7 @@
 var fs = require('fs');
 var path = require('path');
 var renderer = require('./renderer.js');
+var generator = require('./generate.js');
 
 var ROOT = __dirname;
 
@@ -56,6 +57,91 @@ function selfTestWindow() {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Состав набора. Правила лежат в самом файле блока (ключ composition),
+   проверка ничего не подгоняет: не сошлось — ошибка сборки.
+   ══════════════════════════════════════════════════════════ */
+function checkComposition(set, tasks) {
+  var rules = set.composition;
+  var where = set.id;
+  if (!rules) { return []; }
+  var errors = [];
+
+  function need(actual, minimum, what) {
+    if (actual < minimum) {
+      errors.push(where + ': ' + what + ' — ' + actual + ', нужно не меньше ' + minimum);
+    }
+  }
+
+  if (rules.count !== undefined && tasks.length !== rules.count) {
+    errors.push(where + ': задач ' + tasks.length + ', по составу нужно ' + rules.count);
+  }
+
+  var ks = tasks.map(function (task) { return task.meta.k; });
+  need(ks.filter(function (k) { return k > 0; }).length, rules.minIncreasing || 0, 'возрастающих');
+  need(ks.filter(function (k) { return k < 0; }).length, rules.minDecreasing || 0, 'убывающих');
+  need(ks.filter(function (k) { return k !== 0 && Number.isInteger(k); }).length,
+       rules.minIntegerK || 0, 'с целым k');
+  need(ks.filter(function (k) { return k !== 0 && !Number.isInteger(k); }).length,
+       rules.minFractionK || 0, 'с дробным k');
+
+  if (rules.zeroSlope) {
+    var zeros = [];
+    ks.forEach(function (k, i) { if (k === 0) { zeros.push(i + 1); } });
+    if (rules.zeroSlope.exactly !== undefined && zeros.length !== rules.zeroSlope.exactly) {
+      errors.push(where + ': задач с k = 0 — ' + zeros.length + ', нужно ровно ' + rules.zeroSlope.exactly);
+    }
+    if (rules.zeroSlope.position !== undefined && zeros.indexOf(rules.zeroSlope.position) === -1) {
+      errors.push(where + ': задача с k = 0 должна стоять на месте ' + rules.zeroSlope.position +
+        ', а стоит на ' + (zeros.length ? zeros.join(', ') : '—'));
+    }
+  }
+
+  if (rules.uniquePairs) {
+    var pairs = {};
+    tasks.forEach(function (task) {
+      var key = task.meta.k + '@' + task.meta.b;
+      if (pairs[key]) { errors.push(where + ': пара (k, b) = (' + key.replace('@', ', ') + ') повторяется'); }
+      pairs[key] = true;
+    });
+  }
+
+  if (rules.uniqueSlopes) {
+    var slopes = {};
+    ks.forEach(function (k) {
+      if (slopes[k]) { errors.push(where + ': наклон k = ' + k + ' повторяется'); }
+      slopes[k] = true;
+    });
+  }
+
+  return errors;
+}
+
+/* Правила генерации (§4) на каждом собранном варианте. */
+function checkTask(set, task) {
+  var errors = [];
+  var where = set.id + '/' + task.id;
+  var meta = task.meta;
+
+  errors = errors.concat(checkWindow(meta.window, where));
+
+  var abs = Math.abs(meta.k);
+  if (abs === 0) {
+    var allowed = (set.tasks || []).some(function (item) {
+      return item.id === task.id && item.constraints && item.constraints.allowZeroSlope;
+    });
+    if (!allowed) { errors.push(where + ': горизонтальная прямая без флага allowZeroSlope'); }
+  } else if (abs < 1 / 3 - 1e-9 || abs > 3 + 1e-9) {
+    errors.push(where + ': наклон вне диапазона 1/3…3 (k = ' + meta.k + ')');
+  }
+
+  if (!meta.points || meta.points.length < 2) {
+    errors.push(where + ': меньше двух опорных точек с целыми координатами');
+  }
+  if (!task.answer) { errors.push(where + ': пустой ответ'); }
+  return errors;
+}
+
+/* ══════════════════════════════════════════════════════════
    Обход наборов задач. Подготовка и прототипы считаются отдельно
    и ни в каком месте не складываются в одно число.
    ══════════════════════════════════════════════════════════ */
@@ -86,10 +172,19 @@ function run() {
     prototypes.reduce(function (sum, set) { return sum + (set.data.tasks || []).length; }, 0) +
     ' (только это число — покрытие банка)');
 
-  prep.concat(prototypes).forEach(function (set) {
-    (set.data.tasks || []).forEach(function (task) {
-      if (task.window) { errors = errors.concat(checkWindow(task.window, set.name + '/' + task.id)); }
-    });
+  prep.concat(prototypes).forEach(function (entry) {
+    var set = entry.data;
+    var tasks;
+    try {
+      tasks = generator.generateSet(set.id);
+    } catch (error) {
+      errors.push(set.id + ': ' + error.message);
+      return;
+    }
+    tasks.forEach(function (task) { errors = errors.concat(checkTask(set, task)); });
+    errors = errors.concat(checkComposition(set, tasks));
+    report.push('  ' + set.id + ' «' + set.title + '»: собрано ' + tasks.length +
+      ', k = ' + tasks.map(function (t) { return t.answer; }).join(', '));
   });
 
   return { errors: errors, report: report };

@@ -1,0 +1,55 @@
+{
+  "prep": {
+    "P12-1-01": {
+      "answer": "1",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-02": {
+      "answer": "2",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-03": {
+      "answer": "3",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-04": {
+      "answer": "-1",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-05": {
+      "answer": "-3",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-06": {
+      "answer": "-2",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-07": {
+      "answer": "1,5",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-08": {
+      "answer": "-1,5",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-09": {
+      "answer": "0",
+      "answerType": "number",
+      "seed": 1201
+    },
+    "P12-1-10": {
+      "answer": "-1/3",
+      "answerType": "number",
+      "seed": 1201
+    }
+  },
+  "prototypes": {}
+}

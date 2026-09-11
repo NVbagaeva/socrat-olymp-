@@ -15,8 +15,8 @@
    scene = {
      window:     { xmin, xmax, ymin, ymax },   // строго симметричное, квадратное
      grid:       { step: 1, show: true },
-     axes:       { labelX: 'x', labelY: 'y', origin: 'O' },
-     axisLabels: 'minimal' | 'full',
+     axes:       { labelX: 'x', labelY: 'y', origin: '0' },
+     axisLabels: 'minimal' | 'full',   // minimal: подписаны только 0, 1 и −1
      curves:     [ { type: 'line', k, b, color: 'lineA', label: null } ],
      points:     [ { x, y, style: 'solid', label: null, color: 'lineA' } ]
    }
@@ -54,7 +54,7 @@
       tick:        1.6,
       axis:        2.2,
       curve:       3.2,
-      pointStroke: 2.2,
+      pointStroke: 2.6,
       halo:        3                     /* тонкая белая обводка под текстом */
     },
 
@@ -66,7 +66,7 @@
       arrowExtend:   20,    /* продление оси за границу поля под стрелку     */
       tick:           3.5,  /* половина длины засечки (было непропорционально)*/
       tickEdgeCells:  1,    /* засечки не ставятся в этой зоне у края поля   */
-      pointRadius:    4.6
+      pointRadius:    6
     },
 
     font: {
@@ -74,9 +74,16 @@
          фолбэк нужен для отдельного .svg-файла вне страницы.               */
       family:    "var(--font, 'Inter', system-ui, -apple-system, sans-serif)",
       axisLabel:  12,       /* числа на осях — заметно мельче подписей осей  */
-      axisName:   17,       /* x, y, O — курсив                              */
-      curveLabel: 15,
-      pointLabel: 13
+      axisName:   17,       /* x, y, 0 — курсив                              */
+      pointLabel: 13,
+
+      /* Подпись графика: жирное математическое начертание —
+         антиква с курсивом, как набирают формулы в учебниках.              */
+      curveLabel:       17,
+      curveLabelFamily: "var(--font-math, 'STIX Two Text', 'Cambria', 'Charter', Georgia, serif)",
+      curveLabelWeight: 700,
+      curveLabelStyle:  'italic',
+      curveLabelTrack:  0.62   /* оценка ширины символа в долях кегля       */
     },
 
     /* Типографский минус в подписях чертежа (в данных и ответах — обычный). */
@@ -91,6 +98,9 @@
       curveLabel: 15,       /* отступ подписи графика от линии               */
       pointLabel: 9
     },
+
+    /* Режим подписей осей по умолчанию: 0, 1 и −1. */
+    axisLabels: 'minimal',
 
     /* Порядок слоёв. labelsOnTop=true: подписи чисел рисуются ПОВЕРХ графика,
        поэтому белая обводка действительно спасает подпись «1» на оси x.
@@ -246,7 +256,7 @@
     var axisX = sy(0);          /* пиксельная строка оси x */
     var axisY = sx(0);          /* пиксельный столбец оси y */
 
-    var mode = pick(scene.axisLabels, 'full');
+    var mode = pick(scene.axisLabels, THEME.axisLabels);
     var axes = scene.axes || {};
     var grid = scene.grid || {};
     var step = pick(grid.step, 1);
@@ -319,10 +329,11 @@
     axisLayer.push('<path d="' + ticks.join('') + '" fill="none" stroke="' + THEME.colors.axis +
       '" stroke-width="' + THEME.width.tick + '" stroke-linecap="butt"/>');
 
-    /* Подписи чисел ----------------------------------------------------- */
+    /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
+       единичный отрезок задан, остальное ученик отсчитывает по клеткам. -- */
     function labelled(value) {
       if (!ticked(value)) { return false; }
-      return mode === 'full' ? true : Math.abs(value - 1) < EPS;
+      return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
     }
 
     var labelBoxes = [];
@@ -344,8 +355,8 @@
       labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(ly) + 4.5, 'end'));
       boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(ly));
     }
-    if (pick(axes.origin, 'O') !== null) {
-      labelLayer.push(mathText(pick(axes.origin, 'O'), axisY - THEME.gap.origin,
+    if (pick(axes.origin, '0') !== null) {
+      labelLayer.push(mathText(pick(axes.origin, '0'), axisY - THEME.gap.origin,
         axisX + THEME.gap.originDown, 'end'));
     }
     labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
@@ -423,7 +434,7 @@
     var ny = (bx - ax) / len;
 
     var size = THEME.font.curveLabel;
-    var halfW = textWidth(item.curve.label, size) / 2;
+    var halfW = textWidth(item.curve.label, size, THEME.font.curveLabelTrack) / 2;
     var halfH = size * 0.62;
 
     var offset = THEME.gap.curveLabel + halfW * Math.abs(nx) + halfH * Math.abs(ny);
@@ -473,7 +484,7 @@
     var spot = best || fallback ||
       { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
 
-    return labelText(item.curve.label, spot.x, spot.y + halfH * 0.55, 'middle', size, item.stroke);
+    return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke);
   }
 
   /* Облако препятствий в пикселях: графики, оси, отмеченные точки
@@ -521,12 +532,13 @@
 
   function dist(x1, y1, x2, y2) { return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
 
-  /* Оценка ширины строки: цифры и латиница примерно 0,56 кегля. */
-  function textWidth(value, size) {
+  /* Оценка ширины строки: по умолчанию символ примерно 0,56 кегля. */
+  function textWidth(value, size, track) {
+    var unit = track || 0.56;
     var total = 0;
     for (var i = 0; i < value.length; i++) {
       var ch = value.charAt(i);
-      total += ch === ' ' ? 0.3 : (ch === '=' || ch === '−' || ch === '-' ? 0.6 : 0.56);
+      total += ch === ' ' ? unit * 0.55 : (ch === '=' || ch === '−' || ch === '-' ? unit * 1.07 : unit);
     }
     return total * size;
   }
@@ -535,27 +547,43 @@
      Текст. Под каждой подписью белая обводка (paint-order: stroke fill),
      иначе линия графика перечёркивает число.
      ══════════════════════════════════════════════════════════ */
-  function svgText(value, x, y, anchor, size, fill, extraStyle) {
+  function svgText(value, x, y, anchor, opts) {
+    var style = 'font-family:' + (opts.family || THEME.font.family) + ';paint-order:stroke fill' +
+      (opts.style ? ';font-style:' + opts.style : '') +
+      (opts.extra ? ';' + opts.extra : '');
     return '<text x="' + px(x) + '" y="' + px(y) + '" text-anchor="' + anchor +
-      '" font-size="' + size + '" fill="' + fill + '" stroke="' + THEME.colors.halo +
+      '" font-size="' + opts.size + '"' + (opts.weight ? ' font-weight="' + opts.weight + '"' : '') +
+      ' fill="' + (opts.fill || THEME.colors.label) + '" stroke="' + THEME.colors.halo +
       '" stroke-width="' + THEME.width.halo + '" stroke-linejoin="round"' +
-      ' style="font-family:' + THEME.font.family + ';paint-order:stroke fill' +
-      (extraStyle ? ';' + extraStyle : '') + '">' + esc(value) + '</text>';
+      ' style="' + style + '">' + esc(value) + '</text>';
   }
 
   /* Числа на осях — табличные цифры, мельче подписей осей. */
   function numberText(value, x, y, anchor) {
-    return svgText(value, x, y, anchor, THEME.font.axisLabel, THEME.colors.label,
-      'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\' 1');
+    return svgText(value, x, y, anchor, {
+      size: THEME.font.axisLabel,
+      extra: 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\' 1'
+    });
   }
 
-  /* x, y и O — курсив, как принято в математике. */
+  /* x, y и 0 — курсив, как принято в математике. */
   function mathText(value, x, y, anchor) {
-    return svgText(value, x, y, anchor, THEME.font.axisName, THEME.colors.label, 'font-style:italic');
+    return svgText(value, x, y, anchor, { size: THEME.font.axisName, style: 'italic' });
+  }
+
+  /* Подпись графика — жирная антиква курсивом. */
+  function curveLabelText(value, x, y, fill) {
+    return svgText(value, x, y, 'middle', {
+      size:   THEME.font.curveLabel,
+      family: THEME.font.curveLabelFamily,
+      weight: THEME.font.curveLabelWeight,
+      style:  THEME.font.curveLabelStyle,
+      fill:   fill
+    });
   }
 
   function labelText(value, x, y, anchor, size, fill) {
-    return svgText(value, x, y, anchor, size, fill || THEME.colors.label, null);
+    return svgText(value, x, y, anchor, { size: size, fill: fill });
   }
 
   return {
