@@ -1,0 +1,44 @@
+/* graph/graph.css — оформление раздела «Графики функций».
+   Цвета и размеры берутся из токенов styleguide.html.
+   Здесь только то, чего в дизайн-системе ещё нет: набор формул. */
+
+:root {
+  /* Математическая антиква: рисунок букв спокойнее компьютер-модерна,
+     цифры не выпадают из текста, курсив читается при мелком кегле. */
+  --font-math: 'STIX Two Text', 'Cambria Math', Cambria, 'Charter', 'Georgia', serif;
+}
+
+/* ── Формула в строке ───────────────────────────────────────── */
+.math {
+  font-family: var(--font-math);
+  font-size: 1.08em;          /* антиква мельче гротеска при равном кегле */
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.math i {
+  font-style: italic;
+  padding-right: .02em;        /* курсив наклонён — компенсируем правый бок */
+}
+
+/* ── Дробь столбиком ───────────────────────────────────────── */
+.frac {
+  display: inline-grid;
+  vertical-align: -0.42em;
+  text-align: center;
+  font-size: .92em;
+  margin: 0 .1em;
+}
+
+.frac-num { border-bottom: 1px solid currentColor; padding: 0 .22em .04em; }
+.frac-den { padding: .04em .22em 0; }
+
+/* ── Варианты ответа ───────────────────────────────────────── */
+.option {
+  display: flex;
+  gap: var(--space-2, 8px);
+  align-items: baseline;
+}
+
+.option-number { color: var(--color-text-tertiary, #97A1B0); font-variant-numeric: tabular-nums; }

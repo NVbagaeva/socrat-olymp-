@@ -80,9 +80,9 @@
       /* Подпись графика: жирное математическое начертание —
          антиква с курсивом, как набирают формулы в учебниках.              */
       curveLabel:       21,
-      curveLabelFamily: "var(--font-math, 'STIX Two Text', 'Cambria', 'Charter', Georgia, serif)",
+      curveLabelFamily: "var(--font-math, 'STIX Two Text', 'Cambria Math', Cambria, 'Charter', Georgia, serif)",
       curveLabelWeight: 700,
-      curveLabelStyle:  'italic',
+      pointLabelWeight: 600,
       curveLabelTrack:  0.62   /* оценка ширины символа в долях кегля       */
     },
 
@@ -610,6 +610,36 @@
      Текст. Под каждой подписью белая обводка (paint-order: stroke fill),
      иначе линия графика перечёркивает число.
      ══════════════════════════════════════════════════════════ */
+  /* Переменные в подписи набираются курсивом, числа и скобки — прямым.
+     Правило то же, что в graph/math.js; рендерер держит его у себя,
+     чтобы остаться без зависимостей. */
+  var VARIABLE = /[A-Za-z]/;
+
+  function mathRuns(value) {
+    var out = [];
+    var buffer = '';
+    var italic = null;
+
+    for (var i = 0; i < value.length; i++) {
+      var ch = value.charAt(i);
+      var isVar = VARIABLE.test(ch);
+      if (italic === null || isVar === italic) { buffer += ch; }
+      else { out.push({ text: buffer, italic: italic }); buffer = ch; }
+      italic = isVar;
+    }
+    if (buffer) { out.push({ text: buffer, italic: italic }); }
+    return out;
+  }
+
+  function mathSpans(value, baseItalic) {
+    var parts = mathRuns(String(value));
+    if (parts.length === 1 && parts[0].italic === !!baseItalic) { return esc(value); }
+    return parts.map(function (run) {
+      return '<tspan font-style="' + (run.italic ? 'italic' : 'normal') + '">' +
+        esc(run.text) + '</tspan>';
+    }).join('');
+  }
+
   function svgText(value, x, y, anchor, opts) {
     var style = 'font-family:' + (opts.family || THEME.font.family) + ';paint-order:stroke fill' +
       (opts.style ? ';font-style:' + opts.style : '') +
@@ -618,7 +648,8 @@
       '" font-size="' + opts.size + '"' + (opts.weight ? ' font-weight="' + opts.weight + '"' : '') +
       ' fill="' + (opts.fill || THEME.colors.label) + '" stroke="' + THEME.colors.halo +
       '" stroke-width="' + THEME.width.halo + '" stroke-linejoin="round"' +
-      ' style="' + style + '">' + esc(value) + '</text>';
+      ' style="' + style + '">' +
+      (opts.math ? mathSpans(value, opts.style === 'italic') : esc(value)) + '</text>';
   }
 
   /* Числа на осях — табличные цифры, мельче подписей осей. */
@@ -634,19 +665,27 @@
     return svgText(value, x, y, anchor, { size: THEME.font.axisName, style: 'italic' });
   }
 
-  /* Подпись графика — жирная антиква курсивом. */
+  /* Подпись графика — жирная антиква, переменные курсивом. */
   function curveLabelText(value, x, y, fill) {
     return svgText(value, x, y, 'middle', {
       size:   THEME.font.curveLabel,
       family: THEME.font.curveLabelFamily,
       weight: THEME.font.curveLabelWeight,
-      style:  THEME.font.curveLabelStyle,
+      style:  'normal',
+      math:   true,
       fill:   fill
     });
   }
 
+  /* Подпись точки — та же антиква: A курсивом, координаты прямым. */
   function labelText(value, x, y, anchor, size, fill) {
-    return svgText(value, x, y, anchor, { size: size, fill: fill });
+    return svgText(value, x, y, anchor, {
+      size:   size,
+      family: THEME.font.curveLabelFamily,
+      weight: THEME.font.pointLabelWeight,
+      math:   true,
+      fill:   fill
+    });
   }
 
   return {

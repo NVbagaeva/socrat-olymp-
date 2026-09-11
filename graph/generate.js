@@ -16,6 +16,7 @@
 var fs = require('fs');
 var path = require('path');
 var renderer = require('./renderer.js');
+var math = require('./math.js');
 var Line = require('./families/line.js');
 
 var ROOT = __dirname;
@@ -221,7 +222,7 @@ function pointChoice(ctx) {
 
   var onLine = Line.contains(ctx.line, probe.x, probe.y);
   var options = YES_NO.map(function (text, i) {
-    return { number: String(i + 1), text: text, error: null };
+    return { number: String(i + 1), text: text, error: null, math: false };
   });
   return { type: 'choice', options: options, answer: onLine ? '1' : '2' };
 }
@@ -480,6 +481,21 @@ function assemble(set, seed) {
   return chosen;
 }
 
+/* Формулы внутри текста размечаются долларами, как в наборе:
+   «График функции $y = kx + b$ …». В обычном тексте доллары снимаются,
+   в разметке — заменяются набранной формулой. */
+function typesetText(text) {
+  return String(text).replace(/\$([^$]+)\$/g, function (match, formula) {
+    return math.html(formula);
+  });
+}
+
+function plainText(text) {
+  return String(text).replace(/\$([^$]+)\$/g, function (match, formula) {
+    return math.plain(formula);
+  });
+}
+
 /* Подстановка значений в шаблон условия: {x}, {y}, {equation}. */
 function fillTemplate(text, values) {
   return String(text).replace(/\{(\w+)\}/g, function (match, key) {
@@ -541,14 +557,28 @@ function taskResult(set, task, built, seed, index) {
     y: built.probe ? numberText(built.probe.y) : ''
   };
 
+  /* Формулы внутри условия набираются математически; окружающий текст
+     остаётся в основном шрифте страницы. */
+  var typeset = {};
+  Object.keys(values).forEach(function (key) {
+    typeset[key] = values[key] === '' ? '' : math.html(values[key]);
+  });
+
   return {
     id: task.id,
     kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
     svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
-    question: fillTemplate(task.question, values),
-    hint: task.hint || null,
+    question: plainText(fillTemplate(task.question, values)),
+    questionHtml: typesetText(fillTemplate(task.question, typeset)),
+    hint: task.hint ? plainText(task.hint) : null,
+    hintHtml: task.hint ? typesetText(task.hint) : null,
     answer: choice ? choice.answer : answerText(value),
-    options: choice ? choice.options : null,
+    answerHtml: choice ? null : math.html(answerText(value)),
+    options: choice ? choice.options.map(function (option) {
+      /* «Да» и «нет» — обычные слова, их набирать антиквой не нужно. */
+      return { number: option.number, text: option.text, error: option.error,
+               html: option.math === false ? option.text : math.html(option.text) };
+    }) : null,
     answerType: task.answerType || 'number',
     level: task.level || null,
     meta: {
