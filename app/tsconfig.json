@@ -5,7 +5,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "allowJs": false,
+    "allowJs": true,
+    "checkJs": false,
     "skipLibCheck": true,
 
     "strict": true,
