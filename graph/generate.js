@@ -92,6 +92,7 @@ function findSet(taskId) {
 /* ══════════════════════════════════════════════════════════
    Кандидаты коэффициентов
    ══════════════════════════════════════════════════════════ */
+var MINUS = '\u2212';         /* типографский минус в формулах вариантов        */
 var CANDIDATE_POOL = 48;      /* сколько лучших кандидатов держим на задачу      */
 var SEARCH_BUDGET = 200000;   /* потолок перебора с возвратом                    */
 var INTEGER_K = [1, 2, 3];
@@ -130,6 +131,10 @@ function slopeCandidates(constraints) {
     if (constraints.absKMin !== undefined && abs < asNumber(constraints.absKMin) - 1e-9) { return false; }
     if (constraints.absKMax !== undefined && abs > asNumber(constraints.absKMax) + 1e-9) { return false; }
     if (constraints.denominators && constraints.denominators.indexOf(k.q) === -1) { return false; }
+    if (constraints.excludeAbsK &&
+        constraints.excludeAbsK.some(function (v) { return Math.abs(abs - asNumber(v)) < 1e-9; })) {
+      return false;
+    }
     return true;
   });
 }
@@ -153,8 +158,93 @@ function interceptCandidates(constraints) {
    ══════════════════════════════════════════════════════════ */
 var ANSWER_RULES = {
   k: function (ctx) { return ctx.line.k; },
-  b: function (ctx) { return ctx.line.b; }
+  b: function (ctx) { return ctx.line.b; },
+  'equation-choice': function (ctx) { return equationChoice(ctx); }
 };
+
+/* Типичные ошибки, по которым строятся неверные варианты (§7, блок 3).
+   Ровно по одному варианту каждого вида. */
+var EQUATION_DISTRACTORS = [
+  { id: 'A', note: 'перепутаны k и b',              make: function (k, b) { return { k: b, b: k }; } },
+  { id: 'B', note: 'потерян знак углового коэф-та', make: function (k, b) { return { k: -k, b: b }; } },
+  { id: 'C', note: 'потерян знак свободного члена', make: function (k, b) { return { k: k, b: -b }; } }
+];
+
+/* Запись коэффициента в формуле: 1x и −1x не пишутся, разделитель — запятая. */
+function coefficientText(value) {
+  if (Math.abs(value - 1) < 1e-9) { return ''; }
+  if (Math.abs(value + 1) < 1e-9) { return MINUS; }
+  return String(value).replace('.', ',').replace('-', MINUS);
+}
+
+function equationText(k, b) {
+  var left = 'y = ';
+  var slope = Math.abs(k) < 1e-9 ? '' : coefficientText(k) + 'x';
+  if (Math.abs(b) < 1e-9) { return left + (slope || '0'); }
+  var sign = b > 0 ? (slope ? ' + ' : '') : (slope ? ' ' + MINUS + ' ' : MINUS);
+  var value = String(Math.abs(b)).replace('.', ',');
+  return left + slope + sign + value;
+}
+
+/* Четыре варианта: верный плюс три типичные ошибки.
+   Порядок перемешивается по seed детерминированно; совпадение
+   двух вариантов — ошибка сборки, а не тихо принятый набор. */
+function equationChoice(ctx) {
+  var k = ctx.line.kValue;
+  var b = ctx.line.bValue;
+
+  var variants = [{ id: 'верный', k: k, b: b, correct: true }].concat(
+    EQUATION_DISTRACTORS.map(function (item) {
+      var made = item.make(k, b);
+      return { id: item.id, note: item.note, k: made.k, b: made.b, correct: false };
+    })
+  );
+
+  var texts = {};
+  variants.forEach(function (variant) {
+    variant.text = equationText(variant.k, variant.b);
+    if (texts[variant.text]) {
+      throw new Error('generate: у ' + ctx.task.id + ' совпали варианты «' + variant.text +
+        '» — набор бракуется (запрещены b = 0, k = ±1 и k = b)');
+    }
+    texts[variant.text] = true;
+  });
+
+  /* Место верного варианта задаётся на уровне набора: иначе по десяти
+     задачам оно скапливается на двух позициях и ответ угадывается. */
+  var correct = variants.filter(function (variant) { return variant.correct; })[0];
+  var wrong = shuffled(variants.filter(function (variant) { return !variant.correct; }),
+    rng(ctx.set.id + ':' + ctx.task.id + ':' + ctx.seed + ':choice'));
+
+  var place = answerPlaces(ctx.set, ctx.seed, variants.length)[ctx.index];
+  var order = [];
+  wrong.forEach(function (variant) { order.push(variant); });
+  order.splice(place - 1, 0, correct);
+
+  var answer = null;
+  var options = order.map(function (variant, i) {
+    var number = String(i + 1);
+    if (variant.correct) { answer = number; }
+    return { number: number, text: variant.text, error: variant.note || null };
+  });
+
+  return { type: 'choice', options: options, answer: answer };
+}
+
+/* Позиции верного ответа по набору: поровну между вариантами,
+   порядок перемешан по seed и одинаков при одном и том же seed. */
+var placesCache = {};
+
+function answerPlaces(set, seed, optionCount) {
+  var key = set.id + ':' + seed + ':' + optionCount;
+  if (placesCache[key]) { return placesCache[key]; }
+
+  var count = (set.tasks || []).length;
+  var list = [];
+  for (var i = 0; i < count; i++) { list.push((i % optionCount) + 1); }
+  placesCache[key] = shuffled(list, rng(key + ':places'));
+  return placesCache[key];
+}
 
 /* Точная дробь -> строка ответа. Конечная десятичная — с запятой,
    как в бланке ЕГЭ; несократимая треть остаётся дробью. */
@@ -191,6 +281,9 @@ function taskCandidates(task, set, seed) {
 
       /* Прямая не должна ложиться на ось: график сливается с каркасом. */
       if (Line.isZero(line.k) && Line.isZero(line.b)) { continue; }
+
+      /* Блок 3: при k = b верный ответ совпал бы с вариантом «перепутаны k и b». */
+      if (constraints.distinctKB && Math.abs(line.kValue - line.bValue) < 1e-9) { continue; }
 
       /* §3 — окно; §4.2 — прямая проходит окно насквозь. */
       var win = Line.windowFor(line, constraints);
@@ -324,12 +417,16 @@ function sceneFor(built, task, set) {
   };
 }
 
-function taskResult(set, task, built, seed) {
+function taskResult(set, task, built, seed, index) {
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
   var family = FAMILIES[task.family || set.family || 'line'];
   if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
+
+  var value = rule({ line: built.line, window: built.window, points: built.points,
+                     task: task, set: set, seed: seed, index: index });
+  var choice = value && value.type === 'choice' ? value : null;
 
   return {
     id: task.id,
@@ -337,7 +434,8 @@ function taskResult(set, task, built, seed) {
     svg: renderer.renderGraph(sceneFor(built, task, set)),
     question: task.question,
     hint: task.hint || null,
-    answer: answerText(rule({ line: built.line, window: built.window, points: built.points, task: task })),
+    answer: choice ? choice.answer : answerText(value),
+    options: choice ? choice.options : null,
     answerType: task.answerType || 'number',
     level: task.level || null,
     meta: {
@@ -368,7 +466,7 @@ function generateSet(setId, seed) {
   var built = assemble(set, effectiveSeed);
 
   return (set.tasks || []).map(function (task, i) {
-    return taskResult(set, task, built[i], effectiveSeed);
+    return taskResult(set, task, built[i], effectiveSeed, i);
   });
 }
 
@@ -382,7 +480,9 @@ function buildAnswers() {
 
   sets.prep.forEach(function (set) {
     generateSet(set.id).forEach(function (task) {
-      out.prep[task.id] = { answer: task.answer, answerType: task.answerType, seed: task.meta.seed };
+      var record = { answer: task.answer, answerType: task.answerType, seed: task.meta.seed };
+      if (task.options) { record.options = task.options.map(function (o) { return o.text; }); }
+      out.prep[task.id] = record;
     });
   });
   sets.prototypes.forEach(function (set) {
@@ -403,6 +503,7 @@ function writeAnswers() {
 }
 
 module.exports = {
+  equationText: equationText,
   generate: generate,
   generateSet: generateSet,
   loadSets: loadSets,

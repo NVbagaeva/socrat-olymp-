@@ -1,0 +1,229 @@
+{
+  "kind": "prep",
+  "id": "P12-3",
+  "block": 3,
+  "title": "Уравнение прямой",
+  "subtitle": "По графику выбрать формулу функции",
+  "seed": 1203,
+  "family": "line",
+  "axisLabels": "minimal",
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "allChoice": 4,
+    "optionsDistinct": true,
+    "noZeroIntercept": true,
+    "forbidAbsK": [
+      1
+    ],
+    "minIncreasing": 4,
+    "minDecreasing": 4,
+    "minFractionK": 3,
+    "uniquePairs": true,
+    "allIntegerB": true,
+    "interceptMargin": 2,
+    "balancedAnswerPlaces": true
+  },
+  "tasks": [
+    {
+      "id": "P12-3-01",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Сначала посмотри на знак наклона: прямая растёт — значит, k положительный.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bSign": "positive",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-02",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Прямая убывает: у верной формулы перед x стоит минус.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 2,
+        "bSign": "positive",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-03",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Найди, где прямая пересекает ось y, — это b, и он здесь ниже нуля.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 3,
+        "bSign": "negative",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-04",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Проверь оба знака сразу: k отрицательный и b отрицательный.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bSign": "negative",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-05",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Подставь x = 0 в каждую формулу: останется b, сравни с чертежом.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bSign": "negative",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-06",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Не путай местами: число перед x — это k, свободное число — b.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bSign": "positive",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-07",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Наклон дробный: за две клетки вправо прямая поднимается на три.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 1.5,
+        "bSign": "positive",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-08",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Возьми две отмеченные точки, посчитай k, потом прочитай b на оси y.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 1.5,
+        "bSign": "negative",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-09",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Проверь подстановкой: возьми отмеченную точку и подставь её в формулу.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 2.5,
+        "bSign": "negative",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-3-10",
+      "question": "На рисунке изображён график линейной функции. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Отбрасывай варианты по одному признаку за раз: сперва знак k, потом b.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 2.5,
+        "bSign": "positive",
+        "bNonZero": true,
+        "excludeAbsK": [
+          1
+        ],
+        "distinctKB": true,
+        "markIntercept": true,
+        "bVisible": true
+      }
+    }
+  ]
+}

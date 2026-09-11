@@ -139,6 +139,72 @@ function checkComposition(set, tasks) {
     need(Object.keys(absK).length, rules.minDistinctAbsK, 'различных |k|');
   }
 
+  /* Блок 3: варианты ответа. */
+  if (rules.allChoice !== undefined) {
+    tasks.forEach(function (task) {
+      var at = where + '/' + task.id;
+      if (task.answerType !== 'choice') {
+        errors.push(at + ': ожидался answerType choice, а он ' + task.answerType);
+        return;
+      }
+      if (!task.options || task.options.length !== rules.allChoice) {
+        errors.push(at + ': вариантов ' + (task.options ? task.options.length : 0) +
+          ', нужно ' + rules.allChoice);
+        return;
+      }
+
+      /* Верный вариант существует и совпадает с формулой чертежа. */
+      var picked = task.options.filter(function (o) { return o.number === task.answer; })[0];
+      if (!picked) {
+        errors.push(at + ': ответ «' + task.answer + '» не указывает ни на один вариант');
+      } else {
+        var expected = generator.equationText(task.meta.k, task.meta.b);
+        if (picked.text !== expected) {
+          errors.push(at + ': верным помечен «' + picked.text + '», а на чертеже ' + expected);
+        }
+      }
+
+      if (rules.optionsDistinct) {
+        var seen = {};
+        task.options.forEach(function (option) {
+          if (seen[option.text]) { errors.push(at + ': вариант «' + option.text + '» повторяется'); }
+          seen[option.text] = true;
+        });
+      }
+    });
+
+    /* Место верного ответа распределено по набору, а не скоплено. */
+    if (rules.balancedAnswerPlaces) {
+      var places = {};
+      tasks.forEach(function (task) { places[task.answer] = (places[task.answer] || 0) + 1; });
+      var low = Math.floor(tasks.length / rules.allChoice);
+      var high = Math.ceil(tasks.length / rules.allChoice);
+      for (var n = 1; n <= rules.allChoice; n++) {
+        var got = places[String(n)] || 0;
+        if (got < low || got > high) {
+          errors.push(where + ': верный ответ стоит на месте ' + n + ' ' + got + ' раз, нужно ' +
+            (low === high ? low : low + '–' + high));
+        }
+      }
+    }
+  }
+
+  if (rules.noZeroIntercept) {
+    tasks.forEach(function (task) {
+      if (task.meta.b === 0) { errors.push(where + '/' + task.id + ': b = 0 в блоке запрещён'); }
+    });
+  }
+
+  if (rules.forbidAbsK) {
+    tasks.forEach(function (task) {
+      rules.forbidAbsK.forEach(function (value) {
+        if (Math.abs(Math.abs(task.meta.k) - value) < 1e-9) {
+          errors.push(where + '/' + task.id + ': |k| = ' + value + ' в блоке запрещён');
+        }
+      });
+    });
+  }
+
   if (rules.uniquePairs) {
     var pairs = {};
     tasks.forEach(function (task) {
