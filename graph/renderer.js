@@ -666,6 +666,23 @@
         '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helperMark + '"/>';
     }
 
+    /* Окружность: нужна тригонометрическому кругу в разборе. */
+    if (shape.type === 'circle') {
+      return '<circle' + id + ' cx="' + px(sx(shape.at[0])) + '" cy="' + px(sy(shape.at[1])) +
+        '" r="' + px(shape.radius * cell) + '" fill="' +
+        (shape.fill ? color(shape.fill) : 'none') + '" fill-opacity="' +
+        (shape.fillOpacity === undefined ? 1 : shape.fillOpacity) + '" stroke="' + stroke +
+        '" stroke-width="' + (shape.width || THEME.width.helperMark) + '"' + dash + '/>';
+    }
+
+    /* Точка: маленький кружок с белой обводкой, как опорные точки. */
+    if (shape.type === 'dot') {
+      return '<circle' + id + ' cx="' + px(sx(shape.at[0])) + '" cy="' + px(sy(shape.at[1])) +
+        '" r="' + px(shape.radius === undefined ? THEME.geometry.pointRadius * 0.8 : shape.radius) +
+        '" fill="' + stroke + '" stroke="' + THEME.colors.pointStroke +
+        '" stroke-width="' + THEME.width.pointStroke * 0.7 + '"/>';
+    }
+
     /* Дуга угла наклона у левой опорной точки. */
     if (shape.type === 'arc') {
       var r = (shape.radius === undefined ? THEME.helper.arcRadius : shape.radius) * cell;

@@ -69,3 +69,95 @@
 /* Строка про знак приращения у убывающей прямой — не вывод,
    а пояснение, поэтому тише остальных. */
 .solution-line[data-line="sign"] { color: var(--color-text-secondary, #667389); }
+
+/* ── Разбор: пять шагов ────────────────────────────────────
+   Каждый шаг — карточка: фон, один радиус, одна тень, щедрые
+   поля. Между карточками воздух, а не линии-разделители. */
+.solution-steps { display: grid; gap: var(--space-4, 16px); }
+
+.solution-step {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: var(--space-3, 12px);
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm, 0 2px 6px rgba(16,23,40,.05));
+  padding: var(--space-5, 20px);
+}
+
+.solution-number {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text-tertiary, #97A1B0);
+  font-variant-numeric: tabular-nums;
+}
+
+.solution-head { display: flex; align-items: center; gap: var(--space-2, 8px); margin: 0 0 var(--space-2, 8px); }
+.solution-title { font-size: 1rem; font-weight: 600; margin: 0; }
+.solution-arrow { display: block; }
+
+/* Текст объяснения: крупнее интерфейсного, просторный интерлиньяж,
+   строка не длиннее 60 знаков, цифры табличные. */
+.solution-text {
+  margin: 0 0 var(--space-3, 12px);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  max-width: 60ch;
+  font-variant-numeric: tabular-nums;
+}
+.solution-text:last-child { margin-bottom: 0; }
+
+/* Ключевые числа — полужирным и цветом прямой: глаз цепляется
+   за них при повторном чтении. */
+.key { color: var(--color-primary, #1F5FD0); font-weight: 700; }
+
+.solution-formula { margin: 0 0 var(--space-3, 12px); font-size: 1.15rem; }
+
+/* Формула целиком — опорная точка разбора, её видно при беглом просмотре. */
+.solution-formula.feature {
+  background: var(--color-surface-soft, #E8F0FC);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-4, 16px) var(--space-5, 20px);
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.solution-answer {
+  margin: var(--space-3, 12px) 0 0;
+  font-size: 1.0625rem;
+}
+
+/* Врезка «Можно проще» — другой фон, чтобы отличалась от шагов. */
+.solution-callout {
+  margin-top: var(--space-3, 12px);
+  background: var(--color-surface-2, #F7F9FC);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-4, 16px);
+}
+.solution-callout-title {
+  font-size: .8125rem; font-weight: 600; letter-spacing: .02em;
+  color: var(--color-text-secondary, #667389);
+  margin: 0 0 var(--space-2, 8px); text-transform: uppercase;
+}
+.solution-callout .solution-text { font-size: 1rem; }
+
+/* Раскрывающийся блок «Откуда берётся минус». */
+.solution-details { margin-top: var(--space-3, 12px); }
+.solution-details-toggle {
+  font: inherit; font-size: .8125rem; color: var(--color-text-secondary, #667389);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  border-bottom: 1px dashed currentColor;
+}
+.solution-details-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--dur-reveal, 320ms) var(--ease, cubic-bezier(.2,0,0,1));
+}
+.solution-details.open .solution-details-body { max-height: 720px; }
+.solution-details-body > div { padding-top: var(--space-3, 12px); }
+.solution-details svg { display: block; width: 100%; max-width: 360px; margin: 0 auto; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .solution-details-body { transition: none; }
+}

@@ -17,6 +17,7 @@ var THEME = renderer.THEME;
 var generator = require('./generate.js');
 var Line = require('./families/line.js');
 var Triangle = require('./triangle.js');
+var Solution = require('./solution.js');
 
 var ROOT = __dirname;
 
@@ -184,6 +185,33 @@ function checkAnalysis(set, task) {
       errors.push(where + ': подпись ' + (box.id || box.kind) + ' легла на ось');
     }
   });
+
+  /* Разбор собирается целиком: пять шагов, у каждого есть блоки.
+     Так ошибка в шаблоне текста находится на сборке, а не у ученика. */
+  try {
+    var source = (set.tasks || []).filter(function (item) { return item.id === task.id; })[0];
+    var steps = Solution.build({
+      triangle: t, line: analysis.line, window: win,
+      task: { rule: source && source.answerRule, answer: task.answer,
+              query: task.meta.query, probe: task.meta.probe }
+    });
+    if (steps.length !== 5) {
+      errors.push(where + ': в разборе ' + steps.length + ' шагов, схема требует пять');
+    }
+    steps.forEach(function (step) {
+      if (!step.blocks || !step.blocks.length) {
+        errors.push(where + ': шаг «' + step.title + '» пуст');
+      }
+      step.blocks.forEach(function (block) {
+        var body = block.html || block.tex || '';
+        if (/undefined|NaN/.test(body)) {
+          errors.push(where + ': в разборе осталось «' + body.match(/undefined|NaN/)[0] + '»');
+        }
+      });
+    });
+  } catch (error) {
+    errors.push(where + ': разбор не собрался — ' + error.message);
+  }
 
   /* 7. Подпись y = f(x) не пересекается с треугольником и его разметкой. */
   var curveLabel = (report.boxes || []).filter(function (box) { return box.kind === 'curveLabel'; })[0];

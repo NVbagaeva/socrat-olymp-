@@ -112,9 +112,18 @@
         '<span class="math" data-tex="' + esc(tex(String(text))) + '">');
     }
 
-    var body = runs(value).map(function (run) {
-      var content = esc(run.text);
-      return run.italic ? '<i>' + content + '</i>' : content;
+    /* Дроби внутри выражения тоже набираются столбиком: «4/2» в строку
+       выглядит как деление в коде, а не как формула. */
+    var body = value.split(/(\d+\/\d+)/).map(function (piece, index) {
+      if (index % 2 === 1) {
+        var parts = piece.split('/');
+        return '<span class="frac"><span class="frac-num">' + esc(parts[0]) +
+          '</span><span class="frac-den">' + esc(parts[1]) + '</span></span>';
+      }
+      return runs(piece).map(function (run) {
+        var content = esc(run.text);
+        return run.italic ? '<i>' + content + '</i>' : content;
+      }).join('');
     }).join('');
 
     return '<span class="math" data-tex="' + esc(tex(String(text))) + '">' + body + '</span>';

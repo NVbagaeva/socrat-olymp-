@@ -33,6 +33,7 @@
     reveal:       250,
     pause:        150,
     solutionLine: 200,
+    solutionStep: 250,   /* шаги разбора появляются по очереди        */
     solutionRise: 6      /* на сколько пикселей всплывает строка решения */
   };
 
@@ -70,7 +71,12 @@
         : { path: parts.legY, label: parts.labelY };
     });
 
-    var solutionLines = buildSolution(solutionEl, lines);
+    /* Страница может отдать готовые карточки шагов: тогда модуль
+       только показывает их по очереди и ничего не верстает сам. */
+    var solutionLines = options.solutionNodes
+      ? Array.prototype.slice.call(options.solutionNodes)
+      : buildSolution(solutionEl, lines);
+    var lineDelay = options.solutionNodes ? TIMING.solutionStep : TIMING.solutionLine;
     var instant = reducedMotion();
     var timers = [];
     var state = { step: 0, total: 0, playing: false, finished: false };
@@ -176,7 +182,7 @@
     if (solutionLines.length) {
       steps.push({
         id: 'solution',
-        duration: TIMING.solutionLine * solutionLines.length,
+        duration: lineDelay * solutionLines.length,
         run: function (fast) {
           solutionLines.forEach(function (line, i) {
             var show = function () {
@@ -186,7 +192,7 @@
               line.style.opacity = '1';
               line.style.transform = 'translateY(0)';
             };
-            if (fast) { show(); } else { timers.push(setTimeout(show, i * TIMING.solutionLine)); }
+            if (fast) { show(); } else { timers.push(setTimeout(show, i * lineDelay)); }
           });
         },
         freeze: function () {

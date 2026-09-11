@@ -69,7 +69,8 @@
           border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
   aside h2 { font-size: 14px; margin: 0 0 4px; }
   aside .hint { font-size: 12px; color: var(--color-text-secondary); margin: 8px 0 0; }
-  aside svg { display: block; width: 100%; height: auto; margin: 10px 0; }
+  aside > svg { display: block; width: 100%; height: auto; margin: 10px 0; }
+  .solution-arrow { width: 22px; height: 22px; flex: none; }
 
   .attempt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
   .verdict { font-size: 13px; margin: 8px 0 0; }
@@ -118,6 +119,7 @@
 <script src="families/line.js"></script>
 <script src="triangle.js"></script>
 <script src="generate.js"></script>
+<script src="solution.js"></script>
 <script src="animate.js"></script>
 <script>
 (function () {
@@ -298,22 +300,30 @@
       return;
     }
 
-    /* Формулы в строках решения набираются так же, как в условии:
-       куски в долларах — математикой, остальное — шрифтом интерфейса. */
-    var lines = GraphTriangle.solution(analysis.triangle, task.answer).map(function (line) {
-      return {
-        id: line.id,
-        html: line.formula ? GraphMath.html(line.text) : GraphGenerate.typeset(line.text)
-      };
+    var steps = GraphSolution.build({
+      triangle: analysis.triangle,
+      line: analysis.line,
+      window: analysis.scene.window,
+      task: {
+        rule: taskRule(task.id),
+        answer: task.answer,
+        query: task.meta.query,
+        probe: task.meta.probe
+      }
     });
 
     show.addEventListener('click', function () {
       solution.hidden = false;
       if (!player) {
+        solution.innerHTML = '<div class="solution-steps">' +
+          steps.map(stepMarkup).join('') + '</div>';
+        GraphKatex.upgrade(solution);
+        bindDetails(solution);
+
         player = GraphAnimate.create({
           svg: el.panel.querySelector('svg'),
           triangle: analysis.triangle,
-          lines: lines,
+          solutionNodes: solution.querySelectorAll('.solution-step'),
           solutionEl: solution,
           onState: function (state) {
             steps.textContent = 'шаг ' + state.step + ' из ' + state.total +
@@ -339,6 +349,89 @@
     });
 
     next.addEventListener('click', function () { player.next(); });
+  }
+
+  /* ── Разметка шагов разбора ──────────────────────────────
+     Модуль solution.js отдаёт структуру, разметку делает страница. */
+  function blockMarkup(block) {
+    if (block.type === 'text') { return '<p class="solution-text">' + block.html + '</p>'; }
+
+    if (block.type === 'formula') {
+      return '<p class="solution-formula' + (block.feature ? ' feature' : '') + '">' +
+        '<span class="math" data-tex="' + escapeAttr(block.tex) + '">' +
+        GraphMath.html(texFallback(block.tex)) + '</span></p>';
+    }
+
+    if (block.type === 'answer') { return '<p class="solution-answer">' + block.html + '</p>'; }
+
+    if (block.type === 'callout') {
+      return '<div class="solution-callout"><p class="solution-callout-title">' + block.title +
+        '</p>' + block.blocks.map(blockMarkup).join('') + '</div>';
+    }
+
+    if (block.type === 'details') {
+      return '<div class="solution-details"><button type="button" class="solution-details-toggle">' +
+        block.title + '</button><div class="solution-details-body"><div>' +
+        block.blocks.map(blockMarkup).join('') + '</div></div></div>';
+    }
+
+    if (block.type === 'scene') { return GraphRenderer.renderGraph(block.scene); }
+    return '';
+  }
+
+  function stepMarkup(step) {
+    return '<section class="solution-step"><div class="solution-number">' + step.number + '</div>' +
+      '<div><div class="solution-head"><h3 class="solution-title">' + step.title + '</h3>' +
+      (step.arrow ? arrowIcon(step.arrow) : '') + '</div>' +
+      step.blocks.map(blockMarkup).join('') + '</div></section>';
+  }
+
+  /* Схематичная стрелка направления — без подписей, цветом прямой. */
+  function arrowIcon(direction) {
+    var up = direction === 'up';
+    return '<svg class="solution-arrow" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">' +
+      '<path d="M4 ' + (up ? 17 : 5) + 'L18 ' + (up ? 5 : 17) + '" stroke="var(--color-primary, #1F5FD0)" ' +
+      'stroke-width="2.4" stroke-linecap="round"/>' +
+      '<path d="M' + (up ? '12 5H18V11' : '12 17H18V11') + '" fill="none" ' +
+      'stroke="var(--color-primary, #1F5FD0)" stroke-width="2.4" stroke-linecap="round" ' +
+      'stroke-linejoin="round"/></svg>';
+  }
+
+  function escapeAttr(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  /* Пока KaTeX не загружен, формула читается своим набором. */
+  function texFallback(tx) {
+    return String(tx)
+      .replace(/\\operatorname\{tg\}/g, 'tg')
+      .replace(/\\dfrac\{([^{}]+)\}\{([^{}]+)\}/g, '$1/$2')
+      .replace(/\\cdot/g, '·')
+      .replace(/\\alpha/g, 'α')
+      .replace(/\^\\circ/g, '°')
+      .replace(/\{,\}/g, ',')
+      .replace(/\\,/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* Раскрывающийся блок: плавно, а при выключенном движении — сразу. */
+  function bindDetails(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.solution-details'), function (node) {
+      node.querySelector('.solution-details-toggle').addEventListener('click', function () {
+        node.classList.toggle('open');
+      });
+    });
+  }
+
+  /* Правило ответа берётся из описания задачи. */
+  function taskRule(id) {
+    var all = sets.prep.concat(sets.prototypes);
+    var rule = null;
+    all.forEach(function (set) {
+      (set.tasks || []).forEach(function (task) { if (task.id === id) { rule = task.answerRule; } });
+    });
+    return rule;
   }
 
   /* ── События ──────────────────────────────────────────── */
@@ -398,6 +491,15 @@
     if (params.auto === '1') {
       document.getElementById('giveup').click();
       document.getElementById('show').click();
+    }
+
+    /* open=1 — развернуть блок «Откуда берётся минус»: нужен для показа. */
+    if (params.open === '1') {
+      setTimeout(function () {
+        Array.prototype.forEach.call(document.querySelectorAll('.solution-details'), function (node) {
+          node.classList.add('open');
+        });
+      }, 50);
     }
   }
 
