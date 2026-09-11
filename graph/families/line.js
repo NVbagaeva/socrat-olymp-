@@ -89,6 +89,12 @@ function axisIntersections(line) {
   };
 }
 
+/* Лежит ли точка на прямой. Сравнение точное: у дробных k
+   проверка через double ошибается на границе. */
+function contains(line, x, y) {
+  return isZero(sub(yAt(line, x), toFrac(y)));
+}
+
 /* Точка пересечения двух прямых: null, если параллельны. */
 function intersect(a, b) {
   if (isZero(sub(a.k, b.k))) { return null; }
@@ -215,6 +221,7 @@ module.exports = {
   yAt: yAt,
   xForValue: xForValue,
   axisIntersections: axisIntersections,
+  contains: contains,
   intersect: intersect,
   integerPoints: integerPoints,
   referencePoints: referencePoints,

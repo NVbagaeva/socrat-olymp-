@@ -351,19 +351,6 @@
       drawn.push({ curve: curve, pieces: pieces, stroke: stroke });
     });
 
-    /* Точки -------------------------------------------------------------- */
-    (scene.points || []).forEach(function (point) {
-      var fill = THEME.colors.pointFill || color(point.color);
-      var open = point.style === 'open';
-      pointLayer.push('<circle cx="' + px(sx(point.x)) + '" cy="' + px(sy(point.y)) + '" r="' +
-        px(g.pointRadius) + '" fill="' + (open ? THEME.colors.bg : fill) + '" stroke="' +
-        (open ? fill : THEME.colors.pointStroke) + '" stroke-width="' + THEME.width.pointStroke + '"/>');
-      if (point.label) {
-        pointLayer.push(labelText(point.label, sx(point.x) + THEME.gap.pointLabel,
-          sy(point.y) - THEME.gap.pointLabel, 'start', THEME.font.pointLabel, color(point.color)));
-      }
-    });
-
     /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
        единичный отрезок задан, остальное ученик отсчитывает по клеткам. -- */
     function labelled(value) {
@@ -397,30 +384,45 @@
       var originText = pick(axes.origin, '0');
       var originHalfW = textWidth(originText, THEME.font.axisName) / 2;
       var originHalfH = THEME.font.axisName * 0.62;
-      var originCloud = obstacleCloud(scene, drawn, sx, sy,
-        { x: axisY, y: axisX }, { left: sx(win.xmin), right: sx(win.xmax),
-                                  top: sy(win.ymax), bottom: sy(win.ymin) },
-        labelBoxes, { axes: false });
+      var originField = { left: sx(win.xmin), right: sx(win.xmax),
+                          top: sy(win.ymax), bottom: sy(win.ymin) };
+      var originSpot = bestLabelSpot(axisY, axisX, originHalfW, originHalfH, THEME.gap.origin,
+        obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX }, originField, labelBoxes,
+          { axes: false }), originField);
 
-      var bestOrigin = null;
-      [[-1, 1], [-1, -1], [1, 1], [1, -1]].forEach(function (dir, order) {
-        var cx = axisY + dir[0] * (THEME.gap.origin + originHalfW);
-        var cy = axisX + dir[1] * THEME.gap.originDown;
-        var clear = Infinity;
-        for (var c = 0; c < originCloud.length; c++) {
-          clear = Math.min(clear, rectDist(originCloud[c], cx, cy - originHalfH * 0.55,
-                                           originHalfW, originHalfH));
-        }
-        /* Слева-снизу — привычное место, поэтому небольшая фора. */
-        var score = clear - order * 0.5;
-        if (!bestOrigin || score > bestOrigin.score + 1e-9) {
-          bestOrigin = { x: cx + originHalfW, y: cy, score: score };
-        }
-      });
-      labelLayer.push(mathText(originText, bestOrigin.x, bestOrigin.y, 'end'));
+      labelBoxes.push({ x: originSpot.x, y: originSpot.y, halfW: originHalfW, halfH: originHalfH });
+      labelLayer.push(mathText(originText, originSpot.x + originHalfW,
+        originSpot.y + originHalfH * 0.55, 'end'));
     }
+
     labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
     labelLayer.push(mathText(pick(axes.labelY, 'y'), axisY + THEME.gap.axisName, tipY + 8, 'start'));
+
+    /* Точки и их подписи: подпись уходит в свободную сторону,
+       чтобы не садиться на линию, оси и числа. ------------------------- */
+    var field = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+    var originPx = { x: axisY, y: axisX };
+
+    (scene.points || []).forEach(function (point) {
+      var fill = THEME.colors.pointFill || color(point.color);
+      var open = point.style === 'open';
+      pointLayer.push('<circle cx="' + px(sx(point.x)) + '" cy="' + px(sy(point.y)) + '" r="' +
+        px(g.pointRadius) + '" fill="' + (open ? THEME.colors.bg : fill) + '" stroke="' +
+        (open ? fill : THEME.colors.pointStroke) + '" stroke-width="' + THEME.width.pointStroke + '"/>');
+    });
+
+    (scene.points || []).forEach(function (point) {
+      if (!point.label) { return; }
+      var halfW = textWidth(point.label, THEME.font.pointLabel) / 2;
+      var halfH = THEME.font.pointLabel * 0.62;
+      var cloud = obstacleCloud(scene, drawn, sx, sy, originPx, field, labelBoxes);
+      var spot = bestLabelSpot(sx(point.x), sy(point.y), halfW, halfH,
+        THEME.gap.pointLabel + g.pointRadius, cloud, field);
+
+      labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+      pointLayer.push(labelText(point.label, spot.x, spot.y + halfH * 0.55, 'middle',
+        THEME.font.pointLabel, color(point.color)));
+    });
 
     /* Подписи графиков: горизонтально, у самой линии, в стороне
        от точек и пересечений с осями. -------------------------------------*/
@@ -464,9 +466,9 @@
 
     var offset = THEME.gap.curveLabel + halfW * Math.abs(nx) + halfH * Math.abs(ny);
 
-    var field = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+    var labelField = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
     var origin = { x: sx(0), y: sy(0) };
-    var cloud = obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes);
+    var cloud = obstacleCloud(scene, all, sx, sy, origin, labelField, labelBoxes);
 
     var scan = THEME.curveLabelScan;
     var best = null;
@@ -482,10 +484,10 @@
            отойти нужно заметно дальше, чем у пологой.                    */
         var cx = lx + nx * side * offset;
         var cy = ly + ny * side * offset;
-        if (cx - halfW < field.left + THEME.curveLabelEdge) { continue; }
-        if (cx + halfW > field.right - THEME.curveLabelEdge) { continue; }
-        if (cy - halfH < field.top + THEME.curveLabelEdge) { continue; }
-        if (cy + halfH > field.bottom - THEME.curveLabelEdge) { continue; }
+        if (cx - halfW < labelField.left + THEME.curveLabelEdge) { continue; }
+        if (cx + halfW > labelField.right - THEME.curveLabelEdge) { continue; }
+        if (cy - halfH < labelField.top + THEME.curveLabelEdge) { continue; }
+        if (cy + halfH > labelField.bottom - THEME.curveLabelEdge) { continue; }
 
         var clear = Infinity;
         for (var c = 0; c < cloud.length; c++) {
@@ -510,6 +512,39 @@
       { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
 
     return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke);
+  }
+
+  /* Свободное место для короткой подписи рядом с точкой.
+     Перебираются восемь направлений от якоря; берётся то, где до
+     облака препятствий дальше всего. Диагональ вверх-вправо идёт
+     первой: это привычное место подписи точки. */
+  var LABEL_DIRECTIONS = [
+    [1, -1], [-1, -1], [1, 1], [-1, 1],
+    [0, -1], [0, 1], [1, 0], [-1, 0]
+  ];
+
+  function bestLabelSpot(ax, ay, halfW, halfH, gap, cloud, field) {
+    var best = null;
+
+    LABEL_DIRECTIONS.forEach(function (dir, order) {
+      var cx = ax + dir[0] * (gap + halfW);
+      var cy = ay + dir[1] * (gap + halfH);
+
+      var penalty = order * 0.6;
+      if (cx - halfW < field.left) { penalty += (field.left - (cx - halfW)) * 2; }
+      if (cx + halfW > field.right) { penalty += ((cx + halfW) - field.right) * 2; }
+      if (cy - halfH < field.top) { penalty += (field.top - (cy - halfH)) * 2; }
+      if (cy + halfH > field.bottom) { penalty += ((cy + halfH) - field.bottom) * 2; }
+
+      var clear = Infinity;
+      for (var c = 0; c < cloud.length; c++) {
+        clear = Math.min(clear, rectDist(cloud[c], cx, cy, halfW, halfH));
+        if (clear <= 0) { break; }
+      }
+      var score = clear - penalty;
+      if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
+    });
+    return best;
   }
 
   /* Облако препятствий в пикселях: графики, оси, отмеченные точки

@@ -153,11 +153,14 @@ function checkComposition(set, tasks) {
         return;
       }
 
-      /* Верный вариант существует и совпадает с формулой чертежа. */
+      /* Верный вариант существует; если варианты — формулы, он ещё и
+         совпадает с уравнением, восстановленным из чертежа независимо
+         от генератора. У вариантов «да / нет» сверять нечего: их
+         согласованность с чертежом проверяет probeOffsetMax. */
       var picked = task.options.filter(function (o) { return o.number === task.answer; })[0];
       if (!picked) {
         errors.push(at + ': ответ «' + task.answer + '» не указывает ни на один вариант');
-      } else {
+      } else if (rules.optionsAre === 'equation') {
         var expected = generator.equationText(task.meta.k, task.meta.b);
         if (picked.text !== expected) {
           errors.push(at + ': верным помечен «' + picked.text + '», а на чертеже ' + expected);
@@ -187,6 +190,65 @@ function checkComposition(set, tasks) {
         }
       }
     }
+  }
+
+  /* Блоки 4 и 5: состав «да / нет» и поведение проверяемой точки. */
+  if (rules.yesCount !== undefined) {
+    var yes = tasks.filter(function (task) { return task.answer === '1'; }).length;
+    if (yes !== rules.yesCount) {
+      errors.push(where + ': ответов «да» — ' + yes + ', нужно ровно ' + rules.yesCount);
+    }
+  }
+
+  /* Ответы не должны идти строгим чередованием: такую последовательность
+     ученик замечает раньше, чем успевает решить задачу. */
+  if (rules.noAlternatingAnswers) {
+    var alternating = tasks.length > 2;
+    for (var t = 1; t < tasks.length; t++) {
+      if (tasks[t].answer === tasks[t - 1].answer) { alternating = false; break; }
+    }
+    if (alternating) { errors.push(where + ': ответы идут строгим чередованием'); }
+  }
+
+  if (rules.probeOffsetMax !== undefined) {
+    tasks.forEach(function (task) {
+      var probe = task.meta.probe;
+      var at = where + '/' + task.id;
+      if (!probe) { errors.push(at + ': не задана проверяемая точка'); return; }
+      if (Math.abs(probe.delta) > rules.probeOffsetMax + 1e-9) {
+        errors.push(at + ': точка отстоит от прямой на ' + Math.abs(probe.delta) +
+          ', допустимо не больше ' + rules.probeOffsetMax);
+      }
+      /* «Да» — точка ровно на прямой, «нет» — обязательно мимо. */
+      var onLine = Math.abs(probe.delta) < 1e-9;
+      if (onLine !== (task.answer === '1')) {
+        errors.push(at + ': ответ и положение точки не согласованы');
+      }
+    });
+  }
+
+  if (rules.probeInsideWindow) {
+    tasks.forEach(function (task) {
+      var probe = task.meta.probe;
+      var win = task.meta.window;
+      if (!probe || !win) { return; }
+      if (Math.abs(probe.x) > win.xmax - 1 || Math.abs(probe.y) > win.ymax - 1) {
+        errors.push(where + '/' + task.id + ': проверяемая точка (' + probe.x + '; ' + probe.y +
+          ') вышла за окно ±' + win.xmax);
+      }
+    });
+  }
+
+  if (rules.noChart) {
+    tasks.forEach(function (task) {
+      if (task.svg) { errors.push(where + '/' + task.id + ': у задачи без чертежа появился чертёж'); }
+    });
+  }
+
+  if (rules.minDistinctIntercepts !== undefined) {
+    var distinctB = {};
+    tasks.forEach(function (task) { distinctB[task.meta.b] = true; });
+    need(Object.keys(distinctB).length, rules.minDistinctIntercepts, 'различных b');
   }
 
   if (rules.noZeroIntercept) {
@@ -231,7 +293,10 @@ function checkTask(set, task) {
   var where = set.id + '/' + task.id;
   var meta = task.meta;
 
-  errors = errors.concat(checkWindow(meta.window, where));
+  /* Блок 5 идёт без чертежа: окна и опорных точек у него нет. */
+  var hasChart = !!task.svg;
+  if (hasChart) { errors = errors.concat(checkWindow(meta.window, where)); }
+  else if (meta.window) { errors.push(where + ': задача без чертежа, но окно задано'); }
 
   var abs = Math.abs(meta.k);
   if (abs === 0) {
@@ -243,7 +308,7 @@ function checkTask(set, task) {
     errors.push(where + ': наклон вне диапазона 1/3…3 (k = ' + meta.k + ')');
   }
 
-  if (!meta.points || meta.points.length < 2) {
+  if (hasChart && (!meta.points || meta.points.length < 2)) {
     errors.push(where + ': меньше двух опорных точек с целыми координатами');
   }
   if (!task.answer) { errors.push(where + ': пустой ответ'); }

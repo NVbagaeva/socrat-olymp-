@@ -93,7 +93,8 @@ function findSet(taskId) {
    Кандидаты коэффициентов
    ══════════════════════════════════════════════════════════ */
 var MINUS = '\u2212';         /* типографский минус в формулах вариантов        */
-var CANDIDATE_POOL = 48;      /* сколько лучших кандидатов держим на задачу      */
+var CANDIDATE_POOL = 48;
+var PROBE_POOL = 10;          /* из скольких читаемых точек выбирается проверяемая */      /* сколько лучших кандидатов держим на задачу      */
 var SEARCH_BUDGET = 200000;   /* потолок перебора с возвратом                    */
 var INTEGER_K = [1, 2, 3];
 var FRACTION_K = [[1, 2], [1, 3], [2, 3], [3, 2], [1, 4], [3, 4], [5, 2]];
@@ -153,14 +154,77 @@ function interceptCandidates(constraints) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Проверяемая точка (блоки 4 и 5)
+   constraints.probe = {
+     onLine:   true | false,        // принадлежит прямой или нет
+     offsets:  [1],                 // на сколько мимо, если не принадлежит
+     xRange:   6,                   // откуда берутся абсциссы без чертежа
+     integerY: true                 // ордината обязана быть целой
+   }
+   ══════════════════════════════════════════════════════════ */
+function probeCandidates(line, win, probe) {
+  var offsets = probe.offsets || [1];
+  var limit = win ? win.xmax - 1 : (probe.xRange || 6);
+  /* x = 0 превращает задачу в чтение свободного члена — это уже блок 2. */
+  var minAbsX = probe.minAbsX === undefined ? 1 : probe.minAbsX;
+  var found = [];
+
+  for (var x = -limit; x <= limit; x++) {
+    if (Math.abs(x) < minAbsX) { continue; }
+    var exact = Line.yAt(line, x);
+    if (probe.integerY !== false && !Line.isInt(exact)) { continue; }
+    var base = Line.num(exact);
+
+    var deltas = probe.onLine ? [0] : offsets.concat(offsets.map(function (d) { return -d; }));
+    deltas.forEach(function (delta) {
+      var y = Math.round((base + delta) * 100) / 100;
+      if (win && (Math.abs(x) > win.xmax - 1 || Math.abs(y) > win.ymax - 1)) { return; }
+      found.push({ x: x, y: y, delta: delta });
+    });
+  }
+
+  /* Ближе к центру — читаемее; порядок детерминирован. */
+  found.sort(function (a, b) {
+    return (Math.abs(a.x) + Math.abs(a.y)) - (Math.abs(b.x) + Math.abs(b.y)) ||
+           a.x - b.x || a.y - b.y;
+  });
+  return found;
+}
+
+/* Из читаемых кандидатов точка выбирается по seed: иначе во всех
+   десяти задачах блока она садится в одно и то же место. */
+function chooseProbe(line, win, probe, random) {
+  var found = probeCandidates(line, win, probe);
+  if (!found.length) { return null; }
+  return shuffled(found.slice(0, PROBE_POOL), random)[0];
+}
+
+/* ══════════════════════════════════════════════════════════
    Правила вычисления ответа. Реестр расширяется под новые
    формулировки без правок остального кода.
    ══════════════════════════════════════════════════════════ */
 var ANSWER_RULES = {
   k: function (ctx) { return ctx.line.k; },
   b: function (ctx) { return ctx.line.b; },
-  'equation-choice': function (ctx) { return equationChoice(ctx); }
+  'equation-choice': function (ctx) { return equationChoice(ctx); },
+  'point-choice': function (ctx) { return pointChoice(ctx); }
 };
+
+/* Да / нет: принадлежит ли точка графику. Порядок вариантов
+   постоянный — «да» первым: это привычная пара, а баланс набора
+   держится составом 5/5, а не перемешиванием. */
+var YES_NO = ['Да', 'Нет'];
+
+function pointChoice(ctx) {
+  var probe = ctx.probe;
+  if (!probe) { throw new Error('generate: у ' + ctx.task.id + ' не выбрана проверяемая точка'); }
+
+  var onLine = Line.contains(ctx.line, probe.x, probe.y);
+  var options = YES_NO.map(function (text, i) {
+    return { number: String(i + 1), text: text, error: null };
+  });
+  return { type: 'choice', options: options, answer: onLine ? '1' : '2' };
+}
 
 /* Типичные ошибки, по которым строятся неверные варианты (§7, блок 3).
    Ровно по одному варианту каждого вида. */
@@ -285,22 +349,41 @@ function taskCandidates(task, set, seed) {
       /* Блок 3: при k = b верный ответ совпал бы с вариантом «перепутаны k и b». */
       if (constraints.distinctKB && Math.abs(line.kValue - line.bValue) < 1e-9) { continue; }
 
-      /* §3 — окно; §4.2 — прямая проходит окно насквозь. */
-      var win = Line.windowFor(line, constraints);
-      if (!win) { continue; }
+      /* Блок 5 идёт без чертежа: окно и опорные точки не нужны. */
+      var win = null;
+      var points = [];
 
-      /* §4.1 — две целые опорные точки внутри окна.
-         markIntercept — одной из них обязана быть точка (0, b). */
-      var points = Line.referencePoints(line, win,
-        constraints.markIntercept ? { include: 0 } : null);
-      if (!points) { continue; }
+      if (!task.noChart) {
+        /* §3 — окно; §4.2 — прямая проходит окно насквозь. */
+        win = Line.windowFor(line, constraints);
+        if (!win) { continue; }
+
+        /* §4.1 — две целые опорные точки внутри окна.
+           markIntercept — одной из них обязана быть точка (0, b). */
+        points = Line.referencePoints(line, win,
+          constraints.markIntercept ? { include: 0 } : null);
+        if (!points) { continue; }
+      }
+
+      /* Блоки 4 и 5 — проверяемая точка. */
+      var probe = null;
+      if (constraints.probe) {
+        probe = chooseProbe(line, win, constraints.probe,
+          rng(set.id + ':' + task.id + ':' + seed + ':probe:' + line.kValue + ':' + line.bValue));
+        if (!probe) { continue; }
+      }
 
       /* Блок 2: точка (0, b) видна и не жмётся к границе. */
-      if (constraints.bVisible && Math.abs(line.bValue) > win.ymax - Line.RULES.bEdgeGap) { continue; }
+      if (constraints.bVisible && win &&
+          Math.abs(line.bValue) > win.ymax - Line.RULES.bEdgeGap) { continue; }
 
       found.push({
-        line: line, window: win, points: points,
-        score: balanceScore(line, win, points),
+        line: line, window: win, points: points, probe: probe,
+        /* Без чертежа читаемость оценивать не по чему: порядок кандидатов
+           задаётся seed, иначе во всём блоке окажется один и тот же b. */
+        score: win ? balanceScore(line, win, points)
+                   : rng(set.id + ':' + task.id + ':' + seed + ':pick:' +
+                         line.kValue + ':' + line.bValue)(),
         pairKey: 'kb:' + line.k.p + '/' + line.k.q + '@' + line.b.p + '/' + line.b.q,
         slopeKey: 'k:' + line.k.p + '/' + line.k.q,
         interceptKey: 'b:' + line.b.p + '/' + line.b.q,
@@ -397,6 +480,22 @@ function assemble(set, seed) {
   return chosen;
 }
 
+/* Подстановка значений в шаблон условия: {x}, {y}, {equation}. */
+function fillTemplate(text, values) {
+  return String(text).replace(/\{(\w+)\}/g, function (match, key) {
+    return values[key] === undefined ? match : values[key];
+  });
+}
+
+/* Числа в условии и на чертеже: запятая и типографский минус. */
+function numberText(value) {
+  return String(Math.round(value * 100) / 100).replace('.', ',').replace('-', MINUS);
+}
+
+function pointText(name, x, y) {
+  return name + '(' + numberText(x) + '; ' + numberText(y) + ')';
+}
+
 function sceneFor(built, task, set) {
   return {
     window: built.window,
@@ -412,7 +511,12 @@ function sceneFor(built, task, set) {
     } ],
     points: built.points.map(function (point) {
       return { x: point.x, y: point.y, style: 'solid', color: 'lineA' };
-    }),
+    }).concat(built.probe ? [ {
+      /* Проверяемая точка — терракотовая и подписана координатами:
+         её нельзя спутать с опорными точками самой прямой. */
+      x: built.probe.x, y: built.probe.y, style: 'solid', color: 'lineB',
+      label: pointText(task.pointName || 'A', built.probe.x, built.probe.y)
+    } ] : []),
     alt: 'График линейной функции'
   };
 }
@@ -425,14 +529,23 @@ function taskResult(set, task, built, seed, index) {
   if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
 
   var value = rule({ line: built.line, window: built.window, points: built.points,
-                     task: task, set: set, seed: seed, index: index });
+                     probe: built.probe, task: task, set: set, seed: seed, index: index });
   var choice = value && value.type === 'choice' ? value : null;
+
+  var values = {
+    equation: equationText(built.line.kValue, built.line.bValue),
+    k: numberText(built.line.kValue),
+    b: numberText(built.line.bValue),
+    point: built.probe ? pointText(task.pointName || 'A', built.probe.x, built.probe.y) : '',
+    x: built.probe ? numberText(built.probe.x) : '',
+    y: built.probe ? numberText(built.probe.y) : ''
+  };
 
   return {
     id: task.id,
     kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
-    svg: renderer.renderGraph(sceneFor(built, task, set)),
-    question: task.question,
+    svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    question: fillTemplate(task.question, values),
     hint: task.hint || null,
     answer: choice ? choice.answer : answerText(value),
     options: choice ? choice.options : null,
@@ -446,7 +559,8 @@ function taskResult(set, task, built, seed, index) {
       kFraction: built.line.k,
       bFraction: built.line.b,
       window: built.window,
-      points: built.points
+      points: built.points,
+      probe: built.probe || null
     }
   };
 }

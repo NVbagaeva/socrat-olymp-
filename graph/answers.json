@@ -209,6 +209,186 @@
         "y = x − 2,5",
         "y = −2,5x + 1"
       ]
+    },
+    "P12-4-01": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-02": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-03": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-04": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-05": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-06": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-07": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-08": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-09": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-4-10": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1204,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-01": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-02": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-03": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-04": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-05": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-06": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-07": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-08": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-09": {
+      "answer": "2",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
+    },
+    "P12-5-10": {
+      "answer": "1",
+      "answerType": "choice",
+      "seed": 1205,
+      "options": [
+        "Да",
+        "Нет"
+      ]
     }
   },
   "prototypes": {}

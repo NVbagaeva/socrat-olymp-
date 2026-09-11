@@ -1,0 +1,237 @@
+{
+  "kind": "prep",
+  "id": "P12-4",
+  "block": 4,
+  "title": "Принадлежность точки",
+  "subtitle": "По графику определить, лежит ли точка на прямой",
+  "seed": 1204,
+  "family": "line",
+  "axisLabels": "minimal",
+  "uniqueIntercepts": "nonzero",
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "allChoice": 2,
+    "optionsDistinct": true,
+    "yesCount": 5,
+    "probeOffsetMax": 1,
+    "probeInsideWindow": true,
+    "noAlternatingAnswers": true,
+    "minDistinctIntercepts": 6,
+    "minIncreasing": 4,
+    "minDecreasing": 4,
+    "uniquePairs": true
+  },
+  "tasks": [
+    {
+      "id": "P12-4-01",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Найди на прямой точку с той же абсциссой и сравни ординаты по клеткам.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bNonZero": true,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-02",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Опусти от точки вертикаль до прямой: совпали они или нет.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 2,
+        "bNonZero": true,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-03",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Промах бывает всего в одну клетку — считай по сетке, а не смотри на глаз.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 3,
+        "bNonZero": true,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-04",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Пройди по прямой от отмеченной опорной точки до нужной абсциссы.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 1,
+        "bNonZero": true,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-05",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Сравнивай ординаты при одинаковой абсциссе — это и есть проверка.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "absK": 1,
+        "bNonZero": true,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-06",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "У крутой прямой значение меняется быстро: отсчитывай клетки по одной.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 3,
+        "bNonZero": true,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-07",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "При дробном наклоне шагай сразу на две клетки вправо — так видно, куда попадает прямая.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "up",
+        "absK": 1.5,
+        "bNonZero": true,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-08",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Посчитай, какая ордината у прямой при абсциссе точки, и сравни с подписью.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 1.5,
+        "bNonZero": true,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-09",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Можно и без счёта клеток: подставь абсциссу точки в уравнение прямой.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "absK": 2,
+        "bNonZero": true,
+        "probe": {
+          "onLine": true,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    },
+    {
+      "id": "P12-4-10",
+      "question": "На рисунке изображён график линейной функции. Принадлежит ли точка {point} этому графику?",
+      "hint": "Проверяй ровно ту абсциссу, что у точки, — соседняя клетка даст другой ответ.",
+      "answerRule": "point-choice",
+      "answerType": "choice",
+      "constraints": {
+        "slope": "fraction",
+        "direction": "down",
+        "absK": 2.5,
+        "bNonZero": true,
+        "probe": {
+          "onLine": false,
+          "offsets": [
+            1
+          ],
+          "integerY": true,
+          "minAbsX": 1
+        }
+      }
+    }
+  ]
+}

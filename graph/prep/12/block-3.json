@@ -22,7 +22,8 @@
     "uniquePairs": true,
     "allIntegerB": true,
     "interceptMargin": 2,
-    "balancedAnswerPlaces": true
+    "balancedAnswerPlaces": true,
+    "optionsAre": "equation"
   },
   "tasks": [
     {
