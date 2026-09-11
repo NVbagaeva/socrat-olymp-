@@ -57,6 +57,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          # Timeweb, shared-хостинг: подключение по FTPS.
+          # Если первый запуск упадёт на проверке сертификата — ftps-legacy.
+          protocol: ftps
           local-dir: ./app/out/
           server-dir: /public_html/
           # Заливка только добавляющая.
