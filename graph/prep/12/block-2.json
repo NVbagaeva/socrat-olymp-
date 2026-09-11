@@ -1,0 +1,185 @@
+{
+  "kind": "prep",
+  "id": "P12-2",
+  "block": 2,
+  "title": "Коэффициент b",
+  "subtitle": "По графику найти свободный член",
+  "seed": 1202,
+  "family": "line",
+  "axisLabels": "minimal",
+  "uniqueIntercepts": "nonzero",
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "minPositiveB": 4,
+    "minNegativeB": 4,
+    "zeroIntercept": {
+      "exactly": 2
+    },
+    "allIntegerK": true,
+    "allIntegerB": true,
+    "interceptMargin": 2,
+    "uniquePairs": true,
+    "minDistinctAbsK": 3
+  },
+  "tasks": [
+    {
+      "id": "P12-2-01",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "b — ордината точки, где прямая пересекает ось y. Отмеченная точка на оси и есть ответ.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "positive",
+        "bNonZero": true,
+        "absK": 1
+      }
+    },
+    {
+      "id": "P12-2-02",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Смотри, где прямая переходит ось y: на сколько клеток выше нуля она это делает.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "positive",
+        "bNonZero": true,
+        "absK": 2
+      }
+    },
+    {
+      "id": "P12-2-03",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Свободный член читается в одном месте — на оси y, при x = 0.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "positive",
+        "bNonZero": true,
+        "absK": 3
+      }
+    },
+    {
+      "id": "P12-2-04",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Подставь x = 0 в y = kx + b: останется ровно b.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "positive",
+        "bNonZero": true,
+        "absK": 2
+      }
+    },
+    {
+      "id": "P12-2-05",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Прямая пересекает ось y ниже нуля — значит, b отрицательный.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "negative",
+        "bNonZero": true,
+        "absK": 1
+      }
+    },
+    {
+      "id": "P12-2-06",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Отметь точку пересечения с осью y и посчитай клетки от нуля вниз.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "negative",
+        "bNonZero": true,
+        "absK": 3
+      }
+    },
+    {
+      "id": "P12-2-07",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Считай клетки по оси y, а не по оси x: b — это высота, а не сдвиг вбок.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "negative",
+        "bNonZero": true,
+        "absK": 2
+      }
+    },
+    {
+      "id": "P12-2-08",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Знак b определяется тем, выше или ниже нуля прямая переходит ось y.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "bVisible": true,
+        "markIntercept": true,
+        "bSign": "negative",
+        "bNonZero": true,
+        "absK": 1
+      }
+    },
+    {
+      "id": "P12-2-09",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Прямая проходит через начало координат: при x = 0 значение y равно нулю.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "up",
+        "bVisible": true,
+        "markIntercept": true,
+        "b": 0,
+        "absK": 2
+      }
+    },
+    {
+      "id": "P12-2-10",
+      "question": "На рисунке изображён график линейной функции y = kx + b. Отмечены две точки с целыми координатами. Найдите b.",
+      "hint": "Если график проходит через точку O, свободный член ничего не добавляет.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "integer",
+        "direction": "down",
+        "bVisible": true,
+        "markIntercept": true,
+        "b": 0,
+        "absK": 3
+      }
+    }
+  ]
+}

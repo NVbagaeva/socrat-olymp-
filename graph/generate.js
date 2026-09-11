@@ -92,7 +92,8 @@ function findSet(taskId) {
 /* ══════════════════════════════════════════════════════════
    Кандидаты коэффициентов
    ══════════════════════════════════════════════════════════ */
-var LOOK_AHEAD = 60;          /* сколько годных кандидатов сравнить между собой */
+var CANDIDATE_POOL = 48;      /* сколько лучших кандидатов держим на задачу      */
+var SEARCH_BUDGET = 200000;   /* потолок перебора с возвратом                    */
 var INTEGER_K = [1, 2, 3];
 var FRACTION_K = [[1, 2], [1, 3], [2, 3], [3, 2], [1, 4], [3, 4], [5, 2]];
 
@@ -174,17 +175,15 @@ function answerText(value) {
 /* ══════════════════════════════════════════════════════════
    Сборка одного варианта
    ══════════════════════════════════════════════════════════ */
-function buildLineTask(task, set, seed, used) {
+function taskCandidates(task, set, seed) {
   var constraints = task.constraints || {};
   var random = rng(set.id + ':' + task.id + ':' + seed);
   var slopes = shuffled(slopeCandidates(constraints), random);
   var intercepts = shuffled(interceptCandidates(constraints), random);
+  var found = [];
 
-  var best = null;
-  var seen = 0;
-
-  for (var i = 0; i < slopes.length && seen < LOOK_AHEAD; i++) {
-    for (var j = 0; j < intercepts.length && seen < LOOK_AHEAD; j++) {
+  for (var i = 0; i < slopes.length; i++) {
+    for (var j = 0; j < intercepts.length; j++) {
       var line = Line.create(slopes[i], intercepts[j]);
 
       /* §4.3 — наклон читаем; горизонталь только по флагу. */
@@ -193,45 +192,33 @@ function buildLineTask(task, set, seed, used) {
       /* Прямая не должна ложиться на ось: график сливается с каркасом. */
       if (Line.isZero(line.k) && Line.isZero(line.b)) { continue; }
 
-      /* §4.6 — внутри набора нет двух задач с одинаковой парой (k, b). */
-      var key = line.k.p + '/' + line.k.q + '@' + line.b.p + '/' + line.b.q;
-      if (used[key]) { continue; }
-
-      /* Набор может требовать, чтобы все наклоны были попарно различны. */
-      var slopeKey = 'k:' + line.k.p + '/' + line.k.q;
-      if (set.uniqueSlopes && used[slopeKey]) { continue; }
-
-      var interceptKey = 'b:' + line.b.p + '/' + line.b.q;
-      if (set.uniqueIntercepts && used[interceptKey]) { continue; }
-
       /* §3 — окно; §4.2 — прямая проходит окно насквозь. */
       var win = Line.windowFor(line, constraints);
       if (!win) { continue; }
 
-      /* §4.1 — две целые опорные точки внутри окна. */
-      var points = Line.referencePoints(line, win);
+      /* §4.1 — две целые опорные точки внутри окна.
+         markIntercept — одной из них обязана быть точка (0, b). */
+      var points = Line.referencePoints(line, win,
+        constraints.markIntercept ? { include: 0 } : null);
       if (!points) { continue; }
 
       /* Блок 2: точка (0, b) видна и не жмётся к границе. */
       if (constraints.bVisible && Math.abs(line.bValue) > win.ymax - Line.RULES.bEdgeGap) { continue; }
 
-      seen++;
-      var score = balanceScore(line, win, points);
-      if (!best || score > best.score + 1e-9) {
-        best = { line: line, window: win, points: points, score: score,
-                 key: key, slopeKey: slopeKey, interceptKey: interceptKey };
-      }
+      found.push({
+        line: line, window: win, points: points,
+        score: balanceScore(line, win, points),
+        pairKey: 'kb:' + line.k.p + '/' + line.k.q + '@' + line.b.p + '/' + line.b.q,
+        slopeKey: 'k:' + line.k.p + '/' + line.k.q,
+        interceptKey: 'b:' + line.b.p + '/' + line.b.q,
+        zeroIntercept: Line.isZero(line.b)
+      });
     }
   }
 
-  if (!best) {
-    throw new Error('generate: не удалось собрать корректный вариант для ' + task.id +
-      ' (seed ' + seed + '); ограничения слишком узкие');
-  }
-  used[best.key] = true;
-  used[best.slopeKey] = true;
-  used[best.interceptKey] = true;
-  return { line: best.line, window: best.window, points: best.points };
+  /* Сначала самые читаемые чертежи; порядок детерминирован. */
+  found.sort(function (a, b) { return b.score - a.score || a.pairKey.localeCompare(b.pairKey); });
+  return found.slice(0, CANDIDATE_POOL);
 }
 
 /* Из годных кандидатов выбираем самый читаемый чертёж: прямая идёт
@@ -254,6 +241,69 @@ function balanceScore(line, win, points) {
   return length - balance * 0.5 + spread - throughOrigin;
 }
 
+/* ══════════════════════════════════════════════════════════
+   Сборка набора целиком — перебор с возвратом.
+   Жадный выбор по одной задаче упирается в тупик: ранняя задача
+   забирает значение, которое нужно более стеснённой поздней.
+   Поэтому кандидаты перебираются дальше, а не подгоняются правила.
+   ══════════════════════════════════════════════════════════ */
+function dedupeIntercept(set, candidate) {
+  return set.uniqueIntercepts === true ||
+    (set.uniqueIntercepts === 'nonzero' && !candidate.zeroIntercept);
+}
+
+function assemble(set, seed) {
+  var tasks = set.tasks || [];
+  var pools = tasks.map(function (task) { return taskCandidates(task, set, seed); });
+
+  tasks.forEach(function (task, i) {
+    if (!pools[i].length) {
+      throw new Error('generate: для ' + task.id + ' (seed ' + seed +
+        ') нет ни одного варианта, проходящего правила; ограничения слишком узкие');
+    }
+  });
+
+  var used = {};
+  var chosen = new Array(tasks.length);
+  var budget = SEARCH_BUDGET;
+
+  function conflicts(candidate) {
+    if (used[candidate.pairKey]) { return true; }                       /* §4.6 */
+    if (set.uniqueSlopes && used[candidate.slopeKey]) { return true; }
+    if (dedupeIntercept(set, candidate) && used[candidate.interceptKey]) { return true; }
+    return false;
+  }
+
+  function mark(candidate, value) {
+    used[candidate.pairKey] = value;
+    if (set.uniqueSlopes) { used[candidate.slopeKey] = value; }
+    if (dedupeIntercept(set, candidate)) { used[candidate.interceptKey] = value; }
+  }
+
+  function step(i) {
+    if (i === tasks.length) { return true; }
+    var pool = pools[i];
+    for (var c = 0; c < pool.length; c++) {
+      if (--budget < 0) {
+        throw new Error('generate: набор ' + set.id + ' (seed ' + seed +
+          ') не собрался за отведённый перебор');
+      }
+      if (conflicts(pool[c])) { continue; }
+      mark(pool[c], true);
+      chosen[i] = pool[c];
+      if (step(i + 1)) { return true; }
+      mark(pool[c], false);
+    }
+    return false;
+  }
+
+  if (!step(0)) {
+    throw new Error('generate: набор ' + set.id + ' (seed ' + seed +
+      ') не собрался: условия задач несовместимы между собой');
+  }
+  return chosen;
+}
+
 function sceneFor(built, task, set) {
   return {
     window: built.window,
@@ -274,52 +324,38 @@ function sceneFor(built, task, set) {
   };
 }
 
+function taskResult(set, task, built, seed) {
+  var rule = ANSWER_RULES[task.answerRule];
+  if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
+
+  var family = FAMILIES[task.family || set.family || 'line'];
+  if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
+
+  return {
+    id: task.id,
+    kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
+    svg: renderer.renderGraph(sceneFor(built, task, set)),
+    question: task.question,
+    hint: task.hint || null,
+    answer: answerText(rule({ line: built.line, window: built.window, points: built.points, task: task })),
+    answerType: task.answerType || 'number',
+    level: task.level || null,
+    meta: {
+      set: set.id,
+      seed: seed,
+      k: built.line.kValue,
+      b: built.line.bValue,
+      kFraction: built.line.k,
+      bFraction: built.line.b,
+      window: built.window,
+      points: built.points
+    }
+  };
+}
+
 function generate(id, seed) {
   var set = findSet(id);
-  var effectiveSeed = seed === undefined || seed === null ? set.seed : seed;
-
-  /* Набор собирается целиком: только так соблюдается запрет
-     на повторяющиеся пары (k, b) внутри блока или набора. */
-  var used = {};
-  var result = null;
-
-  (set.tasks || []).forEach(function (task) {
-    var family = FAMILIES[task.family || set.family || 'line'];
-    if (!family) { throw new Error('generate: неизвестное семейство у ' + task.id); }
-
-    var built = buildLineTask(task, set, effectiveSeed, used);
-    if (task.id !== id) { return; }
-
-    var scene = sceneFor(built, task, set);
-    var rule = ANSWER_RULES[task.answerRule];
-    if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
-
-    var answer = rule({ line: built.line, window: built.window, points: built.points, task: task });
-
-    result = {
-      id: task.id,
-      kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
-      svg: renderer.renderGraph(scene),
-      question: task.question,
-      hint: task.hint || null,
-      answer: answerText(answer),
-      answerType: task.answerType || 'number',
-      level: task.level || null,
-      meta: {
-        set: set.id,
-        seed: effectiveSeed,
-        k: built.line.kValue,
-        b: built.line.bValue,
-        kFraction: built.line.k,
-        bFraction: built.line.b,
-        window: built.window,
-        points: built.points
-      }
-    };
-  });
-
-  if (!result) { throw new Error('generate: задача «' + id + '» не собралась'); }
-  return result;
+  return generateSet(set.id, seed).filter(function (task) { return task.id === id; })[0];
 }
 
 /* Весь набор разом — для preview.html, validate.js и сборки ответов. */
@@ -329,30 +365,10 @@ function generateSet(setId, seed) {
   if (!set) { throw new Error('generate: набор «' + setId + '» не найден'); }
 
   var effectiveSeed = seed === undefined || seed === null ? set.seed : seed;
-  var used = {};
+  var built = assemble(set, effectiveSeed);
 
-  return (set.tasks || []).map(function (task) {
-    var built = buildLineTask(task, set, effectiveSeed, used);
-    var scene = sceneFor(built, task, set);
-    var rule = ANSWER_RULES[task.answerRule];
-    if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
-
-    return {
-      id: task.id,
-      kind: set.kind,
-      svg: renderer.renderGraph(scene),
-      question: task.question,
-      hint: task.hint || null,
-      answer: answerText(rule({ line: built.line, window: built.window, points: built.points, task: task })),
-      answerType: task.answerType || 'number',
-      level: task.level || null,
-      meta: {
-        set: set.id, seed: effectiveSeed,
-        k: built.line.kValue, b: built.line.bValue,
-        kFraction: built.line.k, bFraction: built.line.b,
-        window: built.window, points: built.points
-      }
-    };
+  return (set.tasks || []).map(function (task, i) {
+    return taskResult(set, task, built[i], effectiveSeed);
   });
 }
 

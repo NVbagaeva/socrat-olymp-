@@ -184,21 +184,27 @@ function windowFor(line, opts) {
 }
 
 /* Две опорные точки: подальше друг от друга, но ближе к центру —
-   так наклон читается по клеткам без прищуривания. */
-function referencePoints(line, win) {
+   так наклон читается по клеткам без прищуривания.
+   opts.include — абсцисса, которая обязана попасть в пару: в блоке
+   про свободный член отмечать нужно именно точку (0, b). */
+function referencePoints(line, win, opts) {
   var points = integerPoints(line, win);
   if (points.length < 2) { return null; }
+
+  var required = opts && opts.include !== undefined ? opts.include : null;
+  if (required !== null && !points.some(function (p) { return p.x === required; })) { return null; }
 
   var best = null;
   for (var i = 0; i < points.length; i++) {
     for (var j = i + 1; j < points.length; j++) {
       var a = points[i];
       var b = points[j];
+      if (required !== null && a.x !== required && b.x !== required) { continue; }
       var score = Math.min(Math.abs(b.x - a.x), 4) - 0.1 * (Math.abs(a.x) + Math.abs(b.x));
       if (!best || score > best.score + 1e-9) { best = { pair: [a, b], score: score }; }
     }
   }
-  return best.pair;
+  return best ? best.pair : null;
 }
 
 module.exports = {

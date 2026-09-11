@@ -92,7 +92,7 @@
     gap: {
       axisLabelX: 16,       /* число под осью x                              */
       axisLabelY: 9,        /* число левее оси y                             */
-      origin:     8,
+      origin:      8,
       originDown: 18,
       axisName:   10,
       curveLabel: 15,       /* отступ подписи графика от линии               */
@@ -329,39 +329,6 @@
     axisLayer.push('<path d="' + ticks.join('') + '" fill="none" stroke="' + THEME.colors.axis +
       '" stroke-width="' + THEME.width.tick + '" stroke-linecap="butt"/>');
 
-    /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
-       единичный отрезок задан, остальное ученик отсчитывает по клеткам. -- */
-    function labelled(value) {
-      if (!ticked(value)) { return false; }
-      return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
-    }
-
-    var labelBoxes = [];
-    function boxFor(value, cx, cy) {
-      var half = textWidth(value, THEME.font.axisLabel) / 2;
-      labelBoxes.push({ x: cx, y: cy, halfW: half, halfH: THEME.font.axisLabel * 0.62 });
-    }
-
-    for (var lx = Math.ceil(win.xmin); lx <= win.xmax + EPS; lx++) {
-      if (!labelled(lx)) { continue; }
-      var textX = fmt(lx);
-      labelLayer.push(numberText(textX, sx(lx), axisX + THEME.gap.axisLabelX, 'middle'));
-      boxFor(textX, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
-    }
-    for (var ly = Math.ceil(win.ymin); ly <= win.ymax + EPS; ly++) {
-      if (!labelled(ly)) { continue; }
-      var textY = fmt(ly);
-      var half = textWidth(textY, THEME.font.axisLabel) / 2;
-      labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(ly) + 4.5, 'end'));
-      boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(ly));
-    }
-    if (pick(axes.origin, '0') !== null) {
-      labelLayer.push(mathText(pick(axes.origin, '0'), axisY - THEME.gap.origin,
-        axisX + THEME.gap.originDown, 'end'));
-    }
-    labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
-    labelLayer.push(mathText(pick(axes.labelY, 'y'), axisY + THEME.gap.axisName, tipY + 8, 'start'));
-
     /* Кривые: поверх осей, обрезаны ровно по границе поля --------------- */
     var drawn = [];
     (scene.curves || []).forEach(function (curve) {
@@ -396,6 +363,64 @@
           sy(point.y) - THEME.gap.pointLabel, 'start', THEME.font.pointLabel, color(point.color)));
       }
     });
+
+    /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
+       единичный отрезок задан, остальное ученик отсчитывает по клеткам. -- */
+    function labelled(value) {
+      if (!ticked(value)) { return false; }
+      return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
+    }
+
+    var labelBoxes = [];
+    function boxFor(value, cx, cy) {
+      var half = textWidth(value, THEME.font.axisLabel) / 2;
+      labelBoxes.push({ x: cx, y: cy, halfW: half, halfH: THEME.font.axisLabel * 0.62 });
+    }
+
+    for (var lx = Math.ceil(win.xmin); lx <= win.xmax + EPS; lx++) {
+      if (!labelled(lx)) { continue; }
+      var textX = fmt(lx);
+      labelLayer.push(numberText(textX, sx(lx), axisX + THEME.gap.axisLabelX, 'middle'));
+      boxFor(textX, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
+    }
+    for (var ly = Math.ceil(win.ymin); ly <= win.ymax + EPS; ly++) {
+      if (!labelled(ly)) { continue; }
+      var textY = fmt(ly);
+      var half = textWidth(textY, THEME.font.axisLabel) / 2;
+      labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(ly) + 4.5, 'end'));
+      boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(ly));
+    }
+    if (pick(axes.origin, '0') !== null) {
+      /* Подпись начала координат уходит в свободную четверть: если
+         в начале координат стоит точка или через него идёт график,
+         классическое место слева-снизу занято. */
+      var originText = pick(axes.origin, '0');
+      var originHalfW = textWidth(originText, THEME.font.axisName) / 2;
+      var originHalfH = THEME.font.axisName * 0.62;
+      var originCloud = obstacleCloud(scene, drawn, sx, sy,
+        { x: axisY, y: axisX }, { left: sx(win.xmin), right: sx(win.xmax),
+                                  top: sy(win.ymax), bottom: sy(win.ymin) },
+        labelBoxes, { axes: false });
+
+      var bestOrigin = null;
+      [[-1, 1], [-1, -1], [1, 1], [1, -1]].forEach(function (dir, order) {
+        var cx = axisY + dir[0] * (THEME.gap.origin + originHalfW);
+        var cy = axisX + dir[1] * THEME.gap.originDown;
+        var clear = Infinity;
+        for (var c = 0; c < originCloud.length; c++) {
+          clear = Math.min(clear, rectDist(originCloud[c], cx, cy - originHalfH * 0.55,
+                                           originHalfW, originHalfH));
+        }
+        /* Слева-снизу — привычное место, поэтому небольшая фора. */
+        var score = clear - order * 0.5;
+        if (!bestOrigin || score > bestOrigin.score + 1e-9) {
+          bestOrigin = { x: cx + originHalfW, y: cy, score: score };
+        }
+      });
+      labelLayer.push(mathText(originText, bestOrigin.x, bestOrigin.y, 'end'));
+    }
+    labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
+    labelLayer.push(mathText(pick(axes.labelY, 'y'), axisY + THEME.gap.axisName, tipY + 8, 'start'));
 
     /* Подписи графиков: горизонтально, у самой линии, в стороне
        от точек и пересечений с осями. -------------------------------------*/
@@ -489,7 +514,8 @@
 
   /* Облако препятствий в пикселях: графики, оси, отмеченные точки
      и уже размещённые подписи чисел. */
-  function obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes) {
+  function obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes, opts) {
+    var withAxes = !opts || opts.axes !== false;
     var cloud = [];
     var stepPx = THEME.curveLabelProbe;
 
@@ -506,8 +532,10 @@
       });
     });
 
-    for (var px1 = field.left; px1 <= field.right; px1 += stepPx) { cloud.push({ x: px1, y: origin.y }); }
-    for (var py1 = field.top; py1 <= field.bottom; py1 += stepPx) { cloud.push({ x: origin.x, y: py1 }); }
+    if (withAxes) {
+      for (var px1 = field.left; px1 <= field.right; px1 += stepPx) { cloud.push({ x: px1, y: origin.y }); }
+      for (var py1 = field.top; py1 <= field.bottom; py1 += stepPx) { cloud.push({ x: origin.x, y: py1 }); }
+    }
 
     (scene.points || []).forEach(function (point) {
       cloud.push({ x: sx(point.x), y: sy(point.y) });

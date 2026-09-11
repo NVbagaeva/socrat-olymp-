@@ -96,6 +96,49 @@ function checkComposition(set, tasks) {
     }
   }
 
+  var bs = tasks.map(function (task) { return task.meta.b; });
+  need(bs.filter(function (b) { return b > 0; }).length, rules.minPositiveB || 0, 'с b > 0');
+  need(bs.filter(function (b) { return b < 0; }).length, rules.minNegativeB || 0, 'с b < 0');
+
+  if (rules.zeroIntercept && rules.zeroIntercept.exactly !== undefined) {
+    var zeroB = bs.filter(function (b) { return b === 0; }).length;
+    if (zeroB !== rules.zeroIntercept.exactly) {
+      errors.push(where + ': задач с b = 0 — ' + zeroB + ', нужно ровно ' + rules.zeroIntercept.exactly);
+    }
+  }
+
+  if (rules.allIntegerK) {
+    tasks.forEach(function (task) {
+      if (!Number.isInteger(task.meta.k)) {
+        errors.push(where + '/' + task.id + ': k должен быть целым, а он ' + task.meta.k);
+      }
+    });
+  }
+  if (rules.allIntegerB) {
+    tasks.forEach(function (task) {
+      if (!Number.isInteger(task.meta.b)) {
+        errors.push(where + '/' + task.id + ': b должен быть целым, а он ' + task.meta.b);
+      }
+    });
+  }
+
+  /* Точка (0, b) внутри окна и не ближе interceptMargin клеток к границе. */
+  if (rules.interceptMargin !== undefined) {
+    tasks.forEach(function (task) {
+      var limit = task.meta.window.ymax - rules.interceptMargin;
+      if (Math.abs(task.meta.b) > limit) {
+        errors.push(where + '/' + task.id + ': точка (0, ' + task.meta.b + ') ближе ' +
+          rules.interceptMargin + ' клеток к границе окна ±' + task.meta.window.ymax);
+      }
+    });
+  }
+
+  if (rules.minDistinctAbsK !== undefined) {
+    var absK = {};
+    ks.forEach(function (k) { absK[Math.abs(k)] = true; });
+    need(Object.keys(absK).length, rules.minDistinctAbsK, 'различных |k|');
+  }
+
   if (rules.uniquePairs) {
     var pairs = {};
     tasks.forEach(function (task) {
@@ -184,7 +227,7 @@ function run() {
     tasks.forEach(function (task) { errors = errors.concat(checkTask(set, task)); });
     errors = errors.concat(checkComposition(set, tasks));
     report.push('  ' + set.id + ' «' + set.title + '»: собрано ' + tasks.length +
-      ', k = ' + tasks.map(function (t) { return t.answer; }).join(', '));
+      ', ответы: ' + tasks.map(function (t) { return t.answer; }).join(', '));
   });
 
   return { errors: errors, report: report };
