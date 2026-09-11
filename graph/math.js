@@ -71,20 +71,53 @@
       '<span class="frac-den">' + esc(match[2]) + '</span></span></span>';
   }
 
-  /* Формула целиком: <span class="math">…</span> с курсивными переменными. */
+  /* ══════════════════════════════════════════════════════════
+     Перевод формулы в LaTeX — исходник для KaTeX.
+     Десятичная запятая в наборе требует {,}: иначе KaTeX ставит
+     после неё пробел, как после разделителя аргументов.
+     ══════════════════════════════════════════════════════════ */
+  var GREEK = { 'α': '\\alpha', 'β': '\\beta', 'Δ': '\\Delta ' };
+
+  function tex(text) {
+    if (text === null || text === undefined) { return ''; }
+    var value = String(text).replace(/\u2212/g, '-');
+
+    var fraction = FRACTION.exec(value.charAt(0) === '-' ? value.slice(1) : value);
+    if (fraction) {
+      return (value.charAt(0) === '-' ? '-' : '') +
+        '\\dfrac{' + fraction[1] + '}{' + fraction[2] + '}';
+    }
+
+    value = value.replace(/(\d),(\d)/g, '$1{,}$2');
+    value = value.replace(/;/g, ';\\,');
+    value = value.replace(/[αβΔ]/g, function (ch) { return GREEK[ch]; });
+
+    /* Дробь внутри выражения набирается столбиком: и 6/2, и Δy/Δx. */
+    var TOKEN = '(?:\\\\Delta\\s*[A-Za-z]|-?\\d+(?:\\{,\\}\\d+)?|[A-Za-z])';
+    value = value.replace(new RegExp('(' + TOKEN + ')\\s*\\/\\s*(' + TOKEN + ')', 'g'),
+      '\\dfrac{$1}{$2}');
+    return value;
+  }
+
+  /* Формула целиком: <span class="math">…</span> с курсивными переменными.
+     data-tex несёт исходник для KaTeX: если он подключён, разметка
+     заменяется его версткой, если нет — остаётся эта, тоже набранная. */
   function html(text) {
     if (text === null || text === undefined) { return ''; }
     var value = spaced(String(text));
 
     var fraction = fractionHtml(value);
-    if (fraction) { return fraction; }
+    if (fraction) {
+      return fraction.replace('<span class="math">',
+        '<span class="math" data-tex="' + esc(tex(String(text))) + '">');
+    }
 
     var body = runs(value).map(function (run) {
       var content = esc(run.text);
       return run.italic ? '<i>' + content + '</i>' : content;
     }).join('');
 
-    return '<span class="math">' + body + '</span>';
+    return '<span class="math" data-tex="' + esc(tex(String(text))) + '">' + body + '</span>';
   }
 
   /* Тот же текст без разметки — для answers.json и проверки ответа. */
@@ -92,5 +125,6 @@
     return spaced(text === null || text === undefined ? '' : String(text));
   }
 
-  return { html: html, plain: plain, runs: runs, spaced: spaced, MINUS: MINUS, THIN: THIN };
+  return { html: html, plain: plain, tex: tex, runs: runs, spaced: spaced,
+           MINUS: MINUS, THIN: THIN };
 });

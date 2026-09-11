@@ -42,3 +42,15 @@
 }
 
 .option-number { color: var(--color-text-tertiary, #97A1B0); font-variant-numeric: tabular-nums; }
+
+/* ── KaTeX ─────────────────────────────────────────────────
+   Формулы подключаются поверх собственного набора: пока KaTeX
+   не загружен, работает разметка .math, после загрузки она
+   заменяется его вёрсткой. Здесь — только посадка на базовую
+   линию текста, чтобы строка не прыгала по высоте. */
+.math[data-katex="on"] { font-size: 1em; }
+.math .katex { font-size: 1.06em; line-height: 1; }
+.math .katex .mord.text { font-family: var(--font); }
+
+/* Формула в тексте условия не растягивает строку. */
+.task-question .katex { line-height: 1.1; }

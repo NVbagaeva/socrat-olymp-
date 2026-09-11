@@ -83,17 +83,26 @@
     var dy = right.y - left.y;            /* приращение функции, со знаком     */
     var rising = dy > 0;
 
-    /* Катеты — длины, они положительны. Но k может быть отрицательным,
-       поэтому вертикальный катет подписывается со знаком приращения:
-       иначе ученик запоминает «k — отношение катетов» и теряет минус. */
+    /* Катет — это длина, она всегда положительна, и подписывать его
+       длиной нельзя: у убывающей прямой ученик запомнит «k — отношение
+       катетов» и потеряет минус. Поэтому подписываются не катеты,
+       а приращения Δx и Δy — со знаком, как они входят в k = Δy / Δx. */
     return {
       left: left, right: right, vertex: vertex,
       dx: dx, dy: dy, rising: rising,
       k: dy / dx,
-      labels: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + Math.abs(dy) },
+      values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + Math.abs(dy) },
+      labels: { dx: 'Δx = +' + dx,
+                dy: 'Δy = ' + (rising ? '+' : MINUS) + Math.abs(dy) },
       angleDeg: Math.atan2(dy, dx) * 180 / Math.PI,
       ids: IDS
     };
+  }
+
+  var alphaRadius = 1.75;     /* где стоит подпись α, в клетках */
+
+  function bisector(triangle) {
+    return (triangle.angleDeg / 2) * Math.PI / 180;
   }
 
   /* Фигуры сцены. Рендерер рисует их как есть, ничего не зная о наклоне. */
@@ -121,12 +130,15 @@
       { type: 'rightAngle', id: IDS.rightAngle,
         at: [t.vertex.x, t.vertex.y], toward: [t.left.x, topY] },
 
-      /* Дуга угла наклона у левой опорной точки, между осью x и прямой. */
+      /* Дуга угла наклона у левой опорной точки, между горизонталью и прямой. */
       { type: 'arc', id: IDS.arc, at: [t.left.x, t.left.y],
         from: 0, to: t.angleDeg },
-      { type: 'label', id: IDS.alpha,
-        at: [t.left.x, t.left.y],
-        offset: [26, t.rising ? -8 : 18], text: 'α' }
+
+      /* Подпись угла ставится на биссектрисе за дугой, а не у самой
+         вершины: у вершины её перечёркивает прямая. */
+      { type: 'label', id: IDS.alpha, gap: 2, text: 'α',
+        at: [ t.left.x + alphaRadius * Math.cos(bisector(t)),
+              t.left.y + alphaRadius * Math.sin(bisector(t)) ] }
     ];
   }
 

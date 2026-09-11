@@ -345,10 +345,13 @@
     axisLayer.push('<path d="' + ticks.join('') + '" fill="none" stroke="' + THEME.colors.axis +
       '" stroke-width="' + THEME.width.tick + '" stroke-linecap="butt"/>');
 
-    /* Вспомогательные фигуры (треугольник наклона): под графиком,
-       чтобы синяя прямая осталась самым заметным элементом. ------------- */
+    /* Вспомогательные фигуры (треугольник наклона): геометрия идёт
+       под графиком, чтобы синяя прямая осталась самым заметным
+       элементом, а подписи — поверх, со своим подбором места. -------- */
+    var shapeLabels = [];
     (scene.shapes || []).forEach(function (shape) {
-      shapeLayer.push(renderShape(shape, sx, sy, cell));
+      if (shape.type === 'label') { shapeLabels.push(shape); }
+      else { shapeLayer.push(renderShape(shape, sx, sy, cell)); }
     });
 
     /* Кривые: поверх осей, обрезаны ровно по границе поля --------------- */
@@ -420,6 +423,33 @@
     labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
     labelLayer.push(mathText(pick(axes.labelY, 'y'), axisY + THEME.gap.axisName, tipY + 8, 'start'));
 
+    /* Подписи фигур: сторону выбираем так же, как у точек, но с оглядкой
+       на подсказку от того, кто фигуру построил. ---------------------- */
+    var shapeLabelLayer = [];
+    shapeLabels.forEach(function (shape) {
+      var size = shape.size || THEME.font.pointLabel;
+      var halfW = textWidth(shape.text, size, THEME.font.curveLabelTrack) / 2;
+      var halfH = size * 0.62;
+      var offset = shape.offset || [0, 0];
+      var prefer = [Math.sign(offset[0]) || 0, Math.sign(offset[1]) || 0];
+      var cloud = obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX },
+        { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) },
+        labelBoxes);
+      var spot = bestLabelSpot(sx(shape.at[0]), sy(shape.at[1]), halfW, halfH,
+        shape.gap === undefined ? THEME.helper.labelGap : shape.gap, cloud,
+        { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) },
+        prefer);
+
+      labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+      shapeLabelLayer.push(svgText(shape.text, spot.x, spot.y + halfH * 0.55, 'middle', {
+        size:   size,
+        family: THEME.font.curveLabelFamily,
+        weight: THEME.font.pointLabelWeight,
+        math:   true,
+        fill:   color(shape.color || 'accent')
+      }));
+    });
+
     /* Точки и их подписи: подпись уходит в свободную сторону,
        чтобы не садиться на линию, оси и числа. ------------------------- */
     var field = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
@@ -455,9 +485,9 @@
 
     var body = gridLayer.concat(axisLayer, shapeLayer);
     if (THEME.layers.labelsOnTop) {
-      body = body.concat(curveLayer, pointLayer, labelLayer);
+      body = body.concat(curveLayer, pointLayer, labelLayer, shapeLabelLayer);
     } else {
-      body = body.concat(labelLayer, curveLayer, pointLayer);
+      body = body.concat(labelLayer, curveLayer, pointLayer, shapeLabelLayer);
     }
     return head.concat(body, curveLabelLayer, '</svg>').join('');
   }
@@ -613,10 +643,21 @@
     [0, -1], [0, 1], [1, 0], [-1, 0]
   ];
 
-  function bestLabelSpot(ax, ay, halfW, halfH, gap, cloud, field) {
+  function bestLabelSpot(ax, ay, halfW, halfH, gap, cloud, field, prefer) {
     var best = null;
+    var directions = LABEL_DIRECTIONS;
 
-    LABEL_DIRECTIONS.forEach(function (dir, order) {
+    /* Подсказанное направление пробуется первым: тот, кто строил фигуру,
+       знает, с какой стороны подпись уместнее. */
+    if (prefer && (prefer[0] || prefer[1])) {
+      directions = LABEL_DIRECTIONS.slice().sort(function (a, b) {
+        var fitA = (a[0] === prefer[0] ? 1 : 0) + (a[1] === prefer[1] ? 1 : 0);
+        var fitB = (b[0] === prefer[0] ? 1 : 0) + (b[1] === prefer[1] ? 1 : 0);
+        return fitB - fitA;
+      });
+    }
+
+    directions.forEach(function (dir, order) {
       var cx = ax + dir[0] * (gap + halfW);
       var cy = ay + dir[1] * (gap + halfH);
 
