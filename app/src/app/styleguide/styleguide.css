@@ -1,0 +1,395 @@
+/* Оформление самой витрины: сетки, образцы палитры, макеты телефонов.
+   Частью дизайн-системы не является — отсюда ничего не переиспользуется. */
+
+.sg-root .page {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+.sg-root .hero {
+  padding: var(--space-16) 0 var(--space-12);
+}
+.sg-root .hero__kicker {
+  margin-bottom: 12px;
+}
+.sg-root .hero h1 {
+  max-width: 16ch;
+}
+.sg-root .hero__lead {
+  max-width: 60ch;
+  margin-top: 20px;
+}
+
+.sg-root .guide-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-bg-translucent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-12);
+}
+.sg-root .guide-nav div {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  height: 56px;
+  align-items: center;
+}
+.sg-root .guide-nav a {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sg-root .guide-nav a:hover {
+  color: var(--color-primary);
+}
+
+.sg-root section {
+  margin-bottom: var(--space-16);
+  scroll-margin-top: 72px;
+}
+.sg-root .sec-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.sg-root .sec-h span {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+.sg-root .sec-d {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  max-width: 70ch;
+  margin-bottom: var(--space-8);
+}
+.sg-root .block {
+  margin-bottom: var(--space-10);
+}
+.sg-root .block > h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+.sg-root .row {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.sg-root .row--tight {
+  gap: 4px;
+}
+.sg-root .row--wide {
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+.sg-root .grid {
+  display: grid;
+  gap: var(--space-5);
+}
+.sg-root .g2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.sg-root .g3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.sg-root .g4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.sg-root .stack {
+  display: grid;
+  gap: 12px;
+}
+.sg-root .stack--lg {
+  gap: 20px;
+}
+.sg-root .stack--sm {
+  gap: 10px;
+}
+.sg-root .stack--form {
+  gap: 14px;
+}
+
+.sg-root .swatch {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.sg-root .swatch b {
+  display: block;
+  height: 64px;
+}
+.sg-root .swatch span {
+  display: block;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 16px;
+}
+.sg-root .swatch code {
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+}
+.sg-root .spec {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-2);
+}
+.sg-root .spec--gap {
+  margin-bottom: var(--space-6);
+}
+
+/* Образцы палитры: единственное место, где примитивы показываются напрямую —
+   это и есть документация цвета. */
+.sg-root [data-token='bg'] {
+  background: var(--ice);
+}
+.sg-root [data-token='surface'] {
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+.sg-root [data-token='surface-2'] {
+  background: var(--grey-50);
+}
+.sg-root [data-token='surface-brand'] {
+  background: var(--navy-800);
+}
+.sg-root [data-token='text'] {
+  background: var(--grey-900);
+}
+.sg-root [data-token='text-secondary'] {
+  background: var(--grey-700);
+}
+.sg-root [data-token='text-tertiary'] {
+  background: var(--grey-500);
+}
+.sg-root [data-token='border'] {
+  background: var(--grey-200);
+}
+.sg-root [data-token='primary'] {
+  background: var(--blue-600);
+}
+.sg-root [data-token='primary-hover'] {
+  background: var(--blue-700);
+}
+.sg-root [data-token='primary-active'] {
+  background: var(--blue-800);
+}
+.sg-root [data-token='surface-soft'] {
+  background: var(--blue-100);
+}
+.sg-root [data-token='success'] {
+  background: var(--green-600);
+}
+.sg-root [data-token='warning'] {
+  background: var(--amber-600);
+}
+.sg-root [data-token='error'] {
+  background: var(--red-600);
+}
+
+.sg-root .heat-scale span {
+  width: 64px;
+  height: 40px;
+  border-radius: 6px;
+  display: block;
+}
+.sg-root [data-heat='1'] {
+  background: var(--color-heat-1);
+}
+.sg-root [data-heat='2'] {
+  background: var(--color-heat-2);
+}
+.sg-root [data-heat='3'] {
+  background: var(--color-heat-3);
+}
+.sg-root [data-heat='4'] {
+  background: var(--color-heat-4);
+}
+.sg-root [data-heat='5'] {
+  background: var(--color-heat-5);
+}
+
+.sg-root .ruler {
+  display: grid;
+  gap: 10px;
+}
+.sg-root .ruler > div {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+.sg-root .ruler b {
+  height: 12px;
+  display: block;
+}
+.sg-root .ruler span {
+  width: 56px;
+}
+.sg-root .ruler [data-scale='1'] {
+  background: var(--blue-300);
+}
+.sg-root .ruler [data-scale='2'] {
+  background: var(--blue-500);
+}
+.sg-root .ruler [data-scale='3'] {
+  background: var(--blue-600);
+}
+.sg-root .ruler [data-scale='4'] {
+  background: var(--navy-800);
+}
+
+.sg-root .radii {
+  margin-bottom: var(--space-6);
+}
+.sg-root .radii b {
+  width: 56px;
+  height: 56px;
+  background: var(--color-surface-soft);
+  display: block;
+}
+.sg-root .radii [data-r='sm'] {
+  border-radius: var(--radius-sm);
+}
+.sg-root .radii [data-r='md'] {
+  border-radius: var(--radius-md);
+}
+.sg-root .radii [data-r='lg'] {
+  border-radius: var(--radius-lg);
+}
+.sg-root .radii [data-r='xl'] {
+  border-radius: var(--radius-xl);
+}
+
+.sg-root .depths b {
+  width: 76px;
+  height: 56px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  display: block;
+}
+.sg-root .depths [data-d='xs'] {
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--color-border);
+}
+.sg-root .depths [data-d='sm'] {
+  box-shadow: var(--shadow-sm);
+}
+.sg-root .depths [data-d='md'] {
+  box-shadow: var(--shadow-md);
+}
+.sg-root .depths [data-d='lg'] {
+  box-shadow: var(--shadow-lg);
+}
+
+.sg-root .type-sample {
+  display: grid;
+  gap: 20px;
+}
+.sg-root .divider {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+.sg-root .ring-box {
+  display: grid;
+  place-items: center;
+  padding: 8px 0;
+}
+.sg-root .shell-body {
+  padding: var(--space-6);
+}
+.sg-root .shell-body h3 {
+  margin: 4px 0 20px;
+}
+
+/* Макеты телефонов из раздела «Мобильная оболочка». */
+.sg-root .phone {
+  width: 236px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.sg-root .phone__head {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sg-root .phone__head--even {
+  padding: 14px var(--space-4);
+}
+/* Шапка без правого элемента: заголовок в обычном потоке, как в эталоне. */
+.sg-root .phone__head--plain {
+  display: block;
+}
+.sg-root .phone__name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.sg-root .phone__body {
+  padding: var(--space-4);
+}
+.sg-root .phone__greeting {
+  font-weight: 600;
+  font-size: 15px;
+  margin: 2px 0 14px;
+}
+.sg-root .phone .card {
+  padding: var(--space-4);
+}
+.sg-root .phone .card--tight {
+  padding: 14px;
+}
+.sg-root .phone .metric-row {
+  margin-bottom: 12px;
+}
+.sg-root .phone__task {
+  font-size: 14px;
+  line-height: 22px;
+  margin-bottom: var(--space-4);
+}
+.sg-root .phone__field {
+  margin-bottom: 14px;
+}
+.sg-root .phone__hint {
+  margin-top: var(--space-2);
+}
+.sg-root .phone__spark {
+  margin: 4px 0 10px;
+}
+
+.sg-root .sg-foot {
+  padding: 48px 0 80px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .sg-root .g4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sg-root .g3,
+  .sg-root .g2 {
+    grid-template-columns: 1fr;
+  }
+  .sg-root .page {
+    padding: 0 var(--space-5);
+  }
+  .sg-root .guide-nav div {
+    padding: 0 var(--space-5);
+  }
+}
