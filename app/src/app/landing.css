@@ -1,0 +1,410 @@
+/* Только то, что специфично для главной страницы.
+   Перенос блока стилей из design-reference/index.html: значения не менялись,
+   цвета переведены с хексов на семантические переменные. */
+
+.hero {
+  padding: var(--space-16) 0 var(--space-12);
+  position: relative;
+  overflow: hidden;
+}
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--space-16);
+  align-items: center;
+}
+.hero h1 {
+  font-size: 64px;
+  line-height: 68px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  max-width: 11ch;
+}
+.hero p.lead {
+  font-size: 19px;
+  line-height: 30px;
+  color: var(--color-text-secondary);
+  max-width: 46ch;
+  margin-top: var(--space-6);
+}
+.hero__actions {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-8);
+  flex-wrap: wrap;
+}
+.hero__note {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-5);
+}
+.hero__chart {
+  background: linear-gradient(
+    160deg,
+    var(--color-surface) 0%,
+    var(--color-glass-mid) 55%,
+    var(--color-glass-end) 100%
+  );
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+}
+.hero__chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-5);
+}
+.hero__chart-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+.hero__chart-note {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-4);
+}
+
+/* Единственная анимация страницы: кривая прочерчивается один раз.
+   pathLength="1" позволяет обойтись без измерения длины скриптом. */
+.hero__curve {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-curve 1100ms var(--ease) 150ms forwards;
+}
+@keyframes draw-curve {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Сетка и толщины у графика героя свои — он крупнее компонентного. */
+.hero__chart .chart__grid {
+  stroke: var(--color-grid-soft);
+}
+.hero__chart .chart__line {
+  stroke-width: 3;
+}
+.hero__chart .chart__dot {
+  stroke-width: 3;
+}
+.hero__chart .chart__label {
+  font-size: 14px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  margin-top: var(--space-12);
+}
+.fact {
+  padding: var(--space-6);
+  border-left: 1px solid var(--color-border);
+}
+.fact:first-child {
+  border-left: 0;
+}
+.fact b {
+  display: block;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.fact span {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+section.band {
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--color-border);
+}
+section.band--soft {
+  background: var(--color-surface);
+}
+.band__head {
+  max-width: 62ch;
+  margin-bottom: var(--space-12);
+}
+.band__head h2 {
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.band__head p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+.step {
+  padding-top: var(--space-5);
+  border-top: 2px solid var(--color-primary);
+}
+.step:nth-child(n + 2) {
+  border-top-color: var(--color-border-strong);
+}
+.step b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+}
+.step h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.step p {
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--color-text-secondary);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-16);
+  align-items: center;
+}
+.split h3 {
+  font-size: 30px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-4);
+}
+.split p {
+  font-size: 17px;
+  line-height: 27px;
+  color: var(--color-text-secondary);
+  max-width: 46ch;
+}
+.split__actions {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.checklist {
+  margin-top: var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+}
+.checklist li {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 15px;
+  line-height: 23px;
+}
+.checklist svg {
+  flex: none;
+  margin-top: 5px;
+  color: var(--color-primary);
+}
+
+/* Карточка результата диагностики: отступы из эталона. */
+.diag__score {
+  margin: 2px 0 var(--space-6);
+}
+.diag__unit {
+  font-size: 20px;
+  font-weight: 500;
+}
+.diag__weak-label {
+  margin-bottom: var(--space-3);
+}
+.diag__action {
+  margin-top: var(--space-6);
+}
+.topic-list--roomy .topic {
+  padding: 8px 0;
+}
+
+.teachers__note {
+  margin-top: var(--space-4);
+}
+
+.dirs {
+  border-top: 1px solid var(--color-border);
+}
+.dir {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 120px;
+  gap: var(--space-5);
+  align-items: center;
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  transition: background var(--dur-hover) var(--ease);
+}
+.dir:hover {
+  background: var(--color-surface-2);
+}
+.dir__no {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+.dir__nm {
+  font-size: 16px;
+}
+.dirs__note {
+  margin-top: var(--space-6);
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+
+.cta {
+  background: var(--color-surface-brand);
+  border-radius: var(--radius-xl);
+  padding: var(--space-16) var(--space-12);
+  color: var(--color-text-inverse);
+  position: relative;
+  overflow: hidden;
+}
+.cta h2 {
+  font-size: 44px;
+  line-height: 52px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  max-width: 14ch;
+  position: relative;
+}
+.cta p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-on-brand-text);
+  max-width: 44ch;
+  margin-top: var(--space-5);
+  position: relative;
+}
+.cta__actions {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  position: relative;
+}
+.cta .btn--primary {
+  background: var(--color-surface);
+  color: var(--color-surface-brand);
+}
+.cta .btn--secondary {
+  background: transparent;
+  color: var(--color-text-inverse);
+  box-shadow: inset 0 0 0 1px var(--color-on-brand-outline);
+}
+.cta .btn--secondary:hover {
+  background: var(--color-on-brand-wash);
+}
+.cta__art {
+  position: absolute;
+  right: -40px;
+  bottom: -30px;
+  opacity: 0.5;
+  pointer-events: none;
+  color: var(--color-on-brand-accent);
+}
+.cta__block {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+@media (max-width: 1024px) {
+  .hero__grid,
+  .split {
+    /* minmax(0, 1fr) вместо 1fr: иначе колонка не может стать уже
+       своего содержимого и на узком экране страница едет вбок. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+  .hero h1 {
+    font-size: 52px;
+    line-height: 56px;
+  }
+  .steps {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    padding: var(--space-10) 0 var(--space-8);
+  }
+  .hero h1 {
+    font-size: 38px;
+    line-height: 42px;
+    max-width: none;
+  }
+  .hero p.lead {
+    font-size: 17px;
+    line-height: 27px;
+  }
+  .hero__actions .btn {
+    width: 100%;
+  }
+  .hero__chart {
+    padding: var(--space-5);
+  }
+  .facts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fact {
+    padding: var(--space-5);
+  }
+  .fact b {
+    font-size: 30px;
+    line-height: 36px;
+  }
+  .fact:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+  }
+  section.band {
+    padding: var(--space-12) 0;
+  }
+  .band__head h2 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .split h3 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .dir {
+    grid-template-columns: 36px 1fr;
+    gap: var(--space-3);
+  }
+  .dir__tag {
+    display: none;
+  }
+  .cta {
+    padding: var(--space-10) var(--space-6);
+  }
+  .cta h2 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+}

@@ -34,6 +34,10 @@
   --amber-50: #fef4e3;
   --red-600: #dc2626;
   --red-50: #fcecec;
+  /* Встречаются только на лендинге: стекло героя и его сетка. */
+  --blue-glass-1: #f0f6ff;
+  --blue-glass-2: #e6effc;
+  --blue-grid: #dce7f7;
   --heat-1: #eef4fd;
   --heat-2: #d5e4fa;
   --heat-3: #a9c8f3;
@@ -112,8 +116,18 @@
   --color-on-brand-border: rgba(255, 255, 255, 0.1);
   --color-on-brand-surface: rgba(255, 255, 255, 0.14);
   --color-spinner-track: rgba(255, 255, 255, 0.35);
+  /* Тёмная брендовая подложка лендинга: белый с прозрачностью */
+  --color-on-brand-text: rgba(255, 255, 255, 0.72);
+  --color-on-brand-outline: rgba(255, 255, 255, 0.28);
+  --color-on-brand-wash: rgba(255, 255, 255, 0.08);
+  --color-on-brand-accent: var(--blue-500);
+  /* Стекло героя и его сетка */
+  --color-glass-mid: var(--blue-glass-1);
+  --color-glass-end: var(--blue-glass-2);
+  --color-grid-soft: var(--blue-grid);
   /* Полупрозрачный фон липкой панели поверх --color-bg */
   --color-bg-translucent: rgba(245, 249, 255, 0.92);
+  --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 

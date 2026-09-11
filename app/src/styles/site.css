@@ -1,0 +1,118 @@
+/* Оболочка публичных страниц: контейнер, шапка, подвал.
+   Переносится из design-reference/index.html без изменения значений.
+   Живёт отдельно от лендинга — этим пользуются все публичные страницы. */
+
+.wrap {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--color-bg-translucent-strong);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+}
+.site-head__in {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--color-text);
+}
+.logo i {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  display: block;
+  position: relative;
+  flex: none;
+}
+.logo i::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  width: 12px;
+  height: 7px;
+  border-left: 2px solid var(--color-text-inverse);
+  border-bottom: 2px solid var(--color-text-inverse);
+  transform: skewY(-32deg);
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-6);
+  margin-left: var(--space-6);
+}
+.site-nav a {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.site-nav a:hover {
+  color: var(--color-primary);
+}
+.site-head__cta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.site-foot {
+  padding: var(--space-12) 0;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+.site-foot__in {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.site-foot a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.site-foot a:hover {
+  color: var(--color-primary);
+}
+.site-foot__links {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* Меню прячется на 768px, а не на 760px, как в эталоне: при 761–768px
+   шапка с меню не помещалась и страница ехала вбок. Остальные правила
+   оболочки остаются на эталонном пороге 760px. */
+@media (max-width: 768px) {
+  .site-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .wrap,
+  .site-head__in {
+    padding: 0 var(--space-5);
+  }
+}
