@@ -166,6 +166,7 @@
   --space-12: 48px;
   --space-16: 64px;
 
+  --h-site-head: 72px;
   --h-control-sm: 36px;
   --h-control: 44px;
   --h-control-lg: 52px;
@@ -174,6 +175,9 @@
   --h-topbar: 64px;
   --w-container: 1280px;
 
+  /* Бургер-меню: превращение иконки, выезд панели и каскад пунктов. */
+  --dur-menu: 200ms;
+  --dur-menu-stagger: 35ms;
   --dur-hover: 120ms;
   --dur-switch: 180ms;
   --dur-state: 240ms;

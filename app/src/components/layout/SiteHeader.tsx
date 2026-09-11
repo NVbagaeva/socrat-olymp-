@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { site } from '@/content/site';
+import { SiteMenu } from './SiteMenu';
 
 export interface SiteHeaderProps {
   /** Какой пункт меню отмечен текущим. Значение — href из site.nav. */
@@ -37,6 +38,7 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
           <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
             {site.headerActions.signup.label}
           </a>
+          <SiteMenu />
         </div>
       </div>
     </header>
