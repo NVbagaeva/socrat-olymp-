@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Задание №12 · визуальный контроль</title>
 <link rel="stylesheet" href="graph.css">
+
+<!-- Автономная страница: открывается без сборки, поэтому KaTeX берётся
+     с CDN прямо здесь. В приложении он ставится пакетом (pnpm add katex)
+     и импортируется в коде — тогда эти две строки не нужны. -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <style>
   /* Служебная страница: контроль чертежей, состава наборов и разбора.
      Оформление намеренно скромное — это инструмент, не витрина. */
@@ -507,7 +514,8 @@
     counts();
     fillSets();
     render();
-    GraphKatex.load({ base: '' });
+    /* KaTeX подключён самой страницей — ждём его и подставляем вёрстку. */
+    GraphKatex.load();
     openFromHash();
   }).catch(function (error) {
     el.grid.innerHTML = '<p>Не удалось загрузить наборы: ' + error.message +

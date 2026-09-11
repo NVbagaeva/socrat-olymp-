@@ -1,14 +1,28 @@
 /* graph/katex-boot.js — подключение KaTeX и подстановка его вёрстки.
 
    Формулы уже набраны своими средствами (graph/math.js) и читаются
-   без единого килобайта стороннего кода. KaTeX улучшает набор там,
-   где он доступен: каждый <span class="math" data-tex="…"> заменяется
-   его версткой. Не загрузился — на странице остаётся свой набор,
-   и ничего не ломается.
+   без стороннего кода. KaTeX улучшает набор: каждый
+   <span class="math" data-tex="…"> заменяется его вёрсткой.
 
-   Источник ищется по порядку: сначала локальная копия в graph/vendor,
-   потом CDN. Локальная копия предпочтительна: сайт школьный, он должен
-   открываться и без стороннего домена.
+   Три способа получить KaTeX, в порядке приоритета:
+
+   1. Приложение подключило его само — импортом из пакета:
+
+        import katex from 'katex';
+        import 'katex/dist/katex.min.css';
+        window.katex = katex;              // или передать через upgrade
+
+      Тогда грузить нечего: модуль видит window.katex и сразу заменяет
+      разметку. Это боевой путь, зависимость ставится как обычно:
+      pnpm add katex.
+
+   2. Страница передала адреса сама: load({ sources: [{ css, js }] }).
+
+   3. Ничего не передали — берётся CDN. Нужен только автономному
+      preview.html, который открывают без сборки.
+
+   Не загрузился ни один источник — на странице остаётся собственный
+   набор формул, и ничего не ломается.
 */
 
 (function (root, factory) {
@@ -18,11 +32,11 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var SOURCES = [
-    { css: 'vendor/katex/katex.min.css', js: 'vendor/katex/katex.min.js', local: true },
-    { css: 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css',
-      js:  'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js', local: false }
-  ];
+  var VERSION = '0.16.11';
+  var CDN = {
+    css: 'https://cdn.jsdelivr.net/npm/katex@' + VERSION + '/dist/katex.min.css',
+    js:  'https://cdn.jsdelivr.net/npm/katex@' + VERSION + '/dist/katex.min.js'
+  };
 
   var state = { tried: false, ready: false };
 
@@ -33,8 +47,7 @@
   }
 
   function loadOne(source, onDone) {
-    var css = element('link', { rel: 'stylesheet', href: source.css });
-    document.head.appendChild(css);
+    if (source.css) { document.head.appendChild(element('link', { rel: 'stylesheet', href: source.css })); }
 
     var script = element('script', { src: source.js, defer: 'defer' });
     script.onload = function () { onDone(true); };
@@ -42,24 +55,9 @@
     document.head.appendChild(script);
   }
 
-  /* Загрузка по цепочке источников; молча сдаётся, если ни один не ответил. */
   function load(options, done) {
-    var sources = (options && options.sources) || SOURCES;
-    var base = (options && options.base) || '';
+    var sources = (options && options.sources) || [CDN];
     var index = 0;
-
-    function next() {
-      if (state.ready) { return finish(); }
-      if (index >= sources.length) { return finish(); }
-      var source = sources[index++];
-      loadOne({
-        css: source.local ? base + source.css : source.css,
-        js:  source.local ? base + source.js  : source.js
-      }, function (ok) {
-        state.ready = ok && typeof window.katex !== 'undefined';
-        if (state.ready) { finish(); } else { next(); }
-      });
-    }
 
     function finish() {
       state.tried = true;
@@ -67,9 +65,17 @@
       if (done) { done(state.ready); }
     }
 
+    function next() {
+      if (state.ready || index >= sources.length) { return finish(); }
+      loadOne(sources[index++], function (ok) {
+        state.ready = ok && typeof window.katex !== 'undefined';
+        if (state.ready) { finish(); } else { next(); }
+      });
+    }
+
     if (typeof document === 'undefined') { return; }
 
-    /* KaTeX мог быть подключён самой страницей — тогда грузить нечего. */
+    /* KaTeX уже импортирован приложением — грузить нечего. */
     if (typeof window !== 'undefined' && typeof window.katex !== 'undefined') {
       state.ready = true;
       return finish();
@@ -77,17 +83,21 @@
     next();
   }
 
-  /* Замена своей разметки вёрсткой KaTeX. Идемпотентна: уже
-     обработанные формулы помечаются и второй раз не трогаются. */
-  function upgrade(root) {
-    if (typeof window === 'undefined' || typeof window.katex === 'undefined') { return 0; }
+  /* Замена своей разметки вёрсткой KaTeX. Идемпотентна: обработанные
+     формулы помечаются и второй раз не трогаются.
+     Второй аргумент — экземпляр katex, если приложение не кладёт его
+     в window: upgrade(root, katex). */
+  function upgrade(root, instance) {
+    var katex = instance || (typeof window !== 'undefined' ? window.katex : null);
+    if (!katex) { return 0; }
     state.ready = true;
+
     var nodes = (root || document).querySelectorAll('.math[data-tex]:not([data-katex])');
     var done = 0;
 
     Array.prototype.forEach.call(nodes, function (node) {
       try {
-        window.katex.render(node.getAttribute('data-tex'), node, {
+        katex.render(node.getAttribute('data-tex'), node, {
           throwOnError: false,
           displayMode: false,
           output: 'html'
@@ -102,5 +112,6 @@
     return done;
   }
 
-  return { load: load, upgrade: upgrade, ready: function () { return state.ready; }, SOURCES: SOURCES };
+  return { load: load, upgrade: upgrade, ready: function () { return state.ready; },
+           CDN: CDN, VERSION: VERSION };
 });

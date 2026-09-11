@@ -12,7 +12,7 @@
 .math {
   font-family: var(--font-math);
   font-size: 1.08em;          /* антиква мельче гротеска при равном кегле */
-  line-height: 1;
+  line-height: normal;        /* дробь столбиком выше строки — ей нужно место */
   white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
 }
@@ -22,17 +22,22 @@
   padding-right: .02em;        /* курсив наклонён — компенсируем правый бок */
 }
 
-/* ── Дробь столбиком ───────────────────────────────────────── */
+/* ── Дробь столбиком ─────────────────────────────────────────
+   Числитель над чертой, знаменатель под ней. Дробь выше обычной
+   строки, поэтому строке нужен запас по высоте — его даёт
+   line-height у .solution-formula и .solution-text. */
 .frac {
-  display: inline-grid;
-  vertical-align: -0.42em;
-  text-align: center;
-  font-size: .92em;
-  margin: 0 .1em;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-size: .82em;
+  line-height: 1.05;
+  margin: 0 .14em;
 }
 
-.frac-num { border-bottom: 1px solid currentColor; padding: 0 .22em .04em; }
-.frac-den { padding: .04em .22em 0; }
+.frac-num { border-bottom: 1px solid currentColor; padding: 0 .28em .05em; }
+.frac-den { padding: .05em .28em 0; }
 
 /* ── Варианты ответа ───────────────────────────────────────── */
 .option {
@@ -102,7 +107,7 @@
 .solution-text {
   margin: 0 0 var(--space-3, 12px);
   font-size: 1.0625rem;
-  line-height: 1.62;
+  line-height: 1.7;
   max-width: 60ch;
   font-variant-numeric: tabular-nums;
 }
@@ -112,7 +117,7 @@
    за них при повторном чтении. */
 .key { color: var(--color-primary, #1F5FD0); font-weight: 700; }
 
-.solution-formula { margin: 0 0 var(--space-3, 12px); font-size: 1.15rem; }
+.solution-formula { margin: 0 0 var(--space-3, 12px); font-size: 1.15rem; line-height: 2; }
 
 /* Формула целиком — опорная точка разбора, её видно при беглом просмотре. */
 .solution-formula.feature {
