@@ -2,31 +2,105 @@
    Перенос блока стилей из design-reference/index.html: значения не менялись,
    цвета переведены с хексов на семантические переменные. */
 
+/* ══════════════════════════════════════════════
+   ПЕРВЫЙ ЭКРАН
+   Слева изображение во всю высоту от края окна, справа текст.
+   ══════════════════════════════════════════════ */
+
 .hero {
-  padding: var(--space-16) 0 var(--space-12);
+  /* Ширина левой колонки. Ограничение 836px — половина натуральных 1672px
+     исходника: шире стекло замыливается. Колонка сужается, картинка
+     не растягивается. */
+  --hero-media: min(45%, 836px);
+
   position: relative;
+  display: grid;
+  grid-template-columns: var(--hero-media) minmax(0, 1fr);
+  align-items: center;
+  min-height: calc(100dvh - var(--h-site-head));
+  background: var(--color-bg);
+  /* Обрезает всё, что вытекает за левую границу окна. */
   overflow: hidden;
 }
-.hero__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: var(--space-16);
-  align-items: center;
+
+.hero__media {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  min-height: 0;
 }
-.hero h1 {
-  font-size: 64px;
-  line-height: 68px;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  max-width: 11ch;
+
+.hero__art {
+  display: block;
+  width: 100%;
+  max-width: 836px;
+  height: 100%;
+  /* Выше натуральных 941px кадр не растягивается: стекло замылится.
+     На высоком экране он просто стоит по центру колонки — фон у кадра
+     прозрачный, поэтому стыка не видно. */
+  max-height: 941px;
+  object-fit: cover;
+  /* Кадр отражён и обрезан при сборке. Прижимаем его правым краем
+     к стыку колонок: там у кадра прозрачная кромка, и каустика не
+     выглядит обрубленной. Лишнее уходит за левую границу окна. */
+  object-position: right center;
 }
-.hero p.lead {
-  font-size: 19px;
-  line-height: 30px;
+
+/* Линии построений уходят под изображение и выходят на светлый фон справа. */
+.hero__lines {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: var(--hero-media);
+  transform: translate(-52%, -50%);
+  width: 640px;
+  height: 760px;
+  max-width: none;
+  pointer-events: none;
+}
+.hero__lines-stroke {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1;
+  opacity: 0.15;
+}
+.hero__lines-node {
+  fill: var(--color-primary);
+  opacity: 0.3;
+}
+
+.hero__body {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-12) var(--space-8);
+  max-width: 700px;
+  /* Полоса показателей решает свою раскладку по ширине этой колонки,
+     а не по ширине окна: в две колонки окно широкое, а места мало. */
+  container-type: inline-size;
+}
+
+.hero__title {
+  /* Верхняя ступень шкалы — 64px. Ниже кегль убавляется по ширине колонки,
+     чтобы ручной перенос держался и строка не ломалась сама.
+     Коэффициент: длинная строка занимает 9.41 кегля, 10.4cqi даёт запас. */
+  font-size: clamp(30px, 10.4cqi, 64px);
+  line-height: 1.08;
+  margin-bottom: var(--space-6);
+}
+.hero__title span {
+  display: block;
+  /* Перенос только там, где он задан в контенте. */
+  white-space: nowrap;
+}
+
+.hero__lead {
+  /* Не приглушённый до неразличимости: 4.54:1 к фону секции. */
   color: var(--color-text-secondary);
-  max-width: 46ch;
-  margin-top: var(--space-6);
+  font-size: 18px;
+  line-height: 28px;
+  max-width: 60ch;
 }
+
 .hero__actions {
   display: flex;
   gap: var(--space-4);
@@ -34,111 +108,28 @@
   margin-top: var(--space-8);
   flex-wrap: wrap;
 }
+
 .hero__note {
   font-size: 14px;
-  color: var(--color-text-tertiary);
-  margin-top: var(--space-5);
-}
-/* Исходники не растягиваются выше половины натуральной ширины:
-   1672 → 836 и 1122 → 561. При двойной плотности это пиксель-в-пиксель,
-   выше — стекло замыливается. */
-.hero__art {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 561px;
-  margin-inline: auto;
-}
-@media (min-width: 768px) {
-  .hero__art {
-    max-width: 836px;
-    margin-inline: 0;
-  }
-}
-
-.hero__chart {
-  background: linear-gradient(
-    160deg,
-    var(--color-surface) 0%,
-    var(--color-glass-mid) 55%,
-    var(--color-glass-end) 100%
-  );
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-sm);
-}
-.hero__chart-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: var(--space-5);
-}
-.hero__chart-title {
-  font-weight: 600;
-  font-size: 15px;
-}
-.hero__chart-note {
-  font-size: 13px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin-top: var(--space-4);
 }
 
-/* Единственная анимация страницы: кривая прочерчивается один раз.
-   pathLength="1" позволяет обойтись без измерения длины скриптом. */
-.hero__curve {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: draw-curve 1100ms var(--ease) 150ms forwards;
+.hero__metrics {
+  /* Ровно по числу показателей: пустых ячеек не бывает.
+     Правило перебивает общий свёрток .metric-row на 900px. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-10);
 }
-@keyframes draw-curve {
-  to {
-    stroke-dashoffset: 0;
-  }
+.hero__metrics .metric {
+  padding: var(--space-4);
 }
-
-/* Сетка и толщины у графика героя свои — он крупнее компонентного. */
-.hero__chart .chart__grid {
-  stroke: var(--color-grid-soft);
+.hero__metrics .metric__val {
+  font-size: 32px;
+  line-height: 40px;
 }
-.hero__chart .chart__line {
-  stroke-width: 3;
-}
-.hero__chart .chart__dot {
-  stroke-width: 3;
-}
-.hero__chart .chart__label {
-  font-size: 14px;
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
-  margin-top: var(--space-12);
-}
-.fact {
-  padding: var(--space-6);
-  border-left: 1px solid var(--color-border);
-}
-.fact:first-child {
-  border-left: 0;
-}
-.fact b {
-  display: block;
-  font-size: 40px;
-  line-height: 48px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-.fact span {
-  display: block;
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
+.hero__metrics .metric__lbl {
+  white-space: nowrap;
 }
 
 section.band {
@@ -352,62 +343,88 @@ section.band--soft {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-10);
   }
-  .hero__grid {
-    gap: var(--space-8);
-  }
-  .hero h1 {
-    font-size: 52px;
-    line-height: 56px;
-  }
   .steps {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-/* Сетка героя расходится на две колонки с 768px — там же, где picture
-   переключается на широкий кадр. Раньше порог был 1024, и в полосе
-   768–1024 широкий кадр с объектом справа попадал в одну колонку,
-   оставляя слева пустое поле. */
-@media (max-width: 767.98px) {
-  .hero__grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-10);
-  }
-}
-
-@media (max-width: 760px) {
+/* ── Первый экран на узком экране ──
+   Колонки складываются до 1024px, а не до 768: на планшете в портрете
+   левая колонка выходит 346×950, и кадр режется в узкую полосу —
+   объект перестаёт читаться. Изображение сверху, под ним текст. */
+@media (max-width: 1023.98px) {
   .hero {
-    padding: var(--space-10) 0 var(--space-8);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    min-height: 0;
+    overflow: visible;
   }
-  .hero h1 {
-    font-size: 38px;
-    line-height: 42px;
+  .hero__media {
+    align-self: auto;
+  }
+  .hero__art {
+    /* Кадр показывается целиком, без обрезки. */
+    width: 100%;
+    max-width: 836px;
+    height: auto;
+    object-fit: fill;
+    object-position: center;
+    margin-inline: auto;
+  }
+  /* Мелкая графика на маленьком экране превращается в мусор. */
+  .hero__lines {
+    display: none;
+  }
+  .hero__body {
     max-width: none;
+    padding: var(--space-8) var(--space-5) var(--space-12);
   }
-  .hero p.lead {
+  .hero__lead {
     font-size: 17px;
     line-height: 27px;
+  }
+  .hero__actions {
+    margin-top: var(--space-6);
   }
   .hero__actions .btn {
     width: 100%;
   }
-  .hero__chart {
-    padding: var(--space-5);
+}
+
+/* На планшете широкий кадр иначе съедает весь экран и выталкивает
+   заголовок за нижнюю кромку. На телефоне кадр вертикальный
+   и идёт во всю ширину — там ограничение не нужно. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .hero__art {
+    max-height: 44dvh;
+    object-fit: contain;
   }
-  .facts {
-    grid-template-columns: 1fr 1fr;
+}
+
+/* Ниже 768px picture отдаёт вертикальный кадр: у него свой предел. */
+@media (max-width: 767.98px) {
+  .hero__art {
+    max-width: 561px;
   }
-  .fact {
-    padding: var(--space-5);
+}
+
+/* Три ячейки в строку, пока помещаются; иначе столбец
+   с горизонтальными разделителями. Порог — по самой длинной подписи
+   «заданий первой части» с полями ячейки. */
+@container (max-width: 554px) {
+  .hero__metrics {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .fact b {
-    font-size: 30px;
-    line-height: 36px;
-  }
-  .fact:nth-child(3) {
+  .hero__metrics .metric {
     border-left: 0;
     border-top: 1px solid var(--color-border);
   }
+  .hero__metrics .metric:first-child {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 760px) {
   section.band {
     padding: var(--space-12) 0;
   }

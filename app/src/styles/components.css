@@ -17,6 +17,8 @@
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
+  /* Кнопка-ссылка не подчёркивается: либо кнопка, либо ссылка. */
+  text-decoration: none;
   position: relative;
   transition:
     background var(--dur-hover) var(--ease),

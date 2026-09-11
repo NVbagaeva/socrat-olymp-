@@ -14,7 +14,8 @@ export interface HeroImageProps {
  * а стекло не замыливается. Пределы стоят в landing.css.
  */
 const DESKTOP = { width: 1672, height: 941 };
-const MOBILE = { width: 1122, height: 1402 };
+/* Подготовленный кадр: снизу срезана пустая треть. */
+const MOBILE = { width: 1122, height: 946 };
 const SWITCH = '(min-width: 768px)';
 
 const FORMATS = [
