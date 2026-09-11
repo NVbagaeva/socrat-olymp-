@@ -346,12 +346,14 @@ section.band--soft {
 }
 
 @media (max-width: 1024px) {
-  .hero__grid,
   .split {
     /* minmax(0, 1fr) вместо 1fr: иначе колонка не может стать уже
        своего содержимого и на узком экране страница едет вбок. */
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-10);
+  }
+  .hero__grid {
+    gap: var(--space-8);
   }
   .hero h1 {
     font-size: 52px;
@@ -359,6 +361,17 @@ section.band--soft {
   }
   .steps {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Сетка героя расходится на две колонки с 768px — там же, где picture
+   переключается на широкий кадр. Раньше порог был 1024, и в полосе
+   768–1024 широкий кадр с объектом справа попадал в одну колонку,
+   оставляя слева пустое поле. */
+@media (max-width: 767.98px) {
+  .hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-10);
   }
 }
 
