@@ -131,8 +131,8 @@
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,
-     жирного и курсива в наборе нет. */
-  --font-hand: 'Caveat', cursive;
+     подмножество cyrillic: латиницу и цифры отрисует запасной cursive. */
+  --font-hand: var(--font-caveat), cursive;
 
   /* Шаг сетки 4px: p-1 = 4px, p-4 = 16px, p-6 = 24px. */
   --spacing: 4px;
