@@ -5,6 +5,10 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: 'Будет на ЕГЭ',
   description: 'Подготовка к ЕГЭ по профильной математике.',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport: Viewport = {
