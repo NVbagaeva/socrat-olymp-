@@ -1,0 +1,232 @@
+/* Страница «Об авторе». Опирается на общие слои: токены, .wrap, .btn, шкалу
+   .t-*. Свои классы описывают только то, чего в оболочке нет, — раскладку
+   героя, схему-цепочку и список принципов. Значения берутся из шкалы отступов,
+   промежуточных не вводится. */
+
+/* ── Первый экран ───────────────────────────────────────────── */
+
+.about-hero {
+  padding: var(--space-16) 0 var(--space-12);
+  background: var(--color-bg);
+}
+.about-hero__in {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.about-eyebrow {
+  /* Та же метка, что над героем главной: мелко, прописными, в разрядку. */
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-5);
+}
+
+.about-hero__title {
+  /* Переносы расставляет браузер: ширину строки держит max-width,
+     а не ручные разрывы. Так заголовок не вылезет ни на какой ширине. */
+  font-size: clamp(30px, 3.4vw, 44px);
+  line-height: 1.18;
+  max-width: 24ch;
+  margin-bottom: var(--space-6);
+  text-wrap: balance;
+}
+
+.about-hero__lead {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+  max-width: 52ch;
+}
+
+.about-hero__figure {
+  margin: 0;
+}
+.about-hero__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Общий каркас секций ────────────────────────────────────── */
+
+.about-band {
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--color-border);
+}
+.about-band--soft {
+  background: var(--color-surface);
+}
+
+.about-head {
+  max-width: 62ch;
+  margin-bottom: var(--space-12);
+}
+.about-head p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+/* Колонка для текстовых блоков: строка не длиннее комфортной. */
+.about-narrow {
+  max-width: 72ch;
+}
+.about-text {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-6);
+}
+.about-text--lead {
+  font-size: 20px;
+  line-height: 32px;
+  color: var(--color-text);
+}
+
+/* ── Схема «один прототип → своё задание каждому» ───────────── */
+
+.chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-8);
+  max-width: 62ch;
+}
+.chain__step {
+  position: relative;
+  padding-left: var(--space-8);
+}
+/* Тонкая линия связывает узлы; у последнего шага её нет. */
+.chain__step::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: calc(var(--space-8) * -1);
+  width: 1px;
+  background: var(--color-border-strong);
+}
+.chain__step:last-child::before {
+  display: none;
+}
+.chain__dot {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--color-surface);
+}
+.chain__title {
+  display: block;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.chain__note {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Принципы ───────────────────────────────────────────────── */
+
+.tenets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10) var(--space-12);
+}
+.tenet {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+.tenet__num {
+  display: block;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-4);
+}
+.tenet__title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.tenet__text {
+  margin-top: var(--space-3);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Финальный призыв ───────────────────────────────────────── */
+
+.about-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+/* ── Планшет ────────────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .about-hero__in {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    gap: var(--space-8);
+  }
+}
+
+/* ── Телефон ────────────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+  .about-hero {
+    padding: var(--space-12) 0 var(--space-10);
+  }
+  /* Фотография уходит под текст и не растягивается во всю ширину. */
+  .about-hero__in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .about-hero__figure {
+    max-width: 320px;
+  }
+  .about-hero__title {
+    font-size: clamp(26px, 7.2vw, 34px);
+    max-width: none;
+  }
+
+  .about-band {
+    padding: var(--space-12) 0;
+  }
+  .tenets {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .about-text--lead {
+    font-size: 18px;
+    line-height: 28px;
+  }
+}
