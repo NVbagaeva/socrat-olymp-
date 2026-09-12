@@ -3,6 +3,13 @@
  * ничего не знает о формулировках, они меняются только здесь.
  */
 
+export interface HeroCredential {
+  icon: string;
+  /** Две строки: в ряду они стоят друг под другом, как в макете. */
+  line1: string;
+  line2: string;
+}
+
 export interface PathPoint {
   /** Годы либо слово «параллельно». Годов у параллельной точки нет. */
   period: string;
@@ -29,6 +36,37 @@ export const about = {
        заданная вручную строка вылезла бы за колонку. */
     title: 'Я создала «Будет на ЕГЭ», потому что знаю, сколько времени забирает подготовка к ЕГЭ',
     lead: 'Я учитель математики и создатель платформы для подготовки к ЕГЭ по профильной математике.',
+    actions: {
+      primary: { label: 'Перейти в банк заданий →', href: '/#bank' },
+      secondary: { label: 'Узнать мою историю', href: '#path-title' },
+    },
+
+    /** Нижний ряд первого экрана: четыре равноправных пункта.
+        Иконки взяты из общего набора проекта — все четыре без вшитой
+        подложки, поэтому кружок под ними задаётся стилями одинаково. */
+    credibility: [
+      {
+        icon: '/images/ikonki/ikonka-nastavnik.png',
+        line1: 'Учитель',
+        line2: 'по призванию',
+      },
+      {
+        icon: '/images/ikonki/ikonka-diplom.png',
+        line1: 'Математическое',
+        line2: 'образование',
+      },
+      {
+        icon: '/images/ikonki/ikonka-tetrad.png',
+        line1: 'Реальный опыт',
+        line2: 'школьной работы',
+      },
+      {
+        icon: '/images/ikonki/ikonka-varianty.png',
+        line1: 'Эксперт',
+        line2: 'ЕГЭ',
+      },
+    ] satisfies HeroCredential[],
+
     photo: {
       src: '/images/author/nata-portrait.webp',
       /* Ширины файлов в пикселях, а не множители плотности: исходник
