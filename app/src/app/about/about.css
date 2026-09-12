@@ -186,9 +186,9 @@
    за границу и обрезался. */
 .hero-layer--crystal {
   z-index: 6;
-  right: 3%;
+  right: 2%;
   bottom: 3%;
-  width: 48%;
+  width: 40%;
   opacity: 0.65;
 }
 
@@ -443,7 +443,7 @@
     width: 11%;
   }
   .hero-layer--crystal {
-    width: 52%;
+    width: 44%;
   }
 
   /* Пять точек в строку тут уже не помещаются: ось встаёт вертикально.
