@@ -43,7 +43,7 @@ export default function TasksPage() {
                 number={task.no}
                 title={task.name}
                 href={task.status === 'active' ? `/zadaniya/${task.slug}` : undefined}
-                soon={task.status !== 'active'}
+                comingSoon={task.status !== 'active'}
                 difficulty={task.badge}
                 difficultyTone="info"
               />
