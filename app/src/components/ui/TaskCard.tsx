@@ -19,6 +19,8 @@ interface TaskCardOwnProps {
   href?: string;
   /** Раздел ещё не открыт: карточка неинтерактивна и помечена бейджем. */
   comingSoon?: boolean;
+  /** Миниатюра раздела. Оформление — за страницей, здесь только место. */
+  illustration?: ReactNode;
 }
 
 export type TaskCardProps = TaskCardOwnProps &
@@ -39,6 +41,7 @@ export function TaskCard({
   statusTone = 'neutral',
   href,
   comingSoon = false,
+  illustration,
   className,
   ...rest
 }: TaskCardProps) {
@@ -64,6 +67,21 @@ export function TaskCard({
           ) : null}
         </span>
       </span>
+      {illustration !== undefined ? (
+        <span className="task-card__ill" aria-hidden="true">
+          {illustration}
+        </span>
+      ) : null}
+      {/* Стрелка открытого раздела. Это span, а не кнопка: карточка уже
+          ссылка, вложенный элемент управления сделал бы разметку
+          невалидной и сломал бы обход с клавиатуры. */}
+      {href !== undefined ? (
+        <span className="task-card__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M5 12h13M12 6l6 6-6 6" />
+          </svg>
+        </span>
+      ) : null}
     </>
   );
 
