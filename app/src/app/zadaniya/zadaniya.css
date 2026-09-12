@@ -145,11 +145,44 @@
   z-index: 0;
   pointer-events: none;
 }
+/* Рамка миниатюры: круг и содержимое лежат друг на друге, поэтому
+   формула центрируется в том же круге, что и фигуры. */
+.ill-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  color: var(--color-primary);
+}
 .ill {
   display: block;
   width: 100%;
   height: auto;
-  color: var(--color-primary);
+}
+/* Подложка: плоская заливка, без обводки и без градиента. */
+.ill-disc {
+  fill: currentColor;
+  opacity: 0.06;
+  stroke: none;
+}
+
+/* Формула поверх подложки. Кегли подобраны замером так, чтобы ширина
+   всех трёх была близка и ни одна не выходила за 70% диаметра круга. */
+.ill-formula {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.ill-formula--long {
+  font-size: 8px;
+}
+.ill-formula--mid {
+  font-size: 22px;
+}
+.ill-formula--short {
+  font-size: 28px;
 }
 .ill-line,
 .ill-accent {
@@ -171,7 +204,7 @@
 }
 .ill-fill {
   fill: currentColor;
-  opacity: 0.13;
+  opacity: 0.12;
   stroke: none;
 }
 .ill-text {
