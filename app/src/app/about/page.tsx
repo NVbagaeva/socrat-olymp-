@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: about.meta.description,
 };
 
-const { hero, problem, engine, principles, personal, cta } = about;
+const { hero, path, problem, engine, principles, personal, cta } = about;
 
 export default function AboutPage() {
   return (
@@ -43,6 +43,39 @@ export default function AboutPage() {
                 decoding="async"
               />
             </figure>
+          </div>
+        </section>
+
+        <section className="about-band about-band--soft" aria-labelledby="path-title">
+          <div className="wrap">
+            <div className="about-head">
+              <h2 className="t-h2" id="path-title">
+                {path.title}
+              </h2>
+              <p>{path.lead}</p>
+            </div>
+
+            {/* Ось со точками: на широком экране горизонтальная, ниже — в столбик.
+                Точка «параллельно» уходит с оси и держится на пунктире. */}
+            <ol className="path">
+              {path.points.map((point) => (
+                <li
+                  className={`path__point${point.parallel ? ' path__point--parallel' : ''}`}
+                  key={point.place}
+                >
+                  <span className="path__dot" aria-hidden="true" />
+                  <span className="path__period">{point.period}</span>
+                  <span className="path__place">{point.place}</span>
+                  {point.note ? (
+                    <span
+                      className={`path__note${point.longNote ? ' path__note--long' : ''}`}
+                    >
+                      {point.note}
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
