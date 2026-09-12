@@ -35,25 +35,15 @@
   text-decoration: none;
   color: var(--color-text);
 }
+/* Знак — угол наклона, отсылка к угловому коэффициенту прямой.
+   Подложка и скругление живут внутри logo.svg, поэтому здесь только
+   коробка: размер 22×22 и отступ до текста (gap у .logo) не меняются. */
 .logo i {
   width: 22px;
   height: 22px;
-  border-radius: 6px;
-  background: var(--color-primary);
+  background: url('/icons/logo.svg') center / 22px 22px no-repeat;
   display: block;
-  position: relative;
   flex: none;
-}
-.logo i::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  bottom: 5px;
-  width: 12px;
-  height: 7px;
-  border-left: 2px solid var(--color-text-inverse);
-  border-bottom: 2px solid var(--color-text-inverse);
-  transform: skewY(-32deg);
 }
 
 .site-nav {
