@@ -130,6 +130,9 @@
   --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* Рукописная подпись на полях. Caveat — только обычное начертание,
+     жирного и курсива в наборе нет. */
+  --font-hand: 'Caveat', cursive;
 
   /* Шаг сетки 4px: p-1 = 4px, p-4 = 16px, p-6 = 24px. */
   --spacing: 4px;
