@@ -57,9 +57,15 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Timeweb, shared-хостинг: подключение по FTPS.
-          # Если первый запуск упадёт на проверке сертификата — ftps-legacy.
-          protocol: ftps
+          # Timeweb, shared-хостинг: сервер не поддерживает FTP через TLS
+          # вообще — проверено клиентом FileZilla, авторизация проходит,
+          # но соединение помечено как незащищённое. Ни ftps (явный TLS),
+          # ни ftps-legacy (implicit TLS) поэтому не подходят.
+          # Внимание: пароль уходит на сервер открытым текстом.
+          protocol: ftp
+          # Порт указан явно, хотя 21 у действия и так по умолчанию:
+          # пусть режим подключения читается целиком, без догадок.
+          port: 21
           local-dir: ./app/out/
           server-dir: /public_html/
           # Заливка только добавляющая.
