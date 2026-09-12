@@ -20,7 +20,7 @@
 .about-hero__body {
   position: relative;
   z-index: 8;
-  width: 30%;
+  width: 38%;
   margin-left: 5%;
 }
 
@@ -130,9 +130,9 @@
 .hero-bust {
   position: absolute;
   z-index: 3;
-  left: 34%;
-  bottom: 28%;
-  height: 42%;
+  left: 40%;
+  bottom: 22%;
+  height: 38%;
   pointer-events: none;
 }
 .hero-bust img {
@@ -161,12 +161,12 @@
   );
 }
 
-/* Слой 4 — рукописная пометка. */
+/* Слой 4 — рукописная пометка, правее текстовой колонки. */
 .hero-layer--note {
   z-index: 4;
-  left: 27%;
-  top: 14%;
-  width: 13%;
+  left: 41%;
+  top: 8%;
+  width: 11%;
   opacity: 0.9;
 }
 
@@ -194,9 +194,9 @@
   position: absolute;
   z-index: 7;
   bottom: 0;
-  left: 56%;
+  left: 62%;
   transform: translateX(-50%);
-  height: 100%;
+  height: 88%;
   margin: 0;
 }
 .about-hero__photo {
