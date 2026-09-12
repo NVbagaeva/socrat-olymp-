@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-/* graph/validate.js — проверка правил движка графиков.
+/* scripts/validate-graph.mjs — проверка правил движка графиков.
+
+   Запуск: pnpm validate:graph
+   Ненулевой код возврата валит сборку.
 
    Печатает отчёт и валит сборку (код возврата 1) при любом нарушении.
    Сейчас реализован слой проверок чертежа: окно обязано быть симметричным
@@ -8,18 +11,18 @@
    ведутся раздельно и нигде не складываются.
 */
 
-'use strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-var fs = require('fs');
-var path = require('path');
-var renderer = require('./renderer.js');
-var THEME = renderer.THEME;
-var generator = require('./generate.js');
-var Line = require('./families/line.js');
-var Triangle = require('./triangle.js');
-var Solution = require('./solution.js');
+import renderer from '../src/lib/graph/renderer.js';
+import generator from '../src/lib/graph/generate.js';
+import Line from '../src/lib/graph/families/line.js';
+import Triangle from '../src/lib/graph/triangle.js';
+import Solution from '../src/lib/graph/solution.js';
 
-var ROOT = __dirname;
+const THEME = renderer.THEME;
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
 
 /* ══════════════════════════════════════════════════════════
    Проверки чертежа
@@ -785,6 +788,8 @@ function checkTask(set, task) {
    Обход наборов задач. Подготовка и прототипы считаются отдельно
    и ни в каком месте не складываются в одно число.
    ══════════════════════════════════════════════════════════ */
+/* Наборы читаются с диска: в приложении их отдаёт статический импорт
+   из data/index.js, здесь — обычное чтение файлов. */
 function readSets(dir) {
   var full = path.join(ROOT, dir);
   if (!fs.existsSync(full)) { return []; }
@@ -795,6 +800,17 @@ function readSets(dir) {
     });
 }
 
+/* Скрипту наборы нужно передать движку до первой генерации. */
+function loadAll() {
+  var prep = readSets('prep/12');
+  var prototypes = readSets('prototypes/12');
+  generator.setSets({
+    prep: prep.map(function (item) { return item.data; }),
+    prototypes: prototypes.map(function (item) { return item.data; })
+  });
+  return { prep: prep, prototypes: prototypes };
+}
+
 function run() {
   var errors = [];
   var report = [];
@@ -802,8 +818,9 @@ function run() {
   errors = errors.concat(selfTestWindow());
   report.push('окно: самопроверка на ' + WINDOW_CASES.length + ' случаях');
 
-  var prep = readSets('prep/12');
-  var prototypes = readSets('prototypes/12');
+  var loaded = loadAll();
+  var prep = loaded.prep;
+  var prototypes = loaded.prototypes;
 
   report.push('подготовка:  блоков ' + prep.length + ', задач ' +
     prep.reduce(function (sum, set) { return sum + (set.data.tasks || []).length; }, 0) +
@@ -847,6 +864,6 @@ function main() {
   console.log('\nвсё чисто');
 }
 
-module.exports = { checkWindow: checkWindow, checkScene: checkScene, run: run };
+export { checkWindow, checkScene, run, loadAll };
 
-if (require.main === module) { main(); }
+main();

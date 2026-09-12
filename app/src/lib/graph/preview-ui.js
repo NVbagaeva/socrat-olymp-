@@ -1,103 +1,24 @@
-<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Задание №12 · визуальный контроль</title>
-<link rel="stylesheet" href="graph.css">
+/* preview-ui.js — служебная страница визуального контроля.
 
-<!-- ВРЕМЕННОЕ РЕШЕНИЕ, только для этой страницы.
-     preview.html — служебный файл, который открывают без сборки,
-     поэтому KaTeX подтягивается с CDN. В приложении (app/, Next.js)
-     KaTeX подключается обычным импортом через graph/katex.js,
-     и эти две строки не нужны. Когда модуль переедет в app/,
-     превью станет страницей проекта и CDN уйдёт вместе с ним. -->
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-<style>
-  /* Служебная страница: контроль чертежей, состава наборов и разбора.
-     Оформление намеренно скромное — это инструмент, не витрина. */
-  :root {
-    --font: 'Inter', system-ui, -apple-system, sans-serif;
-    --color-bg: #F5F9FF;
-    --color-surface: #FFFFFF;
-    --color-border: #E4EBF3;
-    --color-text: #101728;
-    --color-text-secondary: #667389;
-    --color-text-tertiary: #97A1B0;
-    --color-primary: #1F5FD0;
-    --color-surface-2: #F7F9FC;
-    --radius: 12px;
-    --space: 16px;
-  }
+   Собирает разметку в переданный контейнер и ничего не знает
+   ни про React, ни про сборщик: страница проекта монтирует её
+   в useEffect, простой HTML — вызовом из <script type="module">.
 
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--color-bg); color: var(--color-text);
-         font-family: var(--font); font-size: 14px; }
+   Наборы и экземпляр KaTeX приходят снаружи: модуль не ходит
+   ни в файловую систему, ни в сеть.
+*/
 
-  header { position: sticky; top: 0; z-index: 5; background: var(--color-surface);
-           border-bottom: 1px solid var(--color-border); padding: 12px 20px;
-           display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  h1 { font-size: 15px; margin: 0 16px 0 0; }
-  label { font-size: 12px; color: var(--color-text-secondary); display: flex; gap: 6px; align-items: center; }
-  select, input { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px;
-                  border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
-  input[type="number"] { width: 96px; }
-  button { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer;
-           border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
-  button.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
-  button[hidden] { display: none; }
+import renderer from './renderer.js';
+import math from './math.js';
+import katexUpgrade from './katex-upgrade.js';
+import Triangle from './triangle.js';
+import solution from './solution.js';
+import animate from './animate.js';
+import generate from './generate.js';
 
-  .counts { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); text-align: right; }
-
-  main { padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
-  @media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
-
-  .card { background: var(--color-surface); border: 1px solid var(--color-border);
-          border-radius: var(--radius); padding: 12px; cursor: pointer; }
-  .card:hover { border-color: var(--color-primary); }
-  .card.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(31,95,208,.15); }
-  .card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
-  .card-id { font-size: 12px; color: var(--color-text-secondary); }
-  .badge { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
-  .badge.lucky { background: #EFF3F8; color: var(--color-text-secondary); }
-  .badge.unlucky { background: var(--color-primary); color: #fff; }
-  .card svg { display: block; width: 100%; height: auto; }
-  .card .question { font-size: 13px; margin: 8px 0 4px; line-height: 1.4; }
-  .card .answer { font-size: 13px; color: var(--color-primary); font-weight: 600; }
-  .card .options { font-size: 13px; margin: 4px 0 0; padding: 0; list-style: none; }
-  .card .options li { padding: 1px 0; color: var(--color-text-secondary); }
-  .card .options li.right { color: var(--color-primary); font-weight: 600; }
-  .nochart { height: 44px; display: grid; place-items: center; color: var(--color-text-tertiary);
-             font-size: 12px; border: 1px dashed var(--color-border); border-radius: 8px; }
-
-  /* ── Панель разбора ─────────────────────────────────────── */
-  aside { position: sticky; top: 68px; background: var(--color-surface);
-          border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
-  aside h2 { font-size: 14px; margin: 0 0 4px; }
-  aside .hint { font-size: 12px; color: var(--color-text-secondary); margin: 8px 0 0; }
-  aside > svg { display: block; width: 100%; height: auto; margin: 10px 0; }
-  .solution-arrow { width: 22px; height: 22px; flex: none; }
-
-  .attempt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
-  .verdict { font-size: 13px; margin: 8px 0 0; }
-  .verdict.right { color: #16A34A; }
-  .verdict.wrong { color: var(--color-text-secondary); }
-
-  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .steps { font-size: 12px; color: var(--color-text-tertiary); margin-top: 8px; }
-
-  .solution { margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 12px; }
-  .solution-line { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
-  .solution-line:last-child { margin-bottom: 0; font-weight: 600; }
-</style>
-</head>
-<body>
-
-<header>
+/* Разметка страницы: заголовок с переключателями, сетка задач
+   и панель разбора. Собирается один раз при монтировании. */
+const MARKUP = `<header>
   <h1>Задание №12 · визуальный контроль</h1>
 
   <label>Раздел
@@ -121,19 +42,26 @@
     <h2>Разбор</h2>
     <p class="hint" id="panel-hint">Выберите задачу слева.</p>
   </aside>
-</main>
+</main>`;
 
-<script src="math.js"></script>
-<script src="katex-upgrade.js"></script>
-<script src="renderer.js"></script>
-<script src="families/line.js"></script>
-<script src="triangle.js"></script>
-<script src="generate.js"></script>
-<script src="solution.js"></script>
-<script src="animate.js"></script>
-<script>
-(function () {
-  'use strict';
+/**
+ * @param {HTMLElement} container куда монтировать
+ * @param {{ sets: {prep: object[], prototypes: object[]}, katex?: object }} options
+ */
+export function mountPreview(container, options) {
+  const GraphRenderer = renderer;
+  const GraphMath = math;
+  const GraphKatexUpgrade = katexUpgrade;
+  const GraphTriangle = Triangle;
+  const GraphSolution = solution;
+  const GraphAnimate = animate;
+  const GraphGenerate = generate;
+  const katexInstance = (options && options.katex) || null;
+
+  container.innerHTML = MARKUP;
+
+
+  
 
   /* Тексты уровней — одной константой: формулировку меняют здесь. */
   var LEVEL_LABELS = { lucky: 'повезло', unlucky: 'не повезло' };
@@ -147,29 +75,24 @@
                  'prototypes/12/12-C.json', 'prototypes/12/12-D.json']
   };
 
-  var sets = { prep: [], prototypes: [] };
+  var sets = (options && options.sets) || { prep: [], prototypes: [] };
   var current = { mode: 'prep', setId: null, seed: null, taskId: null };
   var player = null;
 
   var el = {
-    mode: document.getElementById('mode'),
-    set: document.getElementById('set'),
-    seed: document.getElementById('seed'),
-    rebuild: document.getElementById('rebuild'),
-    grid: document.getElementById('grid'),
-    panel: document.getElementById('panel'),
-    counts: document.getElementById('counts')
+    mode: container.querySelector('#mode'),
+    set: container.querySelector('#set'),
+    seed: container.querySelector('#seed'),
+    rebuild: container.querySelector('#rebuild'),
+    grid: container.querySelector('#grid'),
+    panel: container.querySelector('#panel'),
+    counts: container.querySelector('#counts')
   };
 
+  /* Наборы уже переданы: страница ничего не загружает. */
   function load() {
-    var all = FILES.prep.concat(FILES.prototypes);
-    return Promise.all(all.map(function (file) {
-      return fetch(file).then(function (response) { return response.json(); });
-    })).then(function (list) {
-      sets.prep = list.slice(0, FILES.prep.length);
-      sets.prototypes = list.slice(FILES.prep.length);
-      GraphGenerate.setSets(sets);
-    });
+    GraphGenerate.setSets(sets);
+    return Promise.resolve();
   }
 
   function counts() {
@@ -277,13 +200,13 @@
   }
 
   function bindPanel(task, analysis) {
-    var answer = document.getElementById('answer');
-    var verdict = document.getElementById('verdict');
-    var show = document.getElementById('show');
-    var pause = document.getElementById('pause');
-    var next = document.getElementById('next');
-    var steps = document.getElementById('steps');
-    var solution = document.getElementById('solution');
+    var answer = container.querySelector('#answer');
+    var verdict = container.querySelector('#verdict');
+    var show = container.querySelector('#show');
+    var pause = container.querySelector('#pause');
+    var next = container.querySelector('#next');
+    var steps = container.querySelector('#steps');
+    var solution = container.querySelector('#solution');
 
     function attemptMade(text, right) {
       verdict.textContent = text;
@@ -291,13 +214,13 @@
       show.hidden = false;
     }
 
-    document.getElementById('check').addEventListener('click', function () {
+    container.querySelector('#check').addEventListener('click', function () {
       var value = (answer.value || '').trim().replace('.', ',');
       var right = value === task.answer;
       attemptMade(right ? 'Верно.' : 'Неверно. Правильный ответ: ' + task.answer, right);
     });
 
-    document.getElementById('giveup').addEventListener('click', function () {
+    container.querySelector('#giveup').addEventListener('click', function () {
       /* Честный выход: считается попыткой без ответа. */
       attemptMade('Засчитано как попытка без ответа: прототип не решён самостоятельно.', false);
     });
@@ -361,19 +284,10 @@
     next.addEventListener('click', function () { player.next(); });
   }
 
-  /* KaTeX приходит с CDN и может опоздать к первой отрисовке. */
+  /* KaTeX передан приложением обычным импортом. Не передан —
+     формулы остаются в исходной записи, страница работает. */
   function katexUpgrade(root) {
-    if (window.katex) { GraphKatexUpgrade.upgrade(root, window.katex); }
-    else { whenKatexReady(function () { GraphKatexUpgrade.upgrade(root, window.katex); }); }
-  }
-
-  function whenKatexReady(done) {
-    if (window.katex) { return done(); }
-    var waited = 0;
-    var timer = setInterval(function () {
-      waited += 50;
-      if (window.katex || waited > 4000) { clearInterval(timer); done(); }
-    }, 50);
+    if (katexInstance) { GraphKatexUpgrade.upgrade(root, katexInstance); }
   }
 
   /* ── Разметка шагов разбора ──────────────────────────────
@@ -507,21 +421,21 @@
     /* only=panel — служебный режим: на странице остаётся только разбор.
        Нужен, чтобы снимать анимацию по шагам. */
     if (params.only === 'panel') {
-      document.querySelector('header').style.display = 'none';
+      container.querySelector('header').style.display = 'none';
       el.grid.style.display = 'none';
-      document.querySelector('main').style.gridTemplateColumns = 'minmax(0, 1fr)';
+      container.querySelector('main').style.gridTemplateColumns = 'minmax(0, 1fr)';
       el.panel.style.position = 'static';
     }
 
     if (params.auto === '1') {
-      document.getElementById('giveup').click();
-      document.getElementById('show').click();
+      container.querySelector('#giveup').click();
+      container.querySelector('#show').click();
     }
 
     /* open=1 — развернуть блок «Откуда берётся минус»: нужен для показа. */
     if (params.open === '1') {
       setTimeout(function () {
-        Array.prototype.forEach.call(document.querySelectorAll('.solution-details'), function (node) {
+        Array.prototype.forEach.call(container.querySelectorAll('.solution-details'), function (node) {
           node.classList.add('open');
         });
       }, 50);
@@ -532,15 +446,9 @@
     counts();
     fillSets();
     render();
-    /* KaTeX подключён строкой выше (временно, с CDN): дожидаемся
-       загрузки и подставляем его вёрстку вместо исходной разметки. */
-    whenKatexReady(function () { GraphKatexUpgrade.upgrade(document, window.katex); });
+    katexUpgrade(container);
     openFromHash();
-  }).catch(function (error) {
-    el.grid.innerHTML = '<p>Не удалось загрузить наборы: ' + error.message +
-      '. Страница читает JSON через fetch — откройте её с локального сервера: python3 -m http.server</p>';
   });
-})();
-</script>
-</body>
-</html>
+}
+
+export default mountPreview;

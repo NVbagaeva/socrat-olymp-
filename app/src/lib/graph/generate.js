@@ -1,32 +1,26 @@
-#!/usr/bin/env node
-/* graph/generate.js — сборка варианта задачи.
+/* generate.js — сборка варианта задачи.
 
    generate(id, seed) -> { svg, question, answer, answerType, level, meta }
 
    Детерминировано по seed: один seed всегда даёт один вариант. Тексты
    условий, подсказки и правила вычисления ответа лежат в данных
-   (graph/prep/12/*.json и graph/prototypes/12/*.json), а не в коде.
+   (data/prep/12/*.json и data/prototypes/12/*.json), а не в коде.
 
    Подготовка и прототипы загружаются из разных папок и нигде
    не смешиваются: у них разные идентификаторы и разные счётчики.
 */
 
-'use strict';
+/* Файловой системы модуль не касается: наборы приходят готовыми —
+   статическим импортом из data/index.js в приложении или чтением
+   с диска в служебном скрипте. Так один и тот же код собирается
+   в бандл и работает в Node. */
 
-/* Модуль работает и в Node, и в браузере. В Node наборы читаются
-   с диска, в браузере страница загружает их сама (fetch) и отдаёт
-   через setSets: своей файловой системы у неё нет. */
-var inNode = typeof module === 'object' && module.exports;
+import renderer from './renderer.js';
+import math from './math.js';
+import Line from './families/line.js';
+import Triangle from './triangle.js';
 
-var fs = inNode ? require('fs') : null;
-var path = inNode ? require('path') : null;
-var renderer = inNode ? require('./renderer.js') : window.GraphRenderer;
-var math = inNode ? require('./math.js') : window.GraphMath;
-var Line = inNode ? require('./families/line.js') : window.GraphLine;
-var Triangle = inNode ? require('./triangle.js') : window.GraphTriangle;
-
-var ROOT = inNode ? __dirname : '';
-var FAMILIES = { line: Line };
+const FAMILIES = { line: Line };
 
 /* ══════════════════════════════════════════════════════════
    Детерминированный генератор псевдослучайных чисел
@@ -74,20 +68,7 @@ function setSets(sets) {
 
 function loadSets() {
   if (cache) { return cache; }
-  if (!inNode) { throw new Error('generate: наборы не загружены, вызовите setSets'); }
-
-  cache = { prep: [], prototypes: [] };
-  [['prep', 'prep/12'], ['prototypes', 'prototypes/12']].forEach(function (pair) {
-    var dir = path.join(ROOT, pair[1]);
-    if (!fs.existsSync(dir)) { return; }
-    fs.readdirSync(dir).filter(function (name) { return /\.json$/.test(name); }).sort()
-      .forEach(function (name) {
-        var data = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8'));
-        data.file = pair[1] + '/' + name;
-        cache[pair[0]].push(data);
-      });
-  });
-  return cache;
+  throw new Error('generate: наборы не загружены, вызовите setSets');
 }
 
 function allSets() {
@@ -943,15 +924,7 @@ function buildAnswers() {
   return out;
 }
 
-function writeAnswers() {
-  var answers = buildAnswers();
-  var file = path.join(ROOT, 'answers.json');
-  fs.writeFileSync(file, JSON.stringify(answers, null, 2) + '\n');
-  return { file: file, prep: Object.keys(answers.prep).length,
-           prototypes: Object.keys(answers.prototypes).length };
-}
-
-var api = {
+const api = {
   setSets: setSets,
   typeset: typesetText,
   analysis: analysis,
@@ -961,25 +934,10 @@ var api = {
   generateSet: generateSet,
   loadSets: loadSets,
   buildAnswers: buildAnswers,
-  writeAnswers: inNode ? writeAnswers : null,
   answerText: answerText
 };
 
-if (inNode) { module.exports = api; }
-else { window.GraphGenerate = api; }
-
-if (inNode && require.main === module) {
-  var args = process.argv.slice(2);
-  if (args[0] === 'build') {
-    var info = writeAnswers();
-    console.log('answers.json обновлён: подготовка ' + info.prep + ', прототипы ' + info.prototypes);
-  } else if (args[0]) {
-    var task = generate(args[0], args[1]);
-    console.log(task.id + '  [' + task.kind + ']  seed ' + task.meta.seed);
-    console.log(task.question);
-    console.log('ответ: ' + task.answer + '  (' + task.answerType + ')');
-    console.log('k = ' + task.meta.k + ', b = ' + task.meta.b + ', окно ±' + task.meta.window.xmax);
-  } else {
-    console.log('использование: node graph/generate.js <id задачи> [seed] | build');
-  }
-}
+export default api;
+export { setSets, analysis, taskCandidates, equationText, generate, generateSet,
+         loadSets, buildAnswers, answerText };
+export const typeset = typesetText;

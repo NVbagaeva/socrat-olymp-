@@ -1,0 +1,79 @@
+/* preview.css — оформление служебной страницы визуального контроля.
+   Это инструмент, а не витрина: скромно и без изысков. */
+/* Служебная страница: контроль чертежей, состава наборов и разбора.
+     Оформление намеренно скромное — это инструмент, не витрина. */
+  :root {
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --color-bg: #F5F9FF;
+    --color-surface: #FFFFFF;
+    --color-border: #E4EBF3;
+    --color-text: #101728;
+    --color-text-secondary: #667389;
+    --color-text-tertiary: #97A1B0;
+    --color-primary: #1F5FD0;
+    --color-surface-2: #F7F9FC;
+    --radius: 12px;
+    --space: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--color-bg); color: var(--color-text);
+         font-family: var(--font); font-size: 14px; }
+
+  header { position: sticky; top: 0; z-index: 5; background: var(--color-surface);
+           border-bottom: 1px solid var(--color-border); padding: 12px 20px;
+           display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 15px; margin: 0 16px 0 0; }
+  label { font-size: 12px; color: var(--color-text-secondary); display: flex; gap: 6px; align-items: center; }
+  select, input { font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px;
+                  border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
+  input[type="number"] { width: 96px; }
+  button { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+           border: 1px solid var(--color-border); background: var(--color-surface); color: inherit; }
+  button.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  button[hidden] { display: none; }
+
+  .counts { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); text-align: right; }
+
+  main { padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+  @media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+
+  .card { background: var(--color-surface); border: 1px solid var(--color-border);
+          border-radius: var(--radius); padding: 12px; cursor: pointer; }
+  .card:hover { border-color: var(--color-primary); }
+  .card.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(31,95,208,.15); }
+  .card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .card-id { font-size: 12px; color: var(--color-text-secondary); }
+  .badge { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .badge.lucky { background: #EFF3F8; color: var(--color-text-secondary); }
+  .badge.unlucky { background: var(--color-primary); color: #fff; }
+  .card svg { display: block; width: 100%; height: auto; }
+  .card .question { font-size: 13px; margin: 8px 0 4px; line-height: 1.4; }
+  .card .answer { font-size: 13px; color: var(--color-primary); font-weight: 600; }
+  .card .options { font-size: 13px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .card .options li { padding: 1px 0; color: var(--color-text-secondary); }
+  .card .options li.right { color: var(--color-primary); font-weight: 600; }
+  .nochart { height: 44px; display: grid; place-items: center; color: var(--color-text-tertiary);
+             font-size: 12px; border: 1px dashed var(--color-border); border-radius: 8px; }
+
+  /* ── Панель разбора ─────────────────────────────────────── */
+  aside { position: sticky; top: 68px; background: var(--color-surface);
+          border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
+  aside h2 { font-size: 14px; margin: 0 0 4px; }
+  aside .hint { font-size: 12px; color: var(--color-text-secondary); margin: 8px 0 0; }
+  aside > svg { display: block; width: 100%; height: auto; margin: 10px 0; }
+  .solution-arrow { width: 22px; height: 22px; flex: none; }
+
+  .attempt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .verdict { font-size: 13px; margin: 8px 0 0; }
+  .verdict.right { color: #16A34A; }
+  .verdict.wrong { color: var(--color-text-secondary); }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .steps { font-size: 12px; color: var(--color-text-tertiary); margin-top: 8px; }
+
+  .solution { margin-top: 12px; border-top: 1px solid var(--color-border); padding-top: 12px; }
+  .solution-line { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+  .solution-line:last-child { margin-bottom: 0; font-weight: 600; }

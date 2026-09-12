@@ -1,0 +1,69 @@
+name: Deploy
+
+# Публикуем сайт при каждом изменении в main.
+# Ручной запуск оставлен на случай, когда нужно перезалить сборку без нового коммита.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Два деплоя одновременно затёрли бы файл состояния на сервере,
+# поэтому новый запуск ждёт, пока закончится предыдущий.
+concurrency:
+  group: deploy-ftp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Сборка и публикация на FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      # pnpm ставим до setup-node: иначе кэшу нечего искать.
+      # Версия берётся из поля packageManager в app/package.json.
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      # next.config.ts собран с output: 'export' — результат складывается в app/out.
+      - name: Собрать статический экспорт
+        working-directory: app
+        run: pnpm build
+
+      - name: Проверить, что экспорт не пустой
+        run: test -f app/out/index.html
+
+      - name: Залить на FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Timeweb, shared-хостинг: подключение по FTPS.
+          # Если первый запуск упадёт на проверке сертификата — ftps-legacy.
+          protocol: ftps
+          local-dir: ./app/out/
+          server-dir: /public_html/
+          # Заливка только добавляющая.
+          # dangerous-clean-slate — единственный режим действия, который стирает
+          # содержимое папки на сервере перед загрузкой. Он выключен явно,
+          # чтобы случайно не удалить ege/, about.html и остальные рабочие страницы.
+          dangerous-clean-slate: false
