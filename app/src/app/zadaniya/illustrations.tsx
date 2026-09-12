@@ -64,13 +64,19 @@ export const ILLUSTRATIONS: Record<string, ReactElement> = {
     </>
   ),
 
-  /* 03 — каркасный куб: передняя грань залита, остальные линиями. */
+  /* 03 — каркасный куб: передняя грань залита, задние рёбра пунктиром.
+     Невидимая вершина — задняя нижняя левая (36,60): три сходящихся
+     в ней ребра и показаны штрихами. */
   '3': (
     <>
       <rect className="ill-fill" x="24" y="36" width="36" height="36" />
       <rect className="ill-line" x="24" y="36" width="36" height="36" />
-      <rect className="ill-line" x="36" y="24" width="36" height="36" />
-      <path className="ill-line" d="M24 36 L 36 24 M60 36 L 72 24 M24 72 L 36 60 M60 72 L 72 60" />
+      {/* видимые задние рёбра */}
+      <path className="ill-line" d="M36 24 H 72 M72 24 V 60" />
+      {/* видимые соединяющие рёбра */}
+      <path className="ill-line" d="M24 36 L 36 24 M60 36 L 72 24 M60 72 L 72 60" />
+      {/* невидимые рёбра */}
+      <path className="ill-dash" d="M36 24 V 60 M36 60 H 72 M24 72 L 36 60" />
     </>
   ),
 
@@ -144,14 +150,15 @@ export const ILLUSTRATIONS: Record<string, ReactElement> = {
   /* 10 — оси t и v, на них возрастающая прямая. */
   '10': (
     <>
-      <path className="ill-line" d="M26 72 H 74 M26 24 V 72" />
-      <path className="ill-accent" d="M30 68 L 70 32" />
-      {/* подписи осей прижаты внутрь: у текста габарит шире якоря,
-          и на прежнем месте он задевал край круга */}
-      <text className="ill-text" x="63" y="76">
+      {/* оси: вертикальная v и горизонтальная t, с общим началом */}
+      <path className="ill-line" d="M32 28 V 70 H 72" />
+      <path className="ill-accent" d="M36 66 L 70 34" />
+      {/* подписи стоят у концов своих осей; якорь задан так, чтобы
+          габарит текста уходил внутрь круга, а не наружу */}
+      <text className="ill-text" x="67" y="78" textAnchor="middle">
         t
       </text>
-      <text className="ill-text" x="22" y="34">
+      <text className="ill-text" x="26" y="30" textAnchor="middle">
         v
       </text>
     </>

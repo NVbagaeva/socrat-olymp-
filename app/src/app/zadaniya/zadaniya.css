@@ -176,7 +176,7 @@
   pointer-events: none;
 }
 .ill-formula--long {
-  font-size: 8px;
+  font-size: 11px;
 }
 .ill-formula--mid {
   font-size: 22px;
@@ -194,6 +194,15 @@
 }
 .ill-line {
   opacity: 0.55;
+}
+/* Невидимые рёбра: тот же вес и цвет, отличается только штрих. */
+.ill-dash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 4 3.5;
+  opacity: 0.4;
 }
 .ill-accent {
   opacity: 1;
