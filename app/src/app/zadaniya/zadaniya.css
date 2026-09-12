@@ -86,34 +86,43 @@
   display: flex;
 }
 
-/* ── Крупная карточка банка ─────────────────────────────────── */
+/* ── Карточка банка ─────────────────────────────────────────── */
 
+/* Две колонки: текст слева во всю оставшуюся ширину, миниатюра справа
+   фиксированной ширины и по вертикальному центру. Пропорции сторон нет:
+   высоту задаёт содержимое, а ровный ряд обеспечивает растяжка сетки. */
 .task-card--bank {
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  align-content: start;
   width: 100%;
-  aspect-ratio: 3 / 2;
-  padding: var(--space-5);
+  height: 100%;
+  min-height: 150px;
+  padding: var(--space-6);
   overflow: hidden;
 }
 
-/* Номер крупно вместо плашки: та же шкала, что у заголовка H2. */
+/* Номер крупно вместо плашки. */
 .task-card--bank .task-card__no {
+  grid-area: 1 / 1;
   width: auto;
   height: auto;
   background: none;
   border-radius: 0;
   display: block;
-  font-size: 40px;
-  line-height: 48px;
+  font-size: 30px;
+  line-height: 36px;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--color-primary);
 }
 .task-card--bank .task-card__body {
+  grid-area: 2 / 1;
   display: block;
-  position: relative;
-  z-index: 1;
 }
 .task-card--bank .task-card__title {
   display: -webkit-box;
@@ -121,30 +130,30 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  margin-top: var(--space-2);
-  /* Меры нет: название должно укладываться в две строки на любой
-     ширине карточки. Миниатюра лежит ниже по слоям и приглушена,
-     поэтому текст спокойно проходит поверх её линий. */
-  padding-right: var(--space-2);
-  font-size: 14px;
-  line-height: 19px;
+  font-size: 16px;
+  line-height: 22px;
   font-weight: 500;
   color: var(--color-text);
 }
 .task-card--bank .task-card__meta {
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
+}
+.task-card--bank .task-card__meta .badge {
+  font-size: 13px;
 }
 
-/* Миниатюра: правая часть, ближе к низу, под текстом по слоям. */
+/* Миниатюра: правая колонка на обе строки, по центру по вертикали.
+   Снизу зарезервирована полоса под круглую стрелку — одинаково у всех
+   карточек, чтобы миниатюры стояли на одной линии по всему ряду. */
 .task-card--bank .task-card__ill {
-  position: absolute;
-  right: var(--space-4);
-  bottom: var(--space-4);
-  width: 38%;
-  max-width: 84px;
-  z-index: 0;
+  grid-area: 1 / 2 / 3 / 3;
+  align-self: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-8);
   pointer-events: none;
 }
+
 /* Рамка миниатюры: круг и содержимое лежат друг на друге, поэтому
    формула центрируется в том же круге, что и фигуры. */
 .ill-frame {
@@ -226,12 +235,14 @@
 
 /* Стрелка открытого раздела. Миниатюра рядом с ней сдвигается вверх,
    чтобы они не наложились. */
+/* Стрелка открытого раздела. Позиционирование абсолютное: элемент вне
+   потока и высоту карточки не меняет, поэтому ряд остаётся ровным. */
 .task-card--bank .task-card__go {
   position: absolute;
-  right: var(--space-5);
-  bottom: var(--space-5);
-  width: 40px;
-  height: 40px;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--color-primary);
   display: grid;
@@ -239,20 +250,14 @@
   z-index: 1;
 }
 .task-card--bank .task-card__go svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: var(--color-text-inverse);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.task-card--bank:has(.task-card__go) .task-card__ill {
-  bottom: auto;
-  top: var(--space-8);
-  right: var(--space-5);
-}
-
 /* Неоткрытая карточка: миниатюра гаснет вместе с текстом. */
 .task-card--soon .ill {
   opacity: 0.5;
@@ -288,5 +293,27 @@
   }
   .tasks-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .task-card--bank {
+    min-height: 100px;
+    padding: var(--space-4);
+  }
+  .task-card--bank .task-card__no {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .task-card--bank .task-card__title {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .task-card--bank .task-card__ill {
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--space-6);
+  }
+  .task-card--bank .task-card__go {
+    right: var(--space-4);
+    bottom: var(--space-4);
   }
 }
