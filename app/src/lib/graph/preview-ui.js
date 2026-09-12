@@ -11,7 +11,6 @@
 import renderer from './renderer.js';
 import math from './math.js';
 import katexUpgrade from './katex-upgrade.js';
-import Triangle from './triangle.js';
 import solution from './solution.js';
 import animate from './animate.js';
 import generate from './generate.js';
@@ -52,7 +51,6 @@ export function mountPreview(container, options) {
   const GraphRenderer = renderer;
   const GraphMath = math;
   const GraphKatexUpgrade = katexUpgrade;
-  const GraphTriangle = Triangle;
   const GraphSolution = solution;
   const GraphAnimate = animate;
   const GraphGenerate = generate;
@@ -65,15 +63,6 @@ export function mountPreview(container, options) {
 
   /* Тексты уровней — одной константой: формулировку меняют здесь. */
   var LEVEL_LABELS = { lucky: 'повезло', unlucky: 'не повезло' };
-
-  /* Статического списка файлов не избежать: на GitHub Pages нет
-     оглавления папки, а сборки в проекте нет. */
-  var FILES = {
-    prep: ['prep/12/block-1.json', 'prep/12/block-2.json', 'prep/12/block-3.json',
-           'prep/12/block-4.json', 'prep/12/block-5.json'],
-    prototypes: ['prototypes/12/12-A.json', 'prototypes/12/12-B.json',
-                 'prototypes/12/12-C.json', 'prototypes/12/12-D.json']
-  };
 
   var sets = (options && options.sets) || { prep: [], prototypes: [] };
   var current = { mode: 'prep', setId: null, seed: null, taskId: null };
@@ -150,7 +139,7 @@ export function mountPreview(container, options) {
         '</article>';
     }).join('');
 
-    katexUpgrade(el.grid);
+    upgradeFormulas(el.grid);
     if (current.taskId) { markActive(); }
   }
 
@@ -195,7 +184,7 @@ export function mountPreview(container, options) {
       '<p class="steps" id="steps"></p>' +
       '<div class="solution" id="solution" hidden></div>';
 
-    katexUpgrade(el.panel);
+    upgradeFormulas(el.panel);
     bindPanel(task, analysis);
   }
 
@@ -250,7 +239,7 @@ export function mountPreview(container, options) {
       if (!player) {
         solution.innerHTML = '<div class="solution-steps">' +
           steps.map(stepMarkup).join('') + '</div>';
-        katexUpgrade(solution);
+        upgradeFormulas(solution);
         bindDetails(solution);
 
         player = GraphAnimate.create({
@@ -265,7 +254,7 @@ export function mountPreview(container, options) {
             next.hidden = state.instant || state.finished;
             show.textContent = state.finished ? 'Показать заново' : 'Показать разбор';
             show.hidden = state.playing;
-            katexUpgrade(solution);
+            upgradeFormulas(solution);
           }
         });
         player.play();
@@ -286,7 +275,7 @@ export function mountPreview(container, options) {
 
   /* KaTeX передан приложением обычным импортом. Не передан —
      формулы остаются в исходной записи, страница работает. */
-  function katexUpgrade(root) {
+  function upgradeFormulas(root) {
     if (katexInstance) { GraphKatexUpgrade.upgrade(root, katexInstance); }
   }
 
@@ -446,7 +435,7 @@ export function mountPreview(container, options) {
     counts();
     fillSets();
     render();
-    katexUpgrade(container);
+    upgradeFormulas(container);
     openFromHash();
   });
 }

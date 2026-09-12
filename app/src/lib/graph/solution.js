@@ -21,8 +21,6 @@
 
 import Line from './families/line.js';
 
-'use strict';
-
 var MINUS = '−';
 
 /* Число для текста: запятая и настоящий минус. */
@@ -64,7 +62,6 @@ function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 function formula(tx) { return { type: 'formula', tex: tx }; }
-function note(html) { return { type: 'note', html: html }; }
 function key(value) { return '<b class="key">' + num(value) + '</b>'; }
 
 /* ══════════════════════════════════════════════════════════
@@ -140,9 +137,8 @@ function whyMinus() {
      и точки на линии тангенсов видно без прищуривания. */
   var alpha = 135;                      /* тупой угол, вторая четверть  */
   var acute = 180 - alpha;              /* смежный острый, первая        */
-  var radObtuse = alpha * Math.PI / 180;
   var radAcute = acute * Math.PI / 180;
-  var tangent = Math.tan(radAcute);     /* tg 60° ≈ 1,73                 */
+  var tangent = Math.tan(radAcute);     /* tg 45° = 1                    */
 
   function at(angleDeg, radius) {
     var rad = angleDeg * Math.PI / 180;
