@@ -25,8 +25,9 @@ function upgrade(root, katex) {
       katex.render(node.getAttribute('data-tex'), node, OPTIONS);
       node.setAttribute('data-katex', 'on');
       done++;
-    } catch (error) {
-      /* Формула остаётся в исходном виде: пустого места не будет. */
+    } catch {
+      /* Формула остаётся в исходном виде: пустого места не будет.
+         Сам объект ошибки не нужен — важен только факт неудачи. */
       node.setAttribute('data-katex', 'error');
     }
   });

@@ -19,8 +19,6 @@
 
 import Line from './families/line.js';
 
-'use strict';
-
 var MINUS = '−';
 
 /* Идентификаторы фигур: по ним анимация находит элементы в готовом SVG. */
