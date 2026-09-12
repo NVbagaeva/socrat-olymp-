@@ -92,6 +92,87 @@
   color: var(--color-text);
 }
 
+/* ── Профессиональный путь ──────────────────────────────────── */
+
+/* Широкий экран: ось лежит горизонтально, пять точек в строку. */
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+/* Одна линия через все точки. За последней она продолжается: работа идёт. */
+.path::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 1px;
+  background: var(--color-border-strong);
+}
+
+.path__point {
+  position: relative;
+  padding-top: var(--space-6);
+}
+.path__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--color-surface);
+}
+
+/* «Параллельно» — работа шла одновременно с предыдущим местом, а не после
+   него. Точка опущена под ось и держится на пунктире, сама она тоже
+   пунктирная: последовательным шагом её не прочитать. */
+.path__point--parallel {
+  margin-top: var(--space-10);
+}
+.path__point--parallel .path__dot {
+  border-style: dashed;
+}
+.path__point--parallel::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: calc(var(--space-10) * -1 + 5px);
+  height: var(--space-10);
+  border-left: 1px dashed var(--color-primary);
+}
+
+/* Шкала: год — .t-caption, место — .t-h4, подпись — .t-body. */
+.path__period {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+.path__place {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.path__note {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+}
+
 /* ── Схема «один прототип → своё задание каждому» ───────────── */
 
 .chain {
@@ -197,6 +278,57 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
     gap: var(--space-8);
   }
+
+  /* Пять точек в строку тут уже не помещаются: ось встаёт вертикально.
+     Отрезки линии рисуют сами точки, поэтому у последней её нет и линия
+     не уходит под текст. */
+  .path {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 62ch;
+  }
+  .path::before {
+    display: none;
+  }
+  .path__point {
+    padding-top: 0;
+    padding-left: var(--space-8);
+  }
+  .path__point::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 21px;
+    bottom: calc(var(--space-8) * -1);
+    width: 1px;
+    height: auto;
+    border-left: 0;
+    background: var(--color-border-strong);
+  }
+  .path__point:last-child::before {
+    display: none;
+  }
+  .path__dot {
+    top: 5px;
+  }
+
+  /* Отступ сдвигает только текст: точка и отрезок оси заданы от края
+     блока, поэтому линия остаётся прямой, а точка уходит вбок на
+     пунктирной перемычке. */
+  .path__point--parallel {
+    margin-top: 0;
+    padding-left: calc(var(--space-8) + var(--space-6));
+  }
+  .path__point--parallel .path__dot {
+    left: var(--space-6);
+  }
+  .path__point--parallel::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    width: var(--space-6);
+    border-top: 1px dashed var(--color-primary);
+  }
 }
 
 /* ── Телефон ────────────────────────────────────────────────── */
@@ -228,5 +360,12 @@
   .about-text--lead {
     font-size: 18px;
     line-height: 28px;
+  }
+
+  /* Длинные подписи на шаг ниже по шкале: .t-body → .t-caption.
+     Текст тот же, сокращений и скрытых строк нет. */
+  .path__note--long {
+    font-size: 14px;
+    line-height: 20px;
   }
 }
