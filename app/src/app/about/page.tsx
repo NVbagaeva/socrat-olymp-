@@ -57,6 +57,7 @@ export default function AboutPage() {
                 геометрия, формула, кристалл, бюст, портрет, надпись.
                 Всё декоративное скрыто от скринридера и не ловит курсор. */}
             <div className="about-hero__stage">
+              <span className="hero-layer hero-layer--haze" aria-hidden="true" />
               <img className="hero-layer hero-layer--net" src="/images/decor/network.png" alt="" aria-hidden="true" />
               <img className="hero-layer hero-layer--arcs" src="/images/decor/circles-1.png" alt="" aria-hidden="true" />
               <img
