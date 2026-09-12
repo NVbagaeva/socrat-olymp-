@@ -39,6 +39,38 @@ const CUBIC = path((x) => {
   return 48 + 11 * (t ** 3 - 3 * t);
 }, 24, 72);
 
+/* Наборы точек вынесены из разметки и типизированы кортежем: при
+   выводе из литерала элемент был бы number | undefined, и арифметика
+   по высоте столбца не прошла бы строгую проверку. */
+/* 05 — узлы дерева вариантов. */
+const TREE: [number, number][] = [
+  [46, 32],
+  [46, 64],
+  [70, 24],
+  [70, 40],
+  [70, 56],
+  [70, 72],
+];
+/* 06 — левый верхний угол столбца гистограммы; низ у всех на y = 72. */
+const BARS_FILLED: [number, number][] = [
+  [37, 50],
+  [48, 40],
+  [59, 50],
+];
+const BARS_ALL: [number, number][] = [
+  [26, 62],
+  [37, 50],
+  [48, 40],
+  [59, 50],
+  [70, 62],
+];
+/* 13 — три столбца диаграммы. */
+const COLUMNS: [number, number][] = [
+  [26, 56],
+  [44, 46],
+  [62, 34],
+];
+
 export const ILLUSTRATIONS: Record<string, ReactElement> = {
   /* 01 — треугольник, вписанный в окружность. */
   '1': (
@@ -97,14 +129,7 @@ export const ILLUSTRATIONS: Record<string, ReactElement> = {
         d="M24 48 L 46 32 M24 48 L 46 64 M46 32 L 70 24 M46 32 L 70 40 M46 64 L 70 56 M46 64 L 70 72"
       />
       <circle className="ill-accent" cx="24" cy="48" r="3.5" />
-      {[
-        [46, 32],
-        [46, 64],
-        [70, 24],
-        [70, 40],
-        [70, 56],
-        [70, 72],
-      ].map(([x, y]) => (
+      {TREE.map(([x, y]) => (
         <circle className="ill-dot" key={`${x}-${y}`} cx={x} cy={y} r="2.5" />
       ))}
     </>
@@ -114,20 +139,10 @@ export const ILLUSTRATIONS: Record<string, ReactElement> = {
   '6': (
     <>
       {/* три средних столбца залиты, два крайних остаются контуром */}
-      {[
-        [37, 50],
-        [48, 40],
-        [59, 50],
-      ].map(([x, y]) => (
+      {BARS_FILLED.map(([x, y]) => (
         <rect className="ill-fill" key={`f${x}`} x={x} y={y} width="9" height={72 - y} />
       ))}
-      {[
-        [26, 62],
-        [37, 50],
-        [48, 40],
-        [59, 50],
-        [70, 62],
-      ].map(([x, y]) => (
+      {BARS_ALL.map(([x, y]) => (
         <rect className="ill-line" key={x} x={x} y={y} width="9" height={72 - y} />
       ))}
       <path className="ill-line" d="M22 72 H 78" />
@@ -178,11 +193,7 @@ export const ILLUSTRATIONS: Record<string, ReactElement> = {
   '13': (
     <>
       <path className="ill-line" d="M22 72 H 76" />
-      {[
-        [26, 56],
-        [44, 46],
-        [62, 34],
-      ].map(([x, y]) => (
+      {COLUMNS.map(([x, y]) => (
         <g key={x}>
           {/* все три столбца залиты и обведены */}
           <rect className="ill-fill" x={x} y={y} width="12" height={72 - y} />
