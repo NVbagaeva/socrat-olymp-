@@ -1,0 +1,55 @@
+name: Check
+
+# Проверяем сборку до слияния, а не после.
+# Ничего никуда не публикуем: секреты FTP этому workflow не нужны
+# и намеренно не используются. Публикацией занимается deploy.yml,
+# он срабатывает отдельно, только при push в main.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+# Если в открытый pull request пушат несколько раз подряд,
+# старая проверка отменяется: ждать её результата смысла нет.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Сборка
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      # pnpm ставим до setup-node: иначе кэшу нечего искать.
+      # Версия берётся из поля packageManager в app/package.json.
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      # next.config.ts собран с output: 'export' — результат в app/out.
+      # Здесь же отрабатывает ESLint: именно этот шаг ловит ошибки кода.
+      - name: Собрать статический экспорт
+        working-directory: app
+        run: pnpm build
+
+      - name: Проверить, что экспорт не пустой
+        run: test -f app/out/index.html
