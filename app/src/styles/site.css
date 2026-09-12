@@ -59,6 +59,12 @@
 .site-nav a:hover {
   color: var(--color-primary);
 }
+/* Текущая страница: тем же синим, что и наведение, плюс вес.
+   Подчёркивания нет — в шапке оно спорит с нижней границей. */
+.site-nav a[aria-current='page'] {
+  color: var(--color-primary);
+  font-weight: 600;
+}
 .site-head__cta {
   margin-left: auto;
   display: flex;
