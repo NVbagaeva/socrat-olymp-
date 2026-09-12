@@ -1,0 +1,42 @@
+/* Страница списка заданий. Оболочка, сайдбар и карточки уже описаны
+   в общих слоях — здесь только раскладка самой страницы. */
+
+.app-shell {
+  /* Оболочка занимает весь экран: это раздел приложения, а не блок
+     внутри лендинга, поэтому скруглений и внешней рамки у неё нет. */
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+}
+
+.app-main {
+  padding: var(--space-10) var(--space-8) var(--space-16);
+}
+.app-main__title {
+  margin-bottom: var(--space-8);
+}
+
+/* Три колонки на десктопе, две на планшете, одна на телефоне. */
+.tasks-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 1023.98px) {
+  .app-main {
+    padding: var(--space-8) var(--space-5) var(--space-12);
+  }
+  .tasks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .tasks-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
