@@ -27,22 +27,37 @@ export default function AboutPage() {
               <p className="about-hero__lead">{hero.lead}</p>
             </div>
 
-            <figure className="about-hero__figure">
-              {/* Оптимизация изображений при статическом экспорте выключена,
-                  поэтому обычный img — как и у героя главной страницы.
-                  Размеры заданы, чтобы страница не дёргалась при загрузке. */}
-              <img
-                className="about-hero__photo"
-                src={hero.photo.src}
-                srcSet={hero.photo.srcSet}
-                sizes={hero.photo.sizes}
-                alt={hero.photo.alt}
-                width={hero.photo.width}
-                height={hero.photo.height}
-                fetchPriority="high"
-                decoding="async"
-              />
-            </figure>
+            {/* Правая часть — composition из слоёв, а не одна картинка.
+                Порядок в разметке совпадает с глубиной: сеть и дуги в фоне,
+                за ними бюст, кристалл, портрет, поверх — формула и надпись.
+                Декоративные слои заданы фоном в CSS: так они не грузятся
+                там, где скрыты, и не попадают в дерево доступности. */}
+            <div className="about-hero__stage">
+              <span className="hero-layer hero-layer--net" aria-hidden="true" />
+              <span className="hero-layer hero-layer--arcs" aria-hidden="true" />
+              <span className="hero-layer hero-layer--bust" aria-hidden="true" />
+              <span className="hero-layer hero-layer--crystal" aria-hidden="true" />
+
+              <figure className="about-hero__figure">
+                {/* Оптимизация изображений при статическом экспорте выключена,
+                    поэтому обычный img — как и у героя главной страницы.
+                    Размеры заданы, чтобы страница не дёргалась при загрузке. */}
+                <img
+                  className="about-hero__photo"
+                  src={hero.photo.src}
+                  srcSet={hero.photo.srcSet}
+                  sizes={hero.photo.sizes}
+                  alt={hero.photo.alt}
+                  width={hero.photo.width}
+                  height={hero.photo.height}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </figure>
+
+              <span className="hero-layer hero-layer--formula" aria-hidden="true" />
+              <span className="hero-layer hero-layer--note" aria-hidden="true" />
+            </div>
           </div>
         </section>
 
