@@ -3,7 +3,7 @@
 import { useId, useMemo, useState } from 'react';
 import { TaskCard } from '@/components/ui';
 import { tasks, tasksPage } from '@/content/tasks';
-import { IllustrationDefs, TaskIllustration } from './illustrations';
+import { TaskIllustration } from './illustrations';
 
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
@@ -26,8 +26,6 @@ export function TaskBank() {
 
   return (
     <main className="app-main">
-      <IllustrationDefs />
-
       <header className="bank-head">
         <div className="bank-head__text">
           <p className="bank-head__eyebrow">{tasksPage.eyebrow}</p>
