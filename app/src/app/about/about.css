@@ -47,12 +47,12 @@
 .about-hero__figure {
   margin: 0;
 }
+/* Ни рамки, ни скругления: фон у портрета вырезан, и рамка обводила бы
+   пустоту вокруг фигуры, а не саму фигуру. */
 .about-hero__photo {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
 }
 
 /* ── Общий каркас секций ────────────────────────────────────── */

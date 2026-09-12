@@ -35,6 +35,7 @@ export default function AboutPage() {
                 className="about-hero__photo"
                 src={hero.photo.src}
                 srcSet={hero.photo.srcSet}
+                sizes={hero.photo.sizes}
                 alt={hero.photo.alt}
                 width={hero.photo.width}
                 height={hero.photo.height}
