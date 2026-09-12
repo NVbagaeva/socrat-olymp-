@@ -130,7 +130,7 @@
 .hero-bust {
   position: absolute;
   z-index: 3;
-  left: 40%;
+  left: 44%;
   bottom: 22%;
   height: 38%;
   pointer-events: none;
@@ -179,13 +179,16 @@
   opacity: 0.5;
 }
 
-/* Слой 6 — кристалл. Центр по вертикали на 48% высоты экрана. */
+/* Слой 6 — кристалл. Втрое крупнее прежнего и опущен к фигуре.
+   Привязан к низу, а не к центру: высота у него считается от ширины
+   экрана, а высота самого экрана зависит от того, как лёг текст.
+   При привязке по центру на широких окнах нижний край уезжал
+   за границу и обрезался. */
 .hero-layer--crystal {
   z-index: 6;
   right: 3%;
-  top: 48%;
-  width: 16%;
-  transform: translateY(-50%);
+  bottom: 3%;
+  width: 48%;
   opacity: 0.65;
 }
 
@@ -194,7 +197,7 @@
   position: absolute;
   z-index: 7;
   bottom: 0;
-  left: 62%;
+  left: 66%;
   transform: translateX(-50%);
   height: 88%;
   margin: 0;
@@ -440,7 +443,7 @@
     width: 11%;
   }
   .hero-layer--crystal {
-    width: 20%;
+    width: 52%;
   }
 
   /* Пять точек в строку тут уже не помещаются: ось встаёт вертикально.
