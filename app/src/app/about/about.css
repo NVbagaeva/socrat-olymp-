@@ -6,25 +6,22 @@
 /* ── Первый экран ───────────────────────────────────────────── */
 
 .about-hero {
-  padding: var(--space-16) 0 var(--space-12);
-  background: var(--color-bg);
-  /* Вынос декора обрезаем здесь, а не отдаём браузеру: иначе страница
-     поехала бы вбок. z-index: 0 — нижняя ступень схемы слоёв. */
+  /* Холст первого экрана. Высоту задаёт текстовая колонка в потоке,
+     вся графика позиционируется от этой высоты в процентах. */
   position: relative;
   z-index: 0;
   overflow: hidden;
+  padding: var(--space-16) 0 var(--space-12);
+  background: var(--color-bg);
 }
-/* 45% под текст, 55% под композицию — доли, а не пиксели, поэтому
-   пропорция держится на любой ширине контейнера. */
-.about-hero__in {
-  display: grid;
-  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
-  gap: var(--space-12);
-  align-items: center;
-}
+
+/* ── Слой 8: текстовая колонка ──────────────────────────────── */
+
 .about-hero__body {
   position: relative;
   z-index: 8;
+  width: 30%;
+  margin-left: 5%;
 }
 
 .about-eyebrow {
@@ -42,14 +39,15 @@
      подключена системная серифная шкала, локально и только для этого
      заголовка: глобальную типографику это не трогает. */
   font-family: 'PT Serif', 'Charter', Georgia, 'Times New Roman', serif;
-  font-size: clamp(32px, 3.1vw, 46px);
-  line-height: 1.16;
+  font-size: clamp(30px, 2.7vw, 42px);
+  line-height: 1.17;
   font-weight: 700;
   letter-spacing: -0.015em;
-  /* Мера строки: заголовок читается как единая форма, а не как столбик
-     обрывков, и при этом не доходит до рукописной пометки справа. */
-  max-width: 19ch;
   color: var(--navy-700);
+  /* Мера строки чуть уже колонки: так «Будет на ЕГЭ» остаётся на строке
+     одно, как на референсе, и вторая строка не заходит под рукописную
+     пометку. Колонка при этом остаётся ровно 30%. */
+  max-width: 86%;
   margin-bottom: var(--space-6);
 }
 
@@ -57,7 +55,6 @@
   font-size: 17px;
   line-height: 26px;
   color: var(--color-text-secondary);
-  max-width: 42ch;
 }
 
 .about-hero__actions {
@@ -75,7 +72,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 .cred {
   display: grid;
@@ -84,33 +81,26 @@
 /* Подложка задана здесь, а не вшита в картинки: все четыре иконки
    набора идут на прозрачном фоне, поэтому вес у пунктов одинаковый. */
 .cred__icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--blue-100);
   display: grid;
   place-items: center;
 }
 .cred__icon img {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   display: block;
 }
 .cred__text {
-  font-size: 13px;
-  line-height: 18px;
+  font-size: 12px;
+  line-height: 17px;
   color: var(--color-text-secondary);
 }
 
-/* ── Слои первого экрана ────────────────────────────────────── */
+/* ── Графика: всё в процентах от первого экрана ─────────────── */
 
-.about-hero__stage {
-  position: relative;
-  z-index: 1;
-  aspect-ratio: 660 / 690;
-}
-
-/* Общее для декора: пропорции сохраняются, сжатия по одной оси нет. */
 .hero-layer {
   position: absolute;
   display: block;
@@ -119,97 +109,100 @@
   object-fit: contain;
 }
 
-/* z2 — геометрическая сеть на самом дальнем плане. */
+/* Слой 1 — фон и сетка. */
 .hero-layer--net {
-  z-index: 2;
-  left: -26%;
-  top: -8%;
-  width: 148%;
-  opacity: 0.16;
-}
-/* z2 — дуги и окружности, одной группой, в верхней правой части. */
-.hero-layer--arcs {
-  z-index: 2;
-  right: -18%;
-  top: -4%;
-  width: 72%;
+  z-index: 1;
+  left: 24%;
+  top: -6%;
+  width: 80%;
   opacity: 0.14;
 }
-
-/* z7 — формула: заметка на полях в правой нижней части, примерно на
-   уровне кнопок. В верхнем углу она висела оторванно от композиции. */
-.hero-layer--formula {
-  z-index: 7;
-  right: 2%;
-  top: 64%;
-  width: 20%;
-  opacity: 0.6;
+.hero-layer--arcs {
+  z-index: 1;
+  right: -4%;
+  top: -2%;
+  width: 42%;
+  opacity: 0.12;
 }
 
-/* z3 — атмосферный свет по нижней линии. Не пол и не тень: очень мягкая
-   холодная дымка, которая связывает три объекта общим уровнем и снимает
-   у бюста ощущение подвешенности. Цвет — существующий токен. */
-.hero-layer--haze {
+/* Слои 2–3 — тень-подложка и бюст. Обёртка повторяет габариты бюста,
+   поэтому тень считается долями от него, а не от экрана. */
+.hero-bust {
+  position: absolute;
   z-index: 3;
-  left: -6%;
-  bottom: -9%;
-  width: 120%;
-  height: 30%;
-  background: radial-gradient(60% 50% at 50% 62%, var(--blue-100), transparent 72%);
-  opacity: 0.75;
+  left: 34%;
+  bottom: 28%;
+  height: 42%;
+  pointer-events: none;
+}
+.hero-bust img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  height: 100%;
+  width: auto;
+  opacity: 0.85;
+}
+/* Слой 2: мягкий эллипс под постаментом. Ширина 1.3 от ширины бюста,
+   высота 8% от его высоты, в центре синий на 8% плотности. */
+.hero-bust::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 130%;
+  height: 8%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-primary) 8%, transparent),
+    transparent
+  );
 }
 
-/* z4 — кристалл. Ушёл в фон: он перетягивал внимание на себя и был
-   ярче лица. Целиком внутри кадра, ни один край не обрезан, правее и
-   ниже фигуры — пересечения с ней больше нет.
-   Форма исходная: contain и авто-высота исключают растяжение. */
-.hero-layer--crystal {
+/* Слой 4 — рукописная пометка. */
+.hero-layer--note {
   z-index: 4;
-  right: 0;
-  bottom: -4%;
-  width: 30.6%;
-  opacity: 0.55;
+  left: 27%;
+  top: 14%;
+  width: 13%;
+  opacity: 0.9;
 }
 
-/* z5 — бюст: левее прежнего места и ниже рукописной пометки, в пустом
-   промежутке между текстовой колонкой и портретом. Ниже опускать
-   некуда — там начинается ряд из четырёх пунктов, и бюст вставал
-   к нему вплотную. Маски по нижнему краю больше нет: постамент виден
-   целиком, иначе фигура читалась обрезанной. */
-.hero-layer--bust {
+/* Слой 5 — формула. */
+.hero-layer--formula {
   z-index: 5;
-  left: -14%;
-  bottom: 34%;
-  width: 10.2%;
-  opacity: 0.7;
+  right: 8%;
+  top: 20%;
+  width: 9%;
+  opacity: 0.5;
 }
 
-/* z6 — портрет, главный объект. Ширина уменьшена: фигура переставала
-   быть соразмерной остальным и читалась слишком вытянутой. Файл,
-   кадрирование и пропорции прежние. */
+/* Слой 6 — кристалл. Центр по вертикали на 48% высоты экрана. */
+.hero-layer--crystal {
+  z-index: 6;
+  right: 3%;
+  top: 48%;
+  width: 16%;
+  transform: translateY(-50%);
+  opacity: 0.65;
+}
+
+/* Слой 7 — портрет: во всю высоту экрана, поверх всей графики. */
 .about-hero__figure {
   position: absolute;
-  z-index: 6;
-  left: 14%;
+  z-index: 7;
   bottom: 0;
-  width: 52%;
+  left: 56%;
+  transform: translateX(-50%);
+  height: 100%;
   margin: 0;
 }
 .about-hero__photo {
   display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* z7 — одна рукописная пометка, в промежутке между колонкой и портретом.
-   Лёгкий наклон — чтобы читалась как пометка от руки, а не как надпись. */
-.hero-layer--note {
-  z-index: 7;
-  left: -16%;
-  top: 8%;
-  width: 34%;
-  opacity: 0.92;
-  transform: rotate(-3deg);
+  height: 100%;
+  width: auto;
 }
 
 /* ── Общий каркас секций ────────────────────────────────────── */
@@ -431,51 +424,23 @@
 /* ── Планшет ────────────────────────────────────────────────── */
 
 @media (max-width: 1023.98px) {
-  /* Планшет: композиция та же, масштаб декора меньше — отношения между
-     объектами сохраняются, просто вся сцена уже. */
-  .about-hero__in {
-    gap: var(--space-8);
+  /* Планшет: та же композиция, текстовая колонка чуть шире — в 30%
+     заголовок начинал сыпаться в столбик по два слова. */
+  .about-hero__body {
+    width: 38%;
   }
-  .about-hero__title {
-    max-width: 17ch;
-  }
-  /* Четыре пункта в строку тут не помещаются — подписи наезжали друг
-     на друга. Ряд становится сеткой 2×2, вес пунктов остаётся равным. */
   .creds {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-6) var(--space-4);
+    gap: var(--space-5) var(--space-4);
   }
-  .cred__icon {
-    width: 42px;
-    height: 42px;
-  }
-  .cred__icon img {
-    width: 22px;
-    height: 22px;
-  }
-  .cred__text {
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  .hero-layer--net {
-    opacity: 0.12;
-  }
-  .hero-layer--arcs {
-    opacity: 0.1;
-  }
-  /* Отношения между объектами те же — проценты считаются от сцены.
-     Кристалл целиком внутри кадра уже в базовом правиле, отдельного
-     выноса здесь больше не требуется. */
-  .hero-layer--haze {
-    opacity: 0.6;
+  .hero-layer--note {
+    width: 16%;
   }
   .hero-layer--formula {
-    width: 19%;
+    width: 11%;
   }
-  /* Надпись снята: на суженной сцене она ложится на заголовок. */
-  .hero-layer--note {
-    display: none;
+  .hero-layer--crystal {
+    width: 20%;
   }
 
   /* Пять точек в строку тут уже не помещаются: ось встаёт вертикально.
@@ -535,65 +500,58 @@
   .about-hero {
     padding: var(--space-12) 0 var(--space-10);
   }
-  /* Телефон: вертикальная композиция — сначала текст, под ним сцена. */
-  .about-hero__in {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-10);
+  /* Телефон: всё встаёт в поток — текст, под ним пометка, под ней
+     портрет. Порядок задан разметкой, отдельной вёрстки не нужно. */
+  .about-hero__body {
+    width: 90%;
+    margin-left: 5%;
   }
   .about-hero__title {
     font-size: clamp(28px, 7.4vw, 36px);
-    max-width: none;
   }
-  .about-hero__lead {
-    max-width: none;
-  }
-  /* Кнопки во всю ширину: на узком экране две в ряд не помещаются. */
   .about-hero__actions .btn {
     flex: 1 1 100%;
     justify-content: center;
   }
-  /* Ряд доверия становится сеткой 2×2. */
   .creds {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-6) var(--space-4);
     margin-top: var(--space-10);
   }
 
-  .about-hero__stage {
-    max-width: 320px;
-  }
-  /* Портрет остаётся главным; декор уменьшен, геометрия почти не видна. */
-  .hero-layer--net {
-    left: -20%;
-    width: 140%;
-    opacity: 0.09;
-  }
+  /* Для бюста, формулы и кристалла здесь нет места — они полезли бы
+     на текст. Скрыты через display: скрытые картинки не грузятся. */
+  .hero-bust,
+  .hero-layer--formula,
+  .hero-layer--crystal,
   .hero-layer--arcs {
     display: none;
   }
-  /* Портрет остаётся главным, поэтому он крупнее, чем на десктопе.
-     Декор уменьшен теми же долями, что и на широком экране. */
-  .about-hero__figure {
-    left: 5%;
-    width: 60%;
-  }
-  .hero-layer--crystal {
-    right: 0;
-    width: 26%;
-  }
-  .hero-layer--bust {
+  .hero-layer--net {
     left: 0;
-    width: 10.5%;
+    top: auto;
+    bottom: 0;
+    width: 120%;
+    opacity: 0.08;
   }
-  .hero-layer--haze {
-    opacity: 0.5;
+
+  /* Пометка — над портретом, прижата вправо. */
+  .hero-layer--note {
+    position: static;
+    width: 40%;
+    margin: var(--space-10) 5% var(--space-4) auto;
   }
-  /* Колонка вертикальная, кнопки далеко выше сцены, поэтому формула
-     просто держится правого нижнего угла кадра. */
-  .hero-layer--formula {
-    right: 2%;
-    top: 66%;
-    width: 17%;
+  /* Портрет уходит в поток и держит нижний край экрана. */
+  .about-hero__figure {
+    position: static;
+    transform: none;
+    height: auto;
+    width: 72%;
+    margin: 0 auto 0 5%;
+  }
+  .about-hero__photo {
+    height: auto;
+    width: 100%;
   }
 
   .about-band {
