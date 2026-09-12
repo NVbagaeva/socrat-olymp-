@@ -57,9 +57,13 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Timeweb, shared-хостинг: подключение по FTPS.
-          # Если первый запуск упадёт на проверке сертификата — ftps-legacy.
-          protocol: ftps
+          # Timeweb, shared-хостинг. На ftps сервер отвечал
+          # «530 Please login with USER and PASS», то есть явный TLS
+          # на 21-м порту он не поднимает. Переходим на implicit TLS.
+          protocol: ftps-legacy
+          # Порт обязателен: действие подставляет 21 при любом протоколе,
+          # а implicit TLS слушает 990. На 21-м подключение не состоится.
+          port: 990
           local-dir: ./app/out/
           server-dir: /public_html/
           # Заливка только добавляющая.
