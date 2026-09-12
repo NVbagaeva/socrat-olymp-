@@ -16,3 +16,21 @@ export const inter = localFont({
   display: 'swap',
   fallback: ['system-ui', '-apple-system', 'sans-serif'],
 });
+
+/**
+ * Caveat для рукописных пометок — файл из @fontsource/caveat 5.2.8,
+ * подмножество cyrillic, обычное начертание. Пакет в зависимости не
+ * добавлен, в репозитории лежит только сам woff2, поэтому версия и
+ * подмножество записаны прямо в имени файла.
+ *
+ * В подмножестве cyrillic нет латиницы и цифр: символы вне кириллицы
+ * браузер отрисует запасным cursive из токена --font-hand.
+ */
+export const caveat = localFont({
+  src: [
+    { path: '../fonts/caveat_5.2.8_cyrillic-400-normal.woff2', weight: '400', style: 'normal' },
+  ],
+  variable: '--font-caveat',
+  display: 'swap',
+  fallback: ['cursive'],
+});

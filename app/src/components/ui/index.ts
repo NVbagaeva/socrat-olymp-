@@ -14,6 +14,7 @@ export { Avatar, type AvatarProps, type AvatarSize, type AvatarTone } from './Av
 export { AvatarGroup, type AvatarGroupProps } from './AvatarGroup';
 export { Tooltip, type TooltipProps } from './Tooltip';
 export { Skeleton, type SkeletonProps } from './Skeleton';
+export { HandNote, type HandNoteProps } from './HandNote';
 
 export { Card, type CardProps } from './Card';
 export { MetricRow, type MetricRowProps } from './MetricRow';

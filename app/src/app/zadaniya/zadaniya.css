@@ -1,0 +1,292 @@
+/* Страница банка заданий. Оболочка, сайдбар и базовая карточка описаны
+   в общих слоях — здесь только то, чего в них нет: шапка контентной
+   части, поиск, крупный вид карточки и сетка. */
+
+.app-shell {
+  /* Оболочка занимает весь экран: это раздел приложения, а не блок
+     внутри лендинга, поэтому скруглений и внешней рамки у неё нет. */
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+}
+
+.app-main {
+  /* Своя система координат: декор страницы позиционируется от неё. */
+  position: relative;
+  padding: var(--space-10) var(--space-8) var(--space-16);
+}
+
+/* ── Шапка контентной части ─────────────────────────────────── */
+
+.bank-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-bottom: var(--space-10);
+}
+.bank-head__eyebrow {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-4);
+}
+.bank-head__title {
+  margin-bottom: var(--space-4);
+}
+.bank-head__lead {
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+}
+
+.bank-search {
+  position: relative;
+  flex: 0 1 360px;
+}
+.bank-search__icon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--color-text-tertiary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+/* Отступ слева освобождает место под лупу; остальное берётся у .input. */
+.bank-search__input {
+  padding-left: var(--space-10);
+}
+
+.bank-empty {
+  color: var(--color-text-secondary);
+}
+
+/* ── Сетка ──────────────────────────────────────────────────── */
+
+.tasks-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  /* Последняя карточка остаётся слева и не растягивается. */
+  justify-items: stretch;
+  align-items: stretch;
+}
+.tasks-grid > li {
+  display: flex;
+}
+
+/* ── Крупная карточка банка ─────────────────────────────────── */
+
+.task-card--bank {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  padding: var(--space-5);
+  overflow: hidden;
+}
+
+/* Номер крупно вместо плашки: та же шкала, что у заголовка H2. */
+.task-card--bank .task-card__no {
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  display: block;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.task-card--bank .task-card__body {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+.task-card--bank .task-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-top: var(--space-2);
+  /* Меры нет: название должно укладываться в две строки на любой
+     ширине карточки. Миниатюра лежит ниже по слоям и приглушена,
+     поэтому текст спокойно проходит поверх её линий. */
+  padding-right: var(--space-2);
+  font-size: 14px;
+  line-height: 19px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.task-card--bank .task-card__meta {
+  margin-top: var(--space-3);
+}
+
+/* Миниатюра: правая часть, ближе к низу, под текстом по слоям. */
+.task-card--bank .task-card__ill {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  width: 38%;
+  max-width: 84px;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Рамка миниатюры: круг и содержимое лежат друг на друге, поэтому
+   формула центрируется в том же круге, что и фигуры. */
+.ill-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  color: var(--color-primary);
+}
+.ill {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Подложка: плоская заливка, без обводки и без градиента. */
+.ill-disc {
+  fill: currentColor;
+  opacity: 0.06;
+  stroke: none;
+}
+
+/* Формула поверх подложки. Кегли подобраны замером так, чтобы ширина
+   всех трёх была близка и ни одна не выходила за 70% диаметра круга. */
+.ill-formula {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.ill-formula--long {
+  font-size: 11px;
+}
+.ill-formula--mid {
+  font-size: 22px;
+}
+.ill-formula--short {
+  font-size: 28px;
+}
+.ill-line,
+.ill-accent {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ill-line {
+  opacity: 0.55;
+}
+/* Невидимые рёбра: тот же вес и цвет, отличается только штрих. */
+.ill-dash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 4 3.5;
+  opacity: 0.4;
+}
+.ill-accent {
+  opacity: 1;
+}
+.ill-dot {
+  fill: currentColor;
+  stroke: none;
+}
+.ill-fill {
+  fill: currentColor;
+  opacity: 0.12;
+  stroke: none;
+}
+.ill-text {
+  fill: currentColor;
+  opacity: 0.55;
+  stroke: none;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Стрелка открытого раздела. Миниатюра рядом с ней сдвигается вверх,
+   чтобы они не наложились. */
+.task-card--bank .task-card__go {
+  position: absolute;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.task-card--bank .task-card__go svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--color-text-inverse);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.task-card--bank:has(.task-card__go) .task-card__ill {
+  bottom: auto;
+  top: var(--space-8);
+  right: var(--space-5);
+}
+
+/* Неоткрытая карточка: миниатюра гаснет вместе с текстом. */
+.task-card--soon .ill {
+  opacity: 0.5;
+}
+
+/* ── Раскладка по ширинам ───────────────────────────────────── */
+
+@media (max-width: 1439.98px) {
+  .tasks-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .app-main {
+    padding: var(--space-8) var(--space-5) var(--space-12);
+  }
+  .tasks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Поиск уходит под заголовок во всю ширину. */
+  .bank-head {
+    display: block;
+  }
+  .bank-head__text {
+    margin-bottom: var(--space-6);
+  }
+  .bank-search {
+    flex: none;
+  }
+  .tasks-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

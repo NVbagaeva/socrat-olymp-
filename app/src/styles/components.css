@@ -495,6 +495,27 @@ select.input {
   border-color: var(--color-accent-soft);
   box-shadow: var(--shadow-sm);
 }
+/* Карточка-ссылка: базовые правила описаны для кнопки и подходят любому
+   тегу, поэтому здесь только то, что у ссылки отличается по умолчанию.
+   Обводку фокуса даёт общий :focus-visible из base.css. */
+a.task-card {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Раздел ещё не открыт. Оформление то же, что у неактивных полей:
+   приглушённая поверхность и третичный текст — подпись остаётся
+   читаемой. Наведение не отзывается: идти по карточке некуда. */
+.task-card--soon {
+  cursor: default;
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.task-card--soon:hover {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
 .task-card__no {
   width: 44px;
   height: 44px;
@@ -1135,6 +1156,17 @@ select.input {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   9. КОМПОНЕНТЫ · рукописная подпись
+   ══════════════════════════════════════════════════════════ */
+/* Только начертание и цвет. Размер наследуется от места вставки,
+   положение задаёт страница: сам себя компонент не позиционирует. */
+.hand-note {
+  font-family: var(--font-hand);
+  color: var(--color-primary);
+  opacity: 0.8;
 }
 
 /* ── адаптив компонентов ── */
