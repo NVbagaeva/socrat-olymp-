@@ -38,6 +38,9 @@
   --blue-glass-1: #f0f6ff;
   --blue-glass-2: #e6effc;
   --blue-grid: #dce7f7;
+  /* Акцент чертежей: треугольник наклона и проверяемая точка.
+     В интерфейсе не используется — кнопки и ссылки синие. */
+  --terracotta: #e07a2f;
   --heat-1: #eef4fd;
   --heat-2: #d5e4fa;
   --heat-3: #a9c8f3;
@@ -134,6 +137,7 @@
      Ось совпадает с --grey-900 точно; сетка взята ближайшей из палитры. */
   --graph-axis: var(--grey-900);
   --graph-grid: var(--grey-300);
+  --graph-accent: var(--terracotta);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,

@@ -12,8 +12,6 @@ export interface SubtopicView {
   status: 'active' | 'soon';
   /** Адрес подтемы. У закрытой ссылки нет. */
   href: string | null;
-  /** Чертёж движка строкой. null — движок такую кривую не умеет. */
-  chartSvg: string | null;
 }
 
 export interface PrototypeView {
@@ -51,13 +49,6 @@ function SubtopicCard({ item }: { item: SubtopicView }) {
           dangerouslySetInnerHTML={{ __html: item.formulaHtml }}
         />
       </span>
-
-      {item.chartSvg !== null ? (
-        <span
-          className="subtopic__chart"
-          dangerouslySetInnerHTML={{ __html: item.chartSvg }}
-        />
-      ) : null}
 
       {item.status === 'soon' ? (
         <span className="subtopic__meta">

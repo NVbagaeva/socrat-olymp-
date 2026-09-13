@@ -9,7 +9,6 @@ import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { lineScene } from '@/lib/scenes';
-import { renderGraph } from '@/lib/graph/renderer.js';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
 import '../zadaniya.css';
@@ -38,20 +37,6 @@ function formulaHtml(tex: string): string {
   return katex.renderToString(tex, { throwOnError: false, displayMode: false });
 }
 
-/**
- * Миниатюра подтемы. Движок умеет одно семейство кривых — прямую,
- * поэтому чертёж есть только у линейных функций. Своего SVG вместо
- * него не рисуем: у остальных подтем места под чертёж просто нет.
- */
-function thumbnail(subtopic: Subtopic): string | null {
-  if (subtopic.slug !== 'linear') {
-    return null;
-  }
-  return renderGraph(
-    lineScene({ k: 1, b: 1, half: 5, alt: `Чертёж: ${subtopic.name}` }),
-  ) as string;
-}
-
 function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
   return {
     slug: subtopic.slug,
@@ -59,7 +44,6 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
     href: subtopic.status === 'active' ? `/zadaniya/${sectionSlug}/${subtopic.slug}` : null,
-    chartSvg: thumbnail(subtopic),
   };
 }
 

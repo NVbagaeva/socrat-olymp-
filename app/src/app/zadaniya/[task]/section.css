@@ -141,22 +141,6 @@ a.subtopic:hover {
   color: var(--color-text-tertiary);
 }
 
-.subtopic__chart {
-  display: block;
-  max-width: 168px;
-  margin: 0 auto;
-}
-.subtopic__chart > svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-/* Место под чертёж, которого движок пока не умеет: карточка держит
-   ту же высоту, что и с чертежом, и ряд остаётся ровным. */
-.subtopic--soon .subtopic__chart {
-  opacity: 0.5;
-}
-
 .subtopic__meta {
   display: block;
   margin-top: var(--space-4);
