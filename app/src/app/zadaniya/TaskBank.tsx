@@ -1,9 +1,8 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import { TaskCard } from '@/components/ui';
+import { TaskGrid } from '@/components/tasks';
 import { tasks, tasksPage } from '@/content/tasks';
-import { TaskIllustration } from './illustrations';
 
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
@@ -56,22 +55,7 @@ export function TaskBank() {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <ul className="tasks-grid">
-          {shown.map((task) => (
-            <li key={task.no}>
-              <TaskCard
-                className="task-card--bank"
-                number={task.no}
-                title={task.name}
-                href={task.status === 'active' ? `${tasksPage.href}/${task.slug}` : undefined}
-                comingSoon={task.status !== 'active'}
-                difficulty={task.badge}
-                difficultyTone="info"
-                illustration={<TaskIllustration slug={task.slug} />}
-              />
-            </li>
-          ))}
-        </ul>
+        <TaskGrid tasks={shown} />
       )}
     </main>
   );

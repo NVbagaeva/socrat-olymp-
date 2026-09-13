@@ -4,6 +4,8 @@
  * Меняется здесь, в разметке текста нет.
  */
 
+import { tasksPage } from '@/content/tasks';
+
 export interface SiteLink {
   label: string;
   href: string;
@@ -15,7 +17,7 @@ export const site = {
   /** Первый пункт — отдельная страница; остальные пока якоря лендинга. */
   nav: [
     { label: 'Об авторе', href: '/about' },
-    { label: 'Банк заданий', href: '/#bank' },
+    { label: 'Банк заданий', href: tasksPage.href },
     { label: 'Учителям', href: '/#teachers' },
     /* Раздела с тарифами на странице пока нет — ссылка ждёт его. */
     { label: 'Тарифы', href: '#' },

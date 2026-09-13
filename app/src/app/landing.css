@@ -264,33 +264,25 @@ section.band--soft {
   margin-top: var(--space-4);
 }
 
-.dirs {
-  border-top: 1px solid var(--color-border);
+/* Четыре колонки по 300px с зазорами 16 требуют 1248px под сетку.
+   Общий контейнер 1280 с полями 32 даёт 1216 — не хватает ровно 32.
+   Блок банка расширяется на эту величину, остальные блоки страницы
+   остаются в общем контейнере. Ниже 1312px ширину всё равно
+   ограничивает экран, и колонок становится меньше само собой. */
+#bank .wrap {
+  max-width: calc(var(--w-container) + var(--space-8));
 }
-.dir {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 120px;
-  gap: var(--space-5);
-  align-items: center;
-  padding: var(--space-4) var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-  transition: background var(--dur-hover) var(--ease);
-}
-.dir:hover {
-  background: var(--color-surface-2);
-}
-.dir__no {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-}
-.dir__nm {
-  font-size: 16px;
-}
-.dirs__note {
+
+/* Ключевая мысль блока — под сеткой, обычным вторичным текстом. */
+.bank-note {
   margin-top: var(--space-6);
   font-size: 15px;
+  line-height: 24px;
   color: var(--color-text-secondary);
+  max-width: 72ch;
+}
+.bank-more {
+  margin-top: var(--space-6);
 }
 
 .cta {
@@ -452,13 +444,6 @@ section.band--soft {
   .split h3 {
     font-size: 24px;
     line-height: 32px;
-  }
-  .dir {
-    grid-template-columns: 36px 1fr;
-    gap: var(--space-3);
-  }
-  .dir__tag {
-    display: none;
   }
   .cta {
     padding: var(--space-10) var(--space-6);
