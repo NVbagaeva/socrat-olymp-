@@ -11,7 +11,25 @@
 
 'use strict';
 
+import { THEME } from '../renderer.js';
+
 var EPS = 1e-9;
+
+/* ── Рисунок пунктира ─────────────────────────────────────────────
+   Один на весь движок: асимптоты и катеты треугольника наклона
+   пунктирятся одинаково. Штрих вдвое длиннее промежутка и заметно
+   длиннее толщины линии — иначе пунктир читается сплошной серой.
+
+   Рисунок подставляется в THEME, потому что renderShape берёт его
+   оттуда и правок в renderer.js для этого не нужно: THEME — штатная
+   точка настройки оформления, она для того и вынесена в экспорт. */
+var DASH = '10 5';
+THEME.helper.dash = DASH;
+
+/* Насколько кривая должна отстоять от оси, чтобы не читаться её
+   утолщением. Пятая часть клетки — в единицах математических
+   координат клетка равна единице. */
+var CLEARANCE = 0.2;
 
 /** Окно из одной полуширины: иного renderGraph не принимает. */
 function windowOf(half) {
@@ -97,21 +115,46 @@ function sampleDense(fn, near, far, steps, power, limit) {
   return pieces;
 }
 
-/** Пунктирная асимптота цветом сетки. Подписей в этой задаче нет. */
+/* ── Асимптоты ────────────────────────────────────────────────────
+   Общее правило на все семейства: асимптота рисуется пунктиром
+   только тогда, когда она НЕ совпадает с координатной осью. Ось на
+   чертеже уже есть, и вторая линия поверх неё — мусор.
+
+   Проверка живёт здесь одна на всех, а не условием в каждом файле
+   семейства. */
+
+/** Совпадает ли асимптота с осью: значение ноль и есть ось. */
+function onAxis(value) {
+  return Math.abs(value) < EPS;
+}
+
 function asymptote(from, to) {
   return { type: 'segment', from: from, to: to, style: 'dashed', color: 'grid' };
 }
 
+/** Вертикальная x = value. На оси y не рисуется — вернётся null. */
 function verticalAsymptote(x, win) {
+  if (onAxis(x)) { return null; }
   return asymptote([x, win.ymin], [x, win.ymax]);
 }
 
+/** Горизонтальная y = value. На оси x не рисуется — вернётся null. */
 function horizontalAsymptote(y, win) {
+  if (onAxis(y)) { return null; }
   return asymptote([win.xmin, y], [win.xmax, y]);
+}
+
+/** Собрать список, выбросив совпавшие с осями. */
+function asymptotes(list) {
+  return list.filter(function (item) { return item !== null; });
 }
 
 var api = {
   EPS: EPS,
+  DASH: DASH,
+  CLEARANCE: CLEARANCE,
+  onAxis: onAxis,
+  asymptotes: asymptotes,
   windowOf: windowOf,
   fitWindow: fitWindow,
   sample: sample,
@@ -123,6 +166,6 @@ var api = {
 
 export default api;
 export {
-  EPS, windowOf, fitWindow, sample, sampleDense,
-  asymptote, verticalAsymptote, horizontalAsymptote,
+  EPS, DASH, CLEARANCE, windowOf, fitWindow, sample, sampleDense,
+  onAxis, asymptote, asymptotes, verticalAsymptote, horizontalAsymptote,
 };

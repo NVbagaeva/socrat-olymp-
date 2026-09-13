@@ -2,19 +2,22 @@
 
    Вертикальная асимптота x = 0, горизонтальная y = b. Ветви слева
    и справа от нуля — РАЗНЫЕ куски ломаной и между собой не
-   соединяются: это самая частая ошибка построения.
+   соединяются.
+
+   Пунктиром рисуется только та асимптота, которая не совпала с осью:
+   x = 0 — это сама ось y, её рисовать нечем. Проверку делает общее
+   правило в shared.js.
 */
 
 'use strict';
 
 import { registerCurve } from '../renderer.js';
-import { fitWindow, sampleDense, verticalAsymptote, horizontalAsymptote, EPS } from './shared.js';
+import { fitWindow, sampleDense, asymptotes as pack,
+         verticalAsymptote, horizontalAsymptote, EPS } from './shared.js';
 
 var BASE = 6;
 var MAX = 14;
 var STEPS = 400;
-/* Ближе этого к асимптоте точки не берутся: там кривая уже далеко
-   за окном, и рамку всё равно режет рендерер. */
 var NEAR = 1e-3;
 
 function create(k, b) {
@@ -26,7 +29,7 @@ function valueAt(p, x) {
   return Math.abs(x) < EPS ? null : p.k / x + p.b;
 }
 
-/** Горизонтальная асимптота должна быть в кадре — иначе её не видно. */
+/** Горизонтальная асимптота обязана быть в кадре — иначе её не видно. */
 function windowFor(p) {
   return fitWindow([{ x: 0, y: p.b }], BASE, MAX);
 }
@@ -37,14 +40,12 @@ registerCurve('rational', function (curve, win) {
 
   /* Две независимые ветви: каждая идёт от асимптоты к краю окна.
      Возвращаются двумя кусками, поэтому соединить их рендереру нечем. */
-  var left = sampleDense(f, -NEAR, win.xmin, STEPS, 3);
-  var right = sampleDense(f, NEAR, win.xmax, STEPS, 3);
-  return left.concat(right);
-});
+  return sampleDense(f, -NEAR, win.xmin, STEPS, 3)
+    .concat(sampleDense(f, NEAR, win.xmax, STEPS, 3));
+}); 
 
-/** Обе асимптоты пунктиром цветом сетки. */
 function asymptotes(p, win) {
-  return [verticalAsymptote(0, win), horizontalAsymptote(p.b === undefined ? 0 : p.b, win)];
+  return pack([verticalAsymptote(0, win), horizontalAsymptote(p.b === undefined ? 0 : p.b, win)]);
 }
 
 var api = { BASE: BASE, MAX: MAX, create: create, valueAt: valueAt,
