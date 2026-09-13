@@ -11,11 +11,9 @@
 'use strict';
 
 import { registerCurve } from '../renderer.js';
-import { windowOf, sampleDense, asymptotes as pack, verticalAsymptote,
-         CLEARANCE, EPS } from './shared.js';
+import { fitWindow, sampleDense, asymptotes as pack, verticalAsymptote,
+         HALF, CLEARANCE, EPS } from './shared.js';
 
-var BASE = 6;
-var MIN = 2;
 var MAX = 12;
 var STEPS = 500;
 var NEAR = 1e-4;
@@ -41,15 +39,12 @@ function tailReach(a) {
 }
 
 /**
- * Окно: видны участки и левее, и правее точки (1 + c, 0), сама точка
- * в кадре, и кривая не прижата к асимптоте на видимой высоте.
+ * Окно общее для всех семейств: масштаб сетки один на весь движок.
+ * Расширяется только если асимптота x = c или контрольная точка
+ * (1 + c, 0) иначе не попадут в кадр.
  */
 function windowFor(p) {
-  var byTail = Math.max(MIN, Math.floor(tailReach(p.a) + EPS));
-  /* Точка (1 + c, 0) и сама асимптота должны попасть в кадр,
-     плюс клетка запаса справа — иначе «правее точки» не видно. */
-  var needed = Math.ceil(Math.max(Math.abs(p.c), Math.abs(1 + p.c) + 1) - EPS);
-  return windowOf(Math.min(Math.max(byTail, needed, MIN), MAX));
+  return fitWindow([{ x: p.c, y: 0 }, { x: 1 + p.c, y: 0 }], HALF, MAX);
 }
 
 /** Фактический зазор до асимптоты на нижней или верхней границе. */
@@ -72,7 +67,7 @@ function asymptotes(p, win) {
   return pack([verticalAsymptote(p.c === undefined ? 0 : p.c, win)]);
 }
 
-var api = { BASE: BASE, MIN: MIN, MAX: MAX, create: create, valueAt: valueAt,
+var api = { MAX: MAX, create: create, valueAt: valueAt,
             tailReach: tailReach, tailClearance: tailClearance,
             windowFor: windowFor, asymptotes: asymptotes };
 

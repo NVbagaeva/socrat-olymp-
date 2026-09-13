@@ -26,10 +26,28 @@ var EPS = 1e-9;
 var DASH = '10 5';
 THEME.helper.dash = DASH;
 
+/* Цвет асимптоты. Сетка для неё слишком бледная: асимптота —
+   математически значимая линия, а не часть фона. Берётся готовый
+   оттенок палитры, заметно темнее сетки; новых цветов не заводим.
+   Ключ добавляется в THEME — штатную точку настройки оформления,
+   вынесенную движком в экспорт, поэтому renderer.js не правится. */
+THEME.colors.asymptote = 'var(--graph-asymptote, #97a1b0)';
+
 /* Насколько кривая должна отстоять от оси, чтобы не читаться её
    утолщением. Пятая часть клетки — в единицах математических
    координат клетка равна единице. */
 var CLEARANCE = 0.2;
+
+/* ── Единый масштаб ───────────────────────────────────────────────
+   Размер холста движок считает как (xmax − xmin) × cell, где cell —
+   пикселей на клетку, общие для всех чертежей. Значит одинаковый
+   размер картинки и одинаковый шаг сетки — это одна и та же
+   полуширина окна у всех семейств.
+
+   Отсюда правило: семейство задаёт границы окна только в
+   математических единицах и только этой величиной. Пиксельный
+   масштаб не трогает никто. */
+var HALF = 6;
 
 /** Окно из одной полуширины: иного renderGraph не принимает. */
 function windowOf(half) {
@@ -129,7 +147,7 @@ function onAxis(value) {
 }
 
 function asymptote(from, to) {
-  return { type: 'segment', from: from, to: to, style: 'dashed', color: 'grid' };
+  return { type: 'segment', from: from, to: to, style: 'dashed', color: 'asymptote' };
 }
 
 /** Вертикальная x = value. На оси y не рисуется — вернётся null. */
@@ -153,6 +171,7 @@ var api = {
   EPS: EPS,
   DASH: DASH,
   CLEARANCE: CLEARANCE,
+  HALF: HALF,
   onAxis: onAxis,
   asymptotes: asymptotes,
   windowOf: windowOf,
@@ -166,6 +185,6 @@ var api = {
 
 export default api;
 export {
-  EPS, DASH, CLEARANCE, windowOf, fitWindow, sample, sampleDense,
+  EPS, DASH, CLEARANCE, HALF, windowOf, fitWindow, sample, sampleDense,
   onAxis, asymptote, asymptotes, verticalAsymptote, horizontalAsymptote,
 };

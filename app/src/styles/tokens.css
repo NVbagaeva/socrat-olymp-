@@ -138,6 +138,9 @@
   --graph-axis: var(--grey-900);
   --graph-grid: var(--grey-300);
   --graph-accent: var(--terracotta);
+  /* Асимптота: значимая линия чертежа, а не фон. Сетка для неё
+     слишком бледная, поэтому берётся оттенок из палитры темнее. */
+  --graph-asymptote: var(--grey-500);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,

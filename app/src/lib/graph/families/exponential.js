@@ -12,11 +12,9 @@
 'use strict';
 
 import { registerCurve } from '../renderer.js';
-import { windowOf, sample, asymptotes as pack, horizontalAsymptote,
-         CLEARANCE, EPS } from './shared.js';
+import { fitWindow, sample, asymptotes as pack, horizontalAsymptote,
+         HALF, CLEARANCE, EPS } from './shared.js';
 
-var BASE = 6;
-var MIN = 2;
 var MAX = 12;
 var STEPS = 600;
 
@@ -39,15 +37,13 @@ function tailReach(a) {
 }
 
 /**
- * Окно: сужается до хвоста, но не мельче MIN и не мельче того, что
- * нужно, чтобы асимптота и точка (0, 1 + d) остались в кадре.
- * Когда эти два требования спорят, побеждает видимость асимптоты:
- * рисовать пунктир за кадром бессмысленно.
+ * Окно общее для всех семейств: масштаб сетки один на весь движок,
+ * поэтому полуширина берётся та же, что у прямой и параболы.
+ * Расширяется только тогда, когда асимптота или точка (0, 1 + d)
+ * иначе не попадут в кадр.
  */
 function windowFor(p) {
-  var byTail = Math.max(MIN, Math.floor(tailReach(p.a) + EPS));
-  var needed = Math.ceil(Math.max(Math.abs(p.d), Math.abs(1 + p.d)) - EPS);
-  return windowOf(Math.min(Math.max(byTail, needed, MIN), MAX));
+  return fitWindow([{ x: 0, y: p.d }, { x: 0, y: 1 + p.d }], HALF, MAX);
 }
 
 /** Фактический зазор у края окна: по нему и проверяется правило. */
@@ -67,7 +63,7 @@ function asymptotes(p, win) {
   return pack([horizontalAsymptote(p.d === undefined ? 0 : p.d, win)]);
 }
 
-var api = { BASE: BASE, MIN: MIN, MAX: MAX, create: create, valueAt: valueAt,
+var api = { MAX: MAX, create: create, valueAt: valueAt,
             tailReach: tailReach, tailClearance: tailClearance,
             windowFor: windowFor, asymptotes: asymptotes };
 
