@@ -3,20 +3,17 @@
    Период 2π/|b|. Окно подбирается так, чтобы в кадр попал хотя бы один
    полный период и вся амплитуда.
 
-   ОГРАНИЧЕНИЕ РЕНДЕРЕРА. Деления и подписи на осях renderer.js ставит
-   строго по целым: цикл засечек идёт шагом 1 и подписи берёт как число.
-   Долей π на оси он поставить не может, а править его в этой задаче
-   нельзя. Поэтому сетка здесь целая, а не πʼная — про это сказано
-   отдельно в отчёте.
+   Ось x размечена в долях π: сетка, засечки и подписи идут шагом π/2.
+   Подписи задаются строками через поле axes.ticks — числом «π/2»
+   записать нельзя. По оси y деления обычные, целые.
 */
 
 'use strict';
 
 import { registerCurve } from '../renderer.js';
-import { windowOf, sample, EPS } from './shared.js';
+import { windowBox, sample, piTicks, HALF, PI_HALF, EPS } from './shared.js';
 
-var BASE = 6;
-var MAX = 14;
+var MAX_HALVES = 12;   /* потолок охвата по x, в единицах π/2 */
 /* Шагов больше, чем у других семейств: у синусоиды изгиб на всём
    протяжении, а не только в одном месте. */
 var STEPS = 900;
@@ -36,14 +33,23 @@ function valueAt(p, x) {
 }
 
 /**
- * Окно: не меньше одного полного периода по горизонтали и вся амплитуда
- * по вертикали. Расширяется до ближайшего целого деления, как у всех
- * семейств — общая логика лежит в shared.js.
+ * Окно. По горизонтали — не меньше одного полного периода, граница
+ * ложится на деление, кратное π/2, чтобы крайняя засечка была
+ * подписана. По вертикали охват как у остальных семейств.
+ *
+ * Масштаб при этом общий: и по x, и по y одна единица — одно и то же
+ * число пикселей. Меняется только охват, поэтому длинный период
+ * расширяет кадр вширь, а не сжимает клетку.
  */
 function windowFor(p) {
-  var byPeriod = Math.ceil(period(p) / 2 - EPS);
-  var byAmplitude = Math.ceil(Math.abs(p.a) + Math.abs(p.d) - EPS);
-  return windowOf(Math.min(Math.max(BASE, byPeriod, byAmplitude), MAX));
+  var halves = Math.ceil(Math.max(period(p) / 2, HALF) / PI_HALF - EPS);
+  var half = Math.min(halves, MAX_HALVES) * PI_HALF;
+  return windowBox(-half, half, -HALF, HALF);
+}
+
+/** Деления оси x: шаг π/2, подписи строками. Ось y — как у всех. */
+function ticksFor(win) {
+  return { x: piTicks(win) };
 }
 
 registerCurve('trigonometric', function (curve, win) {
@@ -60,8 +66,8 @@ function asymptotes() {
   return [];
 }
 
-var api = { BASE: BASE, MAX: MAX, create: create, period: period, valueAt: valueAt,
-            windowFor: windowFor, asymptotes: asymptotes };
+var api = { MAX_HALVES: MAX_HALVES, create: create, period: period, valueAt: valueAt,
+            windowFor: windowFor, ticksFor: ticksFor, asymptotes: asymptotes };
 
 export default api;
-export { create, period, valueAt, windowFor, asymptotes };
+export { create, period, valueAt, windowFor, ticksFor, asymptotes };

@@ -50,9 +50,44 @@ var CLEARANCE = 0.2;
    масштаб не трогает никто. */
 var HALF = 6;
 
-/** Окно из одной полуширины: иного renderGraph не принимает. */
+/** Окно из одной полуширины: квадратное и симметричное. */
 function windowOf(half) {
   return { xmin: -half, xmax: half, ymin: -half, ymax: half };
+}
+
+/** Прямоугольное окно. Масштаб по осям всё равно общий: обе
+    координаты рендерер считает от одного размера клетки. */
+function windowBox(xmin, xmax, ymin, ymax) {
+  return { xmin: xmin, xmax: xmax, ymin: ymin, ymax: ymax };
+}
+
+/* ── Подписи в долях π ────────────────────────────────────────────
+   Числом доли π записать нельзя, поэтому подписи задаются строками
+   через новое поле axes.ticks. */
+var PI_HALF = Math.PI / 2;
+
+/** Подпись деления, кратного π/2: «π/2», «π», «3π/2», «2π», «−π». */
+function piLabel(halves) {
+  var n = Math.round(halves);
+  if (n === 0) { return null; }
+  var sign = n < 0 ? '\u2212' : '';
+  var k = Math.abs(n);
+  if (k % 2 === 0) {
+    var whole = k / 2;
+    return sign + (whole === 1 ? '\u03c0' : whole + '\u03c0');
+  }
+  return sign + (k === 1 ? '\u03c0/2' : k + '\u03c0/2');
+}
+
+/** Деления по оси x с шагом π/2 в пределах окна. */
+function piTicks(win) {
+  var out = [];
+  var from = Math.ceil(win.xmin / PI_HALF - EPS);
+  var to = Math.floor(win.xmax / PI_HALF + EPS);
+  for (var n = from; n <= to; n++) {
+    out.push({ at: n * PI_HALF, label: piLabel(n) });
+  }
+  return out;
 }
 
 /**
@@ -174,6 +209,10 @@ var api = {
   CLEARANCE: CLEARANCE,
   HALF: HALF,
   onAxis: onAxis,
+  windowBox: windowBox,
+  PI_HALF: PI_HALF,
+  piLabel: piLabel,
+  piTicks: piTicks,
   asymptotes: asymptotes,
   windowOf: windowOf,
   fitWindow: fitWindow,
@@ -186,6 +225,6 @@ var api = {
 
 export default api;
 export {
-  EPS, DASH, CLEARANCE, HALF, windowOf, fitWindow, sample, sampleDense,
+  EPS, DASH, CLEARANCE, HALF, PI_HALF, windowOf, windowBox, piLabel, piTicks, fitWindow, sample, sampleDense,
   onAxis, asymptote, asymptotes, verticalAsymptote, horizontalAsymptote,
 };

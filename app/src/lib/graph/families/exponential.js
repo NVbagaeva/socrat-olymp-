@@ -12,10 +12,11 @@
 'use strict';
 
 import { registerCurve } from '../renderer.js';
-import { fitWindow, sample, asymptotes as pack, horizontalAsymptote,
-         HALF, CLEARANCE, EPS } from './shared.js';
+import { windowBox, sample, asymptotes as pack, horizontalAsymptote,
+         CLEARANCE, EPS } from './shared.js';
 
 var MAX = 12;
+var SPAN_Y = 12;   /* высота кадра в клетках — как у остальных семейств */
 var STEPS = 600;
 
 function create(a, d) {
@@ -37,13 +38,24 @@ function tailReach(a) {
 }
 
 /**
- * Окно общее для всех семейств: масштаб сетки один на весь движок,
- * поэтому полуширина берётся та же, что у прямой и параболы.
- * Расширяется только тогда, когда асимптота или точка (0, 1 + d)
- * иначе не попадут в кадр.
+ * Окно прямоугольное: по x охват обрезан там, где кривая уже неотличима
+ * от асимптоты, по y — столько, сколько нужно кривой и асимптоте.
+ *
+ * Хвост отрезается границей окна, а не искусственным обрывом кривой:
+ * поведение функции не искажается, просто неразличимый участок
+ * не попадает в кадр. Масштаб клетки при этом не меняется.
  */
 function windowFor(p) {
-  return fitWindow([{ x: 0, y: p.d }, { x: 0, y: 1 + p.d }], HALF, MAX);
+  /* Дальше этого места aˣ меньше зазора и сливается с асимптотой. */
+  var reach = Math.max(1, Math.floor(tailReach(p.a) + EPS));
+  var grow = 3;                       /* сторона, куда кривая растёт */
+  var xmin = p.a > 1 ? -reach : -grow;
+  var xmax = p.a > 1 ? grow : reach;
+
+  /* Высота кадра постоянная: столько же клеток, сколько у прямой
+     и параболы. Что не поместилось — обрежет рамка. */
+  var ymin = Math.min(p.d, 0) - 2;
+  return windowBox(xmin, xmax, ymin, ymin + SPAN_Y);
 }
 
 /** Фактический зазор у края окна: по нему и проверяется правило. */
