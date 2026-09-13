@@ -243,9 +243,13 @@ function checkAnalysis(set, task) {
 var WINDOW_CASES = [
   { win: { xmin: -8, xmax: 8, ymin: -8, ymax: 8 }, valid: true,  note: 'стандартное окно −8…8' },
   { win: { xmin: -5, xmax: 5, ymin: -5, ymax: 5 }, valid: true,  note: 'суженное окно −5…5' },
-  { win: { xmin: -8, xmax: 8, ymin: -6, ymax: 8 }, valid: false, note: '|ymin| != ymax' },
-  { win: { xmin: -8, xmax: 8, ymin: -7, ymax: 7 }, valid: false, note: 'разное число клеток по осям' },
-  { win: { xmin: -6, xmax: 8, ymin: -8, ymax: 8 }, valid: false, note: 'начало координат смещено по x' }
+  /* Окно больше не обязано быть симметричным и квадратным: охват
+     по осям задаётся независимо, а масштаб остаётся общим, потому
+     что обе координаты считаются от одного размера клетки. */
+  { win: { xmin: -8, xmax: 8, ymin: -6, ymax: 8 }, valid: true,  note: 'охват по y уже, чем по x' },
+  { win: { xmin: -2, xmax: 3, ymin: -1, ymax: 9 }, valid: true,  note: 'несимметричное окно' },
+  { win: { xmin: -6, xmax: -6, ymin: -8, ymax: 8 }, valid: false, note: 'пустое окно по x' },
+  { win: { xmin: -6, xmax: 8, ymin: 4, ymax: 4 }, valid: false, note: 'пустое окно по y' }
 ];
 
 function selfTestWindow() {

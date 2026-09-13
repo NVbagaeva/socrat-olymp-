@@ -38,6 +38,9 @@
   --blue-glass-1: #f0f6ff;
   --blue-glass-2: #e6effc;
   --blue-grid: #dce7f7;
+  /* Акцент чертежей: треугольник наклона и проверяемая точка.
+     В интерфейсе не используется — кнопки и ссылки синие. */
+  --terracotta: #e07a2f;
   --heat-1: #eef4fd;
   --heat-2: #d5e4fa;
   --heat-3: #a9c8f3;
@@ -128,6 +131,16 @@
   /* Полупрозрачный фон липкой панели поверх --color-bg */
   --color-bg-translucent: rgba(245, 249, 255, 0.92);
   --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
+
+  /* Чертежи движка graph/. Движок ждёт эти переменные от дизайн-системы
+     и без них подставляет собственные хексы — то есть цвет мимо токенов.
+     Ось совпадает с --grey-900 точно; сетка взята ближайшей из палитры. */
+  --graph-axis: var(--grey-900);
+  --graph-grid: var(--grey-300);
+  --graph-accent: var(--terracotta);
+  /* Асимптота: значимая линия чертежа, а не фон. Цвет оси с
+     прозрачностью — темнее сетки, но не спорит с самими осями. */
+  --graph-asymptote: color-mix(in srgb, var(--graph-axis) 50%, transparent);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,

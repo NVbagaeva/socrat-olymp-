@@ -1159,7 +1159,48 @@ a.task-card {
 }
 
 /* ══════════════════════════════════════════════════════════
-   9. КОМПОНЕНТЫ · рукописная подпись
+   9. КОМПОНЕНТЫ · хлебные крошки
+   ══════════════════════════════════════════════════════════ */
+.crumbs {
+  font-size: 14px;
+  line-height: 20px;
+}
+.crumbs__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+}
+.crumbs__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* Разделитель рисуется псевдоэлементом: символом в разметке его
+   прочитал бы вслух скринридер. */
+.crumbs__item + .crumbs__item::before {
+  content: '/';
+  color: var(--color-text-tertiary);
+}
+.crumbs a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.crumbs a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.crumbs [aria-current='page'] {
+  color: var(--color-text);
+}
+
+/* ══════════════════════════════════════════════════════════
+   10. КОМПОНЕНТЫ · рукописная подпись
    ══════════════════════════════════════════════════════════ */
 /* Только начертание и цвет. Размер наследуется от места вставки,
    положение задаёт страница: сам себя компонент не позиционирует. */

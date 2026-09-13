@@ -185,26 +185,22 @@ function color(name) {
 function pick(value, fallback) { return value === undefined || value === null ? fallback : value; }
 
 /* ══════════════════════════════════════════════════════════
-   Окно: строго симметричное и квадратное
-   Одинаковое число клеток во все четыре стороны, размер клетки
-   одинаков по обеим осям. Та же проверка вызывается из validate.js.
+   Окно: прямоугольное, охват по осям задаётся независимо
+   Симметрия и квадратность не требуются: охват по x и по y может
+   быть разным. Масштаб при этом общий — одна единица по обеим осям
+   занимает одинаковое число пикселей, потому что sx и sy считают
+   от одного cell. Растянуть одну ось относительно другой нельзя
+   по построению, и угол наклона прямой не искажается.
+   Та же проверка вызывается из validate.js.
    ══════════════════════════════════════════════════════════ */
 function checkWindow(win) {
   var errors = [];
   if (!win) { return ['окно не задано']; }
 
-  if (Math.abs(win.xmin + win.xmax) > EPS) {
-    errors.push('окно не симметрично по x: xmin ' + win.xmin + ', xmax ' + win.xmax);
-  }
-  if (Math.abs(win.ymin + win.ymax) > EPS) {
-    errors.push('окно не симметрично по y: ymin ' + win.ymin + ', ymax ' + win.ymax);
-  }
   var cellsX = win.xmax - win.xmin;
   var cellsY = win.ymax - win.ymin;
-  if (Math.abs(cellsX - cellsY) > EPS) {
-    errors.push('поле не квадратное: ' + cellsX + ' клеток по горизонтали, ' + cellsY + ' по вертикали');
-  }
-  if (cellsX < EPS) { errors.push('пустое окно'); }
+  if (cellsX < EPS) { errors.push('пустое окно по x'); }
+  if (cellsY < EPS) { errors.push('пустое окно по y'); }
   return errors;
 }
 
@@ -265,8 +261,10 @@ function renderGraph(scene, report) {
   var g = THEME.geometry;
   var cell = pick(scene.cell, g.cell);
 
-  var plot = (win.xmax - win.xmin) * cell;   /* поле — квадрат */
-  var size = plot + g.pad * 2;
+  /* Стороны считаются раздельно: охват по осям может не совпадать.
+     У квадратного окна обе величины равны прежнему size. */
+  var width = (win.xmax - win.xmin) * cell + g.pad * 2;
+  var height = (win.ymax - win.ymin) * cell + g.pad * 2;
 
   function sx(x) { return g.pad + (x - win.xmin) * cell; }
   function sy(y) { return g.pad + (win.ymax - y) * cell; }
@@ -288,13 +286,13 @@ function renderGraph(scene, report) {
   var pointLayer = [];
   var curveLabelLayer = [];
 
-  head.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + px(size) + ' ' + px(size) + '"' +
-    ' width="' + px(size) + '" height="' + px(size) + '" role="img"' +
+  head.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + px(width) + ' ' + px(height) + '"' +
+    ' width="' + px(width) + '" height="' + px(height) + '" role="img"' +
     (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">');
   if (scene.alt) { head.push('<title>' + esc(scene.alt) + '</title>'); }
   if (report) { report.cell = cell; report.sx = sx; report.sy = sy; }
-  head.push('<rect x="0" y="0" width="' + px(size) + '" height="' + px(size) + '" fill="' +
+  head.push('<rect x="0" y="0" width="' + px(width) + '" height="' + px(height) + '" fill="' +
     THEME.colors.bg + '"/>');
 
   /* Сетка: только внутренние линии, крайние не рисуются —
@@ -331,21 +329,54 @@ function renderGraph(scene, report) {
   /* Засечки: не ближе tickEdgeCells к краю поля, поэтому между
      последней засечкой и стрелкой остаётся зазор больше клетки,
      а у левого и нижнего концов осей нет «стопоров». ------------------ */
-  function ticked(value) {
-    return value >= win.xmin + g.tickEdgeCells - EPS &&
-           value <= win.xmax - g.tickEdgeCells + EPS &&
+  function ticked(value, lo, hi) {
+    return value >= lo + g.tickEdgeCells - EPS &&
+           value <= hi - g.tickEdgeCells + EPS &&
            Math.abs(value) > EPS;
   }
 
+  /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
+     единичный отрезок задан, остальное ученик отсчитывает по клеткам. */
+  function labelled(value, lo, hi) {
+    if (!ticked(value, lo, hi)) { return false; }
+    return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
+  }
+
+  /* Деления оси. По умолчанию — целые, подписи числом, как было.
+     Необязательное axes.ticks задаёт свои положения и подписи
+     строками: только так на оси появляются доли π, которые числом
+     записать нельзя. Формат: axes.ticks.x = [{ at, label }],
+     label необязательна — без неё будет засечка без подписи. */
+  function tickList(axis) {
+    var custom = axes.ticks && axes.ticks[axis];
+    var lo = axis === 'x' ? win.xmin : win.ymin;
+    var hi = axis === 'x' ? win.xmax : win.ymax;
+
+    if (custom) {
+      return custom.filter(function (item) { return ticked(item.at, lo, hi); })
+        .map(function (item) {
+          return { at: item.at, text: item.label === undefined ? null : item.label };
+        });
+    }
+
+    var out = [];
+    for (var v = Math.ceil(lo); v <= hi + EPS; v++) {
+      if (!ticked(v, lo, hi)) { continue; }
+      out.push({ at: v, text: labelled(v, lo, hi) ? fmt(v) : null });
+    }
+    return out;
+  }
+
+  var ticksX = tickList('x');
+  var ticksY = tickList('y');
+
   var ticks = [];
-  for (var tx = Math.ceil(win.xmin); tx <= win.xmax + EPS; tx++) {
-    if (!ticked(tx)) { continue; }
-    ticks.push('M' + px(sx(tx)) + ' ' + px(axisX - g.tick) + 'v' + px(g.tick * 2));
-  }
-  for (var ty = Math.ceil(win.ymin); ty <= win.ymax + EPS; ty++) {
-    if (!ticked(ty)) { continue; }
-    ticks.push('M' + px(axisY - g.tick) + ' ' + px(sy(ty)) + 'h' + px(g.tick * 2));
-  }
+  ticksX.forEach(function (item) {
+    ticks.push('M' + px(sx(item.at)) + ' ' + px(axisX - g.tick) + 'v' + px(g.tick * 2));
+  });
+  ticksY.forEach(function (item) {
+    ticks.push('M' + px(axisY - g.tick) + ' ' + px(sy(item.at)) + 'h' + px(g.tick * 2));
+  });
   axisLayer.push('<path d="' + ticks.join('') + '" fill="none" stroke="' + THEME.colors.axis +
     '" stroke-width="' + THEME.width.tick + '" stroke-linecap="butt"/>');
 
@@ -386,36 +417,30 @@ function renderGraph(scene, report) {
     drawn.push({ curve: curve, pieces: pieces, stroke: stroke });
   });
 
-  /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
-     единичный отрезок задан, остальное ученик отсчитывает по клеткам. -- */
-  function labelled(value) {
-    if (!ticked(value)) { return false; }
-    return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
-  }
-
   var labelBoxes = [];
   function boxFor(value, cx, cy) {
     var half = textWidth(value, THEME.font.axisLabel) / 2;
     labelBoxes.push({ x: cx, y: cy, halfW: half, halfH: THEME.font.axisLabel * 0.62 });
   }
 
-  for (var lx = Math.ceil(win.xmin); lx <= win.xmax + EPS; lx++) {
-    if (!labelled(lx)) { continue; }
-    var textX = fmt(lx);
-    labelLayer.push(numberText(textX, sx(lx), axisX + THEME.gap.axisLabelX, 'middle'));
-    boxFor(textX, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
-    collect(report, 'axisLabel', null, sx(lx), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35,
+  ticksX.forEach(function (item) {
+    if (item.text === null) { return; }
+    var textX = item.text;
+    labelLayer.push(numberText(textX, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
+    boxFor(textX, sx(item.at), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
+    collect(report, 'axisLabel', null, sx(item.at),
+      axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35,
       textWidth(textX, THEME.font.axisLabel) / 2, THEME.font.axisLabel * 0.62);
-  }
-  for (var ly = Math.ceil(win.ymin); ly <= win.ymax + EPS; ly++) {
-    if (!labelled(ly)) { continue; }
-    var textY = fmt(ly);
+  });
+  ticksY.forEach(function (item) {
+    if (item.text === null) { return; }
+    var textY = item.text;
     var half = textWidth(textY, THEME.font.axisLabel) / 2;
-    labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(ly) + 4.5, 'end'));
-    boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(ly));
-    collect(report, 'axisLabel', null, axisY - THEME.gap.axisLabelY - half, sy(ly),
+    labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(item.at) + 4.5, 'end'));
+    boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(item.at));
+    collect(report, 'axisLabel', null, axisY - THEME.gap.axisLabelY - half, sy(item.at),
       half, THEME.font.axisLabel * 0.62);
-  }
+  });
   if (pick(axes.origin, '0') !== null) {
     /* Подпись начала координат уходит в свободную четверть: если
        в начале координат стоит точка или через него идёт график,
