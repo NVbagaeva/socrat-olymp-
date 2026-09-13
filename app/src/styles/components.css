@@ -1159,7 +1159,260 @@ a.task-card {
 }
 
 /* ══════════════════════════════════════════════════════════
-   9. КОМПОНЕНТЫ · хлебные крошки
+   9. КОМПОНЕНТЫ · банк заданий
+   Карточка и сетка живут в общем слое: их показывают и страница
+   банка, и блок на главной.
+   ══════════════════════════════════════════════════════════ */
+/* ── Сетка ──────────────────────────────────────────────────── */
+
+.tasks-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Колонки считаются от доступной ширины, а не от страницы: одно
+     правило само даёт разное число колонок там, где сайдбар забирает
+     240px, и там, где его нет. Нижняя граница 300px — замеренный
+     минимум, при котором самое длинное название укладывается в две
+     строки на компактной шкале. min() страхует от переполнения, когда
+     места меньше самой границы. */
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-4);
+  /* auto-fill, а не auto-fit: последняя карточка остаётся слева
+     и не растягивается на пустые колонки ряда. */
+  justify-items: stretch;
+  align-items: stretch;
+}
+/* Каждая ячейка — контейнер запроса: шкала карточки выбирается по её
+   собственной ширине, а не по ширине окна. Иначе на планшете карточка
+   в две колонки получает крупную шкалу, под которую ей не хватает
+   места, и название обрезается. */
+.tasks-grid > li {
+  display: flex;
+  container-type: inline-size;
+}
+
+/* ── Карточка банка ─────────────────────────────────────────── */
+
+/* Две колонки: текст слева во всю оставшуюся ширину, миниатюра справа
+   фиксированной ширины и по вертикальному центру. Пропорции сторон нет:
+   высоту задаёт содержимое, а ровный ряд обеспечивает растяжка сетки. */
+.task-card--bank {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  align-content: start;
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  padding: var(--space-6);
+  overflow: hidden;
+}
+
+/* Номер крупно вместо плашки. */
+.task-card--bank .task-card__no {
+  grid-area: 1 / 1;
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  display: block;
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.task-card--bank .task-card__body {
+  grid-area: 2 / 1;
+  display: block;
+}
+.task-card--bank .task-card__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.task-card--bank .task-card__meta {
+  margin-top: var(--space-2);
+}
+.task-card--bank .task-card__meta .badge {
+  font-size: 13px;
+}
+
+/* Миниатюра: правая колонка на обе строки, по центру по вертикали.
+   Снизу зарезервирована полоса под круглую стрелку — одинаково у всех
+   карточек, чтобы миниатюры стояли на одной линии по всему ряду. */
+.task-card--bank .task-card__ill {
+  grid-area: 1 / 2 / 3 / 3;
+  align-self: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-8);
+  pointer-events: none;
+}
+
+/* Плашка «Скоро» на неоткрытой карточке: фон бейджа и фон карточки —
+   один и тот же --color-surface-2, поэтому плашка не читалась. Поднимаем
+   её на поверхность. Бейдж «структура 2027» не трогаем: он с тоном info
+   и виден сам по себе. */
+.task-card--bank.task-card--soon .badge:not(.badge--info) {
+  background: var(--color-surface);
+}
+
+/* Компактная шкала: включается, когда карточке меньше 360px — ширины,
+   при которой самое длинное название ещё держится в двух строках на
+   полной шкале. Порог по карточке, а не по окну. */
+@container (max-width: 359.98px) {
+  .task-card--bank {
+    min-height: 100px;
+    padding: var(--space-4);
+  }
+  .task-card--bank .task-card__no {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .task-card--bank .task-card__title {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .task-card--bank .task-card__ill {
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--space-6);
+  }
+  .task-card--bank .task-card__go {
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+}
+
+/* Рамка миниатюры: круг и содержимое лежат друг на друге, поэтому
+   формула центрируется в том же круге, что и фигуры. */
+.ill-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  color: var(--color-primary);
+}
+.ill {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Подложка: плоская заливка, без обводки и без градиента. */
+.ill-disc {
+  fill: currentColor;
+  opacity: 0.06;
+  stroke: none;
+}
+
+/* Формула поверх подложки. Кегли подобраны замером так, чтобы ширина
+   всех трёх была близка и ни одна не выходила за 70% диаметра круга. */
+.ill-formula {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.ill-formula--long {
+  font-size: 11px;
+}
+.ill-formula--mid {
+  font-size: 22px;
+}
+.ill-formula--short {
+  font-size: 28px;
+}
+.ill-line,
+.ill-accent {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ill-line {
+  opacity: 0.55;
+}
+/* Невидимые рёбра: тот же вес и цвет, отличается только штрих. */
+.ill-dash {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 4 3.5;
+  opacity: 0.4;
+}
+.ill-accent {
+  opacity: 1;
+}
+.ill-dot {
+  fill: currentColor;
+  stroke: none;
+}
+.ill-fill {
+  fill: currentColor;
+  opacity: 0.12;
+  stroke: none;
+}
+.ill-text {
+  fill: currentColor;
+  opacity: 0.55;
+  stroke: none;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Стрелка открытого раздела. Позиционирование абсолютное: элемент вне
+   потока и высоту карточки не меняет, поэтому ряд остаётся ровным. */
+.task-card--bank .task-card__go {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.task-card--bank .task-card__go svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--color-text-inverse);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Неоткрытая карточка: миниатюра гаснет вместе с текстом. */
+.task-card--soon .ill {
+  opacity: 0.5;
+}
+
+
+/* Ниже 768 карточки идут в один столбец, и шаг между ними меньше:
+   на узком экране крупный зазор съедает половину списка. */
+@media (max-width: 767.98px) {
+  .tasks-grid {
+    gap: var(--space-3);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   10. КОМПОНЕНТЫ · хлебные крошки
    ══════════════════════════════════════════════════════════ */
 .crumbs {
   font-size: 14px;
@@ -1200,7 +1453,7 @@ a.task-card {
 }
 
 /* ══════════════════════════════════════════════════════════
-   10. КОМПОНЕНТЫ · рукописная подпись
+   11. КОМПОНЕНТЫ · рукописная подпись
    ══════════════════════════════════════════════════════════ */
 /* Только начертание и цвет. Размер наследуется от места вставки,
    положение задаёт страница: сам себя компонент не позиционирует. */

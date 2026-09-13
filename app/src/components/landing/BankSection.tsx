@@ -1,8 +1,17 @@
-import { Badge } from '@/components/ui';
+import Link from 'next/link';
+import { TaskGrid } from '@/components/tasks';
 import { landing } from '@/content/landing';
+import { tasks, tasksPage } from '@/content/tasks';
 
 const { bank } = landing;
 
+/**
+ * Банк заданий на главной.
+ *
+ * Те же карточки и тот же конфиг, что на странице банка: второго списка
+ * заданий в проекте нет. Отличий от страницы два — здесь нет поиска,
+ * а под сеткой стоит переход в сам раздел.
+ */
 export function BankSection() {
   return (
     <section className="band" id="bank">
@@ -11,18 +20,14 @@ export function BankSection() {
           <h2>{bank.title}</h2>
           <p>{bank.lead}</p>
         </div>
-        <ol className="dirs">
-          {bank.directions.map((direction) => (
-            <li className="dir" key={direction.no}>
-              <span className="dir__no">{direction.no}</span>
-              <span className="dir__nm">{direction.name}</span>
-              <span className="dir__tag">
-                {direction.badge ? <Badge tone="info">{direction.badge}</Badge> : null}
-              </span>
-            </li>
-          ))}
-        </ol>
-        <p className="dirs__note">{bank.note}</p>
+
+        <TaskGrid tasks={tasks} />
+
+        <p className="bank-note">{bank.note}</p>
+
+        <Link className="btn btn--primary bank-more" href={tasksPage.href}>
+          Открыть банк заданий
+        </Link>
       </div>
     </section>
   );
