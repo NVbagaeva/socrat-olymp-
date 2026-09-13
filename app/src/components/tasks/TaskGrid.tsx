@@ -1,7 +1,7 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
 import { tasksPage } from '@/content/tasks';
-import { TaskIllustration } from './illustrations';
+import { TaskImage } from './TaskImage';
 
 export interface TaskGridProps {
   tasks: readonly ExamTask[];
@@ -31,7 +31,7 @@ export function TaskGrid({ tasks }: TaskGridProps) {
             comingSoon={task.status !== 'active'}
             difficulty={task.badge}
             difficultyTone="info"
-            illustration={<TaskIllustration slug={task.slug} />}
+            illustration={<TaskImage no={task.no} />}
           />
         </li>
       ))}

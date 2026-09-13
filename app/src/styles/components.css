@@ -932,6 +932,19 @@ a.task-card {
 .snav a.is-active i {
   opacity: 1;
 }
+/* Значок пункта. Цвет наследуется от ссылки, поэтому активный пункт
+   перекрашивает значок вместе с подписью и отдельного правила на это
+   не нужно. Неактивный чуть приглушён — так же, как метка до него. */
+.snav .nav-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  opacity: 0.75;
+}
+.snav a.is-active .nav-ico,
+.snav a:hover .nav-ico {
+  opacity: 1;
+}
 
 .topbar {
   height: var(--h-topbar);
@@ -1037,6 +1050,48 @@ a.task-card {
 }
 .bnav a.is-active i {
   opacity: 1;
+}
+
+/* Панель в оболочке приложения. Сайдбар и она — одно меню в двух
+   раскладках, поэтому появляется она ровно там, где сайдбар прячется,
+   и ни на одном широком экране не видна. */
+.bnav--shell {
+  display: none;
+}
+@media (max-width: 767.98px) {
+  .bnav--shell {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 20;
+    border-radius: 0;
+    /* Высота фиксирована токеном: от того же числа считается отступ
+       снизу у страницы. Безопасная зона iPhone добавляется сверх —
+       панель поднимается над полосой жеста, не отдавая ей свои ячейки.
+       Своих полей у панели нет: ячейки занимают её целиком, поэтому
+       область нажатия равна всей высоте. */
+    min-height: calc(var(--h-bnav) + env(safe-area-inset-bottom));
+    padding: 0 0 env(safe-area-inset-bottom);
+  }
+  .bnav--shell a {
+    justify-content: center;
+    gap: var(--space-1);
+    padding: 0;
+    /* Не меньше 44px по высоте — требование к пальцу; ячейка тянется
+       на всю панель и с запасом его перекрывает. */
+    min-height: 44px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 14px;
+    /* Подписи однострочные: перенос ломает ряд, а сокращение
+       многоточием — читаемость. Все пять в ячейку помещаются. */
+    white-space: nowrap;
+  }
+  .bnav--shell .nav-ico {
+    width: 24px;
+    height: 24px;
+    flex: none;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1177,6 +1232,11 @@ a.task-card {
      строки на компактной шкале. min() страхует от переполнения, когда
      места меньше самой границы. */
   grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  /* Ряды одной высоты по самому высокому. Растяжка внутри ряда
+     выравнивала карточки только по соседям, и в столбик на телефоне,
+     где каждая карточка — свой ряд, они получались разной высоты:
+     у заданий 06 и 13 название в две строки и второй бейдж. */
+  grid-auto-rows: 1fr;
   gap: var(--space-4);
   /* auto-fill, а не auto-fit: последняя карточка остаётся слева
      и не растягивается на пустые колонки ряда. */
@@ -1201,7 +1261,10 @@ a.task-card {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 1fr;
+  /* Третья строка — полоса под круглую стрелку. Она есть у всех
+     карточек, в том числе у неоткрытых, где остаётся пустой: так
+     миниатюры стоят на одной линии и высота ряда одна на всех. */
+  grid-template-rows: auto 1fr calc(var(--sz-go) + var(--space-2));
   column-gap: var(--space-4);
   row-gap: var(--space-1);
   align-content: start;
@@ -1227,7 +1290,7 @@ a.task-card {
   color: var(--color-primary);
 }
 .task-card--bank .task-card__body {
-  grid-area: 2 / 1;
+  grid-area: 2 / 1 / 4 / 2;
   display: block;
 }
 .task-card--bank .task-card__title {
@@ -1248,15 +1311,14 @@ a.task-card {
   font-size: 13px;
 }
 
-/* Миниатюра: правая колонка на обе строки, по центру по вертикали.
-   Снизу зарезервирована полоса под круглую стрелку — одинаково у всех
-   карточек, чтобы миниатюры стояли на одной линии по всему ряду. */
+/* Миниатюра: правая колонка, две верхние строки, по центру по
+   вертикали. Стрелка стоит под ней в третьей строке — не поверх. */
 .task-card--bank .task-card__ill {
   grid-area: 1 / 2 / 3 / 3;
   align-self: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--space-8);
+  justify-self: center;
+  width: 96px;
+  height: 96px;
   pointer-events: none;
 }
 
@@ -1285,13 +1347,8 @@ a.task-card {
     line-height: 20px;
   }
   .task-card--bank .task-card__ill {
-    width: 56px;
-    height: 56px;
-    margin-bottom: var(--space-6);
-  }
-  .task-card--bank .task-card__go {
-    right: var(--space-4);
-    bottom: var(--space-4);
+    width: 72px;
+    height: 72px;
   }
 }
 
@@ -1313,6 +1370,15 @@ a.task-card {
   fill: currentColor;
   opacity: 0.06;
   stroke: none;
+}
+
+/* Растровая миниатюра. Подложки под ней нет, поэтому картинка просто
+   занимает отведённое место целиком. */
+.ill-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Формула поверх подложки. Кегли подобраны замером так, чтобы ширина
@@ -1374,14 +1440,16 @@ a.task-card {
   font-style: italic;
 }
 
-/* Стрелка открытого раздела. Позиционирование абсолютное: элемент вне
-   потока и высоту карточки не меняет, поэтому ряд остаётся ровным. */
+/* Стрелка открытого раздела. Стоит в потоке, в своей строке под
+   миниатюрой: наложения на картинку нет ни при какой её ширине.
+   Строка выше самой стрелки на --space-2, и вместе с зазором строк
+   это даёт между ними не меньше 12px. */
 .task-card--bank .task-card__go {
-  position: absolute;
-  right: var(--space-6);
-  bottom: var(--space-6);
-  width: 32px;
-  height: 32px;
+  grid-area: 3 / 2 / 4 / 3;
+  align-self: end;
+  justify-self: center;
+  width: var(--sz-go);
+  height: var(--sz-go);
   border-radius: 50%;
   background: var(--color-primary);
   display: grid;

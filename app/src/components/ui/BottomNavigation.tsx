@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { NavIcon } from './NavIcons';
 import type { NavItem } from './Sidebar';
 
 export interface BottomNavigationProps {
@@ -7,7 +8,10 @@ export interface BottomNavigationProps {
   className?: string;
 }
 
-/** Нижняя навигация мобильной оболочки: не больше четырёх пунктов. */
+/**
+ * Нижняя навигация мобильной оболочки: четыре раздела и вход в
+ * остальные. Больше пяти ячеек в строку на телефоне не помещается.
+ */
 export function BottomNavigation({
   items,
   label = 'Основная навигация',
@@ -15,15 +19,18 @@ export function BottomNavigation({
 }: BottomNavigationProps) {
   return (
     <nav className={clsx('bnav', className)} aria-label={label}>
+      {/* Подпись сокращается только на вид: вслух читается полное
+          название раздела, то же самое, что в сайдбаре. */}
       {items.map((item) => (
         <a
           key={item.id}
           href={item.href}
           className={clsx(item.active && 'is-active')}
           aria-current={item.active ? 'page' : undefined}
+          aria-label={item.short !== undefined ? item.label : undefined}
         >
-          <i aria-hidden="true" />
-          {item.label}
+          {item.icon !== undefined ? <NavIcon name={item.icon} /> : <i aria-hidden="true" />}
+          {item.short ?? item.label}
         </a>
       ))}
     </nav>
