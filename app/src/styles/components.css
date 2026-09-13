@@ -1254,9 +1254,8 @@ a.task-card {
 .task-card--bank .task-card__ill {
   grid-area: 1 / 2 / 3 / 3;
   align-self: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--space-8);
+  width: 96px;
+  height: 96px;
   pointer-events: none;
 }
 
@@ -1285,9 +1284,8 @@ a.task-card {
     line-height: 20px;
   }
   .task-card--bank .task-card__ill {
-    width: 56px;
-    height: 56px;
-    margin-bottom: var(--space-6);
+    width: 72px;
+    height: 72px;
   }
   .task-card--bank .task-card__go {
     right: var(--space-4);
@@ -1315,19 +1313,12 @@ a.task-card {
   stroke: none;
 }
 
-/* Растровая миниатюра поверх круглой подложки.
-
-   Доля подобрана замером, а не на глаз: у самой «широкой» из тринадцати
-   картинок непрозрачные пиксели уходят на 120,7% полуширины кадра,
-   а радиус подложки — 70,8%. Отсюда 56%: при нём у самой широкой
-   картинки остаётся 1,2px до края круга, у остальных больше. Доля одна
-   на все, иначе картинки оказались бы разного размера. */
+/* Растровая миниатюра. Подложки под ней нет, поэтому картинка просто
+   занимает отведённое место целиком. */
 .ill-photo {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 56%;
-  height: 56%;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
