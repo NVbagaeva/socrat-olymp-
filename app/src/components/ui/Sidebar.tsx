@@ -1,11 +1,16 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
+import { NavIcon, type NavIconName } from './NavIcons';
 
 export interface NavItem {
   id: string;
   label: string;
   href: string;
   active?: boolean;
+  /** Значок пункта. Не задан — на его месте пустая метка, как было. */
+  icon?: NavIconName;
+  /** Короткая подпись для нижней панели. Не задана — берётся label. */
+  short?: string;
 }
 
 export interface SidebarProps {
@@ -30,7 +35,7 @@ function NavList({ items, label }: { items: NavItem[]; label: string }) {
           className={clsx(item.active && 'is-active')}
           aria-current={item.active ? 'page' : undefined}
         >
-          <i aria-hidden="true" />
+          {item.icon !== undefined ? <NavIcon name={item.icon} /> : <i aria-hidden="true" />}
           <span>{item.label}</span>
         </a>
       ))}
