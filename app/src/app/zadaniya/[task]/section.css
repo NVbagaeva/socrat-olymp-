@@ -1,0 +1,249 @@
+/* Страница раздела задания. Оболочка, карточки и вкладки описаны
+   в общих слоях — здесь только то, чего в них нет. */
+
+/* ── Чертёж движка ──────────────────────────────────────────── */
+
+/* Движок отдаёт SVG с собственными width и height в пикселях.
+   Внутри страницы чертёж тянется по месту, пропорции держит сам SVG. */
+.chart {
+  display: block;
+}
+.chart > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Шапка раздела ──────────────────────────────────────────── */
+
+.section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  gap: var(--space-10);
+  align-items: start;
+  margin: var(--space-6) 0 var(--space-10);
+}
+.section-head__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+.section-head__lead {
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+  margin-bottom: var(--space-6);
+}
+.section-head__cta {
+  gap: var(--space-3);
+}
+.section-head__cta svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.section-head__media {
+  position: relative;
+}
+/* Надпись стоит под чертежом и смещена вправо: положение задаёт
+   страница, сам компонент себя не позиционирует. */
+.section-head__note {
+  display: block;
+  margin-top: var(--space-3);
+  text-align: right;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* ── Панель под вкладками ───────────────────────────────────── */
+
+.section-panel {
+  margin-top: var(--space-8);
+}
+.section-about {
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+  max-width: 68ch;
+}
+
+/* ── Карточки подтем ────────────────────────────────────────── */
+
+.subtopics-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+.subtopics-grid > li {
+  display: flex;
+}
+
+.subtopic {
+  position: relative;
+  display: block;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+a.subtopic:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+/* Подтема ещё не открыта: та же приглушённая поверхность, что
+   у неоткрытой карточки задания. */
+.subtopic--soon {
+  cursor: default;
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+
+.subtopic__head {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+.subtopic__name {
+  display: block;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.subtopic--soon .subtopic__name {
+  color: var(--color-text-tertiary);
+}
+.subtopic__formula {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  /* Формула не должна тянуть карточку вширь на узком экране. */
+  overflow-x: auto;
+}
+.subtopic--soon .subtopic__formula {
+  color: var(--color-text-tertiary);
+}
+
+.subtopic__chart {
+  display: block;
+  max-width: 168px;
+  margin: 0 auto;
+}
+.subtopic__chart > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Место под чертёж, которого движок пока не умеет: карточка держит
+   ту же высоту, что и с чертежом, и ряд остаётся ровным. */
+.subtopic--soon .subtopic__chart {
+  opacity: 0.5;
+}
+
+.subtopic__meta {
+  display: block;
+  margin-top: var(--space-4);
+}
+.subtopic__go {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: grid;
+  place-items: center;
+}
+.subtopic__go svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--color-text-inverse);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Прототипы ──────────────────────────────────────────────── */
+
+.proto-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.proto {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+}
+.proto__id {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.proto__text {
+  display: block;
+  min-width: 0;
+}
+.proto__title {
+  display: block;
+  font-weight: 500;
+}
+.proto__subtitle {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+.proto__count {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Раскладка по ширинам ───────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .section-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  .section-head__media {
+    max-width: 320px;
+  }
+  .subtopics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .subtopics-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .section-head__note {
+    text-align: left;
+  }
+}
