@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { appNavMore, appNavMorePage } from '@/content/appNav';
-import '../zadaniya/zadaniya.css';
 import './eshche.css';
 
 export const metadata: Metadata = {

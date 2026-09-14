@@ -10,14 +10,16 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Шрифт-база: от неё считается вся шкала в rem. */
+  font-size: var(--font-size-base);
 }
 
 body {
   font-family: var(--font);
   background: var(--color-bg);
   color: var(--color-text);
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   font-variant-numeric: tabular-nums lining-nums;
 }
@@ -60,69 +62,70 @@ svg {
   border-radius: var(--radius-sm);
 }
 
-/* ── типографика ── */
+/* ── типографика ──
+   Кегли и интерлиньяж — из токенов шкалы, здесь только начертание. */
 .t-display {
-  font-size: 64px;
-  line-height: 72px;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
 .t-h1 {
-  font-size: 56px;
-  line-height: 64px;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 .t-h2 {
-  font-size: 40px;
-  line-height: 48px;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
 .t-h3 {
-  font-size: 28px;
-  line-height: 36px;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
   font-weight: 500;
   letter-spacing: -0.015em;
 }
 .t-h4 {
-  font-size: 20px;
-  line-height: 28px;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 .t-lg {
-  font-size: 18px;
-  line-height: 28px;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
 }
 .t-body {
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 .t-caption {
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
 .t-label {
-  font-size: 12px;
-  line-height: 16px;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
   font-weight: 500;
 }
 .t-data-xl {
-  font-size: 48px;
-  line-height: 56px;
+  font-size: var(--fs-data-xl);
+  line-height: var(--lh-data-xl);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
 .t-data-lg {
-  font-size: 32px;
-  line-height: 40px;
+  font-size: var(--fs-data-lg);
+  line-height: var(--lh-data-lg);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
 .t-data-sm {
-  font-size: 20px;
-  line-height: 28px;
+  font-size: var(--fs-data-sm);
+  line-height: var(--lh-data-sm);
   font-weight: 600;
 }
 .muted {
@@ -143,21 +146,6 @@ svg {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-
-@media (max-width: 900px) {
-  .t-h1 {
-    font-size: 38px;
-    line-height: 44px;
-  }
-  .t-h2 {
-    font-size: 30px;
-    line-height: 38px;
-  }
-  .t-display {
-    font-size: 44px;
-    line-height: 50px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

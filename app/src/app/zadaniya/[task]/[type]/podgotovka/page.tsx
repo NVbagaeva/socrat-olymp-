@@ -15,7 +15,7 @@ type Params = Promise<{ task: string; type: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type } = await params;
   const subtopic = findSubtopic(task, type);
-  return subtopic ? { title: `Теория · ${subtopic.name} — Будет на ЕГЭ` } : {};
+  return subtopic ? { title: `Теория · ${subtopic.title} — Будет на ЕГЭ` } : {};
 }
 
 export default async function Page({ params }: { params: Params }) {
@@ -26,7 +26,7 @@ export default async function Page({ params }: { params: Params }) {
   }
 
   return (
-    <AppShell active="tasks">
+    <AppShell active="tasks" task={task}>
       <main className="app-main">
         <h1 className="t-h1">Теория</h1>
       </main>

@@ -1,7 +1,11 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
 import { TaskGrid } from '@/components/tasks';
+import { HandNote } from '@/components/ui';
+import type { ExamTask } from '@/content/tasks';
 import { tasks, tasksPage } from '@/content/tasks';
 
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
@@ -17,7 +21,14 @@ function matches(query: string, no: string, name: string): boolean {
   );
 }
 
-export function TaskBank() {
+export interface TaskBankProps {
+  /** Задание, которое открывается окном выбора подтемы. */
+  dialogSlug: string;
+  /** Открыть окно. Второй аргумент — карточка, от неё считается место. */
+  onOpenDialog: (task: ExamTask, card: HTMLElement) => void;
+}
+
+export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
   const [query, setQuery] = useState('');
   const searchId = useId();
 
@@ -32,6 +43,26 @@ export function TaskBank() {
           <p className="bank-head__lead">{tasksPage.lead}</p>
         </div>
 
+        {/* Баннер: портрет и цитата. Декор, поэтому alt пустой —
+            содержания, которого нет в тексте рядом, он не несёт. */}
+        <figure className="bank-quote">
+          <figcaption className="bank-quote__text">
+            <HandNote>«{tasksPage.quote.text}»</HandNote>
+            <span className="bank-quote__author">— {tasksPage.quote.author}</span>
+          </figcaption>
+          <Image
+            className="bank-quote__art"
+            src="/images/bust-galileo.webp"
+            alt=""
+            width={814}
+            height={700}
+          />
+        </figure>
+      </header>
+
+      {/* Строка фильтров. Рядом с поиском встанет выбор темы, когда
+          в конфиге появится признак, по которому фильтровать. */}
+      <div className="bank-filters">
         <div className="bank-search">
           <label className="sr-only" htmlFor={searchId}>
             Поиск по заданиям
@@ -50,13 +81,47 @@ export function TaskBank() {
             autoComplete="off"
           />
         </div>
-      </header>
+      </div>
 
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid tasks={shown} />
+        <TaskGrid tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
       )}
+
+      <section className="bank-start">
+        <div className="bank-start__plate">
+          {/* Книга и пирамида — декор: alt пустой, рядом свой текст. */}
+          <Image
+            className="bank-start__book"
+            src="/images/open-book.webp"
+            alt=""
+            width={700}
+            height={445}
+          />
+          <div className="bank-start__text">
+            <h2 className="t-h4">{tasksPage.start.title}</h2>
+            <p className="bank-start__lead">{tasksPage.start.lead}</p>
+          </div>
+          <Link className="btn btn--primary bank-start__cta" href={tasksPage.start.href}>
+            {tasksPage.start.action}
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 12h13M12 6l6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
+
+        <div className="bank-start__decor" aria-hidden="true">
+          <Image
+            className="bank-start__pyramid"
+            src="/images/pyramid-network.webp"
+            alt=""
+            width={1400}
+            height={504}
+          />
+          <HandNote className="bank-start__note">{tasksPage.start.note}</HandNote>
+        </div>
+      </section>
     </main>
   );
 }

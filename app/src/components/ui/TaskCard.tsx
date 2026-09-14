@@ -73,9 +73,9 @@ export function TaskCard({
         </span>
       ) : null}
       {/* Стрелка открытого раздела. Это span, а не кнопка: карточка уже
-          ссылка, вложенный элемент управления сделал бы разметку
-          невалидной и сломал бы обход с клавиатуры. */}
-      {href !== undefined ? (
+          ссылка или кнопка, вложенный элемент управления сделал бы
+          разметку невалидной и сломал бы обход с клавиатуры. */}
+      {href !== undefined || rest.onClick !== undefined ? (
         <span className="task-card__go" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">
             <path d="M5 12h13M12 6l6 6-6 6" />

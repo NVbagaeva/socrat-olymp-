@@ -11,33 +11,93 @@ export interface NavItem {
   icon?: NavIconName;
   /** Короткая подпись для нижней панели. Не задана — берётся label. */
   short?: string;
+  /** Номер перед названием: список заданий экзамена. */
+  no?: string;
+  /** Раздел ещё не открыт: пункт не ссылка и не берёт фокус. */
+  disabled?: boolean;
 }
 
 export interface SidebarProps {
   /** Название продукта в шапке меню. */
   brand: string;
   items: NavItem[];
-  /** Нижняя группа: уведомления, настройки. */
+  /** Подпись над списком: чему посвящён этот столбец. */
+  caption?: { title: string; subtitle: string };
+  /** Нижняя группа: личные разделы. */
   secondaryItems?: NavItem[];
   user?: { initials: string; name: string };
+  /** Подвал меню: подпись, сноска — что угодно от страницы. */
+  footer?: ReactNode;
   /** Название меню для скринридера. */
   label?: string;
   className?: string;
 }
 
-function NavList({ items, label }: { items: NavItem[]; label: string }) {
+function NavLink({ item, className }: { item: NavItem; className?: string }) {
+  const body = (
+    <>
+      {item.no !== undefined ? (
+        <span className="snav__no" aria-hidden="true">
+          {item.no}
+        </span>
+      ) : null}
+      {item.icon !== undefined ? <NavIcon name={item.icon} /> : null}
+      {item.icon === undefined && item.no === undefined ? <i aria-hidden="true" /> : null}
+      {/* Подпись сокращается только на вид: вслух читается полное
+          название раздела — оно уходит в aria-label ниже. */}
+      <span>{item.short ?? item.label}</span>
+      {/* Стрелка у текущего задания: указывает, что раздел открыт. */}
+      {item.active === true && item.no !== undefined ? (
+        <svg className="snav__go" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m9 5 7 7-7 7" />
+        </svg>
+      ) : null}
+    </>
+  );
+
+  /* Закрытый раздел: ни ссылки, ни обработчика — как на карточке
+     банка. Обычный span не попадает в обход по Tab и не обещает
+     перехода, а aria-disabled сообщает состояние скринридеру. */
+  if (item.disabled === true) {
+    return (
+      <span
+        className={clsx(className, 'is-soon')}
+        aria-disabled="true"
+        aria-label={item.short !== undefined ? item.label : undefined}
+      >
+        {body}
+      </span>
+    );
+  }
   return (
-    <nav className="snav" aria-label={label}>
+    <a
+      href={item.href}
+      className={clsx(className, item.active === true && 'is-active')}
+      aria-current={item.active === true ? 'page' : undefined}
+      aria-label={item.short !== undefined ? item.label : undefined}
+    >
+      {body}
+    </a>
+  );
+}
+
+function NavList({
+  items,
+  label,
+  className,
+}: {
+  items: NavItem[];
+  label: string;
+  className?: string;
+}) {
+  /* Список с номерами — это список заданий: названия в нём длинные и
+     переносятся, поэтому ряд там растёт по содержимому. */
+  const numbered = items.some((item) => item.no !== undefined);
+
+  return (
+    <nav className={clsx('snav', numbered && 'snav--numbered', className)} aria-label={label}>
       {items.map((item) => (
-        <a
-          key={item.id}
-          href={item.href}
-          className={clsx(item.active && 'is-active')}
-          aria-current={item.active ? 'page' : undefined}
-        >
-          {item.icon !== undefined ? <NavIcon name={item.icon} /> : <i aria-hidden="true" />}
-          <span>{item.label}</span>
-        </a>
+        <NavLink key={item.id} item={item} />
       ))}
     </nav>
   );
@@ -50,8 +110,10 @@ function NavList({ items, label }: { items: NavItem[]; label: string }) {
 export function Sidebar({
   brand,
   items,
+  caption,
   secondaryItems,
   user,
+  footer,
   label = 'Основное меню',
   className,
 }: SidebarProps): ReactNode {
@@ -61,11 +123,23 @@ export function Sidebar({
         <span className="sidebar__logo" aria-hidden="true" />
         <span>{brand}</span>
       </div>
+
+      {caption !== undefined ? (
+        <div className="sidebar__caption">
+          <span className="sidebar__caption-title">{caption.title}</span>
+          <span className="sidebar__caption-sub">{caption.subtitle}</span>
+        </div>
+      ) : null}
+
       <NavList items={items} label={label} />
-      {secondaryItems !== undefined || user !== undefined ? (
+
+      {secondaryItems !== undefined || user !== undefined || footer !== undefined ? (
         <div className="sidebar__foot">
+          {/* Подвал идёт сверху вниз: сначала декор с подписью, под
+              ним личные разделы — порядок задан макетом. */}
+          {footer}
           {secondaryItems !== undefined ? (
-            <NavList items={secondaryItems} label="Служебное меню" />
+            <NavList items={secondaryItems} label="Личные разделы" />
           ) : null}
           {user !== undefined ? (
             <div className="sidebar__user">
