@@ -10,15 +10,27 @@ import { MappingDiagram } from './MappingDiagram';
  * него, поэтому рядом нет ни карточек, ни HandNote.
  */
 export function WhatIsFunction() {
-  const { intro, insert, after, illustration, mapping, rule, note } = whatIsFunction;
+  const { lead, intro, accent, after, illustration, mapping, rule, note } = whatIsFunction;
 
   return (
     <div className="what">
-      <p className="what__text">{intro}</p>
-      <p className="what__insert">{insert}</p>
-      <p className="what__text">{after}</p>
+      <div className="what__top">
+        <div className="what__story">
+          <p className="what__lead">{lead}</p>
+          <p className="what__text">{intro}</p>
+          {/* Акцентная строка: синяя и полужирная, без плашки. */}
+          <p className="what__accent">{accent}</p>
+          <p className="what__text">
+            {after.map((part, index) =>
+              part.strong === true ? (
+                <strong key={index}>{part.text}</strong>
+              ) : (
+                <span key={index}>{part.text}</span>
+              ),
+            )}
+          </p>
+        </div>
 
-      <div className="what__cols">
         {/* Фон у файла прозрачный: ни рамки, ни подложки под ним нет. */}
         <Image
           className="what__art"
@@ -28,7 +40,9 @@ export function WhatIsFunction() {
           height={illustration.height}
           loading="lazy"
         />
+      </div>
 
+      <div className="what__cols">
         <figure className="mapping">
           <figcaption className="mapping__title">{mapping.title}</figcaption>
           <MappingDiagram setX={mapping.setX} setY={mapping.setY} />

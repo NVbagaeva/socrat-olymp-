@@ -336,7 +336,7 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: var(--color-text-inverse);
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
@@ -355,21 +355,37 @@
   line-height: var(--lh-body);
   max-width: 72ch;
 }
-/* Врезка: тот же тёплый фон, что у плашки определения, но без рамки
-   и без иконки. Радиус и отступы меньше — это одна-две строки. */
-.what__insert {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-warm);
+/* Первая строка рассказа: крупнее и плотнее остального текста. */
+.what__lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  max-width: 72ch;
+}
+/* Вывод из примеров: синяя строка без плашки и без заливки. */
+.what__accent {
   font-size: var(--fs-body);
   line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-primary);
   max-width: 72ch;
+}
+
+/* Верхний блок: рассказ слева, картинка справа. */
+.what__top {
+  display: grid;
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+.what__story {
+  display: grid;
+  gap: var(--space-4);
 }
 
 .what__cols {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
   margin-top: var(--space-2);
 }
@@ -381,10 +397,13 @@
 }
 
 .mapping {
+  /* Схема не растягивается на всю колонку: её ширину задаёт сама
+     схема, а не место под ней. */
   margin: 0;
   display: grid;
   gap: var(--space-3);
   justify-items: center;
+  max-width: 460px;
 }
 .mapping__title {
   font-size: var(--fs-body);
@@ -726,7 +745,8 @@
   .about-later {
     padding: var(--space-5);
   }
-  /* Картинка, схема и плашки идут по строке на каждую. */
+  /* Рассказ, картинка, схема и плашки идут по строке на каждую. */
+  .what__top,
   .what__cols,
   .what__plates {
     grid-template-columns: minmax(0, 1fr);
