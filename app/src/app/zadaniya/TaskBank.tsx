@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { useId, useMemo, useState } from 'react';
 import { TaskGrid } from '@/components/tasks';
 import { HandNote } from '@/components/ui';
+import type { ExamTask } from '@/content/tasks';
 import { tasks, tasksPage } from '@/content/tasks';
-import { SubtopicDialog, type SubtopicView } from './SubtopicDialog';
 
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
@@ -21,23 +21,14 @@ function matches(query: string, no: string, name: string): boolean {
 }
 
 export interface TaskBankProps {
-  /**
-   * Окно выбора подтемы: заголовок, строки и подсказка. Формулы в
-   * строках свёрстаны KaTeX на сборке — в браузер уходит готовая
-   * разметка, а не библиотека.
-   */
-  dialog: {
-    slug: string;
-    no: string;
-    subtitle: string;
-    hint: string;
-    items: SubtopicView[];
-  };
+  /** Задание, которое открывается окном выбора подтемы. */
+  dialogSlug: string;
+  /** Открыть окно. Второй аргумент — карточка, от неё считается место. */
+  onOpenDialog: (task: ExamTask, card: HTMLElement) => void;
 }
 
-export function TaskBank({ dialog }: TaskBankProps) {
+export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
   const [query, setQuery] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
   const searchId = useId();
 
   const shown = useMemo(() => tasks.filter((t) => matches(query, t.no, t.name)), [query]);
@@ -94,20 +85,8 @@ export function TaskBank({ dialog }: TaskBankProps) {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid
-          tasks={shown}
-          openInDialog={{ slug: dialog.slug, onOpen: () => setDialogOpen(true) }}
-        />
+        <TaskGrid tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
       )}
-
-      <SubtopicDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        no={dialog.no}
-        subtitle={dialog.subtitle}
-        items={dialog.items}
-        hint={dialog.hint}
-      />
     </main>
   );
 }

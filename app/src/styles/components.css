@@ -1382,8 +1382,19 @@ a.task-card {
   display: grid;
   place-items: center;
   padding: var(--space-5);
-  background: color-mix(in srgb, var(--color-surface-inverse) 45%, transparent);
+  /* Затемнение: половина непрозрачности самого тёмного тона палитры.
+     Размытия нет — оно съедает производительность и ничего не даёт
+     поверх и без того приглушённой страницы. */
+  background: color-mix(in srgb, var(--grey-900) 50%, transparent);
   z-index: 50;
+}
+/* Окно рядом с элементом, который его открыл: координаты приходят
+   от страницы, поэтому центрирование выключается. */
+.modal-backdrop--anchored {
+  display: block;
+}
+.modal-anchor {
+  position: absolute;
 }
 .modal {
   background: var(--color-surface);

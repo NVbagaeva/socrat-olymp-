@@ -11,7 +11,11 @@ export interface TaskGridProps {
    * становится кнопкой. Не задано — все карточки ссылки, как на
    * главной.
    */
-  openInDialog?: { slug: string; onOpen: (task: ExamTask) => void };
+  openInDialog?: {
+    slug: string;
+    /** Второй аргумент — сама карточка: от неё считается место окна. */
+    onOpen: (task: ExamTask, card: HTMLElement) => void;
+  };
 }
 
 /**
@@ -39,7 +43,7 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
             title={task.name}
             href={open && !byHandler ? `${tasksPage.href}/${task.slug}` : undefined}
             {...(byHandler && openInDialog !== undefined
-              ? { onClick: () => openInDialog.onOpen(task) }
+              ? { onClick: (event) => openInDialog.onOpen(task, event.currentTarget) }
               : {})}
             comingSoon={task.status !== 'active'}
             difficulty={task.badge}

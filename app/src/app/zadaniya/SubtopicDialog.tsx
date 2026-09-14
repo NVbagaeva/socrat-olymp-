@@ -21,6 +21,8 @@ export interface SubtopicView {
 export interface SubtopicDialogProps {
   open: boolean;
   onClose: () => void;
+  /** Место окна: рядом с карточкой, которая его открыла. */
+  anchor?: { top: number; left: number } | null;
   /** Номер задания и его название — в заголовке окна. */
   no: string;
   subtitle: string;
@@ -84,6 +86,7 @@ function Row({ item }: { item: SubtopicView }) {
 export function SubtopicDialog({
   open,
   onClose,
+  anchor,
   no,
   subtitle,
   items,
@@ -93,6 +96,7 @@ export function SubtopicDialog({
     <Modal
       open={open}
       onClose={onClose}
+      anchor={anchor}
       className="subtopic-modal"
       closeLabel="Закрыть выбор типа функции"
       title={
