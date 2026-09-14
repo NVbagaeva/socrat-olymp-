@@ -1831,7 +1831,10 @@ a.task-card {
     justify-content: center;
     padding: 0;
   }
-  .shell--responsive .snav .is-soon span:last-child {
+  /* В узкой полосе от ряда остаётся номер или значок. Подпись
+     прячется по признаку «не номер», а не по месту в ряду: у текущего
+     задания за ней идёт ещё стрелка, и :last-child её не находил. */
+  .shell--responsive .snav .is-soon > span:not(.snav__no) {
     display: none;
   }
   /* Меню разделов в шапке на планшете не помещается рядом с поиском:
@@ -1853,7 +1856,7 @@ a.task-card {
     padding: 0 0 var(--space-6);
   }
   .shell--responsive .sidebar__mark span:last-child,
-  .shell--responsive .snav a > span:last-child,
+  .shell--responsive .snav a > span:not(.snav__no),
   .shell--responsive .sidebar__user span:last-child {
     display: none;
   }
