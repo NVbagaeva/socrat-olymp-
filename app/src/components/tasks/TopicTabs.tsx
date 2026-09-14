@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { TheoryBlock } from '@/content/sections';
@@ -27,6 +27,11 @@ export interface TopicTabsProps {
   contentsDecor: ReactNode;
 }
 
+/** Идентификатор блока теории в разметке: по нему работают якоря. */
+function blockId(id: string): string {
+  return `theory-${id}`;
+}
+
 const TABS = [
   { id: 'about', label: 'О задании' },
   { id: 'theory', label: 'Теория' },
@@ -48,18 +53,72 @@ const TABS = [
  */
 export function TopicTabs({ about, theory, prep, tutorsHref, contentsDecor }: TopicTabsProps) {
   const [tab, setTab] = useState('about');
-  /* Первый раздел открыт по умолчанию: пустого состояния у теории
-     быть не должно. */
+  /* Раздел, на котором стоит страница: сначала первый, дальше тот,
+     что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
   const [sheet, setSheet] = useState(false);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
   const items = theory.map((item) => ({ id: item.id, title: item.title }));
 
+  /* Переход к разделу. Узла может не быть — тогда просто ничего не
+     происходит, без ошибки в консоли. */
+  const scrollToBlock = useCallback((id: string) => {
+    const node = document.getElementById(blockId(id));
+    if (node === null) {
+      return;
+    }
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    node.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+  }, []);
+
   function pick(id: string) {
     setBlock(id);
     setSheet(false);
+    /* Шторка закрывается той же отрисовкой: прокрутка идёт следующим
+       кадром, когда блокировка прокрутки уже снята. */
+    requestAnimationFrame(() => scrollToBlock(id));
   }
+
+  /* Подсветка в содержании следует за экраном. Наблюдатель видимости
+     дешевле обработчика прокрутки: браузер считает пересечения сам. */
+  useEffect(() => {
+    if (tab !== 'theory' || typeof IntersectionObserver === 'undefined') {
+      return undefined;
+    }
+
+    const nodes = theory
+      .map((item) => document.getElementById(blockId(item.id)))
+      .filter((node): node is HTMLElement => node !== null);
+    if (nodes.length === 0) {
+      return undefined;
+    }
+
+    const visible = new Set<string>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visible.add(entry.target.id);
+          } else {
+            visible.delete(entry.target.id);
+          }
+        });
+        /* Активным считается верхний из видимых: так подсветка не
+           прыгает, когда в полосе видно два раздела сразу. */
+        const top = theory.find((item) => visible.has(blockId(item.id)));
+        if (top !== undefined) {
+          setBlock(top.id);
+        }
+      },
+      /* Полоса наблюдения — верхняя треть экрана: раздел становится
+         активным, когда его заголовок доходит до неё. */
+      { rootMargin: '-72px 0px -66% 0px' },
+    );
+
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [tab, theory]);
 
   return (
     <>
@@ -97,23 +156,27 @@ export function TopicTabs({ about, theory, prep, tutorsHref, contentsDecor }: To
                 ) : null}
               </div>
 
-              {current === undefined ? (
+              {theory.length === 0 ? (
                 <EmptyState
                   title="Материал готовится"
                   description="Разделы теории этого типа функции ещё не собраны."
                 />
               ) : (
-                <article className="theory-block">
-                  <h3 className="t-h3 theory-block__title">{current.title}</h3>
-                  {current.content === null ? (
-                    <EmptyState
-                      title="Материал готовится"
-                      description="Этот раздел ещё не написан. Он появится здесь, когда будет готов."
-                    />
-                  ) : (
-                    <p className="theory-block__text">{current.content}</p>
-                  )}
-                </article>
+                <div className="theory">
+                  {theory.map((item) => (
+                    <article className="theory-block" id={blockId(item.id)} key={item.id}>
+                      <h3 className="t-h3 theory-block__title">{item.title}</h3>
+                      {item.content === null ? (
+                        <EmptyState
+                          title="Материал готовится"
+                          description="Этот раздел ещё не написан. Он появится здесь, когда будет готов."
+                        />
+                      ) : (
+                        <p className="theory-block__text">{item.content}</p>
+                      )}
+                    </article>
+                  ))}
+                </div>
               )}
             </>
           ) : null}
