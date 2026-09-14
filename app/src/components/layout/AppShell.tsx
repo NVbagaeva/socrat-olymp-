@@ -29,6 +29,9 @@ function taskItems(current: string | undefined): NavItem[] {
     id: task.slug,
     no: task.no,
     label: task.name,
+    /* Столбец узкий: длинные названия показываются короткой формой
+       из конфига. Не задана — остаётся полная. */
+    ...(task.shortTitle !== undefined ? { short: task.shortTitle } : {}),
     href: `${tasksPage.href}/${task.slug}`,
     disabled: task.status !== 'active',
     active: task.slug === current,

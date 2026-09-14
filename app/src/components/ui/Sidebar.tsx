@@ -43,7 +43,9 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
       ) : null}
       {item.icon !== undefined ? <NavIcon name={item.icon} /> : null}
       {item.icon === undefined && item.no === undefined ? <i aria-hidden="true" /> : null}
-      <span>{item.label}</span>
+      {/* Подпись сокращается только на вид: вслух читается полное
+          название раздела — оно уходит в aria-label ниже. */}
+      <span>{item.short ?? item.label}</span>
     </>
   );
 
@@ -52,7 +54,11 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
      перехода, а aria-disabled сообщает состояние скринридеру. */
   if (item.disabled === true) {
     return (
-      <span className={clsx(className, 'is-soon')} aria-disabled="true">
+      <span
+        className={clsx(className, 'is-soon')}
+        aria-disabled="true"
+        aria-label={item.short !== undefined ? item.label : undefined}
+      >
         {body}
       </span>
     );
@@ -62,6 +68,7 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
       href={item.href}
       className={clsx(className, item.active === true && 'is-active')}
       aria-current={item.active === true ? 'page' : undefined}
+      aria-label={item.short !== undefined ? item.label : undefined}
     >
       {body}
     </a>
