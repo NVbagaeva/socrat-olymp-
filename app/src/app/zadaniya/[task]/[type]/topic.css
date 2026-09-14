@@ -746,21 +746,21 @@
     justify-items: start;
     gap: var(--space-4);
   }
-  .topic-progress .ring {
+  .topic-progress .progress-ring {
     width: 112px;
     height: 112px;
   }
-  .topic-progress .ring svg {
+  .topic-progress .progress-ring svg {
     width: 112px;
     height: 112px;
   }
-  .topic-progress .ring .t-data-lg {
+  .topic-progress .progress-ring .t-data-lg {
     font-size: var(--fs-data-sm);
     line-height: var(--lh-data-sm);
   }
   /* Внутри круга остаётся только доля: слово «разделов» в круг такого
      размера не помещается, и оно уже стоит в подписи рядом. */
-  .topic-progress .ring .t-caption {
+  .topic-progress .progress-ring .t-caption {
     display: none;
   }
   .topic-progress__text {

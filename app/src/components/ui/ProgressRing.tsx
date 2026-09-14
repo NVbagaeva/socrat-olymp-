@@ -21,7 +21,7 @@ export function ProgressRing({ value, label, srLabel, className }: ProgressRingP
   const offset = LENGTH * (1 - percent / 100);
 
   return (
-    <div className={clsx('ring', className)}>
+    <div className={clsx('progress-ring', className)}>
       <svg
         width={SIZE}
         height={SIZE}
@@ -29,9 +29,9 @@ export function ProgressRing({ value, label, srLabel, className }: ProgressRingP
         role="img"
         aria-label={srLabel ?? `${Math.round(percent)}%`}
       >
-        <circle className="ring__track" cx={80} cy={80} r={RADIUS} strokeWidth={STROKE} />
+        <circle className="progress-ring__track" cx={80} cy={80} r={RADIUS} strokeWidth={STROKE} />
         <circle
-          className="ring__fill"
+          className="progress-ring__fill"
           cx={80}
           cy={80}
           r={RADIUS}
@@ -40,7 +40,7 @@ export function ProgressRing({ value, label, srLabel, className }: ProgressRingP
           strokeDashoffset={offset.toFixed(2)}
         />
       </svg>
-      <div className="ring__c" aria-hidden="true">
+      <div className="progress-ring__c" aria-hidden="true">
         <span className="t-data-lg">{Math.round(percent)}%</span>
         <span className="t-caption muted">{label}</span>
       </div>

@@ -646,30 +646,32 @@ a.task-card {
   font-size: 13px;
 }
 
-.ring {
+.progress-ring {
   position: relative;
   width: 160px;
   height: 160px;
 }
-/* Начало дуги переносится наверх поворотом самих окружностей, а не
-   всего чертежа: повёрнутый replaced-элемент Safari на телефоне
-   местами обводит рамкой, а окружности внутри SVG он поворачивает
-   без этого. Картинка та же: обе окружности лежат в центре поля. */
-.ring__track,
-.ring__fill {
+/* Начало дуги наверху: поворот сидит на самих окружностях, а не на
+   чертеже целиком. Обе лежат в центре поля, поэтому картинка та же,
+   а лишнего преобразования у replaced-элемента нет.
+
+   Имя блока — progress-ring, а не ring: ring занято утилитой
+   Tailwind, и она рисовала вокруг кольца рамку в 1px. */
+.progress-ring__track,
+.progress-ring__fill {
   fill: none;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
 }
-.ring__track {
+.progress-ring__track {
   stroke: var(--color-track);
 }
-.ring__fill {
+.progress-ring__fill {
   stroke: var(--color-primary);
   stroke-linecap: round;
   transition: stroke-dashoffset var(--dur-reveal) var(--ease);
 }
-.ring__c {
+.progress-ring__c {
   position: absolute;
   inset: 0;
   display: grid;
