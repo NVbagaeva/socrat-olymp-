@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!subtopic) {
     return {};
   }
-  return { title: `${subtopic.name} — Будет на ЕГЭ` };
+  return { title: `${subtopic.title} — Будет на ЕГЭ` };
 }
 
 export default async function SubtopicPage({ params }: { params: Params }) {
@@ -33,7 +33,7 @@ export default async function SubtopicPage({ params }: { params: Params }) {
   return (
     <AppShell active="tasks" task={task}>
       <main className="app-main">
-        <h1 className="t-h1">{subtopic.name}</h1>
+        <h1 className="t-h1">{subtopic.title}</h1>
       </main>
     </AppShell>
   );

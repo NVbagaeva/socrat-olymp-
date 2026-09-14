@@ -28,7 +28,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!section) {
     return {};
   }
-  return { title: `${section.title} — Будет на ЕГЭ`, description: section.description };
+  return {
+    title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
+    description: section.description,
+  };
 }
 
 /* Формулы вёрстываются на сборке: в браузер уходит готовая разметка,
@@ -39,11 +42,11 @@ function formulaHtml(tex: string): string {
 
 function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
   return {
-    slug: subtopic.slug,
-    name: subtopic.name,
+    slug: subtopic.id,
+    name: subtopic.title,
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
-    href: subtopic.status === 'active' ? `/zadaniya/${sectionSlug}/${subtopic.slug}` : null,
+    href: subtopic.status === 'active' ? `/zadaniya/${sectionSlug}/${subtopic.id}` : null,
   };
 }
 
@@ -90,7 +93,7 @@ export default async function SectionPage({ params }: { params: Params }) {
             {entry !== undefined ? (
               <Link
                 className="btn btn--primary section-head__cta"
-                href={`/zadaniya/${section.slug}/${entry.slug}`}
+                href={`/zadaniya/${section.slug}/${entry.id}`}
               >
                 Продолжить подготовку
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
