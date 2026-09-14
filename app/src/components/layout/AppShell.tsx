@@ -15,6 +15,8 @@ export interface AppShellProps {
   active?: string;
   /** slug задания, открытого в сайдбаре. */
   task?: string;
+  /** Поиск в шапке. false — у страницы свой, второго поля не нужно. */
+  search?: boolean;
   children: React.ReactNode;
 }
 
@@ -46,7 +48,7 @@ function taskItems(current: string | undefined): NavItem[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-export function AppShell({ active, task, children }: AppShellProps) {
+export function AppShell({ active, task, search = true, children }: AppShellProps) {
   const bottomItems = withActive(
     [...appNavPrimary, appNavMorePage],
     bottomNavActive(active),
@@ -68,6 +70,7 @@ export function AppShell({ active, task, children }: AppShellProps) {
       <div className="app-col">
         <Topbar
           nav={withActive(topNav, active)}
+          search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
           user={demoUser}

@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { useId, useMemo, useState } from 'react';
 import { TaskGrid } from '@/components/tasks';
+import { HandNote } from '@/components/ui';
 import { tasks, tasksPage } from '@/content/tasks';
 
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
@@ -32,6 +34,26 @@ export function TaskBank() {
           <p className="bank-head__lead">{tasksPage.lead}</p>
         </div>
 
+        {/* Баннер: портрет и цитата. Декор, поэтому alt пустой —
+            содержания, которого нет в тексте рядом, он не несёт. */}
+        <figure className="bank-quote">
+          <figcaption className="bank-quote__text">
+            <HandNote>«{tasksPage.quote.text}»</HandNote>
+            <span className="bank-quote__author">— {tasksPage.quote.author}</span>
+          </figcaption>
+          <Image
+            className="bank-quote__art"
+            src="/images/bust-galileo.webp"
+            alt=""
+            width={814}
+            height={700}
+          />
+        </figure>
+      </header>
+
+      {/* Строка фильтров. Рядом с поиском встанет выбор темы, когда
+          в конфиге появится признак, по которому фильтровать. */}
+      <div className="bank-filters">
         <div className="bank-search">
           <label className="sr-only" htmlFor={searchId}>
             Поиск по заданиям
@@ -50,7 +72,7 @@ export function TaskBank() {
             autoComplete="off"
           />
         </div>
-      </header>
+      </div>
 
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>

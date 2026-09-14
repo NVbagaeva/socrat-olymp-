@@ -6,6 +6,12 @@ import type { NavItem } from './Sidebar';
 export interface TopbarProps {
   /** Разделы кабинета. Не переданы — шапка без меню, как была. */
   nav?: NavItem[];
+  /**
+   * Поле поиска в шапке. Выключается там, где у страницы свой поиск:
+   * два поля на одном экране — это два разных поиска, и человек не
+   * знает, какое из них фильтрует список.
+   */
+  search?: boolean;
   /** Название меню шапки для скринридера. */
   navLabel?: string;
   searchPlaceholder?: string;
@@ -23,6 +29,7 @@ export interface TopbarProps {
 export function Topbar({
   nav,
   navLabel = 'Разделы кабинета',
+  search = true,
   searchPlaceholder = 'Поиск по заданиям, темам и номерам',
   searchLabel = 'Поиск',
   unread = true,
@@ -53,12 +60,14 @@ export function Topbar({
         </>
       ) : null}
 
-      <input
-        type="search"
-        className="search"
-        placeholder={searchPlaceholder}
-        aria-label={searchLabel}
-      />
+      {search ? (
+        <input
+          type="search"
+          className="search"
+          placeholder={searchPlaceholder}
+          aria-label={searchLabel}
+        />
+      ) : null}
       <div className="topbar__spacer" />
       {actions}
 
