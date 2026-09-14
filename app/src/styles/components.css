@@ -1400,7 +1400,7 @@ a.task-card {
      минимум, при котором самое длинное название укладывается в две
      строки на компактной шкале. min() страхует от переполнения, когда
      места меньше самой границы. */
-  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(var(--grid-cols), minmax(min(300px, 100%), 1fr));
   /* Ряды одной высоты по самому высокому. Растяжка внутри ряда
      выравнивала карточки только по соседям, и в столбик на телефоне,
      где каждая карточка — свой ряд, они получались разной высоты:
@@ -1440,7 +1440,7 @@ a.task-card {
   width: 100%;
   height: 100%;
   min-height: 150px;
-  padding: var(--space-6);
+  padding: var(--card-pad);
   overflow: hidden;
 }
 
@@ -1452,8 +1452,8 @@ a.task-card {
   background: none;
   border-radius: 0;
   display: block;
-  font-size: 30px;
-  line-height: 36px;
+  font-size: var(--card-no);
+  line-height: var(--card-no-lh);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--color-primary);
@@ -1465,11 +1465,11 @@ a.task-card {
 .task-card--bank .task-card__title {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: var(--card-title-lines);
+  line-clamp: var(--card-title-lines);
   overflow: hidden;
-  font-size: 16px;
-  line-height: 22px;
+  font-size: var(--card-title);
+  line-height: var(--card-title-lh);
   font-weight: 500;
   color: var(--color-text);
 }
@@ -1486,8 +1486,8 @@ a.task-card {
   grid-area: 1 / 2 / 3 / 3;
   align-self: center;
   justify-self: center;
-  width: 96px;
-  height: 96px;
+  width: var(--card-ill);
+  height: var(--card-ill);
   pointer-events: none;
 }
 
@@ -1505,19 +1505,12 @@ a.task-card {
 @container (max-width: 359.98px) {
   .task-card--bank {
     min-height: 100px;
-    padding: var(--space-4);
-  }
-  .task-card--bank .task-card__no {
-    font-size: 24px;
-    line-height: 30px;
-  }
-  .task-card--bank .task-card__title {
-    font-size: 15px;
-    line-height: 20px;
-  }
-  .task-card--bank .task-card__ill {
-    width: 72px;
-    height: 72px;
+    --card-pad: var(--space-4);
+    --card-no: 24px;
+    --card-no-lh: 30px;
+    --card-title: 15px;
+    --card-title-lh: 20px;
+    --card-ill: 72px;
   }
 }
 
