@@ -336,8 +336,8 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-surface-soft);
-  color: var(--color-primary);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
   font-weight: 600;
@@ -355,11 +355,12 @@
   line-height: var(--lh-body);
   max-width: 72ch;
 }
-/* Врезка: та же светлая подложка, что у подсказок, без иконки. */
+/* Врезка: тот же тёплый фон, что у плашки определения, но без рамки
+   и без иконки. Радиус и отступы меньше — это одна-две строки. */
 .what__insert {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--color-surface-2);
+  background: var(--color-surface-warm);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   max-width: 72ch;
@@ -389,6 +390,8 @@
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   font-weight: 600;
+  color: var(--color-text-brand);
+  text-align: center;
 }
 .mapping__art {
   width: 100%;
@@ -412,43 +415,62 @@
   text-align: center;
 }
 
+/* Две плашки в строку, широкая и узкая. Растягиваются по высоте
+   строки, поэтому нижние края стоят на одном уровне. */
 .what__plates {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
   gap: var(--space-4);
 }
 .rule {
-  display: flex;
-  gap: var(--space-4);
-  align-items: flex-start;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
   padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-2);
+  border-radius: var(--radius-xl);
+  border: 1px solid transparent;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
+/* Плашка определения: тёплая заливка и рамка на полтона темнее. */
+.rule--warm {
+  background: var(--color-surface-warm);
+  border-color: var(--color-border-warm);
+}
+/* Лампочка стоит слева от заголовка и вдвое крупнее прежнего. */
+.rule__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
 .rule__art {
-  width: 32px;
+  width: 64px;
   height: auto;
   flex: none;
 }
 .rule__text {
-  display: grid;
-  gap: var(--space-2);
   min-width: 0;
 }
-.rule__title {
+/* Плашка про единственное значение: голубая заливка и рамка в тон. */
+.rule--note {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-info);
+  color: var(--color-text-secondary);
+}
+.rule--note .rule__text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+/* Первая строка узкой плашки — главная мысль, поэтому крупнее. */
+.rule__lead {
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   font-weight: 600;
-}
-.rule--note {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 /* Кнопка «Содержание»: нужна там, где правой колонки нет. */

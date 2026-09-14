@@ -37,35 +37,36 @@ export function WhatIsFunction() {
       </div>
 
       <div className="what__plates">
-        <div className="rule">
-          {/* Лампочка — та же, что в подсказках банка заданий. */}
-          <Image
-            className="rule__art"
-            src="/images/lightbulb.webp"
-            alt=""
-            width={200}
-            height={181}
-          />
-          <div className="rule__text">
-            <h4 className="rule__title">{rule.title}</h4>
-            <p>
-              {rule.text.map((part, index) =>
-                part.strong === true ? (
-                  <strong key={index}>{part.text}</strong>
-                ) : (
-                  <span key={index}>{part.text}</span>
-                ),
-              )}
-            </p>
-          </div>
+        <div className="rule rule--warm">
+          {/* Лампочка — та же, что в подсказках банка заданий. Она стоит
+              слева от заголовка, а текст идёт под ними во всю ширину. */}
+          <h4 className="rule__title">
+            <Image
+              className="rule__art"
+              src="/images/lightbulb.webp"
+              alt=""
+              width={200}
+              height={181}
+            />
+            {rule.title}
+          </h4>
+          <p className="rule__text">
+            {rule.text.map((part, index) =>
+              part.strong === true ? (
+                <strong key={index}>{part.text}</strong>
+              ) : (
+                <span key={index}>{part.text}</span>
+              ),
+            )}
+          </p>
         </div>
 
         <div className="rule rule--note">
-          <div className="rule__text">
-            {note.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
+          {note.map((line, index) => (
+            <p className={index === 0 ? 'rule__lead' : 'rule__text'} key={line}>
+              {line}
+            </p>
+          ))}
         </div>
       </div>
     </div>
