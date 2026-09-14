@@ -4,6 +4,7 @@ import { tasksPage } from '@/content/tasks';
 import { bankSets, type ExamSection, type Subtopic } from '@/content/sections';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
+import { theoryBodies } from './theory';
 import { TopicTabs } from './TopicTabs';
 
 export interface FunctionTopicPageProps {
@@ -70,6 +71,7 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
       <TopicTabs
         about={<TopicAbout section={section} />}
         theory={subtopic.theory}
+        bodies={theoryBodies}
         prep={prep}
         tutorsHref={`${base}/dlya-repetitorov/`}
         contentsDecor={

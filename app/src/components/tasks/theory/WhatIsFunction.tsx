@@ -1,0 +1,73 @@
+import Image from 'next/image';
+import { whatIsFunction } from '@/content/theoryLinear';
+import { MappingDiagram } from './MappingDiagram';
+
+/**
+ * Раздел «Что такое функция?».
+ *
+ * Тексты приходят из content/theoryLinear.ts, картинка — готовый
+ * растр: пузыри с подписями и рукописная надпись нарисованы внутри
+ * него, поэтому рядом нет ни карточек, ни HandNote.
+ */
+export function WhatIsFunction() {
+  const { intro, insert, after, illustration, mapping, rule, note } = whatIsFunction;
+
+  return (
+    <div className="what">
+      <p className="what__text">{intro}</p>
+      <p className="what__insert">{insert}</p>
+      <p className="what__text">{after}</p>
+
+      <div className="what__cols">
+        {/* Фон у файла прозрачный: ни рамки, ни подложки под ним нет. */}
+        <Image
+          className="what__art"
+          src={illustration.src}
+          alt={illustration.alt}
+          width={illustration.width}
+          height={illustration.height}
+          loading="lazy"
+        />
+
+        <figure className="mapping">
+          <figcaption className="mapping__title">{mapping.title}</figcaption>
+          <MappingDiagram setX={mapping.setX} setY={mapping.setY} />
+          <p className="mapping__caption">{mapping.caption}</p>
+        </figure>
+      </div>
+
+      <div className="what__plates">
+        <div className="rule">
+          {/* Лампочка — та же, что в подсказках банка заданий. */}
+          <Image
+            className="rule__art"
+            src="/images/lightbulb.webp"
+            alt=""
+            width={200}
+            height={181}
+          />
+          <div className="rule__text">
+            <h4 className="rule__title">{rule.title}</h4>
+            <p>
+              {rule.text.map((part, index) =>
+                part.strong === true ? (
+                  <strong key={index}>{part.text}</strong>
+                ) : (
+                  <span key={index}>{part.text}</span>
+                ),
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="rule rule--note">
+          <div className="rule__text">
+            {note.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

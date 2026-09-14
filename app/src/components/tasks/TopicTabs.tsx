@@ -25,6 +25,8 @@ export interface TopicTabsProps {
   tutorsHref: string;
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
+  /** Свёрстанные разделы теории по ключу body из конфига. */
+  bodies: Record<string, ReactNode>;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
@@ -51,7 +53,14 @@ const TABS = [
  * Содержание темы на широком экране — правая колонка, ниже 1024px —
  * кнопка и шторка. Список в обоих случаях один и тот же.
  */
-export function TopicTabs({ about, theory, prep, tutorsHref, contentsDecor }: TopicTabsProps) {
+export function TopicTabs({
+  about,
+  theory,
+  prep,
+  tutorsHref,
+  contentsDecor,
+  bodies,
+}: TopicTabsProps) {
   const [tab, setTab] = useState('about');
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
@@ -165,8 +174,19 @@ export function TopicTabs({ about, theory, prep, tutorsHref, contentsDecor }: To
                 <div className="theory">
                   {theory.map((item) => (
                     <article className="theory-block" id={blockId(item.id)} key={item.id}>
-                      <h3 className="t-h3 theory-block__title">{item.title}</h3>
-                      {item.content === null ? (
+                      <h3 className="t-h3 theory-block__title">
+                        {/* Кружок — часть содержимого раздела, со списком
+                            содержания его нумерация не связана. */}
+                        {item.badge !== undefined ? (
+                          <span className="theory-block__no" aria-hidden="true">
+                            {item.badge}
+                          </span>
+                        ) : null}
+                        {item.title}
+                      </h3>
+                      {item.body !== undefined && bodies[item.body] !== undefined ? (
+                        bodies[item.body]
+                      ) : item.content === null ? (
                         <EmptyState
                           title="Материал готовится"
                           description="Этот раздел ещё не написан. Он появится здесь, когда будет готов."

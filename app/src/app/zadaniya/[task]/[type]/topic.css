@@ -323,6 +323,134 @@
   max-width: 72ch;
 }
 
+/* Кружок с номером раздела. Нумерация своя, с содержанием не связана. */
+.theory-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.theory-block__no {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Раздел «Что такое функция?» ────────────────────────────── */
+
+.what {
+  display: grid;
+  gap: var(--space-5);
+}
+.what__text {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+/* Врезка: та же светлая подложка, что у подсказок, без иконки. */
+.what__insert {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+
+.what__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-2);
+}
+/* Фон у файла прозрачный: ни рамки, ни тени, ни скругления. */
+.what__art {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mapping {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+}
+.mapping__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.mapping__art {
+  width: 100%;
+  height: auto;
+  color: var(--color-primary);
+}
+.mapping__set {
+  fill: var(--color-text-secondary);
+  stroke: none;
+  font-size: 12px;
+}
+.mapping__point {
+  fill: var(--color-text);
+  stroke: none;
+  font-size: 14px;
+}
+.mapping__caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.what__plates {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+.rule {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.rule__art {
+  width: 32px;
+  height: auto;
+  flex: none;
+}
+.rule__text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.rule__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.rule--note {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
 /* Кнопка «Содержание»: нужна там, где правой колонки нет. */
 .topic-open {
   display: none;
@@ -575,5 +703,15 @@
   }
   .about-later {
     padding: var(--space-5);
+  }
+  /* Картинка, схема и плашки идут по строке на каждую. */
+  .what__cols,
+  .what__plates {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .theory-block__no {
+    width: 32px;
+    height: 32px;
+    font-size: var(--fs-body);
   }
 }
