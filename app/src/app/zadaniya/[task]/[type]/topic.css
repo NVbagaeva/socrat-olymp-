@@ -542,16 +542,21 @@
     gap: var(--space-4);
   }
   .topic-progress .ring {
-    width: 96px;
-    height: 96px;
+    width: 112px;
+    height: 112px;
   }
   .topic-progress .ring svg {
-    width: 96px;
-    height: 96px;
+    width: 112px;
+    height: 112px;
   }
   .topic-progress .ring .t-data-lg {
     font-size: var(--fs-data-sm);
     line-height: var(--lh-data-sm);
+  }
+  /* Внутри круга остаётся только доля: слово «разделов» в круг такого
+     размера не помещается, и оно уже стоит в подписи рядом. */
+  .topic-progress .ring .t-caption {
+    display: none;
   }
   .topic-progress__text {
     text-align: left;
