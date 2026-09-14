@@ -50,8 +50,9 @@ export interface FunctionType {
   id: FunctionTypeId;
   /** Номер на карточке выбора: 01 … 06. */
   no: string;
+  /** Полное название: «Линейные функции». Так оно стоит в макете. */
   title: string;
-  /** Короткое название для вкладок и фильтров. */
+  /** Короткое название для вкладок и фильтров: «Линейные». */
   shortTitle: string;
   /** Формула в записи TeX: набирается KaTeX, текстом не выводится. */
   formula: string;
@@ -87,7 +88,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'linear',
     no: '01',
-    title: 'Линейная',
+    title: 'Линейные функции',
     shortTitle: 'Линейные',
     formula: 'y = kx + b',
     description: '',
@@ -103,7 +104,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'quadratic',
     no: '02',
-    title: 'Квадратичная',
+    title: 'Квадратичные функции',
     shortTitle: 'Квадратичные',
     formula: 'y = ax^2 + bx + c',
     description: '',
@@ -116,7 +117,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'rational',
     no: '03',
-    title: 'Дробно-рациональная',
+    title: 'Дробно-рациональные функции',
     shortTitle: 'Дробно-рациональные',
     formula: 'y = \\dfrac{ax + b}{cx + d}',
     description: '',
@@ -129,7 +130,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'logarithmic',
     no: '04',
-    title: 'Логарифмическая',
+    title: 'Логарифмические функции',
     shortTitle: 'Логарифмические',
     formula: 'y = \\log_a x',
     description: '',
@@ -142,7 +143,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'exponential',
     no: '05',
-    title: 'Показательная',
+    title: 'Показательные функции',
     shortTitle: 'Показательные',
     formula: 'y = a^x',
     description: '',
@@ -155,7 +156,7 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'trigonometric',
     no: '06',
-    title: 'Тригонометрическая',
+    title: 'Тригонометрические функции',
     shortTitle: 'Тригонометрические',
     formula: 'y = \\sin x',
     description: '',

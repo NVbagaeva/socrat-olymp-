@@ -13,6 +13,12 @@ export interface ModalProps {
   footer?: ReactNode;
   children?: ReactNode;
   /**
+   * Подпись кнопки закрытия. Задана — в углу появляется крестик;
+   * не задана — окно закрывается только Escape, кликом вне и
+   * кнопками подвала, как было.
+   */
+  closeLabel?: string;
+  /**
    * Показать только панель, без затемнения и перехвата фокуса.
    * Нужно стайлгайду, чтобы окно было видно на странице целиком.
    */
@@ -31,6 +37,7 @@ export function Modal({
   description,
   footer,
   children,
+  closeLabel,
   preview = false,
   className,
 }: ModalProps) {
@@ -94,6 +101,13 @@ export function Modal({
       aria-describedby={description === undefined ? undefined : descriptionId}
       tabIndex={-1}
     >
+      {closeLabel !== undefined ? (
+        <button type="button" className="modal__x" onClick={onClose} aria-label={closeLabel}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+      ) : null}
       <div className="modal__b">
         <h4 className="modal__t" id={titleId}>
           {title}

@@ -1396,6 +1396,37 @@ a.task-card {
 .modal__b {
   padding: var(--space-6);
 }
+/* Крестик в углу. Кнопка поверх содержимого, поэтому окно получает
+   систему координат. */
+.modal {
+  position: relative;
+}
+.modal__x {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-tertiary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.modal__x:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.modal__x svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
 .modal__t {
   font-size: 20px;
   line-height: 28px;

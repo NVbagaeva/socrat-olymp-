@@ -30,6 +30,8 @@ export interface ExamSection {
   subtitle: string;
   description: string;
   badge?: string;
+  /** Подсказка внизу окна выбора типа функции. */
+  dialogHint: string;
   subtopics: Subtopic[];
 }
 
@@ -42,6 +44,8 @@ export const sections: ExamSection[] = [
     description:
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
     badge: 'Базовый и средний уровни',
+    dialogHint:
+      'Разные функции — разные истории, но одна идея: график всегда говорит правду.',
     subtopics: functionTypes,
   },
 ];

@@ -106,6 +106,10 @@
   --color-skeleton-sheen: var(--grey-50); /* скелет: блик */
   --color-surface-inverse: var(--navy-900); /* тултип, тост */
   --color-surface-info: var(--blue-50); /* непрочитанное уведомление */
+  /* Акцент интерфейса. Цвет не новый: терракота уже в палитре и
+     ею же крашены акценты чертежей. Здесь ей дано семантическое имя,
+     чтобы компоненты не тянули примитив напрямую. */
+  --color-accent: var(--terracotta);
   --color-accent-soft: var(--blue-300); /* наведение на карточку, линия цели */
   --color-heat-1: var(--heat-1);
   --color-heat-2: var(--heat-2);

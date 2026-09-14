@@ -118,3 +118,153 @@
     flex: none;
   }
 }
+
+/* ── Окно выбора типа функции ───────────────────────────────────── */
+
+.subtopic-modal {
+  /* На узком экране окно занимает почти весь экран и прокручивается
+     внутри себя: строк шесть, и на телефоне они не помещаются. */
+  max-height: min(88vh, 760px);
+  overflow-y: auto;
+}
+.subtopic-modal .modal__t {
+  display: grid;
+  gap: 2px;
+  padding-right: var(--space-8);
+}
+.subtopic-modal__sub {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  color: var(--color-primary);
+}
+.subtopic-modal .modal__d {
+  margin-top: var(--space-4);
+}
+
+.subtopic-list {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.subtopic-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+}
+/* Открытая подтема: светлая подложка и полоска акцентом слева. */
+.subtopic-row--open {
+  background: var(--color-surface-2);
+}
+.subtopic-row--open::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--space-2);
+  bottom: var(--space-2);
+  width: 3px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--color-accent);
+}
+.subtopic-row--soon {
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+
+.subtopic-row__no {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+.subtopic-row--soon .subtopic-row__no {
+  color: var(--color-text-tertiary);
+}
+.subtopic-row__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.subtopic-row__title {
+  font-size: 15px;
+  font-weight: 500;
+}
+.subtopic-row__formula {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+/* Миниатюра из движка: размер задаёт место вставки, не чертёж.
+   Инлайновые размеры движка перебиваются !important — иначе чертёж
+   занимает свои 280px. */
+.subtopic-row__chart {
+  display: block;
+  width: 64px;
+  flex: none;
+}
+.subtopic-row__chart svg {
+  width: 64px !important;
+  height: 48px !important;
+}
+/* Линии не худеют вместе с чертежом: при уменьшении в пять раз
+   двухпиксельный штрих превратился бы в 0,4px и пропал. */
+.subtopic-row__chart svg path,
+.subtopic-row__chart svg line,
+.subtopic-row__chart svg polyline,
+.subtopic-row__chart svg circle {
+  vector-effect: non-scaling-stroke;
+}
+.subtopic-row--soon .subtopic-row__chart {
+  opacity: 0.5;
+}
+
+/* Круглая кнопка перехода. У открытой подтемы — акцентом, у закрытых
+   приглушённая: цвет и есть признак состояния. */
+.subtopic-row__go {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.subtopic-row--open .subtopic-row__go {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.subtopic-row__go svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Подсказка внизу окна. */
+.subtopic-hint {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+.subtopic-hint__art {
+  width: 24px;
+  height: auto;
+  flex: none;
+}
