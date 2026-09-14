@@ -43,8 +43,8 @@ export function MappingDiagram({ setX, setY }: MappingDiagramProps) {
 
       {/* Оба множества на одной светлой холодной заливке, контуры
           одинаковые: разными их делают подписи, а не цвет. */}
-      <ellipse cx="82" cy="128" rx="52" ry="88" fill="var(--color-surface)" />
-      <ellipse cx="278" cy="128" rx="52" ry="88" fill="var(--color-surface)" />
+      <ellipse cx="82" cy="128" rx="52" ry="88" fill="var(--color-surface-soft)" />
+      <ellipse cx="278" cy="128" rx="52" ry="88" fill="var(--color-surface-soft)" />
 
       {ROWS.map((y, index) => (
         <g key={y}>
