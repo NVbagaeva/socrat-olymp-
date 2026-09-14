@@ -54,3 +54,13 @@ export const demoTrainerStats: DemoTrainerStats = {
   correct: 11,
   averageSeconds: 84,
 };
+
+/* DEMO: прочитанные разделы теории на странице подтемы. Настоящее
+   значение придёт из прогресса ученика, когда он появится; до тех пор
+   пара живёт здесь и приходит на страницу через lib/storage.ts. */
+export interface DemoStudied {
+  studied: number;
+  total: number;
+}
+
+export const demoStudied: DemoStudied = { studied: 4, total: 13 };

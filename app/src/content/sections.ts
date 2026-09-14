@@ -32,6 +32,12 @@ export interface ExamSection {
   badge?: string;
   /** Подсказка внизу окна выбора типа функции. */
   dialogHint: string;
+  /** Шапка страницы подтемы: одна на все типы функций раздела. */
+  topic: {
+    badge: string;
+    lead: string;
+    quote: { text: string; author: string };
+  };
   subtopics: Subtopic[];
 }
 
@@ -46,6 +52,14 @@ export const sections: ExamSection[] = [
     badge: 'Базовый и средний уровни',
     dialogHint:
       'Разные функции — разные истории, но одна идея: график всегда говорит правду.',
+    topic: {
+      badge: 'Базовый и средний уровень',
+      lead: 'Теория, графики и приёмы, которые понадобятся для решения задания №12.',
+      quote: {
+        text: 'Всё, что можно измерить, можно описать функциями.',
+        author: 'Г. Галилей',
+      },
+    },
     subtopics: functionTypes,
   },
 ];

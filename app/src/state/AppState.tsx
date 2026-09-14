@@ -19,7 +19,7 @@ import {
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
-import { demoProgress, demoTrainerStats } from '@/data/demo';
+import { demoProgress, demoStudied, demoTrainerStats } from '@/data/demo';
 import { persistent } from '@/lib/storage';
 import {
   computeByTaskType,
@@ -59,6 +59,8 @@ interface Persisted {
   results: Record<string, boolean>;
   attempts: Attempt[];
   progress: Record<string, number>;
+  /** Прочитанные разделы теории: сколько из скольких. */
+  studied: { studied: number; total: number };
   generatorSettings: GeneratorSettings;
   notebook: NotebookState;
 }
@@ -72,6 +74,7 @@ const INITIAL: Persisted = {
   /* DEMO-значения приходят из demo.ts и живут дальше как обычные
      данные: проценты меняются по мере решения. */
   progress: { ...demoProgress },
+  studied: { ...demoStudied },
   generatorSettings: defaultGeneratorSettings,
   notebook: { lessons: [] },
 };

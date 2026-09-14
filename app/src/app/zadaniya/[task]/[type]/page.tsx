@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
+import { FunctionTopicPage } from '@/components/tasks';
 import { findSection, findSubtopic, subtopicParams } from '@/content/sections';
 import '../../zadaniya.css';
+import './topic.css';
 
 /* Собираются все подтемы, включая закрытые: прямой заход на закрытую
    должен показывать «Скоро», а не 404. */
@@ -32,9 +34,7 @@ export default async function SubtopicPage({ params }: { params: Params }) {
 
   return (
     <AppShell active="tasks" task={task}>
-      <main className="app-main">
-        <h1 className="t-h1">{subtopic.title}</h1>
-      </main>
+      <FunctionTopicPage section={section} subtopic={subtopic} />
     </AppShell>
   );
 }
