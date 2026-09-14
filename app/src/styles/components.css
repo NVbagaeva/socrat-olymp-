@@ -884,6 +884,11 @@ a.task-card {
   /* Своя система координат: декор страницы позиционируется от неё. */
   position: relative;
   padding: var(--space-10) var(--space-8) var(--space-16);
+  /* Содержимое растёт до контейнера своего яруса и дальше не тянется:
+     на 2560 остаются симметричные поля, а строки — читаемой длины.
+     Сайдбар в контейнер не входит, у него своя фиксированная ширина. */
+  max-width: var(--w-container);
+  margin-inline: auto;
 }
 .sidebar {
   background: var(--color-surface-brand);
