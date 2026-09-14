@@ -651,15 +651,20 @@ a.task-card {
   width: 160px;
   height: 160px;
 }
-.ring svg {
+/* Начало дуги переносится наверх поворотом самих окружностей, а не
+   всего чертежа: повёрнутый replaced-элемент Safari на телефоне
+   местами обводит рамкой, а окружности внутри SVG он поворачивает
+   без этого. Картинка та же: обе окружности лежат в центре поля. */
+.ring__track,
+.ring__fill {
+  fill: none;
   transform: rotate(-90deg);
+  transform-origin: 50% 50%;
 }
 .ring__track {
-  fill: none;
   stroke: var(--color-track);
 }
 .ring__fill {
-  fill: none;
   stroke: var(--color-primary);
   stroke-linecap: round;
   transition: stroke-dashoffset var(--dur-reveal) var(--ease);
@@ -1796,6 +1801,13 @@ a.task-card {
   .app-main {
     padding: var(--space-8) var(--space-5)
       calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-6));
+  }
+  /* Верхняя безопасная зона iPhone: шапка забирает её себе тем же
+     слагаемым, каким нижняя панель забирает свою. Под чёлкой и
+     островом остаётся фон шапки, а не заголовок страницы. */
+  .topbar {
+    height: calc(var(--h-topbar) + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
   }
   /* Свёрнутый сайдбар: от списка заданий остаются номера. */
   .shell--responsive .sidebar__caption,

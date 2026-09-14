@@ -59,9 +59,8 @@ interface Persisted {
   results: Record<string, boolean>;
   attempts: Attempt[];
   progress: Record<string, number>;
-  /** Сколько разделов теории прочитано. Сколько их всего — не здесь:
-      это считается по содержанию темы. */
-  studied: { studied: number };
+  /** Пройденные разделы кабинета: сколько из скольких. */
+  studied: { studied: number; total: number };
   generatorSettings: GeneratorSettings;
   notebook: NotebookState;
 }
@@ -110,7 +109,18 @@ const Ctx = createContext<AppState | null>(null);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   /* Сборка получает начальный снимок, браузер — сохранённый. Подмену
      React делает сам при подключении разметки. */
-  const saved = useSyncExternalStore(store.subscribe, store.read, store.initial);
+  const stored = useSyncExternalStore(store.subscribe, store.read, store.initial);
+
+  /* Запись могла остаться от прежней раскладки состояния, где у пары
+     разделов не было общего числа. Тогда берётся начальная пара:
+     иначе на экране оказалось бы «из undefined». */
+  const saved = useMemo(
+    () =>
+      typeof stored.studied?.total === 'number'
+        ? stored
+        : { ...stored, studied: INITIAL.studied },
+    [stored],
+  );
   const [tasks, setTasksState] = useState<ExerciseTask[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
 
