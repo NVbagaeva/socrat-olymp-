@@ -13,3 +13,4 @@ export const theoryBodies: Record<string, ReactNode> = {
 
 export { WhatIsFunction } from './WhatIsFunction';
 export { MappingDiagram, type MappingDiagramProps } from './MappingDiagram';
+export { BookIcon } from './BookIcon';

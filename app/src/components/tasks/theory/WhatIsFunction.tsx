@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { whatIsFunction } from '@/content/theoryLinear';
+import { BookIcon } from './BookIcon';
 import { MappingDiagram } from './MappingDiagram';
 
 /**
@@ -10,7 +11,7 @@ import { MappingDiagram } from './MappingDiagram';
  * него, поэтому рядом нет ни карточек, ни HandNote.
  */
 export function WhatIsFunction() {
-  const { lead, intro, accent, after, illustration, mapping, rule, note } = whatIsFunction;
+  const { lead, intro, accent, after, illustration, mapping, rule } = whatIsFunction;
 
   return (
     <div className="what">
@@ -42,26 +43,23 @@ export function WhatIsFunction() {
         />
       </div>
 
-      <div className="what__cols">
-        <figure className="mapping">
-          <figcaption className="mapping__title">{mapping.title}</figcaption>
-          <MappingDiagram setX={mapping.setX} setY={mapping.setY} />
-          <p className="mapping__caption">{mapping.caption}</p>
-        </figure>
-      </div>
+      <div className="what__cards">
+        <section className="card-map">
+          <h4 className="card-map__title">{mapping.title}</h4>
+          <div className="card-map__body">
+            <MappingDiagram setX={mapping.setX} setY={mapping.setY} />
+            {/* Вывод из схемы стоит рядом с ней, отделённый линией.
+                Отдельной плашки под этот текст больше нет. */}
+            <div className="card-map__aside">
+              <p className="card-map__lead">{mapping.caption}</p>
+              <p className="card-map__note">{mapping.note}</p>
+            </div>
+          </div>
+        </section>
 
-      <div className="what__plates">
-        <div className="rule rule--warm">
-          {/* Лампочка — та же, что в подсказках банка заданий. Она стоит
-              слева от заголовка, а текст идёт под ними во всю ширину. */}
+        <section className="rule">
           <h4 className="rule__title">
-            <Image
-              className="rule__art"
-              src="/images/lightbulb.webp"
-              alt=""
-              width={200}
-              height={181}
-            />
+            <BookIcon />
             {rule.title}
           </h4>
           <p className="rule__text">
@@ -73,16 +71,10 @@ export function WhatIsFunction() {
               ),
             )}
           </p>
-        </div>
-
-        <div className="rule rule--note">
-          {note.map((line, index) => (
-            <p className={index === 0 ? 'rule__lead' : 'rule__text'} key={line}>
-              {line}
-            </p>
-          ))}
-        </div>
+          <span className="rule__line" aria-hidden="true" />
+        </section>
       </div>
+
     </div>
   );
 }

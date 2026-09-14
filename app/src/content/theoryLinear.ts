@@ -23,10 +23,12 @@ export interface WhatIsFunctionContent {
     title: string;
     setX: string;
     setY: string;
+    /** Главная мысль схемы, справа от неё. */
     caption: string;
+    /** Уточнение под главной мыслью, мельче и светлее. */
+    note: string;
   };
   rule: { title: string; text: Phrase[] };
-  note: string[];
 }
 
 export const whatIsFunction: WhatIsFunctionContent = {
@@ -54,20 +56,17 @@ export const whatIsFunction: WhatIsFunctionContent = {
     setX: 'Множество X (аргументы)',
     setY: 'Множество Y (значения)',
     caption: 'Для каждого x — ровно одно y.',
+    note: 'Разные значения x могут соответствовать одному и тому же y.',
   },
   rule: {
     title: 'Строгое определение',
     text: [
       { text: 'Функция', strong: true },
       {
-        text: ' — это зависимость, при которой по некоторому правилу каждому значению x из области определения соответствует ',
+        text: ' — это зависимость, при которой каждому значению x из области определения соответствует ',
       },
       { text: 'единственное значение функции y', strong: true },
       { text: '.' },
     ],
   },
-  note: [
-    'Каждому x — ровно одно y.',
-    'Разные значения x могут соответствовать одному и тому же y.',
-  ],
 };

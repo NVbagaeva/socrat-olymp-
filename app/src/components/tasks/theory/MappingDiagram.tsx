@@ -41,18 +41,10 @@ export function MappingDiagram({ setX, setY }: MappingDiagramProps) {
         {setY}
       </text>
 
-      {/* Левое множество на белом, правое на тёплом: так видно, что
-          это разные множества, а не одно и то же поле. Контуры одной
-          толщины, цвета — токенами. */}
+      {/* Оба множества на одной светлой холодной заливке, контуры
+          одинаковые: разными их делают подписи, а не цвет. */}
       <ellipse cx="82" cy="128" rx="52" ry="88" fill="var(--color-surface)" />
-      <ellipse
-        cx="278"
-        cy="128"
-        rx="52"
-        ry="88"
-        fill="var(--color-surface-warm)"
-        stroke="var(--color-border-warm)"
-      />
+      <ellipse cx="278" cy="128" rx="52" ry="88" fill="var(--color-surface)" />
 
       {ROWS.map((y, index) => (
         <g key={y}>
