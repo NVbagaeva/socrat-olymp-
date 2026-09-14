@@ -54,3 +54,15 @@ export const demoTrainerStats: DemoTrainerStats = {
   correct: 11,
   averageSeconds: 84,
 };
+
+/* DEMO: прочитанные разделы теории на странице подтемы. Настоящее
+   значение придёт из прогресса ученика, когда он появится; до тех пор
+   оно живёт здесь и приходит на страницу через lib/storage.ts.
+
+   Сколько разделов в теме всего — здесь не записано: это факт
+   содержания, он считается по списку теории самой темы. */
+export interface DemoStudied {
+  studied: number;
+}
+
+export const demoStudied: DemoStudied = { studied: 4 };
