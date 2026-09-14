@@ -8,12 +8,19 @@
  * проекте нет и не заводится: раздел один, глубина небольшая.
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
 import { demoProgress, demoTrainerStats } from '@/data/demo';
-import { storage } from '@/lib/storage';
+import { persistent } from '@/lib/storage';
 import {
   computeByTaskType,
   computeStatistics,
@@ -56,8 +63,6 @@ interface Persisted {
   notebook: NotebookState;
 }
 
-const KEY = 'state';
-
 const INITIAL: Persisted = {
   selectedFunctionType: 'linear',
   selectedTaskType: null,
@@ -70,6 +75,10 @@ const INITIAL: Persisted = {
   generatorSettings: defaultGeneratorSettings,
   notebook: { lessons: [] },
 };
+
+/* Хранилище — внешний источник: React читает из него снимок, а не
+   догоняет его эффектом после отрисовки. */
+const store = persistent<Persisted>('state', INITIAL);
 
 export interface AppState extends Persisted {
   /** Подборка, с которой сейчас работает тренажёр. Не сохраняется. */
@@ -95,22 +104,17 @@ export interface AppState extends Persisted {
 const Ctx = createContext<AppState | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [saved, setSaved] = useState<Persisted>(INITIAL);
+  /* Сборка получает начальный снимок, браузер — сохранённый. Подмену
+     React делает сам при подключении разметки. */
+  const saved = useSyncExternalStore(store.subscribe, store.read, store.initial);
   const [tasks, setTasksState] = useState<ExerciseTask[]>([]);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
 
-  /* Читаем после монтирования: при статической сборке разметка
-     готовится без браузера, и хранилища в этот момент нет. */
-  useEffect(() => {
-    setSaved(storage.get<Persisted>(KEY, INITIAL));
-  }, []);
-
-  const update = useCallback((patch: Partial<Persisted>) => {
-    setSaved((previous) => {
-      const next = { ...previous, ...patch };
-      storage.set(KEY, next);
-      return next;
-    });
+  /* Правка считается от того, что лежит в хранилище сейчас, а не от
+     снимка этой отрисовки: два изменения подряд не затрут друг друга. */
+  const update = useCallback((make: (previous: Persisted) => Partial<Persisted>) => {
+    const previous = store.read();
+    store.write({ ...previous, ...make(previous) });
   }, []);
 
   const statistics = useMemo(
@@ -137,26 +141,26 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       byTaskType,
       mistakes,
 
-      selectFunctionType: (id) => update({ selectedFunctionType: id }),
-      selectTaskType: (id) => update({ selectedTaskType: id }),
+      selectFunctionType: (id) => update(() => ({ selectedFunctionType: id })),
+      selectTaskType: (id) => update(() => ({ selectedTaskType: id })),
       setTasks: (next) => {
         setTasksState(next);
         setCurrentTaskIndex(0);
       },
       goToTask: (index) => setCurrentTaskIndex(index),
       recordAnswer: (task, answer, correct, seconds) =>
-        update({
-          answers: { ...saved.answers, [task.id]: answer },
-          results: { ...saved.results, [task.id]: correct },
+        update((previous) => ({
+          answers: { ...previous.answers, [task.id]: answer },
+          results: { ...previous.results, [task.id]: correct },
           attempts: [
-            ...saved.attempts,
+            ...previous.attempts,
             { taskId: task.id, taskType: task.taskType, correct, seconds },
           ],
-        }),
-      setGeneratorSettings: (settings) => update({ generatorSettings: settings }),
-      setNotebook: (notebook) => update({ notebook }),
+        })),
+      setGeneratorSettings: (settings) => update(() => ({ generatorSettings: settings })),
+      setNotebook: (notebook) => update(() => ({ notebook })),
       resetTrainer: () => {
-        update({ answers: {}, results: {}, attempts: [] });
+        update(() => ({ answers: {}, results: {}, attempts: [] }));
         setCurrentTaskIndex(0);
       },
     }),

@@ -1389,12 +1389,16 @@ a.task-card {
   z-index: 50;
 }
 /* Окно рядом с элементом, который его открыл: координаты приходят
-   от страницы, поэтому центрирование выключается. */
-.modal-backdrop--anchored {
-  display: block;
-}
-.modal-anchor {
-  position: absolute;
+   от страницы, поэтому центрирование выключается. Ниже 1024px окно
+   занимает почти весь экран, привязывать его не к чему — разметка
+   возвращает его в центр, и координаты перестают влиять. */
+@media (min-width: 1024px) {
+  .modal-backdrop--anchored {
+    display: block;
+  }
+  .modal-anchor {
+    position: absolute;
+  }
 }
 .modal {
   background: var(--color-surface);

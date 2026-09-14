@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 export interface ModalProps {
@@ -50,10 +50,8 @@ export function Modal({
   className,
 }: ModalProps) {
   const panel = useRef<HTMLDivElement>(null);
+  const holder = useRef<HTMLDivElement>(null);
   const restoreTo = useRef<HTMLElement | null>(null);
-  /* Итоговое место окна: считается после отрисовки, когда известны
-     его размеры. null — окно по центру. */
-  const [placed, setPlaced] = useState<{ top: number; left: number } | null>(null);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -100,34 +98,35 @@ export function Modal({
     };
   }, [open, preview, trapFocus]);
 
-  /* Привязка к элементу. Окно сначала рисуется, потом сдвигается: до
-     отрисовки его высота неизвестна, а без неё не удержать его в
-     пределах экрана. Отступ от краёв — одна величина на обе оси. */
+  /* Привязка к элементу. Место считается после отрисовки — до неё
+     высота окна неизвестна, а без неё не удержать его в пределах
+     экрана — и записывается прямо в стиль обёртки. Состояния здесь
+     нет намеренно: положение узла это внешняя система, эффект её и
+     обновляет, лишней перерисовки не возникает.
+
+     Ниже 1024px разметка возвращает окно в центр сама, поэтому
+     координаты там ни на что не влияют. */
   useEffect(() => {
     if (!open || preview || anchor === undefined || anchor === null) {
-      setPlaced(null);
       return undefined;
     }
 
     const GAP = 24;
-    const WIDE = window.matchMedia('(min-width: 1024px)');
 
     const place = () => {
-      const node = panel.current;
-      if (!node || !WIDE.matches) {
-        setPlaced(null);
+      const box = panel.current?.getBoundingClientRect();
+      const node = holder.current;
+      if (!box || !node) {
         return;
       }
-      const box = node.getBoundingClientRect();
-      const top = Math.min(
+      node.style.top = `${Math.min(
         Math.max(GAP, anchor.top - box.height / 2),
         Math.max(GAP, window.innerHeight - box.height - GAP),
-      );
-      const left = Math.min(
+      )}px`;
+      node.style.left = `${Math.min(
         Math.max(GAP, anchor.left),
         Math.max(GAP, window.innerWidth - box.width - GAP),
-      );
-      setPlaced({ top, left });
+      )}px`;
     };
 
     place();
@@ -136,6 +135,8 @@ export function Modal({
   }, [open, preview, anchor]);
 
   if (!open) return null;
+
+  const anchored = !preview && anchor !== undefined && anchor !== null;
 
   const panelNode = (
     <div
@@ -173,13 +174,13 @@ export function Modal({
 
   return (
     <div
-      className={clsx('modal-backdrop', placed !== null && 'modal-backdrop--anchored')}
+      className={clsx('modal-backdrop', anchored && 'modal-backdrop--anchored')}
       onMouseDown={onClose}
       role="presentation"
     >
       <div
-        className={clsx(placed !== null && 'modal-anchor')}
-        style={placed === null ? undefined : { top: placed.top, left: placed.left }}
+        ref={holder}
+        className={clsx(anchored && 'modal-anchor')}
         onMouseDown={(event) => event.stopPropagation()}
         role="presentation"
       >

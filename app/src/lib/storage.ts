@@ -72,3 +72,50 @@ export const storage = {
     }
   },
 };
+
+/* ── Хранилище как внешний источник для React ─────────────────────
+   Значение из localStorage нельзя прочитать во время сборки: браузера
+   там нет. Поэтому чтение оформлено как внешний источник с двумя
+   снимками — для сборки и для браузера. React сам отрисует страницу
+   со сборочным снимком, а после подключения в браузере перерисует её
+   с сохранённым: ни ручного эффекта, ни расхождения разметки. */
+
+export interface PersistentStore<T> {
+  /** Подписка на изменения. Возвращает отписку. */
+  subscribe(listener: () => void): () => void;
+  /** Снимок для браузера. Ссылка не меняется, пока не было записи. */
+  read(): T;
+  /** Снимок для сборки: браузера нет, отдаётся начальное значение. */
+  initial(): T;
+  write(value: T): void;
+}
+
+export function persistent<T>(key: string, initial: T): PersistentStore<T> {
+  const listeners = new Set<() => void>();
+  /* Снимок кэшируется: React сравнивает ссылки, и новый объект на
+     каждое чтение уводил бы его в бесконечную перерисовку. */
+  let snapshot: T | undefined;
+
+  return {
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    read() {
+      if (snapshot === undefined) {
+        snapshot = storage.get<T>(key, initial);
+      }
+      return snapshot;
+    },
+    initial() {
+      return initial;
+    },
+    write(value) {
+      snapshot = value;
+      storage.set(key, value);
+      listeners.forEach((listener) => listener());
+    },
+  };
+}
