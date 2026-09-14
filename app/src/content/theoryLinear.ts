@@ -5,10 +5,16 @@
  * отсюда и своих строк не содержат. Тексты авторские, дословные.
  */
 
-/** Кусок текста: жирным выделяется то, что выделено автором. */
+/**
+ * Кусок текста: жирным выделяется то, что выделено автором.
+ *
+ * math — математическая переменная: она набирается KaTeX и выходит
+ * курсивом, как принято в формулах, а не обычной буквой.
+ */
 export interface Phrase {
   text: string;
   strong?: boolean;
+  math?: boolean;
 }
 
 export interface WhatIsFunctionContent {
@@ -24,9 +30,9 @@ export interface WhatIsFunctionContent {
     setX: string;
     setY: string;
     /** Главная мысль схемы, справа от неё. */
-    caption: string;
+    caption: Phrase[];
     /** Уточнение под главной мыслью, мельче и светлее. */
-    note: string;
+    note: Phrase[];
   };
   rule: { title: string; text: Phrase[] };
 }
@@ -55,17 +61,30 @@ export const whatIsFunction: WhatIsFunctionContent = {
     title: 'Функция как отображение',
     setX: 'Множество X (аргументы)',
     setY: 'Множество Y (значения)',
-    caption: 'Для каждого x — ровно одно y.',
-    note: 'Разные значения x могут соответствовать одному и тому же y.',
+    caption: [
+      { text: 'Для каждого ' },
+      { text: 'x', math: true },
+      { text: ' — ровно одно ' },
+      { text: 'y', math: true },
+      { text: '.' },
+    ],
+    note: [
+      { text: 'Разные значения ' },
+      { text: 'x', math: true },
+      { text: ' могут соответствовать одному и тому же ' },
+      { text: 'y', math: true },
+      { text: '.' },
+    ],
   },
   rule: {
     title: 'Строгое определение',
     text: [
       { text: 'Функция', strong: true },
-      {
-        text: ' — это зависимость, при которой каждому значению x из области определения соответствует ',
-      },
-      { text: 'единственное значение функции y', strong: true },
+      { text: ' — это зависимость, при которой каждому значению ' },
+      { text: 'x', math: true },
+      { text: ' из области определения соответствует ' },
+      { text: 'единственное значение функции ', strong: true },
+      { text: 'y', strong: true, math: true },
       { text: '.' },
     ],
   },
