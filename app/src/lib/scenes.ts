@@ -42,6 +42,29 @@ export function lineScene({ k, b, half = 6, alt, label = null }: LineSceneOption
 }
 
 
+/**
+ * Сравнение двух прямых на одном чертеже.
+ *
+ * Движку для этого ничего не добавлялось: поле curves всегда было
+ * списком, а второй цвет lineB в теме уже есть. Коэффициенты подобраны
+ * так, чтобы прямые пересекались внутри окна и различались наклоном.
+ */
+export function compareLinesScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'line', k: 1, b: 1, color: 'lineA', label: 'y = k₁x + b₁' },
+      { type: 'line', k: -0.5, b: -2, color: 'lineB', label: 'y = k₂x + b₂' },
+    ],
+    points: [],
+    alt: 'Две прямые: y = k₁x + b₁ и y = k₂x + b₂',
+  };
+}
+
+
 /* ── Миниатюры типов функций ──────────────────────────────────────
    По одному представителю на семейство: коэффициенты подобраны так,
    чтобы кривая в окне читалась характерной формой, а не куском.

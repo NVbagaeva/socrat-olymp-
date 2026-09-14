@@ -66,16 +66,26 @@ export interface FunctionType {
   status: 'active' | 'soon';
 }
 
-/* Заголовки блоков теории заданы автором. Тип блока — служебное поле:
-   оно говорит, чем блок будет наполнен, и ни на один видимый текст
-   не влияет. Содержимого нет ни у одного, поэтому все empty. */
+/* Заголовки блоков теории заданы автором: четырнадцать разделов в том
+   порядке, в каком они стоят в содержании темы. Тип блока — служебное
+   поле: оно говорит, чем блок будет наполнен, и ни на один видимый
+   текст не влияет. Содержимого нет ни у одного, поэтому все empty:
+   пустой блок честно показывает «Материал готовится». */
 const LINEAR_THEORY: TheoryBlock[] = [
-  { id: 'definition', title: 'Определение и свойства линейной функции', type: 'definition', content: null, status: 'empty' },
-  { id: 'chart', title: 'График и его параметры', type: 'chart', content: null, status: 'empty' },
-  { id: 'coefficients', title: 'Угловой коэффициент и свободный член', type: 'properties', content: null, status: 'empty' },
-  { id: 'mutual', title: 'Взаимное расположение прямых', type: 'properties', content: null, status: 'empty' },
-  { id: 'examples', title: 'Примеры решения задач', type: 'example', content: null, status: 'empty' },
-  { id: 'mistakes', title: 'Типичные ошибки', type: 'note', content: null, status: 'empty' },
+  { id: 'what', title: 'Что такое функция?', type: 'definition', content: null, status: 'empty' },
+  { id: 'inside', title: 'Как устроена функция', type: 'definition', content: null, status: 'empty' },
+  { id: 'kinds', title: 'Какие бывают функции', type: 'properties', content: null, status: 'empty' },
+  { id: 'not-function', title: 'Что не является функцией', type: 'note', content: null, status: 'empty' },
+  { id: 'special-lines', title: 'Особые прямые', type: 'chart', content: null, status: 'empty' },
+  { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
+  { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
+  { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },
+  { id: 'b', title: 'Коэффициент b', type: 'properties', content: null, status: 'empty' },
+  { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
+  { id: 'non-standard', title: 'Функция не в стандартном виде', type: 'example', content: null, status: 'empty' },
+  { id: 'from-chart', title: 'Коэффициенты по графику', type: 'chart', content: null, status: 'empty' },
+  { id: 'equation', title: 'Составление уравнения прямой', type: 'example', content: null, status: 'empty' },
+  { id: 'prep', title: 'Подготовительные задачи', type: 'example', content: null, status: 'empty' },
 ];
 
 /** Все четыре типа заданий: вопрос не зависит от вида функции. */

@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
-import type { ExamSection, Subtopic } from '@/content/sections';
+import { bankSets, type ExamSection, type Subtopic } from '@/content/sections';
+import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
+import { TopicTabs } from './TopicTabs';
 
 export interface FunctionTopicPageProps {
   section: ExamSection;
@@ -18,6 +20,13 @@ export interface FunctionTopicPageProps {
  */
 export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps) {
   const { topic } = section;
+  const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
+
+  /* Подготовительные наборы берутся из данных движка: числа заданий
+     считаются по составу набора и нигде не записаны руками. */
+  const prep = bankSets(subtopic)
+    .filter((set) => set.kind === 'prep')
+    .map(({ id, title, subtitle, count }) => ({ id, title, subtitle, count }));
 
   return (
     <main className="app-main">
@@ -53,8 +62,29 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
           />
         </figure>
 
-        <TopicProgress />
+        {/* Сколько разделов в теме — факт содержания, а не показатель:
+            он считается по списку теории, а не хранится числом. */}
+        <TopicProgress total={subtopic.theory.length} />
       </header>
+
+      <TopicTabs
+        about={<TopicAbout section={section} />}
+        theory={subtopic.theory}
+        prep={prep}
+        tutorsHref={`${base}/dlya-repetitorov/`}
+        contentsDecor={
+          <div className="topic-side__decor" aria-hidden="true">
+            <Image
+              className="topic-side__pyramid"
+              src="/images/pyramid-network.webp"
+              alt=""
+              width={1400}
+              height={504}
+            />
+            <HandNote className="topic-side__note">{topic.note}</HandNote>
+          </div>
+        }
+      />
     </main>
   );
 }

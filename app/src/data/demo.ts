@@ -57,10 +57,12 @@ export const demoTrainerStats: DemoTrainerStats = {
 
 /* DEMO: прочитанные разделы теории на странице подтемы. Настоящее
    значение придёт из прогресса ученика, когда он появится; до тех пор
-   пара живёт здесь и приходит на страницу через lib/storage.ts. */
+   оно живёт здесь и приходит на страницу через lib/storage.ts.
+
+   Сколько разделов в теме всего — здесь не записано: это факт
+   содержания, он считается по списку теории самой темы. */
 export interface DemoStudied {
   studied: number;
-  total: number;
 }
 
-export const demoStudied: DemoStudied = { studied: 4, total: 13 };
+export const demoStudied: DemoStudied = { studied: 4 };

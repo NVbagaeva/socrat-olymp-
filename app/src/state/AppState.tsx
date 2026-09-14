@@ -59,8 +59,9 @@ interface Persisted {
   results: Record<string, boolean>;
   attempts: Attempt[];
   progress: Record<string, number>;
-  /** Прочитанные разделы теории: сколько из скольких. */
-  studied: { studied: number; total: number };
+  /** Сколько разделов теории прочитано. Сколько их всего — не здесь:
+      это считается по содержанию темы. */
+  studied: { studied: number };
   generatorSettings: GeneratorSettings;
   notebook: NotebookState;
 }
