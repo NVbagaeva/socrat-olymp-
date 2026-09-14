@@ -28,9 +28,17 @@ export interface TheoryBlock {
   id: string;
   title: string;
   type: TheoryBlockType;
-  /** Содержимое блока. null — материала ещё нет. */
+  /** Содержимое блока обычным текстом. null — материала ещё нет. */
   content: string | null;
-  /** ready только тогда, когда content заполнен. */
+  /**
+   * Ключ свёрстанного раздела: разметка с картинками, чертежами и
+   * плашками в строку не укладывается, поэтому раздел собирается
+   * компонентом, а тексты лежат в своём конфиге.
+   */
+  body?: string;
+  /** Кружок у заголовка раздела. Своя нумерация, не из содержания. */
+  badge?: string;
+  /** ready только тогда, когда заполнен content или body. */
   status: 'ready' | 'empty';
 }
 
@@ -75,7 +83,15 @@ export interface FunctionType {
    поэтому все empty: пустой блок честно показывает «Материал
    готовится». */
 const LINEAR_THEORY: TheoryBlock[] = [
-  { id: 'what', title: 'Что такое функция?', type: 'definition', content: null, status: 'empty' },
+  {
+    id: 'what',
+    title: 'Что такое функция?',
+    type: 'definition',
+    content: null,
+    body: 'what-is-function',
+    badge: '1',
+    status: 'ready',
+  },
   { id: 'inside', title: 'Как устроена функция', type: 'definition', content: null, status: 'empty' },
   { id: 'kinds', title: 'Какие бывают функции', type: 'properties', content: null, status: 'empty' },
   { id: 'not-function', title: 'Что не является функцией', type: 'note', content: null, status: 'empty' },

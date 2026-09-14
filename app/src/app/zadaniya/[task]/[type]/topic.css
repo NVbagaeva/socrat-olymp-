@@ -323,6 +323,200 @@
   max-width: 72ch;
 }
 
+/* Кружок с номером раздела. Нумерация своя, с содержанием не связана. */
+.theory-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.theory-block__no {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Раздел «Что такое функция?» ────────────────────────────── */
+
+.what {
+  display: grid;
+  gap: var(--space-5);
+}
+.what__text {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+/* Первая строка рассказа: крупнее и плотнее остального текста. */
+.what__lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  max-width: 72ch;
+}
+/* Вывод из примеров: синяя строка без плашки и без заливки. */
+.what__accent {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-primary);
+  max-width: 72ch;
+}
+
+/* Верхний блок: рассказ слева, картинка справа. */
+.what__top {
+  display: grid;
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+.what__story {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.what__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-2);
+}
+/* Фон у файла прозрачный: ни рамки, ни тени, ни скругления. */
+.what__art {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Две карточки под верхним блоком ────────────────────────── */
+
+/* Рядом они стоят, только если каждой хватает 340px: иначе встают
+   друг под друга. Высоты в ряду равны, поэтому нижние края на одной
+   линии. */
+.what__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.card-map,
+.rule {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.card-map__title,
+.rule__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+
+/* Схема и вывод из неё: рядом, когда карточке хватает ширины. */
+.card-map {
+  container-type: inline-size;
+}
+.card-map__body {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+.card-map__aside {
+  display: grid;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+.card-map__lead {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.card-map__note {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+@container (min-width: 460px) {
+  .card-map__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 168px);
+    gap: var(--space-5);
+  }
+  /* Линия переезжает слева от текста: он становится соседней колонкой. */
+  .card-map__aside {
+    border-top: 0;
+    border-left: 1px solid var(--color-border);
+    padding-top: 0;
+    padding-left: var(--space-5);
+  }
+}
+
+.mapping {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+}
+.mapping__art {
+  width: 100%;
+  height: auto;
+  color: var(--color-primary);
+}
+.mapping__set {
+  fill: var(--color-text-secondary);
+  stroke: none;
+  font-size: 12px;
+}
+.mapping__point {
+  fill: var(--color-text);
+  stroke: none;
+  font-size: 14px;
+}
+
+/* Плашка определения: единственная тёплая поверхность на экране. */
+.rule {
+  background: var(--color-surface-warm);
+  border-color: var(--color-border-warm);
+}
+/* Книга — силуэт, а не контур: заливка синим. */
+.rule__icon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  color: var(--color-primary);
+}
+.rule__text {
+  min-width: 0;
+}
+/* Короткая тёплая черта под определением. Ниже неё ничего нет. */
+.rule__line {
+  display: block;
+  width: 64px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-warm);
+}
+
 /* Кнопка «Содержание»: нужна там, где правой колонки нет. */
 .topic-open {
   display: none;
@@ -575,5 +769,14 @@
   }
   .about-later {
     padding: var(--space-5);
+  }
+  /* Рассказ, картинка и карточки идут по строке на каждую. */
+  .what__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .theory-block__no {
+    width: 32px;
+    height: 32px;
+    font-size: var(--fs-body);
   }
 }
