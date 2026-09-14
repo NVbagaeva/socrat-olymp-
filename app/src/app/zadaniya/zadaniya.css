@@ -99,24 +99,77 @@
 
 /* ── Раскладка по ширинам ───────────────────────────────────── */
 
-@media (max-width: 767.98px) {
-  /* Баннер — декор: на телефоне остаётся только заголовок. */
-  .bank-quote {
-    display: none;
-  }
-  .bank-head {
-    display: block;
-  }
-  .bank-head__text {
-    margin-bottom: var(--space-6);
-  }
-  /* Поиск уходит во всю ширину. */
-  .bank-filters {
-    display: block;
-  }
-  .bank-search {
-    flex: none;
-  }
+
+
+/* ── Нижний блок: с чего начать ─────────────────────────────────── */
+
+.bank-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-10);
+}
+
+.bank-start__plate {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+/* Книга целиком в кадре: высота задана, ширина считается по файлу. */
+.bank-start__book {
+  width: auto;
+  height: 80px;
+  flex: none;
+}
+.bank-start__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.bank-start__lead {
+  margin-top: var(--space-1);
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--color-text-secondary);
+}
+.bank-start__cta {
+  flex: none;
+}
+.bank-start__cta svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Декор справа: пирамида и рукописная подпись рядом с ней. */
+.bank-start__decor {
+  /* Столбец под декор: пирамида занимает в нём чуть больше половины,
+     остальное — подпись. От ширины плашки пирамида выходит примерно
+     на треть, как в макете. */
+  flex: 0 0 34%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.bank-start__pyramid {
+  width: 58%;
+  height: auto;
+  flex: none;
+  opacity: 0.6;
+}
+.bank-start__note {
+  flex: 1 1 auto;
+  font-size: 15px;
+  line-height: 22px;
 }
 
 /* ── Окно выбора типа функции ───────────────────────────────────── */
@@ -267,4 +320,36 @@
   width: 24px;
   height: auto;
   flex: none;
+}
+
+/* Медиазапрос идёт последним: правила в нём перекрывают базовые
+   только за счёт порядка — специфичности медиазапрос не добавляет. */
+@media (max-width: 767.98px) {
+  /* Декор на телефоне убирается весь: портрет в шапке, пирамида и
+     рукописная подпись под сеткой. Горы в сайдбаре уходят вместе с
+     самим сайдбаром. */
+  .bank-quote,
+  .bank-start__decor {
+    display: none;
+  }
+  /* Плашка встаёт столбиком: в строку книга, текст и кнопка не
+     помещаются. */
+  .bank-start__plate {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+  }
+  .bank-head {
+    display: block;
+  }
+  .bank-head__text {
+    margin-bottom: var(--space-6);
+  }
+  /* Поиск уходит во всю ширину. */
+  .bank-filters {
+    display: block;
+  }
+  .bank-search {
+    flex: none;
+  }
 }
