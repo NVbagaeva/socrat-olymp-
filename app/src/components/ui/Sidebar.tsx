@@ -46,6 +46,12 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
       {/* Подпись сокращается только на вид: вслух читается полное
           название раздела — оно уходит в aria-label ниже. */}
       <span>{item.short ?? item.label}</span>
+      {/* Стрелка у текущего задания: указывает, что раздел открыт. */}
+      {item.active === true && item.no !== undefined ? (
+        <svg className="snav__go" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m9 5 7 7-7 7" />
+        </svg>
+      ) : null}
     </>
   );
 
@@ -129,6 +135,9 @@ export function Sidebar({
 
       {secondaryItems !== undefined || user !== undefined || footer !== undefined ? (
         <div className="sidebar__foot">
+          {/* Подвал идёт сверху вниз: сначала декор с подписью, под
+              ним личные разделы — порядок задан макетом. */}
+          {footer}
           {secondaryItems !== undefined ? (
             <NavList items={secondaryItems} label="Личные разделы" />
           ) : null}
@@ -140,7 +149,6 @@ export function Sidebar({
               <span>{user.name}</span>
             </div>
           ) : null}
-          {footer}
         </div>
       ) : null}
     </aside>

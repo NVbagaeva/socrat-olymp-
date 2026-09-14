@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { BottomNavigation, HandNote, Sidebar, Topbar, type NavItem } from '@/components/ui';
 import {
   appNavMorePage,
@@ -63,7 +64,18 @@ export function AppShell({ active, task, search = true, children }: AppShellProp
         items={taskItems(task)}
         secondaryItems={withActive(sidebarExtras, active)}
         footer={
-          <HandNote className="sidebar__note">Математика делает сложное понятным.</HandNote>
+          /* Декор подвала: горы во всю ширину столбца, поверх них
+             рукописная подпись. Картинка — фон, поэтому alt пустой. */
+          <div className="sidebar__decor">
+            <Image
+              className="sidebar__mountains"
+              src="/images/mountains-network.webp"
+              alt=""
+              width={900}
+              height={329}
+            />
+            <HandNote className="sidebar__note">Математика делает сложное понятным.</HandNote>
+          </div>
         }
       />
 

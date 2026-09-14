@@ -1034,12 +1034,46 @@ a.task-card {
   align-items: flex-start;
   line-height: 18px;
 }
+/* Стрелка у текущего задания. */
+.snav__go {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Декор подвала: горы прижаты к низу столбца во всю его ширину,
+   подпись лежит поверх них. Поля сайдбара снимаются отрицательными
+   отступами — картинка идёт от края до края. */
+.sidebar__decor {
+  position: relative;
+  margin: var(--space-4) calc(-1 * var(--space-3)) var(--space-4);
+  padding: var(--space-3) var(--space-3) var(--space-10);
+  display: flex;
+  align-items: flex-start;
+  /* Подпись стоит над кряжем, а не поперёк него: горы занимают низ
+     блока,высоту задаёт картинкой, поэтому запас снизу. */
+  min-height: 132px;
+}
+.sidebar__mountains {
+  position: absolute;
+  inset: auto 0 0;
+  width: 100%;
+  height: auto;
+  opacity: 0.5;
+  pointer-events: none;
+}
 /* Подпись в подвале меню: место задаёт сайдбар, не сам компонент.
    Селектор из двух классов — чтобы перебить цвет .hand-note: на тёмном
    столбце фирменный синий не читается. */
 .sidebar .sidebar__note {
+  position: relative;
   display: block;
-  padding: var(--space-5) var(--space-3) 0;
   font-size: 17px;
   line-height: 24px;
   color: var(--color-text-inverse);
@@ -1719,7 +1753,8 @@ a.task-card {
   }
   /* Свёрнутый сайдбар: от списка заданий остаются номера. */
   .shell--responsive .sidebar__caption,
-  .shell--responsive .sidebar__note {
+  .shell--responsive .sidebar__decor,
+  .shell--responsive .snav__go {
     display: none;
   }
   .shell--responsive .snav .is-soon {

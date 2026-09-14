@@ -34,10 +34,14 @@ export const notificationsPage: NavItem = {
 
 /** Личные разделы под списком заданий в сайдбаре. */
 export const sidebarExtras: NavItem[] = [
+  { id: 'my-tasks', label: 'Мои задания', href: '/moi-zadaniya/', icon: 'assignments' },
   { id: 'favourites', label: 'Избранное', href: '/izbrannoe/', icon: 'favourites' },
-  { id: 'notes', label: 'Мои конспекты', href: '/moi-konspekty/', icon: 'notes' },
   { id: 'history', label: 'История решений', href: '/istoriya-resheniy/', icon: 'history' },
+  { id: 'settings', label: 'Настройки', href: '/nastroyki/', icon: 'settings' },
 ];
+
+/* «Мои конспекты» из этого списка убраны по макету. Маршрут
+   /moi-konspekty остался: страница есть, ссылки в меню нет. */
 
 /* ── Мобильная панель ─────────────────────────────────────────────
    Пунктов помещается пять: три раздела из верхнего меню и вход в
