@@ -856,6 +856,35 @@ a.task-card {
   border: 1px solid var(--color-border);
   background: var(--color-bg);
 }
+
+/* Оболочка кабинета. Занимает весь экран: это раздел приложения,
+   а не блок внутри лендинга, поэтому скруглений и внешней рамки
+   у неё нет. Правила переехали со страницы банка — теперь их
+   показывает не она одна, а каждая страница кабинета. */
+.app-shell {
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+}
+/* Столбец меню стоит на месте, пока страница листается: список из
+   тринадцати заданий выше экрана и прокручивается внутри себя. */
+.app-shell .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Правый столбец: шапка разделов и под ней содержимое. */
+.app-col {
+  min-width: 0;
+}
+.app-main {
+  /* Своя система координат: декор страницы позиционируется от неё. */
+  position: relative;
+  padding: var(--space-10) var(--space-8) var(--space-16);
+}
 .sidebar {
   background: var(--color-surface-brand);
   padding: var(--space-5) var(--space-3);
@@ -944,6 +973,136 @@ a.task-card {
 .snav a.is-active .nav-ico,
 .snav a:hover .nav-ico {
   opacity: 1;
+}
+
+/* Подпись над списком: чему посвящён столбец. */
+.sidebar__caption {
+  padding: 0 var(--space-3) var(--space-4);
+  display: grid;
+  gap: 2px;
+}
+.sidebar__caption-title {
+  color: var(--color-text-inverse);
+  font-size: 15px;
+  font-weight: 600;
+}
+.sidebar__caption-sub {
+  color: var(--color-on-brand);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* Номер задания перед названием. Ширина фиксированная, поэтому
+   названия выстраиваются в столбец, а не пляшут по номеру. */
+.snav__no {
+  width: 22px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  opacity: 0.7;
+}
+.snav a.is-active .snav__no {
+  opacity: 1;
+}
+/* Закрытый раздел: тот же ряд, но приглушённый и без отклика. */
+.snav .is-soon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-on-brand);
+  font-size: 14px;
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Список заданий: название в две строки — обычное дело, поэтому ряд
+   растёт по содержимому, а не режется фиксированной высотой. */
+.snav--numbered a,
+.snav--numbered .is-soon {
+  height: auto;
+  min-height: 40px;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  align-items: flex-start;
+  line-height: 18px;
+}
+/* Подпись в подвале меню: место задаёт сайдбар, не сам компонент.
+   Селектор из двух классов — чтобы перебить цвет .hand-note: на тёмном
+   столбце фирменный синий не читается. */
+.sidebar .sidebar__note {
+  display: block;
+  padding: var(--space-5) var(--space-3) 0;
+  font-size: 17px;
+  line-height: 24px;
+  color: var(--color-text-inverse);
+}
+
+/* Меню разделов в шапке. */
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.topnav a {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.topnav a:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.topnav a.is-active {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* В оболочке кабинета поиск делит шапку с меню разделов: он больше
+   не тянется во всю свободную ширину, иначе меню сжимает его в щель. */
+.app-col .topbar .search {
+  flex: 0 1 360px;
+}
+/* Колокольчик со значком вместо метки-заглушки. */
+.bell .nav-ico {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+}
+
+/* Пользователь в шапке: аватар, имя и роль. Блок не сжимается —
+   иначе имя обрезается многоточием раньше, чем кончится место. */
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+}
+.topbar__who {
+  display: grid;
+  min-width: 0;
+}
+.topbar__name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar__role {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-tertiary);
 }
 
 .topbar {
@@ -1058,7 +1217,7 @@ a.task-card {
 .bnav--shell {
   display: none;
 }
-@media (max-width: 767.98px) {
+@media (max-width: 1023.98px) {
   .bnav--shell {
     display: flex;
     position: fixed;
@@ -1072,6 +1231,11 @@ a.task-card {
        область нажатия равна всей высоте. */
     min-height: calc(var(--h-bnav) + env(safe-area-inset-bottom));
     padding: 0 0 env(safe-area-inset-bottom);
+  }
+  /* На планшете столбец заданий остаётся на месте: панель занимает
+     ширину содержимого, а не лезет поверх него. */
+  .bnav--shell {
+    left: var(--w-sidebar-collapsed);
   }
   .bnav--shell a {
     justify-content: center;
@@ -1547,6 +1711,34 @@ a.task-card {
 
 /* Сайдбар 240px → 72px на планшете → нижняя навигация на мобильном. */
 @media (max-width: 1023.98px) {
+  /* Нижняя панель навигации прижата к низу экрана и лежит поверх
+     страницы: содержимое получает отступ в её высоту, иначе последняя
+     карточка списка окажется под панелью. Безопасная зона iPhone
+     добавляется тем же слагаемым, что и в самой панели. */
+  .app-main {
+    padding: var(--space-8) var(--space-5)
+      calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-6));
+  }
+  /* Свёрнутый сайдбар: от списка заданий остаются номера. */
+  .shell--responsive .sidebar__caption,
+  .shell--responsive .sidebar__note {
+    display: none;
+  }
+  .shell--responsive .snav .is-soon {
+    justify-content: center;
+    padding: 0;
+  }
+  .shell--responsive .snav .is-soon span:last-child {
+    display: none;
+  }
+  /* Меню разделов в шапке на планшете не помещается рядом с поиском:
+     его пункты доступны в нижней панели и на экране «Ещё». */
+  .topnav {
+    display: none;
+  }
+  .shell--responsive .topbar__who {
+    display: none;
+  }
   .shell--responsive {
     grid-template-columns: var(--w-sidebar-collapsed) 1fr;
   }
@@ -1558,7 +1750,7 @@ a.task-card {
     padding: 0 0 var(--space-6);
   }
   .shell--responsive .sidebar__mark span:last-child,
-  .shell--responsive .snav a span,
+  .shell--responsive .snav a > span:last-child,
   .shell--responsive .sidebar__user span:last-child {
     display: none;
   }
@@ -1573,6 +1765,10 @@ a.task-card {
 }
 
 @media (max-width: 767.98px) {
+  /* Столбца заданий больше нет — панель занимает всю ширину. */
+  .bnav--shell {
+    left: 0;
+  }
   .shell--responsive {
     grid-template-columns: 1fr;
   }

@@ -16,6 +16,9 @@ export type NavIconName =
   | 'materials'
   | 'teacher'
   | 'notifications'
+  | 'favourites'
+  | 'notes'
+  | 'history'
   | 'more';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
@@ -60,6 +63,23 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <path d="M12 3.5a5.8 5.8 0 0 0-5.8 5.8c0 3.9-1.2 5.2-1.9 6.2h15.4c-.7-1-1.9-2.3-1.9-6.2A5.8 5.8 0 0 0 12 3.5z" />
       <path d="M10 18.5a2 2 0 0 0 4 0" />
+    </>
+  ),
+  /* Звезда избранного. */
+  favourites: <path d="m12 3.8 2.6 5.2 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" />,
+  /* Тетрадь конспектов: обложка с корешком. */
+  notes: (
+    <>
+      <path d="M6.5 3.5h13v17h-13a1.5 1.5 0 0 1-1.5-1.5V5a1.5 1.5 0 0 1 1.5-1.5z" />
+      <path d="M9.5 3.5v17M12.5 9h4M12.5 13h4" />
+    </>
+  ),
+  /* История: стрелка назад по кругу и стрелки часов. */
+  history: (
+    <>
+      <path d="M4.2 12a7.8 7.8 0 1 0 2.4-5.6" />
+      <path d="M3.8 5.5V10h4.5" />
+      <path d="M12 8.2V12l2.8 1.8" />
     </>
   ),
   /* Три точки: остальные разделы. */

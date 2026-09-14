@@ -31,7 +31,7 @@ export default async function SubtopicPage({ params }: { params: Params }) {
   }
 
   return (
-    <AppShell active="tasks">
+    <AppShell active="tasks" task={task}>
       <main className="app-main">
         <h1 className="t-h1">{subtopic.name}</h1>
       </main>

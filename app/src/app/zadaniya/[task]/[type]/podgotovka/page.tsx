@@ -26,7 +26,7 @@ export default async function Page({ params }: { params: Params }) {
   }
 
   return (
-    <AppShell active="tasks">
+    <AppShell active="tasks" task={task}>
       <main className="app-main">
         <h1 className="t-h1">Теория</h1>
       </main>

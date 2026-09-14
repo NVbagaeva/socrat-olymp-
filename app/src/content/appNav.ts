@@ -1,44 +1,50 @@
 /**
- * Меню раздела приложения. Один список на все страницы с сайдбаром:
- * пункты не повторяются в каждой странице, а подсветка текущего
- * задаётся снаружи по id.
+ * Навигация кабинета. Один источник пунктов на все раскладки:
+ * верхнее меню на широком экране, нижняя панель на мобильном и
+ * экран «Ещё» берут свои пункты отсюда, а не заводят свои списки.
  *
- * Этот же список питает нижнюю панель на мобильном: панель берёт из
- * него четыре главных пункта, остальные уходят на экран «Ещё».
- * Второго списка пунктов в проекте нет.
+ * Список заданий в сайдбаре сюда не входит: он целиком считается
+ * из tasks.ts.
  */
 
 import type { NavItem } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 
-/* Разделов под большинство пунктов ещё нет, поэтому они ведут на список
-   заданий — единственную собранную страницу раздела. Адреса правятся
-   здесь же, когда страницы появятся. */
-export const appNav: NavItem[] = [
+/* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
+   «Прогресс» и «Статистика» → «Статистика», «Материалы» →
+   «Мои материалы», «Учитель» и «Домашние работы» → «Для учителя»,
+   «Уведомления» → колокольчик в шапке. */
+export const topNav: NavItem[] = [
   { id: 'home', label: 'Главная', href: '/', icon: 'home' },
   { id: 'tasks', label: 'Задания', href: tasksPage.href, icon: 'tasks' },
-  /* Короткая подпись — для нижней панели: полное название в ячейку
-     шириной в пятую часть экрана не помещается и рвёт ряд на две
-     строки. В сайдбаре остаётся полное. */
-  { id: 'homework', label: 'Домашние работы', short: 'Домашние', href: tasksPage.href, icon: 'homework' },
-  { id: 'progress', label: 'Прогресс', href: tasksPage.href, icon: 'progress' },
-  { id: 'stats', label: 'Статистика', href: tasksPage.href, icon: 'stats' },
-  { id: 'materials', label: 'Материалы', href: tasksPage.href, icon: 'materials' },
-  { id: 'teacher', label: 'Учитель', href: tasksPage.href, icon: 'teacher' },
+  { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
+  /* Короткая подпись — для нижней панели и экрана «Ещё»: полное
+     название в ячейку шириной в четверть экрана не помещается. */
+  { id: 'materials', label: 'Мои материалы', short: 'Материалы', href: '/moi-materialy/', icon: 'materials' },
+  { id: 'teacher', label: 'Для учителя', short: 'Учитель', href: '/dlya-uchitelya/', icon: 'teacher' },
 ];
 
-export const appNavSecondary: NavItem[] = [
-  { id: 'notifications', label: 'Уведомления', href: tasksPage.href, icon: 'notifications' },
+/** Уведомления живут за колокольчиком, в списке меню их нет. */
+export const notificationsPage: NavItem = {
+  id: 'notifications',
+  label: 'Уведомления',
+  href: '/uvedomleniya/',
+  icon: 'notifications',
+};
+
+/** Личные разделы под списком заданий в сайдбаре. */
+export const sidebarExtras: NavItem[] = [
+  { id: 'favourites', label: 'Избранное', href: '/izbrannoe/', icon: 'favourites' },
+  { id: 'notes', label: 'Мои конспекты', href: '/moi-konspekty/', icon: 'notes' },
+  { id: 'history', label: 'История решений', href: '/istoriya-resheniy/', icon: 'history' },
 ];
 
 /* ── Мобильная панель ─────────────────────────────────────────────
-   На узком экране пунктов помещается пять: четыре раздела и вход в
+   Пунктов помещается пять: три раздела из верхнего меню и вход в
    остальные. Здесь перечислены только идентификаторы — названия и
-   адреса у пунктов те же, что в сайдбаре, и берутся из списков выше. */
+   адреса те же, что наверху. */
 
-const PRIMARY_IDS = ['home', 'tasks', 'homework', 'progress'];
-
-const ALL_ITEMS: NavItem[] = [...appNav, ...appNavSecondary];
+const PRIMARY_IDS = ['home', 'tasks', 'stats'];
 
 /** Экран со списком разделов, не поместившихся в панель. */
 export const appNavMorePage: NavItem = {
@@ -48,16 +54,17 @@ export const appNavMorePage: NavItem = {
   icon: 'more',
 };
 
-/** Четыре главных пункта панели — в порядке PRIMARY_IDS. */
+/** Главные пункты панели — в порядке PRIMARY_IDS. */
 export const appNavPrimary: NavItem[] = PRIMARY_IDS.flatMap((id) => {
-  const item = ALL_ITEMS.find((candidate) => candidate.id === id);
+  const item = topNav.find((candidate) => candidate.id === id);
   return item !== undefined ? [item] : [];
 });
 
-/** Всё остальное: список экрана «Ещё» считается, а не задаётся руками. */
-export const appNavMore: NavItem[] = ALL_ITEMS.filter(
-  (item) => !PRIMARY_IDS.includes(item.id),
-);
+/** Экран «Ещё»: всё, что не попало в панель. Считается, не задаётся. */
+export const appNavMore: NavItem[] = [
+  ...topNav.filter((item) => !PRIMARY_IDS.includes(item.id)),
+  notificationsPage,
+];
 
 /** id пункта панели, который подсвечивается на странице раздела active. */
 export function bottomNavActive(active: string | undefined): string | undefined {
