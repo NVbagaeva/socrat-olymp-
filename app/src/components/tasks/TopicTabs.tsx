@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { TheoryBlock } from '@/content/sections';
@@ -33,6 +33,16 @@ export interface TopicTabsProps {
 function blockId(id: string): string {
   return `theory-${id}`;
 }
+
+/** Плавность прокрутки: при «уменьшить движение» переходы мгновенные. */
+function motion(): ScrollBehavior {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+}
+
+/* Ширина растушёвки по краям ленты вкладок. То же число стоит в
+   topic.css у background-size: под растушёвкой вкладка читалась бы
+   наполовину выцветшей, поэтому подводим её с этим отступом. */
+const TABS_FADE = 32;
 
 const TABS = [
   { id: 'about', label: 'О задании' },
@@ -66,6 +76,9 @@ export function TopicTabs({
      что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
   const [sheet, setSheet] = useState(false);
+  /* Лента вкладок прокручивается вбок: нужен сам узел, чтобы подводить
+     к активной вкладке. */
+  const strip = useRef<HTMLDivElement>(null);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
   const items = theory.map((item) => ({ id: item.id, title: item.title }));
@@ -77,8 +90,7 @@ export function TopicTabs({
     if (node === null) {
       return;
     }
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    node.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+    node.scrollIntoView({ behavior: motion(), block: 'start' });
   }, []);
 
   function pick(id: string) {
@@ -88,6 +100,32 @@ export function TopicTabs({
        кадром, когда блокировка прокрутки уже снята. */
     requestAnimationFrame(() => scrollToBlock(id));
   }
+
+  /* Активная вкладка не должна оставаться за кромкой ленты. Сдвиг
+     считается по самой ленте, а не через scrollIntoView: тот утянул бы
+     за собой и страницу по вертикали. */
+  useEffect(() => {
+    const node = strip.current;
+    if (node === null) {
+      return;
+    }
+    const item = node.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (item === null) {
+      return;
+    }
+
+    const box = node.getBoundingClientRect();
+    const rect = item.getBoundingClientRect();
+    let shift = 0;
+    if (rect.left < box.left + TABS_FADE) {
+      shift = rect.left - box.left - TABS_FADE;
+    } else if (rect.right > box.right - TABS_FADE) {
+      shift = rect.right - box.right + TABS_FADE;
+    }
+    if (shift !== 0) {
+      node.scrollBy({ left: shift, behavior: motion() });
+    }
+  }, [tab]);
 
   /* Подсветка в содержании следует за экраном. Наблюдатель видимости
      дешевле обработчика прокрутки: браузер считает пересечения сам. */
@@ -133,7 +171,7 @@ export function TopicTabs({
     <>
       {/* Лента вкладок: ниже 1024px она прокручивается вбок, тени по
           краям показывают, что прокручивать есть куда. */}
-      <div className="topic-tabs">
+      <div className="topic-tabs" ref={strip}>
         <Tabs items={TABS} value={tab} onValueChange={setTab} label="Разделы темы" />
         <Link className="topic-tabs__link" href={tutorsHref}>
           Для репетиторов
@@ -187,10 +225,10 @@ export function TopicTabs({
                       {item.body !== undefined && bodies[item.body] !== undefined ? (
                         bodies[item.body]
                       ) : item.content === null ? (
-                        <EmptyState
-                          title="Материал готовится"
-                          description="Этот раздел ещё не написан. Он появится здесь, когда будет готов."
-                        />
+                        /* Ненаписанных разделов подряд тринадцать: каждому
+                           по большому пустому экрану — это стена из
+                           одинаковых картинок. Здесь довольно строки. */
+                        <p className="theory-block__soon">Материал готовится</p>
                       ) : (
                         <p className="theory-block__text">{item.content}</p>
                       )}

@@ -93,9 +93,27 @@ const LINEAR_THEORY: TheoryBlock[] = [
     status: 'ready',
   },
   { id: 'inside', title: 'Как устроена функция', type: 'definition', content: null, status: 'empty' },
-  { id: 'kinds', title: 'Какие бывают функции', type: 'properties', content: null, status: 'empty' },
-  { id: 'not-function', title: 'Что не является функцией', type: 'note', content: null, status: 'empty' },
-  { id: 'special-lines', title: 'Особые прямые', type: 'chart', content: null, status: 'empty' },
+  {
+    id: 'kinds',
+    title: 'Какие бывают функции',
+    type: 'properties',
+    content: null,
+    body: 'kinds-of-functions',
+    badge: '3',
+    status: 'ready',
+  },
+  /* Пункт собран из двух прежних: «Что не является функцией» и
+     «Особые прямые». Идентификатор оставлен прежний — на него уже
+     ведут якоря, и менять его без нужды значит их оборвать. */
+  {
+    id: 'not-function',
+    title: 'Когда график не функция',
+    type: 'chart',
+    content: null,
+    body: 'graph-not-function',
+    badge: '4',
+    status: 'ready',
+  },
   { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
   { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
   { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },

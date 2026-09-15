@@ -16,8 +16,9 @@ import rational from './rational.js';
 import exponential from './exponential.js';
 import logarithmic from './logarithmic.js';
 import trigonometric from './trigonometric.js';
+import sqrt from './sqrt.js';
 
-export { quadratic, rational, exponential, logarithmic, trigonometric };
+export { quadratic, rational, exponential, logarithmic, trigonometric, sqrt };
 
 /** Семейство по имени типа кривой. */
 export const families = {
@@ -26,6 +27,7 @@ export const families = {
   exponential: exponential,
   logarithmic: logarithmic,
   trigonometric: trigonometric,
+  sqrt: sqrt,
 };
 
 export default families;

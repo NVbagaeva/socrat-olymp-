@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { WhatIsFunction } from './WhatIsFunction';
+import { GraphNotFunction } from './GraphNotFunction';
+import { WhatKinds } from './WhatKinds';
 
 /**
  * Свёрстанные разделы теории по ключу из конфига.
@@ -9,9 +11,14 @@ import { WhatIsFunction } from './WhatIsFunction';
  */
 export const theoryBodies: Record<string, ReactNode> = {
   'what-is-function': <WhatIsFunction />,
+  'kinds-of-functions': <WhatKinds />,
+  'graph-not-function': <GraphNotFunction />,
 };
 
 export { WhatIsFunction } from './WhatIsFunction';
+export { WhatKinds } from './WhatKinds';
+export { GraphNotFunction } from './GraphNotFunction';
+export { CheckIcon, CrossIcon, PinIcon, WarnIcon } from './VerdictIcons';
 export { MappingDiagram, type MappingDiagramProps } from './MappingDiagram';
 export { BookIcon } from './BookIcon';
 export { Phrases } from './Phrases';

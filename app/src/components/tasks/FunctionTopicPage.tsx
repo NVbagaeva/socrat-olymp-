@@ -63,9 +63,10 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
           />
         </figure>
 
-        {/* Прогресс по разделам кабинета. С числом пунктов теории этой
-            подтемы он не связан: это разные счётчики. */}
-        <TopicProgress />
+        {/* Прогресс по разделам теории темы. Общее число — длина того же
+            списка, из которого строится «Содержание»: второго источника
+            у этой пары нет. */}
+        <TopicProgress total={subtopic.theory.length} />
       </header>
 
       <TopicTabs
