@@ -252,17 +252,22 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-5);
-  padding: var(--space-5) var(--space-6);
+  /* По вертикали ровно 16px: бюст занимает всю высоту плашки между
+     ними, поэтому высоту задаёт он. */
+  padding: var(--space-4) var(--space-6);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
 }
 /* Бюст без рамки и подложки: фон у файла прозрачный. Высота задана,
-   ширина считается сама — файл вытянутый, 1027 на 1505. */
+   ширина считается сама — файл вытянутый, 1027 на 1505, поэтому
+   при равной высоте он вдвое уже Галилея. Ростом он заметно выше
+   его 132px именно ради сопоставимого веса в кадре. */
 .prep-quote__art {
   width: auto;
-  height: 96px;
+  height: 160px;
   flex: none;
+  object-fit: contain;
 }
 .prep-quote__body {
   display: grid;
