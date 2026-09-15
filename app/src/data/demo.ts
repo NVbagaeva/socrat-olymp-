@@ -8,6 +8,7 @@
  */
 
 import type { FunctionTypeId } from '@/data/functionTypes';
+import type { PrepSkillId } from '@/content/prepSkills';
 
 export interface DemoUser {
   initials: string;
@@ -62,3 +63,15 @@ export const demoTrainerStats: DemoTrainerStats = {
    ученика, когда он появится; до тех пор оно живёт здесь и приходит
    на страницу через lib/storage.ts. */
 export const demoStudied = 6;
+
+/* DEMO: сколько задач решено по каждому навыку подготовительных
+   задач. Общее число и проценты нигде не записаны — они считаются
+   отсюда и из длин наборов движка. Настоящий прогресс появится
+   вместе с личным кабинетом; до тех пор это единственное место,
+   где эти числа заданы. */
+export const demoPrepSolved: Record<PrepSkillId, number> = {
+  k: 6,
+  b: 3,
+  equation: 0,
+  point: 8,
+};

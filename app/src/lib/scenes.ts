@@ -250,3 +250,51 @@ export function verticalTestScene() {
     ],
   };
 }
+
+
+/* ── Миниатюры навыков подготовительных задач ─────────────────────
+   Значок рядом с названием навыка: одна прямая и то, что в этом
+   навыке ищут. Сетка выключена, числа осей сняты и подписей нет:
+   в кадре 112px шрифт чертежа выходит меньше шести пикселей и
+   читается грязью. Навыки различает форма — где отмечена точка. */
+
+export type PrepSkillSceneId = 'k' | 'b' | 'equation' | 'point';
+
+export function prepSkillScene(id: PrepSkillSceneId) {
+  const base = {
+    window: squareWindow(3),
+    grid: { step: 1, show: false },
+    /* Оси без имён и без чисел — как у миниатюр типов функций
+       в диалоге выбора подтемы: тот же размер, тот же рецепт. */
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+
+  if (id === 'b') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 1, b: 1.2, color: 'lineA', label: null }],
+      /* Отмечена точка пересечения с осью y — то, что здесь ищут. */
+      points: [{ x: 0, y: 1.2, color: 'lineA', label: null }],
+    };
+  }
+
+  if (id === 'point') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0.8, b: 0, color: 'lineA', label: null }],
+      /* Точка стоит в стороне от прямой: вопрос навыка именно в том,
+         лежит она на ней или нет. */
+      points: [{ x: 1.6, y: 1.9, color: 'lineA', label: null }],
+    };
+  }
+
+  /* k и уравнение показывают одно и то же: прямую с её формулой. */
+  return {
+    ...base,
+    curves: [{ type: 'line', k: id === 'k' ? 0.9 : 0.6, b: 0.4, color: 'lineA', label: null }],
+  };
+}

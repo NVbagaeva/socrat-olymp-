@@ -1,0 +1,292 @@
+/* Подготовительные задачи: экран списка навыков.
+
+   Экран стоит и вкладкой на странице темы, и отдельной страницей
+   /podgotovka/, поэтому стили лежат своим файлом: обе страницы
+   подключают его сами. */
+
+.prep {
+  display: grid;
+  gap: var(--space-5);
+  container-type: inline-size;
+}
+
+/* ── Шапка ──────────────────────────────────────────────────── */
+
+.prep__head {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+@container (min-width: 560px) {
+  .prep__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+.prep__title {
+  margin-bottom: var(--space-1);
+}
+.prep__lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-secondary);
+}
+.prep__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+/* Кольцо здесь мельче, чем в шапке темы: оно тут не главный элемент.
+   Размер меняется у всей обёртки, а не у одного svg: число внутри
+   спозиционировано по ней и иначе съезжает с центра. */
+.prep__progress .progress-ring {
+  width: 104px;
+  height: 104px;
+}
+.prep__progress .progress-ring svg {
+  width: 100%;
+  height: 100%;
+}
+.prep__progress .progress-ring .t-data-lg {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+}
+.prep__counter {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.prep__counter b {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  color: var(--color-text);
+}
+
+/* ── Лента чипов ────────────────────────────────────────────── */
+
+.prep__chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Растушёвка у правого края: показывает, что лента прокручивается.
+     Полосу прокрутки не показываем — она тут только мешает. */
+  background:
+    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--grey-900) 14%, transparent),
+        transparent
+      )
+      right center;
+  background-repeat: no-repeat;
+  background-size:
+    32px 100%,
+    12px 100%;
+  background-attachment: local, scroll;
+}
+.prep__chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-switch) var(--ease);
+}
+.chip:hover {
+  background: var(--color-surface-soft);
+}
+.chip.is-active {
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+}
+
+/* ── Карточки навыков ───────────────────────────────────────── */
+
+.prep__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@container (min-width: 620px) {
+  .prep__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.prep-card {
+  display: grid;
+  /* Карточка сама себе контейнер: ширина миниатюры зависит от неё,
+     а не от всего экрана — в две колонки карточка вдвое уже. */
+  container-type: inline-size;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.prep-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+.prep-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.prep-card__top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+}
+.prep-card__no {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.prep-card__text {
+  display: grid;
+  gap: 2px;
+}
+.prep-card__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  /* Длинные слова вроде «Принадлежность» шире узкой колонки. Сначала
+     пробуем перенос по слогам, и только если словарь не сработал —
+     разрыв по буквам: без него слово вылезало под миниатюру
+     и пряталось за её белой подложкой. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+.prep-card__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Миниатюра — значок навыка, а не рабочее поле. Ширина задана
+   числом, а не процентом: в auto-колонке сетки процент не
+   разрешается, и колонка забирала место у названия. */
+.prep-card__chart {
+  display: block;
+  width: 112px;
+  flex: none;
+}
+/* На узкой карточке миниатюра ужимается, чтобы названию хватило
+   строки: «Коэффициент» целиком шире того, что остаётся иначе. */
+/* Самое длинное название, «Принадлежность», требует 136px при
+   кегле 16px — замерено. Миниатюра ужимается ровно настолько,
+   чтобы столько осталось, иначе слово ломается посередине. */
+@container (max-width: 400px) {
+  .prep-card__chart {
+    width: 56px;
+  }
+  /* И кегль названия ступенью ниже: «Коэффициент» в двадцати
+     пикселях шире оставшейся колонки и ломалось посреди слова. */
+  .prep-card__title {
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+}
+.prep-card__svg,
+.prep-card__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.prep-card__count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.prep-card__ico {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.prep-card__bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  justify-content: space-between;
+  margin-top: auto;
+}
+.prep-card__meter {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.prep-card__done {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+.prep-card__start {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Цитата ─────────────────────────────────────────────────── */
+
+.prep-quote {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  text-align: center;
+}
+.prep-quote__text {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-style: italic;
+}
+.prep-quote__author {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}

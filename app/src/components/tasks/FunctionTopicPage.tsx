@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
-import { bankSets, type ExamSection, type Subtopic } from '@/content/sections';
+import { type ExamSection, type Subtopic } from '@/content/sections';
+import { PrepSkills } from './prep';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
@@ -23,11 +24,6 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
 
-  /* Подготовительные наборы берутся из данных движка: числа заданий
-     считаются по составу набора и нигде не записаны руками. */
-  const prep = bankSets(subtopic)
-    .filter((set) => set.kind === 'prep')
-    .map(({ id, title, subtitle, count }) => ({ id, title, subtitle, count }));
 
   return (
     <main className="app-main">
@@ -73,7 +69,7 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
         about={<TopicAbout section={section} />}
         theory={subtopic.theory}
         bodies={theoryBodies}
-        prep={prep}
+        prep={<PrepSkills base={base} />}
         tutorsHref={`${base}/dlya-repetitorov/`}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
