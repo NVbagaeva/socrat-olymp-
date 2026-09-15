@@ -11,6 +11,8 @@ import { TopicTabs } from './TopicTabs';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
+  /** Вкладка, открытая при заходе: у /podgotovka/ это своя. */
+  initialTab?: string;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface FunctionTopicPageProps {
  * в проекте нет и не будет: маршрут один, содержимое приходит из
  * data/functionTypes.ts.
  */
-export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps) {
+export function FunctionTopicPage({ section, subtopic, initialTab }: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
 
@@ -66,6 +68,7 @@ export function FunctionTopicPage({ section, subtopic }: FunctionTopicPageProps)
       </header>
 
       <TopicTabs
+        initial={initialTab}
         about={<TopicAbout section={section} />}
         theory={subtopic.theory}
         bodies={theoryBodies}

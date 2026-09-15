@@ -20,6 +20,8 @@ export interface TopicTabsProps {
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
+  /** Какая вкладка открыта при заходе. По умолчанию «О задании». */
+  initial?: string;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
@@ -63,8 +65,9 @@ export function TopicTabs({
   tutorsHref,
   contentsDecor,
   bodies,
+  initial = 'about',
 }: TopicTabsProps) {
-  const [tab, setTab] = useState('about');
+  const [tab, setTab] = useState(initial);
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
