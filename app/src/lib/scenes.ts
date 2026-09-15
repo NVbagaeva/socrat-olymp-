@@ -253,19 +253,39 @@ export function verticalTestScene() {
 
 
 /* ── Миниатюры навыков подготовительных задач ─────────────────────
-   Значок рядом с названием навыка: одна прямая и то, что в этом
-   навыке ищут. Сетка выключена, числа осей сняты и подписей нет:
-   в кадре 112px шрифт чертежа выходит меньше шести пикселей и
-   читается грязью. Навыки различает форма — где отмечена точка. */
+   Значок рядом с названием навыка: каждая миниатюра показывает суть
+   своего навыка, а не просто прямую.
+
+   Кегль подписей задан числом: холст 416px ужимается до 112, и
+   штатные 19px вышли бы пятью пикселями на экране. Толщину линий
+   спасает vector-effect в стилях — иначе график в 3,2px рисуется
+   в 0,86 и бледнеет до сетки. */
 
 export type PrepSkillSceneId = 'k' | 'b' | 'equation' | 'point';
 
+/** Кегль подписи в миниатюре: на экране это около двенадцати пунктов. */
+const PREP_LABEL = 34;
+
+function prepLabel(
+  text: string,
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+  color = 'label',
+  size = PREP_LABEL,
+) {
+  return { type: 'label', at: [x, y], offset: [dx, dy], text, size, color };
+}
+
 export function prepSkillScene(id: PrepSkillSceneId) {
   const base = {
-    window: squareWindow(3),
-    grid: { step: 1, show: false },
-    /* Оси без имён и без чисел — как у миниатюр типов функций
-       в диалоге выбора подтемы: тот же размер, тот же рецепт. */
+    /* Окно тесное: клетка крупнее, и подпись при том же кегле
+       занимает меньшую долю поля — длинная формула перестаёт
+       упираться в край холста. */
+    window: squareWindow(2),
+    /* Сетка нужна: по клеткам читаются Δx и Δy у треугольника. */
+    grid: { step: 1, show: true },
     axes: { labelX: '', labelY: '', origin: '' },
     axisLabels: 'none',
     curves: [] as unknown[],
@@ -273,28 +293,50 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     shapes: [] as unknown[],
   };
 
+  if (id === 'k') {
+    /* Треугольник наклона: катеты пунктиром, как в разборе решения. */
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 1, b: 0, color: 'lineA', label: null }],
+      points: [
+        { x: -1, y: -1, color: 'lineA', label: null },
+        { x: 1, y: 1, color: 'lineA', label: null },
+      ],
+      shapes: [
+        { type: 'segment', from: [-1, -1], to: [1, -1], color: 'accent', style: 'dashed' },
+        { type: 'segment', from: [1, -1], to: [1, 1], color: 'accent', style: 'dashed' },
+        prepLabel('\u0394x', 0, -1, 0, 20, 'accent'),
+        prepLabel('\u0394y', 1, 0, 20, 0, 'accent'),
+      ],
+    };
+  }
+
   if (id === 'b') {
     return {
       ...base,
-      curves: [{ type: 'line', k: 1, b: 1.2, color: 'lineA', label: null }],
-      /* Отмечена точка пересечения с осью y — то, что здесь ищут. */
-      points: [{ x: 0, y: 1.2, color: 'lineA', label: null }],
+      curves: [{ type: 'line', k: 0.9, b: 1, color: 'lineA', label: null }],
+      points: [{ x: 0, y: 1, color: 'lineA', label: null }],
+      shapes: [prepLabel('b', 0, 1, -20, 0)],
     };
   }
 
   if (id === 'point') {
     return {
       ...base,
-      curves: [{ type: 'line', k: 0.8, b: 0, color: 'lineA', label: null }],
+      curves: [{ type: 'line', k: 0.9, b: 0, color: 'lineA', label: null }],
       /* Точка стоит в стороне от прямой: вопрос навыка именно в том,
          лежит она на ней или нет. */
-      points: [{ x: 1.6, y: 1.9, color: 'lineA', label: null }],
+      points: [{ x: 1, y: 1.6, color: 'lineA', label: null }],
+      shapes: [prepLabel('A', 1, 1.6, 20, 0)],
     };
   }
 
-  /* k и уравнение показывают одно и то же: прямую с её формулой. */
   return {
     ...base,
-    curves: [{ type: 'line', k: id === 'k' ? 0.9 : 0.6, b: 0.4, color: 'lineA', label: null }],
+    curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
+    /* Формулы «y = kx + b» внутри чертежа нет: при читаемом кегле она
+       шире поля — 161 пиксель на холсте в 212, и движок вытесняет её
+       за кромку. Подпись отсюда убрана до решения, где ей стоять. */
+    shapes: [],
   };
 }

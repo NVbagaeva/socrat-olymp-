@@ -199,6 +199,15 @@
   width: 100%;
   height: auto;
 }
+/* Линии не худеют вместе с чертежом: холст 416px ужимается до 112,
+   и график в 3,2px рисовался бы в 0,86 — бледнее осей. Тот же
+   приём, что у миниатюр типов функций в диалоге подтемы. */
+.prep-card__svg svg path,
+.prep-card__svg svg line,
+.prep-card__svg svg polyline,
+.prep-card__svg svg circle {
+  vector-effect: non-scaling-stroke;
+}
 
 .prep-card__count {
   display: inline-flex;
