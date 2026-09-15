@@ -137,3 +137,83 @@ export function kindScene(id: KindId) {
     shapes: [],
   };
 }
+
+
+/* ── Чертежи раздела «Когда график не функция» ────────────────────
+   Четыре прямые в одном окне и одном масштабе: карточки стоят рядом,
+   и разный масштаб читался бы разным наклоном.
+
+   Вертикальная прямая — не функция, кривой вида y = kx + b её не
+   задать, поэтому она рисуется фигурой-отрезком. Точки на ней —
+   те самые разные y при одном x, ради которых раздел и написан.
+
+   Подписи прямых расставлены фигурами, а не полем label у кривой:
+   автоподбор места рассчитан на крупные чертежи тренажёра и на
+   карточке в 280 пикселей жмёт подпись к началу координат, под числа
+   осей. У фигуры точка — опорная: движок ставит подпись рядом с ней
+   и обходит препятствия, а offset задаёт предпочтительную сторону. */
+
+export type LineKindId = 'horizontal' | 'vertical' | 'bisector' | 'antibisector';
+
+/** Общая часть всех четырёх чертежей: окно, сетка и оси. */
+function lineKindBase() {
+  return {
+    window: squareWindow(3),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+}
+
+/** Подпись прямой: синяя, как сама прямая. dx и dy — сторона, в
+    которую её отводить от опорной точки. */
+function lineLabel(text: string, x: number, y: number, dx: number, dy: number) {
+  return { type: 'label', at: [x, y], offset: [dx, dy], text, color: 'lineA' };
+}
+
+export function lineKindScene(id: LineKindId) {
+  const base = lineKindBase();
+
+  if (id === 'horizontal') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0, b: 1.5, color: 'lineA', label: null }],
+      /* Точка b на оси y: подпись стоит слева от неё, чтобы не сесть
+         на саму прямую. Цвет тёмный, как у остальных чисел оси. */
+      points: [{ x: 0, y: 1.5, color: 'lineA', label: null }],
+      shapes: [
+        { type: 'label', at: [0, 1.5], offset: [-12, 5], text: 'b', anchor: 'end', color: 'label' },
+        lineLabel('y = b', 1.6, 1.5, 8, -8),
+      ],
+    };
+  }
+
+  if (id === 'vertical') {
+    return {
+      ...base,
+      shapes: [
+        { type: 'segment', from: [1.5, -3], to: [1.5, 3], color: 'lineA' },
+        lineLabel('x = a', 1.5, 2.2, 8, 0),
+        { type: 'label', at: [1.5, 0], offset: [-4, 20], text: 'a', anchor: 'end', color: 'label' },
+      ],
+      /* Пять значений y при одном и том же x — то, что делает эту
+         прямую не графиком функции. */
+      points: [-2, -1, 0, 1, 2].map((y) => ({ x: 1.5, y, color: 'lineA', label: null })),
+    };
+  }
+
+  const up = id === 'bisector';
+  return {
+    ...base,
+    curves: [{ type: 'line', k: up ? 1 : -1, b: 0, color: 'lineA', label: null }],
+    points: [{ x: 2, y: up ? 2 : -2, color: 'lineA', label: null }],
+    /* Типографский минус, а не дефис: в подписях чертежа проект
+       набирает его именно так. */
+    shapes: [
+      up ? lineLabel('y = x', 1.8, 1.8, -8, -8) : lineLabel('y = \u2212x', 1.8, -1.8, 8, 8),
+    ],
+  };
+}

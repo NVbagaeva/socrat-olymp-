@@ -18,6 +18,7 @@ export const theoryBodies: Record<string, ReactNode> = {
 export { WhatIsFunction } from './WhatIsFunction';
 export { WhatKinds } from './WhatKinds';
 export { GraphNotFunction } from './GraphNotFunction';
+export { CheckIcon, CrossIcon } from './VerdictIcons';
 export { MappingDiagram, type MappingDiagramProps } from './MappingDiagram';
 export { BookIcon } from './BookIcon';
 export { Phrases } from './Phrases';

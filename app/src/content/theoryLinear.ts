@@ -5,7 +5,7 @@
  * отсюда и своих строк не содержат. Тексты авторские, дословные.
  */
 
-import type { KindId } from '@/lib/scenes';
+import type { KindId, LineKindId } from '@/lib/scenes';
 
 /**
  * Кусок текста: жирным выделяется то, что выделено автором.
@@ -117,11 +117,106 @@ export const whatKinds: WhatKindsContent = {
 };
 
 /** Раздел «Когда график не функция». */
+/** Карточка прямой: формула, чертёж, вердикт и пояснение. */
+export interface NoFnCard {
+  /** Ключ чертежа в lib/scenes.ts. */
+  id: LineKindId;
+  /** Номер на бейдже: 01 … 04. */
+  no: string;
+  /** Формула в записи TeX: набирается KaTeX, текстом не выводится. */
+  formula: string;
+  caption: string;
+  /** Итог: график функции или нет. Отсюда берётся цвет вердикта. */
+  verdict: 'function' | 'not-function';
+  verdictLabel: string;
+  explain: Phrase[];
+  note: Phrase[];
+}
+
 export interface GraphNotFunctionContent {
   /** Плашка в строке заголовка, у правого края. */
   hint: string;
+  cards: NoFnCard[];
 }
+
+/* Пояснения набраны кусками, потому что переменные в них идут
+   курсивом через KaTeX, а выделенные автором слова — полужирным. */
+const FOR_EACH_X: Phrase[] = [
+  { text: 'Для каждого ' },
+  { text: 'x', math: true },
+  { text: ' существует ' },
+  { text: 'ровно одно', strong: true },
+  { text: ' значение ' },
+];
 
 export const graphNotFunction: GraphNotFunctionContent = {
   hint: 'Всё это — прямые. Но не все они являются графиками функций!',
+  cards: [
+    {
+      id: 'horizontal',
+      no: '01',
+      formula: 'y = b',
+      caption: 'Горизонтальная прямая',
+      verdict: 'function',
+      verdictLabel: 'ФУНКЦИЯ',
+      explain: [...FOR_EACH_X, { text: 'y = b', math: true }, { text: '.' }],
+      note: [{ text: 'Любая вертикальная прямая пересекает график ровно в одной точке.' }],
+    },
+    {
+      id: 'vertical',
+      no: '02',
+      formula: 'x = a',
+      caption: 'Вертикальная прямая',
+      verdict: 'not-function',
+      verdictLabel: 'НЕ ФУНКЦИЯ',
+      explain: [
+        { text: 'Для одного и того же ' },
+        { text: 'x = a', math: true },
+        { text: ' существует ' },
+        { text: 'бесконечно много', strong: true },
+        { text: ' значений ' },
+        { text: 'y', math: true },
+        { text: '.' },
+      ],
+      note: [
+        { text: 'Нарушается главное условие функции: одному ' },
+        { text: 'x', math: true },
+        { text: ' соответствует не одно, а множество значений ' },
+        { text: 'y', math: true },
+        { text: '.' },
+      ],
+    },
+    {
+      id: 'bisector',
+      no: '03',
+      formula: 'y = x',
+      caption: 'Биссектриса I и III четвертей',
+      verdict: 'function',
+      verdictLabel: 'ФУНКЦИЯ',
+      explain: [...FOR_EACH_X, { text: 'y', math: true }, { text: '.' }],
+      note: [
+        { text: 'Например: если ' },
+        { text: 'x = 2', math: true },
+        { text: ', то ' },
+        { text: 'y = 2', math: true },
+        { text: '.' },
+      ],
+    },
+    {
+      id: 'antibisector',
+      no: '04',
+      formula: 'y = -x',
+      caption: 'Биссектриса II и IV четвертей',
+      verdict: 'function',
+      verdictLabel: 'ФУНКЦИЯ',
+      explain: [...FOR_EACH_X, { text: 'y', math: true }, { text: '.' }],
+      note: [
+        { text: 'Например: если ' },
+        { text: 'x = 2', math: true },
+        { text: ', то ' },
+        { text: 'y = -2', math: true },
+        { text: '.' },
+      ],
+    },
+  ],
 };
