@@ -104,3 +104,36 @@ export function previewScene(id: FunctionTypeId) {
     shapes: [],
   };
 }
+
+
+/* ── Чертежи раздела «Какие бывают функции» ───────────────────────
+   Четыре известных графика. В отличие от миниатюр типов сетка и
+   подписи осей включены: карточка заметно крупнее значка, и по
+   клеткам видно, что это чертёж, а не пиктограмма.
+
+   Чертёж декоративный: рядом стоят название и формула, поэтому alt
+   не задаётся и график не читается вслух дважды. */
+
+export type KindId = 'linear' | 'quadratic' | 'rational' | 'sqrt';
+
+/* Коэффициенты подобраны так, чтобы в окне читалась характерная
+   форма: прямая идёт через оба края, у параболы видны обе ветви и
+   вершина, у гиперболы — обе ветви, у корня — начало в нуле. */
+const KINDS: Record<KindId, Curve> = {
+  linear: { type: 'line', k: 0.8, b: 1 },
+  quadratic: { type: 'quadratic', a: 1, b: 0, c: -2 },
+  rational: { type: 'rational', k: 3, b: 0 },
+  sqrt: { type: 'sqrt', a: 1, c: 0 },
+};
+
+export function kindScene(id: KindId) {
+  return {
+    window: squareWindow(5),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '' },
+    axisLabels: 'minimal',
+    curves: [{ ...KINDS[id], color: 'lineA', label: null }],
+    points: [],
+    shapes: [],
+  };
+}

@@ -5,6 +5,8 @@
  * отсюда и своих строк не содержат. Тексты авторские, дословные.
  */
 
+import type { KindId } from '@/lib/scenes';
+
 /**
  * Кусок текста: жирным выделяется то, что выделено автором.
  *
@@ -88,4 +90,28 @@ export const whatIsFunction: WhatIsFunctionContent = {
       { text: '.' },
     ],
   },
+};
+
+/** Карточка известного графика: название, формула и чертёж. */
+export interface KindCard {
+  /** Ключ чертежа в lib/scenes.ts. */
+  id: KindId;
+  title: string;
+  /** Формула в записи TeX: набирается KaTeX, текстом не выводится. */
+  formula: string;
+}
+
+export interface WhatKindsContent {
+  lead: string;
+  cards: KindCard[];
+}
+
+export const whatKinds: WhatKindsContent = {
+  lead: 'На самом деле вы уже давно работаете с функциями. Вот самые известные примеры:',
+  cards: [
+    { id: 'linear', title: 'Линейная функция', formula: 'y = kx + b' },
+    { id: 'quadratic', title: 'Квадратичная функция', formula: 'y = ax^2 + bx + c' },
+    { id: 'rational', title: 'Дробно-рациональная', formula: 'y = \\dfrac{ax + b}{cx + d}' },
+    { id: 'sqrt', title: 'График корня', formula: 'y = \\sqrt{x}' },
+  ],
 };

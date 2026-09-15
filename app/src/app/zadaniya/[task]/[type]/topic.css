@@ -789,3 +789,88 @@
     font-size: var(--fs-body);
   }
 }
+
+/* ── Раздел «Какие бывают функции» ──────────────────────────────
+   Четыре известных графика в ряд. Карточки одинаковой высоты:
+   название, формула и чертёж стоят на одних уровнях, иначе ряд
+   читается рваным. */
+
+.kinds {
+  display: grid;
+  gap: var(--space-5);
+  container-type: inline-size;
+}
+.kinds__lead {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+.kinds__grid {
+  display: grid;
+  /* Число колонок задаётся ступенями, а не auto-fit: тот на средней
+     ширине даёт три карточки и одну под ними, а ряд из четырёх
+     ломаться должен пополам. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* Ступени считаются от ширины самого раздела, а не экрана: справа
+   от него стоит колонка содержания, и на одном и том же экране места
+   у раздела бывает разное. */
+@container (min-width: 300px) {
+  .kinds__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (min-width: 700px) {
+  .kinds__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.kind {
+  display: grid;
+  /* Запас на случай, когда subgrid не поддержан: чертёж хотя бы
+     прижат к низу карточки. */
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  /* Белая, а не surface-2: у чертежа своя белая подложка, и на серой
+     карточке она читалась бы вторым прямоугольником. */
+  background: var(--color-surface);
+  text-align: center;
+}
+/* Названия бывают в одну строку и в две, поэтому строки карточек
+   общие на весь ряд: иначе формула у «Графика корня» стояла бы выше
+   соседних, а чертежи начинались вразнобой. */
+@supports (grid-template-rows: subgrid) {
+  .kind {
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+  }
+}
+
+.kind__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.kind__formula {
+  color: var(--color-text-brand);
+}
+/* Чертёж уже отдаёт max-width:100% и height:auto сам: движок кладёт
+   их в style у svg. Здесь ширина колонки под него и потолок: чертёж
+   здесь — пример формы, а не рабочее поле, и на широкой карточке
+   разрастался бы до полуэкранного квадрата. */
+.kind__chart {
+  display: block;
+  width: 100%;
+  max-width: 176px;
+  margin-inline: auto;
+  align-self: end;
+}
