@@ -14,43 +14,15 @@
 
 .prep__head {
   display: grid;
-  gap: var(--space-4);
-  align-items: center;
-}
-@container (min-width: 560px) {
-  .prep__head {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-}
-.prep__title {
-  margin-bottom: var(--space-1);
+  gap: var(--space-2);
 }
 .prep__lead {
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
   color: var(--color-text-secondary);
 }
-.prep__progress {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-/* Кольцо здесь мельче, чем в шапке темы: оно тут не главный элемент.
-   Размер меняется у всей обёртки, а не у одного svg: число внутри
-   спозиционировано по ней и иначе съезжает с центра. */
-.prep__progress .progress-ring {
-  width: 104px;
-  height: 104px;
-}
-.prep__progress .progress-ring svg {
-  width: 100%;
-  height: 100%;
-}
-.prep__progress .progress-ring .t-data-lg {
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-}
 .prep__counter {
+  margin-top: var(--space-2);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--color-text-secondary);
@@ -59,6 +31,11 @@
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
   color: var(--color-text);
+}
+/* Полоса того же вида, что у карточек навыков: высота, скругление
+   и цвета приходят из общего .pbar, здесь только ширина. */
+.prep__meter {
+  width: 100%;
 }
 
 /* ── Лента чипов ────────────────────────────────────────────── */
@@ -272,12 +249,24 @@
 
 .prep-quote {
   display: grid;
-  gap: var(--space-2);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
   padding: var(--space-5) var(--space-6);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
-  text-align: center;
+}
+/* Бюст без рамки и подложки: фон у файла прозрачный. Высота задана,
+   ширина считается сама — файл вытянутый, 1027 на 1505. */
+.prep-quote__art {
+  width: auto;
+  height: 96px;
+  flex: none;
+}
+.prep-quote__body {
+  display: grid;
+  gap: var(--space-2);
 }
 .prep-quote__text {
   margin: 0;

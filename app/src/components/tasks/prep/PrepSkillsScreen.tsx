@@ -1,10 +1,11 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { ProgressBar, ProgressRing } from '@/components/ui';
+import { ProgressBar } from '@/components/ui';
 import { prepPage } from '@/content/prepSkills';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { TaskCountIcon } from './PrepIcons';
@@ -42,21 +43,22 @@ export interface PrepSkillsScreenProps {
 export function PrepSkillsScreen({ items, solved, total, percent }: PrepSkillsScreenProps) {
   const [filter, setFilter] = useState<PrepSkillId | 'all'>('all');
   const shown = filter === 'all' ? items : items.filter((item) => item.id === filter);
-  const counter = `${solved} из ${total} заданий`;
 
   return (
     <section className="prep">
       <header className="prep__head">
-        <div className="prep__intro">
-          <h2 className="t-h2 prep__title">{prepPage.title}</h2>
-          <p className="prep__lead">{prepPage.lead}</p>
-        </div>
-        <div className="prep__progress">
-          <ProgressRing value={percent} label="заданий" srLabel={counter} />
-          <p className="prep__counter">
-            <b>{solved}</b> из {total} заданий
-          </p>
-        </div>
+        <h2 className="t-h2 prep__title">{prepPage.title}</h2>
+        <p className="prep__lead">{prepPage.lead}</p>
+        {/* Кольца здесь нет намеренно: оно стоит в шапке темы и
+            считает другое. Два кольца на экране спорили бы. */}
+        <p className="prep__counter">
+          <b>{solved}</b> из {total} заданий
+        </p>
+        <ProgressBar
+          className="prep__meter"
+          value={percent}
+          label={`Подготовительные задачи: решено ${solved} из ${total}`}
+        />
       </header>
 
       {/* Лента чипов: ниже 1024px прокручивается вбок, тень у правого
@@ -120,8 +122,20 @@ export function PrepSkillsScreen({ items, solved, total, percent }: PrepSkillsSc
       </ul>
 
       <figure className="prep-quote">
-        <blockquote className="prep-quote__text">«{prepPage.quote.text}»</blockquote>
-        <figcaption className="prep-quote__author">— {prepPage.quote.author}</figcaption>
+        {/* Бюст — декор, подпись к нему не читается: автор назван
+            текстом рядом. Фон у файла прозрачный. */}
+        <Image
+          className="prep-quote__art"
+          src="/images/bust-aristotle-glass.webp"
+          alt=""
+          width={1027}
+          height={1505}
+          loading="lazy"
+        />
+        <div className="prep-quote__body">
+          <blockquote className="prep-quote__text">«{prepPage.quote.text}»</blockquote>
+          <figcaption className="prep-quote__author">— {prepPage.quote.author}</figcaption>
+        </div>
       </figure>
     </section>
   );
