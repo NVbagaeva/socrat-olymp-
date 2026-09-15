@@ -46,9 +46,18 @@
   gap: var(--space-2);
   justify-items: end;
   text-align: right;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  max-width: 24ch;
+  /* Рукописный шрифт узкий: в кегле основного текста цитата читалась
+     мелкой и ломалась надвое. Ограничения по ширине нет — на 1440
+     она должна вставать в строку. */
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+}
+/* Не осветлённый примерный синий, как у прочих рукописных пометок,
+   а тот же, которым набран текст страницы: цитата здесь не пометка
+   на полях, её читают. */
+.topic-quote__text .hand-note {
+  color: var(--color-text-brand);
+  opacity: 1;
 }
 .topic-quote__author {
   font-size: var(--fs-caption);
