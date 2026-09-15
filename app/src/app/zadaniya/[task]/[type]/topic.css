@@ -322,6 +322,19 @@
   line-height: var(--lh-body);
   max-width: 72ch;
 }
+/* Заглушка ненаписанного раздела. Пунктир вместо сплошной рамки —
+   честный знак «здесь пока пусто»: с карточкой готового материала её
+   не спутать. */
+.theory-block__soon {
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  /* Не text-tertiary: на фоне страницы он даёт 2,47:1 — ниже нормы
+     для обычного текста. У text-secondary 4,54:1. */
+  color: var(--color-text-secondary);
+}
 
 /* Кружок с номером раздела. Нумерация своя, с содержанием не связана. */
 .theory-block__title {
