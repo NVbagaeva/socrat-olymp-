@@ -59,8 +59,9 @@ interface Persisted {
   results: Record<string, boolean>;
   attempts: Attempt[];
   progress: Record<string, number>;
-  /** Пройденные разделы кабинета: сколько из скольких. */
-  studied: { studied: number; total: number };
+  /** Сколько разделов теории изучено. Общее число не хранится:
+      оно равно длине списка разделов и считается на месте показа. */
+  studied: number;
   generatorSettings: GeneratorSettings;
   notebook: NotebookState;
 }
@@ -74,7 +75,7 @@ const INITIAL: Persisted = {
   /* DEMO-значения приходят из demo.ts и живут дальше как обычные
      данные: проценты меняются по мере решения. */
   progress: { ...demoProgress },
-  studied: { ...demoStudied },
+  studied: demoStudied,
   generatorSettings: defaultGeneratorSettings,
   notebook: { lessons: [] },
 };
@@ -111,14 +112,12 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
      React делает сам при подключении разметки. */
   const stored = useSyncExternalStore(store.subscribe, store.read, store.initial);
 
-  /* Запись могла остаться от прежней раскладки состояния, где у пары
-     разделов не было общего числа. Тогда берётся начальная пара:
-     иначе на экране оказалось бы «из undefined». */
+  /* Запись могла остаться от прежней раскладки состояния, где вместо
+     числа лежала пара «изучено и всего». Тогда берётся начальное
+     значение: иначе на экране оказалось бы «из undefined». */
   const saved = useMemo(
     () =>
-      typeof stored.studied?.total === 'number'
-        ? stored
-        : { ...stored, studied: INITIAL.studied },
+      typeof stored.studied === 'number' ? stored : { ...stored, studied: INITIAL.studied },
     [stored],
   );
   const [tasks, setTasksState] = useState<ExerciseTask[]>([]);
