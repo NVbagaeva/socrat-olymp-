@@ -105,7 +105,15 @@ const LINEAR_THEORY: TheoryBlock[] = [
   /* Пункт собран из двух прежних: «Что не является функцией» и
      «Особые прямые». Идентификатор оставлен прежний — на него уже
      ведут якоря, и менять его без нужды значит их оборвать. */
-  { id: 'not-function', title: 'Когда график не функция', type: 'chart', content: null, status: 'empty' },
+  {
+    id: 'not-function',
+    title: 'Когда график не функция',
+    type: 'chart',
+    content: null,
+    body: 'graph-not-function',
+    badge: '4',
+    status: 'ready',
+  },
   { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
   { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
   { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },

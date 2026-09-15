@@ -115,3 +115,13 @@ export const whatKinds: WhatKindsContent = {
     { id: 'sqrt', title: 'График корня', formula: 'y = \\sqrt{x}' },
   ],
 };
+
+/** Раздел «Когда график не функция». */
+export interface GraphNotFunctionContent {
+  /** Плашка в строке заголовка, у правого края. */
+  hint: string;
+}
+
+export const graphNotFunction: GraphNotFunctionContent = {
+  hint: 'Всё это — прямые. Но не все они являются графиками функций!',
+};

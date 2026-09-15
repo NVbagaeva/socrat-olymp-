@@ -874,3 +874,49 @@
   margin-inline: auto;
   align-self: end;
 }
+
+/* ── Раздел «Когда график не функция» ───────────────────────────
+   Плашка стоит в строке заголовка, у правого края. Заголовок рисует
+   общая разметка блока теории, поэтому строку задаёт сам блок, а
+   раздел раскрывается в его сетку через display: contents — иначе
+   плашка оказалась бы этажом ниже. */
+
+.theory-block:has(> .nofn) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-5);
+  row-gap: var(--space-4);
+}
+/* Отступ под заголовком теперь даёт row-gap сетки. */
+.theory-block:has(> .nofn) > .theory-block__title {
+  margin-bottom: 0;
+}
+.nofn {
+  display: contents;
+}
+.nofn__hint {
+  grid-column: 2;
+  max-width: 34ch;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-warm);
+  background: var(--color-surface-warm);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.nofn__rest {
+  grid-column: 1 / -1;
+}
+
+/* На телефоне плашка уходит под заголовок: в одну колонку она встаёт
+   сама, порядком разметки. */
+@media (max-width: 767.98px) {
+  .theory-block:has(> .nofn) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nofn__hint {
+    grid-column: 1;
+    max-width: none;
+  }
+}
