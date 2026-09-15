@@ -44,22 +44,26 @@ export function FunctionTopicPage({ section, subtopic, initialTab }: FunctionTop
             <Badge tone="info">{topic.badge}</Badge>
           </div>
           <p className="topic-head__lead">{topic.lead}</p>
+
+          {/* Цитата стоит строкой под подзаголовком, а не колонкой
+              рядом: деля ширину, они ломали друг друга. */}
+          <figure className="topic-quote">
+            <blockquote className="topic-quote__text">
+              <HandNote>«{topic.quote.text}»</HandNote>
+            </blockquote>
+            <figcaption className="topic-quote__author">— {topic.quote.author}</figcaption>
+          </figure>
         </div>
 
         {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
-        <figure className="topic-quote">
-          <figcaption className="topic-quote__text">
-            <HandNote>«{topic.quote.text}»</HandNote>
-            <span className="topic-quote__author">— {topic.quote.author}</span>
-          </figcaption>
-          <Image
-            className="topic-quote__art"
-            src="/images/bust-galileo.webp"
-            alt=""
-            width={814}
-            height={700}
-          />
-        </figure>
+        <Image
+          className="topic-head__art"
+          src="/images/bust-galileo.webp"
+          alt=""
+          width={814}
+          height={700}
+        />
+
 
         {/* Прогресс по разделам теории темы. Общее число — длина того же
             списка, из которого строится «Содержание»: второго источника
