@@ -1056,3 +1056,164 @@
 .nofn-card--not-function .nofn-card__note {
   background: var(--color-error-soft);
 }
+
+/* ── Нижний ряд: ленивец, «Не путай!», «Запомни», проверка ───────
+   Колонки неравные: у проверки вертикальной линией есть ещё и
+   чертёж, а у ленивца — только картинка. */
+
+.nofn__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  align-items: start;
+}
+@container (min-width: 460px) {
+  .nofn__bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (min-width: 760px) {
+  .nofn__bottom {
+    /* Колонки неравные: «Не путай!» и проверка несут в себе строки
+       с вердиктом и чертёж, а ленивцу хватает и узкой. */
+    grid-template-columns: 0.9fr 1.35fr 0.95fr 1.3fr;
+  }
+}
+
+/* Картинка без рамки, тени и подложки: фон у файла прозрачный.
+   По центру колонки: ряд получается высоким из-за блока с чертежом,
+   и прижатый к низу ленивец оставлял бы над собой пустое поле. */
+.nofn__art {
+  width: 100%;
+  height: auto;
+  align-self: center;
+}
+
+.nofn-note,
+.nofn-test {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.nofn-note--warm {
+  border-color: var(--color-border-warm);
+  background: var(--color-surface-warm);
+}
+.nofn-note__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.nofn-note__ico {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--color-primary);
+}
+/* У «Запомни» значок внимания — предупреждающий, не фирменный. */
+.nofn-note--warm .nofn-note__ico {
+  color: var(--color-warning);
+}
+.nofn-note__text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── «Не путай!»: формула, стрелка, вердикт ───────────────────── */
+
+.compare {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* Строка переносится, а не обрезается: на узкой колонке вердикт
+   уходит на вторую строку целиком, а не вылезает за плашку. */
+.compare__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+  /* Поля поджаты: в самой узкой колонке ряда строка должна умещаться
+     в одну, иначе вердикт съезжает под формулу. */
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.compare__formula {
+  color: var(--color-text-brand);
+}
+.compare__arrow {
+  color: var(--color-text-tertiary);
+}
+.compare__verdict .verdict__ico {
+  width: 16px;
+  height: 16px;
+}
+.compare__verdict {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* Те же два токена, что у бейджей вердикта в карточках. */
+.compare__row--function .compare__verdict {
+  color: var(--color-success);
+}
+.compare__row--not-function .compare__verdict {
+  color: var(--color-error);
+}
+.compare__row--not-function {
+  background: var(--color-error-soft);
+}
+
+/* ── Проверка вертикальной линией ─────────────────────────────── */
+
+/* Собственный контейнер: рядом ли текст с чертежом, решает ширина
+   самого блока, а не всего раздела. */
+.nofn-test {
+  container-type: inline-size;
+}
+.nofn-test__body {
+  display: grid;
+  gap: var(--space-3);
+  align-items: center;
+}
+@container (min-width: 380px) {
+  .nofn-test__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+  }
+}
+.nofn-test__text {
+  display: grid;
+  gap: var(--space-3);
+}
+/* Маркеры возвращаются явно: в base.css списки сброшены на none. */
+.nofn-test__list {
+  margin: 0;
+  list-style: disc;
+  padding-left: var(--space-5);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.nofn-test__chart {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin-inline: auto;
+}

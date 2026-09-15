@@ -217,3 +217,36 @@ export function lineKindScene(id: LineKindId) {
     ],
   };
 }
+
+
+/* ── Проверка вертикальной линией ─────────────────────────────────
+   Окружность пересекается с вертикальной прямой в двух точках —
+   значит, графиком функции она не является. Точки пересечения
+   отмечены цветом нарушения: тем же, что у бейджа «НЕ ФУНКЦИЯ». */
+
+export function verticalTestScene() {
+  return {
+    window: squareWindow(3),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [],
+    /* Точки пересечения: (0, 2) и (0, −2). */
+    points: [
+      { x: 0, y: 2, color: 'wrong', label: null },
+      { x: 0, y: -2, color: 'wrong', label: null },
+    ],
+    shapes: [
+      { type: 'circle', at: [0, 0], radius: 2, color: 'lineA', width: 3.2 },
+      /* Прямая x = 0 совпадает с осью y, поэтому рисуется пунктиром:
+         сплошная слилась бы с осью и проверять было бы нечем. */
+      { type: 'segment', from: [0, -3], to: [0, 3], color: 'lineA', style: 'dashed' },
+      { type: 'label', at: [0, -2.6], offset: [10, 0], text: 'x = 0', color: 'lineA' },
+      /* Засечки 2 и −2 — ординаты точек пересечения. Ставятся слева
+         от оси, как остальные числа: axisLabels: 'minimal' подписывает
+         только 0 и ±1. */
+      { type: 'label', at: [0, 2], offset: [-14, 0], text: '2', color: 'label' },
+      { type: 'label', at: [0, -2], offset: [-14, 0], text: '\u22122', color: 'label' },
+    ],
+  };
+}

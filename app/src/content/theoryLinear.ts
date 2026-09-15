@@ -133,10 +133,21 @@ export interface NoFnCard {
   note: Phrase[];
 }
 
+/** Строка сравнения в блоке «Не путай!». */
+export interface CompareRow {
+  formula: string;
+  verdict: 'function' | 'not-function';
+  label: string;
+}
+
 export interface GraphNotFunctionContent {
   /** Плашка в строке заголовка, у правого края. */
   hint: string;
   cards: NoFnCard[];
+  illustration: { src: string; width: number; height: number; alt: string };
+  compare: { title: string; rows: CompareRow[] };
+  remember: { title: string; text: Phrase[]; why: Phrase[] };
+  verticalTest: { title: string; lead: string; items: string[]; example: Phrase[] };
 }
 
 /* Пояснения набраны кусками, потому что переменные в них идут
@@ -219,4 +230,46 @@ export const graphNotFunction: GraphNotFunctionContent = {
       ],
     },
   ],
+  /* Облачко «Вот здесь чаще всего ошибаются!» нарисовано внутри
+     самого файла: рядом с ним ни плашек, ни HandNote быть не должно. */
+  illustration: {
+    src: '/images/sloth-pointer-mistake.webp',
+    width: 1472,
+    height: 999,
+    alt: 'Ленивец с указкой предупреждает об ошибке',
+  },
+  compare: {
+    title: 'Не путай!',
+    rows: [
+      { formula: 'y = b', verdict: 'function', label: 'функция' },
+      { formula: 'x = a', verdict: 'not-function', label: 'не функция' },
+      { formula: 'y = x', verdict: 'function', label: 'функция' },
+      { formula: 'y = -x', verdict: 'function', label: 'функция' },
+    ],
+  },
+  remember: {
+    title: 'Запомни:',
+    text: [
+      { text: 'вертикальная прямая ' },
+      { text: 'x = a', math: true },
+      { text: ' — не график функции.' },
+    ],
+    why: [
+      { text: 'Почему? Потому что одному значению ' },
+      { text: 'x', math: true },
+      { text: ' соответствуют бесконечно многие значения ' },
+      { text: 'y', math: true },
+      { text: '.' },
+    ],
+  },
+  verticalTest: {
+    title: 'Проверяем график вертикальной линией',
+    lead: 'Если вертикальная прямая пересекает график:',
+    items: ['один раз → функция;', 'более одного раза → не функция.'],
+    example: [
+      { text: 'Например, окружность ' },
+      { text: 'x^2 + y^2 = 4', math: true },
+      { text: ' пересекается с вертикальной прямой в двух точках. Значит, это не функция.' },
+    ],
+  },
 };
