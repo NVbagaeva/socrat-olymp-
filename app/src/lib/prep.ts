@@ -6,7 +6,6 @@
  */
 
 import { prepSkills, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
-import { demoPrepSolved } from '@/data/demo';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
@@ -28,47 +27,31 @@ export interface PrepSkillView {
   skill: PrepSkill;
   /** Сколько задач в наборе. */
   total: number;
-  /** Сколько решено — витринное значение из demo.ts. */
-  solved: number;
-  /** Доля решённого, 0–100. */
-  percent: number;
 }
 
 export interface PrepOverview {
   skills: PrepSkillView[];
-  solved: number;
+  /** Сколько задач во всех наборах вместе. */
   total: number;
-  percent: number;
-}
-
-function share(solved: number, total: number): number {
-  return total === 0 ? 0 : (solved / total) * 100;
 }
 
 /**
- * Состояние всех четырёх навыков разом.
+ * Состав всех четырёх навыков.
  *
- * Общее число задач и проценты считаются здесь: отдельными
- * константами они не заданы нигде, поэтому разойтись с данными
- * им не на чем.
+ * Здесь только то, что известно на сборке: какие навыки есть и
+ * сколько в каждом задач. Сколько решено — знает браузер ученика,
+ * это читается на клиенте из localStorage.
  */
 export function prepOverview(): PrepOverview {
-  const skills = prepSkills.map((skill) => {
-    const total = setSize(skill.setId);
-    /* Решено не может быть больше, чем есть: витринное число живёт
-       отдельно от наборов и при их правке могло бы обогнать длину. */
-    const solved = Math.min(demoPrepSolved[skill.id], total);
-    return { skill, total, solved, percent: share(solved, total) };
-  });
-
-  const solved = skills.reduce((sum, item) => sum + item.solved, 0);
+  const skills = prepSkills.map((skill) => ({ skill, total: setSize(skill.setId) }));
   const total = skills.reduce((sum, item) => sum + item.total, 0);
-  return { skills, solved, total, percent: share(solved, total) };
+  return { skills, total };
 }
 
-/** Витрина одного навыка. Берётся из той же выборки, что и список. */
-export function prepSkillView(id: PrepSkillId): PrepSkillView | undefined {
-  return prepOverview().skills.find((view) => view.skill.id === id);
+/** Сколько задач у навыка. */
+export function prepSkillTotal(id: PrepSkillId): number {
+  const found = prepSkills.find((skill) => skill.id === id);
+  return found === undefined ? 0 : setSize(found.setId);
 }
 
 /** Навык по части адреса. */

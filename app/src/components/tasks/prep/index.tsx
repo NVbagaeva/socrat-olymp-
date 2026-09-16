@@ -1,6 +1,9 @@
+export { PrepShell, type PrepShellProps } from './PrepShell';
 export { PrepSkills, type PrepSkillsProps } from './PrepSkills';
 export { PrepSkillsScreen, type PrepSkillItem, type PrepSkillsScreenProps } from './PrepSkillsScreen';
 export { PrepTasks, type PrepTasksProps } from './PrepTasks';
 export { PrepTaskScreen, type PrepTaskScreenProps } from './PrepTaskScreen';
 export { PrepSolution, type PrepSolutionProps } from './PrepSolution';
+export { PrepCounter, type PrepCounterProps, type PrepTotal } from './PrepCounter';
+export { PrepCardMeter, type PrepCardMeterProps } from './PrepCardMeter';
 export { TaskCountIcon } from './PrepIcons';

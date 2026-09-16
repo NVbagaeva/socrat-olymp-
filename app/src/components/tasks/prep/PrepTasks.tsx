@@ -1,5 +1,6 @@
 import type { PrepSkill } from '@/content/prepSkills';
-import { buildPrepTasks, prepSkillView } from '@/lib/prep';
+import { buildPrepTasks } from '@/lib/prep';
+import { PrepShell } from './PrepShell';
 import { PrepTaskScreen } from './PrepTaskScreen';
 
 export interface PrepTasksProps {
@@ -16,17 +17,15 @@ export interface PrepTasksProps {
  * ни движок, ни KaTeX не нужны.
  */
 export function PrepTasks({ skill, base }: PrepTasksProps) {
-  /* Витринное «решено» приходит из того же места, что и число
-     на карточке навыка: второго источника у этой пары нет. */
-  const view = prepSkillView(skill.id);
-
   return (
-    <PrepTaskScreen
-      title={skill.title}
-      tasks={buildPrepTasks(skill)}
-      listHref={`${base}/podgotovka/`}
-      tip={skill.tip}
-      solved={view === undefined ? 0 : view.solved}
-    />
+    <PrepShell base={base} active={skill.id}>
+      <PrepTaskScreen
+        skillId={skill.id}
+        title={skill.title}
+        tasks={buildPrepTasks(skill)}
+        listHref={`${base}/podgotovka/`}
+        tip={skill.tip}
+      />
+    </PrepShell>
   );
 }

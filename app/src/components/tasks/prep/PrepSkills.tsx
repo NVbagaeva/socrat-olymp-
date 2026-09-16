@@ -2,6 +2,7 @@ import { Chart } from '@/components/graph/Chart';
 import { katex } from '@/lib/graph/katex';
 import { prepOverview } from '@/lib/prep';
 import { prepSkillScene } from '@/lib/scenes';
+import { PrepShell } from './PrepShell';
 import { PrepSkillsScreen } from './PrepSkillsScreen';
 
 export interface PrepSkillsProps {
@@ -25,8 +26,6 @@ export function PrepSkills({ base }: PrepSkillsProps) {
     title: view.skill.title,
     lead: view.skill.lead,
     total: view.total,
-    solved: view.solved,
-    percent: view.percent,
     href: `${base}/podgotovka/${view.skill.id}/`,
     chart: <Chart className="prep-card__svg" scene={prepSkillScene(view.skill.id)} />,
     formula:
@@ -46,11 +45,8 @@ export function PrepSkills({ base }: PrepSkillsProps) {
   }));
 
   return (
-    <PrepSkillsScreen
-      items={items}
-      solved={overview.solved}
-      total={overview.total}
-      percent={overview.percent}
-    />
+    <PrepShell base={base} active="all">
+      <PrepSkillsScreen items={items} />
+    </PrepShell>
   );
 }

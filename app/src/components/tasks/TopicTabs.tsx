@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
@@ -22,6 +23,8 @@ export interface TopicTabsProps {
   bodies: Record<string, ReactNode>;
   /** Какая вкладка открыта при заходе. По умолчанию «О задании». */
   initial?: string;
+  /** Адрес списка навыков: вкладка подготовительных задач ведёт туда. */
+  prepHref: string;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
@@ -66,8 +69,23 @@ export function TopicTabs({
   contentsDecor,
   bodies,
   initial = 'about',
+  prepHref,
 }: TopicTabsProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [tab, setTab] = useState(initial);
+  /* У подготовительных задач свои адреса: список навыков и каждый
+     навык — отдельная страница. Поэтому вкладка не переключает
+     состояние, а ведёт на адрес списка. Иначе из навыка по ней
+     было не вернуться: вкладка там уже выбрана, менять нечего. */
+  function choose(id: string) {
+    if (id === 'prep' && pathname !== prepHref) {
+      router.push(prepHref);
+      return;
+    }
+    setTab(id);
+  }
+
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
@@ -168,7 +186,7 @@ export function TopicTabs({
       {/* Лента вкладок: ниже 1024px она прокручивается вбок, тени по
           краям показывают, что прокручивать есть куда. */}
       <div className="topic-tabs" ref={strip}>
-        <Tabs items={TABS} value={tab} onValueChange={setTab} label="Разделы темы" />
+        <Tabs items={TABS} value={tab} onValueChange={choose} label="Разделы темы" />
         <Link className="topic-tabs__link" href={tutorsHref}>
           Для репетиторов
         </Link>
