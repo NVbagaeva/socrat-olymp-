@@ -328,3 +328,322 @@
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
+
+/* ── Экран задачи навыка ────────────────────────────────────── */
+
+.ptask {
+  display: grid;
+  gap: var(--space-4);
+  container-type: inline-size;
+}
+
+.ptask__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.ptask__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.ptask__score {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+}
+.ptask__score-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.ptask__score-item--right {
+  color: var(--color-success);
+}
+.ptask__score-item--wrong {
+  color: var(--color-error);
+}
+.ptask__score-ico {
+  width: 20px;
+  height: 20px;
+}
+.ptask__score-num {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ptask__counter {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.ptask__counter b {
+  color: var(--color-text);
+}
+
+/* Ряд задач. Кружков ровно столько, сколько задач в наборе, —
+   число берётся из данных, а не из разметки. */
+.ptask__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pdot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.pdot:hover {
+  border-color: var(--color-primary);
+}
+.pdot:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pdot.is-right {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+.pdot.is-wrong {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+/* Пропущенная задача помечена точкой, а не цветом: пропуск —
+   не ошибка. */
+.pdot.is-skipped {
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.pdot.is-skipped::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+/* Текущая задача — заливка. Стоит последней: она перекрывает
+   и цвет решённой, иначе рамка спорила бы с заливкой. */
+.pdot.is-current {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.ptask__card {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+@container (min-width: 720px) {
+  .ptask__card {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+  }
+}
+.ptask__text {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+.ptask__question {
+  justify-self: stretch;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+/* Чертёж не растягивается на всю карточку: движок рисует квадрат
+   620 на 620, и во всю ширину он занял бы экран целиком. Ширину
+   держит обёртка, а не сам SVG: движок ставит ему max-width прямо
+   в атрибуте style, и оттуда его никаким правилом не подвинуть. */
+.ptask__chart {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+}
+
+.ptask__hint {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.ptask__hint-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.ptask__hint-text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.ptask__answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.ptask__label {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.ptask__input {
+  width: 100%;
+  max-width: 220px;
+}
+
+.ptask__options {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@container (min-width: 620px) {
+  .ptask__options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.popt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.popt:hover {
+  border-color: var(--color-primary);
+}
+.popt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.popt__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.popt.is-chosen {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+/* Подсвечивается только выбранный вариант: верный до проверки
+   не показываем, чужие ошибки — тем более. */
+.popt.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.popt.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+/* Плашка ответа не растягивается на всю ширину экрана: она относится
+   к полю ввода, а не к странице. */
+.pverdict {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+.pverdict--right {
+  background: var(--color-success-soft);
+}
+.pverdict--wrong {
+  background: var(--color-error-soft);
+}
+.pverdict__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.pverdict--right .pverdict__title {
+  color: var(--color-success);
+}
+.pverdict--wrong .pverdict__title {
+  color: var(--color-error);
+}
+.pverdict__lead,
+.pverdict__reason {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.pverdict__reason {
+  color: var(--color-text);
+}
+
+.ptask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

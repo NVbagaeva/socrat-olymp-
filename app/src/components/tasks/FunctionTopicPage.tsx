@@ -1,5 +1,6 @@
 import Image from 'next/image';
-import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
+import type { ReactNode } from 'react';
+import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
 import { PrepSkills } from './prep';
@@ -13,6 +14,14 @@ export interface FunctionTopicPageProps {
   subtopic: Subtopic;
   /** Вкладка, открытая при заходе: у /podgotovka/ это своя. */
   initialTab?: string;
+  /**
+   * Содержимое вкладки подготовительных задач. По умолчанию это
+   * список навыков; экран задачи подставляет себя сюда, чтобы шапка
+   * темы, кольцо разделов и лента вкладок остались на месте.
+   */
+  prep?: ReactNode;
+  /** Продолжение хлебных крошек: у экрана навыка это его название. */
+  trail?: Crumb[];
 }
 
 /**
@@ -22,7 +31,13 @@ export interface FunctionTopicPageProps {
  * в проекте нет и не будет: маршрут один, содержимое приходит из
  * data/functionTypes.ts.
  */
-export function FunctionTopicPage({ section, subtopic, initialTab }: FunctionTopicPageProps) {
+export function FunctionTopicPage({
+  section,
+  subtopic,
+  initialTab,
+  prep,
+  trail = [],
+}: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
 
@@ -33,7 +48,8 @@ export function FunctionTopicPage({ section, subtopic, initialTab }: FunctionTop
         items={[
           { label: 'Задания', href: tasksPage.href },
           { label: `№${section.no}. ${section.subtitle}`, href: `${tasksPage.href}/${section.slug}` },
-          { label: subtopic.title },
+          { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
+          ...trail,
         ]}
       />
 
@@ -76,7 +92,7 @@ export function FunctionTopicPage({ section, subtopic, initialTab }: FunctionTop
         about={<TopicAbout section={section} />}
         theory={subtopic.theory}
         bodies={theoryBodies}
-        prep={<PrepSkills base={base} />}
+        prep={prep ?? <PrepSkills base={base} />}
         tutorsHref={`${base}/dlya-repetitorov/`}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
