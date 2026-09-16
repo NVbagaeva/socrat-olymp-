@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { clsx } from 'clsx';
 import { prepPage, type PrepSkillId } from '@/content/prepSkills';
 import { prepOverview } from '@/lib/prep';
+import { PrepChips } from './PrepChips';
 import { PrepCounter } from './PrepCounter';
+import { PrepScrollOnMount } from './PrepScroll';
 
 export interface PrepShellProps {
   /** Адрес подтемы: от него считаются адреса списка и навыков. */
@@ -45,25 +45,20 @@ export function PrepShell({ base, active, children }: PrepShellProps) {
 
       {/* Лента навыков: ниже 1024px прокручивается вбок, тень у правого
           края показывает, что прокручивать есть куда. */}
-      <nav className="prep__chips" aria-label="Навыки">
-        <Link
-          className={clsx('chip', active === 'all' && 'is-active')}
-          href={listHref}
-          aria-current={active === 'all' ? 'page' : undefined}
-        >
-          {prepPage.allLabel}
-        </Link>
-        {overview.skills.map((view) => (
-          <Link
-            key={view.skill.id}
-            className={clsx('chip', active === view.skill.id && 'is-active')}
-            href={`${listHref}${view.skill.id}/`}
-            aria-current={active === view.skill.id ? 'page' : undefined}
-          >
-            {view.skill.title}
-          </Link>
-        ))}
-      </nav>
+      <PrepChips
+        allLabel={prepPage.allLabel}
+        listHref={listHref}
+        active={active}
+        items={overview.skills.map((view) => ({
+          id: view.skill.id,
+          title: view.skill.title,
+          href: `${listHref}${view.skill.id}/`,
+        }))}
+      />
+
+      {/* На телефоне подводит открытый экран к верху видимой области:
+          иначе после выбора навыка ученик остаётся на шапке темы. */}
+      <PrepScrollOnMount />
 
       {children}
     </section>

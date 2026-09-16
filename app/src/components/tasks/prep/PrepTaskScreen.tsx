@@ -7,6 +7,7 @@ import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
+import { scrollPrepSoon } from '@/lib/prepScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
 
@@ -113,6 +114,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
     setChecked(null);
     setSolution(false);
     setStep(0);
+    /* На телефоне условие следующей задачи оказывается ниже кромки
+       экрана: подводим его к глазам, а не заставляем искать. */
+    scrollPrepSoon('.ptask__card');
   }
 
   function check() {

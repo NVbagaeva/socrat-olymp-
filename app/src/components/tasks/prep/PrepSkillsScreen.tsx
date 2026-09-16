@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { prepPage } from '@/content/prepSkills';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { PrepCardMeter } from './PrepCardMeter';
+import { PrepCardLink } from './PrepScroll';
 import { TaskCountIcon } from './PrepIcons';
 
 export interface PrepSkillItem {
@@ -41,7 +41,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
           <li key={item.id}>
             {/* Кликабельна вся карточка: «Начать» внутри — часть ссылки,
                 а не вторая кнопка, иначе фокус ловил бы её отдельно. */}
-            <Link className="prep-card" href={item.href}>
+            <PrepCardLink className="prep-card" href={item.href}>
               <span className="prep-card__no" aria-hidden="true">
                 {item.no}
               </span>
@@ -64,7 +64,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
                 <PrepCardMeter id={item.id} total={item.total} title={item.title} />
                 <span className="prep-card__start">Начать →</span>
               </span>
-            </Link>
+            </PrepCardLink>
           </li>
         ))}
       </ul>
