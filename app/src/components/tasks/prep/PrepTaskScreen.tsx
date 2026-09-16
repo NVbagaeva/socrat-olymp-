@@ -29,6 +29,19 @@ export interface PrepTaskScreenProps {
   solved: number;
 }
 
+/* Начальное состояние кружков: витринное «решено» из demo.ts. */
+function seedStatus(total: number, solved: number): Status[] {
+  return Array.from({ length: total }, (_, i) => (i < solved ? 'right' : null));
+}
+
+/* Экран открывается на первой задаче с серым кружком: ученик жмёт
+   «Начать», чтобы продолжить, а не перерешивать сделанное. Решены
+   все — открывается первая, как раньше. */
+function firstOpen(status: Status[]): number {
+  const found = status.findIndex((item) => item === null || item === 'skipped');
+  return found === -1 ? 0 : found;
+}
+
 const VERDICT = {
   right: {
     title: 'Верно!',
@@ -54,10 +67,8 @@ const VERDICT = {
  * настоящего прогресса в проекте пока нет.
  */
 export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTaskScreenProps) {
-  const [index, setIndex] = useState(0);
-  const [status, setStatus] = useState<Status[]>(() =>
-    tasks.map((_, i) => (i < solved ? 'right' : null)),
-  );
+  const [status, setStatus] = useState<Status[]>(() => seedStatus(tasks.length, solved));
+  const [index, setIndex] = useState(() => firstOpen(seedStatus(tasks.length, solved)));
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Разбор: раскрыт ли он и какой шаг открыт. */
