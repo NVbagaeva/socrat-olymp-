@@ -69,7 +69,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   /* Пусто — задачу выбирает сам экран: первую нерешённую. Как только
      ученик куда-то перешёл или нажал «Проверить», выбор закрепляется
      за ним, иначе экран уезжал бы вперёд прямо из-под ответа. */
-  const [chosen, setChosen] = useState<number | null>(null);
+  const [picked, setPicked] = useState<number | null>(null);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Разбор: раскрыт ли он и какой шаг открыт. */
@@ -84,7 +84,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
      отрисовке решённых ещё нет, и открыта первая задача. Когда
      прогресс приезжает, экран сам встаёт на первую нерешённую —
      это считается при отрисовке, без побочных эффектов. */
-  const index = chosen ?? firstOpen(status);
+  const index = picked ?? firstOpen(status);
 
   const found = tasks[index];
   if (found === undefined) {
@@ -108,7 +108,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   }
 
   function open(next: number) {
-    setChosen(next);
+    setPicked(next);
     setValue('');
     setChecked(null);
     setSolution(false);
@@ -126,7 +126,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
       task.answerType === 'choice' ? value === task.answer : sameNumber(value, task.answer);
     /* Задача закрепляется за экраном: после верного ответа она станет
        решённой, а экран должен остаться на ней с разбором и плашкой. */
-    setChosen(index);
+    setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
     if (correct) {
       /* Запись в хранилище: отсюда же перерисуются счётчик вкладки
