@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ProgressBar } from '@/components/ui';
 import { prepPage } from '@/content/prepSkills';
 import type { PrepSkillId } from '@/content/prepSkills';
+import { PrepCardMeter } from './PrepCardMeter';
 import { TaskCountIcon } from './PrepIcons';
 
 export interface PrepSkillItem {
@@ -12,8 +12,6 @@ export interface PrepSkillItem {
   title: string;
   lead: string;
   total: number;
-  solved: number;
-  percent: number;
   /** Адрес тренажёра навыка. */
   href: string;
   /** Миниатюра чертежа: её собирает движок на сервере. */
@@ -63,12 +61,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
               </span>
 
               <span className="prep-card__bottom">
-                <span className="prep-card__meter">
-                  <ProgressBar value={item.percent} label={`${item.title}: решено задач`} />
-                  <span className="prep-card__done">
-                    {item.solved} из {item.total}
-                  </span>
-                </span>
+                <PrepCardMeter id={item.id} total={item.total} title={item.title} />
                 <span className="prep-card__start">Начать →</span>
               </span>
             </Link>

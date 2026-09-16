@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { ProgressBar } from '@/components/ui';
 import { prepPage, type PrepSkillId } from '@/content/prepSkills';
 import { prepOverview } from '@/lib/prep';
+import { PrepCounter } from './PrepCounter';
 
 export interface PrepShellProps {
   /** Адрес подтемы: от него считаются адреса списка и навыков. */
@@ -34,14 +34,12 @@ export function PrepShell({ base, active, children }: PrepShellProps) {
         <h2 className="t-h2 prep__title">{prepPage.title}</h2>
         <p className="prep__lead">{prepPage.lead}</p>
         {/* Кольца здесь нет намеренно: оно стоит в шапке темы и
-            считает другое. Два кольца на экране спорили бы. */}
-        <p className="prep__counter">
-          <b>{overview.solved}</b> из {overview.total} заданий
-        </p>
-        <ProgressBar
-          className="prep__meter"
-          value={overview.percent}
-          label={`Подготовительные задачи: решено ${overview.solved} из ${overview.total}`}
+            считает другое. Два кольца на экране спорили бы.
+
+            Счётчик клиентский: сколько решено, знает только браузер
+            ученика. На сборке известны лишь длины наборов. */}
+        <PrepCounter
+          totals={overview.skills.map((view) => ({ id: view.skill.id, total: view.total }))}
         />
       </header>
 

@@ -1,18 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
+import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
 
 /** Как закончилась работа над задачей. Пусто — ещё не бралась. */
 type Status = 'right' | 'wrong' | 'skipped' | null;
 
+/** Что случилось с задачей в этой сессии и не попало в хранилище. */
+type Attempt = 'wrong' | 'skipped';
+
 export interface PrepTaskScreenProps {
+  /** Навык: под ним прогресс лежит в хранилище браузера. */
+  skillId: string;
   /** Название навыка: заголовок экрана. */
   title: string;
   /** Десять задач навыка, собранные на сборке. */
@@ -21,17 +27,6 @@ export interface PrepTaskScreenProps {
   listHref: string;
   /** Приём навыка для плашки «Запомни!» в разборе. */
   tip: string;
-  /**
-   * Сколько задач навыка уже решено — витринное число из demo.ts,
-   * то же самое, что стоит на карточке навыка. С него экран
-   * начинает и к нему возвращается после перезагрузки страницы.
-   */
-  solved: number;
-}
-
-/* Начальное состояние кружков: витринное «решено» из demo.ts. */
-function seedStatus(total: number, solved: number): Status[] {
-  return Array.from({ length: total }, (_, i) => (i < solved ? 'right' : null));
 }
 
 /* Экран открывается на первой задаче с серым кружком: ученик жмёт
@@ -59,21 +54,46 @@ const VERDICT = {
  *
  * Все десять задач приходят готовыми пропсами и живут на одном
  * экране: смена задачи — это состояние, а не переход по адресу.
- * Иначе счётчики верных и неверных обнулялись бы на каждой задаче —
- * хранить их между страницами нечем, localStorage в этой вкладке
- * мы не используем.
+ * Сорок лишних страниц в экспорте ради того, чему адрес не нужен,
+ * заводить незачем.
  *
- * Состояние не переживает перезагрузку страницы, и это осознанно:
- * настоящего прогресса в проекте пока нет.
+ * Решённые задачи переживают перезагрузку: они лежат в localStorage
+ * браузера. Ошибки и пропуски — нет, они живут только в этой сессии.
  */
-export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTaskScreenProps) {
-  const [status, setStatus] = useState<Status[]>(() => seedStatus(tasks.length, solved));
-  const [index, setIndex] = useState(() => firstOpen(seedStatus(tasks.length, solved)));
+export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTaskScreenProps) {
+  /* Решённые задачи приходят из хранилища браузера, ошибки
+     и пропуски живут только в этой сессии: сегодня ошибся, завтра
+     решил — вчерашняя ошибка ничего не значит. */
+  const progress = usePrepProgress();
+  const [attempts, setAttempts] = useState<Record<number, Attempt>>({});
+  const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Разбор: раскрыт ли он и какой шаг открыт. */
   const [solution, setSolution] = useState(false);
   const [step, setStep] = useState(0);
+
+  const status: Status[] = tasks.map((item) =>
+    isSolved(progress, skillId, item.no) ? 'right' : (attempts[item.no] ?? null),
+  );
+
+  /* Хранилище читается только после монтирования, поэтому при первой
+     отрисовке решённых ещё не видно и открыта первая задача. Как
+     только прогресс приехал, переходим к первой нерешённой — но
+     лишь пока ученик сам никуда не переключился. */
+  const moved = useRef(false);
+  useEffect(() => {
+    if (moved.current) {
+      return;
+    }
+    const start = firstOpen(status);
+    if (start !== 0) {
+      moved.current = true;
+      setIndex(start);
+    }
+    /* Следим за прогрессом, а не за состоянием: список статусов
+       пересчитывается на каждой отрисовке. */
+  }, [progress]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const found = tasks[index];
   if (found === undefined) {
@@ -91,13 +111,13 @@ export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTask
   const wrong = status.filter((item) => item === 'wrong').length;
   const ready = value.trim() !== '';
 
-  /* Счётчики считаются из тех же значений, что красят кружки:
-     разойтись им не на чем. */
-  function mark(next: Status) {
-    setStatus((prev) => prev.map((item, i) => (i === index ? next : item)));
+  /* Неудачные попытки в хранилище не уходят: там только решённое. */
+  function remember(next: Attempt) {
+    setAttempts((prev) => ({ ...prev, [task.no]: next }));
   }
 
   function open(next: number) {
+    moved.current = true;
     setIndex(next);
     setValue('');
     setChecked(null);
@@ -115,11 +135,18 @@ export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTask
     const correct =
       task.answerType === 'choice' ? value === task.answer : sameNumber(value, task.answer);
     setChecked(correct ? 'right' : 'wrong');
-    mark(correct ? 'right' : 'wrong');
+    if (correct) {
+      /* Запись в хранилище: отсюда же перерисуются счётчик вкладки
+         и полоса на карточке навыка. Повторное решение той же задачи
+         ничего не добавит. */
+      markSolved(skillId, task.no);
+    } else {
+      remember('wrong');
+    }
   }
 
   function skip() {
-    mark('skipped');
+    remember('skipped');
     if (!last) {
       open(index + 1);
     }
