@@ -4,8 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
-import type { TheoryBlock } from '@/content/sections';
+import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { TopicContents } from './TopicContents';
+import { TutorMenu } from './TutorMenu';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -14,15 +15,17 @@ export interface TopicTabsProps {
   theory: TheoryBlock[];
   /** Экран подготовительных задач: собран на сервере. */
   prep: ReactNode;
-  /** Материалы для репетиторов: собраны на сервере. */
-  tutors: ReactNode;
-  /** Адрес вкладки «Для репетиторов». */
-  tutorsHref: string;
+  /** Материалы для репетиторов: подпись кнопки и карточки меню. */
+  tutors: ExamSection['tutors'];
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
-  /** Какая вкладка открыта при заходе. По умолчанию «О задании». */
+  /**
+   * Что открыто при заходе. По умолчанию «О задании». Значение
+   * 'tutors' — это не вкладка: страница открывается на «О задании»
+   * с раскрытым меню материалов.
+   */
   initial?: string;
   /** Адрес списка навыков: вкладка подготовительных задач ведёт туда. */
   prepHref: string;
@@ -49,16 +52,16 @@ const TABS = [
   { id: 'prep', label: 'Подготовительные задачи' },
   { id: 'trainer', label: 'Тренажёр' },
   { id: 'generator', label: 'Генератор' },
-  { id: 'tutors', label: 'Для репетиторов' },
 ];
 
 /**
  * Вкладки страницы темы и содержание к ним.
  *
- * «Для репетиторов» стоит в той же ленте, но это ссылка на отдельную
- * страницу, а не вкладка: она лежит рядом с набором вкладок, а не
- * внутри него — иначе клавиатурный обход по стрелкам обещал бы
- * переключение содержимого, которого не происходит.
+ * «Для репетиторов» стоит шестым в той же ленте, но это не вкладка:
+ * там не раздел, а два файла для скачивания, и кнопка раскрывает
+ * меню под собой. Поэтому она лежит рядом с набором вкладок, а не
+ * внутри него — иначе обход стрелками обещал бы переключение
+ * содержимого, которого не происходит.
  *
  * Содержание темы на широком экране — правая колонка, ниже 1024px —
  * кнопка и шторка. Список в обоих случаях один и тот же.
@@ -68,7 +71,6 @@ export function TopicTabs({
   theory,
   prep,
   tutors,
-  tutorsHref,
   contentsDecor,
   bodies,
   initial = 'about',
@@ -76,15 +78,19 @@ export function TopicTabs({
 }: TopicTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [tab, setTab] = useState(initial);
-  /* У подготовительных задач и материалов для репетиторов свои
-     адреса. Поэтому такая вкладка не переключает состояние, а ведёт
-     на свой адрес: иначе из навыка по ней было не вернуться —
-     вкладка там уже выбрана, менять нечего. */
+  /* Заход по адресу /dlya-repetitorov/ открывает ту же страницу темы
+     с раскрытым меню: вкладка при этом обычная, первая. */
+  const [tab, setTab] = useState(initial === 'tutors' ? 'about' : initial);
+  const [menu, setMenu] = useState(initial === 'tutors');
+
+  /* У подготовительных задач свой адрес. Поэтому эта вкладка не
+     переключает состояние, а ведёт туда: иначе из навыка по ней было
+     не вернуться — вкладка там уже выбрана, менять нечего. */
   function choose(id: string) {
-    const href = id === 'prep' ? prepHref : id === 'tutors' ? tutorsHref : null;
-    if (href !== null && pathname !== href) {
-      router.push(href);
+    /* Переход на любую вкладку закрывает меню материалов. */
+    setMenu(false);
+    if (id === 'prep' && pathname !== prepHref) {
+      router.push(prepHref);
       return;
     }
     setTab(id);
@@ -188,10 +194,18 @@ export function TopicTabs({
   return (
     <>
       {/* Лента вкладок: ниже 1024px она прокручивается вбок, тени по
-          краям показывают, что прокручивать есть куда. */}
-      <div className="topic-tabs" ref={strip}>
+          краям показывают, что прокручивать есть куда. Ленту держит
+          меню материалов: оно висит под кнопкой и не должно попасть
+          под подрезку прокрутки. */}
+      <TutorMenu
+        items={tutors.items}
+        label={tutors.title}
+        open={menu}
+        onOpenChange={setMenu}
+        stripRef={strip}
+      >
         <Tabs items={TABS} value={tab} onValueChange={choose} label="Разделы темы" />
-      </div>
+      </TutorMenu>
 
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
         <div className="topic-panel">
@@ -269,8 +283,6 @@ export function TopicTabs({
               description="Раздел появится, когда будет решено, что именно он настраивает."
             />
           ) : null}
-
-          {tab === 'tutors' ? tutors : null}
         </div>
 
         {/* Правая колонка: только на вкладке теории и только от 1024px —

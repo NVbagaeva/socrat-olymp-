@@ -135,8 +135,6 @@
   border-bottom: 0;
   flex: 0 0 auto;
 }
-/* «Для репетиторов» — такая же вкладка, как остальные: отдельной
-   ссылки рядом с набором больше нет. */
 .topic-tabs .tabs button {
   white-space: nowrap;
 }
@@ -629,70 +627,193 @@
   line-height: var(--lh-caption);
 }
 
-/* ── Страница «Для репетиторов» ─────────────────────────────── */
+/* ── «Для репетиторов»: кнопка в ленте и меню под ней ───────── */
 
-/* ── Вкладка «Для репетиторов» ──────────────────────────────── */
-
-/* Материалы живут вкладкой, а не отдельной страницей: шапка темы
-   и лента вкладок остаются на месте. Карточки собраны как карточки
-   навыков — та же заливка, рамка, скругление и те же отступы. */
-.tutors {
-  display: grid;
-  gap: var(--space-5);
-  container-type: inline-size;
+/* Раздела с содержимым здесь нет — есть два файла для скачивания.
+   Кнопка стоит шестой в ленте, а меню лежит рядом с лентой: сама
+   лента прокручивается вбок и подрезала бы всё, что из неё торчит. */
+.topic-tabs-row {
+  position: relative;
 }
-.tutors__head {
+/* Кнопка занимает в ленте ровно столько же, сколько вкладка: те же
+   поля и тот же кегль. Заливку несёт внутренняя плашка — её поля
+   выбраны отрицательными отступами, поэтому раскрытая кнопка красится,
+   но лента от этого не становится выше. */
+.topic-tabs__more {
+  flex: 0 0 auto;
+  padding: 0 0 var(--space-3);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color var(--dur-switch) var(--ease);
+}
+.topic-tabs__more:hover {
+  color: var(--color-text);
+}
+.topic-tabs__more[aria-expanded='true'] {
+  color: var(--color-primary);
+}
+.topic-tabs__more-in {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px var(--space-3);
+  margin: -2px calc(var(--space-3) * -1);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-switch) var(--ease);
+}
+.topic-tabs__more[aria-expanded='true'] .topic-tabs__more-in {
+  background: var(--color-surface-soft);
+}
+.topic-tabs__more svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--dur-switch) var(--ease);
+}
+.topic-tabs__more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* Меню. Ширину и сдвиг ставит компонент: место кнопки в прокрученной
+   ленте из стиля не вычислить. --nose — центр носика, он же держит
+   меню привязанным к кнопке, когда его сдвинули от края экрана. */
+.tmenu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 20;
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  animation: tmenu-in 140ms var(--ease);
+}
+.tmenu::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: var(--nose, 50%);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+  border-top-left-radius: 2px;
+  transform: rotate(45deg);
+}
+@keyframes tmenu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tmenu {
+    animation: none;
+  }
+}
+.tmenu__list {
   display: grid;
   gap: var(--space-2);
-}
-.tutors__lead {
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  color: var(--color-text-secondary);
-}
-.tutors__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
   list-style: none;
   padding: 0;
   margin: 0;
 }
-@container (min-width: 620px) {
-  .tutors__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* Материала ещё нет: карточка приглушена и не кликабельна. Цвет
-   текста приходит из токена вторичного текста, а не из прозрачности:
-   так заголовок остаётся читаемым. */
-.tutors-card {
+
+/* Карточка материала: плашка с иконкой, название с описанием и плашка
+   скачивания. Нажимается вся карточка, а не одна стрелка справа. */
+.tutor-card {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
   gap: var(--space-3);
-  height: 100%;
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-decoration: none;
+  transition:
+    background-color var(--dur-switch) var(--ease),
+    border-color var(--dur-switch) var(--ease);
+}
+a.tutor-card:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-strong);
+}
+.tutor-card__icon,
+.tutor-card__go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.tutor-card__icon svg,
+.tutor-card__go svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Подпись PDF внутри листа: буквы залиты, а не обведены. */
+.tutor-card__icon text {
+  fill: currentColor;
+  stroke: none;
+  font-size: 7px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.tutor-card__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.tutor-card__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.tutor-card__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Файла ещё нет: карточка приглушена. Цвет приходит из токенов
+   вторичного и третичного текста, а не из прозрачности — так
+   название остаётся читаемым. */
+.tutor-card--soon {
   background: var(--color-surface-2);
   cursor: default;
 }
-.tutors-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+.tutor-card--soon .tutor-card__icon,
+.tutor-card--soon .tutor-card__go {
+  background: var(--color-track);
+  color: var(--color-text-tertiary);
 }
-.tutors-card__title {
-  margin: 0;
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
-  font-weight: 700;
+.tutor-card--soon .tutor-card__title {
   color: var(--color-text-secondary);
 }
-.tutors-card__lead {
-  margin: 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+.tutor-card--soon .tutor-card__lead {
   color: var(--color-text-tertiary);
 }
 

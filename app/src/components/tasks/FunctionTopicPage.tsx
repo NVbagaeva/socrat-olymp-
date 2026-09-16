@@ -5,7 +5,6 @@ import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
 import { PrepSkills } from './prep';
 import { TopicAbout } from './TopicAbout';
-import { TutorMaterials } from './TutorMaterials';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { TopicTabs } from './TopicTabs';
@@ -13,7 +12,10 @@ import { TopicTabs } from './TopicTabs';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
-  /** Вкладка, открытая при заходе: у /podgotovka/ это своя. */
+  /**
+   * Что открыто при заходе: у /podgotovka/ своя вкладка, у
+   * /dlya-repetitorov/ — раскрытое меню материалов.
+   */
   initialTab?: string;
   /**
    * Содержимое вкладки подготовительных задач. По умолчанию это
@@ -95,8 +97,7 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
-        tutors={<TutorMaterials section={section} />}
-        tutorsHref={`${base}/dlya-repetitorov/`}
+        tutors={section.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
             <Image

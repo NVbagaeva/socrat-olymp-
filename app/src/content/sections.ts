@@ -51,11 +51,19 @@ export interface SectionAbout {
   later: { title: string; text: string; action: string };
 }
 
-/** Материалы для репетиторов: отдельная страница, две карточки. */
+/** Материал для репетиторов: карточка в меню «Для репетиторов». */
 export interface TutorMaterial {
   id: string;
   title: string;
   lead: string;
+  /** Какую иконку рисовать: лист с текстом или лист с подписью PDF. */
+  icon: 'doc' | 'pdf';
+  /**
+   * Адрес файла для скачивания от корня сайта, например
+   * '/materials/12-linear-workbook.pdf'. Сам файл лежит в app/public
+   * по тому же пути. Пока поля нет, карточка приглушена и не нажимается.
+   */
+  file?: string;
 }
 
 export interface ExamSection {
@@ -73,7 +81,7 @@ export interface ExamSection {
   dialogHint: string;
   /** Вкладка «О задании» страницы подтемы. */
   about: SectionAbout;
-  /** Страница «Для репетиторов»: заголовок, подзаголовок и карточки. */
+  /** Меню «Для репетиторов»: подпись кнопки и карточки материалов. */
   tutors: { title: string; lead: string; items: TutorMaterial[] };
   /** Шапка страницы подтемы: одна на все типы функций раздела. */
   topic: {
@@ -159,11 +167,13 @@ export const sections: ExamSection[] = [
           id: 'workbook',
           title: 'Рабочая тетрадь для репетиторов',
           lead: 'Готовые материалы для занятий',
+          icon: 'doc',
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
           lead: 'Все задания по теме в одном файле',
+          icon: 'pdf',
         },
       ],
     },
