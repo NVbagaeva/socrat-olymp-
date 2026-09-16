@@ -64,8 +64,13 @@
 .prep__chips::-webkit-scrollbar {
   display: none;
 }
+/* Чип — ссылка на свой экран: список навыков или навык. Оформление
+   осталось прежним, подчёркивание ссылке здесь ни к чему. */
 .chip {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   padding: var(--space-3) var(--space-5);
   border: 0;
   border-radius: var(--radius-pill);
@@ -85,6 +90,10 @@
 .chip.is-active {
   background: var(--color-surface-brand);
   color: var(--color-text-inverse);
+}
+.chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* ── Карточки навыков ───────────────────────────────────────── */

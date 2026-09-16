@@ -1,3 +1,4 @@
+export { PrepShell, type PrepShellProps } from './PrepShell';
 export { PrepSkills, type PrepSkillsProps } from './PrepSkills';
 export { PrepSkillsScreen, type PrepSkillItem, type PrepSkillsScreenProps } from './PrepSkillsScreen';
 export { PrepTasks, type PrepTasksProps } from './PrepTasks';

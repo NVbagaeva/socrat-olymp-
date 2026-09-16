@@ -1,5 +1,6 @@
 import type { PrepSkill } from '@/content/prepSkills';
 import { buildPrepTasks, prepSkillView } from '@/lib/prep';
+import { PrepShell } from './PrepShell';
 import { PrepTaskScreen } from './PrepTaskScreen';
 
 export interface PrepTasksProps {
@@ -21,12 +22,14 @@ export function PrepTasks({ skill, base }: PrepTasksProps) {
   const view = prepSkillView(skill.id);
 
   return (
-    <PrepTaskScreen
-      title={skill.title}
-      tasks={buildPrepTasks(skill)}
-      listHref={`${base}/podgotovka/`}
-      tip={skill.tip}
-      solved={view === undefined ? 0 : view.solved}
-    />
+    <PrepShell base={base} active={skill.id}>
+      <PrepTaskScreen
+        title={skill.title}
+        tasks={buildPrepTasks(skill)}
+        listHref={`${base}/podgotovka/`}
+        tip={skill.tip}
+        solved={view === undefined ? 0 : view.solved}
+      />
+    </PrepShell>
   );
 }

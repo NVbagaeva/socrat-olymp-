@@ -2,6 +2,7 @@ import { Chart } from '@/components/graph/Chart';
 import { katex } from '@/lib/graph/katex';
 import { prepOverview } from '@/lib/prep';
 import { prepSkillScene } from '@/lib/scenes';
+import { PrepShell } from './PrepShell';
 import { PrepSkillsScreen } from './PrepSkillsScreen';
 
 export interface PrepSkillsProps {
@@ -46,11 +47,8 @@ export function PrepSkills({ base }: PrepSkillsProps) {
   }));
 
   return (
-    <PrepSkillsScreen
-      items={items}
-      solved={overview.solved}
-      total={overview.total}
-      percent={overview.percent}
-    />
+    <PrepShell base={base} active="all">
+      <PrepSkillsScreen items={items} />
+    </PrepShell>
   );
 }

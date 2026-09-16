@@ -93,6 +93,7 @@ export function FunctionTopicPage({
         theory={subtopic.theory}
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
+        prepHref={`${base}/podgotovka/`}
         tutorsHref={`${base}/dlya-repetitorov/`}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
