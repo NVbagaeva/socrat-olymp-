@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { requestPrepScroll, scrollPrepTo, takePrepScroll } from '@/lib/prepScroll';
+import { usePathname } from 'next/navigation';
+import { requestPrepScroll, scrollPrepTo, takePrepScroll, usePrepNarrow } from '@/lib/prepScroll';
 
 /**
  * Подводит экран вкладки к нужному месту после перехода изнутри.
@@ -12,6 +13,10 @@ import { requestPrepScroll, scrollPrepTo, takePrepScroll } from '@/lib/prepScrol
  * вызывают: намерение живёт только между кликом и отрисовкой.
  */
 export function PrepScrollOnMount() {
+  /* Ключ — адрес: экран вкладки может остаться тем же компонентом,
+     и тогда одного монтирования мало. */
+  const pathname = usePathname();
+
   useEffect(() => {
     const target = takePrepScroll();
     if (target === null) {
@@ -23,7 +28,7 @@ export function PrepScrollOnMount() {
       scrollPrepTo(target === 'skill' ? '.ptask__head' : '.prep__title');
     });
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [pathname]);
 
   return null;
 }
@@ -36,8 +41,15 @@ export interface PrepCardLinkProps {
 
 /** Карточка навыка: та же ссылка, но помечает переход как внутренний. */
 export function PrepCardLink({ href, className, children }: PrepCardLinkProps) {
+  const narrow = usePrepNarrow();
+
   return (
-    <Link className={className} href={href} onClick={() => requestPrepScroll('skill')}>
+    <Link
+      className={className}
+      href={href}
+      scroll={!narrow}
+      onClick={() => requestPrepScroll('skill')}
+    >
       {children}
     </Link>
   );

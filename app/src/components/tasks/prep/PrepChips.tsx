@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { clsx } from 'clsx';
-import { requestPrepScroll } from '@/lib/prepScroll';
+import { requestPrepScroll, usePrepNarrow } from '@/lib/prepScroll';
 
 export interface PrepChip {
   id: string;
@@ -27,11 +27,17 @@ export interface PrepChipsProps {
  * на телефоне подведёт себя к верху видимой области.
  */
 export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps) {
+  /* На узком экране прокруткой распоряжаемся сами: Next иначе увёл бы
+     страницу к самому верху, на шапку темы, и наша подводка к делу
+     оказалась бы затёрта. На широком всё остаётся как было. */
+  const narrow = usePrepNarrow();
+
   return (
     <nav className="prep__chips" aria-label="Навыки">
       <Link
         className={clsx('chip', active === 'all' && 'is-active')}
         href={listHref}
+        scroll={!narrow}
         aria-current={active === 'all' ? 'page' : undefined}
         onClick={() => requestPrepScroll('list')}
       >
@@ -42,6 +48,7 @@ export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps)
           key={item.id}
           className={clsx('chip', active === item.id && 'is-active')}
           href={item.href}
+          scroll={!narrow}
           aria-current={active === item.id ? 'page' : undefined}
           onClick={() => requestPrepScroll('skill')}
         >

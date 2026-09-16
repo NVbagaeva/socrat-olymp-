@@ -12,6 +12,8 @@
  * намеренно. Двигается только видимая область.
  */
 
+import { useSyncExternalStore } from 'react';
+
 /* Ниже 1024px содержимое вкладки уходит под шапку темы. Тот же порог,
    по которому в этой вкладке прокручиваются вбок лента вкладок
    и ряд навыков. */
@@ -71,4 +73,27 @@ export function scrollPrepTo(selector: string, gap = 12): void {
 /** То же, но следующим кадром: после того, как экран перерисовался. */
 export function scrollPrepSoon(selector: string, gap = 12): void {
   requestAnimationFrame(() => scrollPrepTo(selector, gap));
+}
+
+/* ── Узкий экран ──────────────────────────────────────────────── */
+
+function subscribeNarrow(listener: () => void): () => void {
+  const list = window.matchMedia(NARROW);
+  list.addEventListener('change', listener);
+  return () => list.removeEventListener('change', listener);
+}
+
+/**
+ * Узкий ли экран сейчас.
+ *
+ * На сервере ответ всегда «нет»: там ширины окна не существует.
+ * Значение нужно только обработчику клика, в разметку оно не попадает,
+ * поэтому расхождению при гидратации взяться неоткуда.
+ */
+export function usePrepNarrow(): boolean {
+  return useSyncExternalStore(
+    subscribeNarrow,
+    () => matches(NARROW),
+    () => false,
+  );
 }
