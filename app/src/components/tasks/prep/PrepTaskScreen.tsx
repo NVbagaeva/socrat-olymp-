@@ -75,12 +75,15 @@ export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTask
   const [solution, setSolution] = useState(false);
   const [step, setStep] = useState(0);
 
-  const task = tasks[index];
-  if (task === undefined) {
+  const found = tasks[index];
+  if (found === undefined) {
     /* Набор пуст — показывать нечего. В данных такого не бывает, но
        обращение по индексу в TypeScript честно необязательно. */
     return null;
   }
+  /* Отдельная запись с объявленным типом: обработчики ниже —
+     замыкания, а в них проверка выше уже не видна. */
+  const task: PrepTask = found;
 
   const total = tasks.length;
   const last = index === total - 1;

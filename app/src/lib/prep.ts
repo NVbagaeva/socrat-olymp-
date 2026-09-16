@@ -228,12 +228,11 @@ function viewBlock(block: EngineBlock): PrepBlock | null {
   if (block.type === 'scene') {
     return { type: 'chart', svg: renderGraph(block.scene) as string };
   }
-  if (block.type === 'callout' || block.type === 'details') {
-    return {
-      type: block.type,
-      title: block.title ?? '',
-      blocks: viewBlocks(block.blocks ?? []),
-    };
+  if (block.type === 'callout') {
+    return { type: 'callout', title: block.title ?? '', blocks: viewBlocks(block.blocks ?? []) };
+  }
+  if (block.type === 'details') {
+    return { type: 'details', title: block.title ?? '', blocks: viewBlocks(block.blocks ?? []) };
   }
   return null;
 }
