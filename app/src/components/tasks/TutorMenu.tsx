@@ -21,6 +21,38 @@ export interface TutorMenuProps {
 const MENU_MAX = 560;
 /** Отступ носика от края меню: ближе он утыкается в скругление. */
 const NOSE_EDGE = 20;
+/* Растушёвка по краям ленты: под ней кнопка читалась бы наполовину
+   выцветшей, поэтому подводим её с этим отступом. То же число стоит
+   в TopicTabs у подводки активной вкладки. */
+const STRIP_FADE = 32;
+
+/** Строка вкладок, лента и кнопка — всё берётся от узла меню: на
+    первой отрисовке ссылка на обёртку ещё не проставлена. */
+function parts(node: HTMLElement) {
+  const row = node.parentElement;
+  return {
+    row,
+    strip: row?.querySelector<HTMLElement>('.topic-tabs') ?? null,
+    button: row?.querySelector<HTMLElement>('.topic-tabs__more') ?? null,
+  };
+}
+
+/** Кнопка не должна остаться за кромкой ленты: меню без неё висит
+    непонятно от чего. Лента доводится мгновенно — меню появляется
+    сразу на месте, без догоняющего сдвига. */
+function reveal(strip: HTMLElement, button: HTMLElement): void {
+  const box = strip.getBoundingClientRect();
+  const rect = button.getBoundingClientRect();
+  let shift = 0;
+  if (rect.right > box.right - STRIP_FADE) {
+    shift = rect.right - box.right + STRIP_FADE;
+  } else if (rect.left < box.left + STRIP_FADE) {
+    shift = rect.left - box.left - STRIP_FADE;
+  }
+  if (shift !== 0) {
+    strip.scrollBy({ left: shift, behavior: 'auto' });
+  }
+}
 
 /**
  * Подводка меню под кнопку.
@@ -30,11 +62,8 @@ const NOSE_EDGE = 20;
  * заранее не известно. За правый край меню не выпускаем — сдвигаем
  * влево, а носик оставляем над кнопкой.
  */
-function place(
-  row: HTMLDivElement | null,
-  button: HTMLButtonElement | null,
-  node: HTMLElement,
-): void {
+function place(node: HTMLElement): void {
+  const { row, button } = parts(node);
   if (row === null || button === null) {
     return;
   }
@@ -90,7 +119,6 @@ export function TutorMenu({
   stripRef,
 }: TutorMenuProps) {
   const id = useId();
-  const row = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement | null>(null);
 
@@ -100,9 +128,14 @@ export function TutorMenu({
      отрисовке и подводка шла бы по кругу. */
   const attach = useCallback((node: HTMLDivElement | null) => {
     menu.current = node;
-    if (node !== null) {
-      place(row.current, button.current, node);
+    if (node === null) {
+      return;
     }
+    const { strip, button: more } = parts(node);
+    if (strip !== null && more !== null) {
+      reveal(strip, more);
+    }
+    place(node);
   }, []);
 
   /* Закрытие: Escape, щелчок мимо меню. Переход на другую вкладку
@@ -133,7 +166,7 @@ export function TutorMenu({
     const again = () => {
       const node = menu.current;
       if (node !== null) {
-        place(row.current, button.current, node);
+        place(node);
       }
     };
 
@@ -152,7 +185,7 @@ export function TutorMenu({
   }, [open, onOpenChange, stripRef]);
 
   return (
-    <div className="topic-tabs-row" ref={row}>
+    <div className="topic-tabs-row">
       <div className="topic-tabs" ref={stripRef}>
         {children}
         <button

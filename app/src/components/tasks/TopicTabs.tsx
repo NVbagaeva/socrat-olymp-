@@ -80,8 +80,9 @@ export function TopicTabs({
   const pathname = usePathname();
   /* Заход по адресу /dlya-repetitorov/ открывает ту же страницу темы
      с раскрытым меню: вкладка при этом обычная, первая. */
-  const [tab, setTab] = useState(initial === 'tutors' ? 'about' : initial);
-  const [menu, setMenu] = useState(initial === 'tutors');
+  const opensMenu = initial === 'tutors';
+  const [tab, setTab] = useState(opensMenu ? 'about' : initial);
+  const [menu, setMenu] = useState(opensMenu);
 
   /* У подготовительных задач свой адрес. Поэтому эта вкладка не
      переключает состояние, а ведёт туда: иначе из навыка по ней было
@@ -128,9 +129,15 @@ export function TopicTabs({
   /* Активная вкладка не должна оставаться за кромкой ленты. Сдвиг
      считается по самой ленте, а не через scrollIntoView: тот утянул бы
      за собой и страницу по вертикали. */
+  const firstRun = useRef(true);
   useEffect(() => {
     const node = strip.current;
-    if (node === null) {
+    const wasFirst = firstRun.current;
+    firstRun.current = false;
+    /* Заход по адресу материалов подвёл ленту к своей кнопке: на узком
+       экране она и активная вкладка разом не помещаются, и подводить
+       ленту обратно значило бы прятать раскрытое меню. */
+    if (node === null || (wasFirst && opensMenu)) {
       return;
     }
     const item = node.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
@@ -149,7 +156,7 @@ export function TopicTabs({
     if (shift !== 0) {
       node.scrollBy({ left: shift, behavior: motion() });
     }
-  }, [tab]);
+  }, [tab, opensMenu]);
 
   /* Подсветка в содержании следует за экраном. Наблюдатель видимости
      дешевле обработчика прокрутки: браузер считает пересечения сам. */
