@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { requestPrepScroll, scrollPrepTo, takePrepScroll, usePrepNarrow } from '@/lib/prepScroll';
+import { requestPrepScroll, scrollPrepTo, takePrepScroll } from '@/lib/prepScroll';
 
 /**
  * Подводит экран вкладки к нужному месту после перехода изнутри.
@@ -39,13 +39,11 @@ export interface PrepCardLinkProps {
 
 /** Карточка навыка: та же ссылка, но помечает переход как внутренний. */
 export function PrepCardLink({ href, className, children }: PrepCardLinkProps) {
-  const narrow = usePrepNarrow();
-
   return (
     <Link
       className={className}
       href={href}
-      scroll={!narrow}
+      scroll={false}
       onClick={() => requestPrepScroll('skill')}
     >
       {children}

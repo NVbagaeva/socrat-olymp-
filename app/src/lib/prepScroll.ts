@@ -3,21 +3,14 @@
 /**
  * Прокрутка при переходах внутри вкладки «Подготовительные задачи».
  *
- * На телефоне шапка темы занимает почти весь первый экран, и после
- * выбора навыка ученик оставался стоять на ней: задание приходилось
- * искать прокруткой. На широком экране этой беды нет, поэтому там
- * страница не двигается.
+ * Шапка темы занимает верх страницы, и после выбора навыка ученик
+ * оставался стоять на ней: задание приходилось искать прокруткой.
+ * Это одинаково на телефоне и на компьютере, поэтому подводим экран
+ * к делу на любой ширине.
  *
  * Шапку темы мы не прячем и не делаем липкой — она возвращена
  * намеренно. Двигается только видимая область.
  */
-
-import { useSyncExternalStore } from 'react';
-
-/* Ниже 1024px содержимое вкладки уходит под шапку темы. Тот же порог,
-   по которому в этой вкладке прокручиваются вбок лента вкладок
-   и ряд навыков. */
-const NARROW = '(max-width: 1023.98px)';
 
 /** Куда прокрутить после перехода на другой экран вкладки. */
 export type PrepTarget = 'skill' | 'list';
@@ -53,43 +46,72 @@ function behavior(): ScrollBehavior {
   return matches('(prefers-reduced-motion: reduce)') ? 'auto' : 'smooth';
 }
 
+/* Через сколько проверить, доехала ли плавная прокрутка. */
+const CHECK_MS = 350;
+
+/* Признаки того, что человек взялся за прокрутку сам. Клавиши берём
+   только прокручивающие: набор ответа в поле прокруткой не считается. */
+const SCROLL_KEYS = new Set([
+  'ArrowUp',
+  'ArrowDown',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+  ' ',
+]);
+
+function inView(node: Element): boolean {
+  const box = node.getBoundingClientRect();
+  return box.bottom > 0 && box.top < window.innerHeight;
+}
+
 /**
  * Подвести узел к верху видимой области.
  *
- * На широком экране не делает ничего: там весь экран виден сразу
- * и самовольная прокрутка только мешала бы.
+ * Плавную прокрутку браузер может оборвать — тогда экран остаётся
+ * посреди пути. Поэтому через треть секунды проверяем, попал ли узел
+ * в кадр, и только если не попал совсем — доводим рывком.
+ *
+ * Если за это время человек крутил сам — колесом, пальцем или
+ * клавишами, — не трогаем ничего: дёргать экран из-под руки нельзя.
  */
 export function scrollPrepTo(selector: string, gap = 12): void {
-  if (!matches(NARROW)) {
-    return;
-  }
   const node = document.querySelector(selector);
   if (node === null) {
     return;
   }
-  window.scrollTo({ top: node.getBoundingClientRect().top + window.scrollY - gap, behavior: behavior() });
-}
 
+  const top = () => node.getBoundingClientRect().top + window.scrollY - gap;
+  const smooth = behavior() === 'smooth';
+  window.scrollTo({ top: top(), behavior: smooth ? 'smooth' : 'auto' });
 
-/* ── Узкий экран ──────────────────────────────────────────────── */
+  if (!smooth) {
+    return;
+  }
 
-function subscribeNarrow(listener: () => void): () => void {
-  const list = window.matchMedia(NARROW);
-  list.addEventListener('change', listener);
-  return () => list.removeEventListener('change', listener);
-}
+  let touched = false;
+  const mark = () => {
+    touched = true;
+  };
+  const byKey = (event: KeyboardEvent) => {
+    if (SCROLL_KEYS.has(event.key)) {
+      touched = true;
+    }
+  };
 
-/**
- * Узкий ли экран сейчас.
- *
- * На сервере ответ всегда «нет»: там ширины окна не существует.
- * Значение нужно только обработчику клика, в разметку оно не попадает,
- * поэтому расхождению при гидратации взяться неоткуда.
- */
-export function usePrepNarrow(): boolean {
-  return useSyncExternalStore(
-    subscribeNarrow,
-    () => matches(NARROW),
-    () => false,
-  );
+  window.addEventListener('wheel', mark, { passive: true });
+  window.addEventListener('touchmove', mark, { passive: true });
+  window.addEventListener('keydown', byKey);
+
+  window.setTimeout(() => {
+    window.removeEventListener('wheel', mark);
+    window.removeEventListener('touchmove', mark);
+    window.removeEventListener('keydown', byKey);
+
+    if (touched || inView(node)) {
+      return;
+    }
+    window.scrollTo({ top: top(), behavior: 'auto' });
+  }, CHECK_MS);
 }
