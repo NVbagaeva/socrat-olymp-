@@ -13,395 +13,474 @@
   "composition": {
     "count": 20,
     "levels": {
-      "lucky": 12,
-      "unlucky": 8
+      "lucky": 2,
+      "unlucky": 18
     },
-    "levelOrder": true,
+    "levelOrder": false,
     "unluckyReasons": {
-      "b-offscreen": 2,
-      "fraction-k": 2,
+      "b-offscreen": 5,
+      "fraction-k": 12,
       "fraction-b": 1
     },
-    "intersectionInside": 12,
-    "intersectionOffscreen": 8,
-    "intersectionMargin": 1,
-    "minBothIncreasing": 5,
-    "minBothDecreasing": 5,
-    "minMixedDirections": 6,
-    "minNearRightAngle": 4,
-    "minShallowAngle": 4,
-    "minFractionVariants": 6,
-    "maxFractionVariants": 6,
+    "intersectionInside": 0,
+    "intersectionOffscreen": 20,
+    "intersectionMargin": 0.2,
+    "askedCoordinateOffscreen": 14,
+    "bothIncreasing": 5,
+    "bothDecreasing": 6,
+    "mixedDirections": 9,
+    "angleMin": 15,
+    "angleMax": 53,
+    "fractionVariants": 18,
+    "nonIntegerAnswers": 7,
+    "answerAbsMin": 2.4,
+    "answerAbsMax": 12,
     "uniqueSlopePairs": true,
     "uniqueAnswers": true,
-    "minNonIntegerAnswers": 6,
     "uniquePairs": true
   },
   "tasks": [
     {
       "id": "12.C-01",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": -3
           },
           {
             "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "absK": 2,
+            "direction": "up",
+            "b": 12,
+            "bMax": 12
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "right",
-          "answerKind": "half"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-02",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": -5
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 7,
+            "bMax": 7
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "right",
-          "answerKind": "half"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-03",
       "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "down",
+            "b": -3
           },
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "up",
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "right"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true
     },
     {
       "id": "12.C-04",
       "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "up",
+            "b": -3
           },
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "down",
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "right"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true
     },
     {
       "id": "12.C-05",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": 2
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": -4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "shallow"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-06",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": -4
           },
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "shallow"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-07",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": -3
           },
           {
             "slope": "integer",
+            "absK": 2,
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 9,
+            "bMax": 9
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "shallow"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-08",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
             "slope": "integer",
+            "absK": 2,
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": -8,
+            "bMax": 8
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "angle": "shallow"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-09",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": -2
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
           "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-10",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 2
           },
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "up",
+            "b": -4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
           "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-11",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": -3
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "answerKind": "half"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-12",
-      "level": "lucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 5,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "up",
+            "b": 3
           },
           {
-            "slope": "integer",
-            "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": -4
           }
         ],
         "intersection": {
-          "inside": true,
-          "marginCells": 1,
+          "inside": false,
           "decimals": 1,
-          "axis": "x",
-          "answerKind": "half"
+          "axis": "x"
         }
-      }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
     },
     {
       "id": "12.C-13",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -432,7 +511,7 @@
     {
       "id": "12.C-14",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -463,7 +542,7 @@
     {
       "id": "12.C-15",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -498,7 +577,7 @@
     {
       "id": "12.C-16",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -533,7 +612,7 @@
     {
       "id": "12.C-17",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -567,7 +646,7 @@
     {
       "id": "12.C-18",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -601,7 +680,7 @@
     {
       "id": "12.C-19",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -635,7 +714,7 @@
     {
       "id": "12.C-20",
       "level": "unlucky",
-      "question": "На рисунке изображены графики двух линейных функций. Найдите абсциссу точки их пересечения.",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
@@ -667,5 +746,9 @@
       "levelReason": "fraction-b",
       "intersectionOffscreen": true
     }
+  ],
+  "curveLabels": [
+    "y = f(x)",
+    "y = g(x)"
   ]
 }

@@ -761,11 +761,14 @@ function sceneFor(built, task, set) {
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
     axisLabels: task.axisLabels || set.axisLabels || 'minimal',
 
-    curves: built.parts.map(function (part) {
-      /* §5 — одиночная прямая подписывается, две различаются цветом. */
+    curves: built.parts.map(function (part, index) {
+      /* §5 — одиночная прямая подписывается. Две прямые различаются
+         цветом, а если набор задал подписи — ещё и ими: по подписи
+         ученик понимает, где f, а где g, не полагаясь на цвет. */
+      var pair = task.curveLabels || set.curveLabels || null;
       var label = single ? (task.curveLabel === null ? null
                                                      : (task.curveLabel || set.curveLabel || 'y = f(x)'))
-                         : null;
+                         : (pair ? (pair[index] || null) : null);
       return { type: 'line', k: part.line.kValue, b: part.line.bValue, color: part.color, label: label };
     }),
 
