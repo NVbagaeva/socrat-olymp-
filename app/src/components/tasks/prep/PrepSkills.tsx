@@ -1,4 +1,5 @@
 import { Chart } from '@/components/graph/Chart';
+import { katex } from '@/lib/graph/katex';
 import { prepOverview } from '@/lib/prep';
 import { prepSkillScene } from '@/lib/scenes';
 import { PrepSkillsScreen } from './PrepSkillsScreen';
@@ -11,8 +12,9 @@ export interface PrepSkillsProps {
 /**
  * Список навыков подготовительных задач, собранный на сервере.
  *
- * Чертежи-миниатюры рисует движок graph/ на сборке и уходят вниз
- * готовой разметкой: клиентскому экрану движок не нужен.
+ * Чертежи-миниатюры рисует движок graph/ на сборке, формулы набирает
+ * KaTeX там же: вниз уходит готовая разметка, и клиентскому экрану
+ * ни движок, ни KaTeX не нужны.
  */
 export function PrepSkills({ base }: PrepSkillsProps) {
   const overview = prepOverview();
@@ -27,6 +29,20 @@ export function PrepSkills({ base }: PrepSkillsProps) {
     percent: view.percent,
     href: `${base}/podgotovka/${view.skill.id}/`,
     chart: <Chart className="prep-card__svg" scene={prepSkillScene(view.skill.id)} />,
+    formula:
+      view.skill.formula === undefined ? null : (
+        <span
+          className="prep-card__formula"
+          /* Разметка своя, из конфига проекта: KaTeX собирает её
+             на сборке и сам кладёт внутрь MathML для скринридера. */
+          dangerouslySetInnerHTML={{
+            __html: katex.renderToString(view.skill.formula, {
+              throwOnError: false,
+              displayMode: false,
+            }),
+          }}
+        />
+      ),
   }));
 
   return (

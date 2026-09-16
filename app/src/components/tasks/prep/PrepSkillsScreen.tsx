@@ -22,6 +22,8 @@ export interface PrepSkillItem {
   href: string;
   /** Миниатюра чертежа: её собирает движок на сервере. */
   chart: ReactNode;
+  /** Формула рядом с чертежом, набранная KaTeX. Есть не у всех. */
+  formula: ReactNode;
 }
 
 export interface PrepSkillsScreenProps {
@@ -98,6 +100,7 @@ export function PrepSkillsScreen({ items, solved, total, percent }: PrepSkillsSc
                 <span className="prep-card__text">
                   <span className="prep-card__title">{item.title}</span>
                   <span className="prep-card__lead">{item.lead}</span>
+                  {item.formula}
                 </span>
                 <span className="prep-card__chart">{item.chart}</span>
               </span>

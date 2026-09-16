@@ -169,6 +169,19 @@
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
+/* Формула стоит рядом с чертежом, а не внутри него: при читаемом
+   кегле строка шире поля миниатюры и движок вытесняет её за кромку.
+   Плашка жмётся по формуле, поэтому в узкой колонке не растягивается. */
+.prep-card__formula {
+  justify-self: start;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
 /* Миниатюра — значок навыка, а не рабочее поле. Ширина задана
    числом, а не процентом: в auto-колонке сетки процент не
    разрешается, и колонка забирала место у названия. */
