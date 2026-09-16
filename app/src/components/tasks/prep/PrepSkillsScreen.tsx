@@ -93,17 +93,18 @@ export function PrepSkillsScreen({ items, solved, total, percent }: PrepSkillsSc
             {/* Кликабельна вся карточка: «Начать» внутри — часть ссылки,
                 а не вторая кнопка, иначе фокус ловил бы её отдельно. */}
             <Link className="prep-card" href={item.href}>
-              <span className="prep-card__top">
-                <span className="prep-card__no" aria-hidden="true">
-                  {item.no}
-                </span>
-                <span className="prep-card__text">
-                  <span className="prep-card__title">{item.title}</span>
-                  <span className="prep-card__lead">{item.lead}</span>
-                  {item.formula}
-                </span>
-                <span className="prep-card__chart">{item.chart}</span>
+              <span className="prep-card__no" aria-hidden="true">
+                {item.no}
               </span>
+              <span className="prep-card__text">
+                <span className="prep-card__title">{item.title}</span>
+                <span className="prep-card__lead">{item.lead}</span>
+                {item.formula}
+              </span>
+              {/* Чертёж занимает две строки сетки — свою и строку
+                  со счётчиком: иначе он один растягивал верхний ряд
+                  и под описанием зияла пустота. */}
+              <span className="prep-card__chart">{item.chart}</span>
 
               <span className="prep-card__count">
                 <TaskCountIcon />

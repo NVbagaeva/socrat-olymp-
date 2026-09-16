@@ -100,6 +100,11 @@
 @container (min-width: 620px) {
   .prep__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Ряды равной высоты: иначе у «Уравнения прямой» с плашкой формулы
+       и «Принадлежности точки» с описанием в две строки нижний ряд
+       карточек выходил выше верхнего. В одну колонку выравнивать
+       нечего — там это только раздуло бы короткие карточки пустотой. */
+    grid-auto-rows: 1fr;
   }
 }
 
@@ -108,6 +113,14 @@
   /* Карточка сама себе контейнер: ширина миниатюры зависит от неё,
      а не от всего экрана — в две колонки карточка вдвое уже. */
   container-type: inline-size;
+  /* Одна сетка на всю карточку: бейдж, текст, чертёж, счётчик
+     и нижняя строка. Чертёж занимает две строки, поэтому его высота
+     больше не задаёт высоту одной. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  /* Третья строка забирает весь запас высоты, поэтому текст, счётчик
+     и чертёж стоят плотной группой сверху, а кнопка — у нижнего края
+     карточки. */
+  grid-template-rows: auto auto 1fr;
   gap: var(--space-3);
   height: 100%;
   padding: var(--space-5);
@@ -129,13 +142,9 @@
   outline-offset: 2px;
 }
 
-.prep-card__top {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--space-3);
-  align-items: start;
-}
 .prep-card__no {
+  grid-column: 1;
+  grid-row: 1;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -149,7 +158,10 @@
   font-variant-numeric: tabular-nums;
 }
 .prep-card__text {
+  grid-column: 2;
+  grid-row: 1;
   display: grid;
+  align-content: start;
   gap: 2px;
 }
 .prep-card__title {
@@ -186,9 +198,11 @@
    числом, а не процентом: в auto-колонке сетки процент не
    разрешается, и колонка забирала место у названия. */
 .prep-card__chart {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
   display: block;
   width: 112px;
-  flex: none;
 }
 /* На узкой карточке миниатюра ужимается, чтобы названию хватило
    строки: «Коэффициент» целиком шире того, что остаётся иначе. */
@@ -223,6 +237,8 @@
 }
 
 .prep-card__count {
+  grid-column: 1 / 3;
+  grid-row: 2;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -237,6 +253,9 @@
 }
 
 .prep-card__bottom {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
   display: flex;
   align-items: center;
   gap: var(--space-4);
