@@ -224,16 +224,34 @@ function viewBlocks(blocks: EngineBlock[]): PrepBlock[] {
   return blocks.map(viewBlock).filter((block): block is PrepBlock => block !== null);
 }
 
-/** Правило ответа задачи: лежит в данных набора, рядом с условием. */
-function answerRule(taskId: string): string | null {
-  const sets = prep as unknown as { tasks?: { id: string; answerRule: string }[] }[];
+/** Запись задачи в данных набора: рядом с условием лежит и правило. */
+interface TaskData {
+  id: string;
+  answerRule: string;
+  pointName?: string;
+}
+
+function taskData(taskId: string): TaskData | null {
+  const sets = prep as unknown as { tasks?: TaskData[] }[];
   for (const set of sets) {
     const found = (set.tasks ?? []).find((task) => task.id === taskId);
     if (found !== undefined) {
-      return found.answerRule;
+      return found;
     }
   }
   return null;
+}
+
+/** Правило ответа задачи: лежит в данных набора, рядом с условием. */
+function answerRule(taskId: string): string | null {
+  return taskData(taskId)?.answerRule ?? null;
+}
+
+/** Проверяемая точка: движок кладёт её в meta вместе с расхождением. */
+interface EngineProbe {
+  x: number;
+  y: number;
+  delta: number;
 }
 
 interface EngineTask {
@@ -244,7 +262,7 @@ interface EngineTask {
   answer: string;
   answerType: string;
   options: { number: string; html: string; error: string | null }[] | null;
-  meta: { query: unknown; probe: unknown; k: number };
+  meta: { query: unknown; probe: EngineProbe | null; k: number; b: number };
 }
 
 interface Analysis {
@@ -311,6 +329,255 @@ function flatSteps(task: EngineTask): PrepStep[] {
   ];
 }
 
+/* ── Разбор подстановкой: набор без чертежа ──────────────────────
+   У задач с флагом noChart окна и опорных точек нет, поэтому движок
+   разбора не строит: треугольнику наклона не по чему строиться.
+   Разбор при этом простой и один и тот же — подставить абсциссу
+   точки в формулу и сравнить результат с её ординатой. Это отдельная
+   ветка ровно на такие задачи; движок она не подменяет и не трогает.
+
+   Все числа берутся из данных задачи: k, b и координаты точки
+   приходят в meta той же генерации, что собрала условие.
+   ══════════════════════════════════════════════════════════════════ */
+
+const MINUS = '\u2212';
+
+/** Число в школьной записи: запятая вместо точки, настоящий минус. */
+function schoolNumber(value: number): string {
+  return String(Math.round(value * 1000) / 1000)
+    .replace('.', ',')
+    .replace('-', MINUS);
+}
+
+/** То же число для KaTeX: десятичная запятая набирается как {,}. */
+function texNumber(value: number): string {
+  return String(Math.round(value * 1000) / 1000).replace('.', '{,}');
+}
+
+/** Коэффициент перед x: единица и минус единица не пишутся. */
+function slopeTex(k: number): string {
+  if (Math.abs(k - 1) < 1e-9) {
+    return '';
+  }
+  if (Math.abs(k + 1) < 1e-9) {
+    return '-';
+  }
+  return texNumber(k);
+}
+
+/** Формула функции той же записью, что и в условии задачи. */
+function equationTex(k: number, b: number): string {
+  const slope = slopeTex(k) + 'x';
+  if (Math.abs(b) < 1e-9) {
+    return 'y = ' + slope;
+  }
+  return 'y = ' + slope + (b > 0 ? ' + ' : ' - ') + texNumber(Math.abs(b));
+}
+
+/** Свободный член в выкладке: знак и число, у нуля — пусто. */
+function tailTex(b: number): string {
+  if (Math.abs(b) < 1e-9) {
+    return '';
+  }
+  return (b > 0 ? ' + ' : ' - ') + texNumber(Math.abs(b));
+}
+
+/**
+ * Окно чертежа проверки.
+ *
+ * Готового окна у задачи нет — его и не считали, раз чертежа в
+ * условии не будет. Здесь оно подбирается под то, что нужно увидеть:
+ * начало координат, точку пересечения с осью Oy и саму проверяемую
+ * точку, с запасом в две клетки. Пропорции держим не круче трёх к
+ * двум — иначе чертёж вытягивается в полосу.
+ */
+function checkWindow(b: number, probe: EngineProbe) {
+  const pad = 2;
+  let xmax = Math.max(3, Math.ceil(Math.abs(probe.x)) + pad);
+  let ymin = Math.floor(Math.min(0, probe.y, b)) - pad;
+  let ymax = Math.ceil(Math.max(0, probe.y, b)) + pad;
+
+  const height = () => ymax - ymin;
+  if (height() > 2 * xmax * 1.5) {
+    xmax = Math.ceil(height() / 3);
+  }
+  if (2 * xmax > height() * 1.5) {
+    const add = Math.ceil(((2 * xmax) / 1.5 - height()) / 2);
+    ymin -= add;
+    ymax += add;
+  }
+
+  return { xmin: -xmax, xmax, ymin, ymax };
+}
+
+/** Засечки оси: через шаг сетки, у нуля своя подпись. */
+function checkMarks(lo: number, hi: number, step: number) {
+  const marks: { at: number; label: string }[] = [];
+  for (let at = Math.ceil(lo / step) * step; at <= hi; at += step) {
+    if (at !== 0) {
+      marks.push({ at, label: schoolNumber(at) });
+    }
+  }
+  return marks;
+}
+
+/** Чертёж проверки: та же прямая движка и отмеченная на ней точка. */
+function checkChart(task: EngineTask, probe: EngineProbe): PrepBlock {
+  const { k, b } = task.meta;
+  const win = checkWindow(b, probe);
+  const span = Math.max(win.xmax - win.xmin, win.ymax - win.ymin);
+  /* Клеток поперёк чертежа не больше шестнадцати: дальше сетка
+     сливается в серое поле. */
+  const step = span <= 16 ? 1 : Math.ceil(span / 16);
+  const name = taskData(task.id)?.pointName ?? 'A';
+
+  const scene = {
+    window: win,
+    grid: { step, show: true },
+    axes: {
+      labelX: 'x',
+      labelY: 'y',
+      origin: '0',
+      ticks: {
+        x: checkMarks(win.xmin, win.xmax, step),
+        y: checkMarks(win.ymin, win.ymax, step),
+      },
+    },
+    axisLabels: 'full',
+    curves: [{ type: 'line', k, b, color: 'lineA', label: 'y = f(x)' }],
+    points: [
+      {
+        x: probe.x,
+        y: probe.y,
+        style: 'solid',
+        color: 'lineB',
+        label: name + '(' + schoolNumber(probe.x) + '; ' + schoolNumber(probe.y) + ')',
+      },
+    ],
+    alt: 'Проверка построением: прямая и отмеченная точка',
+  };
+
+  return { type: 'chart', svg: renderGraph(scene) as string };
+}
+
+/**
+ * Четыре шага подстановки и чертёж под ними.
+ *
+ * Чертёж стоит последним блоком последнего шага: он иллюстрирует
+ * уже полученный ответ, и увидеть его раньше вычислений нельзя.
+ */
+function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
+  const { k, b } = task.meta;
+  const name = taskData(task.id)?.pointName ?? 'A';
+
+  const product = k * probe.x;
+  const value = product + b;
+  const same = Math.abs(value - probe.y) < 1e-9;
+  const tail = tailTex(b);
+  /* Отрицательная абсцисса подставляется в скобках: иначе два знака
+     подряд читаются как вычитание. */
+  const factor = probe.x < 0 ? '(' + texNumber(probe.x) + ')' : texNumber(probe.x);
+  const pointTex = name + '(' + texNumber(probe.x) + ';\\, ' + texNumber(probe.y) + ')';
+  const answer = task.options?.find((option) => option.number === task.answer)?.html ?? task.answer;
+
+  return [
+    {
+      number: 1,
+      title: 'Подставляем координату x точки в формулу',
+      arrow: null,
+      blocks: [
+        {
+          type: 'text',
+          html:
+            'Функция задана формулой ' +
+            katexHtml(equationTex(k, b)) +
+            ', а у точки ' +
+            katexHtml(pointTex) +
+            ' абсцисса ' +
+            katexHtml('x = ' + texNumber(probe.x)) +
+            '.',
+        },
+        {
+          type: 'text',
+          html: 'Подставим ' + katexHtml('x = ' + texNumber(probe.x)) + ' в формулу:',
+        },
+        {
+          type: 'formula',
+          html: katexHtml('y = ' + texNumber(k) + ' \\cdot ' + factor + tail, true),
+          feature: false,
+        },
+      ],
+    },
+    {
+      number: 2,
+      title: 'Вычисляем значение функции',
+      arrow: null,
+      blocks: [
+        { type: 'text', html: 'Сначала умножаем, потом прибавляем свободный член.' },
+        {
+          type: 'formula',
+          html: katexHtml('y = ' + texNumber(product) + tail, true),
+          feature: false,
+        },
+        { type: 'formula', html: katexHtml('y = ' + texNumber(value), true), feature: false },
+        {
+          type: 'text',
+          html:
+            'При ' +
+            katexHtml('x = ' + texNumber(probe.x)) +
+            ' функция принимает значение <b class="key">' +
+            schoolNumber(value) +
+            '</b>.',
+        },
+      ],
+    },
+    {
+      number: 3,
+      title: 'Сравниваем с координатой y точки',
+      arrow: null,
+      blocks: [
+        {
+          type: 'text',
+          html:
+            'Координата ' +
+            katexHtml('y') +
+            ' точки ' +
+            katexHtml(name) +
+            ' равна <b class="key">' +
+            schoolNumber(probe.y) +
+            '</b>.',
+        },
+        {
+          type: 'text',
+          html: same
+            ? 'Мы вычислили ' + katexHtml('y = ' + texNumber(value)) + ' — значения совпали.'
+            : 'Мы вычислили ' +
+              katexHtml('y = ' + texNumber(value)) +
+              ', а у точки ' +
+              katexHtml('y = ' + texNumber(probe.y)) +
+              ' — значения разные.',
+        },
+      ],
+    },
+    {
+      number: 4,
+      title: 'Делаем вывод',
+      arrow: null,
+      blocks: [
+        {
+          type: 'text',
+          html: same
+            ? 'Значения совпали, значит точка принадлежит графику.'
+            : 'Значения разные, значит точка не принадлежит графику.',
+        },
+        { type: 'answer', html: 'Ответ: <b class="key">' + answer + '</b>.' },
+        checkChart(task, probe),
+        { type: 'text', html: 'Проверим построением.' },
+      ],
+    },
+  ];
+}
+
 /**
  * Разбор задачи по шагам.
  *
@@ -322,10 +589,18 @@ function flatSteps(task: EngineTask): PrepStep[] {
 function buildSteps(task: EngineTask): PrepStep[] | null {
   const found = GraphGenerate.analysis(task.id) as Analysis | null;
   if (!found) {
-    /* Единственный случай без треугольника, который мы умеем
-       объяснить сами. Любая другая причина — по-прежнему null,
+    /* Два случая без треугольника, которые мы умеем объяснить сами:
+       горизонтальная прямая и задача без чертежа, где всё решает
+       подстановка. Любая другая причина — по-прежнему null,
        и экран честно скажет, что разбора нет. */
-    return task.meta.k === 0 ? flatSteps(task) : null;
+    if (task.meta.k === 0) {
+      return flatSteps(task);
+    }
+    const probe = task.meta.probe;
+    if (task.svg === null && probe !== null && answerRule(task.id) === 'point-choice') {
+      return substitutionSteps(task, probe);
+    }
+    return null;
   }
 
   const steps = GraphSolution.build({
