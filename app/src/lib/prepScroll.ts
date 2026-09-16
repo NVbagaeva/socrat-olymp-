@@ -70,10 +70,6 @@ export function scrollPrepTo(selector: string, gap = 12): void {
   window.scrollTo({ top: node.getBoundingClientRect().top + window.scrollY - gap, behavior: behavior() });
 }
 
-/** То же, но следующим кадром: после того, как экран перерисовался. */
-export function scrollPrepSoon(selector: string, gap = 12): void {
-  requestAnimationFrame(() => scrollPrepTo(selector, gap));
-}
 
 /* ── Узкий экран ──────────────────────────────────────────────── */
 

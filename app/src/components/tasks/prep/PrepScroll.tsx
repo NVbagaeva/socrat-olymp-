@@ -22,12 +22,10 @@ export function PrepScrollOnMount() {
     if (target === null) {
       return undefined;
     }
-    /* Следующим кадром: к этому времени экран уже отрисован и
-       у заголовка есть настоящее положение на странице. */
-    const frame = requestAnimationFrame(() => {
-      scrollPrepTo(target === 'skill' ? '.ptask__head' : '.prep__title');
-    });
-    return () => cancelAnimationFrame(frame);
+    /* Эффект выполняется после того, как разметка уже в документе,
+       поэтому положение заголовка настоящее и ждать кадра незачем. */
+    scrollPrepTo(target === 'skill' ? '.ptask__head' : '.prep__title');
+    return undefined;
   }, [pathname]);
 
   return null;
