@@ -466,6 +466,12 @@
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
+/* Решённая задача, на которой ученик сейчас стоит: заливка говорит
+   «вы здесь», зелёная рамка — «решено». Иначе ответ засчитан,
+   а кружок выглядит как у нерешённой. */
+.pdot.is-current.is-right {
+  border-color: var(--color-success);
+}
 
 .ptask__card {
   display: grid;
