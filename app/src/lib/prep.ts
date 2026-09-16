@@ -66,6 +66,11 @@ export function prepOverview(): PrepOverview {
   return { skills, solved, total, percent: share(solved, total) };
 }
 
+/** Витрина одного навыка. Берётся из той же выборки, что и список. */
+export function prepSkillView(id: PrepSkillId): PrepSkillView | undefined {
+  return prepOverview().skills.find((view) => view.skill.id === id);
+}
+
 /** Навык по части адреса. */
 export function findPrepSkill(id: string): PrepSkill | undefined {
   return prepSkills.find((skill) => skill.id === id);
@@ -257,13 +262,71 @@ interface EngineTask {
   answer: string;
   answerType: string;
   options: { number: string; html: string; error: string | null }[] | null;
-  meta: { query: unknown; probe: unknown };
+  meta: { query: unknown; probe: unknown; k: number };
 }
 
 interface Analysis {
   triangle: unknown;
   line: unknown;
   scene: { window: unknown };
+}
+
+/* Ответ в записи TeX. Числа приходят из движка в школьной записи:
+   запятая как разделитель и типографский минус в некоторых местах. */
+function answerTex(answer: string): string {
+  return answer.replace(/,/g, '{,}').replace(/\u2212/g, '-');
+}
+
+/**
+ * Разбор горизонтальной прямой.
+ *
+ * Треугольника наклона у неё нет, поэтому движок разбора не строит —
+ * но задача законная и объясняется проще прочих. Это отдельная ветка
+ * ровно на этот случай: обычный разбор она не подменяет, движок
+ * не трогает.
+ *
+ * Число в ответе берётся из данных задачи, а не пишется руками.
+ */
+function flatSteps(task: EngineTask): PrepStep[] {
+  const value = answerTex(task.answer);
+
+  return [
+    {
+      number: 1,
+      title: 'Смотрим на прямую',
+      arrow: null,
+      blocks: [
+        {
+          type: 'text',
+          html: 'Прямая горизонтальная: при движении вправо она не поднимается и не опускается.',
+        },
+      ],
+    },
+    {
+      number: 2,
+      title: 'Находим k',
+      arrow: null,
+      blocks: [
+        {
+          type: 'text',
+          html:
+            'Значит, ' + katexHtml('\\Delta y = 0') + ' при любом ' + katexHtml('\\Delta x') + '.',
+        },
+        {
+          type: 'formula',
+          html: katexHtml(
+            'k = \\Delta y : \\Delta x = 0 : \\Delta x = ' + value,
+            true,
+          ),
+          feature: false,
+        },
+        {
+          type: 'answer',
+          html: 'Ответ: <b class="key">' + katexHtml('k = ' + value) + '</b>.',
+        },
+      ],
+    },
+  ];
 }
 
 /**
@@ -277,7 +340,10 @@ interface Analysis {
 function buildSteps(task: EngineTask): PrepStep[] | null {
   const found = GraphGenerate.analysis(task.id) as Analysis | null;
   if (!found) {
-    return null;
+    /* Единственный случай без треугольника, который мы умеем
+       объяснить сами. Любая другая причина — по-прежнему null,
+       и экран честно скажет, что разбора нет. */
+    return task.meta.k === 0 ? flatSteps(task) : null;
   }
 
   const steps = GraphSolution.build({

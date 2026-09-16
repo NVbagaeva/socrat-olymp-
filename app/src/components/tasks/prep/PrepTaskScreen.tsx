@@ -21,6 +21,12 @@ export interface PrepTaskScreenProps {
   listHref: string;
   /** Приём навыка для плашки «Запомни!» в разборе. */
   tip: string;
+  /**
+   * Сколько задач навыка уже решено — витринное число из demo.ts,
+   * то же самое, что стоит на карточке навыка. С него экран
+   * начинает и к нему возвращается после перезагрузки страницы.
+   */
+  solved: number;
 }
 
 const VERDICT = {
@@ -47,9 +53,11 @@ const VERDICT = {
  * Состояние не переживает перезагрузку страницы, и это осознанно:
  * настоящего прогресса в проекте пока нет.
  */
-export function PrepTaskScreen({ title, tasks, listHref, tip }: PrepTaskScreenProps) {
+export function PrepTaskScreen({ title, tasks, listHref, tip, solved }: PrepTaskScreenProps) {
   const [index, setIndex] = useState(0);
-  const [status, setStatus] = useState<Status[]>(() => tasks.map(() => null));
+  const [status, setStatus] = useState<Status[]>(() =>
+    tasks.map((_, i) => (i < solved ? 'right' : null)),
+  );
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Разбор: раскрыт ли он и какой шаг открыт. */
