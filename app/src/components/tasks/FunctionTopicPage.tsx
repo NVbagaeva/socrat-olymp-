@@ -5,6 +5,7 @@ import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
 import { PrepSkills } from './prep';
 import { TopicAbout } from './TopicAbout';
+import { TutorMaterials } from './TutorMaterials';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { TopicTabs } from './TopicTabs';
@@ -94,6 +95,7 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
+        tutors={<TutorMaterials section={section} />}
         tutorsHref={`${base}/dlya-repetitorov/`}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">

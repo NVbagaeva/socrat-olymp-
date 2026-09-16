@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -15,7 +14,9 @@ export interface TopicTabsProps {
   theory: TheoryBlock[];
   /** Экран подготовительных задач: собран на сервере. */
   prep: ReactNode;
-  /** Адрес страницы «Для репетиторов». */
+  /** Материалы для репетиторов: собраны на сервере. */
+  tutors: ReactNode;
+  /** Адрес вкладки «Для репетиторов». */
   tutorsHref: string;
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
@@ -48,6 +49,7 @@ const TABS = [
   { id: 'prep', label: 'Подготовительные задачи' },
   { id: 'trainer', label: 'Тренажёр' },
   { id: 'generator', label: 'Генератор' },
+  { id: 'tutors', label: 'Для репетиторов' },
 ];
 
 /**
@@ -65,6 +67,7 @@ export function TopicTabs({
   about,
   theory,
   prep,
+  tutors,
   tutorsHref,
   contentsDecor,
   bodies,
@@ -74,13 +77,14 @@ export function TopicTabs({
   const router = useRouter();
   const pathname = usePathname();
   const [tab, setTab] = useState(initial);
-  /* У подготовительных задач свои адреса: список навыков и каждый
-     навык — отдельная страница. Поэтому вкладка не переключает
-     состояние, а ведёт на адрес списка. Иначе из навыка по ней
-     было не вернуться: вкладка там уже выбрана, менять нечего. */
+  /* У подготовительных задач и материалов для репетиторов свои
+     адреса. Поэтому такая вкладка не переключает состояние, а ведёт
+     на свой адрес: иначе из навыка по ней было не вернуться —
+     вкладка там уже выбрана, менять нечего. */
   function choose(id: string) {
-    if (id === 'prep' && pathname !== prepHref) {
-      router.push(prepHref);
+    const href = id === 'prep' ? prepHref : id === 'tutors' ? tutorsHref : null;
+    if (href !== null && pathname !== href) {
+      router.push(href);
       return;
     }
     setTab(id);
@@ -187,9 +191,6 @@ export function TopicTabs({
           краям показывают, что прокручивать есть куда. */}
       <div className="topic-tabs" ref={strip}>
         <Tabs items={TABS} value={tab} onValueChange={choose} label="Разделы темы" />
-        <Link className="topic-tabs__link" href={tutorsHref}>
-          Для репетиторов
-        </Link>
       </div>
 
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
@@ -268,6 +269,8 @@ export function TopicTabs({
               description="Раздел появится, когда будет решено, что именно он настраивает."
             />
           ) : null}
+
+          {tab === 'tutors' ? tutors : null}
         </div>
 
         {/* Правая колонка: только на вкладке теории и только от 1024px —
