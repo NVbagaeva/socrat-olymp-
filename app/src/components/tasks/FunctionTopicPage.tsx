@@ -12,7 +12,10 @@ import { TopicTabs } from './TopicTabs';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
-  /** Вкладка, открытая при заходе: у /podgotovka/ это своя. */
+  /**
+   * Что открыто при заходе: у /podgotovka/ своя вкладка, у
+   * /dlya-repetitorov/ — раскрытое меню материалов.
+   */
   initialTab?: string;
   /**
    * Содержимое вкладки подготовительных задач. По умолчанию это
@@ -94,7 +97,7 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
-        tutorsHref={`${base}/dlya-repetitorov/`}
+        tutors={section.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
             <Image

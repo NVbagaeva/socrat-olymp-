@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { clsx } from 'clsx';
-import { requestPrepScroll, usePrepNarrow } from '@/lib/prepScroll';
+import { requestPrepScroll } from '@/lib/prepScroll';
 
 export interface PrepChip {
   id: string;
@@ -24,20 +24,17 @@ export interface PrepChipsProps {
  * работают «назад» и открытие в новой вкладке.
  *
  * Клик помечает переход как сделанный изнутри — следующий экран
- * на телефоне подведёт себя к верху видимой области.
+ * подведёт себя к верху видимой области. Прокрутку у роутера
+ * забираем (scroll={false}): иначе он увёл бы страницу к самому
+ * верху, на шапку темы, и подводка оказалась бы затёрта.
  */
 export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps) {
-  /* На узком экране прокруткой распоряжаемся сами: Next иначе увёл бы
-     страницу к самому верху, на шапку темы, и наша подводка к делу
-     оказалась бы затёрта. На широком всё остаётся как было. */
-  const narrow = usePrepNarrow();
-
   return (
     <nav className="prep__chips" aria-label="Навыки">
       <Link
         className={clsx('chip', active === 'all' && 'is-active')}
         href={listHref}
-        scroll={!narrow}
+        scroll={false}
         aria-current={active === 'all' ? 'page' : undefined}
         onClick={() => requestPrepScroll('list')}
       >
@@ -48,7 +45,7 @@ export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps)
           key={item.id}
           className={clsx('chip', active === item.id && 'is-active')}
           href={item.href}
-          scroll={!narrow}
+          scroll={false}
           aria-current={active === item.id ? 'page' : undefined}
           onClick={() => requestPrepScroll('skill')}
         >
