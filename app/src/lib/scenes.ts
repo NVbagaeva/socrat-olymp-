@@ -299,14 +299,17 @@ export function prepSkillScene(id: PrepSkillSceneId) {
       ...base,
       curves: [{ type: 'line', k: 1, b: 0, color: 'lineA', label: null }],
       points: [
-        { x: -1, y: -1, color: 'lineA', label: null },
-        { x: 1, y: 1, color: 'lineA', label: null },
+        { x: -0.8, y: -0.8, color: 'lineA', label: null },
+        { x: 0.8, y: 0.8, color: 'lineA', label: null },
       ],
       shapes: [
-        { type: 'segment', from: [-1, -1], to: [1, -1], color: 'accent', style: 'dashed' },
-        { type: 'segment', from: [1, -1], to: [1, 1], color: 'accent', style: 'dashed' },
-        prepLabel('\u0394x', 0, -1, 0, 20, 'accent'),
-        prepLabel('\u0394y', 1, 0, 20, 0, 'accent'),
+        { type: 'segment', from: [-0.8, -0.8], to: [0.8, -0.8], color: 'accent', style: 'dashed' },
+        { type: 'segment', from: [0.8, -0.8], to: [0.8, 0.8], color: 'accent', style: 'dashed' },
+        /* Опорные точки подписей отведены от самих катетов: движок
+           ставит подпись рядом с точкой, и стоя на катете она на него
+           же и наезжала. */
+        prepLabel('\u0394x', 0, -1.25, 0, 14, 'accent'),
+        prepLabel('\u0394y', 1.3, 0, 14, 0, 'accent'),
       ],
     };
   }
