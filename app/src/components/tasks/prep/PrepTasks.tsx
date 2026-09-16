@@ -21,6 +21,7 @@ export function PrepTasks({ skill, base }: PrepTasksProps) {
       title={skill.title}
       tasks={buildPrepTasks(skill)}
       listHref={`${base}/podgotovka/`}
+      tip={skill.tip}
     />
   );
 }

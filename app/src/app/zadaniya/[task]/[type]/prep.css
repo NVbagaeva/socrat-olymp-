@@ -647,3 +647,173 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
+
+/* ── Разбор решения ─────────────────────────────────────────── */
+
+/* Оформление самих выкладок берётся из graph.css: там уже описаны
+   .solution-step, .solution-text, .solution-formula и врезки.
+   Здесь — только оболочка с колонкой шагов и навигацией. */
+.psol {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .psol {
+    animation: psol-in var(--dur-reveal) var(--ease);
+  }
+}
+@keyframes psol-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.psol__cols {
+  display: grid;
+  gap: var(--space-4);
+}
+@container (min-width: 720px) {
+  .psol__cols {
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.psol__steps {
+  display: grid;
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pstep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-switch) var(--ease);
+}
+.pstep:hover {
+  background: var(--color-surface-2);
+}
+.pstep:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pstep.is-current {
+  background: var(--color-surface-info);
+}
+/* Кружок с галочкой: у пройденных шагов залит, у остальных пуст. */
+.pstep__mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  color: transparent;
+}
+.pstep__mark svg {
+  width: 14px;
+  height: 14px;
+}
+.pstep.is-done .pstep__mark {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.pstep.is-current .pstep__mark {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.pstep__text {
+  display: grid;
+  gap: 1px;
+}
+.pstep__no {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.pstep__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+}
+.pstep.is-current .pstep__title {
+  color: var(--color-text-brand);
+}
+
+.psol__stage {
+  display: grid;
+  gap: var(--space-4);
+}
+.psol__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.psol__dots {
+  display: flex;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.psol__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-track);
+}
+.psol__dot.is-current {
+  background: var(--color-primary);
+}
+
+.psol__none {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* Плашка приёма. Тёплая заливка отделяет её от выкладок: это не шаг
+   решения, а то, что остаётся после него. */
+.psol__tip {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.psol__tip-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.psol__tip-text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+}

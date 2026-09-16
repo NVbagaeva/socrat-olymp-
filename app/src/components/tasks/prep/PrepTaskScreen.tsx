@@ -7,6 +7,7 @@ import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
+import { PrepSolution } from './PrepSolution';
 
 /** Как закончилась работа над задачей. Пусто — ещё не бралась. */
 type Status = 'right' | 'wrong' | 'skipped' | null;
@@ -18,6 +19,8 @@ export interface PrepTaskScreenProps {
   tasks: PrepTask[];
   /** Адрес списка навыков: туда ведёт кнопка с последней задачи. */
   listHref: string;
+  /** Приём навыка для плашки «Запомни!» в разборе. */
+  tip: string;
 }
 
 const VERDICT = {
@@ -44,11 +47,14 @@ const VERDICT = {
  * Состояние не переживает перезагрузку страницы, и это осознанно:
  * настоящего прогресса в проекте пока нет.
  */
-export function PrepTaskScreen({ title, tasks, listHref }: PrepTaskScreenProps) {
+export function PrepTaskScreen({ title, tasks, listHref, tip }: PrepTaskScreenProps) {
   const [index, setIndex] = useState(0);
   const [status, setStatus] = useState<Status[]>(() => tasks.map(() => null));
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
+  /* Разбор: раскрыт ли он и какой шаг открыт. */
+  const [solution, setSolution] = useState(false);
+  const [step, setStep] = useState(0);
 
   const task = tasks[index];
   if (task === undefined) {
@@ -73,6 +79,8 @@ export function PrepTaskScreen({ title, tasks, listHref }: PrepTaskScreenProps) 
     setIndex(next);
     setValue('');
     setChecked(null);
+    setSolution(false);
+    setStep(0);
   }
 
   function check() {
@@ -98,6 +106,13 @@ export function PrepTaskScreen({ title, tasks, listHref }: PrepTaskScreenProps) 
   function retry() {
     setValue('');
     setChecked(null);
+    setSolution(false);
+    setStep(0);
+  }
+
+  function showSolution() {
+    setSolution(true);
+    setStep(0);
   }
 
   /* Причина показывается только у того варианта, который выбрал
@@ -245,22 +260,42 @@ export function PrepTaskScreen({ title, tasks, listHref }: PrepTaskScreenProps) 
           ) : null}
 
           {checked === 'right' ? (
-            last ? (
-              <Link className="btn btn--primary" href={listHref}>
-                К списку навыков →
-              </Link>
-            ) : (
-              <Button onClick={() => open(index + 1)}>Следующее задание →</Button>
-            )
+            <>
+              {last ? (
+                <Link className="btn btn--primary" href={listHref}>
+                  К списку навыков →
+                </Link>
+              ) : (
+                <Button onClick={() => open(index + 1)}>Следующее задание →</Button>
+              )}
+              <Button variant="ghost" onClick={showSolution} disabled={solution}>
+                Разобрать решение
+              </Button>
+            </>
           ) : null}
 
           {checked === 'wrong' ? (
-            <Button variant="ghost" onClick={retry}>
-              Попробовать ещё раз
-            </Button>
+            <>
+              <Button onClick={showSolution} disabled={solution}>
+                Разобрать решение →
+              </Button>
+              <Button variant="ghost" onClick={retry}>
+                Попробовать ещё раз
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
+
+      {solution ? (
+        <PrepSolution
+          steps={task.steps}
+          tip={tip}
+          step={step}
+          onStep={setStep}
+          onClose={() => setSolution(false)}
+        />
+      ) : null}
     </section>
   );
 }
