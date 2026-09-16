@@ -477,7 +477,7 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
   /* Отрицательная абсцисса подставляется в скобках: иначе два знака
      подряд читаются как вычитание. */
   const factor = probe.x < 0 ? '(' + texNumber(probe.x) + ')' : texNumber(probe.x);
-  const pointTex = name + '(' + texNumber(probe.x) + ';\, ' + texNumber(probe.y) + ')';
+  const pointTex = name + '(' + texNumber(probe.x) + ';\\, ' + texNumber(probe.y) + ')';
   const answer = task.options?.find((option) => option.number === task.answer)?.html ?? task.answer;
 
   return [
