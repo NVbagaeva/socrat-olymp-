@@ -250,3 +250,96 @@ export function verticalTestScene() {
     ],
   };
 }
+
+
+/* ── Миниатюры навыков подготовительных задач ─────────────────────
+   Значок рядом с названием навыка: каждая миниатюра показывает суть
+   своего навыка, а не просто прямую.
+
+   Кегль подписей задан числом: холст 416px ужимается до 112, и
+   штатные 19px вышли бы пятью пикселями на экране. Толщину линий
+   спасает vector-effect в стилях — иначе график в 3,2px рисуется
+   в 0,86 и бледнеет до сетки. */
+
+export type PrepSkillSceneId = 'k' | 'b' | 'equation' | 'point';
+
+/** Кегль подписи в миниатюре: на экране это около двенадцати пунктов. */
+const PREP_LABEL = 34;
+
+function prepLabel(
+  text: string,
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+  color = 'label',
+  size = PREP_LABEL,
+) {
+  return { type: 'label', at: [x, y], offset: [dx, dy], text, size, color };
+}
+
+export function prepSkillScene(id: PrepSkillSceneId) {
+  const base = {
+    /* Окно тесное: клетка крупнее, и подпись при том же кегле
+       занимает меньшую долю поля — длинная формула перестаёт
+       упираться в край холста. */
+    window: squareWindow(2),
+    /* Сетка нужна: по клеткам читаются Δx и Δy у треугольника. */
+    grid: { step: 1, show: true },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+
+  if (id === 'k') {
+    /* Треугольник наклона: катеты пунктиром, как в разборе решения. */
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 1, b: 0, color: 'lineA', label: null }],
+      points: [
+        { x: -0.8, y: -0.8, color: 'lineA', label: null },
+        { x: 0.8, y: 0.8, color: 'lineA', label: null },
+      ],
+      shapes: [
+        { type: 'segment', from: [-0.8, -0.8], to: [0.8, -0.8], color: 'accent', style: 'dashed' },
+        { type: 'segment', from: [0.8, -0.8], to: [0.8, 0.8], color: 'accent', style: 'dashed' },
+        /* Опорные точки подписей отведены от самих катетов: движок
+           ставит подпись рядом с точкой, и стоя на катете она на него
+           же и наезжала. */
+        prepLabel('\u0394x', 0, -1.25, 0, 14, 'accent'),
+        prepLabel('\u0394y', 1.3, 0, 14, 0, 'accent'),
+      ],
+    };
+  }
+
+  if (id === 'b') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0.9, b: 1, color: 'lineA', label: null }],
+      points: [{ x: 0, y: 1, color: 'lineA', label: null }],
+      shapes: [prepLabel('b', 0, 1, -20, 0)],
+    };
+  }
+
+  if (id === 'point') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0.9, b: 0, color: 'lineA', label: null }],
+      /* Точка стоит в стороне от прямой: вопрос навыка именно в том,
+         лежит она на ней или нет. */
+      points: [{ x: 1, y: 1.6, color: 'lineA', label: null }],
+      shapes: [prepLabel('A', 1, 1.6, 20, 0)],
+    };
+  }
+
+  return {
+    ...base,
+    curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
+    /* Формулы «y = kx + b» внутри чертежа нет: при читаемом кегле она
+       шире поля — 161 пиксель на холсте в 212, и движок вытесняет её
+       за кромку. Подпись отсюда убрана до решения, где ей стоять. */
+    shapes: [],
+  };
+}

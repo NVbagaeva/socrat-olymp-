@@ -34,32 +34,43 @@
 
 /* ── Баннер с цитатой ───────────────────────────────────────── */
 
+/* Цитата — строка под подзаголовком, не колонка рядом с ним: деля
+   ширину, они ломали друг друга. Блок жмётся по длине самой цитаты,
+   поэтому подпись под ней встаёт по её правому краю. */
 .topic-quote {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin: 0;
-  flex: 0 1 auto;
+  display: grid;
+  justify-items: end;
+  gap: var(--space-1);
+  width: max-content;
+  max-width: 100%;
+  margin: var(--space-4) 0 0;
 }
 .topic-quote__text {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: end;
-  text-align: right;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  max-width: 24ch;
+  margin: 0;
+  /* Рукописный шрифт узкий: в кегле основного текста цитата читалась
+     мелкой и ломалась надвое. */
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+}
+/* Не осветлённый примерный синий, как у прочих рукописных пометок,
+   а тот же, которым набран текст страницы: цитата здесь не пометка
+   на полях, её читают. */
+.topic-quote__text .hand-note {
+  color: var(--color-text-brand);
+  opacity: 1;
 }
 .topic-quote__author {
   font-size: var(--fs-caption);
   color: var(--color-text-tertiary);
 }
 /* Портрет целиком в кадре: высота задана, ширина считается по файлу. */
-.topic-quote__art {
+/* Портрет стоит отдельным элементом шапки, справа от текста. */
+.topic-head__art {
   display: block;
   width: auto;
   height: 132px;
   object-fit: contain;
+  flex: none;
 }
 
 /* ── Прогресс по разделам ───────────────────────────────────── */
@@ -714,7 +725,7 @@
 
 @media (max-width: 1279.98px) {
   /* Портрет уменьшается вместе с остальной шапкой. */
-  .topic-quote__art {
+  .topic-head__art {
     height: 104px;
   }
   .about-lead,
@@ -745,6 +756,7 @@
      остальных страницах кабинета. Цитата весила 100px из 392
      у шапки, а первый экран нужен вкладкам. */
   .topic-quote,
+  .topic-head__art,
   .topic-side__decor {
     display: none;
   }

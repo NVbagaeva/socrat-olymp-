@@ -1,0 +1,819 @@
+/* Подготовительные задачи: экран списка навыков.
+
+   Экран стоит и вкладкой на странице темы, и отдельной страницей
+   /podgotovka/, поэтому стили лежат своим файлом: обе страницы
+   подключают его сами. */
+
+.prep {
+  display: grid;
+  gap: var(--space-5);
+  container-type: inline-size;
+}
+
+/* ── Шапка ──────────────────────────────────────────────────── */
+
+.prep__head {
+  display: grid;
+  gap: var(--space-2);
+}
+.prep__lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-secondary);
+}
+.prep__counter {
+  margin-top: var(--space-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.prep__counter b {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  color: var(--color-text);
+}
+/* Полоса того же вида, что у карточек навыков: высота, скругление
+   и цвета приходят из общего .pbar, здесь только ширина. */
+.prep__meter {
+  width: 100%;
+}
+
+/* ── Лента чипов ────────────────────────────────────────────── */
+
+.prep__chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Растушёвка у правого края: показывает, что лента прокручивается.
+     Полосу прокрутки не показываем — она тут только мешает. */
+  background:
+    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--grey-900) 14%, transparent),
+        transparent
+      )
+      right center;
+  background-repeat: no-repeat;
+  background-size:
+    32px 100%,
+    12px 100%;
+  background-attachment: local, scroll;
+}
+.prep__chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-switch) var(--ease);
+}
+.chip:hover {
+  background: var(--color-surface-soft);
+}
+.chip.is-active {
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+}
+
+/* ── Карточки навыков ───────────────────────────────────────── */
+
+.prep__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@container (min-width: 620px) {
+  .prep__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Ряды равной высоты: иначе у «Уравнения прямой» с плашкой формулы
+       и «Принадлежности точки» с описанием в две строки нижний ряд
+       карточек выходил выше верхнего. В одну колонку выравнивать
+       нечего — там это только раздуло бы короткие карточки пустотой. */
+    grid-auto-rows: 1fr;
+  }
+}
+
+.prep-card {
+  display: grid;
+  /* Карточка сама себе контейнер: ширина миниатюры зависит от неё,
+     а не от всего экрана — в две колонки карточка вдвое уже. */
+  container-type: inline-size;
+  /* Одна сетка на всю карточку: бейдж, текст, чертёж, счётчик
+     и нижняя строка. Чертёж занимает две строки, поэтому его высота
+     больше не задаёт высоту одной. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  /* Третья строка забирает весь запас высоты, поэтому текст, счётчик
+     и чертёж стоят плотной группой сверху, а кнопка — у нижнего края
+     карточки. */
+  grid-template-rows: auto auto 1fr;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.prep-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+.prep-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.prep-card__no {
+  grid-column: 1;
+  grid-row: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.prep-card__text {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+.prep-card__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  /* Длинные слова вроде «Принадлежность» шире узкой колонки. Сначала
+     пробуем перенос по слогам, и только если словарь не сработал —
+     разрыв по буквам: без него слово вылезало под миниатюру
+     и пряталось за её белой подложкой. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+.prep-card__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Формула стоит рядом с чертежом, а не внутри него: при читаемом
+   кегле строка шире поля миниатюры и движок вытесняет её за кромку.
+   Плашка жмётся по формуле, поэтому в узкой колонке не растягивается. */
+.prep-card__formula {
+  justify-self: start;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+/* Миниатюра — значок навыка, а не рабочее поле. Ширина задана
+   числом, а не процентом: в auto-колонке сетки процент не
+   разрешается, и колонка забирала место у названия. */
+.prep-card__chart {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
+  display: block;
+  width: 112px;
+}
+/* На узкой карточке миниатюра ужимается, чтобы названию хватило
+   строки: «Коэффициент» целиком шире того, что остаётся иначе. */
+/* Самое длинное название, «Принадлежность», требует 136px при
+   кегле 16px — замерено. Миниатюра ужимается ровно настолько,
+   чтобы столько осталось, иначе слово ломается посередине. */
+@container (max-width: 400px) {
+  .prep-card__chart {
+    width: 56px;
+  }
+  /* И кегль названия ступенью ниже: «Коэффициент» в двадцати
+     пикселях шире оставшейся колонки и ломалось посреди слова. */
+  .prep-card__title {
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+}
+.prep-card__svg,
+.prep-card__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Линии не худеют вместе с чертежом: холст 416px ужимается до 112,
+   и график в 3,2px рисовался бы в 0,86 — бледнее осей. Тот же
+   приём, что у миниатюр типов функций в диалоге подтемы. */
+.prep-card__svg svg path,
+.prep-card__svg svg line,
+.prep-card__svg svg polyline,
+.prep-card__svg svg circle {
+  vector-effect: non-scaling-stroke;
+}
+
+.prep-card__count {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.prep-card__ico {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.prep-card__bottom {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  justify-content: space-between;
+  margin-top: auto;
+}
+.prep-card__meter {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.prep-card__done {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+.prep-card__start {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Цитата ─────────────────────────────────────────────────── */
+
+.prep-quote {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+  /* По вертикали ровно 16px: бюст занимает всю высоту плашки между
+     ними, поэтому высоту задаёт он. */
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+/* Бюст без рамки и подложки: фон у файла прозрачный. Высота задана,
+   ширина считается сама — файл вытянутый, 1027 на 1505, поэтому
+   при равной высоте он вдвое уже Галилея. Ростом он заметно выше
+   его 132px именно ради сопоставимого веса в кадре. */
+.prep-quote__art {
+  width: auto;
+  height: 160px;
+  flex: none;
+  object-fit: contain;
+}
+.prep-quote__body {
+  display: grid;
+  gap: var(--space-2);
+}
+/* Цитата — акцент всей вкладки, поэтому кегль крупнее основного
+   текста и не падает на телефоне: --fs-lg там уходит на ступень вниз
+   и цитата становилась вровень с описаниями карточек. */
+.prep-quote__text {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-style: italic;
+}
+.prep-quote__author {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Экран задачи навыка ────────────────────────────────────── */
+
+.ptask {
+  display: grid;
+  gap: var(--space-4);
+  container-type: inline-size;
+}
+
+.ptask__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.ptask__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.ptask__score {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+}
+.ptask__score-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.ptask__score-item--right {
+  color: var(--color-success);
+}
+.ptask__score-item--wrong {
+  color: var(--color-error);
+}
+.ptask__score-ico {
+  width: 20px;
+  height: 20px;
+}
+.ptask__score-num {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ptask__counter {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.ptask__counter b {
+  color: var(--color-text);
+}
+
+/* Ряд задач. Кружков ровно столько, сколько задач в наборе, —
+   число берётся из данных, а не из разметки. */
+.ptask__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pdot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.pdot:hover {
+  border-color: var(--color-primary);
+}
+.pdot:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pdot.is-right {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+.pdot.is-wrong {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+/* Пропущенная задача помечена точкой, а не цветом: пропуск —
+   не ошибка. */
+.pdot.is-skipped {
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.pdot.is-skipped::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+/* Текущая задача — заливка. Стоит последней: она перекрывает
+   и цвет решённой, иначе рамка спорила бы с заливкой. */
+.pdot.is-current {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.ptask__card {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+@container (min-width: 720px) {
+  .ptask__card {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+  }
+}
+.ptask__text {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+.ptask__question {
+  justify-self: stretch;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+/* Чертёж не растягивается на всю карточку: движок рисует квадрат
+   620 на 620, и во всю ширину он занял бы экран целиком. Ширину
+   держит обёртка, а не сам SVG: движок ставит ему max-width прямо
+   в атрибуте style, и оттуда его никаким правилом не подвинуть. */
+.ptask__chart {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+}
+
+.ptask__hint {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.ptask__hint-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.ptask__hint-text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.ptask__answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.ptask__label {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.ptask__input {
+  width: 100%;
+  max-width: 220px;
+}
+
+.ptask__options {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@container (min-width: 620px) {
+  .ptask__options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.popt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.popt:hover {
+  border-color: var(--color-primary);
+}
+.popt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.popt__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.popt.is-chosen {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+/* Подсвечивается только выбранный вариант: верный до проверки
+   не показываем, чужие ошибки — тем более. */
+.popt.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.popt.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+/* Плашка ответа не растягивается на всю ширину экрана: она относится
+   к полю ввода, а не к странице. */
+.pverdict {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+.pverdict--right {
+  background: var(--color-success-soft);
+}
+.pverdict--wrong {
+  background: var(--color-error-soft);
+}
+.pverdict__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.pverdict--right .pverdict__title {
+  color: var(--color-success);
+}
+.pverdict--wrong .pverdict__title {
+  color: var(--color-error);
+}
+.pverdict__lead,
+.pverdict__reason {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.pverdict__reason {
+  color: var(--color-text);
+}
+
+.ptask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── Разбор решения ─────────────────────────────────────────── */
+
+/* Оформление самих выкладок берётся из graph.css: там уже описаны
+   .solution-step, .solution-text, .solution-formula и врезки.
+   Здесь — только оболочка с колонкой шагов и навигацией. */
+.psol {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .psol {
+    animation: psol-in var(--dur-reveal) var(--ease);
+  }
+}
+@keyframes psol-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.psol__cols {
+  display: grid;
+  gap: var(--space-4);
+}
+@container (min-width: 720px) {
+  .psol__cols {
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.psol__steps {
+  display: grid;
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.pstep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-switch) var(--ease);
+}
+.pstep:hover {
+  background: var(--color-surface-2);
+}
+.pstep:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pstep.is-current {
+  background: var(--color-surface-info);
+}
+/* Кружок с галочкой: у пройденных шагов залит, у остальных пуст. */
+.pstep__mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  color: transparent;
+}
+.pstep__mark svg {
+  width: 14px;
+  height: 14px;
+}
+.pstep.is-done .pstep__mark {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.pstep.is-current .pstep__mark {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.pstep__text {
+  display: grid;
+  gap: 1px;
+}
+.pstep__no {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.pstep__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+}
+.pstep.is-current .pstep__title {
+  color: var(--color-text-brand);
+}
+
+.psol__stage {
+  display: grid;
+  gap: var(--space-4);
+}
+.psol__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.psol__dots {
+  display: flex;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.psol__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-track);
+}
+.psol__dot.is-current {
+  background: var(--color-primary);
+}
+
+.psol__none {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* Плашка приёма. Тёплая заливка отделяет её от выкладок: это не шаг
+   решения, а то, что остаётся после него. */
+.psol__tip {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.psol__tip-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.psol__tip-text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+}

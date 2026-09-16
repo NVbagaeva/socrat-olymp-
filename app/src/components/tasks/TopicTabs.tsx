@@ -7,26 +7,21 @@ import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { TheoryBlock } from '@/content/sections';
 import { TopicContents } from './TopicContents';
 
-export interface PrepSetView {
-  id: string;
-  title: string;
-  subtitle: string;
-  count: number;
-}
-
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
   about: ReactNode;
   /** Разделы теории: они же пункты содержания. */
   theory: TheoryBlock[];
-  /** Наборы подготовительных задач из данных движка. */
-  prep: PrepSetView[];
+  /** Экран подготовительных задач: собран на сервере. */
+  prep: ReactNode;
   /** Адрес страницы «Для репетиторов». */
   tutorsHref: string;
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
+  /** Какая вкладка открыта при заходе. По умолчанию «О задании». */
+  initial?: string;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
@@ -70,8 +65,9 @@ export function TopicTabs({
   tutorsHref,
   contentsDecor,
   bodies,
+  initial = 'about',
 }: TopicTabsProps) {
-  const [tab, setTab] = useState('about');
+  const [tab, setTab] = useState(initial);
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
@@ -239,28 +235,7 @@ export function TopicTabs({
             </>
           ) : null}
 
-          {tab === 'prep' ? (
-            prep.length === 0 ? (
-              <EmptyState
-                title="Задачи готовятся"
-                description="Наборов подготовительных задач для этой темы в данных пока нет."
-              />
-            ) : (
-              <ul className="proto-list">
-                {prep.map((set) => (
-                  <li className="proto" key={set.id}>
-                    <span className="proto__id">{set.id}</span>
-                    <span className="proto__text">
-                      <span className="proto__title">{set.title}</span>
-                      <span className="proto__subtitle">{set.subtitle}</span>
-                    </span>
-                    {/* Число берётся из состава набора движка. */}
-                    <span className="proto__count">{set.count}</span>
-                  </li>
-                ))}
-              </ul>
-            )
-          ) : null}
+          {tab === 'prep' ? prep : null}
 
           {tab === 'trainer' ? (
             <EmptyState
