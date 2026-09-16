@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
@@ -66,7 +66,10 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
      решил — вчерашняя ошибка ничего не значит. */
   const progress = usePrepProgress();
   const [attempts, setAttempts] = useState<Record<number, Attempt>>({});
-  const [index, setIndex] = useState(0);
+  /* Пусто — задачу выбирает сам экран: первую нерешённую. Как только
+     ученик куда-то перешёл или нажал «Проверить», выбор закрепляется
+     за ним, иначе экран уезжал бы вперёд прямо из-под ответа. */
+  const [chosen, setChosen] = useState<number | null>(null);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Разбор: раскрыт ли он и какой шаг открыт. */
@@ -77,23 +80,11 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
     isSolved(progress, skillId, item.no) ? 'right' : (attempts[item.no] ?? null),
   );
 
-  /* Хранилище читается только после монтирования, поэтому при первой
-     отрисовке решённых ещё не видно и открыта первая задача. Как
-     только прогресс приехал, переходим к первой нерешённой — но
-     лишь пока ученик сам никуда не переключился. */
-  const moved = useRef(false);
-  useEffect(() => {
-    if (moved.current) {
-      return;
-    }
-    const start = firstOpen(status);
-    if (start !== 0) {
-      moved.current = true;
-      setIndex(start);
-    }
-    /* Следим за прогрессом, а не за состоянием: список статусов
-       пересчитывается на каждой отрисовке. */
-  }, [progress]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* Хранилище читается только после монтирования: при первой
+     отрисовке решённых ещё нет, и открыта первая задача. Когда
+     прогресс приезжает, экран сам встаёт на первую нерешённую —
+     это считается при отрисовке, без побочных эффектов. */
+  const index = chosen ?? firstOpen(status);
 
   const found = tasks[index];
   if (found === undefined) {
@@ -117,8 +108,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   }
 
   function open(next: number) {
-    moved.current = true;
-    setIndex(next);
+    setChosen(next);
     setValue('');
     setChecked(null);
     setSolution(false);
@@ -134,6 +124,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
        число — как число. */
     const correct =
       task.answerType === 'choice' ? value === task.answer : sameNumber(value, task.answer);
+    /* Задача закрепляется за экраном: после верного ответа она станет
+       решённой, а экран должен остаться на ней с разбором и плашкой. */
+    setChosen(index);
     setChecked(correct ? 'right' : 'wrong');
     if (correct) {
       /* Запись в хранилище: отсюда же перерисуются счётчик вкладки
