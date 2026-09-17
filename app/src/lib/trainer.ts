@@ -142,10 +142,15 @@ function typeset(html: string): string {
     if (close === -1) {
       return out + rest;
     }
-    out +=
-      rest.slice(0, open.index) +
-      katex.renderToString(unescapeTex(open[1] ?? ''), { throwOnError: false });
+    const before = rest.slice(0, open.index);
     rest = rest.slice(close + '</span>'.length);
+    /* Знак препинания не должен отрываться от формулы: между ними
+       ставится неразрывный пробел нулевой ширины. */
+    const glue = /^[.,;:!?)]/.test(rest) ? '\u2060' : '';
+    out +=
+      before +
+      katex.renderToString(unescapeTex(open[1] ?? ''), { throwOnError: false }) +
+      glue;
   }
 }
 
