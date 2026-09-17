@@ -674,11 +674,15 @@ const DIRECTIONS: Vec2[] = Array.from({ length: 16 }, (_, k) => {
  * (снаружи подпись читается лучше).
  */
 function placeLabels(scene: Scene): PlacedLabel[] {
-  const segments: [Vec2, Vec2][] = [];
-  scene.strokes.forEach((s) => {
+  /* Линии по штрихам: одна линия, сколько бы кусков в ней ни было,
+     штрафует один раз — иначе эллипс из сотни отрезков перевешивал бы
+     любое ребро. */
+  const strokes: [Vec2, Vec2][][] = scene.strokes.map((s) => {
+    const list: [Vec2, Vec2][] = [];
     for (let i = 0; i + 1 < s.points.length; i += 1) {
-      segments.push([at(s.points, i), at(s.points, i + 1)]);
+      list.push([at(s.points, i), at(s.points, i + 1)]);
     }
+    return list;
   });
   const anchors = scene.labels.map((l) => l.p);
   const center: Vec2 = anchors.length
@@ -690,6 +694,7 @@ function placeLabels(scene: Scene): PlacedLabel[] {
 
   const placed: PlacedLabel[] = [];
   const clear = 2.5;
+  const gap = THEME.geometry.labelGap;
 
   scene.labels.forEach((label) => {
     const { w, h } = labelSize(label);
@@ -700,19 +705,22 @@ function placeLabels(scene: Scene): PlacedLabel[] {
     let best: PlacedLabel | null = null;
     let bestScore = Infinity;
 
-    [THEME.geometry.labelGap, THEME.geometry.labelGap + 8].forEach((gap, ring) => {
+    [gap, gap + 8, gap + 16].forEach((reachBase, ring) => {
       DIRECTIONS.forEach((dir) => {
-        const reach = gap + Math.abs(dir[0]) * (w / 2) + Math.abs(dir[1]) * (h / 2);
+        const reach = reachBase + Math.abs(dir[0]) * (w / 2) + Math.abs(dir[1]) * (h / 2);
         const cx = label.p[0] + dir[0] * reach;
         const cy = label.p[1] + dir[1] * reach;
         const x = cx - w / 2;
         const y = cy - h / 2;
-        let score = ring * 4;
+        let score = ring * 5;
         score += 3 * (1 - (dir[0] * outward[0] + dir[1] * outward[1]));
 
-        segments.forEach(([a, b]) => {
-          const d = rectSegmentDistance(x - clear, y - clear, w + 2 * clear, h + 2 * clear, a, b);
-          if (d < 0.001) {
+        strokes.forEach((segments) => {
+          const crosses = segments.some(
+            ([a, b]) =>
+              rectSegmentDistance(x - clear, y - clear, w + 2 * clear, h + 2 * clear, a, b) < 0.001,
+          );
+          if (crosses) {
             score += 40;
           }
         });
