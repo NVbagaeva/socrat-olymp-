@@ -15,6 +15,7 @@ import { RAZDEL_4 } from './razdel4';
 import { RAZDEL_5 } from './razdel5';
 import { RAZDEL_6 } from './razdel6';
 import { RAZDEL_7 } from './razdel7';
+import { RAZDEL_8 } from './razdel8';
 import { type Prototype } from './types';
 
 export interface Razdel {
@@ -32,6 +33,7 @@ export const RAZDELY: readonly Razdel[] = [
   { nomer: 'V', nazvanie: 'Цилиндр', prototipy: RAZDEL_5 },
   { nomer: 'VI', nazvanie: 'Шар', prototipy: RAZDEL_6 },
   { nomer: 'VII', nazvanie: 'Вписанный и описанный цилиндр', prototipy: RAZDEL_7 },
+  { nomer: 'VIII', nazvanie: 'Вписанная и описанная сфера', prototipy: RAZDEL_8 },
 ];
 
 export const BANK: readonly Prototype[] = RAZDELY.flatMap((razdel) => [...razdel.prototipy]);
@@ -40,4 +42,4 @@ export function prototypeById(id: string): Prototype | undefined {
   return BANK.find((p) => p.id === id);
 }
 
-export { RAZDEL_1, RAZDEL_2, RAZDEL_3, RAZDEL_4, RAZDEL_5, RAZDEL_6, RAZDEL_7 };
+export { RAZDEL_1, RAZDEL_2, RAZDEL_3, RAZDEL_4, RAZDEL_5, RAZDEL_6, RAZDEL_7, RAZDEL_8 };

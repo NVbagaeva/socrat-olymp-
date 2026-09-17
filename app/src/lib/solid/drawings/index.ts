@@ -15,7 +15,6 @@ import { RAZDELY } from '../../zadanie3';
 import { RAZDEL_1 } from '../../zadanie3/razdel1';
 import { type Prototype } from '../../zadanie3/types';
 import { type Model } from '../model';
-import { SECTION8 } from './section8';
 import { SHEETS } from './sheets';
 import { THUMBS } from './thumbs';
 
@@ -28,7 +27,7 @@ function firstDrawing(prototype: Prototype): Model {
   return prototype.chertezh(first.params);
 }
 
-/** Чертежи всех собранных разделов: id прототипа — его чертёж. */
+/** Чертежи всех разделов: id прототипа — его чертёж. */
 const SECTIONS: Record<string, Model> = Object.fromEntries(
   RAZDELY.flatMap((razdel) =>
     razdel.prototipy.map((prototype) => [prototype.id, firstDrawing(prototype)]),
@@ -39,10 +38,7 @@ const SECTIONS: Record<string, Model> = Object.fromEntries(
 const WITH_NUMBERS = ['P03-05', 'P03-11'];
 
 /** Чертёж прототипа по его id. */
-export const PROTOTYPE_DRAWINGS: Record<string, Model> = {
-  ...SECTIONS,
-  ...SECTION8,
-};
+export const PROTOTYPE_DRAWINGS: Record<string, Model> = SECTIONS;
 
 /**
  * Варианты ступенчатых многогранников: у каждого свои числа на

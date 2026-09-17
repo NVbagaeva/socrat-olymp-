@@ -23,13 +23,19 @@
  *    на 12, 48 и 200.
  */
 
-import { box, pyramid, regularPolygon, rightPrism } from '../../solid/figures';
-import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
+import { box } from '../../solid/figures';
+import { distance, polyhedronVolume } from '../../solid/measure';
 import { type Polyhedron } from '../../solid/model';
 import type { Vec3 } from '../../solid/vec';
 
-/** Граней в приближении круглого тела: как и в остальных разделах. */
-const FACETS = 48;
+export {
+  coneLateral,
+  coneVolume,
+  cylinderLateral,
+  cylinderVolume,
+  prismOut,
+  pyramidOut,
+} from '../round';
 
 /** Прямоугольный параллелепипед, описанный около цилиндра (r, h). */
 export function boxAround(r: number, h: number): Polyhedron {
@@ -39,55 +45,6 @@ export function boxAround(r: number, h: number): Polyhedron {
 /** Объём этого параллелепипеда — измеренный, а не посчитанный. */
 export function boxVolume(r: number, h: number): number {
   return polyhedronVolume(boxAround(r, h));
-}
-
-/**
- * Многоугольник, ОПИСАННЫЙ около окружности радиуса r: апофема
- * равна r ровно, поэтому боковая грань пирамиды на нём имеет ту же
- * наклонную высоту, что и образующая конуса.
- */
-function circumscribed(r: number): Vec3[] {
-  return regularPolygon(FACETS, r / Math.cos(Math.PI / FACETS), 0, 0);
-}
-
-/** Цилиндр (r, h) приближением на описанном многоугольнике. */
-export function prismOut(r: number, h: number): Polyhedron {
-  return rightPrism(circumscribed(r), h);
-}
-
-/** Конус (r, h) приближением на том же описанном многоугольнике. */
-export function pyramidOut(r: number, h: number): Polyhedron {
-  return pyramid(circumscribed(r), [0, 0, h]);
-}
-
-/** Сумма площадей перечисленных граней тела. */
-function areaOf(body: Polyhedron, faces: readonly number[][]): number {
-  return faces.reduce(
-    (sum, face) => sum + polygonArea(face.map((i) => body.vertices[i] as Vec3)),
-    0,
-  );
-}
-
-/** Боковая поверхность цилиндра приближением: без двух оснований. */
-export function cylinderLateral(r: number, h: number): number {
-  const body = prismOut(r, h);
-  return areaOf(body, body.faces.slice(2));
-}
-
-/** Боковая поверхность конуса приближением: без основания. */
-export function coneLateral(r: number, h: number): number {
-  const body = pyramidOut(r, h);
-  return areaOf(body, body.faces.slice(1));
-}
-
-/** Объём цилиндра приближением. */
-export function cylinderVolume(r: number, h: number): number {
-  return polyhedronVolume(prismOut(r, h));
-}
-
-/** Объём конуса приближением. */
-export function coneVolume(r: number, h: number): number {
-  return polyhedronVolume(pyramidOut(r, h));
 }
 
 /**
@@ -115,8 +72,6 @@ export function circumradiusOfLegs(a: number, b: number): number {
 }
 
 /** Объём цилиндра в долях от объёма единичного: измерением, не формулой. */
-export function volumeUnits(r: number, h: number): number {
-  return cylinderVolume(r, h) / cylinderVolume(1, 1);
-}
+export { prismUnits as volumeUnits } from '../round';
 
 export { solveBySearch } from '../search';
