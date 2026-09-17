@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef } from 'react';
+import { useDismiss } from '@/lib/dismiss';
 import type { ReactNode, RefObject } from 'react';
 import type { TutorMaterial } from '@/content/sections';
 
@@ -140,49 +141,29 @@ export function TutorMenu({
 
   /* Закрытие: Escape, щелчок мимо меню. Переход на другую вкладку
      закрывает его снаружи — там же, где меняется сама вкладка. */
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+  useDismiss({ open, onClose: close, menu, trigger: button });
+
+  /* Ширина окна и сдвиг ленты меняют место кнопки: меню идёт за ней,
+     а не остаётся висеть в стороне. */
   useEffect(() => {
     if (!open) {
       return undefined;
     }
-
-    const byKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onOpenChange(false);
-        button.current?.focus();
-      }
-    };
-    const byClick = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) {
-        return;
-      }
-      if (menu.current?.contains(target) === true || button.current?.contains(target) === true) {
-        return;
-      }
-      onOpenChange(false);
-    };
-    /* Ширина окна и сдвиг ленты меняют место кнопки: меню идёт
-       за ней, а не остаётся висеть в стороне. */
     const again = () => {
       const node = menu.current;
       if (node !== null) {
         place(node);
       }
     };
-
     const strip = stripRef.current;
-    document.addEventListener('keydown', byKey);
-    document.addEventListener('pointerdown', byClick);
     window.addEventListener('resize', again);
     strip?.addEventListener('scroll', again, { passive: true });
-
     return () => {
-      document.removeEventListener('keydown', byKey);
-      document.removeEventListener('pointerdown', byClick);
       window.removeEventListener('resize', again);
       strip?.removeEventListener('scroll', again);
     };
-  }, [open, onOpenChange, stripRef]);
+  }, [open, stripRef]);
 
   return (
     <div className="topic-tabs-row">

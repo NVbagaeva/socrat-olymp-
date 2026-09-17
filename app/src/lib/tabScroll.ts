@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Прокрутка при переходах внутри вкладки «Подготовительные задачи».
+ * Прокрутка при переходах внутри вкладки темы.
  *
  * Шапка темы занимает верх страницы, и после выбора навыка ученик
  * оставался стоять на ней: задание приходилось искать прокруткой.
@@ -12,22 +12,22 @@
  * намеренно. Двигается только видимая область.
  */
 
-/** Куда прокрутить после перехода на другой экран вкладки. */
-export type PrepTarget = 'skill' | 'list';
+/** Куда прокрутить после перехода: селектор нужного заголовка. */
+export type TabTarget = string;
 
 /* Намерение живёт между кликом и отрисовкой следующего экрана.
    Обычная переменная модуля: она переживает переход по ссылке внутри
    приложения и не переживает перезагрузку страницы — ровно то, что
    нужно. При прямом заходе по адресу прокрутки не будет. */
-let pending: PrepTarget | null = null;
+let pending: TabTarget | null = null;
 
 /** Запомнить, что переход сделан кликом внутри вкладки. */
-export function requestPrepScroll(target: PrepTarget): void {
+export function requestTabScroll(target: TabTarget): void {
   pending = target;
 }
 
 /** Забрать намерение. Второй раз оно не сработает. */
-export function takePrepScroll(): PrepTarget | null {
+export function takeTabScroll(): TabTarget | null {
   const target = pending;
   pending = null;
   return target;
@@ -76,7 +76,7 @@ function inView(node: Element): boolean {
  * Если за это время человек крутил сам — колесом, пальцем или
  * клавишами, — не трогаем ничего: дёргать экран из-под руки нельзя.
  */
-export function scrollPrepTo(selector: string, gap = 12): void {
+export function scrollTabTo(selector: string, gap = 12): void {
   const node = document.querySelector(selector);
   if (node === null) {
     return;

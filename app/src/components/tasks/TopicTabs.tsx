@@ -15,6 +15,10 @@ export interface TopicTabsProps {
   theory: TheoryBlock[];
   /** Экран подготовительных задач: собран на сервере. */
   prep: ReactNode;
+  /** Экран тренажёра: собран на сервере. */
+  trainer: ReactNode;
+  /** Адрес вкладки тренажёра: у неё свои адреса, как у подготовки. */
+  trainerHref: string;
   /** Материалы для репетиторов: подпись кнопки и карточки меню. */
   tutors: ExamSection['tutors'];
   /** Декор под содержанием: на узком экране не показывается. */
@@ -70,6 +74,8 @@ export function TopicTabs({
   about,
   theory,
   prep,
+  trainer,
+  trainerHref,
   tutors,
   contentsDecor,
   bodies,
@@ -84,14 +90,16 @@ export function TopicTabs({
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
 
-  /* У подготовительных задач свой адрес. Поэтому эта вкладка не
-     переключает состояние, а ведёт туда: иначе из навыка по ней было
-     не вернуться — вкладка там уже выбрана, менять нечего. */
+  /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
+     вкладка не переключает состояние, а ведёт туда: иначе изнутри
+     по ней было не вернуться — вкладка там уже выбрана, менять
+     нечего. */
   function choose(id: string) {
     /* Переход на любую вкладку закрывает меню материалов. */
     setMenu(false);
-    if (id === 'prep' && pathname !== prepHref) {
-      router.push(prepHref);
+    const href = id === 'prep' ? prepHref : id === 'trainer' ? trainerHref : null;
+    if (href !== null && pathname !== href) {
+      router.push(href);
       return;
     }
     setTab(id);
@@ -277,12 +285,7 @@ export function TopicTabs({
 
           {tab === 'prep' ? prep : null}
 
-          {tab === 'trainer' ? (
-            <EmptyState
-              title="Тренажёр готовится"
-              description="Задания собирает движок graph/, но экрана решения в кабинете пока нет."
-            />
-          ) : null}
+          {tab === 'trainer' ? trainer : null}
 
           {tab === 'generator' ? (
             <EmptyState
