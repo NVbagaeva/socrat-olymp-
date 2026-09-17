@@ -50,9 +50,15 @@ function kindRows(progress: TrainerProgress): KindRow[] {
   }));
 }
 
-/** Тип с наименьшей точностью. Пока решено меньше трёх — не советуем. */
+/**
+ * Тип с наименьшей точностью.
+ *
+ * Пока решено меньше трёх заданий, советовать рано, а когда всё
+ * решено верно — не о чем: совет появляется только там, где есть
+ * что подтянуть.
+ */
 function weakest(rows: KindRow[]): KindRow | null {
-  const solid = rows.filter((row) => row.done >= 3 && row.accuracy !== null);
+  const solid = rows.filter((row) => row.done >= 3 && row.accuracy !== null && row.accuracy < 100);
   if (solid.length === 0) {
     return null;
   }
