@@ -208,13 +208,32 @@ function rightHintFor(task: EngineTask): string {
   return 'Ответ получается из уравнений, снятых по чертежу.';
 }
 
-/** Что проверить при ошибке. Один текст на тип задания. */
+/* Что проверить при ошибке. Один текст на тип задания: один для
+   задач с одной прямой, другой — для задач с двумя.
+
+   Ответа текст не выдаёт: он говорит, где искать ошибку, и повторяет
+   те же слова, которыми описаны шаги подсказки. Буквы набираются
+   формулами — как и везде в условиях. */
+const ONE_LINE =
+  'Проверьте, как сняты $k$ и $b$ по чертежу: $k$ — это $\\Delta y : \\Delta x$ ' +
+  'по двум отмеченным точкам, $b$ — значение $y$ там, где прямая пересекает ось $Oy$.';
+
+const TWO_LINES =
+  'Проверьте уравнения обеих прямых: $k$ — это $\\Delta y : \\Delta x$ по двум ' +
+  'отмеченным точкам, $b$ — значение $y$ там, где прямая пересекает ось $Oy$.';
+
 const WRONG_HINT: Record<string, string> = {
-  '12.A': 'Проверьте, как сняты k и b по чертежу: k — это Δy : Δx по двум отмеченным точкам, b — значение y там, где прямая пересекает ось Oy.',
-  '12.B': 'Проверьте, как сняты k и b по чертежу: k — это Δy : Δx по двум отмеченным точкам, b — значение y там, где прямая пересекает ось Oy.',
-  '12.C': 'Проверьте уравнения обеих прямых: k — это Δy : Δx по двум отмеченным точкам, b — значение y там, где прямая пересекает ось Oy.',
-  '12.D': 'Проверьте уравнения обеих прямых: k — это Δy : Δx по двум отмеченным точкам, b — значение y там, где прямая пересекает ось Oy.',
+  '12.A': ONE_LINE,
+  '12.B': ONE_LINE,
+  '12.C': TWO_LINES,
+  '12.D': TWO_LINES,
 };
+
+/* Формулы в пояснении размечены долларами, как в условиях задач:
+   движок превращает их в заглушки, KaTeX набирает на сборке. */
+function hintHtml(text: string): string {
+  return typeset(GraphGenerate.typeset(text) as string);
+}
 
 /** Десять заданий подхода для режима. */
 export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
@@ -228,7 +247,7 @@ export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
     questionHtml: typeset(task.questionHtml),
     chartSvg: task.svg,
     answer: task.answer,
-    wrongHint: WRONG_HINT[task.meta.set] ?? '',
+    wrongHint: hintHtml(WRONG_HINT[task.meta.set] ?? ''),
     rightHint: rightHintFor(task),
   }));
 }
