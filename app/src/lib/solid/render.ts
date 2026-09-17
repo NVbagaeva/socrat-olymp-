@@ -10,15 +10,7 @@
 
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
-import {
-  SILHOUETTE,
-  TOWARD,
-  circlePoint,
-  coneTangent,
-  nearSide,
-  project,
-  spherePoint,
-} from './project';
+import { type View, viewOf } from './project';
 import {
   type Vec2,
   type Vec3,
@@ -144,16 +136,17 @@ interface Scene {
 
 const TWO_PI = Math.PI * 2;
 
-function ellipse(center: Vec3, r: number, from = 0, to = TWO_PI): Vec3[] {
+function ellipse(view: View, center: Vec3, r: number, from = 0, to = TWO_PI): Vec3[] {
   const n = THEME.geometry.ellipsePoints;
   const count = Math.max(2, Math.round((n * Math.abs(to - from)) / TWO_PI));
   return Array.from({ length: count + 1 }, (_, k) =>
-    circlePoint(center, r, from + ((to - from) * k) / count),
+    view.circlePoint(center, r, from + ((to - from) * k) / count),
   );
 }
 
 /** Ломаная по точкам с готовыми флагами видимости → куски. */
 function polylineStrokes(
+  view: View,
   points: Vec3[],
   visible: boolean[],
   role: Role,
@@ -172,10 +165,10 @@ function polylineStrokes(
       if (current.length > 1 && state !== null) {
         out.push({ points: current, role, visible: state });
       }
-      current = [project(a)];
+      current = [view.project(a)];
       state = vis;
     }
-    current.push(project(b));
+    current.push(view.project(b));
   }
   if (current.length > 1 && state !== null) {
     out.push({ points: current, role, visible: state });
@@ -184,6 +177,7 @@ function polylineStrokes(
 }
 
 function segmentStrokes(
+  view: View,
   a: Vec3,
   b: Vec3,
   occluders: readonly Occluder[],
@@ -191,8 +185,8 @@ function segmentStrokes(
   role: Role,
   skip?: (occ: Occluder) => boolean,
 ): Stroke[] {
-  return segmentRuns(a, b, occluders, eps, skip).map((run) => ({
-    points: [project(lerp(a, b, run.t0)), project(lerp(a, b, run.t1))],
+  return segmentRuns(view, a, b, occluders, eps, skip).map((run) => ({
+    points: [view.project(lerp(a, b, run.t0)), view.project(lerp(a, b, run.t1))],
     role,
     visible: run.visible,
   }));
@@ -202,10 +196,17 @@ function others(all: readonly Occluder[], body: Body): Occluder[] {
   return all.filter((occ) => occ.owner !== body);
 }
 
-function addPolyhedron(scene: Scene, body: Polyhedron, all: readonly Occluder[], eps: number) {
-  const occluders = body.glass ? [...all, ...selfOccluders(body)] : all;
+function addPolyhedron(
+  view: View,
+  scene: Scene,
+  body: Polyhedron,
+  all: readonly Occluder[],
+  eps: number,
+) {
+  const occluders = body.glass ? [...all, ...selfOccluders(view, body)] : all;
   polyhedronEdges(body.faces).forEach(([i, j]) => {
     const strokes = segmentStrokes(
+      view,
       at(body.vertices, i),
       at(body.vertices, j),
       occluders,
@@ -218,8 +219,11 @@ function addPolyhedron(scene: Scene, body: Polyhedron, all: readonly Occluder[],
 
   if (!body.noFill) {
     body.faces.forEach((face) => {
-      if (dot(faceNormal(body.vertices, face), TOWARD) > 0) {
-        scene.fills.push({ points: face.map((i) => project(at(body.vertices, i))), role: 'face' });
+      if (dot(faceNormal(body.vertices, face), view.toward) > 0) {
+        scene.fills.push({
+          points: face.map((i) => view.project(at(body.vertices, i))),
+          role: 'face',
+        });
       }
     });
   }
@@ -227,21 +231,28 @@ function addPolyhedron(scene: Scene, body: Polyhedron, all: readonly Occluder[],
   body.vertices.forEach((v, i) => {
     const name = body.names?.[i];
     if (name) {
-      const p = project(v);
+      const p = view.project(v);
       scene.dots.push(p);
       scene.labels.push({ p, text: name, kind: 'vertex' });
     }
   });
 }
 
-function addCylinder(scene: Scene, body: Cylinder, all: readonly Occluder[], eps: number) {
+function addCylinder(
+  view: View,
+  scene: Scene,
+  body: Cylinder,
+  all: readonly Occluder[],
+  eps: number,
+) {
   const occluders = others(all, body);
   const top: Vec3 = add(body.base, [0, 0, body.h]);
   const curve = (points: Vec3[], selfVisible: boolean[]) => {
     scene.strokes.push(
       ...polylineStrokes(
+        view,
         points,
-        polylineVisibility(points, selfVisible, occluders, eps),
+        polylineVisibility(view, points, selfVisible, occluders, eps),
         'edge',
         false,
       ),
@@ -250,24 +261,25 @@ function addCylinder(scene: Scene, body: Cylinder, all: readonly Occluder[], eps
 
   /* Нижнее основание: ближняя половина видна, дальняя за стенкой. */
   if (!body.hideBase) {
-    const bottom = ellipse(body.base, body.r);
+    const bottom = ellipse(view, body.base, body.r);
     curve(
       bottom,
-      bottom.map((_, k) => nearSide((TWO_PI * k) / (bottom.length - 1))),
+      bottom.map((_, k) => view.nearSide((TWO_PI * k) / (bottom.length - 1))),
     );
   }
-  const upper = ellipse(top, body.r);
+  const upper = ellipse(view, top, body.r);
   curve(
     upper,
     upper.map(() => true),
   );
 
   /* Контурные образующие: там, где луч зрения касается боковой поверхности. */
-  [SILHOUETTE, SILHOUETTE + Math.PI].forEach((u) => {
+  [view.silhouette, view.silhouette + Math.PI].forEach((u) => {
     scene.strokes.push(
       ...segmentStrokes(
-        circlePoint(body.base, body.r, u),
-        circlePoint(top, body.r, u),
+        view,
+        view.circlePoint(body.base, body.r, u),
+        view.circlePoint(top, body.r, u),
         occluders,
         eps,
         'edge',
@@ -278,24 +290,24 @@ function addCylinder(scene: Scene, body: Cylinder, all: readonly Occluder[], eps
   /* Силуэт: ближняя дуга низа, образующая, дальняя дуга верха. */
   scene.fills.push({
     points: [
-      ...ellipse(body.base, body.r, SILHOUETTE + Math.PI, SILHOUETTE + TWO_PI),
-      ...ellipse(top, body.r, SILHOUETTE, SILHOUETTE + Math.PI),
-    ].map(project),
+      ...ellipse(view, body.base, body.r, view.silhouette + Math.PI, view.silhouette + TWO_PI),
+      ...ellipse(view, top, body.r, view.silhouette, view.silhouette + Math.PI),
+    ].map(view.project),
     role: 'face',
   });
 
   if (body.liquid !== undefined && body.liquid > 0) {
     const level: Vec3 = add(body.base, [0, 0, body.liquid]);
-    const surface = ellipse(level, body.r);
+    const surface = ellipse(view, level, body.r);
     curve(
       surface,
       surface.map(() => true),
     );
     scene.fills.push({
       points: [
-        ...ellipse(body.base, body.r, SILHOUETTE + Math.PI, SILHOUETTE + TWO_PI),
-        ...ellipse(level, body.r, SILHOUETTE, SILHOUETTE + Math.PI),
-      ].map(project),
+        ...ellipse(view, body.base, body.r, view.silhouette + Math.PI, view.silhouette + TWO_PI),
+        ...ellipse(view, level, body.r, view.silhouette, view.silhouette + Math.PI),
+      ].map(view.project),
       role: 'liquid',
     });
   }
@@ -307,52 +319,56 @@ function inArc(u: number, from: number, to: number): boolean {
   return norm(u - from) < norm(to - from);
 }
 
-function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number) {
+function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
   const curve = (points: Vec3[], selfVisible: boolean[], role: Role = 'edge') => {
     scene.strokes.push(
       ...polylineStrokes(
+        view,
         points,
-        polylineVisibility(points, selfVisible, occluders, eps),
+        polylineVisibility(view, points, selfVisible, occluders, eps),
         role,
         false,
       ),
     );
   };
   const segment = (a: Vec3, b: Vec3) => {
-    scene.strokes.push(...segmentStrokes(a, b, occluders, eps, 'edge'));
+    scene.strokes.push(...segmentStrokes(view, a, b, occluders, eps, 'edge'));
   };
 
   if (body.inverted) {
     /* Сосуд: вершина внизу, в открытое основание сверху видно целиком,
        а контурные образующие уходят на ближнюю сторону. */
     const apex: Vec3 = add(body.base, [0, 0, -body.h]);
-    const psi = coneTangent(body.r, body.h);
-    const left = SILHOUETTE + Math.PI + psi;
-    const right = SILHOUETTE - psi;
-    const base = ellipse(body.base, body.r);
+    const psi = view.coneTangent(body.r, body.h);
+    const left = view.silhouette + Math.PI + psi;
+    const right = view.silhouette - psi;
+    const base = ellipse(view, body.base, body.r);
     if (!body.hideBase) {
       curve(
         base,
         base.map(() => true),
       );
     }
-    segment(apex, circlePoint(body.base, body.r, right));
-    segment(apex, circlePoint(body.base, body.r, left));
+    segment(apex, view.circlePoint(body.base, body.r, right));
+    segment(apex, view.circlePoint(body.base, body.r, left));
     scene.fills.push({
-      points: [project(apex), ...ellipse(body.base, body.r, right, left).map(project)],
+      points: [
+        view.project(apex),
+        ...ellipse(view, body.base, body.r, right, left).map(view.project),
+      ],
       role: 'face',
     });
     if (body.liquid !== undefined && body.liquid > 0) {
       const level: Vec3 = add(apex, [0, 0, body.liquid]);
       const rl = (body.r * body.liquid) / body.h;
-      const surface = ellipse(level, rl);
+      const surface = ellipse(view, level, rl);
       curve(
         surface,
         surface.map(() => true),
       );
       scene.fills.push({
-        points: [project(apex), ...ellipse(level, rl, right, left).map(project)],
+        points: [view.project(apex), ...ellipse(view, level, rl, right, left).map(view.project)],
         role: 'liquid',
       });
     }
@@ -361,11 +377,11 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
 
   /* Высота до вершины: у усечённого конуса она больше собственной. */
   const apexHeight = body.top === undefined ? body.h : (body.h * body.r) / (body.r - body.top);
-  const psi = coneTangent(body.r, apexHeight);
-  const right = SILHOUETTE + psi;
-  const left = SILHOUETTE + Math.PI - psi;
+  const psi = view.coneTangent(body.r, apexHeight);
+  const right = view.silhouette + psi;
+  const left = view.silhouette + Math.PI - psi;
 
-  const base = ellipse(body.base, body.r);
+  const base = ellipse(view, body.base, body.r);
   if (!body.hideBase) {
     const n = base.length - 1;
     curve(
@@ -376,32 +392,38 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
 
   if (body.top === undefined) {
     const apex: Vec3 = add(body.base, [0, 0, body.h]);
-    segment(apex, circlePoint(body.base, body.r, right));
-    segment(apex, circlePoint(body.base, body.r, left));
+    segment(apex, view.circlePoint(body.base, body.r, right));
+    segment(apex, view.circlePoint(body.base, body.r, left));
     scene.fills.push({
-      points: [project(apex), ...ellipse(body.base, body.r, left, right + TWO_PI).map(project)],
+      points: [
+        view.project(apex),
+        ...ellipse(view, body.base, body.r, left, right + TWO_PI).map(view.project),
+      ],
       role: 'face',
     });
   } else {
     const topCenter: Vec3 = add(body.base, [0, 0, body.h]);
-    const upper = ellipse(topCenter, body.top);
+    const upper = ellipse(view, topCenter, body.top);
     curve(
       upper,
       upper.map(() => true),
     );
-    segment(circlePoint(body.base, body.r, right), circlePoint(topCenter, body.top, right));
-    segment(circlePoint(body.base, body.r, left), circlePoint(topCenter, body.top, left));
+    segment(
+      view.circlePoint(body.base, body.r, right),
+      view.circlePoint(topCenter, body.top, right),
+    );
+    segment(view.circlePoint(body.base, body.r, left), view.circlePoint(topCenter, body.top, left));
     scene.fills.push({
       points: [
-        ...ellipse(body.base, body.r, left, right + TWO_PI),
-        ...ellipse(topCenter, body.top, right, left),
-      ].map(project),
+        ...ellipse(view, body.base, body.r, left, right + TWO_PI),
+        ...ellipse(view, topCenter, body.top, right, left),
+      ].map(view.project),
       role: 'face',
     });
   }
 }
 
-function addSphere(scene: Scene, body: Sphere, all: readonly Occluder[], eps: number) {
+function addSphere(view: View, scene: Scene, body: Sphere, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
 
   /* Контур шара — большой круг, перпендикулярный лучу зрения. В косой
@@ -409,13 +431,15 @@ function addSphere(scene: Scene, body: Sphere, all: readonly Occluder[], eps: nu
      получается сам: точки контура строятся в пространстве. */
   const n = THEME.geometry.ellipsePoints;
   const ring = Array.from({ length: n + 1 }, (_, k) =>
-    spherePoint(body.center, body.r, (TWO_PI * k) / n),
+    view.spherePoint(body.center, body.r, (TWO_PI * k) / n),
   );
-  scene.fills.push({ points: ring.map(project), role: 'sphere' });
+  scene.fills.push({ points: ring.map(view.project), role: 'sphere' });
   scene.strokes.push(
     ...polylineStrokes(
+      view,
       ring,
       polylineVisibility(
+        view,
         ring,
         ring.map(() => true),
         occluders,
@@ -428,10 +452,16 @@ function addSphere(scene: Scene, body: Sphere, all: readonly Occluder[], eps: nu
 
   const horizontal = (z: number, r: number, role: Role) => {
     const center: Vec3 = add(body.center, [0, 0, z]);
-    const pts = ellipse(center, r);
-    const selfVisible = pts.map((p) => dot(sub(p, body.center), TOWARD) > 1e-9);
+    const pts = ellipse(view, center, r);
+    const selfVisible = pts.map((p) => dot(sub(p, body.center), view.toward) > 1e-9);
     scene.strokes.push(
-      ...polylineStrokes(pts, polylineVisibility(pts, selfVisible, occluders, eps), role, false),
+      ...polylineStrokes(
+        view,
+        pts,
+        polylineVisibility(view, pts, selfVisible, occluders, eps),
+        role,
+        false,
+      ),
     );
     return pts;
   };
@@ -442,49 +472,50 @@ function addSphere(scene: Scene, body: Sphere, all: readonly Occluder[], eps: nu
   (body.sections ?? []).forEach((z) => {
     const r = Math.sqrt(Math.max(0, body.r * body.r - z * z));
     const pts = horizontal(z, r, 'section');
-    scene.fills.push({ points: pts.map(project), role: 'section' });
+    scene.fills.push({ points: pts.map(view.project), role: 'section' });
   });
 }
 
 function buildScene(model: Model): Scene {
   const scene: Scene = { strokes: [], fills: [], dots: [], labels: [], angles: [] };
-  const all = occludersOf(model.bodies);
+  const view = viewOf(model.view);
+  const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
 
   model.bodies.forEach((body) => {
     switch (body.kind) {
       case 'polyhedron':
-        addPolyhedron(scene, body, all, eps);
+        addPolyhedron(view, scene, body, all, eps);
         break;
       case 'cylinder':
-        addCylinder(scene, body, all, eps);
+        addCylinder(view, scene, body, all, eps);
         break;
       case 'cone':
-        addCone(scene, body, all, eps);
+        addCone(view, scene, body, all, eps);
         break;
       case 'sphere':
-        addSphere(scene, body, all, eps);
+        addSphere(view, scene, body, all, eps);
         break;
     }
   });
 
   (model.sections ?? []).forEach((section) => {
-    scene.fills.push({ points: section.points.map(project), role: 'section' });
+    scene.fills.push({ points: section.points.map(view.project), role: 'section' });
     section.points.forEach((a, i) => {
       const b = at(section.points, (i + 1) % section.points.length);
-      scene.strokes.push(...segmentStrokes(a, b, all, eps, 'section'));
+      scene.strokes.push(...segmentStrokes(view, a, b, all, eps, 'section'));
     });
   });
 
   (model.lines ?? []).forEach((line) => {
-    scene.strokes.push(...segmentStrokes(line.a, line.b, all, eps, 'aux'));
+    scene.strokes.push(...segmentStrokes(view, line.a, line.b, all, eps, 'aux'));
     if (line.label) {
-      scene.labels.push({ p: project(mid(line.a, line.b)), text: line.label, kind: 'aux' });
+      scene.labels.push({ p: view.project(mid(line.a, line.b)), text: line.label, kind: 'aux' });
     }
   });
 
   (model.marks ?? []).forEach((mark) => {
-    const p = project(mark.p);
+    const p = view.project(mark.p);
     scene.dots.push(p);
     if (mark.label) {
       scene.labels.push({ p, text: mark.label, kind: 'vertex' });
@@ -493,16 +524,16 @@ function buildScene(model: Model): Scene {
 
   (model.measures ?? []).forEach((measure) => {
     scene.labels.push({
-      p: project(mid(measure.a, measure.b)),
+      p: view.project(mid(measure.a, measure.b)),
       text: measure.text,
       kind: 'measure',
     });
   });
 
   (model.angles ?? []).forEach((angle) => {
-    const o = project(angle.at);
-    const u = project(add(angle.at, normalize(angle.u)));
-    const v = project(add(angle.at, normalize(angle.v)));
+    const o = view.project(angle.at);
+    const u = view.project(add(angle.at, normalize(angle.u)));
+    const v = view.project(add(angle.at, normalize(angle.v)));
     scene.angles.push({ points: [o, u, v] });
   });
 

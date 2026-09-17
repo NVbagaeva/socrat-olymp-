@@ -6,6 +6,7 @@
  * вычисляются движком. Поэтому здесь нет ни пикселей, ни цветов.
  */
 
+import type { ViewId } from './project';
 import { type Vec3, at, centroid, dot, sub } from './vec';
 
 /** Многогранник: вершины, грани по индексам, имена вершин. */
@@ -104,6 +105,12 @@ export interface Measure {
 export interface Model {
   /** Описание для голосового доступа. */
   alt: string;
+  /**
+   * Вид: ortho для тел вращения, пирамид и комбинаций, cabinet для призм
+   * и параллелепипедов, где переднее ребро AB должно быть горизонтальным.
+   * Не указан — ortho.
+   */
+  view?: ViewId;
   bodies: Body[];
   marks?: Mark[];
   lines?: Line[];
