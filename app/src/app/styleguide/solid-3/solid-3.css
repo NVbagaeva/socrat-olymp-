@@ -27,7 +27,9 @@
 
 .s3__grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, …): иначе минимум колонки — собственная ширина SVG,
+     и на узком экране карточка вылезает за край. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -38,6 +40,7 @@
 }
 
 .s3__card {
+  min-width: 0;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -59,7 +62,7 @@
 
 .s3__pair {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
 }
