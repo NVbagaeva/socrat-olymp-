@@ -12,9 +12,9 @@
 
 import { RAZDEL_1 } from '../../zadanie3/razdel1';
 import { RAZDEL_2 } from '../../zadanie3/razdel2';
+import { RAZDEL_3 } from '../../zadanie3/razdel3';
 import { type Prototype } from '../../zadanie3/types';
 import { type Model } from '../model';
-import { SECTION3 } from './section3';
 import { SECTION4 } from './section4';
 import { SECTION5 } from './section5';
 import { SECTION6 } from './section6';
@@ -38,6 +38,10 @@ const SECTION1: Record<string, Model> = Object.fromEntries(
 
 const SECTION2: Record<string, Model> = Object.fromEntries(
   RAZDEL_2.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+);
+
+const SECTION3: Record<string, Model> = Object.fromEntries(
+  RAZDEL_3.map((prototype) => [prototype.id, firstDrawing(prototype)]),
 );
 
 /** Прототипы, у которых числа стоят на самом чертеже. */
