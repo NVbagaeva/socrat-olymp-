@@ -51,18 +51,21 @@ jobs:
       - name: Посмотреть живой сайт
         run: |
           for u in \
-            https://budetege.ru/zadaniya/12/linear/podgotovka/ \
-            https://budetege.ru/zadaniya/12/linear/podgotovka/k/ ; do
+            https://budetege.ru/zadaniya/12/linear/trenazher/ \
+            https://budetege.ru/zadaniya/12/linear/trenazher/value/ ; do
             echo "=== $u"
             code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
             echo "код ответа: $code, размер: $(wc -c < /tmp/p.html)"
             curl -sI "$u" | grep -i 'last-modified' || true
-            echo "шапка вкладки (prep__title): $(grep -c 'prep__title' /tmp/p.html || true)"
-            echo "ряд чипов (prep__chips): $(grep -c 'prep__chips' /tmp/p.html || true)"
-            echo "экран задачи (ptask__dots): $(grep -c 'ptask__dots' /tmp/p.html || true)"
-            echo "строка счётчика:"; grep -o '<p class="prep__counter">[^<]*<b>[^<]*</b>[^<]*' /tmp/p.html | head -2
-            echo "числа на карточках:"; grep -o 'prep-card__done">[^<]*' /tmp/p.html | head -4
-            echo "витринные 17 из 40: $(grep -c '17</b> из 40' /tmp/p.html || true)"
+            echo "строка выбора типа (tmode__pick): $(grep -c 'tmode__pick' /tmp/p.html || true)"
+            echo "сводка тренажёра (tstats): $(grep -c 'tstats' /tmp/p.html || true)"
+            echo "экран задания (ttask__bar): $(grep -c 'ttask__bar' /tmp/p.html || true)"
+            echo "поле ответа (ttask__input): $(grep -c 'ttask__input' /tmp/p.html || true)"
+            echo "старая заглушка: $(grep -c 'Задания готовятся' /tmp/p.html || true)"
+          done
+          echo "=== файлы сборки"
+          for u in https://budetege.ru/zadaniya/12/linear/trenazher/index.txt ; do
+            echo "$u: $(curl -s -o /dev/null -w '%{http_code}' "$u")"
           done
 
       - name: Положить сборку в служебную ветку
