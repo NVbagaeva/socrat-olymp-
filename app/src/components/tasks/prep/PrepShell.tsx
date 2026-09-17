@@ -3,7 +3,7 @@ import { prepPage, type PrepSkillId } from '@/content/prepSkills';
 import { prepOverview } from '@/lib/prep';
 import { PrepChips } from './PrepChips';
 import { PrepCounter } from './PrepCounter';
-import { PrepScrollOnMount } from './PrepScroll';
+import { TabScrollOnMount } from '../TabScroll';
 
 export interface PrepShellProps {
   /** Адрес подтемы: от него считаются адреса списка и навыков. */
@@ -58,7 +58,7 @@ export function PrepShell({ base, active, children }: PrepShellProps) {
 
       {/* На телефоне подводит открытый экран к верху видимой области:
           иначе после выбора навыка ученик остаётся на шапке темы. */}
-      <PrepScrollOnMount />
+      <TabScrollOnMount />
 
       {children}
     </section>

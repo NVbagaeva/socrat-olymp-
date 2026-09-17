@@ -5,7 +5,7 @@ export { PrepTasks, type PrepTasksProps } from './PrepTasks';
 export { PrepTaskScreen, type PrepTaskScreenProps } from './PrepTaskScreen';
 export { PrepSolution, type PrepSolutionProps } from './PrepSolution';
 export { PrepChips, type PrepChip, type PrepChipsProps } from './PrepChips';
-export { PrepScrollOnMount, PrepCardLink, type PrepCardLinkProps } from './PrepScroll';
+export { PrepCardLink, type PrepCardLinkProps } from './PrepScroll';
 export { PrepCounter, type PrepCounterProps, type PrepTotal } from './PrepCounter';
 export { PrepCardMeter, type PrepCardMeterProps } from './PrepCardMeter';
 export { TaskCountIcon } from './PrepIcons';
