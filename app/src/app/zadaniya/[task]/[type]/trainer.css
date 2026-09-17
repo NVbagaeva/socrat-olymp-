@@ -179,3 +179,135 @@
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
+
+/* ── Экран задания ──────────────────────────────────────────── */
+
+/* Карточка условия, поле ответа и подпись над ним берутся у вкладки
+   подготовительных задач: там это уже описано (.ptask__card,
+   .ptask__text, .ptask__question, .ptask__chart, .ptask__label).
+   Здесь — только то, чего у неё нет: счётчик подхода, полоса
+   и плашки ответа со значком. */
+
+.ttask {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ttask__count {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.ttask__count b {
+  color: var(--color-text-brand);
+}
+
+/* Полоса подхода: десять отрезков вместо кружков с номерами.
+   Задания тренажёра идут подряд, выбирать из них нельзя —
+   значит, и нажимать не на что. */
+.ttask__bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ttask__dot {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+}
+.ttask__dot.is-done {
+  background: var(--color-success);
+}
+.ttask__dot.is-current {
+  background: var(--color-primary);
+}
+
+.ttask__answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.ttask__input {
+  width: 100%;
+  max-width: 220px;
+}
+
+.ttask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── Плашки ответа ──────────────────────────────────────────── */
+
+/* Плашка относится к полю ввода, а не к странице, поэтому во всю
+   ширину экрана не растягивается. */
+.tverdict {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+.tverdict--right {
+  background: var(--color-success-soft);
+}
+.tverdict--wrong {
+  background: var(--color-error-soft);
+}
+
+.tverdict__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.tverdict--right .tverdict__title {
+  color: var(--color-success);
+}
+.tverdict--wrong .tverdict__title {
+  color: var(--color-error);
+}
+
+/* Значок в кружке: галочка и крестик те же, что у счётчиков
+   подготовительных задач, кружок рисуется здесь. */
+.tverdict__ico {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+}
+.tverdict__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.tverdict--right .tverdict__ico {
+  background: var(--color-success);
+}
+.tverdict--wrong .tverdict__ico {
+  background: var(--color-error);
+}
+
+.tverdict__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+/* Формулы внутри пояснения не должны разъезжаться по строкам. */
+.tverdict__text .katex {
+  white-space: nowrap;
+}
