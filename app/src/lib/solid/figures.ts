@@ -10,7 +10,8 @@
  */
 
 import { type Polyhedron, orientOutward } from './model';
-import { type Vec3, add, centroid, sub } from './vec';
+import { TOWARD } from './project';
+import { type Vec3, add, centroid, cross, normalize, scale, sub } from './vec';
 
 const DEG = Math.PI / 180;
 
@@ -39,18 +40,34 @@ export function regularPolygon(n: number, R: number, z: number, start: number): 
   });
 }
 
-/** С какого угла начинать обход, чтобы буквы стояли как в задачнике. */
+/**
+ * С какого угла начинать обход, чтобы буквы стояли по-учебному и ни одно
+ * ребро основания не легло вдоль луча зрения (см. project.ts).
+ */
 export function polygonStart(n: number): number {
   switch (n) {
     case 3:
-      return 150; /* A слева, B спереди, C справа */
+      return 180; /* A слева, B спереди, C справа: рёбра под 30° к лучу зрения */
     case 4:
       return 225; /* A слева-спереди, B справа-спереди */
     case 6:
-      return 180; /* A слева, BC — переднее ребро */
+      return 210; /* A слева-спереди, B спереди, C справа-спереди: без рёбер вдоль луча зрения */
     default:
       return 270 - 360 / n / 2 - 360 / n; /* одна вершина спереди */
   }
+}
+
+/**
+ * Точка на видимом контуре шара: большой круг, обращённый к зрителю.
+ * Радиус к такой точке на чертеже виден целиком и кончается ровно
+ * на окружности шара; angle — угол на этом круге от правой точки
+ * против часовой стрелки, градусы.
+ */
+export function sphereOutlinePoint(center: Vec3, r: number, angle: number): Vec3 {
+  const right = normalize([TOWARD[1], -TOWARD[0], 0]);
+  const up = cross(TOWARD, right);
+  const u = angle * DEG;
+  return add(center, add(scale(right, r * Math.cos(u)), scale(up, r * Math.sin(u))));
 }
 
 /** Буквы основания: A, B, C, … */
