@@ -50,22 +50,20 @@ jobs:
       # а с раннера он виден. Смотрим, что там на самом деле лежит.
       - name: Посмотреть живой сайт
         run: |
-          u=https://budetege.ru/zadaniya/12/linear/trenazher/value/
-          curl -s -o /tmp/p.html "$u"
-          echo "страница: $(wc -c < /tmp/p.html) байт"
-          # В разметке пути экранированы, поэтому хвостовой слэш срезаем.
-          grep -o '/_next/static/[^"\\]*' /tmp/p.html | sort -u > /tmp/files.txt
-          echo "файлов сборки на странице: $(wc -l < /tmp/files.txt)"
-          bad=0
-          while read -r f; do
-            code=$(curl -s -o /tmp/one -w '%{http_code}' "https://budetege.ru$f")
-            size=$(wc -c < /tmp/one)
-            if [ "$code" != "200" ] || [ "$size" -lt 10 ]; then
-              echo "НЕТ: $code $size $f"
-              bad=$((bad+1))
-            fi
-          done < /tmp/files.txt
-          echo "недоступных файлов: $bad"
+          for u in \
+            https://budetege.ru/zadaniya/12/linear/podgotovka/ \
+            https://budetege.ru/zadaniya/12/linear/podgotovka/k/ ; do
+            echo "=== $u"
+            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
+            echo "код ответа: $code, размер: $(wc -c < /tmp/p.html)"
+            curl -sI "$u" | grep -i 'last-modified' || true
+            echo "шапка вкладки (prep__title): $(grep -c 'prep__title' /tmp/p.html || true)"
+            echo "ряд чипов (prep__chips): $(grep -c 'prep__chips' /tmp/p.html || true)"
+            echo "экран задачи (ptask__dots): $(grep -c 'ptask__dots' /tmp/p.html || true)"
+            echo "строка счётчика:"; grep -o '<p class="prep__counter">[^<]*<b>[^<]*</b>[^<]*' /tmp/p.html | head -2
+            echo "числа на карточках:"; grep -o 'prep-card__done">[^<]*' /tmp/p.html | head -4
+            echo "витринные 17 из 40: $(grep -c '17</b> из 40' /tmp/p.html || true)"
+          done
 
       - name: Положить сборку в служебную ветку
         run: |
