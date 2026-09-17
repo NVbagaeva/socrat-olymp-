@@ -50,23 +50,24 @@ jobs:
       # а с раннера он виден. Смотрим, что там на самом деле лежит.
       - name: Посмотреть живой сайт
         run: |
-          for u in \
-            https://budetege.ru/zadaniya/12/linear/trenazher/ \
-            https://budetege.ru/zadaniya/12/linear/trenazher/value/ ; do
-            echo "=== $u"
-            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
-            echo "код ответа: $code, размер: $(wc -c < /tmp/p.html)"
-            curl -sI "$u" | grep -i 'last-modified' || true
-            echo "строка выбора типа (tmode__pick): $(grep -c 'tmode__pick' /tmp/p.html || true)"
-            echo "сводка тренажёра (tstats): $(grep -c 'tstats' /tmp/p.html || true)"
-            echo "экран задания (ttask__bar): $(grep -c 'ttask__bar' /tmp/p.html || true)"
-            echo "поле ответа (ttask__input): $(grep -c 'ttask__input' /tmp/p.html || true)"
-            echo "старая заглушка: $(grep -c 'Задания готовятся' /tmp/p.html || true)"
-          done
-          echo "=== файлы сборки"
-          for u in https://budetege.ru/zadaniya/12/linear/trenazher/index.txt ; do
-            echo "$u: $(curl -s -o /dev/null -w '%{http_code}' "$u")"
-          done
+          u=https://budetege.ru/zadaniya/12/linear/trenazher/value/
+          curl -s -o /tmp/p.html "$u"
+          echo "страница: $(wc -c < /tmp/p.html) байт"
+          grep -o '/_next/static/[^"]*' /tmp/p.html | sort -u > /tmp/files.txt
+          echo "файлов сборки на странице: $(wc -l < /tmp/files.txt)"
+          bad=0
+          while read -r f; do
+            code=$(curl -s -o /tmp/one -w '%{http_code}' "https://budetege.ru$f")
+            size=$(wc -c < /tmp/one)
+            if [ "$code" != "200" ] || [ "$size" -lt 10 ]; then
+              echo "НЕТ: $code $size $f"
+              bad=$((bad+1))
+            fi
+          done < /tmp/files.txt
+          echo "недоступных файлов: $bad"
+          echo "--- страница темы"
+          curl -s -o /tmp/t.html https://budetege.ru/zadaniya/12/linear/
+          echo "тема: $(wc -c < /tmp/t.html) байт, вкладка тренажёра: $(grep -c 'trenazher' /tmp/t.html || true)"
 
       - name: Положить сборку в служебную ветку
         run: |
