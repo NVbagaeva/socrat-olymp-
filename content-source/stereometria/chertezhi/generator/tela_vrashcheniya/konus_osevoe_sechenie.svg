@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Осевое сечение конуса</title>
+<polygon points="191.3,760.9 500.0,143.4 808.7,760.9" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 191.3 760.9 L 500.0 143.4 L 808.7 760.9 A 308.7 111.1 0 0 1 191.3 760.9 Z" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 191.3 760.9 A 308.7 111.1 0 0 1 808.7 760.9" fill="none" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 191.3 760.9 A 308.7 111.1 0 0 0 808.7 760.9" fill="none" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="191.3" y1="760.9" x2="500.0" y2="143.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="808.7" y1="760.9" x2="500.0" y2="143.4" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<polygon points="191.3,760.9 808.7,760.9 500.0,143.4" fill="#E07A2F" fill-opacity="0.12" stroke="none"/>
+<line x1="191.3" y1="760.9" x2="808.7" y2="760.9" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<line x1="500.0" y1="760.9" x2="500.0" y2="143.4" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10"/>
+<circle cx="191.3" cy="760.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="808.7" cy="760.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="760.9" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="143.4" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="500.0" y="102.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
+<text x="485.3" y="828.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+<text x="131.3" y="808.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="868.7" y="808.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+</svg>

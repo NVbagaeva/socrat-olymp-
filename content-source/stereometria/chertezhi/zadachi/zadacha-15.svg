@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1.717 1.994" class="fig" role="img" width="534" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+
+<polygon points="0.235,1.758 1.235,1.758 1.481,1.485 1.481,0.235 0.235,0.508" fill="#E7F3EB" stroke="none"/>
+<line x1="0.235" y1="1.758" x2="1.481" y2="1.485" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.011" stroke-dasharray="0.045 0.033"/>
+<path d="M 1.125 0.508 L 1.160 0.470 L 1.270 0.470" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.009"/>
+<path d="M 1.125 1.758 L 1.160 1.720 L 1.270 1.720" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.009"/>
+<line x1="0.235" y1="1.758" x2="1.235" y2="1.758" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="1.235" y1="1.758" x2="1.481" y2="1.485" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="0.235" y1="0.508" x2="1.235" y2="0.508" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="1.235" y1="0.508" x2="1.481" y2="0.235" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="0.235" y1="0.508" x2="1.481" y2="0.235" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="1.235" y1="1.758" x2="1.235" y2="0.508" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="0.235" y1="1.758" x2="0.235" y2="0.508" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+<line x1="1.481" y1="1.485" x2="1.481" y2="0.235" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.013"/>
+</svg>

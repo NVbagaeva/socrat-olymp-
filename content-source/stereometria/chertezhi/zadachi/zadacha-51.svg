@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.175 2.217" class="fig" role="img" width="608" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+
+<polygon points="0.298,1.918 1.498,1.918 1.876,1.498 1.876,0.298 0.676,0.298 0.298,0.718" fill="#E7F3EB" stroke="none"/>
+<line x1="1.876" y1="1.498" x2="0.676" y2="1.498" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.014" stroke-dasharray="0.057 0.041"/>
+<line x1="0.298" y1="1.918" x2="0.676" y2="1.498" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.014" stroke-dasharray="0.057 0.041"/>
+<line x1="0.676" y1="1.498" x2="0.676" y2="0.298" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.014" stroke-dasharray="0.057 0.041"/>
+<line x1="0.298" y1="1.918" x2="1.498" y2="1.918" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="1.498" y1="1.918" x2="1.876" y2="1.498" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="0.298" y1="0.718" x2="1.498" y2="0.718" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="1.498" y1="0.718" x2="1.876" y2="0.298" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="1.876" y1="0.298" x2="0.676" y2="0.298" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="0.298" y1="0.718" x2="0.676" y2="0.298" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="1.498" y1="1.918" x2="1.498" y2="0.718" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="0.298" y1="1.918" x2="0.298" y2="0.718" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+<line x1="1.876" y1="1.498" x2="1.876" y2="0.298" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.016"/>
+
+<circle cx="1.087" cy="1.108" r="0.6" fill="none" stroke="#C2410C" stroke-width="0.0115"/>
+<path d="M 1.687 1.108 A 0.6 0.2 0 0 1 0.487 1.108" fill="none" stroke="#C2410C" stroke-width="0.0115" stroke-linecap="round"/>
+<path d="M 0.487 1.108 A 0.6 0.2 0 0 1 1.687 1.108" fill="none" stroke="#C2410C" stroke-width="0.0115" stroke-dasharray="0.0373 0.0302" stroke-linecap="round"/>
+</svg>
