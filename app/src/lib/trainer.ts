@@ -280,7 +280,7 @@ function stepK(k: number): TrainerStep {
     titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $k$.'),
     textHtml: hintHtml(
       'Возьми две отмеченные точки. Посчитай, на сколько клеток прямая сдвинулась ' +
-        'вправо и на сколько вверх. Тогда $k$ = $\\Delta y : \\Delta x$.',
+        'вправо и на сколько вверх. Тогда $k = \\Delta y : \\Delta x$.',
     ),
     shape: 'plain',
     fields: [{ labelHtml: math('k ='), answer: plain(k) }],
@@ -312,7 +312,7 @@ function stepEquation(k: number, b: number): TrainerStep {
     shape: 'equation',
     fields: [
       { labelHtml: math('y ='), answer: plain(k) },
-      { labelHtml: math('\\cdot\\, x +'), answer: plain(b) },
+      { labelHtml: math('\\cdot x {}+{}'), answer: plain(b) },
     ],
     wrongHint: hintHtml('Проверь, те ли $k$ и $b$ ты подставил.'),
   };
