@@ -12,7 +12,7 @@
 import { apex, basePoint } from './common';
 import { polygonArea } from '../../solid/measure';
 import { coneWithAxial } from './drawings';
-import { ru } from '../format';
+import { round, ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -67,11 +67,11 @@ export const P03_55: Prototype = {
   shagi: (p) => {
     const r = num(p, 'd') / 2;
     const l = num(p, 'l');
-    const h = Math.sqrt(l * l - r * r);
+    const h = round(Math.sqrt(l * l - r * r));
     return [
       { text: `Высота: √(${ru(l)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = ${ru(num(p, 'd'))} · ${ru(h)} : 2 = ${ru(r * h)}.`,
+        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = ${ru(num(p, 'd'))} · ${ru(h)} : 2 = ${ru(round(r * h))}.`,
         value: r * h,
       },
     ];

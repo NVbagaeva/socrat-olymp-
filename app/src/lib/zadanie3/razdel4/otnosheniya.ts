@@ -17,7 +17,7 @@
 
 import { approxBaseArea, approxTotalArea, approxVolume } from './common';
 import { coneVessel, coneWithHeight, coneWithParallelCut } from './drawings';
-import { ru } from '../format';
+import { round, ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -79,12 +79,18 @@ export const P03_58: Prototype = {
     const a = num(p, 'a');
     const b = num(p, 'b');
     const t = a / (a + b);
+    /* Коэффициент подобия здесь — обыкновенная дробь (например, 1/3).
+       В разбор идёт сама дробь, а не её десятичная тень. */
+    const whole = a + b;
     return [
       {
-        text: `Сечение подобно основанию: коэффициент подобия — доля высоты от вершины: ${ru(a)} : (${ru(a)} + ${ru(b)}) = ${ru(t)}.`,
+        text: `Сечение подобно основанию: коэффициент подобия — доля высоты от вершины, ${ru(a)} : ${ru(whole)}.`,
         value: t,
       },
-      { text: `Площадь сечения: ${ru(S)} · ${ru(t)}² = ${ru(S * t * t)}.`, value: S * t * t },
+      {
+        text: `Площадь растёт как квадрат коэффициента: ${ru(S)} · ${ru(a)}² : ${ru(whole)}² = ${ru(round(S * t * t))}.`,
+        value: S * t * t,
+      },
     ];
   },
 
@@ -238,15 +244,25 @@ export const P03_61: Prototype = {
     ),
 
   shagi: (p) => {
-    const f = num(p, 'num') / num(p, 'den');
+    const numerator = num(p, 'num');
+    const den = num(p, 'den');
+    const f = numerator / den;
     const V = num(p, 'V');
     const full = V / (f * f * f);
     return [
       {
         text: `Налитая жидкость — конус, подобный сосуду с коэффициентом ${num(p, 'num')}/${num(p, 'den')}: её объём — куб этой доли от полного.`,
       },
-      { text: `Полный объём сосуда: ${ru(V)} : ${ru(f * f * f)} = ${ru(full)}.`, value: full },
-      { text: `Долить нужно: ${ru(full)} − ${ru(V)} = ${ru(full - V)}.`, value: full - V },
+      {
+        text:
+          `Полный объём сосуда: ${ru(V)} · ${ru(den)}³` +
+          `${numerator === 1 ? '' : ` : ${ru(numerator)}³`} = ${ru(round(full))}.`,
+        value: full,
+      },
+      {
+        text: `Долить нужно: ${ru(round(full))} − ${ru(V)} = ${ru(round(full - V))}.`,
+        value: full - V,
+      },
     ];
   },
 
@@ -315,11 +331,13 @@ export const P03_62: Prototype = {
     const t = a / (a + b);
     return [
       {
-        text: `Отсечённый (верхний) конус подобен исходному с коэффициентом ${ru(a)} : (${ru(a)} + ${ru(b)}) = ${ru(t)}.`,
+        text: `Отсечённый (верхний) конус подобен исходному с коэффициентом ${ru(a)} : ${ru(a + b)}.`,
         value: t,
       },
       {
-        text: `Его полная поверхность масштабируется как квадрат коэффициента: ${ru(S)} · ${ru(t)}² = ${ru(S * t * t)}.`,
+        text:
+          'Его полная поверхность масштабируется как квадрат коэффициента: ' +
+          `${ru(S)} · ${ru(a)}² : ${ru(a + b)}² = ${ru(round(S * t * t))}.`,
         value: S * t * t,
       },
     ];

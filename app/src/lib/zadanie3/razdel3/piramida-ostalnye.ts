@@ -7,7 +7,7 @@
  */
 
 import { hullVolume, polygonArea, polyhedronVolume } from '../../solid/measure';
-import { circumradius, point, regularPyramidByEdge } from './common';
+import { point, regularPyramidByEdge } from './common';
 import { distance } from '../../solid/measure';
 import { solveBySearch } from '../search';
 import {
@@ -18,7 +18,7 @@ import {
   shapeVertexMidline,
   NAMES4,
 } from './drawings';
-import { ru } from '../format';
+import { round, ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -85,11 +85,22 @@ export const P03_44: Prototype = {
   shagi: (p) => {
     const a = num(p, 'a');
     const b = num(p, 'b');
-    const half = (a * Math.SQRT2) / 2;
-    const h = Math.sqrt(b * b - half * half);
+    /* Половина диагонали иррациональна, и приближать её десятичной
+       дробью незачем: в теореме Пифагора она входит квадратом,
+       а квадрат — число короткое. */
+    const half2 = round((a * a) / 2);
+    const h = round(Math.sqrt(b * b - half2));
     return [
-      { text: `Половина диагонали основания: ${ru(a)} · √2 : 2 = ${ru(half)}.`, value: half },
-      { text: `Высота: √(${ru(b)}² − ${ru(half)}²) = ${ru(h)}.`, value: h },
+      {
+        text:
+          `Половина диагонали основания — радиус описанной окружности: ${ru(a)} · √2 : 2. ` +
+          `Её квадрат: ${ru(a)}² : 2 = ${ru(half2)}.`,
+        value: half2,
+      },
+      {
+        text: `Высота: √(${ru(b)}² − ${ru(half2)}) = √${ru(round(b * b - half2))} = ${ru(h)}.`,
+        value: h,
+      },
     ];
   },
 
@@ -396,11 +407,22 @@ export const P03_49: Prototype = {
   shagi: (p) => {
     const a = num(p, 'a');
     const b = num(p, 'b');
-    const r = circumradius(3, a);
-    const h = Math.sqrt(b * b - r * r);
+    /* Радиус иррационален, а его квадрат — нет: в теореме Пифагора
+       нужен именно квадрат, поэтому десятичное приближение радиуса
+       в разбор не идёт. */
+    const r2 = round((a * a) / 3);
+    const h = round(Math.sqrt(b * b - r2));
     return [
-      { text: `Радиус окружности, описанной около основания: ${ru(a)} / √3 = ${ru(r)}.`, value: r },
-      { text: `Высота: √(${ru(b)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
+      {
+        text:
+          `Радиус окружности, описанной около основания: ${ru(a)} / √3. ` +
+          `Его квадрат: ${ru(a)}² : 3 = ${ru(r2)}.`,
+        value: r2,
+      },
+      {
+        text: `Высота: √(${ru(b)}² − ${ru(r2)}) = √${ru(round(b * b - r2))} = ${ru(h)}.`,
+        value: h,
+      },
     ];
   },
 
@@ -517,7 +539,7 @@ export const P03_51: Prototype = {
     return [
       { text: 'Радиус окружности, описанной около правильного шестиугольника, равен его стороне.' },
       {
-        text: `Высота: √(${ru(b)}² − ${ru(a)}²) = ${ru(Math.sqrt(b * b - a * a))}.`,
+        text: `Высота: √(${ru(b)}² − ${ru(a)}²) = ${ru(round(Math.sqrt(b * b - a * a)))}.`,
         value: Math.sqrt(b * b - a * a),
       },
     ];
