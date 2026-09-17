@@ -18,12 +18,13 @@ import {
   regularPolygon,
   regularPrism,
   regularPyramid,
+  sphereOutlinePoint,
   tetrahedron,
   vertex,
 } from './figures';
 import { type Model, type Polyhedron, orientOutward } from './model';
 import { circlePoint } from './project';
-import { type Vec3, add, mid, normalize, scale } from './vec';
+import { type Vec3, add, mid } from './vec';
 
 export interface CatalogEntry {
   folder: 'piramidy' | 'prizmy' | 'tela_vrashcheniya' | 'kombinacii';
@@ -202,7 +203,7 @@ const PYRAMIDS: CatalogEntry[] = [
     name: 'piramida_usech_3ug',
     title: 'Усечённая треугольная пирамида',
     build: () => {
-      const body = frustumPyramid(3, 3, 1.6, 2.6);
+      const body = frustumPyramid(3, 3, 1.5, 3.4);
       return { alt: polyAlt('Усечённая треугольная пирамида', body), bodies: [body] };
     },
   },
@@ -211,7 +212,7 @@ const PYRAMIDS: CatalogEntry[] = [
     name: 'piramida_usech_4ug',
     title: 'Усечённая четырёхугольная пирамида',
     build: () => {
-      const body = frustumPyramid(4, 3, 1.7, 2.6);
+      const body = frustumPyramid(4, 3, 1.5, 3.4);
       return { alt: polyAlt('Усечённая четырёхугольная пирамида', body), bodies: [body] };
     },
   },
@@ -220,7 +221,7 @@ const PYRAMIDS: CatalogEntry[] = [
     name: 'piramida_usech_6ug',
     title: 'Усечённая шестиугольная пирамида',
     build: () => {
-      const body = frustumPyramid(6, 3, 1.7, 2.6);
+      const body = frustumPyramid(6, 3, 1.5, 3.4);
       return { alt: polyAlt('Усечённая шестиугольная пирамида', body), bodies: [body] };
     },
   },
@@ -577,8 +578,9 @@ const REVOLUTION: CatalogEntry[] = [
     build: () => {
       const R = 2.4;
       const O: Vec3 = [0, 0, 0];
-      /* Точка на поверхности спереди-справа: радиус к ней виден. */
-      const A = add(O, scale(normalize([0.55, -0.7, 0.45]), R));
+      /* Точка на контуре шара справа-сверху: радиус к ней на чертеже
+         виден целиком и кончается ровно на окружности. */
+      const A = sphereOutlinePoint(O, R, 35);
       return {
         alt: 'Шар с центром O и радиусом OA = R',
         bodies: [{ kind: 'sphere', center: O, r: R }],
