@@ -10,19 +10,25 @@
 
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
-import { ELLIPSE_RATIO, TOWARD, circlePoint, project } from './project';
+import {
+  SILHOUETTE,
+  TOWARD,
+  circlePoint,
+  coneTangent,
+  nearSide,
+  project,
+  spherePoint,
+} from './project';
 import {
   type Vec2,
   type Vec3,
   add,
   at,
-  cross,
   dist2,
   dot,
   lerp,
   mid,
   normalize,
-  scale,
   segmentDistance2,
   sub,
 } from './vec';
@@ -231,46 +237,52 @@ function addPolyhedron(scene: Scene, body: Polyhedron, all: readonly Occluder[],
 function addCylinder(scene: Scene, body: Cylinder, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
   const top: Vec3 = add(body.base, [0, 0, body.h]);
-  const curve = (points: Vec3[], selfVisible: boolean[], closed: boolean) => {
+  const curve = (points: Vec3[], selfVisible: boolean[]) => {
     scene.strokes.push(
       ...polylineStrokes(
         points,
         polylineVisibility(points, selfVisible, occluders, eps),
         'edge',
-        closed,
+        false,
       ),
     );
   };
 
-  /* Нижнее основание: передняя половина видна, задняя за стенкой. */
+  /* Нижнее основание: ближняя половина видна, дальняя за стенкой. */
   if (!body.hideBase) {
     const bottom = ellipse(body.base, body.r);
     curve(
       bottom,
-      bottom.map((_, k) => Math.sin((TWO_PI * k) / (bottom.length - 1)) <= 1e-9),
-      false,
+      bottom.map((_, k) => nearSide((TWO_PI * k) / (bottom.length - 1))),
     );
   }
   const upper = ellipse(top, body.r);
   curve(
     upper,
     upper.map(() => true),
-    false,
   );
 
-  [0, Math.PI].forEach((u) => {
-    const a = circlePoint(body.base, body.r, u);
-    const b = circlePoint(top, body.r, u);
-    scene.strokes.push(...segmentStrokes(a, b, occluders, eps, 'edge'));
+  /* Контурные образующие: там, где луч зрения касается боковой поверхности. */
+  [SILHOUETTE, SILHOUETTE + Math.PI].forEach((u) => {
+    scene.strokes.push(
+      ...segmentStrokes(
+        circlePoint(body.base, body.r, u),
+        circlePoint(top, body.r, u),
+        occluders,
+        eps,
+        'edge',
+      ),
+    );
   });
 
-  /* Силуэт: передняя дуга низа, правая образующая, задняя дуга верха,
-     левая образующая. */
-  const silhouette = [
-    ...ellipse(body.base, body.r, Math.PI, TWO_PI),
-    ...ellipse(top, body.r, 0, Math.PI),
-  ].map(project);
-  scene.fills.push({ points: silhouette, role: 'face' });
+  /* Силуэт: ближняя дуга низа, образующая, дальняя дуга верха. */
+  scene.fills.push({
+    points: [
+      ...ellipse(body.base, body.r, SILHOUETTE + Math.PI, SILHOUETTE + TWO_PI),
+      ...ellipse(top, body.r, SILHOUETTE, SILHOUETTE + Math.PI),
+    ].map(project),
+    role: 'face',
+  });
 
   if (body.liquid !== undefined && body.liquid > 0) {
     const level: Vec3 = add(body.base, [0, 0, body.liquid]);
@@ -278,34 +290,32 @@ function addCylinder(scene: Scene, body: Cylinder, all: readonly Occluder[], eps
     curve(
       surface,
       surface.map(() => true),
-      false,
     );
     scene.fills.push({
       points: [
-        ...ellipse(body.base, body.r, Math.PI, TWO_PI),
-        ...ellipse(level, body.r, 0, Math.PI),
+        ...ellipse(body.base, body.r, SILHOUETTE + Math.PI, SILHOUETTE + TWO_PI),
+        ...ellipse(level, body.r, SILHOUETTE, SILHOUETTE + Math.PI),
       ].map(project),
       role: 'liquid',
     });
   }
 }
 
-/** Угол точек касания контурных образующих с основанием. */
-function tangentAngle(r: number, apexHeight: number): number {
-  return Math.asin(
-    Math.min(1, ((r / apexHeight) * ELLIPSE_RATIO) / Math.sqrt(1 - ELLIPSE_RATIO * ELLIPSE_RATIO)),
-  );
+/** Лежит ли угол на дуге от from до to (по возрастанию, с точностью до 2π). */
+function inArc(u: number, from: number, to: number): boolean {
+  const norm = (value: number) => ((value % TWO_PI) + TWO_PI) % TWO_PI;
+  return norm(u - from) < norm(to - from);
 }
 
 function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
-  const curve = (points: Vec3[], selfVisible: boolean[], closed: boolean, role: Role = 'edge') => {
+  const curve = (points: Vec3[], selfVisible: boolean[], role: Role = 'edge') => {
     scene.strokes.push(
       ...polylineStrokes(
         points,
         polylineVisibility(points, selfVisible, occluders, eps),
         role,
-        closed,
+        false,
       ),
     );
   };
@@ -314,21 +324,23 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
   };
 
   if (body.inverted) {
-    /* Сосуд: вершина внизу, открытое основание сверху видно целиком. */
+    /* Сосуд: вершина внизу, в открытое основание сверху видно целиком,
+       а контурные образующие уходят на ближнюю сторону. */
     const apex: Vec3 = add(body.base, [0, 0, -body.h]);
-    const u0 = tangentAngle(body.r, body.h);
+    const psi = coneTangent(body.r, body.h);
+    const left = SILHOUETTE + Math.PI + psi;
+    const right = SILHOUETTE - psi;
     const base = ellipse(body.base, body.r);
     if (!body.hideBase) {
       curve(
         base,
         base.map(() => true),
-        false,
       );
     }
-    segment(apex, circlePoint(body.base, body.r, -u0));
-    segment(apex, circlePoint(body.base, body.r, Math.PI + u0));
+    segment(apex, circlePoint(body.base, body.r, right));
+    segment(apex, circlePoint(body.base, body.r, left));
     scene.fills.push({
-      points: [project(apex), ...ellipse(body.base, body.r, -u0, Math.PI + u0).map(project)],
+      points: [project(apex), ...ellipse(body.base, body.r, right, left).map(project)],
       role: 'face',
     });
     if (body.liquid !== undefined && body.liquid > 0) {
@@ -338,40 +350,36 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
       curve(
         surface,
         surface.map(() => true),
-        false,
       );
       scene.fills.push({
-        points: [project(apex), ...ellipse(level, rl, -u0, Math.PI + u0).map(project)],
+        points: [project(apex), ...ellipse(level, rl, right, left).map(project)],
         role: 'liquid',
       });
     }
     return;
   }
 
+  /* Высота до вершины: у усечённого конуса она больше собственной. */
   const apexHeight = body.top === undefined ? body.h : (body.h * body.r) / (body.r - body.top);
-  const u0 = tangentAngle(body.r, apexHeight);
+  const psi = coneTangent(body.r, apexHeight);
+  const right = SILHOUETTE + psi;
+  const left = SILHOUETTE + Math.PI - psi;
+
   const base = ellipse(body.base, body.r);
   if (!body.hideBase) {
     const n = base.length - 1;
     curve(
       base,
-      base.map((_, k) => {
-        const u = (TWO_PI * k) / n;
-        return !(u > u0 + 1e-9 && u < Math.PI - u0 - 1e-9);
-      }),
-      false,
+      base.map((_, k) => !inArc((TWO_PI * k) / n, right, left)),
     );
   }
 
   if (body.top === undefined) {
     const apex: Vec3 = add(body.base, [0, 0, body.h]);
-    segment(apex, circlePoint(body.base, body.r, u0));
-    segment(apex, circlePoint(body.base, body.r, Math.PI - u0));
+    segment(apex, circlePoint(body.base, body.r, right));
+    segment(apex, circlePoint(body.base, body.r, left));
     scene.fills.push({
-      points: [
-        project(apex),
-        ...ellipse(body.base, body.r, Math.PI - u0, TWO_PI + u0).map(project),
-      ],
+      points: [project(apex), ...ellipse(body.base, body.r, left, right + TWO_PI).map(project)],
       role: 'face',
     });
   } else {
@@ -380,17 +388,13 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
     curve(
       upper,
       upper.map(() => true),
-      false,
     );
-    segment(circlePoint(body.base, body.r, u0), circlePoint(topCenter, body.top, u0));
-    segment(
-      circlePoint(body.base, body.r, Math.PI - u0),
-      circlePoint(topCenter, body.top, Math.PI - u0),
-    );
+    segment(circlePoint(body.base, body.r, right), circlePoint(topCenter, body.top, right));
+    segment(circlePoint(body.base, body.r, left), circlePoint(topCenter, body.top, left));
     scene.fills.push({
       points: [
-        ...ellipse(body.base, body.r, Math.PI - u0, TWO_PI + u0),
-        ...ellipse(topCenter, body.top, u0, Math.PI - u0),
+        ...ellipse(body.base, body.r, left, right + TWO_PI),
+        ...ellipse(topCenter, body.top, right, left),
       ].map(project),
       role: 'face',
     });
@@ -399,25 +403,15 @@ function addCone(scene: Scene, body: Cone, all: readonly Occluder[], eps: number
 
 function addSphere(scene: Scene, body: Sphere, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
-  const c = project(body.center);
-  const outline: Vec2[] = Array.from({ length: THEME.geometry.ellipsePoints + 1 }, (_, k) => {
-    const u = (TWO_PI * k) / THEME.geometry.ellipsePoints;
-    return [c[0] + body.r * Math.cos(u), c[1] + body.r * Math.sin(u)];
-  });
-  scene.fills.push({ points: outline, role: 'sphere' });
 
-  /* Контур шара: большой круг, обращённый к зрителю. Его проекция —
-     круг радиуса шара; видимость по самому шару полная, чужие тела
-     учитываются как для любой линии. */
-  const right: Vec3 = normalize([TOWARD[1], -TOWARD[0], 0]);
-  const up: Vec3 = cross(TOWARD, right);
-  const ring = outline.map((_, k): Vec3 => {
-    const u = (TWO_PI * k) / THEME.geometry.ellipsePoints;
-    return add(
-      body.center,
-      add(scale(right, body.r * Math.cos(u)), scale(up, body.r * Math.sin(u))),
-    );
-  });
+  /* Контур шара — большой круг, перпендикулярный лучу зрения. В косой
+     проекции его образ не круг, а слегка вытянутый эллипс, и он
+     получается сам: точки контура строятся в пространстве. */
+  const n = THEME.geometry.ellipsePoints;
+  const ring = Array.from({ length: n + 1 }, (_, k) =>
+    spherePoint(body.center, body.r, (TWO_PI * k) / n),
+  );
+  scene.fills.push({ points: ring.map(project), role: 'sphere' });
   scene.strokes.push(
     ...polylineStrokes(
       ring,

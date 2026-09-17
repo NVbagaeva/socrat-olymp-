@@ -10,8 +10,8 @@
  */
 
 import { type Polyhedron, orientOutward } from './model';
-import { RIGHT, UP } from './project';
-import { type Vec3, add, centroid, scale, sub } from './vec';
+import { spherePoint } from './project';
+import { type Vec3, add, centroid, sub } from './vec';
 
 const DEG = Math.PI / 180;
 
@@ -41,22 +41,16 @@ export function regularPolygon(n: number, R: number, z: number, start: number): 
 }
 
 /**
- * С какого угла начинать обход, чтобы буквы стояли по-учебному и ни одно
- * ребро основания не легло вдоль луча зрения (см. project.ts).
+ * С какого угла начинать обход основания.
+ *
+ * Одно правило на все правильные многоугольники: сторона AB оказывается
+ * спереди и на чертеже ложится строго горизонтально (в косоугольной
+ * проекции горизонтально идёт всё, что параллельно оси x), а сторона AD
+ * или диагональ AD уходит по диагонали в глубину. Так рисуют призмы
+ * и пирамиды в учебниках.
  */
 export function polygonStart(n: number): number {
-  switch (n) {
-    case 3:
-      return 162.5; /* A слева, B спереди, C справа */
-    case 4:
-      return 225; /* A слева-спереди, B справа-спереди */
-    case 5:
-      return 200; /* A слева, B спереди, C справа-спереди, D справа-сзади, E сзади */
-    case 6:
-      return 217.5; /* A слева-спереди, B спереди, C справа-спереди */
-    default:
-      return 270 - 360 / n / 2 - 360 / n;
-  }
+  return 270 - 180 / n;
 }
 
 /**
@@ -66,8 +60,7 @@ export function polygonStart(n: number): number {
  * против часовой стрелки, градусы.
  */
 export function sphereOutlinePoint(center: Vec3, r: number, angle: number): Vec3 {
-  const u = angle * DEG;
-  return add(center, add(scale(RIGHT, r * Math.cos(u)), scale(UP, r * Math.sin(u))));
+  return spherePoint(center, r, angle * DEG);
 }
 
 /** Буквы основания: A, B, C, … */
