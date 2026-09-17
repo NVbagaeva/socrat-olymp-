@@ -60,6 +60,12 @@ const SECTIONS: { id: string; title: string; lead: string; items: readonly Proto
     lead: '3 прототипа по 10 вариантов.',
     items: RAZDEL_6,
   },
+  {
+    id: 'razdel-VII',
+    title: 'Раздел VII. Вписанный и описанный цилиндр',
+    lead: '7 прототипов по 10 вариантов.',
+    items: RAZDEL_7,
+  },
 ];
 
 function Condition({ text }: { text: string }) {

@@ -16,9 +16,9 @@ import { RAZDEL_3 } from '../../zadanie3/razdel3';
 import { RAZDEL_4 } from '../../zadanie3/razdel4';
 import { RAZDEL_5 } from '../../zadanie3/razdel5';
 import { RAZDEL_6 } from '../../zadanie3/razdel6';
+import { RAZDEL_7 } from '../../zadanie3/razdel7';
 import { type Prototype } from '../../zadanie3/types';
 import { type Model } from '../model';
-import { SECTION7 } from './section7';
 import { SECTION8 } from './section8';
 import { SHEETS } from './sheets';
 import { THUMBS } from './thumbs';
@@ -54,6 +54,10 @@ const SECTION5: Record<string, Model> = Object.fromEntries(
 
 const SECTION6: Record<string, Model> = Object.fromEntries(
   RAZDEL_6.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+);
+
+const SECTION7: Record<string, Model> = Object.fromEntries(
+  RAZDEL_7.map((prototype) => [prototype.id, firstDrawing(prototype)]),
 );
 
 /** Прототипы, у которых числа стоят на самом чертеже. */
