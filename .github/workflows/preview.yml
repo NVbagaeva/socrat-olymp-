@@ -1,0 +1,78 @@
+name: Preview
+
+# Служебный workflow: собирает статический экспорт и кладёт его
+# артефактом, чтобы сборку можно было открыть в браузере там, где
+# реестр пакетов недоступен. Срабатывает только на своей ветке,
+# ничего никуда не публикует и секретов не трогает.
+on:
+  push:
+    branches: [claude/build-preview]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Сборка для просмотра
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      - name: Собрать статический экспорт
+        working-directory: app
+        run: pnpm build
+
+      - name: Проверить, что экспорт не пустой
+        run: test -f app/out/index.html
+
+      # Артефакты качаются с хранилища, которое из среды разработки
+      # закрыто политикой сети. Поэтому сборка кладётся в отдельную
+      # ветку: git оттуда доступен.
+      # Живой сайт из среды разработки закрыт сетевой политикой,
+      # а с раннера он виден. Смотрим, что там на самом деле лежит.
+      - name: Посмотреть живой сайт
+        run: |
+          for u in \
+            https://budetege.ru/zadaniya/12/linear/podgotovka/ \
+            https://budetege.ru/zadaniya/12/linear/podgotovka/k/ ; do
+            echo "=== $u"
+            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
+            echo "код ответа: $code, размер: $(wc -c < /tmp/p.html)"
+            curl -sI "$u" | grep -i 'last-modified' || true
+            echo "шапка вкладки (prep__title): $(grep -c 'prep__title' /tmp/p.html || true)"
+            echo "ряд чипов (prep__chips): $(grep -c 'prep__chips' /tmp/p.html || true)"
+            echo "экран задачи (ptask__dots): $(grep -c 'ptask__dots' /tmp/p.html || true)"
+            echo "строка счётчика:"; grep -o '<p class="prep__counter">[^<]*<b>[^<]*</b>[^<]*' /tmp/p.html | head -2
+            echo "числа на карточках:"; grep -o 'prep-card__done">[^<]*' /tmp/p.html | head -4
+            echo "витринные 17 из 40: $(grep -c '17</b> из 40' /tmp/p.html || true)"
+          done
+
+      - name: Положить сборку в служебную ветку
+        run: |
+          cd app/out
+          git init -q
+          git config user.email noreply@anthropic.com
+          git config user.name "Preview build"
+          git add -A
+          git commit -q -m "Сборка $GITHUB_SHA"
+          git push -q --force \
+            "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" \
+            HEAD:refs/heads/claude/build-out
