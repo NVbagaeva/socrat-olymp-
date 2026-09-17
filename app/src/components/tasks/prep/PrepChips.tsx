@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { clsx } from 'clsx';
-import { requestPrepScroll } from '@/lib/prepScroll';
+import { requestTabScroll } from '@/lib/tabScroll';
 
 export interface PrepChip {
   id: string;
@@ -36,7 +36,7 @@ export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps)
         href={listHref}
         scroll={false}
         aria-current={active === 'all' ? 'page' : undefined}
-        onClick={() => requestPrepScroll('list')}
+        onClick={() => requestTabScroll('.prep__title')}
       >
         {allLabel}
       </Link>
@@ -47,7 +47,7 @@ export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps)
           href={item.href}
           scroll={false}
           aria-current={active === item.id ? 'page' : undefined}
-          onClick={() => requestPrepScroll('skill')}
+          onClick={() => requestTabScroll('.ptask__head')}
         >
           {item.title}
         </Link>

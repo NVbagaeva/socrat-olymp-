@@ -9,6 +9,7 @@ import '../../zadaniya.css';
 import '../section.css';
 import './topic.css';
 import './prep.css';
+import './trainer.css';
 
 /* Собираются все подтемы, включая закрытые: прямой заход на закрытую
    должен показывать «Скоро», а не 404. */

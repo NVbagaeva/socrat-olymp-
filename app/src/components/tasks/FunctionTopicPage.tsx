@@ -4,6 +4,7 @@ import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
 import { PrepSkills } from './prep';
+import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
@@ -23,6 +24,12 @@ export interface FunctionTopicPageProps {
    * темы, кольцо разделов и лента вкладок остались на месте.
    */
   prep?: ReactNode;
+  /**
+   * Содержимое вкладки тренажёра. По умолчанию это выбор типа
+   * заданий; экран режима подставляет себя сюда, чтобы шапка темы
+   * и лента вкладок остались на месте.
+   */
+  trainer?: ReactNode;
   /** Продолжение хлебных крошек: у экрана навыка это его название. */
   trail?: Crumb[];
 }
@@ -39,6 +46,7 @@ export function FunctionTopicPage({
   subtopic,
   initialTab,
   prep,
+  trainer,
   trail = [],
 }: FunctionTopicPageProps) {
   const { topic } = section;
@@ -97,6 +105,8 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
+        trainer={trainer ?? <TrainerShell base={base} mode={null} />}
+        trainerHref={`${base}/trenazher/`}
         tutors={section.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
