@@ -47,13 +47,15 @@ export function regularPolygon(n: number, R: number, z: number, start: number): 
 export function polygonStart(n: number): number {
   switch (n) {
     case 3:
-      return 180; /* A слева, B спереди, C справа: рёбра под 30° к лучу зрения */
+      return 162.5; /* A слева, B спереди, C справа */
     case 4:
       return 225; /* A слева-спереди, B справа-спереди */
+    case 5:
+      return 200; /* A слева, B спереди, C справа-спереди, D справа-сзади, E сзади */
     case 6:
-      return 210; /* A слева-спереди, B спереди, C справа-спереди: без рёбер вдоль луча зрения */
+      return 217.5; /* A слева-спереди, B спереди, C справа-спереди */
     default:
-      return 270 - 360 / n / 2 - 360 / n; /* одна вершина спереди */
+      return 270 - 360 / n / 2 - 360 / n;
   }
 }
 
