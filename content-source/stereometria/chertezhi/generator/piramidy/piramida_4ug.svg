@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Четырёхугольная пирамида</title>
+<polygon points="128.0,840.1 500.0,159.9 872.0,645.8 677.7,840.1" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<line x1="872.0" y1="645.8" x2="322.3" y2="645.8" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="322.3" y1="645.8" x2="128.0" y2="840.1" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="322.3" y1="645.8" x2="500.0" y2="159.9" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="128.0" y1="840.1" x2="677.7" y2="840.1" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="128.0" y1="840.1" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="677.7" y1="840.1" x2="872.0" y2="645.8" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="677.7" y1="840.1" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="872.0" y1="645.8" x2="500.0" y2="159.9" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<circle cx="128.0" cy="840.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="677.7" cy="840.1" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="872.0" cy="645.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="322.3" cy="645.8" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="159.9" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="72.0" y="896.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="719.0" y="913.6" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="936.5" y="672.9" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="312.5" y="733.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="500.0" y="119.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
+</svg>

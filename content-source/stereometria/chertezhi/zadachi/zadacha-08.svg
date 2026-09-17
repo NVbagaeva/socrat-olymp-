@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.570 7.675" class="fig" role="img" width="620" height="497">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+
+<polygon points="1.313,6.363 2.258,5.313 8.258,5.313 7.313,6.363" fill="#E7F3EB" stroke="none"/>
+<polygon points="1.313,6.363 7.313,6.363 7.313,4.363 5.313,4.363 5.313,2.363 1.313,2.363" fill="#E7F3EB" stroke="none"/>
+<polygon points="2.258,5.313 2.258,1.313 6.258,1.313 6.258,3.313 8.258,3.313 8.258,5.313" fill="#E7F3EB" stroke="none"/>
+<polygon points="1.313,6.363 1.313,2.363 2.258,1.313 2.258,5.313" fill="#E7F3EB" stroke="none"/>
+<polygon points="7.313,6.363 8.258,5.313 8.258,3.313 7.313,4.363" fill="#E7F3EB" stroke="none"/>
+<polygon points="1.313,2.363 5.313,2.363 6.258,1.313 2.258,1.313" fill="#E7F3EB" stroke="none"/>
+<polygon points="5.313,4.363 7.313,4.363 8.258,3.313 6.258,3.313" fill="#E7F3EB" stroke="none"/>
+<polygon points="5.313,4.363 5.313,2.363 6.258,1.313 6.258,3.313" fill="#E7F3EB" stroke="none"/>
+<line x1="1.313" y1="6.363" x2="2.258" y2="5.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.062" stroke-dasharray="0.252 0.182"/>
+<line x1="8.258" y1="5.313" x2="2.258" y2="5.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.062" stroke-dasharray="0.252 0.182"/>
+<line x1="2.258" y1="5.313" x2="2.258" y2="1.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.062" stroke-dasharray="0.252 0.182"/>
+<line x1="7.313" y1="6.363" x2="8.258" y2="5.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="1.313" y1="6.363" x2="7.313" y2="6.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="7.313" y1="6.363" x2="7.313" y2="4.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="5.313" y1="4.363" x2="7.313" y2="4.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="5.313" y1="4.363" x2="5.313" y2="2.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="1.313" y1="2.363" x2="5.313" y2="2.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="1.313" y1="6.363" x2="1.313" y2="2.363" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="6.258" y1="1.313" x2="2.258" y2="1.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="6.258" y1="3.313" x2="6.258" y2="1.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="8.258" y1="3.313" x2="6.258" y2="3.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="8.258" y1="5.313" x2="8.258" y2="3.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="1.313" y1="2.363" x2="2.258" y2="1.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="7.313" y1="4.363" x2="8.258" y2="3.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="5.313" y1="2.363" x2="6.258" y2="1.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<line x1="5.313" y1="4.363" x2="6.258" y2="3.313" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.070"/>
+<text x="4.313" y="7.119" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">6</text>
+<text x="0.665" y="4.363" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">4</text>
+<text x="8.693" y="5.363" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">2</text>
+<text x="7.498" y="2.773" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">2</text>
+<text x="6.852" y="1.935" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">2</text>
+<text x="8.487" y="6.162" font-size="0.632" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="dim">3</text>
+</svg>

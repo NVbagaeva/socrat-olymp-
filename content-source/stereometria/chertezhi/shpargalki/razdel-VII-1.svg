@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="70 194 860 732" width="620" height="528">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+<rect x="100.0" y="360.0" width="800.0" height="400.0" fill="#E7F3EB"/>
+<path d="M 100.0 760.0 A 400.0 136.0 0 1 0 900.0 760.0 A 400.0 136.0 0 1 0 100.0 760.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 100.0 360.0 A 400.0 136.0 0 1 0 900.0 360.0 A 400.0 136.0 0 1 0 100.0 360.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 900.0 760.0 A 400.0 136.0 0 0 1 100.0 760.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 100.0 760.0 A 400.0 136.0 0 0 1 900.0 760.0" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="100.0" y1="360.0" x2="100.0" y2="760.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="900.0" y1="360.0" x2="900.0" y2="760.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 100.0 360.0 A 400.0 136.0 0 0 1 900.0 360.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 100.0 360.0 A 400.0 136.0 0 0 0 900.0 360.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="500.0" y1="360.0" x2="123.8" y2="713.8" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<line x1="500.0" y1="360.0" x2="876.2" y2="713.8" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<line x1="500.0" y1="360.0" x2="500.0" y2="760.0" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<line x1="500.0" y1="760.0" x2="900.0" y2="760.0" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<circle cx="500.0" cy="760.0" r="7.4" fill="#C2410C" stroke="#fff" stroke-width="2.6"/>
+<text x="440.0" y="560.0" font-size="80.6" fill="#14231A" text-anchor="middle" dominant-baseline="central" font-style="italic" font-weight="bold" class="lbl">h</text>
+<text x="700.0" y="830.0" font-size="80.6" fill="#14231A" text-anchor="middle" dominant-baseline="central" font-style="italic" font-weight="bold" class="lbl">r</text>
+<text x="790.0" y="530.0" font-size="80.6" fill="#C2410C" text-anchor="middle" dominant-baseline="central" font-style="italic" font-weight="bold" class="lbl">l</text></svg>

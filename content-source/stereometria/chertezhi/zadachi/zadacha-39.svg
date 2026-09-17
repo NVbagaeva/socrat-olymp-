@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="130 -6 740 971" width="473" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+<rect x="160.0" y="140.0" width="680.0" height="680.0" fill="#E7F3EB"/>
+<path d="M 160.0 820.0 A 340.0 115.6 0 1 0 840.0 820.0 A 340.0 115.6 0 1 0 160.0 820.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 160.0 140.0 A 340.0 115.6 0 1 0 840.0 140.0 A 340.0 115.6 0 1 0 160.0 140.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 840.0 820.0 A 340.0 115.6 0 0 1 160.0 820.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 820.0 A 340.0 115.6 0 0 1 840.0 820.0" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="160.0" y1="140.0" x2="160.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="840.0" y1="140.0" x2="840.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 140.0 A 340.0 115.6 0 0 1 840.0 140.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 140.0 A 340.0 115.6 0 0 0 840.0 140.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="500.0" y1="140.0" x2="500.0" y2="820.0" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<circle cx="500.0" cy="820.0" r="7.4" fill="#C2410C" stroke="#fff" stroke-width="2.6"/>
+<circle cx="500.0" cy="140.0" r="7.4" fill="#C2410C" stroke="#fff" stroke-width="2.6"/></svg>
