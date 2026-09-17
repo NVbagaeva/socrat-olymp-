@@ -18,23 +18,22 @@
     },
     "levelOrder": false,
     "unluckyReasons": {
-      "b-offscreen": 5,
-      "fraction-k": 12,
-      "fraction-b": 1
+      "b-offscreen": 12,
+      "fraction-k": 6
     },
     "intersectionInside": 0,
     "intersectionOffscreen": 20,
-    "intersectionMargin": 0.2,
-    "askedCoordinateOffscreen": 14,
-    "bothIncreasing": 5,
-    "bothDecreasing": 6,
-    "mixedDirections": 9,
-    "angleMin": 15,
-    "angleMax": 53,
-    "fractionVariants": 18,
-    "nonIntegerAnswers": 7,
-    "answerAbsMin": 2.4,
-    "answerAbsMax": 12,
+    "intersectionMargin": 2,
+    "askedCoordinateOffscreen": 20,
+    "bothIncreasing": 2,
+    "bothDecreasing": 2,
+    "mixedDirections": 16,
+    "angleMin": 45,
+    "angleMax": 72,
+    "fractionVariants": 20,
+    "nonIntegerAnswers": 12,
+    "answerAbsMin": 7,
+    "answerAbsMax": 15,
     "uniqueSlopePairs": true,
     "uniqueAnswers": true,
     "uniquePairs": true
@@ -55,15 +54,16 @@
               1,
               2
             ],
-            "direction": "up",
-            "b": -3
+            "direction": "down",
+            "b": -8,
+            "bMax": 8
           },
           {
             "slope": "integer",
-            "absK": 2,
+            "absK": 1,
             "direction": "up",
-            "b": 12,
-            "bMax": 12
+            "b": 7,
+            "bMax": 7
           }
         ],
         "intersection": {
@@ -85,23 +85,21 @@
         "window": 8,
         "lines": [
           {
-            "slope": "fraction",
-            "absK": [
-              1,
-              3
-            ],
+            "slope": "integer",
+            "absK": 1,
             "direction": "down",
-            "b": -5
+            "b": 7,
+            "bMax": 7
           },
           {
             "slope": "fraction",
             "absK": [
-              2,
-              3
+              1,
+              2
             ],
             "direction": "up",
-            "b": 7,
-            "bMax": 7
+            "b": -8,
+            "bMax": 8
           }
         ],
         "intersection": {
@@ -111,7 +109,7 @@
         }
       },
       "intersectionOffscreen": true,
-      "levelReason": "fraction-k"
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-03",
@@ -129,7 +127,7 @@
               2
             ],
             "direction": "down",
-            "b": -3
+            "b": -4
           },
           {
             "slope": "fraction",
@@ -138,7 +136,7 @@
               2
             ],
             "direction": "up",
-            "b": 4
+            "b": 3
           }
         ],
         "intersection": {
@@ -165,7 +163,7 @@
               2
             ],
             "direction": "up",
-            "b": -3
+            "b": -4
           },
           {
             "slope": "fraction",
@@ -174,7 +172,7 @@
               2
             ],
             "direction": "down",
-            "b": 4
+            "b": 3
           }
         ],
         "intersection": {
@@ -201,16 +199,16 @@
               3
             ],
             "direction": "down",
-            "b": 2
+            "b": -4
           },
           {
             "slope": "fraction",
             "absK": [
               1,
-              3
+              2
             ],
             "direction": "up",
-            "b": -4
+            "b": 2
           }
         ],
         "intersection": {
@@ -235,150 +233,6 @@
             "slope": "fraction",
             "absK": [
               1,
-              3
-            ],
-            "direction": "up",
-            "b": -4
-          },
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
-              3
-            ],
-            "direction": "down",
-            "b": 4
-          }
-        ],
-        "intersection": {
-          "inside": false,
-          "decimals": 1,
-          "axis": "x"
-        }
-      },
-      "intersectionOffscreen": true,
-      "levelReason": "fraction-k"
-    },
-    {
-      "id": "12.C-07",
-      "level": "unlucky",
-      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
-      "answerRule": "intersection-x",
-      "answerType": "number",
-      "constraints": {
-        "window": 5,
-        "lines": [
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
-              2
-            ],
-            "direction": "down",
-            "b": -3
-          },
-          {
-            "slope": "integer",
-            "absK": 2,
-            "direction": "down",
-            "b": 9,
-            "bMax": 9
-          }
-        ],
-        "intersection": {
-          "inside": false,
-          "decimals": 1,
-          "axis": "x"
-        }
-      },
-      "intersectionOffscreen": true,
-      "levelReason": "b-offscreen"
-    },
-    {
-      "id": "12.C-08",
-      "level": "unlucky",
-      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
-      "answerRule": "intersection-x",
-      "answerType": "number",
-      "constraints": {
-        "window": 5,
-        "lines": [
-          {
-            "slope": "integer",
-            "absK": 2,
-            "direction": "down",
-            "b": -8,
-            "bMax": 8
-          },
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
-              2
-            ],
-            "direction": "down",
-            "b": 4
-          }
-        ],
-        "intersection": {
-          "inside": false,
-          "decimals": 1,
-          "axis": "x"
-        }
-      },
-      "intersectionOffscreen": true,
-      "levelReason": "b-offscreen"
-    },
-    {
-      "id": "12.C-09",
-      "level": "unlucky",
-      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
-      "answerRule": "intersection-x",
-      "answerType": "number",
-      "constraints": {
-        "window": 5,
-        "lines": [
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
-              3
-            ],
-            "direction": "down",
-            "b": -2
-          },
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
-              2
-            ],
-            "direction": "up",
-            "b": 4
-          }
-        ],
-        "intersection": {
-          "inside": false,
-          "decimals": 1,
-          "axis": "x"
-        }
-      },
-      "intersectionOffscreen": true,
-      "levelReason": "fraction-k"
-    },
-    {
-      "id": "12.C-10",
-      "level": "unlucky",
-      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
-      "answerRule": "intersection-x",
-      "answerType": "number",
-      "constraints": {
-        "window": 5,
-        "lines": [
-          {
-            "slope": "fraction",
-            "absK": [
-              1,
               2
             ],
             "direction": "down",
@@ -404,7 +258,7 @@
       "levelReason": "fraction-k"
     },
     {
-      "id": "12.C-11",
+      "id": "12.C-07",
       "level": "unlucky",
       "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
@@ -419,7 +273,7 @@
               3
             ],
             "direction": "up",
-            "b": -3
+            "b": -4
           },
           {
             "slope": "fraction",
@@ -428,7 +282,7 @@
               2
             ],
             "direction": "down",
-            "b": 4
+            "b": 3
           }
         ],
         "intersection": {
@@ -441,7 +295,7 @@
       "levelReason": "fraction-k"
     },
     {
-      "id": "12.C-12",
+      "id": "12.C-08",
       "level": "unlucky",
       "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
@@ -478,35 +332,190 @@
       "levelReason": "fraction-k"
     },
     {
+      "id": "12.C-09",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 5,
+        "lines": [
+          {
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "up",
+            "b": -4
+          },
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "up",
+            "b": 9,
+            "bMax": 9
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x"
+        }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
+    },
+    {
+      "id": "12.C-10",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 5,
+        "lines": [
+          {
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": -4
+          },
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "down",
+            "b": 9,
+            "bMax": 9
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x"
+        }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
+    },
+    {
+      "id": "12.C-11",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "lines": [
+          {
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "down",
+            "b": -7,
+            "bMax": 7
+          },
+          {
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
+            "direction": "up",
+            "b": 5
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x"
+        }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
+    },
+    {
+      "id": "12.C-12",
+      "level": "unlucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "lines": [
+          {
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "down",
+            "b": 7,
+            "bMax": 7
+          },
+          {
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
+            "direction": "up",
+            "b": -7,
+            "bMax": 7
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x"
+        }
+      },
+      "intersectionOffscreen": true,
+      "levelReason": "fraction-k"
+    },
+    {
       "id": "12.C-13",
       "level": "unlucky",
       "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "up",
-            "bOffscreen": true,
-            "bMax": 12
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
+            "direction": "down",
+            "b": -8,
+            "bMax": 8
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 7,
+            "bMax": 7
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "b-offscreen",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-14",
@@ -515,29 +524,37 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "integer",
-            "direction": "down",
-            "bOffscreen": true,
-            "bMax": 12
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
+            "direction": "up",
+            "b": -8,
+            "bMax": 8
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 7,
+            "bMax": 7
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "b-offscreen",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-15",
@@ -546,33 +563,36 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
             "slope": "fraction",
-            "direction": "up",
-            "denominators": [
+            "absK": [
+              1,
               2
             ],
-            "bInside": true,
-            "bMax": 6
+            "direction": "down",
+            "b": -8,
+            "bMax": 8
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              3,
+              4
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 5
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
-          "axis": "x",
-          "answerKind": "half"
+          "axis": "x"
         }
       },
-      "levelReason": "fraction-k",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-16",
@@ -581,33 +601,36 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
             "slope": "fraction",
-            "direction": "down",
-            "denominators": [
-              3
+            "absK": [
+              3,
+              4
             ],
-            "bInside": true,
-            "bMax": 6
+            "direction": "down",
+            "b": 5
           },
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              1,
+              2
+            ],
+            "direction": "up",
+            "b": -8,
+            "bMax": 8
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
-          "axis": "x",
-          "answerKind": "half"
+          "axis": "x"
         }
       },
-      "levelReason": "fraction-k",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-17",
@@ -616,32 +639,34 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "fraction",
+            "slope": "integer",
+            "absK": 2,
             "direction": "up",
-            "denominators": [
-              4
-            ],
-            "bInside": true,
-            "bMax": 6
+            "b": -9,
+            "bMax": 9
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 8,
+            "bMax": 8
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "fraction-k",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-18",
@@ -650,32 +675,34 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
-            "slope": "fraction",
+            "slope": "integer",
+            "absK": 2,
             "direction": "down",
-            "denominators": [
-              2
-            ],
-            "bInside": true,
-            "bMax": 6
+            "b": -9,
+            "bMax": 9
           },
           {
-            "slope": "integer",
+            "slope": "fraction",
+            "absK": [
+              1,
+              3
+            ],
             "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "b": 8,
+            "bMax": 8
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "fraction-k",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-19",
@@ -684,32 +711,33 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
             "slope": "fraction",
-            "direction": "up",
-            "denominators": [
+            "absK": [
+              1,
               3
             ],
-            "bInside": true,
-            "bMax": 6
+            "direction": "down",
+            "b": -8,
+            "bMax": 8
           },
           {
             "slope": "integer",
+            "absK": 1,
             "direction": "up",
-            "bInside": true,
-            "bMax": 6
+            "b": 6
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "fraction-k",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     },
     {
       "id": "12.C-20",
@@ -718,33 +746,36 @@
       "answerRule": "intersection-x",
       "answerType": "number",
       "constraints": {
+        "window": 8,
         "lines": [
           {
             "slope": "fraction",
-            "direction": "down",
-            "denominators": [
-              2
+            "absK": [
+              2,
+              3
             ],
-            "bKind": "half",
-            "bInside": true,
-            "bMax": 6
+            "direction": "down",
+            "b": 6
           },
           {
-            "slope": "integer",
-            "direction": "down",
-            "bInside": true,
-            "bMax": 6
+            "slope": "fraction",
+            "absK": [
+              2,
+              3
+            ],
+            "direction": "up",
+            "b": -8,
+            "bMax": 8
           }
         ],
         "intersection": {
           "inside": false,
-          "marginCells": 1,
           "decimals": 1,
           "axis": "x"
         }
       },
-      "levelReason": "fraction-b",
-      "intersectionOffscreen": true
+      "intersectionOffscreen": true,
+      "levelReason": "b-offscreen"
     }
   ],
   "curveLabels": [
