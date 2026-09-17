@@ -334,15 +334,26 @@ function stepAnswer(task: EngineTask): TrainerStep | null {
       wrongHint: hintHtml('Проверь, как подставил $x$ в уравнение.'),
     };
   }
+  if (set === '12.B') {
+    return {
+      titleHtml: hintHtml('Найди ответ.'),
+      textHtml: hintHtml(
+        'Реши уравнение $' + equation(k, b) + ' = ' + tex(query.y0) + '$ относительно $x$.',
+      ),
+      shape: 'plain',
+      fields: [{ labelHtml: math('x ='), answer: plain((query.y0 - b) / k) }],
+      wrongHint: hintHtml('Проверь, как решил уравнение.'),
+    };
+  }
   return null;
 }
 
 /** Шаги задания. Пусто — цепочки для этого типа ещё нет. */
 function stepsFor(task: EngineTask): TrainerStep[] {
   const { set, k, b } = task.meta;
-  if (set !== '12.A') {
-    /* Типы 2 и 3 идут следующими шагами работы: пока цепочки у них
-       нет, и кнопки подсказки тоже. */
+  if (set !== '12.A' && set !== '12.B') {
+    /* Тип 3 идёт следующим шагом работы: пока цепочки у него нет,
+       и кнопки подсказки тоже. */
     return [];
   }
   const last = stepAnswer(task);
