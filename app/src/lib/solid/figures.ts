@@ -10,8 +10,8 @@
  */
 
 import { type Polyhedron, orientOutward } from './model';
-import { TOWARD } from './project';
-import { type Vec3, add, centroid, cross, normalize, scale, sub } from './vec';
+import { RIGHT, UP } from './project';
+import { type Vec3, add, centroid, scale, sub } from './vec';
 
 const DEG = Math.PI / 180;
 
@@ -64,10 +64,8 @@ export function polygonStart(n: number): number {
  * против часовой стрелки, градусы.
  */
 export function sphereOutlinePoint(center: Vec3, r: number, angle: number): Vec3 {
-  const right = normalize([TOWARD[1], -TOWARD[0], 0]);
-  const up = cross(TOWARD, right);
   const u = angle * DEG;
-  return add(center, add(scale(right, r * Math.cos(u)), scale(up, r * Math.sin(u))));
+  return add(center, add(scale(RIGHT, r * Math.cos(u)), scale(UP, r * Math.sin(u))));
 }
 
 /** Буквы основания: A, B, C, … */
