@@ -37,6 +37,33 @@ export interface TrainerTask {
   wrongHint: string;
   /** Откуда взялся ответ. Показывается, когда ответ верный. */
   rightHint: string;
+  /**
+   * Цепочка подсказки: шаги с полями. Пусто — кнопки «Показать
+   * подсказку» у задания нет.
+   */
+  steps: TrainerStep[];
+}
+
+/** Одно поле шага: подпись слева и ожидаемое значение. */
+export interface TrainerField {
+  /** Подпись поля, набранная KaTeX: «k =», «f(13,5) =». */
+  labelHtml: string;
+  answer: string;
+}
+
+export interface TrainerStep {
+  /** Заголовок шага. Буквы в нём набраны формулами. */
+  titleHtml: string;
+  /** Пояснение под заголовком. */
+  textHtml: string;
+  /**
+   * Как расставлены поля: обычной строкой с подписью или внутри
+   * формулы y = [ ] · x + [ ].
+   */
+  shape: 'plain' | 'equation';
+  fields: TrainerField[];
+  /** Что проверить, если на шаге ошибка. Значения не выдаёт. */
+  wrongHint: string;
 }
 
 interface EngineQuery {
@@ -235,6 +262,93 @@ function hintHtml(text: string): string {
   return typeset(GraphGenerate.typeset(text) as string);
 }
 
+
+/* ── Цепочка подсказки ───────────────────────────────────────────
+
+   Шаги ведут тем же путём, которым задача решается на бумаге:
+   снять k, снять b, записать уравнение, ответить на вопрос. Тексты
+   заголовков и пояснений заданы методикой, числа подставляются
+   из самого задания. */
+
+/** Число в поле: ученик набирает его так же, как итоговый ответ. */
+function plain(value: number): string {
+  return String(Math.round(value * 1000) / 1000).replace('.', ',');
+}
+
+function stepK(k: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $k$.'),
+    textHtml: hintHtml(
+      'Возьми две отмеченные точки. Посчитай, на сколько клеток прямая сдвинулась ' +
+        'вправо и на сколько вверх. Тогда $k$ = $\\Delta y : \\Delta x$.',
+    ),
+    shape: 'plain',
+    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
+    wrongHint: hintHtml(
+      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
+    ),
+  };
+}
+
+function stepB(b: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Теперь проверим $b$.'),
+    textHtml: hintHtml(
+      'Коэффициент $b$ — это значение $y$ в точке, где прямая пересекает ось $Oy$.',
+    ),
+    shape: 'plain',
+    fields: [{ labelHtml: math('b ='), answer: plain(b) }],
+    wrongHint: hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.'),
+  };
+}
+
+/* Уравнение сверяется по числам: ученик подставляет k и b в готовую
+   формулу, а не набирает выражение строкой. Сверка та же, что
+   у остальных полей, второй функции для этого не нужно. */
+function stepEquation(k: number, b: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Запиши уравнение прямой.'),
+    textHtml: hintHtml('Подставь найденные $k$ и $b$ в формулу $y = kx + b$.'),
+    shape: 'equation',
+    fields: [
+      { labelHtml: math('y ='), answer: plain(k) },
+      { labelHtml: math('\\cdot\\, x +'), answer: plain(b) },
+    ],
+    wrongHint: hintHtml('Проверь, те ли $k$ и $b$ ты подставил.'),
+  };
+}
+
+function stepAnswer(task: EngineTask): TrainerStep | null {
+  const { set, k, b, query } = task.meta;
+  if (query === null) {
+    return null;
+  }
+  if (set === '12.A') {
+    return {
+      titleHtml: hintHtml('Найди ответ.'),
+      textHtml: hintHtml('Подставь $x = ' + tex(query.x0) + '$ в полученное уравнение.'),
+      shape: 'plain',
+      fields: [
+        { labelHtml: math('f(' + tex(query.x0) + ') ='), answer: plain(k * query.x0 + b) },
+      ],
+      wrongHint: hintHtml('Проверь, как подставил $x$ в уравнение.'),
+    };
+  }
+  return null;
+}
+
+/** Шаги задания. Пусто — цепочки для этого типа ещё нет. */
+function stepsFor(task: EngineTask): TrainerStep[] {
+  const { set, k, b } = task.meta;
+  if (set !== '12.A') {
+    /* Типы 2 и 3 идут следующими шагами работы: пока цепочки у них
+       нет, и кнопки подсказки тоже. */
+    return [];
+  }
+  const last = stepAnswer(task);
+  return last === null ? [] : [stepK(k), stepB(b), stepEquation(k, b), last];
+}
+
 /** Десять заданий подхода для режима. */
 export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
   const perSet = Math.max(1, Math.round(TRAINER_ROUND / mode.setIds.length));
@@ -249,6 +363,7 @@ export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
     answer: task.answer,
     wrongHint: hintHtml(WRONG_HINT[task.meta.set] ?? ''),
     rightHint: rightHintFor(task),
+    steps: stepsFor(task),
   }));
 }
 
