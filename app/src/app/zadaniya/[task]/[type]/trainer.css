@@ -179,3 +179,582 @@
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
+
+/* ── Экран задания ──────────────────────────────────────────── */
+
+/* Карточка условия, поле ответа и подпись над ним берутся у вкладки
+   подготовительных задач: там это уже описано (.ptask__card,
+   .ptask__text, .ptask__question, .ptask__chart, .ptask__label).
+   Здесь — только то, чего у неё нет: счётчик подхода, полоса
+   и плашки ответа со значком. */
+
+.ttask {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ttask__count {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.ttask__count b {
+  color: var(--color-text-brand);
+}
+
+/* Полоса подхода: десять отрезков вместо кружков с номерами.
+   Задания тренажёра идут подряд, выбирать из них нельзя —
+   значит, и нажимать не на что. */
+.ttask__bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ttask__dot {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+}
+.ttask__dot.is-done {
+  background: var(--color-success);
+}
+/* Задание, пройденное по шагам подсказки: не зелёное и не красное.
+   Стоит до текущего: пока ученик на нём, полоса показывает, где он. */
+.ttask__dot.is-hinted {
+  background: var(--color-border-info);
+}
+.ttask__dot.is-current {
+  background: var(--color-primary);
+}
+
+.ttask__answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.ttask__input {
+  width: 100%;
+  max-width: 220px;
+}
+
+.ttask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── Плашки ответа ──────────────────────────────────────────── */
+
+/* Плашка относится к полю ввода, а не к странице, поэтому во всю
+   ширину экрана не растягивается. */
+.tverdict {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+.tverdict--right {
+  background: var(--color-success-soft);
+}
+.tverdict--wrong {
+  background: var(--color-error-soft);
+}
+
+.tverdict__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.tverdict--right .tverdict__title {
+  color: var(--color-success);
+}
+.tverdict--wrong .tverdict__title {
+  color: var(--color-error);
+}
+
+/* Значок в кружке: галочка и крестик те же, что у счётчиков
+   подготовительных задач, кружок рисуется здесь. */
+.tverdict__ico {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+}
+.tverdict__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.tverdict--right .tverdict__ico {
+  background: var(--color-success);
+}
+.tverdict--wrong .tverdict__ico {
+  background: var(--color-error);
+}
+
+.tverdict__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+/* Формулы внутри пояснения не должны разъезжаться по строкам. */
+.tverdict__text .katex {
+  white-space: nowrap;
+}
+
+/* У карточки подготовительных задач вторая колонка отведена плашке
+   подсказки. В тренажёре её нет, и на широком экране колонка стояла
+   бы пустой: карточка остаётся в одну колонку. */
+.ttask .ptask__card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── Цепочка подсказки ──────────────────────────────────────── */
+
+/* Кнопка подсказки и строка о цене стоят одной колонкой: строка
+   относится к кнопке, а не к ряду кнопок. */
+.thint__offer {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+}
+.thint__warn {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+
+.thint {
+  display: grid;
+  gap: var(--space-3);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .thint {
+    animation: thint-in var(--dur-reveal) var(--ease);
+  }
+}
+@keyframes thint-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.tstep {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+/* Пройденный шаг отходит на второй план: он остаётся на виду,
+   но спорить с текущим не должен. */
+.tstep.is-done {
+  background: var(--color-surface-2);
+  border-color: transparent;
+}
+
+.tstep__no {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.tstep__no b {
+  color: var(--color-text-brand);
+}
+
+.tstep__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tstep__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Ряд шага: подпись, поле, кнопка. На узком экране переносится
+   и не выдавливает кнопку за край. */
+.tstep__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.tstep__label {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+}
+.tstep__input {
+  width: 110px;
+  flex: none;
+}
+/* Строка уравнения набирается как формула: подпись, поле, знак,
+   поле — всё в одну строку, без переноса между частями. */
+.tstep__row--eq .tstep__input {
+  width: 92px;
+}
+
+.tstep__ok {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.tstep__ok svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tstep__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-error);
+}
+
+/* Уравнение двух прямых: четыре поля в одной строке. Поля уже,
+   чтобы строка держалась на одной линии там, где есть место. */
+.tstep__row--wide .tstep__input {
+  width: 74px;
+}
+
+/* На узком экране строка в одну линию не помещается, и свободный
+   перенос рвал её посередине: знак уезжал в начало новой строки
+   без своего поля. Поэтому здесь строка становится сеткой из двух
+   половин уравнения, а кнопка встаёт под ними. */
+@media (max-width: 560px) {
+  .tstep__row--wide {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    align-items: center;
+  }
+  .tstep__row--wide .tstep__input {
+    width: 62px;
+  }
+  .tstep__row--wide .btn,
+  .tstep__row--wide .tstep__ok {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* Формула вместе со знаком препинания за ней: переносить между
+   ними нечего. */
+.tight-math {
+  white-space: nowrap;
+}
+
+/* ── Итог тренировки ────────────────────────────────────────── */
+
+.tdone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* Кубок — акцент, а не главный объект: высота примерно как два ряда
+   текста. Ни рамки, ни тени, ни подложки. */
+.tdone__cup {
+  width: auto;
+  height: 72px;
+}
+
+.tdone__head {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+.tdone__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tdone__lead {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* Два крупных числа: счёт и процент. */
+.tdone__score {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--space-2);
+}
+.tdone__cell {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  text-align: center;
+}
+.tdone__big {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+.tdone__cap {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Строки итога. */
+.tdone__rows {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+}
+.tdone__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.tdone__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.tdone__row dt {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tdone__row dd {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Статистика по типам заданий. */
+.tdone__kinds {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 480px;
+  margin-top: var(--space-2);
+}
+.tdone__kinds-title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tdone__list {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tkind {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+.tkind__name {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+.tkind__score {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+.tkind__bar {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+.tkind__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+
+
+
+/* ── Что сделано в тренажёре ────────────────────────────────── */
+
+.tstats {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tstats__counter {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tstats__counter b {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.tstats__empty {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.tstats__rows {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+}
+.tstats__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.tstats__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.tstats__row dt {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tstats__row dd {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.tstats__kinds {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 480px;
+}
+.tstats__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tstats__list,
+.tstats__mistakes {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tstats__mistakes li {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+/* Совет держится плашкой: это единственная строка, к которой ученик
+   должен вернуться. */
+.tstats__advice {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+.tstats__advice b {
+  color: var(--color-text-brand);
+}
+
+/* Итоговый экран: две кнопки в ряд. */
+.tdone__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}

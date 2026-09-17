@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { trainerPage, type TrainerMode } from '@/content/trainerModes';
+import { trainerTotal } from '@/lib/trainer';
 import { TabScrollOnMount } from '../TabScroll';
 import { TrainerMenu } from './TrainerMenu';
+import { TrainerStats } from './TrainerStats';
 
 export interface TrainerShellProps {
   /** Адрес подтемы: от него считаются адреса режимов. */
@@ -32,7 +34,9 @@ export function TrainerShell({ base, mode, children }: TrainerShellProps) {
           подводим его к глазам, как во вкладке подготовки. */}
       <TabScrollOnMount />
 
-      {children}
+      {/* До выбора типа вкладка показывает, что уже сделано: внутри
+          режима на этом месте стоит экран задания. */}
+      {children ?? <TrainerStats total={trainerTotal()} />}
     </section>
   );
 }

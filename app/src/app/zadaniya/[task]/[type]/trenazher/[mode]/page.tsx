@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
-import { EmptyState } from '@/components/ui';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
-import { TrainerShell } from '@/components/tasks/trainer';
+import { TrainerShell, TrainerTasks } from '@/components/tasks/trainer';
 import { activeSubtopicParams, findSection, findSubtopic } from '@/content/sections';
 import { findTrainerMode, trainerModeIds, trainerPage } from '@/content/trainerModes';
 import { tasksPage } from '@/content/tasks';
@@ -60,12 +59,9 @@ export default async function Page({ params }: { params: Params }) {
         trail={[{ label: trainerPage.title, href: `${base}/trenazher/` }, { label: found.title }]}
         trainer={
           <TrainerShell base={base} mode={found}>
-            {/* Экран задания появится следующим шагом: сейчас
-                собрана только оболочка с выбором типа. */}
-            <EmptyState
-              title="Задания готовятся"
-              description="Тип выбран. Экран задания добавим следующим шагом."
-            />
+            {/* Задания собирает движок на сборке: в браузер уходит
+                готовая разметка. */}
+            <TrainerTasks mode={found} base={`${base}/trenazher/`} />
           </TrainerShell>
         }
       />

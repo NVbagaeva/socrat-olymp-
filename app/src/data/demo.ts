@@ -38,23 +38,6 @@ export const demoProgress: Record<FunctionTypeId, number> = {
    отдельное число, как на макете. */
 export const demoTotalProgress = 68;
 
-/* DEMO: счётчики тренажёра на старте. Дальше они живут в состоянии и
-   пересчитываются после каждой проверки. */
-export interface DemoTrainerStats {
-  total: number;
-  solved: number;
-  correct: number;
-  /** Среднее время на задание, секунды. */
-  averageSeconds: number;
-}
-
-export const demoTrainerStats: DemoTrainerStats = {
-  total: 20,
-  solved: 14,
-  correct: 11,
-  averageSeconds: 84,
-};
-
 /* DEMO: сколько разделов теории темы изучено — число из шапки темы.
    Счётчик один: общее число разделов нигде не записано, оно равно
    длине списка теории в functionTypes.ts, а здесь лежит только
