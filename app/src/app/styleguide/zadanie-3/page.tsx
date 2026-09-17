@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Solid } from '@/components/solid/Solid';
-import { BANK, RAZDEL_1, RAZDEL_2, RAZDEL_3, RAZDEL_4, RAZDEL_5, RAZDEL_6 } from '@/lib/zadanie3';
+import { BANK, RAZDELY } from '@/lib/zadanie3';
 import { assertBankOk, type BankReport, checkBank } from '@/lib/zadanie3/selftest';
 import type { Prototype, Variant } from '@/lib/zadanie3/types';
 import { typeset } from '@/lib/tex';
@@ -20,53 +20,30 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/** «1 прототип», «3 прототипа», «21 прототип». */
+function protoWord(count: number): string {
+  const tens = count % 100;
+  const ones = count % 10;
+  if (tens >= 11 && tens <= 14) {
+    return 'прототипов';
+  }
+  if (ones === 1) {
+    return 'прототип';
+  }
+  return ones >= 2 && ones <= 4 ? 'прототипа' : 'прототипов';
+}
+
 const FULL_REPORT = checkBank(BANK);
 assertBankOk(FULL_REPORT);
 
-const SECTIONS: { id: string; title: string; lead: string; items: readonly Prototype[] }[] = [
-  {
-    id: 'razdel-I',
-    title: 'Раздел I. Параллелепипед и куб',
-    lead: '19 прототипов по 10 вариантов.',
-    items: RAZDEL_1,
-  },
-  {
-    id: 'razdel-II',
-    title: 'Раздел II. Призма',
-    lead: '21 прототип по 10 вариантов.',
-    items: RAZDEL_2,
-  },
-  {
-    id: 'razdel-III',
-    title: 'Раздел III. Пирамида',
-    lead: '11 прототипов по 10 вариантов.',
-    items: RAZDEL_3,
-  },
-  {
-    id: 'razdel-IV',
-    title: 'Раздел IV. Конус',
-    lead: '11 прототипов по 10 вариантов.',
-    items: RAZDEL_4,
-  },
-  {
-    id: 'razdel-V',
-    title: 'Раздел V. Цилиндр',
-    lead: '8 прототипов по 10 вариантов.',
-    items: RAZDEL_5,
-  },
-  {
-    id: 'razdel-VI',
-    title: 'Раздел VI. Шар',
-    lead: '3 прототипа по 10 вариантов.',
-    items: RAZDEL_6,
-  },
-  {
-    id: 'razdel-VII',
-    title: 'Раздел VII. Вписанный и описанный цилиндр',
-    lead: '7 прототипов по 10 вариантов.',
-    items: RAZDEL_7,
-  },
-];
+/* Разделы, их номера и названия приходят из банка: список один,
+   и забыть здесь раздел нельзя. */
+const SECTIONS = RAZDELY.map((razdel) => ({
+  id: `razdel-${razdel.nomer}`,
+  title: `Раздел ${razdel.nomer}. ${razdel.nazvanie}`,
+  lead: `${razdel.prototipy.length} ${protoWord(razdel.prototipy.length)} по 10 вариантов.`,
+  items: razdel.prototipy,
+}));
 
 function Condition({ text }: { text: string }) {
   return <span dangerouslySetInnerHTML={{ __html: typeset(text) }} />;
