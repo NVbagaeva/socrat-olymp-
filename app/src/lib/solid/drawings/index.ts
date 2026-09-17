@@ -5,18 +5,14 @@
  * и миниатюры разделов. Тексты условий здесь не дублируются: они
  * приходят из prototipy-91.json.
  *
- * Раздел I собран не отдельными картинками, а из данных прототипов:
- * чертёж прототипа — это чертёж его первого варианта. Так числа
- * и буквы задачи и её чертёж не могут разойтись.
+ * Собранные разделы берутся не списком картинок, а из данных
+ * прототипов: чертёж прототипа — это чертёж его первого варианта.
+ * Так числа и буквы задачи и её чертёж не могут разойтись, а новый
+ * раздел не нужно вписывать сюда отдельно — он приходит из RAZDELY.
  */
 
+import { RAZDELY } from '../../zadanie3';
 import { RAZDEL_1 } from '../../zadanie3/razdel1';
-import { RAZDEL_2 } from '../../zadanie3/razdel2';
-import { RAZDEL_3 } from '../../zadanie3/razdel3';
-import { RAZDEL_4 } from '../../zadanie3/razdel4';
-import { RAZDEL_5 } from '../../zadanie3/razdel5';
-import { RAZDEL_6 } from '../../zadanie3/razdel6';
-import { RAZDEL_7 } from '../../zadanie3/razdel7';
 import { type Prototype } from '../../zadanie3/types';
 import { type Model } from '../model';
 import { SECTION8 } from './section8';
@@ -32,32 +28,11 @@ function firstDrawing(prototype: Prototype): Model {
   return prototype.chertezh(first.params);
 }
 
-const SECTION1: Record<string, Model> = Object.fromEntries(
-  RAZDEL_1.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION2: Record<string, Model> = Object.fromEntries(
-  RAZDEL_2.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION3: Record<string, Model> = Object.fromEntries(
-  RAZDEL_3.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION4: Record<string, Model> = Object.fromEntries(
-  RAZDEL_4.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION5: Record<string, Model> = Object.fromEntries(
-  RAZDEL_5.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION6: Record<string, Model> = Object.fromEntries(
-  RAZDEL_6.map((prototype) => [prototype.id, firstDrawing(prototype)]),
-);
-
-const SECTION7: Record<string, Model> = Object.fromEntries(
-  RAZDEL_7.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+/** Чертежи всех собранных разделов: id прототипа — его чертёж. */
+const SECTIONS: Record<string, Model> = Object.fromEntries(
+  RAZDELY.flatMap((razdel) =>
+    razdel.prototipy.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+  ),
 );
 
 /** Прототипы, у которых числа стоят на самом чертеже. */
@@ -65,13 +40,7 @@ const WITH_NUMBERS = ['P03-05', 'P03-11'];
 
 /** Чертёж прототипа по его id. */
 export const PROTOTYPE_DRAWINGS: Record<string, Model> = {
-  ...SECTION1,
-  ...SECTION2,
-  ...SECTION3,
-  ...SECTION4,
-  ...SECTION5,
-  ...SECTION6,
-  ...SECTION7,
+  ...SECTIONS,
   ...SECTION8,
 };
 
