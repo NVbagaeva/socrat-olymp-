@@ -45,6 +45,12 @@ jobs:
         working-directory: app
         run: pnpm install --frozen-lockfile
 
+      # Банк задания №3: 190 вариантов, у каждого ответ считается
+      # дважды — по формуле прототипа и по трёхмерной модели.
+      - name: Проверить банк задания №3
+        working-directory: app
+        run: pnpm test:zadanie3
+
       # next.config.ts собран с output: 'export' — результат в app/out.
       # Здесь же отрабатывает ESLint: именно этот шаг ловит ошибки кода.
       - name: Собрать статический экспорт

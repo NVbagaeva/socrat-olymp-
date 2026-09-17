@@ -3,10 +3,10 @@
  * (объём). Это единственные прототипы, где числа стоят на самом
  * чертеже, поэтому у каждого варианта чертёж свой.
  *
- * Тело — призма над ступенчатым профилем, вытянутая в глубину. Профиль
- * и подписи взяты из чертежей домашней работы: ширина основания,
- * высокая и низкая высоты, ширина нижней части, высота ступени
- * и глубина. Никакие числа не придуманы.
+ * Тело — призма над ступенчатым профилем, вытянутая в глубину. Здесь
+ * только сборщик: сами профили вариантов лежат в данных прототипов
+ * (zadanie3/razdel1/stupeni.ts), чтобы числа не оказались в двух
+ * местах сразу.
  */
 
 import { type Measure, type Model, type Polyhedron } from '../model';
@@ -43,7 +43,7 @@ function profile(step: Step): [number, number][] {
  * по двумерной нормали ребра: тело невыпуклое, и по центру
  * ориентацию определить нельзя.
  */
-function stepBody(step: Step): Polyhedron {
+export function stepBody(step: Step): Polyhedron {
   const flat = profile(step);
   const n = flat.length;
   const vertices: Vec3[] = [
@@ -85,7 +85,7 @@ function stepMeasures(step: Step): Measure[] {
   ];
 }
 
-function stepModel(alt: string, step: Step): Model {
+export function stepModel(alt: string, step: Step): Model {
   return {
     alt,
     view: 'cabinet',
@@ -95,47 +95,10 @@ function stepModel(alt: string, step: Step): Model {
 }
 
 /** Описание для голосового доступа. */
-function stepAlt(step: Step): string {
+export function stepAlt(step: Step): string {
   const { W, H, w, h, depth } = step;
   return (
     `Ступенчатый многогранник, все двугранные углы прямые: ширина ${W}, глубина ${depth}, ` +
     `высокая часть шириной ${w} и высотой ${H}, низкая часть шириной ${W - w} и высотой ${h}`
   );
 }
-
-/* Шесть чисел каждого варианта — с чертежей домашней работы. */
-const SURFACE: Step[] = [
-  { W: 5, H: 3, w: 2, h: 2, depth: 4 },
-  { W: 4, H: 4, w: 2, h: 3, depth: 4 },
-  { W: 7, H: 5, w: 2, h: 3, depth: 3 },
-  { W: 6, H: 4, w: 3, h: 3, depth: 4 },
-  { W: 6, H: 3, w: 4, h: 2, depth: 5 },
-];
-
-const VOLUME: Step[] = [
-  { W: 6, H: 4, w: 4, h: 2, depth: 3 },
-  { W: 7, H: 6, w: 2, h: 5, depth: 3 },
-  { W: 5, H: 4, w: 3, h: 2, depth: 2 },
-  { W: 8, H: 4, w: 3, h: 2, depth: 3 },
-  { W: 5, H: 6, w: 3, h: 2, depth: 2 },
-];
-
-/** Первый вариант каждого прототипа — тот, что попадает в список 91. */
-export const STEPS: Record<string, Model> = {
-  'P03-05': stepModel(stepAlt(at(SURFACE, 0)), at(SURFACE, 0)),
-  'P03-11': stepModel(stepAlt(at(VOLUME, 0)), at(VOLUME, 0)),
-};
-
-/** Остальные варианты: у каждого свой чертёж со своими числами. */
-export const STEP_VARIANTS: { id: string; variant: number; model: Model }[] = [
-  ...SURFACE.map((step, index) => ({
-    id: 'P03-05',
-    variant: index + 1,
-    model: stepModel(stepAlt(step), step),
-  })),
-  ...VOLUME.map((step, index) => ({
-    id: 'P03-11',
-    variant: index + 1,
-    model: stepModel(stepAlt(step), step),
-  })),
-];
