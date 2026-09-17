@@ -51,13 +51,14 @@ jobs:
       - name: Посмотреть живой сайт
         run: |
           for u in \
-            https://budetege.ru/zadaniya/12/linear/trenazher/value/ \
-            https://budetege.ru/ ; do
-            echo "=== $u"
-            curl -sI "$u" | grep -iE 'HTTP/|cache-control|expires|last-modified' || true
+            https://budetege.ru/ege/3/ \
+            https://budetege.ru/ege/3/index.html \
+            https://budetege.ru/dz_stereometria_3.html \
+            https://budetege.ru/ege/ \
+            https://budetege.ru/zadaniya/3/ ; do
+            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
+            echo "$code  $(wc -c < /tmp/p.html) байт  $u  title: $(grep -o '<title>[^<]*' /tmp/p.html | head -1 | cut -c8-)"
           done
-          echo "=== сам .htaccess отдаётся наружу?"
-          curl -s -o /dev/null -w 'код ответа: %{http_code}\n' https://budetege.ru/.htaccess
 
       - name: Положить сборку в служебную ветку
         run: |
