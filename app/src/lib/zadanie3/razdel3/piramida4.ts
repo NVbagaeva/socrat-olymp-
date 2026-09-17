@@ -8,6 +8,7 @@
  */
 
 import { regularPyramidByEdge, point } from './common';
+import { solveBySearch } from '../search';
 import { distance } from '../../solid/measure';
 import { shapeHeightDiagonals, NAMES4 } from './drawings';
 import { ru } from '../format';
@@ -26,6 +27,20 @@ function variant(
 }
 
 const ALT = `Правильная четырёхугольная пирамида ${NAMES4}, O — центр основания, показаны высота SO и диагонали AC и BD`;
+
+/** Сторона квадрата, у которого настоящая диагональ BD равна bd: подбором, не через √2. */
+function sideByDiagonal(bd: number): number {
+  return solveBySearch(bd, (side) => {
+    const body = regularPyramidByEdge(4, side, 1);
+    return distance(point(body, 'B'), point(body, 'D'));
+  });
+}
+
+/** Настоящее боковое ребро пирамиды со стороной side и высотой h. */
+function lateralEdge(side: number, h: number): number {
+  const body = regularPyramidByEdge(4, side, h);
+  return distance(point(body, 'S'), point(body, 'A'));
+}
 
 /* ── P03-41. Высота SO по боковому ребру и диагонали ────────────── */
 
@@ -50,13 +65,10 @@ export const P03_41: Prototype = {
   },
 
   poModeli: (p) => {
-    /* Сторона квадрата из диагонали и настоящая, независимо посчитанная
-       высота — строим пирамиду и меряем расстояние S от центра базы. */
-    const side = num(p, 'bd') / Math.SQRT2;
-    const half = num(p, 'bd') / 2;
-    const h = Math.sqrt(num(p, 'sd') * num(p, 'sd') - half * half);
-    const body = regularPyramidByEdge(4, side, h);
-    return distance(point(body, 'S'), [0, 0, 0]);
+    /* Без корня: сторона подбирается по настоящей диагонали, высота —
+       по настоящему боковому ребру, обе — измерением на модели. */
+    const side = sideByDiagonal(num(p, 'bd'));
+    return solveBySearch(num(p, 'sd'), (h) => lateralEdge(side, h));
   },
 
   chertezh: () => shapeHeightDiagonals(ALT),
@@ -112,9 +124,8 @@ export const P03_42: Prototype = {
   },
 
   poModeli: (p) => {
-    const side = num(p, 'bd') / Math.SQRT2;
-    const body = regularPyramidByEdge(4, side, num(p, 'so'));
-    return distance(point(body, 'S'), point(body, 'A'));
+    const side = sideByDiagonal(num(p, 'bd'));
+    return lateralEdge(side, num(p, 'so'));
   },
 
   chertezh: () => shapeHeightDiagonals(ALT),
@@ -170,10 +181,12 @@ export const P03_43: Prototype = {
   },
 
   poModeli: (p) => {
-    const half = Math.sqrt(num(p, 'edge_v') * num(p, 'edge_v') - num(p, 'so') * num(p, 'so'));
-    const side = (2 * half) / Math.SQRT2;
-    const body = regularPyramidByEdge(4, side, num(p, 'so'));
-    return 2 * distance(point(body, 'A'), [0, 0, 0]);
+    /* Сторона подбирается так, чтобы настоящее боковое ребро стало
+       равным данному; диагональ потом просто меряется. */
+    const so = num(p, 'so');
+    const side = solveBySearch(num(p, 'edge_v'), (x) => lateralEdge(x, so));
+    const body = regularPyramidByEdge(4, side, so);
+    return distance(point(body, 'A'), point(body, 'C'));
   },
 
   chertezh: () => shapeHeightDiagonals(ALT),

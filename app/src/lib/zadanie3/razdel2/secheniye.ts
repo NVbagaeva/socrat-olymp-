@@ -16,6 +16,7 @@
 import { prism, vertex } from '../../solid/figures';
 import { hullVolume, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { midlineCutModel } from './drawings';
+import { solveBySearch } from '../search';
 import { ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
@@ -156,7 +157,12 @@ export const P03_25: Prototype = {
 
   dopustimo: (p) => num(p, 's') > 0,
   otvet: (p) => 2 * num(p, 's'),
-  poModeli: (p) => fullLateralArea((2 * num(p, 's')) / PERIMETER),
+  poModeli: (p) => {
+    /* Высота подбирается по настоящей боковой поверхности отсечённой
+       части, полная считается по граням — удвоения нигде нет. */
+    const h = solveBySearch(num(p, 's'), cutLateralArea);
+    return fullLateralArea(h);
+  },
 
   chertezh: () => midlineCutModel(MIDLINE_ALT),
 
@@ -246,7 +252,11 @@ export const P03_27: Prototype = {
 
   dopustimo: (p) => num(p, 'v') > 0,
   otvet: (p) => 4 * num(p, 'v'),
-  poModeli: (p) => polyhedronVolume(canonicalPrism((4 * num(p, 'v')) / AREA)),
+  poModeli: (p) => {
+    /* Высота подбирается по настоящему объёму отсечённой части. */
+    const h = solveBySearch(num(p, 'v'), cutVolume);
+    return polyhedronVolume(canonicalPrism(h));
+  },
 
   chertezh: () => midlineCutModel(MIDLINE_ALT),
 

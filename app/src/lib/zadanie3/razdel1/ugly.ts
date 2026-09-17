@@ -15,6 +15,8 @@ import { type Vec3, sub } from '../../solid/vec';
 import { ru, segment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair } from '../types';
 import { boxOf, directionOf } from './common';
+import { distance } from '../../solid/measure';
+import { solveBySearch } from '../search';
 
 function variant(
   n: number,
@@ -193,10 +195,13 @@ export const P03_08: Prototype = {
 
 /**
  * Высота призмы из условия «диагональ равна k рёбрам основания»:
- * 2a² + h² = k²a², значит h = a√(k² − 2).
+ * подбором, пока настоящая диагональ BD₁ модели не станет равна k·a.
  */
 function prismHeight(a: number, k: number): number {
-  return a * Math.sqrt(k * k - 2);
+  return solveBySearch(k * a, (h) => {
+    const body = boxOf(a, a, h);
+    return distance(vertex(body, 'B'), vertex(body, 'D1'));
+  });
 }
 
 export const P03_09: Prototype = {

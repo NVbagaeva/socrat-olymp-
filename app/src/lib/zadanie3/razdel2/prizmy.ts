@@ -8,6 +8,7 @@ import { shapeLeg } from './drawings';
 import { ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { legPrismBody } from './common';
+import { solveBySearch } from '../search';
 
 function variant(
   n: number,
@@ -125,8 +126,8 @@ export const P03_21: Prototype = {
 
   poModeli: (p) => {
     const [a, b] = legs(p);
-    const h = (2 * num(p, 'V')) / (a * b);
-    return polyhedronVolume(legPrismBody(a, b, h)) / ((a * b) / 2);
+    /* Высота подбирается, пока настоящий объём призмы не совпадёт с данным. */
+    return solveBySearch(num(p, 'V'), (h) => polyhedronVolume(legPrismBody(a, b, h)));
   },
 
   chertezh: () =>

@@ -68,25 +68,4 @@ export function apex(h: number): Vec3 {
   return [0, 0, h];
 }
 
-/**
- * Найти x ≥ 0, при котором f(x) = target, простым делением пополам.
- * Используется там, где формула ответа — короткая алгебра с корнем:
- * бисекция ищет то же число, но без формулы вообще, только через
- * измерение расстояния в реальных координатах на каждом шаге.
- */
-export function solveBySearch(target: number, f: (x: number) => number): number {
-  let lo = 0;
-  let hi = 1;
-  while (f(hi) < target) {
-    hi *= 2;
-  }
-  for (let i = 0; i < 60; i += 1) {
-    const mid = (lo + hi) / 2;
-    if (f(mid) < target) {
-      lo = mid;
-    } else {
-      hi = mid;
-    }
-  }
-  return (lo + hi) / 2;
-}
+export { solveBySearch } from '../search';
