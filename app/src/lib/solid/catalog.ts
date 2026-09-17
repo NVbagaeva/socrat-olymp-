@@ -260,7 +260,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_3ug_naklonnaya',
     title: 'Наклонная треугольная призма',
     build: () => {
-      const body = prism(regularPolygon(3, 2.6, 0, polygonStart(3)), [1.6, 0.6, 4]);
+      const body = prism(regularPolygon(3, 2.6, 0, polygonStart(3)), [1.2, 0.5, 4]);
       return { alt: polyAlt('Наклонная треугольная призма', body), bodies: [body] };
     },
   },
@@ -307,6 +307,8 @@ const PRISMS: CatalogEntry[] = [
     name: 'parallelepiped_naklonnyi',
     title: 'Наклонный параллелепипед',
     build: () => {
+      /* Наклон боковых рёбер вправо и чуть в глубину: на чертеже они
+         уходят вверх круче, чем рёбра глубины, и не сливаются с ними. */
       const body = prism(
         [
           [0, 0, 0],
@@ -314,7 +316,7 @@ const PRISMS: CatalogEntry[] = [
           [5, 3, 0],
           [0, 3, 0],
         ],
-        [1.8, 0.7, 3.2],
+        [1.3, 0.5, 3.4],
       );
       return { alt: polyAlt('Наклонный параллелепипед', body), bodies: [body] };
     },
@@ -372,7 +374,9 @@ const PRISMS: CatalogEntry[] = [
     title: 'Усечённая треугольная призма',
     build: () => {
       const base = regularPolygon(3, 2.6, 0, polygonStart(3));
-      const heights = [4.4, 2.6, 3.6];
+      /* Секущая плоскость наклонена к основанию примерно на 13°:
+         в банке прототипов усечённой призмы нет, наклон витринный. */
+      const heights = [4.0, 3.3, 4.4];
       const top = base.map((p, k): Vec3 => [p[0], p[1], heights[k] ?? 3]);
       const vertices = [...base, ...top];
       const faces = [
@@ -428,6 +432,7 @@ const REVOLUTION: CatalogEntry[] = [
         lines: [
           { a: O, b: O1 },
           { a: O, b: A, label: 'r' },
+          { a: O1, b: A1 },
           { a: A, b: A1, label: 'l' },
         ],
         angles: [{ at: O, u: dir(O, A), v: UP }],
