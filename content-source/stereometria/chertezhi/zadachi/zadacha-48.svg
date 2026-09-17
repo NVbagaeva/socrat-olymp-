@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="130 34 740 911" width="504" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+<rect x="160.0" y="180.0" width="680.0" height="620.0" fill="#E7F3EB"/>
+<path d="M 160.0 800.0 A 340.0 115.6 0 1 0 840.0 800.0 A 340.0 115.6 0 1 0 160.0 800.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 160.0 180.0 A 340.0 115.6 0 1 0 840.0 180.0 A 340.0 115.6 0 1 0 160.0 180.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 840.0 800.0 A 340.0 115.6 0 0 1 160.0 800.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 800.0 A 340.0 115.6 0 0 1 840.0 800.0" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="160.0" y1="180.0" x2="160.0" y2="800.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="840.0" y1="180.0" x2="840.0" y2="800.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 180.0 A 340.0 115.6 0 0 1 840.0 180.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 160.0 180.0 A 340.0 115.6 0 0 0 840.0 180.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="160.0" y1="800.0" x2="840.0" y2="800.0" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<line x1="840.0" y1="800.0" x2="695.0" y2="894.7" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<line x1="160.0" y1="800.0" x2="695.0" y2="894.7" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<line x1="160.0" y1="180.0" x2="840.0" y2="180.0" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<line x1="840.0" y1="180.0" x2="695.0" y2="274.7" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<line x1="160.0" y1="180.0" x2="695.0" y2="274.7" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/>
+<polyline points="655.6,267.7 689.1,245.8 728.5,252.8" fill="none" stroke="#C2410C" stroke-width="5.7"/>
+<line x1="695.0" y1="894.7" x2="695.0" y2="274.7" stroke="#C2410C" stroke-width="7.1" stroke-linecap="round"/></svg>

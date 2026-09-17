@@ -1,0 +1,15 @@
+/* solid/solid.css — чертёж стереометрии на странице.
+   Цвета внутри SVG берутся из токенов (--solid-*, --graph-accent,
+   --color-text); здесь только размещение. */
+
+.solid-wrap {
+  display: block;
+  max-width: 100%;
+}
+
+.solid-wrap .solid {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 360px;
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="70 50 860 916" width="582" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+<path d="M 107.2 774.3 L 500.0 80.0 L 892.8 774.3 A 400.0 136.0 0 0 1 107.2 774.3 Z" fill="#E7F3EB"/>
+<path d="M 100.0 800.0 A 400.0 136.0 0 1 0 900.0 800.0 A 400.0 136.0 0 1 0 100.0 800.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 892.8 774.3 A 400.0 136.0 0 1 1 107.2 774.3" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 107.2 774.3 A 400.0 136.0 0 0 1 892.8 774.3" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="500.0" y1="80.0" x2="107.2" y2="774.3" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="500.0" y1="80.0" x2="892.8" y2="774.3" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="500.0" y1="80.0" x2="500.0" y2="800.0" stroke="#C2410C" stroke-width="7.1" stroke-dasharray="22.8 18.5" stroke-linecap="round"/>
+<circle cx="500.0" cy="800.0" r="7.4" fill="#C2410C" stroke="#fff" stroke-width="2.6"/></svg>

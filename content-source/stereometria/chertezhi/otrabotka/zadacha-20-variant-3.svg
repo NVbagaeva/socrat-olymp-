@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1.378 1.931" class="fig" role="img" width="442" height="620">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+
+<polygon points="0.189,1.742 1.189,1.742 1.189,0.492 0.962,0.189 0.189,0.492" fill="#E7F3EB" stroke="none"/>
+<line x1="1.189" y1="1.742" x2="0.962" y2="1.439" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.009" stroke-dasharray="0.036 0.026"/>
+<line x1="0.189" y1="1.742" x2="0.962" y2="1.439" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.009" stroke-dasharray="0.036 0.026"/>
+<line x1="0.962" y1="1.439" x2="0.962" y2="0.189" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#8CC6A3" stroke-width="0.009" stroke-dasharray="0.036 0.026"/>
+<line x1="0.962" y1="1.439" x2="0.189" y2="0.492" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#C2410C" stroke-width="0.007" stroke-dasharray="0.022 0.020"/>
+<line x1="1.189" y1="1.742" x2="0.189" y2="0.492" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#C2410C" stroke-width="0.007"/>
+<line x1="0.189" y1="1.742" x2="1.189" y2="1.742" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<line x1="0.189" y1="0.492" x2="1.189" y2="0.492" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<line x1="1.189" y1="0.492" x2="0.962" y2="0.189" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<line x1="0.189" y1="0.492" x2="0.962" y2="0.189" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<line x1="1.189" y1="1.742" x2="1.189" y2="0.492" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<line x1="0.189" y1="1.742" x2="0.189" y2="0.492" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#1B7A3E" stroke-width="0.010"/>
+<circle cx="0.189" cy="1.742" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<circle cx="1.189" cy="1.742" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<circle cx="0.962" cy="1.439" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<circle cx="0.189" cy="0.492" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<circle cx="1.189" cy="0.492" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<circle cx="0.962" cy="0.189" r="0.015" fill="#14532D" stroke="#fff" stroke-width="0.008"/>
+<text x="0.127" y="1.816" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">A</text>
+<text x="1.237" y="1.825" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">B</text>
+<text x="0.920" y="1.553" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">C</text>
+<text x="0.100" y="0.403" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">A<tspan font-size="0.061" dy="0.028" font-style="normal">1</tspan></text>
+<text x="1.270" y="0.395" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">B<tspan font-size="0.061" dy="0.028" font-style="normal">1</tspan></text>
+<text x="0.994" y="0.067" font-size="0.099" fill="#14231A" text-anchor="middle" dominant-baseline="central" class="lbl">C<tspan font-size="0.061" dy="0.028" font-style="normal">1</tspan></text>
+</svg>

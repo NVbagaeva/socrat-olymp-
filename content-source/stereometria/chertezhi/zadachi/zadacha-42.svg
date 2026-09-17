@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 102 920 836" width="620" height="563">
+<style>
+  text{font-family:Lora,Georgia,"Times New Roman",serif}
+  .lbl{font-style:italic;font-weight:700}
+</style>
+<rect x="60.0" y="180.0" width="280.0" height="640.0" fill="#E7F3EB"/>
+<path d="M 60.0 820.0 A 140.0 47.6 0 1 0 340.0 820.0 A 140.0 47.6 0 1 0 60.0 820.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 60.0 180.0 A 140.0 47.6 0 1 0 340.0 180.0 A 140.0 47.6 0 1 0 60.0 180.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 340.0 820.0 A 140.0 47.6 0 0 1 60.0 820.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 60.0 820.0 A 140.0 47.6 0 0 1 340.0 820.0" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="60.0" y1="180.0" x2="60.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="340.0" y1="180.0" x2="340.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 60.0 180.0 A 140.0 47.6 0 0 1 340.0 180.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 60.0 180.0 A 140.0 47.6 0 0 0 340.0 180.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<rect x="400.0" y="570.0" width="520.0" height="250.0" fill="#E7F3EB"/>
+<path d="M 400.0 820.0 A 260.0 88.4 0 1 0 920.0 820.0 A 260.0 88.4 0 1 0 400.0 820.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 400.0 570.0 A 260.0 88.4 0 1 0 920.0 570.0 A 260.0 88.4 0 1 0 400.0 570.0" fill="#E7F3EB" fill-opacity="1"/>
+<path d="M 920.0 820.0 A 260.0 88.4 0 0 1 400.0 820.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 400.0 820.0 A 260.0 88.4 0 0 1 920.0 820.0" fill="none" stroke="#8CC6A3" stroke-width="8.9" stroke-dasharray="37.4 26.7" stroke-linecap="round"/>
+<line x1="400.0" y1="570.0" x2="400.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<line x1="920.0" y1="570.0" x2="920.0" y2="820.0" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 400.0 570.0 A 260.0 88.4 0 0 1 920.0 570.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/>
+<path d="M 400.0 570.0 A 260.0 88.4 0 0 0 920.0 570.0" fill="none" stroke="#1B7A3E" stroke-width="9.8" stroke-linecap="round"/></svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<title>Пирамида, вписанная в конус</title>
+<polygon points="267.2,669.7 500.0,128.0 732.8,669.7 732.8,837.3 267.2,837.3" fill="#1B7A3E" fill-opacity="0.09" stroke="none"/>
+<path d="M 170.8 753.5 A 329.2 118.5 0 0 1 829.2 753.5" fill="none" stroke="#8CC6A3" stroke-width="4" stroke-dasharray="18,12" stroke-linecap="round"/>
+<path d="M 170.8 753.5 A 329.2 118.5 0 0 0 829.2 753.5" fill="none" stroke="#1B7A3E" stroke-width="4" stroke-linecap="round"/>
+<line x1="170.8" y1="753.5" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="4"/>
+<line x1="829.2" y1="753.5" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="4"/>
+<line x1="732.8" y1="669.7" x2="267.2" y2="669.7" stroke="#8CC6A3" stroke-width="6" stroke-dasharray="18,12" stroke-linecap="round"/>
+<line x1="267.2" y1="837.3" x2="732.8" y2="837.3" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="267.2" y1="837.3" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="732.8" y1="837.3" x2="732.8" y2="669.7" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="732.8" y1="837.3" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="732.8" y1="669.7" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="267.2" y1="669.7" x2="267.2" y2="837.3" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="267.2" y1="669.7" x2="500.0" y2="128.0" stroke="#1B7A3E" stroke-width="6" stroke-linecap="round"/>
+<line x1="500.0" y1="128.0" x2="500.0" y2="753.5" stroke="#E07A2F" stroke-width="4" stroke-dasharray="14,10" stroke-linecap="round"/>
+<circle cx="267.2" cy="837.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="732.8" cy="837.3" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="732.8" cy="669.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="267.2" cy="669.7" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="753.5" r="7.2" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<circle cx="500.0" cy="128.0" r="9" fill="#14532D" stroke="#fff" stroke-width="2.5"/>
+<text x="217.0" y="901.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">A</text>
+<text x="783.0" y="901.7" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">B</text>
+<text x="760.1" y="752.1" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">C</text>
+<text x="187.7" y="679.5" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">D</text>
+<text x="500.0" y="87.2" font-family="Lora, Georgia, serif" font-weight="700" font-size="68" fill="#14231A" text-anchor="middle">S</text>
+<text x="526.4" y="816.4" font-family="Lora, Georgia, serif" font-weight="700" font-size="54" fill="#14231A" text-anchor="middle">O</text>
+</svg>
