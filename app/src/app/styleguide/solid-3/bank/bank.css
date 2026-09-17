@@ -1,0 +1,136 @@
+/* Витрина банка чертежей задания №3. Служебная страница: в меню
+   не входит, не индексируется. */
+
+.bank {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.bank__lead {
+  max-width: 76ch;
+  color: var(--color-text-secondary);
+}
+
+.bank__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.bank__counts b {
+  color: var(--color-text);
+}
+
+.bank__section {
+  margin-top: var(--space-10);
+}
+
+.bank__section-title {
+  margin-bottom: var(--space-4);
+}
+
+.bank__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 760px) {
+  .bank__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1160px) {
+  .bank__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.bank__card {
+  min-width: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.bank__id {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bank__name {
+  margin: 2px 0 var(--space-2);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bank__cond {
+  margin: 0 0 var(--space-3);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-tertiary);
+}
+
+.bank__fig .solid {
+  max-width: none;
+  margin: 0 auto;
+}
+
+.bank__alt {
+  margin: var(--space-2) 0 0;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+/* Таблица чек-листа */
+.bank__table-wrap {
+  overflow-x: auto;
+}
+
+.bank__table {
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 720px;
+}
+
+.bank__table th,
+.bank__table td {
+  border: 1px solid var(--color-border-strong);
+  padding: 3px 6px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.bank__table th {
+  background: var(--color-surface-2);
+  font-weight: 600;
+}
+
+.bank__table td.yes {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.bank__table td.no {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.bank__legend {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

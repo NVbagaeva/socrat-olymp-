@@ -530,6 +530,10 @@ function buildScene(model: Model): Scene {
     });
   });
 
+  (model.notes ?? []).forEach((note) => {
+    scene.labels.push({ p: view.project(note.p), text: note.text, kind: 'aux' });
+  });
+
   (model.angles ?? []).forEach((angle) => {
     const o = view.project(angle.at);
     const u = view.project(add(angle.at, normalize(angle.u)));
@@ -913,6 +917,36 @@ export function renderSolid(model: Model): string {
     `width="${px(width)}" height="${px(height)}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );
+}
+
+/**
+ * Диагностика чертежа: та же сцена в пикселях, что уходит в SVG,
+ * плюс расставленные подписи. Нужна проверяльщику чертежей, чтобы
+ * измерять зазоры и не пересчитывать геометрию заново.
+ */
+export interface SolidDiagnostics {
+  strokes: { points: Vec2[]; role: Role; visible: boolean }[];
+  labels: { x: number; y: number; w: number; h: number; text: string; kind: string }[];
+  dots: Vec2[];
+  angles: number;
+  fills: number;
+  width: number;
+  height: number;
+}
+
+export function solidDiagnostics(model: Model): SolidDiagnostics {
+  const scene = toPixels(buildScene(model));
+  const labels = placeLabels(scene);
+  const box = boxOf([...scene.strokes.flatMap((s) => s.points), ...scene.dots]);
+  return {
+    strokes: scene.strokes.map((s) => ({ points: s.points, role: s.role, visible: s.visible })),
+    labels: labels.map((l) => ({ x: l.x, y: l.y, w: l.w, h: l.h, text: l.text, kind: l.kind })),
+    dots: scene.dots,
+    angles: scene.angles.length,
+    fills: scene.fills.length,
+    width: box.maxX - box.minX,
+    height: box.maxY - box.minY,
+  };
 }
 
 export { THEME as SOLID_THEME };
