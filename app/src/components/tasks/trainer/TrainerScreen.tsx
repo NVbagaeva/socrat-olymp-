@@ -1,16 +1,21 @@
 'use client';
 
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
-import type { TrainerStep, TrainerTask } from '@/lib/trainer';
+import { TRAINER_ROUND, type TrainerStep, type TrainerTask } from '@/lib/trainer';
+import { trainerKindTitle } from '@/content/trainerModes';
+import { recordAttempt } from '@/lib/trainerProgress';
+import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from './TrainerResult';
 
 export interface TrainerScreenProps {
-  /** Десять заданий подхода, собранные на сборке. */
-  tasks: TrainerTask[];
+  /** Все задания режима: подход собирается из них в браузере. */
+  pool: TrainerTask[];
+  /** Под каким именем помнить подход: у каждого режима свой. */
+  roundKey: string;
   /** Куда ведёт кнопка с итогового экрана. */
   backHref: string;
 }
@@ -36,7 +41,26 @@ const VERDICT = {
  * Все задания подхода приходят готовыми пропсами и живут на одном
  * экране: смена задания — это состояние, а не переход по адресу.
  */
-export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
+export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) {
+  /* Типы заданий пула: по ним подход раскладывается так, чтобы
+     одинаковые не шли подряд. Абсцисса и ордината — один тип. */
+  const kinds = useMemo(
+    () => pool.map((item) => trainerKindTitle[item.kind] ?? item.kind),
+    [pool],
+  );
+  const build = useCallback(() => pickRound(kinds, TRAINER_ROUND), [kinds]);
+  const order = useRound(roundKey, build);
+  /* Пока подход не собран — на сервере и при гидратации — показываем
+     начало пула: экран не мигает пустотой, а через мгновение браузер
+     отдаёт разложенный подход. */
+  const tasks = useMemo(
+    () =>
+      order.length === 0
+        ? pool.slice(0, TRAINER_ROUND)
+        : order.map((at) => pool[at]).filter((item): item is TrainerTask => item !== undefined),
+    [order, pool],
+  );
+
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
@@ -58,11 +82,28 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
   const [result, setResult] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const startedAt = useRef<number | null>(null);
+  const taskStartedAt = useRef<number | null>(null);
 
   function startClock() {
+    const now = Date.now();
     if (startedAt.current === null) {
-      startedAt.current = Date.now();
+      startedAt.current = now;
     }
+    if (taskStartedAt.current === null) {
+      taskStartedAt.current = now;
+    }
+  }
+
+  /** Сколько секунд ушло на текущее задание. */
+  function taskSeconds(): number {
+    const from = taskStartedAt.current;
+    return from === null ? 0 : (Date.now() - from) / 1000;
+  }
+
+  /* Закрытое задание уходит в хранилище: счётчики вкладки считаются
+     оттуда и обновляются сразу, без перезагрузки. */
+  function remember(item: TrainerTask, right: boolean) {
+    recordAttempt({ kind: item.kind, taskId: item.id, right, seconds: taskSeconds() });
   }
 
   function stopClock() {
@@ -104,6 +145,7 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
+      remember(task, true);
       if (last) {
         stopClock();
       }
@@ -138,6 +180,7 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
     if (step + 1 >= steps.length) {
       /* Задача пройдена по шагам: в верных она не числится. */
       setMarks({ ...marks, [index]: 'hinted' });
+      remember(task, false);
       if (last) {
         stopClock();
       }
@@ -145,6 +188,7 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
   }
 
   function next() {
+    taskStartedAt.current = null;
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -160,6 +204,24 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
     <Button onClick={next}>Следующее задание →</Button>
   );
 
+  function again() {
+    /* Новый подход: другие задания и другой порядок. */
+    restartRound(roundKey);
+    setResult(false);
+    setIndex(0);
+    setValue('');
+    setChecked(null);
+    setMarks({});
+    setMisses(0);
+    setSeconds(0);
+    setHint(false);
+    setStep(0);
+    setFields({});
+    setStepMark(null);
+    startedAt.current = null;
+    taskStartedAt.current = null;
+  }
+
   if (result) {
     return (
       <TrainerResult
@@ -168,6 +230,7 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
         misses={misses}
         seconds={seconds}
         backHref={backHref}
+        onAgain={again}
       />
     );
   }
@@ -175,7 +238,7 @@ export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
   return (
     <section className="ttask">
       <p className="ttask__count">
-        Задание <b>{task.no}</b> из {total}
+        Задание <b>{index + 1}</b> из {total}
       </p>
 
       {/* Полоса подхода: решённое залито зелёным, пройденное

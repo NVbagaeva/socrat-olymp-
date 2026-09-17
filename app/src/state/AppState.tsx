@@ -19,7 +19,7 @@ import {
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
-import { demoProgress, demoStudied, demoTrainerStats } from '@/data/demo';
+import { demoProgress, demoStudied } from '@/data/demo';
 import { persistent } from '@/lib/storage';
 import {
   computeByTaskType,
@@ -130,10 +130,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     store.write({ ...previous, ...make(previous) });
   }, []);
 
-  const statistics = useMemo(
-    () => computeStatistics(saved.attempts, demoTrainerStats),
-    [saved.attempts],
-  );
+  /* Счётчики тренажёра стартуют с нуля: витринных значений в них
+     больше нет, всё считается из того, что решил ученик. */
+  const statistics = useMemo(() => computeStatistics(saved.attempts, null), [saved.attempts]);
 
   const byTaskType = useMemo(
     () => computeByTaskType(saved.attempts, taskTypes.map((type) => type.id)),

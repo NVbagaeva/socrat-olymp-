@@ -23,9 +23,7 @@ export const TRAINER_ROUND = 10;
 
 export interface TrainerTask {
   id: string;
-  /** Номер в подходе, 1…10. */
-  no: number;
-  /** Какого типа задание: в смешанном режиме они разные. */
+  /** Набор движка, из которого пришло задание. */
   kind: string;
   questionHtml: string;
   chartSvg: string | null;
@@ -103,6 +101,11 @@ interface EngineTask {
 
 const MATH_OPEN = /<span class="math" data-tex="([^"]*)"[^>]*>/;
 
+/* Тот же режим, в котором движок набирает формулы в браузере
+   (graph/katex-upgrade.js): без MathML разметка вдвое легче, а её
+   на странице с пулом заданий очень много. */
+const KATEX = { throwOnError: false, output: 'html' as const };
+
 function unescapeTex(value: string): string {
   return value
     .replace(/&lt;/g, '<')
@@ -144,7 +147,7 @@ function typeset(html: string): string {
     }
     const before = rest.slice(0, open.index);
     rest = rest.slice(close + '</span>'.length);
-    const formula = katex.renderToString(unescapeTex(open[1] ?? ''), { throwOnError: false });
+    const formula = katex.renderToString(unescapeTex(open[1] ?? ''), KATEX);
     /* Знак препинания после формулы уезжал на новую строку один.
        Формула и знак идут вместе, одним неразрывным куском. */
     const mark = /^[.,;:!?)]/.exec(rest);
@@ -165,11 +168,6 @@ function typeset(html: string): string {
    подхода решает браузер ученика: перемешивать на сборке нельзя,
    иначе у всех будет один и тот же «случайный» порядок. */
 
-function fromSet(setId: string, take: number): EngineTask[] {
-  const tasks = GraphGenerate.generateSet(setId) as EngineTask[];
-  return tasks.slice(0, take);
-}
-
 /* ── Пояснения к ответу ──────────────────────────────────────────
    Оба текста собираются на сборке из чисел самого задания и приходят
    вместе с ним. Числа набираются KaTeX, как и условие. */
@@ -180,7 +178,7 @@ function tex(value: number): string {
 }
 
 function math(source: string): string {
-  return katex.renderToString(source, { throwOnError: false });
+  return katex.renderToString(source, KATEX);
 }
 
 /** Коэффициент перед x: единица и минус единица не пишутся. */
@@ -478,25 +476,47 @@ function stepsFor(task: EngineTask): TrainerStep[] {
   return last === null ? [] : [stepK(k), stepB(b), stepEquation(k, b), last];
 }
 
-/** Десять заданий подхода для режима. */
-export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
-  const perSet = Math.max(1, Math.round(TRAINER_ROUND / mode.setIds.length));
-  const picked = mode.setIds.flatMap((setId) => fromSet(setId, perSet));
+/* ── Пул заданий режима ──────────────────────────────────────────
 
-  return picked.slice(0, TRAINER_ROUND).map((task, index) => ({
-    id: task.id,
-    no: index + 1,
-    kind: task.meta.set,
-    questionHtml: typeset(task.questionHtml),
-    chartSvg: task.svg,
-    answer: task.answer,
-    wrongHint: hintHtml(WRONG_HINT[task.meta.set] ?? ''),
-    rightHint: rightHintFor(task),
-    steps: stepsFor(task),
-  }));
+   На страницу уходит не подход, а весь пул: десять заданий из него
+   выбирает и раскладывает браузер уже после монтирования. Иначе
+   у всех учеников был бы один и тот же «случайный» порядок.
+
+   Задачи на пересечение берутся из обоих наборов целиком — все
+   сорок. У остальных типов в смешанном режиме пул половинный:
+   страница и так тяжёлая. */
+
+const MIXED_TAKE: Record<string, number> = { '12.A': 10, '12.B': 10 };
+
+function fromSet(setId: string, take: number): EngineTask[] {
+  const tasks = GraphGenerate.generateSet(setId) as EngineTask[];
+  return take >= tasks.length ? tasks : tasks.slice(0, take);
+}
+
+/** Все задания, из которых собирается подход этого режима. */
+export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
+  const mixed = mode.setIds.length > 2;
+  return mode.setIds
+    .flatMap((setId) => fromSet(setId, mixed ? (MIXED_TAKE[setId] ?? 20) : 20))
+    .map((task) => ({
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(WRONG_HINT[task.meta.set] ?? ''),
+      rightHint: rightHintFor(task),
+      steps: stepsFor(task),
+    }));
 }
 
 /** Режим по части адреса. Нужен маршруту и оболочке. */
 export function findMode(id: string): TrainerMode | undefined {
   return trainerModes.find((mode) => mode.id === id);
+}
+
+/** Сколько всего заданий в наборах прототипов: знаменатель счётчика. */
+export function trainerTotal(): number {
+  const sets = prototypes as { tasks?: unknown[] }[];
+  return sets.reduce((sum, set) => sum + (set.tasks?.length ?? 0), 0);
 }

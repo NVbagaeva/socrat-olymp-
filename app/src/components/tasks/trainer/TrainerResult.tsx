@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerResult } from '@/content/trainerModes';
 import type { TrainerTask } from '@/lib/trainer';
 
@@ -15,6 +16,8 @@ export interface TrainerResultProps {
   seconds: number;
   /** Куда ведёт кнопка возврата. */
   backHref: string;
+  /** Собрать новый подход: другие задания и другой порядок. */
+  onAgain: () => void;
 }
 
 /** «5 мин 12 с». Часы не нужны: подход столько не длится. */
@@ -56,7 +59,14 @@ function kindRows(tasks: TrainerTask[], marks: Record<number, TrainerMark>): Kin
  * Считается только то, что ученик сделал сам: задача, пройденная
  * по шагам подсказки, в правильные не идёт и стоит отдельной строкой.
  */
-export function TrainerResult({ tasks, marks, misses, seconds, backHref }: TrainerResultProps) {
+export function TrainerResult({
+  tasks,
+  marks,
+  misses,
+  seconds,
+  backHref,
+  onAgain,
+}: TrainerResultProps) {
   const total = tasks.length;
   const right = tasks.filter((_, index) => marks[index] === 'right').length;
   const hinted = tasks.filter((_, index) => marks[index] === 'hinted').length;
@@ -135,9 +145,12 @@ export function TrainerResult({ tasks, marks, misses, seconds, backHref }: Train
         </ul>
       </section>
 
-      <Link className="btn btn--primary" href={backHref}>
-        {trainerResult.back}
-      </Link>
+      <div className="tdone__actions">
+        <Button onClick={onAgain}>{trainerResult.again}</Button>
+        <Link className="btn btn--ghost" href={backHref}>
+          {trainerResult.back}
+        </Link>
+      </div>
     </section>
   );
 }

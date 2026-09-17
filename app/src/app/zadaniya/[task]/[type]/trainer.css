@@ -636,8 +636,125 @@
   background: var(--color-primary);
 }
 
-/* Кнопке возврата нужен воздух: она закрывает экран, а не
-   продолжает список. */
-.tdone > .btn {
+
+
+/* ── Что сделано в тренажёре ────────────────────────────────── */
+
+.tstats {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tstats__counter {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tstats__counter b {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.tstats__empty {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.tstats__rows {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+}
+.tstats__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.tstats__row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.tstats__row dt {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tstats__row dd {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.tstats__kinds {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 480px;
+}
+.tstats__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tstats__list,
+.tstats__mistakes {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tstats__mistakes li {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+/* Совет держится плашкой: это единственная строка, к которой ученик
+   должен вернуться. */
+.tstats__advice {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+.tstats__advice b {
+  color: var(--color-text-brand);
+}
+
+/* Итоговый экран: две кнопки в ряд. */
+.tdone__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
   margin-top: var(--space-3);
 }

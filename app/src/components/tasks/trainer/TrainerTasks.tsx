@@ -15,5 +15,5 @@ export interface TrainerTasksProps {
  * разметка, как и во вкладке подготовительных задач.
  */
 export function TrainerTasks({ mode, base }: TrainerTasksProps) {
-  return <TrainerScreen tasks={buildTrainerTasks(mode)} backHref={base} />;
+  return <TrainerScreen pool={buildTrainerTasks(mode)} roundKey={mode.id} backHref={base} />;
 }
