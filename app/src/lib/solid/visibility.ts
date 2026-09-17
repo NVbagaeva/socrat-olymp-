@@ -14,8 +14,8 @@
 
 import type { Body, Cone, Cylinder, Polyhedron, Sphere } from './model';
 import { faceIsFlat } from './model';
-import { circlePoint, depth, project } from './project';
-import { type Vec2, type Vec3, add, at, lerp } from './vec';
+import { TOWARD, circlePoint, depth, project, rayPoint } from './project';
+import { type Vec2, type Vec3, add, at, dot, lerp, sub } from './vec';
 
 /** Грань-заслонка: проекция и глубина как линейная функция точки. */
 interface FaceOccluder {
@@ -37,9 +37,9 @@ interface FaceOccluder {
 interface SphereOccluder {
   kind: 'sphere';
   owner: Body;
-  cx: number;
-  cy: number;
-  cd: number;
+  /** Центр и радиус: глубина передней поверхности считается по лучу. */
+  center: Vec3;
+  centerDepth: number;
   r: number;
 }
 
@@ -193,8 +193,13 @@ function coneOccluders(body: Cone): Occluder[] {
 }
 
 function sphereOccluder(body: Sphere): Occluder {
-  const c = project(body.center);
-  return { kind: 'sphere', owner: body, cx: c[0], cy: c[1], cd: depth(body.center), r: body.r };
+  return {
+    kind: 'sphere',
+    owner: body,
+    center: body.center,
+    centerDepth: depth(body.center),
+    r: body.r,
+  };
 }
 
 /** Заслонки всех непрозрачных тел модели. */
@@ -245,10 +250,12 @@ export function hidden(p: Vec3, occluders: readonly Occluder[], eps: number): bo
   const d = depth(p);
   for (const occ of occluders) {
     if (occ.kind === 'sphere') {
-      const dx = q[0] - occ.cx;
-      const dy = q[1] - occ.cy;
-      const rr = occ.r * occ.r - dx * dx - dy * dy;
-      if (rr > 0 && occ.cd + Math.sqrt(rr) > d + eps) {
+      /* Луч через ту же точку чертежа: насколько он проходит мимо
+         центра, настолько ближняя поверхность ближе центра. */
+      const w = sub(occ.center, rayPoint(q));
+      const along = dot(w, TOWARD);
+      const rr = occ.r * occ.r - (dot(w, w) - along * along);
+      if (rr > 0 && occ.centerDepth + Math.sqrt(rr) > d + eps) {
         return true;
       }
       continue;

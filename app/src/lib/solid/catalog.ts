@@ -50,9 +50,9 @@ function pyramidWithHeight(n: number, R: number, h: number, apothem: boolean): M
   const names = namesText(body.names ?? []);
 
   if (apothem) {
-    /* Апофема к переднему ребру: у треугольника и шестиугольника это
-       BC, у четырёхугольника — AB. */
-    const M = n === 4 ? mid(A, B) : mid(B, vertex(body, 'C'));
+    /* Апофема к правому ребру BC: к переднему ребру AB она пошла бы
+       почти по той же линии, что и высота SO, и слилась бы с ней. */
+    const M = mid(B, vertex(body, 'C'));
     return {
       alt: `Правильная пирамида ${names} с высотой SO и апофемой SM`,
       bodies: [body],
@@ -307,8 +307,9 @@ const PRISMS: CatalogEntry[] = [
     name: 'parallelepiped_naklonnyi',
     title: 'Наклонный параллелепипед',
     build: () => {
-      /* Наклон боковых рёбер вправо и чуть в глубину: на чертеже они
-         уходят вверх круче, чем рёбра глубины, и не сливаются с ними. */
+      /* Наклон влево: вправо-вверх на чертеже уже уходит ребро глубины
+         AD, и наклонённые в ту же сторону боковые рёбра слились бы
+         с ним в одну полосу. */
       const body = prism(
         [
           [0, 0, 0],
@@ -316,7 +317,7 @@ const PRISMS: CatalogEntry[] = [
           [5, 3, 0],
           [0, 3, 0],
         ],
-        [1.3, 0.5, 3.4],
+        [-1.6, 0.5, 4],
       );
       return { alt: polyAlt('Наклонный параллелепипед', body), bodies: [body] };
     },
