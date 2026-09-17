@@ -635,3 +635,9 @@
   border-radius: var(--radius-pill);
   background: var(--color-primary);
 }
+
+/* Кнопке возврата нужен воздух: она закрывает экран, а не
+   продолжает список. */
+.tdone > .btn {
+  margin-top: var(--space-3);
+}
