@@ -95,6 +95,12 @@ export interface Section {
   points: Vec3[];
 }
 
+/** Одиночная подпись: площадь основания S, где отрезка нет. */
+export interface Note {
+  p: Vec3;
+  text: string;
+}
+
 /** Число на чертеже: длина ребра. */
 export interface Measure {
   a: Vec3;
@@ -117,6 +123,7 @@ export interface Model {
   angles?: RightAngle[];
   sections?: Section[];
   measures?: Measure[];
+  notes?: Note[];
 }
 
 /* ── Помощники для сборки многогранников ────────────────────────── */

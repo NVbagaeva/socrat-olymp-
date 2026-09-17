@@ -166,7 +166,7 @@
      светлые синие из палитры; вспомогательные построения — --graph-accent. */
   --solid-edge: var(--color-primary);
   --solid-face: var(--blue-100);
-  --solid-liquid: var(--blue-200);
+  --solid-liquid: var(--blue-300);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,
