@@ -51,19 +51,16 @@ jobs:
       - name: Посмотреть живой сайт
         run: |
           for u in \
-            https://budetege.ru/zadaniya/12/linear/podgotovka/ \
-            https://budetege.ru/zadaniya/12/linear/podgotovka/k/ ; do
+            https://budetege.ru/zadaniya/12/linear/trenazher/value/ \
+            https://budetege.ru/zadaniya/12/linear/trenazher/ \
+            https://budetege.ru/ ; do
             echo "=== $u"
-            code=$(curl -s -o /tmp/p.html -w '%{http_code}' "$u")
-            echo "код ответа: $code, размер: $(wc -c < /tmp/p.html)"
-            curl -sI "$u" | grep -i 'last-modified' || true
-            echo "шапка вкладки (prep__title): $(grep -c 'prep__title' /tmp/p.html || true)"
-            echo "ряд чипов (prep__chips): $(grep -c 'prep__chips' /tmp/p.html || true)"
-            echo "экран задачи (ptask__dots): $(grep -c 'ptask__dots' /tmp/p.html || true)"
-            echo "строка счётчика:"; grep -o '<p class="prep__counter">[^<]*<b>[^<]*</b>[^<]*' /tmp/p.html | head -2
-            echo "числа на карточках:"; grep -o 'prep-card__done">[^<]*' /tmp/p.html | head -4
-            echo "витринные 17 из 40: $(grep -c '17</b> из 40' /tmp/p.html || true)"
+            curl -sI "$u" | grep -iE 'HTTP/|cache-control|expires|etag|last-modified|age|server|via|cf-' || true
           done
+          echo "=== файл сборки"
+          f=$(curl -s https://budetege.ru/zadaniya/12/linear/trenazher/value/ | grep -o '/_next/static/chunks/[^"\\]*' | head -1)
+          echo "$f"
+          curl -sI "https://budetege.ru$f" | grep -iE 'HTTP/|cache-control|expires|last-modified' || true
 
       - name: Положить сборку в служебную ветку
         run: |
