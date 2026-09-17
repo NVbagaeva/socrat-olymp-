@@ -234,13 +234,23 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
                 <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
                 <p className="tstep__text" dangerouslySetInnerHTML={{ __html: item.textHtml }} />
 
-                <div className={clsx('tstep__row', item.shape === 'equation' && 'tstep__row--eq')}>
+                <div
+                  className={clsx(
+                    'tstep__row',
+                    item.shape === 'equation' && 'tstep__row--eq',
+                    /* Уравнение двух прямых: четыре поля в строке,
+                       им нужно больше места. */
+                    item.fields.length > 2 && 'tstep__row--wide',
+                  )}
+                >
                   {item.fields.map((field, fieldNo) => (
                     <Fragment key={fieldNo}>
-                      <span
-                        className="tstep__label"
-                        dangerouslySetInnerHTML={{ __html: field.labelHtml }}
-                      />
+                      {field.labelHtml === '' ? null : (
+                        <span
+                          className="tstep__label"
+                          dangerouslySetInnerHTML={{ __html: field.labelHtml }}
+                        />
+                      )}
                       <Input
                         className="tstep__input"
                         value={fieldValue(i, fieldNo)}

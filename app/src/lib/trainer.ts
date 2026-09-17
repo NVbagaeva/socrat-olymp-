@@ -76,6 +76,11 @@ interface EngineCross {
   y: number;
 }
 
+interface EngineLine {
+  k: number;
+  b: number;
+}
+
 interface EngineTask {
   id: string;
   svg: string | null;
@@ -87,7 +92,7 @@ interface EngineTask {
     b: number;
     query: EngineQuery | null;
     intersection: EngineCross | null;
-    lines: { k: number; b: number }[];
+    lines: EngineLine[];
   };
 }
 
@@ -348,13 +353,118 @@ function stepAnswer(task: EngineTask): TrainerStep | null {
   return null;
 }
 
+/* ── Цепочка для двух прямых ─────────────────────────────────────
+
+   Путь тот же, только проделать его нужно дважды: снять k и b
+   у каждой прямой, приравнять правые части и решить уравнение.
+   Где спрашивают ординату, добавляется седьмой шаг. */
+
+/** Имя прямой в заголовке и в тексте: f или g. */
+function curve(name: string): string {
+  return 'y = ' + name + '(x)';
+}
+
+function stepPairK(name: string, k: number, firstOne: boolean): TrainerStep {
+  return {
+    titleHtml: hintHtml('Проверим $k$ для прямой $' + curve(name) + '$.'),
+    textHtml: hintHtml(
+      firstOne
+        ? 'Возьми две отмеченные точки на прямой $' +
+            curve(name) +
+            '$. Посчитай, на сколько клеток она сдвинулась вправо и на сколько вверх. ' +
+            'Тогда $k = \\Delta y : \\Delta x$.'
+        : 'То же самое для второй прямой: две отмеченные точки, сдвиг вправо и вверх, ' +
+            '$k = \\Delta y : \\Delta x$.',
+    ),
+    shape: 'plain',
+    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
+    wrongHint: hintHtml(
+      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
+    ),
+  };
+}
+
+function stepPairB(name: string, b: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Проверим $b$ для прямой $' + curve(name) + '$.'),
+    textHtml: hintHtml(
+      'Коэффициент $b$ — это значение $y$ в точке, где прямая $' +
+        curve(name) +
+        '$ пересекает ось $Oy$.',
+    ),
+    shape: 'plain',
+    fields: [{ labelHtml: math('b ='), answer: plain(b) }],
+    wrongHint: hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.'),
+  };
+}
+
+/* Уравнение собирается из тех же числовых полей: четыре подставленных
+   значения вместо набранного строкой выражения. */
+function stepPairEquation(first: EngineLine, second: EngineLine): TrainerStep {
+  return {
+    titleHtml: hintHtml('Приравняй правые части уравнений.'),
+    textHtml: hintHtml(
+      'В точке пересечения значения функций равны. Подставь найденные $k$ и $b$ в обе части.',
+    ),
+    shape: 'equation',
+    fields: [
+      { labelHtml: '', answer: plain(first.k) },
+      { labelHtml: math('\\cdot x {}+{}'), answer: plain(first.b) },
+      { labelHtml: math('='), answer: plain(second.k) },
+      { labelHtml: math('\\cdot x {}+{}'), answer: plain(second.b) },
+    ],
+    wrongHint: hintHtml('Проверь, те ли $k$ и $b$ ты подставил.'),
+  };
+}
+
+function stepCrossX(x: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Реши уравнение и найди $x$.'),
+    textHtml: hintHtml('Перенеси слагаемые с $x$ в одну часть, числа — в другую.'),
+    shape: 'plain',
+    fields: [{ labelHtml: math('x ='), answer: plain(x) }],
+    wrongHint: hintHtml('Проверь, как перенёс слагаемые.'),
+  };
+}
+
+function stepCrossY(y: number): TrainerStep {
+  return {
+    titleHtml: hintHtml('Найди ординату.'),
+    textHtml: hintHtml('Подставь найденный $x$ в любое из двух уравнений.'),
+    shape: 'plain',
+    fields: [{ labelHtml: math('y ='), answer: plain(y) }],
+    wrongHint: hintHtml('Проверь, как подставил $x$ в уравнение.'),
+  };
+}
+
+function stepsForPair(task: EngineTask): TrainerStep[] {
+  const { set, intersection, lines } = task.meta;
+  const first = lines[0];
+  const second = lines[1];
+  if (intersection === null || first === undefined || second === undefined) {
+    return [];
+  }
+  const steps = [
+    stepPairK('f', first.k, true),
+    stepPairB('f', first.b),
+    stepPairK('g', second.k, false),
+    stepPairB('g', second.b),
+    stepPairEquation(first, second),
+    stepCrossX(intersection.x),
+  ];
+  /* Набор 12.D спрашивает ординату: одного x мало, нужно подставить
+     его обратно в уравнение. */
+  if (set === '12.D') {
+    steps.push(stepCrossY(intersection.y));
+  }
+  return steps;
+}
+
 /** Шаги задания. Пусто — цепочки для этого типа ещё нет. */
 function stepsFor(task: EngineTask): TrainerStep[] {
   const { set, k, b } = task.meta;
-  if (set !== '12.A' && set !== '12.B') {
-    /* Тип 3 идёт следующим шагом работы: пока цепочки у него нет,
-       и кнопки подсказки тоже. */
-    return [];
+  if (set === '12.C' || set === '12.D') {
+    return stepsForPair(task);
   }
   const last = stepAnswer(task);
   return last === null ? [] : [stepK(k), stepB(b), stepEquation(k, b), last];
