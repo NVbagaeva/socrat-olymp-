@@ -23,7 +23,7 @@ import {
   vertex,
 } from './figures';
 import { type Model, type Polyhedron, orientOutward } from './model';
-import { circlePoint } from './project';
+import { ortho } from './project';
 import { type Vec3, add, mid } from './vec';
 
 export interface CatalogEntry {
@@ -251,7 +251,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_3ug_pryamaya',
     title: 'Прямая треугольная призма',
     build: () => {
-      const body = regularPrism(3, 2.6, 4.2);
+      const body = regularPrism(3, 2.6, 4.2, 'cabinet');
       return { alt: polyAlt('Прямая треугольная призма', body), bodies: [body] };
     },
   },
@@ -260,7 +260,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_3ug_naklonnaya',
     title: 'Наклонная треугольная призма',
     build: () => {
-      const body = prism(regularPolygon(3, 2.6, 0, polygonStart(3)), [1.2, 0.5, 4]);
+      const body = prism(regularPolygon(3, 2.6, 0, polygonStart(3, 'cabinet')), [1.2, 0.5, 4]);
       return { alt: polyAlt('Наклонная треугольная призма', body), bodies: [body] };
     },
   },
@@ -269,7 +269,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_4ug_pryamaya',
     title: 'Прямая четырёхугольная призма',
     build: () => {
-      const body = regularPrism(4, 2.7, 4.2);
+      const body = regularPrism(4, 2.7, 4.2, 'cabinet');
       return { alt: polyAlt('Прямая четырёхугольная призма', body), bodies: [body] };
     },
   },
@@ -342,7 +342,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_5ug',
     title: 'Правильная пятиугольная призма',
     build: () => {
-      const body = regularPrism(5, 2.7, 4.2);
+      const body = regularPrism(5, 2.7, 4.2, 'cabinet');
       return { alt: polyAlt('Правильная пятиугольная призма', body), bodies: [body] };
     },
   },
@@ -351,7 +351,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_6ug',
     title: 'Правильная шестиугольная призма',
     build: () => {
-      const body = regularPrism(6, 2.7, 4.2);
+      const body = regularPrism(6, 2.7, 4.2, 'cabinet');
       return { alt: polyAlt('Правильная шестиугольная призма', body), bodies: [body] };
     },
   },
@@ -360,7 +360,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_6ug_diag_sechenie',
     title: 'Шестиугольная призма, сечение ADD₁A₁',
     build: () => {
-      const body = regularPrism(6, 2.7, 4.2);
+      const body = regularPrism(6, 2.7, 4.2, 'cabinet');
       const pts = ['A', 'D', 'D1', 'A1'].map((n) => vertex(body, n));
       return {
         alt: `Правильная шестиугольная призма ${namesText(body.names ?? [])}, сечение ADD₁A₁`,
@@ -374,7 +374,7 @@ const PRISMS: CatalogEntry[] = [
     name: 'prizma_usechennaya',
     title: 'Усечённая треугольная призма',
     build: () => {
-      const base = regularPolygon(3, 2.6, 0, polygonStart(3));
+      const base = regularPolygon(3, 2.6, 0, polygonStart(3, 'cabinet'));
       /* Секущая плоскость наклонена к основанию примерно на 13°:
          в банке прототипов усечённой призмы нет, наклон витринный. */
       const heights = [4.0, 3.3, 4.4];
@@ -419,8 +419,8 @@ const REVOLUTION: CatalogEntry[] = [
       const h = 4.4;
       const O: Vec3 = [0, 0, 0];
       const O1: Vec3 = [0, 0, h];
-      const A = circlePoint(O, r, 0);
-      const A1 = circlePoint(O1, r, 0);
+      const A = ortho.circlePoint(O, r, 0);
+      const A1 = ortho.circlePoint(O1, r, 0);
       return {
         alt: 'Цилиндр с осью OO₁, радиусом OA = r и образующей AA₁ = l',
         bodies: [{ kind: 'cylinder', base: O, r, h }],
@@ -449,10 +449,10 @@ const REVOLUTION: CatalogEntry[] = [
       const h = 4.4;
       const O: Vec3 = [0, 0, 0];
       const O1: Vec3 = [0, 0, h];
-      const A = circlePoint(O, r, Math.PI);
-      const B = circlePoint(O, r, 0);
-      const A1 = circlePoint(O1, r, Math.PI);
-      const B1 = circlePoint(O1, r, 0);
+      const A = ortho.circlePoint(O, r, Math.PI);
+      const B = ortho.circlePoint(O, r, 0);
+      const A1 = ortho.circlePoint(O1, r, Math.PI);
+      const B1 = ortho.circlePoint(O1, r, 0);
       return {
         alt: 'Цилиндр с осевым сечением ABB₁A₁',
         bodies: [{ kind: 'cylinder', base: O, r, h }],
@@ -486,7 +486,7 @@ const REVOLUTION: CatalogEntry[] = [
       const h = 4.6;
       const O: Vec3 = [0, 0, 0];
       const S: Vec3 = [0, 0, h];
-      const A = circlePoint(O, r, 0);
+      const A = ortho.circlePoint(O, r, 0);
       return {
         alt: 'Конус с вершиной S, высотой SO = h, образующей SA = l и радиусом OA = r',
         bodies: [{ kind: 'cone', base: O, r, h }],
@@ -513,8 +513,8 @@ const REVOLUTION: CatalogEntry[] = [
       const h = 4.6;
       const O: Vec3 = [0, 0, 0];
       const S: Vec3 = [0, 0, h];
-      const A = circlePoint(O, r, Math.PI);
-      const B = circlePoint(O, r, 0);
+      const A = ortho.circlePoint(O, r, Math.PI);
+      const B = ortho.circlePoint(O, r, 0);
       return {
         alt: 'Конус с осевым сечением SAB и высотой SO',
         bodies: [{ kind: 'cone', base: O, r, h }],
@@ -548,8 +548,8 @@ const REVOLUTION: CatalogEntry[] = [
       const h = 3.2;
       const O: Vec3 = [0, 0, 0];
       const O1: Vec3 = [0, 0, h];
-      const A = circlePoint(O, r, 0);
-      const A1 = circlePoint(O1, r1, 0);
+      const A = ortho.circlePoint(O, r, 0);
+      const A1 = ortho.circlePoint(O1, r1, 0);
       return {
         alt: 'Усечённый конус с осью OO₁ и радиусами OA и O₁A₁',
         bodies: [{ kind: 'cone', base: O, r, top: r1, h }],
@@ -607,7 +607,7 @@ const REVOLUTION: CatalogEntry[] = [
       const z = 1.3;
       const O: Vec3 = [0, 0, 0];
       const O1: Vec3 = [0, 0, z];
-      const A = circlePoint(O1, Math.sqrt(R * R - z * z), 0);
+      const A = ortho.circlePoint(O1, Math.sqrt(R * R - z * z), 0);
       return {
         alt: 'Шар с центром O, сечение плоскостью с центром O₁, радиус сечения O₁A, радиус шара OA = R',
         bodies: [{ kind: 'sphere', center: O, r: R, sections: [z] }],
@@ -744,4 +744,13 @@ const COMBOS: CatalogEntry[] = [
   },
 ];
 
-export const CATALOG: CatalogEntry[] = [...PYRAMIDS, ...PRISMS, ...REVOLUTION, ...COMBOS];
+/* Призмы и параллелепипеды рисуются кабинетным видом: у них переднее
+   ребро AB обязано быть горизонтальным. Пирамиды, тела вращения и
+   комбинации — ортогональным: там важнее ровные круги и симметричные
+   эллипсы оснований. */
+const CABINET_PRISMS: CatalogEntry[] = PRISMS.map((entry) => ({
+  ...entry,
+  build: () => ({ ...entry.build(), view: 'cabinet' as const }),
+}));
+
+export const CATALOG: CatalogEntry[] = [...PYRAMIDS, ...CABINET_PRISMS, ...REVOLUTION, ...COMBOS];

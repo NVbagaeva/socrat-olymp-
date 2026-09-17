@@ -10,7 +10,7 @@
  */
 
 import { type Polyhedron, orientOutward } from './model';
-import { spherePoint } from './project';
+import { type ViewId, viewOf } from './project';
 import { type Vec3, add, centroid, sub } from './vec';
 
 const DEG = Math.PI / 180;
@@ -41,16 +41,12 @@ export function regularPolygon(n: number, R: number, z: number, start: number): 
 }
 
 /**
- * С какого угла начинать обход основания.
- *
- * Одно правило на все правильные многоугольники: сторона AB оказывается
- * спереди и на чертеже ложится строго горизонтально (в косоугольной
- * проекции горизонтально идёт всё, что параллельно оси x), а сторона AD
- * или диагональ AD уходит по диагонали в глубину. Так рисуют призмы
- * и пирамиды в учебниках.
+ * С какого угла начинать обход основания. Зависит от вида: в cabinet
+ * сторона AB встаёт спереди и горизонтально, в ortho углы подобраны так,
+ * чтобы ни одно ребро не легло вдоль луча зрения.
  */
-export function polygonStart(n: number): number {
-  return 270 - 180 / n;
+export function polygonStart(n: number, view: ViewId = 'ortho'): number {
+  return viewOf(view).polygonStart(n);
 }
 
 /**
@@ -59,8 +55,13 @@ export function polygonStart(n: number): number {
  * на окружности шара; angle — угол на этом круге от правой точки
  * против часовой стрелки, градусы.
  */
-export function sphereOutlinePoint(center: Vec3, r: number, angle: number): Vec3 {
-  return spherePoint(center, r, angle * DEG);
+export function sphereOutlinePoint(
+  center: Vec3,
+  r: number,
+  angle: number,
+  view: ViewId = 'ortho',
+): Vec3 {
+  return viewOf(view).spherePoint(center, r, angle * DEG);
 }
 
 /** Буквы основания: A, B, C, … */
@@ -112,8 +113,8 @@ export function box(a: number, b: number, c: number): Polyhedron {
 }
 
 /** Правильная n-угольная призма: радиус описанной окружности R, высота h. */
-export function regularPrism(n: number, R: number, h: number): Polyhedron {
-  return rightPrism(regularPolygon(n, R, 0, polygonStart(n)), h);
+export function regularPrism(n: number, R: number, h: number, view: ViewId = 'ortho'): Polyhedron {
+  return rightPrism(regularPolygon(n, R, 0, polygonStart(n, view)), h);
 }
 
 /** Пирамида: основание и вершина. */
@@ -138,13 +139,24 @@ export function pyramid(
 }
 
 /** Правильная n-угольная пирамида: вершина над центром основания. */
-export function regularPyramid(n: number, R: number, h: number): Polyhedron {
-  return pyramid(regularPolygon(n, R, 0, polygonStart(n)), [0, 0, h]);
+export function regularPyramid(
+  n: number,
+  R: number,
+  h: number,
+  view: ViewId = 'ortho',
+): Polyhedron {
+  return pyramid(regularPolygon(n, R, 0, polygonStart(n, view)), [0, 0, h]);
 }
 
 /** Усечённая пирамида: два подобных основания. */
-export function frustumPyramid(n: number, R: number, r: number, h: number): Polyhedron {
-  const start = polygonStart(n);
+export function frustumPyramid(
+  n: number,
+  R: number,
+  r: number,
+  h: number,
+  view: ViewId = 'ortho',
+): Polyhedron {
+  const start = polygonStart(n, view);
   const base = regularPolygon(n, R, 0, start);
   const top = regularPolygon(n, r, h, start);
   const vertices = [...base, ...top];
@@ -166,9 +178,9 @@ export function frustumPyramid(n: number, R: number, r: number, h: number): Poly
 }
 
 /** Правильный тетраэдр ABCD с ребром a. */
-export function tetrahedron(a: number): Polyhedron {
+export function tetrahedron(a: number, view: ViewId = 'ortho'): Polyhedron {
   const R = a / Math.sqrt(3);
-  const base = regularPolygon(3, R, 0, polygonStart(3));
+  const base = regularPolygon(3, R, 0, polygonStart(3, view));
   return pyramid(base, [0, 0, a * Math.sqrt(2 / 3)], ['A', 'B', 'C'], 'D');
 }
 

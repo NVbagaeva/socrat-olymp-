@@ -14,7 +14,7 @@
 
 import type { Body, Cone, Cylinder, Polyhedron, Sphere } from './model';
 import { faceIsFlat } from './model';
-import { TOWARD, circlePoint, depth, project, rayPoint } from './project';
+import type { View } from './project';
 import { type Vec2, type Vec3, add, at, dot, lerp, sub } from './vec';
 
 /** Грань-заслонка: проекция и глубина как линейная функция точки. */
@@ -48,7 +48,12 @@ export type Occluder = FaceOccluder | SphereOccluder;
 /** Сколько граней у боковой поверхности тела вращения в заслонках. */
 const FACETS = 48;
 
-function faceOccluder(owner: Body, points: Vec3[], verts: number[]): FaceOccluder | null {
+function faceOccluder(
+  view: View,
+  owner: Body,
+  points: Vec3[],
+  verts: number[],
+): FaceOccluder | null {
   if (
     !faceIsFlat(
       points,
@@ -57,8 +62,8 @@ function faceOccluder(owner: Body, points: Vec3[], verts: number[]): FaceOcclude
   ) {
     return null;
   }
-  const poly = points.map(project);
-  const depths = points.map(depth);
+  const poly = points.map(view.project);
+  const depths = points.map(view.depth);
 
   /* Плоскость глубины по паре самых «раскрытых» рёбер: точность
      выше, чем по трём первым вершинам подряд. */
@@ -111,10 +116,11 @@ function faceOccluder(owner: Body, points: Vec3[], verts: number[]): FaceOcclude
   };
 }
 
-function polyhedronOccluders(body: Polyhedron): Occluder[] {
+function polyhedronOccluders(view: View, body: Polyhedron): Occluder[] {
   const out: Occluder[] = [];
   body.faces.forEach((face) => {
     const occ = faceOccluder(
+      view,
       body,
       face.map((i) => at(body.vertices, i)),
       face,
@@ -127,15 +133,17 @@ function polyhedronOccluders(body: Polyhedron): Occluder[] {
 }
 
 /** Основания и боковая поверхность цилиндра гранями. */
-function cylinderOccluders(body: Cylinder): Occluder[] {
+function cylinderOccluders(view: View, body: Cylinder): Occluder[] {
   const out: Occluder[] = [];
   const top: Vec3 = add(body.base, [0, 0, body.h]);
   const ring = (c: Vec3) =>
-    Array.from({ length: FACETS }, (_, k) => circlePoint(c, body.r, (2 * Math.PI * k) / FACETS));
+    Array.from({ length: FACETS }, (_, k) =>
+      view.circlePoint(c, body.r, (2 * Math.PI * k) / FACETS),
+    );
   const bottom = ring(body.base);
   const upper = ring(top);
   const cap = (pts: Vec3[]) => {
-    const occ = faceOccluder(body, pts, []);
+    const occ = faceOccluder(view, body, pts, []);
     if (occ) {
       out.push(occ);
     }
@@ -144,7 +152,12 @@ function cylinderOccluders(body: Cylinder): Occluder[] {
   cap(upper);
   for (let k = 0; k < FACETS; k += 1) {
     const n = (k + 1) % FACETS;
-    const occ = faceOccluder(body, [at(bottom, k), at(bottom, n), at(upper, n), at(upper, k)], []);
+    const occ = faceOccluder(
+      view,
+      body,
+      [at(bottom, k), at(bottom, n), at(upper, n), at(upper, k)],
+      [],
+    );
     if (occ) {
       out.push(occ);
     }
@@ -152,15 +165,15 @@ function cylinderOccluders(body: Cylinder): Occluder[] {
   return out;
 }
 
-function coneOccluders(body: Cone): Occluder[] {
+function coneOccluders(view: View, body: Cone): Occluder[] {
   const out: Occluder[] = [];
   const sign = body.inverted ? -1 : 1;
   const apexZ = body.base[2] + sign * body.h;
   const ring = (c: Vec3, r: number) =>
-    Array.from({ length: FACETS }, (_, k) => circlePoint(c, r, (2 * Math.PI * k) / FACETS));
+    Array.from({ length: FACETS }, (_, k) => view.circlePoint(c, r, (2 * Math.PI * k) / FACETS));
   const bottom = ring(body.base, body.r);
   const cap = (pts: Vec3[]) => {
-    const occ = faceOccluder(body, pts, []);
+    const occ = faceOccluder(view, body, pts, []);
     if (occ) {
       out.push(occ);
     }
@@ -169,7 +182,7 @@ function coneOccluders(body: Cone): Occluder[] {
   if (body.top === undefined) {
     const apex: Vec3 = [body.base[0], body.base[1], apexZ];
     for (let k = 0; k < FACETS; k += 1) {
-      const occ = faceOccluder(body, [at(bottom, k), at(bottom, (k + 1) % FACETS), apex], []);
+      const occ = faceOccluder(view, body, [at(bottom, k), at(bottom, (k + 1) % FACETS), apex], []);
       if (occ) {
         out.push(occ);
       }
@@ -180,6 +193,7 @@ function coneOccluders(body: Cone): Occluder[] {
     for (let k = 0; k < FACETS; k += 1) {
       const n = (k + 1) % FACETS;
       const occ = faceOccluder(
+        view,
         body,
         [at(bottom, k), at(bottom, n), at(upper, n), at(upper, k)],
         [],
@@ -192,39 +206,39 @@ function coneOccluders(body: Cone): Occluder[] {
   return out;
 }
 
-function sphereOccluder(body: Sphere): Occluder {
+function sphereOccluder(view: View, body: Sphere): Occluder {
   return {
     kind: 'sphere',
     owner: body,
     center: body.center,
-    centerDepth: depth(body.center),
+    centerDepth: view.depth(body.center),
     r: body.r,
   };
 }
 
 /** Заслонки всех непрозрачных тел модели. */
-export function occludersOf(bodies: readonly Body[]): Occluder[] {
+export function occludersOf(view: View, bodies: readonly Body[]): Occluder[] {
   return bodies.flatMap((body) => {
     if (body.glass) {
       return [];
     }
     switch (body.kind) {
       case 'polyhedron':
-        return polyhedronOccluders(body);
+        return polyhedronOccluders(view, body);
       case 'cylinder':
-        return cylinderOccluders(body);
+        return cylinderOccluders(view, body);
       case 'cone':
-        return coneOccluders(body);
+        return coneOccluders(view, body);
       case 'sphere':
-        return [sphereOccluder(body)];
+        return [sphereOccluder(view, body)];
     }
   });
 }
 
 /** Заслонки только этого тела: прозрачное тело прячет свои рёбра само. */
-export function selfOccluders(body: Body): Occluder[] {
+export function selfOccluders(view: View, body: Body): Occluder[] {
   if (body.kind === 'polyhedron') {
-    return polyhedronOccluders(body);
+    return polyhedronOccluders(view, body);
   }
   return [];
 }
@@ -245,15 +259,15 @@ function inside(poly: readonly Vec2[], x: number, y: number): boolean {
 }
 
 /** Точка пространства скрыта хотя бы одной заслонкой из списка. */
-export function hidden(p: Vec3, occluders: readonly Occluder[], eps: number): boolean {
-  const q = project(p);
-  const d = depth(p);
+export function hidden(view: View, p: Vec3, occluders: readonly Occluder[], eps: number): boolean {
+  const q = view.project(p);
+  const d = view.depth(p);
   for (const occ of occluders) {
     if (occ.kind === 'sphere') {
       /* Луч через ту же точку чертежа: насколько он проходит мимо
          центра, настолько ближняя поверхность ближе центра. */
-      const w = sub(occ.center, rayPoint(q));
-      const along = dot(w, TOWARD);
+      const w = sub(occ.center, view.rayPoint(q));
+      const along = dot(w, view.toward);
       const rr = occ.r * occ.r - (dot(w, w) - along * along);
       if (rr > 0 && occ.centerDepth + Math.sqrt(rr) > d + eps) {
         return true;
@@ -286,6 +300,7 @@ const REFINE = 10;
  * (грани, которым ребро принадлежит).
  */
 export function segmentRuns(
+  view: View,
   a: Vec3,
   b: Vec3,
   occluders: readonly Occluder[],
@@ -296,7 +311,7 @@ export function segmentRuns(
   if (list.length === 0) {
     return [{ t0: 0, t1: 1, visible: true }];
   }
-  const test = (t: number) => !hidden(lerp(a, b, t), list, eps);
+  const test = (t: number) => !hidden(view, lerp(a, b, t), list, eps);
   const ts = Array.from({ length: SAMPLES }, (_, k) => (k + 0.5) / SAMPLES);
   const states = ts.map(test);
 
@@ -333,10 +348,11 @@ export function segmentRuns(
  * сюда добавляется заслонение чужими телами.
  */
 export function polylineVisibility(
+  view: View,
   points: readonly Vec3[],
   selfVisible: readonly boolean[],
   occluders: readonly Occluder[],
   eps: number,
 ): boolean[] {
-  return points.map((p, i) => at(selfVisible, i) && !hidden(p, occluders, eps));
+  return points.map((p, i) => at(selfVisible, i) && !hidden(view, p, occluders, eps));
 }
