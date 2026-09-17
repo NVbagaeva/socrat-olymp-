@@ -61,7 +61,7 @@ export default async function Page({ params }: { params: Params }) {
           <TrainerShell base={base} mode={found}>
             {/* Задания собирает движок на сборке: в браузер уходит
                 готовая разметка. */}
-            <TrainerTasks mode={found} />
+            <TrainerTasks mode={found} base={`${base}/trenazher/`} />
           </TrainerShell>
         }
       />

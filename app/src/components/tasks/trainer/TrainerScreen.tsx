@@ -1,15 +1,18 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { TrainerStep, TrainerTask } from '@/lib/trainer';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { TrainerResult, type TrainerMark } from './TrainerResult';
 
 export interface TrainerScreenProps {
   /** Десять заданий подхода, собранные на сборке. */
   tasks: TrainerTask[];
+  /** Куда ведёт кнопка с итогового экрана. */
+  backHref: string;
 }
 
 /* Обе плашки обратной связи: заголовки дословные, без «Неверно». */
@@ -17,9 +20,6 @@ const VERDICT = {
   right: { title: 'Верно!' },
   wrong: { title: 'Есть ошибка' },
 };
-
-/** Чем закончилось задание: само или с подсказкой. */
-type Mark = 'right' | 'hinted';
 
 /**
  * Экран задания тренажёра.
@@ -36,12 +36,12 @@ type Mark = 'right' | 'hinted';
  * Все задания подхода приходят готовыми пропсами и живут на одном
  * экране: смена задания — это состояние, а не переход по адресу.
  */
-export function TrainerScreen({ tasks }: TrainerScreenProps) {
+export function TrainerScreen({ tasks, backHref }: TrainerScreenProps) {
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
   /* Чем закончилось каждое задание подхода: полоса берёт вид оттуда. */
-  const [marks, setMarks] = useState<Record<number, Mark>>({});
+  const [marks, setMarks] = useState<Record<number, TrainerMark>>({});
 
   /* Подсказка: открыта ли она, какой шаг идёт, что набрано в полях
      и как проверился текущий шаг. */
@@ -49,6 +49,26 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
   const [step, setStep] = useState(0);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [stepMark, setStepMark] = useState<'right' | 'wrong' | null>(null);
+
+  /* Сколько раз ответ не сошёлся и сколько заняла тренировка. Время
+     идёт от первой проверки: до неё ученик ещё читает условие, да
+     и часы на сервере ни при чём — расхождения гидратации нет. */
+  const [misses, setMisses] = useState(0);
+  /* Итог подхода: открывается с последнего задания. */
+  const [result, setResult] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const startedAt = useRef<number | null>(null);
+
+  function startClock() {
+    if (startedAt.current === null) {
+      startedAt.current = Date.now();
+    }
+  }
+
+  function stopClock() {
+    const from = startedAt.current;
+    setSeconds(from === null ? 0 : (Date.now() - from) / 1000);
+  }
 
   const found = tasks[index];
   if (found === undefined) {
@@ -79,10 +99,16 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
   }
 
   function check() {
+    startClock();
     const right = sameNumber(value, task.answer);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
+      if (last) {
+        stopClock();
+      }
+    } else {
+      setMisses(misses + 1);
     }
   }
 
@@ -98,11 +124,13 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
     if (current === undefined) {
       return;
     }
+    startClock();
     const right = current.fields.every((field, fieldNo) =>
       sameNumber(fieldValue(step, fieldNo), field.answer),
     );
     if (!right) {
       setStepMark('wrong');
+      setMisses(misses + 1);
       return;
     }
     setStepMark(null);
@@ -110,6 +138,9 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
     if (step + 1 >= steps.length) {
       /* Задача пройдена по шагам: в верных она не числится. */
       setMarks({ ...marks, [index]: 'hinted' });
+      if (last) {
+        stopClock();
+      }
     }
   }
 
@@ -123,7 +154,23 @@ export function TrainerScreen({ tasks }: TrainerScreenProps) {
     setStepMark(null);
   }
 
-  const nextButton = last ? null : <Button onClick={next}>Следующее задание →</Button>;
+  const nextButton = last ? (
+    <Button onClick={() => setResult(true)}>Смотреть результат →</Button>
+  ) : (
+    <Button onClick={next}>Следующее задание →</Button>
+  );
+
+  if (result) {
+    return (
+      <TrainerResult
+        tasks={tasks}
+        marks={marks}
+        misses={misses}
+        seconds={seconds}
+        backHref={backHref}
+      />
+    );
+  }
 
   return (
     <section className="ttask">

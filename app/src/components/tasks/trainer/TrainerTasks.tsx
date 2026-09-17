@@ -4,6 +4,8 @@ import { TrainerScreen } from './TrainerScreen';
 
 export interface TrainerTasksProps {
   mode: TrainerMode;
+  /** Вкладка тренажёра: туда ведёт кнопка с итогового экрана. */
+  base: string;
 }
 
 /**
@@ -12,6 +14,6 @@ export interface TrainerTasksProps {
  * Движок и KaTeX остаются на сервере — в браузер уходит готовая
  * разметка, как и во вкладке подготовительных задач.
  */
-export function TrainerTasks({ mode }: TrainerTasksProps) {
-  return <TrainerScreen tasks={buildTrainerTasks(mode)} />;
+export function TrainerTasks({ mode, base }: TrainerTasksProps) {
+  return <TrainerScreen tasks={buildTrainerTasks(mode)} backHref={base} />;
 }

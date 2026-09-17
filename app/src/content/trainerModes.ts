@@ -74,3 +74,31 @@ export function findTrainerMode(id: string): TrainerMode | undefined {
 export function trainerModeIds(): TrainerModeId[] {
   return trainerModes.map((mode) => mode.id);
 }
+
+/** Название типа задания по набору движка: для статистики подхода. */
+export const trainerKindTitle: Record<string, string> = {
+  '12.A': 'Найти значение функции',
+  '12.B': 'Найти аргумент',
+  /* Абсцисса и ордината — один и тот же тип задания, в статистике
+     они идут одной строкой. */
+  '12.C': 'Точка пересечения графиков',
+  '12.D': 'Точка пересечения графиков',
+};
+
+/** Итоговый экран подхода. Тексты заданы заказчиком дословно. */
+export const trainerResult = {
+  title: 'Тренировка завершена!',
+  lead: 'Отличная работа!',
+  scoreLabel: 'Правильных ответов',
+  percentLabel: 'Результат',
+  rows: {
+    total: 'Всего заданий',
+    right: 'Правильных ответов',
+    wrong: 'Ошибок',
+    hinted: 'Решено с подсказкой',
+    time: 'Потраченное время',
+  },
+  kinds: 'Статистика по типам заданий',
+  back: 'Вернуться к заданиям',
+  trophyAlt: 'Кубок',
+};
