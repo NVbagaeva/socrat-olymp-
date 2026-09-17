@@ -1,0 +1,96 @@
+/* Витрина движка solid/: новый чертёж рядом со старым. Только для
+   разработки: страница не входит в меню и не индексируется. */
+
+.s3 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.s3__head {
+  margin-bottom: var(--space-8);
+}
+
+.s3__lead {
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+
+.s3__section {
+  margin-top: var(--space-10);
+}
+
+.s3__section-title {
+  margin-bottom: var(--space-4);
+}
+
+.s3__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .s3__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.s3__card {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.s3__card-title {
+  margin: 0 0 var(--space-3);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.s3__card-id {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.s3__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.s3__new .solid {
+  max-width: none;
+}
+
+.s3__old {
+  position: relative;
+}
+
+.s3__old svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.s3__badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.s3__alt {
+  margin: var(--space-2) 0 0;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
