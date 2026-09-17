@@ -4,10 +4,15 @@
  * Прототипы — по разделам задачника, плюс шпаргалки «Что нужно помнить»
  * и миниатюры разделов. Тексты условий здесь не дублируются: они
  * приходят из prototipy-91.json.
+ *
+ * Раздел I собран не отдельными картинками, а из данных прототипов:
+ * чертёж прототипа — это чертёж его первого варианта. Так числа
+ * и буквы задачи и её чертёж не могут разойтись.
  */
 
+import { RAZDEL_1 } from '../../zadanie3/razdel1';
+import { type Prototype } from '../../zadanie3/types';
 import { type Model } from '../model';
-import { SECTION1 } from './section1';
 import { SECTION2 } from './section2';
 import { SECTION3 } from './section3';
 import { SECTION4 } from './section4';
@@ -16,8 +21,23 @@ import { SECTION6 } from './section6';
 import { SECTION7 } from './section7';
 import { SECTION8 } from './section8';
 import { SHEETS } from './sheets';
-import { STEPS, STEP_VARIANTS } from './steps';
 import { THUMBS } from './thumbs';
+
+/** Чертёж первого варианта прототипа. */
+function firstDrawing(prototype: Prototype): Model {
+  const first = prototype.varianty[0];
+  if (first === undefined) {
+    throw new Error(`У прототипа ${prototype.id} нет вариантов`);
+  }
+  return prototype.chertezh(first.params);
+}
+
+const SECTION1: Record<string, Model> = Object.fromEntries(
+  RAZDEL_1.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+);
+
+/** Прототипы, у которых числа стоят на самом чертеже. */
+const WITH_NUMBERS = ['P03-05', 'P03-11'];
 
 /** Чертёж прототипа по его id. */
 export const PROTOTYPE_DRAWINGS: Record<string, Model> = {
@@ -29,17 +49,30 @@ export const PROTOTYPE_DRAWINGS: Record<string, Model> = {
   ...SECTION6,
   ...SECTION7,
   ...SECTION8,
-  ...STEPS,
 };
 
-export { SHEETS, THUMBS, STEP_VARIANTS };
+/**
+ * Варианты ступенчатых многогранников: у каждого свои числа на
+ * чертеже, поэтому и чертёж свой.
+ */
+export const STEP_VARIANTS: { id: string; variant: number; model: Model }[] = RAZDEL_1.filter(
+  (prototype) => WITH_NUMBERS.includes(prototype.id),
+).flatMap((prototype) =>
+  prototype.varianty.map((v) => ({
+    id: prototype.id,
+    variant: v.n,
+    model: prototype.chertezh(v.params),
+  })),
+);
+
+export { SHEETS, THUMBS };
 
 /** Сколько всего чертежей в банке. */
 export function drawingCount(): number {
   return (
     Object.keys(PROTOTYPE_DRAWINGS).length +
     STEP_VARIANTS.length -
-    Object.keys(STEPS).length +
+    WITH_NUMBERS.length +
     Object.keys(SHEETS).length +
     Object.keys(THUMBS).length
   );
