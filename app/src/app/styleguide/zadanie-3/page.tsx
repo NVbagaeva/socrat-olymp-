@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Solid } from '@/components/solid/Solid';
-import { BANK, RAZDEL_1, RAZDEL_2, RAZDEL_3 } from '@/lib/zadanie3';
+import { BANK, RAZDEL_1, RAZDEL_2, RAZDEL_3, RAZDEL_4 } from '@/lib/zadanie3';
 import { assertBankOk, type BankReport, checkBank } from '@/lib/zadanie3/selftest';
 import type { Prototype, Variant } from '@/lib/zadanie3/types';
 import { typeset } from '@/lib/tex';
@@ -41,6 +41,12 @@ const SECTIONS: { id: string; title: string; lead: string; items: readonly Proto
     title: 'Раздел III. Пирамида',
     lead: '11 прототипов по 10 вариантов.',
     items: RAZDEL_3,
+  },
+  {
+    id: 'razdel-IV',
+    title: 'Раздел IV. Конус',
+    lead: '11 прототипов по 10 вариантов.',
+    items: RAZDEL_4,
   },
 ];
 
