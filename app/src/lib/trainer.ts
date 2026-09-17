@@ -144,13 +144,16 @@ function typeset(html: string): string {
     }
     const before = rest.slice(0, open.index);
     rest = rest.slice(close + '</span>'.length);
-    /* Знак препинания не должен отрываться от формулы: между ними
-       ставится неразрывный пробел нулевой ширины. */
-    const glue = /^[.,;:!?)]/.test(rest) ? '\u2060' : '';
-    out +=
-      before +
-      katex.renderToString(unescapeTex(open[1] ?? ''), { throwOnError: false }) +
-      glue;
+    const formula = katex.renderToString(unescapeTex(open[1] ?? ''), { throwOnError: false });
+    /* Знак препинания после формулы уезжал на новую строку один.
+       Формула и знак идут вместе, одним неразрывным куском. */
+    const mark = /^[.,;:!?)]/.exec(rest);
+    if (mark === null) {
+      out += before + formula;
+    } else {
+      out += before + '<span class="tight-math">' + formula + mark[0] + '</span>';
+      rest = rest.slice(1);
+    }
   }
 }
 
