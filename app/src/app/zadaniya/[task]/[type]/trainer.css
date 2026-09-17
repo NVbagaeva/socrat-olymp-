@@ -445,8 +445,24 @@
 .tstep__row--wide .tstep__input {
   width: 74px;
 }
-@media (max-width: 420px) {
+
+/* На узком экране строка в одну линию не помещается, и свободный
+   перенос рвал её посередине: знак уезжал в начало новой строки
+   без своего поля. Поэтому здесь строка становится сеткой из двух
+   половин уравнения, а кнопка встаёт под ними. */
+@media (max-width: 560px) {
+  .tstep__row--wide {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    align-items: center;
+  }
   .tstep__row--wide .tstep__input {
     width: 62px;
+  }
+  .tstep__row--wide .btn,
+  .tstep__row--wide .tstep__ok {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }
