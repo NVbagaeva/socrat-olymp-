@@ -52,15 +52,12 @@ jobs:
         run: |
           for u in \
             https://budetege.ru/zadaniya/12/linear/trenazher/value/ \
-            https://budetege.ru/zadaniya/12/linear/trenazher/ \
             https://budetege.ru/ ; do
             echo "=== $u"
-            curl -sI "$u" | grep -iE 'HTTP/|cache-control|expires|etag|last-modified|age|server|via|cf-' || true
+            curl -sI "$u" | grep -iE 'HTTP/|cache-control|expires|last-modified' || true
           done
-          echo "=== файл сборки"
-          f=$(curl -s https://budetege.ru/zadaniya/12/linear/trenazher/value/ | grep -o '/_next/static/chunks/[^"\\]*' | head -1)
-          echo "$f"
-          curl -sI "https://budetege.ru$f" | grep -iE 'HTTP/|cache-control|expires|last-modified' || true
+          echo "=== сам .htaccess отдаётся наружу?"
+          curl -s -o /dev/null -w 'код ответа: %{http_code}\n' https://budetege.ru/.htaccess
 
       - name: Положить сборку в служебную ветку
         run: |
