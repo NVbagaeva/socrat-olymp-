@@ -21,10 +21,10 @@ export function subscript(name: string): string {
 
 /** Имена вершин строкой через запятую с индексами: для alt. */
 export function namesText(names: readonly (string | null)[]): string {
-  return names
-    .filter((n): n is string => n !== null)
-    .map(subscript)
-    .join('');
+  const list = names.filter((n): n is string => n !== null);
+  /* Пирамиду называют с вершины: SABCD, а не ABCDS. */
+  const ordered = list.includes('S') ? ['S', ...list.filter((n) => n !== 'S')] : list;
+  return ordered.map(subscript).join('');
 }
 
 /**
