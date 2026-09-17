@@ -138,8 +138,10 @@ export interface TrainerAttempt {
   kind: string;
   /** Номер задания, например «12.C-04». */
   taskId: string;
-  /** Решено самостоятельно и с первого раза. */
+  /** Решено самостоятельно, без подсказки. */
   right: boolean;
+  /** И при этом без единой ошибки: только такое уходит из списка. */
+  clean: boolean;
   /** Сколько секунд заняло задание. */
   seconds: number;
 }
@@ -147,8 +149,9 @@ export interface TrainerAttempt {
 /**
  * Записать закрытое задание.
  *
- * Задание, решённое верно, уходит из списка ошибочных: ученик его
- * отработал. Ошибка или подсказка — наоборот, ставит его в список.
+ * Задание, пройденное начисто, уходит из списка ошибочных: ученик
+ * его отработал. Ошибка или подсказка — наоборот, ставит его
+ * в список, даже если верный ответ в итоге нашёлся.
  */
 export function recordAttempt(attempt: TrainerAttempt): void {
   const current = snapshot();
@@ -163,7 +166,7 @@ export function recordAttempt(attempt: TrainerAttempt): void {
     },
   };
 
-  const mistakes = attempt.right
+  const mistakes = attempt.clean
     ? current.mistakes.filter((id) => id !== attempt.taskId)
     : current.mistakes.includes(attempt.taskId)
       ? current.mistakes

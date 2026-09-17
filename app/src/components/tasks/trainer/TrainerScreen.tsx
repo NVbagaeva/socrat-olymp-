@@ -83,6 +83,9 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
   const [seconds, setSeconds] = useState(0);
   const startedAt = useRef<number | null>(null);
   const taskStartedAt = useRef<number | null>(null);
+  /* Была ли ошибка в текущем задании: начисто пройденное уходит
+     из списка ошибочных, остальное в нём остаётся. */
+  const failed = useRef(false);
 
   function startClock() {
     const now = Date.now();
@@ -102,8 +105,8 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
 
   /* Закрытое задание уходит в хранилище: счётчики вкладки считаются
      оттуда и обновляются сразу, без перезагрузки. */
-  function remember(item: TrainerTask, right: boolean) {
-    recordAttempt({ kind: item.kind, taskId: item.id, right, seconds: taskSeconds() });
+  function remember(item: TrainerTask, right: boolean, clean: boolean) {
+    recordAttempt({ kind: item.kind, taskId: item.id, right, clean, seconds: taskSeconds() });
   }
 
   function stopClock() {
@@ -145,11 +148,12 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
-      remember(task, true);
+      remember(task, true, failed.current === false);
       if (last) {
         stopClock();
       }
     } else {
+      failed.current = true;
       setMisses(misses + 1);
     }
   }
@@ -172,6 +176,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
     );
     if (!right) {
       setStepMark('wrong');
+      failed.current = true;
       setMisses(misses + 1);
       return;
     }
@@ -180,7 +185,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
     if (step + 1 >= steps.length) {
       /* Задача пройдена по шагам: в верных она не числится. */
       setMarks({ ...marks, [index]: 'hinted' });
-      remember(task, false);
+      remember(task, false, false);
       if (last) {
         stopClock();
       }
@@ -189,6 +194,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
 
   function next() {
     taskStartedAt.current = null;
+    failed.current = false;
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -220,6 +226,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
     setStepMark(null);
     startedAt.current = null;
     taskStartedAt.current = null;
+    failed.current = false;
   }
 
   if (result) {
@@ -247,6 +254,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
         {tasks.map((item, i) => (
           <li
             key={item.id}
+            data-kind={item.kind}
             className={clsx(
               'ttask__dot',
               marks[i] === 'right' && 'is-done',
