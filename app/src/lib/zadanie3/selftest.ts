@@ -46,6 +46,19 @@ export interface BankReport {
 /** Насколько два ответа считаются одним и тем же числом. */
 const TOL = 1e-6;
 
+/**
+ * Число в тексте с длинным дробным хвостом: «99,99999999999997».
+ * Так выглядит невычищенная погрешность double. Ученик такого
+ * видеть не должен ни в условии, ни в разборе: в задании №3 все
+ * числа — целые или короткие десятичные дроби.
+ */
+const LONG_TAIL = /\d+[,.]\d{4,}/;
+
+/** Числа с длинным хвостом в тексте, если они там есть. */
+function longTails(text: string): string[] {
+  return (text.match(/\d+[,.]\d+/g) ?? []).filter((piece) => LONG_TAIL.test(piece));
+}
+
 export function checkBank(bank: readonly Prototype[]): BankReport {
   const rows: VariantReport[] = [];
   const bySource = { задачник: 0, домашка: 0, новый: 0 };
@@ -73,6 +86,11 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
       }
 
       const uslovie = prototype.uslovie(variant.params);
+      const uslovieTails = longTails(uslovie);
+      if (uslovieTails.length > 0) {
+        problems.push(`в условии нечищеное число: ${uslovieTails.join(', ')}`);
+      }
+
       const otvet = round(prototype.otvet(variant.params));
       const poModeli = round(prototype.poModeli(variant.params));
 
@@ -82,6 +100,12 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
       }
 
       const steps = prototype.shagi(variant.params);
+      steps.forEach((step, i) => {
+        const tails = longTails(step.text);
+        if (tails.length > 0) {
+          problems.push(`в шаге ${i + 1} нечищеное число: ${tails.join(', ')}`);
+        }
+      });
       const last = steps[steps.length - 1];
       const shag = last?.value === undefined ? null : round(last.value);
       if (shag === null || Math.abs(shag - otvet) > TOL) {

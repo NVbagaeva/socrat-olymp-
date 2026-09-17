@@ -57,3 +57,19 @@ export function fitsFormat(value: number, format: AnswerFormat): boolean {
   /* Конечная десятичная: домножение на 1000 даёт целое. */
   return Number.isInteger(round(v * 1000));
 }
+
+/**
+ * Слово «раз» в нужной форме: «в 2 раза», «в 5 раз», «в 1,5 раза».
+ * Дробные множители всегда идут с «раза».
+ */
+export function razaWord(value: number): string {
+  if (!Number.isInteger(value)) {
+    return 'раза';
+  }
+  const tens = value % 100;
+  const ones = value % 10;
+  if (tens >= 12 && tens <= 14) {
+    return 'раз';
+  }
+  return ones >= 2 && ones <= 4 ? 'раза' : 'раз';
+}

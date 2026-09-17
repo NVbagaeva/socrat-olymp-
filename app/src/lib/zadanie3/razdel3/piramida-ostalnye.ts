@@ -7,7 +7,9 @@
  */
 
 import { hullVolume, polygonArea, polyhedronVolume } from '../../solid/measure';
-import { circumradius, point, regularPyramidByEdge } from './common';
+import { point, regularPyramidByEdge } from './common';
+import { distance } from '../../solid/measure';
+import { solveBySearch } from '../search';
 import {
   shapeHeightOnly,
   shapeLateralEdge,
@@ -16,7 +18,7 @@ import {
   shapeVertexMidline,
   NAMES4,
 } from './drawings';
-import { ru } from '../format';
+import { round, ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -29,6 +31,20 @@ function variant(
   return sourceAnswer === undefined
     ? { n, source, ref, params }
     : { n, source, ref, params, sourceAnswer };
+}
+
+/** Настоящее боковое ребро правильной n-угольной пирамиды со стороной a и высотой h. */
+function lateralEdge(n: number, a: number, h: number): number {
+  const body = regularPyramidByEdge(n, a, h);
+  return distance(point(body, 'S'), point(body, 'A'));
+}
+
+/**
+ * Высота, при которой настоящее боковое ребро равно b: подбором на
+ * модели, без формулы с корнем.
+ */
+function heightByLateral(n: number, a: number, b: number): number {
+  return solveBySearch(b, (h) => lateralEdge(n, a, h));
 }
 
 /* ── P03-44. Высота по боковому ребру и стороне основания ───────── */
@@ -58,13 +74,7 @@ export const P03_44: Prototype = {
     return Math.sqrt(b * b - (a * a) / 2);
   },
 
-  poModeli: (p) => {
-    const a = num(p, 'a');
-    const b = num(p, 'b');
-    const h = Math.sqrt(b * b - (a * a) / 2);
-    const body = regularPyramidByEdge(4, a, h);
-    return point(body, 'S')[2];
-  },
+  poModeli: (p) => heightByLateral(4, num(p, 'a'), num(p, 'b')),
 
   chertezh: () =>
     shapeHeightOnly(
@@ -75,11 +85,22 @@ export const P03_44: Prototype = {
   shagi: (p) => {
     const a = num(p, 'a');
     const b = num(p, 'b');
-    const half = (a * Math.SQRT2) / 2;
-    const h = Math.sqrt(b * b - half * half);
+    /* Половина диагонали иррациональна, и приближать её десятичной
+       дробью незачем: в теореме Пифагора она входит квадратом,
+       а квадрат — число короткое. */
+    const half2 = round((a * a) / 2);
+    const h = round(Math.sqrt(b * b - half2));
     return [
-      { text: `Половина диагонали основания: ${ru(a)} · √2 : 2 = ${ru(half)}.`, value: half },
-      { text: `Высота: √(${ru(b)}² − ${ru(half)}²) = ${ru(h)}.`, value: h },
+      {
+        text:
+          `Половина диагонали основания — радиус описанной окружности: ${ru(a)} · √2 : 2. ` +
+          `Её квадрат: ${ru(a)}² : 2 = ${ru(half2)}.`,
+        value: half2,
+      },
+      {
+        text: `Высота: √(${ru(b)}² − ${ru(half2)}) = √${ru(round(b * b - half2))} = ${ru(h)}.`,
+        value: h,
+      },
     ];
   },
 
@@ -184,11 +205,9 @@ export const P03_46: Prototype = {
 
   poModeli: (p) => {
     const h = num(p, 'h');
-    const b = num(p, 'b');
-    const a2 = 2 * (b * b - h * h);
-    const a = Math.sqrt(a2);
-    const body = regularPyramidByEdge(4, a, h);
-    return polyhedronVolume(body);
+    /* Сторона подбирается по настоящему боковому ребру, объём — по граням. */
+    const a = solveBySearch(num(p, 'b'), (x) => lateralEdge(4, x, h));
+    return polyhedronVolume(regularPyramidByEdge(4, a, h));
   },
 
   chertezh: () =>
@@ -252,12 +271,10 @@ export const P03_47: Prototype = {
   },
 
   poModeli: (p) => {
-    const k = num(p, 'k');
-    const sc = num(p, 'sc');
-    const h = Math.sqrt(sc * sc - k * k);
-    const a = k * Math.SQRT2;
-    const body = regularPyramidByEdge(4, a, h);
-    return polyhedronVolume(body);
+    /* Сторона k√2 — из условия; высота подбирается по боковому ребру SC. */
+    const a = num(p, 'k') * Math.SQRT2;
+    const h = heightByLateral(4, a, num(p, 'sc'));
+    return polyhedronVolume(regularPyramidByEdge(4, a, h));
   },
 
   chertezh: () =>
@@ -379,13 +396,7 @@ export const P03_49: Prototype = {
     return Math.sqrt(b * b - (a * a) / 3);
   },
 
-  poModeli: (p) => {
-    const a = num(p, 'a');
-    const b = num(p, 'b');
-    const h = Math.sqrt(b * b - (a * a) / 3);
-    const body = regularPyramidByEdge(3, a, h);
-    return point(body, 'S')[2];
-  },
+  poModeli: (p) => heightByLateral(3, num(p, 'a'), num(p, 'b')),
 
   chertezh: () =>
     shapeHeightOnly(
@@ -396,11 +407,22 @@ export const P03_49: Prototype = {
   shagi: (p) => {
     const a = num(p, 'a');
     const b = num(p, 'b');
-    const r = circumradius(3, a);
-    const h = Math.sqrt(b * b - r * r);
+    /* Радиус иррационален, а его квадрат — нет: в теореме Пифагора
+       нужен именно квадрат, поэтому десятичное приближение радиуса
+       в разбор не идёт. */
+    const r2 = round((a * a) / 3);
+    const h = round(Math.sqrt(b * b - r2));
     return [
-      { text: `Радиус окружности, описанной около основания: ${ru(a)} / √3 = ${ru(r)}.`, value: r },
-      { text: `Высота: √(${ru(b)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
+      {
+        text:
+          `Радиус окружности, описанной около основания: ${ru(a)} / √3. ` +
+          `Его квадрат: ${ru(a)}² : 3 = ${ru(r2)}.`,
+        value: r2,
+      },
+      {
+        text: `Высота: √(${ru(b)}² − ${ru(r2)}) = √${ru(round(b * b - r2))} = ${ru(h)}.`,
+        value: h,
+      },
     ];
   },
 
@@ -503,13 +525,7 @@ export const P03_51: Prototype = {
     return Math.sqrt(b * b - a * a);
   },
 
-  poModeli: (p) => {
-    const a = num(p, 'a');
-    const b = num(p, 'b');
-    const h = Math.sqrt(b * b - a * a);
-    const body = regularPyramidByEdge(6, a, h);
-    return point(body, 'S')[2];
-  },
+  poModeli: (p) => heightByLateral(6, num(p, 'a'), num(p, 'b')),
 
   chertezh: () =>
     shapeHeightOnly(
@@ -523,7 +539,7 @@ export const P03_51: Prototype = {
     return [
       { text: 'Радиус окружности, описанной около правильного шестиугольника, равен его стороне.' },
       {
-        text: `Высота: √(${ru(b)}² − ${ru(a)}²) = ${ru(Math.sqrt(b * b - a * a))}.`,
+        text: `Высота: √(${ru(b)}² − ${ru(a)}²) = ${ru(round(Math.sqrt(b * b - a * a)))}.`,
         value: Math.sqrt(b * b - a * a),
       },
     ];

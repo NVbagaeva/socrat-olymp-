@@ -13,6 +13,7 @@ import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { letters, ru, segment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
+import { solveBySearch } from '../search';
 
 /** Три ребра условия строкой: «DD₁=2, C₁D₁=6, B₁C₁=3». */
 function edgesText(p: Params): string {
@@ -220,10 +221,13 @@ export const P03_02: Prototype = {
 
   poModeli: (p) => {
     const d = Math.sqrt(3 * num(p, 'k') * num(p, 'k'));
-    const a = d / Math.sqrt(3);
-    const body = boxOf(a, a, a);
-    /* Объём считается по граням модели, а не перемножением рёбер. */
-    return polyhedronVolume(body);
+    /* Ребро подбирается так, чтобы настоящая диагональ куба стала равна
+       данной, — без деления на √3; объём считается по граням модели. */
+    const a = solveBySearch(d, (x) => {
+      const cube = boxOf(x, x, x);
+      return distance(vertex(cube, 'A'), vertex(cube, 'C1'));
+    });
+    return polyhedronVolume(boxOf(a, a, a));
   },
 
   chertezh: () => shapeLines('cube', 'Куб с диагональю', [['A', 'C1']], { letters: false }),
