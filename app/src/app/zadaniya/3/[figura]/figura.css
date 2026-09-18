@@ -23,3 +23,15 @@
 .figura-head {
   margin-bottom: var(--space-6);
 }
+
+/* На узком экране шапка встаёт в одну колонку, и чертёж во всю
+   ширину отжимает ленту вкладок за нижний край экрана. Здесь он
+   ограничен по высоте: селектор длиннее правила движка, иначе
+   ширина взяла бы верх. */
+@media (max-width: 1023.98px) {
+  .figura-head .section-head__media .solid-wrap .solid {
+    width: auto;
+    max-height: 200px;
+    margin: 0 auto;
+  }
+}
