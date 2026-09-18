@@ -237,6 +237,39 @@ function checkReport(name, withAnswers) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Ссылки с сайта: карточка материала должна вести на живой файл
+   ══════════════════════════════════════════════════════════ */
+
+/* Карточка «Для репетиторов» без поля file рисуется приглушённой
+   и не нажимается — так и было со «PDF-практикумом», пока сборник
+   не собрали. Обратная беда тише и хуже: поле есть, а файла нет,
+   и кнопка отдаёт 404. Проверяем прямо по конфигу разделов.
+
+   sections.ts на TypeScript, из служебного скрипта его не
+   импортировать, поэтому пути вынимаются разбором текста. */
+function checkSiteLinks() {
+  const file = path.join(APP, 'src', 'content', 'sections.ts');
+  if (!fs.existsSync(file)) { fail('sections.ts: файла нет'); return; }
+  const source = fs.readFileSync(file, 'utf8');
+
+  const paths = [...source.matchAll(/^\s*file:\s*'([^']+)'/gm)].map((m) => m[1]);
+  if (!paths.length) {
+    fail('sections.ts: ни одна карточка материалов не ведёт на файл');
+    return;
+  }
+
+  paths.forEach((href) => {
+    /* Путь в конфиге — от корня сайта, файл лежит в app/public. */
+    const target = path.join(APP, 'public', href.replace(/^\//, ''));
+    if (!fs.existsSync(target)) {
+      fail('карточка ведёт на ' + href + ', а файла в app/public нет');
+      return;
+    }
+    console.log('  ссылка с сайта: ' + href + ' — файл на месте');
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
    Прогон
    ══════════════════════════════════════════════════════════ */
 const files = [
@@ -259,6 +292,8 @@ files.forEach((file) => {
   checkReport(file.name, file.answers);
   console.log('  проверен ' + file.name + (withKatex ? '' : ' (черновик, без KaTeX)'));
 });
+
+checkSiteLinks();
 
 if (errors.length) {
   console.error('\nнарушений: ' + errors.length);
