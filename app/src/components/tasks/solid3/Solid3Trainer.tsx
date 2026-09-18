@@ -1,31 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
-import {
-  ROUND_SIZE,
-  buildRound,
-  otherVariant,
-  seeded,
-  type RoundItem,
-} from '@/lib/zadanie3/podhod';
+import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
 import { answerMatches, openText } from '@/lib/zadanie3/secret';
+import { restartZ3Round, swapZ3Task, useZ3Round } from '@/lib/zadanie3/useRound';
 import { Solid3Stats } from './Solid3Stats';
 
 export interface Solid3TrainerProps {
   pool: Pool;
+  /** Имя подхода в памяти вкладки: у каждого раздела своё. */
+  roundKey: string;
 }
 
 /** Смешанный режим: не тип, а все типы сразу. */
 const MIX = 'mix';
-
-/** Зерно для подхода. Берётся только в эффекте или в обработчике. */
-function freshSeed(): number {
-  return (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
-}
 
 /**
  * Тренажёр задания №3.
@@ -34,12 +26,12 @@ function freshSeed(): number {
  * чертежи нарисованы движком — на сборке. Ответы уехали вниз только
  * отпечатками, разборы закрытыми, и раскрываются по просьбе ученика.
  *
- * Порядок подхода собирается после монтирования, в эффекте: при
- * отрисовке компонент часов не спрашивает и случайных чисел не
- * берёт, поэтому разметка сервера и первая отрисовка в браузере
- * совпадают.
+ * Порядок подхода собирает хранилище в useRound: там же берётся и
+ * зерно. Компонент при отрисовке ни часов, ни случайных чисел не
+ * спрашивает, поэтому разметка сервера и первая отрисовка в
+ * браузере совпадают, а подход не пересобирается сам собой.
  */
-export function Solid3Trainer({ pool }: Solid3TrainerProps) {
+export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   const progress = useZ3Progress();
   const [mode, setMode] = useState<string>(MIX);
   /* Повторение ошибок — отдельный режим: подход собирается только из
@@ -48,9 +40,6 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
 
   const byId = useMemo(() => new Map(pool.kinds.map((kind) => [kind.id, kind])), [pool]);
 
-  const [order, setOrder] = useState<RoundItem[]>([]);
-  /* Счётчик «начать заново»: меняется он — подход пересобирается. */
-  const [again, setAgain] = useState(0);
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
@@ -102,15 +91,11 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
       )
     : ROUND_SIZE;
 
-  useEffect(() => {
-    setOrder(buildRound(source, seeded(freshSeed()), size));
-    setIndex(0);
-    setValue('');
-    setChecked(null);
-    setSolution(false);
-    setMissed(false);
-    started.current = Date.now();
-  }, [source, size, again]);
+  /* Ключ подхода включает режим и список ошибок: сменил фильтр —
+     собрался другой подход, а прежний остался лежать и вернётся,
+     если переключиться назад. */
+  const key = `${roundKey}:${repeat ? `mistakes:${mistakesKey}` : mode}`;
+  const order = useZ3Round(key, source, size);
 
   const current: RoundItem | undefined = order[index];
   const kind: PoolKind | undefined = current === undefined ? undefined : byId.get(current.kind);
@@ -137,6 +122,8 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
   function choose(next: string) {
     setMode(next);
     setRepeat(false);
+    setIndex(0);
+    reset();
   }
 
   function check() {
@@ -157,12 +144,9 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
     if (kind === undefined || current === undefined) {
       return;
     }
-    const n = otherVariant(kind.variants, current.n, seeded(freshSeed()));
-    setOrder((prev) => {
-      const next = [...prev];
-      next[index] = { kind: current.kind, n };
-      return next;
-    });
+    const seed = (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
+    const n = otherVariant(kind.variants, current.n, seeded(seed));
+    swapZ3Task(key, index, { kind: current.kind, n });
     reset();
   }
 
@@ -299,7 +283,14 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
             <Button variant="ghost" onClick={() => go(index + 1)} disabled={index >= total - 1}>
               Следующее →
             </Button>
-            <Button variant="ghost" onClick={() => setAgain((n) => n + 1)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                restartZ3Round(key);
+                setIndex(0);
+                reset();
+              }}
+            >
               Начать заново
             </Button>
           </div>
@@ -309,7 +300,15 @@ export function Solid3Trainer({ pool }: Solid3TrainerProps) {
       <Solid3Stats
         pool={pool}
         progress={progress}
-        onRepeat={mistakes.length === 0 ? null : () => setRepeat(true)}
+        onRepeat={
+          mistakes.length === 0
+            ? null
+            : () => {
+                setRepeat(true);
+                setIndex(0);
+                reset();
+              }
+        }
         onGoKind={choose}
       />
     </section>

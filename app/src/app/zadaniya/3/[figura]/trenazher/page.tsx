@@ -31,5 +31,5 @@ export default async function TrenazherTab({ params }: { params: Params }) {
   if (razdel === undefined) {
     notFound();
   }
-  return <Solid3Trainer pool={razdelPool(razdel)} />;
+  return <Solid3Trainer pool={razdelPool(razdel)} roundKey={`z3:${razdel.slug}`} />;
 }
