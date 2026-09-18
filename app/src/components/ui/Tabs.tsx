@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import Link from 'next/link';
 import { useId, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
@@ -8,6 +9,13 @@ export interface TabItem {
   id: string;
   label: ReactNode;
   disabled?: boolean;
+  /**
+   * Адрес вкладки. Задан — вкладка становится ссылкой: её можно
+   * открыть в новой вкладке браузера, скопировать и вернуться к ней
+   * кнопкой «назад». Не задан — вкладка переключает содержимое на
+   * месте, как было.
+   */
+  href?: string;
 }
 
 export interface TabsProps {
@@ -27,7 +35,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, label, classNa
   const first = items[0];
   const [inner, setInner] = useState(defaultValue ?? first?.id ?? '');
   const active = value ?? inner;
-  const refs = useRef(new Map<string, HTMLButtonElement>());
+  const refs = useRef(new Map<string, HTMLElement>());
 
   const select = (id: string) => {
     if (value === undefined) setInner(id);
@@ -57,20 +65,35 @@ export function Tabs({ items, value, defaultValue, onValueChange, label, classNa
     <div className={clsx('tabs', className)} role="tablist" aria-label={label} onKeyDown={move}>
       {items.map((item) => {
         const selected = item.id === active;
+        const common = {
+          role: 'tab' as const,
+          id: `${autoId}-tab-${item.id}`,
+          'aria-controls': `${autoId}-panel-${item.id}`,
+          'aria-selected': selected,
+          tabIndex: selected ? 0 : -1,
+          ref: (node: HTMLElement | null) => {
+            if (node) refs.current.set(item.id, node);
+            else refs.current.delete(item.id);
+          },
+        };
+
+        /* Вкладка с адресом — ссылка: переход настоящий, поэтому
+           работают «назад», «открыть в новой вкладке» и копирование
+           адреса. Вид и обход стрелками у неё те же. */
+        if (item.href !== undefined && !item.disabled) {
+          return (
+            <Link key={item.id} href={item.href} {...common}>
+              {item.label}
+            </Link>
+          );
+        }
+
         return (
           <button
             key={item.id}
             type="button"
-            role="tab"
-            id={`${autoId}-tab-${item.id}`}
-            aria-controls={`${autoId}-panel-${item.id}`}
-            aria-selected={selected}
-            tabIndex={selected ? 0 : -1}
             disabled={item.disabled}
-            ref={(node) => {
-              if (node) refs.current.set(item.id, node);
-              else refs.current.delete(item.id);
-            }}
+            {...common}
             onClick={() => select(item.id)}
           >
             {item.label}
