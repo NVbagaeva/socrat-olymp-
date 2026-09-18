@@ -27,8 +27,7 @@ const SHIFT = 24;
  * Экран банка заданий: оболочка, список и окно выбора подтемы.
  *
  * Состояние окна живёт здесь, а не внутри списка, потому что от него
- * зависит и сайдбар: пока окно открыто, задание в столбце отмечено
- * текущим — по нему видно, о каком задании речь.
+ * зависит место окна на экране: оно встаёт по открытой карточке.
  */
 export function BankScreen({ dialog }: BankScreenProps) {
   /* Координаты открытой карточки. null — окно закрыто. */
@@ -49,7 +48,7 @@ export function BankScreen({ dialog }: BankScreenProps) {
 
   return (
     /* Поиск в шапке выключен: на этой странице фильтрует свой. */
-    <AppShell active="tasks" task={open ? dialog.slug : undefined} search={false}>
+    <AppShell active="tasks" search={false}>
       {/* Шапка, поиск и сетка живут в клиентской части: фильтрация
           идёт в браузере, серверу тут делать нечего. */}
       <TaskBank dialogSlug={dialog.slug} onOpenDialog={openDialog} />

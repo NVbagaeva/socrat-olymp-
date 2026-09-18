@@ -22,7 +22,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
   const base = `${tasksPage.href}/${section.slug}`;
 
   return (
-    <AppShell active="tasks" task={section.slug}>
+    <AppShell active="tasks">
       <main className="app-main">
         <Breadcrumbs
           items={[

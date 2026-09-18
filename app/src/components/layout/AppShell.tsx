@@ -14,8 +14,6 @@ import { demoUser } from '@/data/demo';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
-  /** slug задания, открытого в сайдбаре. */
-  task?: string;
   /** Поиск в шапке. false — у страницы свой, второго поля не нужно. */
   search?: boolean;
   children: React.ReactNode;
@@ -26,8 +24,10 @@ function withActive(items: NavItem[], active: string | undefined): NavItem[] {
 }
 
 /* Список заданий в сайдбаре целиком считается из конфига: номера,
-   названия и статус берутся оттуда же, откуда карточки банка. */
-function taskItems(current: string | undefined): NavItem[] {
+   названия и статус берутся оттуда же, откуда карточки банка.
+   Текущий пункт здесь не отмечается: сайдбар сам сверяет адрес
+   пункта с открытым маршрутом, и странице сообщать об этом нечего. */
+function taskItems(): NavItem[] {
   return tasks.map((task) => ({
     id: task.slug,
     no: task.no,
@@ -37,7 +37,6 @@ function taskItems(current: string | undefined): NavItem[] {
     ...(task.shortTitle !== undefined ? { short: task.shortTitle } : {}),
     href: `${tasksPage.href}/${task.slug}`,
     disabled: task.status !== 'active',
-    active: task.slug === current,
   }));
 }
 
@@ -49,7 +48,7 @@ function taskItems(current: string | undefined): NavItem[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-export function AppShell({ active, task, search = true, children }: AppShellProps) {
+export function AppShell({ active, search = true, children }: AppShellProps) {
   const bottomItems = withActive(
     [...appNavPrimary, appNavMorePage],
     bottomNavActive(active),
@@ -61,7 +60,7 @@ export function AppShell({ active, task, search = true, children }: AppShellProp
         brand="Будет на ЕГЭ"
         caption={{ title: 'Задания ЕГЭ', subtitle: 'Профильная математика' }}
         label="Задания ЕГЭ"
-        items={taskItems(task)}
+        items={taskItems()}
         secondaryItems={withActive(sidebarExtras, active)}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
