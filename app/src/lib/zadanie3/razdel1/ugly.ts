@@ -177,6 +177,7 @@ export const P03_06: Prototype = {
   dopustimo: differentLines,
   otvet: () => 90,
   poModeli: cubeAngle,
+  zadacha: (p) => cubeZadacha(p, 90),
   chertezh: (p) => cubeChertezh(p, 90),
   chertezhRazbora: (p) => cubeChertezhRazbora(p, 90),
   shagi: (p) =>
@@ -213,6 +214,7 @@ export const P03_07: Prototype = {
   dopustimo: differentLines,
   otvet: () => 45,
   poModeli: cubeAngle,
+  zadacha: (p) => cubeZadacha(p, 45),
   chertezh: (p) => cubeChertezh(p, 45),
   chertezhRazbora: (p) => cubeChertezhRazbora(p, 45),
   shagi: (p) =>
@@ -250,6 +252,7 @@ export const P03_08: Prototype = {
   dopustimo: differentLines,
   otvet: () => 60,
   poModeli: cubeAngle,
+  zadacha: (p) => cubeZadacha(p, 60),
   chertezh: (p) => cubeChertezh(p, 60),
   chertezhRazbora: (p) => cubeChertezhRazbora(p, 60),
   shagi: (p) =>
