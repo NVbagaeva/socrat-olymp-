@@ -109,6 +109,85 @@ export function previewScene(id: FunctionTypeId) {
 }
 
 
+/* ── Миниатюры навыков генератора ─────────────────────────────────
+   Навык — набор прототипов; по одной картинке на набор: что дано
+   и что ищут. Искомая координата показана пунктиром до оси — тем же
+   приёмом, что катеты в разборе. Числа — параметры чертежа. */
+
+const SKILL_HALF = 3;
+
+/** Прямая для 12.A и 12.B и точка на ней в узле сетки. */
+const SKILL_LINE = { k: 0.6, b: 0.5 };
+const SKILL_PROBE = { x: 2, y: 1.7 };
+
+/** Две прямые для 12.C и 12.D; пересекаются внутри окна. */
+const SKILL_PAIR = [
+  { k: 0.75, b: 0.5 },
+  { k: -0.5, b: 2 },
+];
+const SKILL_CROSS = { x: 1.2, y: 1.4 };
+
+function dashed(from: [number, number], to: [number, number]) {
+  return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
+}
+
+export function generatorSkillScene(setId: string) {
+  const base = {
+    window: squareWindow(SKILL_HALF),
+    grid: { step: 1, show: false },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  const probe = { ...SKILL_PROBE, style: 'solid', color: 'lineB', label: null };
+  const cross = { ...SKILL_CROSS, style: 'solid', color: 'lineB', label: null };
+
+  if (setId === '12.A') {
+    /* Дан x — ищут y: пунктир от оси абсцисс к точке. */
+    return {
+      ...base,
+      curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }],
+      points: [probe],
+      shapes: [dashed([SKILL_PROBE.x, 0], [SKILL_PROBE.x, SKILL_PROBE.y])],
+    };
+  }
+  if (setId === '12.B') {
+    /* Дан y — ищут x: пунктир от оси ординат к точке. */
+    return {
+      ...base,
+      curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }],
+      points: [probe],
+      shapes: [dashed([0, SKILL_PROBE.y], [SKILL_PROBE.x, SKILL_PROBE.y])],
+    };
+  }
+  const pair = [
+    { type: 'line', ...SKILL_PAIR[0], color: 'lineA', label: null },
+    { type: 'line', ...SKILL_PAIR[1], color: 'lineB', label: null },
+  ];
+  if (setId === '12.C') {
+    return {
+      ...base,
+      curves: pair,
+      points: [cross],
+      shapes: [dashed([SKILL_CROSS.x, 0], [SKILL_CROSS.x, SKILL_CROSS.y])],
+    };
+  }
+  if (setId === '12.D') {
+    return {
+      ...base,
+      curves: pair,
+      points: [cross],
+      shapes: [dashed([0, SKILL_CROSS.y], [SKILL_CROSS.x, SKILL_CROSS.y])],
+    };
+  }
+  /* Набор без своей картинки: одна прямая, без точек. Такого набора
+     в данных нет — ветка на случай, если появится. */
+  return { ...base, curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }] };
+}
+
+
 /* ── Чертежи раздела «Какие бывают функции» ───────────────────────
    Четыре известных графика. В отличие от миниатюр типов сетка и
    подписи осей включены: карточка заметно крупнее значка, и по

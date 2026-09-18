@@ -1,0 +1,398 @@
+/* ── Вкладка «Генератор» ─────────────────────────────────────────
+   Заголовок, два шага слева, сводка справа, панель запуска внизу.
+   Ниже 1024px сводка уходит под шаги, панель прилипает к низу.
+   Карточки, галочка и варианты повторяют карточки окна выбора типа
+   функции: та же рамка, то же скругление, тот же выбранный вид. */
+
+.gen {
+  display: grid;
+  gap: var(--space-6);
+}
+.gen__title {
+  color: var(--color-text-brand);
+}
+
+.gen__layout {
+  display: grid;
+  gap: var(--space-6);
+}
+.gen__steps {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* ── Шаг ──────────────────────────────────────────────────────── */
+
+.gen-step {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.gen-step__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+}
+/* Номер шага — тот же кружок, что у навыков подготовки. */
+.gen-step__no {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.gen-step__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.gen-step__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.gen-step__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Карточки навыков ─────────────────────────────────────────── */
+
+.gen-skills {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.gen-skill {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.gen-skill:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.gen-skill:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.gen-skill.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.gen-skill__check {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.gen-skill__check svg {
+  width: 14px;
+  height: 14px;
+}
+.gen-skill__chart {
+  display: block;
+  width: 100%;
+  max-width: 120px;
+}
+.gen-skill__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.gen-skill__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-brand);
+  hyphens: auto;
+}
+.gen-skill__code {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Миниатюра из движка: подложку холста движок берёт из токена
+   поверхности; на голубой выбранной карточке белый квадрат читался
+   бы заплаткой, поэтому в пределах миниатюры поверхность прозрачная. */
+.gen-chart {
+  --color-surface: var(--color-transparent);
+  display: block;
+  width: 100%;
+}
+.gen-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Линии не худеют вместе с чертежом. */
+.gen-chart svg path,
+.gen-chart svg line,
+.gen-chart svg polyline,
+.gen-chart svg circle {
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Параметры ────────────────────────────────────────────────── */
+
+.gen-params {
+  display: grid;
+  gap: var(--space-4);
+}
+.gen-param {
+  display: grid;
+  gap: var(--space-2);
+}
+.gen-param__label {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.gen-param__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Вариант в группе: та же плашка, что карточка, только меньше.
+   Выключенный вариант приглушён, как закрытая карточка семейства. */
+.gen-opt {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.gen-opt:hover {
+  border-color: var(--color-accent-soft);
+}
+.gen-opt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.gen-opt.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.gen-opt:disabled {
+  cursor: default;
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border);
+}
+.gen-opt__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.gen-opt.is-checked .gen-opt__title {
+  color: var(--color-primary);
+}
+.gen-opt__lead {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.gen-opt:disabled .gen-opt__lead {
+  color: inherit;
+}
+/* Числа: варианты одной ширины, число по центру. */
+.gen-param__options--compact .gen-opt {
+  min-width: 56px;
+  text-align: center;
+}
+
+/* ── Сводка ───────────────────────────────────────────────────── */
+
+.gen-summary {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  justify-items: start;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.gen-summary__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.gen-summary__skill {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.gen-summary__count {
+  margin-top: calc(-1 * var(--space-2));
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.gen-summary__chart {
+  width: 100%;
+  max-width: 240px;
+  justify-self: center;
+}
+
+/* Плашка под чертежом: голубая подложка, значок слева. */
+.gen-note {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.gen-note__ico {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border-info);
+  color: var(--color-primary);
+}
+.gen-note__ico svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Панель запуска ───────────────────────────────────────────── */
+
+.gen-bar {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.gen-bar__launch {
+  display: flex;
+  gap: var(--space-2);
+}
+.gen-bar__summary {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Раскладка по ширинам ────────────────────────────────────── */
+/* Медиазапросы идут последними: правила в них перекрывают базовые
+   только за счёт порядка. */
+
+@media (min-width: 1024px) {
+  .gen__layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
+  .gen-summary {
+    position: sticky;
+    top: var(--space-6);
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .gen-skills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Панель прилипает к низу экрана над нижней навигацией: её высота
+     задана тем же токеном, что и у самой панели навигации. */
+  .gen-bar {
+    position: sticky;
+    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Одна колонка: карточка — строка, миниатюра справа от текста. */
+  .gen-skills {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gen-skill {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding-right: var(--space-10);
+  }
+  .gen-skill__text {
+    order: -1;
+  }
+  .gen-skill__chart {
+    width: 64px;
+  }
+  .gen-skill__check {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  /* Панель ниже: переключатель и сводка в одну строку, кнопка во
+     всю ширину под ними — в строку с переключателем она не
+     помещается, а три строки забирали бы треть экрана. */
+  .gen-bar {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+  .gen-bar__summary {
+    order: -1;
+    grid-column: 2;
+  }
+  .gen-bar__start {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

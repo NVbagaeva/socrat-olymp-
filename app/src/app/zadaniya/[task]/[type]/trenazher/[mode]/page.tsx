@@ -13,6 +13,7 @@ import '../../../section.css';
 import '../../topic.css';
 import '../../prep.css';
 import '../../trainer.css';
+import '../../generator.css';
 
 /* Адреса перечислимы на сборке: открытые подтемы × режимы. */
 export function generateStaticParams() {
