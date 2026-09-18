@@ -33,8 +33,8 @@ on:
       target:
         description: Что собирать
         type: choice
-        default: sample
-        options: [sample, full]
+        default: full
+        options: [full, sample]
 
 # Коммит lock-файла и готовых PDF — это push в ту же ветку.
 permissions:
@@ -100,14 +100,25 @@ jobs:
         working-directory: app
         run: pnpm validate:graph
 
+      # По push собирается весь сборник: это и есть предмет работы.
+      # Кнопкой можно попросить только образец — на нём быстрее
+      # смотреть оформление.
       - name: Собрать PDF
         working-directory: app
         run: |
-          if [ "${{ inputs.target }}" = "full" ]; then
-            pnpm build:pdf-12
-          else
+          if [ "${{ inputs.target }}" = "sample" ]; then
             pnpm build:pdf-12-sample
+          else
+            pnpm build:pdf-12
           fi
+
+      # Проверка идёт по готовым файлам и по отчёту сборки: состав,
+      # сквозная нумерация, ответы против движка, формулы, вшитые
+      # шрифты, отсутствие цвета в ч/б, ссылки, заглушки.
+      - name: Проверить сборник
+        if: ${{ inputs.target != 'sample' }}
+        working-directory: app
+        run: pnpm test:pdf-12
 
       # Файлы уезжают архивом на страницу запуска: скачать можно
       # сразу, локальная копия репозитория для этого не нужна.

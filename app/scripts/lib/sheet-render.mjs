@@ -62,15 +62,85 @@ function readSheetAsset(name) {
   return fs.readFileSync(path.join(SHEET, name), 'utf8');
 }
 
-/** Собранный HTML одного листа. Печатать его не обязательно. */
+/* ══════════════════════════════════════════════════════════
+   KaTeX
+   ══════════════════════════════════════════════════════════
+   Формула в разметке живёт тем же способом, что и на сайте:
+   <span class="math" data-tex="…">. Внутри лежит запасной набор
+   из graph/math.js, поэтому лист читается и без KaTeX.
+
+   Подстановка вёрстки — graph/katex-upgrade.js, тот же модуль, что
+   работает в приложении. Он ES-модуль, а в документ нужен обычный
+   script, поэтому хвост с экспортами срезается — и результат
+   проверяется, иначе молча уехал бы лист без формул.
+*/
+function upgradeScript() {
+  const source = fs.readFileSync(
+    path.join(APP, 'src', 'lib', 'graph', 'katex-upgrade.js'), 'utf8');
+
+  /* Срезаем всё от объявления api: дальше только экспорты. */
+  const cut = source.indexOf('const api =');
+  if (cut < 0) { throw new Error('katex-upgrade.js: не найден хвост с экспортами'); }
+  const body = source.slice(0, cut);
+  if (/\bexport\b/.test(body)) {
+    throw new Error('katex-upgrade.js: в теле остался export, обычным скриптом не выйдет');
+  }
+  if (!/function upgrade\s*\(/.test(body)) {
+    throw new Error('katex-upgrade.js: функция upgrade не найдена');
+  }
+
+  return '(function(){' + body + '\nwindow.sheetTypeset = function (root) {' +
+    ' return upgrade(root, window.katex); };})();';
+}
+
+/** KaTeX из зависимостей проекта: код, стили и шрифты одним куском. */
+function katexAssets() {
+  const require = createRequire(import.meta.url);
+  let dist;
+  try {
+    dist = path.join(path.dirname(require.resolve('katex/package.json')), 'dist');
+  } catch {
+    return null;                    /* пакета нет — работает запасной набор */
+  }
+
+  const js = fs.readFileSync(path.join(dist, 'katex.min.js'), 'utf8');
+  let css = fs.readFileSync(path.join(dist, 'katex.min.css'), 'utf8');
+
+  /* Шрифты вшиваются в документ: сети у печати нет. Из трёх форматов
+     берём только woff2 — Chromium его понимает, а woff и ttf утроили
+     бы вес документа ни за чем. */
+  css = css.replace(/src:[^;}]+/g, (src) => {
+    const found = /url\(fonts\/([^)]+\.woff2)\)/.exec(src);
+    if (!found) { return src; }
+    const file = path.join(dist, 'fonts', found[1]);
+    if (!fs.existsSync(file)) { return src; }
+    const data = fs.readFileSync(file).toString('base64');
+    return 'src:url(data:font/woff2;base64,' + data + ') format("woff2")';
+  });
+
+  return { js, css };
+}
+
+/**
+ * Собранный HTML одного листа. Печатать его не обязательно.
+ *
+ * Второе значение говорит, набраны формулы KaTeX или запасным
+ * набором: сборка полного сборника требует KaTeX и без него падает,
+ * а образцу запасного достаточно.
+ */
 export function buildHtml(spec, extraCss) {
   const graphCss = fs.readFileSync(path.join(APP, 'src', 'lib', 'graph', 'graph.css'), 'utf8');
-  return sheet.buildDocument(spec, {
+  const katex = katexAssets();
+
+  const html = sheet.buildDocument(spec, {
     fontCss: fontCss(),
-    css: readSheetAsset('theme.css') + '\n' + graphCss + '\n' + readSheetAsset('sheet.css'),
+    css: readSheetAsset('theme.css') + '\n' + graphCss + '\n' + readSheetAsset('sheet.css') +
+      (katex ? '\n' + katex.css : ''),
     extraCss: extraCss || '',
-    script: readSheetAsset('paginate.js'),
+    script: (katex ? katex.js + '\n' + upgradeScript() + '\n' : '') + readSheetAsset('paginate.js'),
   });
+
+  return { html, katex: Boolean(katex) };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -114,7 +184,16 @@ async function loadPlaywright() {
  */
 export async function renderPdf(spec, file, options = {}) {
   const { chromium } = await loadPlaywright();
-  const html = buildHtml(spec, options.extraCss);
+  const built = buildHtml(spec, options.extraCss);
+  const html = built.html;
+
+  if (options.requireKatex && !built.katex) {
+    throw new Error(
+      'KaTeX не найден, а сборка требует его. Поставьте зависимости:\n' +
+      '    pnpm install\n' +
+      'Либо соберите файлы в GitHub Actions — там реестр npm доступен.'
+    );
+  }
 
   /* HTML пишется на диск: так его можно открыть глазами ровно в том
      виде, в каком его печатал Chromium. */
@@ -134,7 +213,16 @@ export async function renderPdf(spec, file, options = {}) {
     const report = await page.evaluate('window.sheetPagination');
 
     if (report.error) { throw new Error('пагинатор: ' + report.error); }
+    report.katex = built.katex;
+    report.formulas = report.formulas || 0;
     if (problems.length) { throw new Error('ошибка на странице: ' + problems.join('; ')); }
+
+    /* Отчёт кладётся рядом с промежуточным HTML: по нему работают
+       автотесты, и им не нужно поднимать браузер второй раз. */
+    if (options.keepHtml) {
+      fs.writeFileSync(options.keepHtml.replace(/\.html$/, '.json'),
+        JSON.stringify(report, null, 1));
+    }
 
     fs.mkdirSync(path.dirname(file), { recursive: true });
     await page.pdf({

@@ -126,10 +126,42 @@
       if (slot) { slot.textContent = (index + 1) + ' / ' + pages.length; }
     });
 
+    /* Отчёт о ГОТОВОМ документе, а не о спецификации: проверять надо
+       то, что отрисовано. По нему автотесты сверяют состав, нумерацию
+       и ответы, поэтому здесь снимаются факты, а не оценки. */
+    function textOf(node) {
+      return (node.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    var answerRows = [];
+    Array.prototype.forEach.call(host.querySelectorAll('.sheet-answers-table tr'),
+      function (row) {
+        var cells = row.children;
+        for (var c = 0; c + 1 < cells.length; c += 2) {
+          var no = textOf(cells[c]);
+          if (no) { answerRows.push({ no: Number(no), answer: textOf(cells[c + 1]) }); }
+        }
+      });
+
     return {
       pages: pages.length,
       tasks: host.querySelectorAll('.sheet-task').length,
-      overflowing: overflowing
+      overflowing: overflowing,
+      formulas: host.querySelectorAll('.math[data-tex]').length,
+      formulasTypeset: host.querySelectorAll('.math[data-katex="on"]').length,
+      formulasFailed: host.querySelectorAll('.math[data-katex="error"]').length,
+      taskIds: Array.prototype.map.call(host.querySelectorAll('.sheet-task'),
+        function (node) { return node.getAttribute('data-task'); }),
+      taskNumbers: Array.prototype.map.call(host.querySelectorAll('.sheet-task-no'),
+        function (node) { return Number(textOf(node)); }),
+      answerRows: answerRows,
+      solutions: host.querySelectorAll('.sheet-solution').length,
+      answerLines: host.querySelectorAll('.sheet-answer-line').length,
+      links: Array.prototype.map.call(host.querySelectorAll('.sheet-social-item a'),
+        function (node) { return node.getAttribute('href'); }),
+      pageNumbers: Array.prototype.map.call(host.querySelectorAll('[data-page-number]'),
+        function (node) { return textOf(node); }),
+      text: textOf(host)
     };
   }
 
@@ -144,7 +176,42 @@
       : Promise.resolve();
 
     ready.then(function () {
+      /* Формулы набираются ДО обмера: вёрстка KaTeX выше исходной
+         разметки, и по ненабранной высоте карточка обмерялась бы
+         неверно — задача поехала бы через разрыв страницы.
+
+         Набор идёт по всему документу сразу, пока куски ещё лежат
+         в разметке спецификации, а не по страницам: иначе пришлось бы
+         пересчитывать высоты после каждой вставки. */
+      if (typeof window.sheetTypeset === 'function') {
+        var box = document.createElement('div');
+        box.style.cssText = 'position:absolute;left:-9999mm;top:0';
+        box.innerHTML = (spec.items || []).join('');
+        document.body.appendChild(box);
+        window.sheetTypeset(box);
+        var typeset = box.querySelectorAll('.sheet-item');
+        spec.items = Array.prototype.map.call(typeset, function (node) {
+          return node.outerHTML;
+        });
+        var opening = document.createElement('div');
+        opening.innerHTML = spec.opening;
+        window.sheetTypeset(opening);
+        spec.opening = opening.innerHTML;
+        document.body.removeChild(box);
+      }
+
       window.sheetPagination = run(spec);
+
+      /* Уже расставленные по страницам формулы — на случай, если
+         какая-то разметка пришла помимо кусков потока. */
+      if (typeof window.sheetTypeset === 'function') {
+        window.sheetTypeset(document.getElementById('sheet-pages'));
+        var host = document.getElementById('sheet-pages');
+        window.sheetPagination.formulasTypeset =
+          host.querySelectorAll('.math[data-katex="on"]').length;
+        window.sheetPagination.formulasFailed =
+          host.querySelectorAll('.math[data-katex="error"]').length;
+      }
     }).catch(function (error) {
       window.sheetPagination = { error: String(error && error.message || error) };
     });
