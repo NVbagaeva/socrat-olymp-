@@ -68,7 +68,7 @@ export default function Stereometria3Page() {
           </div>
 
           <div className="section-head__media">
-            <Solid className="solid3-head__figure" model={thumb('VIII')} />
+            <Solid model={thumb('VIII')} />
             <HandNote className="section-head__note">{stereometria.note}</HandNote>
           </div>
         </header>

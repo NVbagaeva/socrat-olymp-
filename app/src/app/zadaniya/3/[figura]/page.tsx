@@ -70,7 +70,7 @@ export default async function FiguraPage({ params }: { params: Params }) {
           </div>
 
           <div className="section-head__media">
-            <Solid className="solid3-head__figure" model={thumb(razdel.nomer)} />
+            <Solid model={thumb(razdel.nomer)} />
           </div>
         </header>
 
