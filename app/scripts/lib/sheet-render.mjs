@@ -47,15 +47,37 @@ function fontCss() {
   }).join('\n');
 
   /* Рукописный Caveat лежит в подмножестве cyrillic: латиницы и цифр
-     в нём нет, их отрисует запасной курсивный шрифт. Математическая
-     антиква — для формул: цифры в ней не выпадают из строки. */
+     в нём нет, их отрисует запасной курсивный шрифт. */
   return faces + '\n:root{' +
     '--sheet-font-sans:"Inter Sheet",system-ui,-apple-system,sans-serif;' +
     '--sheet-font-hand:"Caveat Sheet",cursive;' +
     '--font:"Inter Sheet",system-ui,sans-serif;' +
-    '--font-math:"STIX Two Text","Cambria Math",Cambria,Charter,Georgia,' +
-      '"Liberation Serif","Times New Roman",serif;' +
     '}\n';
+}
+
+/* Шрифт подписей на чертеже.
+
+   Подписи движка (y = f(x), буквы осей, числа) — это SVG-текст,
+   а не KaTeX, и набираются они математической антиквой из graph.css.
+   Своей антиквы в репозитории нет, поэтому бралась системная:
+   в контейнере Liberation Serif, на другой машине Georgia или
+   Cambria. Файл-то получался согласованным — шрифт вшивается, —
+   но две сборки на двух машинах давали разные чертежи.
+
+   Когда KaTeX доступен, берём его математический шрифт: он уже
+   вшит ради формул, нарисован именно для математики, и подписи
+   на чертеже становятся того же начертания, что переменные
+   в условии. Без KaTeX остаётся прежняя цепочка.
+
+   Правило идёт последним: в graph.css --font-math объявлен в :root,
+   и объявленное позже побеждает при равной специфичности. */
+function mathFontCss(hasKatex) {
+  if (!hasKatex) { return ''; }
+  /* Inter стоит замыкающим намеренно. Если какого-то знака в шрифтах
+     KaTeX не окажется, он придёт из нашего же Inter, а не из системного
+     шрифта машины: начертание тогда не то, зато сборка остаётся
+     одинаковой всюду, и автотест состава шрифтов это видит. */
+  return ':root{--font-math:"KaTeX_Math","KaTeX_Main","Inter Sheet",serif;}\n';
 }
 
 function readSheetAsset(name) {
@@ -135,7 +157,7 @@ export function buildHtml(spec, extraCss) {
   const html = sheet.buildDocument(spec, {
     fontCss: fontCss(),
     css: readSheetAsset('theme.css') + '\n' + graphCss + '\n' + readSheetAsset('sheet.css') +
-      (katex ? '\n' + katex.css : ''),
+      (katex ? '\n' + katex.css : '') + '\n' + mathFontCss(Boolean(katex)),
     extraCss: extraCss || '',
     script: (katex ? katex.js + '\n' + upgradeScript() + '\n' : '') + readSheetAsset('paginate.js'),
   });
