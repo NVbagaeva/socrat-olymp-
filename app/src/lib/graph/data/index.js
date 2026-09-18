@@ -27,4 +27,3 @@ export const prep = [block1, block2, block3, block4, block5, block6];
 /** Прототипы ФИПИ: только это число считается покрытием банка. */
 export const prototypes = [protoA, protoB, protoC, protoD];
 
-export default { prep, prototypes };

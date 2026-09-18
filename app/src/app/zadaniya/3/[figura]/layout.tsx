@@ -47,7 +47,7 @@ export default async function FiguraLayout({
   const variants = razdel.prototipy.reduce((sum, p) => sum + p.varianty.length, 0);
 
   return (
-    <AppShell active="tasks" task={stereometria.slug}>
+    <AppShell active="tasks">
       <main className="app-main">
         <Breadcrumbs
           items={[

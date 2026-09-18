@@ -48,7 +48,7 @@ export default function Stereometria3Page() {
   const total = RAZDELY.reduce((sum, razdel) => sum + razdel.prototipy.length, 0);
 
   return (
-    <AppShell active="tasks" task={stereometria.slug}>
+    <AppShell active="tasks">
       <main className="app-main">
         <Breadcrumbs
           items={[

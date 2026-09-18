@@ -22,6 +22,11 @@ const config = [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      /* Правило зовёт заменить <img> на next/image ради оптимизации
+         картинок на сервере. Сайт собирается статическим экспортом
+         с images.unoptimized, и оптимизировать там некому: <img> с
+         собственным srcSet — честный выбор, а не упущение. */
+      '@next/next/no-img-element': 'off',
     },
   },
 ];
