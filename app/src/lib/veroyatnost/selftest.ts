@@ -17,6 +17,7 @@
  */
 
 import { otvetUchenika, prepOtvet } from './index';
+import { LABIRINT, veroyatnostVyhoda, vyhody } from './labirint';
 import { sealAnswer } from './secret';
 import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
 
@@ -280,4 +281,48 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     duplicates,
     bad,
   };
+}
+
+/* ── Лабиринт паука ──────────────────────────────────────────────── */
+
+/**
+ * Схема лабиринта, как её задал автор: три развилки, пять выходов,
+ * у A, B и C по 0,25, у D и E по 0,125.
+ *
+ * Проверка нужна, потому что дерево лабиринта — единственный источник
+ * и для чертежа, и для ответа задачи 33. Случайная правка дерева
+ * молча поменяла бы ответ; здесь она уронит сборку.
+ */
+const LABIRINT_ZHDEM: Record<string, number> = {
+  A: 0.25,
+  B: 0.25,
+  C: 0.25,
+  D: 0.125,
+  E: 0.125,
+};
+
+export function checkLabirint(): string[] {
+  const problems: string[] = [];
+  const spisok = vyhody(LABIRINT);
+  const zhdem = Object.keys(LABIRINT_ZHDEM);
+
+  if (spisok.join(',') !== zhdem.join(',')) {
+    problems.push(`выходы ${spisok.join(', ')}, а ожидались ${zhdem.join(', ')}`);
+  }
+
+  for (const [imya, nado] of Object.entries(LABIRINT_ZHDEM)) {
+    const est = veroyatnostVyhoda(LABIRINT, imya);
+    if (Math.abs(est - nado) > TOCHNOST) {
+      problems.push(`выход ${imya}: ${est} вместо ${nado}`);
+    }
+  }
+
+  /* Сумма по всем выходам обязана быть единицей: паук куда-нибудь
+     да выйдет. Это ловит потерянную ветку дерева. */
+  const summa = spisok.reduce((s, imya) => s + veroyatnostVyhoda(LABIRINT, imya), 0);
+  if (Math.abs(summa - 1) > TOCHNOST) {
+    problems.push(`сумма вероятностей по выходам равна ${summa}, а не единице`);
+  }
+
+  return problems;
 }

@@ -62,7 +62,9 @@ for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answ
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep } = require0(path.join(out, 'veroyatnost', 'selftest.js'));
+const { checkBank, checkPrep, checkLabirint } = require0(
+  path.join(out, 'veroyatnost', 'selftest.js'),
+);
 const { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
   path.join(out, 'veroyatnost', 'index.js'),
 );
@@ -92,7 +94,16 @@ console.log(`  ответ не пишется в клетки и округле�
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
 
+const labirint = checkLabirint();
+console.log(`\nлабиринт задачи 33: нарушений ${labirint.length}`);
+labirint.forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (labirint.length > 0) {
+  console.error('\nСхема лабиринта разошлась с той, что задал автор.');
+  process.exit(1);
+}
 
 if (prep.bad.length > 0 || prep.duplicates.length > 0) {
   console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
