@@ -102,7 +102,7 @@ const TOLSHCHINA = 22;
 const LEVO = 120;
 const PRAVO = 700;
 const VERH = 90;
-const NIZ = 460;
+const NIZ = 450;
 /** Отступ подписи от края коридора. */
 const OTSTUP = 18;
 
@@ -136,36 +136,47 @@ interface Vetka {
  * нижний края.
  */
 const RISUNOK: Vetka = {
-  /* Входной коридор слева и первая развилка: вверх или вниз. */
-  hody: [g(LEVO, 200, 290), v(165, 410, 200)],
+  /* Вход слева и первая развилка: вверх или вниз. */
+  hody: [g(LEVO, 180, 270), v(150, 390, 180)],
+
   verh: {
-    /* Вверх и направо — до второй развилки. */
-    hody: [g(200, 300, 165)],
-    /* Вверх до верхнего края. */
-    verh: { hody: [v(VERH, 165, 300)], konec: { x: 300, y: VERH, storona: 'sverhu' } },
-    /* Направо, потом вверх, потом опять направо — до правого края. */
+    /* Верхняя половина листа: направо, вниз, снова направо. */
+    hody: [g(180, 240, 150), v(150, 210, 240), g(240, 360, 210)],
+    /* Вверх, направо и опять вверх — до верхнего края. */
+    verh: {
+      hody: [v(150, 210, 360), g(360, 480, 150), v(VERH, 150, 480)],
+      konec: { x: 480, y: VERH, storona: 'sverhu' },
+    },
+    /* Направо, вниз через середину листа, вверх и направо — до правого края. */
     niz: {
-      hody: [g(300, 470, 165), v(115, 165, 470), g(470, PRAVO, 115)],
-      konec: { x: PRAVO, y: 115, storona: 'sprava' },
+      hody: [
+        g(360, 420, 210),
+        v(210, 270, 420),
+        g(420, 660, 270),
+        v(210, 270, 660),
+        g(660, PRAVO, 210),
+      ],
+      konec: { x: PRAVO, y: 210, storona: 'sprava' },
     },
   },
+
   niz: {
-    /* Вниз и направо — до третьей развилки. */
-    hody: [g(200, 300, 410)],
-    /* Вниз до нижнего края. */
-    verh: { hody: [v(410, NIZ, 300)], konec: { x: 300, y: NIZ, storona: 'snizu' } },
+    /* Нижняя половина: направо, вверх в середину листа, направо и вниз. */
+    hody: [g(180, 300, 390), v(270, 390, 300), g(300, 360, 270), v(270, 330, 360)],
+    /* Прямо вниз — до нижнего края. */
+    verh: { hody: [v(330, NIZ, 360)], konec: { x: 360, y: NIZ, storona: 'snizu' } },
     niz: {
-      /* Направо, ступенькой вверх и опять направо — до четвёртой развилки. */
-      hody: [g(300, 380, 410), v(340, 410, 380), g(380, 500, 340)],
+      /* Направо, вниз, направо — до четвёртой развилки. */
+      hody: [g(360, 480, 330), v(330, 390, 480), g(480, 540, 390)],
       /* Вверх и направо — до правого края. */
       verh: {
-        hody: [v(245, 340, 500), g(500, PRAVO, 245)],
-        konec: { x: PRAVO, y: 245, storona: 'sprava' },
+        hody: [v(330, 390, 540), g(540, PRAVO, 330)],
+        konec: { x: PRAVO, y: 330, storona: 'sprava' },
       },
       /* Направо и вниз — до нижнего края. */
       niz: {
-        hody: [g(500, 580, 340), v(340, NIZ, 580)],
-        konec: { x: 580, y: NIZ, storona: 'snizu' },
+        hody: [g(540, 600, 390), v(390, NIZ, 600)],
+        konec: { x: 600, y: NIZ, storona: 'snizu' },
       },
     },
   },
@@ -211,8 +222,12 @@ interface Podpis {
 }
 
 interface Sborka {
-  /** Ход и путь ветки, которой он принадлежит: '', 'в', 'вн' и так далее. */
-  hody: { hod: Hod; put: string }[];
+  /**
+   * Ход, путь его ветки ('', 'в', 'вн' и так далее) и признак первого
+   * хода ветки: только первые ходы двух дорог имеют право сойтись —
+   * в самой развилке.
+   */
+  hody: { hod: Hod; put: string; pervyy: boolean }[];
   podpisi: Podpis[];
 }
 
@@ -222,7 +237,7 @@ interface Sborka {
  * выход — обязан быть конец коридора.
  */
 function sobrat(uzel: Uzel, vetka: Vetka, out: Sborka, put = ''): void {
-  vetka.hody.forEach((hod) => out.hody.push({ hod, put }));
+  vetka.hody.forEach((hod, i) => out.hody.push({ hod, put, pervyy: i === 0 }));
 
   if (uzel.vid === 'vyhod') {
     const konec = vetka.konec;
@@ -245,6 +260,11 @@ function sobrat(uzel: Uzel, vetka: Vetka, out: Sborka, put = ''): void {
   }
   sobrat(uzel.verh, vetka.verh, out, `${put}в`);
   sobrat(uzel.niz, vetka.niz, out, `${put}н`);
+}
+
+/** Прямоугольник с запасом в пиксель по каждой стороне. */
+function razdut(r: Pryamougolnik): Pryamougolnik {
+  return { x: r.x - 1, y: r.y - 1, shirina: r.shirina + 2, vysota: r.vysota + 2 };
 }
 
 /** Площадь пересечения двух прямоугольников. */
@@ -271,17 +291,38 @@ export function proverkaRisunka(uzel: Uzel = LABIRINT): string[] {
   sobrat(uzel, RISUNOK, sborka);
   const bedy: string[] = [];
 
+  /* Две дороги от одной развилки: пути одной длины, отличаются
+     последней буквой. */
+  const sosedi = (a: string, b: string): boolean =>
+    a.length === b.length && a !== b && a.slice(0, -1) === b.slice(0, -1);
+
   for (let i = 0; i < sborka.hody.length; i += 1) {
     for (let j = i + 1; j < sborka.hody.length; j += 1) {
-      const a = sborka.hody[i] as { hod: Hod; put: string };
-      const b = sborka.hody[j] as { hod: Hod; put: string };
-      /* Одна ветка продолжает другую — стык законный. */
+      const a = sborka.hody[i] as Sborka['hody'][number];
+      const b = sborka.hody[j] as Sborka['hody'][number];
+      /* Одна ветка продолжает другую — это один и тот же путь. */
       if (a.put.startsWith(b.put) || b.put.startsWith(a.put)) {
         continue;
       }
-      const obshchee = ploshchadPeresecheniya(vPryamougolnik(a.hod), vPryamougolnik(b.hod));
-      if (obshchee > TOLSHCHINA * TOLSHCHINA) {
-        bedy.push(`коридоры веток «${a.put}» и «${b.put}» имеют общий кусок площадью ${obshchee}`);
+
+      const ra = vPryamougolnik(a.hod);
+      const rb = vPryamougolnik(b.hod);
+
+      if (sosedi(a.put, b.put) && a.pervyy && b.pervyy) {
+        /* Законный стык в развилке: общего у дорог не больше одного
+           квадрата коридора. Шире — уже общий кусок пути. */
+        const obshchee = ploshchadPeresecheniya(ra, rb);
+        if (obshchee > TOLSHCHINA * TOLSHCHINA) {
+          bedy.push(`дороги «${a.put}» и «${b.put}» сходятся не только в развилке`);
+        }
+        continue;
+      }
+
+      /* Всем остальным парам нельзя даже касаться: коридоры, сомкнутые
+         край в край, на картинке сливаются в один — получился бы
+         проход, которого в дереве нет. Поэтому проверяем с запасом. */
+      if (ploshchadPeresecheniya(razdut(ra), razdut(rb)) > 0) {
+        bedy.push(`коридоры веток «${a.put}» и «${b.put}» соприкасаются`);
       }
     }
   }
@@ -315,7 +356,7 @@ export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
       )
       .join('');
 
-  sborka.podpisi.push({ text: 'Вход', x: LEVO - OTSTUP, y: 297, yakor: 'end' });
+  sborka.podpisi.push({ text: 'Вход', x: LEVO - OTSTUP, y: 277, yakor: 'end' });
 
   const podpisi = sborka.podpisi
     .map(
@@ -326,7 +367,7 @@ export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
 
   const imena = vyhody(uzel).join(', ');
   return [
-    `<svg viewBox="0 0 860 540" role="img" `,
+    `<svg viewBox="0 0 860 520" role="img" `,
     `aria-label="Лабиринт: вход слева, ${razvilki(uzel)} развилки, выходы ${imena}">`,
     `<g class="lab-obvodka">${kak('lab-obvodka-hod')}</g>`,
     `<g class="lab-koridory">${kak('lab-koridor')}</g>`,
