@@ -33,6 +33,59 @@ function tex(value) {
   return String(Math.round(value * 1000) / 1000).replace('.', '{,}');
 }
 
+/* ══════════════════════════════════════════════════════════
+   Точные числа
+
+   Коэффициент может выйти дробью, которая в конечную десятичную
+   не переводится: −1/3, 2/3. Округлять её нельзя, и не только
+   из-за вида. Выкладка после округления перестаёт сходиться:
+   при k = −2/3 подстановка даёт −0,667 · (−19,5) − 4 = 9,0065,
+   а ответ задачи — ровно 9. Учитель, который проверит строчку,
+   увидит противоречие.
+
+   Поэтому такие числа печатаются обыкновенной дробью, а считаются
+   точной дробной арифметикой из families/line.js.
+   ══════════════════════════════════════════════════════════ */
+
+/* Конечная десятичная запись есть, только если после сокращения
+   знаменатель делится нацело лишь на 2 и 5. */
+function decimalFriendly(f) {
+  var q = Math.abs(f.q);
+  while (q % 2 === 0) { q /= 2; }
+  while (q % 5 === 0) { q /= 5; }
+  return q === 1;
+}
+
+/* Точное число в формулу: десятичная, где она конечна, иначе дробь. */
+function texExact(f) {
+  if (decimalFriendly(f)) { return tex(Line.num(f)); }
+  return (f.p < 0 ? '-' : '') + '\\dfrac{' + Math.abs(f.p) + '}{' + f.q + '}';
+}
+
+/* Коэффициент перед x точным числом: 1x и −1x не пишутся. */
+function slopeTexExact(f) {
+  if (f.q === 1 && f.p === 1) { return ''; }
+  if (f.q === 1 && f.p === -1) { return '-'; }
+  return texExact(f);
+}
+
+/* Формула функции целиком, точными числами. */
+function equationTexExact(kf, bf) {
+  var slope = Line.isZero(kf) ? '' : slopeTexExact(kf) + 'x';
+  if (Line.isZero(bf)) { return 'f(x) = ' + (slope || '0'); }
+  var sign = bf.p > 0 ? ' + ' : ' - ';
+  return 'f(x) = ' + slope + sign + texExact(Line.frac(Math.abs(bf.p), bf.q));
+}
+
+/* Число в формулу со скобками у отрицательного: подстановка
+   f(-4) = k · (-4) читается только так. */
+function texBracket(f) {
+  var body = texExact(f);
+  if (f.p >= 0) { return body; }
+  /* У дроби скобки растягиваются: обычные оказались бы ниже неё. */
+  return decimalFriendly(f) ? '(' + body + ')' : '\\left(' + body + '\\right)';
+}
+
 /* Коэффициент в формуле: 1x и −1x не пишутся. */
 function slopeTex(k) {
   if (Math.abs(k - 1) < 1e-9) { return ''; }
@@ -85,7 +138,7 @@ function stepDirection(t) {
 /* ══════════════════════════════════════════════════════════
    Шаг 2. Находим k
    ══════════════════════════════════════════════════════════ */
-function stepSlope(t, k) {
+function stepSlope(t, kf) {
   var blocks = [
     text(math('k', 'k') + ' — это тангенс угла наклона. Угол ' + math('\\alpha', 'α') +
          ' отсчитывается от положительного направления оси ' + math('x', 'x') + ' до прямой.'),
@@ -99,7 +152,11 @@ function stepSlope(t, k) {
       'это отношение противолежащего катета к прилежащему.'));
     blocks.push(text('Противолежащий катет — вертикальный, ' + key(t.dy) + ' кл. ' +
       'Прилежащий катет — горизонтальный, ' + key(t.dx) + ' кл.'));
-    blocks.push(formula('k = ' + fracTex(t.dy, t.dx) + ' = ' + tex(k)));
+    /* Хвост «= 0,333» у неконечной дроби был бы округлением,
+       поэтому сама дробь и есть итог шага. */
+    blocks.push(formula(decimalFriendly(kf)
+      ? 'k = ' + fracTex(t.dy, t.dx) + ' = ' + texExact(kf)
+      : 'k = ' + fracTex(t.dy, t.dx)));
   } else {
     blocks.push(text('Угол ' + math('\\alpha', 'α') + ' здесь тупой: прямая наклонена влево. ' +
       'А прямоугольного треугольника с тупым углом не бывает — значит напрямую ' +
@@ -111,9 +168,11 @@ function stepSlope(t, k) {
     blocks.push(text('Поэтому считаем тангенс острого угла и ставим минус.'));
     blocks.push(text('Противолежащий катет — ' + key(t.dy) + ' кл. ' +
       'Прилежащий катет — ' + key(t.dx) + ' кл.'));
-    blocks.push(formula('\\operatorname{tg}(180^\\circ - \\alpha) = ' + fracTex(t.dy, t.dx) +
-      ' = ' + tex(Math.abs(k))));
-    blocks.push(formula('k = -' + tex(Math.abs(k))));
+    var absK = Line.frac(Math.abs(kf.p), kf.q);
+    blocks.push(formula(decimalFriendly(absK)
+      ? '\\operatorname{tg}(180^\\circ - \\alpha) = ' + fracTex(t.dy, t.dx) + ' = ' + texExact(absK)
+      : '\\operatorname{tg}(180^\\circ - \\alpha) = ' + fracTex(t.dy, t.dx)));
+    blocks.push(formula('k = -' + texExact(absK)));
     blocks.push({ type: 'details', id: 'why-minus', title: 'Откуда берётся минус',
                   blocks: whyMinus() });
   }
@@ -243,7 +302,10 @@ function stepIntercept(t, line, win, k, b, points) {
 
   /* b с графика не снять: пересечение за кадром или не в узле сетки. */
   var base = substitutionPoint(t, points, k);
-  var product = k * base.x;
+  /* Произведение считается точной дробью: при k = −2/3 округление
+     здесь увело бы и b, и всё, что из него следует. */
+  var productFrac = Line.mul(line.k, Line.toFrac(base.x));
+  var product = Line.num(productFrac);
 
   /* Причина у двух случаев разная, и называть её надо ту, что есть:
      «за кадром или не в узле» на чертеже, где пересечение отлично
@@ -276,12 +338,12 @@ function texNegative(value) {
 /* ══════════════════════════════════════════════════════════
    Шаг 4. Формула целиком
    ══════════════════════════════════════════════════════════ */
-function stepFormula(k, b) {
+function stepFormula(kf, bf) {
   return {
     title: 'Записываем формулу',
     blocks: [
       text('Теперь выпишем формулу целиком и зафиксируем её:'),
-      { type: 'formula', tex: equationTex(k, b), feature: true },
+      { type: 'formula', tex: equationTexExact(kf, bf), feature: true },
       text('Дальше работаем только с ней.')
     ]
   };
@@ -290,40 +352,51 @@ function stepFormula(k, b) {
 /* ══════════════════════════════════════════════════════════
    Шаг 5. Ответ на вопрос задачи
    ══════════════════════════════════════════════════════════ */
-function stepAnswer(task, k, b) {
+function stepAnswer(task, line) {
   var rule = task.rule;
   var answer = task.answer;
+  var kf = line.k;
+  var bf = line.b;
+  var b = Line.num(bf);
   var blocks = [];
 
   if (rule === 'value-at' && task.query) {
     var x0 = task.query.x0;
+    /* Значение считает сам движок точной дробью — тот же yAt,
+       которым посчитан ответ задачи. Своей арифметики здесь нет,
+       поэтому строка и ответ разойтись не могут. */
+    var valueAt = Line.yAt(line, x0);
     blocks.push(text('Нужно найти <b class="key">' +
       math('f(' + tex(x0) + ')', 'f(' + num(x0) + ')') + '</b>. Подставляем:'));
-    blocks.push(formula('f(' + texNegative(x0) + ') = ' + tex(k) + ' \\cdot ' + texNegative(x0) +
-      ' + ' + texNegative(b) + ' = ' + tex(k * x0 + b)));
+    blocks.push(formula('f(' + texNegative(x0) + ') = ' + texBracket(kf) + ' \\cdot ' +
+      texNegative(x0) + ' + ' + texNegative(b) + ' = ' + texExact(valueAt)));
   } else if (rule === 'argument-for' && task.query) {
     var y0 = task.query.y0;
+    var shifted = Line.sub(Line.toFrac(y0), bf);
+    var root = Line.xForValue(line, y0);
     blocks.push(text('Нужно найти ' + math('x', 'x') + ', при котором <b class="key">' +
       math('f(x) = ' + tex(y0), 'f(x) = ' + num(y0)) + '</b>. Решаем уравнение:'));
-    blocks.push(formula(slopeTex(k) + 'x + ' + texNegative(b) + ' = ' + tex(y0)));
-    blocks.push(formula(slopeTex(k) + 'x = ' + tex(y0 - b)));
-    blocks.push(formula('x = ' + fracTex(y0 - b, k) + ' = ' + tex((y0 - b) / k)));
+    blocks.push(formula(slopeTexExact(kf) + 'x + ' + texNegative(b) + ' = ' + tex(y0)));
+    blocks.push(formula(slopeTexExact(kf) + 'x = ' + texExact(shifted)));
+    blocks.push(formula('x = ' + texExact(shifted) + ' : ' + texBracket(kf) +
+      ' = ' + texExact(root)));
   } else if (rule === 'k') {
     blocks.push(text('В задаче спрашивают угловой коэффициент. Мы его уже нашли:'));
-    blocks.push(formula('k = ' + tex(k)));
+    blocks.push(formula('k = ' + texExact(kf)));
   } else if (rule === 'b') {
     blocks.push(text('В задаче спрашивают свободный член. Мы его уже нашли:'));
-    blocks.push(formula('b = ' + tex(b)));
+    blocks.push(formula('b = ' + texExact(bf)));
   } else if (rule === 'equation-choice') {
     blocks.push(text('Сравниваем нашу формулу с вариантами ответа и выбираем совпадающую.'));
-    blocks.push(formula(equationTex(k, b)));
+    blocks.push(formula(equationTexExact(kf, bf)));
     blocks.push(text('Это вариант № ' + answer + '.'));
   } else if (rule === 'point-choice' && task.probe) {
+    var atProbe = Line.yAt(line, task.probe.x);
     blocks.push(text('Подставляем координаты точки в формулу и сравниваем с её ординатой:'));
-    blocks.push(formula('f(' + texNegative(task.probe.x) + ') = ' + tex(k) + ' \\cdot ' +
-      texNegative(task.probe.x) + ' + ' + texNegative(b) + ' = ' + tex(k * task.probe.x + b)));
+    blocks.push(formula('f(' + texNegative(task.probe.x) + ') = ' + texBracket(kf) + ' \\cdot ' +
+      texNegative(task.probe.x) + ' + ' + texNegative(b) + ' = ' + texExact(atProbe)));
     blocks.push(text('У точки ордината <b class="key">' + num(task.probe.y) + '</b>. ' +
-      (Math.abs(k * task.probe.x + b - task.probe.y) < 1e-9
+      (Line.isZero(Line.sub(atProbe, Line.toFrac(task.probe.y)))
         ? 'Значения совпали — точка лежит на прямой.'
         : 'Значения разные — точка на прямой не лежит.')));
   } else {
@@ -346,10 +419,10 @@ function build(options) {
 
   var steps = [
     stepDirection(t),
-    stepSlope(t, k),
+    stepSlope(t, line.k),
     stepIntercept(t, line, win, k, b, options.points),
-    stepFormula(k, b),
-    stepAnswer(options.task || {}, k, b)
+    stepFormula(line.k, line.b),
+    stepAnswer(options.task || {}, line)
   ];
 
   return steps.map(function (step, i) {

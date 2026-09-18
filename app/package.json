@@ -23,7 +23,10 @@
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
-    "test:secrets": "node scripts/check-bundle-secrets.mjs"
+    "test:secrets": "node scripts/check-bundle-secrets.mjs",
+    "build:pdf-12": "node scripts/build-pdf-12.mjs",
+    "build:pdf-12-sample": "node scripts/build-pdf-12.mjs --sample",
+    "test:pdf-12": "node scripts/check-pdf-12.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -41,6 +44,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
+    "playwright": "^1.56.1",
     "eslint-config-next": "^15.5.25",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",

@@ -1,0 +1,166 @@
+name: PDF 12
+
+# Собирает сборник «Задание 12. Линейная функция» и отдаёт готовые
+# файлы. Нужен затем, чтобы PDF можно было получить, ничего не
+# устанавливая у себя: Chromium и Playwright живут здесь.
+#
+# Этот же workflow приводит в порядок pnpm-lock.yaml. Playwright
+# объявлен в devDependencies, но обновить lock-файл там, где его
+# добавляли, было нельзя: у песочницы нет доступа к реестру npm.
+# Поэтому install идёт с --no-frozen-lockfile, а обновлённый lock
+# коммитится обратно в ветку — после этого обычные check.yml
+# и deploy.yml снова проходят со --frozen-lockfile.
+#
+# Триггеров два, и push здесь главный. Кнопка «Run workflow»
+# появляется в Actions только тогда, когда файл workflow лежит
+# в ветке по умолчанию, — до слияния в main её не будет вовсе.
+# А push-триггер работает из любой ветки сразу, поэтому сборка
+# запускается сама, без кнопки и без правок main.
+
+on:
+  push:
+    branches: ['claude/pdf-task-12-**']
+    paths:
+      - 'app/package.json'
+      - 'app/src/lib/sheet/**'
+      - 'app/src/lib/graph/**'
+      - 'app/src/content/sheet12.js'
+      - 'app/scripts/build-pdf-12.mjs'
+      - 'app/scripts/lib/sheet-render.mjs'
+      - '.github/workflows/pdf-12.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Что собирать
+        type: choice
+        default: full
+        options: [full, sample]
+
+# Коммит lock-файла и готовых PDF — это push в ту же ветку.
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf-12-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Сборка PDF
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      # Именно --no-frozen-lockfile: со --frozen-lockfile pnpm
+      # не обновляет lock-файл, а отказывается ставить.
+      - name: Поставить зависимости и обновить lock-файл
+        working-directory: app
+        run: pnpm install --no-frozen-lockfile
+
+      # Lock-файл коммитится сразу, до сборки: даже если печать
+      # упадёт, ветка останется в рабочем состоянии.
+      #
+      # Своим push этот шаг сам себя не вызовет: события от
+      # GITHUB_TOKEN новых запусков не создают. [skip ci] в сообщении —
+      # вторая страховка на случай, если ветку будут толкать руками.
+      - name: Вернуть обновлённый lock-файл в ветку
+        run: |
+          if git diff --quiet -- app/pnpm-lock.yaml; then
+            echo "lock-файл не менялся"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/pnpm-lock.yaml
+          git commit -m "pnpm-lock.yaml: playwright для сборки PDF [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      # Браузер ставится отдельной командой, а не постустановочным
+      # скриптом пакета: pnpm 10 их не запускает, если пакета нет
+      # в onlyBuiltDependencies.
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Проверить банк задания №12
+        working-directory: app
+        run: pnpm validate:graph
+
+      # Сборка сайта и проверка утечки ответов. Их делает и check.yml,
+      # но он срабатывает только на pull_request, а этой ветке таких
+      # событий не досталось: PR открыт приложением, и прогон
+      # не создался. Без этих двух шагов правки в движке и новые
+      # модули шаблона остались бы вообще не собранными — ни здесь,
+      # ни там. Шаги дешёвые, дублирование тут честнее пробела.
+      - name: Собрать сайт
+        working-directory: app
+        run: pnpm build
+
+      - name: Проверить, что ответов нет в сборке
+        working-directory: app
+        run: pnpm test:secrets
+
+      # По push собирается весь сборник: это и есть предмет работы.
+      # Кнопкой можно попросить только образец — на нём быстрее
+      # смотреть оформление.
+      - name: Собрать PDF
+        working-directory: app
+        run: |
+          if [ "${{ inputs.target }}" = "sample" ]; then
+            pnpm build:pdf-12-sample
+          else
+            pnpm build:pdf-12
+          fi
+
+      # Проверка идёт по готовым файлам и по отчёту сборки: состав,
+      # сквозная нумерация, ответы против движка, формулы, вшитые
+      # шрифты, отсутствие цвета в ч/б, ссылки, заглушки.
+      - name: Проверить сборник
+        if: ${{ inputs.target != 'sample' }}
+        working-directory: app
+        run: pnpm test:pdf-12
+
+      # Файлы уезжают двумя путями. Архив — чтобы скачать сразу
+      # со страницы запуска, без локальной копии репозитория.
+      - name: Отдать файлы архивом
+        uses: actions/upload-artifact@v4
+        with:
+          name: zadanie-12-pdf
+          path: app/public/materials/zadanie-12/*.pdf
+          if-no-files-found: error
+          retention-days: 90
+
+      # Коммит в ветку — чтобы файлы лежали там, откуда их отдаёт
+      # сайт (/materials/...), и не пропадали вместе с архивом.
+      # Собирать их может только CI: KaTeX требует установленных
+      # зависимостей, а песочница до реестра npm не доходит.
+      - name: Вернуть готовые PDF в ветку
+        if: ${{ inputs.target != 'sample' }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/public/materials/zadanie-12
+          # Сравнивать надо индекс, а не рабочее дерево: файлы могут
+          # быть новыми, а git diff неотслеживаемых не видит и молча
+          # сообщает, что менять нечего.
+          if git diff --cached --quiet -- app/public/materials/zadanie-12; then
+            echo "файлы не менялись"
+            exit 0
+          fi
+          git commit -m "Сборник №12: пересобранные PDF [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
+          
