@@ -21,6 +21,16 @@ import { RAZDELY, type Razdel } from './index';
 import { sealAnswer, sealText } from './secret';
 import { type Prototype } from './types';
 
+/**
+ * Чем шаги разбора разделены в закрытой строке.
+ *
+ * Переводом строки — нельзя: KaTeX рисует знак корня контуром, и
+ * внутри атрибута d у него стоят настоящие переводы строк. Шаг
+ * разлетался на два десятка кусков прямо посреди формулы.
+ * U+001F — разделитель единиц, в вёрстке не встречается.
+ */
+export const STEP_SEP = '\u001f';
+
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
@@ -117,7 +127,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       const steps = prototype
         .shagi(variant.params)
         .map((step) => typeset(step.text))
-        .join('\n');
+        .join(STEP_SEP);
       return {
         n: variant.n,
         uslovieHtml: typeset(prototype.uslovie(variant.params)),
