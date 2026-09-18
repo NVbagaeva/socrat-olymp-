@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { EmptyState } from '@/components/ui';
+import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
 import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
+import { razdelPool } from '@/lib/zadanie3/pool';
+import './trenazher.css';
 
 export function generateStaticParams() {
   return RAZDELY.map((razdel) => ({ figura: razdel.slug }));
@@ -18,20 +20,16 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 /**
- * Вкладка «Тренажёр». Банк раздела уже собран и проверен, но экран
- * решения — отдельный этап: здесь будут выбор типа заданий, условие,
- * чертёж, поле ответа и разбор.
+ * Вкладка «Тренажёр» раздела.
+ *
+ * Банк раздела собирается на сборке: условия набраны KaTeX, чертежи
+ * нарисованы движком. Ответы уходят вниз только отпечатками, разборы
+ * закрытыми — открытым текстом в разметке их нет.
  */
 export default async function TrenazherTab({ params }: { params: Params }) {
   const razdel = razdelBySlug((await params).figura);
   if (razdel === undefined) {
     notFound();
   }
-  const variants = razdel.prototipy.reduce((sum, p) => sum + p.varianty.length, 0);
-  return (
-    <EmptyState
-      title="Тренажёр готовится"
-      description={`Банк раздела собран: ${razdel.prototipy.length} прототипов, ${variants} вариантов. Экран решения появится здесь.`}
-    />
-  );
+  return <Solid3Trainer pool={razdelPool(razdel)} roundKey={`z3:${razdel.slug}`} />;
 }
