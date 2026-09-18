@@ -190,9 +190,14 @@ export interface ProblemModel {
   illustration: { path: string; alt: string; ratio: '4:3' };
 }
 
-/** Путь к иллюстрации по соглашению проекта: картинки живут в /images. */
+/**
+ * Путь к иллюстрации по соглашению проекта: картинки живут в /images,
+ * по одной на задачу, именем — идентификатор задачи. WebP: как и
+ * остальные картинки сайта, PNG с прозрачным фоном в нём в десять раз
+ * легче. Исходники — в assets/img/probability.
+ */
 export function putIllyustratsii(id: string): string {
-  return `/images/veroyatnost/zadanie-4/${id}.png`;
+  return `/images/veroyatnost/zadanie-4/${id}.webp`;
 }
 
 function shagiModeli(shagi: readonly Step[]): ModelShag[] {

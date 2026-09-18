@@ -32,6 +32,7 @@ import {
 import type { Razbor } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
+import { illyustratsiya5 } from './illyustratsii5';
 import { sealAnswer, sealMetod, sealText } from './secret';
 import {
   type Metodika,
@@ -99,6 +100,12 @@ export interface PoolKind {
   /** Диапазон номеров задачника, откуда собран прототип. */
   zadachnik: readonly [number, number];
   variants: PoolVariant[];
+  /**
+   * Иллюстрация к прототипу готовой разметкой, как у лабиринта в
+   * подготовке: сюжет у всех вариантов один. Пока только у №5 — у №4
+   * картинка идёт через модель задачи.
+   */
+  risunok?: string;
 }
 
 export interface Pool {
@@ -176,6 +183,9 @@ function kindOf(prototype: Prototype): PoolKind {
     blokTitle: blok.nazvanie,
     zadachnik: prototype.zadachnik,
     variants: prototype.varianty.map((variant) => variantPool(prototype, variant)),
+    ...(prototype.metodika === undefined && illyustratsiya5(prototype.id) !== undefined
+      ? { risunok: illyustratsiya5(prototype.id) }
+      : {}),
   };
 }
 
@@ -214,6 +224,9 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const otvet = prepOtvet(zadacha);
   const seal = sealAnswer(otvet);
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
+  /* Чертёж из данных (лабиринт) важнее подобранной картинки; у задач
+     с моделью (№4) картинка идёт через модель, а не отсюда. */
+  const risunok = zadacha.risunok ?? (model === null ? illyustratsiya5(zadacha.id) : undefined);
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
@@ -227,7 +240,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
       ),
       seal,
     ),
-    ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
+    ...(risunok === undefined ? {} : { risunok }),
     ...(model === null ? {} : { model: otkrytayaModel(model) }),
   };
 }

@@ -167,6 +167,12 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
 
           <p className="vtask__uslovie">{variant?.uslovie}</p>
 
+          {/* Иллюстрация к прототипу — готовой разметкой, как чертёж в
+              подготовке: строится на сборке, вставляется как есть. */}
+          {kind?.risunok !== undefined ? (
+            <div className="vtask__risunok" dangerouslySetInnerHTML={{ __html: kind.risunok }} />
+          ) : null}
+
           <div className="vtask__answer">
             <label className="vtask__label" htmlFor="vtask-input">
               Ответ
