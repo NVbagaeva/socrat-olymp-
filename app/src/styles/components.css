@@ -1543,11 +1543,14 @@ a.task-card {
 @media (max-width: 767.98px) {
   .modal-backdrop:has(.figzoom-modal) {
     padding: 0;
+    /* По той же причине, что и по ширине: центрирование ужимает
+       окно по содержимому, и растянуть его на высоту экрана надо
+       здесь, у подложки. */
+    align-items: stretch;
   }
   .figzoom-modal {
     max-width: none;
     border-radius: 0;
-    align-self: stretch;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
   }
@@ -1576,6 +1579,10 @@ a.task-card {
   display: block;
   width: 100%;
   height: auto;
+  /* Своя максимальная ширина у движка — 360px: карточный размер,
+     и здесь он снят. Размер увеличенного чертежа держит только
+     высота. */
+  max-width: none;
   max-height: min(70vh, 720px);
   margin: 0 auto;
 }
