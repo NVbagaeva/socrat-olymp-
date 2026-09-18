@@ -98,6 +98,8 @@ export interface EngineTask {
   answer: string;
   meta: {
     set: string;
+    /** Seed, на котором собран набор: по нему задача воспроизводится. */
+    seed: string;
     k: number;
     b: number;
     /** Окно чертежа. Нет — у задачи нет и чертежа. */

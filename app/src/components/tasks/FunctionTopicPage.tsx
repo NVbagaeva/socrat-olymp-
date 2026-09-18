@@ -112,7 +112,7 @@ export function FunctionTopicPage({
         prepHref={`${base}/podgotovka/`}
         trainer={trainer ?? <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />}
         trainerHref={`${base}/trenazher/`}
-        generator={hasGenerator ? <GeneratorTab subtopic={subtopic} /> : undefined}
+        generator={hasGenerator ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
         tutors={section.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">

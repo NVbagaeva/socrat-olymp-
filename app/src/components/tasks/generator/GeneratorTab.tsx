@@ -5,6 +5,8 @@ import { GeneratorScreen } from './GeneratorScreen';
 
 export interface GeneratorTabProps {
   subtopic: Subtopic;
+  /** Адрес подтемы: от него считаются адреса страниц печати. */
+  base: string;
 }
 
 /**
@@ -14,7 +16,7 @@ export interface GeneratorTabProps {
  * миниатюры: движок graph/ рисует их на сборке, как на карточках
  * навыков подготовки, и в браузер не попадает.
  */
-export function GeneratorTab({ subtopic }: GeneratorTabProps) {
+export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
   const family = findManifestFamily(subtopic.id);
-  return <GeneratorScreen family={subtopic.title} skills={skillItems(family)} />;
+  return <GeneratorScreen base={base} family={subtopic.title} skills={skillItems(family)} />;
 }

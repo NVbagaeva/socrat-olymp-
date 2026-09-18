@@ -44,9 +44,21 @@ export interface Session {
    всего две на набор: на десять задач нужно пять удачных seed. */
 const SEED_TRIES = 24;
 
-/** Случайный seed: время и шум, чтобы два запуска подряд различались. */
-function freshSeed(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+/**
+ * Откуда берётся seed для очередной попытки собрать набор.
+ * Тренажёру нужен случайный — два запуска подряд должны различаться;
+ * листу для печати — воспроизводимый, чтобы лист ученика и лист
+ * с ответами по одному адресу содержали одни и те же задачи.
+ */
+export type SeedFor = (setId: string, attempt: number) => string;
+
+/** Случайный seed: время и шум. */
+export const randomSeed: SeedFor = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+
+/** Воспроизводимый seed от одного базового слова. */
+export function seedFrom(base: string): SeedFor {
+  return (setId, attempt) => `${base}:${setId}:${attempt}`;
 }
 
 /** У задачи есть посчитанный числовой ответ — иначе её нельзя проверить. */
@@ -64,9 +76,9 @@ interface Picked {
 }
 
 /** Набор на новом seed. null — движок не подобрал вариант. */
-function trySet(setId: string, tally: { rejected: number }): EngineTask[] | null {
+function trySet(setId: string, seed: string, tally: { rejected: number }): EngineTask[] | null {
   try {
-    return GraphGenerate.generateSet(setId, freshSeed()) as EngineTask[];
+    return GraphGenerate.generateSet(setId, seed) as EngineTask[];
   } catch {
     tally.rejected += 1;
     return null;
@@ -78,12 +90,18 @@ function trySet(setId: string, tally: { rejected: number }): EngineTask[] | null
  * задачи набора, потом — те же задачи на других seed: числа у них
  * уже другие.
  */
-function fromSet(setId: string, level: string | null, want: number, tally: { rejected: number }): EngineTask[] {
+function fromSet(
+  setId: string,
+  level: string | null,
+  want: number,
+  seedFor: SeedFor,
+  tally: { rejected: number },
+): EngineTask[] {
   const picked: Picked[] = [];
   const seen = new Set<string>();
 
   for (let seedNo = 0; seedNo < SEED_TRIES && picked.length < want; seedNo += 1) {
-    const tasks = trySet(setId, tally);
+    const tasks = trySet(setId, seedFor(setId, seedNo), tally);
     if (tasks === null) {
       continue;
     }
@@ -102,7 +120,12 @@ function fromSet(setId: string, level: string | null, want: number, tally: { rej
 }
 
 /** Задачи из истории ошибок: те же идентификаторы, новые seed. */
-function fromMistakes(ids: string[], want: number, tally: { rejected: number }): EngineTask[] {
+function fromMistakes(
+  ids: string[],
+  want: number,
+  seedFor: SeedFor,
+  tally: { rejected: number },
+): EngineTask[] {
   const out: EngineTask[] = [];
   const bySet = new Map<string, EngineTask[]>();
   for (let round = 0; round < SEED_TRIES && out.length < want && ids.length > 0; round += 1) {
@@ -114,7 +137,7 @@ function fromMistakes(ids: string[], want: number, tally: { rejected: number }):
       const setId = id.split('-')[0] ?? '';
       let tasks = bySet.get(setId);
       if (tasks === undefined) {
-        tasks = trySet(setId, tally) ?? [];
+        tasks = trySet(setId, seedFor(setId, round), tally) ?? [];
         bySet.set(setId, tasks);
       }
       const found = tasks.find((task) => task.id === id);
@@ -126,8 +149,18 @@ function fromMistakes(ids: string[], want: number, tally: { rejected: number }):
   return out;
 }
 
-/** Собрать сессию по запросу конфигуратора. */
-export function buildSession(request: SessionRequest): Session {
+export interface PickedTasks {
+  tasks: EngineTask[];
+  shortage: number;
+  rejected: number;
+}
+
+/**
+ * Задачи движка по запросу: общий шаг тренажёра и листа для печати.
+ * Что с ними делать дальше — экран задания или карточка листа, —
+ * решает тот, кто вызвал.
+ */
+export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTasks {
   const tally = { rejected: 0 };
   const want = Math.max(1, Math.floor(request.count));
   let engine: EngineTask[] = [];
@@ -136,7 +169,7 @@ export function buildSession(request: SessionRequest): Session {
     const known = request.mistakes.filter((id) =>
       request.skills.some((setId) => id.startsWith(`${setId}-`)),
     );
-    engine = fromMistakes(known, want, tally);
+    engine = fromMistakes(known, want, seedFor, tally);
   } else {
     const sets = request.skills;
     /* Поровну с каждого набора, остаток — первым. Порядок задач
@@ -146,13 +179,19 @@ export function buildSession(request: SessionRequest): Session {
     sets.forEach((setId) => {
       const extra = rest > 0 ? 1 : 0;
       rest -= extra;
-      engine = engine.concat(fromSet(setId, request.level, base + extra, tally));
+      engine = engine.concat(fromSet(setId, request.level, base + extra, seedFor, tally));
     });
   }
 
+  return { tasks: engine, shortage: Math.max(0, want - engine.length), rejected: tally.rejected };
+}
+
+/** Собрать сессию тренажёра по запросу конфигуратора. */
+export function buildSession(request: SessionRequest): Session {
+  const picked = pickTasks(request, randomSeed);
   return {
-    tasks: engine.map((task) => trainerTaskFrom(task)),
-    shortage: Math.max(0, want - engine.length),
-    rejected: tally.rejected,
+    tasks: picked.tasks.map((task) => trainerTaskFrom(task)),
+    shortage: picked.shortage,
+    rejected: picked.rejected,
   };
 }
