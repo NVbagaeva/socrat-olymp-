@@ -25,21 +25,35 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # pnpm ставим до setup-node: иначе кэшу нечего искать.
       # Версия берётся из поля packageManager в app/package.json.
       - name: Установить pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           package_json_file: app/package.json
 
+      # Кэш зависимостей настроен здесь и только здесь. setup-node@v5
+      # умеет включать его сам по полю packageManager, но лишь когда
+      # входа cache нет; он задан — значит, автокэш не подключается и
+      # два механизма не спорят за один ключ. В шаге установки pnpm
+      # входа cache нет, дублировать нечего.
       - name: Установить Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
           cache-dependency-path: app/pnpm-lock.yaml
+
+      # У pnpm/action-setup@v6 известны случаи, когда поле packageManager
+      # из package_json_file не подхватывается и ставится свежий pnpm.
+      # С lock-файлом от pnpm 10 это кончается ERR_PNPM_BROKEN_LOCKFILE
+      # уже на установке. Печатаем версию, чтобы в логе было видно, что
+      # приехало, а не гадать по последствиям.
+      - name: Показать версию pnpm
+        working-directory: app
+        run: pnpm --version
 
       - name: Поставить зависимости
         working-directory: app
@@ -50,6 +64,14 @@ jobs:
       - name: Проверить банк задания №3
         working-directory: app
         run: pnpm test:zadanie3
+
+      # Банки заданий №4 и №5: 36 прототипов, 360 вариантов, у каждого
+      # ответ считается дважды — по формуле прототипа и перебором
+      # исходов. Плюс 58 подготовительных задач и лабиринт задачи 33:
+      # его стены сверяются с генератором картинки tools/gen_maze.py.
+      - name: Проверить банк заданий №4 и №5
+        working-directory: app
+        run: pnpm test:veroyatnost
 
       # Порядок обхода задач внутри навыка: «дальше» ведёт
       # к ближайшей нерешённой, а не к следующему номеру.

@@ -23,17 +23,22 @@ jobs:
 
     steps:
       - name: Забрать репозиторий
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # pnpm ставим до setup-node: иначе кэшу нечего искать.
       # Версия берётся из поля packageManager в app/package.json.
       - name: Установить pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           package_json_file: app/package.json
 
+      # Кэш зависимостей настроен здесь и только здесь. setup-node@v5
+      # умеет включать его сам по полю packageManager, но лишь когда
+      # входа cache нет; он задан — значит, автокэш не подключается и
+      # два механизма не спорят за один ключ. В шаге установки pnpm
+      # входа cache нет, дублировать нечего.
       - name: Установить Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm

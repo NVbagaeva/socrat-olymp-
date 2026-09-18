@@ -43,7 +43,7 @@ export default async function Page({ params }: { params: Params }) {
   }
 
   return (
-    <AppShell active="tasks" task={task}>
+    <AppShell active="tasks">
       <FunctionTopicPage section={section} subtopic={subtopic} initialTab="trainer" />
     </AppShell>
   );

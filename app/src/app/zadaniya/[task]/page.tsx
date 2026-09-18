@@ -73,7 +73,7 @@ export default async function SectionPage({ params }: { params: Params }) {
   const entry = section.subtopics.find((item) => item.status === 'active');
 
   return (
-    <AppShell active="tasks" task={section.slug}>
+    <AppShell active="tasks">
       <main className="app-main">
         <Breadcrumbs
           items={[

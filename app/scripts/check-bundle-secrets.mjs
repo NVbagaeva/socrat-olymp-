@@ -56,7 +56,9 @@ function walk(dir, ok) {
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'secrets-'));
 const src = path.join(root, 'src', 'lib');
 for (const file of walk(path.join(src, 'solid'), (f) => f.endsWith('.ts'))
-  .concat(walk(path.join(src, 'zadanie3'), (f) => f.endsWith('.ts')))) {
+  .concat(walk(path.join(src, 'zadanie3'), (f) => f.endsWith('.ts')))
+  .concat(walk(path.join(src, 'veroyatnost'), (f) => f.endsWith('.ts')))
+  .concat([path.join(src, 'answer.ts')])) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
@@ -66,17 +68,21 @@ for (const file of walk(path.join(src, 'solid'), (f) => f.endsWith('.ts'))
   fs.writeFileSync(target, js);
 }
 const { BANK } = require0(path.join(tmp, 'zadanie3', 'index.js'));
+const { BANK_4 } = require0(path.join(tmp, 'veroyatnost', 'index.js'));
 
 /* Отпечаток разбора: начало первого шага первого варианта. Строка
-   длинная и в обычной вёрстке не встречается. */
-const marks = BANK.map((prototype) => {
-  const first = prototype.varianty[0];
-  const step = prototype.shagi(first.params)[0];
-  return { id: prototype.id, text: (step?.text ?? '').replace(/\s+/g, ' ').trim().slice(0, 40) };
-}).filter((m) => m.text.length >= 20);
+   длинная и в обычной вёрстке не встречается. Банки обоих разделов
+   проверяются одинаково — правило «ответа в бандле нет» общее. */
+const marks = [...BANK, ...BANK_4]
+  .map((prototype) => {
+    const first = prototype.varianty[0];
+    const step = prototype.shagi(first.params)[0];
+    return { id: prototype.id, text: (step?.text ?? '').replace(/\s+/g, ' ').trim().slice(0, 40) };
+  })
+  .filter((m) => m.text.length >= 20);
 
 /* Имена полей прототипа: если они есть в куске, уехал весь банк. */
-const FIELDS = ['poModeli:', 'dopustimo:', 'varianty:'];
+const FIELDS = ['poModeli:', 'perebor:', 'dopustimo:', 'varianty:'];
 
 const outDir = path.resolve(root, process.argv[2] ?? 'out');
 if (!fs.existsSync(outDir)) {
@@ -104,13 +110,13 @@ for (const file of files) {
 
 fs.rmSync(tmp, { recursive: true, force: true });
 
-console.log(`Просмотрено файлов сборки: ${files.length}; прототипов в банке: ${BANK.length}`);
+console.log(`Просмотрено файлов сборки: ${files.length}; прототипов в банках: ${BANK.length + BANK_4.length}`);
 if (bad.length === 0) {
   console.log('Ответов и разборов в бандле нет.');
   process.exit(0);
 }
 
-console.error('\nВ сборку уехал банк задания №3:');
+console.error('\nВ сборку уехал банк задания:');
 bad.forEach((row) => {
   console.error(`  ${row.file}`);
   if (row.fields.length > 0) {

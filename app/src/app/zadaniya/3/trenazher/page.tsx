@@ -31,7 +31,7 @@ export default function Solid3TrainerPage() {
   );
 
   return (
-    <AppShell active="tasks" task={stereometria.slug}>
+    <AppShell active="tasks">
       <main className="app-main">
         <Breadcrumbs
           items={[

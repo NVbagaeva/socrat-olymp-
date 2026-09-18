@@ -1,4 +1,7 @@
+'use client';
+
 import { clsx } from 'clsx';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { NavIcon, type NavIconName } from './NavIcons';
 
@@ -6,6 +9,11 @@ export interface NavItem {
   id: string;
   label: string;
   href: string;
+  /**
+   * Пункт отмечен текущим принудительно. Не задан — считается по
+   * адресу открытой страницы, и это обычный случай: меню само знает,
+   * где находится пользователь, и страницам об этом сообщать не надо.
+   */
   active?: boolean;
   /** Значок пункта. Не задан — на его месте пустая метка, как было. */
   icon?: NavIconName;
@@ -33,7 +41,41 @@ export interface SidebarProps {
   className?: string;
 }
 
+/* Хвостовая косая ничего не значит для раздела: в конфиге адреса
+   записаны и с ней, и без неё, а маршрут у страницы один. */
+function normalize(path: string): string {
+  const clean = path.split('?')[0]?.split('#')[0] ?? path;
+  return clean.length > 1 && clean.endsWith('/') ? clean.slice(0, -1) : clean;
+}
+
+/**
+ * Пункт текущий, когда открыта его страница или страница внутри него:
+ * раздел №12 подсвечен на /zadaniya/12 и на всём, что под ним, и не
+ * подсвечен на /zadaniya — список разделов лежит не внутри раздела.
+ *
+ * Сравниваются целые отрезки пути, а не строки: иначе /zadaniya/1
+ * отмечал бы себя на странице /zadaniya/12.
+ */
+function isCurrent(pathname: string | null, href: string): boolean {
+  if (pathname === null) {
+    return false;
+  }
+  const here = normalize(pathname);
+  const target = normalize(href);
+  /* Ссылка-якорь внутри страницы разделом не является: сверять с ней
+     маршрут нечем, и такой пункт подсвечивается только явным active. */
+  if (!target.startsWith('/')) {
+    return false;
+  }
+  return here === target || here.startsWith(`${target}/`);
+}
+
 function NavLink({ item, className }: { item: NavItem; className?: string }) {
+  /* Адрес открытой страницы. Пункт сверяется с ним сам — потому и
+     подсветка одинаково верна на всех страницах кабинета. */
+  const pathname = usePathname();
+  const active = item.active ?? isCurrent(pathname, item.href);
+
   const body = (
     <>
       {item.no !== undefined ? (
@@ -47,7 +89,7 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
           название раздела — оно уходит в aria-label ниже. */}
       <span>{item.short ?? item.label}</span>
       {/* Стрелка у текущего задания: указывает, что раздел открыт. */}
-      {item.active === true && item.no !== undefined ? (
+      {active && item.no !== undefined ? (
         <svg className="snav__go" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="m9 5 7 7-7 7" />
         </svg>
@@ -72,8 +114,8 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
   return (
     <a
       href={item.href}
-      className={clsx(className, item.active === true && 'is-active')}
-      aria-current={item.active === true ? 'page' : undefined}
+      className={clsx(className, active && 'is-active')}
+      aria-current={active ? 'page' : undefined}
       aria-label={item.short !== undefined ? item.label : undefined}
     >
       {body}
