@@ -57,6 +57,12 @@ jobs:
         working-directory: app
         run: pnpm test:prep-order
 
+      # Подход тренажёра №3: в смешанном режиме подряд не больше
+      # двух заданий одного типа, повторов в подходе нет.
+      - name: Проверить подход тренажёра задания №3
+        working-directory: app
+        run: pnpm test:z3-round
+
       # next.config.ts собран с output: 'export' — результат в app/out.
       # Здесь же отрабатывает ESLint: именно этот шаг ловит ошибки кода.
       - name: Собрать статический экспорт
