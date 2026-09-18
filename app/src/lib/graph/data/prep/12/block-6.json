@@ -1,0 +1,74 @@
+{
+  "kind": "prep",
+  "id": "P12-6",
+  "block": 6,
+  "title": "Коэффициент b — через точку",
+  "subtitle": "Найти свободный член подстановкой точки",
+  "seed": 1206,
+  "family": "line",
+  "axisLabels": "minimal",
+  "uniqueIntercepts": "nonzero",
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 3,
+    "minPositiveB": 1,
+    "minNegativeB": 1,
+    "minFractionK": 3,
+    "allFractionB": true,
+    "interceptMargin": 2,
+    "uniquePairs": true
+  },
+  "tasks": [
+    {
+      "id": "P12-6-01",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Прямая пересекает ось $y$ между узлами сетки — прочитать $b$ нельзя. Подставь координаты отмеченной точки в $y = kx + b$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "direction": "up",
+        "bKind": "half",
+        "bSign": "positive",
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-6-02",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Сначала найди $k$ по двум отмеченным точкам, потом подставь одну из них в уравнение и реши его относительно $b$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "direction": "down",
+        "bKind": "half",
+        "bSign": "negative",
+        "bVisible": true
+      }
+    },
+    {
+      "id": "P12-6-03",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Считать клетки до оси $y$ бесполезно: пересечение не в узле. Подставляй точку в уравнение.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "direction": "up",
+        "bKind": "half",
+        "bSign": "negative",
+        "bVisible": true
+      }
+    }
+  ]
+}
