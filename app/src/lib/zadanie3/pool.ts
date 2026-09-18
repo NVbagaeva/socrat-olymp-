@@ -110,9 +110,13 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     svg: common,
     variants: prototype.varianty.map((variant) => {
       const seal = sealAnswer(prototype.otvet(variant.params));
+      /* Формулы в разборе набираются здесь же, на сборке: разбор
+         уезжает закрытым, и в браузере KaTeX по нему уже не
+         пройдёт — там только расшифровка и вставка готовой
+         разметки. */
       const steps = prototype
         .shagi(variant.params)
-        .map((step) => step.text)
+        .map((step) => typeset(step.text))
         .join('\n');
       return {
         n: variant.n,

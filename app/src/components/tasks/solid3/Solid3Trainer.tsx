@@ -342,7 +342,9 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
             {solution ? (
               <ol className="z3t__steps">
                 {steps.map((step, i) => (
-                  <li key={i}>{step}</li>
+                  /* Формулы шага свёрстаны KaTeX на сборке: в
+                     расшифровке лежит готовая разметка. */
+                  <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
                 ))}
               </ol>
             ) : null}
