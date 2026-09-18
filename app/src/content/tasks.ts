@@ -63,7 +63,7 @@ export const tasks = [
     name: 'Основные понятия теории вероятностей',
     shortTitle: 'Основные понятия',
     slug: '4',
-    status: 'soon',
+    status: 'active',
   },
   { no: '05', name: 'Вероятности событий', slug: '5', status: 'active' },
   {
