@@ -105,6 +105,21 @@
   text-align: center;
 }
 
+/* Файл иллюстрации есть: картинка вместо рамки, пропорцию держит она. */
+.pc__ill--img {
+  display: block;
+  aspect-ratio: auto;
+  border: 0;
+  background: none;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.pc__ill--img img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Блок «Метод:» — плашка на мягком синем, как в референсе. */
 .pc__metod {
   margin: 0;

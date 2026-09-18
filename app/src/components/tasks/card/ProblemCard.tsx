@@ -38,6 +38,11 @@ export interface ProblemCardZadacha {
   steps: string;
   /** Метод и параметры рисунка — открытая часть модели. */
   model?: PoolModel;
+  /**
+   * Иллюстрация для варианта condition, где модели нет: только если
+   * файл существует. Нет — ни картинки, ни рамки под неё.
+   */
+  illustration?: { path: string; alt: string };
 }
 
 export interface ProblemCardProps {
@@ -149,11 +154,22 @@ export function ProblemCard({
     </header>
   );
 
-  const uslovie = (
-    <div className="pc__uslovie">
-      <p className="pc__text">{zadacha.uslovie}</p>
-      {/* Место под внешнюю blue-glass иллюстрацию: файла ещё нет,
-          поэтому рамка. Размер 4:3 держится и без картинки. */}
+  /* Иллюстрация: есть файл — картинка. В полной карточке без файла
+     стоит рамка 4:3, место под будущую blue-glass иллюстрацию; в
+     варианте condition без файла нет ничего. */
+  const kartinka =
+    variant === 'condition'
+      ? zadacha.illustration
+      : model?.illustration.exists === true
+        ? { path: model.illustration.path, alt: model.illustration.alt }
+        : undefined;
+
+  const illyustratsiya =
+    kartinka !== undefined ? (
+      <figure className="pc__ill pc__ill--img">
+        <img src={kartinka.path} alt={kartinka.alt} loading="lazy" />
+      </figure>
+    ) : variant === 'condition' ? null : (
       <figure className="pc__ill" aria-hidden="true">
         <figcaption>
           место под иллюстрацию
@@ -161,6 +177,12 @@ export function ProblemCard({
           blue-glass · 4:3
         </figcaption>
       </figure>
+    );
+
+  const uslovie = (
+    <div className="pc__uslovie">
+      <p className="pc__text">{zadacha.uslovie}</p>
+      {illyustratsiya}
     </div>
   );
 

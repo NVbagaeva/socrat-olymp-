@@ -8,8 +8,8 @@ import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
 import { TRENAZHER_4, UZNAY_METOD } from '@/content/veroyatnost';
 import { createProgressStore } from '@/lib/progressStore';
 import { METODY, type Method } from '@/lib/veroyatnost/model';
-import { sealMetod, type UznayPool } from '@/lib/veroyatnost/pool';
-import { openText } from '@/lib/veroyatnost/secret';
+import type { UznayPool } from '@/lib/veroyatnost/pool';
+import { openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { ROUND_SIZE, restartRound, useVeroyatnostRound } from '@/lib/veroyatnost/useRound';
 import { MethodPicker } from './MethodPicker';
 import { ProgressMetody } from './ProgressMetody';
@@ -23,9 +23,10 @@ export interface UznayMetodProps {
  *
  * Показывается только условие (ProblemCard в варианте condition) и
  * пять кнопок с названиями методов. Ответ проверяется сразу: верно —
- * зелёная отметка и «Следующая»; неверно — красная, рядом верный
- * метод и признаки в условии, по которым его можно было узнать.
- * Второй попытки нет. Числового ответа нет.
+ * зелёная отметка, признаки под заголовком «Как это было видно» и
+ * «Следующая»; неверно — красная, рядом верный метод и «Признаки в
+ * условии», по которым его можно было узнать. Второй попытки нет.
+ * Числового ответа нет.
  *
  * Метода в разметке нет: у задачи лежит его отпечаток, кнопка
  * сверяется с ним, а признаки открываются тем же отпечатком после
@@ -140,6 +141,7 @@ export function UznayMetod({ pool }: UznayMetodProps) {
               uslovie: variant.uslovie,
               seal: '',
               steps: '',
+              ...(variant.illustration === undefined ? {} : { illustration: variant.illustration }),
             }}
             nomer={index + 1}
             istochnik={UZNAY_METOD.istochnik[kind.istochnik]}
@@ -166,19 +168,20 @@ export function UznayMetod({ pool }: UznayMetodProps) {
                 {verno ? UZNAY_METOD.verno : UZNAY_METOD.neverno}
               </p>
               {verno ? null : (
-                <>
-                  <p className="z4-uznay__pravilnyy">
-                    <b>{UZNAY_METOD.pravilnyy}</b>{' '}
-                    {METODY.find((m) => m.id === itog.verny)?.nazvanie}
-                  </p>
-                  <p className="z4-uznay__priznaki-title">{UZNAY_METOD.priznaki}</p>
-                  <ul className="z4-uznay__priznaki">
-                    {itog.priznaki.map((p) => (
-                      <li key={p}>{p}</li>
-                    ))}
-                  </ul>
-                </>
+                <p className="z4-uznay__pravilnyy">
+                  <b>{UZNAY_METOD.pravilnyy}</b> {METODY.find((m) => m.id === itog.verny)?.nazvanie}
+                </p>
               )}
+              {/* Признаки — и после ошибки, и после верного ответа:
+                  во втором случае это подкрепление, заголовок другой. */}
+              <p className="z4-uznay__priznaki-title">
+                {verno ? UZNAY_METOD.kakVidno : UZNAY_METOD.priznaki}
+              </p>
+              <ul className="z4-uznay__priznaki">
+                {itog.priznaki.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
               <div className="z4-uznay__actions">
                 <Button onClick={dalshe}>
                   {index + 1 === round.length ? TRENAZHER_4.zavershit : TRENAZHER_4.dalshe}

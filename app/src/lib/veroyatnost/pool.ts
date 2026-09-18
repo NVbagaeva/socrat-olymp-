@@ -23,13 +23,16 @@ import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
 import {
   modelPrep,
   modelVarianta,
+  putIllyustratsii,
   texPlain,
   type Method,
   type Parametry,
   type Shape,
 } from './model';
 import type { Razbor } from './razbor';
-import { fingerprint, sealAnswer, sealText } from './secret';
+import fs from 'node:fs';
+import path from 'node:path';
+import { sealAnswer, sealMetod, sealText } from './secret';
 import {
   type Metodika,
   type PrepBlok,
@@ -49,8 +52,24 @@ export interface PoolModel {
   method: Method;
   shape?: Shape;
   parametry: Parametry;
-  /** Место под иллюстрацию: путь по соглашению проекта и alt. */
-  illustration: { path: string; alt: string; ratio: '4:3' };
+  /**
+   * Место под иллюстрацию: путь по соглашению проекта и alt. `exists`
+   * считается на сборке: лежит ли файл в app/public по этому пути.
+   * Есть файл — карточка показывает картинку, нет — место под неё.
+   */
+  illustration: { path: string; alt: string; ratio: '4:3'; exists: boolean };
+}
+
+/**
+ * Лежит ли файл иллюстрации в app/public. Считается на сборке, в
+ * Node: путь модели — от корня сайта, файлы — в папке public.
+ */
+export function illyustratsiyaEst(put: string): boolean {
+  try {
+    return fs.existsSync(path.join(process.cwd(), 'public', put));
+  } catch {
+    return false;
+  }
 }
 
 export interface PoolVariant {
@@ -124,7 +143,7 @@ function otkrytayaModel(model: ReturnType<typeof modelVarianta>): PoolModel {
     method: model.method,
     ...(model.shape === undefined ? {} : { shape: model.shape }),
     parametry: model.parameters,
-    illustration: model.illustration,
+    illustration: { ...model.illustration, exists: illyustratsiyaEst(model.illustration.path) },
   };
 }
 
@@ -247,6 +266,11 @@ export function prep5Pool(): PrepPoolBlok[] {
 export interface UznayVariant {
   n: number;
   uslovie: string;
+  /**
+   * Иллюстрация — только если файл есть: путь по модели метод не
+   * выдаёт, но в карточке без картинки и рамки под неё быть не должно.
+   */
+  illustration?: { path: string; alt: string };
   /** Отпечаток идентификатора метода. */
   metodSeal: string;
   /** Признаки в условии — JSON-список строк, закрытый отпечатком. */
@@ -265,18 +289,19 @@ export interface UznayPool {
   kinds: UznayKind[];
 }
 
-/** Отпечаток метода: с ним сверяется нажатая кнопка. */
-export function sealMetod(metod: Method): string {
-  return fingerprint(`metod:${metod}`);
-}
-
-function uznayVariant(n: number, uslovie: string, metodika: Metodika): UznayVariant {
+function uznayVariant(
+  n: number,
+  uslovie: string,
+  metodika: Metodika,
+  illustration: { path: string; alt: string },
+): UznayVariant {
   const metodSeal = sealMetod(metodika.metod);
   return {
     n,
     uslovie,
     metodSeal,
     hints: sealText(JSON.stringify(metodika.methodHints), metodSeal),
+    ...(illyustratsiyaEst(illustration.path) ? { illustration } : {}),
   };
 }
 
@@ -296,7 +321,10 @@ export function uznayMetodPool(): UznayPool {
         id: prototype.id,
         istochnik: 'prototip',
         variants: prototype.varianty.map((variant) =>
-          uznayVariant(variant.n, prototype.uslovie(variant.params), metodika),
+          uznayVariant(variant.n, prototype.uslovie(variant.params), metodika, {
+            path: putIllyustratsii(prototype.id),
+            alt: prototype.nazvanie,
+          }),
         ),
       },
     ];
@@ -311,7 +339,12 @@ export function uznayMetodPool(): UznayPool {
         {
           id: zadacha.id,
           istochnik: 'konspekt',
-          variants: [uznayVariant(1, zadacha.uslovie, metodika)],
+          variants: [
+            uznayVariant(1, zadacha.uslovie, metodika, {
+              path: putIllyustratsii(zadacha.id),
+              alt: `Задача ${zadacha.nomer} конспекта`,
+            }),
+          ],
         },
       ];
     },

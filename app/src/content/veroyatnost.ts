@@ -179,6 +179,7 @@ export const UZNAY_METOD = {
   neverno: 'Неверно',
   pravilnyy: 'Правильный метод:',
   priznaki: 'Признаки в условии:',
+  kakVidno: 'Как это было видно:',
   istochnik: { prototip: 'Прототип задания 4', konspekt: 'Задача конспекта' },
   progress: {
     title: 'Прогресс',

@@ -54,6 +54,15 @@ export function fingerprint(value: string): string {
   return a.toString(16).padStart(8, '0') + b.toString(16).padStart(8, '0');
 }
 
+/**
+ * Отпечаток метода для режима «Узнай метод»: с ним сверяется нажатая
+ * кнопка, им же закрыты признаки в условии. Считается и на сборке, и в
+ * браузере — поэтому живёт здесь, а не рядом с банком.
+ */
+export function sealMetod(metod: string): string {
+  return fingerprint(`metod:${metod}`);
+}
+
 /** Отпечаток верного ответа: считается на сборке. */
 export function sealAnswer(answer: number): string {
   return fingerprint(String(Math.round(answer * 1e9) / 1e9));
