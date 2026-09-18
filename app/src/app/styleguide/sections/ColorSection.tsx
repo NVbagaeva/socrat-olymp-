@@ -24,6 +24,15 @@ const BRAND: Swatch[] = [
   { token: 'surface-soft', name: 'surface-soft', hex: '#E8F0FC' },
 ];
 
+/* Чертежи стереометрии: три цвета, и каждый значит одно.
+   Ребро тела — обычный синий; то, что спрашивают, — синий темнее и
+   линия толще; дополнительные построения разбора — акцент. */
+const SOLID: Swatch[] = [
+  { token: 'solid-edge', name: 'solid-edge · ребро тела', hex: '#1F5FD0' },
+  { token: 'solid-mark', name: 'solid-mark · искомое в условии', hex: '#163F8C' },
+  { token: 'graph-accent', name: 'graph-accent · построения разбора', hex: '#E07A2F' },
+];
+
 const STATUSES: Swatch[] = [
   { token: 'success', name: 'success · «Отлично», рост', hex: '#16A34A' },
   { token: 'warning', name: 'warning · «Требует внимания»', hex: '#D97D0B' },
@@ -64,6 +73,11 @@ export function ColorSection() {
       <div className="block">
         <h3>Фирменный синий</h3>
         <Swatches items={BRAND} columns="g4" />
+      </div>
+
+      <div className="block">
+        <h3>Чертежи стереометрии</h3>
+        <Swatches items={SOLID} columns="g3" />
       </div>
 
       <div className="block">
