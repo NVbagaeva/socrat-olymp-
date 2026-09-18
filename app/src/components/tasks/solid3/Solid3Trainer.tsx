@@ -5,7 +5,13 @@ import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
-import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
+import {
+  clearMistake,
+  markMistake,
+  recordTask,
+  taskKey,
+  useZ3Progress,
+} from '@/lib/zadanie3/progress';
 import { answerMatches, openText } from '@/lib/zadanie3/secret';
 import { restartZ3Round, swapZ3Task, useZ3Round } from '@/lib/zadanie3/useRound';
 import { Solid3Stats } from './Solid3Stats';
@@ -40,6 +46,13 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   /* Повторение ошибок — отдельный режим: подход собирается только из
      заданий, в которых ошиблись. */
   const [repeat, setRepeat] = useState(false);
+  /* Список ошибок, по которому собран текущий подход повторения.
+     Снимок, а не живое значение из хранилища: решённое верно уходит
+     из повторения сразу, и живой список пересобирал бы подход прямо
+     под руками ученика — на месте решённой задачи оказалась бы
+     другая. Новый снимок берётся при входе в режим и при «Начать
+     заново». */
+  const [repeatList, setRepeatList] = useState('');
 
   const byId = useMemo(() => new Map(pool.kinds.map((kind) => [kind.id, kind])), [pool]);
 
@@ -53,14 +66,13 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   /* Когда взялись за задание. Ноль — ещё не начинали. */
   const started = useRef<number>(0);
 
-  /* Из чего собирать подход: один тип, все типы или список ошибок.
-     Список ошибок берётся строкой, чтобы зависимость эффекта не
+  /* Из чего собирать подход: один тип, все типы или снимок списка
+     ошибок. Список берётся строкой, чтобы зависимость useMemo не
      менялась от каждой перерисовки хранилища. */
-  const mistakesKey = progress.mistakes.join(',');
   const source = useMemo(() => {
     if (repeat) {
       const wanted = new Map<string, number[]>();
-      mistakesKey
+      repeatList
         .split(',')
         .filter((item) => item !== '')
         .forEach((item) => {
@@ -93,7 +105,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     return only === undefined
       ? []
       : [{ id: only.id, variants: only.variants.map((item) => ({ n: item.n })) }];
-  }, [repeat, mode, pool, byId, mistakesKey]);
+  }, [repeat, mode, pool, byId, repeatList]);
 
   /* Чем фильтровать: разделами в общем тренажёре, типами заданий
      в тренажёре раздела. */
@@ -116,7 +128,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   /* Ключ подхода включает режим и список ошибок: сменил фильтр —
      собрался другой подход, а прежний остался лежать и вернётся,
      если переключиться назад. */
-  const key = `${roundKey}:${repeat ? `mistakes:${mistakesKey}` : mode}`;
+  const key = `${roundKey}:${repeat ? `mistakes:${repeatList}` : mode}`;
   const order = useZ3Round(key, source, size);
 
   const current: RoundItem | undefined = order[index];
@@ -144,6 +156,15 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   function choose(next: string) {
     setMode(next);
     setRepeat(false);
+    setRepeatList('');
+    setIndex(0);
+    reset();
+  }
+
+  /** Войти в повторение: подход собирается по снимку списка ошибок. */
+  function startRepeat() {
+    setRepeatList(progress.mistakes.join(','));
+    setRepeat(true);
     setIndex(0);
     reset();
   }
@@ -157,8 +178,17 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     if (right) {
       const seconds = started.current === 0 ? 0 : (Date.now() - started.current) / 1000;
       recordTask(current.kind, current.n, !missed, seconds);
+      /* Из повторения задание уходит только здесь: решено верно
+         в самом повторении. */
+      if (repeat) {
+        clearMistake(current.kind, current.n);
+      }
     } else {
       setMissed(true);
+      /* Первый неверный ответ — и задание уже в повторении. Ждать,
+         пока ученик его добьёт, нельзя: брошенное нерешённым как раз
+         и надо повторить. */
+      markMistake(current.kind, current.n);
     }
   }
 
@@ -206,7 +236,13 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
         ))}
       </nav>
 
-      {total === 0 || current === undefined || kind === undefined || variant === undefined ? (
+      {total === 0 && repeat ? (
+        /* Повторять больше нечего: все задания подхода решены верно
+           и ушли из списка. «Собираем подход…» здесь соврало бы. */
+        <p className="z3t__wait">
+          Ошибок не осталось: всё, что было в повторении, решено верно.
+        </p>
+      ) : total === 0 || current === undefined || kind === undefined || variant === undefined ? (
         <p className="z3t__wait">Собираем подход…</p>
       ) : (
         <>
@@ -307,6 +343,12 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
             <Button
               variant="ghost"
               onClick={() => {
+                if (repeat) {
+                  /* В повторении «заново» — это заново по тому, что
+                     осталось: решённое верно уже ушло из списка. */
+                  startRepeat();
+                  return;
+                }
                 restartZ3Round(key);
                 setIndex(0);
                 reset();
@@ -321,15 +363,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
       <Solid3Stats
         pool={pool}
         progress={progress}
-        onRepeat={
-          mistakes.length === 0
-            ? null
-            : () => {
-                setRepeat(true);
-                setIndex(0);
-                reset();
-              }
-        }
+        onRepeat={mistakes.length === 0 ? null : startRepeat}
         onGoKind={choose}
       />
     </section>
