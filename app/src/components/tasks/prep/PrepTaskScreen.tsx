@@ -6,13 +6,14 @@ import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
+import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
 
 /** Как закончилась работа над задачей. Пусто — ещё не бралась. */
-type Status = 'right' | 'wrong' | 'skipped' | null;
+type Status = TaskStatus;
 
 /** Что случилось с задачей в этой сессии и не попало в хранилище. */
 type Attempt = 'wrong' | 'skipped';
@@ -98,7 +99,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   const task: PrepTask = found;
 
   const total = tasks.length;
-  const last = index === total - 1;
+  /* Куда вести кнопкой дальше: к ближайшей нерешённой, а не к
+     следующему номеру. null — нерешённых больше нет. */
+  const nextOpen = nextUnsolved(status, index);
   const right = status.filter((item) => item === 'right').length;
   const wrong = status.filter((item) => item === 'wrong').length;
   const ready = value.trim() !== '';
@@ -146,8 +149,8 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
 
   function skip() {
     remember('skipped');
-    if (!last) {
-      open(index + 1);
+    if (nextOpen !== null) {
+      open(nextOpen);
     }
   }
 
@@ -199,7 +202,11 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
             <li key={item.id}>
               <button
                 type="button"
-                className={clsx('pdot', state !== null && `is-${state}`, i === index && 'is-current')}
+                className={clsx(
+                  'pdot',
+                  state !== null && `is-${state}`,
+                  i === index && 'is-current',
+                )}
                 aria-current={i === index ? 'true' : undefined}
                 onClick={() => open(i)}
               >
@@ -266,10 +273,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
                   }}
                 >
                   <span className="popt__no">{option.number}</span>
-                  <span
-                    className="popt__text"
-                    dangerouslySetInnerHTML={{ __html: option.html }}
-                  />
+                  <span className="popt__text" dangerouslySetInnerHTML={{ __html: option.html }} />
                 </button>
               </li>
             ))}
@@ -309,12 +313,17 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
 
           {checked === 'right' ? (
             <>
-              {last ? (
+              {nextOpen === null ? (
+                /* Нерешённых не осталось — идти внутри навыка некуда. */
                 <Link className="btn btn--primary" href={listHref}>
                   К списку навыков →
                 </Link>
               ) : (
-                <Button onClick={() => open(index + 1)}>Следующее задание →</Button>
+                <Button onClick={() => open(nextOpen)}>
+                  {/* Подпись честная: если ближайшая нерешённая осталась
+                      позади, «следующей» она не является. */}
+                  {nextOpen === index + 1 ? 'Следующее задание →' : 'Следующая нерешённая →'}
+                </Button>
               )}
               <Button variant="ghost" onClick={showSolution} disabled={solution}>
                 Разобрать решение

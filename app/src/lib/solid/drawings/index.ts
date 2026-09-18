@@ -1,0 +1,68 @@
+/**
+ * Все чертежи банка задания №3 в одном месте.
+ *
+ * Прототипы — по разделам задачника, плюс шпаргалки «Что нужно помнить»
+ * и миниатюры разделов. Тексты условий здесь не дублируются: они
+ * приходят из prototipy-91.json.
+ *
+ * Собранные разделы берутся не списком картинок, а из данных
+ * прототипов: чертёж прототипа — это чертёж его первого варианта.
+ * Так числа и буквы задачи и её чертёж не могут разойтись, а новый
+ * раздел не нужно вписывать сюда отдельно — он приходит из RAZDELY.
+ */
+
+import { RAZDELY } from '../../zadanie3';
+import { RAZDEL_1 } from '../../zadanie3/razdel1';
+import { type Prototype } from '../../zadanie3/types';
+import { type Model } from '../model';
+import { SHEETS } from './sheets';
+import { THUMBS } from './thumbs';
+
+/** Чертёж первого варианта прототипа. */
+function firstDrawing(prototype: Prototype): Model {
+  const first = prototype.varianty[0];
+  if (first === undefined) {
+    throw new Error(`У прототипа ${prototype.id} нет вариантов`);
+  }
+  return prototype.chertezh(first.params);
+}
+
+/** Чертежи всех разделов: id прототипа — его чертёж. */
+const SECTIONS: Record<string, Model> = Object.fromEntries(
+  RAZDELY.flatMap((razdel) =>
+    razdel.prototipy.map((prototype) => [prototype.id, firstDrawing(prototype)]),
+  ),
+);
+
+/** Прототипы, у которых числа стоят на самом чертеже. */
+const WITH_NUMBERS = ['P03-05', 'P03-11'];
+
+/** Чертёж прототипа по его id. */
+export const PROTOTYPE_DRAWINGS: Record<string, Model> = SECTIONS;
+
+/**
+ * Варианты ступенчатых многогранников: у каждого свои числа на
+ * чертеже, поэтому и чертёж свой.
+ */
+export const STEP_VARIANTS: { id: string; variant: number; model: Model }[] = RAZDEL_1.filter(
+  (prototype) => WITH_NUMBERS.includes(prototype.id),
+).flatMap((prototype) =>
+  prototype.varianty.map((v) => ({
+    id: prototype.id,
+    variant: v.n,
+    model: prototype.chertezh(v.params),
+  })),
+);
+
+export { SHEETS, THUMBS };
+
+/** Сколько всего чертежей в банке. */
+export function drawingCount(): number {
+  return (
+    Object.keys(PROTOTYPE_DRAWINGS).length +
+    STEP_VARIANTS.length -
+    WITH_NUMBERS.length +
+    Object.keys(SHEETS).length +
+    Object.keys(THUMBS).length
+  );
+}

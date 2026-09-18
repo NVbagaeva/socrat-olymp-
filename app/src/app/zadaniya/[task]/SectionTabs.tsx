@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Badge, EmptyState, Tabs } from '@/components/ui';
+import { EmptyState, Tabs } from '@/components/ui';
+import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 
 export interface SubtopicView {
   slug: string;
@@ -37,49 +37,6 @@ const TABS = [
 
 const IDS = new Set(TABS.map((tab) => tab.id));
 
-function SubtopicCard({ item }: { item: SubtopicView }) {
-  const body = (
-    <>
-      <span className="subtopic__head">
-        <span className="subtopic__name">{item.name}</span>
-        {/* Формула свёрстана на сборке: обычным текстом она не выводится. */}
-        <span
-          className="subtopic__formula"
-          aria-hidden="true"
-          dangerouslySetInnerHTML={{ __html: item.formulaHtml }}
-        />
-      </span>
-
-      {item.status === 'soon' ? (
-        <span className="subtopic__meta">
-          <Badge>Скоро</Badge>
-        </span>
-      ) : (
-        /* Стрелка — span, а не кнопка: карточка уже ссылка, вложенный
-           элемент управления сломал бы обход с клавиатуры. */
-        <span className="subtopic__go" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M5 12h13M12 6l6 6-6 6" />
-          </svg>
-        </span>
-      )}
-    </>
-  );
-
-  if (item.href === null) {
-    return (
-      <span className="subtopic subtopic--soon" aria-disabled="true">
-        {body}
-      </span>
-    );
-  }
-  return (
-    <Link className="subtopic" href={item.href}>
-      {body}
-    </Link>
-  );
-}
-
 /**
  * Вкладки раздела. Активная вкладка лежит в адресе параметром tab,
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
@@ -107,7 +64,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
           <ul className="subtopics-grid">
             {subtopics.map((item) => (
               <li key={item.slug}>
-                <SubtopicCard item={item} />
+                <SubtopicCard name={item.name} href={item.href} formulaHtml={item.formulaHtml} />
               </li>
             ))}
           </ul>

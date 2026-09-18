@@ -51,10 +51,10 @@ export const tasksPage = {
 export const tasks = [
   { no: '01', name: 'Планиметрия', slug: '1', status: 'soon' },
   { no: '02', name: 'Векторы', slug: '2', status: 'soon' },
-  /* Тренажёр по стереометрии существует только статической страницей
-     в корне репозитория и в сборку Next.js не входит, поэтому раздел
-     закрыт. */
-  { no: '03', name: 'Стереометрия', slug: '3', status: 'soon' },
+  /* Раздел открыт: банк из 91 прототипа собран в lib/zadanie3.
+     Старый статический тренажёр в корне репозитория живёт отдельно
+     и в сборку Next.js по-прежнему не входит. */
+  { no: '03', name: 'Стереометрия', slug: '3', status: 'active' },
   { no: '04', name: 'Вероятность: простая', slug: '4', status: 'soon' },
   { no: '05', name: 'Вероятность: сложная', slug: '5', status: 'soon' },
   {
@@ -66,9 +66,27 @@ export const tasks = [
     badge: 'структура 2027',
   },
   { no: '07', name: 'Уравнения', slug: '7', status: 'soon' },
-  { no: '08', name: 'Вычисления и преобразования', shortTitle: 'Вычисления', slug: '8', status: 'soon' },
-  { no: '09', name: 'Производная и первообразная', shortTitle: 'Производная', slug: '9', status: 'soon' },
-  { no: '10', name: 'Задачи с физическим смыслом', shortTitle: 'Физический смысл', slug: '10', status: 'soon' },
+  {
+    no: '08',
+    name: 'Вычисления и преобразования',
+    shortTitle: 'Вычисления',
+    slug: '8',
+    status: 'soon',
+  },
+  {
+    no: '09',
+    name: 'Производная и первообразная',
+    shortTitle: 'Производная',
+    slug: '9',
+    status: 'soon',
+  },
+  {
+    no: '10',
+    name: 'Задачи с физическим смыслом',
+    shortTitle: 'Физический смысл',
+    slug: '10',
+    status: 'soon',
+  },
   { no: '11', name: 'Текстовая задача', slug: '11', status: 'soon' },
   { no: '12', name: 'Графики функций', slug: '12', status: 'active' },
   {

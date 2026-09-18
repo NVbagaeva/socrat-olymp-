@@ -3,6 +3,8 @@
    KaTeX и движок чертежей, а банк заданий — клиентский экран, и в его
    сборку эти зависимости через общий файл заходить не должны.
    Страница темы берёт их по прямому пути. */
+export { SheetBlock, type SheetBlockProps } from './SheetBlock';
+export { SubtopicCard, type SubtopicCardProps } from './SubtopicCard';
 export { TaskGrid, type TaskGridProps } from './TaskGrid';
 export { TaskImage, type TaskImageProps } from './TaskImage';
 /* Рисованные миниатюры больше не показываются, но остаются

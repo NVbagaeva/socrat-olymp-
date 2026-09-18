@@ -1,0 +1,90 @@
+/* Страница задания №3. Карточки, сетка и шапка описаны в общих
+   слоях: здесь только то, чего в них нет, — чертежи внутри карточек
+   и вторая строка с номером раздела и числом прототипов. */
+
+.solid3-title {
+  margin-bottom: var(--space-2);
+}
+.solid3-lead {
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+/* Разделов восемь, и у каждой карточки сверху чертёж: в четыре
+   колонки они встают двумя ровными рядами, а карточка остаётся
+   достаточно широкой, чтобы чертёж читался. */
+.subtopics-grid--figures {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Чертёж внутри карточки. Высота фиксирована, чтобы карточки
+   стояли ровно при разной высоте тел: шар ниже призмы.
+   Размер задаётся отсюда, а не движком: у движка чертёж тянется
+   по ширине и упирается в 360px, а здесь его держит высота, —
+   поэтому селектор длиннее, чем у правила движка, и перебивает его. */
+.subtopic__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+}
+.subtopic__media .solid-wrap {
+  display: block;
+  height: 100%;
+}
+.subtopic__media .solid-wrap .solid {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+}
+
+/* Строка под названием: номер раздела и сколько в нём прототипов. */
+.subtopic__note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-tertiary);
+}
+.subtopic__no {
+  font-variant-numeric: tabular-nums;
+}
+.subtopic__count {
+  color: var(--color-text-secondary);
+}
+
+/* Стрелка перехода стоит в углу карточки: на карточке с чертежом
+   ей нужно место, поэтому снизу добавлен отступ. */
+.subtopics-grid--figures .subtopic {
+  padding-bottom: var(--space-12);
+}
+
+@media (max-width: 1200px) {
+  .subtopics-grid--figures {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .subtopics-grid--figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* На телефоне чертёж и название в одну колонку: две карточки в ряд
+   ужали бы чертёж до нечитаемого. */
+@media (max-width: 560px) {
+  .subtopics-grid--figures {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .subtopic__media {
+    height: 104px;
+  }
+}
