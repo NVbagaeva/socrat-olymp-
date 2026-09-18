@@ -38,6 +38,10 @@ export interface PoolKind {
   id: string;
   /** Название типа на кнопке фильтра. */
   title: string;
+  /** Римский номер раздела: по нему фильтрует общий тренажёр. */
+  group: string;
+  /** Название раздела на кнопке фильтра общего тренажёра. */
+  groupTitle: string;
   /** Формат ответа: подсказывает, чего ждать от поля ввода. */
   format: Prototype['format'];
   /** Общий чертёж прототипа. */
@@ -61,7 +65,7 @@ function perVariant(prototype: Prototype): boolean {
   return (prototype.chertezh(first.params).measures ?? []).length > 0;
 }
 
-function kindOf(prototype: Prototype): PoolKind {
+function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
   const first = prototype.varianty[0];
   if (first === undefined) {
     throw new Error(`У прототипа ${prototype.id} нет вариантов`);
@@ -70,6 +74,8 @@ function kindOf(prototype: Prototype): PoolKind {
   return {
     id: prototype.id,
     title: prototype.nazvanie,
+    group: razdel.nomer,
+    groupTitle: razdel.nazvanie,
     format: prototype.format,
     svg: renderSolid(prototype.chertezh(first.params)),
     variants: prototype.varianty.map((variant) => {
@@ -95,7 +101,7 @@ export function razdelPool(razdel: Razdel): Pool {
   return {
     razdel: razdel.nomer,
     title: razdel.nazvanie,
-    kinds: razdel.prototipy.map(kindOf),
+    kinds: razdel.prototipy.map((prototype) => kindOf(razdel, prototype)),
   };
 }
 
@@ -104,6 +110,8 @@ export function wholePool(): Pool {
   return {
     razdel: 'all',
     title: 'Весь банк задания №3',
-    kinds: RAZDELY.flatMap((razdel) => razdel.prototipy.map(kindOf)),
+    kinds: RAZDELY.flatMap((razdel) =>
+      razdel.prototipy.map((prototype) => kindOf(razdel, prototype)),
+    ),
   };
 }

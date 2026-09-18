@@ -8,7 +8,7 @@
 }
 
 /* Фильтр по типам заданий: типов бывает и двадцать один, поэтому
-   лента переносится, а не едет вбок — так видно все сразу. */
+   на широком экране лента переносится — так видно все сразу. */
 .z3t__filter {
   display: flex;
   flex-wrap: wrap;
@@ -233,6 +233,18 @@
 }
 
 @media (max-width: 767.98px) {
+  /* На телефоне двадцать один перенос съел бы весь экран, и до
+     задачи пришлось бы листать. Лента едет вбок. */
+  .z3t__filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 0 var(--space-4);
+  }
+  .z3t__filter::-webkit-scrollbar {
+    display: none;
+  }
   .z3t__card {
     grid-template-columns: minmax(0, 1fr);
   }
