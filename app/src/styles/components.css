@@ -1891,3 +1891,125 @@ a.task-card {
     font-size: 13px;
   }
 }
+
+/* ── Разделы теории и содержание темы ────────────────────────
+   Общий слой: одинаково выглядят и в задании №12, и в №3.
+   Раньше лежали в стилях маршрута №12, и второму заданию
+   пришлось бы их повторить. */
+
+/* Разделы теории идут подряд: содержание работает как оглавление,
+   а не как переключатель. */
+.theory {
+  display: grid;
+  gap: var(--space-8);
+}
+.theory-block__title {
+  margin-bottom: var(--space-4);
+}
+/* Переход по якорю оставляет над заголовком воздух: иначе он
+   прилипает к верхней кромке экрана. */
+.theory-block {
+  scroll-margin-top: var(--space-5);
+}
+.theory-block__text {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+/* Заглушка ненаписанного раздела. Пунктир вместо сплошной рамки —
+   честный знак «здесь пока пусто»: с карточкой готового материала её
+   не спутать. */
+.theory-block__soon {
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  /* Не text-tertiary: на фоне страницы он даёт 2,47:1 — ниже нормы
+     для обычного текста. У text-secondary 4,54:1. */
+  color: var(--color-text-secondary);
+}
+
+/* Кружок с номером раздела. Нумерация своя, с содержанием не связана. */
+.theory-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.theory-block__no {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.contents-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  counter-reset: none;
+}
+.contents-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  text-align: left;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease);
+}
+.contents-item:hover {
+  background: var(--color-surface-2);
+}
+.contents-item__no {
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+/* Открытый раздел: подложка и полоска акцентом слева — так же, как
+   у открытой подтемы в окне выбора типа функции. */
+.contents-item.is-active {
+  position: relative;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-weight: 500;
+}
+.contents-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  width: 3px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--color-accent);
+}
+.contents-item.is-active .contents-item__no {
+  color: var(--color-primary);
+}
+
+/* На узком экране кружок с номером меньше. */
+@media (max-width: 767.98px) {
+  .theory-block__no {
+    width: 32px;
+    height: 32px;
+    font-size: var(--fs-body);
+  }
+}
