@@ -137,13 +137,16 @@ jobs:
       - name: Вернуть готовые PDF в ветку
         if: ${{ inputs.target != 'sample' }}
         run: |
-          if git diff --quiet -- app/public/materials/zadanie-12; then
-            echo "файлы не менялись"
-            exit 0
-          fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/public/materials/zadanie-12
+          # Сравнивать надо индекс, а не рабочее дерево: файлы могут
+          # быть новыми, а git diff неотслеживаемых не видит и молча
+          # сообщает, что менять нечего.
+          if git diff --cached --quiet -- app/public/materials/zadanie-12; then
+            echo "файлы не менялись"
+            exit 0
+          fi
           git commit -m "Сборник №12: пересобранные PDF [skip ci]"
           git push origin HEAD:${GITHUB_REF_NAME}
           
