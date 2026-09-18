@@ -1,85 +1,26 @@
 /**
- * Математика в текстах задания №3.
+ * Числа и подписи в условиях задания №3.
  *
- * Вся она идёт через KaTeX: имена вершин, числа, корни, дроби. В
- * строке условия формула помечена долларами — `$DB_1 = 6$`, — а
- * набирает её typeset() на сборке. Юникод-индексов (₁) и знака «√»
- * в текстах быть не должно: буква в формуле курсивная, цифра
- * прямая, вокруг «=» стоят пробелы — всё это KaTeX делает сам, а
- * набранный руками символ ничего этого не даёт.
- *
- * Единственное место, где Юникод-индекс остаётся, — alt, <title> и
- * aria-label: `$A_1$` вслух не прочитать. Для них letters() и
- * segment(), они так и называются: «буквами».
+ * Условие набирается так, как его набирает задачник: десятичная
+ * запятая, буквы вершин с нижним индексом, знак умножения не
+ * пишется. Формулы набора KaTeX здесь не нужны: в условиях
+ * стереометрии формул нет, есть только буквы и числа.
  */
 
 import { subscript } from '../solid/figures';
 import { type AnswerFormat } from './types';
 
-/** Число в тексте вне формулы: 2,5 — с запятой. */
+/** Число в условии: 2,5 — с запятой, как в задачнике. */
 export function ru(value: number): string {
   return String(value).replace('.', ',');
 }
 
-/**
- * Имя вершины в записи TeX: C1 → C_1, ABCDA1B1C1D1 →
- * ABCDA_1B_1C_1D_1. Долларов не ставит: их ставит тот, кто собирает
- * формулу целиком.
- */
-export function tex(name: string): string {
-  return name.replace(/\d+/g, (digits) => (digits.length === 1 ? `_${digits}` : `_{${digits}}`));
-}
-
-/** Число в записи TeX: 1,5 → 1{,}5. Фигурные скобки убирают у
-    запятой отбивку знака препинания. */
-export function texChislo(value: number): string {
-  return String(value).replace('.', '{,}');
-}
-
-/** Имя фигуры или вершины формулой: 'C1' → `$C_1$`. */
-export function imya(name: string): string {
-  return `$${tex(name)}$`;
-}
-
-/** Отрезок формулой: ['D', 'B1'] → `$DB_1$`. */
-export function otr(pair: readonly [string, string]): string {
-  return `$${tex(pair[0] + pair[1])}$`;
-}
-
-/** Число формулой: 1.5 → `$1{,}5$`. */
-export function chislo(value: number): string {
-  return `$${texChislo(value)}$`;
-}
-
-/** Равенство формулой: ['D','D1'] и 2 → `$DD_1 = 2$`. */
-export function ravno(pair: readonly [string, string], value: number): string {
-  return `$${tex(pair[0] + pair[1])} = ${texChislo(value)}$`;
-}
-
-/** Готовая запись TeX в текст: 'AC = \\sqrt{45}' → `$AC = \\sqrt{45}$`. */
-export function formula(body: string): string {
-  return `$${body}$`;
-}
-
-/** Квадратный корень формулой: 75 → `$\sqrt{75}$`. */
-export function koren(value: number): string {
-  return `$\\sqrt{${texChislo(value)}}$`;
-}
-
-/** Градусы формулой: 60 → `$60^\circ$`. */
-export function gradusy(value: number): string {
-  return `$${texChislo(value)}^\\circ$`;
-}
-
-/**
- * Имя вершины или отрезка буквами: AC1 → AC₁.
- * Только для alt, <title> и aria-label — в видимом тексте формула.
- */
+/** Имя вершины или отрезка с индексами: AC1 → AC₁. */
 export function letters(name: string): string {
   return subscript(name);
 }
 
-/** Отрезок буквами: ['D', 'B1'] → DB₁. Только для alt. */
+/** Отрезок по паре вершин: ['D', 'B1'] → DB₁. */
 export function segment(pair: readonly [string, string]): string {
   return subscript(pair[0] + pair[1]);
 }

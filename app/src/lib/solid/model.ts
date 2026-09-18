@@ -75,21 +75,12 @@ export interface Mark {
   label?: string;
 }
 
-/** Роль элемента на чертеже: зачем он здесь. */
-export type LineRole = 'искомое' | 'построение';
-
 /** Вспомогательный отрезок: высота, апофема, радиус. */
 export interface Line {
   a: Vec3;
   b: Vec3;
   /** Подпись курсивом у середины: «h», «l», «R». */
   label?: string;
-  /**
-   * 'искомое' — то, что названо в вопросе условия: синим и толще.
-   * 'построение' — дополнительное построение разбора: оранжевым.
-   * Не задана — 'построение': так рисовались все линии раньше.
-   */
-  role?: LineRole;
 }
 
 /** Знак прямого угла в точке at между направлениями u и v. */
@@ -97,21 +88,6 @@ export interface RightAngle {
   at: Vec3;
   u: Vec3;
   v: Vec3;
-}
-
-/**
- * Дуга угла в точке at между направлениями u и v: знак «вот этот
- * угол». Знак прямого угла рисует RightAngle, а здесь угол любой,
- * поэтому дуга.
- */
-export interface AngleArc {
-  at: Vec3;
-  u: Vec3;
-  v: Vec3;
-  /** Подпись у дуги: «60°», «α». */
-  label?: string;
-  /** Как у Line: искомое синим, построение оранжевым. */
-  role?: LineRole;
 }
 
 /** Сечение или выделенная часть: многоугольник с заливкой. */
@@ -145,7 +121,6 @@ export interface Model {
   marks?: Mark[];
   lines?: Line[];
   angles?: RightAngle[];
-  arcs?: AngleArc[];
   sections?: Section[];
   measures?: Measure[];
   notes?: Note[];

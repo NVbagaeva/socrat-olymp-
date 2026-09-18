@@ -42,8 +42,6 @@ const THEME = {
     face: 'var(--solid-face)',
     liquid: 'var(--solid-liquid)',
     aux: 'var(--graph-accent)',
-    /* Искомое: синий темнее ребра. Толщина ниже, в width.mark. */
-    mark: 'var(--solid-mark)',
     label: 'var(--color-text)',
     surface: 'var(--color-surface)',
   },
@@ -52,10 +50,6 @@ const THEME = {
     hidden: 1.6,
     aux: 1.7,
     auxHidden: 1.5,
-    /* Выделенное толще ребра: тем же цветом, но тоньше, оно
-       потерялось бы среди линий тела. */
-    mark: 3,
-    markHidden: 2.4,
     thin: 1.3,
     marker: 1.4,
     dotStroke: 1.6,
@@ -74,18 +68,9 @@ const THEME = {
     sphere: 0.5,
   },
   font: {
-    /* Буквы на чертеже и буквы в формулах условия — одно и то же:
-       набирает их KaTeX, поэтому и здесь его шрифт. Начертание
-       обычное, а не полужирное: в формуле буква не жирная.
-       Запасной — общий шрифт сайта, если KaTeX не подгрузился. */
-    family: 'KaTeX_Math, var(--font-sans)',
-    /* Индекс — прямой: цифры в математике не наклоняют. */
-    subFamily: 'KaTeX_Main, var(--font-sans)',
+    family: 'var(--font-sans)',
     size: 15,
-    weight: 400,
-    /* Кегль чертежа — доля от его же поля (fit ниже), поэтому
-       подписи растут и уменьшаются вместе с чертежом.
-       Индекс — 70 % кегля, опущен ниже строки. */
+    weight: 600,
     sub: 10.5,
     subShift: 3.5,
     measure: 14,
@@ -101,16 +86,13 @@ const THEME = {
     dot: 3.2,
     labelGap: 10,
     angle: 8,
-    /* Радиус дуги угла: заметно больше знака прямого угла, иначе
-       на пересечении линий её не разглядеть. */
-    arc: 16,
     ellipsePoints: 96,
   },
 } as const;
 
 /* ── Внутренние примитивы чертежа (в пикселях) ─────────────────── */
 
-type Role = 'edge' | 'aux' | 'section' | 'mark';
+type Role = 'edge' | 'aux' | 'section';
 
 interface Stroke {
   points: Vec2[];
@@ -128,7 +110,7 @@ interface Fill {
 interface LabelSpec {
   p: Vec2;
   text: string;
-  kind: 'vertex' | 'aux' | 'measure' | 'mark';
+  kind: 'vertex' | 'aux' | 'measure';
 }
 
 interface PlacedLabel extends LabelSpec {
@@ -142,21 +124,12 @@ interface Angle {
   points: [Vec2, Vec2, Vec2];
 }
 
-/** Дуга угла в пикселях: вершина и два направления. */
-interface Arc {
-  o: Vec2;
-  u: Vec2;
-  v: Vec2;
-  role: 'mark' | 'aux';
-}
-
 interface Scene {
   strokes: Stroke[];
   fills: Fill[];
   dots: Vec2[];
   labels: LabelSpec[];
   angles: Angle[];
-  arcs: Arc[];
 }
 
 /* ── Сбор сцены из модели ──────────────────────────────────────── */
@@ -504,7 +477,7 @@ function addSphere(view: View, scene: Scene, body: Sphere, all: readonly Occlude
 }
 
 function buildScene(model: Model): Scene {
-  const scene: Scene = { strokes: [], fills: [], dots: [], labels: [], angles: [], arcs: [] };
+  const scene: Scene = { strokes: [], fills: [], dots: [], labels: [], angles: [] };
   const view = viewOf(model.view);
   const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
@@ -535,14 +508,9 @@ function buildScene(model: Model): Scene {
   });
 
   (model.lines ?? []).forEach((line) => {
-    const role = line.role === 'искомое' ? 'mark' : 'aux';
-    scene.strokes.push(...segmentStrokes(view, line.a, line.b, all, eps, role));
+    scene.strokes.push(...segmentStrokes(view, line.a, line.b, all, eps, 'aux'));
     if (line.label) {
-      scene.labels.push({
-        p: view.project(mid(line.a, line.b)),
-        text: line.label,
-        kind: role === 'mark' ? 'mark' : 'aux',
-      });
+      scene.labels.push({ p: view.project(mid(line.a, line.b)), text: line.label, kind: 'aux' });
     }
   });
 
@@ -571,27 +539,6 @@ function buildScene(model: Model): Scene {
     const u = view.project(add(angle.at, normalize(angle.u)));
     const v = view.project(add(angle.at, normalize(angle.v)));
     scene.angles.push({ points: [o, u, v] });
-  });
-
-  (model.arcs ?? []).forEach((arc) => {
-    const o = view.project(arc.at);
-    scene.arcs.push({
-      o,
-      u: view.project(add(arc.at, normalize(arc.u))),
-      v: view.project(add(arc.at, normalize(arc.v))),
-      role: arc.role === 'искомое' ? 'mark' : 'aux',
-    });
-    if (arc.label) {
-      /* Подпись у дуги, в стороне от вершины: посередине между
-         направлениями, чуть дальше самой дуги. */
-      const mu = view.project(add(arc.at, normalize(arc.u)));
-      const mv = view.project(add(arc.at, normalize(arc.v)));
-      scene.labels.push({
-        p: [(mu[0] + mv[0]) / 2, (mu[1] + mv[1]) / 2],
-        text: arc.label,
-        kind: arc.role === 'искомое' ? 'mark' : 'aux',
-      });
-    }
   });
 
   return scene;
@@ -657,7 +604,6 @@ function toPixels(scene: Scene): Scene {
     fills: scene.fills.map((f) => ({ ...f, points: f.points.map(map) })),
     dots: scene.dots.map(map),
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
-    arcs: scene.arcs.map((a) => ({ ...a, o: map(a.o), u: map(a.u), v: map(a.v) })),
     angles: scene.angles.map((a) => {
       const [o, u, v] = a.points.map(map) as [Vec2, Vec2, Vec2];
       /* Знак угла: стороны фиксированной длины в пикселях. */
@@ -862,13 +808,6 @@ function strokeAttrs(s: Stroke): string {
       ? `stroke="${c.edge}" stroke-width="${w.edge}"`
       : `stroke="${c.edge}" stroke-width="${w.hidden}" stroke-opacity="${THEME.opacity.hidden}" stroke-dasharray="${THEME.dash.hidden}"`;
   }
-  /* Искомое: синим и толще. Невидимая часть остаётся штриховой —
-     правило чертежа одно для всех линий. */
-  if (s.role === 'mark') {
-    return s.visible
-      ? `stroke="${c.mark}" stroke-width="${w.mark}"`
-      : `stroke="${c.mark}" stroke-width="${w.markHidden}" stroke-dasharray="${THEME.dash.hidden}"`;
-  }
   return s.visible
     ? `stroke="${c.aux}" stroke-width="${w.aux}"`
     : `stroke="${c.aux}" stroke-width="${w.auxHidden}" stroke-dasharray="${THEME.dash.aux}"`;
@@ -889,39 +828,19 @@ function fillAttrs(f: Fill): string {
   }
 }
 
-/**
- * Буквы курсивом, цифры и знаки прямыми — как набирает формулу
- * KaTeX. «90°» на дуге угла и «h» у высоты набраны одним правилом,
- * и то, и другое читается как математика, а не как подпись.
- */
-function italicise(text: string): string {
-  const runs = text.match(/[A-Za-z]+|[^A-Za-z]+/g) ?? [];
-  return runs
-    .map((run) =>
-      /[A-Za-z]/.test(run)
-        ? `<tspan font-style="italic">${esc(run)}</tspan>`
-        : `<tspan font-family="${THEME.font.subFamily}" font-style="normal">${esc(run)}</tspan>`,
-    )
-    .join('');
-}
-
 function labelMarkup(label: PlacedLabel): string {
   const f = THEME.font;
   const { base, sub } = splitName(label.text);
   const size = label.kind === 'measure' ? f.measure : f.size;
-  const fill =
-    label.kind === 'aux'
-      ? THEME.colors.aux
-      : label.kind === 'mark'
-        ? THEME.colors.mark
-        : THEME.colors.label;
+  const fill = label.kind === 'aux' ? THEME.colors.aux : THEME.colors.label;
+  const style = label.kind === 'aux' ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
   const inner = sub
-    ? `${italicise(base)}<tspan font-family="${f.subFamily}" font-style="normal" font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
-    : italicise(base);
+    ? `${esc(base)}<tspan font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
+    : esc(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${f.weight}" ` +
+    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${f.weight}"${style} ` +
     `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
@@ -936,7 +855,6 @@ export function renderSolid(model: Model): string {
     ...scene.strokes.flatMap((s) => s.points),
     ...scene.fills.flatMap((f) => f.points),
     ...scene.angles.flatMap((a) => a.points),
-    ...scene.arcs.flatMap((a): Vec2[] => [a.o, a.u, a.v]),
     ...scene.dots.map((p): Vec2 => [p[0] - THEME.geometry.dot, p[1] - THEME.geometry.dot]),
     ...scene.dots.map((p): Vec2 => [p[0] + THEME.geometry.dot, p[1] + THEME.geometry.dot]),
     ...labels.map((l): Vec2 => [l.x - 2, l.y - 2]),
@@ -962,18 +880,13 @@ export function renderSolid(model: Model): string {
       parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f)} stroke="none"/>`),
     );
 
-  /* Порядок слоёв: сначала всё скрытое, потом всё видимое, и в
-     каждой группе выделенное последним — оно должно лежать поверх
-     линий тела, иначе ребро перечеркнёт его посередине. */
   const strokeLayers: [Role, boolean][] = [
     ['edge', false],
     ['aux', false],
     ['section', false],
-    ['mark', false],
     ['edge', true],
     ['aux', true],
     ['section', true],
-    ['mark', true],
   ];
   strokeLayers.forEach(([role, visible]) => {
     order(scene.strokes, role, visible).forEach((s) => {
@@ -981,23 +894,6 @@ export function renderSolid(model: Model): string {
         `<path d="${pathOf(s.points)}" fill="none" ${strokeAttrs(s)} stroke-linecap="round" stroke-linejoin="round"/>`,
       );
     });
-  });
-
-  scene.arcs.forEach((a) => {
-    /* Дуга между двумя направлениями: радиус в пикселях, поэтому
-       знак угла один и тот же на любом чертеже. Меньшая из двух дуг
-       выбирается знаком векторного произведения. */
-    const r = THEME.geometry.arc;
-    const du = normalize2(sub2(a.u, a.o));
-    const dv = normalize2(sub2(a.v, a.o));
-    const from: Vec2 = [a.o[0] + du[0] * r, a.o[1] + du[1] * r];
-    const to: Vec2 = [a.o[0] + dv[0] * r, a.o[1] + dv[1] * r];
-    const sweep = du[0] * dv[1] - du[1] * dv[0] > 0 ? 1 : 0;
-    parts.push(
-      `<path d="M${px(from[0])} ${px(from[1])}A${r} ${r} 0 0 ${sweep} ${px(to[0])} ${px(to[1])}" ` +
-        `fill="none" stroke="${a.role === 'mark' ? THEME.colors.mark : THEME.colors.aux}" ` +
-        `stroke-width="${THEME.width.marker}"/>`,
-    );
   });
 
   scene.angles.forEach((a) => {

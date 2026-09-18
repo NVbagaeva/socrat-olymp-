@@ -152,10 +152,6 @@ export interface TrainerAttempt {
  * Задание, пройденное начисто, уходит из списка ошибочных: ученик
  * его отработал. Ошибка или подсказка — наоборот, ставит его
  * в список, даже если верный ответ в итоге нашёлся.
- *
- * В список задание попадает и раньше — на первом же неверном
- * ответе, через markTrainerMistake: только по этой записи брошенное
- * нерешённым в список не попадало вовсе.
  */
 export function recordAttempt(attempt: TrainerAttempt): void {
   const current = snapshot();
@@ -177,24 +173,6 @@ export function recordAttempt(attempt: TrainerAttempt): void {
       : [...current.mistakes, attempt.taskId];
 
   save({ kinds, mistakes });
-}
-
-/**
- * Отметить задание ошибочным, не дожидаясь, пока оно будет закрыто.
- *
- * Зовётся на первом неверном ответе — и на ответе, и на шаге
- * подсказки. Раньше в список ошибок попадало только закрытое
- * задание: ошибся, бросил и пошёл дальше — и в «Задания с ошибкой»
- * ничего не появлялось. Счётчиков не трогает: «решено», «верно»,
- * точность и время по-прежнему считаются только по закрытым
- * заданиям.
- */
-export function markTrainerMistake(taskId: string): void {
-  const current = snapshot();
-  if (current.mistakes.includes(taskId)) {
-    return;
-  }
-  save({ kinds: current.kinds, mistakes: [...current.mistakes, taskId] });
 }
 
 /** Очистить прогресс тренажёра. Подготовительные задачи не трогаем. */

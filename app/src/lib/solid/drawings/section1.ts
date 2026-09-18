@@ -28,8 +28,7 @@ export const NAMES = 'ABCDA₁B₁C₁D₁';
 /** Какое тело берём под чертёж. */
 export type Shape = 'box' | 'cube' | 'prism';
 
-/** Тело под чертёж: пропорции схематические, не по числам условия. */
-export function bodyOf(shape: Shape): Polyhedron {
+function bodyOf(shape: Shape): Polyhedron {
   switch (shape) {
     case 'cube':
       return box(CUBE, CUBE, CUBE);

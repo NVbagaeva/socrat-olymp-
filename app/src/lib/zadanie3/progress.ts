@@ -136,24 +136,21 @@ export function taskKey(kind: string, n: number): string {
 }
 
 /**
- * Записать закрытое задание: счётчики типа.
- *
- * Номера варианта здесь нет: счётчики идут по типу задания, а по
- * вариантам считается только список ошибок.
+ * Записать закрытое задание.
  *
  * right — решено ли верно с первой попытки: именно это считается
  * точностью. Ошибся и потом решил — задание закрыто, но в точность
- * не идёт.
- *
- * Списка ошибок эта запись не касается. В повторение задание
- * попадает при первом неверном ответе (markMistake) — иначе
- * брошенная нерешённой задача не попадала туда вовсе, — а уходит
- * оттуда, только когда решено верно в самом повторении
- * (clearMistake).
+ * не идёт и попадает в список ошибок.
  */
-export function recordTask(kind: string, right: boolean, seconds: number): void {
+export function recordTask(kind: string, n: number, right: boolean, seconds: number): void {
   const current = snapshot();
   const tally = current.kinds[kind] ?? { done: 0, right: 0, seconds: 0 };
+  const key = taskKey(kind, n);
+  const mistakes = right
+    ? current.mistakes.filter((item) => item !== key)
+    : current.mistakes.includes(key)
+      ? current.mistakes
+      : [...current.mistakes, key];
 
   write({
     kinds: {
@@ -164,39 +161,8 @@ export function recordTask(kind: string, right: boolean, seconds: number): void 
         seconds: tally.seconds + Math.max(0, Math.round(seconds)),
       },
     },
-    mistakes: current.mistakes,
+    mistakes,
   });
-}
-
-/**
- * Отправить задание в повторение.
- *
- * Зовётся на неверном ответе, поэтому задание попадает в повторение
- * сразу — и остаётся там, даже если ученик бросил его нерешённым.
- * Счётчиков не трогает: точность и «неверно» считаются по закрытым
- * заданиям, как считались.
- */
-export function markMistake(kind: string, n: number): void {
-  const current = snapshot();
-  const key = taskKey(kind, n);
-  if (current.mistakes.includes(key)) {
-    return;
-  }
-  write({ kinds: current.kinds, mistakes: [...current.mistakes, key] });
-}
-
-/**
- * Убрать задание из повторения: его решили верно в самом повторении.
- * Верный ответ в обычном режиме ничего отсюда не убирает — иначе
- * повторение опустошалось бы само собой, мимо ученика.
- */
-export function clearMistake(kind: string, n: number): void {
-  const current = snapshot();
-  const key = taskKey(kind, n);
-  if (!current.mistakes.includes(key)) {
-    return;
-  }
-  write({ kinds: current.kinds, mistakes: current.mistakes.filter((item) => item !== key) });
 }
 
 /** Стереть счёт задания №3. Задания №12 это не касается. */

@@ -5,11 +5,11 @@
  * движок solid/ — в браузер уходит готовая разметка, ни движка, ни
  * KaTeX там не нужно.
  *
- * Чертёж хранится на вариант, но только если он отличается от
- * чертежа прототипа: у большинства прототипов картинка одна на
- * десятерых — числа стоят в условии, а не на ней. Сравниваются
- * сами чертежи, признака у прототипа нет: он легко забывается,
- * и тогда варианту молча достаётся чужой чертёж.
+ * Чертёж хранится один на прототип, а не на вариант: у десяти
+ * вариантов одного прототипа чертёж совпадает — числа стоят в
+ * условии, а не на картинке. Исключение — ступенчатые тела, у них
+ * числа на самом чертеже, и там чертёж свой у каждого варианта.
+ * Иначе банк весил бы вдесятеро больше без единого нового пикселя.
  *
  * Ответы и разборы закрыты (см. secret.ts): открытым текстом в
  * бандл они не попадают.
@@ -21,16 +21,6 @@ import { RAZDELY, type Razdel } from './index';
 import { sealAnswer, sealText } from './secret';
 import { type Prototype } from './types';
 
-/**
- * Чем шаги разбора разделены в закрытой строке.
- *
- * Переводом строки — нельзя: KaTeX рисует знак корня контуром, и
- * внутри атрибута d у него стоят настоящие переводы строк. Шаг
- * разлетался на два десятка кусков прямо посреди формулы.
- * U+001F — разделитель единиц, в вёрстке не встречается.
- */
-export const STEP_SEP = '\u001f';
-
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
@@ -41,13 +31,6 @@ export interface PoolVariant {
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
-  /**
-   * Чертёж разбора: с дополнительными построениями. Закрыт тем же
-   * ключом, что и шаги: на нём отмечен искомый угол, а это ответ —
-   * открытым текстом ему в бандле не место. null — у прототипа
-   * своего чертежа разбора нет.
-   */
-  razbor: string | null;
 }
 
 export interface PoolKind {
@@ -73,23 +56,13 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
-/**
- * Чертёж варианта, если он отличается от общего; иначе null.
- *
- * Раньше решалось признаком прототипа: числа на чертеже есть —
- * значит чертёж свой. Там, где вариант меняет не число, а букву —
- * какую диагональ найти, между какими прямыми угол, — всем десяти
- * доставался чертёж первого: спрашивали DB₁, а выделена была AC₁.
- * Признак к тому же легко забыть, переводя прототип на новый
- * формат, и молча получить ту же ошибку обратно.
- *
- * Поэтому признака больше нет: сравниваются сами чертежи. Совпал
- * с общим — в банк не попадает, и вес не растёт там, где картинка
- * одна на десятерых.
- */
-function ownSvg(prototype: Prototype, variant: Prototype['varianty'][number], common: string) {
-  const svg = renderSolid(prototype.chertezh(variant.params));
-  return svg === common ? null : svg;
+/** У прототипа числа стоят на самом чертеже — чертёж свой у варианта. */
+function perVariant(prototype: Prototype): boolean {
+  const first = prototype.varianty[0];
+  if (first === undefined) {
+    return false;
+  }
+  return (prototype.chertezh(first.params).measures ?? []).length > 0;
 }
 
 function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
@@ -97,36 +70,27 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
   if (first === undefined) {
     throw new Error(`У прототипа ${prototype.id} нет вариантов`);
   }
-  const common = renderSolid(prototype.chertezh(first.params));
+  const own = perVariant(prototype);
   return {
     id: prototype.id,
     title: prototype.nazvanie,
     group: razdel.nomer,
     groupTitle: razdel.nazvanie,
     format: prototype.format,
-    svg: common,
+    svg: renderSolid(prototype.chertezh(first.params)),
     variants: prototype.varianty.map((variant) => {
       const seal = sealAnswer(prototype.otvet(variant.params));
-      /* Формулы в разборе набираются здесь же, на сборке: разбор
-         уезжает закрытым, и в браузере KaTeX по нему уже не
-         пройдёт — там только расшифровка и вставка готовой
-         разметки. */
       const steps = prototype
         .shagi(variant.params)
-        .map((step) => typeset(step.text))
-        .join(STEP_SEP);
+        .map((step) => step.text)
+        .join('\n');
       return {
         n: variant.n,
         uslovieHtml: typeset(prototype.uslovie(variant.params)),
         seal,
         /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
         steps: sealText(steps, seal),
-        razbor:
-          prototype.chertezhRazbora === undefined
-            ? null
-            : sealText(renderSolid(prototype.chertezhRazbora(variant.params)), seal),
-        /* null — чертёж прототипа подходит и этому варианту. */
-        svg: ownSvg(prototype, variant, common),
+        svg: own ? renderSolid(prototype.chertezh(variant.params)) : null,
       };
     }),
   };

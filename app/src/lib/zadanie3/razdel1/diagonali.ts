@@ -10,72 +10,14 @@
 import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
-import {
-  chislo,
-  formula,
-  imya,
-  letters,
-  otr,
-  ravno,
-  ru,
-  segment,
-  tex,
-  texChislo,
-} from '../format';
-import { type Zadacha, chertezhRazbora, chertezhUslovia } from '../zadacha';
+import { letters, ru, segment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
 import { solveBySearch } from '../search';
 
-/** Имя фигуры без индексов: из него собирается и текст, и структура. */
-const FIGURA = 'ABCDA1B1C1D1';
-
-/** Ребро по имени: 'DD1' → ['D', 'D1']. */
-function vershinyRebra(name: string): readonly [string, string] {
-  const parts = name.match(/[A-Z]\d?/g) ?? [];
-  const [a, b] = parts;
-  if (a === undefined || b === undefined) {
-    throw new Error(`Ребро ${name} — не пара вершин`);
-  }
-  return [a, b];
-}
-
-/** Три ребра условия формулами: «$DD_1 = 2$, $C_1D_1 = 6$, $B_1C_1 = 3$». */
+/** Три ребра условия строкой: «DD₁=2, C₁D₁=6, B₁C₁=3». */
 function edgesText(p: Params): string {
-  return [1, 2, 3]
-    .map((i) => ravno(vershinyRebra(text(p, `n${i}`)), num(p, `v${i}`)))
-    .join(', ');
-}
-
-/**
- * Вершина того же основания, что и from, под концом диагонали:
- * A и C₁ → C. Через неё в разборе проходит диагональ основания.
- */
-function podNogami(from: string, to: string): string {
-  const base = to.replace(/\d/g, '');
-  return from.includes('1') ? `${base}1` : base;
-}
-
-/** Структура варианта P03-01: три ребра даны, диагональ ищут. */
-function zadachaDiagonali(p: Params): Zadacha {
-  const diag = pair(p, 'diag');
-  const corner = podNogami(diag[0], diag[1]);
-  return {
-    telo: 'box',
-    imya: FIGURA,
-    iskomoe: 'длина диагонали',
-    elementy: [
-      ...[1, 2, 3].map((i) => {
-        const [ot, to] = vershinyRebra(text(p, `n${i}`));
-        return { vid: 'отрезок' as const, ot, do: to, rol: 'дано' as const, dlina: num(p, `v${i}`) };
-      }),
-      { vid: 'отрезок', ot: diag[0], do: diag[1], rol: 'искомое' },
-      /* Разбор: диагональ основания и вертикальное ребро — катеты
-         того самого прямоугольного треугольника. */
-      { vid: 'отрезок', ot: diag[0], do: corner, rol: 'построение' },
-      { vid: 'отрезок', ot: corner, do: diag[1], rol: 'построение' },
-    ],
-  };
+  return [1, 2, 3].map((i) => `${letters(text(p, `n${i}`))}=${ru(num(p, `v${i}`))}`).join(', ');
 }
 
 function edgeNames(p: Params): string[] {
@@ -114,10 +56,8 @@ export const P03_01: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${imya(FIGURA)} известно, что ${edgesText(p)}. ` +
-    `Найдите длину диагонали ${otr(pair(p, 'diag'))}.`,
-
-  zadacha: zadachaDiagonali,
+    `В прямоугольном параллелепипеде ${NAMES} известно, что ${edgesText(p)}. ` +
+    `Найдите длину диагонали ${segment(pair(p, 'diag'))}.`,
 
   dopustimo: (p) => {
     const [a, b, c] = boxSides(p);
@@ -136,51 +76,30 @@ export const P03_01: Prototype = {
     return distance(vertex(body, from), vertex(body, to));
   },
 
-  chertezh: (p) =>
-    chertezhUslovia(
-      zadachaDiagonali(p),
-      `Прямоугольный параллелепипед ${NAMES}, выделена диагональ ${segment(pair(p, 'diag'))}`,
-    ),
-
-  chertezhRazbora: (p) => {
+  chertezh: (p) => {
     const diag = pair(p, 'diag');
-    const corner = podNogami(diag[0], diag[1]);
-    return chertezhRazbora(
-      zadachaDiagonali(p),
-      `Тот же параллелепипед: к диагонали ${segment(diag)} проведены диагональ основания ` +
-        `${segment([diag[0], corner])} и ребро ${segment([corner, diag[1]])}`,
+    return shapeLines(
+      'box',
+      `Прямоугольный параллелепипед ${NAMES} с диагональю ${segment(diag)}`,
+      [diag],
     );
   },
 
   shagi: (p) => {
     const [a, b, c] = boxSides(p);
-    const diag = pair(p, 'diag');
-    const corner = podNogami(diag[0], diag[1]);
+    const diag = segment(pair(p, 'diag'));
     const base = a * a + b * b;
-    const answer = Math.sqrt(base + c * c);
-    /* Записи TeX собираются из имён вершин, а не пишутся строкой:
-       источник у них тот же, что у чертежа. */
-    const osnovanie = tex(diag[0] + corner);
-    const rebro = tex(corner + diag[1]);
-    const iskomaya = tex(diag[0] + diag[1]);
     return [
       {
-        text:
-          'Рёбра параллелепипеда: два лежат в основании, одно вертикальное — ' +
-          `${chislo(a)}, ${chislo(b)} и ${chislo(c)}.`,
+        text: `Рёбра параллелепипеда: два лежат в основании, одно вертикальное: ${ru(a)}, ${ru(b)} и ${ru(c)}.`,
       },
       {
-        text:
-          `Проведём диагональ основания ${otr([diag[0], corner])}. По теореме Пифагора ` +
-          `${formula(`${osnovanie}^2 = ${texChislo(a)}^2 + ${texChislo(b)}^2 = ${texChislo(base)}`)}.`,
+        text: `Диагональ основания: её квадрат равен ${ru(a)}² + ${ru(b)}² = ${ru(base)}.`,
         value: base,
       },
       {
-        text:
-          `Ребро ${otr([corner, diag[1]])} перпендикулярно основанию, поэтому треугольник ` +
-          `${imya(diag[0] + corner + diag[1])} прямоугольный, и ` +
-          `${formula(`${iskomaya} = \\sqrt{${osnovanie}^2 + ${rebro}^2} = \\sqrt{${texChislo(base)} + ${texChislo(c)}^2} = ${texChislo(answer)}`)}.`,
-        value: answer,
+        text: `Диагональ ${diag} — гипотенуза прямоугольного треугольника с катетами, равными диагонали основания и вертикальному ребру: ${diag} = √(${ru(base)} + ${ru(c)}²) = ${ru(Math.sqrt(base + c * c))}.`,
+        value: Math.sqrt(base + c * c),
       },
     ];
   },

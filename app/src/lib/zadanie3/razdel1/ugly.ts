@@ -12,14 +12,7 @@ import { vertex } from '../../solid/figures';
 import { angleBetweenLines, sinBetweenLines } from '../../solid/measure';
 import { NAMES, shapeLines } from '../../solid/drawings/section1';
 import { type Vec3, sub } from '../../solid/vec';
-import { gradusy, imya, otr, ru, segment } from '../format';
-import {
-  type Zadacha,
-  chertezhRazbora,
-  chertezhUslovia,
-  perenos,
-  peresekayutsya,
-} from '../zadacha';
+import { ru, segment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair } from '../types';
 import { boxOf, directionOf } from './common';
 import { distance } from '../../solid/measure';
@@ -53,65 +46,20 @@ function cubeAngle(p: Params): number {
   return angleBetweenLines(modelDirection([4, 4, 4], l1), modelDirection([4, 4, 4], l2));
 }
 
-/** Имя куба без индексов: из него собираются и текст, и структура. */
-const KUB = 'ABCDA1B1C1D1';
-
 function cubeUslovie(p: Params): string {
   return (
-    `В кубе ${imya(KUB)} найдите угол между прямыми ${otr(pair(p, 'l1'))} ` +
-    `и ${otr(pair(p, 'l2'))}. Ответ дайте в градусах.`
+    `В кубе ${NAMES} найдите угол между прямыми ${segment(pair(p, 'l1'))} ` +
+    `и ${segment(pair(p, 'l2'))}. Ответ дайте в градусах.`
   );
 }
 
-/**
- * Структура варианта: две прямые — искомый угол, а параллельный
- * перенос одной из них — построение разбора. Скрещивающиеся прямые
- * угла на чертеже не образуют, поэтому дуга появляется только после
- * переноса, то есть только на чертеже разбора.
- */
-function cubeZadacha(p: Params, answer: number): Zadacha {
+function cubeChertezh(p: Params) {
   const l1 = pair(p, 'l1');
   const l2 = pair(p, 'l2');
-  /* Перенос нужен только скрещивающимся: пересекающиеся дают
-     угол сразу, и пересечься они могут не в вершине — диагонали
-     основания сходятся в его центре. */
-  const shift = peresekayutsya('cube', l1, l2) ? null : perenos('cube', l1, l2);
-  return {
-    telo: 'cube',
-    imya: KUB,
-    iskomoe: 'угол между прямыми',
-    elementy: [
-      { vid: 'угол', a: l1, b: l2, rol: 'искомое', podpis: `${ru(answer)}°` },
-      ...(shift === null
-        ? []
-        : ([
-            { vid: 'отрезок', ot: shift[0], do: shift[1], rol: 'построение' },
-            { vid: 'угол', a: l1, b: shift, rol: 'построение', podpis: `${ru(answer)}°` },
-          ] as const)),
-    ],
-  };
-}
-
-function cubeChertezh(p: Params, answer: number) {
-  const l1 = pair(p, 'l1');
-  const l2 = pair(p, 'l2');
-  return chertezhUslovia(
-    cubeZadacha(p, answer),
-    `Куб ${NAMES}, выделены прямые ${segment(l1)} и ${segment(l2)}`,
-  );
-}
-
-function cubeChertezhRazbora(p: Params, answer: number) {
-  const l1 = pair(p, 'l1');
-  const l2 = pair(p, 'l2');
-  const shift = peresekayutsya('cube', l1, l2) ? null : perenos('cube', l1, l2);
-  return chertezhRazbora(
-    cubeZadacha(p, answer),
-    shift === null
-      ? `Тот же куб: прямые ${segment(l1)} и ${segment(l2)} пересекаются, отмечен угол между ними`
-      : `Тот же куб: прямая ${segment(l2)} перенесена параллельно себе в ${segment(shift)}, ` +
-          `отмечен угол между ${segment(l1)} и ${segment(shift)}`,
-  );
+  return shapeLines('cube', `Куб ${NAMES}, выделены прямые ${segment(l1)} и ${segment(l2)}`, [
+    l1,
+    l2,
+  ]);
 }
 
 /** Прямые в кубе задают угол только если они не параллельны. */
@@ -124,42 +72,14 @@ function differentLines(p: Params): boolean {
   return cross.some((x) => Math.abs(x) > 1e-9);
 }
 
-/**
- * Шаги разбора для угла в кубе: одинаковые для трёх прототипов.
- *
- * Про перенос подсказка не говорит: перенос — отдельный шаг, и он
- * считается по координатам, а не пишется словами. Здесь остаётся
- * геометрия: почему угол именно такой.
- */
+/** Шаги разбора для угла в кубе: одинаковые для трёх прототипов. */
 function cubeShagi(p: Params, answer: number, hint: string): { text: string; value?: number }[] {
-  const l1 = pair(p, 'l1');
-  const l2 = pair(p, 'l2');
-  /* Пересекаются или скрещиваются — это разные шаги, и «переноса
-     нет» не то же самое, что «переносить нечего». */
-  const meet = peresekayutsya('cube', l1, l2);
-  const shift = meet ? null : perenos('cube', l1, l2);
+  const l1 = segment(pair(p, 'l1'));
+  const l2 = segment(pair(p, 'l2'));
   return [
-    {
-      text:
-        `Прямые ${otr(l1)} и ${otr(l2)} в кубе. Угол между прямыми не зависит ` +
-        'от ребра куба.',
-    },
-    {
-      /* Шаг из данных, а не из слов: перенос считает та же функция,
-         что рисует его на чертеже разбора. */
-      text: meet
-        ? 'Прямые пересекаются — угол между ними виден сразу.'
-        : shift === null
-          ? 'Прямые скрещиваются: перенесём одну из них параллельно себе так, ' +
-            'чтобы они пересеклись.'
-          : `Перенесём ${otr(l2)} параллельно себе в ${otr(shift)}: теперь прямые ` +
-            'пересекаются, и угол между ними — тот же самый.',
-    },
+    { text: `Прямые ${l1} и ${l2} в кубе. Угол между прямыми не зависит от ребра куба.` },
     { text: hint },
-    {
-      text: `Угол между ${otr(l1)} и ${otr(l2)} равен ${gradusy(answer)}.`,
-      value: answer,
-    },
+    { text: `Угол между ${l1} и ${l2} равен ${ru(answer)}°.`, value: answer },
   ];
 }
 
@@ -177,14 +97,13 @@ export const P03_06: Prototype = {
   dopustimo: differentLines,
   otvet: () => 90,
   poModeli: cubeAngle,
-  zadacha: (p) => cubeZadacha(p, 90),
-  chertezh: (p) => cubeChertezh(p, 90),
-  chertezhRazbora: (p) => cubeChertezhRazbora(p, 90),
+  chertezh: cubeChertezh,
   shagi: (p) =>
     cubeShagi(
       p,
       90,
-      'Полученный угол — угол между ребром и перпендикулярной ему прямой грани.',
+      'Перенесём одну из прямых параллельно себе так, чтобы прямые пересеклись: ' +
+        'полученный угол — угол между ребром и перпендикулярной ему прямой грани.',
     ),
   varianty: [
     variant(1, 'задачник', 'задачник 21', { l1: ['B', 'C1'], l2: ['A1', 'B1'] }),
@@ -214,9 +133,7 @@ export const P03_07: Prototype = {
   dopustimo: differentLines,
   otvet: () => 45,
   poModeli: cubeAngle,
-  zadacha: (p) => cubeZadacha(p, 45),
-  chertezh: (p) => cubeChertezh(p, 45),
-  chertezhRazbora: (p) => cubeChertezhRazbora(p, 45),
+  chertezh: cubeChertezh,
   shagi: (p) =>
     cubeShagi(
       p,
@@ -252,15 +169,13 @@ export const P03_08: Prototype = {
   dopustimo: differentLines,
   otvet: () => 60,
   poModeli: cubeAngle,
-  zadacha: (p) => cubeZadacha(p, 60),
-  chertezh: (p) => cubeChertezh(p, 60),
-  chertezhRazbora: (p) => cubeChertezhRazbora(p, 60),
+  chertezh: cubeChertezh,
   shagi: (p) =>
     cubeShagi(
       p,
       60,
-      'Обе прямые — диагонали граней: три диагонали граней образуют равносторонний ' +
-        'треугольник, все его углы по 60°.',
+      'Обе прямые — диагонали граней. Перенесём одну параллельно себе: ' +
+        'три диагонали граней образуют равносторонний треугольник, все его углы по 60°.',
     ),
   varianty: [
     variant(1, 'задачник', 'задачник 29', { l1: ['C', 'D1'], l2: ['B', 'C1'] }),

@@ -76,10 +76,10 @@
 .z3t__fig {
   display: block;
 }
-/* Чертёж разбора идёт в столбце ответа, под шагами: он про то, как
-   решать, а не про то, что дано. */
-.z3t__fig--razbor {
-  margin: var(--space-2) 0 var(--space-3);
+.z3t__fig .solid-wrap .solid {
+  width: 100%;
+  height: auto;
+  max-width: 260px;
 }
 
 .z3t__answer {
@@ -247,6 +247,10 @@
   }
   .z3t__card {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .z3t__fig .solid-wrap .solid {
+    max-width: 220px;
+    margin: 0 auto;
   }
   .z3t-stats__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
