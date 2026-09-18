@@ -16,9 +16,9 @@
  *  7. отпечатки ответов не сталкиваются.
  */
 
-import { otvetUchenika } from './index';
+import { otvetUchenika, prepOtvet } from './index';
 import { sealAnswer } from './secret';
-import { konechnaya, type Prototype, type Variant } from './types';
+import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
 
 export interface BadVariant {
   id: string;
@@ -178,6 +178,100 @@ export function checkBank(bank: readonly Prototype[]): Report {
     duplicates,
     notTen,
     collisions,
+    bad,
+  };
+}
+
+/* ── Подготовительные задачи ─────────────────────────────────────── */
+
+export interface PrepReport {
+  bloki: number;
+  zadachi: number;
+  /** Ответ основным путём разошёлся с проверкой другим путём. */
+  mismatch: number;
+  /** Последний шаг разбора не равен ответу. */
+  mismatchSteps: number;
+  /** Ответ не пишется в клетки и округления в условии нет. */
+  badFormat: number;
+  /** Повторяющиеся идентификаторы или номера конспекта. */
+  duplicates: string[];
+  bad: BadVariant[];
+}
+
+/**
+ * Проверка подготовительных задач.
+ *
+ * Параметров у них нет, поэтому проверять ограничения не на чем —
+ * зато остаётся главное: ответ посчитан двумя путями и сошёлся,
+ * разбор приводит к нему же, и записать его в клетки ЕГЭ можно.
+ */
+export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
+  const bad: BadVariant[] = [];
+  const duplicates: string[] = [];
+  const vidennye = new Set<string>();
+  const nomera = new Set<number>();
+
+  let zadachi = 0;
+  let mismatch = 0;
+  let mismatchSteps = 0;
+  let badFormat = 0;
+
+  for (const blok of bloki) {
+    for (const zadacha of blok.zadachi) {
+      zadachi += 1;
+      const problems: string[] = [];
+
+      if (vidennye.has(zadacha.id)) {
+        duplicates.push(`повторяется идентификатор ${zadacha.id}`);
+      }
+      vidennye.add(zadacha.id);
+      if (nomera.has(zadacha.nomer)) {
+        duplicates.push(`повторяется номер конспекта ${zadacha.nomer}`);
+      }
+      nomera.add(zadacha.nomer);
+
+      if (Math.abs(zadacha.otvet - zadacha.proverka) > TOCHNOST) {
+        problems.push(`ответ ${zadacha.otvet} ≠ проверка ${zadacha.proverka}`);
+      }
+
+      const otvet = prepOtvet(zadacha);
+      if (otvet <= 0 || otvet > 1) {
+        problems.push(`вероятность вне (0; 1]: ${otvet}`);
+      }
+      if (zadacha.okruglenie === undefined && !konechnaya(otvet)) {
+        problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+      }
+
+      const posledniy = zadacha.shagi[zadacha.shagi.length - 1];
+      if (posledniy === undefined || posledniy.value === undefined) {
+        problems.push('последний шаг разбора ничего не считает');
+      } else if (Math.abs(posledniy.value - otvet) > TOCHNOST) {
+        problems.push(`последний шаг ${posledniy.value} ≠ ответ ${otvet}`);
+      }
+
+      if (zadacha.uslovie.trim() === '') {
+        problems.push('пустое условие');
+      }
+      if (/undefined|NaN/.test(zadacha.uslovie)) {
+        problems.push('в условии осталась подстановка без значения');
+      }
+
+      if (problems.length > 0) {
+        bad.push({ id: zadacha.id, n: zadacha.nomer, problems });
+        mismatch += problems.some((x) => x.includes('проверка')) ? 1 : 0;
+        mismatchSteps += problems.some((x) => x.includes('последний шаг')) ? 1 : 0;
+        badFormat += problems.some((x) => x.includes('в клетки')) ? 1 : 0;
+      }
+    }
+  }
+
+  return {
+    bloki: bloki.length,
+    zadachi,
+    mismatch,
+    mismatchSteps,
+    badFormat,
+    duplicates,
     bad,
   };
 }

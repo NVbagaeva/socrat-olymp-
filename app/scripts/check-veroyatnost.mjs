@@ -62,8 +62,8 @@ for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answ
   fs.writeFileSync(target, js);
 }
 
-const { checkBank } = require0(path.join(out, 'veroyatnost', 'selftest.js'));
-const { BANK_4 } = require0(path.join(out, 'veroyatnost', 'index.js'));
+const { checkBank, checkPrep } = require0(path.join(out, 'veroyatnost', 'selftest.js'));
+const { BANK_4, PODGOTOVKA_4 } = require0(path.join(out, 'veroyatnost', 'index.js'));
 
 const report = checkBank(BANK_4);
 
@@ -82,7 +82,23 @@ report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`столкновений отпечатков ответа: ${report.collisions.length}`);
 report.collisions.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 
+const prep = checkPrep(PODGOTOVKA_4);
+console.log(`\nподготовка: блоков ${prep.bloki}, задач ${prep.zadachi}`);
+console.log(`  ответ разошёлся с проверкой другим путём: ${prep.mismatch}`);
+console.log(`  последний шаг разбора не равен ответу: ${prep.mismatchSteps}`);
+console.log(`  ответ не пишется в клетки и округления в условии нет: ${prep.badFormat}`);
+console.log(`  повторов: ${prep.duplicates.length}`);
+prep.duplicates.forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (prep.bad.length > 0 || prep.duplicates.length > 0) {
+  console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
+  prep.bad.forEach((row) =>
+    console.error(`  ${row.id} (конспект № ${row.n}): ${row.problems.join('; ')}`),
+  );
+  process.exit(1);
+}
 
 if (report.bad.length > 0 || report.notTen.length > 0 || report.collisions.length > 0) {
   console.error(`\nБанк не сходится: ${report.bad.length} вариантов с проблемами.`);

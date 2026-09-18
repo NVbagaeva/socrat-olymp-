@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { VeroyatnostPrep } from '@/components/tasks/veroyatnost/VeroyatnostPrep';
 import { veroyatnostTitle } from '@/content/veroyatnost';
+import { prep4Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', 'Подготовительные задачи'),
@@ -9,15 +10,10 @@ export const metadata: Metadata = {
 /**
  * Вкладка «Подготовительные задачи» задания №4.
  *
- * Задачи берутся из авторского конспекта и разложены по его же
- * заголовкам. Ни одной задачи здесь нет до того, как автор утвердит
- * схему раздела: придумывать состав нельзя.
+ * Задачи 1–18 авторского конспекта, разложенные по его же трём
+ * заголовкам. Условия перенесены дословно; ответы уезжают вниз
+ * отпечатками, разборы закрытыми.
  */
 export default function Podgotovka4Tab() {
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появятся блоки подготовительных задач из конспекта: «Определение вероятности», «Жребий, две группы, круглый стол», «Геометрическая вероятность»."
-    />
-  );
+  return <VeroyatnostPrep bloki={prep4Pool()} />;
 }

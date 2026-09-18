@@ -10,7 +10,8 @@
 import { KLASSICHESKOE } from './bank4/klassicheskoe';
 import { STATISTICHESKOE } from './bank4/statisticheskoe';
 import { BLOKI_4, type Blok } from './blocks';
-import { round, type Params, type Prototype } from './types';
+import { PODGOTOVKA_4 } from './podgotovka4';
+import { round, type Params, type PrepZadacha, type Prototype } from './types';
 
 export { BLOKI_4, type Blok } from './blocks';
 
@@ -42,5 +43,24 @@ export function otvetUchenika(prototype: Prototype, params: Params): number {
   /* Девять знаков после запятой. Иначе 1 − 0,32 даёт
      0,6799999999999999, и это «другое число», чем 0,68, — хотя для
      ученика и для отпечатка ответа это одно и то же. */
+  return Math.round(otvet * 1e9) / 1e9;
+}
+
+/* ── Подготовительные задачи ─────────────────────────────────────── */
+
+export { PODGOTOVKA_4 } from './podgotovka4';
+
+/** Все подготовительные задачи задания №4 подряд, в порядке блоков. */
+export function prepZadachi4(): readonly PrepZadacha[] {
+  return PODGOTOVKA_4.flatMap((blok) => [...blok.zadachi]);
+}
+
+/**
+ * Ответ подготовительной задачи в том виде, в каком его пишет ученик.
+ * Округление — только если его просит условие конспекта.
+ */
+export function prepOtvet(zadacha: PrepZadacha): number {
+  const otvet =
+    zadacha.okruglenie === undefined ? zadacha.otvet : round(zadacha.otvet, zadacha.okruglenie);
   return Math.round(otvet * 1e9) / 1e9;
 }

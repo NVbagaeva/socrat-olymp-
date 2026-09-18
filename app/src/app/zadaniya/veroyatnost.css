@@ -167,3 +167,42 @@
   color: var(--color-text-tertiary);
   font-size: 14px;
 }
+
+/* ── Подготовительные задачи ────────────────────────────────────── */
+
+.vprep {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.vprep__blok-head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+.vprep__blok-title {
+  margin: 0;
+}
+.vprep__blok-tip {
+  color: var(--color-text-secondary);
+}
+.vprep__blok-count {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+/* Нумерацию рисует сам список задач — номер конспекта стоит в
+   карточке, и второй ряд цифр сбоку только путал бы. */
+.vprep__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Решённая задача остаётся на месте, но отходит на второй план:
+   видно, где остановился, и не приходится искать глазами. */
+.vtask--solved {
+  border-color: var(--color-success);
+}

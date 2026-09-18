@@ -10,7 +10,7 @@
  * поэтому KaTeX здесь не нужен, и в браузер он не едет.
  */
 
-import { BANK_4, blokById, otvetUchenika } from './index';
+import { BANK_4, PODGOTOVKA_4, blokById, otvetUchenika, prepOtvet } from './index';
 import { BLOKI_4, type Blok } from './blocks';
 import { sealAnswer, sealText } from './secret';
 import { type Prototype } from './types';
@@ -76,4 +76,47 @@ function kindOf(prototype: Prototype): PoolKind {
 
 export function bank4Pool(): Pool {
   return { bloki: BLOKI_4, kinds: BANK_4.map(kindOf) };
+}
+
+/* ── Подготовительные задачи ─────────────────────────────────────── */
+
+export interface PrepPoolZadacha {
+  id: string;
+  /** Номер задачи в конспекте автора. */
+  nomer: number;
+  uslovie: string;
+  /** Отпечаток верного ответа. Самого ответа здесь нет. */
+  seal: string;
+  /** Закрытый разбор: шаги через перевод строки. */
+  steps: string;
+}
+
+export interface PrepPoolBlok {
+  id: string;
+  nazvanie: string;
+  tip: string;
+  zadachi: PrepPoolZadacha[];
+}
+
+/**
+ * Подготовительные задачи для браузера: условия, отпечатки, закрытые
+ * разборы. Ответов и второй проверки здесь уже нет — они остаются
+ * на сборке, как и у банка прототипов.
+ */
+export function prep4Pool(): PrepPoolBlok[] {
+  return PODGOTOVKA_4.map((blok) => ({
+    id: blok.id,
+    nazvanie: blok.nazvanie,
+    tip: blok.tip,
+    zadachi: blok.zadachi.map((zadacha) => {
+      const seal = sealAnswer(prepOtvet(zadacha));
+      return {
+        id: zadacha.id,
+        nomer: zadacha.nomer,
+        uslovie: zadacha.uslovie,
+        seal,
+        steps: sealText(zadacha.shagi.map((shag) => shag.text).join('\n'), seal),
+      };
+    }),
+  }));
 }

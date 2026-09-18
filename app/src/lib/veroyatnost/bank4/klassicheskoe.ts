@@ -56,7 +56,7 @@ function soch(n: number, k: number): number {
  * Перебор бросков монеты: сколько из 2ⁿ исходов подходят.
  * Считается перебором, а не формулой, — это и есть вторая проверка.
  */
-function monetyPerebor(n: number, godится: (uspehov: number) => boolean): number {
+function monetyPerebor(n: number, podhodit: (uspehov: number) => boolean): number {
   let ok = 0;
   for (let mask = 0; mask < 2 ** n; mask += 1) {
     let uspehov = 0;
@@ -65,7 +65,7 @@ function monetyPerebor(n: number, godится: (uspehov: number) => boolean): nu
         uspehov += 1;
       }
     }
-    if (godится(uspehov)) {
+    if (podhodit(uspehov)) {
       ok += 1;
     }
   }
@@ -73,10 +73,10 @@ function monetyPerebor(n: number, godится: (uspehov: number) => boolean): nu
 }
 
 /** Доля k из N перебором позиций, а не делением. */
-function dolyaPerebor(vsego: number, godится: (i: number) => boolean): number {
+function dolyaPerebor(vsego: number, podhodit: (i: number) => boolean): number {
   let ok = 0;
   for (let i = 1; i <= vsego; i += 1) {
-    if (godится(i)) {
+    if (podhodit(i)) {
       ok += 1;
     }
   }
