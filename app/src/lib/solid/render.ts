@@ -889,6 +889,22 @@ function fillAttrs(f: Fill): string {
   }
 }
 
+/**
+ * Буквы курсивом, цифры и знаки прямыми — как набирает формулу
+ * KaTeX. «90°» на дуге угла и «h» у высоты набраны одним правилом,
+ * и то, и другое читается как математика, а не как подпись.
+ */
+function italicise(text: string): string {
+  const runs = text.match(/[A-Za-z]+|[^A-Za-z]+/g) ?? [];
+  return runs
+    .map((run) =>
+      /[A-Za-z]/.test(run)
+        ? `<tspan font-style="italic">${esc(run)}</tspan>`
+        : `<tspan font-family="${THEME.font.subFamily}" font-style="normal">${esc(run)}</tspan>`,
+    )
+    .join('');
+}
+
 function labelMarkup(label: PlacedLabel): string {
   const f = THEME.font;
   const { base, sub } = splitName(label.text);
@@ -899,15 +915,13 @@ function labelMarkup(label: PlacedLabel): string {
       : label.kind === 'mark'
         ? THEME.colors.mark
         : THEME.colors.label;
-  /* Латинская буква курсивом, как в формуле; число прямым. */
-  const style = label.kind === 'measure' ? '' : ' font-style="italic"';
   const x = label.x;
   const y = label.y + label.h * 0.78;
   const inner = sub
-    ? `${esc(base)}<tspan font-family="${f.subFamily}" font-style="normal" font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
-    : esc(base);
+    ? `${italicise(base)}<tspan font-family="${f.subFamily}" font-style="normal" font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
+    : italicise(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${f.weight}"${style} ` +
+    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${f.weight}" ` +
     `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
