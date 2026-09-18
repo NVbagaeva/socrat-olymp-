@@ -13,12 +13,13 @@ export interface KoordinatnayaPryamayaProps {
 }
 
 /* Размеры в единицах viewBox; на странице рисунок масштабируется
-   шириной контейнера. Ось лежит в нижней трети, штрихи от границ
-   поднимаются на треть высоты рисунка, подписи условий — над линиями. */
+   шириной контейнера. Ось лежит внизу, условия — «ступеньками» над
+   ней: линия «x > c» на верхнем уровне, линия «x < d» на нижнем,
+   вполовину ниже. Подписи условий — над своими линиями. */
 const W = 720;
-const H = 220;
+const H = 232;
 /** Высота оси. */
-const OS = 156;
+const OS = 168;
 /** Начало оси и кончик стрелки. */
 const X0 = 36;
 const X1 = 688;
@@ -26,15 +27,17 @@ const STRELKA = 14;
 /** Куда ложатся концы отрезка распределения. */
 const A_X = 96;
 const B_X = 620;
-/** Высота горизонтальных линий условий. */
-const VERH = 76;
-/** Базовая линия подписей условий. */
-const PODPIS = 60;
+/** Верхний уровень: линия условия «x > c». */
+const VERH = 52;
+/** Нижний уровень: линия условия «x < d», на половине высоты верхнего. */
+const NIZ = OS - (OS - VERH) / 2;
+/** Подпись условия стоит на столько выше своей линии. */
+const NAD = 10;
 /** Базовая линия чисел под осью. */
 const CHISLA = OS + 34;
 const R = 6.5;
 
-/** Ширина подписи на глаз: антиква курсивом, кегль 19. */
+/** Ширина подписи на глаз: антиква курсивом, кегль 20. */
 function shirina(text: string): number {
   return text.length * 9.5;
 }
@@ -43,16 +46,19 @@ function shirina(text: string): number {
  * Координатная прямая к задаче на геометрическую вероятность.
  *
  * Синяя ось со стрелкой вправо; под ней числа: концы отрезка
- * распределения и границы благоприятного промежутка. От каждой
- * границы вверх идёт штрих, от его верха — горизонтальная линия в
- * сторону, куда смотрит неравенство: «x > c» вправо до стрелки,
- * «x < d» влево до начала оси. Область под каждой линией залита
- * полупрозрачным оранжевым, и там, где заливки легли одна на другую,
- * цвет гуще — это и есть благоприятный промежуток. Сам отрезок оси
- * от c до d оранжевый и толще, над ним подпись длины.
+ * распределения и границы благоприятного промежутка. Условие «x > c»
+ * нарисовано на верхнем уровне: пунктир от c вверх, от него
+ * горизонталь вправо до стрелки, область под ней залита
+ * полупрозрачным оранжевым. Условие «x < d» — на нижнем уровне,
+ * вполовину ниже: пунктир от d вверх, горизонталь влево до начала
+ * оси, та же заливка. На промежутке [c; d] заливки легли одна на
+ * другую, и цвет там гуще — это благоприятная область. Сам отрезок
+ * оси от c до d оранжевый и толще, подпись длины стоит внутри тёмной
+ * области.
  *
  * Только прямые линии и прямоугольники: никаких дуг. Строгие
  * неравенства — пустые кружки на границах, нестрогие — закрашенные.
+ * Если одной из границ нет, рисуется один уровень.
  */
 export function KoordinatnayaPryamaya({ pryamaya: p, className }: KoordinatnayaPryamayaProps) {
   const { ot, do: do_ } = promezhutok(p);
@@ -69,24 +75,35 @@ export function KoordinatnayaPryamaya({ pryamaya: p, className }: KoordinatnayaP
     .filter((k, i, all) => all.findIndex((other) => p[other] === p[k]) === i)
     .map((k) => ({ k, x: px(p[k] as number), text: podpis(p, k) }));
 
-  /* Подписи условий стоят у своих границ: «x > c» сразу справа от c,
-     «x < d» сразу слева от d. Если промежуток узок и они бы
-     столкнулись, обе уходят к дальним концам своих линий. */
+  /* Подписи условий: «x > c» над верхней линией у её левого края,
+     «x < d» над нижней у её правого края. Они на разной высоте, но
+     в узком промежутке оказались бы друг под другом — тогда каждая
+     отодвигается за чужую границу, и по горизонтали они расходятся. */
   const podpisC = cx === null ? null : usloviePodpis(p, 'c');
   const podpisD = dx === null ? null : usloviePodpis(p, 'd');
-  const tesno =
-    cx !== null &&
-    dx !== null &&
-    podpisC !== null &&
-    podpisD !== null &&
-    cx + 10 + shirina(podpisC) > dx - 10 - shirina(podpisD);
+  let podpisCx = cx === null ? 0 : cx + 10;
+  let podpisDx = dx === null ? 0 : dx - 10;
+  if (cx !== null && dx !== null && podpisC !== null && podpisD !== null) {
+    const tesno = podpisCx + shirina(podpisC) > podpisDx - shirina(podpisD);
+    if (tesno) {
+      podpisCx = Math.max(podpisCx, dx + 12);
+      podpisDx = Math.min(podpisDx, cx - 12);
+    }
+  }
 
   const dlina = dlinaPodpis(p);
   const otX = px(ot);
   const doX = px(do_);
-  /* Подпись длины — посередине промежутка, между линией и осью. В
-     узком промежутке ей там не поместиться, и она уходит наверх. */
+  /* Подпись длины — внутри самой тёмной области: в полосе под нижним
+     уровнем, где заливки наложились; при одной границе — в середине
+     единственной заливки. В узком промежутке ей там не поместиться,
+     и она уходит под числа оси. */
   const dlinaTesno = dlina !== null && doX - otX < shirina(dlina) + 12;
+  const dlinaY = dlinaTesno
+    ? CHISLA + 26
+    : cx !== null && dx !== null
+      ? (NIZ + OS) / 2 + 7
+      : (VERH + OS) / 2 + 7;
 
   const x = p.peremennaya ?? 'x';
   const opisanie =
@@ -98,29 +115,32 @@ export function KoordinatnayaPryamaya({ pryamaya: p, className }: KoordinatnayaP
   return (
     <svg
       className={clsx('kp', className)}
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={`0 0 ${W} ${dlinaTesno ? H + 26 : H}`}
       role="img"
       aria-label={opisanie}
     >
-      {/* Заливки первыми: всё остальное рисуется поверх. */}
+      {/* Заливки первыми: всё остальное рисуется поверх. Верхняя — от
+          c до стрелки на всю высоту верхнего уровня, нижняя — от
+          начала оси до d на высоту нижнего. */}
       {cx !== null ? (
         <rect className="kp__zalivka" x={cx} y={VERH} width={konecLinii - cx} height={OS - VERH} />
       ) : null}
       {dx !== null ? (
-        <rect className="kp__zalivka" x={X0} y={VERH} width={dx - X0} height={OS - VERH} />
+        <rect className="kp__zalivka" x={X0} y={NIZ} width={dx - X0} height={OS - NIZ} />
       ) : null}
 
-      {/* Линии условий: штрих вверх от границы и горизонталь от его верха. */}
+      {/* Условие «x > c»: пунктир вверх до верхнего уровня и линия вправо. */}
       {cx !== null ? (
-        <g className="kp__uslovie-linii">
+        <g>
           <line className="kp__shtrih" x1={cx} y1={OS - R} x2={cx} y2={VERH} />
           <line className="kp__liniya" x1={cx} y1={VERH} x2={konecLinii} y2={VERH} />
         </g>
       ) : null}
+      {/* Условие «x < d»: пунктир вверх до нижнего уровня и линия влево. */}
       {dx !== null ? (
-        <g className="kp__uslovie-linii">
-          <line className="kp__shtrih" x1={dx} y1={OS - R} x2={dx} y2={VERH} />
-          <line className="kp__liniya" x1={X0} y1={VERH} x2={dx} y2={VERH} />
+        <g>
+          <line className="kp__shtrih" x1={dx} y1={OS - R} x2={dx} y2={NIZ} />
+          <line className="kp__liniya" x1={X0} y1={NIZ} x2={dx} y2={NIZ} />
         </g>
       ) : null}
 
@@ -161,35 +181,20 @@ export function KoordinatnayaPryamaya({ pryamaya: p, className }: KoordinatnayaP
         />
       ) : null}
 
-      {/* Подписи условий над линиями. */}
-      {cx !== null && podpisC !== null ? (
-        <text
-          className="kp__uslovie"
-          x={tesno ? konecLinii : cx + 10}
-          y={PODPIS}
-          textAnchor={tesno ? 'end' : 'start'}
-        >
+      {/* Подписи условий над своими линиями. */}
+      {podpisC !== null ? (
+        <text className="kp__uslovie" x={podpisCx} y={VERH - NAD} textAnchor="start">
           {podpisC}
         </text>
       ) : null}
-      {dx !== null && podpisD !== null ? (
-        <text
-          className="kp__uslovie"
-          x={tesno ? X0 : dx - 10}
-          y={PODPIS}
-          textAnchor={tesno ? 'start' : 'end'}
-        >
+      {podpisD !== null ? (
+        <text className="kp__uslovie" x={podpisDx} y={NIZ - NAD} textAnchor="end">
           {podpisD}
         </text>
       ) : null}
 
       {dlina !== null ? (
-        <text
-          className="kp__dlina"
-          x={(otX + doX) / 2}
-          y={dlinaTesno ? PODPIS : (VERH + OS) / 2 + 7}
-          textAnchor="middle"
-        >
+        <text className="kp__dlina" x={(otX + doX) / 2} y={dlinaY} textAnchor="middle">
           {dlina}
         </text>
       ) : null}

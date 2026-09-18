@@ -77,14 +77,15 @@ export interface ZadachaUslovieProps {
   illyustratsiya?: Illyustratsiya;
 }
 
+/**
+ * Условие слева, иллюстрация справа. Библиотека картинок ещё
+ * собирается, поэтому у задачи без картинки справа стоит место под
+ * неё тех же пропорций — раскладка карточки не меняется, когда
+ * картинки приедут.
+ */
 export function ZadachaUslovie({ html, illyustratsiya }: ZadachaUslovieProps) {
   return (
-    <div
-      className={clsx(
-        'zadacha__uslovie-ryad',
-        illyustratsiya && 'zadacha__uslovie-ryad--s-kartinkoy',
-      )}
-    >
+    <div className="zadacha__uslovie-ryad zadacha__uslovie-ryad--s-kartinkoy">
       <p className="zadacha__uslovie" dangerouslySetInnerHTML={{ __html: html }} />
       {illyustratsiya !== undefined ? (
         <img
@@ -93,7 +94,15 @@ export function ZadachaUslovie({ html, illyustratsiya }: ZadachaUslovieProps) {
           alt={illyustratsiya.alt}
           loading="lazy"
         />
-      ) : null}
+      ) : (
+        <div className="zadacha__kartinka zadacha__kartinka--mesto" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <rect x="5" y="7" width="30" height="26" rx="4" />
+            <circle cx="14" cy="16" r="3" />
+            <path d="m5 29 9-8 6 6 5-4 10 8" strokeLinejoin="round" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }

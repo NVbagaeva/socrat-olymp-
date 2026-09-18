@@ -198,6 +198,21 @@
   justify-self: center;
   border-radius: var(--radius-lg);
 }
+/* Место под иллюстрацию, пока библиотеки картинок нет: тех же
+   пропорций, что и присланный макет (примерно 1 : 1), на голубой
+   подложке. Когда у задачи появится картинка, встаёт она. */
+.zadacha__kartinka--mesto {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 482 / 448;
+  border: 1px dashed var(--color-border-info);
+  background: var(--color-surface-info);
+  color: var(--color-accent-soft);
+}
+.zadacha__kartinka--mesto svg {
+  width: 40px;
+  height: 40px;
+}
 
 /* Поле ответа между условием и решением. */
 .zadacha__otvet {
@@ -360,9 +375,11 @@
   height: auto;
   overflow: visible;
 }
+/* Прозрачность одной заливки 0,18: там, где две легли одна на
+   другую, получается 0,33 — благоприятный промежуток читается сразу. */
 .kp__zalivka {
   fill: var(--color-accent);
-  fill-opacity: 0.22;
+  fill-opacity: 0.18;
 }
 .kp__liniya,
 .kp__shtrih {
@@ -372,6 +389,7 @@
 }
 .kp__shtrih {
   stroke-width: 1.5;
+  stroke-dasharray: 5 4;
 }
 .kp__os,
 .kp__zasechka {
