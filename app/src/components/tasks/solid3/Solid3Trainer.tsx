@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
-import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
+import { STEP_SEP, type Pool, type PoolKind, type PoolVariant } from '@/lib/zadanie3/pool';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import {
   clearMistake,
@@ -208,7 +208,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     }
     /* Разбор раскрывается только по просьбе ученика: до этого он
        лежит закрытым и в разметку не попадает. */
-    return openText(variant.steps, variant.seal).split('\n');
+    return openText(variant.steps, variant.seal).split(STEP_SEP);
   }, [variant, solution]);
 
   /* Чертёж разбора закрыт тем же ключом: на нём отмечено искомое,
