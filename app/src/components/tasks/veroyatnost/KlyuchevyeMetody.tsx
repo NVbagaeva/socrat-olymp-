@@ -52,7 +52,8 @@ const PIROZHKI_TREE = [
   { id: 'bb', parent: 'b', label: 'без мяса', p: 0.2 },
 ];
 
-const RISUNKI: Record<Method, ReactNode> = {
+/* Рисунки пяти методов задания №4; у «формулы» (№5) рисунка нет. */
+const RISUNKI: Partial<Record<Method, ReactNode>> = {
   'direct-count': (
     <OutcomeTiles
       outcomes={PIROZHKI}

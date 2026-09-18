@@ -126,10 +126,10 @@ export function plitkiDvuh(
 
 /**
  * Две игральные кости: в клетке — то, что спрашивают (сумма,
- * произведение), благоприятны клетки, где это подходит.
+ * произведение, пара значений), благоприятны клетки, где это подходит.
  */
 export function tablitsaKostey(
-  soderzhimoe: (a: number, b: number) => number,
+  soderzhimoe: (a: number, b: number) => number | string,
   podhodit: (a: number, b: number) => boolean,
 ): Vizual {
   const cells: string[][] = [];

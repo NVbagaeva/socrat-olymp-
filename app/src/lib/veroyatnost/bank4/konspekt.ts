@@ -585,7 +585,9 @@ function n06(p: Params): number {
 }
 
 /** Виды спорта: дательный падеж, множественное родительное, творительный. */
-const SPORT: readonly [string, string, string][] = [
+type Sport = readonly [string, string, string];
+/** Непустой список: первый вид спорта — запасной, если параметр не узнан. */
+const SPORT: readonly [Sport, ...Sport[]] = [
   ['теннису', 'теннисистов', 'теннисистом'],
   ['бадминтону', 'бадминтонистов', 'бадминтонистом'],
   ['шахматам', 'шахматистов', 'шахматистом'],
@@ -1033,7 +1035,8 @@ const K11: Prototype = prototip({
 });
 
 /** Пара: кто они друг другу — во множественном родительном и именительном. */
-const PARY: readonly [string, string, boolean][] = [
+type Para = readonly [string, string, boolean];
+const PARY: readonly [Para, ...Para[]] = [
   ['братьев', 'братья', false],
   ['близнецов', 'близнецы', false],
   ['сестёр', 'сёстры', true],
@@ -1041,7 +1044,7 @@ const PARY: readonly [string, string, boolean][] = [
   ['друзей', 'друзья', false],
 ];
 
-function para12(p: Params): [string, string, boolean] {
+function para12(p: Params): Para {
   return PARY.find(([rod]) => rod === text(p, 'para')) ?? PARY[0];
 }
 
