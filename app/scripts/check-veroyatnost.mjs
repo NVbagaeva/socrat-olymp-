@@ -63,9 +63,11 @@ for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answ
 }
 
 const { checkBank, checkPrep } = require0(path.join(out, 'veroyatnost', 'selftest.js'));
-const { BANK_4, PODGOTOVKA_4 } = require0(path.join(out, 'veroyatnost', 'index.js'));
+const { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
+  path.join(out, 'veroyatnost', 'index.js'),
+);
 
-const report = checkBank(BANK_4);
+const report = checkBank([...BANK_4, ...BANK_5]);
 
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
 console.log(
@@ -82,7 +84,7 @@ report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`столкновений отпечатков ответа: ${report.collisions.length}`);
 report.collisions.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 
-const prep = checkPrep(PODGOTOVKA_4);
+const prep = checkPrep([...PODGOTOVKA_4, ...PODGOTOVKA_5]);
 console.log(`\nподготовка: блоков ${prep.bloki}, задач ${prep.zadachi}`);
 console.log(`  ответ разошёлся с проверкой другим путём: ${prep.mismatch}`);
 console.log(`  последний шаг разбора не равен ответу: ${prep.mismatchSteps}`);

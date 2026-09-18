@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { VeroyatnostTrainer } from '@/components/tasks/veroyatnost/VeroyatnostTrainer';
 import { veroyatnostTitle } from '@/content/veroyatnost';
+import { bank5Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('5', 'Тренажёр'),
@@ -9,14 +10,10 @@ export const metadata: Metadata = {
 /**
  * Вкладка «Тренажёр» задания №5.
  *
- * Банк прототипов собирается из задачника Е. А. Ширяевой. Пока схема
- * не утверждена, здесь нет ни одного сгенерированного варианта.
+ * Пятнадцать прототипов по десять вариантов, одиннадцать чипов —
+ * по одному на способ решения. Вниз уезжают только условия,
+ * отпечатки ответов и закрытые разборы.
  */
 export default function Trenazher5Tab() {
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появится тренажёр с фильтрами по способам решения: сложение, условная вероятность, произведение, «хотя бы один раз», полная вероятность, испытания Бернулли."
-    />
-  );
+  return <VeroyatnostTrainer pool={bank5Pool()} roundKey="v5" />;
 }

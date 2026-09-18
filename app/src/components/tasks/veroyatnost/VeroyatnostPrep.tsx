@@ -83,6 +83,15 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
 
                       <p className="vtask__uslovie">{zadacha.uslovie}</p>
 
+                      {/* Чертёж нарисован на сборке готовой разметкой:
+                          движка в браузере нет, вставляем как есть. */}
+                      {zadacha.risunok !== undefined ? (
+                        <div
+                          className="vtask__risunok"
+                          dangerouslySetInnerHTML={{ __html: zadacha.risunok }}
+                        />
+                      ) : null}
+
                       <div className="vtask__answer">
                         <label className="vtask__label" htmlFor={`prep-${zadacha.id}`}>
                           Ответ

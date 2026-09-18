@@ -206,3 +206,38 @@
 .vtask--solved {
   border-color: var(--color-success);
 }
+
+/* ── Чертёж задачи ──────────────────────────────────────────────── */
+
+/* Схема лабиринта: единственный чертёж в подготовке. Ширину держит
+   сам SVG, цвета задаются здесь — в разметке чертежа их нет. */
+.vtask__risunok {
+  max-width: 420px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.vtask__risunok svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.vtask__risunok .lab-hod {
+  fill: none;
+  stroke: var(--color-text-brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vtask__risunok .lab-uzel {
+  fill: var(--color-primary);
+}
+.vtask__risunok .lab-vhod,
+.vtask__risunok .lab-vyhod {
+  font-size: 14px;
+  fill: var(--color-text);
+}
+.vtask__risunok .lab-vyhod {
+  font-weight: 600;
+}

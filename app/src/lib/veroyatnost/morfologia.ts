@@ -164,6 +164,21 @@ export function kolichestvennoe(n: number): string {
   return word;
 }
 
+/** Числительное в творительном: «тремя лампами». */
+const TVORITELNOE: Record<number, string> = {
+  2: 'двумя',
+  3: 'тремя',
+  4: 'четырьмя',
+};
+
+export function tvoritelnoe(n: number): string {
+  const word = TVORITELNOE[n];
+  if (word === undefined) {
+    throw new Error(`Нет творительной формы числительного для ${n}`);
+  }
+  return word;
+}
+
 /** Кратность в родительном: «не больше одного раза», «двух раз». */
 const RAZ_ROD: Record<number, string> = {
   1: 'одного раза',

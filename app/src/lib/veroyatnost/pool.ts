@@ -10,10 +10,18 @@
  * поэтому KaTeX здесь не нужен, и в браузер он не едет.
  */
 
-import { BANK_4, PODGOTOVKA_4, blokById, otvetUchenika, prepOtvet } from './index';
-import { BLOKI_4, type Blok } from './blocks';
+import {
+  BANK_4,
+  BANK_5,
+  PODGOTOVKA_4,
+  PODGOTOVKA_5,
+  blokById,
+  otvetUchenika,
+  prepOtvet,
+} from './index';
+import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
 import { sealAnswer, sealText } from './secret';
-import { type Prototype } from './types';
+import { type PrepBlok, type Prototype } from './types';
 
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
@@ -78,6 +86,10 @@ export function bank4Pool(): Pool {
   return { bloki: BLOKI_4, kinds: BANK_4.map(kindOf) };
 }
 
+export function bank5Pool(): Pool {
+  return { bloki: BLOKI_5, kinds: BANK_5.map(kindOf) };
+}
+
 /* ── Подготовительные задачи ─────────────────────────────────────── */
 
 export interface PrepPoolZadacha {
@@ -89,6 +101,8 @@ export interface PrepPoolZadacha {
   seal: string;
   /** Закрытый разбор: шаги через перевод строки. */
   steps: string;
+  /** Чертёж задачи готовой разметкой SVG, если он ей нужен. */
+  risunok?: string;
 }
 
 export interface PrepPoolBlok {
@@ -103,8 +117,8 @@ export interface PrepPoolBlok {
  * разборы. Ответов и второй проверки здесь уже нет — они остаются
  * на сборке, как и у банка прототипов.
  */
-export function prep4Pool(): PrepPoolBlok[] {
-  return PODGOTOVKA_4.map((blok) => ({
+function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
+  return bloki.map((blok) => ({
     id: blok.id,
     nazvanie: blok.nazvanie,
     tip: blok.tip,
@@ -116,7 +130,16 @@ export function prep4Pool(): PrepPoolBlok[] {
         uslovie: zadacha.uslovie,
         seal,
         steps: sealText(zadacha.shagi.map((shag) => shag.text).join('\n'), seal),
+        ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
       };
     }),
   }));
+}
+
+export function prep4Pool(): PrepPoolBlok[] {
+  return prepPool(PODGOTOVKA_4);
+}
+
+export function prep5Pool(): PrepPoolBlok[] {
+  return prepPool(PODGOTOVKA_5);
 }

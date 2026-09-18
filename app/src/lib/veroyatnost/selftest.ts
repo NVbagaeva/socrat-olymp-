@@ -70,8 +70,14 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   }
 
   const otvet = otvetUchenika(prototype, p);
-  if (otvet <= 0 || otvet > 1) {
+  /* Вероятность обязана лежать в (0; 1]. У прототипов с целым ответом
+     («сколько патронов дать стрелку») ответ — не вероятность, и это
+     правило к нему не относится. */
+  if (prototype.format === 'десятичная' && (otvet <= 0 || otvet > 1)) {
     problems.push(`вероятность вне (0; 1]: ${otvet}`);
+  }
+  if (prototype.format === 'целое' && !Number.isInteger(otvet)) {
+    problems.push(`ответ должен быть целым: ${otvet}`);
   }
 
   const znakov = prototype.okruglenie(p);
