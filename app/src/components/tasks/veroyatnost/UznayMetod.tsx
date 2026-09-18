@@ -71,7 +71,7 @@ export function UznayMetod({ pool }: UznayMetodProps) {
     nachalo.current = Date.now();
   }, [index]);
 
-  function vybrat(metod: Method): void {
+  function vybrat(metod: Method, seychas: number): void {
     if (item === undefined || variant === undefined || itog !== null) {
       return;
     }
@@ -87,7 +87,7 @@ export function UznayMetod({ pool }: UznayMetodProps) {
       taskId: `${item.kind}:${item.n}`,
       right,
       clean: right,
-      seconds: (Date.now() - nachalo.current) / 1000,
+      seconds: (seychas - nachalo.current) / 1000,
     });
     if (right) {
       setSrazu((n) => n + 1);
@@ -151,7 +151,7 @@ export function UznayMetod({ pool }: UznayMetodProps) {
           <MethodPicker
             vybor={itog?.vybor ?? null}
             verny={itog?.verny ?? null}
-            onPick={vybrat}
+            onPick={(metod) => vybrat(metod, Date.now())}
             label={UZNAY_METOD.vopros}
           />
 

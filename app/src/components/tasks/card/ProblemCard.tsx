@@ -204,7 +204,6 @@ export function ProblemCard({
         disabled && 'pc--disabled',
         className,
       )}
-      aria-disabled={disabled || undefined}
     >
       {head}
 

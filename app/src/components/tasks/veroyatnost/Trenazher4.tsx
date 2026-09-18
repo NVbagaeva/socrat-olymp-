@@ -98,11 +98,9 @@ export function Trenazher4({ pool }: Trenazher4Props) {
     nachalo.current = Date.now();
   }, [key, index]);
 
-  function sekundy(): number {
-    return (Date.now() - nachalo.current) / 1000;
-  }
-
-  function zapisat(right: boolean, clean: boolean): void {
+  /* Время берётся в обработчике и передаётся сюда: часы в теле
+     компонента линтер считает нечистым вызовом при отрисовке. */
+  function zapisat(right: boolean, clean: boolean, seychas: number): void {
     if (item === undefined || kind === undefined) {
       return;
     }
@@ -116,7 +114,7 @@ export function Trenazher4({ pool }: Trenazher4Props) {
       taskId: id,
       right,
       clean,
-      seconds: sekundy(),
+      seconds: (seychas - nachalo.current) / 1000,
     });
     if (right) {
       setSrazu((n) => n + 1);
@@ -220,8 +218,8 @@ export function Trenazher4({ pool }: Trenazher4Props) {
                в повторе ученик должен узнать его сам. */
             {...(rezhim === 'practice' ? { metodLabel: nazvanieMetoda(metodKind(kind)) } : {})}
             istochnik={`${TRENAZHER_4.istochnik} · задачи ${kind.zadachnik[0]}–${kind.zadachnik[1]}`}
-            onResult={(right) => zapisat(right, right)}
-            onReveal={() => zapisat(false, false)}
+            onResult={(right) => zapisat(right, right, Date.now())}
+            onReveal={() => zapisat(false, false, Date.now())}
             onNext={dalshe}
             nextLabel={index + 1 === round.length ? TRENAZHER_4.zavershit : TRENAZHER_4.dalshe}
           />
