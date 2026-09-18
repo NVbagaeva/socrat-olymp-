@@ -57,7 +57,13 @@ export default async function Page({ params }: { params: Params }) {
         subtopic={subtopic}
         initialTab="trainer"
         trail={[{ label: trainerPage.title, href: `${base}/trenazher/` }, { label: found.title }]}
-        trainer={<TrainerShell subtopic={subtopic} preset={{ skill: found.skill, mode: found.mode }} />}
+        trainer={
+          <TrainerShell
+            subtopic={subtopic}
+            base={`${base}/trenazher/`}
+            preset={{ skill: found.skill, mode: found.mode }}
+          />
+        }
       />
     </AppShell>
   );

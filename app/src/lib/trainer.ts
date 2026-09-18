@@ -5,8 +5,9 @@
  * и ответов в проекте нет: всё приходит из движка. Здесь только
  * подбор набора под режим и набор KaTeX на сборке.
  *
- * Модуль серверный: движок и KaTeX работают во время сборки, вниз
- * уходит готовая разметка.
+ * Модуль работает и на сборке, и в браузере: сессию со свежими
+ * числами собирает lib/trainerSession.ts на клиенте, движок и KaTeX
+ * там те же. В разметку страницы ни одно задание при этом не идёт.
  */
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
@@ -17,9 +18,6 @@ import { katex } from '@/lib/graph/katex';
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
    из своего кэша. */
 GraphGenerate.setSets({ prep, prototypes });
-
-/** Сколько заданий в одном подходе. */
-export const TRAINER_ROUND = 10;
 
 export interface TrainerTask {
   id: string;
@@ -108,7 +106,10 @@ export interface EngineTask {
     query: EngineQuery | null;
     intersection: EngineCross | null;
     lines: EngineLine[];
+    /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
+    level?: string | null;
   };
+  answerType?: string;
 }
 
 /* ── KaTeX на сборке ─────────────────────────────────────────────
@@ -687,10 +688,4 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     rightHint: rightHintFor(task),
     steps: stepsFor(task),
   };
-}
-
-/** Сколько всего заданий в наборах прототипов: знаменатель счётчика. */
-export function trainerTotal(): number {
-  const sets = prototypes as { tasks?: unknown[] }[];
-  return sets.reduce((sum, set) => sum + (set.tasks?.length ?? 0), 0);
 }

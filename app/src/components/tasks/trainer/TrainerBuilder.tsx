@@ -7,6 +7,9 @@ import { firstLevel, skillCounts, skillLevels, type SkillLevelId } from '@/conte
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
 import { counted } from '@/lib/plural';
 import { useTrainerProgress } from '@/lib/trainerProgress';
+import { buildSession, type Session } from '@/lib/trainerSession';
+import { TrainerScreen } from './TrainerScreen';
+import { TrainerStats } from './TrainerStats';
 
 export interface TrainerPreset {
   /** Набор движка, выбранный при заходе. null — первый в списке. */
@@ -15,6 +18,8 @@ export interface TrainerPreset {
 }
 
 export interface TrainerBuilderProps {
+  /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
+  base: string;
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
   /** Сколько задач во всех наборах прототипов семейства. */
@@ -24,19 +29,28 @@ export interface TrainerBuilderProps {
   preset?: TrainerPreset | null;
 }
 
+/** Собранная сессия: задания и ключ подхода. */
+interface Started {
+  key: string;
+  session: Session;
+  control: boolean;
+}
+
 /**
  * Конфигуратор тренировки: навык, режим, количество, сложность.
  *
- * Выбор живёт в памяти страницы. Кнопка «Начать тренировку» пока
- * выключена: сборка сессии — следующий этап, и кнопка, которая
- * ничего не делает, не должна выглядеть рабочей.
+ * Выбор живёт в памяти страницы. «Начать тренировку» собирает сессию
+ * тут же, в браузере, — движок считает свежие числа и ответы, и
+ * экран задания встаёт на место конфигуратора. Ни задания, ни
+ * ответы в разметку страницы не попадают.
  */
-export function TrainerBuilder({ family, familyTotal, skills, preset = null }: TrainerBuilderProps) {
+export function TrainerBuilder({ base, family, familyTotal, skills, preset = null }: TrainerBuilderProps) {
   const first = skills.find((item) => item.id === preset?.skill) ?? skills[0];
   const [skillId, setSkillId] = useState(first?.id ?? '');
   const [mode, setMode] = useState<TrainerModeId>(preset?.mode ?? 'practice');
   const [count, setCount] = useState<number | null>(10);
   const [level, setLevel] = useState<SkillLevelId | null>(firstLevel(first?.levels ?? []));
+  const [started, setStarted] = useState<Started | null>(null);
 
   /* История ошибок читается, но не пишется: «Повтор ошибок» есть
      только тогда, когда ученику есть что повторять. */
@@ -54,6 +68,36 @@ export function TrainerBuilder({ family, familyTotal, skills, preset = null }: T
   const shownLevels = skillLevels.filter((item) => skill.levels.includes(item.id));
   const modeTitle = trainerModes.find((item) => item.id === mode)?.title ?? '';
   const chosenCount = count ?? allCount;
+
+  function start() {
+    if (skill === undefined) {
+      return;
+    }
+    const session = buildSession({
+      skills: mode === 'mixed' || mode === 'mistakes' ? skills.map((item) => item.id) : [skill.id],
+      level: mode === 'mistakes' ? null : level,
+      count: chosenCount,
+      mode,
+      mistakes: progress.mistakes,
+    });
+    if (session.tasks.length === 0) {
+      return;
+    }
+    /* Ключ подхода новый на каждый запуск: подход не переиспользует
+       прошлую раскладку. */
+    setStarted({ key: `session:${Date.now()}`, session, control: mode === 'control' });
+  }
+
+  if (started !== null) {
+    return (
+      <TrainerScreen
+        pool={started.session.tasks}
+        roundKey={started.key}
+        backHref={base}
+        control={started.control}
+      />
+    );
+  }
 
   function pickSkill(id: string) {
     setSkillId(id);
@@ -154,8 +198,7 @@ export function TrainerBuilder({ family, familyTotal, skills, preset = null }: T
       </div>
 
       <div className="cfg-bar">
-        {/* Кнопка выключена, пока сборка сессии не сделана. */}
-        <Button className="cfg-bar__start" size="lg" disabled>
+        <Button className="cfg-bar__start" size="lg" onClick={start}>
           {trainerPage.start}
         </Button>
         <p className="cfg-bar__summary">
@@ -163,6 +206,9 @@ export function TrainerBuilder({ family, familyTotal, skills, preset = null }: T
           {counted(chosenCount, 'задание', 'задания', 'заданий')}
         </p>
       </div>
+
+      {/* Что уже сделано: знаменатель — все задания прототипов семейства. */}
+      <TrainerStats total={familyTotal} />
     </div>
   );
 }

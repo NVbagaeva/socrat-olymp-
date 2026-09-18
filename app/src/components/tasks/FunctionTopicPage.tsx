@@ -110,7 +110,7 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
-        trainer={trainer ?? <TrainerShell subtopic={subtopic} />}
+        trainer={trainer ?? <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />}
         trainerHref={`${base}/trenazher/`}
         generator={hasGenerator ? <GeneratorTab subtopic={subtopic} /> : undefined}
         tutors={section.tutors}

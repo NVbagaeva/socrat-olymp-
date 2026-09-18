@@ -4,7 +4,7 @@ import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
-import { TRAINER_ROUND, type TrainerStep, type TrainerTask } from '@/lib/trainer';
+import type { TrainerStep, TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
@@ -12,12 +12,19 @@ import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from './TrainerResult';
 
 export interface TrainerScreenProps {
-  /** Все задания режима: подход собирается из них в браузере. */
+  /** Все задания сессии: подход раскладывается из них в браузере. */
   pool: TrainerTask[];
-  /** Под каким именем помнить подход: у каждого режима свой. */
+  /** Под каким именем помнить подход: у каждой сессии свой. */
   roundKey: string;
   /** Куда ведёт кнопка с итогового экрана. */
   backHref: string;
+  /** Сколько заданий в подходе. По умолчанию — весь пул. */
+  roundSize?: number;
+  /**
+   * Контроль: без подсказок и без пояснений к ответу до конца
+   * сессии — только «верно» или «есть ошибка».
+   */
+  control?: boolean;
 }
 
 /* Обе плашки обратной связи: заголовки дословные, без «Неверно». */
@@ -41,14 +48,20 @@ const VERDICT = {
  * Все задания подхода приходят готовыми пропсами и живут на одном
  * экране: смена задания — это состояние, а не переход по адресу.
  */
-export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) {
+export function TrainerScreen({
+  pool,
+  roundKey,
+  backHref,
+  roundSize = pool.length,
+  control = false,
+}: TrainerScreenProps) {
   /* Типы заданий пула: по ним подход раскладывается так, чтобы
      одинаковые не шли подряд. Абсцисса и ордината — один тип. */
   const kinds = useMemo(
     () => pool.map((item) => trainerKindTitle[item.kind] ?? item.kind),
     [pool],
   );
-  const build = useCallback(() => pickRound(kinds, TRAINER_ROUND), [kinds]);
+  const build = useCallback(() => pickRound(kinds, roundSize), [kinds, roundSize]);
   const order = useRound(roundKey, build);
   /* Пока подход не собран — на сервере и при гидратации — показываем
      начало пула: экран не мигает пустотой, а через мгновение браузер
@@ -56,7 +69,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
   const tasks = useMemo(
     () =>
       order.length === 0
-        ? pool.slice(0, TRAINER_ROUND)
+        ? pool.slice(0, roundSize)
         : order.map((at) => pool[at]).filter((item): item is TrainerTask => item !== undefined),
     [order, pool],
   );
@@ -248,12 +261,14 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
         Задание <b>{index + 1}</b> из {total}
       </p>
 
-      {/* Полоса подхода: решённое залито зелёным, пройденное
-          с подсказкой — светло-синим, текущее подсвечено. */}
-      <ol className="ttask__bar" aria-hidden="true">
+      {/* Кружки подхода — те же, что у шагов в подготовке: решённое
+          залито зелёным с галочкой, пройденное с подсказкой — синим,
+          текущее обведено. Выбирать задание нельзя, поэтому это не
+          кнопки. */}
+      <ol className="ttask__dots" aria-hidden="true">
         {tasks.map((item, i) => (
           <li
-            key={item.id}
+            key={`${i}-${item.id}`}
             data-kind={item.kind}
             className={clsx(
               'ttask__dot',
@@ -261,7 +276,9 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
               marks[i] === 'hinted' && 'is-hinted',
               i === index && 'is-current',
             )}
-          />
+          >
+            {marks[i] === undefined ? i + 1 : <RightIcon />}
+          </li>
         ))}
       </ol>
 
@@ -308,13 +325,16 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
                 {VERDICT[checked].title}
               </p>
               {/* Пояснение пришло вместе с заданием: при ошибке оно
-                  говорит, что проверить, и ответа не выдаёт. */}
-              <p
-                className="tverdict__text"
-                dangerouslySetInnerHTML={{
-                  __html: checked === 'right' ? task.rightHint : task.wrongHint,
-                }}
-              />
+                  говорит, что проверить, и ответа не выдаёт. В режиме
+                  контроля пояснений нет до конца сессии. */}
+              {control ? null : (
+                <p
+                  className="tverdict__text"
+                  dangerouslySetInnerHTML={{
+                    __html: checked === 'right' ? task.rightHint : task.wrongHint,
+                  }}
+                />
+              )}
             </div>
           )}
 
@@ -326,7 +346,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
                 <Button onClick={check} disabled={!ready}>
                   Проверить
                 </Button>
-                {steps.length === 0 ? null : (
+                {steps.length === 0 || control ? null : (
                   <span className="thint__offer">
                     <Button variant="ghost" onClick={openHint}>
                       Показать подсказку
