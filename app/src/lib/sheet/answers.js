@@ -10,6 +10,7 @@
    не разрывается посреди строки, решение не разрывается пополам.
 */
 
+import marks from './marks.js';
 import typo from './typography.js';
 
 /**
@@ -70,7 +71,7 @@ function table(title, rows, columns) {
 function solution(no, formulas, answer) {
   var body = formulas.map(function (tex) {
     return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
-  }).join('<span class="sheet-solution-arrow">→</span>');
+  }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
   return '<div class="sheet-item sheet-solution">' +
     '<span class="sheet-solution-no">' + no + '</span>' +

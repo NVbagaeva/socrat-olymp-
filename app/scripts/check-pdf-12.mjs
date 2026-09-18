@@ -27,6 +27,13 @@ const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
 
 const LINKS = ['https://t.me/budet_na_ege_math', 'https://youtube.com/@math_princess'];
 
+/* Шрифты, которым место в готовом файле: свои из репозитория и KaTeX.
+   Любой другой значит, что какого-то знака в наших шрифтах нет
+   и браузер подставил системный — на другой машине он подставит
+   другой, и строка поедет. Так в файле учителя однажды оказался
+   DejaVuSans: из-за стрелки «→», которой нет в подмножестве Inter. */
+const FONTS_ALLOWED = /^(Inter|Caveat|KaTeX)/;
+
 /* Заглушки из образца оформления: ни одна из этих строк не должна
    попасть в документ. Образец рисовала нейросеть, тексты на нём
    выдуманные. */
@@ -72,7 +79,7 @@ function pdfStreams(data) {
   return out;
 }
 
-function checkPdf(name, expectMono) {
+function checkPdf(name, expectMono, strictFonts) {
   const file = path.join(OUT, name + '.pdf');
   if (!fs.existsSync(file)) { fail(name + '.pdf: файла нет'); return; }
   const data = fs.readFileSync(file);
@@ -80,6 +87,19 @@ function checkPdf(name, expectMono) {
 
   /* Шрифты вшиты: без FontFile принтер подставит свои. */
   if (!/\/FontFile/.test(text)) { fail(name + ': шрифты не вшиты в PDF'); }
+
+  /* Посторонних шрифтов нет. Проверяется только у выпускной сборки:
+     в черновике без KaTeX формулы набирает запасная антиква, и её
+     системный шрифт здесь законен. */
+  if (strictFonts) {
+    const used = [...new Set([...text.matchAll(/\/BaseFont\s*\/([A-Za-z0-9+#-]+)/g)]
+      .map((m) => m[1].split('+').pop()))];
+    const stranger = used.filter((font) => !FONTS_ALLOWED.test(font));
+    if (stranger.length) {
+      fail(name + ': в файле посторонние шрифты — ' + stranger.join(', ') +
+        '. Значит какого-то знака нет в наших шрифтах');
+    }
+  }
 
   /* Ссылки — ровно два адреса и никаких других. */
   const uris = [...new Set([...text.matchAll(/\/URI\s*\(([^)]*)\)/g)].map((m) => m[1]))].sort();
@@ -230,9 +250,14 @@ console.log('сборник «Задание 12. Линейная функция
 console.log('  банк: блоков ' + content.blocks.length + ', задач ' + expected.length);
 
 files.forEach((file) => {
-  checkPdf(file.name, file.mono);
+  /* Выпускная сборка идёт с KaTeX — об этом говорит отчёт. */
+  const report = path.join(BUILD, file.name + '.json');
+  const withKatex = fs.existsSync(report) &&
+    JSON.parse(fs.readFileSync(report, 'utf8')).katex === true;
+
+  checkPdf(file.name, file.mono, withKatex);
   checkReport(file.name, file.answers);
-  console.log('  проверен ' + file.name);
+  console.log('  проверен ' + file.name + (withKatex ? '' : ' (черновик, без KaTeX)'));
 });
 
 if (errors.length) {

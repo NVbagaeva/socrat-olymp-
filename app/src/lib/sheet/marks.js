@@ -68,7 +68,23 @@ function arcs() {
     '</svg>';
 }
 
-const api = { logoMark: logoMark, socialIcon: socialIcon, arcs: arcs };
+/**
+ * Стрелка между формулами краткого решения.
+ *
+ * Рисуется, а не набирается знаком «→»: в подмножестве Inter его нет,
+ * и браузер тянул за ним посторонний системный шрифт — в PDF
+ * вшивался лишний гротеск, а стрелка выбивалась из строки.
+ * Цвет берётся от текста.
+ */
+function arrow() {
+  return '<svg class="sheet-arrow" width="12" height="8" viewBox="0 0 12 8" ' +
+    'aria-hidden="true" focusable="false">' +
+    '<path d="M0.5 4H10M7 1l3 3-3 3" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+}
+
+const api = { logoMark: logoMark, socialIcon: socialIcon, arcs: arcs, arrow: arrow };
 
 export default api;
-export { logoMark, socialIcon, arcs };
+export { logoMark, socialIcon, arcs, arrow };

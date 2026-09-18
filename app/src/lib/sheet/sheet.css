@@ -649,7 +649,11 @@ body {
 .sheet-solution-arrow {
   color: var(--sheet-ink-3);
   padding: 0 calc(var(--sheet-step) * 0.5);
+  display: inline-flex;
+  align-items: center;
 }
+
+.sheet-arrow { display: block; }
 
 .sheet-solution-answer {
   flex: none;
