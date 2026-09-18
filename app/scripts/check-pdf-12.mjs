@@ -17,12 +17,21 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
+import { execFileSync } from 'node:child_process';
+
 import generator from '../src/lib/graph/generate.js';
 import content from '../src/content/sheet12.js';
+import outputs from '../src/lib/sheet/outputs.js';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(APP, 'public', 'materials', 'zadanie-12');
+const SECTION = 'zadanie-12';
 const BUILD = path.join(APP, '.pdf-build');
+
+/* Файл с ответами лежит вне репозитория — путь спрашиваем там же,
+   где его выбирает сборка. */
+function pdfPath(name, withAnswers) {
+  return outputs.target(APP, { name, section: SECTION, withAnswers }).file;
+}
 const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
 
 const LINKS = ['https://t.me/budet_na_ege_math', 'https://youtube.com/@math_princess'];
@@ -79,8 +88,8 @@ function pdfStreams(data) {
   return out;
 }
 
-function checkPdf(name, expectMono, strictFonts) {
-  const file = path.join(OUT, name + '.pdf');
+function checkPdf(name, expectMono, strictFonts, withAnswers) {
+  const file = pdfPath(name, withAnswers);
   if (!fs.existsSync(file)) { fail(name + '.pdf: файла нет'); return; }
   const data = fs.readFileSync(file);
   const text = data.toString('latin1');
@@ -237,6 +246,71 @@ function checkReport(name, withAnswers) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Ссылки с сайта: карточка материала должна вести на живой файл
+   ══════════════════════════════════════════════════════════ */
+
+/* Карточка «Для репетиторов» без поля file рисуется приглушённой
+   и не нажимается — так и было со «PDF-практикумом», пока сборник
+   не собрали. Обратная беда тише и хуже: поле есть, а файла нет,
+   и кнопка отдаёт 404. Проверяем прямо по конфигу разделов.
+
+   sections.ts на TypeScript, из служебного скрипта его не
+   импортировать, поэтому пути вынимаются разбором текста. */
+function checkSiteLinks() {
+  const file = path.join(APP, 'src', 'content', 'sections.ts');
+  if (!fs.existsSync(file)) { fail('sections.ts: файла нет'); return; }
+  const source = fs.readFileSync(file, 'utf8');
+
+  const paths = [...source.matchAll(/^\s*file:\s*'([^']+)'/gm)].map((m) => m[1]);
+  if (!paths.length) {
+    fail('sections.ts: ни одна карточка материалов не ведёт на файл');
+    return;
+  }
+
+  paths.forEach((href) => {
+    /* Путь в конфиге — от корня сайта, файл лежит в app/public. */
+    const target = path.join(APP, 'public', href.replace(/^\//, ''));
+    if (!fs.existsSync(target)) {
+      fail('карточка ведёт на ' + href + ', а файла в app/public нет');
+      return;
+    }
+    console.log('  ссылка с сайта: ' + href + ' — файл на месте');
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   Ответы не лежат в репозитории
+
+   Репозиторий публичный, и всё, что попало под версионный
+   контроль, видно всякому — а из app/public ещё и отдаётся сайтом
+   по прямому адресу. Проверка смотрит не на диск, а на git: файл
+   может лежать рядом (его собрали) и при этом не быть в индексе,
+   и это правильное состояние.
+   ══════════════════════════════════════════════════════════ */
+function checkNoAnswersTracked() {
+  let tracked;
+  try {
+    tracked = execFileSync('git', ['ls-files', '--', '*.pdf'],
+      { cwd: APP, encoding: 'utf8' }).split('\n').filter(Boolean);
+  } catch {
+    console.log('  git недоступен, проверку отслеживаемых файлов пропускаю');
+    return;
+  }
+
+  const marked = tracked.filter((file) =>
+    outputs.ANSWER_MARKS.some((mark) => path.basename(file).includes(mark)));
+
+  if (marked.length) {
+    fail('в репозитории лежат файлы с ответами: ' + marked.join(', ') +
+      '. Им место в ' + outputs.PRIVATE_DIR.join('/') +
+      ', оттуда они уезжают архивом из CI');
+    return;
+  }
+  console.log('  файлов с ответами под версионным контролем нет: ' +
+    tracked.length + ' PDF проверено');
+}
+
+/* ══════════════════════════════════════════════════════════
    Прогон
    ══════════════════════════════════════════════════════════ */
 const files = [
@@ -255,10 +329,13 @@ files.forEach((file) => {
   const withKatex = fs.existsSync(report) &&
     JSON.parse(fs.readFileSync(report, 'utf8')).katex === true;
 
-  checkPdf(file.name, file.mono, withKatex);
+  checkPdf(file.name, file.mono, withKatex, file.answers);
   checkReport(file.name, file.answers);
   console.log('  проверен ' + file.name + (withKatex ? '' : ' (черновик, без KaTeX)'));
 });
+
+checkSiteLinks();
+checkNoAnswersTracked();
 
 if (errors.length) {
   console.error('\nнарушений: ' + errors.length);
