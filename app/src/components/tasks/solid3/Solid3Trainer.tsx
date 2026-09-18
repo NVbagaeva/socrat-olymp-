@@ -19,6 +19,9 @@ export interface Solid3TrainerProps {
 /** Смешанный режим: не тип, а все типы сразу. */
 const MIX = 'mix';
 
+/** Приставка режима «только этот раздел» в общем тренажёре. */
+const GROUP = 'razdel:';
+
 /**
  * Тренажёр задания №3.
  *
@@ -78,11 +81,30 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
         variants: kind.variants.map((item) => ({ n: item.n })),
       }));
     }
+    /* Общий тренажёр фильтрует по разделам: кнопок на 91 прототип
+       было бы полтора экрана, и выбирать в них нечего. */
+    if (mode.startsWith(GROUP)) {
+      const nomer = mode.slice(GROUP.length);
+      return pool.kinds
+        .filter((kind) => kind.group === nomer)
+        .map((kind) => ({ id: kind.id, variants: kind.variants.map((item) => ({ n: item.n })) }));
+    }
     const only = byId.get(mode);
     return only === undefined
       ? []
       : [{ id: only.id, variants: only.variants.map((item) => ({ n: item.n })) }];
   }, [repeat, mode, pool, byId, mistakesKey]);
+
+  /* Чем фильтровать: разделами в общем тренажёре, типами заданий
+     в тренажёре раздела. */
+  const filters = useMemo(() => {
+    if (pool.razdel !== 'all') {
+      return pool.kinds.map((kind) => ({ id: kind.id, title: kind.title }));
+    }
+    const seen = new Map<string, string>();
+    pool.kinds.forEach((kind) => seen.set(kind.group, kind.groupTitle));
+    return [...seen.entries()].map(([nomer, title]) => ({ id: `${GROUP}${nomer}`, title }));
+  }, [pool]);
 
   const size = repeat
     ? Math.min(
@@ -172,7 +194,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
         >
           Смешанный режим
         </button>
-        {pool.kinds.map((item) => (
+        {filters.map((item) => (
           <button
             key={item.id}
             type="button"
