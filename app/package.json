@@ -18,7 +18,8 @@
     "build:hero": "node scripts/build-hero-images.mjs",
     "validate:graph": "node scripts/validate-graph.mjs",
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
-    "test:zadanie3": "node scripts/check-zadanie3.mjs"
+    "test:zadanie3": "node scripts/check-zadanie3.mjs",
+    "test:prep-order": "node scripts/check-prep-order.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

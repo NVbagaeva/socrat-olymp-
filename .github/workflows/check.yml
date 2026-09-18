@@ -51,6 +51,12 @@ jobs:
         working-directory: app
         run: pnpm test:zadanie3
 
+      # Порядок обхода задач внутри навыка: «дальше» ведёт
+      # к ближайшей нерешённой, а не к следующему номеру.
+      - name: Проверить порядок подготовительных задач
+        working-directory: app
+        run: pnpm test:prep-order
+
       # next.config.ts собран с output: 'export' — результат в app/out.
       # Здесь же отрабатывает ESLint: именно этот шаг ловит ошибки кода.
       - name: Собрать статический экспорт

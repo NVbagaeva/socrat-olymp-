@@ -6,13 +6,14 @@ import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
+import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
 
 /** Как закончилась работа над задачей. Пусто — ещё не бралась. */
-type Status = 'right' | 'wrong' | 'skipped' | null;
+type Status = TaskStatus;
 
 /** Что случилось с задачей в этой сессии и не попало в хранилище. */
 type Attempt = 'wrong' | 'skipped';
@@ -36,23 +37,6 @@ export interface PrepTaskScreenProps {
 function firstOpen(status: Status[]): number {
   const found = status.findIndex((item) => item === null || item === 'skipped');
   return found === -1 ? 0 : found;
-}
-
-/**
- * Ближайшая нерешённая задача после текущей, с переходом через конец
- * набора. Порядок решения свободный, поэтому «следующая» — это не
- * «следующая по номеру», а ближайшая из тех, что ещё не сделаны:
- * пропущенную в начале не придётся искать руками. Все решены — null.
- */
-function nextUnsolved(status: Status[], from: number): number | null {
-  const total = status.length;
-  for (let step = 1; step <= total; step += 1) {
-    const i = (from + step) % total;
-    if (status[i] !== 'right') {
-      return i;
-    }
-  }
-  return null;
 }
 
 const VERDICT = {
