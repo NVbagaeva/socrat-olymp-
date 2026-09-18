@@ -2013,3 +2013,39 @@ a.task-card {
     font-size: var(--fs-body);
   }
 }
+
+/* ── Чип ─────────────────────────────────────────────────────
+   Кнопка-пилюля: навык в подготовительных задачах №12 и тип
+   задания в тренажёре №3. Общий слой, потому что нужен обоим:
+   раньше правило лежало в стилях маршрута №12, и во втором
+   задании чипы выходили простым текстом. */
+
+.chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--dur-switch) var(--ease);
+}
+.chip:hover {
+  background: var(--color-surface-soft);
+}
+.chip.is-active {
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+}
+.chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
