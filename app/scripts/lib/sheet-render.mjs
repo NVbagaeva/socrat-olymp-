@@ -261,4 +261,3 @@ export async function renderPdf(spec, file, options = {}) {
   }
 }
 
-export default { buildHtml, renderPdf };
