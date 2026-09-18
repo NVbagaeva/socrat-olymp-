@@ -230,7 +230,7 @@ export function perenos(
   const body = bodyOf(telo);
   const names = body.names ?? [];
   const dir = sub(vertex(body, l2[1]), vertex(body, l2[0]));
-  const parallel = (u: readonly number[]): boolean => {
+  const parallel = (u: Vec3): boolean => {
     const cross = [
       u[1] * dir[2] - u[2] * dir[1],
       u[2] * dir[0] - u[0] * dir[2],
