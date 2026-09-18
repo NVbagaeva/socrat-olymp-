@@ -29,17 +29,28 @@ import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
 import Line from '../src/lib/graph/families/line.js';
 import answers from '../src/lib/sheet/answers.js';
+import outputs from '../src/lib/sheet/outputs.js';
 import content from '../src/content/sheet12.js';
 import { renderPdf } from './lib/sheet-render.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
 const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
-/* Готовые файлы лежат там, откуда их отдаёт сайт: карточка материала
-   для репетиторов ссылается на /materials/... (см. content/sections.ts).
+/* Куда ложится готовый файл, решает sheet/outputs.js, и решение
+   зависит от того, есть ли в файле ответы: файл для ученика идёт
+   в public и отдаётся сайтом, файл для учителя — в папку вне
+   репозитория и уезжает архивом из CI. Репозиторий публичный,
+   и всё из public доступно по прямому адресу.
+
    Промежуточный HTML — в служебной папке, она в сборку не идёт. */
-const OUT = path.join(APP, 'public', 'materials', 'zadanie-12');
+const SECTION = 'zadanie-12';
 const BUILD = path.join(APP, '.pdf-build');
+
+function outputFor(name, withAnswers) {
+  const where = outputs.target(APP, { name, section: SECTION, withAnswers });
+  outputs.assertSafe(where.file, withAnswers);
+  return where;
+}
 
 /* ══════════════════════════════════════════════════════════
    Банк
@@ -246,7 +257,8 @@ const CELL = { single: 3.4, double: 3.0 };
    Сборка
    ══════════════════════════════════════════════════════════ */
 async function build(name, blocks, options) {
-  const file = path.join(OUT, name + '.pdf');
+  const where = outputFor(name, Boolean(options.answers));
+  const file = where.file;
   const report = await renderPdf(spec(blocks, options), file, {
     keepHtml: options.keepHtml ? path.join(BUILD, name + '.html') : null,
     requireKatex: options.requireKatex,
@@ -264,7 +276,8 @@ async function build(name, blocks, options) {
   }
 
   const size = (fs.statSync(file).size / 1024).toFixed(0);
-  console.log('  ' + name + '.pdf — страниц ' + report.pages +
+  console.log('  ' + name + '.pdf → ' + (where.published ? 'сайт' : 'только CI') +
+    ', страниц ' + report.pages +
     ', задач ' + report.tasks + ', формул ' + report.formulas +
     (report.katex ? ' (KaTeX)' : ' (запасной набор)') + ', ' + size + ' КБ');
   return report;
@@ -279,6 +292,7 @@ async function sample() {
   for (const theme of ['color', 'print']) {
     await build('obrazec' + (theme === 'print' ? '-chb' : '-cvet'), blocks, {
       theme, layout: LAYOUT, frame: FRAME, withAnswerLine: true, keepHtml: true,
+      answers: false,
     });
   }
 }
@@ -306,6 +320,8 @@ async function full(draft) {
       frame: FRAME,
       withAnswerLine: !file.answers,
       extraItems: file.answers ? tail : [],
+      /* Ответы есть — значит файл в репозиторий не ложится. */
+      answers: file.answers,
       requireKatex: !draft,
       keepHtml: true,
       expectTasks: total,
@@ -314,7 +330,6 @@ async function full(draft) {
 }
 
 async function main() {
-  fs.mkdirSync(OUT, { recursive: true });
   if (process.argv.includes('--sample')) {
     await sample();
     return;
