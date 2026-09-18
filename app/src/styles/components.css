@@ -1510,12 +1510,40 @@ a.task-card {
 
 /* Окно просмотра шире обычного: в нём только чертёж, и он должен
    стать заметно крупнее, чем был на карточке. Поля тоньше по той
-   же причине — каждый их пиксель уходит у чертежа. */
+   же причине — каждый их пиксель уходит у чертежа, а отступ вокруг
+   окна снят совсем: на телефоне это сорок пикселей ширины, то есть
+   больше десятой части экрана. Затемнение подобрано по классу
+   самого окна — своего класса у подложки Modal не даёт. */
 .figzoom-modal {
   max-width: min(100%, 720px);
 }
 .figzoom-modal .modal__b {
   padding: var(--space-4);
+}
+.modal-backdrop:has(.figzoom-modal) {
+  padding: var(--space-3);
+}
+/* Ниже 768px окно занимает экран целиком: чертежу здесь дорог
+   каждый пиксель, а показывать под ним край страницы незачем —
+   на него всё равно нажимают, чтобы закрыть. */
+@media (max-width: 767.98px) {
+  .modal-backdrop:has(.figzoom-modal) {
+    padding: 0;
+  }
+  .figzoom-modal {
+    max-width: none;
+    border-radius: 0;
+    align-self: stretch;
+    justify-self: stretch;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  /* Подпись сверху, чертёж посередине оставшегося места. */
+  .figzoom-modal .modal__b {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: center;
+  }
 }
 /* Заголовку оставлен только отступ до чертежа: подпись здесь
    служебная, крупной ей быть незачем, а место она занимает. */
@@ -1543,9 +1571,8 @@ a.task-card {
 .figzoom__big > svg,
 .figzoom__big > span > svg {
   display: block;
-  width: auto;
+  width: 100%;
   height: auto;
-  max-width: 100%;
   max-height: min(70vh, 720px);
   margin: 0 auto;
 }
