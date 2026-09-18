@@ -20,8 +20,32 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
+import {
+  modelPrep,
+  modelVarianta,
+  texPlain,
+  type Method,
+  type Parametry,
+  type Shape,
+} from './model';
+import type { Razbor } from './razbor';
 import { sealAnswer, sealText } from './secret';
-import { type PrepBlok, type Prototype } from './types';
+import { type PrepBlok, type PrepZadacha, type Prototype, type Variant } from './types';
+import { typeset } from '../tex';
+
+/**
+ * Открытая часть модели задачи: метод, форма меры и параметры
+ * рисунка. Параметры повторяют числа условия, но не ответ и не
+ * подсветку — та лежит в закрытом разборе. У задания №5 методики нет,
+ * и этих полей у его вариантов тоже нет.
+ */
+export interface PoolModel {
+  method: Method;
+  shape?: Shape;
+  parametry: Parametry;
+  /** Место под иллюстрацию: путь по соглашению проекта и alt. */
+  illustration: { path: string; alt: string; ratio: '4:3' };
+}
 
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
@@ -29,8 +53,13 @@ export interface PoolVariant {
   uslovie: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
+  /**
+   * Закрытый разбор: JSON формы `Razbor` (см. razbor.ts), зашифрованный
+   * отпечатком. Внутри — фраза метода, шаги с формулами, подсветка
+   * рисунка и запись ответа.
+   */
   steps: string;
+  model?: PoolModel;
 }
 
 export interface PoolKind {
@@ -52,6 +81,63 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
+/**
+ * Закрытый разбор в JSON. Формулы шагов набираются KaTeX здесь, на
+ * сборке, и уезжают готовым HTML; рядом — те же формулы словами.
+ * Без методики (задание №5) разбор — только тексты шагов, как раньше.
+ */
+function zakrytyRazbor(
+  model: ReturnType<typeof modelVarianta> | null,
+  shagiTexty: string[],
+  otvet: string,
+): string {
+  if (model === null) {
+    const razbor: Razbor = {
+      metod: '',
+      shagi: shagiTexty.map((text) => ({ text })),
+      podsvetka: { method: 'direct-count', favorable: [] },
+      otvet,
+    };
+    return JSON.stringify(razbor);
+  }
+  const razbor: Razbor = {
+    metod: model.solution.method,
+    shagi: model.solution.steps.map((shag) =>
+      shag.formula === undefined
+        ? { text: shag.text }
+        : { text: shag.text, html: typeset(`$${shag.formula}$`), plain: texPlain(shag.formula) },
+    ),
+    podsvetka: model.solution.highlight,
+    otvet: model.answer.display,
+  };
+  return JSON.stringify(razbor);
+}
+
+function otkrytayaModel(model: ReturnType<typeof modelVarianta>): PoolModel {
+  return {
+    method: model.method,
+    ...(model.shape === undefined ? {} : { shape: model.shape }),
+    parametry: model.parameters,
+    illustration: model.illustration,
+  };
+}
+
+function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
+  const otvet = otvetUchenika(prototype, variant.params);
+  const seal = sealAnswer(otvet);
+  const model = prototype.metodika === undefined ? null : modelVarianta(prototype, variant);
+  const shagiTexty = prototype.shagi(variant.params).map((shag) => shag.text);
+  return {
+    n: variant.n,
+    uslovie: prototype.uslovie(variant.params),
+    seal,
+    /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
+       символов, а раскрывается только по просьбе. */
+    steps: sealText(zakrytyRazbor(model, shagiTexty, String(otvet).replace('.', ',')), seal),
+    ...(model === null ? {} : { model: otkrytayaModel(model) }),
+  };
+}
+
 function kindOf(prototype: Prototype): PoolKind {
   const blok = blokById(prototype.blok);
   if (blok === undefined) {
@@ -64,21 +150,7 @@ function kindOf(prototype: Prototype): PoolKind {
     blok: blok.id,
     blokTitle: blok.nazvanie,
     zadachnik: prototype.zadachnik,
-    variants: prototype.varianty.map((variant) => {
-      const seal = sealAnswer(otvetUchenika(prototype, variant.params));
-      const steps = prototype
-        .shagi(variant.params)
-        .map((shag) => shag.text)
-        .join('\n');
-      return {
-        n: variant.n,
-        uslovie: prototype.uslovie(variant.params),
-        seal,
-        /* Разбор шифруется отпечатком ответа: в бандле он лежит
-           набором символов, а раскрывается только по просьбе. */
-        steps: sealText(steps, seal),
-      };
-    }),
+    variants: prototype.varianty.map((variant) => variantPool(prototype, variant)),
   };
 }
 
@@ -99,10 +171,11 @@ export interface PrepPoolZadacha {
   uslovie: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
+  /** Закрытый разбор: JSON формы `Razbor`, зашифрованный отпечатком. */
   steps: string;
   /** Чертёж задачи готовой разметкой SVG, если он ей нужен. */
   risunok?: string;
+  model?: PoolModel;
 }
 
 export interface PrepPoolBlok {
@@ -110,6 +183,28 @@ export interface PrepPoolBlok {
   nazvanie: string;
   tip: string;
   zadachi: PrepPoolZadacha[];
+}
+
+function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
+  const otvet = prepOtvet(zadacha);
+  const seal = sealAnswer(otvet);
+  const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
+  return {
+    id: zadacha.id,
+    nomer: zadacha.nomer,
+    uslovie: zadacha.uslovie,
+    seal,
+    steps: sealText(
+      zakrytyRazbor(
+        model,
+        zadacha.shagi.map((shag) => shag.text),
+        String(otvet).replace('.', ','),
+      ),
+      seal,
+    ),
+    ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
+    ...(model === null ? {} : { model: otkrytayaModel(model) }),
+  };
 }
 
 /**
@@ -122,17 +217,7 @@ function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
     id: blok.id,
     nazvanie: blok.nazvanie,
     tip: blok.tip,
-    zadachi: blok.zadachi.map((zadacha) => {
-      const seal = sealAnswer(prepOtvet(zadacha));
-      return {
-        id: zadacha.id,
-        nomer: zadacha.nomer,
-        uslovie: zadacha.uslovie,
-        seal,
-        steps: sealText(zadacha.shagi.map((shag) => shag.text).join('\n'), seal),
-        ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
-      };
-    }),
+    zadachi: blok.zadachi.map((zadacha) => prepZadachaPool(zadacha)),
   }));
 }
 

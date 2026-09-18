@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
-import { answerMatches, openText } from '@/lib/veroyatnost/secret';
+import { otkrytRazbor, type RazborShag } from '@/lib/veroyatnost/razbor';
+import { answerMatches } from '@/lib/veroyatnost/secret';
 
 export interface VeroyatnostPrepProps {
   bloki: PrepPoolBlok[];
@@ -14,7 +15,7 @@ export interface VeroyatnostPrepProps {
 interface Sostoyanie {
   value: string;
   checked: 'right' | 'wrong' | null;
-  razbor: string[] | null;
+  razbor: RazborShag[] | null;
 }
 
 const PUSTO: Sostoyanie = { value: '', checked: null, razbor: null };
@@ -49,7 +50,7 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
   }
 
   function pokazatRazbor(zadacha: PrepPoolZadacha): void {
-    izmenit(zadacha.id, { razbor: openText(zadacha.steps, zadacha.seal).split('\n') });
+    izmenit(zadacha.id, { razbor: otkrytRazbor(zadacha.steps, zadacha.seal).shagi });
   }
 
   return (
@@ -144,7 +145,10 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
                       {state.razbor !== null ? (
                         <ol className="vtask__razbor">
                           {state.razbor.map((shag, i) => (
-                            <li key={i}>{shag}</li>
+                            <li key={i}>
+                              {shag.text}
+                              {shag.plain === undefined ? null : ` ${shag.plain}`}
+                            </li>
                           ))}
                         </ol>
                       ) : null}

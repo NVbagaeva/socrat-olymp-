@@ -12,7 +12,8 @@
  */
 
 import { skl } from '../morfologia';
-import { dec, konechnaya, num, round, type Prototype } from '../types';
+import { konechnaya, num, type Prototype } from '../types';
+import { plitkiDvuh, shagP } from './vizual';
 
 const BLOK = 'statisticheskoe';
 
@@ -59,12 +60,28 @@ const P19: Prototype = {
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: `Вероятность, что насос подтекает: ${k} : ${N} = ${dec(k / N)}.`, value: k / N },
       {
-        text: `Событие «не подтекает» — противоположное: 1 − ${dec(k / N)} = ${dec((N - k) / N)}`,
-        value: (N - k) / N,
+        text: 'Все исходы — насосы партии, на контроль равновероятно попадёт любой:',
+        formula: `n = ${N}`,
+        value: N,
       },
+      {
+        text: 'Благоприятные — исправные насосы:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
+      },
+      shagP(N - k, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — на контроль равновероятно попадает любой из ${num(p, 'N')} насосов.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'исправный', count: num(p, 'N') - num(p, 'k') },
+        { label: 'подтекает', count: num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 89', params: { N: 900, k: 27 } },
@@ -120,22 +137,30 @@ const P20: Prototype = {
   shagi: (p) => {
     const N = num(p, 'N');
     const k = num(p, 'k');
-    const znakov = num(p, 'znakov');
-    const dolya = (N - k) / N;
-    const otvet = znakov === 2 ? round(dolya, 2) : dolya;
+    const znakov = num(p, 'znakov') === 2 ? 2 : null;
     return [
       {
-        text: `Сумок с дефектом ${k} из ${N}, значит без дефекта ${N} − ${k} = ${N - k}.`,
-        value: N - k,
+        text: 'Все исходы — сумки партии, покупателю равновероятно достанется любая:',
+        formula: `n = ${N}`,
+        value: N,
       },
       {
-        text:
-          znakov === 2
-            ? `P = ${N - k} : ${N} ≈ ${dec(otvet)}`
-            : `P = ${N - k} : ${N} = ${dec(otvet)}`,
-        value: otvet,
+        text: 'Благоприятные — сумки без дефекта:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
       },
+      shagP(N - k, N, znakov),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — покупателю равновероятно достаётся любая из ${num(p, 'N')} сумок.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'без дефекта', count: num(p, 'N') - num(p, 'k') },
+        { label: 'с дефектом', count: num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 95', params: { N: 200, k: 4, znakov: 0 } },
@@ -182,15 +207,25 @@ const P21: Prototype = {
   shagi: (p) => {
     const q = num(p, 'q');
     const d = num(p, 'd');
-    const otvet = round(q / (q + d), 2);
     return [
       {
-        text: `Всего сумок в такой партии ${q} + ${d} = ${q + d} — это все исходы.`,
+        text: 'Все исходы — сумки партии, качественные вместе с дефектными:',
+        formula: `n = ${q} + ${d} = ${q + d}`,
         value: q + d,
       },
-      { text: `Качественных из них ${q}.`, value: q },
-      { text: `P = ${q} : ${q + d} ≈ ${dec(otvet)}`, value: otvet },
+      { text: 'Благоприятные — качественные сумки:', formula: `m = ${q}`, value: q },
+      shagP(q, q + d, 2),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — покупателю равновероятно достаётся любая из ${num(p, 'q') + num(p, 'd')} сумок партии.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'качественная', count: num(p, 'q') },
+        { label: 'с дефектом', count: num(p, 'd') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 99', params: { q: 110, d: 3 } },

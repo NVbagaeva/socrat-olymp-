@@ -26,7 +26,17 @@ import {
   sobiratelnoe,
   vDen,
 } from '../morfologia';
-import { dec, konechnaya, num, round, text, type Params, type Prototype } from '../types';
+import { konechnaya, num, text, type Params, type Prototype } from '../types';
+import {
+  drob,
+  plitki,
+  plitkiDvuh,
+  shagLL,
+  shagP,
+  tablitsaKostey,
+  tablitsaMonet,
+  tsiferblat,
+} from './vizual';
 
 /* ── Общее ───────────────────────────────────────────────────────── */
 
@@ -106,10 +116,20 @@ const P01: Prototype = {
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: `Турист занимает в очереди одно из ${N} мест — это все исходы.`, value: N },
-      { text: `Первым рейсом улетают ${chelovek(k)} — это благоприятные исходы.`, value: k },
-      { text: `P = ${k} : ${N} = ${dec(k / N)}`, value: k / N },
+      { text: 'Все исходы — места туриста в очереди на вертолёт:', formula: `n = ${N}`, value: N },
+      { text: 'Благоприятные — места первого рейса:', formula: `m = ${k}`, value: k },
+      shagP(k, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — турист занимает одно из ${num(p, 'N')} равновозможных мест, из них ${num(p, 'k')} в первом рейсе.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'первый рейс', count: num(p, 'k') },
+        { label: 'другие рейсы', count: num(p, 'N') - num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 1', params: { N: 20, k: 4, kto: 'В.' } },
@@ -148,10 +168,20 @@ const P02: Prototype = {
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: `В группе ${chelovek(N)} — столько же равновозможных исходов.`, value: N },
-      { text: `В магазин идут ${chelovek(k)} — благоприятные исходы.`, value: k },
-      { text: `P = ${k} : ${N} = ${dec(k / N)}`, value: k / N },
+      { text: 'Все исходы — участники жребия:', formula: `n = ${N}`, value: N },
+      { text: 'Благоприятные — те, кого выберут:', formula: `m = ${k}`, value: k },
+      shagP(k, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — жребий одинаково случаен для всех ${num(p, 'N')}, выбирают ${num(p, 'k')}.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'выбран', count: num(p, 'k') },
+        { label: 'остаётся', count: num(p, 'N') - num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 5', params: { N: 5, k: 3, kto: 'Д.' } },
@@ -202,12 +232,29 @@ const P03: Prototype = {
     const ischem = text(p, 'ischem') === 'a' ? text(p, 'strA') : text(p, 'strB');
     return [
       {
-        text: `Любой из ${N} спортсменов может оказаться под нужным номером — все исходы равновозможны.`,
+        text: 'Все исходы — кто окажется под нужным номером, любой из спортсменов:',
+        formula: `n = ${N}`,
         value: N,
       },
-      { text: `Спортсменов из ${ischem} — ${nado}, это благоприятные исходы.`, value: nado },
-      { text: `P = ${nado} : ${N} = ${dec(nado / N)}`, value: nado / N },
+      { text: `Благоприятные — спортсмены из ${ischem}:`, formula: `m = ${nado}`, value: nado },
+      shagP(nado, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — под нужным номером равновероятно любой из ${num(p, 'N')} спортсменов.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const a = num(p, 'a');
+      const b = num(p, 'b');
+      const ischem = text(p, 'ischem');
+      return plitki([
+        { label: `из ${text(p, 'strA')}`, count: a, blago: ischem === 'a' },
+        { label: `из ${text(p, 'strB')}`, count: b, blago: ischem === 'b' },
+        { label: 'другие страны', count: N - a - b, blago: false },
+      ]);
+    },
   },
   varianty: [
     {
@@ -306,13 +353,34 @@ const P04: Prototype = {
     const vse = spisok(p, 'imena');
     const blag = spisok(p, 'blag');
     return [
-      { text: `Жребий тянут ${vse.length} человек — столько всего исходов.`, value: vse.length },
-      { text: `Подходят ${blag.length} из них: ${perechislenie(blag)}.`, value: blag.length },
       {
-        text: `P = ${blag.length} : ${vse.length} = ${dec(blag.length / vse.length)}`,
-        value: blag.length / vse.length,
+        text: 'Все исходы — кому выпадет жребий, любой из играющих:',
+        formula: `n = ${vse.length}`,
+        value: vse.length,
       },
+      {
+        text: `Благоприятные — ${perechislenie(blag)}:`,
+        formula: `m = ${blag.length}`,
+        value: blag.length,
+      },
+      shagP(blag.length, vse.length),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — жребий одинаково случаен для всех ${spisok(p, 'imena').length} играющих.`,
+    vizual: (p) => {
+      const vse = spisok(p, 'imena');
+      const blag = new Set(spisok(p, 'blag'));
+      return {
+        parametry: { method: 'direct-count', outcomes: vse, columns: 5 },
+        podsvetka: {
+          method: 'direct-count',
+          favorable: vse.flatMap((imya, i) => (blag.has(imya) ? [i] : [])),
+        },
+      };
+    },
   },
   varianty: [
     {
@@ -469,10 +537,24 @@ const P05: Prototype = {
     const b = num(p, 'b');
     const d = duga(a, b);
     return [
-      { text: `Весь циферблат — 12 часовых делений: это вся длина.`, value: 12 },
-      { text: `От отметки ${a} до отметки ${b} стрелка проходит ${d} делений.`, value: d },
-      { text: `P = ${d} : 12 = ${dec(d / 12)}`, value: d / 12 },
+      {
+        text: 'Вся мера — полный круг циферблата, двенадцать часовых делений:',
+        formula: 'L = 12',
+        value: 12,
+      },
+      {
+        text: `Благоприятная дуга — от отметки ${a} до отметки ${b}:`,
+        formula: `l = ${d}`,
+        value: d,
+      },
+      shagLL(d, 12, d / 12),
     ];
+  },
+  metodika: {
+    metod: 'coordinate-line',
+    fraza: () =>
+      'отношение мер — стрелка равновероятно останавливается в любой точке круга, событие задано дугой.',
+    vizual: (p) => tsiferblat(num(p, 'a'), num(p, 'b')),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 19', params: { a: 7, b: 1 } },
@@ -532,10 +614,27 @@ const P06: Prototype = {
     const summa = [1, 2, 3, 4].reduce((s, i) => s + num(p, `k${i}`), 0);
     const { kol, strana } = stranaKol(p, num(p, 'ischem'));
     return [
-      { text: `Всего спортсменов: ${summa} — это все равновозможные исходы.`, value: summa },
-      { text: `Из ${strana} — ${kol}, это благоприятные исходы.`, value: kol },
-      { text: `P = ${kol} : ${summa} = ${dec(kol / summa)}`, value: kol / summa },
+      {
+        text: 'Все исходы — кто выступит под нужным номером, любой из спортсменов:',
+        formula: `n = ${[1, 2, 3, 4].map((i) => num(p, `k${i}`)).join(' + ')} = ${summa}`,
+        value: summa,
+      },
+      { text: `Благоприятные — спортсмены из ${strana}:`, formula: `m = ${kol}`, value: kol },
+      shagP(kol, summa),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — жребий одинаково случаен для всех ${[1, 2, 3, 4].reduce((s, i) => s + num(p, `k${i}`), 0)} спортсменов.`,
+    vizual: (p) =>
+      plitki(
+        [1, 2, 3, 4].map((i) => ({
+          label: `из ${text(p, `s${i}`)}`,
+          count: num(p, `k${i}`),
+          blago: i === num(p, 'ischem'),
+        })),
+      ),
   },
   varianty: [
     {
@@ -753,10 +852,27 @@ const P07: Prototype = {
     const nado = num(p, `k${num(p, 'ischem')}`);
     const strana = text(p, `s${num(p, 'ischem')}`);
     return [
-      { text: `Всего докладов: ${summa} — столько равновозможных исходов.`, value: summa },
-      { text: `Учёных из ${strana} — ${nado}.`, value: nado },
-      { text: `P = ${nado} : ${summa} = ${dec(nado / summa)}`, value: nado / summa },
+      {
+        text: 'Все исходы — чей доклад окажется под нужным номером, любой из докладов:',
+        formula: `n = ${[1, 2, 3].map((i) => num(p, `k${i}`)).join(' + ')} = ${summa}`,
+        value: summa,
+      },
+      { text: `Благоприятные — учёные из ${strana}:`, formula: `m = ${nado}`, value: nado },
+      shagP(nado, summa),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — жеребьёвка одинаково случайна для всех ${[1, 2, 3].reduce((s, i) => s + num(p, `k${i}`), 0)} докладов.`,
+    vizual: (p) =>
+      plitki(
+        [1, 2, 3].map((i) => ({
+          label: `из ${text(p, `s${i}`)}`,
+          count: num(p, `k${i}`),
+          blago: i === num(p, 'ischem'),
+        })),
+      ),
   },
   varianty: [
     {
@@ -888,13 +1004,29 @@ const P08: Prototype = {
     const ne = num(p, 'ne') === 1;
     const blag = ne ? N - k : k;
     return [
-      { text: `Всего билетов ${N} — это все исходы.`, value: N },
-      {
-        text: ne ? `Билетов без этой темы: ${N} − ${k} = ${N - k}.` : `Билетов с этой темой: ${k}.`,
-        value: blag,
-      },
-      { text: `P = ${blag} : ${N} = ${dec(blag / N)}`, value: blag / N },
+      { text: 'Все исходы — билеты сборника:', formula: `n = ${N}`, value: N },
+      ne
+        ? {
+            text: 'Благоприятные — билеты без этой темы:',
+            formula: `m = ${N} - ${k} = ${blag}`,
+            value: blag,
+          }
+        : { text: 'Благоприятные — билеты с этой темой:', formula: `m = ${k}`, value: blag },
+      shagP(blag, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) => `прямой пересчёт — на экзамене равновероятно любой из ${num(p, 'N')} билетов.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const k = num(p, 'k');
+      const ne = num(p, 'ne') === 1;
+      return plitki([
+        { label: `«${text(p, 'tema')}»`, count: k, blago: !ne },
+        { label: 'другая тема', count: N - k, blago: ne },
+      ]);
+    },
   },
   varianty: [
     {
@@ -985,10 +1117,23 @@ const P09: Prototype = {
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: `Всего машин ${N}.`, value: N },
-      { text: `Жёлтых: ${N} − ${k} = ${N - k}.`, value: N - k },
-      { text: `P = ${N - k} : ${N} = ${dec((N - k) / N)}`, value: (N - k) / N },
+      { text: 'Все исходы — машины фирмы, на вызов приедет любая:', formula: `n = ${N}`, value: N },
+      {
+        text: 'Благоприятные — жёлтые машины:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
+      },
+      shagP(N - k, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) => `прямой пересчёт — на вызов равновероятно приедет любая из ${num(p, 'N')} машин.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'жёлтая', count: num(p, 'N') - num(p, 'k') },
+        { label: 'чёрная', count: num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 39', params: { N: 45, k: 18 } },
@@ -1032,10 +1177,32 @@ const P10: Prototype = {
     const b = num(p, 'b');
     const c = N - a - b;
     return [
-      { text: `Всего гимнасток ${N}.`, value: N },
-      { text: `Из ${text(p, 'sC')}: ${N} − ${a} − ${b} = ${c}.`, value: c },
-      { text: `P = ${c} : ${N} = ${dec(c / N)}`, value: c / N },
+      {
+        text: 'Все исходы — кто выступит под нужным номером, любая из гимнасток:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        text: `Благоприятные — гимнастки из ${text(p, 'sC')}:`,
+        formula: `m = ${N} - ${a} - ${b} = ${c}`,
+        value: c,
+      },
+      shagP(c, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) => `прямой пересчёт — жребий одинаково случаен для всех ${num(p, 'N')} гимнасток.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const a = num(p, 'a');
+      const b = num(p, 'b');
+      return plitki([
+        { label: `из ${text(p, 'sA')}`, count: a, blago: false },
+        { label: `из ${text(p, 'sB')}`, count: b, blago: false },
+        { label: `из ${text(p, 'sC')}`, count: N - a - b, blago: true },
+      ]);
+    },
   },
   varianty: [
     {
@@ -1159,16 +1326,37 @@ const P11: Prototype = {
     const k = num(p, 'k');
     const last = vPoslednijDen(d, N, m, k);
     return [
-      { text: `Всего докладов ${N} — все места равновозможны.`, value: N },
       {
-        text:
-          m === 0
-            ? `Дней ${d}, докладов поровну: ${N} : ${d} = ${last} в последний день.`
-            : `На первые дни ушло ${m * k}; остальные ${N - m * k} поделены на 2 дня — в последний день ${last}.`,
-        value: last,
+        text: 'Все исходы — места доклада в расписании, все равновозможны:',
+        formula: `n = ${N}`,
+        value: N,
       },
-      { text: `P = ${last} : ${N} = ${dec(last / N)}`, value: last / N },
+      m === 0
+        ? {
+            text: `Благоприятные — доклады последнего дня; дней ${d}, докладов поровну:`,
+            formula: `m = ${drob(N, d)} = ${last}`,
+            value: last,
+          }
+        : {
+            text: `Благоприятные — доклады последнего дня: на первые дни ушло ${m * k}, остальные поделены поровну:`,
+            formula: `m = ${drob(`${N} - ${m * k}`, d - m)} = ${last}`,
+            value: last,
+          },
+      shagP(last, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — доклад профессора равновероятно стоит на любом из ${num(p, 'N')} мест.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const last = vPoslednijDen(num(p, 'd'), N, num(p, 'm'), num(p, 'k'));
+      return plitkiDvuh(
+        { label: 'последний день', count: last },
+        { label: 'другие дни', count: N - last },
+      );
+    },
   },
   varianty: [
     {
@@ -1268,13 +1456,31 @@ const P12: Prototype = {
     const k = num(p, 'k');
     const ostalos = N - (m - 1) * k;
     return [
-      { text: `Всего участников ${N}.`, value: N },
       {
-        text: `В первых аудиториях ${m - 1} × ${k} = ${(m - 1) * k}; в запасной ${N} − ${(m - 1) * k} = ${ostalos}.`,
+        text: 'Все исходы — участники олимпиады, посадить могут любого:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        text: 'Благоприятные — те, кто попал в запасную аудиторию:',
+        formula: `m = ${N} - ${m - 1} \\cdot ${k} = ${ostalos}`,
         value: ostalos,
       },
-      { text: `P = ${ostalos} : ${N} = ${dec(ostalos / N)}`, value: ostalos / N },
+      shagP(ostalos, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — размещение одинаково случайно для всех ${num(p, 'N')} участников.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const ostalos = N - (num(p, 'm') - 1) * num(p, 'k');
+      return plitkiDvuh(
+        { label: 'запасная аудитория', count: ostalos },
+        { label: 'основные аудитории', count: N - ostalos },
+      );
+    },
   },
   varianty: [
     {
@@ -1388,13 +1594,27 @@ const P13: Prototype = {
     const k = num(p, 'k');
     const vDenN = (N - k) / (d - 1);
     return [
-      { text: `Всего выступлений ${N}.`, value: N },
+      { text: 'Все исходы — места выступления в расписании:', formula: `n = ${N}`, value: N },
       {
-        text: `После первого дня осталось ${N} − ${k} = ${N - k}; на каждый из ${d - 1} дней приходится ${vDenN}.`,
+        text: `Благоприятные — выступления нужного дня; после первого дня осталось ${N - k}, они поделены на ${d - 1} дня поровну:`,
+        formula: `m = ${drob(N - k, d - 1)} = ${vDenN}`,
         value: vDenN,
       },
-      { text: `P = ${vDenN} : ${N} = ${dec(vDenN / N)}`, value: vDenN / N },
+      shagP(vDenN, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — выступление равновероятно стоит на любом из ${num(p, 'N')} мест.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const vDenN = (N - num(p, 'k')) / (num(p, 'd') - 1);
+      return plitkiDvuh(
+        { label: 'нужный день', count: vDenN },
+        { label: 'другие дни', count: N - vDenN },
+      );
+    },
   },
   varianty: [
     {
@@ -1487,10 +1707,28 @@ const P14: Prototype = {
     const N = num(p, 'N');
     const r = num(p, 'r');
     return [
-      { text: `Соперник выбирается из оставшихся ${N} − 1 = ${N - 1} спортсменов.`, value: N - 1 },
-      { text: `Россиян среди них ${r} − 1 = ${r - 1}.`, value: r - 1 },
-      { text: `P = ${r - 1} : ${N - 1} = ${dec((r - 1) / (N - 1))}`, value: (r - 1) / (N - 1) },
+      {
+        text: 'Все исходы — возможные соперники, любой из остальных участников:',
+        formula: `n = ${N} - 1 = ${N - 1}`,
+        value: N - 1,
+      },
+      {
+        text: 'Благоприятные — соперники из России, без него самого:',
+        formula: `m = ${r} - 1 = ${r - 1}`,
+        value: r - 1,
+      },
+      shagP(r - 1, N - 1),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — в соперники равновероятно попадёт любой из остальных ${num(p, 'N') - 1} участников.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'из России', count: num(p, 'r') - 1 },
+        { label: 'из других стран', count: num(p, 'N') - num(p, 'r') },
+      ),
   },
   varianty: [
     {
@@ -1600,22 +1838,41 @@ const P15: Prototype = {
   shagi: (p) => {
     const N = num(p, 'N');
     const razmer = N / num(p, 'g');
-    const vmeste = (razmer - 1) / (N - 1);
-    const otvet = num(p, 'vmeste') === 1 ? vmeste : 1 - vmeste;
+    const vmeste = num(p, 'vmeste') === 1;
+    const m = vmeste ? razmer - 1 : N - razmer;
     return [
       {
-        text: `Одного из двоих фиксируем. Второй занимает одно из ${N} − 1 = ${N - 1} оставшихся мест.`,
+        text: 'Одного из двоих фиксируем. Все исходы — места второго среди оставшихся:',
+        formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
-      { text: `В его группе свободно ${razmer} − 1 = ${razmer - 1} мест.`, value: razmer - 1 },
-      {
-        text:
-          num(p, 'vmeste') === 1
-            ? `P = ${razmer - 1} : ${N - 1} = ${dec(otvet)}`
-            : `P = 1 − ${razmer - 1} : ${N - 1} = ${dec(otvet)}`,
-        value: otvet,
-      },
+      vmeste
+        ? {
+            text: 'Благоприятные — свободные места в группе первого:',
+            formula: `m = ${razmer} - 1 = ${m}`,
+            value: m,
+          }
+        : {
+            text: 'Благоприятные — места в других группах:',
+            formula: `m = ${N} - ${razmer} = ${m}`,
+            value: m,
+          },
+      shagP(m, N - 1),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    fraza: (p) =>
+      `прямой пересчёт — фиксируем одного, второй равновероятно занимает любое из ${num(p, 'N') - 1} оставшихся мест.`,
+    vizual: (p) => {
+      const N = num(p, 'N');
+      const razmer = N / num(p, 'g');
+      const vmeste = num(p, 'vmeste') === 1;
+      return plitki([
+        { label: 'в группе первого', count: razmer - 1, blago: vmeste },
+        { label: 'в других группах', count: N - razmer, blago: !vmeste },
+      ]);
+    },
   },
   varianty: [
     {
@@ -1882,11 +2139,36 @@ const P16: Prototype = {
         : rezhim === 'bolshe'
           ? monetyPerebor(n, (u) => u > n - u)
           : soch(n, k) / vsego;
+    const m = Math.round(otvet * vsego);
     return [
-      { text: `Бросков ${n}, значит всего исходов 2^${n} = ${vsego}.`, value: vsego },
-      { text: `Подходящих исходов: ${Math.round(otvet * vsego)}.`, value: otvet * vsego },
-      { text: `P = ${Math.round(otvet * vsego)} : ${vsego} = ${dec(otvet)}`, value: otvet },
+      {
+        text: `Все исходы — последовательности ${n} бросков, в таблице каждая — своя клетка:`,
+        formula: `n = 2^{${n}} = ${vsego}`,
+        value: vsego,
+      },
+      { text: 'Благоприятные — клетки, где выпало то, что нужно:', formula: `m = ${m}`, value: m },
+      shagP(m, vsego),
     ];
+  },
+  metodika: {
+    metod: 'outcome-table',
+    fraza: (p) =>
+      `таблица исходов — ${num(p, 'n')} независимых броска, важен порядок, все ${2 ** num(p, 'n')} исходов равновозможны.`,
+    vizual: (p) => {
+      const n = num(p, 'n');
+      const k = num(p, 'k');
+      const rezhim = text(p, 'rezhim');
+      const uspeh = text(p, 'storona') === 'орёл' ? 'О' : 'Р';
+      const podhodit = (u: number): boolean =>
+        rezhim === 'ni-razu'
+          ? u === 0
+          : rezhim === 'vse'
+            ? u === n
+            : rezhim === 'bolshe'
+              ? u > n - u
+              : u === k;
+      return tablitsaMonet(n, ['О', 'Р'], uspeh, podhodit);
+    },
   },
   varianty: [
     {
@@ -2021,14 +2303,33 @@ const P17: Prototype = {
     const n = num(p, 'n');
     const vsego = 2 ** n;
     const otvet = P17.otvet(p);
+    const m = Math.round(otvet * vsego);
     return [
       {
-        text: `Матчей ${n}, каждый жребий — «выиграла» или «нет»: всего ${vsego} исходов.`,
+        text: `Все исходы — как лягут ${n} жребия подряд, в таблице каждый — своя клетка:`,
+        formula: `n = 2^{${n}} = ${vsego}`,
         value: vsego,
       },
-      { text: `Подходящих исходов ${Math.round(otvet * vsego)}.`, value: otvet * vsego },
-      { text: `P = ${Math.round(otvet * vsego)} : ${vsego} = ${dec(otvet)}`, value: otvet },
+      {
+        text: 'Благоприятные — клетки, где команда выиграла жребий столько раз, сколько нужно:',
+        formula: `m = ${m}`,
+        value: m,
+      },
+      shagP(m, vsego),
     ];
+  },
+  metodika: {
+    metod: 'outcome-table',
+    fraza: (p) =>
+      `таблица исходов — ${num(p, 'n')} независимых жребия, все ${2 ** num(p, 'n')} исходов равновозможны.`,
+    vizual: (p) => {
+      const n = num(p, 'n');
+      const k = num(p, 'k');
+      const rezhim = text(p, 'rezhim');
+      const podhodit = (u: number): boolean =>
+        rezhim === 'vse' ? u === n : rezhim === 'rovno' ? u === k : u <= k;
+      return tablitsaMonet(n, ['В', 'Н'], 'В', podhodit, ['1-й матч', '2-й матч']);
+    },
   },
   varianty: [
     {
@@ -2149,15 +2450,25 @@ const P18: Prototype = {
         ok += 1;
       }
     }
-    const tochno0 = ok / 36;
     return [
-      { text: `Исходов всего 6 × 6 = 36.`, value: 36 },
-      { text: `Сумму ${s} дают ${ok} ${skl(ok, 'пара', 'пары', 'пар')} значений.`, value: ok },
       {
-        text: `P = ${ok} : 36 ≈ ${dec(round(tochno0, znakov))}`,
-        value: round(tochno0, znakov),
+        text: 'Все исходы — пары значений двух костей, каждая — клетка таблицы:',
+        formula: 'n = 6 \\cdot 6 = 36',
+        value: 36,
       },
+      { text: `Благоприятные — клетки с суммой ${s}:`, formula: `m = ${ok}`, value: ok },
+      shagP(ok, 36, znakov),
     ];
+  },
+  metodika: {
+    metod: 'outcome-table',
+    fraza: () =>
+      'таблица исходов — две кости, результат определяется парой значений, порядок важен.',
+    vizual: (p) =>
+      tablitsaKostey(
+        (a, b) => a + b,
+        (a, b) => a + b === num(p, 's'),
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 85', params: { s: 4, znakov: 2 } },

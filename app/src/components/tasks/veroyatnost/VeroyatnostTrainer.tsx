@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/veroyatnost/pool';
-import { answerMatches, openText } from '@/lib/veroyatnost/secret';
+import { otkrytRazbor, type RazborShag } from '@/lib/veroyatnost/razbor';
+import { answerMatches } from '@/lib/veroyatnost/secret';
 import {
   ROUND_SIZE,
   otherVariant,
@@ -64,11 +65,11 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
     kind === undefined ? undefined : kind.variants.find((v) => v.n === item?.n);
 
   /* Разбор раскрывается только когда его попросили. */
-  const razbor = useMemo(() => {
+  const razbor = useMemo((): RazborShag[] => {
     if (!solution || variant === undefined) {
       return [];
     }
-    return openText(variant.steps, variant.seal).split('\n');
+    return otkrytRazbor(variant.steps, variant.seal).shagi;
   }, [solution, variant]);
 
   function sbros(): void {
@@ -213,7 +214,10 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
           {solution && razbor.length > 0 ? (
             <ol className="vtask__razbor">
               {razbor.map((shag, i) => (
-                <li key={i}>{shag}</li>
+                <li key={i}>
+                  {shag.text}
+                  {shag.plain === undefined ? null : ` ${shag.plain}`}
+                </li>
               ))}
             </ol>
           ) : null}

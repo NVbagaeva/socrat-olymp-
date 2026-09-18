@@ -16,7 +16,17 @@
  * тренажёре.
  */
 
-import { dec, type PrepBlok, type PrepZadacha } from './types';
+import {
+  drob,
+  plitki,
+  plitkiDvuh,
+  ploshchadi,
+  shagLL,
+  shagP,
+  tablitsaKostey,
+  tsiferblat,
+} from './bank4/vizual';
+import { type PrepBlok, type PrepZadacha } from './types';
 
 /* ── Мелкие перечисления, чтобы разбор считался, а не переписывался ── */
 
@@ -70,10 +80,20 @@ const OPREDELENIE: readonly PrepZadacha[] = [
        пирожки с мясом и с капустой. */
     proverka: 1 - (7 + 5) / 16,
     shagi: [
-      { text: 'Всего пирожков 16 — это все равновозможные исходы.', value: 16 },
-      { text: 'С вареньем их 4 — это благоприятные исходы.', value: 4 },
-      { text: `P = 4 : 16 = ${dec(4 / 16)}`, value: 4 / 16 },
+      { text: 'Все исходы — любой из пирожков:', formula: 'n = 7 + 5 + 4 = 16', value: 16 },
+      { text: 'Благоприятные — пирожки с вареньем:', formula: 'm = 4', value: 4 },
+      shagP(4, 16),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — один случайный выбор из 16 одинаково вероятных пирожков.',
+      vizual: () =>
+        plitki([
+          { label: 'мясо', count: 7, blago: false },
+          { label: 'капуста', count: 5, blago: false },
+          { label: 'варенье', count: 4, blago: true },
+        ]),
+    },
   },
   {
     id: 'k4-02',
@@ -83,10 +103,24 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     otvet: (20 + 15) / 50,
     proverka: 1 - 15 / 50,
     shagi: [
-      { text: 'Всего фильмов 50.', value: 50 },
-      { text: 'Не драма — это 20 комедий и 15 боевиков, всего 35.', value: 35 },
-      { text: `P = 35 : 50 = ${dec(35 / 50)}`, value: 35 / 50 },
+      { text: 'Все исходы — любой из фильмов:', formula: 'n = 50', value: 50 },
+      {
+        text: 'Благоприятные — не драмы, то есть комедии и боевики:',
+        formula: 'm = 20 + 15 = 35',
+        value: 35,
+      },
+      shagP(35, 50),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — один случайный выбор из 50 одинаково вероятных фильмов.',
+      vizual: () =>
+        plitki([
+          { label: 'комедия', count: 20, blago: true },
+          { label: 'боевик', count: 15, blago: true },
+          { label: 'драма', count: 15, blago: false },
+        ]),
+    },
   },
   {
     id: 'k4-03',
@@ -96,10 +130,15 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     otvet: 2 / 10,
     proverka: 1 - 8 / 10,
     shagi: [
-      { text: 'Антону достаётся одна из 10 карт — все исходы равновозможны.', value: 10 },
-      { text: 'Карт мафии среди них 2.', value: 2 },
-      { text: `P = 2 : 10 = ${dec(2 / 10)}`, value: 2 / 10 },
+      { text: 'Все исходы — любая из карт:', formula: 'n = 10', value: 10 },
+      { text: 'Благоприятные — карты мафии:', formula: 'm = 2', value: 2 },
+      shagP(2, 10),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — Антону достаётся одна из 10 одинаково вероятных карт.',
+      vizual: () => plitkiDvuh({ label: 'мафия', count: 2 }, { label: 'мирный', count: 8 }),
+    },
   },
   {
     id: 'k4-04',
@@ -110,10 +149,15 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     /* Перебором: подходят ровно два подъезда из десяти. */
     proverka: dolya(10, (i) => i <= 2),
     shagi: [
-      { text: 'Кот равновероятно сидит в любом из 10 подъездов.', value: 10 },
-      { text: 'Подходят два подъезда: первый и второй.', value: 2 },
-      { text: `P = 2 : 10 = ${dec(2 / 10)}`, value: 2 / 10 },
+      { text: 'Все исходы — любой из подъездов:', formula: 'n = 10', value: 10 },
+      { text: 'Благоприятные — первый и второй подъезды:', formula: 'm = 2', value: 2 },
+      shagP(2, 10),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — кот равновероятно сидит в любом из 10 подъездов.',
+      vizual: () => plitkiDvuh({ label: '1-й или 2-й', count: 2 }, { label: 'дальше', count: 8 }),
+    },
   },
   {
     id: 'k4-05',
@@ -125,10 +169,27 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     proverka: poryadkiTroih((p) => p[p.length - 1] === 1),
     okruglenie: 2,
     shagi: [
-      { text: 'Важен только порядок троих: Клима, Гоги и Алекса.', value: 3 },
-      { text: 'Все шесть порядков равновозможны, Клим последний в двух из них.', value: 2 },
-      { text: `P = 2 : 6 = 1 : 3 ≈ ${dec(0.33)}`, value: 0.33 },
+      {
+        text: 'Все исходы — порядки троих: Клима (К), Гоги (Г) и Алекса (А):',
+        formula: 'n = 6',
+        value: 6,
+      },
+      { text: 'Благоприятные — порядки, где Клим последний:', formula: 'm = 2', value: 2 },
+      shagP(2, 6, 2),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — важен только порядок троих, все шесть порядков равновозможны.',
+      vizual: () => ({
+        parametry: {
+          method: 'direct-count',
+          outcomes: ['КГА', 'КАГ', 'ГКА', 'ГАК', 'АКГ', 'АГК'],
+          columns: 6,
+        },
+        podsvetka: { method: 'direct-count', favorable: [3, 5] },
+      }),
+    },
   },
   {
     id: 'k4-06',
@@ -139,12 +200,24 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     proverka: 1 - (8 + 1) / 12,
     shagi: [
       {
-        text: 'Отношение 8 : 1 : 3 означает, что на каждые 8 + 1 + 3 = 12 деревьев приходится 3 вишни.',
+        text: 'Отношение 8 : 1 : 3 — на каждые 8 + 1 + 3 деревьев. Все исходы — любое из них:',
+        formula: 'n = 8 + 1 + 3 = 12',
         value: 12,
       },
-      { text: 'Вишен из этих 12 деревьев — 3.', value: 3 },
-      { text: `P = 3 : 12 = ${dec(3 / 12)}`, value: 3 / 12 },
+      { text: 'Благоприятные — вишни:', formula: 'm = 3', value: 3 },
+      shagP(3, 12),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — на каждые 12 деревьев приходится 3 вишни, выбор одинаково случаен.',
+      vizual: () =>
+        plitki([
+          { label: 'яблоня', count: 8, blago: false },
+          { label: 'груша', count: 1, blago: false },
+          { label: 'вишня', count: 3, blago: true },
+        ]),
+    },
   },
   {
     id: 'k4-07',
@@ -154,10 +227,21 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     otvet: 18 / 45,
     proverka: 1 - 27 / 45,
     shagi: [
-      { text: 'Соперник Исакова выбирается из оставшихся 46 − 1 = 45 теннисистов.', value: 45 },
-      { text: 'Россиян среди них 19 − 1 = 18: сам Исаков в соперники себе не попадёт.', value: 18 },
-      { text: `P = 18 : 45 = ${dec(18 / 45)}`, value: 18 / 45 },
+      {
+        text: 'Все исходы — возможные соперники Исакова, любой из остальных:',
+        formula: 'n = 46 - 1 = 45',
+        value: 45,
+      },
+      { text: 'Благоприятные — россияне без него самого:', formula: 'm = 19 - 1 = 18', value: 18 },
+      shagP(18, 45),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — в соперники равновероятно попадёт любой из остальных 45 теннисистов.',
+      vizual: () =>
+        plitkiDvuh({ label: 'из России', count: 18 }, { label: 'из других стран', count: 27 }),
+    },
   },
   {
     id: 'k4-08',
@@ -167,10 +251,17 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     otvet: 6 / 30,
     proverka: dolya(30, (i) => i <= 6),
     shagi: [
-      { text: 'Турист занимает одно из 30 мест в очереди — все они равновозможны.', value: 30 },
-      { text: 'Первым рейсом улетают 6 человек.', value: 6 },
-      { text: `P = 6 : 30 = ${dec(6 / 30)}`, value: 6 / 30 },
+      { text: 'Все исходы — места туриста в очереди:', formula: 'n = 30', value: 30 },
+      { text: 'Благоприятные — места первого рейса:', formula: 'm = 6', value: 6 },
+      shagP(6, 30),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — турист занимает одно из 30 равновозможных мест, из них 6 в первом рейсе.',
+      vizual: () =>
+        plitkiDvuh({ label: 'первый рейс', count: 6 }, { label: 'другие рейсы', count: 24 }),
+    },
   },
   {
     id: 'k4-09',
@@ -181,12 +272,23 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     proverka: 1 - 7 / 10,
     shagi: [
       {
-        text: 'Всего докладов 3 + 3 + 4 = 10, и восьмым равновероятно может быть любой.',
+        text: 'Все исходы — чей доклад окажется восьмым, любой из докладов:',
+        formula: 'n = 3 + 3 + 4 = 10',
         value: 10,
       },
-      { text: 'Учёных из России среди них 3.', value: 3 },
-      { text: `P = 3 : 10 = ${dec(3 / 10)}`, value: 3 / 10 },
+      { text: 'Благоприятные — учёные из России:', formula: 'm = 3', value: 3 },
+      shagP(3, 10),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — восьмым равновероятно окажется любой из 10 докладов.',
+      vizual: () =>
+        plitki([
+          { label: 'из Норвегии', count: 3, blago: false },
+          { label: 'из России', count: 3, blago: true },
+          { label: 'из Испании', count: 4, blago: false },
+        ]),
+    },
   },
   {
     id: 'k4-10',
@@ -198,10 +300,28 @@ const OPREDELENIE: readonly PrepZadacha[] = [
     proverka: pary((a, b) => a === b),
     okruglenie: 2,
     shagi: [
-      { text: 'Исходов всего 6 × 6 = 36.', value: 36 },
-      { text: 'Значения совпадают в шести парах: (1; 1), (2; 2), …, (6; 6).', value: 6 },
-      { text: `P = 6 : 36 = 1 : 6 ≈ ${dec(0.17)}`, value: 0.17 },
+      {
+        text: 'Все исходы — пары значений двух бросков, каждая — клетка таблицы:',
+        formula: 'n = 6 \\cdot 6 = 36',
+        value: 36,
+      },
+      {
+        text: 'Благоприятные — клетки диагонали, где значения совпали:',
+        formula: 'm = 6',
+        value: 6,
+      },
+      shagP(6, 36, 2),
     ],
+    metodika: {
+      metod: 'outcome-table',
+      fraza: () =>
+        'таблица исходов — два броска, результат определяется парой значений, порядок важен.',
+      vizual: () =>
+        tablitsaKostey(
+          (a, b) => (a === b ? a : 0),
+          (a, b) => a === b,
+        ),
+    },
   },
 ];
 
@@ -216,10 +336,19 @@ const ZHREBIY: readonly PrepZadacha[] = [
     otvet: 3 / 12,
     proverka: 1 - 9 / 12,
     shagi: [
-      { text: 'Всего претендентов 4 + 8 = 12, и все они равноправны.', value: 12 },
-      { text: 'Мест на Марс три, значит подходящих исходов для Д. тоже три.', value: 3 },
-      { text: `P = 3 : 12 = ${dec(3 / 12)}`, value: 3 / 12 },
+      {
+        text: 'Все исходы — претенденты, любой из них равноправен:',
+        formula: 'n = 4 + 8 = 12',
+        value: 12,
+      },
+      { text: 'Благоприятные для Д. — места на Марс:', formula: 'm = 3', value: 3 },
+      shagP(3, 12),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () => 'прямой пересчёт — жребий одинаково случаен для всех 12 претендентов, мест три.',
+      vizual: () => plitkiDvuh({ label: 'летит', count: 3 }, { label: 'остаётся', count: 9 }),
+    },
   },
   {
     id: 'k4-12',
@@ -229,10 +358,25 @@ const ZHREBIY: readonly PrepZadacha[] = [
     otvet: 12 / 25,
     proverka: 1 - 13 / 25,
     shagi: [
-      { text: 'Посадим Олега. Юрий занимает одно из оставшихся 26 − 1 = 25 мест.', value: 25 },
-      { text: 'В автобусе Олега свободно 13 − 1 = 12 мест.', value: 12 },
-      { text: `P = 12 : 25 = ${dec(12 / 25)}`, value: 12 / 25 },
+      {
+        text: 'Посадим Олега. Все исходы — места Юрия среди оставшихся:',
+        formula: 'n = 26 - 1 = 25',
+        value: 25,
+      },
+      {
+        text: 'Благоприятные — свободные места в автобусе Олега:',
+        formula: 'm = 13 - 1 = 12',
+        value: 12,
+      },
+      shagP(12, 25),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — посадим Олега; Юрий равновероятно занимает любое из 25 оставшихся мест.',
+      vizual: () =>
+        plitkiDvuh({ label: 'в автобусе Олега', count: 12 }, { label: 'в другом', count: 13 }),
+    },
   },
   {
     id: 'k4-13',
@@ -242,10 +386,28 @@ const ZHREBIY: readonly PrepZadacha[] = [
     otvet: 2 / 8,
     proverka: 1 - 6 / 8,
     shagi: [
-      { text: 'Группы по 9 : 3 = 3 человека. Посадим Михаила; Андрею остаётся 8 мест.', value: 8 },
-      { text: 'В группе Михаила свободно 3 − 1 = 2 места.', value: 2 },
-      { text: `P = 2 : 8 = ${dec(2 / 8)}`, value: 2 / 8 },
+      {
+        text: 'Группы по 9 : 3 = 3 человека. Посадим Михаила. Все исходы — места Андрея среди оставшихся:',
+        formula: 'n = 9 - 1 = 8',
+        value: 8,
+      },
+      {
+        text: 'Благоприятные — свободные места в группе Михаила:',
+        formula: 'm = 3 - 1 = 2',
+        value: 2,
+      },
+      shagP(2, 8),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — посадим Михаила; Андрей равновероятно занимает любое из 8 оставшихся мест.',
+      vizual: () =>
+        plitkiDvuh(
+          { label: 'в группе Михаила', count: 2 },
+          { label: 'в других группах', count: 6 },
+        ),
+    },
   },
   {
     id: 'k4-14',
@@ -256,10 +418,25 @@ const ZHREBIY: readonly PrepZadacha[] = [
     /* Перебором: у Маши ровно два соседних места из десяти оставшихся. */
     proverka: dolya(10, (i) => i === 1 || i === 10),
     shagi: [
-      { text: 'Поставим Машу. Артём встаёт на одно из оставшихся 11 − 1 = 10 мест.', value: 10 },
-      { text: 'Соседних с Машей мест в круге ровно два: справа и слева.', value: 2 },
-      { text: `P = 2 : 10 = ${dec(2 / 10)}`, value: 2 / 10 },
+      {
+        text: 'Поставим Машу. Все исходы — места Артёма среди оставшихся:',
+        formula: 'n = 11 - 1 = 10',
+        value: 10,
+      },
+      {
+        text: 'Благоприятные — соседние с Машей места, справа и слева:',
+        formula: 'm = 2',
+        value: 2,
+      },
+      shagP(2, 10),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — поставим Машу; Артём равновероятно встаёт на любое из 10 оставшихся мест.',
+      vizual: () =>
+        plitkiDvuh({ label: 'рядом с Машей', count: 2 }, { label: 'не рядом', count: 8 }),
+    },
   },
   {
     id: 'k4-15',
@@ -271,10 +448,25 @@ const ZHREBIY: readonly PrepZadacha[] = [
        через один стул вправо и через один влево. */
     proverka: dolya(200, (i) => i === 2 || i === 199),
     shagi: [
-      { text: 'Посадим первую девочку. Вторая садится на одно из 201 − 1 = 200 мест.', value: 200 },
-      { text: 'Через одного мальчика от первой девочки стоят ровно два стула.', value: 2 },
-      { text: `P = 2 : 200 = ${dec(2 / 200)}`, value: 2 / 200 },
+      {
+        text: 'Посадим первую девочку. Все исходы — стулья второй среди оставшихся:',
+        formula: 'n = 201 - 1 = 200',
+        value: 200,
+      },
+      {
+        text: 'Благоприятные — стулья через одного мальчика от первой, справа и слева:',
+        formula: 'm = 2',
+        value: 2,
+      },
+      shagP(2, 200),
     ],
+    metodika: {
+      metod: 'direct-count',
+      fraza: () =>
+        'прямой пересчёт — посадим первую девочку; вторая равновероятно садится на любой из 200 оставшихся стульев.',
+      vizual: () =>
+        plitkiDvuh({ label: 'через одного', count: 2 }, { label: 'другие стулья', count: 198 }),
+    },
   },
 ];
 
@@ -293,10 +485,20 @@ const GEOMETRICHESKAYA: readonly PrepZadacha[] = [
       return (chasy - 10 + 12) % 12 < 3;
     }),
     shagi: [
-      { text: 'Весь циферблат — 12 часовых делений: это вся длина.', value: 12 },
-      { text: 'От отметки 10 до отметки 1 стрелка проходит 3 деления.', value: 3 },
-      { text: `P = 3 : 12 = ${dec(3 / 12)}`, value: 3 / 12 },
+      {
+        text: 'Вся мера — полный круг циферблата, двенадцать часовых делений:',
+        formula: 'L = 12',
+        value: 12,
+      },
+      { text: 'Благоприятная дуга — от отметки 10 до отметки 1:', formula: 'l = 3', value: 3 },
+      shagLL(3, 12, 3 / 12),
     ],
+    metodika: {
+      metod: 'coordinate-line',
+      fraza: () =>
+        'отношение мер — стрелка равновероятно останавливается в любой точке круга, событие задано дугой.',
+      vizual: () => tsiferblat(10, 1),
+    },
   },
   {
     id: 'k4-17',
@@ -307,10 +509,20 @@ const GEOMETRICHESKAYA: readonly PrepZadacha[] = [
     /* Тот же ответ через площади с числом π: оно сокращается. */
     proverka: (Math.PI * 0.5 ** 2) / (Math.PI * 5 ** 2),
     shagi: [
-      { text: 'Площадь озера: π · 5² = 25π м².', value: 25 },
-      { text: 'Радиус домика 1 : 2 = 0,5 м, его площадь π · 0,5² = 0,25π м².', value: 0.25 },
-      { text: `P = 0,25π : 25π = ${dec(0.01)}`, value: 0.01 },
+      { text: 'Вся мера — площадь озера:', formula: 'L = \\pi \\cdot 5^2 = 25\\pi', value: 25 },
+      {
+        text: 'Благоприятная — площадь домика, его радиус 1 : 2 = 0,5 м:',
+        formula: 'l = \\pi \\cdot 0{,}5^2 = 0{,}25\\pi',
+        value: 0.25,
+      },
+      shagLL('0{,}25\\pi', '25\\pi', 0.01),
     ],
+    metodika: {
+      metod: 'coordinate-line',
+      fraza: () =>
+        'отношение мер — парашютист равновероятно попадает в любую точку озера, событие задано площадью.',
+      vizual: () => ploshchadi(Math.PI * 25, Math.PI * 0.25, 'м²'),
+    },
   },
   {
     id: 'k4-18',
@@ -320,10 +532,24 @@ const GEOMETRICHESKAYA: readonly PrepZadacha[] = [
     otvet: 40 / 5 / 800,
     proverka: 1 - 792 / 800,
     shagi: [
-      { text: 'За 40 минут Маша осмотрит 40 : 5 = 8 м² сада.', value: 8 },
-      { text: 'Колечко равновероятно лежит в любом из 800 м².', value: 800 },
-      { text: `P = 8 : 800 = ${dec(8 / 800)}`, value: 8 / 800 },
+      {
+        text: 'Вся мера — площадь сада, колечко равновероятно в любой его точке:',
+        formula: 'L = 800',
+        value: 800,
+      },
+      {
+        text: 'Благоприятная — то, что Маша успеет осмотреть за 40 минут:',
+        formula: 'l = ' + drob(40, 5) + ' = 8',
+        value: 8,
+      },
+      shagLL(8, 800, 8 / 800),
     ],
+    metodika: {
+      metod: 'coordinate-line',
+      fraza: () =>
+        'отношение мер — колечко равновероятно в любой точке сада, событие задано осмотренной площадью.',
+      vizual: () => ploshchadi(800, 8, 'м²'),
+    },
   },
 ];
 

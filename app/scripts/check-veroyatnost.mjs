@@ -62,7 +62,7 @@ for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answ
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep, checkLabirint } = require0(
+const { checkBank, checkPrep, checkLabirint, checkModel } = require0(
   path.join(out, 'veroyatnost', 'selftest.js'),
 );
 const { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
@@ -93,6 +93,20 @@ console.log(`  последний шаг разбора не равен отве
 console.log(`  ответ не пишется в клетки и округления в условии нет: ${prep.badFormat}`);
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
+
+/* Модель задачи (раздел 04 референса): метод у каждой задачи №4,
+   рисунок собирается из параметров и показывает тот же ответ. */
+const model = checkModel(BANK_4, PODGOTOVKA_4);
+console.log(`\nмодель задания №4: задач по методам —`);
+for (const [metod, skolko] of Object.entries(model.poMetodam)) {
+  console.log(`   ${metod}: ${skolko}`);
+}
+console.log(`  без методики: ${model.bezMetodiki.length}`);
+model.bezMetodiki.forEach((id) => console.log(`   ${id}`));
+console.log(`  рисунок показывает не тот ответ: ${model.risunokVret.length}`);
+model.risunokVret.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+console.log(`  нарушений формы модели: ${model.problems.length}`);
+model.problems.slice(0, 20).forEach((item) => console.log(`   ${item}`));
 
 const labirint = checkLabirint();
 const {
@@ -136,6 +150,11 @@ fs.rmSync(out, { recursive: true, force: true });
 
 if (labirint.length > 0) {
   console.error('\nЛабиринт разошёлся с рисунком.');
+  process.exit(1);
+}
+
+if (model.bezMetodiki.length > 0 || model.risunokVret.length > 0 || model.problems.length > 0) {
+  console.error('\nМодель задания №4 не сходится.');
   process.exit(1);
 }
 
