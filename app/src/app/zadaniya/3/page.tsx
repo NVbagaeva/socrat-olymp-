@@ -97,6 +97,21 @@ export default function Stereometria3Page() {
             </li>
           ))}
         </ul>
+
+        {/* Домашняя работа живёт отдельной страницей и остаётся
+            рабочей: в новом разделе отчёта учителю пока нет, и
+            терять его нельзя. Ссылка, а не перенаправление. */}
+        <a className="solid3-hw" href={stereometria.homework.href}>
+          <span className="solid3-hw__text">
+            <span className="solid3-hw__title">{stereometria.homework.title}</span>
+            <span className="solid3-hw__lead">{stereometria.homework.lead}</span>
+          </span>
+          <span className="solid3-hw__go" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M5 12h13M12 6l6 6-6 6" />
+            </svg>
+          </span>
+        </a>
       </main>
     </AppShell>
   );

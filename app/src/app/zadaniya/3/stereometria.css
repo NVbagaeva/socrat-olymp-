@@ -88,3 +88,61 @@
     height: 104px;
   }
 }
+
+/* ── Ссылка на домашнюю работу ──────────────────────────────── */
+
+/* Не карточка раздела: домашка — другое, отдельная страница со
+   своим отчётом учителю. Поэтому строка во всю ширину, а не
+   девятая плитка в сетке восьми. */
+.solid3-hw {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.solid3-hw:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.solid3-hw__text {
+  display: grid;
+  gap: 2px;
+}
+.solid3-hw__title {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.solid3-hw__lead {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+}
+.solid3-hw__go {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+}
+.solid3-hw__go svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--color-text-inverse);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
