@@ -20,6 +20,11 @@ const LEGS: [number, number, number] = [4.6, 3.2, 4.4];
 export const TRI_NAMES = 'ABCA₁B₁C₁';
 export const HEX_NAMES = 'ABCDEFA₁B₁C₁D₁E₁F₁';
 
+/* Те же имена без индексов: из них собираются формулы видимого
+   текста. Выше — запись буквами, она идёт только в alt и <title>. */
+export const TRI_FIGURA = 'ABCA1B1C1';
+export const HEX_FIGURA = 'ABCDEFA1B1C1D1E1F1';
+
 function legBody(): Polyhedron {
   const [a, b, h] = LEGS;
   const body = prism(

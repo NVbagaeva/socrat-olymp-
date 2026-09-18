@@ -5,7 +5,7 @@
 
 import { polyhedronVolume } from '../../solid/measure';
 import { shapeLeg } from './drawings';
-import { ru } from '../format';
+import { chislo, formula, texChislo } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { legPrismBody } from './common';
 import { solveBySearch } from '../search';
@@ -40,8 +40,9 @@ export const P03_20: Prototype = {
   uslovie: (p) => {
     const [a, b] = legs(p);
     return (
-      `Основанием прямой треугольной призмы является прямоугольный треугольник с катетами ${ru(a)} ` +
-      `и ${ru(b)}, боковое ребро призмы равно ${ru(num(p, 'h'))}. Найдите объём призмы.`
+      'Основанием прямой треугольной призмы является прямоугольный треугольник ' +
+      `с катетами ${chislo(a)} и ${chislo(b)}, боковое ребро призмы равно ` +
+      `${chislo(num(p, 'h'))}. Найдите объём призмы.`
     );
   },
 
@@ -71,11 +72,15 @@ export const P03_20: Prototype = {
     const area = (a * b) / 2;
     return [
       {
-        text: `Площадь основания — прямоугольного треугольника: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`,
+        text:
+          'Площадь основания — прямоугольного треугольника: ' +
+          `${formula(`${texChislo(a)} \\cdot ${texChislo(b)} : 2 = ${texChislo(area)}`)}.`,
         value: area,
       },
       {
-        text: `Объём прямой призмы: площадь основания на высоту: ${ru(area)} · ${ru(h)} = ${ru(area * h)}.`,
+        text:
+          'Объём прямой призмы: площадь основания на высоту: ' +
+          `${formula(`${texChislo(area)} \\cdot ${texChislo(h)} = ${texChislo(area * h)}`)}.`,
         value: area * h,
       },
     ];
@@ -109,8 +114,9 @@ export const P03_21: Prototype = {
   uslovie: (p) => {
     const [a, b] = legs(p);
     return (
-      `Основанием прямой треугольной призмы служит прямоугольный треугольник с катетами ${ru(a)} ` +
-      `и ${ru(b)}, объём призмы равен ${ru(num(p, 'V'))}. Найдите боковое ребро призмы.`
+      'Основанием прямой треугольной призмы служит прямоугольный треугольник ' +
+      `с катетами ${chislo(a)} и ${chislo(b)}, объём призмы равен ` +
+      `${chislo(num(p, 'V'))}. Найдите боковое ребро призмы.`
     );
   },
 
@@ -141,9 +147,14 @@ export const P03_21: Prototype = {
     const area = (a * b) / 2;
     const h = V / area;
     return [
-      { text: `Площадь основания: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`, value: area },
       {
-        text: `Боковое ребро прямой призмы: объём делённый на площадь основания: ${ru(V)} : ${ru(area)} = ${ru(h)}.`,
+        text: `Площадь основания: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} : 2 = ${texChislo(area)}`)}.`,
+        value: area,
+      },
+      {
+        text:
+          'Боковое ребро прямой призмы: объём делённый на площадь основания: ' +
+          `${formula(`${texChislo(V)} : ${texChislo(area)} = ${texChislo(h)}`)}.`,
         value: h,
       },
     ];

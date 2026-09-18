@@ -10,17 +10,7 @@
 import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
-import {
-  chislo,
-  formula,
-  imya,
-  letters,
-  otr,
-  ravno,
-  segment,
-  tex,
-  texChislo,
-} from '../format';
+import { chislo, formula, imya, letters, otr, ravno, segment, tex, texChislo } from '../format';
 import { type Zadacha, chertezhRazbora, chertezhUslovia } from '../zadacha';
 import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
@@ -41,9 +31,7 @@ function vershinyRebra(name: string): readonly [string, string] {
 
 /** Три ребра условия формулами: «$DD_1 = 2$, $C_1D_1 = 6$, $B_1C_1 = 3$». */
 function edgesText(p: Params): string {
-  return [1, 2, 3]
-    .map((i) => ravno(vershinyRebra(text(p, `n${i}`)), num(p, `v${i}`)))
-    .join(', ');
+  return [1, 2, 3].map((i) => ravno(vershinyRebra(text(p, `n${i}`)), num(p, `v${i}`))).join(', ');
 }
 
 /**
@@ -66,7 +54,13 @@ function zadachaDiagonali(p: Params): Zadacha {
     elementy: [
       ...[1, 2, 3].map((i) => {
         const [ot, to] = vershinyRebra(text(p, `n${i}`));
-        return { vid: 'отрезок' as const, ot, do: to, rol: 'дано' as const, dlina: num(p, `v${i}`) };
+        return {
+          vid: 'отрезок' as const,
+          ot,
+          do: to,
+          rol: 'дано' as const,
+          dlina: num(p, `v${i}`),
+        };
       }),
       { vid: 'отрезок', ot: diag[0], do: diag[1], rol: 'искомое' },
       /* Разбор: диагональ основания и вертикальное ребро — катеты

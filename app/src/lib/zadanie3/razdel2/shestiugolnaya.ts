@@ -14,8 +14,8 @@
 import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
-import { shapeHexSolid, HEX_NAMES } from './drawings';
-import { ru } from '../format';
+import { shapeHexSolid, HEX_FIGURA, HEX_NAMES } from './drawings';
+import { chislo, formula, imya, letters, texChislo } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -43,9 +43,9 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function condition(p: Params, names: readonly string[]): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются точки ${names.join(', ')} ` +
-    `правильной шестиугольной призмы ${HEX_NAMES}, площадь основания которой равна ${ru(S)}, ` +
-    `а боковое ребро равно ${ru(h)}.`
+    'Найдите объём многогранника, вершинами которого являются точки ' +
+    `${names.map(imya).join(', ')} правильной шестиугольной призмы ${imya(HEX_FIGURA)}, ` +
+    `площадь основания которой равна ${chislo(S)}, а боковое ребро равно ${chislo(h)}.`
   );
 }
 
@@ -78,10 +78,12 @@ export const P03_36: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Три соседние вершины основания отсекают от правильного шестиугольника треугольник площадью S/6.',
+        text:
+          'Три соседние вершины основания отсекают от правильного шестиугольника ' +
+          `треугольник площадью ${formula('\\tfrac{S}{6}')}.`,
       },
       {
-        text: `Объём отсечённой призмы: ${ru(S)} : 6 · ${ru(h)} = ${ru((S * h) / 6)}.`,
+        text: `Объём отсечённой призмы: ${formula(`${texChislo(S)} : 6 \\cdot ${texChislo(h)} = ${texChislo((S * h) / 6)}`)}.`,
         value: (S * h) / 6,
       },
     ];
@@ -131,9 +133,14 @@ export const P03_37: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по S/6 каждый: остаётся ⅔S.',
+        text:
+          'Четыре вершины через одну отсекают от шестиугольника два одинаковых ' +
+          `треугольника по ${formula('\\tfrac{S}{6}')} каждый: остаётся ${formula('\\tfrac{2}{3}S')}.`,
       },
-      { text: `Объём: ${ru(S)} · ⅔ · ${ru(h)} = ${ru((2 * S * h) / 3)}.`, value: (2 * S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot \\tfrac{2}{3} \\cdot ${texChislo(h)} = ${texChislo((2 * S * h) / 3)}`)}.`,
+        value: (2 * S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -189,9 +196,14 @@ export const P03_38: Prototype = {
     const apex = TOP_APEX[num(p, 'apex') % 3] as string;
     return [
       {
-        text: `Это пирамида с основанием A₁B₁C₁D₁E₁F₁ (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
+        text:
+          `Это пирамида с основанием ${imya('A1B1C1D1E1F1')} (площадь ${imya('S')}) ` +
+          `и вершиной ${imya(apex)}; высота — боковое ребро ${imya('h')}.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -247,9 +259,14 @@ export const P03_39: Prototype = {
     const apex = BOTTOM_APEX_HEX[num(p, 'apex') % 4] as string;
     return [
       {
-        text: `Это пирамида с основанием ABCDEF (площадь S) и вершиной ${apex.replace('1', '₁')}; высота — боковое ребро h.`,
+        text:
+          `Это пирамида с основанием ${imya('ABCDEF')} (площадь ${imya('S')}) ` +
+          `и вершиной ${imya(apex)}; высота — боковое ребро ${imya('h')}.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -289,9 +306,10 @@ export const P03_40: Prototype = {
   uslovie: (p) => {
     const names = tetra40Names(p);
     return (
-      `Найдите объём многогранника, вершинами которого являются вершины ${names.join(', ')} ` +
-      `правильной шестиугольной призмы ${HEX_NAMES}, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
-      `а боковое ребро равно ${ru(num(p, 'h'))}.`
+      'Найдите объём многогранника, вершинами которого являются вершины ' +
+      `${names.map(imya).join(', ')} правильной шестиугольной призмы ${imya(HEX_FIGURA)}, ` +
+      `площадь основания которой равна ${chislo(num(p, 'S'))}, ` +
+      `а боковое ребро равно ${chislo(num(p, 'h'))}.`
     );
   },
   dopustimo: (p) => SH(p).every((x) => x > 0) && (num(p, 'mirror') === 0 || num(p, 'mirror') === 1),
@@ -304,7 +322,7 @@ export const P03_40: Prototype = {
     const names = tetra40Names(p);
     const [a, b, c, d] = names;
     return shapeHexSolid(
-      `Правильная шестиугольная призма ${HEX_NAMES}, выделен тетраэдр ${names.join(', ')}`,
+      `Правильная шестиугольная призма ${HEX_NAMES}, выделен тетраэдр ${names.map(letters).join(', ')}`,
       [
         [a, b],
         [b, c],
@@ -319,10 +337,13 @@ export const P03_40: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Три соседние вершины одного уровня отсекают от основания шестую часть, площадью S/6; четвёртая вершина лежит на высоте h от их плоскости.',
+        text:
+          'Три соседние вершины одного уровня отсекают от основания шестую часть, ' +
+          `площадью ${formula('\\tfrac{S}{6}')}; четвёртая вершина лежит на высоте ` +
+          `${imya('h')} от их плоскости.`,
       },
       {
-        text: `Объём тетраэдра: ⅓ · (${ru(S)} : 6) · ${ru(h)} = ${ru((S * h) / 18)}.`,
+        text: `Объём тетраэдра: ${formula(`\\tfrac{1}{3} \\cdot (${texChislo(S)} : 6) \\cdot ${texChislo(h)} = ${texChislo((S * h) / 18)}`)}.`,
         value: (S * h) / 18,
       },
     ];

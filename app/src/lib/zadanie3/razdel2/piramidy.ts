@@ -12,8 +12,8 @@
 import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
-import { shapeTriSolid, TRI_NAMES } from './drawings';
-import { ru } from '../format';
+import { shapeTriSolid, TRI_FIGURA, TRI_NAMES } from './drawings';
+import { chislo, formula, imya, letters, texChislo } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -42,9 +42,9 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function findVolumeOf(p: Params, names: readonly string[], wordVertices: string): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются ${wordVertices} ${names.join(', ')} ` +
-    `правильной треугольной призмы ${TRI_NAMES}, площадь основания которой равна ${ru(S)}, ` +
-    `а боковое ребро равно ${ru(h)}.`
+    `Найдите объём многогранника, вершинами которого являются ${wordVertices} ` +
+    `${names.map(imya).join(', ')} правильной треугольной призмы ${imya(TRI_FIGURA)}, ` +
+    `площадь основания которой равна ${chislo(S)}, а боковое ребро равно ${chislo(h)}.`
   );
 }
 
@@ -77,9 +77,15 @@ export const P03_28: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Это пирамида с основанием ABC (площадь S) и вершиной C₁; её высота — боковое ребро h, потому что C₁ лежит прямо над C.',
+        text:
+          `Это пирамида с основанием ${imya('ABC')} (площадь ${imya('S')}) и вершиной ` +
+          `${imya('C1')}; её высота — боковое ребро ${imya('h')}, потому что ` +
+          `${imya('C1')} лежит прямо над ${imya('C')}.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -126,12 +132,17 @@ export const P03_29: Prototype = {
   },
   shagi: (p) => {
     const [S, h] = SH(p);
-    const apex = num(p, 'apex') === 1 ? 'A₁' : 'B₁';
+    const apex = num(p, 'apex') === 1 ? 'A1' : 'B1';
     return [
       {
-        text: `Это пирамида с основанием ABC (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
+        text:
+          `Это пирамида с основанием ${imya('ABC')} (площадь ${imya('S')}) и вершиной ` +
+          `${imya(apex)}; высота — боковое ребро ${imya('h')}.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -189,9 +200,14 @@ export const P03_30: Prototype = {
     const apex = BOTTOM_APEX[num(p, 'apex') % 3] as string;
     return [
       {
-        text: `Это пирамида с основанием A₁B₁C₁ (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
+        text:
+          `Это пирамида с основанием ${imya('A1B1C1')} (площадь ${imya('S')}) и вершиной ` +
+          `${imya(apex)}; высота — боковое ребро ${imya('h')}.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -228,9 +244,10 @@ function fiveVertexProto(
     status,
     format: 'целое',
     uslovie: (p) =>
-      `Дана правильная треугольная призма ${TRI_NAMES}, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
-      `а боковое ребро равно ${ru(num(p, 'h'))}. Найдите объём многогранника, вершинами которого ` +
-      `являются точки ${names.join(', ')}.`,
+      `Дана правильная треугольная призма ${imya(TRI_FIGURA)}, площадь основания которой ` +
+      `равна ${chislo(num(p, 'S'))}, а боковое ребро равно ${chislo(num(p, 'h'))}. ` +
+      'Найдите объём многогранника, вершинами которого являются точки ' +
+      `${names.map(imya).join(', ')}.`,
     dopustimo: (p) => SH(p).every((x) => x > 0),
     otvet: (p) => {
       const [S, h] = SH(p);
@@ -239,7 +256,7 @@ function fiveVertexProto(
     poModeli: (p) => volumeOf(p, names),
     chertezh: () =>
       shapeTriSolid(
-        `Правильная треугольная призма ${TRI_NAMES}, выделен многогранник с вершинами ${names.join(', ')}`,
+        `Правильная треугольная призма ${TRI_NAMES}, выделен многогранник с вершинами ${names.map(letters).join(', ')}`,
         [
           [names[0] as string, names[1] as string],
           [names[0] as string, 'B1'],
@@ -251,10 +268,12 @@ function fiveVertexProto(
       const missingName = missing === 'B' ? 'B' : 'A';
       return [
         {
-          text: `Это призма без пирамиды с вершиной ${missingName}: у той пирамиды основание — половина боковой грани, а объём — треть призмы.`,
+          text:
+            `Это призма без пирамиды с вершиной ${imya(missingName)}: у той пирамиды ` +
+            'основание — половина боковой грани, а объём — треть призмы.',
         },
         {
-          text: `Объём фигуры: ${ru(S)} · ${ru(h)} · ⅔ = ${ru((2 * S * h) / 3)}.`,
+          text: `Объём фигуры: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} \\cdot \\tfrac{2}{3} = ${texChislo((2 * S * h) / 3)}`)}.`,
           value: (2 * S * h) / 3,
         },
       ];
@@ -322,9 +341,10 @@ function tetraProto(
     status: 'добавить',
     format: 'целое',
     uslovie: (p) =>
-      `Найдите объём многогранника, вершинами которого являются вершины ${names.join(', ')} ` +
-      `правильной треугольной призмы ${TRI_NAMES}. Площадь основания призмы равна ${ru(num(p, 'S'))}, ` +
-      `а боковое ребро равно ${ru(num(p, 'h'))}.`,
+      'Найдите объём многогранника, вершинами которого являются вершины ' +
+      `${names.map(imya).join(', ')} правильной треугольной призмы ${imya(TRI_FIGURA)}. ` +
+      `Площадь основания призмы равна ${chislo(num(p, 'S'))}, ` +
+      `а боковое ребро равно ${chislo(num(p, 'h'))}.`,
     dopustimo: (p) => SH(p).every((x) => x > 0),
     otvet: (p) => {
       const [S, h] = SH(p);
@@ -333,7 +353,7 @@ function tetraProto(
     poModeli: (p) => volumeOf(p, names),
     chertezh: () =>
       shapeTriSolid(
-        `Правильная треугольная призма ${TRI_NAMES}, выделена пирамида с вершинами ${names.join(', ')}`,
+        `Правильная треугольная призма ${TRI_NAMES}, выделена пирамида с вершинами ${names.map(letters).join(', ')}`,
         edges,
       ),
     shagi: (p) => {
@@ -342,7 +362,10 @@ function tetraProto(
         {
           text: 'Такой тетраэдр — одна из трёх равных частей, на которые призма делится диагональными сечениями: его объём — треть объёма призмы.',
         },
-        { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+        {
+          text: `Объём: ${formula(`${texChislo(S)} \\cdot ${texChislo(h)} : 3 = ${texChislo((S * h) / 3)}`)}.`,
+          value: (S * h) / 3,
+        },
       ];
     },
     varianty,

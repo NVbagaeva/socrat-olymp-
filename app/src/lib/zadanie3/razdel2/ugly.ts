@@ -12,8 +12,15 @@
 
 import { angleBetweenLines } from '../../solid/measure';
 import { direction, regularPrismByEdge } from './common';
-import { shapeHexLines, shapeTriLines, HEX_NAMES, TRI_NAMES } from './drawings';
-import { ru, segment } from '../format';
+import {
+  shapeHexLines,
+  shapeTriLines,
+  HEX_FIGURA,
+  HEX_NAMES,
+  TRI_FIGURA,
+  TRI_NAMES,
+} from './drawings';
+import { chislo, gradusy, imya, otr, segment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair } from '../types';
 
 function variant(
@@ -56,8 +63,9 @@ export const P03_22: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной треугольной призме ${TRI_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `В правильной треугольной призме ${imya(TRI_FIGURA)}, все рёбра которой равны ` +
+    `${chislo(num(p, 'a'))}, найдите угол между прямыми ${otr(pair(p, 'l1'))} ` +
+    `и ${otr(pair(p, 'l2'))}.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isFaceDiagonalPair(p),
   otvet: () => 45,
@@ -73,14 +81,16 @@ export const P03_22: Prototype = {
   },
 
   shagi: (p) => {
-    const l1 = segment(pair(p, 'l1'));
-    const l2 = segment(pair(p, 'l2'));
+    const l1 = otr(pair(p, 'l1'));
+    const l2 = otr(pair(p, 'l2'));
     return [
       {
-        text: `${l1} — боковое ребро, ${l2} — диагональ боковой грани; все рёбра призмы равны, значит грань — квадрат.`,
+        text:
+          `${l1} — боковое ребро, ${l2} — диагональ боковой грани; все рёбра призмы ` +
+          'равны, значит грань — квадрат.',
       },
       {
-        text: `Диагональ квадрата делит угол между стороной и диагональю пополам: 45°.`,
+        text: `Диагональ квадрата делит угол между стороной и диагональю пополам: ${gradusy(45)}.`,
         value: 45,
       },
     ];
@@ -120,8 +130,9 @@ export const P03_23: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной треугольной призме ${TRI_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `В правильной треугольной призме ${imya(TRI_FIGURA)}, все рёбра которой равны ` +
+    `${chislo(num(p, 'a'))}, найдите угол между прямыми ${otr(pair(p, 'l1'))} ` +
+    `и ${otr(pair(p, 'l2'))}.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isBaseEdgePair(p),
   otvet: () => 90,
@@ -137,12 +148,12 @@ export const P03_23: Prototype = {
   },
 
   shagi: (p) => {
-    const l1 = segment(pair(p, 'l1'));
-    const l2 = segment(pair(p, 'l2'));
+    const l1 = otr(pair(p, 'l1'));
+    const l2 = otr(pair(p, 'l2'));
     return [
       { text: `${l1} — боковое ребро призмы, оно перпендикулярно плоскости основания.` },
       {
-        text: `${l2} лежит в плоскости основания, значит угол между ${l1} и ${l2} равен 90°.`,
+        text: `${l2} лежит в плоскости основания, значит угол между ${l1} и ${l2} равен ${gradusy(90)}.`,
         value: 90,
       },
     ];
@@ -212,8 +223,9 @@ export const P03_35: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной шестиугольной призме ${HEX_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}. Ответ дайте в градусах.`,
+    `В правильной шестиугольной призме ${imya(HEX_FIGURA)}, все рёбра которой равны ` +
+    `${chislo(num(p, 'a'))}, найдите угол между прямыми ${otr(pair(p, 'l1'))} ` +
+    `и ${otr(pair(p, 'l2'))}. Ответ дайте в градусах.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isNonParallelSidePair(p),
   otvet: () => 60,
@@ -229,14 +241,18 @@ export const P03_35: Prototype = {
   },
 
   shagi: (p) => {
-    const l1 = segment(pair(p, 'l1'));
-    const l2 = segment(pair(p, 'l2'));
+    const l1 = otr(pair(p, 'l1'));
+    const l2 = otr(pair(p, 'l2'));
     return [
       {
-        text: `${l2} лежит в верхнем основании; перенесём её параллельно себе в нижнее основание — прямая не изменится.`,
+        text:
+          `${l2} лежит в верхнем основании; перенесём её параллельно себе ` +
+          'в нижнее основание — прямая не изменится.',
       },
       {
-        text: `${l1} и перенесённая ${l2} — стороны правильного шестиугольника, не соседние и не противоположные: угол между ними 60°.`,
+        text:
+          `${l1} и перенесённая ${l2} — стороны правильного шестиугольника, ` +
+          `не соседние и не противоположные: угол между ними ${gradusy(60)}.`,
         value: 60,
       },
     ];

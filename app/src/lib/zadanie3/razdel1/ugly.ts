@@ -12,18 +12,7 @@ import { vertex } from '../../solid/figures';
 import { angleBetweenLines, sinBetweenLines } from '../../solid/measure';
 import { NAMES, shapeLines } from '../../solid/drawings/section1';
 import { type Vec3, sub } from '../../solid/vec';
-import {
-  chislo,
-  formula,
-  gradusy,
-  imya,
-  otr,
-  ravno,
-  ru,
-  segment,
-  tex,
-  texChislo,
-} from '../format';
+import { chislo, formula, gradusy, imya, otr, ravno, ru, segment, tex, texChislo } from '../format';
 import {
   type Zadacha,
   chertezhRazbora,
@@ -152,8 +141,7 @@ function cubeShagi(p: Params, answer: number, hint: string): { text: string; val
   return [
     {
       text:
-        `Прямые ${otr(l1)} и ${otr(l2)} в кубе. Угол между прямыми не зависит ` +
-        'от ребра куба.',
+        `Прямые ${otr(l1)} и ${otr(l2)} в кубе. Угол между прямыми не зависит ` + 'от ребра куба.',
     },
     {
       /* Шаг из данных, а не из слов: перенос считает та же функция,
@@ -192,11 +180,7 @@ export const P03_06: Prototype = {
   chertezh: (p) => cubeChertezh(p, 90),
   chertezhRazbora: (p) => cubeChertezhRazbora(p, 90),
   shagi: (p) =>
-    cubeShagi(
-      p,
-      90,
-      'Полученный угол — угол между ребром и перпендикулярной ему прямой грани.',
-    ),
+    cubeShagi(p, 90, 'Полученный угол — угол между ребром и перпендикулярной ему прямой грани.'),
   varianty: [
     variant(1, 'задачник', 'задачник 21', { l1: ['B', 'C1'], l2: ['A1', 'B1'] }),
     variant(2, 'задачник', 'задачник 22', { l1: ['C', 'D1'], l2: ['A', 'D'] }),

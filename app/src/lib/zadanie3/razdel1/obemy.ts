@@ -569,11 +569,15 @@ export const P03_19: Prototype = {
   poModeli: (p) => partVolume(p, PART_19),
 
   chertezh: () =>
-    shapeLines('box', `Прямоугольный параллелепипед ${NAMES}, выделен тетраэдр ${listedAlt(PART_19)}`, [
-      ['A', 'C'],
-      ['A', 'B1'],
-      ['C', 'B1'],
-    ]),
+    shapeLines(
+      'box',
+      `Прямоугольный параллелепипед ${NAMES}, выделен тетраэдр ${listedAlt(PART_19)}`,
+      [
+        ['A', 'C'],
+        ['A', 'B1'],
+        ['C', 'B1'],
+      ],
+    ),
 
   shagi: (p) => {
     const [a, b, c] = abc(p);
