@@ -103,8 +103,16 @@ const LEVO = 120;
 const PRAVO = 700;
 const VERH = 90;
 const NIZ = 450;
-/** Отступ подписи от края коридора. */
-const OTSTUP = 18;
+/** Отступ подписи от внешнего края рамки. */
+const OTSTUP = 28;
+/**
+ * Ширина разрыва в рамке. Заметно шире коридора: иначе коридор
+ * упрётся в края стены и на картинке сольётся с ней в одну полосу,
+ * а должен проходить в проём, ничего не задевая.
+ */
+const RAZRYV = TOLSHCHINA + 32;
+/** Высота, на которой коридор входит в лабиринт слева. */
+const VHOD_Y = 270;
 
 /** Ход коридора: отрезок по горизонтали или по вертикали. */
 type Hod =
@@ -137,7 +145,7 @@ interface Vetka {
  */
 const RISUNOK: Vetka = {
   /* Вход слева и первая развилка: вверх или вниз. */
-  hody: [g(LEVO, 180, 270), v(150, 390, 180)],
+  hody: [g(LEVO, 180, VHOD_Y), v(150, 390, 180)],
 
   verh: {
     /* Верхняя половина листа: направо, вниз, снова направо. */
@@ -221,6 +229,12 @@ interface Podpis {
   yakor: 'start' | 'middle' | 'end';
 }
 
+interface Konec {
+  x: number;
+  y: number;
+  storona: Storona | 'sleva';
+}
+
 interface Sborka {
   /**
    * Ход, путь его ветки ('', 'в', 'вн' и так далее) и признак первого
@@ -229,6 +243,7 @@ interface Sborka {
    */
   hody: { hod: Hod; put: string; pervyy: boolean }[];
   podpisi: Podpis[];
+  konce: Konec[];
 }
 
 /**
@@ -244,6 +259,7 @@ function sobrat(uzel: Uzel, vetka: Vetka, out: Sborka, put = ''): void {
     if (konec === undefined || vetka.verh !== undefined || vetka.niz !== undefined) {
       throw new Error(`Разводка не сходится с деревом на выходе ${uzel.imya}`);
     }
+    out.konce.push(konec);
     const podpis = `Выход ${uzel.imya}`;
     if (konec.storona === 'sprava') {
       out.podpisi.push({ text: podpis, x: konec.x + OTSTUP, y: konec.y + 7, yakor: 'start' });
@@ -260,6 +276,72 @@ function sobrat(uzel: Uzel, vetka: Vetka, out: Sborka, put = ''): void {
   }
   sobrat(uzel.verh, vetka.verh, out, `${put}в`);
   sobrat(uzel.niz, vetka.niz, out, `${put}н`);
+}
+
+/**
+ * Стена с проёмами: отрезок от `ot` до `do`, разрезанный в каждой
+ * точке из `razryvy`. Через проём наружу выходит коридор.
+ */
+function stena(
+  ot: number,
+  konec: number,
+  razryvy: number[],
+  sdelat: (a: number, b: number) => Hod,
+): Hod[] {
+  const out: Hod[] = [];
+  let tekushchiy = ot;
+  for (const centr of [...razryvy].sort((a, b) => a - b)) {
+    const nachalo = centr - RAZRYV / 2;
+    if (nachalo > tekushchiy) {
+      out.push(sdelat(tekushchiy, nachalo));
+    }
+    tekushchiy = centr + RAZRYV / 2;
+  }
+  if (konec > tekushchiy) {
+    out.push(sdelat(tekushchiy, konec));
+  }
+  return out;
+}
+
+/**
+ * Рамка — стены помещения, в которое вписан лабиринт.
+ *
+ * Замкнутый прямоугольник того же цвета и той же толщины, что
+ * коридоры, разорванный ровно там, где коридор выходит наружу:
+ * один проём на вход и по одному на каждый выход. Где какие проёмы,
+ * считается по концам коридоров, а не записано числами, — сдвинется
+ * выход, сдвинется и разрыв.
+ */
+function ramka(konce: readonly Konec[]): Hod[] {
+  const po = (storona: Konec['storona'], chto: (k: Konec) => number): number[] =>
+    konce.filter((k) => k.storona === storona).map(chto);
+
+  return [
+    ...stena(
+      LEVO,
+      PRAVO,
+      po('sverhu', (k) => k.x),
+      (a, b) => g(a, b, VERH),
+    ),
+    ...stena(
+      LEVO,
+      PRAVO,
+      po('snizu', (k) => k.x),
+      (a, b) => g(a, b, NIZ),
+    ),
+    ...stena(
+      VERH,
+      NIZ,
+      po('sprava', (k) => k.y),
+      (a, b) => v(a, b, PRAVO),
+    ),
+    ...stena(
+      VERH,
+      NIZ,
+      po('sleva', (k) => k.y),
+      (a, b) => v(a, b, LEVO),
+    ),
+  ];
 }
 
 /** Прямоугольник с запасом в пиксель по каждой стороне. */
@@ -287,7 +369,7 @@ function ploshchadPeresecheniya(a: Pryamougolnik, b: Pryamougolnik): number {
  * уже общий кусок пути, то есть срез.
  */
 export function proverkaRisunka(uzel: Uzel = LABIRINT): string[] {
-  const sborka: Sborka = { hody: [], podpisi: [] };
+  const sborka: Sborka = { hody: [], podpisi: [], konce: [] };
   sobrat(uzel, RISUNOK, sborka);
   const bedy: string[] = [];
 
@@ -326,6 +408,22 @@ export function proverkaRisunka(uzel: Uzel = LABIRINT): string[] {
       }
     }
   }
+
+  /* Рамка не должна касаться ни одного коридора: коридор обязан
+     проходить в проём, а не упираться в стену и сливаться с ней. */
+  sborka.konce.push({ x: LEVO, y: VHOD_Y, storona: 'sleva' });
+  const steny = ramka(sborka.konce);
+  for (const stenka of steny) {
+    for (const koridor of sborka.hody) {
+      const est = ploshchadPeresecheniya(
+        razdut(vPryamougolnik(stenka)),
+        razdut(vPryamougolnik(koridor.hod)),
+      );
+      if (est > 0) {
+        bedy.push(`коридор ветки «${koridor.put}» упирается в стену, а не проходит в проём`);
+      }
+    }
+  }
   return bedy;
 }
 
@@ -344,10 +442,12 @@ export function proverkaRisunka(uzel: Uzel = LABIRINT): string[] {
  * стилей раздела из токенов проекта.
  */
 export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
-  const sborka: Sborka = { hody: [], podpisi: [] };
+  const sborka: Sborka = { hody: [], podpisi: [], konce: [] };
   sobrat(uzel, RISUNOK, sborka);
+  sborka.konce.push({ x: LEVO, y: VHOD_Y, storona: 'sleva' });
 
-  const pryamougolniki = sborka.hody.map((h) => vPryamougolnik(h.hod));
+  const steny = ramka(sborka.konce);
+  const pryamougolniki = [...sborka.hody.map((h) => h.hod), ...steny].map(vPryamougolnik);
   const kak = (klass: string): string =>
     pryamougolniki
       .map(
@@ -356,7 +456,7 @@ export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
       )
       .join('');
 
-  sborka.podpisi.push({ text: 'Вход', x: LEVO - OTSTUP, y: 277, yakor: 'end' });
+  sborka.podpisi.push({ text: 'Вход', x: LEVO - OTSTUP, y: VHOD_Y + 7, yakor: 'end' });
 
   const podpisi = sborka.podpisi
     .map(
