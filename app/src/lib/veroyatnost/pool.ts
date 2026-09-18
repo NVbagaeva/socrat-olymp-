@@ -29,8 +29,14 @@ import {
   type Shape,
 } from './model';
 import type { Razbor } from './razbor';
-import { sealAnswer, sealText } from './secret';
-import { type PrepBlok, type PrepZadacha, type Prototype, type Variant } from './types';
+import { fingerprint, sealAnswer, sealText } from './secret';
+import {
+  type Metodika,
+  type PrepBlok,
+  type PrepZadacha,
+  type Prototype,
+  type Variant,
+} from './types';
 import { typeset } from '../tex';
 
 /**
@@ -227,4 +233,88 @@ export function prep4Pool(): PrepPoolBlok[] {
 
 export function prep5Pool(): PrepPoolBlok[] {
   return prepPool(PODGOTOVKA_5);
+}
+
+/* ── «Узнай метод» ───────────────────────────────────────────────── */
+
+/**
+ * Задача режима «Узнай метод»: только условие. Метода в открытом
+ * виде нет — лежит отпечаток, с которым сверяется выбор ученика;
+ * признаки в условии закрыты этим же отпечатком и открываются после
+ * ответа. Ни рисунка, ни разбора, ни числового ответа сюда не едет:
+ * параметры рисунка выдали бы метод сами.
+ */
+export interface UznayVariant {
+  n: number;
+  uslovie: string;
+  /** Отпечаток идентификатора метода. */
+  metodSeal: string;
+  /** Признаки в условии — JSON-список строк, закрытый отпечатком. */
+  hints: string;
+}
+
+export interface UznayKind {
+  /** Идентификатор прототипа или задачи конспекта. */
+  id: string;
+  /** Откуда задача: подпись в шапке карточки. */
+  istochnik: 'prototip' | 'konspekt';
+  variants: UznayVariant[];
+}
+
+export interface UznayPool {
+  kinds: UznayKind[];
+}
+
+/** Отпечаток метода: с ним сверяется нажатая кнопка. */
+export function sealMetod(metod: Method): string {
+  return fingerprint(`metod:${metod}`);
+}
+
+function uznayVariant(n: number, uslovie: string, metodika: Metodika): UznayVariant {
+  const metodSeal = sealMetod(metodika.metod);
+  return {
+    n,
+    uslovie,
+    metodSeal,
+    hints: sealText(JSON.stringify(metodika.methodHints), metodSeal),
+  };
+}
+
+/**
+ * Все 39 задач задания №4: 21 прототип со всеми вариантами условий и
+ * 18 задач конспекта по одной. Прототип без методики в режим не
+ * попадает — узнавать в нём нечего.
+ */
+export function uznayMetodPool(): UznayPool {
+  const prototipy = BANK_4.flatMap((prototype): UznayKind[] => {
+    const metodika = prototype.metodika;
+    if (metodika === undefined) {
+      return [];
+    }
+    return [
+      {
+        id: prototype.id,
+        istochnik: 'prototip',
+        variants: prototype.varianty.map((variant) =>
+          uznayVariant(variant.n, prototype.uslovie(variant.params), metodika),
+        ),
+      },
+    ];
+  });
+  const konspekt = PODGOTOVKA_4.flatMap((blok) => [...blok.zadachi]).flatMap(
+    (zadacha): UznayKind[] => {
+      const metodika = zadacha.metodika;
+      if (metodika === undefined) {
+        return [];
+      }
+      return [
+        {
+          id: zadacha.id,
+          istochnik: 'konspekt',
+          variants: [uznayVariant(1, zadacha.uslovie, metodika)],
+        },
+      ];
+    },
+  );
+  return { kinds: [...prototipy, ...konspekt] };
 }

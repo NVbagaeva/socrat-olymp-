@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, EmptyState, ProgressRing } from '@/components/ui';
+import { Button, EmptyState } from '@/components/ui';
 import { ProblemCard } from '@/components/tasks/card';
 import { REZHIMY_4, TRENAZHER_4, type Rezhim4 } from '@/content/veroyatnost';
 import { createProgressStore } from '@/lib/progressStore';
-import { summarize } from '@/lib/trainerProgress';
 import { METODY, type Method } from '@/lib/veroyatnost/model';
 import type { Pool, PoolKind } from '@/lib/veroyatnost/pool';
 import { ROUND_SIZE, restartRound, useVeroyatnostRound } from '@/lib/veroyatnost/useRound';
+import { ProgressMetody } from './ProgressMetody';
 
 export interface Trenazher4Props {
   pool: Pool;
@@ -228,58 +228,7 @@ export function Trenazher4({ pool }: Trenazher4Props) {
         </>
       ) : null}
 
-      <Progress4 />
-    </section>
-  );
-}
-
-/**
- * Прогресс по методам: кольцо с долей верных и пять счётчиков.
- * Один и тот же блок читает и тренажёр, и режим повтора ошибок.
- */
-export function Progress4() {
-  const progress = progress4.useProgress();
-  const svod = summarize(progress);
-
-  return (
-    <section className="z4-progress" aria-labelledby="z4-progress-title">
-      <div className="z4-progress__text">
-        <h3 className="z4-progress__title" id="z4-progress-title">
-          {TRENAZHER_4.progress.title}
-        </h3>
-        <p className="z4-progress__lead">{TRENAZHER_4.progress.lead}</p>
-        {svod.done === 0 ? (
-          <p className="z4-progress__empty">{TRENAZHER_4.progress.pusto}</p>
-        ) : (
-          <Button variant="ghost" size="sm" onClick={progress4.reset}>
-            {TRENAZHER_4.progress.sbros}
-          </Button>
-        )}
-      </div>
-
-      <ProgressRing
-        className="z4-progress__ring"
-        value={svod.accuracy ?? 0}
-        label={TRENAZHER_4.progress.ring}
-        srLabel={`${TRENAZHER_4.progress.ring}: ${svod.right} из ${svod.done}`}
-      />
-
-      <ul className="z4-progress__metody">
-        {METODY.map((m) => {
-          const tally = progress.kinds[m.id];
-          return (
-            <li key={m.id} className="z4-progress__metod">
-              <span className="z4-progress__no" aria-hidden="true">
-                {m.nomer}
-              </span>
-              <span className="z4-progress__name">{m.nazvanie}</span>
-              <span className="z4-progress__count">
-                <b>{tally?.right ?? 0}</b> / {tally?.done ?? 0}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
+      <ProgressMetody store={progress4} slova={TRENAZHER_4.progress} />
     </section>
   );
 }

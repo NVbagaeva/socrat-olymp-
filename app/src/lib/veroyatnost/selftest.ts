@@ -400,6 +400,7 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
     id: string,
     otvet: number,
     znakov: 2 | 3 | null,
+    hints: readonly string[],
     sobrat: () => ReturnType<typeof modelVarianta>,
   ): void => {
     let model: ReturnType<typeof modelVarianta>;
@@ -426,6 +427,13 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
     }
     if (model.solution.method.trim() === '') {
       problems.push(`${id}: пустая фраза «Метод:»`);
+    }
+    /* Признаки для «Узнай метод»: от одного до трёх, без пустых. */
+    if (hints.length < 1 || hints.length > 3) {
+      problems.push(`${id}: признаков метода ${hints.length}, нужно от 1 до 3`);
+    }
+    if (hints.some((h) => h.trim() === '')) {
+      problems.push(`${id}: пустой признак метода`);
     }
     for (const [i, shag] of model.solution.steps.entries()) {
       if (shag.text.trim() === '') {
@@ -464,6 +472,7 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
         `${prototype.id}-${variant.n}`,
         otvetUchenika(prototype, variant.params),
         prototype.okruglenie(variant.params),
+        prototype.metodika.methodHints,
         () => modelVarianta(prototype, variant),
       );
     }
@@ -475,8 +484,12 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
         continue;
       }
       poMetodam[zadacha.metodika.metod] += 1;
-      proverit(zadacha.id, prepOtvet(zadacha), zadacha.okruglenie ?? null, () =>
-        modelPrep(zadacha),
+      proverit(
+        zadacha.id,
+        prepOtvet(zadacha),
+        zadacha.okruglenie ?? null,
+        zadacha.metodika.methodHints,
+        () => modelPrep(zadacha),
       );
     }
   }

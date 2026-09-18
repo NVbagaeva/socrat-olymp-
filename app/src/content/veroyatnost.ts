@@ -55,6 +55,7 @@ const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
+  { id: 'uznay-metod', label: 'Узнай метод', tail: 'uznay-metod/' },
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
@@ -164,6 +165,26 @@ export const TRENAZHER_4 = {
     lead: 'Считается отдельно по каждому методу: верных ответов из закрытых задач.',
     ring: 'решено верно',
     pusto: 'Пока ни одной закрытой задачи',
+    sbros: 'Сбросить прогресс',
+  },
+} as const;
+
+/* ── Слова режима «Узнай метод» ──────────────────────────────────── */
+
+export const UZNAY_METOD = {
+  title: 'Узнай метод',
+  lead: 'Прочитайте условие и выберите, каким из пяти методов решается задача. Считать ничего не нужно.',
+  vopros: 'Каким методом решается задача?',
+  verno: 'Верно',
+  neverno: 'Неверно',
+  pravilnyy: 'Правильный метод:',
+  priznaki: 'Признаки в условии:',
+  istochnik: { prototip: 'Прототип задания 4', konspekt: 'Задача конспекта' },
+  progress: {
+    title: 'Прогресс',
+    lead: 'Считается отдельно от тренажёра: узнано верно из показанных задач, по каждому методу.',
+    ring: 'узнано верно',
+    pusto: 'Пока ни одной задачи',
     sbros: 'Сбросить прогресс',
   },
 } as const;
