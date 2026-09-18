@@ -11,6 +11,7 @@
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
+import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
 import { trainerModes, type TrainerMode } from '@/content/trainerModes';
 
@@ -74,9 +75,23 @@ interface EngineCross {
   y: number;
 }
 
+interface EnginePoint {
+  x: number;
+  y: number;
+}
+
+interface EngineWindow {
+  xmin: number;
+  xmax: number;
+  ymin: number;
+  ymax: number;
+}
+
 interface EngineLine {
   k: number;
   b: number;
+  /** Опорные точки прямой: узлы сетки, отмеченные на чертеже. */
+  points?: EnginePoint[] | null;
 }
 
 interface EngineTask {
@@ -88,6 +103,9 @@ interface EngineTask {
     set: string;
     k: number;
     b: number;
+    /** Окно чертежа. Нет — у задачи нет и чертежа. */
+    window: EngineWindow | null;
+    points: EnginePoint[] | null;
     query: EngineQuery | null;
     intersection: EngineCross | null;
     lines: EngineLine[];
@@ -252,20 +270,39 @@ function rightHintFor(task: EngineTask): string {
    Ответа текст не выдаёт: он говорит, где искать ошибку, и повторяет
    те же слова, которыми описаны шаги подсказки. Буквы набираются
    формулами — как и везде в условиях. */
-const ONE_LINE =
-  'Проверьте, как сняты $k$ и $b$ по чертежу: $k$ — это $\\Delta y : \\Delta x$ ' +
-  'по двум отмеченным точкам, $b$ — значение $y$ там, где прямая пересекает ось $Oy$.';
+const SLOPE_ONE = 'Проверьте, как сняты $k$ и $b$ по чертежу: ';
+const SLOPE_TWO = 'Проверьте уравнения обеих прямых: ';
+const SLOPE_RULE = '$k$ — это $\\Delta y : \\Delta x$ по двум отмеченным точкам, ';
 
-const TWO_LINES =
-  'Проверьте уравнения обеих прямых: $k$ — это $\\Delta y : \\Delta x$ по двум ' +
-  'отмеченным точкам, $b$ — значение $y$ там, где прямая пересекает ось $Oy$.';
+/* Две концовки: там, где пересечение с осью Oy видно в узле сетки,
+   b читается прямо с чертежа; где не видно — только подстановкой. */
+const B_FROM_CHART = '$b$ — значение $y$ там, где прямая пересекает ось $Oy$.';
+const B_BY_POINT =
+  '$b$ здесь с чертежа не снять: возьмите точку с целыми координатами ' +
+  'на прямой и подставьте её в $y = kx + b$.';
 
-const WRONG_HINT: Record<string, string> = {
-  '12.A': ONE_LINE,
-  '12.B': ONE_LINE,
-  '12.C': TWO_LINES,
-  '12.D': TWO_LINES,
-};
+/**
+ * Что проверить после неверного ответа.
+ *
+ * Подсказка зависит не только от набора, но и от самой задачи:
+ * в одном и том же наборе у части задач пересечение с осью Oy
+ * видно, у части — за кадром.
+ */
+function wrongHintFor(task: EngineTask): string | null {
+  const { set, b, window: win, lines } = task.meta;
+  const pair = set === '12.C' || set === '12.D';
+  if (set !== '12.A' && set !== '12.B' && !pair) {
+    return null;
+  }
+  /* У пары достаточно одной прямой с невидимым b: подставлять всё
+     равно придётся. */
+  const readable = pair
+    ? lines.every((line) => interceptVisible(line.b, win))
+    : interceptVisible(b, win);
+  return (
+    (pair ? SLOPE_TWO : SLOPE_ONE) + SLOPE_RULE + (readable ? B_FROM_CHART : B_BY_POINT)
+  );
+}
 
 /* Формулы в пояснении размечены долларами, как в условиях задач:
    движок превращает их в заглушки, KaTeX набирает на сборке. */
@@ -301,15 +338,162 @@ function stepK(k: number): TrainerStep {
   };
 }
 
-function stepB(b: number): TrainerStep {
+/* ── Подсказка про b, когда его не снять с чертежа ───────────────
+
+   Пересечение с осью Oy бывает за краем поля или между узлами
+   сетки. Прочитать b тогда неоткуда, и путь один: взять точку
+   с целыми координатами, которая лежит на прямой, и подставить её
+   в уравнение — коэффициент k к этому шагу уже найден.
+
+   Признак «читается / не читается» берётся из разбора (solution.js),
+   а не пишется здесь заново: иначе подсказка и разбор однажды
+   разойдутся. */
+
+/**
+ * Число внутри формулы: десятичная запятая берётся в скобки, иначе
+ * KaTeX ставит после неё отбивку знака препинания. Минус он рисует
+ * сам, подменять дефис не нужно.
+ */
+function texNum(value: number): string {
+  return plain(value).replace(',', '{,}');
+}
+
+/** Отрицательное берётся в скобки: «2 · −3» без них нечитаемо. */
+function texFactor(value: number): string {
+  return value < 0 ? '(' + texNum(value) + ')' : texNum(value);
+}
+
+/** Целое ли число с точностью до машинной погрешности. */
+function whole(value: number): boolean {
+  return Number.isInteger(Math.round(value * 1e9) / 1e9);
+}
+
+/**
+ * Точка с целыми координатами, лежащая на прямой.
+ *
+ * Сначала — отмеченная на чертеже: её ученик видит, и это та самая
+ * точка, которую движок уже выбрал. Из отмеченных берётся та, где
+ * произведение k·x целое: арифметика в подсказке тогда без лишних
+ * долей. Отмеченных нет — идём целыми x от нуля в обе стороны и
+ * берём первый, где y тоже целый и точка попадает в кадр.
+ */
+function wholePoint(
+  k: number,
+  b: number,
+  win: EngineWindow | null,
+  marked: EnginePoint[] | null | undefined,
+): EnginePoint | null {
+  const ready = (marked ?? []).filter((p) => whole(p.x) && whole(p.y));
+  const nice = ready.find((p) => whole(k * p.x));
+  if (nice !== undefined) {
+    return nice;
+  }
+  const first = ready[0];
+  if (first !== undefined) {
+    return first;
+  }
+  const limit = win === null ? 20 : Math.max(Math.abs(win.xmin), Math.abs(win.xmax));
+  for (let step = 0; step <= limit; step += 1) {
+    for (const x of step === 0 ? [0] : [step, -step]) {
+      const y = Math.round((k * x + b) * 1e9) / 1e9;
+      if (!Number.isInteger(y)) {
+        continue;
+      }
+      if (win !== null && (y < win.ymin || y > win.ymax)) {
+        continue;
+      }
+      return { x, y };
+    }
+  }
+  return null;
+}
+
+/**
+ * Текст шага «находим b» подстановкой точки.
+ *
+ * curve — имя прямой в задачах с двумя графиками: «f» или «g».
+ * Пусто — прямая одна, и называть её незачем.
+ */
+function bySubstitution(
+  k: number,
+  b: number,
+  win: EngineWindow | null,
+  candidates: EnginePoint[] | null | undefined,
+  marked: EnginePoint[] | null | undefined,
+  curve: string,
+): { textHtml: string; wrongHint: string } | null {
+  const point = wholePoint(k, b, win, candidates);
+  if (point === null) {
+    return null;
+  }
+  const which = curve === '' ? 'Прямая' : 'Прямая $' + curve + '$';
+  const where = Number.isInteger(b)
+    ? which + ' пересекает ось $Oy$ за пределами чертежа — с рисунка $b$ не снять.'
+    : which +
+      ' пересекает ось $Oy$ не в узле сетки — с чертежа $b$ не снять, ' +
+      'а «примерно» в ответе не бывает.';
+  /* «Отмеченная» — только если точка и правда нарисована жирной на
+     чертеже. У второй прямой опорные точки движок считает, но не
+     рисует: назвать их отмеченными значило бы отправить ученика
+     искать то, чего он не видит. */
+  const onChart = (marked ?? []).some((p) => p.x === point.x && p.y === point.y);
+  /* Тонкий пробел после «;» ставит сам движок (graph/math.js),
+     руками его дублировать не нужно. */
+  const dot = '$(' + texNum(point.x) + '; ' + texNum(point.y) + ')$';
+  const product = Math.round((k * point.x) * 1e9) / 1e9;
+  const line = curve === '' ? 'на прямой' : 'на $' + curve + '$';
+
+  return {
+    textHtml: hintHtml(
+      where +
+        ' Возьми точку с целыми координатами, которая точно лежит ' +
+        line +
+        ', — например' +
+        (onChart ? ', отмеченную ' : ' точку ') +
+        dot +
+        '. Подставь её координаты в $y = kx + b$ вместо $x$ и $y$; ' +
+        'коэффициент $k = ' +
+        texNum(k) +
+        '$ ты уже нашёл:<br>' +
+        '$' +
+        texNum(point.y) +
+        ' = ' +
+        texNum(k) +
+        ' \\cdot ' +
+        texFactor(point.x) +
+        ' + b$<br>' +
+        '$' +
+        texNum(point.y) +
+        ' = ' +
+        texNum(product) +
+        ' + b$<br>' +
+        'Отсюда найди $b$.',
+    ),
+    wrongHint: hintHtml(
+      'Подставь координаты точки ' +
+        dot +
+        ' в $y = kx + b$ и реши уравнение относительно $b$.',
+    ),
+  };
+}
+
+function stepB(task: EngineTask, b: number): TrainerStep {
+  const { window: win, points } = task.meta;
+  const substitution = interceptVisible(b, win)
+    ? null
+    : bySubstitution(task.meta.k, b, win, points, points, '');
   return {
     titleHtml: hintHtml('Теперь проверим $b$.'),
-    textHtml: hintHtml(
-      'Коэффициент $b$ — это значение $y$ в точке, где прямая пересекает ось $Oy$.',
-    ),
+    textHtml:
+      substitution === null
+        ? hintHtml('Коэффициент $b$ — это значение $y$ в точке, где прямая пересекает ось $Oy$.')
+        : substitution.textHtml,
     shape: 'plain',
     fields: [{ labelHtml: math('b ='), answer: plain(b) }],
-    wrongHint: hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.'),
+    wrongHint:
+      substitution === null
+        ? hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.')
+        : substitution.wrongHint,
   };
 }
 
@@ -390,17 +574,29 @@ function stepPairK(name: string, k: number, firstOne: boolean): TrainerStep {
   };
 }
 
-function stepPairB(name: string, b: number): TrainerStep {
+function stepPairB(task: EngineTask, name: string, line: EngineLine): TrainerStep {
+  const win = task.meta.window;
+  /* Отмечены на чертеже только опорные точки первой прямой; у второй
+     их нет, и точка для подстановки считается. */
+  const substitution = interceptVisible(line.b, win)
+    ? null
+    : bySubstitution(line.k, line.b, win, line.points, task.meta.points, curve(name));
   return {
     titleHtml: hintHtml('Проверим $b$ для прямой $' + curve(name) + '$.'),
-    textHtml: hintHtml(
-      'Коэффициент $b$ — это значение $y$ в точке, где прямая $' +
-        curve(name) +
-        '$ пересекает ось $Oy$.',
-    ),
+    textHtml:
+      substitution === null
+        ? hintHtml(
+            'Коэффициент $b$ — это значение $y$ в точке, где прямая $' +
+              curve(name) +
+              '$ пересекает ось $Oy$.',
+          )
+        : substitution.textHtml,
     shape: 'plain',
-    fields: [{ labelHtml: math('b ='), answer: plain(b) }],
-    wrongHint: hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.'),
+    fields: [{ labelHtml: math('b ='), answer: plain(line.b) }],
+    wrongHint:
+      substitution === null
+        ? hintHtml('Проверь, в какой точке прямая пересекает ось $Oy$.')
+        : substitution.wrongHint,
   };
 }
 
@@ -452,9 +648,9 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
   }
   const steps = [
     stepPairK('f', first.k, true),
-    stepPairB('f', first.b),
+    stepPairB(task, 'f', first),
     stepPairK('g', second.k, false),
-    stepPairB('g', second.b),
+    stepPairB(task, 'g', second),
     stepPairEquation(first, second),
     stepCrossX(intersection.x),
   ];
@@ -473,7 +669,7 @@ function stepsFor(task: EngineTask): TrainerStep[] {
     return stepsForPair(task);
   }
   const last = stepAnswer(task);
-  return last === null ? [] : [stepK(k), stepB(b), stepEquation(k, b), last];
+  return last === null ? [] : [stepK(k), stepB(task, b), stepEquation(k, b), last];
 }
 
 /* ── Пул заданий режима ──────────────────────────────────────────
@@ -504,7 +700,7 @@ export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
       questionHtml: typeset(task.questionHtml),
       chartSvg: task.svg,
       answer: task.answer,
-      wrongHint: hintHtml(WRONG_HINT[task.meta.set] ?? ''),
+      wrongHint: hintHtml(wrongHintFor(task) ?? ''),
       rightHint: rightHintFor(task),
       steps: stepsFor(task),
     }));

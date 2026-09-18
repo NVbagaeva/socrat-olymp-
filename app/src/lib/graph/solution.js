@@ -196,8 +196,19 @@ function whyMinus() {
 /* ══════════════════════════════════════════════════════════
    Шаг 3. Находим b
    ══════════════════════════════════════════════════════════ */
+/* Читается ли b прямо с чертежа: пересечение с осью Oy попадает
+   в узел сетки и не жмётся к краю поля.
+
+   Признак вынесен наружу намеренно. По нему выбирает ветку не только
+   разбор, но и цепочка подсказок тренажёра; запиши мы условие дважды,
+   однажды они разойдутся — и подсказка станет звать читать с чертежа
+   то, чего там нет. */
+function interceptVisible(b, win) {
+  return Number.isInteger(b) && !!win && Math.abs(b) <= win.ymax - 1;
+}
+
 function stepIntercept(t, line, win, k, b) {
-  var visible = Number.isInteger(b) && Math.abs(b) <= win.ymax - 1;
+  var visible = interceptVisible(b, win);
   var blocks = [];
 
   if (visible) {
@@ -319,7 +330,13 @@ function build(options) {
   });
 }
 
-const api = { build: build, equationTex: equationTex, num: num, tex: tex };
+const api = {
+  build: build,
+  equationTex: equationTex,
+  interceptVisible: interceptVisible,
+  num: num,
+  tex: tex
+};
 
 export default api;
-export { build, equationTex, num, tex };
+export { build, equationTex, interceptVisible, num, tex };
