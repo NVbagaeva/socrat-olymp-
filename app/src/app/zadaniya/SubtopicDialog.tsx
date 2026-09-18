@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { Chart } from '@/components/graph/Chart';
-import { Modal } from '@/components/ui';
+import { Badge, CheckIcon, Modal } from '@/components/ui';
 import { previewScene } from '@/lib/scenes';
+import { counted } from '@/lib/plural';
 import type { FunctionTypeId } from '@/data/functionTypes';
 
 export interface SubtopicView {
@@ -11,9 +12,10 @@ export interface SubtopicView {
   /** Номер строки: 01 … 06. */
   no: string;
   title: string;
-  /** Формула, свёрстанная KaTeX на сборке. */
-  formulaHtml: string;
   status: 'active' | 'soon';
+  /** Сколько наборов прототипов и задач в них — из манифеста. */
+  prototypes: number;
+  tasks: number;
   /** Адрес подтемы. У закрытой ссылки нет. */
   href: string | null;
 }
@@ -31,35 +33,46 @@ export interface SubtopicDialogProps {
   hint: string;
 }
 
-function Row({ item }: { item: SubtopicView }) {
+/** Подпись под названием: «4 прототипа · 80 заданий». */
+function countLine(item: SubtopicView): string {
+  return (
+    counted(item.prototypes, 'прототип', 'прототипа', 'прототипов') +
+    ' · ' +
+    counted(item.tasks, 'задание', 'задания', 'заданий')
+  );
+}
+
+function Card({ item }: { item: SubtopicView }) {
+  const open = item.href !== null;
   const body = (
     <>
-      <span className="subtopic-row__no" aria-hidden="true">
-        {item.no}
+      {/* Миниатюра из движка graph/: своего SVG для графиков нет.
+          Оси без чисел — режим 'none' рендерера. */}
+      <span className="subtopic-card__chart" aria-hidden="true">
+        <Chart scene={previewScene(item.id)} />
       </span>
-      <span className="subtopic-row__text">
-        <span className="subtopic-row__title">{item.title}</span>
-        {/* Формула свёрстана на сборке: обычным текстом она не выводится. */}
-        <span
-          className="subtopic-row__formula"
-          aria-hidden="true"
-          dangerouslySetInnerHTML={{ __html: item.formulaHtml }}
-        />
-      </span>
-      {/* Миниатюра из движка graph/: своего SVG для графиков нет. */}
-      <Chart className="subtopic-row__chart" scene={previewScene(item.id)} />
-      <span className="subtopic-row__go" aria-hidden="true">
-        <svg viewBox="0 0 24 24" focusable="false">
-          <path d="M5 12h13M12 6l6 6-6 6" />
-        </svg>
+      {open ? (
+        <span className="subtopic-card__check" aria-hidden="true">
+          <CheckIcon />
+        </span>
+      ) : null}
+      <span className="subtopic-card__text">
+        <span className="subtopic-card__title">{item.title}</span>
+        {/* Числа только у открытого семейства: у закрытого в данных
+            нулей, и вместо них честная подпись. */}
+        {open ? (
+          <span className="subtopic-card__count">{countLine(item)}</span>
+        ) : (
+          <Badge className="subtopic-card__soon">Готовится</Badge>
+        )}
       </span>
     </>
   );
 
-  if (item.href === null) {
+  if (!open) {
     return (
       <li>
-        <span className="subtopic-row subtopic-row--soon" aria-disabled="true">
+        <span className="subtopic-card subtopic-card--soon" aria-disabled="true">
           {body}
         </span>
       </li>
@@ -69,7 +82,7 @@ function Row({ item }: { item: SubtopicView }) {
     <li>
       {/* Обычная ссылка, а не router.push: переход по ней работает и
           средней кнопкой, и в новой вкладке. */}
-      <a className="subtopic-row subtopic-row--open" href={item.href}>
+      <a className="subtopic-card subtopic-card--open" href={item.href ?? undefined}>
         {body}
       </a>
     </li>
@@ -109,7 +122,7 @@ export function SubtopicDialog({
     >
       <ul className="subtopic-list">
         {items.map((item) => (
-          <Row key={item.id} item={item} />
+          <Card key={item.id} item={item} />
         ))}
       </ul>
 

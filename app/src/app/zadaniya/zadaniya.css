@@ -181,8 +181,9 @@
 /* ── Окно выбора типа функции ───────────────────────────────────── */
 
 .subtopic-modal {
-  /* На узком экране окно занимает почти весь экран и прокручивается
-     внутри себя: строк шесть, и на телефоне они не помещаются. */
+  /* Три карточки в ряд: окно шире стандартного. На узком экране
+     занимает почти весь экран и прокручивается внутри себя. */
+  max-width: 760px;
   max-height: min(88vh, 760px);
   overflow-y: auto;
 }
@@ -200,113 +201,150 @@
   margin-top: var(--space-4);
 }
 
+/* Сетка карточек: три в ряд, на планшете две, на телефоне одна. */
 .subtopic-list {
   list-style: none;
   margin: var(--space-4) 0 0;
   padding: 0;
   display: grid;
-  gap: var(--space-2);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.subtopic-list > li {
+  display: flex;
 }
 
-.subtopic-row {
+/* Карточка семейства: миниатюра сверху, название и число задач под
+   ней. Оформление то же, что у карточки банка: рамка, скругление,
+   на наведении рамка акцентом. */
+.subtopic-card {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  text-decoration: none;
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
 }
-/* Открытая подтема: светлая подложка и полоска акцентом слева. */
-.subtopic-row--open {
-  background: var(--color-surface-2);
+/* Открытое семейство: рамка и подложка основным цветом, галочка
+   в углу — как у выбранной карточки на макете. */
+.subtopic-card--open {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
 }
-.subtopic-row--open::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: var(--space-2);
-  bottom: var(--space-2);
-  width: 3px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--color-accent);
+.subtopic-card--open:hover {
+  border-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-sm);
 }
-.subtopic-row--soon {
-  color: var(--color-text-tertiary);
+/* Закрытое семейство: то же, что у неоткрытого раздела в банке —
+   приглушённая поверхность, третичный текст, наведение не отзывается. */
+.subtopic-card--soon {
   cursor: default;
-}
-
-.subtopic-row__no {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-primary);
-  font-variant-numeric: tabular-nums;
-}
-.subtopic-row--soon .subtopic-row__no {
+  background: var(--color-surface-2);
   color: var(--color-text-tertiary);
 }
-.subtopic-row__text {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-.subtopic-row__title {
-  font-size: 15px;
-  font-weight: 500;
-}
-.subtopic-row__formula {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-/* Миниатюра из движка: размер задаёт место вставки, не чертёж.
-   Инлайновые размеры движка перебиваются !important — иначе чертёж
-   занимает свои 280px. */
-.subtopic-row__chart {
-  display: block;
-  width: 64px;
-  flex: none;
-}
-.subtopic-row__chart svg {
-  width: 64px !important;
-  height: 48px !important;
-}
-/* Линии не худеют вместе с чертежом: при уменьшении в пять раз
-   двухпиксельный штрих превратился бы в 0,4px и пропал. */
-.subtopic-row__chart svg path,
-.subtopic-row__chart svg line,
-.subtopic-row__chart svg polyline,
-.subtopic-row__chart svg circle {
-  vector-effect: non-scaling-stroke;
-}
-.subtopic-row--soon .subtopic-row__chart {
-  opacity: 0.5;
-}
 
-/* Круглая кнопка перехода. У открытой подтемы — акцентом, у закрытых
-   приглушённая: цвет и есть признак состояния. */
-.subtopic-row__go {
-  width: 32px;
-  height: 32px;
+.subtopic-card__check {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-surface-2);
-  color: var(--color-text-tertiary);
-}
-.subtopic-row--open .subtopic-row__go {
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: var(--color-text-inverse);
 }
-.subtopic-row__go svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.subtopic-card__check svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Миниатюра из движка: холст квадратный, размер задаёт место вставки.
+   Высота считается от ширины, поэтому ничего не обрезается.
+   Подложку холста движок берёт из токена поверхности; на голубой и
+   серой карточке белый квадрат читался бы заплаткой, поэтому в
+   пределах миниатюры поверхность прозрачная. */
+.subtopic-card__chart {
+  --color-surface: var(--color-transparent);
+  display: block;
+  width: 96px;
+}
+.subtopic-card__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Линии не худеют вместе с чертежом: при уменьшении почти втрое
+   двухпиксельный штрих стал бы волосяным. */
+.subtopic-card__chart svg path,
+.subtopic-card__chart svg line,
+.subtopic-card__chart svg polyline,
+.subtopic-card__chart svg circle {
+  vector-effect: non-scaling-stroke;
+}
+.subtopic-card--soon .subtopic-card__chart {
+  opacity: 0.5;
+}
+
+.subtopic-card__text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  align-content: start;
+}
+.subtopic-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-brand);
+  hyphens: auto;
+}
+.subtopic-card--soon .subtopic-card__title {
+  color: inherit;
+}
+.subtopic-card__count {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.subtopic-card__soon {
+  justify-self: start;
+}
+
+/* Планшет: две в ряд. */
+@media (max-width: 1023.98px) {
+  .subtopic-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* Телефон: одна колонка, миниатюра справа от текста. */
+@media (max-width: 767.98px) {
+  .subtopic-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .subtopic-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding-right: var(--space-10);
+  }
+  .subtopic-card__text {
+    order: -1;
+  }
+  .subtopic-card__chart {
+    width: 64px;
+  }
+  .subtopic-card__check {
+    top: 50%;
+    transform: translateY(-50%);
+  }
 }
 
 /* Подсказка внизу окна. */

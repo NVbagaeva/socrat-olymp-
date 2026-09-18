@@ -99,6 +99,8 @@ export function previewScene(id: FunctionTypeId) {
     window: squareWindow(preset.half),
     grid: { step: 1, show: false },
     axes: { labelX: '', labelY: '', origin: '' },
+    /* Оси с засечками, но без чисел: в карточке шириной сто пикселей
+       цифры всё равно нечитаемы, а обрезанными они выглядят грязью. */
     axisLabels: 'none',
     curves: [{ ...preset.curve, color: 'lineA', label: null }],
     points: [],
@@ -291,7 +293,10 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     /* Сетка нужна: по клеткам читаются Δx и Δy у треугольника. */
     grid: { step: 1, show: true },
     axes: { labelX: '', labelY: '', origin: '' },
-    axisLabels: 'none',
+    /* До появления режима 'none' в рендерере это слово падало в
+       'minimal', и на осях стояли 1 и −1. Так карточки навыков и
+       выпущены — режим закреплён явно, чтобы они не изменились. */
+    axisLabels: 'minimal',
     curves: [] as unknown[],
     points: [] as unknown[],
     shapes: [] as unknown[],
