@@ -3,7 +3,7 @@
 
    Запуск: pnpm manifest:generator
 
-   Печатает то, что соберёт src/lib/generator/manifest.js из данных
+   Печатает то, что соберёт src/lib/generator/build-manifest.js из данных
    движка и списка семейств. Ничего не проверяет и ничего не пишет:
    это способ посмотреть на числа глазами до того, как они попадут
    на экран.
@@ -18,7 +18,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
-import { buildManifest } from '../src/lib/generator/manifest.js';
+import { buildManifest } from '../src/lib/generator/build-manifest.js';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');

@@ -4,13 +4,13 @@
  *
  * Считается из данных движка graph/ и списка семейств в
  * data/functionTypes.ts; ни одного числа и ни одного названия здесь
- * не задано. Сама сборка — в manifest.js: модуль чистый, и тот же
+ * не задано. Сама сборка — в build-manifest.js: модуль чистый, и тот же
  * код печатает таблицу из Node (scripts/print-generator-manifest.mjs).
  */
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import { functionTypes, type FunctionTypeId } from '@/data/functionTypes';
-import { buildManifest } from './manifest.js';
+import { buildManifest } from './build-manifest.js';
 
 export type SkillKind = 'prep' | 'prototype';
 

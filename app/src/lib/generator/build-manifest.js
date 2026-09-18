@@ -1,4 +1,4 @@
-/* manifest.js — манифест генератора: что реально лежит в данных.
+/* build-manifest.js — манифест генератора: что реально лежит в данных.
 
    buildManifest(sets, families) -> { families: [...], orphans: [...] }
 
@@ -11,6 +11,10 @@
    Модуль чистый, как и движок graph/: наборы и список семейств
    приходят аргументами, поэтому один код работает и в бандле
    (через manifest.ts), и в служебном скрипте из Node.
+
+   Имя файла нарочно не manifest.js: TypeScript разрешает импорт
+   './manifest.js' в manifest.ts — в сам файл, — и сборка типов
+   падает на кольце.
 */
 
 'use strict';
@@ -117,4 +121,6 @@ export function buildManifest(sets, families) {
   return { families: out, orphans: orphans };
 }
 
-export default { buildManifest: buildManifest };
+const api = { buildManifest: buildManifest };
+
+export default api;
