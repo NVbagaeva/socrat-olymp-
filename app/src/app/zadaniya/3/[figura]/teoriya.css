@@ -1,0 +1,108 @@
+/* Вкладка «Теория» раздела задания №3.
+   Сами разделы теории и содержание темы описаны в общем слое —
+   тот же вид, что и в №12. Здесь только раскладка вкладки и
+   пункты шпаргалки. */
+
+.teoriya {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: var(--space-10);
+  align-items: start;
+  margin-top: var(--space-6);
+}
+.teoriya__blocks {
+  order: -1;
+}
+.teoriya__side {
+  position: sticky;
+  top: var(--space-5);
+}
+.teoriya__side-title {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+.teoriya__count {
+  margin-top: var(--space-4);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Пункты шпаргалки ───────────────────────────────────────── */
+
+.sheet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+/* Пункт с чертежом: чертёж слева, текст справа. Без чертежа текст
+   занимает всю ширину — пустой колонки не остаётся. */
+.sheet__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.sheet__item:has(.sheet__fig) {
+  grid-template-columns: 180px minmax(0, 1fr);
+}
+.sheet__fig {
+  display: block;
+}
+.sheet__fig .solid-wrap .solid {
+  width: 100%;
+  height: auto;
+  max-width: 180px;
+}
+.sheet__text {
+  display: block;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+
+/* Формула в строку идёт вместе с текстом, формула отдельной строкой
+   стоит по центру своего абзаца — так же, как в источнике. */
+.sheet__formula {
+  display: inline;
+}
+.sheet__formula--block {
+  display: block;
+  margin: var(--space-3) 0;
+  text-align: center;
+  /* Длинная формула на телефоне уезжает вбок, а не ломает колонку. */
+  overflow-x: auto;
+}
+
+@media (max-width: 1023.98px) {
+  .teoriya {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  /* На узком экране содержание встаёт над разделами: листать вверх
+     за оглавлением неудобно. */
+  .teoriya__blocks {
+    order: 0;
+  }
+  .teoriya__side {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .sheet__item,
+  .sheet__item:has(.sheet__fig) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet__fig .solid-wrap .solid {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+}
