@@ -120,8 +120,8 @@ jobs:
         working-directory: app
         run: pnpm test:pdf-12
 
-      # Файлы уезжают архивом на страницу запуска: скачать можно
-      # сразу, локальная копия репозитория для этого не нужна.
+      # Файлы уезжают двумя путями. Архив — чтобы скачать сразу
+      # со страницы запуска, без локальной копии репозитория.
       - name: Отдать файлы архивом
         uses: actions/upload-artifact@v4
         with:
@@ -129,4 +129,21 @@ jobs:
           path: app/public/materials/zadanie-12/*.pdf
           if-no-files-found: error
           retention-days: 90
+
+      # Коммит в ветку — чтобы файлы лежали там, откуда их отдаёт
+      # сайт (/materials/...), и не пропадали вместе с архивом.
+      # Собирать их может только CI: KaTeX требует установленных
+      # зависимостей, а песочница до реестра npm не доходит.
+      - name: Вернуть готовые PDF в ветку
+        if: ${{ inputs.target != 'sample' }}
+        run: |
+          if git diff --quiet -- app/public/materials/zadanie-12; then
+            echo "файлы не менялись"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/public/materials/zadanie-12
+          git commit -m "Сборник №12: пересобранные PDF [skip ci]"
+          git push origin HEAD:${GITHUB_REF_NAME}
           
