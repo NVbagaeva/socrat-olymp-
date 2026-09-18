@@ -413,15 +413,12 @@ body {
 .sheet-task--double .sheet-task-body { flex-direction: column; }
 .sheet-task--double .sheet-task-text { justify-content: flex-start; }
 
-/* Условие и строка ответа — одна группа по центру карточки против
-   чертежа. Прижимать строку ответа к низу нельзя: чертежи разной
-   высоты, и между условием и ответом открывался бы провал. */
+/* Условие идёт сверху, вровень с номером задачи. */
 .sheet-task-text {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .sheet-task-question { margin: 0; }
@@ -448,8 +445,11 @@ body {
 }
 
 /* Строка «Ответ: ____» — только в файле «Для ученика». */
-/* Строка ответа идёт сразу за условием, с воздухом на запись. */
+/* Строка ответа прижата к низу карточки: место между условием
+   и ней — это поле для записи решения, а её край совпадает
+   с низом чертежа. Так же устроен образец оформления. */
 .sheet-answer-line {
+  margin-top: auto;
   padding-top: calc(var(--sheet-step) * 5);
   display: flex;
   align-items: baseline;

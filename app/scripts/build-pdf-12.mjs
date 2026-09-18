@@ -98,9 +98,16 @@ function spec(blocks, options) {
   };
 }
 
-/* Клетка чертежа в миллиметрах. В две колонки карточка вдвое уже,
-   поэтому клетка мельче — но остаётся крупнее 4 мм, иначе точки
-   на печати читаются неуверенно. */
+/* Раскладка сборника — одна колонка, чертёж справа от текста:
+   утверждено автором по образцу Этапа 1. Раскладка в две колонки
+   в шаблоне осталась и работает, но сборник её не использует —
+   она пригодится генератору вариантов.
+
+   Клетка чертежа в миллиметрах. Чертёж масштабируется по клетке,
+   а не по ширине карточки: тогда клетка одинакова на всех задачах
+   и точки читаются одинаково уверенно на всех окнах. 3,4 мм —
+   утверждённое значение. */
+const LAYOUT = 'single';
 const CELL = { single: 3.4, double: 3.0 };
 
 /* ══════════════════════════════════════════════════════════
@@ -127,18 +134,15 @@ async function build(name, blocks, options) {
 }
 
 async function sample() {
-  /* Образец: первый блок, 8 задач. Первые две страницы листа. */
+  /* Образец: первый блок, 8 задач, в утверждённой раскладке. */
   const blocks = collectBlocks(1, 8);
-  console.log('Образец: блок «' + blocks[0].title + '», задач ' + blocks[0].tasks.length);
+  const title = blocks[0].title.replace(/<[^>]*>/g, '');
+  console.log('Образец: блок «' + title + '», задач ' + blocks[0].tasks.length);
 
-  for (const layout of ['single', 'double']) {
-    for (const theme of ['color', 'print']) {
-      const suffix = (layout === 'single' ? '1-kolonka' : '2-kolonki') +
-        (theme === 'print' ? '-chb' : '-cvet');
-      await build('obrazec-' + suffix, blocks, {
-        theme, layout, cell: CELL[layout], withAnswerLine: true, keepHtml: true,
-      });
-    }
+  for (const theme of ['color', 'print']) {
+    await build('obrazec' + (theme === 'print' ? '-chb' : '-cvet'), blocks, {
+      theme, layout: LAYOUT, cell: CELL[LAYOUT], withAnswerLine: true, keepHtml: true,
+    });
   }
 }
 
