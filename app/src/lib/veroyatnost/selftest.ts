@@ -17,7 +17,7 @@
  */
 
 import { otvetUchenika, prepOtvet } from './index';
-import { LABIRINT, veroyatnostVyhoda, vyhody } from './labirint';
+import { LABIRINT, razvilki, veroyatnostVyhoda, vyhody } from './labirint';
 import { sealAnswer } from './secret';
 import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
 
@@ -315,6 +315,14 @@ export function checkLabirint(): string[] {
     if (Math.abs(est - nado) > TOCHNOST) {
       problems.push(`выход ${imya}: ${est} вместо ${nado}`);
     }
+  }
+
+  /* Развилок всегда на одну меньше, чем выходов: на каждой дорога
+     раздваивается. Это правило и поймало прежний счёт «три развилки
+     и пять выходов» — такого дерева не бывает. */
+  const razvilok = razvilki(LABIRINT);
+  if (razvilok !== spisok.length - 1) {
+    problems.push(`развилок ${razvilok} при ${spisok.length} выходах — так не бывает`);
   }
 
   /* Сумма по всем выходам обязана быть единицей: паук куда-нибудь

@@ -1,8 +1,14 @@
 /**
  * Лабиринт паука: чертёж к задаче 33 конспекта.
  *
- * Схему подтвердил автор: три развилки и пять выходов A–E, у A, B и C
- * вероятность по 0,25, у D и E — по 0,125. Ответ задачи 0,125.
+ * Схему подтвердил автор: пять выходов A–E, у A, B и C вероятность по
+ * 0,25, у D и E — по 0,125. Ответ задачи 0,125.
+ *
+ * Развилок при этом четыре, а не три, как говорилось раньше: в дереве,
+ * где на каждой развилке ровно две дороги, выходов всегда на одну
+ * больше, чем развилок. Пять выходов при трёх развилках невозможны.
+ * Вероятности автор назвал верно — ошибочным был только счёт развилок,
+ * и он ни на что не влиял: ответ считается по дереву.
  *
  * Дерево ниже и есть эта схема. Картинка лабиринта из конспекта для
  * сверки не годится: в PDF она растровая, а присланный отдельно файл
@@ -24,7 +30,7 @@ export type Uzel = { vid: 'razvilka'; verh: Uzel; niz: Uzel } | { vid: 'vyhod'; 
 const vyhod = (imya: string): Uzel => ({ vid: 'vyhod', imya });
 
 /**
- * Схема автора: три развилки, пять выходов.
+ * Схема автора: четыре развилки, пять выходов.
  *
  * Лабиринт несимметричный: до A, B и C паук проходит две развилки, до
  * D и E — три. Отсюда 0,25 у первых трёх и 0,125 у последних двух.
@@ -53,6 +59,11 @@ export function veroyatnostVyhoda(uzel: Uzel, imya: string, shans = 1): number {
 /** Все выходы лабиринта в порядке обхода сверху вниз. */
 export function vyhody(uzel: Uzel): string[] {
   return uzel.vid === 'vyhod' ? [uzel.imya] : [...vyhody(uzel.verh), ...vyhody(uzel.niz)];
+}
+
+/** Сколько в лабиринте развилок. */
+export function razvilki(uzel: Uzel): number {
+  return uzel.vid === 'vyhod' ? 0 : 1 + razvilki(uzel.verh) + razvilki(uzel.niz);
 }
 
 /** Сколько развилок проходит паук до этого выхода. */
@@ -102,13 +113,15 @@ function razlozhit(uzel: Uzel, x: number, sverhu: number, snizu: number, out: Ra
   const verh = razlozhit(uzel.verh, x + SHAG_X, sverhu, seredina, out);
   const niz = razlozhit(uzel.niz, x + SHAG_X, seredina, snizu, out);
   const uzelY = (verh.y + niz.y) / 2;
+  const ugol = x + SHAG_X / 2;
   for (const tochka of [verh, niz]) {
-    const ugol = x + SHAG_X / 2;
     out.hody.push(
       `<path d="M ${x} ${uzelY} H ${ugol} V ${tochka.y} H ${tochka.x}" class="lab-hod" />`,
     );
   }
-  out.hody.push(`<circle cx="${x}" cy="${uzelY}" r="4" class="lab-uzel" />`);
+  /* Кружок стоит в самой точке ветвления, а не на подводящем ходе:
+     иначе непонятно, где именно паук выбирает дорогу. */
+  out.hody.push(`<circle cx="${ugol}" cy="${uzelY}" r="4" class="lab-uzel" />`);
   return { x, y: uzelY };
 }
 
@@ -135,7 +148,7 @@ export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
 
   return [
     `<svg viewBox="0 0 ${shirina + POLYA * 2} ${vysota + POLYA * 2}" role="img" `,
-    `aria-label="Схема лабиринта: вход слева, три развилки и выходы ${spisok.join(', ')}">`,
+    `aria-label="Схема лабиринта: вход слева, ${razvilki(uzel)} развилки и выходы ${spisok.join(', ')}">`,
     `<path d="M ${POLYA} ${koren.y} H ${koren.x}" class="lab-hod" />`,
     `<text x="${POLYA}" y="${koren.y - 12}" class="lab-vhod">Вход</text>`,
     ...razmetka.hody,
