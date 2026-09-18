@@ -67,7 +67,15 @@ export const METODY: readonly MetodOpisanie[] = [
     nazvanie: 'Дерево вероятностей',
     formula: 'P = p_1 \\cdot p_2 + \\ldots',
   },
-  { id: 'convenient-number', nomer: 5, nazvanie: 'Удобное число', formula: 'P = \\dfrac{m}{n}' },
+  /* Название метода — «Условная вероятность»: так решил автор. Приём тот
+     же — удобное число объектов и сетка 10×10; идентификатор и рисунок
+     остались прежними. */
+  {
+    id: 'convenient-number',
+    nomer: 5,
+    nazvanie: 'Условная вероятность',
+    formula: 'P = \\dfrac{m}{n}',
+  },
 ];
 
 export function metodPoId(id: Method): MetodOpisanie {
