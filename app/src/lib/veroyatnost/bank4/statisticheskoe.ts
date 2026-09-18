@@ -12,7 +12,9 @@
  */
 
 import { skl } from '../morfologia';
+import { prototip } from '../generator';
 import { konechnaya, num, type Prototype } from '../types';
+import { gen } from './generatory';
 import { plitkiDvuh, shagP } from './vizual';
 
 const BLOK = 'statisticheskoe';
@@ -25,8 +27,9 @@ const poParametru = (p: Record<string, number | string>): 2 | 3 | null => {
 
 /* ── 19. Садовые насосы ──────────────────────────────────────────── */
 
-const P19: Prototype = {
+const P19: Prototype = prototip({
   id: 'p4-19',
+  generator: gen('p4-19'),
   blok: BLOK,
   nazvanie: 'Садовые насосы: брак в партии',
   tip: 'Вероятность противоположного события по доле',
@@ -100,12 +103,13 @@ const P19: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 2500, k: 45 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 800, k: 36 } },
   ],
-};
+});
 
 /* ── 20. Фабрика сумок: доля со скрытым дефектом ─────────────────── */
 
-const P20: Prototype = {
+const P20: Prototype = prototip({
   id: 'p4-20',
+  generator: gen('p4-20'),
   blok: BLOK,
   nazvanie: 'Фабрика сумок: доля с дефектом',
   tip: 'Вероятность противоположного события по доле',
@@ -184,12 +188,13 @@ const P20: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 140, k: 13, znakov: 2 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 60, k: 7, znakov: 2 } },
   ],
-};
+});
 
 /* ── 21. Фабрика сумок: «на q качественных приходится d» ─────────── */
 
-const P21: Prototype = {
+const P21: Prototype = prototip({
   id: 'p4-21',
+  generator: gen('p4-21'),
   blok: BLOK,
   nazvanie: 'Фабрика сумок: на сколько качественных',
   tip: 'Вероятность, когда дана не доля, а отношение',
@@ -254,6 +259,6 @@ const P21: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { q: 250, d: 13 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { q: 60, d: 9 } },
   ],
-};
+});
 
 export const STATISTICHESKOE: readonly Prototype[] = [P19, P20, P21];

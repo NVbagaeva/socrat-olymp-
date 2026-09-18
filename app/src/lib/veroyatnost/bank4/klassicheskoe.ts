@@ -26,7 +26,9 @@ import {
   sobiratelnoe,
   vDen,
 } from '../morfologia';
+import { prototip } from '../generator';
 import { konechnaya, num, text, type Params, type Prototype } from '../types';
+import { gen } from './generatory';
 import {
   drob,
   plitki,
@@ -95,8 +97,9 @@ function dolyaPerebor(vsego: number, podhodit: (i: number) => boolean): number {
 
 /* ── 1. Вертолёт ─────────────────────────────────────────────────── */
 
-const P01: Prototype = {
+const P01: Prototype = prototip({
   id: 'p4-01',
+  generator: gen('p4-01'),
   blok: BLOK,
   nazvanie: 'Вертолёт: первый рейс',
   tip: 'Вероятность попасть в первую группу',
@@ -148,12 +151,13 @@ const P01: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 60, k: 3, kto: 'М.' } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 250, k: 20, kto: 'Н.' } },
   ],
-};
+});
 
 /* ── 2. Жребий: кто пойдёт в магазин ─────────────────────────────── */
 
-const P02: Prototype = {
+const P02: Prototype = prototip({
   id: 'p4-02',
+  generator: gen('p4-02'),
   blok: BLOK,
   nazvanie: 'Жребий: кого выберут',
   tip: 'Вероятность быть выбранным жребием',
@@ -204,12 +208,13 @@ const P02: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 4, k: 3, kto: 'Е.' } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 50, k: 10, kto: 'Ж.' } },
   ],
-};
+});
 
 /* ── 3. Прыжки в воду: жеребьёвка порядка ────────────────────────── */
 
-const P03: Prototype = {
+const P03: Prototype = prototip({
   id: 'p4-03',
+  generator: gen('p4-03'),
   blok: BLOK,
   nazvanie: 'Прыжки в воду: кто выступит по счёту',
   tip: 'Вероятность выбрать спортсмена из страны',
@@ -332,12 +337,13 @@ const P03: Prototype = {
       params: { N: 40, a: 14, strA: 'Польши', b: 6, strB: 'Чехии', m: 9, ischem: 'a' },
     },
   ],
-};
+});
 
 /* ── 4. Жребий: кому начинать игру ───────────────────────────────── */
 
-const P04: Prototype = {
+const P04: Prototype = prototip({
   id: 'p4-04',
+  generator: gen('p4-04'),
   blok: BLOK,
   nazvanie: 'Жребий: кому начинать игру',
   tip: 'Вероятность по списку имён',
@@ -502,7 +508,7 @@ const P04: Prototype = {
       },
     },
   ],
-};
+});
 
 /* ── 5. Механические часы ────────────────────────────────────────── */
 
@@ -511,8 +517,9 @@ function duga(a: number, b: number): number {
   return ((b - a + 12) % 12 === 0 ? 12 : (b - a + 12) % 12) % 12;
 }
 
-const P05: Prototype = {
+const P05: Prototype = prototip({
   id: 'p4-05',
+  generator: gen('p4-05'),
   blok: BLOK,
   nazvanie: 'Механические часы: где встала стрелка',
   tip: 'Геометрическая вероятность на циферблате',
@@ -591,7 +598,7 @@ const P05: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { a: 2, b: 8 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { a: 6, b: 3 } },
   ],
-};
+});
 
 /* ── 6. Толкание ядра: четыре страны ─────────────────────────────── */
 
@@ -600,8 +607,9 @@ function stranaKol(p: Params, i: number): { kol: number; strana: string } {
   return { kol: num(p, `k${i}`), strana: text(p, `s${i}`) };
 }
 
-const P06: Prototype = {
+const P06: Prototype = prototip({
   id: 'p4-06',
+  generator: gen('p4-06'),
   blok: BLOK,
   nazvanie: 'Толкание ядра: четыре страны',
   tip: 'Вероятность выбрать спортсмена из страны',
@@ -836,12 +844,13 @@ const P06: Prototype = {
       },
     },
   ],
-};
+});
 
 /* ── 7. Конференция: три страны ──────────────────────────────────── */
 
-const P07: Prototype = {
+const P07: Prototype = prototip({
   id: 'p4-07',
+  generator: gen('p4-07'),
   blok: BLOK,
   nazvanie: 'Конференция: чей доклад по счёту',
   tip: 'Вероятность выбрать учёного из страны',
@@ -996,12 +1005,13 @@ const P07: Prototype = {
       },
     },
   ],
-};
+});
 
 /* ── 8. Сборник билетов ──────────────────────────────────────────── */
 
-const P08: Prototype = {
+const P08: Prototype = prototip({
   id: 'p4-08',
+  generator: gen('p4-08'),
   blok: BLOK,
   nazvanie: 'Сборник билетов: вопрос по теме',
   tip: 'Вероятность события и противоположного',
@@ -1128,12 +1138,13 @@ const P08: Prototype = {
       params: { N: 25, k: 4, predmet: 'физике', tema: 'Оптика', ne: 1 },
     },
   ],
-};
+});
 
 /* ── 9. Фирма такси ──────────────────────────────────────────────── */
 
-const P09: Prototype = {
+const P09: Prototype = prototip({
   id: 'p4-09',
+  generator: gen('p4-09'),
   blok: BLOK,
   nazvanie: 'Фирма такси: цвет машины',
   tip: 'Вероятность противоположного события',
@@ -1190,12 +1201,13 @@ const P09: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 50, k: 13 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 80, k: 52 } },
   ],
-};
+});
 
 /* ── 10. Гимнастика: «остальные из …» ────────────────────────────── */
 
-const P10: Prototype = {
+const P10: Prototype = prototip({
   id: 'p4-10',
+  generator: gen('p4-10'),
   blok: BLOK,
   nazvanie: 'Гимнастика: остальные спортсменки',
   tip: 'Вероятность, когда группа задана остатком',
@@ -1314,7 +1326,7 @@ const P10: Prototype = {
       params: { N: 50, a: 11, sA: 'Кореи', b: 4, sB: 'Китая', sC: 'Японии' },
     },
   ],
-};
+});
 
 /* ── 11. Научная конференция в несколько дней ────────────────────── */
 
@@ -1323,8 +1335,9 @@ function vPoslednijDen(d: number, N: number, m: number, k: number): number {
   return m === 0 ? N / d : (N - m * k) / (d - m);
 }
 
-const P11: Prototype = {
+const P11: Prototype = prototip({
   id: 'p4-11',
+  generator: gen('p4-11'),
   blok: BLOK,
   nazvanie: 'Научная конференция: последний день',
   tip: 'Вероятность попасть в день конференции',
@@ -1473,12 +1486,13 @@ const P11: Prototype = {
       params: { d: 3, N: 100, m: 1, k: 20, prof: 'Т.' },
     },
   ],
-};
+});
 
 /* ── 12. Олимпиада: запасная аудитория ───────────────────────────── */
 
-const P12: Prototype = {
+const P12: Prototype = prototip({
   id: 'p4-12',
+  generator: gen('p4-12'),
   blok: BLOK,
   nazvanie: 'Олимпиада: запасная аудитория',
   tip: 'Вероятность попасть в остаток',
@@ -1602,12 +1616,13 @@ const P12: Prototype = {
       params: { N: 320, m: 3, k: 100, predmet: 'истории' },
     },
   ],
-};
+});
 
 /* ── 13. Конкурс исполнителей ────────────────────────────────────── */
 
-const P13: Prototype = {
+const P13: Prototype = prototip({
   id: 'p4-13',
+  generator: gen('p4-13'),
   blok: BLOK,
   nazvanie: 'Конкурс исполнителей: день выступления',
   tip: 'Вероятность попасть в день конкурса',
@@ -1741,12 +1756,13 @@ const P13: Prototype = {
       params: { d: 5, N: 80, k: 20, den: 4, strana: 'Германии' },
     },
   ],
-};
+});
 
 /* ── 14. Разбивка на игровые пары ────────────────────────────────── */
 
-const P14: Prototype = {
+const P14: Prototype = prototip({
   id: 'p4-14',
+  generator: gen('p4-14'),
   blok: BLOK,
   nazvanie: 'Игровые пары: соперник из России',
   tip: 'Вероятность при выборе соперника',
@@ -1860,12 +1876,13 @@ const P14: Prototype = {
       params: { N: 46, r: 10, vid: 'теннису', imya: 'Роман Гущин' },
     },
   ],
-};
+});
 
 /* ── 15. Класс делят на группы ───────────────────────────────────── */
 
-const P15: Prototype = {
+const P15: Prototype = prototip({
   id: 'p4-15',
+  generator: gen('p4-15'),
   blok: BLOK,
   nazvanie: 'Деление на группы: вместе или врозь',
   tip: 'Вероятность оказаться в одной группе',
@@ -2109,7 +2126,7 @@ const P15: Prototype = {
       },
     },
   ],
-};
+});
 
 /* ── 16. Симметричная монета ─────────────────────────────────────── */
 
@@ -2133,8 +2150,9 @@ function drugaya(storona: string): string {
   return storona === 'орёл' ? 'решка' : 'орёл';
 }
 
-const P16: Prototype = {
+const P16: Prototype = prototip({
   id: 'p4-16',
+  generator: gen('p4-16'),
   blok: BLOK,
   nazvanie: 'Симметричная монета',
   tip: 'Вероятность числа выпадений',
@@ -2310,12 +2328,13 @@ const P16: Prototype = {
       params: { n: 4, storona: 'решка', rezhim: 'bolshe', k: 0 },
     },
   ],
-};
+});
 
 /* ── 17. Монетка судьи перед матчем ──────────────────────────────── */
 
-const P17: Prototype = {
+const P17: Prototype = prototip({
   id: 'p4-17',
+  generator: gen('p4-17'),
   blok: BLOK,
   nazvanie: 'Монетка судьи: кто начнёт с мячом',
   tip: 'Вероятность числа удачных жребиев',
@@ -2476,12 +2495,13 @@ const P17: Prototype = {
       params: { n: 3, komanda: 'Метеор', rezhim: 'ne-bolee', k: 2 },
     },
   ],
-};
+});
 
 /* ── 18. Две игральные кости ─────────────────────────────────────── */
 
-const P18: Prototype = {
+const P18: Prototype = prototip({
   id: 'p4-18',
+  generator: gen('p4-18'),
   blok: BLOK,
   nazvanie: 'Две игральные кости: сумма очков',
   tip: 'Вероятность суммы на двух кубиках',
@@ -2570,7 +2590,7 @@ const P18: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { s: 2, znakov: 2 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { s: 5, znakov: 3 } },
   ],
-};
+});
 
 export const KLASSICHESKOE: readonly Prototype[] = [
   P01,

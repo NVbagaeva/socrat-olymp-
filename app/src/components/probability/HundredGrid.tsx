@@ -21,8 +21,8 @@ export interface HundredGroup {
 }
 
 export interface HundredGridProps {
-  /** Удобное число: 100 или 1000. */
-  baseNumber?: 100 | 1000;
+  /** Удобное число: 100, 1000 или 10 000 — сетка всегда 10×10, меняется цена клетки. */
+  baseNumber?: 100 | 1000 | 10000;
   groups: readonly HundredGroup[];
   /**
    * Индекс искомой группы. Как и у остальных компонентов — приходит

@@ -12,7 +12,7 @@
  *  4. ответ записывается в клетки ЕГЭ: целое или конечная десятичная
  *     дробь, а если нет — условие обязано просить округление;
  *  5. в условии не осталось «undefined» и «NaN»;
- *  6. вариантов ровно десять и они не повторяются;
+ *  6. вариантов не меньше десяти и они не повторяются;
  *  7. отпечатки ответов не сталкиваются.
  */
 
@@ -50,8 +50,8 @@ export interface Report {
   sourceProblems: { ref: string; why: string }[];
   /** Совпадающие варианты внутри прототипа. */
   duplicates: { a: string; b: string }[];
-  /** Прототипы, где вариантов не десять. */
-  notTen: string[];
+  /** Прототипы, где вариантов меньше десяти. */
+  malo: string[];
   /** Столкновения отпечатков ответов. */
   collisions: { a: string; b: string }[];
   bad: BadVariant[];
@@ -122,7 +122,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
   const bad: BadVariant[] = [];
   const sourceProblems: { ref: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
-  const notTen: string[] = [];
+  const malo: string[] = [];
   const collisions: { a: string; b: string }[] = [];
   const seals = new Map<string, string>();
 
@@ -132,8 +132,8 @@ export function checkBank(bank: readonly Prototype[]): Report {
   let badFormat = 0;
 
   for (const prototype of bank) {
-    if (prototype.varianty.length !== 10) {
-      notTen.push(`${prototype.id}: ${prototype.varianty.length}`);
+    if (prototype.varianty.length < 10) {
+      malo.push(`${prototype.id}: ${prototype.varianty.length}`);
     }
 
     const nomera = new Set<number>();
@@ -192,7 +192,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
     badFormat,
     sourceProblems,
     duplicates,
-    notTen,
+    malo,
     collisions,
     bad,
   };

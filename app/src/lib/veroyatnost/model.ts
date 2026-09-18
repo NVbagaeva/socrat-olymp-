@@ -22,21 +22,27 @@ export type Method =
   | 'outcome-table'
   | 'coordinate-line'
   | 'probability-tree'
-  | 'convenient-number';
+  | 'convenient-number'
+  | 'formula';
 
 /** Форма меры у координатной прямой: отрезок, дуга или площадь. */
 export type Shape = 'segment' | 'arc' | 'area';
 
 export interface MetodOpisanie {
   id: Method;
-  nomer: 1 | 2 | 3 | 4 | 5;
+  nomer: 1 | 2 | 3 | 4 | 5 | 6;
   /** Название метода, как во вкладке «Ключевые методы решения». */
   nazvanie: string;
   /** Формула метода одной строкой, в TeX. */
   formula: string;
 }
 
-/** Каталог методов: ровно пять, порядок — как в референсе. */
+/**
+ * Каталог методов: пять из референса задания №4 и шестой — «Формула»
+ * для задания №5, где ответ считается действиями с вероятностями:
+ * сумма несовместных, противоположное событие, сумма совместных,
+ * перебор числа попыток. У шестого метода рисунка нет — только шаги.
+ */
 export const METODY: readonly MetodOpisanie[] = [
   {
     id: 'direct-count',
@@ -66,7 +72,14 @@ export const METODY: readonly MetodOpisanie[] = [
     nazvanie: 'Условная вероятность',
     formula: 'P = \\dfrac{m}{n}',
   },
+  { id: 'formula', nomer: 6, nazvanie: 'Формула', formula: 'P(A + B) = P(A) + P(B)' },
 ];
+
+/** Методы задания №4: пять из референса, без «Формулы». */
+export const METODY_4: readonly MetodOpisanie[] = METODY.filter((m) => m.id !== 'formula');
+
+/** Методы задания №5: все шесть. */
+export const METODY_5: readonly MetodOpisanie[] = METODY;
 
 export function metodPoId(id: Method): MetodOpisanie {
   const est = METODY.find((m) => m.id === id);
@@ -117,14 +130,24 @@ export type ParametryPryamoy =
 export interface ParametryDereva {
   method: 'probability-tree';
   levels: string[];
-  branches: { id: string; parent: string | null; label: string; p: number }[];
+  /**
+   * Ветви деревом через ссылку на родителя. `pLabel` — как подписать
+   * вероятность, когда десятичная запись некрасива: «11/25» вместо
+   * 0,44 у фломастеров без возвращения.
+   */
+  branches: { id: string; parent: string | null; label: string; p: number; pLabel?: string }[];
 }
 
 export interface ParametrySetki {
   method: 'convenient-number';
-  baseNumber: 100 | 1000;
+  baseNumber: 100 | 1000 | 10000;
   groups: { label: string; share: number; tone?: 'soft' | 'mid' | 'strong' }[];
   unit?: string;
+}
+
+/** Метод «Формула»: рисунка нет, задача решается шагами. */
+export interface ParametryFormuly {
+  method: 'formula';
 }
 
 export type Parametry =
@@ -132,7 +155,8 @@ export type Parametry =
   | ParametryTablitsy
   | ParametryPryamoy
   | ParametryDereva
-  | ParametrySetki;
+  | ParametrySetki
+  | ParametryFormuly;
 
 /* ── Подсветка благоприятного: закрытая часть ────────────────────── */
 
@@ -143,7 +167,10 @@ export type Podsvetka =
      границами, карточка лишь переключает highlightMode. */
   | { method: 'coordinate-line' }
   | { method: 'probability-tree'; highlightedPaths: string[] }
-  | { method: 'convenient-number'; highlightedGroup: number };
+  /* Искомая группа; `highlightedGroups` — когда искомое складывается
+     из нескольких групп (полная вероятность: забракованы и те, и эти). */
+  | { method: 'convenient-number'; highlightedGroup: number; highlightedGroups?: number[] }
+  | { method: 'formula' };
 
 /** Рисунок целиком: открытая и закрытая части. */
 export interface Vizual {
@@ -187,7 +214,8 @@ export interface ProblemModel {
  * легче. Исходники — в assets/img/probability.
  */
 export function putIllyustratsii(id: string): string {
-  return `/images/veroyatnost/zadanie-4/${id}.webp`;
+  const zadanie = /^[pk]5-/.test(id) ? 5 : 4;
+  return `/images/veroyatnost/zadanie-${zadanie}/${id}.webp`;
 }
 
 /* ── Третий счёт: ответ прямо по рисунку ─────────────────────────── */
@@ -259,8 +287,19 @@ export function otvetPoRisunku(vizual: Vizual): number | null {
       if (podsvetka.method !== 'convenient-number') {
         return null;
       }
-      return parametry.groups[podsvetka.highlightedGroup]?.share ?? null;
+      const gruppy = podsvetka.highlightedGroups ?? [podsvetka.highlightedGroup];
+      let summa = 0;
+      for (const i of gruppy) {
+        const gruppa = parametry.groups[i];
+        if (gruppa === undefined) {
+          return null;
+        }
+        summa += gruppa.share;
+      }
+      return Math.round(summa * 1e9) / 1e9;
     }
+    case 'formula':
+      return null;
     default:
       return null;
   }
