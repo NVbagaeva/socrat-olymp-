@@ -247,6 +247,12 @@ function answerRule(taskId: string): string | null {
   return taskData(taskId)?.answerRule ?? null;
 }
 
+/** Опорная точка, отмеченная на чертеже задачи. */
+interface EnginePoint {
+  x: number;
+  y: number;
+}
+
 /** Проверяемая точка: движок кладёт её в meta вместе с расхождением. */
 interface EngineProbe {
   x: number;
@@ -262,7 +268,13 @@ interface EngineTask {
   answer: string;
   answerType: string;
   options: { number: string; html: string; error: string | null }[] | null;
-  meta: { query: unknown; probe: EngineProbe | null; k: number; b: number };
+  meta: {
+    query: unknown;
+    probe: EngineProbe | null;
+    k: number;
+    b: number;
+    points: EnginePoint[] | null;
+  };
 }
 
 interface Analysis {
@@ -607,6 +619,7 @@ function buildSteps(task: EngineTask): PrepStep[] | null {
     triangle: found.triangle,
     line: found.line,
     window: found.scene.window,
+    points: task.meta.points,
     task: {
       rule: answerRule(task.id),
       answer: task.answer,
