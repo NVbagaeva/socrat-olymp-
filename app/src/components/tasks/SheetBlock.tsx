@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Solid } from '@/components/solid/Solid';
+import { FigureZoom } from '@/components/ui';
 import type { SheetItem } from '@/content/shpargalki';
 import { formulaKey } from '@/lib/zadanie3/formulas';
 import { SHEETS } from '@/lib/solid/drawings';
@@ -41,9 +42,9 @@ export function SheetBlock({ items, formulas }: SheetBlockProps): ReactNode {
         return (
           <li className="sheet__item" key={index}>
             {model !== undefined ? (
-              <span className="sheet__fig">
+              <FigureZoom className="sheet__fig" label={model.alt}>
                 <Solid model={model} />
-              </span>
+              </FigureZoom>
             ) : null}
             <span className="sheet__text">
               {item.pieces.map((piece, k) =>
