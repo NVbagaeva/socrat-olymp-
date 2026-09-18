@@ -218,9 +218,11 @@ function peresechenie(a1: Vec3, a2: Vec3, b1: Vec3, b2: Vec3): Vec3 | null {
  * Параллельный перенос прямой l2 к прямой l1.
  *
  * Возвращает пару вершин тела, задающую прямую, параллельную l2 и
- * проходящую через вершину l1: именно её проводят в разборе, чтобы
- * скрещивающиеся прямые стали пересекающимися. Такой пары может и
- * не быть — тогда null, и разбор обходится без переноса.
+ * пересекающую l1: именно её проводят в разборе, чтобы
+ * скрещивающиеся прямые стали пересекающимися. Пересечение не
+ * обязано быть вершиной — у куба AB₁ и BA₁ сходятся в середине
+ * грани, и это законное построение. Пары не нашлось — null, и
+ * разбор обходится без переноса.
  */
 export function perenos(
   telo: Shape,
@@ -228,10 +230,12 @@ export function perenos(
   l2: readonly [string, string],
 ): readonly [string, string] | null {
   const body = bodyOf(telo);
-  const names = body.names ?? [];
+  const names = (body.names ?? []).filter((name): name is string => name !== null);
   const dir = sub(vertex(body, l2[1]), vertex(body, l2[0]));
+  const a1 = vertex(body, l1[0]);
+  const a2 = vertex(body, l1[1]);
   const parallel = (u: Vec3): boolean => {
-    const cross = [
+    const cross: Vec3 = [
       u[1] * dir[2] - u[2] * dir[1],
       u[2] * dir[0] - u[0] * dir[2],
       u[0] * dir[1] - u[1] * dir[0],
@@ -239,21 +243,28 @@ export function perenos(
     return cross.every((x) => Math.abs(x) < 1e-9);
   };
 
-  for (const anchor of l1) {
-    for (const name of names) {
-      if (name === null || name === anchor) {
-        continue;
+  const found: (readonly [string, string])[] = [];
+  names.forEach((from, i) => {
+    names.slice(i + 1).forEach((to) => {
+      if ((from === l2[0] && to === l2[1]) || (from === l2[1] && to === l2[0])) {
+        return;
       }
-      const pairNames: readonly [string, string] = [anchor, name];
-      if (pairNames[0] === l2[0] && pairNames[1] === l2[1]) {
-        continue;
+      const b1 = vertex(body, from);
+      const b2 = vertex(body, to);
+      if (!parallel(sub(b2, b1))) {
+        return;
       }
-      if (parallel(sub(vertex(body, name), vertex(body, anchor)))) {
-        return pairNames;
+      if (peresechenie(a1, a2, b1, b2) === null) {
+        return;
       }
-    }
-  }
-  return null;
+      found.push([from, to]);
+    });
+  });
+
+  /* Если можно перенести прямо в вершину первой прямой — так и
+     переносим: такое построение читается легче. */
+  const atVertex = found.find((item) => item.some((name) => l1.includes(name)));
+  return atVertex ?? found[0] ?? null;
 }
 
 /** Чертёж условия: выделено ровно искомое, и ничего сверх него. */

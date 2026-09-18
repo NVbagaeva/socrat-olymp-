@@ -134,7 +134,10 @@ function differentLines(p: Params): boolean {
 function cubeShagi(p: Params, answer: number, hint: string): { text: string; value?: number }[] {
   const l1 = pair(p, 'l1');
   const l2 = pair(p, 'l2');
-  const shift = peresekayutsya('cube', l1, l2) ? null : perenos('cube', l1, l2);
+  /* Пересекаются или скрещиваются — это разные шаги, и «переноса
+     нет» не то же самое, что «переносить нечего». */
+  const meet = peresekayutsya('cube', l1, l2);
+  const shift = meet ? null : perenos('cube', l1, l2);
   return [
     {
       text:
@@ -144,9 +147,11 @@ function cubeShagi(p: Params, answer: number, hint: string): { text: string; val
     {
       /* Шаг из данных, а не из слов: перенос считает та же функция,
          что рисует его на чертеже разбора. */
-      text:
-        shift === null
-          ? 'Прямые пересекаются — угол между ними виден сразу.'
+      text: meet
+        ? 'Прямые пересекаются — угол между ними виден сразу.'
+        : shift === null
+          ? 'Прямые скрещиваются: перенесём одну из них параллельно себе так, ' +
+            'чтобы они пересеклись.'
           : `Перенесём ${otr(l2)} параллельно себе в ${otr(shift)}: теперь прямые ` +
             'пересекаются, и угол между ними — тот же самый.',
     },
