@@ -109,21 +109,37 @@ function recapBlock(recap) {
    Задача
    ══════════════════════════════════════════════════════════ */
 
-/* Ширина чертежа считается по клетке, а не по ширине карточки:
-   у движка клетка всегда 34 единицы viewBox, поэтому физический
-   размер клетки одинаков на всех задачах и точки читаются
-   одинаково уверенно. */
+/* Размер чертежа задаётся одним из двух способов, и выбор между ними
+   не технический, а смысловой: окна у задач разные (±5 — десять клеток,
+   ±8 — шестнадцать), поэтому одновременно одинаковой рамкой
+   и одинаковой клеткой быть не может.
+
+     frame: 80        одна рамка на все задачи. Страница ровная,
+                      но клетка у окна ±8 мельче, чем у ±5
+     cell: 3.4        одна клетка на все задачи. Точки читаются
+                      одинаково, но рамки разного размера
+
+   У движка клетка всегда 34 единицы viewBox — отсюда пересчёт. */
 var CELL_UNITS = 34;
 
-function figure(svg, cell) {
+function figure(svg, options) {
   if (!svg) { return ''; }
   var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
   var style = '';
   if (box) {
-    var mm = (Number(box[1]) / CELL_UNITS) * cell;
+    var units = Number(box[1]) / CELL_UNITS;
+    var mm = options.frame ? options.frame : units * options.cell;
     style = ' style="width:' + (Math.round(mm * 100) / 100) + 'mm"';
   }
   return '<figure class="sheet-figure"' + style + '>' + svg + '</figure>';
+}
+
+/** Физический размер клетки при заданной рамке — для отчёта сборки. */
+function cellOf(svg, options) {
+  var box = /viewBox="0 0 ([0-9.]+) /.exec(svg || '');
+  if (!box) { return null; }
+  var units = Number(box[1]) / CELL_UNITS;
+  return options.frame ? options.frame / units : options.cell;
 }
 
 function optionList(options) {
@@ -138,7 +154,6 @@ function optionList(options) {
 
 function taskCard(task, options) {
   var layout = options.layout;
-  var cell = options.cell;
 
   var answer = options.withAnswerLine
     ? '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>'
@@ -151,11 +166,12 @@ function taskCard(task, options) {
      потом пишут ответ. В одну колонку чертёж стоит справа, поэтому
      строка ответа живёт в колонке условия; в две колонки чертёж
      под условием, и строка ответа уходит под чертёж. */
+  var size = { cell: options.cell, frame: options.frame };
   var body = options.layout === 'single'
     ? '<div class="sheet-task-text">' + question + answer + '</div>' +
-      figure(task.figureSvg, cell)
+      figure(task.figureSvg, size)
     : '<div class="sheet-task-text">' + question + '</div>' +
-      figure(task.figureSvg, cell) + answer;
+      figure(task.figureSvg, size) + answer;
 
   return '<article class="sheet-task sheet-task--' + layout + '" data-task="' +
     typo.attr(task.id || '') + '">' +
@@ -217,7 +233,7 @@ function footer(foot) {
  */
 function flowItems(spec) {
   var out = [];
-  var cell = spec.cell || null;
+  var size = { cell: spec.cell || null, frame: spec.frame || null };
   var layout = spec.layout;
 
   (spec.blocks || []).forEach(function (block, bi) {
@@ -231,14 +247,16 @@ function flowItems(spec) {
          либо уходит на следующую страницу. */
       for (var i = 0; i < tasks.length; i += 2) {
         var pair = tasks.slice(i, i + 2).map(function (task) {
-          return taskCard(task, { layout: layout, cell: cell, withAnswerLine: spec.withAnswerLine });
+          return taskCard(task, { layout: layout, cell: size.cell, frame: size.frame,
+                                  withAnswerLine: spec.withAnswerLine });
         }).join('');
         out.push('<div class="sheet-item sheet-tasks sheet-tasks--double">' + pair + '</div>');
       }
     } else {
       tasks.forEach(function (task) {
         out.push('<div class="sheet-item sheet-tasks sheet-tasks--single">' +
-          taskCard(task, { layout: layout, cell: cell, withAnswerLine: spec.withAnswerLine }) +
+          taskCard(task, { layout: layout, cell: size.cell, frame: size.frame,
+                           withAnswerLine: spec.withAnswerLine }) +
           '</div>');
       });
     }
@@ -253,7 +271,9 @@ function flowItems(spec) {
  * spec:
  *   theme    'color' | 'print'
  *   layout   'single' | 'double'
- *   cell     размер клетки чертежа в мм; нет — берётся из темы
+ *   cell     размер клетки чертежа в мм (одна клетка на все задачи)
+ *   frame    размер рамки чертежа в мм (одна рамка на все задачи);
+ *            задаётся вместо cell, не вместе с ним
  *   head     { course, author, motto }
  *   runner   строка компактной шапки следующих страниц
  *   title    { chip, text, subtitle }
@@ -301,7 +321,8 @@ function buildDocument(spec, assets) {
     '</body>\n</html>\n';
 }
 
-const api = { buildDocument: buildDocument, taskCard: taskCard, figure: figure, THEMES: THEMES, LAYOUTS: LAYOUTS };
+const api = { buildDocument: buildDocument, taskCard: taskCard, figure: figure,
+              cellOf: cellOf, THEMES: THEMES, LAYOUTS: LAYOUTS };
 
 export default api;
-export { buildDocument, taskCard, figure, THEMES, LAYOUTS };
+export { buildDocument, taskCard, figure, cellOf, THEMES, LAYOUTS };

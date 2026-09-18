@@ -86,6 +86,7 @@ function spec(blocks, options) {
     theme: options.theme,
     layout: options.layout,
     cell: options.cell,
+    frame: options.frame,
     documentTitle: content.title.chip + '. ' + content.title.text,
     head: content.head,
     runner: content.runner,
@@ -108,6 +109,17 @@ function spec(blocks, options) {
    и точки читаются одинаково уверенно на всех окнах. 3,4 мм —
    утверждённое значение. */
 const LAYOUT = 'single';
+
+/* Размер чертежа. Окна у задач разные (±5 — десять клеток, ±8 —
+   шестнадцать), поэтому одна рамка и одна клетка одновременно
+   недостижимы: либо рамка одна и клетка разная, либо наоборот.
+   Привести окна к одному нельзя — у 17 задач 12.C и 12.D точка
+   пересечения оказалась бы внутри окна, а прототип требует, чтобы
+   ответ нельзя было снять с чертежа.
+
+   FRAME — одна рамка на все задачи в миллиметрах. Клетка тогда
+   считается сама: рамка делится на число клеток окна. */
+const FRAME = 84;
 const CELL = { single: 3.4, double: 3.0 };
 
 /* ══════════════════════════════════════════════════════════
@@ -141,7 +153,7 @@ async function sample() {
 
   for (const theme of ['color', 'print']) {
     await build('obrazec' + (theme === 'print' ? '-chb' : '-cvet'), blocks, {
-      theme, layout: LAYOUT, cell: CELL[LAYOUT], withAnswerLine: true, keepHtml: true,
+      theme, layout: LAYOUT, frame: FRAME, withAnswerLine: true, keepHtml: true,
     });
   }
 }
