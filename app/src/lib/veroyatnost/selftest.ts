@@ -25,7 +25,8 @@ import {
   veroyatnostVyhodaVolnoy,
   vyhody,
 } from './labirint';
-import { modelPrep, modelVarianta, METODY, otvetPoRisunku, type Method } from './model';
+import { METODY, otvetPoRisunku, type Method } from './model';
+import { modelPrep, modelVarianta } from './model-zadachi';
 import { sealAnswer } from './secret';
 import { konechnaya, round, type PrepBlok, type Prototype, type Variant } from './types';
 

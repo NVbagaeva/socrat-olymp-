@@ -20,15 +20,8 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import {
-  modelPrep,
-  modelVarianta,
-  putIllyustratsii,
-  texPlain,
-  type Method,
-  type Parametry,
-  type Shape,
-} from './model';
+import { putIllyustratsii, texPlain, type Method, type Parametry, type Shape } from './model';
+import { modelPrep, modelVarianta } from './model-zadachi';
 import type { Razbor } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
