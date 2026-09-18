@@ -210,34 +210,30 @@
 /* ── Чертёж задачи ──────────────────────────────────────────────── */
 
 /* Схема лабиринта: единственный чертёж в подготовке. Ширину держит
-   сам SVG, цвета задаются здесь — в разметке чертежа их нет. */
+   сам SVG, цвета и шрифт задаются здесь — в разметке чертежа их нет,
+   там только классы. Подложки и рамки у чертежа нет: коридоры и
+   подписи читаются прямо на карточке задачи. */
 .vtask__risunok {
-  max-width: 420px;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
+  max-width: 480px;
 }
 .vtask__risunok svg {
   display: block;
   width: 100%;
   height: auto;
 }
-.vtask__risunok .lab-hod {
-  fill: none;
-  stroke: var(--color-text-brand);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.vtask__risunok .lab-uzel {
+
+/* Коридоры — сплошные прямоугольники одной толщины: толщину задаёт
+   чертёж, здесь только цвет. Ни обводки, ни полупрозрачности. */
+.vtask__risunok .lab-koridor {
   fill: var(--color-primary);
 }
+
 .vtask__risunok .lab-vhod,
 .vtask__risunok .lab-vyhod {
-  font-size: 14px;
+  font-size: 20px;
   fill: var(--color-text);
 }
 .vtask__risunok .lab-vyhod {
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
 }

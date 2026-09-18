@@ -82,76 +82,131 @@ export function glubina(uzel: Uzel, imya: string): number {
 
 /* ── Чертёж ──────────────────────────────────────────────────────── */
 
-const SHAG_X = 92;
-const SHAG_Y = 38;
-const POLYA = 18;
-/** Длина входного хода слева от первой развилки. */
-const VHOD = 40;
+/**
+ * Толщина коридора. Одна на всю схему — и это не договорённость, а
+ * устройство: коридоры рисуются прямоугольниками ровно этой ширины,
+ * поэтому веток разной толщины на чертеже не бывает.
+ */
+const TOLSHCHINA = 14;
+/** Расстояние между соседними выходами по вертикали. */
+const SHAG_Y = 64;
+/** Расстояние между колонками развилок. */
+const SHAG_X = 128;
+/** Длина входного коридора слева от первой развилки. */
+const VHOD = 70;
+/** Поля вокруг чертежа. */
+const POLYA = 16;
+/** Отступ подписи от конца коридора. */
+const OTSTUP = 16;
+/** Место справа под буквы выходов. */
+const POD_PODPISI = 44;
 
-interface Tochka {
+interface Vyhod {
+  imya: string;
   x: number;
   y: number;
 }
 
 interface Razmetka {
-  hody: string[];
-  vyhody: { imya: string; tochka: Tochka }[];
+  koridory: string[];
+  vyhody: Vyhod[];
+  /** Сколько выходов уже разложено: по нему считается строка. */
+  razlozheno: number;
+}
+
+/** Горизонтальный коридор от x1 до x2 по средней линии y. */
+function gorizont(x1: number, x2: number, y: number): string {
+  const x = Math.min(x1, x2);
+  const shirina = Math.abs(x2 - x1);
+  return `<rect x="${x}" y="${y - TOLSHCHINA / 2}" width="${shirina}" height="${TOLSHCHINA}" class="lab-koridor" />`;
+}
+
+/** Вертикальный коридор от y1 до y2 по средней линии x. */
+function vertikal(y1: number, y2: number, x: number): string {
+  const y = Math.min(y1, y2);
+  const vysota = Math.abs(y2 - y1);
+  return `<rect x="${x - TOLSHCHINA / 2}" y="${y}" width="${TOLSHCHINA}" height="${vysota}" class="lab-koridor" />`;
+}
+
+/** Левый край колонки узлов этой глубины. */
+function stolbec(glubina: number): number {
+  return POLYA + VHOD + glubina * SHAG_X;
 }
 
 /**
- * Раскладка: колонку задаёт глубина, строку — полоса, отведённая
- * ветке. Ходы рисуются уголком «вбок, потом вверх или вниз»: так
- * видно, что на развилке путей ровно два и назад пути нет.
+ * Раскладка дерева.
+ *
+ * Выходы идут сверху вниз с одинаковым шагом, развилка встаёт ровно
+ * посередине между своими двумя дорогами. Коридоры — прямоугольники
+ * одной ширины; на повороте горизонтальный и вертикальный
+ * перекрываются, поэтому угол получается прямым и сплошным, без
+ * скруглений и стыков.
+ *
+ * Возвращает среднюю линию узла по вертикали.
  */
-function razlozhit(uzel: Uzel, x: number, sverhu: number, snizu: number, out: Razmetka): Tochka {
+function razlozhit(uzel: Uzel, glubina: number, out: Razmetka): number {
   if (uzel.vid === 'vyhod') {
-    const tochka = { x, y: (sverhu + snizu) / 2 };
-    out.vyhody.push({ imya: uzel.imya, tochka });
-    return tochka;
+    const y = POLYA + TOLSHCHINA / 2 + out.razlozheno * SHAG_Y;
+    out.razlozheno += 1;
+    out.vyhody.push({ imya: uzel.imya, x: stolbec(glubina), y });
+    return y;
   }
-  const seredina = (sverhu + snizu) / 2;
-  const verh = razlozhit(uzel.verh, x + SHAG_X, sverhu, seredina, out);
-  const niz = razlozhit(uzel.niz, x + SHAG_X, seredina, snizu, out);
-  const uzelY = (verh.y + niz.y) / 2;
-  const ugol = x + SHAG_X / 2;
-  for (const tochka of [verh, niz]) {
-    out.hody.push(
-      `<path d="M ${x} ${uzelY} H ${ugol} V ${tochka.y} H ${tochka.x}" class="lab-hod" />`,
-    );
-  }
-  /* Кружок стоит в самой точке ветвления, а не на подводящем ходе:
-     иначе непонятно, где именно паук выбирает дорогу. */
-  out.hody.push(`<circle cx="${ugol}" cy="${uzelY}" r="4" class="lab-uzel" />`);
-  return { x, y: uzelY };
+
+  const verhY = razlozhit(uzel.verh, glubina + 1, out);
+  const nizY = razlozhit(uzel.niz, glubina + 1, out);
+  const y = (verhY + nizY) / 2;
+
+  const x = stolbec(glubina);
+  /* Коридор раздваивается посередине между колонками. */
+  const razvilka = x + SHAG_X / 2;
+  const deti = stolbec(glubina + 1);
+
+  out.koridory.push(gorizont(x, razvilka, y));
+  /* Вертикаль вытянута на полтолщины в обе стороны: иначе на повороте
+     остаётся незакрашенный квадратик в пол-коридора — угол выходит со
+     ступенькой вместо прямого. */
+  out.koridory.push(vertikal(verhY - TOLSHCHINA / 2, nizY + TOLSHCHINA / 2, razvilka));
+  out.koridory.push(gorizont(razvilka, deti, verhY));
+  out.koridory.push(gorizont(razvilka, deti, nizY));
+  return y;
 }
 
 /**
  * Чертёж лабиринта готовой разметкой SVG.
  *
  * Рисуется на сборке: в браузер уезжает готовая строка, движка там
- * нет. Цвета заданы классами, а не значениями, — их задаёт таблица
- * стилей раздела, как и у остальных чертежей проекта.
+ * нет. Подписи — обычные <text> внутри того же SVG, а не слой поверх
+ * картинки: они едут вместе с чертежом и не могут от него отъехать.
+ *
+ * Цвета и шрифт заданы классами, а не значениями: их берёт таблица
+ * стилей раздела из токенов проекта — коридор красится в
+ * --color-primary, подписи в --color-text. Фон прозрачный, подложки
+ * и рамки у чертежа нет.
  */
 export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
   const spisok = vyhody(uzel);
-  const vysota = spisok.length * SHAG_Y;
-  const glubinaMax = Math.max(...spisok.map((imya) => glubina(uzel, imya)));
-  const shirina = VHOD + glubinaMax * SHAG_X + 40;
+  const razmetka: Razmetka = { koridory: [], vyhody: [], razlozheno: 0 };
+  const korenY = razlozhit(uzel, 0, razmetka);
 
-  const razmetka: Razmetka = { hody: [], vyhody: [] };
-  const koren = razlozhit(uzel, POLYA + VHOD, POLYA, POLYA + vysota, razmetka);
+  /* Входной коридор: от левого поля до первой развилки. */
+  const vhod = gorizont(POLYA, stolbec(0) + SHAG_X / 2, korenY);
 
   const podpisi = razmetka.vyhody.map(
-    ({ imya, tochka }) =>
-      `<text x="${tochka.x + 12}" y="${tochka.y + 5}" class="lab-vyhod">${imya}</text>`,
+    ({ imya, x, y }) =>
+      `<text x="${x + OTSTUP}" y="${y}" dominant-baseline="central" class="lab-vyhod">${imya}</text>`,
   );
 
+  const shirina = Math.max(...razmetka.vyhody.map((v) => v.x)) + OTSTUP + POD_PODPISI;
+  /* Высота — по краям крайних коридоров, а не по числу шагов: иначе
+     под нижним выходом остаётся пустая полоса в полшага. */
+  const vysota = 2 * POLYA + TOLSHCHINA + (spisok.length - 1) * SHAG_Y;
+
   return [
-    `<svg viewBox="0 0 ${shirina + POLYA * 2} ${vysota + POLYA * 2}" role="img" `,
+    `<svg viewBox="0 0 ${shirina} ${vysota}" role="img" `,
     `aria-label="Схема лабиринта: вход слева, ${razvilki(uzel)} развилки и выходы ${spisok.join(', ')}">`,
-    `<path d="M ${POLYA} ${koren.y} H ${koren.x}" class="lab-hod" />`,
-    `<text x="${POLYA}" y="${koren.y - 12}" class="lab-vhod">Вход</text>`,
-    ...razmetka.hody,
+    vhod,
+    ...razmetka.koridory,
+    `<text x="${POLYA}" y="${korenY - TOLSHCHINA / 2 - 12}" class="lab-vhod">Вход</text>`,
     ...podpisi,
     '</svg>',
   ].join('');
