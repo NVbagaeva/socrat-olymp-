@@ -6,7 +6,7 @@ import { Button, FigureZoom, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import { TRAINER_ROUND, type TrainerStep, type TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
-import { recordAttempt } from '@/lib/trainerProgress';
+import { markTrainerMistake, recordAttempt } from '@/lib/trainerProgress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from './TrainerResult';
@@ -155,6 +155,9 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
     } else {
       failed.current = true;
       setMisses(misses + 1);
+      /* Первый неверный ответ — и задание уже в списке ошибочных:
+         брошенное нерешённым туда иначе не попадёт. */
+      markTrainerMistake(task.id);
     }
   }
 
@@ -178,6 +181,7 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
       setStepMark('wrong');
       failed.current = true;
       setMisses(misses + 1);
+      markTrainerMistake(task.id);
       return;
     }
     setStepMark(null);
