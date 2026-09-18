@@ -14,7 +14,7 @@ import {
 import { firstLevel, skillCounts, skillLevels, type SkillLevelId } from '@/content/skills12';
 import { counted } from '@/lib/plural';
 import { randomSeed } from '@/lib/trainerSession';
-import { sheetQuery } from '@/lib/generatorSheet';
+import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
 
 export interface GeneratorScreenProps {
   /** Адрес подтемы: страницы печати лежат под ним. */
@@ -39,6 +39,8 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
   const customId = useId();
   const [kind, setKind] = useState(workKinds[0] ?? CUSTOM);
   const [customKind, setCustomKind] = useState('');
+  const [date, setDate] = useState('');
+  const dateId = useId();
   const [selected, setSelected] = useState<string[]>(skills[0] === undefined ? [] : [skills[0].id]);
   const [count, setCount] = useState<number | null>(10);
   const [level, setLevel] = useState<SkillLevelId | null>(firstLevel(skills[0]?.levels ?? []));
@@ -61,6 +63,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
   const shownLevels = skillLevels.filter((item) => levelsOfChosen.includes(item.id));
   const chosenCount = count ?? allCount;
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
+  const subtitle = subtitleOf({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
   const query = sheetQuery({
     skills: chosen.map((item) => item.id),
@@ -70,6 +73,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
     theme,
     layout,
     kind: kindTitle,
+    date,
   });
   const studentHref = `${base}/pechat/?${query}`;
   const teacherHref = `${base}/pechat/otvety/?${query}`;
@@ -137,6 +141,19 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
                   />
                 </div>
               ) : null}
+              {/* Дата — по желанию: пустое поле, и на листе даты нет. */}
+              <div className="cfg-param">
+                <label className="cfg-param__label" htmlFor={dateId}>
+                  {generatorPage.kind.date}
+                </label>
+                <Input
+                  id={dateId}
+                  className="cfg-input cfg-input--date"
+                  type="date"
+                  value={date}
+                  onChange={(event) => setDate(event.target.value)}
+                />
+              </div>
             </div>
           </section>
 
@@ -219,7 +236,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
             {generatorPage.summary.title}
           </h3>
           <Badge tone="info">{family}</Badge>
-          {kindTitle === '' ? null : <p className="cfg-summary__skill">{kindTitle}</p>}
+          {subtitle === '' ? null : <p className="cfg-summary__skill">{subtitle}</p>}
           <ul className="cfg-summary__list">
             {chosen.map((item) => (
               <li key={item.id}>
@@ -256,7 +273,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
         </a>
         <p className="cfg-bar__summary">
           {family}
-          {kindTitle === '' ? '' : ` · ${kindTitle}`} · {chosen.map((item) => item.title).join(', ')} ·{' '}
+          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} ·{' '}
           {counted(chosenCount, 'задание', 'задания', 'заданий')}
         </p>
       </div>

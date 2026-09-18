@@ -30,6 +30,8 @@ export interface SheetParams {
   layout: SheetLayoutId;
   /** Вид работы: подзаголовок листа. */
   kind: string;
+  /** Дата в подзаголовке, в записи ГГГГ-ММ-ДД. Пусто — даты нет. */
+  date: string;
 }
 
 /* Клетка чертежа в миллиметрах: 3,4 в одну колонку, 3,0 в две —
@@ -50,6 +52,9 @@ export function sheetQuery(params: SheetParams): string {
   if (params.kind !== '') {
     query.set('k', params.kind);
   }
+  if (params.date !== '') {
+    query.set('d', params.date);
+  }
   return query.toString();
 }
 
@@ -69,6 +74,7 @@ export function parseSheetQuery(query: URLSearchParams): SheetParams {
     theme: query.get('t') === 'print' ? 'print' : 'color',
     layout: query.get('c') === '2' ? 'double' : 'single',
     kind: query.get('k') ?? '',
+    date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
   };
 }
 
@@ -150,6 +156,19 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
     .filter((block) => block.tasks.length > 0);
 }
 
+/** «18.09.2026» из записи ГГГГ-ММ-ДД. */
+export function dateText(date: string): string {
+  const [year, month, day] = date.split('-');
+  return `${day}.${month}.${year}`;
+}
+
+/** Подзаголовок листа: вид работы и дата, что есть. */
+export function subtitleOf(params: Pick<SheetParams, 'kind' | 'date'>): string {
+  return [params.kind, params.date === '' ? '' : dateText(params.date)]
+    .filter((part) => part !== '')
+    .join(' · ');
+}
+
 /**
  * Описание листа для шаблона. Ученику — строка «Ответ: ____» и ни
  * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
@@ -164,7 +183,7 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean) {
     documentTitle: `${content.title.chip}. ${content.title.text}` + (params.kind ? ` — ${params.kind}` : ''),
     head: content.head,
     runner: content.runner,
-    title: { chip: content.title.chip, text: content.title.text, subtitle: params.kind },
+    title: { chip: content.title.chip, text: content.title.text, subtitle: subtitleOf(params) },
     recap: null,
     blocks,
     withAnswerLine: !withAnswers,
