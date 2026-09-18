@@ -55,7 +55,7 @@ export default function Solid3TrainerPage() {
           </div>
         </header>
 
-        <Solid3Trainer pool={wholePool()} roundKey="z3:all" />
+        <Solid3Trainer pool={wholePool()} />
       </main>
     </AppShell>
   );
