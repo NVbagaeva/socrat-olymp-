@@ -1548,6 +1548,12 @@ a.task-card {
        здесь, у подложки. */
     align-items: stretch;
   }
+  /* Между подложкой и окном у Modal стоит своя обёртка без класса:
+     это она — ячейка сетки, и растяжку до окна доводит она. */
+  .modal-backdrop:has(.figzoom-modal) > * {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+  }
   .figzoom-modal {
     max-width: none;
     border-radius: 0;
