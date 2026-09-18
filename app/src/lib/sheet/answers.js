@@ -27,7 +27,8 @@ function sectionHead(title, note) {
 /**
  * Таблица ответов одного блока.
  *
- * rows    — [{ no, answer }]
+ * rows    — [{ no, answer, html }]: answer — точное значение строкой,
+ *           html — тот же ответ, набранный формулой, если он её требует
  * columns — сколько пар «номер — ответ» в строке: по десять ответов
  *           в столбик таблица заняла бы страницу на блок.
  */
@@ -38,7 +39,12 @@ function table(title, rows, columns) {
   for (var i = 0; i < rows.length; i += perRow) {
     var chunk = rows.slice(i, i + perRow);
     var cells = chunk.map(function (row) {
-      return '<th scope="row">' + row.no + '</th><td>' + typo.markup(row.answer) + '</td>';
+      /* Показывается набранный ответ (обыкновенная дробь остаётся
+         дробью), а точное значение лежит атрибутом: по нему
+         автотест сверяет таблицу с движком, и набор ему не мешает. */
+      var shown = row.html || typo.markup(row.answer);
+      return '<th scope="row">' + row.no + '</th>' +
+        '<td data-answer="' + typo.attr(row.answer) + '">' + shown + '</td>';
     }).join('');
     /* Хвост последней строки добивается пустыми ячейками, иначе
        рамка таблицы поедет. */

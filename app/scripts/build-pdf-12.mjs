@@ -88,6 +88,9 @@ function collectBlocks(limitBlocks, limitTasks) {
           options: task.options,
           figureSvg: task.svg,
           answer: task.answer,
+          /* Ответ, набранный движком: обыкновенная дробь приходит
+             дробью, а не строкой с косой чертой. */
+          answerHtml: task.answerHtml,
           /* Для раздела ответов: правило и разбор берутся у движка. */
           answerRule: rules[task.id],
           seed: task.meta.seed,
@@ -105,10 +108,10 @@ function collectBlocks(limitBlocks, limitTasks) {
 /* Ответ для таблицы. У задач с выбором ответ — номер варианта,
    и один номер на бумаге ничего не говорит, поэтому рядом идёт
    текст выбранного варианта. */
-function answerText(task) {
-  if (!task.options) { return task.answer; }
+function answerHtml(task) {
+  if (!task.options) { return task.answerHtml || null; }
   const picked = task.options.filter((option) => option.number === task.answer)[0];
-  return picked ? task.answer + ') ' + (picked.html || picked.text) : task.answer;
+  return picked ? task.answer + ') ' + (picked.html || picked.text) : null;
 }
 
 /*  Краткое решение собирается из разбора движка: берутся только
@@ -172,7 +175,7 @@ function answersItems(blocks) {
   blocks.forEach((block) => {
     items.push(answers.table(
       block.title,
-      block.tasks.map((task) => ({ no: task.no, answer: answerText(task) })),
+      block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: answerHtml(task) })),
       5
     ));
   });

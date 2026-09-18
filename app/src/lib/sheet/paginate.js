@@ -139,7 +139,12 @@
         var cells = row.children;
         for (var c = 0; c + 1 < cells.length; c += 2) {
           var no = textOf(cells[c]);
-          if (no) { answerRows.push({ no: Number(no), answer: textOf(cells[c + 1]) }); }
+          if (!no) { continue; }
+          /* Точное значение берётся из атрибута: у дроби, набранной
+             столбиком, текст ячейки склеился бы в «13». */
+          var cell = cells[c + 1];
+          answerRows.push({ no: Number(no),
+            answer: cell.getAttribute('data-answer') || textOf(cell) });
         }
       });
 
@@ -156,6 +161,12 @@
         function (node) { return Number(textOf(node)); }),
       answerRows: answerRows,
       solutions: host.querySelectorAll('.sheet-solution').length,
+      /* Записи формул кратких решений: по ним проверяется, что числа
+         точные. Сплошной текст страницы для этого не годится —
+         соседние ячейки таблицы склеиваются и дают мнимые дроби. */
+      solutionTex: Array.prototype.map.call(
+        host.querySelectorAll('.sheet-solution .math[data-tex]'),
+        function (node) { return node.getAttribute('data-tex'); }),
       answerLines: host.querySelectorAll('.sheet-answer-line').length,
       links: Array.prototype.map.call(host.querySelectorAll('.sheet-social-item a'),
         function (node) { return node.getAttribute('href'); }),
