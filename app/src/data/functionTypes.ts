@@ -143,7 +143,7 @@ export const functionTypes: FunctionType[] = [
     taskTypes: ALL_TASK_TYPES,
     materials: ['notebook'],
     bank: {
-      prep: ['P12-1', 'P12-2', 'P12-3', 'P12-4', 'P12-5'],
+      prep: ['P12-1', 'P12-2', 'P12-3', 'P12-4', 'P12-5', 'P12-6'],
       prototypes: ['12.A', '12.B', '12.C', '12.D'],
     },
     status: 'active',
