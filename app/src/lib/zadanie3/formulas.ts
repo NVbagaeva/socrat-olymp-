@@ -11,25 +11,39 @@
 import { katex } from '@/lib/graph/katex';
 import { SHPARGALKI, type SheetItem } from '@/content/shpargalki';
 
-/** Все записи формул пунктов: без повторов. */
-export function formulasOf(items: readonly SheetItem[]): string[] {
-  const seen = new Set<string>();
-  items.forEach((item) =>
-    item.pieces.forEach((piece) => {
-      if (piece.kind !== 'текст') {
-        seen.add(piece.value);
-      }
-    }),
-  );
-  return [...seen];
+/**
+ * Ключ формулы в наборе. В ключ входит и режим набора: одна и та же
+ * запись в строке и отдельной строкой набирается по-разному —
+ * у отдельной строки дроби и корни полного размера.
+ */
+export function formulaKey(tex: string, display: boolean): string {
+  return `${display ? 'строкой' : 'в строке'}:${tex}`;
 }
 
-/** Свёрстанные формулы пунктов: ключ — запись в TeX. */
+/** Все формулы пунктов с их режимом набора, без повторов. */
+export function formulasOf(items: readonly SheetItem[]): { tex: string; display: boolean }[] {
+  const seen = new Map<string, { tex: string; display: boolean }>();
+  items.forEach((item) =>
+    item.pieces.forEach((piece) => {
+      if (piece.kind === 'текст') {
+        return;
+      }
+      const display = piece.kind === 'формула-строкой';
+      seen.set(formulaKey(piece.value, display), { tex: piece.value, display });
+    }),
+  );
+  return [...seen.values()];
+}
+
+/** Свёрстанные формулы пунктов: ключ — режим и запись в TeX. */
 export function renderFormulas(items: readonly SheetItem[]): Record<string, string> {
   const out: Record<string, string> = {};
-  formulasOf(items).forEach((tex) => {
+  formulasOf(items).forEach(({ tex, display }) => {
     try {
-      out[tex] = katex.renderToString(tex, { throwOnError: true, displayMode: false });
+      out[formulaKey(tex, display)] = katex.renderToString(tex, {
+        throwOnError: true,
+        displayMode: display,
+      });
     } catch (error) {
       throw new Error(`Формула не набирается KaTeX: ${tex}\n${String(error)}`);
     }

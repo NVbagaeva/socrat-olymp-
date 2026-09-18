@@ -51,7 +51,7 @@
   border-radius: var(--radius-lg);
 }
 .sheet__item:has(.sheet__fig) {
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
 }
 .sheet__fig {
   display: block;
@@ -59,7 +59,7 @@
 .sheet__fig .solid-wrap .solid {
   width: 100%;
   height: auto;
-  max-width: 180px;
+  max-width: 220px;
 }
 .sheet__text {
   display: block;
@@ -73,11 +73,11 @@
 .sheet__formula {
   display: inline;
 }
+/* KaTeX в режиме отдельной строки сам ставит поля и выравнивание,
+   поэтому здесь только рамка для длинной формулы на телефоне:
+   она уезжает вбок, а не ломает колонку. */
 .sheet__formula--block {
   display: block;
-  margin: var(--space-3) 0;
-  text-align: center;
-  /* Длинная формула на телефоне уезжает вбок, а не ломает колонку. */
   overflow-x: auto;
 }
 

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Solid } from '@/components/solid/Solid';
 import type { SheetItem } from '@/content/shpargalki';
+import { formulaKey } from '@/lib/zadanie3/formulas';
 import { SHEETS } from '@/lib/solid/drawings';
 
 export interface SheetBlockProps {
@@ -52,7 +53,7 @@ export function SheetBlock({ items, formulas }: SheetBlockProps): ReactNode {
                   <Formula
                     key={k}
                     tex={piece.value}
-                    html={formulas[piece.value]}
+                    html={formulas[formulaKey(piece.value, piece.kind === 'формула-строкой')]}
                     display={piece.kind === 'формула-строкой'}
                   />
                 ),
