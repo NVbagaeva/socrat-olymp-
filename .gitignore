@@ -16,3 +16,6 @@ app/pdf-private/
 # системное
 .DS_Store
 *.log
+
+# Python
+__pycache__/

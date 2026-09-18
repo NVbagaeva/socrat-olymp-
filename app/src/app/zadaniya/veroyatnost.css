@@ -1,0 +1,227 @@
+/* Страницы заданий №4 и №5 — теория вероятностей.
+
+   Оболочка, карточки и вкладки описаны в общих слоях: здесь только
+   то, чего в них нет. Значения — только токены. */
+
+/* Шапка раздела без чертежа: в общем слое она двухколоночная, правая
+   колонка отведена под чертёж движка. Здесь чертежа нет, и пустая
+   колонка отжимала бы текст к левому краю на половину ширины. */
+.veroyatnost-head {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: var(--space-6);
+}
+
+/* Вкладок три, и одна из них длинная. На узком экране лента едет
+   вбок, а не переносится на вторую строку: перенос ломает
+   подчёркивание активной вкладки. */
+.veroyatnost-tabs {
+  margin-top: var(--space-6);
+  overflow-x: auto;
+  /* Полоса прокрутки под лентой съедала бы подчёркивание. */
+  scrollbar-width: none;
+}
+.veroyatnost-tabs::-webkit-scrollbar {
+  display: none;
+}
+.veroyatnost-tabs a[role='tab'] {
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* ── Тренажёр ───────────────────────────────────────────────────── */
+
+.vtrainer {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* Лента фильтров по блокам задачника. На узком экране едет вбок:
+   перенос рвал бы ряд кнопок посередине. */
+.vtrainer__chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vtrainer__chips::-webkit-scrollbar {
+  display: none;
+}
+
+.vchip {
+  flex: none;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.vchip:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+.vchip--on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-brand);
+  color: var(--color-text-brand);
+}
+.vchip:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.vtrainer__wait {
+  color: var(--color-text-tertiary);
+}
+
+.vtrainer__done {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.vtrainer__done-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+.vtrainer__done-score {
+  color: var(--color-text-secondary);
+}
+
+/* ── Одна задача ────────────────────────────────────────────────── */
+
+.vtask {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.vtask__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+.vtask__kind {
+  color: var(--color-text-secondary);
+}
+
+.vtask__uslovie {
+  font-size: 17px;
+  line-height: 26px;
+  max-width: 68ch;
+}
+
+.vtask__answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.vtask__label {
+  color: var(--color-text-secondary);
+}
+.vtask__answer .input {
+  width: 10rem;
+}
+
+.vtask__verdict {
+  font-weight: 600;
+}
+.vtask__verdict--ok {
+  color: var(--color-success);
+}
+.vtask__verdict--no {
+  color: var(--color-error);
+  font-weight: 400;
+}
+
+.vtask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.vtask__razbor {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  line-height: 24px;
+}
+
+.vtask__istochnik {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+/* ── Подготовительные задачи ────────────────────────────────────── */
+
+.vprep {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.vprep__blok-head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+.vprep__blok-title {
+  margin: 0;
+}
+.vprep__blok-tip {
+  color: var(--color-text-secondary);
+}
+.vprep__blok-count {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+/* Нумерацию рисует сам список задач — номер конспекта стоит в
+   карточке, и второй ряд цифр сбоку только путал бы. */
+.vprep__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Решённая задача остаётся на месте, но отходит на второй план:
+   видно, где остановился, и не приходится искать глазами. */
+.vtask--solved {
+  border-color: var(--color-success);
+}
+
+/* ── Чертёж задачи ──────────────────────────────────────────────── */
+
+/* Лабиринт к задаче про паука — единственный чертёж в подготовке.
+   Это готовый файл `/images/veroyatnost/labirint-glass.svg`, а не
+   построение на лету: цвета и шрифт заданы внутри него. Фон у файла
+   прозрачный, поэтому подложки, рамки и тени здесь нет — под картинкой
+   должен быть виден фон карточки задачи. */
+.vtask__risunok {
+  /* На широком экране картинка не растягивается во всю карточку:
+     дальше 600px коридоры становятся толще текста и перетягивают
+     внимание на себя. На узком — занимает всю ширину контейнера. */
+  max-width: 600px;
+}
+.vtask__risunok img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
