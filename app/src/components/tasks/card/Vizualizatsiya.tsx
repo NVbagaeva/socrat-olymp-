@@ -8,6 +8,7 @@ import {
   type HighlightMode,
   type RisunokState,
 } from '@/components/probability';
+import type { ReactNode } from 'react';
 import type { Parametry, Podsvetka } from '@/lib/veroyatnost/model';
 
 /**
@@ -27,41 +28,98 @@ export interface VizualizatsiyaProps {
   className?: string;
 }
 
-/** Подпись над рисунком: до ответа — только то, что в условии. */
-export function podpisRisunka(parametry: Parametry, podsvetka?: Podsvetka): string {
+/** Число по-русски: запятая, без хвостовых нулей, не больше двух знаков. */
+function chislo(value: number): string {
+  return String(Math.round(value * 100) / 100).replace('.', ',');
+}
+
+/** Листья дерева: ветки, из которых ничего не растёт. */
+function listya(branches: readonly { id: string; parent: string | null }[]): number {
+  const roditeli = new Set(branches.map((b) => b.parent));
+  return branches.filter((b) => !roditeli.has(b.id)).length;
+}
+
+/**
+ * Подпись над рисунком — формулировки автора, числа из параметров.
+ *
+ * До ответа в подписи только то, что есть в условии: всего исходов,
+ * пар, длина отрезка. Благоприятное появляется вместе с подсветкой,
+ * то есть вместе с решением, — иначе подпись выдавала бы ответ.
+ */
+export function podpisRisunka(parametry: Parametry, podsvetka?: Podsvetka): ReactNode {
   switch (parametry.method) {
     case 'direct-count': {
       const counts = parametry.counts;
       const n = (counts ?? parametry.outcomes.map(() => 1)).reduce((s, c) => s + c, 0);
-      const vsego = counts === undefined ? `${n} плиток` : `${n}, плитка — группа`;
       if (podsvetka?.method !== 'direct-count') {
-        return `Все исходы: ${vsego}`;
+        return `Все исходы: ${n} ${counts === undefined ? 'плиток' : 'объектов'}`;
       }
       const m = podsvetka.favorable.reduce((s, i) => s + (counts?.[i] ?? 1), 0);
-      return `Все исходы: ${vsego}, благоприятные — ${m}`;
+      return `Все исходы: ${n}, благоприятные — ${m}`;
     }
     case 'outcome-table': {
-      const osnova = `Таблица ${parametry.rows}×${parametry.columns}, в клетке — пара исходов`;
+      const n = parametry.rows * parametry.columns;
       return podsvetka?.method === 'outcome-table'
-        ? `${osnova}; подсвечены благоприятные клетки`
-        : osnova;
+        ? `Все пары: ${n}, благоприятные — ${podsvetka.favorableCells.length}`
+        : `Все пары: ${n} клеток`;
     }
-    case 'coordinate-line':
+    case 'coordinate-line': {
+      const otkryto = podsvetka?.method === 'coordinate-line';
       if (parametry.shape === 'segment') {
-        return `Отрезок [${parametry.min}; ${parametry.max}]: x > ${parametry.c} сверху вправо${
-          parametry.d === undefined ? '' : `, x < ${parametry.d} снизу влево`
-        }`;
+        const L = parametry.max - parametry.min;
+        const l = (parametry.d ?? parametry.max) - parametry.c;
+        return otkryto ? (
+          <>
+            Весь отрезок <i>L</i> = {chislo(L)}, благоприятный <i>l</i> = {chislo(l)}
+          </>
+        ) : (
+          <>
+            Весь отрезок: <i>L</i> = {chislo(L)}
+          </>
+        );
       }
       if (parametry.shape === 'arc') {
-        return `Круг из ${parametry.divisions} равных долей; благоприятная дуга — сектор`;
+        const { divisions, from, to } = parametry;
+        const dolya = (to - from + divisions) % divisions;
+        return otkryto ? (
+          <>
+            Вся фигура <i>S</i> = {divisions} долей, благоприятная <i>s</i> = {dolya}
+          </>
+        ) : (
+          <>
+            Вся фигура: <i>S</i> = {divisions} долей
+          </>
+        );
       }
-      return 'Вся фигура и благоприятная часть: радиус по площади';
-    case 'probability-tree':
+      const ed = parametry.unit === undefined ? '' : ` ${parametry.unit}`;
+      return otkryto ? (
+        <>
+          Вся фигура <i>S</i> = {chislo(parametry.total)}
+          {ed}, благоприятная <i>s</i> = {chislo(parametry.favorable)}
+          {ed}
+        </>
+      ) : (
+        <>
+          Вся фигура: <i>S</i> = {chislo(parametry.total)}
+          {ed}
+        </>
+      );
+    }
+    case 'probability-tree': {
+      const putey = listya(parametry.branches);
       return podsvetka?.method === 'probability-tree'
-        ? 'Подходящие пути подсвечены; под деревом — произведения и сумма'
-        : `Дерево сверху вниз: ${parametry.levels.length} ${parametry.levels.length === 1 ? 'уровень' : 'уровня'}`;
-    case 'convenient-number':
-      return `${parametry.baseNumber} объектов сеткой 10×10: доли видны как клетки`;
+        ? `Все пути: ${putey}, подходящие — ${podsvetka.highlightedPaths.length}`
+        : `Все пути: ${putey}`;
+    }
+    case 'convenient-number': {
+      const vsego = parametry.baseNumber;
+      if (podsvetka?.method !== 'convenient-number') {
+        return `Всего ${vsego}`;
+      }
+      const gruppa = parametry.groups[podsvetka.highlightedGroup];
+      const shtuk = gruppa === undefined ? 0 : Math.round(gruppa.share * vsego);
+      return `Всего ${vsego}, нужная группа — ${shtuk}`;
+    }
     default:
       return '';
   }

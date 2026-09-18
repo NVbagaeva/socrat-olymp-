@@ -136,6 +136,12 @@
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
 }
+/* Буквы мер в подписи — L, l, S, s — антиквой курсивом, как на
+   самом рисунке и в формулах шагов. */
+.pc__risunok-podpis i {
+  font-family: var(--font-math);
+  font-style: italic;
+}
 
 /* ── Ответ ученика ─────────────────────────────────────────────── */
 
@@ -171,13 +177,13 @@
 .pc__verdict--correct {
   color: var(--color-success);
 }
-/* Ошибка — оранжевая, не красная: так в референсе, и красный в
-   разделе не встречается вовсе. */
+/* Ошибка — красная, как у задания №12: так решил автор. Оранжевый
+   остаётся только благоприятной области на рисунке и ответу. */
 .pc__verdict--incorrect {
-  color: var(--color-accent);
+  color: var(--color-error);
 }
 .pc--incorrect .pc__input {
-  border-color: var(--color-accent);
+  border-color: var(--color-error);
 }
 
 /* ── Решение ───────────────────────────────────────────────────── */
@@ -272,7 +278,7 @@
   border-color: var(--color-success);
 }
 .pc--incorrect {
-  border-color: var(--color-accent);
+  border-color: var(--color-error);
 }
 .pc--disabled {
   opacity: 0.6;

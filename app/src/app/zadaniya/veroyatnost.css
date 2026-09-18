@@ -62,10 +62,13 @@
   border-color: var(--color-border-hover);
   color: var(--color-text);
 }
+/* Выбранный чип — синий текст на мягком синем. Раньше здесь стояли
+   тёмно-синяя подложка и тёмно-синий текст: подпись пропадала. */
 .vchip--on {
   border-color: var(--color-primary);
-  background: var(--color-surface-brand);
-  color: var(--color-text-brand);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 500;
 }
 .vchip:focus-visible {
   outline: 2px solid var(--color-focus-ring);
