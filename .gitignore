@@ -5,6 +5,9 @@ app/out/
 app/next-env.d.ts
 app/tsconfig.tsbuildinfo
 
+# промежуточный HTML сборки PDF: из него печатается лист, хранить нечего
+app/.pdf-build/
+
 # системное
 .DS_Store
 *.log

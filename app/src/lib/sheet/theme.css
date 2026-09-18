@@ -1,0 +1,183 @@
+/* sheet/theme.css — две темы печатного листа.
+
+   Тема выбирается атрибутом на <html>: data-sheet-theme="color"
+   или data-sheet-theme="print". Ни один компонент листа своих
+   цветов не знает — все берут отсюда.
+
+   Значения цветной темы — токены сайта из styles/tokens.css:
+   лист не заводит новой палитры. Ч/б тема — не серая копия
+   цветной, а отдельный набор: заливок в ней нет вовсе, смысл
+   держится на толщине и начертании линий, а не на цвете.
+*/
+
+/* ══════════════════════════════════════════════════════════
+   Общее для обеих тем: сетка, радиусы, кегли.
+   ══════════════════════════════════════════════════════════ */
+:root {
+  /* Шаг сетки 4px, как в дизайн-системе. Отступы листа кратны ему. */
+  --sheet-step: 4px;
+
+  /* Геометрия листа. A4, книжная. Поля с запасом на любой принтер:
+     14 мм по краям, 10 мм под подвал. */
+  --sheet-width: 210mm;
+  --sheet-height: 297mm;
+  --sheet-pad-x: 14mm;
+  --sheet-pad-top: 12mm;
+  --sheet-pad-bottom: 10mm;
+
+  /* Клетка чертежа в миллиметрах. Чертёж масштабируется по клетке,
+     а не по ширине карточки: тогда клетка одинакова на всех задачах
+     и точки читаются одинаково уверенно. */
+  --sheet-cell: 4.6mm;
+
+  --sheet-radius-sm: 6px;
+  --sheet-radius-md: 8px;
+  --sheet-radius-lg: 12px;
+
+  --sheet-fs-title: 30pt;
+  --sheet-fs-badge: 13pt;
+  --sheet-fs-lead: 12pt;
+  --sheet-fs-block: 12.5pt;
+  --sheet-fs-body: 10.5pt;
+  --sheet-fs-small: 8.5pt;
+  --sheet-fs-tiny: 7.5pt;
+  --sheet-fs-hand: 15pt;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ЦВЕТНАЯ ТЕМА — значения один в один из styles/tokens.css.
+   ══════════════════════════════════════════════════════════ */
+:root[data-sheet-theme='color'] {
+  --sheet-ink: #101728;
+  --sheet-ink-2: #667389;
+  --sheet-ink-3: #97a1b0;
+  --sheet-brand: #1f5fd0;
+  --sheet-brand-deep: #0b1f45;
+  --sheet-accent: #e07a2f;
+  --sheet-paper: #ffffff;
+  --sheet-page: #f5f9ff;
+
+  /* Карточка задачи: тонкая рамка и лёгкая заливка. */
+  --sheet-card-bg: #ffffff;
+  --sheet-card-line: #e4ebf3;
+  --sheet-card-width: 1px;
+
+  /* Рамка «Повторяем». */
+  --sheet-recap-bg: #e8f0fc;
+  --sheet-recap-line: #d7e5fa;
+  --sheet-recap-bar: #1f5fd0;
+
+  /* Полоса заголовка блока. */
+  --sheet-block-bg: #f2f7fe;
+  --sheet-block-line: #d7e5fa;
+  --sheet-block-bar: #1f5fd0;
+
+  /* Плашки: «Задание 12», номер задачи, номер пункта. */
+  --sheet-chip-bg: #1f5fd0;
+  --sheet-chip-ink: #ffffff;
+  --sheet-chip-line: transparent;
+  --sheet-chip-width: 0;
+  --sheet-num-bg: #e8f0fc;
+  --sheet-num-ink: #1f5fd0;
+  --sheet-num-line: transparent;
+
+  /* Линейки: под шапкой, вокруг подвала, разделители. */
+  --sheet-rule: #d7e5fa;
+  --sheet-rule-strong: #cfdae8;
+  --sheet-rule-width: 1px;
+
+  /* Строка «Ответ: ____». */
+  --sheet-blank: #cfdae8;
+
+  /* Декоративные дуги в углах. */
+  --sheet-arc: #e8f0fc;
+  --sheet-arc-show: block;
+
+  /* Чертежи движка graph/ и solid/: те же имена, что ждут движки. */
+  --color-surface: #ffffff;
+  --color-primary: #1f5fd0;
+  --color-text: #101728;
+  --color-text-tertiary: #97a1b0;
+  --graph-axis: #101728;
+  --graph-grid: #cfdae8;
+  --graph-accent: #e07a2f;
+  --graph-asymptote: #8a8f9c;
+  --solid-edge: #1f5fd0;
+  --solid-face: #e8f0fc;
+  --solid-liquid: #9bc0f2;
+
+  /* Толщина линий чертежа: в цвете смысл несёт цвет. */
+  --graph-curve-a-width: 3.2;
+  --graph-curve-b-width: 3.2;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Ч/Б ТЕМА ДЛЯ ПЕЧАТИ — экономия краски и чёткость на дешёвом
+   принтере. Заливок нет ни у карточек, ни у рамки «Повторяем»,
+   ни у плашек, ни у фона. Дуги убраны. Только чёрный, белый
+   и два оттенка серого.
+   ══════════════════════════════════════════════════════════ */
+:root[data-sheet-theme='print'] {
+  --sheet-ink: #000000;
+  --sheet-ink-2: #3d3d3d;
+  --sheet-ink-3: #6b6b6b;
+  --sheet-brand: #000000;
+  --sheet-brand-deep: #000000;
+  --sheet-accent: #000000;
+  --sheet-paper: #ffffff;
+  --sheet-page: #ffffff;
+
+  /* Карточка: только контур, заливки нет. Контур чуть толще
+     цветного — в ч/б границу карточки держит он один. */
+  --sheet-card-bg: transparent;
+  --sheet-card-line: #6b6b6b;
+  --sheet-card-width: 1px;
+
+  /* «Повторяем»: заливки нет, слева жирная чёрная полоса. */
+  --sheet-recap-bg: transparent;
+  --sheet-recap-line: #000000;
+  --sheet-recap-bar: #000000;
+
+  /* Заголовок блока: заливки нет, полоса слева чёрная. */
+  --sheet-block-bg: transparent;
+  --sheet-block-line: #000000;
+  --sheet-block-bar: #000000;
+
+  /* Плашки: чёрный контур вместо цветной заливки. */
+  --sheet-chip-bg: transparent;
+  --sheet-chip-ink: #000000;
+  --sheet-chip-line: #000000;
+  --sheet-chip-width: 1.5px;
+  --sheet-num-bg: transparent;
+  --sheet-num-ink: #000000;
+  --sheet-num-line: #000000;
+
+  --sheet-rule: #000000;
+  --sheet-rule-strong: #000000;
+  --sheet-rule-width: 1px;
+
+  --sheet-blank: #6b6b6b;
+
+  /* Декор убран: краски он стоит, смысла не несёт. */
+  --sheet-arc: transparent;
+  --sheet-arc-show: none;
+
+  /* Чертежи: сетка светло-серая, но видна; оси и линии чёрные. */
+  --color-surface: #ffffff;
+  --color-primary: #000000;
+  --color-text: #000000;
+  --color-text-tertiary: #3d3d3d;
+  --graph-axis: #000000;
+  --graph-grid: #b9b9b9;
+  --graph-accent: #000000;
+  --graph-asymptote: #6b6b6b;
+  --solid-edge: #000000;
+  --solid-face: transparent;
+  --solid-liquid: transparent;
+
+  /* Цвета в ч/б нет, поэтому две прямые различаются толщиной:
+     f(x) — тонкая, g(x) — толстая. Штриховые линии остаются
+     штриховыми, их рисует сам движок. */
+  --graph-curve-a-width: 2;
+  --graph-curve-b-width: 3.6;
+}

@@ -633,211 +633,211 @@
       "seed": 12020
     },
     "12.C-01": {
-      "answer": "-0,5",
+      "answer": "-10",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12030
     },
     "12.C-02": {
-      "answer": "0,5",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-03": {
-      "answer": "0",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-04": {
-      "answer": "-1",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-05": {
-      "answer": "-2",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-06": {
-      "answer": "2",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-07": {
-      "answer": "1",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-08": {
-      "answer": "3",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-09": {
-      "answer": "-1,5",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-10": {
-      "answer": "-3",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-11": {
-      "answer": "0,4",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-12": {
-      "answer": "-0,4",
-      "answerType": "number",
-      "level": "lucky",
-      "seed": 12030
-    },
-    "12.C-13": {
-      "answer": "4,5",
-      "answerType": "number",
-      "level": "unlucky",
-      "seed": 12030
-    },
-    "12.C-14": {
-      "answer": "-4,5",
-      "answerType": "number",
-      "level": "unlucky",
-      "seed": 12030
-    },
-    "12.C-15": {
-      "answer": "-2,4",
-      "answerType": "number",
-      "level": "unlucky",
-      "seed": 12030
-    },
-    "12.C-16": {
-      "answer": "10,5",
-      "answerType": "number",
-      "level": "unlucky",
-      "seed": 12030
-    },
-    "12.C-17": {
-      "answer": "-4,8",
-      "answerType": "number",
-      "level": "unlucky",
-      "seed": 12030
-    },
-    "12.C-18": {
       "answer": "10",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12030
     },
+    "12.C-03": {
+      "answer": "-7",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12030
+    },
+    "12.C-04": {
+      "answer": "7",
+      "answerType": "number",
+      "level": "lucky",
+      "seed": 12030
+    },
+    "12.C-05": {
+      "answer": "-7,2",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-06": {
+      "answer": "7,2",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-07": {
+      "answer": "8,4",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-08": {
+      "answer": "-8,4",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-09": {
+      "answer": "-7,8",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-10": {
+      "answer": "7,8",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-11": {
+      "answer": "-12",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-12": {
+      "answer": "12",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-13": {
+      "answer": "-15",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-14": {
+      "answer": "15",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-15": {
+      "answer": "-10,4",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-16": {
+      "answer": "10,4",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-17": {
+      "answer": "10,2",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
+    "12.C-18": {
+      "answer": "-10,2",
+      "answerType": "number",
+      "level": "unlucky",
+      "seed": 12030
+    },
     "12.C-19": {
-      "answer": "-9",
+      "answer": "-10,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12030
     },
     "12.C-20": {
-      "answer": "5",
+      "answer": "10,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12030
     },
     "12.D-01": {
-      "answer": "-1,5",
+      "answer": "-11",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-02": {
-      "answer": "0,5",
+      "answer": "11",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-03": {
-      "answer": "-1",
+      "answer": "-7",
       "answerType": "number",
       "level": "lucky",
       "seed": 12040
     },
     "12.D-04": {
-      "answer": "1",
+      "answer": "7",
       "answerType": "number",
       "level": "lucky",
       "seed": 12040
     },
     "12.D-05": {
-      "answer": "-3",
+      "answer": "8",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-06": {
-      "answer": "3",
+      "answer": "9",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-07": {
-      "answer": "-2",
+      "answer": "-10",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-08": {
-      "answer": "2",
+      "answer": "10",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-09": {
-      "answer": "-0,5",
+      "answer": "-7,2",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-10": {
-      "answer": "0",
+      "answer": "7,2",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-11": {
-      "answer": "1,5",
+      "answer": "-7,4",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-12": {
-      "answer": "-0,2",
+      "answer": "-7,5",
       "answerType": "number",
-      "level": "lucky",
+      "level": "unlucky",
       "seed": 12040
     },
     "12.D-13": {
-      "answer": "-5,5",
+      "answer": "-8",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-14": {
-      "answer": "-6",
+      "answer": "6,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-15": {
-      "answer": "-5,2",
+      "answer": "-6,2",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
@@ -849,7 +849,7 @@
       "seed": 12040
     },
     "12.D-17": {
-      "answer": "-5,6",
+      "answer": "-6,6",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
@@ -861,13 +861,13 @@
       "seed": 12040
     },
     "12.D-19": {
-      "answer": "-8",
+      "answer": "8,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-20": {
-      "answer": "6",
+      "answer": "-12",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040

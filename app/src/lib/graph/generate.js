@@ -259,6 +259,15 @@ function pairCandidates(task, set, seed) {
   var wanted = constraints.intersection || {};
   var found = [];
 
+  /* Запас между точкой пересечения и рамкой окна. Задача может
+     попросить свой, иначе действует общий для набора: правило нужно
+     всему набору сразу, а не отдельным вариантам. Иначе перебор
+     с возвратом чинит один вариант и тут же сажает на край соседний —
+     состав набора связывает варианты между собой. */
+  var leastOffscreen = wanted.offscreenMin !== undefined
+    ? wanted.offscreenMin
+    : (set.composition || {}).intersectionOffscreenMin;
+
   for (var i = 0; i < first.length; i++) {
     for (var j = 0; j < second.length; j++) {
       var a = first[i];
@@ -285,8 +294,17 @@ function pairCandidates(task, set, seed) {
       var inside = Math.abs(cx) <= win.xmax - margin && Math.abs(cy) <= win.ymax - margin;
       var outside = Math.abs(cx) > win.xmax || Math.abs(cy) > win.ymax;
 
+      /* На сколько клеток точка вынесена за рамку окна. Величина нужна
+         варианту «пересечение за кадром»: если прямые сходятся у самого
+         края, ответ читается с чертежа на глаз — а прототип требует
+         решать систему. marginCells к такому варианту не относится,
+         он отмеряет запас внутрь окна. */
+      var offscreenBy = Math.max(Math.abs(cx) - win.xmax, Math.abs(cy) - win.ymax);
+
       if (wanted.inside === true && !inside) { continue; }
       if (wanted.inside === false && !outside) { continue; }
+      if (wanted.inside === false && leastOffscreen !== undefined &&
+          offscreenBy < leastOffscreen - 1e-9) { continue; }
 
       /* Ответ пишется как в бланке: целое или один знак после запятой. */
       if (!decimalsOk(cross.x, wanted.decimals) || !decimalsOk(cross.y, wanted.decimals)) { continue; }
@@ -302,7 +320,7 @@ function pairCandidates(task, set, seed) {
         parts: [ { line: a, color: 'lineA', points: pointsA },
                  { line: b, color: 'lineB', points: pointsB } ],
         line: a, window: win, points: pointsA,
-        intersection: { x: cx, y: cy, inside: inside, angle: angle },
+        intersection: { x: cx, y: cy, inside: inside, angle: angle, offscreenBy: offscreenBy },
         score: (balanceScore(a, win, pointsA) + balanceScore(b, win, pointsB)) / 2,
         pairKey: 'kb2:' + a.kValue + '@' + a.bValue + '|' + b.kValue + '@' + b.bValue,
         slopeKey: 'kk:' + a.kValue + '|' + b.kValue,

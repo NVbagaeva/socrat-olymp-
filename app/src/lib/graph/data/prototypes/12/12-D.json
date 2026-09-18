@@ -24,6 +24,7 @@
     },
     "intersectionInside": 0,
     "intersectionOffscreen": 20,
+    "intersectionOffscreenMin": 1.5,
     "intersectionMargin": 0.2,
     "askedCoordinateOffscreen": 12,
     "bothIncreasing": 5,
@@ -529,17 +530,18 @@
               2
             ],
             "bInside": true,
-            "bMax": 6
+            "bMax": 8
           },
           {
             "slope": "integer",
             "direction": "up",
             "bInside": true,
-            "bMax": 6
+            "bMax": 8
           }
         ],
         "intersection": {
           "inside": false,
+            "offscreenMin": 1.2,
           "marginCells": 1,
           "decimals": 1,
           "axis": "y",

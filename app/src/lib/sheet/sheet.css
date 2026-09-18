@@ -1,0 +1,591 @@
+/* sheet/sheet.css — вёрстка печатного листа A4.
+
+   Здесь только геометрия и ритм. Ни одного цвета и ни одного кегля
+   значением: всё приходит токенами из theme.css, поэтому одна и та же
+   вёрстка работает и в цвете, и в ч/б.
+
+   Сетка отступов — шаг 4px из дизайн-системы, кратности задаются
+   через calc(var(--sheet-step) * n): множитель виден в самом правиле.
+*/
+
+/* ══════════════════════════════════════════════════════════
+   Страница
+   ══════════════════════════════════════════════════════════ */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--sheet-page);
+}
+
+body {
+  font-family: var(--sheet-font-sans);
+  font-size: var(--sheet-fs-body);
+  line-height: 1.45;
+  color: var(--sheet-ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  text-rendering: geometricPrecision;
+}
+
+/* Лист. Ровно A4, поэтому лишней пустой страницы за последней не встаёт. */
+.sheet-page {
+  position: relative;
+  width: var(--sheet-width);
+  height: var(--sheet-height);
+  padding: var(--sheet-pad-top) var(--sheet-pad-x) var(--sheet-pad-bottom);
+  background: var(--sheet-paper);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  break-after: page;
+  page-break-after: always;
+}
+
+.sheet-page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+/* Поток содержимого между шапкой и подвалом. */
+.sheet-flow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ── Декоративные дуги в углах ──────────────────────────────
+   Очень светлые и под содержимым: текст они не задевают.
+   В ч/б теме --sheet-arc-show снимает их полностью. */
+.sheet-arcs {
+  display: var(--sheet-arc-show);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sheet-arcs circle {
+  fill: none;
+  stroke: var(--sheet-arc);
+  stroke-width: 1;
+}
+
+.sheet-page > *:not(.sheet-arcs) { position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════════════════════
+   Шапка
+   ══════════════════════════════════════════════════════════ */
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 4);
+  padding-bottom: calc(var(--sheet-step) * 3);
+  border-bottom: var(--sheet-rule-width) solid var(--sheet-rule);
+  margin-bottom: calc(var(--sheet-step) * 5);
+}
+
+.sheet-logo {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 2);
+  flex: none;
+}
+
+.sheet-logo-mark { flex: none; display: block; }
+
+.sheet-logo-word {
+  font-size: var(--sheet-fs-badge);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--sheet-ink);
+}
+
+/* Вертикальная линия между логотипом и названием курса. */
+.sheet-head-rule {
+  flex: none;
+  align-self: stretch;
+  width: var(--sheet-rule-width);
+  background: var(--sheet-rule-strong);
+}
+
+.sheet-head-course { flex: 1 1 auto; }
+
+.sheet-course-name {
+  font-size: var(--sheet-fs-lead);
+  font-weight: 600;
+  color: var(--sheet-brand);
+}
+
+.sheet-course-author {
+  font-size: var(--sheet-fs-body);
+  color: var(--sheet-ink-2);
+}
+
+/* Правый угол: капслок, тонкая линия и точка. */
+.sheet-motto {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 2);
+}
+
+.sheet-motto-text {
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sheet-ink-2);
+}
+
+.sheet-tail {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 1);
+}
+
+.sheet-tail-line {
+  width: calc(var(--sheet-step) * 9);
+  height: var(--sheet-rule-width);
+  background: var(--sheet-accent);
+}
+
+.sheet-tail-dot {
+  width: calc(var(--sheet-step) * 1.5);
+  height: calc(var(--sheet-step) * 1.5);
+  border-radius: 50%;
+  background: var(--sheet-accent);
+}
+
+/* ── Компактная шапка следующих страниц: одна строка ──────── */
+.sheet-head--compact {
+  padding-bottom: calc(var(--sheet-step) * 2);
+  margin-bottom: calc(var(--sheet-step) * 4);
+  gap: calc(var(--sheet-step) * 2);
+}
+
+.sheet-head--compact .sheet-logo-word {
+  font-size: var(--sheet-fs-body);
+  line-height: 1;
+}
+
+.sheet-head--compact .sheet-runner {
+  flex: 1 1 auto;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
+.sheet-head--compact .sheet-runner b {
+  font-weight: 600;
+  color: var(--sheet-ink);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Блок названия
+   ══════════════════════════════════════════════════════════ */
+.sheet-title-block { margin-bottom: calc(var(--sheet-step) * 5); }
+
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 4);
+}
+
+/* Подзаголовок выключен по названию, а не по плашке: на образце
+   «Задания для отработки» начинается там же, где «Линейная функция». */
+.sheet-title-col { flex: 1 1 auto; min-width: 0; }
+
+.sheet-chip {
+  flex: none;
+  padding: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 4);
+  border-radius: var(--sheet-radius-md);
+  background: var(--sheet-chip-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-chip-line);
+  color: var(--sheet-chip-ink);
+  font-size: var(--sheet-fs-badge);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: var(--sheet-fs-title);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--sheet-ink);
+}
+
+.sheet-subtitle {
+  margin: calc(var(--sheet-step) * 0.5) 0 0;
+  font-size: var(--sheet-fs-lead);
+  color: var(--sheet-ink-3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Рамка «Повторяем:»
+   ══════════════════════════════════════════════════════════ */
+.sheet-recap {
+  display: flex;
+  gap: calc(var(--sheet-step) * 5);
+  padding: calc(var(--sheet-step) * 4) calc(var(--sheet-step) * 5);
+  margin-bottom: calc(var(--sheet-step) * 6);
+  background: var(--sheet-recap-bg);
+  border: var(--sheet-rule-width) solid var(--sheet-recap-line);
+  border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-recap-bar);
+  border-radius: var(--sheet-radius-lg);
+  break-inside: avoid;
+}
+
+.sheet-recap-main { flex: 1 1 auto; }
+
+.sheet-recap-title {
+  margin: 0 0 calc(var(--sheet-step) * 3);
+  font-size: var(--sheet-fs-block);
+  font-weight: 700;
+  color: var(--sheet-brand);
+}
+
+/* Пункты в две колонки сверху вниз: слева 1–3, справа 4–5,
+   как на образце. Поэтому раскладка по столбцам, а не по строкам. */
+.sheet-recap-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-columns: 1fr;
+  gap: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 5);
+}
+
+.sheet-recap-item {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 2);
+  font-size: var(--sheet-fs-body);
+}
+
+/* Номер пункта — в квадратике. */
+.sheet-recap-no {
+  flex: none;
+  width: calc(var(--sheet-step) * 5);
+  height: calc(var(--sheet-step) * 5);
+  border-radius: var(--sheet-radius-sm);
+  background: var(--sheet-num-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-num-line);
+  color: var(--sheet-num-ink);
+  font-size: var(--sheet-fs-small);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+/* Фраза справа, за вертикальной линией. */
+.sheet-recap-aside {
+  flex: none;
+  width: 42mm;
+  padding-left: calc(var(--sheet-step) * 5);
+  border-left: var(--sheet-rule-width) solid var(--sheet-recap-line);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: calc(var(--sheet-step) * 3);
+}
+
+/* Рукописный шрифт, не курсив: курсив в проекте занят чужими
+   цитатами с автором. */
+.sheet-hand {
+  font-family: var(--sheet-font-hand);
+  font-style: normal;
+  font-size: var(--sheet-fs-hand);
+  line-height: 1.25;
+  color: var(--sheet-ink);
+}
+
+.sheet-recap-aside .sheet-tail { align-self: flex-end; }
+
+/* ══════════════════════════════════════════════════════════
+   Заголовок блока — оформленная полоса, а не жирный текст
+   ══════════════════════════════════════════════════════════ */
+.sheet-block-head {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 4);
+  padding: calc(var(--sheet-step) * 2.5) calc(var(--sheet-step) * 4);
+  margin: 0 0 calc(var(--sheet-step) * 4);
+  background: var(--sheet-block-bg);
+  border: var(--sheet-rule-width) solid var(--sheet-block-line);
+  border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-block-bar);
+  border-radius: var(--sheet-radius-md);
+  break-inside: avoid;
+  /* Заголовок не остаётся один внизу страницы. Страницы всё равно
+     набирает paginate.js, но правило нужно и обычной печати из браузера. */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.sheet-block-title {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: var(--sheet-fs-block);
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.sheet-block-note {
+  flex: none;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-3);
+}
+
+/* Блок не прижимается к предыдущему. */
+.sheet-block + .sheet-block { margin-top: calc(var(--sheet-step) * 6); }
+
+/* Между кусками потока тот же ритм, что между карточками внутри
+   куска: страницу набирает paginate.js, и вертикальный отступ
+   должен быть один и тот же в обе стороны. */
+.sheet-item + .sheet-item { margin-top: calc(var(--sheet-step) * 2.5); }
+
+/* ══════════════════════════════════════════════════════════
+   Задача
+   ══════════════════════════════════════════════════════════ */
+.sheet-tasks {
+  display: grid;
+  gap: calc(var(--sheet-step) * 2.5);
+}
+
+/* Раскладка в одну колонку: чертёж справа от текста. */
+.sheet-tasks--single { grid-template-columns: 1fr; }
+
+/* Раскладка в две колонки карточек. */
+.sheet-tasks--double { grid-template-columns: 1fr 1fr; }
+
+.sheet-task {
+  display: flex;
+  gap: calc(var(--sheet-step) * 3);
+  padding: calc(var(--sheet-step) * 2.5) calc(var(--sheet-step) * 3.5);
+  background: var(--sheet-card-bg);
+  border: var(--sheet-card-width) solid var(--sheet-card-line);
+  border-radius: var(--sheet-radius-lg);
+  /* Задача никогда не разрывается между страницами. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Номер задачи — в синем квадратике, сама цифра без «№». */
+.sheet-task-no {
+  flex: none;
+  width: calc(var(--sheet-step) * 7);
+  height: calc(var(--sheet-step) * 7);
+  border-radius: var(--sheet-radius-md);
+  background: var(--sheet-chip-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-chip-line);
+  color: var(--sheet-chip-ink);
+  font-size: var(--sheet-fs-lead);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet-task-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: calc(var(--sheet-step) * 4);
+}
+
+.sheet-task--single .sheet-task-body { flex-direction: row; align-items: stretch; }
+
+/* Чертёж выше текста условия: пустота делится между условием
+   и строкой ответа, а не собирается в один провал. */
+.sheet-task--single .sheet-figure { align-self: center; }
+.sheet-task--double .sheet-task-body { flex-direction: column; }
+.sheet-task--double .sheet-task-text { justify-content: flex-start; }
+
+/* Условие и строка ответа — одна группа по центру карточки против
+   чертежа. Прижимать строку ответа к низу нельзя: чертежи разной
+   высоты, и между условием и ответом открывался бы провал. */
+.sheet-task-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sheet-task-question { margin: 0; }
+
+/* Варианты ответа: у задач с выбором. */
+.sheet-options {
+  margin: calc(var(--sheet-step) * 2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--sheet-step) * 1) calc(var(--sheet-step) * 4);
+}
+
+.sheet-option {
+  display: flex;
+  gap: calc(var(--sheet-step) * 2);
+  align-items: baseline;
+}
+
+.sheet-option-no {
+  color: var(--sheet-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Строка «Ответ: ____» — только в файле «Для ученика». */
+/* Строка ответа идёт сразу за условием, с воздухом на запись. */
+.sheet-answer-line {
+  padding-top: calc(var(--sheet-step) * 5);
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 2);
+  color: var(--sheet-ink-2);
+}
+
+.sheet-answer-blank {
+  width: calc(var(--sheet-step) * 22);
+  border-bottom: var(--sheet-rule-width) solid var(--sheet-blank);
+}
+
+/* ── Чертёж ────────────────────────────────────────────────
+   Ширина считается по клетке, а не по ширине карточки: клетка
+   одинакова на всех задачах, и точки читаются одинаково. */
+.sheet-figure { flex: none; margin: 0; }
+.sheet-figure svg { display: block; width: 100%; height: auto; }
+
+.sheet-task--double .sheet-figure { align-self: center; }
+
+/* В две колонки строка ответа — последняя в карточке, прижата к низу:
+   у соседних карточек строки ответа оказываются на одной высоте. */
+.sheet-task--double .sheet-answer-line { margin-top: auto; }
+
+/* Толщина прямых. В цветной теме обе одинаковы — там различает цвет.
+   В ч/б g(x) толще f(x): смысл не держится на цвете. */
+.graph-curve--lineA { stroke-width: var(--graph-curve-a-width); }
+.graph-curve--lineB { stroke-width: var(--graph-curve-b-width); }
+
+/* ══════════════════════════════════════════════════════════
+   Подвал
+   ══════════════════════════════════════════════════════════ */
+.sheet-foot {
+  flex: none;
+  margin-top: calc(var(--sheet-step) * 4);
+  padding-top: calc(var(--sheet-step) * 2.5);
+  border-top: var(--sheet-rule-width) solid var(--sheet-rule);
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--sheet-step) * 4);
+  font-size: var(--sheet-fs-tiny);
+  color: var(--sheet-ink-2);
+}
+
+.sheet-foot-brand { flex: none; }
+
+.sheet-foot-brand .sheet-logo-word { font-size: var(--sheet-fs-small); }
+
+.sheet-foot-course {
+  margin-top: calc(var(--sheet-step) * 0.5);
+  color: var(--sheet-ink-3);
+}
+
+.sheet-foot-middle {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 1.5);
+}
+
+.sheet-social {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 3);
+}
+
+.sheet-social-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 1.5);
+}
+
+.sheet-social-item svg { flex: none; display: block; }
+
+.sheet-social-item a {
+  color: var(--sheet-brand);
+  text-decoration: none;
+}
+
+.sheet-social-sep {
+  width: var(--sheet-rule-width);
+  align-self: stretch;
+  background: var(--sheet-rule-strong);
+}
+
+.sheet-rights {
+  margin: 0;
+  color: var(--sheet-ink-3);
+  line-height: 1.35;
+}
+
+.sheet-page-no {
+  flex: none;
+  align-self: center;
+  font-size: var(--sheet-fs-lead);
+  font-weight: 600;
+  color: var(--sheet-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Раздел «Ответы» — только файл «Для учителя»
+   ══════════════════════════════════════════════════════════ */
+.sheet-answers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-body);
+}
+
+.sheet-answers-table caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: calc(var(--sheet-step) * 2);
+}
+
+.sheet-answers-table th,
+.sheet-answers-table td {
+  border: var(--sheet-rule-width) solid var(--sheet-card-line);
+  padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 2);
+  text-align: left;
+}
+
+.sheet-answers-table th {
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  color: var(--sheet-ink-2);
+}
+
+.sheet-solution { break-inside: avoid; }
+
+/* ══════════════════════════════════════════════════════════
+   Служебное: контейнер обмера. На печать не идёт.
+   ══════════════════════════════════════════════════════════ */
+#sheet-measure {
+  position: absolute;
+  left: -9999mm;
+  top: 0;
+  visibility: hidden;
+}

@@ -411,7 +411,12 @@ function renderGraph(scene, report) {
     var d = pieces.map(function (piece) {
       return 'M' + piece.map(function (p) { return px(sx(p.x)) + ' ' + px(sy(p.y)); }).join('L');
     }).join('');
-    curveLayer.push('<path d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="' +
+    /* Класс по ключу цвета. Он нужен печати: на чёрно-белом листе цвета
+       нет, и две прямые различаются толщиной линии — её задаёт CSS,
+       а правило CSS сильнее атрибута. Без CSS работает атрибут, то есть
+       на сайте чертёж не меняется. */
+    curveLayer.push('<path class="graph-curve graph-curve--' + (curve.color || 'lineA') +
+      '" d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="' +
       THEME.width.curve + '" stroke-linecap="round" stroke-linejoin="round"/>');
 
     drawn.push({ curve: curve, pieces: pieces, stroke: stroke });
