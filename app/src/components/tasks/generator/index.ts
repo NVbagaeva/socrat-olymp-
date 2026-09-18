@@ -1,1 +1,1 @@
-export { GeneratorTab, generatorSkills } from './GeneratorTab';
+export { GeneratorTab } from './GeneratorTab';

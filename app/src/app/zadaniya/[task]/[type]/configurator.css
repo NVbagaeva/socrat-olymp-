@@ -4,19 +4,19 @@
    Карточки, галочка и варианты повторяют карточки окна выбора типа
    функции: та же рамка, то же скругление, тот же выбранный вид. */
 
-.gen {
+.cfg {
   display: grid;
   gap: var(--space-6);
 }
-.gen__title {
+.cfg__title {
   color: var(--color-text-brand);
 }
 
-.gen__layout {
+.cfg__layout {
   display: grid;
   gap: var(--space-6);
 }
-.gen__steps {
+.cfg__steps {
   display: grid;
   gap: var(--space-5);
   min-width: 0;
@@ -24,7 +24,7 @@
 
 /* ── Шаг ──────────────────────────────────────────────────────── */
 
-.gen-step {
+.cfg-step {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
@@ -32,14 +32,14 @@
   border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
-.gen-step__head {
+.cfg-step__head {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: var(--space-3);
 }
 /* Номер шага — тот же кружок, что у навыков подготовки. */
-.gen-step__no {
+.cfg-step__no {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -52,18 +52,18 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.gen-step__text {
+.cfg-step__text {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
-.gen-step__title {
+.cfg-step__title {
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
   font-weight: 700;
   color: var(--color-text-brand);
 }
-.gen-step__lead {
+.cfg-step__lead {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
@@ -71,12 +71,12 @@
 
 /* ── Карточки навыков ─────────────────────────────────────────── */
 
-.gen-skills {
+.cfg-skills {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-3);
 }
-.gen-skill {
+.cfg-skill {
   position: relative;
   display: grid;
   gap: var(--space-3);
@@ -92,19 +92,19 @@
     border-color var(--dur-hover) var(--ease),
     box-shadow var(--dur-hover) var(--ease);
 }
-.gen-skill:hover {
+.cfg-skill:hover {
   border-color: var(--color-accent-soft);
   box-shadow: var(--shadow-sm);
 }
-.gen-skill:focus-visible {
+.cfg-skill:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
-.gen-skill.is-checked {
+.cfg-skill.is-checked {
   border-color: var(--color-primary);
   background: var(--color-surface-info);
 }
-.gen-skill__check {
+.cfg-skill__check {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
@@ -116,27 +116,27 @@
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
-.gen-skill__check svg {
+.cfg-skill__check svg {
   width: 14px;
   height: 14px;
 }
-.gen-skill__chart {
+.cfg-skill__chart {
   display: block;
   width: 100%;
   max-width: 120px;
 }
-.gen-skill__text {
+.cfg-skill__text {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
-.gen-skill__title {
+.cfg-skill__title {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-text-brand);
   hyphens: auto;
 }
-.gen-skill__code {
+.cfg-skill__code {
   font-size: var(--fs-label);
   line-height: var(--lh-label);
   color: var(--color-text-tertiary);
@@ -146,41 +146,41 @@
 /* Миниатюра из движка: подложку холста движок берёт из токена
    поверхности; на голубой выбранной карточке белый квадрат читался
    бы заплаткой, поэтому в пределах миниатюры поверхность прозрачная. */
-.gen-chart {
+.cfg-chart {
   --color-surface: var(--color-transparent);
   display: block;
   width: 100%;
 }
-.gen-chart svg {
+.cfg-chart svg {
   display: block;
   width: 100%;
   height: auto;
 }
 /* Линии не худеют вместе с чертежом. */
-.gen-chart svg path,
-.gen-chart svg line,
-.gen-chart svg polyline,
-.gen-chart svg circle {
+.cfg-chart svg path,
+.cfg-chart svg line,
+.cfg-chart svg polyline,
+.cfg-chart svg circle {
   vector-effect: non-scaling-stroke;
 }
 
 /* ── Параметры ────────────────────────────────────────────────── */
 
-.gen-params {
+.cfg-params {
   display: grid;
   gap: var(--space-4);
 }
-.gen-param {
+.cfg-param {
   display: grid;
   gap: var(--space-2);
 }
-.gen-param__label {
+.cfg-param__label {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;
   color: var(--color-text);
 }
-.gen-param__options {
+.cfg-param__options {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -188,7 +188,7 @@
 
 /* Вариант в группе: та же плашка, что карточка, только меньше.
    Выключенный вариант приглушён, как закрытая карточка семейства. */
-.gen-opt {
+.cfg-opt {
   display: grid;
   gap: 2px;
   min-width: 0;
@@ -204,49 +204,49 @@
     border-color var(--dur-hover) var(--ease),
     background var(--dur-hover) var(--ease);
 }
-.gen-opt:hover {
+.cfg-opt:hover {
   border-color: var(--color-accent-soft);
 }
-.gen-opt:focus-visible {
+.cfg-opt:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
-.gen-opt.is-checked {
+.cfg-opt.is-checked {
   border-color: var(--color-primary);
   background: var(--color-surface-info);
 }
-.gen-opt:disabled {
+.cfg-opt:disabled {
   cursor: default;
   background: var(--color-surface-2);
   color: var(--color-text-tertiary);
   border-color: var(--color-border);
 }
-.gen-opt__title {
+.cfg-opt__title {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.gen-opt.is-checked .gen-opt__title {
+.cfg-opt.is-checked .cfg-opt__title {
   color: var(--color-primary);
 }
-.gen-opt__lead {
+.cfg-opt__lead {
   font-size: var(--fs-label);
   line-height: var(--lh-label);
   color: var(--color-text-secondary);
 }
-.gen-opt:disabled .gen-opt__lead {
+.cfg-opt:disabled .cfg-opt__lead {
   color: inherit;
 }
 /* Числа: варианты одной ширины, число по центру. */
-.gen-param__options--compact .gen-opt {
+.cfg-param__options--compact .cfg-opt {
   min-width: 56px;
   text-align: center;
 }
 
 /* ── Сводка ───────────────────────────────────────────────────── */
 
-.gen-summary {
+.cfg-summary {
   display: grid;
   gap: var(--space-3);
   align-content: start;
@@ -256,32 +256,54 @@
   border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
-.gen-summary__title {
+.cfg-summary__title {
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
   font-weight: 700;
   color: var(--color-text-brand);
 }
-.gen-summary__skill {
+.cfg-summary__skill {
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
   font-weight: 600;
   color: var(--color-text-brand);
 }
-.gen-summary__count {
+.cfg-summary__count {
   margin-top: calc(-1 * var(--space-2));
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
-.gen-summary__chart {
+.cfg-summary__chart {
   width: 100%;
   max-width: 240px;
   justify-self: center;
 }
 
+/* Список навыков в сводке генератора: один навык — одна строка. */
+.cfg-summary__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-brand);
+}
+.cfg-summary__code {
+  font-size: var(--fs-label);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+/* Поле «своё название»: во всю ширину шага, не шире полосы чтения. */
+.cfg-input {
+  max-width: 420px;
+}
+
 /* Плашка под чертежом: голубая подложка, значок слева. */
-.gen-note {
+.cfg-note {
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
@@ -293,7 +315,7 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
 }
-.gen-note__ico {
+.cfg-note__ico {
   flex: none;
   width: 22px;
   height: 22px;
@@ -303,16 +325,16 @@
   border: 1px solid var(--color-border-info);
   color: var(--color-primary);
 }
-.gen-note__ico svg {
+.cfg-note__ico svg {
   width: 16px;
   height: 16px;
 }
 
 /* ── Панель запуска ───────────────────────────────────────────── */
 
-.gen-bar {
+.cfg-bar {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
@@ -320,11 +342,11 @@
   border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
-.gen-bar__launch {
-  display: flex;
-  gap: var(--space-2);
+/* Две кнопки листов в генераторе. */
+.cfg-bar--two {
+  grid-template-columns: auto auto minmax(0, 1fr);
 }
-.gen-bar__summary {
+.cfg-bar__summary {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
@@ -335,23 +357,23 @@
    только за счёт порядка. */
 
 @media (min-width: 1024px) {
-  .gen__layout {
+  .cfg__layout {
     grid-template-columns: minmax(0, 1fr) 320px;
     align-items: start;
   }
-  .gen-summary {
+  .cfg-summary {
     position: sticky;
     top: var(--space-6);
   }
 }
 
 @media (max-width: 1023.98px) {
-  .gen-skills {
+  .cfg-skills {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   /* Панель прилипает к низу экрана над нижней навигацией: её высота
      задана тем же токеном, что и у самой панели навигации. */
-  .gen-bar {
+  .cfg-bar {
     position: sticky;
     bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
     z-index: 10;
@@ -361,46 +383,36 @@
 
 @media (max-width: 767.98px) {
   /* Одна колонка: карточка — строка, миниатюра справа от текста. */
-  .gen-skills {
+  .cfg-skills {
     grid-template-columns: minmax(0, 1fr);
   }
-  .gen-skill {
+  .cfg-skill {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     padding-right: var(--space-10);
   }
-  .gen-skill__text {
+  .cfg-skill__text {
     order: -1;
   }
-  .gen-skill__chart {
+  .cfg-skill__chart {
     width: 64px;
   }
-  .gen-skill__check {
+  .cfg-skill__check {
     top: 50%;
     transform: translateY(-50%);
   }
-  /* Панель столбиком: переключатель, кнопка во всю ширину, сводка.
-     В строку с переключателем кнопка не помещается, а рядом со
-     сводкой той остаётся меньше ста пикселей. Области заданы явно:
-     автоматическая раскладка ставила переключатель под сводку. */
-  .gen-bar {
+  /* Панель столбиком: кнопки во всю ширину, сводка под ними —
+     в строку кнопка не помещается. */
+  .cfg-bar,
+  .cfg-bar--two {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      'launch'
-      'start'
-      'summary';
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
   }
-  .gen-bar__launch {
-    grid-area: launch;
-  }
-  .gen-bar__start {
-    grid-area: start;
+  .cfg-bar__start {
     width: 100%;
   }
-  .gen-bar__summary {
-    grid-area: summary;
+  .cfg-bar__summary {
     font-size: var(--fs-label);
     line-height: var(--lh-label);
   }

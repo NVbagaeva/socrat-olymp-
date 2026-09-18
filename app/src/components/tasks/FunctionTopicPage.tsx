@@ -4,7 +4,8 @@ import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
-import { GeneratorTab, generatorSkills } from './generator';
+import { prototypeSkills } from './configurator';
+import { GeneratorTab } from './generator';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
@@ -55,7 +56,7 @@ export function FunctionTopicPage({
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
   /* Вкладка «Генератор» есть только у семейства с наборами
      прототипов в данных движка: решает манифест, а не конфиг. */
-  const hasGenerator = generatorSkills(findManifestFamily(subtopic.id)).length > 0;
+  const hasGenerator = prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
 
   return (
     <main className="app-main">
@@ -109,7 +110,7 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
-        trainer={trainer ?? <TrainerShell base={base} mode={null} />}
+        trainer={trainer ?? <TrainerShell subtopic={subtopic} />}
         trainerHref={`${base}/trenazher/`}
         generator={hasGenerator ? <GeneratorTab subtopic={subtopic} /> : undefined}
         tutors={section.tutors}

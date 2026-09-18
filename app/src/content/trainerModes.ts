@@ -1,79 +1,87 @@
 /**
- * Режимы вкладки «Тренажёр» задания №12.
+ * Вкладка «Тренажёр» задания №12: слова и подписи.
  *
- * Здесь перечислено, какие режимы показываются и в каком порядке.
- * Сами задачи приходят из движка graph/ по наборам прототипов:
- * условий, чертежей и ответов в проекте нет и не будет.
+ * Тренировка собирается на вкладке: навык, режим, количество,
+ * сложность. Сами задачи приходят из движка graph/ по наборам
+ * прототипов: условий, чертежей и ответов в проекте нет и не будет.
+ * Названия навыков и уровней — в content/skills12.ts.
  */
 
-export type TrainerModeId = 'value' | 'argument' | 'intersection' | 'mixed';
-
-/** Какую иконку рисует плашка режима. */
-export type TrainerIconId = 'value' | 'argument' | 'intersection' | 'mixed';
+export type TrainerModeId = 'practice' | 'mixed' | 'mistakes' | 'control';
 
 export interface TrainerMode {
-  /** Часть адреса: /trenazher/{id}. */
   id: TrainerModeId;
-  /** Цифра в списке: 01 … 04. */
-  no: string;
   title: string;
-  /** Вторая строка в списке режимов. */
   lead: string;
-  icon: TrainerIconId;
-  /** Наборы прототипов движка, из которых берутся задания. */
-  setIds: string[];
 }
 
 export const trainerModes: TrainerMode[] = [
-  {
-    id: 'value',
-    no: '01',
-    title: 'Найти значение функции',
-    lead: 'По графику (найти f(x))',
-    icon: 'value',
-    setIds: ['12.A'],
-  },
-  {
-    id: 'argument',
-    no: '02',
-    title: 'Найти аргумент',
-    lead: 'По графику (найти x)',
-    icon: 'argument',
-    setIds: ['12.B'],
-  },
-  {
-    id: 'intersection',
-    no: '03',
-    title: 'Точка пересечения графиков',
-    lead: 'Найти абсциссу или ординату',
-    icon: 'intersection',
-    setIds: ['12.C', '12.D'],
-  },
-  {
-    id: 'mixed',
-    no: '04',
-    title: 'Смешанный тренажёр',
-    lead: 'Все типы заданий вперемешку',
-    icon: 'mixed',
-    setIds: ['12.A', '12.B', '12.C', '12.D'],
-  },
+  { id: 'practice', title: 'Отработка', lead: 'Один тип задач' },
+  { id: 'mixed', title: 'Смешанная', lead: 'Несколько типов' },
+  { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
+  { id: 'control', title: 'Контроль', lead: 'Без подсказок' },
 ];
+
+/**
+ * Ярлыки к конфигуратору: прежние адреса /trenazher/{id}/ открывают
+ * ту же вкладку с уже выбранным навыком или режимом. Своих задач у
+ * ярлыка нет — тренировка собирается там же, где и без него.
+ */
+export type TrainerShortcutId = 'value' | 'argument' | 'intersection' | 'mixed';
+
+export interface TrainerShortcut {
+  /** Часть адреса: /trenazher/{id}. */
+  id: TrainerShortcutId;
+  /** Заголовок страницы и крошка. */
+  title: string;
+  /** Что выбрано при заходе: набор движка и (или) режим. */
+  skill: string | null;
+  mode: TrainerModeId;
+}
+
+export const trainerShortcuts: TrainerShortcut[] = [
+  { id: 'value', title: 'Найти значение функции', skill: '12.A', mode: 'practice' },
+  { id: 'argument', title: 'Найти аргумент', skill: '12.B', mode: 'practice' },
+  { id: 'intersection', title: 'Точка пересечения графиков', skill: '12.C', mode: 'practice' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skill: null, mode: 'mixed' },
+];
+
+export function findTrainerShortcut(id: string): TrainerShortcut | undefined {
+  return trainerShortcuts.find((item) => item.id === id);
+}
+
+export function trainerShortcutIds(): TrainerShortcutId[] {
+  return trainerShortcuts.map((item) => item.id);
+}
 
 /** Заголовок и подписи вкладки. */
 export const trainerPage = {
   title: 'Тренажёр',
-  /* Строка выбора в закрытом состоянии. */
-  pickTitle: 'Выберите тип заданий',
-  pickLead: 'Нажмите, чтобы начать тренировку',
+  /* Конфигуратор: заголовок с макета и подписи шагов. */
+  builder: 'Собери свою тренировку',
+  skill: {
+    step: '1',
+    title: 'Выбери навык',
+    /* «{family}» подставляется названием семейства. */
+    lead: 'Что именно хочешь потренировать в разделе «{family}»?',
+  },
+  params: {
+    step: '2',
+    title: 'Настрой параметры тренировки',
+    lead: 'Выбери формат, количество заданий и сложность',
+    mode: 'Режим тренировки',
+    /* Подпись режима «Повтор ошибок», пока в истории ошибок пусто. */
+    noMistakes: 'Пока нет ошибок для повторения',
+    count: 'Количество заданий',
+    all: 'Все',
+    level: 'Сложность',
+  },
+  summary: {
+    title: 'Выбранная тренировка',
+    note: 'Все задания соответствуют реальным прототипам ЕГЭ.',
+  },
+  start: 'Начать тренировку',
 };
-
-export function findTrainerMode(id: string): TrainerMode | undefined {
-  return trainerModes.find((mode) => mode.id === id);
-}
-
-export function trainerModeIds(): TrainerModeId[] {
-  return trainerModes.map((mode) => mode.id);
-}
 
 /** Название типа задания по набору движка: для статистики подхода. */
 export const trainerKindTitle: Record<string, string> = {
