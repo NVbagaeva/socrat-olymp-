@@ -71,7 +71,7 @@ export function TrainerScreen({
       order.length === 0
         ? pool.slice(0, roundSize)
         : order.map((at) => pool[at]).filter((item): item is TrainerTask => item !== undefined),
-    [order, pool],
+    [order, pool, roundSize],
   );
 
   const [index, setIndex] = useState(0);
