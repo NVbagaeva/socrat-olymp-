@@ -22,24 +22,40 @@ export interface Razdel {
   /** Римский номер раздела, как в задачнике. */
   nomer: string;
   nazvanie: string;
+  /** Часть адреса: /zadaniya/3/{slug}. */
+  slug: string;
   prototipy: readonly Prototype[];
 }
 
 export const RAZDELY: readonly Razdel[] = [
-  { nomer: 'I', nazvanie: 'Параллелепипед и куб', prototipy: RAZDEL_1 },
-  { nomer: 'II', nazvanie: 'Призма', prototipy: RAZDEL_2 },
-  { nomer: 'III', nazvanie: 'Пирамида', prototipy: RAZDEL_3 },
-  { nomer: 'IV', nazvanie: 'Конус', prototipy: RAZDEL_4 },
-  { nomer: 'V', nazvanie: 'Цилиндр', prototipy: RAZDEL_5 },
-  { nomer: 'VI', nazvanie: 'Шар', prototipy: RAZDEL_6 },
-  { nomer: 'VII', nazvanie: 'Вписанный и описанный цилиндр', prototipy: RAZDEL_7 },
-  { nomer: 'VIII', nazvanie: 'Вписанная и описанная сфера', prototipy: RAZDEL_8 },
+  { nomer: 'I', nazvanie: 'Параллелепипед и куб', slug: 'parallelepiped', prototipy: RAZDEL_1 },
+  { nomer: 'II', nazvanie: 'Призма', slug: 'prizma', prototipy: RAZDEL_2 },
+  { nomer: 'III', nazvanie: 'Пирамида', slug: 'piramida', prototipy: RAZDEL_3 },
+  { nomer: 'IV', nazvanie: 'Конус', slug: 'konus', prototipy: RAZDEL_4 },
+  { nomer: 'V', nazvanie: 'Цилиндр', slug: 'cilindr', prototipy: RAZDEL_5 },
+  { nomer: 'VI', nazvanie: 'Шар', slug: 'shar', prototipy: RAZDEL_6 },
+  {
+    nomer: 'VII',
+    nazvanie: 'Вписанный и описанный цилиндр',
+    slug: 'vpisannyy-cilindr',
+    prototipy: RAZDEL_7,
+  },
+  {
+    nomer: 'VIII',
+    nazvanie: 'Вписанная и описанная сфера',
+    slug: 'vpisannaya-sfera',
+    prototipy: RAZDEL_8,
+  },
 ];
 
 export const BANK: readonly Prototype[] = RAZDELY.flatMap((razdel) => [...razdel.prototipy]);
 
 export function prototypeById(id: string): Prototype | undefined {
   return BANK.find((p) => p.id === id);
+}
+
+export function razdelBySlug(slug: string): Razdel | undefined {
+  return RAZDELY.find((razdel) => razdel.slug === slug);
 }
 
 export { RAZDEL_1, RAZDEL_2, RAZDEL_3, RAZDEL_4, RAZDEL_5, RAZDEL_6, RAZDEL_7, RAZDEL_8 };
