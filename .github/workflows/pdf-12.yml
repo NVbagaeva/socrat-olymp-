@@ -1,0 +1,100 @@
+name: PDF 12
+
+# Собирает сборник «Задание 12. Линейная функция» и отдаёт готовые
+# файлы. Нужен затем, чтобы PDF можно было получить, ничего не
+# устанавливая у себя: Chromium и Playwright живут здесь.
+#
+# Этот же workflow приводит в порядок pnpm-lock.yaml. Playwright
+# объявлен в devDependencies, но обновить lock-файл там, где его
+# добавляли, было нельзя: у песочницы нет доступа к реестру npm.
+# Поэтому install идёт с --no-frozen-lockfile, а обновлённый lock
+# коммитится обратно в ветку — после этого обычные check.yml
+# и deploy.yml снова проходят со --frozen-lockfile.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Что собирать
+        type: choice
+        default: sample
+        options: [sample, full]
+
+# Коммит lock-файла и готовых PDF — это push в ту же ветку.
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf-12-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Сборка PDF
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      # Именно --no-frozen-lockfile: со --frozen-lockfile pnpm
+      # не обновляет lock-файл, а отказывается ставить.
+      - name: Поставить зависимости и обновить lock-файл
+        working-directory: app
+        run: pnpm install --no-frozen-lockfile
+
+      # Lock-файл коммитится сразу, до сборки: даже если печать
+      # упадёт, ветка останется в рабочем состоянии.
+      - name: Вернуть обновлённый lock-файл в ветку
+        run: |
+          if git diff --quiet -- app/pnpm-lock.yaml; then
+            echo "lock-файл не менялся"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/pnpm-lock.yaml
+          git commit -m "pnpm-lock.yaml: playwright для сборки PDF"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      # Браузер ставится отдельной командой, а не постустановочным
+      # скриптом пакета: pnpm 10 их не запускает, если пакета нет
+      # в onlyBuiltDependencies.
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Проверить банк задания №12
+        working-directory: app
+        run: pnpm validate:graph
+
+      - name: Собрать PDF
+        working-directory: app
+        run: |
+          if [ "${{ inputs.target }}" = "full" ]; then
+            pnpm build:pdf-12
+          else
+            pnpm build:pdf-12-sample
+          fi
+
+      # Файлы уезжают архивом на страницу запуска: скачать можно
+      # сразу, локальная копия репозитория для этого не нужна.
+      - name: Отдать файлы архивом
+        uses: actions/upload-artifact@v4
+        with:
+          name: zadanie-12-pdf
+          path: app/public/materials/zadanie-12/*.pdf
+          if-no-files-found: error
+          retention-days: 90

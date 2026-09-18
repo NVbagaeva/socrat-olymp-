@@ -83,15 +83,23 @@ pnpm build:pdf-12-sample   # образец: первый блок, обе те�
 pnpm build:pdf-12          # весь сборник
 ```
 
-Скрипту нужен Playwright. В зависимостях проекта его нет, потому
-что реестр npm в рабочей среде закрыт политикой и lock-файл оттуда
-не обновить. Поставить одной командой:
+Скрипту нужен Playwright — он объявлен в `devDependencies`:
 
 ```bash
-pnpm add -D playwright
+pnpm install
+pnpm exec playwright install chromium
 ```
 
-Браузер загружать не нужно, если задан `PLAYWRIGHT_BROWSERS_PATH`.
+Ставить ничего не хочется — та же сборка есть в GitHub Actions:
+вкладка **Actions**, workflow **PDF 12**, кнопка **Run workflow**.
+Готовые файлы уезжают архивом на страницу запуска.
+
+Там же собирается и `pnpm-lock.yaml`: playwright добавляли в среде
+без доступа к реестру npm, поэтому lock-файл обновляется первым
+шагом этого workflow и коммитится обратно в ветку. **Пока этот шаг
+не прошёл, `check.yml` и `deploy.yml` будут падать** на
+`pnpm install --frozen-lockfile`: pnpm не обновляет lock-файл,
+а отказывается ставить.
 
 ## Формулы
 
