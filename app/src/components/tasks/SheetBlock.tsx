@@ -3,7 +3,10 @@ import { Solid } from '@/components/solid/Solid';
 import { FigureZoom } from '@/components/ui';
 import type { SheetItem } from '@/content/shpargalki';
 import { formulaKey } from '@/lib/zadanie3/formulas';
-import { SHEETS } from '@/lib/solid/drawings';
+/* Напрямую из sheets, а не из сборного drawings: тот собирает
+   чертежи разделов из данных прототипов и тянет за собой весь
+   банк — вместе с формулами ответов и разборами. */
+import { SHEETS } from '@/lib/solid/drawings/sheets';
 
 export interface SheetBlockProps {
   items: readonly SheetItem[];
