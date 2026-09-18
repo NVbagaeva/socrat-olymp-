@@ -10,13 +10,16 @@
   "uniqueIntercepts": "nonzero",
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 3,
-    "minPositiveB": 1,
-    "minNegativeB": 1,
-    "minFractionK": 3,
+    "count": 10,
+    "minPositiveB": 5,
+    "minNegativeB": 5,
+    "minIncreasing": 5,
+    "minDecreasing": 5,
+    "minFractionK": 10,
     "allFractionB": true,
     "interceptMargin": 2,
-    "uniquePairs": true
+    "uniquePairs": true,
+    "minDistinctAbsK": 3
   },
   "tasks": [
     {
@@ -30,10 +33,14 @@
         "denominators": [
           2
         ],
-        "direction": "up",
         "bKind": "half",
-        "bSign": "positive",
-        "bVisible": true
+        "bVisible": true,
+        "direction": "up",
+        "absK": [
+          1,
+          2
+        ],
+        "bSign": "positive"
       }
     },
     {
@@ -47,10 +54,14 @@
         "denominators": [
           2
         ],
-        "direction": "down",
         "bKind": "half",
-        "bSign": "negative",
-        "bVisible": true
+        "bVisible": true,
+        "direction": "down",
+        "absK": [
+          1,
+          2
+        ],
+        "bSign": "negative"
       }
     },
     {
@@ -64,10 +75,161 @@
         "denominators": [
           2
         ],
-        "direction": "up",
         "bKind": "half",
-        "bSign": "negative",
-        "bVisible": true
+        "bVisible": true,
+        "direction": "up",
+        "absK": [
+          3,
+          2
+        ],
+        "bSign": "negative"
+      }
+    },
+    {
+      "id": "P12-6-04",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Возьми любую из двух отмеченных точек — обе лежат на прямой, обе годятся, ответ выйдет один и тот же.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "down",
+        "absK": [
+          3,
+          2
+        ],
+        "bSign": "positive"
+      }
+    },
+    {
+      "id": "P12-6-05",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Подставляй координаты на свои места: $x$ вместо $x$, $y$ вместо $y$. Перепутаешь — получится другая прямая.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "up",
+        "absK": [
+          5,
+          2
+        ],
+        "bSign": "positive"
+      }
+    },
+    {
+      "id": "P12-6-06",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "После подстановки останется уравнение с одним неизвестным $b$: перенеси известное число вправо.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "down",
+        "absK": [
+          5,
+          2
+        ],
+        "bSign": "negative"
+      }
+    },
+    {
+      "id": "P12-6-07",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "У прямой с дробным $k$ произведение $kx$ тоже бывает дробным — это нормально, $b$ всё равно найдётся.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "up",
+        "absK": [
+          1,
+          2
+        ],
+        "bSign": "negative"
+      }
+    },
+    {
+      "id": "P12-6-08",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Проверь себя: подставь вторую отмеченную точку и найденный $b$ — равенство должно сойтись.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "down",
+        "absK": [
+          1,
+          2
+        ],
+        "bSign": "positive"
+      }
+    },
+    {
+      "id": "P12-6-09",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Пересечение видно, но оно между клетками: «примерно $-1{,}5$» в ответе не принимают, нужно точное значение.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "up",
+        "absK": [
+          3,
+          2
+        ],
+        "bSign": "positive"
+      }
+    },
+    {
+      "id": "P12-6-10",
+      "question": "На рисунке изображён график линейной функции $y = kx + b$. Отмечены две точки с целыми координатами. Найдите $b$.",
+      "hint": "Знак $b$ смотри по результату вычисления, а не по картинке: на глаз половину клетки легко перепутать.",
+      "answerRule": "b",
+      "answerType": "number",
+      "constraints": {
+        "slope": "fraction",
+        "denominators": [
+          2
+        ],
+        "bKind": "half",
+        "bVisible": true,
+        "direction": "down",
+        "absK": [
+          3,
+          2
+        ],
+        "bSign": "negative"
       }
     }
   ]
