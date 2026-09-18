@@ -875,19 +875,19 @@
       "seed": 12040
     },
     "12.D-13": {
-      "answer": "-6",
+      "answer": "-8",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-14": {
-      "answer": "5,5",
+      "answer": "6,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-15": {
-      "answer": "-5,2",
+      "answer": "-6,2",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
@@ -899,7 +899,7 @@
       "seed": 12040
     },
     "12.D-17": {
-      "answer": "-5,6",
+      "answer": "-6,6",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
@@ -911,13 +911,13 @@
       "seed": 12040
     },
     "12.D-19": {
-      "answer": "-8",
+      "answer": "8,5",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040
     },
     "12.D-20": {
-      "answer": "6",
+      "answer": "-12",
       "answerType": "number",
       "level": "unlucky",
       "seed": 12040

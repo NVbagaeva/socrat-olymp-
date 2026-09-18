@@ -23,6 +23,7 @@
     },
     "intersectionInside": 0,
     "intersectionOffscreen": 20,
+    "intersectionOffscreenMin": 1.5,
     "intersectionMargin": 2,
     "askedCoordinateOffscreen": 20,
     "bothIncreasing": 2,

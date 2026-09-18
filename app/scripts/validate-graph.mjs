@@ -669,6 +669,19 @@ function checkComposition(set, tasks) {
           Math.abs(task.meta.intersection.y) <= win.ymax) {
         errors.push(where + '/' + task.id + ': пересечение помечено «за кадром», но попадает в окно');
       }
+
+      /* Вынести точку за рамку мало: если прямые сходятся у самого края,
+         ответ снимается с чертежа продолжением линий на глаз. Задача,
+         которая просит запас, обязана его иметь. */
+      var source = (set.tasks || []).filter(function (item) { return item.id === task.id; })[0];
+      var own = source && source.constraints && source.constraints.intersection &&
+                source.constraints.intersection.offscreenMin;
+      var least = own === undefined ? rules.intersectionOffscreenMin : own;
+      if (least !== undefined && task.meta.intersection.offscreenBy < least - 1e-9) {
+        errors.push(where + '/' + task.id + ': точка пересечения вынесена за окно на ' +
+          Math.round(task.meta.intersection.offscreenBy * 10) / 10 +
+          ' клетки, набор просит не меньше ' + least);
+      }
     });
 
     /* Ответ пересчитывается независимо: по двум уравнениям с чертежа. */
