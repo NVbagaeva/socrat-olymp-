@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { Button, FigureZoom, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import type { PrepTask } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
@@ -231,10 +231,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
             dangerouslySetInnerHTML={{ __html: task.questionHtml }}
           />
           {task.chartSvg === null ? null : (
-            <span
-              className="chart ptask__chart"
-              dangerouslySetInnerHTML={{ __html: task.chartSvg }}
-            />
+            <FigureZoom className="chart ptask__chart" label={`Чертёж к заданию ${task.no}`}>
+              <span dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+            </FigureZoom>
           )}
         </div>
 

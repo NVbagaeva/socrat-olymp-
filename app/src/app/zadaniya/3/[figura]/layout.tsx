@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Solid } from '@/components/solid/Solid';
-import { Breadcrumbs } from '@/components/ui';
+import { Breadcrumbs, FigureZoom } from '@/components/ui';
 import { stereometria } from '@/content/stereometria';
 import { tasksPage } from '@/content/tasks';
 import { razdelBySlug } from '@/lib/zadanie3';
@@ -72,7 +72,9 @@ export default async function FiguraLayout({
           </div>
 
           <div className="section-head__media">
-            <Solid model={thumb(razdel.nomer)} />
+            <FigureZoom label={`${razdel.nazvanie}: чертёж фигуры`}>
+              <Solid model={thumb(razdel.nomer)} />
+            </FigureZoom>
           </div>
         </header>
 
