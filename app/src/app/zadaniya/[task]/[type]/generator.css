@@ -379,20 +379,29 @@
     top: 50%;
     transform: translateY(-50%);
   }
-  /* Панель ниже: переключатель и сводка в одну строку, кнопка во
-     всю ширину под ними — в строку с переключателем она не
-     помещается, а три строки забирали бы треть экрана. */
+  /* Панель столбиком: переключатель, кнопка во всю ширину, сводка.
+     В строку с переключателем кнопка не помещается, а рядом со
+     сводкой той остаётся меньше ста пикселей. Области заданы явно:
+     автоматическая раскладка ставила переключатель под сводку. */
   .gen-bar {
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-2) var(--space-3);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'launch'
+      'start'
+      'summary';
+    gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
   }
-  .gen-bar__summary {
-    order: -1;
-    grid-column: 2;
+  .gen-bar__launch {
+    grid-area: launch;
   }
   .gen-bar__start {
-    grid-column: 1 / -1;
+    grid-area: start;
     width: 100%;
+  }
+  .gen-bar__summary {
+    grid-area: summary;
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
   }
 }
