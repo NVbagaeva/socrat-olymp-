@@ -1,0 +1,72 @@
+/* Витрина компонентов вероятности. Служебная страница: в меню
+   не входит, не индексируется. */
+
+.v4 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.v4__lead {
+  max-width: 82ch;
+  color: var(--color-text-secondary);
+}
+
+.v4__section {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+
+.v4__title {
+  margin: 0;
+}
+
+.v4__metod {
+  margin: var(--space-1) 0 var(--space-2);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Два набора параметров рядом: так сразу видно, что меняется только
+   параметрами. На узком экране — друг под другом. */
+.v4__pair {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .v4__pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.v4__case {
+  display: grid;
+  gap: var(--space-3);
+  /* Без этого строки растягиваются на высоту соседней карточки и
+     подпись отрывается от рисунка. */
+  align-content: start;
+  margin: 0;
+}
+
+.v4__case-head {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.v4__case-head b {
+  color: var(--color-text);
+}
+
+/* Рамка вокруг рисунка — только для витрины: в карточке задачи у
+   рисунка подложки нет. */
+.v4__frame {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}

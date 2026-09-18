@@ -1,0 +1,325 @@
+/* Компоненты вероятности: плитки, таблица, прямая, круг, дерево, сетка.
+
+   Один файл на все шесть: у них общий язык — синий строит рисунок,
+   оранжевый отмечает благоприятное. Ни одного значения цвета, кегля
+   или отступа здесь нет, только токены проекта.
+
+   Все рисунки — SVG с viewBox и шириной 100 %: на узком экране они
+   уменьшаются целиком, а не обрезаются. */
+
+.pr-tiles,
+.pr-grid,
+.pr-line,
+.pr-circle,
+.pr-tree,
+.pr-hundred {
+  display: block;
+  /* Ширина и высота проставлены в самом SVG. Здесь — только верхняя
+     граница: рисунок ужимается на узком экране и не раздувается на
+     широком. width: 100 % растягивал бы мелкую таблицу 2×2 во всю
+     колонку, и подписи в ней становились бы гигантскими. */
+  max-width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+  /* Кегль подписей внутри рисунка задан в единицах viewBox, поэтому
+     он масштабируется вместе с картинкой. */
+  font-size: 15px;
+}
+
+/* Математические буквы — антиква курсивом: n, m, P, L, l.
+   Тот же стек, что в остальном разделе. */
+.pr-math {
+  font-family: var(--font-math);
+  font-style: italic;
+}
+
+/* Счёт под рисунком и итоговая мера. */
+.pr-counts,
+.pr-total {
+  fill: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+/* ── Плитки исходов ─────────────────────────────────────────────── */
+
+.pr-tile rect {
+  fill: var(--color-surface-soft);
+  stroke: var(--color-border-info);
+  stroke-width: 1;
+}
+.pr-tile text {
+  fill: var(--color-text-brand);
+  font-size: 13px;
+}
+.pr-tile--favorable rect {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+.pr-tile--favorable text {
+  fill: var(--color-text-inverse);
+}
+
+/* ── Таблица исходов ────────────────────────────────────────────── */
+
+.pr-grid .pr-axis {
+  fill: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+.pr-grid .pr-head {
+  fill: var(--color-text-secondary);
+  font-size: 14px;
+}
+.pr-cell rect {
+  fill: var(--color-surface);
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+.pr-cell text {
+  fill: var(--color-text);
+  font-size: 14px;
+}
+.pr-cell--favorable rect {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+}
+.pr-cell--favorable text {
+  fill: var(--color-text-inverse);
+}
+.pr-cell--selected rect {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.pr-cell--interactive {
+  cursor: pointer;
+}
+.pr-cell--interactive:hover rect {
+  fill: var(--color-surface-soft);
+}
+.pr-cell--interactive:focus-visible {
+  outline: none;
+}
+.pr-cell--interactive:focus-visible rect {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+/* ── Координатная прямая ────────────────────────────────────────── */
+
+/* Область условия. Полупрозрачная намеренно: там, где две области
+   налагаются, цвет темнеет сам собой — это и есть пересечение. */
+.pr-band {
+  fill: var(--color-accent);
+  fill-opacity: 0.16;
+}
+.pr-band-edge {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+/* Граница условия — пунктиром: это не сама ось, а вспомогательная линия. */
+.pr-band-rule {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.pr-band-label {
+  fill: var(--color-accent);
+  font-size: 16px;
+}
+
+.pr-axis-line {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.pr-axis-arrow {
+  fill: var(--color-primary);
+}
+.pr-axis-name {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+
+.pr-tick line {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.pr-tick text {
+  fill: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* Благоприятный отрезок на оси: оранжевый и заметно толще оси. */
+.pr-favorable {
+  stroke: var(--color-accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* Кружок границы: пустой при строгой, закрашенный при нестрогой. */
+.pr-bound {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+}
+.pr-bound--inclusive {
+  fill: var(--color-primary);
+}
+
+.pr-length {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+.pr-line .pr-total {
+  fill: var(--color-primary);
+  font-size: 14px;
+}
+
+/* ── Отношение мер на круге ─────────────────────────────────────── */
+
+.pr-whole {
+  fill: var(--color-surface-soft);
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.pr-part {
+  fill: var(--color-accent);
+  fill-opacity: 0.55;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+/* Вложенная фигура закрашена плотно: у неё нет второго слоя,
+   с которым надо было бы смешиваться. */
+.pr-part--area {
+  fill-opacity: 0.85;
+}
+.pr-mark line {
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+.pr-mark text {
+  fill: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* ── Дерево вероятностей ────────────────────────────────────────── */
+
+.pr-level {
+  fill: var(--color-text-tertiary);
+  font-size: 13px;
+}
+.pr-branch line {
+  stroke: var(--color-border-strong);
+  stroke-width: 2;
+}
+.pr-node {
+  fill: var(--color-primary);
+}
+.pr-node--root {
+  fill: var(--color-text-brand);
+}
+.pr-branch-label {
+  fill: var(--color-text);
+  font-size: 13px;
+}
+.pr-branch-p {
+  fill: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+/* Подходящий путь усилен, остальные приглушены — за счёт прозрачности,
+   а не второго цвета: цветов в рисунке и так два. */
+.pr-branch--highlighted line {
+  stroke: var(--color-primary);
+  stroke-width: 3.5;
+}
+.pr-branch--highlighted .pr-branch-p,
+.pr-branch--highlighted .pr-branch-label {
+  fill: var(--color-text-brand);
+  font-weight: 600;
+}
+.pr-branch--dimmed {
+  opacity: 0.38;
+}
+
+.pr-leaf {
+  fill: var(--color-text-secondary);
+  font-size: 15px;
+}
+.pr-leaf--highlighted {
+  fill: var(--color-accent);
+  font-weight: 600;
+}
+.pr-leaf--dimmed {
+  opacity: 0.38;
+}
+.pr-tree .pr-total {
+  fill: var(--color-text-brand);
+  font-size: 16px;
+}
+
+/* ── Сетка удобного числа ───────────────────────────────────────── */
+
+.pr-unit {
+  stroke: var(--color-surface);
+  stroke-width: 1;
+}
+.pr-unit--empty {
+  fill: var(--color-track);
+}
+.pr-unit--soft {
+  fill: var(--color-heat-2);
+}
+.pr-unit--mid {
+  fill: var(--color-heat-3);
+}
+.pr-unit--strong {
+  fill: var(--color-heat-4);
+}
+.pr-unit--highlighted {
+  fill: var(--color-accent);
+}
+.pr-unit--dimmed {
+  opacity: 0.45;
+}
+
+.pr-legend text {
+  fill: var(--color-text);
+  font-size: 14px;
+}
+.pr-legend--highlighted text {
+  fill: var(--color-text-brand);
+  font-weight: 600;
+}
+.pr-legend--dimmed {
+  opacity: 0.5;
+}
+.pr-hundred .pr-total {
+  fill: var(--color-accent);
+  font-size: 15px;
+}
+
+/* ── Состояния всего рисунка ────────────────────────────────────── */
+
+/* Приходят от карточки задачи: рисунок сам про верность ответа
+   ничего не знает. */
+.pr-is-correct .pr-favorable,
+.pr-is-correct .pr-part {
+  stroke: var(--color-success);
+}
+.pr-is-correct .pr-tile--favorable rect,
+.pr-is-correct .pr-cell--favorable rect,
+.pr-is-correct .pr-unit--highlighted {
+  fill: var(--color-success);
+  stroke: var(--color-success);
+}
+.pr-is-incorrect .pr-tile--favorable rect,
+.pr-is-incorrect .pr-cell--favorable rect,
+.pr-is-incorrect .pr-unit--highlighted {
+  fill: var(--color-error);
+  stroke: var(--color-error);
+}
+.pr-is-selected {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: var(--space-2);
+  border-radius: var(--radius-md);
+}
