@@ -22,6 +22,7 @@
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
+    "test:z3-nabor": "node scripts/check-z3-nabor.mjs",
     "test:secrets": "node scripts/check-bundle-secrets.mjs"
   },
   "dependencies": {
