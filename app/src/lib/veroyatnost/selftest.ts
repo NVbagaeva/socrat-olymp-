@@ -17,7 +17,7 @@
  */
 
 import { otvetUchenika, prepOtvet } from './index';
-import { LABIRINT, razvilki, veroyatnostVyhoda, vyhody } from './labirint';
+import { LABIRINT, proverkaRisunka, razvilki, veroyatnostVyhoda, vyhody } from './labirint';
 import { sealAnswer } from './secret';
 import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
 
@@ -324,6 +324,10 @@ export function checkLabirint(): string[] {
   if (razvilok !== spisok.length - 1) {
     problems.push(`развилок ${razvilok} при ${spisok.length} выходах — так не бывает`);
   }
+
+  /* Рисунок не должен склеивать разные ветки: иначе на картинке будет
+     проход, которого в дереве нет. */
+  problems.push(...proverkaRisunka(LABIRINT));
 
   /* Сумма по всем выходам обязана быть единицей: паук куда-нибудь
      да выйдет. Это ловит потерянную ветку дерева. */
