@@ -7,7 +7,12 @@ import {
   OutcomeTiles,
   ProbabilityTree,
 } from '@/components/probability';
+import { ProblemCard } from '@/components/tasks/card';
+import { METODY } from '@/lib/veroyatnost/model';
+import { bank4Pool, prep4Pool } from '@/lib/veroyatnost/pool';
+import 'katex/dist/katex.min.css';
 import '@/components/probability/probability.css';
+import '@/components/tasks/card/problem-card.css';
 import './veroyatnost-4.css';
 
 /* Служебная витрина компонентов вероятности (раздел 04 референса).
@@ -288,6 +293,53 @@ const RAZDELY: Razdel[] = [
   },
 ];
 
+/* ── Карточка задачи: три варианта ──────────────────────────────── */
+
+const PREP = prep4Pool().flatMap((blok) => blok.zadachi);
+const BANK = bank4Pool();
+
+function zadachaPrep(id: string) {
+  const est = PREP.find((z) => z.id === id);
+  if (est === undefined) {
+    throw new Error(`Нет подготовительной задачи ${id}`);
+  }
+  return est;
+}
+
+function variantBanka(id: string, n: number) {
+  const kind = BANK.kinds.find((k) => k.id === id);
+  const variant = kind?.variants.find((v) => v.n === n);
+  if (kind === undefined || variant === undefined) {
+    throw new Error(`Нет варианта ${id}-${n}`);
+  }
+  return { ...variant, id: `${id}-${n}` };
+}
+
+function metodLabel(method: string | undefined): string | undefined {
+  return METODY.find((m) => m.id === method)?.nazvanie;
+}
+
+const KARTOCHKI = [
+  {
+    title: 'Полная: условие · визуализация · решение',
+    note: 'k4-01, решение раскрыто целиком, рисунок в режиме ответа. Так карточка выглядит после «Показать решение».',
+    zadacha: zadachaPrep('k4-01'),
+    initial: { state: 'revealed' as const, shagov: 4 },
+  },
+  {
+    title: 'Решение раскрывается по шагам',
+    note: 'p4-18, вариант 4: показаны два шага из трёх, кнопка ведёт к третьему, потом к ответу.',
+    zadacha: variantBanka('p4-18', 4),
+    initial: { state: 'revealed' as const, shagov: 2 },
+  },
+  {
+    title: 'variant="condition" — только условие',
+    note: 'k4-16: ни рисунка, ни решения, ни поля ответа. Для режима «Узнай метод».',
+    zadacha: zadachaPrep('k4-16'),
+    initial: undefined,
+  },
+] as const;
+
 export default function Page() {
   return (
     <main className="v4">
@@ -302,6 +354,35 @@ export default function Page() {
         карточке задачи она появляется только вместе с решением: до ответа эти параметры не
         передаются, иначе ответ оказался бы в разметке страницы.
       </p>
+
+      <section className="v4__section">
+        <h2 className="v4__title">ProblemCard</h2>
+        <p className="v4__metod">Раздел 05 — карточка задачи</p>
+        <p className="v4__lead">
+          Общий компонент: условие, место под иллюстрацию, рисунок по модели задачи и решение по
+          шагам. Данные — те же, что уезжают в тренажёр: отпечаток ответа и закрытый разбор. Здесь
+          разбор открыт сразу, чтобы было видно оформление; в тренажёре он открывается только по
+          действию ученика.
+        </p>
+        <div className="v4__stack">
+          {KARTOCHKI.map((k, i) => (
+            <figure key={i} className="v4__case">
+              <figcaption className="v4__case-head">
+                <b>{k.title}</b>
+                <span>{k.note}</span>
+              </figcaption>
+              <ProblemCard
+                variant={i === 2 ? 'condition' : 'full'}
+                zadacha={k.zadacha}
+                nomer={i + 1}
+                {...(i === 2 ? {} : { metodLabel: metodLabel(k.zadacha.model?.method) })}
+                istochnik={k.zadacha.id.startsWith('k') ? 'Задача конспекта' : 'Прототип задания 4'}
+                {...(k.initial === undefined ? {} : { initial: k.initial })}
+              />
+            </figure>
+          ))}
+        </div>
+      </section>
 
       {RAZDELY.map((razdel) => (
         <section key={razdel.id} className="v4__section">
