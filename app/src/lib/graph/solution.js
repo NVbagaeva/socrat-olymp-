@@ -207,7 +207,28 @@ function interceptVisible(b, win) {
   return Number.isInteger(b) && !!win && Math.abs(b) <= win.ymax - 1;
 }
 
-function stepIntercept(t, line, win, k, b) {
+/* Опорная точка для подстановки — та, что ученик видит жирной на чертеже
+   задачи. Треугольник наклона может стоять на другой паре: его пару
+   выбирают под рисунок, чтобы катет не лёг на ось и дуга угла не села
+   на числа. Подставлять же надо отмеченную точку — другую на чертеже
+   не найти, а условие прямо говорит, что точки отмечены.
+
+   Из двух отмеченных берём ту, где k · x выходит целым: промежуточная
+   строка тогда без дробей. Нет отмеченных точек (задача без чертежа) —
+   остаётся вершина треугольника. */
+function substitutionPoint(t, points, k) {
+  var marked = (points || []).filter(function (p) {
+    return whole(p.x) && whole(p.y);
+  });
+  var nice = marked.filter(function (p) { return whole(k * p.x); });
+  return nice[0] || marked[0] || t.A;
+}
+
+function whole(value) {
+  return Math.abs(value - Math.round(value)) < 1e-9;
+}
+
+function stepIntercept(t, line, win, k, b, points) {
   var visible = interceptVisible(b, win);
   var blocks = [];
 
@@ -221,7 +242,7 @@ function stepIntercept(t, line, win, k, b) {
   }
 
   /* b с графика не снять: пересечение за кадром или не в узле сетки. */
-  var base = t.A;
+  var base = substitutionPoint(t, points, k);
   var product = k * base.x;
 
   /* Причина у двух случаев разная, и называть её надо ту, что есть:
@@ -326,7 +347,7 @@ function build(options) {
   var steps = [
     stepDirection(t),
     stepSlope(t, k),
-    stepIntercept(t, line, win, k, b),
+    stepIntercept(t, line, win, k, b, options.points),
     stepFormula(k, b),
     stepAnswer(options.task || {}, k, b)
   ];
