@@ -65,7 +65,7 @@ export const tasks = [
     slug: '4',
     status: 'soon',
   },
-  { no: '05', name: 'Вероятности событий', slug: '5', status: 'soon' },
+  { no: '05', name: 'Вероятности событий', slug: '5', status: 'active' },
   {
     no: '06',
     name: 'Случайные величины и распределения',
