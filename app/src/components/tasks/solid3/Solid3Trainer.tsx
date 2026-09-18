@@ -177,7 +177,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       const seconds = started.current === 0 ? 0 : (Date.now() - started.current) / 1000;
-      recordTask(current.kind, current.n, !missed, seconds);
+      recordTask(current.kind, !missed, seconds);
       /* Из повторения задание уходит только здесь: решено верно
          в самом повторении. */
       if (repeat) {
