@@ -68,7 +68,7 @@ export default function Stereometria3Page() {
           </div>
 
           <div className="section-head__media">
-            <Solid className="solid3-head__figure" model={thumb('VIII')} />
+            <Solid model={thumb('VIII')} />
             <HandNote className="section-head__note">{stereometria.note}</HandNote>
           </div>
         </header>
@@ -84,7 +84,7 @@ export default function Stereometria3Page() {
               <SubtopicCard
                 name={razdel.nazvanie}
                 href={`${tasksPage.href}/${stereometria.slug}/${razdel.slug}`}
-                media={<Solid className="subtopic__solid" model={thumb(razdel.nomer)} />}
+                media={<Solid model={thumb(razdel.nomer)} />}
                 meta={
                   <>
                     <span className="subtopic__no">Раздел {razdel.nomer}</span>
