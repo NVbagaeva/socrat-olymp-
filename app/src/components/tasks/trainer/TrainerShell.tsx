@@ -1,42 +1,52 @@
 import type { ReactNode } from 'react';
-import { trainerPage, type TrainerMode } from '@/content/trainerModes';
-import { trainerTotal } from '@/lib/trainer';
+import { trainerPage } from '@/content/trainerModes';
+import type { Subtopic } from '@/content/sections';
+import { findManifestFamily } from '@/lib/generator/manifest';
+import { skillItems } from '../configurator';
 import { TabScrollOnMount } from '../TabScroll';
-import { TrainerMenu } from './TrainerMenu';
-import { TrainerStats } from './TrainerStats';
+import { TrainerBuilder, type TrainerPreset } from './TrainerBuilder';
 
 export interface TrainerShellProps {
-  /** Адрес подтемы: от него считаются адреса режимов. */
+  subtopic: Subtopic;
+  /** Адрес вкладки тренажёра: туда возвращает итоговый экран. */
   base: string;
-  /** Выбранный режим. Пусто — тип ещё не выбран. */
-  mode: TrainerMode | null;
-  /** Экран режима: список заданий или итог подхода. */
+  /** Что выбрано при заходе по ярлыку прежнего адреса. */
+  preset?: TrainerPreset | null;
+  /** Экран сессии: подставляется вместо конфигуратора. */
   children?: ReactNode;
 }
 
 /**
- * Постоянная часть вкладки «Тренажёр».
+ * Вкладка «Тренажёр»: заголовок и конфигуратор тренировки; сводка
+ * сделанного живёт под конфигуратором и уходит вместе с ним, когда
+ * начинается сессия. Шапку темы и ленту вкладок рисует страница
+ * темы: вкладка живёт внутри них, а не вместо них.
  *
- * Заголовок и строка выбора типа видны на любом экране вкладки —
- * и до выбора, и внутри режима. Шапку темы и ленту вкладок рисует
- * страница темы: вкладка живёт внутри них, а не вместо них.
+ * Карточки навыков собираются здесь, на сервере: движок рисует
+ * миниатюры на сборке, в браузер уходит готовая разметка.
  */
-export function TrainerShell({ base, mode, children }: TrainerShellProps) {
+export function TrainerShell({ subtopic, base, preset = null, children }: TrainerShellProps) {
+  const family = findManifestFamily(subtopic.id);
+
   return (
     <section className="trainer">
       <header className="trainer__head">
         <h2 className="t-h2 trainer__title">{trainerPage.title}</h2>
       </header>
 
-      <TrainerMenu base={`${base}/trenazher/`} mode={mode} />
-
-      {/* На телефоне выбранный режим оказывается ниже кромки экрана:
-          подводим его к глазам, как во вкладке подготовки. */}
+      {/* На телефоне вкладка оказывается ниже кромки экрана:
+          подводим её к глазам, как во вкладке подготовки. */}
       <TabScrollOnMount />
 
-      {/* До выбора типа вкладка показывает, что уже сделано: внутри
-          режима на этом месте стоит экран задания. */}
-      {children ?? <TrainerStats total={trainerTotal()} />}
+      {children ?? (
+        <TrainerBuilder
+          base={base}
+          family={subtopic.title}
+          familyTotal={family?.prototypes.tasks ?? 0}
+          skills={skillItems(family)}
+          preset={preset}
+        />
+      )}
     </section>
   );
 }

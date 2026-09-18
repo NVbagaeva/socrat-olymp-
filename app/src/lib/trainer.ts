@@ -5,22 +5,19 @@
  * и ответов в проекте нет: всё приходит из движка. Здесь только
  * подбор набора под режим и набор KaTeX на сборке.
  *
- * Модуль серверный: движок и KaTeX работают во время сборки, вниз
- * уходит готовая разметка.
+ * Модуль работает и на сборке, и в браузере: сессию со свежими
+ * числами собирает lib/trainerSession.ts на клиенте, движок и KaTeX
+ * там те же. В разметку страницы ни одно задание при этом не идёт.
  */
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
-import { trainerModes, type TrainerMode } from '@/content/trainerModes';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
    из своего кэша. */
 GraphGenerate.setSets({ prep, prototypes });
-
-/** Сколько заданий в одном подходе. */
-export const TRAINER_ROUND = 10;
 
 export interface TrainerTask {
   id: string;
@@ -94,13 +91,15 @@ interface EngineLine {
   points?: EnginePoint[] | null;
 }
 
-interface EngineTask {
+export interface EngineTask {
   id: string;
   svg: string | null;
   questionHtml: string;
   answer: string;
   meta: {
     set: string;
+    /** Seed, на котором собран набор: по нему задача воспроизводится. */
+    seed: string;
     k: number;
     b: number;
     /** Окно чертежа. Нет — у задачи нет и чертежа. */
@@ -109,7 +108,10 @@ interface EngineTask {
     query: EngineQuery | null;
     intersection: EngineCross | null;
     lines: EngineLine[];
+    /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
+    level?: string | null;
   };
+  answerType?: string;
 }
 
 /* ── KaTeX на сборке ─────────────────────────────────────────────
@@ -672,47 +674,20 @@ function stepsFor(task: EngineTask): TrainerStep[] {
   return last === null ? [] : [stepK(k), stepB(task, b), stepEquation(k, b), last];
 }
 
-/* ── Пул заданий режима ──────────────────────────────────────────
+/* ── Задание тренажёра из задачи движка ──────────────────────────
+   Условие набирается KaTeX, подсказки и цепочка шагов собираются
+   вместе с заданием. Откуда пришла задача — с сборки или из браузера
+   со свежим seed, — этой функции всё равно. */
 
-   На страницу уходит не подход, а весь пул: десять заданий из него
-   выбирает и раскладывает браузер уже после монтирования. Иначе
-   у всех учеников был бы один и тот же «случайный» порядок.
-
-   Задачи на пересечение берутся из обоих наборов целиком — все
-   сорок. У остальных типов в смешанном режиме пул половинный:
-   страница и так тяжёлая. */
-
-const MIXED_TAKE: Record<string, number> = { '12.A': 10, '12.B': 10 };
-
-function fromSet(setId: string, take: number): EngineTask[] {
-  const tasks = GraphGenerate.generateSet(setId) as EngineTask[];
-  return take >= tasks.length ? tasks : tasks.slice(0, take);
-}
-
-/** Все задания, из которых собирается подход этого режима. */
-export function buildTrainerTasks(mode: TrainerMode): TrainerTask[] {
-  const mixed = mode.setIds.length > 2;
-  return mode.setIds
-    .flatMap((setId) => fromSet(setId, mixed ? (MIXED_TAKE[setId] ?? 20) : 20))
-    .map((task) => ({
-      id: task.id,
-      kind: task.meta.set,
-      questionHtml: typeset(task.questionHtml),
-      chartSvg: task.svg,
-      answer: task.answer,
-      wrongHint: hintHtml(wrongHintFor(task) ?? ''),
-      rightHint: rightHintFor(task),
-      steps: stepsFor(task),
-    }));
-}
-
-/** Режим по части адреса. Нужен маршруту и оболочке. */
-export function findMode(id: string): TrainerMode | undefined {
-  return trainerModes.find((mode) => mode.id === id);
-}
-
-/** Сколько всего заданий в наборах прототипов: знаменатель счётчика. */
-export function trainerTotal(): number {
-  const sets = prototypes as { tasks?: unknown[] }[];
-  return sets.reduce((sum, set) => sum + (set.tasks?.length ?? 0), 0);
+export function trainerTaskFrom(task: EngineTask): TrainerTask {
+  return {
+    id: task.id,
+    kind: task.meta.set,
+    questionHtml: typeset(task.questionHtml),
+    chartSvg: task.svg,
+    answer: task.answer,
+    wrongHint: hintHtml(wrongHintFor(task) ?? ''),
+    rightHint: rightHintFor(task),
+    steps: stepsFor(task),
+  };
 }

@@ -3,6 +3,9 @@ import type { ReactNode } from 'react';
 import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
+import { findManifestFamily } from '@/lib/generator/manifest';
+import { prototypeSkills } from './configurator';
+import { GeneratorTab } from './generator';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
@@ -51,7 +54,9 @@ export function FunctionTopicPage({
 }: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
-
+  /* Вкладка «Генератор» есть только у семейства с наборами
+     прототипов в данных движка: решает манифест, а не конфиг. */
+  const hasGenerator = prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
 
   return (
     <main className="app-main">
@@ -105,8 +110,9 @@ export function FunctionTopicPage({
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
         prepHref={`${base}/podgotovka/`}
-        trainer={trainer ?? <TrainerShell base={base} mode={null} />}
+        trainer={trainer ?? <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />}
         trainerHref={`${base}/trenazher/`}
+        generator={hasGenerator ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
         tutors={section.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">

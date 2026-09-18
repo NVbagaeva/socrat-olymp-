@@ -1,0 +1,79 @@
+/**
+ * Вкладка «Генератор» задания №12: вариант для печати.
+ *
+ * Генератор собирает лист по шаблону lib/sheet/ из задач движка со
+ * свежими числами. Здесь — слова вкладки и список видов работы,
+ * заданный заказчиком. Названия навыков и уровней — в
+ * content/skills12.ts, числа — из манифеста.
+ */
+
+/** Виды работы: подзаголовок листа. Список заказчика, порядок его. */
+export const workKinds: string[] = [
+  'Самостоятельная работа',
+  'Домашняя работа',
+  'Проверочная работа',
+  'Контрольная работа',
+  'Тренировочный вариант',
+];
+
+export type SheetLayoutId = 'single' | 'double';
+
+export interface SheetLayoutOption {
+  /** Значение layout шаблона листа. */
+  id: SheetLayoutId;
+  title: string;
+}
+
+export const sheetLayouts: SheetLayoutOption[] = [
+  { id: 'single', title: 'Одна колонка' },
+  { id: 'double', title: 'Две колонки' },
+];
+
+export type SheetThemeId = 'color' | 'print';
+
+export interface SheetThemeOption {
+  /** Значение theme шаблона листа. */
+  id: SheetThemeId;
+  title: string;
+}
+
+export const sheetThemes: SheetThemeOption[] = [
+  { id: 'color', title: 'Цветная' },
+  { id: 'print', title: 'Чёрно-белая' },
+];
+
+export const generatorPage = {
+  title: 'Собери свой вариант',
+  kind: {
+    step: '1',
+    title: 'Вид работы',
+    lead: 'Так будет подписан лист',
+    /* Вариант «своё название» открывает поле ввода. */
+    custom: 'Своё название',
+    placeholder: 'Название работы',
+    /* Дата на листе рядом с видом работы. Пусто — даты нет. */
+    date: 'Дата',
+  },
+  skills: {
+    step: '2',
+    title: 'Выбери навыки',
+    /* «{family}» подставляется названием семейства. */
+    lead: 'Какие задачи из раздела «{family}» войдут в вариант',
+  },
+  params: {
+    step: '3',
+    title: 'Настрой вариант',
+    lead: 'Количество заданий, сложность и вид листа',
+    count: 'Количество заданий',
+    all: 'Все',
+    level: 'Сложность',
+    layout: 'Колонки',
+    theme: 'Тема',
+  },
+  summary: {
+    title: 'Выбранный вариант',
+    note: 'Все задания соответствуют реальным прототипам ЕГЭ.',
+  },
+  student: 'Лист для ученика',
+  teacher: 'Лист с ответами',
+};

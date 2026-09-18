@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
-import answers from '../src/lib/sheet/answers.js';
+import { answersItems } from '../src/lib/sheet/answers12.js';
 import outputs from '../src/lib/sheet/outputs.js';
 import content from '../src/content/sheet12.js';
 import { renderPdf } from './lib/sheet-render.mjs';
@@ -109,103 +109,6 @@ function collectBlocks(limitBlocks, limitTasks) {
       }),
     };
   });
-}
-
-/* ══════════════════════════════════════════════════════════
-   Ответы и краткие решения — только файл «Для учителя»
-   ══════════════════════════════════════════════════════════ */
-
-/* Ответ для таблицы. У задач с выбором ответ — номер варианта,
-   и один номер на бумаге ничего не говорит, поэтому рядом идёт
-   текст выбранного варианта. */
-function answerHtml(task) {
-  if (!task.options) { return task.answerHtml || null; }
-  const picked = task.options.filter((option) => option.number === task.answer)[0];
-  return picked ? task.answer + ') ' + (picked.html || picked.text) : null;
-}
-
-/*  Краткое решение собирается из разбора движка: берутся только
-    блоки-формулы пяти шагов и строка ответа. Ничего не дописывается
-    и не переформулируется — что посчитал движок, то и печатается.
-    Прозаические пояснения разбора на лист не идут: он про ответы,
-    а не про обучение.
-
-    Разбор строится не у всех задач. Нет разбора — задача просто
-    не попадает в раздел кратких решений, и её ответ остаётся
-    в таблице. Придумывать решение нельзя. */
-function shortSolution(task) {
-  let analysis = null;
-  try { analysis = generator.analysis(task.id, task.seed); }
-  catch { return null; }
-  if (!analysis) { return null; }
-
-  const rule = task.answerRule;
-  let steps;
-  try {
-    steps = solutionBuilder.build({
-      triangle: analysis.triangle,
-      line: analysis.line,
-      window: analysis.task.meta.window,
-      task: { rule, answer: task.answer, query: task.meta.query, probe: task.meta.probe },
-    });
-  } catch { return null; }
-
-  /* Пятый шаг разбора умеет не всякое правило ответа. Чего он
-     не умеет — отдаёт общей фразой вместо вывода. Для задач
-     на пересечение это именно так: разбор описывает одну прямую,
-     а ответ получается из системы двух. Печатать такие формулы
-     как решение нельзя — из них заявленный ответ не выводится.
-
-     Ловим по самой фразе, а не по списку правил: если в движке
-     появится ветка для пересечений, решения начнут печататься
-     сами, без правки этого файла. */
-  const last = steps[steps.length - 1] || {};
-  const stub = (last.blocks || []).some((piece) =>
-    piece.type === 'text' && /Ответ читается из формулы/.test(piece.html || ''));
-  if (stub) { return null; }
-
-  /* Из каждого шага берётся ИТОГ — последняя его формула. Промежуточные
-     выкладки шага (тангенс через смежный угол, перенос слагаемых) нужны
-     ученику в разборе, а в ключе для учителя это шум: там важны k, b,
-     сама формула и подстановка. Правило одно на все шаги, поэтому
-     выбор не зависит от содержания формулы. */
-  const formulas = [];
-  steps.forEach((step) => {
-    const own = (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex);
-    if (own.length) { formulas.push(own[own.length - 1].tex); }
-  });
-
-  if (formulas.length < 2) { return null; }
-  return formulas;
-}
-
-function answersItems(blocks) {
-  const items = [answers.sectionHead('Ответы', 'по блокам, сквозная нумерация')];
-
-  blocks.forEach((block) => {
-    items.push(answers.table(
-      block.title,
-      block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: answerHtml(task) })),
-      5
-    ));
-  });
-
-  const solved = [];
-  blocks.forEach((block) => {
-    block.tasks.forEach((task) => {
-      const formulas = shortSolution(task);
-      if (formulas) { solved.push(answers.solution(task.no, formulas, task.answer)); }
-    });
-  });
-
-  if (solved.length) {
-    items.push(answers.sectionHead('Краткие решения',
-      'разбор из банка, ' + solved.length + ' задач из ' +
-      blocks.reduce((sum, block) => sum + block.tasks.length, 0)));
-    solved.forEach((item) => items.push(item));
-  }
-
-  return items;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -296,7 +199,7 @@ async function full(draft) {
   const total = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
   console.log('Сборник: блоков ' + blocks.length + ', задач ' + total);
 
-  const tail = answersItems(blocks);
+  const tail = answersItems(blocks, generator, solutionBuilder);
 
   /* Четыре файла: ученику — со строкой ответа и без ответов вовсе,
      учителю — те же задачи и раздел «Ответы» с новой страницы. */

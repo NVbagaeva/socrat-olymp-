@@ -14,6 +14,7 @@ import '../../../section.css';
 import '../../topic.css';
 import '../../prep.css';
 import '../../trainer.css';
+import '../../configurator.css';
 
 /* Адреса перечислимы на сборке: открытые подтемы × навыки. Руками
    их никто не пишет — список навыков один и тот же везде. */
