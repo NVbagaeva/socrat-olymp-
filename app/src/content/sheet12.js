@@ -90,4 +90,8 @@ export const files = {
   uchitelChb: 'zadanie-12-lineynaya-funkciya-uchitel-chb',
 };
 
-export default { head, title, runner, recap, foot, blocks, files };
+/* Сборка одним объектом: анонимный export default ESLint не любит,
+   и в проекте так же собран data/index.js движка. */
+const content = { head, title, runner, recap, foot, blocks, files };
+
+export default content;

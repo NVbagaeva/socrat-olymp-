@@ -62,12 +62,6 @@ function texExact(f) {
   return (f.p < 0 ? '-' : '') + '\\dfrac{' + Math.abs(f.p) + '}{' + f.q + '}';
 }
 
-/* То же обычным текстом. */
-function numExact(f) {
-  if (decimalFriendly(f)) { return num(Line.num(f)); }
-  return (f.p < 0 ? MINUS : '') + Math.abs(f.p) + '/' + f.q;
-}
-
 /* Коэффициент перед x точным числом: 1x и −1x не пишутся. */
 function slopeTexExact(f) {
   if (f.q === 1 && f.p === 1) { return ''; }
@@ -145,7 +139,6 @@ function stepDirection(t) {
    Шаг 2. Находим k
    ══════════════════════════════════════════════════════════ */
 function stepSlope(t, kf) {
-  var k = Line.num(kf);
   var blocks = [
     text(math('k', 'k') + ' — это тангенс угла наклона. Угол ' + math('\\alpha', 'α') +
          ' отсчитывается от положительного направления оси ' + math('x', 'x') + ' до прямой.'),
@@ -364,7 +357,6 @@ function stepAnswer(task, line) {
   var answer = task.answer;
   var kf = line.k;
   var bf = line.b;
-  var k = Line.num(kf);
   var b = Line.num(bf);
   var blocks = [];
 
