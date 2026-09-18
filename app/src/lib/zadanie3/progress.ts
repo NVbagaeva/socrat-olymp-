@@ -138,6 +138,9 @@ export function taskKey(kind: string, n: number): string {
 /**
  * Записать закрытое задание: счётчики типа.
  *
+ * Номера варианта здесь нет: счётчики идут по типу задания, а по
+ * вариантам считается только список ошибок.
+ *
  * right — решено ли верно с первой попытки: именно это считается
  * точностью. Ошибся и потом решил — задание закрыто, но в точность
  * не идёт.
@@ -148,7 +151,7 @@ export function taskKey(kind: string, n: number): string {
  * оттуда, только когда решено верно в самом повторении
  * (clearMistake).
  */
-export function recordTask(kind: string, n: number, right: boolean, seconds: number): void {
+export function recordTask(kind: string, right: boolean, seconds: number): void {
   const current = snapshot();
   const tally = current.kinds[kind] ?? { done: 0, right: 0, seconds: 0 };
 
