@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { Button, FigureZoom, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
 import { TRAINER_ROUND, type TrainerStep, type TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
@@ -271,7 +271,9 @@ export function TrainerScreen({ pool, roundKey, backHref }: TrainerScreenProps) 
               на сборке. */}
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
           {task.chartSvg === null ? null : (
-            <span className="chart ptask__chart" dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+            <FigureZoom className="chart ptask__chart" label={`Чертёж к заданию ${index + 1}`}>
+              <span dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+            </FigureZoom>
           )}
         </div>
       </article>

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
@@ -235,10 +235,9 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
               className="z3t__question"
               dangerouslySetInnerHTML={{ __html: variant.uslovieHtml }}
             />
-            <span
-              className="z3t__fig"
-              dangerouslySetInnerHTML={{ __html: variant.svg ?? kind.svg }}
-            />
+            <FigureZoom className="z3t__fig" label={`Чертёж к заданию: ${kind.title}`}>
+              <span dangerouslySetInnerHTML={{ __html: variant.svg ?? kind.svg }} />
+            </FigureZoom>
           </article>
 
           <div className="z3t__answer">
