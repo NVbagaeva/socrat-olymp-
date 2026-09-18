@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { VeroyatnostTrainer } from '@/components/tasks/veroyatnost/VeroyatnostTrainer';
 import { veroyatnostTitle } from '@/content/veroyatnost';
+import { bank4Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', 'Тренажёр'),
@@ -9,14 +10,10 @@ export const metadata: Metadata = {
 /**
  * Вкладка «Тренажёр» задания №4.
  *
- * Банк прототипов собирается из задачника Е. А. Ширяевой. Пока схема
- * не утверждена, здесь нет ни одного сгенерированного варианта.
+ * Банк собирается на сборке: 21 прототип по 10 вариантов. Вниз
+ * уезжают только условия, отпечатки ответов и закрытые разборы —
+ * формулы ответа и перебор исходов остаются здесь.
  */
 export default function Trenazher4Tab() {
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появится тренажёр с фильтрами по блокам задачника: классическое и статистическое определение вероятности."
-    />
-  );
+  return <VeroyatnostTrainer pool={bank4Pool()} roundKey="v4" />;
 }

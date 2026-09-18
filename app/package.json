@@ -19,6 +19,7 @@
     "validate:graph": "node scripts/validate-graph.mjs",
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
     "test:zadanie3": "node scripts/check-zadanie3.mjs",
+    "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
