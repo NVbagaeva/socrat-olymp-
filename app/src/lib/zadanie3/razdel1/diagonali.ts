@@ -17,7 +17,6 @@ import {
   letters,
   otr,
   ravno,
-  ru,
   segment,
   tex,
   texChislo,
@@ -317,9 +316,19 @@ export const P03_02: Prototype = {
     const k = num(p, 'k');
     const d2 = 3 * k * k;
     return [
-      { text: `Диагональ куба с ребром a равна a√3, значит a√3 = √${ru(d2)}.` },
-      { text: `Отсюда a = √${ru(d2)} / √3 = ${ru(k)}.`, value: k },
-      { text: `Объём куба: a³ = ${ru(k)}³ = ${ru(k * k * k)}.`, value: k * k * k },
+      {
+        text:
+          `Диагональ куба с ребром ${imya('a')} равна ${formula('a\\sqrt{3}')}, значит ` +
+          `${formula(`a\\sqrt{3} = \\sqrt{${texChislo(d2)}}`)}.`,
+      },
+      {
+        text: `Отсюда ${formula(`a = \\dfrac{\\sqrt{${texChislo(d2)}}}{\\sqrt{3}} = ${texChislo(k)}`)}.`,
+        value: k,
+      },
+      {
+        text: `Объём куба: ${formula(`a^3 = ${texChislo(k)}^3 = ${texChislo(k * k * k)}`)}.`,
+        value: k * k * k,
+      },
     ];
   },
 
@@ -349,9 +358,10 @@ export const P03_03: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известны длины рёбер: ` +
-    `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
-    'Найдите площадь сечения параллелепипеда плоскостью, проходящей через точки A, B и C₁.',
+    `В прямоугольном параллелепипеде ${imya(FIGURA)} известны длины рёбер: ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['A', 'D'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}. Найдите площадь сечения параллелепипеда ` +
+    `плоскостью, проходящей через точки ${imya('A')}, ${imya('B')} и ${imya('C1')}.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && num(p, 'b') > 0 && num(p, 'c') > 0,
 
@@ -375,13 +385,19 @@ export const P03_03: Prototype = {
     const c = num(p, 'c');
     const side = Math.hypot(b, c);
     return [
-      { text: 'Сечение через A, B и C₁ — прямоугольник ABC₁D₁: AB параллельно D₁C₁.' },
       {
-        text: `Вторая сторона BC₁ — диагональ боковой грани: BC₁ = √(${ru(b)}² + ${ru(c)}²) = ${ru(side)}.`,
+        text:
+          `Сечение через ${imya('A')}, ${imya('B')} и ${imya('C1')} — прямоугольник ` +
+          `${imya('ABC1D1')}: ${imya('AB')} параллельно ${imya('D1C1')}.`,
+      },
+      {
+        text:
+          `Вторая сторона ${imya('BC1')} — диагональ боковой грани: ` +
+          `${formula(`BC_1 = \\sqrt{${texChislo(b)}^2 + ${texChislo(c)}^2} = ${texChislo(side)}`)}.`,
         value: side,
       },
       {
-        text: `Площадь: AB · BC₁ = ${ru(a)} · ${ru(side)} = ${ru(a * side)}.`,
+        text: `Площадь: ${formula(`AB \\cdot BC_1 = ${texChislo(a)} \\cdot ${texChislo(side)} = ${texChislo(a * side)}`)}.`,
         value: a * side,
       },
     ];
@@ -422,10 +438,11 @@ export const P03_04: Prototype = {
   format: 'целое',
 
   uslovie: (p) => {
-    const names = [text(p, 'p1'), text(p, 'p2'), text(p, 'p3')].map(letters);
+    const names = [text(p, 'p1'), text(p, 'p2'), text(p, 'p3')].map(imya);
     return (
-      `В прямоугольном параллелепипеде ${NAMES} известны длины рёбер: ` +
-      `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
+      `В прямоугольном параллелепипеде ${imya(FIGURA)} известны длины рёбер: ` +
+      `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['A', 'D'], num(p, 'b'))}, ` +
+      `${ravno(['A', 'A1'], num(p, 'c'))}. ` +
       `Найдите площадь сечения, проходящего через вершины ${names[0]}, ${names[1]} и ${names[2]}.`
     );
   },
@@ -467,14 +484,16 @@ export const P03_04: Prototype = {
     const quad = sectionQuad([text(p, 'p1'), text(p, 'p2'), text(p, 'p3')]);
     return [
       {
-        text: `Сечение ${quad.map(letters).join('')} — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
+        text:
+          `Сечение ${imya(quad.join(''))} — прямоугольник: одна сторона — диагональ ` +
+          'основания, другая — боковое ребро.',
       },
       {
-        text: `Диагональ основания: √(${ru(a)}² + ${ru(b)}²) = ${ru(diag)}.`,
+        text: `Диагональ основания: ${formula(`\\sqrt{${texChislo(a)}^2 + ${texChislo(b)}^2} = ${texChislo(diag)}`)}.`,
         value: diag,
       },
       {
-        text: `Площадь: ${ru(diag)} · ${ru(c)} = ${ru(diag * c)}.`,
+        text: `Площадь: ${formula(`${texChislo(diag)} \\cdot ${texChislo(c)} = ${texChislo(diag * c)}`)}.`,
         value: diag * c,
       },
     ];

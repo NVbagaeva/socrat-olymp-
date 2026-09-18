@@ -128,6 +128,14 @@ for (const list of found.values()) {
 }
 console.log(`прототипов с ручным набором: ${byPrototype.size}`);
 
+/* С флагом --podrobno печатается весь список: конвертация идёт
+   файлами, и по ходу надо видеть, какие прототипы ещё не переведены. */
+if (process.argv.includes('--podrobno')) {
+  [...byPrototype.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .forEach(([id, count]) => console.log(`   ${id}: ${count}`));
+}
+
 let total = 0;
 for (const rule of rules) {
   const list = found.get(rule.key) ?? [];

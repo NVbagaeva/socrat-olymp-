@@ -12,7 +12,18 @@ import { vertex } from '../../solid/figures';
 import { angleBetweenLines, sinBetweenLines } from '../../solid/measure';
 import { NAMES, shapeLines } from '../../solid/drawings/section1';
 import { type Vec3, sub } from '../../solid/vec';
-import { gradusy, imya, otr, ru, segment } from '../format';
+import {
+  chislo,
+  formula,
+  gradusy,
+  imya,
+  otr,
+  ravno,
+  ru,
+  segment,
+  tex,
+  texChislo,
+} from '../format';
 import {
   type Zadacha,
   chertezhRazbora,
@@ -260,7 +271,7 @@ export const P03_08: Prototype = {
       p,
       60,
       'Обе прямые — диагонали граней: три диагонали граней образуют равносторонний ' +
-        'треугольник, все его углы по 60°.',
+        `треугольник, все его углы по ${gradusy(60)}.`,
     ),
   varianty: [
     variant(1, 'задачник', 'задачник 29', { l1: ['C', 'D1'], l2: ['B', 'C1'] }),
@@ -299,9 +310,9 @@ export const P03_09: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной четырёхугольной призме ${NAMES} известно, что ` +
-    `${segment(pair(p, 'd'))}=${ru(num(p, 'k'))}${segment(pair(p, 'e'))}. ` +
-    `Найдите угол между диагоналями ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}. ` +
+    `В правильной четырёхугольной призме ${imya(KUB)} известно, что ` +
+    `${formula(`${tex(pair(p, 'd').join(''))} = ${texChislo(num(p, 'k'))}${tex(pair(p, 'e').join(''))}`)}. ` +
+    `Найдите угол между диагоналями ${otr(pair(p, 'l1'))} и ${otr(pair(p, 'l2'))}. ` +
     'Ответ дайте в градусах.',
 
   dopustimo: (p) => {
@@ -345,18 +356,24 @@ export const P03_09: Prototype = {
 
   shagi: (p) => {
     const k = num(p, 'k');
-    const l1 = segment(pair(p, 'l1'));
-    const l2 = segment(pair(p, 'l2'));
+    const l1 = otr(pair(p, 'l1'));
+    const l2 = otr(pair(p, 'l2'));
     return [
       {
-        text: `Пусть ребро основания равно 1. Тогда диагональ призмы равна ${ru(k)}, а её квадрат: 1² + 1² + h² = ${ru(k * k)}.`,
+        text:
+          `Пусть ребро основания равно ${chislo(1)}. Тогда диагональ призмы равна ` +
+          `${chislo(k)}, а её квадрат: ${formula(`1^2 + 1^2 + h^2 = ${texChislo(k * k)}`)}.`,
       },
       {
-        text: `Отсюда h² = ${ru(k * k - 2)}, то есть h = √${ru(k * k - 2)}.`,
+        text:
+          `Отсюда ${formula(`h^2 = ${texChislo(k * k - 2)}`)}, то есть ` +
+          `${formula(`h = \\sqrt{${texChislo(k * k - 2)}}`)}.`,
         value: Math.sqrt(k * k - 2),
       },
       {
-        text: `Диагонали ${l1} и ${l2} равны и пересекаются; по теореме косинусов угол между ними равен 60°.`,
+        text:
+          `Диагонали ${l1} и ${l2} равны и пересекаются; по теореме косинусов ` +
+          `угол между ними равен ${gradusy(60)}.`,
         value: 60,
       },
     ];
@@ -448,9 +465,10 @@ export const P03_10: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известны длины рёбер: ` +
-    `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
-    `Найдите синус угла между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `В прямоугольном параллелепипеде ${imya(KUB)} известны длины рёбер: ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['A', 'D'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}. ` +
+    `Найдите синус угла между прямыми ${otr(pair(p, 'l1'))} и ${otr(pair(p, 'l2'))}.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && num(p, 'b') > 0 && num(p, 'c') > 0 && differentLines(p),
 
@@ -489,21 +507,24 @@ export const P03_10: Prototype = {
     const a = num(p, 'a');
     const b = num(p, 'b');
     const c = num(p, 'c');
-    const l1 = segment(pair(p, 'l1'));
-    const l2 = segment(pair(p, 'l2'));
+    const l1 = otr(pair(p, 'l1'));
+    const l2 = otr(pair(p, 'l2'));
     const sin = sinBetweenLines(
       directionOf(pair(p, 'l1'), a, b, c),
       directionOf(pair(p, 'l2'), a, b, c),
     );
     return [
       {
-        text: `Перенесём одну из прямых параллельно себе так, чтобы ${l1} и ${l2} пересеклись: получится прямоугольный треугольник со сторонами из рёбер ${ru(a)}, ${ru(b)} и ${ru(c)}.`,
+        text:
+          `Перенесём одну из прямых параллельно себе так, чтобы ${l1} и ${l2} ` +
+          'пересеклись: получится прямоугольный треугольник со сторонами из рёбер ' +
+          `${chislo(a)}, ${chislo(b)} и ${chislo(c)}.`,
       },
       {
         text: 'Синус угла — отношение противолежащего катета к гипотенузе.',
       },
       {
-        text: `Синус угла между ${l1} и ${l2} равен ${ru(Math.round(sin * 1000) / 1000)}.`,
+        text: `Синус угла между ${l1} и ${l2} равен ${chislo(Math.round(sin * 1000) / 1000)}.`,
         value: sin,
       },
     ];

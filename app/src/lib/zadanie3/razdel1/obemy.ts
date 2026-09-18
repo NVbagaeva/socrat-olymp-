@@ -12,9 +12,12 @@ import { vertex } from '../../solid/figures';
 import { hullVolume, polyhedronVolume } from '../../solid/measure';
 import { NAMES, cubeCutPrism, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { type Vec3 } from '../../solid/vec';
-import { letters, ru } from '../format';
+import { chislo, formula, imya, letters, ravno, texChislo } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { boxOf } from './common';
+
+/** Имя фигуры без индексов: из него собираются формулы условия. */
+const FIGURA = 'ABCDA1B1C1D1';
 
 function variant(
   n: number,
@@ -43,8 +46,13 @@ function partVolume(p: Params, names: readonly string[]): number {
   return hullVolume(names.map((name) => vertex(body, name)));
 }
 
-/** Перечень вершин в условии: «A, B, C, A₁, B₁». */
+/** Перечень вершин в условии: «$A$, $B$, $C$, $A_1$, $B_1$». */
 function listed(names: readonly string[]): string {
+  return names.map(imya).join(', ');
+}
+
+/** Тот же перечень буквами — только для alt чертежа. */
+function listedAlt(names: readonly string[]): string {
   return names.map(letters).join(', ');
 }
 
@@ -62,8 +70,9 @@ export const P03_12: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известно, что AB=${ru(num(p, 'a'))}, ` +
-    `BC=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. Найдите объём многогранника, ` +
+    `В прямоугольном параллелепипеде ${imya(FIGURA)} известно, что ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['B', 'C'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}. Найдите объём многогранника, ` +
     `вершинами которого являются точки ${listed(PART_12)}.`,
 
   dopustimo: positive,
@@ -76,7 +85,7 @@ export const P03_12: Prototype = {
   chertezh: () =>
     shapeSection(
       'box',
-      `Прямоугольный параллелепипед ${NAMES}, выделена половина с вершинами A, B, C, A₁, B₁, C₁: она отсечена плоскостью ACC₁A₁`,
+      `Прямоугольный параллелепипед ${NAMES}, выделена половина с вершинами ${listedAlt(PART_12)}: она отсечена плоскостью ACC₁A₁`,
       ['A', 'C', 'C1', 'A1'],
     ),
 
@@ -84,13 +93,15 @@ export const P03_12: Prototype = {
     const [a, b, c] = abc(p);
     return [
       {
-        text: 'Плоскость ACC₁A₁ делит параллелепипед на две равные призмы: перечисленные вершины — это одна из них.',
+        text:
+          `Плоскость ${imya('ACC1A1')} делит параллелепипед на две равные призмы: ` +
+          'перечисленные вершины — это одна из них.',
       },
       {
-        text: `Объём параллелепипеда: ${ru(a)} · ${ru(b)} · ${ru(c)} = ${ru(a * b * c)}.`,
+        text: `Объём параллелепипеда: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} \\cdot ${texChislo(c)} = ${texChislo(a * b * c)}`)}.`,
         value: a * b * c,
       },
-      { text: `Половина от него: ${ru((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
+      { text: `Половина от него: ${chislo((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
     ];
   },
 
@@ -122,8 +133,9 @@ export const P03_13: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известно, что AB=${ru(num(p, 'a'))}, ` +
-    `BC=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. Найдите объём многогранника, ` +
+    `В прямоугольном параллелепипеде ${imya(FIGURA)} известно, что ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['B', 'C'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}. Найдите объём многогранника, ` +
     `вершинами которого являются точки ${listed(PART_13)}.`,
 
   dopustimo: positive,
@@ -136,7 +148,7 @@ export const P03_13: Prototype = {
   chertezh: () =>
     shapeSection(
       'box',
-      `Прямоугольный параллелепипед ${NAMES}, выделена часть с вершинами A, B, C, D, A₁, B₁: она отсечена плоскостью A₁B₁CD`,
+      `Прямоугольный параллелепипед ${NAMES}, выделена часть с вершинами ${listedAlt(PART_13)}: она отсечена плоскостью A₁B₁CD`,
       ['A1', 'B1', 'C', 'D'],
     ),
 
@@ -144,13 +156,16 @@ export const P03_13: Prototype = {
     const [a, b, c] = abc(p);
     return [
       {
-        text: 'Плоскость A₁B₁CD делит параллелепипед на две равные части: перечисленные вершины — одна из них, клин с основанием ABCD и ребром A₁B₁.',
+        text:
+          `Плоскость ${imya('A1B1CD')} делит параллелепипед на две равные части: ` +
+          `перечисленные вершины — одна из них, клин с основанием ${imya('ABCD')} ` +
+          `и ребром ${imya('A1B1')}.`,
       },
       {
-        text: `Объём параллелепипеда: ${ru(a)} · ${ru(b)} · ${ru(c)} = ${ru(a * b * c)}.`,
+        text: `Объём параллелепипеда: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} \\cdot ${texChislo(c)} = ${texChislo(a * b * c)}`)}.`,
         value: a * b * c,
       },
-      { text: `Половина от него: ${ru((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
+      { text: `Половина от него: ${chislo((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
     ];
   },
 
@@ -183,8 +198,9 @@ export const P03_14: Prototype = {
 
   uslovie: (p) =>
     `Найдите объём многогранника, вершинами которого являются точки ${listed(PART_14)} ` +
-    `прямоугольного параллелепипеда ${NAMES}, у которого AB=${ru(num(p, 'a'))}, ` +
-    `AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}.`,
+    `прямоугольного параллелепипеда ${imya(FIGURA)}, у которого ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['A', 'D'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}.`,
 
   dopustimo: positive,
   otvet: (p) => {
@@ -196,7 +212,7 @@ export const P03_14: Prototype = {
   chertezh: () =>
     shapeSection(
       'box',
-      `Прямоугольный параллелепипед ${NAMES}, выделена часть с вершинами A, D₁, A₁, B, C₁, B₁: она отсечена плоскостью ABC₁D₁`,
+      `Прямоугольный параллелепипед ${NAMES}, выделена часть с вершинами ${listedAlt(PART_14)}: она отсечена плоскостью ABC₁D₁`,
       ['A', 'B', 'C1', 'D1'],
     ),
 
@@ -204,13 +220,15 @@ export const P03_14: Prototype = {
     const [a, b, c] = abc(p);
     return [
       {
-        text: 'Плоскость ABC₁D₁ делит параллелепипед на две равные призмы: перечисленные вершины — одна из них.',
+        text:
+          `Плоскость ${imya('ABC1D1')} делит параллелепипед на две равные призмы: ` +
+          'перечисленные вершины — одна из них.',
       },
       {
-        text: `Объём параллелепипеда: ${ru(a)} · ${ru(b)} · ${ru(c)} = ${ru(a * b * c)}.`,
+        text: `Объём параллелепипеда: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} \\cdot ${texChislo(c)} = ${texChislo(a * b * c)}`)}.`,
         value: a * b * c,
       },
-      { text: `Половина от него: ${ru((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
+      { text: `Половина от него: ${chislo((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
     ];
   },
 
@@ -283,7 +301,7 @@ export const P03_15: Prototype = {
   status: 'есть',
   format: 'целое',
 
-  uslovie: (p) => `Объём ${cutText('от куба')}, равен ${ru(num(p, 'v'))}. Найдите объём куба.`,
+  uslovie: (p) => `Объём ${cutText('от куба')}, равен ${chislo(num(p, 'v'))}. Найдите объём куба.`,
 
   dopustimo: (p) => num(p, 'v') > 0,
   otvet: (p) => 8 * num(p, 'v'),
@@ -301,9 +319,14 @@ export const P03_15: Prototype = {
         text: 'Отсечённая призма — прямая, её основание — прямоугольный треугольник с катетами по половине ребра куба.',
       },
       {
-        text: 'Значит объём призмы: ½ · (a/2) · (a/2) · a = a³/8, то есть восьмая часть объёма куба.',
+        text:
+          `Значит объём призмы: ${formula('\\tfrac{1}{2} \\cdot \\tfrac{a}{2} \\cdot \\tfrac{a}{2} \\cdot a = \\tfrac{a^3}{8}')}, ` +
+          'то есть восьмая часть объёма куба.',
       },
-      { text: `Объём куба: 8 · ${ru(v)} = ${ru(8 * v)}.`, value: 8 * v },
+      {
+        text: `Объём куба: ${formula(`8 \\cdot ${texChislo(v)} = ${texChislo(8 * v)}`)}.`,
+        value: 8 * v,
+      },
     ];
   },
 
@@ -330,7 +353,7 @@ export const P03_16: Prototype = {
   status: 'добавить',
   format: 'десятичная',
 
-  uslovie: (p) => `Объём куба равен ${ru(num(p, 'V'))}. Найдите объём ${cutText('от него')}.`,
+  uslovie: (p) => `Объём куба равен ${chislo(num(p, 'V'))}. Найдите объём ${cutText('от него')}.`,
 
   dopustimo: (p) => num(p, 'V') > 0,
   otvet: (p) => num(p, 'V') / 8,
@@ -347,8 +370,15 @@ export const P03_16: Prototype = {
       {
         text: 'Отсечённая призма — прямая, её основание — прямоугольный треугольник с катетами по половине ребра куба.',
       },
-      { text: 'Объём призмы: ½ · (a/2) · (a/2) · a = a³/8 — восьмая часть объёма куба.' },
-      { text: `Объём призмы: ${ru(v)} : 8 = ${ru(v / 8)}.`, value: v / 8 },
+      {
+        text:
+          `Объём призмы: ${formula('\\tfrac{1}{2} \\cdot \\tfrac{a}{2} \\cdot \\tfrac{a}{2} \\cdot a = \\tfrac{a^3}{8}')} ` +
+          '— восьмая часть объёма куба.',
+      },
+      {
+        text: `Объём призмы: ${formula(`${texChislo(v)} : 8 = ${texChislo(v / 8)}`)}.`,
+        value: v / 8,
+      },
     ];
   },
 
@@ -381,8 +411,9 @@ export const P03_17: Prototype = {
 
   uslovie: (p) =>
     `Найдите объём многогранника, вершинами которого являются вершины ${listed(PART_17)} ` +
-    `прямоугольного параллелепипеда ${NAMES}, у которого AB=${ru(num(p, 'a'))}, ` +
-    `BC=${ru(num(p, 'b'))}, BB₁=${ru(num(p, 'c'))}.`,
+    `прямоугольного параллелепипеда ${imya(FIGURA)}, у которого ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['B', 'C'], num(p, 'b'))}, ` +
+    `${ravno(['B', 'B1'], num(p, 'c'))}.`,
 
   dopustimo: positive,
   otvet: (p) => {
@@ -405,13 +436,19 @@ export const P03_17: Prototype = {
   shagi: (p) => {
     const [a, b, c] = abc(p);
     return [
-      { text: 'Это пирамида с основанием ABCD и вершиной B₁; её высота — боковое ребро BB₁.' },
       {
-        text: `Площадь основания: ${ru(a)} · ${ru(b)} = ${ru(a * b)}.`,
+        text:
+          `Это пирамида с основанием ${imya('ABCD')} и вершиной ${imya('B1')}; ` +
+          `её высота — боковое ребро ${imya('BB1')}.`,
+      },
+      {
+        text: `Площадь основания: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} = ${texChislo(a * b)}`)}.`,
         value: a * b,
       },
       {
-        text: `Объём пирамиды — треть произведения основания на высоту: ${ru(a * b)} · ${ru(c)} : 3 = ${ru((a * b * c) / 3)}.`,
+        text:
+          'Объём пирамиды — треть произведения основания на высоту: ' +
+          `${formula(`${texChislo(a * b)} \\cdot ${texChislo(c)} : 3 = ${texChislo((a * b * c) / 3)}`)}.`,
         value: (a * b * c) / 3,
       },
     ];
@@ -445,8 +482,8 @@ export const P03_18: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `Дана правильная четырёхугольная призма ${NAMES}, площадь основания которой равна ` +
-    `${ru(num(p, 'S'))}, а боковое ребро равно ${ru(num(p, 'h'))}. Найдите объём ` +
+    `Дана правильная четырёхугольная призма ${imya(FIGURA)}, площадь основания которой ` +
+    `равна ${chislo(num(p, 'S'))}, а боковое ребро равно ${chislo(num(p, 'h'))}. Найдите объём ` +
     `многогранника, вершинами которого являются точки ${listed(PART_18)}.`,
 
   dopustimo: (p) => num(p, 'S') > 0 && num(p, 'h') > 0,
@@ -463,7 +500,7 @@ export const P03_18: Prototype = {
   chertezh: () =>
     shapeLines(
       'prism',
-      `Правильная четырёхугольная призма ${NAMES}, выделен многогранник с вершинами A, B, C, A₁, B₁`,
+      `Правильная четырёхугольная призма ${NAMES}, выделен многогранник с вершинами ${listedAlt(PART_18)}`,
       [
         ['A', 'C'],
         ['C', 'A1'],
@@ -476,14 +513,16 @@ export const P03_18: Prototype = {
     const h = num(p, 'h');
     return [
       {
-        text: 'Разобьём тело на две пирамиды с общей вершиной C: их основания — половины боковой грани ABB₁A₁.',
+        text:
+          `Разобьём тело на две пирамиды с общей вершиной ${imya('C')}: их основания — ` +
+          `половины боковой грани ${imya('ABB1A1')}.`,
       },
       {
-        text: `Объём призмы: ${ru(s)} · ${ru(h)} = ${ru(s * h)}.`,
+        text: `Объём призмы: ${formula(`${texChislo(s)} \\cdot ${texChislo(h)} = ${texChislo(s * h)}`)}.`,
         value: s * h,
       },
       {
-        text: `Тело занимает треть призмы: ${ru(s * h)} : 3 = ${ru((s * h) / 3)}.`,
+        text: `Тело занимает треть призмы: ${formula(`${texChislo(s * h)} : 3 = ${texChislo((s * h) / 3)}`)}.`,
         value: (s * h) / 3,
       },
     ];
@@ -517,8 +556,9 @@ export const P03_19: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известно, что AB=${ru(num(p, 'a'))}, ` +
-    `BC=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. Найдите объём многогранника, ` +
+    `В прямоугольном параллелепипеде ${imya(FIGURA)} известно, что ` +
+    `${ravno(['A', 'B'], num(p, 'a'))}, ${ravno(['B', 'C'], num(p, 'b'))}, ` +
+    `${ravno(['A', 'A1'], num(p, 'c'))}. Найдите объём многогранника, ` +
     `вершинами которого являются точки ${listed(PART_19)}.`,
 
   dopustimo: positive,
@@ -529,7 +569,7 @@ export const P03_19: Prototype = {
   poModeli: (p) => partVolume(p, PART_19),
 
   chertezh: () =>
-    shapeLines('box', `Прямоугольный параллелепипед ${NAMES}, выделен тетраэдр A, B, C, B₁`, [
+    shapeLines('box', `Прямоугольный параллелепипед ${NAMES}, выделен тетраэдр ${listedAlt(PART_19)}`, [
       ['A', 'C'],
       ['A', 'B1'],
       ['C', 'B1'],
@@ -539,14 +579,16 @@ export const P03_19: Prototype = {
     const [a, b, c] = abc(p);
     return [
       {
-        text: 'Это пирамида с основанием ABC — половиной основания параллелепипеда — и высотой BB₁.',
+        text:
+          `Это пирамида с основанием ${imya('ABC')} — половиной основания ` +
+          `параллелепипеда — и высотой ${imya('BB1')}.`,
       },
       {
-        text: `Площадь основания: ${ru(a)} · ${ru(b)} : 2 = ${ru((a * b) / 2)}.`,
+        text: `Площадь основания: ${formula(`${texChislo(a)} \\cdot ${texChislo(b)} : 2 = ${texChislo((a * b) / 2)}`)}.`,
         value: (a * b) / 2,
       },
       {
-        text: `Объём: ${ru((a * b) / 2)} · ${ru(c)} : 3 = ${ru((a * b * c) / 6)}.`,
+        text: `Объём: ${formula(`${texChislo((a * b) / 2)} \\cdot ${texChislo(c)} : 3 = ${texChislo((a * b * c) / 6)}`)}.`,
         value: (a * b * c) / 6,
       },
     ];

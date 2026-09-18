@@ -13,7 +13,7 @@
 
 import { surfaceArea, polyhedronVolume } from '../../solid/measure';
 import { type Step, stepAlt, stepBody, stepModel } from '../../solid/drawings/steps';
-import { ru } from '../format';
+import { chislo, formula, texChislo } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function stepOf(p: Params): Step {
@@ -130,15 +130,21 @@ export const P03_05: Prototype = {
     const per = profilePerimeter(s);
     return [
       {
-        text: `Тело — призма над ступенчатым профилем. Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text:
+          'Тело — призма над ступенчатым профилем. Площадь профиля: ' +
+          `${formula(`${texChislo(s.W)} \\cdot ${texChislo(s.h)} + ${texChislo(s.w)} \\cdot ${texChislo(s.H - s.h)} = ${texChislo(area)}`)}.`,
         value: area,
       },
       {
-        text: `Ступенька вписана в прямоугольник ${ru(s.W)} на ${ru(s.H)}, поэтому её периметр равен периметру этого прямоугольника: ${ru(per)}.`,
+        text:
+          `Ступенька вписана в прямоугольник ${chislo(s.W)} на ${chislo(s.H)}, поэтому ` +
+          `её периметр равен периметру этого прямоугольника: ${chislo(per)}.`,
         value: per,
       },
       {
-        text: `Поверхность: два профиля плюс боковая: 2 · ${ru(area)} + ${ru(per)} · ${ru(s.depth)} = ${ru(2 * area + per * s.depth)}.`,
+        text:
+          'Поверхность: два профиля плюс боковая: ' +
+          `${formula(`2 \\cdot ${texChislo(area)} + ${texChislo(per)} \\cdot ${texChislo(s.depth)} = ${texChislo(2 * area + per * s.depth)}`)}.`,
         value: 2 * area + per * s.depth,
       },
     ];
@@ -184,11 +190,13 @@ export const P03_11: Prototype = {
         text: 'Тело — призма над ступенчатым профилем: объём равен площади профиля на глубину.',
       },
       {
-        text: `Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text:
+          'Площадь профиля: ' +
+          `${formula(`${texChislo(s.W)} \\cdot ${texChislo(s.h)} + ${texChislo(s.w)} \\cdot ${texChislo(s.H - s.h)} = ${texChislo(area)}`)}.`,
         value: area,
       },
       {
-        text: `Объём: ${ru(area)} · ${ru(s.depth)} = ${ru(area * s.depth)}.`,
+        text: `Объём: ${formula(`${texChislo(area)} \\cdot ${texChislo(s.depth)} = ${texChislo(area * s.depth)}`)}.`,
         value: area * s.depth,
       },
     ];
