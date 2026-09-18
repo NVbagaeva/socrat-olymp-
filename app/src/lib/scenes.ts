@@ -11,6 +11,7 @@
 
 import '@/lib/graph/families/index.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
+import type { PrepSkillId } from '@/content/prepSkills';
 
 /** Квадратное симметричное окно — иного renderGraph не принимает. */
 function squareWindow(half: number) {
@@ -261,7 +262,10 @@ export function verticalTestScene() {
    спасает vector-effect в стилях — иначе график в 3,2px рисуется
    в 0,86 и бледнеет до сетки. */
 
-export type PrepSkillSceneId = 'k' | 'b' | 'equation' | 'point';
+/* Тот же список, что и у самих навыков: держать его здесь вторым
+   значило бы однажды добавить навык и забыть про миниатюру. Сборка
+   это ловит, но ловит поздно. */
+export type PrepSkillSceneId = PrepSkillId;
 
 /** Кегль подписи в миниатюре: на экране это около двенадцати пунктов. */
 const PREP_LABEL = 34;
@@ -320,6 +324,18 @@ export function prepSkillScene(id: PrepSkillSceneId) {
       curves: [{ type: 'line', k: 0.9, b: 1, color: 'lineA', label: null }],
       points: [{ x: 0, y: 1, color: 'lineA', label: null }],
       shapes: [prepLabel('b', 0, 1, -20, 0)],
+    };
+  }
+
+  if (id === 'b-point') {
+    /* Отличие от карточки «по графику» — на самом чертеже: прямая
+       пересекает ось Oy посередине клетки, читать там нечего.
+       Зато на прямой стоит точка в узле: её и подставляют. */
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0.5, b: 0.5, color: 'lineA', label: null }],
+      points: [{ x: 1, y: 1, color: 'lineA', label: null }],
+      shapes: [prepLabel('b', 0, 0.5, -20, 0), prepLabel('?', 0, 0.5, 18, 0)],
     };
   }
 

@@ -329,6 +329,16 @@ function checkComposition(set, tasks) {
       }
     });
   }
+  /* Обратное правило: навык «через точку» держится на том, что
+     пересечение с осью Oy не попадает в узел. Стань b целым — навык
+     выродится в тот, из которого его выделили, и никто не заметит. */
+  if (rules.allFractionB) {
+    tasks.forEach(function (task) {
+      if (Number.isInteger(task.meta.b)) {
+        errors.push(where + '/' + task.id + ': b должен быть нецелым, а он ' + task.meta.b);
+      }
+    });
+  }
 
   /* Точка (0, b) внутри окна и не ближе interceptMargin клеток к границе. */
   if (rules.interceptMargin !== undefined) {

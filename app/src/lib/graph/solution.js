@@ -196,8 +196,40 @@ function whyMinus() {
 /* ══════════════════════════════════════════════════════════
    Шаг 3. Находим b
    ══════════════════════════════════════════════════════════ */
-function stepIntercept(t, line, win, k, b) {
-  var visible = Number.isInteger(b) && Math.abs(b) <= win.ymax - 1;
+/* Читается ли b прямо с чертежа: пересечение с осью Oy попадает
+   в узел сетки и не жмётся к краю поля.
+
+   Признак вынесен наружу намеренно. По нему выбирает ветку не только
+   разбор, но и цепочка подсказок тренажёра; запиши мы условие дважды,
+   однажды они разойдутся — и подсказка станет звать читать с чертежа
+   то, чего там нет. */
+function interceptVisible(b, win) {
+  return Number.isInteger(b) && !!win && Math.abs(b) <= win.ymax - 1;
+}
+
+/* Опорная точка для подстановки — та, что ученик видит жирной на чертеже
+   задачи. Треугольник наклона может стоять на другой паре: его пару
+   выбирают под рисунок, чтобы катет не лёг на ось и дуга угла не села
+   на числа. Подставлять же надо отмеченную точку — другую на чертеже
+   не найти, а условие прямо говорит, что точки отмечены.
+
+   Из двух отмеченных берём ту, где k · x выходит целым: промежуточная
+   строка тогда без дробей. Нет отмеченных точек (задача без чертежа) —
+   остаётся вершина треугольника. */
+function substitutionPoint(t, points, k) {
+  var marked = (points || []).filter(function (p) {
+    return whole(p.x) && whole(p.y);
+  });
+  var nice = marked.filter(function (p) { return whole(k * p.x); });
+  return nice[0] || marked[0] || t.A;
+}
+
+function whole(value) {
+  return Math.abs(value - Math.round(value)) < 1e-9;
+}
+
+function stepIntercept(t, line, win, k, b, points) {
+  var visible = interceptVisible(b, win);
   var blocks = [];
 
   if (visible) {
@@ -210,11 +242,18 @@ function stepIntercept(t, line, win, k, b) {
   }
 
   /* b с графика не снять: пересечение за кадром или не в узле сетки. */
-  var base = t.A;
+  var base = substitutionPoint(t, points, k);
   var product = k * base.x;
 
-  blocks.push(text('Пересечение с осью ' + math('Oy', 'Oy') + ' за пределами чертежа — ' +
-    'или попадает не в узел сетки. Угадывать нельзя.'));
+  /* Причина у двух случаев разная, и называть её надо ту, что есть:
+     «за кадром или не в узле» на чертеже, где пересечение отлично
+     видно посередине клетки, только сбивает. Ветка та же, что
+     в подсказке тренажёра, и условие у них одно — interceptVisible. */
+  blocks.push(text(
+    Number.isInteger(b)
+      ? 'Пересечение с осью ' + math('Oy', 'Oy') + ' за пределами чертежа. Угадывать нельзя.'
+      : 'Пересечение с осью ' + math('Oy', 'Oy') + ' попадает не в узел сетки. ' +
+        'Угадывать нельзя.'));
   blocks.push(text('Может показаться, что там примерно полтора или примерно два — ' +
     'но «примерно» в ответе не бывает. Это лотерея, а в лотерею мы не играем: ' +
     'угадать шесть чисел из сорока пяти — примерно один шанс на восемь миллионов.'));
@@ -308,7 +347,7 @@ function build(options) {
   var steps = [
     stepDirection(t),
     stepSlope(t, k),
-    stepIntercept(t, line, win, k, b),
+    stepIntercept(t, line, win, k, b, options.points),
     stepFormula(k, b),
     stepAnswer(options.task || {}, k, b)
   ];
@@ -319,7 +358,13 @@ function build(options) {
   });
 }
 
-const api = { build: build, equationTex: equationTex, num: num, tex: tex };
+const api = {
+  build: build,
+  equationTex: equationTex,
+  interceptVisible: interceptVisible,
+  num: num,
+  tex: tex
+};
 
 export default api;
-export { build, equationTex, num, tex };
+export { build, equationTex, interceptVisible, num, tex };

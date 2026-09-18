@@ -389,6 +389,56 @@
         "Да",
         "Нет"
       ]
+    },
+    "P12-6-01": {
+      "answer": "0,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-02": {
+      "answer": "-0,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-03": {
+      "answer": "-2,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-04": {
+      "answer": "2,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-05": {
+      "answer": "1,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-06": {
+      "answer": "-1,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-07": {
+      "answer": "-3,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-08": {
+      "answer": "3,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-09": {
+      "answer": "4,5",
+      "answerType": "number",
+      "seed": 1206
+    },
+    "P12-6-10": {
+      "answer": "-4,5",
+      "answerType": "number",
+      "seed": 1206
     }
   },
   "prototypes": {

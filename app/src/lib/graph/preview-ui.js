@@ -226,6 +226,7 @@ export function mountPreview(container, options) {
       triangle: analysis.triangle,
       line: analysis.line,
       window: analysis.scene.window,
+      points: task.meta.points,
       task: {
         rule: taskRule(task.id),
         answer: task.answer,
