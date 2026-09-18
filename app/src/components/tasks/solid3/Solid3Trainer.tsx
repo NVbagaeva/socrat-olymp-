@@ -211,6 +211,15 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     return openText(variant.steps, variant.seal).split('\n');
   }, [variant, solution]);
 
+  /* Чертёж разбора закрыт тем же ключом: на нём отмечено искомое,
+     то есть ответ. Раскрывается вместе с шагами. */
+  const razborSvg = useMemo(() => {
+    if (variant === undefined || !solution || variant.razbor === null) {
+      return null;
+    }
+    return openText(variant.razbor, variant.seal);
+  }, [variant, solution]);
+
   const mistakes = progress.mistakes.filter((item) => byId.has(item.split(':')[0] ?? ''));
 
   return (
@@ -323,6 +332,12 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
                 Ещё один вариант
               </Button>
             </div>
+
+            {razborSvg === null ? null : (
+              <FigureZoom className="z3t__fig z3t__fig--razbor" label={`Чертёж разбора: ${kind.title}`}>
+                <span dangerouslySetInnerHTML={{ __html: razborSvg }} />
+              </FigureZoom>
+            )}
 
             {solution ? (
               <ol className="z3t__steps">

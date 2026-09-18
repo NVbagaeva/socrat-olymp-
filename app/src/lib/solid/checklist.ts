@@ -21,6 +21,7 @@
  */
 
 import type { Model, Polyhedron } from './model';
+import { subscript } from './figures';
 import { renderSolid, solidDiagnostics } from './render';
 
 /** Сколько пунктов в чек-листе. */
@@ -121,7 +122,12 @@ function same(a: P, b: P): boolean {
 /* ── Один чертёж ─────────────────────────────────────────────────── */
 
 function letterSet(text: string): Set<string> {
-  return new Set(text.match(/[A-Z]₁?/g) ?? []);
+  /* Условие набрано в TeX: «A_1». В alt и заголовках — «A₁».
+     Считаем обе записи одной и той же буквой. */
+  const normalised = text
+    .replace(/_\{(\d)\}/g, (_match, digit: string) => subscript(digit))
+    .replace(/_(\d)/g, (_match, digit: string) => subscript(digit));
+  return new Set(normalised.match(/[A-Z]₁?/g) ?? []);
 }
 
 export function checkDrawing(id: string, model: Model, condition: string | null): CheckRow {
@@ -282,12 +288,15 @@ export function checkDrawing(id: string, model: Model, condition: string | null)
     }
   }
 
-  /* 11. Цвета и шрифт — сайта. */
+  /* 11. Цвета — токенами, шрифт подписей — шрифт формул.
+     Буква на чертеже и буква в формуле условия — одна и та же буква,
+     поэтому и шрифт у них один: KaTeX_Math, запасной — шрифт сайта. */
   const hex = svg.match(/#[0-9a-fA-F]{3,8}\b/g);
-  const font = svg.includes('font-family="var(--font-sans)"') || !svg.includes('<text');
+  const font =
+    svg.includes('font-family="KaTeX_Math, var(--font-sans)"') || !svg.includes('<text');
   ok[10] = hex === null && font;
   if (!ok[10]) {
-    notes.push(hex ? `в разметке хекс ${hex[0]}` : 'подписи не шрифтом сайта');
+    notes.push(hex ? `в разметке хекс ${hex[0]}` : 'подписи не шрифтом формул');
   }
 
   /* 12. Читается на 360: зазоры после сжатия до ширины телефона. */

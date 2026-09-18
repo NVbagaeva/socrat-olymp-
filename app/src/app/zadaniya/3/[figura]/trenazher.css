@@ -76,6 +76,11 @@
 .z3t__fig {
   display: block;
 }
+/* Чертёж разбора идёт в столбце ответа, под шагами: он про то, как
+   решать, а не про то, что дано. */
+.z3t__fig--razbor {
+  margin: var(--space-2) 0 var(--space-3);
+}
 
 .z3t__answer {
   display: grid;

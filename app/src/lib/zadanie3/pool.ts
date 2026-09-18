@@ -31,6 +31,13 @@ export interface PoolVariant {
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
+  /**
+   * Чертёж разбора: с дополнительными построениями. Закрыт тем же
+   * ключом, что и шаги: на нём отмечен искомый угол, а это ответ —
+   * открытым текстом ему в бандле не место. null — у прототипа
+   * своего чертежа разбора нет.
+   */
+  razbor: string | null;
 }
 
 export interface PoolKind {
@@ -56,13 +63,35 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
-/** У прототипа числа стоят на самом чертеже — чертёж свой у варианта. */
+/**
+ * Нужен ли варианту свой чертёж.
+ *
+ * Раньше считалось, что чертёж у десяти вариантов один: числа стоят
+ * в условии, а не на картинке. Для прототипов с числами на самом
+ * чертеже — ступенчатых тел — делалось исключение. Но у прототипов,
+ * где вариант меняет не число, а букву — какую диагональ найти,
+ * между какими прямыми угол, — чертежи тоже разные, и всем десяти
+ * доставался чертёж первого: спрашивали DB₁, а выделена была AC₁.
+ *
+ * Теперь так: чертёж свой у варианта, если он вообще отличается.
+ * Сравнение по готовой разметке, поэтому совпавшие чертежи в банк
+ * второй раз не попадают — вес не растёт там, где картинка одна.
+ */
 function perVariant(prototype: Prototype): boolean {
   const first = prototype.varianty[0];
   if (first === undefined) {
     return false;
   }
-  return (prototype.chertezh(first.params).measures ?? []).length > 0;
+  return (
+    (prototype.chertezh(first.params).measures ?? []).length > 0 ||
+    prototype.zadacha !== undefined
+  );
+}
+
+/** Чертёж варианта, если он отличается от общего; иначе null. */
+function ownSvg(prototype: Prototype, variant: Prototype['varianty'][number], common: string) {
+  const svg = renderSolid(prototype.chertezh(variant.params));
+  return svg === common ? null : svg;
 }
 
 function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
@@ -71,13 +100,14 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     throw new Error(`У прототипа ${prototype.id} нет вариантов`);
   }
   const own = perVariant(prototype);
+  const common = renderSolid(prototype.chertezh(first.params));
   return {
     id: prototype.id,
     title: prototype.nazvanie,
     group: razdel.nomer,
     groupTitle: razdel.nazvanie,
     format: prototype.format,
-    svg: renderSolid(prototype.chertezh(first.params)),
+    svg: common,
     variants: prototype.varianty.map((variant) => {
       const seal = sealAnswer(prototype.otvet(variant.params));
       const steps = prototype
@@ -90,7 +120,12 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
         seal,
         /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
         steps: sealText(steps, seal),
-        svg: own ? renderSolid(prototype.chertezh(variant.params)) : null,
+        razbor:
+          prototype.chertezhRazbora === undefined
+            ? null
+            : sealText(renderSolid(prototype.chertezhRazbora(variant.params)), seal),
+        /* null — чертёж прототипа подходит и этому варианту. */
+        svg: own ? ownSvg(prototype, variant, common) : null,
       };
     }),
   };

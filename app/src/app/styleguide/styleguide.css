@@ -196,6 +196,17 @@
 .sg-root [data-token='error'] {
   background: var(--red-600);
 }
+/* Чертежи стереометрии: ребро тела, выделенное искомое и
+   дополнительные построения разбора. */
+.sg-root [data-token='solid-edge'] {
+  background: var(--solid-edge);
+}
+.sg-root [data-token='solid-mark'] {
+  background: var(--solid-mark);
+}
+.sg-root [data-token='graph-accent'] {
+  background: var(--graph-accent);
+}
 
 .sg-root .heat-scale span {
   width: 64px;
