@@ -844,8 +844,13 @@ function taskResult(set, task, built, seed, index) {
       query: built.query || null,
       intersection: built.intersection || null,
       lines: built.parts.map(function (part) {
+        /* Опорные точки каждой прямой: в узлах сетки и на самой
+           прямой. Подсказке про b они нужны готовыми — считать
+           точку заново там, где движок её уже выбрал, значит
+           позволить двум ответам разойтись. */
         return { k: part.line.kValue, b: part.line.bValue,
-                 kFraction: part.line.k, bFraction: part.line.b };
+                 kFraction: part.line.k, bFraction: part.line.b,
+                 points: part.points || null };
       }),
       level: task.level || null
     }
