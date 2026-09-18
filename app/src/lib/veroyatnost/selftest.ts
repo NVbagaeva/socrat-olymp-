@@ -17,7 +17,14 @@
  */
 
 import { otvetUchenika, prepOtvet } from './index';
-import { LABIRINT, proverkaRisunka, razvilki, veroyatnostVyhoda, vyhody } from './labirint';
+import {
+  LABIRINT,
+  tupiki,
+  veroyatnostTupika,
+  veroyatnostVyhoda,
+  veroyatnostVyhodaVolnoy,
+  vyhody,
+} from './labirint';
 import { sealAnswer } from './secret';
 import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
 
@@ -286,24 +293,29 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
 /* ── Лабиринт паука ──────────────────────────────────────────────── */
 
 /**
- * Схема лабиринта, как её задал автор: три развилки, пять выходов,
- * у A, B и C по 0,25, у D и E по 0,125.
+ * Что должно получиться по стенам лабиринта: четыре выхода и три
+ * тупика, вероятности — доли шестнадцатой.
  *
- * Проверка нужна, потому что дерево лабиринта — единственный источник
- * и для чертежа, и для ответа задачи 33. Случайная правка дерева
+ * Проверка нужна, потому что стены — единственный источник и для
+ * картинки, и для ответа задачи 33. Случайная правка списка `STENY`
  * молча поменяла бы ответ; здесь она уронит сборку.
  */
 const LABIRINT_ZHDEM: Record<string, number> = {
-  A: 0.25,
-  B: 0.25,
-  C: 0.25,
-  D: 0.125,
-  E: 0.125,
+  A: 1 / 16,
+  B: 1 / 4,
+  C: 1 / 16,
+  D: 1 / 16,
 };
+
+/** Вероятность застрять: девять путей из шестнадцати. */
+const LABIRINT_TUPIK = 9 / 16;
+
+/** Сколько в лабиринте тупиковых перекрёстков. */
+const LABIRINT_TUPIKOV = 3;
 
 export function checkLabirint(): string[] {
   const problems: string[] = [];
-  const spisok = vyhody(LABIRINT);
+  const spisok = vyhody();
   const zhdem = Object.keys(LABIRINT_ZHDEM);
 
   if (spisok.join(',') !== zhdem.join(',')) {
@@ -311,29 +323,43 @@ export function checkLabirint(): string[] {
   }
 
   for (const [imya, nado] of Object.entries(LABIRINT_ZHDEM)) {
-    const est = veroyatnostVyhoda(LABIRINT, imya);
+    const est = veroyatnostVyhoda(imya);
     if (Math.abs(est - nado) > TOCHNOST) {
       problems.push(`выход ${imya}: ${est} вместо ${nado}`);
     }
+    /* Второй способ счёта обязан дать то же самое. */
+    const volnoy = veroyatnostVyhodaVolnoy(imya);
+    if (Math.abs(est - volnoy) > TOCHNOST) {
+      problems.push(`выход ${imya}: обходом ${est}, волной ${volnoy}`);
+    }
   }
 
-  /* Развилок всегда на одну меньше, чем выходов: на каждой дорога
-     раздваивается. Это правило и поймало прежний счёт «три развилки
-     и пять выходов» — такого дерева не бывает. */
-  const razvilok = razvilki(LABIRINT);
-  if (razvilok !== spisok.length - 1) {
-    problems.push(`развилок ${razvilok} при ${spisok.length} выходах — так не бывает`);
+  if (Math.abs(veroyatnostTupika() - LABIRINT_TUPIK) > TOCHNOST) {
+    problems.push(`вероятность тупика ${veroyatnostTupika()} вместо ${LABIRINT_TUPIK}`);
+  }
+  if (tupiki().length !== LABIRINT_TUPIKOV) {
+    problems.push(`тупиковых перекрёстков ${tupiki().length}, а ожидалось ${LABIRINT_TUPIKOV}`);
   }
 
-  /* Рисунок не должен склеивать разные ветки: иначе на картинке будет
-     проход, которого в дереве нет. */
-  problems.push(...proverkaRisunka(LABIRINT));
+  /* Коридоры обязаны быть деревом: петля означала бы, что паук может
+     прийти на перекрёсток второй раз, и правило «выбирает путь, по
+     которому ещё не полз» перестаёт задавать ответ однозначно. */
+  const koridorov =
+    [...LABIRINT.napravleniya.values()].reduce(
+      (s, spisok2) => s + spisok2.filter((n) => n.startsWith('u:')).length,
+      0,
+    ) / 2;
+  if (koridorov !== LABIRINT.uzly.length - 1) {
+    problems.push(
+      `коридоров ${koridorov} при ${LABIRINT.uzly.length} перекрёстках — в решётке есть петля`,
+    );
+  }
 
-  /* Сумма по всем выходам обязана быть единицей: паук куда-нибудь
-     да выйдет. Это ловит потерянную ветку дерева. */
-  const summa = spisok.reduce((s, imya) => s + veroyatnostVyhoda(LABIRINT, imya), 0);
+  /* Паук всегда где-то оказывается: либо снаружи, либо в тупике. Это
+     ловит потерянный коридор. */
+  const summa = spisok.reduce((s, imya) => s + veroyatnostVyhoda(imya), 0) + veroyatnostTupika();
   if (Math.abs(summa - 1) > TOCHNOST) {
-    problems.push(`сумма вероятностей по выходам равна ${summa}, а не единице`);
+    problems.push(`сумма вероятностей по исходам равна ${summa}, а не единице`);
   }
 
   return problems;

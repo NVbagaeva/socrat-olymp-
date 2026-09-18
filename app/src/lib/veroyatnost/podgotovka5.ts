@@ -14,7 +14,12 @@
  * через противоположное событие; расхождение роняет сборку.
  */
 
-import { chertezhLabirinta, glubina, LABIRINT, veroyatnostVyhoda } from './labirint';
+import {
+  chertezhLabirinta,
+  razvilokDoVyhoda,
+  veroyatnostVyhoda,
+  veroyatnostVyhodaVolnoy,
+} from './labirint';
 import { dec, type PrepBlok, type PrepZadacha } from './types';
 
 /* ── Перечисления для второй проверки ────────────────────────────── */
@@ -317,17 +322,17 @@ const PROIZVEDENIE: readonly PrepZadacha[] = [
     uslovie:
       'На рисунке изображён лабиринт. Паук заползает в лабиринт в точке «Вход». Развернуться и ползти назад паук не может, поэтому на каждом разветвлении паук выбирает один из путей, по которому ещё не полз. Считая, что выбор дальнейшего пути чисто случайный, определите, с какой вероятностью паук придёт к выходу D.',
     risunok: chertezhLabirinta(),
-    otvet: veroyatnostVyhoda(LABIRINT, 'D'),
-    /* Второй путь: по числу развилок на дороге к выходу. */
-    proverka: 0.5 ** glubina(LABIRINT, 'D'),
+    otvet: veroyatnostVyhoda('D'),
+    /* Второй путь: волной по коридорам вместо обхода в глубину. */
+    proverka: veroyatnostVyhodaVolnoy('D'),
     shagi: [
       {
-        text: `До выхода D паук проходит ${glubina(LABIRINT, 'D')} развилки, и на каждой выбирает один путь из двух.`,
-        value: glubina(LABIRINT, 'D'),
+        text: `До выхода D паук проходит ${razvilokDoVyhoda('D')} разветвления, и на каждом выбирает одну дорогу из двух.`,
+        value: razvilokDoVyhoda('D'),
       },
       {
-        text: `P = 0,5 · 0,5 · 0,5 = ${dec(veroyatnostVyhoda(LABIRINT, 'D'))}`,
-        value: veroyatnostVyhoda(LABIRINT, 'D'),
+        text: `P = ${Array(razvilokDoVyhoda('D')).fill('0,5').join(' · ')} = ${dec(veroyatnostVyhoda('D'))}`,
+        value: veroyatnostVyhoda('D'),
       },
     ],
   },

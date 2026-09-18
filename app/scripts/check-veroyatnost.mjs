@@ -95,13 +95,47 @@ console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
 
 const labirint = checkLabirint();
+const {
+  STENY,
+  veroyatnostVyhoda,
+  veroyatnostTupika,
+  vyhody: vyhodyLabirinta,
+} = require0(path.join(out, 'veroyatnost', 'labirint.js'));
+
+/* Стены лабиринта записаны дважды: в labirint.ts, откуда берётся ответ,
+   и в tools/gen_maze.py, откуда берётся картинка. Разойдутся — ученик
+   увидит один лабиринт, а ответ будет от другого. Сверяем списки. */
+const pySrc = fs.readFileSync(path.join(root, '..', 'tools', 'gen_maze.py'), 'utf8');
+const pyBlok = pySrc.slice(
+  pySrc.indexOf('RECTS = ['),
+  pySrc.indexOf(']', pySrc.indexOf('RECTS = [')),
+);
+const pySteny = [...pyBlok.matchAll(/\((\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/g)].map((m) =>
+  m.slice(1, 5).map(Number).join(','),
+);
+const tsSteny = STENY.map((s) => s.join(','));
+if (pySteny.join(' | ') !== tsSteny.join(' | ')) {
+  const i = tsSteny.findIndex((s, k) => s !== pySteny[k]);
+  const gde =
+    i === -1
+      ? `стен ${tsSteny.length} против ${pySteny.length}`
+      : `стена ${i + 1}: [${tsSteny[i]}] против [${pySteny[i] ?? 'её нет'}]`;
+  labirint.push(`стены в labirint.ts и tools/gen_maze.py разошлись — ${gde}`);
+}
+
 console.log(`\nлабиринт задачи 33: нарушений ${labirint.length}`);
+console.log(`   стен ${tsSteny.length}, сверены с tools/gen_maze.py`);
+console.log(
+  `   ${vyhodyLabirinta()
+    .map((imya) => `${imya} ${veroyatnostVyhoda(imya)}`)
+    .join(', ')}, тупик ${veroyatnostTupika()}`,
+);
 labirint.forEach((item) => console.log(`   ${item}`));
 
 fs.rmSync(out, { recursive: true, force: true });
 
 if (labirint.length > 0) {
-  console.error('\nСхема лабиринта разошлась с той, что задал автор.');
+  console.error('\nЛабиринт разошёлся с рисунком.');
   process.exit(1);
 }
 

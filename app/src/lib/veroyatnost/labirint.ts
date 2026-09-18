@@ -1,477 +1,445 @@
 /**
- * Лабиринт паука: чертёж к задаче 33 конспекта.
+ * Лабиринт паука: задача 33 конспекта.
  *
- * Схему подтвердил автор: пять выходов A–E, у A, B и C вероятность по
- * 0,25, у D и E — по 0,125. Ответ задачи 0,125.
+ * Источник истины — рисунок `app/public/images/veroyatnost/labirint-glass.svg`.
+ * Его геометрия сверена с оригиналом задачи, и ответ считается по ней, а
+ * не записан числом: стены лежат в `STENY` тем же списком, что в
+ * генераторе картинки `tools/gen_maze.py`, а вероятности выводятся из
+ * них. Сдвинется стена — поедет и ответ, молча разойтись они не могут.
  *
- * Развилок при этом четыре, а не три, как говорилось раньше: в дереве,
- * где на каждой развилке ровно две дороги, выходов всегда на одну
- * больше, чем развилок. Пять выходов при трёх развилках невозможны.
- * Вероятности автор назвал верно — ошибочным был только счёт развилок,
- * и он ни на что не влиял: ответ считается по дереву.
+ * Что в лабиринте: вход слева, четыре выхода — A, B, C, D — и три
+ * тупика. Тупик здесь не ошибка условия, а законный исход: развернуться
+ * паук не может, поэтому, зайдя в тупик, остаётся там навсегда.
  *
- * Дерево ниже и есть эта схема. Картинка лабиринта из конспекта для
- * сверки не годится: в PDF она растровая, а присланный отдельно файл
- * labirint-clean.png — декоративный рисунок без подписанных выходов,
- * по нему структуру не прочитать. Поэтому источник истины здесь —
- * слова автора, а не изображение.
+ *     Выход A   1/16     Выход C   1/16
+ *     Выход B   1/4      Выход D   1/16
+ *     тупик     9/16
  *
- * Если схема всё-таки поменяется, правится только дерево `LABIRINT`:
- * и чертёж, и ответ задачи пересчитаются сами, потому что оба
- * считаются по нему, а не записаны числами.
+ * Прежняя версия этого файла описывала лабиринт двоичным деревом с пятью
+ * выходами A–E и без тупиков. Дерево было неверным: выхода E на рисунке
+ * нет, а развилки не все двойные. Считать по дереву больше нельзя —
+ * считаем по стенам.
  *
- * Правило задачи: развернуться паук не может, поэтому на каждой
- * развилке он равновероятно выбирает один из путей вперёд.
+ * Правило задачи: на каждом разветвлении паук равновероятно выбирает
+ * один из путей, по которым ещё не полз.
  */
 
-/** Узел лабиринта: либо развилка на два пути, либо выход. */
-export type Uzel = { vid: 'razvilka'; verh: Uzel; niz: Uzel } | { vid: 'vyhod'; imya: string };
+/** Прямоугольник стены в клетках: [c0, c1, r0, r1] включительно. */
+export type Stena = readonly [number, number, number, number];
 
-const vyhod = (imya: string): Uzel => ({ vid: 'vyhod', imya });
+/** Размер сетки в мелких клетках — как в `tools/gen_maze.py`. */
+export const KOLONOK = 54;
+export const RYADOV = 44;
 
 /**
- * Схема автора: четыре развилки, пять выходов.
+ * Стены лабиринта. Список слово в слово повторяет `RECTS` из
+ * `tools/gen_maze.py`; совпадение сверяет `pnpm test:veroyatnost`.
  *
- * Лабиринт несимметричный: до A, B и C паук проходит две развилки, до
- * D и E — три. Отсюда 0,25 у первых трёх и 0,125 у последних двух.
- * Автотест сверяет эти числа с чертежом при каждой сборке.
+ * Менять его нельзя: координаты сверены с оригиналом задачи.
  */
-export const LABIRINT: Uzel = {
-  vid: 'razvilka',
-  verh: { vid: 'razvilka', verh: vyhod('A'), niz: vyhod('B') },
-  niz: {
-    vid: 'razvilka',
-    verh: vyhod('C'),
-    niz: { vid: 'razvilka', verh: vyhod('D'), niz: vyhod('E') },
-  },
+export const STENY: readonly Stena[] = [
+  [0, 23, 0, 3],
+  [30, 53, 0, 3], // верхняя стена, проём = выход D
+  [0, 3, 10, 13],
+  [0, 3, 20, 43], // левая стена: проём 4–9 = выход B, 14–19 = вход
+  [50, 53, 10, 43], // правая стена: проём 4–9 = выход A
+  [0, 43, 40, 43], // нижняя стена, проём 44–49 = выход C
+  [20, 23, 4, 13], // вертикаль от верха
+  [10, 13, 10, 23], // вертикаль слева внутри
+  [30, 51, 10, 13], // длинная горизонталь справа
+  [10, 33, 20, 23],
+  [40, 51, 20, 23], // второй ряд
+  [30, 33, 20, 29], // короткая вертикаль
+  [10, 43, 30, 33], // третий ряд
+  [40, 43, 30, 41], // вертикаль вниз
+];
+
+/* ── Решётка коридоров ───────────────────────────────────────────────
+ *
+ * Стены нарезаны с шагом 10 клеток: 4 клетки стена, 6 клеток коридор.
+ * Значит, весь лабиринт — решётка 5 × 4 перекрёстков, а коридор между
+ * соседними перекрёстками либо есть, либо перекрыт стеной. По этой
+ * решётке и считается блуждание: возиться с отдельными клетками не
+ * нужно, а проверить её глазами по рисунку легко.
+ */
+
+const SHAG = 10;
+const TOLSHCHINA_STENY = 4;
+const SHIRINA_KORIDORA = SHAG - TOLSHCHINA_STENY;
+
+const STOLBTSY: readonly number[] = [4, 14, 24, 34, 44];
+const RYADY: readonly number[] = [4, 14, 24, 34];
+
+/** Перекрёсток решётки: номер столбца и ряда коридоров. */
+export interface Uzel {
+  i: number;
+  j: number;
+}
+
+/**
+ * Куда можно уйти с перекрёстка. Строка, а не объект: направление, с
+ * которого паук пришёл, надо уметь просто вычесть из списка.
+ *
+ *   `u:2:1` — на соседний перекрёсток;
+ *   `v:D`   — наружу через проём выхода D;
+ *   `vh`    — наружу через вход.
+ */
+type Napravlenie = string;
+
+const uzelKlyuch = (u: Uzel): Napravlenie => `u:${u.i}:${u.j}`;
+
+/** Имена проёмов в рамке: сторона и номер коридора вдоль неё. */
+const IMENA_PROEMOV: Readonly<Record<string, string>> = {
+  'left:0': 'B',
+  'right:0': 'A',
+  'top:2': 'D',
+  'bottom:4': 'C',
 };
+const VHOD_PROEM = 'left:1';
+
+const STENA_KLETKI: ReadonlySet<string> = (() => {
+  const kletki = new Set<string>();
+  for (const [c0, c1, r0, r1] of STENY) {
+    for (let c = c0; c <= c1; c += 1) {
+      for (let r = r0; r <= r1; r += 1) {
+        kletki.add(`${c}:${r}`);
+      }
+    }
+  }
+  return kletki;
+})();
+
+/** Свободен ли прямоугольник клеток [c0, c1) × [r0, r1) целиком. */
+function svobodno(c0: number, c1: number, r0: number, r1: number): boolean {
+  for (let c = c0; c < c1; c += 1) {
+    for (let r = r0; r < r1; r += 1) {
+      if (c < 0 || c >= KOLONOK || r < 0 || r >= RYADOV || STENA_KLETKI.has(`${c}:${r}`)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+interface Reshetka {
+  /** Перекрёстки решётки. */
+  uzly: Uzel[];
+  /** С каждого перекрёстка — куда с него можно уйти. */
+  napravleniya: Map<Napravlenie, Napravlenie[]>;
+  /** Проёмы в рамке: имя проёма → перекрёсток, к которому он ведёт. */
+  proemy: Map<string, Uzel>;
+}
+
+function sobrat(): Reshetka {
+  const uzly: Uzel[] = [];
+  const napravleniya = new Map<Napravlenie, Napravlenie[]>();
+  const proemy = new Map<string, Uzel>();
+
+  for (let i = 0; i < STOLBTSY.length; i += 1) {
+    for (let j = 0; j < RYADY.length; j += 1) {
+      uzly.push({ i, j });
+      napravleniya.set(uzelKlyuch({ i, j }), []);
+    }
+  }
+
+  const svyazat = (a: Uzel, b: Uzel): void => {
+    napravleniya.get(uzelKlyuch(a))?.push(uzelKlyuch(b));
+    napravleniya.get(uzelKlyuch(b))?.push(uzelKlyuch(a));
+  };
+
+  const stolbets = (i: number): number => STOLBTSY[i] ?? 0;
+  const ryad = (j: number): number => RYADY[j] ?? 0;
+
+  /* Коридор между соседями по горизонтали — это кусок стены между их
+     столбцами. Свободен — коридор есть. */
+  for (let i = 0; i + 1 < STOLBTSY.length; i += 1) {
+    for (let j = 0; j < RYADY.length; j += 1) {
+      const most = svobodno(
+        stolbets(i) + SHIRINA_KORIDORA,
+        stolbets(i + 1),
+        ryad(j),
+        ryad(j) + SHIRINA_KORIDORA,
+      );
+      if (most) {
+        svyazat({ i, j }, { i: i + 1, j });
+      }
+    }
+  }
+  for (let i = 0; i < STOLBTSY.length; i += 1) {
+    for (let j = 0; j + 1 < RYADY.length; j += 1) {
+      const most = svobodno(
+        stolbets(i),
+        stolbets(i) + SHIRINA_KORIDORA,
+        ryad(j) + SHIRINA_KORIDORA,
+        ryad(j + 1),
+      );
+      if (most) {
+        svyazat({ i, j }, { i, j: j + 1 });
+      }
+    }
+  }
+
+  /* Проёмы в рамке: кусок поля между краем сетки и крайним коридором. */
+  for (let j = 0; j < RYADY.length; j += 1) {
+    if (svobodno(0, stolbets(0), ryad(j), ryad(j) + SHIRINA_KORIDORA)) {
+      proemy.set(`left:${j}`, { i: 0, j });
+    }
+    const posledniy = STOLBTSY.length - 1;
+    if (
+      svobodno(stolbets(posledniy) + SHIRINA_KORIDORA, KOLONOK, ryad(j), ryad(j) + SHIRINA_KORIDORA)
+    ) {
+      proemy.set(`right:${j}`, { i: posledniy, j });
+    }
+  }
+  for (let i = 0; i < STOLBTSY.length; i += 1) {
+    if (svobodno(stolbets(i), stolbets(i) + SHIRINA_KORIDORA, 0, ryad(0))) {
+      proemy.set(`top:${i}`, { i, j: 0 });
+    }
+    const posledniy = RYADY.length - 1;
+    if (
+      svobodno(
+        stolbets(i),
+        stolbets(i) + SHIRINA_KORIDORA,
+        ryad(posledniy) + SHIRINA_KORIDORA,
+        RYADOV,
+      )
+    ) {
+      proemy.set(`bottom:${i}`, { i, j: posledniy });
+    }
+  }
+
+  /* Проём выхода — такое же направление с перекрёстка, как коридор:
+     дойдя до него, паук на развилке выбирает между «наружу» и
+     «дальше по лабиринту». */
+  for (const [imya, uzel] of proemy) {
+    const vyhod = IMENA_PROEMOV[imya];
+    if (vyhod !== undefined) {
+      napravleniya.get(uzelKlyuch(uzel))?.push(`v:${vyhod}`);
+    }
+  }
+
+  proverkaDereva(uzly, napravleniya);
+  return { uzly, napravleniya, proemy };
+}
+
+/**
+ * Коридоры обязаны образовывать дерево: связное и без петель.
+ *
+ * Петля означала бы, что паук может вернуться на перекрёсток, где уже
+ * был, а правило «выбирает путь, по которому ещё не полз» такого случая
+ * не описывает — ответ перестал бы быть определён. Обход же по петле не
+ * кончился бы вовсе, поэтому проверяем до счёта, а не после: лучше
+ * внятная ошибка, чем переполнение стека.
+ */
+function proverkaDereva(uzly: Uzel[], napravleniya: Map<Napravlenie, Napravlenie[]>): void {
+  const koridorov =
+    [...napravleniya.values()].reduce(
+      (s, spisok) => s + spisok.filter((n) => n.startsWith('u:')).length,
+      0,
+    ) / 2;
+  if (koridorov !== uzly.length - 1) {
+    throw new Error(
+      `Коридоры лабиринта не дерево: ${koridorov} коридоров при ${uzly.length} перекрёстках`,
+    );
+  }
+
+  const vidno = new Set<Napravlenie>();
+  const ochered: Napravlenie[] = uzly[0] === undefined ? [] : [uzelKlyuch(uzly[0])];
+  while (ochered.length > 0) {
+    const gde = ochered.pop() as Napravlenie;
+    if (vidno.has(gde)) {
+      continue;
+    }
+    vidno.add(gde);
+    for (const sosed of napravleniya.get(gde) ?? []) {
+      if (sosed.startsWith('u:') && !vidno.has(sosed)) {
+        ochered.push(sosed);
+      }
+    }
+  }
+  if (vidno.size !== uzly.length) {
+    throw new Error(
+      `Лабиринт распался на части: от входа достижимы ${vidno.size} перекрёстков из ${uzly.length}`,
+    );
+  }
+}
+
+/** Лабиринт целиком: решётка коридоров, собранная по стенам. */
+export const LABIRINT: Reshetka = sobrat();
+
+/** Перекрёсток, в который паук попадает со входа. */
+function vhodnoyUzel(): Uzel {
+  const uzel = LABIRINT.proemy.get(VHOD_PROEM);
+  if (uzel === undefined) {
+    throw new Error('В рамке нет проёма для входа');
+  }
+  return uzel;
+}
+
+/** Сколько дорог вперёд у паука, пришедшего на перекрёсток `otkuda`. */
+function dorogiVpered(gde: Napravlenie, otkuda: Napravlenie): Napravlenie[] {
+  return (LABIRINT.napravleniya.get(gde) ?? []).filter((n) => n !== otkuda);
+}
+
+export interface Ishody {
+  /** Вероятность выйти через каждый выход. */
+  vyhody: Record<string, number>;
+  /** Вероятность застрять в тупике. */
+  tupik: number;
+}
+
+/**
+ * Куда приходит паук. Обход в глубину: на каждом перекрёстке доля
+ * вероятности делится поровну между дорогами вперёд, в тупике —
+ * оседает.
+ */
+function obhodom(): Ishody {
+  const vyhody: Record<string, number> = {};
+  let tupik = 0;
+
+  const idti = (gde: Napravlenie, otkuda: Napravlenie, p: number): void => {
+    const dalshe = dorogiVpered(gde, otkuda);
+    if (dalshe.length === 0) {
+      tupik += p;
+      return;
+    }
+    for (const sled of dalshe) {
+      const dolya = p / dalshe.length;
+      if (sled.startsWith('v:')) {
+        const imya = sled.slice(2);
+        vyhody[imya] = (vyhody[imya] ?? 0) + dolya;
+      } else {
+        idti(sled, gde, dolya);
+      }
+    }
+  };
+
+  idti(uzelKlyuch(vhodnoyUzel()), 'vh', 1);
+  return { vyhody, tupik };
+}
+
+/**
+ * То же самое вторым путём — волной по направленным коридорам.
+ *
+ * Здесь нет рекурсии и нет понятия «ветка»: вероятность лежит на парах
+ * «где паук и откуда пришёл» и на каждом шаге вся разом сдвигается
+ * вперёд, пока не осядет на выходах и в тупиках. Алгоритм другой,
+ * ответ обязан получиться тот же — на этом и держится проверка.
+ */
+function volnoy(): Ishody {
+  const vyhody: Record<string, number> = {};
+  let tupik = 0;
+
+  /* Ключ состояния — «перекрёсток, откуда пришли». */
+  let volna = new Map<string, number>([[`${uzelKlyuch(vhodnoyUzel())}|vh`, 1]]);
+
+  while (volna.size > 0) {
+    const sled = new Map<string, number>();
+    for (const [sostoyanie, p] of volna) {
+      const [gde = '', otkuda = ''] = sostoyanie.split('|');
+      const dorogi = dorogiVpered(gde, otkuda);
+      if (dorogi.length === 0) {
+        tupik += p;
+        continue;
+      }
+      for (const kuda of dorogi) {
+        const dolya = p / dorogi.length;
+        if (kuda.startsWith('v:')) {
+          const imya = kuda.slice(2);
+          vyhody[imya] = (vyhody[imya] ?? 0) + dolya;
+        } else {
+          const klyuch = `${kuda}|${gde}`;
+          sled.set(klyuch, (sled.get(klyuch) ?? 0) + dolya);
+        }
+      }
+    }
+    volna = sled;
+  }
+
+  return { vyhody, tupik };
+}
+
+const ISHODY = obhodom();
+const ISHODY_VOLNOY = volnoy();
 
 /** Вероятность прийти к выходу с этим именем. */
-export function veroyatnostVyhoda(uzel: Uzel, imya: string, shans = 1): number {
-  if (uzel.vid === 'vyhod') {
-    return uzel.imya === imya ? shans : 0;
-  }
-  return (
-    veroyatnostVyhoda(uzel.verh, imya, shans / 2) + veroyatnostVyhoda(uzel.niz, imya, shans / 2)
-  );
+export function veroyatnostVyhoda(imya: string): number {
+  return ISHODY.vyhody[imya] ?? 0;
 }
 
-/** Все выходы лабиринта в порядке обхода сверху вниз. */
-export function vyhody(uzel: Uzel): string[] {
-  return uzel.vid === 'vyhod' ? [uzel.imya] : [...vyhody(uzel.verh), ...vyhody(uzel.niz)];
+/** Та же вероятность, посчитанная вторым способом. */
+export function veroyatnostVyhodaVolnoy(imya: string): number {
+  return ISHODY_VOLNOY.vyhody[imya] ?? 0;
 }
 
-/** Сколько в лабиринте развилок. */
-export function razvilki(uzel: Uzel): number {
-  return uzel.vid === 'vyhod' ? 0 : 1 + razvilki(uzel.verh) + razvilki(uzel.niz);
+/** Вероятность застрять в тупике. */
+export function veroyatnostTupika(): number {
+  return ISHODY.tupik;
 }
 
-/** Сколько развилок проходит паук до этого выхода. */
-export function glubina(uzel: Uzel, imya: string): number {
-  if (uzel.vid === 'vyhod') {
-    return uzel.imya === imya ? 0 : -1;
-  }
-  for (const vetka of [uzel.verh, uzel.niz]) {
-    const dalshe = glubina(vetka, imya);
-    if (dalshe >= 0) {
-      return dalshe + 1;
-    }
-  }
-  return -1;
+/** Все выходы лабиринта по алфавиту. */
+export function vyhody(): string[] {
+  return Object.values(IMENA_PROEMOV).sort();
 }
 
-/* ── Чертёж ──────────────────────────────────────────────────────── */
+/** Перекрёстки, с которых нет дороги вперёд ни при каком приходе. */
+export function tupiki(): Uzel[] {
+  return LABIRINT.uzly.filter((u) => (LABIRINT.napravleniya.get(uzelKlyuch(u)) ?? []).length === 1);
+}
+
+/** Перекрёстки, где паук выбирает из нескольких дорог. */
+export function razvilki(): Uzel[] {
+  return LABIRINT.uzly.filter((u) => (LABIRINT.napravleniya.get(uzelKlyuch(u)) ?? []).length > 2);
+}
 
 /**
- * Рисунок лабиринта, а не схема дерева.
+ * Сколько разветвлений паук проходит по дороге к этому выходу.
  *
- * Дерево говорит, какие развилки есть и куда ведут; как именно повернуть
- * коридор на бумаге, оно не знает — это работа художника. Поэтому
- * геометрия задана вручную в `RISUNOK`, но **формой повторяет дерево**:
- * у развилки обязаны быть обе ветки, у выхода — ни одной. Несовпадение
- * роняет сборку в `sobrat`, так что нарисовать один лабиринт, а считать
- * ответ по другому нельзя.
- *
- * Коридоры — широкие прямоугольные трубы одной толщины с прямыми
- * поворотами; выходы упираются в край и подписаны снаружи.
+ * Дорога единственная: коридоры образуют дерево, петель в нём нет. Путь
+ * ищется в глубину, а считаются на нём только те перекрёстки, где дорог
+ * вперёд больше одной, — остальные паук проходит не выбирая.
  */
-
-/** Толщина коридора. Одна на весь рисунок. */
-const TOLSHCHINA = 22;
-/** Края лабиринта: за ними только подписи. */
-const LEVO = 120;
-const PRAVO = 700;
-const VERH = 90;
-const NIZ = 450;
-/** Отступ подписи от внешнего края рамки. */
-const OTSTUP = 28;
-/**
- * Ширина разрыва в рамке. Заметно шире коридора: иначе коридор
- * упрётся в края стены и на картинке сольётся с ней в одну полосу,
- * а должен проходить в проём, ничего не задевая.
- */
-const RAZRYV = TOLSHCHINA + 32;
-/** Высота, на которой коридор входит в лабиринт слева. */
-const VHOD_Y = 270;
-
-/** Ход коридора: отрезок по горизонтали или по вертикали. */
-type Hod =
-  | { vid: 'gorizont'; x1: number; x2: number; y: number }
-  | { vid: 'vertikal'; y1: number; y2: number; x: number };
-
-const g = (x1: number, x2: number, y: number): Hod => ({ vid: 'gorizont', x1, x2, y });
-const v = (y1: number, y2: number, x: number): Hod => ({ vid: 'vertikal', y1, y2, x });
-
-/** С какой стороны от конца коридора ставится подпись выхода. */
-type Storona = 'sverhu' | 'snizu' | 'sprava';
-
-/**
- * Геометрия ветки. Повторяет форму дерева: `verh` и `niz` есть ровно
- * у тех веток, которым в дереве отвечает развилка.
- */
-interface Vetka {
-  /** Ходы от предыдущей развилки до этой. */
-  hody: Hod[];
-  /** Где кончается коридор выхода и куда смотрит подпись. */
-  konec?: { x: number; y: number; storona: Storona };
-  verh?: Vetka;
-  niz?: Vetka;
-}
-
-/**
- * Разводка коридоров. Считана с рисунка задачи: вход слева, первая
- * развилка ведёт вверх и вниз, выходы упираются в верхний, правый и
- * нижний края.
- */
-const RISUNOK: Vetka = {
-  /* Вход слева и первая развилка: вверх или вниз. */
-  hody: [g(LEVO, 180, VHOD_Y), v(150, 390, 180)],
-
-  verh: {
-    /* Верхняя половина листа: направо, вниз, снова направо. */
-    hody: [g(180, 240, 150), v(150, 210, 240), g(240, 360, 210)],
-    /* Вверх, направо и опять вверх — до верхнего края. */
-    verh: {
-      hody: [v(150, 210, 360), g(360, 480, 150), v(VERH, 150, 480)],
-      konec: { x: 480, y: VERH, storona: 'sverhu' },
-    },
-    /* Направо, вниз через середину листа, вверх и направо — до правого края. */
-    niz: {
-      hody: [
-        g(360, 420, 210),
-        v(210, 270, 420),
-        g(420, 660, 270),
-        v(210, 270, 660),
-        g(660, PRAVO, 210),
-      ],
-      konec: { x: PRAVO, y: 210, storona: 'sprava' },
-    },
-  },
-
-  niz: {
-    /* Нижняя половина: направо, вверх в середину листа, направо и вниз. */
-    hody: [g(180, 300, 390), v(270, 390, 300), g(300, 360, 270), v(270, 330, 360)],
-    /* Прямо вниз — до нижнего края. */
-    verh: { hody: [v(330, NIZ, 360)], konec: { x: 360, y: NIZ, storona: 'snizu' } },
-    niz: {
-      /* Направо, вниз, направо — до четвёртой развилки. */
-      hody: [g(360, 480, 330), v(330, 390, 480), g(480, 540, 390)],
-      /* Вверх и направо — до правого края. */
-      verh: {
-        hody: [v(330, 390, 540), g(540, PRAVO, 330)],
-        konec: { x: PRAVO, y: 330, storona: 'sprava' },
-      },
-      /* Направо и вниз — до нижнего края. */
-      niz: {
-        hody: [g(540, 600, 390), v(390, NIZ, 600)],
-        konec: { x: 600, y: NIZ, storona: 'snizu' },
-      },
-    },
-  },
-};
-
-interface Pryamougolnik {
-  x: number;
-  y: number;
-  shirina: number;
-  vysota: number;
-}
-
-/**
- * Ход в прямоугольник. Концы вытянуты на полтолщины: иначе на
- * повороте остаётся незакрашенный квадратик и угол выходит со
- * ступенькой вместо прямого.
- */
-function vPryamougolnik(hod: Hod): Pryamougolnik {
-  const pol = TOLSHCHINA / 2;
-  if (hod.vid === 'gorizont') {
-    const x = Math.min(hod.x1, hod.x2) - pol;
-    return {
-      x,
-      y: hod.y - pol,
-      shirina: Math.abs(hod.x2 - hod.x1) + TOLSHCHINA,
-      vysota: TOLSHCHINA,
-    };
-  }
-  const y = Math.min(hod.y1, hod.y2) - pol;
-  return {
-    x: hod.x - pol,
-    y,
-    shirina: TOLSHCHINA,
-    vysota: Math.abs(hod.y2 - hod.y1) + TOLSHCHINA,
-  };
-}
-
-interface Podpis {
-  text: string;
-  x: number;
-  y: number;
-  yakor: 'start' | 'middle' | 'end';
-}
-
-interface Konec {
-  x: number;
-  y: number;
-  storona: Storona | 'sleva';
-}
-
-interface Sborka {
-  /**
-   * Ход, путь его ветки ('', 'в', 'вн' и так далее) и признак первого
-   * хода ветки: только первые ходы двух дорог имеют право сойтись —
-   * в самой развилке.
-   */
-  hody: { hod: Hod; put: string; pervyy: boolean }[];
-  podpisi: Podpis[];
-  konce: Konec[];
-}
-
-/**
- * Обход дерева вместе с разводкой. Форму сверяем на каждом узле: где
- * в дереве развилка, там у разводки обязаны быть обе ветки, а где
- * выход — обязан быть конец коридора.
- */
-function sobrat(uzel: Uzel, vetka: Vetka, out: Sborka, put = ''): void {
-  vetka.hody.forEach((hod, i) => out.hody.push({ hod, put, pervyy: i === 0 }));
-
-  if (uzel.vid === 'vyhod') {
-    const konec = vetka.konec;
-    if (konec === undefined || vetka.verh !== undefined || vetka.niz !== undefined) {
-      throw new Error(`Разводка не сходится с деревом на выходе ${uzel.imya}`);
-    }
-    out.konce.push(konec);
-    const podpis = `Выход ${uzel.imya}`;
-    if (konec.storona === 'sprava') {
-      out.podpisi.push({ text: podpis, x: konec.x + OTSTUP, y: konec.y + 7, yakor: 'start' });
-    } else if (konec.storona === 'sverhu') {
-      out.podpisi.push({ text: podpis, x: konec.x, y: konec.y - OTSTUP - 8, yakor: 'middle' });
-    } else {
-      out.podpisi.push({ text: podpis, x: konec.x, y: konec.y + OTSTUP + 20, yakor: 'middle' });
-    }
-    return;
-  }
-
-  if (vetka.verh === undefined || vetka.niz === undefined || vetka.konec !== undefined) {
-    throw new Error('Разводка не сходится с деревом на развилке');
-  }
-  sobrat(uzel.verh, vetka.verh, out, `${put}в`);
-  sobrat(uzel.niz, vetka.niz, out, `${put}н`);
-}
-
-/**
- * Стена с проёмами: отрезок от `ot` до `do`, разрезанный в каждой
- * точке из `razryvy`. Через проём наружу выходит коридор.
- */
-function stena(
-  ot: number,
-  konec: number,
-  razryvy: number[],
-  sdelat: (a: number, b: number) => Hod,
-): Hod[] {
-  const out: Hod[] = [];
-  let tekushchiy = ot;
-  for (const centr of [...razryvy].sort((a, b) => a - b)) {
-    const nachalo = centr - RAZRYV / 2;
-    if (nachalo > tekushchiy) {
-      out.push(sdelat(tekushchiy, nachalo));
-    }
-    tekushchiy = centr + RAZRYV / 2;
-  }
-  if (konec > tekushchiy) {
-    out.push(sdelat(tekushchiy, konec));
-  }
-  return out;
-}
-
-/**
- * Рамка — стены помещения, в которое вписан лабиринт.
- *
- * Замкнутый прямоугольник того же цвета и той же толщины, что
- * коридоры, разорванный ровно там, где коридор выходит наружу:
- * один проём на вход и по одному на каждый выход. Где какие проёмы,
- * считается по концам коридоров, а не записано числами, — сдвинется
- * выход, сдвинется и разрыв.
- */
-function ramka(konce: readonly Konec[]): Hod[] {
-  const po = (storona: Konec['storona'], chto: (k: Konec) => number): number[] =>
-    konce.filter((k) => k.storona === storona).map(chto);
-
-  return [
-    ...stena(
-      LEVO,
-      PRAVO,
-      po('sverhu', (k) => k.x),
-      (a, b) => g(a, b, VERH),
-    ),
-    ...stena(
-      LEVO,
-      PRAVO,
-      po('snizu', (k) => k.x),
-      (a, b) => g(a, b, NIZ),
-    ),
-    ...stena(
-      VERH,
-      NIZ,
-      po('sprava', (k) => k.y),
-      (a, b) => v(a, b, PRAVO),
-    ),
-    ...stena(
-      VERH,
-      NIZ,
-      po('sleva', (k) => k.y),
-      (a, b) => v(a, b, LEVO),
-    ),
-  ];
-}
-
-/** Прямоугольник с запасом в пиксель по каждой стороне. */
-function razdut(r: Pryamougolnik): Pryamougolnik {
-  return { x: r.x - 1, y: r.y - 1, shirina: r.shirina + 2, vysota: r.vysota + 2 };
-}
-
-/** Площадь пересечения двух прямоугольников. */
-function ploshchadPeresecheniya(a: Pryamougolnik, b: Pryamougolnik): number {
-  const poX = Math.min(a.x + a.shirina, b.x + b.shirina) - Math.max(a.x, b.x);
-  const poY = Math.min(a.y + a.vysota, b.y + b.vysota) - Math.max(a.y, b.y);
-  return poX > 0 && poY > 0 ? poX * poY : 0;
-}
-
-/**
- * Проверка рисунка: коридоры разных веток не должны пересекаться.
- *
- * Если два коридора наложатся, на картинке появится проход, которого
- * в дереве нет: паук сможет попасть из одной ветки в другую, и
- * нарисованные вероятности перестанут совпадать с посчитанными.
- *
- * Ветка со своим продолжением стыкуется как угодно — это один и тот же
- * путь. Две дороги от одной развилки обязаны сойтись ровно в ней, и
- * общего у них не больше одного квадрата коридора; всё, что шире, —
- * уже общий кусок пути, то есть срез.
- */
-export function proverkaRisunka(uzel: Uzel = LABIRINT): string[] {
-  const sborka: Sborka = { hody: [], podpisi: [], konce: [] };
-  sobrat(uzel, RISUNOK, sborka);
-  const bedy: string[] = [];
-
-  /* Две дороги от одной развилки: пути одной длины, отличаются
-     последней буквой. */
-  const sosedi = (a: string, b: string): boolean =>
-    a.length === b.length && a !== b && a.slice(0, -1) === b.slice(0, -1);
-
-  for (let i = 0; i < sborka.hody.length; i += 1) {
-    for (let j = i + 1; j < sborka.hody.length; j += 1) {
-      const a = sborka.hody[i] as Sborka['hody'][number];
-      const b = sborka.hody[j] as Sborka['hody'][number];
-      /* Одна ветка продолжает другую — это один и тот же путь. */
-      if (a.put.startsWith(b.put) || b.put.startsWith(a.put)) {
-        continue;
+export function razvilokDoVyhoda(imya: string): number {
+  const iskat = (gde: Napravlenie, otkuda: Napravlenie): number | null => {
+    const dalshe = dorogiVpered(gde, otkuda);
+    for (const sled of dalshe) {
+      if (sled === `v:${imya}`) {
+        return dalshe.length > 1 ? 1 : 0;
       }
-
-      const ra = vPryamougolnik(a.hod);
-      const rb = vPryamougolnik(b.hod);
-
-      if (sosedi(a.put, b.put) && a.pervyy && b.pervyy) {
-        /* Законный стык в развилке: общего у дорог не больше одного
-           квадрата коридора. Шире — уже общий кусок пути. */
-        const obshchee = ploshchadPeresecheniya(ra, rb);
-        if (obshchee > TOLSHCHINA * TOLSHCHINA) {
-          bedy.push(`дороги «${a.put}» и «${b.put}» сходятся не только в развилке`);
+      if (!sled.startsWith('v:')) {
+        const dalshe2 = iskat(sled, gde);
+        if (dalshe2 !== null) {
+          return dalshe2 + (dalshe.length > 1 ? 1 : 0);
         }
-        continue;
-      }
-
-      /* Всем остальным парам нельзя даже касаться: коридоры, сомкнутые
-         край в край, на картинке сливаются в один — получился бы
-         проход, которого в дереве нет. Поэтому проверяем с запасом. */
-      if (ploshchadPeresecheniya(razdut(ra), razdut(rb)) > 0) {
-        bedy.push(`коридоры веток «${a.put}» и «${b.put}» соприкасаются`);
       }
     }
-  }
-
-  /* Рамка не должна касаться ни одного коридора: коридор обязан
-     проходить в проём, а не упираться в стену и сливаться с ней. */
-  sborka.konce.push({ x: LEVO, y: VHOD_Y, storona: 'sleva' });
-  const steny = ramka(sborka.konce);
-  for (const stenka of steny) {
-    for (const koridor of sborka.hody) {
-      const est = ploshchadPeresecheniya(
-        razdut(vPryamougolnik(stenka)),
-        razdut(vPryamougolnik(koridor.hod)),
-      );
-      if (est > 0) {
-        bedy.push(`коридор ветки «${koridor.put}» упирается в стену, а не проходит в проём`);
-      }
-    }
-  }
-  return bedy;
+    return null;
+  };
+  return iskat(uzelKlyuch(vhodnoyUzel()), 'vh') ?? -1;
 }
 
+/* ── Рисунок ─────────────────────────────────────────────────────── */
+
+/** Размеры файла картинки: нужны, чтобы страница не дёргалась при загрузке. */
+const RISUNOK_SHIRINA = 908;
+const RISUNOK_VYSOTA = 688;
+
 /**
- * Чертёж лабиринта готовой разметкой SVG.
+ * Разметка чертежа к задаче.
  *
- * Рисуется на сборке: в браузер уезжает готовая строка, движка там
- * нет. Подписи — обычные <text> внутри того же SVG, а не слой поверх
- * картинки, и берутся из имён выходов в дереве.
+ * Картинка — готовый файл, а не построение на лету: её собирает
+ * `tools/gen_maze.py`, и она же сверена с оригиналом задачи. Рисовать
+ * её второй раз здесь значило бы завести второй источник истины.
  *
- * Коридоры рисуются дважды: сначала под обводку, потом заливкой
- * поверх. Так тёмный контур обходит лабиринт снаружи, а внутренних
- * швов на стыках труб не видно.
- *
- * Цвета и шрифт заданы классами, а не значениями: их берёт таблица
- * стилей раздела из токенов проекта.
+ * Фон у файла прозрачный, подложки под ним нет. Ширину и высоту тега
+ * проставляем явно — иначе при загрузке страница дёргается.
  */
-export function chertezhLabirinta(uzel: Uzel = LABIRINT): string {
-  const sborka: Sborka = { hody: [], podpisi: [], konce: [] };
-  sobrat(uzel, RISUNOK, sborka);
-  sborka.konce.push({ x: LEVO, y: VHOD_Y, storona: 'sleva' });
-
-  const steny = ramka(sborka.konce);
-  const pryamougolniki = [...sborka.hody.map((h) => h.hod), ...steny].map(vPryamougolnik);
-  const kak = (klass: string): string =>
-    pryamougolniki
-      .map(
-        (r) =>
-          `<rect x="${r.x}" y="${r.y}" width="${r.shirina}" height="${r.vysota}" class="${klass}" />`,
-      )
-      .join('');
-
-  sborka.podpisi.push({ text: 'Вход', x: LEVO - OTSTUP, y: VHOD_Y + 7, yakor: 'end' });
-
-  const podpisi = sborka.podpisi
-    .map(
-      (p) =>
-        `<text x="${p.x}" y="${p.y}" text-anchor="${p.yakor}" class="lab-podpis">${p.text}</text>`,
-    )
-    .join('');
-
-  const imena = vyhody(uzel).join(', ');
+export function chertezhLabirinta(): string {
+  const imena = vyhody().join(', ');
   return [
-    `<svg viewBox="0 0 860 520" role="img" `,
-    `aria-label="Лабиринт: вход слева, ${razvilki(uzel)} развилки, выходы ${imena}">`,
-    `<g class="lab-obvodka">${kak('lab-obvodka-hod')}</g>`,
-    `<g class="lab-koridory">${kak('lab-koridor')}</g>`,
-    podpisi,
-    '</svg>',
+    '<img src="/images/veroyatnost/labirint-glass.svg"',
+    ` width="${RISUNOK_SHIRINA}" height="${RISUNOK_VYSOTA}"`,
+    ` alt="Лабиринт: вход слева, выходы ${imena}, в лабиринте есть тупики"`,
+    ' />',
   ].join('');
 }
