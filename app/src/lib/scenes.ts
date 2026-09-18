@@ -109,23 +109,27 @@ export function previewScene(id: FunctionTypeId) {
 }
 
 
-/* ── Миниатюры навыков генератора ─────────────────────────────────
+/* ── Миниатюры навыков ────────────────────────────────────────────
    Навык — набор прототипов; по одной картинке на набор: что дано
    и что ищут. Искомая координата показана пунктиром до оси — тем же
-   приёмом, что катеты в разборе. Числа — параметры чертежа. */
+   приёмом, что катеты в разборе. Числа — параметры чертежа.
 
-const SKILL_HALF = 3;
+   Окно тесное, как у карточек подготовки: клетка крупнее, и в
+   карточке шириной 120px сетка и буквы осей ещё читаются. Чисел на
+   осях нет — они превращались бы в крошки. */
 
-/** Прямая для 12.A и 12.B и точка на ней в узле сетки. */
+const SKILL_HALF = 2;
+
+/** Прямая для 12.A и 12.B и точка на ней. */
 const SKILL_LINE = { k: 0.6, b: 0.5 };
-const SKILL_PROBE = { x: 2, y: 1.7 };
+const SKILL_PROBE = { x: 1.4, y: 1.34 };
 
 /** Две прямые для 12.C и 12.D; пересекаются внутри окна. */
 const SKILL_PAIR = [
   { k: 0.75, b: 0.5 },
-  { k: -0.5, b: 2 },
+  { k: -0.5, b: 1.5 },
 ];
-const SKILL_CROSS = { x: 1.2, y: 1.4 };
+const SKILL_CROSS = { x: 0.8, y: 1.1 };
 
 function dashed(from: [number, number], to: [number, number]) {
   return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
@@ -134,8 +138,8 @@ function dashed(from: [number, number], to: [number, number]) {
 export function generatorSkillScene(setId: string) {
   const base = {
     window: squareWindow(SKILL_HALF),
-    grid: { step: 1, show: false },
-    axes: { labelX: '', labelY: '', origin: '' },
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
     axisLabels: 'none',
     curves: [] as unknown[],
     points: [] as unknown[],
