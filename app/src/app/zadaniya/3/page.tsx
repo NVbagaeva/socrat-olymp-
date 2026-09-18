@@ -84,7 +84,7 @@ export default function Stereometria3Page() {
               <SubtopicCard
                 name={razdel.nazvanie}
                 href={`${tasksPage.href}/${stereometria.slug}/${razdel.slug}`}
-                media={<Solid className="subtopic__solid" model={thumb(razdel.nomer)} />}
+                media={<Solid model={thumb(razdel.nomer)} />}
                 meta={
                   <>
                     <span className="subtopic__no">Раздел {razdel.nomer}</span>
