@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { RisunokState } from './OutcomeTiles';
+import { Znaki } from './Znaki';
 
 /**
  * Сетка удобного числа — метод 5.
@@ -188,7 +189,7 @@ export function HundredGrid({
       {/* Перевод доли в штуки — та самая мысль метода. */}
       {showConversion && perevod !== null ? (
         <text className="pr-math pr-total" x="0" y={height - 6}>
-          {perevod + (unit === undefined ? '' : ` ${unit}`)}
+          <Znaki text={perevod + (unit === undefined ? '' : ` ${unit}`)} />
         </text>
       ) : null}
     </svg>

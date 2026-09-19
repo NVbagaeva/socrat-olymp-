@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { RisunokState } from './OutcomeTiles';
+import { Znaki } from './Znaki';
 
 /**
  * Дерево вероятностей — метод 4.
@@ -256,7 +257,7 @@ export function ProbabilityTree({
               y={y(glubina.get(b.id) ?? urovney - 1) + 44}
               textAnchor="middle"
             >
-              {proizv(proizvedenie.get(b.id) ?? 0)}
+              <Znaki text={proizv(proizvedenie.get(b.id) ?? 0)} />
             </text>
           ))
         : null}
