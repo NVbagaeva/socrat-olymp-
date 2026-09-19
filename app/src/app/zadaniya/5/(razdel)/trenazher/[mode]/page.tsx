@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: Params }) {
       uznay={uznayMetodPool(5)}
       zadanie={5}
       base={`${tasksPage.href}/5/trenazher/`}
-      family={veroyatnostBySlug('5')?.title ?? ''}
+      family={veroyatnostFamily('5')}
       skills={navykiMetodov(pool, 5)}
       preset={{ skill: found.skill, mode: found.mode }}
     />

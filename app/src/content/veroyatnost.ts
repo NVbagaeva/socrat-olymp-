@@ -29,6 +29,12 @@ export interface VeroyatnostSection {
   slug: string;
   /** Название темы: заголовок страницы. */
   title: string;
+  /**
+   * Короткое имя темы — для тренажёра и генератора. Там страница уже
+   * внутри задания, и номер в подписи «Задание №4. …» повторял бы
+   * сам себя. Нет поля — берётся полное название.
+   */
+  korotko?: string;
   /** Одна строка под заголовком. Про устройство раздела, не про предмет. */
   lead: string;
   /** Пометка уровня рядом с заголовком. */
@@ -80,6 +86,12 @@ const TABS_5: readonly VeroyatnostTab[] = [
  */
 export const ZAGOLOVOK_4 = 'Задание №4. Вероятность: простая';
 
+/**
+ * Короткое имя темы №4 — для тренажёра и генератора: там страница уже
+ * внутри задания, и «Задание №4» в подписи повторяло бы само себя.
+ */
+export const KOROTKO_4 = 'Вероятность: простая';
+
 /** Подзаголовок раздела №4 — строка под бейджем уровня. */
 export const PODZAGOLOVOK_4 =
   'Одно задание — восемь методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
@@ -89,6 +101,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     no: '04',
     slug: '4',
     title: ZAGOLOVOK_4,
+    korotko: KOROTKO_4,
     lead: PODZAGOLOVOK_4,
     badge: 'Базовый уровень',
     tabs: TABS_4,
@@ -163,6 +176,15 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
 
 export function veroyatnostBySlug(slug: string): VeroyatnostSection | undefined {
   return VEROYATNOST.find((section) => section.slug === slug);
+}
+
+/**
+ * Имя темы для тренажёра и генератора: короткое, если оно задано.
+ * Эти экраны живут внутри задания, и номер в подписи там лишний.
+ */
+export function veroyatnostFamily(slug: string): string {
+  const section = veroyatnostBySlug(slug);
+  return section === undefined ? '' : (section.korotko ?? section.title);
 }
 
 /**

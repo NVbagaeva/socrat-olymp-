@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
 import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function Trenazher4Tab() {
       uznay={uznayMetodPool(4)}
       zadanie={4}
       base={`${tasksPage.href}/4/trenazher/`}
-      family={veroyatnostBySlug('4')?.title ?? ''}
+      family={veroyatnostFamily('4')}
       skills={navykiMetodov(pool, 4)}
     />
   );

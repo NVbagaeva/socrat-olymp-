@@ -777,3 +777,602 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* ── Вкладка «Теория» ───────────────────────────────────────────── */
+
+/* Разделы подряд, содержание рядом: раскладка .topic-body--theory
+   взята у задания №12 вместе со списком и шторкой. Здесь только то,
+   чего у №12 нет. */
+
+/* Содержание уже, чем у №12: там колонка держит длинные названия
+   типов функций, здесь названия короткие, а разделу нужна ширина
+   под три карточки в ряд. */
+@media (min-width: 1024px) {
+  .vteor {
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--space-5);
+  }
+}
+.vteor__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.vteor-side__lead {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vteor-razdel {
+  display: grid;
+  gap: var(--space-4);
+  /* Заголовок не прячется под липкую шапку при переходе по содержанию. */
+  scroll-margin-top: var(--space-6);
+}
+.vteor-razdel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+/* Кружок с номером блока — как у теории задания №12. */
+.vteor-razdel__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.vteor-razdel__soon {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vteor-blok {
+  display: grid;
+  gap: var(--space-4);
+}
+.vteor-blok__lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Формула отдельной строкой в рамке — общая для всех карточек теории.
+   Формула не переносится по знакам: «0 < P(A) < 1» на трёх строках
+   читается как три разных выражения. Не влезла — уезжает прокруткой
+   внутри своей рамки, а не ломает карточку. */
+.vteor-formula {
+  margin: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  text-align: center;
+  font-size: var(--fs-lg);
+}
+
+/* ── Блок 1: виды событий ───────────────────────────────────────── */
+
+.vvidy {
+  display: grid;
+  grid-template-columns: minmax(0, 3.4fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.vvidy__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vvidy__side {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Карточка вида события: заголовок, определение, формула, пример. */
+.vvid {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vvid__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+/* У случайного и достоверного заголовок синий, у невозможного —
+   тёмно-синий: так на макете. */
+.vvid--info .vvid__title {
+  color: var(--color-primary);
+}
+.vvid--accent .vvid__title {
+  color: var(--color-text-brand);
+}
+/* Плашка определения: тон задаётся видом события. */
+.vvid__opredelenie {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vvid--accent .vvid__opredelenie {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+}
+.vvid--info .vvid__opredelenie {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.vvid__primer {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vvid__primer b {
+  color: var(--color-text-brand);
+}
+/* Иллюстрация прижата к низу карточки и тянется на всю её ширину. */
+.vvid__figura {
+  margin: auto 0 0;
+}
+.vvid__foto {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+/* Подпись от руки стоит под снимком. На макете она лежит поверх
+   правого края фотографии, но там карточка шире: в колонке 220px
+   рукописная строка поверх снимка не читается и рвётся на слоги. */
+.vvid__podpis {
+  margin-top: var(--space-2);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+/* Плашка с галочкой — вместо иллюстрации у достоверного события. */
+.vvid__itog {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: auto 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vvid__galka {
+  display: grid;
+  place-items: center;
+  flex: none;
+  order: 1;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-text-inverse);
+}
+.vvid__galka svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Правая колонка: «А что, если изменить условия?» */
+.vusloviya__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.vusloviya__figura {
+  margin: var(--space-3) 0 0;
+}
+.vusloviya__foto {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+.vusloviya__podpis {
+  margin-top: var(--space-2);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+
+/* ── Плашка «Запомни» ───────────────────────────────────────────── */
+
+.vzapomni {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vzapomni__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.vzapomni__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+.vzapomni__ico svg {
+  width: 100%;
+  height: 100%;
+}
+.vzapomni__lead {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vzapomni__cep {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vzapomni__zveno {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.vzveno {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+.vzveno--accent {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+}
+.vzveno--info {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.vzveno__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+}
+.vzveno__formula {
+  color: var(--color-text-brand);
+}
+.vzapomni__strelka {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary);
+}
+.vzapomni__strelka svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Блок 2: проверь себя ───────────────────────────────────────── */
+
+.vcheck {
+  display: grid;
+  gap: var(--space-4);
+}
+.vcheck__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.vcheck__lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vcheck__go {
+  flex: none;
+}
+.vcheck__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vcheck-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vcheck-card__text {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+.vcheck-card__no {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.vcheck-card__otvety {
+  margin-top: var(--space-1);
+}
+
+/* Ряд вариантов ответа: кнопки столбиком, во всю ширину карточки. */
+.vvar {
+  display: grid;
+  gap: var(--space-1);
+}
+.vvar__btn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.vvar__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.vvar__btn.is-picked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.vvar__btn:disabled {
+  cursor: default;
+}
+/* Состояния после проверки — те же, что у выбора метода в тренажёре.
+   Вес селектора выше, чем у отметки выбора: иначе выбранный вариант
+   остался бы синим и вердикта на нём не было бы видно. */
+.vvar__btn.vvar__btn--correct {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-weight: 600;
+}
+.vvar__btn.vvar__btn--incorrect {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+  font-weight: 600;
+}
+/* Верный вариант, который ученик не выбрал: рамка без заливки. */
+.vvar__btn.vvar__btn--answer {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+/* ── Блок 3: связанные события ──────────────────────────────────── */
+
+.vsvyaz__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vsvyaz {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 118px);
+  align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vsvyaz__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.vsvyaz__ico svg {
+  width: 24px;
+  height: 24px;
+}
+.vsvyaz__text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.vsvyaz__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.vsvyaz__opredelenie,
+.vsvyaz__primer {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vsvyaz__primer b {
+  color: var(--color-text-brand);
+}
+/* Формула блока ступенью мельче: в колонке 210px запись
+   «P(A ∩ B) = P(A) · P(B)» кеглем карточек не помещается. */
+.vsvyaz .vteor-formula {
+  padding: var(--space-2);
+  font-size: var(--fs-body);
+}
+.vsvyaz__figura {
+  margin: 0;
+}
+.vsvyaz__foto {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Плашка под карточкой — на всю её ширину, в тон смыслу. */
+.vsvyaz__plashka {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vsvyaz__plashka--info {
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+}
+.vsvyaz__plashka--info b {
+  color: var(--color-primary);
+}
+.vsvyaz__plashka--accent {
+  border: 1px solid var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text-secondary);
+}
+.vsvyaz__plashka--accent b {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-accent);
+}
+
+/* ── Теория: планшет и телефон ──────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  /* Правая колонка раздела уходит под карточки. */
+  .vvidy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vvidy__side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vcheck__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .vzapomni {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Карточки связанных событий — по одной в ряд: вдвоём они оставляют
+     под текст полторы сотни пикселей, и формула в них не помещается. */
+  .vsvyaz__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .vvidy__grid,
+  .vvidy__side,
+  .vcheck__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Цепочка «Запомни» встаёт столбиком, стрелки смотрят вниз. */
+  .vzapomni__cep {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+  .vzapomni__zveno {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--space-1);
+  }
+  .vzapomni__zveno .vzveno {
+    width: 100%;
+  }
+  .vzapomni__strelka {
+    transform: rotate(90deg);
+  }
+  /* Карточка связанных событий складывается: значок с заголовком,
+     текст, иллюстрация, плашка. */
+  .vsvyaz {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .vsvyaz__figura {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 200px;
+  }
+  /* Подпись от руки поверх снимка на телефоне не читается. */
+  .vvid__podpis {
+    position: static;
+    max-width: none;
+    margin-top: var(--space-2);
+    text-align: left;
+  }
+}
