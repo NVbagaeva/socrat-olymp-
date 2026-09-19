@@ -20,7 +20,6 @@
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
     "test:zadanie3": "node scripts/check-zadanie3.mjs",
     "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
-    "test:razbor": "node scripts/check-razbor.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
@@ -28,6 +27,8 @@
     "build:pdf-12": "node scripts/build-pdf-12.mjs",
     "build:pdf-12-sample": "node scripts/build-pdf-12.mjs --sample",
     "test:pdf-12": "node scripts/check-pdf-12.mjs",
+    "build:pdf-4": "node scripts/build-pdf-4.mjs",
+    "test:pdf-4": "node scripts/check-pdf-4.mjs",
     "manifest:generator": "node scripts/print-generator-manifest.mjs"
   },
   "dependencies": {

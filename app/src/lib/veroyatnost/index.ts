@@ -8,6 +8,7 @@
  */
 
 import { KLASSICHESKOE } from './bank4/klassicheskoe';
+import { KONSPEKT_4 } from './bank4/konspekt';
 import { PRYAMAYA } from './bank4/pryamaya';
 import { STATISTICHESKOE } from './bank4/statisticheskoe';
 import { BANK_5 } from './bank5';
@@ -21,6 +22,9 @@ export { BANK_5 } from './bank5';
 
 /** Банк задания №4: два блока задачника и блок координатной прямой, 23 прототипа. */
 export const BANK_4: readonly Prototype[] = [...KLASSICHESKOE, ...STATISTICHESKOE, ...PRYAMAYA];
+
+/** Прототипы задач конспекта №4: вариант 1 — задача автора, дальше генератор. */
+export { KONSPEKT_4 };
 
 /** Прототипы обоих заданий подряд: по ним ищут и проверяют. */
 export const VSE_PROTOTIPY: readonly Prototype[] = [...BANK_4, ...BANK_5];

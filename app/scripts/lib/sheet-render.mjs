@@ -35,7 +35,15 @@ const FONT_FACES = [
   { family: 'Inter Sheet', file: 'inter-500.woff2', weight: 500 },
   { family: 'Inter Sheet', file: 'inter-600.woff2', weight: 600 },
   { family: 'Inter Sheet', file: 'inter-700.woff2', weight: 700 },
-  { family: 'Caveat Sheet', file: 'caveat_5.2.8_cyrillic-400-normal.woff2', weight: 400 },
+  /* Рукописный Caveat — двумя подмножествами @fontsource/caveat 5.2.8
+     с их же unicode-range: кириллица (в ней есть «ё») и латиница,
+     где живут цифры и знаки препинания. Без второго запятая или тире
+     в надписи приходили из системного шрифта. */
+  { family: 'Caveat Sheet', file: 'caveat_5.2.8_cyrillic-400-normal.woff2', weight: 400,
+    range: 'U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116' },
+  { family: 'Caveat Sheet', file: 'caveat_5.2.8_latin-400-normal.woff2', weight: 400,
+    range: 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,' +
+      'U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD' },
 ];
 
 function fontCss() {
@@ -43,11 +51,10 @@ function fontCss() {
     const data = fs.readFileSync(path.join(FONTS, face.file)).toString('base64');
     return '@font-face{font-family:"' + face.family + '";font-style:normal;' +
       'font-weight:' + face.weight + ';font-display:block;' +
+      (face.range ? 'unicode-range:' + face.range + ';' : '') +
       'src:url(data:font/woff2;base64,' + data + ') format("woff2");}';
   }).join('\n');
 
-  /* Рукописный Caveat лежит в подмножестве cyrillic: латиницы и цифр
-     в нём нет, их отрисует запасной курсивный шрифт. */
   return faces + '\n:root{' +
     '--sheet-font-sans:"Inter Sheet",system-ui,-apple-system,sans-serif;' +
     '--sheet-font-hand:"Caveat Sheet",cursive;' +

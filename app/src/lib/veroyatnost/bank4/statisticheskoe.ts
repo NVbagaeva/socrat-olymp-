@@ -12,7 +12,10 @@
  */
 
 import { skl } from '../morfologia';
-import { dec, konechnaya, num, round, type Prototype } from '../types';
+import { prototip } from '../generator';
+import { konechnaya, num, type Prototype } from '../types';
+import { gen } from './generatory';
+import { plitkiDvuh, shagP } from './vizual';
 
 const BLOK = 'statisticheskoe';
 
@@ -24,8 +27,9 @@ const poParametru = (p: Record<string, number | string>): 2 | 3 | null => {
 
 /* ── 19. Садовые насосы ──────────────────────────────────────────── */
 
-const P19: Prototype = {
+const P19: Prototype = prototip({
   id: 'p4-19',
+  generator: gen('p4-19'),
   blok: BLOK,
   nazvanie: 'Садовые насосы: брак в партии',
   tip: 'Вероятность противоположного события по доле',
@@ -59,12 +63,33 @@ const P19: Prototype = {
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: `Вероятность, что насос подтекает: ${k} : ${N} = ${dec(k / N)}.`, value: k / N },
       {
-        text: `Событие «не подтекает» — противоположное: 1 − ${dec(k / N)} = ${dec((N - k) / N)}`,
-        value: (N - k) / N,
+        text: 'Все исходы — насосы партии, на контроль равновероятно попадёт любой:',
+        formula: `n = ${N}`,
+        value: N,
       },
+      {
+        text: 'Благоприятные — исправные насосы:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
+      },
+      shagP(N - k, N),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    methodHints: [
+      'один случайно выбранный насос из всех',
+      'даны количества «из N — k», не проценты',
+      'благоприятные — исправные: вычитаем',
+    ],
+    fraza: (p) =>
+      `прямой пересчёт — на контроль равновероятно попадает любой из ${num(p, 'N')} насосов.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'исправный', count: num(p, 'N') - num(p, 'k') },
+        { label: 'подтекает', count: num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 89', params: { N: 900, k: 27 } },
@@ -78,12 +103,13 @@ const P19: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 2500, k: 45 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 800, k: 36 } },
   ],
-};
+});
 
 /* ── 20. Фабрика сумок: доля со скрытым дефектом ─────────────────── */
 
-const P20: Prototype = {
+const P20: Prototype = prototip({
   id: 'p4-20',
+  generator: gen('p4-20'),
   blok: BLOK,
   nazvanie: 'Фабрика сумок: доля с дефектом',
   tip: 'Вероятность противоположного события по доле',
@@ -120,22 +146,35 @@ const P20: Prototype = {
   shagi: (p) => {
     const N = num(p, 'N');
     const k = num(p, 'k');
-    const znakov = num(p, 'znakov');
-    const dolya = (N - k) / N;
-    const otvet = znakov === 2 ? round(dolya, 2) : dolya;
+    const znakov = num(p, 'znakov') === 2 ? 2 : null;
     return [
       {
-        text: `Сумок с дефектом ${k} из ${N}, значит без дефекта ${N} − ${k} = ${N - k}.`,
-        value: N - k,
+        text: 'Все исходы — сумки партии, покупателю равновероятно достанется любая:',
+        formula: `n = ${N}`,
+        value: N,
       },
       {
-        text:
-          znakov === 2
-            ? `P = ${N - k} : ${N} ≈ ${dec(otvet)}`
-            : `P = ${N - k} : ${N} = ${dec(otvet)}`,
-        value: otvet,
+        text: 'Благоприятные — сумки без дефекта:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
       },
+      shagP(N - k, N, znakov),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    methodHints: [
+      'одна купленная сумка — один случайный выбор',
+      'даны количества «k из N»',
+      'благоприятные — без дефектов: вычитаем',
+    ],
+    fraza: (p) =>
+      `прямой пересчёт — покупателю равновероятно достаётся любая из ${num(p, 'N')} сумок.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'без дефекта', count: num(p, 'N') - num(p, 'k') },
+        { label: 'с дефектом', count: num(p, 'k') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 95', params: { N: 200, k: 4, znakov: 0 } },
@@ -149,12 +188,13 @@ const P20: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { N: 140, k: 13, znakov: 2 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { N: 60, k: 7, znakov: 2 } },
   ],
-};
+});
 
 /* ── 21. Фабрика сумок: «на q качественных приходится d» ─────────── */
 
-const P21: Prototype = {
+const P21: Prototype = prototip({
   id: 'p4-21',
+  generator: gen('p4-21'),
   blok: BLOK,
   nazvanie: 'Фабрика сумок: на сколько качественных',
   tip: 'Вероятность, когда дана не доля, а отношение',
@@ -182,15 +222,30 @@ const P21: Prototype = {
   shagi: (p) => {
     const q = num(p, 'q');
     const d = num(p, 'd');
-    const otvet = round(q / (q + d), 2);
     return [
       {
-        text: `Всего сумок в такой партии ${q} + ${d} = ${q + d} — это все исходы.`,
+        text: 'Все исходы — сумки партии, качественные вместе с дефектными:',
+        formula: `n = ${q} + ${d} = ${q + d}`,
         value: q + d,
       },
-      { text: `Качественных из них ${q}.`, value: q },
-      { text: `P = ${q} : ${q + d} ≈ ${dec(otvet)}`, value: otvet },
+      { text: 'Благоприятные — качественные сумки:', formula: `m = ${q}`, value: q },
+      shagP(q, q + d, 2),
     ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    methodHints: [
+      'один случайный выбор сумки',
+      'дано отношение «на 110 приходится 3» — всего складываем',
+      'делим качественные на все',
+    ],
+    fraza: (p) =>
+      `прямой пересчёт — покупателю равновероятно достаётся любая из ${num(p, 'q') + num(p, 'd')} сумок партии.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'качественная', count: num(p, 'q') },
+        { label: 'с дефектом', count: num(p, 'd') },
+      ),
   },
   varianty: [
     { n: 1, source: 'задачник', ref: 'задачник 04, № 99', params: { q: 110, d: 3 } },
@@ -204,6 +259,6 @@ const P21: Prototype = {
     { n: 9, source: 'новый', ref: 'создан заново', params: { q: 250, d: 13 } },
     { n: 10, source: 'новый', ref: 'создан заново', params: { q: 60, d: 9 } },
   ],
-};
+});
 
 export const STATISTICHESKOE: readonly Prototype[] = [P19, P20, P21];

@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
-import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
+import { otkrytRazbor, type RazborShag } from '@/lib/veroyatnost/razbor';
 import { answerMatches } from '@/lib/veroyatnost/secret';
-import { Reshenie, Zadacha, ZadachaKnopki, ZadachaShapka, ZadachaUslovie } from './ZadachaCard';
 
 export interface VeroyatnostPrepProps {
   bloki: PrepPoolBlok[];
@@ -16,16 +15,10 @@ export interface VeroyatnostPrepProps {
 interface Sostoyanie {
   value: string;
   checked: 'right' | 'wrong' | null;
-  /** Раскрытый разбор; null — ещё закрыт. */
-  razbor: Razbor | null;
+  razbor: RazborShag[] | null;
 }
 
 const PUSTO: Sostoyanie = { value: '', checked: null, razbor: null };
-
-/** Якорь карточки на странице: к нему ведёт «Следующая». */
-function yakor(id: string): string {
-  return `zadacha-${id}`;
-}
 
 /**
  * Подготовительные задачи задания №4.
@@ -39,9 +32,6 @@ function yakor(id: string): string {
  */
 export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
   const [sostoyaniya, setSostoyaniya] = useState<Record<string, Sostoyanie>>({});
-
-  /* Порядок задач сквозь блоки: по нему «Следующая» находит соседку. */
-  const poryadok = bloki.flatMap((blok) => blok.zadachi.map((zadacha) => zadacha.id));
 
   function sostoyanie(id: string): Sostoyanie {
     return sostoyaniya[id] ?? PUSTO;
@@ -60,23 +50,7 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
   }
 
   function pokazatRazbor(zadacha: PrepPoolZadacha): void {
-    const otkryt = sostoyanie(zadacha.id).razbor !== null;
-    izmenit(zadacha.id, { razbor: otkryt ? null : otkrytRazbor(zadacha.razbor, zadacha.seal) });
-  }
-
-  /* Список не листается по одной: «Следующая» просто подводит к
-     соседней карточке и отдаёт ей фокус. */
-  function sleduyushchaya(id: string): void {
-    const next = poryadok[poryadok.indexOf(id) + 1];
-    if (next === undefined) {
-      return;
-    }
-    const element = document.getElementById(yakor(next));
-    if (element === null) {
-      return;
-    }
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    element.focus({ preventScroll: true });
+    izmenit(zadacha.id, { razbor: otkrytRazbor(zadacha.steps, zadacha.seal).shagi });
   }
 
   return (
@@ -99,34 +73,28 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
             <ol className="vprep__list">
               {blok.zadachi.map((zadacha) => {
                 const state = sostoyanie(zadacha.id);
-                const poslednyaya = poryadok[poryadok.length - 1] === zadacha.id;
                 return (
                   <li className="vprep__item" key={zadacha.id}>
-                    <Zadacha
-                      id={yakor(zadacha.id)}
-                      tabIndex={-1}
-                      className={clsx(state.checked === 'right' && 'zadacha--reshena')}
+                    <article
+                      className={clsx('vtask', state.checked === 'right' && 'vtask--solved')}
                     >
-                      <ZadachaShapka tip={blok.nazvanie} znak={zadacha.znak}>
-                        <span>Задача {zadacha.nomer}</span>
-                      </ZadachaShapka>
+                      <header className="vtask__head">
+                        <span className="vtask__no">Задача {zadacha.nomer}</span>
+                      </header>
 
-                      <ZadachaUslovie
-                        html={zadacha.uslovie}
-                        illyustratsiya={zadacha.illyustratsiya}
-                      />
+                      <p className="vtask__uslovie">{zadacha.uslovie}</p>
 
                       {/* Чертёж нарисован на сборке готовой разметкой:
                           движка в браузере нет, вставляем как есть. */}
                       {zadacha.risunok !== undefined ? (
                         <div
-                          className="zadacha__risunok"
+                          className="vtask__risunok"
                           dangerouslySetInnerHTML={{ __html: zadacha.risunok }}
                         />
                       ) : null}
 
-                      <div className="zadacha__otvet">
-                        <label className="zadacha__otvet-label" htmlFor={`prep-${zadacha.id}`}>
+                      <div className="vtask__answer">
+                        <label className="vtask__label" htmlFor={`prep-${zadacha.id}`}>
                           Ответ
                         </label>
                         <Input
@@ -156,30 +124,35 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
                         >
                           Проверить
                         </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => pokazatRazbor(zadacha)}
+                          disabled={state.razbor !== null}
+                        >
+                          Посмотреть решение
+                        </Button>
                       </div>
 
                       {state.checked === 'right' ? (
-                        <p className="zadacha__verdikt zadacha__verdikt--da">Верно</p>
+                        <p className="vtask__verdict vtask__verdict--ok">Верно</p>
                       ) : null}
                       {state.checked === 'wrong' ? (
-                        <p className="zadacha__verdikt zadacha__verdikt--net">
+                        <p className="vtask__verdict vtask__verdict--no">
                           Не сходится. Попробуйте ещё раз или посмотрите решение.
                         </p>
                       ) : null}
 
-                      {state.razbor !== null ? <Reshenie razbor={state.razbor} /> : null}
-
-                      <ZadachaKnopki
-                        pokazat={{
-                          otkryto: state.razbor !== null,
-                          onClick: () => pokazatRazbor(zadacha),
-                        }}
-                        dalshe={{
-                          onClick: () => sleduyushchaya(zadacha.id),
-                          disabled: poslednyaya,
-                        }}
-                      />
-                    </Zadacha>
+                      {state.razbor !== null ? (
+                        <ol className="vtask__razbor">
+                          {state.razbor.map((shag, i) => (
+                            <li key={i}>
+                              {shag.text}
+                              {shag.plain === undefined ? null : ` ${shag.plain}`}
+                            </li>
+                          ))}
+                        </ol>
+                      ) : null}
+                    </article>
                   </li>
                 );
               })}

@@ -1,0 +1,306 @@
+/* Карточка задачи: условие · визуализация · решение.
+
+   Раздел 05 референса. Три колонки 3/4/3 на широком экране, две на
+   планшете (решение уходит вниз), одна на телефоне. Значения — только
+   токены. Оранжевый — только акцент: благоприятное на рисунке, ответ
+   и ошибка. */
+
+.pc {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Шапка ─────────────────────────────────────────────────────── */
+
+.pc__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pc__no {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+.pc__istochnik {
+  margin-left: auto;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+
+/* ── Три колонки ───────────────────────────────────────────────── */
+
+.pc__grid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr);
+  align-items: start;
+}
+.pc__col {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Планшет: условие и рисунок рядом, решение под ними на всю ширину. */
+@media (max-width: 1023px) {
+  .pc__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .pc__col--reshenie {
+    grid-column: 1 / -1;
+  }
+}
+/* Телефон: условие → рисунок → решение, друг под другом. */
+@media (max-width: 767px) {
+  .pc {
+    padding: var(--space-4);
+  }
+  .pc__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pc__col--reshenie {
+    grid-column: auto;
+  }
+}
+
+/* ── Условие ───────────────────────────────────────────────────── */
+
+.pc__uslovie {
+  display: grid;
+  gap: var(--space-4);
+}
+.pc__text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 68ch;
+}
+
+/* Место под иллюстрацию: рамка пунктиром, пропорция 4:3. Подложка —
+   мягкий синий, чтобы пустое место не читалось как ошибка загрузки. */
+.pc__ill {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+/* Файл иллюстрации есть: картинка вместо рамки, пропорцию держит она. */
+.pc__ill--img {
+  display: block;
+  aspect-ratio: auto;
+  border: 0;
+  background: none;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.pc__ill--img img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Блок «Метод:» — плашка на мягком синем, как в референсе. */
+.pc__metod {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+.pc__metod b {
+  color: var(--color-primary);
+}
+
+/* ── Рисунок ───────────────────────────────────────────────────── */
+
+.pc__risunok {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.pc__risunok-podpis {
+  justify-self: start;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+/* Буквы мер в подписи — L, l, S, s — антиквой курсивом, как на
+   самом рисунке и в формулах шагов. */
+.pc__risunok-podpis i {
+  font-family: var(--font-math);
+  font-style: italic;
+}
+
+/* ── Ответ ученика ─────────────────────────────────────────────── */
+
+.pc__answer {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.pc__answer-label {
+  color: var(--color-text-secondary);
+}
+.pc__input {
+  width: 100%;
+  max-width: 12rem;
+}
+
+.pc__verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 600;
+}
+.pc__verdict-ico {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+}
+.pc__verdict-ico svg {
+  width: 100%;
+  height: 100%;
+}
+.pc__verdict--correct {
+  color: var(--color-success);
+}
+/* Ошибка — красная, как у задания №12: так решил автор. Оранжевый
+   остаётся только благоприятной области на рисунке и ответу. */
+.pc__verdict--incorrect {
+  color: var(--color-error);
+}
+.pc--incorrect .pc__input {
+  border-color: var(--color-error);
+}
+
+/* ── Решение ───────────────────────────────────────────────────── */
+
+.pc__reshenie {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.pc__reshenie-title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+}
+
+.pc-steps {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pc-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.pc-step__no {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.pc-step__body {
+  display: grid;
+  gap: var(--space-1);
+}
+.pc-step__text {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+/* Формула набрана KaTeX: дроби настоящие, буквы курсивные. Кегль
+   чуть крупнее текста — как в референсе (19–22 px против 16–17). */
+.pc-step__formula {
+  margin: 0;
+  font-size: 1.15em;
+  overflow-x: auto;
+}
+
+.pc__otvet {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.pc__otvet-label {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.pc__otvet-value {
+  color: var(--color-accent);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+
+/* ── Действия ──────────────────────────────────────────────────── */
+
+.pc__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* ── Состояния карточки целиком ────────────────────────────────── */
+
+.pc--correct {
+  border-color: var(--color-success);
+}
+.pc--incorrect {
+  border-color: var(--color-error);
+}
+.pc--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Урезанный вариант: только условие, без сетки. */
+.pc--condition .pc__uslovie {
+  max-width: 720px;
+}

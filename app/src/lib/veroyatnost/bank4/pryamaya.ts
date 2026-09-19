@@ -17,6 +17,7 @@
 
 import type { Pryamaya } from '../pryamaya';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
+import { otrezok as otrezokVizual, shagLL } from './vizual';
 
 const BLOK = 'pryamaya';
 
@@ -59,7 +60,27 @@ function kletki(a: number, b: number, c: number, d: number): number {
   return podhodit / (B - A);
 }
 
+/* Признаки метода одни на оба прототипа: разница между ними только
+   в числе границ, а узнаётся метод по тем же словам условия. */
+const PRIZNAKI: readonly string[] = [
+  'величина равномерно распределена на отрезке',
+  'событие задано промежутком значений',
+  'вероятность — отношение длин',
+];
+
+function fraza(p: Params): string {
+  return `координатная прямая — ${text(p, 'izvestno')} равномерно ${text(p, 'raspredelena')} на отрезке, событие задано промежутком.`;
+}
+
 /* ── 1. Промежуток с двумя границами ─────────────────────────────── */
+
+const pryamaya22 = (p: Params): Pryamaya => ({
+  a: num(p, 'a'),
+  b: num(p, 'b'),
+  c: num(p, 'c'),
+  d: num(p, 'd'),
+  nestrogo: text(p, 'granicy') === 'нестрогие',
+});
 
 const P22: Prototype = {
   id: 'p4-22',
@@ -95,33 +116,29 @@ const P22: Prototype = {
     const b = num(p, 'b');
     const c = num(p, 'c');
     const d = num(p, 'd');
-    const n = b - a;
-    const m = d - c;
+    const L = b - a;
+    const l = d - c;
     return [
       {
-        text: 'Все исходы — длина отрезка распределения:',
-        formula: `n = ${tex(b)} - ${tex(a)} = ${tex(n)}.`,
-        value: n,
+        text: 'Вся мера — длина отрезка распределения:',
+        formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
+        value: L,
       },
       {
-        text: `Благоприятные исходы — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
-        formula: `m = ${tex(d)} - ${tex(c)} = ${tex(m)}.`,
-        value: m,
+        text: `Благоприятный промежуток — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
+        formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
+        value: l,
       },
-      {
-        text: 'Вероятность:',
-        formula: `P = \\dfrac{m}{n} = \\dfrac{${tex(m)}}{${tex(n)}} = ${tex(m / n)}.`,
-        value: m / n,
-      },
+      shagLL(tex(l), tex(L), l / L),
     ];
   },
-  pryamaya: (p): Pryamaya => ({
-    a: num(p, 'a'),
-    b: num(p, 'b'),
-    c: num(p, 'c'),
-    d: num(p, 'd'),
-    nestrogo: text(p, 'granicy') === 'нестрогие',
-  }),
+  pryamaya: pryamaya22,
+  metodika: {
+    metod: 'coordinate-line',
+    methodHints: PRIZNAKI,
+    fraza,
+    vizual: (p) => otrezokVizual(pryamaya22(p)),
+  },
   varianty: [
     {
       n: 1,
@@ -311,6 +328,13 @@ function granicy(p: Params): { c: number; d: number } {
   return storona(p) === 'nizhnyaya' ? { c: g, d: num(p, 'b') } : { c: num(p, 'a'), d: g };
 }
 
+const pryamaya23 = (p: Params): Pryamaya => ({
+  a: num(p, 'a'),
+  b: num(p, 'b'),
+  ...(storona(p) === 'nizhnyaya' ? { c: num(p, 'g') } : { d: num(p, 'g') }),
+  nestrogo: text(p, 'granicy') === 'нестрогие',
+});
+
 const P23: Prototype = {
   id: 'p4-23',
   blok: BLOK,
@@ -341,36 +365,33 @@ const P23: Prototype = {
     const a = num(p, 'a');
     const b = num(p, 'b');
     const { c, d } = granicy(p);
-    const n = b - a;
-    const m = d - c;
+    const L = b - a;
+    const l = d - c;
     const kray = storona(p) === 'nizhnyaya' ? 'до конца отрезка' : 'от начала отрезка';
     return [
       {
-        text: 'Все исходы — длина отрезка распределения:',
-        formula: `n = ${tex(b)} - ${tex(a)} = ${tex(n)}.`,
-        value: n,
+        text: 'Вся мера — длина отрезка распределения:',
+        formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
+        value: L,
       },
       {
         text:
           storona(p) === 'nizhnyaya'
-            ? `Благоприятные исходы — от ${dec(c)} ${text(p, 'ed')} ${kray}:`
-            : `Благоприятные исходы — ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
-        formula: `m = ${tex(d)} - ${tex(c)} = ${tex(m)}.`,
-        value: m,
+            ? `Благоприятный промежуток — от ${dec(c)} ${text(p, 'ed')} ${kray}:`
+            : `Благоприятный промежуток — ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
+        formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
+        value: l,
       },
-      {
-        text: 'Вероятность:',
-        formula: `P = \\dfrac{m}{n} = \\dfrac{${tex(m)}}{${tex(n)}} = ${tex(m / n)}.`,
-        value: m / n,
-      },
+      shagLL(tex(l), tex(L), l / L),
     ];
   },
-  pryamaya: (p): Pryamaya => ({
-    a: num(p, 'a'),
-    b: num(p, 'b'),
-    ...(storona(p) === 'nizhnyaya' ? { c: num(p, 'g') } : { d: num(p, 'g') }),
-    nestrogo: text(p, 'granicy') === 'нестрогие',
-  }),
+  pryamaya: pryamaya23,
+  metodika: {
+    metod: 'coordinate-line',
+    methodHints: PRIZNAKI,
+    fraza,
+    vizual: (p) => otrezokVizual(pryamaya23(p)),
+  },
   varianty: [
     {
       n: 1,

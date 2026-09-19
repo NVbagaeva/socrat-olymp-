@@ -80,7 +80,28 @@ function solution(no, formulas, answer) {
     '</div>';
 }
 
-const api = { sectionHead: sectionHead, table: table, solution: solution };
+/**
+ * Решение по шагам внутри карточки задачи: текст шага и его формула,
+ * затем строка ответа. Печатается в файле для учителя.
+ *
+ * steps — [{ text, tex, plain }]: tex — формула шага, plain — она же
+ * словами для запасного набора без KaTeX. Ничего не досочиняется.
+ */
+function steps(items, answer) {
+  var list = items.map(function (step) {
+    return '<li class="sheet-step">' +
+      (step.text ? '<span class="sheet-step-text">' + typo.text(step.text) + '</span>' : '') +
+      (step.tex
+        ? ' <span class="math" data-tex="' + typo.attr(step.tex) + '">' +
+          typo.escape(step.plain || step.tex) + '</span>'
+        : '') +
+      '</li>';
+  }).join('');
+  return '<ol class="sheet-steps">' + list + '</ol>' +
+    '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
+}
+
+const api = { sectionHead: sectionHead, table: table, solution: solution, steps: steps };
 
 export default api;
-export { sectionHead, table, solution };
+export { sectionHead, table, solution, steps };

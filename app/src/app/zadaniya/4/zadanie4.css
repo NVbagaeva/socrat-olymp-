@@ -1,0 +1,677 @@
+/* Задание №4 — вкладки по референсу методов.
+
+   Оболочка, карточка задачи, рисунки и лента с меню репетиторов
+   описаны в своих слоях: здесь только то, чего в них нет — режимы
+   тренажёра, прогресс по методам, вкладки «О задании» и «Ключевые
+   методы решения». Значения — только токены. Оранжевый — только
+   акцент: благоприятное на рисунке и ответ. */
+
+/* ── Лента вкладок с кнопкой меню ───────────────────────────────── */
+
+/* Лента задания №4 стоит внутри .topic-tabs из слоя задания №12:
+   прокручивается она, а не набор вкладок, иначе получились бы две
+   вложенные прокрутки. Верхний отступ переезжает на строку. */
+.topic-tabs-row {
+  margin-top: var(--space-6);
+}
+.topic-tabs .veroyatnost-tabs {
+  margin-top: 0;
+  overflow: visible;
+}
+
+/* ── Тренажёр: режимы ───────────────────────────────────────────── */
+
+.z4-trainer {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.z4-trainer__rezhimy {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+@media (max-width: 767px) {
+  .z4-trainer__rezhimy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Режим — плашка с названием и строкой пояснения, как варианты
+   конфигуратора задания №12. */
+.z4-rezhim {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.z4-rezhim:hover {
+  border-color: var(--color-border-hover);
+}
+.z4-rezhim--on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-soft);
+}
+.z4-rezhim:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.z4-rezhim__title {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z4-rezhim--on .z4-rezhim__title {
+  color: var(--color-primary);
+}
+.z4-rezhim__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.z4-trainer__schet {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+
+/* ── Прогресс по методам ────────────────────────────────────────── */
+
+.z4-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr);
+  gap: var(--space-6);
+  align-items: center;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+@media (max-width: 1023px) {
+  .z4-progress {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .z4-progress__metody {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 767px) {
+  .z4-progress {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+  .z4-progress__metody {
+    grid-column: auto;
+    width: 100%;
+  }
+}
+.z4-progress__text {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.z4-progress__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+}
+.z4-progress__lead,
+.z4-progress__empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z4-progress__metody {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z4-progress__metod {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+}
+.z4-progress__no {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.z4-progress__name {
+  color: var(--color-text-secondary);
+}
+.z4-progress__count {
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.z4-progress__count b {
+  color: var(--color-text-brand);
+}
+
+/* ── Генератор: миниатюра прототипа ─────────────────────────────── */
+
+/* Рисунок модели в карточке навыка: ужимается в отведённые 120px,
+   подписи при этом читаются как значок, а не как текст. */
+.z4-skill-chart {
+  display: block;
+  width: 100%;
+}
+.z4-skill-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Вкладка «О задании» ────────────────────────────────────────── */
+
+.z4-about {
+  display: grid;
+  gap: var(--space-8);
+}
+.z4-about__title {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-brand);
+}
+.z4-about__sub {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-brand);
+}
+.z4-about__text {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+
+/* Пять шагов в ряд, на узком экране — столбиком. */
+.z4-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+@media (max-width: 1023px) {
+  .z4-pipeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .z4-pipeline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z4-pipeline__step {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z4-pipeline__no {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z4-pipeline__title {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z4-pipeline__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.z4-metody-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 1023px) {
+  .z4-metody-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .z4-metody-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z4-metod-tile {
+  display: grid;
+  gap: var(--space-1);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.z4-metod-tile:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.z4-metod-tile__no {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z4-metod-tile__title {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z4-metod-tile__formula {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* ── Вкладка «Ключевые методы решения» ──────────────────────────── */
+
+.z4-metody {
+  display: grid;
+  gap: var(--space-8);
+}
+.z4-metody__title {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-brand);
+}
+.z4-metody__lead {
+  margin: 0 0 var(--space-4);
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+}
+.z4-metody__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z4-metody__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  text-decoration: none;
+}
+.z4-metody__link:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text-brand);
+}
+.z4-metody__link-no {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Карточка метода: шапка, сетка разделов, плашка правила. */
+.z4-metod {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  /* Якорь ведёт сюда: заголовок не прячется под шапкой. */
+  scroll-margin-top: var(--space-16);
+}
+.z4-metod__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.z4-metod__no {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z4-metod__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h3);
+}
+.z4-metod__sut {
+  margin: var(--space-1) 0 0;
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+
+.z4-metod__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+@media (max-width: 767px) {
+  .z4-metod__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z4-metod__block {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+.z4-metod__sub {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.z4-metod__text {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.z4-metod__list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: var(--lh-body);
+}
+.z4-metod__list--oshibki li::marker {
+  color: var(--color-error);
+}
+.z4-metod__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-6);
+  line-height: var(--lh-body);
+}
+.z4-metod__steps li::marker {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Параметры компонента: имя параметра и пояснение рядом. Моноширинного
+   шрифта в токенах нет, и заводить его ради одной таблицы не стоит. */
+.z4-metod__params {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.z4-metod__param {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.z4-metod__param dt {
+  min-width: 0;
+}
+.z4-metod__param dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z4-metod__param code {
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-brand);
+  overflow-wrap: anywhere;
+}
+
+/* Рисунок метода — на мягком синем, как в карточке задачи. */
+.z4-metod__figure {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z4-metod__risunok {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.z4-metod__figure figcaption {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+/* Правило и формула метода: плашка на мягком синем, формула справа. */
+.z4-metod__pravilo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+.z4-metod__pravilo-text {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z4-metod__formula {
+  font-size: 1.25em;
+  color: var(--color-text-brand);
+}
+
+/* ── «Узнай метод» ──────────────────────────────────────────────── */
+
+.z4-uznay {
+  display: grid;
+  gap: var(--space-6);
+}
+.z4-uznay__title {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-brand);
+}
+.z4-uznay__lead {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+}
+.z4-uznay__zadacha {
+  display: grid;
+  gap: var(--space-4);
+}
+.z4-uznay__vopros {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+
+/* Пять кнопок методов — всегда все пять, в ряд; на узком экране
+   переносятся. После ответа кнопки замирают, и цвет говорит, что
+   вышло: зелёный — верно, красный — ошибка, синий контур — верный
+   метод рядом с ошибочным выбором. */
+.z4-picker {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+@media (max-width: 1023px) {
+  .z4-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .z4-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z4-picker__btn {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-brand);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.z4-picker__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z4-picker__btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.z4-picker__btn:disabled {
+  cursor: default;
+  color: var(--color-text-secondary);
+}
+.z4-picker__no {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+}
+.z4-picker__btn--correct {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.z4-picker__btn--correct .z4-picker__no {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.z4-picker__btn--incorrect {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.z4-picker__btn--incorrect .z4-picker__no {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+}
+.z4-picker__btn--answer {
+  border-color: var(--color-primary);
+  border-width: 2px;
+  color: var(--color-primary);
+}
+
+/* Итог: вердикт, верный метод и признаки в условии. */
+.z4-uznay__itog {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z4-uznay__itog--correct {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z4-uznay__itog--incorrect {
+  border-color: var(--color-error);
+}
+.z4-uznay__verdict {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 600;
+}
+.z4-uznay__itog--correct .z4-uznay__verdict {
+  color: var(--color-success);
+}
+.z4-uznay__itog--incorrect .z4-uznay__verdict {
+  color: var(--color-error);
+}
+.z4-uznay__ico {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+}
+.z4-uznay__ico svg {
+  width: 100%;
+  height: 100%;
+}
+.z4-uznay__pravilnyy {
+  margin: 0;
+}
+.z4-uznay__pravilnyy b {
+  color: var(--color-primary);
+}
+.z4-uznay__priznaki-title {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z4-uznay__priznaki {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: var(--lh-body);
+}
+.z4-uznay__actions {
+  display: flex;
+  justify-content: flex-end;
+}

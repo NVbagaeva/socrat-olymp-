@@ -45,7 +45,11 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           </div>
         </header>
 
-        <VeroyatnostTabs base={base} />
+        <VeroyatnostTabs
+          base={base}
+          tabs={section.tabs}
+          {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
+        />
 
         <div className="section-panel">{children}</div>
       </main>

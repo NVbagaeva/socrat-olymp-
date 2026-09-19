@@ -50,9 +50,14 @@ function walk(dir) {
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'veroyatnost-'));
 const src = path.join(root, 'src', 'lib');
 
-/* Банк тянет за собой только разбор ответа из lib/answer.ts —
-   переводим его вместе с папкой раздела. */
-for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answer.ts')]) {
+/* Банк тянет за собой разбор ответа из lib/answer.ts и источник
+   случайных чисел генератора из lib/zadanie3/podhod.ts — переводим
+   их вместе с папкой раздела. */
+for (const file of [
+  ...walk(path.join(src, 'veroyatnost')),
+  path.join(src, 'answer.ts'),
+  path.join(src, 'zadanie3', 'podhod.ts'),
+]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
@@ -62,16 +67,19 @@ for (const file of [...walk(path.join(src, 'veroyatnost')), path.join(src, 'answ
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep, checkLabirint } = require0(
+const { checkBank, checkPrep, checkLabirint, checkModel } = require0(
   path.join(out, 'veroyatnost', 'selftest.js'),
 );
-const { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
+const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
   path.join(out, 'veroyatnost', 'index.js'),
 );
 
-const report = checkBank([...BANK_4, ...BANK_5]);
+/* Прототипы конспекта проверяются вместе с банком: их сгенерированные
+   варианты обязаны сходиться так же, как варианты задачника. */
+const report = checkBank([...BANK_4, ...BANK_5, ...KONSPEKT_4]);
 
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
+console.log(`   сгенерировано ${report.bySource.новый} (пометка «генератор» у каждого прототипа)`);
 console.log(
   `2. из задачника ${report.bySource.задачник}, из конспекта ${report.bySource.конспект}, ` +
     `создано заново ${report.bySource.новый}`,
@@ -93,6 +101,30 @@ console.log(`  последний шаг разбора не равен отве
 console.log(`  ответ не пишется в клетки и округления в условии нет: ${prep.badFormat}`);
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
+
+/* Модель задачи (раздел 04 референса): метод у каждой задачи №4,
+   рисунок собирается из параметров и показывает тот же ответ. */
+const modeli = [
+  ['№4', checkModel(BANK_4, PODGOTOVKA_4)],
+  ['№5', checkModel(BANK_5, [])],
+];
+for (const [nomer, model] of modeli) {
+  console.log(`\nмодель задания ${nomer}: задач по методам —`);
+  for (const [metod, skolko] of Object.entries(model.poMetodam)) {
+    console.log(`   ${metod}: ${skolko}`);
+  }
+  console.log(`  без методики: ${model.bezMetodiki.length}`);
+  model.bezMetodiki.forEach((id) => console.log(`   ${id}`));
+  console.log(`  рисунок показывает не тот ответ: ${model.risunokVret.length}`);
+  model.risunokVret.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+  console.log(`  нарушений формы модели: ${model.problems.length}`);
+  model.problems.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+}
+const model = {
+  bezMetodiki: modeli.flatMap(([, m]) => m.bezMetodiki),
+  risunokVret: modeli.flatMap(([, m]) => m.risunokVret),
+  problems: modeli.flatMap(([, m]) => m.problems),
+};
 
 const labirint = checkLabirint();
 const {
@@ -139,6 +171,11 @@ if (labirint.length > 0) {
   process.exit(1);
 }
 
+if (model.bezMetodiki.length > 0 || model.risunokVret.length > 0 || model.problems.length > 0) {
+  console.error('\nМодель задания №4 не сходится.');
+  process.exit(1);
+}
+
 if (prep.bad.length > 0 || prep.duplicates.length > 0) {
   console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
   prep.bad.forEach((row) =>
@@ -147,12 +184,12 @@ if (prep.bad.length > 0 || prep.duplicates.length > 0) {
   process.exit(1);
 }
 
-if (report.bad.length > 0 || report.notTen.length > 0 || report.collisions.length > 0) {
+if (report.bad.length > 0 || report.malo.length > 0 || report.collisions.length > 0) {
   console.error(`\nБанк не сходится: ${report.bad.length} вариантов с проблемами.`);
   report.bad
     .slice(0, 40)
     .forEach((row) => console.error(`  ${row.id} вариант ${row.n}: ${row.problems.join('; ')}`));
-  report.notTen.forEach((item) => console.error(`  не по десять вариантов: ${item}`));
+  report.malo.forEach((item) => console.error(`  меньше десяти вариантов: ${item}`));
   process.exit(1);
 }
 

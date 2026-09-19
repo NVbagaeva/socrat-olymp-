@@ -12,7 +12,7 @@
  *  4. ответ записывается в клетки ЕГЭ: целое или конечная десятичная
  *     дробь, а если нет — условие обязано просить округление;
  *  5. в условии не осталось «undefined» и «NaN»;
- *  6. вариантов ровно десять и они не повторяются;
+ *  6. вариантов не меньше десяти и они не повторяются;
  *  7. отпечатки ответов не сталкиваются.
  */
 
@@ -25,8 +25,10 @@ import {
   veroyatnostVyhodaVolnoy,
   vyhody,
 } from './labirint';
+import { METODY, otvetPoRisunku, type Method } from './model';
+import { modelPrep, modelVarianta } from './model-zadachi';
 import { sealAnswer } from './secret';
-import { konechnaya, type PrepBlok, type Prototype, type Variant } from './types';
+import { konechnaya, round, type PrepBlok, type Prototype, type Variant } from './types';
 
 export interface BadVariant {
   id: string;
@@ -48,8 +50,8 @@ export interface Report {
   sourceProblems: { ref: string; why: string }[];
   /** Совпадающие варианты внутри прототипа. */
   duplicates: { a: string; b: string }[];
-  /** Прототипы, где вариантов не десять. */
-  notTen: string[];
+  /** Прототипы, где вариантов меньше десяти. */
+  malo: string[];
   /** Столкновения отпечатков ответов. */
   collisions: { a: string; b: string }[];
   bad: BadVariant[];
@@ -120,7 +122,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
   const bad: BadVariant[] = [];
   const sourceProblems: { ref: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
-  const notTen: string[] = [];
+  const malo: string[] = [];
   const collisions: { a: string; b: string }[] = [];
   const seals = new Map<string, string>();
 
@@ -130,8 +132,8 @@ export function checkBank(bank: readonly Prototype[]): Report {
   let badFormat = 0;
 
   for (const prototype of bank) {
-    if (prototype.varianty.length !== 10) {
-      notTen.push(`${prototype.id}: ${prototype.varianty.length}`);
+    if (prototype.varianty.length < 10) {
+      malo.push(`${prototype.id}: ${prototype.varianty.length}`);
     }
 
     const nomera = new Set<number>();
@@ -190,7 +192,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
     badFormat,
     sourceProblems,
     duplicates,
-    notTen,
+    malo,
     collisions,
     bad,
   };
@@ -363,4 +365,135 @@ export function checkLabirint(): string[] {
   }
 
   return problems;
+}
+
+/* ── Модель задачи: метод и рисунок ─────────────────────────────── */
+
+export interface ModelReport {
+  /** Сколько задач разложено по методам — прототипы и подготовка. */
+  poMetodam: Record<Method, number>;
+  /** Задач без методики: у задания №4 их быть не должно. */
+  bezMetodiki: string[];
+  /** Ответ по рисунку разошёлся с ответом задачи. */
+  risunokVret: string[];
+  /** Прочие нарушения формы модели. */
+  problems: string[];
+}
+
+/**
+ * Проверка модели (раздел 04 референса) для всех задач задания №4.
+ *
+ *  1. у каждой задачи есть методика и метод — один из пяти;
+ *  2. у координатной прямой есть shape, у остальных его нет;
+ *  3. параметры рисунка и подсветка одного метода;
+ *  4. ответ, который показывает рисунок, равен ответу задачи — это
+ *     третий независимый путь к ответу, после формулы и перебора;
+ *  5. у каждого шага есть текст, а формула — только TeX-строка;
+ *  6. модель собирается в JSON без потерь (нет функций, undefined).
+ */
+export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[]): ModelReport {
+  const poMetodam = Object.fromEntries(METODY.map((m) => [m.id, 0])) as Record<Method, number>;
+  const bezMetodiki: string[] = [];
+  const risunokVret: string[] = [];
+  const problems: string[] = [];
+
+  const proverit = (
+    id: string,
+    otvet: number,
+    znakov: 2 | 3 | null,
+    hints: readonly string[],
+    sobrat: () => ReturnType<typeof modelVarianta>,
+  ): void => {
+    let model: ReturnType<typeof modelVarianta>;
+    try {
+      model = sobrat();
+    } catch (e) {
+      problems.push(`${id}: ${e instanceof Error ? e.message : String(e)}`);
+      return;
+    }
+    if (!METODY.some((m) => m.id === model.method)) {
+      problems.push(`${id}: неизвестный метод ${model.method}`);
+    }
+    if (model.method === 'coordinate-line' && model.shape === undefined) {
+      problems.push(`${id}: у координатной прямой нет shape`);
+    }
+    if (model.method !== 'coordinate-line' && model.shape !== undefined) {
+      problems.push(`${id}: shape есть только у координатной прямой`);
+    }
+    if (
+      model.parameters.method !== model.method ||
+      model.solution.highlight.method !== model.method
+    ) {
+      problems.push(`${id}: рисунок и подсветка не того метода`);
+    }
+    if (model.solution.method.trim() === '') {
+      problems.push(`${id}: пустая фраза «Метод:»`);
+    }
+    /* Признаки для «Узнай метод»: от одного до трёх, без пустых. */
+    if (hints.length < 1 || hints.length > 3) {
+      problems.push(`${id}: признаков метода ${hints.length}, нужно от 1 до 3`);
+    }
+    if (hints.some((h) => h.trim() === '')) {
+      problems.push(`${id}: пустой признак метода`);
+    }
+    for (const [i, shag] of model.solution.steps.entries()) {
+      if (shag.text.trim() === '') {
+        problems.push(`${id}: у шага ${i + 1} нет текста`);
+      }
+      if (shag.formula !== undefined && /undefined|NaN/.test(shag.formula)) {
+        problems.push(`${id}: в формуле шага ${i + 1} undefined или NaN`);
+      }
+    }
+    /* Без потерь в JSON: функций и undefined в модели быть не должно. */
+    const cherezJson = JSON.parse(JSON.stringify(model)) as unknown;
+    if (JSON.stringify(cherezJson) !== JSON.stringify(model)) {
+      problems.push(`${id}: модель не переживает JSON`);
+    }
+
+    const poRisunku = otvetPoRisunku({
+      parametry: model.parameters,
+      podsvetka: model.solution.highlight,
+    });
+    if (poRisunku !== null) {
+      const kakUchenik = znakov === null ? poRisunku : round(poRisunku, znakov);
+      if (Math.abs(kakUchenik - otvet) > TOCHNOST) {
+        risunokVret.push(`${id}: по рисунку ${kakUchenik}, ответ ${otvet}`);
+      }
+    }
+  };
+
+  for (const prototype of bank) {
+    if (prototype.metodika === undefined) {
+      bezMetodiki.push(prototype.id);
+      continue;
+    }
+    poMetodam[prototype.metodika.metod] += 1;
+    for (const variant of prototype.varianty) {
+      proverit(
+        `${prototype.id}-${variant.n}`,
+        otvetUchenika(prototype, variant.params),
+        prototype.okruglenie(variant.params),
+        prototype.metodika.methodHints,
+        () => modelVarianta(prototype, variant),
+      );
+    }
+  }
+  for (const blok of bloki) {
+    for (const zadacha of blok.zadachi) {
+      if (zadacha.metodika === undefined) {
+        bezMetodiki.push(zadacha.id);
+        continue;
+      }
+      poMetodam[zadacha.metodika.metod] += 1;
+      proverit(
+        zadacha.id,
+        prepOtvet(zadacha),
+        zadacha.okruglenie ?? null,
+        zadacha.metodika.methodHints,
+        () => modelPrep(zadacha),
+      );
+    }
+  }
+
+  return { poMetodam, bezMetodiki, risunokVret, problems };
 }
