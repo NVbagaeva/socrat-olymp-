@@ -16,7 +16,7 @@ name: PDF 4
 
 on:
   push:
-    branches: ['claude/task-4-print-**']
+    branches: ['claude/task-4-**', 'claude/task-5-**']
     paths:
       - 'app/package.json'
       - 'app/src/lib/sheet/**'
