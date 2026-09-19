@@ -231,7 +231,17 @@ export async function renderPdf(spec, file, options = {}) {
     fs.writeFileSync(options.keepHtml, html);
   }
 
-  const browser = await chromium.launch({ args: ['--no-sandbox'] });
+  /* PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH — только для ручной проверки
+     в песочнице, где `playwright install` до реестра npm не доходит,
+     а готовый Chromium лежит по другому пути, чем ждёт playwright-core.
+     В CI переменная не задана, и запускается обычный playwright'овский
+     браузер — поведение сборки не меняется. */
+  const browser = await chromium.launch({
+    args: ['--no-sandbox'],
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {}),
+  });
   try {
     const page = await browser.newPage();
     const problems = [];

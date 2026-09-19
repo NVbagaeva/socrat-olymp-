@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import outputs from '../src/lib/sheet/outputs.js';
 import { buildDir } from './lib/sheet-build.mjs';
-import { checkNoAnswersTracked, checkPdfFile } from './lib/sheet-check.mjs';
+import { checkNoAnswersTracked, checkNoTaskImages, checkPdfFile } from './lib/sheet-check.mjs';
 import { collectSections, content, naming } from './lib/sheet4-tasks.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -46,6 +46,7 @@ function specItems(name) {
   const file = path.join(BUILD, name + '.html');
   if (!fs.existsSync(file)) { fail(name + ': нет промежуточного HTML, соберите заново'); return null; }
   const html = fs.readFileSync(file, 'utf8');
+  checkNoTaskImages(html, name, fail);
   const found = /<script type="application\/json" id="sheet-spec">([\s\S]*?)<\/script>/.exec(html);
   if (!found) { fail(name + ': в HTML нет спецификации листа'); return null; }
   const title = /<title>([^<]*)<\/title>/.exec(html);

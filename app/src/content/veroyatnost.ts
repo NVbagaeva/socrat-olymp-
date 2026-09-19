@@ -11,6 +11,7 @@
  */
 
 import type { TutorMaterial } from './sections';
+import { counted } from '@/lib/plural';
 import { trainerPage } from './trainerModes';
 
 /** Вкладка раздела: хвост адреса и есть её идентификатор. */
@@ -263,11 +264,29 @@ export function uznaySlova(zadanie: Zadanie) {
   } as const;
 }
 
-/* ── Слова подготовительных задач №4 ─────────────────────────────── */
+/* ── Слова подготовительных задач ────────────────────────────────── */
 
-export const PODGOTOVKA_4_SLOVA = {
+/**
+ * Вкладка подготовки устроена как у задания №12: лента блоков сверху,
+ * страница блока с рядом кружков и одной задачей на экране. Слова
+ * общие для №4 и №5 — разница только в числе блоков и задач, а его
+ * даёт банк.
+ */
+export const PODGOTOVKA_SLOVA = {
+  title: 'Подготовительные задачи',
+  lead: 'Задачи авторского конспекта. Блоки идут в порядке конспекта: это последовательность, а не каталог.',
+  allLabel: 'Все блоки',
   istochnik: 'Задача конспекта',
-  resheno: (resheno: number, vsego: number): string => `Решено ${resheno} из ${vsego}`,
+  /** Строка над рядом кружков. */
+  schet: (nomer: number, vsego: number): string => `Задача ${nomer} из ${vsego}`,
+  ryad: 'Задачи блока',
+  verno: 'верных',
+  neverno: 'неверных',
+  dalshe: 'Следующая задача →',
+  dalsheNereshennaya: 'Следующая нерешённая →',
+  kSpisku: 'К списку блоков →',
+  /** Подпись под карточкой блока в списке. */
+  zadach: (vsego: number): string => counted(vsego, 'задача', 'задачи', 'задач'),
 } as const;
 
 /* ── Слова листа для печати: вкладка «Генератор» ─────────────────── */

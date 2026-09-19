@@ -40,6 +40,43 @@ export function pdfStreams(data) {
 }
 
 /**
+ * Сколько в файле страниц. Считаются объекты страниц: /Type /Pages —
+ * это узел дерева, а не страница, и слово «Page» в нём длиннее.
+ */
+export function pdfPages(data) {
+  return (data.toString('latin1').match(/\/Type\s*\/Page\b/g) || []).length;
+}
+
+/**
+ * Текст файла: операнды показа текста из содержимого страниц.
+ *
+ * Читаемых слов здесь нет — шрифты подмножествами, и в потоке лежат
+ * номера знаков. Для сравнения двух сборок этого хватает: одно и то
+ * же содержимое даёт одну и ту же последовательность, а дата сборки
+ * и внутренние идентификаторы, которыми файлы расходятся всегда,
+ * в содержимое страниц не попадают.
+ */
+export function pdfText(data) {
+  return pdfStreams(data)
+    .filter(soderzhanie)
+    .map((stream) =>
+      (stream.match(/\bBT\b[\s\S]*?\bET\b/g) || [])
+        .map((blok) => (blok.match(/\((?:\\.|[^()\\])*\)|<[0-9A-Fa-f\s]+>/g) || []).join(''))
+        .join(''))
+    .join('\n');
+}
+
+/* Поток с содержимым страницы, а не программа шрифта и не картинка.
+   Содержимое — это текст операторов, поэтому смотрим на долю
+   печатных знаков: в двоичном потоке она низкая, и случайное «BT»
+   внутри него не должно попадать в сравнение. */
+function soderzhanie(stream) {
+  if (!/\bBT\b/.test(stream) || !/\bT[jJ]\b/.test(stream)) { return false; }
+  const pechatnyh = (stream.match(/[\x20-\x7e\r\n\t]/g) || []).length;
+  return pechatnyh / stream.length > 0.85;
+}
+
+/**
  * Проверка одного файла: шрифты, ссылки, цвет.
  *
  * options:
@@ -95,6 +132,30 @@ export function checkPdfFile(file, options) {
   }
 
   return data;
+}
+
+/**
+ * Картинок задач на листе нет.
+ *
+ * Иллюстрации — дело подготовки и тренажёра; на листе задача живёт
+ * условием и рисунком метода, а рисунок метода приходит инлайновым
+ * SVG. Значит ни тега <img>, ни пути /images/ на листе быть не
+ * должно: если они там появились, картинка уедет в PDF — или, хуже,
+ * не уедет и оставит пустую рамку.
+ *
+ * Смотрим разметку листа и описание потока, а стили и служебные
+ * скрипты выбрасываем: в исходнике KaTeX лежит своя разметка <img>
+ * для \includegraphics, и к листу она отношения не имеет. Описание
+ * потока — тот же скрипт, но с данными, поэтому оно возвращается.
+ */
+export function checkNoTaskImages(html, name, fail) {
+  const spec = /<script type="application\/json" id="sheet-spec">([\s\S]*?)<\/script>/.exec(html);
+  const list = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ') + (spec ? spec[1] : '');
+
+  if (/<img\b/i.test(list)) { fail(name + ': на листе есть тег <img>'); }
+  if (/\/images\//.test(list)) { fail(name + ': на листе есть путь /images/'); }
 }
 
 /**

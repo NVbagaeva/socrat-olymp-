@@ -24,12 +24,19 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { putIllyustratsii, texPlain, type Method, type Parametry, type Shape } from './model';
+import { altIllyustratsii } from './illyustratsii';
+import {
+  imyaIllyustratsii,
+  texPlain,
+  zadanieIllyustratsii,
+  type Method,
+  type Parametry,
+  type Shape,
+} from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import type { Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
-import { kartinka5 } from './illyustratsii5';
 import { sealAnswer, sealMetod, sealText } from './secret';
 import {
   type Metodika,
@@ -52,23 +59,79 @@ export interface PoolModel {
   shape?: Shape;
   parametry: Parametry;
   /**
-   * Место под иллюстрацию: путь по соглашению проекта и alt. `exists`
-   * считается на сборке: лежит ли файл в app/public по этому пути.
-   * Есть файл — карточка показывает картинку, нет — место под неё.
+   * Иллюстрация варианта: путь и alt. Поле есть только когда файл
+   * лежит в манифесте картинок; нет файла — нет поля, и карточка
+   * не показывает ни картинки, ни места под неё.
    */
-  illustration: { path: string; alt: string; ratio: '4:3'; exists: boolean };
+  illustration?: { path: string; alt: string };
+}
+
+/* ── Манифест иллюстраций ────────────────────────────────────────── */
+
+/**
+ * Имена файлов картинок задания без расширения — по папке
+ * app/public/images/veroyatnost/zadanie-N. Читается на сборке, в Node,
+ * один раз на задание; нет папки — манифест пуст. Картинка привязана
+ * к варианту: `<id>-<n>.webp` — вариант n, `<id>.webp` — вариант 1
+ * (исходный сюжет задачника). Вариант с другим сюжетом без своего
+ * файла картинки не получает.
+ */
+const manifest = new Map<4 | 5, Set<string>>();
+
+function manifestIllyustratsiy(zadanie: 4 | 5): Set<string> {
+  let imena = manifest.get(zadanie);
+  if (imena === undefined) {
+    imena = new Set<string>();
+    try {
+      const papka = path.join(
+        process.cwd(),
+        'public',
+        'images',
+        'veroyatnost',
+        `zadanie-${zadanie}`,
+      );
+      for (const fayl of fs.readdirSync(papka)) {
+        if (fayl.endsWith('.webp')) {
+          imena.add(fayl.slice(0, -'.webp'.length));
+        }
+      }
+    } catch {
+      /* папки нет — картинок нет */
+    }
+    /* Оба имени сразу — это про один и тот же вариант 1. Берётся
+       `<id>-1.webp`, а `<id>.webp` остаётся лежать без дела: сборку
+       это не роняет, но сказать об этом надо — иначе правка уедет
+       в файл, который никто не видит. */
+    for (const imya of imena) {
+      const bez = imya.slice(0, -2);
+      if (imya.endsWith('-1') && imena.has(bez)) {
+        console.warn(
+          `картинки ${imya}.webp и ${bez}.webp — обе про вариант 1 задачи ${bez}: ` +
+            `показывается ${imya}.webp`,
+        );
+      }
+    }
+    manifest.set(zadanie, imena);
+  }
+  return imena;
 }
 
 /**
- * Лежит ли файл иллюстрации в app/public. Считается на сборке, в
- * Node: путь модели — от корня сайта, файлы — в папке public.
+ * Иллюстрация варианта n задачи id по манифесту, или ничего.
+ * Подпись alt — по имени файла (illyustratsii.ts): сюжет у вариантов
+ * разный, поэтому и подпись своя.
  */
-export function illyustratsiyaEst(put: string): boolean {
-  try {
-    return fs.existsSync(path.join(process.cwd(), 'public', put));
-  } catch {
-    return false;
-  }
+export function illyustratsiyaVarianta(
+  id: string,
+  n: number,
+): { path: string; alt: string } | undefined {
+  const zadanie = zadanieIllyustratsii(id);
+  const imena = manifestIllyustratsiy(zadanie);
+  const svoy = imyaIllyustratsii(id, n);
+  const imya = imena.has(`${id}-${n}`) ? `${id}-${n}` : imena.has(svoy) ? svoy : undefined;
+  return imya === undefined
+    ? undefined
+    : { path: `/images/veroyatnost/zadanie-${zadanie}/${imya}.webp`, alt: altIllyustratsii(imya) };
 }
 
 export interface PoolVariant {
@@ -235,12 +298,14 @@ function zapechatatRazbor(razbor: Razbor, seal: string): string {
 
 /* ── Банк прототипов ─────────────────────────────────────────────── */
 
-function otkrytayaModel(model: ReturnType<typeof modelVarianta>): PoolModel {
+/** Открытая часть модели варианта n задачи id; картинка — по манифесту. */
+function otkrytayaModel(model: ReturnType<typeof modelVarianta>, id: string, n: number): PoolModel {
+  const illustration = illyustratsiyaVarianta(id, n);
   return {
     method: model.method,
     ...(model.shape === undefined ? {} : { shape: model.shape }),
     parametry: model.parameters,
-    illustration: { ...model.illustration, exists: illyustratsiyaEst(model.illustration.path) },
+    ...(illustration === undefined ? {} : { illustration }),
   };
 }
 
@@ -260,7 +325,7 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
     steps: zapechatatRazbor(razbor, seal),
-    ...(model === null ? {} : { model: otkrytayaModel(model) }),
+    ...(model === null ? {} : { model: otkrytayaModel(model, prototype.id, variant.n) }),
   };
 }
 
@@ -321,18 +386,14 @@ export interface PrepPoolBlok {
   zadachi: PrepPoolZadacha[];
 }
 
-/** Картинка к условию задачи без модели — по подбору, и только если файл есть. */
-function kartinkaPrep(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
-  const kartinka = kartinka5(zadacha.id);
-  return kartinka !== undefined && illyustratsiyaEst(kartinka.path) ? kartinka : undefined;
-}
-
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const otvet = prepOtvet(zadacha);
   const seal = sealAnswer(otvet);
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
-  const illustration = model === null ? kartinkaPrep(zadacha) : undefined;
+  /* Картинка к условию задачи без модели: у задачи с моделью она
+     приходит вместе с моделью. */
+  const illustration = model === null ? illyustratsiyaVarianta(zadacha.id, 1) : undefined;
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
@@ -341,7 +402,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     steps: zapechatatRazbor(razbor, seal),
     ...(illustration === undefined ? {} : { illustration }),
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
-    ...(model === null ? {} : { model: otkrytayaModel(model) }),
+    ...(model === null ? {} : { model: otkrytayaModel(model, zadacha.id, 1) }),
   };
 }
 
@@ -406,7 +467,7 @@ function uznayVariant(
   n: number,
   uslovie: string,
   metodika: Metodika,
-  illustration: { path: string; alt: string },
+  illustration: { path: string; alt: string } | undefined,
 ): UznayVariant {
   const metodSeal = sealMetod(metodika.metod);
   return {
@@ -414,7 +475,7 @@ function uznayVariant(
     uslovie,
     metodSeal,
     hints: sealText(JSON.stringify(metodika.methodHints), metodSeal),
-    ...(illyustratsiyaEst(illustration.path) ? { illustration } : {}),
+    ...(illustration === undefined ? {} : { illustration }),
   };
 }
 
@@ -437,10 +498,12 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
         id: prototype.id,
         istochnik: 'prototip',
         variants: prototype.varianty.map((variant) =>
-          uznayVariant(variant.n, prototype.uslovie(variant.params), metodika, {
-            path: putIllyustratsii(prototype.id),
-            alt: prototype.nazvanie,
-          }),
+          uznayVariant(
+            variant.n,
+            prototype.uslovie(variant.params),
+            metodika,
+            illyustratsiyaVarianta(prototype.id, variant.n),
+          ),
         ),
       },
     ];
@@ -457,10 +520,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
           id: zadacha.id,
           istochnik: 'konspekt',
           variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, {
-              path: putIllyustratsii(zadacha.id),
-              alt: `Задача ${zadacha.nomer} конспекта`,
-            }),
+            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1)),
           ],
         },
       ];

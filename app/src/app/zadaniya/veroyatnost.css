@@ -36,33 +36,54 @@
 
 /* ── Подготовительные задачи ────────────────────────────────────── */
 
-.vprep {
-  display: grid;
-  gap: var(--space-12);
+/* ── Кружки подготовки и тренажёра ──────────────────────────────── */
+
+/* Состояние «разобрано решение»: задачу открыли и разобрали, но своими
+   силами она не закрыта. Это не пропуск, поэтому цвет свой. У заданий
+   №12 и №8 такого состояния нет — правило живёт здесь, а не в общем
+   prep.css. */
+.pdot.is-revealed {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.pdot.is-current.is-revealed {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
 }
 
-.vprep__blok-head {
-  display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
+/* Ряд-указатель хода подхода: кружки не нажимаются. Наведение из
+   prep.css красит рамку синим — здесь оно возвращается к цвету
+   состояния, поэтому цвета перечислены заново. */
+.pdot--flat {
+  cursor: default;
 }
-.vprep__blok-title {
-  margin: 0;
+.pdot--flat:hover {
+  border-color: var(--color-border);
 }
-.vprep__blok-tip {
-  color: var(--color-text-secondary);
+.pdot--flat.is-right:hover {
+  border-color: var(--color-success);
 }
-.vprep__blok-count {
-  color: var(--color-text-tertiary);
-  font-size: 14px;
+.pdot--flat.is-wrong:hover {
+  border-color: var(--color-error);
+}
+.pdot--flat.is-revealed:hover,
+.pdot--flat.is-current.is-revealed:hover {
+  border-color: var(--color-warning);
+}
+.pdot--flat.is-current:hover {
+  border-color: var(--color-primary);
+}
+.pdot--flat.is-current.is-right:hover {
+  border-color: var(--color-success);
 }
 
-/* Нумерацию рисует сам список задач — номер конспекта стоит в
-   карточке, и второй ряд цифр сбоку только путал бы. */
-.vprep__list {
-  display: grid;
-  gap: var(--space-4);
+/* Экран блока — тот же .ptask, что у подготовки задания №12: шапка
+   со счётом, строка «Задача N из M», ряд кружков и одна задача.
+   Здесь только то, чего у №12 нет: карточка задачи вероятности и
+   выход к списку блоков. */
+.vprep__zadacha {
+  scroll-margin-top: var(--space-4);
+}
+.vprep__gotovo {
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
