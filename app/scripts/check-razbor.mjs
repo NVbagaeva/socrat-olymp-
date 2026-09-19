@@ -55,10 +55,13 @@ try {
      объявляет "type": "module". Переведённый код — CommonJS, поэтому
      папке нужен свой package.json с обратным объявлением. */
   fs.writeFileSync(path.join(out, 'package.json'), '{ "type": "commonjs" }\n');
+  /* Банк тянет разбор ответа из lib/answer.ts, набор из lib/tex.ts и
+     источник случайных чисел генератора из lib/zadanie3/podhod.ts. */
   for (const file of [
     ...walk(path.join(src, 'veroyatnost')),
     path.join(src, 'answer.ts'),
     path.join(src, 'tex.ts'),
+    path.join(src, 'zadanie3', 'podhod.ts'),
   ]) {
     const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
