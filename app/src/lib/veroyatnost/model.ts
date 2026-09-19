@@ -206,14 +206,14 @@ export interface ProblemModel {
   };
   answer: { value: number; display: string };
   /**
-   * Иллюстрация варианта: путь по соглашению проекта и alt. Картинка
-   * привязана к варианту, а не к прототипу: у варианта 1 — исходный
-   * сюжет задачника (`<id>.webp`), у варианта n — свой файл
+   * Иллюстрация варианта: путь по соглашению проекта и подпись alt.
+   * Картинка привязана к варианту, а не к прототипу: у варианта 1 —
+   * исходный сюжет задачника (`<id>.webp`), у варианта n — свой файл
    * `<id>-<n>.webp`, потому что сюжет у него другой (дыня вместо
    * хлеба). Есть ли файл на самом деле, модель не знает: это смотрит
    * сборка (pool.ts) по манифесту папки картинок.
    */
-  illustration: { path: string; alt: string; ratio: '4:3' };
+  illustration: { path: string; alt: string };
 }
 
 /** Задание по идентификатору задачи: p5-…/k5-… — №5, остальное — №4. */
@@ -222,16 +222,22 @@ export function zadanieIllyustratsii(id: string): 4 | 5 {
 }
 
 /**
+ * Имя файла картинки без расширения: у варианта 1 — сам идентификатор
+ * задачи (исходный сюжет задачника), дальше `<id>-<n>`. По этому же
+ * имени берётся подпись alt (illyustratsii.ts).
+ */
+export function imyaIllyustratsii(id: string, n = 1): string {
+  return n === 1 ? id : `${id}-${n}`;
+}
+
+/**
  * Путь к иллюстрации по соглашению проекта: картинки живут в /images,
- * именем — идентификатор задачи. `<id>.webp` — исходный сюжет
- * задачника, он же вариант 1; вариант n > 1 ищет свой файл
- * `<id>-<n>.webp`. WebP: как и остальные картинки сайта, PNG
- * с прозрачным фоном в нём в десять раз легче. Исходники —
- * в assets/img/probability.
+ * именем — идентификатор задачи и номер варианта. WebP: как и
+ * остальные картинки сайта, PNG с прозрачным фоном в нём в десять раз
+ * легче. Исходники — в assets/img/probability.
  */
 export function putIllyustratsii(id: string, n = 1): string {
-  const imya = n === 1 ? id : `${id}-${n}`;
-  return `/images/veroyatnost/zadanie-${zadanieIllyustratsii(id)}/${imya}.webp`;
+  return `/images/veroyatnost/zadanie-${zadanieIllyustratsii(id)}/${imyaIllyustratsii(id, n)}.webp`;
 }
 
 /* ── Третий счёт: ответ прямо по рисунку ─────────────────────────── */
