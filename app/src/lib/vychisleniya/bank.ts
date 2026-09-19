@@ -243,8 +243,8 @@ export const BANK: BankEntry[] = [
       { n: 6, seed: '8.O#6', level: 'base' },
       { n: 7, seed: '8.O#7', level: 'advanced' },
       { n: 8, seed: '8.O#8', level: 'base' },
-      { n: 9, seed: '8.O#11', level: 'base' },
-      { n: 10, seed: '8.O#12', level: 'advanced' },
+      { n: 9, seed: '8.O#10', level: 'base' },
+      { n: 10, seed: '8.O#11', level: 'advanced' },
     ],
   },
   {

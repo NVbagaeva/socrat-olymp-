@@ -51,9 +51,9 @@ function drawMN(r: Rng, find: 'sin' | 'cos', wantBase: boolean): Draft | null {
   if (isBase !== wantBase) {
     return null;
   }
-  /* Рациональное данное — дробью или десятичной: обе записи в ходу. */
-  const decimalGiven = rational && r.int(0, 1) === 0;
-  const givenTex = decimalGiven ? d((SIGN[given][q] * k) / n) : radicalFrac(SIGN[given][q], k, rad, n);
+  /* Рациональное данное записывается десятичной дробью, как в ЕГЭ:
+     знаменатели 4, 5, 10, 20, 25 всегда дают конечную запись. */
+  const givenTex = rational ? d((SIGN[given][q] * k) / n) : radicalFrac(SIGN[given][q], k, rad, n);
   const ans = round9((SIGN[find][q] * m) / n);
   const uslovie = `Найдите $${fn(find)}\\alpha$, если $${fn(given)}\\alpha = ${givenTex}$ и $\\alpha \\in ${quarterInterval(q)}$.`;
   return {
@@ -65,7 +65,7 @@ function drawMN(r: Rng, find: 'sin' | 'cos', wantBase: boolean): Draft | null {
     ],
     proverka: SIGN[find][q] * Math.sqrt(1 - ((SIGN[given][q] * k * Math.sqrt(rad)) / n) ** 2),
     signature: `${n}:${m}`,
-        params: { n, m, q, dec: decimalGiven ? 1 : 0 },
+    params: { n, m, q },
   };
 }
 
@@ -73,16 +73,19 @@ export const P8M: Prototype = {
   id: '8.M',
   group: 'III',
   nazvanie: 'Найти sin α по cos α',
-  podtipy: [podtip('base', 'base', (r) => drawMN(r, 'sin', true)), podtip('adv', 'advanced', (r) => drawMN(r, 'sin', false))],
+  podtipy: [
+    podtip('base', 'base', (r) => drawMN(r, 'sin', true)),
+    podtip('adv', 'advanced', (r) => drawMN(r, 'sin', false)),
+  ],
   isklyucheniya: keys([
-    { n: 5, m: 1, q: 1, dec: 0 },
-    { n: 10, m: 9, q: 1, dec: 0 },
-    { n: 4, m: 3, q: 2, dec: 0 },
-    { n: 5, m: 2, q: 2, dec: 0 },
-    { n: 10, m: 9, q: 3, dec: 0 },
-    { n: 10, m: 7, q: 3, dec: 0 },
-    { n: 10, m: 3, q: 4, dec: 0 },
-    { n: 4, m: 3, q: 4, dec: 0 },
+    { n: 5, m: 1, q: 1 },
+    { n: 10, m: 9, q: 1 },
+    { n: 4, m: 3, q: 2 },
+    { n: 5, m: 2, q: 2 },
+    { n: 10, m: 9, q: 3 },
+    { n: 10, m: 7, q: 3 },
+    { n: 10, m: 3, q: 4 },
+    { n: 4, m: 3, q: 4 },
   ]),
 };
 
@@ -90,24 +93,27 @@ export const P8N: Prototype = {
   id: '8.N',
   group: 'III',
   nazvanie: 'Найти cos α по sin α',
-  podtipy: [podtip('base', 'base', (r) => drawMN(r, 'cos', true)), podtip('adv', 'advanced', (r) => drawMN(r, 'cos', false))],
+  podtipy: [
+    podtip('base', 'base', (r) => drawMN(r, 'cos', true)),
+    podtip('adv', 'advanced', (r) => drawMN(r, 'cos', false)),
+  ],
   isklyucheniya: keys([
-    { n: 4, m: 3, q: 1, dec: 0 },
-    { n: 10, m: 1, q: 1, dec: 0 },
-    { n: 4, m: 2, q: 1, dec: 0 },
-    { n: 25, m: 24, q: 1, dec: 0 },
-    { n: 5, m: 1, q: 2, dec: 0 },
-    { n: 10, m: 1, q: 2, dec: 0 },
-    { n: 5, m: 2, q: 2, dec: 0 },
-    { n: 4, m: 3, q: 2, dec: 0 },
-    { n: 5, m: 2, q: 3, dec: 0 },
-    { n: 10, m: 9, q: 3, dec: 0 },
-    { n: 4, m: 2, q: 3, dec: 0 },
-    { n: 10, m: 7, q: 3, dec: 0 },
-    { n: 25, m: 24, q: 4, dec: 0 },
-    { n: 10, m: 3, q: 4, dec: 0 },
-    { n: 5, m: 1, q: 4, dec: 0 },
-    { n: 5, m: 2, q: 4, dec: 0 },
+    { n: 4, m: 3, q: 1 },
+    { n: 10, m: 1, q: 1 },
+    { n: 4, m: 2, q: 1 },
+    { n: 25, m: 24, q: 1 },
+    { n: 5, m: 1, q: 2 },
+    { n: 10, m: 1, q: 2 },
+    { n: 5, m: 2, q: 2 },
+    { n: 4, m: 3, q: 2 },
+    { n: 5, m: 2, q: 3 },
+    { n: 10, m: 9, q: 3 },
+    { n: 4, m: 2, q: 3 },
+    { n: 10, m: 7, q: 3 },
+    { n: 25, m: 24, q: 4 },
+    { n: 10, m: 3, q: 4 },
+    { n: 5, m: 1, q: 4 },
+    { n: 5, m: 2, q: 4 },
   ]),
 };
 
@@ -138,45 +144,16 @@ export const P8O: Prototype = {
           `$${fn(other)}^2\\alpha = 1 - ${d(value * value)} = ${d(round9(otherValue * otherValue))}$, в ${ROMAN[q]} четверти $${fn(other)}\\alpha = ${d(SIGN[other][q] * otherValue)}$`,
           `$\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha} = ${d(ans)}$`,
         ],
-        proverka: given === 'sin' ? (SIGN.sin[q] * value) / (SIGN.cos[q] * Math.sqrt(1 - value * value)) : (SIGN.sin[q] * Math.sqrt(1 - value * value)) / (SIGN.cos[q] * value),
+        proverka:
+          given === 'sin'
+            ? (SIGN.sin[q] * value) / (SIGN.cos[q] * Math.sqrt(1 - value * value))
+            : (SIGN.sin[q] * Math.sqrt(1 - value * value)) / (SIGN.cos[q] * value),
         signature: `${given}:${scale}:${q}`,
         params: { given, value: round9(value), q },
       };
     }),
-    podtip('root', 'advanced', (r) => {
-      const p = r.int(1, 9);
-      const qq = r.pick([1, 2, 4, 5, 8, 10]);
-      if (gcd(p, qq) !== 1 || p === qq) {
-        return null;
-      }
-      const s = p * p + qq * qq;
-      const { k, m } = simpRoot(s);
-      if (m === 1) {
-        return null;
-      }
-      const given = r.pick(['sin', 'cos'] as const);
-      const q = r.pick([1, 2, 3, 4] as const);
-      /* sin α = p/√s = p√m / (k·m), cos α = q/√s. */
-      const num = given === 'sin' ? p : qq;
-      const givenTex = radicalFrac(SIGN[given][q], num, m, k * m);
-      const ans = round9((SIGN.tg[q] * p) / qq);
-      if (!nice(ans, 3)) {
-        return null;
-      }
-      const other = given === 'sin' ? 'cos' : 'sin';
-      const otherNum = given === 'sin' ? qq : p;
-      return {
-        uslovie: `Найдите $\\operatorname{tg}\\alpha$, если $${fn(given)}\\alpha = ${givenTex}$ и $\\alpha \\in ${quarterInterval(q)}$.`,
-        otvet: ans,
-        razbor: [
-          `$${fn(given)}^2\\alpha = \\dfrac{${num * num}}{${s}}$, значит $${fn(other)}^2\\alpha = \\dfrac{${otherNum * otherNum}}{${s}}$ и $${fn(other)}\\alpha = ${radicalFrac(SIGN[other][q], otherNum, m, k * m)}$`,
-          `$\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha} = ${SIGN.tg[q] < 0 ? '-' : ''}\\dfrac{${p}}{${qq}} = ${d(ans)}$`,
-        ],
-        proverka: given === 'sin' ? (SIGN.sin[q] * (p / Math.sqrt(s))) / (SIGN.cos[q] * Math.sqrt(1 - (p * p) / s)) : (SIGN.sin[q] * Math.sqrt(1 - (qq * qq) / s)) / (SIGN.cos[q] * (qq / Math.sqrt(s))),
-        signature: `${p}:${qq}`,
-        params: { given, p, q: qq, quarter: q },
-      };
-    }),
+    podtip('root-int', 'base', (r) => drawO(r, [1])),
+    podtip('root', 'advanced', (r) => drawO(r, [2, 4, 5, 8, 10])),
   ],
   isklyucheniya: keys([
     { given: 'sin', p: 2, q: 5, quarter: 1 },
@@ -197,6 +174,47 @@ export const P8O: Prototype = {
     { given: 'cos', p: 4, q: 1, quarter: 4 },
   ]),
 };
+
+/** Тангенс по данному с корнем: sin α = p/√(p²+q²) или cos α = q/√(p²+q²). */
+function drawO(r: Rng, qs: number[]): Draft | null {
+  {
+    const p = r.int(qs.length === 1 ? 2 : 1, 9);
+    const qq = r.pick(qs);
+    if (gcd(p, qq) !== 1 || p === qq) {
+      return null;
+    }
+    const s = p * p + qq * qq;
+    const { k, m } = simpRoot(s);
+    if (m === 1) {
+      return null;
+    }
+    const given = r.pick(['sin', 'cos'] as const);
+    const q = r.pick([1, 2, 3, 4] as const);
+    /* sin α = p/√s = p√m / (k·m), cos α = q/√s. */
+    const num = given === 'sin' ? p : qq;
+    const givenTex = radicalFrac(SIGN[given][q], num, m, k * m);
+    const ans = round9((SIGN.tg[q] * p) / qq);
+    if (!nice(ans, 3)) {
+      return null;
+    }
+    const other = given === 'sin' ? 'cos' : 'sin';
+    const otherNum = given === 'sin' ? qq : p;
+    return {
+      uslovie: `Найдите $\\operatorname{tg}\\alpha$, если $${fn(given)}\\alpha = ${givenTex}$ и $\\alpha \\in ${quarterInterval(q)}$.`,
+      otvet: ans,
+      razbor: [
+        `$${fn(given)}^2\\alpha = \\dfrac{${num * num}}{${s}}$, значит $${fn(other)}^2\\alpha = \\dfrac{${otherNum * otherNum}}{${s}}$ и $${fn(other)}\\alpha = ${radicalFrac(SIGN[other][q], otherNum, m, k * m)}$`,
+        `$\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha} = ${SIGN.tg[q] < 0 ? '-' : ''}\\dfrac{${p}}{${qq}} = ${d(ans)}$`,
+      ],
+      proverka:
+        given === 'sin'
+          ? (SIGN.sin[q] * (p / Math.sqrt(s))) / (SIGN.cos[q] * Math.sqrt(1 - (p * p) / s))
+          : (SIGN.sin[q] * Math.sqrt(1 - (qq * qq) / s)) / (SIGN.cos[q] * (qq / Math.sqrt(s))),
+      signature: `${p}:${qq}`,
+      params: { given, p, q: qq, quarter: q },
+    };
+  }
+}
 
 /* ── 8.P  k·cos 2α по sin α или cos α ────────────────────────── */
 
@@ -222,7 +240,7 @@ function drawP(r: Rng, integer: boolean): Draft | null {
     ],
     proverka: k * Math.cos(2 * (given === 'sin' ? Math.asin(s) : Math.acos(s))),
     signature: `${given}:${s}`,
-        params: { given, s, k },
+    params: { given, s, k },
   };
 }
 
@@ -230,7 +248,10 @@ export const P8P: Prototype = {
   id: '8.P',
   group: 'III',
   nazvanie: 'Косинус двойного угла по sin или cos',
-  podtipy: [podtip('int', 'base', (r) => drawP(r, true)), podtip('dec', 'advanced', (r) => drawP(r, false))],
+  podtipy: [
+    podtip('int', 'base', (r) => drawP(r, true)),
+    podtip('dec', 'advanced', (r) => drawP(r, false)),
+  ],
   isklyucheniya: keys([
     { given: 'sin', s: 0.6, k: 3 },
     { given: 'cos', s: 0.5, k: 16 },

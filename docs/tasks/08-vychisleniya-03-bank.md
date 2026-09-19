@@ -196,10 +196,10 @@
 
 | № | Уровень | Условие | Ответ |
 |---|---|---|---|
-| 1 | Б | Найдите $\sin\alpha$, если $\cos\alpha = -\dfrac{4}{5}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,6** |
+| 1 | Б | Найдите $\sin\alpha$, если $\cos\alpha = -0{,}8$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,6** |
 | 2 | П | Найдите $\sin\alpha$, если $\cos\alpha = \dfrac{\sqrt{15}}{4}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-0,25** |
-| 3 | Б | Найдите $\sin\alpha$, если $\cos\alpha = \dfrac{3}{5}$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,8** |
-| 4 | Б | Найдите $\sin\alpha$, если $\cos\alpha = -\dfrac{3}{5}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,8** |
+| 3 | Б | Найдите $\sin\alpha$, если $\cos\alpha = 0{,}6$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,8** |
+| 4 | Б | Найдите $\sin\alpha$, если $\cos\alpha = -0{,}6$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,8** |
 | 5 | П | Найдите $\sin\alpha$, если $\cos\alpha = -\dfrac{2\sqrt{6}}{5}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,2** |
 | 6 | Б | Найдите $\sin\alpha$, если $\cos\alpha = \dfrac{\sqrt{7}}{4}$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,75** |
 | 7 | П | Найдите $\sin\alpha$, если $\cos\alpha = -\dfrac{\sqrt{91}}{10}$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **0,3** |
@@ -211,14 +211,14 @@
 
 | № | Уровень | Условие | Ответ |
 |---|---|---|---|
-| 1 | Б | Найдите $\cos\alpha$, если $\sin\alpha = \dfrac{24}{25}$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,28** |
+| 1 | Б | Найдите $\cos\alpha$, если $\sin\alpha = 0{,}96$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,28** |
 | 2 | П | Найдите $\cos\alpha$, если $\sin\alpha = \dfrac{\sqrt{15}}{4}$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,25** |
 | 3 | Б | Найдите $\cos\alpha$, если $\sin\alpha = \dfrac{\sqrt{21}}{5}$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,4** |
-| 4 | Б | Найдите $\cos\alpha$, если $\sin\alpha = -\dfrac{3}{5}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,8** |
+| 4 | Б | Найдите $\cos\alpha$, если $\sin\alpha = -0{,}6$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,8** |
 | 5 | П | Найдите $\cos\alpha$, если $\sin\alpha = -\dfrac{4\sqrt{21}}{25}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **-0,68** |
 | 6 | Б | Найдите $\cos\alpha$, если $\sin\alpha = 0{,}8$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,6** |
 | 7 | П | Найдите $\cos\alpha$, если $\sin\alpha = -\dfrac{\sqrt{3}}{2}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **0,5** |
-| 8 | Б | Найдите $\cos\alpha$, если $\sin\alpha = \dfrac{4}{5}$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,6** |
+| 8 | Б | Найдите $\cos\alpha$, если $\sin\alpha = 0{,}8$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,6** |
 | 9 | Б | Найдите $\cos\alpha$, если $\sin\alpha = 0{,}6$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,8** |
 | 10 | П | Найдите $\cos\alpha$, если $\sin\alpha = -\dfrac{\sqrt{39}}{20}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **0,95** |
 
@@ -229,15 +229,15 @@
 | № | Уровень | Условие | Ответ |
 |---|---|---|---|
 | 1 | Б | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = -0{,}6$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **0,75** |
-| 2 | П | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = \dfrac{6\sqrt{37}}{37}$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **6** |
+| 2 | П | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = -\dfrac{7\sqrt{113}}{113}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **0,875** |
 | 3 | Б | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = 0{,}6$ и $\alpha \in \left(0; \frac{\pi}{2}\right)$. | **0,75** |
-| 4 | Б | Найдите $\operatorname{tg}\alpha$, если $\cos\alpha = -0{,}8$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **0,75** |
+| 4 | Б | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = -\dfrac{5\sqrt{26}}{26}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-5** |
 | 5 | П | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = -\dfrac{\sqrt{26}}{26}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-0,2** |
 | 6 | Б | Найдите $\operatorname{tg}\alpha$, если $\cos\alpha = 0{,}8$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-0,75** |
 | 7 | П | Найдите $\operatorname{tg}\alpha$, если $\cos\alpha = -\dfrac{5\sqrt{34}}{34}$ и $\alpha \in \left(\pi; \frac{3\pi}{2}\right)$. | **0,6** |
 | 8 | Б | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = -0{,}6$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-0,75** |
-| 9 | Б | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = 0{,}6$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,75** |
-| 10 | П | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = \dfrac{9\sqrt{181}}{181}$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-0,9** |
+| 9 | Б | Найдите $\operatorname{tg}\alpha$, если $\cos\alpha = \dfrac{\sqrt{82}}{82}$ и $\alpha \in \left(\frac{3\pi}{2}; 2\pi\right)$. | **-9** |
+| 10 | П | Найдите $\operatorname{tg}\alpha$, если $\sin\alpha = \dfrac{7\sqrt{65}}{65}$ и $\alpha \in \left(\frac{\pi}{2}; \pi\right)$. | **-1,75** |
 
 ### 8.P · Косинус двойного угла по sin или cos
 
