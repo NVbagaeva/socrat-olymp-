@@ -17,6 +17,11 @@ export interface TopicTabsProps {
   prep: ReactNode;
   /** Экран тренажёра: собран на сервере. */
   trainer: ReactNode;
+  /**
+   * Экран генератора: собран на сервере. Не задан — вкладки нет:
+   * у семейства без наборов прототипов генерировать нечего.
+   */
+  generator?: ReactNode;
   /** Адрес вкладки тренажёра: у неё свои адреса, как у подготовки. */
   trainerHref: string;
   /** Материалы для репетиторов: подпись кнопки и карточки меню. */
@@ -75,6 +80,7 @@ export function TopicTabs({
   theory,
   prep,
   trainer,
+  generator,
   trainerHref,
   tutors,
   contentsDecor,
@@ -89,6 +95,7 @@ export function TopicTabs({
   const opensMenu = initial === 'tutors';
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
+  const tabs = generator === undefined ? TABS.filter((item) => item.id !== 'generator') : TABS;
 
   /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
      вкладка не переключает состояние, а ведёт туда: иначе изнутри
@@ -219,7 +226,7 @@ export function TopicTabs({
         onOpenChange={setMenu}
         stripRef={strip}
       >
-        <Tabs items={TABS} value={tab} onValueChange={choose} label="Разделы темы" />
+        <Tabs items={tabs} value={tab} onValueChange={choose} label="Разделы темы" />
       </TutorMenu>
 
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
@@ -287,12 +294,7 @@ export function TopicTabs({
 
           {tab === 'trainer' ? trainer : null}
 
-          {tab === 'generator' ? (
-            <EmptyState
-              title="Генератор готовится"
-              description="Раздел появится, когда будет решено, что именно он настраивает."
-            />
-          ) : null}
+          {tab === 'generator' ? generator : null}
         </div>
 
         {/* Правая колонка: только на вкладке теории и только от 1024px —

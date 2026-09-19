@@ -16,7 +16,8 @@
      window:     { xmin, xmax, ymin, ymax },   // строго симметричное, квадратное
      grid:       { step: 1, show: true },
      axes:       { labelX: 'x', labelY: 'y', origin: '0' },
-     axisLabels: 'minimal' | 'full',   // minimal: подписаны только 0, 1 и −1
+     axisLabels: 'minimal' | 'full' | 'none',   // minimal: подписаны только 0, 1 и −1;
+                                                // none: засечки есть, чисел нет (миниатюры)
      curves:     [ { type: 'line', k, b, color: 'lineA', label: null } ],
      points:     [ { x, y, style: 'solid', label: null, color: 'lineA' } ]
    }
@@ -336,9 +337,11 @@ function renderGraph(scene, report) {
   }
 
   /* Подписи чисел. В режиме 'minimal' подписаны только 0, 1 и −1:
-     единичный отрезок задан, остальное ученик отсчитывает по клеткам. */
+     единичный отрезок задан, остальное ученик отсчитывает по клеткам.
+     В режиме 'none' чисел нет вовсе — это миниатюра, где цифры при
+     уменьшении всё равно не прочитать; засечки при этом остаются. */
   function labelled(value, lo, hi) {
-    if (!ticked(value, lo, hi)) { return false; }
+    if (mode === 'none' || !ticked(value, lo, hi)) { return false; }
     return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
   }
 

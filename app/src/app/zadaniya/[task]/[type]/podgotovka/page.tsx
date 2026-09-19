@@ -9,6 +9,7 @@ import '../../section.css';
 import '../topic.css';
 import '../prep.css';
 import '../trainer.css';
+import '../configurator.css';
 
 /* Вложенные разделы существуют только у открытых подтем. */
 export function generateStaticParams() {

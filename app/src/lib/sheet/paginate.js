@@ -228,6 +228,11 @@
     });
   }
 
+  /* Страница генератора кладёт спецификацию в документ уже после
+     загрузки скрипта и запускает набор сама. Обычному листу это
+     свойство не мешает. */
+  window.sheetPaginate = start;
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
   } else {

@@ -99,11 +99,96 @@ export function previewScene(id: FunctionTypeId) {
     window: squareWindow(preset.half),
     grid: { step: 1, show: false },
     axes: { labelX: '', labelY: '', origin: '' },
+    /* Оси с засечками, но без чисел: в карточке шириной сто пикселей
+       цифры всё равно нечитаемы, а обрезанными они выглядят грязью. */
     axisLabels: 'none',
     curves: [{ ...preset.curve, color: 'lineA', label: null }],
     points: [],
     shapes: [],
   };
+}
+
+
+/* ── Миниатюры навыков ────────────────────────────────────────────
+   Навык — набор прототипов; по одной картинке на набор: что дано
+   и что ищут. Искомая координата показана пунктиром до оси — тем же
+   приёмом, что катеты в разборе. Числа — параметры чертежа.
+
+   Окно тесное, как у карточек подготовки: клетка крупнее, и в
+   карточке шириной 120px сетка и буквы осей ещё читаются. Чисел на
+   осях нет — они превращались бы в крошки. */
+
+const SKILL_HALF = 2;
+
+/** Прямая для 12.A и 12.B и точка на ней. */
+const SKILL_LINE = { k: 0.6, b: 0.5 };
+const SKILL_PROBE = { x: 1.4, y: 1.34 };
+
+/** Две прямые для 12.C и 12.D; пересекаются внутри окна. */
+const SKILL_PAIR = [
+  { k: 0.75, b: 0.5 },
+  { k: -0.5, b: 1.5 },
+];
+const SKILL_CROSS = { x: 0.8, y: 1.1 };
+
+function dashed(from: [number, number], to: [number, number]) {
+  return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
+}
+
+export function generatorSkillScene(setId: string) {
+  const base = {
+    window: squareWindow(SKILL_HALF),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'none',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  const probe = { ...SKILL_PROBE, style: 'solid', color: 'lineB', label: null };
+  const cross = { ...SKILL_CROSS, style: 'solid', color: 'lineB', label: null };
+
+  if (setId === '12.A') {
+    /* Дан x — ищут y: пунктир от оси абсцисс к точке. */
+    return {
+      ...base,
+      curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }],
+      points: [probe],
+      shapes: [dashed([SKILL_PROBE.x, 0], [SKILL_PROBE.x, SKILL_PROBE.y])],
+    };
+  }
+  if (setId === '12.B') {
+    /* Дан y — ищут x: пунктир от оси ординат к точке. */
+    return {
+      ...base,
+      curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }],
+      points: [probe],
+      shapes: [dashed([0, SKILL_PROBE.y], [SKILL_PROBE.x, SKILL_PROBE.y])],
+    };
+  }
+  const pair = [
+    { type: 'line', ...SKILL_PAIR[0], color: 'lineA', label: null },
+    { type: 'line', ...SKILL_PAIR[1], color: 'lineB', label: null },
+  ];
+  if (setId === '12.C') {
+    return {
+      ...base,
+      curves: pair,
+      points: [cross],
+      shapes: [dashed([SKILL_CROSS.x, 0], [SKILL_CROSS.x, SKILL_CROSS.y])],
+    };
+  }
+  if (setId === '12.D') {
+    return {
+      ...base,
+      curves: pair,
+      points: [cross],
+      shapes: [dashed([0, SKILL_CROSS.y], [SKILL_CROSS.x, SKILL_CROSS.y])],
+    };
+  }
+  /* Набор без своей картинки: одна прямая, без точек. Такого набора
+     в данных нет — ветка на случай, если появится. */
+  return { ...base, curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }] };
 }
 
 
@@ -291,7 +376,10 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     /* Сетка нужна: по клеткам читаются Δx и Δy у треугольника. */
     grid: { step: 1, show: true },
     axes: { labelX: '', labelY: '', origin: '' },
-    axisLabels: 'none',
+    /* До появления режима 'none' в рендерере это слово падало в
+       'minimal', и на осях стояли 1 и −1. Так карточки навыков и
+       выпущены — режим закреплён явно, чтобы они не изменились. */
+    axisLabels: 'minimal',
     curves: [] as unknown[],
     points: [] as unknown[],
     shapes: [] as unknown[],

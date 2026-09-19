@@ -1,0 +1,24 @@
+/* Страница печати: только лист, без оболочки сайта.
+
+   Шрифты листа — те же, что у сайта: шаблон ждёт их в своих токенах,
+   и в CI их вшивает сборка, а здесь они уже подключены страницей.
+   Подписи на чертеже — математическим шрифтом KaTeX, как в сборнике. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+/* На экране страницы стоят столбиком с зазором; на печати зазора
+   нет — каждая страница ровно A4. */
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
