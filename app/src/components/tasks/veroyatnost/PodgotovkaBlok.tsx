@@ -8,7 +8,8 @@ import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { METODY } from '@/lib/veroyatnost/model';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
-import { prepReshena, prepStore, prepTrudnaya } from '@/lib/veroyatnost/prepProgress';
+import type { TaskOutcome } from '@/lib/progressStore';
+import { prepItog, prepReshena, prepStore } from '@/lib/veroyatnost/prepProgress';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { PrepDots, type PrepDotState } from '../prep/PrepDots';
 
@@ -18,9 +19,6 @@ export interface PodgotovkaBlokProps {
   /** Адрес списка блоков: туда ведёт кнопка с последней задачи. */
   listHref: string;
 }
-
-/** Что случилось с задачей в этой сессии и чего нет в хранилище. */
-type Popytka = 'wrong' | 'revealed';
 
 /* Экран открывается на первой нерешённой задаче: ученик продолжает,
    а не перерешивает сделанное. Решены все — открывается первая. */
@@ -38,10 +36,9 @@ function pervaya(status: readonly TaskStatus[]): number {
  * перейти. Порядок внутри блока свободный, «дальше» ведёт к ближайшей
  * нерешённой; между блоками ученик ходит лентой сверху.
  *
- * Решённое переживает перезагрузку — оно в хранилище подготовки этого
- * задания. Ошибка и открытый разбор держатся до перезагрузки точно;
- * после неё видно только то, что задача бралась и своими силами
- * не закрыта.
+ * Цвет кружка переживает перезагрузку: хранилище подготовки помнит
+ * не только решённое, но и чем закрылась каждая задача — ошибкой или
+ * разобранным решением.
  *
  * Ответов в разметке нет ни у одной задачи: карточка сверяет ответ
  * с отпечатком, разбор раскрывается по нему же.
@@ -49,17 +46,12 @@ function pervaya(status: readonly TaskStatus[]): number {
 export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps) {
   const store = prepStore(zadanie);
   const progress = store.useProgress();
-  const [popytki, setPopytki] = useState<Record<string, Popytka>>({});
   /* Пусто — задачу выбирает сам экран: первую нерешённую. Как только
      ученик перешёл по кружку, выбор закрепляется за ним. */
   const [vybrana, setVybrana] = useState<number | null>(null);
 
   const zadachi = blok.zadachi;
-  const sostoyaniya: PrepDotState[] = zadachi.map((zadacha) =>
-    prepReshena(progress, zadacha.id)
-      ? 'right'
-      : (popytki[zadacha.id] ?? (prepTrudnaya(progress, zadacha.id) ? 'revealed' : null)),
-  );
+  const sostoyaniya: PrepDotState[] = zadachi.map((zadacha) => prepItog(progress, zadacha.id));
   /* Для обхода важно одно: решена задача или нет. */
   const status: TaskStatus[] = sostoyaniya.map((item) => (item === 'right' ? 'right' : null));
 
@@ -86,29 +78,27 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
     scrollTabTo('.vprep__zadacha');
   }
 
-  /* В хранилище уходит номер задачи и то, закрыта ли она начисто:
-     ответа там нет. Времени подготовка не считает — это конспект,
-     а не подход на скорость. */
-  function zapisat(id: string, right: boolean, clean: boolean): void {
-    store.recordAttempt({ kind: id, taskId: id, right, clean, seconds: 0 });
+  /* В хранилище уходит номер задачи и её исход: ответа там нет.
+     Времени подготовка не считает — это конспект, а не подход
+     на скорость. */
+  function zapisat(right: boolean, clean: boolean, itog: TaskOutcome): void {
+    store.recordAttempt({ kind: zadacha.id, taskId: zadacha.id, right, clean, seconds: 0, itog });
   }
 
   function otvet(right: boolean): void {
     setVybrana(index);
-    if (right) {
-      /* Начисто — если до верного ответа не было ни ошибки,
-         ни открытого разбора. */
-      zapisat(zadacha.id, true, popytki[zadacha.id] === undefined);
-      return;
-    }
-    setPopytki((was) => ({ ...was, [zadacha.id]: 'wrong' }));
-    zapisat(zadacha.id, false, false);
+    /* Начисто — если до верного ответа задачу не открывали
+       и не отвечали неверно. */
+    zapisat(right, right && prepItog(progress, zadacha.id) === null, right ? 'right' : 'wrong');
   }
 
   function razbor(): void {
     setVybrana(index);
-    setPopytki((was) => ({ ...was, [zadacha.id]: 'revealed' }));
-    zapisat(zadacha.id, false, false);
+    /* Решённую задачу разбор не понижает: ученик перечитывает своё. */
+    if (prepReshena(progress, zadacha.id)) {
+      return;
+    }
+    zapisat(false, false, 'revealed');
   }
 
   return (

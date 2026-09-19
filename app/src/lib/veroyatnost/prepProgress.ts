@@ -9,16 +9,20 @@
  *
  * Внутри — тот же склад, что у тренажёра вероятности
  * (`createProgressStore`), только набором считается не прототип,
- * а сама задача: так по счётчику `right` видно, решена ли она, и
- * зелёный кружок переживает перезагрузку. Список `mistakes` хранит
- * задачи, закрытые не начисто: с ошибкой или с открытым решением.
+ * а сама задача. Исход каждой задачи хранилище помнит отдельно
+ * (`outcomes`): верно, неверно или разобрано решение — поэтому после
+ * перезагрузки кружок того же цвета, каким был.
  *
  * Ответов в хранилище нет — только идентификаторы задач и счётчики.
  */
 
 import type { Zadanie } from '@/content/veroyatnost';
-import { createProgressStore, type ProgressStore } from '../progressStore';
-import type { TrainerProgress } from '../trainerProgress';
+import {
+  createProgressStore,
+  type ProgressStore,
+  type StoreProgress,
+  type TaskOutcome,
+} from '../progressStore';
 
 const STORES: Record<Zadanie, ProgressStore> = {
   4: createProgressStore('budetege:veroyatnost-4:prep:v1'),
@@ -30,17 +34,25 @@ export function prepStore(zadanie: Zadanie): ProgressStore {
   return STORES[zadanie];
 }
 
-/** Решена ли задача: был верный ответ своими силами. */
-export function prepReshena(progress: TrainerProgress, id: string): boolean {
-  return (progress.kinds[id]?.right ?? 0) > 0;
+/**
+ * Чем закрылась задача. Нет записи — её не открывали.
+ *
+ * Счётчик `right` смотрится заодно: записи, сделанные до появления
+ * исходов, помнят только его, и решённое в них не должно потеряться.
+ */
+export function prepItog(progress: StoreProgress, id: string): TaskOutcome | null {
+  if ((progress.kinds[id]?.right ?? 0) > 0) {
+    return 'right';
+  }
+  return progress.outcomes[id] ?? null;
 }
 
-/** Задача бралась, но своими силами не закрыта: ошибка или разбор. */
-export function prepTrudnaya(progress: TrainerProgress, id: string): boolean {
-  return progress.mistakes.includes(id);
+/** Решена ли задача: был верный ответ своими силами. */
+export function prepReshena(progress: StoreProgress, id: string): boolean {
+  return prepItog(progress, id) === 'right';
 }
 
 /** Сколько задач блока решено. */
-export function prepResheno(progress: TrainerProgress, ids: readonly string[]): number {
+export function prepResheno(progress: StoreProgress, ids: readonly string[]): number {
   return ids.filter((id) => prepReshena(progress, id)).length;
 }
