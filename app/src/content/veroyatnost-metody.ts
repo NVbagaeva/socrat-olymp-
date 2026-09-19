@@ -27,14 +27,14 @@ export const O_ZADANII_4 = {
     { title: 'Выполнить шаги', lead: 'фиксированный алгоритм' },
     { title: 'Ответ', lead: 'десятичная дробь' },
   ] as readonly Shag01[],
-  /** Подпись под названием метода на карточке-плитке. */
+  /** Подпись под названием метода на карточке-плитке: пять методов №4. */
   korotko: {
     'direct-count': '$P = \\dfrac{m}{n}$',
     'outcome-table': '$6 \\times 6 = 36$',
     'coordinate-line': '$P = \\dfrac{l}{L}$',
     'probability-tree': 'умножаем · складываем',
     'convenient-number': '$0{,}93 \\to 93$ из $100$',
-  } as Record<Method, string>,
+  } as Partial<Record<Method, string>>,
   metodyTitle: 'Пять методов',
   metodyLead:
     'Каждый разобран во вкладке «Ключевые методы решения»: когда применять, алгоритм, типичные ошибки.',

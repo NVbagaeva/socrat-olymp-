@@ -3,7 +3,7 @@
 import { Button, ProgressRing } from '@/components/ui';
 import type { ProgressStore } from '@/lib/progressStore';
 import { summarize } from '@/lib/trainerProgress';
-import { METODY } from '@/lib/veroyatnost/model';
+import { METODY_4 } from '@/lib/veroyatnost/model';
 
 export interface ProgressMetodyProps {
   store: ProgressStore;
@@ -49,7 +49,7 @@ export function ProgressMetody({ store, slova }: ProgressMetodyProps) {
       />
 
       <ul className="z4-progress__metody">
-        {METODY.map((m) => {
+        {METODY_4.map((m) => {
           const tally = progress.kinds[m.id];
           return (
             <li key={m.id} className="z4-progress__metod">

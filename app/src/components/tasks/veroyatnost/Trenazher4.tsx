@@ -6,7 +6,7 @@ import { Button, EmptyState } from '@/components/ui';
 import { ProblemCard } from '@/components/tasks/card';
 import { REZHIMY_4, TRENAZHER_4, type Rezhim4 } from '@/content/veroyatnost';
 import { createProgressStore } from '@/lib/progressStore';
-import { METODY, type Method } from '@/lib/veroyatnost/model';
+import { METODY, METODY_4, type Method } from '@/lib/veroyatnost/model';
 import type { Pool, PoolKind } from '@/lib/veroyatnost/pool';
 import { ROUND_SIZE, restartRound, useVeroyatnostRound } from '@/lib/veroyatnost/useRound';
 import { ProgressMetody } from './ProgressMetody';
@@ -170,7 +170,7 @@ export function Trenazher4({ pool }: Trenazher4Props) {
 
       {rezhim === 'practice' ? (
         <div className="vtrainer__chips" role="radiogroup" aria-label={TRENAZHER_4.metod}>
-          {METODY.map((m) => (
+          {METODY_4.map((m) => (
             <button
               key={m.id}
               type="button"

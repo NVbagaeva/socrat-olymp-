@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { METODY, type Method } from '@/lib/veroyatnost/model';
+import { METODY_4, type Method } from '@/lib/veroyatnost/model';
 
 export interface MethodPickerProps {
   /** Что нажал ученик. null — ещё не отвечал. */
@@ -22,7 +22,7 @@ export function MethodPicker({ vybor, verny, onPick, label }: MethodPickerProps)
   const otvecheno = vybor !== null;
   return (
     <div className="z4-picker" role="group" aria-label={label}>
-      {METODY.map((m) => {
+      {METODY_4.map((m) => {
         const eto = m.id === vybor;
         const pravilny = verny !== null && m.id === verny;
         return (

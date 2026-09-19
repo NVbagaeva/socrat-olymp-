@@ -8,7 +8,7 @@ import {
 } from '@/components/probability';
 import { METODY_02, METODY_4, type MetodOpisanie02 } from '@/content/veroyatnost-metody';
 import { typeset } from '@/lib/tex';
-import { METODY, type Method } from '@/lib/veroyatnost/model';
+import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
 
 /**
  * Вкладка «Ключевые методы решения» — раздел 02 референса.
@@ -195,12 +195,15 @@ export function KlyuchevyeMetody() {
         <h2 className="t-h2 z4-metody__title">{METODY_02.title}</h2>
         <p className="z4-metody__lead">{METODY_02.lead}</p>
         <nav className="z4-metody__nav" aria-label="Методы">
-          {METODY.map((m) => (
-            <a key={m.id} className="z4-metody__link" href={`#${metodAnchor(m.id)}`}>
-              <span className="z4-metody__link-no">{m.nomer}</span>
-              {m.nazvanie}
-            </a>
-          ))}
+          {METODY_4.map((metod) => {
+            const m = metodPoId(metod.id);
+            return (
+              <a key={m.id} className="z4-metody__link" href={`#${metodAnchor(m.id)}`}>
+                <span className="z4-metody__link-no">{m.nomer}</span>
+                {m.nazvanie}
+              </a>
+            );
+          })}
         </nav>
       </header>
 

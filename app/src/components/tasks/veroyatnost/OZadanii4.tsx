@@ -1,6 +1,6 @@
 import { O_ZADANII_4 } from '@/content/veroyatnost-metody';
 import { typeset } from '@/lib/tex';
-import { METODY } from '@/lib/veroyatnost/model';
+import { METODY_4 } from '@/lib/veroyatnost/model';
 import { metodAnchor } from './KlyuchevyeMetody';
 
 export interface OZadanii4Props {
@@ -39,14 +39,14 @@ export function OZadanii4({ base }: OZadanii4Props) {
         <h3 className="t-h4 z4-about__sub">{O_ZADANII_4.metodyTitle}</h3>
         <p className="z4-about__text">{O_ZADANII_4.metodyLead}</p>
         <ul className="z4-metody-grid">
-          {METODY.map((m) => (
+          {METODY_4.map((m) => (
             <li key={m.id}>
               <a className="z4-metod-tile" href={`${base}/metody/#${metodAnchor(m.id)}`}>
                 <span className="z4-metod-tile__no">Метод {m.nomer}</span>
                 <span className="z4-metod-tile__title">{m.nazvanie}</span>
                 <span
                   className="z4-metod-tile__formula"
-                  dangerouslySetInnerHTML={{ __html: typeset(O_ZADANII_4.korotko[m.id]) }}
+                  dangerouslySetInnerHTML={{ __html: typeset(O_ZADANII_4.korotko[m.id] ?? '') }}
                 />
               </a>
             </li>
