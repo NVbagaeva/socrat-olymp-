@@ -28,15 +28,21 @@ export interface VeroyatnostTabsProps {
  * «Для репетиторов» — кнопка меню в той же ленте, тот же TutorMenu,
  * что у задания №12: меню стоит последним и панель не переключает.
  */
+/** Хвост адреса материалов: /dlya-repetitorov/ — как у задания №12. */
+export const TUTORS_TAIL = 'dlya-repetitorov/';
+
 export function VeroyatnostTabs({ base, tabs, tutors }: VeroyatnostTabsProps) {
   const pathname = usePathname();
-  const [menu, setMenu] = useState(false);
   const strip = useRef<HTMLDivElement>(null);
 
   /* Активна та вкладка, чей хвост стоит в адресе; если хвоста нет —
      та, что живёт на самом адресе раздела. Сравнение по хвосту, а не
      по вхождению строки. */
   const tail = pathname.replace(base, '').replace(/^\/+/, '');
+  /* Заход по адресу материалов открывает первую вкладку с раскрытым
+     меню — то же, что делает страница темы задания №12. Адрес известен
+     и на сборке, поэтому разметка сервера и первая отрисовка совпадают. */
+  const [menu, setMenu] = useState(tail === TUTORS_TAIL);
   const active =
     tabs.find((tab) => tab.tail !== '' && tail.startsWith(tab.tail)) ??
     tabs.find((tab) => tab.tail === '');

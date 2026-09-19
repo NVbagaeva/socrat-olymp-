@@ -29,6 +29,8 @@
     "test:pdf-12": "node scripts/check-pdf-12.mjs",
     "build:pdf-4": "node scripts/build-pdf-4.mjs",
     "test:pdf-4": "node scripts/check-pdf-4.mjs",
+    "build:pdf-5": "node scripts/build-pdf-5.mjs",
+    "test:pdf-5": "node scripts/check-pdf-5.mjs",
     "manifest:generator": "node scripts/print-generator-manifest.mjs"
   },
   "dependencies": {

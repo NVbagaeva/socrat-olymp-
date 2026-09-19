@@ -81,9 +81,12 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: 'Одно задание — пять методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
     badge: 'Базовый уровень',
     tabs: TABS_4,
-    /* Те же две карточки, что у задания №12. Файлов ещё нет, поэтому
-       карточки приглушены: меню показывает, что здесь появится, а не
-       обещает скачивание. */
+    /* Те же две карточки, что у задания №12. Файлы — сборник
+       «Задание 4», который собирает scripts/build-pdf-4.mjs и кладёт
+       в app/public по этим же путям (workflow «PDF 4»). Здесь стоят
+       файлы для ученика, а не для учителя: меню открыто всем, кто
+       зашёл на страницу темы, и ответы из него скачивались бы заодно;
+       файлы учителя уезжают архивом со страницы запуска CI. */
     tutors: {
       title: 'Для репетиторов',
       lead: 'Материалы для занятий по теме «Основные понятия теории вероятностей».',
@@ -91,14 +94,16 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
         {
           id: 'workbook',
           title: 'Рабочая тетрадь для репетиторов',
-          lead: 'Готовые материалы для занятий',
+          lead: 'Задачи с заготовками рисунков и строкой для ответа',
           icon: 'doc',
+          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf',
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
-          lead: 'Все задания по теме в одном файле',
+          lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
+          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf',
         },
       ],
     },
@@ -110,6 +115,28 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: 'Двенадцать типов задач — шесть методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
     badge: 'Базовый уровень',
     tabs: TABS_5,
+    /* Сборник «Задание 5»: scripts/build-pdf-5.mjs, workflow «PDF 5».
+       Как и у №4, здесь только файлы для ученика. */
+    tutors: {
+      title: 'Для репетиторов',
+      lead: 'Материалы для занятий по теме «Вероятности событий».',
+      items: [
+        {
+          id: 'workbook',
+          title: 'Рабочая тетрадь для репетиторов',
+          lead: 'Задачи конспекта и прототипы с заготовками рисунков и строкой для ответа',
+          icon: 'doc',
+          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf',
+        },
+        {
+          id: 'pdf',
+          title: 'PDF-практикум',
+          lead: 'Те же задания чёрно-белым — для принтера',
+          icon: 'pdf',
+          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb.pdf',
+        },
+      ],
+    },
   },
 ];
 
