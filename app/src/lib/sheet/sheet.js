@@ -106,6 +106,29 @@ function recapBlock(recap) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Разобранный пример
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Пример — кусок потока в оформлении рамки «Повторяем»: подпись,
+ * название, условие, решение и рисунок. Идёт в потоке, а не в шапке
+ * первой страницы: пример с рисунком высок, и в шапке два таких
+ * не помещались бы на лист вместе с задачами. Кусок неделим.
+ */
+function exampleItem(example) {
+  return '<div class="sheet-item sheet-example' +
+      (example.figureBelow ? ' sheet-example--stack' : '') + '">' +
+    '<span class="sheet-example-label">' + typo.text(example.label) + '</span>' +
+    '<div class="sheet-example-text">' +
+      (example.title ? '<p class="sheet-example-title">' + typo.markup(example.title) + '</p>' : '') +
+      '<p class="sheet-task-question">' + typo.markup(example.conditionHtml) + '</p>' +
+      (example.solutionHtml ? '<div class="sheet-task-solution">' + example.solutionHtml + '</div>' : '') +
+    '</div>' +
+    figure(example.figureSvg, { width: example.figureWidth }) +
+    '</div>';
+}
+
+/* ══════════════════════════════════════════════════════════
    Задача
    ══════════════════════════════════════════════════════════ */
 
@@ -126,7 +149,11 @@ function figure(svg, options) {
   if (!svg) { return ''; }
   var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
   var style = '';
-  if (box) {
+  /* Рисунок без клетки (плитки, дерево, ось): ширина задаётся прямо
+     в миллиметрах тем, кто собирает лист. */
+  if (options.width) {
+    style = ' style="width:' + (Math.round(options.width * 100) / 100) + 'mm"';
+  } else if (box) {
     var units = Number(box[1]) / CELL_UNITS;
     var mm = options.frame ? options.frame : units * options.cell;
     style = ' style="width:' + (Math.round(mm * 100) / 100) + 'mm"';
@@ -162,18 +189,29 @@ function taskCard(task, options) {
   var question = '<p class="sheet-task-question">' + typo.markup(task.questionHtml) + '</p>' +
     optionList(task.options);
 
+  /* Решение по шагам — только в файле для учителя: кто собирает лист,
+     тот и кладёт его в задачу готовой разметкой. */
+  var solution = task.solutionHtml
+    ? '<div class="sheet-task-solution">' + task.solutionHtml + '</div>'
+    : '';
+
   /* Строка ответа всегда ниже чертежа: сначала смотрят на рисунок,
      потом пишут ответ. В одну колонку чертёж стоит справа, поэтому
      строка ответа живёт в колонке условия; в две колонки чертёж
-     под условием, и строка ответа уходит под чертёж. */
-  var size = { cell: options.cell, frame: options.frame };
-  var body = options.layout === 'single'
-    ? '<div class="sheet-task-text">' + question + answer + '</div>' +
+     под условием, и строка ответа уходит под чертёж.
+
+     Широкий рисунок (ось, дерево) справа от текста не встаёт: тогда
+     задача помечена figureBelow, и рисунок идёт под условием. */
+  var size = { cell: options.cell, frame: options.frame, width: task.figureWidth };
+  var stacked = options.layout === 'single' && task.figureBelow;
+  var body = options.layout === 'single' && !stacked
+    ? '<div class="sheet-task-text">' + question + solution + answer + '</div>' +
       figure(task.figureSvg, size)
-    : '<div class="sheet-task-text">' + question + '</div>' +
+    : '<div class="sheet-task-text">' + question + solution + '</div>' +
       figure(task.figureSvg, size) + answer;
 
-  return '<article class="sheet-task sheet-task--' + layout + '" data-task="' +
+  return '<article class="sheet-task sheet-task--' + layout +
+    (stacked ? ' sheet-task--stack' : '') + '" data-task="' +
     typo.attr(task.id || '') + '">' +
     '<span class="sheet-task-no">' + task.no + '</span>' +
     '<div class="sheet-task-body">' + body + '</div>' +
@@ -278,7 +316,13 @@ function flowItems(spec) {
  *   runner   строка компактной шапки следующих страниц
  *   title    { chip, text, subtitle }
  *   recap    { title, items[], phrase } либо null
- *   blocks   [ { title, note, tasks[] } ]
+ *   leadItems  куски потока перед блоками задач: например,
+ *            разобранные примеры (exampleItem)
+ *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия
+ *            и чертежа могут быть figureWidth (мм), figureBelow
+ *            (рисунок под условием) и solutionHtml (для учителя)
+ *   defs     разметка, которая кладётся в документ один раз перед
+ *            страницами: например, SVG-паттерны штриховки для ч/б
  *   withAnswerLine  ставить ли строку «Ответ: ____»
  *   extraItems  куски потока после задач: раздел «Ответы».
  *               Первый из них помечается data-page-break, чтобы
@@ -295,7 +339,7 @@ function buildDocument(spec, assets) {
     throw new Error('sheet: неизвестная раскладка «' + spec.layout + '»');
   }
 
-  var items = flowItems(spec);
+  var items = (spec.leadItems || []).concat(flowItems(spec));
 
   return '<!doctype html>\n<html lang="ru" data-sheet-theme="' + spec.theme +
     '" data-sheet-layout="' + spec.layout + '">\n<head>\n' +
@@ -306,6 +350,7 @@ function buildDocument(spec, assets) {
     (spec.cell ? ':root { --sheet-cell: ' + spec.cell + 'mm; }\n' : '') +
     '</style>\n</head>\n<body>\n' +
     '<div id="sheet-measure"></div>\n' +
+    (spec.defs || '') +
     '<div id="sheet-pages"></div>\n' +
     '<script type="application/json" id="sheet-spec">' +
       JSON.stringify({
@@ -322,7 +367,7 @@ function buildDocument(spec, assets) {
 }
 
 const api = { buildDocument: buildDocument, taskCard: taskCard, figure: figure,
-              cellOf: cellOf, THEMES: THEMES, LAYOUTS: LAYOUTS };
+              exampleItem: exampleItem, cellOf: cellOf, THEMES: THEMES, LAYOUTS: LAYOUTS };
 
 export default api;
-export { buildDocument, taskCard, figure, cellOf, THEMES, LAYOUTS };
+export { buildDocument, taskCard, figure, exampleItem, cellOf, THEMES, LAYOUTS };

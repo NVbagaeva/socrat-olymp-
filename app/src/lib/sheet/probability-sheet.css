@@ -1,0 +1,102 @@
+/* sheet/probability-sheet.css — рисунки вероятности на печатном листе.
+
+   Сами рисунки красит components/probability/probability.css — тот же
+   файл, что на сайте. Здесь только то, чего на сайте нет:
+
+     • шрифт подписей — вшитый Inter листа, а не системный;
+     • паттерны штриховки (marks.hatchDefs) спрятаны, но не убраны:
+       display: none сломал бы ссылки url(#…) на них;
+     • ч/б тема: заливок нет, благоприятная область — штриховка,
+       выделенный путь дерева — толстая линия, остальные тонкие,
+       приглушения прозрачностью сняты — серое на ксероксе пропадает.
+
+   Ни одного значения цвета: цвета приходят токенами из theme.css. */
+
+.pr-tiles,
+.pr-grid,
+.pr-line,
+.pr-circle,
+.pr-tree,
+.pr-hundred {
+  font-family: var(--sheet-font-sans);
+}
+
+.sheet-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ── Ч/б: штриховка вместо заливки ─────────────────────────────── */
+
+:root[data-sheet-theme='print'] .pr-tile--favorable rect,
+:root[data-sheet-theme='print'] .pr-cell--favorable rect,
+:root[data-sheet-theme='print'] .pr-unit--highlighted,
+:root[data-sheet-theme='print'] .pr-part {
+  fill: url(#sheet-hatch);
+  fill-opacity: 1;
+  stroke: var(--sheet-ink);
+}
+
+/* Подпись на штриховке: чёрная с белой обводкой, чтобы читалась. */
+:root[data-sheet-theme='print'] .pr-tile--favorable text,
+:root[data-sheet-theme='print'] .pr-cell--favorable text {
+  fill: var(--sheet-ink);
+  stroke: var(--sheet-paper);
+  stroke-width: 3px;
+  paint-order: stroke;
+  font-weight: 600;
+}
+
+/* Плитки и клетки без заливки: только контур. */
+:root[data-sheet-theme='print'] .pr-tile rect,
+:root[data-sheet-theme='print'] .pr-cell rect,
+:root[data-sheet-theme='print'] .pr-whole {
+  fill: var(--sheet-paper);
+}
+:root[data-sheet-theme='print'] .pr-tile--favorable rect,
+:root[data-sheet-theme='print'] .pr-cell--favorable rect {
+  fill: url(#sheet-hatch);
+}
+
+/* Координатная прямая: области условий — редкой штриховкой в разные
+   стороны, пересечение выходит клеткой; сам благоприятный отрезок
+   на оси — толстая чёрная линия. */
+:root[data-sheet-theme='print'] .pr-band {
+  fill: url(#sheet-hatch-light);
+  fill-opacity: 1;
+}
+:root[data-sheet-theme='print'] .pr-band ~ .pr-band {
+  fill: url(#sheet-hatch-back);
+}
+:root[data-sheet-theme='print'] .pr-favorable {
+  stroke-width: 7;
+}
+:root[data-sheet-theme='print'] .pr-bound {
+  fill: var(--sheet-paper);
+}
+:root[data-sheet-theme='print'] .pr-bound--inclusive {
+  fill: var(--sheet-ink);
+}
+
+/* Дерево: смысл несёт толщина. Выделенный путь толстый, остальные
+   тонкие; полупрозрачного приглушения нет. */
+:root[data-sheet-theme='print'] .pr-branch line {
+  stroke: var(--sheet-ink);
+  stroke-width: 1.2;
+}
+:root[data-sheet-theme='print'] .pr-branch--highlighted line {
+  stroke-width: 4.5;
+}
+:root[data-sheet-theme='print'] .pr-branch--dimmed,
+:root[data-sheet-theme='print'] .pr-leaf--dimmed,
+:root[data-sheet-theme='print'] .pr-unit--dimmed,
+:root[data-sheet-theme='print'] .pr-legend--dimmed {
+  opacity: 1;
+}
+:root[data-sheet-theme='print'] .pr-branch--dimmed .pr-branch-p,
+:root[data-sheet-theme='print'] .pr-branch--dimmed .pr-branch-label,
+:root[data-sheet-theme='print'] .pr-leaf--dimmed {
+  fill: var(--sheet-ink-3);
+}
