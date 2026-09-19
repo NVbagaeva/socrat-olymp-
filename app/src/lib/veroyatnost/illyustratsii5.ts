@@ -62,13 +62,12 @@ const KARTINKI: Record<string, Kartinka> = {
 };
 
 /**
- * Картинка задачи для карточки: путь от корня сайта и alt — в той же
- * форме, в какой карточка получает иллюстрацию из модели. Нет записи —
- * undefined, и карточка показывает место под иллюстрацию.
+ * Подбор картинки задачи: alt по идентификатору. Путь и наличие файла
+ * здесь не решаются — их смотрит манифест картинок в pool.ts
+ * (`illyustratsiyaVarianta`). Нет записи — undefined, и карточка
+ * картинки не показывает.
  */
-export function kartinka5(id: string): { path: string; alt: string } | undefined {
+export function kartinka5(id: string): { alt: string } | undefined {
   const kartinka = KARTINKI[id];
-  return kartinka === undefined
-    ? undefined
-    : { path: `/images/veroyatnost/zadanie-5/${id}.webp`, alt: kartinka.alt };
+  return kartinka === undefined ? undefined : { alt: kartinka.alt };
 }

@@ -180,13 +180,11 @@ export function ProblemCard({
   );
 
   /* Иллюстрация: есть файл — картинка справа от условия, нет файла —
-     ничего: ни рамки, ни места под неё, условие занимает всю ширину. */
-  const kartinka =
-    variant === 'condition' || model === undefined
-      ? zadacha.illustration
-      : model.illustration.exists
-        ? { path: model.illustration.path, alt: model.illustration.alt }
-        : undefined;
+     ничего: ни рамки, ни места под неё, условие занимает всю ширину.
+     У задачи с моделью картинка приходит с моделью варианта (свой
+     файл у варианта, а не у прототипа), у задачи без модели и у
+     условия «Узнай метод» — полем задачи. */
+  const kartinka = zadacha.illustration ?? model?.illustration;
 
   const illyustratsiya =
     kartinka === undefined ? null : (
