@@ -140,3 +140,68 @@
 .z8-memo__list .katex {
   white-space: nowrap;
 }
+
+/* ── Вкладка «О задании» ──────────────────────────────────────── */
+
+.z8-about {
+  display: grid;
+  gap: var(--space-8);
+}
+.z8-about__lead {
+  max-width: 64ch;
+}
+.z8-about__text {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z8-about__sub {
+  margin-bottom: var(--space-4);
+}
+.z8-about__groups {
+  display: grid;
+  gap: var(--space-6);
+}
+.z8-group {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z8-group__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.z8-group__lead {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+}
+.z8-group__skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.z8-skill-tile {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.z8-skill-tile__title {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.z8-skill-tile__formula {
+  color: var(--color-text-secondary);
+  overflow-x: auto;
+}
+.z8-skill-tile__formula .katex {
+  white-space: nowrap;
+}

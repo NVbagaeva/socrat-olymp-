@@ -1,20 +1,12 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { VychisleniyaAbout } from '@/components/tasks/vychisleniya/VychisleniyaAbout';
 import { vychisleniyaTitle } from '@/content/vychisleniya';
 
 export const metadata: Metadata = {
-  title: vychisleniyaTitle('Теория'),
+  title: vychisleniyaTitle('О задании'),
 };
 
-/**
- * Вкладка «Теория» задания №8 живёт на адресе раздела.
- * Текст теории пишет автор; пока его нет, вкладка честно об этом говорит.
- */
-export default function Teoriya8Tab() {
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появится теория раздела. Текст напишет автор — придуманного здесь не будет."
-    />
-  );
+/** Вкладка «О задании» живёт на адресе самого раздела, как у №4 и №12. */
+export default function OZadanii8Tab() {
+  return <VychisleniyaAbout />;
 }

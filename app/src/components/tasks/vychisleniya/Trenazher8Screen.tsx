@@ -7,7 +7,9 @@ import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
 import { progress8 } from '@/lib/vychisleniya/progress';
 import { answerMatches, openText } from '@/lib/vychisleniya/secret';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
-import { RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { SKILL_FORMULA } from '@/content/vychisleniya';
+import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { Formula } from './Formula';
 import { Trenazher8Result, type Mark8 } from './Trenazher8Result';
 
 export interface Trenazher8ScreenProps {
@@ -219,6 +221,21 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
             )}
           </div>
         )}
+
+        {/* Бесплатная подсказка: только формула навыка, без разбора чисел.
+            Зачёт не снимает — в отличие от «Показать решение». В режиме
+            «Контроль» подсказок нет вовсе. */}
+        {checked === 'wrong' && !control ? (
+          <aside className="ptask__hint">
+            <p className="ptask__hint-head">
+              <HintIcon />
+              Подсказка
+            </p>
+            <div className="ptask__hint-text">
+              <Formula tex={SKILL_FORMULA[task.skill] ?? ''} />
+            </div>
+          </aside>
+        ) : null}
 
         {solution === null ? null : (
           <div className="z8-razbor" role="region" aria-label="Решение">
