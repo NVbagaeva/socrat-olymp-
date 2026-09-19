@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import type { ListSlova } from '@/content/veroyatnost';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
@@ -16,9 +17,11 @@ declare global {
   }
 }
 
-export interface Sheet4PageProps {
-  /** Банк задания №4: условия, отпечатки, закрытые разборы. */
+export interface PechatVeroyatnostiProps {
+  /** Банк задания: условия, отпечатки, закрытые разборы. */
   pool: Pool;
+  /** Слова листа этого задания: название, колонтитул, разделы ответов. */
+  list: ListSlova;
   /** Лист с ответами: те же задачи и таблица «Ответы» в конце. */
   withAnswers: boolean;
 }
@@ -32,15 +35,16 @@ function specJson(html: string): string {
 }
 
 /**
- * Лист задания №4, собранный в браузере.
+ * Лист заданий №4 и №5, собранный в браузере.
  *
  * Устройство то же, что у листа задания №12: buildDocument собирает
  * куски листа, paginate.js раскладывает их по страницам A4 после
  * загрузки шрифтов, формулы кратких решений набирает KaTeX, готовый
  * лист сразу отправляется в печать. Адрес страницы можно открыть
- * повторно — лист будет тем же.
+ * повторно — лист будет тем же. Одна страница на оба задания: разница
+ * только в банке и в словах листа.
  */
-export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
+export function PechatVeroyatnosti({ pool, list, withAnswers }: PechatVeroyatnostiProps) {
   const query = useSearchParams();
   const params = parseSheet4Query(query);
   const [spec, setSpec] = useState<string | null>(null);
@@ -66,7 +70,7 @@ export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheet4Spec(pool, params, withAnswers), {});
+    const html = buildDocument(sheet4Spec(pool, params, withAnswers, list), {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setSpec(specJson(html));

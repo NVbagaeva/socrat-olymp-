@@ -1,10 +1,11 @@
 /**
- * Лист для печати задания №4: адрес → задачи → описание листа.
+ * Лист для печати заданий №4 и №5: адрес → задачи → описание листа.
  *
  * Тот же шаблон lib/sheet/, что печатает сборник №12 и варианты его
  * генератора: лист про предмет ничего не знает, ему отдаются готовые
  * куски разметки. Здесь — только выбор задач из прототипов банка и
- * раскладка по блокам.
+ * раскладка по блокам. Банк и слова листа приходят параметрами:
+ * у заданий №4 и №5 они разные, устройство листа одно.
  *
  * Адрес читается в том же формате, что пишет GeneratorScreen
  * (`sheetQuery` в lib/generatorSheet.ts): s — наборы, n — число задач,
@@ -18,7 +19,7 @@
  */
 
 import content from '@/content/sheet12.js';
-import { LIST_4 } from '@/content/veroyatnost';
+import { LIST_4, type ListSlova } from '@/content/veroyatnost';
 import answers from '@/lib/sheet/answers.js';
 import typo from '@/lib/sheet/typography.js';
 import { seeded } from '../zadanie3/podhod';
@@ -164,9 +165,14 @@ export function sheet4Blocks(
  * одного ответа; учителю — те же задачи, таблица ответов с новой
  * страницы и краткие решения: формулы шагов разбора в TeX, те же,
  * что видит ученик в тренажёре. Набирает их KaTeX на странице печати,
- * как у задания №12.
+ * как у задания №12. `list` — слова листа задания; по умолчанию №4.
  */
-export function sheet4Spec(pool: Pool, params: Sheet4Params, withAnswers: boolean) {
+export function sheet4Spec(
+  pool: Pool,
+  params: Sheet4Params,
+  withAnswers: boolean,
+  list: ListSlova = LIST_4,
+) {
   const blocks = sheet4Blocks(pool, params, withAnswers);
   const resheniya = withAnswers
     ? blocks.flatMap((block) =>
@@ -178,7 +184,7 @@ export function sheet4Spec(pool: Pool, params: Sheet4Params, withAnswers: boolea
   const vsego = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
   const extraItems = withAnswers
     ? [
-        answers.sectionHead(LIST_4.otvety.title, LIST_4.otvety.note),
+        answers.sectionHead(list.otvety.title, list.otvety.note),
         ...blocks.map((block) =>
           answers.table(
             block.title,
@@ -190,8 +196,8 @@ export function sheet4Spec(pool: Pool, params: Sheet4Params, withAnswers: boolea
           ? []
           : [
               answers.sectionHead(
-                LIST_4.resheniya.title,
-                LIST_4.resheniya.note(resheniya.length, vsego),
+                list.resheniya.title,
+                list.resheniya.note(resheniya.length, vsego),
               ),
               ...resheniya,
             ]),
@@ -204,10 +210,10 @@ export function sheet4Spec(pool: Pool, params: Sheet4Params, withAnswers: boolea
     /* Чертежей на листе нет; клетка нужна шаблону только для них. */
     cell: 3.4,
     documentTitle:
-      `${LIST_4.title.chip}. ${LIST_4.title.text}` + (params.kind ? ` — ${params.kind}` : ''),
+      `${list.title.chip}. ${list.title.text}` + (params.kind ? ` — ${params.kind}` : ''),
     head: content.head,
-    runner: LIST_4.runner,
-    title: { chip: LIST_4.title.chip, text: LIST_4.title.text, subtitle: podzagolovok(params) },
+    runner: list.runner,
+    title: { chip: list.title.chip, text: list.title.text, subtitle: podzagolovok(params) },
     recap: null,
     blocks,
     withAnswerLine: !withAnswers,

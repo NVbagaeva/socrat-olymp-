@@ -40,6 +40,29 @@ export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
   });
 }
 
+/**
+ * Навыки генератора — прототипы банка: название, число вариантов и
+ * миниатюра по модели первого варианта. У прототипа без рисунка
+ * (метод «Формула») карточка идёт без миниатюры.
+ */
+export function navykiPrototipov(pool: Pool): SkillItem[] {
+  return pool.kinds.map((kind): SkillItem => {
+    const model = kind.variants[0]?.model;
+    return {
+      id: kind.id,
+      title: kind.title,
+      count: kind.variants.length,
+      levels: [],
+      chart:
+        model === undefined || model.parametry.method === 'formula' ? null : (
+          <span className="z4-skill-chart">
+            <Vizualizatsiya parametry={model.parametry} />
+          </span>
+        ),
+    };
+  });
+}
+
 /** Ярлык к конфигуратору: адрес /trenazher/{id}/ и что в нём выбрано. */
 export interface Yarlyk {
   id: string;

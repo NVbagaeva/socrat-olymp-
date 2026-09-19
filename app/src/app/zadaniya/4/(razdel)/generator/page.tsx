@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
-import type { SkillItem } from '@/components/tasks/configurator';
-import { Vizualizatsiya } from '@/components/tasks/card';
+import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
 import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
@@ -21,25 +20,11 @@ export const metadata: Metadata = {
  * собирается из тех же прототипов по параметрам адреса.
  */
 export default function Generator4Tab() {
-  const section = veroyatnostBySlug('4');
-  const pool = bank4Pool();
-  const skills: SkillItem[] = pool.kinds.map((kind) => {
-    const model = kind.variants[0]?.model;
-    return {
-      id: kind.id,
-      title: kind.title,
-      count: kind.variants.length,
-      levels: [],
-      chart:
-        model === undefined ? null : (
-          <span className="z4-skill-chart">
-            <Vizualizatsiya parametry={model.parametry} />
-          </span>
-        ),
-    };
-  });
-
   return (
-    <GeneratorScreen base={`${tasksPage.href}/4`} family={section?.title ?? ''} skills={skills} />
+    <GeneratorScreen
+      base={`${tasksPage.href}/4`}
+      family={veroyatnostBySlug('4')?.title ?? ''}
+      skills={navykiPrototipov(bank4Pool())}
+    />
   );
 }

@@ -62,14 +62,15 @@ const TABS_4: readonly VeroyatnostTab[] = [
 ];
 
 /**
- * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр.
- * Вкладок «О задании» и «Ключевые методы решения» нет — их тексты
- * для №5 автор ещё не писал; появятся вместе с текстами.
+ * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр ·
+ * Генератор. Вкладок «О задании» и «Ключевые методы решения» нет —
+ * их тексты для №5 автор ещё не писал; появятся вместе с текстами.
  */
 const TABS_5: readonly VeroyatnostTab[] = [
   { id: 'teoriya', label: 'Теория', tail: '' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
+  { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
@@ -232,21 +233,38 @@ export const PODGOTOVKA_4_SLOVA = {
   resheno: (resheno: number, vsego: number): string => `Решено ${resheno} из ${vsego}`,
 } as const;
 
-/* ── Слова вкладки «Генератор» задания №4 ────────────────────────── */
+/* ── Слова листа для печати: вкладка «Генератор» ─────────────────── */
 
 /**
- * Экран генератора — тот же, что у задания №12, со своими словами
- * листа. Шапка и подвал листа общие для всей платформы и берутся из
+ * Слова листа одного задания: название, колонтитул и заголовки
+ * разделов файла с ответами. Экран генератора — тот же, что у задания
+ * №12; шапка и подвал листа общие для всей платформы и берутся из
  * content/sheet12.js: там подпись курса и соцсети, а не слова про
  * линейную функцию.
  */
-export const LIST_4 = {
+export interface ListSlova {
+  title: { chip: string; text: string };
+  runner: string;
+  otvety: { title: string; note: string };
+  resheniya: { title: string; note: (resheno: number, vsego: number) => string };
+}
+
+const RESHENIYA = {
+  title: 'Краткие решения',
+  note: (resheno: number, vsego: number): string =>
+    `формулы разбора из банка, ${resheno} задач из ${vsego}`,
+};
+
+export const LIST_4: ListSlova = {
   title: { chip: 'Задание 4', text: 'Основные понятия теории вероятностей' },
   runner: 'Задание 4 · Основные понятия теории вероятностей',
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
-  resheniya: {
-    title: 'Краткие решения',
-    note: (resheno: number, vsego: number): string =>
-      `формулы разбора из банка, ${resheno} задач из ${vsego}`,
-  },
-} as const;
+  resheniya: RESHENIYA,
+};
+
+export const LIST_5: ListSlova = {
+  title: { chip: 'Задание 5', text: 'Вероятности событий' },
+  runner: 'Задание 5 · Вероятности событий',
+  otvety: { title: 'Ответы', note: 'по типам задач, сквозная нумерация' },
+  resheniya: RESHENIYA,
+};
