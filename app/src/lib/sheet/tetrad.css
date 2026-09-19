@@ -1,0 +1,454 @@
+/* sheet/tetrad.css — пять типов страниц методической тетради для
+   репетитора: титул, разделитель, теория, тренировка (плашка
+   репетитора), схема/памятка.
+
+   Тот же принцип, что у sheet.css: ни одного цвета и ни одного
+   кегля значением, всё приходит токенами из theme.css. Модуль
+   пристёгивается к тому же документу, что и sheet.css/graph.css —
+   классы не пересекаются с ними по имени.
+*/
+
+/* ══════════════════════════════════════════════════════════
+   0. Поток страницы — растянуть кусок на всю высоту
+   ══════════════════════════════════════════════════════════
+   В тетради на каждой странице ровно один кусок потока: у всех
+   пяти типов страниц стоит data-page-break, поэтому вместе они
+   никогда не встают на один лист. Раз кусок на странице один,
+   он же может занять всю высоту .sheet-flow — тогда «Разделитель»
+   центрируется по высоте, а «Тренировка» прижимает плашку книзу.
+   На страницах-теории и памятках высота та же, но их содержимое
+   не тянется: оно просто встаёт сверху, а лишнее место остаётся
+   пустым снизу — то самое место для конспекта.
+
+   Этот блок переопределяет sheet.css только для документов,
+   которые подключают tetrad.css: sборник №12 его не подключает,
+   и на нём ничего не меняется. */
+.sheet-flow { display: flex; flex-direction: column; }
+.sheet-item { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ══════════════════════════════════════════════════════════
+   1. Титульная страница
+   Полосатый фон из тонов primary, поверх — белая карточка
+   с зубчатым нижним краем. Страница без шапки и подвала —
+   собирается paginate.js отдельно, в общий обмер потока не входит.
+   ══════════════════════════════════════════════════════════ */
+.tetrad-title-page {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Специфичность в паре с селектором из sheet.css: там прямой потомок
+   .sheet-page получает position:relative — здесь нужен absolute,
+   чтобы полосы легли на всю страницу, а не заняли своё место в потоке. */
+.sheet-page > .tetrad-title-stripes {
+  position: absolute;
+  inset: 0;
+  display: var(--sheet-stripe-show);
+  flex-direction: row;
+  z-index: 0;
+}
+
+.tetrad-title-stripes span {
+  flex: 1 1 0;
+}
+.tetrad-title-stripes span:nth-child(4n + 1) { background: var(--sheet-stripe-1); }
+.tetrad-title-stripes span:nth-child(4n + 2) { background: var(--sheet-stripe-2); }
+.tetrad-title-stripes span:nth-child(4n + 3) { background: var(--sheet-stripe-3); }
+.tetrad-title-stripes span:nth-child(4n)     { background: var(--sheet-stripe-4); }
+
+/* В ч/б полос нет — карточка стоит на белом листе. */
+:root[data-sheet-theme='print'] .tetrad-title-stripes { display: none; }
+:root[data-sheet-theme='print'] .tetrad-title-page { background: var(--sheet-paper); }
+
+.tetrad-title-body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--sheet-step) * 10);
+  padding: calc(var(--sheet-step) * 10);
+}
+
+.tetrad-title-card {
+  position: relative;
+  width: 100%;
+  max-width: 148mm;
+  background: var(--sheet-paper);
+  border-radius: var(--sheet-radius-lg) var(--sheet-radius-lg) 0 0;
+  padding: calc(var(--sheet-step) * 12) calc(var(--sheet-step) * 10) calc(var(--sheet-step) * 8);
+  text-align: center;
+  box-shadow: var(--shadow-lg, 0 16px 40px rgba(16, 23, 40, 0.16));
+}
+
+:root[data-sheet-theme='print'] .tetrad-title-card {
+  box-shadow: none;
+  border: var(--sheet-rule-width) solid var(--sheet-ink);
+  border-bottom: none;
+}
+
+.tetrad-title-lines {
+  margin: 0;
+  font-size: calc(var(--sheet-fs-title) * 1.05);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--sheet-ink);
+}
+
+.tetrad-title-lines span { display: block; }
+
+.tetrad-title-subtitle {
+  margin: calc(var(--sheet-step) * 3) 0 0;
+  font-size: var(--sheet-fs-lead);
+  color: var(--sheet-ink-3);
+}
+
+.tetrad-title-rule {
+  margin: calc(var(--sheet-step) * 6) auto;
+  width: calc(var(--sheet-step) * 10);
+  height: var(--sheet-rule-width);
+  background: var(--sheet-rule-strong);
+}
+
+.tetrad-title-teacher {
+  margin: 0;
+  font-size: var(--sheet-fs-body);
+  font-weight: 600;
+  color: var(--sheet-ink);
+}
+
+.tetrad-title-meta {
+  margin: calc(var(--sheet-step) * 1.5) 0 0;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
+/* Зубчатый нижний край: полоса треугольников тем же цветом, что
+   и карточка, встык под ней — без зазора и без второго слоя фона. */
+.tetrad-title-jagged {
+  display: block;
+  width: 100%;
+  max-width: 148mm;
+  margin-top: -1px;
+}
+
+.tetrad-title-jagged path { fill: var(--sheet-paper); }
+:root[data-sheet-theme='print'] .tetrad-title-jagged path {
+  fill: none;
+  stroke: var(--sheet-ink);
+  stroke-width: 1;
+}
+
+.tetrad-title-logo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--sheet-step) * 2);
+  font-size: var(--sheet-fs-small);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sheet-paper);
+}
+
+:root[data-sheet-theme='print'] .tetrad-title-logo { color: var(--sheet-ink); }
+
+/* ══════════════════════════════════════════════════════════
+   2. Разделитель
+   Белая страница, крупная надпись слева по центру высоты,
+   под ней — рукописная реплика. Кусок неделим и сам занимает
+   всю страницу: data-page-break гонит его на новый лист.
+   ══════════════════════════════════════════════════════════ */
+.tetrad-divider {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--sheet-step) * 5);
+}
+
+.tetrad-divider-title {
+  margin: 0;
+  max-width: 70%;
+  font-size: calc(var(--sheet-fs-title) * 0.92);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--sheet-brand);
+}
+
+.tetrad-divider-phrase {
+  margin: 0;
+  max-width: 60%;
+  color: var(--sheet-ink-2);
+}
+
+/* ══════════════════════════════════════════════════════════
+   3. Теория
+   Заголовок, 1–2 абзаца, ключевая формулировка в рамке, чертёж.
+   Один кусок — одна страница: не больше одного правила и одного
+   чертежа, внизу остаётся простор для конспекта.
+   ══════════════════════════════════════════════════════════ */
+.tetrad-theory {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 5);
+}
+
+.tetrad-theory-label {
+  display: inline-block;
+  font-size: var(--sheet-fs-small);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sheet-brand);
+}
+
+.tetrad-theory-title {
+  margin: calc(var(--sheet-step) * 1.5) 0 0;
+  font-size: calc(var(--sheet-fs-block) * 1.35);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--sheet-ink);
+}
+
+.tetrad-theory-text {
+  margin: 0;
+  max-width: 130mm;
+}
+
+.tetrad-theory-text + .tetrad-theory-text { margin-top: calc(var(--sheet-step) * 2); }
+
+/* Рамка ключевой формулировки: заливка светлого тона primary,
+   рамка 1px --color-border, скруглённые углы. */
+.tetrad-frame {
+  margin: 0;
+  max-width: 130mm;
+  padding: calc(var(--sheet-step) * 4) calc(var(--sheet-step) * 5);
+  background: var(--sheet-recap-bg);
+  border: var(--sheet-rule-width) solid var(--color-border);
+  border-radius: var(--sheet-radius-lg);
+  font-weight: 600;
+  color: var(--sheet-ink);
+}
+
+.tetrad-theory-row {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--sheet-step) * 8);
+  flex-wrap: wrap;
+}
+
+.tetrad-theory-row > .tetrad-theory-col { flex: 1 1 70mm; min-width: 0; }
+.tetrad-theory-row > .tetrad-theory-figure { flex: none; }
+
+.tetrad-theory-figure { margin: 0; }
+.tetrad-theory-figure figcaption {
+  margin-top: calc(var(--sheet-step) * 1.5);
+  font-family: var(--sheet-font-hand);
+  font-size: calc(var(--sheet-fs-hand) * 0.86);
+  color: var(--sheet-brand);
+  text-align: center;
+}
+
+.tetrad-theory-note {
+  margin: 0;
+  max-width: 130mm;
+  color: var(--sheet-ink-2);
+}
+
+/* Итоговая строка о трёх случаях k, в ряд. */
+.tetrad-theory-triples {
+  display: flex;
+  gap: calc(var(--sheet-step) * 4);
+  flex-wrap: wrap;
+}
+
+.tetrad-theory-triples span {
+  flex: 1 1 0;
+  min-width: 46mm;
+}
+
+/* ══════════════════════════════════════════════════════════
+   4. Схема / памятка
+   Карточки-рамки в сетке. Три пункта укладываются в две колонки
+   с растянутым последним, четыре — ровно 2×2.
+   ══════════════════════════════════════════════════════════ */
+.tetrad-memo {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 6);
+}
+
+.tetrad-memo-title {
+  margin: 0;
+  font-size: calc(var(--sheet-fs-block) * 1.25);
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.tetrad-memo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: calc(var(--sheet-step) * 5);
+}
+
+.tetrad-memo-grid[data-count='3'] .tetrad-card:last-child { grid-column: 1 / -1; }
+
+.tetrad-card {
+  padding: calc(var(--sheet-step) * 5);
+  background: var(--sheet-card-bg);
+  border: var(--sheet-card-width) solid var(--sheet-card-line);
+  border-radius: var(--sheet-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 2.5);
+}
+
+.tetrad-card-no {
+  width: calc(var(--sheet-step) * 6);
+  height: calc(var(--sheet-step) * 6);
+  border-radius: var(--sheet-radius-sm);
+  background: var(--sheet-num-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-num-line);
+  color: var(--sheet-num-ink);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tetrad-card-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.tetrad-card-text {
+  margin: 0;
+  color: var(--sheet-ink-2);
+}
+
+/* Акцентная памятка (2.2): заливка светлого тона accent — единственное
+   место в тетради, где используется акцентный, а не primary тон. */
+.tetrad-callout {
+  padding: calc(var(--sheet-step) * 6);
+  background: var(--sheet-accent-soft);
+  border: var(--sheet-rule-width) solid var(--sheet-accent-soft-line);
+  border-radius: var(--sheet-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 4);
+}
+
+.tetrad-callout-title {
+  margin: 0;
+  font-size: calc(var(--sheet-fs-block) * 1.15);
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.tetrad-callout-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 2.5);
+}
+
+.tetrad-callout-list li {
+  padding-left: calc(var(--sheet-step) * 4);
+  position: relative;
+}
+
+.tetrad-callout-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: calc(var(--sheet-step) * 1.5);
+  height: calc(var(--sheet-step) * 1.5);
+  border-radius: 50%;
+  background: var(--sheet-accent);
+}
+
+.tetrad-callout-phrase {
+  margin: calc(var(--sheet-step) * 2) 0 0;
+  font-family: var(--sheet-font-hand);
+  font-style: normal;
+  font-size: var(--sheet-fs-hand);
+  line-height: 1.25;
+  color: var(--sheet-ink);
+}
+
+/* ══════════════════════════════════════════════════════════
+   5. Плашка репетитора
+   Под каждой тренировочной задачей: заливка светлого тона primary,
+   заголовок рукописным шрифтом, ответ и разбор в 2–3 строки.
+   Отделена от поля ученика линией 1px --color-border.
+   ══════════════════════════════════════════════════════════ */
+.tetrad-tutor {
+  margin-top: calc(var(--sheet-step) * 6);
+  padding-top: calc(var(--sheet-step) * 4);
+  border-top: var(--sheet-rule-width) solid var(--color-border);
+}
+
+.tetrad-tutor-box {
+  padding: calc(var(--sheet-step) * 4) calc(var(--sheet-step) * 5);
+  background: var(--sheet-tutor-bg);
+  border: var(--sheet-rule-width) solid var(--sheet-tutor-line);
+  border-radius: var(--sheet-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 2);
+}
+
+.tetrad-tutor-title {
+  margin: 0;
+  font-family: var(--sheet-font-hand);
+  font-style: normal;
+  font-size: var(--sheet-fs-hand);
+  color: var(--sheet-brand);
+}
+
+.tetrad-tutor-answer {
+  margin: 0;
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.tetrad-tutor-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 1);
+  color: var(--sheet-ink-2);
+}
+
+/* Стрелка «→» в тексте памяток и плашки: SVG вместо знака (см.
+   tetrad.js, withArrows) — та же посадка по базовой линии, что
+   у стрелки между формулами краткого решения в sheet.css. */
+.tetrad-arrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 calc(var(--sheet-step) * 0.5);
+  color: var(--sheet-ink-2);
+}
+
+/* Тренировочная страница: одна задача, посередине — простор для
+   решения ученика, плашка репетитора прижата книзу. */
+.tetrad-training {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.tetrad-training-spacer { flex: 1 1 auto; min-height: calc(var(--sheet-step) * 20); }
