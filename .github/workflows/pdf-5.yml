@@ -165,6 +165,15 @@ jobs:
             echo "файлы не менялись"
             exit 0
           fi
+          # Байты у двух сборок расходятся всегда: в файле лежат дата
+          # печати и внутренние идентификаторы. Смотрим содержимое —
+          # число страниц и текст страниц; совпало, значит коммитить
+          # нечего, иначе история копится из одинаковых файлов.
+          echo "сравнение с файлами ветки:"
+          if [ "$(node app/scripts/pdf-changed.mjs app/public/materials/zadanie-5)" = same ]; then
+            echo "содержимое то же — коммит не нужен"
+            exit 0
+          fi
           git commit -m "Сборник №5: пересобранные PDF [skip ci]"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin HEAD:"${GITHUB_REF_NAME}"
