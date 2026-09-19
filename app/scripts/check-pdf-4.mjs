@@ -165,6 +165,9 @@ function checkStudentItems(name) {
     if (/pr-branch-p/.test(card)) {
       fail(name + ': у ветвей дерева задачи ' + task.no + ' для ученика стоят вероятности');
     }
+    if (/pr-band/.test(card)) {
+      fail(name + ': на оси задачи ' + task.no + ' для ученика показаны области условий');
+    }
     /* Само число ответа в карточке — тоже утечка. Число ищется как
        отдельное слово, чтобы «0,2» не нашлось внутри «0,25». */
     if (hasNumber(textOf(card), task.answer)) {

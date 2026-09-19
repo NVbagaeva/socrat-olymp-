@@ -118,7 +118,8 @@ export type ParametryPryamoy =
       shape: 'segment';
       min: number;
       max: number;
-      c: number;
+      /** Границы промежутка; хотя бы одна задана, вторая — край отрезка. */
+      c?: number;
       d?: number;
       leftBoundary: 'strict' | 'inclusive';
       rightBoundary: 'strict' | 'inclusive';
@@ -254,7 +255,8 @@ export function otvetPoRisunku(vizual: Vizual): number | null {
     case 'coordinate-line': {
       if (parametry.shape === 'segment') {
         const d = parametry.d ?? parametry.max;
-        return (d - parametry.c) / (parametry.max - parametry.min);
+        const c = parametry.c ?? parametry.min;
+        return (d - c) / (parametry.max - parametry.min);
       }
       if (parametry.shape === 'arc') {
         const { divisions, from, to } = parametry;

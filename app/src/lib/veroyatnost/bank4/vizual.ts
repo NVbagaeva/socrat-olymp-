@@ -223,12 +223,11 @@ export function tablitsaMonet(
 /**
  * Отрезок распределения с благоприятным промежутком — случай прямой.
  * Границы берутся из описания `Pryamaya` того же прототипа, поэтому
- * рисунок и разбор считают одни числа. Если нижней границы нет,
- * промежуток начинается от края отрезка: у компонента левая граница
- * обязательна, и тогда ею становится сам край.
+ * рисунок и разбор считают одни числа. Граница может быть одна:
+ * вторая — край отрезка, и компонент рисует его просто концом оси.
  */
 export function otrezok(pr: Pryamaya): Vizual {
-  const { ot } = promezhutok(pr);
+  promezhutok(pr);
   const granica = pr.nestrogo ? 'inclusive' : 'strict';
   return {
     parametry: {
@@ -236,9 +235,9 @@ export function otrezok(pr: Pryamaya): Vizual {
       shape: 'segment',
       min: pr.a,
       max: pr.b,
-      c: ot,
+      ...(pr.c === undefined ? {} : { c: pr.c }),
       ...(pr.d === undefined ? {} : { d: pr.d }),
-      leftBoundary: pr.c === undefined ? 'inclusive' : granica,
+      leftBoundary: granica,
       rightBoundary: granica,
     },
     podsvetka: { method: 'coordinate-line' },
