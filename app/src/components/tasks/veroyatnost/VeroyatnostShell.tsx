@@ -23,7 +23,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
 
   return (
     <AppShell active="tasks">
-      <main className="app-main">
+      <main className="app-main veroyatnost-main">
         <Breadcrumbs
           items={[
             { label: 'Главная', href: '/' },

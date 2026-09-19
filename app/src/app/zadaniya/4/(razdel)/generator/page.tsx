@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
 import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function Generator4Tab() {
   return (
     <GeneratorScreen
       base={`${tasksPage.href}/4`}
-      family={veroyatnostBySlug('4')?.title ?? ''}
+      family={veroyatnostFamily('4')}
       skills={navykiPrototipov(bank4Pool())}
     />
   );
