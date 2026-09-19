@@ -1,0 +1,78 @@
+/**
+ * Тексты раздела задания №8 «Вычисления и преобразования».
+ *
+ * Здесь только то, что читается глазами: заголовок, подпись, вкладки,
+ * меню материалов, названия и формулы навыков на карточках. Текста
+ * теории нет намеренно — его пишет автор, вкладка честно говорит
+ * «Материал готовится».
+ */
+
+import type { TutorMaterial } from './sections';
+
+export interface VychisleniyaTab {
+  id: string;
+  label: string;
+  /** Часть адреса после /zadaniya/8/. Пусто — сам адрес раздела. */
+  tail: string;
+}
+
+export const VYCHISLENIYA = {
+  no: '08',
+  slug: '8',
+  title: 'Вычисления и преобразования',
+  lead: 'Пять групп прототипов: степени и корни, логарифмы, тригонометрия по четверти, тригонометрические преобразования и буквенные выражения. Числа в каждой задаче свои.',
+  badge: 'Базовый уровень',
+  tabs: [
+    { id: 'teoriya', label: 'Теория', tail: '' },
+    { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
+    { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
+  ] as readonly VychisleniyaTab[],
+  /* Те же две карточки, что у №4 и №12. Файлов ещё нет, поэтому
+     карточки приглушены: меню показывает, что здесь появится. */
+  tutors: {
+    title: 'Для репетиторов',
+    lead: 'Материалы для занятий по теме «Вычисления и преобразования».',
+    items: [
+      {
+        id: 'workbook',
+        title: 'Рабочая тетрадь для репетиторов',
+        lead: 'Готовые материалы для занятий',
+        icon: 'doc',
+      },
+      {
+        id: 'pdf',
+        title: 'PDF-практикум',
+        lead: 'Все задания по теме в одном файле',
+        icon: 'pdf',
+      },
+    ] as TutorMaterial[],
+  },
+} as const;
+
+/** Формула на карточке навыка, в записи TeX: по одной на навык. */
+export const SKILL_FORMULA: Record<string, string> = {
+  S1: 'a^{m} \\cdot a^{n} = a^{m+n}',
+  S2: '\\sqrt[n]{a} \\cdot \\sqrt[n]{b} = \\sqrt[n]{ab}',
+  S3: '\\log_a x + \\log_a y = \\log_a xy',
+  S4: '\\log_a b = \\dfrac{\\log_c b}{\\log_c a}',
+  S5: '\\sin^2\\alpha + \\cos^2\\alpha = 1',
+  S6: '\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha}',
+  S7: '\\sin 30^\\circ = \\dfrac{1}{2}',
+  S8: '\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha',
+  S9: '\\sin(90^\\circ - \\alpha) = \\cos\\alpha',
+  S10: 'a^2 - b^2 = (a - b)(a + b)',
+  S11: '\\sqrt{a}\\cdot\\sqrt{b} = \\sqrt{ab}',
+};
+
+/** Заголовок окна браузера: «Вкладка · Вычисления и преобразования — Будет на ЕГЭ». */
+export function vychisleniyaTitle(tab: string): string {
+  return `${tab} · ${VYCHISLENIYA.title} — Будет на ЕГЭ`;
+}
+
+/** Подписи вкладки подготовки. */
+export const prep8Page = {
+  title: 'Подготовительные задачи',
+  lead: 'Одно свойство — одно действие',
+  allLabel: 'Все блоки',
+  again: 'Ещё вариант',
+};

@@ -11,6 +11,8 @@
 import { BANK } from './bank';
 import { generate, hasLevel } from './generate';
 import { nice, round9, ru } from './numbers';
+import { PREP_BLOCKS } from './prep/blocks';
+import { fixedSeed, generatePrep } from './prep/generate';
 import { PROTOTYPES } from './prototypes';
 import { sealAnswer } from './secret';
 import { SKILLS } from './skills';
@@ -180,4 +182,71 @@ export function checkBank(typeset: ((tex: string) => void) | null): Report {
     }
   }
   return { prototypes: PROTOTYPES.length, generated, problems };
+}
+
+/** Подготовка: сорок микро-задач на многих seed и их зафиксированные варианты. */
+export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void) | null): Report {
+  const problems: Problem[] = [];
+  let generated = 0;
+  const ids = new Set<string>();
+  for (const block of PREP_BLOCKS) {
+    if (block.zadachi.length !== 8) {
+      problems.push({ where: block.id, what: `в блоке ${block.zadachi.length} задач, а не 8` });
+    }
+    block.zadachi.forEach((micro, i) => {
+      const expected = `${block.id}-${String(i + 1).padStart(2, '0')}`;
+      if (micro.id !== expected || ids.has(micro.id)) {
+        problems.push({ where: micro.id, what: `ожидался идентификатор ${expected}` });
+      }
+      ids.add(micro.id);
+      if (typeset !== null) {
+        try {
+          typeset(micro.formula);
+        } catch (error) {
+          problems.push({ where: micro.id, what: `KaTeX не принял формулу-подсказку: ${String(error)}` });
+        }
+      }
+      const seeds = [fixedSeed(micro), ...Array.from({ length: seedsPerTask }, (_, k) => `t${k}`)];
+      for (const seed of seeds) {
+        const where = `${micro.id} seed=${seed}`;
+        let task;
+        try {
+          task = generatePrep(micro.id, seed);
+        } catch (error) {
+          problems.push({ where, what: String(error) });
+          continue;
+        }
+        generated += 1;
+        if (micro.answerType === 'number') {
+          if (typeof task.otvet !== 'number' || !nice(task.otvet, 3)) {
+            problems.push({ where, what: `ответ не целый и не конечная десятичная дробь: ${String(task.otvet)}` });
+          }
+          if (task.proverka === null || typeof task.otvet !== 'number' || Math.abs(task.proverka - task.otvet) > 1e-6) {
+            problems.push({ where, what: `независимый счёт ${String(task.proverka)} не сходится с ответом ${String(task.otvet)}` });
+          }
+          const tail = task.razbor.replace(/\{,\}/g, ',').replace(/\s/g, '');
+          if (typeof task.otvet === 'number' && !tail.includes(ru(task.otvet))) {
+            problems.push({ where, what: `разбор не содержит ответа ${ru(task.otvet)}: ${task.razbor}` });
+          }
+        } else if (!(micro.choices ?? []).some((c) => c.number === task.otvet)) {
+          problems.push({ where, what: `ответ-выбор ${String(task.otvet)} не из списка вариантов` });
+        }
+        if (/NaN|Infinity|undefined/.test(task.uslovie + task.razbor)) {
+          problems.push({ where, what: 'NaN или undefined в тексте' });
+        }
+        if (typeset !== null) {
+          for (const text of [task.uslovie, task.razbor]) {
+            for (const match of text.matchAll(/\$([^$]+)\$/g)) {
+              try {
+                typeset(match[1] as string);
+              } catch (error) {
+                problems.push({ where, what: `KaTeX не принял «${match[1] as string}»: ${String(error)}` });
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  return { prototypes: ids.size, generated, problems };
 }

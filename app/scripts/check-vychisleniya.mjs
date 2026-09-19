@@ -19,14 +19,16 @@ const katex = require('katex');
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
 const seeds = Number(process.argv[2] ?? 1000);
-const { checkGenerators, checkBank } = requireSrc('lib/vychisleniya/selftest');
+const { checkGenerators, checkBank, checkPrep } = requireSrc('lib/vychisleniya/selftest');
 
 const gen = checkGenerators(seeds, typeset);
 const bank = checkBank(typeset);
+const prep = checkPrep(Math.min(seeds, 300), typeset);
 console.log(`генераторы: ${gen.prototypes} прототипов, ${gen.generated} задач, проблем ${gen.problems.length}`);
 console.log(`банк: ${bank.generated} вариантов, проблем ${bank.problems.length}`);
+console.log(`подготовка: ${prep.prototypes} микро-задач, ${prep.generated} вариантов, проблем ${prep.problems.length}`);
 
-const problems = [...gen.problems, ...bank.problems];
+const problems = [...gen.problems, ...bank.problems, ...prep.problems];
 const shown = new Map();
 for (const p of problems) {
   const key = `${p.where.split(' seed=')[0]} — ${p.what.slice(0, 80)}`;
