@@ -39,10 +39,16 @@ export interface ProblemCardZadacha {
   /** Метод и параметры рисунка — открытая часть модели. */
   model?: PoolModel;
   /**
-   * Иллюстрация для варианта condition, где модели нет: только если
-   * файл существует. Нет — ни картинки, ни рамки под неё.
+   * Иллюстрация задачи без модели: у варианта condition и у задач
+   * подготовки №5, где методики пока нет. Только если файл
+   * существует. У задачи с моделью картинка идёт через модель.
    */
   illustration?: { path: string; alt: string };
+  /**
+   * Чертёж готовой разметкой — у задачи без модели, где без картинки
+   * условие не читается (лабиринт). Встаёт в колонку рисунка.
+   */
+  risunok?: string;
 }
 
 export interface ProblemCardProps {
@@ -73,6 +79,15 @@ const VERDICT = {
   correct: 'Верно',
   incorrect: 'Неверно',
 };
+
+/** Дерево, у которого листьев больше четырёх. */
+function shirokoeDerevo(parametry: PoolModel['parametry']): boolean {
+  if (parametry.method !== 'probability-tree') {
+    return false;
+  }
+  const roditeli = new Set(parametry.branches.map((b) => b.parent));
+  return parametry.branches.filter((b) => !roditeli.has(b.id)).length > 4;
+}
 
 export function ProblemCard({
   variant = 'full',
@@ -137,6 +152,16 @@ export function ProblemCard({
   const risunokState =
     state === 'correct' ? 'correct' : state === 'incorrect' ? 'incorrect' : 'default';
   const model = zadacha.model;
+  /* У метода «Формула» рисунка нет: задача решается шагами, и колонка
+     под рисунок не нужна — условие и решение делят ширину пополам.
+     Так же у задачи без модели, если у неё нет чертежа. */
+  const bezRisunka =
+    model === undefined ? zadacha.risunok === undefined : model.parametry.method === 'formula';
+  /* Дерево на много листьев в узкой средней колонке не прочесть:
+     такой рисунок занимает всю ширину карточки под условием и
+     решением. Порог — больше четырёх листьев, то есть больше дерева
+     двух испытаний по два исхода из референса. */
+  const shirokiyRisunok = model !== undefined && shirokoeDerevo(model.parametry);
 
   /* Подсветка благоприятного — только когда разбор уже открыт. */
   const podsvetka =
@@ -154,28 +179,17 @@ export function ProblemCard({
     </header>
   );
 
-  /* Иллюстрация: есть файл — картинка. В полной карточке без файла
-     стоит рамка 4:3, место под будущую blue-glass иллюстрацию; в
-     варианте condition без файла нет ничего. */
-  const kartinka =
-    variant === 'condition'
-      ? zadacha.illustration
-      : model?.illustration.exists === true
-        ? { path: model.illustration.path, alt: model.illustration.alt }
-        : undefined;
+  /* Иллюстрация: есть файл — картинка справа от условия, нет файла —
+     ничего: ни рамки, ни места под неё, условие занимает всю ширину.
+     У задачи с моделью картинка приходит с моделью варианта (свой
+     файл у варианта, а не у прототипа), у задачи без модели и у
+     условия «Узнай метод» — полем задачи. */
+  const kartinka = zadacha.illustration ?? model?.illustration;
 
   const illyustratsiya =
-    kartinka !== undefined ? (
-      <figure className="pc__ill pc__ill--img">
+    kartinka === undefined ? null : (
+      <figure className="pc__ill">
         <img src={kartinka.path} alt={kartinka.alt} loading="lazy" />
-      </figure>
-    ) : variant === 'condition' ? null : (
-      <figure className="pc__ill" aria-hidden="true">
-        <figcaption>
-          место под иллюстрацию
-          <br />
-          blue-glass · 4:3
-        </figcaption>
       </figure>
     );
 
@@ -201,6 +215,8 @@ export function ProblemCard({
         'pc',
         `pc--${state}`,
         resheniyeVidno && 'pc--solution-revealed',
+        bezRisunka && 'pc--bez-risunka',
+        shirokiyRisunok && 'pc--shirokiy-risunok',
         disabled && 'pc--disabled',
         className,
       )}
@@ -219,8 +235,8 @@ export function ProblemCard({
           ) : null}
         </div>
 
-        <div className="pc__col pc__col--risunok">
-          {model === undefined ? null : (
+        {bezRisunka ? null : model !== undefined ? (
+          <div className="pc__col pc__col--risunok">
             <figure className="pc__risunok">
               <figcaption className="pc__risunok-podpis">
                 {podpisRisunka(model.parametry, podsvetka)}
@@ -231,8 +247,17 @@ export function ProblemCard({
                 state={risunokState}
               />
             </figure>
-          )}
-        </div>
+          </div>
+        ) : zadacha.risunok === undefined ? null : (
+          <div className="pc__col pc__col--risunok">
+            {/* Чертёж нарисован на сборке готовой разметкой: движка в
+                браузере нет, вставляем как есть. */}
+            <figure
+              className="pc__chertezh"
+              dangerouslySetInnerHTML={{ __html: zadacha.risunok }}
+            />
+          </div>
+        )}
 
         <div className="pc__col pc__col--reshenie">
           {resheniyeVidno && razbor !== null ? (

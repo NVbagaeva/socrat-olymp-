@@ -1,12 +1,14 @@
 /**
- * Иллюстрации к задачам задания №5.
+ * Иллюстрации к подготовительным задачам задания №5.
  *
- * У задания №5 модели нет, поэтому картинка подключается так же, как
- * лабиринт к задаче 33: готовой разметкой `<img>` в поле `risunok`.
- * Здесь — какая задача какую картинку получила и что на ней; сами
- * файлы лежат в `app/public/images/veroyatnost/zadanie-5/` по
- * идентификатору задачи, исходники — в `assets/img/probability/`
- * (там же README с сюжетами).
+ * У подготовительных задач №5 модели пока нет, поэтому картинку к
+ * условию карточка получает не через модель, а отсюда — по
+ * идентификатору задачи. У прототипов №5 модель есть, и их картинка
+ * идёт через модель по тому же пути и имени файла — здесь они
+ * записаны, чтобы подбор был виден в одном месте. Сами файлы лежат в
+ * `app/public/images/veroyatnost/zadanie-5/` по идентификатору
+ * задачи, исходники — в `assets/img/probability/` (там же README с
+ * сюжетами).
  *
  * Правило подбора: одна картинка — одна задача; одна и та же картинка
  * стоит у двух задач только когда их сюжеты совпадают буквально
@@ -59,15 +61,13 @@ const KARTINKI: Record<string, Kartinka> = {
   'k5-56': { alt: 'Три шарика и три приза: мёд, колокольчик, морковка', w: 1200, h: 800 },
 };
 
-/** Разметка картинки для задачи или undefined, если картинки нет. */
-export function illyustratsiya5(id: string): string | undefined {
+/**
+ * Подбор картинки задачи: alt по идентификатору. Путь и наличие файла
+ * здесь не решаются — их смотрит манифест картинок в pool.ts
+ * (`illyustratsiyaVarianta`). Нет записи — undefined, и карточка
+ * картинки не показывает.
+ */
+export function kartinka5(id: string): { alt: string } | undefined {
   const kartinka = KARTINKI[id];
-  if (kartinka === undefined) {
-    return undefined;
-  }
-  return [
-    `<img src="/images/veroyatnost/zadanie-5/${id}.webp"`,
-    ` width="${kartinka.w}" height="${kartinka.h}"`,
-    ` alt="${kartinka.alt}" loading="lazy" />`,
-  ].join('');
+  return kartinka === undefined ? undefined : { alt: kartinka.alt };
 }

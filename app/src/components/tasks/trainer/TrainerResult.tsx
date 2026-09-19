@@ -2,13 +2,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerResult } from '@/content/trainerModes';
-import type { TrainerTask } from '@/lib/trainer';
 
 /** Чем закончилось задание: решено само или пройдено по подсказке. */
 export type TrainerMark = 'right' | 'hinted';
 
+/** Итогу нужен от задания только его тип. */
+export interface ResultTask {
+  kind: string;
+}
+
 export interface TrainerResultProps {
-  tasks: TrainerTask[];
+  tasks: readonly ResultTask[];
   marks: Record<number, TrainerMark>;
   /** Сколько раз ответ не сошёлся: и в поле ответа, и на шагах. */
   misses: number;
@@ -18,6 +22,11 @@ export interface TrainerResultProps {
   backHref: string;
   /** Собрать новый подход: другие задания и другой порядок. */
   onAgain: () => void;
+  /**
+   * Название типа задания по его идентификатору — для статистики.
+   * По умолчанию — наборы движка задания №12.
+   */
+  kindTitle?: Record<string, string>;
 }
 
 /** «5 мин 12 с». Часы не нужны: подход столько не длится. */
@@ -36,10 +45,14 @@ interface KindRow {
 
 /* Задания одного типа идут одной строкой в том порядке, в котором
    встретились: в смешанном режиме это порядок самой тренировки. */
-function kindRows(tasks: TrainerTask[], marks: Record<number, TrainerMark>): KindRow[] {
+function kindRows(
+  tasks: readonly ResultTask[],
+  marks: Record<number, TrainerMark>,
+  kindTitle: Record<string, string>,
+): KindRow[] {
   const rows: KindRow[] = [];
   tasks.forEach((task, index) => {
-    const title = trainerKindTitle[task.kind] ?? task.kind;
+    const title = kindTitle[task.kind] ?? task.kind;
     const found = rows.find((row) => row.title === title);
     const row = found ?? { title, right: 0, total: 0 };
     if (found === undefined) {
@@ -66,6 +79,7 @@ export function TrainerResult({
   seconds,
   backHref,
   onAgain,
+  kindTitle = trainerKindTitle,
 }: TrainerResultProps) {
   const total = tasks.length;
   const right = tasks.filter((_, index) => marks[index] === 'right').length;
@@ -128,7 +142,7 @@ export function TrainerResult({
       <section className="tdone__kinds">
         <h4 className="tdone__kinds-title">{trainerResult.kinds}</h4>
         <ul className="tdone__list">
-          {kindRows(tasks, marks).map((row) => (
+          {kindRows(tasks, marks, kindTitle).map((row) => (
             <li className="tkind" key={row.title}>
               <span className="tkind__name">{row.title}</span>
               <span className="tkind__bar">

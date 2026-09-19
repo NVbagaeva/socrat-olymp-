@@ -6,22 +6,25 @@ import { PODGOTOVKA_4_SLOVA } from '@/content/veroyatnost';
 import { METODY } from '@/lib/veroyatnost/model';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 
-export interface Podgotovka4Props {
+export interface PodgotovkaProps {
   bloki: PrepPoolBlok[];
 }
 
 /**
- * Подготовительные задачи задания №4 на карточке ProblemCard.
+ * Подготовительные задачи заданий №4 и №5 на карточке ProblemCard.
  *
  * Ни подхода, ни перемешивания: это конспект автора, задачи идут в
  * его порядке и разложены по его же заголовкам. Метод в шапке
- * показан — конспект и есть отработка, узнавать структуру здесь не
- * просят. Ученик решает подряд и видит, сколько в блоке уже сошлось.
+ * показан, если у задачи есть модель, — конспект и есть отработка,
+ * узнавать структуру здесь не просят. У подготовки №5 модели пока
+ * нет: карточка без рисунка, картинка к условию — по подбору
+ * (illyustratsii5.ts), чертёж лабиринта — готовой разметкой. Ученик
+ * решает подряд и видит, сколько в блоке уже сошлось.
  *
  * Ответы уехали вниз отпечатками, разборы закрытыми: в разметке
  * верного ответа нет ни у одной задачи.
  */
-export function Podgotovka4({ bloki }: Podgotovka4Props) {
+export function Podgotovka({ bloki }: PodgotovkaProps) {
   const [resheno, setResheno] = useState<Record<string, boolean>>({});
 
   function otmetit(zadacha: PrepPoolZadacha, right: boolean): void {
@@ -56,6 +59,10 @@ export function Podgotovka4({ bloki }: Podgotovka4Props) {
                         seal: zadacha.seal,
                         steps: zadacha.steps,
                         ...(zadacha.model === undefined ? {} : { model: zadacha.model }),
+                        ...(zadacha.illustration === undefined
+                          ? {}
+                          : { illustration: zadacha.illustration }),
+                        ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
                       }}
                       nomer={zadacha.nomer}
                       {...(metod === undefined ? {} : { metodLabel: metod.nazvanie })}

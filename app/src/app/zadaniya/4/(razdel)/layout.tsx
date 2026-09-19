@@ -4,10 +4,12 @@ import { veroyatnostBySlug } from '@/content/veroyatnost';
 import 'katex/dist/katex.min.css';
 import '../../zadaniya.css';
 import '../../[task]/section.css';
-/* Лента с кнопкой «Для репетиторов» и экран генератора — те же, что у
-   задания №12, со своими стилями маршрута: подключаются без правок. */
+/* Лента с кнопкой «Для репетиторов», конфигуратор тренировки, экран
+   генератора, кружки подхода и итог тренировки — те же, что у задания
+   №12, со своими стилями маршрута: подключаются без правок. */
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
+import '../../[task]/[type]/trainer.css';
 import '../../veroyatnost.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';

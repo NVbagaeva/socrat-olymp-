@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { METODY_4, type Method } from '@/lib/veroyatnost/model';
+import { METODY_4, type Method, type MetodOpisanie } from '@/lib/veroyatnost/model';
 
 export interface MethodPickerProps {
   /** Что нажал ученик. null — ещё не отвечал. */
@@ -10,19 +10,27 @@ export interface MethodPickerProps {
   verny: Method | null;
   onPick: (metod: Method) => void;
   label: string;
+  /** Какие методы предлагать: пять у задания №4, шесть у задания №5. */
+  metody?: readonly MetodOpisanie[];
 }
 
 /**
- * Пять кнопок с названиями методов — всегда все пять, в порядке
- * референса. После ответа кнопки замирают: выбранная верная —
- * зелёная, выбранная неверная — красная, а рядом подсвечивается
- * верная. Второй попытки нет.
+ * Кнопки с названиями методов — всегда все, в порядке референса.
+ * После ответа кнопки замирают: выбранная верная — зелёная, выбранная
+ * неверная — красная, а рядом подсвечивается верная. Второй попытки
+ * нет.
  */
-export function MethodPicker({ vybor, verny, onPick, label }: MethodPickerProps) {
+export function MethodPicker({
+  vybor,
+  verny,
+  onPick,
+  label,
+  metody = METODY_4,
+}: MethodPickerProps) {
   const otvecheno = vybor !== null;
   return (
     <div className="z4-picker" role="group" aria-label={label}>
-      {METODY_4.map((m) => {
+      {metody.map((m) => {
         const eto = m.id === vybor;
         const pravilny = verny !== null && m.id === verny;
         return (

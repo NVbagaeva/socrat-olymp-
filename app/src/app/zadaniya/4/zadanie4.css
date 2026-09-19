@@ -19,70 +19,6 @@
   overflow: visible;
 }
 
-/* ── Тренажёр: режимы ───────────────────────────────────────────── */
-
-.z4-trainer {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.z4-trainer__rezhimy {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-@media (max-width: 767px) {
-  .z4-trainer__rezhimy {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* Режим — плашка с названием и строкой пояснения, как варианты
-   конфигуратора задания №12. */
-.z4-rezhim {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color var(--dur-switch) var(--ease),
-    background-color var(--dur-switch) var(--ease);
-}
-.z4-rezhim:hover {
-  border-color: var(--color-border-hover);
-}
-.z4-rezhim--on {
-  border-color: var(--color-primary);
-  background: var(--color-surface-soft);
-}
-.z4-rezhim:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-.z4-rezhim__title {
-  color: var(--color-text-brand);
-  font-weight: 600;
-}
-.z4-rezhim--on .z4-rezhim__title {
-  color: var(--color-primary);
-}
-.z4-rezhim__lead {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-}
-
-.z4-trainer__schet {
-  margin: 0;
-  color: var(--color-text-tertiary);
-  font-size: var(--fs-caption);
-}
-
 /* ── Прогресс по методам ────────────────────────────────────────── */
 
 .z4-progress {
@@ -508,15 +444,6 @@
 .z4-uznay {
   display: grid;
   gap: var(--space-6);
-}
-.z4-uznay__title {
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-brand);
-}
-.z4-uznay__lead {
-  margin: 0;
-  max-width: 68ch;
-  color: var(--color-text-secondary);
 }
 .z4-uznay__zadacha {
   display: grid;

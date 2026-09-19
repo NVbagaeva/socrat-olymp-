@@ -55,6 +55,23 @@
   min-width: 0;
 }
 
+/* Без рисунка (метод «Формула»): условие и решение делят ширину
+   пополам, пустой колонки посередине нет. */
+.pc--bez-risunka .pc__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* Широкий рисунок (дерево на много листьев): условие и решение рядом,
+   рисунок под ними на всю ширину карточки — в узкой колонке его не
+   прочесть. */
+.pc--shirokiy-risunok .pc__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.pc--shirokiy-risunok .pc__col--risunok {
+  grid-column: 1 / -1;
+  order: 1;
+}
+
 /* Планшет: условие и рисунок рядом, решение под ними на всю ширину. */
 @media (max-width: 1023px) {
   .pc__grid {
@@ -62,6 +79,10 @@
   }
   .pc__col--reshenie {
     grid-column: 1 / -1;
+  }
+  .pc--bez-risunka .pc__col--reshenie,
+  .pc--shirokiy-risunok .pc__col--reshenie {
+    grid-column: auto;
   }
 }
 /* Телефон: условие → рисунок → решение, друг под другом. */
@@ -90,31 +111,15 @@
   max-width: 68ch;
 }
 
-/* Место под иллюстрацию: рамка пунктиром, пропорция 4:3. Подложка —
-   мягкий синий, чтобы пустое место не читалось как ошибка загрузки. */
+/* Иллюстрация под условием: только когда файл есть, пропорцию держит
+   она сама. Без файла карточка места под картинку не отводит. */
 .pc__ill {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3;
-  margin: 0;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
-  color: var(--color-text-tertiary);
-  font-size: var(--fs-caption);
-  text-align: center;
-}
-
-/* Файл иллюстрации есть: картинка вместо рамки, пропорцию держит она. */
-.pc__ill--img {
   display: block;
-  aspect-ratio: auto;
-  border: 0;
-  background: none;
+  margin: 0;
   overflow: hidden;
   border-radius: var(--radius-lg);
 }
-.pc__ill--img img {
+.pc__ill img {
   display: block;
   width: 100%;
   height: auto;
@@ -156,6 +161,22 @@
 .pc__risunok-podpis i {
   font-family: var(--font-math);
   font-style: italic;
+}
+
+/* Чертёж готовой разметкой — лабиринт к задаче про паука, единственный
+   в подготовке №5. Это готовый файл `/images/veroyatnost/labirint-glass.svg`,
+   а не построение на лету: цвета и шрифт заданы внутри него. Фон у
+   файла прозрачный, поэтому подложки, рамки и тени здесь нет — под
+   картинкой виден фон карточки. Шире 600px коридоры становятся толще
+   текста и перетягивают внимание, поэтому картинка не растягивается. */
+.pc__chertezh {
+  margin: 0;
+  max-width: 600px;
+}
+.pc__chertezh img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ── Ответ ученика ─────────────────────────────────────────────── */

@@ -149,6 +149,8 @@ pnpm build:pdf-12-sample   # образец: первый блок, обе те�
 pnpm build:pdf-12          # весь сборник №12
 pnpm build:pdf-4           # сборник №4: задачи банка с рисунками тренажёра
 pnpm test:pdf-4            # проверка сборника №4
+pnpm build:pdf-5           # сборник №5: задачи конспекта и прототипы с рисунками
+pnpm test:pdf-5            # проверка сборника №5
 ```
 
 Банк задания №4 и его рисунки написаны на TypeScript и TSX; в служебный
@@ -164,7 +166,7 @@ pnpm exec playwright install chromium
 ```
 
 Ставить ничего не хочется — та же сборка есть в GitHub Actions:
-вкладка **Actions**, workflow **PDF 12** или **PDF 4**, кнопка
+вкладка **Actions**, workflow **PDF 12**, **PDF 4** или **PDF 5**, кнопка
 **Run workflow**.
 Готовые файлы уезжают архивом на страницу запуска.
 

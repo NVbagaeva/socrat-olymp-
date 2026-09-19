@@ -12,10 +12,14 @@
 
 import { katex } from './graph/katex';
 
-/** Текст с формулами → HTML: $...$ набирается KaTeX. */
-export function typeset(text: string): string {
+/**
+ * Текст с формулами → HTML: $...$ набирается KaTeX. `strogo` — ошибка
+ * TeX роняет набор, а не оставляет формулу текстом: так набираются
+ * разборы заданий №4 и №5, у которых формула обязана собраться.
+ */
+export function typeset(text: string, strogo = false): string {
   return text.replace(/\$([^$]+)\$/g, (_match, formula: string) =>
-    katex.renderToString(formula, { throwOnError: false, displayMode: false }),
+    katex.renderToString(formula, { throwOnError: strogo, displayMode: false }),
   );
 }
 

@@ -68,12 +68,13 @@ for (const file of walk(path.join(src, 'solid'), (f) => f.endsWith('.ts'))
   fs.writeFileSync(target, js);
 }
 const { BANK } = require0(path.join(tmp, 'zadanie3', 'index.js'));
-const { BANK_4 } = require0(path.join(tmp, 'veroyatnost', 'index.js'));
+const { BANK_4, BANK_5, KONSPEKT_4 } = require0(path.join(tmp, 'veroyatnost', 'index.js'));
+const BANKI = [...BANK_4, ...BANK_5, ...KONSPEKT_4];
 
 /* Отпечаток разбора: начало первого шага первого варианта. Строка
-   длинная и в обычной вёрстке не встречается. Банки обоих разделов
+   длинная и в обычной вёрстке не встречается. Банки всех разделов
    проверяются одинаково — правило «ответа в бандле нет» общее. */
-const marks = [...BANK, ...BANK_4]
+const marks = [...BANK, ...BANKI]
   .map((prototype) => {
     const first = prototype.varianty[0];
     const step = prototype.shagi(first.params)[0];
@@ -110,7 +111,9 @@ for (const file of files) {
 
 fs.rmSync(tmp, { recursive: true, force: true });
 
-console.log(`Просмотрено файлов сборки: ${files.length}; прототипов в банках: ${BANK.length + BANK_4.length}`);
+console.log(
+  `Просмотрено файлов сборки: ${files.length}; прототипов в банках: ${BANK.length + BANKI.length}`,
+);
 if (bad.length === 0) {
   console.log('Ответов и разборов в бандле нет.');
   process.exit(0);
@@ -123,7 +126,9 @@ bad.forEach((row) => {
     console.error(`    поля прототипа: ${row.fields.join(' ')}`);
   }
   if (row.ids.length > 0) {
-    console.error(`    разборы прототипов: ${row.ids.slice(0, 8).join(', ')}${row.ids.length > 8 ? ` и ещё ${row.ids.length - 8}` : ''}`);
+    console.error(
+      `    разборы прототипов: ${row.ids.slice(0, 8).join(', ')}${row.ids.length > 8 ? ` и ещё ${row.ids.length - 8}` : ''}`,
+    );
   }
 });
 process.exit(1);

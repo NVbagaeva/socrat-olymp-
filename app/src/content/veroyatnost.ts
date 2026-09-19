@@ -11,6 +11,7 @@
  */
 
 import type { TutorMaterial } from './sections';
+import { trainerPage } from './trainerModes';
 
 /** Вкладка раздела: хвост адреса и есть её идентификатор. */
 export interface VeroyatnostTab {
@@ -48,6 +49,8 @@ export interface VeroyatnostSection {
  * Ключевые методы решения · Подготовительные задачи · Тренажёр ·
  * Генератор; «Для репетиторов» стоит в той же ленте кнопкой меню.
  * Теория живёт на своём адресе, а сам адрес раздела — это «О задании».
+ * «Узнай метод» — режим тренажёра, а не вкладка: как и остальные
+ * режимы, он выбирается в конфигураторе тренировки.
  */
 const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'o-zadanii', label: 'О задании', tail: '' },
@@ -55,15 +58,19 @@ const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-  { id: 'uznay-metod', label: 'Узнай метод', tail: 'uznay-metod/' },
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
-/** Вкладки задания №5: тот же порядок и те же названия, что в задании №3. */
+/**
+ * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр ·
+ * Генератор. Вкладок «О задании» и «Ключевые методы решения» нет —
+ * их тексты для №5 автор ещё не писал; появятся вместе с текстами.
+ */
 const TABS_5: readonly VeroyatnostTab[] = [
   { id: 'teoriya', label: 'Теория', tail: '' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
+  { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
@@ -74,9 +81,12 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: 'Одно задание — пять методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
     badge: 'Базовый уровень',
     tabs: TABS_4,
-    /* Те же две карточки, что у задания №12. Файлов ещё нет, поэтому
-       карточки приглушены: меню показывает, что здесь появится, а не
-       обещает скачивание. */
+    /* Те же две карточки, что у задания №12. Файлы — сборник
+       «Задание 4», который собирает scripts/build-pdf-4.mjs и кладёт
+       в app/public по этим же путям (workflow «PDF 4»). Здесь стоят
+       файлы для ученика, а не для учителя: меню открыто всем, кто
+       зашёл на страницу темы, и ответы из него скачивались бы заодно;
+       файлы учителя уезжают архивом со страницы запуска CI. */
     tutors: {
       title: 'Для репетиторов',
       lead: 'Материалы для занятий по теме «Основные понятия теории вероятностей».',
@@ -84,14 +94,16 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
         {
           id: 'workbook',
           title: 'Рабочая тетрадь для репетиторов',
-          lead: 'Готовые материалы для занятий',
+          lead: 'Задачи с заготовками рисунков и строкой для ответа',
           icon: 'doc',
+          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf',
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
-          lead: 'Все задания по теме в одном файле',
+          lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
+          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf',
         },
       ],
     },
@@ -100,9 +112,31 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     no: '05',
     slug: '5',
     title: 'Вероятности событий',
-    lead: 'Раздел собирается: прототипы и подготовительные задачи появятся здесь после того, как автор утвердит схему.',
+    lead: 'Двенадцать типов задач — шесть методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
     badge: 'Базовый уровень',
     tabs: TABS_5,
+    /* Сборник «Задание 5»: scripts/build-pdf-5.mjs, workflow «PDF 5».
+       Как и у №4, здесь только файлы для ученика. */
+    tutors: {
+      title: 'Для репетиторов',
+      lead: 'Материалы для занятий по теме «Вероятности событий».',
+      items: [
+        {
+          id: 'workbook',
+          title: 'Рабочая тетрадь для репетиторов',
+          lead: 'Задачи конспекта и прототипы с заготовками рисунков и строкой для ответа',
+          icon: 'doc',
+          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf',
+        },
+        {
+          id: 'pdf',
+          title: 'PDF-практикум',
+          lead: 'Те же задания чёрно-белым — для принтера',
+          icon: 'pdf',
+          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb.pdf',
+        },
+      ],
+    },
   },
 ];
 
@@ -123,72 +157,101 @@ export function veroyatnostTitle(slug: string, tab: string): string {
   return `${section.title}. ${tab} — задание №${Number(section.no)} — Будет на ЕГЭ`;
 }
 
-/* ── Слова тренажёра задания №4 (раздел 07 референса) ────────────── */
+/* ── Слова тренажёра (раздел 07 референса) ───────────────────────── */
 
-export type Rezhim4 = 'practice' | 'mixed' | 'mistakes';
+/** Задание, у которого есть тренажёр по методам и «Узнай метод». */
+export type Zadanie = 4 | 5;
 
-export interface Rezhim4Opisanie {
-  id: Rezhim4;
+/**
+ * Режимы тренажёра — форматы внутри одного конфигуратора, как у
+ * задания №12: три режима референса и «Узнай метод», где считать
+ * ничего не нужно — только назвать метод по условию.
+ */
+export type Rezhim = 'practice' | 'mixed' | 'mistakes' | 'uznay';
+
+export interface RezhimOpisanie {
+  id: Rezhim;
   title: string;
   lead: string;
 }
 
-/** Три режима — как в референсе, слово в слово. */
-export const REZHIMY_4: readonly Rezhim4Opisanie[] = [
-  { id: 'practice', title: 'Отработка', lead: 'один метод, задачи только этого метода' },
-  { id: 'mixed', title: 'Смешанная', lead: 'несколько методов, ученик сам распознаёт структуру' },
-  { id: 'mistakes', title: 'Повтор ошибок', lead: 'только задачи, где был неверный ответ' },
+/** Режимы — как в референсе, слово в слово; четвёртый — «Узнай метод». */
+export const REZHIMY: readonly RezhimOpisanie[] = [
+  { id: 'practice', title: 'Отработка', lead: 'Один метод' },
+  { id: 'mixed', title: 'Смешанная', lead: 'Все методы вперемешку' },
+  { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
+  { id: 'uznay', title: 'Узнай метод', lead: 'Только условие: назвать метод' },
 ];
 
-export const TRENAZHER_4 = {
-  rezhim: 'Режим тренировки',
-  metod: 'Метод',
-  /* Метод есть, задач под него в банке пока нет: так решил автор,
-     контент допишется отдельно. */
-  netZadach: {
-    title: 'Задачи скоро появятся',
-    text: 'Задачи на этот метод в банке задания №4 ещё не собраны. Пока метод можно разобрать во вкладке «Ключевые методы решения».',
+/**
+ * Слова конфигуратора тренировки — те же, что у задания №12, кроме
+ * первого шага: здесь выбирают не навык, а метод. Уровней сложности у
+ * задач вероятности нет, и конфигуратор этот ряд не показывает.
+ */
+export const KONFIGURATOR_SLOVA: typeof trainerPage = {
+  ...trainerPage,
+  skill: {
+    step: '1',
+    title: 'Выбери метод',
+    lead: 'Какой метод отрабатываем в разделе «{family}»?',
   },
-  netOshibok: {
-    title: 'Ошибок пока нет',
-    text: 'Сюда попадают задачи, в которых ответ не сошёлся или было открыто решение. Решите несколько задач в отработке или смешанном режиме.',
+  params: {
+    ...trainerPage.params,
+    lead: 'Выбери формат и количество задач',
   },
-  zhdem: 'Собираем подход…',
-  schet: (i: number, n: number): string => `Задача ${i} из ${n}`,
-  istochnik: 'Прототип задания 4',
-  dalshe: 'Следующая',
-  zavershit: 'Завершить подход',
-  proyden: 'Подход пройден',
-  zanovo: 'Начать заново',
-  progress: {
-    title: 'Прогресс',
-    lead: 'Считается отдельно по каждому методу: верных ответов из закрытых задач.',
-    ring: 'решено верно',
-    pusto: 'Пока ни одной закрытой задачи',
-    sbros: 'Сбросить прогресс',
+  summary: {
+    title: 'Выбранная тренировка',
+    note: 'Все задачи соответствуют реальным прототипам ЕГЭ.',
   },
-} as const;
+};
+
+/**
+ * Ярлыки к конфигуратору — как у задания №12: адрес /trenazher/{id}/
+ * открывает ту же вкладку с уже выбранным методом или режимом.
+ */
+export const YARLYKI_REZHIMOV: readonly { id: string; title: string; mode: Rezhim }[] = [
+  { id: 'mixed', title: 'Смешанная тренировка', mode: 'mixed' },
+  { id: 'uznay-metod', title: 'Узнай метод', mode: 'uznay' },
+];
+
+/** Слова тренажёра одного задания: общие, кроме номера задания. */
+export function trenazherSlova(zadanie: Zadanie) {
+  return {
+    zhdem: 'Собираем подход…',
+    schet: (i: number, n: number): string => `Задача ${i} из ${n}`,
+    istochnik: `Прототип задания ${zadanie}`,
+    dalshe: 'Следующая',
+    zavershit: 'Завершить подход',
+    progress: {
+      title: 'Прогресс тренажёра',
+      lead: 'Считается отдельно по каждому методу: верных ответов из закрытых задач.',
+      ring: 'решено верно',
+      pusto: 'Пока ни одной закрытой задачи',
+      sbros: 'Сбросить прогресс',
+    },
+  } as const;
+}
 
 /* ── Слова режима «Узнай метод» ──────────────────────────────────── */
 
-export const UZNAY_METOD = {
-  title: 'Узнай метод',
-  lead: 'Прочитайте условие и выберите, каким из пяти методов решается задача. Считать ничего не нужно.',
-  vopros: 'Каким методом решается задача?',
-  verno: 'Верно',
-  neverno: 'Неверно',
-  pravilnyy: 'Правильный метод:',
-  priznaki: 'Признаки в условии:',
-  kakVidno: 'Как это было видно:',
-  istochnik: { prototip: 'Прототип задания 4', konspekt: 'Задача конспекта' },
-  progress: {
-    title: 'Прогресс',
-    lead: 'Считается отдельно от тренажёра: узнано верно из показанных задач, по каждому методу.',
-    ring: 'узнано верно',
-    pusto: 'Пока ни одной задачи',
-    sbros: 'Сбросить прогресс',
-  },
-} as const;
+export function uznaySlova(zadanie: Zadanie) {
+  return {
+    vopros: 'Каким методом решается задача?',
+    verno: 'Верно',
+    neverno: 'Неверно',
+    pravilnyy: 'Правильный метод:',
+    priznaki: 'Признаки в условии:',
+    kakVidno: 'Как это было видно:',
+    istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Задача конспекта' },
+    progress: {
+      title: 'Прогресс «Узнай метод»',
+      lead: 'Считается отдельно от решённых задач: узнано верно из показанных, по каждому методу.',
+      ring: 'узнано верно',
+      pusto: 'Пока ни одной задачи',
+      sbros: 'Сбросить прогресс',
+    },
+  } as const;
+}
 
 /* ── Слова подготовительных задач №4 ─────────────────────────────── */
 
@@ -197,16 +260,48 @@ export const PODGOTOVKA_4_SLOVA = {
   resheno: (resheno: number, vsego: number): string => `Решено ${resheno} из ${vsego}`,
 } as const;
 
-/* ── Слова вкладки «Генератор» задания №4 ────────────────────────── */
+/* ── Слова листа для печати: вкладка «Генератор» ─────────────────── */
 
 /**
- * Экран генератора — тот же, что у задания №12, со своими словами
- * листа. Шапка и подвал листа общие для всей платформы и берутся из
+ * Слова листа одного задания: название, колонтитул и заголовки
+ * разделов файла с ответами. Экран генератора — тот же, что у задания
+ * №12; шапка и подвал листа общие для всей платформы и берутся из
  * content/sheet12.js: там подпись курса и соцсети, а не слова про
  * линейную функцию.
  */
-export const LIST_4 = {
+export interface ListSlova {
+  title: { chip: string; text: string };
+  runner: string;
+  otvety: { title: string; note: string };
+  resheniya: { title: string; note: (resheno: number, vsego: number) => string };
+}
+
+const RESHENIYA = {
+  title: 'Краткие решения',
+  note: (resheno: number, vsego: number): string =>
+    `формулы разбора из банка, ${resheno} задач из ${vsego}`,
+};
+
+export const LIST_4: ListSlova = {
   title: { chip: 'Задание 4', text: 'Основные понятия теории вероятностей' },
   runner: 'Задание 4 · Основные понятия теории вероятностей',
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
-} as const;
+  resheniya: RESHENIYA,
+};
+
+export const LIST_5: ListSlova = {
+  title: { chip: 'Задание 5', text: 'Вероятности событий' },
+  runner: 'Задание 5 · Вероятности событий',
+  otvety: { title: 'Ответы', note: 'по типам задач, сквозная нумерация' },
+  resheniya: RESHENIYA,
+};
+
+/**
+ * Слова листа по номеру задания. Страница печати — клиентский
+ * компонент, а в словах есть функция подписи «Кратких решений»:
+ * с сервера такой объект не передать, поэтому компонент получает
+ * номер задания и выбирает слова сам.
+ */
+export function listSlova(zadanie: Zadanie): ListSlova {
+  return zadanie === 4 ? LIST_4 : LIST_5;
+}

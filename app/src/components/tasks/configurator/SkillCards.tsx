@@ -8,6 +8,12 @@ export interface SkillItem {
   /** Идентификатор набора движка: 12.A … */
   id: string;
   title: string;
+  /**
+   * Подпись под названием на карточке. Не задана — идентификатор:
+   * у наборов движка он и есть код, «12.A»; у методов вероятности
+   * идентификатор служебный, и подписью идёт номер метода.
+   */
+  code?: string;
   /** Сколько задач в наборе — из манифеста. */
   count: number;
   /** Уровни, встреченные у задач набора — из манифеста. */
@@ -61,7 +67,7 @@ export function SkillCards({
             ) : null}
             <span className="cfg-skill__text">
               <span className="cfg-skill__title">{item.title}</span>
-              <span className="cfg-skill__code">{item.id}</span>
+              <span className="cfg-skill__code">{item.code ?? item.id}</span>
             </span>
           </button>
         );

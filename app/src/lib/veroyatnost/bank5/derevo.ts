@@ -10,7 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
-import { derevo, derevoDvuh, type Vetv } from './vizual5';
+import { derevo, type Vetv } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
 /* ── 5.6. Шахматы: выиграет обе партии ───────────────────────────── */
@@ -144,7 +144,8 @@ const P07: Prototype = prototip({
     const mnozhiteli = [...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' \\cdot ');
     return [
       {
-        text: `Выстрелы независимы. Попадание — ${dec(q)}, промах — 1 − ${dec(q)} = ${dec(tochnee(1 - q))}.`,
+        text: `Выстрелы независимы. Попадание — ${dec(q)}, промах — всё остальное:`,
+        formula: `1 - ${tex(q)} = ${tex(tochnee(1 - q))}`,
       },
       {
         text: `Нужная последовательность: ${slova}. Это один путь по дереву; вдоль пути вероятности перемножаются:`,
@@ -219,6 +220,7 @@ const LAMPY: Record<number, string> = {
   3: 'тремя лампами',
   4: 'четырьмя лампами',
 };
+const SLOVAMI: Record<number, string> = { 2: 'две', 3: 'три', 4: 'четыре' };
 
 const P08: Prototype = prototip({
   id: 'p5-08',
@@ -261,7 +263,7 @@ const P08: Prototype = prototip({
     const vse = tochnee(q ** n);
     return [
       {
-        text: `Противоположное событие — все ${n === 2 ? 'две' : n === 3 ? 'три' : 'четыре'} лампы перегорели. Лампы независимы, вдоль этого пути вероятности перемножаются:`,
+        text: `Противоположное событие — все ${SLOVAMI[n] ?? n} лампы перегорели. Лампы независимы, вдоль этого пути вероятности перемножаются:`,
         formula: `P(\\bar A) = ${tex(q)}^${n} = ${tex(vse)}`,
         value: vse,
       },
@@ -291,34 +293,31 @@ const P08: Prototype = prototip({
       'спрашивают «хотя бы один»',
       'проще через противоположное: «ни одного» — один путь по дереву',
     ],
-    fraza: () =>
-      'дерево вероятностей — «хотя бы одна» проще через противоположное событие: все три перегорели — один путь.',
+    fraza: (p) =>
+      `дерево вероятностей — «хотя бы одна» проще через противоположное событие: все ${SLOVAMI[lamp(p)] ?? lamp(p)} перегорели — один путь.`,
     vizual: (p) => {
+      /* До конца раскрыт только путь противоположного события — «все
+         перегорели»; как только лампа оказалась целой, событие уже
+         наступило, и эта ветка — лист. Подсвечены все листья с целой
+         лампой, их сумма и есть ответ. */
       const q = veroyatnost(p, 'p');
       const n = lamp(p);
       const ok = tochnee(1 - q);
       const branches: Vetv[] = [];
-      const ids = [''];
+      const listya: string[] = [];
+      let parent: string | null = null;
+      let put = '';
       for (let uroven = 0; uroven < n; uroven += 1) {
-        const novye: string[] = [];
-        for (const parent of ids) {
-          for (const [bukva, label, pp] of [
-            ['b', 'перегорела', q],
-            ['c', 'целая', ok],
-          ] as const) {
-            const id = parent + bukva;
-            branches.push({ id, parent: parent === '' ? null : parent, label, p: pp });
-            novye.push(id);
-          }
-        }
-        ids.splice(0, ids.length, ...novye);
+        branches.push({ id: `${put}b`, parent, label: 'перегорела', p: q });
+        branches.push({ id: `${put}c`, parent, label: 'целая', p: ok });
+        listya.push(`${put}c`);
+        put += 'b';
+        parent = put;
       }
-      /* Подсвечены подходящие пути — все, где есть хоть одна целая;
-         сумма под деревом совпадает с ответом. */
       return derevo(
         Array.from({ length: n }, (_, i) => `${i + 1}-я лампа`),
         branches,
-        ids.filter((id) => id.includes('c')),
+        listya,
       );
     },
   },
@@ -445,7 +444,12 @@ const P09: Prototype = prototip({
       for (const [id, label, kol] of tsveta) {
         branches.push({ id, parent: null, label, p: kol / n, pLabel: `${kol}/${n}` });
       }
+      /* Ветка «сначала зелёный» к ответу не ведёт — она остаётся
+         листом, дерево не раскрывает её дальше. */
       for (const [id1, , kol1] of tsveta) {
+        if (id1 === 'z') {
+          continue;
+        }
         for (const [id2, label, kol2] of tsveta) {
           const ostalos = id1 === id2 ? kol1 - 1 : kol2;
           branches.push({
@@ -508,10 +512,11 @@ const P10: Prototype = prototip({
     const vn = tochnee(q * nich);
     return [
       {
-        text: `Ничья — всё, что не выигрыш и не проигрыш: 1 − ${dec(q)} − ${dec(q)} = ${dec(nich)}. Хотя бы 4 очка дают три исхода двух игр: выигрыш-выигрыш (6 очков), выигрыш-ничья и ничья-выигрыш (по 4 очка).`,
+        text: 'Ничья — всё, что не выигрыш и не проигрыш:',
+        formula: `1 - ${tex(q)} - ${tex(q)} = ${tex(nich)}`,
       },
       {
-        text: 'Вдоль каждого пути вероятности перемножаются, пути складываются:',
+        text: 'Хотя бы 4 очка дают три исхода двух игр: выигрыш-выигрыш (6 очков), выигрыш-ничья и ничья-выигрыш (по 4 очка). Вдоль каждого пути вероятности перемножаются, пути складываются:',
         formula: `P = ${tex(q)} \\cdot ${tex(q)} + ${tex(q)} \\cdot ${tex(nich)} + ${tex(nich)} \\cdot ${tex(q)} = ${tex(vv)} + ${tex(vn)} + ${tex(vn)} = ${tex(tochnee(vv + 2 * vn))}`,
         value: tochnee(vv + 2 * vn),
       },
@@ -536,15 +541,26 @@ const P10: Prototype = prototip({
     vizual: (p) => {
       const q = veroyatnost(p, 'p');
       const nich = tochnee(1 - 2 * q);
-      return derevoDvuh(
-        ['1-я игра', '2-я игра'],
-        [
-          { id: 'v', label: 'выигрыш', p1: q, p2: q },
-          { id: 'n', label: 'ничья', p1: nich, p2: nich },
-          { id: 'l', label: 'проигрыш', p1: q, p2: q },
-        ],
-        ['vv', 'vn', 'nv'],
-      );
+      const ishody = [
+        ['v', 'выигрыш', q],
+        ['n', 'ничья', nich],
+        ['l', 'проигрыш', q],
+      ] as const;
+      const branches: Vetv[] = [];
+      for (const [id, label, pp] of ishody) {
+        branches.push({ id, parent: null, label, p: pp });
+      }
+      /* После проигрыша в первой игре четырёх очков уже не набрать:
+         эта ветка остаётся листом, дерево раскрывает только две. */
+      for (const [id1] of ishody) {
+        if (id1 === 'l') {
+          continue;
+        }
+        for (const [id2, label, pp] of ishody) {
+          branches.push({ id: id1 + id2, parent: id1, label, p: pp });
+        }
+      }
+      return derevo(['1-я игра', '2-я игра'], branches, ['vv', 'vn', 'nv']);
     },
   },
 });

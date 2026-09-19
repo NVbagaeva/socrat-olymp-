@@ -57,7 +57,11 @@ export function modelVarianta(prototype: Prototype, variant: Variant): ProblemMo
       highlight: vizual.podsvetka,
     },
     answer: { value: otvet, display: dec(otvet) },
-    illustration: { path: putIllyustratsii(prototype.id), alt: prototype.nazvanie, ratio: '4:3' },
+    illustration: {
+      path: putIllyustratsii(prototype.id, variant.n),
+      alt: prototype.nazvanie,
+      ratio: '4:3',
+    },
   };
 }
 

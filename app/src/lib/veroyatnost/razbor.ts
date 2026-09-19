@@ -9,8 +9,11 @@ import type { Podsvetka } from './model';
 import { openText } from './secret';
 
 export interface RazborShag {
+  /** Пояснение шага словами. Дробей и выкладок в нём нет — они в формуле. */
   text: string;
-  /** Формула, набранная KaTeX на сборке — готовый HTML. */
+  /** Формула шага в TeX — из неё набираются печатные листы. */
+  tex?: string;
+  /** Та же формула, набранная KaTeX на сборке — готовый HTML. */
   html?: string;
   /** Та же формула словами: для alt и для мест без KaTeX. */
   plain?: string;

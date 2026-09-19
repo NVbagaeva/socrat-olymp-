@@ -19,24 +19,6 @@ export function derevo(levels: string[], branches: Vetv[], podhodyat: string[]):
   };
 }
 
-/** Двухуровневое дерево из двух независимых испытаний с одинаковыми исходами. */
-export function derevoDvuh(
-  levels: [string, string],
-  ishody: readonly { id: string; label: string; p1: number; p2: number }[],
-  podhodyat: string[],
-): Vizual {
-  const branches: Vetv[] = [];
-  for (const a of ishody) {
-    branches.push({ id: a.id, parent: null, label: a.label, p: a.p1 });
-  }
-  for (const a of ishody) {
-    for (const b of ishody) {
-      branches.push({ id: a.id + b.id, parent: a.id, label: b.label, p: b.p2 });
-    }
-  }
-  return derevo(levels, branches, podhodyat);
-}
-
 /** Сетка удобного числа: группы по порядку, искомые — по индексам. */
 export function setka(
   baseNumber: 100 | 1000 | 10000,

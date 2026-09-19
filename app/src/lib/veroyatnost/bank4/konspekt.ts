@@ -529,7 +529,7 @@ const K06: Prototype = prototip({
   perebor: (p) => 1 - (n06(p) - num(p, derevo06(p).key)) / n06(p),
   shagi: (p) => [
     {
-      text: `Отношение ${num(p, 'a')} : ${num(p, 'b')} : ${num(p, 'c')} — на каждые ${num(p, 'a')} + ${num(p, 'b')} + ${num(p, 'c')} деревьев. Все исходы — любое из них:`,
+      text: 'Отношение задаёт доли: возьмём одну порцию деревьев в этом отношении. Все исходы — любое дерево в ней:',
       formula: `n = ${num(p, 'a')} + ${num(p, 'b')} + ${num(p, 'c')} = ${n06(p)}`,
       value: n06(p),
     },
@@ -1145,7 +1145,7 @@ const K13: Prototype = prototip({
     const razmer = N / g;
     return [
       {
-        text: `Группы по ${N} : ${g} = ${razmer} человека. Посадим ${text(p, 'aR')}. Все исходы — места ${text(p, 'bR')} среди оставшихся:`,
+        text: `${N} человек делятся на ${g} ${g === 2 ? 'группы' : 'групп'} по ${razmer}. Посадим ${text(p, 'aR')}. Все исходы — места ${text(p, 'bR')} среди оставшихся:`,
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
@@ -1408,8 +1408,8 @@ const K17: Prototype = prototip({
         value: R * R,
       },
       {
-        text: `Благоприятная — площадь домика, его радиус ${num(p, 'd')} : 2 = ${String(r).replace('.', ',')} м:`,
-        formula: `l = \\pi \\cdot ${rTex}^2 = ${String(r * r).replace('.', '{,}')}\\pi`,
+        text: 'Благоприятная — площадь домика; его радиус — половина диаметра:',
+        formula: `r = \\dfrac{${num(p, 'd')}}{2} = ${rTex},\\quad l = \\pi \\cdot ${rTex}^2 = ${String(r * r).replace('.', '{,}')}\\pi`,
         value: r * r,
       },
       shagLL(`${String(r * r).replace('.', '{,}')}\\pi`, `${R * R}\\pi`, (r * r) / (R * R)),

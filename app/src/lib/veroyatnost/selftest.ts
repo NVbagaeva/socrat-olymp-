@@ -28,7 +28,7 @@ import {
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { sealAnswer } from './secret';
-import { konechnaya, round, type PrepBlok, type Prototype, type Variant } from './types';
+import { konechnaya, round, type PrepBlok, type Prototype, type Step, type Variant } from './types';
 
 export interface BadVariant {
   id: string;
@@ -46,6 +46,8 @@ export interface Report {
   mismatchSteps: number;
   /** Ответ не записывается в клетки и округления в условии нет. */
   badFormat: number;
+  /** Выкладка в тексте шага или формула не в TeX. */
+  vykladki: number;
   /** Варианты, взятые из источника, с проблемами. */
   sourceProblems: { ref: string; why: string }[];
   /** Совпадающие варианты внутри прототипа. */
@@ -58,6 +60,31 @@ export interface Report {
 }
 
 const TOCHNOST = 1e-9;
+
+/* ── Соглашение о шагах разбора ──────────────────────────────────── */
+
+/** Выкладка в тексте шага: дробь через слеш или двоеточие, знак равенства, произведение, разность. */
+const VYKLADKA_V_TEKSTE = /\d\s*[:/]\s*\d|[=≈]|\d\s*·\s*\d|\d\s*[−-]\s*\d/;
+/** Формула не по соглашению: десятичная точка, дробь слешем, деление двоеточием. */
+const PLOHOY_TEX = /\d\.\d|\d\s*\/\s*\d|\d\s*:\s*\d/;
+
+/**
+ * Шаги разбора по соглашению: выкладки только в формуле, формула в
+ * TeX с запятой `0{,}25` и настоящими дробями. Возвращает список
+ * нарушений — пустой, если всё по правилам.
+ */
+export function problemyShagov(shagi: readonly Step[]): string[] {
+  const problems: string[] = [];
+  shagi.forEach((shag, i) => {
+    if (VYKLADKA_V_TEKSTE.test(shag.text)) {
+      problems.push(`шаг ${i + 1}: выкладка в тексте — «${shag.text.slice(0, 50)}»`);
+    }
+    if (shag.formula !== undefined && PLOHOY_TEX.test(shag.formula)) {
+      problems.push(`шаг ${i + 1}: формула не в TeX — «${shag.formula.slice(0, 50)}»`);
+    }
+  });
+  return problems;
+}
 
 function problemsOf(prototype: Prototype, variant: Variant): string[] {
   const problems: string[] = [];
@@ -113,6 +140,7 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   if (shagi.some((shag) => /undefined|NaN/.test(shag.text))) {
     problems.push('в разборе осталась подстановка без значения');
   }
+  problems.push(...problemyShagov(shagi));
 
   return problems;
 }
@@ -130,6 +158,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
   let mismatchPerebor = 0;
   let mismatchSteps = 0;
   let badFormat = 0;
+  let vykladki = 0;
 
   for (const prototype of bank) {
     if (prototype.varianty.length < 10) {
@@ -167,6 +196,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
         mismatchPerebor += problems.some((x) => x.includes('перебор')) ? 1 : 0;
         mismatchSteps += problems.some((x) => x.includes('последний шаг')) ? 1 : 0;
         badFormat += problems.some((x) => x.includes('в клетки')) ? 1 : 0;
+        vykladki += problems.some((x) => x.includes('в тексте') || x.includes('не в TeX')) ? 1 : 0;
         continue;
       }
 
@@ -190,6 +220,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
     mismatchPerebor,
     mismatchSteps,
     badFormat,
+    vykladki,
     sourceProblems,
     duplicates,
     malo,
@@ -209,6 +240,8 @@ export interface PrepReport {
   mismatchSteps: number;
   /** Ответ не пишется в клетки и округления в условии нет. */
   badFormat: number;
+  /** Выкладка в тексте шага или формула не в TeX. */
+  vykladki: number;
   /** Повторяющиеся идентификаторы или номера конспекта. */
   duplicates: string[];
   bad: BadVariant[];
@@ -231,6 +264,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
   let mismatch = 0;
   let mismatchSteps = 0;
   let badFormat = 0;
+  let vykladki = 0;
 
   for (const blok of bloki) {
     for (const zadacha of blok.zadachi) {
@@ -264,6 +298,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
       } else if (Math.abs(posledniy.value - otvet) > TOCHNOST) {
         problems.push(`последний шаг ${posledniy.value} ≠ ответ ${otvet}`);
       }
+      problems.push(...problemyShagov(zadacha.shagi));
 
       if (zadacha.uslovie.trim() === '') {
         problems.push('пустое условие');
@@ -277,6 +312,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
         mismatch += problems.some((x) => x.includes('проверка')) ? 1 : 0;
         mismatchSteps += problems.some((x) => x.includes('последний шаг')) ? 1 : 0;
         badFormat += problems.some((x) => x.includes('в клетки')) ? 1 : 0;
+        vykladki += problems.some((x) => x.includes('в тексте') || x.includes('не в TeX')) ? 1 : 0;
       }
     }
   }
@@ -287,6 +323,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     mismatch,
     mismatchSteps,
     badFormat,
+    vykladki,
     duplicates,
     bad,
   };

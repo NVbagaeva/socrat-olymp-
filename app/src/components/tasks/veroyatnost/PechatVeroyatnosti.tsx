@@ -2,20 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { listSlova, type Zadanie } from '@/content/veroyatnost';
+import { katex } from '@/lib/graph/katex';
+import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import type { Pool } from '@/lib/veroyatnost/pool';
 import { parseSheet4Query, sheet4Spec } from '@/lib/veroyatnost/sheet4';
 
 declare global {
   interface Window {
+    sheetTypeset?: (root: ParentNode) => number;
     sheetPaginate?: () => void;
     sheetPagination?: { pages?: number; error?: string } | undefined;
   }
 }
 
-export interface Sheet4PageProps {
-  /** Банк задания №4: условия, отпечатки, закрытые разборы. */
+export interface PechatVeroyatnostiProps {
+  /** Банк задания: условия, отпечатки, закрытые разборы. */
   pool: Pool;
+  /** Номер задания: по нему берутся слова листа — название, колонтитул, разделы ответов. */
+  zadanie: Zadanie;
   /** Лист с ответами: те же задачи и таблица «Ответы» в конце. */
   withAnswers: boolean;
 }
@@ -29,15 +35,17 @@ function specJson(html: string): string {
 }
 
 /**
- * Лист задания №4, собранный в браузере.
+ * Лист заданий №4 и №5, собранный в браузере.
  *
  * Устройство то же, что у листа задания №12: buildDocument собирает
  * куски листа, paginate.js раскладывает их по страницам A4 после
- * загрузки шрифтов, готовый лист сразу отправляется в печать. Формул
- * в условиях задания №4 нет, поэтому набора KaTeX на листе нет тоже.
- * Адрес страницы можно открыть повторно — лист будет тем же.
+ * загрузки шрифтов, формулы кратких решений набирает KaTeX, готовый
+ * лист сразу отправляется в печать. Адрес страницы можно открыть
+ * повторно — лист будет тем же. Одна страница на оба задания: разница
+ * только в банке и в словах листа.
  */
-export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
+export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyatnostiProps) {
+  const list = listSlova(zadanie);
   const query = useSearchParams();
   const params = parseSheet4Query(query);
   const [spec, setSpec] = useState<string | null>(null);
@@ -62,7 +70,8 @@ export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
       return;
     }
     let alive = true;
-    const html = buildDocument(sheet4Spec(pool, params, withAnswers), {});
+    window.sheetTypeset = (root) => upgrade(root, katex);
+    const html = buildDocument(sheet4Spec(pool, params, withAnswers, list), {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setSpec(specJson(html));
