@@ -14,14 +14,12 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
-
-import { execFileSync } from 'node:child_process';
 
 import generator from '../src/lib/graph/generate.js';
 import content from '../src/content/sheet12.js';
 import outputs from '../src/lib/sheet/outputs.js';
+import { checkNoAnswersTracked, checkPdfFile } from './lib/sheet-check.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SECTION = 'zadanie-12';
@@ -35,13 +33,6 @@ function pdfPath(name, withAnswers) {
 const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
 
 const LINKS = ['https://t.me/budet_na_ege_math', 'https://youtube.com/@math_princess'];
-
-/* Шрифты, которым место в готовом файле: свои из репозитория и KaTeX.
-   Любой другой значит, что какого-то знака в наших шрифтах нет
-   и браузер подставил системный — на другой машине он подставит
-   другой, и строка поедет. Так в файле учителя однажды оказался
-   DejaVuSans: из-за стрелки «→», которой нет в подмножестве Inter. */
-const FONTS_ALLOWED = /^(Inter|Caveat|KaTeX)/;
 
 /* Заглушки из образца оформления: ни одна из этих строк не должна
    попасть в документ. Образец рисовала нейросеть, тексты на нём
@@ -71,67 +62,11 @@ for (const block of content.blocks) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PDF: шрифты, цвета, ссылки
+   PDF: шрифты, цвета, ссылки — общая проверка листа
    ══════════════════════════════════════════════════════════ */
-function pdfStreams(data) {
-  const out = [];
-  const re = /stream\r?\n/g;
-  let found;
-  while ((found = re.exec(data.toString('latin1')))) {
-    const start = found.index + found[0].length;
-    const end = data.indexOf('endstream', start, 'latin1');
-    if (end < 0) { continue; }
-    const raw = data.subarray(start, end);
-    try { out.push(zlib.inflateSync(raw).toString('latin1')); }
-    catch { out.push(raw.toString('latin1')); }
-  }
-  return out;
-}
-
 function checkPdf(name, expectMono, strictFonts, withAnswers) {
-  const file = pdfPath(name, withAnswers);
-  if (!fs.existsSync(file)) { fail(name + '.pdf: файла нет'); return; }
-  const data = fs.readFileSync(file);
-  const text = data.toString('latin1');
-
-  /* Шрифты вшиты: без FontFile принтер подставит свои. */
-  if (!/\/FontFile/.test(text)) { fail(name + ': шрифты не вшиты в PDF'); }
-
-  /* Посторонних шрифтов нет. Проверяется только у выпускной сборки:
-     в черновике без KaTeX формулы набирает запасная антиква, и её
-     системный шрифт здесь законен. */
-  if (strictFonts) {
-    const used = [...new Set([...text.matchAll(/\/BaseFont\s*\/([A-Za-z0-9+#-]+)/g)]
-      .map((m) => m[1].split('+').pop()))];
-    const stranger = used.filter((font) => !FONTS_ALLOWED.test(font));
-    if (stranger.length) {
-      fail(name + ': в файле посторонние шрифты — ' + stranger.join(', ') +
-        '. Значит какого-то знака нет в наших шрифтах');
-    }
-  }
-
-  /* Ссылки — ровно два адреса и никаких других. */
-  const uris = [...new Set([...text.matchAll(/\/URI\s*\(([^)]*)\)/g)].map((m) => m[1]))].sort();
-  if (uris.join('|') !== [...LINKS].sort().join('|')) {
-    fail(name + ': ссылки в подвале — ' + (uris.join(', ') || 'нет') +
-      ', а должно быть ровно два адреса');
-  }
-
-  /* Ч/б файл: только чёрный, белый и серые. */
-  if (expectMono) {
-    const colored = new Set();
-    for (const stream of pdfStreams(data)) {
-      for (const m of stream.matchAll(/([\d.]+) ([\d.]+) ([\d.]+) (rg|RG)/g)) {
-        const [r, g, b] = [m[1], m[2], m[3]].map(Number);
-        if (Math.abs(r - g) > 0.02 || Math.abs(g - b) > 0.02) {
-          colored.add([r, g, b].map((v) => v.toFixed(3)).join(' '));
-        }
-      }
-    }
-    if (colored.size) {
-      fail(name + ': в ч/б файле цветá кроме серых — ' + [...colored].slice(0, 5).join('; '));
-    }
-  }
+  checkPdfFile(pdfPath(name, withAnswers),
+    { name, mono: expectMono, strictFonts, links: LINKS, fail });
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -279,38 +214,6 @@ function checkSiteLinks() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   Ответы не лежат в репозитории
-
-   Репозиторий публичный, и всё, что попало под версионный
-   контроль, видно всякому — а из app/public ещё и отдаётся сайтом
-   по прямому адресу. Проверка смотрит не на диск, а на git: файл
-   может лежать рядом (его собрали) и при этом не быть в индексе,
-   и это правильное состояние.
-   ══════════════════════════════════════════════════════════ */
-function checkNoAnswersTracked() {
-  let tracked;
-  try {
-    tracked = execFileSync('git', ['ls-files', '--', '*.pdf'],
-      { cwd: APP, encoding: 'utf8' }).split('\n').filter(Boolean);
-  } catch {
-    console.log('  git недоступен, проверку отслеживаемых файлов пропускаю');
-    return;
-  }
-
-  const marked = tracked.filter((file) =>
-    outputs.ANSWER_MARKS.some((mark) => path.basename(file).includes(mark)));
-
-  if (marked.length) {
-    fail('в репозитории лежат файлы с ответами: ' + marked.join(', ') +
-      '. Им место в ' + outputs.PRIVATE_DIR.join('/') +
-      ', оттуда они уезжают архивом из CI');
-    return;
-  }
-  console.log('  файлов с ответами под версионным контролем нет: ' +
-    tracked.length + ' PDF проверено');
-}
-
-/* ══════════════════════════════════════════════════════════
    Прогон
    ══════════════════════════════════════════════════════════ */
 const files = [
@@ -335,7 +238,7 @@ files.forEach((file) => {
 });
 
 checkSiteLinks();
-checkNoAnswersTracked();
+checkNoAnswersTracked(APP, fail);
 
 if (errors.length) {
   console.error('\nнарушений: ' + errors.length);

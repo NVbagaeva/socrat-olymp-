@@ -28,28 +28,17 @@ import { fileURLToPath } from 'node:url';
 import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
 import { answersItems } from '../src/lib/sheet/answers12.js';
-import outputs from '../src/lib/sheet/outputs.js';
 import content from '../src/content/sheet12.js';
-import { renderPdf } from './lib/sheet-render.mjs';
+import { buildSheet } from './lib/sheet-build.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
 const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
-/* Куда ложится готовый файл, решает sheet/outputs.js, и решение
-   зависит от того, есть ли в файле ответы: файл для ученика идёт
-   в public и отдаётся сайтом, файл для учителя — в папку вне
-   репозитория и уезжает архивом из CI. Репозиторий публичный,
-   и всё из public доступно по прямому адресу.
-
-   Промежуточный HTML — в служебной папке, она в сборку не идёт. */
+/* Куда ложится готовый файл и как печатается лист, решает общая
+   сборка scripts/lib/sheet-build.mjs: файл для ученика идёт в public
+   и отдаётся сайтом, файл для учителя — в папку вне репозитория
+   и уезжает архивом из CI. Промежуточный HTML — в служебной папке. */
 const SECTION = 'zadanie-12';
-const BUILD = path.join(APP, '.pdf-build');
-
-function outputFor(name, withAnswers) {
-  const where = outputs.target(APP, { name, section: SECTION, withAnswers });
-  outputs.assertSafe(where.file, withAnswers);
-  return where;
-}
 
 /* ══════════════════════════════════════════════════════════
    Банк
@@ -154,30 +143,13 @@ const FRAME = 62;
    Сборка
    ══════════════════════════════════════════════════════════ */
 async function build(name, blocks, options) {
-  const where = outputFor(name, Boolean(options.answers));
-  const file = where.file;
-  const report = await renderPdf(spec(blocks, options), file, {
-    keepHtml: options.keepHtml ? path.join(BUILD, name + '.html') : null,
-    requireKatex: options.requireKatex,
-  });
-
   const expected = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
-  if (report.tasks !== expected) {
-    throw new Error(name + ': на листе ' + report.tasks + ' задач, в банке ' + expected);
-  }
-  if (report.overflowing.length) {
-    throw new Error(name + ': куски выше страницы — ' + report.overflowing.join(', '));
-  }
-  if (report.formulasFailed) {
-    throw new Error(name + ': KaTeX не принял формул — ' + report.formulasFailed);
-  }
-
-  const size = (fs.statSync(file).size / 1024).toFixed(0);
-  console.log('  ' + name + '.pdf → ' + (where.published ? 'сайт' : 'только CI') +
-    ', страниц ' + report.pages +
-    ', задач ' + report.tasks + ', формул ' + report.formulas +
-    (report.katex ? ' (KaTeX)' : ' (запасной набор)') + ', ' + size + ' КБ');
-  return report;
+  return buildSheet(APP, SECTION, name, spec(blocks, options), {
+    withAnswers: Boolean(options.answers),
+    expectTasks: expected,
+    requireKatex: options.requireKatex,
+    keepHtml: options.keepHtml,
+  });
 }
 
 async function sample() {
