@@ -30,78 +30,8 @@
 
 /* ── Тренажёр ───────────────────────────────────────────────────── */
 
-.vtrainer {
-  display: grid;
-  gap: var(--space-6);
-}
-
-/* Лента фильтров по блокам задачника. На узком экране едет вбок:
-   перенос рвал бы ряд кнопок посередине. */
-.vtrainer__chips {
-  display: flex;
-  gap: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.vtrainer__chips::-webkit-scrollbar {
-  display: none;
-}
-/* На широком экране чипы переносятся, а не уезжают за край: шесть
-   методов задания №5 в одну строку не помещаются. */
-@media (min-width: 768px) {
-  .vtrainer__chips {
-    flex-wrap: wrap;
-    overflow: visible;
-  }
-}
-
-.vchip {
-  flex: none;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.vchip:hover {
-  border-color: var(--color-border-hover);
-  color: var(--color-text);
-}
-/* Выбранный чип — синий текст на мягком синем. Раньше здесь стояли
-   тёмно-синяя подложка и тёмно-синий текст: подпись пропадала. */
-.vchip--on {
-  border-color: var(--color-primary);
-  background: var(--color-surface-soft);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-.vchip:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
 .vtrainer__wait {
   color: var(--color-text-tertiary);
-}
-
-.vtrainer__done {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-4);
-  padding: var(--space-8);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.vtrainer__done-title {
-  font-size: 20px;
-  font-weight: 600;
-}
-.vtrainer__done-score {
-  color: var(--color-text-secondary);
 }
 
 /* ── Подготовительные задачи ────────────────────────────────────── */

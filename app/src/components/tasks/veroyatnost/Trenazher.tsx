@@ -1,40 +1,61 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { clsx } from 'clsx';
-import { Button, EmptyState } from '@/components/ui';
-import { ProblemCard } from '@/components/tasks/card';
-import { REZHIMY_4, trenazherSlova, type Rezhim4, type Zadanie } from '@/content/veroyatnost';
+import { useState } from 'react';
+import type { SkillItem } from '@/components/tasks/configurator';
+import {
+  TrainerConfigurator,
+  type ConfiguratorPreset,
+  type TrainerModeOption,
+  type TrainerRequest,
+} from '@/components/tasks/trainer';
+import {
+  KONFIGURATOR_SLOVA,
+  REZHIMY,
+  trenazherSlova,
+  uznaySlova,
+  type Rezhim,
+  type Zadanie,
+} from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
-import { METODY_4, METODY_5, metodPoId, type Method } from '@/lib/veroyatnost/model';
-import type { Pool, PoolKind } from '@/lib/veroyatnost/pool';
-import { ROUND_SIZE, restartRound, useVeroyatnostRound } from '@/lib/veroyatnost/useRound';
+import type { Method } from '@/lib/veroyatnost/model';
+import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
+import type { RoundKind } from '@/lib/veroyatnost/useRound';
+import { metodKind, metodyZadaniya, zadachaId } from './metody';
 import { ProgressMetody } from './ProgressMetody';
+import { Sessiya, type SessiyaPlan } from './Sessiya';
 
 export interface TrenazherProps {
   pool: Pool;
+  /** Задачи режима «Узнай метод»: только условия и отпечатки методов. */
+  uznay: UznayPool;
   /** Чей тренажёр: у №4 пять методов, у №5 шесть; хранилища разные. */
-  zadanie?: Zadanie;
+  zadanie: Zadanie;
+  /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
+  base: string;
+  /** Название темы: в подзаголовке, бейдже и сводке. */
+  family: string;
+  /** Карточки методов, собранные на сервере (navyki.tsx). */
+  skills: SkillItem[];
+  /** Что выбрано при заходе по ярлыку адреса. */
+  preset?: ConfiguratorPreset<Rezhim> | null;
 }
 
 /**
- * Тренажёр заданий №4 и №5 — раздел 07 референса.
+ * Тренажёр заданий №4 и №5 — раздел 07 референса на конфигураторе
+ * задания №12.
  *
- * Три режима: «Отработка» — один метод, задачи только этого метода;
- * «Смешанная» — все методы вперемешку, ученик сам распознаёт
- * структуру, поэтому названия метода в шапке карточки нет; «Повтор
- * ошибок» — только те задачи, где ответ не сошёлся или было открыто
- * решение. Прогресс считается отдельно по каждому методу и живёт в
- * своём хранилище: у каждого задания своё, сброс здесь не трогает ни
- * задание №12, ни режим «Узнай метод».
+ * Конфигуратор тот же, что у №12 (TrainerConfigurator): метод вместо
+ * навыка, четыре режима — «Отработка» (один метод), «Смешанная» (все
+ * методы, названия метода в шапке карточки нет), «Повтор ошибок»
+ * (задачи, где ответ не сошёлся или было открыто решение) и «Узнай
+ * метод» (только условие и кнопки методов, считать не нужно), —
+ * и количество задач. Уровней сложности у задач вероятности нет.
  *
- * Сама задача — ProblemCard: условие, рисунок по модели, решение по
- * шагам. Правильных ответов в разметке нет — карточка сверяет ввод с
- * отпечатком и открывает закрытый разбор только по действию ученика.
- *
- * Порядок подхода собирает хранилище в useRound после монтирования:
- * при отрисовке компонент ни часов, ни случайных чисел не спрашивает,
- * поэтому разметка сервера и первая отрисовка в браузере совпадают.
+ * «Начать тренировку» собирает подход из банка тут же, в браузере, и
+ * экран задачи (Sessiya) встаёт на место конфигуратора. Прогресс
+ * считается отдельно по каждому методу и живёт в своих хранилищах:
+ * у каждого задания своё, у «Узнай метод» — своё, сброс здесь не
+ * трогает ни задание №12, ни соседнее задание.
  */
 
 /** Свои хранилища: ключ с номером задания и версией формата. */
@@ -43,211 +64,123 @@ const STORES: Record<Zadanie, ProgressStore> = {
   5: createProgressStore('budetege:veroyatnost-5:v1'),
 };
 
-export function progressTrenazhera(zadanie: Zadanie): ProgressStore {
-  return STORES[zadanie];
+const UZNAY_STORES: Record<Zadanie, ProgressStore> = {
+  4: createProgressStore('budetege:veroyatnost-4-uznay:v1'),
+  5: createProgressStore('budetege:veroyatnost-5-uznay:v1'),
+};
+
+function vsegoVariantov(kinds: readonly { variants: readonly unknown[] }[]): number {
+  return kinds.reduce((sum, kind) => sum + kind.variants.length, 0);
 }
 
-/** Идентификатор задачи в списке ошибок: прототип и номер варианта. */
-function zadachaId(kind: string, n: number): string {
-  return `${kind}:${n}`;
-}
-
-/** Метод прототипа: он один на все варианты, поэтому берётся с первого. */
-function metodKind(kind: PoolKind): Method | undefined {
-  return kind.variants[0]?.model?.method;
-}
-
-function nazvanieMetoda(id: Method | undefined): string | undefined {
-  return id === undefined ? undefined : metodPoId(id).nazvanie;
-}
-
-export function Trenazher({ pool, zadanie = 4 }: TrenazherProps) {
+export function Trenazher({
+  pool,
+  uznay,
+  zadanie,
+  base,
+  family,
+  skills,
+  preset = null,
+}: TrenazherProps) {
+  const store = STORES[zadanie];
+  const uznayStore = UZNAY_STORES[zadanie];
+  const progress = store.useProgress();
   const slova = trenazherSlova(zadanie);
-  const metody = zadanie === 4 ? METODY_4 : METODY_5;
-  const progressStore = STORES[zadanie];
-  const prefix = `v${zadanie}`;
+  const metody = metodyZadaniya(zadanie);
+  const [plan, setPlan] = useState<SessiyaPlan | null>(null);
 
-  /* Первым открывается первый метод, под который в банке есть задачи:
-     у №5 это не первый метод списка. */
-  const pervyMetod = useMemo<Method>(() => {
-    const est = metody.find((m) => pool.kinds.some((kind) => metodKind(kind) === m.id));
-    return est?.id ?? metody[0]?.id ?? 'direct-count';
-  }, [metody, pool]);
+  /* Ошибки — только те, что есть в банке: прототип могли переименовать. */
+  const oshibki = new Set(progress.mistakes);
+  const oshibochnye: RoundKind[] = pool.kinds
+    .map((kind) => ({
+      id: kind.id,
+      variants: kind.variants
+        .filter((v) => oshibki.has(zadachaId(kind.id, v.n)))
+        .map((v) => ({ n: v.n })),
+    }))
+    .filter((kind) => kind.variants.length > 0);
 
-  const [rezhim, setRezhim] = useState<Rezhim4>('practice');
-  const [metod, setMetod] = useState<Method>(pervyMetod);
-  const [index, setIndex] = useState(0);
-  /* Сколько решено с первой попытки: в счёт подхода идёт только это. */
-  const [srazu, setSrazu] = useState(0);
-  const progress = progressStore.useProgress();
+  /* «Все» в режиме на всё задание — сколько задач в нём на самом деле. */
+  const modes: TrainerModeOption<Rezhim>[] = REZHIMY.map((item) => {
+    switch (item.id) {
+      case 'mixed':
+        return { ...item, total: vsegoVariantov(pool.kinds) };
+      case 'mistakes':
+        return {
+          ...item,
+          total: vsegoVariantov(oshibochnye),
+          locked: oshibochnye.length === 0,
+        };
+      case 'uznay':
+        return { ...item, total: vsegoVariantov(uznay.kinds) };
+      default:
+        return item;
+    }
+  });
 
-  const byId = useMemo(() => new Map(pool.kinds.map((kind) => [kind.id, kind])), [pool]);
-
-  /* Из чего собирать подход. Отработка — прототипы одного метода,
-     смешанная — все, повтор — только ошибочные варианты. */
-  const source = useMemo(() => {
-    if (rezhim === 'mistakes') {
-      const oshibki = new Set(progress.mistakes);
-      return pool.kinds
-        .map((kind) => ({
+  function istochnik(rezhim: Rezhim, metod: Method): RoundKind[] {
+    switch (rezhim) {
+      case 'mistakes':
+        return oshibochnye;
+      case 'uznay':
+        return uznay.kinds.map((kind) => ({
           id: kind.id,
-          variants: kind.variants
-            .filter((v) => oshibki.has(zadachaId(kind.id, v.n)))
-            .map((v) => ({ n: v.n })),
-        }))
-        .filter((kind) => kind.variants.length > 0);
+          variants: kind.variants.map((v) => ({ n: v.n })),
+        }));
+      default:
+        return pool.kinds
+          .filter((kind) => rezhim === 'mixed' || metodKind(kind) === metod)
+          .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
     }
-    return pool.kinds
-      .filter((kind) => rezhim === 'mixed' || metodKind(kind) === metod)
-      .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
-    /* Список ошибок меняется по ходу подхода; подход при этом не
-       пересобирается — он привязан к ключу, а не к источнику. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pool, rezhim, metod]);
+  }
 
-  const key = rezhim === 'practice' ? `${prefix}:practice:${metod}` : `${prefix}:${rezhim}`;
-  const round = useVeroyatnostRound(key, source, ROUND_SIZE);
-  const item = round[index];
-  const kind = item === undefined ? undefined : byId.get(item.kind);
-  const variant = kind?.variants.find((v) => v.n === item?.n);
-
-  /* Задача закрывается один раз: первым ответом или открытым
-     решением. Второй ответ после ошибки счётчиков не меняет. */
-  const zakryto = useRef<string | null>(null);
-  const nachalo = useRef(0);
-  useEffect(() => {
-    nachalo.current = Date.now();
-  }, [key, index]);
-
-  /* Время берётся в обработчике и передаётся сюда: часы в теле
-     компонента линтер считает нечистым вызовом при отрисовке. */
-  function zapisat(right: boolean, clean: boolean, seychas: number): void {
-    if (item === undefined || kind === undefined) {
+  function start(request: TrainerRequest<Rezhim>) {
+    const metod = request.skill.id as Method;
+    const source = istochnik(request.mode, metod);
+    if (source.length === 0) {
       return;
     }
-    const id = zadachaId(item.kind, item.n);
-    if (zakryto.current === id) {
-      return;
-    }
-    zakryto.current = id;
-    progressStore.recordAttempt({
-      kind: metodKind(kind) ?? pervyMetod,
-      taskId: id,
-      right,
-      clean,
-      seconds: (seychas - nachalo.current) / 1000,
+    /* Ключ подхода новый на каждый запуск: подход не переиспользует
+       прошлую раскладку. */
+    setPlan({
+      key: `v${zadanie}:${request.mode}:${Date.now()}`,
+      rezhim: request.mode,
+      metod,
+      source,
+      size: request.count,
     });
-    if (right) {
-      setSrazu((n) => n + 1);
-    }
   }
 
-  function smenitRezhim(next: Rezhim4): void {
-    if (next === 'mistakes') {
-      /* Повтор собирается из свежего списка: прошлый подход мог
-         содержать задачи, которые с тех пор решены начисто. */
-      restartRound(`${prefix}:mistakes`);
-    }
-    setRezhim(next);
-    setIndex(0);
-    setSrazu(0);
+  if (plan !== null) {
+    return (
+      <Sessiya
+        zadanie={zadanie}
+        pool={pool}
+        uznay={uznay}
+        plan={plan}
+        store={store}
+        uznayStore={uznayStore}
+        backHref={base}
+        onAgain={() => setPlan({ ...plan, key: `v${zadanie}:${plan.rezhim}:${Date.now()}` })}
+      />
+    );
   }
-
-  function smenitMetod(next: Method): void {
-    setMetod(next);
-    setIndex(0);
-    setSrazu(0);
-  }
-
-  function dalshe(): void {
-    setIndex((n) => n + 1);
-  }
-
-  function zanovo(): void {
-    restartRound(key);
-    setIndex(0);
-    setSrazu(0);
-  }
-
-  const pusto = rezhim === 'mistakes' ? slova.netOshibok : slova.netZadach;
 
   return (
-    <section className="z4-trainer">
-      <div className="z4-trainer__rezhimy" role="radiogroup" aria-label={slova.rezhim}>
-        {REZHIMY_4.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            role="radio"
-            aria-checked={r.id === rezhim}
-            className={clsx('z4-rezhim', r.id === rezhim && 'z4-rezhim--on')}
-            onClick={() => smenitRezhim(r.id)}
-          >
-            <span className="z4-rezhim__title">{r.title}</span>
-            <span className="z4-rezhim__lead">{r.lead}</span>
-          </button>
-        ))}
-      </div>
-
-      {rezhim === 'practice' ? (
-        <div className="vtrainer__chips" role="radiogroup" aria-label={slova.metod}>
-          {metody.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              role="radio"
-              aria-checked={m.id === metod}
-              className={clsx('vchip', m.id === metod && 'vchip--on')}
-              onClick={() => smenitMetod(m.id)}
-            >
-              {m.nomer}. {m.nazvanie}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      {source.length === 0 ? (
-        <EmptyState title={pusto.title} description={pusto.text} />
-      ) : round.length === 0 ? (
-        /* До монтирования подхода нет: показываем место под него,
-           а не пустой экран, который тут же сменится задачей. */
-        <p className="vtrainer__wait">{slova.zhdem}</p>
-      ) : index >= round.length ? (
-        <div className="vtrainer__done">
-          <p className="vtrainer__done-title">{slova.proyden}</p>
-          <p className="vtrainer__done-score">
-            С первой попытки решено <b>{srazu}</b> из <b>{round.length}</b>
-          </p>
-          <Button onClick={zanovo}>{slova.zanovo}</Button>
-        </div>
-      ) : item !== undefined && kind !== undefined && variant !== undefined ? (
+    <TrainerConfigurator
+      family={family}
+      skills={skills}
+      modes={modes}
+      preset={preset}
+      levels={[]}
+      words={KONFIGURATOR_SLOVA}
+      onStart={start}
+      stats={
         <>
-          <p className="z4-trainer__schet">{slova.schet(index + 1, round.length)}</p>
-          {/* Ключ — сама задача: следующая карточка начинается с чистого
-              состояния, а не наследует введённый ответ. */}
-          <ProblemCard
-            key={zadachaId(item.kind, item.n)}
-            zadacha={{
-              id: zadachaId(item.kind, item.n),
-              uslovie: variant.uslovie,
-              seal: variant.seal,
-              steps: variant.steps,
-              ...(variant.model === undefined ? {} : { model: variant.model }),
-            }}
-            nomer={index + 1}
-            /* Метод в шапке — только в отработке: в смешанном режиме и
-               в повторе ученик должен узнать его сам. */
-            {...(rezhim === 'practice' ? { metodLabel: nazvanieMetoda(metodKind(kind)) } : {})}
-            istochnik={kind.istochnik}
-            onResult={(right) => zapisat(right, right, Date.now())}
-            onReveal={() => zapisat(false, false, Date.now())}
-            onNext={dalshe}
-            nextLabel={index + 1 === round.length ? slova.zavershit : slova.dalshe}
-          />
+          <ProgressMetody store={store} slova={slova.progress} metody={metody} />
+          <ProgressMetody store={uznayStore} slova={uznaySlova(zadanie).progress} metody={metody} />
         </>
-      ) : null}
-
-      <ProgressMetody store={progressStore} slova={slova.progress} metody={metody} />
-    </section>
+      }
+    />
   );
 }

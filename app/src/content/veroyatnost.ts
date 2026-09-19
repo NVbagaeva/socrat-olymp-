@@ -11,6 +11,7 @@
  */
 
 import type { TutorMaterial } from './sections';
+import { trainerPage } from './trainerModes';
 
 /** Вкладка раздела: хвост адреса и есть её идентификатор. */
 export interface VeroyatnostTab {
@@ -48,6 +49,8 @@ export interface VeroyatnostSection {
  * Ключевые методы решения · Подготовительные задачи · Тренажёр ·
  * Генератор; «Для репетиторов» стоит в той же ленте кнопкой меню.
  * Теория живёт на своём адресе, а сам адрес раздела — это «О задании».
+ * «Узнай метод» — режим тренажёра, а не вкладка: как и остальные
+ * режимы, он выбирается в конфигураторе тренировки.
  */
 const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'o-zadanii', label: 'О задании', tail: '' },
@@ -55,20 +58,18 @@ const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-  { id: 'uznay-metod', label: 'Узнай метод', tail: 'uznay-metod/' },
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
 /**
- * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр ·
- * Узнай метод. Вкладок «О задании» и «Ключевые методы решения» нет —
- * их тексты для №5 автор ещё не писал; появятся вместе с текстами.
+ * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр.
+ * Вкладок «О задании» и «Ключевые методы решения» нет — их тексты
+ * для №5 автор ещё не писал; появятся вместе с текстами.
  */
 const TABS_5: readonly VeroyatnostTab[] = [
   { id: 'teoriya', label: 'Теория', tail: '' },
   { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-  { id: 'uznay-metod', label: 'Узнай метод', tail: 'uznay-metod/' },
 ];
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
@@ -133,45 +134,68 @@ export function veroyatnostTitle(slug: string, tab: string): string {
 /** Задание, у которого есть тренажёр по методам и «Узнай метод». */
 export type Zadanie = 4 | 5;
 
-export type Rezhim4 = 'practice' | 'mixed' | 'mistakes';
+/**
+ * Режимы тренажёра — форматы внутри одного конфигуратора, как у
+ * задания №12: три режима референса и «Узнай метод», где считать
+ * ничего не нужно — только назвать метод по условию.
+ */
+export type Rezhim = 'practice' | 'mixed' | 'mistakes' | 'uznay';
 
-export interface Rezhim4Opisanie {
-  id: Rezhim4;
+export interface RezhimOpisanie {
+  id: Rezhim;
   title: string;
   lead: string;
 }
 
-/** Три режима — как в референсе, слово в слово. */
-export const REZHIMY_4: readonly Rezhim4Opisanie[] = [
-  { id: 'practice', title: 'Отработка', lead: 'один метод, задачи только этого метода' },
-  { id: 'mixed', title: 'Смешанная', lead: 'несколько методов, ученик сам распознаёт структуру' },
-  { id: 'mistakes', title: 'Повтор ошибок', lead: 'только задачи, где был неверный ответ' },
+/** Режимы — как в референсе, слово в слово; четвёртый — «Узнай метод». */
+export const REZHIMY: readonly RezhimOpisanie[] = [
+  { id: 'practice', title: 'Отработка', lead: 'Один метод' },
+  { id: 'mixed', title: 'Смешанная', lead: 'Все методы вперемешку' },
+  { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
+  { id: 'uznay', title: 'Узнай метод', lead: 'Только условие: назвать метод' },
+];
+
+/**
+ * Слова конфигуратора тренировки — те же, что у задания №12, кроме
+ * первого шага: здесь выбирают не навык, а метод. Уровней сложности у
+ * задач вероятности нет, и конфигуратор этот ряд не показывает.
+ */
+export const KONFIGURATOR_SLOVA: typeof trainerPage = {
+  ...trainerPage,
+  skill: {
+    step: '1',
+    title: 'Выбери метод',
+    lead: 'Какой метод отрабатываем в разделе «{family}»?',
+  },
+  params: {
+    ...trainerPage.params,
+    lead: 'Выбери формат и количество задач',
+  },
+  summary: {
+    title: 'Выбранная тренировка',
+    note: 'Все задачи соответствуют реальным прототипам ЕГЭ.',
+  },
+};
+
+/**
+ * Ярлыки к конфигуратору — как у задания №12: адрес /trenazher/{id}/
+ * открывает ту же вкладку с уже выбранным методом или режимом.
+ */
+export const YARLYKI_REZHIMOV: readonly { id: string; title: string; mode: Rezhim }[] = [
+  { id: 'mixed', title: 'Смешанная тренировка', mode: 'mixed' },
+  { id: 'uznay-metod', title: 'Узнай метод', mode: 'uznay' },
 ];
 
 /** Слова тренажёра одного задания: общие, кроме номера задания. */
 export function trenazherSlova(zadanie: Zadanie) {
   return {
-    rezhim: 'Режим тренировки',
-    metod: 'Метод',
-    /* Метод есть, задач под него в банке нет: у №5 нет прямого
-       пересчёта и координатной прямой, у №4 — дерева и формулы. */
-    netZadach: {
-      title: 'Задач на этот метод нет',
-      text: `В банке задания №${zadanie} нет задач на этот метод: он нужен в другом задании. Выберите другой метод или смешанный режим.`,
-    },
-    netOshibok: {
-      title: 'Ошибок пока нет',
-      text: 'Сюда попадают задачи, в которых ответ не сошёлся или было открыто решение. Решите несколько задач в отработке или смешанном режиме.',
-    },
     zhdem: 'Собираем подход…',
     schet: (i: number, n: number): string => `Задача ${i} из ${n}`,
     istochnik: `Прототип задания ${zadanie}`,
     dalshe: 'Следующая',
     zavershit: 'Завершить подход',
-    proyden: 'Подход пройден',
-    zanovo: 'Начать заново',
     progress: {
-      title: 'Прогресс',
+      title: 'Прогресс тренажёра',
       lead: 'Считается отдельно по каждому методу: верных ответов из закрытых задач.',
       ring: 'решено верно',
       pusto: 'Пока ни одной закрытой задачи',
@@ -180,15 +204,10 @@ export function trenazherSlova(zadanie: Zadanie) {
   } as const;
 }
 
-export const TRENAZHER_4 = trenazherSlova(4);
-
 /* ── Слова режима «Узнай метод» ──────────────────────────────────── */
 
 export function uznaySlova(zadanie: Zadanie) {
-  const skolko = zadanie === 4 ? 'пяти' : 'шести';
   return {
-    title: 'Узнай метод',
-    lead: `Прочитайте условие и выберите, каким из ${skolko} методов решается задача. Считать ничего не нужно.`,
     vopros: 'Каким методом решается задача?',
     verno: 'Верно',
     neverno: 'Неверно',
@@ -197,16 +216,14 @@ export function uznaySlova(zadanie: Zadanie) {
     kakVidno: 'Как это было видно:',
     istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Задача конспекта' },
     progress: {
-      title: 'Прогресс',
-      lead: 'Считается отдельно от тренажёра: узнано верно из показанных задач, по каждому методу.',
+      title: 'Прогресс «Узнай метод»',
+      lead: 'Считается отдельно от решённых задач: узнано верно из показанных, по каждому методу.',
       ring: 'узнано верно',
       pusto: 'Пока ни одной задачи',
       sbros: 'Сбросить прогресс',
     },
   } as const;
 }
-
-export const UZNAY_METOD = uznaySlova(4);
 
 /* ── Слова подготовительных задач №4 ─────────────────────────────── */
 

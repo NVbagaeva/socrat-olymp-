@@ -241,7 +241,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
             {chosen.map((item) => (
               <li key={item.id}>
                 {item.title}
-                <span className="cfg-summary__code"> {item.id}</span>
+                <span className="cfg-summary__code"> {item.code ?? item.id}</span>
               </li>
             ))}
           </ul>
