@@ -154,6 +154,18 @@
   font-size: 13px;
 }
 
+/* Скоба под осью с итогом промежутка: тонкая, цвета оси, а подпись
+   под ней — как у формул. Появляется только в теории. */
+.pr-brace path {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+.pr-brace text {
+  fill: var(--color-text);
+  font-size: 19px;
+}
+
 /* Благоприятный отрезок на оси: оранжевый и заметно толще оси. */
 .pr-favorable {
   stroke: var(--color-accent);

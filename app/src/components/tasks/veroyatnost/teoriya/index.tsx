@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
 
 /**
@@ -10,14 +11,12 @@ import { VidySobytiy } from './VidySobytiy';
  */
 export const telaRazdelov4: Record<string, ReactNode> = {
   'vidy-sobytiy': <VidySobytiy />,
+  'koordinatnaya-pryamaya': <KoordinatnayaPryamaya />,
 };
 
 export { TeoriyaShell, type TeoriyaShellProps } from './TeoriyaShell';
 export { ProverSebya, type ProverSebyaProps } from './ProverSebya';
-export {
-  VariantyOtveta,
-  type VariantyOtvetaProps,
-  type VariantSostoyanie,
-} from './VariantyOtveta';
+export { VariantyOtveta, type VariantyOtvetaProps, type VariantSostoyanie } from './VariantyOtveta';
 export { VidySobytiy } from './VidySobytiy';
+export { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 export { KrugiIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';

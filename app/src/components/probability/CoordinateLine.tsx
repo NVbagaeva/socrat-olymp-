@@ -27,12 +27,49 @@ import type { RisunokState } from './OutcomeTiles';
 /**
  * Что уже показано ученику: 'condition' — только ось и границы,
  * 'intersection' — области условий и длина l, 'answer' — ещё
- * благоприятный отрезок на оси и длина L.
+ * благоприятный отрезок на оси и длина L, 'segment' — один
+ * благоприятный отрезок без областей: так рисунок стоит в теории,
+ * где показывают саму мысль, а не разбор задачи.
  */
-export type HighlightMode = 'condition' | 'intersection' | 'answer';
+export type HighlightMode = 'condition' | 'intersection' | 'answer' | 'segment';
 
 /** Граница промежутка: строгая (пустой кружок) или нестрогая. */
 export type Boundary = 'strict' | 'inclusive';
+
+/**
+ * В какую сторону от границы лежит область уровня. По умолчанию
+ * верхний идёт вправо, нижний влево — случай отрезка из референса.
+ */
+export type BandSide = 'right' | 'left';
+
+/**
+ * Уровень условия целиком: от какого числа, в какую сторону и что
+ * приписано в скобках.
+ *
+ * Без этого поля уровни берутся из границ промежутка, как в
+ * тренажёре: верхний — «x > c» вправо, нижний — «x < d» влево.
+ * Задают его там, где эта пара не подходит: два условия одного
+ * знака («X > 1» и «X > 2») или вероятность рядом с условием.
+ */
+export interface Band {
+  value: number;
+  side: BandSide;
+  /** Что в скобках после условия: «(0,96)». */
+  note?: string;
+}
+
+/**
+ * Деление оси. Числом — подпись сама собой; парой — когда под
+ * делением стоит буква, а не число: «0» и «x» у отрезка в теории.
+ */
+export type Tick = number | { value: number; label: string };
+
+/** Скоба под осью с итогом промежутка: «1 < X ≤ 2». */
+export interface Brace {
+  from: number;
+  to: number;
+  label: string;
+}
 
 export interface CoordinateLineProps {
   /** Концы всего отрезка — a и b. */
@@ -47,6 +84,14 @@ export interface CoordinateLineProps {
   /** Подписи l и L. */
   showLength?: boolean;
   highlightMode?: HighlightMode;
+  /** Верхний уровень целиком. Без него — «x > c» вправо. */
+  upper?: Band;
+  /** Нижний уровень целиком. Без него — «x < d» влево. */
+  lower?: Band;
+  /** Свои деления: без них подписываются края и обе границы. */
+  ticks?: readonly Tick[];
+  /** Скоба под осью с итогом промежутка. */
+  brace?: Brace;
   /** Подпись оси: по умолчанию x. */
   axisLabel?: string;
   /** Единица измерения в подписях делений: «г», «мин». */
@@ -80,6 +125,10 @@ export function CoordinateLine({
   rightBoundary = 'strict',
   showLength = false,
   highlightMode = 'answer',
+  upper,
+  lower,
+  ticks,
+  brace,
   axisLabel = 'x',
   unit,
   state = 'default',
@@ -102,8 +151,23 @@ export function CoordinateLine({
   const L = max - min;
   const l = pravaya - levaya;
 
-  const vidnoPeresechenie = highlightMode !== 'condition';
-  const videnOtvet = highlightMode === 'answer';
+  /* Один отрезок без областей: рисунок теории. */
+  const tolkoOtrezok = highlightMode === 'segment';
+  /* Скоба живёт ниже подписей делений, и под неё рисунок подрастает.
+     Без скобы высота прежняя — рисунки тренажёра не меняются. */
+  const nizhneePole = brace === undefined ? 0 : 60;
+  /* Уровни: свои, если заданы, иначе пара из границ промежутка —
+     тот самый случай отрезка, что рисует тренажёр. */
+  const verhniy: Band | null = upper ?? (c === undefined ? null : { value: c, side: 'right' });
+  const nizhniy: Band | null = lower ?? (d === undefined ? null : { value: d, side: 'left' });
+  /* С вероятностью в скобках подпись условия длиннее и крупнее, и
+     ей нужно место над верхним уровнем: в теории рисунок сжат в узкую
+     колонку, а кегль задан в единицах рисунка. Там, где скобок нет
+     (тренажёр, лист), поля нет и рисунок прежний. */
+  const verhneePole = verhniy?.note === undefined && nizhniy?.note === undefined ? 0 : 34;
+  const vysota = VB_H + verhneePole + nizhneePole;
+  const vidnoPeresechenie = highlightMode !== 'condition' && !tolkoOtrezok;
+  const videnOtvet = highlightMode === 'answer' || tolkoOtrezok;
 
   const podpis =
     alt ??
@@ -121,62 +185,74 @@ export function CoordinateLine({
     />
   );
 
-  const delenie = (value: number, key: string) => (
-    <g key={key} className="pr-tick">
-      <line x1={px(value)} y1={AXIS_Y - 7} x2={px(value)} y2={AXIS_Y + 7} />
-      <text x={px(value)} y={AXIS_Y + 26} textAnchor="middle">
-        {chislo(value)}
-        {unit === undefined ? '' : ` ${unit}`}
-      </text>
-    </g>
-  );
+  const delenie = (tick: Tick, key: string) => {
+    const value = typeof tick === 'number' ? tick : tick.value;
+    const podpisDeleniya =
+      typeof tick === 'number'
+        ? chislo(value) + (unit === undefined ? '' : ` ${unit}`)
+        : tick.label;
+    return (
+      <g key={key} className="pr-tick">
+        <line x1={px(value)} y1={AXIS_Y - 7} x2={px(value)} y2={AXIS_Y + 7} />
+        <text x={px(value)} y={AXIS_Y + 26} textAnchor="middle">
+          {podpisDeleniya}
+        </text>
+      </g>
+    );
+  };
 
-  return (
-    <svg
-      className={clsx('pr-line', `pr-is-${state}`, className)}
-      viewBox={`0 0 ${VB_W} ${VB_H}`}
-      width={VB_W}
-      height={VB_H}
-      role="img"
-      aria-label={podpis}
-    >
-      {/* Верхний уровень: условие x > c, область вправо. Его нет, когда
-          левая граница не задана, и нет до ответа. */}
-      {c === undefined || !vidnoPeresechenie ? null : (
-        <>
-          <rect
-            className="pr-band"
-            x={xc}
-            y={UPPER_Y}
-            width={X1 + OVERHANG - xc}
-            height={AXIS_Y - UPPER_Y}
-          />
-          <line className="pr-band-edge" x1={xc} y1={UPPER_Y} x2={X1 + OVERHANG} y2={UPPER_Y} />
-          <line className="pr-band-rule" x1={xc} y1={UPPER_Y} x2={xc} y2={AXIS_Y} />
-          <text className="pr-math pr-band-label" x={xc + 10} y={UPPER_Y - 8}>
-            {`${axisLabel} > ${chislo(c)}`}
-          </text>
-        </>
-      )}
+  /**
+   * Уровень условия: полупрозрачная область от границы в свою
+   * сторону, её верхний край, отвес к оси и подпись условия.
+   */
+  const uroven = (band: Band, y: number) => {
+    const { value, side, note } = band;
+    const x = px(value);
+    const kray = side === 'right' ? X1 + OVERHANG : X0 - OVERHANG;
+    const znak = side === 'right' ? '>' : '<';
+    const text = `${axisLabel} ${znak} ${chislo(value)}${note === undefined ? '' : ` (${note})`}`;
+    /* Вправо — выравнивание по умолчанию, и атрибут не пишется:
+       разметка уровня совпадает с прежней до знака. */
+    const vyravnivanie = side === 'right' ? {} : { textAnchor: 'end' as const };
+    return (
+      <>
+        <rect
+          className="pr-band"
+          x={Math.min(x, kray)}
+          y={y}
+          width={Math.abs(kray - x)}
+          height={AXIS_Y - y}
+        />
+        <line
+          className="pr-band-edge"
+          x1={Math.min(x, kray)}
+          y1={y}
+          x2={Math.max(x, kray)}
+          y2={y}
+        />
+        <line className="pr-band-rule" x1={x} y1={y} x2={x} y2={AXIS_Y} />
+        <text
+          className="pr-math pr-band-label"
+          x={side === 'right' ? x + 10 : x - 10}
+          y={y - 8}
+          {...vyravnivanie}
+        >
+          {text}
+        </text>
+      </>
+    );
+  };
 
-      {/* Нижний уровень: условие x < d, область влево. Его нет, когда
-          правая граница не задана: одно условие — один уровень. */}
-      {d === undefined || !vidnoPeresechenie ? null : (
-        <>
-          <rect
-            className="pr-band"
-            x={X0 - OVERHANG}
-            y={LOWER_Y}
-            width={xd - (X0 - OVERHANG)}
-            height={AXIS_Y - LOWER_Y}
-          />
-          <line className="pr-band-edge" x1={X0 - OVERHANG} y1={LOWER_Y} x2={xd} y2={LOWER_Y} />
-          <line className="pr-band-rule" x1={xd} y1={LOWER_Y} x2={xd} y2={AXIS_Y} />
-          <text className="pr-math pr-band-label" x={xd - 10} y={LOWER_Y - 8} textAnchor="end">
-            {`${axisLabel} < ${chislo(d)}`}
-          </text>
-        </>
-      )}
+  const risunok = (
+    <>
+      {/* Верхний уровень: по умолчанию условие x > c, область вправо.
+          Его нет, когда левая граница не задана, и нет до ответа. */}
+      {verhniy === null || !vidnoPeresechenie ? null : uroven(verhniy, UPPER_Y)}
+
+      {/* Нижний уровень: по умолчанию условие x < d, область влево.
+          Его нет, когда правая граница не задана: одно условие —
+          один уровень. */}
+      {nizhniy === null || !vidnoPeresechenie ? null : uroven(nizhniy, LOWER_Y)}
 
       {/* Ось со стрелкой и её имя. */}
       <line className="pr-axis-line" x1={X0 - 34} y1={AXIS_Y} x2={X1 + 46} y2={AXIS_Y} />
@@ -190,9 +266,29 @@ export function CoordinateLine({
         <line className="pr-favorable" x1={xc} y1={AXIS_Y} x2={xd} y2={AXIS_Y} />
       ) : null}
 
-      {[min, ...(c === undefined ? [] : [c]), ...(d === undefined ? [] : [d]), max]
-        .filter((value, i, all) => all.indexOf(value) === i)
-        .map((value, i) => delenie(value, `t${i}`))}
+      {(
+        ticks ??
+        [min, ...(c === undefined ? [] : [c]), ...(d === undefined ? [] : [d]), max].filter(
+          (value, i, all) => all.indexOf(value) === i,
+        )
+      ).map((tick, i) => delenie(tick, `t${i}`))}
+
+      {/* Скоба под осью: итоговый промежуток словами условия. */}
+      {brace === undefined ? null : (
+        <g className="pr-brace">
+          {/* «П» под отрезком: концы вниз, перекладина под подписями
+              делений. */}
+          <path d={`M${px(brace.from)} ${AXIS_Y + 34} v10 H${px(brace.to)} v-10`} />
+          <text
+            className="pr-math"
+            x={(px(brace.from) + px(brace.to)) / 2}
+            y={AXIS_Y + 72}
+            textAnchor="middle"
+          >
+            {brace.label}
+          </text>
+        </g>
+      )}
 
       {/* Кружки границ видны всегда: это часть условия, а не ответа. */}
       {c === undefined ? null : kruzhok(xc, leftBoundary, 'bc')}
@@ -216,6 +312,21 @@ export function CoordinateLine({
           {`L = ${chislo(max)} − ${chislo(min)} = ${chislo(L)}`}
         </text>
       ) : null}
+    </>
+  );
+
+  return (
+    <svg
+      className={clsx('pr-line', `pr-is-${state}`, className)}
+      viewBox={`0 0 ${VB_W} ${vysota}`}
+      width={VB_W}
+      height={vysota}
+      role="img"
+      aria-label={podpis}
+    >
+      {/* Верхнее поле сдвигает рисунок вниз. Поля нет — нет и
+          обёртки: разметка та же, что была до появления теории. */}
+      {verhneePole === 0 ? risunok : <g transform={`translate(0 ${verhneePole})`}>{risunok}</g>}
     </svg>
   );
 }

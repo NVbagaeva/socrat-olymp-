@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useState, type ReactNode } from 'react';
-import { Modal } from '@/components/ui';
+import Image from 'next/image';
+import { HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
-import { SODERZHANIE, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
+import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
 
 export interface TeoriyaShellProps {
   razdely: readonly TeoriyaRazdel[];
@@ -97,6 +98,20 @@ export function TeoriyaShell({ razdely, tela }: TeoriyaShellProps) {
           <h2 className="topic-side__title">{SODERZHANIE.title}</h2>
           <p className="vteor-side__lead">{SODERZHANIE.lead}</p>
           {spisok}
+
+          {/* Картинка с подписью под содержанием — из макета: колонка
+              не обрывается списком. На узком экране колонки нет, и
+              декор не показывается вовсе. */}
+          <div className="vteor-side__decor" aria-hidden="true">
+            <Image
+              className="vteor-side__kartinka"
+              src={TEORIYA_DEKOR.src}
+              alt={TEORIYA_DEKOR.alt}
+              width={TEORIYA_DEKOR.width}
+              height={TEORIYA_DEKOR.height}
+            />
+            <HandNote className="topic-side__note">{TEORIYA_DEKOR.note}</HandNote>
+          </div>
         </aside>
       </div>
 
