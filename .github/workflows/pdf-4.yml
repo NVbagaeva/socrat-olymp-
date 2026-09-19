@@ -16,7 +16,7 @@ name: PDF 4
 
 on:
   push:
-    branches: ['claude/task-4-print-**']
+    branches: ['claude/task-4-**', 'claude/task-5-**']
     paths:
       - 'app/package.json'
       - 'app/src/lib/sheet/**'
@@ -87,7 +87,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/pnpm-lock.yaml
           git commit -m "pnpm-lock.yaml: playwright для сборки PDF [skip ci]"
-          git push origin HEAD:${GITHUB_REF_NAME}
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
 
       # Браузер ставится отдельной командой, а не постустановочным
       # скриптом пакета: pnpm 10 их не запускает, если пакета нет
@@ -163,6 +164,16 @@ jobs:
             echo "файлы не менялись"
             exit 0
           fi
+          # Байты у двух сборок расходятся всегда: в файле лежат дата
+          # печати и внутренние идентификаторы. Смотрим содержимое —
+          # число страниц и текст страниц; совпало, значит коммитить
+          # нечего, иначе история копится из одинаковых файлов.
+          echo "сравнение с файлами ветки:"
+          if [ "$(node app/scripts/pdf-changed.mjs app/public/materials/zadanie-4)" = same ]; then
+            echo "содержимое то же — коммит не нужен"
+            exit 0
+          fi
           git commit -m "Сборник №4: пересобранные PDF [skip ci]"
-          git push origin HEAD:${GITHUB_REF_NAME}
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
           

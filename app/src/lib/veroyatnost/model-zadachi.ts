@@ -8,7 +8,9 @@
  * проверяет test:secrets.
  */
 
+import { altIllyustratsii } from './illyustratsii';
 import {
+  imyaIllyustratsii,
   putIllyustratsii,
   type ModelShag,
   type Parametry,
@@ -59,8 +61,7 @@ export function modelVarianta(prototype: Prototype, variant: Variant): ProblemMo
     answer: { value: otvet, display: dec(otvet) },
     illustration: {
       path: putIllyustratsii(prototype.id, variant.n),
-      alt: prototype.nazvanie,
-      ratio: '4:3',
+      alt: altIllyustratsii(imyaIllyustratsii(prototype.id, variant.n)),
     },
   };
 }
@@ -87,8 +88,7 @@ export function modelPrep(zadacha: PrepZadacha): ProblemModel {
     answer: { value: otvet, display: dec(otvet) },
     illustration: {
       path: putIllyustratsii(zadacha.id),
-      alt: `Задача ${zadacha.nomer} конспекта`,
-      ratio: '4:3',
+      alt: altIllyustratsii(imyaIllyustratsii(zadacha.id)),
     },
   };
 }
