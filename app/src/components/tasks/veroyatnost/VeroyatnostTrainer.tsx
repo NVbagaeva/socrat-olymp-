@@ -159,7 +159,7 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
         </div>
       ) : kind !== undefined && variant !== undefined ? (
         <Zadacha className={clsx(checked === 'right' && 'zadacha--reshena')}>
-          <ZadachaShapka tip={kind.title} znak={kind.znak}>
+          <ZadachaShapka tip={kind.plashka} znak={kind.znak}>
             <span>
               Задача {index + 1} из {round.length}
             </span>
@@ -214,9 +214,7 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
             }}
           />
 
-          <p className="zadacha__istochnik">
-            Задачник №4, задачи {kind.zadachnik[0]}–{kind.zadachnik[1]}. {kind.tip}.
-          </p>
+          <p className="zadacha__istochnik">{kind.istochnik}</p>
         </Zadacha>
       ) : null}
     </section>

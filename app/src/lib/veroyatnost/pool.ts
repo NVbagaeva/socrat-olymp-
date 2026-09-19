@@ -55,6 +55,10 @@ export interface PoolKind {
   blokTitle: string;
   /** Диапазон номеров задачника, откуда собран прототип. */
   zadachnik: readonly [number, number];
+  /** Строка об источнике под карточкой. */
+  istochnik: string;
+  /** Надпись на плашке типа: у координатной прямой — её имя. */
+  plashka: string;
   znak: Znak;
   illyustratsiya?: Illyustratsiya;
   variants: PoolVariant[];
@@ -65,11 +69,13 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
-function kindOf(prototype: Prototype): PoolKind {
+function kindOf(prototype: Prototype, zadanie: string): PoolKind {
   const blok = blokById(prototype.blok);
   if (blok === undefined) {
     throw new Error(`У прототипа ${prototype.id} неизвестный блок ${prototype.blok}`);
   }
+  /* Нулевой диапазон — прототип составлен не по задачнику. */
+  const izZadachnika = prototype.zadachnik[0] > 0;
   return {
     id: prototype.id,
     title: prototype.nazvanie,
@@ -77,6 +83,10 @@ function kindOf(prototype: Prototype): PoolKind {
     blok: blok.id,
     blokTitle: blok.nazvanie,
     zadachnik: prototype.zadachnik,
+    istochnik: izZadachnika
+      ? `Задачник №${zadanie}, задачи ${prototype.zadachnik[0]}–${prototype.zadachnik[1]}. ${prototype.tip}.`
+      : `Составлено по схеме автора. ${prototype.tip}.`,
+    plashka: prototype.pryamaya === undefined ? prototype.nazvanie : blok.nazvanie,
     znak: prototype.pryamaya === undefined ? 'zadacha' : 'pryamaya',
     ...(prototype.illyustratsiya === undefined ? {} : { illyustratsiya: prototype.illyustratsiya }),
     variants: prototype.varianty.map((variant) => {
@@ -98,11 +108,11 @@ function kindOf(prototype: Prototype): PoolKind {
 }
 
 export function bank4Pool(): Pool {
-  return { bloki: BLOKI_4, kinds: BANK_4.map(kindOf) };
+  return { bloki: BLOKI_4, kinds: BANK_4.map((p) => kindOf(p, '4')) };
 }
 
 export function bank5Pool(): Pool {
-  return { bloki: BLOKI_5, kinds: BANK_5.map(kindOf) };
+  return { bloki: BLOKI_5, kinds: BANK_5.map((p) => kindOf(p, '5')) };
 }
 
 /* ── Подготовительные задачи ─────────────────────────────────────── */

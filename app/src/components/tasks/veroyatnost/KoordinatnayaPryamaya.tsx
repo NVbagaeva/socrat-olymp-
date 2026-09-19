@@ -95,15 +95,11 @@ export function KoordinatnayaPryamaya({ pryamaya: p, className }: KoordinatnayaP
   const otX = px(ot);
   const doX = px(do_);
   /* Подпись длины — внутри самой тёмной области: в полосе под нижним
-     уровнем, где заливки наложились; при одной границе — в середине
-     единственной заливки. В узком промежутке ей там не поместиться,
-     и она уходит под числа оси. */
+     уровнем, где заливки наложились; если нижней линии нет, то в
+     середине единственной верхней заливки. В узком промежутке ей там
+     не поместиться, и она уходит под числа оси. */
   const dlinaTesno = dlina !== null && doX - otX < shirina(dlina) + 12;
-  const dlinaY = dlinaTesno
-    ? CHISLA + 26
-    : cx !== null && dx !== null
-      ? (NIZ + OS) / 2 + 7
-      : (VERH + OS) / 2 + 7;
+  const dlinaY = dlinaTesno ? CHISLA + 26 : dx !== null ? (NIZ + OS) / 2 + 7 : (VERH + OS) / 2 + 7;
 
   const x = p.peremennaya ?? 'x';
   const opisanie =
