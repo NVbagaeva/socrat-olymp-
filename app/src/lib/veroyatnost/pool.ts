@@ -180,6 +180,10 @@ export function kuskiFormuly(formula: string): string[] {
  * видах — TeX для печатного листа, вёрстка KaTeX для карточки (тем же
  * набором, что и формулы в условиях: lib/tex.ts) и слова для alt.
  * В последней формуле разбора ответ выделяется жирным.
+ *
+ * Набор строгий: ошибка TeX роняет сборку, а не оставляет формулу
+ * текстом. Та же проверка идёт в автотесте банка (test:veroyatnost),
+ * где ошибка называется по задаче.
  */
 export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   if (shag.formula === undefined) {
@@ -187,7 +191,7 @@ export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
   const html = kuskiFormuly(tex)
-    .map((kusok) => typeset(`$${kusok}$`))
+    .map((kusok) => typeset(`$${kusok}$`, true))
     .join(' ');
   return { text: shag.text, tex, html, plain: texPlain(tex) };
 }
@@ -317,11 +321,9 @@ export interface PrepPoolBlok {
   zadachi: PrepPoolZadacha[];
 }
 
-/** Картинка к условию задачи без модели: из поля задачи или по её id. */
+/** Картинка к условию задачи без модели — по подбору, и только если файл есть. */
 function kartinkaPrep(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
-  const svoya = zadacha.illyustratsiya;
-  const kartinka =
-    svoya === undefined ? kartinka5(zadacha.id) : { path: svoya.src, alt: svoya.alt };
+  const kartinka = kartinka5(zadacha.id);
   return kartinka !== undefined && illyustratsiyaEst(kartinka.path) ? kartinka : undefined;
 }
 

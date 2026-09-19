@@ -9,6 +9,11 @@
    разбора не равен ответу, где ответ не пишется в клетки ЕГЭ, какие
    варианты из источников не прошли проверку и есть ли повторы.
 
+   Отдельно набирает формулы всех разборов настоящим KaTeX в строгом
+   режиме — тем же кодом, что и сборка (pool.ts). Формула, которую
+   KaTeX не принял, называется по задаче и роняет проверку: на сборке
+   молчаливого отката формулы в текст нет, и здесь его тоже нет.
+
    Ненулевой код возврата — банк не сходится.
 
    Сама проверка живёт в src/lib/veroyatnost/selftest.ts: здесь
@@ -50,12 +55,13 @@ function walk(dir) {
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'veroyatnost-'));
 const src = path.join(root, 'src', 'lib');
 
-/* Банк тянет за собой разбор ответа из lib/answer.ts и источник
-   случайных чисел генератора из lib/zadanie3/podhod.ts — переводим
-   их вместе с папкой раздела. */
+/* Банк тянет за собой разбор ответа из lib/answer.ts, источник
+   случайных чисел генератора из lib/zadanie3/podhod.ts и набор формул
+   из lib/tex.ts — переводим их вместе с папкой раздела. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
   path.join(src, 'answer.ts'),
+  path.join(src, 'tex.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
@@ -182,7 +188,57 @@ console.log(
 );
 labirint.forEach((item) => console.log(`   ${item}`));
 
+/* Набор формул разборов настоящим KaTeX — тем же кодом, что на сборке.
+   lib/tex.ts берёт KaTeX через graph/katex.js, а тот тянет CSS и в
+   Node не грузится; вместо него в переводе лежит модуль с тем же
+   экспортом, который берёт katex из зависимостей проекта по полному
+   пути — из временной папки простой require('katex') его не нашёл бы.
+   Нет KaTeX — нет и проверки, а значит и зелёного результата. */
+const tex = { shagov: 0, formul: 0, oshibki: [] };
+let katexPut;
+try {
+  katexPut = require0.resolve('katex');
+} catch {
+  tex.oshibki.push('KaTeX не установлен (pnpm install): набор формул не проверен');
+}
+if (katexPut !== undefined) {
+  fs.mkdirSync(path.join(out, 'graph'), { recursive: true });
+  fs.writeFileSync(
+    path.join(out, 'graph', 'katex.js'),
+    `exports.katex = require(${JSON.stringify(katexPut)});\n`,
+  );
+  const { shagiRazbora } = require0(path.join(out, 'veroyatnost', 'pool.js'));
+  const nabrat = (imya, shagi) => {
+    try {
+      const razbor = shagiRazbora(shagi);
+      tex.shagov += razbor.length;
+      tex.formul += razbor.filter((shag) => shag.html !== undefined).length;
+    } catch (error) {
+      tex.oshibki.push(`${imya}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+  for (const prototype of [...BANK_4, ...BANK_5, ...KONSPEKT_4]) {
+    for (const variant of prototype.varianty) {
+      nabrat(`${prototype.id} вариант ${variant.n}`, prototype.shagi(variant.params));
+    }
+  }
+  for (const blok of [...PODGOTOVKA_4, ...PODGOTOVKA_5]) {
+    for (const zadacha of blok.zadachi) {
+      nabrat(zadacha.id, zadacha.shagi);
+    }
+  }
+}
+
+console.log(`\nнабор формул KaTeX: шагов ${tex.shagov}, из них с формулой ${tex.formul}`);
+console.log(`  формул, которые KaTeX не принял: ${tex.oshibki.length}`);
+tex.oshibki.slice(0, 40).forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (tex.oshibki.length > 0) {
+  console.error('\nФормулы разборов не набираются.');
+  process.exit(1);
+}
 
 if (labirint.length > 0) {
   console.error('\nЛабиринт разошёлся с рисунком.');

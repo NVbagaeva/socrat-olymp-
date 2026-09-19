@@ -111,31 +111,15 @@
   max-width: 68ch;
 }
 
-/* Место под иллюстрацию: рамка пунктиром, пропорция 4:3. Подложка —
-   мягкий синий, чтобы пустое место не читалось как ошибка загрузки. */
+/* Иллюстрация под условием: только когда файл есть, пропорцию держит
+   она сама. Без файла карточка места под картинку не отводит. */
 .pc__ill {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 3;
-  margin: 0;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
-  color: var(--color-text-tertiary);
-  font-size: var(--fs-caption);
-  text-align: center;
-}
-
-/* Файл иллюстрации есть: картинка вместо рамки, пропорцию держит она. */
-.pc__ill--img {
   display: block;
-  aspect-ratio: auto;
-  border: 0;
-  background: none;
+  margin: 0;
   overflow: hidden;
   border-radius: var(--radius-lg);
 }
-.pc__ill--img img {
+.pc__ill img {
   display: block;
   width: 100%;
   height: auto;

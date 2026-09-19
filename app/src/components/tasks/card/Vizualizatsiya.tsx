@@ -17,8 +17,11 @@ import type { Parametry, Podsvetka } from '@/lib/veroyatnost/model';
  *
  * Поле `method` параметров выбирает компонент; подсветка благоприятного
  * приходит отдельно и только после ответа — до него рисунок показывает
- * лишь то, что есть в условии. Это единственное место, где модель
- * встречается с компонентами: карточка про конкретные рисунки не знает.
+ * лишь то, что есть в условии, и остаётся заготовкой: плитки без
+ * количеств, таблица без сумм в клетках, дерево без вероятностей
+ * на ветвях. Числа открываются вместе с решением. Это единственное
+ * место, где модель встречается с компонентами: карточка про
+ * конкретные рисунки не знает.
  */
 
 export interface VizualizatsiyaProps {
@@ -53,7 +56,9 @@ export function podpisRisunka(parametry: Parametry, podsvetka?: Podsvetka): Reac
       const counts = parametry.counts;
       const n = (counts ?? parametry.outcomes.map(() => 1)).reduce((s, c) => s + c, 0);
       if (podsvetka?.method !== 'direct-count') {
-        return `Все исходы: ${n} ${counts === undefined ? 'плиток' : 'объектов'}`;
+        /* До ответа число объектов за плитками не называется: с ним
+           ответ считался бы в уме. */
+        return counts === undefined ? `Все исходы: ${n} плиток` : 'Все исходы — группами';
       }
       const m = podsvetka.favorable.reduce((s, i) => s + (counts?.[i] ?? 1), 0);
       return `Все исходы: ${n}, благоприятные — ${m}`;
@@ -152,6 +157,7 @@ export function Vizualizatsiya({
           {...(parametry.columns === undefined ? {} : { columns: parametry.columns })}
           {...(podsvetka?.method === 'direct-count' ? { favorable: podsvetka.favorable } : {})}
           showCounts={otkryto}
+          blank={!otkryto}
           state={state}
           {...(className === undefined ? {} : { className })}
         />
@@ -172,6 +178,7 @@ export function Vizualizatsiya({
             ? { favorableCells: podsvetka.favorableCells }
             : {})}
           showCounts={otkryto}
+          blank={!otkryto}
           state={state}
           {...(className === undefined ? {} : { className })}
         />
@@ -230,6 +237,7 @@ export function Vizualizatsiya({
             : {})}
           showProducts={otkryto}
           showSum={otkryto}
+          blank={!otkryto}
           state={state}
           {...(className === undefined ? {} : { className })}
         />

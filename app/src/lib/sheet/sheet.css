@@ -660,3 +660,80 @@ body {
   font-weight: 700;
   color: var(--sheet-ink);
 }
+
+/* ══════════════════════════════════════════════════════════
+   Решение по шагам в карточке — файл «Для учителя»
+   ══════════════════════════════════════════════════════════ */
+.sheet-task-solution {
+  margin-top: calc(var(--sheet-step) * 2);
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
+.sheet-steps {
+  margin: 0;
+  padding-left: calc(var(--sheet-step) * 4);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--sheet-step) * 0.75);
+}
+
+.sheet-step .math { margin-left: calc(var(--sheet-step) * 1); white-space: nowrap; }
+
+/* Строка ответа под решением — жирная, чернилами. */
+.sheet-task-answer {
+  margin: calc(var(--sheet-step) * 1.5) 0 0;
+  font-size: var(--sheet-fs-body);
+  color: var(--sheet-ink);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Широкий рисунок под условием: ось, дерево
+   ══════════════════════════════════════════════════════════ */
+.sheet-task--stack .sheet-task-body { flex-direction: column; align-items: stretch; }
+.sheet-task--stack .sheet-figure { align-self: flex-start; max-width: 100%; }
+.sheet-task--stack .sheet-answer-line { padding-top: calc(var(--sheet-step) * 2); }
+
+/* ══════════════════════════════════════════════════════════
+   Разобранный пример — кусок потока в оформлении «Повторяем»
+   ══════════════════════════════════════════════════════════ */
+.sheet-example {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: calc(var(--sheet-step) * 3);
+  padding: calc(var(--sheet-step) * 3) calc(var(--sheet-step) * 4);
+  background: var(--sheet-recap-bg);
+  border: var(--sheet-rule-width) solid var(--sheet-recap-line);
+  border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-recap-bar);
+  border-radius: var(--sheet-radius-lg);
+  font-size: var(--sheet-fs-small);
+  break-inside: avoid;
+}
+
+/* Подпись «пример» — плашка, как номер пункта. */
+.sheet-example-label {
+  flex: none;
+  padding: calc(var(--sheet-step) * 0.5) calc(var(--sheet-step) * 2);
+  border-radius: var(--sheet-radius-sm);
+  background: var(--sheet-num-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-num-line);
+  color: var(--sheet-num-ink);
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 700;
+}
+
+.sheet-example-text { flex: 1 1 0; min-width: 0; }
+.sheet-example-text .sheet-task-question { font-size: var(--sheet-fs-small); }
+.sheet-example-title {
+  margin: 0 0 calc(var(--sheet-step) * 1);
+  font-size: var(--sheet-fs-body);
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+.sheet-example .sheet-task-solution { margin-top: calc(var(--sheet-step) * 1.5); }
+.sheet-example .sheet-figure { flex: none; }
+
+/* Широкий рисунок примера — под текстом, во всю ширину рамки. */
+.sheet-example--stack .sheet-figure { flex: 1 1 100%; display: flex; justify-content: center; }
+.sheet-example--stack .sheet-figure svg { width: auto; }

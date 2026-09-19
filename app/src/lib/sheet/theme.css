@@ -109,6 +109,25 @@
   /* Толщина линий чертежа: в цвете смысл несёт цвет. */
   --graph-curve-a-width: 3.2;
   --graph-curve-b-width: 3.2;
+
+  /* Рисунки вероятности (components/probability): те же токены сайта,
+     что ждёт probability.css. Синий строит рисунок, оранжевый
+     отмечает благоприятное. */
+  --color-accent: #e07a2f;
+  --color-surface-soft: #e8f0fc;
+  --color-border: #e4ebf3;
+  --color-border-strong: #cfdae8;
+  --color-border-info: #d7e5fa;
+  --color-text-secondary: #667389;
+  --color-text-brand: #0b1f45;
+  --color-text-inverse: #ffffff;
+  --color-track: #eff3f8;
+  --color-heat-2: #d5e4fa;
+  --color-heat-3: #a9c8f3;
+  --color-heat-4: #6098e6;
+  --color-success: #16a34a;
+  --color-error: #dc2626;
+  --color-focus-ring: #e8f0fc;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -180,4 +199,24 @@
      штриховыми, их рисует сам движок. */
   --graph-curve-a-width: 2;
   --graph-curve-b-width: 3.6;
+
+  /* Рисунки вероятности: заливок нет, благоприятное — штриховкой
+     (probability-sheet.css), группы сетки — тремя серыми. Текст
+     на штриховке чёрный с белой обводкой, поэтому «инверсный» цвет
+     здесь тоже чёрный. */
+  --color-accent: #000000;
+  --color-surface-soft: transparent;
+  --color-border: #6b6b6b;
+  --color-border-strong: #6b6b6b;
+  --color-border-info: #6b6b6b;
+  --color-text-secondary: #3d3d3d;
+  --color-text-brand: #000000;
+  --color-text-inverse: #000000;
+  --color-track: #e6e6e6;
+  --color-heat-2: #e6e6e6;
+  --color-heat-3: #c8c8c8;
+  --color-heat-4: #a3a3a3;
+  --color-success: #000000;
+  --color-error: #000000;
+  --color-focus-ring: transparent;
 }

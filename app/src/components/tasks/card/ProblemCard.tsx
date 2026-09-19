@@ -179,10 +179,8 @@ export function ProblemCard({
     </header>
   );
 
-  /* Иллюстрация: есть файл — картинка. В полной карточке без файла
-     стоит рамка 4:3, место под будущую blue-glass иллюстрацию; в
-     варианте condition без файла нет ничего, как и у задачи с
-     чертежом: второй картинки рядом с лабиринтом не будет. */
+  /* Иллюстрация: есть файл — картинка справа от условия, нет файла —
+     ничего: ни рамки, ни места под неё, условие занимает всю ширину. */
   const kartinka =
     variant === 'condition' || model === undefined
       ? zadacha.illustration
@@ -191,17 +189,9 @@ export function ProblemCard({
         : undefined;
 
   const illyustratsiya =
-    kartinka !== undefined ? (
-      <figure className="pc__ill pc__ill--img">
+    kartinka === undefined ? null : (
+      <figure className="pc__ill">
         <img src={kartinka.path} alt={kartinka.alt} loading="lazy" />
-      </figure>
-    ) : variant === 'condition' || (model === undefined && zadacha.risunok !== undefined) ? null : (
-      <figure className="pc__ill" aria-hidden="true">
-        <figcaption>
-          место под иллюстрацию
-          <br />
-          blue-glass · 4:3
-        </figcaption>
       </figure>
     );
 

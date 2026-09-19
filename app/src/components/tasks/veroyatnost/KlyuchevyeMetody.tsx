@@ -9,6 +9,7 @@ import {
 import { METODY_02, METODY_4, type MetodOpisanie02 } from '@/content/veroyatnost-metody';
 import { typeset } from '@/lib/tex';
 import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
+import { HLEB, PIROZHKI_PUTI, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/veroyatnost/primery';
 
 /**
  * Вкладка «Ключевые методы решения» — раздел 02 референса.
@@ -41,15 +42,6 @@ const PIROZHKI = [
   ...Array.from({ length: 5 }, () => 'мясо'),
   ...Array.from({ length: 4 }, () => 'капуста'),
   ...Array.from({ length: 3 }, () => 'вишня'),
-];
-
-const PIROZHKI_TREE = [
-  { id: 'a', parent: null, label: 'с мясом', p: 0.8 },
-  { id: 'b', parent: null, label: 'без мяса', p: 0.2 },
-  { id: 'aa', parent: 'a', label: 'с мясом', p: 0.8 },
-  { id: 'ab', parent: 'a', label: 'без мяса', p: 0.2 },
-  { id: 'ba', parent: 'b', label: 'с мясом', p: 0.8 },
-  { id: 'bb', parent: 'b', label: 'без мяса', p: 0.2 },
 ];
 
 /* Рисунки пяти методов задания №4; у «формулы» (№5) рисунка нет. */
@@ -85,13 +77,20 @@ const RISUNKI: Partial<Record<Method, ReactNode>> = {
     />
   ),
   'coordinate-line': (
-    <CoordinateLine min={600} max={1000} c={700} d={900} showLength highlightMode="answer" />
+    <CoordinateLine
+      min={HLEB.min}
+      max={HLEB.max}
+      c={HLEB.c}
+      d={HLEB.d}
+      showLength
+      highlightMode="answer"
+    />
   ),
   'probability-tree': (
     <ProbabilityTree
-      levels={['1-й пирожок', '2-й пирожок']}
-      branches={PIROZHKI_TREE}
-      highlightedPaths={['aa']}
+      levels={PIROZHKI_UROVNI}
+      branches={PIROZHKI_VETVI}
+      highlightedPaths={PIROZHKI_PUTI}
       showProducts
       showSum
     />

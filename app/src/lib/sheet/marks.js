@@ -84,7 +84,34 @@ function arrow() {
     '</svg>';
 }
 
-const api = { logoMark: logoMark, socialIcon: socialIcon, arcs: arcs, arrow: arrow };
+/**
+ * Паттерны штриховки для ч/б печати. Кладутся в документ один раз
+ * (spec.defs), а рисунки ссылаются на них по имени: url(#sheet-hatch).
+ *
+ * Единицы — пространство того рисунка, который штрихуется, поэтому
+ * шаг подобран под масштаб рисунков раздела: около миллиметра на
+ * бумаге. Цвет штриха — чернила темы.
+ *
+ *   sheet-hatch        плотная косая штриховка: благоприятная область
+ *   sheet-hatch-light  редкая, наклон вправо: область первого условия
+ *   sheet-hatch-back   редкая, наклон влево: область второго условия;
+ *                      там, где они накладываются, выходит клетка
+ */
+function hatchDefs() {
+  function pattern(id, step, width, angle) {
+    return '<pattern id="' + id + '" patternUnits="userSpaceOnUse" width="' + step +
+      '" height="' + step + '" patternTransform="rotate(' + angle + ')">' +
+      '<line x1="0" y1="0" x2="0" y2="' + step + '" stroke="var(--sheet-ink)" ' +
+      'stroke-width="' + width + '"/></pattern>';
+  }
+  return '<svg class="sheet-defs" width="0" height="0" aria-hidden="true"><defs>' +
+    pattern('sheet-hatch', 6, 1.4, 45) +
+    pattern('sheet-hatch-light', 9, 1, 45) +
+    pattern('sheet-hatch-back', 9, 1, -45) +
+    '</defs></svg>';
+}
+
+const api = { hatchDefs: hatchDefs, logoMark: logoMark, socialIcon: socialIcon, arcs: arcs, arrow: arrow };
 
 export default api;
-export { logoMark, socialIcon, arcs, arrow };
+export { hatchDefs, logoMark, socialIcon, arcs, arrow };

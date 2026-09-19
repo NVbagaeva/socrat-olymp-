@@ -29,6 +29,11 @@ export interface OutcomeGridProps {
   /** Клик по клетке отмечает её. Передан — клетки становятся кнопками. */
   onCellClick?: (row: number, column: number) => void;
   showCounts?: boolean;
+  /**
+   * Заготовка: клетки пустые, без сумм и пар — ученик заполняет их
+   * сам. Размер клеток считается по содержимому, как и с числами.
+   */
+  blank?: boolean;
   state?: RisunokState;
   alt?: string;
   className?: string;
@@ -56,6 +61,7 @@ export function OutcomeGrid({
   selectedCell,
   onCellClick,
   showCounts = false,
+  blank = false,
   state = 'default',
   alt,
   className,
@@ -187,20 +193,22 @@ export function OutcomeGrid({
                   })}
             >
               <rect x={x} y={y} width={cellW} height={CELL} />
-              <text
-                x={x + cellW / 2}
-                y={y + CELL / 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-              >
-                {cellContent(r, c)}
-              </text>
+              {blank ? null : (
+                <text
+                  x={x + cellW / 2}
+                  y={y + CELL / 2}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                >
+                  {cellContent(r, c)}
+                </text>
+              )}
             </g>
           );
         }),
       )}
 
-      {showCounts ? (
+      {showCounts && !blank ? (
         <text className="pr-counts" x="0" y={height - 8}>
           <tspan className="pr-math">n</tspan>
           {` = ${rows} · ${columns} = ${n}`}

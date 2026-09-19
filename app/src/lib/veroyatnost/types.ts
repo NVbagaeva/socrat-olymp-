@@ -81,12 +81,6 @@ export interface Metodika {
   vizual(p: Params): Vizual;
 }
 
-/** Картинка справа от условия: файл из public/images. */
-export interface Illyustratsiya {
-  src: string;
-  alt: string;
-}
-
 export interface Prototype {
   /** Идентификатор: «p4-01». Он же ключ прогресса и фильтра. */
   id: string;
@@ -127,8 +121,6 @@ export interface Prototype {
    * метода (bank4/vizual.ts, otrezok) — у рисунка и разбора одни числа.
    */
   pryamaya?(p: Params): Pryamaya;
-  /** Картинка к условию, одна на прототип. */
-  illyustratsiya?: Illyustratsiya;
   varianty: readonly Variant[];
   /** Метод и рисунок. У задания №4 обязательна — см. checkModel. */
   metodika?: Metodika;
@@ -226,8 +218,6 @@ export interface PrepZadacha {
   prototip?: Prototype;
   /** Координатная прямая к разбору — см. Prototype.pryamaya. */
   pryamaya?: Pryamaya;
-  /** Картинка к условию. */
-  illyustratsiya?: Illyustratsiya;
 }
 
 /** Блок подготовительных задач — заголовок из конспекта. */
