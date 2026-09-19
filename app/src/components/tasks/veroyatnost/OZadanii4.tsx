@@ -1,7 +1,10 @@
-import { O_ZADANII_4 } from '@/content/veroyatnost-metody';
-import { typeset } from '@/lib/tex';
-import { METODY_4 } from '@/lib/veroyatnost/model';
-import { metodAnchor } from './KlyuchevyeMetody';
+import fs from 'node:fs';
+import path from 'node:path';
+import Image from 'next/image';
+import { AlertIcon, EmptyState, HandNote, NavIcon } from '@/components/ui';
+import { FOTO_4, O_ZADANII_4, STATISTIKA_4 } from '@/content/veroyatnost-o-zadanii';
+import { HintIcon } from '../prep/PrepIcons';
+import { Roscherk, ShapochkaIcon } from './Ikonki4';
 
 export interface OZadanii4Props {
   /** Адрес раздела без хвоста: /zadaniya/4. */
@@ -9,50 +12,121 @@ export interface OZadanii4Props {
 }
 
 /**
- * Вкладка «О задании» задания №4 — раздел 01 референса.
+ * Вкладка «О задании» задания №4 — по утверждённому макету.
  *
- * Пять шагов решения и пять плиток методов, каждая ведёт к своей
- * карточке во вкладке «Ключевые методы решения». Текст — из
- * референса, формулы набраны KaTeX на сборке.
+ * Две колонки: слева история с фотографией и рукописной подписью,
+ * справа три карточки — решаемость, какие задачи встречаются, о чём
+ * помнить. Все тексты и числа приходят из content/veroyatnost-o-zadanii:
+ * в разметке строк нет.
+ *
+ * Значки берутся готовыми: столбики статистики и восклицательный знак
+ * из общего набора, лампочка из подготовки. Своя здесь одна шапочка
+ * выпускника — см. Ikonki4.
  */
+
+/**
+ * Лежит ли фотография на месте. Смотрится на сборке, в Node: файла
+ * нет — вкладка показывает пустое место, а не битую картинку и не
+ * чужой снимок.
+ */
+function fotoEst(): boolean {
+  try {
+    return fs.statSync(path.join(process.cwd(), 'public', FOTO_4.src)).isFile();
+  } catch {
+    return false;
+  }
+}
+
 export function OZadanii4({ base }: OZadanii4Props) {
+  const { istoriya, reshaemost, zadachi, vazhno } = O_ZADANII_4;
+
   return (
     <div className="z4-about">
-      <section className="z4-about__lead">
-        <h2 className="t-h2 z4-about__title">{O_ZADANII_4.title}</h2>
-        <p className="z4-about__text">{O_ZADANII_4.lead}</p>
+      <section className="z4-about__istoriya">
+        <h2 className="z4-about__h2">{istoriya.title}</h2>
+        <p className="z4-about__text">{istoriya.text}</p>
+
+        <figure className="z4-about__figura">
+          {fotoEst() ? (
+            <Image
+              className="z4-about__foto"
+              src={FOTO_4.src}
+              alt={FOTO_4.alt}
+              width={FOTO_4.width}
+              height={FOTO_4.height}
+            />
+          ) : (
+            <EmptyState
+              className="z4-about__pusto"
+              title={FOTO_4.pusto.title}
+              description={FOTO_4.pusto.description}
+            />
+          )}
+          <figcaption className="z4-about__podpis">
+            <HandNote className="z4-about__ruka">{istoriya.podpis}</HandNote>
+            <Roscherk />
+          </figcaption>
+        </figure>
       </section>
 
-      <ol className="z4-pipeline" aria-label="Порядок решения">
-        {O_ZADANII_4.shagi.map((shag, i) => (
-          <li key={shag.title} className="z4-pipeline__step">
-            <span className="z4-pipeline__no" aria-hidden="true">
-              {i + 1}
+      <div className="z4-about__karty">
+        {/* Решаемость: число слева, пояснение справа. */}
+        <section className="z4-karta z4-stat">
+          <div className="z4-stat__chislo">
+            <span className="z4-stat__ico" aria-hidden="true">
+              <NavIcon name="stats" />
             </span>
-            <span className="z4-pipeline__title">{shag.title}</span>
-            <span className="z4-pipeline__lead">{shag.lead}</span>
-          </li>
-        ))}
-      </ol>
+            <p className="z4-stat__value">{STATISTIKA_4.znachenie}</p>
+            <p className="z4-stat__label">{STATISTIKA_4.podpis(STATISTIKA_4.god)}</p>
+            <p className="z4-stat__istochnik">{STATISTIKA_4.istochnik}</p>
+          </div>
+          <p className="z4-stat__text">{reshaemost.text}</p>
+        </section>
 
-      <section className="z4-about__metody">
-        <h3 className="t-h4 z4-about__sub">{O_ZADANII_4.metodyTitle}</h3>
-        <p className="z4-about__text">{O_ZADANII_4.metodyLead}</p>
-        <ul className="z4-metody-grid">
-          {METODY_4.map((m) => (
-            <li key={m.id}>
-              <a className="z4-metod-tile" href={`${base}/metody/#${metodAnchor(m.id)}`}>
-                <span className="z4-metod-tile__no">Метод {m.nomer}</span>
-                <span className="z4-metod-tile__title">{m.nazvanie}</span>
-                <span
-                  className="z4-metod-tile__formula"
-                  dangerouslySetInnerHTML={{ __html: typeset(O_ZADANII_4.korotko[m.id] ?? '') }}
-                />
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+        {/* Какие задачи встречаются. */}
+        <section className="z4-karta z4-zadachi">
+          <h3 className="z4-karta__title">
+            <span className="z4-karta__ico" aria-hidden="true">
+              <ShapochkaIcon />
+            </span>
+            {zadachi.title}
+          </h3>
+          <p className="z4-karta__text">{zadachi.text}</p>
+
+          <div className="z4-shire">
+            <p className="z4-shire__title">
+              <span className="z4-shire__ico" aria-hidden="true">
+                <AlertIcon />
+              </span>
+              {zadachi.shire.title}
+            </p>
+            <ul className="z4-shire__list">
+              {zadachi.shire.punkty.map((punkt) => (
+                <li key={punkt}>{punkt}</li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="z4-karta__text z4-zadachi__razbor">
+            {zadachi.razbor.do}
+            <a className="z4-zadachi__link" href={`${base}/metody/`}>
+              {zadachi.razbor.ssylka}
+            </a>
+            {zadachi.razbor.posle}
+          </p>
+        </section>
+
+        {/* О чём помнить. */}
+        <section className="z4-karta z4-vazhno">
+          <h3 className="z4-karta__title">
+            <span className="z4-karta__ico" aria-hidden="true">
+              <HintIcon />
+            </span>
+            {vazhno.title}
+          </h3>
+          <p className="z4-karta__text">{vazhno.text}</p>
+        </section>
+      </div>
     </div>
   );
 }
