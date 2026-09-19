@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import { AlertIcon, NavIcon } from '@/components/ui';
 import { CoordinateLine } from '@/components/probability';
-import { PRYAMAYA_4 } from '@/content/veroyatnost-teoriya-4';
-import { HintIcon } from '../prep/PrepIcons';
-import { Tex } from './Tex';
+import { PRYAMAYA } from '@/content/veroyatnost-teoriya';
+import { HintIcon } from '../../prep/PrepIcons';
+import { Tex } from '../Tex';
 
 /**
- * Раздел теории «03. Координатная прямая» задания №4 — по
- * утверждённому макету.
+ * Раздел теории «Координатная прямая» задания №4 — по утверждённому
+ * макету. Третий в содержании вкладки.
  *
  * Разбор идёт двумя случаями: когда один промежуток лежит внутри
  * другого и вычесть можно, и когда они пересекаются и напрямую
@@ -16,8 +16,9 @@ import { Tex } from './Tex';
  *
  * Все схемы рисует CoordinateLine из тренажёра — той же прямой
  * ученик пользуется в подходе, и второй её здесь не заводится.
- * Тексты и формулы приходят из content/veroyatnost-teoriya-4:
- * в разметке строк нет, формулы набираются KaTeX на сборке.
+ * Тексты и формулы приходят из content/veroyatnost-teoriya —
+ * общего файла вкладки: в разметке строк нет, формулы набираются
+ * KaTeX на сборке.
  */
 
 /** Ось в теории названа заглавной X — так на макете и в условиях. */
@@ -55,15 +56,18 @@ function Uslovie({
   );
 }
 
-export function TeoriyaPryamaya4() {
-  const { nomer, title, lead, ideya, pervaya, vtoraya, vyvod, algoritm, syuzhety } = PRYAMAYA_4;
+export function KoordinatnayaPryamaya() {
+  const { nomer, title, lead, ideya, pervaya, vtoraya, vyvod, algoritm, syuzhety } = PRYAMAYA;
 
   return (
-    <div className="z4-teoriya-razdel">
-      <h2 className="z4-teoriya__h2">
-        <span className="z4-teoriya__nomer">{nomer}.</span> {title}
+    <>
+      <h2 className="vteor-razdel__title">
+        <span className="vteor-razdel__no" aria-hidden="true">
+          {nomer}
+        </span>
+        {title}
       </h2>
-      <p className="z4-teoriya__lead">{lead}</p>
+      <p className="vteor-blok__lead">{lead}</p>
 
       {/* ── Главная идея ─────────────────────────────────────────── */}
 
@@ -217,7 +221,7 @@ export function TeoriyaPryamaya4() {
 
       {/* ── Три карточки итога ───────────────────────────────────── */}
 
-      <div className="z4-teoriya__itogi">
+      <div className="z4-itogi">
         <section className="z4-itog">
           <h3 className="z4-itog__title">
             <span className="z4-itog__znak" aria-hidden="true">
@@ -261,6 +265,6 @@ export function TeoriyaPryamaya4() {
           </ul>
         </section>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Teoriya4 } from '@/components/tasks/veroyatnost/Teoriya4';
+import { TeoriyaShell, telaRazdelov4 } from '@/components/tasks/veroyatnost/teoriya';
+import { RAZDELY_4 } from '@/content/veroyatnost-teoriya';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 
 export const metadata: Metadata = {
@@ -9,10 +10,13 @@ export const metadata: Metadata = {
 /**
  * Вкладка «Теория» задания №4.
  *
- * Разделы идут подряд на одной странице, содержание — рядом.
- * Написан раздел «03. Координатная прямая»; остальные стоят в
- * содержании с пометкой «готовится»: придуманного здесь не будет.
+ * Разделы идут подряд на одной странице, содержание — рядом. Написан
+ * первый раздел, «Виды событий»; остальные стоят в содержании и
+ * честно говорят, что материал готовится: придуманного здесь нет.
+ *
+ * Страница серверная: формулы набираются KaTeX на сборке, а верные
+ * ответы самопроверки закрываются отпечатком и вниз не уезжают.
  */
 export default function Teoriya4Tab() {
-  return <Teoriya4 />;
+  return <TeoriyaShell razdely={RAZDELY_4} tela={telaRazdelov4} />;
 }
