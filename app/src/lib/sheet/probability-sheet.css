@@ -108,3 +108,36 @@
   stroke-width: 4px;
   paint-order: stroke;
 }
+
+/* ── Лабиринт задачи 33: готовый файл labirint-glass.svg ─────────── */
+
+/* Файл лабиринта неприкосновенен, поэтому лист переопределяет его
+   презентационные атрибуты снаружи. Шрифт подписей: в файле стоит
+   системный «Inter», а на листе шрифт вшит под своим именем — без
+   правила Chromium подставил бы Liberation. Буквы выходов — тот же
+   шрифт курсивом. */
+.sheet-labirint,
+.sheet-labirint text,
+.sheet-labirint tspan {
+  font-family: var(--sheet-font-sans);
+}
+
+/* Ч/б: стекло, свечения, блёстки и паук — цвет и растр размытий, на
+   ксероксе от них остаётся грязь. Остаются стены сплошными чернилами
+   и подписи. Классов в файле нет, поэтому селекторы по атрибутам:
+   тело стен — заливка градиентом, декор — обводки, кружки и вставки. */
+:root[data-sheet-theme='print'] .sheet-labirint * {
+  filter: none;
+}
+:root[data-sheet-theme='print'] .sheet-labirint path[fill='url(#glass)'] {
+  fill: var(--sheet-ink);
+}
+:root[data-sheet-theme='print'] .sheet-labirint g[clip-path],
+:root[data-sheet-theme='print'] .sheet-labirint path[stroke]:not([stroke='none']),
+:root[data-sheet-theme='print'] .sheet-labirint circle,
+:root[data-sheet-theme='print'] .sheet-labirint use {
+  display: none;
+}
+:root[data-sheet-theme='print'] .sheet-labirint text {
+  fill: var(--sheet-ink);
+}

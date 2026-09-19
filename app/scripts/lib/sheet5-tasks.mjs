@@ -80,7 +80,9 @@ function konspektTask(zadacha, withAnswers) {
     solutionHtml: withAnswers ? stepsHtml(zadacha.shagi, answer) : null,
   };
   if (zadacha.risunok !== undefined) {
-    const svg = fs.readFileSync(LABIRINT, 'utf8');
+    /* Класс на корне — за него цепляется probability-sheet.css: шрифт
+       листа и ч/б без стекла. Сам файл лабиринта не меняется. */
+    const svg = fs.readFileSync(LABIRINT, 'utf8').replace('<svg ', '<svg class="sheet-labirint" ');
     const size = figureSize(svg);
     Object.assign(task, { figureSvg: svg, figureWidth: size.width, figureBelow: size.below });
   }
