@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { ListSlova } from '@/content/veroyatnost';
+import { listSlova, type Zadanie } from '@/content/veroyatnost';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
@@ -20,8 +20,8 @@ declare global {
 export interface PechatVeroyatnostiProps {
   /** Банк задания: условия, отпечатки, закрытые разборы. */
   pool: Pool;
-  /** Слова листа этого задания: название, колонтитул, разделы ответов. */
-  list: ListSlova;
+  /** Номер задания: по нему берутся слова листа — название, колонтитул, разделы ответов. */
+  zadanie: Zadanie;
   /** Лист с ответами: те же задачи и таблица «Ответы» в конце. */
   withAnswers: boolean;
 }
@@ -44,7 +44,8 @@ function specJson(html: string): string {
  * повторно — лист будет тем же. Одна страница на оба задания: разница
  * только в банке и в словах листа.
  */
-export function PechatVeroyatnosti({ pool, list, withAnswers }: PechatVeroyatnostiProps) {
+export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyatnostiProps) {
+  const list = listSlova(zadanie);
   const query = useSearchParams();
   const params = parseSheet4Query(query);
   const [spec, setSpec] = useState<string | null>(null);

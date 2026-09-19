@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PechatVeroyatnosti } from '@/components/tasks/veroyatnost/PechatVeroyatnosti';
 import { generatorPage } from '@/content/generator';
-import { LIST_4, veroyatnostBySlug } from '@/content/veroyatnost';
+import { veroyatnostBySlug } from '@/content/veroyatnost';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <Suspense fallback={null}>
-      <PechatVeroyatnosti pool={bank4Pool()} list={LIST_4} withAnswers />
+      <PechatVeroyatnosti pool={bank4Pool()} zadanie={4} withAnswers />
     </Suspense>
   );
 }
