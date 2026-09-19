@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { Podgotovka } from '@/components/tasks/veroyatnost/Podgotovka';
+import { PodgotovkaList } from '@/components/tasks/veroyatnost/PodgotovkaList';
+import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
 
@@ -8,12 +9,16 @@ export const metadata: Metadata = {
 };
 
 /**
- * Вкладка «Подготовительные задачи» задания №5.
+ * Вкладка «Подготовительные задачи» задания №5: список блоков.
  *
- * Задачи 19–62 авторского конспекта в шести блоках на карточке
- * ProblemCard. Номеров 51–54 в конспекте нет, поэтому задач сорок,
- * а не сорок четыре.
+ * Задачи 19–62 авторского конспекта, разложенные по его же шести
+ * заголовкам. Номеров 51–54 в конспекте нет, поэтому задач сорок. Блок открывается своей страницей — как у задания №12.
  */
 export default function Podgotovka5Tab() {
-  return <Podgotovka bloki={prep5Pool()} />;
+  const bloki = prep5Pool();
+  return (
+    <PodgotovkaShell zadanie={5} base="/zadaniya/5" active="all" bloki={bloki}>
+      <PodgotovkaList zadanie={5} bloki={bloki} listHref="/zadaniya/5/podgotovka/" />
+    </PodgotovkaShell>
+  );
 }

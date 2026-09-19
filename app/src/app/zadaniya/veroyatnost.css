@@ -36,33 +36,13 @@
 
 /* ── Подготовительные задачи ────────────────────────────────────── */
 
-.vprep {
-  display: grid;
-  gap: var(--space-12);
+/* Экран блока — тот же .ptask, что у подготовки задания №12: шапка
+   со счётом, строка «Задача N из M», ряд кружков и одна задача.
+   Здесь только то, чего у №12 нет: карточка задачи вероятности и
+   выход к списку блоков. */
+.vprep__zadacha {
+  scroll-margin-top: var(--space-4);
 }
-
-.vprep__blok-head {
-  display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-}
-.vprep__blok-title {
+.vprep__gotovo {
   margin: 0;
-}
-.vprep__blok-tip {
-  color: var(--color-text-secondary);
-}
-.vprep__blok-count {
-  color: var(--color-text-tertiary);
-  font-size: 14px;
-}
-
-/* Нумерацию рисует сам список задач — номер конспекта стоит в
-   карточке, и второй ряд цифр сбоку только путал бы. */
-.vprep__list {
-  display: grid;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
