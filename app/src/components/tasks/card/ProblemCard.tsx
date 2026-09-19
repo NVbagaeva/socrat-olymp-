@@ -193,21 +193,48 @@ export function ProblemCard({
       </figure>
     );
 
-  const uslovie = (
-    <div className="pc__uslovie">
-      <p className="pc__text">{zadacha.uslovie}</p>
-      {illyustratsiya}
-    </div>
-  );
-
   if (variant === 'condition') {
     return (
       <article className={clsx('pc', 'pc--condition', className)}>
         {head}
-        {uslovie}
+        <div className="pc__uslovie">
+          <p className="pc__text">{zadacha.uslovie}</p>
+          {illyustratsiya}
+        </div>
       </article>
     );
   }
+
+  /* Рисунок метода: собирается движком по параметрам модели, а у
+     задачи без модели может быть готовый чертёж (лабиринт). */
+  const risunok = bezRisunka ? null : model !== undefined ? (
+    <figure className="pc__risunok">
+      <figcaption className="pc__risunok-podpis">
+        {podpisRisunka(model.parametry, podsvetka)}
+      </figcaption>
+      <Vizualizatsiya
+        parametry={model.parametry}
+        {...(podsvetka === undefined ? {} : { podsvetka })}
+        state={risunokState}
+      />
+    </figure>
+  ) : zadacha.risunok === undefined ? null : (
+    /* Чертёж нарисован на сборке готовой разметкой: движка в браузере
+       нет, вставляем как есть. */
+    <figure className="pc__chertezh" dangerouslySetInnerHTML={{ __html: zadacha.risunok }} />
+  );
+
+  /* Справа стоит одна картинка — иллюстрация задачи. Рисунок метода
+     попадает в колонку, только когда иллюстрации нет: две картинки
+     одна под другой перерастают условие, и слева под кнопками
+     оставалась бы пустая зона. Широкое дерево и готовый чертёж
+     (лабиринт) в колонку шириной 320 px не читаются и тоже уходят
+     вниз, на всю ширину карточки. */
+  const spravaRisunok =
+    illyustratsiya === null && !shirokiyRisunok && model !== undefined && !bezRisunka;
+  const kolonka = spravaRisunok ? risunok : illyustratsiya;
+  /* Рисунок метода на всю ширину — под условием и ответом. */
+  const risunokVnizu = spravaRisunok ? null : risunok;
 
   return (
     <article
@@ -215,8 +242,7 @@ export function ProblemCard({
         'pc',
         `pc--${state}`,
         resheniyeVidno && 'pc--solution-revealed',
-        bezRisunka && 'pc--bez-risunka',
-        shirokiyRisunok && 'pc--shirokiy-risunok',
+        kolonka === null && 'pc--bez-kolonki',
         disabled && 'pc--disabled',
         className,
       )}
@@ -224,8 +250,8 @@ export function ProblemCard({
       {head}
 
       <div className="pc__grid">
-        <div className="pc__col pc__col--uslovie">
-          {uslovie}
+        <div className="pc__part pc__part--uslovie">
+          <p className="pc__text">{zadacha.uslovie}</p>
           {/* «Метод:» — часть решения: до ответа его нет, иначе он
               подсказывал бы структуру в смешанном режиме. */}
           {razbor !== null && (state === 'correct' || resheniyeVidno) && razbor.metod !== '' ? (
@@ -235,64 +261,13 @@ export function ProblemCard({
           ) : null}
         </div>
 
-        {bezRisunka ? null : model !== undefined ? (
-          <div className="pc__col pc__col--risunok">
-            <figure className="pc__risunok">
-              <figcaption className="pc__risunok-podpis">
-                {podpisRisunka(model.parametry, podsvetka)}
-              </figcaption>
-              <Vizualizatsiya
-                parametry={model.parametry}
-                {...(podsvetka === undefined ? {} : { podsvetka })}
-                state={risunokState}
-              />
-            </figure>
-          </div>
-        ) : zadacha.risunok === undefined ? null : (
-          <div className="pc__col pc__col--risunok">
-            {/* Чертёж нарисован на сборке готовой разметкой: движка в
-                браузере нет, вставляем как есть. */}
-            <figure
-              className="pc__chertezh"
-              dangerouslySetInnerHTML={{ __html: zadacha.risunok }}
-            />
-          </div>
-        )}
+        {kolonka === null ? null : <div className="pc__part pc__part--kartinki">{kolonka}</div>}
 
-        <div className="pc__col pc__col--reshenie">
-          {resheniyeVidno && razbor !== null ? (
-            <section className="pc__reshenie" aria-live="polite">
-              <h3 className="pc__reshenie-title">Решение</h3>
-              <ol className="pc-steps">
-                {razbor.shagi.slice(0, shagov).map((shag, i) => (
-                  <li key={i} className="pc-step">
-                    <span className="pc-step__no" aria-hidden="true">
-                      {i + 1}
-                    </span>
-                    <div className="pc-step__body">
-                      <p className="pc-step__text">{shag.text}</p>
-                      {shag.html === undefined ? null : (
-                        <p
-                          className="pc-step__formula"
-                          dangerouslySetInnerHTML={{ __html: shag.html }}
-                        />
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              {otvetViden ? (
-                <p className="pc__otvet">
-                  <span className="pc__otvet-label">Ответ:</span>
-                  <b className="pc__otvet-value">{razbor.otvet}</b>
-                </p>
-              ) : (
-                <Button variant="secondary" size="sm" onClick={() => setShagov((s) => s + 1)}>
-                  {shagov < vseShagi ? `Шаг ${shagov + 1}` : 'Ответ'}
-                </Button>
-              )}
-            </section>
-          ) : (
+        {/* Ответ стоит сразу под условием: это продолжение чтения
+            задачи, а не отдельный блок в другом конце карточки.
+            Кнопки — строкой под полем, по левому краю. */}
+        <div className="pc__part pc__part--otvet">
+          {resheniyeVidno && razbor !== null ? null : (
             <div className="pc__answer">
               <label className="pc__answer-label" htmlFor={`pc-${zadacha.id}`}>
                 Ответ:
@@ -330,38 +305,78 @@ export function ProblemCard({
               ) : null}
             </div>
           )}
-        </div>
-      </div>
 
-      <footer className="pc__actions">
-        {resheniyeVidno ? (
-          <Button variant="ghost" onClick={skryt}>
-            Скрыть решение
-          </Button>
-        ) : state === 'correct' ? (
-          <Button variant="ghost" onClick={raskryt}>
-            Показать решение
-          </Button>
-        ) : (
-          <>
-            <Button onClick={proverit} disabled={disabled || value.trim() === ''}>
-              Проверить
-            </Button>
-            <Button variant="ghost" onClick={raskryt} disabled={disabled}>
-              {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
-            </Button>
-          </>
+          <footer className="pc__actions">
+            {resheniyeVidno ? (
+              <Button variant="ghost" onClick={skryt}>
+                Скрыть решение
+              </Button>
+            ) : state === 'correct' ? (
+              <Button variant="ghost" onClick={raskryt}>
+                Показать решение
+              </Button>
+            ) : (
+              <>
+                <Button onClick={proverit} disabled={disabled || value.trim() === ''}>
+                  Проверить
+                </Button>
+                <Button variant="ghost" onClick={raskryt} disabled={disabled}>
+                  {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
+                </Button>
+              </>
+            )}
+            {onNext === undefined ? null : (
+              <Button
+                variant={state === 'correct' || resheniyeVidno ? 'primary' : 'secondary'}
+                onClick={onNext}
+                disabled={disabled || state === 'before'}
+              >
+                {nextLabel}
+              </Button>
+            )}
+          </footer>
+        </div>
+
+        {risunokVnizu === null ? null : (
+          <div className="pc__part pc__part--risunok">{risunokVnizu}</div>
         )}
-        {onNext === undefined ? null : (
-          <Button
-            variant={state === 'correct' || resheniyeVidno ? 'primary' : 'secondary'}
-            onClick={onNext}
-            disabled={disabled || state === 'before'}
-          >
-            {nextLabel}
-          </Button>
-        )}
-      </footer>
+
+        {/* Решение — на всю ширину под условием и картинками: шаги
+            длинные, в узкой колонке они рвутся. */}
+        {resheniyeVidno && razbor !== null ? (
+          <section className="pc__part pc__part--reshenie" aria-live="polite">
+            <h3 className="pc__reshenie-title">Решение</h3>
+            <ol className="pc-steps">
+              {razbor.shagi.slice(0, shagov).map((shag, i) => (
+                <li key={i} className="pc-step">
+                  <span className="pc-step__no" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <div className="pc-step__body">
+                    <p className="pc-step__text">{shag.text}</p>
+                    {shag.html === undefined ? null : (
+                      <p
+                        className="pc-step__formula"
+                        dangerouslySetInnerHTML={{ __html: shag.html }}
+                      />
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+            {otvetViden ? (
+              <p className="pc__otvet">
+                <span className="pc__otvet-label">Ответ:</span>
+                <b className="pc__otvet-value">{razbor.otvet}</b>
+              </p>
+            ) : (
+              <Button variant="secondary" size="sm" onClick={() => setShagov((s) => s + 1)}>
+                {shagov < vseShagi ? `Шаг ${shagov + 1}` : 'Ответ'}
+              </Button>
+            )}
+          </section>
+        ) : null}
+      </div>
     </article>
   );
 }
