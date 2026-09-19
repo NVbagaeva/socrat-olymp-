@@ -37,6 +37,8 @@ export interface ProbabilityTreeProps {
   showSum?: boolean;
   /** Пока только сверху вниз — другого направления референс не знает. */
   direction?: 'top-to-bottom';
+  /** Заготовка: ветви без вероятностей — ученик подписывает их сам. */
+  blank?: boolean;
   state?: RisunokState;
   alt?: string;
   className?: string;
@@ -62,6 +64,7 @@ export function ProbabilityTree({
   showProducts = false,
   showSum = false,
   direction = 'top-to-bottom',
+  blank = false,
   state = 'default',
   alt,
   className,
@@ -183,15 +186,17 @@ export function ProbabilityTree({
           >
             <line x1={px} y1={py} x2={bx} y2={y(d)} />
             {/* Вероятность стоит сбоку от ветки, со стороны её наклона:
-                поверх линии она читалась бы хуже. */}
-            <text
-              className="pr-math pr-branch-p"
-              x={(px + bx) / 2 + (vlevo ? -10 : 10)}
-              y={(py + y(d)) / 2}
-              textAnchor={vlevo ? 'end' : 'start'}
-            >
-              {chislo(b.p)}
-            </text>
+                поверх линии она читалась бы хуже. В заготовке её нет. */}
+            {blank ? null : (
+              <text
+                className="pr-math pr-branch-p"
+                x={(px + bx) / 2 + (vlevo ? -10 : 10)}
+                y={(py + y(d)) / 2}
+                textAnchor={vlevo ? 'end' : 'start'}
+              >
+                {chislo(b.p)}
+              </text>
+            )}
             <circle className="pr-node" cx={bx} cy={y(d)} r="5" />
             {/* У листа подпись снизу — под ним ничего нет. У развилки
                 снизу расходятся ветки, поэтому подпись уходит вбок. */}

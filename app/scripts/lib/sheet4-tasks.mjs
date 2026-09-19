@@ -50,6 +50,7 @@ function lib() {
       modeli: requireSrc('lib/veroyatnost/model-zadachi'),
       model: requireSrc('lib/veroyatnost/model'),
       primery: requireSrc('lib/veroyatnost/primery'),
+      list: requireSrc('content/veroyatnost'),
       viz: requireSrc('components/tasks/card/Vizualizatsiya'),
       React: require('react'),
       server: require('react-dom/server'),
@@ -175,7 +176,7 @@ function mathSpan(tex) {
 /** Примеры из референса — с рисунком и решением в обеих версиях. */
 export function examples() {
   const { primery } = lib();
-  const vizualy = { hleb: primery.HLEB_VIZUAL, pirozhki: primery.PIROZHKI_VIZUAL };
+  const vizualy = { pirozhki: primery.PIROZHKI_VIZUAL };
   return content.examples.map((example) => {
     const vizual = vizualy[example.id];
     if (!vizual) { throw new Error('у примера ' + example.id + ' нет рисунка в primery.ts'); }
@@ -222,15 +223,27 @@ export function answersItems(sections) {
   return items;
 }
 
+/** Название задания и строка компактной шапки — те же, что на сайте. */
+export function naming() {
+  const { LIST_4 } = lib().list;
+  return {
+    chip: LIST_4.title.chip,
+    text: LIST_4.title.text,
+    runner: LIST_4.runner,
+    documentTitle: LIST_4.title.chip + '. ' + LIST_4.title.text,
+  };
+}
+
 /** Описание листа для шаблона. */
 export function sheetSpec(sections, options) {
+  const name = naming();
   return {
     theme: options.theme,
     layout: 'single',
-    documentTitle: content.title.chip + '. ' + content.title.text,
+    documentTitle: name.documentTitle,
     head: content.head,
-    runner: content.runner,
-    title: content.title,
+    runner: name.runner,
+    title: { chip: name.chip, text: name.text, subtitle: content.subtitle },
     recap: recap(),
     /* Примеры идут в потоке сразу за рамкой «Повторяем». */
     leadItems: examples().map((example) => sheet.exampleItem(example)),

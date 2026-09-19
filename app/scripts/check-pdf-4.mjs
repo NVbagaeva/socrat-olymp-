@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import outputs from '../src/lib/sheet/outputs.js';
 import { buildDir } from './lib/sheet-build.mjs';
 import { checkNoAnswersTracked, checkPdfFile } from './lib/sheet-check.mjs';
-import { collectSections, content } from './lib/sheet4-tasks.mjs';
+import { collectSections, content, naming } from './lib/sheet4-tasks.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SECTION = 'zadanie-4';
@@ -154,6 +154,17 @@ function checkStudentItems(name) {
     if (/--favorable|--highlighted|highlightedPaths|pr-counts|благоприятн\w+ \d/.test(card)) {
       fail(name + ': в рисунке задачи ' + task.no + ' для ученика есть подсветка ответа');
     }
+    /* Заготовка без чисел: у плиток нет количеств «×873», в клетках
+       таблицы нет сумм, у ветвей дерева нет вероятностей. */
+    if (/×\d/.test(card)) {
+      fail(name + ': у плиток задачи ' + task.no + ' для ученика стоят количества');
+    }
+    if (/class="pr-cell[^"]*"><rect[^>]*><\/rect><text/.test(card)) {
+      fail(name + ': в клетках таблицы задачи ' + task.no + ' для ученика есть значения');
+    }
+    if (/pr-branch-p/.test(card)) {
+      fail(name + ': у ветвей дерева задачи ' + task.no + ' для ученика стоят вероятности');
+    }
     /* Само число ответа в карточке — тоже утечка. Число ищется как
        отдельное слово, чтобы «0,2» не нашлось внутри «0,25». */
     if (hasNumber(textOf(card), task.answer)) {
@@ -196,7 +207,7 @@ const files = [
   { name: content.files.uchitelChb, mono: true, answers: true },
 ];
 
-console.log('сборник «' + content.title.chip + '. ' + content.title.text + '»');
+console.log('сборник «' + naming().documentTitle + '»');
 console.log('  банк: задач ' + expected.length);
 
 files.forEach((file) => {

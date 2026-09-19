@@ -9,7 +9,7 @@ import {
 import { METODY_02, METODY_4, type MetodOpisanie02 } from '@/content/veroyatnost-metody';
 import { typeset } from '@/lib/tex';
 import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
-import { HLEB, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/veroyatnost/primery';
+import { HLEB, PIROZHKI_PUTI, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/veroyatnost/primery';
 
 /**
  * Вкладка «Ключевые методы решения» — раздел 02 референса.
@@ -90,7 +90,7 @@ const RISUNKI: Partial<Record<Method, ReactNode>> = {
     <ProbabilityTree
       levels={PIROZHKI_UROVNI}
       branches={PIROZHKI_VETVI}
-      highlightedPaths={['aa']}
+      highlightedPaths={PIROZHKI_PUTI}
       showProducts
       showSum
     />

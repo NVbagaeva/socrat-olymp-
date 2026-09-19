@@ -100,3 +100,11 @@
 :root[data-sheet-theme='print'] .pr-leaf--dimmed {
   fill: var(--sheet-ink-3);
 }
+
+/* Подпись условия над штрихованной областью — с белой обводкой,
+   иначе на штрихах она не читается. */
+:root[data-sheet-theme='print'] .pr-band-label {
+  stroke: var(--sheet-paper);
+  stroke-width: 4px;
+  paint-order: stroke;
+}

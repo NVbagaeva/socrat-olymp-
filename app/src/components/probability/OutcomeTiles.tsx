@@ -36,6 +36,13 @@ export interface OutcomeTilesProps {
   showCounts?: boolean;
   /** Сколько плиток в ряду. */
   columns?: number;
+  /**
+   * Заготовка до ответа: подписи без количеств («×873»), без списка
+   * групп для скринридера и без счёта. Числа за плитками — уже
+   * подсказка, поэтому до ответа их не показывают. Геометрия та же,
+   * что и с числами: рисунок не дёргается, когда ответ открывается.
+   */
+  blank?: boolean;
   state?: RisunokState;
   /** Что прочитает скринридер вместо картинки. */
   alt?: string;
@@ -59,6 +66,7 @@ export function OutcomeTiles({
   groups,
   showCounts = false,
   columns = 6,
+  blank = false,
   state = 'default',
   alt,
   className,
@@ -71,9 +79,11 @@ export function OutcomeTiles({
   const rows = Math.ceil(outcomes.length / cols);
   const blago = new Set(favorable ?? []);
 
-  const podpis_ = (label: string, i: number): string =>
+  const polnaya = (label: string, i: number): string =>
     counts === undefined ? label : `${label} ×${counts[i] ?? 0}`;
-  const dlinnaya = outcomes.reduce((max, s, i) => Math.max(max, podpis_(s, i).length), 0);
+  const podpis_ = (label: string, i: number): string => (blank ? label : polnaya(label, i));
+  /* Ширина плитки — по полной подписи и в заготовке тоже. */
+  const dlinnaya = outcomes.reduce((max, s, i) => Math.max(max, polnaya(s, i).length), 0);
   const w = Math.max(W, Math.round(dlinnaya * ZNAK) + 22);
 
   const width = cols * (w + GAP) - GAP;
@@ -107,7 +117,7 @@ export function OutcomeTiles({
 
       {/* Счёт под сеткой. Буквы математические — курсивная антиква,
           как во всех остальных обозначениях раздела. */}
-      {showCounts ? (
+      {showCounts && !blank ? (
         <text className="pr-counts" x="0" y={height - 8}>
           <tspan className="pr-math">n</tspan>
           {` = ${n}`}
@@ -123,7 +133,7 @@ export function OutcomeTiles({
 
       {/* Группы в подписи к рисунку: их видно и без цвета, поэтому
           они уходят только в текст для скринридера. */}
-      {groups === undefined ? null : (
+      {groups === undefined || blank ? null : (
         <desc>{groups.map((g) => `${g.label} — ${g.count}`).join(', ')}</desc>
       )}
     </svg>
