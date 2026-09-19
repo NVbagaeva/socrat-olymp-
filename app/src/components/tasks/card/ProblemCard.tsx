@@ -39,10 +39,16 @@ export interface ProblemCardZadacha {
   /** Метод и параметры рисунка — открытая часть модели. */
   model?: PoolModel;
   /**
-   * Иллюстрация для варианта condition, где модели нет: только если
-   * файл существует. Нет — ни картинки, ни рамки под неё.
+   * Иллюстрация задачи без модели: у варианта condition и у задач
+   * подготовки №5, где методики пока нет. Только если файл
+   * существует. У задачи с моделью картинка идёт через модель.
    */
   illustration?: { path: string; alt: string };
+  /**
+   * Чертёж готовой разметкой — у задачи без модели, где без картинки
+   * условие не читается (лабиринт). Встаёт в колонку рисунка.
+   */
+  risunok?: string;
 }
 
 export interface ProblemCardProps {
@@ -147,8 +153,10 @@ export function ProblemCard({
     state === 'correct' ? 'correct' : state === 'incorrect' ? 'incorrect' : 'default';
   const model = zadacha.model;
   /* У метода «Формула» рисунка нет: задача решается шагами, и колонка
-     под рисунок не нужна — условие и решение делят ширину пополам. */
-  const bezRisunka = model === undefined || model.parametry.method === 'formula';
+     под рисунок не нужна — условие и решение делят ширину пополам.
+     Так же у задачи без модели, если у неё нет чертежа. */
+  const bezRisunka =
+    model === undefined ? zadacha.risunok === undefined : model.parametry.method === 'formula';
   /* Дерево на много листьев в узкой средней колонке не прочесть:
      такой рисунок занимает всю ширину карточки под условием и
      решением. Порог — больше четырёх листьев, то есть больше дерева
@@ -173,11 +181,12 @@ export function ProblemCard({
 
   /* Иллюстрация: есть файл — картинка. В полной карточке без файла
      стоит рамка 4:3, место под будущую blue-glass иллюстрацию; в
-     варианте condition без файла нет ничего. */
+     варианте condition без файла нет ничего, как и у задачи с
+     чертежом: второй картинки рядом с лабиринтом не будет. */
   const kartinka =
-    variant === 'condition'
+    variant === 'condition' || model === undefined
       ? zadacha.illustration
-      : model?.illustration.exists === true
+      : model.illustration.exists
         ? { path: model.illustration.path, alt: model.illustration.alt }
         : undefined;
 
@@ -186,7 +195,7 @@ export function ProblemCard({
       <figure className="pc__ill pc__ill--img">
         <img src={kartinka.path} alt={kartinka.alt} loading="lazy" />
       </figure>
-    ) : variant === 'condition' ? null : (
+    ) : variant === 'condition' || (model === undefined && zadacha.risunok !== undefined) ? null : (
       <figure className="pc__ill" aria-hidden="true">
         <figcaption>
           место под иллюстрацию
@@ -238,7 +247,7 @@ export function ProblemCard({
           ) : null}
         </div>
 
-        {bezRisunka || model === undefined ? null : (
+        {bezRisunka ? null : model !== undefined ? (
           <div className="pc__col pc__col--risunok">
             <figure className="pc__risunok">
               <figcaption className="pc__risunok-podpis">
@@ -250,6 +259,15 @@ export function ProblemCard({
                 state={risunokState}
               />
             </figure>
+          </div>
+        ) : zadacha.risunok === undefined ? null : (
+          <div className="pc__col pc__col--risunok">
+            {/* Чертёж нарисован на сборке готовой разметкой: движка в
+                браузере нет, вставляем как есть. */}
+            <figure
+              className="pc__chertezh"
+              dangerouslySetInnerHTML={{ __html: zadacha.risunok }}
+            />
           </div>
         )}
 

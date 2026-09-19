@@ -1,14 +1,14 @@
 /**
- * Иллюстрации к задачам задания №5 без модели.
+ * Иллюстрации к подготовительным задачам задания №5.
  *
- * У подготовительных задач №5 модели пока нет, поэтому картинка
- * подключается так же, как лабиринт к задаче 33: готовой разметкой
- * `<img>` в поле `risunok`. У прототипов №5 модель есть, и их
- * картинка идёт через модель по тому же пути и имени файла — здесь
- * они записаны, чтобы подбор был виден в одном месте. Сами файлы
- * лежат в `app/public/images/veroyatnost/zadanie-5/` по
- * идентификатору задачи, исходники — в `assets/img/probability/`
- * (там же README с сюжетами).
+ * У подготовительных задач №5 модели пока нет, поэтому картинку к
+ * условию карточка получает не через модель, а отсюда — по
+ * идентификатору задачи. У прототипов №5 модель есть, и их картинка
+ * идёт через модель по тому же пути и имени файла — здесь они
+ * записаны, чтобы подбор был виден в одном месте. Сами файлы лежат в
+ * `app/public/images/veroyatnost/zadanie-5/` по идентификатору
+ * задачи, исходники — в `assets/img/probability/` (там же README с
+ * сюжетами).
  *
  * Правило подбора: одна картинка — одна задача; одна и та же картинка
  * стоит у двух задач только когда их сюжеты совпадают буквально
@@ -61,23 +61,14 @@ const KARTINKI: Record<string, Kartinka> = {
   'k5-56': { alt: 'Три шарика и три приза: мёд, колокольчик, морковка', w: 1200, h: 800 },
 };
 
-/** Картинка задачи для карточки по макету: путь и alt; нет — undefined. */
-export function kartinka5(id: string): { src: string; alt: string } | undefined {
+/**
+ * Картинка задачи для карточки: путь от корня сайта и alt — в той же
+ * форме, в какой карточка получает иллюстрацию из модели. Нет записи —
+ * undefined, и карточка показывает место под иллюстрацию.
+ */
+export function kartinka5(id: string): { path: string; alt: string } | undefined {
   const kartinka = KARTINKI[id];
   return kartinka === undefined
     ? undefined
-    : { src: `/images/veroyatnost/zadanie-5/${id}.webp`, alt: kartinka.alt };
-}
-
-/** Разметка картинки для задачи или undefined, если картинки нет. */
-export function illyustratsiya5(id: string): string | undefined {
-  const kartinka = KARTINKI[id];
-  if (kartinka === undefined) {
-    return undefined;
-  }
-  return [
-    `<img src="/images/veroyatnost/zadanie-5/${id}.webp"`,
-    ` width="${kartinka.w}" height="${kartinka.h}"`,
-    ` alt="${kartinka.alt}" loading="lazy" />`,
-  ].join('');
+    : { path: `/images/veroyatnost/zadanie-5/${id}.webp`, alt: kartinka.alt };
 }

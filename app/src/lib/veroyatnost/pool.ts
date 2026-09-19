@@ -7,9 +7,11 @@
  * проверяется отдельным автотестом по готовой сборке.
  *
  * Условие — обычный текст: формул в условии не бывает, поэтому KaTeX
- * здесь не нужен, и в браузер он не едет. Формулы шагов набираются на
- * сборке (nabor.ts) и уезжают готовой разметкой внутри закрытого
- * разбора.
+ * здесь не нужен, и в браузер он не едет. Формулы шагов набираются
+ * здесь же на сборке и уезжают готовой разметкой внутри закрытого
+ * разбора. Это единственное место, где разбор заданий №4 и №5
+ * встречается с KaTeX: модуль импортируют страницы (они серверные),
+ * а не клиентские компоненты — те получают уже набранный HTML.
  */
 
 import {
@@ -22,16 +24,14 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { putIllyustratsii, type Method, type Parametry, type Shape } from './model';
+import { putIllyustratsii, texPlain, type Method, type Parametry, type Shape } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import { naborRazbora, zapechatatRazbor } from './nabor';
-import type { Razbor } from './razbor';
+import type { Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
-import { illyustratsiya5, kartinka5 } from './illyustratsii5';
+import { kartinka5 } from './illyustratsii5';
 import { sealAnswer, sealMetod, sealText } from './secret';
 import {
-  type Illyustratsiya,
   type Metodika,
   type PrepBlok,
   type PrepZadacha,
@@ -39,6 +39,7 @@ import {
   type Step,
   type Variant,
 } from './types';
+import { typeset } from '../tex';
 
 /**
  * Открытая часть модели задачи: метод, форма меры и параметры
@@ -70,12 +71,6 @@ export function illyustratsiyaEst(put: string): boolean {
   }
 }
 
-/**
- * Знак на плашке типа задачи у карточки по макету: у задач с
- * координатной прямой — ось с засечками, у остальных — общий знак.
- */
-export type Znak = 'pryamaya' | 'zadacha';
-
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
@@ -104,17 +99,7 @@ export interface PoolKind {
   zadachnik: readonly [number, number];
   /** Строка об источнике в шапке карточки. */
   istochnik: string;
-  /** Надпись на плашке типа у карточки по макету. */
-  plashka: string;
-  znak: Znak;
-  illyustratsiya?: Illyustratsiya;
   variants: PoolVariant[];
-  /**
-   * Иллюстрация к прототипу готовой разметкой, как у лабиринта в
-   * подготовке, — только у прототипов без методики. У прототипов с
-   * моделью картинка идёт через модель задачи.
-   */
-  risunok?: string;
 }
 
 export interface Pool {
@@ -122,28 +107,129 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
+/* ── Набор разбора ───────────────────────────────────────────────── */
+
 /**
- * Закрытый разбор в JSON. Шаги набирает nabor.ts: формулы в TeX, в
- * вёрстке KaTeX и словами, ответ в последней формуле — жирным. Без
- * методики (подготовка №5) — те же шаги без подсветки.
+ * Ответ в конце последней формулы — жирным: `= 0{,}25` → `= \mathbf{0{,}25}`.
+ * Берётся хвост после последнего знака отношения верхнего уровня
+ * (=, ≈, ≥): внутри дробей и скобок знаки не ищутся.
+ */
+export function vydelitOtvet(formula: string): string {
+  let glubina = 0;
+  let poz = -1;
+  let dlina = 0;
+  for (let i = 0; i < formula.length; i += 1) {
+    const ch = formula[i];
+    if (ch === '{' || ch === '(') {
+      glubina += 1;
+    } else if (ch === '}' || ch === ')') {
+      glubina -= 1;
+    } else if (glubina === 0) {
+      if (ch === '=') {
+        poz = i;
+        dlina = 1;
+      } else if (formula.startsWith('\\approx', i) || formula.startsWith('\\ge', i)) {
+        poz = i;
+        dlina = formula.startsWith('\\approx', i) ? 7 : 3;
+      }
+    }
+  }
+  if (poz < 0) {
+    return formula;
+  }
+  const hvost = formula.slice(poz + dlina).trim();
+  if (hvost === '' || hvost.includes('\\mathbf')) {
+    return formula;
+  }
+  return `${formula.slice(0, poz + dlina)} \\mathbf{${hvost}}`;
+}
+
+/**
+ * Формула кусками, по которым её можно переносить на новую строку:
+ * перед каждым знаком отношения верхнего уровня и после `,\quad`.
+ * KaTeX внутри одной формулы строку не переносит, а в узкой колонке
+ * карточки длинная цепочка равенств не помещается — поэтому каждый
+ * кусок набирается отдельно, а между ними обычный пробел.
+ */
+export function kuskiFormuly(formula: string): string[] {
+  const kuski: string[] = [];
+  let glubina = 0;
+  let nachalo = 0;
+  for (let i = 0; i < formula.length; i += 1) {
+    const ch = formula[i];
+    if (ch === '{' || ch === '(') {
+      glubina += 1;
+    } else if (ch === '}' || ch === ')') {
+      glubina -= 1;
+    } else if (glubina === 0 && i > nachalo) {
+      if (ch === '=' || formula.startsWith('\\approx', i)) {
+        kuski.push(formula.slice(nachalo, i).trim());
+        nachalo = i;
+      } else if (formula.startsWith(',\\quad', i)) {
+        kuski.push(formula.slice(nachalo, i + 1).trim());
+        nachalo = i + 6;
+      }
+    }
+  }
+  kuski.push(formula.slice(nachalo).trim());
+  return kuski.filter((k) => k !== '');
+}
+
+/**
+ * Шаг банка → шаг для показа: текст и, если есть, формула в трёх
+ * видах — TeX для печатного листа, вёрстка KaTeX для карточки (тем же
+ * набором, что и формулы в условиях: lib/tex.ts) и слова для alt.
+ * В последней формуле разбора ответ выделяется жирным.
+ */
+export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
+  if (shag.formula === undefined) {
+    return { text: shag.text };
+  }
+  const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
+  const html = kuskiFormuly(tex)
+    .map((kusok) => typeset(`$${kusok}$`))
+    .join(' ');
+  return { text: shag.text, tex, html, plain: texPlain(tex) };
+}
+
+/** Шаги банка → шаги для показа; ответ — жирным в последней формуле. */
+export function shagiRazbora(shagi: readonly Step[]): RazborShag[] {
+  const posledniy = shagi.reduce((k, s, i) => (s.formula === undefined ? k : i), -1);
+  return shagi.map((shag, i) => shagRazbora(shag, i === posledniy));
+}
+
+/**
+ * Закрытый разбор в JSON: фраза метода, набранные шаги, подсветка
+ * рисунка и ответ строкой. Без методики (подготовка №5) — те же шаги
+ * без метода и подсветки.
  */
 function zakrytyRazbor(
   model: ReturnType<typeof modelVarianta> | null,
   shagi: readonly Step[],
   otvet: string,
-): string {
-  const nabor = naborRazbora(shagi);
-  const razbor: Razbor =
-    model === null
-      ? { ...nabor, otvet }
-      : {
-          ...nabor,
-          metod: model.solution.method,
-          podsvetka: model.solution.highlight,
-          otvet: model.answer.display,
-        };
-  return JSON.stringify(razbor);
+): Razbor {
+  const nabrannye = shagiRazbora(shagi);
+  return model === null
+    ? {
+        metod: '',
+        shagi: nabrannye,
+        podsvetka: { method: 'direct-count', favorable: [] },
+        otvet,
+      }
+    : {
+        metod: model.solution.method,
+        shagi: nabrannye,
+        podsvetka: model.solution.highlight,
+        otvet: model.answer.display,
+      };
 }
+
+/** Закрыть разбор отпечатком ответа: вызывается на сборке. */
+function zapechatatRazbor(razbor: Razbor, seal: string): string {
+  return sealText(JSON.stringify(razbor), seal);
+}
+
+/* ── Банк прототипов ─────────────────────────────────────────────── */
 
 function otkrytayaModel(model: ReturnType<typeof modelVarianta>): PoolModel {
   return {
@@ -158,16 +244,18 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
   const otvet = otvetUchenika(prototype, variant.params);
   const seal = sealAnswer(otvet);
   const model = prototype.metodika === undefined ? null : modelVarianta(prototype, variant);
+  const razbor = zakrytyRazbor(
+    model,
+    prototype.shagi(variant.params),
+    String(otvet).replace('.', ','),
+  );
   return {
     n: variant.n,
     uslovie: prototype.uslovie(variant.params),
     seal,
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
-    steps: sealText(
-      zakrytyRazbor(model, prototype.shagi(variant.params), String(otvet).replace('.', ',')),
-      seal,
-    ),
+    steps: zapechatatRazbor(razbor, seal),
     ...(model === null ? {} : { model: otkrytayaModel(model) }),
   };
 }
@@ -189,13 +277,7 @@ function kindOf(prototype: Prototype, zadanie: string): PoolKind {
     istochnik: izZadachnika
       ? `Прототип задания ${zadanie} · задачи ${prototype.zadachnik[0]}–${prototype.zadachnik[1]}`
       : `Прототип задания ${zadanie} · составлено по схеме автора`,
-    plashka: prototype.pryamaya === undefined ? prototype.nazvanie : blok.nazvanie,
-    znak: prototype.pryamaya === undefined ? 'zadacha' : 'pryamaya',
-    ...(prototype.illyustratsiya === undefined ? {} : { illyustratsiya: prototype.illyustratsiya }),
     variants: prototype.varianty.map((variant) => variantPool(prototype, variant)),
-    ...(prototype.metodika === undefined && illyustratsiya5(prototype.id) !== undefined
-      ? { risunok: illyustratsiya5(prototype.id) }
-      : {}),
   };
 }
 
@@ -218,8 +300,11 @@ export interface PrepPoolZadacha {
   seal: string;
   /** Закрытый разбор: JSON формы `Razbor`, зашифрованный отпечатком. */
   steps: string;
-  znak: Znak;
-  illyustratsiya?: Illyustratsiya;
+  /**
+   * Картинка к условию у задачи без модели (подготовка №5): у задач
+   * с моделью она идёт через модель. Только если файл есть.
+   */
+  illustration?: { path: string; alt: string };
   /** Чертёж задачи готовой разметкой SVG, если он ей нужен. */
   risunok?: string;
   model?: PoolModel;
@@ -232,30 +317,28 @@ export interface PrepPoolBlok {
   zadachi: PrepPoolZadacha[];
 }
 
+/** Картинка к условию задачи без модели: из поля задачи или по её id. */
+function kartinkaPrep(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
+  const svoya = zadacha.illyustratsiya;
+  const kartinka =
+    svoya === undefined ? kartinka5(zadacha.id) : { path: svoya.src, alt: svoya.alt };
+  return kartinka !== undefined && illyustratsiyaEst(kartinka.path) ? kartinka : undefined;
+}
+
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const otvet = prepOtvet(zadacha);
   const seal = sealAnswer(otvet);
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
-  /* Чертёж из данных (лабиринт) идёт разметкой; подобранная картинка
-     у задач без модели встаёт справа от условия, как у карточки по
-     макету; у задач с моделью (№4) картинка идёт через модель. */
-  const risunok = zadacha.risunok;
-  const illyustratsiya =
-    zadacha.illyustratsiya ?? (model === null ? kartinka5(zadacha.id) : undefined);
-  const otvetStrokoy = String(otvet).replace('.', ',');
-  const razbor: Razbor =
-    model === null
-      ? { ...naborRazbora(zadacha.shagi, zadacha.pryamaya), otvet: otvetStrokoy }
-      : JSON.parse(zakrytyRazbor(model, zadacha.shagi, otvetStrokoy));
+  const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
+  const illustration = model === null ? kartinkaPrep(zadacha) : undefined;
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
     uslovie: zadacha.uslovie,
     seal,
     steps: zapechatatRazbor(razbor, seal),
-    znak: zadacha.pryamaya === undefined ? 'zadacha' : 'pryamaya',
-    ...(illyustratsiya === undefined ? {} : { illyustratsiya }),
-    ...(risunok === undefined ? {} : { risunok }),
+    ...(illustration === undefined ? {} : { illustration }),
+    ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
     ...(model === null ? {} : { model: otkrytayaModel(model) }),
   };
 }

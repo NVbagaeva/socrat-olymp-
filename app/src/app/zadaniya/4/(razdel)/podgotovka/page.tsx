@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Podgotovka4 } from '@/components/tasks/veroyatnost/Podgotovka4';
+import { Podgotovka } from '@/components/tasks/veroyatnost/Podgotovka';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 import { prep4Pool } from '@/lib/veroyatnost/pool';
 
@@ -15,5 +15,5 @@ export const metadata: Metadata = {
  * ответы уезжают вниз отпечатками, разборы закрытыми.
  */
 export default function Podgotovka4Tab() {
-  return <Podgotovka4 bloki={prep4Pool()} />;
+  return <Podgotovka bloki={prep4Pool()} />;
 }

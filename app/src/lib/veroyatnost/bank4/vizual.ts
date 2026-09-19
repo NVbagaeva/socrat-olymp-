@@ -11,6 +11,7 @@
  */
 
 import type { Vizual } from '../model';
+import { promezhutok, type Pryamaya } from '../pryamaya';
 import { dec, round, type Step } from '../types';
 
 /* ── Числа в TeX ─────────────────────────────────────────────────── */
@@ -218,6 +219,30 @@ export function tablitsaMonet(
 }
 
 /* ── Координатная прямая ─────────────────────────────────────────── */
+
+/**
+ * Отрезок распределения с благоприятным промежутком — случай прямой.
+ * Границы берутся из описания `Pryamaya` того же прототипа, поэтому
+ * рисунок и разбор считают одни числа. Граница может быть одна:
+ * вторая — край отрезка, и компонент рисует его просто концом оси.
+ */
+export function otrezok(pr: Pryamaya): Vizual {
+  promezhutok(pr);
+  const granica = pr.nestrogo ? 'inclusive' : 'strict';
+  return {
+    parametry: {
+      method: 'coordinate-line',
+      shape: 'segment',
+      min: pr.a,
+      max: pr.b,
+      ...(pr.c === undefined ? {} : { c: pr.c }),
+      ...(pr.d === undefined ? {} : { d: pr.d }),
+      leftBoundary: granica,
+      rightBoundary: granica,
+    },
+    podsvetka: { method: 'coordinate-line' },
+  };
+}
 
 /** Циферблат: дуга от одной отметки до другой по часовой стрелке. */
 export function tsiferblat(from: number, to: number): Vizual {

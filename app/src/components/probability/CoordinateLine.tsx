@@ -11,11 +11,24 @@ import type { RisunokState } from './OutcomeTiles';
  * налагаются, цвет темнее сам собой — это и есть благоприятный
  * промежуток l. Никаких дуг и третьего прямоугольника.
  *
+ * Граница может быть одна: только c («больше 210») или только d
+ * («не больше 750»). Тогда уровень один, а край отрезка, в который
+ * упирается промежуток, — просто конец оси: без подписи условия
+ * и без области.
+ *
+ * До ответа рисунок — заготовка: ось, деления и кружки границ.
+ * Области условий и их пересечение — подсказка, они открываются
+ * вместе с решением (highlightMode 'intersection' и 'answer').
+ *
  * Строгие и нестрогие границы на вероятность не влияют, а на рисунок
  * влияют: пустой кружок при строгой, закрашенный при нестрогой.
  */
 
-/** Что уже показано ученику. */
+/**
+ * Что уже показано ученику: 'condition' — только ось и границы,
+ * 'intersection' — области условий и длина l, 'answer' — ещё
+ * благоприятный отрезок на оси и длина L.
+ */
 export type HighlightMode = 'condition' | 'intersection' | 'answer';
 
 /** Граница промежутка: строгая (пустой кружок) или нестрогая. */
@@ -25,8 +38,8 @@ export interface CoordinateLineProps {
   /** Концы всего отрезка — a и b. */
   min: number;
   max: number;
-  /** Левая граница благоприятного промежутка. */
-  c: number;
+  /** Левая граница благоприятного промежутка. Не задана — от min. */
+  c?: number;
   /** Правая граница. Не задана — благоприятен весь хвост от c до max. */
   d?: number;
   leftBoundary?: Boundary;
@@ -76,13 +89,18 @@ export function CoordinateLine({
   /* Значение на оси → координата рисунка. */
   const px = (value: number): number => X0 + ((value - min) / (max - min)) * (X1 - X0);
 
-  const xc = px(c);
-  /* Правой границы может не быть: тогда благоприятен хвост до конца. */
+  if (c === undefined && d === undefined) {
+    throw new Error('У координатной прямой нет ни одной границы промежутка');
+  }
+  /* Границы может не быть с любой стороны: тогда благоприятен хвост
+     до края отрезка, а сам край остаётся концом оси. */
+  const levaya = c ?? min;
   const pravaya = d ?? max;
+  const xc = px(levaya);
   const xd = px(pravaya);
 
   const L = max - min;
-  const l = pravaya - c;
+  const l = pravaya - levaya;
 
   const vidnoPeresechenie = highlightMode !== 'condition';
   const videnOtvet = highlightMode === 'answer';
@@ -90,7 +108,7 @@ export function CoordinateLine({
   const podpis =
     alt ??
     `Координатная прямая от ${chislo(min)} до ${chislo(max)}, ` +
-      `благоприятный промежуток от ${chislo(c)} до ${chislo(pravaya)}`;
+      `благоприятный промежуток от ${chislo(levaya)} до ${chislo(pravaya)}`;
 
   /* Кружок границы: пустой при строгой, закрашенный при нестрогой. */
   const kruzhok = (x: number, vid: Boundary, key: string) => (
@@ -122,23 +140,28 @@ export function CoordinateLine({
       role="img"
       aria-label={podpis}
     >
-      {/* Верхний уровень: условие x > c, область вправо. */}
-      <rect
-        className="pr-band"
-        x={xc}
-        y={UPPER_Y}
-        width={X1 + OVERHANG - xc}
-        height={AXIS_Y - UPPER_Y}
-      />
-      <line className="pr-band-edge" x1={xc} y1={UPPER_Y} x2={X1 + OVERHANG} y2={UPPER_Y} />
-      <line className="pr-band-rule" x1={xc} y1={UPPER_Y} x2={xc} y2={AXIS_Y} />
-      <text className="pr-math pr-band-label" x={xc + 10} y={UPPER_Y - 8}>
-        {`${axisLabel} > ${chislo(c)}`}
-      </text>
+      {/* Верхний уровень: условие x > c, область вправо. Его нет, когда
+          левая граница не задана, и нет до ответа. */}
+      {c === undefined || !vidnoPeresechenie ? null : (
+        <>
+          <rect
+            className="pr-band"
+            x={xc}
+            y={UPPER_Y}
+            width={X1 + OVERHANG - xc}
+            height={AXIS_Y - UPPER_Y}
+          />
+          <line className="pr-band-edge" x1={xc} y1={UPPER_Y} x2={X1 + OVERHANG} y2={UPPER_Y} />
+          <line className="pr-band-rule" x1={xc} y1={UPPER_Y} x2={xc} y2={AXIS_Y} />
+          <text className="pr-math pr-band-label" x={xc + 10} y={UPPER_Y - 8}>
+            {`${axisLabel} > ${chislo(c)}`}
+          </text>
+        </>
+      )}
 
       {/* Нижний уровень: условие x < d, область влево. Его нет, когда
           правая граница не задана: одно условие — один уровень. */}
-      {d === undefined ? null : (
+      {d === undefined || !vidnoPeresechenie ? null : (
         <>
           <rect
             className="pr-band"
@@ -167,16 +190,13 @@ export function CoordinateLine({
         <line className="pr-favorable" x1={xc} y1={AXIS_Y} x2={xd} y2={AXIS_Y} />
       ) : null}
 
-      {[min, c, ...(d === undefined ? [] : [d]), max]
+      {[min, ...(c === undefined ? [] : [c]), ...(d === undefined ? [] : [d]), max]
         .filter((value, i, all) => all.indexOf(value) === i)
         .map((value, i) => delenie(value, `t${i}`))}
 
-      {vidnoPeresechenie
-        ? [
-            kruzhok(xc, leftBoundary, 'bc'),
-            ...(d === undefined ? [] : [kruzhok(xd, rightBoundary, 'bd')]),
-          ]
-        : null}
+      {/* Кружки границ видны всегда: это часть условия, а не ответа. */}
+      {c === undefined ? null : kruzhok(xc, leftBoundary, 'bc')}
+      {d === undefined ? null : kruzhok(xd, rightBoundary, 'bd')}
 
       {/* Длина благоприятного промежутка — внутри пересечения. */}
       {showLength && vidnoPeresechenie ? (

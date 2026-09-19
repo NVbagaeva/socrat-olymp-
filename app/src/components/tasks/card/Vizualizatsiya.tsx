@@ -68,7 +68,7 @@ export function podpisRisunka(parametry: Parametry, podsvetka?: Podsvetka): Reac
       const otkryto = podsvetka?.method === 'coordinate-line';
       if (parametry.shape === 'segment') {
         const L = parametry.max - parametry.min;
-        const l = (parametry.d ?? parametry.max) - parametry.c;
+        const l = (parametry.d ?? parametry.max) - (parametry.c ?? parametry.min);
         return otkryto ? (
           <>
             Весь отрезок <i>L</i> = {chislo(L)}, благоприятный <i>l</i> = {chislo(l)}
@@ -182,7 +182,7 @@ export function Vizualizatsiya({
           <CoordinateLine
             min={parametry.min}
             max={parametry.max}
-            c={parametry.c}
+            {...(parametry.c === undefined ? {} : { c: parametry.c })}
             {...(parametry.d === undefined ? {} : { d: parametry.d })}
             leftBoundary={parametry.leftBoundary}
             rightBoundary={parametry.rightBoundary}

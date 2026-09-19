@@ -6,7 +6,6 @@
  */
 
 import type { Podsvetka } from './model';
-import type { Pryamaya } from './pryamaya';
 import { openText } from './secret';
 
 export interface RazborShag {
@@ -28,11 +27,6 @@ export interface Razbor {
   podsvetka: Podsvetka;
   /** Ответ, как его записать: «0,25». */
   otvet: string;
-  /**
-   * Координатная прямая по макету карточки (KoordinatnayaPryamaya) —
-   * у задач, которые несут её отдельно от модели; см. pryamaya.ts.
-   */
-  pryamaya?: Pryamaya;
 }
 
 /** Открыть закрытый разбор по отпечатку верного ответа. */
