@@ -5,6 +5,7 @@ import {
   OutcomeGrid,
   OutcomeTiles,
   ProbabilityTree,
+  tselo,
   type HighlightMode,
   type RisunokState,
 } from '@/components/probability';
@@ -114,12 +115,19 @@ export function podpisRisunka(parametry: Parametry, podsvetka?: Podsvetka): Reac
     case 'convenient-number': {
       const vsego = parametry.baseNumber;
       if (podsvetka?.method !== 'convenient-number') {
-        return `Всего ${vsego}`;
+        return `Всего ${tselo(vsego)}`;
       }
-      const gruppa = parametry.groups[podsvetka.highlightedGroup];
-      const shtuk = gruppa === undefined ? 0 : Math.round(gruppa.share * vsego);
-      return `Всего ${vsego}, нужная группа — ${shtuk}`;
+      const gruppy = podsvetka.highlightedGroups ?? [podsvetka.highlightedGroup];
+      const shtuki = gruppy.map((i) => Math.round((parametry.groups[i]?.share ?? 0) * vsego));
+      if (shtuki.length === 1) {
+        return `Всего ${tselo(vsego)}, нужная группа — ${tselo(shtuki[0] ?? 0)}`;
+      }
+      const summa = shtuki.reduce((s, m) => s + m, 0);
+      return `Всего ${tselo(vsego)}, нужные группы — ${shtuki.map(tselo).join(' + ')} = ${tselo(summa)}`;
     }
+    /* «Формула»: рисунка нет, подписи тоже. */
+    case 'formula':
+      return '';
     default:
       return '';
   }
@@ -233,13 +241,22 @@ export function Vizualizatsiya({
           groups={parametry.groups}
           {...(parametry.unit === undefined ? {} : { unit: parametry.unit })}
           {...(podsvetka?.method === 'convenient-number'
-            ? { highlightedGroup: podsvetka.highlightedGroup }
+            ? {
+                highlightedGroup: podsvetka.highlightedGroup,
+                ...(podsvetka.highlightedGroups === undefined
+                  ? {}
+                  : { highlightedGroups: podsvetka.highlightedGroups }),
+              }
             : {})}
           showConversion={otkryto}
           state={state}
           {...(className === undefined ? {} : { className })}
         />
       );
+    /* Метод «Формула» решается шагами: рисунка у него нет, и карточка
+       не отводит под него колонку (см. ProblemCard). */
+    case 'formula':
+      return null;
     default:
       return null;
   }

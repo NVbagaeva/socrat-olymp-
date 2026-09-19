@@ -55,6 +55,23 @@
   min-width: 0;
 }
 
+/* Без рисунка (метод «Формула»): условие и решение делят ширину
+   пополам, пустой колонки посередине нет. */
+.pc--bez-risunka .pc__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* Широкий рисунок (дерево на много листьев): условие и решение рядом,
+   рисунок под ними на всю ширину карточки — в узкой колонке его не
+   прочесть. */
+.pc--shirokiy-risunok .pc__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.pc--shirokiy-risunok .pc__col--risunok {
+  grid-column: 1 / -1;
+  order: 1;
+}
+
 /* Планшет: условие и рисунок рядом, решение под ними на всю ширину. */
 @media (max-width: 1023px) {
   .pc__grid {
@@ -62,6 +79,10 @@
   }
   .pc__col--reshenie {
     grid-column: 1 / -1;
+  }
+  .pc--bez-risunka .pc__col--reshenie,
+  .pc--shirokiy-risunok .pc__col--reshenie {
+    grid-column: auto;
   }
 }
 /* Телефон: условие → рисунок → решение, друг под другом. */

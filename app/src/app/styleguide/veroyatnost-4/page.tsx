@@ -9,7 +9,7 @@ import {
 } from '@/components/probability';
 import { ProblemCard } from '@/components/tasks/card';
 import { METODY } from '@/lib/veroyatnost/model';
-import { bank4Pool, prep4Pool } from '@/lib/veroyatnost/pool';
+import { bank4Pool, bank5Pool, prep4Pool } from '@/lib/veroyatnost/pool';
 import 'katex/dist/katex.min.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
@@ -293,10 +293,120 @@ const RAZDELY: Razdel[] = [
   },
 ];
 
+/* ── Задание №5: обрезанное дерево, дроби на ветках, сетка 10 000 ── */
+
+/** Три лампы, «хотя бы одна целая»: до конца раскрыт только путь «все перегорели». */
+const LAMPY = [
+  { id: 'b', parent: null, label: 'перегорела', p: 0.8 },
+  { id: 'c', parent: null, label: 'целая', p: 0.2 },
+  { id: 'bb', parent: 'b', label: 'перегорела', p: 0.8 },
+  { id: 'bc', parent: 'b', label: 'целая', p: 0.2 },
+  { id: 'bbb', parent: 'bb', label: 'перегорела', p: 0.8 },
+  { id: 'bbc', parent: 'bb', label: 'целая', p: 0.2 },
+];
+
+/** Два фломастера без возвращения: вероятности подписаны дробями. */
+const FLOMASTERY = [
+  { id: 's', parent: null, label: 'синий', p: 11 / 25, pLabel: '11/25' },
+  { id: 'k', parent: null, label: 'красный', p: 6 / 25, pLabel: '6/25' },
+  { id: 'z', parent: null, label: 'зелёный', p: 8 / 25, pLabel: '8/25' },
+  { id: 'ss', parent: 's', label: 'синий', p: 10 / 24, pLabel: '10/24' },
+  { id: 'sk', parent: 's', label: 'красный', p: 6 / 24, pLabel: '6/24' },
+  { id: 'sz', parent: 's', label: 'зелёный', p: 8 / 24, pLabel: '8/24' },
+  { id: 'ks', parent: 'k', label: 'синий', p: 11 / 24, pLabel: '11/24' },
+  { id: 'kk', parent: 'k', label: 'красный', p: 5 / 24, pLabel: '5/24' },
+  { id: 'kz', parent: 'k', label: 'зелёный', p: 8 / 24, pLabel: '8/24' },
+];
+
+const RAZDELY_5: Razdel[] = [
+  {
+    id: 'tree-5',
+    title: 'ProbabilityTree — задание №5',
+    metod: 'Метод 4 — ветви разной глубины и дроби на ветках',
+    lead: 'Дерево может обрываться листьями там, где событие уже решено, а вероятность ветки — быть дробью, если десятичная запись некрасива.',
+    pokazy: [
+      {
+        title: 'Три лампы, хотя бы одна целая',
+        note: 'Раскрыт только путь «все перегорели»; листья «целая» на каждом уровне подсвечены, их сумма — ответ. Произведение стоит под своим листом.',
+        node: (
+          <ProbabilityTree
+            levels={['1-я лампа', '2-я лампа', '3-я лампа']}
+            branches={LAMPY}
+            highlightedPaths={['c', 'bc', 'bbc']}
+            showProducts
+            showSum
+          />
+        ),
+      },
+      {
+        title: 'Два фломастера без возвращения',
+        note: 'pLabel — «11/25» вместо 0,44. Ветка «зелёный» к ответу не ведёт и остаётся листом; бесконечные произведения под приглушёнными листьями идут со знаком ≈.',
+        node: (
+          <ProbabilityTree
+            levels={['1-й фломастер', '2-й фломастер']}
+            branches={FLOMASTERY}
+            highlightedPaths={['sk', 'ks']}
+            showProducts
+            showSum
+          />
+        ),
+      },
+    ],
+  },
+  {
+    id: 'hundred-5',
+    title: 'HundredGrid и OutcomeGrid — задание №5',
+    metod: 'Методы 5 и 2 — удобное число 10 000 и таблица 5×5',
+    lead: 'Полная вероятность: искомых групп несколько, их штуки складываются. Условная вероятность через таблицу: условие убирает одну грань у каждой кости.',
+    pokazy: [
+      {
+        title: 'Батарейки: 10 000 штук, забракованы две группы',
+        note: 'baseNumber = 10000, в клетке сто объектов; highlightedGroups = [0, 1], строка перевода складывает штуки.',
+        node: (
+          <HundredGrid
+            baseNumber={10000}
+            groups={[
+              { label: 'неисправные, забракованы', share: 0.0096, tone: 'strong' },
+              { label: 'исправные, забракованы по ошибке', share: 0.0594, tone: 'strong' },
+              { label: 'неисправные, пропущены', share: 0.0004, tone: 'soft' },
+              { label: 'исправные, прошли контроль', share: 0.9306, tone: 'soft' },
+            ]}
+            highlightedGroups={[0, 1]}
+            showConversion
+            unit="батареек"
+          />
+        ),
+      },
+      {
+        title: 'Две кости без шестёрки, сумма 8',
+        note: 'rows = columns = 5, подписи граней 1–5, в клетке сумма; благоприятны три клетки.',
+        node: (
+          <OutcomeGrid
+            rows={5}
+            columns={5}
+            rowLabels={['1', '2', '3', '4', '5']}
+            columnLabels={['1', '2', '3', '4', '5']}
+            rowTitle="1-й бросок"
+            columnTitle="2-й бросок"
+            cellContent={(r, c) => String(r + c + 2)}
+            favorableCells={[
+              [2, 4],
+              [3, 3],
+              [4, 2],
+            ]}
+            showCounts
+          />
+        ),
+      },
+    ],
+  },
+];
+
 /* ── Карточка задачи: три варианта ──────────────────────────────── */
 
 const PREP = prep4Pool().flatMap((blok) => blok.zadachi);
 const BANK = bank4Pool();
+const BANK5 = bank5Pool();
 
 function zadachaPrep(id: string) {
   const est = PREP.find((z) => z.id === id);
@@ -306,14 +416,36 @@ function zadachaPrep(id: string) {
   return est;
 }
 
-function variantBanka(id: string, n: number) {
-  const kind = BANK.kinds.find((k) => k.id === id);
+function variantBanka(id: string, n: number, bank = BANK) {
+  const kind = bank.kinds.find((k) => k.id === id);
   const variant = kind?.variants.find((v) => v.n === n);
   if (kind === undefined || variant === undefined) {
     throw new Error(`Нет варианта ${id}-${n}`);
   }
   return { ...variant, id: `${id}-${n}` };
 }
+
+/** Карточки задания №5: без рисунка, с широким деревом, с сеткой 10 000. */
+const KARTOCHKI_5 = [
+  {
+    title: 'Метод «Формула»: рисунка нет',
+    note: 'p5-01, вариант 1. Колонки под рисунок нет — условие и решение делят ширину пополам.',
+    zadacha: variantBanka('p5-01', 1, BANK5),
+    initial: { state: 'revealed' as const, shagov: 3 },
+  },
+  {
+    title: 'Широкое дерево: рисунок под условием и решением',
+    note: 'p5-10, вариант 1. У дерева больше четырёх листьев — в узкой колонке его не прочесть, карточка отдаёт ему всю ширину.',
+    zadacha: variantBanka('p5-10', 1, BANK5),
+    initial: { state: 'revealed' as const, shagov: 3 },
+  },
+  {
+    title: 'Полная вероятность: сетка 10 000, две искомые группы',
+    note: 'p5-11, вариант 1. Подпись над рисунком складывает штуки искомых групп.',
+    zadacha: variantBanka('p5-11', 1, BANK5),
+    initial: { state: 'revealed' as const, shagov: 4 },
+  },
+] as const;
 
 function metodLabel(method: string | undefined): string | undefined {
   return METODY.find((m) => m.id === method)?.nazvanie;
@@ -345,7 +477,8 @@ export default function Page() {
     <main className="v4">
       <h1>Компоненты вероятности</h1>
       <p className="v4__lead">
-        Шесть рисунков к пяти методам решения задания №4. Каждый показан на двух наборах параметров:
+        Шесть рисунков к пяти методам решения задания №4; задание №5 использует те же рисунки и
+        шестой метод «Формула» без рисунка. Каждый компонент показан на двух наборах параметров:
         рисунок собирается из параметров, а не нарисован под конкретную задачу. Ни одного значения
         цвета и кегля в компонентах нет — только токены проекта.
       </p>
@@ -384,7 +517,7 @@ export default function Page() {
         </div>
       </section>
 
-      {RAZDELY.map((razdel) => (
+      {[...RAZDELY, ...RAZDELY_5].map((razdel) => (
         <section key={razdel.id} className="v4__section">
           <h2 className="v4__title">{razdel.title}</h2>
           <p className="v4__metod">{razdel.metod}</p>
@@ -402,6 +535,34 @@ export default function Page() {
           </div>
         </section>
       ))}
+
+      <section className="v4__section">
+        <h2 className="v4__title">ProblemCard — задание №5</h2>
+        <p className="v4__metod">Раздел 05 на задачах задания №5</p>
+        <p className="v4__lead">
+          Та же карточка на данных задания №5: метод «Формула» без рисунка, широкое дерево на всю
+          ширину карточки и сетка удобного числа 10 000 с двумя искомыми группами.
+        </p>
+        <div className="v4__stack">
+          {KARTOCHKI_5.map((k, i) => (
+            <figure key={i} className="v4__case">
+              <figcaption className="v4__case-head">
+                <b>{k.title}</b>
+                <span>{k.note}</span>
+              </figcaption>
+              <ProblemCard
+                zadacha={k.zadacha}
+                nomer={i + 1}
+                {...(metodLabel(k.zadacha.model?.method) === undefined
+                  ? {}
+                  : { metodLabel: metodLabel(k.zadacha.model?.method) })}
+                istochnik="Прототип задания 5"
+                initial={k.initial}
+              />
+            </figure>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

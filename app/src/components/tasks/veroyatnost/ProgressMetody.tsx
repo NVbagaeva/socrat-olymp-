@@ -3,7 +3,7 @@
 import { Button, ProgressRing } from '@/components/ui';
 import type { ProgressStore } from '@/lib/progressStore';
 import { summarize } from '@/lib/trainerProgress';
-import { METODY_4 } from '@/lib/veroyatnost/model';
+import { METODY_4, type MetodOpisanie } from '@/lib/veroyatnost/model';
 
 export interface ProgressMetodyProps {
   store: ProgressStore;
@@ -14,14 +14,16 @@ export interface ProgressMetodyProps {
     pusto: string;
     sbros: string;
   };
+  /** Какие методы считать: пять у задания №4, шесть у задания №5. */
+  metody?: readonly MetodOpisanie[];
 }
 
 /**
- * Прогресс по методам: кольцо с долей верных и пять счётчиков.
- * Один блок на тренажёр и на «Узнай метод» — у каждого своё
- * хранилище и свои слова, устройство одно.
+ * Прогресс по методам: кольцо с долей верных и счётчик на каждый
+ * метод. Один блок на тренажёр и на «Узнай метод» обоих заданий — у
+ * каждого своё хранилище и свои слова, устройство одно.
  */
-export function ProgressMetody({ store, slova }: ProgressMetodyProps) {
+export function ProgressMetody({ store, slova, metody = METODY_4 }: ProgressMetodyProps) {
   const progress = store.useProgress();
   const svod = summarize(progress);
 
@@ -49,7 +51,7 @@ export function ProgressMetody({ store, slova }: ProgressMetodyProps) {
       />
 
       <ul className="z4-progress__metody">
-        {METODY_4.map((m) => {
+        {metody.map((m) => {
           const tally = progress.kinds[m.id];
           return (
             <li key={m.id} className="z4-progress__metod">

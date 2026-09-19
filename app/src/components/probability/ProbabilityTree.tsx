@@ -10,6 +10,10 @@ import type { RisunokState } from './OutcomeTiles';
  *
  * Структура приходит плоским списком ветвей со ссылкой на родителя —
  * так её удобно держать в JSON-модели задачи.
+ *
+ * Ветви могут быть разной глубины: у длинной серии испытаний до конца
+ * раскрывают только нужный путь, остальные ветви обрываются листьями.
+ * Произведение стоит под своим листом, на его глубине.
  */
 
 export interface TreeBranch {
@@ -20,6 +24,11 @@ export interface TreeBranch {
   label: string;
   /** Вероятность самой ветки. В каждом разветвлении сумма равна 1. */
   p: number;
+  /**
+   * Как подписать вероятность, если десятичная запись некрасива:
+   * «11/25» у выбора без возвращения. Нет — пишется число.
+   */
+  pLabel?: string;
 }
 
 export interface ProbabilityTreeProps {
@@ -42,7 +51,11 @@ export interface ProbabilityTreeProps {
   className?: string;
 }
 
-const LEAF_GAP = 122;
+/* Шаг между листьями подстраивается под самую длинную подпись ветки:
+   «не выиграл» просит больше места, чем «попал». */
+const LEAF_GAP_MIN = 88;
+const LEAF_GAP_MAX = 122;
+const ZNAK = 7.5;
 const LEVEL_H = 96;
 const TOP = 42;
 const PAD_X = 20;
@@ -53,6 +66,18 @@ const PAD_LEVELS = 104;
 function chislo(value: number): string {
   /* Хвосты вида 0,6400000000000001 — от двоичной дроби, а не от задачи. */
   return String(Math.round(value * 1e9) / 1e9).replace('.', ',');
+}
+
+/**
+ * Произведение под листом: до четырёх знаков. У ветвей с дробными
+ * вероятностями (10/24 · 11/25) произведение бесконечно — тогда
+ * пишется приближение со знаком ≈; у подходящих путей оно конечно
+ * по построению задачи.
+ */
+function proizv(value: number): string {
+  const kratko = Math.round(value * 1e4) / 1e4;
+  const tochno = Math.abs(kratko - value) < 1e-9;
+  return (tochno ? '' : '≈ ') + chislo(kratko);
 }
 
 export function ProbabilityTree({
@@ -67,6 +92,9 @@ export function ProbabilityTree({
   className,
 }: ProbabilityTreeProps) {
   void direction;
+
+  const dlinnaya = branches.reduce((m, b) => Math.max(m, b.label.length), 0);
+  const LEAF_GAP = Math.max(LEAF_GAP_MIN, Math.min(LEAF_GAP_MAX, Math.round(dlinnaya * ZNAK) + 28));
 
   const deti = new Map<string | null, TreeBranch[]>();
   for (const b of branches) {
@@ -190,7 +218,7 @@ export function ProbabilityTree({
               y={(py + y(d)) / 2}
               textAnchor={vlevo ? 'end' : 'start'}
             >
-              {chislo(b.p)}
+              {b.pLabel ?? chislo(b.p)}
             </text>
             <circle className="pr-node" cx={bx} cy={y(d)} r="5" />
             {/* У листа подпись снизу — под ним ничего нет. У развилки
@@ -220,10 +248,10 @@ export function ProbabilityTree({
                 highlightedPaths !== undefined && !podhodit.has(b.id) && 'pr-leaf--dimmed',
               )}
               x={x.get(b.id) ?? 0}
-              y={y(urovney - 1) + 44}
+              y={y(glubina.get(b.id) ?? urovney - 1) + 44}
               textAnchor="middle"
             >
-              {chislo(proizvedenie.get(b.id) ?? 0)}
+              {proizv(proizvedenie.get(b.id) ?? 0)}
             </text>
           ))
         : null}

@@ -4,9 +4,13 @@ import type { RisunokState } from './OutcomeTiles';
 /**
  * Сетка удобного числа — метод 5.
  *
- * Берём 100 (или 1000) объектов и раскладываем их сеткой 10×10.
+ * Берём 100 (1000, 10 000) объектов и раскладываем их сеткой 10×10.
  * Проценты и доли становятся клетками, и дальше задача считается как
  * обычная классика: посчитать клетки и поделить.
+ *
+ * Искомых групп может быть несколько: в формуле полной вероятности
+ * бракованные детали складываются с двух заводов. Тогда подсвечены
+ * все искомые группы, а строка перевода складывает их штуки.
  */
 
 /** Насыщенность группы. Значения берут цвет из токенов, а не свой. */
@@ -29,6 +33,8 @@ export interface HundredGridProps {
    * вместе с решением: подсвеченная группа и есть ответ.
    */
   highlightedGroup?: number;
+  /** Несколько искомых групп сразу: их штуки складываются. */
+  highlightedGroups?: readonly number[];
   /** Строка перевода «0,93 → 93». */
   showConversion?: boolean;
   /** Что считаем штуками: «чайника», «жителей». */
@@ -47,10 +53,17 @@ function chislo(value: number): string {
   return String(Math.round(value * 1e6) / 1e6).replace('.', ',');
 }
 
+/** Целое с разбивкой на тысячи от пяти знаков: «10 000», но «1000». */
+export function tselo(value: number): string {
+  const s = String(Math.round(value));
+  return s.length >= 5 ? s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : s;
+}
+
 export function HundredGrid({
   baseNumber = 100,
   groups,
   highlightedGroup,
+  highlightedGroups,
   showConversion = false,
   unit,
   state = 'default',
@@ -58,8 +71,13 @@ export function HundredGrid({
   className,
 }: HundredGridProps) {
   /* Клетка одна и та же при любом удобном числе: при 1000 в клетке
-     десять объектов, сетка остаётся 10×10. */
+     десять объектов, при 10 000 — сто; сетка остаётся 10×10. */
   const naKletku = baseNumber / (COLS * COLS);
+
+  /* Искомые группы по порядку: список важнее одиночного индекса. */
+  const iskomye = highlightedGroups ?? (highlightedGroup === undefined ? [] : [highlightedGroup]);
+  const iskoma = new Set(iskomye);
+  const podsvetka = iskoma.size > 0;
 
   /* Раскладываем группы по клеткам подряд. Доли считаем в клетках,
      чтобы сетка всегда заполнялась ровно. */
@@ -71,30 +89,52 @@ export function HundredGrid({
     }
   });
 
-  const width = COLS * (CELL + GAP) - GAP;
+  const gridW = COLS * (CELL + GAP) - GAP;
   const gridH = Math.ceil((COLS * COLS) / COLS) * (CELL + GAP) - GAP;
   const height = gridH + groups.length * LEGEND_H + (showConversion ? LEGEND_H : 0) + 14;
 
   const shtuk = (g: HundredGroup): number => Math.round(g.share * baseNumber);
 
+  /* Строка перевода: одна группа — «0,93 → 93»; несколько —
+     «0,03 + 0,01 → 300 + 100 = 400». */
+  const nuzhnye = iskomye.map((i) => groups[i]).filter((g): g is HundredGroup => g !== undefined);
+  const [odna] = nuzhnye;
+  const perevod =
+    odna === undefined
+      ? null
+      : nuzhnye.length === 1
+        ? `${chislo(odna.share)} → ${tselo(shtuk(odna))}`
+        : `${nuzhnye.map((g) => chislo(g.share)).join(' + ')} → ` +
+          `${nuzhnye.map((g) => tselo(shtuk(g))).join(' + ')} = ` +
+          tselo(nuzhnye.reduce((s, g) => s + shtuk(g), 0));
+
+  /* Ширина — по самой длинной строке легенды или перевода: подпись
+     «9306 — исправные, прошли контроль» шире самой сетки. */
+  const ZNAK = 8.5;
+  const stroki = [
+    ...groups.map((g) => `${tselo(shtuk(g))} — ${g.label}`.length + 4),
+    perevod === null || !showConversion ? 0 : perevod.length + (unit?.length ?? 0) + 1,
+  ];
+  /* Плюс отступ легенды от левого края: квадратик и зазор. */
+  const width = Math.max(gridW, 260, Math.round(Math.max(...stroki) * ZNAK) + CELL + 8);
+
   return (
     <svg
       className={clsx('pr-hundred', `pr-is-${state}`, className)}
-      viewBox={`0 0 ${Math.max(width, 260)} ${height}`}
-      width={Math.max(width, 260)}
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
       height={height}
       role="img"
       aria-label={
         alt ??
-        `Сетка из ${baseNumber} объектов: ` +
-          groups.map((g) => `${g.label} — ${shtuk(g)}`).join(', ')
+        `Сетка из ${tselo(baseNumber)} объектов: ` +
+          groups.map((g) => `${g.label} — ${tselo(shtuk(g))}`).join(', ')
       }
     >
       {Array.from({ length: COLS * COLS }, (_, i) => {
         const gruppa = kletok[i];
-        const podsvechena = gruppa !== undefined && gruppa === highlightedGroup;
-        const priglushena =
-          highlightedGroup !== undefined && gruppa !== undefined && gruppa !== highlightedGroup;
+        const podsvechena = gruppa !== undefined && iskoma.has(gruppa);
+        const priglushena = podsvetka && gruppa !== undefined && !iskoma.has(gruppa);
         return (
           <rect
             key={i}
@@ -119,15 +159,15 @@ export function HundredGrid({
           key={i}
           className={clsx(
             'pr-legend',
-            i === highlightedGroup && 'pr-legend--highlighted',
-            highlightedGroup !== undefined && i !== highlightedGroup && 'pr-legend--dimmed',
+            iskoma.has(i) && 'pr-legend--highlighted',
+            podsvetka && !iskoma.has(i) && 'pr-legend--dimmed',
           )}
         >
           <rect
             className={clsx(
               'pr-unit',
               `pr-unit--${g.tone ?? 'mid'}`,
-              i === highlightedGroup && 'pr-unit--highlighted',
+              iskoma.has(i) && 'pr-unit--highlighted',
             )}
             x="0"
             y={gridH + 14 + i * LEGEND_H}
@@ -140,18 +180,15 @@ export function HundredGrid({
             y={gridH + 14 + i * LEGEND_H + (CELL - 4) / 2}
             dominantBaseline="central"
           >
-            {`${shtuk(g)} — ${g.label}`}
+            {`${tselo(shtuk(g))} — ${g.label}`}
           </text>
         </g>
       ))}
 
       {/* Перевод доли в штуки — та самая мысль метода. */}
-      {showConversion &&
-      highlightedGroup !== undefined &&
-      groups[highlightedGroup] !== undefined ? (
+      {showConversion && perevod !== null ? (
         <text className="pr-math pr-total" x="0" y={height - 6}>
-          {`${chislo(groups[highlightedGroup].share)} → ${shtuk(groups[highlightedGroup])}` +
-            (unit === undefined ? '' : ` ${unit}`)}
+          {perevod + (unit === undefined ? '' : ` ${unit}`)}
         </text>
       ) : null}
     </svg>

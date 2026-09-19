@@ -25,6 +25,7 @@ export { CircularRatio, type CircularRatioProps } from './CircularRatio';
 export { ProbabilityTree, type ProbabilityTreeProps, type TreeBranch } from './ProbabilityTree';
 export {
   HundredGrid,
+  tselo,
   type HundredGridProps,
   type HundredGroup,
   type GroupTone,

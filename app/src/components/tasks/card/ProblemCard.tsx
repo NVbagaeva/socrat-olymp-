@@ -74,6 +74,15 @@ const VERDICT = {
   incorrect: 'Неверно',
 };
 
+/** Дерево, у которого листьев больше четырёх. */
+function shirokoeDerevo(parametry: PoolModel['parametry']): boolean {
+  if (parametry.method !== 'probability-tree') {
+    return false;
+  }
+  const roditeli = new Set(parametry.branches.map((b) => b.parent));
+  return parametry.branches.filter((b) => !roditeli.has(b.id)).length > 4;
+}
+
 export function ProblemCard({
   variant = 'full',
   zadacha,
@@ -137,6 +146,14 @@ export function ProblemCard({
   const risunokState =
     state === 'correct' ? 'correct' : state === 'incorrect' ? 'incorrect' : 'default';
   const model = zadacha.model;
+  /* У метода «Формула» рисунка нет: задача решается шагами, и колонка
+     под рисунок не нужна — условие и решение делят ширину пополам. */
+  const bezRisunka = model === undefined || model.parametry.method === 'formula';
+  /* Дерево на много листьев в узкой средней колонке не прочесть:
+     такой рисунок занимает всю ширину карточки под условием и
+     решением. Порог — больше четырёх листьев, то есть больше дерева
+     двух испытаний по два исхода из референса. */
+  const shirokiyRisunok = model !== undefined && shirokoeDerevo(model.parametry);
 
   /* Подсветка благоприятного — только когда разбор уже открыт. */
   const podsvetka =
@@ -201,6 +218,8 @@ export function ProblemCard({
         'pc',
         `pc--${state}`,
         resheniyeVidno && 'pc--solution-revealed',
+        bezRisunka && 'pc--bez-risunka',
+        shirokiyRisunok && 'pc--shirokiy-risunok',
         disabled && 'pc--disabled',
         className,
       )}
@@ -219,8 +238,8 @@ export function ProblemCard({
           ) : null}
         </div>
 
-        <div className="pc__col pc__col--risunok">
-          {model === undefined ? null : (
+        {bezRisunka || model === undefined ? null : (
+          <div className="pc__col pc__col--risunok">
             <figure className="pc__risunok">
               <figcaption className="pc__risunok-podpis">
                 {podpisRisunka(model.parametry, podsvetka)}
@@ -231,8 +250,8 @@ export function ProblemCard({
                 state={risunokState}
               />
             </figure>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="pc__col pc__col--reshenie">
           {resheniyeVidno && razbor !== null ? (

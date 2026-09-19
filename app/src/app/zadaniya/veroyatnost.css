@@ -46,6 +46,14 @@
 .vtrainer__chips::-webkit-scrollbar {
   display: none;
 }
+/* На широком экране чипы переносятся, а не уезжают за край: шесть
+   методов задания №5 в одну строку не помещаются. */
+@media (min-width: 768px) {
+  .vtrainer__chips {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
 
 .vchip {
   flex: none;
