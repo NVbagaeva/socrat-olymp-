@@ -31,7 +31,10 @@
     "test:pdf-4": "node scripts/check-pdf-4.mjs",
     "manifest:generator": "node scripts/print-generator-manifest.mjs",
     "test:vychisleniya": "node scripts/check-vychisleniya.mjs",
-    "build:bank-8": "node scripts/build-bank-8.mjs"
+    "build:bank-8": "node scripts/build-bank-8.mjs",
+    "build:pdf-8": "node scripts/build-pdf-8.mjs",
+    "build:pdf-8-sample": "node scripts/build-pdf-8.mjs --sample",
+    "test:pdf-8": "node scripts/check-pdf-8.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
