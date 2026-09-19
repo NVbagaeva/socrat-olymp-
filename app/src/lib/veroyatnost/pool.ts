@@ -6,10 +6,13 @@
  * разбор. Открытым текстом ответа в бандле не остаётся, и это
  * проверяется отдельным автотестом по готовой сборке.
  *
- * Условие — обычный текст: в задании №4 формул в условии не бывает,
- * поэтому KaTeX здесь не нужен, и в браузер он не едет.
+ * Условие и разбор набраны здесь же: формулы в $…$ проходят через
+ * KaTeX на сборке, в браузер уходит готовая разметка, и сам KaTeX
+ * туда не едет. Разбор закрывается целиком — слова, формулы и
+ * координатная прямая одной строкой (см. nabor.ts и razbor.ts).
  */
 
+import { typeset } from '../tex';
 import {
   BANK_4,
   BANK_5,
@@ -20,17 +23,25 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { sealAnswer, sealText } from './secret';
-import { type PrepBlok, type Prototype } from './types';
+import { naborRazbora, zapechatatRazbor } from './nabor';
+import { sealAnswer } from './secret';
+import { type Illyustratsiya, type PrepBlok, type Prototype } from './types';
+
+/**
+ * Знак на плашке типа задачи: у задач с координатной прямой — ось
+ * с засечками, у остальных — общий знак задачи.
+ */
+export type Znak = 'pryamaya' | 'zadacha';
 
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
+  /** Условие: HTML, формулы набраны. */
   uslovie: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
-  steps: string;
+  /** Закрытый разбор: слова, формулы и чертёж одной строкой. */
+  razbor: string;
 }
 
 export interface PoolKind {
@@ -44,6 +55,12 @@ export interface PoolKind {
   blokTitle: string;
   /** Диапазон номеров задачника, откуда собран прототип. */
   zadachnik: readonly [number, number];
+  /** Строка об источнике под карточкой. */
+  istochnik: string;
+  /** Надпись на плашке типа: у координатной прямой — её имя. */
+  plashka: string;
+  znak: Znak;
+  illyustratsiya?: Illyustratsiya;
   variants: PoolVariant[];
 }
 
@@ -52,11 +69,13 @@ export interface Pool {
   kinds: PoolKind[];
 }
 
-function kindOf(prototype: Prototype): PoolKind {
+function kindOf(prototype: Prototype, zadanie: string): PoolKind {
   const blok = blokById(prototype.blok);
   if (blok === undefined) {
     throw new Error(`У прототипа ${prototype.id} неизвестный блок ${prototype.blok}`);
   }
+  /* Нулевой диапазон — прототип составлен не по задачнику. */
+  const izZadachnika = prototype.zadachnik[0] > 0;
   return {
     id: prototype.id,
     title: prototype.nazvanie,
@@ -64,30 +83,36 @@ function kindOf(prototype: Prototype): PoolKind {
     blok: blok.id,
     blokTitle: blok.nazvanie,
     zadachnik: prototype.zadachnik,
+    istochnik: izZadachnika
+      ? `Задачник №${zadanie}, задачи ${prototype.zadachnik[0]}–${prototype.zadachnik[1]}. ${prototype.tip}.`
+      : `Составлено по схеме автора. ${prototype.tip}.`,
+    plashka: prototype.pryamaya === undefined ? prototype.nazvanie : blok.nazvanie,
+    znak: prototype.pryamaya === undefined ? 'zadacha' : 'pryamaya',
+    ...(prototype.illyustratsiya === undefined ? {} : { illyustratsiya: prototype.illyustratsiya }),
     variants: prototype.varianty.map((variant) => {
       const seal = sealAnswer(otvetUchenika(prototype, variant.params));
-      const steps = prototype
-        .shagi(variant.params)
-        .map((shag) => shag.text)
-        .join('\n');
+      const razbor = naborRazbora(
+        prototype.shagi(variant.params),
+        prototype.pryamaya?.(variant.params),
+      );
       return {
         n: variant.n,
-        uslovie: prototype.uslovie(variant.params),
+        uslovie: typeset(prototype.uslovie(variant.params)),
         seal,
         /* Разбор шифруется отпечатком ответа: в бандле он лежит
            набором символов, а раскрывается только по просьбе. */
-        steps: sealText(steps, seal),
+        razbor: zapechatatRazbor(razbor, seal),
       };
     }),
   };
 }
 
 export function bank4Pool(): Pool {
-  return { bloki: BLOKI_4, kinds: BANK_4.map(kindOf) };
+  return { bloki: BLOKI_4, kinds: BANK_4.map((p) => kindOf(p, '4')) };
 }
 
 export function bank5Pool(): Pool {
-  return { bloki: BLOKI_5, kinds: BANK_5.map(kindOf) };
+  return { bloki: BLOKI_5, kinds: BANK_5.map((p) => kindOf(p, '5')) };
 }
 
 /* ── Подготовительные задачи ─────────────────────────────────────── */
@@ -96,11 +121,14 @@ export interface PrepPoolZadacha {
   id: string;
   /** Номер задачи в конспекте автора. */
   nomer: number;
+  /** Условие: HTML, формулы набраны. */
   uslovie: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
-  steps: string;
+  /** Закрытый разбор: слова, формулы и чертёж одной строкой. */
+  razbor: string;
+  znak: Znak;
+  illyustratsiya?: Illyustratsiya;
   /** Чертёж задачи готовой разметкой SVG, если он ей нужен. */
   risunok?: string;
 }
@@ -127,9 +155,11 @@ function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
       return {
         id: zadacha.id,
         nomer: zadacha.nomer,
-        uslovie: zadacha.uslovie,
+        uslovie: typeset(zadacha.uslovie),
         seal,
-        steps: sealText(zadacha.shagi.map((shag) => shag.text).join('\n'), seal),
+        razbor: zapechatatRazbor(naborRazbora(zadacha.shagi, zadacha.pryamaya), seal),
+        znak: zadacha.pryamaya === undefined ? 'zadacha' : 'pryamaya',
+        ...(zadacha.illyustratsiya === undefined ? {} : { illyustratsiya: zadacha.illyustratsiya }),
         ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
       };
     }),

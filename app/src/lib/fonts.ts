@@ -34,3 +34,24 @@ export const caveat = localFont({
   display: 'swap',
   fallback: ['cursive'],
 });
+
+/**
+ * PT Serif — антиква условий и разборов на карточке задачи: так
+ * набран учебник, и так утверждён макет карточки. Обычное и курсивное
+ * начертания одного веса: курсив нужен буквам-обозначениям (x, l) на
+ * чертежах и подписям к ним, жирного в макете нет.
+ *
+ * Файлы собраны из PT_Serif-Web-Regular.ttf и PT_Serif-Web-Italic.ttf
+ * (репозиторий google/fonts, OFL) командой pyftsubset: поддиапазоны
+ * latin, latin-ext, cyrillic, cyrillic-ext и знаки сравнения ≤ ≥ ≠ ≈
+ * в одном woff2 на начертание — по той же причине, что и у Inter.
+ */
+export const ptSerif = localFont({
+  src: [
+    { path: '../fonts/pt-serif-400.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/pt-serif-400-italic.woff2', weight: '400', style: 'italic' },
+  ],
+  variable: '--font-pt-serif',
+  display: 'swap',
+  fallback: ['Georgia', 'Times New Roman', 'serif'],
+});

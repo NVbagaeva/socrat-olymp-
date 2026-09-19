@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/veroyatnost/pool';
-import { answerMatches, openText } from '@/lib/veroyatnost/secret';
+import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
+import { answerMatches } from '@/lib/veroyatnost/secret';
 import {
   ROUND_SIZE,
   otherVariant,
@@ -12,6 +13,7 @@ import {
   swapTask,
   useVeroyatnostRound,
 } from '@/lib/veroyatnost/useRound';
+import { Reshenie, Zadacha, ZadachaKnopki, ZadachaShapka, ZadachaUslovie } from './ZadachaCard';
 
 export interface VeroyatnostTrainerProps {
   pool: Pool;
@@ -64,11 +66,11 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
     kind === undefined ? undefined : kind.variants.find((v) => v.n === item?.n);
 
   /* Разбор раскрывается только когда его попросили. */
-  const razbor = useMemo(() => {
+  const razbor = useMemo<Razbor | null>(() => {
     if (!solution || variant === undefined) {
-      return [];
+      return null;
     }
-    return openText(variant.steps, variant.seal).split('\n');
+    return otkrytRazbor(variant.razbor, variant.seal);
   }, [solution, variant]);
 
   function sbros(): void {
@@ -155,19 +157,21 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
           </p>
           <Button onClick={zanovo}>Начать заново</Button>
         </div>
-      ) : (
-        <article className="vtask">
-          <header className="vtask__head">
-            <span className="vtask__no">
+      ) : kind !== undefined && variant !== undefined ? (
+        <Zadacha className={clsx(checked === 'right' && 'zadacha--reshena')}>
+          <ZadachaShapka tip={kind.plashka} znak={kind.znak}>
+            <span>
               Задача {index + 1} из {round.length}
             </span>
-            {kind !== undefined ? <span className="vtask__kind">{kind.title}</span> : null}
-          </header>
+            <button type="button" className="zadacha__ssylka" onClick={eshcheVariant}>
+              Ещё вариант
+            </button>
+          </ZadachaShapka>
 
-          <p className="vtask__uslovie">{variant?.uslovie}</p>
+          <ZadachaUslovie html={variant.uslovie} illyustratsiya={kind.illyustratsiya} />
 
-          <div className="vtask__answer">
-            <label className="vtask__label" htmlFor="vtask-input">
+          <div className="zadacha__otvet">
+            <label className="zadacha__otvet-label" htmlFor="vtask-input">
               Ответ
             </label>
             <Input
@@ -191,40 +195,28 @@ export function VeroyatnostTrainer({ pool, roundKey }: VeroyatnostTrainerProps) 
             </Button>
           </div>
 
-          {checked === 'right' ? <p className="vtask__verdict vtask__verdict--ok">Верно</p> : null}
+          {checked === 'right' ? (
+            <p className="zadacha__verdikt zadacha__verdikt--da">Верно</p>
+          ) : null}
           {checked === 'wrong' ? (
-            <p className="vtask__verdict vtask__verdict--no">
+            <p className="zadacha__verdikt zadacha__verdikt--net">
               Не сходится. Попробуйте ещё раз или посмотрите решение.
             </p>
           ) : null}
 
-          <div className="vtask__actions">
-            <Button variant="ghost" onClick={() => setSolution(true)} disabled={solution}>
-              Посмотреть решение
-            </Button>
-            <Button variant="ghost" onClick={eshcheVariant}>
-              Ещё вариант
-            </Button>
-            <Button variant="secondary" onClick={dalshe}>
-              {index + 1 === round.length ? 'Завершить подход' : 'Дальше'}
-            </Button>
-          </div>
+          {razbor !== null ? <Reshenie razbor={razbor} /> : null}
 
-          {solution && razbor.length > 0 ? (
-            <ol className="vtask__razbor">
-              {razbor.map((shag, i) => (
-                <li key={i}>{shag}</li>
-              ))}
-            </ol>
-          ) : null}
+          <ZadachaKnopki
+            pokazat={{ otkryto: solution, onClick: () => setSolution((was) => !was) }}
+            dalshe={{
+              label: index + 1 === round.length ? 'Завершить подход' : 'Следующая',
+              onClick: dalshe,
+            }}
+          />
 
-          {kind !== undefined ? (
-            <p className="vtask__istochnik">
-              Задачник №4, задачи {kind.zadachnik[0]}–{kind.zadachnik[1]}. {kind.tip}.
-            </p>
-          ) : null}
-        </article>
-      )}
+          <p className="zadacha__istochnik">{kind.istochnik}</p>
+        </Zadacha>
+      ) : null}
     </section>
   );
 }
