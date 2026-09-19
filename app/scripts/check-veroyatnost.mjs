@@ -14,6 +14,11 @@
    KaTeX не принял, называется по задаче и роняет проверку: на сборке
    молчаливого отката формулы в текст нет, и здесь его тоже нет.
 
+   И собирает листы генератора обоих заданий (sheet4Spec) со всеми
+   вариантами всех прототипов: картинок задач на листе быть не должно —
+   ни тега <img>, ни путей /images/. Картинки — только у подготовки
+   и тренажёра.
+
    Ненулевой код возврата — банк не сходится.
 
    Сама проверка живёт в src/lib/veroyatnost/selftest.ts: здесь
@@ -233,7 +238,93 @@ console.log(`\nнабор формул KaTeX: шагов ${tex.shagov}, из н�
 console.log(`  формул, которые KaTeX не принял: ${tex.oshibki.length}`);
 tex.oshibki.slice(0, 40).forEach((item) => console.log(`   ${item}`));
 
+/* Лист генератора: картинок задач на нём нет. Лист №5 печатается той
+   же sheet4Spec со словами LIST_5, поэтому собираются оба задания, с
+   ответами и без, со всеми вариантами всех прототипов. Модули листа
+   импортируют «@/…» — во временной папке эти пути разложены в
+   node_modules/@: lib — ссылка на перевод, content — переведённые
+   слова. Плоские ES-модули листа переводятся в CommonJS тем же
+   TypeScript. Пул набирает формулы разборов KaTeX, поэтому без него
+   лист не собрать — и это ошибка, а не пропуск проверки. */
+const listy = { sobrano: 0, oshibki: [] };
+if (katexPut === undefined) {
+  listy.oshibki.push('KaTeX не установлен (pnpm install): лист генератора не собран');
+} else {
+  const alias = path.join(out, 'node_modules', '@');
+  fs.mkdirSync(path.join(alias, 'content'), { recursive: true });
+  fs.mkdirSync(path.join(out, 'sheet'), { recursive: true });
+  fs.symlinkSync(out, path.join(alias, 'lib'), 'dir');
+  const perevesti = (file, target) => {
+    const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+        allowJs: true,
+      },
+      fileName: file,
+    }).outputText;
+    fs.writeFileSync(target, js);
+  };
+  for (const [file, target] of [
+    ['content/sheet12.js', path.join(alias, 'content', 'sheet12.js')],
+    ['content/trainerModes.ts', path.join(alias, 'content', 'trainerModes.js')],
+    ['content/veroyatnost.ts', path.join(alias, 'content', 'veroyatnost.js')],
+    ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],
+    ['lib/sheet/typography.js', path.join(out, 'sheet', 'typography.js')],
+    ['lib/sheet/answers.js', path.join(out, 'sheet', 'answers.js')],
+  ]) {
+    perevesti(path.join(root, 'src', file), target);
+  }
+
+  const { sheet4Spec } = require0(path.join(out, 'veroyatnost', 'sheet4.js'));
+  const { bank4Pool, bank5Pool } = require0(path.join(out, 'veroyatnost', 'pool.js'));
+  const { LIST_4, LIST_5 } = require0(path.join(alias, 'content', 'veroyatnost.js'));
+  /* Описание листа целиком в строку: функции слов листа пропускаются. */
+  const stroka = (spec) =>
+    JSON.stringify(spec, (key, value) => (typeof value === 'function' ? undefined : value));
+  for (const [nomer, pool, slova] of [
+    ['№4', bank4Pool(), LIST_4],
+    ['№5', bank5Pool(), LIST_5],
+  ]) {
+    const skills = pool.kinds.map((kind) => kind.id);
+    const vsego = pool.kinds.reduce((sum, kind) => sum + kind.variants.length, 0);
+    for (const withAnswers of [false, true]) {
+      const imya = `лист ${nomer}${withAnswers ? ' с ответами' : ''}`;
+      const params = {
+        skills,
+        count: vsego,
+        seed: 'проверка',
+        theme: 'color',
+        layout: 'single',
+        kind: 'Проверка',
+        date: '',
+      };
+      const spec = sheet4Spec(pool, params, withAnswers, slova);
+      listy.sobrano += 1;
+      const zadach = spec.blocks.reduce((sum, block) => sum + block.tasks.length, 0);
+      if (zadach !== vsego) {
+        listy.oshibki.push(`${imya}: задач на листе ${zadach}, в банке ${vsego}`);
+      }
+      const text = stroka(spec);
+      if (/<img\b/i.test(text)) {
+        listy.oshibki.push(`${imya}: на листе есть тег <img>`);
+      }
+      if (/\/images\//.test(text)) {
+        listy.oshibki.push(`${imya}: на листе есть путь /images/`);
+      }
+    }
+  }
+}
+console.log(`\nлист генератора: собрано ${listy.sobrano}, картинок задач на листе нет`);
+console.log(`  нарушений: ${listy.oshibki.length}`);
+listy.oshibki.forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (listy.oshibki.length > 0) {
+  console.error('\nНа листе генератора есть картинки задач.');
+  process.exit(1);
+}
 
 if (tex.oshibki.length > 0) {
   console.error('\nФормулы разборов не набираются.');
