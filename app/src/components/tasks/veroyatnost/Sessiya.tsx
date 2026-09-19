@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
 import { ProblemCard } from '@/components/tasks/card';
+import { PrepDots } from '@/components/tasks/prep/PrepDots';
 import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
 import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
@@ -223,21 +224,16 @@ export function Sessiya({
       <p className="ttask__count">
         Задача <b>{index + 1}</b> из {total}
       </p>
-      <ol className="ttask__dots" aria-hidden="true">
-        {round.map((z, i) => (
-          <li
-            key={`${i}-${z.kind}-${z.n}`}
-            className={clsx(
-              'ttask__dot',
-              marks[i] === 'right' && 'is-done',
-              marks[i] === 'hinted' && 'is-hinted',
-              i === index && 'is-current',
-            )}
-          >
-            {marks[i] === undefined ? i + 1 : <RightIcon />}
-          </li>
-        ))}
-      </ol>
+      {/* Кружки — те же, что в подготовке: цвет говорит, что с задачей
+          стало. Прыгать по подходу нельзя, поэтому ряд без ссылок. */}
+      <PrepDots
+        items={round.map((z, i) => ({
+          id: `${i}-${z.kind}-${z.n}`,
+          no: i + 1,
+          state: marks[i] === 'right' ? 'right' : marks[i] === 'hinted' ? 'revealed' : null,
+        }))}
+        current={index}
+      />
     </>
   );
 

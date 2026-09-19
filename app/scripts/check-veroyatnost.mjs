@@ -61,11 +61,13 @@ const out = fs.mkdtempSync(path.join(os.tmpdir(), 'veroyatnost-'));
 const src = path.join(root, 'src', 'lib');
 
 /* Банк тянет за собой разбор ответа из lib/answer.ts, источник
-   случайных чисел генератора из lib/zadanie3/podhod.ts и набор формул
-   из lib/tex.ts — переводим их вместе с папкой раздела. */
+   случайных чисел генератора из lib/zadanie3/podhod.ts, набор формул
+   из lib/tex.ts и склонение из lib/plural.ts (его просят слова
+   вкладки подготовки) — переводим их вместе с папкой раздела. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
   path.join(src, 'answer.ts'),
+  path.join(src, 'plural.ts'),
   path.join(src, 'tex.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
 ]) {

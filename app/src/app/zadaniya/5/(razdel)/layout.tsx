@@ -10,6 +10,7 @@ import '../../[task]/section.css';
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
 import '../../[task]/[type]/trainer.css';
+import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';

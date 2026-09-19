@@ -16,37 +16,62 @@
  * неоткуда. Форма записи та же, что у задания №12: типы берутся
  * оттуда, а его экспорт не меняется.
  *
- * Правильных ответов здесь нет: только счётчики и идентификаторы
- * задач, в которых ученик ошибся.
+ * Правильных ответов здесь нет: только счётчики, идентификаторы
+ * задач, в которых ученик ошибся, и чем каждая задача закрылась.
  */
 
 import { useSyncExternalStore } from 'react';
 import type { TrainerAttempt, TrainerKindTally, TrainerProgress } from './trainerProgress';
 
+/** Чем закрылась задача. Список ошибок этого не различает. */
+export type TaskOutcome = 'right' | 'wrong' | 'revealed';
+
+/**
+ * Попытка с исходом. Поле `itog` необязательное: тренажёрам хватает
+ * счётчиков и списка ошибок, а подготовке нужен цвет кружка — и он
+ * должен пережить перезагрузку ровно таким, каким был.
+ */
+export interface StoreAttempt extends TrainerAttempt {
+  itog?: TaskOutcome;
+}
+
+/** Прогресс хранилища: счётчики задания №12 плюс исходы задач. */
+export interface StoreProgress extends TrainerProgress {
+  /** Идентификатор задачи → чем она закрылась. */
+  outcomes: Record<string, TaskOutcome>;
+}
+
 export interface ProgressStore {
   /** Ключ в localStorage. */
   key: string;
   /** Прогресс целиком. Перерисовка происходит сама при каждой записи. */
-  useProgress(): TrainerProgress;
+  useProgress(): StoreProgress;
   /**
    * Записать закрытую задачу. Задача, пройденная начисто, уходит из
    * списка ошибочных; ошибка или открытое решение — ставит её туда.
+   * Передан `itog` — он же запоминается как исход задачи.
    */
-  recordAttempt(attempt: TrainerAttempt): void;
+  recordAttempt(attempt: StoreAttempt): void;
   /** Очистить это хранилище. Остальные не трогаются. */
   reset(): void;
 }
 
 /* Пустой снимок — одна и та же ссылка: иначе useSyncExternalStore
    зациклится, сверяя снимки. */
-const EMPTY: TrainerProgress = { kinds: {}, mistakes: [] };
+const EMPTY: StoreProgress = { kinds: {}, mistakes: [], outcomes: {} };
+
+const ISHODY: readonly TaskOutcome[] = ['right', 'wrong', 'revealed'];
+
+function outcome(value: unknown): TaskOutcome | null {
+  return ISHODY.includes(value as TaskOutcome) ? (value as TaskOutcome) : null;
+}
 
 function number(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
 /** Разбор записи из хранилища. Мусор и чужой формат считаем пустотой. */
-function parse(raw: string | null): TrainerProgress {
+function parse(raw: string | null): StoreProgress {
   if (raw === null) {
     return EMPTY;
   }
@@ -55,7 +80,7 @@ function parse(raw: string | null): TrainerProgress {
     if (typeof value !== 'object' || value === null) {
       return EMPTY;
     }
-    const source = value as { kinds?: unknown; mistakes?: unknown };
+    const source = value as { kinds?: unknown; mistakes?: unknown; outcomes?: unknown };
     const kinds: Record<string, TrainerKindTally> = {};
     if (typeof source.kinds === 'object' && source.kinds !== null) {
       Object.entries(source.kinds as Record<string, unknown>).forEach(([id, tally]) => {
@@ -72,17 +97,28 @@ function parse(raw: string | null): TrainerProgress {
     const mistakes = Array.isArray(source.mistakes)
       ? source.mistakes.filter((item): item is string => typeof item === 'string')
       : [];
-    return { kinds, mistakes };
+    /* Записи старого формата поля не имеют — тогда исходов просто нет,
+       и кружки красятся по счётчикам, как раньше. */
+    const outcomes: Record<string, TaskOutcome> = {};
+    if (typeof source.outcomes === 'object' && source.outcomes !== null) {
+      Object.entries(source.outcomes as Record<string, unknown>).forEach(([id, item]) => {
+        const ishod = outcome(item);
+        if (ishod !== null) {
+          outcomes[id] = ishod;
+        }
+      });
+    }
+    return { kinds, mistakes, outcomes };
   } catch {
     return EMPTY;
   }
 }
 
 export function createProgressStore(key: string): ProgressStore {
-  let cache: TrainerProgress | null = null;
+  let cache: StoreProgress | null = null;
   const listeners = new Set<() => void>();
 
-  function read(): TrainerProgress {
+  function read(): StoreProgress {
     /* Приватный режим и запрет на хранилище: обращение само по себе
        может бросить исключение, поэтому в try завёрнуто и оно. */
     try {
@@ -92,14 +128,14 @@ export function createProgressStore(key: string): ProgressStore {
     }
   }
 
-  function snapshot(): TrainerProgress {
+  function snapshot(): StoreProgress {
     if (cache === null) {
       cache = read();
     }
     return cache;
   }
 
-  function serverSnapshot(): TrainerProgress {
+  function serverSnapshot(): StoreProgress {
     return EMPTY;
   }
 
@@ -123,7 +159,7 @@ export function createProgressStore(key: string): ProgressStore {
     };
   }
 
-  function save(next: TrainerProgress): void {
+  function save(next: StoreProgress): void {
     cache = next;
     try {
       window.localStorage.setItem(key, JSON.stringify(next));
@@ -154,7 +190,13 @@ export function createProgressStore(key: string): ProgressStore {
         : current.mistakes.includes(attempt.taskId)
           ? current.mistakes
           : [...current.mistakes, attempt.taskId];
-      save({ kinds, mistakes });
+      /* Исход запоминается, только если его передали: тренажёрам он
+         не нужен, и лишнего в их записи не появится. */
+      const outcomes =
+        attempt.itog === undefined
+          ? current.outcomes
+          : { ...current.outcomes, [attempt.taskId]: attempt.itog };
+      save({ kinds, mistakes, outcomes });
     },
     reset() {
       cache = EMPTY;
