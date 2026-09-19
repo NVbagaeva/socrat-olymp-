@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { katex } from '@/lib/graph/katex';
+import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import type { Pool } from '@/lib/veroyatnost/pool';
 import { parseSheet4Query, sheet4Spec } from '@/lib/veroyatnost/sheet4';
 
 declare global {
   interface Window {
+    sheetTypeset?: (root: ParentNode) => number;
     sheetPaginate?: () => void;
     sheetPagination?: { pages?: number; error?: string } | undefined;
   }
@@ -33,9 +36,9 @@ function specJson(html: string): string {
  *
  * Устройство то же, что у листа задания №12: buildDocument собирает
  * куски листа, paginate.js раскладывает их по страницам A4 после
- * загрузки шрифтов, готовый лист сразу отправляется в печать. Формул
- * в условиях задания №4 нет, поэтому набора KaTeX на листе нет тоже.
- * Адрес страницы можно открыть повторно — лист будет тем же.
+ * загрузки шрифтов, формулы кратких решений набирает KaTeX, готовый
+ * лист сразу отправляется в печать. Адрес страницы можно открыть
+ * повторно — лист будет тем же.
  */
 export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
   const query = useSearchParams();
@@ -62,6 +65,7 @@ export function Sheet4Page({ pool, withAnswers }: Sheet4PageProps) {
       return;
     }
     let alive = true;
+    window.sheetTypeset = (root) => upgrade(root, katex);
     const html = buildDocument(sheet4Spec(pool, params, withAnswers), {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {

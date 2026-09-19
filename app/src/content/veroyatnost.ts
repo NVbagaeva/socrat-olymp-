@@ -227,4 +227,9 @@ export const LIST_4 = {
   title: { chip: 'Задание 4', text: 'Основные понятия теории вероятностей' },
   runner: 'Задание 4 · Основные понятия теории вероятностей',
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
+  resheniya: {
+    title: 'Краткие решения',
+    note: (resheno: number, vsego: number): string =>
+      `формулы разбора из банка, ${resheno} задач из ${vsego}`,
+  },
 } as const;

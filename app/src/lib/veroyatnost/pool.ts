@@ -23,7 +23,7 @@ import {
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
 import { putIllyustratsii, texPlain, type Method, type Parametry, type Shape } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import type { Razbor } from './razbor';
+import type { Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
 import { illyustratsiya5 } from './illyustratsii5';
@@ -33,6 +33,7 @@ import {
   type PrepBlok,
   type PrepZadacha,
   type Prototype,
+  type Step,
   type Variant,
 } from './types';
 import { typeset } from '../tex';
@@ -108,19 +109,100 @@ export interface Pool {
 }
 
 /**
+ * Ответ в конце последней формулы — жирным: `= 0{,}25` → `= \mathbf{0{,}25}`.
+ * Берётся хвост после последнего знака отношения верхнего уровня
+ * (=, ≈, ≥): внутри дробей и скобок знаки не ищутся.
+ */
+export function vydelitOtvet(formula: string): string {
+  let glubina = 0;
+  let poz = -1;
+  let dlina = 0;
+  for (let i = 0; i < formula.length; i += 1) {
+    const ch = formula[i];
+    if (ch === '{' || ch === '(') {
+      glubina += 1;
+    } else if (ch === '}' || ch === ')') {
+      glubina -= 1;
+    } else if (glubina === 0) {
+      if (ch === '=') {
+        poz = i;
+        dlina = 1;
+      } else if (formula.startsWith('\\approx', i) || formula.startsWith('\\ge', i)) {
+        poz = i;
+        dlina = formula.startsWith('\\approx', i) ? 7 : 3;
+      }
+    }
+  }
+  if (poz < 0) {
+    return formula;
+  }
+  const hvost = formula.slice(poz + dlina).trim();
+  if (hvost === '' || hvost.includes('\\mathbf')) {
+    return formula;
+  }
+  return `${formula.slice(0, poz + dlina)} \\mathbf{${hvost}}`;
+}
+
+/**
+ * Формула кусками, по которым её можно переносить на новую строку:
+ * перед каждым знаком отношения верхнего уровня и после `,\quad`.
+ * KaTeX внутри одной формулы строку не переносит, а в узкой колонке
+ * карточки длинная цепочка равенств не помещается — поэтому каждый
+ * кусок набирается отдельно, а между ними обычный пробел.
+ */
+export function kuskiFormuly(formula: string): string[] {
+  const kuski: string[] = [];
+  let glubina = 0;
+  let nachalo = 0;
+  for (let i = 0; i < formula.length; i += 1) {
+    const ch = formula[i];
+    if (ch === '{' || ch === '(') {
+      glubina += 1;
+    } else if (ch === '}' || ch === ')') {
+      glubina -= 1;
+    } else if (glubina === 0 && i > nachalo) {
+      if (ch === '=' || formula.startsWith('\\approx', i)) {
+        kuski.push(formula.slice(nachalo, i).trim());
+        nachalo = i;
+      } else if (formula.startsWith(',\\quad', i)) {
+        kuski.push(formula.slice(nachalo, i + 1).trim());
+        nachalo = i + 6;
+      }
+    }
+  }
+  kuski.push(formula.slice(nachalo).trim());
+  return kuski.filter((k) => k !== '');
+}
+
+/** Шаг разбора: текст и, если есть, формула в трёх видах. */
+function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
+  if (shag.formula === undefined) {
+    return { text: shag.text };
+  }
+  const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
+  const html = kuskiFormuly(tex)
+    .map((kusok) => typeset(`$${kusok}$`))
+    .join(' ');
+  return { text: shag.text, tex, html, plain: texPlain(tex) };
+}
+
+/**
  * Закрытый разбор в JSON. Формулы шагов набираются KaTeX здесь, на
- * сборке, и уезжают готовым HTML; рядом — те же формулы словами.
- * Без методики (задание №5) разбор — только тексты шагов, как раньше.
+ * сборке, и уезжают готовым HTML; рядом — те же формулы в TeX для
+ * печатных листов и словами для alt. Ответ в последней формуле —
+ * жирным. Без методики (подготовка №5) — те же шаги без подсветки.
  */
 function zakrytyRazbor(
   model: ReturnType<typeof modelVarianta> | null,
-  shagiTexty: string[],
+  shagi: readonly Step[],
   otvet: string,
 ): string {
+  const posledniyS = shagi.reduce((k, s, i) => (s.formula === undefined ? k : i), -1);
+  const shagiRazbora = shagi.map((shag, i) => shagRazbora(shag, i === posledniyS));
   if (model === null) {
     const razbor: Razbor = {
       metod: '',
-      shagi: shagiTexty.map((text) => ({ text })),
+      shagi: shagiRazbora,
       podsvetka: { method: 'direct-count', favorable: [] },
       otvet,
     };
@@ -128,11 +210,7 @@ function zakrytyRazbor(
   }
   const razbor: Razbor = {
     metod: model.solution.method,
-    shagi: model.solution.steps.map((shag) =>
-      shag.formula === undefined
-        ? { text: shag.text }
-        : { text: shag.text, html: typeset(`$${shag.formula}$`), plain: texPlain(shag.formula) },
-    ),
+    shagi: shagiRazbora,
     podsvetka: model.solution.highlight,
     otvet: model.answer.display,
   };
@@ -152,14 +230,16 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
   const otvet = otvetUchenika(prototype, variant.params);
   const seal = sealAnswer(otvet);
   const model = prototype.metodika === undefined ? null : modelVarianta(prototype, variant);
-  const shagiTexty = prototype.shagi(variant.params).map((shag) => shag.text);
   return {
     n: variant.n,
     uslovie: prototype.uslovie(variant.params),
     seal,
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
-    steps: sealText(zakrytyRazbor(model, shagiTexty, String(otvet).replace('.', ',')), seal),
+    steps: sealText(
+      zakrytyRazbor(model, prototype.shagi(variant.params), String(otvet).replace('.', ',')),
+      seal,
+    ),
     ...(model === null ? {} : { model: otkrytayaModel(model) }),
   };
 }
@@ -226,14 +306,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     nomer: zadacha.nomer,
     uslovie: zadacha.uslovie,
     seal,
-    steps: sealText(
-      zakrytyRazbor(
-        model,
-        zadacha.shagi.map((shag) => shag.text),
-        String(otvet).replace('.', ','),
-      ),
-      seal,
-    ),
+    steps: sealText(zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ',')), seal),
     ...(risunok === undefined ? {} : { risunok }),
     ...(model === null ? {} : { model: otkrytayaModel(model) }),
   };

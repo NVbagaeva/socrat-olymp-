@@ -163,6 +163,16 @@
   gap: var(--space-3);
 }
 
+/* Шаг разбора: пояснение словами и под ним формула, набранная KaTeX
+   на сборке. Кегль формулы чуть крупнее текста, как у карточки. */
+.vtask__razbor-text,
+.vtask__razbor-formula {
+  margin: 0;
+}
+.vtask__razbor-formula {
+  font-size: 1.15em;
+  overflow-x: auto;
+}
 .vtask__razbor {
   display: grid;
   gap: var(--space-2);

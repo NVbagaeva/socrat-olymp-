@@ -87,6 +87,15 @@ console.log(
 console.log(`3. ответ по формуле разошёлся с ответом перебором: ${report.mismatchPerebor}`);
 console.log(`4. последний шаг разбора не равен ответу: ${report.mismatchSteps}`);
 console.log(`5. ответ не пишется в клетки и округления в условии нет: ${report.badFormat}`);
+console.log(`   выкладки в тексте шага или формулы не в TeX: ${report.vykladki}`);
+report.bad
+  .flatMap((v) =>
+    v.problems
+      .filter((x) => x.includes('в тексте') || x.includes('не в TeX'))
+      .map((x) => `${v.id} № ${v.n}: ${x}`),
+  )
+  .slice(0, 20)
+  .forEach((item) => console.log(`   ${item}`));
 console.log(`6. варианты из источников с проблемами: ${report.sourceProblems.length}`);
 report.sourceProblems.slice(0, 20).forEach((item) => console.log(`   ${item.ref}: ${item.why}`));
 console.log(`7. совпадающих вариантов: ${report.duplicates.length}`);
@@ -99,6 +108,15 @@ console.log(`\nподготовка: блоков ${prep.bloki}, задач ${pr
 console.log(`  ответ разошёлся с проверкой другим путём: ${prep.mismatch}`);
 console.log(`  последний шаг разбора не равен ответу: ${prep.mismatchSteps}`);
 console.log(`  ответ не пишется в клетки и округления в условии нет: ${prep.badFormat}`);
+console.log(`  выкладки в тексте шага или формулы не в TeX: ${prep.vykladki}`);
+prep.bad
+  .flatMap((v) =>
+    v.problems
+      .filter((x) => x.includes('в тексте') || x.includes('не в TeX'))
+      .map((x) => `${v.id}: ${x}`),
+  )
+  .slice(0, 60)
+  .forEach((item) => console.log(`   ${item}`));
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
 

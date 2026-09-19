@@ -146,8 +146,15 @@ export function VeroyatnostPrep({ bloki }: VeroyatnostPrepProps) {
                         <ol className="vtask__razbor">
                           {state.razbor.map((shag, i) => (
                             <li key={i}>
-                              {shag.text}
-                              {shag.plain === undefined ? null : ` ${shag.plain}`}
+                              <p className="vtask__razbor-text">{shag.text}</p>
+                              {/* Формула набрана KaTeX на сборке: вставляется
+                                  готовой вёрсткой, движка в браузере нет. */}
+                              {shag.html === undefined ? null : (
+                                <p
+                                  className="vtask__razbor-formula"
+                                  dangerouslySetInnerHTML={{ __html: shag.html }}
+                                />
+                              )}
                             </li>
                           ))}
                         </ol>
