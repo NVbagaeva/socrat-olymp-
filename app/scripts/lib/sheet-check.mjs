@@ -102,13 +102,23 @@ export function checkPdfFile(file, options) {
  *
  * Иллюстрации — дело подготовки и тренажёра; на листе задача живёт
  * условием и рисунком метода, а рисунок метода приходит инлайновым
- * SVG. Значит ни тега <img>, ни пути /images/ в промежуточном HTML
- * быть не должно: если они там появились, картинка уедет в PDF —
- * или, хуже, не уедет и оставит пустую рамку.
+ * SVG. Значит ни тега <img>, ни пути /images/ на листе быть не
+ * должно: если они там появились, картинка уедет в PDF — или, хуже,
+ * не уедет и оставит пустую рамку.
+ *
+ * Смотрим разметку листа и описание потока, а стили и служебные
+ * скрипты выбрасываем: в исходнике KaTeX лежит своя разметка <img>
+ * для \includegraphics, и к листу она отношения не имеет. Описание
+ * потока — тот же скрипт, но с данными, поэтому оно возвращается.
  */
 export function checkNoTaskImages(html, name, fail) {
-  if (/<img\b/i.test(html)) { fail(name + ': на листе есть тег <img>'); }
-  if (/\/images\//.test(html)) { fail(name + ': на листе есть путь /images/'); }
+  const spec = /<script type="application\/json" id="sheet-spec">([\s\S]*?)<\/script>/.exec(html);
+  const list = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ') + (spec ? spec[1] : '');
+
+  if (/<img\b/i.test(list)) { fail(name + ': на листе есть тег <img>'); }
+  if (/\/images\//.test(list)) { fail(name + ': на листе есть путь /images/'); }
 }
 
 /**
