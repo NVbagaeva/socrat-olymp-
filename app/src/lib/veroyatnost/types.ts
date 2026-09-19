@@ -18,6 +18,7 @@
  */
 
 import type { Method, Vizual } from './model';
+import type { Pryamaya } from './pryamaya';
 
 /** Формат ответа, как его ждёт ЕГЭ. */
 export type AnswerFormat = 'целое' | 'десятичная';
@@ -46,6 +47,7 @@ export interface Variant {
  * последнего шага оно равно ответу, это проверяет автотест.
  */
 export interface Step {
+  /** Слова шага; можно с формулами в $…$. */
   text: string;
   formula?: string;
   value?: number;
@@ -74,6 +76,12 @@ export interface Metodika {
    * она выдаёт m, а значит и ответ.
    */
   vizual(p: Params): Vizual;
+}
+
+/** Картинка справа от условия: файл из public/images. */
+export interface Illyustratsiya {
+  src: string;
+  alt: string;
 }
 
 export interface Prototype {
@@ -109,6 +117,15 @@ export interface Prototype {
   perebor(p: Params): number;
   /** Шаги разбора; значение последнего шага равно ответу. */
   shagi(p: Params): Step[];
+  /**
+   * Координатная прямая к разбору: есть у задач на геометрическую
+   * вероятность, где величина равномерно распределена на отрезке.
+   * Считается из параметров, как и шаги, и уезжает в браузер вместе
+   * с ними закрытой — на ней видна длина благоприятного промежутка.
+   */
+  pryamaya?(p: Params): Pryamaya;
+  /** Картинка к условию, одна на прототип. */
+  illyustratsiya?: Illyustratsiya;
   varianty: readonly Variant[];
   /** Метод и рисунок. У задания №4 обязательна — см. checkModel. */
   metodika?: Metodika;
@@ -204,6 +221,10 @@ export interface PrepZadacha {
    * конспекта — его вариант 1, остальные варианты собрал генератор.
    */
   prototip?: Prototype;
+  /** Координатная прямая к разбору — см. Prototype.pryamaya. */
+  pryamaya?: Pryamaya;
+  /** Картинка к условию. */
+  illyustratsiya?: Illyustratsiya;
 }
 
 /** Блок подготовительных задач — заголовок из конспекта. */

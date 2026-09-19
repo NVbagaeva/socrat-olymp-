@@ -179,6 +179,10 @@
      Тот же стек прописан в генераторе иллюстраций
      `tools/glass_style.py` (FONT_MATH) — в SVG токены не доезжают. */
   --font-math: 'Latin Modern Roman', 'Cambria Math', 'Times New Roman', serif;
+  /* Антиква карточки задачи: условие, заголовок «Решение», слова
+     шагов разбора и подписи-обозначения на чертежах. PT Serif
+     подключён через next/font/local (app/src/lib/fonts.ts). */
+  --font-serif: var(--font-pt-serif), Georgia, 'Times New Roman', serif;
 
   /* Шаг сетки 4px: p-1 = 4px, p-4 = 16px, p-6 = 24px. */
   --spacing: 4px;
