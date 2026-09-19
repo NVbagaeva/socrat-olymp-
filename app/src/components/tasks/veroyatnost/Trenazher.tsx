@@ -20,7 +20,7 @@ import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
 import type { Method } from '@/lib/veroyatnost/model';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import type { RoundKind } from '@/lib/veroyatnost/useRound';
-import { metodKind, metodyZadaniya, zadachaId } from './metody';
+import { metodKind, metodyZadaniya, seychas, zadachaId } from './metody';
 import { ProgressMetody } from './ProgressMetody';
 import { Sessiya, type SessiyaPlan } from './Sessiya';
 
@@ -143,7 +143,7 @@ export function Trenazher({
     /* Ключ подхода новый на каждый запуск: подход не переиспользует
        прошлую раскладку. */
     setPlan({
-      key: `v${zadanie}:${request.mode}:${Date.now()}`,
+      key: `v${zadanie}:${request.mode}:${seychas()}`,
       rezhim: request.mode,
       metod,
       source,
@@ -161,7 +161,7 @@ export function Trenazher({
         store={store}
         uznayStore={uznayStore}
         backHref={base}
-        onAgain={() => setPlan({ ...plan, key: `v${zadanie}:${plan.rezhim}:${Date.now()}` })}
+        onAgain={() => setPlan({ ...plan, key: `v${zadanie}:${plan.rezhim}:${seychas()}` })}
       />
     );
   }

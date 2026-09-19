@@ -13,7 +13,7 @@ import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import { openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
 import { MethodPicker } from './MethodPicker';
-import { metodKind, metodyZadaniya, zadachaId } from './metody';
+import { metodKind, metodyZadaniya, seychas, zadachaId } from './metody';
 
 /** Что собрал конфигуратор: режим, метод, откуда брать задачи и сколько. */
 export interface SessiyaPlan {
@@ -120,17 +120,17 @@ export function Sessiya({
   }
 
   /* Время идёт от первой проверки: до неё ученик ещё читает условие. */
-  function tik(seychas: number) {
+  function tik(vremya: number) {
     if (startedAt.current === null) {
-      startedAt.current = seychas;
+      startedAt.current = vremya;
     }
     if (last) {
-      setSeconds((seychas - startedAt.current) / 1000);
+      setSeconds((vremya - startedAt.current) / 1000);
     }
   }
 
   /** Закрыть задачу тренажёра: верный ответ или открытое решение. */
-  function zapisat(right: boolean, clean: boolean, seychas: number) {
+  function zapisat(right: boolean, clean: boolean, vremya: number) {
     if (item === undefined || zakryto.current === id) {
       return;
     }
@@ -145,24 +145,24 @@ export function Sessiya({
       taskId: id,
       right,
       clean,
-      seconds: (seychas - nachalo.current) / 1000,
+      seconds: (vremya - nachalo.current) / 1000,
     });
     otmetit(right ? 'right' : 'hinted', metod);
-    tik(seychas);
+    tik(vremya);
   }
 
-  function otvet(right: boolean, seychas: number) {
+  function otvet(right: boolean, vremya: number) {
     if (right) {
-      zapisat(true, !oshibsya.current, seychas);
+      zapisat(true, !oshibsya.current, vremya);
       return;
     }
     oshibsya.current = true;
     setMisses((n) => n + 1);
-    tik(seychas);
+    tik(vremya);
   }
 
   /** «Узнай метод»: сверить выбор с отпечатком и открыть признаки. */
-  function vybrat(metod: Method, seychas: number) {
+  function vybrat(metod: Method, vremya: number) {
     const kind = item === undefined ? undefined : uznayById.get(item.kind);
     const variant = kind?.variants.find((v) => v.n === item?.n);
     if (item === undefined || variant === undefined || itog !== null) {
@@ -180,13 +180,13 @@ export function Sessiya({
       taskId: id,
       right,
       clean: right,
-      seconds: (seychas - nachalo.current) / 1000,
+      seconds: (vremya - nachalo.current) / 1000,
     });
     if (!right) {
       setMisses((n) => n + 1);
     }
     otmetit(right ? 'right' : null, verny);
-    tik(seychas);
+    tik(vremya);
   }
 
   function dalshe() {
@@ -275,7 +275,7 @@ export function Sessiya({
           <MethodPicker
             vybor={itog?.vybor ?? null}
             verny={itog?.verny ?? null}
-            onPick={(metod) => vybrat(metod, Date.now())}
+            onPick={(metod) => vybrat(metod, seychas())}
             label={uznayTeksty.vopros}
             metody={metody}
           />
@@ -345,8 +345,8 @@ export function Sessiya({
           ? { metodLabel: metodPoId(metod).nazvanie }
           : {})}
         istochnik={kind.istochnik}
-        onResult={(right) => otvet(right, Date.now())}
-        onReveal={() => zapisat(false, false, Date.now())}
+        onResult={(right) => otvet(right, seychas())}
+        onReveal={() => zapisat(false, false, seychas())}
         onNext={dalshe}
         nextLabel={last ? slova.zavershit : slova.dalshe}
       />

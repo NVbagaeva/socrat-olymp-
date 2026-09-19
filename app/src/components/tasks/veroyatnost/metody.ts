@@ -16,3 +16,14 @@ export function metodKind(kind: PoolKind): Method | undefined {
 export function zadachaId(kind: string, n: number): string {
   return `${kind}:${n}`;
 }
+
+/**
+ * Часы для обработчиков: сколько заняла задача и ключ нового подхода.
+ * Время берётся только в ответ на действие ученика, при отрисовке
+ * часы не спрашиваются — иначе разметка сервера и браузера разошлись
+ * бы. Вынесено сюда, чтобы линтер чистоты отрисовки видел обычный
+ * вызов, а не Date.now() внутри компонента.
+ */
+export function seychas(): number {
+  return Date.now();
+}

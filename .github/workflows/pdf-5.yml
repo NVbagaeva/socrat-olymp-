@@ -25,6 +25,7 @@ on:
       - 'app/src/components/tasks/card/Vizualizatsiya.tsx'
       - 'app/src/content/sheet5.js'
       - 'app/src/content/sheet12.js'
+      - 'app/src/content/veroyatnost.ts'
       - 'app/scripts/build-pdf-5.mjs'
       - 'app/scripts/check-pdf-5.mjs'
       - 'app/scripts/lib/**'
