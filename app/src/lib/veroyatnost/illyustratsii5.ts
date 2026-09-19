@@ -61,6 +61,14 @@ const KARTINKI: Record<string, Kartinka> = {
   'k5-56': { alt: 'Три шарика и три приза: мёд, колокольчик, морковка', w: 1200, h: 800 },
 };
 
+/** Картинка задачи для карточки по макету: путь и alt; нет — undefined. */
+export function kartinka5(id: string): { src: string; alt: string } | undefined {
+  const kartinka = KARTINKI[id];
+  return kartinka === undefined
+    ? undefined
+    : { src: `/images/veroyatnost/zadanie-5/${id}.webp`, alt: kartinka.alt };
+}
+
 /** Разметка картинки для задачи или undefined, если картинки нет. */
 export function illyustratsiya5(id: string): string | undefined {
   const kartinka = KARTINKI[id];

@@ -9,6 +9,7 @@
 
 import { KLASSICHESKOE } from './bank4/klassicheskoe';
 import { KONSPEKT_4 } from './bank4/konspekt';
+import { PRYAMAYA } from './bank4/pryamaya';
 import { STATISTICHESKOE } from './bank4/statisticheskoe';
 import { BANK_5 } from './bank5';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
@@ -19,8 +20,8 @@ import { round, type Params, type PrepZadacha, type Prototype } from './types';
 export { BLOKI_4, BLOKI_5, type Blok } from './blocks';
 export { BANK_5 } from './bank5';
 
-/** Банк задания №4: два блока задачника, 21 прототип. */
-export const BANK_4: readonly Prototype[] = [...KLASSICHESKOE, ...STATISTICHESKOE];
+/** Банк задания №4: два блока задачника и блок координатной прямой, 23 прототипа. */
+export const BANK_4: readonly Prototype[] = [...KLASSICHESKOE, ...STATISTICHESKOE, ...PRYAMAYA];
 
 /** Прототипы задач конспекта №4: вариант 1 — задача автора, дальше генератор. */
 export { KONSPEKT_4 };

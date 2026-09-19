@@ -238,7 +238,7 @@ export function Trenazher({ pool, zadanie = 4 }: TrenazherProps) {
             /* Метод в шапке — только в отработке: в смешанном режиме и
                в повторе ученик должен узнать его сам. */
             {...(rezhim === 'practice' ? { metodLabel: nazvanieMetoda(metodKind(kind)) } : {})}
-            istochnik={`${slova.istochnik} · задачи ${kind.zadachnik[0]}–${kind.zadachnik[1]}`}
+            istochnik={kind.istochnik}
             onResult={(right) => zapisat(right, right, Date.now())}
             onReveal={() => zapisat(false, false, Date.now())}
             onNext={dalshe}

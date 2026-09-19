@@ -19,6 +19,8 @@
 
 import type { Method, Vizual } from './model';
 
+import type { Pryamaya } from './pryamaya';
+
 /** Формат ответа, как его ждёт ЕГЭ. */
 export type AnswerFormat = 'целое' | 'десятичная';
 
@@ -59,6 +61,12 @@ export interface Step {
   text: string;
   formula?: string;
   value?: number;
+}
+
+/** Картинка справа от условия: файл из public/images. */
+export interface Illyustratsiya {
+  src: string;
+  alt: string;
 }
 
 /**
@@ -122,6 +130,13 @@ export interface Prototype {
   varianty: readonly Variant[];
   /** Метод и рисунок. У задания №4 обязательна — см. checkModel. */
   metodika?: Metodika;
+  /**
+   * Координатная прямая по макету карточки (см. pryamaya.ts) — у
+   * задач на геометрическую вероятность, отдельно от модели метода.
+   */
+  pryamaya?(p: Params): Pryamaya;
+  /** Картинка к условию, одна на прототип (карточка по макету). */
+  illyustratsiya?: Illyustratsiya;
 }
 
 /* ── Чтение параметров ───────────────────────────────────────────── */
@@ -209,6 +224,10 @@ export interface PrepZadacha {
   shagi: Step[];
   /** Метод и рисунок. У задания №4 обязательна — см. checkModel. */
   metodika?: Metodika;
+  /** Координатная прямая по макету — см. Prototype.pryamaya. */
+  pryamaya?: Pryamaya;
+  /** Картинка к условию (карточка по макету). */
+  illyustratsiya?: Illyustratsiya;
   /**
    * Параметрический прототип этой задачи, если он есть: задача
    * конспекта — его вариант 1, остальные варианты собрал генератор.

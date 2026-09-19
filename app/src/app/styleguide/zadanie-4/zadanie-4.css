@@ -1,0 +1,37 @@
+/* Витрина карточки задания №4. Служебная страница: в меню не
+   входит, не индексируется. Карточка и рисунок оформлены в
+   zadaniya/veroyatnost.css — здесь только раскладка страницы. */
+
+.z4 {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.z4__kicker {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.z4__lead {
+  max-width: 70ch;
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+}
+
+.z4__list {
+  display: grid;
+  gap: var(--space-10);
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.z4__chem {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
