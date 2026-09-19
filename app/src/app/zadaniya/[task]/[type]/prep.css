@@ -413,12 +413,8 @@
     border-color var(--dur-switch) var(--ease),
     background var(--dur-switch) var(--ease);
 }
-.pdot:not(.pdot--flat):hover {
+.pdot:hover {
   border-color: var(--color-primary);
-}
-/* Ряд, который только показывает ход подхода: кружки не нажимаются. */
-.pdot--flat {
-  cursor: default;
 }
 .pdot:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -462,16 +458,6 @@
 .pdot.is-current.is-right {
   border-color: var(--color-success);
   background: var(--color-success);
-}
-/* Решение разобрано — это не пропуск: задачу открыли и поняли, но
-   своими силами она не решена. Поэтому свой цвет, а не серый. */
-.pdot.is-revealed {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-.pdot.is-current.is-revealed {
-  border-color: var(--color-warning);
-  background: var(--color-warning);
 }
 
 .ptask__card {

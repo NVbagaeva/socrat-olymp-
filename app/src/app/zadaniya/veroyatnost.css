@@ -36,6 +36,47 @@
 
 /* ── Подготовительные задачи ────────────────────────────────────── */
 
+/* ── Кружки подготовки и тренажёра ──────────────────────────────── */
+
+/* Состояние «разобрано решение»: задачу открыли и разобрали, но своими
+   силами она не закрыта. Это не пропуск, поэтому цвет свой. У заданий
+   №12 и №8 такого состояния нет — правило живёт здесь, а не в общем
+   prep.css. */
+.pdot.is-revealed {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.pdot.is-current.is-revealed {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+}
+
+/* Ряд-указатель хода подхода: кружки не нажимаются. Наведение из
+   prep.css красит рамку синим — здесь оно возвращается к цвету
+   состояния, поэтому цвета перечислены заново. */
+.pdot--flat {
+  cursor: default;
+}
+.pdot--flat:hover {
+  border-color: var(--color-border);
+}
+.pdot--flat.is-right:hover {
+  border-color: var(--color-success);
+}
+.pdot--flat.is-wrong:hover {
+  border-color: var(--color-error);
+}
+.pdot--flat.is-revealed:hover,
+.pdot--flat.is-current.is-revealed:hover {
+  border-color: var(--color-warning);
+}
+.pdot--flat.is-current:hover {
+  border-color: var(--color-primary);
+}
+.pdot--flat.is-current.is-right:hover {
+  border-color: var(--color-success);
+}
+
 /* Экран блока — тот же .ptask, что у подготовки задания №12: шапка
    со счётом, строка «Задача N из M», ряд кружков и одна задача.
    Здесь только то, чего у №12 нет: карточка задачи вероятности и
