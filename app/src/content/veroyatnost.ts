@@ -74,12 +74,22 @@ const TABS_5: readonly VeroyatnostTab[] = [
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
+/**
+ * Заголовок раздела №4 — один на все вкладки: он живёт в шапке
+ * раздела, а не в страницах, и по вкладкам не дублируется.
+ */
+export const ZAGOLOVOK_4 = 'Задание №4. Вероятность: простая';
+
+/** Подзаголовок раздела №4 — строка под бейджем уровня. */
+export const PODZAGOLOVOK_4 =
+  'Одно задание — 8 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
+
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
     no: '04',
     slug: '4',
-    title: 'Основные понятия теории вероятностей',
-    lead: 'Одно задание — пять методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
+    title: ZAGOLOVOK_4,
+    lead: PODZAGOLOVOK_4,
     badge: 'Базовый уровень',
     tabs: TABS_4,
     /* Те же две карточки, что у задания №12. Файлы — сборник
@@ -159,13 +169,19 @@ export function veroyatnostBySlug(slug: string): VeroyatnostSection | undefined 
  * Заголовок окна браузера: «Тема. Вкладка — задание №N — Будет на ЕГЭ».
  * Собирается здесь, чтобы название темы и номер не переписывались
  * руками в каждой из страниц.
+ *
+ * Номер задания приписывается, только если его нет в самом названии:
+ * у №4 название начинается с «Задание №4», и повторять его дважды
+ * в одной строке незачем.
  */
 export function veroyatnostTitle(slug: string, tab: string): string {
   const section = veroyatnostBySlug(slug);
   if (section === undefined) {
     throw new Error(`Нет раздела вероятности ${slug}`);
   }
-  return `${section.title}. ${tab} — задание №${Number(section.no)} — Будет на ЕГЭ`;
+  const zadanie = `задание №${Number(section.no)}`;
+  const hvost = section.title.toLowerCase().includes(zadanie) ? '' : ` — ${zadanie}`;
+  return `${section.title}. ${tab}${hvost} — Будет на ЕГЭ`;
 }
 
 /* ── Слова тренажёра (раздел 07 референса) ───────────────────────── */

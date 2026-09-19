@@ -51,7 +51,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
         />
 
-        <div className="section-panel">{children}</div>
+        <div className="section-panel veroyatnost-panel">{children}</div>
       </main>
     </AppShell>
   );

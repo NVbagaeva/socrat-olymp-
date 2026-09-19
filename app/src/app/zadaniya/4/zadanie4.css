@@ -118,125 +118,257 @@
 
 /* ── Вкладка «О задании» ────────────────────────────────────────── */
 
+/* Две равные колонки: слева история с фотографией, справа три
+   карточки. Макет 1440: колонки 562 и 552 при зазоре 24 — разница
+   в десять пикселей на глаз не читается, поэтому колонки равные. */
 .z4-about {
   display: grid;
-  gap: var(--space-8);
-}
-.z4-about__title {
-  margin: 0 0 var(--space-3);
-  color: var(--color-text-brand);
-}
-.z4-about__sub {
-  margin: 0 0 var(--space-2);
-  color: var(--color-text-brand);
-}
-.z4-about__text {
-  margin: 0;
-  max-width: 68ch;
-  color: var(--color-text-secondary);
-  line-height: var(--lh-body);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
 }
 
-/* Пять шагов в ряд, на узком экране — столбиком. */
-.z4-pipeline {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
+/* ── Левая колонка: немного истории ─────────────────────────────── */
+
+.z4-about__h2 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-brand);
+}
+/* Кегль страницы — на ступень мельче платформенного: так набран
+   макет раздела. Ширину не ограничиваем: колонка и есть мера. */
+.z4-about__text {
   margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: none;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
 }
-@media (max-width: 1023px) {
-  .z4-pipeline {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+
+.z4-about__figura {
+  margin: var(--space-4) 0 0;
 }
-@media (max-width: 767px) {
-  .z4-pipeline {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* Пропорции свои, файла: фотографию не кадрируем. */
+.z4-about__foto {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
 }
-.z4-pipeline__step {
+/* Нет файла — пустое место в пунктирной рамке, а не чужая картинка.
+   Место под фотографию держится её пропорциями, чтобы вёрстка
+   не прыгала, когда файл появится. */
+.z4-about__pusto {
   display: grid;
-  gap: var(--space-1);
+  align-content: center;
+  aspect-ratio: 1672 / 941;
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.z4-about__podpis {
+  margin-top: var(--space-4);
+  color: var(--color-primary);
+}
+/* Рукописный шрифт узкий и мелкий в росте: при равном кегле он
+   читается меньше Inter, поэтому ступень выше обычного текста. */
+.z4-about__ruka {
+  display: block;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+}
+.z4-about__roscherk {
+  display: block;
+  width: 72%;
+  height: 32px;
+  margin-top: var(--space-2);
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+/* ── Правая колонка: три карточки ───────────────────────────────── */
+
+.z4-about__karty {
+  display: grid;
+  gap: var(--space-4);
+}
+/* Карточки раздела — на голубой подложке и без тени: разделение
+   несут рамка и заливка. Общий .card не трогаем, он с тенью. */
+.z4-karta {
   padding: var(--space-4);
   border: 1px solid var(--color-border-info);
   border-radius: var(--radius-lg);
   background: var(--color-surface-info);
 }
-.z4-pipeline__no {
-  display: inline-grid;
+.z4-karta__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z4-karta__ico {
+  display: grid;
   place-items: center;
+  flex: none;
   width: 28px;
   height: 28px;
-  margin-bottom: var(--space-1);
+  color: var(--color-primary);
+}
+.z4-karta__ico svg {
+  width: 100%;
+  height: 100%;
+}
+.z4-karta__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Карточка 1: решаемость ─────────────────────────────────────── */
+
+/* Число и пояснение делят карточку пополам; между ними линия —
+   она же граница колонок. */
+.z4-stat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5);
+}
+.z4-stat__chislo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-6);
+}
+.z4-stat__ico {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-pill);
   background: var(--color-primary);
   color: var(--color-text-inverse);
-  font-size: var(--fs-caption);
+}
+.z4-stat__ico svg {
+  width: 24px;
+  height: 24px;
+}
+.z4-stat__value {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
   font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--color-primary);
 }
-.z4-pipeline__title {
-  color: var(--color-text-brand);
-  font-weight: 600;
-}
-.z4-pipeline__lead {
-  color: var(--color-text-secondary);
+.z4-stat__label {
+  grid-column: 1 / -1;
+  margin: var(--space-3) 0 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
 }
-
-.z4-metody-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-3);
+.z4-stat__istochnik {
+  grid-column: 1 / -1;
   margin: var(--space-4) 0 0;
-  padding: 0;
-  list-style: none;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-tertiary);
 }
-@media (max-width: 1023px) {
-  .z4-metody-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 767px) {
-  .z4-metody-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.z4-metod-tile {
-  display: grid;
-  gap: var(--space-1);
-  height: 100%;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  text-decoration: none;
-  transition:
-    border-color var(--dur-switch) var(--ease),
-    box-shadow var(--dur-switch) var(--ease);
-}
-.z4-metod-tile:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-sm);
-}
-.z4-metod-tile__no {
-  color: var(--color-primary);
+.z4-stat__text {
+  margin: 0;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--color-border-info);
   font-size: var(--fs-caption);
-  font-weight: 600;
-}
-.z4-metod-tile__title {
-  color: var(--color-text-brand);
-  font-weight: 600;
-}
-.z4-metod-tile__formula {
-  margin-top: var(--space-1);
+  line-height: var(--lh-caption);
   color: var(--color-text-secondary);
 }
 
+/* ── Карточка 2: какие задачи встречаются ───────────────────────── */
+
+/* Заголовок карточки крупнее остальных: он на макете ступенью выше. */
+.z4-zadachi .z4-karta__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+}
+
+/* Плашка-уточнение: терракотовая пара токенов, заливка и рамка. */
+.z4-shire {
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+}
+.z4-shire__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+.z4-shire__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.z4-shire__ico svg {
+  width: 16px;
+  height: 16px;
+}
+/* Список выровнен по тексту заголовка, за значком. */
+.z4-shire__list {
+  margin: var(--space-2) 0 0;
+  padding: 0 0 0 calc(24px + var(--space-2));
+  list-style: none;
+}
+.z4-shire__list li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Маркер — кружок в цвет акцента, посажен по середине строки. */
+.z4-shire__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc((var(--lh-caption) - 6px) / 2);
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+
+.z4-zadachi__razbor {
+  margin: 0;
+}
+.z4-zadachi__link {
+  color: var(--color-primary);
+}
+
+/* ── Карточка 3: важно понимать ─────────────────────────────────── */
+
+/* Текст выровнен по заголовку, за значком, — как на макете. */
+.z4-vazhno .z4-karta__text {
+  padding-left: calc(28px + var(--space-2));
+}
 /* ── Вкладка «Ключевые методы решения» ──────────────────────────── */
 
 .z4-metody {
