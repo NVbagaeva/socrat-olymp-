@@ -7,9 +7,9 @@ import {
   ProbabilityTree,
 } from '@/components/probability';
 import { METODY_02, METODY_4, type MetodOpisanie02 } from '@/content/veroyatnost-metody';
-import { typeset } from '@/lib/tex';
 import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
 import { HLEB, PIROZHKI_PUTI, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/veroyatnost/primery';
+import { Tex } from './Tex';
 
 /**
  * Вкладка «Ключевые методы решения» — раздел 02 референса.
@@ -20,16 +20,6 @@ import { HLEB, PIROZHKI_PUTI, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/vero
  * в карточке задачи, на параметрах из референса. Формулы набираются
  * KaTeX здесь, на сервере: в браузер уходит готовая вёрстка.
  */
-
-/** Текст с формулами между долларами → разметка. */
-function Tex({ text, className }: { text: string; className?: string }) {
-  return (
-    <span
-      {...(className === undefined ? {} : { className })}
-      dangerouslySetInnerHTML={{ __html: typeset(text) }}
-    />
-  );
-}
 
 /** Идентификатор карточки метода в разметке: по нему ведут ссылки. */
 export function metodAnchor(id: Method): string {

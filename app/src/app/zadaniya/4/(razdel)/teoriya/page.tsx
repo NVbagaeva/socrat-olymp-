@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { Teoriya4 } from '@/components/tasks/veroyatnost/Teoriya4';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 
 export const metadata: Metadata = {
@@ -9,14 +9,10 @@ export const metadata: Metadata = {
 /**
  * Вкладка «Теория» задания №4.
  *
- * Текст теории пишет автор. Пока его нет — вкладка честно об этом
- * говорит; придуманного здесь не будет.
+ * Разделы идут подряд на одной странице, содержание — рядом.
+ * Написан раздел «03. Координатная прямая»; остальные стоят в
+ * содержании с пометкой «готовится»: придуманного здесь не будет.
  */
 export default function Teoriya4Tab() {
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появится теория раздела. Текст напишет автор — придуманного здесь не будет."
-    />
-  );
+  return <Teoriya4 />;
 }
