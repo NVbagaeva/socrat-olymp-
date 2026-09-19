@@ -221,9 +221,14 @@ function taskCard(task, options) {
 /* ══════════════════════════════════════════════════════════
    Блок задач
    ══════════════════════════════════════════════════════════ */
+/* Идентификатор перед названием — плашкой: у прототипа в печатной
+   базе это его «p4-07», по которому задачу находят в тренажёре. */
 function blockHead(block) {
+  var id = block.id
+    ? '<span class="sheet-block-id">' + typo.escape(block.id) + '</span>'
+    : '';
   return '<header class="sheet-block-head">' +
-    '<h2 class="sheet-block-title">' + typo.markup(block.title) + '</h2>' +
+    '<h2 class="sheet-block-title">' + id + typo.markup(block.title) + '</h2>' +
     (block.note ? '<span class="sheet-block-note">' + typo.markup(block.note) + '</span>' : '') +
     '</header>';
 }
@@ -275,7 +280,10 @@ function flowItems(spec) {
   var layout = spec.layout;
 
   (spec.blocks || []).forEach(function (block, bi) {
-    out.push('<div class="sheet-item sheet-block" data-keep-with-next="1" data-block="' + bi + '">' +
+    /* Блок второго уровня — подзаголовок внутри раздела: плашка
+       прототипа в печатной базе. Оформляется легче полосы раздела. */
+    var sub = block.level === 2 ? ' sheet-block--sub' : '';
+    out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
       blockHead(block) + '</div>');
 
     var tasks = block.tasks || [];
@@ -320,7 +328,10 @@ function flowItems(spec) {
  *            разобранные примеры (exampleItem)
  *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия
  *            и чертежа могут быть figureWidth (мм), figureBelow
- *            (рисунок под условием) и solutionHtml (для учителя)
+ *            (рисунок под условием) и solutionHtml (для учителя).
+ *            У блока могут быть id (плашка перед названием) и
+ *            level: 2 — подзаголовок внутри раздела; блок без задач
+ *            даёт одну полосу заголовка
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
  *   withAnswerLine  ставить ли строку «Ответ: ____»

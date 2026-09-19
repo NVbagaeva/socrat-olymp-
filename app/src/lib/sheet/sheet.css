@@ -351,6 +351,37 @@ body {
 /* Блок не прижимается к предыдущему. */
 .sheet-block + .sheet-block { margin-top: calc(var(--sheet-step) * 6); }
 
+/* Идентификатор перед названием блока — плашкой в цвет номера задачи. */
+.sheet-block-id {
+  display: inline-block;
+  margin-right: calc(var(--sheet-step) * 2);
+  padding: 0 calc(var(--sheet-step) * 1.5);
+  border-radius: var(--sheet-radius-sm);
+  background: var(--sheet-chip-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-chip-line);
+  color: var(--sheet-chip-ink);
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.7;
+  vertical-align: baseline;
+}
+
+/* ── Блок второго уровня: подзаголовок внутри раздела ──────
+   Плашка прототипа в печатной базе. Легче полосы раздела: без
+   заливки, тоньше полоса слева, кегль текста. За своим разделом
+   идёт ближе, чем раздел за разделом. */
+.sheet-block--sub .sheet-block-head {
+  background: transparent;
+  border-left-width: calc(var(--sheet-step) * 1);
+  padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 3);
+  margin-bottom: calc(var(--sheet-step) * 2.5);
+}
+
+.sheet-block--sub .sheet-block-title { font-size: var(--sheet-fs-body); }
+
+.sheet-block + .sheet-block--sub { margin-top: calc(var(--sheet-step) * 3); }
+
 /* Между кусками потока тот же ритм, что между карточками внутри
    куска: страницу набирает paginate.js, и вертикальный отступ
    должен быть один и тот же в обе стороны. */

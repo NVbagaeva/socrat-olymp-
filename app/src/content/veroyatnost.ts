@@ -105,6 +105,16 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           icon: 'pdf',
           file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf',
         },
+        /* Печатная база тренажёра: все прототипы, варианты 1–10.
+           Собирает scripts/build-pdf-4-baza.mjs (workflow «PDF 4 база»);
+           файл учителя с решениями — только архивом CI. */
+        {
+          id: 'baza',
+          title: 'Печатная база задания 4',
+          lead: 'Все прототипы тренажёра, по десять вариантов, без рисунков — со строкой для ответа',
+          icon: 'pdf',
+          file: '/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf',
+        },
       ],
     },
   },
