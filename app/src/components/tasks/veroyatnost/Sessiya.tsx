@@ -263,7 +263,6 @@ export function Sessiya({
               steps: '',
               ...(variant.illustration === undefined ? {} : { illustration: variant.illustration }),
             }}
-            nomer={index + 1}
             istochnik={uznayTeksty.istochnik[kind.istochnik]}
           />
 
@@ -334,7 +333,6 @@ export function Sessiya({
           steps: variant.steps,
           ...(variant.model === undefined ? {} : { model: variant.model }),
         }}
-        nomer={index + 1}
         /* Метод в шапке — только в отработке: в смешанном режиме и
            в повторе ученик должен узнать его сам. */
         {...(plan.rezhim === 'practice' && metod !== undefined
