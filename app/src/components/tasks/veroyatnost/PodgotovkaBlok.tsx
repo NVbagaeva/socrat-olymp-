@@ -144,9 +144,7 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
             ...(zadacha.illustration === undefined ? {} : { illustration: zadacha.illustration }),
             ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
           }}
-          nomer={zadacha.nomer}
           {...(metod === undefined ? {} : { metodLabel: metod.nazvanie })}
-          istochnik={PODGOTOVKA_SLOVA.istochnik}
           onResult={otvet}
           onReveal={razbor}
           {...(dalshe === null

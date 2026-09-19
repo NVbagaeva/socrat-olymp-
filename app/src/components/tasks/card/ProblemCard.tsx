@@ -54,8 +54,6 @@ export interface ProblemCardZadacha {
 export interface ProblemCardProps {
   variant?: 'full' | 'condition';
   zadacha: ProblemCardZadacha;
-  /** Номер в подходе — плашка слева в шапке. */
-  nomer?: number;
   /** Название метода в шапке. В смешанном режиме не передаётся. */
   metodLabel?: string;
   /** Подпись справа в шапке: «Прототип задания 4». */
@@ -92,7 +90,6 @@ function shirokoeDerevo(parametry: PoolModel['parametry']): boolean {
 export function ProblemCard({
   variant = 'full',
   zadacha,
-  nomer,
   metodLabel,
   istochnik,
   initial,
@@ -167,17 +164,16 @@ export function ProblemCard({
   const podsvetka =
     razbor === null || state === 'incorrect' || state === 'before' ? undefined : razbor.podsvetka;
 
-  const head = (
-    <header className="pc__head">
-      {nomer === undefined ? null : (
-        <span className="pc__no" aria-label={`Задача ${nomer}`}>
-          {nomer}
-        </span>
-      )}
-      {metodLabel === undefined ? null : <Badge tone="info">{metodLabel}</Badge>}
-      {istochnik === undefined ? null : <span className="pc__istochnik">{istochnik}</span>}
-    </header>
-  );
+  /* Номера в шапке нет: он уже стоит в ряду кружков над карточкой,
+     и второй раз называть задачу незачем. Шапка рисуется, только
+     когда в ней что-то осталось, — иначе она давала бы пустой отступ. */
+  const head =
+    metodLabel === undefined && istochnik === undefined ? null : (
+      <header className="pc__head">
+        {metodLabel === undefined ? null : <Badge tone="info">{metodLabel}</Badge>}
+        {istochnik === undefined ? null : <span className="pc__istochnik">{istochnik}</span>}
+      </header>
+    );
 
   /* Иллюстрация: есть файл — картинка справа от условия, нет файла —
      ничего: ни рамки, ни места под неё, условие занимает всю ширину.

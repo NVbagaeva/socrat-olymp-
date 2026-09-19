@@ -507,7 +507,6 @@ export default function Page() {
               <ProblemCard
                 variant={i === 2 ? 'condition' : 'full'}
                 zadacha={k.zadacha}
-                nomer={i + 1}
                 {...(i === 2 ? {} : { metodLabel: metodLabel(k.zadacha.model?.method) })}
                 istochnik={k.zadacha.id.startsWith('k') ? 'Задача конспекта' : 'Прототип задания 4'}
                 {...(k.initial === undefined ? {} : { initial: k.initial })}
@@ -552,7 +551,6 @@ export default function Page() {
               </figcaption>
               <ProblemCard
                 zadacha={k.zadacha}
-                nomer={i + 1}
                 {...(metodLabel(k.zadacha.model?.method) === undefined
                   ? {}
                   : { metodLabel: metodLabel(k.zadacha.model?.method) })}
