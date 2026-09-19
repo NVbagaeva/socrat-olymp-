@@ -99,11 +99,21 @@
       }
     }
 
+    /* Заголовок остался последним на странице — после того, как
+       перенос вниз увёл за ним первую задачу. Правило 2 для такой
+       страницы надо применить ещё раз. */
+    function endsWithHead(flow) {
+      var last = flow.lastElementChild;
+      return Boolean(last && last.getAttribute('data-keep-with-next') === '1');
+    }
+
     /* Перенос заголовка мог оставить следующую страницу переполненной:
        на ней стало на кусок больше. Догоняем переносом вниз, пока
-       всё не встанет. */
+       всё не встанет — и пока страница не кончается заголовком:
+       сдвинутая вниз задача могла оставить его последним. */
     for (var q = 0; q < pages.length; q += 1) {
-      while (!fits(pages[q].flow) && pages[q].flow.childElementCount > 1) {
+      while ((!fits(pages[q].flow) || endsWithHead(pages[q].flow)) &&
+             pages[q].flow.childElementCount > 1) {
         var moved = pages[q].flow.lastElementChild;
         var target = pages[q + 1];
         if (!target) {
