@@ -358,6 +358,11 @@ function buildDocument(spec, assets) {
         fullHead: fullHead(spec.head),
         compactHead: compactHead(spec.head, spec.runner || spec.title.text),
         opening: titleBlock(spec.title) + recapBlock(spec.recap),
+        /* Титул тетради — целая страница без шапки и подвала,
+           готовая разметкой (sheet/tetrad.js, titlePage()); её
+           кладёт первым листом сам paginate.js. Сборник №12 это
+           поле не задаёт, и ничего не меняется. */
+        titlePage: spec.titlePage || null,
         items: items.concat(spec.extraItems || []),
         footer: footer(spec.foot)
       }).replace(/<\//g, '<\\/') +

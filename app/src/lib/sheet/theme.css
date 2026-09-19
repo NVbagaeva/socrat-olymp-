@@ -128,6 +128,24 @@
   --color-success: #16a34a;
   --color-error: #dc2626;
   --color-focus-ring: #e8f0fc;
+
+  /* ── Тетрадь для репетитора: титул, плашка, акцентная памятка ──
+     Ничего нового по смыслу: полосы титула — четыре тона primary
+     из тех же токенов сайта (blue-800…blue-500), плашка репетитора —
+     тот же светлый тон primary, что и у рамки «Повторяем», акцентная
+     заливка — светлый tint accent тем же приёмом, каким соткана вся
+     остальная палитра листа. */
+  --sheet-stripe-show: flex;
+  --sheet-stripe-1: #163f8c;
+  --sheet-stripe-2: #1a4fb0;
+  --sheet-stripe-3: #1f5fd0;
+  --sheet-stripe-4: #3d79e0;
+
+  --sheet-tutor-bg: #e8f0fc;
+  --sheet-tutor-line: #d7e5fa;
+
+  --sheet-accent-soft: color-mix(in srgb, var(--sheet-accent) 14%, var(--sheet-paper));
+  --sheet-accent-soft-line: color-mix(in srgb, var(--sheet-accent) 32%, var(--sheet-paper));
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -219,4 +237,19 @@
   --color-success: #000000;
   --color-error: #000000;
   --color-focus-ring: transparent;
+
+  /* Тетрадь в ч/б: полосы титула не печатаются — тот же приём,
+     что и у декоративных дуг (--sheet-arc-show). Плашка и акцентная
+     заливка — контуром, без цветной заливки, как остальные плашки. */
+  --sheet-stripe-show: none;
+  --sheet-stripe-1: #ffffff;
+  --sheet-stripe-2: #ffffff;
+  --sheet-stripe-3: #ffffff;
+  --sheet-stripe-4: #ffffff;
+
+  --sheet-tutor-bg: transparent;
+  --sheet-tutor-line: #000000;
+
+  --sheet-accent-soft: transparent;
+  --sheet-accent-soft-line: #000000;
 }

@@ -56,6 +56,22 @@
       return flow.scrollHeight <= flow.clientHeight + 0.5;
     }
 
+    /* Титульная страница тетради — отдельный лист без шапки,
+       подвала и обмера: он приходит уже готовой разметкой целой
+       страницы (sheet/tetrad.js, titlePage()) и просто встаёт
+       первым, а не третьим куском потока. flow: null помечает,
+       что у него нет области, которую можно упаковывать или
+       переполнять, — остальные проходы по pages это учитывают.
+       Как только он занял место 0, addPage() сам увидит
+       pages.length !== 0 и даст первой странице потока compactHead:
+       fullHead и opening нужны только сборнику №12, где всё
+       — шапка, название, «Повторяем» — идёт на одном листе. */
+    if (spec.titlePage) {
+      var titlePage = el(spec.titlePage);
+      host.appendChild(titlePage);
+      pages.push({ page: titlePage, flow: null });
+    }
+
     var flow = addPage();
     var items = spec.items || [];
     var i = 0;
@@ -89,8 +105,11 @@
     }
 
     /* Правило 2: заголовок блока не остаётся один внизу страницы.
-       Проверяется после набора — тогда видно, кто у кого последний. */
+       Проверяется после набора — тогда видно, кто у кого последний.
+       Титульная страница (flow: null) в этом правиле не участвует:
+       у неё нет потока, который можно было бы продолжить. */
     for (var p = 0; p < pages.length - 1; p += 1) {
+      if (!pages[p].flow) { continue; }
       var last = pages[p].flow.lastElementChild;
       while (last && last.getAttribute('data-keep-with-next') === '1') {
         var next = pages[p + 1].flow;
@@ -103,6 +122,7 @@
        на ней стало на кусок больше. Догоняем переносом вниз, пока
        всё не встанет. */
     for (var q = 0; q < pages.length; q += 1) {
+      if (!pages[q].flow) { continue; }
       while (!fits(pages[q].flow) && pages[q].flow.childElementCount > 1) {
         var moved = pages[q].flow.lastElementChild;
         var target = pages[q + 1];
