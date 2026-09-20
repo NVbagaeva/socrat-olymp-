@@ -1,11 +1,14 @@
 /**
- * Задание №5, прототипы метода удобного числа: 5.3 разность вложенных
- * событий (100 объектов) и 5.11 формула полной вероятности (10 000
- * объектов). Рисунок — сетка 10×10, искомая группа подсвечена.
+ * Задание №5, прототипы метода удобного числа: 5.3 координатная прямая
+ * (разность вложенных событий, 100 объектов), 5.4 сложение совместных
+ * событий (масса хлеба, 100 буханок) и 5.11 формула полной
+ * вероятности (10 000 объектов). Рисунок — сетка 10×10, искомая
+ * группа подсвечена.
  *
- * Хлеб в 5.3 стоит с оговоркой: там события не вложены, а совместны
- * («легче 810» и «тяжелее 790»), и ответ равен p₁ + p₂ − 1. Приём тот
- * же — сто буханок, лишние группы вычитаются, — поэтому прототип один.
+ * Хлеб — отдельный прототип: там события не вложены, а совместны
+ * («легче 810» и «тяжелее 790»), и ответ равен p₁ + p₂ − 1. Приём
+ * счёта тот же — сто буханок, лишние группы вычитаются, — но метод по
+ * типологии автора другой, и в банке он стоит своим блоком.
  */
 
 import { prototip, type Rng } from '../generator';
@@ -14,9 +17,9 @@ import { dec, konechnaya, num, text, type Params, type Prototype, type Step } fr
 import { setka } from './vizual5';
 import { shtuk, tex, texInt, tochnee, tochno, veroyatnost } from './obshchee';
 
-/* ── 5.3. Разность вложенных событий ─────────────────────────────── */
+/* ── 5.3. Координатная прямая: разность вложенных событий ────────── */
 
-type Syuzhet = 'test' | 'pribor' | 'avtobus' | 'hleb';
+type Syuzhet = 'test' | 'pribor' | 'avtobus';
 
 const PREDMETY = ['математике', 'физике', 'химии', 'информатике'];
 const PRIBORY = [
@@ -26,26 +29,18 @@ const PRIBORY = [
   ['фен', 'он'],
   ['принтер', 'он'],
 ] as const;
-const HLEB = [
-  [790, 810],
-  [785, 815],
-  [795, 805],
-  [780, 820],
-] as const;
 
 function syuzhet(p: Params): Syuzhet {
   const s = text(p, 'syuzhet');
-  if (s === 'test' || s === 'pribor' || s === 'avtobus' || s === 'hleb') {
+  if (s === 'test' || s === 'pribor' || s === 'avtobus') {
     return s;
   }
   throw new Error(`Неизвестный сюжет ${s}`);
 }
 
-/** Ответ 5.3: разность вложенных, у хлеба — сумма совместных минус единица. */
+/** Ответ 5.3: разность вложенных событий. */
 function otvet03(p: Params): number {
-  const p1 = veroyatnost(p, 'p1');
-  const p2 = veroyatnost(p, 'p2');
-  return tochnee(syuzhet(p) === 'hleb' ? p1 + p2 - 1 : p1 - p2);
+  return tochnee(veroyatnost(p, 'p1') - veroyatnost(p, 'p2'));
 }
 
 /** Группы из 100 объектов: подписи и доли, искомая — вторая. */
@@ -77,26 +72,22 @@ function gruppy03(p: Params): { label: string; share: number }[] {
         { label: `${b} и больше`, share: tochnee(1 - p1) },
       ];
     }
-    case 'hleb': {
-      const a = num(p, 'a');
-      const b = num(p, 'b');
-      return [
-        { label: `легче ${a} г`, share: tochnee(1 - p2) },
-        { label: `от ${a} до ${b} г`, share: otv },
-        { label: `тяжелее ${b} г`, share: tochnee(1 - p1) },
-      ];
-    }
     default:
       return [];
   }
 }
 
+/** Обе вероятности — целые проценты: иначе ста объектов не хватит. */
+function tselyeProtsenty(p1: number, p2: number): boolean {
+  return Math.round(p1 * 100) === p1 * 100 && Math.round(p2 * 100) === p2 * 100;
+}
+
 const P03: Prototype = prototip({
   id: 'p5-03',
-  blok: 'vlozhennye',
+  blok: 'koordinatnaya',
   nazvanie: 'Вложенные события: «между» через 100 объектов',
-  tip: 'Разность вложенных событий',
-  zadachnik: [9, 20],
+  tip: 'Координатная прямая',
+  zadachnik: [9, 16],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -114,11 +105,6 @@ const P03: Prototype = prototip({
         const b = num(p, 'b');
         return `Из районного центра в деревню ежедневно ходит автобус. Вероятность того, что в понедельник в автобусе окажется меньше ${b} пассажиров, равна ${p1}. Вероятность того, что окажется меньше ${a} пассажиров, равна ${p2}. Найдите вероятность того, что число пассажиров будет от ${a} до ${b - 1} включительно.`;
       }
-      case 'hleb': {
-        const a = num(p, 'a');
-        const b = num(p, 'b');
-        return `При выпечке хлеба производится контрольное взвешивание свежей буханки. Известно, что вероятность того, что масса окажется меньше ${b} г, равна ${p1}. Вероятность того, что масса окажется больше ${a} г, равна ${p2}. Найдите вероятность того, что масса буханки больше ${a} г, но меньше ${b} г.`;
-      }
       default:
         return '';
     }
@@ -127,8 +113,7 @@ const P03: Prototype = prototip({
     const p1 = veroyatnost(p, 'p1');
     const p2 = veroyatnost(p, 'p2');
     const s = syuzhet(p);
-    /* Сто объектов: обе вероятности — целые проценты. */
-    if (Math.round(p1 * 100) !== p1 * 100 || Math.round(p2 * 100) !== p2 * 100) {
+    if (!tselyeProtsenty(p1, p2)) {
       return false;
     }
     if (p1 <= 0 || p1 >= 1 || p2 <= 0 || p2 >= 1) {
@@ -137,9 +122,6 @@ const P03: Prototype = prototip({
     const otv = otvet03(p);
     if (otv <= 0 || otv >= 1 || !konechnaya(otv)) {
       return false;
-    }
-    if (s === 'hleb') {
-      return num(p, 'a') < num(p, 'b') && gruppy03(p).every((g) => g.share > 0);
     }
     if (s === 'avtobus' && !(num(p, 'a') >= 2 && num(p, 'a') < num(p, 'b'))) {
       return false;
@@ -154,9 +136,6 @@ const P03: Prototype = prototip({
   perebor: (p) => {
     const a = shtuk(veroyatnost(p, 'p1'), 100);
     const b = shtuk(veroyatnost(p, 'p2'), 100);
-    if (syuzhet(p) === 'hleb') {
-      return (100 - (100 - a) - (100 - b)) / 100;
-    }
     return (a - b) / 100;
   },
   shagi: (p): Step[] => {
@@ -205,22 +184,6 @@ const P03: Prototype = prototip({
           {
             text: `От ${aa} до ${bb - 1} — это «меньше ${bb}», но не «меньше ${aa}»:`,
             formula: `m = ${a} - ${b} = ${m}`,
-            value: m,
-          },
-          shagP(m, 100),
-        ];
-      }
-      case 'hleb': {
-        const aa = num(p, 'a');
-        const bb = num(p, 'b');
-        return [
-          {
-            text: `Возьмём 100 буханок. Легче ${bb} г — ${a} из них, тяжелее ${aa} г — ${b}:`,
-            formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
-          },
-          {
-            text: `Тяжелее ${bb} г — остальные, легче ${aa} г — тоже остальные; между ${aa} и ${bb} г — всё, что не попало ни туда, ни туда:`,
-            formula: `100 - ${a} = ${100 - a},\\quad 100 - ${b} = ${100 - b},\\quad m = 100 - ${100 - a} - ${100 - b} = ${m}`,
             value: m,
           },
           shagP(m, 100),
@@ -279,33 +242,9 @@ const P03: Prototype = prototip({
       ref: 'задачник 05, № 16',
       params: { syuzhet: 'avtobus', a: 11, b: 20, p1: 0.79, p2: 0.61 },
     },
-    {
-      n: 9,
-      source: 'задачник',
-      ref: 'задачник 05, № 17',
-      params: { syuzhet: 'hleb', a: 790, b: 810, p1: 0.96, p2: 0.82 },
-    },
-    {
-      n: 10,
-      source: 'задачник',
-      ref: 'задачник 05, № 18',
-      params: { syuzhet: 'hleb', a: 790, b: 810, p1: 0.98, p2: 0.83 },
-    },
-    {
-      n: 11,
-      source: 'задачник',
-      ref: 'задачник 05, № 19',
-      params: { syuzhet: 'hleb', a: 785, b: 815, p1: 0.98, p2: 0.86 },
-    },
-    {
-      n: 12,
-      source: 'задачник',
-      ref: 'задачник 05, № 20',
-      params: { syuzhet: 'hleb', a: 795, b: 805, p1: 0.95, p2: 0.81 },
-    },
   ],
   generator: (r: Rng): Params => {
-    const s = r.pick<Syuzhet>(['test', 'pribor', 'avtobus', 'hleb']);
+    const s = r.pick<Syuzhet>(['test', 'pribor', 'avtobus']);
     switch (s) {
       case 'test': {
         const p2 = r.dec(0.55, 0.85, 2);
@@ -326,14 +265,10 @@ const P03: Prototype = prototip({
           p2: tochnee(p1 - r.dec(0.03, 0.15, 2)),
         };
       }
-      case 'avtobus': {
+      default: {
         const a = r.int(8, 16);
         const p1 = r.dec(0.7, 0.92, 2);
         return { syuzhet: s, a, b: a + r.int(5, 12), p1, p2: tochnee(p1 - r.dec(0.1, 0.35, 2)) };
-      }
-      default: {
-        const [a, b] = r.pick(HLEB);
-        return { syuzhet: s, a, b, p1: r.dec(0.9, 0.98, 2), p2: r.dec(0.78, 0.92, 2) };
       }
     }
   },
@@ -344,11 +279,140 @@ const P03: Prototype = prototip({
       'спрашивают про «между»: ровно k, от года до двух, от a до b',
       'проценты удобно превратить в 100 объектов и вычитать группы',
     ],
-    fraza: (p) =>
-      syuzhet(p) === 'hleb'
-        ? 'удобное число — 100 буханок: вычитаем слишком лёгкие и слишком тяжёлые, остаётся искомая группа.'
-        : 'удобное число — 100 объектов: событие «между» получается вычитанием одной группы из другой.',
+    fraza: () =>
+      'удобное число — 100 объектов: событие «между» получается вычитанием одной группы из другой.',
     vizual: (p) => setka(100, gruppy03(p), [1]),
+  },
+});
+
+/* ── 5.4. Сложение совместных событий: масса хлеба ───────────────── */
+
+const HLEB = [
+  [790, 810],
+  [785, 815],
+  [795, 805],
+  [780, 820],
+] as const;
+
+/**
+ * Ответ 5.4: события «легче b» и «тяжелее a» совместны, их объединение —
+ * вся прямая, поэтому P(A ∪ B) = 1 и искомое P(A ∩ B) = p₁ + p₂ − 1.
+ */
+function otvet04(p: Params): number {
+  return tochnee(veroyatnost(p, 'p1') + veroyatnost(p, 'p2') - 1);
+}
+
+/** Группы из 100 буханок: слишком лёгкие, искомые, слишком тяжёлые. */
+function gruppy04(p: Params): { label: string; share: number }[] {
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  return [
+    { label: `легче ${a} г`, share: tochnee(1 - veroyatnost(p, 'p2')) },
+    { label: `от ${a} до ${b} г`, share: otvet04(p) },
+    { label: `тяжелее ${b} г`, share: tochnee(1 - veroyatnost(p, 'p1')) },
+  ];
+}
+
+/**
+ * Идентификатор p5-13, а не p5-04: прототип выделен из p5-03 (задачи
+ * 17–20 были его вариантами 9–12), а номера остальных прототипов
+ * закреплены за картинками и прогрессом. В банке он стоит на своём
+ * месте — четвёртым (bank5/index.ts).
+ */
+const P13: Prototype = prototip({
+  id: 'p5-13',
+  blok: 'sovmestnye',
+  nazvanie: 'Масса буханки: между двумя границами',
+  tip: 'Сложение совместных событий',
+  zadachnik: [17, 20],
+  format: 'десятичная',
+  okruglenie: tochno,
+  uslovie: (p) =>
+    `При выпечке хлеба производится контрольное взвешивание свежей буханки. Известно, что вероятность того, что масса окажется меньше ${num(p, 'b')} г, равна ${dec(veroyatnost(p, 'p1'))}. Вероятность того, что масса окажется больше ${num(p, 'a')} г, равна ${dec(veroyatnost(p, 'p2'))}. Найдите вероятность того, что масса буханки больше ${num(p, 'a')} г, но меньше ${num(p, 'b')} г.`,
+  dopustimo: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    if (!tselyeProtsenty(p1, p2)) {
+      return false;
+    }
+    if (p1 <= 0 || p1 >= 1 || p2 <= 0 || p2 >= 1) {
+      return false;
+    }
+    const otv = otvet04(p);
+    if (otv <= 0 || otv >= 1 || !konechnaya(otv)) {
+      return false;
+    }
+    return num(p, 'a') < num(p, 'b') && gruppy04(p).every((g) => g.share > 0);
+  },
+  otvet: otvet04,
+  /* Второй путь: сто буханок штуками — убираем слишком лёгкие и
+     слишком тяжёлые. */
+  perebor: (p) => {
+    const a = shtuk(veroyatnost(p, 'p1'), 100);
+    const b = shtuk(veroyatnost(p, 'p2'), 100);
+    return (100 - (100 - a) - (100 - b)) / 100;
+  },
+  shagi: (p): Step[] => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const a = shtuk(p1, 100);
+    const b = shtuk(p2, 100);
+    const m = shtuk(otvet04(p), 100);
+    const aa = num(p, 'a');
+    const bb = num(p, 'b');
+    return [
+      {
+        text: `Возьмём 100 буханок. Легче ${bb} г — ${a} из них, тяжелее ${aa} г — ${b}:`,
+        formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
+      },
+      {
+        text: `Тяжелее ${bb} г — остальные, легче ${aa} г — тоже остальные; между ${aa} и ${bb} г — всё, что не попало ни туда, ни туда:`,
+        formula: `100 - ${a} = ${100 - a},\\quad 100 - ${b} = ${100 - b},\\quad m = 100 - ${100 - a} - ${100 - b} = ${m}`,
+        value: m,
+      },
+      shagP(m, 100),
+    ];
+  },
+  varianty: [
+    {
+      n: 1,
+      source: 'задачник',
+      ref: 'задачник 05, № 17',
+      params: { a: 790, b: 810, p1: 0.96, p2: 0.82 },
+    },
+    {
+      n: 2,
+      source: 'задачник',
+      ref: 'задачник 05, № 18',
+      params: { a: 790, b: 810, p1: 0.98, p2: 0.83 },
+    },
+    {
+      n: 3,
+      source: 'задачник',
+      ref: 'задачник 05, № 19',
+      params: { a: 785, b: 815, p1: 0.98, p2: 0.86 },
+    },
+    {
+      n: 4,
+      source: 'задачник',
+      ref: 'задачник 05, № 20',
+      params: { a: 795, b: 805, p1: 0.95, p2: 0.81 },
+    },
+  ],
+  generator: (r: Rng): Params => {
+    const [a, b] = r.pick(HLEB);
+    return { a, b, p1: r.dec(0.9, 0.98, 2), p2: r.dec(0.78, 0.92, 2) };
+  },
+  metodika: {
+    metod: 'convenient-number',
+    methodHints: [
+      'две вероятности событий, которые пересекаются: «легче b» и «тяжелее a»',
+      'спрашивают про «между a и b»',
+      'сто буханок: вычитаем слишком лёгкие и слишком тяжёлые, остаётся искомая группа',
+    ],
+    fraza: () =>
+      'удобное число — 100 буханок: вычитаем слишком лёгкие и слишком тяжёлые, остаётся искомая группа.',
+    vizual: (p) => setka(100, gruppy04(p), [1]),
   },
 });
 
@@ -463,4 +527,4 @@ const P11: Prototype = prototip({
   },
 });
 
-export const UDOBNOE: readonly Prototype[] = [P03, P11];
+export const UDOBNOE: readonly Prototype[] = [P03, P13, P11];

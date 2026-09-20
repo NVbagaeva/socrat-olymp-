@@ -9,12 +9,11 @@ import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
 import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import type { ProgressStore } from '@/lib/progressStore';
-import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import { openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
 import { MethodPicker } from './MethodPicker';
-import { metodKind, metodyZadaniya, seychas, zadachaId } from './metody';
+import { navykKind, navykPoId, navykiZadaniya, seychas, zadachaId } from './metody';
 
 /** Что собрал конфигуратор: режим, метод, откуда брать задачи и сколько. */
 export interface SessiyaPlan {
@@ -22,7 +21,7 @@ export interface SessiyaPlan {
   key: string;
   rezhim: Rezhim;
   /** Метод отработки; в остальных режимах не важен. */
-  metod: Method;
+  metod: string;
   source: RoundKind[];
   size: number;
 }
@@ -41,15 +40,9 @@ export interface SessiyaProps {
   onAgain: () => void;
 }
 
-/** Название метода по идентификатору — для статистики итога. */
-const NAZVANIYA: Record<string, string> = Object.fromEntries(METODY.map((m) => [m.id, m.nazvanie]));
-
-/** Отпечатки всех методов — чтобы после ответа назвать верный. */
-const OTPECHATKI = new Map<string, Method>(METODY.map((m) => [sealMetod(m.id), m.id]));
-
 interface Itog {
-  vybor: Method;
-  verny: Method;
+  vybor: string;
+  verny: string;
   priznaki: string[];
 }
 
@@ -79,8 +72,15 @@ export function Sessiya({
 }: SessiyaProps) {
   const slova = trenazherSlova(zadanie);
   const uznayTeksty = uznaySlova(zadanie);
-  const metody = metodyZadaniya(zadanie);
+  const metody = navykiZadaniya(zadanie);
   const uznayRezhim = plan.rezhim === 'uznay';
+  /* Название метода по идентификатору — для статистики итога, и
+     отпечатки всех методов задания — чтобы после ответа назвать верный. */
+  const nazvaniya = useMemo(
+    () => Object.fromEntries(metody.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
+    [metody],
+  );
+  const otpechatki = useMemo(() => new Map(metody.map((m) => [sealMetod(m.id), m.id])), [metody]);
 
   const round = useVeroyatnostRound(plan.key, plan.source, plan.size);
   const byId = useMemo(() => new Map(pool.kinds.map((kind) => [kind.id, kind])), [pool]);
@@ -91,7 +91,7 @@ export function Sessiya({
   const [marks, setMarks] = useState<Record<number, TrainerMark>>({});
   /* Метод каждой задачи подхода — для статистики итога. В «Узнай
      метод» он становится известен только после ответа. */
-  const [metodyZadach, setMetodyZadach] = useState<Record<number, Method>>({});
+  const [metodyZadach, setMetodyZadach] = useState<Record<number, string>>({});
   const [misses, setMisses] = useState(0);
   const [result, setResult] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -113,7 +113,7 @@ export function Sessiya({
   const last = index === total - 1;
   const id = item === undefined ? '' : zadachaId(item.kind, item.n);
 
-  function otmetit(mark: TrainerMark | null, metod: Method) {
+  function otmetit(mark: TrainerMark | null, metod: string) {
     if (mark !== null) {
       setMarks((was) => ({ ...was, [index]: mark }));
     }
@@ -136,7 +136,7 @@ export function Sessiya({
       return;
     }
     const kind = byId.get(item.kind);
-    const metod = kind === undefined ? undefined : metodKind(kind);
+    const metod = kind === undefined ? undefined : navykKind(kind, zadanie);
     if (metod === undefined) {
       return;
     }
@@ -163,13 +163,13 @@ export function Sessiya({
   }
 
   /** «Узнай метод»: сверить выбор с отпечатком и открыть признаки. */
-  function vybrat(metod: Method, vremya: number) {
+  function vybrat(metod: string, vremya: number) {
     const kind = item === undefined ? undefined : uznayById.get(item.kind);
     const variant = kind?.variants.find((v) => v.n === item?.n);
     if (item === undefined || variant === undefined || itog !== null) {
       return;
     }
-    const verny = OTPECHATKI.get(variant.metodSeal);
+    const verny = otpechatki.get(variant.metodSeal);
     if (verny === undefined) {
       return;
     }
@@ -208,7 +208,7 @@ export function Sessiya({
         seconds={seconds}
         backHref={backHref}
         onAgain={onAgain}
-        kindTitle={NAZVANIYA}
+        kindTitle={nazvaniya}
       />
     );
   }
@@ -289,7 +289,7 @@ export function Sessiya({
               </p>
               {verno ? null : (
                 <p className="z4-uznay__pravilnyy">
-                  <b>{uznayTeksty.pravilnyy}</b> {metodPoId(itog.verny).nazvanie}
+                  <b>{uznayTeksty.pravilnyy}</b> {navykPoId(zadanie, itog.verny)?.nazvanie}
                 </p>
               )}
               {/* Признаки — и после ошибки, и после верного ответа:
@@ -317,7 +317,8 @@ export function Sessiya({
   if (kind === undefined || variant === undefined) {
     return null;
   }
-  const metod = metodKind(kind);
+  const metod = navykKind(kind, zadanie);
+  const navyk = metod === undefined ? undefined : navykPoId(zadanie, metod);
 
   return (
     <section className="ttask">
@@ -335,8 +336,8 @@ export function Sessiya({
         }}
         /* Метод в шапке — только в отработке: в смешанном режиме и
            в повторе ученик должен узнать его сам. */
-        {...(plan.rezhim === 'practice' && metod !== undefined
-          ? { metodLabel: metodPoId(metod).nazvanie }
+        {...(plan.rezhim === 'practice' && navyk !== undefined
+          ? { metodLabel: navyk.nazvanie }
           : {})}
         istochnik={kind.istochnik}
         onResult={(right) => otvet(right, seychas())}

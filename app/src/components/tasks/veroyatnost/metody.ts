@@ -1,15 +1,35 @@
 import type { Zadanie } from '@/content/veroyatnost';
-import { METODY_4, METODY_5, type Method } from '@/lib/veroyatnost/model';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
+import { METODY_4 } from '@/lib/veroyatnost/model';
 import type { PoolKind } from '@/lib/veroyatnost/pool';
 
-/** Каталог методов задания: пять у №4, шесть у №5. */
-export function metodyZadaniya(zadanie: Zadanie) {
+/**
+ * Навык тренажёра — то, по чему выбирают тренировку, считают прогресс
+ * и что угадывают в «Узнай метод». У задания №4 это метод решения из
+ * каталога рисунков (model.ts: пять методов), у задания №5 — один из
+ * двенадцати методов автора (metody5.ts), он же блок банка.
+ */
+export interface Navyk {
+  id: string;
+  nomer: number;
+  nazvanie: string;
+}
+
+/** Навыки задания: пять методов у №4, двенадцать у №5. */
+export function navykiZadaniya(zadanie: Zadanie): readonly Navyk[] {
   return zadanie === 4 ? METODY_4 : METODY_5;
 }
 
-/** Метод прототипа: он один на все варианты, поэтому берётся с первого. */
-export function metodKind(kind: PoolKind): Method | undefined {
-  return kind.variants[0]?.model?.method;
+export function navykPoId(zadanie: Zadanie, id: string): Navyk | undefined {
+  return navykiZadaniya(zadanie).find((n) => n.id === id);
+}
+
+/**
+ * Навык прототипа: у №4 — метод рисунка, один на все варианты, поэтому
+ * берётся с первого; у №5 — блок банка.
+ */
+export function navykKind(kind: PoolKind, zadanie: Zadanie): string | undefined {
+  return zadanie === 4 ? kind.variants[0]?.model?.method : kind.blok;
 }
 
 /** Идентификатор задачи в списке ошибок: прототип и номер варианта. */

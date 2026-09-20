@@ -468,8 +468,9 @@ function uznayVariant(
   uslovie: string,
   metodika: Metodika,
   illustration: { path: string; alt: string } | undefined,
+  klyuch: string,
 ): UznayVariant {
-  const metodSeal = sealMetod(metodika.metod);
+  const metodSeal = sealMetod(klyuch);
   return {
     n,
     uslovie,
@@ -481,9 +482,11 @@ function uznayVariant(
 
 /**
  * Задание №4: прототипы со всеми вариантами условий и задачи
- * конспекта по одной. Задание №5: 12 прототипов со всеми вариантами;
- * его подготовительные задачи методики не имеют и в режим не
- * попадают — узнавать в них пока нечего.
+ * конспекта по одной; угадывают метод рисунка. Задание №5: прототипы
+ * со всеми вариантами; угадывают один из двенадцати методов автора,
+ * поэтому закрыт отпечатком блок банка, а не метод рисунка. Его
+ * подготовительные задачи методики не имеют и в режим не попадают —
+ * узнавать в них пока нечего.
  */
 export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
   const bank = zadanie === 4 ? BANK_4 : BANK_5;
@@ -503,6 +506,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
             prototype.uslovie(variant.params),
             metodika,
             illyustratsiyaVarianta(prototype.id, variant.n),
+            zadanie === 4 ? metodika.metod : prototype.blok,
           ),
         ),
       },
@@ -520,7 +524,13 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
           id: zadacha.id,
           istochnik: 'konspekt',
           variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1)),
+            uznayVariant(
+              1,
+              zadacha.uslovie,
+              metodika,
+              illyustratsiyaVarianta(zadacha.id, 1),
+              metodika.metod,
+            ),
           ],
         },
       ];

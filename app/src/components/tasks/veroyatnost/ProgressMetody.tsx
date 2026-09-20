@@ -3,7 +3,8 @@
 import { Button, ProgressRing } from '@/components/ui';
 import type { ProgressStore } from '@/lib/progressStore';
 import { summarize } from '@/lib/trainerProgress';
-import { METODY_4, type MetodOpisanie } from '@/lib/veroyatnost/model';
+import { METODY_4 } from '@/lib/veroyatnost/model';
+import type { Navyk } from './metody';
 
 export interface ProgressMetodyProps {
   store: ProgressStore;
@@ -14,8 +15,8 @@ export interface ProgressMetodyProps {
     pusto: string;
     sbros: string;
   };
-  /** Какие методы считать: пять у задания №4, шесть у задания №5. */
-  metody?: readonly MetodOpisanie[];
+  /** Какие методы считать: пять у задания №4, двенадцать у задания №5. */
+  metody?: readonly Navyk[];
 }
 
 /**

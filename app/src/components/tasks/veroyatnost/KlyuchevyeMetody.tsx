@@ -6,19 +6,37 @@ import {
   OutcomeTiles,
   ProbabilityTree,
 } from '@/components/probability';
-import { METODY_02, METODY_4, type MetodOpisanie02 } from '@/content/veroyatnost-metody';
+import { tasksPage } from '@/content/tasks';
+import {
+  METODY_02,
+  METODY_02_5,
+  METODY_4,
+  type MetodOpisanie02,
+} from '@/content/veroyatnost-metody';
+import type { Zadanie } from '@/content/veroyatnost';
+import { BANK_5 } from '@/lib/veroyatnost';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { METODY, metodPoId, type Method } from '@/lib/veroyatnost/model';
 import { HLEB, PIROZHKI_PUTI, PIROZHKI_UROVNI, PIROZHKI_VETVI } from '@/lib/veroyatnost/primery';
+import { MetodyKartochki5, type Kartochka5 } from './MetodyKartochki5';
 import { Tex } from './Tex';
 
 /**
- * Вкладка «Ключевые методы решения» — раздел 02 референса.
+ * Вкладка «Ключевые методы решения» заданий №4 и №5 — раздел 02
+ * референса.
  *
- * Пять карточек по одной схеме: когда применять → алгоритм →
- * компонент → как это выглядит → ошибки → правило. Тексты приходят
- * из content/veroyatnost-metody.ts, рисунки — те же компоненты, что
- * в карточке задачи, на параметрах из референса. Формулы набираются
- * KaTeX здесь, на сервере: в браузер уходит готовая вёрстка.
+ * У задания №4 пять карточек по одной схеме: когда применять →
+ * алгоритм → компонент → как это выглядит → ошибки → правило. Тексты
+ * приходят из content/veroyatnost-metody.ts, рисунки — те же
+ * компоненты, что в карточке задачи, на параметрах из референса.
+ *
+ * У задания №5 двенадцать карточек методов автора
+ * (lib/veroyatnost/metody5.ts): номер в кружке, название, подпись,
+ * формула в плашке там, где она есть. Карточка открывает модалку
+ * (MetodyKartochki5); счётчик задач считается здесь по банку.
+ *
+ * Формулы набираются KaTeX здесь, на сервере: в браузер уходит
+ * готовая вёрстка, а банк с ответами — нет.
  */
 
 /** Идентификатор карточки метода в разметке: по нему ведут ссылки. */
@@ -177,7 +195,45 @@ function Kartochka({ metod }: { metod: MetodOpisanie02 }) {
   );
 }
 
-export function KlyuchevyeMetody() {
+/**
+ * Карточки методов задания №5. Счётчик «задач в банке» — число задач
+ * задачника, отнесённых к методу (варианты с источником «задачник»
+ * у прототипов этого блока); сгенерированные варианты не считаются.
+ */
+function kartochki5(): Kartochka5[] {
+  return METODY_5.map((m) => ({
+    id: m.id,
+    nomer: m.nomer,
+    nazvanie: m.nazvanie,
+    opisanie: m.opisanie,
+    formula: m.formula === undefined ? null : <Tex text={`$${m.formula}$`} />,
+    schet: METODY_02_5.modal.vBanke(
+      BANK_5.filter((p) => p.blok === m.id).reduce(
+        (sum, p) => sum + p.varianty.filter((v) => v.source === 'задачник').length,
+        0,
+      ),
+    ),
+    href: `${tasksPage.href}/5/trenazher/${m.id}/`,
+  }));
+}
+
+export interface KlyuchevyeMetodyProps {
+  /** Чья вкладка: пять методов референса у №4, двенадцать автора у №5. */
+  zadanie?: Zadanie;
+}
+
+export function KlyuchevyeMetody({ zadanie = 4 }: KlyuchevyeMetodyProps) {
+  if (zadanie === 5) {
+    return (
+      <div className="z4-metody z5-metody">
+        <header className="z4-metody__head">
+          <h2 className="t-h2 z4-metody__title">{METODY_02_5.title}</h2>
+        </header>
+        <MetodyKartochki5 items={kartochki5()} />
+      </div>
+    );
+  }
+
   return (
     <div className="z4-metody">
       <header className="z4-metody__head">

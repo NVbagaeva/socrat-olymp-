@@ -1,0 +1,166 @@
+/* Задание №5 — то, чего нет в общих слоях и в zadanie4.css.
+
+   Вкладка «Ключевые методы решения»: сетка карточек методов и модалка
+   метода. Значения — только токены: обводка 1px --color-border, радиусы
+   из ряда 6/8/12/16, теней нет. */
+
+/* ── Сетка карточек ─────────────────────────────────────────────── */
+
+.z5-metody__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 1023px) {
+  .z5-metody__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .z5-metody__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Карточка — кнопка: номер в кружке, название, подпись, плашка
+   формулы. Растягивается на высоту ряда, плашка прижата к низу. */
+.z5-metod {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  align-items: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.z5-metod:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z5-metod:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.z5-metod__no {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1;
+}
+.z5-metod__title {
+  align-self: center;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-h4);
+  overflow-wrap: anywhere;
+}
+.z5-metod__sut {
+  grid-column: 2;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.z5-metod__formula {
+  grid-column: 2;
+  align-self: end;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+}
+@media (max-width: 767px) {
+  .z5-metod {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Модалка метода ─────────────────────────────────────────────── */
+
+/* Заголовок — с номером в кружке; справа оставлено место под крестик,
+   иначе на узком экране длинное название уходит под него. */
+.z5-modal .modal__t {
+  padding-right: var(--space-10);
+}
+.z5-modal__title {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.z5-modal__title .z5-metod__no {
+  flex: none;
+}
+.z5-modal__body {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.z5-modal__formula {
+  grid-column: auto;
+  align-self: auto;
+  font-size: 1.125em;
+}
+.z5-modal__block {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.z5-modal__sub {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.z5-modal__soon {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Подвал: счётчик слева, кнопка справа; на узком экране столбиком. */
+.z5-modal .modal__f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.z5-modal__schet {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* Окно метода шире общего: четыре блока и формула. Тени у него нет —
+   правило раздела; обводка та же, что у карточек. */
+.z5-modal {
+  max-width: 560px;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
