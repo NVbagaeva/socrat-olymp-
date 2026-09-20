@@ -267,11 +267,19 @@ if (katexPut === undefined) {
     }).outputText;
     fs.writeFileSync(target, js);
   };
+  /* Папка content переводится целиком, а не списком нужных файлов:
+     список приходилось дописывать каждый раз, когда слова листа
+     начинали импортировать соседний модуль, и проверка падала
+     на ровном месте. Лишние файлы просто лежат рядом — требуются
+     только те, что кто-то импортирует. */
+  const contentDir = path.join(root, 'src', 'content');
+  for (const name of fs.readdirSync(contentDir)) {
+    if (name.endsWith('.ts') || name.endsWith('.js')) {
+      const target = path.join(alias, 'content', name.replace(/\.ts$/, '.js'));
+      perevesti(path.join(contentDir, name), target);
+    }
+  }
   for (const [file, target] of [
-    ['content/sheet12.js', path.join(alias, 'content', 'sheet12.js')],
-    ['content/tasks.ts', path.join(alias, 'content', 'tasks.js')],
-    ['content/trainerModes.ts', path.join(alias, 'content', 'trainerModes.js')],
-    ['content/veroyatnost.ts', path.join(alias, 'content', 'veroyatnost.js')],
     ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],
     ['lib/sheet/typography.js', path.join(out, 'sheet', 'typography.js')],
     ['lib/sheet/answers.js', path.join(out, 'sheet', 'answers.js')],

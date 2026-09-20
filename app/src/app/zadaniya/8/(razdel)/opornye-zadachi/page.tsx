@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import { Podgotovka8List } from '@/components/tasks/vychisleniya/Podgotovka8List';
 import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
 import { tasksPage } from '@/content/tasks';
+import { OPORNYE } from '@/content/opornye';
 import { vychisleniyaTitle } from '@/content/vychisleniya';
 import { prepPool } from '@/lib/vychisleniya/prep/pool';
 
 export const metadata: Metadata = {
-  title: vychisleniyaTitle('Подготовительные задачи'),
+  title: vychisleniyaTitle(OPORNYE.title),
 };
 
 /** Список блоков подготовки задания №8. */

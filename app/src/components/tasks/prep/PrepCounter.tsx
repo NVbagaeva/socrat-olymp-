@@ -1,5 +1,6 @@
 'use client';
 
+import { OPORNYE } from '@/content/opornye';
 import { ProgressBar } from '@/components/ui';
 import { solvedCount, usePrepProgress } from '@/lib/prepProgress';
 
@@ -35,7 +36,7 @@ export function PrepCounter({ totals }: PrepCounterProps) {
       <ProgressBar
         className="prep__meter"
         value={percent}
-        label={`Подготовительные задачи: решено ${solved} из ${total}`}
+        label={`${OPORNYE.title}: решено ${solved} из ${total}`}
       />
     </>
   );

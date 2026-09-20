@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import { PodgotovkaList } from '@/components/tasks/veroyatnost/PodgotovkaList';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
+import { OPORNYE } from '@/content/opornye';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', 'Подготовительные задачи'),
+  title: veroyatnostTitle('5', OPORNYE.title),
 };
 
 /**
- * Вкладка «Подготовительные задачи» задания №5: список блоков.
+ * Вкладка «Опорные задачи» задания №5: список блоков.
  *
  * Задачи 19–62 авторского конспекта, разложенные по его же шести
  * заголовкам. Номеров 51–54 в конспекте нет, поэтому задач сорок. Блок открывается своей страницей — как у задания №12.

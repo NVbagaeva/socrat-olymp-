@@ -7,7 +7,7 @@ import { PodgotovkaMeter } from './PodgotovkaSchet';
 export interface PodgotovkaListProps {
   zadanie: Zadanie;
   bloki: PrepPoolBlok[];
-  /** Адрес вкладки подготовки: /zadaniya/4/podgotovka/. */
+  /** Адрес вкладки опорных задач: /zadaniya/4/opornye-zadachi/. */
   listHref: string;
 }
 

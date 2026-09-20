@@ -57,7 +57,7 @@ export function otvetUchenika(prototype: Prototype, params: Params): number {
   return Math.round(otvet * 1e9) / 1e9;
 }
 
-/* ── Подготовительные задачи ─────────────────────────────────────── */
+/* ── Опорные задачи ──────────────────────────────────────────────── */
 
 export { PODGOTOVKA_4 } from './podgotovka4';
 export { PODGOTOVKA_5 } from './podgotovka5';

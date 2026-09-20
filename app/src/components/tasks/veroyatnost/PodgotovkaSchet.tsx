@@ -1,5 +1,6 @@
 'use client';
 
+import { OPORNYE } from '@/content/opornye';
 import { ProgressBar } from '@/components/ui';
 import type { Zadanie } from '@/content/veroyatnost';
 import { prepResheno, prepStore } from '@/lib/veroyatnost/prepProgress';
@@ -30,7 +31,7 @@ export function PodgotovkaSchet({ zadanie, bloki }: PodgotovkaSchetProps) {
       <ProgressBar
         className="prep__meter"
         value={vsego === 0 ? 0 : (resheno / vsego) * 100}
-        label={`Подготовительные задачи: решено ${resheno} из ${vsego}`}
+        label={`${OPORNYE.title}: решено ${resheno} из ${vsego}`}
       />
     </>
   );

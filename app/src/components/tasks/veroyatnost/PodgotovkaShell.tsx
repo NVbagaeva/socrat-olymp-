@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { OPORNYE } from '@/content/opornye';
 import { PODGOTOVKA_SLOVA, type Zadanie } from '@/content/veroyatnost';
 import type { PrepPoolBlok } from '@/lib/veroyatnost/pool';
 import { PrepChips } from '../prep/PrepChips';
@@ -24,7 +25,7 @@ export interface PodgotovkaShellProps {
  * блока живёт на своём адресе.
  */
 export function PodgotovkaShell({ zadanie, base, active, bloki, children }: PodgotovkaShellProps) {
-  const listHref = `${base}/podgotovka/`;
+  const listHref = `${base}/${OPORNYE.tail}`;
   return (
     <section className="prep">
       <header className="prep__head">

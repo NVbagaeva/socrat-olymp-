@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
 import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
 import { tasksPage } from '@/content/tasks';
+import { OPORNYE } from '@/content/opornye';
 import { vychisleniyaTitle } from '@/content/vychisleniya';
 import { PREP_BLOCKS } from '@/lib/vychisleniya/prep/blocks';
 import { prepPool } from '@/lib/vychisleniya/prep/pool';
@@ -18,7 +19,7 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const block = PREP_BLOCKS.find((item) => item.slug === blok);
-  return { title: vychisleniyaTitle(block === undefined ? 'Подготовительные задачи' : block.nazvanie) };
+  return { title: vychisleniyaTitle(block === undefined ? OPORNYE.title : block.nazvanie) };
 }
 
 /**

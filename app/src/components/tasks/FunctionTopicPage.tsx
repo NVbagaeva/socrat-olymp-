@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
+import { OPORNYE } from '@/content/opornye';
 import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type ExamSection, type Subtopic } from '@/content/sections';
@@ -17,7 +18,7 @@ export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
   /**
-   * Что открыто при заходе: у /podgotovka/ своя вкладка, у
+   * Что открыто при заходе: у опорных задач своя вкладка, у
    * /dlya-repetitorov/ — раскрытое меню материалов.
    */
   initialTab?: string;
@@ -63,7 +64,10 @@ export function FunctionTopicPage({
       <Breadcrumbs
         items={[
           { label: 'Задания', href: tasksPage.href },
-          { label: `№${section.no}. ${section.subtitle}`, href: `${tasksPage.href}/${section.slug}` },
+          {
+            label: `№${section.no}. ${section.subtitle}`,
+            href: `${tasksPage.href}/${section.slug}`,
+          },
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
@@ -96,7 +100,6 @@ export function FunctionTopicPage({
           height={700}
         />
 
-
         {/* Прогресс по разделам теории темы. Общее число — длина того же
             списка, из которого строится «Содержание»: второго источника
             у этой пары нет. */}
@@ -109,7 +112,7 @@ export function FunctionTopicPage({
         theory={subtopic.theory}
         bodies={theoryBodies}
         prep={prep ?? <PrepSkills base={base} />}
-        prepHref={`${base}/podgotovka/`}
+        prepHref={`${base}/${OPORNYE.tail}`}
         trainer={trainer ?? <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />}
         trainerHref={`${base}/trenazher/`}
         generator={hasGenerator ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}

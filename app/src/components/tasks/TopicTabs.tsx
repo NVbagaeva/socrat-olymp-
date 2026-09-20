@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { OPORNYE } from '@/content/opornye';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { TopicContents } from './TopicContents';
@@ -58,7 +59,7 @@ const TABS_FADE = 32;
 const TABS = [
   { id: 'about', label: 'О задании' },
   { id: 'theory', label: 'Теория' },
-  { id: 'prep', label: 'Подготовительные задачи' },
+  { id: 'prep', label: OPORNYE.title },
   { id: 'trainer', label: 'Тренажёр' },
   { id: 'generator', label: 'Генератор' },
 ];

@@ -229,7 +229,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
   };
 }
 
-/* ── Подготовительные задачи ─────────────────────────────────────── */
+/* ── Опорные задачи ──────────────────────────────────────────────── */
 
 export interface PrepReport {
   bloki: number;
