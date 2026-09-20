@@ -97,6 +97,10 @@ export const KOROTKO_4 = taskName('4');
  */
 export const ZAGOLOVOK_4 = `Задание №4. ${KOROTKO_4}`;
 
+/** Короткое имя и заголовок темы №5 — устроены так же, как у №4. */
+export const KOROTKO_5 = taskName('5');
+export const ZAGOLOVOK_5 = `Задание №5. ${KOROTKO_5}`;
+
 /** Подзаголовок раздела №4: пять методов списка А (lib/veroyatnost/metody4.ts). */
 export const PODZAGOLOVOK_4 =
   'Одно задание — 5 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
@@ -122,7 +126,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
        файлы учителя уезжают архивом со страницы запуска CI. */
     tutors: {
       title: 'Для репетиторов',
-      lead: 'Материалы для занятий по теме «Основные понятия теории вероятностей».',
+      lead: `Материалы для занятий по теме «${KOROTKO_4}».`,
       items: [
         {
           id: 'workbook',
@@ -154,7 +158,8 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
     no: '05',
     slug: '5',
-    title: taskName('5'),
+    title: ZAGOLOVOK_5,
+    korotko: KOROTKO_5,
     lead: PODZAGOLOVOK_5,
     badge: 'Базовый уровень',
     tabs: TABS_5,
@@ -162,7 +167,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
        Как и у №4, здесь только файлы для ученика. */
     tutors: {
       title: 'Для репетиторов',
-      lead: 'Материалы для занятий по теме «Вероятности событий».',
+      lead: `Материалы для занятий по теме «${KOROTKO_5}».`,
       items: [
         {
           id: 'workbook',
@@ -185,6 +190,19 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
 
 export function veroyatnostBySlug(slug: string): VeroyatnostSection | undefined {
   return VEROYATNOST.find((section) => section.slug === slug);
+}
+
+/**
+ * Название вкладки по её id — для заголовка вкладки (H2) и заголовка
+ * окна. Берётся из ленты вкладок раздела: второго списка названий
+ * у страниц нет.
+ */
+export function vkladka(slug: string, id: string): string {
+  const tab = veroyatnostBySlug(slug)?.tabs.find((t) => t.id === id);
+  if (tab === undefined) {
+    throw new Error(`Нет вкладки ${id} в разделе вероятности ${slug}`);
+  }
+  return tab.label;
 }
 
 /**
@@ -358,15 +376,15 @@ const RESHENIYA = {
 };
 
 export const LIST_4: ListSlova = {
-  title: { chip: 'Задание 4', text: 'Основные понятия теории вероятностей' },
-  runner: 'Задание 4 · Основные понятия теории вероятностей',
+  title: { chip: 'Задание 4', text: KOROTKO_4 },
+  runner: `Задание 4 · ${KOROTKO_4}`,
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
   resheniya: RESHENIYA,
 };
 
 export const LIST_5: ListSlova = {
-  title: { chip: 'Задание 5', text: 'Вероятности событий' },
-  runner: 'Задание 5 · Вероятности событий',
+  title: { chip: 'Задание 5', text: KOROTKO_5 },
+  runner: `Задание 5 · ${KOROTKO_5}`,
   otvety: { title: 'Ответы', note: 'по типам задач, сквозная нумерация' },
   resheniya: RESHENIYA,
 };

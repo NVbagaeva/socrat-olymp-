@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { TeoriyaShell, telaRazdelov5 } from '@/components/tasks/veroyatnost/teoriya';
-import { veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { RAZDELY_5 } from '@/content/veroyatnost-teoriya';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', 'Теория'),
+  title: veroyatnostTitle('5', vkladka('5', 'teoriya')),
 };
 
 /**
@@ -18,5 +18,7 @@ export const metadata: Metadata = {
  * Страница серверная: формулы набираются KaTeX на сборке.
  */
 export default function Teoriya5Tab() {
-  return <TeoriyaShell razdely={RAZDELY_5} tela={telaRazdelov5} />;
+  return (
+    <TeoriyaShell vkladka={vkladka('5', 'teoriya')} razdely={RAZDELY_5} tela={telaRazdelov5} />
+  );
 }

@@ -75,12 +75,12 @@ export function ProverPonimanie({ voprosy }: ProverPonimaniyaProps) {
   return (
     <section className="vpon">
       <header className="vpon__head">
-        <h3 className="vpon__title">
+        <h4 className="vpon__title">
           <span className="vpon__znak" aria-hidden="true">
             <CheckIcon />
           </span>
           {PROVER_PONIMANIE.title}
-        </h3>
+        </h4>
         {/* Счётчик и стрелки — отдельной строкой под заголовком, на
             всех ширинах одинаково: втиснуть их в строку с заголовком
             выходит только на телефоне, и карточка вела бы себя

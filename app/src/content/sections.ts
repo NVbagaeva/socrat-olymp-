@@ -11,6 +11,7 @@
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import { functionTypes, type FunctionType } from '@/data/functionTypes';
+import { taskName } from './tasks';
 
 export type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 
@@ -103,13 +104,13 @@ export const sections: ExamSection[] = [
     no: '12',
     slug: '12',
     title: 'Задание 12',
-    subtitle: 'Графики функций',
+    subtitle: taskName('12'),
     description:
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
     badge: 'Базовый и средний уровни',
     dialogHint: HINT_12,
     about: {
-      title: 'Графики функций',
+      title: taskName('12'),
       description:
         'В задании №12 вам могут предложить найти значение функции, аргумент или координаты точки пересечения графиков. Ниже — самые типичные формулировки этого задания.',
       hint: HINT_12,

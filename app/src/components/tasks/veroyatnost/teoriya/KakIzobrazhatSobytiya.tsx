@@ -210,9 +210,9 @@ export function KakIzobrazhatSobytiya() {
         </div>
         {stroki.map((stroka) => (
           <div key={stroka.id} className="vteor-izobr__ryad" role="row">
-            <h3 className="vteor-izobr__sobytie" role="rowheader">
+            <h4 className="vteor-izobr__sobytie" role="rowheader">
               <Tex text={stroka.sobytie} />
-            </h3>
+            </h4>
             <figure className="vteor-izobr__yacheyka" role="cell">
               <Eyler vid={stroka.id} alt={`${kolonki.eyler}: ${plain(stroka.eyler)}`} />
               <figcaption className="vteor-izobr__podpis">

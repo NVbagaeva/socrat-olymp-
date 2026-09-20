@@ -36,7 +36,7 @@ export function VidySobytiy() {
         <ul className="vvidy__grid">
           {kartochki.map((karta) => (
             <li className={clsx('vvid', `vvid--${karta.ton}`)} key={karta.id}>
-              <h3 className="vvid__title">{karta.title}</h3>
+              <h4 className="vvid__title">{karta.title}</h4>
               <p className="vvid__opredelenie">{karta.opredelenie}</p>
               <Formula tex={karta.formula} />
               <p className="vvid__primer">
@@ -74,17 +74,17 @@ export function VidySobytiy() {
 
         <div className="vvidy__side">
           <section className="z4-karta">
-            <h3 className="z4-karta__title">
+            <h4 className="z4-karta__title">
               <span className="z4-karta__ico" aria-hidden="true">
                 <HintIcon />
               </span>
               {vazhno.title}
-            </h3>
+            </h4>
             <p className="z4-karta__text">{vazhno.text}</p>
           </section>
 
           <section className="z4-karta vusloviya">
-            <h3 className="vusloviya__title">{usloviya.title}</h3>
+            <h4 className="vusloviya__title">{usloviya.title}</h4>
             <p className="z4-karta__text">{usloviya.text}</p>
             <figure className="vusloviya__figura">
               <Image
@@ -105,12 +105,12 @@ export function VidySobytiy() {
       {/* Плашка «Запомни»: три типа события цепочкой. */}
       <section className="vzapomni">
         <div className="vzapomni__text">
-          <h3 className="vzapomni__title">
+          <h4 className="vzapomni__title">
             <span className="vzapomni__ico" aria-hidden="true">
               <ZakladkaIcon />
             </span>
             {zapomni.title}
-          </h3>
+          </h4>
           <p className="vzapomni__lead">{zapomni.lead}</p>
         </div>
         <ol className="vzapomni__cep">
@@ -139,7 +139,7 @@ export function VidySobytiy() {
       {/* Блок самопроверки. Кружка с номером нет: номера в кружках —
           это номера разделов темы, а здесь блок внутри раздела. */}
       <section className="vteor-blok">
-        <h2 className="vteor-blok__title">{PROVER_SEBYA.title}</h2>
+        <h4 className="vteor-blok__title">{PROVER_SEBYA.title}</h4>
         <ProverSebya
           voprosy={voprosyVidovSobytiy()}
           otvety={PROVER_SEBYA.otvety}
@@ -150,7 +150,7 @@ export function VidySobytiy() {
 
       {/* Блок «События могут быть связаны» — тоже часть раздела. */}
       <section className="vteor-blok">
-        <h2 className="vteor-blok__title">{SVYAZANY.title}</h2>
+        <h4 className="vteor-blok__title">{SVYAZANY.title}</h4>
         <p className="vteor-blok__lead">{SVYAZANY.lead}</p>
 
         <ul className="vsvyaz__grid">
@@ -160,7 +160,7 @@ export function VidySobytiy() {
                 {ZNACHKI[karta.znachok]}
               </span>
               <div className="vsvyaz__text">
-                <h3 className="vsvyaz__title">{karta.title}</h3>
+                <h4 className="vsvyaz__title">{karta.title}</h4>
                 <p className="vsvyaz__opredelenie">{karta.opredelenie}</p>
                 <Formula tex={karta.formula} />
                 <p className="vsvyaz__primer">

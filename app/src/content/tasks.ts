@@ -72,7 +72,7 @@ export const tasks = [
      списка (content/veroyatnost.ts), и двух имён у одной темы быть
      не должно. */
   { no: '04', name: 'Вероятность: простая', slug: '4', status: 'active' },
-  { no: '05', name: 'Вероятности событий', slug: '5', status: 'active' },
+  { no: '05', name: 'Вероятность: сложная', slug: '5', status: 'active' },
   {
     no: '06',
     name: 'Случайные величины и распределения',

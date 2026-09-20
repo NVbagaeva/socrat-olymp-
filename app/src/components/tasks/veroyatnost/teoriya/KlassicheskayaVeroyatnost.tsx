@@ -38,12 +38,12 @@ function Formula({ tex }: { tex: string }) {
 /** Заголовок карточки со значком. */
 function Zagolovok({ znak, children }: { znak: ReactNode; children: ReactNode }) {
   return (
-    <h3 className="vklass__title">
+    <h4 className="vklass__title">
       <span className="vklass__ico" aria-hidden="true">
         {znak}
       </span>
       {children}
-    </h3>
+    </h4>
   );
 }
 
@@ -112,12 +112,12 @@ export function KlassicheskayaVeroyatnost() {
           </div>
 
           <div className="vklass-nelzya">
-            <h4 className="vklass-nelzya__title">
+            <h5 className="vklass-nelzya__title">
               <span className="vklass__znak vklass__znak--accent" aria-hidden="true">
                 <TreugolnikIcon />
               </span>
               {primer.nelzya.title}
-            </h4>
+            </h5>
             <div className="vklass-nelzya__ryad">
               <Stroka className="vklass-nelzya__formula" tex={primer.nelzya.formula} />
               <p className="vklass-nelzya__metka">{primer.nelzya.metka}</p>

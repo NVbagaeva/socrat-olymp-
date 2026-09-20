@@ -80,7 +80,7 @@ export function KoordinatnayaPryamaya() {
           <HintIcon />
         </span>
         <div className="vteor-ideya__text">
-          <h3 className="vteor-ideya__title">{ideya.title}</h3>
+          <h4 className="vteor-ideya__title">{ideya.title}</h4>
           <p>{ideya.text}</p>
         </div>
         {/* Отрезок без чисел: показывает саму мысль, а не задачу. */}
@@ -106,7 +106,7 @@ export function KoordinatnayaPryamaya() {
       <article className="vteor-sluchay">
         <header className="vteor-sluchay__head">
           <Metka />
-          <h3 className="vteor-sluchay__title">{pervaya.zagolovok}</h3>
+          <h4 className="vteor-sluchay__title">{pervaya.zagolovok}</h4>
         </header>
 
         <Uslovie kartinka={pervaya.kartinka} uslovie={pervaya.uslovie} vopros={pervaya.vopros} />
@@ -135,7 +135,7 @@ export function KoordinatnayaPryamaya() {
         </div>
 
         <div className="vteor-reshenie">
-          <h4 className="vteor-reshenie__title">{pervaya.reshenie.title}</h4>
+          <h5 className="vteor-reshenie__title">{pervaya.reshenie.title}</h5>
           <p className="vteor-reshenie__text">
             <Tex text={pervaya.reshenie.text} />
           </p>
@@ -149,7 +149,7 @@ export function KoordinatnayaPryamaya() {
       <article className="vteor-sluchay">
         <header className="vteor-sluchay__head">
           <Metka />
-          <h3 className="vteor-sluchay__title">{vtoraya.zagolovok}</h3>
+          <h4 className="vteor-sluchay__title">{vtoraya.zagolovok}</h4>
         </header>
 
         <Uslovie kartinka={vtoraya.kartinka} uslovie={vtoraya.uslovie} vopros={vtoraya.vopros} />
@@ -172,7 +172,7 @@ export function KoordinatnayaPryamaya() {
         </div>
 
         <div className="vteor-reshenie">
-          <h4 className="vteor-reshenie__title">{vtoraya.pochemu.title}</h4>
+          <h5 className="vteor-reshenie__title">{vtoraya.pochemu.title}</h5>
           <p className="vteor-reshenie__text">
             <Tex text={vtoraya.pochemu.text} />
           </p>
@@ -187,7 +187,7 @@ export function KoordinatnayaPryamaya() {
         {/* Разбор через противоположное событие — во всю ширину
             карточки: шаги идут подряд и делят её на три. */}
         <section className="vteor-protivopolozhnoe">
-          <h4 className="vteor-protivopolozhnoe__title">{vtoraya.protivopolozhnoe.title}</h4>
+          <h5 className="vteor-protivopolozhnoe__title">{vtoraya.protivopolozhnoe.title}</h5>
           <ol className="vteor-protivopolozhnoe__shagi">
             {vtoraya.protivopolozhnoe.shagi.map((shag, i) => (
               <li key={shag.text} className="vteor-shag">
@@ -219,22 +219,22 @@ export function KoordinatnayaPryamaya() {
 
       <div className="vteor-itogi">
         <section className="vteor-itog">
-          <h3 className="vteor-itog__title">
+          <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="notes" />
             </span>
             {vyvod.title}
-          </h3>
+          </h4>
           <p>{vyvod.text}</p>
         </section>
 
         <section className="vteor-itog">
-          <h3 className="vteor-itog__title">
+          <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="assignments" />
             </span>
             {algoritm.title}
-          </h3>
+          </h4>
           <ol className="vteor-itog__shagi">
             {algoritm.shagi.map((shag, i) => (
               <li key={shag}>
@@ -248,12 +248,12 @@ export function KoordinatnayaPryamaya() {
         </section>
 
         <section className="vteor-itog vteor-itog--syuzhety">
-          <h3 className="vteor-itog__title">
+          <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <HintIcon />
             </span>
             {syuzhety.title}
-          </h3>
+          </h4>
           <ul className="vteor-itog__punkty">
             {syuzhety.punkty.map((punkt) => (
               <li key={punkt}>{punkt}</li>

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { OZadanii4 } from '@/components/tasks/veroyatnost/OZadanii4';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', 'О задании'),
+  title: veroyatnostTitle('4', vkladka('4', 'o-zadanii')),
 };
 
 /**

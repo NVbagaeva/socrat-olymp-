@@ -8,6 +8,7 @@
  */
 
 import { OPORNYE } from './opornye';
+import { taskName } from './tasks';
 import type { TutorMaterial } from './sections';
 
 export interface VychisleniyaTab {
@@ -20,7 +21,7 @@ export interface VychisleniyaTab {
 export const VYCHISLENIYA = {
   no: '08',
   slug: '8',
-  title: 'Вычисления и преобразования',
+  title: taskName('8'),
   lead: 'Пять групп прототипов: степени и корни, логарифмы, тригонометрия по четверти, тригонометрические преобразования и буквенные выражения. Числа в каждой задаче свои.',
   badge: 'Базовый уровень',
   tabs: [

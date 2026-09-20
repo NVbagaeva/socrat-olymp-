@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { KlyuchevyeMetody } from '@/components/tasks/veroyatnost/KlyuchevyeMetody';
-import { veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', 'Ключевые методы решения'),
+  title: veroyatnostTitle('4', vkladka('4', 'metody')),
 };
 
 /**
