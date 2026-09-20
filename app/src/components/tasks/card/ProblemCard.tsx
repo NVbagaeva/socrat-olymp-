@@ -351,8 +351,8 @@ export function ProblemCard({
                   </span>
                   <div className="pc-step__body">
                     <p className="pc-step__text">{shag.text}</p>
-                    {shag.kuski === undefined ? null : (
-                      <VykladkaKlient className="pc-step__formula" kuski={shag.kuski} />
+                    {shag.vykladka === undefined ? null : (
+                      <VykladkaKlient className="pc-step__formula" vykladka={shag.vykladka} />
                     )}
                   </div>
                 </li>

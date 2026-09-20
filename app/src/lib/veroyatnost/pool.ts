@@ -46,7 +46,7 @@ import {
   type Step,
   type Variant,
 } from './types';
-import { kuskiPoRavno, nabratKuski } from '../tex';
+import { nabratVykladku } from '../tex';
 
 /**
  * Открытая часть модели задачи: метод, форма меры и параметры
@@ -210,9 +210,10 @@ export function vydelitOtvet(formula: string): string {
 /**
  * Шаг банка → шаг для показа: текст и, если есть, формула в трёх
  * видах — TeX для печатного листа, вёрстка KaTeX для карточки (тем же
- * набором, что и формулы в условиях: lib/tex.ts) кусками по знаку
- * «=», чтобы карточка могла разорвать длинную цепочку на строки, и
- * слова для alt. В последней формуле разбора ответ выделяется жирным.
+ * набором, что и формулы в условиях: lib/tex.ts) выкладкой — атомами
+ * со знаками между ними, чтобы карточка могла разорвать длинную
+ * цепочку на строки по правилам тетради, — и слова для alt.
+ * В последней формуле разбора ответ выделяется жирным.
  *
  * Набор строгий: ошибка TeX роняет сборку, а не оставляет формулу
  * текстом. Та же проверка идёт в автотесте банка (test:veroyatnost),
@@ -226,7 +227,7 @@ export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   return {
     text: shag.text,
     tex,
-    kuski: nabratKuski(kuskiPoRavno(tex), true),
+    vykladka: nabratVykladku(tex, true),
     plain: texPlain(tex),
   };
 }
