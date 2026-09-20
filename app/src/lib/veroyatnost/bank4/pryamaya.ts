@@ -19,7 +19,10 @@ import type { Pryamaya } from '../pryamaya';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
 import { otrezok as otrezokVizual, shagLL } from './vizual';
 
-const BLOK = 'pryamaya';
+/* Раздел списка Б: геометрическое определение вероятности. Задачи
+   составлены по схеме автора, в задачнике их нет, но приём тот же,
+   что у задач 19–22, — доля длины вместо числа исходов. */
+const BLOK = 'geometricheskoe';
 
 /** Без округления: ответ обязан быть конечной десятичной дробью. */
 const tochno = (): null => null;

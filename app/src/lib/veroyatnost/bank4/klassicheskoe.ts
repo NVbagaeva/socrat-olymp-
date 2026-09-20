@@ -27,7 +27,7 @@ import {
   vDen,
 } from '../morfologia';
 import { prototip } from '../generator';
-import { konechnaya, num, text, type Params, type Prototype } from '../types';
+import { konechnaya, num, text, type Params, type Prototype, type Variant } from '../types';
 import { gen } from './generatory';
 import {
   drob,
@@ -42,7 +42,18 @@ import {
 
 /* ── Общее ───────────────────────────────────────────────────────── */
 
-const BLOK = 'klassicheskoe';
+/**
+ * Блоки банка — методы списка А и разделы списка Б задания №4
+ * (lib/veroyatnost/metody4.ts). Задача попадает в блок по своему
+ * номеру в задачнике, а не по рисунку: один и тот же рисунок бывает
+ * у разных методов, и наоборот.
+ */
+const KLASSICHESKAYA = 'klassicheskaya';
+const KUBIKI = 'kubiki';
+const MONETY = 'monety';
+const KRUGLYY_STOL = 'kruglyy-stol';
+const PROTIVOPOLOZHNYE = 'protivopolozhnye';
+const GEOMETRICHESKOE = 'geometricheskoe';
 
 /** Без округления: ответ обязан быть конечной десятичной дробью. */
 const tochno = (): null => null;
@@ -100,7 +111,7 @@ function dolyaPerebor(vsego: number, podhodit: (i: number) => boolean): number {
 const P01: Prototype = prototip({
   id: 'p4-01',
   generator: gen('p4-01'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Вертолёт: первый рейс',
   tip: 'Вероятность попасть в первую группу',
   zadachnik: [1, 4],
@@ -158,7 +169,7 @@ const P01: Prototype = prototip({
 const P02: Prototype = prototip({
   id: 'p4-02',
   generator: gen('p4-02'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Жребий: кого выберут',
   tip: 'Вероятность быть выбранным жребием',
   zadachnik: [5, 8],
@@ -215,7 +226,7 @@ const P02: Prototype = prototip({
 const P03: Prototype = prototip({
   id: 'p4-03',
   generator: gen('p4-03'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Прыжки в воду: кто выступит по счёту',
   tip: 'Вероятность выбрать спортсмена из страны',
   zadachnik: [9, 14],
@@ -341,71 +352,101 @@ const P03: Prototype = prototip({
 
 /* ── 4. Жребий: кому начинать игру ───────────────────────────────── */
 
-const P04: Prototype = prototip({
-  id: 'p4-04',
-  generator: gen('p4-04'),
-  blok: BLOK,
-  nazvanie: 'Жребий: кому начинать игру',
-  tip: 'Вероятность по списку имён',
-  zadachnik: [15, 18],
-  format: 'десятичная',
-  okruglenie: tochno,
-  uslovie: (p) =>
-    `${perechislenie(spisok(p, 'imena'))} бросили жребий — кому начинать игру. Найдите вероятность того, что ${text(p, 'vopros')}.`,
-  dopustimo: (p) => {
-    const vse = spisok(p, 'imena');
-    const blag = spisok(p, 'blag');
-    return (
-      vse.length >= 3 &&
-      blag.length >= 1 &&
-      blag.length < vse.length &&
-      blag.every((imya) => vse.includes(imya)) &&
-      konechnaya(blag.length / vse.length)
-    );
-  },
-  otvet: (p) => spisok(p, 'blag').length / spisok(p, 'imena').length,
-  perebor: (p) => {
-    const vse = spisok(p, 'imena');
-    const blag = new Set(spisok(p, 'blag'));
-    return dolyaPerebor(vse.length, (i) => blag.has(vse[i - 1] as string));
-  },
-  shagi: (p) => {
-    const vse = spisok(p, 'imena');
-    const blag = spisok(p, 'blag');
-    return [
-      {
-        text: 'Все исходы — кому выпадет жребий, любой из играющих:',
-        formula: `n = ${vse.length}`,
-        value: vse.length,
-      },
-      {
-        text: `Благоприятные — ${perechislenie(blag)}:`,
-        formula: `m = ${blag.length}`,
-        value: blag.length,
-      },
-      shagP(blag.length, vse.length),
-    ];
-  },
-  metodika: {
-    metod: 'direct-count',
-    methodHints: [
-      'один случайный выбор из перечисленных людей',
-      'благоприятные — просто пересчитать: мальчики',
-    ],
-    fraza: (p) =>
-      `прямой пересчёт — жребий одинаково случаен для всех ${spisok(p, 'imena').length} играющих.`,
-    vizual: (p) => {
+/**
+ * Жребий: кому начинать игру.
+ *
+ * Тело у двух прототипов одно, а метод разный: вопрос «мальчик или
+ * девочка» — классическая вероятность (задачи 15–16), вопрос «не
+ * такой-то» — противоположные события (17–18). Считается и рисуется
+ * это одинаково, поэтому заготовка общая, а прототипа два: по методу
+ * их и выбирают в тренажёре.
+ */
+function zhrebiyPrototip(opisanie: {
+  id: string;
+  blok: string;
+  nazvanie: string;
+  tip: string;
+  zadachnik: readonly [number, number];
+  methodHints: readonly string[];
+  varianty: Variant[];
+}): Prototype {
+  return prototip({
+    id: opisanie.id,
+    generator: gen(opisanie.id),
+    blok: opisanie.blok,
+    nazvanie: opisanie.nazvanie,
+    tip: opisanie.tip,
+    zadachnik: opisanie.zadachnik,
+    format: 'десятичная',
+    okruglenie: tochno,
+    uslovie: (p) =>
+      `${perechislenie(spisok(p, 'imena'))} бросили жребий — кому начинать игру. Найдите вероятность того, что ${text(p, 'vopros')}.`,
+    dopustimo: (p) => {
+      const vse = spisok(p, 'imena');
+      const blag = spisok(p, 'blag');
+      return (
+        vse.length >= 3 &&
+        blag.length >= 1 &&
+        blag.length < vse.length &&
+        blag.every((imya) => vse.includes(imya)) &&
+        konechnaya(blag.length / vse.length)
+      );
+    },
+    otvet: (p) => spisok(p, 'blag').length / spisok(p, 'imena').length,
+    perebor: (p) => {
       const vse = spisok(p, 'imena');
       const blag = new Set(spisok(p, 'blag'));
-      return {
-        parametry: { method: 'direct-count', outcomes: vse, columns: 5 },
-        podsvetka: {
-          method: 'direct-count',
-          favorable: vse.flatMap((imya, i) => (blag.has(imya) ? [i] : [])),
-        },
-      };
+      return dolyaPerebor(vse.length, (i) => blag.has(vse[i - 1] as string));
     },
-  },
+    shagi: (p) => {
+      const vse = spisok(p, 'imena');
+      const blag = spisok(p, 'blag');
+      return [
+        {
+          text: 'Все исходы — кому выпадет жребий, любой из играющих:',
+          formula: `n = ${vse.length}`,
+          value: vse.length,
+        },
+        {
+          text: `Благоприятные — ${perechislenie(blag)}:`,
+          formula: `m = ${blag.length}`,
+          value: blag.length,
+        },
+        shagP(blag.length, vse.length),
+      ];
+    },
+    metodika: {
+      metod: 'direct-count',
+      methodHints: opisanie.methodHints,
+      fraza: (p) =>
+        `прямой пересчёт — жребий одинаково случаен для всех ${spisok(p, 'imena').length} играющих.`,
+      vizual: (p) => {
+        const vse = spisok(p, 'imena');
+        const blag = new Set(spisok(p, 'blag'));
+        return {
+          parametry: { method: 'direct-count', outcomes: vse, columns: 5 },
+          podsvetka: {
+            method: 'direct-count',
+            favorable: vse.flatMap((imya, i) => (blag.has(imya) ? [i] : [])),
+          },
+        };
+      },
+    },
+    varianty: opisanie.varianty,
+  });
+}
+
+/* 4а. Задачи 15–16: спрашивают, кто начнёт, — мальчик или девочка. */
+const P04: Prototype = zhrebiyPrototip({
+  id: 'p4-04',
+  blok: KLASSICHESKAYA,
+  nazvanie: 'Жребий: кому начинать игру',
+  tip: 'Вероятность по списку имён',
+  zadachnik: [15, 16],
+  methodHints: [
+    'один случайный выбор из перечисленных людей',
+    'благоприятные — просто пересчитать: мальчики',
+  ],
   varianty: [
     {
       n: 1,
@@ -429,26 +470,6 @@ const P04: Prototype = prototip({
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 17',
-      params: {
-        imena: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Ксюша, Федя',
-        blag: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Федя',
-        vopros: 'начинать игру должна будет не Ксюша',
-      },
-    },
-    {
-      n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 18',
-      params: {
-        imena: 'Миша, Олег, Настя, Галя',
-        blag: 'Миша, Олег, Настя',
-        vopros: 'начинать игру должна будет не Галя',
-      },
-    },
-    {
-      n: 5,
       source: 'новый',
       ref: 'создан заново',
       params: {
@@ -458,7 +479,7 @@ const P04: Prototype = prototip({
       },
     },
     {
-      n: 6,
+      n: 4,
       source: 'новый',
       ref: 'создан заново',
       params: {
@@ -468,17 +489,7 @@ const P04: Prototype = prototip({
       },
     },
     {
-      n: 7,
-      source: 'новый',
-      ref: 'создан заново',
-      params: {
-        imena: 'Ваня, Коля, Оля, Зина, Слава',
-        blag: 'Ваня, Коля, Оля, Слава',
-        vopros: 'начинать игру должна будет не Зина',
-      },
-    },
-    {
-      n: 8,
+      n: 5,
       source: 'новый',
       ref: 'создан заново',
       params: {
@@ -488,23 +499,69 @@ const P04: Prototype = prototip({
       },
     },
     {
-      n: 9,
-      source: 'новый',
-      ref: 'создан заново',
-      params: {
-        imena: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа, Дина',
-        blag: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа',
-        vopros: 'начинать игру должна будет не Дина',
-      },
-    },
-    {
-      n: 10,
+      n: 6,
       source: 'новый',
       ref: 'создан заново',
       params: {
         imena: 'Гриша, Захар, Илья, Катя, Пётр',
         blag: 'Катя',
         vopros: 'начинать игру должна будет девочка',
+      },
+    },
+  ],
+});
+
+/* 4б. Задачи 17–18: спрашивают, что начнёт НЕ названный человек. */
+const P24: Prototype = zhrebiyPrototip({
+  id: 'p4-24',
+  blok: PROTIVOPOLOZHNYE,
+  nazvanie: 'Жребий: начинать будет не он',
+  tip: 'Вероятность противоположного события',
+  zadachnik: [17, 18],
+  methodHints: [
+    'один случайный выбор из перечисленных людей',
+    'спрашивают, что жребий выпадет НЕ названному человеку',
+    'благоприятные — все остальные',
+  ],
+  varianty: [
+    {
+      n: 1,
+      source: 'задачник',
+      ref: 'задачник 04, № 17',
+      params: {
+        imena: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Ксюша, Федя',
+        blag: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Федя',
+        vopros: 'начинать игру должна будет не Ксюша',
+      },
+    },
+    {
+      n: 2,
+      source: 'задачник',
+      ref: 'задачник 04, № 18',
+      params: {
+        imena: 'Миша, Олег, Настя, Галя',
+        blag: 'Миша, Олег, Настя',
+        vopros: 'начинать игру должна будет не Галя',
+      },
+    },
+    {
+      n: 3,
+      source: 'новый',
+      ref: 'создан заново',
+      params: {
+        imena: 'Ваня, Коля, Оля, Зина, Слава',
+        blag: 'Ваня, Коля, Оля, Слава',
+        vopros: 'начинать игру должна будет не Зина',
+      },
+    },
+    {
+      n: 4,
+      source: 'новый',
+      ref: 'создан заново',
+      params: {
+        imena: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа, Дина',
+        blag: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа',
+        vopros: 'начинать игру должна будет не Дина',
       },
     },
   ],
@@ -520,7 +577,7 @@ function duga(a: number, b: number): number {
 const P05: Prototype = prototip({
   id: 'p4-05',
   generator: gen('p4-05'),
-  blok: BLOK,
+  blok: GEOMETRICHESKOE,
   nazvanie: 'Механические часы: где встала стрелка',
   tip: 'Геометрическая вероятность на циферблате',
   zadachnik: [19, 22],
@@ -610,7 +667,7 @@ function stranaKol(p: Params, i: number): { kol: number; strana: string } {
 const P06: Prototype = prototip({
   id: 'p4-06',
   generator: gen('p4-06'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Толкание ядра: четыре страны',
   tip: 'Вероятность выбрать спортсмена из страны',
   zadachnik: [23, 26],
@@ -851,7 +908,7 @@ const P06: Prototype = prototip({
 const P07: Prototype = prototip({
   id: 'p4-07',
   generator: gen('p4-07'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Конференция: чей доклад по счёту',
   tip: 'Вероятность выбрать учёного из страны',
   zadachnik: [27, 30],
@@ -1009,73 +1066,102 @@ const P07: Prototype = prototip({
 
 /* ── 8. Сборник билетов ──────────────────────────────────────────── */
 
-const P08: Prototype = prototip({
-  id: 'p4-08',
-  generator: gen('p4-08'),
-  blok: BLOK,
-  nazvanie: 'Сборник билетов: вопрос по теме',
-  tip: 'Вероятность события и противоположного',
-  zadachnik: [31, 38],
-  format: 'десятичная',
-  okruglenie: tochno,
-  uslovie: (p) => {
-    const N = num(p, 'N');
-    const k = num(p, 'k');
-    const tema = text(p, 'tema');
-    const ne = num(p, 'ne') === 1 ? 'не ' : '';
-    return `В сборнике билетов по ${text(p, 'predmet')} всего ${N} ${skl(N, 'билет', 'билета', 'билетов')}, в ${k} из них встречается вопрос по теме «${tema}». Найдите вероятность того, что в случайно выбранном на экзамене билете школьнику ${ne}достанется вопрос по теме «${tema}».`;
-  },
-  dopustimo: (p) => {
-    const N = num(p, 'N');
-    const k = num(p, 'k');
-    const ne = num(p, 'ne');
-    return k >= 1 && k < N && (ne === 0 || ne === 1) && konechnaya(ne === 1 ? (N - k) / N : k / N);
-  },
-  otvet: (p) => {
-    const N = num(p, 'N');
-    const k = num(p, 'k');
-    return num(p, 'ne') === 1 ? (N - k) / N : k / N;
-  },
-  perebor: (p) => {
-    const k = num(p, 'k');
-    const ne = num(p, 'ne') === 1;
-    return dolyaPerebor(num(p, 'N'), (i) => (ne ? i > k : i <= k));
-  },
-  shagi: (p) => {
-    const N = num(p, 'N');
-    const k = num(p, 'k');
-    const ne = num(p, 'ne') === 1;
-    const blag = ne ? N - k : k;
-    return [
-      { text: 'Все исходы — билеты сборника:', formula: `n = ${N}`, value: N },
-      ne
-        ? {
-            text: 'Благоприятные — билеты без этой темы:',
-            formula: `m = ${N} - ${k} = ${blag}`,
-            value: blag,
-          }
-        : { text: 'Благоприятные — билеты с этой темой:', formula: `m = ${k}`, value: blag },
-      shagP(blag, N),
-    ];
-  },
-  metodika: {
-    metod: 'direct-count',
-    methodHints: [
-      'один случайный выбор билета',
-      'даны количества: всего и подходящих',
-      'делим благоприятные на все',
-    ],
-    fraza: (p) => `прямой пересчёт — на экзамене равновероятно любой из ${num(p, 'N')} билетов.`,
-    vizual: (p) => {
+/**
+ * Сборник билетов: вопрос по теме и вопрос не по теме.
+ *
+ * Считается это одинаково — все билеты и подходящие, — но по
+ * типологии автора методы разные: «достанется вопрос по теме» —
+ * классическая вероятность (задачи 31–34), «не достанется» —
+ * противоположные события (35–38). Заготовка общая, прототипа два.
+ */
+function biletyPrototip(opisanie: {
+  id: string;
+  blok: string;
+  nazvanie: string;
+  tip: string;
+  zadachnik: readonly [number, number];
+  /** 0 — вопрос по теме, 1 — не по теме. Фиксирован у прототипа. */
+  ne: 0 | 1;
+  methodHints: readonly string[];
+  varianty: Variant[];
+}): Prototype {
+  const { ne } = opisanie;
+  return prototip({
+    id: opisanie.id,
+    generator: gen(opisanie.id),
+    blok: opisanie.blok,
+    nazvanie: opisanie.nazvanie,
+    tip: opisanie.tip,
+    zadachnik: opisanie.zadachnik,
+    format: 'десятичная',
+    okruglenie: tochno,
+    uslovie: (p) => {
       const N = num(p, 'N');
       const k = num(p, 'k');
-      const ne = num(p, 'ne') === 1;
-      return plitki([
-        { label: `«${text(p, 'tema')}»`, count: k, blago: !ne },
-        { label: 'другая тема', count: N - k, blago: ne },
-      ]);
+      const tema = text(p, 'tema');
+      const otritsanie = ne === 1 ? 'не ' : '';
+      return `В сборнике билетов по ${text(p, 'predmet')} всего ${N} ${skl(N, 'билет', 'билета', 'билетов')}, в ${k} из них встречается вопрос по теме «${tema}». Найдите вероятность того, что в случайно выбранном на экзамене билете школьнику ${otritsanie}достанется вопрос по теме «${tema}».`;
     },
-  },
+    /* Признак «не по теме» у прототипа один на все варианты: иначе
+       в одном прототипе смешались бы два метода. */
+    dopustimo: (p) => {
+      const N = num(p, 'N');
+      const k = num(p, 'k');
+      return k >= 1 && k < N && num(p, 'ne') === ne && konechnaya(ne === 1 ? (N - k) / N : k / N);
+    },
+    otvet: (p) => {
+      const N = num(p, 'N');
+      const k = num(p, 'k');
+      return ne === 1 ? (N - k) / N : k / N;
+    },
+    perebor: (p) =>
+      dolyaPerebor(num(p, 'N'), (i) => (ne === 1 ? i > num(p, 'k') : i <= num(p, 'k'))),
+    shagi: (p) => {
+      const N = num(p, 'N');
+      const k = num(p, 'k');
+      const blag = ne === 1 ? N - k : k;
+      return [
+        { text: 'Все исходы — билеты сборника:', formula: `n = ${N}`, value: N },
+        ne === 1
+          ? {
+              text: 'Благоприятные — билеты без этой темы:',
+              formula: `m = ${N} - ${k} = ${blag}`,
+              value: blag,
+            }
+          : { text: 'Благоприятные — билеты с этой темой:', formula: `m = ${k}`, value: blag },
+        shagP(blag, N),
+      ];
+    },
+    metodika: {
+      metod: 'direct-count',
+      methodHints: opisanie.methodHints,
+      fraza: (p) => `прямой пересчёт — на экзамене равновероятно любой из ${num(p, 'N')} билетов.`,
+      vizual: (p) => {
+        const N = num(p, 'N');
+        const k = num(p, 'k');
+        return plitki([
+          { label: `«${text(p, 'tema')}»`, count: k, blago: ne === 0 },
+          { label: 'другая тема', count: N - k, blago: ne === 1 },
+        ]);
+      },
+    },
+    varianty: opisanie.varianty,
+  });
+}
+
+/* 8а. Задачи 31–34: вопрос по теме. */
+const P08: Prototype = biletyPrototip({
+  id: 'p4-08',
+  blok: KLASSICHESKAYA,
+  nazvanie: 'Сборник билетов: вопрос по теме',
+  tip: 'Вероятность события',
+  zadachnik: [31, 34],
+  ne: 0,
+  methodHints: [
+    'один случайный выбор билета',
+    'даны количества: всего и подходящих',
+    'делим благоприятные на все',
+  ],
   varianty: [
     {
       n: 1,
@@ -1103,36 +1189,53 @@ const P08: Prototype = prototip({
     },
     {
       n: 5,
+      source: 'новый',
+      ref: 'создан заново',
+      params: { N: 80, k: 28, predmet: 'обществознанию', tema: 'Право', ne: 0 },
+    },
+  ],
+});
+
+/* 8б. Задачи 35–38: вопрос НЕ по теме. */
+const P25: Prototype = biletyPrototip({
+  id: 'p4-25',
+  blok: PROTIVOPOLOZHNYE,
+  nazvanie: 'Сборник билетов: вопрос не по теме',
+  tip: 'Вероятность противоположного события',
+  zadachnik: [35, 38],
+  ne: 1,
+  methodHints: [
+    'один случайный выбор билета',
+    'спрашивают, что вопрос по теме НЕ достанется',
+    'благоприятные — все остальные билеты',
+  ],
+  varianty: [
+    {
+      n: 1,
       source: 'задачник',
       ref: 'задачник 04, № 35',
       params: { N: 40, k: 14, predmet: 'географии', tema: 'Страны Африки', ne: 1 },
     },
     {
-      n: 6,
+      n: 2,
       source: 'задачник',
       ref: 'задачник 04, № 36',
       params: { N: 48, k: 12, predmet: 'математике', tema: 'Логарифмы', ne: 1 },
     },
     {
-      n: 7,
+      n: 3,
       source: 'задачник',
       ref: 'задачник 04, № 37',
       params: { N: 50, k: 5, predmet: 'истории', tema: 'Великая Отечественная война', ne: 1 },
     },
     {
-      n: 8,
+      n: 4,
       source: 'задачник',
       ref: 'задачник 04, № 38',
       params: { N: 60, k: 9, predmet: 'географии', tema: 'Ресурсообеспеченность', ne: 1 },
     },
     {
-      n: 9,
-      source: 'новый',
-      ref: 'создан заново',
-      params: { N: 80, k: 28, predmet: 'обществознанию', tema: 'Право', ne: 0 },
-    },
-    {
-      n: 10,
+      n: 5,
       source: 'новый',
       ref: 'создан заново',
       params: { N: 25, k: 4, predmet: 'физике', tema: 'Оптика', ne: 1 },
@@ -1145,7 +1248,7 @@ const P08: Prototype = prototip({
 const P09: Prototype = prototip({
   id: 'p4-09',
   generator: gen('p4-09'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Фирма такси: цвет машины',
   tip: 'Вероятность противоположного события',
   zadachnik: [39, 42],
@@ -1208,7 +1311,7 @@ const P09: Prototype = prototip({
 const P10: Prototype = prototip({
   id: 'p4-10',
   generator: gen('p4-10'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Гимнастика: остальные спортсменки',
   tip: 'Вероятность, когда группа задана остатком',
   zadachnik: [43, 48],
@@ -1338,7 +1441,7 @@ function vPoslednijDen(d: number, N: number, m: number, k: number): number {
 const P11: Prototype = prototip({
   id: 'p4-11',
   generator: gen('p4-11'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Научная конференция: последний день',
   tip: 'Вероятность попасть в день конференции',
   zadachnik: [49, 54],
@@ -1493,7 +1596,7 @@ const P11: Prototype = prototip({
 const P12: Prototype = prototip({
   id: 'p4-12',
   generator: gen('p4-12'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Олимпиада: запасная аудитория',
   tip: 'Вероятность попасть в остаток',
   zadachnik: [55, 58],
@@ -1623,7 +1726,7 @@ const P12: Prototype = prototip({
 const P13: Prototype = prototip({
   id: 'p4-13',
   generator: gen('p4-13'),
-  blok: BLOK,
+  blok: KLASSICHESKAYA,
   nazvanie: 'Конкурс исполнителей: день выступления',
   tip: 'Вероятность попасть в день конкурса',
   zadachnik: [59, 62],
@@ -1763,7 +1866,7 @@ const P13: Prototype = prototip({
 const P14: Prototype = prototip({
   id: 'p4-14',
   generator: gen('p4-14'),
-  blok: BLOK,
+  blok: KRUGLYY_STOL,
   nazvanie: 'Игровые пары: соперник из России',
   tip: 'Вероятность при выборе соперника',
   zadachnik: [63, 66],
@@ -1883,7 +1986,7 @@ const P14: Prototype = prototip({
 const P15: Prototype = prototip({
   id: 'p4-15',
   generator: gen('p4-15'),
-  blok: BLOK,
+  blok: KRUGLYY_STOL,
   nazvanie: 'Деление на группы: вместе или врозь',
   tip: 'Вероятность оказаться в одной группе',
   zadachnik: [67, 70],
@@ -2153,7 +2256,7 @@ function drugaya(storona: string): string {
 const P16: Prototype = prototip({
   id: 'p4-16',
   generator: gen('p4-16'),
-  blok: BLOK,
+  blok: MONETY,
   nazvanie: 'Симметричная монета',
   tip: 'Вероятность числа выпадений',
   zadachnik: [71, 78],
@@ -2335,7 +2438,7 @@ const P16: Prototype = prototip({
 const P17: Prototype = prototip({
   id: 'p4-17',
   generator: gen('p4-17'),
-  blok: BLOK,
+  blok: MONETY,
   nazvanie: 'Монетка судьи: кто начнёт с мячом',
   tip: 'Вероятность числа удачных жребиев',
   zadachnik: [79, 84],
@@ -2502,7 +2605,7 @@ const P17: Prototype = prototip({
 const P18: Prototype = prototip({
   id: 'p4-18',
   generator: gen('p4-18'),
-  blok: BLOK,
+  blok: KUBIKI,
   nazvanie: 'Две игральные кости: сумма очков',
   tip: 'Вероятность суммы на двух кубиках',
   zadachnik: [85, 88],
@@ -2592,15 +2695,21 @@ const P18: Prototype = prototip({
   ],
 });
 
+/* Порядок — порядок задачника: P24 стоит за P04 (задачи 17–18),
+   P25 за P08 (35–38). Номера прототипов у них другие: p4-01…p4-23
+   уже разошлись по картинкам и прогрессу, и перенумеровать их
+   значило бы сбить и то, и другое. */
 export const KLASSICHESKOE: readonly Prototype[] = [
   P01,
   P02,
   P03,
   P04,
+  P24,
   P05,
   P06,
   P07,
   P08,
+  P25,
   P09,
   P10,
   P11,
