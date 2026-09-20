@@ -116,6 +116,26 @@ function chislo(value: number): string {
   return String(value).replace('.', ',');
 }
 
+/**
+ * Подпись как в наборе формул: буквы-переменные отдельно от цифр
+ * и знаков. В формуле KaTeX буква идёт курсивом математического
+ * шрифта, а цифры, скобки и знаки сравнения — прямым основным;
+ * подпись на чертеже собирается так же, чтобы теория могла
+ * набрать её той же гарнитурой (.pr-var). Без своих стилей
+ * обёртка ничего не меняет: тренажёр видит прежнюю подпись.
+ */
+function podpisMat(text: string) {
+  return text.split(/([A-Za-z]+)/).map((kusok, i) =>
+    i % 2 === 1 ? (
+      <tspan key={i} className="pr-var">
+        {kusok}
+      </tspan>
+    ) : (
+      kusok
+    ),
+  );
+}
+
 export function CoordinateLine({
   min,
   max,
@@ -237,7 +257,7 @@ export function CoordinateLine({
           y={y - 8}
           {...vyravnivanie}
         >
-          {text}
+          {podpisMat(text)}
         </text>
       </>
     );
@@ -258,7 +278,7 @@ export function CoordinateLine({
       <line className="pr-axis-line" x1={X0 - 34} y1={AXIS_Y} x2={X1 + 46} y2={AXIS_Y} />
       <path className="pr-axis-arrow" d={`M${X1 + 46} ${AXIS_Y} l-10 -5 v10 z`} />
       <text className="pr-math pr-axis-name" x={X1 + 62} y={AXIS_Y + 5}>
-        {axisLabel}
+        {podpisMat(axisLabel)}
       </text>
 
       {/* Благоприятный отрезок на оси: оранжевый и толще. */}
@@ -285,7 +305,7 @@ export function CoordinateLine({
             y={AXIS_Y + 72}
             textAnchor="middle"
           >
-            {brace.label}
+            {podpisMat(brace.label)}
           </text>
         </g>
       )}

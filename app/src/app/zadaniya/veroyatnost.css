@@ -1098,26 +1098,50 @@
 
 /* Подписи на схеме теории.
 
-   Прямую рисует тот же CoordinateLine, что и в тренажёре, а там она
-   стоит во всю ширину карточки. Здесь колонка втрое уже, рисунок
-   сжимается вместе с подписями — и они становятся нечитаемыми.
-   Поэтому в теории кегль внутри рисунка задан в единицах его
-   системы координат: после сжатия он выходит тем же, что на макете.
-   Тренажёра это не касается — правило скоупится колонкой схемы. */
-.vteor-sluchay__shema .pr-band-label {
-  font-size: 34px;
+   Прямую рисует тот же CoordinateLine, что и в тренажёре, и кегль
+   внутри рисунка задан в единицах его системы координат: рисунок
+   растягивается по колонке, и подписи растут и убывают вместе с
+   ним. Главный элемент карточки — формула в решении (кегль
+   --fs-body, KaTeX), и подпись на чертеже не должна быть крупнее
+   её ни на одной ширине. Поэтому кегль подписи выбирается по
+   ширине колонки схемы: чем сильнее рисунок сжат, тем крупнее
+   кегль в его единицах, чтобы на экране подпись оставалась
+   примерно на ступень мельче формулы. Шире собственных 760px
+   рисунок не растёт — иначе на большом мониторе подпись перерастёт
+   формулу при любом кегле. Тренажёра это не касается — правила
+   скоупятся колонкой схемы.
+
+   Гарнитура — та же, что у формулы: переменная курсивом
+   математического шрифта KaTeX, цифры, скобки и знаки — прямым
+   основным. */
+.vteor-sluchay__shema {
+  container: vteor-shema / inline-size;
+}
+.vteor-sluchay__shema .pr-line {
+  max-width: 760px;
+  justify-self: center;
+}
+.vteor-sluchay__shema .pr-math,
+.vteor-sluchay__shema .pr-tick text {
+  font-family: KaTeX_Main, var(--font-math);
+  font-style: normal;
+}
+.vteor-sluchay__shema .pr-math .pr-var {
+  font-family: KaTeX_Math, var(--font-math);
+  font-style: italic;
+}
+/* Рисунок сжат сильнее чем вдвое (телефон): кегль в его единицах
+   самый крупный, на экране выходит около 10px. */
+.vteor-sluchay__shema .pr-band-label,
+.vteor-sluchay__shema .pr-brace text,
+.vteor-sluchay__shema .pr-axis-name,
+.vteor-sluchay__shema .pr-tick text {
+  font-size: var(--fs-h2);
 }
 .vteor-sluchay__shema .pr-tick text {
   /* Кегль крупнее — и подпись деления упирается в ось: опускаем её
      на ту же величину, на какую выросла. */
-  font-size: 28px;
   translate: 0 12px;
-}
-.vteor-sluchay__shema .pr-brace text {
-  font-size: 34px;
-}
-.vteor-sluchay__shema .pr-axis-name {
-  font-size: 30px;
 }
 .vteor-sluchay__shema .pr-axis-line,
 .vteor-sluchay__shema .pr-tick line {
@@ -1128,6 +1152,34 @@
 }
 .vteor-sluchay__shema .pr-bound {
   r: 10;
+}
+/* Ступени по ширине колонки схемы: масштаб рисунка — её ширина
+   без полей к 760. */
+@container vteor-shema (min-width: 400px) {
+  .vteor-sluchay__shema .pr-band-label,
+  .vteor-sluchay__shema .pr-brace text,
+  .vteor-sluchay__shema .pr-axis-name,
+  .vteor-sluchay__shema .pr-tick text {
+    font-size: var(--fs-h3);
+  }
+}
+@container vteor-shema (min-width: 540px) {
+  .vteor-sluchay__shema .pr-band-label,
+  .vteor-sluchay__shema .pr-brace text,
+  .vteor-sluchay__shema .pr-axis-name,
+  .vteor-sluchay__shema .pr-tick text {
+    font-size: var(--fs-lg);
+  }
+}
+/* От 792px рисунок стоит в натуральную величину, и кегль на экране
+   равен токену: на ступень мельче формулы. */
+@container vteor-shema (min-width: 792px) {
+  .vteor-sluchay__shema .pr-band-label,
+  .vteor-sluchay__shema .pr-brace text,
+  .vteor-sluchay__shema .pr-axis-name,
+  .vteor-sluchay__shema .pr-tick text {
+    font-size: var(--fs-caption);
+  }
 }
 
 /* ── Вкладка «Теория»: общий слой ───────────────────────────────── */
