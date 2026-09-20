@@ -1143,7 +1143,9 @@
 .vteor-shema .pr-axis-name,
 .vteor-shema .pr-tick text,
 .vteor-shema .pr-sobytie__label,
-.vteor-shema .vteor-eyler__imya {
+.vteor-shema .vizo-eyler__imya,
+.vteor-shema .vizo-eyler__chislo,
+.vteor-shema .pr-tochka__label {
   font-size: var(--fs-h3);
   font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
 }
@@ -1193,19 +1195,298 @@
 
 /* ── Раздел «Как изображать события» ─────────────────────────────── */
 
-/* Таблица-сопоставление. На узкой карточке — стопка карточек:
-   событие заголовком, под ним два рисунка с подписями; шапки
-   колонок нет, её роль играют подписи. От ширины раздела в 720px —
-   три колонки с шапкой. Горизонтальной прокрутки нет ни там, ни
-   там: рисунки ужимаются по колонке. */
-.vteor-izobr {
+/* Порядок блоков — макет: лид, две карточки способов, блок про
+   Эйлера, строка-связка, таблица, пример, две плашки. Раскладка
+   считается от ширины раздела (контейнер vteor-razdel), а не окна. */
+.vizo {
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* Две карточки способов: в ряд равной ширины, на узкой карточке —
+   друг под другом. */
+.vizo-sposoby {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vizo-sposob {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.vizo-sposob__risunok {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.vizo-sposob__text {
+  display: grid;
+  gap: var(--space-1);
+}
+.vizo-sposob__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: var(--lh-body);
+}
+.vizo-sposob__text p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Диаграммы Эйлера: прямоугольник — обводка 1px цвета рамок, круги —
+   обводка цвета оси и акцента; закраска — те же цвета с
+   прозрачностью, как полосы событий на прямой. */
+.vizo-eyler {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+.vizo-eyler--primer {
+  max-width: 260px;
+}
+.vizo-eyler__pole {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+.vizo-eyler__pole.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vizo-eyler__zalivka {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vizo-eyler__zalivka--b {
+  fill: var(--color-accent);
+}
+.vizo-eyler__krug {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.vizo-eyler__krug--b {
+  stroke: var(--color-accent);
+}
+/* Подложка под кругом A на диаграмме противоположного события:
+   закраска Ā не должна просвечивать сквозь A. */
+.vizo-eyler__krug--fon {
+  fill: var(--color-surface);
+  stroke: none;
+}
+.vizo-eyler__krug.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vizo-eyler__krug--b.is-zakrasheno {
+  fill: var(--color-accent);
+}
+.vizo-eyler__krug.is-obshchee {
+  stroke: none;
+  fill-opacity: 0.36;
+}
+.vizo-eyler__imya,
+.vizo-eyler__chislo {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+.vizo-eyler__chislo {
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+.vizo-eyler__imya--cherta {
+  text-decoration: overline;
+}
+/* Ω — прямым основным шрифтом формул и крупнее букв событий. */
+.vizo-eyler__imya--pryamoy {
+  font-family: KaTeX_Main, var(--font-math);
+  font-style: normal;
+  font-size: 22px;
+}
+/* Мини-рисунок прямой в карточке способа. */
+.vizo-mini__polosa {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vizo-mini__os {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.vizo-mini__strelka,
+.vizo-mini__tochka {
+  fill: var(--color-primary);
+}
+.vizo-mini__podpis {
+  fill: var(--color-text);
+  font-family: KaTeX_Math, var(--font-math);
+  font-style: italic;
+  font-size: 13px;
+}
+.vizo-pryamaya {
+  width: 100%;
+  height: auto;
+}
+
+/* Блок про Эйлера: слева портрет с рукописной подписью и реплика,
+   справа плашка с фактом. На узкой карточке — портрет, тексты,
+   плашка последней. Кегль обеих колонок — основной текст раздела. */
+.vizo-eylerblok {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+}
+.vizo-eylerblok__levo {
   display: grid;
   gap: var(--space-4);
 }
-.vteor-izobr__shapka {
+.vizo-eylerblok__figura {
+  position: relative;
+  margin: 0;
+}
+/* Портрет по высоте не выше текста рядом: картинка вписана в свою
+   ячейку и не растит её. На узкой карточке — не выше 320px. */
+.vizo-eylerblok__portret {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.vizo-eylerblok__pusto {
+  display: grid;
+  align-content: center;
+  aspect-ratio: 1583 / 993;
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+/* Рукописная цитата — над горами слева от портрета, чуть с наклоном,
+   как на макете. Рукописный шрифт узкий, поэтому кегль на ступень
+   выше основного. */
+.vizo-eylerblok__ruka {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  max-width: 45%;
+  display: grid;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  rotate: -6deg;
+}
+.vizo-eylerblok__avtor {
+  margin-top: var(--space-1);
+}
+.vizo-eylerblok__text {
+  display: grid;
+  gap: var(--space-3);
+  align-content: center;
+}
+.vizo-eylerblok__text p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.vizo-eylerblok__text b {
+  color: var(--color-text);
+}
+.vizo-eylerblok__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+/* Плашка факта: тёплая заливка, лампочка, сам факт и рукописная
+   приписка; остальное — под раскрывающейся строкой. */
+.vizo-fakt {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+}
+.vizo-fakt__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: var(--lh-body);
+}
+.vizo-fakt__znak {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-accent);
+}
+.vizo-fakt__znak svg {
+  width: 22px;
+  height: 22px;
+}
+.vizo-fakt__text,
+.vizo-fakt__eshche {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.vizo-fakt__pripiska {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+}
+.vizo-fakt .solution-details {
+  margin-top: 0;
+}
+
+/* Строка-связка перед таблицей. */
+.vizo-svyazka {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* Таблица-сопоставление. На узкой карточке — стопка карточек:
+   событие заголовком, формула под ним, два рисунка с подписями;
+   шапки колонок нет, её роль играют подписи. От ширины раздела в
+   760px — четыре колонки с шапкой. Прокрутки нет ни там, ни там:
+   рисунки ужимаются по колонке. */
+.vizo-tabl {
+  display: grid;
+  gap: var(--space-4);
+}
+.vizo-tabl__shapka {
   display: none;
 }
-.vteor-izobr__ryad {
+.vizo-tabl__ryad {
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
@@ -1213,131 +1494,179 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
-.vteor-izobr__sobytie {
+.vizo-tabl__sobytie {
+  display: grid;
+  gap: var(--space-1);
+}
+.vizo-tabl__title {
   margin: 0;
   color: var(--color-text);
   font-size: var(--fs-body);
-  font-weight: 600;
+  font-weight: 700;
   line-height: var(--lh-body);
 }
-.vteor-izobr__yacheyka {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  min-width: 0;
-}
-.vteor-izobr__podpis {
+.vizo-tabl__opisanie {
   margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
 }
-.vteor-izobr__kolonka {
+.vizo-tabl__formula {
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  white-space: nowrap;
+}
+.vizo-tabl__risunok {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  margin: 0;
+  min-width: 0;
+}
+/* Диаграмма в строке таблицы невысокая, как на макете. */
+.vizo-tabl__risunok .vizo-eyler {
+  max-width: 176px;
+}
+.vizo-tabl__podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: center;
+}
+.vizo-tabl__imya-kolonki {
   color: var(--color-text);
 }
-.vteor-eyler {
-  display: block;
-  width: 100%;
-  max-width: 220px;
-  height: auto;
+
+/* Разберём на примере: текст, два рисунка рядом, три строки формул.
+   В строке два утверждения: на широком экране рядом, на узком
+   второе уходит под первое — по пробелу между ними, не внутри. */
+.vizo-primer {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
 }
-.vteor-izobr__pryamaya {
-  width: 100%;
-  height: auto;
+.vizo-primer__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
 }
-/* Диаграмма Эйлера: прямоугольник — обводка 1px цвета рамок, круги —
-   обводка цвета оси и акцента; закраска — те же цвета с
-   прозрачностью, как полосы событий на прямой. */
-.vteor-eyler__pole {
-  fill: var(--color-surface);
-  stroke: var(--color-border-strong);
-  stroke-width: 1.5;
+.vizo-primer__text {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
-.vteor-eyler__pole.is-zakrasheno {
-  fill: var(--color-primary);
-  fill-opacity: 0.18;
+.vizo-primer__risunki {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
 }
-.vteor-eyler__zalivka {
-  fill: var(--color-primary);
-  fill-opacity: 0.18;
+.vizo-primer__risunok {
+  display: grid;
+  justify-items: center;
+  margin: 0;
+  min-width: 0;
 }
-.vteor-eyler__zalivka--b {
-  fill: var(--color-accent);
+.vizo-primer__formuly {
+  display: grid;
+  gap: var(--space-2);
 }
-.vteor-eyler__krug {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 2;
+.vizo-primer__formula {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
 }
-.vteor-eyler__krug--b {
-  stroke: var(--color-accent);
+.vizo-primer__formula .katex {
+  white-space: nowrap;
 }
-/* Подложка под кругом A на диаграмме противоположного события:
-   закраска Ā не должна просвечивать сквозь A. */
-.vteor-eyler__krug--fon {
-  fill: var(--color-surface);
-  stroke: none;
-}
-.vteor-eyler__krug.is-zakrasheno {
-  fill: var(--color-primary);
-  fill-opacity: 0.18;
-}
-.vteor-eyler__krug--b.is-zakrasheno {
-  fill: var(--color-accent);
-}
-.vteor-eyler__krug.is-obshchee {
-  stroke: none;
-  fill-opacity: 0.36;
-}
-.vteor-eyler__imya {
-  fill: var(--color-text);
-  font-size: 16px;
-}
-.vteor-eyler__imya--cherta {
-  text-decoration: overline;
-}
-/* Плашка вывода: мягкий синий, как у главной идеи. Вторая — с
-   формулой в той же плашке. */
-.vteor-izobr__plashka {
+
+/* Две итоговые плашки: мягкий синий, как у главной идеи; вторая —
+   с формулой. */
+.vizo-plashka {
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-lg);
   background: var(--color-surface-soft);
   color: var(--color-primary);
+  font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
-.vteor-izobr__formula {
+.vizo-plashka__formula {
   white-space: nowrap;
 }
-@container vteor-razdel (min-width: 720px) {
-  .vteor-izobr {
+
+/* Широкая карточка: способы в ряд, Эйлер в две колонки, таблица. */
+@container vteor-razdel (min-width: 600px) {
+  .vizo-sposoby {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vizo-primer__risunki {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+@container vteor-razdel (min-width: 760px) {
+  .vizo-eylerblok {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+  .vizo-eylerblok__levo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    align-items: stretch;
+  }
+  /* Портрет — не выше текстовой колонки: ячейка растёт по тексту,
+     картинка вписывается в неё. */
+  .vizo-eylerblok__portret {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+  }
+  .vizo-tabl {
     gap: 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
   }
-  .vteor-izobr__shapka,
-  .vteor-izobr__ryad {
+  .vizo-tabl__shapka,
+  .vizo-tabl__ryad {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr);
+    grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr) minmax(0, 1.4fr);
     gap: var(--space-4);
     align-items: center;
     padding: var(--space-3) var(--space-4);
     border: 0;
     border-radius: 0;
   }
-  .vteor-izobr__shapka {
+  .vizo-tabl__shapka {
     color: var(--color-text-secondary);
     font-size: var(--fs-caption);
     font-weight: 600;
     line-height: var(--lh-caption);
     background: var(--color-surface-2);
   }
-  .vteor-izobr__ryad {
+  /* Шапка «Событие» накрывает и колонку формулы. */
+  .vizo-tabl__kolonka--sobytie {
+    grid-column: 1 / 3;
+  }
+  .vizo-tabl__ryad {
     border-top: 1px solid var(--color-border);
   }
   /* В таблице колонка названа в шапке — в подписи её имя лишнее. */
-  .vteor-izobr__kolonka {
+  .vizo-tabl__imya-kolonki {
     display: none;
   }
 }

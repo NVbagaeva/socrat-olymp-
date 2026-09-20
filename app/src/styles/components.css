@@ -1913,6 +1913,49 @@ a.task-card {
 }
 
 /* ══════════════════════════════════════════════════════════
+   10а. КОМПОНЕНТЫ · раскрывающаяся врезка (Details)
+   ══════════════════════════════════════════════════════════ */
+/* Строка с пунктирным подчёркиванием, под ней плавно открывается
+   тело. Разбор №12 («Откуда берётся минус») и теория №4 («Ещё один
+   факт») — одна и та же врезка. */
+.solution-details {
+  margin-top: var(--space-3);
+}
+.solution-details-toggle {
+  font: inherit;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 1px dashed currentColor;
+}
+.solution-details-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--dur-reveal, 320ms) var(--ease);
+}
+.solution-details.open .solution-details-body {
+  max-height: 720px;
+}
+.solution-details-body > div {
+  padding-top: var(--space-3);
+}
+.solution-details svg {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  height: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .solution-details-body {
+    transition: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
    11. КОМПОНЕНТЫ · рукописная подпись
    ══════════════════════════════════════════════════════════ */
 /* Только начертание и цвет. Размер наследуется от места вставки,

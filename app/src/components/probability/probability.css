@@ -183,6 +183,27 @@
   text-decoration: overline;
 }
 
+/* Точка-исход на оси: кружок цвета события, общий исход двух
+   событий — цвета их пересечения (темнее). */
+.pr-tochka circle {
+  fill: var(--color-text-tertiary);
+  stroke: var(--color-surface);
+  stroke-width: 2.5;
+}
+.pr-tochka--a circle {
+  fill: var(--color-primary);
+}
+.pr-tochka--b circle {
+  fill: var(--color-accent);
+}
+.pr-tochka--obshchee circle {
+  fill: var(--color-primary-active);
+}
+.pr-tochka__label {
+  fill: var(--color-text-secondary);
+  font-size: 16px;
+}
+
 /* Благоприятный отрезок на оси: оранжевый и заметно толще оси. */
 .pr-favorable {
   stroke: var(--color-accent);
