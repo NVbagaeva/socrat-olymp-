@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import type { ReactNode } from 'react';
 
 export type VariantSostoyanie = 'correct' | 'incorrect' | 'answer' | null;
 
@@ -15,6 +16,12 @@ export interface VariantyOtvetaProps {
    * ещё не было, кнопки живые и ничего не подсвечивают.
    */
   itog?: (variant: string) => VariantSostoyanie;
+  /**
+   * Чем нарисовать вариант, если подпись — не просто строка. Пусто —
+   * на кнопке стоит само значение. Так блок с дробями отдаёт готовую
+   * вёрстку формулы, а блок с одним словом ничего не передаёт.
+   */
+  vid?: (variant: string) => ReactNode;
   /** После проверки кнопки замирают. */
   disabled?: boolean;
   label: string;
@@ -38,6 +45,7 @@ export function VariantyOtveta({
   vybor,
   onPick,
   itog,
+  vid,
   disabled = false,
   label,
   className,
@@ -59,7 +67,7 @@ export function VariantyOtveta({
             disabled={disabled}
             onClick={() => onPick(variant)}
           >
-            {variant}
+            {vid === undefined ? variant : vid(variant)}
           </button>
         );
       })}

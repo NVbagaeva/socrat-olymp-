@@ -66,3 +66,51 @@ export function KrugiIcon() {
     </svg>
   );
 }
+
+/** Игральная кость: значок карточки «Равновозможные исходы». */
+export function KostIcon() {
+  return (
+    <svg
+      className="z4-ico"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* Куб в изометрии: верхняя грань ромбом, две боковые. */}
+      <path d="M12 2.6 20.5 7v10L12 21.4 3.5 17V7z" />
+      <path d="M3.5 7 12 11.4 20.5 7M12 11.4v10" />
+      {/* Точки: две на верхней грани, по две на боковых. */}
+      <circle cx="9.1" cy="6.2" r=".85" fill="currentColor" stroke="none" />
+      <circle cx="14.9" cy="8" r=".85" fill="currentColor" stroke="none" />
+      <circle cx="7.1" cy="11.7" r=".85" fill="currentColor" stroke="none" />
+      <circle cx="8.6" cy="16.3" r=".85" fill="currentColor" stroke="none" />
+      <circle cx="15.4" cy="13.3" r=".85" fill="currentColor" stroke="none" />
+      <circle cx="16.9" cy="17.1" r=".85" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/** Треугольник с восклицательным знаком: значок запрета. */
+export function TreugolnikIcon() {
+  return (
+    <svg
+      className="z4-ico"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 4.4 21 19.6H3z" />
+      <path d="M12 10.3v3.6M12 16.7v.4" />
+    </svg>
+  );
+}
