@@ -3,7 +3,6 @@
 import { Button, ProgressRing } from '@/components/ui';
 import type { ProgressStore } from '@/lib/progressStore';
 import { summarize } from '@/lib/trainerProgress';
-import { METODY_4 } from '@/lib/veroyatnost/model';
 import type { Navyk } from './metody';
 
 export interface ProgressMetodyProps {
@@ -15,8 +14,8 @@ export interface ProgressMetodyProps {
     pusto: string;
     sbros: string;
   };
-  /** Какие методы считать: пять у задания №4, десять у задания №5. */
-  metody?: readonly Navyk[];
+  /** Какие методы считать: семь у задания №4, десять у задания №5. */
+  metody: readonly Navyk[];
 }
 
 /**
@@ -24,7 +23,7 @@ export interface ProgressMetodyProps {
  * метод. Один блок на тренажёр и на «Узнай метод» обоих заданий — у
  * каждого своё хранилище и свои слова, устройство одно.
  */
-export function ProgressMetody({ store, slova, metody = METODY_4 }: ProgressMetodyProps) {
+export function ProgressMetody({ store, slova, metody }: ProgressMetodyProps) {
   const progress = store.useProgress();
   const svod = summarize(progress);
 

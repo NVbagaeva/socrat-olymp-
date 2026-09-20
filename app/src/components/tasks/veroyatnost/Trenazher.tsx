@@ -27,7 +27,7 @@ export interface TrenazherProps {
   pool: Pool;
   /** Задачи режима «Узнай метод»: только условия и отпечатки методов. */
   uznay: UznayPool;
-  /** Чей тренажёр: у №4 пять методов, у №5 десять; хранилища разные. */
+  /** Чей тренажёр: у №4 семь разделов, у №5 десять методов; хранилища разные. */
   zadanie: Zadanie;
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
   base: string;
@@ -58,17 +58,17 @@ export interface TrenazherProps {
  */
 
 /**
- * Свои хранилища: ключ с номером задания и версией формата. У №5 —
- * v2: прогресс там считается по десяти методам автора, а в v1
- * лежали ключи шести методов рисунка, и складывать их некуда.
+ * Свои хранилища: ключ с номером задания и версией формата. Версия
+ * v2 у обоих заданий: прогресс считается по методам автора, а в v1
+ * лежали ключи методов рисунка, и складывать их некуда.
  */
 const STORES: Record<Zadanie, ProgressStore> = {
-  4: createProgressStore('budetege:veroyatnost-4:v1'),
+  4: createProgressStore('budetege:veroyatnost-4:v2'),
   5: createProgressStore('budetege:veroyatnost-5:v2'),
 };
 
 const UZNAY_STORES: Record<Zadanie, ProgressStore> = {
-  4: createProgressStore('budetege:veroyatnost-4-uznay:v1'),
+  4: createProgressStore('budetege:veroyatnost-4-uznay:v2'),
   5: createProgressStore('budetege:veroyatnost-5-uznay:v2'),
 };
 
@@ -132,7 +132,7 @@ export function Trenazher({
         }));
       default:
         return pool.kinds
-          .filter((kind) => rezhim === 'mixed' || navykKind(kind, zadanie) === metod)
+          .filter((kind) => rezhim === 'mixed' || navykKind(kind) === metod)
           .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
     }
   }

@@ -136,7 +136,7 @@ export function Sessiya({
       return;
     }
     const kind = byId.get(item.kind);
-    const metod = kind === undefined ? undefined : navykKind(kind, zadanie);
+    const metod = kind === undefined ? undefined : navykKind(kind);
     if (metod === undefined) {
       return;
     }
@@ -317,7 +317,7 @@ export function Sessiya({
   if (kind === undefined || variant === undefined) {
     return null;
   }
-  const metod = navykKind(kind, zadanie);
+  const metod = navykKind(kind);
   const navyk = metod === undefined ? undefined : navykPoId(zadanie, metod);
 
   return (

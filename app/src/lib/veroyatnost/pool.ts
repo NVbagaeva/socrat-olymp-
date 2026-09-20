@@ -481,59 +481,40 @@ function uznayVariant(
 }
 
 /**
- * Задание №4: прототипы со всеми вариантами условий и задачи
- * конспекта по одной; угадывают метод рисунка. Задание №5: прототипы
- * со всеми вариантами; угадывают один из десяти методов автора,
- * поэтому закрыт отпечатком блок банка, а не метод рисунка. Его
- * подготовительные задачи методики не имеют и в режим не попадают —
- * узнавать в них пока нечего.
+ * Задачи режима «Узнай метод»: прототипы банка со всеми вариантами
+ * условий. Угадывают метод автора, поэтому отпечатком закрыт блок
+ * банка — он же навык тренажёра (components/…/metody.ts).
+ *
+ * Задачи авторского конспекта в режим пока не попадают ни у №4, ни
+ * у №5. У №5 у них нет методики вовсе. У №4 методика есть, но она
+ * называет рисунок, а не метод из типологии автора: показать такую
+ * задачу значило бы ждать от ученика ответа, которого нет среди
+ * кнопок. Вернутся, когда автор разнесёт восемнадцать задач
+ * конспекта по методам.
  */
 export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
   const bank = zadanie === 4 ? BANK_4 : BANK_5;
-  const podgotovka = zadanie === 4 ? PODGOTOVKA_4 : PODGOTOVKA_5;
-  const prototipy = bank.flatMap((prototype): UznayKind[] => {
-    const metodika = prototype.metodika;
-    if (metodika === undefined) {
-      return [];
-    }
-    return [
-      {
-        id: prototype.id,
-        istochnik: 'prototip',
-        variants: prototype.varianty.map((variant) =>
-          uznayVariant(
-            variant.n,
-            prototype.uslovie(variant.params),
-            metodika,
-            illyustratsiyaVarianta(prototype.id, variant.n),
-            zadanie === 4 ? metodika.metod : prototype.blok,
-          ),
-        ),
-      },
-    ];
-  });
-  const konspekt = podgotovka
-    .flatMap((blok) => [...blok.zadachi])
-    .flatMap((zadacha): UznayKind[] => {
-      const metodika = zadacha.metodika;
+  return {
+    kinds: bank.flatMap((prototype): UznayKind[] => {
+      const metodika = prototype.metodika;
       if (metodika === undefined) {
         return [];
       }
       return [
         {
-          id: zadacha.id,
-          istochnik: 'konspekt',
-          variants: [
+          id: prototype.id,
+          istochnik: 'prototip',
+          variants: prototype.varianty.map((variant) =>
             uznayVariant(
-              1,
-              zadacha.uslovie,
+              variant.n,
+              prototype.uslovie(variant.params),
               metodika,
-              illyustratsiyaVarianta(zadacha.id, 1),
-              metodika.metod,
+              illyustratsiyaVarianta(prototype.id, variant.n),
+              prototype.blok,
             ),
-          ],
+          ),
         },
       ];
-    });
-  return { kinds: [...prototipy, ...konspekt] };
+    }),
+  };
 }

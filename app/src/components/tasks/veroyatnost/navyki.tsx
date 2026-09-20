@@ -6,7 +6,7 @@ import { navykKind, navykiZadaniya } from './metody';
 
 /**
  * Навыки тренажёра и генератора — методы, под которые в банке есть
- * задачи: у №4 пять методов рисунка, у №5 десять методов автора.
+ * задачи: у №4 семь разделов списка Б, у №5 десять методов автора.
  * Карточка навыка собирается на сервере: название и номер метода из
  * каталога, число задач из банка, миниатюра — рисунок первого
  * варианта первого прототипа этого метода по его модели. У задачи
@@ -17,7 +17,7 @@ import { navykKind, navykiZadaniya } from './metody';
  */
 export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
   return navykiZadaniya(zadanie).flatMap((m): SkillItem[] => {
-    const kinds = pool.kinds.filter((kind) => navykKind(kind, zadanie) === m.id);
+    const kinds = pool.kinds.filter((kind) => navykKind(kind) === m.id);
     if (kinds.length === 0) {
       return [];
     }
