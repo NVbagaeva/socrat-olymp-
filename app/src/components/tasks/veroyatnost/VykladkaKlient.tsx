@@ -91,7 +91,14 @@ export function VykladkaKlient({ kuski, className }: VykladkaKlientProps) {
     primerit();
     const nablyudatel = new ResizeObserver(primerit);
     nablyudatel.observe(blok);
-    return () => nablyudatel.disconnect();
+    /* Пока шрифты KaTeX не подгрузились, проба меряется запасным
+       шрифтом и врёт; с приходом шрифтов примерка повторяется. */
+    const shrifty = document.fonts;
+    shrifty.addEventListener('loadingdone', primerit);
+    return () => {
+      nablyudatel.disconnect();
+      shrifty.removeEventListener('loadingdone', primerit);
+    };
   }, [n]);
 
   /* Пробы всех отрезков длиннее одного куска: один кусок и так
