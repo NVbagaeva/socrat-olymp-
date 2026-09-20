@@ -60,25 +60,27 @@ export function TeoriyaShell({ razdely, tela }: TeoriyaShellProps) {
 
   return (
     <>
+      {/* Кнопка содержания — только на узком экране, вместо колонки.
+          Стоит над сеткой, а не первой ячейкой в ней: в сетке её
+          липкость не работала бы — ячейка ростом с саму кнопку, и
+          ездить внутри неё некуда. Здесь же кнопка липнет вдоль всей
+          панели вкладки. */}
+      <div className="topic-open vteor-open">
+        <button
+          type="button"
+          className="topic-open__btn btn btn--secondary btn--sm"
+          onClick={() => setShtorka(true)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 7h16M4 12h16M4 17h10" />
+          </svg>
+          {SODERZHANIE.title}
+        </button>
+        {otkryto === undefined ? null : <span className="topic-open__now">{otkryto.title}</span>}
+      </div>
+
       <div className="topic-body topic-body--theory vteor">
         <div className="vteor__main">
-          {/* Кнопка содержания — только на узком экране, вместо колонки. */}
-          <div className="topic-open">
-            <button
-              type="button"
-              className="topic-open__btn btn btn--secondary btn--sm"
-              onClick={() => setShtorka(true)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M4 7h16M4 12h16M4 17h10" />
-              </svg>
-              {SODERZHANIE.title}
-            </button>
-            {otkryto === undefined ? null : (
-              <span className="topic-open__now">{otkryto.title}</span>
-            )}
-          </div>
-
           {razdely.map((razdel) => (
             <article className="vteor-razdel" id={razdelId(razdel.id)} key={razdel.id}>
               {tela[razdel.id] ?? (
