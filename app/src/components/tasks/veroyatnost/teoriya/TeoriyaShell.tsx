@@ -2,7 +2,7 @@
 
 import { useCallback, useState, type ReactNode } from 'react';
 import Image from 'next/image';
-import { HandNote, Modal } from '@/components/ui';
+import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
 
@@ -101,7 +101,12 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
                 </span>
                 {razdel.title}
               </h3>
-              {tela[razdel.id] ?? <p className="vteor-razdel__soon">{SODERZHANIE.gotovitsya}</p>}
+              {tela[razdel.id] ?? (
+                <EmptyState
+                  title={SODERZHANIE.gotovitsya}
+                  description={SODERZHANIE.gotovitsyaText}
+                />
+              )}
             </article>
           ))}
         </div>

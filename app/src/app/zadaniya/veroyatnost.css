@@ -1441,12 +1441,6 @@
   font-size: var(--fs-caption);
   font-weight: 700;
 }
-.vteor-razdel__soon {
-  margin: 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-tertiary);
-}
 .vteor-blok {
   display: grid;
   gap: var(--space-4);
