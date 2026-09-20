@@ -1236,6 +1236,446 @@
   color: var(--color-success);
 }
 
+/* ── Раздел 02: классическая вероятность ────────────────────────── */
+
+/* Шесть карточек в два ряда по три — так раздел и рисовали. Карточка
+   тут высокая и разнородная (формула, фотография, вопрос), поэтому
+   ряд не тянется по высоте: каждая заканчивается там, где кончается
+   её содержимое. */
+/* Три карточки в ряд — на верхнем ярусе экранов, как рисовали. Ниже
+   их две: в карточке фотография, формула и вопрос с вариантами, и на
+   трети от 756 px всё это уже не читается. На телефоне — по одной. */
+.vklass__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1440px) {
+  .vklass__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .vklass__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Колонкой на флексе, а не сеткой: карточки в ряду одной высоты, и
+   сноске нужен верхний отступ «auto», чтобы сесть на низ карточки. */
+.vklass {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vklass__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.vklass__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  color: var(--color-primary);
+}
+.vklass__ico svg {
+  width: 100%;
+  height: 100%;
+}
+/* Значок в залитом кружке: восклицательный знак и треугольник. */
+.vklass__znak {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-inverse);
+}
+.vklass__znak svg {
+  width: 20px;
+  height: 20px;
+}
+.vklass__znak--accent {
+  background: var(--color-accent);
+}
+.vklass__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Определение — врезкой: это то, что учат наизусть. */
+.vklass__vrezka {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-primary);
+}
+.vklass__bukvy {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vklass__bukva {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+/* Вывод «вероятность не может быть больше 1» — красным: это та самая
+   ошибка, ради которой карточка написана. */
+.vklass__vyvod {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-accent);
+}
+/* Сноска карточки — прижата к низу, чтобы ряд читался ровно. */
+.vklass__snoska {
+  margin: 0;
+  margin-top: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vklass__snoska-label {
+  display: block;
+  color: var(--color-text);
+}
+
+/* Пример: фотография и счёт рядом. */
+/* Фотография и счёт рядом — на верхнем ярусе, как в макете. Ниже
+   коробка встаёт над счётом: на половине карточки строка
+   «P(A) = 2/8 = 1/4» ломается посередине выражения. */
+.vklass-primer {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+}
+@media (min-width: 1440px) {
+  .vklass-primer {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+.vklass-primer__schet {
+  width: 100%;
+}
+.vklass-primer__foto {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+.vklass-primer__schet {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  text-align: center;
+}
+.vklass-primer__stroka,
+.vklass-primer__itog {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--color-text-brand);
+}
+.vklass-primer__itog {
+  font-size: var(--fs-lg);
+}
+
+/* Плашка «а может ли быть больше» — на терракоте: это запрет. */
+.vklass-nelzya {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+}
+.vklass-nelzya__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.vklass-nelzya__ryad {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.vklass-nelzya__formula {
+  flex: 1 1 auto;
+  margin: 0;
+  overflow-x: auto;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  text-align: center;
+  color: var(--color-text-brand);
+}
+.vklass-nelzya__metka {
+  flex: none;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-error-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-error);
+}
+
+/* Кубики с подписью под ними. */
+.vklass-kosti {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  justify-items: center;
+}
+.vklass-kosti__foto {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+.vklass-kosti__plashka {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+/* Шаги «как узнать задачу»: тот же кружок, что у номеров вопросов. */
+.vklass-shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vklass-shag {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vklass-shag__no {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+
+/* ── Блок «Проверь понимание» ───────────────────────────────────── */
+
+.vpon {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+.vpon__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* Счётчик и стрелки держатся вместе и прижаты вправо. */
+.vpon__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.vpon__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  margin-right: auto;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+/* Галочка в залитом квадрате со скруглением — по макету. */
+.vpon__znak {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.vpon__znak svg {
+  width: 20px;
+  height: 20px;
+}
+.vpon__schet {
+  margin: 0;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vpon__strelka {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.vpon__strelka svg {
+  width: 16px;
+  height: 16px;
+}
+.vpon__strelka:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.vpon__strelka:disabled {
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+.vpon__vopros {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vpon__soon {
+  margin: 0;
+  padding: var(--space-4) 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+/* Варианты — дробями в два столбца: так их видно все разом. */
+.vpon__otvety {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.vpon__drob {
+  display: block;
+  overflow-x: auto;
+}
+
+/* Разбор под вариантами: цвет — от того, верно ли ответили. */
+.vpon-itog {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid;
+  border-radius: var(--radius-md);
+}
+.vpon-itog--verno {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.vpon-itog--neverno {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+.vpon-itog__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.vpon-itog--verno .vpon-itog__title {
+  color: var(--color-success);
+}
+.vpon-itog--neverno .vpon-itog__title {
+  color: var(--color-error);
+}
+.vpon-itog__znak {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-inverse);
+}
+.vpon-itog--verno .vpon-itog__znak {
+  background: var(--color-success);
+}
+.vpon-itog--neverno .vpon-itog__znak {
+  background: var(--color-error);
+}
+.vpon-itog__znak svg {
+  width: 16px;
+  height: 16px;
+}
+.vpon-itog__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vpon-itog__formula {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--color-text-brand);
+}
+
 /* ── Блок 3: связанные события ──────────────────────────────────── */
 
 .vsvyaz__grid {
