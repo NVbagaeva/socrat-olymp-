@@ -24,9 +24,16 @@ import { Tex } from '../Tex';
 /** Ось в теории названа заглавной X — так на макете и в условиях. */
 const OS = 'X';
 
-/** Кружок с номером случая. */
-function Nomer({ children }: { children: number }) {
-  return <span className="z4-sluchay__nomer">{children}</span>;
+/**
+ * Метка случая: кружок без цифры.
+ *
+ * Номер в кружке на вкладке значит только номер раздела темы, и
+ * второго такого числа на странице быть не должно. Случаи здесь
+ * называют себя заголовками — «когда можно вычесть» и «когда
+ * нельзя», — порядковый номер им ничего не добавлял.
+ */
+function Metka() {
+  return <span className="z4-sluchay__metka" aria-hidden="true" />;
 }
 
 /** Условие случая: картинка, данные и вопрос. */
@@ -101,7 +108,7 @@ export function KoordinatnayaPryamaya() {
 
       <article className="z4-sluchay">
         <header className="z4-sluchay__head">
-          <Nomer>{pervaya.nomer}</Nomer>
+          <Metka />
           <h3 className="z4-sluchay__title">{pervaya.zagolovok}</h3>
         </header>
 
@@ -148,7 +155,7 @@ export function KoordinatnayaPryamaya() {
 
       <article className="z4-sluchay">
         <header className="z4-sluchay__head">
-          <Nomer>{vtoraya.nomer}</Nomer>
+          <Metka />
           <h3 className="z4-sluchay__title">{vtoraya.zagolovok}</h3>
         </header>
 

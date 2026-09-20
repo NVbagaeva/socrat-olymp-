@@ -843,6 +843,16 @@
   display: grid;
   gap: var(--space-4);
 }
+/* Заголовок блока внутри раздела: без кружка — номера в кружках
+   нумеруют разделы темы, а не блоки. Размер тот же, чтобы разделы
+   не потеряли ритм. */
+.vteor-blok__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
 .vteor-blok__lead {
   margin: 0;
   font-size: var(--fs-caption);
@@ -1119,13 +1129,23 @@
 .vcheck__go {
   flex: none;
 }
+/* Шесть вопросов в ряд помещаются только на верхнем ярусе экранов
+   (1440 и шире) — так раздел и рисовали. Ниже карточка сжимается до
+   сотни с небольшим пикселей, а кнопка «Невозможное» уже этого не
+   выдерживает и вылезает за край: на 1024 — на 62 px. Поэтому до
+   1440 вопросы идут двумя рядами по три. */
 .vcheck__grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+@media (min-width: 1440px) {
+  .vcheck__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 .vcheck-card {
   display: grid;
@@ -1323,9 +1343,6 @@
   .vvidy__side {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .vcheck__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .vzapomni {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1479,16 +1496,17 @@
   align-items: start;
   gap: var(--space-3);
 }
-.z4-sluchay__nomer {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
+/* Метка случая: кружок без цифры. Цифру в кружке на вкладке носит
+   только заголовок раздела, поэтому здесь просто точка — она держит
+   отступ заголовка и не притворяется номером. */
+.z4-sluchay__metka {
+  width: 12px;
+  height: 12px;
   flex: none;
+  /* Точка — к середине первой строки заголовка. */
+  margin-top: 6px;
   border-radius: var(--radius-pill);
   background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-weight: 700;
 }
 /* Заголовок случая — ниже заголовка раздела: тот у вкладки общий
    (vteor-razdel__title), и перебивать его нельзя. */
@@ -1643,22 +1661,26 @@
 }
 .z4-shag {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: 20px minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
   padding: var(--space-4);
   border-radius: var(--radius-md);
   background: var(--color-surface);
 }
+/* Номер шага внутри карточки: тот же кружок, что у вопросов
+   самопроверки (.vcheck-card__no) — обводка, а не заливка. Шаги
+   алгоритма нумеровать надо, но залитый синий кружок читался как
+   номер раздела. */
 .z4-shag__nomer {
   display: inline-grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-size: var(--fs-caption);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
   font-weight: 600;
 }
 .z4-shag__telo {
@@ -1729,7 +1751,7 @@
 }
 .z4-itog__shagi li {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: 20px minmax(0, 1fr);
   gap: var(--space-3);
   align-items: start;
   color: var(--color-text-secondary);
