@@ -24,6 +24,23 @@ export function typeset(text: string, strogo = false): string {
 }
 
 /**
+ * Строки выкладки одной строкой.
+ *
+ * В данных формула хранится строками с разрывами по знаку «=», и на
+ * разрыве знак стоит дважды — в конце строки и в начале следующей.
+ * Когда формула помещается целиком, она показывается одной строкой,
+ * и второй знак на стыке лишний: он снимается здесь. Строки, не
+ * начинающиеся со знака, склеиваются как есть.
+ */
+export function odnoyStrokoy(stroki: readonly string[]): string {
+  return stroki.reduce((formula, stroka) => {
+    const dalshe = stroka.trim();
+    const dubl = formula.trimEnd().endsWith('=') && dalshe.startsWith('=');
+    return `${formula} ${dubl ? dalshe.slice(1).trim() : dalshe}`;
+  });
+}
+
+/**
  * Тот же текст словами: для alt, заголовков и голосового доступа.
  * Читать «доллар слэш sqrt» вслух нельзя, поэтому корень
  * проговаривается словами.
