@@ -778,7 +778,7 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface-info);
 }
-.vteor-sluchay__shema .pr-line {
+.vteor-shema .pr-line {
   width: 100%;
   height: auto;
 }
@@ -1062,6 +1062,8 @@
    держит прежний отступ своими полями. */
 .vteor-sluchay__shema {
   padding-inline: 0;
+}
+.vteor-shema {
   container: vteor-shema / inline-size;
 }
 .vteor-sluchay__shema .vteor-sluchay__podskazka {
@@ -1087,30 +1089,32 @@
    Гарнитура — та же, что у формулы: переменная курсивом
    математического шрифта KaTeX, цифры, скобки и знаки — прямым
    основным. */
-.vteor-sluchay__shema .pr-math,
-.vteor-sluchay__shema .pr-tick text {
+.vteor-shema .pr-math,
+.vteor-shema .pr-tick text {
   font-family: KaTeX_Main, var(--font-math);
   font-style: normal;
 }
-.vteor-sluchay__shema .pr-math .pr-var {
+.vteor-shema .pr-math .pr-var {
   font-family: KaTeX_Math, var(--font-math);
   font-style: italic;
 }
-.vteor-sluchay__shema .pr-band-label,
-.vteor-sluchay__shema .pr-brace text,
-.vteor-sluchay__shema .pr-axis-name,
-.vteor-sluchay__shema .pr-tick text {
+.vteor-shema .pr-band-label,
+.vteor-shema .pr-brace text,
+.vteor-shema .pr-axis-name,
+.vteor-shema .pr-tick text,
+.vteor-shema .pr-sobytie__label,
+.vteor-shema .vteor-eyler__imya {
   font-size: var(--fs-h3);
   font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
 }
-.vteor-sluchay__shema .pr-tick text {
+.vteor-shema .pr-tick text {
   /* Подпись деления стоит на 26 единиц рисунка под осью; на
      сжатом рисунке это меньше высоты цифры, и она упирается в
      ось. Опускаем на ступень сетки — тоже в экранных пикселях. */
   translate: 0 12px;
   translate: 0 calc(var(--space-2) * tan(atan2(760px, 100cqw)));
 }
-.vteor-sluchay__shema .pr-brace {
+.vteor-shema .pr-brace {
   /* Скоба стоит на 34 единицы под осью и на сжатом рисунке
      упирается в подписи делений, которые на экране не сжимаются.
      Опускаем её на столько, чтобы между подписью деления и скобой
@@ -1118,21 +1122,21 @@
      на нет. */
   translate: 0 max(0px, calc(var(--space-3) * tan(atan2(760px, 100cqw)) - 8px));
 }
-.vteor-sluchay__shema .pr-brace text {
+.vteor-shema .pr-brace text {
   /* Подпись скобы стоит на 28 единиц под ней; на сжатом рисунке
      это меньше высоты буквы. Держим на экране высоту буквы и
      ступень сетки: --fs-caption + --space-1. */
   translate: 0
     max(0px, calc((var(--fs-caption) + var(--space-1)) * tan(atan2(760px, 100cqw)) - 28px));
 }
-.vteor-sluchay__shema .pr-axis-line,
-.vteor-sluchay__shema .pr-tick line {
+.vteor-shema .pr-axis-line,
+.vteor-shema .pr-tick line {
   stroke-width: 3;
 }
-.vteor-sluchay__shema .pr-favorable {
+.vteor-shema .pr-favorable {
   stroke-width: 8;
 }
-.vteor-sluchay__shema .pr-bound {
+.vteor-shema .pr-bound {
   r: 10;
 }
 
@@ -1144,6 +1148,157 @@
   }
   .vteor-sluchay__kartinka {
     width: 100%;
+  }
+}
+
+/* ── Раздел «Как изображать события» ─────────────────────────────── */
+
+/* Таблица-сопоставление. На узкой карточке — стопка карточек:
+   событие заголовком, под ним два рисунка с подписями; шапки
+   колонок нет, её роль играют подписи. От ширины раздела в 720px —
+   три колонки с шапкой. Горизонтальной прокрутки нет ни там, ни
+   там: рисунки ужимаются по колонке. */
+.vteor-izobr {
+  display: grid;
+  gap: var(--space-4);
+}
+.vteor-izobr__shapka {
+  display: none;
+}
+.vteor-izobr__ryad {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.vteor-izobr__sobytie {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: var(--lh-body);
+}
+.vteor-izobr__yacheyka {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+.vteor-izobr__podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vteor-izobr__kolonka {
+  color: var(--color-text);
+}
+.vteor-eyler {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+.vteor-izobr__pryamaya {
+  width: 100%;
+  height: auto;
+}
+/* Диаграмма Эйлера: прямоугольник — обводка 1px цвета рамок, круги —
+   обводка цвета оси и акцента; закраска — те же цвета с
+   прозрачностью, как полосы событий на прямой. */
+.vteor-eyler__pole {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+.vteor-eyler__pole.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__zalivka {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__zalivka--b {
+  fill: var(--color-accent);
+}
+.vteor-eyler__krug {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.vteor-eyler__krug--b {
+  stroke: var(--color-accent);
+}
+/* Подложка под кругом A на диаграмме противоположного события:
+   закраска Ā не должна просвечивать сквозь A. */
+.vteor-eyler__krug--fon {
+  fill: var(--color-surface);
+  stroke: none;
+}
+.vteor-eyler__krug.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__krug--b.is-zakrasheno {
+  fill: var(--color-accent);
+}
+.vteor-eyler__krug.is-obshchee {
+  stroke: none;
+  fill-opacity: 0.36;
+}
+.vteor-eyler__imya {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+.vteor-eyler__imya--cherta {
+  text-decoration: overline;
+}
+/* Плашка вывода: мягкий синий, как у главной идеи. Вторая — с
+   формулой в той же плашке. */
+.vteor-izobr__plashka {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  line-height: var(--lh-body);
+}
+.vteor-izobr__formula {
+  white-space: nowrap;
+}
+@container vteor-razdel (min-width: 720px) {
+  .vteor-izobr {
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .vteor-izobr__shapka,
+  .vteor-izobr__ryad {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    border-radius: 0;
+  }
+  .vteor-izobr__shapka {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    line-height: var(--lh-caption);
+    background: var(--color-surface-2);
+  }
+  .vteor-izobr__ryad {
+    border-top: 1px solid var(--color-border);
+  }
+  /* В таблице колонка названа в шапке — в подписи её имя лишнее. */
+  .vteor-izobr__kolonka {
+    display: none;
   }
 }
 

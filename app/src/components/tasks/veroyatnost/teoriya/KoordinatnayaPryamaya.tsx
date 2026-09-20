@@ -111,7 +111,7 @@ export function KoordinatnayaPryamaya() {
 
         <Uslovie kartinka={pervaya.kartinka} uslovie={pervaya.uslovie} vopros={pervaya.vopros} />
 
-        <div className="vteor-sluchay__shema">
+        <div className="vteor-sluchay__shema vteor-shema">
           {/* Оба условия со знаком «больше»: области смотрят вправо,
               и одна целиком лежит в другой — это и видно на рисунке. */}
           <CoordinateLine
@@ -154,7 +154,7 @@ export function KoordinatnayaPryamaya() {
 
         <Uslovie kartinka={vtoraya.kartinka} uslovie={vtoraya.uslovie} vopros={vtoraya.vopros} />
 
-        <div className="vteor-sluchay__shema">
+        <div className="vteor-sluchay__shema vteor-shema">
           {/* Условия разных знаков: области идут навстречу и
               накладываются, но ни одна не лежит в другой. */}
           <CoordinateLine

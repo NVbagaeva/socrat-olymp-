@@ -71,10 +71,35 @@ export interface Brace {
   label: string;
 }
 
+/**
+ * Событие-промежуток на прямой — для теории, где события рисуют без
+ * чисел: отрезок между from и to, луч, если одного конца нет, вся
+ * прямая, если нет обоих. Закрашивается полосой над осью; где
+ * полосы налегают, цвет темнее сам собой — это общая часть.
+ */
+export interface Promezhutok {
+  from?: number;
+  to?: number;
+  /** Имя события над полосой: «A», «B». */
+  label?: string;
+  /** Черта над именем — противоположное событие. */
+  cherta?: boolean;
+  /** Второй цвет для второго события; первый — по умолчанию. */
+  ton?: 'a' | 'b';
+}
+
 export interface CoordinateLineProps {
   /** Концы всего отрезка — a и b. */
   min: number;
   max: number;
+  /**
+   * События-промежутки вместо условий задачи: рисунок теории.
+   * С ними границ c и d, уровней условий и делений нет; на оси
+   * выделяется только промежуток `vydelit`, если он задан.
+   */
+  promezhutki?: readonly Promezhutok[];
+  /** Промежуток на оси, о котором речь: пересечение или объединение. */
+  vydelit?: { from: number; to: number };
   /** Левая граница благоприятного промежутка. Не задана — от min. */
   c?: number;
   /** Правая граница. Не задана — благоприятен весь хвост от c до max. */
@@ -154,11 +179,15 @@ export function CoordinateLine({
   state = 'default',
   alt,
   className,
+  promezhutki,
+  vydelit,
 }: CoordinateLineProps) {
   /* Значение на оси → координата рисунка. */
   const px = (value: number): number => X0 + ((value - min) / (max - min)) * (X1 - X0);
 
-  if (c === undefined && d === undefined) {
+  /* Рисунок теории: события полосами, без условий и границ. */
+  const sobytiya = promezhutki !== undefined;
+  if (c === undefined && d === undefined && !sobytiya) {
     throw new Error('У координатной прямой нет ни одной границы промежутка');
   }
   /* Границы может не быть с любой стороны: тогда благоприятен хвост
@@ -178,21 +207,59 @@ export function CoordinateLine({
   const nizhneePole = brace === undefined ? 0 : 60;
   /* Уровни: свои, если заданы, иначе пара из границ промежутка —
      тот самый случай отрезка, что рисует тренажёр. */
-  const verhniy: Band | null = upper ?? (c === undefined ? null : { value: c, side: 'right' });
-  const nizhniy: Band | null = lower ?? (d === undefined ? null : { value: d, side: 'left' });
+  const verhniy: Band | null =
+    upper ?? (c === undefined || sobytiya ? null : { value: c, side: 'right' });
+  const nizhniy: Band | null =
+    lower ?? (d === undefined || sobytiya ? null : { value: d, side: 'left' });
   /* С вероятностью в скобках подпись условия длиннее и крупнее, и
      ей нужно место над верхним уровнем: в теории рисунок сжат в узкую
      колонку, а кегль задан в единицах рисунка. Там, где скобок нет
      (тренажёр, лист), поля нет и рисунок прежний. */
   const verhneePole = verhniy?.note === undefined && nizhniy?.note === undefined ? 0 : 34;
-  const vysota = VB_H + verhneePole + nizhneePole;
+  /* У рисунка событий верхнего уровня и подписей делений нет: он
+     сдвигается вверх и укорачивается, чтобы не нести пустые поля. */
+  const sdvigSobytiy = sobytiya ? 30 : 0;
+  const vysota = sobytiya ? AXIS_Y - sdvigSobytiy + 22 : VB_H + verhneePole + nizhneePole;
   const vidnoPeresechenie = highlightMode !== 'condition' && !tolkoOtrezok;
-  const videnOtvet = highlightMode === 'answer' || tolkoOtrezok;
+  const videnOtvet = (highlightMode === 'answer' || tolkoOtrezok) && !sobytiya;
 
   const podpis =
     alt ??
     `Координатная прямая от ${chislo(min)} до ${chislo(max)}, ` +
       `благоприятный промежуток от ${chislo(levaya)} до ${chislo(pravaya)}`;
+
+  /* Событие-промежуток: полоса над осью, имя над ней и точки на
+     концах. Луч уходит за край оси, как и область условия. */
+  const sobytie = (pr: Promezhutok, key: string) => {
+    const levo = pr.from === undefined ? X0 - OVERHANG : px(pr.from);
+    const pravo = pr.to === undefined ? X1 + OVERHANG : px(pr.to);
+    return (
+      <g key={key} className={clsx('pr-sobytie', pr.ton === 'b' && 'pr-sobytie--b')}>
+        <rect
+          className="pr-sobytie__polosa"
+          x={levo}
+          y={LOWER_Y}
+          width={pravo - levo}
+          height={AXIS_Y - LOWER_Y}
+        />
+        {pr.label === undefined ? null : (
+          <text
+            className={clsx('pr-math pr-sobytie__label', pr.cherta && 'pr-sobytie__label--cherta')}
+            x={(levo + pravo) / 2}
+            y={LOWER_Y - 10}
+            textAnchor="middle"
+          >
+            <tspan className="pr-var">{pr.label}</tspan>
+          </text>
+        )}
+      </g>
+    );
+  };
+  /* Концы промежутков — по одной точке на каждое значение: у двух
+     соседних лучей общая граница — одна точка. */
+  const kontsy = sobytiya
+    ? [...new Set(promezhutki.flatMap((pr) => [pr.from, pr.to]).filter((v) => v !== undefined))]
+    : [];
 
   /* Кружок границы: пустой при строгой, закрашенный при нестрогой. */
   const kruzhok = (x: number, vid: Boundary, key: string) => (
@@ -265,6 +332,9 @@ export function CoordinateLine({
 
   const risunok = (
     <>
+      {/* События-промежутки: полосы над осью, рисунок теории. */}
+      {sobytiya ? promezhutki.map((pr, i) => sobytie(pr, `s${i}`)) : null}
+
       {/* Верхний уровень: по умолчанию условие x > c, область вправо.
           Его нет, когда левая граница не задана, и нет до ответа. */}
       {verhniy === null || !vidnoPeresechenie ? null : uroven(verhniy, UPPER_Y)}
@@ -285,12 +355,26 @@ export function CoordinateLine({
       {videnOtvet ? (
         <line className="pr-favorable" x1={xc} y1={AXIS_Y} x2={xd} y2={AXIS_Y} />
       ) : null}
+      {/* Промежуток, о котором речь в рисунке событий: пересечение
+          или объединение. */}
+      {vydelit === undefined ? null : (
+        <line
+          className="pr-favorable"
+          x1={px(vydelit.from)}
+          y1={AXIS_Y}
+          x2={px(vydelit.to)}
+          y2={AXIS_Y}
+        />
+      )}
+      {kontsy.map((v) => kruzhok(px(v), 'inclusive', `k${v}`))}
 
       {(
         ticks ??
-        [min, ...(c === undefined ? [] : [c]), ...(d === undefined ? [] : [d]), max].filter(
-          (value, i, all) => all.indexOf(value) === i,
-        )
+        (sobytiya
+          ? []
+          : [min, ...(c === undefined ? [] : [c]), ...(d === undefined ? [] : [d]), max].filter(
+              (value, i, all) => all.indexOf(value) === i,
+            ))
       ).map((tick, i) => delenie(tick, `t${i}`))}
 
       {/* Скоба под осью: итоговый промежуток словами условия. */}
@@ -311,8 +395,8 @@ export function CoordinateLine({
       )}
 
       {/* Кружки границ видны всегда: это часть условия, а не ответа. */}
-      {c === undefined ? null : kruzhok(xc, leftBoundary, 'bc')}
-      {d === undefined ? null : kruzhok(xd, rightBoundary, 'bd')}
+      {c === undefined || sobytiya ? null : kruzhok(xc, leftBoundary, 'bc')}
+      {d === undefined || sobytiya ? null : kruzhok(xd, rightBoundary, 'bd')}
 
       {/* Длина благоприятного промежутка — внутри пересечения. */}
       {showLength && vidnoPeresechenie ? (
@@ -346,7 +430,11 @@ export function CoordinateLine({
     >
       {/* Верхнее поле сдвигает рисунок вниз. Поля нет — нет и
           обёртки: разметка та же, что была до появления теории. */}
-      {verhneePole === 0 ? risunok : <g transform={`translate(0 ${verhneePole})`}>{risunok}</g>}
+      {verhneePole === 0 && sdvigSobytiy === 0 ? (
+        risunok
+      ) : (
+        <g transform={`translate(0 ${verhneePole - sdvigSobytiy})`}>{risunok}</g>
+      )}
     </svg>
   );
 }

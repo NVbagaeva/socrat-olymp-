@@ -166,6 +166,23 @@
   font-size: 19px;
 }
 
+/* Событие-промежуток в теории: полоса цвета оси, второе событие —
+   цвета акцента; где полосы налегают, цвет темнее сам собой. */
+.pr-sobytie__polosa {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.pr-sobytie--b .pr-sobytie__polosa {
+  fill: var(--color-accent);
+}
+.pr-sobytie__label {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+.pr-sobytie__label--cherta {
+  text-decoration: overline;
+}
+
 /* Благоприятный отрезок на оси: оранжевый и заметно толще оси. */
 .pr-favorable {
   stroke: var(--color-accent);

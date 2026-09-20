@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { KakIzobrazhatSobytiya } from './KakIzobrazhatSobytiya';
 import { KlassicheskayaVeroyatnost } from './KlassicheskayaVeroyatnost';
 import { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 import { VidySobytiy } from './VidySobytiy';
@@ -14,6 +15,7 @@ import { VidySobytiy } from './VidySobytiy';
 export const telaRazdelov4: Record<string, ReactNode> = {
   'vidy-sobytiy': <VidySobytiy />,
   klassicheskaya: <KlassicheskayaVeroyatnost />,
+  'kak-izobrazhat': <KakIzobrazhatSobytiya />,
 };
 
 /** Разделы теории задания №5: пока один — координатная прямая. */
@@ -28,4 +30,5 @@ export { VariantyOtveta, type VariantyOtvetaProps, type VariantSostoyanie } from
 export { VidySobytiy } from './VidySobytiy';
 export { KoordinatnayaPryamaya } from './KoordinatnayaPryamaya';
 export { KlassicheskayaVeroyatnost } from './KlassicheskayaVeroyatnost';
+export { KakIzobrazhatSobytiya } from './KakIzobrazhatSobytiya';
 export { KostIcon, KrugiIcon, TreugolnikIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';
