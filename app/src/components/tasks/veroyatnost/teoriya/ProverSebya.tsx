@@ -19,6 +19,7 @@ export interface ProverSebyaProps {
  * и одна кнопка на весь блок.
  *
  * Ученик отмечает варианты в любом порядке и проверяет всё разом.
+ * Кнопка стоит под вопросами: сначала ответы, потом проверка.
  * После проверки кнопки замирают и подсвечиваются: выбранный верный —
  * зелёным, выбранный неверный — красным, а рядом видно верный.
  * Счёта нет намеренно: подсветки довольно, а «4 из 6» превращает
@@ -56,18 +57,7 @@ export function ProverSebya({ voprosy, otvety, lead, knopka }: ProverSebyaProps)
 
   return (
     <div className="vcheck">
-      <div className="vcheck__head">
-        <p className="vcheck__lead">{lead}</p>
-        <Button
-          className="vcheck__go"
-          variant="secondary"
-          size="sm"
-          disabled={provereno || !estVybor}
-          onClick={() => setProvereno(true)}
-        >
-          {knopka}
-        </Button>
-      </div>
+      <p className="vcheck__lead">{lead}</p>
 
       <ol className="vcheck__grid">
         {voprosy.map((vopros, i) => (
@@ -90,6 +80,21 @@ export function ProverSebya({ voprosy, otvety, lead, knopka }: ProverSebyaProps)
           </li>
         ))}
       </ol>
+
+      {/* Кнопка под вопросами, а не над ними: сначала ученик отвечает
+          на все шесть, и только потом проверяет. Сверху она звала
+          нажать раньше, чем было что проверять. */}
+      <div className="vcheck__niz">
+        <Button
+          className="vcheck__go"
+          variant="secondary"
+          size="sm"
+          disabled={provereno || !estVybor}
+          onClick={() => setProvereno(true)}
+        >
+          {knopka}
+        </Button>
+      </div>
     </div>
   );
 }

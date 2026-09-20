@@ -62,30 +62,32 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
 
   return (
     <>
+      {/* Название вкладки — H2 панели: заголовок задания (H1) один на
+          все вкладки и живёт в шапке раздела. Разделы теории — на
+          уровень ниже. */}
+      <h2 className="t-h2 vtab__title">{vkladka}</h2>
+
+      {/* Кнопка содержания — только на узком экране, вместо колонки.
+          Стоит над сеткой, а не первой ячейкой в ней: в сетке её
+          липкость не работала бы — ячейка ростом с саму кнопку, и
+          ездить внутри неё некуда. Здесь же кнопка липнет вдоль всей
+          панели вкладки. */}
+      <div className="topic-open vteor-open">
+        <button
+          type="button"
+          className="topic-open__btn btn btn--secondary btn--sm"
+          onClick={() => setShtorka(true)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 7h16M4 12h16M4 17h10" />
+          </svg>
+          {SODERZHANIE.title}
+        </button>
+        {otkryto === undefined ? null : <span className="topic-open__now">{otkryto.title}</span>}
+      </div>
+
       <div className="topic-body topic-body--theory vteor">
         <div className="vteor__main">
-          {/* Название вкладки — H2 панели: заголовок задания (H1)
-              один на все вкладки и живёт в шапке раздела. Разделы
-              теории — на уровень ниже. */}
-          <h2 className="t-h2 vtab__title">{vkladka}</h2>
-
-          {/* Кнопка содержания — только на узком экране, вместо колонки. */}
-          <div className="topic-open">
-            <button
-              type="button"
-              className="topic-open__btn btn btn--secondary btn--sm"
-              onClick={() => setShtorka(true)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M4 7h16M4 12h16M4 17h10" />
-              </svg>
-              {SODERZHANIE.title}
-            </button>
-            {otkryto === undefined ? null : (
-              <span className="topic-open__now">{otkryto.title}</span>
-            )}
-          </div>
-
           {/* Заголовок с номером рисует оболочка, а не сам раздел:
               номер — это место в содержании, и при переносе раздела
               в соседнее задание он должен пересчитаться сам.

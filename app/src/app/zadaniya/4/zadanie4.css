@@ -722,10 +722,12 @@
   height: auto;
   border-radius: var(--radius-md);
 }
+/* Рукописное начертание читается мельче своего кегля, поэтому
+   подпись набрана на ступень крупнее соседнего текста. */
 .vusloviya__podpis {
   margin-top: var(--space-2);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
 }
 
 /* ── Плашка «Запомни» ───────────────────────────────────────────── */
@@ -823,12 +825,11 @@
   display: grid;
   gap: var(--space-4);
 }
-.vcheck__head {
+/* Кнопка проверки под вопросами и справа: слева от неё пусто, и
+   нажимают её, дойдя до низа блока. */
+.vcheck__niz {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .vcheck__lead {
   margin: 0;
@@ -1512,6 +1513,15 @@
   .vvidy__side,
   .vcheck__grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Карточка во всю ширину экрана, и картинка в ней растягивалась
+     вместе с ней: кости выходили в треть высоты карточки и
+     перебивали определение. Рисунок здесь — пояснение к тексту,
+     а не главное в карточке. */
+  .vvid__figura {
+    justify-self: center;
+    width: 100%;
+    max-width: 220px;
   }
   /* Цепочка «Запомни» встаёт столбиком, стрелки смотрят вниз. */
   .vzapomni__cep {
