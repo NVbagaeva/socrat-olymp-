@@ -856,11 +856,25 @@
 .vteor-vykladka {
   display: grid;
   justify-items: start;
+  /* Просвет между соседними строками выкладки. Сверху и снизу
+     блока отступ даёт сетка карточки решения, здесь его нет. */
+  row-gap: var(--space-2);
   margin: 0;
-  font-size: 1.05em;
+  font-size: var(--fs-body);
 }
 .vteor-vykladka__stroka {
   white-space: nowrap;
+}
+/* Интерлиньяж с запасом: скобки, знак «≤» и дроби выше строчной
+   буквы, и при тесном интерлиньяже строки визуально наезжают. */
+.vteor-vykladka__stroka,
+.vteor-vykladka .katex {
+  line-height: 1.5;
+}
+/* Плашка ответа стоит на ступень дальше остальных строк карточки:
+   12px сетки плюс 4px. */
+.vteor-vykladka + .vteor-reshenie__otvet {
+  margin-top: var(--space-1);
 }
 .vteor-reshenie__otvet {
   margin: 0;
