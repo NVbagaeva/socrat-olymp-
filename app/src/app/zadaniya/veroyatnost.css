@@ -744,14 +744,16 @@
   font-size: var(--fs-body);
   font-weight: 700;
 }
+/* Условие: на узкой карточке картинка сверху, текст под ней во всю
+   ширину — в две колонки текст шёл лентой по три-четыре слова.
+   Колонки включаются, когда карточке хватает ширины (ниже). */
 .vteor-sluchay__uslovie {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
   gap: var(--space-4);
   align-items: start;
 }
 .vteor-sluchay__kartinka {
-  width: 100%;
+  width: 116px;
   height: auto;
 }
 .vteor-sluchay__text {
@@ -1096,31 +1098,36 @@
   }
 }
 
+/* Схема: рисунок во всю ширину плашки, без боковых полей — на
+   телефоне каждый пиксель ширины идёт подписям. Подсказка под ним
+   держит прежний отступ своими полями. */
+.vteor-sluchay__shema {
+  padding-inline: 0;
+  container: vteor-shema / inline-size;
+}
+.vteor-sluchay__shema .vteor-sluchay__podskazka {
+  margin-inline: var(--space-4);
+}
+
 /* Подписи на схеме теории.
 
    Прямую рисует тот же CoordinateLine, что и в тренажёре, и кегль
-   внутри рисунка задан в единицах его системы координат: рисунок
-   растягивается по колонке, и подписи растут и убывают вместе с
-   ним. Главный элемент карточки — формула в решении (кегль
-   --fs-body, KaTeX), и подпись на чертеже не должна быть крупнее
-   её ни на одной ширине. Поэтому кегль подписи выбирается по
-   ширине колонки схемы: чем сильнее рисунок сжат, тем крупнее
-   кегль в его единицах, чтобы на экране подпись оставалась
-   примерно на ступень мельче формулы. Шире собственных 760px
-   рисунок не растёт — иначе на большом мониторе подпись перерастёт
-   формулу при любом кегле. Тренажёра это не касается — правила
-   скоупятся колонкой схемы.
+   внутри рисунка задан в единицах его системы координат (ширина
+   760): рисунок растягивается по плашке, и всё в нём растёт и
+   убывает вместе с ним. Подписи так масштабировать нельзя: на
+   телефоне они становились нечитаемыми, на мониторе — крупнее
+   формулы решения. Поэтому кегль подписи задаётся в единицах
+   рисунка так, чтобы на экране выходил ровно токен:
+   токен × 760 / ширина плашки. Деление длины на длину в CSS
+   считается через tan(atan2()) — это единственный способ. На экране
+   подпись — --fs-caption: на ступень мельче формулы (--fs-body) и
+   выше нижнего предела читаемости при любой ширине. Браузер без
+   tan(atan2()) берёт строку выше — крупный кегль для сжатого
+   рисунка. Тренажёра это не касается — правила скоупятся плашкой.
 
    Гарнитура — та же, что у формулы: переменная курсивом
    математического шрифта KaTeX, цифры, скобки и знаки — прямым
    основным. */
-.vteor-sluchay__shema {
-  container: vteor-shema / inline-size;
-}
-.vteor-sluchay__shema .pr-line {
-  max-width: 760px;
-  justify-self: center;
-}
 .vteor-sluchay__shema .pr-math,
 .vteor-sluchay__shema .pr-tick text {
   font-family: KaTeX_Main, var(--font-math);
@@ -1130,18 +1137,34 @@
   font-family: KaTeX_Math, var(--font-math);
   font-style: italic;
 }
-/* Рисунок сжат сильнее чем вдвое (телефон): кегль в его единицах
-   самый крупный, на экране выходит около 10px. */
 .vteor-sluchay__shema .pr-band-label,
 .vteor-sluchay__shema .pr-brace text,
 .vteor-sluchay__shema .pr-axis-name,
 .vteor-sluchay__shema .pr-tick text {
-  font-size: var(--fs-h2);
+  font-size: var(--fs-h3);
+  font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
 }
 .vteor-sluchay__shema .pr-tick text {
-  /* Кегль крупнее — и подпись деления упирается в ось: опускаем её
-     на ту же величину, на какую выросла. */
+  /* Подпись деления стоит на 26 единиц рисунка под осью; на
+     сжатом рисунке это меньше высоты цифры, и она упирается в
+     ось. Опускаем на ступень сетки — тоже в экранных пикселях. */
   translate: 0 12px;
+  translate: 0 calc(var(--space-2) * tan(atan2(760px, 100cqw)));
+}
+.vteor-sluchay__shema .pr-brace {
+  /* Скоба стоит на 34 единицы под осью и на сжатом рисунке
+     упирается в подписи делений, которые на экране не сжимаются.
+     Опускаем её на столько, чтобы между подписью деления и скобой
+     осталась ступень сетки; на крупном рисунке сдвиг сходит
+     на нет. */
+  translate: 0 max(0px, calc(var(--space-3) * tan(atan2(760px, 100cqw)) - 8px));
+}
+.vteor-sluchay__shema .pr-brace text {
+  /* Подпись скобы стоит на 28 единиц под ней; на сжатом рисунке
+     это меньше высоты буквы. Держим на экране высоту буквы и
+     ступень сетки: --fs-caption + --space-1. */
+  translate: 0
+    max(0px, calc((var(--fs-caption) + var(--space-1)) * tan(atan2(760px, 100cqw)) - 28px));
 }
 .vteor-sluchay__shema .pr-axis-line,
 .vteor-sluchay__shema .pr-tick line {
@@ -1153,32 +1176,15 @@
 .vteor-sluchay__shema .pr-bound {
   r: 10;
 }
-/* Ступени по ширине колонки схемы: масштаб рисунка — её ширина
-   без полей к 760. */
-@container vteor-shema (min-width: 400px) {
-  .vteor-sluchay__shema .pr-band-label,
-  .vteor-sluchay__shema .pr-brace text,
-  .vteor-sluchay__shema .pr-axis-name,
-  .vteor-sluchay__shema .pr-tick text {
-    font-size: var(--fs-h3);
+
+/* Карточке хватает ширины — условие в две колонки: картинка слева,
+   текст справа. */
+@container vteor-razdel (min-width: 560px) {
+  .vteor-sluchay__uslovie {
+    grid-template-columns: 116px minmax(0, 1fr);
   }
-}
-@container vteor-shema (min-width: 540px) {
-  .vteor-sluchay__shema .pr-band-label,
-  .vteor-sluchay__shema .pr-brace text,
-  .vteor-sluchay__shema .pr-axis-name,
-  .vteor-sluchay__shema .pr-tick text {
-    font-size: var(--fs-lg);
-  }
-}
-/* От 792px рисунок стоит в натуральную величину, и кегль на экране
-   равен токену: на ступень мельче формулы. */
-@container vteor-shema (min-width: 792px) {
-  .vteor-sluchay__shema .pr-band-label,
-  .vteor-sluchay__shema .pr-brace text,
-  .vteor-sluchay__shema .pr-axis-name,
-  .vteor-sluchay__shema .pr-tick text {
-    font-size: var(--fs-caption);
+  .vteor-sluchay__kartinka {
+    width: 100%;
   }
 }
 
