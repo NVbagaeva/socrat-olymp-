@@ -4,10 +4,13 @@ import { CoordinateLine } from '@/components/probability';
 import { PRYAMAYA } from '@/content/veroyatnost-teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
+import { Vykladka } from './Vykladka';
 
 /**
- * Раздел теории «Координатная прямая» задания №4 — по утверждённому
- * макету. Третий в содержании вкладки.
+ * Раздел теории «Координатная прямая» задания №5 — по утверждённому
+ * макету. Переехал из теории №4: здесь разбираются два
+ * события-промежутка и их вложенность, а это метод 3 задания №5.
+ * Случайная точка на отрезке осталась в №4 — там другой приём.
  *
  * Разбор идёт двумя случаями: когда один промежуток лежит внутри
  * другого и вычесть можно, и когда они пересекаются и напрямую
@@ -33,7 +36,7 @@ const OS = 'X';
  * нельзя», — порядковый номер им ничего не добавлял.
  */
 function Metka() {
-  return <span className="z4-sluchay__metka" aria-hidden="true" />;
+  return <span className="vteor-sluchay__metka" aria-hidden="true" />;
 }
 
 /** Условие случая: картинка, данные и вопрос. */
@@ -47,48 +50,42 @@ function Uslovie({
   vopros: string;
 }) {
   return (
-    <div className="z4-sluchay__uslovie">
+    <div className="vteor-sluchay__uslovie">
       <Image
-        className="z4-sluchay__kartinka"
+        className="vteor-sluchay__kartinka"
         src={kartinka.src}
         alt={kartinka.alt}
         width={kartinka.width}
         height={kartinka.height}
       />
-      <div className="z4-sluchay__text">
+      <div className="vteor-sluchay__text">
         <p>{uslovie}</p>
-        <p className="z4-sluchay__vopros">{vopros}</p>
+        <p className="vteor-sluchay__vopros">{vopros}</p>
       </div>
     </div>
   );
 }
 
 export function KoordinatnayaPryamaya() {
-  const { nomer, title, lead, ideya, pervaya, vtoraya, vyvod, algoritm, syuzhety } = PRYAMAYA;
+  const { lead, ideya, pervaya, vtoraya, vyvod, algoritm, syuzhety } = PRYAMAYA;
 
   return (
     <>
-      <h2 className="vteor-razdel__title">
-        <span className="vteor-razdel__no" aria-hidden="true">
-          {nomer}
-        </span>
-        {title}
-      </h2>
       <p className="vteor-blok__lead">{lead}</p>
 
       {/* ── Главная идея ─────────────────────────────────────────── */}
 
-      <section className="z4-ideya">
-        <span className="z4-ideya__znak" aria-hidden="true">
+      <section className="vteor-ideya">
+        <span className="vteor-ideya__znak" aria-hidden="true">
           <HintIcon />
         </span>
-        <div className="z4-ideya__text">
-          <h3 className="z4-ideya__title">{ideya.title}</h3>
+        <div className="vteor-ideya__text">
+          <h4 className="vteor-ideya__title">{ideya.title}</h4>
           <p>{ideya.text}</p>
         </div>
         {/* Отрезок без чисел: показывает саму мысль, а не задачу. */}
         <CoordinateLine
-          className="z4-ideya__shema"
+          className="vteor-ideya__shema"
           min={0}
           max={10}
           c={3}
@@ -101,20 +98,20 @@ export function KoordinatnayaPryamaya() {
           ]}
           alt="Отрезок на координатной прямой: от нуля до x выделен нужный кусок"
         />
-        <p className="z4-ideya__plashka">{ideya.plashka}</p>
+        <p className="vteor-ideya__plashka">{ideya.plashka}</p>
       </section>
 
       {/* ── Случай 1: один промежуток внутри другого ─────────────── */}
 
-      <article className="z4-sluchay">
-        <header className="z4-sluchay__head">
+      <article className="vteor-sluchay">
+        <header className="vteor-sluchay__head">
           <Metka />
-          <h3 className="z4-sluchay__title">{pervaya.zagolovok}</h3>
+          <h4 className="vteor-sluchay__title">{pervaya.zagolovok}</h4>
         </header>
 
         <Uslovie kartinka={pervaya.kartinka} uslovie={pervaya.uslovie} vopros={pervaya.vopros} />
 
-        <div className="z4-sluchay__shema">
+        <div className="vteor-sluchay__shema vteor-shema">
           {/* Оба условия со знаком «больше»: области смотрят вправо,
               и одна целиком лежит в другой — это и видно на рисунке. */}
           <CoordinateLine
@@ -129,39 +126,35 @@ export function KoordinatnayaPryamaya() {
             brace={{ from: 1, to: 2, label: `1 < ${OS} ≤ 2` }}
             alt="Координатная прямая: область X больше единицы целиком содержит область X больше двух"
           />
-          <p className="z4-sluchay__podskazka">
-            <span className="z4-sluchay__znak" aria-hidden="true">
+          <p className="vteor-sluchay__podskazka">
+            <span className="vteor-sluchay__znak" aria-hidden="true">
               <AlertIcon />
             </span>
             {pervaya.podskazka}
           </p>
         </div>
 
-        <div className="z4-reshenie">
-          <h4 className="z4-reshenie__title">{pervaya.reshenie.title}</h4>
-          <p className="z4-reshenie__text">
+        <div className="vteor-reshenie">
+          <h5 className="vteor-reshenie__title">{pervaya.reshenie.title}</h5>
+          <p className="vteor-reshenie__text">
             <Tex text={pervaya.reshenie.text} />
           </p>
-          {pervaya.reshenie.shagi.map((formula) => (
-            <p key={formula} className="z4-reshenie__formula">
-              <Tex text={`$${formula}$`} />
-            </p>
-          ))}
-          <p className="z4-reshenie__otvet">{pervaya.reshenie.otvet}</p>
+          <Vykladka stroki={pervaya.reshenie.stroki} />
+          <p className="vteor-reshenie__otvet">{pervaya.reshenie.otvet}</p>
         </div>
       </article>
 
       {/* ── Случай 2: промежутки пересекаются ────────────────────── */}
 
-      <article className="z4-sluchay">
-        <header className="z4-sluchay__head">
+      <article className="vteor-sluchay">
+        <header className="vteor-sluchay__head">
           <Metka />
-          <h3 className="z4-sluchay__title">{vtoraya.zagolovok}</h3>
+          <h4 className="vteor-sluchay__title">{vtoraya.zagolovok}</h4>
         </header>
 
         <Uslovie kartinka={vtoraya.kartinka} uslovie={vtoraya.uslovie} vopros={vtoraya.vopros} />
 
-        <div className="z4-sluchay__shema">
+        <div className="vteor-sluchay__shema vteor-shema">
           {/* Условия разных знаков: области идут навстречу и
               накладываются, но ни одна не лежит в другой. */}
           <CoordinateLine
@@ -178,13 +171,13 @@ export function KoordinatnayaPryamaya() {
           />
         </div>
 
-        <div className="z4-reshenie z4-reshenie--pochemu">
-          <h4 className="z4-reshenie__title">{vtoraya.pochemu.title}</h4>
-          <p className="z4-reshenie__text">
+        <div className="vteor-reshenie">
+          <h5 className="vteor-reshenie__title">{vtoraya.pochemu.title}</h5>
+          <p className="vteor-reshenie__text">
             <Tex text={vtoraya.pochemu.text} />
           </p>
-          <p className="z4-reshenie__preduprezhdenie">
-            <span className="z4-sluchay__znak" aria-hidden="true">
+          <p className="vteor-reshenie__preduprezhdenie">
+            <span className="vteor-sluchay__znak" aria-hidden="true">
               <AlertIcon />
             </span>
             {vtoraya.pochemu.preduprezhdenie}
@@ -193,33 +186,29 @@ export function KoordinatnayaPryamaya() {
 
         {/* Разбор через противоположное событие — во всю ширину
             карточки: шаги идут подряд и делят её на три. */}
-        <section className="z4-protivopolozhnoe">
-          <h4 className="z4-protivopolozhnoe__title">{vtoraya.protivopolozhnoe.title}</h4>
-          <ol className="z4-protivopolozhnoe__shagi">
+        <section className="vteor-protivopolozhnoe">
+          <h5 className="vteor-protivopolozhnoe__title">{vtoraya.protivopolozhnoe.title}</h5>
+          <ol className="vteor-protivopolozhnoe__shagi">
             {vtoraya.protivopolozhnoe.shagi.map((shag, i) => (
-              <li key={shag.text} className="z4-shag">
-                <span className="z4-shag__nomer" aria-hidden="true">
+              <li key={shag.text} className="vteor-shag">
+                <span className="vteor-shag__nomer" aria-hidden="true">
                   {i + 1}
                 </span>
-                <div className="z4-shag__telo">
-                  <p className="z4-shag__text">
+                <div className="vteor-shag__telo">
+                  <p className="vteor-shag__text">
                     <Tex text={shag.text} />
                   </p>
-                  {shag.formuly.map((formula) => (
-                    <p key={formula} className="z4-reshenie__formula">
-                      <Tex text={`$${formula}$`} />
-                    </p>
-                  ))}
+                  <Vykladka stroki={shag.stroki} />
                 </div>
               </li>
             ))}
-            <li className="z4-shag z4-shag--otvet">
-              <span className="z4-shag__nomer" aria-hidden="true">
+            <li className="vteor-shag">
+              <span className="vteor-shag__nomer" aria-hidden="true">
                 {vtoraya.protivopolozhnoe.shagi.length + 1}
               </span>
-              <div className="z4-shag__telo">
-                <p className="z4-shag__text">{vtoraya.protivopolozhnoe.otvet.podpis}</p>
-                <p className="z4-shag__znachenie">{vtoraya.protivopolozhnoe.otvet.znachenie}</p>
+              <div className="vteor-shag__telo">
+                <p className="vteor-shag__text">{vtoraya.protivopolozhnoe.otvet.podpis}</p>
+                <p className="vteor-shag__znachenie">{vtoraya.protivopolozhnoe.otvet.znachenie}</p>
               </div>
             </li>
           </ol>
@@ -228,28 +217,28 @@ export function KoordinatnayaPryamaya() {
 
       {/* ── Три карточки итога ───────────────────────────────────── */}
 
-      <div className="z4-itogi">
-        <section className="z4-itog">
-          <h3 className="z4-itog__title">
-            <span className="z4-itog__znak" aria-hidden="true">
+      <div className="vteor-itogi">
+        <section className="vteor-itog">
+          <h4 className="vteor-itog__title">
+            <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="notes" />
             </span>
             {vyvod.title}
-          </h3>
+          </h4>
           <p>{vyvod.text}</p>
         </section>
 
-        <section className="z4-itog">
-          <h3 className="z4-itog__title">
-            <span className="z4-itog__znak" aria-hidden="true">
+        <section className="vteor-itog">
+          <h4 className="vteor-itog__title">
+            <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="assignments" />
             </span>
             {algoritm.title}
-          </h3>
-          <ol className="z4-itog__shagi">
+          </h4>
+          <ol className="vteor-itog__shagi">
             {algoritm.shagi.map((shag, i) => (
               <li key={shag}>
-                <span className="z4-shag__nomer" aria-hidden="true">
+                <span className="vteor-shag__nomer" aria-hidden="true">
                   {i + 1}
                 </span>
                 <span>{shag}</span>
@@ -258,14 +247,14 @@ export function KoordinatnayaPryamaya() {
           </ol>
         </section>
 
-        <section className="z4-itog z4-itog--syuzhety">
-          <h3 className="z4-itog__title">
-            <span className="z4-itog__znak" aria-hidden="true">
+        <section className="vteor-itog vteor-itog--syuzhety">
+          <h4 className="vteor-itog__title">
+            <span className="vteor-itog__znak" aria-hidden="true">
               <HintIcon />
             </span>
             {syuzhety.title}
-          </h3>
-          <ul className="z4-itog__punkty">
+          </h4>
+          <ul className="vteor-itog__punkty">
             {syuzhety.punkty.map((punkt) => (
               <li key={punkt}>{punkt}</li>
             ))}

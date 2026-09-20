@@ -46,7 +46,7 @@ import {
   type Step,
   type Variant,
 } from './types';
-import { typeset } from '../tex';
+import { nabratVykladku } from '../tex';
 
 /**
  * Открытая часть модели задачи: метод, форма меры и параметры
@@ -208,40 +208,11 @@ export function vydelitOtvet(formula: string): string {
 }
 
 /**
- * Формула кусками, по которым её можно переносить на новую строку:
- * перед каждым знаком отношения верхнего уровня и после `,\quad`.
- * KaTeX внутри одной формулы строку не переносит, а в узкой колонке
- * карточки длинная цепочка равенств не помещается — поэтому каждый
- * кусок набирается отдельно, а между ними обычный пробел.
- */
-export function kuskiFormuly(formula: string): string[] {
-  const kuski: string[] = [];
-  let glubina = 0;
-  let nachalo = 0;
-  for (let i = 0; i < formula.length; i += 1) {
-    const ch = formula[i];
-    if (ch === '{' || ch === '(') {
-      glubina += 1;
-    } else if (ch === '}' || ch === ')') {
-      glubina -= 1;
-    } else if (glubina === 0 && i > nachalo) {
-      if (ch === '=' || formula.startsWith('\\approx', i)) {
-        kuski.push(formula.slice(nachalo, i).trim());
-        nachalo = i;
-      } else if (formula.startsWith(',\\quad', i)) {
-        kuski.push(formula.slice(nachalo, i + 1).trim());
-        nachalo = i + 6;
-      }
-    }
-  }
-  kuski.push(formula.slice(nachalo).trim());
-  return kuski.filter((k) => k !== '');
-}
-
-/**
  * Шаг банка → шаг для показа: текст и, если есть, формула в трёх
  * видах — TeX для печатного листа, вёрстка KaTeX для карточки (тем же
- * набором, что и формулы в условиях: lib/tex.ts) и слова для alt.
+ * набором, что и формулы в условиях: lib/tex.ts) выкладкой — атомами
+ * со знаками между ними, чтобы карточка могла разорвать длинную
+ * цепочку на строки по правилам тетради, — и слова для alt.
  * В последней формуле разбора ответ выделяется жирным.
  *
  * Набор строгий: ошибка TeX роняет сборку, а не оставляет формулу
@@ -253,10 +224,12 @@ export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
     return { text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
-  const html = kuskiFormuly(tex)
-    .map((kusok) => typeset(`$${kusok}$`, true))
-    .join(' ');
-  return { text: shag.text, tex, html, plain: texPlain(tex) };
+  return {
+    text: shag.text,
+    tex,
+    vykladka: nabratVykladku(tex, true),
+    plain: texPlain(tex),
+  };
 }
 
 /** Шаги банка → шаги для показа; ответ — жирным в последней формуле. */
@@ -358,7 +331,7 @@ export function bank5Pool(): Pool {
   return { bloki: BLOKI_5, kinds: BANK_5.map((p) => kindOf(p, '5')) };
 }
 
-/* ── Подготовительные задачи ─────────────────────────────────────── */
+/* ── Опорные задачи ──────────────────────────────────────────────── */
 
 export interface PrepPoolZadacha {
   id: string;
@@ -407,7 +380,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
 }
 
 /**
- * Подготовительные задачи для браузера: условия, отпечатки, закрытые
+ * Опорные задачи для браузера: условия, отпечатки, закрытые
  * разборы. Ответов и второй проверки здесь уже нет — они остаются
  * на сборке, как и у банка прототипов.
  */
@@ -468,8 +441,9 @@ function uznayVariant(
   uslovie: string,
   metodika: Metodika,
   illustration: { path: string; alt: string } | undefined,
+  klyuch: string,
 ): UznayVariant {
-  const metodSeal = sealMetod(metodika.metod);
+  const metodSeal = sealMetod(klyuch);
   return {
     n,
     uslovie,
@@ -480,10 +454,15 @@ function uznayVariant(
 }
 
 /**
- * Задание №4: прототипы со всеми вариантами условий и задачи
- * конспекта по одной. Задание №5: 12 прототипов со всеми вариантами;
- * его подготовительные задачи методики не имеют и в режим не
- * попадают — узнавать в них пока нечего.
+ * Задачи режима «Узнай метод»: прототипы банка со всеми вариантами
+ * условий и опорные задачи конспекта по одной. Угадывают метод
+ * автора, поэтому отпечатком закрыт блок банка — он же навык
+ * тренажёра (components/…/metody.ts).
+ *
+ * Опорная задача попадает в режим, только когда у неё есть и
+ * методика (признаки в условии), и метод автора. У №4 есть и то,
+ * и другое; у №5 задачам конспекта методы пока не назначены, и в
+ * режим они не идут — верного ответа среди кнопок для них нет.
  */
 export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
   const bank = zadanie === 4 ? BANK_4 : BANK_5;
@@ -503,6 +482,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
             prototype.uslovie(variant.params),
             metodika,
             illyustratsiyaVarianta(prototype.id, variant.n),
+            prototype.blok,
           ),
         ),
       },
@@ -511,8 +491,8 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
   const konspekt = podgotovka
     .flatMap((blok) => [...blok.zadachi])
     .flatMap((zadacha): UznayKind[] => {
-      const metodika = zadacha.metodika;
-      if (metodika === undefined) {
+      const { metodika, blok } = zadacha;
+      if (metodika === undefined || blok === undefined) {
         return [];
       }
       return [
@@ -520,7 +500,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
           id: zadacha.id,
           istochnik: 'konspekt',
           variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1)),
+            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1), blok),
           ],
         },
       ];

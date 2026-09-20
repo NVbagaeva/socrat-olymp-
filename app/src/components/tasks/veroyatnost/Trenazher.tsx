@@ -17,10 +17,9 @@ import {
   type Zadanie,
 } from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
-import type { Method } from '@/lib/veroyatnost/model';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import type { RoundKind } from '@/lib/veroyatnost/useRound';
-import { metodKind, metodyZadaniya, seychas, zadachaId } from './metody';
+import { navykKind, navykiZadaniya, seychas, zadachaId } from './metody';
 import { ProgressMetody } from './ProgressMetody';
 import { Sessiya, type SessiyaPlan } from './Sessiya';
 
@@ -28,7 +27,7 @@ export interface TrenazherProps {
   pool: Pool;
   /** Задачи режима «Узнай метод»: только условия и отпечатки методов. */
   uznay: UznayPool;
-  /** Чей тренажёр: у №4 пять методов, у №5 шесть; хранилища разные. */
+  /** Чей тренажёр: у №4 семь разделов, у №5 десять методов; хранилища разные. */
   zadanie: Zadanie;
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
   base: string;
@@ -58,15 +57,19 @@ export interface TrenazherProps {
  * трогает ни задание №12, ни соседнее задание.
  */
 
-/** Свои хранилища: ключ с номером задания и версией формата. */
+/**
+ * Свои хранилища: ключ с номером задания и версией формата. Версия
+ * v2 у обоих заданий: прогресс считается по методам автора, а в v1
+ * лежали ключи методов рисунка, и складывать их некуда.
+ */
 const STORES: Record<Zadanie, ProgressStore> = {
-  4: createProgressStore('budetege:veroyatnost-4:v1'),
-  5: createProgressStore('budetege:veroyatnost-5:v1'),
+  4: createProgressStore('budetege:veroyatnost-4:v2'),
+  5: createProgressStore('budetege:veroyatnost-5:v2'),
 };
 
 const UZNAY_STORES: Record<Zadanie, ProgressStore> = {
-  4: createProgressStore('budetege:veroyatnost-4-uznay:v1'),
-  5: createProgressStore('budetege:veroyatnost-5-uznay:v1'),
+  4: createProgressStore('budetege:veroyatnost-4-uznay:v2'),
+  5: createProgressStore('budetege:veroyatnost-5-uznay:v2'),
 };
 
 function vsegoVariantov(kinds: readonly { variants: readonly unknown[] }[]): number {
@@ -86,7 +89,7 @@ export function Trenazher({
   const uznayStore = UZNAY_STORES[zadanie];
   const progress = store.useProgress();
   const slova = trenazherSlova(zadanie);
-  const metody = metodyZadaniya(zadanie);
+  const metody = navykiZadaniya(zadanie);
   const [plan, setPlan] = useState<SessiyaPlan | null>(null);
 
   /* Ошибки — только те, что есть в банке: прототип могли переименовать. */
@@ -118,7 +121,7 @@ export function Trenazher({
     }
   });
 
-  function istochnik(rezhim: Rezhim, metod: Method): RoundKind[] {
+  function istochnik(rezhim: Rezhim, metod: string): RoundKind[] {
     switch (rezhim) {
       case 'mistakes':
         return oshibochnye;
@@ -129,13 +132,13 @@ export function Trenazher({
         }));
       default:
         return pool.kinds
-          .filter((kind) => rezhim === 'mixed' || metodKind(kind) === metod)
+          .filter((kind) => rezhim === 'mixed' || navykKind(kind) === metod)
           .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
     }
   }
 
   function start(request: TrainerRequest<Rezhim>) {
-    const metod = request.skill.id as Method;
+    const metod = request.skill.id;
     const source = istochnik(request.mode, metod);
     if (source.length === 0) {
       return;

@@ -127,14 +127,19 @@ const KOMANDY = [
 ];
 const INITSIALY = ['В.', 'Д.', 'Н.', 'К.', 'М.', 'П.', 'С.', 'Ж.'];
 
-/** Один из четырёх вопросов жребия: мальчик, девочка, не такой-то. */
-function zhrebiy(r: Rng): Params {
+/**
+ * Жребий: кому начинать игру. Два вопроса разведены по прототипам,
+ * потому что это разные методы по типологии автора: «мальчик» и
+ * «девочка» — классическая вероятность (задачи 15–16), «не такой-то» —
+ * противоположные события (задачи 17–18).
+ */
+function zhrebiy(r: Rng, otritsanie: boolean): Params {
   const nb = r.int(1, 4);
   const ng = r.int(1, 4);
   const malchiki = r.sample(IMENA_M, nb);
   const devochki = r.sample(IMENA_ZH, ng);
   const imena = r.sample([...malchiki, ...devochki], nb + ng);
-  const vid = r.int(1, 4);
+  const vid = otritsanie ? r.int(3, 4) : r.int(1, 2);
   if (vid === 1) {
     return {
       imena: imena.join(', '),
@@ -179,7 +184,9 @@ const GENERATORY: Record<string, (r: Rng) => Params> = {
       strB,
     };
   },
-  'p4-04': zhrebiy,
+  'p4-04': (r) => zhrebiy(r, false),
+  /* 4б: тот же жребий, но вопрос с «не» — противоположное событие. */
+  'p4-24': (r) => zhrebiy(r, true),
   'p4-05': (r) => {
     const a = r.int(1, 12);
     const d = r.pick([3, 6, 9]);
@@ -207,10 +214,17 @@ const GENERATORY: Record<string, (r: Rng) => Params> = {
     const k3 = r.int(2, 7);
     return { k1, s1, k2, s2, k3, s3, ischem: r.int(1, 3), m: r.int(1, k1 + k2 + k3) };
   },
+  /* 8а: билет по теме. 8б (p4-25) — «не по теме», противоположное
+     событие: разные методы, поэтому и прототипы разные. */
   'p4-08': (r) => {
     const [predmet, tema] = r.pick(BILETY);
     const N = r.pick([15, 20, 25, 30, 40, 45, 48, 50, 60]);
-    return { N, k: r.int(1, N - 1), predmet, tema, ne: r.int(0, 1) };
+    return { N, k: r.int(1, N - 1), predmet, tema, ne: 0 };
+  },
+  'p4-25': (r) => {
+    const [predmet, tema] = r.pick(BILETY);
+    const N = r.pick([15, 20, 25, 30, 40, 45, 48, 50, 60]);
+    return { N, k: r.int(1, N - 1), predmet, tema, ne: 1 };
   },
   'p4-09': (r) => {
     const N = r.int(40, 80);

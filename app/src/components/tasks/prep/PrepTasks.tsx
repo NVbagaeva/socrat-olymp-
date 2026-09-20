@@ -1,3 +1,4 @@
+import { OPORNYE } from '@/content/opornye';
 import type { PrepSkill } from '@/content/prepSkills';
 import { buildPrepTasks } from '@/lib/prep';
 import { PrepShell } from './PrepShell';
@@ -23,7 +24,7 @@ export function PrepTasks({ skill, base }: PrepTasksProps) {
         skillId={skill.id}
         title={skill.title}
         tasks={buildPrepTasks(skill)}
-        listHref={`${base}/podgotovka/`}
+        listHref={`${base}/${OPORNYE.tail}`}
         tip={skill.tip}
       />
     </PrepShell>

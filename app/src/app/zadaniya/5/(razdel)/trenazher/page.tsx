@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', 'Тренажёр'),
+  title: veroyatnostTitle('5', vkladka('5', 'trenazher')),
 };
 
 /**
@@ -21,13 +21,17 @@ export const metadata: Metadata = {
 export default function Trenazher5Tab() {
   const pool = bank5Pool();
   return (
-    <Trenazher
-      pool={pool}
-      uznay={uznayMetodPool(5)}
-      zadanie={5}
-      base={`${tasksPage.href}/5/trenazher/`}
-      family={veroyatnostFamily('5')}
-      skills={navykiMetodov(pool, 5)}
-    />
+    <>
+      {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
+      <h2 className="t-h2 vtab__title">{vkladka('5', 'trenazher')}</h2>
+      <Trenazher
+        pool={pool}
+        uznay={uznayMetodPool(5)}
+        zadanie={5}
+        base={`${tasksPage.href}/5/trenazher/`}
+        family={veroyatnostFamily('5')}
+        skills={navykiMetodov(pool, 5)}
+      />
+    </>
   );
 }

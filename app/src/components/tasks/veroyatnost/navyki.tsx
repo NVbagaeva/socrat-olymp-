@@ -1,23 +1,23 @@
 import type { SkillItem } from '@/components/tasks/configurator';
 import { Vizualizatsiya } from '@/components/tasks/card';
 import { YARLYKI_REZHIMOV, type Rezhim, type Zadanie } from '@/content/veroyatnost';
-import type { Method } from '@/lib/veroyatnost/model';
 import type { Pool } from '@/lib/veroyatnost/pool';
-import { metodKind, metodyZadaniya } from './metody';
+import { navykKind, navykiZadaniya } from './metody';
 
 /**
  * Навыки тренажёра и генератора — методы, под которые в банке есть
- * задачи. Карточка навыка собирается на сервере: название и номер
- * метода из каталога, число задач из банка, миниатюра — рисунок
- * первого варианта первого прототипа этого метода по его модели.
- * У метода «Формула» рисунка нет, и карточка идёт без миниатюры.
+ * задачи: у №4 семь разделов списка Б, у №5 десять методов автора.
+ * Карточка навыка собирается на сервере: название и номер метода из
+ * каталога, число задач из банка, миниатюра — рисунок первого
+ * варианта первого прототипа этого метода по его модели. У задачи
+ * без рисунка карточка идёт без миниатюры.
  *
- * Метод без задач в банке (у №5 — прямой пересчёт и координатная
- * прямая) карточки не получает: тренировать по нему нечего.
+ * Метод без задач в банке карточки не получает: тренировать по нему
+ * нечего.
  */
 export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
-  return metodyZadaniya(zadanie).flatMap((m): SkillItem[] => {
-    const kinds = pool.kinds.filter((kind) => metodKind(kind) === m.id);
+  return navykiZadaniya(zadanie).flatMap((m): SkillItem[] => {
+    const kinds = pool.kinds.filter((kind) => navykKind(kind) === m.id);
     if (kinds.length === 0) {
       return [];
     }
@@ -67,7 +67,7 @@ export function navykiPrototipov(pool: Pool): SkillItem[] {
 export interface Yarlyk {
   id: string;
   title: string;
-  skill: Method | null;
+  skill: string | null;
   mode: Rezhim;
 }
 
@@ -76,13 +76,11 @@ export interface Yarlyk {
  * тренировка и «Узнай метод». Из них собираются адреса страниц.
  */
 export function yarlyki(pool: Pool, zadanie: Zadanie): Yarlyk[] {
-  const poMetodam = navykiMetodov(pool, zadanie).map(
-    (skill): Yarlyk => ({
-      id: skill.id,
-      title: skill.title,
-      skill: skill.id as Method,
-      mode: 'practice',
-    }),
-  );
+  const poMetodam = navykiMetodov(pool, zadanie).map((skill): Yarlyk => ({
+    id: skill.id,
+    title: skill.title,
+    skill: skill.id,
+    mode: 'practice',
+  }));
   return [...poMetodam, ...YARLYKI_REZHIMOV.map((item): Yarlyk => ({ ...item, skill: null }))];
 }

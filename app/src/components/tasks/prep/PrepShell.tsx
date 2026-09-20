@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { OPORNYE } from '@/content/opornye';
 import { prepPage, type PrepSkillId } from '@/content/prepSkills';
 import { prepOverview } from '@/lib/prep';
 import { PrepChips } from './PrepChips';
@@ -15,7 +16,7 @@ export interface PrepShellProps {
 }
 
 /**
- * Постоянная часть вкладки «Подготовительные задачи».
+ * Постоянная часть вкладки «Опорные задачи».
  *
  * Заголовок, счётчик и ряд навыков видны на любом экране вкладки:
  * и в списке, и внутри навыка. Раньше они лежали внутри списка и
@@ -26,7 +27,7 @@ export interface PrepShellProps {
  */
 export function PrepShell({ base, active, children }: PrepShellProps) {
   const overview = prepOverview();
-  const listHref = `${base}/podgotovka/`;
+  const listHref = `${base}/${OPORNYE.tail}`;
 
   return (
     <section className="prep">

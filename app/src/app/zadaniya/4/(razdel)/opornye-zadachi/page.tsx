@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import { PodgotovkaList } from '@/components/tasks/veroyatnost/PodgotovkaList';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
+import { OPORNYE } from '@/content/opornye';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 import { prep4Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', 'Подготовительные задачи'),
+  title: veroyatnostTitle('4', OPORNYE.title),
 };
 
 /**
- * Вкладка «Подготовительные задачи» задания №4: список блоков.
+ * Вкладка «Опорные задачи» задания №4: список блоков.
  *
  * Задачи 1–18 авторского конспекта, разложенные по его же трём
  * заголовкам. Блок открывается своей страницей — как у задания №12.

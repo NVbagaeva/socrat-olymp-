@@ -7,6 +7,8 @@
  * «Материал готовится».
  */
 
+import { OPORNYE } from './opornye';
+import { taskName } from './tasks';
 import type { TutorMaterial } from './sections';
 
 export interface VychisleniyaTab {
@@ -19,13 +21,13 @@ export interface VychisleniyaTab {
 export const VYCHISLENIYA = {
   no: '08',
   slug: '8',
-  title: 'Вычисления и преобразования',
+  title: taskName('8'),
   lead: 'Пять групп прототипов: степени и корни, логарифмы, тригонометрия по четверти, тригонометрические преобразования и буквенные выражения. Числа в каждой задаче свои.',
   badge: 'Базовый уровень',
   tabs: [
     { id: 'o-zadanii', label: 'О задании', tail: '' },
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/' },
-    { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
+    { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
     { id: 'generator', label: 'Генератор', tail: 'generator/' },
   ] as readonly VychisleniyaTab[],
@@ -69,11 +71,31 @@ export interface AboutGroup {
 
 /** Пять групп прототипов задания №8: заголовок и описание в одну строку. */
 export const ABOUT_GROUPS: AboutGroup[] = [
-  { id: 'I', title: 'Степени и корни', lead: 'Свойства степеней, корни разных степеней, раскрытие скобок' },
-  { id: 'II', title: 'Логарифмы', lead: 'Определение, сумма и разность, переход к новому основанию' },
-  { id: 'III', title: 'Тригонометрия: значения по четверти', lead: 'sin, cos, tg по данному значению и четверти' },
-  { id: 'IV', title: 'Тригонометрия: преобразования', lead: 'Табличные значения, формулы двойного угла и приведения' },
-  { id: 'V', title: 'Буквенные выражения', lead: 'Формулы сокращённого умножения, свойства степеней и логарифмов с буквами' },
+  {
+    id: 'I',
+    title: 'Степени и корни',
+    lead: 'Свойства степеней, корни разных степеней, раскрытие скобок',
+  },
+  {
+    id: 'II',
+    title: 'Логарифмы',
+    lead: 'Определение, сумма и разность, переход к новому основанию',
+  },
+  {
+    id: 'III',
+    title: 'Тригонометрия: значения по четверти',
+    lead: 'sin, cos, tg по данному значению и четверти',
+  },
+  {
+    id: 'IV',
+    title: 'Тригонометрия: преобразования',
+    lead: 'Табличные значения, формулы двойного угла и приведения',
+  },
+  {
+    id: 'V',
+    title: 'Буквенные выражения',
+    lead: 'Формулы сокращённого умножения, свойства степеней и логарифмов с буквами',
+  },
 ];
 
 /** Формула на карточке навыка, в записи TeX: по одной на навык. */
@@ -96,9 +118,9 @@ export function vychisleniyaTitle(tab: string): string {
   return `${tab} · ${VYCHISLENIYA.title} — Будет на ЕГЭ`;
 }
 
-/** Подписи вкладки подготовки. */
+/** Подписи вкладки опорных задач. */
 export const prep8Page = {
-  title: 'Подготовительные задачи',
+  title: OPORNYE.title,
   lead: 'Одно свойство — одно действие',
   allLabel: 'Все блоки',
   again: 'Ещё вариант',

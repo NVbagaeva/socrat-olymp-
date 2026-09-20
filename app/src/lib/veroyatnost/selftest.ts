@@ -229,7 +229,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
   };
 }
 
-/* ── Подготовительные задачи ─────────────────────────────────────── */
+/* ── Опорные задачи ──────────────────────────────────────────────── */
 
 export interface PrepReport {
   bloki: number;
@@ -533,4 +533,133 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
   }
 
   return { poMetodam, bezMetodiki, risunokVret, problems };
+}
+
+/* ── Раскладка банка по методам ──────────────────────────────────── */
+
+/** Раздел типологии: диапазоны номеров задачника, отнесённые к нему. */
+export interface RazdelDiapazonov {
+  id: string;
+  nazvanie: string;
+  zadachnik: readonly (readonly [number, number])[];
+}
+
+export interface RaskladkaRazdel {
+  id: string;
+  nazvanie: string;
+  /** Сколько номеров задачника отведено разделу по диапазонам. */
+  nomerov: number;
+  /** Сколько задач задачника лежит в прототипах этого блока. */
+  zadach: number;
+}
+
+export interface RaskladkaReport {
+  vsego: number;
+  razdely: RaskladkaRazdel[];
+  /** Прототипы вне задачника: составлены по схеме автора. */
+  vneZadachnika: string[];
+  problems: string[];
+}
+
+/**
+ * Раскладка банка по методам: каждая задача задачника лежит в своём
+ * разделе, и ни одна не потеряна.
+ *
+ * Проверяется четыре вещи:
+ *  1. диапазоны разделов не пересекаются и покрывают 1…N без дыр;
+ *  2. блок каждого прототипа назван в типологии;
+ *  3. номер каждой задачи задачника попадает в диапазоны своего блока —
+ *     иначе прототип собран из задач двух разных методов;
+ *  4. каждый номер от 1 до N встречается ровно один раз.
+ *
+ * Прототип с нулевым диапазоном (`zadachnik: [0, 0]`) в задачнике не
+ * значится — он составлен по схеме автора и в счёт номеров не идёт.
+ */
+export function checkRaskladku(
+  bank: readonly Prototype[],
+  razdely: readonly RazdelDiapazonov[],
+  vsego: number,
+): RaskladkaReport {
+  const problems: string[] = [];
+
+  /* 1. Диапазоны: без пересечений и без дыр. */
+  const hozyain = new Map<number, string>();
+  for (const razdel of razdely) {
+    for (const [ot, do_] of razdel.zadachnik) {
+      for (let n = ot; n <= do_; n += 1) {
+        const bylo = hozyain.get(n);
+        if (bylo !== undefined) {
+          problems.push(`задача ${n} названа и в разделе «${bylo}», и в «${razdel.nazvanie}»`);
+        }
+        hozyain.set(n, razdel.nazvanie);
+      }
+    }
+  }
+  for (let n = 1; n <= vsego; n += 1) {
+    if (!hozyain.has(n)) {
+      problems.push(`задача ${n} не названа ни в одном разделе`);
+    }
+  }
+  for (const n of hozyain.keys()) {
+    if (n < 1 || n > vsego) {
+      problems.push(`в диапазонах есть задача ${n}, а всего их ${vsego}`);
+    }
+  }
+
+  /* 2–4. Прототипы и их варианты. */
+  const poRazdelam = new Map(razdely.map((r) => [r.id, 0]));
+  const vneZadachnika: string[] = [];
+  const vstrecheno = new Map<number, string>();
+  for (const prototype of bank) {
+    const razdel = razdely.find((r) => r.id === prototype.blok);
+    if (razdel === undefined) {
+      problems.push(`у прототипа ${prototype.id} блок «${prototype.blok}» не назван в типологии`);
+      continue;
+    }
+    if (prototype.zadachnik[0] === 0) {
+      vneZadachnika.push(prototype.id);
+      continue;
+    }
+    for (const variant of prototype.varianty) {
+      if (variant.source !== 'задачник') {
+        continue;
+      }
+      const nomer = Number(variant.ref.split('№')[1]);
+      if (!Number.isInteger(nomer)) {
+        problems.push(
+          `у варианта ${prototype.id}-${variant.n} не читается номер: «${variant.ref}»`,
+        );
+        continue;
+      }
+      const bylo = vstrecheno.get(nomer);
+      if (bylo !== undefined) {
+        problems.push(`задача ${nomer} есть и в ${bylo}, и в ${prototype.id}`);
+      }
+      vstrecheno.set(nomer, prototype.id);
+      poRazdelam.set(razdel.id, (poRazdelam.get(razdel.id) ?? 0) + 1);
+      if (!razdel.zadachnik.some(([ot, do_]) => nomer >= ot && nomer <= do_)) {
+        problems.push(
+          `задача ${nomer} лежит в прототипе ${prototype.id} раздела «${razdel.nazvanie}», ` +
+            `а по типологии она в «${hozyain.get(nomer) ?? 'ниоткуда'}»`,
+        );
+      }
+    }
+  }
+  for (let n = 1; n <= vsego; n += 1) {
+    if (!vstrecheno.has(n)) {
+      problems.push(`задачи ${n} нет ни в одном прототипе банка`);
+    }
+  }
+
+  return {
+    vsego,
+    razdely: razdely.map((r) => ({
+      id: r.id,
+      nazvanie: r.nazvanie,
+      nomerov: r.zadachnik.reduce((sum, [ot, do_]) => sum + (do_ - ot + 1), 0),
+      zadach: poRazdelam.get(r.id) ?? 0,
+    })),
+    vneZadachnika,
+    problems,
+  };
 }

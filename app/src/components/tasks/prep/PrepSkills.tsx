@@ -1,3 +1,4 @@
+import { OPORNYE } from '@/content/opornye';
 import { Chart } from '@/components/graph/Chart';
 import { katex } from '@/lib/graph/katex';
 import { prepOverview } from '@/lib/prep';
@@ -26,7 +27,7 @@ export function PrepSkills({ base }: PrepSkillsProps) {
     title: view.skill.title,
     lead: view.skill.lead,
     total: view.total,
-    href: `${base}/podgotovka/${view.skill.id}/`,
+    href: `${base}/${OPORNYE.tail}${view.skill.id}/`,
     chart: <Chart className="prep-card__svg" scene={prepSkillScene(view.skill.id)} />,
     formula:
       view.skill.formula === undefined ? null : (

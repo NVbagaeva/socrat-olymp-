@@ -75,11 +75,12 @@ export const METODY: readonly MetodOpisanie[] = [
   { id: 'formula', nomer: 6, nazvanie: 'Формула', formula: 'P(A + B) = P(A) + P(B)' },
 ];
 
-/** Методы задания №4: пять из референса, без «Формулы». */
+/**
+ * Методы задания №4: пять из референса, без «Формулы». У задания №5
+ * свой состав методов — десять методов автора (metody5.ts); здесь
+ * для него только рисунки.
+ */
 export const METODY_4: readonly MetodOpisanie[] = METODY.filter((m) => m.id !== 'formula');
-
-/** Методы задания №5: все шесть. */
-export const METODY_5: readonly MetodOpisanie[] = METODY;
 
 export function metodPoId(id: Method): MetodOpisanie {
   const est = METODY.find((m) => m.id === id);

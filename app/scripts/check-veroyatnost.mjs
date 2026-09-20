@@ -80,7 +80,7 @@ for (const file of [
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep, checkLabirint, checkModel } = require0(
+const { checkBank, checkPrep, checkLabirint, checkModel, checkRaskladku } = require0(
   path.join(out, 'veroyatnost', 'selftest.js'),
 );
 const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
@@ -156,6 +156,31 @@ const model = {
   risunokVret: modeli.flatMap(([, m]) => m.risunokVret),
   problems: modeli.flatMap(([, m]) => m.problems),
 };
+
+/* Раскладка банков по методам: каждая задача задачника лежит в своём
+   разделе типологии, ни одна не потеряна и ни одна не названа дважды.
+   У №4 разделов семь (список Б: пять методов плюс два определения),
+   у №5 — десять методов автора. */
+const { OPORNYE_4 } = require0(path.join(out, 'veroyatnost', 'metody4.js'));
+const { METODY_5 } = require0(path.join(out, 'veroyatnost', 'metody5.js'));
+const raskladki = [
+  ['№4', checkRaskladku(BANK_4, OPORNYE_4, 102)],
+  ['№5', checkRaskladku(BANK_5, METODY_5, 58)],
+];
+for (const [nomer, raskladka] of raskladki) {
+  const summa = raskladka.razdely.reduce((sum, r) => sum + r.zadach, 0);
+  console.log(`\nраскладка задания ${nomer}: задач задачника ${summa} из ${raskladka.vsego}`);
+  for (const razdel of raskladka.razdely) {
+    const pometka = razdel.nomerov === razdel.zadach ? '' : `  ← по типологии ${razdel.nomerov}`;
+    console.log(`   ${String(razdel.zadach).padStart(3)}  ${razdel.nazvanie}${pometka}`);
+  }
+  if (raskladka.vneZadachnika.length > 0) {
+    console.log(`  вне задачника (схема автора): ${raskladka.vneZadachnika.join(', ')}`);
+  }
+  console.log(`  нарушений раскладки: ${raskladka.problems.length}`);
+  raskladka.problems.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+}
+const raskladka = { problems: raskladki.flatMap(([, r]) => r.problems) };
 
 const labirint = checkLabirint();
 const {
@@ -267,10 +292,19 @@ if (katexPut === undefined) {
     }).outputText;
     fs.writeFileSync(target, js);
   };
+  /* Папка content переводится целиком, а не списком нужных файлов:
+     список приходилось дописывать каждый раз, когда слова листа
+     начинали импортировать соседний модуль, и проверка падала
+     на ровном месте. Лишние файлы просто лежат рядом — требуются
+     только те, что кто-то импортирует. */
+  const contentDir = path.join(root, 'src', 'content');
+  for (const name of fs.readdirSync(contentDir)) {
+    if (name.endsWith('.ts') || name.endsWith('.js')) {
+      const target = path.join(alias, 'content', name.replace(/\.ts$/, '.js'));
+      perevesti(path.join(contentDir, name), target);
+    }
+  }
   for (const [file, target] of [
-    ['content/sheet12.js', path.join(alias, 'content', 'sheet12.js')],
-    ['content/trainerModes.ts', path.join(alias, 'content', 'trainerModes.js')],
-    ['content/veroyatnost.ts', path.join(alias, 'content', 'veroyatnost.js')],
     ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],
     ['lib/sheet/typography.js', path.join(out, 'sheet', 'typography.js')],
     ['lib/sheet/answers.js', path.join(out, 'sheet', 'answers.js')],
@@ -340,6 +374,12 @@ if (labirint.length > 0) {
 
 if (model.bezMetodiki.length > 0 || model.risunokVret.length > 0 || model.problems.length > 0) {
   console.error('\nМодель задания №4 не сходится.');
+  process.exit(1);
+}
+
+if (raskladka.problems.length > 0) {
+  console.error(`\nРаскладка банков по методам не сходится: ${raskladka.problems.length}.`);
+  raskladka.problems.forEach((item) => console.error(`  ${item}`));
   process.exit(1);
 }
 

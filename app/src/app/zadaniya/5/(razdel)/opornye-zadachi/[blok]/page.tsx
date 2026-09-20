@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PodgotovkaBlok } from '@/components/tasks/veroyatnost/PodgotovkaBlok';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
+import { OPORNYE } from '@/content/opornye';
 import { veroyatnostTitle } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { blok } = await params;
   const found = prep5Pool().find((item) => item.id === blok);
   return {
-    title: veroyatnostTitle('5', found === undefined ? 'Подготовительные задачи' : found.nazvanie),
+    title: veroyatnostTitle('5', found === undefined ? OPORNYE.title : found.nazvanie),
   };
 }
 

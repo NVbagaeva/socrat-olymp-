@@ -5,6 +5,7 @@
  * закрытого разбора и разбор строки, которую открыл `openText`.
  */
 
+import type { AtomVykladki } from '../tex';
 import type { Podsvetka } from './model';
 import { openText } from './secret';
 
@@ -13,8 +14,12 @@ export interface RazborShag {
   text: string;
   /** Формула шага в TeX — из неё набираются печатные листы. */
   tex?: string;
-  /** Та же формула, набранная KaTeX на сборке — готовый HTML. */
-  html?: string;
+  /**
+   * Та же формула выкладкой: утверждения, каждое атомами со знаками
+   * между ними, набранными KaTeX на сборке. Строки из атомов
+   * собирает карточка по ширине колонки (VykladkaKlient).
+   */
+  vykladka?: AtomVykladki[][];
   /** Та же формула словами: для alt и для мест без KaTeX. */
   plain?: string;
 }

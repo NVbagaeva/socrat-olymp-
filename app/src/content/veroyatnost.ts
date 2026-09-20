@@ -10,8 +10,10 @@
  * теории вероятностей» и «Вероятности событий».
  */
 
+import { OPORNYE } from './opornye';
 import type { TutorMaterial } from './sections';
 import { counted } from '@/lib/plural';
+import { taskName } from './tasks';
 import { trainerPage } from './trainerModes';
 
 /** Вкладка раздела: хвост адреса и есть её идентификатор. */
@@ -40,8 +42,8 @@ export interface VeroyatnostSection {
   /** Пометка уровня рядом с заголовком. */
   badge: string;
   /**
-   * Вкладки раздела по порядку. У заданий они разные: №4 собран по
-   * референсу методов, №5 пока живёт тремя вкладками.
+   * Вкладки раздела по порядку. У заданий они разные: у №4 есть
+   * «О задании», у №5 её пока нет.
    */
   tabs: readonly VeroyatnostTab[];
   /**
@@ -53,7 +55,7 @@ export interface VeroyatnostSection {
 
 /**
  * Вкладки задания №4 — по референсу тренажёра: О задании · Теория ·
- * Ключевые методы решения · Подготовительные задачи · Тренажёр ·
+ * Ключевые методы решения · Опорные задачи · Тренажёр ·
  * Генератор; «Для репетиторов» стоит в той же ленте кнопкой меню.
  * Теория живёт на своём адресе, а сам адрес раздела — это «О задании».
  * «Узнай метод» — режим тренажёра, а не вкладка: как и остальные
@@ -63,38 +65,49 @@ const TABS_4: readonly VeroyatnostTab[] = [
   { id: 'o-zadanii', label: 'О задании', tail: '' },
   { id: 'teoriya', label: 'Теория', tail: 'teoriya/' },
   { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
-  { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
+  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
 
 /**
- * Вкладки задания №5: Теория · Подготовительные задачи · Тренажёр ·
- * Генератор. Вкладок «О задании» и «Ключевые методы решения» нет —
- * их тексты для №5 автор ещё не писал; появятся вместе с текстами.
+ * Вкладки задания №5: Теория · Ключевые методы решения ·
+ * Опорные задачи · Тренажёр · Генератор. Вкладки «О задании»
+ * нет — её текст для №5 автор ещё не писал; появится вместе с текстом.
  */
 const TABS_5: readonly VeroyatnostTab[] = [
   { id: 'teoriya', label: 'Теория', tail: '' },
-  { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
+  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
+  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
   { id: 'generator', label: 'Генератор', tail: 'generator/' },
 ];
+
+/**
+ * Короткое имя темы №4 — для тренажёра и генератора: там страница уже
+ * внутри задания, и «Задание №4» в подписи повторяло бы само себя.
+ * Берётся из списка заданий (content/tasks.ts): тем же словом тема
+ * подписана в левом меню и на карточке банка.
+ */
+export const KOROTKO_4 = taskName('4');
 
 /**
  * Заголовок раздела №4 — один на все вкладки: он живёт в шапке
  * раздела, а не в страницах, и по вкладкам не дублируется.
  */
-export const ZAGOLOVOK_4 = 'Задание №4. Вероятность: простая';
+export const ZAGOLOVOK_4 = `Задание №4. ${KOROTKO_4}`;
 
-/**
- * Короткое имя темы №4 — для тренажёра и генератора: там страница уже
- * внутри задания, и «Задание №4» в подписи повторяло бы само себя.
- */
-export const KOROTKO_4 = 'Вероятность: простая';
+/** Короткое имя и заголовок темы №5 — устроены так же, как у №4. */
+export const KOROTKO_5 = taskName('5');
+export const ZAGOLOVOK_5 = `Задание №5. ${KOROTKO_5}`;
 
-/** Подзаголовок раздела №4 — строка под бейджем уровня. */
+/** Подзаголовок раздела №4: пять методов списка А (lib/veroyatnost/metody4.ts). */
 export const PODZAGOLOVOK_4 =
-  'Одно задание — восемь методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
+  'Одно задание — 5 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
+
+/** Подзаголовок раздела №5: десять методов автора (lib/veroyatnost/metody5.ts). */
+export const PODZAGOLOVOK_5 =
+  'Одно задание — 10 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
@@ -113,7 +126,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
        файлы учителя уезжают архивом со страницы запуска CI. */
     tutors: {
       title: 'Для репетиторов',
-      lead: 'Материалы для занятий по теме «Основные понятия теории вероятностей».',
+      lead: `Материалы для занятий по теме «${KOROTKO_4}».`,
       items: [
         {
           id: 'workbook',
@@ -145,15 +158,16 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
     no: '05',
     slug: '5',
-    title: 'Вероятности событий',
-    lead: 'Двенадцать типов задач — шесть методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.',
+    title: ZAGOLOVOK_5,
+    korotko: KOROTKO_5,
+    lead: PODZAGOLOVOK_5,
     badge: 'Базовый уровень',
     tabs: TABS_5,
     /* Сборник «Задание 5»: scripts/build-pdf-5.mjs, workflow «PDF 5».
        Как и у №4, здесь только файлы для ученика. */
     tutors: {
       title: 'Для репетиторов',
-      lead: 'Материалы для занятий по теме «Вероятности событий».',
+      lead: `Материалы для занятий по теме «${KOROTKO_5}».`,
       items: [
         {
           id: 'workbook',
@@ -176,6 +190,19 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
 
 export function veroyatnostBySlug(slug: string): VeroyatnostSection | undefined {
   return VEROYATNOST.find((section) => section.slug === slug);
+}
+
+/**
+ * Название вкладки по её id — для заголовка вкладки (H2) и заголовка
+ * окна. Берётся из ленты вкладок раздела: второго списка названий
+ * у страниц нет.
+ */
+export function vkladka(slug: string, id: string): string {
+  const tab = veroyatnostBySlug(slug)?.tabs.find((t) => t.id === id);
+  if (tab === undefined) {
+    throw new Error(`Нет вкладки ${id} в разделе вероятности ${slug}`);
+  }
+  return tab.label;
 }
 
 /**
@@ -305,13 +332,13 @@ export function uznaySlova(zadanie: Zadanie) {
 /* ── Слова подготовительных задач ────────────────────────────────── */
 
 /**
- * Вкладка подготовки устроена как у задания №12: лента блоков сверху,
- * страница блока с рядом кружков и одной задачей на экране. Слова
- * общие для №4 и №5 — разница только в числе блоков и задач, а его
- * даёт банк.
+ * Вкладка опорных задач устроена как у задания №12: лента блоков
+ * сверху, страница блока с рядом кружков и одной задачей на экране.
+ * Слова общие для №4 и №5 — разница только в числе блоков и задач,
+ * а его даёт банк.
  */
 export const PODGOTOVKA_SLOVA = {
-  title: 'Подготовительные задачи',
+  title: OPORNYE.title,
   lead: 'Задачи авторского конспекта. Блоки идут в порядке конспекта: это последовательность, а не каталог.',
   allLabel: 'Все блоки',
   /** Строка над рядом кружков. */
@@ -349,15 +376,15 @@ const RESHENIYA = {
 };
 
 export const LIST_4: ListSlova = {
-  title: { chip: 'Задание 4', text: 'Основные понятия теории вероятностей' },
-  runner: 'Задание 4 · Основные понятия теории вероятностей',
+  title: { chip: 'Задание 4', text: KOROTKO_4 },
+  runner: `Задание 4 · ${KOROTKO_4}`,
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
   resheniya: RESHENIYA,
 };
 
 export const LIST_5: ListSlova = {
-  title: { chip: 'Задание 5', text: 'Вероятности событий' },
-  runner: 'Задание 5 · Вероятности событий',
+  title: { chip: 'Задание 5', text: KOROTKO_5 },
+  runner: `Задание 5 · ${KOROTKO_5}`,
   otvety: { title: 'Ответы', note: 'по типам задач, сквозная нумерация' },
   resheniya: RESHENIYA,
 };

@@ -14,6 +14,7 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
+import '@/components/tasks/veroyatnost/vykladka.css';
 import '../zadanie4.css';
 
 /**

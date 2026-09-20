@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
@@ -33,14 +33,18 @@ export default async function Page({ params }: { params: Params }) {
     notFound();
   }
   return (
-    <Trenazher
-      pool={pool}
-      uznay={uznayMetodPool(4)}
-      zadanie={4}
-      base={`${tasksPage.href}/4/trenazher/`}
-      family={veroyatnostFamily('4')}
-      skills={navykiMetodov(pool, 4)}
-      preset={{ skill: found.skill, mode: found.mode }}
-    />
+    <>
+      {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
+      <h2 className="t-h2 vtab__title">{vkladka('4', 'trenazher')}</h2>
+      <Trenazher
+        pool={pool}
+        uznay={uznayMetodPool(4)}
+        zadanie={4}
+        base={`${tasksPage.href}/4/trenazher/`}
+        family={veroyatnostFamily('4')}
+        skills={navykiMetodov(pool, 4)}
+        preset={{ skill: found.skill, mode: found.mode }}
+      />
+    </>
   );
 }

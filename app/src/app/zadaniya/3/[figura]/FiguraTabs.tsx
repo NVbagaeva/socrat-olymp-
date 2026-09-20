@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { Tabs } from '@/components/ui';
+import { OPORNYE } from '@/content/opornye';
 
 export interface FiguraTabsProps {
   /** Адрес раздела без хвоста: /zadaniya/3/konus. */
@@ -12,7 +13,7 @@ export interface FiguraTabsProps {
    теория живёт на самом адресе раздела, остальные — в подпапках. */
 const TABS = [
   { id: 'teoriya', label: 'Теория', tail: '' },
-  { id: 'podgotovka', label: 'Подготовительные задачи', tail: 'podgotovka/' },
+  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
 ];
 

@@ -53,6 +53,14 @@
   /* Полоса прокрутки под лентой съедала бы подчёркивание. */
   scrollbar-width: none;
 }
+/* Страница вбок не едет ни на одной ширине: то, что выступило за
+   правый край на доли пикселя (подложка ленты, знак в узкой колонке
+   шага), обрезается, а не становится горизонтальной прокруткой.
+   clip, а не hidden: контейнера прокрутки не появляется, и липкая
+   лента с липкой кнопкой содержания работают как прежде. */
+.veroyatnost-main {
+  overflow-x: clip;
+}
 .veroyatnost-main .topic-tabs-row,
 .veroyatnost-main > .veroyatnost-tabs {
   position: sticky;
@@ -92,7 +100,7 @@
   color: var(--color-text-tertiary);
 }
 
-/* ── Подготовительные задачи ────────────────────────────────────── */
+/* ── Опорные задачи ─────────────────────────────────────────────── */
 
 /* ── Кружки подготовки и тренажёра ──────────────────────────────── */
 
@@ -153,4 +161,1339 @@
    вверх одинаково — высота начала страницы у них общая. */
 .veroyatnost-main {
   padding-top: var(--space-3);
+}
+
+/* ── Вкладка «Ключевые методы решения» ──────────────────────────── */
+
+/* Заголовок вкладки; сетка карточек методов и модалка метода — одни
+   на задания №4 и №5. Обводка 1px --color-border, радиусы из ряда
+   6/8/12/16, теней нет. */
+.vmetody {
+  display: grid;
+  gap: var(--space-6);
+}
+.vmetody__title {
+  margin: 0;
+  color: var(--color-text-brand);
+}
+
+/* ── Сетка карточек ─────────────────────────────────────────────── */
+
+.vmetody__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 1023px) {
+  .vmetody__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .vmetody__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Карточка — кнопка: номер в кружке, название, подпись, плашка
+   формулы. Растягивается на высоту ряда, плашка прижата к низу. */
+.vmetod {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  align-items: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.vmetod:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.vmetod:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.vmetod__no {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1;
+}
+.vmetod__title {
+  align-self: center;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-h4);
+  overflow-wrap: anywhere;
+}
+.vmetod__sut {
+  grid-column: 2;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vmetod__formula {
+  grid-column: 2;
+  align-self: end;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+}
+@media (max-width: 767px) {
+  .vmetod {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Модалка метода ─────────────────────────────────────────────── */
+
+/* Заголовок — с номером в кружке; справа оставлено место под крестик,
+   иначе на узком экране длинное название уходит под него. */
+.vmetod-modal .modal__t {
+  padding-right: var(--space-10);
+}
+.vmetod-modal__title {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.vmetod-modal__title .vmetod__no {
+  flex: none;
+}
+.vmetod-modal__body {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.vmetod-modal__formula {
+  grid-column: auto;
+  align-self: auto;
+  font-size: 1.125em;
+}
+.vmetod-modal__block {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.vmetod-modal__sub {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.vmetod-modal__soon {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Подвал: счётчик слева, кнопка справа; на узком экране столбиком. */
+.vmetod-modal .modal__f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.vmetod-modal__schet {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* Окно метода шире общего: четыре блока и формула. Тени у него нет —
+   правило раздела; обводка та же, что у карточек. */
+.vmetod-modal {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  /* Окно не выше экрана: с длинным описанием на телефоне кнопка
+     подвала иначе уходила за нижний край. Прокручивается тело,
+     подвал со счётчиком и кнопкой остаётся на виду. */
+  max-height: calc(100dvh - 2 * var(--space-5));
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+.vmetod-modal .modal__b {
+  min-height: 0;
+  overflow-y: auto;
+}
+.vmetod-modal .modal__f {
+  flex: none;
+} /* Страницы заданий №4 и №5 — теория вероятностей.
+
+   Оболочка, карточки и вкладки описаны в общих слоях: здесь только
+   то, чего в них нет. Значения — только токены. */
+
+/* Шапка раздела без чертежа: в общем слое она двухколоночная, правая
+   колонка отведена под чертёж движка. Здесь чертежа нет, и пустая
+   колонка отжимала бы текст к левому краю на половину ширины. */
+.veroyatnost-head {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 0;
+}
+
+/* Порядок шапки по макету раздела: заголовок, под ним бейдж уровня,
+   ниже подзаголовок. В общем слое бейдж стоит справа от заголовка
+   строкой — здесь он под ним, поэтому ряд разворачивается в столбец.
+   Заголовок на ступень мельче платформенного: так набран макет. */
+.veroyatnost-head .section-head__title {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+.veroyatnost-head .section-head__title h1 {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+}
+/* Подзаголовок идёт одной строкой, как на макете: мера в 62 знака
+   рвала бы его надвое уже на 1440. */
+.veroyatnost-head .section-head__lead {
+  max-width: none;
+  margin-bottom: 0;
+}
+
+/* Панель вкладки идёт сразу за лентой: в общем слое отступ больше,
+   он рассчитан на страницу с чертежом в шапке. */
+.veroyatnost-panel {
+  margin-top: var(--space-4);
+}
+
+/* Вкладок три, и одна из них длинная. На узком экране лента едет
+   вбок, а не переносится на вторую строку: перенос ломает
+   подчёркивание активной вкладки. */
+.veroyatnost-tabs {
+  margin-top: var(--space-4);
+  overflow-x: auto;
+  /* Полоса прокрутки под лентой съедала бы подчёркивание. */
+  scrollbar-width: none;
+}
+.veroyatnost-tabs::-webkit-scrollbar {
+  display: none;
+}
+.veroyatnost-tabs a[role='tab'] {
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* ── Тренажёр ───────────────────────────────────────────────────── */
+
+.vtrainer__wait {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Опорные задачи ─────────────────────────────────────────────── */
+
+/* ── Кружки подготовки и тренажёра ──────────────────────────────── */
+
+/* Состояние «разобрано решение»: задачу открыли и разобрали, но своими
+   силами она не закрыта. Это не пропуск, поэтому цвет свой. У заданий
+   №12 и №8 такого состояния нет — правило живёт здесь, а не в общем
+   prep.css. */
+.pdot.is-revealed {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+.pdot.is-current.is-revealed {
+  border-color: var(--color-warning);
+  background: var(--color-warning);
+}
+
+/* Ряд-указатель хода подхода: кружки не нажимаются. Наведение из
+   prep.css красит рамку синим — здесь оно возвращается к цвету
+   состояния, поэтому цвета перечислены заново. */
+.pdot--flat {
+  cursor: default;
+}
+.pdot--flat:hover {
+  border-color: var(--color-border);
+}
+.pdot--flat.is-right:hover {
+  border-color: var(--color-success);
+}
+.pdot--flat.is-wrong:hover {
+  border-color: var(--color-error);
+}
+.pdot--flat.is-revealed:hover,
+.pdot--flat.is-current.is-revealed:hover {
+  border-color: var(--color-warning);
+}
+.pdot--flat.is-current:hover {
+  border-color: var(--color-primary);
+}
+.pdot--flat.is-current.is-right:hover {
+  border-color: var(--color-success);
+}
+
+/* Экран блока — тот же .ptask, что у подготовки задания №12: шапка
+   со счётом, строка «Задача N из M», ряд кружков и одна задача.
+   Здесь только то, чего у №12 нет: карточка задачи вероятности и
+   выход к списку блоков. */
+.vprep__zadacha {
+  scroll-margin-top: var(--space-4);
+}
+.vprep__gotovo {
+  margin: 0;
+}
+
+/* Верх страницы по макету раздела: общий отступ главной области
+   рассчитан на страницы с чертежом в шапке и здесь отодвигает крошки
+   на 28px ниже макета. Правило живёт на своём классе, поэтому
+   задания №12, №3 и №8 его не видят; у №4 и №5 все вкладки съезжают
+   вверх одинаково — высота начала страницы у них общая. */
+.veroyatnost-main {
+  padding-top: var(--space-3);
+}
+
+/* ── Вкладка «Ключевые методы решения» ──────────────────────────── */
+
+/* Заголовок вкладки; сетка карточек методов и модалка метода — одни
+   на задания №4 и №5. Обводка 1px --color-border, радиусы из ряда
+   6/8/12/16, теней нет. */
+.vmetody {
+  display: grid;
+  gap: var(--space-6);
+}
+.vmetody__title {
+  margin: 0;
+  color: var(--color-text-brand);
+}
+
+/* ── Сетка карточек ─────────────────────────────────────────────── */
+
+.vmetody__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 1023px) {
+  .vmetody__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .vmetody__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Карточка — кнопка: номер в кружке, название, подпись, плашка
+   формулы. Растягивается на высоту ряда, плашка прижата к низу. */
+.vmetod {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  align-items: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.vmetod:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.vmetod:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.vmetod__no {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1;
+}
+.vmetod__title {
+  align-self: center;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-h4);
+  overflow-wrap: anywhere;
+}
+.vmetod__sut {
+  grid-column: 2;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vmetod__formula {
+  grid-column: 2;
+  align-self: end;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+}
+@media (max-width: 767px) {
+  .vmetod {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Модалка метода ─────────────────────────────────────────────── */
+
+/* Заголовок — с номером в кружке; справа оставлено место под крестик,
+   иначе на узком экране длинное название уходит под него. */
+.vmetod-modal .modal__t {
+  padding-right: var(--space-10);
+}
+.vmetod-modal__title {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.vmetod-modal__title .vmetod__no {
+  flex: none;
+}
+.vmetod-modal__body {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.vmetod-modal__formula {
+  grid-column: auto;
+  align-self: auto;
+  font-size: 1.125em;
+}
+.vmetod-modal__block {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.vmetod-modal__sub {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.vmetod-modal__soon {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Подвал: счётчик слева, кнопка справа; на узком экране столбиком. */
+.vmetod-modal .modal__f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.vmetod-modal__schet {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* Окно метода шире общего: четыре блока и формула. Тени у него нет —
+   правило раздела; обводка та же, что у карточек. */
+.vmetod-modal {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  /* Окно не выше экрана: с длинным описанием на телефоне кнопка
+     подвала иначе уходила за нижний край. Прокручивается тело,
+     подвал со счётчиком и кнопкой остаётся на виду. */
+  max-height: calc(100dvh - 2 * var(--space-5));
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+.vmetod-modal .modal__b {
+  min-height: 0;
+  overflow-y: auto;
+}
+.vmetod-modal .modal__f {
+  flex: none;
+}
+
+/* ── Раздел теории «Координатная прямая» ────────────────────────── */
+
+/* Заголовок раздела, содержание и раскладка вкладки — общие
+   (vteor-*). Здесь только карточки этого раздела. */
+
+/* Раскладка страницы, правая колонка и список содержания — общие
+   с теорией задания №12 (.topic-body--theory, .topic-side,
+   .contents-*). Здесь только то, чего у №12 нет: разделы вероятности
+   и их карточки. */
+
+/* ── Главная идея ──────────────────────────────────────────────── */
+
+.vteor-ideya {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3) var(--space-4);
+  align-items: start;
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+}
+.vteor-ideya__znak {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary);
+}
+.vteor-ideya__znak svg {
+  width: 100%;
+  height: 100%;
+}
+.vteor-ideya__text {
+  display: grid;
+  gap: var(--space-2);
+}
+.vteor-ideya__text p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vteor-ideya__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+/* Тот же случай, что и у схем в карточках: рисунок сжат, поэтому
+   кегль подписей задан в единицах его системы координат. */
+.vteor-ideya__shema .pr-tick text {
+  font-size: 30px;
+  translate: 0 12px;
+}
+.vteor-ideya__shema .pr-axis-name {
+  font-size: 30px;
+}
+.vteor-ideya__shema .pr-axis-line,
+.vteor-ideya__shema .pr-tick line {
+  stroke-width: 3;
+}
+.vteor-ideya__shema .pr-favorable {
+  stroke-width: 9;
+}
+.vteor-ideya__shema .pr-bound {
+  r: 10;
+}
+.vteor-ideya__shema {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  justify-self: center;
+}
+/* Плашка вывода: тот же мягкий синий, что у карточки метода. */
+.vteor-ideya__plashka {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  line-height: var(--lh-body);
+}
+
+/* ── Случай: условие · схема · решение ─────────────────────────── */
+
+.vteor-sluchay {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.vteor-sluchay__head {
+  display: flex;
+  /* Кружок — к первой строке: на телефоне заголовок в три строки,
+     и посередине он повисает. */
+  align-items: start;
+  gap: var(--space-3);
+}
+/* Метка случая: кружок без цифры. Цифру в кружке на вкладке носит
+   только заголовок раздела, поэтому здесь просто точка — она держит
+   отступ заголовка и не притворяется номером. */
+.vteor-sluchay__metka {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  /* Точка — к середине первой строки заголовка. */
+  margin-top: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+/* Заголовок случая — ниже заголовка раздела: тот у вкладки общий
+   (vteor-razdel__title), и перебивать его нельзя. */
+.vteor-sluchay__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+/* Условие: на узкой карточке картинка сверху, текст под ней во всю
+   ширину — в две колонки текст шёл лентой по три-четыре слова.
+   Колонки включаются, когда карточке хватает ширины (ниже). */
+.vteor-sluchay__uslovie {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+.vteor-sluchay__kartinka {
+  width: 116px;
+  height: auto;
+}
+.vteor-sluchay__text {
+  display: grid;
+  gap: var(--space-3);
+}
+.vteor-sluchay__text p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vteor-sluchay__vopros {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.vteor-sluchay__shema {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vteor-shema .pr-line {
+  width: 100%;
+  height: auto;
+}
+/* Предупреждение под схемой: оранжевая рамка, как у акцента. */
+.vteor-sluchay__podskazka {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vteor-sluchay__znak {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--color-accent);
+}
+.vteor-sluchay__znak svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Решение ───────────────────────────────────────────────────── */
+
+.vteor-reshenie {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+.vteor-reshenie__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.vteor-reshenie__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+/* Выкладка в решении: кегль основного текста, на ступень крупнее
+   подписей карточки. Сама выкладка — components/…/vykladka.css. */
+.vteor-vykladka {
+  font-size: var(--fs-body);
+}
+/* Плашка ответа стоит на ступень дальше остальных строк карточки:
+   12px сетки плюс 4px. */
+.vteor-vykladka + .vteor-reshenie__otvet {
+  margin-top: var(--space-1);
+}
+.vteor-reshenie__otvet {
+  margin-top: var(--space-1);
+}
+.vteor-reshenie__otvet {
+  margin-top: var(--space-1);
+}
+.vteor-reshenie__otvet {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  text-align: center;
+}
+.vteor-reshenie__preduprezhdenie {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── Разбор через противоположное событие ──────────────────────── */
+
+.vteor-protivopolozhnoe {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vteor-protivopolozhnoe__title {
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+}
+.vteor-protivopolozhnoe__shagi {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vteor-shag {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+/* Номер шага внутри карточки: тот же кружок, что у вопросов
+   самопроверки (.vcheck-card__no) — обводка, а не заливка. Шаги
+   алгоритма нумеровать надо, но залитый синий кружок читался как
+   номер раздела. */
+.vteor-shag__nomer {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.vteor-shag__telo {
+  display: grid;
+  gap: var(--space-2);
+}
+.vteor-shag__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vteor-shag__znachenie {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── Три карточки итога ────────────────────────────────────────── */
+
+.vteor-itogi {
+  display: grid;
+  gap: var(--space-4);
+}
+.vteor-itog {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vteor-itog p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vteor-itog__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.vteor-itog__znak {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+.vteor-itog__znak svg {
+  width: 100%;
+  height: 100%;
+}
+.vteor-itog__shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vteor-itog__shagi li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+/* Последняя карточка — о сюжетах ЕГЭ: оранжевая, как акцент. */
+.vteor-itog--syuzhety {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft-surface);
+}
+.vteor-itog--syuzhety .vteor-itog__title {
+  color: var(--color-accent);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.vteor-itog--syuzhety .vteor-itog__znak {
+  color: var(--color-accent);
+}
+.vteor-itog__punkty {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── Широкий экран ─────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  /* Три карточки итога в ряд — как на макете. */
+  .vteor-itogi {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Раскладка раздела считается от ширины самого раздела, а не окна:
+   рядом стоит колонка содержания, и при одной и той же ширине окна
+   место под текст разное. По ширине окна колонки получались по
+   60–90px — туда не помещалась ни одна строка формулы, ни схема,
+   ни условие. */
+.vteor-razdel {
+  container: vteor-razdel / inline-size;
+}
+
+/* Случай всегда идёт одной колонкой: условие, схема, решение друг
+   под другом во всю ширину карточки. Три колонки допустимы только
+   там, где каждая вмещает своё, а решению нужна формула одной
+   строкой — разрывы по «=» лишь запас на узкий экран. Колонке
+   текста отведено не больше 1396px, и три колонки в неё не
+   помещаются ни на одном экране; то же с шагами разбора. */
+
+/* Главная идея: текст слева, схема и вывод справа — когда разделу
+   хватает ширины на четыре колонки. */
+@container vteor-razdel (min-width: 840px) {
+  .vteor-ideya {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 0.7fr);
+    align-items: center;
+  }
+  .vteor-ideya__shema,
+  .vteor-ideya__plashka {
+    grid-column: auto;
+  }
+  .vteor-ideya__shema {
+    max-width: none;
+  }
+}
+
+/* Схема: рисунок во всю ширину плашки, без боковых полей — на
+   телефоне каждый пиксель ширины идёт подписям. Подсказка под ним
+   держит прежний отступ своими полями. */
+.vteor-sluchay__shema {
+  padding-inline: 0;
+}
+.vteor-shema {
+  container: vteor-shema / inline-size;
+}
+.vteor-sluchay__shema .vteor-sluchay__podskazka {
+  margin-inline: var(--space-4);
+}
+
+/* Подписи на схеме теории.
+
+   Прямую рисует тот же CoordinateLine, что и в тренажёре, и кегль
+   внутри рисунка задан в единицах его системы координат (ширина
+   760): рисунок растягивается по плашке, и всё в нём растёт и
+   убывает вместе с ним. Подписи так масштабировать нельзя: на
+   телефоне они становились нечитаемыми, на мониторе — крупнее
+   формулы решения. Поэтому кегль подписи задаётся в единицах
+   рисунка так, чтобы на экране выходил ровно токен:
+   токен × 760 / ширина плашки. Деление длины на длину в CSS
+   считается через tan(atan2()) — это единственный способ. На экране
+   подпись — --fs-caption: на ступень мельче формулы (--fs-body) и
+   выше нижнего предела читаемости при любой ширине. Браузер без
+   tan(atan2()) берёт строку выше — крупный кегль для сжатого
+   рисунка. Тренажёра это не касается — правила скоупятся плашкой.
+
+   Гарнитура — та же, что у формулы: переменная курсивом
+   математического шрифта KaTeX, цифры, скобки и знаки — прямым
+   основным. */
+.vteor-shema .pr-math,
+.vteor-shema .pr-tick text {
+  font-family: KaTeX_Main, var(--font-math);
+  font-style: normal;
+}
+.vteor-shema .pr-math .pr-var {
+  font-family: KaTeX_Math, var(--font-math);
+  font-style: italic;
+}
+.vteor-shema .pr-band-label,
+.vteor-shema .pr-brace text,
+.vteor-shema .pr-axis-name,
+.vteor-shema .pr-tick text,
+.vteor-shema .pr-sobytie__label,
+.vteor-shema .vteor-eyler__imya {
+  font-size: var(--fs-h3);
+  font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+}
+.vteor-shema .pr-tick text {
+  /* Подпись деления стоит на 26 единиц рисунка под осью; на
+     сжатом рисунке это меньше высоты цифры, и она упирается в
+     ось. Опускаем на ступень сетки — тоже в экранных пикселях. */
+  translate: 0 12px;
+  translate: 0 calc(var(--space-2) * tan(atan2(760px, 100cqw)));
+}
+.vteor-shema .pr-brace {
+  /* Скоба стоит на 34 единицы под осью и на сжатом рисунке
+     упирается в подписи делений, которые на экране не сжимаются.
+     Опускаем её на столько, чтобы между подписью деления и скобой
+     осталась ступень сетки; на крупном рисунке сдвиг сходит
+     на нет. */
+  translate: 0 max(0px, calc(var(--space-3) * tan(atan2(760px, 100cqw)) - 8px));
+}
+.vteor-shema .pr-brace text {
+  /* Подпись скобы стоит на 28 единиц под ней; на сжатом рисунке
+     это меньше высоты буквы. Держим на экране высоту буквы и
+     ступень сетки: --fs-caption + --space-1. */
+  translate: 0
+    max(0px, calc((var(--fs-caption) + var(--space-1)) * tan(atan2(760px, 100cqw)) - 28px));
+}
+.vteor-shema .pr-axis-line,
+.vteor-shema .pr-tick line {
+  stroke-width: 3;
+}
+.vteor-shema .pr-favorable {
+  stroke-width: 8;
+}
+.vteor-shema .pr-bound {
+  r: 10;
+}
+
+/* Карточке хватает ширины — условие в две колонки: картинка слева,
+   текст справа. */
+@container vteor-razdel (min-width: 560px) {
+  .vteor-sluchay__uslovie {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+  .vteor-sluchay__kartinka {
+    width: 100%;
+  }
+}
+
+/* ── Раздел «Как изображать события» ─────────────────────────────── */
+
+/* Таблица-сопоставление. На узкой карточке — стопка карточек:
+   событие заголовком, под ним два рисунка с подписями; шапки
+   колонок нет, её роль играют подписи. От ширины раздела в 720px —
+   три колонки с шапкой. Горизонтальной прокрутки нет ни там, ни
+   там: рисунки ужимаются по колонке. */
+.vteor-izobr {
+  display: grid;
+  gap: var(--space-4);
+}
+.vteor-izobr__shapka {
+  display: none;
+}
+.vteor-izobr__ryad {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.vteor-izobr__sobytie {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: var(--lh-body);
+}
+.vteor-izobr__yacheyka {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+.vteor-izobr__podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vteor-izobr__kolonka {
+  color: var(--color-text);
+}
+.vteor-eyler {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+.vteor-izobr__pryamaya {
+  width: 100%;
+  height: auto;
+}
+/* Диаграмма Эйлера: прямоугольник — обводка 1px цвета рамок, круги —
+   обводка цвета оси и акцента; закраска — те же цвета с
+   прозрачностью, как полосы событий на прямой. */
+.vteor-eyler__pole {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+.vteor-eyler__pole.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__zalivka {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__zalivka--b {
+  fill: var(--color-accent);
+}
+.vteor-eyler__krug {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.vteor-eyler__krug--b {
+  stroke: var(--color-accent);
+}
+/* Подложка под кругом A на диаграмме противоположного события:
+   закраска Ā не должна просвечивать сквозь A. */
+.vteor-eyler__krug--fon {
+  fill: var(--color-surface);
+  stroke: none;
+}
+.vteor-eyler__krug.is-zakrasheno {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+}
+.vteor-eyler__krug--b.is-zakrasheno {
+  fill: var(--color-accent);
+}
+.vteor-eyler__krug.is-obshchee {
+  stroke: none;
+  fill-opacity: 0.36;
+}
+.vteor-eyler__imya {
+  fill: var(--color-text);
+  font-size: 16px;
+}
+.vteor-eyler__imya--cherta {
+  text-decoration: overline;
+}
+/* Плашка вывода: мягкий синий, как у главной идеи. Вторая — с
+   формулой в той же плашке. */
+.vteor-izobr__plashka {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  line-height: var(--lh-body);
+}
+.vteor-izobr__formula {
+  white-space: nowrap;
+}
+@container vteor-razdel (min-width: 720px) {
+  .vteor-izobr {
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .vteor-izobr__shapka,
+  .vteor-izobr__ryad {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    border-radius: 0;
+  }
+  .vteor-izobr__shapka {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    line-height: var(--lh-caption);
+    background: var(--color-surface-2);
+  }
+  .vteor-izobr__ryad {
+    border-top: 1px solid var(--color-border);
+  }
+  /* В таблице колонка названа в шапке — в подписи её имя лишнее. */
+  .vteor-izobr__kolonka {
+    display: none;
+  }
+}
+
+/* ── Заголовок вкладки ───────────────────────────────────────────── */
+
+/* Название вкладки — H2 панели на всех вкладках №4 и №5: заголовок
+   задания (H1) один и живёт в шапке раздела. Там, где у экрана есть
+   свой заголовок (тренажёр, опорные задачи), он и есть этот H2. */
+.vtab__title {
+  margin: 0 0 var(--space-5);
+  color: var(--color-text-brand);
+}
+
+/* ── Вкладка «Теория»: общий слой ───────────────────────────────── */
+
+/* Содержание остаётся на экране, пока читают раздел.
+
+   На широком экране колонка липнет сама (.topic-side в topic.css), но
+   отсчёт там от верха окна — под липкой лентой вкладок заголовок
+   «Содержание» уезжал бы под неё. Здесь отсчёт начинается от низа
+   ленты.
+
+   На узком экране колонки нет, её заменяет кнопка со шторкой — и
+   липнет уже кнопка: иначе, уйдя в «Координатную прямую», к списку
+   разделов надо листать вверх через весь раздел. */
+@media (min-width: 1024px) {
+  .vteor .topic-side {
+    top: calc(var(--h-tabs) + var(--space-5));
+  }
+}
+@media (max-width: 1023.98px) {
+  .vteor-open {
+    position: sticky;
+    top: var(--h-tabs);
+    z-index: 4;
+    margin-bottom: 0;
+    /* Фон во всю ширину колонки, как у ленты вкладок: иначе разделы
+       просвечивали бы сбоку от кнопки. */
+    margin-inline: calc(var(--space-5) * -1);
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-bg);
+  }
+}
+
+/* Оболочка теории одна на задания №4 и №5 (TeoriyaShell), поэтому её
+   раскладка, заголовок раздела с кружком и общие блоки лежат здесь,
+   а не в стилях одного из заданий. В zadanie4.css остались только
+   разделы, которые есть в №4 и больше нигде. */
+
+/* Разделы подряд, содержание рядом: раскладка .topic-body--theory
+   взята у задания №12 вместе со списком и шторкой. Здесь только то,
+   чего у №12 нет. */
+
+/* Содержание уже, чем у №12: там колонка держит длинные названия
+   типов функций, здесь названия короткие, а разделу нужна ширина
+   под три карточки в ряд. */
+@media (min-width: 1024px) {
+  .vteor {
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--space-5);
+  }
+}
+.vteor__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.vteor-side__lead {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vteor-razdel {
+  display: grid;
+  gap: var(--space-4);
+  /* Заголовок не прячется под липкую шапку при переходе по содержанию. */
+  scroll-margin-top: var(--space-6);
+}
+.vteor-razdel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+/* Кружок с номером блока — как у теории задания №12. */
+.vteor-razdel__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.vteor-razdel__soon {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vteor-blok {
+  display: grid;
+  gap: var(--space-4);
+}
+/* Заголовок блока внутри раздела: без кружка — номера в кружках
+   нумеруют разделы темы, а не блоки. Размер тот же, чтобы разделы
+   не потеряли ритм. */
+.vteor-blok__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vteor-blok__lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Формула отдельной строкой в рамке — общая для всех карточек теории.
+   Формула не переносится по знакам: «0 < P(A) < 1» на трёх строках
+   читается как три разных выражения. Не влезла — уезжает прокруткой
+   внутри своей рамки, а не ломает карточку. */
+.vteor-formula {
+  margin: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  text-align: center;
+  font-size: var(--fs-lg);
+}
+
+/* Декор правой колонки под содержанием: картинка и рукописная
+   подпись из макета. Колонка узкая, поэтому картинка занимает её
+   почти целиком, а подпись идёт под ней, а не сбоку. */
+.vteor-side__decor {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.vteor-side__kartinka {
+  width: 88%;
+  height: auto;
 }

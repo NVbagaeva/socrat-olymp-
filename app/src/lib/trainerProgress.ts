@@ -175,7 +175,7 @@ export function recordAttempt(attempt: TrainerAttempt): void {
   save({ kinds, mistakes });
 }
 
-/** Очистить прогресс тренажёра. Подготовительные задачи не трогаем. */
+/** Очистить прогресс тренажёра. Опорные задачи не трогаем. */
 export function resetTrainer(): void {
   cache = EMPTY;
   try {

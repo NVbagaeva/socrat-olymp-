@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
 import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
 import { tasksPage } from '@/content/tasks';
-import { veroyatnostFamily, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', 'Генератор'),
+  title: veroyatnostTitle('4', vkladka('4', 'generator')),
 };
 
 /**
@@ -21,10 +21,15 @@ export const metadata: Metadata = {
  */
 export default function Generator4Tab() {
   return (
-    <GeneratorScreen
-      base={`${tasksPage.href}/4`}
-      family={veroyatnostFamily('4')}
-      skills={navykiPrototipov(bank4Pool())}
-    />
+    <>
+      {/* Название вкладки — H2 панели; у экрана генератора свой
+          заголовок ниже, общий с заданием №12. */}
+      <h2 className="t-h2 vtab__title">{vkladka('4', 'generator')}</h2>
+      <GeneratorScreen
+        base={`${tasksPage.href}/4`}
+        family={veroyatnostFamily('4')}
+        skills={navykiPrototipov(bank4Pool())}
+      />
+    </>
   );
 }

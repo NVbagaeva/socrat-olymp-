@@ -9,17 +9,13 @@
  * честное «материала ещё нет», а не повод что-то придумать.
  */
 
+import { OPORNYE } from '@/content/opornye';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
 
 export type FunctionTypeId =
-  | 'linear'
-  | 'quadratic'
-  | 'rational'
-  | 'logarithmic'
-  | 'exponential'
-  | 'trigonometric';
+  'linear' | 'quadratic' | 'rational' | 'logarithmic' | 'exponential' | 'trigonometric';
 
 /** Что лежит в блоке теории. Определяет, чем блок будет наполнен. */
 export type TheoryBlockType = 'definition' | 'properties' | 'chart' | 'example' | 'note';
@@ -92,7 +88,13 @@ const LINEAR_THEORY: TheoryBlock[] = [
     badge: '1',
     status: 'ready',
   },
-  { id: 'inside', title: 'Как устроена функция', type: 'definition', content: null, status: 'empty' },
+  {
+    id: 'inside',
+    title: 'Как устроена функция',
+    type: 'definition',
+    content: null,
+    status: 'empty',
+  },
   {
     id: 'kinds',
     title: 'Какие бывают функции',
@@ -119,10 +121,28 @@ const LINEAR_THEORY: TheoryBlock[] = [
   { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },
   { id: 'b', title: 'Коэффициент b', type: 'properties', content: null, status: 'empty' },
   { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
-  { id: 'non-standard', title: 'Функция не в стандартном виде', type: 'example', content: null, status: 'empty' },
-  { id: 'from-chart', title: 'Коэффициенты по графику', type: 'chart', content: null, status: 'empty' },
-  { id: 'equation', title: 'Составление уравнения прямой', type: 'example', content: null, status: 'empty' },
-  { id: 'prep', title: 'Подготовительные задачи', type: 'example', content: null, status: 'empty' },
+  {
+    id: 'non-standard',
+    title: 'Функция не в стандартном виде',
+    type: 'example',
+    content: null,
+    status: 'empty',
+  },
+  {
+    id: 'from-chart',
+    title: 'Коэффициенты по графику',
+    type: 'chart',
+    content: null,
+    status: 'empty',
+  },
+  {
+    id: 'equation',
+    title: 'Составление уравнения прямой',
+    type: 'example',
+    content: null,
+    status: 'empty',
+  },
+  { id: 'prep', title: OPORNYE.title, type: 'example', content: null, status: 'empty' },
 ];
 
 /** Все четыре типа заданий: вопрос не зависит от вида функции. */

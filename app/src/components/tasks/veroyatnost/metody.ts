@@ -1,15 +1,36 @@
 import type { Zadanie } from '@/content/veroyatnost';
-import { METODY_4, METODY_5, type Method } from '@/lib/veroyatnost/model';
+import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import type { PoolKind } from '@/lib/veroyatnost/pool';
 
-/** Каталог методов задания: пять у №4, шесть у №5. */
-export function metodyZadaniya(zadanie: Zadanie) {
-  return zadanie === 4 ? METODY_4 : METODY_5;
+/**
+ * Навык тренажёра — то, по чему выбирают тренировку, считают прогресс
+ * и что угадывают в «Узнай метод». Навык и блок банка — одно и то же:
+ * у №4 это семь разделов списка Б (metody4.ts), у №5 — десять методов
+ * автора (metody5.ts).
+ *
+ * Названия рисунков («Прямой пересчёт исходов», «Таблица исходов»)
+ * навыками больше не бывают: рисунок — это как показать задачу, а не
+ * каким методом её решают.
+ */
+export interface Navyk {
+  id: string;
+  nomer: number;
+  nazvanie: string;
 }
 
-/** Метод прототипа: он один на все варианты, поэтому берётся с первого. */
-export function metodKind(kind: PoolKind): Method | undefined {
-  return kind.variants[0]?.model?.method;
+/** Навыки задания: семь разделов у №4, десять методов у №5. */
+export function navykiZadaniya(zadanie: Zadanie): readonly Navyk[] {
+  return zadanie === 4 ? OPORNYE_4 : METODY_5;
+}
+
+export function navykPoId(zadanie: Zadanie, id: string): Navyk | undefined {
+  return navykiZadaniya(zadanie).find((n) => n.id === id);
+}
+
+/** Навык прототипа — его блок банка. */
+export function navykKind(kind: PoolKind): string {
+  return kind.blok;
 }
 
 /** Идентификатор задачи в списке ошибок: прототип и номер варианта. */

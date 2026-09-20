@@ -20,6 +20,7 @@ export {
   type CoordinateLineProps,
   type HighlightMode,
   type Boundary,
+  type Promezhutok,
 } from './CoordinateLine';
 export { CircularRatio, type CircularRatioProps } from './CircularRatio';
 export { ProbabilityTree, type ProbabilityTreeProps, type TreeBranch } from './ProbabilityTree';
