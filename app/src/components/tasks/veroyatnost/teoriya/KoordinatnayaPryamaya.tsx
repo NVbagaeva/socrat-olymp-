@@ -4,6 +4,7 @@ import { CoordinateLine } from '@/components/probability';
 import { PRYAMAYA } from '@/content/veroyatnost-teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
+import { Vykladka } from './Vykladka';
 
 /**
  * Раздел теории «Координатная прямая» задания №5 — по утверждённому
@@ -138,11 +139,7 @@ export function KoordinatnayaPryamaya() {
           <p className="vteor-reshenie__text">
             <Tex text={pervaya.reshenie.text} />
           </p>
-          {pervaya.reshenie.shagi.map((formula) => (
-            <p key={formula} className="vteor-reshenie__formula">
-              <Tex text={`$${formula}$`} />
-            </p>
-          ))}
+          <Vykladka stroki={pervaya.reshenie.stroki} />
           <p className="vteor-reshenie__otvet">{pervaya.reshenie.otvet}</p>
         </div>
       </article>
