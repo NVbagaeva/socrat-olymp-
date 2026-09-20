@@ -1037,19 +1037,29 @@
   }
 }
 
-@media (min-width: 1024px) {
-  /* Случай раскладывается натрое: условие, схема, решение. Шапка и
-     разбор через противоположное событие идут во всю ширину. */
+/* Раскладка раздела считается от ширины самого раздела, а не окна:
+   рядом стоит колонка содержания, и при одной и той же ширине окна
+   место под текст разное. По ширине окна колонки получались по
+   60–90px — туда не помещалась ни одна строка формулы, ни схема,
+   ни условие. */
+.vteor-razdel {
+  container: vteor-razdel / inline-size;
+}
+
+/* Случай раскладывается натрое: условие, схема, решение. Порог —
+   та ширина, при которой каждая из трёх колонок вмещает своё:
+   решение со строкой формулы и две другие не уже трети. Ширины не
+   хватает — условие, схема и решение идут друг под другом во всю
+   ширину карточки. Колонка решения снизу ограничена содержимым:
+   формула не переносится и обрезать её нечем. */
+@container vteor-razdel (min-width: 840px) {
   .vteor-sluchay {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 0.95fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(min-content, 0.95fr);
     align-items: start;
   }
   .vteor-sluchay__head,
   .vteor-protivopolozhnoe {
     grid-column: 1 / -1;
-  }
-  .vteor-protivopolozhnoe__shagi {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   /* Главная идея: текст слева, схема и вывод справа. */
   .vteor-ideya {
@@ -1062,6 +1072,14 @@
   }
   .vteor-ideya__shema {
     max-width: none;
+  }
+}
+
+/* Шаги разбора встают в ряд позже случая: у шага своя рамка, номер
+   и отступы, и на строку формулы в колонке остаётся меньше места. */
+@container vteor-razdel (min-width: 980px) {
+  .vteor-protivopolozhnoe__shagi {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
