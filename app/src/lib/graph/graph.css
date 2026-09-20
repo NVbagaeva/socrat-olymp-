@@ -11,15 +11,15 @@
 /* ── Формула в строке ───────────────────────────────────────── */
 .math {
   font-family: var(--font-math);
-  font-size: 1.08em; /* антиква мельче гротеска при равном кегле */
-  line-height: normal; /* дробь столбиком выше строки — ей нужно место */
+  font-size: 1.08em;          /* антиква мельче гротеска при равном кегле */
+  line-height: normal;        /* дробь столбиком выше строки — ей нужно место */
   white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
 }
 
 .math i {
   font-style: italic;
-  padding-right: 0.02em; /* курсив наклонён — компенсируем правый бок */
+  padding-right: .02em;        /* курсив наклонён — компенсируем правый бок */
 }
 
 /* ── Дробь столбиком ─────────────────────────────────────────
@@ -31,18 +31,13 @@
   flex-direction: column;
   align-items: center;
   vertical-align: middle;
-  font-size: 0.82em;
+  font-size: .82em;
   line-height: 1.05;
-  margin: 0 0.14em;
+  margin: 0 .14em;
 }
 
-.frac-num {
-  border-bottom: 1px solid currentColor;
-  padding: 0 0.28em 0.05em;
-}
-.frac-den {
-  padding: 0.05em 0.28em 0;
-}
+.frac-num { border-bottom: 1px solid currentColor; padding: 0 .28em .05em; }
+.frac-den { padding: .05em .28em 0; }
 
 /* ── Варианты ответа ───────────────────────────────────────── */
 .option {
@@ -51,31 +46,19 @@
   align-items: baseline;
 }
 
-.option-number {
-  color: var(--color-text-tertiary, #97a1b0);
-  font-variant-numeric: tabular-nums;
-}
+.option-number { color: var(--color-text-tertiary, #97A1B0); font-variant-numeric: tabular-nums; }
 
 /* ── KaTeX ─────────────────────────────────────────────────
    Формулы подключаются поверх собственного набора: пока KaTeX
    не загружен, работает разметка .math, после загрузки она
    заменяется его вёрсткой. Здесь — только посадка на базовую
    линию текста, чтобы строка не прыгала по высоте. */
-.math[data-katex='on'] {
-  font-size: 1em;
-}
-.math .katex {
-  font-size: 1.06em;
-  line-height: 1;
-}
-.math .katex .mord.text {
-  font-family: var(--font);
-}
+.math[data-katex="on"] { font-size: 1em; }
+.math .katex { font-size: 1.06em; line-height: 1; }
+.math .katex .mord.text { font-family: var(--font); }
 
 /* Формула в тексте условия не растягивает строку. */
-.task-question .katex {
-  line-height: 1.1;
-}
+.task-question .katex { line-height: 1.1; }
 
 /* ── Блок решения ──────────────────────────────────────────
    Строки появляются по одной; начальное состояние задаёт
@@ -86,24 +69,16 @@
   line-height: 1.5;
 }
 
-.solution-line:last-child {
-  margin-bottom: 0;
-  font-weight: 600;
-}
+.solution-line:last-child { margin-bottom: 0; font-weight: 600; }
 
 /* Строка про знак приращения у убывающей прямой — не вывод,
    а пояснение, поэтому тише остальных. */
-.solution-line[data-line='sign'] {
-  color: var(--color-text-secondary, #667389);
-}
+.solution-line[data-line="sign"] { color: var(--color-text-secondary, #667389); }
 
 /* ── Разбор: пять шагов ────────────────────────────────────
    Каждый шаг — карточка: фон, один радиус, одна тень, щедрые
    поля. Между карточками воздух, а не линии-разделители. */
-.solution-steps {
-  display: grid;
-  gap: var(--space-4, 16px);
-}
+.solution-steps { display: grid; gap: var(--space-4, 16px); }
 
 .solution-step {
   display: grid;
@@ -111,7 +86,7 @@
   gap: var(--space-3, 12px);
   background: var(--color-surface, #fff);
   border-radius: var(--radius-lg, 12px);
-  box-shadow: var(--shadow-sm, 0 2px 6px rgba(16, 23, 40, 0.05));
+  box-shadow: var(--shadow-sm, 0 2px 6px rgba(16,23,40,.05));
   padding: var(--space-5, 20px);
 }
 
@@ -119,24 +94,13 @@
   font-size: 26px;
   font-weight: 700;
   line-height: 1;
-  color: var(--color-text-tertiary, #97a1b0);
+  color: var(--color-text-tertiary, #97A1B0);
   font-variant-numeric: tabular-nums;
 }
 
-.solution-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2, 8px);
-  margin: 0 0 var(--space-2, 8px);
-}
-.solution-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}
-.solution-arrow {
-  display: block;
-}
+.solution-head { display: flex; align-items: center; gap: var(--space-2, 8px); margin: 0 0 var(--space-2, 8px); }
+.solution-title { font-size: 1rem; font-weight: 600; margin: 0; }
+.solution-arrow { display: block; }
 
 /* Текст объяснения: крупнее интерфейсного, просторный интерлиньяж,
    строка не длиннее 60 знаков, цифры табличные. */
@@ -147,26 +111,17 @@
   max-width: 60ch;
   font-variant-numeric: tabular-nums;
 }
-.solution-text:last-child {
-  margin-bottom: 0;
-}
+.solution-text:last-child { margin-bottom: 0; }
 
 /* Ключевые числа — полужирным и цветом прямой: глаз цепляется
    за них при повторном чтении. */
-.key {
-  color: var(--color-primary, #1f5fd0);
-  font-weight: 700;
-}
+.key { color: var(--color-primary, #1F5FD0); font-weight: 700; }
 
-.solution-formula {
-  margin: 0 0 var(--space-3, 12px);
-  font-size: 1.15rem;
-  line-height: 2;
-}
+.solution-formula { margin: 0 0 var(--space-3, 12px); font-size: 1.15rem; line-height: 2; }
 
 /* Формула целиком — опорная точка разбора, её видно при беглом просмотре. */
 .solution-formula.feature {
-  background: var(--color-surface-soft, #e8f0fc);
+  background: var(--color-surface-soft, #E8F0FC);
   border-radius: var(--radius-md, 8px);
   padding: var(--space-4, 16px) var(--space-5, 20px);
   font-size: 1.35rem;
@@ -181,21 +136,16 @@
 /* Врезка «Можно проще» — другой фон, чтобы отличалась от шагов. */
 .solution-callout {
   margin-top: var(--space-3, 12px);
-  background: var(--color-surface-2, #f7f9fc);
+  background: var(--color-surface-2, #F7F9FC);
   border-radius: var(--radius-md, 8px);
   padding: var(--space-4, 16px);
 }
 .solution-callout-title {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: .8125rem; font-weight: 600; letter-spacing: .02em;
   color: var(--color-text-secondary, #667389);
-  margin: 0 0 var(--space-2, 8px);
-  text-transform: uppercase;
+  margin: 0 0 var(--space-2, 8px); text-transform: uppercase;
 }
-.solution-callout .solution-text {
-  font-size: 1rem;
-}
+.solution-callout .solution-text { font-size: 1rem; }
 
 /* Раскрывающийся блок (.solution-details) описан в styles/components.css:
    им пользуется не только разбор №12. */
