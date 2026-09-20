@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { clsx } from 'clsx';
-import { Button } from '@/components/ui';
+import { Button, Details as UiDetails } from '@/components/ui';
 import type { PrepBlock, PrepStep } from '@/lib/prep';
 import { HintIcon } from './PrepIcons';
 
@@ -41,26 +40,13 @@ function ArrowIcon({ up }: { up: boolean }) {
   );
 }
 
-/* Раскрывающаяся врезка вроде «Откуда берётся минус». Оформление
-   и раскрытие уже описаны в graph.css — здесь только состояние. */
+/* Раскрывающаяся врезка вроде «Откуда берётся минус» — общий Details
+   платформы; здесь только его содержимое. */
 function Details({ title, blocks }: { title: string; blocks: PrepBlock[] }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className={clsx('solution-details', open && 'open')}>
-      <button
-        type="button"
-        className="solution-details-toggle"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-      >
-        {title}
-      </button>
-      <div className="solution-details-body">
-        <div>
-          <Blocks blocks={blocks} />
-        </div>
-      </div>
-    </div>
+    <UiDetails title={title}>
+      <Blocks blocks={blocks} />
+    </UiDetails>
   );
 }
 
@@ -79,7 +65,11 @@ function Blocks({ blocks }: { blocks: PrepBlock[] }) {
 
         if (block.type === 'text') {
           return (
-            <p key={key} className="solution-text" dangerouslySetInnerHTML={{ __html: block.html }} />
+            <p
+              key={key}
+              className="solution-text"
+              dangerouslySetInnerHTML={{ __html: block.html }}
+            />
           );
         }
         if (block.type === 'formula') {

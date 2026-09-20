@@ -162,7 +162,9 @@ export function VidySobytiy() {
               <div className="vsvyaz__text">
                 <h4 className="vsvyaz__title">{karta.title}</h4>
                 <p className="vsvyaz__opredelenie">{karta.opredelenie}</p>
-                <Formula tex={karta.formula} />
+                {'raznitsa' in karta ? (
+                  <p className="vsvyaz__opredelenie">{karta.raznitsa}</p>
+                ) : null}
                 <p className="vsvyaz__primer">
                   <b>{primerLabel}</b> {karta.primer}
                 </p>

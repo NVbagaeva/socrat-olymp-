@@ -147,22 +147,5 @@
 }
 .solution-callout .solution-text { font-size: 1rem; }
 
-/* Раскрывающийся блок «Откуда берётся минус». */
-.solution-details { margin-top: var(--space-3, 12px); }
-.solution-details-toggle {
-  font: inherit; font-size: .8125rem; color: var(--color-text-secondary, #667389);
-  background: none; border: 0; padding: 0; cursor: pointer;
-  border-bottom: 1px dashed currentColor;
-}
-.solution-details-body {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height var(--dur-reveal, 320ms) var(--ease, cubic-bezier(.2,0,0,1));
-}
-.solution-details.open .solution-details-body { max-height: 720px; }
-.solution-details-body > div { padding-top: var(--space-3, 12px); }
-.solution-details svg { display: block; width: 100%; max-width: 360px; margin: 0 auto; height: auto; }
-
-@media (prefers-reduced-motion: reduce) {
-  .solution-details-body { transition: none; }
-}
+/* Раскрывающийся блок (.solution-details) описан в styles/components.css:
+   им пользуется не только разбор №12. */

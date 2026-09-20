@@ -43,6 +43,7 @@ export { Sparkline, type SparklineProps } from './Sparkline';
 export { Heatmap, type HeatLevel, type HeatmapProps, type HeatmapRow } from './Heatmap';
 
 export { EmptyState, type StateProps } from './EmptyState';
+export { Details, type DetailsProps } from './Details';
 export { FigureZoom, type FigureZoomProps } from './FigureZoom';
 export { ErrorState } from './ErrorState';
 export { SuccessState } from './SuccessState';

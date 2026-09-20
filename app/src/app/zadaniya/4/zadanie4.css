@@ -1447,12 +1447,6 @@
 .vsvyaz__primer b {
   color: var(--color-text-brand);
 }
-/* Формула блока ступенью мельче: в колонке 210px запись
-   «P(A ∩ B) = P(A) · P(B)» кеглем карточек не помещается. */
-.vsvyaz .vteor-formula {
-  padding: var(--space-2);
-  font-size: var(--fs-body);
-}
 .vsvyaz__figura {
   margin: 0;
 }
