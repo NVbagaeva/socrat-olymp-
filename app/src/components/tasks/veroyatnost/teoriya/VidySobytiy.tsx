@@ -27,17 +27,10 @@ function Formula({ tex }: { tex: string }) {
 const ZNACHKI = { zveno: <ZvenoIcon />, krugi: <KrugiIcon /> };
 
 export function VidySobytiy() {
-  const { title, kartochki, primerLabel, vazhno, usloviya, zapomni } = VIDY_SOBYTIY;
+  const { kartochki, primerLabel, vazhno, usloviya, zapomni } = VIDY_SOBYTIY;
 
   return (
     <>
-      <h2 className="vteor-razdel__title">
-        <span className="vteor-razdel__no" aria-hidden="true">
-          1
-        </span>
-        {title}
-      </h2>
-
       {/* Три карточки видов событий и правая колонка с пояснениями. */}
       <div className="vvidy">
         <ul className="vvidy__grid">

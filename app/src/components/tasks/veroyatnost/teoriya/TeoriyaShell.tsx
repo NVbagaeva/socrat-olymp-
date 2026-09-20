@@ -79,17 +79,20 @@ export function TeoriyaShell({ razdely, tela }: TeoriyaShellProps) {
             )}
           </div>
 
-          {razdely.map((razdel) => (
+          {/* Заголовок с номером рисует оболочка, а не сам раздел:
+              номер — это место в содержании, и при переносе раздела
+              в соседнее задание он должен пересчитаться сам.
+              Ненаписанный раздел не пропадает — он есть в плане темы
+              и говорит о себе строкой. */}
+          {razdely.map((razdel, i) => (
             <article className="vteor-razdel" id={razdelId(razdel.id)} key={razdel.id}>
-              {tela[razdel.id] ?? (
-                /* Ненаписанных разделов подряд четыре: каждому по
-                   большому пустому экрану — это стена из одинаковых
-                   картинок. Здесь довольно заголовка и строки. */
-                <>
-                  <h2 className="vteor-razdel__title">{razdel.title}</h2>
-                  <p className="vteor-razdel__soon">{SODERZHANIE.gotovitsya}</p>
-                </>
-              )}
+              <h2 className="vteor-razdel__title">
+                <span className="vteor-razdel__no" aria-hidden="true">
+                  {i + 1}
+                </span>
+                {razdel.title}
+              </h2>
+              {tela[razdel.id] ?? <p className="vteor-razdel__soon">{SODERZHANIE.gotovitsya}</p>}
             </article>
           ))}
         </div>

@@ -48,17 +48,10 @@ function Zagolovok({ znak, children }: { znak: ReactNode; children: ReactNode })
 }
 
 export function KlassicheskayaVeroyatnost() {
-  const { nomer, title, lead, opredelenie, pochemu, primer, ravnovozmozhnye, kakUznat } =
-    KLASSICHESKAYA;
+  const { lead, opredelenie, pochemu, primer, ravnovozmozhnye, kakUznat } = KLASSICHESKAYA;
 
   return (
     <>
-      <h2 className="vteor-razdel__title">
-        <span className="vteor-razdel__no" aria-hidden="true">
-          {nomer}
-        </span>
-        {title}
-      </h2>
       <p className="vteor-blok__lead">{lead}</p>
 
       <ul className="vklass__grid">
