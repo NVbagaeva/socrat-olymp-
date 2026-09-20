@@ -160,7 +160,20 @@
 /* Окно метода шире общего: четыре блока и формула. Тени у него нет —
    правило раздела; обводка та же, что у карточек. */
 .z5-modal {
+  display: flex;
+  flex-direction: column;
   max-width: 560px;
+  /* Окно не выше экрана: с длинным описанием на телефоне кнопка
+     подвала иначе уходила за нижний край. Прокручивается тело,
+     подвал со счётчиком и кнопкой остаётся на виду. */
+  max-height: calc(100dvh - 2 * var(--space-5));
   border: 1px solid var(--color-border);
   box-shadow: none;
+}
+.z5-modal .modal__b {
+  min-height: 0;
+  overflow-y: auto;
+}
+.z5-modal .modal__f {
+  flex: none;
 }

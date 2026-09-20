@@ -77,7 +77,7 @@ export const METODY: readonly MetodOpisanie[] = [
 
 /**
  * Методы задания №4: пять из референса, без «Формулы». У задания №5
- * свой состав методов — двенадцать методов автора (metody5.ts); здесь
+ * свой состав методов — десять методов автора (metody5.ts); здесь
  * для него только рисунки.
  */
 export const METODY_4: readonly MetodOpisanie[] = METODY.filter((m) => m.id !== 'formula');

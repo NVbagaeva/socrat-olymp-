@@ -269,6 +269,7 @@ if (katexPut === undefined) {
   };
   for (const [file, target] of [
     ['content/sheet12.js', path.join(alias, 'content', 'sheet12.js')],
+    ['content/tasks.ts', path.join(alias, 'content', 'tasks.js')],
     ['content/trainerModes.ts', path.join(alias, 'content', 'trainerModes.js')],
     ['content/veroyatnost.ts', path.join(alias, 'content', 'veroyatnost.js')],
     ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],

@@ -11,7 +11,7 @@ export interface MethodPickerProps {
   verny: string | null;
   onPick: (metod: string) => void;
   label: string;
-  /** Какие методы предлагать: пять у задания №4, двенадцать у задания №5. */
+  /** Какие методы предлагать: пять у задания №4, десять у задания №5. */
   metody?: readonly Navyk[];
 }
 

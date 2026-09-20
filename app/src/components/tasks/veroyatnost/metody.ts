@@ -7,7 +7,7 @@ import type { PoolKind } from '@/lib/veroyatnost/pool';
  * Навык тренажёра — то, по чему выбирают тренировку, считают прогресс
  * и что угадывают в «Узнай метод». У задания №4 это метод решения из
  * каталога рисунков (model.ts: пять методов), у задания №5 — один из
- * двенадцати методов автора (metody5.ts), он же блок банка.
+ * десяти методов автора (metody5.ts), он же блок банка.
  */
 export interface Navyk {
   id: string;
@@ -15,7 +15,7 @@ export interface Navyk {
   nazvanie: string;
 }
 
-/** Навыки задания: пять методов у №4, двенадцать у №5. */
+/** Навыки задания: пять методов у №4, десять у №5. */
 export function navykiZadaniya(zadanie: Zadanie): readonly Navyk[] {
   return zadanie === 4 ? METODY_4 : METODY_5;
 }

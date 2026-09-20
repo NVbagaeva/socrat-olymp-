@@ -15,7 +15,7 @@ export interface ProgressMetodyProps {
     pusto: string;
     sbros: string;
   };
-  /** Какие методы считать: пять у задания №4, двенадцать у задания №5. */
+  /** Какие методы считать: пять у задания №4, десять у задания №5. */
   metody?: readonly Navyk[];
 }
 
