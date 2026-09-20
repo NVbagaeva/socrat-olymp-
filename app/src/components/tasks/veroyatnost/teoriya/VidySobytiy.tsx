@@ -143,14 +143,10 @@ export function VidySobytiy() {
         </ol>
       </section>
 
-      {/* Блок 2: самопроверка. */}
+      {/* Блок самопроверки. Кружка с номером нет: номера в кружках —
+          это номера разделов темы, а здесь блок внутри раздела. */}
       <section className="vteor-blok">
-        <h2 className="vteor-razdel__title">
-          <span className="vteor-razdel__no" aria-hidden="true">
-            2
-          </span>
-          {PROVER_SEBYA.title}
-        </h2>
+        <h2 className="vteor-blok__title">{PROVER_SEBYA.title}</h2>
         <ProverSebya
           voprosy={voprosyVidovSobytiy()}
           otvety={PROVER_SEBYA.otvety}
@@ -159,14 +155,9 @@ export function VidySobytiy() {
         />
       </section>
 
-      {/* Блок 3: связанные события. */}
+      {/* Блок «События могут быть связаны» — тоже часть раздела. */}
       <section className="vteor-blok">
-        <h2 className="vteor-razdel__title">
-          <span className="vteor-razdel__no" aria-hidden="true">
-            3
-          </span>
-          {SVYAZANY.title}
-        </h2>
+        <h2 className="vteor-blok__title">{SVYAZANY.title}</h2>
         <p className="vteor-blok__lead">{SVYAZANY.lead}</p>
 
         <ul className="vsvyaz__grid">

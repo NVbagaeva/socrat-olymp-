@@ -843,6 +843,16 @@
   display: grid;
   gap: var(--space-4);
 }
+/* Заголовок блока внутри раздела: без кружка — номера в кружках
+   нумеруют разделы темы, а не блоки. Размер тот же, чтобы разделы
+   не потеряли ритм. */
+.vteor-blok__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
 .vteor-blok__lead {
   margin: 0;
   font-size: var(--fs-caption);
