@@ -174,7 +174,7 @@ export function KoordinatnayaPryamaya() {
           />
         </div>
 
-        <div className="vteor-reshenie vteor-reshenie--pochemu">
+        <div className="vteor-reshenie">
           <h4 className="vteor-reshenie__title">{vtoraya.pochemu.title}</h4>
           <p className="vteor-reshenie__text">
             <Tex text={vtoraya.pochemu.text} />
@@ -209,7 +209,7 @@ export function KoordinatnayaPryamaya() {
                 </div>
               </li>
             ))}
-            <li className="vteor-shag vteor-shag--otvet">
+            <li className="vteor-shag">
               <span className="vteor-shag__nomer" aria-hidden="true">
                 {vtoraya.protivopolozhnoe.shagi.length + 1}
               </span>
