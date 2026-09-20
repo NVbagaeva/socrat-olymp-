@@ -3,10 +3,10 @@
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { Modal } from '@/components/ui';
-import { METODY_02_5 } from '@/content/veroyatnost-metody';
+import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 
 /** Карточка метода, собранная на сервере: формула уже набрана KaTeX. */
-export interface Kartochka5 {
+export interface KartochkaMetoda {
   id: string;
   nomer: number;
   nazvanie: string;
@@ -15,16 +15,17 @@ export interface Kartochka5 {
   formula: ReactNode | null;
   /** Строка счётчика «задач в банке: N» — посчитана на сервере. */
   schet: string;
-  /** Адрес тренажёра с уже выбранным этим методом. */
+  /** Адрес тренажёра: с уже выбранным этим методом, если такой ярлык есть. */
   href: string;
 }
 
-export interface MetodyKartochki5Props {
-  items: readonly Kartochka5[];
+export interface MetodyKartochkiProps {
+  items: readonly KartochkaMetoda[];
 }
 
 /**
- * Сетка карточек методов задания №5 и модалка метода.
+ * Сетка карточек методов и модалка метода — вкладка «Ключевые методы
+ * решения» заданий №4 и №5.
  *
  * Карточка — кнопка: номер в кружке, название, подпись и, где есть,
  * формула в плашке. По нажатию открывается модалка с четырьмя
@@ -34,31 +35,32 @@ export interface MetodyKartochki5Props {
  * банка по методу и ссылка на тренажёр с этим методом.
  *
  * Все слова — из content/veroyatnost-metody.ts, сами методы — из
- * lib/veroyatnost/metody5.ts через страницу; в разметке строк нет.
+ * lib/veroyatnost/metody4.ts и metody5.ts через страницу; в разметке
+ * строк нет.
  */
-export function MetodyKartochki5({ items }: MetodyKartochki5Props) {
+export function MetodyKartochki({ items }: MetodyKartochkiProps) {
   const [otkryt, setOtkryt] = useState<string | null>(null);
   const tekushchiy = items.find((m) => m.id === otkryt) ?? null;
-  const { modal } = METODY_02_5;
+  const { modal } = METODY_KARTOCHKI;
 
   return (
     <>
-      <ul className="z5-metody__grid">
+      <ul className="vmetody__grid">
         {items.map((m) => (
           <li key={m.id}>
             <button
               type="button"
-              className="z5-metod"
+              className="vmetod"
               onClick={() => setOtkryt(m.id)}
               aria-haspopup="dialog"
-              aria-label={`${METODY_02_5.otkryt}: ${m.nazvanie}`}
+              aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanie}`}
             >
-              <span className="z5-metod__no" aria-hidden="true">
+              <span className="vmetod__no" aria-hidden="true">
                 {m.nomer}
               </span>
-              <span className="z5-metod__title">{m.nazvanie}</span>
-              <span className="z5-metod__sut">{m.opisanie}</span>
-              {m.formula === null ? null : <span className="z5-metod__formula">{m.formula}</span>}
+              <span className="vmetod__title">{m.nazvanie}</span>
+              <span className="vmetod__sut">{m.opisanie}</span>
+              {m.formula === null ? null : <span className="vmetod__formula">{m.formula}</span>}
             </button>
           </li>
         ))}
@@ -71,8 +73,8 @@ export function MetodyKartochki5({ items }: MetodyKartochki5Props) {
           tekushchiy === null ? (
             ''
           ) : (
-            <span className="z5-modal__title">
-              <span className="z5-metod__no" aria-hidden="true">
+            <span className="vmetod-modal__title">
+              <span className="vmetod__no" aria-hidden="true">
                 {tekushchiy.nomer}
               </span>
               {tekushchiy.nazvanie}
@@ -81,11 +83,11 @@ export function MetodyKartochki5({ items }: MetodyKartochki5Props) {
         }
         description={tekushchiy?.opisanie}
         closeLabel={modal.zakryt}
-        className="z5-modal"
+        className="vmetod-modal"
         footer={
           tekushchiy === null ? undefined : (
             <>
-              <span className="z5-modal__schet">{tekushchiy.schet}</span>
+              <span className="vmetod-modal__schet">{tekushchiy.schet}</span>
               <Link className="btn btn--primary" href={tekushchiy.href}>
                 {modal.trenirovka}
               </Link>
@@ -94,14 +96,14 @@ export function MetodyKartochki5({ items }: MetodyKartochki5Props) {
         }
       >
         {tekushchiy === null ? null : (
-          <div className="z5-modal__body">
+          <div className="vmetod-modal__body">
             {tekushchiy.formula === null ? null : (
-              <div className="z5-metod__formula z5-modal__formula">{tekushchiy.formula}</div>
+              <div className="vmetod__formula vmetod-modal__formula">{tekushchiy.formula}</div>
             )}
             {Object.values(modal.razdely).map((razdel) => (
-              <section key={razdel} className="z5-modal__block">
-                <h3 className="z5-modal__sub">{razdel}</h3>
-                <p className="z5-modal__soon">{modal.gotovitsya}</p>
+              <section key={razdel} className="vmetod-modal__block">
+                <h3 className="vmetod-modal__sub">{razdel}</h3>
+                <p className="vmetod-modal__soon">{modal.gotovitsya}</p>
               </section>
             ))}
           </div>

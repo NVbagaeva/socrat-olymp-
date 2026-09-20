@@ -17,35 +17,10 @@
  * нужно стрелку») решаются через противоположное событие и подбор n.
  */
 
-/** Диапазон номеров задачника: от и до включительно. */
-export type Diapazon = readonly [number, number];
+import { vDiapazonah, type Metod } from './tipologiya';
 
-/** Подтип по сюжету — диапазон номеров задачника, название и заметка для подсказки. */
-export interface Podtip5 {
-  zadachi: Diapazon;
-  nazvanie: string;
-  /** Ключевая идея подтипа — заметка автора для будущих подсказок. */
-  ideya?: string;
-}
-
-export interface Metod5 {
-  /** Идентификатор: он же `blok` прототипа и навык тренажёра. */
-  id: string;
-  /** Номер карточки, 1–10. */
-  nomer: number;
-  /** Название метода — как на карточке и на кнопке тренажёра. */
-  nazvanie: string;
-  /** Фраза о сути метода — под названием. */
-  opisanie: string;
-  /** Формула метода одной строкой, в TeX. Есть не у всех. */
-  formula?: string;
-  /**
-   * Диапазоны номеров задачника, отнесённых к методу. Обычно один;
-   * у умножения независимых событий два — 29–36 и 45–48.
-   */
-  zadachnik: readonly Diapazon[];
-  /** Подтипы по сюжету, если автор их выделил. */
-  podtipy?: readonly Podtip5[];
+/** Метод задания №5: карточка плюс заметки автора для подсказок. */
+export interface Metod5 extends Metod {
   /**
    * Ключевая идея решения — заметка автора для будущих подсказок.
    * На экран пока не выводится.
@@ -210,5 +185,5 @@ export function metod5PoId(id: string): Metod5 {
 
 /** Метод, к которому автор отнёс задачу задачника с этим номером. */
 export function metod5Zadachi(nomer: number): Metod5 | undefined {
-  return METODY_5.find((m) => m.zadachnik.some(([ot, do_]) => nomer >= ot && nomer <= do_));
+  return METODY_5.find((m) => vDiapazonah(m, nomer));
 }
