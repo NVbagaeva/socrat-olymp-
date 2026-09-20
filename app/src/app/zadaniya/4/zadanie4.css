@@ -1428,14 +1428,16 @@
   font-weight: 700;
   color: var(--color-accent);
 }
+/* Формула, под ней бейдж «Нельзя!» — отдельной строкой на всех
+   ширинах. Сбоку он помещается только в узкой карточке телефона, а
+   на широком экране уезжал под формулу сам: пусть стоит одинаково. */
 .vklass-nelzya__ryad {
-  display: flex;
-  align-items: center;
+  display: grid;
+  justify-items: start;
   gap: var(--space-2);
-  flex-wrap: wrap;
 }
 .vklass-nelzya__formula {
-  flex: 1 1 auto;
+  width: 100%;
   margin: 0;
   overflow-x: auto;
   padding: var(--space-2) var(--space-3);
@@ -1445,7 +1447,6 @@
   color: var(--color-text-brand);
 }
 .vklass-nelzya__metka {
-  flex: none;
   margin: 0;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
@@ -1518,25 +1519,28 @@
   align-content: start;
   gap: var(--space-3);
 }
+/* Заголовок первой строкой, счётчик и стрелки — второй. Одинаково
+   на всех ширинах: в строку с заголовком они влезают только на
+   телефоне, и карточка вела бы себя по-разному на разных экранах. */
 .vpon__head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  display: grid;
   gap: var(--space-2);
 }
-/* Счётчик и стрелки держатся вместе и прижаты вправо. */
 .vpon__nav {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  margin-left: auto;
+}
+.vpon__strelki {
+  display: flex;
+  gap: var(--space-1);
 }
 .vpon__title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: 0;
-  margin-right: auto;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   font-weight: 700;
