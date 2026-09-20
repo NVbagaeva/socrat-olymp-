@@ -7,6 +7,7 @@ import type { PoolModel } from '@/lib/veroyatnost/pool';
 import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
 import { answerMatches } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { VykladkaKlient } from '../veroyatnost/VykladkaKlient';
 import { Vizualizatsiya, podpisRisunka } from './Vizualizatsiya';
 
 /**
@@ -350,11 +351,8 @@ export function ProblemCard({
                   </span>
                   <div className="pc-step__body">
                     <p className="pc-step__text">{shag.text}</p>
-                    {shag.html === undefined ? null : (
-                      <p
-                        className="pc-step__formula"
-                        dangerouslySetInnerHTML={{ __html: shag.html }}
-                      />
+                    {shag.kuski === undefined ? null : (
+                      <VykladkaKlient className="pc-step__formula" kuski={shag.kuski} />
                     )}
                   </div>
                 </li>

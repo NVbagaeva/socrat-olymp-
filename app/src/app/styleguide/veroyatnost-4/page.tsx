@@ -13,6 +13,7 @@ import { bank4Pool, bank5Pool, prep4Pool } from '@/lib/veroyatnost/pool';
 import 'katex/dist/katex.min.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
+import '@/components/tasks/veroyatnost/vykladka.css';
 import './veroyatnost-4.css';
 
 /* Служебная витрина компонентов вероятности (раздел 04 референса).

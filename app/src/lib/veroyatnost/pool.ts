@@ -46,7 +46,7 @@ import {
   type Step,
   type Variant,
 } from './types';
-import { typeset } from '../tex';
+import { kuskiPoRavno, nabratKuski } from '../tex';
 
 /**
  * Открытая часть модели задачи: метод, форма меры и параметры
@@ -208,41 +208,11 @@ export function vydelitOtvet(formula: string): string {
 }
 
 /**
- * Формула кусками, по которым её можно переносить на новую строку:
- * перед каждым знаком отношения верхнего уровня и после `,\quad`.
- * KaTeX внутри одной формулы строку не переносит, а в узкой колонке
- * карточки длинная цепочка равенств не помещается — поэтому каждый
- * кусок набирается отдельно, а между ними обычный пробел.
- */
-export function kuskiFormuly(formula: string): string[] {
-  const kuski: string[] = [];
-  let glubina = 0;
-  let nachalo = 0;
-  for (let i = 0; i < formula.length; i += 1) {
-    const ch = formula[i];
-    if (ch === '{' || ch === '(') {
-      glubina += 1;
-    } else if (ch === '}' || ch === ')') {
-      glubina -= 1;
-    } else if (glubina === 0 && i > nachalo) {
-      if (ch === '=' || formula.startsWith('\\approx', i)) {
-        kuski.push(formula.slice(nachalo, i).trim());
-        nachalo = i;
-      } else if (formula.startsWith(',\\quad', i)) {
-        kuski.push(formula.slice(nachalo, i + 1).trim());
-        nachalo = i + 6;
-      }
-    }
-  }
-  kuski.push(formula.slice(nachalo).trim());
-  return kuski.filter((k) => k !== '');
-}
-
-/**
  * Шаг банка → шаг для показа: текст и, если есть, формула в трёх
  * видах — TeX для печатного листа, вёрстка KaTeX для карточки (тем же
- * набором, что и формулы в условиях: lib/tex.ts) и слова для alt.
- * В последней формуле разбора ответ выделяется жирным.
+ * набором, что и формулы в условиях: lib/tex.ts) кусками по знаку
+ * «=», чтобы карточка могла разорвать длинную цепочку на строки, и
+ * слова для alt. В последней формуле разбора ответ выделяется жирным.
  *
  * Набор строгий: ошибка TeX роняет сборку, а не оставляет формулу
  * текстом. Та же проверка идёт в автотесте банка (test:veroyatnost),
@@ -253,10 +223,12 @@ export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
     return { text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
-  const html = kuskiFormuly(tex)
-    .map((kusok) => typeset(`$${kusok}$`, true))
-    .join(' ');
-  return { text: shag.text, tex, html, plain: texPlain(tex) };
+  return {
+    text: shag.text,
+    tex,
+    kuski: nabratKuski(kuskiPoRavno(tex), true),
+    plain: texPlain(tex),
+  };
 }
 
 /** Шаги банка → шаги для показа; ответ — жирным в последней формуле. */

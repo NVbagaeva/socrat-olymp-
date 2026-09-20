@@ -14,6 +14,7 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
+import '@/components/tasks/veroyatnost/vykladka.css';
 /* Стили «Узнай метод», кнопок методов, прогресса по методам и
    миниатюр генератора общие с заданием №4 и живут в его файле. */
 import '../../4/zadanie4.css';

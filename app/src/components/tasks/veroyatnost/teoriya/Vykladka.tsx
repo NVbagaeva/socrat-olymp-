@@ -1,28 +1,21 @@
-import { odnoyStrokoy, typeset } from '@/lib/tex';
-import { VykladkaKlient } from './VykladkaKlient';
+import { nabratKuski } from '@/lib/tex';
+import { VykladkaKlient } from '../VykladkaKlient';
 
 export interface VykladkaProps {
-  /** Строки формулы, каждая — TeX без долларов, в порядке чтения. */
+  /**
+   * Куски формулы, каждый — TeX без долларов, в порядке чтения.
+   * Рвётся формула только по знаку «=», и на разрыве знак стоит в
+   * тексте дважды: в конце куска и в начале следующего.
+   */
   stroki: readonly string[];
 }
 
 /**
- * Формула с запасными разрывами — выкладка, как в тетради.
- *
- * В данных формула хранится строками: где она рвётся, решает автор,
- * и рвётся она только по знаку «=», который на разрыве стоит дважды —
- * в конце оборванной строки и в начале следующей. Но разрыв — запас
- * на узкий экран, а не постоянная форма записи: помещается формула
- * в колонку целиком — показывается одной строкой, без повторных
- * знаков. Здесь набираются обе записи, а какую показать, решает
- * браузер по ширине колонки (VykladkaKlient). Прокрутки нет ни в
- * одном из случаев.
+ * Выкладка теории: куски задаёт автор в конфиге, набираются они
+ * здесь, на сервере, а в строки по ширине колонки их собирает
+ * VykladkaKlient — помещается формула целиком, она стоит одной
+ * строкой без повторных знаков.
  */
 export function Vykladka({ stroki }: VykladkaProps) {
-  return (
-    <VykladkaKlient
-      odnoy={typeset(`$${odnoyStrokoy(stroki)}$`, true)}
-      stroki={stroki.map((stroka) => typeset(`$${stroka}$`, true))}
-    />
-  );
+  return <VykladkaKlient className="vteor-vykladka" kuski={nabratKuski(stroki, true)} />;
 }
