@@ -1078,3 +1078,120 @@
 .vteor-sluchay__shema .pr-bound {
   r: 10;
 }
+
+/* ── Вкладка «Теория»: общий слой ───────────────────────────────── */
+
+/* Оболочка теории одна на задания №4 и №5 (TeoriyaShell), поэтому её
+   раскладка, заголовок раздела с кружком и общие блоки лежат здесь,
+   а не в стилях одного из заданий. В zadanie4.css остались только
+   разделы, которые есть в №4 и больше нигде. */
+
+/* Разделы подряд, содержание рядом: раскладка .topic-body--theory
+   взята у задания №12 вместе со списком и шторкой. Здесь только то,
+   чего у №12 нет. */
+
+/* Содержание уже, чем у №12: там колонка держит длинные названия
+   типов функций, здесь названия короткие, а разделу нужна ширина
+   под три карточки в ряд. */
+@media (min-width: 1024px) {
+  .vteor {
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--space-5);
+  }
+}
+.vteor__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.vteor-side__lead {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vteor-razdel {
+  display: grid;
+  gap: var(--space-4);
+  /* Заголовок не прячется под липкую шапку при переходе по содержанию. */
+  scroll-margin-top: var(--space-6);
+}
+.vteor-razdel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+/* Кружок с номером блока — как у теории задания №12. */
+.vteor-razdel__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.vteor-razdel__soon {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vteor-blok {
+  display: grid;
+  gap: var(--space-4);
+}
+/* Заголовок блока внутри раздела: без кружка — номера в кружках
+   нумеруют разделы темы, а не блоки. Размер тот же, чтобы разделы
+   не потеряли ритм. */
+.vteor-blok__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vteor-blok__lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Формула отдельной строкой в рамке — общая для всех карточек теории.
+   Формула не переносится по знакам: «0 < P(A) < 1» на трёх строках
+   читается как три разных выражения. Не влезла — уезжает прокруткой
+   внутри своей рамки, а не ломает карточку. */
+.vteor-formula {
+  margin: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  text-align: center;
+  font-size: var(--fs-lg);
+}
+
+/* Декор правой колонки под содержанием: картинка и рукописная
+   подпись из макета. Колонка узкая, поэтому картинка занимает её
+   почти целиком, а подпись идёт под ней, а не сбоку. */
+.vteor-side__decor {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.vteor-side__kartinka {
+  width: 88%;
+  height: auto;
+}
