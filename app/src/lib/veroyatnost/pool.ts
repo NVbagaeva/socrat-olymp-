@@ -482,39 +482,55 @@ function uznayVariant(
 
 /**
  * Задачи режима «Узнай метод»: прототипы банка со всеми вариантами
- * условий. Угадывают метод автора, поэтому отпечатком закрыт блок
- * банка — он же навык тренажёра (components/…/metody.ts).
+ * условий и опорные задачи конспекта по одной. Угадывают метод
+ * автора, поэтому отпечатком закрыт блок банка — он же навык
+ * тренажёра (components/…/metody.ts).
  *
- * Задачи авторского конспекта в режим пока не попадают ни у №4, ни
- * у №5. У №5 у них нет методики вовсе. У №4 методика есть, но она
- * называет рисунок, а не метод из типологии автора: показать такую
- * задачу значило бы ждать от ученика ответа, которого нет среди
- * кнопок. Вернутся, когда автор разнесёт восемнадцать задач
- * конспекта по методам.
+ * Опорная задача попадает в режим, только когда у неё есть и
+ * методика (признаки в условии), и метод автора. У №4 есть и то,
+ * и другое; у №5 задачам конспекта методы пока не назначены, и в
+ * режим они не идут — верного ответа среди кнопок для них нет.
  */
 export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
   const bank = zadanie === 4 ? BANK_4 : BANK_5;
-  return {
-    kinds: bank.flatMap((prototype): UznayKind[] => {
-      const metodika = prototype.metodika;
-      if (metodika === undefined) {
+  const podgotovka = zadanie === 4 ? PODGOTOVKA_4 : PODGOTOVKA_5;
+  const prototipy = bank.flatMap((prototype): UznayKind[] => {
+    const metodika = prototype.metodika;
+    if (metodika === undefined) {
+      return [];
+    }
+    return [
+      {
+        id: prototype.id,
+        istochnik: 'prototip',
+        variants: prototype.varianty.map((variant) =>
+          uznayVariant(
+            variant.n,
+            prototype.uslovie(variant.params),
+            metodika,
+            illyustratsiyaVarianta(prototype.id, variant.n),
+            prototype.blok,
+          ),
+        ),
+      },
+    ];
+  });
+  const konspekt = podgotovka
+    .flatMap((blok) => [...blok.zadachi])
+    .flatMap((zadacha): UznayKind[] => {
+      const { metodika, blok } = zadacha;
+      if (metodika === undefined || blok === undefined) {
         return [];
       }
       return [
         {
-          id: prototype.id,
-          istochnik: 'prototip',
-          variants: prototype.varianty.map((variant) =>
-            uznayVariant(
-              variant.n,
-              prototype.uslovie(variant.params),
-              metodika,
-              illyustratsiyaVarianta(prototype.id, variant.n),
-              prototype.blok,
-            ),
-          ),
+          id: zadacha.id,
+          istochnik: 'konspekt',
+          variants: [
+            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1), blok),
+          ],
         },
       ];
-    }),
-  };
+    });
+  return { kinds: [...prototipy, ...konspekt] };
 }
