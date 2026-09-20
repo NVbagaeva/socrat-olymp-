@@ -198,11 +198,7 @@ export function KoordinatnayaPryamaya() {
                   <p className="vteor-shag__text">
                     <Tex text={shag.text} />
                   </p>
-                  {shag.formuly.map((formula) => (
-                    <p key={formula} className="vteor-reshenie__formula">
-                      <Tex text={`$${formula}$`} />
-                    </p>
-                  ))}
+                  <Vykladka stroki={shag.stroki} />
                 </div>
               </li>
             ))}
