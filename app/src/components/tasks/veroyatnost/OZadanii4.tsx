@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Image from 'next/image';
 import { AlertIcon, EmptyState, HandNote, NavIcon } from '@/components/ui';
-import { FOTO_4, O_ZADANII_4, STATISTIKA_4 } from '@/content/veroyatnost-o-zadanii';
+import { FOTO_4, O_ZADANII_4, STATISTIKA_4, V_ZADANII_5 } from '@/content/veroyatnost-o-zadanii';
 import { HintIcon } from '../prep/PrepIcons';
 import { Roscherk, ShapochkaIcon } from './Ikonki4';
 
@@ -93,18 +93,21 @@ export function OZadanii4({ base }: OZadanii4Props) {
           </h3>
           <p className="z4-karta__text">{zadachi.text}</p>
 
+          {/* Методы, которых в №4 нет: они составляют задание №5,
+              и плашка ведёт прямо в его раздел. */}
           <div className="z4-shire">
             <p className="z4-shire__title">
               <span className="z4-shire__ico" aria-hidden="true">
                 <AlertIcon />
               </span>
-              {zadachi.shire.title}
+              {V_ZADANII_5.title}
             </p>
-            <ul className="z4-shire__list">
-              {zadachi.shire.punkty.map((punkt) => (
-                <li key={punkt}>{punkt}</li>
-              ))}
-            </ul>
+            <p className="z4-shire__text">{V_ZADANII_5.text}</p>
+            <p className="z4-shire__text">
+              <a className="z4-zadachi__link" href={V_ZADANII_5.href}>
+                {V_ZADANII_5.ssylka}
+              </a>
+            </p>
           </div>
 
           <p className="z4-karta__text z4-zadachi__razbor">
