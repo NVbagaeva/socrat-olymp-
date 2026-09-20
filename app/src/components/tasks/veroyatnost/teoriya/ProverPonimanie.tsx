@@ -81,30 +81,34 @@ export function ProverPonimanie({ voprosy }: ProverPonimaniyaProps) {
           </span>
           {PROVER_PONIMANIE.title}
         </h3>
-        {/* Счётчик и стрелки — одной группой: когда заголовок в узкой
-            карточке переносится, они уезжают вниз вместе. */}
+        {/* Счётчик и стрелки — отдельной строкой под заголовком, на
+            всех ширинах одинаково: втиснуть их в строку с заголовком
+            выходит только на телефоне, и карточка вела бы себя
+            по-разному на разных экранах. */}
         <div className="vpon__nav">
           <p className="vpon__schet">
             {shag + 1} / {voprosy.length}
           </p>
-          <button
-            type="button"
-            className="vpon__strelka"
-            aria-label={PROVER_PONIMANIE.nazad}
-            disabled={shag === 0}
-            onClick={() => setShag((was) => was - 1)}
-          >
-            <StrelkaIcon nazad />
-          </button>
-          <button
-            type="button"
-            className="vpon__strelka"
-            aria-label={PROVER_PONIMANIE.vpered}
-            disabled={shag === voprosy.length - 1}
-            onClick={() => setShag((was) => was + 1)}
-          >
-            <StrelkaIcon nazad={false} />
-          </button>
+          <div className="vpon__strelki">
+            <button
+              type="button"
+              className="vpon__strelka"
+              aria-label={PROVER_PONIMANIE.nazad}
+              disabled={shag === 0}
+              onClick={() => setShag((was) => was - 1)}
+            >
+              <StrelkaIcon nazad />
+            </button>
+            <button
+              type="button"
+              className="vpon__strelka"
+              aria-label={PROVER_PONIMANIE.vpered}
+              disabled={shag === voprosy.length - 1}
+              onClick={() => setShag((was) => was + 1)}
+            >
+              <StrelkaIcon nazad={false} />
+            </button>
+          </div>
         </div>
       </header>
 
