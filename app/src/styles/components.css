@@ -2230,7 +2230,10 @@ a.task-card {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 500;
-  color: var(--color-text);
+  /* Цвет вкладки — синий: отсюда значок берёт его через currentColor.
+     Подпись перекрашивается в тёмный правилом ниже, поэтому отдельно
+     значок не красится нигде. */
+  color: var(--color-primary);
   background: transparent;
   text-decoration: none;
   cursor: pointer;
@@ -2242,15 +2245,15 @@ a.task-card {
 .tabs--lenta a[role='tab']:hover,
 .topic-tabs__more:hover {
   background: var(--color-surface);
-  color: var(--color-text);
 }
 .tabs--lenta button[aria-selected='true'],
 .tabs--lenta a[role='tab'][aria-selected='true'] {
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
-/* Значок наследует цвет подписи: на активной вкладке белый,
-   на остальных синий. */
+/* Значок цвета не имеет: берёт его у вкладки через currentColor.
+   Поэтому на активной он белый, на остальных синий, и правило
+   одно на все значки ленты. */
 .tabs--lenta .tabs__ico,
 .topic-tabs__more .tabs__ico {
   display: grid;
@@ -2258,16 +2261,25 @@ a.task-card {
   flex: none;
   width: 22px;
   height: 22px;
-  color: var(--color-primary);
 }
 .tabs--lenta .tabs__ico svg,
 .topic-tabs__more .tabs__ico svg {
   width: 100%;
   height: 100%;
 }
-.tabs--lenta button[aria-selected='true'] .tabs__ico,
-.tabs--lenta a[role='tab'][aria-selected='true'] .tabs__ico {
-  color: currentColor;
+/* Подпись тёмная, пока вкладка не активна и на неё не наводят;
+   в обоих этих случаях она принимает цвет вкладки — белый
+   на заливке, синий под курсором. */
+.tabs--lenta .tabs__text,
+.topic-tabs__more .tabs__text {
+  color: var(--color-text);
+}
+.tabs--lenta button:hover .tabs__text,
+.tabs--lenta a[role='tab']:hover .tabs__text,
+.topic-tabs__more:hover .tabs__text,
+.tabs--lenta button[aria-selected='true'] .tabs__text,
+.tabs--lenta a[role='tab'][aria-selected='true'] .tabs__text {
+  color: inherit;
 }
 /* Подпись переносится по словам там, где в строку не влезает
    («Ключевые методы решения»), и не сокращается. */
