@@ -132,8 +132,12 @@ const KNOWN_A = { vertex: { xNonZero: true }, bInteger: true, marks: { vertex: t
 /* Вершина подальше от оси Oy: тогда b = −2am у задач с известным a
    не совпадает с b задач на систему, где вершина рядом с осью. */
 const FAR = { vertex: { xNonZero: true, xAbsMin: 4 }, bInteger: true, marks: { vertex: true } };
+/* Система: точка на Oy и два узла по обе стороны от вершины. Пара
+   несимметричная; симметричная — не больше двух на набор, с пометкой. */
 const SYSTEM = { vertex: { xNonZero: true }, bInteger: true, cVisible: true, cNonZero: true,
-                 marks: { intercept: true, points: 2, sides: 'both' } };
+                 marks: { intercept: true, points: 2, sides: 'both', symmetric: false } };
+const SYSTEM_SYMMETRIC = { ...SYSTEM, marks: { ...SYSTEM.marks, symmetric: true } };
+const SYMMETRY = 'симметрия — вершина по двум точкам';
 const VALUE_B = {
   kind: 'prep',
   id: 'P12Q-4',
@@ -143,6 +147,7 @@ const VALUE_B = {
   axisLabels: 'minimal',
   uniqueVertices: true,
   uniqueAnswers: true,
+  maxSymmetricPairs: 2,
   composition: {
     count: 10,
     minUp: 4,
@@ -151,6 +156,7 @@ const VALUE_B = {
     uniqueAnswers: true,
     allIntegerB: true,
     knownA: 6,
+    maxSymmetricPairs: 2,
   },
   tasks: tasks('P12Q-4', [
     { answerRule: 'b', answerType: 'number', knownA: true, constraints: { ...FAR, direction: 'up', absA: 1 } },
@@ -162,8 +168,8 @@ const VALUE_B = {
     /* В системе a получается сам: целый или половина — оба читаются. */
     { answerRule: 'b', answerType: 'number', knownA: false, constraints: { ...SYSTEM, direction: 'up', absA: 1 } },
     { answerRule: 'b', answerType: 'number', knownA: false, constraints: { ...SYSTEM, direction: 'down', absA: 1 } },
-    { answerRule: 'b', answerType: 'number', knownA: false, constraints: { ...SYSTEM, direction: 'up', absA: [1, 2] } },
-    { answerRule: 'b', answerType: 'number', knownA: false, constraints: { ...SYSTEM, direction: 'down', absA: [1, 2] } },
+    { answerRule: 'b', answerType: 'number', knownA: false, levelReason: SYMMETRY, constraints: { ...SYSTEM_SYMMETRIC, direction: 'up', absA: [1, 2] } },
+    { answerRule: 'b', answerType: 'number', knownA: false, levelReason: SYMMETRY, constraints: { ...SYSTEM_SYMMETRIC, direction: 'down', absA: [1, 2] } },
   ]),
 };
 
@@ -290,14 +296,16 @@ const EQUATION_SET = {
   ]),
 };
 
-/* 8. Парабола и прямая: абсцисса или ордината точки пересечения. */
-const CROSS_LINE = (which, axis, visible, extra) => ({
+/* 8. Парабола и прямая: абсцисса или ордината скрытой точки пересечения.
+   На чертеже ровно одна точка пересечения, отмеченная; вторая за рамкой
+   с запасом, ответ только решением уравнения. */
+const CROSS_LINE = (axis, extra) => ({
   answerRule: axis === 'y' ? 'intersection-y' : 'intersection-x',
   answerType: 'number',
   constraints: {
     marks: { vertex: true }, cVisible: true,
     line: { absKMin: [1, 2] },
-    intersection: { visible, which, axis, labels: false },
+    intersection: { visible: 'one', which: 'hidden', axis, marks: 'visible', labels: false },
     ...extra,
   },
 });
@@ -317,31 +325,32 @@ const CROSS_LINE_SET = {
     uniqueVertices: true,
     uniqueAnswers: true,
     intersectionsInteger: true,
-    visibleBoth: 6,
-    visibleOne: 4,
+    visibleBoth: 0,
+    visibleOne: 10,
   },
   tasks: tasks('P12Q-8', [
-    CROSS_LINE('left', 'x', 'both', { direction: 'up', absA: 1 }),
-    CROSS_LINE('right', 'y', 'both', { direction: 'down', absA: 1 }),
-    CROSS_LINE('upper', 'x', 'both', { direction: 'up', absA: [1, 2] }),
-    CROSS_LINE('lower', 'y', 'both', { direction: 'down', absA: 2 }),
-    CROSS_LINE('right', 'x', 'both', { direction: 'up', absA: 2 }),
-    CROSS_LINE('left', 'y', 'both', { direction: 'down', absA: [1, 2] }),
-    CROSS_LINE('hidden', 'x', 'one', { direction: 'up', absA: 1 }),
-    CROSS_LINE('hidden', 'y', 'one', { direction: 'down', absA: 1 }),
-    CROSS_LINE('hidden', 'x', 'one', { direction: 'up', absA: [1, 2] }),
-    CROSS_LINE('hidden', 'y', 'one', { direction: 'down', absA: 2 }),
+    CROSS_LINE('x', { direction: 'up', absA: 1 }),
+    CROSS_LINE('y', { direction: 'down', absA: 1 }),
+    CROSS_LINE('x', { direction: 'up', absA: [1, 2] }),
+    CROSS_LINE('y', { direction: 'down', absA: 2 }),
+    CROSS_LINE('x', { direction: 'up', absA: 2 }),
+    CROSS_LINE('y', { direction: 'down', absA: [1, 2] }),
+    CROSS_LINE('x', { direction: 'up', absA: 1, line: { absKMin: 1 } }),
+    CROSS_LINE('y', { direction: 'down', absA: 1, line: { absKMin: 1 } }),
+    CROSS_LINE('x', { direction: 'up', absA: [1, 2], line: { direction: 'down' } }),
+    CROSS_LINE('y', { direction: 'down', absA: 2, line: { direction: 'up' } }),
   ]),
 };
 
-/* 9. Парабола и парабола: одна точка пересечения видна, вторая — по Виета. */
-const CROSS_PARABOLA = (which, axis, visible, extra) => ({
+/* 9. Парабола и парабола: одна точка пересечения видна и подписана,
+   вторая — за рамкой, по Виета. */
+const CROSS_PARABOLA = (axis, extra) => ({
   answerRule: axis === 'y' ? 'intersection-y' : 'intersection-x',
   answerType: 'number',
   constraints: {
     marks: { vertex: true }, cVisible: true,
     second: { aKind: 'any', marks: { vertex: true } },
-    intersection: { visible, which, axis, labels: true, gapMax: 6 },
+    intersection: { visible: 'one', which: 'hidden', axis, marks: 'visible', labels: true, gapMax: 6 },
     ...extra,
   },
 });
@@ -361,20 +370,20 @@ const CROSS_PARABOLA_SET = {
     uniqueVertices: true,
     uniqueAnswers: true,
     intersectionsInteger: true,
-    visibleBoth: 2,
-    visibleOne: 8,
+    visibleBoth: 0,
+    visibleOne: 10,
   },
   tasks: tasks('P12Q-9', [
-    CROSS_PARABOLA('hidden', 'x', 'one', { direction: 'up', absA: 1 }),
-    CROSS_PARABOLA('hidden', 'y', 'one', { direction: 'down', absA: 1 }),
-    CROSS_PARABOLA('hidden', 'x', 'one', { direction: 'up', absA: 2 }),
-    CROSS_PARABOLA('hidden', 'y', 'one', { direction: 'down', absA: 2 }),
-    CROSS_PARABOLA('hidden', 'x', 'one', { direction: 'up', absA: [1, 2] }),
-    CROSS_PARABOLA('hidden', 'y', 'one', { direction: 'down', absA: [1, 2] }),
-    CROSS_PARABOLA('hidden', 'x', 'one', { direction: 'down', absA: 1 }),
-    CROSS_PARABOLA('hidden', 'y', 'one', { direction: 'up', absA: 2 }),
-    CROSS_PARABOLA('left', 'x', 'both', { direction: 'up', absA: 1 }),
-    CROSS_PARABOLA('right', 'y', 'both', { direction: 'down', absA: 1 }),
+    CROSS_PARABOLA('x', { direction: 'up', absA: 1 }),
+    CROSS_PARABOLA('y', { direction: 'down', absA: 1 }),
+    CROSS_PARABOLA('x', { direction: 'up', absA: 2 }),
+    CROSS_PARABOLA('y', { direction: 'down', absA: 2 }),
+    CROSS_PARABOLA('x', { direction: 'up', absA: [1, 2] }),
+    CROSS_PARABOLA('y', { direction: 'down', absA: [1, 2] }),
+    CROSS_PARABOLA('x', { direction: 'down', absA: 1 }),
+    CROSS_PARABOLA('y', { direction: 'up', absA: 2 }),
+    CROSS_PARABOLA('x', { direction: 'up', absA: 1, second: { aKind: 'fraction', marks: { vertex: true } } }),
+    CROSS_PARABOLA('y', { direction: 'down', absA: 1, second: { absA: 2, marks: { vertex: true } } }),
   ]),
 };
 

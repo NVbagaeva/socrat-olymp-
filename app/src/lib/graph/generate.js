@@ -660,6 +660,10 @@ function assemble(set, seed) {
     if (set.uniqueAnswers && candidate.answerKey && count(candidate.answerKey)) { return true; }
     /* Парабола: вершина не повторяется в наборе, если набор так просит. */
     if (set.uniqueVertices && candidate.vertexKey && count(candidate.vertexKey)) { return true; }
+    /* Парабола: симметричных пар отмеченных точек в наборе не больше,
+       чем разрешено. */
+    if (set.maxSymmetricPairs !== undefined && candidate.symmetricPair &&
+        count('sym:pair') >= set.maxSymmetricPairs) { return true; }
     return false;
   }
 
@@ -669,6 +673,7 @@ function assemble(set, seed) {
     used[candidate.interceptKey] = count(candidate.interceptKey) + delta;
     if (candidate.answerKey) { used[candidate.answerKey] = count(candidate.answerKey) + delta; }
     if (candidate.vertexKey) { used[candidate.vertexKey] = count(candidate.vertexKey) + delta; }
+    if (candidate.symmetricPair) { used['sym:pair'] = count('sym:pair') + delta; }
   }
 
   /* У каждой ещё не разобранной задачи остался хотя бы один кандидат

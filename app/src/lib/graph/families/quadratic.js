@@ -99,7 +99,13 @@ var RULES = {
   windowMax:     8,
   vertexMargin:  1,      /* вершина не ближе клетки к рамке окна           */
   sidePoints:    1,      /* целых точек по каждую сторону от вершины       */
-  edge:          1       /* целая точка на самой рамке опорной не считается */
+  edge:          1,      /* целая точка на самой рамке опорной не считается */
+
+  /* Пересечение двух графиков: видимая точка — очевидная, скрытая —
+     не угадывается продолжением графика. */
+  crossMargin:       2,  /* видимая точка не ближе двух клеток к рамке      */
+  crossOffscreenMin: 2,  /* скрытая точка вынесена за рамку не меньше чем на две клетки */
+  crossAngleMin:     15  /* угол между кривыми в видимой точке, градусы     */
 };
 
 /**
@@ -203,6 +209,53 @@ function intersectParabola(p, q) {
   var xs = solve(sub(p.a, q.a), sub(p.b, q.b), sub(p.c, q.c));
   if (xs === null) { return null; }
   return xs.map(function (x) { return { x: x, y: yAt(p, x) }; });
+}
+
+/* ── Пересечение двух графиков ─────────────────────────────── */
+
+/* Значение и наклон кривой в точке: парабола или прямая семейства line. */
+function curveValue(part, x) {
+  return part.kind === 'line'
+    ? part.line.kValue * x + part.line.bValue
+    : part.curve.aValue * x * x + part.curve.bValue * x + part.curve.cValue;
+}
+
+function curveSlope(part, x) {
+  return part.kind === 'line' ? part.line.kValue : 2 * part.curve.aValue * x + part.curve.bValue;
+}
+
+/** Угол между кривыми в точке с абсциссой x, в градусах. */
+function crossAngle(first, second, x) {
+  var a1 = Math.atan(curveSlope(first, x));
+  var a2 = Math.atan(curveSlope(second, x));
+  return Math.abs(a1 - a2) * 180 / Math.PI;
+}
+
+/**
+ * Кривые расходятся от видимой точки и на видимой части окна больше
+ * не сближаются: зазор между ними по вертикали от видимой точки в
+ * сторону скрытой не убывает, пока обе кривые в окне. Иначе вторая
+ * точка читалась бы на глаз продолжением графика.
+ */
+function gapGrows(first, second, win, visible, hidden) {
+  var dir = hidden.x > visible.x ? 1 : -1;
+  var prev = 0;
+  for (var t = 0; ; t += 0.1) {
+    var x = visible.x + dir * t;
+    if (x < win.xmin - 1e-9 || x > win.xmax + 1e-9) { break; }
+    var f = curveValue(first, x);
+    var g = curveValue(second, x);
+    if (Math.abs(f) > win.ymax + 1e-9 || Math.abs(g) > win.ymax + 1e-9) { break; }
+    var gap = Math.abs(f - g);
+    if (gap < prev - 1e-9) { return false; }
+    prev = gap;
+  }
+  return true;
+}
+
+/** На сколько клеток точка вынесена за рамку окна; внутри — ноль. */
+function offscreenBy(point, win) {
+  return Math.max(Math.abs(point.x) - win.xmax, Math.abs(point.y) - win.ymax, 0);
 }
 
 /* ── Читаемость на сетке ───────────────────────────────────── */
@@ -343,6 +396,8 @@ var api = {
   intersectParabola: intersectParabola, integerPoints: integerPoints,
   pointInside: pointInside, vertexInside: vertexInside, readable: readable,
   windowOf: windowOf, windowForExact: windowForExact,
+  curveValue: curveValue, curveSlope: curveSlope, crossAngle: crossAngle, gapGrows: gapGrows,
+  offscreenBy: offscreenBy,
   equationText: equationText, coefficientText: coefficientText, signedTerm: signedTerm,
   numberText: numberText
 };
@@ -351,4 +406,5 @@ export default api;
 export { create, vertex, roots, valueAt, windowFor, asymptotes,
          RULES, FORMS, toExact, exact, fromVertex, fromRoots, yAt, solve, xForValue, rootsOf,
          intersectLine, intersectParabola, integerPoints, pointInside, vertexInside, readable,
-         windowOf, windowForExact, equationText, coefficientText, signedTerm, numberText };
+         windowOf, windowForExact, curveValue, curveSlope, crossAngle, gapGrows, offscreenBy,
+         equationText, coefficientText, signedTerm, numberText };

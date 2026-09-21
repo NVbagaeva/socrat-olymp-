@@ -24,16 +24,23 @@
      rootsVisible: true                               — нули внутри окна
      form:       'general' | 'vertex' | 'roots'       — запись формулы
      window, windowMin, windowMax, vertexMargin, sidePoints
-     marks:      { vertex, intercept, points: n, labels, sides: 'both' }
+     marks:      { vertex, intercept, points: n, labels, sides: 'both',
+                   symmetric: true | false }  — пара точек симметрична
+                   относительно оси параболы или нет; не задано — любая
      query:      { type: 'value-at' | 'argument-for', outside, xAbsMax,
                    yAbsMax, allowHalf, answerKind, side, pick, decimals }
      line:       { … ограничения наклона прямой: kKind, direction,
                    absKMin, absKMax }                 — парабола и прямая
      second:     { … ограничения a второй параболы }  — две параболы
-     intersection: { visible: 'both' | 'one', which: 'left' | 'right' |
-                   'upper' | 'lower' | 'visible' | 'hidden', axis: 'x' | 'y',
-                   marks: 'both' | 'asked' | 'other' | 'visible' | 'none',
-                   labels, avoidAxes, gapMax }
+     intersection: { visible: 'one' | 'both', which: 'hidden' | 'left' |
+                   'right' | 'upper' | 'lower' | 'visible', axis: 'x' | 'y',
+                   marks: 'visible' | 'both' | 'asked' | 'other' | 'none',
+                   labels, avoidAxes, gapMax, margin, offscreenMin, angleMin }
+                   При visible: 'one' видимая точка стоит в узле не ближе
+                   margin клеток к рамке, скрытая вынесена за рамку не
+                   меньше чем на offscreenMin, угол в видимой точке не
+                   меньше angleMin, зазор между кривыми на видимой части
+                   не убывает, а вопрос — всегда о скрытой точке.
      options:    число вариантов формулы (по умолчанию 6)
 */
 
@@ -232,9 +239,21 @@ function chooseMarks(p, win, spec, random) {
       var left = shuffled(pool.filter(function (pt) { return pt.x < p.mValue; }), random);
       var right = shuffled(pool.filter(function (pt) { return pt.x > p.mValue; }), random);
       if (!left.length || !right.length) { return null; }
-      picked.push(left[0], right[0]);
+      /* Пара по обе стороны от вершины: симметричная — если задача
+         просит симметрию, несимметричная — если запрещает. */
+      var pair = null;
+      for (var i = 0; i < left.length && !pair; i++) {
+        for (var j = 0; j < right.length && !pair; j++) {
+          var mirror = symmetricPair(p, left[i], right[j]);
+          if (spec.symmetric === true && !mirror) { continue; }
+          if (spec.symmetric === false && mirror) { continue; }
+          pair = [left[i], right[j]];
+        }
+      }
+      if (!pair) { return null; }
+      picked.push(pair[0], pair[1]);
       var rest = shuffled(pool.filter(function (pt) {
-        return pt !== left[0] && pt !== right[0];
+        return pt !== pair[0] && pt !== pair[1];
       }), random);
       while (picked.length < want && rest.length) { picked.push(rest.shift()); }
     } else {
@@ -244,6 +263,20 @@ function chooseMarks(p, win, spec, random) {
     picked.forEach(function (point) { take(point.x, point.y, 'point'); });
   }
   return marks;
+}
+
+/* Две точки симметричны относительно оси параболы: одна высота,
+   абсциссы равноудалены от вершины. По такой паре вершина находится
+   без счёта — это законный метод, но набор ограничивает число таких
+   задач и помечает их. */
+function symmetricPair(p, a, b) {
+  return Math.abs(a.y - b.y) < 1e-9 && Math.abs(a.x + b.x - 2 * p.mValue) < 1e-9;
+}
+
+/* Симметрична ли пара отмеченных узлов задачи. */
+function marksSymmetric(p, marks) {
+  var points = marks.filter(function (mark) { return mark.role === 'point'; });
+  return points.length === 2 && symmetricPair(p, points[0], points[1]);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -392,6 +425,7 @@ function singleCandidates(task, set, seed, opts) {
         found.push({
           parts: [{ kind: 'quadratic', curve: p, color: 'lineA', points: marks, label: true }],
           curve: p, window: win, points: marks, query: query, form: form,
+          symmetricPair: marksSymmetric(p, marks),
           answerKey: answerKeyOf(task, p, query),
           score: balanceScore(p, win, marks),
           pairKey: 'q:' + sig,
@@ -480,14 +514,21 @@ function pointPairs(p, win, spec) {
     return pairs;
   }
 
-  /* Одна точка внутри окна, вторая — за его рамкой: по x или по y. */
+  /* Одна точка внутри окна, вторая — за его рамкой: по x или по y.
+     Видимая стоит не ближе margin клеток к рамке, скрытая вынесена
+     за рамку не меньше чем на offscreenMin клеток. */
+  var margin = spec.margin === undefined ? Q.RULES.crossMargin : spec.margin;
+  var least = spec.offscreenMin === undefined ? Q.RULES.crossOffscreenMin : spec.offscreenMin;
+  inside = inside.filter(function (point) {
+    return Math.abs(point.x) <= win.xmax - margin + 1e-9 && Math.abs(point.y) <= win.ymax - margin + 1e-9;
+  });
   var gap = spec.gapMax === undefined ? 6 : spec.gapMax;
   var outside = [];
   for (var x = -(win.xmax + gap); x <= win.xmax + gap; x++) {
     var y = Q.yAt(p, x);
     if (!isInt(y)) { continue; }
     var value = num(y);
-    if (!outsideWindow(x, value, win)) { continue; }
+    if (Q.offscreenBy({ x: x, y: value }, win) < least - 1e-9) { continue; }
     if (Math.abs(value) > win.ymax + gap * 3) { continue; }
     outside.push({ x: x, y: value, visible: false });
   }
@@ -565,8 +606,12 @@ function secondOk(q, p, win, spec, readability) {
 function pairCandidates(task, set, seed) {
   var constraints = task.constraints || {};
   var spec = constraints.intersection || {};
-  var which = spec.which || 'left';
+  var oneVisible = (spec.visible || 'both') === 'one';
+  /* При одной видимой точке вопрос всегда о скрытой: видимая — опора
+     для решения, ответом она не бывает. */
+  var which = oneVisible ? 'hidden' : (spec.which || 'left');
   var axis = spec.axis || 'x';
+  var angleMin = spec.angleMin === undefined ? Q.RULES.crossAngleMin : spec.angleMin;
   var withLine = !!constraints.line;
   var random = rng(set.id + ':' + task.id + ':' + seed + ':pair');
   var firsts = singleCandidates(task, set, seed, { limit: FIRST_POOL });
@@ -609,6 +654,18 @@ function pairCandidates(task, set, seed) {
 
         var asked = askedPoint(points, which);
         var answer = axis === 'y' ? asked.y : asked.x;
+        var firstPart = { kind: 'quadratic', curve: p };
+        if (oneVisible) {
+          var visible = points[0].visible ? points[0] : points[1];
+          var hidden = points[0].visible ? points[1] : points[0];
+          /* Видимая точка очевидна: кривые пересекаются под заметным
+             углом, а не касаются и не идут рядом. */
+          if (Q.crossAngle(firstPart, other, visible.x) < angleMin - 1e-9) { return; }
+          /* Скрытая не угадывается: на видимой части кривые не сходятся. */
+          if (!Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
+          /* Ответ не читается с видимой точки. */
+          if (answer === visible.x || answer === visible.y) { return; }
+        }
         var marks = intersectionMarks(points, asked, spec);
         var sig = withLine
           ? 'ql:' + signature(p) + '|' + key(other.line.k) + '@' + key(other.line.b)
@@ -625,7 +682,8 @@ function pairCandidates(task, set, seed) {
             asked: { x: asked.x, y: asked.y, visible: asked.visible },
             other: { x: asked === points[0] ? points[1].x : points[0].x,
                      y: asked === points[0] ? points[1].y : points[0].y },
-            which: which, axis: axis, x: asked.x, y: asked.y
+            which: which, axis: axis, x: asked.x, y: asked.y,
+            oneVisible: oneVisible
           },
           answerKey: 'ans:' + answer,
           score: first.score + (marks.length ? 0.05 : 0) -
@@ -973,6 +1031,9 @@ function result(set, task, built, seed, index) {
                        other: query.other === undefined ? null : query.other,
                        pick: query.pick || null } : null,
       intersection: built.intersection || null,
+      /* Пара отмеченных узлов симметрична относительно оси параболы:
+         вершина по ней находится без счёта. Набор такие задачи считает. */
+      symmetricPair: built.symmetricPair === true,
       curves: built.parts.map(partMeta),
       level: task.level || null
     }

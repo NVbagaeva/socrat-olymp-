@@ -19,7 +19,11 @@ import path from 'node:path';
 
 import generator from '../src/lib/graph/generate.js';
 import { QUADRATIC_SETS } from './lib/quadratic-sets.mjs';
-import { checkQuadraticComposition, checkQuadraticTask } from './lib/graph-quadratic-checks.mjs';
+import { INTERSECTION_CHECKS, checkQuadraticComposition, checkQuadraticTask,
+         intersectionAudit } from './lib/graph-quadratic-checks.mjs';
+
+/* Цель по окну: ±5…±6; шире — исключение, о котором отчёт говорит вслух. */
+const WINDOW_TARGET = 6;
 
 const args = process.argv.slice(2);
 const svgDir = args.includes('--svg') ? args[args.indexOf('--svg') + 1] : null;
@@ -58,6 +62,27 @@ for (const set of QUADRATIC_SETS) {
   const distinct = new Set(tasks.map(signatureOf));
   tasks.forEach((task) => distinctAll.add(signatureOf(task)));
 
+  /* Окна шире цели — списком с причиной разобраться на этапе наборов. */
+  const wide = tasks.filter((task) => task.meta.window.xmax > WINDOW_TARGET);
+  const wideNote = wide.length === 0 ? 'все окна ±' + WINDOW_TARGET + ' или теснее'
+    : `окно шире ±${WINDOW_TARGET} у ${wide.length}: ` +
+      wide.map((task) => `${task.id} (±${task.meta.window.xmax})`).join(', ');
+
+  /* Пересечения: сколько задач прошло каждую проверку. */
+  const crossTasks = tasks.filter((task) => task.meta.intersection);
+  let crossNote = '';
+  if (crossTasks.length) {
+    const passed = {};
+    crossTasks.forEach((task) => {
+      const audit = intersectionAudit(set, task);
+      INTERSECTION_CHECKS.forEach(([id]) => { passed[id] = (passed[id] || 0) + (audit.ok[id] ? 1 : 0); });
+    });
+    crossNote = '\n    пересечения: ' + INTERSECTION_CHECKS
+      .map(([id, title]) => `${title} — ${passed[id] || 0}/${crossTasks.length}`).join('; ');
+  }
+  const symmetric = tasks.filter((task) => task.meta.symmetricPair).map((task) => task.id);
+  const symmetricNote = symmetric.length ? `; симметричные пары: ${symmetric.join(', ')}` : '';
+
   /* Случайные seed: столько же, сколько перебирает тренажёр. */
   let ok = 0;
   const seedErrors = [];
@@ -85,7 +110,7 @@ for (const set of QUADRATIC_SETS) {
   report.push(`  ${set.id} «${set.title}»: собрано ${tasks.length}, ответы: ` +
     tasks.map((task) => task.answer).join(', ') +
     `; разных чертежей ${distinct.size}; случайные seed ${ok}/${seedRuns}; ` +
-    `${Date.now() - started} мс`);
+    `${Date.now() - started} мс\n    ${wideNote}${symmetricNote}${crossNote}`);
 
   if (svgDir) {
     fs.mkdirSync(svgDir, { recursive: true });

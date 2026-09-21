@@ -41,6 +41,77 @@ function sourceTask(set, task) {
   return (set.tasks || []).find((item) => item.id === task.id) ?? {};
 }
 
+/* Пометка задачи, где вершина находится по симметричной паре точек. */
+export const SYMMETRY_REASON = 'симметрия — вершина по двум точкам';
+
+/* Кривая из meta в виде части сцены семейства: значение и наклон. */
+function partOf(curve) {
+  return curve.kind === 'line'
+    ? { kind: 'line', line: { kValue: curve.k, bValue: curve.b } }
+    : { kind: 'quadratic', curve: { aValue: curve.a, bValue: curve.b, cValue: curve.c } };
+}
+
+/* ══════════════════════════════════════════════════════════
+   Пересечение двух графиков: одна видимая точка — очевидная,
+   скрытая — не угадывается. Каждая проверка отдельно: по ним
+   отчёт считает, сколько задач прошло каждую.
+   ══════════════════════════════════════════════════════════ */
+export const INTERSECTION_CHECKS = [
+  ['oneVisible', 'ровно одна точка пересечения в окне'],
+  ['visibleMargin', 'видимая точка в узле не ближе двух клеток к рамке'],
+  ['hiddenFar', 'скрытая точка за рамкой с запасом'],
+  ['answerHidden', 'ответ — о скрытой точке и не совпадает с координатами видимой'],
+  ['angle', 'угол в видимой точке не меньше порога'],
+  ['gapGrows', 'кривые на видимой части не сходятся снова'],
+];
+
+export function intersectionAudit(set, task) {
+  const meta = task.meta;
+  const cross = meta.intersection;
+  const win = meta.window;
+  const source = sourceTask(set, task);
+  const spec = source.constraints?.intersection ?? {};
+  const out = { ok: {}, errors: [] };
+  if (!cross || !meta.curves || meta.curves.length !== 2) { return out; }
+  const points = cross.points;
+  const visible = points.filter((pt) => pt.visible);
+  const hidden = points.filter((pt) => !pt.visible);
+  const first = partOf(meta.curves[0]);
+  const second = partOf(meta.curves[1]);
+  const margin = spec.margin ?? Q.RULES.crossMargin;
+  const least = spec.offscreenMin ?? Q.RULES.crossOffscreenMin;
+  const angleMin = spec.angleMin ?? Q.RULES.crossAngleMin;
+  const answer = answerNumber(task.answer);
+
+  out.ok.oneVisible = visible.length === 1;
+  if (!out.ok.oneVisible) { out.errors.push(`в окне ${visible.length} точек пересечения, нужна ровно одна`); }
+
+  out.ok.visibleMargin = visible.every((pt) =>
+    Number.isInteger(pt.x) && Number.isInteger(pt.y) &&
+    Math.abs(pt.x) <= win.xmax - margin + EPS && Math.abs(pt.y) <= win.ymax - margin + EPS);
+  if (!out.ok.visibleMargin) { out.errors.push(`видимая точка ближе ${margin} клеток к рамке или не в узле`); }
+
+  out.ok.hiddenFar = hidden.length > 0 && hidden.every((pt) => Q.offscreenBy(pt, win) >= least - EPS);
+  if (!out.ok.hiddenFar) {
+    out.errors.push(hidden.length === 0 ? 'нет скрытой точки пересечения'
+      : `скрытая точка вынесена за рамку меньше чем на ${least} клетки`);
+  }
+
+  const asked = cross.asked;
+  out.ok.answerHidden = asked.visible === false && visible.every((pt) =>
+    !near(answer, pt.x) && !near(answer, pt.y));
+  if (!out.ok.answerHidden) { out.errors.push('вопрос должен быть о скрытой точке, ответ не читается с видимой'); }
+
+  const angles = visible.map((pt) => Q.crossAngle(first, second, pt.x));
+  out.ok.angle = angles.every((angle) => angle >= angleMin - EPS);
+  if (!out.ok.angle) { out.errors.push(`угол в видимой точке ${angles.map((a) => a.toFixed(1)).join(', ')}°, нужно не меньше ${angleMin}°`); }
+
+  out.ok.gapGrows = visible.length === 1 && hidden.length === 1 &&
+    Q.gapGrows(first, second, win, visible[0], hidden[0]);
+  if (!out.ok.gapGrows) { out.errors.push('на видимой части кривые снова сходятся — вторая точка читается на глаз'); }
+  return out;
+}
+
 /* ══════════════════════════════════════════════════════════
    Одна задача
    ══════════════════════════════════════════════════════════ */
@@ -167,7 +238,7 @@ export function checkQuadraticTask(set, task) {
       const wantVisible = source.constraints?.intersection?.visible ?? 'both';
       const visibleCount = cross.points.filter((pt) => pt.visible).length;
       if (wantVisible === 'both' && visibleCount !== 2) { fail('обе точки пересечения должны быть видны'); }
-      if (wantVisible === 'one' && visibleCount !== 1) { fail('видна должна быть ровно одна точка пересечения'); }
+      if (wantVisible === 'one') { intersectionAudit(set, task).errors.forEach(fail); }
       const second = meta.curves[1];
       if (second.kind === 'line') {
         const line = Line.create(second.kFraction, second.bFraction);
@@ -176,6 +247,14 @@ export function checkQuadraticTask(set, task) {
         fail('у второй параболы тот же a: уравнение перестаёт быть квадратным');
       }
     }
+  }
+
+  /* Симметричная пара отмеченных точек помечена в данных. */
+  if (meta.symmetricPair && task.levelReason !== SYMMETRY_REASON) {
+    fail(`отмеченные точки симметричны, а levelReason не «${SYMMETRY_REASON}»`);
+  }
+  if (!meta.symmetricPair && task.levelReason === SYMMETRY_REASON) {
+    fail('levelReason обещает симметричную пару, а точки несимметричны');
   }
 
   /* Варианты ответа. */
@@ -296,6 +375,14 @@ export function checkQuadraticComposition(set, tasks) {
       if (tasks[i].answer === tasks[i - 1].answer) { alternating = false; break; }
     }
     if (alternating) { fail('ответы идут строгим чередованием'); }
+  }
+
+  /* Симметричных пар в наборе не больше двух, если набор не просит
+     меньше. */
+  const symmetric = tasks.filter((task) => task.meta.symmetricPair).length;
+  const maxSymmetric = rules.maxSymmetricPairs ?? 2;
+  if (symmetric > maxSymmetric) {
+    fail(`симметричных пар отмеченных точек — ${symmetric}, допустимо не больше ${maxSymmetric}`);
   }
 
   if (rules.knownA !== undefined) {
