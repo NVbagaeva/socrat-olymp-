@@ -21,7 +21,10 @@ import type { RisunokState } from './OutcomeTiles';
  * вместе с решением (highlightMode 'intersection' и 'answer').
  *
  * Строгие и нестрогие границы на вероятность не влияют, а на рисунок
- * влияют: пустой кружок при строгой, закрашенный при нестрогой.
+ * влияют: пустой кружок при строгой, закрашенный при нестрогой, и
+ * знак в подписи уровня тот же — «x > c» при строгой, «x ≥ c» при
+ * нестрогой. Кружок и подпись берут вид границы из одного поля, и
+ * разойтись им негде.
  */
 
 /**
@@ -56,6 +59,12 @@ export interface Band {
   side: BandSide;
   /** Что в скобках после условия: «(0,96)». */
   note?: string;
+  /**
+   * Граница условия: строгая даёт знак «>» или «<», нестрогая — «≥»
+   * или «≤». По умолчанию строгая. У уровней, взятых из границ
+   * промежутка, — та же граница, что закрашивает кружок.
+   */
+  boundary?: Boundary;
 }
 
 /**
@@ -225,11 +234,15 @@ export function CoordinateLine({
      Без скобы высота прежняя — рисунки тренажёра не меняются. */
   const nizhneePole = brace === undefined ? 0 : 60;
   /* Уровни: свои, если заданы, иначе пара из границ промежутка —
-     тот самый случай отрезка, что рисует тренажёр. */
+     тот самый случай отрезка, что рисует тренажёр. Вид границы
+     уровня — тот же, что у кружка на оси: строгая — «x > c»,
+     нестрогая — «x ≥ c». */
   const verhniy: Band | null =
-    upper ?? (c === undefined || sobytiya ? null : { value: c, side: 'right' });
+    upper ??
+    (c === undefined || sobytiya ? null : { value: c, side: 'right', boundary: leftBoundary });
   const nizhniy: Band | null =
-    lower ?? (d === undefined || sobytiya ? null : { value: d, side: 'left' });
+    lower ??
+    (d === undefined || sobytiya ? null : { value: d, side: 'left', boundary: rightBoundary });
   /* С вероятностью в скобках подпись условия длиннее и крупнее, и
      ей нужно место над верхним уровнем: в теории рисунок сжат в узкую
      колонку, а кегль задан в единицах рисунка. Там, где скобок нет
@@ -335,10 +348,18 @@ export function CoordinateLine({
    * сторону, её верхний край, отвес к оси и подпись условия.
    */
   const uroven = (band: Band, y: number) => {
-    const { value, side, note } = band;
+    const { value, side, note, boundary = 'strict' } = band;
     const x = px(value);
     const kray = side === 'right' ? X1 + OVERHANG : X0 - OVERHANG;
-    const znak = side === 'right' ? '>' : '<';
+    /* Знак — по виду границы: нестрогая даёт ≥ и ≤. */
+    const znak =
+      side === 'right'
+        ? boundary === 'inclusive'
+          ? '≥'
+          : '>'
+        : boundary === 'inclusive'
+          ? '≤'
+          : '<';
     const text = `${axisLabel} ${znak} ${chislo(value)}${note === undefined ? '' : ` (${note})`}`;
     /* Вправо — выравнивание по умолчанию, и атрибут не пишется:
        разметка уровня совпадает с прежней до знака. */

@@ -83,13 +83,16 @@ export function KoordinatnayaPryamaya() {
           <h4 className="vteor-ideya__title">{ideya.title}</h4>
           <p>{ideya.text}</p>
         </div>
-        {/* Отрезок без чисел: показывает саму мысль, а не задачу. */}
+        {/* Отрезок без чисел: показывает саму мысль, а не задачу.
+            Концы закрашены: это отрезок с длиной, а не интервал. */}
         <CoordinateLine
           className="vteor-ideya__shema"
           min={0}
           max={10}
           c={3}
           d={7}
+          leftBoundary="inclusive"
+          rightBoundary="inclusive"
           highlightMode="segment"
           axisLabel="x"
           ticks={[
@@ -113,14 +116,20 @@ export function KoordinatnayaPryamaya() {
 
         <div className="vteor-sluchay__shema vteor-shema">
           {/* Оба условия со знаком «больше»: области смотрят вправо,
-              и одна целиком лежит в другой — это и видно на рисунке. */}
+              и одна целиком лежит в другой — это и видно на рисунке.
+              Искомый промежуток — то, что осталось от «X > 1» после
+              вычитания «X > 2»: точка 2 в него входит, точка 1 нет.
+              Поэтому левый кружок пустой, правый закрашенный — как в
+              скобе «1 < X ≤ 2» и в выкладке. */}
           <CoordinateLine
             min={0}
             max={3}
             c={1}
             d={2}
-            upper={{ value: 1, side: 'right', note: '0,96' }}
-            lower={{ value: 2, side: 'right', note: '0,85' }}
+            leftBoundary="strict"
+            rightBoundary="inclusive"
+            upper={{ value: 1, side: 'right', note: '0,96', boundary: 'strict' }}
+            lower={{ value: 2, side: 'right', note: '0,85', boundary: 'strict' }}
             axisLabel={OS}
             ticks={[0, 1, 2]}
             brace={{ from: 1, to: 2, label: `1 < ${OS} ≤ 2` }}
@@ -156,14 +165,18 @@ export function KoordinatnayaPryamaya() {
 
         <div className="vteor-sluchay__shema vteor-shema">
           {/* Условия разных знаков: области идут навстречу и
-              накладываются, но ни одна не лежит в другой. */}
+              накладываются, но ни одна не лежит в другой. Искомый
+              промежуток «1 < X < 2» — обе границы строгие, оба
+              кружка пустые. */}
           <CoordinateLine
             min={0}
             max={3}
             c={1}
             d={2}
-            upper={{ value: 2, side: 'left', note: '0,85' }}
-            lower={{ value: 1, side: 'right', note: '0,95' }}
+            leftBoundary="strict"
+            rightBoundary="strict"
+            upper={{ value: 2, side: 'left', note: '0,85', boundary: 'strict' }}
+            lower={{ value: 1, side: 'right', note: '0,95', boundary: 'strict' }}
             axisLabel={OS}
             ticks={[0, 1, 2]}
             brace={{ from: 1, to: 2, label: `1 < ${OS} < 2` }}
