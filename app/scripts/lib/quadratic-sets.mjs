@@ -343,12 +343,15 @@ const CROSS_LINE_SET = {
 };
 
 /* 9. Парабола и парабола: одна точка пересечения видна и подписана,
-   вторая — за рамкой, по Виета. */
+   вторая — за рамкой, по Виета. Точка на Oy первой параболы не
+   требуется: её a читается по вершине и подписанной точке
+   пересечения, а требование cVisible при a = ±2 оставляет одну
+   вершину на задачу, и набор не собирается. */
 const CROSS_PARABOLA = (axis, extra) => ({
   answerRule: axis === 'y' ? 'intersection-y' : 'intersection-x',
   answerType: 'number',
   constraints: {
-    marks: { vertex: true }, cVisible: true,
+    marks: { vertex: true },
     second: { aKind: 'any', marks: { vertex: true } },
     intersection: { visible: 'one', which: 'hidden', axis, marks: 'visible', labels: true, gapMax: 6 },
     ...extra,
