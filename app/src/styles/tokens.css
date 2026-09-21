@@ -155,6 +155,16 @@
   --color-glass-mid: var(--blue-glass-1);
   --color-glass-end: var(--blue-glass-2);
   --color-grid-soft: var(--blue-grid);
+  /* Стеклянный кружок GlassBadge: значок статистической карточки
+     «О задании». Три остановки радиального градиента от светлого
+     центра-верха к насыщенному краю, блик, обводка по краю и белый
+     глиф с прозрачностью, чтобы читался «под стеклом». */
+  --color-glass-badge-light: var(--blue-300);
+  --color-glass-badge-base: var(--blue-500);
+  --color-glass-badge-deep: var(--blue-700);
+  --color-glass-badge-sheen: rgba(255, 255, 255, 0.55);
+  --color-glass-badge-rim: rgba(255, 255, 255, 0.5);
+  --color-glass-badge-glyph: rgba(255, 255, 255, 0.9);
   /* Полупрозрачный фон липкой панели поверх --color-bg */
   --color-bg-translucent: rgba(245, 249, 255, 0.92);
   --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
@@ -206,6 +216,11 @@
   --shadow-sm: 0 2px 6px rgba(16, 23, 40, 0.05);
   --shadow-md: 0 8px 24px rgba(16, 23, 40, 0.06);
   --shadow-lg: 0 16px 40px rgba(16, 23, 40, 0.1);
+  /* Единственное разрешённое свечение — для статистических карточек
+     «О задании». Голубое, без смещения, с большим размытием: карточка
+     выделена мягким ореолом по контуру, а не жёсткой линией. Больше
+     нигде не использовать. */
+  --glow-accent: 0 0 24px rgba(155, 192, 242, 0.55);
 
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;

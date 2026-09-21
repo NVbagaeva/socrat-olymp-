@@ -2219,3 +2219,59 @@ a.task-card {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* ── Стеклянный кружок GlassBadge ─────────────────────────────
+   Значок статистической карточки «О задании»: стекло рисует SVG,
+   глиф лежит поверх отдельным слоем. Цвета остановок градиента,
+   блика, обводки и глифа — токены --color-glass-badge-*. */
+
+.glass-badge {
+  --glass-badge-size: 72px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--glass-badge-size);
+  height: var(--glass-badge-size);
+}
+.glass-badge__glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.glass-badge__stop-light {
+  stop-color: var(--color-glass-badge-light);
+}
+.glass-badge__stop-base {
+  stop-color: var(--color-glass-badge-base);
+}
+.glass-badge__stop-deep {
+  stop-color: var(--color-glass-badge-deep);
+}
+.glass-badge__sheen {
+  fill: var(--color-glass-badge-sheen);
+}
+.glass-badge__rim {
+  fill: none;
+  stroke: var(--color-glass-badge-rim);
+  stroke-width: 1;
+}
+/* Глиф — 48% от кружка, как на макете: 35px в 72, 27px в 56. */
+.glass-badge__glyph {
+  position: relative;
+  display: block;
+  width: 48%;
+  height: 48%;
+}
+.glass-glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: var(--color-glass-badge-glyph);
+}
+@media (max-width: 767.98px) {
+  .glass-badge {
+    --glass-badge-size: 56px;
+  }
+}
