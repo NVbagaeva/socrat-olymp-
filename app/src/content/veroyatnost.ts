@@ -11,18 +11,16 @@
  */
 
 import { OPORNYE } from './opornye';
+import type { RazdelTab } from './vkladki';
 import type { TutorMaterial } from './sections';
 import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
 import { trainerPage } from './trainerModes';
 
-/** Вкладка раздела: хвост адреса и есть её идентификатор. */
-export interface VeroyatnostTab {
-  id: string;
-  label: string;
-  /** Часть адреса после /zadaniya/{slug}/. Пусто — сам адрес раздела. */
-  tail: string;
-}
+/* Вкладка раздела описывается общим типом: лента у всех заданий одна
+   (components/tasks/RazdelTabs). Имя оставлено прежним, чтобы
+   не править импорты по всему разделу. */
+export type VeroyatnostTab = RazdelTab;
 
 export interface VeroyatnostSection {
   /** Номер задания в экзамене, две цифры — как в банке заданий. */
@@ -62,12 +60,12 @@ export interface VeroyatnostSection {
  * режимы, он выбирается в конфигураторе тренировки.
  */
 const TABS_4: readonly VeroyatnostTab[] = [
-  { id: 'o-zadanii', label: 'О задании', tail: '' },
-  { id: 'teoriya', label: 'Теория', tail: 'teoriya/' },
-  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
-  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
-  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-  { id: 'generator', label: 'Генератор', tail: 'generator/' },
+  { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
+  { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
+  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/', icon: 'bulb' },
+  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
+  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+  { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
 ];
 
 /**
@@ -76,11 +74,11 @@ const TABS_4: readonly VeroyatnostTab[] = [
  * нет — её текст для №5 автор ещё не писал; появится вместе с текстом.
  */
 const TABS_5: readonly VeroyatnostTab[] = [
-  { id: 'teoriya', label: 'Теория', tail: '' },
-  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/' },
-  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
-  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-  { id: 'generator', label: 'Генератор', tail: 'generator/' },
+  { id: 'teoriya', label: 'Теория', tail: '', icon: 'book' },
+  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/', icon: 'bulb' },
+  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
+  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+  { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
 ];
 
 /**

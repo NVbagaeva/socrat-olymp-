@@ -94,53 +94,9 @@
 
 /* ── Лента вкладок ──────────────────────────────────────────── */
 
-.topic-tabs {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-  /* Вкладки не переносятся и не сжимаются: когда они перестают
-     помещаться, лента прокручивается вбок. */
-  overflow-x: auto;
-  scrollbar-width: none;
-  /* Тени по краям: две нижние подложки показывают, что прокручивать
-     есть куда, две верхние закрывают их, пока лента не сдвинута.
-     Отдельных стрелок нет — они здесь ничего не добавляют. */
-  background:
-    linear-gradient(to right, var(--color-bg) 45%, transparent) left center,
-    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
-    radial-gradient(
-        farthest-side at 0 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      left center,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      right center;
-  background-repeat: no-repeat;
-  background-size:
-    32px 100%,
-    32px 100%,
-    12px 100%,
-    12px 100%;
-  background-attachment: local, local, scroll, scroll;
-}
-.topic-tabs::-webkit-scrollbar {
-  display: none;
-}
-/* Набор вкладок отдаёт черту самой ленте: иначе на прокрутке она
-   обрывалась бы вместе с содержимым. */
-.topic-tabs .tabs {
-  border-bottom: 0;
-  flex: 0 0 auto;
-}
-.topic-tabs .tabs button {
-  white-space: nowrap;
-}
+/* Оформление ленты — общее, в styles/components.css: плашка,
+   вкладки и кнопка материалов одинаковы во всех разделах.
+   Здесь остаётся только то, что относится к странице темы. */
 
 /* ── Раскладка вкладки ──────────────────────────────────────── */
 
@@ -530,33 +486,13 @@
    поля и тот же кегль. Заливку несёт внутренняя плашка — её поля
    выбраны отрицательными отступами, поэтому раскрытая кнопка красится,
    но лента от этого не становится выше. */
-.topic-tabs__more {
-  flex: 0 0 auto;
-  padding: 0 0 var(--space-3);
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
-  font-size: 15px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  transition: color var(--dur-switch) var(--ease);
-}
-.topic-tabs__more:hover {
-  color: var(--color-text);
-}
 .topic-tabs__more[aria-expanded='true'] {
-  color: var(--color-primary);
+  background: var(--color-surface);
 }
 .topic-tabs__more-in {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 2px var(--space-3);
-  margin: -2px calc(var(--space-3) * -1);
-  border-radius: var(--radius-pill);
-  transition: background-color var(--dur-switch) var(--ease);
-}
-.topic-tabs__more[aria-expanded='true'] .topic-tabs__more-in {
-  background: var(--color-surface-soft);
 }
 .topic-tabs__more svg {
   width: 16px;

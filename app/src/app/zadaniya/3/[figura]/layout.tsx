@@ -7,7 +7,8 @@ import { tasksPage } from '@/content/tasks';
 import { razdelBySlug } from '@/lib/zadanie3';
 import { THUMBS } from '@/lib/solid/drawings';
 import { type Model } from '@/lib/solid';
-import { FiguraTabs } from './FiguraTabs';
+import { RazdelTabs } from '@/components/tasks/RazdelTabs';
+import { VKLADKI_FIGURY } from '@/content/vkladki';
 import '@/lib/solid/solid.css';
 import '../../zadaniya.css';
 import '../../[task]/section.css';
@@ -78,7 +79,7 @@ export default async function FiguraLayout({
           </div>
         </header>
 
-        <FiguraTabs base={base} />
+        <RazdelTabs base={base} tabs={VKLADKI_FIGURY} />
 
         <div className="section-panel">{children}</div>
       </main>

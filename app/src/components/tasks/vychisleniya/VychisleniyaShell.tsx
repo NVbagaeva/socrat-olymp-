@@ -2,7 +2,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Badge, Breadcrumbs } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
-import { VychisleniyaTabs } from './VychisleniyaTabs';
+import { RazdelTabs } from '../RazdelTabs';
 
 /**
  * Оболочка задания №8: крошки, заголовок и лента вкладок.
@@ -35,7 +35,7 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <VychisleniyaTabs base={base} tabs={VYCHISLENIYA.tabs} tutors={VYCHISLENIYA.tutors} />
+        <RazdelTabs base={base} tabs={VYCHISLENIYA.tabs} tutors={VYCHISLENIYA.tutors} />
 
         <div className="section-panel">{children}</div>
       </main>

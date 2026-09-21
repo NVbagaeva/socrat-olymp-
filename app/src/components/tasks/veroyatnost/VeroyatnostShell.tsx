@@ -2,7 +2,8 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Badge, Breadcrumbs } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
-import { VeroyatnostTabs } from './VeroyatnostTabs';
+import { TUTORS_TAIL } from '@/content/vkladki';
+import { RazdelTabs } from '../RazdelTabs';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -45,9 +46,10 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           </div>
         </header>
 
-        <VeroyatnostTabs
+        <RazdelTabs
           base={base}
           tabs={section.tabs}
+          tutorsTail={TUTORS_TAIL}
           {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
         />
 

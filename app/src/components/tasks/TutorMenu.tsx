@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef } from 'react';
 import { useDismiss } from '@/lib/dismiss';
+import { NavIcon } from '@/components/ui';
 import type { ReactNode, RefObject } from 'react';
 import type { TutorMaterial } from '@/content/sections';
 
@@ -74,10 +75,7 @@ function place(node: HTMLElement): void {
   const width = Math.min(MENU_MAX, rowBox.width);
   const start = btnBox.left - rowBox.left;
   const left = Math.max(0, Math.min(start, rowBox.width - width));
-  const nose = Math.max(
-    NOSE_EDGE,
-    Math.min(start + btnBox.width / 2 - left, width - NOSE_EDGE),
-  );
+  const nose = Math.max(NOSE_EDGE, Math.min(start + btnBox.width / 2 - left, width - NOSE_EDGE));
 
   node.style.width = `${width}px`;
   node.style.left = `${left}px`;
@@ -178,7 +176,10 @@ export function TutorMenu({
           onClick={() => onOpenChange(!open)}
         >
           <span className="topic-tabs__more-in">
-            {label}
+            <span className="tabs__ico" aria-hidden="true">
+              <NavIcon name="materials" />
+            </span>
+            <span className="tabs__text">{label}</span>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M6 9l6 6 6-6" />
             </svg>

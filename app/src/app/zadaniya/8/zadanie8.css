@@ -12,19 +12,6 @@
 }
 
 /* Лента вкладок: на узком экране едет вбок, а не переносится. */
-.z8-tabs {
-  margin-top: var(--space-6);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.z8-tabs::-webkit-scrollbar {
-  display: none;
-}
-.z8-tabs a[role='tab'] {
-  white-space: nowrap;
-  text-decoration: none;
-}
-
 /* Формула вместо чертежа на карточке навыка и в сводке. */
 .z8-formula {
   display: flex;

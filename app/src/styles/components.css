@@ -2184,6 +2184,115 @@ a.task-card {
   }
 }
 
+/* ── Лента вкладок раздела ────────────────────────────────────
+   Вид по макету design-reference/mockups/zadanie-04/
+   shapka-i-vkladki-1440.jpeg: голубая плашка со скруглением и тонкой
+   обводкой, активная вкладка внутри неё — залитая синяя кнопка.
+
+   Плашка — обёртка .topic-tabs, а не сам набор вкладок: в ней рядом
+   с вкладками стоит кнопка материалов для репетитора, и подложка
+   должна быть общей. Набор .tabs--lenta внутри — только строка. */
+
+.topic-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-soft);
+  /* Вкладки не переносятся и не сжимаются: когда они перестают
+     помещаться, лента прокручивается вбок. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.topic-tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs--lenta {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+  border: 0;
+}
+.tabs--lenta button,
+.tabs--lenta a[role='tab'],
+.topic-tabs__more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  margin-bottom: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  color: var(--color-text);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.tabs--lenta button:hover,
+.tabs--lenta a[role='tab']:hover,
+.topic-tabs__more:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.tabs--lenta button[aria-selected='true'],
+.tabs--lenta a[role='tab'][aria-selected='true'] {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+/* Значок наследует цвет подписи: на активной вкладке белый,
+   на остальных синий. */
+.tabs--lenta .tabs__ico,
+.topic-tabs__more .tabs__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--color-primary);
+}
+.tabs--lenta .tabs__ico svg,
+.topic-tabs__more .tabs__ico svg {
+  width: 100%;
+  height: 100%;
+}
+.tabs--lenta button[aria-selected='true'] .tabs__ico,
+.tabs--lenta a[role='tab'][aria-selected='true'] .tabs__ico {
+  color: currentColor;
+}
+/* Подпись переносится по словам там, где в строку не влезает
+   («Ключевые методы решения»), и не сокращается. */
+.tabs--lenta .tabs__text,
+.topic-tabs__more .tabs__text {
+  text-align: left;
+  text-wrap: balance;
+}
+/* Материалы для репетитора отделены чертой: на макете это не вкладка
+   раздела, а выход к печатным файлам. Черта — на отдельном элементе,
+   иначе она прилипала бы к рамке кнопки при наведении. */
+.topic-tabs__more {
+  position: relative;
+  margin-left: var(--space-3);
+}
+.topic-tabs__more::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-3) * -1 - 1px);
+  top: var(--space-2);
+  bottom: var(--space-2);
+  width: 1px;
+  background: var(--color-border-strong);
+}
+
 /* ── Чип ─────────────────────────────────────────────────────
    Кнопка-пилюля: навык в подготовительных задачах №12 и тип
    задания в тренажёре №3. Общий слой, потому что нужен обоим:
