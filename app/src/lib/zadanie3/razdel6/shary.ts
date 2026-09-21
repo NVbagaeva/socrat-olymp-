@@ -12,7 +12,7 @@
 
 import { areaUnits, approxArea, solveBySearch, volumeUnits } from './common';
 import { twoBalls } from './drawings';
-import { razaWord, ru } from '../format';
+import { razaWord, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -62,12 +62,15 @@ export const P03_71: Prototype = {
     const sum = a * a + b * b;
     return [
       {
-        text:
-          'Поверхность шара растёт как квадрат радиуса, поэтому складываются квадраты: ' +
-          `${ru(a)}² + ${ru(b)}² = ${ru(sum)}.`,
+        text: 'Поверхность шара растёт как квадрат радиуса, поэтому складываются квадраты радиусов.',
+        formula: `${tex(a)}^2 + ${tex(b)}^2 = ${tex(round(a * a))} + ${tex(round(b * b))} = ${tex(round(sum))}`,
         value: sum,
       },
-      { text: `Радиус: √${ru(sum)} = ${ru(Math.sqrt(sum))}.`, value: Math.sqrt(sum) },
+      {
+        text: 'Искомый радиус — корень из этой суммы.',
+        formula: `\\sqrt{${tex(round(sum))}} = ${tex(round(Math.sqrt(sum)))}`,
+        value: Math.sqrt(sum),
+      },
     ];
   },
 
@@ -115,7 +118,8 @@ export const P03_72: Prototype = {
     return [
       { text: 'Площадь поверхности шара растёт как квадрат радиуса.' },
       {
-        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит поверхность — в ${ru(k)}² = ${ru(k * k)} ${razaWord(k * k)}.`,
+        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит поверхность — во столько раз, сколько даёт квадрат.`,
+        formula: `${tex(k)}^2 = ${tex(round(k * k))}`,
         value: k * k,
       },
     ];
@@ -164,7 +168,8 @@ export const P03_73: Prototype = {
     return [
       { text: 'Объём шара растёт как куб радиуса.' },
       {
-        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит объём — в ${ru(k)}³ = ${ru(k ** 3)} ${razaWord(k ** 3)}.`,
+        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит объём — во столько раз, сколько даёт куб.`,
+        formula: `${tex(k)}^3 = ${tex(round(k ** 3))}`,
         value: k ** 3,
       },
     ];

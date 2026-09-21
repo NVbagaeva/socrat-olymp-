@@ -14,7 +14,7 @@
 
 import { ballOverPi, cubeVolume, inradiusOfCube } from './common';
 import { ballInCube } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -56,13 +56,13 @@ export const P03_81: Prototype = {
     const r = a / 2;
     return [
       {
-        text: `Шар касается всех граней, поэтому его радиус — половина ребра: ${ru(a)} : 2 = ${ru(r)}.`,
+        text: 'Шар касается всех граней, поэтому его радиус — половина ребра.',
+        formula: `\\dfrac{${tex(a)}}{2} = ${tex(round(r))}`,
         value: r,
       },
       {
-        text:
-          `Объём шара — четыре трети π на куб радиуса, значит делённый на π он равен ` +
-          `4 · ${ru(r)}³ : 3 = ${ru(a ** 3 / 6)}.`,
+        text: 'Объём шара — четыре трети «пи» на куб радиуса; делённый на «пи», он теряет множитель.',
+        formula: `\\dfrac{4 \\cdot ${tex(round(r))}^3}{3} = \\dfrac{4 \\cdot ${tex(round(r ** 3))}}{3} = ${tex(round(a ** 3 / 6))}`,
         value: a ** 3 / 6,
       },
     ];
@@ -115,8 +115,16 @@ export const P03_82: Prototype = {
     const r = num(p, 'r');
     const a = 2 * r;
     return [
-      { text: `Сфера касается всех граней, значит ребро куба — диаметр: ${ru(a)}.`, value: a },
-      { text: `Объём: ${ru(a)}³ = ${ru(a ** 3)}.`, value: a ** 3 },
+      {
+        text: 'Сфера касается всех граней, значит ребро куба равно диаметру.',
+        formula: `2 \\cdot ${tex(r)} = ${tex(round(a))}`,
+        value: a,
+      },
+      {
+        text: 'Объём куба — куб его ребра.',
+        formula: `${tex(round(a))}^3 = ${tex(round(a ** 3))}`,
+        value: a ** 3,
+      },
     ];
   },
 
@@ -169,12 +177,15 @@ export const P03_83: Prototype = {
     const a = 2 * r;
     return [
       {
-        text:
-          'Сфера касается всех шести граней, а это возможно только у куба: каждое ребро ' +
-          `равно диаметру, ${ru(a)}.`,
+        text: 'Сфера касается всех шести граней, а это возможно только у куба: каждое ребро равно диаметру.',
+        formula: `2 \\cdot ${tex(r)} = ${tex(round(a))}`,
         value: a,
       },
-      { text: `Объём: ${ru(a)}³ = ${ru(a ** 3)}.`, value: a ** 3 },
+      {
+        text: 'Объём куба — куб его ребра.',
+        formula: `${tex(round(a))}^3 = ${tex(round(a ** 3))}`,
+        value: a ** 3,
+      },
     ];
   },
 

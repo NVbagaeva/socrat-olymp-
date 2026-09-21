@@ -11,7 +11,7 @@
 
 import { circumradiusOfLegs, volumeUnits } from './common';
 import { cylinderAroundPrism } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -65,15 +65,13 @@ export const P03_76: Prototype = {
     const d2 = a * a + b * b;
     return [
       {
-        text:
-          'Центр описанной окружности прямоугольного треугольника — середина гипотенузы, ' +
-          `поэтому квадрат радиуса равен четверти квадрата гипотенузы: (${ru(a)}² + ${ru(b)}²) : 4 = ${ru(d2 / 4)}.`,
+        text: 'Центр описанной окружности прямоугольного треугольника — середина гипотенузы, поэтому квадрат радиуса равен четверти квадрата гипотенузы.',
+        formula: `\\dfrac{${tex(a)}^2 + ${tex(b)}^2}{4} = \\dfrac{${tex(round(a * a))} + ${tex(round(b * b))}}{4} = \\dfrac{${tex(round(d2))}}{4} = ${tex(round(d2 / 4))}`,
         value: d2 / 4,
       },
       {
-        text:
-          `Объём цилиндра равен π · R² · h. Высота ${ru(k)} : π, поэтому π сокращается: ` +
-          `${ru(d2 / 4)} · ${ru(k)} = ${ru((k * d2) / 4)}.`,
+        text: `Объём цилиндра — «пи» на квадрат радиуса и на высоту. Высота равна ${ru(k)}, делённому на «пи», поэтому «пи» сокращается.`,
+        formula: `${tex(round(d2 / 4))} \\cdot ${tex(k)} = ${tex(round((k * d2) / 4))}`,
         value: (k * d2) / 4,
       },
     ];

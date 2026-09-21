@@ -12,7 +12,7 @@
 
 import { boxVolume, solveBySearch } from './common';
 import { H, boxAroundCylinder } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -60,11 +60,13 @@ export const P03_74: Prototype = {
     const side = 2 * r;
     return [
       {
-        text: `Основание параллелепипеда — квадрат со стороной, равной диаметру: ${ru(side)}.`,
+        text: 'Основание параллелепипеда — квадрат со стороной, равной диаметру цилиндра.',
+        formula: `2 \\cdot ${tex(r)} = ${tex(round(side))}`,
         value: side,
       },
       {
-        text: `Высота та же, что у цилиндра, поэтому объём: ${ru(side)} · ${ru(side)} · ${ru(r)} = ${ru(side * side * r)}.`,
+        text: 'Высота та же, что у цилиндра, поэтому объём — произведение трёх рёбер.',
+        formula: `${tex(round(side))} \\cdot ${tex(round(side))} \\cdot ${tex(r)} = ${tex(round(side * side))} \\cdot ${tex(r)} = ${tex(round(side * side * r))}`,
         value: side * side * r,
       },
     ];
@@ -119,11 +121,13 @@ export const P03_75: Prototype = {
     const base = 4 * r * r;
     return [
       {
-        text: `Основание — квадрат со стороной ${ru(2 * r)}, его площадь: ${ru(2 * r)} · ${ru(2 * r)} = ${ru(base)}.`,
+        text: `Основание — квадрат со стороной ${ru(2 * r)}, его площадь есть квадрат стороны.`,
+        formula: `${tex(round(2 * r))} \\cdot ${tex(round(2 * r))} = ${tex(round(base))}`,
         value: base,
       },
       {
-        text: `Высота: ${ru(V)} : ${ru(base)} = ${ru(V / base)}.`,
+        text: 'Высота — объём, делённый на площадь основания.',
+        formula: `\\dfrac{${tex(V)}}{${tex(round(base))}} = ${tex(round(V / base))}`,
         value: V / base,
       },
     ];

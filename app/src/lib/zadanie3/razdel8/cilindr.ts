@@ -15,7 +15,7 @@
 
 import { cylinderOverBallArea, cylinderOverBallVolume } from './common';
 import { ballInCylinder } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -66,7 +66,11 @@ export const P03_84: Prototype = {
           'Боковая поверхность описанного цилиндра равна поверхности шара, а два основания ' +
           'добавляют ещё половину этой величины.',
       },
-      { text: `Полная поверхность: ${ru(S)} · 1,5 = ${ru(S * 1.5)}.`, value: S * 1.5 },
+      {
+        text: 'Значит полная поверхность цилиндра в полтора раза больше поверхности шара.',
+        formula: `\\dfrac{3}{2} \\cdot ${tex(S)} = \\dfrac{${tex(round(S * 3))}}{2} = ${tex(round(S * 1.5))}`,
+        value: S * 1.5,
+      },
     ];
   },
 
@@ -110,7 +114,11 @@ export const P03_85: Prototype = {
     const V = num(p, 'V');
     return [
       { text: 'Объём описанного цилиндра в полтора раза больше объёма вписанного шара.' },
-      { text: `Объём цилиндра: ${ru(V)} · 1,5 = ${ru(V * 1.5)}.`, value: V * 1.5 },
+      {
+        text: 'Значит умножаем объём шара на полтора.',
+        formula: `\\dfrac{3}{2} \\cdot ${tex(V)} = \\dfrac{${tex(round(V * 3))}}{2} = ${tex(round(V * 1.5))}`,
+        value: V * 1.5,
+      },
     ];
   },
 
@@ -154,7 +162,11 @@ export const P03_86: Prototype = {
     const V = num(p, 'V');
     return [
       { text: 'Объём вписанного шара составляет две трети объёма описанного цилиндра.' },
-      { text: `Объём шара: ${ru(V)} · 2 : 3 = ${ru((V * 2) / 3)}.`, value: (V * 2) / 3 },
+      {
+        text: 'Значит берём две трети объёма цилиндра.',
+        formula: `\\dfrac{2}{3} \\cdot ${tex(V)} = \\dfrac{${tex(round(V * 2))}}{3} = ${tex(round((V * 2) / 3))}`,
+        value: (V * 2) / 3,
+      },
     ];
   },
 
@@ -203,7 +215,11 @@ export const P03_87: Prototype = {
           'Поверхность шара равна боковой поверхности цилиндра, а это две трети его полной ' +
           'поверхности.',
       },
-      { text: `Поверхность шара: ${ru(S)} · 2 : 3 = ${ru((S * 2) / 3)}.`, value: (S * 2) / 3 },
+      {
+        text: 'Значит берём две трети полной поверхности цилиндра.',
+        formula: `\\dfrac{2}{3} \\cdot ${tex(S)} = \\dfrac{${tex(round(S * 2))}}{3} = ${tex(round((S * 2) / 3))}`,
+        value: (S * 2) / 3,
+      },
     ];
   },
 

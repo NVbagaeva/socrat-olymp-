@@ -59,6 +59,35 @@ function longTails(text: string): string[] {
   return (text.match(/\d+[,.]\d+/g) ?? []).filter((piece) => LONG_TAIL.test(piece));
 }
 
+/**
+ * Выкладка, оставшаяся в тексте шага.
+ *
+ * Соглашение разбора: все выкладки идут в `formula` записью TeX, а
+ * текст объясняет словами (types.ts). Знак равенства, знак действия
+ * между числами, дробная черта и корень в тексте означают, что шаг
+ * перевели не до конца, — правило держится этой проверкой, а не
+ * внимательностью.
+ *
+ * Двоеточие в счёте («12 : 3») тоже считается: делить в тексте
+ * нечем, для этого есть дробь в формуле.
+ */
+const VYKLADKA_V_TEKSTE: readonly (readonly [RegExp, string])[] = [
+  [/=/, 'знак равенства'],
+  [/√/, 'корень'],
+  /* Значок степени — только после числа или латинской буквы: «см³»
+     и «дм³» — это единицы измерения, им в тексте самое место. */
+  [/[0-9a-zA-Z][²³]/, 'степень значком'],
+  [/\d\s*[·×]\s*\d/, 'умножение чисел'],
+  [/\d\s*[:÷]\s*\d/, 'деление чисел'],
+  [/\d\s*[+−]\s*\d/, 'сложение или вычитание чисел'],
+  [/[½⅓⅔¼¾⅙]/, 'дробь значком'],
+];
+
+/** Чем именно текст шага нарушает соглашение, если нарушает. */
+function vykladkiVTekste(text: string): string[] {
+  return VYKLADKA_V_TEKSTE.filter(([re]) => re.test(text)).map(([, why]) => why);
+}
+
 export function checkBank(bank: readonly Prototype[]): BankReport {
   const rows: VariantReport[] = [];
   const bySource = { задачник: 0, домашка: 0, новый: 0 };
@@ -104,6 +133,14 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
         const tails = longTails(step.text);
         if (tails.length > 0) {
           problems.push(`в шаге ${i + 1} нечищеное число: ${tails.join(', ')}`);
+        }
+        const vTekste = vykladkiVTekste(step.text);
+        if (vTekste.length > 0) {
+          problems.push(`в тексте шага ${i + 1} осталась выкладка: ${vTekste.join(', ')}`);
+        }
+        const vFormule = step.formula === undefined ? [] : longTails(step.formula);
+        if (vFormule.length > 0) {
+          problems.push(`в формуле шага ${i + 1} нечищеное число: ${vFormule.join(', ')}`);
         }
       });
       const last = steps[steps.length - 1];

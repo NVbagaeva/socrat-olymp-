@@ -11,7 +11,7 @@
 
 import { lateralUnits, solveBySearch } from './common';
 import { cylinderWithHeight } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -59,9 +59,14 @@ export const P03_63: Prototype = {
     const h = num(p, 'h');
     return [
       {
-        text: `Боковая поверхность цилиндра равна π · (диаметр) · (высота), значит π · d · ${ru(h)} = ${ru(k)}π.`,
+        text: 'Боковая поверхность цилиндра — произведение «пи», диаметра и высоты. Приравниваем её к данной.',
+        formula: `\\pi d \\cdot ${tex(h)} = ${tex(k)}\\pi`,
       },
-      { text: `Диаметр: ${ru(k)} : ${ru(h)} = ${ru(k / h)}.`, value: k / h },
+      {
+        text: 'Отсюда находим диаметр: «пи» сокращается.',
+        formula: `d = \\dfrac{${tex(k)}}{${tex(h)}} = ${tex(round(k / h))}`,
+        value: k / h,
+      },
     ];
   },
 
@@ -111,9 +116,14 @@ export const P03_64: Prototype = {
     const d = num(p, 'd');
     return [
       {
-        text: `Боковая поверхность равна π · (диаметр) · (высота), значит π · ${ru(d)} · h = ${ru(k)}π.`,
+        text: 'Боковая поверхность цилиндра — произведение «пи», диаметра и высоты. Приравниваем её к данной.',
+        formula: `\\pi \\cdot ${tex(d)} \\cdot h = ${tex(k)}\\pi`,
       },
-      { text: `Высота: ${ru(k)} : ${ru(d)} = ${ru(k / d)}.`, value: k / d },
+      {
+        text: 'Отсюда находим высоту: «пи» сокращается.',
+        formula: `h = \\dfrac{${tex(k)}}{${tex(d)}} = ${tex(round(k / d))}`,
+        value: k / d,
+      },
     ];
   },
 
