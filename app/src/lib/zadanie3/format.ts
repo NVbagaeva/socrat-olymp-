@@ -52,6 +52,45 @@ export function texSegment(pair: readonly [string, string]): string {
   return texLetters(pair[0] + pair[1]);
 }
 
+/** Слагаемое под корнем: как оно записано и чему равно. */
+export interface ChlenKornya {
+  /** Запись слагаемого в TeX: «4^2», «65». */
+  tex: string;
+  value: number;
+}
+
+/**
+ * Цепочка извлечения корня без перепрыгивания через шаг:
+ * «√(65 + 4²) = √(65 + 16) = √81 = 9».
+ *
+ * Ступени выписываются только те, что что-то меняют: если слагаемые
+ * уже числа, второй ступени нет; если слагаемое одно, нет третьей.
+ * Так у ученика не остаётся числа, взявшегося ниоткуда, но и лишних
+ * равенств не появляется.
+ *
+ * Корень обязан быть точным: иначе последней ступенью встало бы
+ * округление, выданное за равенство. Неточный корень роняет сборку с
+ * указанием, где он, — как и любая другая ошибка в данных банка.
+ */
+export function korenSummy(chleny: readonly ChlenKornya[]): string {
+  const summa = round(chleny.reduce((s, c) => s + c.value, 0));
+  const znachenie = round(Math.sqrt(summa));
+  if (!Number.isInteger(round(znachenie * 1000))) {
+    throw new Error(`Корень из ${summa} не точный: ${znachenie}`);
+  }
+  const stupeni = [`\\sqrt{${chleny.map((c) => c.tex).join(' + ')}}`];
+  const chislami = `\\sqrt{${chleny.map((c) => tex(c.value)).join(' + ')}}`;
+  if (chislami !== stupeni.at(-1)) {
+    stupeni.push(chislami);
+  }
+  const odnim = `\\sqrt{${tex(summa)}}`;
+  if (odnim !== stupeni.at(-1)) {
+    stupeni.push(odnim);
+  }
+  stupeni.push(tex(znachenie));
+  return stupeni.join(' = ');
+}
+
 /**
  * Ответ в том виде, в каком его вводят на ЕГЭ.
  * Целое — без запятой, десятичная дробь — с запятой.

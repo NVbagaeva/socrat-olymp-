@@ -10,7 +10,7 @@
 import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
-import { letters, round, ru, segment, tex, texSegment } from '../format';
+import { korenSummy, letters, round, ru, segment, tex, texSegment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
 import { solveBySearch } from '../search';
@@ -96,12 +96,15 @@ export const P03_01: Prototype = {
       },
       {
         text: 'Диагональ основания — гипотенуза прямоугольного треугольника с катетами, равными рёбрам основания. Её квадрат считаем по теореме Пифагора.',
-        formula: `${tex(a)}^2 + ${tex(b)}^2 = ${tex(base)}`,
+        formula: `${tex(a)}^2 + ${tex(b)}^2 = ${tex(a * a)} + ${tex(b * b)} = ${tex(base)}`,
         value: base,
       },
       {
         text: `Диагональ ${diag} — гипотенуза прямоугольного треугольника с катетами, равными диагонали основания и вертикальному ребру.`,
-        formula: `${diagTex} = \\sqrt{${tex(base)} + ${tex(c)}^2} = ${tex(round(Math.sqrt(base + c * c)))}`,
+        formula: `${diagTex} = ${korenSummy([
+          { tex: tex(base), value: base },
+          { tex: `${tex(c)}^2`, value: c * c },
+        ])}`,
         value: Math.sqrt(base + c * c),
       },
     ];
@@ -244,8 +247,11 @@ export const P03_02: Prototype = {
         formula: `a\\sqrt{3} = \\sqrt{${tex(d2)}}`,
       },
       {
-        text: 'Отсюда находим ребро.',
-        formula: `a = \\dfrac{\\sqrt{${tex(d2)}}}{\\sqrt{3}} = ${tex(k)}`,
+        /* Частное корней сводится к одному корню: без этой ступени
+           непонятно, откуда взялось ребро — делить корни в уме
+           ученик не умеет. Больше ступеней здесь не нужно. */
+        text: 'Отсюда находим ребро: частное корней — это корень из частного.',
+        formula: `a = \\dfrac{\\sqrt{${tex(d2)}}}{\\sqrt{3}} = \\sqrt{${tex(k * k)}} = ${tex(k)}`,
         value: k,
       },
       {
@@ -311,7 +317,10 @@ export const P03_03: Prototype = {
       { text: 'Сечение через A, B и C₁ — прямоугольник ABC₁D₁: AB параллельно D₁C₁.' },
       {
         text: 'Вторая сторона BC₁ — диагональ боковой грани, её находим по теореме Пифагора.',
-        formula: `BC_{1} = \\sqrt{${tex(b)}^2 + ${tex(c)}^2} = ${tex(round(side))}`,
+        formula: `BC_{1} = ${korenSummy([
+          { tex: `${tex(b)}^2`, value: b * b },
+          { tex: `${tex(c)}^2`, value: c * c },
+        ])}`,
         value: side,
       },
       {
@@ -406,7 +415,10 @@ export const P03_04: Prototype = {
       },
       {
         text: 'Диагональ основания — по теореме Пифагора.',
-        formula: `\\sqrt{${tex(a)}^2 + ${tex(b)}^2} = ${tex(round(diag))}`,
+        formula: korenSummy([
+          { tex: `${tex(a)}^2`, value: a * a },
+          { tex: `${tex(b)}^2`, value: b * b },
+        ]),
         value: diag,
       },
       {
