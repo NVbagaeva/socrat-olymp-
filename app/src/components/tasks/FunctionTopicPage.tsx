@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
-import { Badge, Breadcrumbs, EmptyState, HandNote, type Crumb } from '@/components/ui';
+import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
@@ -12,6 +12,7 @@ import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
+import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
 
 export interface FunctionTopicPageProps {
@@ -69,8 +70,9 @@ export function FunctionTopicPage({
 
   return (
     <main className="app-main">
-      <Breadcrumbs
-        items={[
+      <ShapkaRazdela
+        className="topic-head"
+        crumbs={[
           { label: 'Задания', href: tasksPage.href },
           {
             label: `№${section.no}. ${section.subtitle}`,
@@ -79,40 +81,37 @@ export function FunctionTopicPage({
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
-      />
-
-      <header className="topic-head">
-        <div className="topic-head__text">
-          <div className="topic-head__title">
-            <h1 className="t-h1">{subtopic.title}</h1>
-            <Badge tone="info">{topic.badge}</Badge>
-          </div>
-          <p className="topic-head__lead">{topic.lead}</p>
-
-          {/* Цитата стоит строкой под подзаголовком, а не колонкой
-              рядом: деля ширину, они ломали друг друга. */}
+        title={subtopic.title}
+        badge={topic.badge}
+        lead={topic.lead}
+        actions={
+          /* Цитата стоит строкой под подзаголовком, а не колонкой
+             рядом: деля ширину, они ломали друг друга. */
           <figure className="topic-quote">
             <blockquote className="topic-quote__text">
               <HandNote>«{topic.quote.text}»</HandNote>
             </blockquote>
             <figcaption className="topic-quote__author">— {topic.quote.author}</figcaption>
           </figure>
-        </div>
+        }
+        media={
+          <>
+            {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
+            <Image
+              className="topic-head__art"
+              src="/images/bust-galileo.webp"
+              alt=""
+              width={814}
+              height={700}
+            />
 
-        {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
-        <Image
-          className="topic-head__art"
-          src="/images/bust-galileo.webp"
-          alt=""
-          width={814}
-          height={700}
-        />
-
-        {/* Прогресс по разделам теории темы. Общее число — длина того же
-            списка, из которого строится «Содержание»: второго источника
-            у этой пары нет. */}
-        <TopicProgress total={subtopic.theory.length} />
-      </header>
+            {/* Прогресс по разделам теории темы. Общее число — длина того же
+                списка, из которого строится «Содержание»: второго источника
+                у этой пары нет. */}
+            <TopicProgress total={subtopic.theory.length} />
+          </>
+        }
+      />
 
       <TopicTabs
         initial={initialTab}

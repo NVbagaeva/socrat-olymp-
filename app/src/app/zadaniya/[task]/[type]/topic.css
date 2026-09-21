@@ -5,30 +5,22 @@
 
 /* ── Шапка темы ─────────────────────────────────────────────── */
 
+/* Разметку шапки даёт общий компонент (components/tasks/ShapkaRazdela),
+   здесь — только то, чем шапка темы отличается: портрет и кольцо
+   прогресса стоят в правой колонке рядом, а не под друг другом,
+   и по центру по вертикали. */
 .topic-head {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-6) var(--space-8);
-  margin: var(--space-6) 0 var(--space-8);
 }
-/* Текст занимает всё свободное место и переносит соседей на новую
-   строку сам, когда места перестаёт хватать. */
-.topic-head__text {
-  flex: 1 1 320px;
-  min-width: 0;
-}
-.topic-head__title {
+.topic-head .section-head__media {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-3);
+  justify-content: flex-end;
+  gap: var(--space-6);
 }
-.topic-head__lead {
+.topic-head .section-head__lead {
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
-  color: var(--color-text-secondary);
   max-width: 54ch;
 }
 
@@ -702,16 +694,13 @@ a.tutor-card:hover {
   /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
      цитата и прогресс — по строке на каждое. */
   .topic-head {
-    flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-5);
     margin-bottom: var(--space-6);
   }
-  /* В столбце основа гибкости считается по высоте, а не по ширине:
-     320px там означали бы пустую полосу под подзаголовком. */
-  .topic-head__text {
-    flex: 0 0 auto;
-    width: 100%;
+  /* В одну колонку портрет и кольцо встают под текстом — и от левого
+     края, как он: прижатые вправо, они висели бы сами по себе. */
+  .topic-head .section-head__media {
+    justify-content: flex-start;
   }
   /* Цитата и пирамида — декор: на телефоне его нет, как и на
      остальных страницах кабинета. Цитата весила 100px из 392
