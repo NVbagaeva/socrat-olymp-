@@ -886,15 +886,20 @@
 .vteor-reshenie__otvet {
   margin-top: var(--space-1);
 }
+/* Плашка ответа: по левому краю, на ступень крупнее основного
+   текста и на ступень легче заголовка «Решение» — ответ читается
+   как итог, а не как самая крупная строка карточки. Те же кегль и
+   вес у ответа в карточке разбора (problem-card.css). */
 .vteor-reshenie__otvet {
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
   color: var(--color-accent);
-  font-size: var(--fs-h4);
-  font-weight: 700;
-  text-align: center;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  text-align: left;
 }
 .vteor-reshenie__preduprezhdenie {
   display: flex;
@@ -974,9 +979,10 @@
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
   color: var(--color-accent);
-  font-size: var(--fs-h3);
-  font-weight: 700;
-  text-align: center;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
+  text-align: left;
 }
 
 /* ── Три карточки итога ────────────────────────────────────────── */
