@@ -665,6 +665,10 @@ function pairCandidates(task, set, seed) {
           if (!Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
           /* Ответ не читается с видимой точки. */
           if (answer === visible.x || answer === visible.y) { return; }
+          /* Видимая точка не садится на уже отмеченную: две отметки
+             в одном узле — вершина и пересечение — сливаются. */
+          var marked = (first.points || []).concat(other.points || []);
+          if (marked.some(function (pt) { return pt.x === visible.x && pt.y === visible.y; })) { return; }
         }
         var marks = intersectionMarks(points, asked, spec);
         var sig = withLine

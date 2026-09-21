@@ -63,6 +63,7 @@ export const INTERSECTION_CHECKS = [
   ['answerHidden', 'ответ — о скрытой точке и не совпадает с координатами видимой'],
   ['angle', 'угол в видимой точке не меньше порога'],
   ['gapGrows', 'кривые на видимой части не сходятся снова'],
+  ['ownMark', 'видимая точка не совпадает с отмеченными точками кривых'],
 ];
 
 export function intersectionAudit(set, task) {
@@ -109,6 +110,10 @@ export function intersectionAudit(set, task) {
   out.ok.gapGrows = visible.length === 1 && hidden.length === 1 &&
     Q.gapGrows(first, second, win, visible[0], hidden[0]);
   if (!out.ok.gapGrows) { out.errors.push('на видимой части кривые снова сходятся — вторая точка читается на глаз'); }
+
+  const marked = (meta.points || []).filter((pt) => pt.role !== 'cross');
+  out.ok.ownMark = visible.every((v) => !marked.some((pt) => pt.x === v.x && pt.y === v.y));
+  if (!out.ok.ownMark) { out.errors.push('видимая точка пересечения совпала с отмеченной точкой кривой'); }
   return out;
 }
 
