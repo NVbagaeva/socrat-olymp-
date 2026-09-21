@@ -3,7 +3,8 @@
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
-import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
+import type { Pool, PoolKind, PoolShag, PoolVariant } from '@/lib/zadanie3/pool';
+import { VykladkaKlient } from '@/components/tasks/veroyatnost/VykladkaKlient';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
 import { answerMatches, klyuchZadachi, openText } from '@/lib/zadanie3/secret';
@@ -172,13 +173,13 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     reset();
   }
 
-  const steps = useMemo(() => {
+  const steps = useMemo<PoolShag[]>(() => {
     if (variant === undefined || !solution) {
       return [];
     }
     /* Разбор раскрывается только по просьбе ученика: до этого он
        лежит закрытым и в разметку не попадает. */
-    return openText(variant.steps, variant.seal).split('\n');
+    return JSON.parse(openText(variant.steps, variant.seal)) as PoolShag[];
   }, [variant, solution]);
 
   const mistakes = progress.mistakes.filter((item) => byId.has(item.split(':')[0] ?? ''));
@@ -291,7 +292,12 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
             {solution ? (
               <ol className="z3t__steps">
                 {steps.map((step, i) => (
-                  <li key={i}>{step}</li>
+                  <li key={i}>
+                    <p className="z3t__step-text">{step.text}</p>
+                    {step.vykladka === undefined ? null : (
+                      <VykladkaKlient className="z3t__step-formula" vykladka={step.vykladka} />
+                    )}
+                  </li>
                 ))}
               </ol>
             ) : null}

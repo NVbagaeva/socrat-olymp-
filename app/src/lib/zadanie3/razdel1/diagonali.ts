@@ -10,7 +10,7 @@
 import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
-import { letters, ru, segment } from '../format';
+import { letters, round, ru, segment, tex, texSegment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
 import { solveBySearch } from '../search';
@@ -88,17 +88,20 @@ export const P03_01: Prototype = {
   shagi: (p) => {
     const [a, b, c] = boxSides(p);
     const diag = segment(pair(p, 'diag'));
+    const diagTex = texSegment(pair(p, 'diag'));
     const base = a * a + b * b;
     return [
       {
         text: `Рёбра параллелепипеда: два лежат в основании, одно вертикальное: ${ru(a)}, ${ru(b)} и ${ru(c)}.`,
       },
       {
-        text: `Диагональ основания: её квадрат равен ${ru(a)}² + ${ru(b)}² = ${ru(base)}.`,
+        text: 'Диагональ основания — гипотенуза прямоугольного треугольника с катетами, равными рёбрам основания. Её квадрат считаем по теореме Пифагора.',
+        formula: `${tex(a)}^2 + ${tex(b)}^2 = ${tex(base)}`,
         value: base,
       },
       {
-        text: `Диагональ ${diag} — гипотенуза прямоугольного треугольника с катетами, равными диагонали основания и вертикальному ребру: ${diag} = √(${ru(base)} + ${ru(c)}²) = ${ru(Math.sqrt(base + c * c))}.`,
+        text: `Диагональ ${diag} — гипотенуза прямоугольного треугольника с катетами, равными диагонали основания и вертикальному ребру.`,
+        formula: `${diagTex} = \\sqrt{${tex(base)} + ${tex(c)}^2} = ${tex(round(Math.sqrt(base + c * c)))}`,
         value: Math.sqrt(base + c * c),
       },
     ];
@@ -236,9 +239,20 @@ export const P03_02: Prototype = {
     const k = num(p, 'k');
     const d2 = 3 * k * k;
     return [
-      { text: `Диагональ куба с ребром a равна a√3, значит a√3 = √${ru(d2)}.` },
-      { text: `Отсюда a = √${ru(d2)} / √3 = ${ru(k)}.`, value: k },
-      { text: `Объём куба: a³ = ${ru(k)}³ = ${ru(k * k * k)}.`, value: k * k * k },
+      {
+        text: 'Диагональ куба равна его ребру, умноженному на корень из трёх. Приравниваем её к данной диагонали.',
+        formula: `a\\sqrt{3} = \\sqrt{${tex(d2)}}`,
+      },
+      {
+        text: 'Отсюда находим ребро.',
+        formula: `a = \\dfrac{\\sqrt{${tex(d2)}}}{\\sqrt{3}} = ${tex(k)}`,
+        value: k,
+      },
+      {
+        text: 'Объём куба — куб его ребра.',
+        formula: `a^3 = ${tex(k)}^3 = ${tex(k * k * k)}`,
+        value: k * k * k,
+      },
     ];
   },
 
@@ -296,11 +310,13 @@ export const P03_03: Prototype = {
     return [
       { text: 'Сечение через A, B и C₁ — прямоугольник ABC₁D₁: AB параллельно D₁C₁.' },
       {
-        text: `Вторая сторона BC₁ — диагональ боковой грани: BC₁ = √(${ru(b)}² + ${ru(c)}²) = ${ru(side)}.`,
+        text: 'Вторая сторона BC₁ — диагональ боковой грани, её находим по теореме Пифагора.',
+        formula: `BC_{1} = \\sqrt{${tex(b)}^2 + ${tex(c)}^2} = ${tex(round(side))}`,
         value: side,
       },
       {
-        text: `Площадь: AB · BC₁ = ${ru(a)} · ${ru(side)} = ${ru(a * side)}.`,
+        text: 'Площадь прямоугольника — произведение сторон.',
+        formula: `AB \\cdot BC_{1} = ${tex(a)} \\cdot ${tex(round(side))} = ${tex(round(a * side))}`,
         value: a * side,
       },
     ];
@@ -389,11 +405,13 @@ export const P03_04: Prototype = {
         text: `Сечение ${quad.map(letters).join('')} — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
       },
       {
-        text: `Диагональ основания: √(${ru(a)}² + ${ru(b)}²) = ${ru(diag)}.`,
+        text: 'Диагональ основания — по теореме Пифагора.',
+        formula: `\\sqrt{${tex(a)}^2 + ${tex(b)}^2} = ${tex(round(diag))}`,
         value: diag,
       },
       {
-        text: `Площадь: ${ru(diag)} · ${ru(c)} = ${ru(diag * c)}.`,
+        text: 'Площадь прямоугольника — произведение сторон.',
+        formula: `${tex(round(diag))} \\cdot ${tex(c)} = ${tex(round(diag * c))}`,
         value: diag * c,
       },
     ];

@@ -15,6 +15,17 @@ export function ru(value: number): string {
   return String(value).replace('.', ',');
 }
 
+/**
+ * Число в формуле разбора: 2{,}5 — запятая в группе.
+ *
+ * В TeX голая запятая между цифрами набирается как знак препинания и
+ * получает отбивку справа: «2, 5» вместо «2,5». Группа эту отбивку
+ * снимает. Та же запись, что в разборах №4 и №5.
+ */
+export function tex(value: number): string {
+  return String(value).replace('.', '{,}');
+}
+
 /** Имя вершины или отрезка с индексами: AC1 → AC₁. */
 export function letters(name: string): string {
   return subscript(name);
@@ -23,6 +34,22 @@ export function letters(name: string): string {
 /** Отрезок по паре вершин: ['D', 'B1'] → DB₁. */
 export function segment(pair: readonly [string, string]): string {
   return subscript(pair[0] + pair[1]);
+}
+
+/**
+ * Имя вершины или отрезка в формуле: AC1 → AC_1.
+ *
+ * В тексте индекс стоит готовым знаком (AC₁), а в формуле его ставит
+ * KaTeX: иначе индекс набирается кеглем основного текста и рядом с
+ * курсивными буквами формулы смотрится чужим.
+ */
+export function texLetters(name: string): string {
+  return name.replace(/(\d+)/g, '_{$1}');
+}
+
+/** Отрезок по паре вершин в формуле: ['D', 'B1'] → DB_{1}. */
+export function texSegment(pair: readonly [string, string]): string {
+  return texLetters(pair[0] + pair[1]);
 }
 
 /**

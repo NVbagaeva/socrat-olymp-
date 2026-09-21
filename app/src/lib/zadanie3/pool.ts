@@ -16,10 +16,20 @@
  */
 
 import { renderSolid } from '../solid';
-import { typeset } from '../tex';
+import { nabratVykladku, typeset, type AtomVykladki } from '../tex';
 import { RAZDELY, type Razdel } from './index';
 import { klyuchZadachi, sealAnswer, sealText } from './secret';
-import { type Prototype } from './types';
+import { type Prototype, type Step } from './types';
+
+/** Шаг разбора для показа: пояснение и выкладка, уже разобранная. */
+export interface PoolShag {
+  text: string;
+  /**
+   * Выкладка атомами: тренажёр собирает их в строки по ширине
+   * колонки. Её нет у шага без формулы.
+   */
+  vykladka?: AtomVykladki[][];
+}
 
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
@@ -27,7 +37,7 @@ export interface PoolVariant {
   uslovieHtml: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
+  /** Закрытый разбор: шаги списком (PoolShag) в JSON. */
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
@@ -65,6 +75,20 @@ function perVariant(prototype: Prototype): boolean {
   return (prototype.chertezh(first.params).measures ?? []).length > 0;
 }
 
+/**
+ * Шаг банка → шаг для показа: текст и, если есть, выкладка атомами.
+ *
+ * Набор строгий: ошибка в записи TeX роняет сборку с указанием, где
+ * она, а не оставляет формулу голым текстом на глазах у ученика.
+ * Набор выключной — дроби и корни в полный рост, как у формулы
+ * отдельной строкой.
+ */
+function shagPokaza(shag: Step): PoolShag {
+  return shag.formula === undefined
+    ? { text: shag.text }
+    : { text: shag.text, vykladka: nabratVykladku(shag.formula, true, true) };
+}
+
 function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
   const first = prototype.varianty[0];
   if (first === undefined) {
@@ -85,16 +109,13 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
         prototype.otvet(variant.params),
         klyuchZadachi(prototype.id, variant.n),
       );
-      const steps = prototype
-        .shagi(variant.params)
-        .map((step) => step.text)
-        .join('\n');
+      const steps = prototype.shagi(variant.params).map(shagPokaza);
       return {
         n: variant.n,
         uslovieHtml: typeset(prototype.uslovie(variant.params)),
         seal,
         /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
-        steps: sealText(steps, seal),
+        steps: sealText(JSON.stringify(steps), seal),
         svg: own ? renderSolid(prototype.chertezh(variant.params)) : null,
       };
     }),

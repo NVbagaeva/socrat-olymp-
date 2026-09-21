@@ -7,6 +7,7 @@ import { tasksPage } from '@/content/tasks';
 import { RAZDELY } from '@/lib/zadanie3';
 import { wholePool } from '@/lib/zadanie3/pool';
 import '@/lib/solid/solid.css';
+import '@/components/tasks/veroyatnost/vykladka.css';
 import '../../zadaniya.css';
 import '../../[task]/section.css';
 import '../stereometria.css';

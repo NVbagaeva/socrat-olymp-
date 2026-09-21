@@ -12,7 +12,7 @@ import { vertex } from '../../solid/figures';
 import { hullVolume, polyhedronVolume } from '../../solid/measure';
 import { NAMES, cubeCutPrism, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { type Vec3 } from '../../solid/vec';
-import { letters, ru } from '../format';
+import { letters, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { boxOf } from './common';
 
@@ -87,10 +87,15 @@ export const P03_12: Prototype = {
         text: 'Плоскость ACC₁A₁ делит параллелепипед на две равные призмы: перечисленные вершины — это одна из них.',
       },
       {
-        text: `Объём параллелепипеда: ${ru(a)} · ${ru(b)} · ${ru(c)} = ${ru(a * b * c)}.`,
+        text: 'Объём параллелепипеда — произведение трёх рёбер.',
+        formula: `${tex(a)} \\cdot ${tex(b)} \\cdot ${tex(c)} = ${tex(round(a * b * c))}`,
         value: a * b * c,
       },
-      { text: `Половина от него: ${ru((a * b * c) / 2)}.`, value: (a * b * c) / 2 },
+      {
+        text: 'Призма — половина параллелепипеда.',
+        formula: `\\dfrac{${tex(round(a * b * c))}}{2} = ${tex(round((a * b * c) / 2))}`,
+        value: (a * b * c) / 2,
+      },
     ];
   },
 

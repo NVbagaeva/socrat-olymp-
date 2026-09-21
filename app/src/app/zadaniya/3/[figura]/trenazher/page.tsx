@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
 import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
 import { razdelPool } from '@/lib/zadanie3/pool';
+import '@/components/tasks/veroyatnost/vykladka.css';
 import '../trenazher.css';
 
 export function generateStaticParams() {
