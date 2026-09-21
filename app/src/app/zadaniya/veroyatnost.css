@@ -746,7 +746,11 @@
   line-height: var(--lh-body);
 }
 
-/* ── Случай: условие · схема · решение ─────────────────────────── */
+/* ── Случай: шапка · чертёж · решение ──────────────────────────
+   По макету design-reference/mockups/zadanie-05/
+   teoriya-koordinatnaya-sluchay-1440.png. Блоки друг под другом во
+   всю ширину карточки; внутри шапки — две колонки, когда карточке
+   хватает ширины (контейнер vteor-razdel, ниже). */
 
 .vteor-sluchay {
   display: grid;
@@ -755,97 +759,134 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
+
+/* Шапка: на узкой карточке картинка сверху по центру, текст под
+   ней; в две колонки — ниже, по ширине раздела. */
 .vteor-sluchay__head {
-  display: flex;
-  /* Кружок — к первой строке: на телефоне заголовок в три строки,
-     и посередине он повисает. */
-  align-items: start;
-  gap: var(--space-3);
-}
-/* Метка случая: кружок без цифры. Цифру в кружке на вкладке носит
-   только заголовок раздела, поэтому здесь просто точка — она держит
-   отступ заголовка и не притворяется номером. */
-.vteor-sluchay__metka {
-  width: 12px;
-  height: 12px;
-  flex: none;
-  /* Точка — к середине первой строки заголовка. */
-  margin-top: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-}
-/* Заголовок случая — ниже заголовка раздела: тот у вкладки общий
-   (vteor-razdel__title), и перебивать его нельзя. */
-.vteor-sluchay__title {
-  margin: 0;
-  color: var(--color-primary);
-  font-size: var(--fs-body);
-  font-weight: 700;
-}
-/* Условие: на узкой карточке картинка сверху, текст под ней во всю
-   ширину — в две колонки текст шёл лентой по три-четыре слова.
-   Колонки включаются, когда карточке хватает ширины (ниже). */
-.vteor-sluchay__uslovie {
   display: grid;
-  gap: var(--space-4);
-  align-items: start;
+  gap: var(--space-5);
+  justify-items: center;
+}
+/* Картинка на мягкой круглой подложке. Подложка — круг по видимой
+   части картинки (высота картинки), без обводки и тени; крышка
+   чайника чуть выступает за круг, как на макете. */
+.vteor-sluchay__figura {
+  display: grid;
+  place-items: center;
+  width: calc(200px + var(--space-6));
+  height: calc(200px + var(--space-6));
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
 }
 .vteor-sluchay__kartinka {
-  width: 116px;
-  height: auto;
+  width: auto;
+  height: 200px;
+  translate: calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
 }
 .vteor-sluchay__text {
   display: grid;
   gap: var(--space-3);
+  justify-self: stretch;
+  /* Строки условия не длиннее ~70 знаков: колонка текста ограничена,
+     на всю ширину карточки она не растягивается. */
+  max-width: 70ch;
 }
-.vteor-sluchay__text p {
+/* Заголовок случая — уровень H3 по макету, с синей точкой перед
+   ним. Тег остаётся h4: заголовок раздела — h3 (vteor-razdel__title),
+   и случай стоит под ним. */
+.vteor-sluchay__title {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+}
+/* Метка случая: кружок без цифры. Цифру в кружке на вкладке носит
+   только заголовок раздела, поэтому здесь просто точка — она держит
+   отступ заголовка и не притворяется номером. К середине первой
+   строки: на телефоне заголовок в две-три строки. */
+.vteor-sluchay__metka {
+  flex: none;
+  width: var(--space-5);
+  height: var(--space-5);
+  margin-top: calc((var(--lh-h3) - var(--space-5)) / 2);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+.vteor-sluchay__uslovie,
+.vteor-sluchay__vopros {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
 }
 .vteor-sluchay__vopros {
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: 700;
 }
+
+/* Плашка чертежа: светло-голубая, скруглённая; чертёж по центру,
+   на узкой карточке во всю ширину плашки, на широкой — компактный
+   (ниже). Подписи считаются от ширины самого чертежа: контейнер
+   vteor-shema стоит на нём, а не на плашке. */
 .vteor-sluchay__shema {
   display: grid;
   gap: var(--space-4);
-  align-content: start;
-  padding: var(--space-4);
+  justify-items: center;
+  /* На узкой карточке боковых полей нет: вся ширина плашки идёт
+     чертежу и его подписям; плашка «важно» держит отступ сама. */
+  padding: var(--space-5) 0;
   border-radius: var(--radius-lg);
   background: var(--color-surface-info);
+}
+.vteor-sluchay__risunok {
+  width: 100%;
+}
+.vteor-sluchay__shema > .vteor-vazhno {
+  margin-inline: var(--space-4);
 }
 .vteor-shema .pr-line {
   width: 100%;
   height: auto;
 }
-/* Предупреждение под схемой: оранжевая рамка, как у акцента. */
-.vteor-sluchay__podskazka {
+
+/* Плашка «важно»: оранжевый кружок со знаком слева, вертикальная
+   разделительная черта, текст. Тёплая заливка, обводка цветом
+   акцента. Стоит внутри плашки чертежа и в блоке решения. */
+.vteor-vazhno {
   display: flex;
-  align-items: start;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-4);
+  justify-self: stretch;
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
   color: var(--color-text);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
-.vteor-sluchay__znak {
-  display: inline-flex;
-  width: 22px;
-  height: 22px;
+.vteor-vazhno__znak {
+  display: inline-grid;
+  place-items: center;
   flex: none;
-  color: var(--color-accent);
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1;
 }
-.vteor-sluchay__znak svg {
-  width: 100%;
-  height: 100%;
+.vteor-vazhno__text {
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-border);
 }
 
 /* ── Решение ───────────────────────────────────────────────────── */
@@ -854,64 +895,42 @@
   display: grid;
   gap: var(--space-3);
   align-content: start;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-5) var(--space-6);
   border-radius: var(--radius-lg);
   background: var(--color-surface-soft);
 }
 .vteor-reshenie__title {
   margin: 0;
   color: var(--color-primary);
-  font-size: var(--fs-body);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
   font-weight: 700;
 }
 .vteor-reshenie__text {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
 }
-/* Выкладка в решении: кегль основного текста, на ступень крупнее
-   подписей карточки. Сама выкладка — components/…/vykladka.css. */
+/* Выкладка в решении: на широкой карточке крупнее основного текста,
+   как на макете (ниже); на узкой — кеглем текста: крупной не хватает
+   ширины даже на самую короткую строку разрыва. Правила переноса те
+   же: сама выкладка — components/…/vykladka.css. */
 .vteor-vykladka {
   font-size: var(--fs-body);
 }
-/* Плашка ответа стоит на ступень дальше остальных строк карточки:
-   12px сетки плюс 4px. */
-.vteor-vykladka + .vteor-reshenie__otvet {
-  margin-top: var(--space-1);
-}
-.vteor-reshenie__otvet {
-  margin-top: var(--space-1);
-}
-.vteor-reshenie__otvet {
-  margin-top: var(--space-1);
-}
-/* Плашка ответа: по левому краю, на ступень крупнее основного
-   текста и на ступень легче заголовка «Решение» — ответ читается
-   как итог, а не как самая крупная строка карточки. Те же кегль и
-   вес у ответа в карточке разбора (problem-card.css). */
+/* Плашка ответа: тёплая заливка, текст оранжевый, жирный, по левому
+   краю. Те же кегль и вес у ответа второго случая (vteor-shag__znachenie). */
 .vteor-reshenie__otvet {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
   color: var(--color-accent);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
   text-align: left;
-}
-.vteor-reshenie__preduprezhdenie {
-  display: flex;
-  align-items: start;
-  gap: var(--space-3);
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-accent-soft-surface);
-  color: var(--color-accent);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
 }
 
 /* ── Разбор через противоположное событие ──────────────────────── */
@@ -975,13 +994,13 @@
 }
 .vteor-shag__znachenie {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
   color: var(--color-accent);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  font-weight: 600;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
   text-align: left;
 }
 
@@ -1103,17 +1122,10 @@
   }
 }
 
-/* Схема: рисунок во всю ширину плашки, без боковых полей — на
-   телефоне каждый пиксель ширины идёт подписям. Подсказка под ним
-   держит прежний отступ своими полями. */
-.vteor-sluchay__shema {
-  padding-inline: 0;
-}
+/* Контейнер подписей чертежа: у случая — сам рисунок, у прочих
+   схем — их плашка. */
 .vteor-shema {
   container: vteor-shema / inline-size;
-}
-.vteor-sluchay__shema .vteor-sluchay__podskazka {
-  margin-inline: var(--space-4);
 }
 
 /* Подписи на схеме теории.
@@ -1155,6 +1167,26 @@
   font-size: var(--fs-h3);
   font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
 }
+/* Подпись под скобой — жирная и кеглем основного текста: итог
+   промежутка, а не пометка; подписи над лучами остаются мелкими. */
+.vteor-shema .pr-brace text {
+  font-size: calc(var(--fs-body) * tan(atan2(760px, 100cqw)));
+  font-weight: 700;
+}
+/* На узком чертеже (телефон) подписи лучей стоят слишком близко по
+   высоте для кегля --fs-caption и налезают друг на друга: там они
+   на ступень мельче, до нижнего предела 12px (--fs-label); подпись
+   под скобой — --fs-caption. */
+@container vteor-shema (max-width: 400px) {
+  .vteor-shema .pr-band-label,
+  .vteor-shema .pr-axis-name,
+  .vteor-shema .pr-tick text {
+    font-size: calc(var(--fs-label) * tan(atan2(760px, 100cqw)));
+  }
+  .vteor-shema .pr-brace text {
+    font-size: calc(var(--fs-caption) * tan(atan2(760px, 100cqw)));
+  }
+}
 .vteor-shema .pr-tick text {
   /* Подпись деления стоит на 26 единиц рисунка под осью; на
      сжатом рисунке это меньше высоты цифры, и она упирается в
@@ -1188,14 +1220,31 @@
   r: 10;
 }
 
-/* Карточке хватает ширины — условие в две колонки: картинка слева,
-   текст справа. */
+/* Карточке хватает ширины — шапка в две колонки: картинка слева,
+   заголовок и условие справа; чертёж компактный, по центру плашки —
+   около половины её ширины, но не уже, чем нужно подписям. */
 @container vteor-razdel (min-width: 560px) {
-  .vteor-sluchay__uslovie {
-    grid-template-columns: 116px minmax(0, 1fr);
+  .vteor-sluchay {
+    padding: var(--space-8);
   }
-  .vteor-sluchay__kartinka {
-    width: 100%;
+  .vteor-sluchay__head {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: center;
+    justify-items: start;
+  }
+  .vteor-sluchay__shema {
+    padding: var(--space-5);
+  }
+  .vteor-sluchay__shema > .vteor-vazhno {
+    margin-inline: 0;
+  }
+  .vteor-sluchay__risunok {
+    width: max(50%, 480px);
+    max-width: 100%;
+  }
+  .vteor-vykladka {
+    font-size: var(--fs-h4);
   }
 }
 

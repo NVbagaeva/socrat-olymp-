@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { AlertIcon, NavIcon } from '@/components/ui';
+import { NavIcon } from '@/components/ui';
 import { CoordinateLine } from '@/components/probability';
 import { PRYAMAYA } from '@/content/veroyatnost-teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
@@ -28,7 +28,7 @@ import { Vykladka } from './Vykladka';
 const OS = 'X';
 
 /**
- * Метка случая: кружок без цифры.
+ * Метка случая: кружок без цифры перед заголовком.
  *
  * Номер в кружке на вкладке значит только номер раздела темы, и
  * второго такого числа на странице быть не должно. Случаи здесь
@@ -39,30 +39,60 @@ function Metka() {
   return <span className="vteor-sluchay__metka" aria-hidden="true" />;
 }
 
-/** Условие случая: картинка, данные и вопрос. */
-function Uslovie({
+/**
+ * Шапка случая — по макету: слева картинка на круглой подложке,
+ * справа заголовок с точкой, условие и вопрос. Без картинки текст
+ * занимает всю ширину, подложка не рисуется. На узкой карточке
+ * картинка стоит сверху по центру, текст под ней.
+ */
+function Shapka({
   kartinka,
+  zagolovok,
   uslovie,
   vopros,
 }: {
-  kartinka: { src: string; width: number; height: number; alt: string };
+  kartinka?: { src: string; width: number; height: number; alt: string };
+  zagolovok: string;
   uslovie: string;
   vopros: string;
 }) {
   return (
-    <div className="vteor-sluchay__uslovie">
-      <Image
-        className="vteor-sluchay__kartinka"
-        src={kartinka.src}
-        alt={kartinka.alt}
-        width={kartinka.width}
-        height={kartinka.height}
-      />
+    <header className="vteor-sluchay__head">
+      {kartinka !== undefined ? (
+        <div className="vteor-sluchay__figura">
+          <Image
+            className="vteor-sluchay__kartinka"
+            src={kartinka.src}
+            alt={kartinka.alt}
+            width={kartinka.width}
+            height={kartinka.height}
+          />
+        </div>
+      ) : null}
       <div className="vteor-sluchay__text">
-        <p>{uslovie}</p>
+        <h4 className="vteor-sluchay__title">
+          <Metka />
+          {zagolovok}
+        </h4>
+        <p className="vteor-sluchay__uslovie">{uslovie}</p>
         <p className="vteor-sluchay__vopros">{vopros}</p>
       </div>
-    </div>
+    </header>
+  );
+}
+
+/**
+ * Плашка «важно» под чертежом: оранжевый кружок со знаком,
+ * разделительная черта и текст — как на макете.
+ */
+function Vazhno({ children }: { children: string }) {
+  return (
+    <p className="vteor-vazhno">
+      <span className="vteor-vazhno__znak" aria-hidden="true">
+        !
+      </span>
+      <span className="vteor-vazhno__text">{children}</span>
+    </p>
   );
 }
 
@@ -104,34 +134,33 @@ export function KoordinatnayaPryamaya() {
       {/* ── Случай 1: один промежуток внутри другого ─────────────── */}
 
       <article className="vteor-sluchay">
-        <header className="vteor-sluchay__head">
-          <Metka />
-          <h4 className="vteor-sluchay__title">{pervaya.zagolovok}</h4>
-        </header>
+        <Shapka
+          kartinka={pervaya.kartinka}
+          zagolovok={pervaya.zagolovok}
+          uslovie={pervaya.uslovie}
+          vopros={pervaya.vopros}
+        />
 
-        <Uslovie kartinka={pervaya.kartinka} uslovie={pervaya.uslovie} vopros={pervaya.vopros} />
-
-        <div className="vteor-sluchay__shema vteor-shema">
+        <div className="vteor-sluchay__shema">
           {/* Оба условия со знаком «больше»: области смотрят вправо,
-              и одна целиком лежит в другой — это и видно на рисунке. */}
-          <CoordinateLine
-            min={0}
-            max={3}
-            c={1}
-            d={2}
-            upper={{ value: 1, side: 'right', note: '0,96' }}
-            lower={{ value: 2, side: 'right', note: '0,85' }}
-            axisLabel={OS}
-            ticks={[0, 1, 2]}
-            brace={{ from: 1, to: 2, label: `1 < ${OS} ≤ 2` }}
-            alt="Координатная прямая: область X больше единицы целиком содержит область X больше двух"
-          />
-          <p className="vteor-sluchay__podskazka">
-            <span className="vteor-sluchay__znak" aria-hidden="true">
-              <AlertIcon />
-            </span>
-            {pervaya.podskazka}
-          </p>
+              и одна целиком лежит в другой — это и видно на рисунке.
+              Рисунок компактный, по центру плашки; подписи считаются
+              от его ширины (контейнер vteor-shema). */}
+          <div className="vteor-sluchay__risunok vteor-shema">
+            <CoordinateLine
+              min={0}
+              max={3}
+              c={1}
+              d={2}
+              upper={{ value: 1, side: 'right', note: '0,96' }}
+              lower={{ value: 2, side: 'right', note: '0,85' }}
+              axisLabel={OS}
+              ticks={[0, 1, 2]}
+              brace={{ from: 1, to: 2, label: `1 < ${OS} ≤ 2` }}
+              alt="Координатная прямая: область X больше единицы целиком содержит область X больше двух"
+            />
+          </div>
+          <Vazhno>{pervaya.podskazka}</Vazhno>
         </div>
 
         <div className="vteor-reshenie">
@@ -147,28 +176,30 @@ export function KoordinatnayaPryamaya() {
       {/* ── Случай 2: промежутки пересекаются ────────────────────── */}
 
       <article className="vteor-sluchay">
-        <header className="vteor-sluchay__head">
-          <Metka />
-          <h4 className="vteor-sluchay__title">{vtoraya.zagolovok}</h4>
-        </header>
+        <Shapka
+          kartinka={vtoraya.kartinka}
+          zagolovok={vtoraya.zagolovok}
+          uslovie={vtoraya.uslovie}
+          vopros={vtoraya.vopros}
+        />
 
-        <Uslovie kartinka={vtoraya.kartinka} uslovie={vtoraya.uslovie} vopros={vtoraya.vopros} />
-
-        <div className="vteor-sluchay__shema vteor-shema">
+        <div className="vteor-sluchay__shema">
           {/* Условия разных знаков: области идут навстречу и
               накладываются, но ни одна не лежит в другой. */}
-          <CoordinateLine
-            min={0}
-            max={3}
-            c={1}
-            d={2}
-            upper={{ value: 2, side: 'left', note: '0,85' }}
-            lower={{ value: 1, side: 'right', note: '0,95' }}
-            axisLabel={OS}
-            ticks={[0, 1, 2]}
-            brace={{ from: 1, to: 2, label: `1 < ${OS} < 2` }}
-            alt="Координатная прямая: области X меньше двух и X больше единицы пересекаются"
-          />
+          <div className="vteor-sluchay__risunok vteor-shema">
+            <CoordinateLine
+              min={0}
+              max={3}
+              c={1}
+              d={2}
+              upper={{ value: 2, side: 'left', note: '0,85' }}
+              lower={{ value: 1, side: 'right', note: '0,95' }}
+              axisLabel={OS}
+              ticks={[0, 1, 2]}
+              brace={{ from: 1, to: 2, label: `1 < ${OS} < 2` }}
+              alt="Координатная прямая: области X меньше двух и X больше единицы пересекаются"
+            />
+          </div>
         </div>
 
         <div className="vteor-reshenie">
@@ -176,12 +207,7 @@ export function KoordinatnayaPryamaya() {
           <p className="vteor-reshenie__text">
             <Tex text={vtoraya.pochemu.text} />
           </p>
-          <p className="vteor-reshenie__preduprezhdenie">
-            <span className="vteor-sluchay__znak" aria-hidden="true">
-              <AlertIcon />
-            </span>
-            {vtoraya.pochemu.preduprezhdenie}
-          </p>
+          <Vazhno>{vtoraya.pochemu.preduprezhdenie}</Vazhno>
         </div>
 
         {/* Разбор через противоположное событие — во всю ширину
