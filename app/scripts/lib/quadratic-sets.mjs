@@ -297,8 +297,10 @@ const EQUATION_SET = {
 };
 
 /* 8. Парабола и прямая: абсцисса или ордината скрытой точки пересечения.
-   На чертеже ровно одна точка пересечения, отмеченная; вторая за рамкой
-   с запасом, ответ только решением уравнения. */
+   На чертеже ровно одна очевидная точка пересечения, отмеченная;
+   вторая не читается с чертежа: в шести задачах она за рамкой с запасом,
+   в четырёх — внутри окна, но не в узле сетки, и ответ — конечная
+   десятичная дробь. В обоих вариантах ответ только решением уравнения. */
 const CROSS_LINE = (axis, extra) => ({
   answerRule: axis === 'y' ? 'intersection-y' : 'intersection-x',
   answerType: 'number',
@@ -308,6 +310,11 @@ const CROSS_LINE = (axis, extra) => ({
     intersection: { visible: 'one', which: 'hidden', axis, marks: 'visible', labels: false },
     ...extra,
   },
+});
+/* Второй вариант: обе точки в окне, вторая — не в узле сетки. */
+const CROSS_LINE_FRACTION = (axis, extra) => CROSS_LINE(axis, {
+  intersection: { visible: 'one', which: 'hidden', axis, hidden: 'fraction', marks: 'visible', labels: false },
+  ...extra,
 });
 const CROSS_LINE_SET = {
   kind: 'prep',
@@ -324,21 +331,22 @@ const CROSS_LINE_SET = {
     minDown: 4,
     uniqueVertices: true,
     uniqueAnswers: true,
-    intersectionsInteger: true,
     visibleBoth: 0,
     visibleOne: 10,
+    hiddenOffscreen: 6,
+    hiddenFraction: 4,
   },
   tasks: tasks('P12Q-8', [
     CROSS_LINE('x', { direction: 'up', absA: 1 }),
     CROSS_LINE('y', { direction: 'down', absA: 1 }),
-    CROSS_LINE('x', { direction: 'up', absA: [1, 2] }),
+    CROSS_LINE_FRACTION('x', { direction: 'up', absA: 1 }),
     CROSS_LINE('y', { direction: 'down', absA: 2 }),
     CROSS_LINE('x', { direction: 'up', absA: 2 }),
-    CROSS_LINE('y', { direction: 'down', absA: [1, 2] }),
+    CROSS_LINE_FRACTION('y', { direction: 'down', absA: [1, 2] }),
     CROSS_LINE('x', { direction: 'up', absA: 1, line: { absKMin: 1 } }),
-    CROSS_LINE('y', { direction: 'down', absA: 1, line: { absKMin: 1 } }),
+    CROSS_LINE_FRACTION('y', { direction: 'down', absA: 1 }),
     CROSS_LINE('x', { direction: 'up', absA: [1, 2], line: { direction: 'down' } }),
-    CROSS_LINE('y', { direction: 'down', absA: 2, line: { direction: 'up' } }),
+    CROSS_LINE_FRACTION('x', { direction: 'down', absA: 2, line: { direction: 'up' } }),
   ]),
 };
 

@@ -19,8 +19,8 @@ import path from 'node:path';
 
 import generator from '../src/lib/graph/generate.js';
 import { QUADRATIC_SETS } from './lib/quadratic-sets.mjs';
-import { INTERSECTION_CHECKS, checkQuadraticComposition, checkQuadraticTask,
-         intersectionAudit } from './lib/graph-quadratic-checks.mjs';
+import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkQuadraticComposition, checkQuadraticTask,
+         hiddenVariantCounts, intersectionAudit } from './lib/graph-quadratic-checks.mjs';
 
 /* Цель по окну: ±5…±6; шире — исключение, о котором отчёт говорит вслух. */
 const WINDOW_TARGET = 6;
@@ -77,7 +77,10 @@ for (const set of QUADRATIC_SETS) {
       const audit = intersectionAudit(set, task);
       INTERSECTION_CHECKS.forEach(([id]) => { passed[id] = (passed[id] || 0) + (audit.ok[id] ? 1 : 0); });
     });
-    crossNote = '\n    пересечения: ' + INTERSECTION_CHECKS
+    const counts = hiddenVariantCounts(crossTasks);
+    crossNote = '\n    вторая точка: ' + Object.keys(HIDDEN_VARIANTS)
+      .map((id) => `${HIDDEN_VARIANTS[id]} — ${counts[id]}`).join(', ') +
+      '\n    пересечения: ' + INTERSECTION_CHECKS
       .map(([id, title]) => `${title} — ${passed[id] || 0}/${crossTasks.length}`).join('; ');
   }
   const symmetric = tasks.filter((task) => task.meta.symmetricPair).map((task) => task.id);

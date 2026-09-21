@@ -34,13 +34,21 @@
      second:     { … ограничения a второй параболы }  — две параболы
      intersection: { visible: 'one' | 'both', which: 'hidden' | 'left' |
                    'right' | 'upper' | 'lower' | 'visible', axis: 'x' | 'y',
+                   hidden: 'offscreen' | 'fraction',
                    marks: 'visible' | 'both' | 'asked' | 'other' | 'none',
-                   labels, avoidAxes, gapMax, margin, offscreenMin, angleMin }
-                   При visible: 'one' видимая точка стоит в узле не ближе
-                   margin клеток к рамке, скрытая вынесена за рамку не
-                   меньше чем на offscreenMin, угол в видимой точке не
-                   меньше angleMin, зазор между кривыми на видимой части
-                   не убывает, а вопрос — всегда о скрытой точке.
+                   labels, avoidAxes, gapMax, margin, offscreenMin, angleMin,
+                   insideMargin, separation }
+                   При visible: 'one' очевидная точка стоит в узле не ближе
+                   margin клеток к рамке, угол в ней не меньше angleMin,
+                   а вопрос — всегда о второй точке. Вторая точка по
+                   hidden: 'offscreen' (по умолчанию) — вынесена за рамку
+                   не меньше чем на offscreenMin, и зазор между кривыми
+                   на видимой части не убывает; 'fraction' — только
+                   с прямой: точка внутри окна, но не в узле сетки,
+                   спрошенная координата нецелая, точка не ближе
+                   insideMargin клеток к рамке и не ближе separation
+                   клеток к очевидной. Ответ — конечная десятичная дробь.
+                   Отмечается только очевидная точка.
      options:    число вариантов формулы (по умолчанию 6)
 */
 
@@ -485,8 +493,8 @@ function askedPoint(points, which) {
   if (which === 'right') { return right; }
   if (which === 'upper') { return upper; }
   if (which === 'lower') { return lower; }
-  if (which === 'visible') { return points[0].visible ? points[0] : points[1]; }
-  if (which === 'hidden') { return points[0].visible ? points[1] : points[0]; }
+  if (which === 'visible') { return points[0].shown ? points[0] : points[1]; }
+  if (which === 'hidden') { return points[0].shown ? points[1] : points[0]; }
   throw new Error('generate-quadratic: неизвестная точка пересечения «' + which + '»');
 }
 
@@ -499,7 +507,7 @@ function pointPairs(p, win, spec) {
   var inside = Q.integerPoints(p, win).filter(function (point) {
     return !avoidAxes || (point.x !== 0 && point.y !== 0);
   }).map(function (point) {
-    return { x: point.x, y: point.y, visible: true };
+    return { x: point.x, y: point.y, visible: true, shown: true };
   });
   var pairs = [];
   var i, j;
@@ -530,7 +538,7 @@ function pointPairs(p, win, spec) {
     var value = num(y);
     if (Q.offscreenBy({ x: x, y: value }, win) < least - 1e-9) { continue; }
     if (Math.abs(value) > win.ymax + gap * 3) { continue; }
-    outside.push({ x: x, y: value, visible: false });
+    outside.push({ x: x, y: value, visible: false, shown: false });
   }
   inside.forEach(function (a) {
     outside.forEach(function (b) {
@@ -541,10 +549,58 @@ function pointPairs(p, win, spec) {
   return pairs;
 }
 
+/* Наклоны прямой для второй точки внутри окна: прямая идёт через
+   очевидную точку под одним из этих наклонов, а вторая точка
+   получается нецелой. Читаемость наклона и целые точки прямой
+   проверяет lineOk, дробность второй точки — fractionPairs. */
+var FRACTION_SLOPES = [[1, 4], [1, 3], [1, 2], [2, 3], [3, 4], [1, 1], [4, 3], [3, 2],
+                       [2, 1], [5, 2], [3, 1]];
+
+/* Второй вариант скрытой точки: обе точки пересечения в окне, но
+   вторая — не в узле сетки. Прямая проводится через очевидную точку
+   с заданным наклоном; вторая точка считается точно, и берётся
+   только тогда, когда её спрошенная координата нецелая, а обе —
+   конечные десятичные. Точка стоит не у рамки и не сливается
+   с очевидной. Возвращает пары [очевидная, скрытая] вместе с прямой. */
+function fractionPairs(p, win, spec, axis) {
+  var avoidAxes = spec.avoidAxes === undefined ? !!spec.labels : spec.avoidAxes;
+  var margin = spec.margin === undefined ? Q.RULES.crossMargin : spec.margin;
+  var insideMargin = spec.insideMargin === undefined ? Q.RULES.crossInsideMargin : spec.insideMargin;
+  var apart = spec.separation === undefined ? Q.RULES.crossSeparation : spec.separation;
+  var shown = Q.integerPoints(p, win).filter(function (point) {
+    return (!avoidAxes || (point.x !== 0 && point.y !== 0)) &&
+      Math.abs(point.x) <= win.xmax - margin + 1e-9 && Math.abs(point.y) <= win.ymax - margin + 1e-9;
+  });
+  var pairs = [];
+  shown.forEach(function (a) {
+    FRACTION_SLOPES.forEach(function (slope) {
+      [1, -1].forEach(function (sign) {
+        var k = frac(sign * slope[0], slope[1]);
+        var line = Line.create(k, sub(frac(a.y), mul(k, frac(a.x))));
+        var cross = Q.intersectLine(p, line);
+        if (!cross || cross.length !== 2) { return; }
+        var other = Math.abs(num(cross[0].x) - a.x) < 1e-9 ? cross[1] : cross[0];
+        if (Math.abs(num(other.x) - a.x) < 1e-9) { return; }
+        if (!decimalFriendly(other.x) || !decimalFriendly(other.y)) { return; }
+        /* Не больше двух знаков после запятой: 0,25 и −0,75 — ответы
+           бланка, 0,9375 — нет. */
+        if (100 % other.x.q !== 0 || 100 % other.y.q !== 0) { return; }
+        if (isInt(axis === 'y' ? other.y : other.x)) { return; }
+        var b = { x: num(other.x), y: num(other.y), visible: true, shown: false,
+                  xFraction: other.x, yFraction: other.y };
+        if (!Q.pointInside(b, win, insideMargin)) { return; }
+        if (Math.hypot(b.x - a.x, b.y - a.y) < apart - 1e-9) { return; }
+        pairs.push({ points: [{ x: a.x, y: a.y, visible: true, shown: true }, b], line: line });
+      });
+    });
+  });
+  return pairs;
+}
+
 function intersectionMarks(points, asked, spec) {
-  var mode = spec.marks || (points.every(function (pt) { return pt.visible; }) ? 'both' : 'visible');
+  var mode = spec.marks || (points.every(function (pt) { return pt.shown; }) ? 'both' : 'visible');
   return points.filter(function (point) {
-    if (!point.visible) { return false; }
+    if (!point.shown) { return false; }
     if (mode === 'none') { return false; }
     if (mode === 'both' || mode === 'visible') { return true; }
     if (mode === 'asked') { return point === asked; }
@@ -607,21 +663,102 @@ function pairCandidates(task, set, seed) {
   var constraints = task.constraints || {};
   var spec = constraints.intersection || {};
   var oneVisible = (spec.visible || 'both') === 'one';
-  /* При одной видимой точке вопрос всегда о скрытой: видимая — опора
-     для решения, ответом она не бывает. */
+  /* При одной очевидной точке вопрос всегда о второй: очевидная —
+     опора для решения, ответом она не бывает. */
   var which = oneVisible ? 'hidden' : (spec.which || 'left');
   var axis = spec.axis || 'x';
+  var variant = oneVisible ? (spec.hidden || 'offscreen') : null;
   var angleMin = spec.angleMin === undefined ? Q.RULES.crossAngleMin : spec.angleMin;
   var withLine = !!constraints.line;
+  if (variant === 'fraction' && !withLine) {
+    throw new Error('generate-quadratic: у ' + task.id + ' нецелая точка пересечения — только с прямой');
+  }
+  if (variant !== null && variant !== 'offscreen' && variant !== 'fraction') {
+    throw new Error('generate-quadratic: неизвестный вариант скрытой точки «' + variant + '»');
+  }
   var random = rng(set.id + ':' + task.id + ':' + seed + ':pair');
   var firsts = singleCandidates(task, set, seed, { limit: FIRST_POOL });
   var seconds = withLine ? null : shuffled(aCandidates(constraints.second || {}), random);
   var readability = readabilityOptions(constraints);
   var found = [];
 
+  /* Пара кривых прошла свои правила — остаются общие для обоих
+     вариантов: очевидная точка под заметным углом и не на отметке,
+     ответ не читается с неё. */
+  function consider(first, points, other) {
+    var p = first.curve;
+    var win = first.window;
+    var asked = askedPoint(points, which);
+    var answer = axis === 'y' ? asked.y : asked.x;
+    var firstPart = { kind: 'quadratic', curve: p };
+    if (oneVisible) {
+      var visible = points[0].shown ? points[0] : points[1];
+      var hidden = points[0].shown ? points[1] : points[0];
+      /* Очевидная точка очевидна: кривые пересекаются под заметным
+         углом, а не касаются и не идут рядом. */
+      if (Q.crossAngle(firstPart, other, visible.x) < angleMin - 1e-9) { return; }
+      /* За рамкой скрытая не угадывается: на видимой части кривые
+         не сходятся. Внутри окна они сходятся к ней по построению,
+         и там её прячет нецелость — это проверено при подборе. */
+      if (variant === 'offscreen' && !Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
+      /* Ответ не читается с очевидной точки. */
+      if (answer === visible.x || answer === visible.y) { return; }
+      /* Очевидная точка не садится на уже отмеченную: две отметки
+         в одном узле — вершина и пересечение — сливаются. */
+      var marked = (first.points || []).concat(other.points || []);
+      if (marked.some(function (pt) { return pt.x === visible.x && pt.y === visible.y; })) { return; }
+    }
+    var marks = intersectionMarks(points, asked, spec);
+    var sig = withLine
+      ? 'ql:' + signature(p) + '|' + key(other.line.k) + '@' + key(other.line.b)
+      : 'qq:' + signature(p) + '|' + signature(other.curve);
+
+    function pointMeta(pt) {
+      var out = { x: pt.x, y: pt.y, visible: pt.visible, shown: pt.shown };
+      if (pt.xFraction) { out.xFraction = pt.xFraction; out.yFraction = pt.yFraction; }
+      return out;
+    }
+    var otherPoint = asked === points[0] ? points[1] : points[0];
+    found.push({
+      parts: [
+        { kind: 'quadratic', curve: p, color: 'lineA', points: first.points, label: true },
+        other
+      ],
+      curve: p, window: win, points: first.points.concat(marks), form: first.form,
+      intersection: {
+        points: points.map(pointMeta),
+        asked: pointMeta(asked),
+        other: { x: otherPoint.x, y: otherPoint.y },
+        which: which, axis: axis, x: asked.x, y: asked.y,
+        oneVisible: oneVisible,
+        hidden: variant
+      },
+      answerKey: 'ans:' + answer,
+      score: first.score + (marks.length ? 0.05 : 0) -
+             Math.abs(points[1].x - points[0].x) * 0.02,
+      pairKey: sig,
+      /* В паре ключ наклона — обе кривые: пул не должен состоять
+         из одной параболы с разными прямыми. */
+      slopeKey: first.slopeKey + '|' + (withLine ? 'k:' + key(other.line.k) : 'a:' + key(other.curve.a)),
+      interceptKey: first.interceptKey,
+      vertexKey: first.vertexKey,
+      zeroIntercept: first.zeroIntercept
+    });
+  }
+
   firsts.forEach(function (first) {
     var p = first.curve;
     var win = first.window;
+
+    if (variant === 'fraction') {
+      /* Прямая через очевидную точку под читаемым наклоном; вторая
+         точка нецелая и внутри окна — уже отобрана в fractionPairs. */
+      fractionPairs(p, win, spec, axis).forEach(function (pair) {
+        if (!lineOk(pair.line, win, constraints.line)) { return; }
+        consider(first, pair.points, { kind: 'line', line: pair.line, color: 'lineB' });
+      });
+      return;
+    }
 
     pointPairs(p, win, spec).forEach(function (points) {
       var candidates = withLine ? [null] : seconds;
@@ -652,54 +789,7 @@ function pairCandidates(task, set, seed) {
         });
         if (!match) { return; }
 
-        var asked = askedPoint(points, which);
-        var answer = axis === 'y' ? asked.y : asked.x;
-        var firstPart = { kind: 'quadratic', curve: p };
-        if (oneVisible) {
-          var visible = points[0].visible ? points[0] : points[1];
-          var hidden = points[0].visible ? points[1] : points[0];
-          /* Видимая точка очевидна: кривые пересекаются под заметным
-             углом, а не касаются и не идут рядом. */
-          if (Q.crossAngle(firstPart, other, visible.x) < angleMin - 1e-9) { return; }
-          /* Скрытая не угадывается: на видимой части кривые не сходятся. */
-          if (!Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
-          /* Ответ не читается с видимой точки. */
-          if (answer === visible.x || answer === visible.y) { return; }
-          /* Видимая точка не садится на уже отмеченную: две отметки
-             в одном узле — вершина и пересечение — сливаются. */
-          var marked = (first.points || []).concat(other.points || []);
-          if (marked.some(function (pt) { return pt.x === visible.x && pt.y === visible.y; })) { return; }
-        }
-        var marks = intersectionMarks(points, asked, spec);
-        var sig = withLine
-          ? 'ql:' + signature(p) + '|' + key(other.line.k) + '@' + key(other.line.b)
-          : 'qq:' + signature(p) + '|' + signature(other.curve);
-
-        found.push({
-          parts: [
-            { kind: 'quadratic', curve: p, color: 'lineA', points: first.points, label: true },
-            other
-          ],
-          curve: p, window: win, points: first.points.concat(marks), form: first.form,
-          intersection: {
-            points: points.map(function (pt) { return { x: pt.x, y: pt.y, visible: pt.visible }; }),
-            asked: { x: asked.x, y: asked.y, visible: asked.visible },
-            other: { x: asked === points[0] ? points[1].x : points[0].x,
-                     y: asked === points[0] ? points[1].y : points[0].y },
-            which: which, axis: axis, x: asked.x, y: asked.y,
-            oneVisible: oneVisible
-          },
-          answerKey: 'ans:' + answer,
-          score: first.score + (marks.length ? 0.05 : 0) -
-                 Math.abs(points[1].x - points[0].x) * 0.02,
-          pairKey: sig,
-          /* В паре ключ наклона — обе кривые: пул не должен состоять
-             из одной параболы с разными прямыми. */
-          slopeKey: first.slopeKey + '|' + (withLine ? 'k:' + key(other.line.k) : 'a:' + key(other.curve.a)),
-          interceptKey: first.interceptKey,
-          vertexKey: first.vertexKey,
-          zeroIntercept: first.zeroIntercept
-        });
+        consider(first, points, other);
       });
     });
   });
@@ -904,13 +994,15 @@ var ANSWER_RULES = {
     return ctx.query.answerFrac;
   },
   'equation-choice': equationChoice,
+  /* Координата точной дробью, когда она есть: у нецелой точки
+     значение 2,5 хранится как 5/2, и ответ не зависит от double. */
   'intersection-x': function (ctx) {
     if (!ctx.intersection) { throw new Error('generate-quadratic: у ' + ctx.task.id + ' нет точки пересечения'); }
-    return frac(ctx.intersection.asked.x);
+    return ctx.intersection.asked.xFraction || frac(ctx.intersection.asked.x);
   },
   'intersection-y': function (ctx) {
     if (!ctx.intersection) { throw new Error('generate-quadratic: у ' + ctx.task.id + ' нет точки пересечения'); }
-    return frac(ctx.intersection.asked.y);
+    return ctx.intersection.asked.yFraction || frac(ctx.intersection.asked.y);
   }
 };
 
