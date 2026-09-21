@@ -77,10 +77,7 @@ function place(node: HTMLElement): void {
   const width = Math.min(MENU_MAX, rowBox.width);
   const start = btnBox.left - rowBox.left;
   const left = Math.max(0, Math.min(start, rowBox.width - width));
-  const nose = Math.max(
-    NOSE_EDGE,
-    Math.min(start + btnBox.width / 2 - left, width - NOSE_EDGE),
-  );
+  const nose = Math.max(NOSE_EDGE, Math.min(start + btnBox.width / 2 - left, width - NOSE_EDGE));
 
   node.style.width = `${width}px`;
   node.style.marginLeft = `${left}px`;
