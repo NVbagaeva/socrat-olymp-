@@ -48,7 +48,7 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
             comingSoon={task.status !== 'active'}
             difficulty={task.badge}
             difficultyTone="info"
-            illustration={<TaskImage no={task.no} />}
+            illustration={<TaskImage no={task.no} format={task.illustration} />}
           />
         </li>
         );
