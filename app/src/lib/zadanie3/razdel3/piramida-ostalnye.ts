@@ -18,7 +18,7 @@ import {
   shapeVertexMidline,
   NAMES4,
 } from './drawings';
-import { round, ru } from '../format';
+import { korenSummy, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -92,13 +92,16 @@ export const P03_44: Prototype = {
     const h = round(Math.sqrt(b * b - half2));
     return [
       {
-        text:
-          `Половина диагонали основания — радиус описанной окружности: ${ru(a)} · √2 : 2. ` +
-          `Её квадрат: ${ru(a)}² : 2 = ${ru(half2)}.`,
+        text: 'Половина диагонали основания — радиус описанной окружности. Приближать её незачем: в теореме Пифагора она входит квадратом, а квадрат — число короткое.',
+        formula: `\\left(\\dfrac{${tex(a)}\\sqrt{2}}{2}\\right)^2 = \\dfrac{${tex(a)}^2}{2} = \\dfrac{${tex(round(a * a))}}{2} = ${tex(half2)}`,
         value: half2,
       },
       {
-        text: `Высота: √(${ru(b)}² − ${ru(half2)}) = √${ru(round(b * b - half2))} = ${ru(h)}.`,
+        text: 'Высота, радиус и боковое ребро образуют прямоугольный треугольник.',
+        formula: `h = ${korenSummy([
+          { tex: `${tex(b)}^2`, value: b * b },
+          { tex: tex(half2), value: half2, znak: '-' },
+        ])}`,
         value: h,
       },
     ];
@@ -157,7 +160,11 @@ export const P03_45: Prototype = {
     const a = num(p, 'a');
     return [
       { text: 'Сечение — квадрат, подобный основанию с коэффициентом ½ (середины рёбер).' },
-      { text: `Площадь: (${ru(a)} : 2)² = ${ru((a * a) / 4)}.`, value: (a * a) / 4 },
+      {
+        text: 'Значит сторона сечения вдвое меньше стороны основания, а площадь — квадрат этой стороны.',
+        formula: `\\left(\\dfrac{${tex(a)}}{2}\\right)^2 = \\dfrac{${tex(round(a * a))}}{4} = ${tex(round((a * a) / 4))}`,
+        value: (a * a) / 4,
+      },
     ];
   },
 
@@ -222,8 +229,16 @@ export const P03_46: Prototype = {
     const a2 = 2 * (b * b - h * h);
     const v = (a2 * h) / 3;
     return [
-      { text: `Квадрат стороны основания: 2 · (${ru(b)}² − ${ru(h)}²) = ${ru(a2)}.`, value: a2 },
-      { text: `Объём: ${ru(a2)} · ${ru(h)} : 3 = ${ru(v)}.`, value: v },
+      {
+        text: 'Половина диагонали основания — катет прямоугольного треугольника с высотой и боковым ребром, а сторона основания вдвое больше её квадрата.',
+        formula: `2 \\cdot (${tex(b)}^2 - ${tex(h)}^2) = 2 \\cdot (${tex(round(b * b))} - ${tex(round(h * h))}) = ${tex(round(a2))}`,
+        value: a2,
+      },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(round(a2))} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(a2 * h))}}{3} = ${tex(round(v))}`,
+        value: v,
+      },
     ];
   },
 
@@ -288,11 +303,23 @@ export const P03_47: Prototype = {
     const v = (a2 * h) / 3;
     return [
       {
-        text: `Сторона основания задана так, что половина диагонали равна ${ru(k)}: высота = √(${ru(sc)}² − ${ru(k)}²) = ${ru(h)}.`,
+        text: `Сторона основания задана так, что половина диагонали равна ${ru(k)}. Высота, эта половина и боковое ребро образуют прямоугольный треугольник.`,
+        formula: `h = ${korenSummy([
+          { tex: `${tex(sc)}^2`, value: sc * sc },
+          { tex: `${tex(k)}^2`, value: k * k, znak: '-' },
+        ])}`,
         value: h,
       },
-      { text: `Площадь основания: (${ru(k)}√2)² = ${ru(a2)}.`, value: a2 },
-      { text: `Объём: ${ru(a2)} · ${ru(h)} : 3 = ${ru(v)}.`, value: v },
+      {
+        text: 'Сторона основания равна половине диагонали, умноженной на корень из двух, а площадь — её квадрат.',
+        formula: `(${tex(k)}\\sqrt{2})^2 = 2 \\cdot ${tex(round(k * k))} = ${tex(round(a2))}`,
+        value: a2,
+      },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(round(a2))} \\cdot ${tex(round(h))}}{3} = \\dfrac{${tex(round(a2 * h))}}{3} = ${tex(round(v))}`,
+        value: v,
+      },
     ];
   },
 
@@ -351,7 +378,11 @@ export const P03_48: Prototype = {
         text: 'E лежит на середине SB, значит её высота над плоскостью ABC вдвое меньше высоты S.',
       },
       { text: 'Основание EABC (треугольник ABC) — половина основания ABCD.' },
-      { text: `Объём EABC: ${ru(V)} · ½ · ½ = ${ru(V / 4)}.`, value: V / 4 },
+      {
+        text: 'Вдвое меньше высота и вдвое меньше основание — объём меньше вчетверо.',
+        formula: `\\dfrac{1}{2} \\cdot \\dfrac{1}{2} \\cdot ${tex(V)} = \\dfrac{${tex(V)}}{4} = ${tex(round(V / 4))}`,
+        value: V / 4,
+      },
     ];
   },
 
@@ -414,13 +445,16 @@ export const P03_49: Prototype = {
     const h = round(Math.sqrt(b * b - r2));
     return [
       {
-        text:
-          `Радиус окружности, описанной около основания: ${ru(a)} / √3. ` +
-          `Его квадрат: ${ru(a)}² : 3 = ${ru(r2)}.`,
+        text: 'Радиус окружности, описанной около основания, иррационален, а его квадрат — нет: в теореме Пифагора нужен именно квадрат.',
+        formula: `\\left(\\dfrac{${tex(a)}}{\\sqrt{3}}\\right)^2 = \\dfrac{${tex(a)}^2}{3} = \\dfrac{${tex(round(a * a))}}{3} = ${tex(r2)}`,
         value: r2,
       },
       {
-        text: `Высота: √(${ru(b)}² − ${ru(r2)}) = √${ru(round(b * b - r2))} = ${ru(h)}.`,
+        text: 'Высота, радиус и боковое ребро образуют прямоугольный треугольник.',
+        formula: `h = ${korenSummy([
+          { tex: `${tex(b)}^2`, value: b * b },
+          { tex: tex(r2), value: r2, znak: '-' },
+        ])}`,
         value: h,
       },
     ];
@@ -480,7 +514,11 @@ export const P03_50: Prototype = {
       {
         text: 'Средняя линия отсекает от основания треугольник площадью в четверть исходного (подобие с коэффициентом ½); высота у отсечённой пирамиды та же.',
       },
-      { text: `Объём отсечённой части: ${ru(V)} : 4 = ${ru(V / 4)}.`, value: V / 4 },
+      {
+        text: 'Значит объём отсечённой части — четверть исходного.',
+        formula: `\\dfrac{${tex(V)}}{4} = ${tex(round(V / 4))}`,
+        value: V / 4,
+      },
     ];
   },
 
@@ -539,7 +577,11 @@ export const P03_51: Prototype = {
     return [
       { text: 'Радиус окружности, описанной около правильного шестиугольника, равен его стороне.' },
       {
-        text: `Высота: √(${ru(b)}² − ${ru(a)}²) = ${ru(round(Math.sqrt(b * b - a * a)))}.`,
+        text: 'Высота, радиус и боковое ребро образуют прямоугольный треугольник.',
+        formula: `h = ${korenSummy([
+          { tex: `${tex(b)}^2`, value: b * b },
+          { tex: `${tex(a)}^2`, value: a * a, znak: '-' },
+        ])}`,
         value: Math.sqrt(b * b - a * a),
       },
     ];

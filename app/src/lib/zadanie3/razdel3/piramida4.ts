@@ -11,7 +11,7 @@ import { regularPyramidByEdge, point } from './common';
 import { solveBySearch } from '../search';
 import { distance } from '../../solid/measure';
 import { shapeHeightDiagonals, NAMES4 } from './drawings';
-import { ru } from '../format';
+import { korenSummy, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num, text } from '../types';
 
 function variant(
@@ -79,9 +79,17 @@ export const P03_41: Prototype = {
     const half = bd / 2;
     const so = Math.sqrt(sd * sd - half * half);
     return [
-      { text: `Половина диагонали: BD : 2 = ${ru(bd)} : 2 = ${ru(half)}.`, value: half },
       {
-        text: `Треугольник, образованный высотой, половиной диагонали и боковым ребром, прямоугольный: SO = √(${ru(sd)}² − ${ru(half)}²) = ${ru(so)}.`,
+        text: 'Высота пирамиды падает в центр основания — точку пересечения диагоналей. Берём половину диагонали.',
+        formula: `\\dfrac{BD}{2} = \\dfrac{${tex(bd)}}{2} = ${tex(round(half))}`,
+        value: half,
+      },
+      {
+        text: 'Высота, половина диагонали и боковое ребро образуют прямоугольный треугольник.',
+        formula: `SO = ${korenSummy([
+          { tex: `${tex(sd)}^2`, value: sd * sd },
+          { tex: `${tex(round(half))}^2`, value: half * half, znak: '-' },
+        ])}`,
         value: so,
       },
     ];
@@ -136,9 +144,17 @@ export const P03_42: Prototype = {
     const half = bd / 2;
     const sc = Math.sqrt(so * so + half * half);
     return [
-      { text: `Половина диагонали: BD : 2 = ${ru(bd)} : 2 = ${ru(half)}.`, value: half },
       {
-        text: `Боковое ребро — гипотенуза прямоугольного треугольника с катетами SO и половиной диагонали: ${text(p, 'edge')} = √(${ru(so)}² + ${ru(half)}²) = ${ru(sc)}.`,
+        text: 'Высота пирамиды падает в центр основания — точку пересечения диагоналей. Берём половину диагонали.',
+        formula: `\\dfrac{BD}{2} = \\dfrac{${tex(bd)}}{2} = ${tex(round(half))}`,
+        value: half,
+      },
+      {
+        text: 'Боковое ребро — гипотенуза прямоугольного треугольника с катетами SO и половиной диагонали.',
+        formula: `${text(p, 'edge')} = ${korenSummy([
+          { tex: `${tex(so)}^2`, value: so * so },
+          { tex: `${tex(round(half))}^2`, value: half * half },
+        ])}`,
         value: sc,
       },
     ];
@@ -197,10 +213,18 @@ export const P03_43: Prototype = {
     const half = Math.sqrt(ev * ev - so * so);
     return [
       {
-        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой ${text(p, 'edge')} и катетом SO: √(${ru(ev)}² − ${ru(so)}²) = ${ru(half)}.`,
+        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой ${text(p, 'edge')} и катетом SO.`,
+        formula: korenSummy([
+          { tex: `${tex(ev)}^2`, value: ev * ev },
+          { tex: `${tex(so)}^2`, value: so * so, znak: '-' },
+        ]),
         value: half,
       },
-      { text: `Диагональ ${text(p, 'diag')}: ${ru(half)} · 2 = ${ru(2 * half)}.`, value: 2 * half },
+      {
+        text: `Диагональ ${text(p, 'diag')} вдвое длиннее своей половины.`,
+        formula: `2 \\cdot ${tex(round(half))} = ${tex(round(2 * half))}`,
+        value: 2 * half,
+      },
     ];
   },
 

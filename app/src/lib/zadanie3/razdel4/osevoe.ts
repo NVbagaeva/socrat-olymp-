@@ -12,7 +12,7 @@
 import { apex, basePoint } from './common';
 import { polygonArea } from '../../solid/measure';
 import { coneWithAxial } from './drawings';
-import { round, ru } from '../format';
+import { korenSummy, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -69,9 +69,17 @@ export const P03_55: Prototype = {
     const l = num(p, 'l');
     const h = round(Math.sqrt(l * l - r * r));
     return [
-      { text: `Высота: √(${ru(l)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = ${ru(num(p, 'd'))} · ${ru(h)} : 2 = ${ru(round(r * h))}.`,
+        text: 'Высота, радиус и образующая образуют прямоугольный треугольник.',
+        formula: `h = ${korenSummy([
+          { tex: `${tex(l)}^2`, value: l * l },
+          { tex: `${tex(round(r))}^2`, value: r * r, znak: '-' },
+        ])}`,
+        value: h,
+      },
+      {
+        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}. Площадь треугольника — половина произведения основания на высоту.`,
+        formula: `\\dfrac{${tex(num(p, 'd'))} \\cdot ${tex(h)}}{2} = \\dfrac{${tex(round(num(p, 'd') * h))}}{2} = ${tex(round(r * h))}`,
         value: r * h,
       },
     ];
@@ -129,9 +137,17 @@ export const P03_56: Prototype = {
     const l = num(p, 'l');
     const r = Math.sqrt(l * l - h * h);
     return [
-      { text: `Радиус: √(${ru(l)}² − ${ru(h)}²) = ${ru(r)}.`, value: r },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}: площадь = ${ru(r)} · ${ru(h)} = ${ru(r * h)}.`,
+        text: 'Радиус, высота и образующая образуют прямоугольный треугольник.',
+        formula: `r = ${korenSummy([
+          { tex: `${tex(l)}^2`, value: l * l },
+          { tex: `${tex(h)}^2`, value: h * h, znak: '-' },
+        ])}`,
+        value: r,
+      },
+      {
+        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}. Площадь треугольника — половина произведения основания на высоту.`,
+        formula: `\\dfrac{${tex(round(2 * r))} \\cdot ${tex(h)}}{2} = \\dfrac{${tex(round(2 * r * h))}}{2} = ${tex(round(r * h))}`,
         value: r * h,
       },
     ];
@@ -185,8 +201,16 @@ export const P03_57: Prototype = {
     const h = num(p, 'h');
     const r = Math.sqrt(k);
     return [
-      { text: `Площадь основания πr² = ${ru(k)}π, значит r = √${ru(k)} = ${ru(r)}.`, value: r },
-      { text: `Осевое сечение: ${ru(r)} · ${ru(h)} = ${ru(r * h)}.`, value: r * h },
+      {
+        text: 'Площадь основания — это «пи на эр квадрат», отсюда и радиус.',
+        formula: `\\pi r^2 = ${tex(k)}\\pi,\\quad r = \\sqrt{${tex(k)}} = ${tex(round(r))}`,
+        value: r,
+      },
+      {
+        text: 'Осевое сечение — треугольник с основанием в два радиуса и высотой конуса.',
+        formula: `\\dfrac{2 \\cdot ${tex(round(r))} \\cdot ${tex(h)}}{2} = ${tex(round(r))} \\cdot ${tex(h)} = ${tex(round(r * h))}`,
+        value: r * h,
+      },
     ];
   },
 

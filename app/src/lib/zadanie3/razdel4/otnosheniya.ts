@@ -17,7 +17,7 @@
 
 import { approxBaseArea, approxTotalArea, approxVolume } from './common';
 import { coneVessel, coneWithHeight, coneWithParallelCut } from './drawings';
-import { round, ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -84,11 +84,13 @@ export const P03_58: Prototype = {
     const whole = a + b;
     return [
       {
-        text: `Сечение подобно основанию: коэффициент подобия — доля высоты от вершины, ${ru(a)} : ${ru(whole)}.`,
+        text: 'Сечение подобно основанию, а коэффициент подобия — доля высоты, считая от вершины.',
+        formula: `k = \\dfrac{${tex(a)}}{${tex(whole)}}`,
         value: t,
       },
       {
-        text: `Площадь растёт как квадрат коэффициента: ${ru(S)} · ${ru(a)}² : ${ru(whole)}² = ${ru(round(S * t * t))}.`,
+        text: 'Площадь растёт как квадрат коэффициента.',
+        formula: `${tex(S)} \\cdot \\dfrac{${tex(a)}^2}{${tex(whole)}^2} = ${tex(S)} \\cdot \\dfrac{${tex(round(a * a))}}{${tex(round(whole * whole))}} = ${tex(round(S * t * t))}`,
         value: S * t * t,
       },
     ];
@@ -139,7 +141,11 @@ export const P03_59: Prototype = {
     const k = num(p, 'k');
     return [
       { text: 'Объём конуса пропорционален квадрату радиуса при неизменной высоте.' },
-      { text: `Объём увеличится в ${ru(k)}² = ${ru(k * k)} раз.`, value: k * k },
+      {
+        text: 'Значит объём вырастет во столько раз, сколько даёт квадрат этого множителя.',
+        formula: `${tex(k)}^2 = ${tex(round(k * k))}`,
+        value: k * k,
+      },
     ];
   },
 
@@ -186,7 +192,12 @@ export const P03_60: Prototype = {
     const k = num(p, 'k');
     return [
       { text: 'Объём конуса пропорционален высоте при неизменном радиусе.' },
-      { text: `Объём уменьшится в ${ru(k)} раза.`, value: k },
+      {
+        /* Формулы здесь нет: считать нечего, множитель объёма равен
+           множителю высоты — это и есть весь шаг. */
+        text: `Значит объём меняется во столько же раз, во сколько высота, — в ${ru(k)}.`,
+        value: k,
+      },
     ];
   },
 
@@ -254,13 +265,16 @@ export const P03_61: Prototype = {
         text: `Налитая жидкость — конус, подобный сосуду с коэффициентом ${num(p, 'num')}/${num(p, 'den')}: её объём — куб этой доли от полного.`,
       },
       {
-        text:
-          `Полный объём сосуда: ${ru(V)} · ${ru(den)}³` +
-          `${numerator === 1 ? '' : ` : ${ru(numerator)}³`} = ${ru(round(full))}.`,
+        text: 'Отсюда полный объём сосуда: делим налитый на куб доли.',
+        formula:
+          numerator === 1
+            ? `${tex(V)} \\cdot ${tex(den)}^3 = ${tex(V)} \\cdot ${tex(round(den ** 3))} = ${tex(round(full))}`
+            : `${tex(V)} \\cdot \\dfrac{${tex(den)}^3}{${tex(numerator)}^3} = ${tex(V)} \\cdot \\dfrac{${tex(round(den ** 3))}}{${tex(round(numerator ** 3))}} = ${tex(round(full))}`,
         value: full,
       },
       {
-        text: `Долить нужно: ${ru(round(full))} − ${ru(V)} = ${ru(round(full - V))}.`,
+        text: 'Долить нужно разницу между полным объёмом и налитым.',
+        formula: `${tex(round(full))} - ${tex(V)} = ${tex(round(full - V))}`,
         value: full - V,
       },
     ];
@@ -331,13 +345,13 @@ export const P03_62: Prototype = {
     const t = a / (a + b);
     return [
       {
-        text: `Отсечённый (верхний) конус подобен исходному с коэффициентом ${ru(a)} : ${ru(a + b)}.`,
+        text: 'Отсечённый (верхний) конус подобен исходному, коэффициент — доля высоты от вершины.',
+        formula: `k = \\dfrac{${tex(a)}}{${tex(a + b)}}`,
         value: t,
       },
       {
-        text:
-          'Его полная поверхность масштабируется как квадрат коэффициента: ' +
-          `${ru(S)} · ${ru(a)}² : ${ru(a + b)}² = ${ru(round(S * t * t))}.`,
+        text: 'Полная поверхность растёт как квадрат коэффициента.',
+        formula: `${tex(S)} \\cdot \\dfrac{${tex(a)}^2}{${tex(a + b)}^2} = ${tex(S)} \\cdot \\dfrac{${tex(round(a * a))}}{${tex(round((a + b) * (a + b)))}} = ${tex(round(S * t * t))}`,
         value: S * t * t,
       },
     ];

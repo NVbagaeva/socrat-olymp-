@@ -13,7 +13,7 @@
 import { apex, basePoint, solveBySearch } from './common';
 import { distance } from '../../solid/measure';
 import { coneWithHeight } from './drawings';
-import { ru } from '../format';
+import { korenSummy, round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -64,9 +64,17 @@ export const P03_52: Prototype = {
     const r = num(p, 'd') / 2;
     const l = Math.hypot(h, r);
     return [
-      { text: `Радиус основания: ${ru(num(p, 'd'))} : 2 = ${ru(r)}.`, value: r },
       {
-        text: `Образующая — гипотенуза прямоугольного треугольника с катетами высотой и радиусом: √(${ru(h)}² + ${ru(r)}²) = ${ru(l)}.`,
+        text: 'Радиус основания — половина диаметра.',
+        formula: `\\dfrac{${tex(num(p, 'd'))}}{2} = ${tex(round(r))}`,
+        value: r,
+      },
+      {
+        text: 'Образующая — гипотенуза прямоугольного треугольника с катетами высотой и радиусом.',
+        formula: `l = ${korenSummy([
+          { tex: `${tex(h)}^2`, value: h * h },
+          { tex: `${tex(round(r))}^2`, value: r * r },
+        ])}`,
         value: l,
       },
     ];
@@ -126,10 +134,18 @@ export const P03_53: Prototype = {
     const r = Math.sqrt(l * l - h * h);
     return [
       {
-        text: `Радиус — катет прямоугольного треугольника с гипотенузой образующей: √(${ru(l)}² − ${ru(h)}²) = ${ru(r)}.`,
+        text: 'Радиус — катет прямоугольного треугольника, в котором гипотенуза есть образующая.',
+        formula: `r = ${korenSummy([
+          { tex: `${tex(l)}^2`, value: l * l },
+          { tex: `${tex(h)}^2`, value: h * h, znak: '-' },
+        ])}`,
         value: r,
       },
-      { text: `Диаметр: ${ru(r)} · 2 = ${ru(2 * r)}.`, value: 2 * r },
+      {
+        text: 'Диаметр вдвое больше радиуса.',
+        formula: `2 \\cdot ${tex(round(r))} = ${tex(round(2 * r))}`,
+        value: 2 * r,
+      },
     ];
   },
 
@@ -188,8 +204,19 @@ export const P03_54: Prototype = {
     const l = num(p, 'l');
     const h = Math.sqrt(l * l - r * r);
     return [
-      { text: `Радиус: ${ru(num(p, 'd'))} : 2 = ${ru(r)}.`, value: r },
-      { text: `Высота — катет: √(${ru(l)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
+      {
+        text: 'Радиус основания — половина диаметра.',
+        formula: `\\dfrac{${tex(num(p, 'd'))}}{2} = ${tex(round(r))}`,
+        value: r,
+      },
+      {
+        text: 'Высота — второй катет того же прямоугольного треугольника.',
+        formula: `h = ${korenSummy([
+          { tex: `${tex(l)}^2`, value: l * l },
+          { tex: `${tex(round(r))}^2`, value: r * r, znak: '-' },
+        ])}`,
+        value: h,
+      },
     ];
   },
 

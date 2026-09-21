@@ -52,11 +52,14 @@ export function texSegment(pair: readonly [string, string]): string {
   return texLetters(pair[0] + pair[1]);
 }
 
-/** Слагаемое под корнем: как оно записано и чему равно. */
+/** Слагаемое под корнем: как оно записано, чему равно и с каким знаком. */
 export interface ChlenKornya {
-  /** Запись слагаемого в TeX: «4^2», «65». */
+  /** Запись слагаемого в TeX без знака: «4^2», «65». */
   tex: string;
+  /** Величина слагаемого, тоже без знака. */
   value: number;
+  /** Знак перед слагаемым; у первого он не пишется. По умолчанию «+». */
+  znak?: '+' | '-';
 }
 
 /**
@@ -73,13 +76,16 @@ export interface ChlenKornya {
  * указанием, где он, — как и любая другая ошибка в данных банка.
  */
 export function korenSummy(chleny: readonly ChlenKornya[]): string {
-  const summa = round(chleny.reduce((s, c) => s + c.value, 0));
+  const summa = round(chleny.reduce((s, c) => (c.znak === '-' ? s - c.value : s + c.value), 0));
   const znachenie = round(Math.sqrt(summa));
   if (!Number.isInteger(round(znachenie * 1000))) {
     throw new Error(`Корень из ${summa} не точный: ${znachenie}`);
   }
-  const stupeni = [`\\sqrt{${chleny.map((c) => c.tex).join(' + ')}}`];
-  const chislami = `\\sqrt{${chleny.map((c) => tex(c.value)).join(' + ')}}`;
+  /* Знак пишется перед слагаемым, у первого его нет: «b^2 - 18». */
+  const podryad = (kak: (c: ChlenKornya) => string) =>
+    chleny.map((c, i) => (i === 0 ? kak(c) : ` ${c.znak ?? '+'} ${kak(c)}`)).join('');
+  const stupeni = [`\\sqrt{${podryad((c) => c.tex)}}`];
+  const chislami = `\\sqrt{${podryad((c) => tex(c.value))}}`;
   if (chislami !== stupeni.at(-1)) {
     stupeni.push(chislami);
   }
