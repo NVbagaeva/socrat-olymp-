@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import Image from 'next/image';
-import { AlertIcon, EmptyState, HandNote, NavIcon } from '@/components/ui';
+import { AlertIcon, EmptyState, GlassBadge, HandNote } from '@/components/ui';
 import { vkladka } from '@/content/veroyatnost';
 import { FOTO_4, O_ZADANII_4, STATISTIKA_4, V_ZADANII_5 } from '@/content/veroyatnost-o-zadanii';
 import { HintIcon } from '../prep/PrepIcons';
@@ -75,12 +75,10 @@ export function OZadanii4({ base }: OZadanii4Props) {
         </section>
 
         <div className="z4-about__karty">
-          {/* Решаемость: число слева, пояснение справа. */}
+          {/* Решаемость: значок и число, под линией — пояснение. */}
           <section className="z4-karta z4-stat">
             <div className="z4-stat__chislo">
-              <span className="z4-stat__ico" aria-hidden="true">
-                <NavIcon name="stats" />
-              </span>
+              <GlassBadge />
               <p className="z4-stat__value">{STATISTIKA_4.znachenie}</p>
               <p className="z4-stat__label">{STATISTIKA_4.podpis(STATISTIKA_4.god)}</p>
               <p className="z4-stat__istochnik">{STATISTIKA_4.istochnik}</p>

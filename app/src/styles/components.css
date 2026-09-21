@@ -2219,3 +2219,37 @@ a.task-card {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* ── Стеклянный значок GlassBadge ────────────────────────────
+   Рисунок целиком лежит в SVG компонента — он перенесён из образца
+   и цвета держит в себе. Здесь только место под него: ни фона,
+   ни рамки, ни тени на обёртке, свечение у шара своё, внутри. */
+
+.glass-badge {
+  --glass-badge-size: 72px;
+  /* Шар занимает 104 единицы холста из 160, остальное — свечение
+     вокруг него. Чтобы сам шар остался заданного размера, холст берётся
+     шире значка (160 / 104) и выступает за рамку на половину разницы. */
+  --glass-badge-canvas: 153.846%;
+  --glass-badge-bleed: -26.923%;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: var(--glass-badge-size);
+  height: var(--glass-badge-size);
+}
+.glass-badge__art {
+  position: absolute;
+  top: var(--glass-badge-bleed);
+  left: var(--glass-badge-bleed);
+  width: var(--glass-badge-canvas);
+  height: var(--glass-badge-canvas);
+  /* Сброс в base.css не даёт картинкам вылезать за родителя, а здесь
+     холст шире значка намеренно: за рамку выходит только свечение. */
+  max-width: none;
+}
+@media (max-width: 767.98px) {
+  .glass-badge {
+    --glass-badge-size: 56px;
+  }
+}
