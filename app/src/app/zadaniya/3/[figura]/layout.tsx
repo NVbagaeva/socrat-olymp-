@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Solid } from '@/components/solid/Solid';
-import { Breadcrumbs, FigureZoom } from '@/components/ui';
+import { FigureZoom } from '@/components/ui';
 import { stereometria } from '@/content/stereometria';
 import { tasksPage } from '@/content/tasks';
 import { razdelBySlug } from '@/lib/zadanie3';
 import { THUMBS } from '@/lib/solid/drawings';
 import { type Model } from '@/lib/solid';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
+import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { VKLADKI_FIGURY } from '@/content/vkladki';
 import '@/lib/solid/solid.css';
 import '../../zadaniya.css';
@@ -50,8 +51,9 @@ export default async function FiguraLayout({
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <Breadcrumbs
-          items={[
+        <ShapkaRazdela
+          className="figura-head"
+          crumbs={[
             { label: 'Задания', href: tasksPage.href },
             {
               label: `№${Number(stereometria.no)} ${stereometria.subtitle}`,
@@ -59,25 +61,19 @@ export default async function FiguraLayout({
             },
             { label: razdel.nazvanie },
           ]}
-        />
-
-        <header className="section-head figura-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">{razdel.nazvanie}</h1>
-            </div>
-            <p className="section-head__lead">
+          title={razdel.nazvanie}
+          lead={
+            <>
               Раздел {razdel.nomer} задачника: {razdel.prototipy.length} прототипов, {variants}{' '}
               вариантов.
-            </p>
-          </div>
-
-          <div className="section-head__media">
+            </>
+          }
+          media={
             <FigureZoom label={`${razdel.nazvanie}: чертёж фигуры`}>
               <Solid model={thumb(razdel.nomer)} />
             </FigureZoom>
-          </div>
-        </header>
+          }
+        />
 
         <RazdelTabs base={base} tabs={VKLADKI_FIGURY} />
 

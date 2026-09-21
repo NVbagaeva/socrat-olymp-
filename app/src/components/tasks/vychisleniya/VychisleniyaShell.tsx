@@ -1,8 +1,8 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { Badge, Breadcrumbs } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { RazdelTabs } from '../RazdelTabs';
+import { ShapkaRazdela } from '../ShapkaRazdela';
 
 /**
  * Оболочка задания №8: крошки, заголовок и лента вкладок.
@@ -17,23 +17,17 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <Breadcrumbs
-          items={[
+        <ShapkaRazdela
+          className="z8-head"
+          crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(VYCHISLENIYA.no)}` },
           ]}
+          title={VYCHISLENIYA.title}
+          badge={VYCHISLENIYA.badge}
+          lead={VYCHISLENIYA.lead}
         />
-
-        <header className="section-head z8-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">{VYCHISLENIYA.title}</h1>
-              <Badge tone="info">{VYCHISLENIYA.badge}</Badge>
-            </div>
-            <p className="section-head__lead">{VYCHISLENIYA.lead}</p>
-          </div>
-        </header>
 
         <RazdelTabs base={base} tabs={VYCHISLENIYA.tabs} tutors={VYCHISLENIYA.tutors} />
 
