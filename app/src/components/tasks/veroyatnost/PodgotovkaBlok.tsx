@@ -10,6 +10,7 @@ import { METODY } from '@/lib/veroyatnost/model';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { TaskOutcome } from '@/lib/progressStore';
 import { prepItog, prepReshena, prepStore } from '@/lib/veroyatnost/prepProgress';
+import { klyuchZadachi } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { PrepDots, type PrepDotState } from '../prep/PrepDots';
 
@@ -138,6 +139,7 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
           zadacha={{
             id: zadacha.id,
             uslovie: zadacha.uslovie,
+            klyuch: klyuchZadachi(zadacha.id),
             seal: zadacha.seal,
             steps: zadacha.steps,
             ...(zadacha.model === undefined ? {} : { model: zadacha.model }),

@@ -6,7 +6,7 @@
  */
 
 import type { AtomVykladki } from '../tex';
-import type { Podsvetka } from './model';
+import type { Parametry, Podsvetka } from './model';
 import { openText } from './secret';
 
 export interface RazborShag {
@@ -28,6 +28,13 @@ export interface Razbor {
   /** Фраза после «Метод:». */
   metod: string;
   shagi: RazborShag[];
+  /**
+   * Параметры рисунка: плитки с количествами, клетки таблицы,
+   * вероятности на ветвях, доли групп. По ним ответ читается прямо
+   * с рисунка, поэтому они закрыты вместе с разбором, а не лежат в
+   * странице открыто. Нет у задачи без модели.
+   */
+  parametry?: Parametry;
   /** Подсветка благоприятного на рисунке. */
   podsvetka: Podsvetka;
   /** Ответ, как его записать: «0,25». */

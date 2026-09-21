@@ -27,7 +27,7 @@ import {
 } from './labirint';
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import { sealAnswer } from './secret';
+import { klyuchZadachi, sealAnswer } from './secret';
 import { konechnaya, round, type PrepBlok, type Prototype, type Step, type Variant } from './types';
 
 export interface BadVariant {
@@ -204,7 +204,7 @@ export function checkBank(bank: readonly Prototype[]): Report {
          отпечаток. Один и тот же ответ в разных вариантах —
          обычное дело и не нарушение. */
       const otvet = otvetUchenika(prototype, variant.params);
-      const seal = sealAnswer(otvet);
+      const seal = sealAnswer(otvet, klyuchZadachi(prototype.id, variant.n));
       const zanyato = seals.get(seal);
       if (zanyato !== undefined && zanyato !== String(otvet)) {
         collisions.push({ a: zanyato, b: String(otvet) });

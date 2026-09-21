@@ -10,7 +10,7 @@ import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
 import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import type { ProgressStore } from '@/lib/progressStore';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
-import { openText, sealMetod } from '@/lib/veroyatnost/secret';
+import { klyuchZadachi, openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
 import { MethodPicker } from './MethodPicker';
 import { navykKind, navykPoId, navykiZadaniya, seychas, zadachaId } from './metody';
@@ -259,6 +259,8 @@ export function Sessiya({
             zadacha={{
               id,
               uslovie: variant.uslovie,
+              /* Числового ответа у условия нет: ни ключа, ни отпечатка. */
+              klyuch: '',
               seal: '',
               steps: '',
               ...(variant.illustration === undefined ? {} : { illustration: variant.illustration }),
@@ -330,6 +332,7 @@ export function Sessiya({
         zadacha={{
           id,
           uslovie: variant.uslovie,
+          klyuch: klyuchZadachi(kind.id, variant.n),
           seal: variant.seal,
           steps: variant.steps,
           ...(variant.model === undefined ? {} : { model: variant.model }),

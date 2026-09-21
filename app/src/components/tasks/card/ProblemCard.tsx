@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Badge, Button, Input } from '@/components/ui';
+import type { Parametry } from '@/lib/veroyatnost/model';
 import type { PoolModel } from '@/lib/veroyatnost/pool';
 import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
 import { answerMatches } from '@/lib/veroyatnost/secret';
@@ -14,12 +15,16 @@ import { Vizualizatsiya, podpisRisunka } from './Vizualizatsiya';
  * Карточка задачи — раздел 05 референса: условие · визуализация · решение.
  *
  * Общий компонент, не привязанный к заданию №4: ему нужны условие,
- * отпечаток ответа, закрытый разбор и, если есть, модель рисунка.
- * Правильного ответа в разметке нет: разбор лежит зашифрованным и
- * открывается только по действию ученика или после верного ответа.
+ * ключ и отпечаток ответа, закрытый разбор и, если есть, метод
+ * с картинкой. Правильного ответа в разметке нет: разбор лежит
+ * зашифрованным и открывается только по действию ученика или после
+ * верного ответа. Параметры рисунка — количества за плитками,
+ * клетки, вероятности на ветвях — лежат там же: по ним ответ
+ * читается прямо с рисунка, поэтому до ответа рисунка нет, он
+ * появляется вместе с решением.
  *
  * Состояния (раздел 06 и 07):
- *   before    — условие, рисунок без подсветки, поле ответа; решение скрыто;
+ *   before    — условие и поле ответа; рисунка и решения нет;
  *   correct   — поле зелёное, рисунок подсвечивает благоприятное, «Следующая»;
  *   incorrect — поле оранжевое, предлагается открыть решение;
  *   revealed  — шаги появляются по одному, рисунок в режиме ответа.
@@ -33,11 +38,13 @@ export type CardState = 'before' | 'correct' | 'incorrect' | 'revealed';
 export interface ProblemCardZadacha {
   id: string;
   uslovie: string;
+  /** Ключ задачи, с которым считан отпечаток (secret.ts). */
+  klyuch: string;
   /** Отпечаток верного ответа. */
   seal: string;
   /** Закрытый разбор (JSON формы Razbor, зашифрованный отпечатком). */
   steps: string;
-  /** Метод и параметры рисунка — открытая часть модели. */
+  /** Метод и картинка — открытая часть модели. */
   model?: PoolModel;
   /**
    * Иллюстрация задачи без модели: у варианта condition и у задач
@@ -80,7 +87,7 @@ const VERDICT = {
 };
 
 /** Дерево, у которого листьев больше четырёх. */
-function shirokoeDerevo(parametry: PoolModel['parametry']): boolean {
+function shirokoeDerevo(parametry: Parametry): boolean {
   if (parametry.method !== 'probability-tree') {
     return false;
   }
@@ -122,14 +129,14 @@ export function ProblemCard({
     if (value.trim() === '') {
       return;
     }
-    const right = answerMatches(value, zadacha.seal);
+    const right = answerMatches(value, zadacha.seal, zadacha.klyuch);
     setState(right ? 'correct' : 'incorrect');
     setItog(right ? 'correct' : 'incorrect');
     if (right) {
       setOtkryt(true);
     }
     onResult?.(right);
-  }, [value, zadacha.seal, onResult]);
+  }, [value, zadacha.seal, zadacha.klyuch, onResult]);
 
   const raskryt = useCallback((): void => {
     setOtkryt(true);
@@ -154,16 +161,19 @@ export function ProblemCard({
      под рисунок не нужна — условие и решение делят ширину пополам.
      Так же у задачи без модели, если у неё нет чертежа. */
   const bezRisunka =
-    model === undefined ? zadacha.risunok === undefined : model.parametry.method === 'formula';
+    model === undefined ? zadacha.risunok === undefined : model.method === 'formula';
+
+  /* Рисунок и подсветка благоприятного — только когда разбор уже
+     открыт: параметры рисунка лежат в нём, до ответа их нет. После
+     неверного ответа разбор ещё закрыт, и рисунка тоже нет. */
+  const otvetOtkryt = razbor !== null && state !== 'incorrect' && state !== 'before';
+  const parametry = otvetOtkryt ? razbor.parametry : undefined;
+  const podsvetka = otvetOtkryt ? razbor.podsvetka : undefined;
   /* Дерево на много листьев в узкой средней колонке не прочесть:
      такой рисунок занимает всю ширину карточки под условием и
      решением. Порог — больше четырёх листьев, то есть больше дерева
      двух испытаний по два исхода из референса. */
-  const shirokiyRisunok = model !== undefined && shirokoeDerevo(model.parametry);
-
-  /* Подсветка благоприятного — только когда разбор уже открыт. */
-  const podsvetka =
-    razbor === null || state === 'incorrect' || state === 'before' ? undefined : razbor.podsvetka;
+  const shirokiyRisunok = parametry !== undefined && shirokoeDerevo(parametry);
 
   /* Номера в шапке нет: он уже стоит в ряду кружков над карточкой,
      и второй раз называть задачу незачем. Шапка рисуется, только
@@ -202,20 +212,15 @@ export function ProblemCard({
     );
   }
 
-  /* Рисунок метода: собирается движком по параметрам модели, а у
-     задачи без модели может быть готовый чертёж (лабиринт). */
-  const risunok = bezRisunka ? null : model !== undefined ? (
+  /* Рисунок метода: собирается движком по параметрам из открытого
+     разбора, а у задачи без модели может быть готовый чертёж
+     (лабиринт). Пока разбор закрыт, рисунка метода нет. */
+  const risunok = bezRisunka ? null : parametry !== undefined && podsvetka !== undefined ? (
     <figure className="pc__risunok">
-      <figcaption className="pc__risunok-podpis">
-        {podpisRisunka(model.parametry, podsvetka)}
-      </figcaption>
-      <Vizualizatsiya
-        parametry={model.parametry}
-        {...(podsvetka === undefined ? {} : { podsvetka })}
-        state={risunokState}
-      />
+      <figcaption className="pc__risunok-podpis">{podpisRisunka(parametry, podsvetka)}</figcaption>
+      <Vizualizatsiya parametry={parametry} podsvetka={podsvetka} state={risunokState} />
     </figure>
-  ) : zadacha.risunok === undefined ? null : (
+  ) : model !== undefined ? null : zadacha.risunok === undefined ? null : (
     /* Чертёж нарисован на сборке готовой разметкой: движка в браузере
        нет, вставляем как есть. */
     <figure className="pc__chertezh" dangerouslySetInnerHTML={{ __html: zadacha.risunok }} />
@@ -228,7 +233,7 @@ export function ProblemCard({
      (лабиринт) в колонку шириной 320 px не читаются и тоже уходят
      вниз, на всю ширину карточки. */
   const spravaRisunok =
-    illyustratsiya === null && !shirokiyRisunok && model !== undefined && !bezRisunka;
+    illyustratsiya === null && !shirokiyRisunok && parametry !== undefined && !bezRisunka;
   const kolonka = spravaRisunok ? risunok : illyustratsiya;
   /* Рисунок метода на всю ширину — под условием и ответом. */
   const risunokVnizu = spravaRisunok ? null : risunok;

@@ -1,8 +1,23 @@
 import type { SkillItem } from '@/components/tasks/configurator';
 import { Vizualizatsiya } from '@/components/tasks/card';
 import { YARLYKI_REZHIMOV, type Rezhim, type Zadanie } from '@/content/veroyatnost';
-import type { Pool } from '@/lib/veroyatnost/pool';
+import { parametryMiniatyury, type Pool } from '@/lib/veroyatnost/pool';
 import { navykKind, navykiZadaniya } from './metody';
+
+/**
+ * Миниатюра прототипа: заготовка рисунка первого варианта, без
+ * количеств и подсветки. Параметры берутся на сборке из банка, а не
+ * из пула: в пул они не едут, и рисунок уходит вниз уже готовой
+ * разметкой. У метода «Формула» рисунка нет.
+ */
+function miniatyura(kindId: string) {
+  const parametry = parametryMiniatyury(kindId);
+  return parametry === undefined || parametry.method === 'formula' ? null : (
+    <span className="z4-skill-chart">
+      <Vizualizatsiya parametry={parametry} />
+    </span>
+  );
+}
 
 /**
  * Навыки тренажёра и генератора — методы, под которые в банке есть
@@ -18,10 +33,10 @@ import { navykKind, navykiZadaniya } from './metody';
 export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
   return navykiZadaniya(zadanie).flatMap((m): SkillItem[] => {
     const kinds = pool.kinds.filter((kind) => navykKind(kind) === m.id);
-    if (kinds.length === 0) {
+    const pervy = kinds[0];
+    if (pervy === undefined) {
       return [];
     }
-    const model = kinds[0]?.variants[0]?.model;
     return [
       {
         id: m.id,
@@ -29,12 +44,7 @@ export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
         code: `Метод ${m.nomer}`,
         count: kinds.reduce((sum, kind) => sum + kind.variants.length, 0),
         levels: [],
-        chart:
-          model === undefined || model.parametry.method === 'formula' ? null : (
-            <span className="z4-skill-chart">
-              <Vizualizatsiya parametry={model.parametry} />
-            </span>
-          ),
+        chart: miniatyura(pervy.id),
       },
     ];
   });
@@ -46,21 +56,13 @@ export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
  * (метод «Формула») карточка идёт без миниатюры.
  */
 export function navykiPrototipov(pool: Pool): SkillItem[] {
-  return pool.kinds.map((kind): SkillItem => {
-    const model = kind.variants[0]?.model;
-    return {
-      id: kind.id,
-      title: kind.title,
-      count: kind.variants.length,
-      levels: [],
-      chart:
-        model === undefined || model.parametry.method === 'formula' ? null : (
-          <span className="z4-skill-chart">
-            <Vizualizatsiya parametry={model.parametry} />
-          </span>
-        ),
-    };
-  });
+  return pool.kinds.map((kind): SkillItem => ({
+    id: kind.id,
+    title: kind.title,
+    count: kind.variants.length,
+    levels: [],
+    chart: miniatyura(kind.id),
+  }));
 }
 
 /** Ярлык к конфигуратору: адрес /trenazher/{id}/ и что в нём выбрано. */
