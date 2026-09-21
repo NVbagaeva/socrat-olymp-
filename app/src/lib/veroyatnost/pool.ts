@@ -31,13 +31,12 @@ import {
   zadanieIllyustratsii,
   type Method,
   type Parametry,
-  type Shape,
 } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import type { Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
-import { sealAnswer, sealMetod, sealText } from './secret';
+import { klyuchZadachi, sealAnswer, sealMetod, sealText } from './secret';
 import {
   type Metodika,
   type PrepBlok,
@@ -49,15 +48,14 @@ import {
 import { nabratVykladku } from '../tex';
 
 /**
- * Открытая часть модели задачи: метод, форма меры и параметры
- * рисунка. Параметры повторяют числа условия, но не ответ и не
- * подсветку — та лежит в закрытом разборе. У метода «Формула»
- * параметров нет — только имя метода.
+ * Открытая часть модели задачи: метод и картинка. Параметров рисунка
+ * здесь нет: количества за плитками, клетки таблицы, вероятности на
+ * ветвях и доли групп — это уже ответ или его половина, поэтому они
+ * лежат в закрытом разборе вместе с подсветкой и открываются с ним.
+ * У метода «Формула» рисунка нет — только имя метода.
  */
 export interface PoolModel {
   method: Method;
-  shape?: Shape;
-  parametry: Parametry;
   /**
    * Иллюстрация варианта: путь и alt. Поле есть только когда файл
    * лежит в манифесте картинок; нет файла — нет поля, и карточка
@@ -239,9 +237,9 @@ export function shagiRazbora(shagi: readonly Step[]): RazborShag[] {
 }
 
 /**
- * Закрытый разбор в JSON: фраза метода, набранные шаги, подсветка
- * рисунка и ответ строкой. Без методики (подготовка №5) — те же шаги
- * без метода и подсветки.
+ * Закрытый разбор в JSON: фраза метода, набранные шаги, параметры и
+ * подсветка рисунка и ответ строкой. Без методики (подготовка №5) —
+ * те же шаги без метода и рисунка.
  */
 function zakrytyRazbor(
   model: ReturnType<typeof modelVarianta> | null,
@@ -259,6 +257,7 @@ function zakrytyRazbor(
     : {
         metod: model.solution.method,
         shagi: nabrannye,
+        parametry: model.parameters,
         podsvetka: model.solution.highlight,
         otvet: model.answer.display,
       };
@@ -276,15 +275,29 @@ function otkrytayaModel(model: ReturnType<typeof modelVarianta>, id: string, n: 
   const illustration = illyustratsiyaVarianta(id, n);
   return {
     method: model.method,
-    ...(model.shape === undefined ? {} : { shape: model.shape }),
-    parametry: model.parameters,
     ...(illustration === undefined ? {} : { illustration }),
   };
 }
 
+/**
+ * Параметры рисунка для миниатюры навыка: первый вариант прототипа.
+ * Считается на сборке прямо по банку — в пуле параметров нет, и
+ * карточка навыка получает готовый рисунок, а не числа.
+ */
+export function parametryMiniatyury(kindId: string): Parametry | undefined {
+  const prototype = [...BANK_4, ...BANK_5].find((p) => p.id === kindId);
+  const variant = prototype?.varianty[0];
+  if (prototype === undefined || variant === undefined || prototype.metodika === undefined) {
+    return undefined;
+  }
+  return modelVarianta(prototype, variant).parameters;
+}
+
 function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
   const otvet = otvetUchenika(prototype, variant.params);
-  const seal = sealAnswer(otvet);
+  /* Отпечаток — с ключом задачи: у одного ответа в двух вариантах
+     отпечатки разные. Тот же ключ считает карточка в браузере. */
+  const seal = sealAnswer(otvet, klyuchZadachi(prototype.id, variant.n));
   const model = prototype.metodika === undefined ? null : modelVarianta(prototype, variant);
   const razbor = zakrytyRazbor(
     model,
@@ -361,7 +374,7 @@ export interface PrepPoolBlok {
 
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const otvet = prepOtvet(zadacha);
-  const seal = sealAnswer(otvet);
+  const seal = sealAnswer(otvet, klyuchZadachi(zadacha.id));
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
   /* Картинка к условию задачи без модели: у задачи с моделью она

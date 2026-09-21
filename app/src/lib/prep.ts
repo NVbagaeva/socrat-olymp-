@@ -11,6 +11,7 @@ import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { katex } from '@/lib/graph/katex';
+import { sealAnswer, sealChoice, sealText } from '@/lib/prepSecret';
 
 interface GraphSet {
   id: string;
@@ -72,7 +73,9 @@ export function prepSkillIds(): PrepSkillId[] {
    и тому же окну. Захардкоженных условий и разборов в проекте нет.
 
    Модуль серверный: движок и KaTeX работают на сборке, вниз уходит
-   готовая разметка.
+   готовая разметка. Ответ вниз не уходит вовсе: только его отпечаток
+   (lib/prepSecret.ts), а разбор и пояснения к неверным вариантам —
+   закрытыми, они раскрываются после проверки ответа.
    ══════════════════════════════════════════════════════════════════ */
 
 /** Блок разбора в том виде, в каком его рисует экран. */
@@ -95,9 +98,21 @@ export interface PrepStep {
 export interface PrepOption {
   number: string;
   html: string;
-  /** Чем плох вариант. У верного — null. Показывается только тому,
-      кто именно этот вариант и выбрал. */
-  error: string | null;
+}
+
+/**
+ * Закрытая часть задачи: то, что раскрывается после проверки ответа.
+ * В странице лежит JSON этой формы, зашифрованный отпечатком.
+ */
+export interface PrepZakrytoe {
+  /** Разбор. null — если движок не строит его для этой задачи. */
+  steps: PrepStep[] | null;
+  /**
+   * Чем плох вариант — по его номеру. У верного записи нет, поэтому
+   * и сам список лежит закрытым: пустое место выдавало бы ответ.
+   * Показывается только тому, кто именно этот вариант и выбрал.
+   */
+  oshibki: Record<string, string>;
 }
 
 export interface PrepTask {
@@ -108,11 +123,11 @@ export interface PrepTask {
   chartSvg: string | null;
   hintHtml: string | null;
   answerType: 'number' | 'choice';
-  /** Число текстом — или номер верного варианта у задач с выбором. */
-  answer: string;
   options: PrepOption[] | null;
-  /** Разбор. null — если движок не строит его для этой задачи. */
-  steps: PrepStep[] | null;
+  /** Отпечаток верного ответа с ключом задачи (её id). Ответа здесь нет. */
+  seal: string;
+  /** Закрытая часть: JSON формы PrepZakrytoe, зашифрованный отпечатком. */
+  zakryto: string;
 }
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
@@ -326,10 +341,7 @@ function flatSteps(task: EngineTask): PrepStep[] {
         },
         {
           type: 'formula',
-          html: katexHtml(
-            'k = \\Delta y : \\Delta x = 0 : \\Delta x = ' + value,
-            true,
-          ),
+          html: katexHtml('k = \\Delta y : \\Delta x = 0 : \\Delta x = ' + value, true),
           feature: false,
         },
         {
@@ -636,26 +648,43 @@ function buildSteps(task: EngineTask): PrepStep[] | null {
   }));
 }
 
-/** Десять задач навыка: условия, чертежи, ответы и разборы. */
+/**
+ * Десять задач навыка: условия, чертежи, отпечатки ответов и
+ * закрытые разборы. Ключ отпечатка — идентификатор задачи: у одного
+ * и того же числа в двух задачах отпечатки разные.
+ */
 export function buildPrepTasks(skill: PrepSkill): PrepTask[] {
   const tasks = GraphGenerate.generateSet(skill.setId) as EngineTask[];
 
-  return tasks.map((task, index) => ({
-    id: task.id,
-    no: index + 1,
-    questionHtml: typeset(task.questionHtml),
-    chartSvg: task.svg,
-    hintHtml: task.hintHtml === null ? null : typeset(task.hintHtml),
-    answerType: task.answerType === 'choice' ? 'choice' : 'number',
-    answer: task.answer,
-    options:
-      task.options === null
-        ? null
-        : task.options.map((option) => ({
-            number: option.number,
-            html: typeset(option.html),
-            error: option.error,
-          })),
-    steps: buildSteps(task),
-  }));
+  return tasks.map((task, index) => {
+    const choice = task.answerType === 'choice';
+    /* У задач с выбором ответ движка — номер варианта, у остальных
+       число. Поэтому и отпечаток разный: номер как есть, число — в
+       единственной записи. */
+    const seal = choice ? sealChoice(task.answer, task.id) : sealAnswer(task.answer, task.id);
+    const zakryto: PrepZakrytoe = {
+      steps: buildSteps(task),
+      oshibki: Object.fromEntries(
+        (task.options ?? []).flatMap((option) =>
+          option.error === null ? [] : [[option.number, option.error]],
+        ),
+      ),
+    };
+    return {
+      id: task.id,
+      no: index + 1,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      hintHtml: task.hintHtml === null ? null : typeset(task.hintHtml),
+      answerType: choice ? 'choice' : 'number',
+      options:
+        task.options === null
+          ? null
+          : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
+      seal,
+      /* Разбор шифруется отпечатком ответа: в странице он лежит
+         набором символов, а раскрывается после проверки. */
+      zakryto: sealText(JSON.stringify(zakryto), seal),
+    };
+  });
 }

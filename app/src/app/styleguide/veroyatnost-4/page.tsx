@@ -10,6 +10,7 @@ import {
 import { ProblemCard } from '@/components/tasks/card';
 import { METODY } from '@/lib/veroyatnost/model';
 import { bank4Pool, bank5Pool, prep4Pool } from '@/lib/veroyatnost/pool';
+import { klyuchZadachi } from '@/lib/veroyatnost/secret';
 import 'katex/dist/katex.min.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
@@ -414,7 +415,7 @@ function zadachaPrep(id: string) {
   if (est === undefined) {
     throw new Error(`Нет подготовительной задачи ${id}`);
   }
-  return est;
+  return { ...est, klyuch: klyuchZadachi(est.id) };
 }
 
 function variantBanka(id: string, n: number, bank = BANK) {
@@ -423,7 +424,7 @@ function variantBanka(id: string, n: number, bank = BANK) {
   if (kind === undefined || variant === undefined) {
     throw new Error(`Нет варианта ${id}-${n}`);
   }
-  return { ...variant, id: `${id}-${n}` };
+  return { ...variant, id: `${id}-${n}`, klyuch: klyuchZadachi(id, n) };
 }
 
 /** Карточки задания №5: без рисунка, с широким деревом, с сеткой 10 000. */

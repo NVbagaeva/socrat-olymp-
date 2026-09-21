@@ -6,7 +6,7 @@ import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
-import { answerMatches, openText } from '@/lib/zadanie3/secret';
+import { answerMatches, klyuchZadachi, openText } from '@/lib/zadanie3/secret';
 import { restartZ3Round, swapZ3Task, useZ3Round } from '@/lib/zadanie3/useRound';
 import { Solid3Stats } from './Solid3Stats';
 
@@ -152,7 +152,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     if (variant === undefined || current === undefined || value.trim() === '') {
       return;
     }
-    const right = answerMatches(value, variant.seal);
+    const right = answerMatches(value, variant.seal, klyuchZadachi(current.kind, current.n));
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       const seconds = started.current === 0 ? 0 : (Date.now() - started.current) / 1000;

@@ -18,7 +18,7 @@
 import { renderSolid } from '../solid';
 import { typeset } from '../tex';
 import { RAZDELY, type Razdel } from './index';
-import { sealAnswer, sealText } from './secret';
+import { klyuchZadachi, sealAnswer, sealText } from './secret';
 import { type Prototype } from './types';
 
 export interface PoolVariant {
@@ -79,7 +79,12 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     format: prototype.format,
     svg: renderSolid(prototype.chertezh(first.params)),
     variants: prototype.varianty.map((variant) => {
-      const seal = sealAnswer(prototype.otvet(variant.params));
+      /* Отпечаток — с ключом задачи: у одного ответа в двух вариантах
+         отпечатки разные. */
+      const seal = sealAnswer(
+        prototype.otvet(variant.params),
+        klyuchZadachi(prototype.id, variant.n),
+      );
       const steps = prototype
         .shagi(variant.params)
         .map((step) => step.text)

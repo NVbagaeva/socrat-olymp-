@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
-import { sameNumber } from '@/lib/answer';
-import type { PrepTask } from '@/lib/prep';
+import type { PrepTask, PrepZakrytoe } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
+import { answerMatches, choiceMatches, openText } from '@/lib/prepSecret';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
@@ -61,6 +61,10 @@ const VERDICT = {
  *
  * Решённые задачи переживают перезагрузку: они лежат в localStorage
  * браузера. Ошибки и пропуски — нет, они живут только в этой сессии.
+ *
+ * Ответов в разметке нет: введённое сверяется с отпечатком, а разбор
+ * и пояснения к вариантам лежат закрытыми и раскрываются только
+ * после проверки ответа.
  */
 export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTaskScreenProps) {
   /* Решённые задачи приходят из хранилища браузера, ошибки
@@ -89,6 +93,17 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   const index = picked ?? firstOpen(status);
 
   const found = tasks[index];
+
+  /* Закрытая часть раскрывается после проверки и один раз на задачу:
+     до этого ни разбора, ни пояснений к вариантам в памяти нет. */
+  const zakryto = useMemo<PrepZakrytoe | null>(
+    () =>
+      checked === null || found === undefined
+        ? null
+        : (JSON.parse(openText(found.zakryto, found.seal)) as PrepZakrytoe),
+    [checked, found],
+  );
+
   if (found === undefined) {
     /* Набор пуст — показывать нечего. В данных такого не бывает, но
        обращение по индексу в TypeScript честно необязательно. */
@@ -128,11 +143,13 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
     if (!ready) {
       return;
     }
-    /* У задач с выбором ответ движка — номер варианта, у остальных
-       число. Поэтому сверка разная: номер сравнивается как есть,
-       число — как число. */
+    /* У задач с выбором ответ — номер варианта, у остальных число.
+       Поэтому сверка разная: номер сверяется с отпечатком как есть,
+       число — в единственной записи. Ключ отпечатка — id задачи. */
     const correct =
-      task.answerType === 'choice' ? value === task.answer : sameNumber(value, task.answer);
+      task.answerType === 'choice'
+        ? choiceMatches(value, task.seal, task.id)
+        : answerMatches(value, task.seal, task.id);
     /* Задача закрепляется за экраном: после верного ответа она станет
        решённой, а экран должен остаться на ней с разбором и плашкой. */
     setPicked(index);
@@ -169,8 +186,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   /* Причина показывается только у того варианта, который выбрал
      ученик: подсвечивать чужие ошибки и тем более верный ответ
      до проверки нельзя. */
-  const chosen = task.options?.find((option) => option.number === value) ?? null;
-  const reason = checked === 'wrong' && chosen?.error ? chosen.error : null;
+  const reason = checked === 'wrong' && zakryto !== null ? (zakryto.oshibki[value] ?? null) : null;
 
   return (
     <section className="ptask">
@@ -343,9 +359,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
         </div>
       </div>
 
-      {solution ? (
+      {solution && zakryto !== null ? (
         <PrepSolution
-          steps={task.steps}
+          steps={zakryto.steps}
           tip={tip}
           step={step}
           onStep={setStep}
