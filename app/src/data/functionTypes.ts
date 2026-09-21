@@ -11,6 +11,7 @@
 
 import { OPORNYE } from '@/content/opornye';
 import { QUADRATIC } from '@/content/quadratic';
+import { QUADRATIC_THEORY } from '@/content/theoryQuadratic';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -205,7 +206,7 @@ export const functionTypes: FunctionType[] = [
     shortTitle: 'Квадратичные',
     formula: 'y = ax^2 + bx + c',
     description: '',
-    theory: [],
+    theory: QUADRATIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
     bank: EMPTY_BANK,

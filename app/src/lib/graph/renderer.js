@@ -18,7 +18,8 @@
      axes:       { labelX: 'x', labelY: 'y', origin: '0' },
      axisLabels: 'minimal' | 'full' | 'none',   // minimal: подписаны только 0, 1 и −1;
                                                 // none: засечки есть, чисел нет (миниатюры)
-     curves:     [ { type: 'line', k, b, color: 'lineA', label: null } ],
+     curves:     [ { type: 'line', k, b, color: 'lineA', label: null,
+                     style: 'solid' | 'dashed' } ],   // dashed — эталон рядом
      points:     [ { x, y, style: 'solid', label: null, color: 'lineA' } ]
    }
 */
@@ -414,13 +415,16 @@ function renderGraph(scene, report) {
     var d = pieces.map(function (piece) {
       return 'M' + piece.map(function (p) { return px(sx(p.x)) + ' ' + px(sy(p.y)); }).join('L');
     }).join('');
+    /* Пунктирная кривая — эталон для сравнения (обычная парабола рядом
+       со сдвинутой). Штрих тот же, что у вспомогательных линий. */
+    var dash = curve.style === 'dashed' ? ' stroke-dasharray="' + THEME.helper.dash + '"' : '';
     /* Класс по ключу цвета. Он нужен печати: на чёрно-белом листе цвета
        нет, и две прямые различаются толщиной линии — её задаёт CSS,
        а правило CSS сильнее атрибута. Без CSS работает атрибут, то есть
        на сайте чертёж не меняется. */
     curveLayer.push('<path class="graph-curve graph-curve--' + (curve.color || 'lineA') +
       '" d="' + d + '" fill="none" stroke="' + stroke + '" stroke-width="' +
-      THEME.width.curve + '" stroke-linecap="round" stroke-linejoin="round"/>');
+      THEME.width.curve + '" stroke-linecap="round" stroke-linejoin="round"' + dash + '/>');
 
     drawn.push({ curve: curve, pieces: pieces, stroke: stroke });
   });
