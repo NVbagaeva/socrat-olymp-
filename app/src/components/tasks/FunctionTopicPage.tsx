@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
-import { Badge, Breadcrumbs, HandNote, type Crumb } from '@/components/ui';
+import { Badge, Breadcrumbs, EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
-import { type ExamSection, type Subtopic } from '@/content/sections';
+import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { prototypeSkills } from './configurator';
 import { GeneratorTab } from './generator';
@@ -55,9 +55,17 @@ export function FunctionTopicPage({
 }: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
+  /* Закрытая подтема: задач у неё нет, и страниц опорных задач и
+     тренажёра в экспорте тоже нет — их адреса собираются только для
+     открытых подтем (activeSubtopicParams). Поэтому вкладки остаются
+     на месте, но ведут не по адресу, а к пустому состоянию: иначе
+     нажатие уводило бы на 404, а до нажатия показывало бы навыки
+     чужой подтемы — единственный собранный набор пока линейный. */
+  const otkryta = subtopic.status === 'active';
   /* Вкладка «Генератор» есть только у семейства с наборами
-     прототипов в данных движка: решает манифест, а не конфиг. */
-  const hasGenerator = prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
+     прототипов в данных движка: решает манифест, а не конфиг.
+     У закрытой подтемы генерировать нечего. */
+  const hasGenerator = otkryta && prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
 
   return (
     <main className="app-main">
@@ -111,10 +119,30 @@ export function FunctionTopicPage({
         about={<TopicAbout section={section} />}
         theory={subtopic.theory}
         bodies={theoryBodies}
-        prep={prep ?? <PrepSkills base={base} />}
-        prepHref={`${base}/${OPORNYE.tail}`}
-        trainer={trainer ?? <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />}
-        trainerHref={`${base}/trenazher/`}
+        prep={
+          prep ??
+          (otkryta ? (
+            <PrepSkills base={base} />
+          ) : (
+            <EmptyState
+              title={PODTEMA_SKORO.prep.title}
+              description={PODTEMA_SKORO.prep.description}
+            />
+          ))
+        }
+        prepHref={otkryta ? `${base}/${OPORNYE.tail}` : null}
+        trainer={
+          trainer ??
+          (otkryta ? (
+            <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />
+          ) : (
+            <EmptyState
+              title={PODTEMA_SKORO.trainer.title}
+              description={PODTEMA_SKORO.trainer.description}
+            />
+          ))
+        }
+        trainerHref={otkryta ? `${base}/trenazher/` : null}
         generator={hasGenerator ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
         tutors={section.tutors}
         contentsDecor={
