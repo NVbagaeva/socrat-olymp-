@@ -244,9 +244,12 @@
    нигде не используется. Поле шире соседних: кружок вырос с 48 до 72px,
    и на прежних 16px он упирался в край.  */
 .z4-stat {
+  /* Мера текстовых блоков: во всю ширину карточки строка получалась
+     длиннее читаемой. Считается по кеглю пояснения — около 65 знаков. */
+  --stat-mera: 520px;
   display: grid;
   gap: var(--space-5);
-  padding: var(--space-6);
+  padding: var(--space-8);
   border-radius: var(--radius-xl);
   box-shadow: var(--glow-accent);
 }
@@ -264,15 +267,20 @@
   letter-spacing: -0.025em;
   color: var(--color-primary);
 }
+/* Межстрочный интервал подписи и пояснения — 1,6: он задан долей кегля,
+   а не токеном шага, иначе строки не попадают на сетку 4px ни при одном
+   из двух кеглей. */
 .z4-stat__label {
   grid-column: 1 / -1;
-  margin: var(--space-3) 0 0;
+  max-width: var(--stat-mera);
+  margin: var(--space-5) 0 0;
   font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
+  line-height: 1.6;
   color: var(--color-text-secondary);
 }
 .z4-stat__istochnik {
   grid-column: 1 / -1;
+  max-width: var(--stat-mera);
   margin: var(--space-4) 0 0;
   font-size: var(--fs-label);
   line-height: var(--lh-label);
@@ -281,11 +289,12 @@
 /* Пояснение под линией — главная мысль карточки, поэтому оно основным
    текстом, а не второстепенным. Подпись и источник выше остаются мельче. */
 .z4-stat__text {
+  max-width: var(--stat-mera);
   margin: 0;
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border-info);
   font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  line-height: 1.6;
   color: var(--color-text);
 }
 
@@ -392,13 +401,10 @@
 
 @media (max-width: 767px) {
   /* Карточка решаемости и так в одну колонку: на телефоне у неё
-     только поле и просветы теснее. */
+     уже поле. Просветы между блоками те же 20px, что на широком
+     экране: на них держится ритм карточки. */
   .z4-stat {
-    gap: var(--space-4);
-    padding: var(--space-4);
-  }
-  .z4-stat__text {
-    padding-top: var(--space-4);
+    padding: var(--space-5);
   }
   /* Кружок и число остаются в строке: вдвоём они занимают 190px. */
   .z4-stat__chislo {

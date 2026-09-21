@@ -33,10 +33,10 @@ export function GlassBadge({ children, className }: GlassBadgeProps) {
     <span className={clsx('glass-badge', className)} aria-hidden="true">
       <svg className="glass-badge__glass" viewBox="0 0 72 72" focusable="false">
         <defs>
-          {/* Центр градиента в верхней трети шара, а насыщенный край берётся
+          {/* Светлое ядро в левом верхнем секторе, а насыщенный край берётся
               только на последней десятой радиуса: так верхняя половина
               читается светлой, а объём даёт узкая тёмная кромка. */}
-          <radialGradient id={gradientId} cx="0.5" cy="0.3" r="0.9">
+          <radialGradient id={gradientId} cx="0.38" cy="0.28" r="0.95">
             <stop offset="0" className="glass-badge__stop-light" />
             <stop offset="0.55" className="glass-badge__stop-base" />
             <stop offset="0.92" className="glass-badge__stop-deep" />
@@ -58,10 +58,11 @@ export function GlassBadge({ children, className }: GlassBadgeProps) {
           fill={`url(#${gradientId})`}
         />
 
-        {/* Верхний блик: 60% диаметра в ширину, 30% в высоту, центр в верхней трети. */}
+        {/* Блик: 60% диаметра в ширину, 30% в высоту, в левом верхнем
+            секторе — смещение от центра и даёт объём. */}
         <ellipse
           className="glass-badge__sheen"
-          cx="36"
+          cx="28"
           cy="18"
           rx="21.5"
           ry="10.5"
