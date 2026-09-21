@@ -13,7 +13,7 @@
 import { angleBetweenLines } from '../../solid/measure';
 import { direction, regularPrismByEdge } from './common';
 import { shapeHexLines, shapeTriLines, HEX_NAMES, TRI_NAMES } from './drawings';
-import { ru, segment } from '../format';
+import { ru, segment, texSegment } from '../format';
 import { type Params, type Prototype, type Variant, num, pair } from '../types';
 
 function variant(
@@ -80,7 +80,8 @@ export const P03_22: Prototype = {
         text: `${l1} — боковое ребро, ${l2} — диагональ боковой грани; все рёбра призмы равны, значит грань — квадрат.`,
       },
       {
-        text: `Диагональ квадрата делит угол между стороной и диагональю пополам: 45°.`,
+        text: 'Диагональ квадрата делит его прямой угол пополам.',
+        formula: `\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = 45^\\circ`,
         value: 45,
       },
     ];
@@ -142,7 +143,8 @@ export const P03_23: Prototype = {
     return [
       { text: `${l1} — боковое ребро призмы, оно перпендикулярно плоскости основания.` },
       {
-        text: `${l2} лежит в плоскости основания, значит угол между ${l1} и ${l2} равен 90°.`,
+        text: `${l2} лежит в плоскости основания, а ребро к этой плоскости перпендикулярно.`,
+        formula: `\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = 90^\\circ`,
         value: 90,
       },
     ];
@@ -236,7 +238,8 @@ export const P03_35: Prototype = {
         text: `${l2} лежит в верхнем основании; перенесём её параллельно себе в нижнее основание — прямая не изменится.`,
       },
       {
-        text: `${l1} и перенесённая ${l2} — стороны правильного шестиугольника, не соседние и не противоположные: угол между ними 60°.`,
+        text: `${l1} и перенесённая ${l2} — стороны правильного шестиугольника, не соседние и не противоположные.`,
+        formula: `\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = 60^\\circ`,
         value: 60,
       },
     ];

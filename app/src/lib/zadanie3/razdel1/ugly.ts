@@ -12,8 +12,8 @@ import { vertex } from '../../solid/figures';
 import { angleBetweenLines, sinBetweenLines } from '../../solid/measure';
 import { NAMES, shapeLines } from '../../solid/drawings/section1';
 import { type Vec3, sub } from '../../solid/vec';
-import { ru, segment } from '../format';
-import { type Params, type Prototype, type Variant, num, pair } from '../types';
+import { round, ru, segment, tex, texSegment } from '../format';
+import { type Params, type Prototype, type Step, type Variant, num, pair } from '../types';
 import { boxOf, directionOf } from './common';
 import { distance } from '../../solid/measure';
 import { solveBySearch } from '../search';
@@ -73,13 +73,17 @@ function differentLines(p: Params): boolean {
 }
 
 /** Шаги разбора для угла в кубе: одинаковые для трёх прототипов. */
-function cubeShagi(p: Params, answer: number, hint: string): { text: string; value?: number }[] {
+function cubeShagi(p: Params, answer: number, hint: string): Step[] {
   const l1 = segment(pair(p, 'l1'));
   const l2 = segment(pair(p, 'l2'));
   return [
     { text: `Прямые ${l1} и ${l2} в кубе. Угол между прямыми не зависит от ребра куба.` },
     { text: hint },
-    { text: `Угол между ${l1} и ${l2} равен ${ru(answer)}°.`, value: answer },
+    {
+      text: `Отсюда и берётся угол между ${l1} и ${l2}.`,
+      formula: `\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = ${tex(answer)}^\\circ`,
+      value: answer,
+    },
   ];
 }
 
@@ -264,14 +268,17 @@ export const P03_09: Prototype = {
     const l2 = segment(pair(p, 'l2'));
     return [
       {
-        text: `Пусть ребро основания равно 1. Тогда диагональ призмы равна ${ru(k)}, а её квадрат: 1² + 1² + h² = ${ru(k * k)}.`,
+        text: `Пусть ребро основания равно 1. Тогда диагональ призмы равна ${ru(k)}, а её квадрат складывается из двух рёбер основания и высоты.`,
+        formula: `1^2 + 1^2 + h^2 = ${tex(k)}^2 = ${tex(k * k)}`,
       },
       {
-        text: `Отсюда h² = ${ru(k * k - 2)}, то есть h = √${ru(k * k - 2)}.`,
+        text: 'Отсюда находим высоту.',
+        formula: `h^2 = ${tex(k * k)} - 2 = ${tex(k * k - 2)},\\quad h = \\sqrt{${tex(k * k - 2)}}`,
         value: Math.sqrt(k * k - 2),
       },
       {
-        text: `Диагонали ${l1} и ${l2} равны и пересекаются; по теореме косинусов угол между ними равен 60°.`,
+        text: `Диагонали ${l1} и ${l2} равны и пересекаются; по теореме косинусов угол между ними выходит табличным.`,
+        formula: `\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = 60^\\circ`,
         value: 60,
       },
     ];
@@ -418,7 +425,8 @@ export const P03_10: Prototype = {
         text: 'Синус угла — отношение противолежащего катета к гипотенузе.',
       },
       {
-        text: `Синус угла между ${l1} и ${l2} равен ${ru(Math.round(sin * 1000) / 1000)}.`,
+        text: `Отсюда и берётся синус угла между ${l1} и ${l2}.`,
+        formula: `\\sin\\angle(${texSegment(pair(p, 'l1'))},\\ ${texSegment(pair(p, 'l2'))}) = ${tex(round(Math.round(sin * 1000) / 1000))}`,
         value: sin,
       },
     ];

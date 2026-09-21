@@ -5,7 +5,7 @@
 
 import { polyhedronVolume } from '../../solid/measure';
 import { shapeLeg } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { legPrismBody } from './common';
 import { solveBySearch } from '../search';
@@ -71,11 +71,13 @@ export const P03_20: Prototype = {
     const area = (a * b) / 2;
     return [
       {
-        text: `Площадь основания — прямоугольного треугольника: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`,
+        text: 'Площадь основания — половина произведения катетов прямоугольного треугольника.',
+        formula: `\\dfrac{${tex(a)} \\cdot ${tex(b)}}{2} = \\dfrac{${tex(round(a * b))}}{2} = ${tex(round(area))}`,
         value: area,
       },
       {
-        text: `Объём прямой призмы: площадь основания на высоту: ${ru(area)} · ${ru(h)} = ${ru(area * h)}.`,
+        text: 'Объём прямой призмы — произведение площади основания на высоту.',
+        formula: `${tex(round(area))} \\cdot ${tex(h)} = ${tex(round(area * h))}`,
         value: area * h,
       },
     ];
@@ -141,9 +143,14 @@ export const P03_21: Prototype = {
     const area = (a * b) / 2;
     const h = V / area;
     return [
-      { text: `Площадь основания: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`, value: area },
       {
-        text: `Боковое ребро прямой призмы: объём делённый на площадь основания: ${ru(V)} : ${ru(area)} = ${ru(h)}.`,
+        text: 'Площадь основания — половина произведения катетов.',
+        formula: `\\dfrac{${tex(a)} \\cdot ${tex(b)}}{2} = \\dfrac{${tex(round(a * b))}}{2} = ${tex(round(area))}`,
+        value: area,
+      },
+      {
+        text: 'Боковое ребро прямой призмы — объём, делённый на площадь основания.',
+        formula: `\\dfrac{${tex(V)}}{${tex(round(area))}} = ${tex(round(h))}`,
         value: h,
       },
     ];

@@ -13,7 +13,7 @@ import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeTriSolid, TRI_NAMES } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -79,7 +79,11 @@ export const P03_28: Prototype = {
       {
         text: 'Это пирамида с основанием ABC (площадь S) и вершиной C₁; её высота — боковое ребро h, потому что C₁ лежит прямо над C.',
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -131,7 +135,11 @@ export const P03_29: Prototype = {
       {
         text: `Это пирамида с основанием ABC (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -191,7 +199,11 @@ export const P03_30: Prototype = {
       {
         text: `Это пирамида с основанием A₁B₁C₁ (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -254,7 +266,8 @@ function fiveVertexProto(
           text: `Это призма без пирамиды с вершиной ${missingName}: у той пирамиды основание — половина боковой грани, а объём — треть призмы.`,
         },
         {
-          text: `Объём фигуры: ${ru(S)} · ${ru(h)} · ⅔ = ${ru((2 * S * h) / 3)}.`,
+          text: 'Объём призмы — произведение площади основания на высоту, а от неё остаются две трети.',
+          formula: `\\dfrac{2}{3} \\cdot ${tex(S)} \\cdot ${tex(h)} = \\dfrac{2 \\cdot ${tex(round(S * h))}}{3} = ${tex(round((2 * S * h) / 3))}`,
           value: (2 * S * h) / 3,
         },
       ];
@@ -342,7 +355,11 @@ function tetraProto(
         {
           text: 'Такой тетраэдр — одна из трёх равных частей, на которые призма делится диагональными сечениями: его объём — треть объёма призмы.',
         },
-        { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+        {
+          text: 'Объём призмы — произведение площади основания на высоту, а тетраэдру достаётся треть.',
+          formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+          value: (S * h) / 3,
+        },
       ];
     },
     varianty,

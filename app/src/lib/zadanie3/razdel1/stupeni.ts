@@ -13,7 +13,7 @@
 
 import { surfaceArea, polyhedronVolume } from '../../solid/measure';
 import { type Step, stepAlt, stepBody, stepModel } from '../../solid/drawings/steps';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function stepOf(p: Params): Step {
@@ -130,15 +130,18 @@ export const P03_05: Prototype = {
     const per = profilePerimeter(s);
     return [
       {
-        text: `Тело — призма над ступенчатым профилем. Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text: 'Тело — призма над ступенчатым профилем. Профиль складывается из двух прямоугольников.',
+        formula: `${tex(s.W)} \\cdot ${tex(s.h)} + ${tex(s.w)} \\cdot ${tex(s.H - s.h)} = ${tex(round(s.W * s.h))} + ${tex(round(s.w * (s.H - s.h)))} = ${tex(round(area))}`,
         value: area,
       },
       {
-        text: `Ступенька вписана в прямоугольник ${ru(s.W)} на ${ru(s.H)}, поэтому её периметр равен периметру этого прямоугольника: ${ru(per)}.`,
+        text: `Ступенька вписана в прямоугольник ${ru(s.W)} на ${ru(s.H)}, поэтому её периметр равен периметру этого прямоугольника.`,
+        formula: `2 \\cdot (${tex(s.W)} + ${tex(s.H)}) = 2 \\cdot ${tex(round(s.W + s.H))} = ${tex(round(per))}`,
         value: per,
       },
       {
-        text: `Поверхность: два профиля плюс боковая: 2 · ${ru(area)} + ${ru(per)} · ${ru(s.depth)} = ${ru(2 * area + per * s.depth)}.`,
+        text: 'Поверхность — два профиля плюс боковая поверхность призмы.',
+        formula: `2 \\cdot ${tex(round(area))} + ${tex(round(per))} \\cdot ${tex(s.depth)} = ${tex(round(2 * area))} + ${tex(round(per * s.depth))} = ${tex(round(2 * area + per * s.depth))}`,
         value: 2 * area + per * s.depth,
       },
     ];
@@ -184,11 +187,13 @@ export const P03_11: Prototype = {
         text: 'Тело — призма над ступенчатым профилем: объём равен площади профиля на глубину.',
       },
       {
-        text: `Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text: 'Профиль складывается из двух прямоугольников.',
+        formula: `${tex(s.W)} \\cdot ${tex(s.h)} + ${tex(s.w)} \\cdot ${tex(s.H - s.h)} = ${tex(round(s.W * s.h))} + ${tex(round(s.w * (s.H - s.h)))} = ${tex(round(area))}`,
         value: area,
       },
       {
-        text: `Объём: ${ru(area)} · ${ru(s.depth)} = ${ru(area * s.depth)}.`,
+        text: 'Объём призмы — произведение площади профиля на глубину.',
+        formula: `${tex(round(area))} \\cdot ${tex(s.depth)} = ${tex(round(area * s.depth))}`,
         value: area * s.depth,
       },
     ];

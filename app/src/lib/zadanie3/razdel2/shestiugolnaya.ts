@@ -15,7 +15,7 @@ import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeHexSolid, HEX_NAMES } from './drawings';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -81,7 +81,8 @@ export const P03_36: Prototype = {
         text: 'Три соседние вершины основания отсекают от правильного шестиугольника треугольник площадью S/6.',
       },
       {
-        text: `Объём отсечённой призмы: ${ru(S)} : 6 · ${ru(h)} = ${ru((S * h) / 6)}.`,
+        text: 'Объём отсечённой призмы — произведение этой площади на высоту.',
+        formula: `\\dfrac{${tex(S)}}{6} \\cdot ${tex(h)} = \\dfrac{${tex(round(S * h))}}{6} = ${tex(round((S * h) / 6))}`,
         value: (S * h) / 6,
       },
     ];
@@ -133,7 +134,11 @@ export const P03_37: Prototype = {
       {
         text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по S/6 каждый: остаётся ⅔S.',
       },
-      { text: `Объём: ${ru(S)} · ⅔ · ${ru(h)} = ${ru((2 * S * h) / 3)}.`, value: (2 * S * h) / 3 },
+      {
+        text: 'Объём призмы над этой частью — произведение оставшейся площади на высоту.',
+        formula: `\\dfrac{2}{3} \\cdot ${tex(S)} \\cdot ${tex(h)} = \\dfrac{2 \\cdot ${tex(round(S * h))}}{3} = ${tex(round((2 * S * h) / 3))}`,
+        value: (2 * S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -191,7 +196,11 @@ export const P03_38: Prototype = {
       {
         text: `Это пирамида с основанием A₁B₁C₁D₁E₁F₁ (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -249,7 +258,11 @@ export const P03_39: Prototype = {
       {
         text: `Это пирамида с основанием ABCDEF (площадь S) и вершиной ${apex.replace('1', '₁')}; высота — боковое ребро h.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      {
+        text: 'Объём пирамиды — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{${tex(S)} \\cdot ${tex(h)}}{3} = \\dfrac{${tex(round(S * h))}}{3} = ${tex(round((S * h) / 3))}`,
+        value: (S * h) / 3,
+      },
     ];
   },
   varianty: [
@@ -322,7 +335,8 @@ export const P03_40: Prototype = {
         text: 'Три соседние вершины одного уровня отсекают от основания шестую часть, площадью S/6; четвёртая вершина лежит на высоте h от их плоскости.',
       },
       {
-        text: `Объём тетраэдра: ⅓ · (${ru(S)} : 6) · ${ru(h)} = ${ru((S * h) / 18)}.`,
+        text: 'Объём тетраэдра — треть произведения площади основания на высоту.',
+        formula: `\\dfrac{1}{3} \\cdot \\dfrac{${tex(S)}}{6} \\cdot ${tex(h)} = \\dfrac{${tex(round(S * h))}}{18} = ${tex(round((S * h) / 18))}`,
         value: (S * h) / 18,
       },
     ];

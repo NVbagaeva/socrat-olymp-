@@ -17,7 +17,7 @@ import { prism, vertex } from '../../solid/figures';
 import { hullVolume, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { midlineCutModel } from './drawings';
 import { solveBySearch } from '../search';
-import { ru } from '../format';
+import { round, ru, tex } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -121,7 +121,11 @@ export const P03_24: Prototype = {
       {
         text: 'Отсечённая часть — призма с основанием, подобным исходному с коэффициентом ½: две её боковые грани — половины исходных, третья (по сечению) равна половине третьей исходной.',
       },
-      { text: `Боковая поверхность отсечённой части: ${ru(s)} : 2 = ${ru(s / 2)}.`, value: s / 2 },
+      {
+        text: 'Значит боковая поверхность отсечённой части — половина исходной.',
+        formula: `\\dfrac{${tex(s)}}{2} = ${tex(round(s / 2))}`,
+        value: s / 2,
+      },
     ];
   },
 
@@ -172,7 +176,11 @@ export const P03_25: Prototype = {
       {
         text: 'Боковая поверхность отсечённой части — ровно половина полной, для любого треугольника в основании.',
       },
-      { text: `Полная боковая поверхность: ${ru(s)} · 2 = ${ru(2 * s)}.`, value: 2 * s },
+      {
+        text: 'Значит полная боковая поверхность вдвое больше данной.',
+        formula: `2 \\cdot ${tex(s)} = ${tex(round(2 * s))}`,
+        value: 2 * s,
+      },
     ];
   },
 
@@ -217,7 +225,11 @@ export const P03_26: Prototype = {
       {
         text: 'Отсечённая часть подобна исходной призме с коэффициентом ½ по основанию: её объём — ¼ полного, для любого треугольника в основании.',
       },
-      { text: `Объём отсечённой части: ${ru(V)} : 4 = ${ru(V / 4)}.`, value: V / 4 },
+      {
+        text: 'Значит объём отсечённой части — четверть полного.',
+        formula: `\\dfrac{${tex(V)}}{4} = ${tex(round(V / 4))}`,
+        value: V / 4,
+      },
     ];
   },
 
@@ -266,7 +278,11 @@ export const P03_27: Prototype = {
       {
         text: 'Объём отсечённой части — ровно четверть полного объёма, для любого треугольника в основании.',
       },
-      { text: `Полный объём: ${ru(v)} · 4 = ${ru(4 * v)}.`, value: 4 * v },
+      {
+        text: 'Значит полный объём вчетверо больше данного.',
+        formula: `4 \\cdot ${tex(v)} = ${tex(round(4 * v))}`,
+        value: 4 * v,
+      },
     ];
   },
 
