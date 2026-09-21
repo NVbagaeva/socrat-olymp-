@@ -2227,6 +2227,11 @@ a.task-card {
 
 .glass-badge {
   --glass-badge-size: 72px;
+  /* Шар занимает 104 единицы холста из 160, остальное — свечение вокруг
+     него. Чтобы сам шар остался заданного размера, холст берётся шире
+     значка (160 / 104) и выступает за рамку на половину разницы. */
+  --glass-badge-canvas: 153.846%;
+  --glass-badge-bleed: -26.923%;
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -2234,11 +2239,20 @@ a.task-card {
   width: var(--glass-badge-size);
   height: var(--glass-badge-size);
 }
-.glass-badge__glass {
+/* Стекло и глиф лежат в одном холсте и с одним выпуском: так слои
+   совмещаются один в один, как в образце. Размер холста задан явно:
+   SVG — заменяемый элемент, растягиваться по одним отступам он
+   не обязан и берёт собственный размер. */
+.glass-badge__glass,
+.glass-badge__glyph {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: var(--glass-badge-bleed);
+  left: var(--glass-badge-bleed);
+  width: var(--glass-badge-canvas);
+  height: var(--glass-badge-canvas);
+  /* Сброс в base.css не даёт картинкам вылезать за родителя, а здесь
+     холст шире значка намеренно: за рамку выходит только свечение. */
+  max-width: none;
 }
 .glass-badge__stop-light {
   stop-color: var(--color-glass-badge-light);
@@ -2249,35 +2263,36 @@ a.task-card {
 .glass-badge__stop-deep {
   stop-color: var(--color-glass-badge-deep);
 }
-.glass-badge__sheen {
-  fill: var(--color-glass-badge-sheen);
+.glass-badge__stop-edge {
+  stop-color: var(--color-glass-badge-edge);
 }
-/* Отражение снизу — тот же цвет, что у блика, но едва различимое. */
-.glass-badge__reflex {
-  fill: none;
+.glass-badge__stop-sheen {
+  stop-color: var(--color-glass-badge-sheen);
+}
+.glass-badge__stop-rim {
+  stop-color: var(--color-glass-badge-rim);
+}
+/* Размытый свет внутри верхней кромки. */
+.glass-badge__arc {
   stroke: var(--color-glass-badge-sheen);
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  opacity: 0.6;
-}
-.glass-badge__rim {
-  fill: none;
-  stroke: var(--color-glass-badge-rim);
-  stroke-width: 1.5;
-}
-/* Поле глифа — 64% кружка; сам рисунок занимает три четверти своего
-   поля, то есть около половины диаметра, как на макете. */
-.glass-badge__glyph {
-  position: relative;
-  display: block;
-  width: 64%;
-  height: 64%;
 }
 .glass-glyph {
   display: block;
   width: 100%;
   height: 100%;
+}
+.glass-glyph__stop-top {
+  stop-color: var(--color-glass-badge-glyph);
+}
+.glass-glyph__stop-bottom {
+  stop-color: var(--color-glass-badge-edge);
+}
+.glass-glyph__shadow {
+  fill: var(--color-glass-badge-deep);
+}
+.glass-glyph__base {
   fill: var(--color-glass-badge-glyph);
+  opacity: 0.65;
 }
 @media (max-width: 767.98px) {
   .glass-badge {
