@@ -2199,7 +2199,9 @@ a.task-card {
   gap: var(--space-1);
   padding: var(--space-2);
   border: 1px solid var(--color-border-info);
-  border-radius: var(--radius-xl);
+  /* Скругление на половину высоты: у ленты и у активной вкладки
+     концы полукруглые, как на макете. */
+  border-radius: var(--radius-pill);
   background: var(--color-surface-soft);
   /* Тот же мягкий ореол, что у статистической карточки: лента
      отделяется от фона страницы, а не сливается с ним. */
@@ -2226,9 +2228,9 @@ a.task-card {
   align-items: center;
   gap: var(--space-2);
   flex: 0 0 auto;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3);
   border: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-pill);
   margin-bottom: 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
@@ -2254,7 +2256,7 @@ a.task-card {
    заливка рядом с объёмной подложкой выглядела наклейкой. */
 .tabs--lenta button[aria-selected='true'],
 .tabs--lenta a[role='tab'][aria-selected='true'] {
-  background: linear-gradient(to bottom, var(--color-tab-top), var(--color-tab-bottom));
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
   color: var(--color-text-inverse);
   box-shadow:
     inset 0 1px 0 var(--color-tab-sheen),
@@ -2270,8 +2272,8 @@ a.task-card {
   flex: none;
   /* Поле значка больше самого рисунка: на активной вкладке оно
      становится светлой плашкой, и от этого ничего не съезжает. */
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-md);
 }
 .tabs--lenta .tabs__ico svg,
@@ -2299,11 +2301,49 @@ a.task-card {
 }
 /* Подпись переносится по словам там, где в строку не влезает
    («Ключевые методы решения»), и не сокращается. */
+/* Мера подписи: длинные названия («Ключевые методы решения»,
+   «Для репетиторов») переносятся на вторую строку и не сокращаются —
+   иначе лента перестаёт помещаться и уезжает вбок на широком экране.
+   Короткие подписи меру не замечают. */
 .tabs--lenta .tabs__text,
 .topic-tabs__more .tabs__text {
+  max-width: 16ch;
   text-align: left;
-  text-wrap: balance;
+  /* Без выравнивания строк по длине: оно разбивало «Ключевые методы
+     решения» на три ровные строчки вместо двух и растило ленту. */
+  text-wrap: wrap;
 }
+/* Ниже 1440 места под ленту меньше — на этом ярусе подписи
+   переносятся охотнее. Мера меняется только здесь: на широком
+   экране лента остаётся просторной, как на макете. */
+@media (max-width: 1439.98px) {
+  /* Мера подписи здесь та же: подпись всё равно не должна разъезжаться
+     больше чем на две строки. Место выигрывается кеглем, значком
+     и полями — у таблеток свои поля, и без просветов они не слипаются. */
+  .tabs--lenta button,
+  .tabs--lenta a[role='tab'],
+  .topic-tabs__more {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
+  }
+  .topic-tabs,
+  .tabs--lenta {
+    gap: 0;
+  }
+  .tabs--lenta .tabs__ico,
+  .topic-tabs__more .tabs__ico {
+    width: 22px;
+    height: 22px;
+  }
+  .tabs--lenta .tabs__ico svg,
+  .topic-tabs__more .tabs__ico svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 /* Материалы для репетитора отделены чертой: на макете это не вкладка
    раздела, а выход к печатным файлам. Черта — на отдельном элементе,
    иначе она прилипала бы к рамке кнопки при наведении. */

@@ -53,9 +53,12 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
 
   /* На узком экране лента шире окна и прокручивается вбок. Активная
      вкладка может оказаться за правым краем, и страница открывалась бы
-     с непонятного места ленты — подводим её к виду сразу. Прокручивается
-     сама лента, а не страница: inline для горизонтали, block: 'nearest'
-     чтобы страница не дёргалась к ленте. */
+     с непонятного места ленты — подводим её к виду.
+
+     Подводим минимально (inline: 'nearest'), а не в центр: центрирование
+     резало соседние вкладки посередине слова даже тогда, когда активная
+     и так была видна. Если вкладка уже в виду, прокрутки не будет вовсе.
+     Прокручивается сама лента, а не страница — block: 'nearest'. */
   useEffect(() => {
     const lenta = strip.current;
     const knopka = lenta?.querySelector('[aria-selected="true"]');
@@ -63,7 +66,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
       return;
     }
     if (lenta.scrollWidth > lenta.clientWidth) {
-      knopka.scrollIntoView({ inline: 'center', block: 'nearest' });
+      knopka.scrollIntoView({ inline: 'nearest', block: 'nearest' });
     }
   }, [active?.id]);
 
