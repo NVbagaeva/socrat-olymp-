@@ -16,7 +16,9 @@ import { tasksPage } from '@/content/tasks';
    «Уведомления» → колокольчик в шапке. */
 export const topNav: NavItem[] = [
   { id: 'home', label: 'Главная', href: '/', icon: 'home' },
-  { id: 'tasks', label: 'Задания', href: tasksPage.href, icon: 'tasks' },
+  /* В нижней панели пункт называется полным именем страницы —
+     «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
+  { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное
      название в ячейку шириной в четверть экрана не помещается. */
