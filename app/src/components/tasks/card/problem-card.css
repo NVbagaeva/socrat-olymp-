@@ -314,10 +314,13 @@
   color: var(--color-accent);
   font-weight: 600;
 }
+/* Значение ответа: на ступень крупнее текста, вес как у подписи —
+   одинаково с плашкой ответа в теории (veroyatnost.css). */
 .pc__otvet-value {
   color: var(--color-accent);
-  font-size: var(--fs-h3);
-  font-weight: 700;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  font-weight: 600;
 }
 
 /* ── Действия ──────────────────────────────────────────────────── */

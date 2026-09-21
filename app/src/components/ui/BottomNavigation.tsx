@@ -21,18 +21,21 @@ export function BottomNavigation({
     <nav className={clsx('bnav', className)} aria-label={label}>
       {/* Подпись сокращается только на вид: вслух читается полное
           название раздела, то же самое, что в сайдбаре. */}
-      {items.map((item) => (
-        <a
-          key={item.id}
-          href={item.href}
-          className={clsx(item.active && 'is-active')}
-          aria-current={item.active ? 'page' : undefined}
-          aria-label={item.short !== undefined ? item.label : undefined}
-        >
-          {item.icon !== undefined ? <NavIcon name={item.icon} /> : <i aria-hidden="true" />}
-          {item.short ?? item.label}
-        </a>
-      ))}
+      {items.map((item) => {
+        const podpis = item.panel ?? item.short ?? item.label;
+        return (
+          <a
+            key={item.id}
+            href={item.href}
+            className={clsx(item.active && 'is-active')}
+            aria-current={item.active ? 'page' : undefined}
+            aria-label={podpis !== item.label ? item.label : undefined}
+          >
+            {item.icon !== undefined ? <NavIcon name={item.icon} /> : <i aria-hidden="true" />}
+            {podpis}
+          </a>
+        );
+      })}
     </nav>
   );
 }
