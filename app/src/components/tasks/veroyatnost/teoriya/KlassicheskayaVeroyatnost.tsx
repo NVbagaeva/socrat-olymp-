@@ -5,6 +5,7 @@ import { KLASSICHESKAYA } from '@/content/veroyatnost-teoriya';
 import { typeset } from '@/lib/tex';
 import { voprosyPonimaniya } from '@/lib/veroyatnost/teoriya-ponimanie';
 import { HintIcon } from '../../prep/PrepIcons';
+import { FormulaTeorii } from './FormulaTeorii';
 import { KostIcon, TreugolnikIcon, ZakladkaIcon } from './IkonkiTeorii';
 import { ProverPonimanie } from './ProverPonimanie';
 
@@ -28,11 +29,6 @@ import { ProverPonimanie } from './ProverPonimanie';
 /** Строка с формулами внутри текста. */
 function Stroka({ tex, className }: { tex: string; className: string }) {
   return <p className={className} dangerouslySetInnerHTML={{ __html: typeset(tex, true) }} />;
-}
-
-/** Формула отдельной строкой в рамке — общая для карточек теории. */
-function Formula({ tex }: { tex: string }) {
-  return <Stroka tex={tex} className="vteor-formula" />;
 }
 
 /**
@@ -71,7 +67,7 @@ export function KlassicheskayaVeroyatnost() {
         <li className="vklass">
           <Zagolovok znak={<ZakladkaIcon />}>{opredelenie.title}</Zagolovok>
           <Stroka className="vklass__vrezka" tex={opredelenie.text} />
-          <Formula tex={opredelenie.formula} />
+          <FormulaTeorii tex={opredelenie.formula} />
           <ul className="vklass__bukvy">
             {opredelenie.bukvy.map((bukva) => (
               <li key={bukva.id}>
@@ -94,7 +90,7 @@ export function KlassicheskayaVeroyatnost() {
             <span dangerouslySetInnerHTML={{ __html: zagolovokSFormuloy(pochemu.title) }} />
           </Zagolovok>
           <p className="vklass__text">{pochemu.text}</p>
-          <Formula tex={pochemu.formula} />
+          <FormulaTeorii tex={pochemu.formula} />
           <p className="vklass__vyvod">{pochemu.vyvod}</p>
           <p className="vklass__snoska">
             <b className="vklass__snoska-label">{pochemu.ravna.label}</b>

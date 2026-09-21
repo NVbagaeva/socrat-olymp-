@@ -5,6 +5,7 @@ import { PROVER_SEBYA, SVYAZANY, VIDY_SOBYTIY } from '@/content/veroyatnost-teor
 import { typeset } from '@/lib/tex';
 import { voprosyVidovSobytiy } from '@/lib/veroyatnost/teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
+import { FormulaTeorii } from './FormulaTeorii';
 import { KrugiIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';
 import { ProverSebya } from './ProverSebya';
 
@@ -18,11 +19,6 @@ import { ProverSebya } from './ProverSebya';
  * Верных ответов самопроверки здесь нет: блок получает вопросы с
  * отпечатками, а сверяет их уже в браузере (lib/veroyatnost/teoriya).
  */
-
-/** Формула в рамке: набирается на сборке. */
-function Formula({ tex }: { tex: string }) {
-  return <p className="vteor-formula" dangerouslySetInnerHTML={{ __html: typeset(tex, true) }} />;
-}
 
 const ZNACHKI = { zveno: <ZvenoIcon />, krugi: <KrugiIcon /> };
 
@@ -38,7 +34,7 @@ export function VidySobytiy() {
             <li className={clsx('vvid', `vvid--${karta.ton}`)} key={karta.id}>
               <h4 className="vvid__title">{karta.title}</h4>
               <p className="vvid__opredelenie">{karta.opredelenie}</p>
-              <Formula tex={karta.formula} />
+              <FormulaTeorii tex={karta.formula} />
               <p className="vvid__primer">
                 <b>{primerLabel}</b> {karta.primer}
               </p>
