@@ -5,7 +5,7 @@
  * получают готовые значения пропсами и про движок ничего не знают.
  */
 
-import { prepSkills, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
+import { prepSkillsFor, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
@@ -37,32 +37,32 @@ export interface PrepOverview {
 }
 
 /**
- * Состав всех четырёх навыков.
+ * Состав навыков подтемы.
  *
  * Здесь только то, что известно на сборке: какие навыки есть и
  * сколько в каждом задач. Сколько решено — знает браузер ученика,
  * это читается на клиенте из localStorage.
  */
-export function prepOverview(): PrepOverview {
-  const skills = prepSkills.map((skill) => ({ skill, total: setSize(skill.setId) }));
+export function prepOverview(type: string): PrepOverview {
+  const skills = prepSkillsFor(type).map((skill) => ({ skill, total: setSize(skill.setId) }));
   const total = skills.reduce((sum, item) => sum + item.total, 0);
   return { skills, total };
 }
 
-/** Сколько задач у навыка. */
-export function prepSkillTotal(id: PrepSkillId): number {
-  const found = prepSkills.find((skill) => skill.id === id);
+/** Сколько задач у навыка подтемы. */
+export function prepSkillTotal(type: string, id: PrepSkillId): number {
+  const found = prepSkillsFor(type).find((skill) => skill.id === id);
   return found === undefined ? 0 : setSize(found.setId);
 }
 
-/** Навык по части адреса. */
-export function findPrepSkill(id: string): PrepSkill | undefined {
-  return prepSkills.find((skill) => skill.id === id);
+/** Навык подтемы по части адреса. */
+export function findPrepSkill(type: string, id: string): PrepSkill | undefined {
+  return prepSkillsFor(type).find((skill) => skill.id === id);
 }
 
-/** Адреса тренажёров навыков для статического экспорта. */
-export function prepSkillIds(): PrepSkillId[] {
-  return prepSkills.map((skill) => skill.id);
+/** Адреса тренажёров навыков подтемы для статического экспорта. */
+export function prepSkillIds(type: string): PrepSkillId[] {
+  return prepSkillsFor(type).map((skill) => skill.id);
 }
 
 /* ══════════════════════════════════════════════════════════════════

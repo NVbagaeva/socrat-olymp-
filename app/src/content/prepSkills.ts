@@ -83,6 +83,17 @@ export const prepSkills: PrepSkill[] = [
   },
 ];
 
+/**
+ * Навыки подтемы по её идентификатору (data/functionTypes.ts).
+ *
+ * Список выше — линейной подтемы; у остальных навыков пока нет, и
+ * вкладка показывает пустое состояние. Новая подтема добавляет сюда
+ * свой список, а не дописывается в линейный.
+ */
+export function prepSkillsFor(type: string): PrepSkill[] {
+  return type === 'linear' ? prepSkills : [];
+}
+
 /** Заголовок и подписи экрана списка навыков. */
 export const prepPage = {
   title: OPORNYE.title,

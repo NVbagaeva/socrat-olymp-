@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
-import { activeSubtopicParams, findSection, findSubtopic } from '@/content/sections';
+import { findSection, findSubtopic, prepSubtopicParams } from '@/content/sections';
 import { prepPage } from '@/content/prepSkills';
 import '../../../zadaniya.css';
 import '../../section.css';
@@ -11,9 +11,9 @@ import '../prep.css';
 import '../trainer.css';
 import '../configurator.css';
 
-/* Вложенные разделы существуют только у открытых подтем. */
+/* Адрес есть только у подтем со списком навыков. */
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return prepSubtopicParams();
 }
 export const dynamicParams = false;
 

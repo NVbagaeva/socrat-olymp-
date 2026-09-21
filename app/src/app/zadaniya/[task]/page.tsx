@@ -8,6 +8,7 @@ import { Chart } from '@/components/graph/Chart';
 import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
+import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
@@ -46,7 +47,8 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
     name: subtopic.title,
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
-    href: subtopic.status === 'active' ? `/zadaniya/${sectionSlug}/${subtopic.id}` : null,
+    /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
+    href: subtopicBuilt(subtopic) ? `/zadaniya/${sectionSlug}/${subtopic.id}` : null,
   };
 }
 

@@ -66,6 +66,38 @@ export function compareLinesScene() {
 }
 
 
+/**
+ * Парабола и прямая на одном чертеже: вкладка «О задании»
+ * квадратичной подтемы, там, где у линейной стоят две прямые.
+ *
+ * Коэффициенты подобраны так, чтобы обе точки пересечения — (−2; 0)
+ * и (3; 2,5) — лежали внутри окна, а вершина (0; −2) читалась
+ * в узле сетки. Числа здесь — параметры чертежа, не содержание
+ * задания.
+ */
+export function parabolaAndLineScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'quadratic', a: 0.5, b: 0, c: -2, color: 'lineA', label: 'y = ax² + bx + c' },
+      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: 'y = kx + b' },
+    ],
+    points: [],
+    alt: 'Парабола y = ax² + bx + c и прямая y = kx + b',
+  };
+}
+
+/**
+ * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
+ * у квадратичной — парабола и прямая.
+ */
+export function aboutScene(type: FunctionTypeId) {
+  return type === 'quadratic' ? parabolaAndLineScene() : compareLinesScene();
+}
+
 /* ── Миниатюры типов функций ──────────────────────────────────────
    По одному представителю на семейство: коэффициенты подобраны так,
    чтобы кривая в окне читалась характерной формой, а не куском.

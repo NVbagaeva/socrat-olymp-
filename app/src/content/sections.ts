@@ -10,7 +10,9 @@
  */
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
-import { functionTypes, type FunctionType } from '@/data/functionTypes';
+import { functionTypes, subtopicBuilt, type FunctionType } from '@/data/functionTypes';
+import { findManifestFamily } from '@/lib/generator/manifest';
+import { prepSkillsFor } from './prepSkills';
 import { taskName } from './tasks';
 
 export type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
@@ -115,6 +117,11 @@ export const PODTEMA_SKORO = {
   trainer: {
     title: 'Материал готовится',
     description: 'Тренажёр этого типа функции ещё не собран.',
+  },
+  /* Меню «Для репетиторов» у подтемы, материалов у которой ещё нет. */
+  tutors: {
+    title: 'Материал готовится',
+    description: 'Материалов для репетиторов по этой подтеме ещё нет.',
   },
 } as const;
 
@@ -240,12 +247,34 @@ export function subtopicParams(): { task: string; type: string }[] {
   );
 }
 
-/** Вложенные разделы существуют только у открытых подтем. */
-export function activeSubtopicParams(): { task: string; type: string }[] {
+/**
+ * Вложенные разделы существуют только у собранных подтем: открытых
+ * и стоящих в предпросмотре.
+ */
+export function builtSubtopicParams(): { task: string; type: string }[] {
   return sections.flatMap((section) =>
     section.subtopics
-      .filter((item) => item.status === 'active')
+      .filter((item) => subtopicBuilt(item))
       .map((item) => ({ task: section.slug, type: item.id })),
+  );
+}
+
+/**
+ * Подтемы, у которых есть опорные задачи: собранные и со списком
+ * навыков. У остальных вкладка стоит на месте с пустым состоянием,
+ * и адреса под неё не собираются.
+ */
+export function prepSubtopicParams(): { task: string; type: string }[] {
+  return builtSubtopicParams().filter((params) => prepSkillsFor(params.type).length > 0);
+}
+
+/**
+ * Подтемы, у которых есть тренажёр и генератор: собранные и с
+ * наборами прототипов в данных движка. Решает манифест, не конфиг.
+ */
+export function trainerSubtopicParams(): { task: string; type: string }[] {
+  return builtSubtopicParams().filter(
+    (params) => (findManifestFamily(params.type)?.prototypes.sets ?? 0) > 0,
   );
 }
 

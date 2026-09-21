@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { METODY } from '@/content/metody';
 import { OPORNYE } from '@/content/opornye';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
@@ -14,6 +15,11 @@ export interface TopicTabsProps {
   about: ReactNode;
   /** Разделы теории: они же пункты содержания. */
   theory: TheoryBlock[];
+  /**
+   * Вкладка «Ключевые методы решения»: собрана на сервере. Не задана —
+   * вкладки нет: у линейной подтемы её не было и нет.
+   */
+  methods?: ReactNode;
   /** Экран подготовительных задач: собран на сервере. */
   prep: ReactNode;
   /** Экран тренажёра: собран на сервере. */
@@ -30,6 +36,8 @@ export interface TopicTabsProps {
   trainerHref: string | null;
   /** Материалы для репетиторов: подпись кнопки и карточки меню. */
   tutors: ExamSection['tutors'];
+  /** Что показать в меню, когда карточек у подтемы нет. */
+  tutorsEmpty: { title: string; description: string };
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
@@ -66,6 +74,7 @@ const TABS_FADE = 32;
 const TABS = [
   { id: 'about', label: 'О задании' },
   { id: 'theory', label: 'Теория' },
+  { id: 'methods', label: METODY.title },
   { id: 'prep', label: OPORNYE.title },
   { id: 'trainer', label: 'Тренажёр' },
   { id: 'generator', label: 'Генератор' },
@@ -86,11 +95,13 @@ const TABS = [
 export function TopicTabs({
   about,
   theory,
+  methods,
   prep,
   trainer,
   generator,
   trainerHref,
   tutors,
+  tutorsEmpty,
   contentsDecor,
   bodies,
   initial = 'about',
@@ -103,7 +114,13 @@ export function TopicTabs({
   const opensMenu = initial === 'tutors';
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
-  const tabs = generator === undefined ? TABS.filter((item) => item.id !== 'generator') : TABS;
+  /* Вкладки без содержимого в ленту не попадают: «Генератор» — без
+     наборов прототипов, «Ключевые методы» — без признака у подтемы. */
+  const tabs = TABS.filter(
+    (item) =>
+      (item.id !== 'generator' || generator !== undefined) &&
+      (item.id !== 'methods' || methods !== undefined),
+  );
 
   /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
      вкладка не переключает состояние, а ведёт туда: иначе изнутри
@@ -231,6 +248,7 @@ export function TopicTabs({
       <TutorMenu
         items={tutors.items}
         label={tutors.title}
+        empty={tutorsEmpty}
         open={menu}
         onOpenChange={setMenu}
         stripRef={strip}
@@ -298,6 +316,8 @@ export function TopicTabs({
               )}
             </>
           ) : null}
+
+          {tab === 'methods' ? methods : null}
 
           {tab === 'prep' ? prep : null}
 

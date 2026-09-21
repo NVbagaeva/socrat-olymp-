@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
-import { activeSubtopicParams, findSubtopic } from '@/content/sections';
+import { builtSubtopicParams, findSubtopic } from '@/content/sections';
 import '../../../zadaniya.css';
 
-/* Вложенные разделы существуют только у открытых подтем. */
+/* Вложенные разделы существуют только у собранных подтем. */
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return builtSubtopicParams();
 }
 export const dynamicParams = false;
 

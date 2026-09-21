@@ -46,12 +46,22 @@ export const trainerShortcuts: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skill: null, mode: 'mixed' },
 ];
 
-export function findTrainerShortcut(id: string): TrainerShortcut | undefined {
-  return trainerShortcuts.find((item) => item.id === id);
+/**
+ * Ярлыки подтемы по её идентификатору (data/functionTypes.ts).
+ *
+ * Список выше ведёт на наборы линейной подтемы; у остальных ярлыков
+ * пока нет. Новая подтема добавляет сюда свой список.
+ */
+export function trainerShortcutsFor(type: string): TrainerShortcut[] {
+  return type === 'linear' ? trainerShortcuts : [];
 }
 
-export function trainerShortcutIds(): TrainerShortcutId[] {
-  return trainerShortcuts.map((item) => item.id);
+export function findTrainerShortcut(type: string, id: string): TrainerShortcut | undefined {
+  return trainerShortcutsFor(type).find((item) => item.id === id);
+}
+
+export function trainerShortcutIds(type: string): TrainerShortcutId[] {
+  return trainerShortcutsFor(type).map((item) => item.id);
 }
 
 /** Заголовок и подписи вкладки. */

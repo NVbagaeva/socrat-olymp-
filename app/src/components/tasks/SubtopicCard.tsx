@@ -5,8 +5,13 @@ import { Badge } from '@/components/ui';
 export interface SubtopicCardProps {
   /** Название подтемы или раздела. */
   name: string;
-  /** Адрес. null — подтема ещё не открыта, карточка не кликается. */
+  /** Адрес. null — страниц у подтемы нет, карточка не кликается. */
   href: string | null;
+  /**
+   * Подтема ещё не открыта: бейдж «Скоро» вместо стрелки. С адресом
+   * это предпросмотр — карточка ведёт на страницы, но бейдж остаётся.
+   */
+  soon?: boolean;
   /**
    * Формула, свёрстанная KaTeX на сборке. Есть у типов функций
    * задания №12; у разделов стереометрии формулы нет.
@@ -33,7 +38,14 @@ export interface SubtopicCardProps {
  * формула, у №3 чертёж и число прототипов, и то и другое приходит
  * сюда готовым.
  */
-export function SubtopicCard({ name, href, formulaHtml, media, meta }: SubtopicCardProps) {
+export function SubtopicCard({
+  name,
+  href,
+  soon = href === null,
+  formulaHtml,
+  media,
+  meta,
+}: SubtopicCardProps) {
   const body = (
     <>
       {media !== undefined ? (
@@ -56,7 +68,7 @@ export function SubtopicCard({ name, href, formulaHtml, media, meta }: SubtopicC
 
       {meta !== undefined ? <span className="subtopic__note">{meta}</span> : null}
 
-      {href === null ? (
+      {soon ? (
         <span className="subtopic__meta">
           <Badge>Скоро</Badge>
         </span>

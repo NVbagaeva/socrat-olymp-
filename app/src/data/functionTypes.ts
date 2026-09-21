@@ -10,6 +10,8 @@
  */
 
 import { OPORNYE } from '@/content/opornye';
+import { QUADRATIC } from '@/content/quadratic';
+import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
@@ -68,6 +70,31 @@ export interface FunctionType {
   materials: MaterialId[];
   bank: FunctionBank;
   status: 'active' | 'soon';
+  /**
+   * Предпросмотр: страницы подтемы собраны и открываются с карточки
+   * и из окна выбора типа, но бейдж «Скоро» остаётся. Снимается
+   * вместе со сменой status на active, когда подтема готова.
+   */
+  preview?: boolean;
+  /**
+   * Шапка подтемы. Задана — H1 общий на задание, «Задание №12.
+   * Графики функций», а название подтемы стоит подзаголовком.
+   * Не задана — H1 равен названию подтемы, как у линейной.
+   */
+  head?: { subtitle: string };
+  /**
+   * Своя вкладка «О задании». Не задана — вкладка раздела, одна на
+   * все его подтемы. Плашка-подсказка у подтемы не своя: она одна
+   * на раздел и стоит ещё в окне выбора типа функции.
+   */
+  about?: Omit<SectionAbout, 'hint'>;
+  /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
+  methods?: boolean;
+  /**
+   * Материалы «Для репетиторов» подтемы. Не заданы — материалы
+   * раздела. Пустой список — меню открывается на пустое состояние.
+   */
+  tutors?: TutorMaterial[];
 }
 
 /* Заголовки блоков теории заданы автором: четырнадцать пунктов в том
@@ -168,6 +195,9 @@ export const functionTypes: FunctionType[] = [
     },
     status: 'active',
   },
+  /* Подтема собирается: страницы есть и открываются, бейдж «Скоро»
+     снимается последним этапом. Чем она отличается от линейной —
+     признаками ниже, тексты к ним в content/quadratic.ts. */
   {
     id: 'quadratic',
     no: '02',
@@ -180,6 +210,11 @@ export const functionTypes: FunctionType[] = [
     materials: [],
     bank: EMPTY_BANK,
     status: 'soon',
+    preview: true,
+    head: QUADRATIC.head,
+    about: QUADRATIC.about,
+    methods: true,
+    tutors: QUADRATIC.tutors,
   },
   {
     id: 'rational',
@@ -237,6 +272,14 @@ export const functionTypes: FunctionType[] = [
 
 export function findFunctionType(id: string): FunctionType | undefined {
   return functionTypes.find((type) => type.id === id);
+}
+
+/**
+ * Страницы подтемы собраны: она открыта или стоит в предпросмотре.
+ * Только у таких подтем есть вложенные адреса и ссылки с карточек.
+ */
+export function subtopicBuilt(type: FunctionType): boolean {
+  return type.status === 'active' || type.preview === true;
 }
 
 /** Первый открытый тип: единственный осмысленный переход по умолчанию. */

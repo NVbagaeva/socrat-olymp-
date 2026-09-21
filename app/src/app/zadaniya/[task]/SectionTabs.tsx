@@ -10,7 +10,7 @@ export interface SubtopicView {
   /** Формула, уже свёрстанная KaTeX на сборке. */
   formulaHtml: string;
   status: 'active' | 'soon';
-  /** Адрес подтемы. У закрытой ссылки нет. */
+  /** Адрес подтемы. Нет ни у закрытой, ни у той, чьи страницы не собраны. */
   href: string | null;
 }
 
@@ -64,7 +64,12 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
           <ul className="subtopics-grid">
             {subtopics.map((item) => (
               <li key={item.slug}>
-                <SubtopicCard name={item.name} href={item.href} formulaHtml={item.formulaHtml} />
+                <SubtopicCard
+                  name={item.name}
+                  href={item.href}
+                  soon={item.status === 'soon'}
+                  formulaHtml={item.formulaHtml}
+                />
               </li>
             ))}
           </ul>
