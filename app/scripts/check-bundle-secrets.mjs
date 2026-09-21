@@ -86,15 +86,19 @@ for (const prototype of BANK_3) {
   zadachi.push({
     razdel: '№3',
     id: prototype.id,
+    variantov: prototype.varianty.length,
     otvety: prototype.varianty.flatMap((v) => formy(prototype.otvet(v.params))),
     polya: [],
   });
 }
 
-/* №4 и №5: прототипы банка и задачи конспекта. Кроме ответа, в окне
-   не должно быть полей параметров рисунка: количества за плитками,
-   клетки таблицы, вероятности на ветвях, доли групп, границы дуги
-   и благоприятной площади. */
+/* №4 и №5: прототипы банка со всеми вариантами (у №4 это все 102
+   задачи задачника плюс новые варианты) и задачи конспекта — у №4
+   каждая из них прототип на одиннадцать вариантов, и ответы всех
+   вариантов ищутся в окне задачи. Кроме ответа, в окне не должно
+   быть полей параметров рисунка: количества за плитками, клетки
+   таблицы, вероятности на ветвях, доли групп, границы дуги и
+   благоприятной площади. */
 const POLYA_RISUNKA = [
   'counts',
   'cells',
@@ -105,7 +109,7 @@ const POLYA_RISUNKA = [
   'to',
   'parametry',
 ];
-const { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5, otvetUchenika, prepOtvet } =
+const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5, otvetUchenika, prepOtvet } =
   requireSrc('lib/veroyatnost/index');
 for (const [razdel, bank, podgotovka] of [
   ['№4', BANK_4, PODGOTOVKA_4],
@@ -115,16 +119,28 @@ for (const [razdel, bank, podgotovka] of [
     zadachi.push({
       razdel,
       id: prototype.id,
+      variantov: prototype.varianty.length,
       otvety: prototype.varianty.flatMap((v) => formy(otvetUchenika(prototype, v.params))),
       polya: POLYA_RISUNKA,
     });
   }
   for (const blok of podgotovka) {
     for (const zadacha of blok.zadachi) {
+      /* Задача конспекта №4 — прототип с вариантами под тем же id:
+         в окно задачи идут ответы всех его вариантов. */
+      const prototype = KONSPEKT_4.find((k) => k.id === zadacha.id);
+      const otvety =
+        prototype === undefined
+          ? formy(prepOtvet(zadacha))
+          : [
+              ...formy(prepOtvet(zadacha)),
+              ...prototype.varianty.flatMap((v) => formy(otvetUchenika(prototype, v.params))),
+            ];
       zadachi.push({
         razdel,
         id: zadacha.id,
-        otvety: formy(prepOtvet(zadacha)),
+        variantov: prototype === undefined ? 1 : prototype.varianty.length,
+        otvety: [...new Set(otvety)],
         polya: POLYA_RISUNKA,
       });
     }
@@ -146,6 +162,7 @@ for (const blok of PREP_BLOCKS) {
     zadachi.push({
       razdel: '№8',
       id: micro.id,
+      variantov: 1,
       otvety: typeof task.otvet === 'number' ? formy(task.otvet) : [],
       polya: POLYA_8,
     });
@@ -175,6 +192,7 @@ for (const skill of prepSkills) {
     zadachi.push({
       razdel: '№12',
       id: task.id,
+      variantov: 1,
       otvety: formy(task.answer),
       polya: POLYA_12,
     });
@@ -185,7 +203,6 @@ for (const skill of prepSkills) {
 
 /* Начало первого шага первого варианта: строка длинная и в обычной
    вёрстке не встречается. */
-const { KONSPEKT_4 } = requireSrc('lib/veroyatnost/index');
 const marks = [...BANK_3, ...BANK_4, ...BANK_5, ...KONSPEKT_4]
   .map((prototype) => {
     const first = prototype.varianty[0];
@@ -343,15 +360,24 @@ for (const file of files) {
   }
 }
 
+/* Сводка: записей (прототипов и задач) и вариантов с ответами в
+   каждой; у банка тренажёра №8 записи нет — его варианты отдельно. */
 const poRazdelam = {};
 for (const z of zadachi) {
-  poRazdelam[z.razdel] = (poRazdelam[z.razdel] ?? 0) + 1;
+  const s = poRazdelam[z.razdel] ?? { zapisey: 0, variantov: 0 };
+  s.zapisey += 1;
+  s.variantov += z.variantov;
+  poRazdelam[z.razdel] = s;
 }
+poRazdelam['№8'].variantov += BANK_8.reduce((s, e) => s + e.variants.length, 0);
 console.log(
-  `Просмотрено файлов сборки: ${files.length}; задач в банках: ${zadachi.length} ` +
-    `(${Object.entries(poRazdelam)
-      .map(([k, v]) => `${k} — ${v}`)
-      .join(', ')}); окон задач в страницах: ${oknaVsego}.`,
+  `Просмотрено файлов сборки: ${files.length}; окон задач в страницах: ${oknaVsego}.\n` +
+    `Проверено записей банков: ${zadachi.length}, вариантов с ответами: ` +
+    `${Object.values(poRazdelam).reduce((s, r) => s + r.variantov, 0)} — ` +
+    Object.entries(poRazdelam)
+      .map(([k, r]) => `${k}: записей ${r.zapisey}, вариантов ${r.variantov}`)
+      .join('; ') +
+    '.',
 );
 if (bad.length === 0) {
   console.log('Ответов, разборов и параметров рисунков в бандле нет.');
