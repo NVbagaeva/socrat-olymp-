@@ -1258,7 +1258,9 @@ a.task-card {
   padding: var(--space-2) 0;
   text-decoration: none;
   color: var(--color-text-tertiary);
-  font-size: 11px;
+  /* Нижняя ступень шкалы, 12px: мельче на продуктовых страницах
+     текста нет, и подписи панели — не исключение. */
+  font-size: var(--fs-label);
 }
 .bnav a.is-active {
   color: var(--color-primary);
@@ -1308,8 +1310,10 @@ a.task-card {
        на всю панель и с запасом его перекрывает. */
     min-height: 44px;
     text-align: center;
-    font-size: 11px;
-    line-height: 14px;
+    /* Нижняя ступень шкалы, 12px: мельче на продуктовых страницах
+       текста нет, и подписи панели — не исключение. */
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
     /* Подписи однострочные: перенос ломает ряд, а сокращение
        многоточием — читаемость. Все пять в ячейку помещаются. */
     white-space: nowrap;

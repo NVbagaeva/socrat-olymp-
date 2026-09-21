@@ -876,6 +876,9 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text);
+  /* В карточке 123px «подбрасывании» длиннее строки: слово рвётся,
+     а не вылезает за рамку. Короткие слова переносятся как обычно. */
+  overflow-wrap: break-word;
 }
 .vcheck-card__no {
   display: grid;

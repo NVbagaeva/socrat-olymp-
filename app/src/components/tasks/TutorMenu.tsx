@@ -62,6 +62,9 @@ function reveal(strip: HTMLElement, button: HTMLElement): void {
  * внутри ленты, которая прокручивается вбок, поэтому её место в строке
  * заранее не известно. За правый край меню не выпускаем — сдвигаем
  * влево, а носик оставляем над кнопкой.
+ *
+ * Сдвиг — отступом слева, а не left: меню стоит в потоке и раздвигает
+ * содержимое, а не лежит поверх него.
  */
 function place(node: HTMLElement): void {
   const { row, button } = parts(node);
@@ -80,7 +83,7 @@ function place(node: HTMLElement): void {
   );
 
   node.style.width = `${width}px`;
-  node.style.left = `${left}px`;
+  node.style.marginLeft = `${left}px`;
   node.style.setProperty('--nose', `${nose}px`);
 }
 

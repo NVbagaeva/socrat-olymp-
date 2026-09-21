@@ -57,7 +57,11 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
 
   return (
     <>
-      <Tabs items={TABS} value={active} onValueChange={select} label="Разделы задания" />
+      {/* Лента прокручивается вбок: на телефоне пять вкладок в строку
+          не помещаются, и последние без прокрутки недостижимы. */}
+      <div className="topic-tabs">
+        <Tabs items={TABS} value={active} onValueChange={select} label="Разделы задания" />
+      </div>
 
       <div className="section-panel">
         {active === 'subtopics' ? (

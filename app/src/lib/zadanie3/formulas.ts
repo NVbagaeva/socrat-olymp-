@@ -9,6 +9,7 @@
  */
 
 import { katex } from '@/lib/graph/katex';
+import { nabratVykladku, type AtomVykladki } from '@/lib/tex';
 import { SHPARGALKI, type SheetItem } from '@/content/shpargalki';
 
 /**
@@ -48,6 +49,34 @@ export function renderFormulas(items: readonly SheetItem[]): Record<string, stri
       throw new Error(`Формула не набирается KaTeX: ${tex}\n${String(error)}`);
     }
   });
+  return out;
+}
+
+/**
+ * Блочные формулы пунктов выкладкой: атомы со знаками между ними.
+ *
+ * Из них браузер собирает строки по ширине колонки — тем же правилом
+ * тетради, что и разборы задач (components/…/VykladkaKlient). Раньше
+ * такая формула уезжала вбок в невидимую прокрутку и на телефоне
+ * выглядела обрезанной.
+ *
+ * Строчные формулы сюда не идут: они стоят внутри предложения и
+ * рвать их по «=» посреди фразы незачем.
+ *
+ * Набор выключной: дроби и индексы того же размера, что у формулы
+ * отдельной строкой, которую выкладка заменила, — от переноса формула
+ * не мельчает.
+ */
+export function renderVykladki(items: readonly SheetItem[]): Record<string, AtomVykladki[][]> {
+  const out: Record<string, AtomVykladki[][]> = {};
+  items.forEach((item) =>
+    item.pieces.forEach((piece) => {
+      if (piece.kind !== 'формула-строкой') {
+        return;
+      }
+      out[piece.value] = nabratVykladku(piece.value, true, true);
+    }),
+  );
   return out;
 }
 

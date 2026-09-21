@@ -92,56 +92,6 @@
   max-width: 20ch;
 }
 
-/* ── Лента вкладок ──────────────────────────────────────────── */
-
-.topic-tabs {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-  /* Вкладки не переносятся и не сжимаются: когда они перестают
-     помещаться, лента прокручивается вбок. */
-  overflow-x: auto;
-  scrollbar-width: none;
-  /* Тени по краям: две нижние подложки показывают, что прокручивать
-     есть куда, две верхние закрывают их, пока лента не сдвинута.
-     Отдельных стрелок нет — они здесь ничего не добавляют. */
-  background:
-    linear-gradient(to right, var(--color-bg) 45%, transparent) left center,
-    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
-    radial-gradient(
-        farthest-side at 0 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      left center,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      right center;
-  background-repeat: no-repeat;
-  background-size:
-    32px 100%,
-    32px 100%,
-    12px 100%,
-    12px 100%;
-  background-attachment: local, local, scroll, scroll;
-}
-.topic-tabs::-webkit-scrollbar {
-  display: none;
-}
-/* Набор вкладок отдаёт черту самой ленте: иначе на прокрутке она
-   обрывалась бы вместе с содержимым. */
-.topic-tabs .tabs {
-  border-bottom: 0;
-  flex: 0 0 auto;
-}
-.topic-tabs .tabs button {
-  white-space: nowrap;
-}
-
 /* ── Раскладка вкладки ──────────────────────────────────────── */
 
 .topic-body {
@@ -575,11 +525,14 @@
 /* Меню. Ширину и сдвиг ставит компонент: место кнопки в прокрученной
    ленте из стиля не вычислить. --nose — центр носика, он же держит
    меню привязанным к кнопке, когда его сдвинули от края экрана. */
+/* Меню стоит в потоке под лентой и раздвигает содержимое страницы,
+   а не ложится поверх него: раскрытое, оно закрывало заголовок и
+   описание вкладки, а на телефоне упиралось в нижнюю панель.
+   Сдвиг под кнопку — отступом слева, чтобы место в строке оставалось
+   настоящим (TutorMenu.place). */
 .tmenu {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  left: 0;
-  z-index: 20;
+  position: relative;
+  margin-top: var(--space-2);
   padding: var(--space-3);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);

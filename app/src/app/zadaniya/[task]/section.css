@@ -1,6 +1,61 @@
 /* Страница раздела задания. Оболочка, карточки и вкладки описаны
    в общих слоях — здесь только то, чего в них нет. */
 
+/* ── Лента вкладок ──────────────────────────────────────────── */
+
+/* Одна лента на страницу раздела и на страницы подтем: вкладок
+   и там, и там больше, чем влезает на телефон, и прокручиваться
+   они должны одинаково. Жила в topic.css — оттуда её видели только
+   подтемы, и на /zadaniya/12/ вкладки справа были недостижимы. */
+
+.topic-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  /* Вкладки не переносятся и не сжимаются: когда они перестают
+     помещаться, лента прокручивается вбок. */
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Тени по краям: две нижние подложки показывают, что прокручивать
+     есть куда, две верхние закрывают их, пока лента не сдвинута.
+     Отдельных стрелок нет — они здесь ничего не добавляют. */
+  background:
+    linear-gradient(to right, var(--color-bg) 45%, transparent) left center,
+    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
+    radial-gradient(
+        farthest-side at 0 50%,
+        color-mix(in srgb, var(--grey-900) 14%, transparent),
+        transparent
+      )
+      left center,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--grey-900) 14%, transparent),
+        transparent
+      )
+      right center;
+  background-repeat: no-repeat;
+  background-size:
+    32px 100%,
+    32px 100%,
+    12px 100%,
+    12px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+.topic-tabs::-webkit-scrollbar {
+  display: none;
+}
+/* Набор вкладок отдаёт черту самой ленте: иначе на прокрутке она
+   обрывалась бы вместе с содержимым. */
+.topic-tabs .tabs {
+  border-bottom: 0;
+  flex: 0 0 auto;
+}
+.topic-tabs .tabs button {
+  white-space: nowrap;
+}
+
 /* ── Чертёж движка ──────────────────────────────────────────── */
 
 /* Движок отдаёт SVG с собственными width и height в пикселях.

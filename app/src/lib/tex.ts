@@ -169,11 +169,20 @@ function atomy(utverzhdenie: string): Atom[] {
  * Формула шага → выкладка: утверждения, каждое атомами с готовой
  * вёрсткой. Как из атомов собрать строки по ширине колонки, решает
  * браузер (VykladkaKlient); знаки между атомами он рисует сам.
+ *
+ * `vyklyuchnoy` — выключной набор: дроби и индексы в полный рост, как
+ * у формулы отдельной строкой. Разборы набираются строчным: формула
+ * там стоит в потоке шага. Пробы берут ту же вёрстку, что и строки,
+ * поэтому примерка остаётся верной при любом из наборов.
  */
-export function nabratVykladku(formula: string, strogo = false): AtomVykladki[][] {
+export function nabratVykladku(
+  formula: string,
+  strogo = false,
+  vyklyuchnoy = false,
+): AtomVykladki[][] {
   return utverzhdeniya(formula).map((u) =>
     atomy(u).map(({ tex, znak, uroven }) => ({
-      html: typeset(`$${tex}$`, strogo),
+      html: typeset(`$${vyklyuchnoy ? `\\displaystyle ${tex}` : tex}$`, strogo),
       ...(znak === undefined ? {} : { znak }),
       ...(uroven === undefined ? {} : { uroven }),
     })),

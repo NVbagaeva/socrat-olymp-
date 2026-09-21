@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 import { SheetBlock } from '@/components/tasks/SheetBlock';
 import { theoryBlocks } from '@/content/stereometria';
 import { SHPARGALKI } from '@/content/shpargalki';
-import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
+import { assertSheetsOk, renderFormulas, renderVykladki } from '@/lib/zadanie3/formulas';
 import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
+import '@/components/tasks/veroyatnost/vykladka.css';
 import './teoriya.css';
 
 export function generateStaticParams() {
@@ -46,6 +47,7 @@ export default async function TeoriyaTab({ params }: { params: Params }) {
 
   const sheet = SHPARGALKI[razdel.nomer] ?? [];
   const formulas = renderFormulas(sheet);
+  const vykladki = renderVykladki(sheet);
   /* Готов тот раздел, у которого есть содержимое. Счётчик считается
      по этому признаку, а не записан числом. */
   const ready = theoryBlocks.filter((block) => block.id === 'pomnit' && sheet.length > 0).length;
@@ -85,7 +87,7 @@ export default async function TeoriyaTab({ params }: { params: Params }) {
                 {block.title}
               </h2>
               {filled ? (
-                <SheetBlock items={sheet} formulas={formulas} />
+                <SheetBlock items={sheet} formulas={formulas} vykladki={vykladki} />
               ) : (
                 <p className="theory-block__soon">
                   Материал готовится. Текст этого раздела напишет автор — придуманного здесь не
