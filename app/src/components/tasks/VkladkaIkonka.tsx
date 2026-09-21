@@ -19,7 +19,7 @@ const ZNACHKI: Record<VkladkaIcon, ReactElement> = {
   bulb: <HintIcon />,
   target: <NavIcon name="target" />,
   dumbbell: <NavIcon name="dumbbell" />,
-  settings: <NavIcon name="settings" />,
+  settings: <NavIcon name="gear" />,
   tasks: <NavIcon name="tasks" />,
   stats: <NavIcon name="stats" />,
   materials: <NavIcon name="materials" />,
