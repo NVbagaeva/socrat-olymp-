@@ -24,6 +24,11 @@ export interface ExamTask {
   status: TaskStatus;
   /** Пометка о смене структуры экзамена, если она есть в источнике. */
   badge?: string;
+  /**
+   * Формат миниатюры карточки: файл /images/task-{no}.{format}.
+   * Не задан — растровый webp, как у большинства заданий.
+   */
+  illustration?: 'svg';
 }
 
 export const tasksPage = {
@@ -61,7 +66,9 @@ export function taskName(slug: string): string {
 }
 
 export const tasks = [
-  { no: '01', name: 'Планиметрия', slug: '1', status: 'soon' },
+  /* Миниатюра №1 — вектор: чертёж посчитан точно, и в SVG касание
+     окружностей не расплывается при любом масштабе. */
+  { no: '01', name: 'Планиметрия', slug: '1', status: 'soon', illustration: 'svg' },
   { no: '02', name: 'Векторы', slug: '2', status: 'soon' },
   /* Раздел открыт: банк из 91 прототипа собран в lib/zadanie3.
      Старый статический тренажёр в корне репозитория живёт отдельно
