@@ -571,6 +571,11 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
   for (var i = 1; i < item.pieces.length; i++) {
     if (item.pieces[i].length > piece.length) { piece = item.pieces[i]; }
   }
+  /* Кривая из многих звеньев (парабола) подписывается вдоль самой
+     ломаной: хорда от первой точки до последней прошла бы мимо неё. */
+  if (piece.length > 2) {
+    return curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report);
+  }
   var a = piece[0];
   var b = piece[piece.length - 1];
 
@@ -642,6 +647,82 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
 
   var spot = best || fallback ||
     { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
+
+  labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+  collect(report, 'curveLabel', 'curve-label', spot.x, spot.y, halfW, halfH);
+
+  return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke);
+}
+
+/* Подпись кривой вдоль ломаной: точки перебираются по длине дуги,
+   подпись отводится по местной нормали — по обе стороны, — а зазор до
+   облака препятствий считается так же, как у прямой. Зона подписи
+   у кривых не задаётся: она нужна только треугольнику наклона. */
+function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report) {
+  var pts = piece.map(function (p) { return { x: sx(p.x), y: sy(p.y) }; });
+  var cum = [0];
+  for (var i = 1; i < pts.length; i++) {
+    cum.push(cum[i - 1] + dist(pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y));
+  }
+  var total = cum[cum.length - 1] || 1;
+
+  /* Точка на расстоянии s от начала и единичная нормаль в ней. */
+  function at(s) {
+    var k = 1;
+    while (k < cum.length - 1 && cum[k] < s) { k++; }
+    var p0 = pts[k - 1], p1 = pts[k];
+    var seg = cum[k] - cum[k - 1] || 1;
+    var t = Math.min(1, Math.max(0, (s - cum[k - 1]) / seg));
+    var len = dist(p0.x, p0.y, p1.x, p1.y) || 1;
+    return { x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t,
+             nx: -(p1.y - p0.y) / len, ny: (p1.x - p0.x) / len };
+  }
+
+  var size = THEME.font.curveLabel;
+  var halfW = textWidth(item.curve.label, size, THEME.font.curveLabelTrack) / 2;
+  var halfH = size * 0.62;
+  var labelField = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+  var origin = { x: sx(0), y: sy(0) };
+  var cloud = obstacleCloud(scene, all, sx, sy, origin, labelField, labelBoxes);
+
+  var scan = THEME.curveLabelScan;
+  var best = null;
+  var fallback = null;
+
+  for (var t = scan.from; t <= scan.to + 1e-9; t += scan.step) {
+    var here = at(t * total);
+    var offset = THEME.gap.curveLabel + halfW * Math.abs(here.nx) + halfH * Math.abs(here.ny);
+
+    for (var side = 1; side >= -1; side -= 2) {
+      var cx = here.x + here.nx * side * offset;
+      var cy = here.y + here.ny * side * offset;
+
+      if (cx - halfW < labelField.left + THEME.curveLabelEdge) { continue; }
+      if (cx + halfW > labelField.right - THEME.curveLabelEdge) { continue; }
+      if (cy - halfH < labelField.top + THEME.curveLabelEdge) { continue; }
+      if (cy + halfH > labelField.bottom - THEME.curveLabelEdge) { continue; }
+
+      var clear = Infinity;
+      for (var c = 0; c < cloud.length; c++) {
+        var d = rectDist(cloud[c], cx, cy, halfW, halfH);
+        if (d < clear) { clear = d; }
+        if (clear <= 0) { break; }
+      }
+
+      var outer = dist(cx, cy, origin.x, origin.y) > dist(here.x, here.y, origin.x, origin.y);
+      var score = clear +
+        (outer ? THEME.curveLabelOuter : 0) +
+        (1 - Math.abs(t - 0.5) * 2) * THEME.curveLabelMiddle;
+
+      if (!fallback || clear > fallback.clear + 1e-9) { fallback = { x: cx, y: cy, clear: clear }; }
+      if (clear < THEME.curveLabelClear) { continue; }
+      if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
+    }
+  }
+
+  var mid = at(total / 2);
+  var spot = best || fallback ||
+    { x: mid.x + mid.nx * THEME.gap.curveLabel, y: mid.y + mid.ny * THEME.gap.curveLabel };
 
   labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
   collect(report, 'curveLabel', 'curve-label', spot.x, spot.y, halfW, halfH);

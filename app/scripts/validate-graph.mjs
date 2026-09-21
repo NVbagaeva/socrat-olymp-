@@ -20,6 +20,7 @@ import generator from '../src/lib/graph/generate.js';
 import Line from '../src/lib/graph/families/line.js';
 import Triangle from '../src/lib/graph/triangle.js';
 import Solution from '../src/lib/graph/solution.js';
+import { checkQuadraticComposition, checkQuadraticTask } from './lib/graph-quadratic-checks.mjs';
 
 const THEME = renderer.THEME;
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
@@ -865,11 +866,20 @@ function run() {
       errors.push(set.id + ': ' + error.message);
       return;
     }
-    tasks.forEach(function (task) {
-      errors = errors.concat(checkTask(set, task));
-      errors = errors.concat(checkAnalysis(set, task));
-    });
-    errors = errors.concat(checkComposition(set, tasks));
+    /* У параболы свои правила читаемости и состава: треугольник
+       наклона и диапазон k к ней не относятся. */
+    if (set.family === 'quadratic') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkQuadraticTask(set, task));
+      });
+      errors = errors.concat(checkQuadraticComposition(set, tasks));
+    } else {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkTask(set, task));
+        errors = errors.concat(checkAnalysis(set, task));
+      });
+      errors = errors.concat(checkComposition(set, tasks));
+    }
     report.push('  ' + set.id + ' «' + set.title + '»: собрано ' + tasks.length +
       ', ответы: ' + tasks.map(function (t) { return t.answer; }).join(', '));
   });
