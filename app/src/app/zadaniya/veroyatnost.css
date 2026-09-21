@@ -1355,12 +1355,27 @@
   display: grid;
   gap: var(--space-4);
 }
+/* Подпись и портрет не перекрываются ни на какой ширине: это две
+   ячейки одной сетки. На узкой карточке — подпись строкой над
+   портретом во всю ширину, портрет под ней; от 600px — подпись в
+   своей колонке слева от портрета (см. контейнерный запрос ниже). */
 .vizo-eylerblok__figura {
-  position: relative;
+  display: grid;
+  gap: var(--space-3);
   margin: 0;
 }
+/* Кадр — ячейка портрета. На широкой карточке портрет вписывается
+   в неё абсолютным позиционированием, поэтому кадр — опорный блок. */
+.vizo-eylerblok__kadr {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
 /* Портрет по высоте не выше текста рядом: картинка вписана в свою
-   ячейку и не растит её. На узкой карточке — не выше 320px. */
+   ячейку и не растит её. На узкой карточке — не выше 320px.
+   Прозрачные поля у файла портрета — 13/12px по бокам и 24/28px
+   сверху/снизу из 1583×993 (≈1–3%), отдельных отступов под них
+   не нужно. */
 .vizo-eylerblok__portret {
   display: block;
   width: 100%;
@@ -1377,18 +1392,16 @@
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-lg);
 }
-/* Рукописная цитата — над горами слева от портрета, чуть с наклоном,
-   как на макете. Рукописный шрифт узкий, поэтому кегль на ступень
-   выше основного. */
+/* Рукописная цитата. Рукописный шрифт узкий, поэтому кегль на
+   ступень выше основного. На узкой карточке — строкой над портретом,
+   по левому краю, без наклона: наклонённая строка во всю ширину
+   вылезала бы за карточку. Наклон, как на макете, — только в
+   широкой раскладке, где у цитаты своя колонка. */
 .vizo-eylerblok__ruka {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  max-width: 45%;
   display: grid;
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);
-  rotate: -6deg;
+  text-align: left;
 }
 .vizo-eylerblok__avtor {
   margin-top: var(--space-1);
@@ -1616,18 +1629,43 @@
   .vizo-primer__risunki {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   }
+  /* Цитата в своей колонке слева от портрета, как на макете. Колонка
+     цитаты — не шире 36% кадра, остальное — портрету: когда места
+     мало, ужимается портрет, а не накладывается текст. Зазор 32px:
+     после наклона на 6° угол цитаты сдвигается вправо примерно на
+     10px, и до видимого края портрета остаётся не меньше 16px. */
+  .vizo-eylerblok__figura {
+    grid-template-columns: fit-content(32%) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+  .vizo-eylerblok__ruka {
+    padding-top: var(--space-2);
+    rotate: -6deg;
+  }
+  .vizo-eylerblok__kadr {
+    align-self: stretch;
+  }
 }
 @container vteor-razdel (min-width: 760px) {
+  /* Левая часть шире, чем раньше: в ней теперь три колонки — цитата,
+     портрет и реплика, — и портрету нужно место, чтобы не ужаться
+     в полоску. Пропорции — с макета 1440. */
   .vizo-eylerblok {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
     align-items: start;
   }
   .vizo-eylerblok__levo {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     align-items: stretch;
   }
-  /* Портрет — не выше текстовой колонки: ячейка растёт по тексту,
-     картинка вписывается в неё. */
+  /* Кадр растёт по тексту, а портрет прижат к низу кадра — цитата
+     стоит рядом с ним, а не над пустым местом. */
+  .vizo-eylerblok__figura {
+    align-items: end;
+  }
+  /* Портрет — не выше текстовой колонки: кадр растёт по тексту,
+     картинка вписывается в него. */
   .vizo-eylerblok__portret {
     position: absolute;
     inset: 0;

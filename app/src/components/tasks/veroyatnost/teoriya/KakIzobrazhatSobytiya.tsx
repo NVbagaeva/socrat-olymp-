@@ -385,7 +385,11 @@ export function KakIzobrazhatSobytiya() {
       </ul>
 
       {/* Блок про Эйлера: портрет с рукописной подписью и реплика
-          слева, плашка с фактом справа. */}
+          слева, плашка с фактом справа. Подпись и портрет — соседние
+          ячейки, а не слой поверх картинки: на широкой карточке
+          подпись стоит в своей колонке слева от портрета, на узкой —
+          строкой над ним. Кадр — отдельная обёртка, чтобы портрет
+          можно было вписать в высоту текста, не трогая подпись. */}
       <section className="vizo-eylerblok">
         <div className="vizo-eylerblok__levo">
           <figure className="vizo-eylerblok__figura">
@@ -393,21 +397,23 @@ export function KakIzobrazhatSobytiya() {
               {eyler.tsitata}
               <span className="vizo-eylerblok__avtor">{eyler.avtor}</span>
             </HandNote>
-            {portretEst() ? (
-              <Image
-                className="vizo-eylerblok__portret"
-                src={eyler.portret.src}
-                alt={eyler.portret.alt}
-                width={eyler.portret.width}
-                height={eyler.portret.height}
-              />
-            ) : (
-              <EmptyState
-                className="vizo-eylerblok__pusto"
-                title={eyler.portret.pusto.title}
-                description={eyler.portret.pusto.description}
-              />
-            )}
+            <span className="vizo-eylerblok__kadr">
+              {portretEst() ? (
+                <Image
+                  className="vizo-eylerblok__portret"
+                  src={eyler.portret.src}
+                  alt={eyler.portret.alt}
+                  width={eyler.portret.width}
+                  height={eyler.portret.height}
+                />
+              ) : (
+                <EmptyState
+                  className="vizo-eylerblok__pusto"
+                  title={eyler.portret.pusto.title}
+                  description={eyler.portret.pusto.description}
+                />
+              )}
+            </span>
           </figure>
           <div className="vizo-eylerblok__text">
             <h4 className="vizo-eylerblok__title">{eyler.title}</h4>
