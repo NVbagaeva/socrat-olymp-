@@ -1,0 +1,216 @@
+name: Preview
+
+# Снимки страниц к каждому pull request.
+#
+# Превью-сборки у проекта нет: сайт выкладывается только из main,
+# и посмотреть правку раньше слияния было негде. Здесь сборка
+# поднимается прямо в прогоне, страницы снимаются на трёх ширинах,
+# снимки складываются в отдельную ветку previews и показываются
+# картинками в комментарии к pull request — с телефона это открывается
+# там же, где лежит сам pull request.
+#
+# Ветка previews к сайту отношения не имеет и в main не вливается.
+# Каждый прогон переписывает её одним коммитом без истории, поэтому
+# репозиторий не растёт от снимка к снимку.
+#
+# Права здесь шире, чем у check.yml: нужно записать ветку и оставить
+# комментарий. Прогон запускается на коде из pull request, так что
+# такие права стоит держать, пока pull request приходят из этого же
+# репозитория. Для копий репозитория GitHub выдаёт токен только
+# на чтение, и шаг публикации там просто не сработает.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Новый пуш в pull request отменяет прошлый прогон: снимки прошлой
+# версии всё равно некому смотреть.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    name: Снимки страниц
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      # pnpm ставим до setup-node: иначе кэшу нечего искать.
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      # Браузер ставится отдельной командой, а не постустановочным
+      # скриптом пакета: pnpm 10 их не запускает, если пакета нет
+      # в onlyBuiltDependencies.
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Собрать статический экспорт
+        working-directory: app
+        run: pnpm build
+
+      # Строка «превью: /адрес/» в описании pull request добавляет
+      # страницу к списку по умолчанию. Описание приходит через
+      # переменную окружения, а не подстановкой в команду: в нём
+      # может оказаться что угодно, вплоть до кавычек и переводов строк.
+      - name: Выбрать страницы из описания
+        id: puti
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          puti=$(printf '%s' "${PR_BODY:-}" \
+            | grep -oE '([Пп]ревью|[Pp]review)[[:space:]]*:[[:space:]]*/[a-zA-Z0-9/_-]*' \
+            | sed -E 's|.*:[[:space:]]*||' \
+            | tr '\n' ' ' || true)
+          echo "puti=${puti}" >> "$GITHUB_OUTPUT"
+          echo "Дополнительные страницы: ${puti:-нет}"
+
+      - name: Снять страницы
+        working-directory: app
+        env:
+          PREVIEW_PATHS: ${{ steps.puti.outputs.puti }}
+        run: node scripts/preview-shots.mjs "${RUNNER_TEMP}/shots"
+
+      # Снимки нужны и сами по себе: артефакт живёт независимо
+      # от ветки и годится, когда комментарий перезаписан.
+      - name: Сохранить снимки артефактом
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-${{ github.event.pull_request.number }}
+          path: ${{ runner.temp }}/shots
+          retention-days: 14
+
+      - name: Положить снимки в ветку previews
+        id: publish
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          short="${GITHUB_SHA::7}"
+          work="${RUNNER_TEMP}/previews"
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # Ветка одна на все открытые pull request, и соседний прогон
+          # может успеть записать её первым. Поэтому ветка не
+          # перезаписывается вслепую: push проходит, только если она
+          # осталась той же, что была прочитана. Не осталась — читаем
+          # заново и собираем дерево поверх свежего.
+          for popytka in 1 2 3; do
+            rm -rf "$work"
+            mkdir -p "$work"
+            cd "$work"
+            git init -q
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git remote add origin "$remote"
+
+            # Ветки может ещё не быть — тогда начинаем с пустой папки,
+            # а замок требует, чтобы её не было и на сервере.
+            if git fetch -q --depth 1 origin previews; then
+              git checkout -q FETCH_HEAD -- .
+              zamok="previews:$(git rev-parse FETCH_HEAD)"
+            else
+              zamok='previews:'
+            fi
+
+            # Прошлые снимки этого pull request не нужны: комментарий
+            # всё равно показывает только текущие.
+            rm -rf "pr-${PR}"
+            mkdir -p "pr-${PR}/${short}"
+            cp "${RUNNER_TEMP}/shots"/*.jpg "pr-${PR}/${short}/"
+            git add -A
+            # Коммит без родителя: в ветке всегда ровно один коммит,
+            # и вес репозитория не растёт от прогона к прогону.
+            git commit -q -m "Снимки pull request #${PR}, ${short}"
+
+            if git push -q --force-with-lease="$zamok" origin HEAD:previews; then
+              echo "papka=pr-${PR}/${short}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Ветку previews успел записать соседний прогон, попытка ${popytka} из 3"
+          done
+          echo 'Не вышло записать ветку previews: она меняется быстрее, чем мы пишем.'
+          exit 1
+
+      - name: Оставить комментарий со снимками
+        working-directory: app
+        env:
+          SHOTS_DIR: ${{ runner.temp }}/shots
+          SHOTS_BASE: >-
+            https://raw.githubusercontent.com/${{ github.repository }}/previews/${{ steps.publish.outputs.papka }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/preview-comment.mjs
+
+  cleanup:
+    name: Убрать снимки закрытого pull request
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Стереть папку в ветке previews
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          work="${RUNNER_TEMP}/previews"
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # Замок и повтор — по той же причине, что и при записи снимков.
+          for popytka in 1 2 3; do
+            rm -rf "$work"
+            mkdir -p "$work"
+            cd "$work"
+            git init -q
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git remote add origin "$remote"
+
+            if ! git fetch -q --depth 1 origin previews; then
+              echo 'Ветки previews нет — стирать нечего.'
+              exit 0
+            fi
+            git checkout -q FETCH_HEAD -- .
+            zamok="previews:$(git rev-parse FETCH_HEAD)"
+
+            if [ ! -d "pr-${PR}" ]; then
+              echo "Снимков pull request #${PR} в ветке нет."
+              exit 0
+            fi
+            rm -rf "pr-${PR}"
+            git add -A
+            git commit -q -m "Снимки pull request #${PR} больше не нужны"
+
+            if git push -q --force-with-lease="$zamok" origin HEAD:previews; then
+              exit 0
+            fi
+            echo "Ветку previews успел записать соседний прогон, попытка ${popytka} из 3"
+          done
+          echo 'Не вышло почистить ветку previews.'
+          exit 1
