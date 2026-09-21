@@ -278,13 +278,15 @@
   line-height: var(--lh-label);
   color: var(--color-text-tertiary);
 }
+/* Пояснение под линией — главная мысль карточки, поэтому оно основным
+   текстом, а не второстепенным. Подпись и источник выше остаются мельче. */
 .z4-stat__text {
   margin: 0;
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border-info);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
 }
 
 /* ── Карточка 2: какие задачи встречаются ───────────────────────── */

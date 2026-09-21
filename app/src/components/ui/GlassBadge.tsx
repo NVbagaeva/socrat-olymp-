@@ -12,12 +12,12 @@ export interface GlassBadgeProps {
  *
  * Стекло нарисовано SVG, без растра: круг с радиальным градиентом от
  * светлого центра-верха к насыщенному краю, размытый белый блик в верхней
- * трети и тонкая светлая обводка по краю. Глиф лежит поверх отдельным
- * слоем — так внутрь встаёт любой значок, и его не нужно вписывать
- * в разметку стекла.
+ * трети, слабое отражение дугой у нижнего края и тонкая светлая обводка.
+ * Глиф лежит поверх отдельным слоем — так внутрь встаёт любой значок,
+ * и его не нужно вписывать в разметку стекла.
  *
  * Все цвета — из токенов через классы на остановках градиента и на фигурах:
- * в атрибутах SVG переменных нет. Идентификаторы градиента и фильтра
+ * в атрибутах SVG переменных нет. Идентификаторы градиента и фильтров
  * уникальны на экземпляр, иначе два кружка на странице делили бы один def.
  *
  * Размер задаёт CSS (--glass-badge-size): 72px, на телефоне 56px.
@@ -27,21 +27,29 @@ export function GlassBadge({ children, className }: GlassBadgeProps) {
   const id = useId();
   const gradientId = `${id}-glass`;
   const sheenId = `${id}-sheen`;
+  const reflexId = `${id}-reflex`;
 
   return (
     <span className={clsx('glass-badge', className)} aria-hidden="true">
       <svg className="glass-badge__glass" viewBox="0 0 72 72" focusable="false">
         <defs>
-          <radialGradient id={gradientId} cx="0.42" cy="0.3" r="0.78">
+          {/* Центр градиента в верхней трети шара, а насыщенный край берётся
+              только на последней десятой радиуса: так верхняя половина
+              читается светлой, а объём даёт узкая тёмная кромка. */}
+          <radialGradient id={gradientId} cx="0.5" cy="0.3" r="0.9">
             <stop offset="0" className="glass-badge__stop-light" />
             <stop offset="0.55" className="glass-badge__stop-base" />
-            <stop offset="1" className="glass-badge__stop-deep" />
+            <stop offset="0.92" className="glass-badge__stop-deep" />
           </radialGradient>
-          {/* Область фильтра шире эллипса, иначе размытие обрезается по его рамке. */}
-          <filter id={sheenId} x="-30%" y="-60%" width="160%" height="220%">
-            <feGaussianBlur stdDeviation="2.4" />
+          {/* Область фильтра шире фигуры, иначе размытие обрезается по её рамке. */}
+          <filter id={sheenId} x="-40%" y="-70%" width="180%" height="240%">
+            <feGaussianBlur stdDeviation="2.6" />
+          </filter>
+          <filter id={reflexId} x="-40%" y="-70%" width="180%" height="240%">
+            <feGaussianBlur stdDeviation="2.2" />
           </filter>
         </defs>
+
         <circle
           className="glass-badge__body"
           cx="36"
@@ -49,15 +57,25 @@ export function GlassBadge({ children, className }: GlassBadgeProps) {
           r="35.5"
           fill={`url(#${gradientId})`}
         />
+
+        {/* Верхний блик: 60% диаметра в ширину, 30% в высоту, центр в верхней трети. */}
         <ellipse
           className="glass-badge__sheen"
-          cx="30"
+          cx="36"
           cy="18"
-          rx="19"
-          ry="9"
+          rx="21.5"
+          ry="10.5"
           filter={`url(#${sheenId})`}
         />
-        <circle className="glass-badge__rim" cx="36" cy="36" r="35" />
+
+        {/* Отражение снизу: слабая дуга вдоль нижнего края — она и даёт объём. */}
+        <path
+          className="glass-badge__reflex"
+          d="M 15 53 A 24 18 0 0 1 57 53"
+          filter={`url(#${reflexId})`}
+        />
+
+        <circle className="glass-badge__rim" cx="36" cy="36" r="34.8" />
       </svg>
       <span className="glass-badge__glyph">{children}</span>
     </span>

@@ -2252,17 +2252,26 @@ a.task-card {
 .glass-badge__sheen {
   fill: var(--color-glass-badge-sheen);
 }
+/* Отражение снизу — тот же цвет, что у блика, но едва различимое. */
+.glass-badge__reflex {
+  fill: none;
+  stroke: var(--color-glass-badge-sheen);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
 .glass-badge__rim {
   fill: none;
   stroke: var(--color-glass-badge-rim);
-  stroke-width: 1;
+  stroke-width: 1.5;
 }
-/* Глиф — 48% от кружка, как на макете: 35px в 72, 27px в 56. */
+/* Поле глифа — 64% кружка; сам рисунок занимает три четверти своего
+   поля, то есть около половины диаметра, как на макете. */
 .glass-badge__glyph {
   position: relative;
   display: block;
-  width: 48%;
-  height: 48%;
+  width: 64%;
+  height: 64%;
 }
 .glass-glyph {
   display: block;
