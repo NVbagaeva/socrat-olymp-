@@ -155,20 +155,6 @@
   --color-glass-mid: var(--blue-glass-1);
   --color-glass-end: var(--blue-glass-2);
   --color-grid-soft: var(--blue-grid);
-  /* Стеклянный кружок GlassBadge: значок статистической карточки
-     «О задании». Четыре ступени тела шара — от насыщенной середины
-     к светлому краю, — блик, ободок и глиф.
-
-     Прозрачности здесь нет намеренно: один и тот же белый нужен блику,
-     ободку, глифу и его основанию в разных долях, и доля задаётся
-     на слое, в разметке значка, где её видно рядом с остальными. */
-  --color-glass-badge-light: var(--blue-300);
-  --color-glass-badge-base: var(--blue-500);
-  --color-glass-badge-deep: var(--blue-700);
-  --color-glass-badge-edge: var(--blue-200);
-  --color-glass-badge-sheen: var(--white);
-  --color-glass-badge-rim: var(--white);
-  --color-glass-badge-glyph: var(--white);
   /* Полупрозрачный фон липкой панели поверх --color-bg */
   --color-bg-translucent: rgba(245, 249, 255, 0.92);
   --color-bg-translucent-strong: rgba(245, 249, 255, 0.9);
@@ -224,7 +210,7 @@
      «О задании». Голубое, без смещения, с большим размытием: карточка
      выделена мягким ореолом по контуру, а не жёсткой линией. Больше
      нигде не использовать. */
-  --glow-accent: 0 0 40px rgba(155, 192, 242, 0.85);
+  --glow-accent: 0 0 24px rgba(155, 192, 242, 0.18);
 
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;

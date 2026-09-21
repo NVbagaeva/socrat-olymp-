@@ -2220,31 +2220,25 @@ a.task-card {
   outline-offset: 2px;
 }
 
-/* ── Стеклянный кружок GlassBadge ─────────────────────────────
-   Значок статистической карточки «О задании»: стекло рисует SVG,
-   глиф лежит поверх отдельным слоем. Цвета остановок градиента,
-   блика, обводки и глифа — токены --color-glass-badge-*. */
+/* ── Стеклянный значок GlassBadge ────────────────────────────
+   Рисунок целиком лежит в SVG компонента — он перенесён из образца
+   и цвета держит в себе. Здесь только место под него: ни фона,
+   ни рамки, ни тени на обёртке, свечение у шара своё, внутри. */
 
 .glass-badge {
   --glass-badge-size: 72px;
-  /* Шар занимает 104 единицы холста из 160, остальное — свечение вокруг
-     него. Чтобы сам шар остался заданного размера, холст берётся шире
-     значка (160 / 104) и выступает за рамку на половину разницы. */
+  /* Шар занимает 104 единицы холста из 160, остальное — свечение
+     вокруг него. Чтобы сам шар остался заданного размера, холст берётся
+     шире значка (160 / 104) и выступает за рамку на половину разницы. */
   --glass-badge-canvas: 153.846%;
   --glass-badge-bleed: -26.923%;
   position: relative;
-  display: inline-grid;
-  place-items: center;
+  display: inline-block;
   flex: none;
   width: var(--glass-badge-size);
   height: var(--glass-badge-size);
 }
-/* Стекло и глиф лежат в одном холсте и с одним выпуском: так слои
-   совмещаются один в один, как в образце. Размер холста задан явно:
-   SVG — заменяемый элемент, растягиваться по одним отступам он
-   не обязан и берёт собственный размер. */
-.glass-badge__glass,
-.glass-badge__glyph {
+.glass-badge__art {
   position: absolute;
   top: var(--glass-badge-bleed);
   left: var(--glass-badge-bleed);
@@ -2253,46 +2247,6 @@ a.task-card {
   /* Сброс в base.css не даёт картинкам вылезать за родителя, а здесь
      холст шире значка намеренно: за рамку выходит только свечение. */
   max-width: none;
-}
-.glass-badge__stop-light {
-  stop-color: var(--color-glass-badge-light);
-}
-.glass-badge__stop-base {
-  stop-color: var(--color-glass-badge-base);
-}
-.glass-badge__stop-deep {
-  stop-color: var(--color-glass-badge-deep);
-}
-.glass-badge__stop-edge {
-  stop-color: var(--color-glass-badge-edge);
-}
-.glass-badge__stop-sheen {
-  stop-color: var(--color-glass-badge-sheen);
-}
-.glass-badge__stop-rim {
-  stop-color: var(--color-glass-badge-rim);
-}
-/* Размытый свет внутри верхней кромки. */
-.glass-badge__arc {
-  stroke: var(--color-glass-badge-sheen);
-}
-.glass-glyph {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.glass-glyph__stop-top {
-  stop-color: var(--color-glass-badge-glyph);
-}
-.glass-glyph__stop-bottom {
-  stop-color: var(--color-glass-badge-edge);
-}
-.glass-glyph__shadow {
-  fill: var(--color-glass-badge-deep);
-}
-.glass-glyph__base {
-  fill: var(--color-glass-badge-glyph);
-  opacity: 0.65;
 }
 @media (max-width: 767.98px) {
   .glass-badge {
