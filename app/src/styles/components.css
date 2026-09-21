@@ -2361,6 +2361,42 @@ a.task-card {
   background: var(--color-border-strong);
 }
 
+/* ── Заголовок вкладки ────────────────────────────────────────
+   Под лентой у каждой вкладки свой заголовок. По макету он с синей
+   отбивкой слева — она показывает, что это заголовок содержимого
+   вкладки, а не раздела. Правило перечисляет классы всех таких
+   заголовков: своего общего класса у них пока нет, а вид должен быть
+   один во всех разделах. */
+
+.vtab__title,
+.vmetody__title,
+.z4-about__title,
+.z8-about__title,
+.prep__title,
+.trainer__title,
+.cfg__title {
+  position: relative;
+  padding-left: var(--space-4);
+}
+.vtab__title::before,
+.vmetody__title::before,
+.z4-about__title::before,
+.z8-about__title::before,
+.prep__title::before,
+.trainer__title::before,
+.cfg__title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  /* Отбивка чуть короче строки: она держится за кегль букв,
+     а не за высоту строки с её просветами. */
+  top: 0.14em;
+  bottom: 0.14em;
+  width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+}
+
 /* ── Чип ─────────────────────────────────────────────────────
    Кнопка-пилюля: навык в подготовительных задачах №12 и тип
    задания в тренажёре №3. Общий слой, потому что нужен обоим:

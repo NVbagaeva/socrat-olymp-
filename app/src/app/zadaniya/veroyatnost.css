@@ -8,6 +8,7 @@
    колонка отжимала бы текст к левому краю на половину ширины. */
 .veroyatnost-head {
   grid-template-columns: minmax(0, 1fr);
+  margin-top: var(--space-8);
   margin-bottom: 0;
 }
 
@@ -20,14 +21,15 @@
   margin-bottom: var(--space-2);
 }
 .veroyatnost-head .section-head__title h1 {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
 }
-/* Подзаголовок идёт одной строкой, как на макете: мера в 62 знака
-   рвала бы его надвое уже на 1440. */
+/* Просветы по макету: от крошек до заголовка шире, чем между
+   заголовком и бейджем, а подзаголовок отбит от бейджа так же,
+   как заголовок от крошек. */
 .veroyatnost-head .section-head__lead {
-  max-width: none;
+  margin-top: var(--space-5);
   margin-bottom: 0;
 }
 
