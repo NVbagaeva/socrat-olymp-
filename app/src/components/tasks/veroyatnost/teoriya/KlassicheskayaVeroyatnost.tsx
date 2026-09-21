@@ -35,6 +35,18 @@ function Formula({ tex }: { tex: string }) {
   return <Stroka tex={tex} className="vteor-formula" />;
 }
 
+/**
+ * Заголовок с формулой: знак препинания сразу после формулы не
+ * отрывается от неё — «P(A) ≤ 1?» переносится целиком, а не так,
+ * что вопросительный знак остаётся на новой строке один.
+ */
+function zagolovokSFormuloy(text: string): string {
+  return typeset(
+    text.replace(/(\$[^$]+\$)([?!.,:;])/g, '<span class="vklass__nerazryv">$1$2</span>'),
+    true,
+  );
+}
+
 /** Заголовок карточки со значком. */
 function Zagolovok({ znak, children }: { znak: ReactNode; children: ReactNode }) {
   return (
@@ -79,7 +91,7 @@ export function KlassicheskayaVeroyatnost() {
               </span>
             }
           >
-            <span dangerouslySetInnerHTML={{ __html: typeset(pochemu.title, true) }} />
+            <span dangerouslySetInnerHTML={{ __html: zagolovokSFormuloy(pochemu.title) }} />
           </Zagolovok>
           <p className="vklass__text">{pochemu.text}</p>
           <Formula tex={pochemu.formula} />

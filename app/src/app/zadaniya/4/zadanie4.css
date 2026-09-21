@@ -995,6 +995,10 @@
   font-weight: 700;
   color: var(--color-primary);
 }
+/* Формула и знак препинания за ней — одним неразрывным куском. */
+.vklass__nerazryv {
+  white-space: nowrap;
+}
 .vklass__ico {
   display: grid;
   place-items: center;
