@@ -31,10 +31,9 @@ function taskItems(): NavItem[] {
   return tasks.map((task) => ({
     id: task.slug,
     no: task.no,
+    /* Название всегда полное: сокращений в конфиге нет, длинное
+       переносится на вторую строку. */
     label: task.name,
-    /* Столбец узкий: длинные названия показываются короткой формой
-       из конфига. Не задана — остаётся полная. */
-    ...(task.shortTitle !== undefined ? { short: task.shortTitle } : {}),
     href: `${tasksPage.href}/${task.slug}`,
     disabled: task.status !== 'active',
   }));
