@@ -234,31 +234,27 @@
 
 /* ── Карточка 1: решаемость ─────────────────────────────────────── */
 
-/* Число и пояснение делят карточку пополам; между ними линия —
-   она же граница колонок. */
+/* Карточка в одну колонку, как на макете: значок и число в строке,
+   под ними подпись и источник, линия, под линией пояснение во всю
+   ширину.
+
+   Свечение вместо рамки, которая сливалась с фоном. Это осознанное
+   исключение из «карточки раздела без тени» абзацем выше: --glow-accent
+   заведён только для статистических карточек «О задании» и больше
+   нигде не используется. Поле шире соседних: кружок вырос с 48 до 72px,
+   и на прежних 16px он упирался в край.  */
 .z4-stat {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-5);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glow-accent);
 }
 .z4-stat__chislo {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 0 var(--space-6);
-}
-.z4-stat__ico {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-.z4-stat__ico svg {
-  width: 24px;
-  height: 24px;
 }
 .z4-stat__value {
   margin: 0;
@@ -284,8 +280,8 @@
 }
 .z4-stat__text {
   margin: 0;
-  padding-left: var(--space-5);
-  border-left: 1px solid var(--color-border-info);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-info);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
@@ -393,17 +389,14 @@
 }
 
 @media (max-width: 767px) {
-  /* Карточка решаемости складывается в столбец: число сверху,
-     пояснение под ним. Линия между колонками становится линией
-     между строками — иначе она висела бы сбоку ни при чём. */
+  /* Карточка решаемости и так в одну колонку: на телефоне у неё
+     только поле и просветы теснее. */
   .z4-stat {
-    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
+    padding: var(--space-4);
   }
   .z4-stat__text {
-    padding: var(--space-4) 0 0;
-    border-left: none;
-    border-top: 1px solid var(--color-border-info);
+    padding-top: var(--space-4);
   }
   /* Кружок и число остаются в строке: вдвоём они занимают 190px. */
   .z4-stat__chislo {
