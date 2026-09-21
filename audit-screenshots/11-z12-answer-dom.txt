@@ -1,0 +1,58 @@
+/zadaniya/12/linear/opornye-zadachi/k/ — 10 occurrences of \"answer\":\" in the served HTML (answers shipped to the client)
+
+== Occurrence 1 of \"answer\":\" in document.documentElement.outerHTML (±120 chars) ==
+\":\"Возьми две отмеченные точки и посчитай, на сколько клеток вверх приходится шаг вправо.\",\"answerType\":\"number\",\"answer\":\"1\",\"options\":null,\"steps\":[{\"number\":1,\"title\":\"Прямая возрастает или убывает?\",\"arrow\":\"up\",\"blocks\":[
+
+== Occurrence 2 of \"answer\":\" in document.documentElement.outerHTML (±120 chars) ==
+,\"hintHtml\":\"Посчитай клетки между отмеченными точками: сколько вверх на сколько вправо.\",\"answerType\":\"number\",\"answer\":\"2\",\"options\":null,\"steps\":[{\"number\":1,\"title\":\"Прямая возрастает или убывает?\",\"arrow\":\"up\",\"blocks\":[
+
+== Occurrence 3 of \"answer\":\" in document.documentElement.outerHTML (±120 chars) ==
+id\":\"P12-1-03\",\"no\":3,\"questionHtml\":\"$4e\",\"chartSvg\":\"$4f\",\"hintHtml\":\"$50\",\"answerType\":\"number\",\"answer\":\"3\",\"options\":null,\"steps\":[{\"number\":1,\"title\":\"Прямая возрастает или убывает?\",\"arrow\":\"up\",\"blocks\":[
+
+== Rendered text of the first task card (section.ptask) ==
+Коэффициент k
+
+0
+верных
+0
+неверных
+
+Задание 1 из 10
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+На рисунке изображён график линейной функции 
+𝑦
+=
+𝑘
+𝑥
++
+𝑏
+y=kx+b. Отмечены две точки с целыми координатами. Найдите 
+𝑘
+k.
+−1
+1
+−1
+1
+0
+x
+y
+y = f(x)
+
+Подсказка
+
+Возьми две отмеченные точки и посчитай, на сколько клеток вверх приходится шаг вправо.
+
+Ваш ответ:
+
+Проверить
+Пропустить задание
