@@ -55,13 +55,18 @@ export const VKLADKI_FIGURY: readonly RazdelTab[] = [
 
 /**
  * Вкладки подтемы задания №12. Раньше список лежал внутри TopicTabs.
+ *
+ * Хвостов у них нет: лента подтемы переключает содержимое на месте,
+ * а те две вкладки, у которых свой адрес есть (опорные задачи и
+ * тренажёр), получают его отдельным свойством — адрес зависит от
+ * подтемы, и здесь его не записать.
  */
 export const VKLADKI_PODTEMY: readonly RazdelTab[] = [
   { id: 'about', label: 'О задании', tail: '', icon: 'sheet' },
-  { id: 'theory', label: 'Теория', tail: 'teoriya/', icon: 'book' },
-  { id: 'prep', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
-  { id: 'trainer', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
-  { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
+  { id: 'theory', label: 'Теория', tail: '', icon: 'book' },
+  { id: 'prep', label: OPORNYE.title, tail: '', icon: 'target' },
+  { id: 'trainer', label: 'Тренажёр', tail: '', icon: 'dumbbell' },
+  { id: 'generator', label: 'Генератор', tail: '', icon: 'settings' },
 ];
 
 /**
