@@ -92,6 +92,13 @@ export interface FunctionType {
   /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
   methods?: boolean;
   /**
+   * Кольцо разделов считает честно: раздел засчитывается, когда
+   * ученик долистал до его конца, и запоминается в браузере
+   * (lib/theoryRead.ts). Не задано — кольцо показывает витринное
+   * число кабинета, как у линейной подтемы.
+   */
+  theoryProgress?: boolean;
+  /**
    * Материалы «Для репетиторов» подтемы. Не заданы — материалы
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
@@ -215,6 +222,7 @@ export const functionTypes: FunctionType[] = [
     head: QUADRATIC.head,
     about: QUADRATIC.about,
     methods: true,
+    theoryProgress: true,
     tutors: QUADRATIC.tutors,
   },
   {

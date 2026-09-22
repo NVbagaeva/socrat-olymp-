@@ -130,7 +130,12 @@ export function FunctionTopicPage({
         {/* Прогресс по разделам теории темы. Общее число — длина того же
             списка, из которого строится «Содержание»: второго источника
             у этой пары нет. */}
-        <TopicProgress total={subtopic.theory.length} />
+        {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
+            до конца которых ученик долистал; иначе витринное число. */}
+        <TopicProgress
+          total={subtopic.theory.length}
+          trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
+        />
       </header>
 
       <TopicTabs
@@ -138,6 +143,7 @@ export function FunctionTopicPage({
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
         theory={subtopic.theory}
         bodies={theoryBodies}
+        trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
         methods={subtopic.methods === true ? <MethodsTab /> : undefined}
         prep={
           prep ??

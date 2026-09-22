@@ -7,6 +7,7 @@ import { METODY } from '@/content/metody';
 import { OPORNYE } from '@/content/opornye';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
+import { markSectionRead } from '@/lib/theoryRead';
 import { TopicContents } from './TopicContents';
 import { TutorMenu } from './TutorMenu';
 
@@ -42,6 +43,13 @@ export interface TopicTabsProps {
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
+  /**
+   * Ключ подтемы в хранилище прочитанных разделов. Задан — раздел
+   * засчитывается прочитанным, когда ученик долистал до его конца,
+   * и кольцо в шапке считает по этим отметкам. Не задан — ничего не
+   * запоминается: так было и остаётся у линейной подтемы.
+   */
+  trackKey?: string;
   /**
    * Что открыто при заходе. По умолчанию «О задании». Значение
    * 'tutors' — это не вкладка: страница открывается на «О задании»
@@ -104,6 +112,7 @@ export function TopicTabs({
   tutorsEmpty,
   contentsDecor,
   bodies,
+  trackKey,
   initial = 'about',
   prepHref,
 }: TopicTabsProps) {
@@ -238,6 +247,57 @@ export function TopicTabs({
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
   }, [tab, theory]);
+
+  /* Прочитанные разделы. Раздел засчитывается, когда ученик долистал
+     до его конца: нижний край поднялся выше середины экрана. Считаем
+     сами при прокрутке, а не наблюдателем видимости: наблюдатель
+     сообщает только о смене состояния, и разделы, пролистанные
+     одним махом, он пропускает. Семь измерений на кадр прокрутки
+     дешевле, чем неверный счёт.
+
+     При открытии вкладки не считается ничего: пока ученик не тронул
+     страницу, прочитанных разделов у него нет. */
+  useEffect(() => {
+    if (tab !== 'theory' || trackKey === undefined) {
+      return undefined;
+    }
+    const key = trackKey;
+    const last = theory[theory.length - 1];
+    let waiting = false;
+
+    function scan() {
+      waiting = false;
+      const line = window.innerHeight / 2;
+      theory.forEach((item) => {
+        const node = document.getElementById(blockId(item.id));
+        if (node !== null && node.getBoundingClientRect().bottom <= line) {
+          markSectionRead(key, item.id);
+        }
+      });
+      /* Последний раздел кончается вместе со страницей, и выше
+         середины экрана его нижний край может не подняться. Низ
+         страницы засчитывает его отдельно. */
+      const seen = window.scrollY + window.innerHeight;
+      if (last !== undefined && seen >= document.documentElement.scrollHeight - 4) {
+        markSectionRead(key, last.id);
+      }
+    }
+
+    function onScroll() {
+      if (waiting) {
+        return;
+      }
+      waiting = true;
+      requestAnimationFrame(scan);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [tab, theory, trackKey]);
 
   return (
     <>

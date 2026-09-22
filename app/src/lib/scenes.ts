@@ -511,6 +511,7 @@ export type QuadraticTheorySceneId =
   | 'complete-square'
   | 'roots-form'
   | 'roots-vertex'
+  | 'two-roots'
   | 'no-roots'
   | 'physics'
   | 'inequality'
@@ -772,6 +773,21 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
         curves: [parabola(1, -8, 15)],
         points: [mark(3, 0), mark(5, 0), mark(4, -1, true)],
         shapes: [dashedSegment([4, -2], [4, 6]), note('x = 4', [4, 5.2], [28, 0])],
+      };
+
+    /* 6. Два корня уравнения f(x) = 3: симметричны относительно оси
+       параболы, до каждого от вершины ровно две клетки. */
+    case 'two-roots':
+      return {
+        ...theoryBase(windowOf(-1, 7, -2, 6)),
+        curves: [parabola(1, -8, 15), { type: 'line', k: 0, b: 3, color: 'lineB', label: 'y = 3' }],
+        points: [mark(2, 3, true, 'lineB'), mark(6, 3, true, 'lineB'), mark(4, -1)],
+        shapes: [
+          dashedSegment([4, -2], [4, 6]),
+          ...arrow([4, 3], [2.35, 3]),
+          ...arrow([4, 3], [5.65, 3]),
+          note('x = 4', [4, 5.2], [28, 0]),
+        ],
       };
 
     /* 6. Нулей нет: параболы целиком выше и целиком ниже оси Ox. */
