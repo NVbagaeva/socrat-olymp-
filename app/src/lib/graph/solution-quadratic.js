@@ -500,10 +500,10 @@ function secondLineBlocks(line, win, blocks) {
   var dx = frac(B.x - A.x);
   var dy = frac(B.y - A.y);
 
-  blocks.push(text('Это прямая. Запишем её как ' +
-    math('g(x) = kx + m', 'g(x) = kx + m') + ': буква ' + math('b', 'b') +
-    ' занята коэффициентом параболы, и свободный член прямой назовём ' +
-    math('m', 'm') + '.'));
+  blocks.push(text('Это прямая. Обычно её свободный член обозначают ' +
+    math('b', 'b') + ', но здесь эта буква уже занята коэффициентом параболы, ' +
+    'поэтому в этой задаче назовём его ' + math('m', 'm') + ': ' +
+    math('g(x) = kx + m', 'g(x) = kx + m') + '.'));
   blocks.push(text('Берём две точки прямой в узлах сетки: ' +
     math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
     math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
