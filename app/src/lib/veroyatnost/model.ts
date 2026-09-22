@@ -72,7 +72,11 @@ export const METODY: readonly MetodOpisanie[] = [
     nazvanie: 'Условная вероятность',
     formula: 'P = \\dfrac{m}{n}',
   },
-  { id: 'formula', nomer: 6, nazvanie: 'Формула', formula: 'P(A + B) = P(A) + P(B)' },
+  /* Формула — сложение несовместных событий: только для них. На экран
+     эта строка не идёт: вкладка «Ключевые методы» №5 берёт карточку из
+     metody5.ts, где рядом с формулой так и написано; отсюда берётся
+     лишь название для бейджа задачи. */
+  { id: 'formula', nomer: 6, nazvanie: 'Формула', formula: 'P(A \\cup B) = P(A) + P(B)' },
 ];
 
 /**

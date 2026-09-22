@@ -70,7 +70,7 @@ export const examples = [
       },
       {
         text: 'Короче — через противоположное событие:',
-        formula: 'P(A) = 1 - P(\\bar{A}) = 1 - 0{,}2 \\cdot 0{,}2 = 0{,}96',
+        formula: 'P(A) = 1 - P(\\bar A) = 1 - 0{,}2 \\cdot 0{,}2 = 0{,}96',
       },
     ],
     answer: '0,96',

@@ -54,7 +54,7 @@ const P05: Prototype = prototip({
     const { ok, vsego } = paryBezGrani(num(p, 'zapret'), num(p, 's'));
     return ok / vsego;
   },
-  /* Второй путь: по определению условной вероятности P(AB) : P(B),
+  /* Второй путь: по определению условной вероятности P(A \cap B) : P(B),
      обе вероятности — от всех 36 исходов. */
   perebor: (p) => {
     const zapret = num(p, 'zapret');
