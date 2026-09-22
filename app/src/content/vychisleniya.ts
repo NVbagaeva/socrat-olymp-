@@ -8,15 +8,12 @@
  */
 
 import { OPORNYE } from './opornye';
+import type { RazdelTab } from './vkladki';
 import { taskName } from './tasks';
 import type { TutorMaterial } from './sections';
 
-export interface VychisleniyaTab {
-  id: string;
-  label: string;
-  /** Часть адреса после /zadaniya/8/. Пусто — сам адрес раздела. */
-  tail: string;
-}
+/* Вкладка описывается общим типом: лента у всех заданий одна. */
+export type VychisleniyaTab = RazdelTab;
 
 export const VYCHISLENIYA = {
   no: '08',
@@ -25,11 +22,11 @@ export const VYCHISLENIYA = {
   lead: 'Пять групп прототипов: степени и корни, логарифмы, тригонометрия по четверти, тригонометрические преобразования и буквенные выражения. Числа в каждой задаче свои.',
   badge: 'Базовый уровень',
   tabs: [
-    { id: 'o-zadanii', label: 'О задании', tail: '' },
-    { id: 'teoriya', label: 'Теория', tail: 'teoriya/' },
-    { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail },
-    { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/' },
-    { id: 'generator', label: 'Генератор', tail: 'generator/' },
+    { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
+    { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
+    { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
+    { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+    { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
   ] as readonly VychisleniyaTab[],
   /** Вкладка «О задании»: короткое описание раздела и его групп. */
   about: {

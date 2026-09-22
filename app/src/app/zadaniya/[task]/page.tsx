@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { katex } from '@/lib/graph/katex';
 import { AppShell } from '@/components/layout/AppShell';
+import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { Chart } from '@/components/graph/Chart';
-import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
+import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { lineScene } from '@/lib/scenes';
@@ -75,22 +76,17 @@ export default async function SectionPage({ params }: { params: Params }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <Breadcrumbs
-          items={[
+        <ShapkaRazdela
+          crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${section.no}` },
           ]}
-        />
-
-        <header className="section-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">{section.title}</h1>
-              {section.badge !== undefined ? <Badge tone="info">{section.badge}</Badge> : null}
-            </div>
-            <p className="section-head__lead">{section.description}</p>
-            {entry !== undefined ? (
+          title={section.title}
+          {...(section.badge === undefined ? {} : { badge: section.badge })}
+          lead={section.description}
+          actions={
+            entry === undefined ? null : (
               <Link
                 className="btn btn--primary section-head__cta"
                 href={`/zadaniya/${section.slug}/${entry.id}`}
@@ -100,17 +96,18 @@ export default async function SectionPage({ params }: { params: Params }) {
                   <path d="M5 12h13M12 6l6 6-6 6" />
                 </svg>
               </Link>
-            ) : null}
-          </div>
-
-          <div className="section-head__media">
-            <Chart
-              className="section-head__chart"
-              scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
-            />
-            <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
-          </div>
-        </header>
+            )
+          }
+          media={
+            <>
+              <Chart
+                className="section-head__chart"
+                scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
+              />
+              <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
+            </>
+          }
+        />
 
         {/* useSearchParams требует границы ожидания: без неё статический
             экспорт отказывается собирать страницу. */}

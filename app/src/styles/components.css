@@ -2184,6 +2184,223 @@ a.task-card {
   }
 }
 
+/* ── Лента вкладок раздела ────────────────────────────────────
+   Вид по макету design-reference/mockups/zadanie-04/
+   shapka-i-vkladki-1440.jpeg: голубая плашка со скруглением и тонкой
+   обводкой, активная вкладка внутри неё — залитая синяя кнопка.
+
+   Плашка — обёртка .topic-tabs, а не сам набор вкладок: в ней рядом
+   с вкладками стоит кнопка материалов для репетитора, и подложка
+   должна быть общей. Набор .tabs--lenta внутри — только строка. */
+
+.topic-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-info);
+  /* Скругление на половину высоты: у ленты и у активной вкладки
+     концы полукруглые, как на макете. */
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  /* Тот же мягкий ореол, что у статистической карточки: лента
+     отделяется от фона страницы, а не сливается с ним. */
+  box-shadow: var(--glow-accent);
+  /* Вкладки не переносятся и не сжимаются: когда они перестают
+     помещаться, лента прокручивается вбок. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.topic-tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs--lenta {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+  border: 0;
+}
+.tabs--lenta button,
+.tabs--lenta a[role='tab'],
+.topic-tabs__more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  margin-bottom: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  /* Цвет вкладки — синий: отсюда значок берёт его через currentColor.
+     Подпись перекрашивается в тёмный правилом ниже, поэтому отдельно
+     значок не красится нигде. */
+  color: var(--color-primary);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.tabs--lenta button:hover,
+.tabs--lenta a[role='tab']:hover,
+.topic-tabs__more:hover {
+  background: var(--color-surface);
+}
+/* Активная вкладка: градиент сверху вниз, тонкий блик по верхней
+   кромке внутренней тенью и мягкое свечение под кнопкой. Плоская
+   заливка рядом с объёмной подложкой выглядела наклейкой. */
+.tabs--lenta button[aria-selected='true'],
+.tabs--lenta a[role='tab'][aria-selected='true'] {
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow:
+    inset 0 1px 0 var(--color-tab-sheen),
+    var(--glow-tab);
+}
+/* Значок цвета не имеет: берёт его у вкладки через currentColor.
+   Поэтому на активной он белый, на остальных синий, и правило
+   одно на все значки ленты. */
+.tabs--lenta .tabs__ico,
+.topic-tabs__more .tabs__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  /* Поле значка больше самого рисунка: на активной вкладке оно
+     становится светлой плашкой, и от этого ничего не съезжает. */
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-md);
+}
+.tabs--lenta .tabs__ico svg,
+.topic-tabs__more .tabs__ico svg {
+  width: 20px;
+  height: 20px;
+}
+.tabs--lenta button[aria-selected='true'] .tabs__ico,
+.tabs--lenta a[role='tab'][aria-selected='true'] .tabs__ico {
+  background: var(--color-tab-plate);
+}
+/* Подпись тёмная, пока вкладка не активна и на неё не наводят;
+   в обоих этих случаях она принимает цвет вкладки — белый
+   на заливке, синий под курсором. */
+.tabs--lenta .tabs__text,
+.topic-tabs__more .tabs__text {
+  color: var(--color-text-secondary);
+}
+.tabs--lenta button:hover .tabs__text,
+.tabs--lenta a[role='tab']:hover .tabs__text,
+.topic-tabs__more:hover .tabs__text,
+.tabs--lenta button[aria-selected='true'] .tabs__text,
+.tabs--lenta a[role='tab'][aria-selected='true'] .tabs__text {
+  color: inherit;
+}
+/* Подпись переносится по словам там, где в строку не влезает
+   («Ключевые методы решения»), и не сокращается. */
+/* Мера подписи: длинные названия («Ключевые методы решения»,
+   «Для репетиторов») переносятся на вторую строку и не сокращаются —
+   иначе лента перестаёт помещаться и уезжает вбок на широком экране.
+   Короткие подписи меру не замечают. */
+.tabs--lenta .tabs__text,
+.topic-tabs__more .tabs__text {
+  max-width: 16ch;
+  text-align: left;
+  /* Без выравнивания строк по длине: оно разбивало «Ключевые методы
+     решения» на три ровные строчки вместо двух и растило ленту. */
+  text-wrap: wrap;
+}
+/* Ниже 1440 места под ленту меньше — на этом ярусе подписи
+   переносятся охотнее. Мера меняется только здесь: на широком
+   экране лента остаётся просторной, как на макете. */
+@media (max-width: 1439.98px) {
+  /* Мера подписи здесь та же: подпись всё равно не должна разъезжаться
+     больше чем на две строки. Место выигрывается кеглем, значком
+     и полями — у таблеток свои поля, и без просветов они не слипаются. */
+  .tabs--lenta button,
+  .tabs--lenta a[role='tab'],
+  .topic-tabs__more {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
+  }
+  .topic-tabs,
+  .tabs--lenta {
+    gap: 0;
+  }
+  .tabs--lenta .tabs__ico,
+  .topic-tabs__more .tabs__ico {
+    width: 22px;
+    height: 22px;
+  }
+  .tabs--lenta .tabs__ico svg,
+  .topic-tabs__more .tabs__ico svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Материалы для репетитора отделены чертой: на макете это не вкладка
+   раздела, а выход к печатным файлам. Черта — на отдельном элементе,
+   иначе она прилипала бы к рамке кнопки при наведении. */
+.topic-tabs__more {
+  position: relative;
+  margin-left: var(--space-3);
+}
+.topic-tabs__more::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-3) * -1 - 1px);
+  top: var(--space-2);
+  bottom: var(--space-2);
+  width: 1px;
+  background: var(--color-border-strong);
+}
+
+/* ── Заголовок вкладки ────────────────────────────────────────
+   Под лентой у каждой вкладки свой заголовок. По макету он с синей
+   отбивкой слева — она показывает, что это заголовок содержимого
+   вкладки, а не раздела. Правило перечисляет классы всех таких
+   заголовков: своего общего класса у них пока нет, а вид должен быть
+   один во всех разделах. */
+
+.vtab__title,
+.vmetody__title,
+.z4-about__title,
+.z8-about__title,
+.prep__title,
+.trainer__title,
+.cfg__title {
+  position: relative;
+}
+.vtab__title::before,
+.vmetody__title::before,
+.z4-about__title::before,
+.z8-about__title::before,
+.prep__title::before,
+.trainer__title::before,
+.cfg__title::before {
+  content: '';
+  position: absolute;
+  /* Отбивка висит слева от колонки текста, в поле страницы, а сам
+     заголовок стоит там же, где стоял: по макету он выровнен с
+     крошками и с текстом под собой, а не сдвинут вправо. Отступом
+     внутрь это не сделать — отступ съедает ширину строки, и на
+     телефоне «Собери свой вариант» переносилось на вторую строку. */
+  left: calc(var(--space-4) * -1);
+  /* Отбивка чуть короче строки: она держится за кегль букв,
+     а не за высоту строки с её просветами. */
+  top: 0.14em;
+  bottom: 0.14em;
+  width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+}
+
 /* ── Чип ─────────────────────────────────────────────────────
    Кнопка-пилюля: навык в подготовительных задачах №12 и тип
    задания в тренажёре №3. Общий слой, потому что нужен обоим:

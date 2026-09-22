@@ -1,8 +1,10 @@
+import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
-import { Badge, Breadcrumbs } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
-import { VeroyatnostTabs } from './VeroyatnostTabs';
+import { TUTORS_TAIL } from '@/content/vkladki';
+import { ShapkaRazdela } from '../ShapkaRazdela';
+import { RazdelTabs } from '../RazdelTabs';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -24,30 +26,42 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
   return (
     <AppShell active="tasks">
       <main className="app-main veroyatnost-main">
-        <Breadcrumbs
-          items={[
+        {/* В заголовке стоит название темы, а номер задания — в
+            крошках: страница задания здесь и есть страница темы,
+            промежуточного выбора раздела, как в №3, у неё нет. */}
+        <ShapkaRazdela
+          className="veroyatnost-head"
+          crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(section.no)}` },
           ]}
+          title={section.title}
+          badge={section.badge}
+          lead={section.lead}
+          {...(section.art === undefined
+            ? {}
+            : {
+                media: (
+                  /* Картинка — декор: alt пустой, ничего сверх заголовка
+                     она не сообщает. Размеры стоят настоящие, чтобы место
+                     под неё держалось до загрузки и шапка не прыгала. */
+                  <Image
+                    className="veroyatnost-art"
+                    src={section.art.src}
+                    alt=""
+                    width={section.art.width}
+                    height={section.art.height}
+                    priority
+                  />
+                ),
+              })}
         />
 
-        {/* В заголовке стоит название темы, а номер задания — в
-            крошках: страница задания здесь и есть страница темы,
-            промежуточного выбора раздела, как в №3, у неё нет. */}
-        <header className="section-head veroyatnost-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">{section.title}</h1>
-              <Badge tone="info">{section.badge}</Badge>
-            </div>
-            <p className="section-head__lead">{section.lead}</p>
-          </div>
-        </header>
-
-        <VeroyatnostTabs
+        <RazdelTabs
           base={base}
           tabs={section.tabs}
+          tutorsTail={TUTORS_TAIL}
           {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
         />
 

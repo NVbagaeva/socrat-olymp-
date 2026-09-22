@@ -8,6 +8,12 @@ import type { KeyboardEvent, ReactNode } from 'react';
 export interface TabItem {
   id: string;
   label: ReactNode;
+  /**
+   * Значок перед подписью. Не задан — вкладка остаётся текстовой,
+   * как была: поле добавлено для лент разделов и другие наборы
+   * вкладок его не заполняют.
+   */
+  icon?: ReactNode;
   disabled?: boolean;
   /**
    * Адрес вкладки. Задан — вкладка становится ссылкой: её можно
@@ -80,10 +86,24 @@ export function Tabs({ items, value, defaultValue, onValueChange, label, classNa
         /* Вкладка с адресом — ссылка: переход настоящий, поэтому
            работают «назад», «открыть в новой вкладке» и копирование
            адреса. Вид и обход стрелками у неё те же. */
+        /* Значок и подпись — отдельными span: по ним CSS красит
+           значок и разводит подпись на две строки, не трогая сам
+           набор вкладок. */
+        const inside = (
+          <>
+            {item.icon === undefined ? null : (
+              <span className="tabs__ico" aria-hidden="true">
+                {item.icon}
+              </span>
+            )}
+            <span className="tabs__text">{item.label}</span>
+          </>
+        );
+
         if (item.href !== undefined && !item.disabled) {
           return (
             <Link key={item.id} href={item.href} {...common}>
-              {item.label}
+              {inside}
             </Link>
           );
         }
@@ -96,7 +116,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, label, classNa
             {...common}
             onClick={() => select(item.id)}
           >
-            {item.label}
+            {inside}
           </button>
         );
       })}

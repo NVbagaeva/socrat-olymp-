@@ -3,7 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { OPORNYE } from '@/content/opornye';
+import { VKLADKI_PODTEMY } from '@/content/vkladki';
+import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { TopicContents } from './TopicContents';
@@ -63,13 +64,14 @@ function motion(): ScrollBehavior {
    наполовину выцветшей, поэтому подводим её с этим отступом. */
 const TABS_FADE = 32;
 
-const TABS = [
-  { id: 'about', label: 'О задании' },
-  { id: 'theory', label: 'Теория' },
-  { id: 'prep', label: OPORNYE.title },
-  { id: 'trainer', label: 'Тренажёр' },
-  { id: 'generator', label: 'Генератор' },
-];
+/* Список вкладок лежит в конфиге, как у остальных разделов. Хвост
+   адреса здесь не используется: у «О задании», «Теории» и «Генератора»
+   своих адресов нет, вкладка переключает содержимое на месте. */
+const TABS = VKLADKI_PODTEMY.map((tab) => ({
+  id: tab.id,
+  label: tab.label,
+  ...(tab.icon === undefined ? {} : { icon: <VkladkaIkonka name={tab.icon} /> }),
+}));
 
 /**
  * Вкладки страницы темы и содержание к ним.
@@ -235,7 +237,13 @@ export function TopicTabs({
         onOpenChange={setMenu}
         stripRef={strip}
       >
-        <Tabs items={tabs} value={tab} onValueChange={choose} label="Разделы темы" />
+        <Tabs
+          className="tabs--lenta"
+          items={tabs}
+          value={tab}
+          onValueChange={choose}
+          label="Разделы темы"
+        />
       </TutorMenu>
 
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
