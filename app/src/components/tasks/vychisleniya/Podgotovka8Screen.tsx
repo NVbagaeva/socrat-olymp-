@@ -10,6 +10,7 @@ import { scrollTabTo } from '@/lib/tabScroll';
 import { prepMicroById } from '@/lib/vychisleniya/prep/blocks';
 import { sealPrep, type PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import { prep8IsSolved, prep8MarkSolved, usePrep8Progress } from '@/lib/vychisleniya/progress';
+import { recordPrep8 } from '@/lib/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/vychisleniya/secret';
 import { randomSeed } from '@/lib/vychisleniya/session';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
@@ -87,6 +88,16 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
     const correct = task.answerType === 'choice' ? choiceMatches(value, task.seal) : answerMatches(value, task.seal);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
+    /* Единый журнал прогресса: пишется рядом со старым хранилищем,
+       его не заменяя (см. отчёт этапа 1). */
+    recordPrep8({
+      skillId: blockId,
+      taskId: task.id,
+      verdict: correct ? 'correct' : 'incorrect',
+      hintUsed: solution !== null,
+      firstTry: attempts[base.no] === undefined,
+      seed: task.seed,
+    });
     if (correct) {
       prep8MarkSolved(blockId, base.no);
     } else {
@@ -95,6 +106,14 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
   }
 
   function skip() {
+    recordPrep8({
+      skillId: blockId,
+      taskId: task.id,
+      verdict: 'skipped',
+      hintUsed: solution !== null,
+      firstTry: attempts[base.no] === undefined,
+      seed: task.seed,
+    });
     setAttempts((prev) => ({ ...prev, [base.no]: 'skipped' }));
     if (nextOpen !== null) {
       open(nextOpen);

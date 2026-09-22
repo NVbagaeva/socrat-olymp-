@@ -16,9 +16,10 @@
  * lib/trainerProgress.ts своим ключом. Набросок убран.
  */
 
-import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { demoStudied } from '@/data/demo';
 import { persistent } from '@/lib/storage';
+import { migrateLegacyProgress } from '@/lib/progress';
 
 /** То, что переживает перезагрузку страницы. */
 interface Persisted {
@@ -53,6 +54,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     () => (typeof stored.studied === 'number' ? { studied: stored.studied } : INITIAL),
     [stored],
   );
+
+  /* Разовый перенос старых ключей прогресса в новый журнал — только
+     в браузере, только один раз на устройство (store сам это помнит).
+     Здесь, а не в каждом экране: провайдер и так один на весь сайт. */
+  useEffect(() => {
+    migrateLegacyProgress();
+  }, []);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

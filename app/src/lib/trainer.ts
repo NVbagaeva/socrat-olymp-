@@ -23,6 +23,8 @@ export interface TrainerTask {
   id: string;
   /** Набор движка, из которого пришло задание. */
   kind: string;
+  /** Семя, на котором собран набор: по нему задание воспроизводимо. */
+  seed: string;
   questionHtml: string;
   chartSvg: string | null;
   answer: string;
@@ -683,6 +685,7 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
   return {
     id: task.id,
     kind: task.meta.set,
+    seed: task.meta.seed,
     questionHtml: typeset(task.questionHtml),
     chartSvg: task.svg,
     answer: task.answer,

@@ -9,6 +9,7 @@ import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
 import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import type { ProgressStore } from '@/lib/progressStore';
+import { recordTrainerVeroyatnost } from '@/lib/progress';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import { klyuchZadachi, openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
@@ -141,12 +142,17 @@ export function Sessiya({
       return;
     }
     zakryto.current = id;
-    store.recordAttempt({
-      kind: metod,
+    const elapsed = (vremya - nachalo.current) / 1000;
+    store.recordAttempt({ kind: metod, taskId: id, right, clean, seconds: elapsed });
+    /* Единый журнал прогресса: пишется рядом, старую запись не
+       заменяет (см. отчёт этапа 1). */
+    recordTrainerVeroyatnost(zadanie, {
+      skillId: metod,
       taskId: id,
-      right,
-      clean,
-      seconds: (vremya - nachalo.current) / 1000,
+      verdict: right ? 'correct' : 'incorrect',
+      hintUsed: !right,
+      firstTry: clean,
+      seconds: elapsed,
     });
     otmetit(right ? 'right' : 'hinted', metod);
     tik(vremya);
@@ -176,12 +182,19 @@ export function Sessiya({
     const right = sealMetod(metod) === variant.metodSeal;
     const priznaki = JSON.parse(openText(variant.hints, variant.metodSeal)) as string[];
     setItog({ vybor: metod, verny, priznaki });
-    uznayStore.recordAttempt({
-      kind: verny,
+    const elapsed = (vremya - nachalo.current) / 1000;
+    uznayStore.recordAttempt({ kind: verny, taskId: id, right, clean: right, seconds: elapsed });
+    /* Единый журнал прогресса: пишется рядом, старую запись не
+       заменяет (см. отчёт этапа 1). Навык — верный метод (verny), не
+       выбор ученика: так же, как в старой записи выше. Подсказки
+       в этом режиме нет — один клик, ответ сразу финальный. */
+    recordTrainerVeroyatnost(zadanie, {
+      skillId: verny,
       taskId: id,
-      right,
-      clean: right,
-      seconds: (vremya - nachalo.current) / 1000,
+      verdict: right ? 'correct' : 'incorrect',
+      hintUsed: false,
+      firstTry: true,
+      seconds: elapsed,
     });
     if (!right) {
       setMisses((n) => n + 1);

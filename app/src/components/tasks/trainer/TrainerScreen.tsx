@@ -7,6 +7,7 @@ import { sameNumber } from '@/lib/answer';
 import type { TrainerStep, TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
+import { recordTrainer12 } from '@/lib/progress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from './TrainerResult';
@@ -120,6 +121,18 @@ export function TrainerScreen({
      оттуда и обновляются сразу, без перезагрузки. */
   function remember(item: TrainerTask, right: boolean, clean: boolean) {
     recordAttempt({ kind: item.kind, taskId: item.id, right, clean, seconds: taskSeconds() });
+    /* Единый журнал прогресса: пишется рядом, старую запись не
+       заменяет (см. отчёт этапа 1). `right` в старой записи означает
+       «не через подсказку», `clean` — «без единой ошибки на пути». */
+    recordTrainer12({
+      skillId: item.kind,
+      taskId: item.id,
+      verdict: 'correct',
+      hintUsed: !right,
+      firstTry: clean,
+      seconds: taskSeconds(),
+      seed: item.seed,
+    });
   }
 
   function stopClock() {

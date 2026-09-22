@@ -9,6 +9,7 @@ import { scrollTabTo } from '@/lib/tabScroll';
 import { METODY } from '@/lib/veroyatnost/model';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { TaskOutcome } from '@/lib/progressStore';
+import { recordPrepVeroyatnost } from '@/lib/progress';
 import { prepItog, prepReshena, prepStore } from '@/lib/veroyatnost/prepProgress';
 import { klyuchZadachi } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
@@ -84,6 +85,16 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
      на скорость. */
   function zapisat(right: boolean, clean: boolean, itog: TaskOutcome): void {
     store.recordAttempt({ kind: zadacha.id, taskId: zadacha.id, right, clean, seconds: 0, itog });
+    /* Единый журнал прогресса: пишется рядом, старую запись не
+       заменяет (см. отчёт этапа 1). Навык — блок конспекта: это то,
+       что ученик видит заголовком экрана, а не отдельная задача. */
+    recordPrepVeroyatnost(zadanie, {
+      skillId: blok.id,
+      taskId: zadacha.id,
+      verdict: right ? 'correct' : 'incorrect',
+      hintUsed: itog === 'revealed',
+      firstTry: clean,
+    });
   }
 
   function otvet(right: boolean): void {

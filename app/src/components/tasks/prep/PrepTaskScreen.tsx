@@ -8,6 +8,7 @@ import type { PrepTask, PrepZakrytoe } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
 import { answerMatches, choiceMatches, openText } from '@/lib/prepSecret';
+import { recordPrep12 } from '@/lib/progress';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
@@ -154,6 +155,18 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
        решённой, а экран должен остаться на ней с разбором и плашкой. */
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
+    /* Единый журнал прогресса: пишется рядом со старым хранилищем,
+       его не заменяя — см. отчёт этапа 1 про временную двойную
+       запись. «С первой проверки» и «без подсказки» читаются из
+       того же состояния экрана, что уже здесь есть. */
+    const firstTry = attempts[task.no] === undefined;
+    recordPrep12({
+      skillId,
+      taskId: task.id,
+      verdict: correct ? 'correct' : 'incorrect',
+      hintUsed: solution,
+      firstTry,
+    });
     if (correct) {
       /* Запись в хранилище: отсюда же перерисуются счётчик вкладки
          и полоса на карточке навыка. Повторное решение той же задачи
@@ -165,6 +178,13 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   }
 
   function skip() {
+    recordPrep12({
+      skillId,
+      taskId: task.id,
+      verdict: 'skipped',
+      hintUsed: solution,
+      firstTry: attempts[task.no] === undefined,
+    });
     remember('skipped');
     if (nextOpen !== null) {
       open(nextOpen);
