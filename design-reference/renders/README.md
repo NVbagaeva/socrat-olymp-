@@ -15,6 +15,7 @@
 | `caesar-icon-source.png` | Упрощённый бюст Цезаря | Иконки, аватары от 96px |
 | `wife-icon-source.png` | Упрощённый женский бюст | Иконки, аватары от 96px |
 | `nata-portrait-source.png` | Портрет, студийная обработка | Блок «Кто за этим стоит» |
+| `eyler-portret-source.png` | Портрет Эйлера с книгами, PNG 1583×993 с альфой | Теория №4, блок «Как изображать события»: `public/images/zadanie-04/eyler-portret.webp`, 1200px, q85 |
 
 ## Как готовились файлы в `public/`
 

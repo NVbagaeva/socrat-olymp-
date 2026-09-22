@@ -377,9 +377,12 @@ export const IZOBRAZHENIE = {
   /* Блок про Эйлера. */
   eyler: {
     portret: {
-      src: '/images/zadanie-04/eyler-portret.png',
-      width: 1583,
-      height: 993,
+      /* WebP 1200px, 158 КБ вместо PNG 1583px на 1,86 МБ: портрет стоит
+         в колонке уже 600px, и разница на экране не видна. Оригинал —
+         design-reference/renders/eyler-portret-source.png. */
+      src: '/images/zadanie-04/eyler-portret.webp',
+      width: 1200,
+      height: 753,
       alt: 'Леонард Эйлер на фоне гор, рядом стопка книг и «Энеида» Вергилия',
       /** Нет файла — пустое место в пунктирной рамке. */
       pusto: { title: 'Иллюстрация готовится', description: 'Портрета пока нет.' },
