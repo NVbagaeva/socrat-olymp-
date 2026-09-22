@@ -16,13 +16,30 @@ import block4 from './prep/12/block-4.json';
 import block5 from './prep/12/block-5.json';
 import block6 from './prep/12/block-6.json';
 
+/* Подтема «Квадратичная функция»: девять навыков, P12Q-1 … P12Q-9. */
+import quad1 from './prep/12q/skill-1.json';
+import quad2 from './prep/12q/skill-2.json';
+import quad3 from './prep/12q/skill-3.json';
+import quad4 from './prep/12q/skill-4.json';
+import quad5 from './prep/12q/skill-5.json';
+import quad6 from './prep/12q/skill-6.json';
+import quad7 from './prep/12q/skill-7.json';
+import quad8 from './prep/12q/skill-8.json';
+import quad9 from './prep/12q/skill-9.json';
+
 import protoA from './prototypes/12/12-A.json';
 import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
 import protoD from './prototypes/12/12-D.json';
 
-/** Подготовка: собственный материал платформы, в покрытие банка не входит. */
-export const prep = [block1, block2, block3, block4, block5, block6];
+/** Подготовка: собственный материал платформы, в покрытие банка не входит.
+    Сначала наборы линейной подтемы, потом квадратичной: порядок в этом
+    списке задаёт порядок записей в answers.json, и линейные записи от
+    появления новой подтемы не сдвигаются. */
+export const prep = [
+  block1, block2, block3, block4, block5, block6,
+  quad1, quad2, quad3, quad4, quad5, quad6, quad7, quad8, quad9,
+];
 
 /** Прототипы ФИПИ: только это число считается покрытием банка. */
 export const prototypes = [protoA, protoB, protoC, protoD];

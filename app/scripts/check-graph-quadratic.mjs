@@ -4,8 +4,8 @@
 
    Запуск: pnpm test:graph-quadratic [--svg папка] [--seeds N]
 
-   Наборы берутся из scripts/lib/quadratic-sets.mjs: там только
-   ограничения задач, без текстов. Проверяется, что каждый набор
+   Наборы берутся из данных движка (data/prep/12q/): те же файлы,
+   по которым собираются экраны. Проверяется, что каждый набор
    собирается на своём seed без единого «нет вариантов», что каждая
    задача проходит правила читаемости и состава, что все ответы —
    целые или конечные десятичные, и что наборы собираются на серии
@@ -17,8 +17,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { fileURLToPath } from 'node:url';
+
 import generator from '../src/lib/graph/generate.js';
-import { QUADRATIC_SETS } from './lib/quadratic-sets.mjs';
 import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkQuadraticComposition, checkQuadraticTask,
          hiddenVariantCounts, intersectionAudit } from './lib/graph-quadratic-checks.mjs';
 
@@ -33,6 +34,20 @@ const seedRuns = args.includes('--seeds') ? Number(args[args.indexOf('--seeds') 
    не бывает. */
 const SEED_SHARE = 0.9;
 
+/* Наборы подтемы — из данных движка: второго источника ограничений
+   у них нет. Файлы читаются с диска, а не импортом data/index.js:
+   импорт JSON в Node требует своих оговорок, а здесь достаточно
+   прочитать папку. */
+const DATA = path.join(path.dirname(fileURLToPath(import.meta.url)),
+  '..', 'src', 'lib', 'graph', 'data', 'prep', '12q');
+const QUADRATIC_SETS = fs.readdirSync(DATA)
+  .filter((name) => name.endsWith('.json'))
+  .sort()
+  .map((name) => JSON.parse(fs.readFileSync(path.join(DATA, name), 'utf8')));
+if (QUADRATIC_SETS.length === 0) {
+  console.error('В данных нет наборов подтемы «Квадратичная функция»');
+  process.exit(1);
+}
 generator.setSets({ prep: QUADRATIC_SETS, prototypes: [] });
 
 const errors = [];

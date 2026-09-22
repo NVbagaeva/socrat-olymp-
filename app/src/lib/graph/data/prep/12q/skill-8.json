@@ -1,0 +1,327 @@
+{
+  "kind": "prep",
+  "id": "P12Q-8",
+  "block": 8,
+  "title": "Парабола и прямая",
+  "subtitle": "Найти вторую точку пересечения графиков",
+  "seed": 12108,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueVertices": true,
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "minUp": 4,
+    "minDown": 4,
+    "uniqueVertices": true,
+    "uniqueAnswers": true,
+    "visibleBoth": 0,
+    "visibleOne": 10,
+    "hiddenOffscreen": 6,
+    "hiddenFraction": 4
+  },
+  "tasks": [
+    {
+      "id": "P12Q-8-01",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Запиши обе формулы по чертежу и реши уравнение $f(x) = g(x)$. Один корень — абсцисса отмеченной точки, в ответ идёт второй.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-8-02",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "hint": "Собери формулы параболы и прямой, приравняй их. Из двух корней возьми тот, которого нет на чертеже, и посчитай его ординату.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "y",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "down",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-8-03",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Вторая точка не в узле сетки — с чертежа её не снять. Решай уравнение $f(x) = g(x)$.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка не в узле сетки",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false,
+          "hidden": "fraction"
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-8-04",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "hint": "Прямую задают две её точки в узлах сетки: по ним находится наклон и свободный член.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "y",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "down",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-8-05",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Сумма корней приведённого уравнения равна $-\\dfrac{B}{A}$: зная один корень, второй находится вычитанием.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "up",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-8-06",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "hint": "Ордината второй точки считается подстановкой её абсциссы в формулу прямой — там одно умножение.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка не в узле сетки",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "y",
+          "marks": "visible",
+          "labels": false,
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "absA": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "P12Q-8-07",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Сначала парабола: вершина и шаг от неё дают $a$, точка на оси $Oy$ даёт $c$. Потом прямая.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": 1
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-8-08",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "hint": "Не пытайся дочитать вторую точку по клеткам: её координаты нецелые, ответ получается только из уравнения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка не в узле сетки",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "y",
+          "marks": "visible",
+          "labels": false,
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-8-09",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Приравняй формулы, перенеси всё в одну сторону и реши квадратное уравнение. Проверка: один из корней совпадёт с отмеченной точкой.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка за рамкой чертежа",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "direction": "down"
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "P12Q-8-10",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "hint": "Найдя второй корень, подставь его в ту формулу, которая проще, — в прямую.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "вторая точка не в узле сетки",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "line": {
+          "direction": "up"
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "axis": "x",
+          "marks": "visible",
+          "labels": false,
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "absA": 2
+      }
+    }
+  ]
+}

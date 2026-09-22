@@ -830,7 +830,9 @@ function readSets(dir) {
 
 /* Скрипту наборы нужно передать движку до первой генерации. */
 function loadAll() {
-  var prep = readSets('prep/12');
+  /* Наборы обеих подтем: прямой из prep/12, параболы из prep/12q.
+     Проверки каждая выбирает по семейству набора. */
+  var prep = readSets('prep/12').concat(readSets('prep/12q'));
   var prototypes = readSets('prototypes/12');
   generator.setSets({
     prep: prep.map(function (item) { return item.data; }),
