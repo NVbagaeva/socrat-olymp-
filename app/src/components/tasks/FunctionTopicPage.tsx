@@ -144,7 +144,9 @@ export function FunctionTopicPage({
         theory={subtopic.theory}
         bodies={theoryBodies}
         trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
-        methods={subtopic.methods === true ? <MethodsTab /> : undefined}
+        methods={
+          subtopic.methods === true ? <MethodsTab type={subtopic.id} base={base} /> : undefined
+        }
         prep={
           prep ??
           (hasPrep ? (
