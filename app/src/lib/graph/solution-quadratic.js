@@ -463,17 +463,20 @@ function stepFormula(p, second, interceptFound, win, points) {
   var blocks = [];
 
   if (!interceptFound) {
-    blocks.push(text('Вернёмся к ' + math('c', 'c') +
-      '. Раскроем запись через вершину — свободный член и будет ' + math('c', 'c') + ':'));
-    blocks.push(formula('c = a \\cdot ' + texBracket(p.m) + '^2 + ' + texBracket(p.n) +
-      ' = ' + tex(p.c)));
+    blocks.push(text('Вернёмся к ' + math('c', 'c') + '. Это значение функции при ' +
+      math('x = 0', 'x = 0') + ', а формулу через вершину мы уже знаем — подставим в неё ноль:'));
+    blocks.push(formula('c = f(0) = a(0 - m)^2 + n'));
+    blocks.push(formula('c = ' + coefDot(p.a) + '(0 - ' + texBracket(p.m) + ')^2' +
+      term(p.n) + ' = ' + tex(p.c)));
   }
 
   blocks.push(text('Собираем всё вместе:'));
   blocks.push(formula(equationTex(p, second === null ? 'y' : 'f(x)')));
 
   if (second !== null) {
-    blocks.push(text('Теперь вторая линия на чертеже. Читаем её теми же действиями.'));
+    blocks.push(text('Теперь вторая линия на чертеже. Читаем её теми же действиями, ' +
+      'но помним: у неё свои коэффициенты, и с коэффициентами первой кривой ' +
+      'их путать нельзя.'));
     if (second.kind === 'line') {
       secondLineBlocks(second.line, win, blocks);
     } else {
@@ -497,22 +500,28 @@ function secondLineBlocks(line, win, blocks) {
   var dx = frac(B.x - A.x);
   var dy = frac(B.y - A.y);
 
-  blocks.push(text('Это прямая ' + math('y = kx + b', 'y = kx + b') +
-    '. Берём две её точки в узлах сетки: ' +
+  blocks.push(text('Это прямая. Запишем её как ' +
+    math('g(x) = kx + m', 'g(x) = kx + m') + ': буква ' + math('b', 'b') +
+    ' занята коэффициентом параболы, и свободный член прямой назовём ' +
+    math('m', 'm') + '.'));
+  blocks.push(text('Берём две точки прямой в узлах сетки: ' +
     math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
     math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
   blocks.push(text('Наклон — это отношение сдвига по вертикали к сдвигу по горизонтали:'));
   blocks.push(formula('k = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)));
   blocks.push(text('Свободный член находим подстановкой одной из этих точек:'));
-  blocks.push(formula(tex(frac(A.y)) + ' = ' + coefDot(line.k) + texBracket(frac(A.x)) + ' + b'));
-  blocks.push(formula('b = ' + tex(line.b)));
+  blocks.push(formula(tex(frac(A.y)) + ' = ' + coefDot(line.k) + texBracket(frac(A.x)) + ' + m'));
+  blocks.push(formula('m = ' + tex(line.b)));
   blocks.push(formula(lineTex(line, 'g(x)')));
 }
 
 /* Вторая парабола: вершина с чертежа, a шагом от неё, запись через
    вершину и раскрытие скобок. */
 function secondParabolaBlocks(q, win, points, blocks) {
-  blocks.push(text('Это вторая парабола. Её вершина отмечена: ' +
+  blocks.push(text('Это вторая парабола. Её коэффициенты обозначим своими буквами: ' +
+    math('g(x) = a_2(x - m_2)^2 + n_2', 'g(x) = a₂(x − m₂)² + n₂') +
+    ' — с коэффициентами первой параболы их не путаем.'));
+  blocks.push(text('Вершина второй параболы отмечена: ' +
     keyMath(pointTex(q.m, q.n), pointText(q.m, q.n)) + '.'));
 
   var node = gridNode(q, win, points);
@@ -521,8 +530,9 @@ function secondParabolaBlocks(q, win, points, blocks) {
     var dy = sub(frac(node.y), q.n);
     blocks.push(text('От вершины до узла сетки ' +
       math(pointTex(frac(node.x), frac(node.y)), pointText(frac(node.x), frac(node.y))) +
-      ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) + '.'));
-    blocks.push(formula('a = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(q.a)));
+      ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) +
+      '. Старший коэффициент второй параболы:'));
+    blocks.push(formula('a_2 = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(q.a)));
   }
 
   var vertexForm = vertexFormTex(q);
@@ -666,8 +676,18 @@ function stepIntersectionAnswer(p, options, blocks) {
   blocks.push(text('Один корень мы знаем: это абсцисса отмеченной точки ' +
     keyMath(pointTex(Q.toExact(shown.x), Q.toExact(shown.y)),
       pointText(Q.toExact(shown.x), Q.toExact(shown.y))) + '.'));
-  blocks.push(text('Сумма корней квадратного уравнения равна ' +
-    math('-\\dfrac{B}{A}', '−B/A') + ', поэтому второй корень находится вычитанием:'));
+  /* Приведённое уравнение — отдельный случай: там сумма корней равна
+     просто −B, и лишняя дробь ученику ни к чему. */
+  var reduced = isInt(A) && A.p === 1;
+  blocks.push(text('Для уравнения ' + math('Ax^2 + Bx + C = 0', 'Ax² + Bx + C = 0') +
+    ' сумма корней равна ' + math('-\\dfrac{B}{A}', '−B/A') +
+    ' — это теорема Виета.' +
+    (reduced ? ' Здесь ' + math('A = 1', 'A = 1') + ', поэтому сумма корней равна ' +
+      math('-B', '−B') + '.' : '')));
+  blocks.push(text('У нас ' +
+    math('A = ' + tex(A) + ',\\; B = ' + tex(B) + ',\\; C = ' + tex(sub(p.c, c2)),
+      'A = ' + plain(A) + ', B = ' + plain(B) + ', C = ' + plain(sub(p.c, c2))) +
+    ', поэтому второй корень находится вычитанием:'));
 
   var sum = div(mul(frac(-1), B), A);
   var x2 = sub(sum, Q.toExact(shown.x));

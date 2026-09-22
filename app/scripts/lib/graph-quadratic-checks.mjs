@@ -185,6 +185,38 @@ const LEFTOVERS = [['&lt;', 'экранированный знак «меньш�
                    ['&amp;', 'экранированный амперсанд'],
                    ['</', 'закрывающий тег']];
 
+/* Буквы, которым разбор что-то присваивает: формула, начинающаяся
+   с «буква =». Имена функций и переменные оси сюда не считаются. */
+const NOT_A_COEFFICIENT = new Set(['f', 'g', 'x', 'y']);
+
+function assignedLetters(blocks) {
+  const letters = new Set();
+  blocks.forEach((block) => {
+    if (block.type !== 'formula') { return; }
+    const match = /^\s*([a-z](?:_\{?\d\}?)?)\s*=/.exec(block.tex ?? '');
+    if (match && !NOT_A_COEFFICIENT.has(match[1])) { letters.add(match[1]); }
+  });
+  return letters;
+}
+
+/* Где в разборе начинается вторая кривая: с этой фразы и дальше речь
+   идёт о ней, и её коэффициенты обязаны называться своими буквами. */
+const SECOND_CURVE = 'Теперь вторая линия на чертеже';
+
+/** Одна буква не может означать коэффициенты разных кривых. */
+function checkLetters(where, steps) {
+  const blocks = steps.flatMap((step) => step.blocks);
+  const start = blocks.findIndex((block) => (block.html ?? '').includes(SECOND_CURVE));
+  if (start === -1) {
+    return [`${where}: в разборе задачи с двумя кривыми нет перехода ко второй`];
+  }
+  const first = assignedLetters(blocks.slice(0, start));
+  const second = assignedLetters(blocks.slice(start));
+  const shared = [...second].filter((letter) => first.has(letter));
+  return shared.length === 0 ? []
+    : [`${where}: буква «${shared.join('», «')}» обозначает коэффициенты обеих кривых`];
+}
+
 export function checkQuadraticSolution(set, task) {
   const errors = [];
   const where = `${set.id}/${task.id}`;
@@ -239,6 +271,11 @@ export function checkQuadraticSolution(set, task) {
     if (/(?<![\d,])-\d/.test(shown)) {
       errors.push(`${where}: в разборе ответ набран обычным минусом`);
     }
+  }
+
+  /* Две кривые на чертеже — две разные буквы под коэффициенты. */
+  if ((task.meta.curves ?? []).length === 2) {
+    errors.push(...checkLetters(where, steps));
   }
 
   /* Свёрнутый блок «Если нужна вся формула» — только у задач, где
