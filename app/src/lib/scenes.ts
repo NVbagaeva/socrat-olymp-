@@ -471,6 +471,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     };
   }
 
+  const quadratic = quadraticPrepScene(id, base);
+  if (quadratic !== null) {
+    return quadratic;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -479,6 +484,128 @@ export function prepSkillScene(id: PrepSkillSceneId) {
        за кромку. Подпись отсюда убрана до решения, где ей стоять. */
     shapes: [],
   };
+}
+
+/* ── Миниатюры навыков квадратичной подтемы ───────────────────────
+   Окно то же тесное, что у линейных: клетка крупнее, и в карточке
+   шириной 120px парабола читается формой, а не пятном. Вершины
+   подобраны так, чтобы ветви входили в окно, а отметка не садилась
+   на ось. Числа — параметры чертежа, а не содержание задач. */
+
+/** Парабола миниатюры: задаётся через вершину, как в теории. */
+function miniParabola(a: number, m: number, n: number, color = 'lineA') {
+  return { type: 'quadratic', a, b: -2 * a * m, c: a * m * m + n, color, label: null };
+}
+
+function miniDot(x: number, y: number, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: null };
+}
+
+function quadraticPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'sign-a') {
+    /* Знак a: две параболы, ветви вверх и вниз. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0, -1.4), miniParabola(-1, 0, 1.4, 'lineB')],
+      points: [miniDot(0, -1.4), miniDot(0, 1.4, 'lineB')],
+    };
+  }
+
+  if (id === 'value-a') {
+    /* Шаг от вершины: пунктирная ступенька в одну клетку. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -1, -1)],
+      points: [miniDot(-1, -1), miniDot(0, 0)],
+      shapes: [
+        dashed([-1, -1], [0, -1]),
+        dashed([0, -1], [0, 0]),
+        prepLabel('a', 0, -0.5, 14, 0, 'accent'),
+      ],
+    };
+  }
+
+  if (id === 'value-c') {
+    /* Свободный член: точка на оси Oy отмечена и подписана. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0.8, -1.6)],
+      points: [miniDot(0, -0.96)],
+      shapes: [prepLabel('c', 0, -0.96, -20, 0)],
+    };
+  }
+
+  if (id === 'value-b') {
+    /* Вершина и её абсцисса: от вершины пунктир к оси Ox. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0.9, -1.3)],
+      points: [miniDot(0.9, -1.3)],
+      shapes: [dashed([0.9, -1.3], [0.9, 0]), prepLabel('x\u0432', 0.9, 0, 18, -14, 'accent')],
+    };
+  }
+
+  if (id === 'value-at') {
+    /* Дан x — ищут y: пунктир от оси абсцисс к кривой. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.5, -1.4)],
+      points: [miniDot(1, 0.85, 'lineB')],
+      shapes: [dashed([1, 0], [1, 0.85]), prepLabel('?', 1, 0.85, 16, 0, 'accent')],
+    };
+  }
+
+  if (id === 'argument-for') {
+    /* Дан y — ищут x: горизонталь и две точки пересечения. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0, -1.5)],
+      points: [miniDot(-1.2, -0.06, 'lineB'), miniDot(1.2, -0.06, 'lineB')],
+      shapes: [
+        { type: 'segment', from: [-2, -0.06], to: [2, -0.06], color: 'accent', style: 'dashed' },
+        prepLabel('?', 1.2, -0.06, 16, 16, 'accent'),
+      ],
+    };
+  }
+
+  if (id === 'formula') {
+    /* Формула по графику: парабола с вершиной и знаком вопроса. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.6, -1.3)],
+      points: [miniDot(-0.6, -1.3)],
+      /* Подпись в верхней части поля и по центру: у правого края
+         «y = ?» не помещалась и уезжала за кромку холста. */
+      shapes: [prepLabel('y = ?', 0, 1.4, 0, 0, 'accent')],
+    };
+  }
+
+  if (id === 'cross-line') {
+    /* Парабола и прямая: одна точка пересечения отмечена. */
+    return {
+      ...base,
+      curves: [
+        miniParabola(1, 0, -1.5),
+        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+      ],
+      points: [miniDot(1, 0.5, 'lineB')],
+    };
+  }
+
+  if (id === 'cross-parabola') {
+    /* Две параболы: отмечена одна общая точка. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
+      points: [miniDot(-0.2, -1.41, 'lineB')],
+    };
+  }
+
+  return null;
 }
 
 

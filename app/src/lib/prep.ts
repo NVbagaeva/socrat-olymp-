@@ -9,6 +9,8 @@ import { prepSkillsFor, type PrepSkill, type PrepSkillId } from '@/content/prepS
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
+import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
+import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { katex } from '@/lib/graph/katex';
 import { sealAnswer, sealChoice, sealText } from '@/lib/prepSecret';
@@ -244,6 +246,8 @@ interface TaskData {
   id: string;
   answerRule: string;
   pointName?: string;
+  /** Задачи о параболе: старший коэффициент дан в условии. */
+  knownA?: boolean;
 }
 
 function taskData(taskId: string): TaskData | null {
@@ -266,6 +270,8 @@ function answerRule(taskId: string): string | null {
 interface EnginePoint {
   x: number;
   y: number;
+  /** Чем точка стоит на чертеже: вершина, точка на оси, пересечение. */
+  role?: string;
 }
 
 /** Проверяемая точка: движок кладёт её в meta вместе с расхождением. */
@@ -289,6 +295,21 @@ interface EngineTask {
     k: number;
     b: number;
     points: EnginePoint[] | null;
+    /* Поля параболы. У задач о прямой их нет, и разбор идёт своей
+       веткой: семейство задачи решает, какой модуль его строит. */
+    family?: string;
+    aFraction?: unknown;
+    bFraction?: unknown;
+    cFraction?: unknown;
+    window?: unknown;
+    intersection?: unknown;
+    curves?: {
+      kind: string;
+      kFraction?: unknown;
+      bFraction?: unknown;
+      aFraction?: unknown;
+      cFraction?: unknown;
+    }[];
   };
 }
 
@@ -610,7 +631,52 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
  * наклона треугольник не строится, и разбора у такой задачи нет —
  * это честное null, а не выдуманные шаги.
  */
+/* Вторая кривая сцены в том виде, в каком её ждёт разбор параболы. */
+function secondCurve(task: EngineTask): unknown {
+  const curve = task.meta.curves?.[1];
+  if (curve === undefined) {
+    return null;
+  }
+  if (curve.kind === 'line') {
+    return { kind: 'line', line: { k: curve.kFraction, b: curve.bFraction } };
+  }
+  return {
+    kind: 'quadratic',
+    curve: Quadratic.exact(curve.aFraction, curve.bFraction, curve.cFraction),
+  };
+}
+
+/* Разбор задачи о параболе: свой модуль, своя схема шагов. Числа
+   берутся из точных дробей meta, а не из округлённых значений. */
+function quadraticSteps(task: EngineTask): PrepStep[] {
+  const data = taskData(task.id);
+  const steps = GraphSolutionQuadratic.build({
+    curve: Quadratic.exact(task.meta.aFraction, task.meta.bFraction, task.meta.cFraction),
+    window: task.meta.window,
+    points: task.meta.points,
+    second: secondCurve(task),
+    task: {
+      rule: data?.answerRule,
+      answer: task.answer,
+      knownA: data?.knownA === true,
+      query: task.meta.query,
+      intersection: task.meta.intersection,
+    },
+  }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
+
+  return steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
+    blocks: viewBlocks(step.blocks),
+  }));
+}
+
 function buildSteps(task: EngineTask): PrepStep[] | null {
+  if (task.meta.family === 'quadratic') {
+    return quadraticSteps(task);
+  }
+
   const found = GraphGenerate.analysis(task.id) as Analysis | null;
   if (!found) {
     /* Два случая без треугольника, которые мы умеем объяснить сами:

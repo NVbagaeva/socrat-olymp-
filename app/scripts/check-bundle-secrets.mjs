@@ -177,7 +177,7 @@ const otvety8 = BANK_8.flatMap((entry) =>
 /* №12: наборы движка graph/ по навыкам опорных задач. Ответ — число
    или номер верного варианта; в окне не должно быть ни поля
    «answer», ни открытого разбора, ни пометок вариантов «error». */
-const { prepSkills } = requireSrc('content/prepSkills');
+const { allPrepSkills } = requireSrc('content/prepSkills');
 const graphData = path.join(root, 'src', 'lib', 'graph', 'data');
 const readSets = (dir) =>
   fs
@@ -185,9 +185,14 @@ const readSets = (dir) =>
     .filter((name) => name.endsWith('.json'))
     .sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(graphData, dir, name), 'utf8')));
-GraphGenerate.setSets({ prep: readSets('prep/12'), prototypes: readSets('prototypes/12') });
+/* Наборы обеих подтем: прямой из prep/12, параболы из prep/12q.
+   Проверяются навыки всех подтем, а не одной. */
+GraphGenerate.setSets({
+  prep: [...readSets('prep/12'), ...readSets('prep/12q')],
+  prototypes: readSets('prototypes/12'),
+});
 const POLYA_12 = ['answer', 'error', 'steps'];
-for (const skill of prepSkills) {
+for (const skill of allPrepSkills) {
   for (const task of GraphGenerate.generateSet(skill.setId)) {
     zadachi.push({
       razdel: '№12',
@@ -276,8 +281,42 @@ function stroka(text, nomer) {
 }
 
 /**
- * Окна задачи в тексте: от её идентификатора до следующего, вместе
- * со строками, на которые окно ссылается.
+ * Объект задачи целиком: от открывающей скобки перед её
+ * идентификатором до парной закрывающей, со скобками внутри строк.
+ * Не нашлось — null, и окно берётся прежним способом.
+ *
+ * Понадобилось из-за последней задачи набора: до неё окно кончалось
+ * следующим идентификатором, а у последней тянулось до конца файла
+ * и забирало служебную разметку страницы — поле «error» каркаса
+ * Next читалось как открытая пометка варианта.
+ */
+function obekt(text, at) {
+  let start = text.lastIndexOf('{', at);
+  if (start === -1) {
+    return null;
+  }
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (ch === '\\') { i += 1; } else if (ch === '"') { inString = false; }
+      continue;
+    }
+    if (ch === '"') { inString = true; continue; }
+    if (ch === '{') { depth += 1; continue; }
+    if (ch === '}') {
+      depth -= 1;
+      if (depth === 0) { return text.slice(start, i + 1); }
+    }
+  }
+  return null;
+}
+
+/**
+ * Окна задачи в тексте: её объект (а если его не разобрать — кусок
+ * до следующего идентификатора), вместе со строками, на которые окно
+ * ссылается.
  */
 function okna(text, id) {
   const marker = `"id":"${id}"`;
@@ -285,7 +324,8 @@ function okna(text, id) {
   let from = text.indexOf(marker);
   while (from !== -1) {
     const next = text.indexOf('"id":"', from + marker.length);
-    const okno = text.slice(from, next === -1 ? text.length : next);
+    const okno = obekt(text, from) ??
+      text.slice(from, next === -1 ? text.length : next);
     const ssylki = [...okno.matchAll(/"\$([0-9a-f]+)"/g)].map((m) => stroka(text, m[1]));
     out.push([okno, ...ssylki].join('\n'));
     from = text.indexOf(marker, from + marker.length);
