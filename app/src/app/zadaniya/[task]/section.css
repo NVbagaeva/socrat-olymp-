@@ -31,6 +31,12 @@
   align-items: start;
   margin: var(--space-6) 0 var(--space-10);
 }
+/* Шапка без правой колонки. Ставится самим компонентом шапки, когда
+   слот иллюстрации пуст: иначе пустая колонка отжимала бы текст
+   к левому краю на треть ширины. */
+.section-head--text {
+  grid-template-columns: minmax(0, 1fr);
+}
 .section-head__title {
   display: flex;
   align-items: center;

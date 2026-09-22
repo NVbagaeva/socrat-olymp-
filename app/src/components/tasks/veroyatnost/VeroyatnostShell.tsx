@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
@@ -38,6 +39,23 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           title={section.title}
           badge={section.badge}
           lead={section.lead}
+          {...(section.art === undefined
+            ? {}
+            : {
+                media: (
+                  /* Картинка — декор: alt пустой, ничего сверх заголовка
+                     она не сообщает. Размеры стоят настоящие, чтобы место
+                     под неё держалось до загрузки и шапка не прыгала. */
+                  <Image
+                    className="veroyatnost-art"
+                    src={section.art.src}
+                    alt=""
+                    width={section.art.width}
+                    height={section.art.height}
+                    priority
+                  />
+                ),
+              })}
         />
 
         <RazdelTabs

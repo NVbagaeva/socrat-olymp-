@@ -49,6 +49,13 @@ export interface VeroyatnostSection {
    * Нет поля — нет и кнопки.
    */
   tutors?: { title: string; lead: string; items: TutorMaterial[] };
+  /**
+   * Иллюстрация справа в шапке раздела. Декор: alt у неё пустой,
+   * ничего, кроме настроения, она не сообщает. Нет поля — шапка
+   * одноколоночная, и текст занимает всю ширину. У №5 своей картинки
+   * пока нет, поэтому поле необязательное.
+   */
+  art?: { src: string; width: number; height: number };
 }
 
 /**
@@ -116,6 +123,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: PODZAGOLOVOK_4,
     badge: 'Базовый уровень',
     tabs: TABS_4,
+    art: { src: '/images/zadanie-04/shapka-veroyatnost-prostaya.webp', width: 900, height: 423 },
     /* Те же две карточки, что у задания №12. Файлы — сборник
        «Задание 4», который собирает scripts/build-pdf-4.mjs и кладёт
        в app/public по этим же путям (workflow «PDF 4»). Здесь стоят
