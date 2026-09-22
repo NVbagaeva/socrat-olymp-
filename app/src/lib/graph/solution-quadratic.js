@@ -163,6 +163,28 @@ function symmetricPair(marks) {
   return null;
 }
 
+/* Узел сетки на кривой, по которому читается её старший коэффициент:
+   ближайший к вершине. Узел, занятый отметкой пересечения, берём
+   в последнюю очередь — на чертеже он уже значит другое. */
+function gridNode(curve, win, points) {
+  var nodes = Q.integerPoints(curve, win).filter(function (node) {
+    return Math.abs(node.x - curve.mValue) > 1e-9;
+  });
+  var free = nodes.filter(function (node) {
+    return !(points || []).some(function (mark) {
+      return mark.role === 'cross' && mark.x === node.x && mark.y === node.y;
+    });
+  });
+  var pool = free.length ? free : nodes;
+  var best = null;
+  pool.forEach(function (node) {
+    if (best === null || Math.abs(node.x - curve.mValue) < Math.abs(best.x - curve.mValue)) {
+      best = node;
+    }
+  });
+  return best;
+}
+
 /* Точка для шага от вершины: ближайшая к ней отмеченная. Чем ближе,
    тем меньше клеток считать. */
 function stepPoint(marks, p) {
@@ -313,7 +335,8 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
         'a \\cdot ' + texBracket(x1) + term(p.c)));
       blocks.push(text('Остаётся одно уравнение с одним неизвестным:'));
       blocks.push(formula('a = ' + tex(p.a)));
-      return { title: 'Находим a подстановкой точки', blocks: blocks, found: true };
+      return { title: 'Находим a подстановкой точки', blocks: blocks, found: true,
+               bySubstitution: true };
     }
   }
 
@@ -323,17 +346,8 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
      парабола: на чертеже он виден так же. */
   var fromChart = false;
   if (marks.length === 0 && win) {
-    var nodes = Q.integerPoints(p, win).filter(function (point) {
-      return Math.abs(point.x - p.mValue) > 1e-9;
-    });
-    /* Узел, на котором уже стоит отметка пересечения, берём в
-       последнюю очередь: на чертеже он занят другой ролью. */
-    var free = nodes.filter(function (node) {
-      return !(points || []).some(function (mark) {
-        return mark.role === 'cross' && mark.x === node.x && mark.y === node.y;
-      });
-    });
-    marks = free.length ? free : nodes;
+    var node = gridNode(p, win, points);
+    marks = node === null ? [] : [node];
     fromChart = marks.length > 0;
   }
   var probe = vertexKnown ? stepPoint(marks, p) : null;
@@ -343,8 +357,9 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
     var dy = sub(frac(probe.y), p.n);
     blocks.push(text('В записи через вершину ' +
       math('y = a(x - m)^2 + n', 'y = a(x − m)² + n') + ' шаг от вершины в сторону ' +
-      'меняет значение на ' + math('a', 'a') + ' при шаге на клетку и на ' +
-      math('4a', '4a') + ' при шаге на две.'));
+      'меняет значение на ' + math('a', 'a') + ' при шаге на клетку, на ' +
+      math('4a', '4a') + ' при шаге на две, а вообще — на ' +
+      math('a \\cdot (\\Delta x)^2', 'a · (Δx)²') + '.'));
     blocks.push(text('От вершины до ' + (fromChart ? 'узла сетки ' : 'отмеченной точки ') +
       math(pointTex(frac(probe.x), frac(probe.y)), pointText(frac(probe.x), frac(probe.y))) +
       ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) + '.'));
@@ -444,7 +459,7 @@ function lineTex(line, name) {
   return head + body;
 }
 
-function stepFormula(p, second, interceptFound) {
+function stepFormula(p, second, interceptFound, win, points) {
   var blocks = [];
 
   if (!interceptFound) {
@@ -458,29 +473,96 @@ function stepFormula(p, second, interceptFound) {
   blocks.push(formula(equationTex(p, second === null ? 'y' : 'f(x)')));
 
   if (second !== null) {
-    blocks.push(text('Теперь вторая линия на чертеже.'));
+    blocks.push(text('Теперь вторая линия на чертеже. Читаем её теми же действиями.'));
     if (second.kind === 'line') {
-      blocks.push(text('Это прямая: по двум её точкам в узлах сетки находим наклон ' +
-        math('k', 'k') + ' и свободный член. Получается'));
-      blocks.push(formula(lineTex(second.line, 'g(x)')));
+      secondLineBlocks(second.line, win, blocks);
     } else {
-      blocks.push(text('Это вторая парабола. Её вершина отмечена — ' +
-        math(pointTex(second.curve.m, second.curve.n),
-          pointText(second.curve.m, second.curve.n)) +
-        ', — и шаг от вершины даёт её старший коэффициент. Получается'));
-      blocks.push(formula(equationTex(second.curve, 'g(x)')));
+      secondParabolaBlocks(second.curve, win, points, blocks);
     }
   }
 
   return { title: 'Записываем формулу целиком', blocks: blocks };
 }
 
+/* Прямая: наклон по двум узлам сетки, свободный член подстановкой —
+   тот же ход, что в разборе линейной подтемы. */
+function secondLineBlocks(line, win, blocks) {
+  var nodes = Line.integerPoints(line, win);
+  if (nodes.length < 2) {
+    blocks.push(formula(lineTex(line, 'g(x)')));
+    return;
+  }
+  var A = nodes[0];
+  var B = nodes[nodes.length - 1];
+  var dx = frac(B.x - A.x);
+  var dy = frac(B.y - A.y);
+
+  blocks.push(text('Это прямая ' + math('y = kx + b', 'y = kx + b') +
+    '. Берём две её точки в узлах сетки: ' +
+    math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
+    math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
+  blocks.push(text('Наклон — это отношение сдвига по вертикали к сдвигу по горизонтали:'));
+  blocks.push(formula('k = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)));
+  blocks.push(text('Свободный член находим подстановкой одной из этих точек:'));
+  blocks.push(formula(tex(frac(A.y)) + ' = ' + coefDot(line.k) + texBracket(frac(A.x)) + ' + b'));
+  blocks.push(formula('b = ' + tex(line.b)));
+  blocks.push(formula(lineTex(line, 'g(x)')));
+}
+
+/* Вторая парабола: вершина с чертежа, a шагом от неё, запись через
+   вершину и раскрытие скобок. */
+function secondParabolaBlocks(q, win, points, blocks) {
+  blocks.push(text('Это вторая парабола. Её вершина отмечена: ' +
+    keyMath(pointTex(q.m, q.n), pointText(q.m, q.n)) + '.'));
+
+  var node = gridNode(q, win, points);
+  if (node !== null) {
+    var dx = sub(frac(node.x), q.m);
+    var dy = sub(frac(node.y), q.n);
+    blocks.push(text('От вершины до узла сетки ' +
+      math(pointTex(frac(node.x), frac(node.y)), pointText(frac(node.x), frac(node.y))) +
+      ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) + '.'));
+    blocks.push(formula('a = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(q.a)));
+  }
+
+  var vertexForm = vertexFormTex(q);
+  var general = equationTex(q, 'g(x)');
+  if ('g(x) = ' + vertexForm === general) {
+    /* Вершина на оси Oy: раскрывать нечего, записи совпадают. */
+    blocks.push(text('Записываем через вершину — она же и общая запись:'));
+    blocks.push(formula(general));
+  } else {
+    blocks.push(text('Записываем через вершину и раскрываем скобки:'));
+    blocks.push(formula('g(x) = ' + vertexForm));
+    blocks.push(formula(general));
+  }
+}
+
+/* Коэффициент с точкой умножения: «0,5 · », «−» или пусто. */
+function coefDot(f) {
+  var body = coef(f);
+  if (body === '' || body === '-') { return body; }
+  return body + ' \\cdot ';
+}
+
 /* ══════════════════════════════════════════════════════════
    Шаг 7. Отвечаем на вопрос задачи
    ══════════════════════════════════════════════════════════ */
 
+/* Ответ в тексте разбора набирается типографским минусом: в поле
+   ввода ученик печатает обычный, а в тексте стоит настоящий. */
+function answerText(value) {
+  return String(value).replace(/-/g, MINUS);
+}
+
 function answerBlock(answer) {
-  return { type: 'answer', html: 'Ответ: ' + key(answer) };
+  return { type: 'answer', html: 'Ответ: ' + key(answerText(answer)) };
+}
+
+/* Ответ-неравенство: «a < 0» в разметку как есть не уходит — знак
+   «меньше» там начал бы тег. Поэтому он набирается формулой. */
+function answerMathBlock(tx) {
+  return { type: 'answer', html: 'Ответ: ' + key(math(tx, tx)) };
 }
 
 function stepAnswer(p, options) {
@@ -492,7 +574,7 @@ function stepAnswer(p, options) {
     blocks.push(text('Вопрос был о знаке ' + math('a', 'a') +
       '. Ветви ' + (p.aValue > 0 ? 'направлены вверх' : 'направлены вниз') + ', значит ' +
       keyMath(p.aValue > 0 ? 'a > 0' : 'a < 0', p.aValue > 0 ? 'a > 0' : 'a < 0') + '.'));
-    blocks.push(answerBlock(p.aValue > 0 ? 'a > 0' : 'a < 0'));
+    blocks.push(answerMathBlock(p.aValue > 0 ? 'a > 0' : 'a < 0'));
     return { title: 'Отвечаем на вопрос', blocks: blocks };
   }
 
@@ -593,12 +675,21 @@ function stepIntersectionAnswer(p, options, blocks) {
     texBracket(Q.toExact(shown.x)) + ' = ' + tex(x2)));
 
   if (options.rule === 'intersection-y') {
-    blocks.push(text('Спрашивают ординату, поэтому подставим найденный ' + math('x', 'x') +
-      ' в ту формулу, которая проще:'));
-    var y2 = second.kind === 'line'
-      ? add(mul(second.line.k, x2), second.line.b)
-      : Q.yAt(p, x2);
-    blocks.push(formula('y = ' + tex(y2)));
+    if (second.kind === 'line') {
+      var yLine = add(mul(second.line.k, x2), second.line.b);
+      blocks.push(text('Спрашивают ординату, поэтому подставим найденный ' + math('x', 'x') +
+        ' в формулу прямой — она короче:'));
+      blocks.push(formula('g(' + tex(x2) + ') = ' + coefDot(second.line.k) + texBracket(x2) +
+        term(second.line.b) + ' = ' + tex(yLine)));
+    } else {
+      var q = second.curve;
+      var yCurve = Q.yAt(q, x2);
+      blocks.push(text('Спрашивают ординату, поэтому подставим найденный ' + math('x', 'x') +
+        ' в любую из двух формул — возьмём вторую:'));
+      blocks.push(formula('g(' + tex(x2) + ') = ' + coefDot(q.a) + texBracket(x2) + '^2' +
+        (isZero(q.b) ? '' : term(q.b, ' \\cdot ' + texBracket(x2))) + term(q.c) +
+        ' = ' + tex(yCurve)));
+    }
   }
 
   blocks.push(text('Вторая точка пересечения — ' +
@@ -615,6 +706,44 @@ function stepIntersectionAnswer(p, options, blocks) {
    Сборка
    ══════════════════════════════════════════════════════════ */
 
+/* Какой шаг закрывает вопрос задачи. Дальше него разбор не идёт:
+   всё остальное — по желанию, в свёрнутом блоке под ответом. */
+var TARGET = {
+  'sign-a': 'direction',
+  a: 'slope',
+  b: 'b',
+  c: 'intercept'
+};
+
+/* Шаги, без которых целевой шаг не сделать. Зависят от того, каким
+   путём пошёл разбор: по отмеченной вершине, по симметрии или
+   через систему. */
+function prerequisites(steps) {
+  var need = {};
+  steps.forEach(function (step) { need[step.id] = step.needs || []; });
+  return need;
+}
+
+/* Замыкание: целевой шаг и всё, на чём он держится. Первый шаг
+   входит всегда — с него начинается любое чтение чертежа. */
+function neededSteps(steps, target) {
+  var need = prerequisites(steps);
+  var chosen = { direction: true };
+  var queue = [target];
+  while (queue.length) {
+    var id = queue.shift();
+    if (chosen[id]) { continue; }
+    chosen[id] = true;
+    (need[id] || []).forEach(function (next) { queue.push(next); });
+  }
+  return chosen;
+}
+
+/** Шаг внутри свёрнутого блока: заголовок строкой, дальше его блоки. */
+function foldedStep(step) {
+  return [text('<b>' + step.title + '</b>')].concat(step.blocks);
+}
+
 /**
  * Разбор задачи о параболе.
  *
@@ -625,6 +754,12 @@ function stepIntersectionAnswer(p, options, blocks) {
  *   second: вторая кривая сцены или null,
  *   task:   { rule, answer, knownA, query, intersection }
  * }
+ *
+ * Разбор доходит до того шага, на котором получен ответ, и
+ * останавливается. Шаги, которые доводят формулу до конца, но для
+ * ответа не нужны, уходят в свёрнутый блок под ответом — по желанию
+ * ученика. Там, где формула не нужна вовсе (знак a, свободный член),
+ * свёрнутого блока нет.
  */
 function build(options) {
   var p = options.curve;
@@ -632,13 +767,39 @@ function build(options) {
   var points = options.points || [];
   var second = options.second || null;
   var task = options.task || {};
+  var knownA = task.knownA === true;
 
   var direction = stepDirection(p);
   var intercept = stepIntercept(p, win, points);
   var vertex = stepVertex(p, win, points);
-  var slope = stepSlope(p, win, points, task.knownA === true, vertex, intercept.found);
+  var slope = stepSlope(p, win, points, knownA, vertex, intercept.found);
   var b = stepB(p, vertex.known, slope.bySystem === true);
-  var formulaStep = stepFormula(p, second, intercept.found);
+  var formulaStep = stepFormula(p, second, intercept.found, win, points);
+
+  direction.id = 'direction'; direction.needs = [];
+  intercept.id = 'intercept'; intercept.needs = [];
+  vertex.id = 'vertex'; vertex.needs = [];
+  slope.id = 'slope';
+  slope.needs = knownA ? []
+    : slope.bySystem === true || slope.bySubstitution === true ? ['vertex', 'intercept']
+    : ['vertex'];
+  b.id = 'b';
+  b.needs = slope.bySystem === true ? ['slope'] : ['vertex', 'slope'];
+  formulaStep.id = 'formula';
+  formulaStep.needs = ['slope', 'b'].concat(intercept.found ? ['intercept'] : ['vertex']);
+
+  var all = [direction, intercept, vertex, slope, b, formulaStep];
+  var target = TARGET[task.rule] || 'formula';
+  var chosen = neededSteps(all, target);
+
+  var shown = all.filter(function (step) { return chosen[step.id]; });
+  /* Шаг про c, если он кончился словами «с чертежа не снять», в
+     дописку не идёт: там нет действия, только объяснение, почему
+     оно откладывается. Само c считается в шаге с формулой. */
+  var folded = all.filter(function (step) {
+    return !chosen[step.id] && !(step.id === 'intercept' && step.found === false);
+  });
+
   var answer = stepAnswer(p, {
     rule: task.rule,
     answer: task.answer,
@@ -647,11 +808,23 @@ function build(options) {
     second: second
   });
 
-  return [direction, intercept, vertex, slope, b, formulaStep, answer]
-    .map(function (step, index) {
-      return { number: index + 1, title: step.title,
-               arrow: step.arrow || null, blocks: step.blocks };
-    });
+  /* Свёрнутый блок нужен там, где формула для ответа не понадобилась,
+     но дописать её есть чем. У знака a и свободного члена дописывать
+     нечего: формула в ответе не участвует. */
+  var offerFormula = folded.length > 0 && target !== 'direction' && target !== 'intercept';
+  if (offerFormula) {
+    answer.blocks = answer.blocks.concat([{
+      type: 'details',
+      id: 'full-formula',
+      title: 'Если нужна вся формула',
+      blocks: folded.reduce(function (acc, step) { return acc.concat(foldedStep(step)); }, [])
+    }]);
+  }
+
+  return shown.concat([answer]).map(function (step, index) {
+    return { number: index + 1, title: step.title,
+             arrow: step.arrow || null, blocks: step.blocks };
+  });
 }
 
 const api = { build: build, equationTex: equationTex, interceptVisible: interceptVisible };

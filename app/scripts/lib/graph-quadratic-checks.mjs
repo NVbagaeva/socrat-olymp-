@@ -11,6 +11,7 @@
 import renderer from '../../src/lib/graph/renderer.js';
 import Q from '../../src/lib/graph/families/quadratic.js';
 import Line from '../../src/lib/graph/families/line.js';
+import { buildSolution, stepText } from './quadratic-solution-text.mjs';
 
 const EPS = 1e-9;
 
@@ -166,6 +167,104 @@ export function intersectionAudit(set, task) {
     out.errors.push('скрытая точка пересечения отмечена на чертеже');
   }
   return out;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Разбор: шаги собираются, формулы закрыты, ответ на месте
+
+   Проверка появилась после того, как в текстах разборов оборвались
+   формулы вида «a < 0»: знак «меньше» снимался с экранирования
+   раньше, чем удалялись теги, и хвост «< 0$</b>» уходил как начало
+   тега. Разметка движка была цела, ломался перевод в текст — теперь
+   он один на отчёты и на эту проверку.
+   ══════════════════════════════════════════════════════════ */
+
+/** Следы разметки, которых в готовом тексте шага быть не может. */
+const LEFTOVERS = [['&lt;', 'экранированный знак «меньше»'],
+                   ['&gt;', 'экранированный знак «больше»'],
+                   ['&amp;', 'экранированный амперсанд'],
+                   ['</', 'закрывающий тег']];
+
+export function checkQuadraticSolution(set, task) {
+  const errors = [];
+  const where = `${set.id}/${task.id}`;
+  const source = sourceTask(set, task);
+  let steps;
+  try {
+    steps = buildSolution(task, source);
+  } catch (error) {
+    return [`${where}: разбор не собрался — ${error.message}`];
+  }
+
+  if (!Array.isArray(steps) || steps.length === 0) {
+    return [`${where}: разбор пуст`];
+  }
+
+  steps.forEach((step) => {
+    const text = stepText(step);
+    const label = `${where}, шаг ${step.number} «${step.title}»`;
+    if (text.trim() === '') {
+      errors.push(`${label}: пустой`);
+      return;
+    }
+    /* Нечётное число «$» — где-то формула не закрылась. Ровно так
+       выглядел обрыв «Значит $a .». */
+    const dollars = (text.match(/\$/g) ?? []).length;
+    if (dollars % 2 !== 0) {
+      errors.push(`${label}: незакрытая формула (${dollars} знаков «$») — ${text.slice(0, 80)}`);
+    }
+    LEFTOVERS.forEach(([mark, name]) => {
+      if (text.includes(mark)) {
+        errors.push(`${label}: в тексте остался ${name}`);
+      }
+    });
+  });
+
+  const last = steps[steps.length - 1];
+  const answers = last.blocks.filter((block) => block.type === 'answer');
+  if (answers.length !== 1) {
+    errors.push(`${where}: последний шаг должен нести ровно один ответ, их ${answers.length}`);
+  } else {
+    /* В тексте разбора минус типографский, в поле ввода — обычный. */
+    const shown = stepText({ blocks: answers }).replace('Ответ: ', '').trim();
+    const wanted = String(task.answer).replace(/-/g, '−');
+    /* У задачи с выбором ответ движка — номер варианта; разбор вправе
+       назвать и сам вариант словами: «a > 0» понятнее, чем «1». */
+    const correct = (task.options ?? []).find((option) => option.number === String(task.answer));
+    const allowed = [wanted];
+    if (correct) { allowed.push(correct.text.trim(), String(correct.number)); }
+    if (!allowed.some((value) => shown === value || shown.includes(value))) {
+      errors.push(`${where}: в разборе ответ «${shown}», а у задачи «${task.answer}»`);
+    }
+    if (/(?<![\d,])-\d/.test(shown)) {
+      errors.push(`${where}: в разборе ответ набран обычным минусом`);
+    }
+  }
+
+  /* Свёрнутый блок «Если нужна вся формула» — только у задач, где
+     формула для ответа не понадобилась. */
+  const folded = last.blocks.filter((block) => block.type === 'details');
+  folded.forEach((block) => {
+    if (!block.title) {
+      errors.push(`${where}: свёрнутый блок без заголовка`);
+    }
+    if ((block.blocks ?? []).length === 0) {
+      errors.push(`${where}: свёрнутый блок пуст`);
+    }
+  });
+
+  return errors;
+}
+
+/** Сколько шагов в разборе задачи и есть ли свёрнутый блок. */
+export function solutionShape(set, task) {
+  const steps = buildSolution(task, sourceTask(set, task));
+  const last = steps[steps.length - 1];
+  return {
+    steps: steps.length,
+    titles: steps.map((step) => step.title),
+    folded: last.blocks.some((block) => block.type === 'details'),
+  };
 }
 
 /* ══════════════════════════════════════════════════════════
