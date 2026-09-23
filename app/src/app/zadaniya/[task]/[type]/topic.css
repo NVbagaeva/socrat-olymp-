@@ -821,6 +821,159 @@ a.tutor-card:hover {
   }
 }
 
+/* ── Разговор двух Аполлониев ───────────────────────────────── */
+
+/* Баннер и врезка — один раздел «Немного истории»: между ними
+   просвет, какой стоит между крупными частями раздела. */
+.istor-razdel {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* Терракотовая пара токенов: по цвету врезка не спорит с кремовой
+   плашкой «Запомни» и с голубым баннером над ней. Своя система
+   координат не нужна — подписей поверх поля здесь нет, зато врезка
+   смотрит на свою ширину: на 1024 рядом стоит колонка содержания. */
+.razgovor {
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-xl);
+  background: var(--color-accent-soft-surface);
+}
+.razgovor__title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.razgovor__ryad {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Узкая врезка — основа: портреты в колонках спрятаны, говорящего
+   показывает кружок перед подписью реплики. */
+.razgovor__lico {
+  display: none;
+}
+.razgovor__lenta {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Реплика прижата к своей стороне: античный слева, современный
+   справа. Не во всю ширину — иначе стороны не различить. Плашка
+   шире своего текста не растёт: короткой реплике незачем занимать
+   строку целиком и переносить последнее слово вниз. */
+.razgovor__replika {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  max-width: 92%;
+}
+.razgovor__replika--sovremennyy {
+  margin-left: auto;
+  justify-items: end;
+}
+.razgovor__kto {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.razgovor__kruzhok {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+/* В кружок должна попасть голова, а не вся грудь: портрет увеличен
+   и сдвинут. Доли считаются от размера кружка, поэтому кадр не
+   поедет, если кружок станет другого размера. Сдвиги у портретов
+   разные: лица стоят в своих картинках по-разному. */
+.razgovor__avatar {
+  position: absolute;
+  width: 165%;
+  height: 165%;
+  max-width: none;
+}
+.razgovor__avatar--antichnyy {
+  left: -32%;
+  top: -2%;
+}
+.razgovor__avatar--sovremennyy {
+  left: -62%;
+  top: -4%;
+}
+/* Сама реплика: светлая плашка на терракотовом поле. Шрифт со
+   греческим подмножеством — в репликах есть παραβολή, ἔλλειψις
+   и ὑπερβολή. */
+.razgovor__slova {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font-family: var(--font-grech);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: left;
+}
+
+/* Широкая врезка: портреты встают по краям, реплики идут между ними.
+   Портрет стоит один раз сверху своей колонки и держится на месте,
+   пока реплики прокручиваются мимо: колонка растянута на всю ленту,
+   липнет сама картинка. Прижимается туда же, куда колонка
+   содержания, — в этих ширинах она рядом.
+
+   Порог считается по полю врезки без её полей: на 1280 это 594px,
+   на 768 — 606px. Двенадцати пикселей между ними на два разных вида
+   не хватит, поэтому портреты стоят в обеих ширинах, а не только на
+   большом экране; в тесной ширине они мельче. */
+@container (min-width: 560px) {
+  .razgovor__ryad {
+    grid-template-columns: 104px minmax(0, 1fr) 104px;
+    gap: var(--space-3);
+  }
+  .razgovor__lico {
+    display: block;
+  }
+  .razgovor__portret {
+    position: sticky;
+    top: var(--space-6);
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .razgovor__kruzhok {
+    display: none;
+  }
+  .razgovor__replika {
+    max-width: 86%;
+  }
+}
+
+/* Просторная врезка: портреты крупнее, но не за счёт реплик —
+   лента между ними остаётся шире половины поля. */
+@container (min-width: 700px) {
+  .razgovor__ryad {
+    grid-template-columns: 132px minmax(0, 1fr) 132px;
+    gap: var(--space-5);
+  }
+}
+
 /* ── Раскладка по ширинам ───────────────────────────────────── */
 /* Медиазапросы идут последними: правила в них перекрывают базовые
    только за счёт порядка — специфичности медиазапрос не добавляет. */
@@ -913,7 +1066,8 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 767.98px) {
-  .istor {
+  .istor,
+  .razgovor {
     padding: var(--space-4);
   }
 
