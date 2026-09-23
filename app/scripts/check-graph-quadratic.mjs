@@ -39,17 +39,25 @@ const SEED_SHARE = 0.9;
    у них нет. Файлы читаются с диска, а не импортом data/index.js:
    импорт JSON в Node требует своих оговорок, а здесь достаточно
    прочитать папку. */
-const DATA = path.join(path.dirname(fileURLToPath(import.meta.url)),
-  '..', 'src', 'lib', 'graph', 'data', 'prep', '12q');
-const QUADRATIC_SETS = fs.readdirSync(DATA)
-  .filter((name) => name.endsWith('.json'))
-  .sort()
-  .map((name) => JSON.parse(fs.readFileSync(path.join(DATA, name), 'utf8')));
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)),
+  '..', 'src', 'lib', 'graph', 'data');
+function readSets(dir) {
+  const full = path.join(ROOT, dir);
+  return fs.existsSync(full) ? fs.readdirSync(full)
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .map((name) => JSON.parse(fs.readFileSync(path.join(full, name), 'utf8'))) : [];
+}
+/* Опорные наборы и наборы прототипов проверяются одними правилами:
+   правила читаемости у чертежа одни, кем бы он ни был показан. */
+const PREP_SETS = readSets(path.join('prep', '12q'));
+const PROTO_SETS = readSets(path.join('prototypes', '12q'));
+const QUADRATIC_SETS = PREP_SETS.concat(PROTO_SETS);
 if (QUADRATIC_SETS.length === 0) {
   console.error('В данных нет наборов подтемы «Квадратичная функция»');
   process.exit(1);
 }
-generator.setSets({ prep: QUADRATIC_SETS, prototypes: [] });
+generator.setSets({ prep: PREP_SETS, prototypes: PROTO_SETS });
 
 const errors = [];
 const report = [];

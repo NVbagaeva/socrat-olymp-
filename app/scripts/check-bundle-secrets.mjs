@@ -186,14 +186,20 @@ const readSets = (dir) =>
     .sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(graphData, dir, name), 'utf8')));
 /* Наборы обеих подтем: прямой из prep/12, параболы из prep/12q.
-   Проверяются навыки всех подтем, а не одной. */
+   Наборы прототипов — оттуда задачи берут тренажёр, генератор и лист
+   для печати, и их ответы тоже не должны попадать в разметку. */
 GraphGenerate.setSets({
   prep: [...readSets('prep/12'), ...readSets('prep/12q')],
-  prototypes: readSets('prototypes/12'),
+  prototypes: [...readSets('prototypes/12'), ...readSets('prototypes/12q')],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
-for (const skill of allPrepSkills) {
-  for (const task of GraphGenerate.generateSet(skill.setId)) {
+/* Опорные задачи — по списку навыков; прототипы — по самим наборам:
+   задачи тренажёра и листа для печати считает тот же движок, и их
+   ответам в разметке страницы тоже не место. */
+const NABORY_12 = allPrepSkills.map((skill) => skill.setId)
+  .concat(readSets('prototypes/12q').map((set) => set.id));
+for (const setId of NABORY_12) {
+  for (const task of GraphGenerate.generateSet(setId)) {
     zadachi.push({
       razdel: '№12',
       id: task.id,

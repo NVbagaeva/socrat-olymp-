@@ -313,8 +313,17 @@ function queryCandidates(p, win, spec) {
     var Y = Q.yAt(p, X);
     if (!decimalsOk(X, spec.decimals) || !decimalsOk(Y, spec.decimals)) { continue; }
     if (Math.abs(num(Y)) > yAbsMax) { continue; }
-    /* Суть задачи: точку нельзя снять с чертежа. */
-    if (spec.outside !== false && !outsideWindow(num(X), num(Y), win)) { continue; }
+    /* Суть задачи: точку нельзя снять с чертежа. У вопроса про
+       аргумент этого мало: значение y0 стоит в условии, и если оно
+       попадает в окно, ученик читает ответ по клеткам вместо того,
+       чтобы решать уравнение. Поэтому здесь за рамку выносится
+       именно ордината. */
+    if (spec.outside !== false) {
+      var enough = spec.type === 'argument-for'
+        ? Math.abs(num(Y)) > win.ymax + 1e-9
+        : outsideWindow(num(X), num(Y), win);
+      if (!enough) { continue; }
+    }
 
     if (spec.type === 'argument-for') {
       /* Второй корень — симметричный: 2m − x. Он тоже должен
@@ -798,11 +807,38 @@ function pairCandidates(task, set, seed) {
   return trimPool(found);
 }
 
+/* Разнообразие от seed.
+
+   Кандидаты отсортированы по читаемости, и лучший из них не зависит
+   от seed: одна и та же задача набора раз за разом давала один и тот
+   же чертёж. Опорным задачам это и нужно — их девяносто чертежей
+   утверждены и меняться не должны. Тренажёру нужно обратное: свежие
+   числа на каждый заход.
+
+   Поэтому перемешивается только верхняя полоса пула — кандидаты,
+   чья оценка отстаёт от лучшей не больше чем на SCORE_BAND. Ниже
+   полосы порядок прежний, отбраковка не трогается вовсе: перебор
+   идёт по тому, что уже прошло все правила читаемости. Набор без
+   признака varySelection собирается ровно как раньше. */
+var SCORE_BAND = 0.35;
+
+function varyPool(found, task, set, seed) {
+  if (!set.varySelection || found.length < 2) { return found; }
+  var best = found[0].score;
+  var edge = 0;
+  while (edge < found.length && found[edge].score >= best - SCORE_BAND) { edge += 1; }
+  if (edge < 2) { return found; }
+  var head = shuffled(found.slice(0, edge), rng(set.id + ':' + task.id + ':' + seed + ':vary'));
+  return head.concat(found.slice(edge));
+}
+
 /* Точка входа для generate.js. */
 function candidates(task, set, seed) {
   var constraints = task.constraints || {};
-  if (constraints.line || constraints.second) { return pairCandidates(task, set, seed); }
-  return singleCandidates(task, set, seed);
+  var found = constraints.line || constraints.second
+    ? pairCandidates(task, set, seed)
+    : singleCandidates(task, set, seed);
+  return varyPool(found, task, set, seed);
 }
 
 /* ══════════════════════════════════════════════════════════

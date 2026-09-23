@@ -225,7 +225,12 @@ export const functionTypes: FunctionType[] = [
     theory: QUADRATIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
+    bank: {
+      prep: ['P12Q-1', 'P12Q-2', 'P12Q-3', 'P12Q-4', 'P12Q-5',
+             'P12Q-6', 'P12Q-7', 'P12Q-8', 'P12Q-9'],
+      prototypes: ['12Q.A', '12Q.B', '12Q.C', '12Q.D', '12Q.E',
+                   '12Q.F', '12Q.G', '12Q.H', '12Q.I'],
+    },
     status: 'soon',
     preview: true,
     head: QUADRATIC.head,

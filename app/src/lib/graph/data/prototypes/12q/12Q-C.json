@@ -1,0 +1,388 @@
+{
+  "kind": "prototype",
+  "id": "12Q.C",
+  "block": 3,
+  "title": "12Q.C · свободный член c",
+  "subtitle": "Отмечена точка пересечения с осью Oy. Прочитайте c",
+  "seed": 12203,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueIntercepts": false,
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "minFractionA": 6,
+    "minDistinctC": 6,
+    "minPositiveC": 6,
+    "minNegativeC": 6,
+    "uniqueVertices": true
+  },
+  "tasks": [
+    {
+      "id": "12Q.C-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "positive",
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "positive",
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "negative",
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "negative",
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "positive",
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "positive",
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "negative",
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "negative",
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-11",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "positive",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-12",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "positive",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-13",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "negative",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-14",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "integer",
+        "cSign": "negative",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-15",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "negative",
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "negative"
+        },
+        "windowMax": 6,
+        "direction": "down"
+      }
+    },
+    {
+      "id": "12Q.C-16",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "fraction",
+        "cSign": "negative",
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "negative"
+        },
+        "windowMax": 6,
+        "direction": "up"
+      }
+    },
+    {
+      "id": "12Q.C-17",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cSign": "positive",
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "positive"
+        },
+        "windowMax": 6,
+        "direction": "up"
+      }
+    },
+    {
+      "id": "12Q.C-18",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cSign": "positive",
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "positive"
+        },
+        "windowMax": 6,
+        "direction": "down"
+      }
+    },
+    {
+      "id": "12Q.C-19",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.C-20",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "answerRule": "c",
+      "level": "lucky",
+      "constraints": {
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        },
+        "aKind": "any",
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    }
+  ]
+}

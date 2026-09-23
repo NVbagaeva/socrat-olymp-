@@ -1,0 +1,585 @@
+{
+  "kind": "prototype",
+  "id": "12Q.H",
+  "block": 8,
+  "title": "12Q.H · парабола и прямая",
+  "subtitle": "Найдите вторую точку пересечения — её на чертеже не видно",
+  "seed": 12208,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "uniqueVertices": true,
+    "visibleBoth": 0,
+    "visibleOne": 20
+  },
+  "tasks": [
+    {
+      "id": "12Q.H-01",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-02",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-03",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y",
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-04",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x",
+          "hidden": "fraction"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-05",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-06",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-07",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y",
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-08",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x",
+          "hidden": "fraction"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-09",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": [
+          1,
+          2
+        ],
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-10",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": [
+          1,
+          2
+        ],
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-11",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": 1
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-12",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": 1
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-13",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x",
+          "hidden": "fraction"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-14",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y",
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-15",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "direction": "up"
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-16",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 2,
+        "line": {
+          "direction": "up"
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-17",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x",
+          "hidden": "fraction"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-18",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 1,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y",
+          "hidden": "fraction"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-19",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите ординату второй точки пересечения.",
+      "answerRule": "intersection-y",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 3,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "y"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.H-20",
+      "question": "На рисунке изображены графики квадратичной функции $y = f(x)$ и линейной функции $y = g(x)$. Отмечена одна из точек их пересечения. Найдите абсциссу второй точки пересечения.",
+      "answerRule": "intersection-x",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true
+        },
+        "cVisible": true,
+        "absA": 3,
+        "line": {
+          "absKMin": [
+            1,
+            2
+          ]
+        },
+        "intersection": {
+          "visible": "one",
+          "which": "hidden",
+          "marks": "visible",
+          "labels": false,
+          "axis": "x"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    }
+  ]
+}

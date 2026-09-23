@@ -32,6 +32,19 @@ import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
 import protoD from './prototypes/12/12-D.json';
 
+/* Прототипы квадратичной подтемы: те же девять навыков, но условия
+   заданы полосой, а не точкой, и чертёж выбирается по seed. Отсюда
+   берут задачи тренажёр и генератор. */
+import quadA from './prototypes/12q/12Q-A.json';
+import quadB from './prototypes/12q/12Q-B.json';
+import quadC from './prototypes/12q/12Q-C.json';
+import quadD from './prototypes/12q/12Q-D.json';
+import quadE from './prototypes/12q/12Q-E.json';
+import quadF from './prototypes/12q/12Q-F.json';
+import quadG from './prototypes/12q/12Q-G.json';
+import quadH from './prototypes/12q/12Q-H.json';
+import quadI from './prototypes/12q/12Q-I.json';
+
 /** Подготовка: собственный материал платформы, в покрытие банка не входит.
     Сначала наборы линейной подтемы, потом квадратичной: порядок в этом
     списке задаёт порядок записей в answers.json, и линейные записи от
@@ -41,6 +54,12 @@ export const prep = [
   quad1, quad2, quad3, quad4, quad5, quad6, quad7, quad8, quad9,
 ];
 
-/** Прототипы ФИПИ: только это число считается покрытием банка. */
-export const prototypes = [protoA, protoB, protoC, protoD];
+/** Прототипы: у линейной — банк ФИПИ, у квадратичной — свой материал.
+    Покрытием банка считаются только линейные наборы: у квадратичных
+    в поле note так и сказано. Порядок тот же, что у подготовки:
+    сначала линейная подтема, потом квадратичная. */
+export const prototypes = [
+  protoA, protoB, protoC, protoD,
+  quadA, quadB, quadC, quadD, quadE, quadF, quadG, quadH, quadI,
+];
 
