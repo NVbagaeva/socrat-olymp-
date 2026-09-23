@@ -16,7 +16,9 @@
     "minDown": 9,
     "uniqueVertices": true,
     "visibleBoth": 0,
-    "visibleOne": 20
+    "visibleOne": 20,
+    "hiddenOffscreen": 20,
+    "hiddenFraction": 0
   },
   "tasks": [
     {
