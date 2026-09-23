@@ -119,8 +119,21 @@ function answerRules(): Record<string, string> {
  * seed воспроизводимый.
  */
 export function sheetBlocks(params: SheetParams): SheetBlock[] {
+  /* choice: задачи с выбором варианта листу годятся — варианты
+     печатаются списком под условием, а на листе с ответами стоит
+     текст верного варианта. Без этого признака лист по навыку, где
+     отвечают выбором (знак коэффициента a, формула параболы), выходил
+     пустым: шапка и колонтитул есть, задач нет. У линейной подтемы
+     задач с выбором нет, и её лист от признака не меняется. */
   const picked = pickTasks(
-    { skills: params.skills, level: params.level, count: params.count, mode: 'practice', mistakes: [] },
+    {
+      skills: params.skills,
+      level: params.level,
+      count: params.count,
+      mode: 'practice',
+      mistakes: [],
+      choice: true,
+    },
     seedFrom(params.seed),
   );
   const rules = answerRules();
