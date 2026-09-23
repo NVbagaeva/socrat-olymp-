@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
+import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
-import { Breadcrumbs } from '@/components/ui';
+
 import { stereometria } from '@/content/stereometria';
 import { tasksPage } from '@/content/tasks';
 import { RAZDELY } from '@/lib/zadanie3';
@@ -33,8 +34,9 @@ export default function Solid3TrainerPage() {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <Breadcrumbs
-          items={[
+        <ShapkaRazdela
+          className="figura-head"
+          crumbs={[
             { label: 'Задания', href: tasksPage.href },
             {
               label: `№${Number(stereometria.no)} ${stereometria.subtitle}`,
@@ -42,18 +44,9 @@ export default function Solid3TrainerPage() {
             },
             { label: 'Общий тренажёр' },
           ]}
+          title="Общий тренажёр"
+          lead={`Задания всех восьми разделов вперемешку: ${variants} вариантов по 91 прототипу.`}
         />
-
-        <header className="section-head figura-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">Общий тренажёр</h1>
-            </div>
-            <p className="section-head__lead">
-              Задания всех восьми разделов вперемешку: {variants} вариантов по 91 прототипу.
-            </p>
-          </div>
-        </header>
 
         <Solid3Trainer pool={wholePool()} roundKey="z3:all" />
       </main>

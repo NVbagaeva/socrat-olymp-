@@ -24,6 +24,7 @@
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
     "test:graph-quadratic": "node scripts/check-graph-quadratic.mjs",
+    "preview:shots": "node scripts/preview-shots.mjs",
     "test:secrets": "node scripts/check-bundle-secrets.mjs",
     "build:pdf-12": "node scripts/build-pdf-12.mjs",
     "build:pdf-12-sample": "node scripts/build-pdf-12.mjs --sample",

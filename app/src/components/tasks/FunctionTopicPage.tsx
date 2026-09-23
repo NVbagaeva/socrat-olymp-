@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
-import { Badge, Breadcrumbs, EmptyState, HandNote, type Crumb } from '@/components/ui';
+import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { prepSkillsFor } from '@/content/prepSkills';
 import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
@@ -16,6 +16,7 @@ import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
+import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
 
 export interface FunctionTopicPageProps {
@@ -79,8 +80,9 @@ export function FunctionTopicPage({
 
   return (
     <main className="app-main">
-      <Breadcrumbs
-        items={[
+      <ShapkaRazdela
+        className="topic-head"
+        crumbs={[
           { label: 'Задания', href: tasksPage.href },
           {
             label: `№${section.no}. ${section.subtitle}`,
@@ -89,54 +91,55 @@ export function FunctionTopicPage({
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
-      />
-
-      <header className="topic-head">
-        <div className="topic-head__text">
-          <div className="topic-head__title">
-            {/* Шапка по признаку подтемы: H1 общий на задание, название
-                подтемы — подзаголовком. Без признака H1 — сама подтема. */}
-            <h1 className="t-h1">
-              {subtopic.head === undefined
-                ? subtopic.title
-                : `Задание №${section.no}. ${section.subtitle}`}
-            </h1>
-            <Badge tone="info">{topic.badge}</Badge>
-          </div>
-          {subtopic.head === undefined ? null : (
+        /* Шапка по признаку подтемы: H1 общий на задание, название
+           подтемы — подзаголовком. Без признака H1 — сама подтема. */
+        title={
+          subtopic.head === undefined
+            ? subtopic.title
+            : `Задание №${section.no}. ${section.subtitle}`
+        }
+        subtitle={
+          subtopic.head === undefined ? undefined : (
             <p className="t-h3 topic-head__subtitle">{subtopic.head.subtitle}</p>
-          )}
-          <p className="topic-head__lead">{topic.lead}</p>
-
-          {/* Цитата стоит строкой под подзаголовком, а не колонкой
-              рядом: деля ширину, они ломали друг друга. */}
+          )
+        }
+        badge={topic.badge}
+        lead={topic.lead}
+        actions={
+          /* Цитата стоит строкой под подзаголовком, а не колонкой
+             рядом: деля ширину, они ломали друг друга. */
           <figure className="topic-quote">
             <blockquote className="topic-quote__text">
               <HandNote>«{topic.quote.text}»</HandNote>
             </blockquote>
             <figcaption className="topic-quote__author">— {topic.quote.author}</figcaption>
           </figure>
-        </div>
+        }
+        media={
+          <>
+            {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
+            <Image
+              className="topic-head__art"
+              src="/images/bust-galileo.webp"
+              alt=""
+              width={814}
+              height={700}
+            />
 
-        {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
-        <Image
-          className="topic-head__art"
-          src="/images/bust-galileo.webp"
-          alt=""
-          width={814}
-          height={700}
-        />
-
-        {/* Прогресс по разделам теории темы. Общее число — длина того же
-            списка, из которого строится «Содержание»: второго источника
-            у этой пары нет. */}
-        {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
-            до конца которых ученик долистал; иначе витринное число. */}
-        <TopicProgress
-          total={subtopic.theory.length}
-          trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
-        />
-      </header>
+            {/* Прогресс по разделам теории темы. Общее число — длина того же
+                списка, из которого строится «Содержание»: второго источника
+                у этой пары нет. */}
+            {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
+                до конца которых ученик долистал; иначе витринное число. */}
+            <TopicProgress
+              total={subtopic.theory.length}
+              trackKey={
+                subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined
+              }
+            />
+          </>
+        }
+      />
 
       <TopicTabs
         initial={initialTab}

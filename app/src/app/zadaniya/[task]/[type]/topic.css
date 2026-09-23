@@ -5,30 +5,22 @@
 
 /* ── Шапка темы ─────────────────────────────────────────────── */
 
+/* Разметку шапки даёт общий компонент (components/tasks/ShapkaRazdela),
+   здесь — только то, чем шапка темы отличается: портрет и кольцо
+   прогресса стоят в правой колонке рядом, а не под друг другом,
+   и по центру по вертикали. */
 .topic-head {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-6) var(--space-8);
-  margin: var(--space-6) 0 var(--space-8);
 }
-/* Текст занимает всё свободное место и переносит соседей на новую
-   строку сам, когда места перестаёт хватать. */
-.topic-head__text {
-  flex: 1 1 320px;
-  min-width: 0;
-}
-.topic-head__title {
+.topic-head .section-head__media {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-3);
+  justify-content: flex-end;
+  gap: var(--space-6);
 }
-.topic-head__lead {
+.topic-head .section-head__lead {
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
-  color: var(--color-text-secondary);
   max-width: 54ch;
 }
 /* Подзаголовок подтемы под общим H1 задания: название подтемы.
@@ -113,53 +105,9 @@
 
 /* ── Лента вкладок ──────────────────────────────────────────── */
 
-.topic-tabs {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-  /* Вкладки не переносятся и не сжимаются: когда они перестают
-     помещаться, лента прокручивается вбок. */
-  overflow-x: auto;
-  scrollbar-width: none;
-  /* Тени по краям: две нижние подложки показывают, что прокручивать
-     есть куда, две верхние закрывают их, пока лента не сдвинута.
-     Отдельных стрелок нет — они здесь ничего не добавляют. */
-  background:
-    linear-gradient(to right, var(--color-bg) 45%, transparent) left center,
-    linear-gradient(to left, var(--color-bg) 45%, transparent) right center,
-    radial-gradient(
-        farthest-side at 0 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      left center,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        color-mix(in srgb, var(--grey-900) 14%, transparent),
-        transparent
-      )
-      right center;
-  background-repeat: no-repeat;
-  background-size:
-    32px 100%,
-    32px 100%,
-    12px 100%,
-    12px 100%;
-  background-attachment: local, local, scroll, scroll;
-}
-.topic-tabs::-webkit-scrollbar {
-  display: none;
-}
-/* Набор вкладок отдаёт черту самой ленте: иначе на прокрутке она
-   обрывалась бы вместе с содержимым. */
-.topic-tabs .tabs {
-  border-bottom: 0;
-  flex: 0 0 auto;
-}
-.topic-tabs .tabs button {
-  white-space: nowrap;
-}
+/* Оформление ленты — общее, в styles/components.css: плашка,
+   вкладки и кнопка материалов одинаковы во всех разделах.
+   Здесь остаётся только то, что относится к странице темы. */
 
 /* ── Раскладка вкладки ──────────────────────────────────────── */
 
@@ -549,33 +497,13 @@
    поля и тот же кегль. Заливку несёт внутренняя плашка — её поля
    выбраны отрицательными отступами, поэтому раскрытая кнопка красится,
    но лента от этого не становится выше. */
-.topic-tabs__more {
-  flex: 0 0 auto;
-  padding: 0 0 var(--space-3);
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
-  font-size: 15px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  transition: color var(--dur-switch) var(--ease);
-}
-.topic-tabs__more:hover {
-  color: var(--color-text);
-}
 .topic-tabs__more[aria-expanded='true'] {
-  color: var(--color-primary);
+  background: var(--color-surface);
 }
 .topic-tabs__more-in {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 2px var(--space-3);
-  margin: -2px calc(var(--space-3) * -1);
-  border-radius: var(--radius-pill);
-  transition: background-color var(--dur-switch) var(--ease);
-}
-.topic-tabs__more[aria-expanded='true'] .topic-tabs__more-in {
-  background: var(--color-surface-soft);
 }
 .topic-tabs__more svg {
   width: 16px;
@@ -790,16 +718,13 @@ a.tutor-card:hover {
   /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
      цитата и прогресс — по строке на каждое. */
   .topic-head {
-    flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-5);
     margin-bottom: var(--space-6);
   }
-  /* В столбце основа гибкости считается по высоте, а не по ширине:
-     320px там означали бы пустую полосу под подзаголовком. */
-  .topic-head__text {
-    flex: 0 0 auto;
-    width: 100%;
+  /* В одну колонку портрет и кольцо встают под текстом — и от левого
+     края, как он: прижатые вправо, они висели бы сами по себе. */
+  .topic-head .section-head__media {
+    justify-content: flex-start;
   }
   /* Цитата и пирамида — декор: на телефоне его нет, как и на
      остальных страницах кабинета. Цитата весила 100px из 392

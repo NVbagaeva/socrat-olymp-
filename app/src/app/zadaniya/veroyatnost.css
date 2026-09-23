@@ -3,12 +3,44 @@
    Оболочка, карточки и вкладки описаны в общих слоях: здесь только
    то, чего в них нет. Значения — только токены. */
 
-/* Шапка раздела без чертежа: в общем слое она двухколоночная, правая
-   колонка отведена под чертёж движка. Здесь чертежа нет, и пустая
-   колонка отжимала бы текст к левому краю на половину ширины. */
+/* Шапка раздела. Одноколоночную форму (№5, иллюстрации нет) задаёт
+   общий слой по метке section-head--text; здесь только просветы. */
 .veroyatnost-head {
-  grid-template-columns: minmax(0, 1fr);
+  margin-top: var(--space-8);
   margin-bottom: 0;
+}
+
+/* Шапка с иллюстрацией (№4). Картинка занимает правую треть, текст
+   лежит в соседней колонке сетки и под неё не заходит: колонки
+   не перекрываются, поэтому наехать текст не может даже при самом
+   длинном заголовке. Выравнивание по центру — как на макете.
+
+   Доли, а не пиксели: картинка ужимается вместе с шапкой, и отдельная
+   ступень на 1280 не нужна. 1.8 к 1 — наименьшая доля, при которой
+   заголовок №4 на 1440 ещё укладывается в строку, как на макете:
+   ему нужно 689px, а колонка даёт 710px. */
+.veroyatnost-head:not(.section-head--text) {
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+}
+/* Картинка тянется по ширине колонки, высоту держит сама: пропорции
+   исходника сохраняются, по одной оси она не сжимается. */
+.veroyatnost-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* На планшете и телефоне иллюстрации нет: под неё нужна треть ширины,
+   а на этом ярусе её забирает текст — общий слой разворачивает шапку
+   в одну колонку. Картинка декоративная, ничего с ней не теряется. */
+@media (max-width: 1023.98px) {
+  .veroyatnost-head:not(.section-head--text) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .veroyatnost-head .section-head__media {
+    display: none;
+  }
 }
 
 /* Порядок шапки по макету раздела: заголовок, под ним бейдж уровня,
@@ -20,14 +52,15 @@
   margin-bottom: var(--space-2);
 }
 .veroyatnost-head .section-head__title h1 {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
 }
-/* Подзаголовок идёт одной строкой, как на макете: мера в 62 знака
-   рвала бы его надвое уже на 1440. */
+/* Просветы по макету: от крошек до заголовка шире, чем между
+   заголовком и бейджем, а подзаголовок отбит от бейджа так же,
+   как заголовок от крошек. */
 .veroyatnost-head .section-head__lead {
-  max-width: none;
+  margin-top: var(--space-5);
   margin-bottom: 0;
 }
 
@@ -47,12 +80,6 @@
    у раздела нет, лента лежит в main сама — тогда липнет она.
    Фон непрозрачный и растянут на поля страницы, иначе текст
    просвечивал бы сбоку. */
-.veroyatnost-tabs {
-  margin-top: var(--space-4);
-  overflow-x: auto;
-  /* Полоса прокрутки под лентой съедала бы подчёркивание. */
-  scrollbar-width: none;
-}
 /* Страница вбок не едет ни на одной ширине: то, что выступило за
    правый край на доли пикселя (подложка ленты, знак в узкой колонке
    шага), обрезается, а не становится горизонтальной прокруткой.
@@ -61,8 +88,7 @@
 .veroyatnost-main {
   overflow-x: clip;
 }
-.veroyatnost-main .topic-tabs-row,
-.veroyatnost-main > .veroyatnost-tabs {
+.veroyatnost-main .topic-tabs-row {
   position: sticky;
   top: 0;
   z-index: 5;
@@ -70,8 +96,7 @@
 /* Фон выходит на поля страницы подложкой, а не полями самой строки:
    по ширине строки меню «Для репетиторов» считает своё место, и,
    раздвинь её отрицательными полями, меню упёрлось бы в край окна. */
-.veroyatnost-main .topic-tabs-row::before,
-.veroyatnost-main > .veroyatnost-tabs::before {
+.veroyatnost-main .topic-tabs-row::before {
   content: '';
   position: absolute;
   inset: 0 calc(var(--space-8) * -1);
@@ -81,17 +106,9 @@
 @media (max-width: 1023.98px) {
   /* Поля страницы на этом ярусе уже — подложка сужается вместе с
      ними, иначе она вылезет за край экрана. */
-  .veroyatnost-main .topic-tabs-row::before,
-  .veroyatnost-main > .veroyatnost-tabs::before {
+  .veroyatnost-main .topic-tabs-row::before {
     inset: 0 calc(var(--space-5) * -1);
   }
-}
-.veroyatnost-tabs::-webkit-scrollbar {
-  display: none;
-}
-.veroyatnost-tabs a[role='tab'] {
-  white-space: nowrap;
-  text-decoration: none;
 }
 
 /* ── Тренажёр ───────────────────────────────────────────────────── */
@@ -167,57 +184,6 @@
 
    Оболочка, карточки и вкладки описаны в общих слоях: здесь только
    то, чего в них нет. Значения — только токены. */
-
-/* Шапка раздела без чертежа: в общем слое она двухколоночная, правая
-   колонка отведена под чертёж движка. Здесь чертежа нет, и пустая
-   колонка отжимала бы текст к левому краю на половину ширины. */
-.veroyatnost-head {
-  grid-template-columns: minmax(0, 1fr);
-  margin-bottom: 0;
-}
-
-/* Порядок шапки по макету раздела: заголовок, под ним бейдж уровня,
-   ниже подзаголовок. В общем слое бейдж стоит справа от заголовка
-   строкой — здесь он под ним, поэтому ряд разворачивается в столбец.
-   Заголовок на ступень мельче платформенного: так набран макет. */
-.veroyatnost-head .section-head__title {
-  display: block;
-  margin-bottom: var(--space-2);
-}
-.veroyatnost-head .section-head__title h1 {
-  margin-bottom: var(--space-2);
-  font-size: var(--fs-h2);
-  line-height: var(--lh-h2);
-}
-/* Подзаголовок идёт одной строкой, как на макете: мера в 62 знака
-   рвала бы его надвое уже на 1440. */
-.veroyatnost-head .section-head__lead {
-  max-width: none;
-  margin-bottom: 0;
-}
-
-/* Панель вкладки идёт сразу за лентой: в общем слое отступ больше,
-   он рассчитан на страницу с чертежом в шапке. */
-.veroyatnost-panel {
-  margin-top: var(--space-4);
-}
-
-/* Вкладок три, и одна из них длинная. На узком экране лента едет
-   вбок, а не переносится на вторую строку: перенос ломает
-   подчёркивание активной вкладки. */
-.veroyatnost-tabs {
-  margin-top: var(--space-4);
-  overflow-x: auto;
-  /* Полоса прокрутки под лентой съедала бы подчёркивание. */
-  scrollbar-width: none;
-}
-.veroyatnost-tabs::-webkit-scrollbar {
-  display: none;
-}
-.veroyatnost-tabs a[role='tab'] {
-  white-space: nowrap;
-  text-decoration: none;
-}
 
 /* ── Тренажёр ───────────────────────────────────────────────────── */
 

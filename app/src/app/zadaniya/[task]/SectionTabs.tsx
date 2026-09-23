@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { EmptyState, Tabs } from '@/components/ui';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
+import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
+import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
 
 export interface SubtopicView {
   slug: string;
@@ -27,13 +29,14 @@ export interface SectionTabsProps {
   prototypes: PrototypeView[];
 }
 
-const TABS = [
-  { id: 'subtopics', label: 'Подтемы' },
-  { id: 'about', label: 'О задании' },
-  { id: 'prototypes', label: 'Прототипы' },
-  { id: 'stats', label: 'Статистика' },
-  { id: 'materials', label: 'Материалы' },
-];
+/* Список лежит в конфиге, как у остальных разделов. Состав у этой
+   ленты свой: здесь вкладки переключают содержимое одной страницы,
+   а не ведут в разделы темы. */
+const TABS = VKLADKI_OGLAVLENIYA.map((tab) => ({
+  id: tab.id,
+  label: tab.label,
+  ...(tab.icon === undefined ? {} : { icon: <VkladkaIkonka name={tab.icon} /> }),
+}));
 
 const IDS = new Set(TABS.map((tab) => tab.id));
 
@@ -57,7 +60,17 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
 
   return (
     <>
-      <Tabs items={TABS} value={active} onValueChange={select} label="Разделы задания" />
+      <div className="topic-tabs-row">
+        <div className="topic-tabs">
+          <Tabs
+            className="tabs--lenta"
+            items={TABS}
+            value={active}
+            onValueChange={select}
+            label="Разделы задания"
+          />
+        </div>
+      </div>
 
       <div className="section-panel">
         {active === 'subtopics' ? (

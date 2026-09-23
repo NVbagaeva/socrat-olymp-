@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
+import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { Solid } from '@/components/solid/Solid';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
-import { Badge, Breadcrumbs, HandNote } from '@/components/ui';
+import { HandNote } from '@/components/ui';
 import { stereometria } from '@/content/stereometria';
 import { tasksPage } from '@/content/tasks';
 import { RAZDELY } from '@/lib/zadanie3';
@@ -50,28 +51,22 @@ export default function Stereometria3Page() {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <Breadcrumbs
-          items={[
+        <ShapkaRazdela
+          crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(stereometria.no)}` },
           ]}
+          title={stereometria.title}
+          badge={stereometria.badge}
+          lead={stereometria.lead}
+          media={
+            <>
+              <Solid model={thumb('VIII')} />
+              <HandNote className="section-head__note">{stereometria.note}</HandNote>
+            </>
+          }
         />
-
-        <header className="section-head">
-          <div className="section-head__text">
-            <div className="section-head__title">
-              <h1 className="t-h1">{stereometria.title}</h1>
-              <Badge tone="info">{stereometria.badge}</Badge>
-            </div>
-            <p className="section-head__lead">{stereometria.lead}</p>
-          </div>
-
-          <div className="section-head__media">
-            <Solid model={thumb('VIII')} />
-            <HandNote className="section-head__note">{stereometria.note}</HandNote>
-          </div>
-        </header>
 
         <h2 className="t-h2 solid3-title">Разделы задачника</h2>
         <p className="solid3-lead">
