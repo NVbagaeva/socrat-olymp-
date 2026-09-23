@@ -225,9 +225,8 @@ export const functionTypes: FunctionType[] = [
     },
     status: 'active',
   },
-  /* Подтема собирается: страницы есть и открываются, бейдж «Скоро»
-     снимается последним этапом. Чем она отличается от линейной —
-     признаками ниже, тексты к ним в content/quadratic.ts. */
+  /* Подтема открыта. Чем она отличается от линейной — признаками
+     ниже, тексты к ним в content/quadratic.ts. */
   {
     id: 'quadratic',
     no: '02',
@@ -244,8 +243,7 @@ export const functionTypes: FunctionType[] = [
       prototypes: ['12Q.A', '12Q.B', '12Q.C', '12Q.D', '12Q.E',
                    '12Q.F', '12Q.G', '12Q.H', '12Q.I'],
     },
-    status: 'soon',
-    preview: true,
+    status: 'active',
     head: QUADRATIC.head,
     about: QUADRATIC.about,
     methods: true,
