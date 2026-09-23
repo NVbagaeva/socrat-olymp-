@@ -31,14 +31,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  */
 export default async function Page({ params }: { params: Params }) {
   const { task, type } = await params;
-  if (!findSubtopic(task, type)) {
+  const subtopic = findSubtopic(task, type);
+  if (!subtopic) {
     notFound();
   }
   return (
     /* useSearchParams требует границы ожидания: без неё статический
        экспорт страницы не собирается. */
     <Suspense fallback={null}>
-      <SheetPage withAnswers={false} />
+      <SheetPage withAnswers={false} {...(subtopic.sheetTitle === undefined ? {} : { subtopic: subtopic.sheetTitle })} />
     </Suspense>
   );
 }

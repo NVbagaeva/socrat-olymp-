@@ -854,5 +854,30 @@ function build(options) {
 
 const api = { build: build, equationTex: equationTex, interceptVisible: interceptVisible };
 
+/* Разбор прямо по задаче движка: всё, что нужно, лежит в её meta.
+   Так краткое решение для листа с ответами собирается без обратного
+   поиска по наборам. */
+function fromTask(task) {
+  var meta = task.meta;
+  var second = null;
+  var curve = meta.curves && meta.curves[1];
+  if (curve) {
+    second = curve.kind === 'line'
+      ? { kind: 'line', line: { k: curve.kFraction, b: curve.bFraction } }
+      : { kind: 'quadratic',
+          curve: Q.exact(curve.aFraction, curve.bFraction, curve.cFraction) };
+  }
+  return build({
+    curve: Q.exact(meta.aFraction, meta.bFraction, meta.cFraction),
+    window: meta.window,
+    points: meta.points,
+    second: second,
+    task: { rule: meta.rule, answer: task.answer, knownA: meta.knownA === true,
+            query: meta.query, intersection: meta.intersection }
+  });
+}
+
+api.fromTask = fromTask;
+
 export default api;
-export { build, equationTex, interceptVisible };
+export { build, fromTask, equationTex, interceptVisible };

@@ -1186,7 +1186,13 @@ function result(set, task, built, seed, index) {
          вершина по ней находится без счёта. Набор такие задачи считает. */
       symmetricPair: built.symmetricPair === true,
       curves: built.parts.map(partMeta),
-      level: task.level || null
+      level: task.level || null,
+      /* Правило ответа и признак «a дан в условии» нужны разбору.
+         Раньше их приходилось искать в самом наборе — теперь они
+         приходят вместе с задачей, и краткое решение для листа
+         собирается без обратного поиска по данным. */
+      rule: task.answerRule,
+      knownA: task.knownA === true
     }
   };
 }

@@ -30,12 +30,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  */
 export default async function Page({ params }: { params: Params }) {
   const { task, type } = await params;
-  if (!findSubtopic(task, type)) {
+  const subtopic = findSubtopic(task, type);
+  if (!subtopic) {
     notFound();
   }
   return (
     <Suspense fallback={null}>
-      <SheetPage withAnswers />
+      <SheetPage withAnswers {...(subtopic.sheetTitle === undefined ? {} : { subtopic: subtopic.sheetTitle })} />
     </Suspense>
   );
 }

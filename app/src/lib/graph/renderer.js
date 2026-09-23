@@ -300,6 +300,10 @@ function renderGraph(scene, report) {
   var curveLabelLayer = [];
 
   head.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + px(width) + ' ' + px(height) + '"' +
+    /* Признак сцены виден и в разметке: по нему лист для печати
+       различает вторую кривую типом линии, а не только толщиной.
+       У сцен без строгих правил класса нет, и их чертежи прежние. */
+    (strict ? ' class="graph-strict"' : '') +
     ' width="' + px(width) + '" height="' + px(height) + '" role="img"' +
     (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">');

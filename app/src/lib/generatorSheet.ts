@@ -12,6 +12,7 @@
 
 import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
+import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import { answersItems } from '@/lib/sheet/answers12.js';
 import content from '@/content/sheet12.js';
 import { skillTitle } from '@/content/skills12';
@@ -174,20 +175,29 @@ export function subtitleOf(params: Pick<SheetParams, 'kind' | 'date'>): string {
  * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
  * страницы. Рамки «Повторяем» на варианте нет.
  */
-export function sheetSpec(params: SheetParams, withAnswers: boolean) {
+export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
   const blocks = sheetBlocks(params);
+  /* Название подтемы приходит со страницы: лист собирается один на
+     все подтемы задания, а в шапке должно стоять то, что печатают.
+     Не передали — остаётся название из конфига листа. */
+  const name = subtopic ?? content.title.text;
   return {
     theme: params.theme,
     layout: params.layout,
     cell: CELL[params.layout],
-    documentTitle: `${content.title.chip}. ${content.title.text}` + (params.kind ? ` — ${params.kind}` : ''),
+    documentTitle: `${content.title.chip}. ${name}` + (params.kind ? ` — ${params.kind}` : ''),
     head: content.head,
-    runner: content.runner,
-    title: { chip: content.title.chip, text: content.title.text, subtitle: subtitleOf(params) },
+    /* Бегунок собран в конфиге листа целиком: у другой подтемы в нём
+       меняется только название, остальное остаётся как было. */
+    runner: subtopic === undefined ? content.runner
+      : content.runner.replace(content.title.text, subtopic),
+    title: { chip: content.title.chip, text: name, subtitle: subtitleOf(params) },
     recap: null,
     blocks,
     withAnswerLine: !withAnswers,
-    extraItems: withAnswers ? answersItems(blocks, GraphGenerate, solutionBuilder) : [],
+    extraItems: withAnswers
+      ? answersItems(blocks, GraphGenerate, solutionBuilder, quadraticBuilder)
+      : [],
     foot: content.foot,
   };
 }

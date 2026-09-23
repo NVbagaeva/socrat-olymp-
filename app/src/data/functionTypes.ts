@@ -114,6 +114,13 @@ export interface FunctionType {
    */
   choiceAnswers?: boolean;
   /**
+   * Название подтемы в шапке листа для печати. Не задано — лист
+   * берёт название из своего конфига (content/sheet12.js): там оно
+   * написано в единственном числе, «Линейная функция», и менять его
+   * ради множественного числа с карточки незачем.
+   */
+  sheetTitle?: string;
+  /**
    * Материалы «Для репетиторов» подтемы. Не заданы — материалы
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
@@ -245,6 +252,7 @@ export const functionTypes: FunctionType[] = [
     theoryProgress: true,
     bezStarogoAdresa: true,
     choiceAnswers: true,
+    sheetTitle: 'Квадратичная функция',
     tutors: QUADRATIC.tutors,
   },
   {

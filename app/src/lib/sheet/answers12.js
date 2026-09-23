@@ -30,7 +30,26 @@ function answerHtml(task) {
     Разбор строится не у всех задач. Нет разбора — задача просто
     не попадает в раздел кратких решений, и её ответ остаётся
     в таблице. Придумывать решение нельзя. */
-function shortSolution(task, generator, solutionBuilder) {
+/* Краткое решение задачи о параболе: разбор строит свой модуль, и
+   задача несёт в meta всё, что ему нужно. Берётся тот же итог каждого
+   шага, что и у прямой. */
+function shortSolutionQuadratic(task, quadraticBuilder) {
+  if (!quadraticBuilder) { return null; }
+  let steps;
+  try { steps = quadraticBuilder.fromTask(task); }
+  catch { return null; }
+  const formulas = [];
+  steps.forEach((step) => {
+    const own = (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex);
+    if (own.length) { formulas.push(own[own.length - 1].tex); }
+  });
+  return formulas.length < 2 ? null : formulas;
+}
+
+function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
+  if (task.meta && task.meta.family === 'quadratic') {
+    return shortSolutionQuadratic(task, quadraticBuilder);
+  }
   let analysis = null;
   try { analysis = generator.analysis(task.id, task.seed); }
   catch { return null; }
@@ -83,7 +102,7 @@ function shortSolution(task, generator, solutionBuilder) {
  * blocks — [{ title, tasks: [{ no, id, answer, answerHtml, options,
  *             answerRule, seed, meta }] }]
  */
-export function answersItems(blocks, generator, solutionBuilder) {
+export function answersItems(blocks, generator, solutionBuilder, quadraticBuilder) {
   const items = [answers.sectionHead('Ответы', 'по блокам, сквозная нумерация')];
 
   blocks.forEach((block) => {
@@ -97,7 +116,7 @@ export function answersItems(blocks, generator, solutionBuilder) {
   const solved = [];
   blocks.forEach((block) => {
     block.tasks.forEach((task) => {
-      const formulas = shortSolution(task, generator, solutionBuilder);
+      const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
       if (formulas) { solved.push(answers.solution(task.no, formulas, task.answer)); }
     });
   });
