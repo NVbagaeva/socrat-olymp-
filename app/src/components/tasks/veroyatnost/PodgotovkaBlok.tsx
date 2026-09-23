@@ -9,7 +9,7 @@ import { scrollTabTo } from '@/lib/tabScroll';
 import { METODY } from '@/lib/veroyatnost/model';
 import type { PrepPoolBlok, PrepPoolZadacha } from '@/lib/veroyatnost/pool';
 import type { TaskOutcome } from '@/lib/progressStore';
-import { recordPrepVeroyatnost } from '@/lib/progress';
+import { recordPrepVeroyatnost, useTaskInstance } from '@/lib/progress';
 import { prepItog, prepReshena, prepStore } from '@/lib/veroyatnost/prepProgress';
 import { klyuchZadachi } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
@@ -51,6 +51,10 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
   /* Пусто — задачу выбирает сам экран: первую нерешённую. Как только
      ученик перешёл по кружку, выбор закрепляется за ним. */
   const [vybrana, setVybrana] = useState<number | null>(null);
+  /* Экземпляр задачи для единого журнала: новый при переходе к другой
+     задаче блока. «С первой проверки» считается по экземпляру, а не по
+     старому исходу задачи — повторное решение в новый заход идёт с чистого листа. */
+  const instance = useTaskInstance();
 
   const zadachi = blok.zadachi;
   const sostoyaniya: PrepDotState[] = zadachi.map((zadacha) => prepItog(progress, zadacha.id));
@@ -85,16 +89,24 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
      на скорость. */
   function zapisat(right: boolean, clean: boolean, itog: TaskOutcome): void {
     store.recordAttempt({ kind: zadacha.id, taskId: zadacha.id, right, clean, seconds: 0, itog });
-    /* Единый журнал прогресса: пишется рядом, старую запись не
-       заменяет (см. отчёт этапа 1). Навык — блок конспекта: это то,
-       что ученик видит заголовком экрана, а не отдельная задача. */
+    /* Единый журнал — временная двойная запись до конца этапа 3. Каждая
+       проверка идёт в журнал, в окно навыка — только итог экземпляра.
+       Навык — блок конспекта (заголовок экрана), не отдельная задача. */
+    const revealed = itog === 'revealed';
+    const inst = instance.current(zadacha.id);
     recordPrepVeroyatnost(zadanie, {
       skillId: blok.id,
       taskId: zadacha.id,
+      instanceId: inst.id,
       verdict: right ? 'correct' : 'incorrect',
-      hintUsed: itog === 'revealed',
-      firstTry: clean,
+      hintUsed: inst.hinted || revealed,
+      firstTry: !inst.missed,
     });
+    if (revealed) {
+      instance.markHinted(zadacha.id);
+    } else if (!right) {
+      instance.markMissed(zadacha.id);
+    }
   }
 
   function otvet(right: boolean): void {

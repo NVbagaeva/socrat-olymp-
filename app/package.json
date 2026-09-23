@@ -22,6 +22,7 @@
     "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
+    "test:progress": "node scripts/check-progress.mjs",
     "test:imports": "node scripts/check-imports.mjs",
     "preview:shots": "node scripts/preview-shots.mjs",
     "test:secrets": "node scripts/check-bundle-secrets.mjs",

@@ -1,71 +1,25 @@
 'use client';
 
 /**
- * Единый журнал прогресса: хранилище.
+ * Единый журнал прогресса: хранилище в браузере.
  *
  * Тот же паттерн, что у остальных хранилищ прогресса в проекте:
  * useSyncExternalStore, снимок для сборки — пустой, try/catch вокруг
- * localStorage. Отличие — два слоя: журнал попыток (ограничен по
- * числу записей) и агрегат по навыку, который считается добавлением
- * при каждой записи, а не пересчётом журнала. Поэтому обрезка
- * журнала агрегатам не вредит: освоенность не зависит от того,
- * сколько попыток физически осталось лежать.
+ * localStorage. Правило учёта (что идёт в окно навыка, что только
+ * в журнал) — в core.ts, здесь только чтение и запись.
  *
- * Старые одиннадцать ключей прогресса этот модуль не трогает и не
- * заменяет: он пишется отдельным, новым ключом рядом (см. отчёт
- * этапа 1 про временную двойную запись).
+ * Старые одиннадцать ключей прогресса этот модуль не трогает: он
+ * пишется отдельным ключом рядом (временная двойная запись до конца
+ * этапа 3).
  */
 
 import { useSyncExternalStore } from 'react';
-import type { Attempt, SkillSource, SkillTally, TaskNo, Verdict } from './types';
-import { isCredit } from './types';
+import { EMPTY, WINDOW, applyAttempt, type LegacyActivity, type ProgressData } from './core';
+import type { Attempt, SkillTally, TaskNo, Verdict, WindowEntry } from './types';
+
+export type { LegacyActivity, ProgressData } from './core';
 
 export const PROGRESS_KEY = 'budetege:progress:v1';
-
-/** Сколько последних попыток учитывается в освоенности навыка. */
-export const WINDOW = 5;
-
-/** Потолок журнала: строк с запасом на годы использования одним
-    учеником, в бюджете примерно 1–1.5 МБ из пяти доступных на
-    источник (localStorage может делить квоту с другими данными
-    сайта). При переполнении вытесняются старейшие записи — агрегаты
-    навыков от этого не страдают. */
-const JOURNAL_CAP = 8000;
-
-export function skillKey(taskNo: TaskNo, subtopicId: string, source: SkillSource, skillId: string): string {
-  return `${taskNo}:${subtopicId}:${source}:${skillId}`;
-}
-
-/** Историческая активность, перенесённая из старого ключа при
-    миграции: только для строки «до обновления учёта решено N» на
-    странице статистики — в освоенность навыков не идёт (см. п.1
-    решений этапа 1: досчитывать зачёты по строгому новому правилу
-    из старых счётчиков значило бы их выдумывать). */
-export interface LegacyActivity {
-  title: string;
-  solved: number;
-}
-
-export interface ProgressData {
-  schemaVersion: 1;
-  journal: Attempt[];
-  skills: Record<string, SkillTally>;
-  legacy: Record<string, LegacyActivity>;
-  /** Штамп однократной миграции легаси-ключей. null — ещё не была. */
-  migratedAt: number | null;
-}
-
-const EMPTY: ProgressData = {
-  schemaVersion: 1,
-  journal: [],
-  skills: {},
-  legacy: {},
-  migratedAt: null,
-};
-
-function emptyTally(): SkillTally {
-  return { window: [], attemptsTotal: 0, creditsTotal: 0, hintsTotal: 0, secondsTotal: 0, lastAttemptAt: null };
-}
 
 const VERDICTS: readonly Verdict[] = ['correct', 'incorrect', 'skipped'];
 
@@ -77,8 +31,11 @@ function isTaskNo(value: unknown): value is TaskNo {
   return value === '3' || value === '4' || value === '5' || value === '8' || value === '12';
 }
 
-/** Разбор одной записи журнала. Мусор и чужой формат отбрасываются
-    молча: одна испорченная строка не должна ронять весь журнал. */
+function num(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+/** Одна испорченная строка не должна ронять весь журнал. */
 function parseAttempt(value: unknown): Attempt | null {
   if (typeof value !== 'object' || value === null) {
     return null;
@@ -103,13 +60,24 @@ function parseAttempt(value: unknown): Attempt | null {
     source: v.source,
     skillId: v.skillId,
     taskId: v.taskId,
+    instanceId: typeof v.instanceId === 'string' ? v.instanceId : v.taskId,
     seed: typeof v.seed === 'string' ? v.seed : null,
     verdict: v.verdict,
     hintUsed: v.hintUsed,
     firstTry: v.firstTry,
-    seconds: typeof v.seconds === 'number' && Number.isFinite(v.seconds) && v.seconds >= 0 ? v.seconds : 0,
+    seconds: num(v.seconds),
     ts: v.ts,
   };
+}
+
+function parseEntry(value: unknown): WindowEntry | null {
+  if (typeof value !== 'object' || value === null) {
+    return null;
+  }
+  const v = value as Record<string, unknown>;
+  return typeof v.instance === 'string' && typeof v.credit === 'boolean'
+    ? { instance: v.instance, credit: v.credit }
+    : null;
 }
 
 function parseTally(value: unknown): SkillTally | null {
@@ -118,14 +86,14 @@ function parseTally(value: unknown): SkillTally | null {
   }
   const v = value as Record<string, unknown>;
   const window = Array.isArray(v.window)
-    ? v.window.filter((item): item is boolean => typeof item === 'boolean').slice(-WINDOW)
+    ? v.window.map(parseEntry).filter((entry): entry is WindowEntry => entry !== null).slice(-WINDOW)
     : [];
   return {
     window,
-    attemptsTotal: typeof v.attemptsTotal === 'number' ? v.attemptsTotal : 0,
-    creditsTotal: typeof v.creditsTotal === 'number' ? v.creditsTotal : 0,
-    hintsTotal: typeof v.hintsTotal === 'number' ? v.hintsTotal : 0,
-    secondsTotal: typeof v.secondsTotal === 'number' ? v.secondsTotal : 0,
+    instancesTotal: num(v.instancesTotal),
+    creditsTotal: num(v.creditsTotal),
+    hintsTotal: num(v.hintsTotal),
+    secondsTotal: num(v.secondsTotal),
     lastAttemptAt: typeof v.lastAttemptAt === 'number' ? v.lastAttemptAt : null,
   };
 }
@@ -135,10 +103,9 @@ function parseLegacy(value: unknown): LegacyActivity | null {
     return null;
   }
   const v = value as Record<string, unknown>;
-  if (typeof v.title !== 'string' || typeof v.solved !== 'number') {
-    return null;
-  }
-  return { title: v.title, solved: v.solved };
+  return typeof v.title === 'string' && typeof v.solved === 'number'
+    ? { title: v.title, solved: v.solved }
+    : null;
 }
 
 /** Разбор записи из хранилища. Мусор и чужой формат считаем пустотой. */
@@ -252,29 +219,8 @@ export function getProgressData(): ProgressData {
 
 export type RecordAttemptInput = Omit<Attempt, 'ts'> & { ts?: number };
 
-/** Записать попытку: одним ходом обновляет журнал и агрегат навыка. */
 export function recordAttempt(input: RecordAttemptInput): void {
-  const attempt: Attempt = { ...input, ts: input.ts ?? Date.now() };
-  const current = snapshot();
-
-  const key = skillKey(attempt.taskNo, attempt.subtopicId, attempt.source, attempt.skillId);
-  const tally = current.skills[key] ?? emptyTally();
-  const credit = isCredit(attempt);
-  const nextTally: SkillTally = {
-    window: [...tally.window, credit].slice(-WINDOW),
-    attemptsTotal: tally.attemptsTotal + 1,
-    creditsTotal: tally.creditsTotal + (credit ? 1 : 0),
-    hintsTotal: tally.hintsTotal + (attempt.hintUsed ? 1 : 0),
-    secondsTotal: tally.secondsTotal + Math.max(0, Math.round(attempt.seconds)),
-    lastAttemptAt: attempt.ts,
-  };
-
-  const journal = [...current.journal, attempt];
-  if (journal.length > JOURNAL_CAP) {
-    journal.splice(0, journal.length - JOURNAL_CAP);
-  }
-
-  save({ ...current, journal, skills: { ...current.skills, [key]: nextTally } });
+  save(applyAttempt(snapshot(), { ...input, ts: input.ts ?? Date.now() }));
 }
 
 /** Историческая активность легаси-ключа: пишет только миграция. */
@@ -284,12 +230,10 @@ export function setLegacyActivity(legacyKey: string, activity: LegacyActivity): 
 }
 
 export function markMigrated(): void {
-  const current = snapshot();
-  save({ ...current, migratedAt: Date.now() });
+  save({ ...snapshot(), migratedAt: Date.now() });
 }
 
-/** Сбросить весь новый журнал. Старые одиннадцать ключей не трогает:
-    у каждого свой сброс, и этот модуль их не заменяет (см. отчёт). */
+/** Сбросить новый журнал. Старые ключи не трогает: у каждого свой сброс. */
 export function resetAll(): void {
   cache = EMPTY;
   try {
@@ -300,8 +244,7 @@ export function resetAll(): void {
   notify();
 }
 
-/** Журнал целиком, в каноническом формате попытки — то, что можно
-    будет позже отправить на сервер без переделки формата. */
+/** Журнал в каноническом формате попытки — то, что позже уйдёт на сервер. */
 export function exportJournal(): Attempt[] {
   return snapshot().journal;
 }

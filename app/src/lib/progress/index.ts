@@ -18,6 +18,7 @@ export {
   type AttemptArgs,
 } from './adapters';
 export { getSkillState, useSkillState } from './selectors';
+export { useTaskInstance, type TaskInstance } from './instance';
 export { migrateLegacyProgress } from './migrate';
 export { resetAll, exportJournal, PROGRESS_KEY, useProgressData, getProgressData } from './store';
 export type { Attempt, SkillSource, SkillState, SkillStatus, TaskNo, Verdict } from './types';

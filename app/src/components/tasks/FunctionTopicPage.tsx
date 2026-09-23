@@ -10,7 +10,6 @@ import { GeneratorTab } from './generator';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
-import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
@@ -95,21 +94,16 @@ export function FunctionTopicPage({
           </figure>
         }
         media={
-          <>
-            {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
-            <Image
-              className="topic-head__art"
-              src="/images/bust-galileo.webp"
-              alt=""
-              width={814}
-              height={700}
-            />
-
-            {/* Прогресс по разделам теории темы. Общее число — длина того же
-                списка, из которого строится «Содержание»: второго источника
-                у этой пары нет. */}
-            <TopicProgress total={subtopic.theory.length} />
-          </>
+          /* Портрет — декор: alt пустой, цитата рядом текстом. Кольца
+             прогресса по теории здесь нет, пока нет честной отметки
+             «раздел прочитан» (этап 4). */
+          <Image
+            className="topic-head__art"
+            src="/images/bust-galileo.webp"
+            alt=""
+            width={814}
+            height={700}
+          />
         }
       />
 

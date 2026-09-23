@@ -10,7 +10,7 @@ import { scrollTabTo } from '@/lib/tabScroll';
 import { prepMicroById } from '@/lib/vychisleniya/prep/blocks';
 import { sealPrep, type PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import { prep8IsSolved, prep8MarkSolved, usePrep8Progress } from '@/lib/vychisleniya/progress';
-import { recordPrep8 } from '@/lib/progress';
+import { recordPrep8, useTaskInstance } from '@/lib/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/vychisleniya/secret';
 import { randomSeed } from '@/lib/vychisleniya/session';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
@@ -54,6 +54,9 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
   const [memo, setMemo] = useState(false);
   /* Свежие варианты по номеру задачи: пока не просили — зафиксированный. */
   const [fresh, setFresh] = useState<Record<number, PrepSealed>>({});
+  /* Экземпляр задачи для единого журнала: ключ — задача и её семя, так
+     что «Ещё вариант» и переход к другой задаче начинают новый. */
+  const instance = useTaskInstance();
 
   const status: TaskStatus[] = tasks.map((item) => (prep8IsSolved(progress, blockId, item.no) ? 'right' : (attempts[item.no] ?? null)));
   const index = picked ?? firstOpen(status);
@@ -88,30 +91,36 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
     const correct = task.answerType === 'choice' ? choiceMatches(value, task.seal) : answerMatches(value, task.seal);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
-    /* Единый журнал прогресса: пишется рядом со старым хранилищем,
-       его не заменяя (см. отчёт этапа 1). */
+    /* Единый журнал — временная двойная запись до конца этапа 3. */
+    const key = `${task.id}|${task.seed}`;
+    const inst = instance.current(key);
     recordPrep8({
       skillId: blockId,
       taskId: task.id,
+      instanceId: inst.id,
       verdict: correct ? 'correct' : 'incorrect',
-      hintUsed: solution !== null,
-      firstTry: attempts[base.no] === undefined,
+      hintUsed: inst.hinted,
+      firstTry: !inst.missed,
       seed: task.seed,
     });
     if (correct) {
       prep8MarkSolved(blockId, base.no);
     } else {
+      instance.markMissed(key);
       setAttempts((prev) => ({ ...prev, [base.no]: 'wrong' }));
     }
   }
 
   function skip() {
+    /* Пропуск — только в журнал: в окно навыка он не идёт. */
+    const inst = instance.current(`${task.id}|${task.seed}`);
     recordPrep8({
       skillId: blockId,
       taskId: task.id,
+      instanceId: inst.id,
       verdict: 'skipped',
-      hintUsed: solution !== null,
-      firstTry: attempts[base.no] === undefined,
+      hintUsed: inst.hinted,
+      firstTry: !inst.missed,
       seed: task.seed,
     });
     setAttempts((prev) => ({ ...prev, [base.no]: 'skipped' }));
@@ -131,6 +140,7 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
   }
 
   function showSolution() {
+    instance.markHinted(`${task.id}|${task.seed}`);
     setSolution(openText(task.razbor, task.seal));
   }
 

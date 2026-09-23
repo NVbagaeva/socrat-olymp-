@@ -6,9 +6,8 @@
 /* ── Шапка темы ─────────────────────────────────────────────── */
 
 /* Разметку шапки даёт общий компонент (components/tasks/ShapkaRazdela),
-   здесь — только то, чем шапка темы отличается: портрет и кольцо
-   прогресса стоят в правой колонке рядом, а не под друг другом,
-   и по центру по вертикали. */
+   здесь — только то, чем шапка темы отличается: портрет стоит в правой
+   колонке по центру по вертикали. */
 .topic-head {
   align-items: center;
 }
@@ -66,22 +65,6 @@
   height: 132px;
   object-fit: contain;
   flex: none;
-}
-
-/* ── Прогресс по разделам ───────────────────────────────────── */
-
-.topic-progress {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-3);
-  flex: 0 0 auto;
-}
-.topic-progress__text {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
-  text-align: center;
-  max-width: 20ch;
 }
 
 /* ── Лента вкладок ──────────────────────────────────────────── */
@@ -656,6 +639,11 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 1023.98px) {
+  /* Шапка в одну колонку: портрет встаёт под текстом от левого края,
+     как он, — прижатый вправо, он висел бы сам по себе. */
+  .topic-head .section-head__media {
+    justify-content: flex-start;
+  }
   /* Правой колонки нет — её заменяют кнопка и шторка. */
   .topic-side {
     display: none;
@@ -697,46 +685,15 @@ a.tutor-card:hover {
     align-items: flex-start;
     margin-bottom: var(--space-6);
   }
-  /* В одну колонку портрет и кольцо встают под текстом — и от левого
-     края, как он: прижатые вправо, они висели бы сами по себе. */
-  .topic-head .section-head__media {
-    justify-content: flex-start;
-  }
-  /* Цитата и пирамида — декор: на телефоне его нет, как и на
-     остальных страницах кабинета. Цитата весила 100px из 392
-     у шапки, а первый экран нужен вкладкам. */
+  /* Цитата, портрет и пирамида — декор: на телефоне его нет, как и на
+     остальных страницах кабинета. Цитата весила 100px из 392 у шапки,
+     а первый экран нужен вкладкам. Без портрета правая колонка шапки
+     пуста — её убираем целиком, чтобы пустая строка сетки не
+     оставляла отступ. */
   .topic-quote,
-  .topic-head__art,
+  .topic-head .section-head__media,
   .topic-side__decor {
     display: none;
-  }
-  /* Кольцо уменьшается вместе с шапкой и встаёт рядом с подписью. */
-  .topic-progress {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    justify-items: start;
-    gap: var(--space-4);
-  }
-  .topic-progress .progress-ring {
-    width: 112px;
-    height: 112px;
-  }
-  .topic-progress .progress-ring svg {
-    width: 112px;
-    height: 112px;
-  }
-  .topic-progress .progress-ring .t-data-lg {
-    font-size: var(--fs-data-sm);
-    line-height: var(--lh-data-sm);
-  }
-  /* Внутри круга остаётся только доля: слово «разделов» в круг такого
-     размера не помещается, и оно уже стоит в подписи рядом. */
-  .topic-progress .progress-ring .t-caption {
-    display: none;
-  }
-  .topic-progress__text {
-    text-align: left;
-    max-width: none;
   }
   .about-later {
     padding: var(--space-5);

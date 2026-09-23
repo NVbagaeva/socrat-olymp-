@@ -9,7 +9,7 @@ import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
 import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
 import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import type { ProgressStore } from '@/lib/progressStore';
-import { recordTrainerVeroyatnost } from '@/lib/progress';
+import { recordTrainerVeroyatnost, useTaskInstance } from '@/lib/progress';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import { klyuchZadachi, openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
@@ -104,6 +104,8 @@ export function Sessiya({
      решением. Второй ответ после ошибки счётчиков не меняет. */
   const zakryto = useRef<string | null>(null);
   const oshibsya = useRef(false);
+  /* Экземпляр задачи для единого журнала: ключ — подход и место в нём. */
+  const instance = useTaskInstance();
   useEffect(() => {
     nachalo.current = Date.now();
     oshibsya.current = false;
@@ -144,11 +146,11 @@ export function Sessiya({
     zakryto.current = id;
     const elapsed = (vremya - nachalo.current) / 1000;
     store.recordAttempt({ kind: metod, taskId: id, right, clean, seconds: elapsed });
-    /* Единый журнал прогресса: пишется рядом, старую запись не
-       заменяет (см. отчёт этапа 1). */
+    /* Единый журнал — временная двойная запись до конца этапа 3. */
     recordTrainerVeroyatnost(zadanie, {
       skillId: metod,
       taskId: id,
+      instanceId: instance.current(`${plan.key}:${index}`).id,
       verdict: right ? 'correct' : 'incorrect',
       hintUsed: !right,
       firstTry: clean,
@@ -184,13 +186,13 @@ export function Sessiya({
     setItog({ vybor: metod, verny, priznaki });
     const elapsed = (vremya - nachalo.current) / 1000;
     uznayStore.recordAttempt({ kind: verny, taskId: id, right, clean: right, seconds: elapsed });
-    /* Единый журнал прогресса: пишется рядом, старую запись не
-       заменяет (см. отчёт этапа 1). Навык — верный метод (verny), не
-       выбор ученика: так же, как в старой записи выше. Подсказки
-       в этом режиме нет — один клик, ответ сразу финальный. */
+    /* Единый журнал — временная двойная запись до конца этапа 3. Навык —
+       верный метод (verny), не выбор ученика: так же, как в старой записи.
+       Подсказки в этом режиме нет — один клик, ответ сразу финальный. */
     recordTrainerVeroyatnost(zadanie, {
       skillId: verny,
       taskId: id,
+      instanceId: instance.current(`${plan.key}:${index}`).id,
       verdict: right ? 'correct' : 'incorrect',
       hintUsed: false,
       firstTry: true,

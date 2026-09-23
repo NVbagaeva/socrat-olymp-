@@ -6,7 +6,7 @@ import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
 import { ROUND_SIZE, otherVariant, seeded, type RoundItem } from '@/lib/zadanie3/podhod';
 import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
-import { recordTrainer3 } from '@/lib/progress';
+import { recordTrainer3, useTaskInstance } from '@/lib/progress';
 import { answerMatches, klyuchZadachi, openText } from '@/lib/zadanie3/secret';
 import { restartZ3Round, swapZ3Task, useZ3Round } from '@/lib/zadanie3/useRound';
 import { Solid3Stats } from './Solid3Stats';
@@ -53,6 +53,8 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
   const [missed, setMissed] = useState(false);
   /* Когда взялись за задание. Ноль — ещё не начинали. */
   const started = useRef<number>(0);
+  /* Экземпляр задания для единого журнала: новый при каждой смене задания. */
+  const instance = useTaskInstance();
 
   /* Из чего собирать подход: один тип, все типы или список ошибок.
      Список ошибок берётся строкой, чтобы зависимость эффекта не
@@ -135,6 +137,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     setSolution(false);
     setMissed(false);
     started.current = Date.now();
+    instance.reset();
   }
 
   function go(next: number) {
@@ -158,15 +161,15 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
     if (right) {
       const seconds = started.current === 0 ? 0 : (Date.now() - started.current) / 1000;
       recordTask(current.kind, current.n, !missed, seconds);
-      /* Единый журнал прогресса: пишется рядом, старую запись не
-         заменяет (см. отчёт этапа 1). «Показать решение» в этом
-         движке не влияет на старую запись — единственный такой
-         пробел среди пяти (см. отчёт), поэтому здесь, в отличие от
-         старого recordTask, разбор честно учтён как подсказка:
-         solution — тот же флаг, что открывает разбор ниже. */
+      /* Единый журнал — временная двойная запись до конца этапа 3. В
+         старой записи «Показать решение» не учитывается; здесь разбор
+         честно считается подсказкой: solution — тот же флаг, что
+         открывает разбор ниже. */
+      const id = taskKey(current.kind, current.n);
       recordTrainer3(kind.group, {
         skillId: current.kind,
-        taskId: taskKey(current.kind, current.n),
+        taskId: id,
+        instanceId: instance.current(id).id,
         verdict: 'correct',
         hintUsed: solution,
         firstTry: !missed,

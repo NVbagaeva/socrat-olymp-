@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
-import { recordTrainer8 } from '@/lib/progress';
+import { recordTrainer8, useTaskInstance } from '@/lib/progress';
 import { progress8 } from '@/lib/vychisleniya/progress';
 import { answerMatches, openText } from '@/lib/vychisleniya/secret';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
@@ -63,6 +63,8 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
   const startedAt = useRef<number | null>(null);
   const taskStartedAt = useRef<number | null>(null);
   const failed = useRef(false);
+  /* Экземпляр задания для единого журнала: новый на каждое задание подхода. */
+  const instance = useTaskInstance();
 
   function startClock() {
     const now = Date.now();
@@ -77,16 +79,20 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
 
   function remember(item: Task8, right: boolean, clean: boolean) {
     progress8.recordAttempt({ kind: item.prototype, taskId: item.id, right, clean, seconds: taskSeconds() });
-    /* Единый журнал прогресса: пишется рядом, старую запись не
-       заменяет (см. отчёт этапа 1). Навык — Skill (item.skill), а не
-       прототип: это то, что ученик выбирает в конфигураторе. Семя
-       лежит второй частью в id задачи (prototype|seed|level). */
+    /* Единый журнал — временная двойная запись до конца этапа 3. */
+    journal(item, 'correct', !right, clean);
+  }
+
+  /* Навык — Skill (item.skill), а не прототип: его ученик выбирает
+     в конфигураторе. Семя — вторая часть id задачи (prototype|seed|level). */
+  function journal(item: Task8, verdict: 'correct' | 'incorrect', hintUsed: boolean, firstTry: boolean) {
     recordTrainer8({
       skillId: item.skill,
       taskId: item.id,
-      verdict: 'correct',
-      hintUsed: !right,
-      firstTry: clean,
+      instanceId: instance.current(item.id).id,
+      verdict,
+      hintUsed,
+      firstTry,
       seconds: taskSeconds(),
       seed: item.id.split('|')[1] ?? null,
     });
@@ -120,6 +126,9 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
         stopClock();
       }
     } else {
+      /* Неверный ответ без раскрытия решения: старое хранилище его
+         не видит, в единый журнал он идёт. */
+      journal(task, 'incorrect', solution !== null, !failed.current);
       failed.current = true;
       setMisses(misses + 1);
     }
@@ -142,6 +151,7 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
   function next() {
     taskStartedAt.current = null;
     failed.current = false;
+    instance.reset();
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -161,6 +171,7 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
     startedAt.current = null;
     taskStartedAt.current = null;
     failed.current = false;
+    instance.reset();
   }
 
   const nextButton = last ? (

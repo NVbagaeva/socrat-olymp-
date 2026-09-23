@@ -30,12 +30,14 @@ import type { TaskNo, Verdict } from './types';
 
 export interface AttemptArgs {
   skillId: string;
-  /** Экземпляр задачи: для журнала и будущего «повтора ошибок». */
+  /** Задача: для журнала и будущего «повтора ошибок». */
   taskId: string;
+  /** Экземпляр задачи (instance.ts): в окно навыка идёт один итог на него. */
+  instanceId: string;
   verdict: Verdict;
   /** Была ли на этом экземпляре открыта подсказка, разбор или решение. */
   hintUsed: boolean;
-  /** Верно с первой проверки: до этого не было ни ошибки, ни разбора. */
+  /** Первая проверка этого экземпляра: до неё ошибок не было. */
   firstTry: boolean;
   seconds?: number;
   /** null или не передано — семя не нужно/недоступно (см. отчёт). */
@@ -49,6 +51,7 @@ function write(taskNo: TaskNo, subtopicId: string, source: 'prep' | 'trainer', a
     source,
     skillId: args.skillId,
     taskId: args.taskId,
+    instanceId: args.instanceId,
     seed: args.seed ?? null,
     verdict: args.verdict,
     hintUsed: args.hintUsed,

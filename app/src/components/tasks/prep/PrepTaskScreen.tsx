@@ -8,7 +8,7 @@ import type { PrepTask, PrepZakrytoe } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { isSolved, markSolved, usePrepProgress } from '@/lib/prepProgress';
 import { answerMatches, choiceMatches, openText } from '@/lib/prepSecret';
-import { recordPrep12 } from '@/lib/progress';
+import { recordPrep12, useTaskInstance } from '@/lib/progress';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
@@ -82,6 +82,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   /* Разбор: раскрыт ли он и какой шаг открыт. */
   const [solution, setSolution] = useState(false);
   const [step, setStep] = useState(0);
+  /* Экземпляр задачи для единого журнала: новый при переходе к другой
+     задаче, «Попробовать ещё раз» — тот же экземпляр. */
+  const instance = useTaskInstance();
 
   const status: Status[] = tasks.map((item) =>
     isSolved(progress, skillId, item.no) ? 'right' : (attempts[item.no] ?? null),
@@ -155,17 +158,16 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
        решённой, а экран должен остаться на ней с разбором и плашкой. */
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
-    /* Единый журнал прогресса: пишется рядом со старым хранилищем,
-       его не заменяя — см. отчёт этапа 1 про временную двойную
-       запись. «С первой проверки» и «без подсказки» читаются из
-       того же состояния экрана, что уже здесь есть. */
-    const firstTry = attempts[task.no] === undefined;
+    /* Единый журнал прогресса — временная двойная запись рядом со
+       старым хранилищем, до конца этапа 3. */
+    const inst = instance.current(task.id);
     recordPrep12({
       skillId,
       taskId: task.id,
+      instanceId: inst.id,
       verdict: correct ? 'correct' : 'incorrect',
-      hintUsed: solution,
-      firstTry,
+      hintUsed: inst.hinted,
+      firstTry: !inst.missed,
     });
     if (correct) {
       /* Запись в хранилище: отсюда же перерисуются счётчик вкладки
@@ -173,17 +175,21 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
          ничего не добавит. */
       markSolved(skillId, task.no);
     } else {
+      instance.markMissed(task.id);
       remember('wrong');
     }
   }
 
   function skip() {
+    /* Пропуск — только в журнал: в окно навыка он не идёт. */
+    const inst = instance.current(task.id);
     recordPrep12({
       skillId,
       taskId: task.id,
+      instanceId: inst.id,
       verdict: 'skipped',
-      hintUsed: solution,
-      firstTry: attempts[task.no] === undefined,
+      hintUsed: inst.hinted,
+      firstTry: !inst.missed,
     });
     remember('skipped');
     if (nextOpen !== null) {
@@ -199,6 +205,7 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   }
 
   function showSolution() {
+    instance.markHinted(task.id);
     setSolution(true);
     setStep(0);
   }
