@@ -708,6 +708,50 @@ a.tutor-card:hover {
   /* Строка ломается пополам, а не оставляет одно слово внизу. */
   text-wrap: balance;
 }
+/* Чертёж «конус, плоскость, парабола»: линии тонкие, заливки лёгкие,
+   парабола — главная линия, поэтому она толще и акцентного цвета.
+   Сама геометрия считается в lib/graph/konus3d.js. */
+.konus {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.konus__fon {
+  fill: var(--color-surface-soft);
+  fill-opacity: 0.7;
+}
+.konus__ploskost-fon {
+  fill: var(--color-border-info);
+  fill-opacity: 0.45;
+}
+.konus__ploskost {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+.konus__rebro {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+/* Дальняя половина окружности основания. */
+.konus__rebro--za {
+  stroke-dasharray: 10 8;
+}
+.konus__parabola {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 4.4;
+  stroke-linecap: round;
+}
+/* Часть кривой, уходящая за конус. */
+.konus__parabola--za {
+  stroke-dasharray: 12 10;
+}
+
 /* Конус: картинка и кривая сечения поверх неё. Кривая живёт в системе
    координат самой картинки, поэтому при любой ширине остаётся на
    своём месте. */
