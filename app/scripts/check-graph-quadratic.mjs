@@ -20,8 +20,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import generator from '../src/lib/graph/generate.js';
-import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkQuadraticComposition, checkQuadraticSolution,
-         checkQuadraticTask, hiddenVariantCounts, intersectionAudit,
+import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkLabels, checkQuadraticComposition,
+         checkQuadraticSolution, checkQuadraticTask, hiddenVariantCounts, intersectionAudit,
          solutionShape } from './lib/graph-quadratic-checks.mjs';
 
 /* Цель по окну: ±5…±6; шире — исключение, о котором отчёт говорит вслух. */
@@ -58,6 +58,8 @@ if (QUADRATIC_SETS.length === 0) {
   process.exit(1);
 }
 generator.setSets({ prep: PREP_SETS, prototypes: PROTO_SETS });
+/* Проверке подписей нужны настоящие прямоугольники из рендерера. */
+generator.setLayoutReport(true);
 
 const errors = [];
 const report = [];
@@ -79,7 +81,7 @@ for (const set of QUADRATIC_SETS) {
   }
 
   tasks.forEach((task) => {
-    errors.push(...checkQuadraticTask(set, task));
+    errors.push(...checkQuadraticTask(set, task), ...checkLabels(set, task));
     errors.push(...checkQuadraticSolution(set, task));
   });
   errors.push(...checkQuadraticComposition(set, tasks));
@@ -126,7 +128,7 @@ for (const set of QUADRATIC_SETS) {
     try {
       const fresh = generator.generateSet(set.id, seed);
       const bad = fresh.flatMap((task) => checkQuadraticTask(set, task)
-        .concat(checkQuadraticSolution(set, task)))
+        .concat(checkQuadraticSolution(set, task), checkLabels(set, task)))
         .concat(checkQuadraticComposition(set, fresh));
       if (bad.length) {
         seedErrors.push(`${seed}: ${bad[0]}`);

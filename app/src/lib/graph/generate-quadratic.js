@@ -1053,6 +1053,12 @@ function curveOf(part, label) {
   return { type: 'quadratic', a: p.aValue, b: p.bValue, c: p.cValue, color: part.color, label: label };
 }
 
+/* Отчёт о размещении подписей нужен только проверке: она смотрит
+   на настоящие прямоугольники, а не на догадки. В приложении его
+   никто не просит, и в задачу он не кладётся. */
+var LAYOUT_REPORT = false;
+function setLayoutReport(on) { LAYOUT_REPORT = !!on; }
+
 function sceneFor(built, task, set) {
   var single = built.parts.length === 1;
   var pair = task.curveLabels || set.curveLabels || ['y = f(x)', 'y = g(x)'];
@@ -1063,10 +1069,11 @@ function sceneFor(built, task, set) {
       points.push({ x: point.x, y: point.y, style: 'solid', color: part.color, label: point.label });
     });
   });
-  /* Точки пересечения — терракотовые, как проверяемая точка у прямой:
-     их нельзя спутать с опорными точками самой параболы. */
+  /* Точка пересечения принадлежит обеим кривым, поэтому цвета ни
+     одной из них у неё нет: она тёмная, как оси. Терракотовой, как
+     вторая кривая, она читалась точкой одной только g. */
   built.points.filter(function (point) { return point.role === 'cross'; }).forEach(function (point) {
-    points.push({ x: point.x, y: point.y, style: 'solid', color: 'lineB', label: point.label });
+    points.push({ x: point.x, y: point.y, style: 'solid', color: 'cross', label: point.label });
   });
 
   var second = built.parts[1];
@@ -1074,6 +1081,10 @@ function sceneFor(built, task, set) {
     window: built.window,
     grid: { step: 1, show: true },
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    /* Строгие правила подписей: никаких наложений, подпись у своей
+       точки, отмеченная точка не садится на подпись деления.
+       Признак подтемы — у линейной чертежи прежние. */
+    labelRules: 'strict',
     axisLabels: task.axisLabels || set.axisLabels || 'minimal',
     curves: built.parts.map(function (part, index) {
       var label = single
@@ -1107,6 +1118,7 @@ function result(set, task, built, seed, index) {
   if (!rule) { throw new Error('generate-quadratic: неизвестное правило ответа «' + task.answerRule + '»'); }
 
   var p = built.curve;
+  var layout = LAYOUT_REPORT && !task.noChart ? {} : null;
   var form = built.form || task.form || set.form || 'general';
   var value = rule({ curve: p, window: built.window, points: built.points, query: built.query,
                      intersection: built.intersection, parts: built.parts, form: form,
@@ -1134,7 +1146,8 @@ function result(set, task, built, seed, index) {
   return {
     id: task.id,
     kind: set.kind,
-    svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set), layout),
+    layout: layout,
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),
     hint: task.hint ? plainText(fillTemplate(task.hint, values)) : null,
@@ -1186,9 +1199,11 @@ const api = {
   result: result,
   distractors: distractors,
   equationChoice: equationChoice,
+  setLayoutReport: setLayoutReport,
   ANSWER_RULES: ANSWER_RULES,
   OPTIONS: OPTIONS
 };
 
 export default api;
-export { candidates, result, distractors, equationChoice, ANSWER_RULES, OPTIONS };
+export { candidates, result, distractors, equationChoice, setLayoutReport,
+         ANSWER_RULES, OPTIONS };

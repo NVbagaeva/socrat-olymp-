@@ -634,3 +634,63 @@ export function hiddenVariantCounts(tasks) {
   });
   return counts;
 }
+
+/* ══════════════════════════════════════════════════════════
+   Подписи на чертеже
+
+   Считается по отчёту рендерера: там лежат настоящие прямоугольники
+   подписей, их вид и точки, к которым подписи относятся. Мерить по
+   картинке на глаз нечего — числа те же, по которым рендерер сам
+   выбирал место.
+   ══════════════════════════════════════════════════════════ */
+
+/* Пересекаются ли два прямоугольника. Касание не в счёт. */
+function boxesHit(a, b) {
+  return Math.abs(a.x - b.x) < a.halfW + b.halfW - 1e-6 &&
+         Math.abs(a.y - b.y) < a.halfH + b.halfH - 1e-6;
+}
+
+/* Зазор от точки до прямоугольника. */
+function gapToBox(box, point) {
+  const dx = Math.max(Math.abs(point.x - box.x) - box.halfW, 0);
+  const dy = Math.max(Math.abs(point.y - box.y) - box.halfH, 0);
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function checkLabels(set, task) {
+  const layout = task.layout;
+  if (!layout || !layout.boxes) { return []; }
+  const errors = [];
+  const where = `${set.id}/${task.id}`;
+  const boxes = layout.boxes;
+
+  /* Ни одна подпись не налезает ни на какую другую. */
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      if (boxesHit(boxes[i], boxes[j])) {
+        errors.push(`${where}: подписи налезают друг на друга — ${boxes[i].kind} и ${boxes[j].kind}`);
+      }
+    }
+  }
+
+  /* Подпись точки стоит у своей точки: не дальше половины клетки. */
+  const limit = layout.cell * 0.5 + 1e-6;
+  boxes.filter((box) => box.kind === 'pointLabel' && box.at).forEach((box) => {
+    const gap = gapToBox(box, box.at);
+    if (gap > limit) {
+      errors.push(`${where}: подпись точки в ${gap.toFixed(1)} px от неё, ` +
+        `а клетка ${layout.cell} px — не дальше половины`);
+    }
+  });
+
+  /* Отмеченная точка не закрывает подпись деления оси. */
+  (layout.points || []).forEach((point) => {
+    boxes.filter((box) => box.kind === 'axisLabel').forEach((box) => {
+      if (gapToBox(box, point) < point.r) {
+        errors.push(`${where}: отмеченная точка закрывает подпись деления оси`);
+      }
+    });
+  });
+
+  return errors;
+}

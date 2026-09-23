@@ -904,8 +904,13 @@ function buildAnswers() {
   return out;
 }
 
+/* Проверке нужен отчёт о размещении подписей: включается отсюда,
+   чтобы скрипту не пришлось лезть в модуль параболы напрямую. */
+function setLayoutReport(on) { Quadratic.setLayoutReport(on); }
+
 const api = {
   setSets: setSets,
+  setLayoutReport: setLayoutReport,
   typeset: typesetText,
   analysis: analysis,
   taskCandidates: taskCandidates,
@@ -918,6 +923,6 @@ const api = {
 };
 
 export default api;
-export { setSets, analysis, taskCandidates, equationText, generate, generateSet,
+export { setSets, setLayoutReport, analysis, taskCandidates, equationText, generate, generateSet,
          loadSets, buildAnswers, answerText };
 export const typeset = typesetText;

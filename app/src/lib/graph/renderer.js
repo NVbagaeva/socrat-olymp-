@@ -45,7 +45,10 @@ var THEME = {
     accent:      'var(--graph-accent, #E07A2F)',   /* треугольник наклона   */
     pointFill:   null,                             /* null — цвет кривой    */
     pointStroke: 'var(--color-surface, #FFFFFF)',
-    halo:        'var(--color-surface, #FFFFFF)'
+    halo:        'var(--color-surface, #FFFFFF)',
+    /* Общая точка двух кривых: она ничья, и цвет у неё ничей —
+       тёмный, как у осей, и не совпадает ни с одной из кривых. */
+    cross:       'var(--graph-axis, #101728)'
   },
 
   /* Иерархия толщин: каждая ступень различима на глаз.
@@ -71,7 +74,8 @@ var THEME = {
     slideReachPx:  62,       /* насколько подпись катета ходит вдоль него  */
     slideStepPx:    6,
     anchorPenalty:  3.5,     /* плата за уход от ближнего места подписи    */
-    overlapPenalty: 1000     /* занятое место проигрывает любому свободному */
+    overlapPenalty: 1000,    /* занятое место проигрывает любому свободному */
+    textPenalty:  100000     /* наложение подписи на подпись — хуже всего   */
   },
 
   geometry: {
@@ -92,6 +96,9 @@ var THEME = {
     axisLabel:  12,       /* числа на осях — заметно мельче подписей осей  */
     axisName:    17,      /* x, y, 0 — курсив                              */
     pointLabel:  13,
+    /* Строгие подписи: координаты точки читаются с телефона, поэтому
+       кегль не меньше, чем у чисел осей, и с запасом. */
+    pointLabelStrict: 15,
     helperLabel: 19,      /* числа у катетов треугольника наклона           */
 
     /* Подпись графика: жирное математическое начертание —
@@ -275,6 +282,10 @@ function renderGraph(scene, report) {
   var axisY = sx(0);          /* пиксельный столбец оси y */
 
   var mode = pick(scene.axisLabels, THEME.axisLabels);
+  /* Строгие правила подписей: расхождение подтемы «Квадратичная
+     функция». Сцена объявляет их сама, поэтому чертежи остальных
+     подтем рисуются ровно как прежде. */
+  var strict = scene.labelRules === 'strict';
   var axes = scene.axes || {};
   var grid = scene.grid || {};
   var step = pick(grid.step, 1);
@@ -371,6 +382,23 @@ function renderGraph(scene, report) {
     return out;
   }
 
+  /* Отмеченная точка садится на подпись деления и закрывает её.
+     Значение деления при этом видно из подписи самой точки, так что
+     подпись убирается, а не рисуется под кружком.
+
+     Проверяется не «точка стоит на оси», а настоящая геометрия:
+     кружок радиуса pointRadius против прямоугольника подписи.
+     Точка рядом с осью закрывает подпись ничуть не меньше, чем
+     точка ровно на ней. */
+  function coveredByPoint(cx, cy, halfW, halfH) {
+    if (!strict) { return false; }
+    return (scene.points || []).some(function (point) {
+      var dx = Math.max(Math.abs(sx(point.x) - cx) - halfW, 0);
+      var dy = Math.max(Math.abs(sy(point.y) - cy) - halfH, 0);
+      return Math.sqrt(dx * dx + dy * dy) < g.pointRadius;
+    });
+  }
+
   var ticksX = tickList('x');
   var ticksY = tickList('y');
 
@@ -438,6 +466,10 @@ function renderGraph(scene, report) {
   ticksX.forEach(function (item) {
     if (item.text === null) { return; }
     var textX = item.text;
+    var boxXc = sx(item.at);
+    var boxYc = axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35;
+    var boxXh = textWidth(textX, THEME.font.axisLabel) / 2;
+    if (coveredByPoint(boxXc, boxYc, boxXh, THEME.font.axisLabel * 0.62)) { return; }
     labelLayer.push(numberText(textX, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
     boxFor(textX, sx(item.at), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
     collect(report, 'axisLabel', null, sx(item.at),
@@ -448,12 +480,17 @@ function renderGraph(scene, report) {
     if (item.text === null) { return; }
     var textY = item.text;
     var half = textWidth(textY, THEME.font.axisLabel) / 2;
+    if (coveredByPoint(axisY - THEME.gap.axisLabelY - half, sy(item.at), half,
+      THEME.font.axisLabel * 0.62)) { return; }
     labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(item.at) + 4.5, 'end'));
     boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(item.at));
     collect(report, 'axisLabel', null, axisY - THEME.gap.axisLabelY - half, sy(item.at),
       half, THEME.font.axisLabel * 0.62);
   });
-  if (pick(axes.origin, '0') !== null) {
+  var originTaken = strict && (scene.points || []).some(function (point) {
+    return dist(sx(point.x), sy(point.y), axisY, axisX) < g.pointRadius * 2;
+  });
+  if (pick(axes.origin, '0') !== null && !originTaken) {
     /* Подпись начала координат уходит в свободную четверть: если
        в начале координат стоит точка или через него идёт график,
        классическое место слева-снизу занято. */
@@ -521,6 +558,10 @@ function renderGraph(scene, report) {
   var originPx = { x: axisY, y: axisX };
 
   (scene.points || []).forEach(function (point) {
+    if (report) {
+      if (!report.points) { report.points = []; }
+      report.points.push({ x: sx(point.x), y: sy(point.y), r: g.pointRadius });
+    }
     var fill = THEME.colors.pointFill || color(point.color);
     var open = point.style === 'open';
     pointLayer.push('<circle cx="' + px(sx(point.x)) + '" cy="' + px(sy(point.y)) + '" r="' +
@@ -530,16 +571,36 @@ function renderGraph(scene, report) {
 
   (scene.points || []).forEach(function (point) {
     if (!point.label) { return; }
-    var halfW = textWidth(point.label, THEME.font.pointLabel) / 2;
-    var halfH = THEME.font.pointLabel * 0.62;
-    var cloud = obstacleCloud(scene, drawn, sx, sy, originPx, field, labelBoxes);
-    var spot = bestLabelSpot(sx(point.x), sy(point.y), halfW, halfH,
-      THEME.gap.pointLabel + g.pointRadius, cloud, field);
+    var size = strict ? THEME.font.pointLabelStrict : THEME.font.pointLabel;
+    var halfW = (strict ? pointTextWidth(point.label, size)
+                        : textWidth(point.label, size)) / 2;
+    var halfH = size * 0.62;
+    var cloud = obstacleCloud(scene, drawn, sx, sy, originPx, field,
+      strict ? [] : labelBoxes);
+    var spot;
+    if (strict) {
+      /* Зазор до точки — не больше половины клетки: подпись читается
+         как подпись именно этой точки, а не соседней. Кружок она при
+         этом не задевает. */
+      var gapStrict = Math.max(g.pointRadius + 2,
+        Math.min(THEME.gap.pointLabel + g.pointRadius, cell * 0.5));
+      spot = pointLabelSpot(sx(point.x), sy(point.y), halfW, halfH, gapStrict,
+        cloud, labelBoxes, field);
+    } else {
+      spot = bestLabelSpot(sx(point.x), sy(point.y), halfW, halfH,
+        THEME.gap.pointLabel + g.pointRadius, cloud, field);
+    }
 
     labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
     collect(report, 'pointLabel', null, spot.x, spot.y, halfW, halfH);
+    if (report) {
+      report.boxes[report.boxes.length - 1].at = { x: sx(point.x), y: sy(point.y) };
+    }
+    /* Координаты точки — тёмные, как числа осей: цветом кривой их
+       набирать незачем, а у общей точки двух кривых такого цвета и
+       нет. Белая подложка под текстом — общая для всех подписей. */
     pointLayer.push(labelText(point.label, spot.x, spot.y + halfH * 0.55, 'middle',
-      THEME.font.pointLabel, color(point.color)));
+      size, strict ? THEME.colors.label : color(point.color)));
   });
 
   /* Подписи графиков: горизонтально, у самой линии, в стороне
@@ -548,7 +609,8 @@ function renderGraph(scene, report) {
     if (!item.curve.label) { return; }
     /* Зона может быть пустой: тогда места под подпись нет и её не рисуем. */
     if (item.curve.labelZone === null) { return; }
-    curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes, report, cell));
+    curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes, report, cell,
+      strict));
   });
 
   var body = gridLayer.concat(axisLayer, shapeLayer);
@@ -560,6 +622,18 @@ function renderGraph(scene, report) {
   return head.concat(body, curveLabelLayer, '</svg>').join('');
 }
 
+/* Подпись легла на другую подпись — обе нечитаемы. Для строгих
+   правил это дороже любого зазора, поэтому считается отдельно от
+   облака: зазор там меряется до линий и осей, а лечь на линию
+   подпись может — под ней белая подложка. */
+function textHit(boxes, strict, cx, cy, halfW, halfH) {
+  if (!strict) { return false; }
+  for (var i = 0; i < boxes.length; i++) {
+    if (rectDist(boxes[i], cx, cy, halfW, halfH) <= 0) { return true; }
+  }
+  return false;
+}
+
 /* ══════════════════════════════════════════════════════════
    Подпись графика: горизонтально, без поворота, с белой подложкой.
    Перебираем точки вдоль видимой части линии и обе стороны от неё,
@@ -567,7 +641,7 @@ function renderGraph(scene, report) {
    самих графиков, осей и отмеченных точек — и берём лучшее место.
    Не нашлось — сдвигаемся вдоль линии, но никогда не вращаем.
    ══════════════════════════════════════════════════════════ */
-function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
+function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, strict) {
   /* Зона задаётся снаружи: подпись ставится только на той части
      прямой, что лежит за треугольником. Пустая зона — подписи нет. */
   var zone = item.curve.labelZone;
@@ -578,7 +652,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
   /* Кривая из многих звеньев (парабола) подписывается вдоль самой
      ломаной: хорда от первой точки до последней прошла бы мимо неё. */
   if (piece.length > 2) {
-    return curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report);
+    return curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report, strict);
   }
   var a = piece[0];
   var b = piece[piece.length - 1];
@@ -639,6 +713,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
         (outer ? THEME.curveLabelOuter : 0) +
         (1 - Math.abs(t - 0.5) * 2) * THEME.curveLabelMiddle;
 
+      if (textHit(labelBoxes, strict, cx, cy, halfW, halfH)) { continue; }
       if (!fallback || clear > fallback.clear + 1e-9) { fallback = { x: cx, y: cy, clear: clear }; }
       if (clear < THEME.curveLabelClear) { continue; }
       if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
@@ -662,7 +737,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell) {
    подпись отводится по местной нормали — по обе стороны, — а зазор до
    облака препятствий считается так же, как у прямой. Зона подписи
    у кривых не задаётся: она нужна только треугольнику наклона. */
-function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report) {
+function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, report, strict) {
   var pts = piece.map(function (p) { return { x: sx(p.x), y: sy(p.y) }; });
   var cum = [0];
   for (var i = 1; i < pts.length; i++) {
@@ -718,6 +793,7 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
         (outer ? THEME.curveLabelOuter : 0) +
         (1 - Math.abs(t - 0.5) * 2) * THEME.curveLabelMiddle;
 
+      if (textHit(labelBoxes, strict, cx, cy, halfW, halfH)) { continue; }
       if (!fallback || clear > fallback.clear + 1e-9) { fallback = { x: cx, y: cy, clear: clear }; }
       if (clear < THEME.curveLabelClear) { continue; }
       if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
@@ -868,6 +944,69 @@ var LABEL_DIRECTIONS = [
   [0, -1], [0, 1], [1, 0], [-1, 0]
 ];
 
+/* Место подписи у точки по строгим правилам подтемы «Квадратичная
+   функция».
+
+   Два отличия от общего подбора. Первое: подпись стоит вплотную к
+   своей точке — зазор от её рамки до точки один и тот же во всех
+   положениях, и он не больше половины клетки. Раньше по диагонали
+   рамка отъезжала в полтора раза дальше, чем по прямой, и подпись
+   читалась как ничья. Второе: положений не восемь, а до двадцати —
+   у каждой прямой стороны подпись ещё ходит вдоль себя на свою
+   полуширину. Уехать от точки она при этом не может: сдвиг вдоль
+   стороны зазор не меняет.
+
+   Наложение по-прежнему дисквалифицирует место, но теперь считается
+   честно, по прямоугольникам соседних подписей. */
+function pointLabelSpot(ax, ay, halfW, halfH, gap, cloud, texts, field) {
+  var best = null;
+  var order = 0;
+
+  /* Лечь на кривую подпись может: под ней белая подложка, и линия
+     сквозь неё не читается. Лечь на другую подпись — нет: там обе
+     становятся нечитаемыми. Поэтому наложение на текст стоит дороже
+     всего остального вместе взятого. */
+  function onText(cx, cy) {
+    for (var i = 0; i < texts.length; i++) {
+      if (rectDist(texts[i], cx, cy, halfW, halfH) <= 0) { return true; }
+    }
+    return false;
+  }
+
+  LABEL_DIRECTIONS.forEach(function (dir) {
+    var diagonal = dir[0] !== 0 && dir[1] !== 0;
+    /* По диагонали зазор раскладывается на две оси: иначе рамка
+       окажется от точки в √2 раз дальше, чем сбоку. */
+    var step = diagonal ? gap * Math.SQRT1_2 : gap;
+    var dx = dir[0] * (dir[0] ? halfW + step : 0);
+    var dy = dir[1] * (dir[1] ? halfH + step : 0);
+    var shifts = diagonal ? [0]
+      : (dir[0] !== 0 ? [0, -halfH, halfH] : [0, -halfW, halfW]);
+
+    shifts.forEach(function (shift) {
+      var cx = ax + dx + (dir[0] !== 0 ? 0 : shift);
+      var cy = ay + dy + (dir[0] !== 0 ? shift : 0);
+      var penalty = order * 0.6;
+      order += 1;
+
+      if (cx - halfW < field.left) { penalty += (field.left - (cx - halfW)) * 2; }
+      if (cx + halfW > field.right) { penalty += ((cx + halfW) - field.right) * 2; }
+      if (cy - halfH < field.top) { penalty += (field.top - (cy - halfH)) * 2; }
+      if (cy + halfH > field.bottom) { penalty += ((cy + halfH) - field.bottom) * 2; }
+
+      var clear = Infinity;
+      for (var c = 0; c < cloud.length; c++) {
+        clear = Math.min(clear, rectDist(cloud[c], cx, cy, halfW, halfH));
+        if (clear <= 0) { break; }
+      }
+      var score = (clear > 0 ? clear : clear - THEME.helper.overlapPenalty) - penalty;
+      if (onText(cx, cy)) { score -= THEME.helper.textPenalty; }
+      if (!best || score > best.score + 1e-9) { best = { x: cx, y: cy, score: score }; }
+    });
+  });
+  return best;
+}
+
 function bestLabelSpot(ax, ay, halfW, halfH, gap, cloud, field, prefer) {
   var best = null;
   var directions = LABEL_DIRECTIONS;
@@ -957,7 +1096,11 @@ function obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes, opts) {
   });
 
   (labelBoxes || []).forEach(function (box) {
-    cloud.push({ x: box.x, y: box.y });
+    /* Строгий режим: подпись занимает свой прямоугольник целиком.
+       Обычный — только середину, как было до правил квадратичной. */
+    cloud.push(opts && opts.boxes === 'rect'
+      ? { x: box.x, y: box.y, halfW: box.halfW, halfH: box.halfH }
+      : { x: box.x, y: box.y });
     cloud.push({ x: box.x - box.halfW, y: box.y - box.halfH });
     cloud.push({ x: box.x + box.halfW, y: box.y - box.halfH });
     cloud.push({ x: box.x - box.halfW, y: box.y + box.halfH });
@@ -967,9 +1110,13 @@ function obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes, opts) {
 }
 
 /* Расстояние от точки до прямоугольника подписи. */
-function rectDist(point, cx, cy, halfW, halfH) {
-  var dx = Math.max(Math.abs(point.x - cx) - halfW, 0);
-  var dy = Math.max(Math.abs(point.y - cy) - halfH, 0);
+/* Зазор от прямоугольника подписи до препятствия. Препятствие — либо
+   точка облака, либо прямоугольник (у него есть halfW и halfH): подпись
+   занимает место целиком, и мерить расстояние до её середины значит
+   разрешить наложение краями. Раньше так и было. */
+function rectDist(item, cx, cy, halfW, halfH) {
+  var dx = Math.max(Math.abs(item.x - cx) - halfW - (item.halfW || 0), 0);
+  var dy = Math.max(Math.abs(item.y - cy) - halfH - (item.halfH || 0), 0);
   return Math.sqrt(dx * dx + dy * dy);
 }
 
@@ -980,6 +1127,24 @@ function collect(report, kind, id, x, y, halfW, halfH) {
   if (!report) { return; }
   if (!report.boxes) { report.boxes = []; }
   report.boxes.push({ kind: kind, id: id, x: x, y: y, halfW: halfW, halfH: halfH });
+}
+
+/* Ширина подписи координат — по таблице долей кегля, снятой с того
+   самого начертания, каким подпись набирается. Общая оценка в 0,56
+   кегля на знак годится для слов, а у «(2; −3)» половину строки
+   занимают скобки и точка с запятой, и она завышает ширину в полтора
+   раза. Подпись от этого отъезжала от своей точки дальше, чем видно
+   рендереру: он считал, что рамка уже дотянулась. */
+var GLYPH = { '(': 0.333, ')': 0.333, ';': 0.333, ' ': 0.25,
+              '\u2212': 0.57, '-': 0.57, ',': 0.25, '.': 0.25 };
+
+function pointTextWidth(value, size) {
+  var total = 0;
+  for (var i = 0; i < value.length; i++) {
+    var w = GLYPH[value.charAt(i)];
+    total += w === undefined ? 0.5 : w;
+  }
+  return total * size;
 }
 
 /* Оценка ширины строки: по умолчанию символ примерно 0,56 кегля. */
