@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { activeSubtopicParams, findSubtopic } from '@/content/sections';
+import { findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { generatorPage } from '@/content/generator';
 import { SheetPage } from '../SheetPage';
 import 'katex/dist/katex.min.css';
@@ -11,7 +11,7 @@ import '@/lib/sheet/sheet.css';
 import '../pechat.css';
 
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return trainerSubtopicParams();
 }
 export const dynamicParams = false;
 
@@ -30,12 +30,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  */
 export default async function Page({ params }: { params: Params }) {
   const { task, type } = await params;
-  if (!findSubtopic(task, type)) {
+  const subtopic = findSubtopic(task, type);
+  if (!subtopic) {
     notFound();
   }
   return (
     <Suspense fallback={null}>
-      <SheetPage withAnswers />
+      <SheetPage withAnswers {...(subtopic.sheetTitle === undefined ? {} : { subtopic: subtopic.sheetTitle })} />
     </Suspense>
   );
 }

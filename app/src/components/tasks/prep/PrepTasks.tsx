@@ -5,6 +5,8 @@ import { PrepShell } from './PrepShell';
 import { PrepTaskScreen } from './PrepTaskScreen';
 
 export interface PrepTasksProps {
+  /** Подтема: её список навыков в ленте над задачами. */
+  type: string;
   skill: PrepSkill;
   /** Адрес подтемы: от него считается ссылка на список навыков. */
   base: string;
@@ -17,9 +19,9 @@ export interface PrepTasksProps {
  * готовая разметка условий, чертежей и разборов. Клиентскому экрану
  * ни движок, ни KaTeX не нужны.
  */
-export function PrepTasks({ skill, base }: PrepTasksProps) {
+export function PrepTasks({ type, skill, base }: PrepTasksProps) {
   return (
-    <PrepShell base={base} active={skill.id}>
+    <PrepShell type={type} base={base} active={skill.id}>
       <PrepTaskScreen
         skillId={skill.id}
         title={skill.title}

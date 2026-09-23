@@ -14,6 +14,8 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
+import { quadraticSteps, type PrepStep } from '@/lib/prep';
+import { methodFor } from '@/lib/trainerMethod';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
    из своего кэша. */
@@ -38,6 +40,34 @@ export interface TrainerTask {
    * подсказку» у задания нет.
    */
   steps: TrainerStep[];
+  /**
+   * Варианты ответа. null — ответ вводится числом. Появляются
+   * у подтемы с признаком choiceAnswers.
+   */
+  options: TrainerOption[] | null;
+  /** Чем плох вариант — по его номеру. У верного записи нет. */
+  oshibki: Record<string, string>;
+  /**
+   * Разбор — тот же, что в опорных задачах, вместе со свёрнутым
+   * блоком «Если нужна вся формула» там, где он есть. null —
+   * движок не строит разбора для этой задачи.
+   */
+  solution: PrepStep[] | null;
+  /** Рисунок метода: чем эта задача решается. null — рисунка нет. */
+  method: TrainerMethod | null;
+}
+
+/** Вариант ответа: номер и готовая разметка. */
+export interface TrainerOption {
+  number: string;
+  html: string;
+}
+
+/** Рисунок метода под разбором: миниатюра, название и приём. */
+export interface TrainerMethod {
+  title: string;
+  tip: string;
+  svg: string;
 }
 
 /** Одно поле шага: подпись слева и ожидаемое значение. */
@@ -110,8 +140,17 @@ export interface EngineTask {
     lines: EngineLine[];
     /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
     level?: string | null;
+    /** Семейство кривой: 'line' или 'quadratic'. */
+    family?: string;
   };
   answerType?: string;
+  /**
+   * Варианты ответа у задачи с выбором. Пояснение к неверному
+   * варианту движок кладёт в error — у верного там null.
+   */
+  options?: { number: string; html: string; text?: string; error: string | null }[] | null;
+  /** Подсказка условия: у наборов подготовки она есть, у прототипов нет. */
+  hintHtml?: string | null;
 }
 
 /* ── KaTeX на сборке ─────────────────────────────────────────────
@@ -680,14 +719,24 @@ function stepsFor(task: EngineTask): TrainerStep[] {
    со свежим seed, — этой функции всё равно. */
 
 export function trainerTaskFrom(task: EngineTask): TrainerTask {
+  /* У параболы своя ветка: цепочки подсказок с полями у неё нет,
+     зато есть разбор — тот же, что во вкладке опорных задач, — и
+     рисунок метода. */
+  const quadratic = task.meta.family === 'quadratic';
   return {
     id: task.id,
     kind: task.meta.set,
     questionHtml: typeset(task.questionHtml),
     chartSvg: task.svg,
     answer: task.answer,
-    wrongHint: hintHtml(wrongHintFor(task) ?? ''),
-    rightHint: rightHintFor(task),
-    steps: stepsFor(task),
+    wrongHint: quadratic ? '' : hintHtml(wrongHintFor(task) ?? ''),
+    rightHint: quadratic ? '' : rightHintFor(task),
+    steps: quadratic ? [] : stepsFor(task),
+    options: task.options == null ? null
+      : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
+    oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
+      option.error === null ? [] : [[option.number, typeset(option.error)]])),
+    solution: quadratic ? quadraticSteps(task) : null,
+    method: quadratic ? methodFor(task.meta.set) : null,
   };
 }

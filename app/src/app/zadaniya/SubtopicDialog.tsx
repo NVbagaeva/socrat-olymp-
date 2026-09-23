@@ -16,7 +16,7 @@ export interface SubtopicView {
   /** Сколько наборов прототипов и задач в них — из манифеста. */
   prototypes: number;
   tasks: number;
-  /** Адрес подтемы. У закрытой ссылки нет. */
+  /** Адрес подтемы. Нет ни у закрытой, ни у той, чьи страницы не собраны. */
   href: string | null;
 }
 
@@ -43,7 +43,10 @@ function countLine(item: SubtopicView): string {
 }
 
 function Card({ item }: { item: SubtopicView }) {
-  const open = item.href !== null;
+  /* Открытая подтема — со счётом задач и галочкой; собранная в
+     предпросмотре — со ссылкой, но с бейджем: задач у неё ещё нет. */
+  const open = item.status === 'active';
+  const linked = item.href !== null;
   const body = (
     <>
       {/* Миниатюра из движка graph/: своего SVG для графиков нет.
@@ -69,7 +72,7 @@ function Card({ item }: { item: SubtopicView }) {
     </>
   );
 
-  if (!open) {
+  if (!linked) {
     return (
       <li>
         <span className="subtopic-card subtopic-card--soon" aria-disabled="true">
@@ -82,7 +85,12 @@ function Card({ item }: { item: SubtopicView }) {
     <li>
       {/* Обычная ссылка, а не router.push: переход по ней работает и
           средней кнопкой, и в новой вкладке. */}
-      <a className="subtopic-card subtopic-card--open" href={item.href ?? undefined}>
+      <a
+        className={
+          open ? 'subtopic-card subtopic-card--open' : 'subtopic-card subtopic-card--preview'
+        }
+        href={item.href ?? undefined}
+      >
         {body}
       </a>
     </li>

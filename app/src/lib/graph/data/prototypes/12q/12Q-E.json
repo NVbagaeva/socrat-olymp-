@@ -1,0 +1,572 @@
+{
+  "kind": "prototype",
+  "id": "12Q.E",
+  "block": 5,
+  "title": "12Q.E · значение функции",
+  "subtitle": "Найдите значение в точке за пределами чертежа",
+  "seed": 12205,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "minFractionA": 6,
+    "uniqueVertices": true,
+    "queryOutsideWindow": true,
+    "minNonIntegerAnswers": 4
+  },
+  "tasks": [
+    {
+      "id": "12Q.E-01",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-02",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-03",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-04",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-05",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 3,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 80,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-06",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 3,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 80,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-07",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "answerKind": "half"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-08",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "answerKind": "half"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-09",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "answerKind": "half"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-10",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "answerKind": "half"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-11",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "side": "left"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-12",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "side": "left"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-13",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "side": "right"
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-14",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "side": "right"
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-15",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-16",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "absA": 2,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-17",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-18",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-19",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "yNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.E-20",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "yNonZero": true
+        },
+        "absA": 1,
+        "query": {
+          "type": "value-at",
+          "outside": true,
+          "xAbsMax": 8,
+          "yAbsMax": 60,
+          "decimals": 1
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    }
+  ]
+}

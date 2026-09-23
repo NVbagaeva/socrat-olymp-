@@ -7,6 +7,8 @@ import { PrepCounter } from './PrepCounter';
 import { TabScrollOnMount } from '../TabScroll';
 
 export interface PrepShellProps {
+  /** Подтема: её список навыков. */
+  type: string;
   /** Адрес подтемы: от него считаются адреса списка и навыков. */
   base: string;
   /** Что открыто: список навыков или конкретный навык. */
@@ -25,8 +27,8 @@ export interface PrepShellProps {
  * Чипы — это навигация, а не фильтр: каждый ведёт на свой адрес,
  * поэтому работают кнопка «назад» и открытие в новой вкладке.
  */
-export function PrepShell({ base, active, children }: PrepShellProps) {
-  const overview = prepOverview();
+export function PrepShell({ type, base, active, children }: PrepShellProps) {
+  const overview = prepOverview(type);
   const listHref = `${base}/${OPORNYE.tail}`;
 
   return (

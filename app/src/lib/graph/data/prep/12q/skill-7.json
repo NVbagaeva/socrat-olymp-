@@ -1,0 +1,282 @@
+{
+  "kind": "prep",
+  "id": "P12Q-7",
+  "block": 7,
+  "title": "Формула по графику",
+  "subtitle": "Выбрать запись функции по её графику",
+  "seed": 12107,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueVertices": true,
+  "options": 6,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "allChoice": 6,
+    "optionsDistinct": true,
+    "optionsAre": "equation",
+    "balancedAnswerPlaces": true,
+    "minUp": 4,
+    "minDown": 4,
+    "minFractionA": 2,
+    "uniqueVertices": true,
+    "forms": {
+      "general": 6,
+      "vertex": 3,
+      "roots": 1
+    }
+  },
+  "tasks": [
+    {
+      "id": "P12Q-7-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Начни со знака: ветви вверх — у верной формулы перед $x^2$ плюс. Это сразу убирает половину вариантов.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-7-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Ветви вниз: у верной формулы перед $x^2$ стоит минус.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "down",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-7-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Посмотри, где график пересекает ось $Oy$: это $c$. Формулы с другим свободным членом отпадают.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "up",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-7-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Сравни вершину на чертеже с вершиной каждой формулы: у записи через вершину она видна сразу.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "unlucky",
+      "levelReason": "дробный a — сверка по шагу от вершины",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "down",
+        "absA": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "P12Q-7-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "В записи $y = a(x - m)^2 + n$ вершина — это $(m;\\, n)$. Знак в скобке читается наоборот.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "vertex",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-7-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Найди $a$ шагом от вершины и сравни с числом перед скобкой в вариантах.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "vertex",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "down",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-7-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Подставь абсциссу отмеченной точки в каждую подозрительную формулу: верная даст её ординату.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "unlucky",
+      "levelReason": "дробный a — сверка по шагу от вершины",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "P12Q-7-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "В записи через нули $x_1$ и $x_2$ — это точки пересечения с осью $Ox$, они видны на чертеже.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "roots",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "down",
+        "absA": 1,
+        "roots": "integer",
+        "rootsVisible": true
+      }
+    },
+    {
+      "id": "P12Q-7-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Проверь вершину и знак $a$: этого обычно хватает, чтобы остался один вариант.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "unlucky",
+      "levelReason": "дробный a — сверка по шагу от вершины",
+      "form": "vertex",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "P12Q-7-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "hint": "Ветви вниз и вершина не на оси $Oy$: годится только формула, у которой совпадают оба признака.",
+      "answerRule": "equation-choice",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, сверка по вершине и знаку",
+      "form": "general",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "direction": "down",
+        "absA": 2
+      }
+    }
+  ]
+}

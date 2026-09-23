@@ -11,6 +11,7 @@
  * нет, и заводить их по одному на раздел незачем.
  */
 
+import { METODY } from './metody';
 import { OPORNYE } from './opornye';
 
 /**
@@ -64,6 +65,9 @@ export const VKLADKI_FIGURY: readonly RazdelTab[] = [
 export const VKLADKI_PODTEMY: readonly RazdelTab[] = [
   { id: 'about', label: 'О задании', tail: '', icon: 'sheet' },
   { id: 'theory', label: 'Теория', tail: '', icon: 'book' },
+  /* Вкладка есть не у всякой подтемы: без методов в конфиге лента её
+     не показывает. Подпись и значок те же, что у №4 и №5. */
+  { id: 'methods', label: METODY.title, tail: '', icon: 'bulb' },
   { id: 'prep', label: OPORNYE.title, tail: '', icon: 'target' },
   { id: 'trainer', label: 'Тренажёр', tail: '', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: '', icon: 'settings' },

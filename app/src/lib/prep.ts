@@ -5,10 +5,12 @@
  * получают готовые значения пропсами и про движок ничего не знают.
  */
 
-import { prepSkills, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
+import { prepSkillsFor, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
+import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
+import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { katex } from '@/lib/graph/katex';
 import { sealAnswer, sealChoice, sealText } from '@/lib/prepSecret';
@@ -37,32 +39,32 @@ export interface PrepOverview {
 }
 
 /**
- * Состав всех четырёх навыков.
+ * Состав навыков подтемы.
  *
  * Здесь только то, что известно на сборке: какие навыки есть и
  * сколько в каждом задач. Сколько решено — знает браузер ученика,
  * это читается на клиенте из localStorage.
  */
-export function prepOverview(): PrepOverview {
-  const skills = prepSkills.map((skill) => ({ skill, total: setSize(skill.setId) }));
+export function prepOverview(type: string): PrepOverview {
+  const skills = prepSkillsFor(type).map((skill) => ({ skill, total: setSize(skill.setId) }));
   const total = skills.reduce((sum, item) => sum + item.total, 0);
   return { skills, total };
 }
 
-/** Сколько задач у навыка. */
-export function prepSkillTotal(id: PrepSkillId): number {
-  const found = prepSkills.find((skill) => skill.id === id);
+/** Сколько задач у навыка подтемы. */
+export function prepSkillTotal(type: string, id: PrepSkillId): number {
+  const found = prepSkillsFor(type).find((skill) => skill.id === id);
   return found === undefined ? 0 : setSize(found.setId);
 }
 
-/** Навык по части адреса. */
-export function findPrepSkill(id: string): PrepSkill | undefined {
-  return prepSkills.find((skill) => skill.id === id);
+/** Навык подтемы по части адреса. */
+export function findPrepSkill(type: string, id: string): PrepSkill | undefined {
+  return prepSkillsFor(type).find((skill) => skill.id === id);
 }
 
-/** Адреса тренажёров навыков для статического экспорта. */
-export function prepSkillIds(): PrepSkillId[] {
-  return prepSkills.map((skill) => skill.id);
+/** Адреса тренажёров навыков подтемы для статического экспорта. */
+export function prepSkillIds(type: string): PrepSkillId[] {
+  return prepSkillsFor(type).map((skill) => skill.id);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -244,6 +246,8 @@ interface TaskData {
   id: string;
   answerRule: string;
   pointName?: string;
+  /** Задачи о параболе: старший коэффициент дан в условии. */
+  knownA?: boolean;
 }
 
 function taskData(taskId: string): TaskData | null {
@@ -266,6 +270,8 @@ function answerRule(taskId: string): string | null {
 interface EnginePoint {
   x: number;
   y: number;
+  /** Чем точка стоит на чертеже: вершина, точка на оси, пересечение. */
+  role?: string;
 }
 
 /** Проверяемая точка: движок кладёт её в meta вместе с расхождением. */
@@ -289,6 +295,21 @@ interface EngineTask {
     k: number;
     b: number;
     points: EnginePoint[] | null;
+    /* Поля параболы. У задач о прямой их нет, и разбор идёт своей
+       веткой: семейство задачи решает, какой модуль его строит. */
+    family?: string;
+    aFraction?: unknown;
+    bFraction?: unknown;
+    cFraction?: unknown;
+    window?: unknown;
+    intersection?: unknown;
+    curves?: {
+      kind: string;
+      kFraction?: unknown;
+      bFraction?: unknown;
+      aFraction?: unknown;
+      cFraction?: unknown;
+    }[];
   };
 }
 
@@ -610,7 +631,82 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
  * наклона треугольник не строится, и разбора у такой задачи нет —
  * это честное null, а не выдуманные шаги.
  */
+/* Вторая кривая сцены в том виде, в каком её ждёт разбор параболы. */
+/** Что разбору параболы нужно от задачи движка — и ничего сверх. */
+export interface QuadraticSource {
+  id: string;
+  answer: string;
+  meta: {
+    /* Точные дроби коэффициентов: разбор считает по ним, а не по
+       округлённым числам. */
+    aFraction?: unknown;
+    bFraction?: unknown;
+    cFraction?: unknown;
+    window?: unknown;
+    points?: unknown;
+    query?: unknown;
+    intersection?: unknown;
+    curves?: {
+      kind: string;
+      kFraction?: unknown;
+      bFraction?: unknown;
+      aFraction?: unknown;
+      cFraction?: unknown;
+    }[] | null;
+  };
+}
+
+function secondCurve(task: QuadraticSource): unknown {
+  const curve = task.meta.curves?.[1];
+  if (curve === undefined) {
+    return null;
+  }
+  if (curve.kind === 'line') {
+    return { kind: 'line', line: { k: curve.kFraction, b: curve.bFraction } };
+  }
+  return {
+    kind: 'quadratic',
+    curve: Quadratic.exact(curve.aFraction, curve.bFraction, curve.cFraction),
+  };
+}
+
+/**
+ * Разбор задачи о параболе: свой модуль, своя схема шагов. Числа
+ * берутся из точных дробей meta, а не из округлённых значений.
+ *
+ * Принимает задачу движка по тем полям, которые разбору и нужны:
+ * тренажёр зовёт эту же функцию, а его взгляд на задачу движка чуть
+ * другой — там нет полей, которые нужны только экрану подготовки.
+ */
+export function quadraticSteps(task: QuadraticSource): PrepStep[] {
+  const data = taskData(task.id);
+  const steps = GraphSolutionQuadratic.build({
+    curve: Quadratic.exact(task.meta.aFraction, task.meta.bFraction, task.meta.cFraction),
+    window: task.meta.window,
+    points: task.meta.points,
+    second: secondCurve(task),
+    task: {
+      rule: data?.answerRule,
+      answer: task.answer,
+      knownA: data?.knownA === true,
+      query: task.meta.query,
+      intersection: task.meta.intersection,
+    },
+  }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
+
+  return steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
+    blocks: viewBlocks(step.blocks),
+  }));
+}
+
 function buildSteps(task: EngineTask): PrepStep[] | null {
+  if (task.meta.family === 'quadratic') {
+    return quadraticSteps(task);
+  }
+
   const found = GraphGenerate.analysis(task.id) as Analysis | null;
   if (!found) {
     /* Два случая без треугольника, которые мы умеем объяснить сами:

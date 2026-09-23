@@ -7,6 +7,7 @@ import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
+import { markSectionRead } from '@/lib/theoryRead';
 import { TopicContents } from './TopicContents';
 import { TutorMenu } from './TutorMenu';
 
@@ -15,6 +16,11 @@ export interface TopicTabsProps {
   about: ReactNode;
   /** Разделы теории: они же пункты содержания. */
   theory: TheoryBlock[];
+  /**
+   * Вкладка «Ключевые методы решения»: собрана на сервере. Не задана —
+   * вкладки нет: у линейной подтемы её не было и нет.
+   */
+  methods?: ReactNode;
   /** Экран подготовительных задач: собран на сервере. */
   prep: ReactNode;
   /** Экран тренажёра: собран на сервере. */
@@ -31,10 +37,19 @@ export interface TopicTabsProps {
   trainerHref: string | null;
   /** Материалы для репетиторов: подпись кнопки и карточки меню. */
   tutors: ExamSection['tutors'];
+  /** Что показать в меню, когда карточек у подтемы нет. */
+  tutorsEmpty: { title: string; description: string };
   /** Декор под содержанием: на узком экране не показывается. */
   contentsDecor: ReactNode;
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
+  /**
+   * Ключ подтемы в хранилище прочитанных разделов. Задан — раздел
+   * засчитывается прочитанным, когда ученик долистал до его конца,
+   * и кольцо в шапке считает по этим отметкам. Не задан — ничего не
+   * запоминается: так было и остаётся у линейной подтемы.
+   */
+  trackKey?: string;
   /**
    * Что открыто при заходе. По умолчанию «О задании». Значение
    * 'tutors' — это не вкладка: страница открывается на «О задании»
@@ -88,13 +103,16 @@ const TABS = VKLADKI_PODTEMY.map((tab) => ({
 export function TopicTabs({
   about,
   theory,
+  methods,
   prep,
   trainer,
   generator,
   trainerHref,
   tutors,
+  tutorsEmpty,
   contentsDecor,
   bodies,
+  trackKey,
   initial = 'about',
   prepHref,
 }: TopicTabsProps) {
@@ -105,7 +123,13 @@ export function TopicTabs({
   const opensMenu = initial === 'tutors';
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
-  const tabs = generator === undefined ? TABS.filter((item) => item.id !== 'generator') : TABS;
+  /* Вкладки без содержимого в ленту не попадают: «Генератор» — без
+     наборов прототипов, «Ключевые методы» — без признака у подтемы. */
+  const tabs = TABS.filter(
+    (item) =>
+      (item.id !== 'generator' || generator !== undefined) &&
+      (item.id !== 'methods' || methods !== undefined),
+  );
 
   /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
      вкладка не переключает состояние, а ведёт туда: иначе изнутри
@@ -224,6 +248,57 @@ export function TopicTabs({
     return () => observer.disconnect();
   }, [tab, theory]);
 
+  /* Прочитанные разделы. Раздел засчитывается, когда ученик долистал
+     до его конца: нижний край поднялся выше середины экрана. Считаем
+     сами при прокрутке, а не наблюдателем видимости: наблюдатель
+     сообщает только о смене состояния, и разделы, пролистанные
+     одним махом, он пропускает. Семь измерений на кадр прокрутки
+     дешевле, чем неверный счёт.
+
+     При открытии вкладки не считается ничего: пока ученик не тронул
+     страницу, прочитанных разделов у него нет. */
+  useEffect(() => {
+    if (tab !== 'theory' || trackKey === undefined) {
+      return undefined;
+    }
+    const key = trackKey;
+    const last = theory[theory.length - 1];
+    let waiting = false;
+
+    function scan() {
+      waiting = false;
+      const line = window.innerHeight / 2;
+      theory.forEach((item) => {
+        const node = document.getElementById(blockId(item.id));
+        if (node !== null && node.getBoundingClientRect().bottom <= line) {
+          markSectionRead(key, item.id);
+        }
+      });
+      /* Последний раздел кончается вместе со страницей, и выше
+         середины экрана его нижний край может не подняться. Низ
+         страницы засчитывает его отдельно. */
+      const seen = window.scrollY + window.innerHeight;
+      if (last !== undefined && seen >= document.documentElement.scrollHeight - 4) {
+        markSectionRead(key, last.id);
+      }
+    }
+
+    function onScroll() {
+      if (waiting) {
+        return;
+      }
+      waiting = true;
+      requestAnimationFrame(scan);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [tab, theory, trackKey]);
+
   return (
     <>
       {/* Лента вкладок: ниже 1024px она прокручивается вбок, тени по
@@ -233,6 +308,7 @@ export function TopicTabs({
       <TutorMenu
         items={tutors.items}
         label={tutors.title}
+        empty={tutorsEmpty}
         open={menu}
         onOpenChange={setMenu}
         stripRef={strip}
@@ -306,6 +382,8 @@ export function TopicTabs({
               )}
             </>
           ) : null}
+
+          {tab === 'methods' ? methods : null}
 
           {tab === 'prep' ? prep : null}
 

@@ -42,8 +42,14 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
     nazvanie: m.nazvanie,
     opisanie: m.opisanie,
     formula: m.formula === undefined ? null : <Tex text={`$${m.formula}$`} />,
-    schet: METODY_KARTOCHKI.modal.vBanke(zadachVBanke(m)),
-    href: presety.has(m.id) ? `${trenazher}${m.id}/` : trenazher,
+    /* Тренировка у метода вероятности одна: тренажёр с выбранным
+       методом. Подвал окна с одной тренировкой выглядит как раньше. */
+    trenirovki: [
+      {
+        schet: METODY_KARTOCHKI.modal.vBanke(zadachVBanke(m)),
+        href: presety.has(m.id) ? `${trenazher}${m.id}/` : trenazher,
+      },
+    ],
   }));
 }
 

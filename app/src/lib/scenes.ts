@@ -12,6 +12,7 @@
 import '@/lib/graph/families/index.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { PrepSkillId } from '@/content/prepSkills';
+import { playground as PLAY } from '@/content/theoryQuadratic';
 
 /** Квадратное симметричное окно — иного renderGraph не принимает. */
 function squareWindow(half: number) {
@@ -65,6 +66,38 @@ export function compareLinesScene() {
   };
 }
 
+
+/**
+ * Парабола и прямая на одном чертеже: вкладка «О задании»
+ * квадратичной подтемы, там, где у линейной стоят две прямые.
+ *
+ * Коэффициенты подобраны так, чтобы обе точки пересечения — (−2; 0)
+ * и (3; 2,5) — лежали внутри окна, а вершина (0; −2) читалась
+ * в узле сетки. Числа здесь — параметры чертежа, не содержание
+ * задания.
+ */
+export function parabolaAndLineScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'quadratic', a: 0.5, b: 0, c: -2, color: 'lineA', label: 'y = ax² + bx + c' },
+      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: 'y = kx + b' },
+    ],
+    points: [],
+    alt: 'Парабола y = ax² + bx + c и прямая y = kx + b',
+  };
+}
+
+/**
+ * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
+ * у квадратичной — парабола и прямая.
+ */
+export function aboutScene(type: FunctionTypeId) {
+  return type === 'quadratic' ? parabolaAndLineScene() : compareLinesScene();
+}
 
 /* ── Миниатюры типов функций ──────────────────────────────────────
    По одному представителю на семейство: коэффициенты подобраны так,
@@ -135,7 +168,27 @@ function dashed(from: [number, number], to: [number, number]) {
   return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
 }
 
+/* Набор прототипов квадратичной → навык подтемы: у карточки
+   конфигуратора та же миниатюра, что у карточки навыка во вкладке
+   опорных задач. Второго набора картинок для одного и того же
+   приёма заводить незачем. */
+const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12Q.A': 'sign-a',
+  '12Q.B': 'value-a',
+  '12Q.C': 'value-c',
+  '12Q.D': 'value-b',
+  '12Q.E': 'value-at',
+  '12Q.F': 'argument-for',
+  '12Q.G': 'formula',
+  '12Q.H': 'cross-line',
+  '12Q.I': 'cross-parabola',
+};
+
 export function generatorSkillScene(setId: string) {
+  const quadratic = QUADRATIC_SKILL_SCENE[setId];
+  if (quadratic !== undefined) {
+    return prepSkillScene(quadratic);
+  }
   const base = {
     window: squareWindow(SKILL_HALF),
     grid: { step: 1, show: true },
@@ -438,6 +491,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     };
   }
 
+  const quadratic = quadraticPrepScene(id, base);
+  if (quadratic !== null) {
+    return quadratic;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -445,5 +503,532 @@ export function prepSkillScene(id: PrepSkillSceneId) {
        шире поля — 161 пиксель на холсте в 212, и движок вытесняет её
        за кромку. Подпись отсюда убрана до решения, где ей стоять. */
     shapes: [],
+  };
+}
+
+/* ── Миниатюры навыков квадратичной подтемы ───────────────────────
+   Окно то же тесное, что у линейных: клетка крупнее, и в карточке
+   шириной 120px парабола читается формой, а не пятном. Вершины
+   подобраны так, чтобы ветви входили в окно, а отметка не садилась
+   на ось. Числа — параметры чертежа, а не содержание задач. */
+
+/** Парабола миниатюры: задаётся через вершину, как в теории. */
+function miniParabola(a: number, m: number, n: number, color = 'lineA') {
+  return { type: 'quadratic', a, b: -2 * a * m, c: a * m * m + n, color, label: null };
+}
+
+function miniDot(x: number, y: number, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: null };
+}
+
+function quadraticPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'sign-a') {
+    /* Знак a: две параболы, ветви вверх и вниз. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0, -1.4), miniParabola(-1, 0, 1.4, 'lineB')],
+      points: [miniDot(0, -1.4), miniDot(0, 1.4, 'lineB')],
+    };
+  }
+
+  if (id === 'value-a') {
+    /* Шаг от вершины: пунктирная ступенька в одну клетку. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -1, -1)],
+      points: [miniDot(-1, -1), miniDot(0, 0)],
+      shapes: [
+        dashed([-1, -1], [0, -1]),
+        dashed([0, -1], [0, 0]),
+        prepLabel('a', 0, -0.5, 14, 0, 'accent'),
+      ],
+    };
+  }
+
+  if (id === 'value-c') {
+    /* Свободный член: точка на оси Oy отмечена и подписана. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0.8, -1.6)],
+      points: [miniDot(0, -0.96)],
+      shapes: [prepLabel('c', 0, -0.96, -20, 0)],
+    };
+  }
+
+  if (id === 'value-b') {
+    /* Вершина и её абсцисса: от вершины пунктир к оси Ox. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0.9, -1.3)],
+      points: [miniDot(0.9, -1.3)],
+      shapes: [dashed([0.9, -1.3], [0.9, 0]), prepLabel('x\u0432', 0.9, 0, 18, -14, 'accent')],
+    };
+  }
+
+  if (id === 'value-at') {
+    /* Дан x — ищут y: пунктир от оси абсцисс к кривой. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.5, -1.4)],
+      points: [miniDot(1, 0.85, 'lineB')],
+      shapes: [dashed([1, 0], [1, 0.85]), prepLabel('?', 1, 0.85, 16, 0, 'accent')],
+    };
+  }
+
+  if (id === 'argument-for') {
+    /* Дан y — ищут x: горизонталь и две точки пересечения. */
+    return {
+      ...base,
+      curves: [miniParabola(1, 0, -1.5)],
+      points: [miniDot(-1.2, -0.06, 'lineB'), miniDot(1.2, -0.06, 'lineB')],
+      shapes: [
+        { type: 'segment', from: [-2, -0.06], to: [2, -0.06], color: 'accent', style: 'dashed' },
+        prepLabel('?', 1.2, -0.06, 16, 16, 'accent'),
+      ],
+    };
+  }
+
+  if (id === 'formula') {
+    /* Формула по графику: парабола с вершиной и знаком вопроса. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.6, -1.3)],
+      points: [miniDot(-0.6, -1.3)],
+      /* Подпись в верхней части поля и по центру: у правого края
+         «y = ?» не помещалась и уезжала за кромку холста. */
+      shapes: [prepLabel('y = ?', 0, 1.4, 0, 0, 'accent')],
+    };
+  }
+
+  if (id === 'cross-line') {
+    /* Парабола и прямая: одна точка пересечения отмечена. */
+    return {
+      ...base,
+      curves: [
+        miniParabola(1, 0, -1.5),
+        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+      ],
+      points: [miniDot(1, 0.5, 'lineB')],
+    };
+  }
+
+  if (id === 'cross-parabola') {
+    /* Две параболы: отмечена одна общая точка. */
+    return {
+      ...base,
+      curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
+      points: [miniDot(-0.2, -1.41, 'lineB')],
+    };
+  }
+
+  return null;
+}
+
+
+/* ── Чертежи теории квадратичной функции ──────────────────────
+   По одному чертежу на карточку раздела: парабола, отмеченные
+   точки, ось симметрии пунктиром, подписи. Числа здесь — параметры
+   чертежа, они же стоят в текстах карточек (content/theoryQuadratic.ts).
+
+   Окно бывает прямоугольным: у обычной параболы y = x² стандартные
+   точки доходят до 9, и квадратное окно ±9 сделало бы клетку крошкой.
+   Чертёж декоративный, рядом стоит текст карточки: alt не задаётся,
+   и график не читается вслух дважды. */
+
+export type QuadraticTheorySceneId =
+  | 'parabola-vertex-axis'
+  | 'a-zero'
+  | 'a-sign'
+  | 'x-squared'
+  | 'a-width'
+  | 'a-step'
+  | 'c-read'
+  | 'c-offscreen'
+  | 'vertex-formula'
+  | 'b-sign'
+  | 'path-vertex'
+  | 'path-system'
+  | 'symmetry'
+  | 'shift-vertex'
+  | 'shift-points'
+  | 'complete-square'
+  | 'roots-form'
+  | 'roots-vertex'
+  | 'two-roots'
+  | 'no-roots'
+  | 'physics'
+  | 'inequality'
+  | 'level-line'
+  | 'family';
+
+function windowOf(xmin: number, xmax: number, ymin: number, ymax: number) {
+  return { xmin, xmax, ymin, ymax };
+}
+
+function parabola(a: number, b: number, c: number, extra: Record<string, unknown> = {}) {
+  return { type: 'quadratic', a, b, c, color: 'lineA', label: null, ...extra };
+}
+
+/** Парабола через вершину: y = a(x − m)² + n. */
+function fromVertex(a: number, m: number, n: number, extra: Record<string, unknown> = {}) {
+  return parabola(a, -2 * a * m, a * m * m + n, extra);
+}
+
+/** Типографский минус в подписях чертежа. */
+const MINUS = '−';
+
+function coordinate(value: number) {
+  return String(value).replace('-', MINUS).replace('.', ',');
+}
+
+/** Подпись точки координатами: «(1; −4)». */
+function pointLabel(x: number, y: number) {
+  return `(${coordinate(x)}; ${coordinate(y)})`;
+}
+
+function mark(x: number, y: number, labelled = false, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: labelled ? pointLabel(x, y) : null };
+}
+
+function dashedSegment(from: [number, number], to: [number, number], color = 'accent') {
+  return { type: 'segment', from, to, color, style: 'dashed' };
+}
+
+function note(text: string, at: [number, number], offset: [number, number], color = 'accent') {
+  return { type: 'label', at, offset, text, color };
+}
+
+/** Стрелка: отрезок и треугольник на конце, в клетках. */
+function arrow(from: [number, number], to: [number, number], color = 'accent') {
+  const dx = to[0] - from[0];
+  const dy = to[1] - from[1];
+  const length = Math.hypot(dx, dy);
+  const ux = dx / length;
+  const uy = dy / length;
+  const head = 0.42;
+  const half = 0.2;
+  const base: [number, number] = [to[0] - ux * head, to[1] - uy * head];
+  return [
+    { type: 'segment', from, to: base, color },
+    {
+      type: 'polygon',
+      color,
+      fillOpacity: 1,
+      points: [to, [base[0] - uy * half, base[1] + ux * half], [base[0] + uy * half, base[1] - ux * half]],
+    },
+  ];
+}
+
+function theoryBase(win: { xmin: number; xmax: number; ymin: number; ymax: number }) {
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [] as unknown[],
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+}
+
+export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
+  switch (id) {
+    /* 1. Вершина и ось симметрии: y = x² − 2x − 3, вершина (1; −4). */
+    case 'parabola-vertex-axis':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [parabola(1, -2, -3)],
+        points: [mark(1, -4, true)],
+        shapes: [dashedSegment([1, -5], [1, 5]), note('x = 1', [1, 4.2], [26, 0])],
+      };
+
+    /* 1. Почему a ≠ 0: парабола y = x² + 1 и прямая y = x + 1. */
+    case 'a-zero':
+      return {
+        ...theoryBase(squareWindow(4)),
+        curves: [
+          parabola(1, 0, 1, { label: 'a ≠ 0' }),
+          { type: 'line', k: 1, b: 1, color: 'lineB', label: 'a = 0' },
+        ],
+      };
+
+    /* 2. Направление ветвей: y = 0,5x² − 3 и y = −0,5x² + 3. */
+    case 'a-sign':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [
+          parabola(0.5, 0, -3, { label: 'a > 0' }),
+          parabola(-0.5, 0, 3, { color: 'lineB', label: 'a < 0' }),
+        ],
+        points: [mark(0, -3), mark(0, 3, false, 'lineB')],
+      };
+
+    /* 2. Обычная парабола со стандартными точками. */
+    case 'x-squared':
+      return {
+        ...theoryBase(windowOf(-4, 4, -1, 10)),
+        curves: [parabola(1, 0, 0, { label: 'y = x²' })],
+        points: [-3, -2, -1, 0, 1, 2, 3].map((x) => mark(x, x * x, true)),
+      };
+
+    /* 2. Уже или шире: эталон пунктиром, y = 2x² и y = 0,5x². Окно
+       тесное, чтобы три подписи у x = 1 не слипались; параболы
+       узнаются по своим точкам, подписана только эталонная. */
+    case 'a-width':
+      return {
+        ...theoryBase(windowOf(-2, 3, -1, 5)),
+        curves: [
+          parabola(1, 0, 0, { style: 'dashed', label: 'y = x²' }),
+          parabola(2, 0, 0),
+          parabola(0.5, 0, 0, { color: 'lineB' }),
+        ],
+        points: [mark(1, 1, true), mark(1, 2, true), mark(1, 0.5, true, 'lineB')],
+      };
+
+    /* 2. Шаг от вершины: y = −2(x − 1)² + 3, вправо на 1 — вниз на 2. */
+    case 'a-step':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [fromVertex(-2, 1, 3)],
+        points: [mark(1, 3), mark(2, 1)],
+        shapes: [
+          dashedSegment([1, 3], [2, 3]),
+          dashedSegment([2, 3], [2, 1]),
+          /* Подпись вершины уходит влево-вверх: справа от неё ступенька. */
+          note(pointLabel(1, 3), [1, 3], [-40, -14], 'lineA'),
+          note('1', [1.5, 3], [0, -14]),
+          note('2', [2, 2], [16, 0]),
+          note(`a = ${MINUS}2`, [3.2, 1], [30, 8]),
+        ],
+      };
+
+    /* 3. c с графика: y = x² − 2x − 3, точка (0; −3). */
+    case 'c-read':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [parabola(1, -2, -3)],
+        points: [mark(0, -3, true)],
+        shapes: [note(`c = ${MINUS}3`, [0, -3], [-52, 14])],
+      };
+
+    /* 3. Точка (0; c) за кадром: y = (x − 5)² − 2 в окне ±6. */
+    case 'c-offscreen':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, 5, -2)],
+        points: [mark(5, -2, true)],
+        shapes: [
+          /* Стрелка идёт рядом с левой ветвью, левее её, вверх за рамку. */
+          ...arrow([2.0, 3.4], [1.5, 5.8]),
+          note('(0; c) за кадром', [0.6, 4.6], [-40, 0]),
+        ],
+      };
+
+    /* 4. Формула вершины: y = x² − 6x + 5, вершина (3; −4). */
+    case 'vertex-formula':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [parabola(1, -6, 5)],
+        points: [mark(3, -4, true)],
+        shapes: [dashedSegment([3, -4], [3, 0]), note('xв = 3', [3, 0.6], [30, -8])],
+      };
+
+    /* 4. Знак b без счёта: вершины справа и слева от Oy. */
+    case 'b-sign':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [
+          fromVertex(1, 2, -1, { label: 'b < 0' }),
+          fromVertex(1, -2, -1, { color: 'lineB', label: 'b > 0' }),
+        ],
+        points: [mark(2, -1), mark(-2, -1, false, 'lineB')],
+      };
+
+    /* 4. Путь через вершину: та же парабола, вершина подписана. */
+    case 'path-vertex':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [parabola(1, -6, 5, { label: 'y = x² + bx + 5' })],
+        points: [mark(3, -4, true)],
+      };
+
+    /* 4. Путь через систему: три несимметричные точки. */
+    case 'path-system':
+      return {
+        ...theoryBase(windowOf(-2, 7, -2, 9)),
+        curves: [parabola(1, -4, 3)],
+        points: [mark(0, 3, true), mark(1, 0, true), mark(5, 8, true)],
+      };
+
+    /* 4. Симметрия: пара (0; 3) и (4; 3), ось x = 2. */
+    case 'symmetry':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [parabola(1, -4, 3)],
+        points: [mark(0, 3, true), mark(4, 3, true), mark(2, -1)],
+        shapes: [
+          dashedSegment([2, -5], [2, 5]),
+          ...arrow([2, 3], [0.35, 3]),
+          ...arrow([2, 3], [3.65, 3]),
+          note('x = 2', [2, 4.3], [28, 0]),
+        ],
+      };
+
+    /* 5. Сдвиг: эталон пунктиром, y = (x − 2)² + 1, стрелка вершин. */
+    case 'shift-vertex':
+      return {
+        ...theoryBase(squareWindow(5)),
+        /* Подписана только эталонная: формула сдвинутой стоит в тексте,
+           а две подписи в тесном окне садились друг на друга. */
+        curves: [parabola(1, 0, 0, { style: 'dashed', label: 'y = x²' }), fromVertex(1, 2, 1)],
+        points: [mark(0, 0), mark(2, 1, true)],
+        shapes: arrow([0, 0], [2, 1]),
+      };
+
+    /* 5. Вершина и стандартные точки от неё. */
+    case 'shift-points':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, 2, 1)],
+        points: [mark(2, 1, true), mark(1, 2), mark(3, 2), mark(0, 5, true), mark(4, 5, true)],
+      };
+
+    /* 5. Выделение полного квадрата: y = (x + 3)² − 2. */
+    case 'complete-square':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, -3, -2, { label: 'y = (x + 3)² − 2' })],
+        points: [mark(-3, -2, true)],
+      };
+
+    /* 6. Форма через нули: y = (x − 3)(x − 5). */
+    case 'roots-form':
+      return {
+        ...theoryBase(windowOf(-1, 7, -2, 6)),
+        curves: [parabola(1, -8, 15)],
+        points: [mark(3, 0, true), mark(5, 0, true)],
+      };
+
+    /* 6. Вершина посередине между нулями. */
+    case 'roots-vertex':
+      return {
+        ...theoryBase(windowOf(-1, 7, -2, 6)),
+        curves: [parabola(1, -8, 15)],
+        points: [mark(3, 0), mark(5, 0), mark(4, -1, true)],
+        shapes: [dashedSegment([4, -2], [4, 6]), note('x = 4', [4, 5.2], [28, 0])],
+      };
+
+    /* 6. Два корня уравнения f(x) = 3: симметричны относительно оси
+       параболы, до каждого от вершины ровно две клетки. */
+    case 'two-roots':
+      return {
+        ...theoryBase(windowOf(-1, 7, -2, 6)),
+        curves: [parabola(1, -8, 15), { type: 'line', k: 0, b: 3, color: 'lineB', label: 'y = 3' }],
+        points: [mark(2, 3, true, 'lineB'), mark(6, 3, true, 'lineB'), mark(4, -1)],
+        shapes: [
+          dashedSegment([4, -2], [4, 6]),
+          ...arrow([4, 3], [2.35, 3]),
+          ...arrow([4, 3], [5.65, 3]),
+          note('x = 4', [4, 5.2], [28, 0]),
+        ],
+      };
+
+    /* 6. Нулей нет: параболы целиком выше и целиком ниже оси Ox. */
+    case 'no-roots':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [fromVertex(1, 2, 1), fromVertex(-1, -2, -1, { color: 'lineB' })],
+        points: [mark(2, 1), mark(-2, -1, false, 'lineB')],
+      };
+
+    /* 7. Полёт: h = −t² + 4t, вершина (2; 4), падение при t = 4. */
+    case 'physics':
+      return {
+        ...theoryBase(windowOf(-1, 5, -1, 5)),
+        axes: { labelX: 't', labelY: 'h', origin: '0' },
+        curves: [parabola(-1, 4, 0)],
+        points: [mark(2, 4), mark(4, 0)],
+      };
+
+    /* 7. Неравенство: y = x² − 4, участок под осью залит. */
+    case 'inequality': {
+      const region: [number, number][] = [];
+      for (let x = -2; x <= 2 + 1e-9; x += 0.25) {
+        region.push([x, x * x - 4]);
+      }
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [parabola(1, 0, -4)],
+        points: [mark(-2, 0), mark(2, 0)],
+        shapes: [
+          { type: 'polygon', points: region, color: 'lineB', fillOpacity: 0.18 },
+          note('y < 0', [0, -2.4], [0, 0]),
+          note('y > 0', [-3.6, 2.6], [0, 0]),
+          note('y > 0', [3.6, 2.6], [0, 0]),
+        ],
+      };
+    }
+
+    /* 7. Уровень: y = x² − 2 и прямая y = 2, точки пересечения (±2; 2). */
+    case 'level-line':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [parabola(1, 0, -2), { type: 'line', k: 0, b: 2, color: 'lineB', label: 'y = h' }],
+        points: [mark(-2, 2, false, 'lineB'), mark(2, 2, false, 'lineB')],
+        shapes: [dashedSegment([-2, 2], [-2, 0]), dashedSegment([2, 2], [2, 0])],
+      };
+
+    /* 7. Семейство y = x² + px: вершина скользит при p = −2, 0, 2. */
+    case 'family':
+      return {
+        ...theoryBase(squareWindow(4)),
+        curves: [
+          parabola(1, 0, 0, { style: 'dashed', label: 'p = 0' }),
+          parabola(1, -2, 0, { label: `p = ${MINUS}2` }),
+          parabola(1, 2, 0, { color: 'lineB', label: 'p = 2' }),
+        ],
+        points: [mark(0, 0), mark(1, -1), mark(-1, -1, false, 'lineB')],
+      };
+  }
+}
+
+
+/* ── Интерактив «Поиграй с параболой» ─────────────────────────
+   Эталон y = x² пунктиром со стандартными точками, живая парабола
+   y = ax² + c сплошной с точками при x = ±1, ±2. Точки у самой рамки
+   и за ней не рисуются: подпись прилипала бы к краю. При a = 0
+   квадрата нет, и живая кривая — прямая y = c. Числа окна и точек —
+   в конфиге блока (content/theoryQuadratic.ts). */
+
+/** Точка не ближе клетки к рамке окна: подписи есть где встать. */
+function deepInside(x: number, y: number) {
+  const win = PLAY.window;
+  return x > win.xmin + 1 - 1e-9 && x < win.xmax - 1 + 1e-9 &&
+    y > win.ymin + 1 - 1e-9 && y < win.ymax - 1 + 1e-9;
+}
+
+export function playgroundScene(a: number, c: number) {
+  const live = a === 0
+    ? { type: 'line', k: 0, b: c, color: 'lineA', label: null }
+    : parabola(a, 0, c);
+  const standard = PLAY.standardAt
+    .filter((x) => deepInside(x, x * x))
+    .map((x) => mark(x, x * x, true, 'lineB'));
+  /* Точка живой параболы, совпавшая со стандартной, не рисуется второй
+     раз: при a = 1 и c = 0 подписи легли бы одна на другую. */
+  const marks = a === 0
+    ? []
+    : PLAY.markAt
+        .map((x) => ({ x, y: Math.round((a * x * x + c) * 100) / 100 }))
+        .filter((point) => deepInside(point.x, point.y) && point.y !== point.x * point.x)
+        .map((point) => mark(point.x, point.y, true));
+  return {
+    ...theoryBase(PLAY.window),
+    curves: [parabola(1, 0, 0, { color: 'lineB', style: 'dashed' }), live],
+    points: [...standard, ...marks],
   };
 }

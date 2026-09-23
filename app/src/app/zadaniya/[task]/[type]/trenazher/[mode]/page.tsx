@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
 import { TrainerShell } from '@/components/tasks/trainer';
-import { activeSubtopicParams, findSection, findSubtopic } from '@/content/sections';
+import { findSection, findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { findTrainerShortcut, trainerPage, trainerShortcutIds } from '@/content/trainerModes';
 import { tasksPage } from '@/content/tasks';
 import 'katex/dist/katex.min.css';
@@ -15,10 +15,10 @@ import '../../prep.css';
 import '../../trainer.css';
 import '../../configurator.css';
 
-/* Адреса перечислимы на сборке: открытые подтемы × ярлыки. */
+/* Адреса перечислимы на сборке: подтемы с тренажёром × их ярлыки. */
 export function generateStaticParams() {
-  return activeSubtopicParams().flatMap((params) =>
-    trainerShortcutIds().map((mode) => ({ ...params, mode })),
+  return trainerSubtopicParams().flatMap((params) =>
+    trainerShortcutIds(params.type).map((mode) => ({ ...params, mode })),
   );
 }
 export const dynamicParams = false;
@@ -28,7 +28,7 @@ type Params = Promise<{ task: string; type: string; mode: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type, mode } = await params;
   const subtopic = findSubtopic(task, type);
-  const found = findTrainerShortcut(mode);
+  const found = findTrainerShortcut(type, mode);
   return subtopic && found
     ? { title: `${found.title} · ${trainerPage.title} · ${subtopic.title} — Будет на ЕГЭ` }
     : {};
@@ -43,7 +43,7 @@ export default async function Page({ params }: { params: Params }) {
   const { task, type, mode } = await params;
   const section = findSection(task);
   const subtopic = findSubtopic(task, type);
-  const found = findTrainerShortcut(mode);
+  const found = findTrainerShortcut(type, mode);
   if (!section || !subtopic || !found) {
     notFound();
   }
@@ -61,7 +61,7 @@ export default async function Page({ params }: { params: Params }) {
           <TrainerShell
             subtopic={subtopic}
             base={`${base}/trenazher/`}
-            preset={{ skill: found.skill, mode: found.mode }}
+            preset={{ skill: found.skills[0] ?? null, skills: found.skills, mode: found.mode }}
           />
         }
       />

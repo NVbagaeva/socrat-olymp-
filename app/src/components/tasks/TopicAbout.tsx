@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Chart } from '@/components/graph/Chart';
-import type { ExamSection, Formulation } from '@/content/sections';
+import type { ExamSection, Formulation, SectionAbout } from '@/content/sections';
 import { katex } from '@/lib/graph/katex';
 import { compareLinesScene } from '@/lib/scenes';
 import { FormulationIcon } from './FormulationIcon';
@@ -34,15 +34,26 @@ function FormCard({ item }: { item: Formulation }) {
   );
 }
 
+export interface TopicAboutProps {
+  section: ExamSection;
+  /** Тексты вкладки. По умолчанию — вкладка раздела, одна на подтемы. */
+  about?: SectionAbout;
+  /** Сцена чертежа в блоке «Что нужно уметь». По умолчанию — две прямые. */
+  scene?: unknown;
+}
+
 /**
  * Вкладка «О задании».
  *
- * Все тексты приходят из конфига раздела: ни одной строки, написанной
- * в разметке, здесь нет. Чертёж рисует движок graph/.
+ * Все тексты приходят из конфига раздела или подтемы: ни одной
+ * строки, написанной в разметке, здесь нет. Чертёж рисует движок
+ * graph/ по сцене, которую подобрала подтема.
  */
-export function TopicAbout({ section }: { section: ExamSection }) {
-  const { about } = section;
-
+export function TopicAbout({
+  section,
+  about = section.about,
+  scene = compareLinesScene(),
+}: TopicAboutProps) {
   return (
     <div className="about">
       <section className="about-lead">
@@ -89,9 +100,10 @@ export function TopicAbout({ section }: { section: ExamSection }) {
           </ul>
         </div>
 
-        {/* Чертёж из движка: две прямые с разными коэффициентами. */}
+        {/* Чертёж из движка: у линейной две прямые, у квадратичной
+            парабола и прямая. */}
         <figure className="about-skills__chart">
-          <Chart scene={compareLinesScene()} />
+          <Chart scene={scene} />
         </figure>
       </section>
 

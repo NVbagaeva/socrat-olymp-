@@ -19,40 +19,22 @@ import renderer from './renderer.js';
 import math from './math.js';
 import Line from './families/line.js';
 import Triangle from './triangle.js';
+import Quadratic from './generate-quadratic.js';
+import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
+import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
+         answerText } from './text.js';
 
 const FAMILIES = { line: Line };
 
-/* ══════════════════════════════════════════════════════════
-   Детерминированный генератор псевдослучайных чисел
-   ══════════════════════════════════════════════════════════ */
-function hash(text) {
-  var h = 2166136261;
-  for (var i = 0; i < text.length; i++) {
-    h ^= text.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
+/* Семейство задачи: своё у задачи, иначе у набора, иначе прямая.
+   Парабола собирается своим модулем (generate-quadratic.js), общими
+   остаются перебор с возвратом, состав набора и файл ответов. */
+function familyOf(task, set) {
+  return task.family || set.family || 'line';
 }
 
-function rng(seedText) {
-  var state = hash(String(seedText)) || 1;
-  return function () {
-    state |= 0; state = (state + 0x6D2B79F5) | 0;
-    var t = Math.imul(state ^ (state >>> 15), 1 | state);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/* Перестановка списка по seed: порядок перебора кандидатов. */
-function shuffled(list, random) {
-  var copy = list.slice();
-  for (var i = copy.length - 1; i > 0; i--) {
-    var j = Math.floor(random() * (i + 1));
-    var t = copy[i]; copy[i] = copy[j]; copy[j] = t;
-  }
-  return copy;
-}
+/* Случайность по seed и перестановка списка живут в random.js:
+   ими же пользуется генератор параболы. */
 
 /* ══════════════════════════════════════════════════════════
    Загрузка наборов. prep и prototypes — раздельно, всегда.
@@ -62,7 +44,7 @@ var cache = null;
 /* Наборы, загруженные страницей: { prep: [...], prototypes: [...] }. */
 function setSets(sets) {
   cache = { prep: (sets && sets.prep) || [], prototypes: (sets && sets.prototypes) || [] };
-  placesCache = {};
+  resetPlaces();
   return cache;
 }
 
@@ -88,7 +70,6 @@ function findSet(taskId) {
 /* ══════════════════════════════════════════════════════════
    Кандидаты коэффициентов
    ══════════════════════════════════════════════════════════ */
-var MINUS = '\u2212';         /* типографский минус в формулах вариантов        */
 var CANDIDATE_POOL = 72;
 var LINE_POOL = 40;           /* сколько прямых перебирается на каждую сторону пары */
 var POOL_PER_SLOPE = 12;       /* сколько вариантов с одним наклоном держим в пуле      */
@@ -506,41 +487,14 @@ function equationChoice(ctx) {
   return { type: 'choice', options: options, answer: answer };
 }
 
-/* Позиции верного ответа по набору: поровну между вариантами,
-   порядок перемешан по seed и одинаков при одном и том же seed. */
-var placesCache = {};
-
-function answerPlaces(set, seed, optionCount) {
-  var key = set.id + ':' + seed + ':' + optionCount;
-  if (placesCache[key]) { return placesCache[key]; }
-
-  var count = (set.tasks || []).length;
-  var list = [];
-  for (var i = 0; i < count; i++) { list.push((i % optionCount) + 1); }
-  placesCache[key] = shuffled(list, rng(key + ':places'));
-  return placesCache[key];
-}
-
-/* Точная дробь -> строка ответа. Конечная десятичная — с запятой,
-   как в бланке ЕГЭ; несократимая треть остаётся дробью. */
-function answerText(value) {
-  if (typeof value === 'string') { return value; }
-  var f = Line.toFrac(value);
-  var q = f.q;
-  while (q % 2 === 0) { q /= 2; }
-  while (q % 5 === 0) { q /= 5; }
-  if (q === 1) {
-    /* Разделитель — запятая, как в бланке ЕГЭ; минус обычный, чтобы
-       ответ можно было сравнивать с тем, что вводит ученик. */
-    return String(Line.num(f)).replace('.', ',');
-  }
-  return (f.p < 0 ? '-' : '') + Math.abs(f.p) + '/' + f.q;
-}
+/* Позиции верного ответа по набору и строка ответа — в random.js
+   и text.js: они общие для прямой и параболы. */
 
 /* ══════════════════════════════════════════════════════════
    Сборка одного варианта
    ══════════════════════════════════════════════════════════ */
 function taskCandidates(task, set, seed) {
+  if (familyOf(task, set) === 'quadratic') { return Quadratic.candidates(task, set, seed); }
   var constraints = task.constraints || {};
   if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
@@ -704,6 +658,12 @@ function assemble(set, seed) {
     if (set.maxSlopeRepeat && count(candidate.slopeKey) >= set.maxSlopeRepeat) { return true; }
     if (set.maxInterceptRepeat && count(candidate.interceptKey) >= set.maxInterceptRepeat) { return true; }
     if (set.uniqueAnswers && candidate.answerKey && count(candidate.answerKey)) { return true; }
+    /* Парабола: вершина не повторяется в наборе, если набор так просит. */
+    if (set.uniqueVertices && candidate.vertexKey && count(candidate.vertexKey)) { return true; }
+    /* Парабола: симметричных пар отмеченных точек в наборе не больше,
+       чем разрешено. */
+    if (set.maxSymmetricPairs !== undefined && candidate.symmetricPair &&
+        count('sym:pair') >= set.maxSymmetricPairs) { return true; }
     return false;
   }
 
@@ -712,6 +672,25 @@ function assemble(set, seed) {
     used[candidate.slopeKey] = count(candidate.slopeKey) + delta;
     used[candidate.interceptKey] = count(candidate.interceptKey) + delta;
     if (candidate.answerKey) { used[candidate.answerKey] = count(candidate.answerKey) + delta; }
+    if (candidate.vertexKey) { used[candidate.vertexKey] = count(candidate.vertexKey) + delta; }
+    if (candidate.symmetricPair) { used['sym:pair'] = count('sym:pair') + delta; }
+  }
+
+  /* У каждой ещё не разобранной задачи остался хотя бы один кандидат
+     без конфликтов. Иначе ветка перебора мертва, и спускаться в неё
+     незачем: она кончилась бы тем же провалом, только после долгого
+     обхода. На порядок обхода и на найденный набор это не влияет —
+     срезаются лишь ветки без решения. */
+  function feasible(depth) {
+    for (var d = depth; d < order.length; d++) {
+      var pool = pools[order[d]];
+      var any = false;
+      for (var c = 0; c < pool.length; c++) {
+        if (!conflicts(pool[c])) { any = true; break; }
+      }
+      if (!any) { return false; }
+    }
+    return true;
   }
 
   function step(depth) {
@@ -726,7 +705,7 @@ function assemble(set, seed) {
       if (conflicts(pool[c])) { continue; }
       mark(pool[c], 1);
       chosen[i] = pool[c];
-      if (step(depth + 1)) { return true; }
+      if (feasible(depth + 1) && step(depth + 1)) { return true; }
       mark(pool[c], -1);
     }
     return false;
@@ -739,36 +718,8 @@ function assemble(set, seed) {
   return chosen;
 }
 
-/* Формулы внутри текста размечаются долларами, как в наборе:
-   «График функции $y = kx + b$ …». В обычном тексте доллары снимаются,
-   в разметке — заменяются набранной формулой. */
-function typesetText(text) {
-  return String(text).replace(/\$([^$]+)\$/g, function (match, formula) {
-    return math.html(formula);
-  });
-}
-
-function plainText(text) {
-  return String(text).replace(/\$([^$]+)\$/g, function (match, formula) {
-    return math.plain(formula);
-  });
-}
-
-/* Подстановка значений в шаблон условия: {x}, {y}, {equation}. */
-function fillTemplate(text, values) {
-  return String(text).replace(/\{(\w+)\}/g, function (match, key) {
-    return values[key] === undefined ? match : values[key];
-  });
-}
-
-/* Числа в условии и на чертеже: запятая и типографский минус. */
-function numberText(value) {
-  return String(Math.round(value * 100) / 100).replace('.', ',').replace('-', MINUS);
-}
-
-function pointText(name, x, y) {
-  return name + '(' + numberText(x) + '; ' + numberText(y) + ')';
-}
+/* Набор формул из долларов, подстановка в шаблон, запись чисел
+   и точек — в text.js: они общие для прямой и параболы. */
 
 function sceneFor(built, task, set) {
   var single = built.parts.length === 1;
@@ -807,6 +758,7 @@ function sceneFor(built, task, set) {
 }
 
 function taskResult(set, task, built, seed, index) {
+  if (familyOf(task, set) === 'quadratic') { return Quadratic.result(set, task, built, seed, index); }
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
@@ -902,6 +854,8 @@ function generateSet(setId, seed) {
 function analysis(id, seed) {
   var task = generate(id, seed);
   if (!task.svg || !task.meta.window) { return null; }
+  /* Разбор с треугольником наклона — только у прямой. */
+  if (task.meta.family === 'quadratic') { return null; }
 
   var line = Line.create(task.meta.kFraction, task.meta.bFraction);
   var triangle = Triangle.build(line, task.meta.window, task.meta.points);
@@ -950,8 +904,13 @@ function buildAnswers() {
   return out;
 }
 
+/* Проверке нужен отчёт о размещении подписей: включается отсюда,
+   чтобы скрипту не пришлось лезть в модуль параболы напрямую. */
+function setLayoutReport(on) { Quadratic.setLayoutReport(on); }
+
 const api = {
   setSets: setSets,
+  setLayoutReport: setLayoutReport,
   typeset: typesetText,
   analysis: analysis,
   taskCandidates: taskCandidates,
@@ -964,6 +923,6 @@ const api = {
 };
 
 export default api;
-export { setSets, analysis, taskCandidates, equationText, generate, generateSet,
+export { setSets, setLayoutReport, analysis, taskCandidates, equationText, generate, generateSet,
          loadSets, buildAnswers, answerText };
 export const typeset = typesetText;

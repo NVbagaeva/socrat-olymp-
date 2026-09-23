@@ -10,6 +10,9 @@
  */
 
 import { OPORNYE } from '@/content/opornye';
+import { QUADRATIC } from '@/content/quadratic';
+import { QUADRATIC_THEORY } from '@/content/theoryQuadratic';
+import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
@@ -68,6 +71,60 @@ export interface FunctionType {
   materials: MaterialId[];
   bank: FunctionBank;
   status: 'active' | 'soon';
+  /**
+   * Предпросмотр: страницы подтемы собраны и открываются с карточки
+   * и из окна выбора типа, но бейдж «Скоро» остаётся. Снимается
+   * вместе со сменой status на active, когда подтема готова.
+   */
+  preview?: boolean;
+  /**
+   * Шапка подтемы. Задана — H1 общий на задание, «Задание №12.
+   * Графики функций», а название подтемы стоит подзаголовком.
+   * Не задана — H1 равен названию подтемы, как у линейной.
+   */
+  head?: { subtitle: string };
+  /**
+   * Своя вкладка «О задании». Не задана — вкладка раздела, одна на
+   * все его подтемы. Плашка-подсказка у подтемы не своя: она одна
+   * на раздел и стоит ещё в окне выбора типа функции.
+   */
+  about?: Omit<SectionAbout, 'hint'>;
+  /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
+  methods?: boolean;
+  /**
+   * Кольцо разделов считает честно: раздел засчитывается, когда
+   * ученик долистал до его конца, и запоминается в браузере
+   * (lib/theoryRead.ts). Не задано — кольцо показывает витринное
+   * число кабинета, как у линейной подтемы.
+   */
+  theoryProgress?: boolean;
+  /**
+   * Подтема заведена после того, как вкладку «Подготовительные
+   * задачи» переименовали в «Опорные задачи». Прежнего адреса
+   * (content/opornye.ts, staryyTail) у неё никогда не было, и
+   * страницы-редиректы по нему не собираются: уводить с адреса,
+   * которого не существовало, некого. Не задано — подтема жила до
+   * переименования, и редиректы ей нужны.
+   */
+  bezStarogoAdresa?: boolean;
+  /**
+   * Тренажёр подтемы принимает задачи с ответом выбором варианта.
+   * Не задано — берутся только задачи с числовым ответом, как было
+   * у линейной подтемы и у заданий №4 и №5.
+   */
+  choiceAnswers?: boolean;
+  /**
+   * Название подтемы в шапке листа для печати. Не задано — лист
+   * берёт название из своего конфига (content/sheet12.js): там оно
+   * написано в единственном числе, «Линейная функция», и менять его
+   * ради множественного числа с карточки незачем.
+   */
+  sheetTitle?: string;
+  /**
+   * Материалы «Для репетиторов» подтемы. Не заданы — материалы
+   * раздела. Пустой список — меню открывается на пустое состояние.
+   */
+  tutors?: TutorMaterial[];
 }
 
 /* Заголовки блоков теории заданы автором: четырнадцать пунктов в том
@@ -168,6 +225,8 @@ export const functionTypes: FunctionType[] = [
     },
     status: 'active',
   },
+  /* Подтема открыта. Чем она отличается от линейной — признаками
+     ниже, тексты к ним в content/quadratic.ts. */
   {
     id: 'quadratic',
     no: '02',
@@ -175,11 +234,24 @@ export const functionTypes: FunctionType[] = [
     shortTitle: 'Квадратичные',
     formula: 'y = ax^2 + bx + c',
     description: '',
-    theory: [],
+    theory: QUADRATIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12Q-1', 'P12Q-2', 'P12Q-3', 'P12Q-4', 'P12Q-5',
+             'P12Q-6', 'P12Q-7', 'P12Q-8', 'P12Q-9'],
+      prototypes: ['12Q.A', '12Q.B', '12Q.C', '12Q.D', '12Q.E',
+                   '12Q.F', '12Q.G', '12Q.H', '12Q.I'],
+    },
+    status: 'active',
+    head: QUADRATIC.head,
+    about: QUADRATIC.about,
+    methods: true,
+    theoryProgress: true,
+    bezStarogoAdresa: true,
+    choiceAnswers: true,
+    sheetTitle: 'Квадратичная функция',
+    tutors: QUADRATIC.tutors,
   },
   {
     id: 'rational',
@@ -237,6 +309,14 @@ export const functionTypes: FunctionType[] = [
 
 export function findFunctionType(id: string): FunctionType | undefined {
   return functionTypes.find((type) => type.id === id);
+}
+
+/**
+ * Страницы подтемы собраны: она открыта или стоит в предпросмотре.
+ * Только у таких подтем есть вложенные адреса и ссылки с карточек.
+ */
+export function subtopicBuilt(type: FunctionType): boolean {
+  return type.status === 'active' || type.preview === true;
 }
 
 /** Первый открытый тип: единственный осмысленный переход по умолчанию. */
