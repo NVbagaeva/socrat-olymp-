@@ -436,6 +436,51 @@ export const playground = {
   standardAt: [-3, -2, -1, 0, 1, 2, 3],
 } as const;
 
+/* ── Немного истории: баннер ────────────────────────────────── */
+
+/**
+ * Баннер в начале раздела «Немного истории».
+ *
+ * Слева Аполлоний в своём времени, справа он же сегодня, между ними
+ * конус с сечением. Кривую сечения рисует не картинка, а SVG поверх
+ * неё: на картинке её нет намеренно, чтобы геометрия была верной —
+ * парабола, а не замкнутая петля.
+ *
+ * Подписи от руки — текст рукописным шрифтом, а не картинка: они
+ * ищутся поиском, читаются экранным чтецом и не мылятся при
+ * увеличении.
+ */
+export const istoriya = {
+  /* Подписи от руки. */
+  zametki: {
+    konus: 'Конус, рассечённый плоскостью — в сечении парабола',
+    sleva: 'Геометрия открывает больше, чем кажется',
+    sprava: 'Одна идея — и множество применений',
+  },
+  /* Формула над правым портретом: её набирает KaTeX, не от руки. */
+  formula: 'y = ax^2 + bx + c',
+  antichnyy: {
+    src: '/images/theory/12/apollonius-antique.webp',
+    width: 800,
+    height: 800,
+    alt: 'Аполлоний Пергский, античный портрет',
+    podpis: 'Аполлоний, около 200 до н. э.',
+  },
+  sovremennyy: {
+    src: '/images/theory/12/apollonius-modern.webp',
+    width: 800,
+    height: 800,
+    alt: 'Аполлоний Пергский, современный портрет',
+    podpis: 'Аполлоний, наши дни',
+  },
+  konus: {
+    src: '/images/theory/12/cone-parabola.webp',
+    width: 1000,
+    height: 1000,
+    alt: 'Конус, рассечённый плоскостью: в сечении парабола',
+  },
+} as const;
+
 /* ── Список разделов для вкладки «Теория» ───────────────────── */
 
 export const QUADRATIC_SECTIONS: QuadraticSection[] = [
@@ -453,6 +498,7 @@ export const QUADRATIC_SECTIONS: QuadraticSection[] = [
  * с номером и ключ свёрстанного раздела. Порядок — по ТЗ.
  */
 const BLOCKS: { id: string; title: string; type: TheoryBlockType }[] = [
+  { id: 'history', title: 'Немного истории', type: 'note' },
   { id: 'what-is-quadratic', title: 'Что такое квадратичная функция', type: 'definition' },
   { id: 'coefficient-a', title: 'Коэффициент $a$', type: 'properties' },
   { id: 'coefficient-c', title: 'Коэффициент $c$', type: 'properties' },

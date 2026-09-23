@@ -660,6 +660,174 @@ a.tutor-card:hover {
   color: var(--color-text-tertiary);
 }
 
+/* ── Баннер «Немного истории» ───────────────────────────────── */
+
+/* Светлое поле во всю ширину раздела: слева Аполлоний в своём
+   времени, справа он же сегодня, между ними конус. Подписи от руки
+   стоят поверх поля — поэтому у него своя система координат. */
+.istor {
+  position: relative;
+  /* Баннер смотрит на свою ширину, а не на ширину окна: на 1024 рядом
+     стоит колонка содержания, и поля ему остаётся меньше, чем на 768,
+     где колонки нет. */
+  container-type: inline-size;
+  margin: 0;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+  overflow: hidden;
+}
+.istor__ryad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-4);
+  /* Верхняя полоса поля отдана подписям от руки: под ними начинаются
+     портреты, и строка подписи не ложится на лицо. */
+  padding-top: 64px;
+}
+.istor__lico {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+/* Портреты повёрнуты друг к другу, поэтому местами их не меняют
+   и не зеркалят: античный смотрит вправо, современный — влево. */
+.istor__portret {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+.istor__podpis {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  text-align: center;
+  /* Строка ломается пополам, а не оставляет одно слово внизу. */
+  text-wrap: balance;
+}
+/* Конус: картинка и кривая сечения поверх неё. Кривая живёт в системе
+   координат самой картинки, поэтому при любой ширине остаётся на
+   своём месте. */
+.istor__konus {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 280px;
+}
+.istor__konus-kartinka {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.istor__sechenie {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Толщина линии сечения — как у графика на чертежах движка, 3,2
+   пикселя экрана: при масштабировании картинки она не тянется. */
+.istor__krivaya {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+/* Часть кривой, уходящая за конус. */
+.istor__krivaya--za {
+  stroke-dasharray: 7 6;
+}
+/* Формула над правым портретом: набрана KaTeX, а не от руки. */
+/* Формула стоит над правым портретом, как на макете. */
+.istor__formula {
+  position: absolute;
+  top: 8%;
+  right: 22%;
+  font-size: var(--fs-lg);
+  color: var(--color-text-brand);
+}
+/* Подписи от руки: текст рукописным шрифтом со стрелкой к тому, что
+   подписано. Ширина в ch, чтобы строка ломалась там же при любом
+   кегле. */
+.istor__zametka {
+  position: absolute;
+  display: block;
+  max-width: 15ch;
+  font-family: var(--font-hand);
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+  color: var(--color-text-brand);
+}
+.istor__strelka {
+  display: block;
+  width: 60px;
+  height: 60px;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.istor__zametka--sleva {
+  top: var(--space-5);
+  left: var(--space-4);
+}
+.istor__zametka--konus {
+  top: 12%;
+  left: 30%;
+  max-width: 20ch;
+}
+.istor__zametka--sprava {
+  top: var(--space-5);
+  right: var(--space-4);
+  text-align: right;
+}
+.istor__zametka--sprava .istor__strelka {
+  margin-left: auto;
+}
+
+/* Узкий баннер: так он выглядит и на телефоне, и на 1024, где рядом
+   стоит колонка содержания. Конус переезжает наверх и остаётся по
+   центру целиком, портреты встают под ним рядом и уменьшаются. Две
+   верхние подписи от руки читаемо не помещаются — остаётся только
+   подпись у конуса, она идёт последней строкой по центру. Стрелка
+   у неё убрана: подпись стоит прямо под картинкой, показывать
+   стрелке некуда. */
+@container (max-width: 600px) {
+  .istor__ryad {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4) var(--space-3);
+    padding-top: 0;
+  }
+  .istor__konus {
+    grid-column: 1 / -1;
+    order: -1;
+    max-width: 220px;
+  }
+  .istor__portret {
+    max-width: 120px;
+  }
+  .istor__formula,
+  .istor__zametka--sleva,
+  .istor__zametka--sprava {
+    display: none;
+  }
+  .istor__zametka--konus {
+    position: static;
+    max-width: none;
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+  .istor__zametka--konus .istor__strelka {
+    display: none;
+  }
+}
+
 /* ── Раскладка по ширинам ───────────────────────────────────── */
 /* Медиазапросы идут последними: правила в них перекрывают базовые
    только за счёт порядка — специфичности медиазапрос не добавляет. */
@@ -752,6 +920,10 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 767.98px) {
+  .istor {
+    padding: var(--space-4);
+  }
+
   /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
      цитата и прогресс — по строке на каждое. */
   .topic-head {

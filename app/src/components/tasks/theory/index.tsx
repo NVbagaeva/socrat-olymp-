@@ -3,6 +3,7 @@ import { QUADRATIC_SECTIONS } from '@/content/theoryQuadratic';
 import { WhatIsFunction } from './WhatIsFunction';
 import { GraphNotFunction } from './GraphNotFunction';
 import { WhatKinds } from './WhatKinds';
+import { IstoriyaBanner } from './quadratic/IstoriyaBanner';
 import { QuadraticSection } from './quadratic/QuadraticSection';
 
 /**
@@ -15,6 +16,8 @@ export const theoryBodies: Record<string, ReactNode> = {
   'what-is-function': <WhatIsFunction />,
   'kinds-of-functions': <WhatKinds />,
   'graph-not-function': <GraphNotFunction />,
+  /* Немного истории: баннер, дальше — разговор двух Аполлониев. */
+  history: <IstoriyaBanner />,
   /* Разделы квадратичной подтемы: одна разметка, семь наборов данных. */
   ...Object.fromEntries(
     QUADRATIC_SECTIONS.map((section) => [
