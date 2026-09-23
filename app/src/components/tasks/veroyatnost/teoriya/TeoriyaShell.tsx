@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
@@ -57,6 +57,28 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
     requestAnimationFrame(() => scrollTo(id));
   }
 
+  /* Полоска содержания липнет под липкой лентой вкладок, поэтому ей
+     нужен отступ ровно в высоту ленты. Высота эта не постоянная:
+     на узком экране подпись вкладки переносится на две строки, и лента
+     становится выше. Раньше отступ брался числом из токена — лента
+     переросла его, и верх полоски уходил под ленту. Теперь высота
+     измеряется у самой ленты и живёт свойством на полоске. */
+  const polosa = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const uzel = polosa.current;
+    const lenta = document.querySelector('.topic-tabs-row');
+    if (uzel === null || lenta === null) {
+      return undefined;
+    }
+    const obnovit = () => {
+      uzel.style.setProperty('--h-lenty', `${Math.round(lenta.getBoundingClientRect().height)}px`);
+    };
+    obnovit();
+    const nablyudatel = new ResizeObserver(obnovit);
+    nablyudatel.observe(lenta);
+    return () => nablyudatel.disconnect();
+  }, []);
+
   const spisok = <TopicContents items={[...razdely]} active={aktivnyy} onSelect={vybrat} />;
   const otkryto = razdely.find((razdel) => razdel.id === aktivnyy);
 
@@ -72,7 +94,7 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
           липкость не работала бы — ячейка ростом с саму кнопку, и
           ездить внутри неё некуда. Здесь же кнопка липнет вдоль всей
           панели вкладки. */}
-      <div className="topic-open vteor-open">
+      <div className="topic-open vteor-open" ref={polosa}>
         <button
           type="button"
           className="topic-open__btn btn btn--secondary btn--sm"
