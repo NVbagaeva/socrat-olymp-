@@ -917,19 +917,41 @@ a.tutor-card:hover {
   left: -62%;
   top: -4%;
 }
-/* Сама реплика: светлая плашка на терракотовом поле. Шрифт со
-   греческим подмножеством — в репликах есть παραβολή, ἔλλειψις
-   и ὑπερβολή. */
+/* Сама реплика: светлая плашка на терракотовом поле. */
 .razgovor__slova {
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-accent);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  font-family: var(--font-grech);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   text-align: left;
+}
+
+/* Цитата под разговором: разговор обрывается на вопросе, и последнее
+   слово во врезке — за ней. Отбивка слева вместо кавычки-украшения:
+   в проекте цитату нигде не открывает нарисованный знак. */
+.razgovor__citata {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  background: var(--color-surface);
+}
+.razgovor__citata-text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.razgovor__citata-avtor {
+  justify-self: end;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
 }
 
 /* Широкая врезка: портреты встают по краям, реплики идут между ними.

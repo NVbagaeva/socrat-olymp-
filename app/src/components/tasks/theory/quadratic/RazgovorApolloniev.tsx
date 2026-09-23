@@ -16,6 +16,9 @@ import { istoriya, razgovor, type Storona } from '@/content/theoryQuadratic';
  * Узкая врезка: портреты уходят, вместо них перед подписью реплики
  * стоит кружок с лицом говорящего — как в переписке. Появления реплик
  * не анимируются: это не чат, а страница учебника.
+ *
+ * Разговор обрывается на вопросе о происхождении названия — ответ
+ * будет в продолжении; пока врезку закрывает цитата.
  */
 
 /** Портрет в колонке: он же несёт alt, кружки реплик — декор. */
@@ -74,6 +77,12 @@ export function RazgovorApolloniev() {
 
         <Lico kto="sovremennyy" />
       </div>
+
+      {/* Разговор обрывается на вопросе — закрывает врезку цитата. */}
+      <figure className="razgovor__citata">
+        <blockquote className="razgovor__citata-text">{razgovor.citata.text}</blockquote>
+        <figcaption className="razgovor__citata-avtor">— {razgovor.citata.avtor}</figcaption>
+      </figure>
     </section>
   );
 }
