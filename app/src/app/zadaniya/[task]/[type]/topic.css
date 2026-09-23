@@ -708,53 +708,7 @@ a.tutor-card:hover {
   /* Строка ломается пополам, а не оставляет одно слово внизу. */
   text-wrap: balance;
 }
-/* Чертёж «конус, плоскость, парабола»: линии тонкие, заливки лёгкие,
-   парабола — главная линия, поэтому она толще и акцентного цвета.
-   Сама геометрия считается в lib/graph/konus3d.js. */
-.konus {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.konus__fon {
-  fill: var(--color-surface-soft);
-  fill-opacity: 0.7;
-}
-.konus__ploskost-fon {
-  fill: var(--color-border-info);
-  fill-opacity: 0.45;
-}
-.konus__ploskost {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  opacity: 0.75;
-}
-.konus__rebro {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-}
-/* Дальняя половина окружности основания. */
-.konus__rebro--za {
-  stroke-dasharray: 10 8;
-}
-.konus__parabola {
-  fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 4.4;
-  stroke-linecap: round;
-}
-/* Часть кривой, уходящая за конус. */
-.konus__parabola--za {
-  stroke-dasharray: 12 10;
-}
-
-/* Конус: картинка и кривая сечения поверх неё. Кривая живёт в системе
-   координат самой картинки, поэтому при любой ширине остаётся на
-   своём месте. */
+/* Конус: картинка, на которой кривая сечения уже нарисована. */
 .istor__konus {
   position: relative;
   justify-self: center;
@@ -765,25 +719,6 @@ a.tutor-card:hover {
   display: block;
   width: 100%;
   height: auto;
-}
-.istor__sechenie {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-/* Толщина линии сечения — как у графика на чертежах движка, 3,2
-   пикселя экрана: при масштабировании картинки она не тянется. */
-.istor__krivaya {
-  fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 3.2;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-/* Часть кривой, уходящая за конус. */
-.istor__krivaya--za {
-  stroke-dasharray: 7 6;
 }
 /* Формула над правым портретом: набрана KaTeX, а не от руки. */
 /* Формула стоит над правым портретом, как на макете. */
@@ -812,7 +747,10 @@ a.tutor-card:hover {
   height: 60px;
   fill: none;
   stroke: var(--color-primary);
-  stroke-width: 3;
+  /* Толщина в пикселях экрана: стрелки разной длины, и без этого
+     длинная стрелка у конуса выходила заметно жирнее коротких. */
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -832,6 +770,17 @@ a.tutor-card:hover {
 }
 .istor__zametka--sprava .istor__strelka {
   margin-left: auto;
+}
+/* Стрелка у конуса показывает на саму кривую сечения, поэтому она
+   лежит внутри картинки и меряется в её долях: остриё приходит в одну
+   и ту же точку рисунка при любой ширине. */
+.istor__strelka--konus {
+  position: absolute;
+  left: 4.7%;
+  top: 11.7%;
+  width: 45%;
+  height: auto;
+  aspect-ratio: 1;
 }
 
 /* Узкий баннер: так он выглядит и на телефоне, и на 1024, где рядом
@@ -867,7 +816,7 @@ a.tutor-card:hover {
     margin-top: var(--space-4);
     text-align: center;
   }
-  .istor__zametka--konus .istor__strelka {
+  .istor__strelka--konus {
     display: none;
   }
 }

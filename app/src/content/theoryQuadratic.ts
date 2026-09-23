@@ -477,7 +477,7 @@ export const istoriya = {
     src: '/images/theory/12/cone-parabola.webp',
     width: 1000,
     height: 1000,
-    alt: 'Конус, рассечённый плоскостью: в сечении парабола',
+    alt: 'Конус, рассечённый плоскостью: в сечении — парабола',
   },
 } as const;
 
