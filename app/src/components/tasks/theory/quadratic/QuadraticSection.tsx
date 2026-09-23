@@ -3,11 +3,12 @@ import { Chart } from '@/components/graph/Chart';
 import { REMEMBER_TITLE, type QuadraticCard, type QuadraticSection as Section } from '@/content/theoryQuadratic';
 import { katex } from '@/lib/graph/katex';
 import { quadraticTheoryScene } from '@/lib/scenes';
+import { MathTitle } from '../MathTitle';
 import { Phrases } from '../Phrases';
 import { WarnIcon } from '../VerdictIcons';
 import { ForwardIcon } from './ForwardIcon';
 import { ParabolaPlayground } from './ParabolaPlayground';
-import { phrases } from './markup';
+import { phrases } from '../markup';
 
 /** Формула набором KaTeX: разметка собирается на сборке. */
 function formula(tex: string, display = false) {
@@ -27,7 +28,7 @@ function Card({ card }: { card: QuadraticCard }) {
     >
       <h4 className="qth-card__title">
         {card.forward === true ? <ForwardIcon /> : null}
-        {card.title}
+        <MathTitle text={card.title} />
       </h4>
 
       <div className="qth-card__text">

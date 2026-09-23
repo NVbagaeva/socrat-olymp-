@@ -1,10 +1,13 @@
 'use client';
 
 import { clsx } from 'clsx';
+import type { ReactNode } from 'react';
 
 export interface ContentsItem {
   id: string;
-  title: string;
+  /* Узел, а не строка: в заголовке могут стоять переменные, набранные
+     KaTeX на сервере. Обычная строка сюда подходит как была. */
+  title: ReactNode;
 }
 
 export interface TopicContentsProps {
