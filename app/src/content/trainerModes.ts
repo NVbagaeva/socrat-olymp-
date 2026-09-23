@@ -27,33 +27,67 @@ export const trainerModes: TrainerMode[] = [
  * ту же вкладку с уже выбранным навыком или режимом. Своих задач у
  * ярлыка нет — тренировка собирается там же, где и без него.
  */
-export type TrainerShortcutId = 'value' | 'argument' | 'intersection' | 'mixed';
+export type TrainerShortcutId =
+  'value' | 'argument' | 'intersection' | 'mixed' |
+  'koefficienty' | 'znachenie' | 'formula' | 'peresechenie';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
   id: TrainerShortcutId;
   /** Заголовок страницы и крошка. */
   title: string;
-  /** Что выбрано при заходе: набор движка и (или) режим. */
-  skill: string | null;
+  /**
+   * Наборы движка, которыми ярлык открывает конфигуратор. Пусто —
+   * все наборы семейства. Несколько наборов: конфигуратор
+   * показывает только их, и «Смешанная» идёт по ним же.
+   */
+  skills: string[];
   mode: TrainerModeId;
 }
 
-export const trainerShortcuts: TrainerShortcut[] = [
-  { id: 'value', title: 'Найти значение функции', skill: '12.A', mode: 'practice' },
-  { id: 'argument', title: 'Найти аргумент', skill: '12.B', mode: 'practice' },
-  { id: 'intersection', title: 'Точка пересечения графиков', skill: '12.C', mode: 'practice' },
-  { id: 'mixed', title: 'Смешанный тренажёр', skill: null, mode: 'mixed' },
+const LINEAR_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'value', title: 'Найти значение функции', skills: ['12.A'], mode: 'practice' },
+  { id: 'argument', title: 'Найти аргумент', skills: ['12.B'], mode: 'practice' },
+  { id: 'intersection', title: 'Точка пересечения графиков', skills: ['12.C'], mode: 'practice' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
+
+/* Девять навыков в ленту ярлыков не влезут и не нужны: ярлык — это
+   короткий путь к частой тренировке, а не оглавление. Наборы
+   сгруппированы по тому, что ученик делает руками: читает
+   коэффициент, считает значение, собирает формулу, решает уравнение
+   с двумя кривыми, — те же четыре связки, по которым разложены
+   карточки методов. */
+const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
+  {
+    id: 'koefficienty',
+    title: 'Коэффициенты по графику',
+    skills: ['12Q.A', '12Q.B', '12Q.C', '12Q.D'],
+    mode: 'mixed',
+  },
+  { id: 'znachenie', title: 'Значение и аргумент', skills: ['12Q.E', '12Q.F'], mode: 'mixed' },
+  { id: 'formula', title: 'Формула параболы', skills: ['12Q.G'], mode: 'practice' },
+  {
+    id: 'peresechenie',
+    title: 'Два графика на одном чертеже',
+    skills: ['12Q.H', '12Q.I'],
+    mode: 'mixed',
+  },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
  * Ярлыки подтемы по её идентификатору (data/functionTypes.ts).
  *
- * Список выше ведёт на наборы линейной подтемы; у остальных ярлыков
- * пока нет. Новая подтема добавляет сюда свой список.
+ * У подтемы без своего списка ярлыков нет — вкладка тренажёра
+ * открывается обычным адресом.
  */
 export function trainerShortcutsFor(type: string): TrainerShortcut[] {
-  return type === 'linear' ? trainerShortcuts : [];
+  if (type === 'linear') { return LINEAR_SHORTCUTS; }
+  if (type === 'quadratic') { return QUADRATIC_SHORTCUTS; }
+  return [];
 }
 
 export function findTrainerShortcut(type: string, id: string): TrainerShortcut | undefined {
@@ -93,6 +127,24 @@ export const trainerPage = {
   start: 'Начать тренировку',
 };
 
+/**
+ * Подписи конфигуратора подтемы.
+ *
+ * У квадратичной наборы — собственный материал платформы, в открытый
+ * банк ФИПИ они не входят, и обещать обратное нельзя: так и сказано
+ * в поле note самих наборов.
+ */
+export function trainerWordsFor(type: string) {
+  if (type !== 'quadratic') { return trainerPage; }
+  return {
+    ...trainerPage,
+    summary: {
+      ...trainerPage.summary,
+      note: 'Задания составлены платформой по разборам прототипов ЕГЭ.',
+    },
+  };
+}
+
 /** Название типа задания по набору движка: для статистики подхода. */
 export const trainerKindTitle: Record<string, string> = {
   '12.A': 'Найти значение функции',
@@ -101,6 +153,19 @@ export const trainerKindTitle: Record<string, string> = {
      они идут одной строкой. */
   '12.C': 'Точка пересечения графиков',
   '12.D': 'Точка пересечения графиков',
+  /* Квадратичная: по этим именам подход раскладывает задания так,
+     чтобы одинаковые не шли подряд, и по ним же собирается сводка. */
+  '12Q.A': 'Знак коэффициента a',
+  '12Q.B': 'Значение коэффициента a',
+  '12Q.C': 'Свободный член c',
+  '12Q.D': 'Коэффициент b',
+  '12Q.E': 'Значение функции',
+  '12Q.F': 'Аргумент по значению',
+  '12Q.G': 'Формула по графику',
+  /* Парабола с прямой и парабола с параболой — одно и то же
+     действие: приравнять формулы и найти второй корень. */
+  '12Q.H': 'Два графика на одном чертеже',
+  '12Q.I': 'Два графика на одном чертеже',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

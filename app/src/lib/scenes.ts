@@ -168,7 +168,27 @@ function dashed(from: [number, number], to: [number, number]) {
   return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
 }
 
+/* Набор прототипов квадратичной → навык подтемы: у карточки
+   конфигуратора та же миниатюра, что у карточки навыка во вкладке
+   опорных задач. Второго набора картинок для одного и того же
+   приёма заводить незачем. */
+const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12Q.A': 'sign-a',
+  '12Q.B': 'value-a',
+  '12Q.C': 'value-c',
+  '12Q.D': 'value-b',
+  '12Q.E': 'value-at',
+  '12Q.F': 'argument-for',
+  '12Q.G': 'formula',
+  '12Q.H': 'cross-line',
+  '12Q.I': 'cross-parabola',
+};
+
 export function generatorSkillScene(setId: string) {
+  const quadratic = QUADRATIC_SKILL_SCENE[setId];
+  if (quadratic !== undefined) {
+    return prepSkillScene(quadratic);
+  }
   const base = {
     window: squareWindow(SKILL_HALF),
     grid: { step: 1, show: true },

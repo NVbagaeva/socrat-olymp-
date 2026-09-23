@@ -632,7 +632,31 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
  * это честное null, а не выдуманные шаги.
  */
 /* Вторая кривая сцены в том виде, в каком её ждёт разбор параболы. */
-function secondCurve(task: EngineTask): unknown {
+/** Что разбору параболы нужно от задачи движка — и ничего сверх. */
+export interface QuadraticSource {
+  id: string;
+  answer: string;
+  meta: {
+    /* Точные дроби коэффициентов: разбор считает по ним, а не по
+       округлённым числам. */
+    aFraction?: unknown;
+    bFraction?: unknown;
+    cFraction?: unknown;
+    window?: unknown;
+    points?: unknown;
+    query?: unknown;
+    intersection?: unknown;
+    curves?: {
+      kind: string;
+      kFraction?: unknown;
+      bFraction?: unknown;
+      aFraction?: unknown;
+      cFraction?: unknown;
+    }[] | null;
+  };
+}
+
+function secondCurve(task: QuadraticSource): unknown {
   const curve = task.meta.curves?.[1];
   if (curve === undefined) {
     return null;
@@ -646,9 +670,15 @@ function secondCurve(task: EngineTask): unknown {
   };
 }
 
-/* Разбор задачи о параболе: свой модуль, своя схема шагов. Числа
-   берутся из точных дробей meta, а не из округлённых значений. */
-function quadraticSteps(task: EngineTask): PrepStep[] {
+/**
+ * Разбор задачи о параболе: свой модуль, своя схема шагов. Числа
+ * берутся из точных дробей meta, а не из округлённых значений.
+ *
+ * Принимает задачу движка по тем полям, которые разбору и нужны:
+ * тренажёр зовёт эту же функцию, а его взгляд на задачу движка чуть
+ * другой — там нет полей, которые нужны только экрану подготовки.
+ */
+export function quadraticSteps(task: QuadraticSource): PrepStep[] {
   const data = taskData(task.id);
   const steps = GraphSolutionQuadratic.build({
     curve: Quadratic.exact(task.meta.aFraction, task.meta.bFraction, task.meta.cFraction),

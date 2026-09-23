@@ -108,6 +108,12 @@ export interface FunctionType {
    */
   bezStarogoAdresa?: boolean;
   /**
+   * Тренажёр подтемы принимает задачи с ответом выбором варианта.
+   * Не задано — берутся только задачи с числовым ответом, как было
+   * у линейной подтемы и у заданий №4 и №5.
+   */
+  choiceAnswers?: boolean;
+  /**
    * Материалы «Для репетиторов» подтемы. Не заданы — материалы
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
@@ -238,6 +244,7 @@ export const functionTypes: FunctionType[] = [
     methods: true,
     theoryProgress: true,
     bezStarogoAdresa: true,
+    choiceAnswers: true,
     tutors: QUADRATIC.tutors,
   },
   {

@@ -2505,3 +2505,60 @@ a.task-card {
   font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
+
+/* ── Тренажёр квадратичной: разбор и рисунок метода ──────────────
+   Расхождение подтемы: после ответа под заданием открывается тот же
+   разбор, что во вкладке опорных задач, и рядом — чем эту задачу
+   решают. У линейной подтемы ни того, ни другого нет, и правила
+   ниже её экрана не касаются. */
+
+.tsolution {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.tmethod {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+.tmethod__label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+.tmethod__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+/* Миниатюра не тянется: на узком экране она уходит над текстом,
+   но остаётся того же размера — мельче её уже не прочитать. */
+.tmethod__chart {
+  flex: none;
+  display: block;
+  width: 96px;
+}
+.tmethod__chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.tmethod__text {
+  flex: 1 1 14rem;
+}
+.tmethod__title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tmethod__tip {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+}

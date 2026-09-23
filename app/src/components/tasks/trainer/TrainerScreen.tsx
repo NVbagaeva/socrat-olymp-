@@ -9,6 +9,7 @@ import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { PrepSolution } from '../prep/PrepSolution';
 import { TrainerResult, type TrainerMark } from './TrainerResult';
 
 export interface TrainerScreenProps {
@@ -83,6 +84,10 @@ export function TrainerScreen({
   /* Подсказка: открыта ли она, какой шаг идёт, что набрано в полях
      и как проверился текущий шаг. */
   const [hint, setHint] = useState(false);
+  /* Разбор параболы: у неё нет цепочки шагов с полями, зато есть
+     тот же разбор, что во вкладке опорных задач. */
+  const [solution, setSolution] = useState(false);
+  const [solutionStep, setSolutionStep] = useState(0);
   const [step, setStep] = useState(0);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [stepMark, setStepMark] = useState<'right' | 'wrong' | null>(null);
@@ -157,7 +162,11 @@ export function TrainerScreen({
 
   function check() {
     startClock();
-    const right = sameNumber(value, task.answer);
+    /* У задачи с выбором ответ движка — номер варианта, и сравнивать
+       его надо как строку: «02» и «2» — разные варианты. */
+    const right = task.options === null
+      ? sameNumber(value, task.answer)
+      : value === task.answer;
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
@@ -168,6 +177,21 @@ export function TrainerScreen({
     } else {
       failed.current = true;
       setMisses(misses + 1);
+    }
+  }
+
+  /* Открытый разбор стоит того же, что подсказка: задача в зачёт не
+     идёт, и ученик знает это заранее. */
+  function openSolution() {
+    startClock();
+    setSolution(true);
+    setSolutionStep(0);
+    setChecked(null);
+    failed.current = true;
+    setMarks({ ...marks, [index]: 'hinted' });
+    remember(task, false, false);
+    if (last) {
+      stopClock();
     }
   }
 
@@ -212,6 +236,8 @@ export function TrainerScreen({
     setValue('');
     setChecked(null);
     setHint(false);
+    setSolution(false);
+    setSolutionStep(0);
     setStep(0);
     setFields({});
     setStepMark(null);
@@ -234,6 +260,8 @@ export function TrainerScreen({
     setMisses(0);
     setSeconds(0);
     setHint(false);
+    setSolution(false);
+    setSolutionStep(0);
     setStep(0);
     setFields({});
     setStepMark(null);
@@ -300,21 +328,54 @@ export function TrainerScreen({
           <p className="ptask__label" id="ttask-answer-label">
             Ваш ответ:
           </p>
-          <Input
-            className="ttask__input"
-            value={value}
-            state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
-            inputMode="text"
-            autoComplete="off"
-            aria-labelledby="ttask-answer-label"
-            readOnly={checked === 'right'}
-            onChange={(event) => {
-              setValue(event.target.value);
-              if (checked === 'wrong') {
-                setChecked(null);
-              }
-            }}
-          />
+          {task.options === null ? (
+            <Input
+              className="ttask__input"
+              value={value}
+              state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
+              inputMode="text"
+              autoComplete="off"
+              aria-labelledby="ttask-answer-label"
+              readOnly={checked === 'right'}
+              onChange={(event) => {
+                setValue(event.target.value);
+                if (checked === 'wrong') {
+                  setChecked(null);
+                }
+              }}
+            />
+          ) : (
+            /* Ответ выбором варианта: та же разметка, что у опорных
+               задач, — список кнопок, выбранная обведена. */
+            <ul className="ptask__options" aria-labelledby="ttask-answer-label">
+              {task.options.map((option) => (
+                <li key={option.number}>
+                  <button
+                    type="button"
+                    /* Разметка и классы те же, что у опорных задач:
+                       второго оформления для одного и того же списка
+                       вариантов в проекте нет. */
+                    className={clsx(
+                      'popt',
+                      value === option.number && 'is-chosen',
+                      value === option.number && checked !== null && `is-${checked}`,
+                    )}
+                    aria-pressed={value === option.number}
+                    disabled={checked === 'right'}
+                    onClick={() => {
+                      setValue(option.number);
+                      if (checked === 'wrong') {
+                        setChecked(null);
+                      }
+                    }}
+                  >
+                    <span className="popt__no">{option.number}</span>
+                    <span className="popt__text" dangerouslySetInnerHTML={{ __html: option.html }} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
 
           {checked === null ? null : (
             <div className={clsx('tverdict', `tverdict--${checked}`)} role="status">
@@ -331,7 +392,12 @@ export function TrainerScreen({
                 <p
                   className="tverdict__text"
                   dangerouslySetInnerHTML={{
-                    __html: checked === 'right' ? task.rightHint : task.wrongHint,
+                    /* У задачи с вариантами пояснение своё у каждого
+                       неверного варианта: оно говорит, что именно в
+                       нём не так. */
+                    __html: checked === 'right'
+                      ? (task.options === null ? task.rightHint : '')
+                      : (task.options === null ? task.wrongHint : (task.oshibki[value] ?? '')),
                   }}
                 />
               )}
@@ -356,11 +422,51 @@ export function TrainerScreen({
                     <span className="thint__warn">Задача не будет засчитана.</span>
                   </span>
                 )}
+                {task.solution === null || control ? null : (
+                  <span className="thint__offer">
+                    <Button variant="ghost" onClick={openSolution}>
+                      Показать решение
+                    </Button>
+                    <span className="thint__warn">Задача не будет засчитана.</span>
+                  </span>
+                )}
               </>
             )}
           </div>
         </div>
       )}
+
+      {/* Разбор параболы и рисунок метода. Разбор открывается либо
+          кнопкой до ответа — тогда задача не засчитана, — либо сам
+          после верного ответа: там он уже ничего не стоит. Рисунок
+          метода показывается вместе с разбором и только у этой
+          подтемы. */}
+      {task.solution !== null && !control && (solution || checked === 'right') ? (
+        <div className="tsolution">
+          <PrepSolution
+            steps={task.solution}
+            tip={task.method?.tip ?? ''}
+            step={solutionStep}
+            onStep={setSolutionStep}
+            onClose={() => setSolution(false)}
+          />
+          {task.method === null ? null : (
+            <aside className="tmethod">
+              <p className="tmethod__label">Каким методом решали</p>
+              <div className="tmethod__body">
+                <span
+                  className="tmethod__chart"
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{ __html: task.method.svg }}
+                />
+                <div className="tmethod__text">
+                  <p className="tmethod__title">{task.method.title}</p>
+                </div>
+              </div>
+            </aside>
+          )}
+        </div>
+      ) : null}
 
       {hint ? (
         <div className="thint">
