@@ -1,12 +1,12 @@
 import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
-import { prepSubtopicParams } from '@/content/sections';
+import { prepRedirectParams } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { prepSkillIds } from '@/lib/prep';
 
-/* Те же адреса, что были: подтемы с навыками × их навыки. */
+/* Те же адреса, что были: прежние подтемы × их навыки. */
 export function generateStaticParams() {
-  return prepSubtopicParams().flatMap((params) =>
+  return prepRedirectParams().flatMap((params) =>
     prepSkillIds(params.type).map((skill) => ({ ...params, skill })),
   );
 }

@@ -99,6 +99,15 @@ export interface FunctionType {
    */
   theoryProgress?: boolean;
   /**
+   * Подтема заведена после того, как вкладку «Подготовительные
+   * задачи» переименовали в «Опорные задачи». Прежнего адреса
+   * (content/opornye.ts, staryyTail) у неё никогда не было, и
+   * страницы-редиректы по нему не собираются: уводить с адреса,
+   * которого не существовало, некого. Не задано — подтема жила до
+   * переименования, и редиректы ей нужны.
+   */
+  bezStarogoAdresa?: boolean;
+  /**
    * Материалы «Для репетиторов» подтемы. Не заданы — материалы
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
@@ -223,6 +232,7 @@ export const functionTypes: FunctionType[] = [
     about: QUADRATIC.about,
     methods: true,
     theoryProgress: true,
+    bezStarogoAdresa: true,
     tutors: QUADRATIC.tutors,
   },
   {
