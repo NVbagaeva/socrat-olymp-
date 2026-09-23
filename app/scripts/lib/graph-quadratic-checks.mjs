@@ -692,5 +692,20 @@ export function checkLabels(set, task) {
     });
   });
 
+  /* На каждой оси подписано хотя бы одно деление: без него единичный
+     отрезок не задан и считать по клеткам не от чего. Ось, к которой
+     относится подпись, рендерер кладёт в отчёт сам. */
+  const axisBoxes = boxes.filter((box) => box.kind === 'axisLabel');
+  const naOsiX = axisBoxes.filter((box) => box.id === 'x').length;
+  const naOsiY = axisBoxes.filter((box) => box.id === 'y').length;
+  if (naOsiX === 0) { errors.push(`${where}: на оси x не подписано ни одно деление`); }
+  if (naOsiY === 0) { errors.push(`${where}: на оси y не подписано ни одно деление`); }
+
   return errors;
+}
+
+/* Сколько раз рендереру пришлось подписать запасное деление вместо
+   закрытой кружком единицы. Нужно только отчёту. */
+export function rescuedLabels(task) {
+  return task.layout && task.layout.rescued ? task.layout.rescued : 0;
 }

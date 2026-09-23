@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import generator from '../src/lib/graph/generate.js';
 import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkLabels, checkQuadraticComposition,
          checkQuadraticSolution, checkQuadraticTask, hiddenVariantCounts, intersectionAudit,
-         solutionShape } from './lib/graph-quadratic-checks.mjs';
+         rescuedLabels, solutionShape } from './lib/graph-quadratic-checks.mjs';
 
 /* Цель по окну: ±5…±6; шире — исключение, о котором отчёт говорит вслух. */
 const WINDOW_TARGET = 6;
@@ -64,6 +64,8 @@ generator.setLayoutReport(true);
 const errors = [];
 const report = [];
 let distinctAll = new Set();
+/* Сколько раз подписывалось запасное деление вместо закрытой единицы. */
+let rescued = 0;
 
 function signatureOf(task) {
   return task.meta.curves.map((curve) =>
@@ -82,6 +84,7 @@ for (const set of QUADRATIC_SETS) {
 
   tasks.forEach((task) => {
     errors.push(...checkQuadraticTask(set, task), ...checkLabels(set, task));
+    rescued += rescuedLabels(task);
     errors.push(...checkQuadraticSolution(set, task));
   });
   errors.push(...checkQuadraticComposition(set, tasks));
@@ -135,7 +138,7 @@ for (const set of QUADRATIC_SETS) {
       } else {
         ok += 1;
       }
-      fresh.forEach((task) => distinctAll.add(signatureOf(task)));
+      fresh.forEach((task) => { distinctAll.add(signatureOf(task)); rescued += rescuedLabels(task); });
     } catch (error) {
       seedErrors.push(`${seed}: ${error.message}`);
     }
@@ -161,6 +164,7 @@ for (const set of QUADRATIC_SETS) {
 console.log('graph/check-graph-quadratic');
 report.forEach((line) => console.log(line));
 console.log(`  разных чертежей по всем наборам и seed: ${distinctAll.size}`);
+console.log(`  подписано запасное деление вместо закрытой единицы: ${rescued} раз`);
 
 if (errors.length) {
   console.error(`\nОШИБКИ (${errors.length}):`);

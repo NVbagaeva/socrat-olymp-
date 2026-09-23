@@ -304,7 +304,8 @@ function renderGraph(scene, report) {
     (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">');
   if (scene.alt) { head.push('<title>' + esc(scene.alt) + '</title>'); }
-  if (report) { report.cell = cell; report.sx = sx; report.sy = sy; }
+  if (report) { report.cell = cell; report.sx = sx; report.sy = sy;
+                report.axis = { x: axisY, y: axisX }; }
   head.push('<rect x="0" y="0" width="' + px(width) + '" height="' + px(height) + '" fill="' +
     THEME.colors.bg + '"/>');
 
@@ -390,11 +391,11 @@ function renderGraph(scene, report) {
      кружок радиуса pointRadius против прямоугольника подписи.
      Точка рядом с осью закрывает подпись ничуть не меньше, чем
      точка ровно на ней. */
-  function coveredByPoint(cx, cy, halfW, halfH) {
+  function coveredByPoint(box) {
     if (!strict) { return false; }
     return (scene.points || []).some(function (point) {
-      var dx = Math.max(Math.abs(sx(point.x) - cx) - halfW, 0);
-      var dy = Math.max(Math.abs(sy(point.y) - cy) - halfH, 0);
+      var dx = Math.max(Math.abs(sx(point.x) - box.x) - box.halfW, 0);
+      var dy = Math.max(Math.abs(sy(point.y) - box.y) - box.halfH, 0);
       return Math.sqrt(dx * dx + dy * dy) < g.pointRadius;
     });
   }
@@ -458,34 +459,57 @@ function renderGraph(scene, report) {
   });
 
   var labelBoxes = [];
-  function boxFor(value, cx, cy) {
-    var half = textWidth(value, THEME.font.axisLabel) / 2;
-    labelBoxes.push({ x: cx, y: cy, halfW: half, halfH: THEME.font.axisLabel * 0.62 });
+
+  /* Где встанет прямоугольник подписи деления: у оси x — под осью,
+     у оси y — левее её. */
+  function tickBox(axis, at, text) {
+    var half = textWidth(text, THEME.font.axisLabel) / 2;
+    var halfH = THEME.font.axisLabel * 0.62;
+    return axis === 'x'
+      ? { x: sx(at), y: axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35,
+          halfW: half, halfH: halfH }
+      : { x: axisY - THEME.gap.axisLabelY - half, y: sy(at), halfW: half, halfH: halfH };
   }
 
-  ticksX.forEach(function (item) {
-    if (item.text === null) { return; }
-    var textX = item.text;
-    var boxXc = sx(item.at);
-    var boxYc = axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35;
-    var boxXh = textWidth(textX, THEME.font.axisLabel) / 2;
-    if (coveredByPoint(boxXc, boxYc, boxXh, THEME.font.axisLabel * 0.62)) { return; }
-    labelLayer.push(numberText(textX, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
-    boxFor(textX, sx(item.at), axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35);
-    collect(report, 'axisLabel', null, sx(item.at),
-      axisX + THEME.gap.axisLabelX - THEME.font.axisLabel * 0.35,
-      textWidth(textX, THEME.font.axisLabel) / 2, THEME.font.axisLabel * 0.62);
+  /* Какие деления оси будут подписаны.
+
+     Единичный отрезок задан подписями 1 и −1, и без них с чертежа
+     нечего считать. Поэтому убрать закрытую кружком подпись можно,
+     только пока на оси остаётся хотя бы одна: если закрыты обе,
+     подписывается ближайшее свободное деление — 2, −2 и дальше. */
+  function axisLabels(ticks, axis) {
+    var wanted = ticks.filter(function (item) { return item.text !== null; });
+    var kept = wanted.filter(function (item) {
+      return !coveredByPoint(tickBox(axis, item.at, item.text));
+    });
+    if (report && kept.length < wanted.length) {
+      report.dropped = (report.dropped || 0) + (wanted.length - kept.length);
+    }
+    if (!strict || kept.length > 0) { return kept; }
+
+    var spare = ticks.filter(function (item) { return item.text === null; })
+      .sort(function (u, v) { return Math.abs(u.at) - Math.abs(v.at); });
+    for (var i = 0; i < spare.length; i++) {
+      var text = fmt(spare[i].at);
+      if (!coveredByPoint(tickBox(axis, spare[i].at, text))) {
+        if (report) { report.rescued = (report.rescued || 0) + 1; }
+        return [{ at: spare[i].at, text: text }];
+      }
+    }
+    return [];
+  }
+
+  axisLabels(ticksX, 'x').forEach(function (item) {
+    var box = tickBox('x', item.at, item.text);
+    labelLayer.push(numberText(item.text, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
+    labelBoxes.push(box);
+    collect(report, 'axisLabel', 'x', box.x, box.y, box.halfW, box.halfH);
   });
-  ticksY.forEach(function (item) {
-    if (item.text === null) { return; }
-    var textY = item.text;
-    var half = textWidth(textY, THEME.font.axisLabel) / 2;
-    if (coveredByPoint(axisY - THEME.gap.axisLabelY - half, sy(item.at), half,
-      THEME.font.axisLabel * 0.62)) { return; }
-    labelLayer.push(numberText(textY, axisY - THEME.gap.axisLabelY, sy(item.at) + 4.5, 'end'));
-    boxFor(textY, axisY - THEME.gap.axisLabelY - half, sy(item.at));
-    collect(report, 'axisLabel', null, axisY - THEME.gap.axisLabelY - half, sy(item.at),
-      half, THEME.font.axisLabel * 0.62);
+  axisLabels(ticksY, 'y').forEach(function (item) {
+    var box = tickBox('y', item.at, item.text);
+    labelLayer.push(numberText(item.text, axisY - THEME.gap.axisLabelY, sy(item.at) + 4.5, 'end'));
+    labelBoxes.push(box);
+    collect(report, 'axisLabel', 'y', box.x, box.y, box.halfW, box.halfH);
   });
   var originTaken = strict && (scene.points || []).some(function (point) {
     return dist(sx(point.x), sy(point.y), axisY, axisX) < g.pointRadius * 2;

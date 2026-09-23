@@ -673,9 +673,14 @@ function stepIntersectionAnswer(p, options, blocks) {
   blocks.push(text('Переносим всё в одну сторону и приводим подобные:'));
   blocks.push(formula(coef(A) + 'x^2' + term(B, 'x') + term(sub(p.c, c2)) + ' = 0'));
 
-  blocks.push(text('Один корень мы знаем: это абсцисса отмеченной точки ' +
+  /* Координат отмеченной точки на чертеже нет — как в экзаменационных
+     чертежах, — поэтому разбор называет их сам и говорит, откуда они
+     взяты: точка стоит в узле сетки. */
+  blocks.push(text('Один корень мы знаем: отмеченная точка пересечения стоит в узле сетки, ' +
+    'её координаты ' +
     keyMath(pointTex(Q.toExact(shown.x), Q.toExact(shown.y)),
-      pointText(Q.toExact(shown.x), Q.toExact(shown.y))) + '.'));
+      pointText(Q.toExact(shown.x), Q.toExact(shown.y))) +
+    ' — значит, один корень это её абсцисса.'));
   /* Приведённое уравнение — отдельный случай: там сумма корней равна
      просто −B, и лишняя дробь ученику ни к чему. */
   var reduced = isInt(A) && A.p === 1;
