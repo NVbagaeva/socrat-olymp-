@@ -110,6 +110,7 @@ def main():
     ap.add_argument('-o', '--out', default=None, help='voice.wav, либо итоговый MP4 при --video')
     ap.add_argument('--video', default=None, help='готовое видео: наложить на него озвучку')
     ap.add_argument('--update-html', action='store_true', help='записать в index.html огибающую голоса для движения ротика')
+    ap.add_argument('--music', default=None, help='фоновая музыка (music.wav из music.py): подмешать под голос с приглушением на репликах')
     args = ap.parse_args()
     if not shutil.which('RHVoice-test'):
         sys.exit('Не найден RHVoice: sudo apt install rhvoice rhvoice-russian')
@@ -161,9 +162,18 @@ def main():
         html.write_text(src, encoding='utf-8')
         print(f'Ротик синхронизирован с голосом: {html}')
 
+    audio = voice
+    if args.music:
+        # музыка тише голоса и мягко приглушается, пока кто-то говорит (sidechain), затем общий уровень -16 LUFS
+        audio = voice.with_name('mix.wav')
+        subprocess.run([ff, '-y', '-loglevel', 'error', '-i', str(voice), '-i', args.music, '-filter_complex',
+                        '[1:a]volume=0.9[m];[m][0:a]sidechaincompress=threshold=0.03:ratio=4:attack=60:release=700:makeup=1[md];'
+                        '[md][0:a]amix=inputs=2:duration=first:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]',
+                        '-map', '[out]', '-ar', str(SR), '-ac', '2', str(audio)], check=True)
+        print(f'Голос + музыка: {audio}')
     if args.video:
         out = Path(args.out or Path(args.video).with_name(Path(args.video).stem + '_voice.mp4'))
-        subprocess.run([ff, '-y', '-loglevel', 'error', '-i', args.video, '-i', str(voice), '-map', '0:v', '-map', '1:a',
+        subprocess.run([ff, '-y', '-loglevel', 'error', '-i', args.video, '-i', str(audio), '-map', '0:v', '-map', '1:a',
                         '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', str(out)], check=True)
         print(f'Видео с озвучкой: {out}')
 
