@@ -19,3 +19,6 @@ app/pdf-private/
 
 # Python
 __pycache__/
+
+# рендер мультика kawaii-love
+kawaii-love/*.mp4

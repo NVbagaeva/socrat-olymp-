@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Спасибо, что ты рядом</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0d2a; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: 'Nunito', 'Comfortaa', 'Segoe UI', system-ui, sans-serif; }
+
+  /* Сцена всегда 1080×1920 (вертикальный формат), масштабируется под окно */
+  #stage { position: relative; width: 1080px; height: 1920px; transform-origin: 0 0; flex: none; }
+  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #ui    { position: absolute; inset: 0; pointer-events: none; }
+
+  /* Облачко-реплика */
+  .bubble {
+    position: absolute; opacity: 0; visibility: hidden;
+    max-width: 600px; padding: 26px 40px; box-sizing: border-box;
+    background: #fff; border-radius: 40px; color: #4a3566;
+    font-weight: 800; font-size: 46px; line-height: 1.25; text-align: center;
+    box-shadow: 0 14px 44px rgba(50, 20, 90, .28);
+    transform-origin: var(--tail, 50%) 100%;
+  }
+  .bubble::after {               /* хвостик к говорящему */
+    content: ''; position: absolute; left: calc(var(--tail, 50%) - 18px); bottom: -14px;
+    width: 36px; height: 36px; background: inherit; border-radius: 8px; transform: rotate(45deg);
+  }
+  .bubble.soft { background: rgba(255,255,255,.74); color: #5d4a78; box-shadow: 0 10px 30px rgba(50,20,90,.18); }
+  .bubble .ghost { visibility: hidden; }            /* невидимый полный текст задаёт размер облачка */
+  .bubble .txt { position: absolute; inset: 26px 40px; }
+  .bubble.dots { padding: 22px 34px; letter-spacing: 6px; font-size: 60px; line-height: 1; }
+  .bubble.dots span { display: inline-block; opacity: 0; }
+
+  /* Финальная надпись */
+  #final {
+    position: absolute; left: 50%; top: 46%; width: 900px;
+    opacity: 0; visibility: hidden; text-align: center; color: #fff5fb;
+    font-weight: 900; font-size: 84px; line-height: 1.2;
+    text-shadow: 0 0 30px rgba(255, 200, 235, .65), 0 6px 30px rgba(60, 20, 90, .5);
+  }
+  #fade { position: absolute; inset: 0; background: #06071a; opacity: 0; }
+
+  /* Кнопка «Ещё раз» */
+  #replay {
+    position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
+    pointer-events: auto; cursor: pointer; opacity: 0; visibility: hidden;
+    border: 0; border-radius: 999px; padding: 26px 64px;
+    font: 800 48px/1 'Nunito', system-ui, sans-serif; color: #4a3566;
+    background: linear-gradient(135deg, #ffd6e8, #d9c6ff); box-shadow: 0 14px 44px rgba(255, 180, 220, .35);
+    transition: transform .2s;
+  }
+  #replay:hover { transform: translate(-50%, -50%) scale(1.06); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="scene" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Небо: глубокий вечерний градиент, к горизонту пыльно-розовый -->
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop id="sky0" offset="0"    stop-color="#0e1240"/>
+        <stop id="sky1" offset="0.45" stop-color="#2b2260"/>
+        <stop id="sky2" offset="0.72" stop-color="#6a3f7c"/>
+        <stop id="sky3" offset="1"    stop-color="#c9788f"/>
+      </linearGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#4a3470"/>
+        <stop offset="0.3" stop-color="#33244f"/>
+        <stop offset="1"   stop-color="#1c1436"/>
+      </linearGradient>
+      <radialGradient id="moonFill" cx="0.4" cy="0.35" r="0.8">
+        <stop offset="0"   stop-color="#fffbe6"/>
+        <stop offset="0.7" stop-color="#ffeeb0"/>
+        <stop offset="1"   stop-color="#f8d78a"/>
+      </radialGradient>
+      <radialGradient id="moonGlow">
+        <stop offset="0"   stop-color="#ffe9a8" stop-opacity=".55"/>
+        <stop offset="0.5" stop-color="#ffd58a" stop-opacity=".18"/>
+        <stop offset="1"   stop-color="#ffc98a" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Пушистики: объёмный градиент меха -->
+      <radialGradient id="furNata" cx="0.38" cy="0.32" r="0.8">
+        <stop offset="0"   stop-color="#eadcff"/>
+        <stop offset="0.55" stop-color="#c7a9f2"/>
+        <stop offset="1"   stop-color="#8f6cc9"/>
+      </radialGradient>
+      <radialGradient id="furOlya" cx="0.38" cy="0.32" r="0.8">
+        <stop offset="0"   stop-color="#ffe9dd"/>
+        <stop offset="0.55" stop-color="#ffbfae"/>
+        <stop offset="1"   stop-color="#e8848f"/>
+      </radialGradient>
+      <linearGradient id="furHug" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#c7a9f2"/>
+        <stop offset="0.5" stop-color="#e6b9d6"/>
+        <stop offset="1"   stop-color="#ffbfae"/>
+      </linearGradient>
+      <radialGradient id="iris" cx="0.5" cy="0.4" r="0.6">
+        <stop offset="0"   stop-color="#6b4fa8"/>
+        <stop offset="0.7" stop-color="#3b2a6a"/>
+        <stop offset="1"   stop-color="#1e1440"/>
+      </radialGradient>
+      <radialGradient id="irisOlya" cx="0.5" cy="0.4" r="0.6">
+        <stop offset="0"   stop-color="#b3567a"/>
+        <stop offset="0.7" stop-color="#5e2c4c"/>
+        <stop offset="1"   stop-color="#2a1430"/>
+      </radialGradient>
+      <!-- Машинка -->
+      <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#3a3a4c"/>
+        <stop offset="0.5" stop-color="#1f1f2c"/>
+        <stop offset="1"   stop-color="#0f0f18"/>
+      </linearGradient>
+      <linearGradient id="carGlass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#cfe2ff"/>
+        <stop offset="1"   stop-color="#7f9bd0"/>
+      </linearGradient>
+      <radialGradient id="lampFill" cx="0.45" cy="0.4" r="0.7">
+        <stop offset="0"   stop-color="#ffffff"/>
+        <stop offset="0.45" stop-color="#fff3c2"/>
+        <stop offset="1"   stop-color="#ffcf7a"/>
+      </radialGradient>
+      <radialGradient id="lampGlow">
+        <stop offset="0" stop-color="#ffe8a8" stop-opacity=".8"/>
+        <stop offset="1" stop-color="#ffe8a8" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- ШЁРСТКА: два слоя шума. Крупный даёт мягкие «бугорки», мелкий — ворсинки по краю -->
+      <filter id="fur-nata" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="coarse"/>
+        <feDisplacementMap in="SourceGraphic" in2="coarse" scale="26" xChannelSelector="R" yChannelSelector="G" result="d1"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="3" result="fine"/>
+        <feDisplacementMap class="furFine" in="d1" in2="fine" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="fur-olya" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="11" result="coarse"/>
+        <feDisplacementMap in="SourceGraphic" in2="coarse" scale="26" xChannelSelector="R" yChannelSelector="G" result="d1"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="5" result="fine"/>
+        <feDisplacementMap class="furFine" in="d1" in2="fine" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="fur-hug" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="21" result="coarse"/>
+        <feDisplacementMap in="SourceGraphic" in2="coarse" scale="34" xChannelSelector="R" yChannelSelector="G" result="d1"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="3" seed="9" result="fine"/>
+        <feDisplacementMap in="d1" in2="fine" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="10"/>
+      </filter>
+      <filter id="blur6" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="6"/></filter>
+      <filter id="blur3" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
+      <filter id="shadowSoft" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="18"/>
+      </filter>
+
+      <!-- Заготовка сердечка -->
+      <path id="heartShape" d="M0 26 C -6 18 -30 6 -30 -10 C -30 -24 -18 -30 -10 -30 C -4 -30 0 -26 0 -22 C 0 -26 4 -30 10 -30 C 18 -30 30 -24 30 -10 C 30 6 6 18 0 26 Z"/>
+    </defs>
+
+    <!-- ===== ФОН ===== -->
+    <rect width="1080" height="1920" fill="url(#sky)"/>
+    <g id="stars"></g>
+    <g id="moon">
+      <circle id="moonGlowC" cx="840" cy="330" r="290" fill="url(#moonGlow)"/>
+      <g id="moonBody">
+        <circle cx="840" cy="330" r="118" fill="url(#moonFill)"/>
+        <circle cx="800" cy="290" r="16" fill="#f3d58f" opacity=".45"/>
+        <circle cx="880" cy="370" r="22" fill="#f3d58f" opacity=".4"/>
+        <circle cx="860" cy="280" r="9"  fill="#f3d58f" opacity=".4"/>
+        <!-- лицо луны, появляется когда прилетает сердечко -->
+        <g id="moonFace" opacity="0" fill="none" stroke="#c48a4a" stroke-width="7" stroke-linecap="round">
+          <path d="M 790 322 q 16 -18 32 0"/>
+          <path d="M 858 322 q 16 -18 32 0"/>
+          <path d="M 806 362 q 34 32 68 0"/>
+          <ellipse cx="786" cy="352" rx="14" ry="9" fill="#f7b0a8" stroke="none" opacity=".8"/>
+          <ellipse cx="894" cy="352" rx="14" ry="9" fill="#f7b0a8" stroke="none" opacity=".8"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ===== МИР (масштабируется при отъезде камеры) ===== -->
+    <g id="world">
+      <!-- земля: широкий холм, чтобы при отъезде камеры не появлялись края -->
+      <path d="M -2000 1600 Q 540 1480 3100 1600 L 3100 2600 L -2000 2600 Z" fill="url(#ground)"/>
+      <path d="M -2000 1600 Q 540 1480 3100 1600" fill="none" stroke="#7a5aa0" stroke-width="6" opacity=".35" filter="url(#blur3)"/>
+      <g id="fireflies"></g>
+      <g id="shadows"></g>
+      <g id="car"></g>
+      <g id="hugBlob" opacity="0">
+        <ellipse cx="0" cy="0" rx="300" ry="185" fill="url(#furHug)" filter="url(#fur-hug)"/>
+      </g>
+      <g id="chars"></g>
+      <g id="hearts"></g>
+      <g id="flyHeart" opacity="0">
+        <use href="#heartShape" fill="#ff6f9c" filter="url(#blur6)" opacity=".8" transform="scale(1.35)"/>
+        <use href="#heartShape" fill="#ff7fa8"/>
+        <ellipse cx="-9" cy="-14" rx="6" ry="4" fill="#fff" opacity=".8" transform="rotate(-30 -9 -14)"/>
+      </g>
+    </g>
+
+    <!-- приглушённый свет в грустной половине -->
+    <rect id="dim" width="1080" height="1920" fill="#0a0d33" opacity=".28"/>
+  </svg>
+
+  <div id="ui">
+    <div id="final"></div>
+    <div id="fade"></div>
+    <button id="replay">▶ Ещё раз</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* =====================================================================
+ *  ТЕКСТЫ, ТАЙМИНГИ И НАСТРОЙКИ — меняются здесь
+ * ===================================================================== */
+const LINES = {
+  hi1:   { who: 'nata', at: 2.5,  text: 'Оля, привет!' },
+  hi2:   { who: 'olya', at: 5.5,  text: 'Привет-привет!' },
+  sorry: { who: 'nata', at: 8.4,  text: 'Прости, что я опять такая косячная…', mood: 'sad' },
+  shame: { who: 'nata', at: 15.2, text: 'Мне очень стыдно, что я создаю тебе проблемы…', mood: 'sad' },
+  love1: { who: 'nata', at: 21.9, text: 'Моя дорогая Олечка… Я тебя очень-очень люблю!' },
+  love2: { who: 'nata', at: 27.4, text: 'До луны и обратно!' },
+  quiet: { who: 'nata', at: 36.1, text: 'Мне так ценны минуты, когда ты рядом…', mood: 'soft', x: 620 },
+};
+const THINK_DOTS_AT = 12.6;                    // Оля задумалась: «…» (точки по одной)
+const FINAL_TEXT    = 'Спасибо, что ты рядом 🌙❤️';
+
+// Начало каждой сцены, секунды
+const T = {
+  intro: 0,      // появление сцены
+  hi1: 2,        // Ната машет лапкой
+  hi2: 5,        // Оля подпрыгивает
+  sorry: 8,      // Ната косится на машинку, сникает
+  think: 12,     // Оля задумывается
+  shame: 15,     // Ната совсем сникает, слезинка
+  comfort: 19.5, // Оля качает головой, шаг ближе
+  love: 21.8,    // признание, сердечко к луне и обратно
+  hug: 31.0,     // Ната бежит, объятие
+  quiet: 35.0,   // минуты тишины, машинка подкатывается
+  outro: 40.8,   // камера отъезжает, финальная надпись
+  end: 44.4,     // конец мультика
+};
+
+const TYPE_SPEED = 16;   // символов в секунду при печати
+const HOLD_AFTER = 2;    // сколько секунд реплика висит после допечатывания
+
+// Позиции героев (центр туловища) — сцена 1080×1920
+const POS = {
+  nata: { x: 300, y: 1410 },
+  olya: { x: 780, y: 1410 },
+  car:  { x: 545, y: 1370, scale: 0.78 },       // чуть позади, между героями
+  carEnd: { x: 240, y: 1490, scale: 1 },        // куда машинка подкатывается в конце
+  hugX: 640,                                    // куда добегает Ната
+  sitNata: 615, sitOlya: 795,                   // «прижавшись бочками»
+  moon: { x: 840, y: 330 },
+};
+
+/* =====================================================================
+ *  УТИЛИТЫ
+ * ===================================================================== */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+// Детерминированный генератор случайных чисел — кадры одинаковы при каждом запуске
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rand = rng(2024);
+const R = (a, b) => a + rand() * (b - a);
+
+// «Производные» обновления (печать текста, полёт по дуге) пересчитываются
+// из значений прокси-объектов — так кадр корректен при любом seek().
+const derived = [];
+const runDerived = () => derived.forEach(f => f());
+// Сколько повторов нужно циклу длиной dur, начатому в момент at, чтобы дожить до конца мультика
+// (repeat: -1 сделал бы длительность таймлайна бесконечной)
+const loops = (dur, at = 0) => Math.max(0, Math.ceil((T.end - at) / dur) - 1);
+
+/* =====================================================================
+ *  ПОСТРОЕНИЕ ПЕРСОНАЖЕЙ
+ * ===================================================================== */
+function makeFluffy(cfg) {
+  const g = el('g', { class: 'char ' + cfg.id }, $('#chars'));
+  const jump   = el('g', { class: 'jump' }, g);      // squash & stretch, прыжки
+  const breath = el('g', { class: 'breath' }, jump); // дыхание
+  const sway   = el('g', { class: 'sway' }, breath); // покачивание
+
+  // лапки-ножки
+  const legs = el('g', { class: 'legs' }, sway);
+  const legL = el('ellipse', { cx: -48, cy: 148, rx: 30, ry: 17, fill: cfg.dark }, legs);
+  const legR = el('ellipse', { cx:  48, cy: 148, rx: 30, ry: 17, fill: cfg.dark }, legs);
+
+  // туловище: пушистый круг + мягкое свечение для читаемости на фоне неба
+  el('circle', { r: 168, fill: cfg.light, opacity: .28, filter: 'url(#softGlow)' }, sway);
+  const bodyF = el('g', { filter: `url(#${cfg.fur})` }, sway);
+  el('circle', { r: 150, fill: `url(#${cfg.grad})` }, bodyF);
+
+  // хохолок (Ната) или бантик (Оля) — follow-through
+  let topper;
+  if (cfg.tuft) {
+    topper = el('g', { class: 'tuft', transform: 'translate(0,-142)' }, sway);
+    [-28, 0, 26].forEach((a, i) => el('path', {
+      d: 'M 0 0 C -12 -26 -22 -48 -6 -74 C 6 -50 12 -26 0 0 Z',
+      fill: i === 1 ? cfg.light : cfg.mid, transform: `rotate(${a})`
+    }, topper));
+  } else {
+    topper = el('g', { class: 'bow', transform: 'translate(52,-128) rotate(-18)' }, sway);
+    el('path', { d: 'M 0 0 C -20 -40 -70 -44 -66 -10 C -64 12 -30 16 0 0 Z', fill: '#ff6f9c' }, topper);
+    el('path', { d: 'M 0 0 C 20 -40 70 -44 66 -10 C 64 12 30 16 0 0 Z', fill: '#ff6f9c' }, topper);
+    el('path', { d: 'M -6 4 C -16 20 -14 34 -4 42 C 0 30 2 18 -6 4 Z', fill: '#e0507e' }, topper);
+    el('path', { d: 'M 6 4 C 16 20 14 34 4 42 C 0 30 -2 18 6 4 Z', fill: '#e0507e' }, topper);
+    el('circle', { r: 13, fill: '#e0507e' }, topper);
+    el('ellipse', { cx: -40, cy: -22, rx: 10, ry: 5, fill: '#fff', opacity: .55, transform: 'rotate(-20 -40 -22)' }, topper);
+  }
+
+  // ручки (короткие, торчат из меха); вращаются вокруг «плеча»
+  const armL = el('g', { class: 'arm armL', transform: 'translate(-118,34)' }, sway);
+  el('ellipse', { cx: -38, cy: 0, rx: 42, ry: 21, fill: cfg.mid, filter: `url(#${cfg.fur})` }, armL);
+  const armR = el('g', { class: 'arm armR', transform: 'translate(118,34)' }, sway);
+  el('ellipse', { cx: 38, cy: 0, rx: 42, ry: 21, fill: cfg.mid, filter: `url(#${cfg.fur})` }, armR);
+
+  // ЛИЦО
+  const face = el('g', { class: 'face' }, sway);
+  const cheeks = el('g', { class: 'cheeks', opacity: .55 }, face);
+  el('ellipse', { cx: -96, cy: 28, rx: 28, ry: 17, fill: '#ff8fb1', filter: 'url(#blur3)' }, cheeks);
+  el('ellipse', { cx:  96, cy: 28, rx: 28, ry: 17, fill: '#ff8fb1', filter: 'url(#blur3)' }, cheeks);
+
+  const eyes = el('g', { class: 'eyes' }, face);
+  const irises = [], lids = [], shines = [];
+  [-56, 56].forEach((ex, i) => {
+    const eye = el('g', { class: 'eye', transform: `translate(${ex},-18)` }, eyes);
+    const clipId = `${cfg.id}-eyeclip${i}`;
+    const cp = el('clipPath', { id: clipId }, eye);
+    el('ellipse', { rx: 38, ry: 44 }, cp);
+    el('ellipse', { rx: 38, ry: 44, fill: '#fff' }, eye);
+    const inner = el('g', { 'clip-path': `url(#${clipId})` }, eye);
+    const ir = el('g', { class: 'iris' }, inner);
+    el('circle', { r: 29, fill: `url(#${cfg.iris})` }, ir);
+    el('circle', { r: 14, fill: '#12102a' }, ir);
+    const sh = el('g', { class: 'shine' }, ir);
+    el('circle', { cx: -10, cy: -15, r: 11, fill: '#fff' }, sh);
+    el('circle', { cx: 9, cy: 9, r: 5, fill: '#fff', opacity: .9 }, sh);
+    el('circle', { cx: 14, cy: -6, r: 3, fill: '#fff', opacity: .7 }, sh);
+    const lid = el('ellipse', { class: 'lid', cx: 0, cy: -92, rx: 52, ry: 50, fill: cfg.mid }, inner);
+    irises.push(ir); lids.push(lid); shines.push(sh);
+  });
+  // закрытые от счастья глазки «^ ^»
+  const happyEyes = el('g', { class: 'happyEyes', fill: 'none', stroke: cfg.ink, 'stroke-width': 8, 'stroke-linecap': 'round', opacity: 0 }, face);
+  el('path', { d: 'M -84 -14 q 28 -30 56 0' }, happyEyes);
+  el('path', { d: 'M 28 -14 q 28 -30 56 0' }, happyEyes);
+
+  // бровки
+  const browL = el('path', { class: 'brow', d: 'M -82 -78 q 26 -14 52 0', fill: 'none', stroke: cfg.ink, 'stroke-width': 7, 'stroke-linecap': 'round', opacity: .75 }, face);
+  const browR = el('path', { class: 'brow', d: 'M 30 -78 q 26 -14 52 0', fill: 'none', stroke: cfg.ink, 'stroke-width': 7, 'stroke-linecap': 'round', opacity: .75 }, face);
+
+  // ротик: улыбка (переворачивается в грустную) + открытый ротик для речи
+  const smile = el('path', { class: 'smile', d: 'M -15 42 q 15 18 30 0', fill: 'none', stroke: cfg.ink, 'stroke-width': 6, 'stroke-linecap': 'round' }, face);
+  const mouth = el('ellipse', { class: 'mouth', cx: 0, cy: 50, rx: 11, ry: 9, fill: '#b3455f' }, face);
+  el('ellipse', { cx: 0, cy: 55, rx: 6, ry: 3, fill: '#ff8fa8' }, face);
+
+  // слезинка
+  const tear = el('g', { class: 'tear', transform: 'translate(92,4)', opacity: 0 }, face);
+  el('path', { d: 'M 0 -14 C 6 -3 10 4 10 9 A 10 10 0 1 1 -10 9 C -10 4 -6 -3 0 -14 Z', fill: '#cfe8ff' }, tear);
+  el('circle', { cx: -3, cy: 8, r: 3, fill: '#fff' }, tear);
+
+  // тень под персонажем
+  const shadow = el('ellipse', { rx: 120, ry: 22, fill: '#160f2e', opacity: .35, filter: 'url(#shadowSoft)' }, $('#shadows'));
+
+  const furFine = $(`#${cfg.fur} .furFine`);
+
+  gsap.set(g, { x: cfg.x, y: cfg.y });
+  gsap.set(shadow, { x: cfg.x, y: cfg.y + 165, transformOrigin: '50% 50%' });
+  gsap.set([jump, breath, sway], { transformOrigin: '50% 100%' });
+  gsap.set(topper, { transformOrigin: '50% 100%' });
+  gsap.set(armL, { transformOrigin: '97% 50%' });
+  gsap.set(armR, { transformOrigin: '3% 50%' });
+  gsap.set(eyes, { transformOrigin: '50% 50%' });
+  gsap.set([smile, mouth], { transformOrigin: '50% 50%' });
+  gsap.set(mouth, { scaleY: 0 });
+  gsap.set([browL, browR], { transformOrigin: '50% 50%' });
+  gsap.set(cheeks, { transformOrigin: '50% 50%' });
+  gsap.set(shines, { transformOrigin: '50% 50%' });
+
+  return { g, jump, breath, sway, legL, legR, topper, armL, armR, face, cheeks, eyes, irises, lids, shines,
+           happyEyes, browL, browR, smile, mouth, tear, shadow, furFine, cfg };
+}
+
+const nata = makeFluffy({ id: 'nata', x: POS.nata.x, y: POS.nata.y, fur: 'fur-nata', grad: 'furNata', iris: 'iris',
+  light: '#eadcff', mid: '#c7a9f2', dark: '#8f6cc9', ink: '#3b2a6a', tuft: true });
+const olya = makeFluffy({ id: 'olya', x: POS.olya.x, y: POS.olya.y, fur: 'fur-olya', grad: 'furOlya', iris: 'irisOlya',
+  light: '#ffe9dd', mid: '#ffbfae', dark: '#e8848f', ink: '#5e2c4c', tuft: false });
+const CH = { nata, olya };
+
+/* ---------- Машинка ---------- */
+function makeCar() {
+  const g = $('#car');
+  const rock = el('g', { class: 'rock' }, g);
+  // мягкая тень
+  el('ellipse', { cx: 0, cy: 92, rx: 150, ry: 20, fill: '#160f2e', opacity: .4, filter: 'url(#shadowSoft)' }, rock);
+  // колёса
+  [-112, 112].forEach(x => {
+    el('rect', { x: x - 24, y: 40, width: 48, height: 60, rx: 16, fill: '#15151f' }, rock);
+    el('rect', { x: x - 10, y: 58, width: 20, height: 26, rx: 8, fill: '#3a3a4a' }, rock);
+  });
+  const bodyD = 'M -142 66 C -142 -4 -130 -28 -100 -30 L 100 -30 C 130 -28 142 -4 142 66 C 142 82 132 86 118 86 L -118 86 C -132 86 -142 82 -142 66 Z';
+  const roofD = 'M -96 -30 C -92 -100 -70 -122 -40 -124 L 40 -124 C 70 -122 92 -100 96 -30 Z';
+  // контурный блик, чтобы чёрная машинка читалась на фоне
+  el('path', { d: bodyD, fill: 'none', stroke: '#d9c8ff', 'stroke-width': 10, opacity: .55, filter: 'url(#blur6)' }, rock);
+  el('path', { d: roofD, fill: 'none', stroke: '#d9c8ff', 'stroke-width': 10, opacity: .55, filter: 'url(#blur6)' }, rock);
+  el('path', { d: roofD, fill: '#1c1c28' }, rock);
+  el('path', { d: 'M -78 -36 C -74 -96 -56 -108 -36 -108 L 36 -108 C 56 -108 74 -96 78 -36 Z', fill: 'url(#carGlass)' }, rock);
+  el('path', { d: 'M -60 -100 C -50 -104 -20 -104 -10 -100 L -30 -44 L -66 -44 Z', fill: '#fff', opacity: .35 }, rock);
+  el('path', { d: bodyD, fill: 'url(#carBody)' }, rock);
+  el('path', { d: 'M -128 -12 C -100 -24 100 -24 128 -12 C 100 -18 -100 -18 -128 -12 Z', fill: '#fff', opacity: .28, filter: 'url(#blur3)' }, rock);
+  el('ellipse', { cx: -70, cy: -14, rx: 34, ry: 7, fill: '#fff', opacity: .22, filter: 'url(#blur3)' }, rock);
+  el('path', { d: 'M -96 -30 C -92 -70 -80 -100 -40 -118', fill: 'none', stroke: '#fff', 'stroke-width': 4, opacity: .35, 'stroke-linecap': 'round', filter: 'url(#blur3)' }, rock);
+  // бампер
+  el('rect', { x: -130, y: 52, width: 260, height: 30, rx: 14, fill: '#2a2a3a' }, rock);
+  // фары-глазки
+  const lamps = el('g', { class: 'lamps' }, rock);
+  [-86, 86].forEach(x => {
+    el('circle', { cx: x, cy: 14, r: 52, fill: 'url(#lampGlow)', class: 'lampGlow' }, lamps);
+    const lamp = el('g', { class: 'lamp', transform: `translate(${x},14)` }, lamps);
+    el('circle', { r: 30, fill: '#ffd98a' }, lamp);
+    el('circle', { r: 26, fill: 'url(#lampFill)' }, lamp);
+    el('circle', { cx: -8, cy: -9, r: 8, fill: '#fff' }, lamp);
+    el('circle', { cx: 8, cy: 8, r: 4, fill: '#fff', opacity: .8 }, lamp);
+    gsap.set(lamp, { transformOrigin: '50% 50%' });
+  });
+  // розовый пластырь крест-накрест на бампере
+  const patch = el('g', { class: 'patch', transform: 'translate(0,60)' }, rock);
+  [45, -45].forEach(a => {
+    const p = el('g', { transform: `rotate(${a})` }, patch);
+    el('rect', { x: -52, y: -13, width: 104, height: 26, rx: 12, fill: '#ffb3c6' }, p);
+    el('rect', { x: -18, y: -9, width: 36, height: 18, rx: 6, fill: '#ffd9e3' }, p);
+    [-40, -32, 32, 40].forEach(dx => [-5, 5].forEach(dy => el('circle', { cx: dx, cy: dy, r: 2, fill: '#ff8fb1', opacity: .8 }, p)));
+  });
+  // сердечко над машинкой
+  const heart = el('use', { href: '#heartShape', fill: '#ff7fa8', opacity: 0, transform: 'translate(0,-190)' }, g);
+  gsap.set(rock, { transformOrigin: '50% 100%' });
+  gsap.set(g, { x: POS.car.x, y: POS.car.y, scale: POS.car.scale });
+  return { g, rock, lamps: [...lamps.querySelectorAll('.lamp')], glows: [...lamps.querySelectorAll('.lampGlow')], heart };
+}
+const car = makeCar();
+
+/* ---------- Звёзды и светлячки ---------- */
+const stars = [];
+(function makeStars() {
+  const g = $('#stars');
+  for (let i = 0; i < 90; i++) {
+    const x = R(20, 1060), y = R(20, 1300);
+    if (Math.hypot(x - POS.moon.x, y - POS.moon.y) < 170) continue;
+    const s = el('circle', { cx: x, cy: y, r: R(1.4, 3.6), fill: rand() < .3 ? '#ffe6f2' : '#fff' }, g);
+    stars.push(s);
+  }
+  for (let i = 0; i < 7; i++) { // крупные искорки
+    const x = R(60, 1020), y = R(60, 1200);
+    const s = el('path', { d: 'M 0 -14 Q 2 -2 14 0 Q 2 2 0 14 Q -2 2 -14 0 Q -2 -2 0 -14 Z', fill: '#fff4fb', transform: `translate(${x},${y})` }, g);
+    stars.push(s);
+  }
+})();
+const fireflies = [];
+(function makeFireflies() {
+  const g = $('#fireflies');
+  for (let i = 0; i < 12; i++) {
+    const f = el('g', { opacity: 0 }, g);
+    el('circle', { r: 14, fill: '#fff3a8', opacity: .35, filter: 'url(#blur6)' }, f);
+    el('circle', { r: 4, fill: '#fffbe0' }, f);
+    fireflies.push(f);
+  }
+})();
+
+/* ---------- Облачка-реплики (HTML поверх SVG) ---------- */
+function makeBubble(line) {
+  const b = document.createElement('div');
+  b.className = 'bubble' + (line.mood === 'soft' ? ' soft' : '');
+  b.innerHTML = `<span class="ghost"></span><span class="txt"></span>`;
+  $('.ghost', b).textContent = line.text;
+  $('#ui').appendChild(b);
+  const who = POS[line.who];
+  const x = line.x ?? who.x;
+  b.style.setProperty('--tail', '50%');
+  gsap.set(b, { left: x, bottom: 1920 - (who.y - 150 - 70), xPercent: -50, scale: 0 });
+  return b;
+}
+
+/* =====================================================================
+ *  АНИМАЦИОННЫЕ ПРИМИТИВЫ
+ * ===================================================================== */
+const tl = gsap.timeline({ paused: true, onUpdate: runDerived });
+
+// Реплика: pop облачка, печать по буквам, ротик говорит, затем исчезает
+function say(line) {
+  const b = makeBubble(line);
+  const txt = $('.txt', b);
+  const ch = CH[line.who];
+  const typeDur = line.text.length / TYPE_SPEED;
+  const t0 = line.at, tType = t0 + 0.3, tDone = tType + typeDur, tHide = tDone + HOLD_AFTER;
+
+  if (line.mood === 'sad' || line.mood === 'soft') {   // грустная реплика — мягче, без подпрыгивания
+    tl.fromTo(b, { autoAlpha: 0, scale: .85, y: 14 }, { autoAlpha: line.mood === 'soft' ? .92 : 1, scale: 1, y: 0, duration: .55, ease: 'sine.out' }, t0);
+  } else {                                              // pop: 0 → 1.1 → 1
+    tl.fromTo(b, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2.4)' }, t0);
+  }
+  const p = { n: 0 };
+  derived.push(() => { txt.textContent = line.text.slice(0, Math.round(p.n)); });
+  tl.fromTo(p, { n: 0 }, { n: line.text.length, duration: typeDur, ease: 'none' }, tType);
+  talk(ch, tType, typeDur);
+  tl.to(b, { autoAlpha: 0, scale: .9, y: -10, duration: .35, ease: 'sine.in' }, tHide);
+  return { t0, tType, tDone, tHide };
+}
+// Ротик открывается-закрывается, пока печатается текст
+function talk(ch, t, dur) {
+  const step = .12, reps = Math.max(1, Math.floor(dur / step));
+  tl.fromTo(ch.mouth, { scaleY: 0 }, { scaleY: 1, duration: step / 2, repeat: reps * 2 - 1, yoyo: true, ease: 'sine.inOut' }, t);
+  tl.set(ch.mouth, { scaleY: 0 }, t + reps * step + .01);
+}
+// Прыжок с anticipation, squash & stretch и follow-through хохолка/бантика
+function hop(ch, t, { h = 90, dur = .55, tilt = 0 } = {}) {
+  tl.to(ch.jump, { scaleY: .86, scaleX: 1.12, duration: .16, ease: 'sine.in' }, t)                       // anticipation
+    .to(ch.jump, { scaleY: 1.14, scaleX: .92, y: -h, duration: dur * .45, ease: 'power2.out' }, t + .16)  // взлёт
+    .to(ch.jump, { scaleY: 1.05, scaleX: .97, y: 0, duration: dur * .45, ease: 'power2.in' }, t + .16 + dur * .45)
+    .to(ch.jump, { scaleY: .88, scaleX: 1.1, duration: .1, ease: 'sine.out' }, t + .16 + dur * .9)        // приземление
+    .to(ch.jump, { scaleY: 1, scaleX: 1, duration: .45, ease: 'elastic.out(1, .45)' }, t + .26 + dur * .9);
+  tl.to(ch.topper, { rotation: -14 + tilt, duration: .25, ease: 'sine.out' }, t + .2)
+    .to(ch.topper, { rotation: 12, duration: .3, ease: 'sine.inOut' }, t + .45)
+    .to(ch.topper, { rotation: 0, duration: .8, ease: 'elastic.out(1, .4)' }, t + .75);
+  tl.to(ch.shadow, { scale: .8, opacity: .2, duration: dur * .45, ease: 'power2.out' }, t + .16)
+    .to(ch.shadow, { scale: 1, opacity: .35, duration: dur * .45, ease: 'power2.in' }, t + .16 + dur * .45);
+  ruffle(ch, t + .1);
+}
+// Шёрстка колышется при движении
+function ruffle(ch, t, amount = 6) {
+  tl.to(ch.furFine, { attr: { scale: 14 + amount }, duration: .25, ease: 'sine.out' }, t)
+    .to(ch.furFine, { attr: { scale: 14 }, duration: .6, ease: 'sine.inOut' }, t + .25);
+}
+// Моргание
+function blink(ch, t) {
+  tl.to(ch.eyes, { scaleY: .06, duration: .09, ease: 'power1.in' }, t)
+    .to(ch.eyes, { scaleY: 1, duration: .12, ease: 'power1.out' }, t + .09);
+}
+// Настроение: грусть (глазки вниз, бровки домиком, ротик грустный, хохолок поник, шёрстка приглажена)
+function sad(ch, t, dur = .8, deep = false) {
+  tl.to(ch.lids, { y: deep ? 40 : 30, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.irises, { y: 9, x: 0, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.browL, { rotation: -16, y: 6, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.browR, { rotation: 16, y: 6, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.smile, { scaleY: -1, y: -4, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.topper, { rotation: 38, scaleY: .8, duration: dur * 1.2, ease: 'sine.inOut' }, t);
+  tl.to(ch.furFine, { attr: { scale: 7 }, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.sway, { rotation: 4, duration: dur, ease: 'sine.inOut' }, t);
+}
+function cheerUp(ch, t, dur = .9) {
+  tl.to(ch.lids, { y: 0, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.irises, { y: 0, x: 0, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to([ch.browL, ch.browR], { rotation: 0, y: 0, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.smile, { scaleY: 1, y: 0, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.topper, { rotation: 0, scaleY: 1, duration: dur * 1.3, ease: 'elastic.out(1, .5)' }, t + .1);
+  tl.to(ch.furFine, { attr: { scale: 14 }, duration: dur, ease: 'sine.inOut' }, t);
+  tl.to(ch.sway, { rotation: 0, duration: dur, ease: 'sine.inOut' }, t);
+}
+// Румянец
+function blush(ch, t, level = 1, dur = .7) {
+  tl.to(ch.cheeks, { opacity: 1, scale: 1 + level * .25, duration: dur, ease: 'sine.inOut' }, t);
+}
+// Маленькое сердечко, всплывающее над точкой (x,y)
+function popHeart(x, y, t, { size = 1, color = '#ff7fa8', rise = 90, life = 1.6 } = {}) {
+  const h = el('use', { href: '#heartShape', fill: color, opacity: 0 }, $('#hearts'));
+  gsap.set(h, { x, y, scale: 0, transformOrigin: '50% 50%' });
+  tl.to(h, { opacity: 1, scale: size, duration: .35, ease: 'back.out(2)' }, t)
+    .to(h, { y: y - rise, x: x + R(-25, 25), rotation: R(-18, 18), duration: life, ease: 'sine.out' }, t)
+    .to(h, { opacity: 0, scale: size * .6, duration: .5, ease: 'sine.in' }, t + life - .5);
+}
+// Полёт сердечка по квадратичной кривой Безье
+function flyAlong(node, P0, C, P1, t, dur, ease = 'power1.inOut') {
+  const p = { k: 0 };
+  derived.push(() => {
+    const k = p.k, u = 1 - k;
+    const x = u * u * P0.x + 2 * u * k * C.x + k * k * P1.x;
+    const y = u * u * P0.y + 2 * u * k * C.y + k * k * P1.y;
+    gsap.set(node, { x, y });
+  });
+  tl.fromTo(p, { k: 0 }, { k: 1, duration: dur, ease }, t);
+}
+
+/* =====================================================================
+ *  ПОСТОЯННАЯ «ЖИЗНЬ»: дыхание, покачивание, звёзды, машинка
+ * ===================================================================== */
+[nata, olya].forEach((ch, i) => {
+  tl.to(ch.breath, { scaleY: 1.035, scaleX: .985, duration: 1.7 + i * .3, yoyo: true, repeat: loops(1.7 + i * .3), ease: 'sine.inOut' }, 0);
+  tl.fromTo(ch.breath, { rotation: -1.4 }, { rotation: 1.4, duration: 2.4 + i * .4, yoyo: true, repeat: loops(2.4 + i * .4), ease: 'sine.inOut' }, 0);
+});
+// моргание раз в 2–4 секунды, не во время закрытых от счастья глаз
+[nata, olya].forEach(ch => {
+  for (let t = R(1.4, 3); t < T.end - 1.5; t += R(2, 4)) {
+    if (t > T.hug + 2.3 && t < T.quiet + 1.2) continue;
+    blink(ch, t);
+  }
+});
+// Ната переминается с лапки на лапку
+for (let t = 2.2; t < 34; t += R(1.2, 2.6)) {
+  const leg = rand() < .5 ? nata.legL : nata.legR;
+  tl.to(leg, { y: -9, scaleX: .9, duration: .22, yoyo: true, repeat: 1, ease: 'sine.inOut' }, t);
+}
+// звёзды мерцают
+stars.forEach(s => {
+  gsap.set(s, { opacity: R(.35, 1), transformOrigin: '50% 50%' });
+  const d = R(.9, 2.8);
+  tl.to(s, { opacity: R(.15, .5), duration: d, yoyo: true, repeat: loops(d), ease: 'sine.inOut' }, R(0, 2));
+});
+// машинка чуть покачивается на колёсиках и иногда моргает фарами
+tl.to(car.rock, { rotation: 1.4, y: -2, duration: 1.3, yoyo: true, repeat: loops(1.3), ease: 'sine.inOut' }, 0);
+function carBlink(t, twice = false) {
+  tl.to(car.lamps, { scaleY: .08, duration: .1, yoyo: true, repeat: twice ? 3 : 1, repeatDelay: twice ? .12 : 0, ease: 'power1.inOut' }, t);
+}
+[1.2, 6.6, 17.5, 25.5, 33.6, 39.6].forEach(t => carBlink(t));
+
+/* =====================================================================
+ *  СЦЕНЫ
+ * ===================================================================== */
+
+/* --- 0–2 с: появление сцены --- */
+tl.fromTo('#stage', { opacity: 0 }, { opacity: 1, duration: 1.6, ease: 'sine.inOut' }, T.intro);
+tl.fromTo('#moonGlowC', { scale: .85, transformOrigin: '50% 50%' }, { scale: 1, duration: 2, ease: 'sine.out' }, T.intro);
+tl.fromTo('#chars', { y: 20 }, { y: 0, duration: 1.4, ease: 'sine.out' }, T.intro);
+
+/* --- 2–5 с: Ната робко машет лапкой: «Оля, привет!» --- */
+hop(nata, T.hi1 + .2, { h: 70 });
+tl.to(nata.armR, { rotation: -118, duration: .35, ease: 'back.out(1.6)' }, T.hi1 + .35)
+  .to(nata.armR, { rotation: -88, duration: .22, yoyo: true, repeat: 5, ease: 'sine.inOut' }, T.hi1 + .7)
+  .to(nata.armR, { rotation: 0, duration: .5, ease: 'sine.inOut' }, T.hi1 + 2.3);
+tl.to(nata.irises, { x: 8, duration: .4 }, T.hi1 + .2);         // смотрит на Олю
+say(LINES.hi1);
+
+/* --- 5–8 с: Оля радостно подпрыгивает: «Привет-привет!» --- */
+hop(olya, T.hi2 + .2, { h: 110, tilt: -6 });
+hop(olya, T.hi2 + 1.5, { h: 55, dur: .4 });
+tl.to(olya.armL, { rotation: 110, duration: .35, ease: 'back.out(1.6)' }, T.hi2 + .3)
+  .to(olya.armL, { rotation: 80, duration: .2, yoyo: true, repeat: 5, ease: 'sine.inOut' }, T.hi2 + .65)
+  .to(olya.armL, { rotation: 0, duration: .5, ease: 'sine.inOut' }, T.hi2 + 2.2);
+tl.to(olya.irises, { x: -8, duration: .4 }, T.hi2 + .2);
+say(LINES.hi2);
+
+/* --- 8–12 с: Ната виновато косится на машинку, машинка смущённо моргает, Ната сникает --- */
+tl.to(nata.irises, { x: 12, y: -5, duration: .5, ease: 'sine.inOut' }, T.sorry + .1);     // взгляд на машинку
+tl.to(nata.sway, { rotation: -5, duration: .5, ease: 'sine.inOut' }, T.sorry + .1);
+carBlink(T.sorry + .7, true);
+tl.to(car.rock, { x: -6, duration: .12, yoyo: true, repeat: 5, ease: 'sine.inOut' }, T.sorry + .7); // смущённо ёрзает
+tl.to(nata.irises, { x: 0, duration: .4 }, T.sorry + 1.4);
+sad(nata, T.sorry + 1.5, .9);
+blush(nata, T.sorry + 1.6, .6);
+say(LINES.sorry);
+
+/* --- 12–15 с: Оля задумывается: глазки вверх, лапка у щёчки, облачко «…» --- */
+tl.to(olya.irises, { x: -9, y: -11, duration: .6, ease: 'sine.inOut' }, T.think + .2);
+tl.to(olya.browL, { y: -6, duration: .6, ease: 'sine.inOut' }, T.think + .2);
+tl.to(olya.armL, { rotation: 86, x: 12, y: -16, duration: .7, ease: 'back.out(1.4)' }, T.think + .3);
+tl.to(olya.sway, { rotation: -4, duration: .7, ease: 'sine.inOut' }, T.think + .3);
+(function thinkDots() {
+  const b = document.createElement('div');
+  b.className = 'bubble dots';
+  b.innerHTML = '<span>•</span><span>•</span><span>•</span>';
+  $('#ui').appendChild(b);
+  gsap.set(b, { left: POS.olya.x, bottom: 1920 - (POS.olya.y - 150 - 70), xPercent: -50, scale: 0 });
+  tl.fromTo(b, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2)' }, THINK_DOTS_AT);
+  [...b.children].forEach((d, i) => tl.fromTo(d, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .3, ease: 'sine.out' }, THINK_DOTS_AT + .5 + i * .6));
+  tl.to(b, { autoAlpha: 0, scale: .9, duration: .35, ease: 'sine.in' }, T.shame + .3);
+})();
+tl.to(olya.armL, { rotation: 0, x: 0, y: 0, duration: .6, ease: 'sine.inOut' }, T.shame + .2);
+tl.to(olya.irises, { x: -6, y: 0, duration: .6, ease: 'sine.inOut' }, T.shame + .2);
+tl.to(olya.browL, { y: 0, duration: .6 }, T.shame + .2);
+tl.to(olya.sway, { rotation: 0, duration: .6, ease: 'sine.inOut' }, T.shame + .2);
+
+/* --- 15–19.5 с: Ната совсем сникает, щёчки краснеют, слезинка --- */
+sad(nata, T.shame + .2, .9, true);
+blush(nata, T.shame + .3, 1);
+tl.to(nata.jump, { scaleY: .94, scaleX: 1.04, duration: 1, ease: 'sine.inOut' }, T.shame + .2);
+tl.fromTo(nata.tear, { opacity: 0, y: 0, scale: .4 }, { opacity: 1, y: 10, scale: 1, duration: .8, ease: 'sine.out' }, T.shame + 1.3)
+  .to(nata.tear, { y: 34, duration: 2.2, ease: 'sine.in' }, T.shame + 2.1)
+  .to(nata.tear, { opacity: 0, duration: .5 }, T.shame + 4.0);
+tl.to(nata.shines, { scale: 1.25, duration: .5, yoyo: true, repeat: 3, ease: 'sine.inOut' }, T.shame + 1.3); // глазки блестят
+say(LINES.shame);
+
+/* --- 19.5–22 с: Оля мягко качает головой, улыбается, шаг ближе; сердечко над ней. Ната поднимает глазки --- */
+tl.to(olya.sway, { rotation: -7, duration: .3, ease: 'sine.inOut' }, T.comfort)
+  .to(olya.sway, { rotation: 7, duration: .4, ease: 'sine.inOut' }, T.comfort + .3)
+  .to(olya.sway, { rotation: -5, duration: .4, ease: 'sine.inOut' }, T.comfort + .7)
+  .to(olya.sway, { rotation: 0, duration: .5, ease: 'sine.inOut' }, T.comfort + 1.1);
+tl.to(olya.lids, { y: 14, duration: .5, ease: 'sine.inOut' }, T.comfort);             // мягкий, тёплый взгляд
+tl.to(olya.lids, { y: 0, duration: .5, ease: 'sine.inOut' }, T.comfort + 2.2);
+blush(olya, T.comfort + .2, .5);
+hop(olya, T.comfort + 1.0, { h: 40, dur: .5 });
+tl.to(olya.g, { x: POS.olya.x - 60, duration: .6, ease: 'sine.inOut' }, T.comfort + 1.15);
+tl.to(olya.shadow, { x: POS.olya.x - 60, duration: .6, ease: 'sine.inOut' }, T.comfort + 1.15);
+popHeart(POS.olya.x - 60, POS.olya.y - 230, T.comfort + 1.5, { size: 1.1, rise: 70, life: 2 });
+cheerUp(nata, T.comfort + 1.6, 1);
+blush(nata, T.comfort + 1.6, .4, 1);
+tl.to(nata.jump, { scaleY: 1, scaleX: 1, duration: .8, ease: 'sine.inOut' }, T.comfort + 1.6);
+tl.to(nata.irises, { x: 10, y: -3, duration: .6 }, T.comfort + 2.7);
+
+/* --- 21.8–31 с: признание. Лапки к груди, потом на луну; сердечко летит к луне и обратно к Оле --- */
+tl.to(nata.armL, { rotation: -62, x: 22, y: -10, duration: .6, ease: 'back.out(1.5)' }, T.love + .1);
+tl.to(nata.armR, { rotation: 62, x: -22, y: -10, duration: .6, ease: 'back.out(1.5)' }, T.love + .1);
+tl.to(nata.sway, { rotation: -3, duration: .6, ease: 'sine.inOut' }, T.love + .1);
+blush(nata, T.love + .3, .9, .8);
+tl.to(nata.shines, { scale: 1.3, duration: .6, yoyo: true, repeat: 5, ease: 'sine.inOut' }, T.love + .5);
+say(LINES.love1);
+const love2 = say(LINES.love2);
+// поднимает лапки к небу, показывает на луну
+hop(nata, love2.t0 - .1, { h: 60, dur: .45 });
+tl.to(nata.armR, { rotation: -112, x: 0, y: 0, duration: .5, ease: 'back.out(1.6)' }, love2.t0 + .1);
+tl.to(nata.armL, { rotation: 70, x: 0, y: 0, duration: .5, ease: 'back.out(1.6)' }, love2.t0 + .1);
+tl.to(nata.irises, { x: 12, y: -12, duration: .5 }, love2.t0 + .2);
+tl.to(olya.irises, { x: 4, y: -12, duration: .5 }, love2.t0 + .6);
+// сердечко: из лапок → к луне
+const H0 = { x: POS.nata.x + 40, y: POS.nata.y - 110 };
+const HM = { x: POS.moon.x, y: POS.moon.y };
+const HO = { x: POS.olya.x - 60, y: POS.olya.y - 40 };
+const tLaunch = love2.t0 + .5, tMoon = tLaunch + 1.35, tBack = tMoon + .6, tLand = tBack + 1.3;
+tl.fromTo('#flyHeart', { opacity: 0, scale: .3 }, { opacity: 1, scale: 2, duration: .4, ease: 'back.out(2)' }, tLaunch);
+gsap.set('#flyHeart', { transformOrigin: '50% 50%' });
+flyAlong($('#flyHeart'), H0, { x: 160, y: 560 }, HM, tLaunch, tMoon - tLaunch, 'power2.inOut');
+tl.to('#flyHeart', { rotation: 360, duration: tMoon - tLaunch, ease: 'none' }, tLaunch);
+(function trail() {   // искорки-сердечки вдоль траектории полёта
+  const ease = gsap.parseEase('power2.inOut'), C = { x: 160, y: 560 };
+  for (let i = 1; i <= 7; i++) {
+    const k = ease(i / 8), u = 1 - k;
+    const x = u * u * H0.x + 2 * u * k * C.x + k * k * HM.x, y = u * u * H0.y + 2 * u * k * C.y + k * k * HM.y;
+    popHeart(x, y, tLaunch + (tMoon - tLaunch) * i / 8, { size: R(.5, .8), color: '#ffd1e8', rise: 30, life: .9 });
+  }
+})();
+// луна улыбается и отправляет сердечко обратно
+tl.to('#flyHeart', { scale: .3, opacity: 0, duration: .3, ease: 'sine.in' }, tMoon - .1);
+tl.to('#moonFace', { opacity: 1, duration: .5, ease: 'sine.out' }, tMoon);
+tl.to('#moonBody', { scaleX: 1.08, scaleY: .94, duration: .18, ease: 'sine.out', transformOrigin: '50% 50%' }, tMoon)
+  .to('#moonBody', { scaleX: .96, scaleY: 1.06, duration: .18, ease: 'sine.inOut' }, tMoon + .18)
+  .to('#moonBody', { scaleX: 1, scaleY: 1, duration: .6, ease: 'elastic.out(1,.4)' }, tMoon + .36);
+tl.to('#moonGlowC', { scale: 1.25, duration: .5, yoyo: true, repeat: 1, ease: 'sine.inOut' }, tMoon);
+tl.fromTo('#flyHeart', { opacity: 0, scale: .3 }, { opacity: 1, scale: 1.8, duration: .35, ease: 'back.out(2)' }, tBack);
+flyAlong($('#flyHeart'), HM, { x: 1120, y: 900 }, HO, tBack, tLand - tBack, 'sine.inOut');
+tl.to('#flyHeart', { rotation: 0, duration: tLand - tBack, ease: 'none' }, tBack);
+tl.to(olya.irises, { x: 8, y: 4, duration: .5 }, tLand - .6);
+// прилетело к Оле: тает, Оля растрогана
+tl.to('#flyHeart', { scale: 2.6, opacity: 0, duration: .45, ease: 'sine.out' }, tLand);
+for (let i = 0; i < 7; i++) popHeart(HO.x + R(-70, 70), HO.y + R(-40, 40), tLand + i * .06, { size: R(.35, .6), rise: R(50, 110), life: 1.3 });
+blush(olya, tLand, 1, .6);
+tl.to(olya.shines, { scale: 1.35, duration: .35, yoyo: true, repeat: 3, ease: 'sine.inOut' }, tLand);
+tl.to(olya.lids, { y: 12, duration: .4, ease: 'sine.inOut' }, tLand)
+  .to(olya.lids, { y: 0, duration: .4, ease: 'sine.inOut' }, tLand + .7);
+tl.to(nata.armR, { rotation: 0, duration: .5, ease: 'sine.inOut' }, tMoon + .3);
+tl.to(nata.armL, { rotation: 0, duration: .5, ease: 'sine.inOut' }, tMoon + .3);
+tl.to(nata.irises, { x: 10, y: 0, duration: .5 }, tLand - .3);
+
+/* --- 31–35 с: Оля раскрывает лапки, Ната бежит смешными прыжками, объятие --- */
+tl.to(olya.armL, { rotation: 95, duration: .5, ease: 'back.out(1.6)' }, T.hug + .1);
+tl.to(olya.armR, { rotation: -95, duration: .5, ease: 'back.out(1.6)' }, T.hug + .1);
+tl.to(olya.jump, { scaleY: 1.06, scaleX: .96, duration: .5, ease: 'sine.out' }, T.hug + .1);
+const runStart = T.hug + .45, hops = 4, hopDur = .42;
+tl.to(nata.g, { x: POS.hugX, duration: hops * hopDur, ease: 'none' }, runStart);
+tl.to(nata.shadow, { x: POS.hugX, duration: hops * hopDur, ease: 'none' }, runStart);
+for (let i = 0; i < hops; i++) {
+  const t = runStart + i * hopDur;
+  tl.to(nata.jump, { scaleY: 1.18, scaleX: .88, y: -80, duration: hopDur * .5, ease: 'power2.out' }, t)
+    .to(nata.jump, { scaleY: .82, scaleX: 1.18, y: 0, duration: hopDur * .5, ease: 'power2.in' }, t + hopDur * .5);
+  tl.to(nata.topper, { rotation: 22, duration: hopDur * .5, ease: 'sine.out' }, t + .08)
+    .to(nata.topper, { rotation: -16, duration: hopDur * .5, ease: 'sine.inOut' }, t + .08 + hopDur * .5);
+  tl.to(nata.armL, { rotation: 60 - i * 8, duration: hopDur, ease: 'sine.inOut' }, t);
+  tl.to(nata.armR, { rotation: -60 + i * 8, duration: hopDur, ease: 'sine.inOut' }, t);
+  ruffle(nata, t, 8);
+}
+tl.to(nata.sway, { rotation: 6, duration: .4 }, runStart);
+// столкновение-объятие: оба сжимаются, лапки смыкаются, шарик меха
+const tMerge = runStart + hops * hopDur;
+tl.to(nata.jump, { scaleY: .9, scaleX: 1.12, y: 0, duration: .25, ease: 'sine.out' }, tMerge)
+  .to(nata.jump, { scaleY: 1, scaleX: 1, duration: .8, ease: 'elastic.out(1,.4)' }, tMerge + .25);
+tl.to(olya.jump, { scaleY: .9, scaleX: 1.12, duration: .25, ease: 'sine.out' }, tMerge)
+  .to(olya.jump, { scaleY: 1, scaleX: 1, duration: .8, ease: 'elastic.out(1,.4)' }, tMerge + .25);
+tl.to(olya.g, { x: POS.olya.x - 40, duration: .3, ease: 'sine.out' }, tMerge);
+tl.to(olya.shadow, { x: POS.olya.x - 40, duration: .3, ease: 'sine.out' }, tMerge);
+tl.to(olya.armL, { rotation: 40, x: 30, duration: .5, ease: 'sine.inOut' }, tMerge + .1);
+tl.to(olya.armR, { rotation: -30, x: -30, duration: .5, ease: 'sine.inOut' }, tMerge + .1);
+tl.to(nata.armL, { rotation: -70, x: 30, y: -10, duration: .5, ease: 'sine.inOut' }, tMerge + .1);
+tl.to(nata.armR, { rotation: 20, x: -20, duration: .5, ease: 'sine.inOut' }, tMerge + .1);
+tl.to(nata.sway, { rotation: -6, duration: .5 }, tMerge);
+tl.to(olya.sway, { rotation: 6, duration: .5 }, tMerge);
+tl.to(nata.topper, { rotation: 0, duration: 1, ease: 'elastic.out(1,.4)' }, tMerge + .3);
+gsap.set('#hugBlob', { x: (POS.hugX + POS.olya.x - 40) / 2, y: POS.nata.y + 10, transformOrigin: '50% 50%' });
+tl.fromTo('#hugBlob', { opacity: 0, scale: .7 }, { opacity: .9, scale: 1, duration: .7, ease: 'sine.out' }, tMerge + .1);
+// глазки закрыты от счастья, щёчки краснеют сильнее
+[nata, olya].forEach(ch => {
+  tl.to(ch.eyes, { scaleY: 0, duration: .3, ease: 'sine.in' }, tMerge + .3);
+  tl.to(ch.happyEyes, { opacity: 1, duration: .3 }, tMerge + .35);
+  blush(ch, tMerge + .3, 1.3, .6);
+  tl.to(ch.smile, { scaleX: 1.25, duration: .5, ease: 'sine.out' }, tMerge + .3);
+});
+for (let i = 0; i < 14; i++) {
+  popHeart((POS.hugX + POS.olya.x) / 2 + R(-220, 220), POS.nata.y + R(-160, 80), tMerge + .3 + i * .17,
+    { size: R(.4, .9), color: i % 3 ? '#ff7fa8' : '#ffd1e8', rise: R(120, 220), life: R(1.6, 2.4) });
+}
+
+/* --- 35–40.8 с: минуты тишины. Сидят рядом, смотрят на луну; машинка подкатывается; светлячки --- */
+const tQ = T.quiet;
+tl.to('#hugBlob', { opacity: 0, scale: .8, duration: 1.2, ease: 'sine.inOut' }, tQ);
+tl.to(nata.g, { x: POS.sitNata, duration: 1.2, ease: 'sine.inOut' }, tQ);
+tl.to(nata.shadow, { x: POS.sitNata, duration: 1.2, ease: 'sine.inOut' }, tQ);
+tl.to(olya.g, { x: POS.sitOlya, duration: 1.2, ease: 'sine.inOut' }, tQ);
+tl.to(olya.shadow, { x: POS.sitOlya, duration: 1.2, ease: 'sine.inOut' }, tQ);
+[nata, olya].forEach((ch, i) => {
+  tl.to(ch.jump, { scaleY: .94, scaleX: 1.07, duration: 1.2, ease: 'sine.inOut' }, tQ);   // «сели»
+  tl.to([ch.armL, ch.armR], { rotation: 0, x: 0, y: 0, duration: 1, ease: 'sine.inOut' }, tQ + .2);
+  tl.to(ch.sway, { rotation: i ? -3 : 3, duration: 1.2, ease: 'sine.inOut' }, tQ);
+  tl.to(ch.happyEyes, { opacity: 0, duration: .3 }, tQ + 1.0);
+  tl.to(ch.eyes, { scaleY: 1, duration: .4, ease: 'sine.out' }, tQ + 1.1);
+  tl.to(ch.irises, { x: 11, y: -13, duration: .8, ease: 'sine.inOut' }, tQ + 1.3);     // смотрят на луну
+  tl.to(ch.lids, { y: 0, duration: .5 }, tQ + 1.1);
+  tl.to(ch.smile, { scaleX: 1, duration: .8 }, tQ + 1.0);
+  tl.to(ch.cheeks, { opacity: .8, scale: 1.15, duration: 1.5, ease: 'sine.inOut' }, tQ + 1);
+});
+// свет теплеет: приглушение уходит, луна светит ярче, горизонт розовеет
+tl.to('#dim', { opacity: 0, duration: 3, ease: 'sine.inOut' }, tMerge);
+tl.to('#moonGlowC', { scale: 1.35, duration: 3, ease: 'sine.inOut' }, tMerge);
+tl.to('#sky2', { attr: { 'stop-color': '#7d4a86' }, duration: 3 }, tMerge);
+tl.to('#sky3', { attr: { 'stop-color': '#e08aa0' }, duration: 3 }, tMerge);
+tl.to('#sky1', { attr: { 'stop-color': '#35296e' }, duration: 3 }, tMerge);
+// машинка тихонько подкатывается и встаёт рядом, фары светятся, сердечко
+tl.to(car.g, { x: POS.carEnd.x, y: POS.carEnd.y, scale: POS.carEnd.scale, duration: 2.4, ease: 'sine.inOut' }, tQ + .7);
+tl.to(car.rock, { rotation: -2.5, duration: .3, yoyo: true, repeat: 7, ease: 'sine.inOut' }, tQ + .7);
+tl.to(car.glows, { scale: 1.6, opacity: 1, transformOrigin: '50% 50%', duration: 1.2, ease: 'sine.inOut' }, tQ + 2.6);
+tl.fromTo(car.heart, { opacity: 0, scale: 0, transformOrigin: '50% 50%' }, { opacity: 1, scale: .9, duration: .5, ease: 'back.out(2)' }, tQ + 3.4)
+  .to(car.heart, { y: '-=14', duration: 1.4, yoyo: true, repeat: 3, ease: 'sine.inOut' }, tQ + 3.4);
+// светлячки медленно летают
+fireflies.forEach((f, i) => {
+  const x0 = R(60, 1020), y0 = R(1150, 1560);
+  gsap.set(f, { x: x0, y: y0 });
+  tl.to(f, { opacity: R(.5, .95), duration: 1.5, ease: 'sine.inOut' }, tQ + R(0, 1.5));
+  const dp = R(1, 2);
+  tl.to(f, { opacity: .25, duration: dp, yoyo: true, repeat: loops(dp, tQ + 2.5), ease: 'sine.inOut' }, tQ + 1.5 + R(0, 1));
+  let t = tQ;
+  for (let k = 0; k < 6; k++) { const d = R(1.6, 2.8); tl.to(f, { x: x0 + R(-140, 140), y: y0 + R(-90, 90), duration: d, ease: 'sine.inOut' }, t); t += d; }
+});
+say(LINES.quiet);
+
+/* --- 40.8–44.4 с: камера отъезжает, финальная надпись, затухание --- */
+tl.to('#world', { scale: .45, svgOrigin: '540 1560', duration: 3.2, ease: 'power2.inOut' }, T.outro);
+tl.to('#moon', { scale: .88, transformOrigin: '50% 50%', duration: 3.2, ease: 'power2.inOut' }, T.outro);
+tl.to('#stars', { scale: 1.05, transformOrigin: '50% 50%', duration: 3.2, ease: 'power2.inOut' }, T.outro);
+$('#final').textContent = FINAL_TEXT;
+gsap.set('#final', { xPercent: -50, yPercent: -50 });
+tl.fromTo('#final', { autoAlpha: 0, scale: .92, y: 30 }, { autoAlpha: 1, scale: 1, y: 0, duration: 1.2, ease: 'sine.out' }, T.outro + 1.2);
+tl.to('#fade', { opacity: 1, duration: 1.1, ease: 'sine.in' }, T.end - 1.1);
+tl.call(() => { if (!isRender) gsap.to(replay, { autoAlpha: 1, duration: .6 }); }, [], T.end);   // конец: кнопка «Ещё раз»
+
+/* =====================================================================
+ *  ЗАПУСК, МАСШТАБИРОВАНИЕ, КНОПКА «ЕЩЁ РАЗ», API ДЛЯ РЕНДЕРА
+ * ===================================================================== */
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  gsap.set('#stage', { scale: s, x: (innerWidth - 1080 * s) / 2, y: (innerHeight - 1920 * s) / 2 });
+}
+addEventListener('resize', fit); fit();
+
+const isRender = new URLSearchParams(location.search).has('render');
+const replay = $('#replay');
+replay.addEventListener('click', () => {
+  gsap.to(replay, { autoAlpha: 0, duration: .3 });
+  tl.pause(0); runDerived(); tl.play();
+});
+
+// Готовность: дождаться шрифта, показать первый кадр
+const ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  tl.seek(0, false); runDerived();
+  return T.end;
+});
+
+// API для покадрового рендера (render.py): window.__anim.seek(t) ставит точное время
+window.__anim = {
+  ready,
+  duration: () => T.end,
+  seek(t) { tl.pause(); tl.seek(Math.min(t, T.end), false); runDerived(); },
+};
+
+if (!isRender) ready.then(() => gsap.delayedCall(.3, () => tl.play(0)));
+</script>
+</body>
+</html>
