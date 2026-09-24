@@ -417,8 +417,10 @@ export function ZakazForma() {
                     <b>{oshibka.prichiny[kod]}</b>{' '}
                   </>
                 ) : null}
-                {oshibka.text} {oshibka.pochta}{' '}
-                <a href={`mailto:${POCHTA_ZAKAZOV}`}>{POCHTA_ZAKAZOV}</a> {oshibka.pochtaKonec}
+                {/* У лимита частоты свой срок в причине — общее «через минуту» ему противоречит. */}
+                {kod === 'rate' ? null : `${oshibka.text} `}
+                {oshibka.pochta} <a href={`mailto:${POCHTA_ZAKAZOV}`}>{POCHTA_ZAKAZOV}</a>{' '}
+                {oshibka.pochtaKonec}
               </>
             }
           />
