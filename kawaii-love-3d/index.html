@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Спасибо, что ты рядом · 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #04051a; overflow: hidden; }
+  /* Сцена всегда 1080×1920 (вертикальное видео), в браузере масштабируется под окно */
+  #stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; overflow: hidden;
+           font-family: 'Nunito', 'Comfortaa', system-ui, sans-serif; background: #04051a; }
+  #gl { position: absolute; inset: 0; display: block; }
+  #labels { position: absolute; inset: 0; pointer-events: none; }
+
+  /* Облачко-реплика (живёт в CSS2DObject, привязанном к голове персонажа) */
+  .b-anchor { width: 0; height: 0; }
+  .bubble {
+    position: absolute; left: 0; bottom: 34px; box-sizing: border-box;
+    width: max-content; max-width: 640px; padding: 30px 46px;
+    background: #fff; color: #33224d; border-radius: 48px;
+    font-weight: 800; font-size: 52px; line-height: 1.22; text-align: center;
+    box-shadow: 0 18px 50px rgba(20, 8, 45, .45), 0 3px 10px rgba(20, 8, 45, .25);
+    transform-origin: var(--tail, 50%) 100%; will-change: transform, opacity;
+  }
+  .bubble::after {                       /* хвостик к говорящему */
+    content: ''; position: absolute; left: calc(var(--tail, 50%) - 22px); bottom: -17px;
+    width: 44px; height: 44px; background: inherit; border-radius: 10px; transform: rotate(45deg);
+  }
+  .bubble .rest { color: transparent; }  /* ещё не напечатанный хвост текста держит размер облачка */
+  .bubble.soft { background: rgba(255, 255, 255, .78); }
+  .bubble.dots { padding: 22px 40px 30px; font-size: 72px; line-height: .8; letter-spacing: 10px; }
+  .bubble.dots span { opacity: 0; }
+
+  #final {
+    position: absolute; left: 50%; top: 38%; width: 940px; transform: translate(-50%, -50%);
+    opacity: 0; text-align: center; color: #fff6fb; font-weight: 900; font-size: 92px; line-height: 1.18;
+    text-shadow: 0 0 34px rgba(255, 190, 225, .8), 0 0 90px rgba(255, 160, 210, .45), 0 8px 30px rgba(30, 10, 60, .6);
+  }
+  #fade { position: absolute; inset: 0; background: #03040f; opacity: 1; pointer-events: none; }
+  #replay {
+    position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%);
+    display: none; cursor: pointer; border: 0; border-radius: 999px; padding: 30px 72px;
+    font: 800 54px/1 'Nunito', system-ui, sans-serif; color: #3d2860;
+    background: linear-gradient(135deg, #ffd6e8, #d8c6ff); box-shadow: 0 16px 50px rgba(255, 170, 215, .45);
+  }
+  #replay:hover { filter: brightness(1.06); }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="labels"></div>
+  <div id="final"></div>
+  <div id="fade"></div>
+  <button id="replay">▶ Ещё раз</button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  1. ТЕКСТЫ И ТАЙМИНГИ — всё, что обычно хочется поменять, здесь
+ * ═════════════════════════════════════════════════════════════════════ */
+const LINES = [
+  { who: 'nata', at: 2.5,  text: 'Оля, привет!' },
+  { who: 'olya', at: 5.3,  text: 'Привет-привет!' },
+  { who: 'nata', at: 8.3,  text: 'Прости, что я опять такая косячная…', mood: 'sad' },
+  { who: 'nata', at: 15.2, text: 'Мне очень стыдно, что я создаю тебе проблемы…', mood: 'sad' },
+  { who: 'nata', at: 21.9, text: 'Моя дорогая Олечка… Я тебя очень-очень люблю!' },
+  { who: 'nata', at: 26.9, text: 'До луны и обратно!' },
+  { who: 'nata', at: 35.8, text: 'Мне так ценны минуты, когда ты рядом…', mood: 'soft' },
+];
+const THINK_DOTS_AT = 12.7;               // Оля задумалась: «…», точки по одной
+const FINAL_TEXT = 'Спасибо, что ты рядом 🌙❤️';
+
+// Начала сцен, секунды
+const T = {
+  hi1: 2.0,       // Ната робко машет
+  hi2: 5.0,       // Оля подпрыгивает
+  sorry: 8.1,     // крупный план Наты: «прости…»
+  think: 12.3,    // крупный план Оли: задумалась
+  shame: 15.0,    // Ната сникает, слезинка
+  comfort: 19.5,  // средний план: Оля качает головой, шаг ближе
+  love: 21.7,     // признание, лапки к груди
+  moon: 26.8,     // «До луны и обратно!», сердечко летит к луне
+  hug: 30.6,      // Оля раскрывает лапки, Ната бежит, объятие
+  quiet: 34.6,    // минуты тишины: смотрят на луну, машинка рядом
+  outro: 40.0,    // камера отъезжает, финальная надпись
+  end: 43.6,      // конец
+};
+const TYPE_SPEED = 18;   // букв в секунду
+const HOLD_AFTER = 2.0;  // реплика висит после допечатывания, с
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  2. УТИЛИТЫ: easing, ключевые кадры, детерминированный random, пружина
+ * ═════════════════════════════════════════════════════════════════════ */
+const W = 1080, H = 1920;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const sstep = (a, b, x) => { const k = clamp((x - a) / (b - a)); return k * k * (3 - 2 * k); };
+const TAU = Math.PI * 2;
+const EASE = {
+  lin: k => k,
+  sine: k => -(Math.cos(Math.PI * k) - 1) / 2,
+  inOut: k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2,
+  out: k => 1 - Math.pow(1 - k, 3),
+  in: k => k * k * k,
+  back: k => { const c1 = 2.0, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); },
+  elastic: k => k <= 0 ? 0 : k >= 1 ? 1 : Math.pow(2, -9 * k) * Math.sin((k * 9 - .75) * TAU / 3) + 1,
+};
+// Ключевые кадры: [[время, значение, easing к этому ключу], ...]. Значение — число или массив.
+// easing 'cut' — монтажная склейка: предыдущее значение держится до времени ключа.
+function keys(t, ks) {
+  if (t <= ks[0][0]) return ks[0][1];
+  for (let i = 1; i < ks.length; i++) {
+    const [t1, v1, e = 'sine'] = ks[i];
+    if (t < t1) {
+      const [t0, v0] = ks[i - 1];
+      if (e === 'cut') return v0;
+      const k = EASE[e]((t - t0) / (t1 - t0));
+      return Array.isArray(v0) ? v0.map((a, j) => a + (v1[j] - a) * k) : v0 + (v1 - v0) * k;
+    }
+  }
+  return ks[ks.length - 1][1];
+}
+// «Окно»: плавно 0→1 на [a, a+fin], держится, 1→0 на [b-fout, b]
+const env = (t, a, b, fin = .3, fout = .3) => Math.min(sstep(a, a + fin, t), 1 - sstep(b - fout, b, t));
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+// Follow-through без состояния: отклик затухающей пружины на ускорение fn(t) (свёртка по прошлому).
+// Поэтому любой кадр можно посчитать отдельно, и рендер детерминирован.
+function spring(fn, t, hz = 2.2, zeta = .22, win = 1.2, n = 24) {
+  const w = TAU * hz, wd = w * Math.sqrt(1 - zeta * zeta), dt = win / n, f = [];
+  for (let k = -1; k <= n + 1; k++) f.push(fn(t - k * dt));
+  let x = 0;
+  for (let i = 0; i <= n; i++) {
+    const a = (f[i] - 2 * f[i + 1] + f[i + 2]) / (dt * dt);
+    x += Math.exp(-zeta * w * i * dt) * Math.sin(wd * i * dt) / wd * a * dt;
+  }
+  return -x;
+}
+// Прыжок: anticipation → stretch в полёте → squash при приземлении. Возвращает [высота, squash]
+function hopAt(t, t0, h, dur, ant = .16) {
+  const a = t - t0;
+  if (a < 0 || a > ant + dur + .8) return [0, 0];
+  const amt = clamp(.45 + h, .5, 1.1);
+  if (a < ant) return [0, -.13 * EASE.sine(a / ant) * amt];
+  const b = a - ant;
+  if (b < dur) {
+    const k = b / dur;
+    return [4 * h * k * (1 - k), lerp(-.13, .15 * Math.abs(Math.cos(Math.PI * k)), sstep(0, .14, k)) * amt];
+  }
+  const c = b - dur, m = sstep(0, .05, c);
+  return [0, lerp(.15, -.18 * Math.exp(-6 * c) * Math.cos(13 * c), m) * amt];
+}
+const hops = (t, list) => list.reduce((s, h) => { const r = hopAt(t, ...h); s[0] += r[0]; s[1] += r[1]; return s; }, [0, 0]);
+const lineEnd = l => l.at + l.text.length / TYPE_SPEED;
+
+// Производные тайминги
+const RUN = { start: T.hug + .4, step: .43, n: 3 };
+const MERGE = RUN.start + RUN.n * RUN.step;                       // момент объятия
+const HEART = { launch: T.moon + .6 }; HEART.atMoon = HEART.launch + 1.35; HEART.back = HEART.atMoon + .6; HEART.land = HEART.back + 1.3;
+const MOON_POS = new THREE.Vector3(12, 30, -100), MOON_R = 7.5;
+const MOON_YAW = Math.atan2(MOON_POS.x, MOON_POS.z);             // куда смотреть, чтобы видеть луну
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  3. РЕНДЕР, КАМЕРА, СВЕТ, ПОСТ-ОБРАБОТКА
+ * ═════════════════════════════════════════════════════════════════════ */
+const params = new URLSearchParams(location.search);
+const RENDER_MODE = params.has('render');
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;   // в r18x это мягкие PCF-тени (PCFSoftShadowMap удалён); мягкость — shadow.radius
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x3a2a5c, .012);
+const camera = new THREE.PerspectiveCamera(38, W / H, .1, 1000);
+
+// Окружение для отражений (глаза, лак машинки, сердечки)
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+scene.environmentIntensity = .32;
+
+// Свет: тёплый ключевой «от луны», холодный заполняющий, контровой для силуэтов меха
+const hemi = new THREE.HemisphereLight(0x7d6fc4, 0x2a1d3a, .9);
+const key = new THREE.DirectionalLight(0xffd6b0, 2.0);
+key.position.set(4.5, 7.5, 8);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: .5, far: 40 });
+key.shadow.bias = -.0004; key.shadow.normalBias = .03; key.shadow.radius = 5;
+const fill = new THREE.DirectionalLight(0x8fa4ff, .75); fill.position.set(-7, 2.5, 5);
+const rim = new THREE.DirectionalLight(0xffc4e4, 2.6); rim.position.set(5, 6, -10);
+scene.add(hemi, key, key.target, fill, rim);
+
+// Общие uniforms шейдера меха (одни объекты на всех — обновляются раз за кадр)
+const SHARED = {
+  uTime: { value: 0 }, uCamPos: { value: new THREE.Vector3() },
+  uKeyDir: { value: new THREE.Vector3() }, uKeyCol: { value: new THREE.Color() },
+  uFillDir: { value: new THREE.Vector3() }, uFillCol: { value: new THREE.Color() },
+  uRimDir: { value: new THREE.Vector3() }, uRimCol: { value: new THREE.Color() },
+  uSkyCol: { value: new THREE.Color() }, uGroundCol: { value: new THREE.Color() },
+  uFogCol: { value: new THREE.Color() }, uFogDen: { value: .012 },
+};
+
+// Пост-обработка: рендер (MSAA 4x, HDR) → глубина резкости → bloom → тонмаппинг → виньетка + зерно
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 }));
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 10, aperture: .0004, maxblur: .009 });
+composer.addPass(bokeh);
+const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), .7, .55, .9);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+const finalPass = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uVig: { value: .38 }, uGrain: { value: .05 }, uRes: { value: new THREE.Vector2(W, H) } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform float uTime, uVig, uGrain; uniform vec2 uRes; varying vec2 vUv;
+    float hash(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+    void main(){
+      vec4 c = texture2D(tDiffuse, vUv);
+      vec2 q = vUv - .5; q.y *= 1.2;
+      c.rgb *= mix(1.0 - uVig, 1.0, smoothstep(.78, .22, length(q)));
+      float g = hash(floor(vUv * uRes) + floor(fract(uTime * .731) * 997.0)) - .5;
+      c.rgb += g * uGrain * (1.0 - .6 * c.rgb);
+      gl_FragColor = c;
+    }`,
+});
+composer.addPass(finalPass);
+
+// Объекты, которые не участвуют в проходе глубины для боке (частицы, спрайты, оболочки меха)
+const NO_DEPTH = [];
+const bokehRender = bokeh.render.bind(bokeh);
+bokeh.render = (...a) => {
+  NO_DEPTH.forEach(o => { o.userData.v = o.visible; o.visible = false; });
+  bokehRender(...a);
+  NO_DEPTH.forEach(o => { o.visible = o.userData.v; });
+};
+
+const labelRenderer = new CSS2DRenderer({ element: document.getElementById('labels') });
+labelRenderer.setSize(W, H);
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  4. ОКРУЖЕНИЕ: небо, звёзды, луна, холм, трава, туман
+ * ═════════════════════════════════════════════════════════════════════ */
+const R0 = rng(7);
+const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
+const radialTex = canvasTex(128, 128, (g, w) => { const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.35, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+
+const skyRoot = new THREE.Group(); scene.add(skyRoot);   // небо и звёзды «на бесконечности» — следуют за камерой
+const skyMat = new THREE.ShaderMaterial({
+  uniforms: { uTop: { value: new THREE.Color() }, uMid: { value: new THREE.Color() }, uHor: { value: new THREE.Color() },
+              uMoonDir: { value: MOON_POS.clone().normalize() }, uGlow: { value: new THREE.Color(0xffd9a8) }, uGlowAmt: { value: 1 } },
+  vertexShader: `varying vec3 vDir; void main(){ vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }`,
+  fragmentShader: `
+    uniform vec3 uTop, uMid, uHor, uMoonDir, uGlow; uniform float uGlowAmt; varying vec3 vDir;
+    void main(){
+      vec3 d = normalize(vDir); float h = d.y;
+      vec3 c = mix(uHor, uMid, smoothstep(-.04, .26, h));
+      c = mix(c, uTop, smoothstep(.2, .78, h));
+      float m = max(dot(d, uMoonDir), 0.0);
+      c += uGlow * uGlowAmt * (pow(m, 40.0) * .16 + pow(m, 400.0) * .55);
+      c = mix(c, uHor * .5, smoothstep(0.0, -.3, h));
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+  side: THREE.BackSide, depthWrite: false, fog: false,
+});
+const sky = new THREE.Mesh(new THREE.SphereGeometry(500, 48, 32), skyMat);
+sky.renderOrder = -10; skyRoot.add(sky); NO_DEPTH.push(sky);
+
+// Звёзды: частицы с мерцанием в шейдере
+const STAR_N = 1600;
+{
+  const pos = new Float32Array(STAR_N * 3), size = new Float32Array(STAR_N), ph = new Float32Array(STAR_N), br = new Float32Array(STAR_N);
+  for (let i = 0; i < STAR_N; i++) {
+    const u = R0() * TAU, y = Math.pow(R0(), .8) * .98 + .02, r = Math.sqrt(1 - y * y);
+    pos.set([Math.cos(u) * r * 420, y * 420, Math.sin(u) * r * 420], i * 3);
+    size[i] = 1.5 + Math.pow(R0(), 3) * 5.5; ph[i] = R0() * TAU; br[i] = .35 + Math.pow(R0(), 2) * 1.6;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(ph, 1));
+  g.setAttribute('aBright', new THREE.BufferAttribute(br, 1));
+  var starMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: SHARED.uTime, uPR: { value: 1 }, uAmt: { value: 1 } },
+    vertexShader: `
+      uniform float uTime, uPR, uAmt; attribute float aSize, aPhase, aBright; varying float vB;
+      void main(){
+        vB = aBright * uAmt * (.55 + .45 * sin(uTime * (1.2 + fract(aPhase * 3.7) * 2.5) + aPhase));
+        vB *= smoothstep(.02, .2, normalize(position).y);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize * uPR;
+      }`,
+    fragmentShader: `varying float vB; void main(){ float d = length(gl_PointCoord - .5); float a = smoothstep(.5, 0.0, d); a *= a; gl_FragColor = vec4(vec3(1.0, .93, .97) * vB * a, 1.0); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+  });
+  const stars = new THREE.Points(g, starMat); stars.frustumCulled = false; skyRoot.add(stars); NO_DEPTH.push(stars);
+}
+
+// Луна: мягкое лицо (спокойное → улыбка), сильное свечение
+const moonMap = canvasTex(1024, 512, (g, w, h) => {
+  g.fillStyle = '#fff0c4'; g.fillRect(0, 0, w, h);
+  const r = rng(3);
+  for (let i = 0; i < 70; i++) {
+    const x = r() * w, y = 60 + r() * (h - 120), s = 6 + Math.pow(r(), 2) * 46;
+    const gr = g.createRadialGradient(x, y, 0, x, y, s); gr.addColorStop(0, 'rgba(214,176,112,.45)'); gr.addColorStop(1, 'rgba(214,176,112,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, s, 0, TAU); g.fill();
+  }
+});
+const face = (smile) => canvasTex(1024, 512, (g) => {
+  const cx = 256, cy = 256;
+  g.lineCap = 'round'; g.strokeStyle = 'rgba(140,86,40,1)'; g.lineWidth = 13;
+  // закрытые глазки-дуги
+  [[-52, -18], [52, -18]].forEach(([dx, dy]) => { g.beginPath(); g.arc(cx + dx, cy + dy + (smile ? 10 : 0), 22, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); });
+  g.beginPath();
+  if (smile) g.arc(cx, cy + 22, 42, Math.PI * .15, Math.PI * .85); else g.arc(cx, cy + 34, 18, Math.PI * .2, Math.PI * .8);
+  g.stroke();
+  g.fillStyle = smile ? 'rgba(245,150,150,.75)' : 'rgba(245,160,150,.4)';
+  [[-92, 30], [92, 30]].forEach(([dx, dy]) => { g.beginPath(); g.ellipse(cx + dx, cy + dy, 26, 15, 0, 0, TAU); g.fill(); });
+});
+const moonMat = new THREE.ShaderMaterial({
+  uniforms: { uMap: { value: moonMap }, uFaceA: { value: face(false) }, uFaceB: { value: face(true) }, uSmile: { value: 0 }, uBright: { value: 1.6 } },
+  vertexShader: `varying vec2 vUv; varying vec3 vN; void main(){ vUv = uv; vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `
+    uniform sampler2D uMap, uFaceA, uFaceB; uniform float uSmile, uBright; varying vec2 vUv; varying vec3 vN;
+    void main(){
+      vec3 c = texture2D(uMap, vUv).rgb;
+      vec4 f = mix(texture2D(uFaceA, vUv), texture2D(uFaceB, vUv), uSmile);
+      c = mix(c, f.rgb, f.a);
+      float limb = pow(max(vN.z, 0.0), .35);
+      gl_FragColor = vec4(c * uBright * (.72 + .28 * limb), 1.0);
+    }`,
+  fog: false,
+});
+const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON_R, 64, 32), moonMat);
+moon.position.copy(MOON_POS); moon.lookAt(0, 2, 0);   // сторона сферы с лицом (u = 0.25, ось +Z) смотрит на сцену
+scene.add(moon);
+const moonGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTex, color: 0xffd9a0, transparent: true, opacity: .6, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+moonGlow.position.copy(MOON_POS).multiplyScalar(1.02); moonGlow.scale.setScalar(MOON_R * 4.6);
+scene.add(moonGlow); NO_DEPTH.push(moonGlow);
+
+// Холм: вершина под героями, склоны уходят вниз — за спинами открывается небо
+const hill = (x, z) => -.016 * (x * x + (z + 1) * (z + 1) * .9);
+{
+  const g = new THREE.PlaneGeometry(220, 220, 220, 220); g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position, col = [];
+  const c1 = new THREE.Color(0x3b2b62), c2 = new THREE.Color(0x2a2050), tmp = new THREE.Color();
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i);
+    p.setY(i, hill(x, z) + Math.sin(x * .7) * Math.cos(z * .6) * .05);
+    const n = .5 + .5 * Math.sin(x * 2.3 + Math.cos(z * 1.7) * 2) * Math.cos(z * 2.1);
+    tmp.copy(c1).lerp(c2, n * .7); col.push(tmp.r, tmp.g, tmp.b);
+  }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  g.computeVertexNormals();
+  const ground = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: .95, sheen: 1, sheenColor: 0x9b7fd0, sheenRoughness: .55 }));
+  ground.receiveShadow = true; scene.add(ground);
+}
+// Далёкие холмы — силуэты в тумане
+[[-70, -50, -160, 52], [55, -50, -180, 58], [5, -62, -130, 50], [-140, -40, -120, 55], [130, -44, -130, 50]].forEach(([x, y, z, r]) => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 16), new THREE.MeshStandardMaterial({ color: 0x21183a, roughness: 1 }));
+  m.position.set(x, y, z); scene.add(m);
+});
+// Мягкая травка: тысячи травинок, колышутся в шейдере
+{
+  const blade = new THREE.ConeGeometry(.013, .15, 3, 1); blade.translate(0, .075, 0);
+  const N = 6000, grass = new THREE.InstancedMesh(blade, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), N);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), v = new THREE.Vector3(), c = new THREE.Color();
+  for (let i = 0; i < N; i++) {
+    const x = (R0() - .5) * 14, z = -6 + R0() * 12;
+    e.set((R0() - .5) * .5, R0() * TAU, (R0() - .5) * .5); q.setFromEuler(e);
+    const k = .6 + R0() * .9; s.set(k, k * (.7 + R0() * .7), k);
+    m.compose(v.set(x, hill(x, z), z), q, s); grass.setMatrixAt(i, m);
+    grass.setColorAt(i, c.setHSL(.72 + R0() * .08, .32, .13 + R0() * .1));
+  }
+  grass.material.onBeforeCompile = sh => {
+    sh.uniforms.uTime = SHARED.uTime;
+    sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      float gh = clamp(position.y / .15, 0.0, 1.0); vec4 ip = instanceMatrix[3];
+      transformed.x += sin(uTime * 1.6 + ip.x * 1.3 + ip.z * .7) * .05 * gh * gh;
+      transformed.z += cos(uTime * 1.2 + ip.x * .8) * .035 * gh * gh;`);
+  };
+  scene.add(grass); NO_DEPTH.push(grass);
+}
+// Стелющийся туман у земли
+const fogTex = canvasTex(256, 256, (g, w) => {
+  const r = rng(11);
+  for (let i = 0; i < 14; i++) {
+    const x = w * (.25 + r() * .5), y = w * (.35 + r() * .3), s = w * (.12 + r() * .2);
+    const gr = g.createRadialGradient(x, y, 0, x, y, s); gr.addColorStop(0, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, w);
+  }
+});
+const fogSprites = [];
+for (let i = 0; i < 18; i++) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: fogTex, color: 0xc0a8ee, transparent: true, opacity: .2 + R0() * .15, depthWrite: false }));
+  const s = 7 + R0() * 8; sp.scale.set(s, s * .45, 1);
+  sp.userData = { x0: (R0() - .5) * 26, y: .25 + R0() * .8, z: -13 + R0() * 11, sp: .12 + R0() * .15 };
+  scene.add(sp); fogSprites.push(sp); NO_DEPTH.push(sp);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  5. МЕХ: shell texturing — N оболочек (инстансы), шум задаёт ворсинки
+ * ═════════════════════════════════════════════════════════════════════ */
+const FUR_VS = `
+  uniform float uLen, uLayers, uTime, uFluff, uGravity, uFaceShort, uSeed;
+  uniform vec3 uWind, uFaceDir;
+  varying float vH; varying vec3 vRoot, vWN, vWP;
+  void main(){
+    float h = float(gl_InstanceID) / (uLayers - 1.0);
+    vec3 n = normalize(normal);
+    float face = smoothstep(.70, .93, dot(n, uFaceDir));
+    float len = uLen * uFluff * mix(1.0, uFaceShort, face);
+    vec3 p = position + n * len * h;
+    vec3 sway = vec3(sin(uTime * 1.9 + position.y * 4.0 + uSeed), 0.0, cos(uTime * 1.5 + position.x * 4.0 + uSeed)) * .2;
+    vec3 g = vec3(0.0, -uGravity, 0.0) + uWind + sway;
+    g -= n * dot(g, n) * .6;                 // ворс изгибается вдоль поверхности
+    p += g * len * h * h;
+    vRoot = position; vH = h;
+    vec4 wp = modelMatrix * vec4(p, 1.0);
+    vWP = wp.xyz; vWN = normalize(mat3(modelMatrix) * n);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }`;
+const FUR_FS = `
+  uniform vec3 uRoot, uTip, uKeyDir, uKeyCol, uFillDir, uFillCol, uRimDir, uRimCol, uSkyCol, uGroundCol, uFogCol, uCamPos;
+  uniform float uDensity, uSeed, uFogDen, uBright;
+  varying float vH; varying vec3 vRoot, vWN, vWP;
+  vec3 hash33(vec3 p){ p = fract(p * vec3(.1031, .1030, .0973)); p += dot(p, p.yxz + 33.33); return fract((p.xxy + p.yxx) * p.zyx); }
+  // одна ворсинка на ячейку 3D-сетки: сужается к кончику, длина случайная
+  vec2 strand(vec3 q, float h){
+    vec3 cell = floor(q), f = fract(q), rn = hash33(cell);
+    float len = .45 + .55 * rn.z;
+    float hh = h / len;
+    if (hh > 1.0) return vec2(0.0, rn.z);
+    float d = length(f - (rn * .5 + .25));
+    float thick = .62 * (1.0 - hh) + .04;
+    return vec2(1.0 - smoothstep(thick - .1, thick + .02, d), rn.z);
+  }
+  void main(){
+    vec3 q = vRoot * uDensity + uSeed;
+    vec2 s1 = strand(q, vH), s2 = strand(q + 17.5, vH);
+    float cov = max(s1.x, s2.x), rnd = s1.x > s2.x ? s1.y : s2.y;
+    if (vH < .001) cov = 1.0;
+    if (cov < .02) discard;
+    vec3 N = normalize(vWN), V = normalize(uCamPos - vWP);
+    vec3 base = mix(uRoot, uTip, smoothstep(0.0, 1.0, vH)) * (.86 + .28 * rnd);
+    float ao = mix(.5, 1.0, smoothstep(0.0, .9, vH));                        // самозатенение у корней
+    float kd = clamp(dot(N, uKeyDir) * .55 + .45, 0.0, 1.0);                  // мягкий wrap-диффуз
+    float fd = clamp(dot(N, uFillDir) * .5 + .5, 0.0, 1.0);
+    vec3 amb = mix(uGroundCol, uSkyCol, N.y * .5 + .5);
+    vec3 col = base * (amb + uKeyCol * kd + uFillCol * fd * .6) * ao * .55;
+    float fres = pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 2.2);
+    float rl = clamp(dot(N, uRimDir) * .5 + .5, 0.0, 1.0);
+    col += (uRimCol * .7 + base * uRimCol * .5) * fres * (.2 + .8 * rl) * (.3 + .7 * vH) * .3;  // просвечивание по краю
+    vec3 Hh = normalize(uKeyDir + V);
+    col += uKeyCol * pow(clamp(dot(N, Hh), 0.0, 1.0), 20.0) * .05 * vH;      // шелковистый блик
+    col *= uBright;
+    float fd2 = length(vWP - uCamPos);
+    col = mix(col, uFogCol, 1.0 - exp(-uFogDen * uFogDen * fd2 * fd2));
+    gl_FragColor = vec4(col, cov);
+  }`;
+function furMesh(geo, o) {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      ...SHARED,
+      uRoot: { value: new THREE.Color(o.root) }, uTip: { value: new THREE.Color(o.tip) },
+      uLen: { value: o.len }, uLayers: { value: o.layers }, uDensity: { value: o.density }, uSeed: { value: o.seed || 0 },
+      uFaceDir: { value: (o.faceDir || new THREE.Vector3(0, 0, 1)).clone().normalize() }, uFaceShort: { value: o.faceShort ?? 1 },
+      uFluff: { value: 1 }, uWind: { value: new THREE.Vector3() }, uGravity: { value: o.gravity ?? .35 }, uBright: { value: 1 },
+    },
+    vertexShader: FUR_VS, fragmentShader: FUR_FS, alphaToCoverage: true,
+  });
+  const mesh = new THREE.InstancedMesh(geo, mat, o.layers);
+  const id = new THREE.Matrix4(); for (let i = 0; i < o.layers; i++) mesh.setMatrixAt(i, id);
+  mesh.frustumCulled = false; NO_DEPTH.push(mesh);
+  return mesh;
+}
+// Невидимое «ядро»: отбрасывает тень и даёт глубину для боке (вместо 36 оболочек)
+const proxyMat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+const proxy = geo => { const m = new THREE.Mesh(geo, proxyMat); m.castShadow = true; return m; };
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  6. ПЕРСОНАЖИ
+ * ═════════════════════════════════════════════════════════════════════ */
+const Z = new THREE.Vector3(0, 0, 1);
+const blushTex = canvasTex(128, 128, (g, w) => { const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(.55, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+const irisTex = (c0, c1, c2) => canvasTex(64, 256, (g, w, h) => {
+  const gr = g.createLinearGradient(0, 0, 0, h);          // верх текстуры = центр радужки, низ = край
+  gr.addColorStop(0, c0); gr.addColorStop(.55, c1); gr.addColorStop(.85, c1); gr.addColorStop(1, c2);
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  const r = rng(c1.length * 31 + 5); g.globalAlpha = .18; for (let i = 0; i < 26; i++) { g.fillStyle = i % 2 ? '#fff' : '#000'; g.fillRect(r() * w, h * .3, 1.5, h * .6); }
+});
+const onSphere = (dir, r) => dir.clone().normalize().multiplyScalar(r);
+const orientOut = (obj, dir) => obj.quaternion.setFromUnitVectors(Z, dir.clone().normalize());
+
+function makeFluffy(c) {
+  const R = 1;
+  const root = new THREE.Group(), hop = new THREE.Group(), squash = new THREE.Group(), lean = new THREE.Group(), body = new THREE.Group();
+  root.add(hop); hop.add(squash); squash.add(lean); lean.add(body); body.position.y = R + .12; scene.add(root);
+  lean.rotation.order = 'YXZ';
+
+  // ножки-лапки: бархат с sheen
+  const footMat = new THREE.MeshPhysicalMaterial({ color: c.foot, roughness: .75, sheen: 1, sheenColor: c.tip, sheenRoughness: .4 });
+  const feet = [-1, 1].map(s => {
+    const f = new THREE.Mesh(new THREE.SphereGeometry(.26, 24, 16), footMat);
+    f.scale.set(1, .55, 1.3); f.position.set(s * .42, .13, .28); f.castShadow = true; squash.add(f); return f;
+  });
+
+  // туловище-помпон
+  const fur = furMesh(new THREE.SphereGeometry(R, 72, 48), { root: c.root, tip: c.tip, len: .17, layers: 36, density: 52, faceDir: new THREE.Vector3(0, .05, 1), faceShort: .38, seed: c.seed });
+  body.add(fur, proxy(new THREE.SphereGeometry(R + .08, 32, 24)));
+
+  // глаза: склера + радужка + зрачок (clearcoat, отражают окружение), два блика, веко
+  const scleraMat = new THREE.MeshPhysicalMaterial({ color: 0xd9d4e6, roughness: .3, clearcoat: 1, clearcoatRoughness: .04 });
+  const irisMat = new THREE.MeshPhysicalMaterial({ map: irisTex(...c.iris), roughness: .4, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: .35 });
+  const pupilMat = new THREE.MeshPhysicalMaterial({ color: 0x07040d, roughness: .4, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: .35 });
+  const glintMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.5, 1.5, 1.5) });
+  const lidMat = new THREE.MeshPhysicalMaterial({ color: c.lid, roughness: 1, sheen: 1, sheenColor: c.tip, sheenRoughness: .6 });
+  const inkMat = new THREE.MeshStandardMaterial({ color: c.ink, roughness: .6 });
+  const ER = .27;
+  const eyes = [-1, 1].map(s => {
+    const dir = new THREE.Vector3(s * .37, .12, .92).normalize();
+    const eye = new THREE.Group(); eye.position.copy(onSphere(dir, .84)); orientOut(eye, dir); body.add(eye);
+    eye.add(new THREE.Mesh(new THREE.SphereGeometry(ER, 40, 28), scleraMat));
+    const iris = new THREE.Group(); eye.add(iris);
+    const ir = new THREE.Mesh(new THREE.SphereGeometry(ER * 1.006, 40, 16, 0, TAU, 0, 1.32), irisMat); ir.rotation.x = Math.PI / 2; iris.add(ir);
+    const pu = new THREE.Mesh(new THREE.SphereGeometry(ER * 1.012, 32, 8, 0, TAU, 0, .62), pupilMat); pu.rotation.x = Math.PI / 2; iris.add(pu);
+    const glints = new THREE.Group(); eye.add(glints);
+    [[-.34, .4, .055], [.3, -.28, .028]].forEach(([x, y, r]) => {
+      const g = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), glintMat);
+      const d = new THREE.Vector3(x, y, .82).normalize(); g.position.copy(onSphere(d, ER * 1.01)); orientOut(g, d); g.scale.z = .35; glints.add(g);
+    });
+    const lid = new THREE.Mesh(new THREE.SphereGeometry(ER * 1.06, 40, 20, 0, TAU, 0, Math.PI / 2), lidMat); eye.add(lid);
+    const happy = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(-.17, -.04, 0), new THREE.Vector3(0, .1, 0), new THREE.Vector3(.17, -.04, 0)), 20, .024, 8), inkMat);
+    happy.position.z = ER * 1.08; eye.add(happy);
+    return { eye, iris, lid, glints, happy, s };
+  });
+
+  // бровки
+  const brows = [-1, 1].map(s => {
+    const dir = new THREE.Vector3(s * .36, .42, .84).normalize();
+    const g = new THREE.Group(); g.position.copy(onSphere(dir, 1.1)); orientOut(g, dir); body.add(g);
+    const b = new THREE.Mesh(new THREE.CapsuleGeometry(.024, .13, 4, 8), inkMat); b.rotation.z = Math.PI / 2; g.add(b);
+    return { g, s };
+  });
+
+  // ротик: улыбка-линия (переворачивается в грустную) + открытый ротик для речи
+  const mouthDir = new THREE.Vector3(0, -.26, .96).normalize();
+  const mouth = new THREE.Group(); mouth.position.copy(onSphere(mouthDir, 1.065)); orientOut(mouth, mouthDir); body.add(mouth);
+  const smile = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(new THREE.Vector3(-.1, .02, 0), new THREE.Vector3(0, -.06, 0), new THREE.Vector3(.1, .02, 0)), 16, .018, 8), inkMat);
+  mouth.add(smile);
+  const open = new THREE.Group(); mouth.add(open);
+  const om = new THREE.Mesh(new THREE.SphereGeometry(.075, 24, 16), new THREE.MeshStandardMaterial({ color: 0x6e1f3a, roughness: .5 })); om.scale.set(1, 1, .45); open.add(om);
+  const tongue = new THREE.Mesh(new THREE.SphereGeometry(.045, 16, 12), new THREE.MeshStandardMaterial({ color: 0xff7f9f, roughness: .5 })); tongue.position.set(0, -.035, .02); tongue.scale.set(1, .6, .5); open.add(tongue);
+  open.position.y = -.04;
+
+  // щёчки-румянец
+  const cheekMat = new THREE.MeshBasicMaterial({ map: blushTex, color: 0xff6f9f, transparent: true, opacity: .4, depthWrite: false });
+  const cheeks = [-1, 1].map(s => {
+    const dir = new THREE.Vector3(s * .6, -.12, .79).normalize();
+    const m = new THREE.Mesh(new THREE.CircleGeometry(.19, 32), cheekMat); m.position.copy(onSphere(dir, 1.13)); orientOut(m, dir); m.scale.set(1.25, .8, 1);
+    body.add(m); NO_DEPTH.push(m); return m;
+  });
+
+  // слезинка
+  const tear = new THREE.Mesh(new THREE.SphereGeometry(.05, 24, 16), new THREE.MeshPhysicalMaterial({ color: 0xd4ecff, emissive: 0x8fc6ff, emissiveIntensity: .7, roughness: .02, clearcoat: 1, transparent: true, opacity: .9 }));
+  tear.scale.set(1, 1.4, .7); tear.visible = false; body.add(tear);
+
+  // ручки: пушистые капсулы на шарнире-плече
+  const arms = [-1, 1].map(s => {
+    const pivot = new THREE.Group(); pivot.position.set(s * .8, -.1, .3); pivot.rotation.order = 'YZX'; body.add(pivot);
+    const g = new THREE.CapsuleGeometry(.16, .22, 8, 16); g.rotateZ(-s * Math.PI / 2); g.translate(s * .24, 0, 0);
+    pivot.add(furMesh(g, { root: c.root, tip: c.tip, len: .09, layers: 20, density: 60, seed: c.seed + s * 3 }), proxy(g));
+    const paw = new THREE.Object3D(); paw.position.set(s * .52, 0, 0); pivot.add(paw);
+    return { pivot, paw, s };
+  });
+
+  // хохолок (Ната) или атласный бантик (Оля) — отдельный шарнир для follow-through
+  const topper = new THREE.Group(); body.add(topper);
+  if (c.tuft) {
+    topper.position.set(0, R * .92, .05);
+    const blades = [-.5, 0, .45].map((a, i) => { const g = new THREE.SphereGeometry(.09, 18, 14); g.scale(.9, 3.1 - i % 2 * .5, .9); g.translate(0, .26, 0); g.rotateZ(a); g.rotateX(-.15); return g; });
+    topper.add(furMesh(mergeGeometries(blades), { root: c.root, tip: c.tip, len: .06, layers: 16, density: 70, gravity: .1, seed: c.seed + 9 }));
+  } else {
+    const d = new THREE.Vector3(.42, .86, .18).normalize();
+    topper.position.copy(onSphere(d, 1.03)); topper.rotation.set(-.1, 0, -.42);
+    const satin = new THREE.MeshPhysicalMaterial({ color: 0xff5b92, roughness: .36, sheen: 1, sheenColor: 0xffd3e6, sheenRoughness: .22, clearcoat: .35, clearcoatRoughness: .2 });
+    [-1, 1].forEach(s => {
+      const loop = new THREE.Mesh(new THREE.TorusGeometry(.15, .06, 18, 40), satin);
+      loop.position.set(s * .17, .02, 0); loop.scale.set(1.15, .78, .55); loop.rotation.z = s * .22; loop.castShadow = true; topper.add(loop);
+      const tail = new THREE.Mesh(new THREE.CapsuleGeometry(.045, .2, 6, 12), satin);
+      tail.position.set(s * .08, -.17, .02); tail.rotation.z = s * .38; tail.scale.z = .5; topper.add(tail);
+    });
+    const knot = new THREE.Mesh(new THREE.SphereGeometry(.085, 20, 16), satin); knot.scale.set(1, .95, .8); topper.add(knot);
+  }
+
+  // якорь для облачка-реплики над головой
+  const anchor = new THREE.Object3D(); anchor.position.set(0, R + (c.tuft ? .62 : .5), 0); body.add(anchor);
+
+  return { c, root, hop, squash, lean, body, feet, fur, eyes, brows, smile, open, cheeks, cheekMat, tear, arms, topper, anchor, topperRot: topper.rotation.clone() };
+}
+
+const nata = makeFluffy({ root: 0x7b5cc4, tip: 0xeadcff, lid: 0x8f72cf, foot: 0xa184dc, ink: 0x2a1c4a, iris: ['#1c1034', '#6f4cc0', '#150b28'], tuft: true, seed: 3.1 });
+const olya = makeFluffy({ root: 0xe07a86, tip: 0xffe6d8, lid: 0xe58b8d, foot: 0xf29a98, ink: 0x4a1f35, iris: ['#26101c', '#a24a70', '#1a0a14'], tuft: false, seed: 8.7 });
+const CH = { nata, olya };
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  7. МАШИНКА: глянцевый чёрный хэтчбек, фары-глазки с веками, пластырь
+ * ═════════════════════════════════════════════════════════════════════ */
+function makeCar() {
+  const root = new THREE.Group(), rock = new THREE.Group(); root.add(rock); scene.add(root);
+  const paint = new THREE.MeshPhysicalMaterial({ color: 0x0b0b12, metalness: .15, roughness: .3, clearcoat: 1, clearcoatRoughness: .04, envMapIntensity: 3 });
+  paint.onBeforeCompile = sh => {          // мягкий контурный блик, чтобы чёрный кузов читался на тёмном фоне
+    sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>',
+      'outgoingLight += vec3(.55, .45, .85) * pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 3.0) * .5;\n#include <opaque_fragment>');
+  };
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0x1a2748, metalness: .2, roughness: .04, clearcoat: 1, envMapIntensity: 3 });
+  const rubber = new THREE.MeshStandardMaterial({ color: 0x131318, roughness: .85 });
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xe4e2f0, metalness: 1, roughness: .18 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0x1c1b26, roughness: .55 });
+  const add = (m, x, y, z) => { m.position.set(x, y, z); m.castShadow = true; rock.add(m); return m; };
+
+  add(new THREE.Mesh(new RoundedBoxGeometry(1.5, .62, 2.15, 6, .27), paint), 0, .64, 0);
+  add(new THREE.Mesh(new RoundedBoxGeometry(1.3, .6, 1.35, 6, .29), paint), 0, 1.12, -.22);
+  add(new THREE.Mesh(new RoundedBoxGeometry(1.34, .34, 1.39, 6, .15), glass), 0, 1.15, -.22);
+  add(new THREE.Mesh(new RoundedBoxGeometry(1.46, .22, .3, 4, .1), trim), 0, .36, 1.0);
+  add(new THREE.Mesh(new RoundedBoxGeometry(1.46, .22, .3, 4, .1), trim), 0, .36, -1.0);
+
+  const wheels = [];
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const w = new THREE.Group(); w.position.set(sx * .7, .3, sz * .7); rock.add(w);
+    const tire = new THREE.Mesh(new THREE.TorusGeometry(.19, .11, 16, 32), rubber); tire.rotation.y = Math.PI / 2; tire.castShadow = true; w.add(tire);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .12, 24), chrome); hub.rotation.z = Math.PI / 2; w.add(hub);
+    wheels.push(w);
+  }
+  // фары-глазки: светящиеся линзы + веки из того же лака, чтобы моргать
+  const lampMat = new THREE.MeshStandardMaterial({ color: 0xfff1d0, emissive: 0xffdc9c, emissiveIntensity: 2.2 });
+  const lamps = [-1, 1].map(s => {
+    const g = new THREE.Group(); g.position.set(s * .44, .72, 1.03); g.scale.z = .62; rock.add(g);
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(.21, 32, 24), lampMat));
+    const rimT = new THREE.Mesh(new THREE.TorusGeometry(.215, .035, 12, 36), chrome); g.add(rimT);
+    const lid = new THREE.Mesh(new THREE.SphereGeometry(.225, 32, 16, 0, TAU, 0, Math.PI / 2), paint); g.add(lid);
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(.045, 12, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 3, 3) }));
+    glint.position.set(-.07, .08, .2); g.add(glint);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTex, color: 0xffd9a0, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false }));
+    glow.position.set(s * .44, .72, 1.25); glow.scale.setScalar(1); rock.add(glow); NO_DEPTH.push(glow);
+    return { g, lid, glow };
+  });
+  // задние фонарики
+  [-1, 1].forEach(s => add(new THREE.Mesh(new THREE.SphereGeometry(.09, 16, 12), new THREE.MeshStandardMaterial({ color: 0xff7aa0, emissive: 0xff4f86, emissiveIntensity: 1.6 })), s * .55, .72, -1.08).scale.set(1.3, .8, .4));
+  // розовый пластырь крест-накрест на бампере
+  const band = new THREE.Group(); band.position.set(0, .38, 1.16); rock.add(band);
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0xffa9c2, roughness: .75 }), padMat = new THREE.MeshStandardMaterial({ color: 0xffe3ec, roughness: .8 });
+  [.62, -.62].forEach(a => { const st = new THREE.Mesh(new RoundedBoxGeometry(.52, .13, .03, 2, .012), bandMat); st.rotation.z = a; band.add(st); });
+  const pad = new THREE.Mesh(new RoundedBoxGeometry(.17, .11, .045, 2, .015), padMat); band.add(pad);
+  // тёплое пятно света от фар на траве
+  const light = new THREE.PointLight(0xffd9a0, 0, 6, 2); light.position.set(0, .7, 1.8); rock.add(light);
+  return { root, rock, wheels, lamps, lampMat, light };
+}
+const car = makeCar();
+const CAR = { p0: [-3.4, -3.0], yaw0: .6, c1: [-3.8, 1.2], c2: [-2.4, 2.5], p1: [-2.62, .45], roll0: T.quiet + .9, roll1: T.quiet + 3.4, len: 7 };
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  8. ЭФФЕКТЫ: сердечки, искры, светлячки, пылинки, вспышка объятия
+ * ═════════════════════════════════════════════════════════════════════ */
+const heartGeo = (() => {
+  const s = new THREE.Shape();
+  s.moveTo(5, 5); s.bezierCurveTo(5, 5, 4, 0, 0, 0); s.bezierCurveTo(-6, 0, -6, 7, -6, 7); s.bezierCurveTo(-6, 11, -3, 15.4, 5, 19);
+  s.bezierCurveTo(12, 15.4, 16, 11, 16, 7); s.bezierCurveTo(16, 7, 16, 0, 10, 0); s.bezierCurveTo(7, 0, 5, 5, 5, 5);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 4, bevelEnabled: true, bevelThickness: 3, bevelSize: 2.4, bevelSegments: 6, curveSegments: 20 });
+  g.center(); g.rotateZ(Math.PI); g.scale(.05, .05, .05); g.computeVertexNormals(); return g;
+})();
+const heartMat = new THREE.MeshPhysicalMaterial({ color: 0xff4f86, emissive: 0xff2c70, emissiveIntensity: 1.7, roughness: .25, clearcoat: 1 });
+const HEART_POOL = Array.from({ length: 32 }, () => { const m = new THREE.Mesh(heartGeo, heartMat); m.visible = false; scene.add(m); return m; });
+const flyHeart = new THREE.Mesh(heartGeo, heartMat); scene.add(flyHeart);
+const flyGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTex, color: 0xff7fb0, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+scene.add(flyGlow); NO_DEPTH.push(flyGlow);
+
+// общий материал светящихся частиц (размер с перспективой)
+function glowPoints(n) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(n), 1));
+  g.setAttribute('aAlpha', new THREE.BufferAttribute(new Float32Array(n), 1));
+  g.setAttribute('aColor', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  const m = new THREE.ShaderMaterial({
+    uniforms: { uPR: { value: 1 } },
+    vertexShader: `uniform float uPR; attribute float aSize, aAlpha; attribute vec3 aColor; varying float vA; varying vec3 vC;
+      void main(){ vA = aAlpha; vC = aColor; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = aSize * uPR * 30.0 / -mv.z; }`,
+    fragmentShader: `varying float vA; varying vec3 vC; void main(){ float d = length(gl_PointCoord - .5); float a = pow(smoothstep(.5, 0.0, d), 1.6) * vA; if (a < .003) discard; gl_FragColor = vec4(vC * a, 1.0); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  const p = new THREE.Points(g, m); p.frustumCulled = false; scene.add(p); NO_DEPTH.push(p);
+  return p;
+}
+const sparks = glowPoints(160), fireflies = glowPoints(40), dust = glowPoints(260);
+const FF = Array.from({ length: 40 }, () => ({ x: (R0() - .5) * 12, y: .3 + R0() * 2.8, z: -6 + R0() * 9, f: [.2 + R0() * .3, .25 + R0() * .3, .2 + R0() * .3, 1 + R0() * 2], p: [R0() * TAU, R0() * TAU, R0() * TAU, R0() * TAU], s: 5 + R0() * 6 }));
+const DUST = Array.from({ length: 260 }, () => ({ x: (R0() - .5) * 11, y: R0() * 4.5, z: -4 + R0() * 10, p: R0() * TAU, s: 1 + R0() * 1.8, b: .15 + R0() * .35 }));
+const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTex, color: 0xffb3d6, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+scene.add(flash); NO_DEPTH.push(flash);
+const flashLight = new THREE.PointLight(0xffb0d0, 0, 8, 2); scene.add(flashLight);
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  9. ТАЙМЛАЙН: позы героев — чистые функции времени
+ * ═════════════════════════════════════════════════════════════════════ */
+const lineOf = who => LINES.filter(l => l.who === who);
+function talk(t, who) {           // ротик открывается, пока печатается реплика
+  let m = 0;
+  for (const l of lineOf(who)) { const e = lineEnd(l); if (t >= l.at && t <= e) m = Math.max(m, Math.min(1, (t - l.at) / .08, (e - t) / .08) * (.3 + .7 * Math.abs(Math.sin((t - l.at) * Math.PI * 6.2)))); }
+  return m;
+}
+function makeBlinks(seed, skip) { const r = rng(seed), out = []; for (let t = 1.2 + r() * 1.5; t < T.end; t += 2 + r() * 2) if (!skip(t)) out.push(t); return out; }
+const blinkAt = (t, list) => list.reduce((m, b) => { const a = t - b; return a >= 0 && a < .22 ? Math.max(m, a < .09 ? a / .09 : 1 - (a - .09) / .13) : m; }, 0);
+const noBlink = t => t > MERGE && t < T.quiet + 1.4;
+const BLINK = { nata: makeBlinks(21, noBlink), olya: makeBlinks(42, noBlink) };
+const FIDGET = (() => { const r = rng(5), out = []; for (let t = 2.2; t < RUN.start - .5; t += 1.2 + r() * 1.4) out.push([t, out.length % 2 ? 1 : -1]); return out; })();
+
+const NATA_HOPS = [[T.hi1 + .2, .16, .36], [T.moon - .1, .22, .4], ...Array.from({ length: RUN.n }, (_, i) => [RUN.start + i * RUN.step, .34, RUN.step * .8, .06])];
+const OLYA_HOPS = [[T.hi2 + .2, .55, .52], [T.hi2 + .95, .28, .4], [T.comfort + 1.4, .12, .32], [HEART.land - .05, .14, .32]];
+const hug = k => [[MERGE - .02, 0], [MERGE + .12, 1 * k, 'out'], [MERGE + .6, .55 * k], [T.quiet + .3, .55 * k], [T.quiet + 1.5, .3 * k]];
+
+const TRACKS = {
+  nata: {
+    x: [[0, -1.45], [T.shame + .3, -1.45], [T.shame + 1.3, -1.72, 'inOut'], [RUN.start + .1, -1.72], [MERGE, -.64, 'lin'], [T.quiet + .3, -.64], [T.quiet + 1.5, -.74, 'inOut']],
+    yaw: [[0, .2], [T.sorry, .2], [T.sorry + .4, -.35, 'inOut'], [T.sorry + 1.3, -.35], [T.sorry + 1.8, .05, 'inOut'], [T.comfort + 1.6, .05], [T.comfort + 2.1, .25, 'inOut'],
+          [T.moon, .25], [T.moon + .3, .1], [RUN.start - .1, .1], [RUN.start + .2, .45], [T.quiet + .2, .45], [T.quiet + 1.6, MOON_YAW, 'inOut']],
+    gaze: [[0, [.15, 0]], [T.hi1, [.15, 0]], [T.hi1 + .3, [.55, .05]], [T.sorry, [.55, .05]], [T.sorry + .4, [-.85, -.05]], [T.sorry + 1.3, [-.85, -.05]], [T.sorry + 1.8, [.05, -.8]],
+           [T.comfort + 1.7, [.05, -.8]], [T.comfort + 2.2, [.55, .05]], [T.moon, [.55, .05]], [T.moon + .3, [.45, .85]], [HEART.back + .2, [.45, .85]], [HEART.land - .3, [.6, 0]],
+           [T.quiet + .8, [.6, 0]], [T.quiet + 1.8, [.1, .6]]],
+    lid: [[0, .08], [T.sorry + 1.3, .08], [T.sorry + 1.9, .38], [T.shame, .38], [T.shame + .4, .46], [T.comfort + 1.6, .46], [T.comfort + 2.2, .05], [T.love + .3, .05], [T.love + .8, .18], [T.moon, .18], [T.moon + .3, 0]],
+    brow: [[0, [.25, 0]], [T.sorry + .4, [.5, 0]], [T.sorry + 1.8, [1, 0]], [T.shame + .3, [1.25, 0]], [T.comfort + 1.6, [1.25, 0]], [T.comfort + 2.2, [0, .2]], [T.love + .3, [0, .2]], [T.love + .8, [.4, 0]], [T.moon, [.4, 0]], [T.moon + .3, [-.2, .4]], [HEART.land, [-.2, .4]], [HEART.land + .4, [0, 0]]],
+    smile: [[0, .6], [T.hi1 + .3, .85], [T.sorry + 1.8, .85], [T.sorry + 2.3, -.7], [T.shame + .3, -1], [T.comfort + 1.6, -1], [T.comfort + 2.3, .9], [T.love + .5, 1.1], [MERGE + .3, 1.1], [MERGE + .6, 1.4], [T.quiet + 1.2, 1.4], [T.quiet + 2, 1]],
+    blush: [[0, .35], [T.hi1 + .3, .5], [T.sorry + 2, .8], [T.shame + .4, 1.35], [T.comfort + 1.8, 1.35], [T.comfort + 2.6, .7], [T.love + .5, 1.1], [MERGE + .3, 1.1], [MERGE + .7, 1.6], [T.quiet + 1.5, 1.6], [T.quiet + 3, 1.15]],
+    droop: [[0, .1], [T.sorry + 1.6, .1], [T.sorry + 2.4, 1], [T.comfort + 1.7, 1], [T.comfort + 2.8, -.1, 'elastic'], [T.love, 0]],
+    fluff: [[0, 1], [T.sorry + 1.8, 1], [T.sorry + 2.6, .72], [T.comfort + 1.8, .72], [T.comfort + 2.5, 1.08], [T.love + 1, 1], [MERGE + .2, 1], [MERGE + .5, 1.18], [T.quiet + 1, 1.05]],
+    lean: [[0, [0, 0]], [T.shame + .2, [0, 0]], [T.shame + 1.2, [-.08, .05]], [T.comfort + 1.8, [-.08, .05]], [T.comfort + 2.4, [0, 0]], [T.love + .3, [0, 0]], [T.love + .9, [.06, 0]],
+           [T.moon - .1, [.06, 0]], [T.moon + .3, [-.1, 0]], [HEART.atMoon + .3, [-.1, 0]], [HEART.atMoon + .9, [0, 0]], [T.quiet + .5, [0, 0]], [T.quiet + 1.8, [-.06, .1]]],
+    squash: [[0, 0], [T.shame + .2, 0], [T.shame + 1.2, -.06], [T.comfort + 1.8, -.06], [T.comfort + 2.4, 0], [T.quiet + .5, 0], [T.quiet + 1.6, -.05]],
+    press: hug(1),
+    armR: [[0, [0, 0]], [T.hi1 + .25, [0, 0]], [T.hi1 + .6, [1.05, .15], 'back'], [T.hi1 + 2.3, [1.05, .15]], [T.hi1 + 2.8, [0, 0]],
+           [T.love + .1, [0, 0]], [T.love + .7, [.35, 1], 'back'], [T.moon - .05, [.35, 1]], [T.moon + .35, [1.35, .15], 'back'], [HEART.atMoon + .2, [1.35, .15]], [HEART.atMoon + .8, [.1, .1]],
+           [RUN.start, [.55, 0]], [MERGE, [.55, 0]], [MERGE + .4, [.5, .85]], [T.quiet + .2, [.5, .85]], [T.quiet + 1.2, [.05, .1]]],
+    armL: [[0, [0, 0]], [T.love + .1, [0, 0]], [T.love + .7, [.35, 1], 'back'], [T.moon - .05, [.35, 1]], [T.moon + .35, [.6, .4]], [HEART.atMoon + .2, [.6, .4]], [HEART.atMoon + .8, [.1, .1]],
+           [RUN.start, [.55, 0]], [MERGE, [.55, 0]], [MERGE + .4, [.45, .9]], [T.quiet + .2, [.45, .9]], [T.quiet + 1.2, [.05, .1]]],
+    wave: [T.hi1 + .6, T.hi1 + 2.3, 1],
+  },
+  olya: {
+    x: [[0, 1.45], [T.comfort + 1.45, 1.45], [T.comfort + 2.05, 1.15, 'inOut'], [MERGE, 1.15], [MERGE + .25, 1.08, 'out'], [T.quiet + .3, 1.08], [T.quiet + 1.5, 1.06]],
+    yaw: [[0, -.2], [T.think, -.2], [T.think + .5, -.05], [T.shame, -.05], [T.shame + .5, -.2], [MERGE - .3, -.2], [MERGE, -.45], [T.quiet + .2, -.45], [T.quiet + 1.6, MOON_YAW - TAU, 'inOut']],
+    gaze: [[0, [-.2, 0]], [T.hi1 + .1, [-.55, .05]], [T.think, [-.55, .05]], [T.think + .5, [-.3, .8]], [T.shame, [-.3, .8]], [T.shame + .5, [-.6, -.05]], [T.moon + .4, [-.6, -.05]], [T.moon + .8, [-.1, .85]],
+           [HEART.back + .2, [-.1, .85]], [HEART.land - .2, [0, -.1]], [HEART.land + .6, [-.55, 0]], [T.quiet + .8, [-.55, 0]], [T.quiet + 1.8, [-.1, .6]]],
+    lid: [[0, .05], [T.comfort, .05], [T.comfort + .4, .25], [T.comfort + 2.2, .25], [T.comfort + 2.6, .05], [HEART.land, .05], [HEART.land + .3, .3], [HEART.land + .9, .05]],
+    brow: [[0, [0, 0]], [T.think + .2, [0, 0]], [T.think + .6, [-.3, 1]], [T.shame, [-.3, 1]], [T.shame + .5, [.25, 0]], [T.comfort, [.25, 0]], [T.comfort + .4, [0, .3]], [T.comfort + 2, [0, 0]]],
+    smile: [[0, 1], [T.think + .3, 1], [T.think + .7, .35], [T.shame, .35], [T.shame + .5, .6], [T.comfort, .6], [T.comfort + .4, 1.25], [MERGE + .3, 1.25], [MERGE + .6, 1.45], [T.quiet + 2, 1.1]],
+    blush: [[0, .4], [T.comfort + .4, .7], [HEART.land, .7], [HEART.land + .4, 1.2], [MERGE + .7, 1.6], [T.quiet + 3, 1.15]],
+    droop: [[0, 0], [T.think + .3, 0], [T.think + .8, .35], [T.shame + .2, .35], [T.shame + .8, 0]],
+    fluff: [[0, 1], [MERGE + .2, 1], [MERGE + .5, 1.15], [T.quiet + 1, 1.05]],
+    lean: [[0, [0, 0]], [T.think + .3, [0, 0]], [T.think + .9, [0, .1]], [T.shame + .1, [0, .1]], [T.shame + .6, [0, 0]], [T.comfort, [0, 0]], [T.comfort + .5, [.05, 0]], [T.comfort + 2, [0, 0]],
+           [T.quiet + .5, [0, 0]], [T.quiet + 1.8, [-.06, -.1]]],
+    squash: [[0, 0], [T.quiet + .5, 0], [T.quiet + 1.6, -.05]],
+    press: hug(1),
+    armL: [[0, [0, 0]], [T.hi2 + .3, [0, 0]], [T.hi2 + .65, [1.1, .1], 'back'], [T.hi2 + 2.2, [1.1, .1]], [T.hi2 + 2.7, [0, 0]],
+           [T.think + .3, [0, 0]], [T.think + .9, [.7, .95], 'back'], [T.shame + .1, [.7, .95]], [T.shame + .7, [0, 0]],
+           [T.hug + .1, [0, 0]], [T.hug + .6, [.9, -.25], 'back'], [MERGE, [.9, -.25]], [MERGE + .35, [.5, .9]], [T.quiet + .2, [.5, .9]], [T.quiet + 1.2, [.05, .1]]],
+    armR: [[0, [0, 0]], [HEART.land - .3, [0, 0]], [HEART.land + .1, [.3, .9]], [T.hug + .1, [.3, .9]], [T.hug + .6, [.9, -.25], 'back'], [MERGE, [.9, -.25]], [MERGE + .35, [.5, .9]], [T.quiet + .2, [.5, .9]], [T.quiet + 1.2, [.05, .1]]],
+    wave: [T.hi2 + .65, T.hi2 + 2.2, -1],
+  },
+};
+const HAPPY = [[0, 0], [MERGE + .25, 0], [MERGE + .55, 1], [T.quiet + .9, 1], [T.quiet + 1.3, 0]];
+
+function pose(who, t) {
+  const K = TRACKS[who], nat = who === 'nata';
+  const [hy, hs] = hops(t, nat ? NATA_HOPS : OLYA_HOPS);
+  const p = {
+    x: keys(t, K.x), yaw: keys(t, K.yaw), hopY: hy, sq: hs + keys(t, K.squash), press: keys(t, K.press),
+    gaze: keys(t, K.gaze), lid: keys(t, K.lid), brow: keys(t, K.brow), smile: keys(t, K.smile), blush: keys(t, K.blush),
+    droop: keys(t, K.droop), fluff: keys(t, K.fluff), lean: keys(t, K.lean), happy: keys(t, HAPPY),
+    armL: keys(t, K.armL), armR: keys(t, K.armR), mouth: talk(t, who), blink: blinkAt(t, BLINK[who]),
+    breath: .022 * Math.sin(TAU * t / (nat ? 3.3 : 3.9) + (nat ? 0 : 1.7)), sway: .03 * Math.sin(TAU * t / (nat ? 4.1 : 4.8) + (nat ? .5 : 2)),
+    shine: 1, tear: 0, tearSlide: 0, foot: [0, 0],
+  };
+  if (!nat) p.yaw += .28 * Math.sin(TAU * 1.5 * (t - T.comfort - .1)) * env(t, T.comfort + .1, T.comfort + 1.5, .2, .35);   // мягко качает головой
+  const [w0, w1, ws] = K.wave;                                     // машет лапкой
+  const wave = .32 * Math.sin(TAU * 2.2 * (t - w0)) * env(t, w0, w1, .15, .25);
+  if (ws > 0) p.armR[0] += wave; else p.armL[0] += wave;
+  if (nat) {
+    const flap = .35 * Math.sin(TAU * (t - RUN.start) / RUN.step) * env(t, RUN.start, MERGE, .1, .1);
+    p.armL[0] += flap; p.armR[0] += flap;
+    p.tear = sstep(T.shame + 1.3, T.shame + 1.8, t) * (1 - sstep(T.shame + 4.0, T.shame + 4.4, t));
+    p.tearSlide = sstep(T.shame + 2.1, T.shame + 4.3, t);
+    p.shine = 1 + .22 * Math.sin(t * 9) * (env(t, T.shame + 1.3, T.shame + 4.3) + env(t, T.love + .5, T.love + 4.5));
+    for (const [ft, s] of FIDGET) { const a = (t - ft) / .38; if (a > 0 && a < 1) p.foot[s > 0 ? 1 : 0] = .08 * Math.sin(Math.PI * a); }   // переминается с лапки на лапку
+  } else {
+    p.shine = 1 + .25 * Math.sin(t * 9) * env(t, HEART.land, HEART.land + 1.6);
+  }
+  return p;
+}
+// Траектории для пружин follow-through
+const motionY = who => t => hops(t, who === 'nata' ? NATA_HOPS : OLYA_HOPS)[0];
+const motionX = who => t => keys(t, TRACKS[who].x);
+
+function applyPose(ch, who, p, t) {
+  const R = 1;
+  ch.root.position.set(p.x, hill(p.x, 0), 0);
+  ch.root.rotation.y = p.yaw;
+  ch.hop.position.y = p.hopY;
+  const sy = 1 + p.sq + .04 * p.press, sx = (1 - p.sq * .5) * (1 - .1 * p.press);
+  ch.squash.scale.set(sx, sy, 1 - p.sq * .5 + .04 * p.press);
+  ch.lean.rotation.set(p.lean[0], 0, p.lean[1] + p.sway);
+  ch.body.scale.set(1 - p.breath * .5, 1 + p.breath, 1 - p.breath * .5);
+  // лицо
+  const lid = p.happy > .5 ? 1 : Math.max(p.lid, p.blink);
+  ch.eyes.forEach(e => {
+    e.iris.rotation.set(-p.gaze[1] * .38, p.gaze[0] * .42, 0);
+    e.lid.rotation.x = lerp(-1.3, 1.55, lid);
+    e.glints.scale.setScalar(p.shine);
+    e.happy.visible = p.happy > .5;
+  });
+  ch.brows.forEach(b => { b.g.children[0].rotation.z = Math.PI / 2 - b.s * p.brow[0] * .42; b.g.children[0].position.y = p.brow[1] * .05 - p.brow[0] * .015; });
+  ch.smile.scale.set(p.happy > .5 ? 1.25 : 1, Math.abs(p.smile) < .15 ? Math.sign(p.smile || 1) * .15 : p.smile, 1);
+  ch.open.visible = p.mouth > .03; ch.open.scale.set(1, Math.max(.05, p.mouth), 1);
+  ch.cheekMat.opacity = clamp(.22 + p.blush * .42, 0, .9);
+  ch.cheeks.forEach(c => c.scale.set(1.25 + p.blush * .12, .8 + p.blush * .08, 1));
+  ch.tear.visible = p.tear > .01;
+  if (ch.tear.visible) {
+    const s0 = ch.eyes[1].eye.position, d = new THREE.Vector3(s0.x + .1, s0.y - .2 - p.tearSlide * .42, s0.z + .12);
+    ch.tear.position.copy(d.normalize().multiplyScalar(1.1)); ch.tear.scale.set(p.tear, 1.4 * p.tear, .7 * p.tear);
+  }
+  // ручки
+  ch.arms.forEach(a => {
+    const [up, fwd] = a.s > 0 ? p.armR : p.armL;
+    a.pivot.rotation.z = a.s * (-.55 + 1.9 * up);
+    a.pivot.rotation.y = -a.s * fwd * 1.25;
+  });
+  ch.feet.forEach((f, i) => { f.position.y = .13 + p.foot[i]; });
+  // follow-through: хохолок / бантик и шёрстка догоняют движение
+  const sy2 = spring(motionY(who), t), sx2 = spring(motionX(who), t, 1.8, .25);
+  const vy = (motionY(who)(t) - motionY(who)(t - .05)) / .05, vx = (motionX(who)(t) - motionX(who)(t - .05)) / .05;
+  if (ch.c.tuft) ch.topper.rotation.set(p.droop * .95 + sy2 * 1.4, 0, -sx2 * 1.2 + p.droop * .25);
+  else ch.topper.rotation.set(ch.topperRot.x + sy2 * 1.1 + p.droop * .4, 0, ch.topperRot.z - sx2 * .9 - p.droop * .3);
+  const c = Math.cos(-p.yaw), s = Math.sin(-p.yaw);
+  const wx = -vx * .35, wz = 0;
+  const wind = new THREE.Vector3(wx * c - wz * s, clamp(-vy * .12 + sy2 * .8, -.8, .8), wx * s + wz * c);
+  const furs = [ch.fur, ...ch.arms.map(a => a.pivot.children[0])];
+  if (ch.c.tuft) furs.push(ch.topper.children[0]);
+  furs.forEach(f => { f.material.uniforms.uWind.value.copy(wind); f.material.uniforms.uFluff.value = p.fluff; });
+}
+
+/* ---------- Сердечко «до луны и обратно» ---------- */
+const bez = (a, b, c, k) => { const u = 1 - k; return new THREE.Vector3(u * u * a.x + 2 * u * k * b.x + k * k * c.x, u * u * a.y + 2 * u * k * b.y + k * k * c.y, u * u * a.z + 2 * u * k * b.z + k * k * c.z); };
+let H0, HO;                                                             // старт (лапка Наты) и финиш (грудь Оли) — вычисляются из поз
+const HM = MOON_POS.clone().add(new THREE.Vector3(0, 2, 104).normalize().multiplyScalar(MOON_R + 1.5));
+const HC1 = new THREE.Vector3(-12, 26, -32), HC2 = new THREE.Vector3(24, 16, -30);
+function heartPos(t) {
+  if (t < HEART.atMoon) return bez(H0, HC1, HM, EASE.inOut(clamp((t - HEART.launch) / (HEART.atMoon - HEART.launch))));
+  if (t < HEART.back) return HM.clone();
+  return bez(HM, HC2, HO, EASE.sine(clamp((t - HEART.back) / (HEART.land - HEART.back))));
+}
+const heartVisible = t => t >= HEART.launch && t < HEART.land + .45;
+
+/* ---------- События-сердечки (всплывают и тают) ---------- */
+const HEART_EVENTS = [];
+function initHeartEvents() {
+  const r = rng(99);
+  const op = pose('olya', T.comfort + 1.5);
+  HEART_EVENTS.push({ t0: T.comfort + 1.5, life: 2.6, p: [op.x - .1, 2.95, .2], v: [0, .32, 0], size: 1.3, spin: 1.3 });
+  for (let i = 0; i < 7; i++) HEART_EVENTS.push({ t0: HEART.land + i * .05, life: 1.4 + r() * .5, p: HO.clone().add(new THREE.Vector3(0, .9, -.4)).toArray(), v: [(r() - .5) * 1.6, .7 + r() * .9, (r() - .2) * .8], size: .35 + r() * .3, spin: (r() - .5) * 5 });
+  const hx = (keys(MERGE, TRACKS.nata.x) + keys(MERGE, TRACKS.olya.x)) / 2;
+  for (let i = 0; i < 16; i++) HEART_EVENTS.push({ t0: MERGE + .2 + i * .1, life: 1.9 + r() * .9, p: [hx + (r() - .5) * 1.4, 1.2 + r() * 1.3, .4 + r() * .4], v: [(r() - .5) * 1.2, .6 + r() * .8, (r() - .3) * .5], size: .3 + r() * .45, spin: (r() - .5) * 4 });
+  HEART_EVENTS.push({ t0: T.quiet + 3.8, life: 99, p: [CAR.p1[0], 2.1, CAR.p1[1] - .2], v: [0, 0, 0], size: .75, spin: .8, bob: true });
+}
+function updateHearts(t) {
+  let j = 0;
+  for (const e of HEART_EVENTS) {
+    const a = t - e.t0;
+    if (a < 0 || a > e.life || j >= HEART_POOL.length) continue;
+    const m = HEART_POOL[j++]; m.visible = true;
+    const pop = a < .35 ? EASE.back(a / .35) : 1, fade = e.bob ? 1 : 1 - sstep(e.life - .5, e.life, a);
+    m.position.set(e.p[0] + e.v[0] * a + .08 * Math.sin(a * 3 + e.t0), e.p[1] + e.v[1] * a + (e.bob ? .1 * Math.sin(a * 2.2) : 0), e.p[2] + e.v[2] * a);
+    m.scale.setScalar(Math.max(.001, e.size * pop * fade * .55));
+    m.rotation.set(0, e.spin * a, .15 * Math.sin(a * 2));
+  }
+  for (; j < HEART_POOL.length; j++) HEART_POOL[j].visible = false;
+}
+function setPoint(pts, i, x, y, z, size, alpha, r, g, b) {
+  const A = pts.geometry.attributes;
+  A.position.setXYZ(i, x, y, z); A.aSize.setX(i, size); A.aAlpha.setX(i, alpha); A.aColor.setXYZ(i, r, g, b);
+}
+const flagPoints = pts => Object.values(pts.geometry.attributes).forEach(a => { a.needsUpdate = true; });
+
+function updateParticles(t, warm) {
+  // искры-хвост за летящим сердечком: частица k рождается в момент k/RATE — детерминированно
+  const RATE = 70, LIFE = .9; let j = 0;
+  for (let k = Math.ceil((t - LIFE) * RATE); k <= Math.floor(t * RATE) && j < 160; k++) {
+    const tb = k / RATE, a = t - tb;
+    const flying = (tb >= HEART.launch && tb < HEART.atMoon - .05) || (tb >= HEART.back && tb < HEART.land);
+    if (!flying) continue;
+    const r = rng(k * 7 + 1), p = heartPos(tb), sc = 1 + p.distanceTo(camera.position) / 7;
+    setPoint(sparks, j++, p.x + (r() - .5) * .5 * sc * a, p.y + (r() - .5) * .5 * sc * a - .4 * a * a * sc, p.z + (r() - .5) * .5 * sc * a,
+      (.8 + r() * 1.4) * sc, (1 - a / LIFE) * 1.3, 1.6, r() < .5 ? .9 : 1.3, r() < .5 ? 1.2 : .6);
+  }
+  for (; j < 160; j++) setPoint(sparks, j, 0, -99, 0, 0, 0, 0, 0, 0);
+  flagPoints(sparks);
+  // светлячки: немного в начале, больше после объятия
+  const ffAmt = keys(t, [[0, .3], [T.hug, .3], [T.quiet, .6], [T.quiet + 2, 1]]);
+  FF.forEach((f, i) => {
+    const b = Math.pow(.5 + .5 * Math.sin(t * f.f[3] + f.p[3]), 2) * ffAmt * (i < 12 ? 1 : sstep(T.hug, T.quiet + 1.5, t));
+    setPoint(fireflies, i, f.x + Math.sin(t * f.f[0] + f.p[0]) * .8, f.y + Math.sin(t * f.f[1] + f.p[1]) * .4, f.z + Math.cos(t * f.f[2] + f.p[2]) * .8, f.s, b * 1.3, 2.2, 1.9, .9);
+  });
+  flagPoints(fireflies);
+  // пылинки в лунном свете
+  DUST.forEach((d, i) => {
+    const x = ((d.x + t * .05 + Math.sin(t * .3 + d.p) * .3) + 5.5) % 11 - 5.5;
+    setPoint(dust, i, x, d.y + Math.sin(t * .25 + d.p) * .25, d.z + Math.cos(t * .2 + d.p) * .25, d.s, d.b * (.6 + .4 * warm), 1.1, 1, 1.2);
+  });
+  flagPoints(dust);
+}
+
+/* ---------- Камера: планы, склейки, «ручная» камера, фокус ---------- */
+// [время, [камера x,y,z, цель x,y,z, fov, апертура], easing]
+const CAM = [
+  [0, [.6, 9.5, 17, 4, 15, -60, 42, 0]],
+  [3.2, [0, 2.6, 17.5, -.2, 2.5, 0, 38, .00025], 'inOut'],                        // опускаемся с неба: общий план
+  [T.sorry - .05, [0, 2.4, 15.5, -.2, 2.35, 0, 38, .00025]],
+  [T.sorry, [-.6, 2.0, 7.6, -2.0, 1.85, 0, 32, .0011], 'cut'],               // крупный: Ната
+  [T.think - .05, [-.65, 1.95, 7.0, -2.0, 1.83, 0, 32, .0011]],
+  [T.think, [.7, 2.0, 7.4, 1.35, 1.85, 0, 32, .0011], 'cut'],                 // крупный: Оля
+  [T.shame - .05, [.72, 1.95, 6.9, 1.35, 1.83, 0, 32, .0011]],
+  [T.shame, [-1.2, 1.9, 6.6, -1.75, 1.75, 0, 31, .0013], 'cut'],             // крупный: Ната сникла
+  [T.comfort - .05, [-1.25, 1.85, 6.0, -1.78, 1.72, 0, 31, .0013]],
+  [T.comfort, [0, 2.4, 14.8, -.1, 2.15, 0, 36, .0005], 'cut'],                 // средний: двое
+  [T.love - .05, [0, 2.35, 14.0, -.1, 2.12, 0, 36, .0005]],
+  [T.love, [-.8, 2.0, 8.4, -1.3, 1.85, 0, 33, .001], 'cut'],                // признание: медленный наезд
+  [T.moon - .05, [-.85, 1.95, 7.6, -1.32, 1.83, 0, 33, .001]],
+  [T.moon, [.5, 2.4, 13.5, 0, 2.4, 0, 40, .0003], 'cut'],                     // общий: следим за сердечком
+  [HEART.atMoon, [.2, 2.8, 15, 0, 2.4, 0, 40, .0002]],
+  [HEART.land, [.3, 2.35, 13.5, .1, 2.1, 0, 38, .0004]],
+  [T.hug + .5, [.2, 2.25, 13.5, 0, 2.0, 0, 37, .0005]],
+  [T.quiet, [.25, 2.1, 12, .2, 1.9, 0, 37, .0005]],
+  [T.quiet + 2, [-.6, 1.8, 15, .1, 3.2, -8, 40, .0003], 'inOut'],            // сзади: силуэты на фоне луны
+  [T.outro, [-.55, 1.75, 14.4, .12, 3.25, -8, 40, .0003]],
+  [T.end, [0, 7.5, 21, 1.5, 3.2, -40, 44, .0001], 'inOut'],                     // отъезд вверх
+];
+const FOLLOW = [[HEART.launch - .1, 0], [HEART.launch + .4, .72], [HEART.back + .6, .72], [HEART.land + .15, 0]];
+const FOCUS = [[0, [0, 1.5, 0]], [T.hi1, [-1.45, 1.6, 0]], [T.hi2, [1.45, 1.6, 0]], [T.sorry, [-1.45, 1.6, 0], 'cut'], [T.think, [1.45, 1.6, 0], 'cut'],
+  [T.shame, [-1.6, 1.6, 0], 'cut'], [T.shame + 1.3, [-1.72, 1.55, 0]], [T.comfort, [1.3, 1.6, 0], 'cut'], [T.comfort + 2, [-1.45, 1.6, 0]],
+  [T.love, [-1.45, 1.6, 0], 'cut'], [HEART.land + .2, [1.15, 1.5, 0]], [MERGE, [.25, 1.5, 0]], [T.quiet + 2, [.2, 1.2, 0]]];
+const _v = new THREE.Vector3(), _t = new THREE.Vector3(), _f = new THREE.Vector3();
+function updateCamera(t) {
+  const c = keys(t, CAM);
+  _v.set(c[0], c[1], c[2]); _t.set(c[3], c[4], c[5]);
+  _f.fromArray(keys(t, FOCUS));
+  const w = keys(t, FOLLOW);
+  if (w > 0) { const hp = heartPos(t); _t.lerp(hp, w); _f.lerp(hp, w); }
+  // лёгкая «ручная» камера
+  _v.x += Math.sin(t * .9) * .02 + Math.sin(t * 2.3 + 1) * .008; _v.y += Math.sin(t * 1.1 + 2) * .015 + Math.sin(t * 2.7) * .006;
+  _t.x += Math.sin(t * .7 + .5) * .01; _t.y += Math.sin(t * .8 + 1.3) * .01;
+  camera.position.copy(_v); camera.fov = c[6]; camera.updateProjectionMatrix(); camera.lookAt(_t); camera.updateMatrixWorld();
+  const dir = _t.clone().sub(_v).normalize();
+  bokeh.uniforms.focus.value = Math.max(.5, _f.sub(_v).dot(dir));
+  bokeh.uniforms.aperture.value = c[7];
+  bokeh.uniforms.maxblur.value = Math.min(.0075, c[7] * 6);
+}
+
+/* ---------- Облачка-реплики ---------- */
+const BUBBLES = LINES.map(l => {
+  const a = document.createElement('div'); a.className = 'b-anchor';
+  const el = document.createElement('div'); el.className = 'bubble' + (l.mood === 'soft' ? ' soft' : '');
+  const typed = document.createElement('span'), rest = document.createElement('span'); rest.className = 'rest';
+  el.append(typed, rest); a.append(el);
+  const obj = new CSS2DObject(a); obj.center.set(0, 0); CH[l.who].anchor.add(obj);
+  return { l, obj, el, typed, rest, n: -1, t0: l.at, hide: lineEnd(l) + HOLD_AFTER, s: 0, o: 0 };
+});
+const DOTS = (() => {
+  const a = document.createElement('div'); a.className = 'b-anchor';
+  const el = document.createElement('div'); el.className = 'bubble dots'; el.innerHTML = '<span>•</span><span>•</span><span>•</span>';
+  a.append(el); const obj = new CSS2DObject(a); obj.center.set(0, 0); olya.anchor.add(obj);
+  return { l: { mood: 'normal' }, obj, el, dots: [...el.children], t0: THINK_DOTS_AT, hide: T.shame - .35, s: 0, o: 0 };
+})();
+function popScale(a, mood) {
+  if (mood === 'sad' || mood === 'soft') return lerp(.86, 1, EASE.out(clamp(a / .5)));   // грустные — мягко, без подпрыгивания
+  return a < .22 ? 1.12 * EASE.out(a / .22) : lerp(1.12, 1, EASE.sine(clamp((a - .22) / .18)));
+}
+function updateBubble(B, t) {
+  const a = t - B.t0, on = a >= 0 && t < B.hide + .35;
+  B.obj.visible = on;
+  if (!on) return;
+  if (B.typed) {                                        // облачко появляется вместе с первой буквой
+    const n = Math.min(B.l.text.length, Math.floor(a * TYPE_SPEED) + 1);
+    if (n !== B.n) { B.typed.textContent = B.l.text.slice(0, n); B.rest.textContent = B.l.text.slice(n); B.n = n; }
+  } else B.dots.forEach((d, i) => { d.style.opacity = clamp((a - i * .6) / .2); });
+  const hk = clamp((t - B.hide) / .35);
+  B.s = popScale(a, B.l.mood) * (1 - .08 * hk);
+  B.o = (B.l.mood === 'sad' || B.l.mood === 'soft' ? EASE.sine(clamp(a / .45)) : clamp(a / .1)) * (1 - hk) * (B.l.mood === 'soft' ? .85 : 1);
+}
+function placeBubble(B) {                               // держим облачко в кадре, хвостик — к говорящему
+  if (!B.obj.visible) return;
+  const v = _v.setFromMatrixPosition(B.obj.matrixWorld).project(camera);
+  const off = v.z > 1 || Math.abs(v.x) > 1.08 || v.y > 1.15 || v.y < -1.05;
+  B.el.style.visibility = off ? 'hidden' : 'visible';
+  if (off) return;
+  const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H, bw = B.el.offsetWidth, bh = B.el.offsetHeight, M = 36;
+  const left = clamp(sx - bw / 2, M, W - M - bw), top = sy - 34 - bh, dy = top < M ? M - top : 0;
+  const tail = clamp(sx - left, 52, bw - 52);
+  B.el.style.setProperty('--tail', tail + 'px');
+  B.el.style.transform = `translate(${left - sx}px, ${dy}px) scale(${B.s})`;
+  B.el.style.opacity = B.o;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  10. КАДР: renderFrame(t) выставляет ВСЮ сцену на момент t и рисует её
+ * ═════════════════════════════════════════════════════════════════════ */
+const COL = { top0: new THREE.Color(0x070a28), top1: new THREE.Color(0x0e1236), mid0: new THREE.Color(0x1f1a4e), mid1: new THREE.Color(0x3d2869),
+              hor0: new THREE.Color(0x8a5a88), hor1: new THREE.Color(0xe38d9c), key0: new THREE.Color(0xe8d0c0), key1: new THREE.Color(0xffc48f),
+              sky0: new THREE.Color(0x6b61b0), sky1: new THREE.Color(0xa47bbf) };
+const tc = new THREE.Color();
+const finalEl = document.getElementById('final'), fadeEl = document.getElementById('fade');
+finalEl.textContent = FINAL_TEXT;
+
+function updateCar(t) {
+  // путь: кубическая кривая Безье — машинка разворачивается по дуге и встаёт рядом с героями
+  const k = EASE.inOut(clamp((t - CAR.roll0) / (CAR.roll1 - CAR.roll0))), u = 1 - k;
+  const P = [CAR.p0, CAR.c1, CAR.c2, CAR.p1];
+  const at = i => u * u * u * P[0][i] + 3 * u * u * k * P[1][i] + 3 * u * k * k * P[2][i] + k * k * k * P[3][i];
+  const d = i => 3 * u * u * (P[1][i] - P[0][i]) + 6 * u * k * (P[2][i] - P[1][i]) + 3 * k * k * (P[3][i] - P[2][i]);
+  const x = at(0), z = at(1);
+  let pathYaw = Math.atan2(d(0), d(1)); if (pathYaw < -1) pathYaw += TAU;   // без скачка через ±π
+  car.root.position.set(x, hill(x, z), z);
+  car.root.rotation.y = lerp(CAR.yaw0, pathYaw, sstep(0, .2, k));
+  const dist = k * CAR.len; car.wheels.forEach(w => { w.rotation.x = dist / .3; });
+  // покачивание, смущённое ёрзанье, лёгкий подскок при езде
+  const shy = env(t, T.sorry + .6, T.sorry + 1.6, .1, .2);
+  car.rock.rotation.set(.012 * Math.sin(t * 2.1), .07 * Math.sin(t * 22) * shy, .02 * Math.sin(t * 1.7) + .03 * Math.sin(t * 9) * (k > 0 && k < 1 ? 1 : 0));
+  car.rock.position.y = .012 * Math.sin(t * 3.4) + (k > 0 && k < 1 ? .02 * Math.abs(Math.sin(t * 11)) : 0);
+  // моргание фарами
+  let blink = 0;
+  for (const b of [1.3, 6.4, T.sorry + .6, T.sorry + .95, 17.2, 24.8, T.hug + 1.2]) { const a = t - b; if (a >= 0 && a < .24) blink = Math.max(blink, a < .1 ? a / .1 : 1 - (a - .1) / .14); }
+  const glowK = keys(t, [[0, 1], [CAR.roll1 - .2, 1], [CAR.roll1 + .8, 2]]);
+  car.lamps.forEach(L => { L.lid.rotation.x = lerp(-1.25, 1.55, blink); L.glow.material.opacity = .45 * glowK * (1 - blink); L.glow.scale.setScalar(.9 + .5 * (glowK - 1)); });
+  car.lampMat.emissiveIntensity = 2.2 * glowK;
+  car.light.intensity = 6 * (glowK - 1);
+}
+
+function renderFrame(t) {
+  t = clamp(t, 0, T.end);
+  SHARED.uTime.value = t;
+  const warm = keys(t, [[0, 0], [MERGE, 0], [T.quiet + 1.5, 1]]);   // настроение: холодно → тепло
+  // небо, луна, свет
+  skyMat.uniforms.uTop.value.lerpColors(COL.top0, COL.top1, warm);
+  skyMat.uniforms.uMid.value.lerpColors(COL.mid0, COL.mid1, warm);
+  skyMat.uniforms.uHor.value.lerpColors(COL.hor0, COL.hor1, warm);
+  skyMat.uniforms.uGlowAmt.value = .8 + .7 * warm;
+  starMat.uniforms.uAmt.value = 1 + .35 * warm;
+  moonMat.uniforms.uBright.value = .9 + .12 * warm + .1 * env(t, HEART.atMoon - .1, HEART.back + .6, .2, .5);
+  moonMat.uniforms.uSmile.value = sstep(HEART.atMoon, HEART.atMoon + .5, t);
+  const squish = env(t, HEART.atMoon, HEART.atMoon + .7, .12, .5) * Math.sin((t - HEART.atMoon) * 18);
+  moon.scale.set(1 + .06 * squish, 1 - .06 * squish, 1);
+  moonGlow.material.opacity = .26 + .14 * warm + .12 * env(t, HEART.atMoon - .1, HEART.back + .6, .2, .5);
+  const silhouette = sstep(T.quiet + .5, T.quiet + 2, t);
+  key.color.lerpColors(COL.key0, COL.key1, warm); key.intensity = lerp(1.8, 2.5, warm) * (1 - .5 * silhouette);
+  rim.intensity = 2.6 * (1 + .7 * silhouette);
+  hemi.color.lerpColors(COL.sky0, COL.sky1, warm);
+  renderer.toneMappingExposure = lerp(.92, 1.05, warm);
+  scene.fog.color.copy(skyMat.uniforms.uHor.value).lerp(skyMat.uniforms.uMid.value, .5).multiplyScalar(.6);
+  finalPass.uniforms.uTime.value = t; finalPass.uniforms.uVig.value = lerp(.4, .28, warm);
+  fogSprites.forEach(s => { const d = s.userData; s.position.set(((d.x0 + t * d.sp) + 13) % 26 - 13, d.y, d.z); });
+  // герои, машинка, эффекты
+  const pn = pose('nata', t), po = pose('olya', t);
+  applyPose(nata, 'nata', pn, t); applyPose(olya, 'olya', po, t);
+  updateCar(t);
+  updateHearts(t);
+  // летящее сердечко
+  const hv = heartVisible(t);
+  flyHeart.visible = flyGlow.visible = hv;
+  if (hv) {
+    const p = heartPos(t);
+    let s = .28 * (1 + p.distanceTo(camera.position) / 7);
+    s *= t < HEART.launch + .3 ? EASE.back((t - HEART.launch) / .3) : 1;
+    s *= 1 - sstep(HEART.atMoon - .15, HEART.atMoon, t) * (1 - sstep(HEART.back, HEART.back + .3, t));
+    s *= 1 + sstep(HEART.land, HEART.land + .45, t) * 1.5;
+    flyHeart.position.copy(p); flyHeart.scale.setScalar(Math.max(.001, s)); flyHeart.rotation.set(0, t * 3, .2 * Math.sin(t * 4));
+    flyGlow.position.copy(p); flyGlow.scale.setScalar(s * 3.2); flyGlow.material.opacity = .9 * (1 - sstep(HEART.land, HEART.land + .45, t));
+  }
+  // вспышка объятия
+  const fl = env(t, MERGE, MERGE + 1.6, .15, 1.2);
+  const hx = (pn.x + po.x) / 2;
+  flash.position.set(hx, 1.6, .6); flash.scale.setScalar(2 + 3.5 * fl); flash.material.opacity = .28 * fl;
+  flashLight.position.set(hx, 1.8, 1.2); flashLight.intensity = 6 * fl;
+  // камера и свет для меха
+  skyRoot.position.copy(camera.position);
+  updateCamera(t);
+  skyRoot.position.copy(camera.position);
+  updateParticles(t, warm);
+  SHARED.uCamPos.value.copy(camera.position);
+  const L = (light, dirU, colU, k = 1) => { dirU.value.copy(light.position).sub(light.target.position).normalize(); colU.value.copy(light.color).multiplyScalar(light.intensity * k); };
+  L(key, SHARED.uKeyDir, SHARED.uKeyCol); L(fill, SHARED.uFillDir, SHARED.uFillCol); L(rim, SHARED.uRimDir, SHARED.uRimCol);
+  SHARED.uSkyCol.value.copy(hemi.color).multiplyScalar(hemi.intensity); SHARED.uGroundCol.value.copy(hemi.groundColor).multiplyScalar(hemi.intensity);
+  SHARED.uFogCol.value.copy(scene.fog.color); SHARED.uFogDen.value = scene.fog.density;
+  // облачка
+  BUBBLES.forEach(b => updateBubble(b, t)); updateBubble(DOTS, t);
+  // рисуем
+  composer.render();
+  labelRenderer.render(scene, camera);
+  BUBBLES.forEach(placeBubble); placeBubble(DOTS);
+  // финальная надпись и затемнения
+  const fk = sstep(T.outro + 1.0, T.outro + 2.2, t);
+  finalEl.style.opacity = fk; finalEl.style.transform = `translate(-50%, -50%) scale(${lerp(.94, 1, EASE.out(fk))})`;
+  fadeEl.style.opacity = Math.max(1 - sstep(.1, 1.9, t), sstep(T.end - 1.3, T.end, t));
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+ *  11. ЗАПУСК: масштаб под окно, просмотр в реальном времени, API для render.py
+ * ═════════════════════════════════════════════════════════════════════ */
+function setQuality(pr) {
+  renderer.setPixelRatio(pr); composer.setPixelRatio(pr); composer.setSize(W, H);
+  starMat.uniforms.uPR.value = pr; [sparks, fireflies, dust].forEach(p => { p.material.uniforms.uPR.value = pr; });
+}
+function fit() {
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  stage.style.transform = `translate(${(innerWidth - W * s) / 2}px, ${(innerHeight - H * s) / 2}px) scale(${s})`;
+  if (!RENDER_MODE) setQuality(clamp(s * devicePixelRatio, .5, 1));
+}
+if (RENDER_MODE) setQuality(1); else { addEventListener('resize', fit); fit(); }
+
+// начальные и конечные точки полёта сердечка берём из поз героев
+function pointAt(who, t, obj) { applyPose(CH[who], who, pose(who, t), t); CH[who].root.updateMatrixWorld(true); return obj().getWorldPosition(new THREE.Vector3()); }
+H0 = pointAt('nata', HEART.launch, () => nata.arms[1].paw);
+HO = pointAt('olya', HEART.land, () => olya.body).add(new THREE.Vector3(0, -.1, 1.15));
+initHeartEvents();
+
+const ready = (async () => {
+  try { await document.fonts.load('800 52px Nunito'); await document.fonts.ready; } catch (e) { /* шрифт не обязателен */ }
+  renderFrame(0);
+  return T.end;
+})();
+window.__ready = ready;
+window.DURATION = T.end;
+window.renderFrame = renderFrame;
+
+const replay = document.getElementById('replay');
+if (!RENDER_MODE) {
+  const from = parseFloat(params.get('t') || params.get('from') || 0);
+  let start = 0, still = params.has('t');
+  const loop = now => {
+    const t = still ? from : from + (now - start) / 1000;
+    renderFrame(t);
+    if (t >= T.end) { replay.style.display = 'block'; return; }
+    if (!still) requestAnimationFrame(loop);
+  };
+  replay.onclick = () => { replay.style.display = 'none'; start = performance.now(); still = false; requestAnimationFrame(n => { start = n; loop(n); }); };
+  ready.then(() => requestAnimationFrame(n => { start = n; loop(n); }));
+}
+</script>
+</body>
+</html>
