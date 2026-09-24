@@ -1852,6 +1852,88 @@ a.tutor-card:hover {
 }
 /* Чертёж здесь — пример, а не рабочее поле: на широкой карточке он
    разрастался бы до полуэкранного квадрата. */
+/* ── Карточка с разбором примера ─────────────────────────────── */
+
+/* Разбор идёт во всю ширину раздела: в колонке шириной с половину
+   пять шагов и чертёж не встают. На узкой карточке чертёж стоит
+   сразу под заголовком: шаги ссылаются на него с первой строки. */
+.qth-card--razbor {
+  grid-column: 1 / -1;
+  grid-template-rows: auto auto auto;
+}
+.qth-card--razbor .qth-card__title {
+  grid-row: 1;
+}
+.qth-card--razbor .qth-card__chart {
+  grid-row: 2;
+}
+.qth-card--razbor .qth-card__text {
+  grid-row: 3;
+}
+/* Карточке хватает ширины: шаги слева, чертёж справа, на одной
+   высоте с ними. Блок идёт после базовых правил — перекрывает их
+   порядком, специфичности медиазапрос не добавляет. */
+@container (min-width: 640px) {
+  .qth-card--razbor {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--space-5);
+  }
+  .qth-card--razbor .qth-card__title {
+    grid-column: 1 / -1;
+  }
+  .qth-card--razbor .qth-card__text {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .qth-card--razbor .qth-card__chart {
+    grid-row: 2;
+    grid-column: 2;
+    align-self: start;
+  }
+}
+/* Шаги разбора: номер в кружке слева, как в разборе опорной задачи.
+   Нумерация счётчиком, а не маркером списка: номер должен стоять
+   вровень с заголовком шага, а не с первой строкой текста. */
+.qth-steps {
+  display: grid;
+  gap: var(--space-4);
+  counter-reset: shag;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.qth-step {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: calc(var(--space-6) + var(--space-4));
+  position: relative;
+  counter-increment: shag;
+}
+.qth-step::before {
+  content: counter(shag) '.';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--space-6);
+  text-align: right;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.qth-step__title {
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+/* Замечание под разбором: тише шагов, но не мельче. */
+.qth-card__after {
+  color: var(--color-text-secondary);
+}
+
 .qth-card__chart {
   display: block;
   width: 100%;
