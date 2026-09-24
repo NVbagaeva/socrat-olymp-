@@ -57,26 +57,38 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
     requestAnimationFrame(() => scrollTo(id));
   }
 
-  /* Полоска содержания липнет под липкой лентой вкладок, поэтому ей
-     нужен отступ ровно в высоту ленты. Высота эта не постоянная:
-     на узком экране подпись вкладки переносится на две строки, и лента
-     становится выше. Раньше отступ брался числом из токена — лента
-     переросла его, и верх полоски уходил под ленту. Теперь высота
-     измеряется у самой ленты и живёт свойством на полоске. */
+  /* Полоска содержания липнет под липкой лентой вкладок, колонка
+     содержания на широком экране — тоже, а заголовок раздела при
+     переходе по содержанию должен встать под обе полосы. Высоты у них
+     не постоянные: на узком экране подпись вкладки переносится на две
+     строки, и лента растёт; на широком полоски нет вовсе. Числом из
+     токена их брать нельзя — лента однажды уже переросла такое число,
+     и верх полоски уходил под неё. Поэтому обе высоты измеряются и
+     живут свойствами на панели вкладки — общем предке полоски,
+     разделов и колонки: --tabs-bar-height у ленты, --contents-bar-height
+     у полоски (ноль, пока она спрятана). */
   const polosa = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const uzel = polosa.current;
+    const panel = uzel?.parentElement ?? null;
     const lenta = document.querySelector('.topic-tabs-row');
-    if (uzel === null || lenta === null) {
+    if (uzel === null || panel === null || lenta === null) {
       return undefined;
     }
+    const vysota = (element: Element) => `${Math.round(element.getBoundingClientRect().height)}px`;
     const obnovit = () => {
-      uzel.style.setProperty('--h-lenty', `${Math.round(lenta.getBoundingClientRect().height)}px`);
+      panel.style.setProperty('--tabs-bar-height', vysota(lenta));
+      panel.style.setProperty('--contents-bar-height', vysota(uzel));
     };
     obnovit();
     const nablyudatel = new ResizeObserver(obnovit);
     nablyudatel.observe(lenta);
-    return () => nablyudatel.disconnect();
+    nablyudatel.observe(uzel);
+    return () => {
+      nablyudatel.disconnect();
+      panel.style.removeProperty('--tabs-bar-height');
+      panel.style.removeProperty('--contents-bar-height');
+    };
   }, []);
 
   const spisok = <TopicContents items={[...razdely]} active={aktivnyy} onSelect={vybrat} />;
