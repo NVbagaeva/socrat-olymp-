@@ -174,6 +174,18 @@ for (const [, id, cena, uroven, variantov] of kartochki) {
   );
 }
 
+/* Опция «решения» у «Четырёх вариантов»: цена на карточке — по формуле.
+   Утверждено 24.09: +2 500 ₽, ставки не меняются. */
+const opciya = /Решения — опция, \+([\d\u00A0 ]+)₽ за четыре варианта/.exec(content);
+const opciyaFormula = r({ uroven: 'resheniya', variantov: 4 }).itogo - r({ variantov: 4 }).itogo;
+check('на карточке «Четыре варианта» указана цена решений', opciya !== null);
+check(
+  'цена решений на карточке совпадает с формулой',
+  opciya !== null && Number(opciya[1].replace(/\D/g, '')) === opciyaFormula,
+  `${opciya?.[1]} против ${opciyaFormula}`,
+);
+check('решения к «Четырём вариантам» — +2 500 ₽', opciyaFormula === 2500, `вышло ${opciyaFormula}`);
+
 /* ── 3. Строка загрузки ─────────────────────────────────────── */
 
 const den = new Date(2026, 8, 30); // среда, 30 сентября 2026
@@ -300,6 +312,29 @@ if (/uslovno: true/.test(content)) {
     '! Картинки «было → стало» условные: заменить фотографией рукописного листа и четырьмя его вариантами.',
   );
 }
+/* Вебвизор записывает ввод в поля — на странице с формой и на юридических
+   страницах его быть не должно. Счётчик один на весь сайт, поэтому
+   достаточно, чтобы он всегда подключался с webvisor: false. */
+const metrika = read('src/components/layout/Metrika.tsx');
+check(
+  'Метрика подключается с выключенным Вебвизором',
+  /webvisor: false/.test(metrika) && !/webvisor: true/.test(metrika),
+);
+check(
+  'счётчик Метрики подключается в одном месте',
+  !/mc\.yandex\.ru\/metrika\/tag\.js/.test(
+    [
+      'src/app/uchitelyam/page.tsx',
+      'src/components/uchitelyam/DokumentStranica.tsx',
+      'src/app/politika-dannyh/page.tsx',
+      'src/app/uchitelyam/oferta/page.tsx',
+      'src/app/uchitelyam/soglasie/page.tsx',
+    ]
+      .map(read)
+      .join('\n'),
+  ),
+);
+
 if (/id: ''/.test(read('src/content/site.ts'))) {
   console.warn('! Номер счётчика Яндекс Метрики не задан: цели не считаются.');
 }
