@@ -12,6 +12,8 @@ export interface Step {
   no: string;
   title: string;
   text: string;
+  /** Ссылка под текстом карточки. */
+  link?: { label: string; href: string };
 }
 
 export interface TopicScore {
@@ -96,8 +98,21 @@ export const landing = {
         no: '04',
         title: 'Материалы',
         text: 'Не стыдно раздать',
+        link: { label: 'Свой материал — под ключ →', href: '/uchitelyam/' },
       },
     ] satisfies Step[],
+  },
+
+  /**
+   * Анонс услуги «Материалы под ключ» после блока how. Текст — §2.3
+   * документа услуги, первая фраза стала заголовком. Утверждён 24.09.
+   */
+  uslugaAnons: {
+    eyebrow: 'Услуга автора платформы',
+    title: 'Если материал уже есть, а\u00A0вечера на\u00A0него\u00A0нет',
+    text: 'Пришлите самостоятельную или домашнюю в\u00A0любом виде — рукопись, фото, файл Word. Верну её набранной в\u00A0стиле платформы: с\u00A0выверенными формулами, точными чертежами, вариантами равной сложности, ответами и\u00A0решениями.',
+    action: { label: 'Материалы под ключ →', href: '/uchitelyam/' },
+    price: 'от 2\u00A0000\u00A0₽ · от 5 рабочих дней',
   },
 
   diagnostics: {
@@ -213,6 +228,6 @@ export const landing = {
     title: 'Узнай свой балл за 25 минут',
     lead: 'Без регистрации и без оплаты. Дальше сам решишь, нужен ли тебе план.',
     primaryAction: { label: 'Пройти диагностику', href: '#' },
-    secondaryAction: { label: 'Я преподаватель', href: '#' },
+    secondaryAction: { label: 'Я преподаватель', href: '/uchitelyam/' },
   },
 } as const;

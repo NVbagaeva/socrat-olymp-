@@ -41,6 +41,10 @@ pnpm dev
 | `src/app/page.tsx`          | главная страница, она же лендинг                                |
 | `src/app/landing.css`       | оформление секций главной                                       |
 | `src/app/styleguide/`       | страница витрины и её собственное оформление                    |
+| `src/app/uchitelyam/`       | услуга «Материалы под ключ»: лендинг, оферта, согласие          |
+| `src/components/uchitelyam/`| секции услуги, калькулятор, форма заказа, `usluga.css`          |
+| `src/lib/usluga/`           | формула цены и срока, строка загрузки                           |
+| `public/zakaz/`             | PHP-обработчик заявок, см. docs/SERVICE TEACHERS LANDING.md §9  |
 | `src/fonts/`                | Inter, по одному woff2 на начертание                            |
 
 ## Правила дизайн-системы
