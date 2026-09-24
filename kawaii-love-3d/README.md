@@ -43,6 +43,25 @@ python render.py --start 8 --end 12 -o test.mp4   # быстрый кусок д
 | `--chromium`, `--ffmpeg` | из Playwright / PATH | свои пути к браузеру и ffmpeg |
 | `--url` | — | открыть страницу по адресу, например с локального сервера |
 
+## Озвучка
+
+`voice.py` озвучивает реплики голосами RHVoice: Ната — голос «Арина» повыше и эмоциональнее, Оля — «Виктория»,
+спокойнее и ниже. Тон, темп и громкость подстраиваются под настроение облачка (`sad`, `soft`), каждая фраза
+начинается вместе с первой буквой в облачке. Ударения в трудных словах размечены в словаре `STRESS`.
+
+```bash
+sudo apt install rhvoice rhvoice-russian ffmpeg        # Linux или WSL на Windows
+echo 'languages.Russian.stress_marker=+' | sudo tee -a /etc/RHVoice/RHVoice.conf
+pip install numpy
+
+python voice.py --update-html            # voice.wav + ротик в index.html следует за голосом
+python render.py -o out.mp4              # видео (после --update-html — с синхронным ротиком)
+python voice.py --video out.mp4 -o final.mp4   # наложить озвучку на видео
+```
+
+`--update-html` записывает в `index.html` огибающую громкости каждой фразы (блок `VOICE_ENV`),
+и ротик открывается на гласных и закрывается в паузах. После правки реплик запустите эти три команды заново.
+
 ## Что поменять под себя
 
 В начале `<script type="module">`:

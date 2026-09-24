@@ -23,3 +23,5 @@ __pycache__/
 # рендер мультика kawaii-love
 kawaii-love/*.mp4
 kawaii-love-3d/*.mp4
+kawaii-love-3d/voice.wav
+kawaii-love-3d/voice_timing.json
