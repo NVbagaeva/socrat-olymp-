@@ -1148,6 +1148,10 @@
   color: var(--color-primary);
   font-weight: 600;
 }
+/* Значок на белом: на розовой подложке его заливка сливалась с фоном. */
+.svc-form__fail .state__ico {
+  background: var(--color-surface);
+}
 .svc-form__submit {
   justify-self: start;
 }
