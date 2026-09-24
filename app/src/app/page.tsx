@@ -8,9 +8,11 @@ import {
   HowSection,
   PathSection,
   TeachersSection,
+  UslugaAnonsSection,
 } from '@/components/landing';
 import { landing } from '@/content/landing';
 import './landing.css';
+import '@/components/uchitelyam/usluga.css';
 
 export const metadata: Metadata = {
   title: landing.meta.title,
@@ -24,6 +26,7 @@ export default function HomePage() {
       <main>
         <HeroSection />
         <HowSection />
+        <UslugaAnonsSection />
         <DiagnosticsSection />
         <PathSection />
         <BankSection />

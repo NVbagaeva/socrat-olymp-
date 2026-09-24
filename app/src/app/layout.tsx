@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { caveat, inter, ptSerif } from '@/lib/fonts';
+import { Metrika } from '@/components/layout/Metrika';
 import { AppStateProvider } from '@/state/AppState';
 import '@/styles/globals.css';
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Состояние раздела доступно на любой странице: провайдер
             клиентский, содержимое страниц остаётся серверным. */}
         <AppStateProvider>{children}</AppStateProvider>
+        <Metrika />
       </body>
     </html>
   );

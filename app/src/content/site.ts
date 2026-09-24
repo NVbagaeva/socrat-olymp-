@@ -18,7 +18,10 @@ export const site = {
   nav: [
     { label: 'Об авторе', href: '/about' },
     { label: 'Банк заданий', href: tasksPage.href },
-    { label: 'Учителям', href: '/#teachers' },
+    /* Страница учителя. Пока на ней услуга «Материалы под ключ»; когда
+       появится кабинет, она станет узлом «Учителям» с услугой как
+       разделом — адрес не изменится (docs/SERVICE TEACHERS LANDING.md, §2.1). */
+    { label: 'Учителям', href: '/uchitelyam/' },
     /* Раздела с тарифами на странице пока нет — ссылка ждёт его. */
     { label: 'Тарифы', href: '#' },
   ] satisfies SiteLink[],
@@ -28,11 +31,19 @@ export const site = {
     signup: { label: 'Начать бесплатно', href: '#' } satisfies SiteLink,
   },
 
+  /**
+   * Яндекс Метрика: номер счётчика из кабинета metrika.yandex.ru.
+   * Пустая строка — счётчик не подключается вовсе.
+   */
+  metrika: {
+    id: '',
+  },
+
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
     links: [
       { label: 'Оферта', href: '#' },
-      { label: 'Обработка данных', href: '#' },
+      { label: 'Обработка данных', href: '/politika-dannyh/' },
       { label: 'Контакты', href: '#' },
     ] satisfies SiteLink[],
   },
