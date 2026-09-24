@@ -5,8 +5,9 @@ import { playground } from '@/content/theoryQuadratic';
 import { katex } from '@/lib/graph/katex';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { playgroundScene } from '@/lib/scenes';
+import { MathTitle } from '../MathTitle';
 import { Phrases } from '../Phrases';
-import { phrases } from './markup';
+import { phrases } from '../markup';
 
 /** Число в тексте: запятая, не больше двух знаков, без хвоста нулей. */
 function plain(value: number): string {
@@ -56,6 +57,12 @@ function clamp(value: number, min: number, max: number): number {
  * ползунка возвращает a в его диапазон. При a = 0 квадрата нет:
  * чертёж показывает прямую y = c и говорит об этом словами.
  */
+/* Буквы переменных в строке значения набираются один раз при загрузке
+   модуля: рядом с ними стоит число, которое меняется на каждом шаге
+   ползунка, а сама буква та же — пересобирать её незачем. */
+const BUKVA_A = <Phrases parts={phrases('$a$')} />;
+const BUKVA_C = <Phrases parts={phrases('$c$')} />;
+
 export function ParabolaPlayground() {
   const [a, setA] = useState<number>(playground.a.initial);
   const [c, setC] = useState<number>(playground.c.initial);
@@ -88,15 +95,19 @@ export function ParabolaPlayground() {
           <p className="play__describe" aria-live="polite">
             {words}
             {a === 0 ? '. ' : ''}
-            {a === 0 ? <span className="play__zero">{playground.zero}</span> : null}
+            {a === 0 ? (
+              <span className="play__zero">
+                <Phrases parts={phrases(playground.zero)} />
+              </span>
+            ) : null}
           </p>
         </div>
 
         <div className="play__controls">
           <div className="play__field">
             <label className="play__label" htmlFor={aId}>
-              {playground.a.label}
-              <span className="play__value">a = {plain(a)}</span>
+              <MathTitle text={playground.a.label} />
+              <span className="play__value">{BUKVA_A} = {plain(a)}</span>
             </label>
             <input
               className="play__range"
@@ -131,13 +142,15 @@ export function ParabolaPlayground() {
                 </div>
               ))}
             </div>
-            <p className="play__hint">{playground.presets.hint}</p>
+            <p className="play__hint">
+              <Phrases parts={phrases(playground.presets.hint)} />
+            </p>
           </div>
 
           <div className="play__field">
             <label className="play__label" htmlFor={cId}>
-              {playground.c.label}
-              <span className="play__value">c = {plain(c)}</span>
+              <MathTitle text={playground.c.label} />
+              <span className="play__value">{BUKVA_C} = {plain(c)}</span>
             </label>
             <input
               className="play__range"

@@ -1,13 +1,18 @@
 import { clsx } from 'clsx';
 import { Chart } from '@/components/graph/Chart';
-import { REMEMBER_TITLE, type QuadraticCard, type QuadraticSection as Section } from '@/content/theoryQuadratic';
+import {
+  REMEMBER_TITLE,
+  type QuadraticCard,
+  type QuadraticSection as Section,
+} from '@/content/theoryQuadratic';
 import { katex } from '@/lib/graph/katex';
 import { quadraticTheoryScene } from '@/lib/scenes';
+import { MathTitle } from '../MathTitle';
 import { Phrases } from '../Phrases';
 import { WarnIcon } from '../VerdictIcons';
 import { ForwardIcon } from './ForwardIcon';
 import { ParabolaPlayground } from './ParabolaPlayground';
-import { phrases } from './markup';
+import { phrases } from '../markup';
 
 /** Формула набором KaTeX: разметка собирается на сборке. */
 function formula(tex: string, display = false) {
@@ -23,11 +28,12 @@ function Card({ card }: { card: QuadraticCard }) {
         'qth-card',
         card.scene !== undefined && 'qth-card--chart',
         card.forward === true && 'qth-card--forward',
+        card.steps !== undefined && 'qth-card--razbor',
       )}
     >
       <h4 className="qth-card__title">
         {card.forward === true ? <ForwardIcon /> : null}
-        {card.title}
+        <MathTitle text={card.title} />
       </h4>
 
       <div className="qth-card__text">
@@ -60,6 +66,40 @@ function Card({ card }: { card: QuadraticCard }) {
               <span className="qth-card__line" key={line} dangerouslySetInnerHTML={formula(line)} />
             ))}
           </div>
+        ) : null}
+
+        {card.steps !== undefined ? (
+          /* Разбор по шагам: нумерация своя, счётчиком — так номер
+             остаётся и когда шаг начинается с выкладки. */
+          <ol className="qth-steps">
+            {card.steps.map((step) => (
+              <li className="qth-step" key={step.title}>
+                <p className="qth-step__title">
+                  <MathTitle text={step.title} />
+                </p>
+                <p className="qth-card__p">
+                  <Phrases parts={phrases(step.text)} />
+                </p>
+                {step.lines !== undefined ? (
+                  <div className="qth-card__lines">
+                    {step.lines.map((line) => (
+                      <span
+                        className="qth-card__line"
+                        key={line}
+                        dangerouslySetInnerHTML={formula(line)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        ) : null}
+
+        {card.after !== undefined ? (
+          <p className="qth-card__p qth-card__after">
+            <Phrases parts={phrases(card.after)} />
+          </p>
         ) : null}
 
         {card.table !== undefined ? (

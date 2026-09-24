@@ -17,6 +17,12 @@ export interface TopicTabsProps {
   /** Разделы теории: они же пункты содержания. */
   theory: TheoryBlock[];
   /**
+   * Заголовки разделов готовыми узлами по идентификатору раздела:
+   * в них могут стоять переменные, набранные KaTeX на сервере.
+   * Раздела нет в наборе — печатается строка из конфига, как было.
+   */
+  titles?: Record<string, ReactNode>;
+  /**
    * Вкладка «Ключевые методы решения»: собрана на сервере. Не задана —
    * вкладки нет: у линейной подтемы её не было и нет.
    */
@@ -103,6 +109,7 @@ const TABS = VKLADKI_PODTEMY.map((tab) => ({
 export function TopicTabs({
   about,
   theory,
+  titles,
   methods,
   prep,
   trainer,
@@ -156,7 +163,10 @@ export function TopicTabs({
   const strip = useRef<HTMLDivElement>(null);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
-  const items = theory.map((item) => ({ id: item.id, title: item.title }));
+  /* Заголовок раздела печатается в трёх местах: в самом разделе,
+     в содержании и в полоске над текстом. Узел один на все три. */
+  const titleOf = (item: TheoryBlock): ReactNode => titles?.[item.id] ?? item.title;
+  const items = theory.map((item) => ({ id: item.id, title: titleOf(item) }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
      происходит, без ошибки в консоли. */
@@ -343,7 +353,7 @@ export function TopicTabs({
                   Содержание
                 </button>
                 {current !== undefined ? (
-                  <span className="topic-open__now">{current.title}</span>
+                  <span className="topic-open__now">{titleOf(current)}</span>
                 ) : null}
               </div>
 
@@ -364,7 +374,7 @@ export function TopicTabs({
                             {item.badge}
                           </span>
                         ) : null}
-                        {item.title}
+                        {titleOf(item)}
                       </h3>
                       {item.body !== undefined && bodies[item.body] !== undefined ? (
                         bodies[item.body]

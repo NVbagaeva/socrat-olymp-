@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
@@ -57,6 +57,40 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
     requestAnimationFrame(() => scrollTo(id));
   }
 
+  /* Полоска содержания липнет под липкой лентой вкладок, колонка
+     содержания на широком экране — тоже, а заголовок раздела при
+     переходе по содержанию должен встать под обе полосы. Высоты у них
+     не постоянные: на узком экране подпись вкладки переносится на две
+     строки, и лента растёт; на широком полоски нет вовсе. Числом из
+     токена их брать нельзя — лента однажды уже переросла такое число,
+     и верх полоски уходил под неё. Поэтому обе высоты измеряются и
+     живут свойствами на панели вкладки — общем предке полоски,
+     разделов и колонки: --tabs-bar-height у ленты, --contents-bar-height
+     у полоски (ноль, пока она спрятана). */
+  const polosa = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const uzel = polosa.current;
+    const panel = uzel?.parentElement ?? null;
+    const lenta = document.querySelector('.topic-tabs-row');
+    if (uzel === null || panel === null || lenta === null) {
+      return undefined;
+    }
+    const vysota = (element: Element) => `${Math.round(element.getBoundingClientRect().height)}px`;
+    const obnovit = () => {
+      panel.style.setProperty('--tabs-bar-height', vysota(lenta));
+      panel.style.setProperty('--contents-bar-height', vysota(uzel));
+    };
+    obnovit();
+    const nablyudatel = new ResizeObserver(obnovit);
+    nablyudatel.observe(lenta);
+    nablyudatel.observe(uzel);
+    return () => {
+      nablyudatel.disconnect();
+      panel.style.removeProperty('--tabs-bar-height');
+      panel.style.removeProperty('--contents-bar-height');
+    };
+  }, []);
+
   const spisok = <TopicContents items={[...razdely]} active={aktivnyy} onSelect={vybrat} />;
   const otkryto = razdely.find((razdel) => razdel.id === aktivnyy);
 
@@ -72,7 +106,7 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
           липкость не работала бы — ячейка ростом с саму кнопку, и
           ездить внутри неё некуда. Здесь же кнопка липнет вдоль всей
           панели вкладки. */}
-      <div className="topic-open vteor-open">
+      <div className="topic-open vteor-open" ref={polosa}>
         <button
           type="button"
           className="topic-open__btn btn btn--secondary btn--sm"
