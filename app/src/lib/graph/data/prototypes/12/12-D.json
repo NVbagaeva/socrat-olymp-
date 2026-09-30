@@ -748,7 +748,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "y",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -778,7 +779,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "y",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -808,7 +810,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "y",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -838,7 +841,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "y",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true

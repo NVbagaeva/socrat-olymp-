@@ -815,7 +815,7 @@
       "seed": 12030
     },
     "12.C-23": {
-      "answer": "9",
+      "answer": "-13",
       "answerType": "number",
       "level": "lucky",
       "seed": 12030
@@ -953,7 +953,7 @@
       "seed": 12040
     },
     "12.D-22": {
-      "answer": "7,5",
+      "answer": "-9,5",
       "answerType": "number",
       "level": "lucky",
       "seed": 12040

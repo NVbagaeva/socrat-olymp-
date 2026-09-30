@@ -805,7 +805,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "x",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -837,7 +838,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "x",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -869,7 +871,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "x",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
@@ -901,7 +904,8 @@
           "inside": false,
           "decimals": 1,
           "axis": "x",
-          "askedOffscreen": true
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
         }
       },
       "intersectionOffscreen": true
