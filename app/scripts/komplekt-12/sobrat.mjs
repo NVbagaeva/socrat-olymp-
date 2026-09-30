@@ -75,8 +75,19 @@ const KEGL = process.env.KEGL || '9.5pt';
    PROVERKA_SHIRINY=0 — не останавливать сборку, если карточка
    вышла за поле (нужно, чтобы обмерить негодную пробу). */
 const EXTRA_CSS = process.env.EXTRA_CSS || '';
-const NOMER = process.env.NOMER || '';
+/* Номер задачи. По умолчанию — в первой строке условия, текст его
+   обтекает (NOMER=v-stroke): отдельный столбец с номером отнимал
+   у колонки текста 9,5 мм, а рядом с чертежом ±8 тексту и так
+   остаётся 26,8 мм из 89,9 мм колонки сетки. NOMER=stolbec — столбец
+   слева, как на листе; NOMER=v-tekste — над условием. */
+const NOMER = process.env.NOMER || 'v-stroke';
 const STOPKA8 = process.env.STOPKA8 === '1';
+/* Задачи банка, которые в комплект не берутся. 12.D-03/04 помечены
+   в банке уровнем «Базовая», но b = ±7 у них за рамкой окна ±5,
+   а k = ±2,5 — по определению уровня («b читается с графика, k целый»)
+   это не «Базовая». В банке они не трогаются: решение об уровне —
+   отдельно, с учётом истории решений учеников. */
+const ISKLYUCHIT = new Set((process.env.ISKLYUCHIT || '12.D-03,12.D-04').split(',').map((s) => s.trim()).filter(Boolean));
 const PROVERKA_SHIRINY = process.env.PROVERKA_SHIRINY !== '0';
 const KRUPNOE_OKNO = Number(process.env.KRUPNOE_OKNO || 8);
 const SOSTAV = (process.env.SOSTAV || '12.A:2,12.B:2,12.C:2,12.D:2').split(',').map((part) => {
@@ -125,7 +136,7 @@ function poolOf(setId) {
     let tasks = null;
     try { tasks = generator.generateSet(setId, `komplekt:${setId}:${n}`); } catch { continue; }
     for (const task of tasks) {
-      if (task.level !== LEVEL) { continue; }
+      if (task.level !== LEVEL || ISKLYUCHIT.has(task.id)) { continue; }
       const key = lineKey(task) + '#' + task.answer + '#' + (task.meta.query ? task.meta.query.x0 : '');
       if (seen.has(key)) { continue; }
       seen.add(key);
@@ -162,9 +173,16 @@ for (const part of pickOrder) {
 
 const tight = new Set(SOSTAV.filter((part) =>
   new Set(pools.get(part.id).map((t) => t.answer)).size < 2 * part.count * VARIANTS).map((part) => part.id));
-const BUDGET = Number(process.env.BUDGET || 20000000);
-function search(relaxed) {
-  const usedLines = new Set();
+const BUDGET = Number(process.env.BUDGET || 10000000);
+/* relaxed — запасное правило для ответов (см. выше). lineRepeats —
+   сколько раз прямая может повториться половиной другой пары: у 12.D
+   без 12.D-03/04 разных прямых 26 на восемь пар, и без единого повтора
+   восемь пар с разными ответами не набираются. Повтор допускается
+   только у пары в другом варианте; целиком пара и одиночная прямая
+   не повторяются никогда. */
+function search(relaxed, lineRepeats) {
+  const usedLines = new Map();            /* прямая → { variant, pair } */
+  let repeatsLeft = lineRepeats;
   const usedAnswers = new Map();          /* ответ → сколько раз */
   const usedInSet = new Map();
   const usedInVariant = new Map();
@@ -186,8 +204,18 @@ function search(relaxed) {
       if (--budget < 0) { throw new Error('подбор не уложился в отведённый перебор'); }
       const task = pool[(start + c) % pool.length];
       if (setOf(usedIds, slot.v).has(task.id)) { continue; }
+      let reuse = 0;
       if (RAZNYE) {
-        if (lineKeys(task).some((key) => usedLines.has(key))) { continue; }
+        const keys = lineKeys(task);
+        const pair = keys.length === 2 ? keys.join('|') : null;
+        let clash = false;
+        for (const key of keys) {
+          const prev = usedLines.get(key);
+          if (!prev) { continue; }
+          if (!pair || !prev.pair || prev.pair === pair || prev.variant === slot.v) { clash = true; break; }
+          reuse += 1;
+        }
+        if (clash || reuse > repeatsLeft) { continue; }
         const a = task.answer;
         if (usedAnswers.has(a)) {
           /* Запасное правило — только для тесных наборов, у которых
@@ -201,7 +229,10 @@ function search(relaxed) {
       const big = isBig(task) && !bigParts.get(partKey);
       if (big && (bigRows.get(slot.v) || 0) >= KRUPNYH) { continue; }
 
-      lineKeys(task).forEach((key) => usedLines.add(key));
+      const ownKeys = lineKeys(task).filter((key) => !usedLines.has(key));
+      const pairKey = ownKeys.length === lineKeys(task).length && lineKeys(task).length === 2 ? lineKeys(task).join('|') : lineKeys(task).join('|');
+      ownKeys.forEach((key) => usedLines.set(key, { variant: slot.v, pair: lineKeys(task).length === 2 ? pairKey : null }));
+      repeatsLeft -= reuse;
       usedAnswers.set(task.answer, (usedAnswers.get(task.answer) || 0) + 1);
       setOf(usedInSet, slot.set).add(task.answer);
       setOf(usedInVariant, slot.v).add(task.answer);
@@ -209,7 +240,8 @@ function search(relaxed) {
       if (big) { bigParts.set(partKey, true); bigRows.set(slot.v, (bigRows.get(slot.v) || 0) + 1); }
       chosen[depth] = task;
       if (step(depth + 1)) { return true; }
-      lineKeys(task).forEach((key) => usedLines.delete(key));
+      ownKeys.forEach((key) => usedLines.delete(key));
+      repeatsLeft += reuse;
       if (usedAnswers.get(task.answer) === 1) {
         usedAnswers.delete(task.answer);
         setOf(usedInSet, slot.set).delete(task.answer);
@@ -235,17 +267,25 @@ function search(relaxed) {
     if (!/отведённый перебор/.test(error.message)) { throw error; }
     ok = false;
   }
-  console.log(`  перебор (${relaxed ? 'запасное' : 'строгое'} правило): шагов ${BUDGET - budget}, ${ok ? 'найдено' : 'решения нет'}`);
+  console.log(`  перебор (ответы: ${relaxed ? 'запасное' : 'строгое'} правило; повторов прямых не больше ${lineRepeats}): ` +
+    `шагов ${BUDGET - budget}, ${ok ? 'найдено' : 'решения нет'}`);
   if (!ok) { return null; }
-  return { chosen, bigRows, usedLines, usedAnswers };
+  return { chosen, bigRows, usedLines, usedAnswers, lineRepeats: lineRepeats - repeatsLeft };
 }
 
-let found = search(false);
+/* От строгого к запасному: сначала без повторов прямых (ответы строго,
+   потом запасное правило), затем с одним повтором прямой, с двумя… */
+let found = null;
 let relaxedUsed = false;
-if (!found) { found = search(true); relaxedUsed = true; }
+for (let k = 0; k <= 3 && !found; k += 1) {
+  for (const relaxed of [false, true]) {
+    found = search(relaxed, k);
+    if (found) { relaxedUsed = relaxed; break; }
+  }
+}
 if (!found) {
   throw new Error('комплект не собрался: в банке не хватает разных прямых и ответов ' +
-    'даже при повторе ответов между наборами');
+    'даже при повторе ответов между наборами и трёх повторах прямых');
 }
 const repeats = [...found.usedAnswers].filter(([, n]) => n > 1).map(([a]) => a);
 
@@ -262,6 +302,13 @@ for (let v = 1; v <= VARIANTS; v += 1) {
 }
 const usedLines = found.usedLines;
 const usedAnswers = found.usedAnswers;
+/* Какие прямые повторились половиной пары и в каких задачах. */
+const lineUses = new Map();
+slots.forEach((slot, i) => lineKeys(found.chosen[i]).forEach((key) => {
+  if (!lineUses.has(key)) { lineUses.set(key, []); }
+  lineUses.get(key).push(`${found.chosen[i].id} (вариант ${slot.v})`);
+}));
+const repeatedLines = [...lineUses].filter(([, uses]) => uses.length > 1);
 
 function sheetTask(task, no) {
   return {
@@ -291,8 +338,31 @@ const CSS = `
 .sheet-variant-strip .sheet-name-line > span:first-child { white-space: nowrap; }
 .sheet-task { padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 2.5); gap: calc(var(--sheet-step) * 2); }
 .sheet-task-body { gap: calc(var(--sheet-step) * 2.5); }
-.sheet-task-text { font-size: ${KEGL}; line-height: 1.35; }
+.sheet-task-text { font-size: ${KEGL}; line-height: 1.25; }
 .sheet-tasks { gap: calc(var(--sheet-step) * 2); }
+/* Шрифты формул — заранее. Пагинатор шаблона ждёт document.fonts.ready
+   и лишь потом набирает формулы; шрифты KaTeX запрашиваются набранной
+   разметкой, то есть уже после ожидания, и обмер карточек идёт
+   по запасному шрифту. Ч/б лист от этого рвал вариант на две страницы.
+   Невидимые псевдоэлементы с нулевым кеглем запрашивают нужные
+   начертания при первой раскладке — до ожидания шрифтов. Правка
+   самого пагинатора меняла бы разбивку сборников, поэтому здесь. */
+html::before { content: "\\200b"; font-family: KaTeX_Main; font-weight: 400; font-size: 0; position: absolute; }
+html::after { content: "\\200b"; font-family: KaTeX_Main; font-weight: 700; font-size: 0; position: absolute; }
+body::before { content: "\\200b"; font-family: KaTeX_Math; font-style: italic; font-size: 0; position: absolute; }
+body::after { content: "\\200b"; font-family: KaTeX_Size1; font-size: 0; position: absolute; }
+#sheet-pages::before { content: "\\200b"; font-family: KaTeX_Size2; font-size: 0; position: absolute; }
+#sheet-pages::after { content: "\\200b"; font-family: KaTeX_Main; font-style: italic; font-size: 0; position: absolute; }
+/* Колонки сетки строго поровну: иначе сетка растягивается под чертёж
+   ±8 и уводит правую карточку за поле страницы. Ширина текста внутри
+   карточки подстраивается (min-width: 0 у .sheet-task-text). */
+.sheet-tasks--double { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+/* Номер в первой строке — встроенным блоком, а не обтеканием: обтекаемый
+   квадратик выше строки, и вторая строка уходила под него с зазором. */
+.sheet-task-question .sheet-task-no { display: inline-flex; vertical-align: -0.35em;
+  width: calc(var(--sheet-step) * 5); height: calc(var(--sheet-step) * 5);
+  font-size: var(--sheet-fs-small); margin: 0 calc(var(--sheet-step) * 1.5) 0 0; }
+.sheet-task-text .sheet-task-no { align-self: flex-start; margin: 0 0 calc(var(--sheet-step) * 1.5); }
 ${EXTRA_CSS}
 ${KOMPAKT ? `.sheet-title-block { display: none; }
 .sheet-head { padding-bottom: calc(var(--sheet-step) * 2); margin-bottom: calc(var(--sheet-step) * 3); }
@@ -501,7 +571,12 @@ const sostav = variants.map((variant) => ({
   })),
 }));
 fs.writeFileSync(path.join(OUT, 'sostav.json'), JSON.stringify(sostav, null, 1));
-console.log(`разных прямых ${usedLines.size}, разных ответов ${usedAnswers.size}; файлы в ${OUT}`);
+console.log(`разных прямых ${usedLines.size} из ${slots.reduce((n, slot, i) => n + lineKeys(found.chosen[i]).length, 0)}, ` +
+  `разных ответов ${usedAnswers.size}; файлы в ${OUT}`);
+if (repeatedLines.length) {
+  console.log('прямые, повторившиеся половиной пары в другом варианте: ' +
+    repeatedLines.map(([key, uses]) => `${generator.equationText(...key.split('@').map(Number))} — ${uses.join(', ')}`).join('; '));
+}
 if (relaxedUsed) {
   console.log('строгое правило «все ответы разные» не выполнимо; ответы, повторившиеся между наборами ' +
     '(в своём наборе и в своём варианте — нет): ' + repeats.join(', '));
