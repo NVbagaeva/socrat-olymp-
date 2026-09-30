@@ -1,0 +1,322 @@
+#!/usr/bin/env node
+/* scripts/komplekt-12/sobrat.mjs — бесплатный комплект №1 для учителей:
+   самостоятельная по заданию 12 «Линейная функция» в нескольких
+   вариантах, лист учителя с таблицей ответов и краткими решениями,
+   страница «Частые ошибки».
+
+   Запуск:  pnpm build:komplekt-12
+   Готовые файлы — в app/pdf-private/komplekt-12/ (папка вне
+   репозитория: в комплекте есть ответы, а репозиторий публичный).
+
+   Что здесь своего: выбор задач по правилу «во всём комплекте все
+   прямые и все ответы разные», подпись варианта, строка для фамилии,
+   подвал комплекта, таблица ответов «варианты × задачи» и страница
+   «Частые ошибки». Условия, чертежи, ответы и краткие решения —
+   только из движка graph/ и шаблона lib/sheet/, банк не трогается.
+
+   Настройки — переменными окружения, все необязательны:
+     SOSTAV    сколько задач из какого набора: "12.A:2,12.B:2,12.C:2,12.D:2"
+     VARIANTS  число вариантов, по умолчанию 4
+     LAYOUT    раскладка листа ученика: double-side (по умолчанию),
+               double или single
+     CELL      клетка чертежа в мм, по умолчанию 3
+     LEVEL     уровень задач: lucky (по умолчанию) или unlucky */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import generator from '../../src/lib/graph/generate.js';
+import solutionBuilder from '../../src/lib/graph/solution.js';
+import sheet from '../../src/lib/sheet/sheet.js';
+import { answersItems } from '../../src/lib/sheet/answers12.js';
+import typo from '../../src/lib/sheet/typography.js';
+import content from '../../src/content/sheet12.js';
+import { renderPdf } from '../lib/sheet-render.mjs';
+import * as oshibki from './chastye-oshibki.mjs';
+
+/* Названия блоков — как у навыков генератора (content/skills12.ts;
+   тот файл на TypeScript, и Node его не читает). */
+const skillTitle = {
+  '12.A': 'Значение функции',
+  '12.B': 'Аргумент по значению',
+  '12.C': 'Абсцисса пересечения',
+  '12.D': 'Ордината пересечения',
+};
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const APP = path.join(HERE, '..', '..');
+const OUT = process.env.OUT || path.join(APP, 'pdf-private', 'komplekt-12');
+const VARIANTS = Number(process.env.VARIANTS || 4);
+const LAYOUT = process.env.LAYOUT || 'double-side';
+const CELL = Number(process.env.CELL || 3);
+const LEVEL = process.env.LEVEL || 'lucky';
+const RAZNYE = process.env.RAZNYE !== '0';
+/* KOMPAKT=1 — без полос-заголовков блоков, «Вариант N» и строка для
+   фамилии в одну строку: так восемь задач встают на одну страницу. */
+const KOMPAKT = process.env.KOMPAKT === '1';
+/* OKNO=5 — брать только задачи с окном ±5 (10 клеток): чертёж при
+   клетке 3 мм выходит 30 мм, и восемь задач встают на страницу. */
+const OKNO = process.env.OKNO ? Number(process.env.OKNO) : null;
+const SOSTAV = (process.env.SOSTAV || '12.A:2,12.B:2,12.C:2,12.D:2').split(',').map((part) => {
+  const [id, n] = part.split(':');
+  return { id: id.trim(), count: Number(n) };
+});
+
+/* ── Банк ─────────────────────────────────────────────────── */
+const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
+const readSets = (dir) => fs.readdirSync(path.join(DATA, dir))
+  .filter((name) => name.endsWith('.json')).sort()
+  .map((name) => JSON.parse(fs.readFileSync(path.join(DATA, dir, name), 'utf8')));
+const prep = readSets('prep/12');
+const prototypes = readSets('prototypes/12');
+generator.setSets({ prep, prototypes });
+const rules = {};
+for (const set of [...prep, ...prototypes]) {
+  for (const task of set.tasks || []) { rules[task.id] = task.answerRule; }
+}
+
+/* ── Выбор задач ──────────────────────────────────────────────
+   В комплекте не повторяются ни прямая (у пары — обе прямые), ни
+   ответ. Перебор идёт по задачам набора (у каждой свои наклон и
+   направление) и по seed; берётся первая, что ещё не встречалась.
+   Варианты начинают перебор с разных задач набора, чтобы наклоны
+   в них шли в разном порядке. */
+const lineKey = (task) => (task.meta.lines || [task.meta])
+  .map((line) => `${line.k}@${line.b}`).join('|');
+const usedLines = new Set();
+const usedAnswers = new Set();
+const cache = new Map();
+
+function setOnSeed(setId, seed) {
+  const key = `${setId}|${seed}`;
+  if (!cache.has(key)) {
+    let tasks = null;
+    try { tasks = generator.generateSet(setId, seed); } catch { tasks = null; }
+    cache.set(key, tasks);
+  }
+  return cache.get(key);
+}
+
+function pick(setId, want, variant) {
+  const set = prototypes.find((item) => item.id === setId);
+  if (!set) { throw new Error(`набор ${setId} не найден`); }
+  const ids = set.tasks.filter((task) => task.level === LEVEL).map((task) => task.id);
+  if (!ids.length) { throw new Error(`${setId}: нет задач уровня ${LEVEL}`); }
+  const start = ((variant - 1) * want) % ids.length;
+  const order = ids.slice(start).concat(ids.slice(0, start));
+  const chosen = [];
+  for (let round = 0; round < 6 && chosen.length < want; round += 1) {
+    for (const id of order) {
+      if (chosen.length >= want) { break; }
+      if (chosen.some((task) => task.id === id)) { continue; }
+      for (let n = 0; n < 60; n += 1) {
+        const tasks = setOnSeed(setId, `komplekt:${setId}:${id}:${round}:${n}`);
+        if (!tasks) { continue; }
+        const task = tasks.find((item) => item.id === id);
+        if (!task || task.level !== LEVEL) { continue; }
+        if (OKNO !== null && task.meta.window && task.meta.window.xmax > OKNO) { continue; }
+        const key = lineKey(task);
+        /* RAZNYE=0 снимает правило «всё разное» — только для проб
+           раскладки, когда важен вид страницы, а не состав. */
+        if (RAZNYE && (usedLines.has(key) || usedAnswers.has(task.answer))) { continue; }
+        usedLines.add(key);
+        usedAnswers.add(task.answer);
+        chosen.push(task);
+        break;
+      }
+    }
+  }
+  if (chosen.length < want) {
+    throw new Error(`${setId}, вариант ${variant}: набралось ${chosen.length} из ${want} — ` +
+      'в банке не хватает разных прямых и ответов');
+  }
+  return chosen;
+}
+
+function sheetTask(task, no) {
+  return {
+    no, id: task.id, questionHtml: task.questionHtml, options: task.options, figureSvg: task.svg,
+    answer: task.answer, answerHtml: task.answerHtml, answerRule: rules[task.id],
+    seed: task.meta.seed, meta: task.meta,
+  };
+}
+
+const variants = [];
+for (let v = 1; v <= VARIANTS; v += 1) {
+  let no = 0;
+  const blocks = SOSTAV.map((part) => ({
+    title: skillTitle[part.id] || part.id, note: '', set: part.id,
+    tasks: pick(part.id, part.count, v).map((task) => sheetTask(task, ++no)),
+  }));
+  variants.push({ v, blocks });
+}
+const perVariant = variants[0].blocks.reduce((sum, block) => sum + block.tasks.length, 0);
+
+/* ── Общие куски описания листа ──────────────────────────────── */
+const FOOT = { ...content.foot, rights: 'Собрано в „Будет на ЕГЭ“ · budetege.ru' };
+const HEAD = content.head;
+const SUBTITLE = 'Самостоятельная работа · Задание 12';
+const CSS = `
+.sheet-name-line { display: flex; align-items: baseline; gap: calc(var(--sheet-step) * 2);
+  margin: 0 0 calc(var(--sheet-step) * 3); font-size: var(--sheet-fs-body); color: var(--sheet-ink-2); }
+.sheet-name-line .sheet-answer-blank { flex: 1 1 auto; }
+.sheet-variant-head { margin: 0 0 calc(var(--sheet-step) * 3); }
+.sheet-variant-strip { display: flex; align-items: center; gap: calc(var(--sheet-step) * 4);
+  margin: 0 0 calc(var(--sheet-step) * 2); }
+.sheet-variant-strip .sheet-name-line { flex: 1 1 auto; margin: 0; }
+.sheet-variant-strip .sheet-chip { font-size: var(--sheet-fs-body); }
+.sheet-variant-strip-title { flex: none; font-weight: 600; white-space: nowrap; }
+.sheet-variant-strip .sheet-name-line > span:first-child { white-space: nowrap; }
+${KOMPAKT ? `.sheet-title-block { display: none; }
+.sheet-head { padding-bottom: calc(var(--sheet-step) * 2); margin-bottom: calc(var(--sheet-step) * 3); }
+.sheet-variant-strip { margin-bottom: calc(var(--sheet-step) * 1); }` : ''}
+.sheet-recap--mistakes { margin-top: calc(var(--sheet-step) * 2); }
+.sheet-recap--mistakes .sheet-recap-list { grid-auto-flow: row; grid-template-rows: none;
+  grid-template-columns: 1fr; gap: calc(var(--sheet-step) * 3); }
+.sheet-recap--mistakes .sheet-recap-item { align-items: flex-start; line-height: 1.5; }
+.sheet-recap--mistakes .sheet-recap-no { align-self: flex-start; margin-top: 2px; }
+.sheet-signature { text-align: right; font-family: var(--sheet-font-hand); font-size: 17pt;
+  color: var(--sheet-ink); margin: calc(var(--sheet-step) * 4) 0 0; }
+.sheet-matrix th, .sheet-matrix td { text-align: center; }
+.sheet-matrix th[scope='col'] { background: var(--sheet-num-bg); color: var(--sheet-num-ink); }
+.sheet-matrix th[scope='row'] { width: auto; white-space: nowrap; text-align: left;
+  padding-right: calc(var(--sheet-step) * 4); }
+`;
+
+const nameLine = '<div class="sheet-item sheet-name-line"><span>Фамилия, имя, класс</span>' +
+  '<span class="sheet-answer-blank"></span></div>';
+
+/* Шапка варианта — той же разметкой, что блок названия листа.
+   У первого варианта название даёт сам шаблон; у следующих оно
+   повторяется куском потока с новой страницы. */
+function variantHead(variant) {
+  return '<div class="sheet-item sheet-variant-head" data-page-break="1" data-keep-with-next="1">' +
+    '<div class="sheet-title-block"><div class="sheet-title-row">' +
+    `<span class="sheet-chip">Вариант ${variant.v}</span>` +
+    '<div class="sheet-title-col"><h1 class="sheet-title">Линейная функция</h1>' +
+    `<p class="sheet-subtitle">${SUBTITLE}</p></div></div></div></div>`;
+}
+
+/* Задачи варианта: куски потока в раскладке листа. Их собирает сам
+   шаблон (flowItems внутри buildDocument); здесь они вынимаются из
+   спецификации документа с одним вариантом, чтобы вставить между
+   вариантами шапку и строку для фамилии. */
+function taskItems(variant, theme) {
+  const html = sheet.buildDocument({
+    theme, layout: LAYOUT, cell: CELL, head: HEAD, title: { chip: '', text: 'Вариант' },
+    recap: null, blocks: variant.blocks, withAnswerLine: true, foot: FOOT,
+  }, {});
+  const open = '<script type="application/json" id="sheet-spec">';
+  const start = html.indexOf(open) + open.length;
+  const items = JSON.parse(html.slice(start, html.indexOf('</script>', start))).items;
+  return KOMPAKT ? items.filter((item) => !item.startsWith('<div class="sheet-item sheet-block')) : items;
+}
+
+/* Компактная шапка варианта: плашка и строка для фамилии в одну
+   строку. У первого варианта плашка стоит в названии листа. */
+function variantStrip(variant, first) {
+  return `<div class="sheet-item sheet-variant-strip"${first ? '' : ' data-page-break="1"'} data-keep-with-next="1">` +
+    `<span class="sheet-chip">Вариант ${variant.v}</span>` +
+    '<span class="sheet-variant-strip-title">Линейная функция · Самостоятельная работа</span>' +
+    '<span class="sheet-name-line"><span>Фамилия, имя, класс</span><span class="sheet-answer-blank"></span></span></div>';
+}
+
+const mistakesItem = '<div class="sheet-item" data-page-break="1">' +
+  '<section class="sheet-recap sheet-recap--mistakes"><div class="sheet-recap-main">' +
+  `<h2 class="sheet-recap-title">${typo.text(oshibki.title)}</h2><ul class="sheet-recap-list">` +
+  oshibki.items.map((text, i) =>
+    `<li class="sheet-recap-item"><span class="sheet-recap-no">${i + 1}</span><span>${typo.markup(text)}</span></li>`).join('') +
+  `</ul></div></section><p class="sheet-signature">${typo.text(oshibki.signature)}</p></div>`;
+
+function studentSpec(theme) {
+  const items = [];
+  variants.forEach((variant, i) => {
+    if (KOMPAKT) {
+      items.push(variantStrip(variant, i === 0));
+    } else {
+      if (i > 0) { items.push(variantHead(variant)); }
+      items.push(nameLine);
+    }
+    items.push(...taskItems(variant, theme));
+  });
+  items.push(mistakesItem);
+  return {
+    theme, layout: LAYOUT, cell: CELL,
+    documentTitle: 'Линейная функция. Самостоятельная работа',
+    head: HEAD, runner: 'Линейная функция · Самостоятельная работа',
+    title: { chip: 'Вариант 1', text: 'Линейная функция', subtitle: SUBTITLE },
+    recap: null, leadItems: items, blocks: [], withAnswerLine: true, foot: FOOT,
+  };
+}
+
+/* ── Лист учителя ────────────────────────────────────────────── */
+function matrixItem() {
+  let html = '<div class="sheet-item sheet-answers"><table class="sheet-answers-table sheet-matrix">' +
+    '<caption>Ответы: строки — варианты, столбцы — номера задач</caption><thead><tr><th scope="col"></th>';
+  for (let i = 1; i <= perVariant; i += 1) { html += `<th scope="col">${i}</th>`; }
+  html += '</tr></thead><tbody>';
+  for (const variant of variants) {
+    html += `<tr><th scope="row">Вариант ${variant.v}</th>`;
+    for (const task of variant.blocks.flatMap((block) => block.tasks)) {
+      html += `<td data-answer="${typo.attr(task.answer)}">${task.answerHtml || typo.markup(task.answer)}</td>`;
+    }
+    html += '</tr>';
+  }
+  return html + '</tbody></table></div>';
+}
+
+function solutionsOf(variant) {
+  const items = answersItems(variant.blocks, generator, solutionBuilder);
+  const solved = items.filter((html) => html.includes('class="sheet-item sheet-solution"'));
+  const head = '<div class="sheet-item sheet-block" data-keep-with-next="1"><header class="sheet-block-head">' +
+    `<h2 class="sheet-block-title">Вариант ${variant.v}</h2>` +
+    `<span class="sheet-block-note">краткие решения, ${solved.length} задач из ${perVariant}</span></header></div>`;
+  return [head, ...solved];
+}
+
+function teacherSpec(theme) {
+  return {
+    theme, layout: 'single', cell: CELL,
+    documentTitle: 'Линейная функция. Самостоятельная работа. Ответы',
+    head: HEAD, runner: 'Линейная функция · Ответы',
+    title: { chip: 'Ответы', text: 'Линейная функция', subtitle: `Самостоятельная работа · вариантов: ${VARIANTS} · лист учителя` },
+    recap: null, leadItems: [matrixItem()], blocks: [], withAnswerLine: false,
+    extraItems: variants.flatMap(solutionsOf), foot: FOOT,
+  };
+}
+
+/* ── Печать ──────────────────────────────────────────────────── */
+fs.mkdirSync(OUT, { recursive: true });
+
+async function print(name, spec, expectTasks) {
+  const file = path.join(OUT, name + '.pdf');
+  const report = await renderPdf(spec, file, {
+    keepHtml: path.join(OUT, 'html', name + '.html'), requireKatex: true, extraCss: CSS,
+  });
+  console.log(`  ${name}.pdf: страниц ${report.pages}, задач ${report.tasks}, формул ${report.formulas}` +
+    (report.overflowing.length ? `, ВЫШЕ СТРАНИЦЫ: ${report.overflowing.join(', ')}` : '') +
+    (report.formulasFailed ? `, KaTeX не принял ${report.formulasFailed}` : ''));
+  if (report.tasks !== expectTasks) {
+    throw new Error(`${name}: задач на листе ${report.tasks}, ждали ${expectTasks}`);
+  }
+  if (report.overflowing.length || report.formulasFailed) {
+    throw new Error(`${name}: лист собрался с ошибками, см. выше`);
+  }
+  return report;
+}
+
+console.log(`Комплект: вариантов ${VARIANTS}, задач в варианте ${perVariant}, раскладка ${LAYOUT}, клетка ${CELL} мм`);
+await print('samostoyatelnaya-12-lineynaya-funkciya-cvet', studentSpec('color'), VARIANTS * perVariant);
+await print('samostoyatelnaya-12-lineynaya-funkciya-chb', studentSpec('print'), VARIANTS * perVariant);
+await print('samostoyatelnaya-12-lineynaya-funkciya-otvety-uchitel', teacherSpec('color'), 0);
+
+const sostav = variants.map((variant) => ({
+  v: variant.v,
+  tasks: variant.blocks.flatMap((block) => block.tasks).map((task) => ({
+    no: task.no, id: task.id, lines: lineKey(task),
+    x0: task.meta.query ? task.meta.query.x0 : null, answer: task.answer,
+  })),
+}));
+fs.writeFileSync(path.join(OUT, 'sostav.json'), JSON.stringify(sostav, null, 1));
+console.log(`разных прямых ${usedLines.size}, разных ответов ${usedAnswers.size}; файлы в ${OUT}`);
