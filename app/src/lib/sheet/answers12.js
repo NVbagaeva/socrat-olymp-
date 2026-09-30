@@ -50,31 +50,41 @@ function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
   if (task.meta && task.meta.family === 'quadratic') {
     return shortSolutionQuadratic(task, quadraticBuilder);
   }
-  let analysis = null;
-  try { analysis = generator.analysis(task.id, task.seed); }
-  catch { return null; }
-  if (!analysis) { return null; }
-
   const rule = task.answerRule;
   let steps;
-  try {
-    steps = solutionBuilder.build({
-      triangle: analysis.triangle,
-      line: analysis.line,
-      window: analysis.task.meta.window,
-      task: { rule, answer: task.answer, query: task.meta.query, probe: task.meta.probe },
-    });
-  } catch { return null; }
+
+  /* Две прямые (12.C, 12.D): разбор строится по коэффициентам
+     и отмеченным точкам обеих прямых из meta, треугольник наклона
+     ему не нужен. */
+  const lines = task.meta && task.meta.lines;
+  if (lines && lines.length === 2) {
+    try {
+      steps = solutionBuilder.build({
+        lines,
+        window: task.meta.window,
+        task: { rule, answer: task.answer },
+      });
+    } catch { return null; }
+  } else {
+    let analysis = null;
+    try { analysis = generator.analysis(task.id, task.seed); }
+    catch { return null; }
+    if (!analysis) { return null; }
+
+    try {
+      steps = solutionBuilder.build({
+        triangle: analysis.triangle,
+        line: analysis.line,
+        window: analysis.task.meta.window,
+        task: { rule, answer: task.answer, query: task.meta.query, probe: task.meta.probe },
+      });
+    } catch { return null; }
+  }
 
   /* Пятый шаг разбора умеет не всякое правило ответа. Чего он
-     не умеет — отдаёт общей фразой вместо вывода. Для задач
-     на пересечение это именно так: разбор описывает одну прямую,
-     а ответ получается из системы двух. Печатать такие формулы
-     как решение нельзя — из них заявленный ответ не выводится.
-
-     Ловим по самой фразе, а не по списку правил: если в движке
-     появится ветка для пересечений, решения начнут печататься
-     сами, без правки этого файла. */
+     не умеет — отдаёт общей фразой вместо вывода. Печатать такие
+     формулы как решение нельзя — из них заявленный ответ
+     не выводится. Ловим по самой фразе, а не по списку правил. */
   const last = steps[steps.length - 1] || {};
   const stub = (last.blocks || []).some((piece) =>
     piece.type === 'text' && /Ответ читается из формулы/.test(piece.html || ''));

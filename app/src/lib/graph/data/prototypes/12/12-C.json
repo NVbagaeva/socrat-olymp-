@@ -11,9 +11,9 @@
   "uniqueAnswers": true,
   "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка.",
   "composition": {
-    "count": 20,
+    "count": 24,
     "levels": {
-      "lucky": 2,
+      "lucky": 6,
       "unlucky": 18
     },
     "levelOrder": false,
@@ -22,12 +22,12 @@
       "fraction-k": 6
     },
     "intersectionInside": 0,
-    "intersectionOffscreen": 20,
+    "intersectionOffscreen": 24,
     "intersectionOffscreenMin": 1.5,
     "intersectionMargin": 2,
-    "askedCoordinateOffscreen": 20,
-    "bothIncreasing": 2,
-    "bothDecreasing": 2,
+    "askedCoordinateOffscreen": 24,
+    "bothIncreasing": 4,
+    "bothDecreasing": 4,
     "mixedDirections": 16,
     "angleMin": 45,
     "angleMax": 72,
@@ -777,6 +777,134 @@
       },
       "intersectionOffscreen": true,
       "levelReason": "b-offscreen"
+    },
+    {
+      "id": "12.C-21",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "absK": 1,
+            "direction": "up",
+            "bMax": 7
+          },
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "up",
+            "bMax": 7
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x",
+          "askedOffscreen": true
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.C-22",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "up",
+            "bMax": 7
+          },
+          {
+            "slope": "integer",
+            "absK": 1,
+            "direction": "up",
+            "bMax": 7
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x",
+          "askedOffscreen": true
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.C-23",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "absK": 1,
+            "direction": "down",
+            "bMax": 7
+          },
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "down",
+            "bMax": 7
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x",
+          "askedOffscreen": true
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.C-24",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите абсциссу точки их пересечения.",
+      "answerRule": "intersection-x",
+      "answerType": "number",
+      "constraints": {
+        "window": 8,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "absK": 2,
+            "direction": "down",
+            "bMax": 7
+          },
+          {
+            "slope": "integer",
+            "absK": 1,
+            "direction": "down",
+            "bMax": 7
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "x",
+          "askedOffscreen": true
+        }
+      },
+      "intersectionOffscreen": true
     }
   ],
   "curveLabels": [

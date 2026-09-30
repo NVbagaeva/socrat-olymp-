@@ -287,6 +287,18 @@ function pairCandidates(task, set, seed) {
       if (wanted.inside === false && leastOffscreen !== undefined &&
           offscreenBy < leastOffscreen - 1e-9) { continue; }
 
+      /* «За кадром» — это про точку целиком: достаточно, чтобы за рамку
+         вышла хотя бы одна координата. Задаче на абсциссу этого мало:
+         точка может уйти вверх, а её x при этом остаться внутри окна
+         и читаться продолжением линий на глаз. askedOffscreen требует,
+         чтобы за окном лежала именно спрашиваемая координата — не ближе
+         askedOffscreenMin клеток к рамке (по умолчанию одна клетка). */
+      if (wanted.askedOffscreen) {
+        var askedBy = wanted.axis === 'y' ? Math.abs(cy) - win.ymax : Math.abs(cx) - win.xmax;
+        var askedMin = wanted.askedOffscreenMin === undefined ? 1 : wanted.askedOffscreenMin;
+        if (askedBy < askedMin - 1e-9) { continue; }
+      }
+
       /* Ответ пишется как в бланке: целое или один знак после запятой. */
       if (!decimalsOk(cross.x, wanted.decimals) || !decimalsOk(cross.y, wanted.decimals)) { continue; }
       if (wanted.answerKind === 'half' &&
@@ -297,13 +309,25 @@ function pairCandidates(task, set, seed) {
       if (!pointsA || !pointsB) { continue; }
 
       var answer = wanted.axis === 'y' ? cy : cx;
+      var pairKey = 'kb2:' + a.kValue + '@' + a.bValue + '|' + b.kValue + '@' + b.bValue;
+
+      /* Порядок кандидатов задаётся читаемостью чертежа, и он один
+         на все seed. У задачи с закреплёнными наклонами обеих прямых
+         это значит один и тот же чертёж при любом seed: перебор берёт
+         первого подходящего. varyBySeed отдаёт порядок seed —
+         читаемость и так гарантируют правила выше, а тренажёру
+         и листу с вариантами нужны разные числа. */
+      var score = constraints.varyBySeed
+        ? rng(set.id + ':' + task.id + ':' + seed + ':pick:' + pairKey)()
+        : (balanceScore(a, win, pointsA) + balanceScore(b, win, pointsB)) / 2;
+
       found.push({
         parts: [ { line: a, color: 'lineA', points: pointsA },
                  { line: b, color: 'lineB', points: pointsB } ],
         line: a, window: win, points: pointsA,
         intersection: { x: cx, y: cy, inside: inside, angle: angle, offscreenBy: offscreenBy },
-        score: (balanceScore(a, win, pointsA) + balanceScore(b, win, pointsB)) / 2,
-        pairKey: 'kb2:' + a.kValue + '@' + a.bValue + '|' + b.kValue + '@' + b.bValue,
+        score: score,
+        pairKey: pairKey,
         slopeKey: 'kk:' + a.kValue + '|' + b.kValue,
         interceptKey: 'bb:' + a.bValue + '|' + b.bValue,
         answerKey: 'ans:' + answer,
@@ -313,7 +337,11 @@ function pairCandidates(task, set, seed) {
   }
 
   found.sort(function (x, y) { return y.score - x.score || x.pairKey.localeCompare(y.pairKey); });
-  return trimPool(found);
+  /* Пул урезается до лучших по читаемости, по дюжине на наклон. У задачи
+     с порядком по seed «лучших» нет, а короткий пул только заставляет
+     перебор с возвратом переделывать соседние задачи, у которых числа
+     закреплены с прошлых сборок. Ей оставляется весь список. */
+  return constraints.varyBySeed ? found : trimPool(found);
 }
 
 /* ══════════════════════════════════════════════════════════
