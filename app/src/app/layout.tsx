@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { caveat, inter, ptSerif } from '@/lib/fonts';
+import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import { AppStateProvider } from '@/state/AppState';
 import '@/styles/globals.css';
 
@@ -19,7 +19,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${caveat.variable} ${ptSerif.variable}`}>
+    <html
+      lang="ru"
+      className={`${inter.variable} ${interGreek.variable} ${caveat.variable} ${ptSerif.variable}`}
+    >
       <body>
         {/* Состояние раздела доступно на любой странице: провайдер
             клиентский, содержимое страниц остаётся серверным. */}

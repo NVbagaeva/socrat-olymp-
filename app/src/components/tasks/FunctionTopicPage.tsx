@@ -13,6 +13,7 @@ import { GeneratorTab } from './generator';
 import { MethodsTab } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
+import { MathTitle } from './theory/MathTitle';
 import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
@@ -145,6 +146,13 @@ export function FunctionTopicPage({
         initial={initialTab}
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
         theory={subtopic.theory}
+        /* Заголовки набираются здесь, на сервере: в ленте вкладок,
+           клиентском компоненте, KaTeX появился бы в бандле всех
+           разделов сайта. Заголовок без разметки $…$ возвращается
+           строкой, и у подтем без переменных ничего не меняется. */
+        titles={Object.fromEntries(
+          subtopic.theory.map((block) => [block.id, <MathTitle text={block.title} key={block.id} />]),
+        )}
         bodies={theoryBodies}
         trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
         methods={

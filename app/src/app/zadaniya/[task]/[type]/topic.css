@@ -660,6 +660,487 @@ a.tutor-card:hover {
   color: var(--color-text-tertiary);
 }
 
+/* ── Баннер «Немного истории» ───────────────────────────────── */
+
+/* Светлое поле во всю ширину раздела: слева Аполлоний в своём
+   времени, справа он же сегодня, между ними конус. Подписи от руки
+   стоят поверх поля — поэтому у него своя система координат. */
+.istor {
+  position: relative;
+  /* Баннер смотрит на свою ширину, а не на ширину окна: на 1024 рядом
+     стоит колонка содержания, и поля ему остаётся меньше, чем на 768,
+     где колонки нет. */
+  container-type: inline-size;
+  margin: 0;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+  overflow: hidden;
+}
+.istor__ryad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-4);
+  /* Верхняя полоса поля отдана подписям от руки: под ними начинаются
+     портреты, и строка подписи не ложится на лицо. */
+  padding-top: 64px;
+}
+.istor__lico {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+/* Портреты повёрнуты друг к другу, поэтому местами их не меняют
+   и не зеркалят: античный смотрит вправо, современный — влево. */
+.istor__portret {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+}
+.istor__podpis {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  text-align: center;
+  /* Строка ломается пополам, а не оставляет одно слово внизу. */
+  text-wrap: balance;
+}
+/* Конус: картинка, на которой кривая сечения уже нарисована. */
+.istor__konus {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 280px;
+}
+.istor__konus-kartinka {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Формула над правым портретом: набрана KaTeX, а не от руки. */
+/* Формула стоит над правым портретом, как на макете. */
+.istor__formula {
+  position: absolute;
+  top: 8%;
+  right: 22%;
+  font-size: var(--fs-lg);
+  color: var(--color-text-brand);
+}
+/* Подписи от руки: текст рукописным шрифтом со стрелкой к тому, что
+   подписано. Ширина в ch, чтобы строка ломалась там же при любом
+   кегле. */
+.istor__zametka {
+  position: absolute;
+  display: block;
+  max-width: 15ch;
+  font-family: var(--font-hand);
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+  color: var(--color-text-brand);
+}
+/* Штрихи рисованной стрелки — общие для всех её мест: сама линия,
+   её цвет и толщина. Размер и положение задаёт место вставки.
+   Толщина в пикселях экрана: стрелки разной длины, и без этого
+   длинная стрелка у конуса выходила заметно жирнее коротких. */
+.strelka {
+  display: block;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.istor__strelka {
+  width: 60px;
+  height: 60px;
+}
+.istor__zametka--sleva {
+  top: var(--space-5);
+  left: var(--space-4);
+}
+.istor__zametka--konus {
+  top: 12%;
+  left: 30%;
+  max-width: 20ch;
+}
+.istor__zametka--sprava {
+  top: var(--space-5);
+  right: var(--space-4);
+  text-align: right;
+}
+.istor__zametka--sprava .istor__strelka {
+  margin-left: auto;
+}
+/* Стрелка у конуса показывает на саму кривую сечения, поэтому она
+   лежит внутри картинки и меряется в её долях: остриё приходит в одну
+   и ту же точку рисунка при любой ширине. */
+.istor__strelka--konus {
+  position: absolute;
+  left: 4.7%;
+  top: 11.7%;
+  width: 45%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* Узкий баннер: так он выглядит и на телефоне, и на 1024, где рядом
+   стоит колонка содержания. Конус переезжает наверх и остаётся по
+   центру целиком, портреты встают под ним рядом и уменьшаются. Две
+   верхние подписи от руки читаемо не помещаются — остаётся только
+   подпись у конуса, она идёт последней строкой по центру. Стрелка
+   у неё убрана: подпись стоит прямо под картинкой, показывать
+   стрелке некуда. */
+@container (max-width: 600px) {
+  .istor__ryad {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4) var(--space-3);
+    padding-top: 0;
+  }
+  .istor__konus {
+    grid-column: 1 / -1;
+    order: -1;
+    max-width: 220px;
+  }
+  .istor__portret {
+    max-width: 120px;
+  }
+  .istor__formula,
+  .istor__zametka--sleva,
+  .istor__zametka--sprava {
+    display: none;
+  }
+  .istor__zametka--konus {
+    position: static;
+    max-width: none;
+    margin-top: var(--space-4);
+    text-align: center;
+  }
+  .istor__strelka--konus {
+    display: none;
+  }
+}
+
+/* ── Разговор двух Аполлониев ───────────────────────────────── */
+
+/* Баннер и врезка — один раздел «Немного истории»: между ними
+   просвет, какой стоит между крупными частями раздела. */
+.istor-razdel {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* Терракотовая пара токенов: по цвету врезка не спорит с кремовой
+   плашкой «Запомни» и с голубым баннером над ней. Своя система
+   координат не нужна — подписей поверх поля здесь нет, зато врезка
+   смотрит на свою ширину: на 1024 рядом стоит колонка содержания. */
+.razgovor {
+  /* Имя контейнера: внутри врезки живёт ещё одна — плашка
+     продолжения, и её правила не должны мерить ширину врезки. */
+  container: vrezka / inline-size;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.razgovor__title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.razgovor__ryad {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Узкая врезка — основа: портреты в колонках спрятаны, говорящего
+   показывает кружок перед подписью реплики. */
+.razgovor__lico {
+  display: none;
+}
+/* Средняя колонка: первая часть разговора, под ней плашка со
+   свёрнутым продолжением. */
+.razgovor__stolb {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+}
+.razgovor__lenta {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Смена говорящего — просвет больше: так видно, где реплика одного
+   кончилась и началась реплика другого. */
+.razgovor__replika {
+  margin-top: var(--space-4);
+}
+.razgovor__replika--podryad {
+  margin-top: var(--space-2);
+}
+.razgovor__replika:first-child {
+  margin-top: 0;
+}
+/* Реплика прижата к своей стороне: античный слева, современный
+   справа. Не во всю ширину — иначе стороны не различить. Плашка
+   шире своего текста не растёт: короткой реплике незачем занимать
+   строку целиком и переносить последнее слово вниз. */
+.razgovor__replika {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  max-width: 92%;
+}
+.razgovor__replika--sovremennyy {
+  margin-left: auto;
+  justify-items: end;
+}
+.razgovor__kto {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.razgovor__kruzhok {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+/* В кружок должна попасть голова, а не вся грудь: портрет увеличен
+   и сдвинут. Доли считаются от размера кружка, поэтому кадр не
+   поедет, если кружок станет другого размера. Сдвиги у портретов
+   разные: лица стоят в своих картинках по-разному. */
+.razgovor__avatar {
+  position: absolute;
+  width: 165%;
+  height: 165%;
+  max-width: none;
+}
+.razgovor__avatar--antichnyy {
+  left: -32%;
+  top: -2%;
+}
+.razgovor__avatar--sovremennyy {
+  left: -62%;
+  top: -4%;
+}
+/* Сама реплика: плашка своей пары токенов. Античный говорит
+   с терракотовой, современный — с голубой; подпись над репликой
+   в тон своей плашке, но темнее её рамки — мелкому кеглю нужен
+   контраст. Шрифт со греческим подмножеством: в продолжении есть
+   παραβολή, ἔλλειψις и ὑπερβολή. */
+.razgovor__slova {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  font-family: var(--font-grech);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  text-align: left;
+}
+.razgovor__replika--antichnyy .razgovor__slova {
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+}
+.razgovor__replika--sovremennyy .razgovor__slova {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.razgovor__replika--antichnyy .razgovor__kto {
+  color: var(--color-accent-text);
+}
+.razgovor__replika--sovremennyy .razgovor__kto {
+  color: var(--color-primary);
+}
+
+/* Широкая врезка: портреты встают по краям, реплики идут между ними.
+   Портрет стоит один раз сверху своей колонки и держится на месте,
+   пока реплики прокручиваются мимо: колонка растянута на всю ленту,
+   липнет сама картинка. Прижимается туда же, куда колонка
+   содержания, — в этих ширинах она рядом.
+
+   Порог считается по полю врезки без её полей: на 1280 это 594px,
+   на 768 — 606px. Двенадцати пикселей между ними на два разных вида
+   не хватит, поэтому портреты стоят в обеих ширинах, а не только на
+   большом экране; в тесной ширине они мельче. */
+@container vrezka (min-width: 560px) {
+  .razgovor__ryad {
+    grid-template-columns: 104px minmax(0, 1fr) 104px;
+    gap: var(--space-3);
+  }
+  .razgovor__lico {
+    display: block;
+  }
+  .razgovor__portret {
+    position: sticky;
+    top: var(--space-6);
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .razgovor__kruzhok {
+    display: none;
+  }
+  .razgovor__replika {
+    max-width: 86%;
+  }
+}
+
+/* Просторная врезка: портреты крупнее, но не за счёт реплик —
+   лента между ними остаётся шире половины поля. */
+@container vrezka (min-width: 700px) {
+  .razgovor__ryad {
+    grid-template-columns: 132px minmax(0, 1fr) 132px;
+    gap: var(--space-5);
+  }
+}
+
+/* ── Плашка «Разговор продолжается…» ────────────────────────── */
+
+/* Место второй половины разговора. Пока она свёрнута, здесь стоит
+   плашка; раскрытая половина встаёт ровно на её место, поэтому
+   просвета между ними не заводим. Плашка стоит в колонке реплик и
+   меряет её, а не всю врезку, — отсюда своё имя контейнера. */
+.prodolzh {
+  container: plashka / inline-size;
+  display: grid;
+}
+.prodolzh__plashka {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+  /* Искры лежат по краям плашки и за её рамку не вылезают. */
+  overflow: hidden;
+}
+.prodolzh__znachok {
+  --glass-badge-size: 52px;
+}
+.prodolzh__text {
+  display: grid;
+  gap: var(--space-1);
+}
+.prodolzh__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  text-wrap: balance;
+}
+.prodolzh__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+/* Нижняя строка плашки: кнопка и рукописная подпись к ней. Идёт во
+   всю ширину — кнопке тесно в колонке значка. */
+.prodolzh__deystvie {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--space-3);
+  align-items: center;
+}
+.prodolzh__knopka .qth-card__icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+/* Рукописная подпись со стрелкой к кнопке. На тесной плашке её нет:
+   под кнопкой во всю ширину стрелке некуда показывать. */
+.prodolzh__zametka {
+  display: none;
+  text-align: center;
+  font-size: var(--fs-lg);
+  line-height: 1.15;
+  color: var(--color-primary);
+}
+.prodolzh__zametka .hand-note {
+  color: var(--color-primary);
+  opacity: 1;
+}
+/* Стрелка идёт из-под подписи влево-вниз и упирается остриём в
+   правый край кнопки, поэтому она шире подписи и сдвинута влево. */
+.prodolzh__strelka {
+  width: 72px;
+  height: 72px;
+  margin: calc(var(--space-2) * -1) 0 0 calc(var(--space-6) * -1);
+}
+/* Искры — декор плашки: четырёхлучевые звёздочки того же синего,
+   что и кнопка, приглушённые прозрачностью. */
+.prodolzh__iskra {
+  position: absolute;
+  color: var(--color-primary);
+  opacity: 0.35;
+}
+.prodolzh__iskra--verh {
+  top: var(--space-2);
+  left: var(--space-3);
+  width: 14px;
+  height: 14px;
+}
+.prodolzh__iskra--niz {
+  bottom: var(--space-3);
+  left: var(--space-5);
+  width: 10px;
+  height: 10px;
+}
+.prodolzh__iskra--kray {
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 12px;
+  height: 12px;
+}
+/* Свёрнутое продолжение: реплики остаются в разметке и обрезаются по
+   высоте. Спрятать их display: none нельзя — поиск по странице их
+   тогда не найдёт. */
+.prodolzh__telo {
+  max-height: 0;
+  overflow: hidden;
+}
+.prodolzh.is-otkryto .prodolzh__telo {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Плашке хватает ширины: кнопка встаёт по левому краю, подпись от
+   руки — справа от неё, стрелкой к кнопке. */
+@container plashka (min-width: 340px) {
+  .prodolzh__deystvie {
+    grid-auto-flow: column;
+    justify-content: start;
+    gap: var(--space-4);
+  }
+  .prodolzh__zametka {
+    display: block;
+    max-width: 12ch;
+  }
+}
+
 /* ── Раскладка по ширинам ───────────────────────────────────── */
 /* Медиазапросы идут последними: правила в них перекрывают базовые
    только за счёт порядка — специфичности медиазапрос не добавляет. */
@@ -680,12 +1161,49 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 1023.98px) {
-  /* Правой колонки нет — её заменяют кнопка и шторка. */
+  /* Правой колонки нет — её заменяют полоска и шторка. */
   .topic-side {
     display: none;
   }
+  /* Высота полоски: кнопка 44 и поля по 12. Тем же числом заголовок
+     раздела отходит от верхней кромки, когда к нему ведёт содержание,
+     иначе он встал бы под полоску. */
+  .topic-body--theory {
+    --h-soderzhanie: 69px;
+  }
+  /* Полоска содержания прижата к верхней кромке экрана: панель
+     приложения не липкая и уезжает вместе со страницей, прижиматься
+     не к чему. Подложка идёт во всю ширину колонки — поля страницы
+     компенсируются отрицательными отступами, иначе текст просвечивал
+     бы по краям полоски. Слой ниже нижней панели навигации и меню
+     материалов: полоска не должна лезть поверх них. */
   .topic-open {
     display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-inline: calc(var(--space-5) * -1);
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+  /* Название текущего раздела — одной строкой с многоточием: на узком
+     экране длинное название иначе разносит полоску на две строки.
+     Ужимается при этом название, а не кнопка: у кнопки в строке без
+     переносов значок схлопывался до нулевой ширины. */
+  .topic-open__btn {
+    flex: none;
+  }
+  .topic-open__now {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Переход из содержания ведёт заголовок раздела к верхней кромке —
+     туда же, где стоит полоска. Отступ отводит заголовок из-под неё. */
+  .theory-block {
+    scroll-margin-top: calc(var(--h-soderzhanie) + var(--space-4));
   }
   /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
   .modal-backdrop:has(.contents-sheet) {
@@ -715,6 +1233,11 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 767.98px) {
+  .istor,
+  .razgovor {
+    padding: var(--space-4);
+  }
+
   /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
      цитата и прогресс — по строке на каждое. */
   .topic-head {
@@ -1329,6 +1852,88 @@ a.tutor-card:hover {
 }
 /* Чертёж здесь — пример, а не рабочее поле: на широкой карточке он
    разрастался бы до полуэкранного квадрата. */
+/* ── Карточка с разбором примера ─────────────────────────────── */
+
+/* Разбор идёт во всю ширину раздела: в колонке шириной с половину
+   пять шагов и чертёж не встают. На узкой карточке чертёж стоит
+   сразу под заголовком: шаги ссылаются на него с первой строки. */
+.qth-card--razbor {
+  grid-column: 1 / -1;
+  grid-template-rows: auto auto auto;
+}
+.qth-card--razbor .qth-card__title {
+  grid-row: 1;
+}
+.qth-card--razbor .qth-card__chart {
+  grid-row: 2;
+}
+.qth-card--razbor .qth-card__text {
+  grid-row: 3;
+}
+/* Карточке хватает ширины: шаги слева, чертёж справа, на одной
+   высоте с ними. Блок идёт после базовых правил — перекрывает их
+   порядком, специфичности медиазапрос не добавляет. */
+@container (min-width: 640px) {
+  .qth-card--razbor {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--space-5);
+  }
+  .qth-card--razbor .qth-card__title {
+    grid-column: 1 / -1;
+  }
+  .qth-card--razbor .qth-card__text {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .qth-card--razbor .qth-card__chart {
+    grid-row: 2;
+    grid-column: 2;
+    align-self: start;
+  }
+}
+/* Шаги разбора: номер в кружке слева, как в разборе опорной задачи.
+   Нумерация счётчиком, а не маркером списка: номер должен стоять
+   вровень с заголовком шага, а не с первой строкой текста. */
+.qth-steps {
+  display: grid;
+  gap: var(--space-4);
+  counter-reset: shag;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.qth-step {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: calc(var(--space-6) + var(--space-4));
+  position: relative;
+  counter-increment: shag;
+}
+.qth-step::before {
+  content: counter(shag) '.';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--space-6);
+  text-align: right;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.qth-step__title {
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+/* Замечание под разбором: тише шагов, но не мельче. */
+.qth-card__after {
+  color: var(--color-text-secondary);
+}
+
 .qth-card__chart {
   display: block;
   width: 100%;

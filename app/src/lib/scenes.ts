@@ -43,7 +43,6 @@ export function lineScene({ k, b, half = 6, alt, label = null }: LineSceneOption
   };
 }
 
-
 /**
  * Сравнение двух прямых на одном чертеже.
  *
@@ -65,7 +64,6 @@ export function compareLinesScene() {
     alt: 'Две прямые: y = k₁x + b₁ и y = k₂x + b₂',
   };
 }
-
 
 /**
  * Парабола и прямая на одном чертеже: вкладка «О задании»
@@ -140,7 +138,6 @@ export function previewScene(id: FunctionTypeId) {
     shapes: [],
   };
 }
-
 
 /* ── Миниатюры навыков ────────────────────────────────────────────
    Навык — набор прототипов; по одной картинке на набор: что дано
@@ -244,7 +241,6 @@ export function generatorSkillScene(setId: string) {
   return { ...base, curves: [{ type: 'line', ...SKILL_LINE, color: 'lineA', label: null }] };
 }
 
-
 /* ── Чертежи раздела «Какие бывают функции» ───────────────────────
    Четыре известных графика. В отличие от миниатюр типов сетка и
    подписи осей включены: карточка заметно крупнее значка, и по
@@ -276,7 +272,6 @@ export function kindScene(id: KindId) {
     shapes: [],
   };
 }
-
 
 /* ── Чертежи раздела «Когда график не функция» ────────────────────
    Четыре прямые в одном окне и одном масштабе: карточки стоят рядом,
@@ -351,12 +346,9 @@ export function lineKindScene(id: LineKindId) {
     points: [{ x: 2, y: up ? 2 : -2, color: 'lineA', label: null }],
     /* Типографский минус, а не дефис: в подписях чертежа проект
        набирает его именно так. */
-    shapes: [
-      up ? lineLabel('y = x', 1.8, 1.8, -8, -8) : lineLabel('y = \u2212x', 1.8, -1.8, 8, 8),
-    ],
+    shapes: [up ? lineLabel('y = x', 1.8, 1.8, -8, -8) : lineLabel('y = \u2212x', 1.8, -1.8, 8, 8)],
   };
 }
-
 
 /* ── Проверка вертикальной линией ─────────────────────────────────
    Окружность пересекается с вертикальной прямой в двух точках —
@@ -389,7 +381,6 @@ export function verticalTestScene() {
     ],
   };
 }
-
 
 /* ── Миниатюры навыков подготовительных задач ─────────────────────
    Значок рядом с названием навыка: каждая миниатюра показывает суть
@@ -523,8 +514,15 @@ function miniDot(x: number, y: number, color = 'lineA') {
 
 function quadraticPrepScene(
   id: PrepSkillSceneId,
-  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
-          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+  base: {
+    window: unknown;
+    grid: unknown;
+    axes: unknown;
+    axisLabels: string;
+    curves: unknown[];
+    points: unknown[];
+    shapes: unknown[];
+  },
 ) {
   if (id === 'sign-a') {
     /* Знак a: две параболы, ветви вверх и вниз. */
@@ -628,7 +626,6 @@ function quadraticPrepScene(
   return null;
 }
 
-
 /* ── Чертежи теории квадратичной функции ──────────────────────
    По одному чертежу на карточку раздела: парабола, отмеченные
    точки, ось симметрии пунктиром, подписи. Числа здесь — параметры
@@ -648,6 +645,7 @@ export type QuadraticTheorySceneId =
   | 'a-step'
   | 'c-read'
   | 'c-offscreen'
+  | 'c-by-point'
   | 'vertex-formula'
   | 'b-sign'
   | 'path-vertex'
@@ -694,6 +692,11 @@ function mark(x: number, y: number, labelled = false, color = 'lineA') {
   return { x, y, style: 'solid', color, label: labelled ? pointLabel(x, y) : null };
 }
 
+/** Точка с буквенной подписью: координаты ученик читает по сетке. */
+function namedPoint(x: number, y: number, name: string, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: name };
+}
+
 function dashedSegment(from: [number, number], to: [number, number], color = 'accent') {
   return { type: 'segment', from, to, color, style: 'dashed' };
 }
@@ -718,7 +721,11 @@ function arrow(from: [number, number], to: [number, number], color = 'accent') {
       type: 'polygon',
       color,
       fillOpacity: 1,
-      points: [to, [base[0] - uy * half, base[1] + ux * half], [base[0] + uy * half, base[1] - ux * half]],
+      points: [
+        to,
+        [base[0] - uy * half, base[1] + ux * half],
+        [base[0] + uy * half, base[1] - ux * half],
+      ],
     },
   ];
 }
@@ -826,6 +833,16 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
           ...arrow([2.0, 3.4], [1.5, 5.8]),
           note('(0; c) за кадром', [0.6, 4.6], [-40, 0]),
         ],
+      };
+
+    /* 3а. Тот же чертёж, что и выше, с отмеченной точкой A(3; 2):
+       по ней в разборе находят c = 23. Кроме A на чертеже не отмечено
+       ничего — вершину (5; −2) ученик читает по сетке. */
+    case 'c-by-point':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, 5, -2)],
+        points: [namedPoint(3, 2, 'A')],
       };
 
     /* 4. Формула вершины: y = x² − 6x + 5, вершина (3; −4). */
@@ -996,7 +1013,6 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
   }
 }
 
-
 /* ── Интерактив «Поиграй с параболой» ─────────────────────────
    Эталон y = x² пунктиром со стандартными точками, живая парабола
    y = ax² + c сплошной с точками при x = ±1, ±2. Точки у самой рамки
@@ -1007,25 +1023,29 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
 /** Точка не ближе клетки к рамке окна: подписи есть где встать. */
 function deepInside(x: number, y: number) {
   const win = PLAY.window;
-  return x > win.xmin + 1 - 1e-9 && x < win.xmax - 1 + 1e-9 &&
-    y > win.ymin + 1 - 1e-9 && y < win.ymax - 1 + 1e-9;
+  return (
+    x > win.xmin + 1 - 1e-9 &&
+    x < win.xmax - 1 + 1e-9 &&
+    y > win.ymin + 1 - 1e-9 &&
+    y < win.ymax - 1 + 1e-9
+  );
 }
 
 export function playgroundScene(a: number, c: number) {
-  const live = a === 0
-    ? { type: 'line', k: 0, b: c, color: 'lineA', label: null }
-    : parabola(a, 0, c);
+  const live =
+    a === 0 ? { type: 'line', k: 0, b: c, color: 'lineA', label: null } : parabola(a, 0, c);
   const standard = PLAY.standardAt
     .filter((x) => deepInside(x, x * x))
     .map((x) => mark(x, x * x, true, 'lineB'));
   /* Точка живой параболы, совпавшая со стандартной, не рисуется второй
      раз: при a = 1 и c = 0 подписи легли бы одна на другую. */
-  const marks = a === 0
-    ? []
-    : PLAY.markAt
-        .map((x) => ({ x, y: Math.round((a * x * x + c) * 100) / 100 }))
-        .filter((point) => deepInside(point.x, point.y) && point.y !== point.x * point.x)
-        .map((point) => mark(point.x, point.y, true));
+  const marks =
+    a === 0
+      ? []
+      : PLAY.markAt
+          .map((x) => ({ x, y: Math.round((a * x * x + c) * 100) / 100 }))
+          .filter((point) => deepInside(point.x, point.y) && point.y !== point.x * point.x)
+          .map((point) => mark(point.x, point.y, true));
   return {
     ...theoryBase(PLAY.window),
     curves: [parabola(1, 0, 0, { color: 'lineB', style: 'dashed' }), live],
