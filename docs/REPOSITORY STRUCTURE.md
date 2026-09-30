@@ -16,7 +16,7 @@ ege-math/
 │   ├── workflows/
 │   │   ├── ci.yml               # lint, typecheck, unit, e2e, db-migrate-check
 │   │   ├── deploy-db.yml        # supabase db push на main
-│   │   ├── backup.yml           # ежедневный pg_dump → R2
+│   │   ├── backup.yml           # ежедневный pg_dump → Yandex Object Storage
 │   │   └── security.yml         # gitleaks, pnpm audit, dependabot
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   └── CODEOWNERS
@@ -106,7 +106,7 @@ ege-math/
 │   │   ├── db/                  # drizzle client, транзакции
 │   │   ├── auth/                # guards.ts, session.ts, roles.ts
 │   │   ├── rate-limit.ts
-│   │   ├── storage/             # StorageProvider: supabase.ts, (r2.ts позже)
+│   │   ├── storage/             # StorageProvider: supabase.ts
 │   │   ├── queue/               # QStash publish/verify
 │   │   ├── logger.ts
 │   │   ├── errors.ts            # AppError, Result<T,E>
