@@ -52,12 +52,22 @@ const LAYOUT = process.env.LAYOUT || 'double-side';
 const CELL = Number(process.env.CELL || 3);
 const LEVEL = process.env.LEVEL || 'lucky';
 const RAZNYE = process.env.RAZNYE !== '0';
-/* KOMPAKT=1 — без полос-заголовков блоков, «Вариант N» и строка для
-   фамилии в одну строку: так восемь задач встают на одну страницу. */
-const KOMPAKT = process.env.KOMPAKT === '1';
-/* OKNO=5 — брать только задачи с окном ±5 (10 клеток): чертёж при
-   клетке 3 мм выходит 30 мм, и восемь задач встают на страницу. */
-const OKNO = process.env.OKNO ? Number(process.env.OKNO) : null;
+/* Без полос-заголовков блоков, «Вариант N» и строка для фамилии
+   в одну строку: так восемь задач встают на одну страницу.
+   KOMPAKT=0 возвращает полосы блоков и отдельную шапку варианта. */
+const KOMPAKT = process.env.KOMPAKT !== '0';
+/* Ряд карточек с чертежом на окно ±8 (16 клеток, 48 мм при клетке
+   3 мм) выше ряда с окном ±5 или ±6. Восемь задач встают на страницу,
+   только если таких рядов не больше двух: KRUPNYH — сколько рядов
+   с крупным чертежом допускается в варианте, KRUPNOE_OKNO — с какого
+   окна чертёж считается крупным. Ряд — две задачи одного набора. */
+const KRUPNYH = Number(process.env.KRUPNYH || 2);
+/* Кегль условия и отступы карточки. В раскладке double-side колонка
+   текста рядом с чертежом узкая (около 37 мм), длинное условие 12.C/12.D
+   в кегле листа 10,5 pt занимает 10 строк и делает ряд выше чертежа.
+   Кегль 9,5 pt и отступы поменьше возвращают высоту ряда чертежу. */
+const KEGL = process.env.KEGL || '9.5pt';
+const KRUPNOE_OKNO = Number(process.env.KRUPNOE_OKNO || 8);
 const SOSTAV = (process.env.SOSTAV || '12.A:2,12.B:2,12.C:2,12.D:2').split(',').map((part) => {
   const [id, n] = part.split(':');
   return { id: id.trim(), count: Number(n) };
@@ -77,62 +87,170 @@ for (const set of [...prep, ...prototypes]) {
 }
 
 /* ── Выбор задач ──────────────────────────────────────────────
-   В комплекте не повторяются ни прямая (у пары — обе прямые), ни
-   ответ. Перебор идёт по задачам набора (у каждой свои наклон и
-   направление) и по seed; берётся первая, что ещё не встречалась.
-   Варианты начинают перебор с разных задач набора, чтобы наклоны
-   в них шли в разном порядке. */
-const lineKey = (task) => (task.meta.lines || [task.meta])
-  .map((line) => `${line.k}@${line.b}`).join('|');
-const usedLines = new Set();
-const usedAnswers = new Set();
-const cache = new Map();
+   В комплекте не повторяются ни прямая (у пары — каждая из двух
+   прямых по отдельности), ни ответ. Кандидаты — задачи нужного
+   уровня на SEEDS разных seed; из них перебором с возвратом
+   набираются все варианты сразу: жадный выбор по одному варианту
+   заходит в тупик, когда ранний вариант забирает прямую или ответ,
+   без которых поздний не соберётся.
 
-function setOnSeed(setId, seed) {
-  const key = `${setId}|${seed}`;
-  if (!cache.has(key)) {
-    let tasks = null;
-    try { tasks = generator.generateSet(setId, seed); } catch { tasks = null; }
-    cache.set(key, tasks);
-  }
-  return cache.get(key);
-}
+   Ответы: сначала ищется набор, где ответ не повторяется нигде
+   в комплекте. Если такого нет (у 12.C и 12.D разных ответов уровня
+   «Базовая» ровно столько, сколько нужно, и часть у них общая),
+   действует запасное правило: ответ не повторяется в своём наборе
+   и в своём варианте, а каждый повтор печатается в отчёте. */
+const SEEDS = Number(process.env.SEEDS || 60);
+const lineKeys = (task) => (task.meta.lines || [task.meta]).map((line) => `${line.k}@${line.b}`);
+const lineKey = (task) => lineKeys(task).join('|');
+const isBig = (task) => Boolean(task.meta.window) && task.meta.window.xmax >= KRUPNOE_OKNO;
 
-function pick(setId, want, variant) {
+function poolOf(setId) {
   const set = prototypes.find((item) => item.id === setId);
   if (!set) { throw new Error(`набор ${setId} не найден`); }
-  const ids = set.tasks.filter((task) => task.level === LEVEL).map((task) => task.id);
-  if (!ids.length) { throw new Error(`${setId}: нет задач уровня ${LEVEL}`); }
-  const start = ((variant - 1) * want) % ids.length;
-  const order = ids.slice(start).concat(ids.slice(0, start));
-  const chosen = [];
-  for (let round = 0; round < 6 && chosen.length < want; round += 1) {
-    for (const id of order) {
-      if (chosen.length >= want) { break; }
-      if (chosen.some((task) => task.id === id)) { continue; }
-      for (let n = 0; n < 60; n += 1) {
-        const tasks = setOnSeed(setId, `komplekt:${setId}:${id}:${round}:${n}`);
-        if (!tasks) { continue; }
-        const task = tasks.find((item) => item.id === id);
-        if (!task || task.level !== LEVEL) { continue; }
-        if (OKNO !== null && task.meta.window && task.meta.window.xmax > OKNO) { continue; }
-        const key = lineKey(task);
-        /* RAZNYE=0 снимает правило «всё разное» — только для проб
-           раскладки, когда важен вид страницы, а не состав. */
-        if (RAZNYE && (usedLines.has(key) || usedAnswers.has(task.answer))) { continue; }
-        usedLines.add(key);
-        usedAnswers.add(task.answer);
-        chosen.push(task);
-        break;
-      }
+  if (!set.tasks.some((task) => task.level === LEVEL)) { throw new Error(`${setId}: нет задач уровня ${LEVEL}`); }
+  const seen = new Set();
+  const pool = [];
+  for (let n = 0; n < SEEDS; n += 1) {
+    let tasks = null;
+    try { tasks = generator.generateSet(setId, `komplekt:${setId}:${n}`); } catch { continue; }
+    for (const task of tasks) {
+      if (task.level !== LEVEL) { continue; }
+      const key = lineKey(task) + '#' + task.answer + '#' + (task.meta.query ? task.meta.query.x0 : '');
+      if (seen.has(key)) { continue; }
+      seen.add(key);
+      pool.push(task);
     }
   }
-  if (chosen.length < want) {
-    throw new Error(`${setId}, вариант ${variant}: набралось ${chosen.length} из ${want} — ` +
-      'в банке не хватает разных прямых и ответов');
-  }
-  return chosen;
+  return pool;
 }
+
+/* Порядок подбора — не порядок на листе. Сначала наборы, у которых
+   задач нужного уровня меньше (12.C и 12.D): их ответы почти все
+   нужны комплекту. Крупные ряды считаются в том же порядке: 12.C
+   с окном ±8 берёт один из KRUPNYH, 12.A/12.B получают оставшийся. */
+const pools = new Map(SOSTAV.map((part) => [part.id, poolOf(part.id)]));
+/* Тесные наборы — вперёд: у кого меньше разных прямых в пуле, тот
+   первым. Так тупик обнаруживается на первых шагах перебора. */
+const distinctLines = (setId) => new Set(pools.get(setId).flatMap(lineKeys)).size;
+const pickOrder = SOSTAV.map((part, i) => ({ part, i }))
+  .sort((a, b) => distinctLines(a.part.id) - distinctLines(b.part.id) || a.i - b.i)
+  .map((item) => item.part);
+for (const part of pickOrder) {
+  console.log(`  пул ${part.id}: кандидатов ${pools.get(part.id).length}, разных прямых ${distinctLines(part.id)}, ` +
+    `разных ответов ${new Set(pools.get(part.id).map((t) => t.answer)).size}`);
+}
+/* Слоты перебора: сначала все варианты тесного набора, потом
+   следующего. Так тупик в 12.C обнаруживается на первых шагах,
+   а не после того, как расставлены задачи 12.A/12.B. */
+const slots = [];
+for (const part of pickOrder) {
+  for (let v = 1; v <= VARIANTS; v += 1) {
+    for (let i = 0; i < part.count; i += 1) { slots.push({ v, set: part.id }); }
+  }
+}
+
+const tight = new Set(SOSTAV.filter((part) =>
+  new Set(pools.get(part.id).map((t) => t.answer)).size < 2 * part.count * VARIANTS).map((part) => part.id));
+const BUDGET = Number(process.env.BUDGET || 20000000);
+function search(relaxed) {
+  const usedLines = new Set();
+  const usedAnswers = new Map();          /* ответ → сколько раз */
+  const usedInSet = new Map();
+  const usedInVariant = new Map();
+  const usedIds = new Map();              /* вариант → задачи банка */
+  const bigRows = new Map();              /* вариант → крупных рядов */
+  const bigParts = new Map();             /* вариант|набор → крупный ли ряд */
+  const chosen = new Array(slots.length);
+  let budget = BUDGET;
+  const setOf = (map, key) => { if (!map.has(key)) { map.set(key, new Set()); } return map.get(key); };
+
+  function step(depth) {
+    if (depth === slots.length) { return true; }
+    const slot = slots[depth];
+    const pool = pools.get(slot.set);
+    /* Варианты начинают перебор с разных мест пула: так задачи банка
+       и наклоны в них идут в разном порядке. */
+    const start = ((slot.v - 1) * 7) % pool.length;
+    for (let c = 0; c < pool.length; c += 1) {
+      if (--budget < 0) { throw new Error('подбор не уложился в отведённый перебор'); }
+      const task = pool[(start + c) % pool.length];
+      if (setOf(usedIds, slot.v).has(task.id)) { continue; }
+      if (RAZNYE) {
+        if (lineKeys(task).some((key) => usedLines.has(key))) { continue; }
+        const a = task.answer;
+        if (usedAnswers.has(a)) {
+          /* Запасное правило — только для тесных наборов, у которых
+             разных ответов меньше, чем вдвое нужно; 12.A/12.B в нём
+             не нуждаются и остаются под строгим. */
+          if (!relaxed || !tight.has(slot.set) ||
+              setOf(usedInSet, slot.set).has(a) || setOf(usedInVariant, slot.v).has(a)) { continue; }
+        }
+      }
+      const partKey = `${slot.v}|${slot.set}`;
+      const big = isBig(task) && !bigParts.get(partKey);
+      if (big && (bigRows.get(slot.v) || 0) >= KRUPNYH) { continue; }
+
+      lineKeys(task).forEach((key) => usedLines.add(key));
+      usedAnswers.set(task.answer, (usedAnswers.get(task.answer) || 0) + 1);
+      setOf(usedInSet, slot.set).add(task.answer);
+      setOf(usedInVariant, slot.v).add(task.answer);
+      setOf(usedIds, slot.v).add(task.id);
+      if (big) { bigParts.set(partKey, true); bigRows.set(slot.v, (bigRows.get(slot.v) || 0) + 1); }
+      chosen[depth] = task;
+      if (step(depth + 1)) { return true; }
+      lineKeys(task).forEach((key) => usedLines.delete(key));
+      if (usedAnswers.get(task.answer) === 1) {
+        usedAnswers.delete(task.answer);
+        setOf(usedInSet, slot.set).delete(task.answer);
+        setOf(usedInVariant, slot.v).delete(task.answer);
+      } else {
+        usedAnswers.set(task.answer, usedAnswers.get(task.answer) - 1);
+        /* Ответ повторён в другом наборе/варианте: в своём наборе и
+           варианте он был единственным — снимаем только их. */
+        setOf(usedInSet, slot.set).delete(task.answer);
+        setOf(usedInVariant, slot.v).delete(task.answer);
+      }
+      setOf(usedIds, slot.v).delete(task.id);
+      if (big) { bigParts.delete(partKey); bigRows.set(slot.v, bigRows.get(slot.v) - 1); }
+    }
+    return false;
+  }
+
+  let ok = false;
+  try { ok = step(0); }
+  catch (error) {
+    /* Перебор исчерпан — решения при этом правиле нет (или его
+       не найти за разумное время); пробуем следующее правило. */
+    if (!/отведённый перебор/.test(error.message)) { throw error; }
+    ok = false;
+  }
+  console.log(`  перебор (${relaxed ? 'запасное' : 'строгое'} правило): шагов ${BUDGET - budget}, ${ok ? 'найдено' : 'решения нет'}`);
+  if (!ok) { return null; }
+  return { chosen, bigRows, usedLines, usedAnswers };
+}
+
+let found = search(false);
+let relaxedUsed = false;
+if (!found) { found = search(true); relaxedUsed = true; }
+if (!found) {
+  throw new Error('комплект не собрался: в банке не хватает разных прямых и ответов ' +
+    'даже при повторе ответов между наборами');
+}
+const repeats = [...found.usedAnswers].filter(([, n]) => n > 1).map(([a]) => a);
+
+const variants = [];
+for (let v = 1; v <= VARIANTS; v += 1) {
+  let no = 0;
+  const blocks = SOSTAV.map((part) => ({
+    title: skillTitle[part.id] || part.id, note: '', set: part.id,
+    tasks: slots.map((slot, i) => ({ slot, task: found.chosen[i] }))
+      .filter(({ slot }) => slot.v === v && slot.set === part.id)
+      .map(({ task }) => sheetTask(task, ++no)),
+  }));
+  variants.push({ v, blocks, bigRows: found.bigRows.get(v) || 0 });
+}
+const usedLines = found.usedLines;
+const usedAnswers = found.usedAnswers;
 
 function sheetTask(task, no) {
   return {
@@ -142,15 +260,6 @@ function sheetTask(task, no) {
   };
 }
 
-const variants = [];
-for (let v = 1; v <= VARIANTS; v += 1) {
-  let no = 0;
-  const blocks = SOSTAV.map((part) => ({
-    title: skillTitle[part.id] || part.id, note: '', set: part.id,
-    tasks: pick(part.id, part.count, v).map((task) => sheetTask(task, ++no)),
-  }));
-  variants.push({ v, blocks });
-}
 const perVariant = variants[0].blocks.reduce((sum, block) => sum + block.tasks.length, 0);
 
 /* ── Общие куски описания листа ──────────────────────────────── */
@@ -168,6 +277,10 @@ const CSS = `
 .sheet-variant-strip .sheet-chip { font-size: var(--sheet-fs-body); }
 .sheet-variant-strip-title { flex: none; font-weight: 600; white-space: nowrap; }
 .sheet-variant-strip .sheet-name-line > span:first-child { white-space: nowrap; }
+.sheet-task { padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 2.5); gap: calc(var(--sheet-step) * 2); }
+.sheet-task-body { gap: calc(var(--sheet-step) * 2.5); }
+.sheet-task-text { font-size: ${KEGL}; line-height: 1.35; }
+.sheet-tasks { gap: calc(var(--sheet-step) * 2); }
 ${KOMPAKT ? `.sheet-title-block { display: none; }
 .sheet-head { padding-bottom: calc(var(--sheet-step) * 2); margin-bottom: calc(var(--sheet-step) * 3); }
 .sheet-variant-strip { margin-bottom: calc(var(--sheet-step) * 1); }` : ''}
@@ -307,6 +420,10 @@ async function print(name, spec, expectTasks) {
 }
 
 console.log(`Комплект: вариантов ${VARIANTS}, задач в варианте ${perVariant}, раскладка ${LAYOUT}, клетка ${CELL} мм`);
+for (const variant of variants) {
+  const windows = variant.blocks.flatMap((block) => block.tasks).map((task) => '±' + task.meta.window.xmax);
+  console.log(`  вариант ${variant.v}: окна ${windows.join(' ')}, крупных рядов ${variant.bigRows}`);
+}
 await print('samostoyatelnaya-12-lineynaya-funkciya-cvet', studentSpec('color'), VARIANTS * perVariant);
 await print('samostoyatelnaya-12-lineynaya-funkciya-chb', studentSpec('print'), VARIANTS * perVariant);
 await print('samostoyatelnaya-12-lineynaya-funkciya-otvety-uchitel', teacherSpec('color'), 0);
@@ -320,3 +437,7 @@ const sostav = variants.map((variant) => ({
 }));
 fs.writeFileSync(path.join(OUT, 'sostav.json'), JSON.stringify(sostav, null, 1));
 console.log(`разных прямых ${usedLines.size}, разных ответов ${usedAnswers.size}; файлы в ${OUT}`);
+if (relaxedUsed) {
+  console.log('строгое правило «все ответы разные» не выполнимо; ответы, повторившиеся между наборами ' +
+    '(в своём наборе и в своём варианте — нет): ' + repeats.join(', '));
+}

@@ -516,7 +516,8 @@ function stepPairSolve(first, second, x0) {
       'и приводим подобные:'),
     formula(slopeTexExact(dk) + 'x = ' + texExact(db))
   ];
-  if (dk.p === 1 && dk.q === 1) {
+  if ((dk.p === 1 && dk.q === 1) || Line.isZero(db)) {
+    /* Делить на 1 или делить ноль — лишняя строка: сразу ответ. */
     blocks.push(formula('x = ' + texExact(x0)));
   } else {
     blocks.push(formula('x = ' + texExact(db) + ' : ' + texBracket(dk) + ' = ' + texExact(x0)));
@@ -532,7 +533,7 @@ function stepPairAnswer(task, first, x0) {
     var x = Line.num(x0);
     blocks.push(text('Спрашивают ординату точки пересечения. Подставляем найденный ' +
       math('x', 'x') + ' в любую из формул — возьмём ' + math('f', 'f') + ':'));
-    blocks.push(formula('y = f(' + texNegative(x) + ') = ' + texBracket(first.k) + ' \\cdot ' +
+    blocks.push(formula('y = f(' + tex(x) + ') = ' + texBracket(first.k) + ' \\cdot ' +
       texNegative(x) + ' + ' + texNegative(Line.num(first.b)) + ' = ' + texExact(y0)));
   } else {
     blocks.push(text('Спрашивают абсциссу точки пересечения — это найденный ' + math('x', 'x') + '.'));
