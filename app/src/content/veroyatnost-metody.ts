@@ -12,8 +12,11 @@
  * готовится» — придуманного здесь не будет.
  */
 
+import { METODY } from './metody';
+
 export const METODY_KARTOCHKI = {
-  title: 'Ключевые методы решения',
+  /* Подпись вкладки одна на все задания: content/metody.ts. */
+  title: METODY.title,
   /** Подпись кнопки-карточки для читалки: что откроется по нажатию. */
   otkryt: 'Открыть метод',
   modal: {

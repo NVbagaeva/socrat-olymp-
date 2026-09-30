@@ -1,0 +1,270 @@
+{
+  "kind": "prep",
+  "id": "P12Q-4",
+  "block": 4,
+  "title": "Коэффициент b",
+  "subtitle": "Найти b через вершину или через систему",
+  "seed": 12104,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueVertices": true,
+  "uniqueAnswers": true,
+  "maxSymmetricPairs": 2,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "minUp": 4,
+    "minDown": 4,
+    "uniqueVertices": true,
+    "uniqueAnswers": true,
+    "allIntegerB": true,
+    "knownA": 6,
+    "maxSymmetricPairs": 2
+  },
+  "tasks": [
+    {
+      "id": "P12Q-4-01",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Коэффициент $a$ уже стоит в формуле. Подставь абсциссу вершины в $x_{\\text{в}} = -\\dfrac{b}{2a}$ и реши уравнение относительно $b$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 4
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-4-02",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Абсцисса вершины и есть $-\\dfrac{b}{2a}$. Отсюда $b = -2a \\cdot x_{\\text{в}}$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 4
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "down",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-4-03",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Прочитай абсциссу вершины по чертежу, подставь её и известный $a$ в формулу вершины.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "up",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-4-04",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Формула вершины связывает то, что видно на чертеже, с тем, что ищут: $x_{\\text{в}} = -\\dfrac{b}{2a}$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "down",
+        "absA": 2
+      }
+    },
+    {
+      "id": "P12Q-4-05",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Точка пересечения с осью $Oy$ здесь не нужна: $b$ находится по вершине и уже известному $a$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ],
+        "cInteger": false
+      }
+    },
+    {
+      "id": "P12Q-4-06",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "hint": "Запиши $-\\dfrac{b}{2a} = x_{\\text{в}}$ с числами из условия и чертежа — останется одно уравнение.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "a дано, b через вершину",
+      "knownA": true,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "direction": "down",
+        "absA": [
+          1,
+          2
+        ],
+        "cInteger": false
+      }
+    },
+    {
+      "id": "P12Q-4-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "hint": "Коэффициент $c$ читается сразу по точке на оси $Oy$. Подставь две отмеченные точки в формулу и реши систему на $a$ и $b$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "a и b из системы",
+      "knownA": false,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "up",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-4-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "hint": "Из точки на оси $Oy$ возьми $c$, потом подставь по очереди обе отмеченные точки: два уравнения, два неизвестных.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "a и b из системы",
+      "knownA": false,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "down",
+        "absA": 1
+      }
+    },
+    {
+      "id": "P12Q-4-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "hint": "Отмеченные точки стоят на одной высоте — значит вершина ровно посередине между ними. Найди $x_{\\text{в}}$, потом $a$ по третьей точке и $b$ по формуле вершины.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "симметрия — вершина по двум точкам",
+      "knownA": false,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "direction": "up",
+        "absA": 2,
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "P12Q-4-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "hint": "Две точки на одной высоте симметричны относительно оси параболы: середина между их абсциссами и есть $x_{\\text{в}}$.",
+      "answerRule": "b",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "симметрия — вершина по двум точкам",
+      "knownA": false,
+      "constraints": {
+        "vertex": {
+          "xNonZero": true
+        },
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "direction": "down",
+        "absA": 2,
+        "windowMax": 6
+      }
+    }
+  ]
+}

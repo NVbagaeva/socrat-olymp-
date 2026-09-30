@@ -1,0 +1,221 @@
+{
+  "kind": "prep",
+  "id": "P12Q-3",
+  "block": 3,
+  "title": "Коэффициент c",
+  "subtitle": "Прочитать свободный член по оси Oy",
+  "seed": 12103,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueIntercepts": true,
+  "uniqueVertices": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "minUp": 5,
+    "minDown": 5,
+    "minFractionA": 3,
+    "minDistinctC": 10,
+    "uniqueVertices": true,
+    "minPositiveC": 4,
+    "minNegativeC": 4
+  },
+  "tasks": [
+    {
+      "id": "P12Q-3-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Подставь $x = 0$: слагаемые с $x^2$ и с $x$ обращаются в ноль, остаётся $y = c$.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "up",
+        "aKind": "integer",
+        "cSign": "positive",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Посмотри, на какой высоте парабола пересекает вертикальную ось. Эта высота и есть $c$.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "down",
+        "aKind": "integer",
+        "cSign": "positive",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Точка пересечения с осью $Oy$ ниже начала координат — значит $c$ отрицательный.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "up",
+        "aKind": "integer",
+        "cSign": "negative",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Считать не нужно: ордината отмеченной точки на оси $Oy$ и есть ответ.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "down",
+        "aKind": "integer",
+        "cSign": "negative",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Ветви и ширина параболы на $c$ не влияют: смотри только на точку пересечения с осью $Oy$.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "up",
+        "aKind": "fraction",
+        "cSign": "positive",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Отсчитай клетки от начала координат до отмеченной точки вниз — столько же и в ответе, со знаком минус.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "down",
+        "aKind": "fraction",
+        "cSign": "negative",
+        "cVisible": true,
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Вершина стоит в стороне от оси $Oy$, но $c$ берётся не из неё, а из точки пересечения с осью.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "up",
+        "aKind": "any",
+        "cNonZero": true,
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Найди на чертеже вертикальную ось и место, где её пересекает парабола: ордината этой точки — ответ.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "down",
+        "aKind": "any",
+        "cNonZero": true,
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "marks": {
+          "intercept": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-3-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Вершина ниже оси $Ox$, но это не $c$. Коэффициент $c$ — ордината точки на оси $Oy$.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "up",
+        "aKind": "fraction",
+        "cSign": "negative",
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "negative"
+        },
+        "marks": {
+          "intercept": true
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "P12Q-3-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечена точка пересечения графика с осью $Oy$. Найдите $c$.",
+      "hint": "Вершина выше оси $Ox$, а $c$ читается там, где график пересекает ось $Oy$: это разные точки.",
+      "answerRule": "c",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "c читается с оси Oy",
+      "constraints": {
+        "direction": "down",
+        "aKind": "any",
+        "cSign": "positive",
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "positive"
+        },
+        "marks": {
+          "intercept": true
+        },
+        "windowMax": 6
+      }
+    }
+  ]
+}

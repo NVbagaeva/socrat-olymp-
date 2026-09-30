@@ -242,6 +242,12 @@
   border-color: var(--color-primary-hover);
   box-shadow: var(--shadow-sm);
 }
+/* Семейство в предпросмотре: страницы открываются, но задач ещё нет —
+   обычная поверхность и бейдж, без галочки и подложки открытого. */
+.subtopic-card--preview:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
 /* Закрытое семейство: то же, что у неоткрытого раздела в банке —
    приглушённая поверхность, третичный текст, наведение не отзывается. */
 .subtopic-card--soon {

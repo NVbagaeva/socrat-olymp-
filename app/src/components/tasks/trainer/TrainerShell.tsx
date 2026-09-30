@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { trainerPage } from '@/content/trainerModes';
+import { trainerPage, trainerWordsFor } from '@/content/trainerModes';
+import { skillLevelsFor } from '@/content/skills12';
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { skillItems } from '../configurator';
@@ -27,6 +28,16 @@ export interface TrainerShellProps {
  */
 export function TrainerShell({ subtopic, base, preset = null, children }: TrainerShellProps) {
   const family = findManifestFamily(subtopic.id);
+  /* Ярлык может вести не в один набор, а в связку: тогда
+     конфигуратор показывает только её наборы, и «Смешанная» идёт
+     по ним же — иначе выбранное на экране расходилось бы с тем,
+     что попадёт в тренировку. */
+  const group = preset?.skills ?? [];
+  const all = skillItems(family);
+  const skills = group.length > 1 ? all.filter((item) => group.includes(item.id)) : all;
+  const total = group.length > 1
+    ? skills.reduce((sum, item) => sum + item.count, 0)
+    : (family?.prototypes.tasks ?? 0);
 
   return (
     <section className="trainer">
@@ -42,8 +53,13 @@ export function TrainerShell({ subtopic, base, preset = null, children }: Traine
         <TrainerBuilder
           base={base}
           family={subtopic.title}
-          familyTotal={family?.prototypes.tasks ?? 0}
-          skills={skillItems(family)}
+          familyTotal={total}
+          skills={skills}
+          levels={skillLevelsFor(subtopic.id)}
+          words={trainerWordsFor(subtopic.id)}
+          /* Ответ выбором варианта — признак подтемы: у линейной его
+             нет, и её тренажёр берёт только числовые ответы. */
+          choice={subtopic.choiceAnswers === true}
           preset={preset}
         />
       )}

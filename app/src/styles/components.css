@@ -2470,3 +2470,312 @@ a.task-card {
     --glass-badge-size: 56px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   Карточки «Ключевых методов решения»
+
+   Сетка карточек, карточка и окно метода одинаковы в разделах №4
+   и №5 и в подтеме «Квадратичная функция» задания №12. Правила
+   лежали в стилях вероятности; подтеме №12 пришлось бы тянуть весь
+   их файл ради трёх селекторов. Своим файлом они тоже не стали:
+   лишний файл стилей — лишняя ссылка на страницах, которые этой
+   вкладкой не пользуются. Здесь они в общем слое компонентов, где
+   и место общему на два раздела.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Вкладка «Ключевые методы решения» ──────────────────────────── */
+
+/* Заголовок вкладки; сетка карточек методов и модалка метода — одни
+   на все разделы, где эта вкладка есть. */
+.vmetody {
+  display: grid;
+  gap: var(--space-6);
+}
+.vmetody__title {
+  margin: 0;
+  color: var(--color-text-brand);
+}
+
+/* ── Сетка карточек ─────────────────────────────────────────────── */
+
+.vmetody__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 1023px) {
+  .vmetody__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .vmetody__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Карточка — кнопка: номер в кружке, название, подпись, плашка
+   формулы. Растягивается на высоту ряда, плашка прижата к низу. */
+.vmetod {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  align-items: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease);
+}
+.vmetod:hover {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.vmetod:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.vmetod__no {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1;
+}
+.vmetod__title {
+  align-self: center;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-h4);
+  overflow-wrap: anywhere;
+}
+.vmetod__sut {
+  grid-column: 2;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.vmetod__formula {
+  grid-column: 2;
+  align-self: end;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+}
+@media (max-width: 767px) {
+  .vmetod {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Модалка метода ─────────────────────────────────────────────── */
+
+/* Заголовок — с номером в кружке; справа оставлено место под крестик,
+   иначе на узком экране длинное название уходит под него. */
+.vmetod-modal .modal__t {
+  padding-right: var(--space-10);
+}
+.vmetod-modal__title {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.vmetod-modal__title .vmetod__no {
+  flex: none;
+}
+.vmetod-modal__body {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.vmetod-modal__formula {
+  grid-column: auto;
+  align-self: auto;
+  font-size: 1.125em;
+}
+.vmetod-modal__block {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.vmetod-modal__sub {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.vmetod-modal__soon {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Подвал: счётчик слева, кнопка справа; на узком экране столбиком. */
+.vmetod-modal .modal__f {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.vmetod-modal__schet {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* Окно метода шире общего: четыре блока и формула. Тени у него нет —
+   правило раздела; обводка та же, что у карточек. */
+.vmetod-modal {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  /* Окно не выше экрана: с длинным описанием на телефоне кнопка
+     подвала иначе уходила за нижний край. Прокручивается тело,
+     подвал со счётчиком и кнопкой остаётся на виду. */
+  max-height: calc(100dvh - 2 * var(--space-5));
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+.vmetod-modal .modal__b {
+  min-height: 0;
+  overflow-y: auto;
+}
+.vmetod-modal .modal__f {
+  flex: none;
+}
+
+/* ── Несколько тренировок у одного метода ───────────────────────────
+   Метод бывает нужен не одному набору задач: тогда в подвале окна
+   у каждого набора своя строка с названием, счётчиком и кнопкой.
+   У метода с одной тренировкой подвал прежний — эти правила его
+   не касаются. */
+
+.vmetod-modal__trenirovki {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+.vmetod-modal__trenirovka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+/* Название набора над счётчиком: на узком экране строка счётчика
+   и кнопка встают друг под друга, и название не должно их разводить. */
+.vmetod-modal__nabor {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.vmetod-modal__trenirovka .btn {
+  flex: none;
+}
+
+/* ── Тексты блоков окна ─────────────────────────────────────────── */
+
+.vmetod-modal__text {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.vmetod-modal__text + .vmetod-modal__text {
+  margin-top: var(--space-2);
+}
+.vmetod-modal__shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-6);
+  /* В общем слое у списков маркеры сняты: здесь номера шагов нужны,
+     и ставит их разметка, а не текст. */
+  list-style: decimal;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* ── Тренажёр квадратичной: разбор и рисунок метода ──────────────
+   Расхождение подтемы: после ответа под заданием открывается тот же
+   разбор, что во вкладке опорных задач, и рядом — чем эту задачу
+   решают. У линейной подтемы ни того, ни другого нет, и правила
+   ниже её экрана не касаются. */
+
+.tsolution {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.tmethod {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+.tmethod__label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+.tmethod__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+/* Миниатюра не тянется: на узком экране она уходит над текстом,
+   но остаётся того же размера — мельче её уже не прочитать. */
+.tmethod__chart {
+  flex: none;
+  display: block;
+  width: 96px;
+}
+.tmethod__chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.tmethod__text {
+  flex: 1 1 14rem;
+}
+.tmethod__title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tmethod__tip {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+}

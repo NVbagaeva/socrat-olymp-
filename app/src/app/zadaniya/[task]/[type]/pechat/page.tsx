@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { activeSubtopicParams, findSubtopic } from '@/content/sections';
+import { findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { generatorPage } from '@/content/generator';
 import { SheetPage } from './SheetPage';
 import 'katex/dist/katex.min.css';
@@ -10,9 +10,10 @@ import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import './pechat.css';
 
-/* Страница печати есть только у открытых подтем. */
+/* Страница печати есть только у подтем с наборами прототипов: лист
+   собирает генератор, а он идёт по тем же наборам, что тренажёр. */
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return trainerSubtopicParams();
 }
 export const dynamicParams = false;
 
@@ -30,14 +31,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  */
 export default async function Page({ params }: { params: Params }) {
   const { task, type } = await params;
-  if (!findSubtopic(task, type)) {
+  const subtopic = findSubtopic(task, type);
+  if (!subtopic) {
     notFound();
   }
   return (
     /* useSearchParams требует границы ожидания: без неё статический
        экспорт страницы не собирается. */
     <Suspense fallback={null}>
-      <SheetPage withAnswers={false} />
+      <SheetPage withAnswers={false} {...(subtopic.sheetTitle === undefined ? {} : { subtopic: subtopic.sheetTitle })} />
     </Suspense>
   );
 }

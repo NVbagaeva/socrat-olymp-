@@ -1,0 +1,473 @@
+{
+  "kind": "prototype",
+  "id": "12Q.D",
+  "block": 4,
+  "title": "12Q.D · коэффициент b",
+  "subtitle": "Найдите b через вершину или через систему",
+  "seed": 12204,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "maxSymmetricPairs": 4,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "uniqueVertices": true,
+    "allIntegerB": true,
+    "knownA": 12,
+    "maxSymmetricPairs": 4
+  },
+  "tasks": [
+    {
+      "id": "12Q.D-01",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 4
+        },
+        "absA": 1,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-02",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 4
+        },
+        "absA": 1,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-03",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "absA": 2,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-04",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "absA": 2,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-05",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "absA": 3,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-06",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 3
+        },
+        "absA": 3,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-07",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "cInteger": false,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-08",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "cInteger": false,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-09",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "cInteger": false,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-10",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "cInteger": false,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-11",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 2
+        },
+        "absA": 1,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-12",
+      "question": "На рисунке изображён график функции $y = {aTerm} + bx + c$. Отмечена вершина параболы. Найдите $b$.",
+      "answerRule": "b",
+      "level": "lucky",
+      "constraints": {
+        "bInteger": true,
+        "marks": {
+          "vertex": true
+        },
+        "vertex": {
+          "xNonZero": true,
+          "xAbsMin": 2
+        },
+        "absA": 1,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": true
+    },
+    {
+      "id": "12Q.D-13",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": false
+    },
+    {
+      "id": "12Q.D-14",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": false
+    },
+    {
+      "id": "12Q.D-15",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "windowMax": 6,
+        "direction": "down"
+      },
+      "knownA": false,
+      "levelReason": "симметрия — вершина по двум точкам"
+    },
+    {
+      "id": "12Q.D-16",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "windowMax": 6,
+        "direction": "up"
+      },
+      "knownA": false,
+      "levelReason": "симметрия — вершина по двум точкам"
+    },
+    {
+      "id": "12Q.D-17",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "knownA": false
+    },
+    {
+      "id": "12Q.D-18",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": false
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "knownA": false
+    },
+    {
+      "id": "12Q.D-19",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "windowMax": 6,
+        "direction": "down"
+      },
+      "knownA": false,
+      "levelReason": "симметрия — вершина по двум точкам"
+    },
+    {
+      "id": "12Q.D-20",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены точка пересечения с осью $Oy$ и две точки с целыми координатами. Найдите $b$.",
+      "answerRule": "b",
+      "level": "unlucky",
+      "constraints": {
+        "bInteger": true,
+        "cVisible": true,
+        "cNonZero": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "marks": {
+          "intercept": true,
+          "points": 2,
+          "sides": "both",
+          "symmetric": true
+        },
+        "windowMax": 6,
+        "direction": "up"
+      },
+      "knownA": false,
+      "levelReason": "симметрия — вершина по двум точкам"
+    }
+  ]
+}

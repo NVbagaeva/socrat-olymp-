@@ -11,9 +11,9 @@
   "uniqueAnswers": true,
   "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка.",
   "composition": {
-    "count": 20,
+    "count": 24,
     "levels": {
-      "lucky": 2,
+      "lucky": 6,
       "unlucky": 18
     },
     "levelOrder": false,
@@ -23,12 +23,12 @@
       "fraction-b": 1
     },
     "intersectionInside": 0,
-    "intersectionOffscreen": 20,
+    "intersectionOffscreen": 24,
     "intersectionOffscreenMin": 1.5,
     "intersectionMargin": 0.2,
-    "askedCoordinateOffscreen": 12,
-    "bothIncreasing": 5,
-    "bothDecreasing": 5,
+    "askedCoordinateOffscreen": 16,
+    "bothIncreasing": 7,
+    "bothDecreasing": 7,
     "mixedDirections": 10,
     "angleMin": 15,
     "angleMax": 48,
@@ -541,7 +541,7 @@
         ],
         "intersection": {
           "inside": false,
-            "offscreenMin": 1.2,
+          "offscreenMin": 1.2,
           "marginCells": 1,
           "decimals": 1,
           "axis": "y",
@@ -721,6 +721,130 @@
         }
       },
       "levelReason": "fraction-b",
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-21",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "window": 6,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bMax": 5
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bMax": 5
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "y",
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-22",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "window": 6,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bMax": 5
+          },
+          {
+            "slope": "integer",
+            "direction": "up",
+            "bMax": 5
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "y",
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-23",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "window": 6,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bMax": 5
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bMax": 5
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "y",
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
+        }
+      },
+      "intersectionOffscreen": true
+    },
+    {
+      "id": "12.D-24",
+      "level": "lucky",
+      "question": "На рисунке изображены графики линейных функций $y = f(x)$ и $y = g(x)$. Найдите ординату точки их пересечения.",
+      "answerRule": "intersection-y",
+      "answerType": "number",
+      "constraints": {
+        "window": 6,
+        "varyBySeed": true,
+        "lines": [
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bMax": 5
+          },
+          {
+            "slope": "integer",
+            "direction": "down",
+            "bMax": 5
+          }
+        ],
+        "intersection": {
+          "inside": false,
+          "decimals": 1,
+          "axis": "y",
+          "askedOffscreen": true,
+          "askedOffscreenMin": 2
+        }
+      },
       "intersectionOffscreen": true
     }
   ],

@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
+import { QUADRATIC_SECTIONS } from '@/content/theoryQuadratic';
 import { WhatIsFunction } from './WhatIsFunction';
 import { GraphNotFunction } from './GraphNotFunction';
 import { WhatKinds } from './WhatKinds';
+import { QuadraticSection } from './quadratic/QuadraticSection';
 
 /**
  * Свёрстанные разделы теории по ключу из конфига.
@@ -13,6 +15,13 @@ export const theoryBodies: Record<string, ReactNode> = {
   'what-is-function': <WhatIsFunction />,
   'kinds-of-functions': <WhatKinds />,
   'graph-not-function': <GraphNotFunction />,
+  /* Разделы квадратичной подтемы: одна разметка, семь наборов данных. */
+  ...Object.fromEntries(
+    QUADRATIC_SECTIONS.map((section) => [
+      section.id,
+      <QuadraticSection section={section} key={section.id} />,
+    ]),
+  ),
 };
 
 export { WhatIsFunction } from './WhatIsFunction';

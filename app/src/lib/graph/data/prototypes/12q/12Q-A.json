@@ -1,0 +1,309 @@
+{
+  "kind": "prototype",
+  "id": "12Q.A",
+  "block": 1,
+  "title": "12Q.A · знак коэффициента a",
+  "subtitle": "Дан график параболы. Определите, куда направлены ветви",
+  "seed": 12201,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "allChoice": 2,
+    "optionsDistinct": true,
+    "minUp": 10,
+    "minDown": 10,
+    "minFractionA": 6,
+    "uniqueVertices": true,
+    "noAlternatingAnswers": true
+  },
+  "tasks": [
+    {
+      "id": "12Q.A-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "absA": 2,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "absA": 2,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "absA": 3,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "absA": 3,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "vertex": {
+          "yNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "vertex": {
+          "yNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-11",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "any",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-12",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "any",
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-13",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "absA": 2,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-14",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "absA": 2,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-15",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "any",
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-16",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "any",
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-17",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "vertex": {
+          "ySign": "negative"
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-18",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "integer",
+        "vertex": {
+          "ySign": "negative"
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-19",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "vertex": {
+          "ySign": "positive"
+        },
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.A-20",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "answerRule": "sign-a",
+      "level": "lucky",
+      "constraints": {
+        "aKind": "fraction",
+        "vertex": {
+          "ySign": "positive"
+        },
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    }
+  ]
+}

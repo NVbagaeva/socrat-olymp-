@@ -18,6 +18,8 @@ declare global {
 export interface SheetPageProps {
   /** Лист с ответами: те же задачи и раздел «Ответы» в конце. */
   withAnswers: boolean;
+  /** Название подтемы в шапке листа. */
+  subtopic?: string;
 }
 
 /** Спецификация набора из готового документа шаблона. */
@@ -40,7 +42,7 @@ function specJson(html: string): string {
  * PDF» — и файл на диске. Адрес страницы можно открыть повторно —
  * лист будет тем же.
  */
-export function SheetPage({ withAnswers }: SheetPageProps) {
+export function SheetPage({ withAnswers, subtopic }: SheetPageProps) {
   const query = useSearchParams();
   const params = parseSheetQuery(query);
   const [spec, setSpec] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export function SheetPage({ withAnswers }: SheetPageProps) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheetSpec(params, withAnswers), {});
+    const html = buildDocument(sheetSpec(params, withAnswers, subtopic), {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setSpec(specJson(html));
@@ -77,7 +79,7 @@ export function SheetPage({ withAnswers }: SheetPageProps) {
     };
     /* Параметры приходят из адреса и за жизнь страницы не меняются. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withAnswers, query.toString()]);
+  }, [withAnswers, subtopic, query.toString()]);
 
   /* Спецификация в документе — запускаем набор и ждём отчёт. */
   useEffect(() => {

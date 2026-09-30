@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
 import { PrepTasks } from '@/components/tasks/prep';
-import { activeSubtopicParams, findSection, findSubtopic } from '@/content/sections';
+import { findSection, findSubtopic, prepSubtopicParams } from '@/content/sections';
 import { prepPage } from '@/content/prepSkills';
 import { findPrepSkill, prepSkillIds } from '@/lib/prep';
 import { OPORNYE } from '@/content/opornye';
@@ -17,11 +17,12 @@ import '../../prep.css';
 import '../../trainer.css';
 import '../../configurator.css';
 
-/* Адреса перечислимы на сборке: открытые подтемы × навыки. Руками
-   их никто не пишет — список навыков один и тот же везде. */
+/* Адреса перечислимы на сборке: подтемы с навыками × их навыки.
+   Руками их никто не пишет — список навыков подтемы один и тот же
+   везде. */
 export function generateStaticParams() {
-  return activeSubtopicParams().flatMap((params) =>
-    prepSkillIds().map((skill) => ({ ...params, skill })),
+  return prepSubtopicParams().flatMap((params) =>
+    prepSkillIds(params.type).map((skill) => ({ ...params, skill })),
   );
 }
 export const dynamicParams = false;
@@ -31,7 +32,7 @@ type Params = Promise<{ task: string; type: string; skill: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type, skill } = await params;
   const subtopic = findSubtopic(task, type);
-  const found = findPrepSkill(skill);
+  const found = findPrepSkill(type, skill);
   return subtopic && found
     ? { title: `${found.title} · ${prepPage.title} · ${subtopic.title} — Будет на ЕГЭ` }
     : {};
@@ -48,7 +49,7 @@ export default async function Page({ params }: { params: Params }) {
   const { task, type, skill } = await params;
   const section = findSection(task);
   const subtopic = findSubtopic(task, type);
-  const found = findPrepSkill(skill);
+  const found = findPrepSkill(type, skill);
   if (!section || !subtopic || !found) {
     notFound();
   }
@@ -62,7 +63,7 @@ export default async function Page({ params }: { params: Params }) {
         subtopic={subtopic}
         initialTab="prep"
         trail={[{ label: prepPage.title, href: `${base}/${OPORNYE.tail}` }, { label: found.title }]}
-        prep={<PrepTasks skill={found} base={base} />}
+        prep={<PrepTasks type={subtopic.id} skill={found} base={base} />}
       />
     </AppShell>
   );

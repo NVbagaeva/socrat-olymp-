@@ -30,6 +30,12 @@ export interface SessionRequest {
   mode: TrainerModeId;
   /** История ошибок: идентификаторы задач, например «12.A-03». */
   mistakes: string[];
+  /**
+   * Принимать задачи с ответом выбором варианта. Признак подтемы
+   * (data/functionTypes.ts, choiceAnswers): у линейной он не задан,
+   * и фильтр остаётся прежним — только числовой ответ.
+   */
+  choice?: boolean;
 }
 
 export interface Session {
@@ -41,7 +47,10 @@ export interface Session {
 }
 
 /* Сколько seed перебирать на один набор. Задач уровня lucky в 12.C
-   всего две на набор: на десять задач нужно пять удачных seed. */
+   и 12.D по шесть на набор (две прежние с закреплёнными числами и
+   четыре новые, у которых числа зависят от seed): на десять задач
+   нужно два удачных seed, а запас нужен на seed, которые движок
+   отверг. */
 const SEED_TRIES = 24;
 
 /**
@@ -62,8 +71,14 @@ export function seedFrom(base: string): SeedFor {
 }
 
 /** У задачи есть посчитанный числовой ответ — иначе её нельзя проверить. */
-function answerable(task: EngineTask & { answerType?: string }): boolean {
-  return (task.answerType ?? 'number') === 'number' && parseAnswer(task.answer) !== null;
+function answerable(task: EngineTask & { answerType?: string }, choice: boolean): boolean {
+  const type = task.answerType ?? 'number';
+  if (type === 'choice') {
+    /* Ответ такой задачи — номер верного варианта, и проверять её
+       можно, только если варианты пришли вместе с ней. */
+    return choice && Array.isArray(task.options) && task.options.length > 0;
+  }
+  return type === 'number' && parseAnswer(task.answer) !== null;
 }
 
 function levelOf(task: EngineTask): string | null {
@@ -96,6 +111,7 @@ function fromSet(
   want: number,
   seedFor: SeedFor,
   tally: { rejected: number },
+  choice: boolean,
 ): EngineTask[] {
   const picked: Picked[] = [];
   const seen = new Set<string>();
@@ -105,7 +121,8 @@ function fromSet(
     if (tasks === null) {
       continue;
     }
-    const fit = tasks.filter((task) => answerable(task) && (level === null || levelOf(task) === level));
+    const fit = tasks.filter((task) => answerable(task, choice) &&
+      (level === null || levelOf(task) === level));
     /* Новые задачи — вперёд, повторы — только если новых уже нет. */
     const fresh = fit.filter((task) => !seen.has(task.id));
     const queue = fresh.length > 0 ? fresh : fit;
@@ -125,6 +142,7 @@ function fromMistakes(
   want: number,
   seedFor: SeedFor,
   tally: { rejected: number },
+  choice: boolean,
 ): EngineTask[] {
   const out: EngineTask[] = [];
   const bySet = new Map<string, EngineTask[]>();
@@ -141,7 +159,7 @@ function fromMistakes(
         bySet.set(setId, tasks);
       }
       const found = tasks.find((task) => task.id === id);
-      if (found !== undefined && answerable(found)) {
+      if (found !== undefined && answerable(found, choice)) {
         out.push(found);
       }
     }
@@ -162,6 +180,7 @@ export interface PickedTasks {
  */
 export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTasks {
   const tally = { rejected: 0 };
+  const choice = request.choice === true;
   const want = Math.max(1, Math.floor(request.count));
   let engine: EngineTask[] = [];
 
@@ -169,7 +188,7 @@ export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTask
     const known = request.mistakes.filter((id) =>
       request.skills.some((setId) => id.startsWith(`${setId}-`)),
     );
-    engine = fromMistakes(known, want, seedFor, tally);
+    engine = fromMistakes(known, want, seedFor, tally, choice);
   } else {
     const sets = request.skills;
     /* Поровну с каждого набора, остаток — первым. Порядок задач
@@ -179,7 +198,7 @@ export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTask
     sets.forEach((setId) => {
       const extra = rest > 0 ? 1 : 0;
       rest -= extra;
-      engine = engine.concat(fromSet(setId, request.level, base + extra, seedFor, tally));
+      engine = engine.concat(fromSet(setId, request.level, base + extra, seedFor, tally, choice));
     });
   }
 

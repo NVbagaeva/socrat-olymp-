@@ -26,6 +26,11 @@ export interface TrainerModeOption<M extends string = string> {
 export interface ConfiguratorPreset<M extends string = string> {
   /** Навык, выбранный при заходе. null — первый в списке. */
   skill: string | null;
+  /**
+   * Наборы, которыми ярлык ограничивает конфигуратор. Пусто или не
+   * задано — все наборы семейства.
+   */
+  skills?: string[];
   mode: M;
 }
 

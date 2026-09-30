@@ -30,32 +30,61 @@ function answerHtml(task) {
     Разбор строится не у всех задач. Нет разбора — задача просто
     не попадает в раздел кратких решений, и её ответ остаётся
     в таблице. Придумывать решение нельзя. */
-function shortSolution(task, generator, solutionBuilder) {
-  let analysis = null;
-  try { analysis = generator.analysis(task.id, task.seed); }
+/* Краткое решение задачи о параболе: разбор строит свой модуль, и
+   задача несёт в meta всё, что ему нужно. Берётся тот же итог каждого
+   шага, что и у прямой. */
+function shortSolutionQuadratic(task, quadraticBuilder) {
+  if (!quadraticBuilder) { return null; }
+  let steps;
+  try { steps = quadraticBuilder.fromTask(task); }
   catch { return null; }
-  if (!analysis) { return null; }
+  const formulas = [];
+  steps.forEach((step) => {
+    const own = (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex);
+    if (own.length) { formulas.push(own[own.length - 1].tex); }
+  });
+  return formulas.length < 2 ? null : formulas;
+}
 
+function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
+  if (task.meta && task.meta.family === 'quadratic') {
+    return shortSolutionQuadratic(task, quadraticBuilder);
+  }
   const rule = task.answerRule;
   let steps;
-  try {
-    steps = solutionBuilder.build({
-      triangle: analysis.triangle,
-      line: analysis.line,
-      window: analysis.task.meta.window,
-      task: { rule, answer: task.answer, query: task.meta.query, probe: task.meta.probe },
-    });
-  } catch { return null; }
+
+  /* Две прямые (12.C, 12.D): разбор строится по коэффициентам
+     и отмеченным точкам обеих прямых из meta, треугольник наклона
+     ему не нужен. */
+  const lines = task.meta && task.meta.lines;
+  if (lines && lines.length === 2) {
+    try {
+      steps = solutionBuilder.build({
+        lines,
+        window: task.meta.window,
+        task: { rule, answer: task.answer },
+      });
+    } catch { return null; }
+  } else {
+    let analysis = null;
+    try { analysis = generator.analysis(task.id, task.seed); }
+    catch { return null; }
+    if (!analysis) { return null; }
+
+    try {
+      steps = solutionBuilder.build({
+        triangle: analysis.triangle,
+        line: analysis.line,
+        window: analysis.task.meta.window,
+        task: { rule, answer: task.answer, query: task.meta.query, probe: task.meta.probe },
+      });
+    } catch { return null; }
+  }
 
   /* Пятый шаг разбора умеет не всякое правило ответа. Чего он
-     не умеет — отдаёт общей фразой вместо вывода. Для задач
-     на пересечение это именно так: разбор описывает одну прямую,
-     а ответ получается из системы двух. Печатать такие формулы
-     как решение нельзя — из них заявленный ответ не выводится.
-
-     Ловим по самой фразе, а не по списку правил: если в движке
-     появится ветка для пересечений, решения начнут печататься
-     сами, без правки этого файла. */
+     не умеет — отдаёт общей фразой вместо вывода. Печатать такие
+     формулы как решение нельзя — из них заявленный ответ
+     не выводится. Ловим по самой фразе, а не по списку правил. */
   const last = steps[steps.length - 1] || {};
   const stub = (last.blocks || []).some((piece) =>
     piece.type === 'text' && /Ответ читается из формулы/.test(piece.html || ''));
@@ -83,7 +112,7 @@ function shortSolution(task, generator, solutionBuilder) {
  * blocks — [{ title, tasks: [{ no, id, answer, answerHtml, options,
  *             answerRule, seed, meta }] }]
  */
-export function answersItems(blocks, generator, solutionBuilder) {
+export function answersItems(blocks, generator, solutionBuilder, quadraticBuilder) {
   const items = [answers.sectionHead('Ответы', 'по блокам, сквозная нумерация')];
 
   blocks.forEach((block) => {
@@ -97,7 +126,7 @@ export function answersItems(blocks, generator, solutionBuilder) {
   const solved = [];
   blocks.forEach((block) => {
     block.tasks.forEach((task) => {
-      const formulas = shortSolution(task, generator, solutionBuilder);
+      const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
       if (formulas) { solved.push(answers.solution(task.no, formulas, task.answer)); }
     });
   });

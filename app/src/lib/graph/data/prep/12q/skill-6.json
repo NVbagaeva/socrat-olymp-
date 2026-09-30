@@ -1,0 +1,330 @@
+{
+  "kind": "prep",
+  "id": "P12Q-6",
+  "block": 6,
+  "title": "Аргумент по значению",
+  "subtitle": "Найти нужный из двух корней уравнения",
+  "seed": 12106,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueVertices": true,
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "minUp": 5,
+    "minDown": 5,
+    "minFractionA": 2,
+    "uniqueVertices": true,
+    "uniqueAnswers": true,
+    "queryOutsideWindow": true,
+    "picks": {
+      "larger": 3,
+      "smaller": 3,
+      "positive": 2,
+      "negative": 2
+    }
+  },
+  "tasks": [
+    {
+      "id": "P12Q-6-01",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Запиши формулу по вершине и отмеченной точке, реши уравнение $f(x) = {y0}$ и возьми больший из двух корней.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "absA": 1,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-02",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Корней будет два: они симметричны относительно $x_{\\text{в}}$. В ответ идёт меньший — тот, что левее вершины.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "absA": 1,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-03",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "hint": "Из двух корней выбирают положительный. Посмотри на чертёж: с какой стороны от нуля он стоит.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "absA": 2,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-04",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "hint": "Уравнение даст два значения $x$. Нужен отрицательный — он левее оси $Oy$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "absA": 2,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-05",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Собери формулу через вершину: $a(x - m)^2 + n = {y0}$. Дальше квадратный корень, и оба знака дают два корня.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный a или полуцелая вершина",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ],
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-06",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Не бери первый попавшийся корень: в условии сказано, какой из двух нужен.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный a или полуцелая вершина",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "absA": [
+          1,
+          2
+        ],
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-07",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "hint": "Корни стоят симметрично относительно вершины. Найди $x_{\\text{в}}$, отступи от него на равные расстояния в обе стороны.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "absA": 1,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-08",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "hint": "Сначала $a$ шагом от вершины, потом уравнение. Из двух корней выбери тот, что просит условие.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "коэффициенты целые, дальше уравнение",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "absA": 1,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-09",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Вершина между узлами сетки, но метод тот же: формула через вершину и уравнение.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный a или полуцелая вершина",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "direction": "down",
+        "absA": 2,
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        }
+      }
+    },
+    {
+      "id": "P12Q-6-10",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "hint": "Дробный $a$ делает корни дальше от вершины, но их по-прежнему два, и выбирают один по условию.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный a или полуцелая вершина",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "y": "half"
+        },
+        "direction": "up",
+        "absA": [
+          1,
+          2
+        ],
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        }
+      }
+    }
+  ]
+}

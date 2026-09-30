@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useRef } from 'react';
+import { EmptyState } from '@/components/ui';
 import { useDismiss } from '@/lib/dismiss';
 import { NavIcon } from '@/components/ui';
 import type { ReactNode, RefObject } from 'react';
@@ -11,6 +12,11 @@ export interface TutorMenuProps {
   items: TutorMaterial[];
   /** Подпись кнопки в ленте вкладок. */
   label: string;
+  /**
+   * Что показать, когда карточек нет. Не задано — меню без карточек
+   * пустое: у разделов, где материалы есть всегда, это не встречается.
+   */
+  empty?: { title: string; description: string };
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Лента вкладок: кнопка встаёт последней внутри неё. */
@@ -112,6 +118,7 @@ function sheet(kind: TutorMaterial['icon']): ReactNode {
 export function TutorMenu({
   items,
   label,
+  empty,
   open,
   onOpenChange,
   children,
@@ -189,43 +196,54 @@ export function TutorMenu({
 
       {open ? (
         <div className="tmenu" id={`${id}-menu`} ref={attach} role="group" aria-label={label}>
-          <ul className="tmenu__list">
-            {items.map((item) => {
-              const inside = (
-                <>
-                  <span className="tutor-card__icon" aria-hidden="true">
-                    {sheet(item.icon)}
-                  </span>
-                  <span className="tutor-card__text">
-                    <span className="tutor-card__title">{item.title}</span>
-                    <span className="tutor-card__lead">{item.lead}</span>
-                  </span>
-                  <span className="tutor-card__go" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                      <path d="M12 4v10m0 0l-4-4m4 4l4-4" />
-                      <path d="M5 19h14" />
-                    </svg>
-                  </span>
-                </>
-              );
+          {/* Материалов у подтемы ещё нет: вместо карточек — честное
+              пустое состояние, а не карточки соседней подтемы. */}
+          {items.length === 0 && empty !== undefined ? (
+            <EmptyState
+              className="tmenu__empty"
+              title={empty.title}
+              description={empty.description}
+            />
+          ) : null}
+          {items.length === 0 ? null : (
+            <ul className="tmenu__list">
+              {items.map((item) => {
+                const inside = (
+                  <>
+                    <span className="tutor-card__icon" aria-hidden="true">
+                      {sheet(item.icon)}
+                    </span>
+                    <span className="tutor-card__text">
+                      <span className="tutor-card__title">{item.title}</span>
+                      <span className="tutor-card__lead">{item.lead}</span>
+                    </span>
+                    <span className="tutor-card__go" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 4v10m0 0l-4-4m4 4l4-4" />
+                        <path d="M5 19h14" />
+                      </svg>
+                    </span>
+                  </>
+                );
 
-              return (
-                <li key={item.id}>
-                  {/* Файла ещё нет: карточка приглушена, не ссылка и не
+                return (
+                  <li key={item.id}>
+                    {/* Файла ещё нет: карточка приглушена, не ссылка и не
                       берёт фокус — нажимать в ней нечего. */}
-                  {item.file === undefined ? (
-                    <div className="tutor-card tutor-card--soon" aria-disabled="true">
-                      {inside}
-                    </div>
-                  ) : (
-                    <a className="tutor-card" href={item.file} download>
-                      {inside}
-                    </a>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                    {item.file === undefined ? (
+                      <div className="tutor-card tutor-card--soon" aria-disabled="true">
+                        {inside}
+                      </div>
+                    ) : (
+                      <a className="tutor-card" href={item.file} download>
+                        {inside}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       ) : null}
     </div>

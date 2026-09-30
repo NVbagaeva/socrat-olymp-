@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
-import { activeSubtopicParams, findSection, findSubtopic } from '@/content/sections';
+import { findSection, findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { trainerPage } from '@/content/trainerModes';
 import 'katex/dist/katex.min.css';
 import '@/lib/graph/graph.css';
@@ -13,9 +13,9 @@ import '../prep.css';
 import '../trainer.css';
 import '../configurator.css';
 
-/* Вложенные разделы существуют только у открытых подтем. */
+/* Тренажёр есть только у подтем с наборами прототипов в данных движка. */
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return trainerSubtopicParams();
 }
 export const dynamicParams = false;
 

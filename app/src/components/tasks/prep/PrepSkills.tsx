@@ -7,6 +7,8 @@ import { PrepShell } from './PrepShell';
 import { PrepSkillsScreen } from './PrepSkillsScreen';
 
 export interface PrepSkillsProps {
+  /** Подтема: её список навыков. */
+  type: string;
   /** Адрес подтемы: от него считаются ссылки на тренажёры. */
   base: string;
 }
@@ -18,8 +20,8 @@ export interface PrepSkillsProps {
  * KaTeX там же: вниз уходит готовая разметка, и клиентскому экрану
  * ни движок, ни KaTeX не нужны.
  */
-export function PrepSkills({ base }: PrepSkillsProps) {
-  const overview = prepOverview();
+export function PrepSkills({ type, base }: PrepSkillsProps) {
+  const overview = prepOverview(type);
 
   const items = overview.skills.map((view) => ({
     id: view.skill.id,
@@ -46,7 +48,7 @@ export function PrepSkills({ base }: PrepSkillsProps) {
   }));
 
   return (
-    <PrepShell base={base} active="all">
+    <PrepShell type={type} base={base} active="all">
       <PrepSkillsScreen items={items} />
     </PrepShell>
   );

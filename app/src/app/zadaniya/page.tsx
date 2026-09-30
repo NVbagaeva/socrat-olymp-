@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { findSection } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
+import { subtopicBuilt } from '@/data/functionTypes';
 import { BankScreen } from './BankScreen';
 import type { SubtopicView } from './SubtopicDialog';
 import './zadaniya.css';
@@ -31,7 +32,8 @@ const dialog = {
       status: item.status,
       prototypes: family?.prototypes.sets ?? 0,
       tasks: family?.prototypes.tasks ?? 0,
-      href: item.status === 'active' ? `${tasksPage.href}/12/${item.id}` : null,
+      /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
+      href: subtopicBuilt(item) ? `${tasksPage.href}/12/${item.id}` : null,
     };
   }),
 };

@@ -11,7 +11,8 @@ import {
   type SheetLayoutId,
   type SheetThemeId,
 } from '@/content/generator';
-import { firstLevel, skillCounts, skillLevels, type SkillLevelId } from '@/content/skills12';
+import { firstLevel, skillCounts, skillLevels, type SkillLevel, type SkillLevelId }
+  from '@/content/skills12';
 import { counted } from '@/lib/plural';
 import { randomSeed } from '@/lib/trainerSession';
 import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
@@ -22,6 +23,10 @@ export interface GeneratorScreenProps {
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
   skills: SkillItem[];
+  /** Подписи уровней подтемы. Не заданы — общие. */
+  levels?: readonly SkillLevel[];
+  /** Плашка под сводкой: откуда взяты задания. Не задана — общая. */
+  note?: string;
 }
 
 /** Значение «своё название» в группе видов работы. */
@@ -35,7 +40,13 @@ const CUSTOM = '';
  * набор параметров: лист ученика и лист с ответами по нему
  * совпадают, а смена любого параметра даёт новый вариант.
  */
-export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) {
+export function GeneratorScreen({
+  base,
+  family,
+  skills,
+  levels = skillLevels,
+  note = generatorPage.summary.note,
+}: GeneratorScreenProps) {
   const customId = useId();
   const [kind, setKind] = useState(workKinds[0] ?? CUSTOM);
   const [customKind, setCustomKind] = useState('');
@@ -60,7 +71,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
   /* «Все» — сколько задач в выбранных наборах на самом деле. */
   const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
   const levelsOfChosen = chosen.flatMap((item) => item.levels);
-  const shownLevels = skillLevels.filter((item) => levelsOfChosen.includes(item.id));
+  const shownLevels = levels.filter((item) => levelsOfChosen.includes(item.id));
   const chosenCount = count ?? allCount;
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf({ kind: kindTitle, date });
@@ -248,7 +259,7 @@ export function GeneratorScreen({ base, family, skills }: GeneratorScreenProps) 
           <p className="cfg-summary__count">
             {counted(chosenCount, 'задание', 'задания', 'заданий')} · {layoutTitle} · {themeTitle}
           </p>
-          <Note>{generatorPage.summary.note}</Note>
+          <Note>{note}</Note>
         </aside>
       </div>
 

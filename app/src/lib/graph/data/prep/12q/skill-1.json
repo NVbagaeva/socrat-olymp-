@@ -1,0 +1,167 @@
+{
+  "kind": "prep",
+  "id": "P12Q-1",
+  "block": 1,
+  "title": "Знак коэффициента a",
+  "subtitle": "По графику определить, куда направлены ветви",
+  "seed": 12101,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "uniqueVertices": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10,
+    "allChoice": 2,
+    "optionsDistinct": true,
+    "minUp": 5,
+    "minDown": 5,
+    "minFractionA": 3,
+    "uniqueVertices": true,
+    "noAlternatingAnswers": true
+  },
+  "tasks": [
+    {
+      "id": "P12Q-1-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Посмотри, куда направлены ветви. Идут вверх — вершина самая нижняя точка графика, и это признак $a > 0$.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "up",
+        "aKind": "integer"
+      }
+    },
+    {
+      "id": "P12Q-1-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Ветви опускаются, вершина оказалась самой высокой точкой. Перед $x^2$ в такой параболе стоит минус.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "down",
+        "aKind": "integer"
+      }
+    },
+    {
+      "id": "P12Q-1-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Дробный $a$ или целый — на знак это не влияет. Решает только то, куда смотрят ветви.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "down",
+        "aKind": "fraction"
+      }
+    },
+    {
+      "id": "P12Q-1-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Найди вершину и посмотри, куда уходит график по обе стороны от неё. Вверх — значит $a$ положительный.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "up",
+        "aKind": "fraction"
+      }
+    },
+    {
+      "id": "P12Q-1-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Вершина стоит между узлами сетки, но знак читается не по ней: смотри на направление ветвей.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "up",
+        "absA": 2,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        }
+      }
+    },
+    {
+      "id": "P12Q-1-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Обе ветви уходят вниз — значит вершина наверху, а $a$ отрицательный.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "down",
+        "absA": 2,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        }
+      }
+    },
+    {
+      "id": "P12Q-1-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Вершина не на оси $Oy$, и это ничего не меняет: за знак $a$ отвечает только направление ветвей.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "up",
+        "aKind": "any",
+        "vertex": {
+          "yNonZero": true
+        }
+      }
+    },
+    {
+      "id": "P12Q-1-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Ветви направлены вниз. Каким бы ни было значение $a$, знак у него минус.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "down",
+        "aKind": "fraction"
+      }
+    },
+    {
+      "id": "P12Q-1-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Чем больше $|a|$, тем уже парабола, но знак по ширине не читается — только по ветвям.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "down",
+        "aKind": "integer",
+        "absA": 3
+      }
+    },
+    {
+      "id": "P12Q-1-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Каков знак коэффициента $a$?",
+      "hint": "Ветви идут вверх: вершина — самая низкая точка графика, поэтому $a > 0$.",
+      "answerRule": "sign-a",
+      "answerType": "choice",
+      "level": "lucky",
+      "levelReason": "знак читается по направлению ветвей",
+      "constraints": {
+        "direction": "up",
+        "aKind": "integer",
+        "absA": 3
+      }
+    }
+  ]
+}

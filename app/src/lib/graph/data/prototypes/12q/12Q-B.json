@@ -1,0 +1,379 @@
+{
+  "kind": "prototype",
+  "id": "12Q.B",
+  "block": 2,
+  "title": "12Q.B · значение коэффициента a",
+  "subtitle": "Отмечены вершина и ещё одна точка. Найдите старший коэффициент",
+  "seed": 12202,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "minFractionA": 8,
+    "minDistinctA": 10,
+    "uniqueVertices": true
+  },
+  "tasks": [
+    {
+      "id": "12Q.B-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 3,
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 3,
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-11",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-12",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-13",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-14",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-15",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "vertex": {
+          "yNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-16",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "vertex": {
+          "yNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-17",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-18",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-19",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "down",
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.B-20",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Отмечены вершина параболы и ещё одна точка с целыми координатами. Найдите $a$.",
+      "answerRule": "a",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "vertex": {
+          "xNonZero": true
+        },
+        "direction": "up",
+        "windowMax": 6
+      }
+    }
+  ]
+}

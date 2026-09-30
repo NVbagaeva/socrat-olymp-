@@ -69,12 +69,18 @@ function slopeTexExact(f) {
   return texExact(f);
 }
 
-/* Формула функции целиком, точными числами. */
-function equationTexExact(kf, bf) {
+/* Правая часть формулы kx + b точными числами. */
+function rhsTexExact(kf, bf) {
   var slope = Line.isZero(kf) ? '' : slopeTexExact(kf) + 'x';
-  if (Line.isZero(bf)) { return 'f(x) = ' + (slope || '0'); }
+  if (Line.isZero(bf)) { return slope || '0'; }
   var sign = bf.p > 0 ? ' + ' : ' - ';
-  return 'f(x) = ' + slope + sign + texExact(Line.frac(Math.abs(bf.p), bf.q));
+  return slope + sign + texExact(Line.frac(Math.abs(bf.p), bf.q));
+}
+
+/* Формула функции целиком, точными числами. Имя функции — f,
+   у второй прямой пары — g. */
+function equationTexExact(kf, bf, name) {
+  return (name || 'f') + '(x) = ' + rhsTexExact(kf, bf);
 }
 
 /* Число в формулу со скобками у отрицательного: подстановка
@@ -410,9 +416,159 @@ function stepAnswer(task, line) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Две прямые: точка пересечения (прототипы 12.C и 12.D)
+
+   Порядок тот же по духу — от чертежа к формуле, от формулы
+   к ответу, — но прямых две, и шаги идут так:
+
+     1. Формула первой прямой y = f(x)
+     2. Формула второй прямой y = g(x)
+     3. Приравниваем: f(x) = g(x)
+     4. Решаем уравнение
+     5. Отвечаем на вопрос задачи
+
+   Числа берутся у движка: k и b каждой прямой и её отмеченные точки
+   (meta.lines). Своей арифметики здесь нет — точка пересечения
+   считается теми же точными дробями, что и ответ задачи.
+   ══════════════════════════════════════════════════════════ */
+function pointTex(p) { return '(' + tex(p.x) + ';\\, ' + tex(p.y) + ')'; }
+function pointPlain(p) { return '(' + num(p.x) + '; ' + num(p.y) + ')'; }
+
+/* Прямая из описания движка: k и b точными дробями, отмеченные
+   точки слева направо. */
+function pairLine(spec) {
+  var line = Line.create(spec.kFraction || spec.k, spec.bFraction || spec.b);
+  var points = (spec.points || []).slice().sort(function (a, b) { return a.x - b.x; });
+  return { line: line, points: points };
+}
+
+/* Шаги 1 и 2: формула одной прямой пары по отмеченным точкам. */
+function stepPairFormula(name, item, win) {
+  var line = item.line;
+  var kf = line.k;
+  var bf = line.b;
+  var b = Line.num(bf);
+  var p1 = item.points[0];
+  var p2 = item.points[1];
+  var blocks = [];
+
+  if (p1 && p2) {
+    var dy = p2.y - p1.y;
+    var dx = p2.x - p1.x;
+    blocks.push(text('Прямая ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') +
+      ' проходит через отмеченные точки <b class="key">' + math(pointTex(p1), pointPlain(p1)) +
+      '</b> и <b class="key">' + math(pointTex(p2), pointPlain(p2)) + '</b>. ' +
+      'Угловой коэффициент — это отношение изменения ' + math('y', 'y') +
+      ' к изменению ' + math('x', 'x') + ' между ними:'));
+    var raw = fracTex(dy, dx);
+    var done = texExact(kf);
+    blocks.push(formula('k = \\dfrac{' + texNegative(p2.y) + ' - ' + texNegative(p1.y) + '}{' +
+      texNegative(p2.x) + ' - ' + texNegative(p1.x) + '} = ' + raw +
+      (raw === done ? '' : ' = ' + done)));
+  } else {
+    blocks.push(text('Угловой коэффициент прямой ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') + ':'));
+    blocks.push(formula('k = ' + texExact(kf)));
+  }
+
+  if (interceptVisible(b, win)) {
+    blocks.push(text('Пересечение с осью ' + math('Oy', 'Oy') + ' видно на чертеже: точка ' +
+      '<b class="key">' + math('(0;\\, ' + tex(b) + ')', '(0; ' + num(b) + ')') + '</b>. Значит ' +
+      '<b class="key">' + math('b = ' + tex(b), 'b = ' + num(b)) + '</b>.'));
+  } else if (p1) {
+    /* Точка (0; b) за кадром или не в узле: b находим подстановкой
+       отмеченной точки, произведение считаем точной дробью. */
+    var base = whole(Line.num(kf) * p1.x) || !p2 ? p1 : p2;
+    var product = Line.mul(kf, Line.toFrac(base.x));
+    blocks.push(text('Пересечение с осью ' + math('Oy', 'Oy') + ' с чертежа не снять. ' +
+      'Подставляем в формулу точку <b class="key">' + math(pointTex(base), pointPlain(base)) +
+      '</b>, которая точно лежит на прямой:'));
+    blocks.push(formula(tex(base.y) + ' = ' + texBracket(kf) + ' \\cdot ' + texNegative(base.x) + ' + b'));
+    blocks.push(formula('b = ' + tex(base.y) + ' - ' + texBracket(product) + ' = ' + texExact(bf)));
+  } else {
+    blocks.push(formula('b = ' + texExact(bf)));
+  }
+
+  blocks.push(text('Формула прямой целиком:'));
+  blocks.push({ type: 'formula', tex: equationTexExact(kf, bf, name), feature: true });
+
+  return { title: 'Формула прямой ' + name, blocks: blocks };
+}
+
+/* Шаг 3: в точке пересечения у прямых общие x и y. */
+function stepPairEquate(first, second) {
+  return {
+    title: 'Приравниваем',
+    blocks: [
+      text('В точке пересечения у обеих прямых один и тот же ' + math('x', 'x') +
+        ' и один и тот же ' + math('y', 'y') + '. Значит правые части формул равны:'),
+      formula('f(x) = g(x)'),
+      formula(rhsTexExact(first.k, first.b) + ' = ' + rhsTexExact(second.k, second.b))
+    ]
+  };
+}
+
+/* Шаг 4: слагаемые с x — влево, числа — вправо. */
+function stepPairSolve(first, second, x0) {
+  var dk = Line.sub(first.k, second.k);
+  var db = Line.sub(second.b, first.b);
+  var blocks = [
+    text('Переносим слагаемые с ' + math('x', 'x') + ' влево, числа — вправо, ' +
+      'и приводим подобные:'),
+    formula(slopeTexExact(dk) + 'x = ' + texExact(db))
+  ];
+  if (dk.p === 1 && dk.q === 1) {
+    blocks.push(formula('x = ' + texExact(x0)));
+  } else {
+    blocks.push(formula('x = ' + texExact(db) + ' : ' + texBracket(dk) + ' = ' + texExact(x0)));
+  }
+  return { title: 'Решаем уравнение', blocks: blocks };
+}
+
+/* Шаг 5: абсцисса — найденный x, ордината — подстановка x в формулу. */
+function stepPairAnswer(task, first, x0) {
+  var blocks = [];
+  if (task.rule === 'intersection-y') {
+    var y0 = Line.yAt(first, Line.num(x0));
+    var x = Line.num(x0);
+    blocks.push(text('Спрашивают ординату точки пересечения. Подставляем найденный ' +
+      math('x', 'x') + ' в любую из формул — возьмём ' + math('f', 'f') + ':'));
+    blocks.push(formula('y = f(' + texNegative(x) + ') = ' + texBracket(first.k) + ' \\cdot ' +
+      texNegative(x) + ' + ' + texNegative(Line.num(first.b)) + ' = ' + texExact(y0)));
+  } else {
+    blocks.push(text('Спрашивают абсциссу точки пересечения — это найденный ' + math('x', 'x') + '.'));
+  }
+  blocks.push({ type: 'answer', html: 'Ответ: <b class="key">' + task.answer + '</b>' });
+  return { title: 'Отвечаем на вопрос', blocks: blocks };
+}
+
+function buildPair(options) {
+  var win = options.window;
+  var a = pairLine(options.lines[0]);
+  var b = pairLine(options.lines[1]);
+  var cross = Line.intersect(a.line, b.line);
+  if (!cross) { throw new Error('solution: прямые параллельны, точки пересечения нет'); }
+
+  var steps = [
+    stepPairFormula('f', a, win),
+    stepPairFormula('g', b, win),
+    stepPairEquate(a.line, b.line),
+    stepPairSolve(a.line, b.line, cross.x),
+    stepPairAnswer(options.task || {}, a.line, cross.x)
+  ];
+
+  return steps.map(function (step, i) {
+    step.number = i + 1;
+    return step;
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
    Сборка
    ══════════════════════════════════════════════════════════ */
 function build(options) {
+  /* Две прямые — своя цепочка шагов; треугольник наклона ей не нужен. */
+  if (options.lines && options.lines.length === 2) { return buildPair(options); }
+
   var t = options.triangle;
   var line = options.line;
   var win = options.window;

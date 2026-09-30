@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { SkillItem } from '../configurator';
 import { trainerModes, type TrainerModeId } from '@/content/trainerModes';
+import type { SkillLevel } from '@/content/skills12';
 import { useTrainerProgress } from '@/lib/trainerProgress';
 import { buildSession, type Session } from '@/lib/trainerSession';
 import {
@@ -10,6 +11,7 @@ import {
   type ConfiguratorPreset,
   type TrainerModeOption,
   type TrainerRequest,
+  type TrainerWords,
 } from './TrainerConfigurator';
 import { TrainerScreen } from './TrainerScreen';
 import { TrainerStats } from './TrainerStats';
@@ -25,6 +27,12 @@ export interface TrainerBuilderProps {
   /** Сколько задач во всех наборах прототипов семейства. */
   familyTotal: number;
   skills: SkillItem[];
+  /** Подписи уровней подтемы. */
+  levels?: readonly SkillLevel[];
+  /** Подписи конфигуратора подтемы. */
+  words?: TrainerWords;
+  /** Принимать задачи с ответом выбором варианта: признак подтемы. */
+  choice?: boolean;
   /** Что выбрано при заходе: ярлык прежнего адреса или ничего. */
   preset?: TrainerPreset | null;
 }
@@ -51,6 +59,9 @@ export function TrainerBuilder({
   family,
   familyTotal,
   skills,
+  levels,
+  words,
+  choice = false,
   preset = null,
 }: TrainerBuilderProps) {
   const [started, setStarted] = useState<Started | null>(null);
@@ -77,6 +88,7 @@ export function TrainerBuilder({
       count: request.count,
       mode,
       mistakes: progress.mistakes,
+      choice,
     });
     if (session.tasks.length === 0) {
       return;
@@ -103,6 +115,8 @@ export function TrainerBuilder({
       skills={skills}
       modes={modes}
       preset={preset}
+      {...(levels === undefined ? {} : { levels })}
+      {...(words === undefined ? {} : { words })}
       onStart={start}
       /* Что уже сделано: знаменатель — все задания прототипов семейства. */
       stats={<TrainerStats total={familyTotal} />}

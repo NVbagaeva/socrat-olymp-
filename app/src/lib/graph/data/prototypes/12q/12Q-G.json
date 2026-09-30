@@ -1,0 +1,492 @@
+{
+  "kind": "prototype",
+  "id": "12Q.G",
+  "block": 7,
+  "title": "12Q.G · формула по графику",
+  "subtitle": "Соберите запись через вершину и выберите её среди вариантов",
+  "seed": 12207,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "options": 6,
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "allChoice": 6,
+    "optionsDistinct": true,
+    "minUp": 9,
+    "minDown": 9,
+    "uniqueVertices": true
+  },
+  "tasks": [
+    {
+      "id": "12Q.G-01",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-02",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-03",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-04",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-05",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 3,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-06",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 3,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-07",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-08",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-09",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-10",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-11",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "roots": "integer",
+        "rootsVisible": true,
+        "windowMax": 7,
+        "direction": "down"
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-12",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "roots": "integer",
+        "rootsVisible": true,
+        "windowMax": 7,
+        "direction": "up"
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-13",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-14",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          4
+        ],
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-15",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-16",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "unlucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "yNonZero": true
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-17",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "negative"
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-18",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "negative"
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 1,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-19",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "positive"
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "down",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    },
+    {
+      "id": "12Q.G-20",
+      "question": "На рисунке изображён график функции $y = ax^2 + bx + c$. Выберите формулу, которая задаёт эту функцию.",
+      "answerRule": "equation-choice",
+      "level": "lucky",
+      "constraints": {
+        "vertex": {
+          "xNonZero": true,
+          "ySign": "positive"
+        },
+        "cNonZero": true,
+        "cVisible": true,
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "absA": 2,
+        "direction": "up",
+        "windowMax": 6
+      },
+      "answerType": "choice"
+    }
+  ]
+}

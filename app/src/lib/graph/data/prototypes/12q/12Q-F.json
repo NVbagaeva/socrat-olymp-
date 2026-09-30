@@ -1,0 +1,583 @@
+{
+  "kind": "prototype",
+  "id": "12Q.F",
+  "block": 6,
+  "title": "12Q.F · аргумент по значению",
+  "subtitle": "Решите уравнение f(x) = y и выберите нужный корень",
+  "seed": 12206,
+  "family": "quadratic",
+  "axisLabels": "minimal",
+  "varySelection": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "uniqueVertices": true,
+  "composition": {
+    "count": 20,
+    "minUp": 9,
+    "minDown": 9,
+    "minFractionA": 4,
+    "uniqueVertices": true,
+    "queryOutsideWindow": true
+  },
+  "tasks": [
+    {
+      "id": "12Q.F-01",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-02",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-03",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-04",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-05",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-06",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-07",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-08",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 2,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-09",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-10",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-11",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-12",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": [
+          1,
+          2
+        ],
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-13",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-14",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите положительный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "positive"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-15",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-16",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите отрицательный $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "lucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "xNonZero": true
+        },
+        "absA": 1,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "negative"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-17",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "absA": 2,
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-18",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите больший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "x": "half",
+          "y": "half"
+        },
+        "absA": 2,
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "larger"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-19",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "y": "half"
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "down",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    },
+    {
+      "id": "12Q.F-20",
+      "question": "На рисунке изображён график функции $f(x) = ax^2 + bx + c$. Найдите меньший $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "level": "unlucky",
+      "constraints": {
+        "marks": {
+          "vertex": true,
+          "points": 1
+        },
+        "cVisible": true,
+        "vertex": {
+          "y": "half"
+        },
+        "absA": [
+          3,
+          2
+        ],
+        "direction": "up",
+        "query": {
+          "type": "argument-for",
+          "outside": true,
+          "xAbsMax": 9,
+          "yAbsMax": 60,
+          "decimals": 1,
+          "pick": "smaller"
+        },
+        "windowMax": 6
+      }
+    }
+  ]
+}

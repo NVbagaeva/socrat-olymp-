@@ -1,11 +1,11 @@
 import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
-import { activeSubtopicParams } from '@/content/sections';
+import { prepRedirectParams } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 
-/* Те же адреса, что были: открытые подтемы. */
+/* Те же адреса, что были: подтемы, жившие до переименования. */
 export function generateStaticParams() {
-  return activeSubtopicParams();
+  return prepRedirectParams();
 }
 export const dynamicParams = false;
 

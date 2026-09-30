@@ -7,6 +7,11 @@ export interface ShapkaRazdelaProps {
   /** Крошки над заголовком. Последняя — без ссылки, это сама страница. */
   crumbs: Crumb[];
   title: ReactNode;
+  /**
+   * Строка под заголовком: у подтемы №12 — её название, когда H1
+   * занят названием задания. Не задана — строки нет.
+   */
+  subtitle?: ReactNode;
   /** Уровень задания. Не задан — бейджа нет: у страниц фигур №3 его нет. */
   badge?: ReactNode;
   lead?: ReactNode;
@@ -36,6 +41,7 @@ export interface ShapkaRazdelaProps {
 export function ShapkaRazdela({
   crumbs,
   title,
+  subtitle,
   badge,
   lead,
   media,
@@ -53,6 +59,7 @@ export function ShapkaRazdela({
             <h1 className="t-h1">{title}</h1>
             {badge === undefined ? null : <Badge tone="info">{badge}</Badge>}
           </div>
+          {subtitle}
           {lead === undefined ? null : <p className="section-head__lead">{lead}</p>}
           {actions}
         </div>

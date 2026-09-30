@@ -83,6 +83,8 @@ function tex(text) {
       '\\dfrac{' + fraction[1] + '}{' + fraction[2] + '}';
   }
 
+  /* Квадрат в записи параболы — знаком ²; KaTeX понимает только ^2. */
+  value = value.replace(/\u00b2/g, '^2');
   value = value.replace(/(\d),(\d)/g, '$1{,}$2');
   value = value.replace(/;/g, ';\\,');
   value = value.replace(/[αβΔ]/g, function (ch) { return GREEK[ch]; });

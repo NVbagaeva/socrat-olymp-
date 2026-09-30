@@ -2,11 +2,15 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
 import { EmptyState, HandNote, type Crumb } from '@/components/ui';
+import { prepSkillsFor } from '@/content/prepSkills';
 import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
+import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
+import { aboutScene } from '@/lib/scenes';
 import { prototypeSkills } from './configurator';
 import { GeneratorTab } from './generator';
+import { MethodsTab } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
@@ -56,17 +60,23 @@ export function FunctionTopicPage({
 }: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
-  /* Закрытая подтема: задач у неё нет, и страниц опорных задач и
-     тренажёра в экспорте тоже нет — их адреса собираются только для
-     открытых подтем (activeSubtopicParams). Поэтому вкладки остаются
-     на месте, но ведут не по адресу, а к пустому состоянию: иначе
-     нажатие уводило бы на 404, а до нажатия показывало бы навыки
-     чужой подтемы — единственный собранный набор пока линейный. */
-  const otkryta = subtopic.status === 'active';
-  /* Вкладка «Генератор» есть только у семейства с наборами
-     прототипов в данных движка: решает манифест, а не конфиг.
-     У закрытой подтемы генерировать нечего. */
-  const hasGenerator = otkryta && prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
+  /* Вкладка ведёт по адресу только тогда, когда за ней есть материал
+     этой подтемы: у опорных задач — список навыков, у тренажёра
+     и генератора — наборы прототипов в данных движка. Иначе вкладка
+     остаётся на месте и показывает пустое состояние: нажатие не
+     уводит на 404, а до нажатия не показываются навыки чужой подтемы.
+     Адреса под вкладки собираются по тем же условиям (lib/prep.ts,
+     content/sections.ts). У закрытой подтемы страниц нет вовсе. */
+  const built = subtopicBuilt(subtopic);
+  const hasPrep = built && prepSkillsFor(subtopic.id).length > 0;
+  const hasTrainer = built && prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
+  /* Чем подтема отличается от линейной — признаками в её конфиге;
+     не задано — берётся общее для раздела. Плашка-подсказка вкладки
+     «О задании» у раздела одна, подтема её не переопределяет. */
+  const about =
+    subtopic.about === undefined ? section.about : { ...subtopic.about, hint: section.about.hint };
+  const tutors =
+    subtopic.tutors === undefined ? section.tutors : { ...section.tutors, items: subtopic.tutors };
 
   return (
     <main className="app-main">
@@ -81,7 +91,18 @@ export function FunctionTopicPage({
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
-        title={subtopic.title}
+        /* Шапка по признаку подтемы: H1 общий на задание, название
+           подтемы — подзаголовком. Без признака H1 — сама подтема. */
+        title={
+          subtopic.head === undefined
+            ? subtopic.title
+            : `Задание №${section.no}. ${section.subtitle}`
+        }
+        subtitle={
+          subtopic.head === undefined ? undefined : (
+            <p className="t-h3 topic-head__subtitle">{subtopic.head.subtitle}</p>
+          )
+        }
         badge={topic.badge}
         lead={topic.lead}
         actions={
@@ -108,20 +129,31 @@ export function FunctionTopicPage({
             {/* Прогресс по разделам теории темы. Общее число — длина того же
                 списка, из которого строится «Содержание»: второго источника
                 у этой пары нет. */}
-            <TopicProgress total={subtopic.theory.length} />
+            {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
+                до конца которых ученик долистал; иначе витринное число. */}
+            <TopicProgress
+              total={subtopic.theory.length}
+              trackKey={
+                subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined
+              }
+            />
           </>
         }
       />
 
       <TopicTabs
         initial={initialTab}
-        about={<TopicAbout section={section} />}
+        about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
         theory={subtopic.theory}
         bodies={theoryBodies}
+        trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
+        methods={
+          subtopic.methods === true ? <MethodsTab type={subtopic.id} base={base} /> : undefined
+        }
         prep={
           prep ??
-          (otkryta ? (
-            <PrepSkills base={base} />
+          (hasPrep ? (
+            <PrepSkills type={subtopic.id} base={base} />
           ) : (
             <EmptyState
               title={PODTEMA_SKORO.prep.title}
@@ -129,10 +161,10 @@ export function FunctionTopicPage({
             />
           ))
         }
-        prepHref={otkryta ? `${base}/${OPORNYE.tail}` : null}
+        prepHref={hasPrep ? `${base}/${OPORNYE.tail}` : null}
         trainer={
           trainer ??
-          (otkryta ? (
+          (hasTrainer ? (
             <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />
           ) : (
             <EmptyState
@@ -141,9 +173,10 @@ export function FunctionTopicPage({
             />
           ))
         }
-        trainerHref={otkryta ? `${base}/trenazher/` : null}
-        generator={hasGenerator ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
-        tutors={section.tutors}
+        trainerHref={hasTrainer ? `${base}/trenazher/` : null}
+        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
+        tutors={tutors}
+        tutorsEmpty={PODTEMA_SKORO.tutors}
         contentsDecor={
           <div className="topic-side__decor" aria-hidden="true">
             <Image

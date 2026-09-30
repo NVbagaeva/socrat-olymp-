@@ -1,5 +1,7 @@
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
+import { generatorPage } from '@/content/generator';
+import { skillLevelsFor } from '@/content/skills12';
 import { skillItems } from '../configurator';
 import { GeneratorScreen } from './GeneratorScreen';
 
@@ -18,5 +20,18 @@ export interface GeneratorTabProps {
  */
 export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
   const family = findManifestFamily(subtopic.id);
-  return <GeneratorScreen base={base} family={subtopic.title} skills={skillItems(family)} />;
+  /* Подписи уровней и плашка «откуда задания» — подтемы: у
+     квадратичной наборы собственные, и обещать прототипы ФИПИ
+     нельзя, а уровень у неё не про коэффициент b. */
+  return (
+    <GeneratorScreen
+      base={base}
+      family={subtopic.title}
+      skills={skillItems(family)}
+      levels={skillLevelsFor(subtopic.id)}
+      note={subtopic.id === 'quadratic'
+        ? generatorPage.summary.noteOwn
+        : generatorPage.summary.note}
+    />
+  );
 }
