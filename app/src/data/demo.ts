@@ -17,7 +17,7 @@ export interface DemoUser {
 /* DEMO: пользователь в шапке кабинета. Настоящий придёт из аккаунта. */
 export const demoUser: DemoUser = {
   initials: 'НВ',
-  name: 'Наталья Витальевна',
+  name: 'Наталия Витальевна',
   role: 'Преподаватель',
 };
 
