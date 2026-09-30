@@ -71,10 +71,13 @@ const KEGL = process.env.KEGL || '9.5pt';
 /* Пробы раскладки (только для сравнения вариантов, в комплекте не
    используются): EXTRA_CSS — добавочные правила; NOMER=v-tekste —
    номер задачи внутри колонки текста, а не отдельным столбцом;
-   STOPKA8=1 — у карточек с окном ±8 условие над чертежом.
-   PROVERKA_SHIRINY=0 — не останавливать сборку, если карточка
-   вышла за поле (нужно, чтобы обмерить негодную пробу). */
+   STOPKA8=1 — у карточек с окном ±8 условие над чертежом. */
 const EXTRA_CSS = process.env.EXTRA_CSS || '';
+/* Запас по высоте: на каждой странице листа ученика до потолка
+   пагинатора должно оставаться не меньше ZAPAS мм. Не хватает —
+   в этом варианте задачи 12.A/12.B берутся с окном ±5 (лимит крупных
+   рядов варианта уменьшается на один), и комплект подбирается заново. */
+const ZAPAS = Number(process.env.ZAPAS || 3);
 /* Номер задачи. По умолчанию — в первой строке условия, текст его
    обтекает (NOMER=v-stroke): отдельный столбец с номером отнимал
    у колонки текста 9,5 мм, а рядом с чертежом ±8 тексту и так
@@ -88,7 +91,6 @@ const STOPKA8 = process.env.STOPKA8 === '1';
    это не «Базовая». В банке они не трогаются: решение об уровне —
    отдельно, с учётом истории решений учеников. */
 const ISKLYUCHIT = new Set((process.env.ISKLYUCHIT || '12.D-03,12.D-04').split(',').map((s) => s.trim()).filter(Boolean));
-const PROVERKA_SHIRINY = process.env.PROVERKA_SHIRINY !== '0';
 const KRUPNOE_OKNO = Number(process.env.KRUPNOE_OKNO || 8);
 const SOSTAV = (process.env.SOSTAV || '12.A:2,12.B:2,12.C:2,12.D:2').split(',').map((part) => {
   const [id, n] = part.split(':');
@@ -180,7 +182,7 @@ const BUDGET = Number(process.env.BUDGET || 10000000);
    восемь пар с разными ответами не набираются. Повтор допускается
    только у пары в другом варианте; целиком пара и одиночная прямая
    не повторяются никогда. */
-function search(relaxed, lineRepeats) {
+function search(relaxed, lineRepeats, bigLimit) {
   const usedLines = new Map();            /* прямая → { variant, pair } */
   let repeatsLeft = lineRepeats;
   const usedAnswers = new Map();          /* ответ → сколько раз */
@@ -227,7 +229,7 @@ function search(relaxed, lineRepeats) {
       }
       const partKey = `${slot.v}|${slot.set}`;
       const big = isBig(task) && !bigParts.get(partKey);
-      if (big && (bigRows.get(slot.v) || 0) >= KRUPNYH) { continue; }
+      if (big && (bigRows.get(slot.v) || 0) >= (bigLimit.has(slot.v) ? bigLimit.get(slot.v) : KRUPNYH)) { continue; }
 
       const ownKeys = lineKeys(task).filter((key) => !usedLines.has(key));
       const pairKey = ownKeys.length === lineKeys(task).length && lineKeys(task).length === 2 ? lineKeys(task).join('|') : lineKeys(task).join('|');
@@ -274,41 +276,52 @@ function search(relaxed, lineRepeats) {
 }
 
 /* От строгого к запасному: сначала без повторов прямых (ответы строго,
-   потом запасное правило), затем с одним повтором прямой, с двумя… */
+   потом запасное правило), затем с одним повтором прямой, с двумя…
+   bigLimit — лимит крупных рядов по вариантам (см. ZAPAS). */
 let found = null;
 let relaxedUsed = false;
-for (let k = 0; k <= 3 && !found; k += 1) {
-  for (const relaxed of [false, true]) {
-    found = search(relaxed, k);
-    if (found) { relaxedUsed = relaxed; break; }
-  }
-}
-if (!found) {
-  throw new Error('комплект не собрался: в банке не хватает разных прямых и ответов ' +
-    'даже при повторе ответов между наборами и трёх повторах прямых');
-}
-const repeats = [...found.usedAnswers].filter(([, n]) => n > 1).map(([a]) => a);
+let repeats = [];
+let variants = [];
+let usedLines = null;
+let usedAnswers = null;
+let repeatedLines = [];
 
-const variants = [];
-for (let v = 1; v <= VARIANTS; v += 1) {
-  let no = 0;
-  const blocks = SOSTAV.map((part) => ({
-    title: skillTitle[part.id] || part.id, note: '', set: part.id,
-    tasks: slots.map((slot, i) => ({ slot, task: found.chosen[i] }))
-      .filter(({ slot }) => slot.v === v && slot.set === part.id)
-      .map(({ task }) => sheetTask(task, ++no)),
+function select(bigLimit) {
+  found = null;
+  relaxedUsed = false;
+  for (let k = 0; k <= 3 && !found; k += 1) {
+    for (const relaxed of [false, true]) {
+      found = search(relaxed, k, bigLimit);
+      if (found) { relaxedUsed = relaxed; break; }
+    }
+  }
+  if (!found) {
+    throw new Error('комплект не собрался: в банке не хватает разных прямых и ответов ' +
+      'даже при повторе ответов между наборами и трёх повторах прямых');
+  }
+  repeats = [...found.usedAnswers].filter(([, n]) => n > 1).map(([a]) => a);
+
+  variants = [];
+  for (let v = 1; v <= VARIANTS; v += 1) {
+    let no = 0;
+    const blocks = SOSTAV.map((part) => ({
+      title: skillTitle[part.id] || part.id, note: '', set: part.id,
+      tasks: slots.map((slot, i) => ({ slot, task: found.chosen[i] }))
+        .filter(({ slot }) => slot.v === v && slot.set === part.id)
+        .map(({ task }) => sheetTask(task, ++no)),
+    }));
+    variants.push({ v, blocks, bigRows: found.bigRows.get(v) || 0 });
+  }
+  usedLines = found.usedLines;
+  usedAnswers = found.usedAnswers;
+  /* Какие прямые повторились половиной пары и в каких задачах. */
+  const lineUses = new Map();
+  slots.forEach((slot, i) => lineKeys(found.chosen[i]).forEach((key) => {
+    if (!lineUses.has(key)) { lineUses.set(key, []); }
+    lineUses.get(key).push(`${found.chosen[i].id} (вариант ${slot.v})`);
   }));
-  variants.push({ v, blocks, bigRows: found.bigRows.get(v) || 0 });
+  repeatedLines = [...lineUses].filter(([, uses]) => uses.length > 1);
 }
-const usedLines = found.usedLines;
-const usedAnswers = found.usedAnswers;
-/* Какие прямые повторились половиной пары и в каких задачах. */
-const lineUses = new Map();
-slots.forEach((slot, i) => lineKeys(found.chosen[i]).forEach((key) => {
-  if (!lineUses.has(key)) { lineUses.set(key, []); }
-  lineUses.get(key).push(`${found.chosen[i].id} (вариант ${slot.v})`);
-}));
-const repeatedLines = [...lineUses].filter(([, uses]) => uses.length > 1);
 
 function sheetTask(task, no) {
   return {
@@ -319,7 +332,7 @@ function sheetTask(task, no) {
   };
 }
 
-const perVariant = variants[0].blocks.reduce((sum, block) => sum + block.tasks.length, 0);
+const perVariant = SOSTAV.reduce((sum, part) => sum + part.count, 0);
 
 /* ── Общие куски описания листа ──────────────────────────────── */
 const FOOT = { ...content.foot, rights: 'Собрано в „Будет на ЕГЭ“ · budetege.ru' };
@@ -500,7 +513,7 @@ fs.mkdirSync(OUT, { recursive: true });
    страницы. Пагинатор следит только за высотой, а по ширине сетка
    в две колонки растягивается под содержимое и уводит правую
    карточку за поле. Обмер — по готовой разметке в браузере. */
-async function checkWidths(htmlFile) {
+async function checkLayout(htmlFile) {
   const browser = await chromium.launch({
     args: ['--no-sandbox'],
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
@@ -513,9 +526,19 @@ async function checkWidths(htmlFile) {
     return await page.$$eval('#sheet-pages .sheet-page', (pages) => {
       const mm = (px) => Math.round(px / 96 * 25.4 * 10) / 10;
       const bad = [];
+      const heights = [];
       let widest = 0;
       pages.forEach((p, i) => {
-        const flow = p.querySelector('.sheet-flow').getBoundingClientRect();
+        const flowEl = p.querySelector('.sheet-flow');
+        const flow = flowEl.getBoundingClientRect();
+        /* Запас по высоте: от низа последнего куска до потолка потока.
+           Потолок пагинатора — ровно высота потока (проверено: пустой
+           блок добавляется, пока не упрётся в неё). */
+        const last = flowEl.lastElementChild;
+        const chip = p.querySelector('.sheet-variant-strip .sheet-chip, .sheet-variant-head .sheet-chip');
+        const variant = chip ? Number((chip.textContent.match(/\d+/) || [0])[0]) : null;
+        heights.push({ page: i + 1, variant,
+          free: mm(last ? flowEl.clientHeight - (last.getBoundingClientRect().bottom - flow.top) : flowEl.clientHeight) });
         p.querySelectorAll('.sheet-task, .sheet-figure').forEach((el) => {
           const r = el.getBoundingClientRect();
           const over = Math.max(r.right - flow.right, flow.left - r.left);
@@ -527,7 +550,7 @@ async function checkWidths(htmlFile) {
           }
         });
       });
-      return { bad, widest: mm(Math.max(0, widest)) };
+      return { bad, heights, widest: mm(Math.max(0, widest)) };
     });
   } finally { await browser.close(); }
 }
@@ -536,13 +559,14 @@ async function print(name, spec, expectTasks) {
   const file = path.join(OUT, name + '.pdf');
   const htmlFile = path.join(OUT, 'html', name + '.html');
   const report = await renderPdf(spec, file, { keepHtml: htmlFile, requireKatex: true, extraCss: CSS });
-  const widths = await checkWidths(htmlFile);
-  if (widths.bad.length) {
-    console.log(`  ${name}: за полем страницы — ${widths.bad.join('; ')}`);
-    if (PROVERKA_SHIRINY) { throw new Error(`${name}: карточки выходят за поле страницы, см. выше`); }
+  const layout = await checkLayout(htmlFile);
+  if (layout.bad.length) {
+    console.log(`  ${name}: за полем страницы — ${layout.bad.join('; ')}`);
+    throw new Error(`${name}: карточки выходят за поле страницы, см. выше`);
   }
   console.log(`  ${name}.pdf: страниц ${report.pages}, задач ${report.tasks}, формул ${report.formulas}` +
-    (widths.bad.length ? '' : ', по ширине все карточки в поле') +
+    ', по ширине все карточки в поле; запас по высоте: ' +
+    layout.heights.map((h) => `стр. ${h.page} — ${h.free} мм`).join(', ') +
     (report.overflowing.length ? `, ВЫШЕ СТРАНИЦЫ: ${report.overflowing.join(', ')}` : '') +
     (report.formulasFailed ? `, KaTeX не принял ${report.formulasFailed}` : ''));
   if (report.tasks !== expectTasks) {
@@ -551,16 +575,46 @@ async function print(name, spec, expectTasks) {
   if (report.overflowing.length || report.formulasFailed) {
     throw new Error(`${name}: лист собрался с ошибками, см. выше`);
   }
-  return report;
+  return { report, layout };
 }
 
-console.log(`Комплект: вариантов ${VARIANTS}, задач в варианте ${perVariant}, раскладка ${LAYOUT}, клетка ${CELL} мм`);
-for (const variant of variants) {
-  const windows = variant.blocks.flatMap((block) => block.tasks).map((task) => '±' + task.meta.window.xmax);
-  console.log(`  вариант ${variant.v}: окна ${windows.join(' ')}, крупных рядов ${variant.bigRows}`);
+/* Страницы вариантов с запасом меньше ZAPAS (страница «Частые ошибки»
+   не считается: у неё вариант не подписан). */
+const tightPages = (layout) => layout.heights.filter((h) => h.variant && h.free < ZAPAS - 1e-9);
+
+console.log(`Комплект: вариантов ${VARIANTS}, задач в варианте ${perVariant}, раскладка ${LAYOUT}, клетка ${CELL} мм, запас по высоте не меньше ${ZAPAS} мм`);
+
+/* Подбор и печать листа ученика — пока на каждой странице не останется
+   запас ZAPAS. Страница не проходит — у её варианта лимит крупных рядов
+   уменьшается на один (задачи 12.A/12.B берутся с окном ±5), и комплект
+   подбирается заново. Лимит кончился — ошибка. */
+const bigLimit = new Map();
+let student = null;
+for (let round = 0; round < 3; round += 1) {
+  select(bigLimit);
+  for (const variant of variants) {
+    const windows = variant.blocks.flatMap((block) => block.tasks).map((task) => '±' + task.meta.window.xmax);
+    console.log(`  вариант ${variant.v}: окна ${windows.join(' ')}, крупных рядов ${variant.bigRows}`);
+  }
+  student = await print('samostoyatelnaya-12-lineynaya-funkciya-cvet', studentSpec('color'), VARIANTS * perVariant);
+  const short = tightPages(student.layout);
+  if (!short.length) { break; }
+  for (const h of short) {
+    const limit = (bigLimit.has(h.variant) ? bigLimit.get(h.variant) : KRUPNYH) - 1;
+    if (limit < 0) {
+      throw new Error(`вариант ${h.variant}: запас по высоте ${h.free} мм меньше ${ZAPAS} мм даже без крупных рядов`);
+    }
+    bigLimit.set(h.variant, limit);
+    console.log(`  вариант ${h.variant}: запас по высоте ${h.free} мм меньше ${ZAPAS} мм — крупных рядов не больше ${limit}, подбор заново`);
+  }
+  student = null;
 }
-await print('samostoyatelnaya-12-lineynaya-funkciya-cvet', studentSpec('color'), VARIANTS * perVariant);
-await print('samostoyatelnaya-12-lineynaya-funkciya-chb', studentSpec('print'), VARIANTS * perVariant);
+if (!student) { throw new Error('запас по высоте не набран за три подбора'); }
+const chb = await print('samostoyatelnaya-12-lineynaya-funkciya-chb', studentSpec('print'), VARIANTS * perVariant);
+if (tightPages(chb.layout).length) {
+  throw new Error('ч/б лист: запас по высоте меньше ' + ZAPAS + ' мм — ' +
+    tightPages(chb.layout).map((h) => `стр. ${h.page}: ${h.free} мм`).join(', '));
+}
 await print('samostoyatelnaya-12-lineynaya-funkciya-otvety-uchitel', teacherSpec('color'), 0);
 
 const sostav = variants.map((variant) => ({
