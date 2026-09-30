@@ -5,7 +5,7 @@
    1. Формулу цены и срока (lib/usluga/raschet.ts) на утверждённых
       числах: цены четырёх пакетов, минимальный заказ, пример письма
       из §5.2 документа, срочность и её ограничения, пороги предоплаты
-      и согласования, сроки в рабочих днях.
+      и согласования, сроки в календарных днях.
    2. Что цены на карточках пакетов совпадают с формулой.
    3. Строку загрузки (lib/usluga/zagruzka.ts): забытый файл не врёт.
    4. Что лимиты формы в content/uchitelyam.ts совпадают с лимитами
@@ -86,15 +86,15 @@ const r = (over) => poschitat(Z(over), stavki, sroki);
 /* ── 1. Формула ─────────────────────────────────────────────── */
 
 const pakety = {
-  nabor: { uroven: 'nabor', variantov: 1, cena: 2000, dney: 5 },
-  otvety: { uroven: 'otvety', variantov: 1, cena: 2700, dney: 5 },
-  resheniya: { uroven: 'resheniya', variantov: 1, cena: 4000, dney: 7 },
-  chetyre: { uroven: 'otvety', variantov: 4, cena: 4500, dney: 7 },
+  nabor: { uroven: 'nabor', variantov: 1, cena: 2000, dney: 7 },
+  otvety: { uroven: 'otvety', variantov: 1, cena: 2700, dney: 7 },
+  resheniya: { uroven: 'resheniya', variantov: 1, cena: 4000, dney: 10 },
+  chetyre: { uroven: 'otvety', variantov: 4, cena: 4500, dney: 10 },
 };
 for (const [id, p] of Object.entries(pakety)) {
   const x = r({ uroven: p.uroven, variantov: p.variantov });
   check(`пакет ${id}: ${p.cena} ₽`, x.itogo === p.cena, `вышло ${x.itogo}`);
-  check(`пакет ${id}: ${p.dney} дней`, x.rabochihDney === p.dney, `вышло ${x.rabochihDney}`);
+  check(`пакет ${id}: ${p.dney} дней`, x.kalendarnyhDney === p.dney, `вышло ${x.kalendarnyhDney}`);
 }
 
 check('меньше 10 задач считается как 10', r({ zadach: 3 }).itogo === r({ zadach: 10 }).itogo);
@@ -103,7 +103,7 @@ check('у набора без ответов вариантов нет', r({ uro
 /* Пример письма из §5.2: четыре варианта, 12 задач, рукопись. */
 const primer = r({ variantov: 4, zadach: 12, rukopis: true });
 check('пример §5.2: 6 120 ₽', primer.itogo === 6120, `вышло ${primer.itogo}`);
-check('пример §5.2: 10 рабочих дней', primer.rabochihDney === 10, `вышло ${primer.rabochihDney}`);
+check('пример §5.2: 14 календарных дней', primer.kalendarnyhDney === 14, `вышло ${primer.kalendarnyhDney}`);
 
 check('задача сверх десяти в «Наборе» — 200 ₽', r({ uroven: 'nabor', zadach: 11 }).itogo === 2200);
 check(
@@ -120,7 +120,7 @@ check('48 часов — +50 %', r({ srochnost: '48' }).itogo === 4050);
 check('24 часа — +100 %', r({ srochnost: '24' }).itogo === 5400);
 check(
   'срочный срок — в часах',
-  r({ srochnost: '24' }).chasov === 24 && r({ srochnost: '24' }).rabochihDney === null,
+  r({ srochnost: '24' }).chasov === 24 && r({ srochnost: '24' }).kalendarnyhDney === null,
 );
 
 const pr = (over, srok, mesto = true) => prichinyBezSrochnosti(Z(over), srok, mesto);
@@ -149,11 +149,11 @@ check(
 );
 
 check(
-  'каждые начатые 10 задач — +2 дня',
-  r({ zadach: 11 }).rabochihDney === 7 && r({ zadach: 21 }).rabochihDney === 9,
+  'каждые начатые 10 задач — +3 дня',
+  r({ zadach: 11 }).kalendarnyhDney === 10 && r({ zadach: 21 }).kalendarnyhDney === 13,
 );
-check('вариант сверх четырёх — +1 день', r({ variantov: 6 }).rabochihDney === 9);
-check('рукопись — +1 день', r({ rukopis: true }).rabochihDney === 6);
+check('вариант сверх четырёх — +1 день', r({ variantov: 6 }).kalendarnyhDney === 12);
+check('рукопись — +1 день', r({ rukopis: true }).kalendarnyhDney === 8);
 
 /* ── 2. Карточки пакетов ────────────────────────────────────── */
 

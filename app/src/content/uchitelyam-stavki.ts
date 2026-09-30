@@ -1,5 +1,6 @@
 /**
- * Ставки и сроки услуги «Материалы под ключ». Утверждены 24.09.2026:
+ * Ставки и сроки услуги «Материалы под ключ». Ставки утверждены 24.09.2026,
+ * сроки переведены в календарные дни 30.09.2026:
  * docs/SERVICE TEACHERS LANDING.md, §3.1, §3.4, §4.1.
  *
  * Файл намеренно без зависимостей (только import type): его читает
@@ -22,9 +23,9 @@ export const stavki: Stavki = {
 };
 
 export const sroki: Sroki = {
-  korotkiy: 5,
-  dlinnyy: 7,
-  zaDesyatok: 2,
+  korotkiy: 7,
+  dlinnyy: 10,
+  zaDesyatok: 3,
   zaVariantSverh: 1,
   zaRukopis: 1,
 };

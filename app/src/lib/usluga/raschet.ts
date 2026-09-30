@@ -34,9 +34,9 @@ export interface Stavki {
 }
 
 export interface Sroki {
-  /** Рабочих дней: набор и набор с ответами, один вариант. */
+  /** Календарных дней: набор и набор с ответами, один вариант. */
   korotkiy: number;
-  /** Рабочих дней: решения или больше одного варианта. */
+  /** Календарных дней: решения или больше одного варианта. */
   dlinnyy: number;
   /** За каждые начатые 10 задач сверх первых десяти. */
   zaDesyatok: number;
@@ -73,8 +73,8 @@ export interface Raschet {
   /** Надбавка за срочность в рублях. */
   srochnost: number;
   itogo: number;
-  /** Рабочих дней для базового срока; для срочного — null. */
-  rabochihDney: number | null;
+  /** Календарных дней для базового срока; для срочного — null. */
+  kalendarnyhDney: number | null;
   /** Часов для срочного срока; для базового — null. */
   chasov: number | null;
   /** Предоплата: вся сумма или половина. */
@@ -162,11 +162,11 @@ export function poschitat(vvod: Zakaz, s: Stavki, sr: Sroki): Raschet {
   const srochnost = Math.round(baza * dolya);
   const itogo = baza + srochnost;
 
-  let rabochihDney: number | null = null;
+  let kalendarnyhDney: number | null = null;
   let chasov: number | null = null;
   if (z.srochnost === 'bazovyy') {
     const dlinnyy = z.uroven === 'resheniya' || z.variantov > 1;
-    rabochihDney =
+    kalendarnyhDney =
       (dlinnyy ? sr.dlinnyy : sr.korotkiy) +
       sr.zaDesyatok * Math.max(0, Math.ceil((z.zadach - 10) / 10)) +
       sr.zaVariantSverh * Math.max(0, z.variantov - 4) +
@@ -181,7 +181,7 @@ export function poschitat(vvod: Zakaz, s: Stavki, sr: Sroki): Raschet {
     baza,
     srochnost,
     itogo,
-    rabochihDney,
+    kalendarnyhDney,
     chasov,
     predoplata: itogo > POROG_POLOVINY ? 'polovina' : 'polnaya',
     soglasovanie: itogo >= POROG_SOGLASOVANIYA,

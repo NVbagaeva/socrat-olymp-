@@ -16,10 +16,10 @@ const { kalkulyator: t, nadbavki } = uchitelyam;
 
 export const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`;
 
-/** Строка «6 120 ₽ · 10 рабочих дней после оплаты» — её же видит форма. */
+/** Строка «6 120 ₽ · 14 календарных дней после оплаты» — её же видит форма. */
 export function itogStroka(r: ReturnType<typeof poschitat>): [string, string] {
   const srok =
-    r.rabochihDney !== null ? t.srokRabochih(r.rabochihDney) : t.srokChasov(r.chasov ?? 0);
+    r.kalendarnyhDney !== null ? t.srokKalendarnyh(r.kalendarnyhDney) : t.srokChasov(r.chasov ?? 0);
   return [rub(r.itogo), srok];
 }
 
