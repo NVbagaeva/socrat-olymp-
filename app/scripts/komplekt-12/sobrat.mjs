@@ -32,6 +32,7 @@ import sheet from '../../src/lib/sheet/sheet.js';
 import { answersItems } from '../../src/lib/sheet/answers12.js';
 import typo from '../../src/lib/sheet/typography.js';
 import content from '../../src/content/sheet12.js';
+import { chromium } from 'playwright';
 import { renderPdf } from '../lib/sheet-render.mjs';
 import * as oshibki from './chastye-oshibki.mjs';
 
@@ -67,6 +68,16 @@ const KRUPNYH = Number(process.env.KRUPNYH || 2);
    в кегле листа 10,5 pt занимает 10 строк и делает ряд выше чертежа.
    Кегль 9,5 pt и отступы поменьше возвращают высоту ряда чертежу. */
 const KEGL = process.env.KEGL || '9.5pt';
+/* Пробы раскладки (только для сравнения вариантов, в комплекте не
+   используются): EXTRA_CSS — добавочные правила; NOMER=v-tekste —
+   номер задачи внутри колонки текста, а не отдельным столбцом;
+   STOPKA8=1 — у карточек с окном ±8 условие над чертежом.
+   PROVERKA_SHIRINY=0 — не останавливать сборку, если карточка
+   вышла за поле (нужно, чтобы обмерить негодную пробу). */
+const EXTRA_CSS = process.env.EXTRA_CSS || '';
+const NOMER = process.env.NOMER || '';
+const STOPKA8 = process.env.STOPKA8 === '1';
+const PROVERKA_SHIRINY = process.env.PROVERKA_SHIRINY !== '0';
 const KRUPNOE_OKNO = Number(process.env.KRUPNOE_OKNO || 8);
 const SOSTAV = (process.env.SOSTAV || '12.A:2,12.B:2,12.C:2,12.D:2').split(',').map((part) => {
   const [id, n] = part.split(':');
@@ -257,6 +268,7 @@ function sheetTask(task, no) {
     no, id: task.id, questionHtml: task.questionHtml, options: task.options, figureSvg: task.svg,
     answer: task.answer, answerHtml: task.answerHtml, answerRule: rules[task.id],
     seed: task.meta.seed, meta: task.meta,
+    ...(STOPKA8 && isBig(task) ? { figureBelow: true } : {}),
   };
 }
 
@@ -281,6 +293,7 @@ const CSS = `
 .sheet-task-body { gap: calc(var(--sheet-step) * 2.5); }
 .sheet-task-text { font-size: ${KEGL}; line-height: 1.35; }
 .sheet-tasks { gap: calc(var(--sheet-step) * 2); }
+${EXTRA_CSS}
 ${KOMPAKT ? `.sheet-title-block { display: none; }
 .sheet-head { padding-bottom: calc(var(--sheet-step) * 2); margin-bottom: calc(var(--sheet-step) * 3); }
 .sheet-variant-strip { margin-bottom: calc(var(--sheet-step) * 1); }` : ''}
@@ -322,7 +335,18 @@ function taskItems(variant, theme) {
   }, {});
   const open = '<script type="application/json" id="sheet-spec">';
   const start = html.indexOf(open) + open.length;
-  const items = JSON.parse(html.slice(start, html.indexOf('</script>', start))).items;
+  let items = JSON.parse(html.slice(start, html.indexOf('</script>', start))).items;
+  if (NOMER === 'v-tekste') {
+    /* Номер уходит из отдельного столбца в начало колонки текста. */
+    items = items.map((item) => item.replace(
+      /(<span class="sheet-task-no">[^<]*<\/span>)(<div class="sheet-task-body">)(<div class="sheet-task-text">)/g,
+      '$2$3$1'));
+  } else if (NOMER === 'v-stroke') {
+    /* Номер — в первой строке условия, текст обтекает его. */
+    items = items.map((item) => item.replace(
+      /(<span class="sheet-task-no">[^<]*<\/span>)(<div class="sheet-task-body">)(<div class="sheet-task-text">)(<p class="sheet-task-question">)/g,
+      '$2$3$4$1'));
+  }
   return KOMPAKT ? items.filter((item) => !item.startsWith('<div class="sheet-item sheet-block')) : items;
 }
 
@@ -402,12 +426,53 @@ function teacherSpec(theme) {
 /* ── Печать ──────────────────────────────────────────────────── */
 fs.mkdirSync(OUT, { recursive: true });
 
+/* Ширина: каждая карточка и каждый чертёж целиком в поле потока
+   страницы. Пагинатор следит только за высотой, а по ширине сетка
+   в две колонки растягивается под содержимое и уводит правую
+   карточку за поле. Обмер — по готовой разметке в браузере. */
+async function checkWidths(htmlFile) {
+  const browser = await chromium.launch({
+    args: ['--no-sandbox'],
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}),
+  });
+  try {
+    const page = await browser.newPage();
+    await page.goto('file://' + htmlFile, { waitUntil: 'networkidle' });
+    await page.waitForSelector('#sheet-pages .sheet-page');
+    return await page.$$eval('#sheet-pages .sheet-page', (pages) => {
+      const mm = (px) => Math.round(px / 96 * 25.4 * 10) / 10;
+      const bad = [];
+      let widest = 0;
+      pages.forEach((p, i) => {
+        const flow = p.querySelector('.sheet-flow').getBoundingClientRect();
+        p.querySelectorAll('.sheet-task, .sheet-figure').forEach((el) => {
+          const r = el.getBoundingClientRect();
+          const over = Math.max(r.right - flow.right, flow.left - r.left);
+          widest = Math.max(widest, over);
+          if (over > 0.5) {
+            const card = el.closest('.sheet-task');
+            bad.push(`стр. ${i + 1}, задача ${card ? card.getAttribute('data-task') : '?'}` +
+              (el.classList.contains('sheet-figure') ? ' (чертёж)' : '') + ` — за полем на ${mm(over)} мм`);
+          }
+        });
+      });
+      return { bad, widest: mm(Math.max(0, widest)) };
+    });
+  } finally { await browser.close(); }
+}
+
 async function print(name, spec, expectTasks) {
   const file = path.join(OUT, name + '.pdf');
-  const report = await renderPdf(spec, file, {
-    keepHtml: path.join(OUT, 'html', name + '.html'), requireKatex: true, extraCss: CSS,
-  });
+  const htmlFile = path.join(OUT, 'html', name + '.html');
+  const report = await renderPdf(spec, file, { keepHtml: htmlFile, requireKatex: true, extraCss: CSS });
+  const widths = await checkWidths(htmlFile);
+  if (widths.bad.length) {
+    console.log(`  ${name}: за полем страницы — ${widths.bad.join('; ')}`);
+    if (PROVERKA_SHIRINY) { throw new Error(`${name}: карточки выходят за поле страницы, см. выше`); }
+  }
   console.log(`  ${name}.pdf: страниц ${report.pages}, задач ${report.tasks}, формул ${report.formulas}` +
+    (widths.bad.length ? '' : ', по ширине все карточки в поле') +
     (report.overflowing.length ? `, ВЫШЕ СТРАНИЦЫ: ${report.overflowing.join(', ')}` : '') +
     (report.formulasFailed ? `, KaTeX не принял ${report.formulasFailed}` : ''));
   if (report.tasks !== expectTasks) {
