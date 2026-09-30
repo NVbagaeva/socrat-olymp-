@@ -42,7 +42,7 @@ EdTech-платформа подготовки к ЕГЭ (профильная �
 
 - **A. Next.js + Supabase (PostgreSQL)** — рекомендация.
 - **B. Next.js + Firebase (Firestore + Auth + Storage + Cloud Functions).**
-- **C. Next.js + Neon/Postgres + Auth.js + Drizzle + Cloudflare R2** («сборная» без BaaS).
+- **C. Next.js + Neon/Postgres + Auth.js + Drizzle + Cloudflare R2** («сборная» без BaaS). Cloudflare R2 — зарубежное хранилище, по 152-ФЗ для данных пользователей не подходит.
 - **D. Next.js + Convex.**
 - **E. Next.js + PocketBase / Appwrite (self-hosted BaaS).**
 - **F. Отдельный backend: NestJS/FastAPI + PostgreSQL + Docker (VPS).**
@@ -62,7 +62,7 @@ EdTech-платформа подготовки к ЕГЭ (профильная �
 | Авторизация | 5 | 5 | 3 (сборка вручную) | 4 | 3 | 3 |
 | Аналитика (SQL, matviews, витрины) | 5 | 2 (только через BigQuery) | 5 | 3 | 2 | 5 |
 | PDF | 4 (Edge/Node functions, Storage) | 4 | 4 | 3 | 3 | 5 |
-| Файловое хранилище | 5 (S3-совместимое, RLS) | 5 | 4 (R2 отдельно) | 3 | 3 | 4 |
+| Файловое хранилище | 5 (S3-совместимое, RLS) | 5 | 4 (R2 отдельно; по 152-ФЗ не подходит) | 3 | 3 | 4 |
 | Будущая B2B-модель (multi-tenant) | 5 (RLS по organization_id) | 3 | 4 | 3 | 2 | 5 |
 | Vendor lock-in | 2 (низкий — это Postgres) | 5 (высокий) | 1 | 4 | 2 | 1 |
 | **Итого** | **63** | **51** | **56** | **49** | **43** | **53** |
@@ -261,7 +261,7 @@ Backend = серверная часть Next.js + PostgreSQL-логика.
 | `exports` | нет | CSV/XLSX-экспорты статистики | владелец, TTL 24 ч |
 
 Правила: файлы называются по `{entityType}/{entityId}/{hash}.{ext}`; метаданные (размер, хэш, TTL) — в таблице `files`. Очистка просроченных — `pg_cron`.
-При росте объёма PDF (>100 GB) — вынос в Cloudflare R2 (без egress-платы), интерфейс `StorageProvider` в `src/lib/storage/` это допускает.
+При росте объёма PDF (>100 GB) — вынос в российское хранилище (Yandex Object Storage), интерфейс `StorageProvider` в `src/lib/storage/` это допускает.
 
 ---
 
@@ -445,8 +445,8 @@ spec/         FigureSpec (jsonb) — декларативное описание
 |---|---|---|---|
 | Postgres | Supabase daily backup (Pro) | ежедневно | 7 дней |
 | Postgres PITR | Supabase PITR add-on (~10 $/мес) | непрерывно | 7 дней |
-| Postgres внешняя копия | GitHub Action `pg_dump` → Cloudflare R2 (шифрование age) | ежедневно | 30 дней + 12 месячных |
-| Storage (pdfs, figures) | `rclone sync` Supabase → R2 | ежедневно | 30 дней |
+| Postgres внешняя копия | GitHub Action `pg_dump` → Yandex Object Storage (шифрование age) | ежедневно | 30 дней + 12 месячных |
+| Storage (pdfs, figures) | `rclone sync` Supabase → Yandex Object Storage | ежедневно | 30 дней |
 | Схема БД | миграции в git | каждый коммит | всегда |
 | Банк заданий | `content/exports/*.json` в git через админ-экспорт | при публикации | всегда |
 
@@ -488,7 +488,7 @@ spec/         FigureSpec (jsonb) — декларативное описание
 | **M3 (2–3 нед.)** | Worksheets + PDF, экспорт | + QStash |
 | **M4** | №1, №2, №4, №5 — только контент и новые генераторы | — |
 | **M5** | №6 «Лаборатория» — отдельный feature-модуль с интерактивной геометрией | — |
-| **M6** | B2B: организации, API v1, тарифы, SSO | + R2 |
+| **M6** | B2B: организации, API v1, тарифы, SSO | — |
 | **M7** | ОГЭ / другие предметы — добавление данных `exams/subjects` | — |
 
 ---
@@ -501,5 +501,5 @@ spec/         FigureSpec (jsonb) — декларативное описание
 | Утечка ответов | Ответы только на сервере; RLS; тесты «ученик не может прочитать `correct_answer`» в CI |
 | Сложность Geometry Engine | Начать с 5 тел и кабинетной проекции; интерактив — позже |
 | Холодные старты Vercel для PDF | Очередь + статус; при росте — отдельный PDF-сервис |
-| Рост стоимости Vercel (bandwidth) | Чертежи и PDF раздаются с Supabase CDN / R2, не через Next |
+| Рост стоимости Vercel (bandwidth) | Чертежи и PDF раздаются с Supabase CDN, не через Next |
 | Регуляторика (152-ФЗ, локализация ПДн) | Согласия; при требовании — самохостинг Postgres в РФ (вариант F) без изменения кода |
