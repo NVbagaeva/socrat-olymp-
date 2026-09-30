@@ -683,6 +683,23 @@ function checkComposition(set, tasks) {
           Math.round(task.meta.intersection.offscreenBy * 10) / 10 +
           ' клетки, набор просит не меньше ' + least);
       }
+
+      /* Задача, которая просит askedOffscreen, обещает, что за окном
+         лежит именно спрашиваемая координата, а не только точка целиком:
+         иначе абсцисса читается продолжением линий на глаз. */
+      var asked = source && source.constraints && source.constraints.intersection;
+      if (asked && asked.askedOffscreen) {
+        var askedBy = asked.axis === 'y'
+          ? Math.abs(task.meta.intersection.y) - win.ymax
+          : Math.abs(task.meta.intersection.x) - win.xmax;
+        var askedMin = asked.askedOffscreenMin === undefined ? 1 : asked.askedOffscreenMin;
+        if (askedBy < askedMin - 1e-9) {
+          errors.push(where + '/' + task.id + ': спрашиваемая координата (' +
+            (asked.axis === 'y' ? task.meta.intersection.y : task.meta.intersection.x) +
+            ') ближе ' + askedMin + ' клетки к рамке окна ±' + win.xmax +
+            ', а задача просит её за окном');
+        }
+      }
     });
 
     /* Ответ пересчитывается независимо: по двум уравнениям с чертежа. */
