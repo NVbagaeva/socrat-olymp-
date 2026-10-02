@@ -141,6 +141,59 @@ export function answersItems(blocks, generator, solutionBuilder, quadraticBuilde
   return items;
 }
 
-const api = { answersItems: answersItems };
+/**
+ * Раздел «Ответы» листа генератора: с новой страницы, с пометкой
+ * «Только для учителя». У каждой задачи — номер, ответ и метод (на
+ * листе ученика метод не подписан). Несколько вариантов — по ним:
+ * подзаголовок «Вариант K» и ключ его задач, нумерация в каждом своя,
+ * как на листах учеников. Краткие решения — так же по вариантам.
+ *
+ * variants — [{ title: 'Вариант 1' | null, blocks }]; у задачи
+ *            сверх полей answersItems есть method
+ */
+export function variantAnswersItems(variants, generator, solutionBuilder, quadraticBuilder) {
+  const many = variants.length > 1;
+  const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: many })];
+
+  variants.forEach((variant) => {
+    const rows = [];
+    variant.blocks.forEach((block) => {
+      block.tasks.forEach((task) => {
+        rows.push({ no: task.no, answer: task.answer, html: answerHtml(task), method: task.method });
+      });
+    });
+    if (variant.title) { items.push(answers.subHead(variant.title)); }
+    answers.keyTable(null, rows).forEach((item) => items.push(item));
+  });
+
+  let total = 0;
+  let count = 0;
+  const solved = [];
+  variants.forEach((variant) => {
+    const own = [];
+    variant.blocks.forEach((block) => {
+      block.tasks.forEach((task) => {
+        total += 1;
+        const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
+        if (formulas) { own.push(answers.solution(task.no, formulas, task.answer)); }
+      });
+    });
+    count += own.length;
+    if (own.length) {
+      if (variant.title) { solved.push(answers.subHead(variant.title)); }
+      own.forEach((item) => solved.push(item));
+    }
+  });
+
+  if (count) {
+    items.push(answers.sectionHead('Краткие решения',
+      'Только для учителя · ' + count + ' задач из ' + total));
+    solved.forEach((item) => items.push(item));
+  }
+
+  return items;
+}
+
+const api = { answersItems: answersItems, variantAnswersItems: variantAnswersItems };
 
 export default api;

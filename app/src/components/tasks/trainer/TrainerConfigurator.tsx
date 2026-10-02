@@ -3,7 +3,18 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Badge, Button } from '@/components/ui';
-import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
+import {
+  CountPicker,
+  Note,
+  Option,
+  OptionGroup,
+  SkillCards,
+  StepHead,
+  countLabel,
+  countOf,
+  useCountChoice,
+  type SkillItem,
+} from '../configurator';
 import { firstLevel, skillCounts, skillLevels, type SkillLevel } from '@/content/skills12';
 import { trainerPage } from '@/content/trainerModes';
 import { counted } from '@/lib/plural';
@@ -85,7 +96,7 @@ export function TrainerConfigurator<M extends string>({
   const first = skills.find((item) => item.id === preset?.skill) ?? skills[0];
   const [skillId, setSkillId] = useState(first?.id ?? '');
   const [mode, setMode] = useState<M>(preset?.mode ?? (modes[0]?.id as M));
-  const [count, setCount] = useState<number | null>(10);
+  const [count, setCount] = useCountChoice();
   const [level, setLevel] = useState<string | null>(firstLevel(first?.levels ?? []));
 
   const skill = skills.find((item) => item.id === skillId) ?? first;
@@ -99,7 +110,8 @@ export function TrainerConfigurator<M extends string>({
   const allCount = current?.total ?? skill.count;
   const shownLevels = levels.filter((item) => skill.levels.includes(item.id));
   const modeTitle = current?.title ?? '';
-  const chosenCount = count ?? allCount;
+  /* null — в поле «Своё» пусто: запускать нечего. */
+  const chosenCount = countOf(count, allCount);
 
   function pickSkill(id: string) {
     setSkillId(id);
@@ -111,7 +123,7 @@ export function TrainerConfigurator<M extends string>({
   }
 
   function start() {
-    if (skill === undefined) {
+    if (skill === undefined || chosenCount === null) {
       return;
     }
     onStart({ skill, mode, count: chosenCount, level });
@@ -162,16 +174,15 @@ export function TrainerConfigurator<M extends string>({
                 })}
               </OptionGroup>
 
-              <OptionGroup id="trainer-param-count" label={words.params.count} compact>
-                {counts.map((item) => (
-                  <Option
-                    key={item ?? 'all'}
-                    checked={count === item}
-                    onSelect={() => setCount(item)}
-                    title={item === null ? `${words.params.all} (${allCount})` : item}
-                  />
-                ))}
-              </OptionGroup>
+              <CountPicker
+                id="trainer-param-count"
+                label={words.params.count}
+                max={allCount}
+                value={count}
+                onChange={setCount}
+                presets={counts}
+                allWord={words.params.all}
+              />
 
               {shownLevels.length === 0 ? null : (
                 <OptionGroup id="trainer-param-level" label={words.params.level}>
@@ -207,12 +218,16 @@ export function TrainerConfigurator<M extends string>({
       </div>
 
       <div className="cfg-bar">
-        <Button className="cfg-bar__start" size="lg" onClick={start}>
+        <Button
+          className="cfg-bar__start"
+          size="lg"
+          onClick={start}
+          disabled={chosenCount === null}
+        >
           {words.start}
         </Button>
         <p className="cfg-bar__summary">
-          {family} · {skill.title} · {modeTitle} ·{' '}
-          {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          {family} · {skill.title} · {modeTitle} · {countLabel(chosenCount)}
         </p>
       </div>
 

@@ -69,14 +69,19 @@ export function TrainerBuilder({
   /* История ошибок читается, но не пишется: «Повтор ошибок» есть
      только тогда, когда ученику есть что повторять. */
   const progress = useTrainerProgress();
-  const hasMistakes = progress.mistakes.length > 0;
+
+  /* Ошибки этого семейства: по ним считается «Все» и потолок «Своё»
+     в «Повторе ошибок». */
+  const familyMistakes = progress.mistakes.filter((id) =>
+    skills.some((item) => id.startsWith(`${item.id}-`)),
+  ).length;
 
   /* «Все» в смешанной тренировке — все наборы семейства. */
   const modes: TrainerModeOption<TrainerModeId>[] = trainerModes.map((item) =>
     item.id === 'mixed'
       ? { ...item, total: familyTotal }
       : item.id === 'mistakes'
-        ? { ...item, locked: !hasMistakes }
+        ? { ...item, total: familyMistakes, locked: familyMistakes === 0 }
         : item,
   );
 
