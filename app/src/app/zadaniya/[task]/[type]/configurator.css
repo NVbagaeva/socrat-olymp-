@@ -306,6 +306,26 @@
   max-width: 200px;
 }
 
+/* Поле «Своё» количество: крупное, кегль не меньше 16px — иначе
+   iOS увеличивает страницу при фокусе. Отступ прокрутки снизу —
+   на высоту прилипшей панели запуска, чтобы поле под неё не ушло. */
+.cfg-count {
+  gap: var(--space-1);
+}
+.cfg-count__input {
+  max-width: 200px;
+  height: var(--h-control-lg);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  scroll-margin-bottom: calc(var(--h-bnav) + 200px);
+}
+.cfg-count__hint {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+
 /* Плашка под чертежом: голубая подложка, значок слева. */
 .cfg-note {
   display: flex;
@@ -349,6 +369,12 @@
 /* Две кнопки листов в генераторе. */
 .cfg-bar--two {
   grid-template-columns: auto auto minmax(0, 1fr);
+}
+/* Ссылка на лист без адреса: количество не выбрано. Вид — как у
+   выключенной кнопки. */
+.cfg-bar__start.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 .cfg-bar__summary {
   font-size: var(--fs-caption);

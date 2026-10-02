@@ -17,11 +17,26 @@ import typo from './typography.js';
  * Полоса-заголовок раздела. Начинает новую страницу:
  * ответы не должны начинаться под последней задачей.
  */
-function sectionHead(title, note) {
-  return '<div class="sheet-item sheet-block" data-keep-with-next="1" data-page-break="1">' +
+function sectionHead(title, note, options) {
+  /* section — своя нумерация страниц раздела: у листа с вариантами
+     ответы не продолжают счёт страниц последнего варианта. */
+  var section = options && options.section ? ' data-section-start="1"' : '';
+  return '<div class="sheet-item sheet-block" data-keep-with-next="1" data-page-break="1"' +
+    section + '>' +
     '<header class="sheet-block-head">' +
       '<h2 class="sheet-block-title">' + typo.text(title) + '</h2>' +
       (note ? '<span class="sheet-block-note">' + typo.text(note) + '</span>' : '') +
+    '</header></div>';
+}
+
+/**
+ * Подзаголовок внутри раздела: «Вариант 2» над его таблицами.
+ * Оформлен как блок второго уровня и не остаётся один внизу страницы.
+ */
+function subHead(title) {
+  return '<div class="sheet-item sheet-block sheet-block--sub" data-keep-with-next="1">' +
+    '<header class="sheet-block-head">' +
+      '<h2 class="sheet-block-title">' + typo.text(title) + '</h2>' +
     '</header></div>';
 }
 
@@ -101,7 +116,8 @@ function steps(items, answer) {
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
 }
 
-const api = { sectionHead: sectionHead, table: table, solution: solution, steps: steps };
+const api = { sectionHead: sectionHead, subHead: subHead, table: table, solution: solution,
+              steps: steps };
 
 export default api;
-export { sectionHead, table, solution, steps };
+export { sectionHead, subHead, table, solution, steps };

@@ -1,8 +1,20 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import { clsx } from 'clsx';
 import { Badge, Input } from '@/components/ui';
-import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
+import {
+  CountPicker,
+  Note,
+  Option,
+  OptionGroup,
+  SkillCards,
+  StepHead,
+  countLabel,
+  countOf,
+  useCountChoice,
+  type SkillItem,
+} from '../configurator';
 import {
   generatorPage,
   sheetLayouts,
@@ -12,7 +24,6 @@ import {
   type SheetThemeId,
 } from '@/content/generator';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
-import { counted } from '@/lib/plural';
 import { randomSeed } from '@/lib/vychisleniya/session';
 import { sheetQuery8, subtitleOf8 } from '@/lib/vychisleniya/sheet8';
 import { LEVELS } from '@/lib/vychisleniya/skills';
@@ -39,26 +50,27 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
   const [date, setDate] = useState('');
   const dateId = useId();
   const [selected, setSelected] = useState<string[]>(skills[0] === undefined ? [] : [skills[0].id]);
-  const [count, setCount] = useState<number | null>(10);
+  const [count, setCount] = useCountChoice();
   const [level, setLevel] = useState<Level | null>('base');
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
 
   const chosen = skills.filter((item) => selected.includes(item.id));
+  const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
+  /* null — в поле «Своё» пусто: лист не собирается. */
+  const chosenCount = countOf(count, allCount);
   const selectedKey = selected.join(',');
   const seed = useMemo(
     () => randomSeed(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, count, level],
+    [selectedKey, chosenCount, level],
   );
-  const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
-  const chosenCount = count ?? allCount;
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf8({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
   const query = sheetQuery8({
     skills: chosen.map((item) => item.id),
-    count: chosenCount,
+    count: chosenCount ?? 0,
     level,
     seed,
     theme,
@@ -66,6 +78,8 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
     kind: kindTitle,
     date,
   });
+  /* Пустое поле «Своё» — листа нет, ссылки выключены. */
+  const ready = chosenCount !== null;
   const studentHref = `${base}/pechat/?${query}`;
   const teacherHref = `${base}/pechat/otvety/?${query}`;
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
@@ -135,16 +149,14 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
           <section className="cfg-step" aria-labelledby="z8-gen-step-params">
             <StepHead id="z8-gen-step-params" no={generatorPage.params.step} title={generatorPage.params.title} lead={generatorPage.params.lead} />
             <div className="cfg-params">
-              <OptionGroup id="z8-gen-param-count" label={generatorPage.params.count} compact>
-                {[5, 10, 20, null].map((item) => (
-                  <Option
-                    key={item ?? 'all'}
-                    checked={count === item}
-                    onSelect={() => setCount(item)}
-                    title={item === null ? `${generatorPage.params.all} (${allCount})` : item}
-                  />
-                ))}
-              </OptionGroup>
+              <CountPicker
+                id="z8-gen-param-count"
+                label={generatorPage.params.count}
+                max={allCount}
+                value={count}
+                onChange={setCount}
+                allWord={generatorPage.params.all}
+              />
 
               <OptionGroup id="z8-gen-param-level" label={generatorPage.params.level}>
                 {LEVELS.map((item) => (
@@ -182,22 +194,34 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
             ))}
           </ul>
           <p className="cfg-summary__count">
-            {counted(chosenCount, 'задание', 'задания', 'заданий')} · {layoutTitle} · {themeTitle}
+            {countLabel(chosenCount)} · {layoutTitle} · {themeTitle}
           </p>
           <Note>{generatorPage.summary.note}</Note>
         </aside>
       </div>
 
       <div className="cfg-bar cfg-bar--two">
-        <a className="btn btn--primary btn--lg cfg-bar__start" href={studentHref} target="_blank" rel="noopener">
+        <a
+          className={clsx('btn btn--primary btn--lg cfg-bar__start', ready || 'is-disabled')}
+          href={ready ? studentHref : undefined}
+          aria-disabled={!ready || undefined}
+          target="_blank"
+          rel="noopener"
+        >
           {generatorPage.student}
         </a>
-        <a className="btn btn--secondary btn--lg cfg-bar__start" href={teacherHref} target="_blank" rel="noopener">
+        <a
+          className={clsx('btn btn--secondary btn--lg cfg-bar__start', ready || 'is-disabled')}
+          href={ready ? teacherHref : undefined}
+          aria-disabled={!ready || undefined}
+          target="_blank"
+          rel="noopener"
+        >
           {generatorPage.teacher}
         </a>
         <p className="cfg-bar__summary">
           {VYCHISLENIYA.title}
-          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} · {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} · {countLabel(chosenCount)}
         </p>
       </div>
     </section>

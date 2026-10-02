@@ -229,6 +229,40 @@ body {
   color: var(--sheet-ink-3);
 }
 
+/* Номер варианта — справа в строке названия, плашкой той же формы. */
+.sheet-variant {
+  flex: none;
+  padding: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 4);
+  border-radius: var(--sheet-radius-md);
+  border: var(--sheet-rule-width) solid var(--sheet-ink);
+  color: var(--sheet-ink);
+  font-size: var(--sheet-fs-badge);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Строка полей ученика: фамилия, класс, дата. Линии — как у строки
+   «Ответ: ____», чтобы на листе был один вид поля для письма. */
+.sheet-fields {
+  display: flex;
+  gap: calc(var(--sheet-step) * 6);
+  margin: calc(var(--sheet-step) * -2) 0 calc(var(--sheet-step) * 5);
+  color: var(--sheet-ink-2);
+}
+.sheet-field {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 2);
+}
+.sheet-field--wide { flex: 1 1 auto; }
+.sheet-field-blank {
+  flex: 1 1 auto;
+  min-width: calc(var(--sheet-step) * 14);
+  border-bottom: var(--sheet-rule-width) solid var(--sheet-blank);
+}
+.sheet-field-value { color: var(--sheet-ink); }
+
 /* ══════════════════════════════════════════════════════════
    Рамка «Повторяем:»
    ══════════════════════════════════════════════════════════ */

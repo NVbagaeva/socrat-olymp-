@@ -141,6 +141,52 @@ export function answersItems(blocks, generator, solutionBuilder, quadraticBuilde
   return items;
 }
 
-const api = { answersItems: answersItems };
+/**
+ * Раздел «Ответы» листа с несколькими вариантами: с новой страницы,
+ * с пометкой «Только для учителя», внутри — по вариантам: подзаголовок
+ * «Вариант K» и таблицы его блоков. Нумерация задач в каждом варианте
+ * своя, как на листах учеников. Краткие решения — так же по вариантам.
+ *
+ * variants — [{ title: 'Вариант 1', blocks }]
+ */
+export function variantAnswersItems(variants, generator, solutionBuilder, quadraticBuilder) {
+  const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: true })];
+
+  variants.forEach((variant) => {
+    items.push(answers.subHead(variant.title));
+    variant.blocks.forEach((block) => {
+      items.push(answers.table(
+        block.title,
+        block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: answerHtml(task) })),
+        5
+      ));
+    });
+  });
+
+  let total = 0;
+  const solved = [];
+  variants.forEach((variant) => {
+    const own = [];
+    variant.blocks.forEach((block) => {
+      block.tasks.forEach((task) => {
+        total += 1;
+        const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
+        if (formulas) { own.push(answers.solution(task.no, formulas, task.answer)); }
+      });
+    });
+    if (own.length) { solved.push(answers.subHead(variant.title), ...own); }
+  });
+
+  const count = solved.filter((item) => item.indexOf('sheet-solution') >= 0).length;
+  if (count) {
+    items.push(answers.sectionHead('Краткие решения',
+      'Только для учителя · ' + count + ' задач из ' + total));
+    solved.forEach((item) => items.push(item));
+  }
+
+  return items;
+}
+
+const api = { answersItems: answersItems, variantAnswersItems: variantAnswersItems };
 
 export default api;

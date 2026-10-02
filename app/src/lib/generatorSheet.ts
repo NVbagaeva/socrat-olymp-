@@ -13,7 +13,8 @@
 import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
-import { answersItems } from '@/lib/sheet/answers12.js';
+import { answersItems, variantAnswersItems } from '@/lib/sheet/answers12.js';
+import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
 import { skillTitle } from '@/content/skills12';
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
@@ -33,6 +34,17 @@ export interface SheetParams {
   kind: string;
   /** Дата в подзаголовке, в записи ГГГГ-ММ-ДД. Пусто — даты нет. */
   date: string;
+  /** Сколько вариантов: 1…4. Структура у всех одна, числа разные. */
+  variants: number;
+}
+
+/** Сколько вариантов можно заказать в генераторе. */
+export const MAX_VARIANTS = 4;
+
+/** Число вариантов из адреса: 1…MAX_VARIANTS, иначе 1. */
+export function variantsFrom(raw: string | null): number {
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 1 && n <= MAX_VARIANTS ? n : 1;
 }
 
 /* Клетка чертежа в миллиметрах: 3,4 в одну колонку, 3,0 в две —
@@ -56,6 +68,10 @@ export function sheetQuery(params: SheetParams): string {
   if (params.date !== '') {
     query.set('d', params.date);
   }
+  /* Один вариант — адрес как прежде. */
+  if (params.variants > 1) {
+    query.set('v', String(params.variants));
+  }
   return query.toString();
 }
 
@@ -76,6 +92,7 @@ export function parseSheetQuery(query: URLSearchParams): SheetParams {
     layout: query.get('c') === '2' ? 'double' : 'single',
     kind: query.get('k') ?? '',
     date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
+    variants: variantsFrom(query.get('v')),
   };
 }
 
@@ -148,26 +165,168 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
         set: setId,
         tasks: tasks.map((task): SheetTask => {
           number += 1;
-          const engine = task as EngineTask & {
-            options?: unknown;
-            answerHtml?: string | null;
-          };
-          return {
-            no: number,
-            id: task.id,
-            questionHtml: task.questionHtml,
-            options: engine.options ?? null,
-            figureSvg: task.svg,
-            answer: task.answer,
-            answerHtml: engine.answerHtml ?? null,
-            answerRule: rules[task.id],
-            seed: task.meta.seed,
-            meta: task.meta,
-          };
+          return sheetTaskFrom(task, number, rules);
         }),
       };
     })
     .filter((block) => block.tasks.length > 0);
+}
+
+/* Сколько seed перебирать на набор, подбирая задачи следующего
+   варианта: как у тренажёра. */
+const VARIANT_TRIES = 24;
+
+type EngineExtra = EngineTask & { options?: unknown; answerType?: string };
+
+/** Что видит ученик: условие, чертёж, варианты ответа. */
+function shownKey(task: SheetTask): string {
+  return `${task.questionHtml}\u0000${task.figureSvg ?? ''}\u0000${JSON.stringify(task.options)}`;
+}
+
+/** Задача годится листу: ответ есть и проверяется. */
+function usable(task: EngineExtra): boolean {
+  const type = task.answerType ?? 'number';
+  if (type === 'choice') {
+    return Array.isArray(task.options) && task.options.length > 0;
+  }
+  return type === 'number' && parseAnswer(task.answer) !== null;
+}
+
+function sheetTaskFrom(task: EngineTask, no: number, rules: Record<string, string>): SheetTask {
+  const engine = task as EngineExtra & { answerHtml?: string | null };
+  return {
+    no,
+    id: task.id,
+    questionHtml: task.questionHtml,
+    options: engine.options ?? null,
+    figureSvg: task.svg,
+    answer: task.answer,
+    answerHtml: engine.answerHtml ?? null,
+    answerRule: rules[task.id],
+    seed: task.meta.seed,
+    meta: task.meta,
+  };
+}
+
+/** Что уже стоит на листах прежних вариантов. */
+interface VariantMemory {
+  /** Условия с чертежами всех задач всех вариантов. */
+  shown: Set<string>;
+  /** Ответы по месту задачи: «набор#номер в блоке» → ответы. */
+  answers: Map<string, Set<string>>;
+}
+
+function remember(memory: VariantMemory, blocks: SheetBlock[]) {
+  blocks.forEach((block) => {
+    block.tasks.forEach((task, i) => {
+      memory.shown.add(shownKey(task));
+      const slot = `${block.set}#${i}`;
+      const seen = memory.answers.get(slot) ?? new Set<string>();
+      seen.add(task.answer);
+      memory.answers.set(slot, seen);
+    });
+  });
+}
+
+/**
+ * Следующий вариант по образцу первого: те же блоки, то же число
+ * задач, на каждом месте — та же задача набора (тот же тип и
+ * уровень), только на другом seed, то есть с другими числами.
+ * Порядок не меняется.
+ *
+ * На каждое место берётся лучшее из найденного:
+ *   1. та же задача, новое условие, новый ответ;
+ *   2. та же задача, новое условие (ответ совпал с прежним вариантом);
+ *   3. другая задача того же набора и уровня — у задачи с
+ *      закреплёнными числами другого seed не бывает;
+ *   4. если ничего не нашлось — задача образца как есть.
+ */
+function nextVariant(
+  params: SheetParams,
+  base: SheetBlock[],
+  k: number,
+  memory: VariantMemory,
+  rules: Record<string, string>,
+): SheetBlock[] {
+  let number = 0;
+  return base.map((block) => {
+    const batches: EngineTask[][] = [];
+    const batch = (attempt: number): EngineTask[] => {
+      if (batches[attempt] === undefined) {
+        try {
+          batches[attempt] = GraphGenerate.generateSet(
+            block.set,
+            `${params.seed}:v${k}:${block.set}:${attempt}`,
+          ) as EngineTask[];
+        } catch {
+          batches[attempt] = [];
+        }
+      }
+      return batches[attempt] ?? [];
+    };
+
+    const tasks = block.tasks.map((sample, i) => {
+      const slotAnswers = memory.answers.get(`${block.set}#${i}`) ?? new Set<string>();
+      const sampleLevel = sample.meta.level ?? null;
+      const sampleType = sample.options === null ? 'number' : 'choice';
+      let best: SheetTask | null = null;
+      let bestTier = 5;
+      for (let attempt = 0; attempt < VARIANT_TRIES && bestTier > 1; attempt += 1) {
+        for (const candidate of batch(attempt)) {
+          const engine = candidate as EngineExtra;
+          const same = candidate.id === sample.id;
+          if (!same && ((candidate.meta.level ?? null) !== sampleLevel ||
+              (engine.answerType ?? 'number') !== sampleType)) {
+            continue;
+          }
+          if (!usable(engine)) {
+            continue;
+          }
+          const task = sheetTaskFrom(candidate, 0, rules);
+          if (memory.shown.has(shownKey(task))) {
+            continue;
+          }
+          const fresh = !slotAnswers.has(task.answer);
+          const tier = same ? (fresh ? 1 : 2) : fresh ? 3 : 4;
+          if (tier < bestTier) {
+            best = task;
+            bestTier = tier;
+            if (tier === 1) {
+              break;
+            }
+          }
+        }
+      }
+      const picked = best ?? { ...sample };
+      /* Взятое сразу запоминается: два места одного варианта не
+         получат одно и то же условие. */
+      memory.shown.add(shownKey(picked));
+      number += 1;
+      return { ...picked, no: number };
+    });
+    return { ...block, tasks };
+  });
+}
+
+/**
+ * Все варианты листа. Первый — ровно тот, что собирался до появления
+ * вариантов (тот же seed), остальные — по его образцу.
+ */
+export function sheetVariants(params: SheetParams): SheetBlock[][] {
+  const first = sheetBlocks(params);
+  const out = [first];
+  if (params.variants <= 1) {
+    return out;
+  }
+  const rules = answerRules();
+  const memory: VariantMemory = { shown: new Set(), answers: new Map() };
+  remember(memory, first);
+  for (let k = 2; k <= params.variants; k += 1) {
+    const next = nextVariant(params, first, k, memory, rules);
+    remember(memory, next);
+    out.push(next);
+  }
+  return out;
 }
 
 /** «18.09.2026» из записи ГГГГ-ММ-ДД. */
@@ -189,7 +348,8 @@ export function subtitleOf(params: Pick<SheetParams, 'kind' | 'date'>): string {
  * страницы. Рамки «Повторяем» на варианте нет.
  */
 export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
-  const blocks = sheetBlocks(params);
+  const variants = sheetVariants(params);
+  const blocks = variants[0] ?? [];
   /* Название подтемы приходит со страницы: лист собирается один на
      все подтемы задания, а в шапке должно стоять то, что печатают.
      Не передали — остаётся название из конфига листа. */
@@ -207,10 +367,34 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
     title: { chip: content.title.chip, text: name, subtitle: subtitleOf(params) },
     recap: null,
     blocks,
+    /* Строка «Фамилия, имя / Класс / Дата» — на каждом варианте. */
+    fields: { date: params.date === '' ? '' : dateText(params.date) },
+    /* Несколько вариантов: каждый с новой страницы, со своей шапкой
+       и номером. Один — лист как прежде. */
+    ...(variants.length > 1
+      ? {
+          variants: variants.map((list, i) => ({
+            title: {
+              chip: content.title.chip,
+              text: name,
+              subtitle: subtitleOf(params),
+              variant: `Вариант ${i + 1}`,
+            },
+            blocks: list,
+          })),
+        }
+      : {}),
     withAnswerLine: !withAnswers,
-    extraItems: withAnswers
-      ? answersItems(blocks, GraphGenerate, solutionBuilder, quadraticBuilder)
-      : [],
+    extraItems: !withAnswers
+      ? []
+      : variants.length > 1
+        ? variantAnswersItems(
+            variants.map((list, i) => ({ title: `Вариант ${i + 1}`, blocks: list })),
+            GraphGenerate,
+            solutionBuilder,
+            quadraticBuilder,
+          )
+        : answersItems(blocks, GraphGenerate, solutionBuilder, quadraticBuilder),
     foot: content.foot,
   };
 }
