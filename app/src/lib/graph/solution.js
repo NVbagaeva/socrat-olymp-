@@ -374,7 +374,9 @@ function stepAnswer(task, line) {
     var valueAt = Line.yAt(line, x0);
     blocks.push(text('Нужно найти <b class="key">' +
       math('f(' + tex(x0) + ')', 'f(' + num(x0) + ')') + '</b>. Подставляем:'));
-    blocks.push(formula('f(' + texNegative(x0) + ') = ' + texBracket(kf) + ' \\cdot ' +
+    /* В записи f(x₀) скобки уже есть: отрицательный аргумент внутри
+       них второй пары не получает — f(−19,5), а не f((−19,5)). */
+    blocks.push(formula('f(' + tex(x0) + ') = ' + texBracket(kf) + ' \\cdot ' +
       texNegative(x0) + ' + ' + texNegative(b) + ' = ' + texExact(valueAt)));
   } else if (rule === 'argument-for' && task.query) {
     var y0 = task.query.y0;
@@ -399,7 +401,7 @@ function stepAnswer(task, line) {
   } else if (rule === 'point-choice' && task.probe) {
     var atProbe = Line.yAt(line, task.probe.x);
     blocks.push(text('Подставляем координаты точки в формулу и сравниваем с её ординатой:'));
-    blocks.push(formula('f(' + texNegative(task.probe.x) + ') = ' + texBracket(kf) + ' \\cdot ' +
+    blocks.push(formula('f(' + tex(task.probe.x) + ') = ' + texBracket(kf) + ' \\cdot ' +
       texNegative(task.probe.x) + ' + ' + texNegative(b) + ' = ' + texExact(atProbe)));
     blocks.push(text('У точки ордината <b class="key">' + num(task.probe.y) + '</b>. ' +
       (Line.isZero(Line.sub(atProbe, Line.toFrac(task.probe.y)))
@@ -514,7 +516,8 @@ function stepPairSolve(first, second, x0) {
       'и приводим подобные:'),
     formula(slopeTexExact(dk) + 'x = ' + texExact(db))
   ];
-  if (dk.p === 1 && dk.q === 1) {
+  if ((dk.p === 1 && dk.q === 1) || Line.isZero(db)) {
+    /* Делить на 1 или делить ноль — лишняя строка: сразу ответ. */
     blocks.push(formula('x = ' + texExact(x0)));
   } else {
     blocks.push(formula('x = ' + texExact(db) + ' : ' + texBracket(dk) + ' = ' + texExact(x0)));
@@ -530,7 +533,7 @@ function stepPairAnswer(task, first, x0) {
     var x = Line.num(x0);
     blocks.push(text('Спрашивают ординату точки пересечения. Подставляем найденный ' +
       math('x', 'x') + ' в любую из формул — возьмём ' + math('f', 'f') + ':'));
-    blocks.push(formula('y = f(' + texNegative(x) + ') = ' + texBracket(first.k) + ' \\cdot ' +
+    blocks.push(formula('y = f(' + tex(x) + ') = ' + texBracket(first.k) + ' \\cdot ' +
       texNegative(x) + ' + ' + texNegative(Line.num(first.b)) + ' = ' + texExact(y0)));
   } else {
     blocks.push(text('Спрашивают абсциссу точки пересечения — это найденный ' + math('x', 'x') + '.'));

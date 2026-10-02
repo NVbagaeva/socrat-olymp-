@@ -76,7 +76,7 @@ export function FeedbackSection() {
             <Notification
               unread
               title="Комментарий к заданию №17"
-              meta="Наталья В. · 12 минут назад"
+              meta="Наталия В. · 12 минут назад"
             />
             <Notification title="Домашняя работа №4 проверена" meta="вчера, 19:40" />
           </div>

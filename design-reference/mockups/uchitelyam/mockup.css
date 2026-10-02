@@ -1,0 +1,429 @@
+/* Мокап этапа 1: первый экран /uchitelyam/ и блок-анонс на главной.
+   Не код сайта. Фрагменты вставляются в собранную страницу поверх её
+   стилей, поэтому шапка, кнопки, шрифты и токены — настоящие.
+   Здесь только новые классы с префиксом svc-, и в них только
+   семантические токены платформы: ни одного хекса и ни одного примитива. */
+
+/* Латиница Caveat — только для «рукописного исходника» в мокапе.
+   На сайте на этом месте будет фотография настоящего листа. */
+@font-face {
+  font-family: 'Caveat Mockup';
+  src: url('caveat-latin.woff2') format('woff2');
+  font-weight: 400;
+}
+
+/* ══════════════ Первый экран лендинга ══════════════ */
+
+.svc-hero {
+  background: var(--color-bg);
+  min-height: calc(100dvh - var(--h-site-head));
+  display: flex;
+  align-items: center;
+  padding: var(--space-12) 0;
+  overflow: hidden;
+}
+.svc-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: center;
+  width: 100%;
+}
+.svc-hero__title {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-6);
+}
+.svc-hero__title span {
+  display: block;
+  white-space: nowrap;
+}
+.svc-hero__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  max-width: 54ch;
+}
+.svc-hero__actions {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-top: var(--space-8);
+}
+.svc-hero__note {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+/* Полоса под кнопками: кто делает и когда начнёт.
+   Та же подача, что у полосы показателей на главной. */
+.svc-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  margin-top: var(--space-10);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+.svc-foot > * {
+  padding: var(--space-4) var(--space-5);
+}
+.svc-foot > * + * {
+  border-left: 1px solid var(--color-border);
+}
+.svc-trust {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.svc-trust img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+  object-position: center 18%;
+  background: var(--color-surface-soft);
+}
+.svc-trust b,
+.svc-status b {
+  display: block;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.svc-trust span,
+.svc-status span {
+  display: block;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.svc-status {
+  position: relative;
+  padding-left: calc(var(--space-5) + 18px) !important;
+}
+.svc-status::before {
+  content: '';
+  position: absolute;
+  left: var(--space-5);
+  top: calc(var(--space-4) + 6px);
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+  box-shadow: 0 0 0 4px var(--color-success-soft);
+}
+.svc-status--busy::before {
+  background: var(--color-warning);
+  box-shadow: 0 0 0 4px var(--color-warning-soft);
+}
+
+/* ── «Было → стало» ── */
+
+.svc-ba {
+  position: relative;
+  height: 600px;
+  border-radius: var(--radius-xl);
+  /* Клетка тетради из сетки героя: намёк на исходник, не декор ради декора. */
+  background:
+    linear-gradient(var(--color-grid-soft) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--color-grid-soft) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(160deg, var(--color-glass-mid), var(--color-glass-end));
+  border: 1px solid var(--color-border-info);
+}
+.svc-chip {
+  position: absolute;
+  z-index: 6;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+.svc-chip--after {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Исходник: фотография тетрадного листа. В мокапе нарисован,
+   на сайте — снимок вашего настоящего рукописного листа. */
+.svc-before {
+  position: absolute;
+  width: 250px;
+  aspect-ratio: 1 / 1.414;
+  padding: 22px 20px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--color-text) 5%, transparent), transparent 40%),
+    linear-gradient(var(--color-grid-soft) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(90deg, var(--color-grid-soft) 1px, transparent 1px) 0 0 / 14px 14px,
+    var(--color-surface);
+  border-radius: 3px;
+  box-shadow: var(--shadow-lg);
+  font-family: 'Caveat Mockup', var(--font-hand);
+  color: var(--color-text-brand);
+  font-size: 19px;
+  line-height: 22px;
+  overflow: hidden;
+}
+.svc-before p {
+  margin: 0 0 6px;
+}
+.svc-before .svc-before__head {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+.svc-before .svc-before__var {
+  text-align: center;
+  text-decoration: underline;
+  margin-bottom: 8px;
+}
+.svc-before s {
+  text-decoration-thickness: 2px;
+  opacity: 0.8;
+}
+.svc-before svg {
+  display: block;
+  margin: 2px 0 8px 18px;
+  overflow: visible;
+}
+.svc-before svg path,
+.svc-before svg line {
+  stroke: var(--color-text-brand);
+  fill: none;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+/* Результат: веер листов, сверху — первый вариант. */
+.svc-fan {
+  position: absolute;
+}
+.svc-fan img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  background: var(--color-surface);
+  border-radius: 3px;
+  box-shadow: var(--shadow-md);
+  transform-origin: 50% 100%;
+}
+.svc-fan__tabs {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+}
+.svc-fan__tabs span {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border-info);
+}
+.svc-fan__tabs span:first-child {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Стрелка и рукописная реплика — приём листов и страницы «Об авторе». */
+.svc-arrow {
+  position: absolute;
+  z-index: 6;
+  overflow: visible;
+}
+.svc-arrow path {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.svc-note {
+  position: absolute;
+  z-index: 6;
+  font-size: 30px;
+  line-height: 30px;
+  transform: rotate(-5deg);
+  white-space: nowrap;
+}
+.svc-note::after {
+  content: '';
+  display: block;
+  width: 70%;
+  height: 2px;
+  margin-top: 6px;
+  background: var(--color-accent);
+  border-radius: 1px;
+}
+
+/* Раскладка первого экрана на широком экране. */
+.svc-hero .svc-before { left: 34px; top: 92px; transform: rotate(-6deg); z-index: 2; }
+.svc-hero .svc-chip--before { left: 44px; top: 36px; }
+.svc-hero .svc-fan { right: 86px; top: 76px; width: 320px; height: 452px; z-index: 3; }
+.svc-hero .svc-fan img:nth-child(1) { transform: rotate(7.5deg) translate(28px, -6px); }
+.svc-hero .svc-fan img:nth-child(2) { transform: rotate(5deg) translate(18px, -4px); }
+.svc-hero .svc-fan img:nth-child(3) { transform: rotate(2.5deg) translate(8px, -2px); }
+.svc-hero .svc-fan img:nth-child(4) { transform: none; box-shadow: var(--shadow-lg); }
+.svc-hero .svc-fan__tabs { right: 40px; top: 36px; }
+.svc-hero .svc-chip--after { right: 40px; bottom: 30px; }
+.svc-hero .svc-arrow { left: 214px; top: 408px; }
+.svc-hero .svc-note { left: 40px; bottom: 34px; }
+
+/* ══════════════ Блок-анонс на главной ══════════════ */
+
+.svc-promo .split {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.svc-promo .svc-promo__eyebrow {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+.svc-promo .svc-promo__price {
+  margin-top: var(--space-4);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.svc-promo__art {
+  position: relative;
+  height: 420px;
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(var(--color-grid-soft) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--color-grid-soft) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--color-bg);
+  border: 1px solid var(--color-border-info);
+  overflow: hidden;
+}
+.svc-promo .svc-before {
+  width: 200px;
+  font-size: 16px;
+  line-height: 18px;
+  padding: 16px 14px;
+  left: 44px;
+  top: 58px;
+  transform: rotate(-6deg);
+}
+.svc-promo .svc-before .svc-before__head { font-size: 18px; }
+.svc-promo .svc-before svg { transform: scale(0.8); transform-origin: 0 0; margin-bottom: -10px; }
+.svc-promo .svc-fan { right: 48px; top: 44px; width: 232px; height: 330px; }
+.svc-promo .svc-fan img:nth-child(1) { transform: rotate(7deg) translate(18px, -4px); }
+.svc-promo .svc-fan img:nth-child(2) { transform: rotate(3.5deg) translate(8px, -2px); }
+.svc-promo .svc-fan img:nth-child(3) { transform: none; box-shadow: var(--shadow-lg); }
+.svc-promo .svc-arrow { left: 214px; top: 150px; }
+.svc-promo .svc-note { font-size: 26px; line-height: 27px; left: 36px; bottom: 22px; }
+.svc-promo h3 { max-width: 20ch; }
+
+/* Ссылка в карточке 04 «Материалы» блока «Мы взяли на себя…». */
+.svc-step-link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 15px;
+  line-height: 23px;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* ══════════════ Узкий экран ══════════════ */
+
+@media (max-width: 1023.98px) {
+  .svc-hero { min-height: 0; padding: var(--space-8) 0 var(--space-12); }
+  .svc-hero__grid,
+  .svc-promo .split { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+}
+
+@media (max-width: 767.98px) {
+  .wrap { padding: 0 var(--space-5); }
+  .svc-hero__title { font-size: 32px; line-height: 38px; }
+  .svc-hero__actions .btn { width: 100%; }
+  .svc-foot { grid-template-columns: minmax(0, 1fr); }
+  .svc-foot > * + * { border-left: 0; border-top: 1px solid var(--color-border); }
+
+  /* На телефоне без стрелки и ярлыков вариантов: мелкая графика
+     превращается в мусор, как и линии героя главной. */
+  .svc-ba { height: 440px; overflow: hidden; }
+  .svc-arrow,
+  .svc-hero .svc-fan__tabs { display: none; }
+  .svc-hero .svc-before { width: 160px; left: 16px; top: 58px; font-size: 13px; line-height: 15px; padding: 12px 10px; }
+  .svc-hero .svc-before .svc-before__head { font-size: 15px; }
+  .svc-hero .svc-before svg { transform: scale(0.62); transform-origin: 0 0; margin-bottom: -22px; margin-left: 8px; }
+  .svc-hero .svc-chip--before { left: 14px; top: 16px; }
+  .svc-hero .svc-chip--after { right: 14px; bottom: 16px; }
+  .svc-hero .svc-fan { right: 36px; top: 64px; width: 172px; height: 244px; }
+  .svc-hero .svc-fan img:nth-child(1) { transform: rotate(7deg) translate(14px, -4px); }
+  .svc-hero .svc-fan img:nth-child(2) { transform: rotate(4.5deg) translate(9px, -2px); }
+  .svc-hero .svc-fan img:nth-child(3) { transform: rotate(2deg) translate(4px, -1px); }
+  .svc-hero .svc-note { font-size: 22px; line-height: 23px; left: 18px; bottom: 62px; }
+
+  /* Анонс: сначала текст, картинка под ним. */
+  .svc-promo__art { order: 2; height: 330px; }
+  .svc-promo .svc-before { width: 140px; left: 18px; top: 26px; font-size: 12px; line-height: 14px; padding: 10px; }
+  .svc-promo .svc-before .svc-before__head { font-size: 13px; }
+  .svc-promo .svc-before svg { transform: scale(0.55); margin-bottom: -26px; margin-left: 6px; }
+  .svc-promo .svc-fan { right: 22px; top: 30px; width: 158px; height: 224px; }
+    .svc-promo .svc-note { font-size: 20px; line-height: 21px; left: 18px; bottom: 14px; }
+  .svc-promo .btn { width: 100%; }
+}
+
+/* ══════════════ Доска состояний строки загрузки ══════════════ */
+
+.svc-states {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  background: var(--color-bg);
+}
+.svc-states h2 {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  margin: 0 0 var(--space-2);
+}
+.svc-states .svc-state {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+.svc-states .svc-state > p {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.svc-states .svc-status {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+}
