@@ -645,6 +645,43 @@ body {
 
 .sheet-solution { break-inside: avoid; }
 
+/* Ключ генератора: номер, ответ, метод — две задачи в строке. */
+.sheet-key-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-body);
+  table-layout: fixed;
+}
+.sheet-key-table caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: calc(var(--sheet-step) * 2);
+}
+.sheet-key-table th,
+.sheet-key-table td {
+  border: var(--sheet-rule-width) solid var(--sheet-card-line);
+  padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 2);
+  text-align: left;
+  vertical-align: top;
+}
+.sheet-key-table th[scope='row'] {
+  width: calc(var(--sheet-step) * 7);
+  text-align: center;
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  color: var(--sheet-num-ink);
+  background: var(--sheet-num-bg);
+  font-variant-numeric: tabular-nums;
+}
+.sheet-key-answer {
+  width: 18%;
+  font-variant-numeric: tabular-nums;
+}
+.sheet-key-method {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
 /* ══════════════════════════════════════════════════════════
    Служебное: контейнер обмера. На печать не идёт.
    ══════════════════════════════════════════════════════════ */

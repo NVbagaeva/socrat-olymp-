@@ -142,28 +142,32 @@ export function answersItems(blocks, generator, solutionBuilder, quadraticBuilde
 }
 
 /**
- * Раздел «Ответы» листа с несколькими вариантами: с новой страницы,
- * с пометкой «Только для учителя», внутри — по вариантам: подзаголовок
- * «Вариант K» и таблицы его блоков. Нумерация задач в каждом варианте
- * своя, как на листах учеников. Краткие решения — так же по вариантам.
+ * Раздел «Ответы» листа генератора: с новой страницы, с пометкой
+ * «Только для учителя». У каждой задачи — номер, ответ и метод (на
+ * листе ученика метод не подписан). Несколько вариантов — по ним:
+ * подзаголовок «Вариант K» и ключ его задач, нумерация в каждом своя,
+ * как на листах учеников. Краткие решения — так же по вариантам.
  *
- * variants — [{ title: 'Вариант 1', blocks }]
+ * variants — [{ title: 'Вариант 1' | null, blocks }]; у задачи
+ *            сверх полей answersItems есть method
  */
 export function variantAnswersItems(variants, generator, solutionBuilder, quadraticBuilder) {
-  const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: true })];
+  const many = variants.length > 1;
+  const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: many })];
 
   variants.forEach((variant) => {
-    items.push(answers.subHead(variant.title));
+    const rows = [];
     variant.blocks.forEach((block) => {
-      items.push(answers.table(
-        block.title,
-        block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: answerHtml(task) })),
-        5
-      ));
+      block.tasks.forEach((task) => {
+        rows.push({ no: task.no, answer: task.answer, html: answerHtml(task), method: task.method });
+      });
     });
+    if (variant.title) { items.push(answers.subHead(variant.title)); }
+    answers.keyTable(null, rows).forEach((item) => items.push(item));
   });
 
   let total = 0;
+  let count = 0;
   const solved = [];
   variants.forEach((variant) => {
     const own = [];
@@ -174,10 +178,13 @@ export function variantAnswersItems(variants, generator, solutionBuilder, quadra
         if (formulas) { own.push(answers.solution(task.no, formulas, task.answer)); }
       });
     });
-    if (own.length) { solved.push(answers.subHead(variant.title), ...own); }
+    count += own.length;
+    if (own.length) {
+      if (variant.title) { solved.push(answers.subHead(variant.title)); }
+      own.forEach((item) => solved.push(item));
+    }
   });
 
-  const count = solved.filter((item) => item.indexOf('sheet-solution') >= 0).length;
   if (count) {
     items.push(answers.sectionHead('Краткие решения',
       'Только для учителя · ' + count + ' задач из ' + total));

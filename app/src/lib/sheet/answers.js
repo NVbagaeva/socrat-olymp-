@@ -78,6 +78,42 @@ function table(title, rows, columns) {
 }
 
 /**
+ * Ключ для учителя: у каждой задачи номер, ответ и метод. Метод на
+ * листе ученика не подписан — он есть только здесь, чтобы проверять
+ * было удобно. Две задачи в строке. Возвращает список кусков потока.
+ *
+ * rows — [{ no, answer, html, method }]
+ */
+function keyTable(title, rows) {
+  var perRow = 2;
+  var lines = [];
+  for (var i = 0; i < rows.length; i += perRow) {
+    var chunk = rows.slice(i, i + perRow);
+    var cells = chunk.map(function (row) {
+      var shown = row.html || typo.markup(row.answer);
+      return '<th scope="row">' + row.no + '</th>' +
+        '<td class="sheet-key-answer" data-answer="' + typo.attr(row.answer) + '">' + shown + '</td>' +
+        '<td class="sheet-key-method">' + typo.markup(row.method || '') + '</td>';
+    }).join('');
+    for (var pad = chunk.length; pad < perRow; pad += 1) {
+      cells += '<th scope="row"></th><td></td><td></td>';
+    }
+    lines.push('<tr>' + cells + '</tr>');
+  }
+  /* Длинный ключ режется на куски по десять строк: кусок потока
+     неделим, и таблица на сотню задач не влезла бы на страницу. */
+  var out = [];
+  for (var j = 0; j < lines.length; j += 10) {
+    out.push('<div class="sheet-item sheet-answers">' +
+      '<table class="sheet-key-table">' +
+        (title && j === 0 ? '<caption>' + typo.markup(title) + '</caption>' : '') +
+        '<tbody>' + lines.slice(j, j + 10).join('') + '</tbody>' +
+      '</table></div>');
+  }
+  return out;
+}
+
+/**
  * Краткое решение одной задачи.
  *
  * steps — уже отобранные куски: [{ tex }] для формул и строка
@@ -116,8 +152,8 @@ function steps(items, answer) {
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
 }
 
-const api = { sectionHead: sectionHead, subHead: subHead, table: table, solution: solution,
-              steps: steps };
+const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
+              solution: solution, steps: steps };
 
 export default api;
-export { sectionHead, subHead, table, solution, steps };
+export { sectionHead, subHead, table, keyTable, solution, steps };

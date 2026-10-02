@@ -13,12 +13,14 @@
 import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
-import { answersItems, variantAnswersItems } from '@/lib/sheet/answers12.js';
+import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
 import { skillTitle } from '@/content/skills12';
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import { pickTasks, seedFrom } from '@/lib/trainerSession';
+import { manifest } from '@/lib/generator/manifest';
+import { planCounts, planOrder, type PlanMethod } from '@/lib/sheetPlan';
 import type { EngineTask } from '@/lib/trainer';
 
 export interface SheetParams {
@@ -107,13 +109,29 @@ interface SheetTask {
   answerRule: string | undefined;
   seed: string;
   meta: EngineTask['meta'];
+  /** Навык задачи — только для раздела ответов учителя. */
+  method: string;
 }
 
 interface SheetBlock {
   title: string;
   note: string;
   set: string;
+  /** false — блок без полосы-заголовка: навык на листе не подписан. */
+  head?: boolean;
   tasks: SheetTask[];
+}
+
+/**
+ * Навыки листа для плана: сколько задач в наборе — то же число, что
+ * на карточке навыка и за «Все (N)» в генераторе.
+ */
+export function sheetMethods(skills: readonly string[]): PlanMethod[] {
+  const sizes = new Map<string, number>();
+  manifest.families.forEach((family) => {
+    family.skills.forEach((skill) => sizes.set(skill.id, skill.count));
+  });
+  return skills.map((id) => ({ id, capacity: sizes.get(id) ?? 0 }));
 }
 
 /* Правило ответа лежит в описании задачи, а не в результате сборки:
@@ -131,45 +149,43 @@ function answerRules(): Record<string, string> {
 }
 
 /**
- * Блоки листа: по одному на навык, сквозная нумерация задач.
- * Задачи — те же, что собрал бы тренажёр по этому запросу, только
- * seed воспроизводимый.
+ * Задачи листа одним блоком без заголовка: навык на листе ученика не
+ * подписан. Доли навыков — поровну по плану (lib/sheetPlan.ts), задачи
+ * каждого навыка — те же, что собрал бы тренажёр, только seed
+ * воспроизводимый. Порядок чередует навыки, чтобы по соседним задачам
+ * нельзя было угадать метод.
  */
 export function sheetBlocks(params: SheetParams): SheetBlock[] {
+  const plan = planCounts(sheetMethods(params.skills), params.count);
+  const rules = answerRules();
   /* choice: задачи с выбором варианта листу годятся — варианты
      печатаются списком под условием, а на листе с ответами стоит
      текст верного варианта. Без этого признака лист по навыку, где
      отвечают выбором (знак коэффициента a, формула параболы), выходил
      пустым: шапка и колонтитул есть, задач нет. У линейной подтемы
      задач с выбором нет, и её лист от признака не меняется. */
-  const picked = pickTasks(
-    {
-      skills: params.skills,
-      level: params.level,
-      count: params.count,
-      mode: 'practice',
-      mistakes: [],
-      choice: true,
-    },
-    seedFrom(params.seed),
+  const queues = new Map(
+    plan.counts.map(({ id, count }) => [
+      id,
+      count <= 0
+        ? []
+        : pickTasks(
+            { skills: [id], level: params.level, count, mode: 'practice', mistakes: [], choice: true },
+            seedFrom(params.seed),
+          ).tasks,
+    ]),
   );
-  const rules = answerRules();
-  let number = 0;
 
-  return params.skills
-    .map((setId) => {
-      const tasks = picked.tasks.filter((task) => task.meta.set === setId);
-      return {
-        title: skillTitle[setId] ?? setId,
-        note: '',
-        set: setId,
-        tasks: tasks.map((task): SheetTask => {
-          number += 1;
-          return sheetTaskFrom(task, number, rules);
-        }),
-      };
-    })
-    .filter((block) => block.tasks.length > 0);
+  let number = 0;
+  const tasks: SheetTask[] = [];
+  planOrder(plan.counts, params.seed).forEach((id) => {
+    const task = queues.get(id)?.shift();
+    if (task !== undefined) {
+      number += 1;
+      tasks.push(sheetTaskFrom(task, number, rules));
+    }
+  });
+  return tasks.length === 0 ? [] : [{ title: '', note: '', set: '', head: false, tasks }];
 }
 
 /* Сколько seed перебирать на набор, подбирая задачи следующего
@@ -205,6 +221,7 @@ function sheetTaskFrom(task: EngineTask, no: number, rules: Record<string, strin
     answerRule: rules[task.id],
     seed: task.meta.seed,
     meta: task.meta,
+    method: skillTitle[task.meta.set] ?? task.meta.set,
   };
 }
 
@@ -212,7 +229,7 @@ function sheetTaskFrom(task: EngineTask, no: number, rules: Record<string, strin
 interface VariantMemory {
   /** Условия с чертежами всех задач всех вариантов. */
   shown: Set<string>;
-  /** Ответы по месту задачи: «набор#номер в блоке» → ответы. */
+  /** Ответы по месту задачи: номер на листе → ответы. */
   answers: Map<string, Set<string>>;
 }
 
@@ -229,10 +246,10 @@ function remember(memory: VariantMemory, blocks: SheetBlock[]) {
 }
 
 /**
- * Следующий вариант по образцу первого: те же блоки, то же число
- * задач, на каждом месте — та же задача набора (тот же тип и
- * уровень), только на другом seed, то есть с другими числами.
- * Порядок не меняется.
+ * Следующий вариант по образцу первого: то же число задач, на каждом
+ * месте — та же задача того же навыка (тот же тип и уровень), только
+ * на другом seed, то есть с другими числами. Порядок и доли навыков
+ * не меняются: задача N в каждом варианте — одного навыка.
  *
  * На каждое место берётся лучшее из найденного:
  *   1. та же задача, новое условие, новый ответ;
@@ -249,23 +266,28 @@ function nextVariant(
   rules: Record<string, string>,
 ): SheetBlock[] {
   let number = 0;
-  return base.map((block) => {
-    const batches: EngineTask[][] = [];
-    const batch = (attempt: number): EngineTask[] => {
-      if (batches[attempt] === undefined) {
-        try {
-          batches[attempt] = GraphGenerate.generateSet(
-            block.set,
-            `${params.seed}:v${k}:${block.set}:${attempt}`,
-          ) as EngineTask[];
-        } catch {
-          batches[attempt] = [];
-        }
+  /* Наборы движка на новых seed — по набору задачи: в блоке листа
+     навыки перемешаны. */
+  const batches = new Map<string, EngineTask[][]>();
+  const batchOf = (setId: string, attempt: number): EngineTask[] => {
+    const list = batches.get(setId) ?? [];
+    batches.set(setId, list);
+    if (list[attempt] === undefined) {
+      try {
+        list[attempt] = GraphGenerate.generateSet(
+          setId,
+          `${params.seed}:v${k}:${setId}:${attempt}`,
+        ) as EngineTask[];
+      } catch {
+        list[attempt] = [];
       }
-      return batches[attempt] ?? [];
-    };
+    }
+    return list[attempt] ?? [];
+  };
 
+  return base.map((block) => {
     const tasks = block.tasks.map((sample, i) => {
+      const batch = (attempt: number) => batchOf(sample.meta.set, attempt);
       const slotAnswers = memory.answers.get(`${block.set}#${i}`) ?? new Set<string>();
       const sampleLevel = sample.meta.level ?? null;
       const sampleType = sample.options === null ? 'number' : 'choice';
@@ -387,14 +409,15 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
     withAnswerLine: !withAnswers,
     extraItems: !withAnswers
       ? []
-      : variants.length > 1
-        ? variantAnswersItems(
-            variants.map((list, i) => ({ title: `Вариант ${i + 1}`, blocks: list })),
-            GraphGenerate,
-            solutionBuilder,
-            quadraticBuilder,
-          )
-        : answersItems(blocks, GraphGenerate, solutionBuilder, quadraticBuilder),
+      : variantAnswersItems(
+          variants.map((list, i) => ({
+            title: variants.length > 1 ? `Вариант ${i + 1}` : null,
+            blocks: list,
+          })),
+          GraphGenerate,
+          solutionBuilder,
+          quadraticBuilder,
+        ),
     foot: content.foot,
   };
 }

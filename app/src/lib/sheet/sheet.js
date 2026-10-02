@@ -305,8 +305,12 @@ function flowItems(spec) {
     /* Блок второго уровня — подзаголовок внутри раздела: плашка
        прототипа в печатной базе. Оформляется легче полосы раздела. */
     var sub = block.level === 2 ? ' sheet-block--sub' : '';
-    out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
-      blockHead(block) + '</div>');
+    /* head: false — блок без полосы: на листе генератора навык или
+       метод задачи не подписывается. */
+    if (block.head !== false) {
+      out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
+        blockHead(block) + '</div>');
+    }
 
     var tasks = block.tasks || [];
     if (layout === 'double') {
@@ -353,7 +357,7 @@ function flowItems(spec) {
  *            (рисунок под условием) и solutionHtml (для учителя).
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
- *            даёт одну полосу заголовка
+ *            даёт одну полосу заголовка; head: false — блок без полосы
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
  *   fields   { date } — строка «Фамилия, имя / Класс / Дата» под

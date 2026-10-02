@@ -27,6 +27,7 @@ import {
 import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
+import { planCounts } from '@/lib/sheetPlan';
 import { randomSeed } from '@/lib/trainerSession';
 import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
 
@@ -107,6 +108,30 @@ export function GeneratorScreen({
     date,
     variants,
   });
+  /* Доли навыков на листе — тот же план, что у страницы печати:
+     нехватку у навыка учитель видит до печати. */
+  const plan = planCounts(
+    chosen.map((item) => ({ id: item.id, capacity: item.count })),
+    chosenCount ?? 0,
+  );
+  /* Банк кончился у всех навыков — отдавать некому, и про отдачу
+     говорить нечего: одна фраза о том, сколько всего есть. */
+  const warnings = [
+    ...(plan.overflow > 0 ? [] : plan.shortages).map((item) => {
+      const title = chosen.find((skill) => skill.id === item.id)?.title ?? item.id;
+      return generatorPage.params.shortage
+        .replace('{title}', title)
+        .replace('{have}', counted(item.have, 'задача', 'задачи', 'задач'))
+        .replace('{give}', String(item.want - item.have));
+    }),
+    ...(plan.overflow > 0
+      ? [
+          generatorPage.params.overflow
+            .replace('{have}', counted(allCount, 'задача', 'задачи', 'задач'))
+            .replace('{want}', String(chosenCount ?? 0)),
+        ]
+      : []),
+  ];
   /* Пустое поле «Своё» — листа нет, ссылки выключены. */
   const ready = chosenCount !== null;
   const studentHref = `${base}/pechat/?${query}`;
@@ -223,6 +248,11 @@ export function GeneratorScreen({
                 onChange={setCount}
                 allWord={generatorPage.params.all}
               />
+              {warnings.map((text) => (
+                <Note key={text} tone="warning">
+                  {text}
+                </Note>
+              ))}
 
               {shownLevels.length === 0 ? null : (
                 <OptionGroup id="gen-param-level" label={generatorPage.params.level}>

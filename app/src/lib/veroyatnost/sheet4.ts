@@ -23,6 +23,7 @@ import { LIST_4, type ListSlova } from '@/content/veroyatnost';
 import answers from '@/lib/sheet/answers.js';
 import typo from '@/lib/sheet/typography.js';
 import { seeded } from '../zadanie3/podhod';
+import { planCounts, planOrder } from '../sheetPlan';
 import type { Pool, PoolKind } from './pool';
 import { otkrytRazbor } from './razbor';
 
@@ -115,12 +116,16 @@ export interface Sheet4Task {
    * листе ученика список пуст: разбор для него не открывается.
    */
   formulas: string[];
+  /** Метод и прототип задачи — только для раздела ответов учителя. */
+  method: string;
 }
 
 export interface Sheet4Block {
   title: string;
   note: string;
   set: string;
+  /** false — блок без полосы-заголовка: метод на листе не подписан. */
+  head?: boolean;
   tasks: Sheet4Task[];
 }
 
@@ -130,30 +135,45 @@ interface Vybor {
   variant: PoolKind['variants'][number];
 }
 
-/**
- * Выбор первого варианта листа: по одному списку на прототип.
- * Из всех вариантов выбранных прототипов берутся `count` штук
- * вперемешку, зерно — из адреса, поэтому лист ученика и лист с
- * ответами по одному адресу совпадают.
- */
-function vyborPervogo(pool: Pool, params: Sheet4Params): Vybor[][] {
-  const kinds = params.skills
+/** Прототипы листа в порядке выбора: тех, что есть в банке. */
+function prototipyLista(pool: Pool, params: Sheet4Params): PoolKind[] {
+  return params.skills
     .map((id) => pool.kinds.find((kind) => kind.id === id))
     .filter((kind): kind is PoolKind => kind !== undefined);
-  const vse = kinds.flatMap((kind) => kind.variants.map((variant) => ({ kind, variant })));
-  const vybrano = shuffle(vse, seeded(zerno(params.seed))).slice(0, params.count);
-
-  return kinds
-    .map((kind) =>
-      vybrano.filter((item) => item.kind.id === kind.id).sort((a, b) => a.variant.n - b.variant.n),
-    )
-    .filter((list) => list.length > 0);
 }
 
 /**
- * Следующий вариант по образцу первого: те же прототипы в том же
- * порядке и столько же задач, на каждом месте — другой вариант того
- * же прототипа из банка, то есть та же задача с другими числами.
+ * Выбор первого варианта листа: задачи по порядку на листе.
+ *
+ * Доли прототипов — поровну по плану (lib/sheetPlan.ts): остаток по
+ * одному по кругу, нехватка у прототипа уходит другим. Варианты
+ * внутри прототипа — случайные, порядок на листе чередует прототипы,
+ * чтобы по соседним задачам нельзя было угадать метод. Зерно — из
+ * адреса, поэтому лист ученика и лист с ответами совпадают.
+ */
+function vyborPervogo(pool: Pool, params: Sheet4Params): Vybor[] {
+  const kinds = prototipyLista(pool, params);
+  const plan = planCounts(
+    kinds.map((kind) => ({ id: kind.id, capacity: kind.variants.length })),
+    params.count,
+  );
+  const ocheredi = new Map(
+    kinds.map((kind) => {
+      const dolya = plan.counts.find((item) => item.id === kind.id)?.count ?? 0;
+      const varianty = shuffle(kind.variants, seeded(zerno(`${params.seed}:${kind.id}`)));
+      return [kind.id, varianty.slice(0, dolya).map((variant) => ({ kind, variant }))];
+    }),
+  );
+  return planOrder(plan.counts, params.seed).flatMap((id) => {
+    const item = ocheredi.get(id)?.shift();
+    return item === undefined ? [] : [item];
+  });
+}
+
+/**
+ * Следующий вариант по образцу первого: на каждом месте тот же
+ * прототип, что в первом варианте, — другой его вариант из банка, то
+ * есть та же задача с другими числами. Порядок и доли не меняются.
  * Сложность у вариантов прототипа одна.
  *
  * На место берётся вариант, которого ещё не было ни на одном листе;
@@ -165,43 +185,37 @@ function vyborPervogo(pool: Pool, params: Sheet4Params): Vybor[][] {
  */
 function vyborSleduyushchego(
   params: Sheet4Params,
-  obrazec: Vybor[][],
+  obrazec: Vybor[],
   k: number,
   bylo: Set<string>,
-  naMeste: Map<string, Set<string>>,
-): Vybor[][] {
+  naMeste: Map<number, Set<string>>,
+): Vybor[] {
   const random = seeded(zerno(`${params.seed}:v${k}`));
   const zdes = new Set<string>();
-  return obrazec.map((list) =>
-    list.map((item, i) => {
-      const mesto = `${item.kind.id}#${i}`;
-      const prezhnie = naMeste.get(mesto) ?? new Set<string>();
-      const kandidaty = shuffle(item.kind.variants, random);
-      const vzyat =
-        kandidaty.find((v) => !bylo.has(v.uslovie) && !zdes.has(v.uslovie)) ??
-        kandidaty.find((v) => !prezhnie.has(v.uslovie) && !zdes.has(v.uslovie)) ??
-        kandidaty.find((v) => !zdes.has(v.uslovie)) ??
-        item.variant;
-      zdes.add(vzyat.uslovie);
-      return { kind: item.kind, variant: vzyat };
-    }),
-  );
+  return obrazec.map((item, i) => {
+    const prezhnie = naMeste.get(i) ?? new Set<string>();
+    const kandidaty = shuffle(item.kind.variants, random);
+    const vzyat =
+      kandidaty.find((v) => !bylo.has(v.uslovie) && !zdes.has(v.uslovie)) ??
+      kandidaty.find((v) => !prezhnie.has(v.uslovie) && !zdes.has(v.uslovie)) ??
+      kandidaty.find((v) => !zdes.has(v.uslovie)) ??
+      item.variant;
+    zdes.add(vzyat.uslovie);
+    return { kind: item.kind, variant: vzyat };
+  });
 }
 
-/** Все варианты листа: первый — тот же, что до появления вариантов. */
-function vyborVariantov(pool: Pool, params: Sheet4Params): Vybor[][][] {
+/** Все варианты листа: у всех одни и те же прототипы на тех же местах. */
+function vyborVariantov(pool: Pool, params: Sheet4Params): Vybor[][] {
   const pervyy = vyborPervogo(pool, params);
   const out = [pervyy];
   const bylo = new Set<string>();
-  const naMeste = new Map<string, Set<string>>();
-  const zapomnit = (variant: Vybor[][]) => {
-    variant.forEach((list) =>
-      list.forEach((item, i) => {
-        bylo.add(item.variant.uslovie);
-        const mesto = `${item.kind.id}#${i}`;
-        naMeste.set(mesto, (naMeste.get(mesto) ?? new Set<string>()).add(item.variant.uslovie));
-      }),
-    );
+  const naMeste = new Map<number, Set<string>>();
+  const zapomnit = (variant: Vybor[]) => {
+    variant.forEach((item, i) => {
+      bylo.add(item.variant.uslovie);
+      naMeste.set(i, (naMeste.get(i) ?? new Set<string>()).add(item.variant.uslovie));
+    });
   };
   zapomnit(pervyy);
   for (let k = 2; k <= params.variants; k += 1) {
@@ -212,38 +226,32 @@ function vyborVariantov(pool: Pool, params: Sheet4Params): Vybor[][][] {
   return out;
 }
 
-/** Блоки листа из выбора: по одному на прототип, нумерация с 1. */
-function blokiIz(vybor: Vybor[][], withAnswers: boolean): Sheet4Block[] {
-  let number = 0;
-  return vybor.map((list) => {
-    const kind = list[0]?.kind as PoolKind;
-    const tasks = list.map(({ variant }): Sheet4Task => {
-      number += 1;
-      const razbor = withAnswers ? otkrytRazbor(variant.steps, variant.seal) : null;
-      return {
-        no: number,
-        id: `${kind.id}-${variant.n}`,
-        questionHtml: typo.escape(variant.uslovie),
-        options: null,
-        figureSvg: null,
-        answer: razbor === null ? '' : razbor.otvet,
-        answerHtml: null,
-        formulas:
-          razbor === null
-            ? []
-            : razbor.shagi.flatMap((shag) => (shag.tex === undefined ? [] : [shag.tex])),
-      };
-    });
-    return { title: kind.title, note: kind.tip, set: kind.id, tasks };
+/**
+ * Блок листа из выбора: один, без полосы-заголовка — ни метод, ни
+ * прототип на листе ученика не подписаны. Нумерация с 1.
+ */
+function blokiIz(vybor: Vybor[], withAnswers: boolean): Sheet4Block[] {
+  const tasks = vybor.map(({ kind, variant }, i): Sheet4Task => {
+    const razbor = withAnswers ? otkrytRazbor(variant.steps, variant.seal) : null;
+    return {
+      no: i + 1,
+      id: `${kind.id}-${variant.n}`,
+      questionHtml: typo.escape(variant.uslovie),
+      options: null,
+      figureSvg: null,
+      answer: razbor === null ? '' : razbor.otvet,
+      answerHtml: null,
+      formulas:
+        razbor === null
+          ? []
+          : razbor.shagi.flatMap((shag) => (shag.tex === undefined ? [] : [shag.tex])),
+      method: `${kind.blokTitle} — ${kind.title}`,
+    };
   });
+  return tasks.length === 0 ? [] : [{ title: '', note: '', set: '', head: false, tasks }];
 }
 
-/**
- * Блоки листа: по одному на прототип, сквозная нумерация задач.
- * Из всех вариантов выбранных прототипов берутся `count` штук
- * вперемешку, зерно — из адреса, поэтому лист ученика и лист с
- * ответами по одному адресу совпадают.
- */
+/** Блоки первого варианта листа. */
 export function sheet4Blocks(
   pool: Pool,
   params: Sheet4Params,
@@ -293,35 +301,7 @@ export function sheet4Spec(
       extraItems: withAnswers ? otvetyVariantov(variants, list) : [],
     };
   }
-  const resheniya = withAnswers
-    ? blocks.flatMap((block) =>
-        block.tasks
-          .filter((task) => task.formulas.length > 0)
-          .map((task) => answers.solution(task.no, task.formulas, task.answer)),
-      )
-    : [];
-  const vsego = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
-  const extraItems = withAnswers
-    ? [
-        answers.sectionHead(list.otvety.title, list.otvety.note),
-        ...blocks.map((block) =>
-          answers.table(
-            block.title,
-            block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: null })),
-            5,
-          ),
-        ),
-        ...(resheniya.length === 0
-          ? []
-          : [
-              answers.sectionHead(
-                list.resheniya.title,
-                list.resheniya.note(resheniya.length, vsego),
-              ),
-              ...resheniya,
-            ]),
-      ]
-    : [];
+  const extraItems = withAnswers ? otvetyVariantov(variants, list) : [];
 
   return {
     ...sheet4Base(params, list),
@@ -350,23 +330,31 @@ function sheet4Base(params: Sheet4Params, list: ListSlova) {
 }
 
 /**
- * Ответы листа с несколькими вариантами: с новой страницы, с пометкой
- * «Только для учителя», по вариантам — подзаголовок «Вариант K» и
- * таблицы его прототипов; затем краткие решения так же по вариантам.
+ * Ответы листа: с новой страницы, с пометкой «Только для учителя».
+ * У каждой задачи — номер, ответ и метод (на листе ученика метод не
+ * подписан). Несколько вариантов — по ним: подзаголовок «Вариант K»
+ * и ключ его задач; затем краткие решения так же по вариантам.
  */
 function otvetyVariantov(variants: Sheet4Block[][], list: ListSlova): string[] {
-  const items = [answers.sectionHead(list.otvety.title, 'Только для учителя', { section: true })];
+  const many = variants.length > 1;
+  const items = [answers.sectionHead(list.otvety.title, 'Только для учителя', { section: many })];
   variants.forEach((blocks, i) => {
-    items.push(answers.subHead(`Вариант ${i + 1}`));
-    blocks.forEach((block) => {
-      items.push(
-        answers.table(
-          block.title,
-          block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: null })),
-          5,
+    if (many) {
+      items.push(answers.subHead(`Вариант ${i + 1}`));
+    }
+    items.push(
+      ...answers.keyTable(
+        null,
+        blocks.flatMap((block) =>
+          block.tasks.map((task) => ({
+            no: task.no,
+            answer: task.answer,
+            html: null,
+            method: task.method,
+          })),
         ),
-      );
-    });
+      ),
+    );
   });
 
   let vsego = 0;
@@ -381,7 +369,10 @@ function otvetyVariantov(variants: Sheet4Block[][], list: ListSlova): string[] {
     vsego += blocks.reduce((sum, block) => sum + block.tasks.length, 0);
     resheno += svoi.length;
     if (svoi.length > 0) {
-      resheniya.push(answers.subHead(`Вариант ${i + 1}`), ...svoi);
+      if (many) {
+        resheniya.push(answers.subHead(`Вариант ${i + 1}`));
+      }
+      resheniya.push(...svoi);
     }
   });
   if (resheno > 0) {
