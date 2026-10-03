@@ -28,6 +28,8 @@
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
 import { equationText as lineEquationText } from './generate.js';
+import Slope from './slope.js';
+import renderer from './renderer.js';
 
 var frac = Line.frac;
 var toFrac = Line.toFrac;
@@ -223,18 +225,15 @@ function row(textValue, texValue) {
  * name — f или g, letter — буква свободного члена (b, а если она
  * занята коэффициентом параболы, — m). Возвращает строки и найденные k, b.
  */
-function lineFromPoints(name, letter, p1, p2, given) {
+function lineFromPoints(name, letter, p1, p2, given, slopeLetter) {
   var rows = [];
-  var x1 = F(p1.x); var y1 = F(p1.y); var x2 = F(p2.x); var y2 = F(p2.y);
+  var x1 = F(p1.x); var y1 = F(p1.y); var x2 = F(p2.x);
   rows.push(row('Общий вид: $' + name + '(x) = kx + ' + letter + '$. С рисунка берём точки $' +
     pt(p1.x, p1.y) + '$ и $' + pt(p2.x, p2.y) + '$' + (given ? ' (отмечены на рисунке).' : ' (узлы сетки на прямой).')));
-  var dy = sub(y2, y1);
-  var dx = sub(x2, x1);
-  var k = div(dy, dx);
-  var kChain = 'k = \\dfrac{' + N(y2) + ' - ' + P(y1) + '}{' + N(x2) + ' - ' + P(x1) + '} = ' +
-    '\\dfrac{' + N(dy) + '}{' + N(dx) + '}';
-  if (!(isInt(dy) && isInt(dx) && dx.p === 1)) { kChain += ' = ' + N(k); }
-  rows.push(row('Угловой коэффициент:', kChain));
+  /* k — через треугольник наклона и тангенс угла (graph/slope.js). */
+  var triangle = Slope.build(p1, p2);
+  var k = triangle.k;
+  Slope.teacherRows(triangle, slopeLetter || 'k').forEach(function (item) { rows.push(row(item.text, item.tex)); });
 
   var b;
   var onAxis = isZero(x1) ? p1 : isZero(x2) ? p2 : null;
@@ -249,7 +248,7 @@ function lineFromPoints(name, letter, p1, p2, given) {
       letter + ' = ' + N(y1) + plus(neg(mul(k, x1))) + ' = ' + N(b)));
   }
   rows.push(row('Формула:', name + '(x) = ' + lineTex(k, b)));
-  return { rows: rows, k: k, b: b };
+  return { rows: rows, k: k, b: b, triangle: triangle };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -483,7 +482,7 @@ function optionByText(task, text) {
 function lineTask(task, rule) {
   var meta = task.meta;
   var steps = [];
-  var check = { rule: rule, curves: [], points: [] };
+  var check = { rule: rule, curves: [], points: [], triangles: [] };
   var lines = meta.lines || [];
 
   /* Две прямые. */
@@ -494,6 +493,7 @@ function lineTask(task, rule) {
       var out = lineFromPoints(name, 'b', source.p1, source.p2, true);
       steps.push({ title: 'Находим $' + name + '(x)$', rows: out.rows });
       check.curves.push({ kind: 'line', k: out.k, b: out.b, exact: { k: F(line.kFraction), b: F(line.bFraction) } });
+      check.triangles.push({ curve: i, triangle: out.triangle });
       check.points.push({ curve: i, x: source.p1.x, y: source.p1.y }, { curve: i, x: source.p2.x, y: source.p2.y });
       return out;
     });
@@ -533,6 +533,7 @@ function lineTask(task, rule) {
     var out1 = lineFromPoints('f', 'b', source1.p1, source1.p2, true);
     steps.push({ title: 'Находим $f(x)$', rows: out1.rows });
     k = out1.k; b = out1.b;
+    check.triangles.push({ curve: 0, triangle: out1.triangle });
     check.points.push({ curve: 0, x: source1.p1.x, y: source1.p1.y }, { curve: 0, x: source1.p2.x, y: source1.p2.y });
   } else {
     k = F(meta.kFraction); b = F(meta.bFraction);
@@ -594,7 +595,7 @@ function lineGridNodes(line, win) { return Line.integerPoints(Line.create(line.k
 function quadraticTask(task, rule) {
   var meta = task.meta;
   var steps = [];
-  var check = { rule: rule, curves: [], points: [] };
+  var check = { rule: rule, curves: [], points: [], triangles: [] };
   var curve = Q.exact(meta.aFraction, meta.bFraction, meta.cFraction);
   var win = meta.window;
   var marks = meta.points || [];
@@ -704,6 +705,7 @@ function quadraticTask(task, rule) {
     gTex = lineTex(gl.k, gl.b);
     gDesc = { A: ZERO, B: gl.k, C: gl.b };
     check.curves.push({ kind: 'line', k: gl.k, b: gl.b, exact: lineExact });
+    check.triangles.push({ curve: 1, triangle: gl.triangle });
     check.points.push({ curve: 1, x: first.x, y: first.y }, { curve: 1, x: second.x, y: second.y });
   } else {
     var gCurve = Q.exact(two.aFraction, two.bFraction, two.cFraction);
@@ -801,7 +803,76 @@ function build(task) {
   return lineTask(task, rule);
 }
 
-var api = { build: build };
+/* ══════════════════════════════════════════════════════════
+   Чертёж к решению: тот же график, что в условии, и поверх —
+   треугольники наклона, по которым найдены угловые коэффициенты
+   ══════════════════════════════════════════════════════════ */
+
+var COLORS = ['lineA', 'lineB'];
+
+/** Кривые сцены из параметров задачи: прямые, параболы. */
+function sceneCurves(meta) {
+  if (meta.family === 'quadratic') {
+    return (meta.curves || []).map(function (curve, i) {
+      var label = (meta.curves.length === 1 ? 'y = f(x)' : ['y = f(x)', 'y = g(x)'][i]);
+      return curve.kind === 'line'
+        ? { type: 'line', k: curve.k, b: curve.b, color: COLORS[i], label: label }
+        : { type: 'quadratic', a: curve.a, b: curve.b, c: curve.c, color: COLORS[i], label: label };
+    });
+  }
+  var lines = meta.lines || [];
+  return lines.map(function (line, i) {
+    return { type: 'line', k: line.k, b: line.b, color: COLORS[i],
+             label: lines.length === 1 ? 'y = f(x)' : ['y = f(x)', 'y = g(x)'][i] };
+  });
+}
+
+function scenePoints(meta) {
+  var points = [];
+  if (meta.family === 'quadratic') {
+    (meta.curves || []).forEach(function (curve, i) {
+      (curve.points || []).forEach(function (p) {
+        points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] });
+      });
+    });
+    (meta.points || []).filter(function (p) { return p.role === 'cross'; }).forEach(function (p) {
+      points.push({ x: p.x, y: p.y, style: 'solid', color: 'cross' });
+    });
+    return points;
+  }
+  (meta.lines || []).forEach(function (line, i) {
+    (line.points || []).forEach(function (p) { points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] }); });
+  });
+  return points;
+}
+
+/**
+ * SVG чертежа с треугольниками наклона. Нет чертежа у задачи или нет
+ * ни одного треугольника (горизонтальная прямая, одна парабола) —
+ * null: рисовать нечего.
+ */
+function figure(task, solved) {
+  var meta = task.meta || {};
+  var triangles = ((solved && solved.check.triangles) || []).filter(function (item) { return !item.triangle.flat; });
+  if (!meta.window || !triangles.length) { return null; }
+  var shapes = [];
+  triangles.forEach(function (item, i) {
+    shapes = shapes.concat(Slope.shapes(item.triangle, String(i + 1), COLORS[item.curve]));
+  });
+  return renderer.renderGraph({
+    window: meta.window,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    labelRules: meta.family === 'quadratic' ? 'strict' : undefined,
+    curves: sceneCurves(meta),
+    points: scenePoints(meta),
+    shapes: shapes,
+    alt: 'Треугольник наклона к решению'
+  });
+}
+
+var api = { build: build, figure: figure };
 
 export default api;
-export { build };
+export { build, figure };

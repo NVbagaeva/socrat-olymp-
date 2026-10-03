@@ -358,11 +358,12 @@ function flatSteps(task: EngineTask): PrepStep[] {
         {
           type: 'text',
           html:
-            'Значит, ' + katexHtml('\\Delta y = 0') + ' при любом ' + katexHtml('\\Delta x') + '.',
+            'Прямая параллельна оси ' + katexHtml('Ox') + ': угол между ней и положительным ' +
+            'направлением оси равен ' + katexHtml('\\alpha = 0^\\circ') + ', треугольник строить не нужно.',
         },
         {
           type: 'formula',
-          html: katexHtml('k = \\Delta y : \\Delta x = 0 : \\Delta x = ' + value, true),
+          html: katexHtml('k = \\operatorname{tg} 0^\\circ = ' + value, true),
           feature: false,
         },
         {

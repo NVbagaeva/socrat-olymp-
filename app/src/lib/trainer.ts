@@ -11,6 +11,7 @@
  */
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
+import Slope from '@/lib/graph/slope.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
@@ -75,6 +76,11 @@ export interface TrainerField {
   /** Подпись поля, набранная KaTeX: «k =», «f(13,5) =». */
   labelHtml: string;
   answer: string;
+  /**
+   * Ответ выбором, а не числом: «возрастает» / «убывает». Есть —
+   * вместо поля ввода кнопки, и ответ сверяется как строка.
+   */
+  choices?: string[];
 }
 
 export interface TrainerStep {
@@ -313,7 +319,9 @@ function rightHintFor(task: EngineTask): string {
    формулами — как и везде в условиях. */
 const SLOPE_ONE = 'Проверьте, как сняты $k$ и $b$ по чертежу: ';
 const SLOPE_TWO = 'Проверьте уравнения обеих прямых: ';
-const SLOPE_RULE = '$k$ — это $\\Delta y : \\Delta x$ по двум отмеченным точкам, ';
+const SLOPE_RULE =
+  '$k = \\operatorname{tg} \\alpha$: под прямой строится прямоугольный треугольник ' +
+  'по двум отмеченным точкам, катеты считаются в клетках, у убывающей прямой — знак минус; ';
 
 /* Две концовки: там, где пересечение с осью Oy видно в узле сетки,
    b читается прямо с чертежа; где не видно — только подстановкой. */
@@ -364,18 +372,147 @@ function plain(value: number): string {
   return String(Math.round(value * 1000) / 1000).replace('.', ',');
 }
 
-function stepK(k: number): TrainerStep {
+/* ── Угловой коэффициент: треугольник под прямой и тангенс ───────
+
+   k находится только так: k = tg α, α — угол между прямой
+   и положительным направлением оси Ox. По двум отмеченным точкам
+   строится прямоугольный треугольник ПОД прямой, катеты считаются
+   в клетках, у убывающей прямой tg α = −tg(180° − α). Геометрию
+   считает graph/slope.js — тот же модуль, что пишет решения
+   в листе учителя и разборы, поэтому числа нигде не разойдутся. */
+
+interface SlopeTriangle {
+  flat: boolean;
+  rising: boolean;
+  first: EnginePoint;
+  second: EnginePoint;
+  C: EnginePoint | null;
+  dx: number;
+  dy: number;
+}
+
+const RISING = 'возрастает';
+const FALLING = 'убывает';
+const FLAT = 'параллельна оси Ox';
+
+function pointMath(p: EnginePoint): string {
+  return '$(' + tex(p.x) + ';\\, ' + tex(p.y) + ')$';
+}
+
+/**
+ * Четыре шага подсказки про k: направление прямой, треугольник
+ * под ней, катеты, ответ со знаком. У горизонтальной прямой
+ * треугольника нет — после направления сразу k = tg 0° = 0.
+ *
+ * name — «f» или «g» у пары прямых, пусто — прямая одна.
+ */
+function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: string): TrainerStep[] {
+  const which = name === '' ? 'Прямая' : 'Прямая $' + curve(name) + '$';
+  const pair = (points ?? []).filter((p) => whole(p.x) && whole(p.y));
+  const first = pair[0];
+  const second = pair[1];
+  if (first === undefined || second === undefined || first.x === second.x) {
+    return [stepKOnly(k)];
+  }
+  const t = Slope.build(first, second) as SlopeTriangle;
+  const direction: TrainerStep = {
+    titleHtml: hintHtml(which + ' возрастает или убывает?'),
+    textHtml: hintHtml(
+      'Посмотри на прямую слева направо. Поднимается — $k = \\operatorname{tg} \\alpha > 0$, ' +
+        'опускается — $\\alpha$ тупой и $k < 0$, идёт ровно — $k = 0$. Здесь $\\alpha$ — угол ' +
+        'между прямой и положительным направлением оси $Ox$.',
+    ),
+    shape: 'plain',
+    fields: [
+      {
+        labelHtml: '',
+        answer: t.flat ? FLAT : t.rising ? RISING : FALLING,
+        choices: [RISING, FALLING, FLAT],
+      },
+    ],
+    wrongHint: hintHtml('Смотри слева направо: куда идёт прямая — вверх или вниз?'),
+  };
+  if (t.flat || t.C === null) {
+    return [
+      direction,
+      {
+        titleHtml: hintHtml('Найди $k$.'),
+        textHtml: hintHtml('Прямая параллельна оси $Ox$: $\\alpha = 0^\\circ$, $k = \\operatorname{tg} 0^\\circ$.'),
+        shape: 'plain',
+        fields: [{ labelHtml: math('k ='), answer: plain(k) }],
+        wrongHint: hintHtml('Чему равен тангенс нулевого угла?'),
+      },
+    ];
+  }
+  const vertex = t.C;
+  /* Ответ — точной дробью из катетов: 1/3 не округляется до 0,333,
+     и ученик может ввести и «1/3», и «−1,5». */
+  const exactK = (t.rising ? '' : '-') + t.dy + '/' + t.dx;
+  return [
+    direction,
+    {
+      titleHtml: hintHtml('Построй треугольник под прямой по двум отмеченным точкам.'),
+      textHtml: hintHtml(
+        'Гипотенуза — отрезок между точками ' + pointMath(t.first) + ' и ' + pointMath(t.second) +
+          '. Катеты идут по линиям сетки, вершина прямого угла лежит ниже прямой. ' +
+          'Найди её координаты.',
+      ),
+      shape: 'plain',
+      fields: [
+        { labelHtml: math('x ='), answer: plain(vertex.x) },
+        { labelHtml: math('y ='), answer: plain(vertex.y) },
+      ],
+      wrongHint: hintHtml(
+        'Вершина прямого угла — под прямой: у неё абсцисса одной отмеченной точки ' +
+          'и ордината другой, та, что меньше.',
+      ),
+    },
+    {
+      titleHtml: hintHtml('Посчитай катеты в клетках.'),
+      textHtml: hintHtml('Длины катетов — положительные числа: сколько клеток по вертикали и по горизонтали.'),
+      shape: 'plain',
+      fields: [
+        { labelHtml: 'вертикальный', answer: plain(t.dy) },
+        { labelHtml: 'горизонтальный', answer: plain(t.dx) },
+      ],
+      wrongHint: hintHtml('Пересчитай клетки вдоль каждого катета от вершины прямого угла.'),
+    },
+    t.rising
+      ? {
+          titleHtml: hintHtml('Найди $k = \\operatorname{tg} \\alpha$.'),
+          textHtml: hintHtml(
+            'Угол $\\alpha$ острый и лежит в треугольнике: $\\operatorname{tg} \\alpha$ — ' +
+              'вертикальный катет, делённый на горизонтальный.',
+          ),
+          shape: 'plain',
+          fields: [{ labelHtml: math('k ='), answer: exactK }],
+          wrongHint: hintHtml('Раздели вертикальный катет на горизонтальный.'),
+        }
+      : {
+          titleHtml: hintHtml('Для убывающей прямой не забудь знак минус.'),
+          textHtml: hintHtml(
+            'Острый угол треугольника смежный с $\\alpha$ и равен $180^\\circ - \\alpha$: ' +
+              '$\\operatorname{tg}(180^\\circ - \\alpha)$ — вертикальный катет, делённый на горизонтальный. ' +
+              'А $k = \\operatorname{tg} \\alpha = -\\operatorname{tg}(180^\\circ - \\alpha)$.',
+          ),
+          shape: 'plain',
+          fields: [{ labelHtml: math('k ='), answer: exactK }],
+          wrongHint: hintHtml('Прямая убывает — $k$ отрицательный. Проверь деление катетов и знак.'),
+        },
+  ];
+}
+
+/* Запасной шаг на случай, когда двух отмеченных точек нет. */
+function stepKOnly(k: number): TrainerStep {
   return {
     titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $k$.'),
     textHtml: hintHtml(
-      'Возьми две отмеченные точки. Посчитай, на сколько клеток прямая сдвинулась ' +
-        'вправо и на сколько вверх. Тогда $k = \\Delta y : \\Delta x$.',
+      'Построй под прямой прямоугольный треугольник по двум точкам в узлах сетки. ' +
+        '$k = \\operatorname{tg} \\alpha$: вертикальный катет на горизонтальный, у убывающей прямой — со знаком минус.',
     ),
     shape: 'plain',
     fields: [{ labelHtml: math('k ='), answer: plain(k) }],
-    wrongHint: hintHtml(
-      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
-    ),
+    wrongHint: hintHtml('Проверь катеты и знак: прямая возрастает или убывает?'),
   };
 }
 
@@ -595,26 +732,6 @@ function curve(name: string): string {
   return 'y = ' + name + '(x)';
 }
 
-function stepPairK(name: string, k: number, firstOne: boolean): TrainerStep {
-  return {
-    titleHtml: hintHtml('Проверим $k$ для прямой $' + curve(name) + '$.'),
-    textHtml: hintHtml(
-      firstOne
-        ? 'Возьми две отмеченные точки на прямой $' +
-            curve(name) +
-            '$. Посчитай, на сколько клеток она сдвинулась вправо и на сколько вверх. ' +
-            'Тогда $k = \\Delta y : \\Delta x$.'
-        : 'То же самое для второй прямой: две отмеченные точки, сдвиг вправо и вверх, ' +
-            '$k = \\Delta y : \\Delta x$.',
-    ),
-    shape: 'plain',
-    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
-    wrongHint: hintHtml(
-      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
-    ),
-  };
-}
-
 function stepPairB(task: EngineTask, name: string, line: EngineLine): TrainerStep {
   const win = task.meta.window;
   /* Отмечены на чертеже только опорные точки первой прямой; у второй
@@ -688,9 +805,9 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
     return [];
   }
   const steps = [
-    stepPairK('f', first.k, true),
+    ...slopeSteps(first.k, first.points, 'f'),
     stepPairB(task, 'f', first),
-    stepPairK('g', second.k, false),
+    ...slopeSteps(second.k, second.points, 'g'),
     stepPairB(task, 'g', second),
     stepPairEquation(first, second),
     stepCrossX(intersection.x),
@@ -710,7 +827,9 @@ function stepsFor(task: EngineTask): TrainerStep[] {
     return stepsForPair(task);
   }
   const last = stepAnswer(task);
-  return last === null ? [] : [stepK(k), stepB(task, b), stepEquation(k, b), last];
+  return last === null
+    ? []
+    : [...slopeSteps(k, task.meta.points, ''), stepB(task, b), stepEquation(k, b), last];
 }
 
 /* ── Задание тренажёра из задачи движка ──────────────────────────

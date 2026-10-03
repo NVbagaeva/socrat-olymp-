@@ -33,7 +33,11 @@ function solutionItem(task, teacherBuilder) {
   try { solved = teacherBuilder.build(task); }
   catch { return null; }
   if (!solved || !solved.steps.length) { return null; }
-  return answers.fullSolution(task.no, solved.steps, answerHtml(task) || task.answer);
+  /* Чертёж с треугольником наклона — там, где k найден по треугольнику. */
+  let svg = null;
+  try { svg = teacherBuilder.figure ? teacherBuilder.figure(task, solved) : null; }
+  catch { svg = null; }
+  return answers.fullSolution(task.no, solved.steps, answerHtml(task) || task.answer, svg);
 }
 
 /**

@@ -805,6 +805,10 @@ body {
 .sheet-solution--full .sheet-step .math { margin-left: 0; white-space: normal; }
 .sheet-solution--full .sheet-step-formula { display: inline-block; margin-left: calc(var(--sheet-step) * 1); }
 .sheet-solution--full .sheet-task-answer { margin-top: calc(var(--sheet-step) * 2); }
+/* Чертёж с треугольником наклона — справа от шагов, мельче чертежа условия. */
+.sheet-solution-figure { flex: none; width: 42mm; margin: 0; align-self: flex-start; }
+.sheet-solution-figure svg { display: block; width: 100%; height: auto; }
+.sheet-solution--full .sheet-solution-body { flex: 1 1 auto; min-width: 0; }
 
 /* Строка ответа под решением — жирная, чернилами. */
 .sheet-task-answer {

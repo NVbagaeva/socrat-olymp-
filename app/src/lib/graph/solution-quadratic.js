@@ -30,6 +30,7 @@
 
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
+import Slope from './slope.js';
 
 var MINUS = '−';
 
@@ -497,8 +498,6 @@ function secondLineBlocks(line, win, blocks) {
   }
   var A = nodes[0];
   var B = nodes[nodes.length - 1];
-  var dx = frac(B.x - A.x);
-  var dy = frac(B.y - A.y);
 
   blocks.push(text('Это прямая. Обычно её свободный член обозначают ' +
     math('b', 'b') + ', но здесь эта буква уже занята коэффициентом параболы, ' +
@@ -507,8 +506,13 @@ function secondLineBlocks(line, win, blocks) {
   blocks.push(text('Берём две точки прямой в узлах сетки: ' +
     math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
     math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
-  blocks.push(text('Наклон — это отношение сдвига по вертикали к сдвигу по горизонтали:'));
-  blocks.push(formula('k = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)));
+  /* k — тангенс угла наклона, через треугольник под прямой. */
+  Slope.teacherRows(Slope.build(A, B), 'k').forEach(function (item) {
+    if (item.text) {
+      blocks.push(text(item.text.replace(/\$([^$]*)\$/g, function (_m, tx) { return math(tx, tx); })));
+    }
+    if (item.tex) { blocks.push(formula(item.tex)); }
+  });
   blocks.push(text('Свободный член находим подстановкой одной из этих точек:'));
   blocks.push(formula(tex(frac(A.y)) + ' = ' + coefDot(line.k) + texBracket(frac(A.x)) + ' + m'));
   blocks.push(formula('m = ' + tex(line.b)));

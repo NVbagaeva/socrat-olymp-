@@ -28,6 +28,7 @@ import katex from 'katex';
 import generator from '../src/lib/graph/generate.js';
 import teacher from '../src/lib/graph/solution-teacher.js';
 import Line from '../src/lib/graph/families/line.js';
+import Slope from '../src/lib/graph/slope.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
 function readSets(dir) {
@@ -82,6 +83,8 @@ const HYGIENE = [
   [/(^|[^\d}{\\a-z])1x/, 'единица перед x'],
   [/[a-z0-9})]-[\d\\a-z]/, 'минус без пробелов между слагаемыми'],
   [/[a-z](_\d)?\d\^/, 'буква вплотную к числу в степени'],
+  [/[ka] = \\dfrac\{[^{}]*\d - [^{}]*\}\{[^{}]*\d - /, 'k через разность координат'],
+  [/\\Delta/, 'k через разность координат'],
 ];
 
 function checkTask(task) {
@@ -106,6 +109,33 @@ function checkTask(task) {
       problems.push('точка (' + point.x + '; ' + point.y + ') не лежит на ' + (point.curve ? 'g' : 'f'));
     }
   });
+  /* Треугольник наклона: вершина прямого угла под прямой, катеты —
+     положительные целые, знак k — по направлению прямой, k из
+     треугольника равен точному k задачи. */
+  (check.triangles || []).forEach(({ curve: index, triangle: t }) => {
+    const curve = check.curves[index];
+    const name = index ? 'g' : 'f';
+    const exactK = curve.exact.k;
+    if (!same(t.k, exactK)) { problems.push(name + ': k по треугольнику ' + show(t.k) + ', в ключе ' + show(exactK)); }
+    if (t.flat) {
+      if (exactK.p !== 0) { problems.push(name + ': прямая не горизонтальна, а треугольник не построен'); }
+      return;
+    }
+    if (!(t.dx > 0 && t.dy > 0 && Number.isInteger(t.dx) && Number.isInteger(t.dy))) {
+      problems.push(name + ': катеты ' + t.dx + ' и ' + t.dy + ' — не положительные целые');
+    }
+    if (!Slope.vertexBelow(t, Line.create(curve.exact.k, curve.exact.b))) {
+      problems.push(name + ': вершина прямого угла (' + t.C.x + '; ' + t.C.y + ') не под прямой');
+    }
+    if (t.rising !== (exactK.p > 0)) { problems.push(name + ': знак k не совпадает с направлением прямой'); }
+  });
+  if (check.curves.some((curve) => curve.kind === 'line') && !(check.triangles || []).length &&
+      check.points.length) {
+    /* Прямая с чертежа без треугольника — k найден не тем способом. */
+    if (check.curves.some((curve, i) => curve.kind === 'line' && check.points.some((p) => p.curve === i))) {
+      problems.push('k найден без треугольника наклона');
+    }
+  }
   if (check.roots && check.curves.length === 2) {
     check.roots.forEach((r) => {
       const fv = valueOf(check.curves[0], r);

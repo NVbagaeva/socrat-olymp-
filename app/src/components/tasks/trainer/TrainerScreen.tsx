@@ -209,7 +209,9 @@ export function TrainerScreen({
     }
     startClock();
     const right = current.fields.every((field, fieldNo) =>
-      sameNumber(fieldValue(step, fieldNo), field.answer),
+      field.choices === undefined
+        ? sameNumber(fieldValue(step, fieldNo), field.answer)
+        : fieldValue(step, fieldNo) === field.answer,
     );
     if (!right) {
       setStepMark('wrong');
@@ -497,17 +499,36 @@ export function TrainerScreen({
                           dangerouslySetInnerHTML={{ __html: field.labelHtml }}
                         />
                       )}
-                      <Input
-                        className="tstep__input"
-                        value={fieldValue(i, fieldNo)}
-                        state={
-                          done ? 'success' : stepMark === 'wrong' ? 'error' : 'default'
-                        }
-                        inputMode="text"
-                        autoComplete="off"
-                        readOnly={done}
-                        onChange={(event) => setFieldValue(i, fieldNo, event.target.value)}
-                      />
+                      {field.choices === undefined ? (
+                        <Input
+                          className="tstep__input"
+                          value={fieldValue(i, fieldNo)}
+                          state={
+                            done ? 'success' : stepMark === 'wrong' ? 'error' : 'default'
+                          }
+                          inputMode="text"
+                          autoComplete="off"
+                          readOnly={done}
+                          onChange={(event) => setFieldValue(i, fieldNo, event.target.value)}
+                        />
+                      ) : (
+                        /* Ответ выбором: «возрастает» / «убывает». */
+                        <span className="tstep__choices" role="radiogroup">
+                          {field.choices.map((choice) => (
+                            <Button
+                              key={choice}
+                              size="sm"
+                              variant={fieldValue(i, fieldNo) === choice ? 'primary' : 'secondary'}
+                              role="radio"
+                              aria-checked={fieldValue(i, fieldNo) === choice}
+                              disabled={done}
+                              onClick={() => setFieldValue(i, fieldNo, choice)}
+                            >
+                              {choice}
+                            </Button>
+                          ))}
+                        </span>
+                      )}
                     </Fragment>
                   ))}
                   {done ? (

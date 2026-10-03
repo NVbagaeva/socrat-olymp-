@@ -173,8 +173,9 @@ function inlineText(value) {
  * steps  — [{ title, rows: [{ text, tex }] }]: text — строка, где
  *          формулы стоят между знаками $…$; tex — формула строки
  * answer — ответ разметкой, как в ключе
+ * figureSvg — чертёж с треугольником наклона, если он есть
  */
-function fullSolution(no, steps, answer) {
+function fullSolution(no, steps, answer, figureSvg) {
   var list = steps.map(function (step) {
     var rows = step.rows.map(function (item) {
       return '<div class="sheet-step-row">' +
@@ -191,6 +192,7 @@ function fullSolution(no, steps, answer) {
       '<ol class="sheet-steps">' + list + '</ol>' +
       '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answer) + '</b></p>' +
     '</div>' +
+    (figureSvg ? '<figure class="sheet-figure sheet-solution-figure">' + figureSvg + '</figure>' : '') +
     '</div>';
 }
 
