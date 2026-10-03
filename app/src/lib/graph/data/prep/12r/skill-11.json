@@ -1,0 +1,137 @@
+{
+  "kind": "prep",
+  "id": "P12R-11",
+  "block": 11,
+  "title": "Гипербола и прямая: ордината B",
+  "subtitle": "Найти ординату второй точки пересечения",
+  "seed": 12411,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-11-01",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-02",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, пересекающиеся в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-03",
+      "question": "Графики функций $f(x) = k/x$ и $g(x) = ax + b$ пересекаются в точках $A$ и $B$ (см. рисунок). Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-04",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$. Они пересекаются в точке $A$ и ещё в одной точке $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-05",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-06",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точке $A$ и ещё в одной точке. Найдите ординату второй точки пересечения графиков.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-07",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите $y_B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-08",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    }
+  ]
+}

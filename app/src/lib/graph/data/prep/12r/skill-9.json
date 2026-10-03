@@ -1,0 +1,105 @@
+{
+  "kind": "prep",
+  "id": "P12R-9",
+  "block": 9,
+  "title": "Прямая по двум точкам",
+  "subtitle": "Найти коэффициенты a и b прямой g(x) = ax + b",
+  "seed": 12409,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-9-01",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите угловой коэффициент $a$ прямой $g(x)$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-9-02",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите свободный член $b$ прямой $g(x)$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-9-03",
+      "question": "Графики функций $f(x) = k/x$ и $g(x) = ax + b$ пересекаются в точках $A$ и $B$ (см. рисунок). Найдите $a$ — угловой коэффициент прямой.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-9-04",
+      "question": "Графики функций $f(x) = k/x$ и $g(x) = ax + b$ пересекаются в точках $A$ и $B$ (см. рисунок). Найдите $b$ — свободный член прямой.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-9-05",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, пересекающиеся в точках $A$ и $B$. Найдите коэффициент $a$ функции $g(x)$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-9-06",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, пересекающиеся в точках $A$ и $B$. Найдите коэффициент $b$ функции $g(x)$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-9-07",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$. Они пересекаются в точке $A$ и ещё в одной точке $B$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-9-08",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$. Они пересекаются в точке $A$ и ещё в одной точке $B$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "hint": "Угловой коэффициент прямой $a = \\dfrac{\\Delta y}{\\Delta x}$ по двум отмеченным точкам. Свободный член $b$ — из подстановки точки $A$: $b = y_A - a x_A$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative"
+      }
+    }
+  ]
+}

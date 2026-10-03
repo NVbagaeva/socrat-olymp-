@@ -12,6 +12,8 @@
 import { OPORNYE } from '@/content/opornye';
 import { QUADRATIC } from '@/content/quadratic';
 import { QUADRATIC_THEORY } from '@/content/theoryQuadratic';
+import { RATIONAL } from '@/content/rational';
+import { RATIONAL_THEORY } from '@/content/theoryRational';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -253,18 +255,33 @@ export const functionTypes: FunctionType[] = [
     sheetTitle: 'Квадратичная функция',
     tutors: QUADRATIC.tutors,
   },
+  /* Подтема «Гипербола» открыта на месте дробно-рациональных функций:
+     y = k/x, её сдвиги и дробь (kx + a)/(x + b). Признаки — как у
+     квадратичной, тексты в content/rational.ts. */
   {
     id: 'rational',
     no: '03',
-    title: 'Дробно-рациональные функции',
-    shortTitle: 'Дробно-рациональные',
-    formula: 'y = \\dfrac{ax + b}{cx + d}',
+    title: 'Гипербола',
+    shortTitle: 'Гипербола',
+    formula: 'y = \\dfrac{k}{x + a} + b',
     description: '',
-    theory: [],
+    theory: RATIONAL_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12R-1', 'P12R-2', 'P12R-3', 'P12R-4', 'P12R-5', 'P12R-6',
+             'P12R-7', 'P12R-8', 'P12R-9', 'P12R-10', 'P12R-11'],
+      prototypes: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.E',
+                   '12R.F', '12R.G', '12R.H', '12R.I', '12R.J'],
+    },
+    status: 'active',
+    head: RATIONAL.head,
+    about: RATIONAL.about,
+    methods: true,
+    theoryProgress: true,
+    bezStarogoAdresa: true,
+    sheetTitle: 'Гипербола',
+    tutors: RATIONAL.tutors,
   },
   {
     id: 'logarithmic',

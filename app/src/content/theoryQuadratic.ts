@@ -19,7 +19,11 @@ import type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 const XV = 'x_{\\text{в}}';
 const YV = 'y_{\\text{в}}';
 
-export interface QuadraticCard {
+/**
+ * Карточка раздела теории. Общая для подтем: у параболы и гиперболы
+ * разные только ключи чертежей, поэтому тип сцены — параметр.
+ */
+export interface TheoryCard<S extends string = QuadraticTheorySceneId> {
   id: string;
   title: string;
   /** Абзацы текста с формулами $…$ и выделениями **…**. */
@@ -31,22 +35,38 @@ export interface QuadraticCard {
   /** Выкладка: строки TeX одна под другой. */
   lines?: string[];
   /** Чертёж: ключ сцены в lib/scenes.ts. */
-  scene?: QuadraticTheorySceneId;
+  scene?: S;
+  /**
+   * Место под иллюстрацию автора: рамка с подписью. Картинку автор
+   * добавляет сам — пока её нет, рамка честно говорит, что здесь будет.
+   */
+  illustration?: {
+    caption: string;
+    src?: string;
+    alt?: string;
+    /** Размеры файла в пикселях: браузер держит место до загрузки. */
+    width?: number;
+    height?: number;
+  };
   /** Маленькая таблица значений: шапка и строки, ячейки с $…$. */
   table?: { head: string[]; rows: string[][] };
   /** Текстовая карточка со значком «дальше»: без чертежа и формулы. */
   forward?: boolean;
 }
 
-export interface QuadraticSection {
+export type QuadraticCard = TheoryCard<QuadraticTheorySceneId>;
+
+export interface TheorySection<S extends string = QuadraticTheorySceneId> {
   id: string;
   lead: string;
-  cards: QuadraticCard[];
+  cards: TheoryCard<S>[];
   /** Плашка «Запомни»: абзацы. */
   remember: string[];
   /** Интерактивный блок «Поиграй с параболой» после карточек. */
   playground?: boolean;
 }
+
+export type QuadraticSection = TheorySection<QuadraticTheorySceneId>;
 
 /** Заголовок плашки, общий для всех разделов. */
 export const REMEMBER_TITLE = 'Запомни';
