@@ -166,18 +166,31 @@ a.subtopic:hover {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--color-primary);
+  /* В покое стрелка серая: синеет только у нажатой карточки. */
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    border-color var(--dur-hover) var(--ease);
+}
+.subtopic.is-picked .subtopic__go {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.subtopic.is-picked .subtopic__go svg {
+  stroke: var(--color-text-inverse);
 }
 .subtopic__go svg {
   width: 16px;
   height: 16px;
   fill: none;
-  stroke: var(--color-text-inverse);
+  stroke: var(--color-text-tertiary);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: stroke var(--dur-hover) var(--ease);
 }
 
 /* ── Прототипы ──────────────────────────────────────────────── */
