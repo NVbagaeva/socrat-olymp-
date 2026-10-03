@@ -13,6 +13,7 @@
 import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
+import rationalBuilder from '@/lib/graph/solution-rational.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
@@ -417,6 +418,7 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
           GraphGenerate,
           solutionBuilder,
           quadraticBuilder,
+          rationalBuilder,
         ),
     foot: content.foot,
   };

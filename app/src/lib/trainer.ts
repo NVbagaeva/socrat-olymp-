@@ -14,7 +14,7 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps, type PrepStep } from '@/lib/prep';
+import { quadraticSteps, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
 import { methodFor } from '@/lib/trainerMethod';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
@@ -140,7 +140,7 @@ export interface EngineTask {
     lines: EngineLine[];
     /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
     level?: string | null;
-    /** Семейство кривой: 'line' или 'quadratic'. */
+    /** Семейство кривой: 'line', 'quadratic' или 'rational'. */
     family?: string;
   };
   answerType?: string;
@@ -713,6 +713,277 @@ function stepsFor(task: EngineTask): TrainerStep[] {
   return last === null ? [] : [stepK(k), stepB(task, b), stepEquation(k, b), last];
 }
 
+/* ── Цепочка для гиперболы ───────────────────────────────────────
+
+   Порядок — тот, в котором ошибка вероятнее всего: сначала знак
+   сдвига по вертикальной асимптоте, потом горизонтальная асимптота,
+   потом k по точке, у (kx + a)/(x + b) — a через точку, у задач с
+   прямой — прямая по двум точкам, уравнение, корни и выбор корня.
+   Каждый шаг говорит, к какой функции относится коэффициент:
+   буквы a и b в разных записях значат разное. */
+
+interface Exact {
+  p: number;
+  q: number;
+}
+
+interface RationalMeta {
+  set: string;
+  form: string;
+  rule: string;
+  m: Exact;
+  s: Exact;
+  t: Exact;
+  coefficients: Record<string, Exact>;
+  points: { x: number; y: number; role: string }[];
+  query: { type: string; x0: Exact | null; y0: Exact | null; answer: Exact } | null;
+  line: { k: Exact; b: Exact } | null;
+  intersection: { axis: string; A: { x: number; y: number }; B: { x: Exact; y: Exact } } | null;
+  answer: Exact;
+}
+
+const val = (e: Exact): number => e.p / e.q;
+
+/** Число в подсказке: десятичная, а трети — дробью, как в условии. */
+function rtex(e: Exact): string {
+  let q = e.q;
+  while (q % 2 === 0) { q /= 2; }
+  while (q % 5 === 0) { q /= 5; }
+  if (q === 1) { return tex(val(e)); }
+  return (e.p < 0 ? '-' : '') + '\\dfrac{' + Math.abs(e.p) + '}{' + e.q + '}';
+}
+
+function field(label: string, value: number): TrainerField {
+  return { labelHtml: math(label), answer: plain(value) };
+}
+
+function rationalStep(title: string, text: string, fields: TrainerField[], wrong: string): TrainerStep {
+  return {
+    titleHtml: hintHtml(title),
+    textHtml: hintHtml(text),
+    shape: 'plain',
+    fields,
+    wrongHint: hintHtml(wrong),
+  };
+}
+
+/** Знак в формуле: «x - 3» при a = −3, «x + 2» при a = 2. */
+function signedTex(v: number): string {
+  if (Math.abs(v) < 1e-9) { return ''; }
+  return (v > 0 ? ' + ' : ' - ') + tex(Math.abs(v));
+}
+
+function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
+  const { form, rule } = meta;
+  const s = val(meta.s);
+  const t = val(meta.t);
+  const co = Object.fromEntries(Object.entries(meta.coefficients).map(([n, e]) => [n, val(e)]));
+  const mark = meta.points.find((p) => p.role === 'mark') ?? { x: 0, y: 0 };
+  const dot = '$(' + tex(mark.x) + '; ' + tex(mark.y) + ')$';
+  const steps: TrainerStep[] = [];
+
+  /* 1. Вертикальная асимптота: сдвиг влево-вправо и его знак. */
+  if (form === 'shift-x' || form === 'shift-xy') {
+    steps.push(rationalStep(
+      'Давай проверим, как ты нашёл(ла) вертикальную асимптоту и сдвиг влево-вправо.',
+      'Вертикальная пунктирная прямая — асимптота $x = ' + tex(s) + '$. Знаменатель $x + a$ ' +
+        'обращается в ноль при $x = -a$. Внимание на знак: сдвиг вправо даёт $a < 0$, ' +
+        'сдвиг влево — $a > 0$. Чему равно $a$ функции $f$?',
+      [field('a =', co.a ?? 0)],
+      'Асимптота $x = 3$ значит знаменатель $x - 3$, то есть $a = -3$. Знак $a$ противоположен ' +
+        'координате асимптоты.',
+    ));
+  }
+  if (form === 'linear') {
+    steps.push(rationalStep(
+      'Давай проверим, как ты нашёл(ла) вертикальную асимптоту.',
+      'Вертикальная асимптота $x = ' + tex(s) + '$ — там знаменатель $x + b$ равен нулю, ' +
+        'то есть $x = -b$. Чему равно $b$ функции $f$?',
+      [field('b =', co.b ?? 0)],
+      'Знак $b$ противоположен координате вертикальной асимптоты: $x = -b$.',
+    ));
+  }
+
+  /* 2. Горизонтальная асимптота: сдвиг вверх-вниз или k целой части. */
+  if (form === 'shift-y' || form === 'shift-xy') {
+    const name = form === 'shift-y' ? 'a' : 'b';
+    steps.push(rationalStep(
+      (steps.length === 0 ? 'Давай проверим, как ты нашёл(ла)' : 'Теперь проверим') +
+        ' горизонтальную асимптоту — сдвиг вверх-вниз.',
+      'Горизонтальная пунктирная прямая — асимптота $y = ' + name + '$. Слагаемое $' + name +
+        '$ поднимает или опускает весь график. Чему равно $' + name + '$ функции $f$?',
+      [field(name + ' =', form === 'shift-y' ? co.a ?? 0 : co.b ?? 0)],
+      'Посмотри, на какой высоте проходит горизонтальный пунктир: это и есть сдвиг, знак тот же.',
+    ));
+  }
+  if (form === 'linear') {
+    steps.push(rationalStep(
+      'Теперь выделим целую часть и проверим $k$.',
+      '$\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$, поэтому горизонтальная асимптота — ' +
+        '$y = k$. Чему равно $k$?',
+      [field('k =', co.k ?? 0)],
+      '$k$ — высота горизонтальной асимптоты, знак тот же.',
+    ));
+  }
+
+  /* 3. k по точке (у записи (kx + a)/(x + b) — a по точке). */
+  if (form === 'linear') {
+    steps.push(rationalStep(
+      'Проверим, как ты нашёл(ла) $a$.',
+      'Подставь отмеченную точку ' + dot + ' в $y_0 = \\dfrac{kx_0 + a}{x_0 + b}$: ' +
+        '$a = y_0(x_0 + b) - k x_0$.',
+      [field('a =', co.a ?? 0)],
+      'Подставь именно координаты отмеченной точки и проверь знаки при раскрытии скобок.',
+    ));
+  } else {
+    const formula = form === 'basic' ? 'k = x \\cdot y'
+      : form === 'shift-y' ? 'k = (y - a) \\cdot x'
+      : form === 'shift-x' ? 'k = y \\cdot (x + a)'
+      : 'k = (y - b) \\cdot (x + a)';
+    steps.push(rationalStep(
+      'Давай проверим, как ты нашёл(ла) $k$.',
+      'Подставь координаты отмеченной точки ' + dot + ' в формулу: $' + formula + '$' +
+        (form === 'basic' ? '.' : ' (сдвиги ты уже нашёл(ла)).'),
+      [field('k =', co.k ?? 0)],
+      'Проверь, ту ли точку взял(а) — она должна быть отмечена на графике, — и знаки в скобках.',
+    ));
+  }
+
+  /* 4. Итог. Вопрос о коэффициенте, найденном раньше, цепочку и заканчивает. */
+  const asked = { 'coef-k': 'k', 'coef-a': 'a', 'coef-b': 'b' }[rule];
+  if (asked !== undefined) {
+    const idx = steps.findIndex((step) => step.fields.some((f) => f.labelHtml === math(asked + ' =')));
+    return idx === -1 ? steps : steps.slice(0, idx + 1);
+  }
+  if (rule === 'coef-sum') {
+    steps.push(rationalStep('Сложи найденные коэффициенты.', '$k + a + b$.',
+      [field('k + a + b =', val(meta.answer))], 'Проверь знаки слагаемых.'));
+    return steps;
+  }
+  const q = meta.query;
+  if (q !== null && q.type === 'value-at' && q.x0 !== null) {
+    steps.push(rationalStep(
+      'Итоговое вычисление: подставь $x = ' + rtex(q.x0) + '$ в формулу.',
+      'Смешанную дробь удобнее перевести в неправильную. Функция: $f(x) = ' +
+        rtex(meta.t) + ' + \\dfrac{' + rtex(meta.m) + '}{x' + signedTex(-s) + '}$.',
+      [field('f(' + rtex(q.x0) + ') =', val(meta.answer))],
+      'Сначала посчитай знаменатель, потом дробь, потом прибавь сдвиг.',
+    ));
+  }
+  if (q !== null && q.type === 'argument-for' && q.y0 !== null) {
+    steps.push(rationalStep(
+      'Итоговое вычисление: реши уравнение $f(x) = ' + rtex(q.y0) + '$.',
+      'Перенеси сдвиг: $\\dfrac{' + rtex(meta.m) + '}{x' + signedTex(-s) + '} = ' + rtex(q.y0) +
+        signedTex(-t) + '$, затем найди знаменатель и $x$.',
+      [field('x =', val(meta.answer))],
+      'Проверь, что вычел(ла) сдвиг до того, как перевернуть дробь.',
+    ));
+  }
+  return steps;
+}
+
+function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
+  const cross = meta.intersection;
+  const line = meta.line;
+  if (cross === null || line === null) { return []; }
+  const A = cross.A;
+  const P = meta.points.find((p) => p.role === 'line') ?? A;
+  const k = val(meta.m);
+  const a = val(line.k);
+  const b = val(line.b);
+  const xB = val(cross.B.x);
+  const yB = val(cross.B.y);
+  const steps: TrainerStep[] = [];
+  const lineOnly = meta.rule === 'line-a' || meta.rule === 'line-b';
+
+  if (!lineOnly) {
+    steps.push(rationalStep(
+      'Давай проверим, как ты нашёл(ла) $k$ — коэффициент гиперболы $f(x)$.',
+      'Точка $A(' + tex(A.x) + '; ' + tex(A.y) + ')$ лежит на графике $f(x) = \\dfrac{k}{x}$, ' +
+        'значит $k = x_A \\cdot y_A$.',
+      [field('k =', k)],
+      'Перемножь координаты точки $A$, следи за знаками.',
+    ));
+  }
+  steps.push(rationalStep(
+    'Проверим угловой коэффициент прямой $g(x)$.',
+    '$a$ и $b$ — коэффициенты прямой $g(x) = ax + b$. Она проходит через $A(' + tex(A.x) + '; ' +
+      tex(A.y) + ')$ и $(' + tex(P.x) + '; ' + tex(P.y) + ')$: $a = \\dfrac{\\Delta y}{\\Delta x}$.',
+    [field('a =', a)],
+    'Считай $\\Delta y$ и $\\Delta x$ от одной и той же точки к другой, в одном порядке.',
+  ));
+  if (meta.rule === 'line-a') { return steps; }
+  steps.push(rationalStep(
+    'Теперь свободный член прямой $g(x)$.',
+    'Подставь точку $A$: $b = y_A - a \\cdot x_A$.',
+    [field('b =', b)],
+    'Проверь знак произведения $a \\cdot x_A$.',
+  ));
+  if (meta.rule === 'line-b') { return steps; }
+  steps.push(rationalStep(
+    'Приравняй функции: $\\dfrac{k}{x} = ax + b$.',
+    'Домножь на $x$ и перенеси всё в одну часть: получится $ax^2 + bx - k = 0$. ' +
+      'Запиши коэффициенты этого уравнения.',
+    [field('\\text{при } x^2:', a), field('\\text{при } x:', b), field('\\text{свободный член:}', -k)],
+    'Свободный член — это $-k$: при переносе $k$ меняет знак.',
+  ));
+  steps.push(rationalStep(
+    'Найди корни и выбери нужный.',
+    'Один корень известен — это абсцисса $A$: $x = ' + tex(A.x) + '$. Второй — по теореме Виета: ' +
+      '$x_A \\cdot x_B = \\dfrac{-k}{a}$. Нужен корень, который не равен абсциссе $A$.',
+    [field('x_B =', xB)],
+    'Не бери абсциссу точки $A$ — она на рисунке. Точке $B$ соответствует другой корень.',
+  ));
+  if (cross.axis === 'y') {
+    steps.push(rationalStep(
+      'Итоговое вычисление: ордината точки $B$.',
+      'Подставь $x_B$ в формулу гиперболы: $y_B = \\dfrac{k}{x_B}$. Проверь себя по прямой.',
+      [field('y_B =', yB)],
+      'Подставляй найденный $x_B$, а не абсциссу $A$.',
+    ));
+  }
+  return steps;
+}
+
+function rationalSteps(task: EngineTask): TrainerStep[] {
+  const meta = task.meta as unknown as RationalMeta;
+  return meta.form === 'line' ? rationalLineSteps(meta) : rationalSingleSteps(meta);
+}
+
+/** Что проверить при неверном ответе: начало цепочки, без значения. */
+function rationalWrongHint(task: EngineTask): string {
+  const meta = task.meta as unknown as RationalMeta;
+  if (meta.form === 'line') {
+    return hintHtml(
+      'Проверь по шагам: $k$ гиперболы $f(x)$ по точке $A$, коэффициенты $a$ и $b$ прямой ' +
+        '$g(x)$ по двум точкам, уравнение $ax^2 + bx - k = 0$ и выбор корня — абсцисса $A$ ' +
+        'в ответ не идёт.',
+    );
+  }
+  if (meta.form === 'linear') {
+    return hintHtml(
+      'Проверь асимптоты: вертикальная $x = -b$, горизонтальная $y = k$ — и подстановку точки ' +
+        'для $a$.',
+    );
+  }
+  return hintHtml(
+    'Проверь сдвиги по асимптотам — особенно знак сдвига влево-вправо, — потом $k$ по ' +
+      'отмеченной точке и итоговое вычисление.',
+  );
+}
+
+/** Откуда взялся ответ — формула функции, восстановленная по чертежу. */
+function rationalRightHint(task: EngineTask): string {
+  const meta = task.meta as unknown as RationalMeta & { equation?: string; line: { text?: string } | null };
+  if (meta.form === 'line' && meta.line !== null) {
+    return hintHtml(
+      'По чертежу $f(x) = ' + rtex(meta.m) + '/x$ и $' + (meta.line.text ?? '') + '$. ' +
+        'Второй корень уравнения $ax^2 + bx - k = 0$ — абсцисса точки $B$.',
+    );
+  }
+  return hintHtml('По чертежу $' + (meta.equation ?? '') + '$, дальше вычисление.');
+}
+
 /* ── Задание тренажёра из задачи движка ──────────────────────────
    Условие набирается KaTeX, подсказки и цепочка шагов собираются
    вместе с заданием. Откуда пришла задача — с сборки или из браузера
@@ -723,6 +994,23 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      зато есть разбор — тот же, что во вкладке опорных задач, — и
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
+  const rational = task.meta.family === 'rational';
+  if (rational) {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: rationalWrongHint(task),
+      rightHint: rationalRightHint(task),
+      steps: rationalSteps(task),
+      options: null,
+      oshibki: {},
+      solution: rationalSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   return {
     id: task.id,
     kind: task.meta.set,

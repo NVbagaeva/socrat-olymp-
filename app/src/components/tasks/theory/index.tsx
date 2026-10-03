@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { QUADRATIC_SECTIONS } from '@/content/theoryQuadratic';
+import { RATIONAL_SECTIONS } from '@/content/theoryRational';
+import { rationalTheoryScene } from '@/lib/scenes';
 import { WhatIsFunction } from './WhatIsFunction';
 import { GraphNotFunction } from './GraphNotFunction';
 import { WhatKinds } from './WhatKinds';
@@ -20,6 +22,17 @@ export const theoryBodies: Record<string, ReactNode> = {
     QUADRATIC_SECTIONS.map((section) => [
       section.id,
       <QuadraticSection section={section} key={section.id} />,
+    ]),
+  ),
+  /* Разделы гиперболы: та же разметка, свои чертежи. */
+  ...Object.fromEntries(
+    RATIONAL_SECTIONS.map((section) => [
+      section.id,
+      <QuadraticSection
+        section={section}
+        sceneFor={rationalTheoryScene as (id: string) => unknown}
+        key={section.id}
+      />,
     ]),
   ),
 };

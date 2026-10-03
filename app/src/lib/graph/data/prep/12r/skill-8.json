@@ -1,0 +1,137 @@
+{
+  "kind": "prep",
+  "id": "P12R-8",
+  "block": 8,
+  "title": "Аргумент по значению",
+  "subtitle": "Найти x, при котором f(x) = c",
+  "seed": 12408,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-8-01",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-02",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-03",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a) + b$. Найдите значение аргумента, при котором значение функции равно ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-04",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Решите уравнение $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-05",
+      "question": "График функции $f(x) = k/(x + a) + b$ изображён на рисунке. При каком $x$ выполняется равенство $f(x) = {y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-06",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Найдите абсциссу точки графика, ордината которой равна ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-07",
+      "question": "На рисунке показан график функции $f(x) = k/(x + a) + b$. В какой точке $x$ функция принимает значение ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-08",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    }
+  ]
+}

@@ -132,6 +132,30 @@ function solution(no, formulas, answer) {
 }
 
 /**
+ * Полное решение задачи для учителя: номер, затем шаги разбора —
+ * заголовок шага и все его формулы подряд, — и ответ. Так печатается
+ * гипербола: учителю нужна вся цепочка (асимптоты → сдвиги → точка →
+ * k → формула; у задач с прямой — обе функции, уравнение, корни),
+ * а не только итог каждого шага.
+ *
+ * items — [{ title, formulas: [tex] }]
+ */
+function fullSolution(no, items, answer) {
+  var list = items.map(function (step) {
+    var body = step.formulas.map(function (tex) {
+      return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+    }).join('<span class="sheet-solution-sep">;</span> ');
+    return '<li class="sheet-step"><span class="sheet-step-text">' + typo.text(step.title) +
+      (body ? ':' : '') + '</span> ' + body + '</li>';
+  }).join('');
+  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+    '<span class="sheet-solution-no">' + no + '</span>' +
+    '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
+    '<span class="sheet-solution-answer">' + typo.markup(answer) + '</span>' +
+    '</div>';
+}
+
+/**
  * Решение по шагам внутри карточки задачи: текст шага и его формула,
  * затем строка ответа. Печатается в файле для учителя.
  *
@@ -153,7 +177,7 @@ function steps(items, answer) {
 }
 
 const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
-              solution: solution, steps: steps };
+              solution: solution, fullSolution: fullSolution, steps: steps };
 
 export default api;
-export { sectionHead, subHead, table, keyTable, solution, steps };
+export { sectionHead, subHead, table, keyTable, solution, fullSolution, steps };

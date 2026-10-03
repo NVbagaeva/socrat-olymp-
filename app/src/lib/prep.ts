@@ -10,6 +10,7 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
+import GraphSolutionRational from '@/lib/graph/solution-rational.js';
 import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { katex } from '@/lib/graph/katex';
@@ -702,9 +703,31 @@ export function quadraticSteps(task: QuadraticSource): PrepStep[] {
   }));
 }
 
+/**
+ * Разбор задачи о гиперболе: модуль solution-rational.js строит его
+ * прямо по meta задачи — там лежат точные дроби кривой, отмеченные
+ * точки, запрос и, у задач с прямой, её коэффициенты и точка B.
+ */
+export function rationalSteps(task: { answer: string; meta: unknown }): PrepStep[] {
+  const steps = GraphSolutionRational.fromTask(task) as {
+    number: number;
+    title: string;
+    blocks: EngineBlock[];
+  }[];
+  return steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: null,
+    blocks: viewBlocks(step.blocks),
+  }));
+}
+
 function buildSteps(task: EngineTask): PrepStep[] | null {
   if (task.meta.family === 'quadratic') {
     return quadraticSteps(task);
+  }
+  if (task.meta.family === 'rational') {
+    return rationalSteps(task);
   }
 
   const found = GraphGenerate.analysis(task.id) as Analysis | null;

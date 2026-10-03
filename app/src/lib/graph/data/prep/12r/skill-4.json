@@ -1,0 +1,105 @@
+{
+  "kind": "prep",
+  "id": "P12R-4",
+  "block": 4,
+  "title": "Совместный сдвиг",
+  "subtitle": "k известен: найти a или b в k/(x + a) + b",
+  "seed": 12404,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-4-01",
+      "question": "На рисунке изображён график функции $f(x) = {k}/(x + a) + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-4-02",
+      "question": "На рисунке изображён график функции $f(x) = {k}/(x + a) + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-4-03",
+      "question": "График функции $f(x) = {k}/(x + a) + b$ изображён на рисунке. Чему равно $a$?",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-4-04",
+      "question": "График функции $f(x) = {k}/(x + a) + b$ изображён на рисунке. Чему равно $b$?",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-4-05",
+      "question": "На рисунке показан график функции $f(x) = {k}/(x + a) + b$. Определите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-4-06",
+      "question": "На рисунке показан график функции $f(x) = {k}/(x + a) + b$. Определите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-4-07",
+      "question": "На рисунке изображён график функции вида $f(x) = {k}/(x + a) + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-4-08",
+      "question": "На рисунке изображён график функции вида $f(x) = {k}/(x + a) + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative"
+      }
+    }
+  ]
+}
