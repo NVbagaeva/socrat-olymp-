@@ -1,0 +1,209 @@
+{
+  "kind": "prototype",
+  "id": "12R.D",
+  "block": 4,
+  "title": "12R.D · k/(x + a): аргумент по значению",
+  "subtitle": "Найти x, при котором f(x) равно заданному числу",
+  "seed": 12304,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 12
+  },
+  "tasks": [
+    {
+      "id": "12R.D-01",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-02",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-03",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a)$. Найдите значение аргумента, при котором значение функции равно ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-04",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Решите уравнение $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-05",
+      "question": "График функции $f(x) = k/(x + a)$ изображён на рисунке. При каком $x$ выполняется равенство $f(x) = {y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-06",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите абсциссу точки графика, ордината которой равна ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение функции целое",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.D-07",
+      "question": "На рисунке показан график функции $f(x) = k/(x + a)$. В какой точке $x$ функция принимает значение ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.D-08",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.D-09",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.D-10",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a)$. Найдите значение аргумента, при котором значение функции равно ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.D-11",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Решите уравнение $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.D-12",
+      "question": "График функции $f(x) = k/(x + a)$ изображён на рисунке. При каком $x$ выполняется равенство $f(x) = {y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение функции — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    }
+  ]
+}

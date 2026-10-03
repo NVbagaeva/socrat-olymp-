@@ -1,0 +1,105 @@
+{
+  "kind": "prep",
+  "id": "P12R-1",
+  "block": 1,
+  "title": "Коэффициент k гиперболы y = k/x",
+  "subtitle": "Найти k по отмеченной точке",
+  "seed": 12401,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-1-01",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-1-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k/x$. Найдите значение $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-1-03",
+      "question": "График функции $f(x) = k/x$ изображён на рисунке. Чему равен коэффициент $k$?",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-1-04",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-1-05",
+      "question": "На рисунке показан график функции $f(x) = k/x$. Определите коэффициент $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-1-06",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите коэффициент $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-1-07",
+      "question": "На рисунке изображён график функции вида $f(x) = k/x$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-1-08",
+      "question": "График функции $f(x) = k/x$ изображён на рисунке. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative"
+      }
+    }
+  ]
+}

@@ -304,6 +304,9 @@ function stepAnswerSingle(c, form, rule, query, answer) {
     blocks.splice(blocks.length - 1, 0, text('Подставляем ' + m('x = ' + tex(exact(query.x0))) + ':'));
   } else if (rule === 'argument-for') {
     blocks = argumentBlocks(c, form, exact(query.y0), answer);
+  } else if (rule === 'coef-sum') {
+    blocks = [text('Складываем найденные коэффициенты функции ' + m('f') + ':'),
+      formula('k + a + b = ' + tex(co.k) + ' + ' + tb(co.a) + ' + ' + tb(co.b) + ' = ' + tex(answer))];
   } else {
     var name = rule === 'coef-k' ? 'k' : (rule === 'coef-a' ? 'a' : 'b');
     blocks = [text('Спрашивают коэффициент ' + m(name) + ' функции ' + m('f') + ':'),
@@ -333,7 +336,8 @@ function lineSteps(c, task) {
   var asksY = meta.intersection.axis === 'y';
   var steps = [];
 
-  steps.push(step('k', 'Гипербола: находим k по точке A', [
+  var lineOnly = meta.rule === 'line-a' || meta.rule === 'line-b';
+  if (!lineOnly) steps.push(step('k', 'Гипербола: находим k по точке A', [
     text('Точка ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') + ' лежит на графике ' +
       m('f(x) = \\dfrac{k}{x}') + ', значит ' + m('k = x \\cdot y') + ' (' + m('k') +
       ' — коэффициент гиперболы ' + m('f(x)') + '):'),
@@ -351,6 +355,15 @@ function lineSteps(c, task) {
     formula('b = ' + tex(yA) + ' - ' + tb(line.k) + ' \\cdot ' + tb(xA) + ' = ' + tex(line.b)),
     formula(lineTex(line))
   ]));
+
+  if (lineOnly) {
+    var asksA = meta.rule === 'line-a';
+    steps.push(step('answer', 'Ответ', [
+      text((asksA ? 'Угловой коэффициент ' + m('a') : 'Свободный член ' + m('b')) + ' прямой ' + m('g(x)') + ':'),
+      answerBlock(asksA ? line.k : line.b)
+    ]));
+    return steps;
+  }
 
   /* ax² + bx − k = 0, домноженное до целых коэффициентов. */
   var L = lcm(line.k.q, line.b.q);

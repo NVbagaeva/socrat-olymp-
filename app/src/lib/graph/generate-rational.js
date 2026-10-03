@@ -22,10 +22,16 @@
        узлов на кривой только по два на ветвь у самой асимптоты);
      • всё, что идёт в ответ, — целое или конечная десятичная дробь.
 
+   Правила ответа (task.answerRule): value-at, argument-for, coef-k,
+   coef-a, coef-b, coef-sum (k + a + b), cross-x, cross-y, line-a и
+   line-b (коэффициенты прямой g). В шаблон условия подставляются
+   {x0}, {y0}, {equation}, {line} и коэффициенты записи {k}, {a}, {b}.
+
    Ограничения задачи (task.constraints):
      mAbs, mSign: 'positive' | 'negative'
      sAbsMax, tAbsMax, sNonZero, tNonZero  — асимптоты
      marks: число отмеченных точек (1 или 2), branches: 'both' | 'one'
+     answerKind: 'integer' | 'decimal'   — ответ целый или нецелый (уровни)
      query: { type: 'value-at' | 'argument-for',
               kind: 'integer' | 'decimal' | 'mixed' | 'any', decimals }
      line:  { absMin, absMax }               — наклон прямой (тип «гипербола и прямая»)
@@ -141,6 +147,14 @@ function equationText(c, form) {
 /* ══════════════════════════════════════════════════════════
    Окно и отмеченные точки
    ══════════════════════════════════════════════════════════ */
+/** Целый ответ, десятичный или любой: так уровни задач различаются числами. */
+function answerKindOk(value, kind) {
+  if (places(value) > 2) { return false; }
+  if (kind === 'integer') { return isInt(value); }
+  if (kind === 'decimal') { return !isInt(value); }
+  return true;
+}
+
 function windowOf(half) { return { xmin: -half, xmax: half, ymin: -half, ymax: half }; }
 
 function inside(x, y, win, margin) {
@@ -320,6 +334,7 @@ function answerOf(rule, c, form, query) {
   if (rule === 'coef-k') { return co.k; }
   if (rule === 'coef-a') { return co.a; }
   if (rule === 'coef-b') { return co.b; }
+  if (rule === 'coef-sum') { return add(add(co.k, co.a), co.b); }
   if (query) { return query.answer; }
   throw new Error('generate-rational: нечем ответить на «' + rule + '»');
 }
@@ -353,7 +368,7 @@ function singleCandidates(task, set, seed) {
           query = pool[Math.floor(rng(base + ':query:' + sig)() * pool.length)];
         }
         var answer = answerOf(task.answerRule, c, form, query);
-        if (places(answer) > 2) { return; }
+        if (!answerKindOk(answer, constraints.answerKind)) { return; }
 
         found.push({
           kind: 'single', form: form, curve: c, window: win, query: query,
@@ -421,8 +436,13 @@ function lineCandidates(task, set, seed) {
           if (isZero(line.b)) { continue; }
           var B = crossOf(c.m, line, frac(A.x));
           if (key(B.x) === key(frac(A.x))) { continue; }
-          var asked = axis === 'x' ? B.x : B.y;
-          if (places(asked) > 2 || Math.abs(num(asked)) > 40) { continue; }
+          var asked = task.answerRule === 'line-a' ? line.k
+            : task.answerRule === 'line-b' ? line.b
+            : axis === 'x' ? B.x : B.y;
+          if (!answerKindOk(asked, constraints.answerKind) || Math.abs(num(asked)) > 40) { continue; }
+          /* Наклон и свободный член прямой — тоже конечные дроби:
+             в разборе они идут в уравнение. */
+          if (places(line.k) > 2 || places(line.b) > 2) { continue; }
           /* B на рисунке не видна никогда: её координаты не должны
              читаться с чертежа. Она заметно за рамкой — не ближе
              offscreenMin клеток за границей по x или по y. */
@@ -519,6 +539,9 @@ function result(set, task, built, seed) {
     line: built.line ? lineText(built.line) : ''
   };
   var co = coefficients(c, form);
+  /* Известные коэффициенты для условий вида «f(x) = 4/x + a»:
+     число подставляется в шаблон как {k}, {a}, {b}. */
+  Object.keys(co).forEach(function (name) { values[name] = valueText(co[name]); });
   var coMeta = {};
   Object.keys(co).forEach(function (name) { coMeta[name] = exactMeta(co[name]); });
 

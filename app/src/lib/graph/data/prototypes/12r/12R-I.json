@@ -1,0 +1,209 @@
+{
+  "kind": "prototype",
+  "id": "12R.I",
+  "block": 9,
+  "title": "12R.I · k/x: значение и аргумент",
+  "subtitle": "Гипербола без сдвигов: найти f(x₀) или x по значению",
+  "seed": 12309,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 12
+  },
+  "tasks": [
+    {
+      "id": "12R.I-01",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k/x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-03",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-04",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-05",
+      "question": "График функции $f(x) = k/x$ изображён на рисунке. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный аргумент",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.I-06",
+      "question": "На рисунке показан график функции $f(x) = k/x$. Вычислите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный аргумент",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.I-07",
+      "question": "Функция задана формулой $f(x) = k/x$, её график изображён на рисунке. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "дробный аргумент",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    },
+    {
+      "id": "12R.I-08",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Какое значение принимает функция при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-09",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение целое",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-10",
+      "question": "На рисунке изображён график функции вида $f(x) = k/x$. Найдите значение аргумента, при котором значение функции равно ${y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "значение целое",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.I-11",
+      "question": "На рисунке изображён график функции $f(x) = k/x$. Решите уравнение $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение — десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.I-12",
+      "question": "График функции $f(x) = k/x$ изображён на рисунке. При каком $x$ выполняется равенство $f(x) = {y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "значение — десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    }
+  ]
+}

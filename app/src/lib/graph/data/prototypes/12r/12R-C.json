@@ -1,0 +1,209 @@
+{
+  "kind": "prototype",
+  "id": "12R.C",
+  "block": 3,
+  "title": "12R.C · k/(x + a): значение функции",
+  "subtitle": "Найти f(x₀) по графику со сдвигом влево или вправо",
+  "seed": 12303,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 12
+  },
+  "tasks": [
+    {
+      "id": "12R.C-01",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a)$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-03",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-04",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-05",
+      "question": "График функции $f(x) = k/(x + a)$ изображён на рисунке. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-06",
+      "question": "На рисунке показан график функции $f(x) = k/(x + a)$. Вычислите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "аргумент целый",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.C-07",
+      "question": "Функция задана формулой $f(x) = k/(x + a)$, её график изображён на рисунке. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.C-08",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Какое значение принимает функция при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.C-09",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — десятичная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.C-10",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a)$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — смешанная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    },
+    {
+      "id": "12R.C-11",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — смешанная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    },
+    {
+      "id": "12R.C-12",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a)$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "аргумент — смешанная дробь",
+      "form": "shift-x",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    }
+  ]
+}
