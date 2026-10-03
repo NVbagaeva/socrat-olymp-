@@ -89,8 +89,23 @@ function tex(text) {
   value = value.replace(/;/g, ';\\,');
   value = value.replace(/[αβΔ]/g, function (ch) { return GREEK[ch]; });
 
+  /* Смешанная дробь гиперболы: «6⅓» набирается целой частью и
+     маленькой дробью рядом, как пишут от руки. */
+  value = value.replace(/⅓/g, '\\tfrac{1}{3}').replace(/⅔/g, '\\tfrac{2}{3}');
+
   /* Дробь внутри выражения набирается столбиком: и 6/2, и Δy/Δx. */
   var TOKEN = '(?:\\\\Delta\\s*[A-Za-z]|-?\\d+(?:\\{,\\}\\d+)?|[A-Za-z])';
+
+  /* Знаменатель в скобках — гипербола: «k/(x + a)», «(kx + a)/(x + b)».
+     Скобки знаменателя (и числителя, если он в скобках) уходят: их
+     роль берёт на себя черта дроби. Вложенных скобок в таких записях
+     нет, поэтому хватает простого шаблона. */
+  value = value.replace(
+    new RegExp('(' + TOKEN + '|\\([^()]*\\))\\s*\\/\\s*\\(([^()]*)\\)', 'g'),
+    function (match, top, bottom) {
+      var numerator = top.charAt(0) === '(' ? top.slice(1, -1) : top;
+      return '\\dfrac{' + numerator + '}{' + bottom + '}';
+    });
   value = value.replace(new RegExp('(' + TOKEN + ')\\s*\\/\\s*(' + TOKEN + ')', 'g'),
     '\\dfrac{$1}{$2}');
   return value;
