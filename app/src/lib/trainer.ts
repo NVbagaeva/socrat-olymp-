@@ -384,8 +384,9 @@ function plain(value: number): string {
 interface SlopeTriangle {
   flat: boolean;
   rising: boolean;
-  first: EnginePoint;
-  second: EnginePoint;
+  /** Левая и правая точки: в тексте они всегда слева направо. */
+  A: EnginePoint;
+  B: EnginePoint;
   C: EnginePoint | null;
   dx: number;
   dy: number;
@@ -453,7 +454,7 @@ function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: s
     {
       titleHtml: hintHtml('Построй треугольник под прямой по двум отмеченным точкам.'),
       textHtml: hintHtml(
-        'Гипотенуза — отрезок между точками ' + pointMath(t.first) + ' и ' + pointMath(t.second) +
+        'Гипотенуза — отрезок между точками ' + pointMath(t.A) + ' и ' + pointMath(t.B) +
           '. Катеты идут по линиям сетки, вершина прямого угла лежит ниже прямой. ' +
           'Найди её координаты.',
       ),

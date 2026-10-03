@@ -27,7 +27,8 @@
 
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
-import { equationText as lineEquationText } from './generate.js';
+import { equationText as lineEquationText, loadSets } from './generate.js';
+import { pointText } from './text.js';
 import Slope from './slope.js';
 import renderer from './renderer.js';
 
@@ -228,8 +229,11 @@ function row(textValue, texValue) {
 function lineFromPoints(name, letter, p1, p2, given, slopeLetter) {
   var rows = [];
   var x1 = F(p1.x); var y1 = F(p1.y); var x2 = F(p2.x);
+  /* Точки называются слева направо — так же, как в треугольнике. */
+  var left = p1.x < p2.x ? p1 : p2;
+  var right = p1.x < p2.x ? p2 : p1;
   rows.push(row('Общий вид: $' + name + '(x) = kx + ' + letter + '$. С рисунка берём точки $' +
-    pt(p1.x, p1.y) + '$ и $' + pt(p2.x, p2.y) + '$' + (given ? ' (отмечены на рисунке).' : ' (узлы сетки на прямой).')));
+    pt(left.x, left.y) + '$ и $' + pt(right.x, right.y) + '$' + (given ? ' (отмечены на рисунке).' : ' (узлы сетки на прямой).')));
   /* k — через треугольник наклона и тангенс угла (graph/slope.js). */
   var triangle = Slope.build(p1, p2);
   var k = triangle.k;
@@ -698,8 +702,9 @@ function quadraticTask(task, rule) {
     if (!first || !second) { throw new Error('solution-teacher: у прямой нет двух узлов сетки'); }
     var gl = lineFromPoints('g', 'm', first, second, false);
     gl.rows[0].text = 'Это прямая. Буква $b$ занята коэффициентом параболы, поэтому свободный член обозначим $m$: $g(x) = kx + m$. ' +
-      'С рисунка берём точки $' + pt(first.x, first.y) + '$' + (first === cross ? ' (отмеченная точка пересечения)' : '') +
-      ' и $' + pt(second.x, second.y) + '$ (узел сетки).';
+      'С рисунка берём точки ' + [first, second].sort(function (p, q) { return p.x - q.x; }).map(function (p) {
+        return '$' + pt(p.x, p.y) + '$' + (p === cross ? ' (отмеченная точка пересечения)' : ' (узел сетки)');
+      }).join(' и ') + '.';
     gRows = gl.rows;
     gTerms = lineTerms(gl.k, gl.b);
     gTex = lineTex(gl.k, gl.b);
@@ -810,66 +815,111 @@ function build(task) {
 
 var COLORS = ['lineA', 'lineB'];
 
-/** Кривые сцены из параметров задачи: прямые, параболы. */
-function sceneCurves(meta) {
-  if (meta.family === 'quadratic') {
-    return (meta.curves || []).map(function (curve, i) {
-      var label = (meta.curves.length === 1 ? 'y = f(x)' : ['y = f(x)', 'y = g(x)'][i]);
-      return curve.kind === 'line'
-        ? { type: 'line', k: curve.k, b: curve.b, color: COLORS[i], label: label }
-        : { type: 'quadratic', a: curve.a, b: curve.b, c: curve.c, color: COLORS[i], label: label };
-    });
-  }
-  var lines = meta.lines || [];
-  return lines.map(function (line, i) {
-    return { type: 'line', k: line.k, b: line.b, color: COLORS[i],
-             label: lines.length === 1 ? 'y = f(x)' : ['y = f(x)', 'y = g(x)'][i] };
+/* Описание задачи и её набора в данных: оттуда подписи кривых, точки
+   и подписи осей — ровно то, по чему генератор рисовал условие. */
+function sourceOf(taskId) {
+  var sets = loadSets();
+  var found = null;
+  sets.prep.concat(sets.prototypes).forEach(function (set) {
+    (set.tasks || []).forEach(function (item) { if (item.id === taskId) { found = { set: set, task: item }; } });
   });
-}
-
-function scenePoints(meta) {
-  var points = [];
-  if (meta.family === 'quadratic') {
-    (meta.curves || []).forEach(function (curve, i) {
-      (curve.points || []).forEach(function (p) {
-        points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] });
-      });
-    });
-    (meta.points || []).filter(function (p) { return p.role === 'cross'; }).forEach(function (p) {
-      points.push({ x: p.x, y: p.y, style: 'solid', color: 'cross' });
-    });
-    return points;
-  }
-  (meta.lines || []).forEach(function (line, i) {
-    (line.points || []).forEach(function (p) { points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] }); });
-  });
-  return points;
+  return found;
 }
 
 /**
- * SVG чертежа с треугольниками наклона. Нет чертежа у задачи или нет
- * ни одного треугольника (горизонтальная прямая, одна парабола) —
- * null: рисовать нечего.
+ * Сцена чертежа условия, восстановленная из meta по тем же правилам,
+ * что sceneFor в generate.js и generate-quadratic.js. Без треугольников
+ * она даёт тот же SVG, что у ученика, — это сверяет автопроверка.
  */
-function figure(task, solved) {
+function taskScene(task) {
   var meta = task.meta || {};
-  var triangles = ((solved && solved.check.triangles) || []).filter(function (item) { return !item.triangle.flat; });
-  if (!meta.window || !triangles.length) { return null; }
-  var shapes = [];
-  triangles.forEach(function (item, i) {
-    shapes = shapes.concat(Slope.shapes(item.triangle, String(i + 1), COLORS[item.curve]));
+  var source = sourceOf(task.id);
+  if (!source || !meta.window) { return null; }
+  var set = source.set;
+  var def = source.task;
+  var axisLabels = def.axisLabels || set.axisLabels || 'minimal';
+  var singleLabel = def.curveLabel === null ? null : (def.curveLabel || set.curveLabel || 'y = f(x)');
+
+  if (meta.family === 'quadratic') {
+    var curves = meta.curves || [];
+    var pair = def.curveLabels || set.curveLabels || ['y = f(x)', 'y = g(x)'];
+    var points = [];
+    curves.forEach(function (curve, i) {
+      (curve.points || []).forEach(function (p) {
+        points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i], label: p.label });
+      });
+    });
+    (meta.points || []).filter(function (p) { return p.role === 'cross'; }).forEach(function (p) {
+      points.push({ x: p.x, y: p.y, style: 'solid', color: 'cross', label: null });
+    });
+    return {
+      window: meta.window,
+      grid: { step: 1, show: true },
+      axes: { labelX: 'x', labelY: 'y', origin: '0' },
+      labelRules: 'strict',
+      axisLabels: axisLabels,
+      curves: curves.map(function (curve, i) {
+        var label = curves.length === 1 ? singleLabel : (pair[i] || null);
+        return curve.kind === 'line'
+          ? { type: 'line', k: curve.k, b: curve.b, color: COLORS[i], label: label }
+          : { type: 'quadratic', a: curve.a, b: curve.b, c: curve.c, color: COLORS[i], label: label };
+      }),
+      points: points,
+      alt: curves.length === 1 ? 'График квадратичной функции'
+        : (curves[1].kind === 'line' ? 'Графики квадратичной и линейной функций'
+                                     : 'Графики двух квадратичных функций')
+    };
+  }
+
+  var lines = meta.lines || [];
+  var single = lines.length === 1;
+  var labels = def.curveLabels || set.curveLabels || null;
+  var linePoints = [];
+  lines.forEach(function (line, i) {
+    (line.points || []).forEach(function (p) {
+      linePoints.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] });
+    });
   });
-  return renderer.renderGraph({
+  if (meta.probe) {
+    linePoints.push({ x: meta.probe.x, y: meta.probe.y, style: 'solid', color: 'lineB',
+      label: pointText(def.pointName || 'A', meta.probe.x, meta.probe.y) });
+  }
+  return {
     window: meta.window,
     grid: { step: 1, show: true },
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
-    axisLabels: 'minimal',
-    labelRules: meta.family === 'quadratic' ? 'strict' : undefined,
-    curves: sceneCurves(meta),
-    points: scenePoints(meta),
-    shapes: shapes,
-    alt: 'Треугольник наклона к решению'
-  });
+    axisLabels: axisLabels,
+    curves: lines.map(function (line, i) {
+      return { type: 'line', k: line.k, b: line.b, color: COLORS[i],
+               label: single ? singleLabel : (labels ? (labels[i] || null) : null) };
+    }),
+    points: linePoints,
+    alt: single ? 'График линейной функции' : 'Графики двух линейных функций'
+  };
+}
+
+/**
+ * Чертёж условия для листа учителя: тот же график, и поверх — тонким
+ * пунктиром цветом своей прямой — треугольники наклона, по которым
+ * найдены угловые коэффициенты. Нет чертежа или треугольника — null,
+ * и на листе остаётся чертёж условия как есть.
+ *
+ * options.triangles: false — без треугольников (для сверки с условием).
+ */
+function figure(task, solved, options) {
+  var scene = taskScene(task);
+  if (!scene) { return null; }
+  var withTriangles = !options || options.triangles !== false;
+  var triangles = ((solved && solved.check.triangles) || []).filter(function (item) { return !item.triangle.flat; });
+  if (withTriangles && !triangles.length) { return null; }
+  var shapes = [];
+  if (withTriangles) {
+    triangles.forEach(function (item, i) {
+      shapes = shapes.concat(Slope.shapes(item.triangle, String(i + 1), COLORS[item.curve]));
+    });
+  }
+  if (shapes.length) { scene.shapes = shapes; }
+  return renderer.renderGraph(scene);
 }
 
 var api = { build: build, figure: figure };

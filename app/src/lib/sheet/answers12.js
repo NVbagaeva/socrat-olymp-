@@ -33,7 +33,9 @@ function solutionItem(task, teacherBuilder) {
   try { solved = teacherBuilder.build(task); }
   catch { return null; }
   if (!solved || !solved.steps.length) { return null; }
-  /* Чертёж с треугольником наклона — там, где k найден по треугольнику. */
+  /* Рядом с решением — чертёж условия с треугольниками наклона, по
+     которым найден угловой коэффициент: учителю не нужно листать
+     назад к условию. Треугольника нет — нет и чертежа. */
   let svg = null;
   try { svg = teacherBuilder.figure ? teacherBuilder.figure(task, solved) : null; }
   catch { svg = null; }

@@ -158,6 +158,37 @@ function checkTask(task) {
     problems.push('в решении нет ответа');
   }
 
+  /* Точки в тексте — слева направо; у возрастающей прямой названа
+     вершина угла α, у убывающей — угла 180° − α. */
+  steps.forEach((step) => step.rows.forEach((item) => {
+    const textRow = String(item.text || '');
+    const pair = /(?:точками|берём точки) \$\((-?\d+);[^$]*\$[^$]*? и \$\((-?\d+);/.exec(textRow);
+    if (pair && Number(pair[1]) >= Number(pair[2])) {
+      problems.push('точки не слева направо: «' + textRow.slice(0, 120) + '»');
+    }
+    if (/Прямая возрастает/.test(textRow) && !/при вершине \$[^$]+\$ равен \$\\alpha\$/.test(textRow)) {
+      problems.push('у возрастающей прямой не названа вершина угла α');
+    }
+    if (/Прямая убывает/.test(textRow) && !/при вершине \$[^$]+\$ — смежный/.test(textRow)) {
+      problems.push('у убывающей прямой не названа вершина угла 180° − α');
+    }
+  }));
+
+  /* Чертёж учителя: без треугольников — байт в байт чертёж ученика,
+     с ними — на нём есть катеты каждого треугольника. */
+  if (task.svg) {
+    if (teacher.figure(task, null, { triangles: false }) !== task.svg) {
+      problems.push('чертёж учителя без треугольников не совпадает с чертежом условия');
+    }
+    const drawn = (check.triangles || []).filter((item) => !item.triangle.flat);
+    if (drawn.length) {
+      const svg = teacher.figure(task, solved) || '';
+      drawn.forEach((item, i) => {
+        if (!svg.includes('id="teacher-leg-x-' + (i + 1) + '"')) { problems.push('на чертеже нет треугольника ' + (i + 1)); }
+      });
+    }
+  }
+
   formulasOf(steps).forEach((tex) => {
     HYGIENE.forEach(([pattern, what]) => { if (pattern.test(tex)) { problems.push(what + ': «' + tex + '»'); } });
     try { katex.renderToString(tex, { throwOnError: true }); }

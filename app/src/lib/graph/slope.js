@@ -41,15 +41,14 @@ function build(p1, p2) {
   var dx = Math.abs(B.x - A.x);
   var dy = Math.abs(B.y - A.y);
   if (dy === 0) {
-    return { flat: true, rising: false, A: A, B: B, C: null, dx: dx, dy: 0, k: frac(0), acute: null,
-             first: p1, second: p2 };
+    return { flat: true, rising: false, A: A, B: B, C: null, dx: dx, dy: 0, k: frac(0), acute: null };
   }
   var rising = B.y > A.y;
   /* Ниже прямой — та вершина, у которой ордината меньшая из двух. */
   var C = rising ? { x: B.x, y: A.y } : { x: A.x, y: B.y };
   var k = div(frac(rising ? dy : -dy), frac(dx));
   return { flat: false, rising: rising, A: A, B: B, C: C, dx: dx, dy: dy, k: k,
-           acute: rising ? A : B, first: p1, second: p2 };
+           acute: rising ? A : B };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -82,13 +81,15 @@ function teacherRows(t, letter) {
     return [{ text: 'Прямая параллельна оси $Ox$, $\\alpha = 0^\\circ$, $' + name + ' = ' + tg +
       ' 0^\\circ = 0$.' }];
   }
+  /* Точки всегда называются слева направо: A, затем B. */
   var build = 'Строим под прямой прямоугольный треугольник с гипотенузой между точками $' +
-    pt(t.first) + '$ и $' + pt(t.second) + '$. Вершина прямого угла — $' + pt(t.C) + '$. ' +
+    pt(t.A) + '$ и $' + pt(t.B) + '$. Вершина прямого угла — $' + pt(t.C) + '$. ' +
     'Катеты: вертикальный $' + t.dy + '$, горизонтальный $' + t.dx + '$.';
   if (t.rising) {
     return [
       { text: 'Прямая возрастает, значит $' + name + ' = ' + tg + ' \\alpha > 0$, $\\alpha$ — угол между ' +
-        'прямой и положительным направлением оси $Ox$. ' + build },
+        'прямой и положительным направлением оси $Ox$. ' + build +
+        ' Угол треугольника при вершине $' + pt(t.A) + '$ равен $\\alpha$.' },
       { text: '', tex: tg + ' \\alpha = ' + ratio(t.dy, t.dx) + ', \\quad ' + name + ' = ' + N(t.k) }
     ];
   }

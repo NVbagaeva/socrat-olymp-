@@ -173,7 +173,7 @@ function inlineText(value) {
  * steps  — [{ title, rows: [{ text, tex }] }]: text — строка, где
  *          формулы стоят между знаками $…$; tex — формула строки
  * answer — ответ разметкой, как в ключе
- * figureSvg — чертёж с треугольником наклона, если он есть
+ * figureSvg — чертёж условия с треугольником наклона, если он есть
  */
 function fullSolution(no, steps, answer, figureSvg) {
   var list = steps.map(function (step) {

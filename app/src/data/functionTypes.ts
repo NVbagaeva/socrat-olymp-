@@ -175,6 +175,11 @@ const LINEAR_THEORY: TheoryBlock[] = [
   },
   { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
   { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
+  /* Методика: k объясняется только через треугольник под прямой и
+     тангенс угла наклона — k = tg α, у убывающей прямой
+     tg α = −tg(180° − α), у горизонтальной k = tg 0° = 0. Формулу
+     через разность координат не вводим. Так же k находят решения
+     листа учителя, разборы и подсказки (lib/graph/slope.js). */
   { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },
   { id: 'b', title: 'Коэффициент b', type: 'properties', content: null, status: 'empty' },
   { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
