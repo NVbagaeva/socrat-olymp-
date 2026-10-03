@@ -757,6 +757,14 @@ body {
 
 .sheet-arrow { display: block; }
 
+/* Полное решение (гипербола): шаги списком, ответ справа сверху. */
+.sheet-solution--full { align-items: flex-start; }
+.sheet-solution--full .sheet-solution-no { align-self: flex-start; }
+.sheet-solution--full .sheet-solution-body { display: block; }
+.sheet-solution--full .sheet-steps { margin: 0; padding-left: calc(var(--sheet-step) * 5); }
+.sheet-solution--full .sheet-step + .sheet-step { margin-top: calc(var(--sheet-step) * 1); }
+.sheet-solution-sep { color: var(--sheet-ink-3); }
+
 .sheet-solution-answer {
   flex: none;
   font-weight: 700;

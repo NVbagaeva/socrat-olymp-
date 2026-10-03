@@ -76,6 +76,20 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Гипербола: те же связки действий — значение и аргумент, коэффициенты
+   по асимптотам, две кривые на одном чертеже. */
+const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
+  {
+    id: 'znachenie',
+    title: 'Значение и аргумент',
+    skills: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.I'],
+    mode: 'mixed',
+  },
+  { id: 'koefficienty', title: 'Коэффициенты по графику', skills: ['12R.E', '12R.F', '12R.J'], mode: 'mixed' },
+  { id: 'peresechenie', title: 'Гипербола и прямая', skills: ['12R.G', '12R.H'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -87,6 +101,7 @@ export const trainerShortcuts = LINEAR_SHORTCUTS;
 export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   if (type === 'linear') { return LINEAR_SHORTCUTS; }
   if (type === 'quadratic') { return QUADRATIC_SHORTCUTS; }
+  if (type === 'rational') { return RATIONAL_SHORTCUTS; }
   return [];
 }
 
@@ -130,12 +145,12 @@ export const trainerPage = {
 /**
  * Подписи конфигуратора подтемы.
  *
- * У квадратичной наборы — собственный материал платформы, в открытый
+ * У квадратичной и гиперболы наборы — собственный материал платформы, в открытый
  * банк ФИПИ они не входят, и обещать обратное нельзя: так и сказано
  * в поле note самих наборов.
  */
 export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic') { return trainerPage; }
+  if (type !== 'quadratic' && type !== 'rational') { return trainerPage; }
   return {
     ...trainerPage,
     summary: {
@@ -166,6 +181,18 @@ export const trainerKindTitle: Record<string, string> = {
      действие: приравнять формулы и найти второй корень. */
   '12Q.H': 'Два графика на одном чертеже',
   '12Q.I': 'Два графика на одном чертеже',
+  /* Гипербола: значение и аргумент — по записи функции, точки B —
+     одним типом, как у параболы. */
+  '12R.A': 'Значение функции k/x + a',
+  '12R.B': 'Аргумент: k/x + a',
+  '12R.C': 'Значение функции k/(x + a)',
+  '12R.D': 'Аргумент: k/(x + a)',
+  '12R.E': 'Коэффициент k в (kx + a)/(x + b)',
+  '12R.F': 'Коэффициент a в (kx + a)/(x + b)',
+  '12R.G': 'Гипербола и прямая',
+  '12R.H': 'Гипербола и прямая',
+  '12R.I': 'Гипербола y = k/x',
+  '12R.J': 'Коэффициент b и значение (kx + a)/(x + b)',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

@@ -79,7 +79,12 @@ function exact(o) { return o ? frac(o.p, o.q) : null; }
    ══════════════════════════════════════════════════════════ */
 function text(html) { return { type: 'text', html: html }; }
 function formula(tx) { return { type: 'formula', tex: tx }; }
-function answerBlock(value) { return { type: 'answer', tex: tex(value), text: R.valueText(value) }; }
+/* Ответ в тексте — типографским минусом, как в разборе параболы;
+   text — тот же ответ строкой, по нему проверка сверяет ключ. */
+function answerBlock(value) {
+  var shown = R.valueText(value);
+  return { type: 'answer', html: 'Ответ: <b class="key">' + shown + '</b>', tex: tex(value), text: shown };
+}
 
 function escapeAttr(value) {
   return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');

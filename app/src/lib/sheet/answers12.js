@@ -46,6 +46,32 @@ function shortSolutionQuadratic(task, quadraticBuilder) {
   return formulas.length < 2 ? null : formulas;
 }
 
+/* Гипербола: полное решение по шагам — заголовок шага и все его
+   формулы. Шаг без формул (асимптота на оси) печатается одной строкой. */
+function fullSolutionRational(task, rationalBuilder) {
+  if (!rationalBuilder) { return null; }
+  let steps;
+  try { steps = rationalBuilder.fromTask(task); }
+  catch { return null; }
+  return steps.filter((step) => step.id !== 'answer' || step.blocks.some((b) => b.type === 'formula'))
+    .map((step) => ({
+      title: step.title,
+      formulas: (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex)
+        .map((piece) => piece.tex),
+    }));
+}
+
+/* Решение задачи для листа: у гиперболы полное, у прямой и параболы
+   краткое. Возвращает готовый кусок листа или null. */
+function solutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder) {
+  if (task.meta && task.meta.family === 'rational') {
+    const full = fullSolutionRational(task, rationalBuilder);
+    return full ? answers.fullSolution(task.no, full, task.answer) : null;
+  }
+  const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
+  return formulas ? answers.solution(task.no, formulas, task.answer) : null;
+}
+
 function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
   if (task.meta && task.meta.family === 'quadratic') {
     return shortSolutionQuadratic(task, quadraticBuilder);
@@ -112,7 +138,8 @@ function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
  * blocks — [{ title, tasks: [{ no, id, answer, answerHtml, options,
  *             answerRule, seed, meta }] }]
  */
-export function answersItems(blocks, generator, solutionBuilder, quadraticBuilder) {
+export function answersItems(blocks, generator, solutionBuilder, quadraticBuilder,
+                             rationalBuilder) {
   const items = [answers.sectionHead('Ответы', 'по блокам, сквозная нумерация')];
 
   blocks.forEach((block) => {
@@ -126,8 +153,8 @@ export function answersItems(blocks, generator, solutionBuilder, quadraticBuilde
   const solved = [];
   blocks.forEach((block) => {
     block.tasks.forEach((task) => {
-      const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
-      if (formulas) { solved.push(answers.solution(task.no, formulas, task.answer)); }
+      const item = solutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder);
+      if (item) { solved.push(item); }
     });
   });
 
@@ -151,7 +178,8 @@ export function answersItems(blocks, generator, solutionBuilder, quadraticBuilde
  * variants — [{ title: 'Вариант 1' | null, blocks }]; у задачи
  *            сверх полей answersItems есть method
  */
-export function variantAnswersItems(variants, generator, solutionBuilder, quadraticBuilder) {
+export function variantAnswersItems(variants, generator, solutionBuilder, quadraticBuilder,
+                                    rationalBuilder) {
   const many = variants.length > 1;
   const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: many })];
 
@@ -168,14 +196,17 @@ export function variantAnswersItems(variants, generator, solutionBuilder, quadra
 
   let total = 0;
   let count = 0;
+  let full = false;
   const solved = [];
   variants.forEach((variant) => {
     const own = [];
     variant.blocks.forEach((block) => {
       block.tasks.forEach((task) => {
         total += 1;
-        const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
-        if (formulas) { own.push(answers.solution(task.no, formulas, task.answer)); }
+        const item = solutionItem(task, generator, solutionBuilder, quadraticBuilder,
+          rationalBuilder);
+        if (item) { own.push(item); }
+        if (task.meta && task.meta.family === 'rational') { full = true; }
       });
     });
     count += own.length;
@@ -186,7 +217,7 @@ export function variantAnswersItems(variants, generator, solutionBuilder, quadra
   });
 
   if (count) {
-    items.push(answers.sectionHead('Краткие решения',
+    items.push(answers.sectionHead(full ? 'Решения по шагам' : 'Краткие решения',
       'Только для учителя · ' + count + ' задач из ' + total));
     solved.forEach((item) => items.push(item));
   }

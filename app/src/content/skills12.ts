@@ -23,6 +23,16 @@ export const skillTitle: Record<string, string> = {
   '12Q.G': 'Формула по графику',
   '12Q.H': 'Парабола и прямая',
   '12Q.I': 'Парабола и парабола',
+  '12R.A': 'k/x + a: значение функции',
+  '12R.B': 'k/x + a: аргумент по значению',
+  '12R.C': 'k/(x + a): значение функции',
+  '12R.D': 'k/(x + a): аргумент по значению',
+  '12R.E': '(kx + a)/(x + b): коэффициент k',
+  '12R.F': '(kx + a)/(x + b): коэффициент a',
+  '12R.G': 'Гипербола и прямая: абсцисса B',
+  '12R.H': 'Гипербола и прямая: ордината B',
+  '12R.I': 'k/x: значение и аргумент',
+  '12R.J': '(kx + a)/(x + b): b и значение',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -48,8 +58,18 @@ const QUADRATIC_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'ответ нужно вычислить' },
 ];
 
-/** Уровни подтемы: у квадратичной свои подписи. */
+/* У гиперболы уровни различаются числами: целые аргументы и ответы
+   против десятичных и смешанных дробей. */
+const RATIONAL_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'целые числа' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'дроби и подстановка' },
+];
+
+/** Уровни подтемы: у квадратичной и гиперболы свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'rational') {
+    return RATIONAL_LEVELS;
+  }
   return type === 'quadratic' ? QUADRATIC_LEVELS : skillLevels;
 }
 
