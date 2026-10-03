@@ -40,7 +40,14 @@ export interface TheoryCard<S extends string = QuadraticTheorySceneId> {
    * Место под иллюстрацию автора: рамка с подписью. Картинку автор
    * добавляет сам — пока её нет, рамка честно говорит, что здесь будет.
    */
-  illustration?: { caption: string; src?: string; alt?: string };
+  illustration?: {
+    caption: string;
+    src?: string;
+    alt?: string;
+    /** Размеры файла в пикселях: браузер держит место до загрузки. */
+    width?: number;
+    height?: number;
+  };
   /** Маленькая таблица значений: шапка и строки, ячейки с $…$. */
   table?: { head: string[]; rows: string[][] };
   /** Текстовая карточка со значком «дальше»: без чертежа и формулы. */
