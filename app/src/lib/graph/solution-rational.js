@@ -335,14 +335,15 @@ function lineSteps(c, task) {
 
   steps.push(step('k', 'Гипербола: находим k по точке A', [
     text('Точка ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') + ' лежит на графике ' +
-      m('f(x) = \\dfrac{k}{x}') + ', значит ' + m('k = x \\cdot y') + ':'),
+      m('f(x) = \\dfrac{k}{x}') + ', значит ' + m('k = x \\cdot y') + ' (' + m('k') +
+      ' — коэффициент гиперболы ' + m('f(x)') + '):'),
     formula('k = ' + tb(xA) + ' \\cdot ' + tb(yA) + ' = ' + tex(k)),
     formula('f(x) = \\dfrac{' + tex(k) + '}{x}')
   ]));
 
   var dy = sub(yP, yA), dx = sub(xP, xA);
   steps.push(step('line', 'Прямая: коэффициенты a и b функции g по двум точкам', [
-    text('Прямая ' + m('g(x) = ax + b') + ' проходит через ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') +
+    text(m('a') + ' и ' + m('b') + ' — коэффициенты прямой ' + m('g(x)') + '. Прямая ' + m('g(x) = ax + b') + ' проходит через ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') +
       ' и ' + m('(' + tex(xP) + ';\\, ' + tex(yP) + ')') + '. Угловой коэффициент прямой:'),
     formula('a = \\dfrac{' + tex(yP) + term(mul(frac(-1), yA)) + '}{' + tex(xP) + term(mul(frac(-1), xA)) +
       '} = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)),
@@ -359,8 +360,8 @@ function lineSteps(c, task) {
     text('В точках пересечения значения функций равны:'),
     formula('\\dfrac{' + tex(k) + '}{x} = ' + coef(line.k) + 'x' + term(line.b)),
     text('Домножаем на ' + m('x \\ne 0') + ' и переносим всё в одну часть — получаем ' +
-      m('ax^2 + bx - k = 0') + ' (здесь ' + m('a') + ' и ' + m('b') + ' — коэффициенты прямой, ' +
-      m('k') + ' — гиперболы):'),
+      m('ax^2 + bx - k = 0') + ' (здесь ' + m('a') + ' и ' + m('b') + ' — коэффициенты прямой ' +
+      m('g(x)') + ', ' + m('k') + ' — коэффициент гиперболы ' + m('f(x)') + '):'),
     formula(coef(line.k) + 'x^2' + termX(line.b, 'x') + term(mul(k, frac(-1))) + ' = 0')
   ];
   if (L !== 1) {
@@ -386,7 +387,7 @@ function lineSteps(c, task) {
   ]));
 
   steps.push(step('choose', 'Выбираем нужный корень', [
-    text('Корень ' + m('x = ' + tex(xA)) + ' — это точка ' + m('A') + ', её на рисунке видно. ' +
+    text('Корень ' + m('x = ' + tex(xA)) + ' — это абсцисса точки ' + m('A') + ', она отмечена на рисунке. ' +
       'Точке ' + m('B') + ' соответствует другой корень:'),
     formula('x_B = ' + tex(xB))
   ]));

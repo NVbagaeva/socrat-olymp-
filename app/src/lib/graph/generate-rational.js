@@ -29,7 +29,8 @@
      query: { type: 'value-at' | 'argument-for',
               kind: 'integer' | 'decimal' | 'mixed' | 'any', decimals }
      line:  { absMin, absMax }               — наклон прямой (тип «гипербола и прямая»)
-     intersection: { axis: 'x' | 'y', offscreen: true | false }
+     intersection: { axis: 'x' | 'y', offscreenMin }  — B всегда за рамкой,
+                   не ближе offscreenMin клеток (по умолчанию 3) по x или по y
 */
 
 'use strict';
@@ -52,6 +53,7 @@ var ASYMPTOTE_MARGIN = 3;
 var POINT_MARGIN = 1;
 var M_ABS = [1, 2, 3, 4, 5, 6, 8, 9, 10, 12];
 var ANSWER_MAX = 100;
+var OFFSCREEN_MIN = 3;     /* на сколько клеток B уходит за рамку, не меньше */
 
 /* ══════════════════════════════════════════════════════════
    Числа
@@ -376,6 +378,10 @@ function singleCandidates(task, set, seed) {
    Вторая точка B: из ax² + bx − k = 0 по Виету x_A·x_B = −k/a,
    значит x_B = −k/(a·x_A), а y_B = k/x_B = −a·x_A.
    ══════════════════════════════════════════════════════════ */
+function offscreen(B, win, min) {
+  return Math.abs(num(B.x)) >= win.xmax + min - 1e-9 || Math.abs(num(B.y)) >= win.ymax + min - 1e-9;
+}
+
 function crossOf(k, line, xA) {
   var xB = div(mul(frac(-1), k), mul(line.k, xA));
   var yB = div(k, xB);
@@ -387,6 +393,7 @@ function lineCandidates(task, set, seed) {
   var spec = constraints.line || {};
   var cross = constraints.intersection || {};
   var axis = cross.axis || 'x';
+  var offscreenMin = cross.offscreenMin === undefined ? OFFSCREEN_MIN : cross.offscreenMin;
   var base = set.id + ':' + task.id + ':' + seed;
   var random = rng(base);
   var absMin = spec.absMin === undefined ? 0.25 : spec.absMin;
@@ -416,10 +423,10 @@ function lineCandidates(task, set, seed) {
           if (key(B.x) === key(frac(A.x))) { continue; }
           var asked = axis === 'x' ? B.x : B.y;
           if (places(asked) > 2 || Math.abs(num(asked)) > 40) { continue; }
-          var bInside = inside(num(B.x), num(B.y), win, 0);
-          if (bInside && isInt(asked)) { continue; }
-          if (cross.offscreen === true && bInside) { continue; }
-          if (cross.offscreen === false && !bInside) { continue; }
+          /* B на рисунке не видна никогда: её координаты не должны
+             читаться с чертежа. Она заметно за рамкой — не ближе
+             offscreenMin клеток за границей по x или по y. */
+          if (!offscreen(B, win, offscreenMin)) { continue; }
           /* P не должна случайно совпасть с B или лежать на продолжении
              через начало: на чертеже это путает. */
           if (key(B.x) === String(px)) { continue; }
@@ -429,7 +436,7 @@ function lineCandidates(task, set, seed) {
             kind: 'line', form: 'line', curve: c, window: win, line: line,
             points: [{ x: A.x, y: A.y, role: 'cross', label: 'A' },
                      { x: px, y: py, role: 'line' }],
-            intersection: { A: { x: A.x, y: A.y }, B: B, inside: bInside, axis: axis },
+            intersection: { A: { x: A.x, y: A.y }, B: B, axis: axis },
             answer: asked,
             answerKey: 'ans:' + key(asked),
             pairKey: 'rl:' + sig,
@@ -464,21 +471,18 @@ function sceneFor(built, task, set) {
   var c = built.curve;
   var win = built.window;
   var hyper = { k: c.mValue, a: -c.sValue, b: c.tValue };
+  /* Как в ЕГЭ: кривые не подписаны, подписана только точка A. */
   var curves = [{ type: 'rational', k: hyper.k, a: hyper.a, b: hyper.b, color: 'lineA',
-                  label: built.kind === 'line' ? 'y = f(x)' : null }];
+                  label: null }];
   if (built.kind === 'line') {
     curves.push({ type: 'line', k: num(built.line.k), b: num(built.line.b), color: 'lineB',
-                  label: 'y = g(x)' });
+                  label: null });
   }
   var points = built.points.map(function (point) {
     return { x: point.x, y: point.y, style: 'solid',
              color: point.role === 'cross' ? 'cross' : (point.role === 'line' ? 'lineB' : 'lineA'),
              label: point.label || null };
   });
-  if (built.kind === 'line' && built.intersection.inside) {
-    points.push({ x: num(built.intersection.B.x), y: num(built.intersection.B.y), style: 'solid',
-                  color: 'cross', label: 'B' });
-  }
   return {
     window: win,
     grid: { step: 1, show: true },
@@ -555,7 +559,6 @@ function result(set, task, built, seed) {
                            text: values.line } : null,
       intersection: built.intersection ? {
         axis: built.intersection.axis,
-        inside: built.intersection.inside,
         A: built.intersection.A,
         B: { x: exactMeta(built.intersection.B.x), y: exactMeta(built.intersection.B.y) }
       } : null,
