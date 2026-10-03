@@ -107,6 +107,10 @@ function Card({ card, sceneFor }: { card: TheoryCard<string>; sceneFor: SceneFor
               className="qth-illustration__img"
               src={card.illustration.src}
               alt={card.illustration.alt ?? ''}
+              width={card.illustration.width}
+              height={card.illustration.height}
+              loading="lazy"
+              decoding="async"
             />
           )}
           <figcaption className="qth-illustration__caption">{card.illustration.caption}</figcaption>
