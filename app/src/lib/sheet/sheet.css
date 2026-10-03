@@ -782,6 +782,30 @@ body {
 
 .sheet-step .math { margin-left: calc(var(--sheet-step) * 1); white-space: nowrap; }
 
+/* Полное решение для учителя: шаги столбиком внутри карточки. */
+.sheet-solution--full { align-items: flex-start; }
+.sheet-solution--full .sheet-solution-no { align-self: flex-start; }
+.sheet-solution--full .sheet-solution-body {
+  display: block;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+.sheet-solution--full .sheet-steps {
+  gap: calc(var(--sheet-step) * 1);
+  /* Номера шагов нужны и на странице приложения, где сброс стилей
+     снимает маркеры списков. */
+  list-style: decimal;
+}
+/* Заголовок шага и первая его строка — в одну линию: карточка
+   неделима, и каждая сэкономленная строка — меньше пустот внизу страниц. */
+.sheet-step-title { color: var(--sheet-ink); margin-right: calc(var(--sheet-step) * 1.5); }
+.sheet-step-row { margin-top: calc(var(--sheet-step) * 0.5); }
+.sheet-step-title + .sheet-step-row { display: inline; margin-top: 0; }
+/* Длинная выкладка переносится по знакам, а не вылезает за рамку. */
+.sheet-solution--full .sheet-step .math { margin-left: 0; white-space: normal; }
+.sheet-solution--full .sheet-step-formula { display: inline-block; margin-left: calc(var(--sheet-step) * 1); }
+.sheet-solution--full .sheet-task-answer { margin-top: calc(var(--sheet-step) * 2); }
+
 /* Строка ответа под решением — жирная, чернилами. */
 .sheet-task-answer {
   margin: calc(var(--sheet-step) * 1.5) 0 0;

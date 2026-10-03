@@ -152,8 +152,50 @@ function steps(items, answer) {
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
 }
 
+/* Формула разметкой листа: KaTeX заменит её вёрсткой. */
+function mathSpan(tex) {
+  return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+}
+
+/* Текст с формулами между знаками $…$. */
+function inlineText(value) {
+  return String(value).split('$').map(function (piece, i) {
+    return i % 2 ? mathSpan(piece) : typo.text(piece);
+  }).join('');
+}
+
+/**
+ * Полное решение одной задачи для учителя: номер, шаги по порядку
+ * и строка ответа. Класс sheet-solution тот же, что у краткого:
+ * карточка так же не рвётся между страницами и так же считается
+ * в отчёте сборки.
+ *
+ * steps  — [{ title, rows: [{ text, tex }] }]: text — строка, где
+ *          формулы стоят между знаками $…$; tex — формула строки
+ * answer — ответ разметкой, как в ключе
+ */
+function fullSolution(no, steps, answer) {
+  var list = steps.map(function (step) {
+    var rows = step.rows.map(function (item) {
+      return '<div class="sheet-step-row">' +
+        (item.text ? '<span class="sheet-step-text">' + inlineText(item.text) + '</span>' : '') +
+        (item.tex ? ' <span class="sheet-step-formula">' + mathSpan(item.tex) + '</span>' : '') +
+        '</div>';
+    }).join('');
+    return '<li class="sheet-step"><b class="sheet-step-title">' + inlineText(step.title) + '</b>' + rows + '</li>';
+  }).join('');
+
+  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+    '<span class="sheet-solution-no">' + no + '</span>' +
+    '<div class="sheet-solution-body">' +
+      '<ol class="sheet-steps">' + list + '</ol>' +
+      '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answer) + '</b></p>' +
+    '</div>' +
+    '</div>';
+}
+
 const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
-              solution: solution, steps: steps };
+              solution: solution, fullSolution: fullSolution, steps: steps };
 
 export default api;
-export { sectionHead, subHead, table, keyTable, solution, steps };
+export { sectionHead, subHead, table, keyTable, solution, fullSolution, steps };

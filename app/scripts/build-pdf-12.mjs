@@ -26,7 +26,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import generator from '../src/lib/graph/generate.js';
-import solutionBuilder from '../src/lib/graph/solution.js';
+import teacherBuilder from '../src/lib/graph/solution-teacher.js';
 import { answersItems } from '../src/lib/sheet/answers12.js';
 import content from '../src/content/sheet12.js';
 import { buildSheet } from './lib/sheet-build.mjs';
@@ -171,7 +171,7 @@ async function full(draft) {
   const total = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
   console.log('Сборник: блоков ' + blocks.length + ', задач ' + total);
 
-  const tail = answersItems(blocks, generator, solutionBuilder);
+  const tail = answersItems(blocks, teacherBuilder);
 
   /* Четыре файла: ученику — со строкой ответа и без ответов вовсе,
      учителю — те же задачи и раздел «Ответы» с новой страницы. */
