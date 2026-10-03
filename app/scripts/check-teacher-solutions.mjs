@@ -29,6 +29,7 @@ import generator from '../src/lib/graph/generate.js';
 import teacher from '../src/lib/graph/solution-teacher.js';
 import Line from '../src/lib/graph/families/line.js';
 import Slope from '../src/lib/graph/slope.js';
+import SlopeFigure from '../src/lib/graph/slope-figure.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
 function readSets(dir) {
@@ -188,6 +189,9 @@ function checkTask(task) {
       });
     }
   }
+
+  const drawnItems = (check.triangles || []).filter((item) => !item.triangle.flat);
+  if (task.svg && drawnItems.length) { problems.push(...SlopeFigure.layoutProblems(task, drawnItems)); }
 
   formulasOf(steps).forEach((tex) => {
     HYGIENE.forEach(([pattern, what]) => { if (pattern.test(tex)) { problems.push(what + ': «' + tex + '»'); } });

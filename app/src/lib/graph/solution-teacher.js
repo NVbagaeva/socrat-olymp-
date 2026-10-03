@@ -27,10 +27,9 @@
 
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
-import { equationText as lineEquationText, loadSets } from './generate.js';
-import { pointText } from './text.js';
+import { equationText as lineEquationText } from './generate.js';
 import Slope from './slope.js';
-import renderer from './renderer.js';
+import SlopeFigure from './slope-figure.js';
 
 var frac = Line.frac;
 var toFrac = Line.toFrac;
@@ -694,11 +693,44 @@ function quadraticTask(task, rule) {
   if (two.kind === 'line') {
     var lineExact = { k: F(two.kFraction), b: F(two.bFraction) };
     var nodes = lineGridNodes(lineExact, win);
-    var first = cross || nodes[0];
-    var rest = nodes.filter(function (n) { return n.x !== first.x; });
-    var zeroNode = rest.filter(function (n) { return n.x === 0; })[0];
-    var second = zeroNode || rest.sort(function (p, q) { return Math.abs(p.x - first.x) - Math.abs(q.x - first.x); })
-      .filter(function (n) { return Math.abs(n.x - first.x) >= 2; })[0] || rest[0];
+    /* Пара точек прямой для треугольника. Сначала — отмеченная точка
+       пересечения и узел на оси Oy (тогда m читается сразу), потом она же
+       и узел в двух–четырёх клетках, потом более широкие пары; в конце —
+       два других узла сетки: у точки пересечения рядом всегда парабола,
+       и треугольник с вершиной в ней бывает зажат её веткой. Треугольник
+       в одну клетку тесен: его подписи ложатся на кривые. */
+    var anchor = cross || nodes[0];
+    var span = function (p, q) { return Math.abs(p.x - q.x); };
+    var others = nodes.filter(function (n) { return n.x !== anchor.x; });
+    var pairs = [];
+    var zero = others.filter(function (n) { return n.x === 0 && span(n, anchor) >= 2; })[0];
+    if (zero) { pairs.push([anchor, zero]); }
+    others.filter(function (n) { return n !== zero && span(n, anchor) >= 2 && span(n, anchor) <= 4; })
+      .sort(function (p, q) { return Math.abs(span(p, anchor) - 3) - Math.abs(span(q, anchor) - 3); })
+      .forEach(function (n) { pairs.push([anchor, n]); });
+    others.filter(function (n) { return span(n, anchor) > 4; })
+      .sort(function (p, q) { return span(p, anchor) - span(q, anchor); })
+      .forEach(function (n) { pairs.push([anchor, n]); });
+    others.forEach(function (p, i) {
+      others.slice(i + 1).forEach(function (q) {
+        if (span(p, q) >= 2 && span(p, q) <= 4) { pairs.push([p, q]); }
+      });
+    });
+    others.filter(function (n) { return span(n, anchor) < 2; }).forEach(function (n) { pairs.push([anchor, n]); });
+    /* Из пар — первая, у которой подписи треугольника на чертеже легли
+       чисто: не на кривую и не друг на друга. Чистой нет — та, где
+       замечаний меньше всего. */
+    var first = null;
+    var second = null;
+    var fewest = Infinity;
+    for (var ci = 0; ci < pairs.length; ci += 1) {
+      var issues;
+      try {
+        issues = SlopeFigure.layoutProblems(task, [{ triangle: Slope.build(pairs[ci][0], pairs[ci][1]), curve: 1 }]).length;
+      } catch { issues = Infinity; }
+      if (issues < fewest) { fewest = issues; first = pairs[ci][0]; second = pairs[ci][1]; }
+      if (issues === 0) { break; }
+    }
     if (!first || !second) { throw new Error('solution-teacher: у прямой нет двух узлов сетки'); }
     var gl = lineFromPoints('g', 'm', first, second, false);
     gl.rows[0].text = 'Это прямая. Буква $b$ занята коэффициентом параболы, поэтому свободный член обозначим $m$: $g(x) = kx + m$. ' +
@@ -813,113 +845,18 @@ function build(task) {
    треугольники наклона, по которым найдены угловые коэффициенты
    ══════════════════════════════════════════════════════════ */
 
-var COLORS = ['lineA', 'lineB'];
-
-/* Описание задачи и её набора в данных: оттуда подписи кривых, точки
-   и подписи осей — ровно то, по чему генератор рисовал условие. */
-function sourceOf(taskId) {
-  var sets = loadSets();
-  var found = null;
-  sets.prep.concat(sets.prototypes).forEach(function (set) {
-    (set.tasks || []).forEach(function (item) { if (item.id === taskId) { found = { set: set, task: item }; } });
-  });
-  return found;
-}
-
 /**
- * Сцена чертежа условия, восстановленная из meta по тем же правилам,
- * что sceneFor в generate.js и generate-quadratic.js. Без треугольников
- * она даёт тот же SVG, что у ученика, — это сверяет автопроверка.
- */
-function taskScene(task) {
-  var meta = task.meta || {};
-  var source = sourceOf(task.id);
-  if (!source || !meta.window) { return null; }
-  var set = source.set;
-  var def = source.task;
-  var axisLabels = def.axisLabels || set.axisLabels || 'minimal';
-  var singleLabel = def.curveLabel === null ? null : (def.curveLabel || set.curveLabel || 'y = f(x)');
-
-  if (meta.family === 'quadratic') {
-    var curves = meta.curves || [];
-    var pair = def.curveLabels || set.curveLabels || ['y = f(x)', 'y = g(x)'];
-    var points = [];
-    curves.forEach(function (curve, i) {
-      (curve.points || []).forEach(function (p) {
-        points.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i], label: p.label });
-      });
-    });
-    (meta.points || []).filter(function (p) { return p.role === 'cross'; }).forEach(function (p) {
-      points.push({ x: p.x, y: p.y, style: 'solid', color: 'cross', label: null });
-    });
-    return {
-      window: meta.window,
-      grid: { step: 1, show: true },
-      axes: { labelX: 'x', labelY: 'y', origin: '0' },
-      labelRules: 'strict',
-      axisLabels: axisLabels,
-      curves: curves.map(function (curve, i) {
-        var label = curves.length === 1 ? singleLabel : (pair[i] || null);
-        return curve.kind === 'line'
-          ? { type: 'line', k: curve.k, b: curve.b, color: COLORS[i], label: label }
-          : { type: 'quadratic', a: curve.a, b: curve.b, c: curve.c, color: COLORS[i], label: label };
-      }),
-      points: points,
-      alt: curves.length === 1 ? 'График квадратичной функции'
-        : (curves[1].kind === 'line' ? 'Графики квадратичной и линейной функций'
-                                     : 'Графики двух квадратичных функций')
-    };
-  }
-
-  var lines = meta.lines || [];
-  var single = lines.length === 1;
-  var labels = def.curveLabels || set.curveLabels || null;
-  var linePoints = [];
-  lines.forEach(function (line, i) {
-    (line.points || []).forEach(function (p) {
-      linePoints.push({ x: p.x, y: p.y, style: 'solid', color: COLORS[i] });
-    });
-  });
-  if (meta.probe) {
-    linePoints.push({ x: meta.probe.x, y: meta.probe.y, style: 'solid', color: 'lineB',
-      label: pointText(def.pointName || 'A', meta.probe.x, meta.probe.y) });
-  }
-  return {
-    window: meta.window,
-    grid: { step: 1, show: true },
-    axes: { labelX: 'x', labelY: 'y', origin: '0' },
-    axisLabels: axisLabels,
-    curves: lines.map(function (line, i) {
-      return { type: 'line', k: line.k, b: line.b, color: COLORS[i],
-               label: single ? singleLabel : (labels ? (labels[i] || null) : null) };
-    }),
-    points: linePoints,
-    alt: single ? 'График линейной функции' : 'Графики двух линейных функций'
-  };
-}
-
-/**
- * Чертёж условия для листа учителя: тот же график, и поверх — тонким
- * пунктиром цветом своей прямой — треугольники наклона, по которым
- * найдены угловые коэффициенты. Нет чертежа или треугольника — null,
- * и на листе остаётся чертёж условия как есть.
+ * Чертёж к решению для листа учителя: чертёж условия и поверх —
+ * треугольники наклона, по которым найдены угловые коэффициенты
+ * (graph/slope-figure.js). Нет чертежа или треугольника — null.
  *
  * options.triangles: false — без треугольников (для сверки с условием).
  */
 function figure(task, solved, options) {
-  var scene = taskScene(task);
-  if (!scene) { return null; }
-  var withTriangles = !options || options.triangles !== false;
-  var triangles = ((solved && solved.check.triangles) || []).filter(function (item) { return !item.triangle.flat; });
-  if (withTriangles && !triangles.length) { return null; }
-  var shapes = [];
-  if (withTriangles) {
-    triangles.forEach(function (item, i) {
-      shapes = shapes.concat(Slope.shapes(item.triangle, String(i + 1), COLORS[item.curve]));
-    });
-  }
-  if (shapes.length) { scene.shapes = shapes; }
-  return renderer.renderGraph(scene);
+  var items = ((solved && solved.check.triangles) || []).filter(function (item) { return !item.triangle.flat; });
+  if (options && options.triangles === false) { return SlopeFigure.render(task, []); }
+  if (!items.length) { return null; }
+  return SlopeFigure.render(task, items);
 }
 
 var api = { build: build, figure: figure };

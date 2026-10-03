@@ -169,6 +169,8 @@ function arcRadius(t) {
 function shapes(triangle) {
   var t = triangle;
   var list = [];
+  /* Все фигуры помечены slope: рендерер рисует их только на сцене
+     с showSlopeTriangle: true. */
 
   list.push({ type: 'polygon', id: IDS.fill,
     points: [[t.A.x, t.A.y], [t.C.x, t.C.y], [t.B.x, t.B.y]] });
@@ -232,6 +234,7 @@ function shapes(triangle) {
       offset: [Math.cos(bisector) * RULES.alphaGapPx, -Math.sin(bisector) * RULES.alphaGapPx] });
   }
 
+  list.forEach(function (shape) { shape.slope = true; });
   return list;
 }
 

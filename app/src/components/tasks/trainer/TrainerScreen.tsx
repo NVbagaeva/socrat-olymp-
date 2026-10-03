@@ -147,6 +147,14 @@ export function TrainerScreen({
   /* Цепочка пройдена: шагов больше не осталось. */
   const solvedByHint = hint && step >= steps.length;
   const current: TrainerStep | undefined = steps[step];
+  /* Чертёж: исходный, пока подсказка закрыта; в подсказке — тот, что
+     задал последний открытый шаг (с него на чертеже треугольник). */
+  const chart = hint
+    ? steps.slice(0, step + 1).reduce<string | null>(
+        (shown, item) => item.chartSvg ?? shown,
+        task.chartSvg,
+      )
+    : task.chartSvg;
 
   function fieldValue(stepNo: number, fieldNo: number): string {
     return fields[`${stepNo}:${fieldNo}`] ?? '';
@@ -317,9 +325,9 @@ export function TrainerScreen({
           {/* Условие собрал движок, формулы набрал KaTeX — обе
               на сборке. */}
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
-          {task.chartSvg === null ? null : (
+          {chart === null ? null : (
             <FigureZoom className="chart ptask__chart" label={`Чертёж к заданию ${index + 1}`}>
-              <span dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+              <span dangerouslySetInnerHTML={{ __html: chart }} />
             </FigureZoom>
           )}
         </div>

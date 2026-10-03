@@ -12,6 +12,7 @@
 
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import Slope from '@/lib/graph/slope.js';
+import SlopeFigure from '@/lib/graph/slope-figure.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
@@ -96,6 +97,13 @@ export interface TrainerStep {
   fields: TrainerField[];
   /** Что проверить, если на шаге ошибка. Значения не выдаёт. */
   wrongHint: string;
+  /**
+   * Чертёж, который показывается с этого шага подсказки и дальше
+   * (пока следующий шаг не задаст свой). Нет — остаётся прежний.
+   * Так треугольник наклона появляется только на шаге «Построй
+   * треугольник», а на исходном чертеже задачи его нет.
+   */
+  chartSvg?: string | null;
 }
 
 interface EngineQuery {
@@ -407,7 +415,33 @@ function pointMath(p: EnginePoint): string {
  *
  * name — «f» или «g» у пары прямых, пусто — прямая одна.
  */
-function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: string): TrainerStep[] {
+interface SlopeItem {
+  triangle: SlopeTriangle;
+  curve: number;
+  legLabels?: boolean;
+}
+
+/** Чертёж подсказки: условие и уже построенные треугольники. */
+function hintChart(task: EngineTask, items: SlopeItem[]): string | null {
+  try {
+    return SlopeFigure.render(task, items) as string | null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * drawn — треугольники, построенные на прошлых шагах (у пары прямых —
+ * треугольник f, когда дошли до g): они остаются на чертеже.
+ */
+function slopeSteps(
+  task: EngineTask,
+  k: number,
+  points: EnginePoint[] | null | undefined,
+  name: string,
+  curveIndex: number,
+  drawn: SlopeItem[],
+): TrainerStep[] {
   const which = name === '' ? 'Прямая' : 'Прямая $' + curve(name) + '$';
   const pair = (points ?? []).filter((p) => whole(p.x) && whole(p.y));
   const first = pair[0];
@@ -446,6 +480,13 @@ function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: s
     ];
   }
   const vertex = t.C;
+  const item: SlopeItem = { triangle: t, curve: curveIndex };
+  /* На шаге «Построй треугольник» он появляется на чертеже без длин
+     катетов — их ученик считает на следующем шаге; после него длины
+     подписаны. */
+  const bare = hintChart(task, [...drawn, { ...item, legLabels: false }]);
+  const full = hintChart(task, [...drawn, item]);
+  drawn.push(item);
   /* Ответ — точной дробью из катетов: 1/3 не округляется до 0,333,
      и ученик может ввести и «1/3», и «−1,5». */
   const exactK = (t.rising ? '' : '-') + t.dy + '/' + t.dx;
@@ -453,6 +494,7 @@ function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: s
     direction,
     {
       titleHtml: hintHtml('Построй треугольник под прямой по двум отмеченным точкам.'),
+      chartSvg: bare,
       textHtml: hintHtml(
         'Гипотенуза — отрезок между точками ' + pointMath(t.A) + ' и ' + pointMath(t.B) +
           '. Катеты идут по линиям сетки, вершина прямого угла лежит ниже прямой. ' +
@@ -481,6 +523,7 @@ function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: s
     t.rising
       ? {
           titleHtml: hintHtml('Найди $k = \\operatorname{tg} \\alpha$.'),
+          chartSvg: full,
           textHtml: hintHtml(
             'Угол $\\alpha$ острый и лежит в треугольнике: $\\operatorname{tg} \\alpha$ — ' +
               'вертикальный катет, делённый на горизонтальный.',
@@ -491,6 +534,7 @@ function slopeSteps(k: number, points: EnginePoint[] | null | undefined, name: s
         }
       : {
           titleHtml: hintHtml('Для убывающей прямой не забудь знак минус.'),
+          chartSvg: full,
           textHtml: hintHtml(
             'Острый угол треугольника смежный с $\\alpha$ и равен $180^\\circ - \\alpha$: ' +
               '$\\operatorname{tg}(180^\\circ - \\alpha)$ — вертикальный катет, делённый на горизонтальный. ' +
@@ -805,10 +849,11 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
   if (intersection === null || first === undefined || second === undefined) {
     return [];
   }
+  const drawn: SlopeItem[] = [];
   const steps = [
-    ...slopeSteps(first.k, first.points, 'f'),
+    ...slopeSteps(task, first.k, first.points, 'f', 0, drawn),
     stepPairB(task, 'f', first),
-    ...slopeSteps(second.k, second.points, 'g'),
+    ...slopeSteps(task, second.k, second.points, 'g', 1, drawn),
     stepPairB(task, 'g', second),
     stepPairEquation(first, second),
     stepCrossX(intersection.x),
@@ -830,7 +875,7 @@ function stepsFor(task: EngineTask): TrainerStep[] {
   const last = stepAnswer(task);
   return last === null
     ? []
-    : [...slopeSteps(k, task.meta.points, ''), stepB(task, b), stepEquation(k, b), last];
+    : [...slopeSteps(task, k, task.meta.points, '', 0, []), stepB(task, b), stepEquation(k, b), last];
 }
 
 /* ── Задание тренажёра из задачи движка ──────────────────────────

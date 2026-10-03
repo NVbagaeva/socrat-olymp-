@@ -506,8 +506,12 @@ function secondLineBlocks(line, win, blocks) {
   blocks.push(text('Берём две точки прямой в узлах сетки: ' +
     math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
     math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
-  /* k — тангенс угла наклона, через треугольник под прямой. */
-  Slope.teacherRows(Slope.build(A, B), 'k').forEach(function (item) {
+  /* k — тангенс угла наклона, через треугольник под прямой. Блок
+     slope — место для чертежа с этим треугольником: его рисует экран,
+     у которого есть задача целиком (lib/prep.ts). */
+  var triangle = Slope.build(A, B);
+  blocks.push({ type: 'slope', triangle: triangle, curve: 1 });
+  Slope.teacherRows(triangle, 'k').forEach(function (item) {
     if (item.text) {
       blocks.push(text(item.text.replace(/\$([^$]*)\$/g, function (_m, tx) { return math(tx, tx); })));
     }

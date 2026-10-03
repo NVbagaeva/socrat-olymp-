@@ -107,25 +107,65 @@ function teacherRows(t, letter) {
    Фигуры для чертежа: тонкий пунктир, длины катетов, угол
    ══════════════════════════════════════════════════════════ */
 
-var GAP_PX = 12;
+/* Подписи треугольника крупнее подписей делений: их читают с листа. */
+var LABEL_SIZE = 30;
+var ANGLE_SIZE = 25;
+
+/* Запасные места вокруг точки: по кольцам, от ближних к дальним.
+   Нужны, когда все «правильные» места заняты прямой или подписями —
+   подпись тогда встаёт рядом, но не поверх линии. */
+function ring(center, maxRadius) {
+  var out = [];
+  for (var dx = -maxRadius; dx <= maxRadius + 1e-9; dx += 0.25) {
+    for (var dy = -maxRadius; dy <= maxRadius + 1e-9; dy += 0.25) {
+      out.push([center.x + dx, center.y + dy, Math.hypot(dx, dy)]);
+    }
+  }
+  return out.sort(function (a, b) { return a[2] - b[2]; }).map(function (p) { return [p[0], p[1]]; });
+}
 
 /* Подпись катета: места — только вдоль самого катета, от середины
-   к краям, и снаружи треугольника (side — сторона на экране). */
-function legLabel(id, value, ink, from, to, side) {
-  var anchors = [0.5, 0.35, 0.65, 0.25, 0.75].map(function (share) {
-    return [from.x + (to.x - from.x) * share, from.y + (to.y - from.y) * share];
+   к краям; сначала снаружи треугольника (side — сторона в клетках),
+   потом изнутри, если снаружи занято. */
+/* Расстояние от точки до отрезка — в клетках. */
+function toSegment(p, a, b) {
+  var vx = b.x - a.x; var vy = b.y - a.y;
+  var len = vx * vx + vy * vy;
+  var u = len ? Math.max(0, Math.min(1, ((p[0] - a.x) * vx + (p[1] - a.y) * vy) / len)) : 0;
+  return Math.hypot(p[0] - (a.x + u * vx), p[1] - (a.y + u * vy));
+}
+
+function legLabel(id, value, ink, from, to, side, other) {
+  var anchors = [];
+  /* Отступ — в клетках, с запасом на половину подписи: у горизонтального
+     катета подпись высокая, у вертикального — узкая. */
+  var gaps = side[1] ? [0.8, 1.05] : [0.6, 0.9];
+  [1, -1].forEach(function (sign) {
+    gaps.forEach(function (gap) {
+      [0.5, 0.35, 0.65, 0.2, 0.8].forEach(function (share) {
+        anchors.push([from.x + (to.x - from.x) * share + sign * side[0] * gap,
+                      from.y + (to.y - from.y) * share + sign * side[1] * gap]);
+      });
+    });
   });
-  return { type: 'label', id: id, text: String(value), color: ink, at: anchors[0], anchors: anchors,
-    offset: [side[0] * GAP_PX, side[1] * GAP_PX], gap: GAP_PX };
+  /* Запасные места — рядом с серединой катета, не дальше полутора
+     клеток: дальше подпись читается как длина соседнего катета. */
+  anchors = anchors.concat(ring({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }, 1.5));
+  /* Подпись ближе к своему катету, чем к соседнему: иначе её читают
+     как длину соседнего. */
+  anchors = anchors.filter(function (p) { return toSegment(p, from, to) + 0.3 < toSegment(p, other.from, other.to); });
+  return { type: 'label', id: id, text: String(value), color: ink, centered: true,
+    at: anchors[0], anchors: anchors, size: LABEL_SIZE, smaller: [24, 20] };
 }
 
 /**
  * Фигуры сцены рендерера. suffix делает id уникальными, когда
  * на одном чертеже два треугольника (две прямые); color — цвет
  * своей прямой: так видно, чей это треугольник, и катет, легший
- * на ось, не сливается с ней.
+ * на ось, не сливается с ней. options.legLabels: false — без длин
+ * катетов (их ученик на шаге подсказки считает сам).
  */
-function shapes(t, suffix, color) {
+function shapes(t, suffix, color, options) {
   if (t.flat) { return []; }
   var tail = suffix ? '-' + suffix : '';
   var ink = color || 'accent';
@@ -144,8 +184,6 @@ function shapes(t, suffix, color) {
      стороны вертикального, где треугольника нет. Рендерер сдвигает
      подпись вдоль катета, если место занято. */
   var outward = horizontalTo.x < C.x ? 1 : -1;     /* +1 — вправо по экрану */
-  list.push(legLabel('teacher-label-x' + tail, t.dx, ink, C, horizontalTo, [0, 1]));
-  list.push(legLabel('teacher-label-y' + tail, t.dy, ink, C, verticalTo, [outward, 0]));
 
   list.push({ type: 'rightAngle', id: 'teacher-right' + tail, color: ink, at: [C.x, C.y],
     alongX: Math.sign(horizontalTo.x - C.x), alongY: Math.sign(verticalTo.y - C.y), sizePx: 9 });
@@ -162,17 +200,52 @@ function shapes(t, suffix, color) {
   list.push({ type: 'arc', id: 'teacher-arc' + tail, color: ink, at: [at.x, at.y],
     radius: r, maxRadiusPx: 30, from: from, to: to });
 
-  /* Подпись угла — веером внутри угла, ближе к вершине: рендерер
-     берёт первое свободное место. */
+  /* Подпись угла: рендерер перебирает места по порядку и берёт первое,
+     где она не задевает ни прямую, ни катеты, ни другие подписи. */
+  /* Треугольник всегда над горизонтальным катетом (прямой угол под
+     прямой), поэтому места — над катетом, от вершины угла к вершине
+     прямого угла: там треугольник шире, и подпись не задевает прямую.
+     Высота — от половины до целой клетки, чтобы не лечь на катет. */
+  var inward = Math.sign(C.x - at.x);
   var anchors = [];
-  [1.6, 2.1, 2.7].forEach(function (scale) {
-    [0.5, 0.3, 0.7].forEach(function (share) {
-      var theta = (from + (to - from) * share) * Math.PI / 180;
-      anchors.push([at.x + r * scale * Math.cos(theta), at.y + r * scale * Math.sin(theta)]);
+  /* Не дальше двух с половиной клеток от вершины угла: глубже внутри
+     большого треугольника подпись уже не читается как подпись угла. */
+  [1.2, 1.6, 2.0, 2.4, 0.9].forEach(function (shift) {
+    if (shift > 0.85 * t.dx) { return; }
+    [0.6, 0.8, 1.0, 1.25].forEach(function (lift) {
+      anchors.push([at.x + inward * shift, at.y + lift]);
     });
   });
-  list.push({ type: 'label', id: 'teacher-angle' + tail, color: ink,
-    text: t.rising ? 'α' : '180° − α', at: anchors[0], anchors: anchors, gap: 4 });
+  /* Запасные места — под дугой, по ту сторону горизонтального катета:
+     прямая за вершиной угла уходит в другую сторону, там свободно. */
+  [1.0, 1.3, 1.6, 0.7, 2.0].forEach(function (shift) {
+    [0.55, 0.8].forEach(function (drop) {
+      anchors.push([at.x + inward * shift, at.y - drop]);
+    });
+  });
+  /* Кольца — от дуги, а не от вершины: подпись должна читаться как
+     подпись этого угла, а не соседнего. */
+  anchors = anchors.concat(ring({ x: at.x + inward * 0.8, y: at.y + 0.3 }, 2.2));
+  /* Только под прямой — с той стороны, где треугольник: подпись над
+     прямой читается как подпись другого угла. */
+  var kValue = Line.num(t.k);
+  anchors = anchors.filter(function (p) { return A.y + kValue * (p[0] - A.x) - p[1] > 0.45; });
+  list.push({ type: 'label', id: 'teacher-angle' + tail, color: ink, centered: true,
+    text: t.rising ? 'α' : '180°−α', at: anchors[0], anchors: anchors, size: ANGLE_SIZE,
+    smaller: [21, 18, 15] });
+
+  /* Длины катетов — после подписи угла: они короткие и встают
+     вокруг неё, а не наоборот. */
+  if (!options || options.legLabels !== false) {
+    list.push(legLabel('teacher-label-x' + tail, t.dx, ink, C, horizontalTo, [0, -1],
+      { from: C, to: verticalTo }));
+    list.push(legLabel('teacher-label-y' + tail, t.dy, ink, C, verticalTo, [outward, 0],
+      { from: C, to: horizontalTo }));
+  }
+
+  /* Пометка slope: рендерер рисует фигуры только на сцене
+     с showSlopeTriangle: true. */
+  list.forEach(function (shape) { shape.slope = true; });
   return list;
 }
 

@@ -8,6 +8,7 @@
 import { prepSkillsFor, type PrepSkill, type PrepSkillId } from '@/content/prepSkills';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
+import SlopeFigure from '@/lib/graph/slope-figure.js';
 import GraphSolution from '@/lib/graph/solution.js';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import Quadratic from '@/lib/graph/families/quadratic.js';
@@ -227,6 +228,9 @@ function viewBlock(block: EngineBlock): PrepBlock | null {
   }
   if (block.type === 'scene') {
     return { type: 'chart', svg: renderGraph(block.scene) as string };
+  }
+  if (block.type === 'chart-svg') {
+    return { type: 'chart', svg: block.html ?? '' };
   }
   if (block.type === 'callout') {
     return { type: 'callout', title: block.title ?? '', blocks: viewBlocks(block.blocks ?? []) };
@@ -699,8 +703,30 @@ export function quadraticSteps(task: QuadraticSource): PrepStep[] {
     number: step.number,
     title: step.title,
     arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
-    blocks: viewBlocks(step.blocks),
+    blocks: viewBlocks(step.blocks.map((block) => slopeChart(task, block))),
   }));
+}
+
+/* Блок slope из разбора — чертёж условия с треугольником наклона:
+   в разборе он нужен, на чертеже условия его нет (graph/slope-figure.js). */
+function slopeChart(task: QuadraticSource, block: EngineBlock): EngineBlock {
+  if (block.type !== 'slope') {
+    return block;
+  }
+  const slope = block as EngineBlock & { triangle?: unknown; curve?: number };
+  let svg: string | null = null;
+  try {
+    svg = SlopeFigure.render(task, [{ triangle: slope.triangle, curve: slope.curve ?? 0 }]) as string | null;
+  } catch {
+    svg = null;
+  }
+  return svg === null ? { type: 'skip' } : { type: 'chart-svg', html: svg };
+}
+
+/** Разбор опорной задачи по шагам — тот, что лежит в странице
+    зашифрованным. Открыт для проверок (scripts/check-slope-visibility.mjs). */
+export function prepSolutionSteps(task: EngineTask): PrepStep[] | null {
+  return buildSteps(task);
 }
 
 function buildSteps(task: EngineTask): PrepStep[] | null {
@@ -737,11 +763,18 @@ function buildSteps(task: EngineTask): PrepStep[] | null {
     },
   }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
 
+  /* Шаг «Находим k» начинается с чертежа треугольника наклона: сцена
+     разбора просит его явно (showSlopeTriangle), на чертеже условия
+     треугольника нет. */
+  const triangleChart: PrepBlock = { type: 'chart', svg: renderGraph(found.scene) as string };
   return steps.map((step) => ({
     number: step.number,
     title: step.title,
     arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
-    blocks: viewBlocks(step.blocks),
+    blocks:
+      step.title === 'Находим k'
+        ? [triangleChart, ...viewBlocks(step.blocks)]
+        : viewBlocks(step.blocks),
   }));
 }
 
