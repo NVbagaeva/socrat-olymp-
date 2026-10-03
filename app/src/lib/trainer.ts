@@ -808,7 +808,8 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
   if (form === 'shift-y' || form === 'shift-xy') {
     const name = form === 'shift-y' ? 'a' : 'b';
     steps.push(rationalStep(
-      'Теперь проверим горизонтальную асимптоту — сдвиг вверх-вниз.',
+      (steps.length === 0 ? 'Давай проверим, как ты нашёл(ла)' : 'Теперь проверим') +
+        ' горизонтальную асимптоту — сдвиг вверх-вниз.',
       'Горизонтальная пунктирная прямая — асимптота $y = ' + name + '$. Слагаемое $' + name +
         '$ поднимает или опускает весь график. Чему равно $' + name + '$ функции $f$?',
       [field(name + ' =', form === 'shift-y' ? co.a ?? 0 : co.b ?? 0)],

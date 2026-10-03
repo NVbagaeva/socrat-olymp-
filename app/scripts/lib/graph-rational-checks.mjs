@@ -9,12 +9,14 @@
      • у (kx + a)/(x + b) точки лежат на кривой, записанной через k, a, b;
      • с прямой: A — точка пересечения обеих кривых, B — тоже, B ≠ A,
        вторая точка прямой не на гиперболе и не совпадает с B;
-     • B за рамкой не ближе трёх клеток по x или по y;
+     • B за рамкой не ближе трёх клеток по x или по y; прямая видна
+       не меньше чем на шесть клеток;
      • ответ задач на f(x₀) и на x по значению не читается с рисунка;
      • на чертеже нет подписей кривых — подписана только точка A;
      • ответ последнего шага разбора совпадает с ключом. */
 
 import solution from '../../src/lib/graph/solution-rational.js';
+import Line from '../../src/lib/graph/families/line.js';
 
 const EPS = 1e-9;
 const OFFSCREEN_MIN = 3;
@@ -84,6 +86,8 @@ export function checkRationalTask(set, task) {
       : M.rule === 'line-a' ? v(M.line.k) : v(M.line.b);
     if (!near(asked, answer)) { bad('ответ не совпадает с B или коэффициентом прямой'); }
     if (/>B</.test(task.svg)) { bad('точка B подписана на чертеже'); }
+    const part = Line.visiblePart({ kValue: v(M.line.k), bValue: v(M.line.b) }, M.window);
+    if (part.length < 6 - EPS) { bad(`прямая видна лишь на ${part.length.toFixed(1)} клетки`); }
   }
   if (/y = [fg]\(x\)|<tspan[^>]*>[fg]<\/tspan>/.test(task.svg)) { bad('на чертеже подпись кривой'); }
 

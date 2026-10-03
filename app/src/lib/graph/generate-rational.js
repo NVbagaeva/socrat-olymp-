@@ -59,7 +59,8 @@ var ASYMPTOTE_MARGIN = 3;
 var POINT_MARGIN = 1;
 var M_ABS = [1, 2, 3, 4, 5, 6, 8, 9, 10, 12];
 var ANSWER_MAX = 100;
-var OFFSCREEN_MIN = 3;     /* на сколько клеток B уходит за рамку, не меньше */
+var OFFSCREEN_MIN = 3;
+var LINE_VISIBLE_MIN = 6;  /* видимая часть прямой, клеток, не меньше */     /* на сколько клеток B уходит за рамку, не меньше */
 
 /* ══════════════════════════════════════════════════════════
    Числа
@@ -431,6 +432,10 @@ function lineCandidates(task, set, seed) {
           var abs = Math.abs(num(slope));
           if (isZero(slope) || abs < absMin - 1e-9 || abs > absMax + 1e-9) { continue; }
           var line = { k: slope, b: sub(frac(A.y), mul(slope, frac(A.x))) };
+          /* Прямая на чертеже — не огрызок в углу: видимая часть
+             не короче LINE_VISIBLE_MIN клеток. */
+          if (Line.visiblePart({ kValue: num(line.k), bValue: num(line.b) }, win).length <
+              LINE_VISIBLE_MIN) { continue; }
           /* b = 0: B симметрична A относительно начала координат и
              читается без вычислений. */
           if (isZero(line.b)) { continue; }
