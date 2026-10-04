@@ -49,19 +49,19 @@
     "@fontsource/inter": "^5.3.0",
     "clsx": "^2.1.1",
     "katex": "^0.16.11",
-    "next": "^15.5.25",
+    "next": "15.5.27",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
-    "@next/eslint-plugin-next": "^15.5.25",
+    "@next/eslint-plugin-next": "15.5.27",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^15.5.25",
+    "eslint-config-next": "15.5.27",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -81,7 +81,7 @@
       "sharp"
     ],
     "patchedDependencies": {
-      "next@15.5.25": "patches/next@15.5.25.patch"
+      "next@15.5.27": "patches/next@15.5.27.patch"
     }
   }
 }
