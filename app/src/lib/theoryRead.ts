@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * Прочитанные разделы теории подтемы.
+ * Прочитанные разделы теории и ключевых методов подтемы.
  *
- * Кольцо в шапке темы показывает, сколько разделов изучено. У линейной
- * подтемы это число демонстрационное (data/demo.ts) — витрина кабинета,
- * которой ещё нет. У подтемы с признаком `theoryProgress` оно считается
- * честно: раздел засчитывается, когда ученик долистал до его конца, и
- * запоминается в браузере под ключом подтемы. Пока не долистал ни
- * одного — «0 из 7», и это правда.
+ * Раздел теории засчитывается, когда ученик долистал до его конца и
+ * раздел пробыл на экране не меньше READ_DWELL_MS (lib/topicProgress.ts):
+ * пролистанное одним рывком прочитанным не считается. Метод — когда
+ * его окно дочитано до конца. Кнопка «Прочитано» внизу вкладки
+ * отмечает все разделы сразу. Отметки живут в браузере под ключом
+ * подтемы: «theory:12:rational», «methods:12:rational».
  *
  * Устройство то же, что у счётчиков тренажёра (lib/progressStore.ts):
  * внешний источник, который React читает через useSyncExternalStore.
@@ -27,8 +27,11 @@ const EMPTY: readonly string[] = [];
 const cache = new Map<string, readonly string[]>();
 const listeners = new Map<string, Set<() => void>>();
 
+/* Версия в ключе: прежние записи (theory:…) набирались прокруткой
+   без проверки времени на экране, и пролистанная одним рывком теория
+   считалась прочитанной. Им веры нет, счёт начинается заново. */
 function storageKey(key: string): string {
-  return `theory:${key}`;
+  return `read:v2:${key}`;
 }
 
 function load(key: string): readonly string[] {
@@ -54,22 +57,25 @@ function notify(key: string): void {
   listeners.get(key)?.forEach((listener) => listener());
 }
 
-/** Запомнить, что раздел прочитан. Повтор ничего не меняет. */
-export function markSectionRead(key: string, id: string): void {
+/** Запомнить, что разделы прочитаны. Повтор ничего не меняет. */
+export function markSectionsRead(key: string, ids: readonly string[]): void {
   const current = snapshot(key);
-  if (current.includes(id)) {
+  const fresh = ids.filter((id) => !current.includes(id));
+  if (fresh.length === 0) {
     return;
   }
-  const next = [...current, id];
+  const next = [...current, ...fresh];
   cache.set(key, next);
   storage.set(storageKey(key), next);
   notify(key);
 }
 
-/**
- * Прочитанные разделы подтемы. Ключ null — подтема считает разделы
- * не здесь, а витринным числом кабинета: тогда список всегда пуст.
- */
+/** Запомнить, что раздел прочитан. */
+export function markSectionRead(key: string, id: string): void {
+  markSectionsRead(key, [id]);
+}
+
+/** Прочитанные разделы по ключу. Ключ null — отметок нет, список пуст. */
 export function useSectionsRead(key: string | null): readonly string[] {
   const api = useMemo(() => {
     if (key === null) {

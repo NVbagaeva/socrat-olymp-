@@ -101,13 +101,6 @@ export interface FunctionType {
   /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
   methods?: boolean;
   /**
-   * Кольцо разделов считает честно: раздел засчитывается, когда
-   * ученик долистал до его конца, и запоминается в браузере
-   * (lib/theoryRead.ts). Не задано — кольцо показывает витринное
-   * число кабинета, как у линейной подтемы.
-   */
-  theoryProgress?: boolean;
-  /**
    * Подтема заведена после того, как вкладку «Подготовительные
    * задачи» переименовали в «Опорные задачи». Прежнего адреса
    * (content/opornye.ts, staryyTail) у неё никогда не было, и
@@ -256,7 +249,6 @@ export const functionTypes: FunctionType[] = [
     head: QUADRATIC.head,
     about: QUADRATIC.about,
     methods: true,
-    theoryProgress: true,
     bezStarogoAdresa: true,
     choiceAnswers: true,
     sheetTitle: 'Квадратичная функция',
@@ -285,7 +277,6 @@ export const functionTypes: FunctionType[] = [
     head: RATIONAL.head,
     about: RATIONAL.about,
     methods: true,
-    theoryProgress: true,
     bezStarogoAdresa: true,
     sheetTitle: 'Гипербола',
     tutors: RATIONAL.tutors,

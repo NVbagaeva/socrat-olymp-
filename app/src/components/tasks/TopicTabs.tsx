@@ -8,6 +8,8 @@ import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { markSectionRead } from '@/lib/theoryRead';
+import { READ_DWELL_MS } from '@/lib/topicProgress';
+import { ReadMark } from './ReadMark';
 import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
 import { TutorMenu } from './TutorMenu';
@@ -45,10 +47,10 @@ export interface TopicTabsProps {
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
   /**
-   * Ключ подтемы в хранилище прочитанных разделов. Задан — раздел
-   * засчитывается прочитанным, когда ученик долистал до его конца,
-   * и кольцо в шапке считает по этим отметкам. Не задан — ничего не
-   * запоминается: так было и остаётся у линейной подтемы.
+   * Ключ прочитанных разделов теории: «theory:12:rational». Раздел
+   * засчитывается, когда ученик долистал до его конца и раздел пробыл
+   * на экране не меньше READ_DWELL_MS; кольцо в шапке считает по этим
+   * отметкам. Не задан — ничего не запоминается.
    */
   trackKey?: string;
   /**
@@ -250,38 +252,53 @@ export function TopicTabs({
   }, [tab, theory]);
 
   /* Прочитанные разделы. Раздел засчитывается, когда ученик долистал
-     до его конца: нижний край поднялся выше середины экрана. Считаем
-     сами при прокрутке, а не наблюдателем видимости: наблюдатель
-     сообщает только о смене состояния, и разделы, пролистанные
-     одним махом, он пропускает. Семь измерений на кадр прокрутки
-     дешевле, чем неверный счёт.
+     до его конца — нижний край поднялся выше середины экрана — и раздел
+     пробыл на экране не меньше READ_DWELL_MS. Время копится, пока раздел
+     хоть краем виден и вкладка браузера открыта; пролистанное одним
+     рывком (переход по «Содержанию», клавиша End) его не набирает.
+     Считаем сами по таймеру и при прокрутке, а не наблюдателем
+     видимости: наблюдатель сообщает только о смене состояния.
 
-     При открытии вкладки не считается ничего: пока ученик не тронул
-     страницу, прочитанных разделов у него нет. */
+     Пустые разделы («Материал готовится») в счёт не идут. При открытии
+     вкладки не считается ничего: время только начинает копиться. */
   useEffect(() => {
     if (tab !== 'theory' || trackKey === undefined) {
       return undefined;
     }
     const key = trackKey;
-    const last = theory[theory.length - 1];
+    const counted = theory.filter((item) => item.status !== 'empty');
+    const last = counted[counted.length - 1];
+    const dwell = new Map<string, number>();
+    let before = performance.now();
     let waiting = false;
 
     function scan() {
       waiting = false;
+      const now = performance.now();
+      /* Шаг таймера — не больше секунды: после спящей вкладки или
+         зависшего кадра время не должно прийти разом. */
+      const step = document.hidden ? 0 : Math.min(now - before, 1000);
+      before = now;
       const line = window.innerHeight / 2;
-      theory.forEach((item) => {
+      const seen = window.scrollY + window.innerHeight;
+      const bottom = seen >= document.documentElement.scrollHeight - 4;
+      counted.forEach((item) => {
         const node = document.getElementById(blockId(item.id));
-        if (node !== null && node.getBoundingClientRect().bottom <= line) {
+        if (node === null) {
+          return;
+        }
+        const rect = node.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          dwell.set(item.id, (dwell.get(item.id) ?? 0) + step);
+        }
+        /* Последний раздел кончается вместе со страницей, и выше
+           середины экрана его нижний край может не подняться. Низ
+           страницы засчитывает его отдельно. */
+        const ended = rect.bottom <= line || (item === last && bottom);
+        if (ended && (dwell.get(item.id) ?? 0) >= READ_DWELL_MS) {
           markSectionRead(key, item.id);
         }
       });
-      /* Последний раздел кончается вместе со страницей, и выше
-         середины экрана его нижний край может не подняться. Низ
-         страницы засчитывает его отдельно. */
-      const seen = window.scrollY + window.innerHeight;
-      if (last !== undefined && seen >= document.documentElement.scrollHeight - 4) {
-        markSectionRead(key, last.id);
-      }
     }
 
     function onScroll() {
@@ -292,9 +309,11 @@ export function TopicTabs({
       requestAnimationFrame(scan);
     }
 
+    const timer = window.setInterval(scan, 500);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     return () => {
+      window.clearInterval(timer);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
@@ -381,6 +400,15 @@ export function TopicTabs({
                       )}
                     </article>
                   ))}
+                  {/* Отметить всю теорию разом — тому, кто прочитал её
+                      раньше или читал не подряд. */}
+                  {trackKey === undefined ? null : (
+                    <ReadMark
+                      storeKey={trackKey}
+                      ids={theory.filter((item) => item.status !== 'empty').map((item) => item.id)}
+                      done="Теория прочитана"
+                    />
+                  )}
                 </div>
               )}
             </>
