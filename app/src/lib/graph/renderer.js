@@ -263,6 +263,18 @@ function near(a, b) { return Math.abs(a.x - b.x) < 1e-7 && Math.abs(a.y - b.y) <
    реальные прямоугольники подписей и фигур. По нему validate.js
    проверяет наложения на том же, что видит ученик, а не на догадках. */
 function renderGraph(scene, report) {
+  /* Треугольник наклона подсказывает ответ, поэтому по умолчанию его
+     нет: фигуры с пометкой slope рисуются, только если сцена явно
+     просит showSlopeTriangle: true (лист учителя, подсказка, разбор).
+     Новые разделы ученику треугольник не покажут, пока не попросят. */
+  var slopeShown = false;
+  if (scene.shapes && scene.shapes.some(function (shape) { return shape.slope; })) {
+    var allow = scene.showSlopeTriangle === true;
+    scene = Object.assign({}, scene, { shapes: scene.shapes.filter(function (shape) {
+      return !shape.slope || allow;
+    }) });
+    slopeShown = allow;
+  }
   var win = scene.window;
   var problems = checkWindow(win);
   if (problems.length) { throw new Error('renderer: ' + problems.join('; ')); }
@@ -297,6 +309,9 @@ function renderGraph(scene, report) {
   var shapeLayer = [];
   var curveLayer = [];
   var pointLayer = [];
+  /* Подписи точек — отдельным слоем поверх кружков: на чертеже
+     с треугольником наклона они ставятся раньше самих кружков. */
+  var pointLabelLayer = [];
   var curveLabelLayer = [];
 
   head.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + px(width) + ' ' + px(height) + '"' +
@@ -304,6 +319,8 @@ function renderGraph(scene, report) {
        различает вторую кривую типом линии, а не только толщиной.
        У сцен без строгих правил класса нет, и их чертежи прежние. */
     (strict ? ' class="graph-strict"' : '') +
+    /* Метка чертежа с треугольником: по ней проверка находит, где он есть. */
+    (slopeShown ? ' data-slope-triangle="1"' : '') +
     ' width="' + px(width) + '" height="' + px(height) + '" role="img"' +
     (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">');
@@ -539,6 +556,63 @@ function renderGraph(scene, report) {
   labelLayer.push(mathText(pick(axes.labelX, 'x'), tipX - 2, axisX - THEME.gap.axisName, 'end'));
   labelLayer.push(mathText(pick(axes.labelY, 'y'), axisY + THEME.gap.axisName, tipY + 8, 'start'));
 
+  /* Подписи точек. На чертеже с треугольником наклона они ставятся
+     до его подписей: подпись угла встаёт в точное место и обходит
+     подпись точки, а не наоборот. На остальных чертежах порядок прежний. */
+  var pointLabelsFirst = (scene.shapes || []).some(function (shape) {
+    return shape.type === 'label' && shape.centered;
+  });
+  var field = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+  var originPx = { x: axisY, y: axisX };
+  function placePointLabels() {
+    (scene.points || []).forEach(function (point) {
+      if (!point.label) { return; }
+      var size = strict ? THEME.font.pointLabelStrict : THEME.font.pointLabel;
+      var halfW = (strict ? pointTextWidth(point.label, size)
+                          : textWidth(point.label, size)) / 2;
+      var halfH = size * 0.62;
+      var cloud = obstacleCloud(scene, drawn, sx, sy, originPx, field,
+        strict ? [] : labelBoxes);
+      var spot;
+      if (strict) {
+        /* Зазор до точки — не больше половины клетки: подпись читается
+           как подпись именно этой точки, а не соседней. Кружок она при
+           этом не задевает. */
+        var gapStrict = Math.max(g.pointRadius + 2,
+          Math.min(THEME.gap.pointLabel + g.pointRadius, cell * 0.5));
+        spot = pointLabelSpot(sx(point.x), sy(point.y), halfW, halfH, gapStrict,
+          cloud, labelBoxes, field);
+      } else {
+        spot = bestLabelSpot(sx(point.x), sy(point.y), halfW, halfH,
+          THEME.gap.pointLabel + g.pointRadius, cloud, field);
+      }
+
+      labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+      collect(report, 'pointLabel', null, spot.x, spot.y, halfW, halfH);
+      if (report) {
+        report.boxes[report.boxes.length - 1].at = { x: sx(point.x), y: sy(point.y) };
+      }
+      /* Координаты точки — тёмные, как числа осей: цветом кривой их
+         набирать незачем, а у общей точки двух кривых такого цвета и
+         нет. Белая подложка под текстом — общая для всех подписей. */
+      pointLabelLayer.push(labelText(point.label, spot.x, spot.y + halfH * 0.55, 'middle',
+        size, strict ? THEME.colors.label : color(point.color)));
+    });
+  }
+  /* Подписи графиков: горизонтально, у самой линии, в стороне
+     от точек и пересечений с осями. На чертеже с треугольником наклона —
+     тоже до его подписей, по той же причине, что и подписи точек. ------*/
+  function placeCurveLabels() {
+    drawn.forEach(function (item) {
+      if (!item.curve.label) { return; }
+      /* Зона может быть пустой: тогда места под подпись нет и её не рисуем. */
+      if (item.curve.labelZone === null) { return; }
+      curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes, report, cell,
+        strict));
+    });
+  }
+  if (pointLabelsFirst) { placePointLabels(); placeCurveLabels(); }
+
   /* Подписи фигур: сторону выбираем так же, как у точек, но с оглядкой
      на подсказку от того, кто фигуру построил. ---------------------- */
   var shapeLabelLayer = [];
@@ -556,6 +630,74 @@ function renderGraph(scene, report) {
     var spot;
     if (shape.slide) {
       spot = slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field);
+    } else if (shape.centered) {
+      /* Подпись ровно в одном из мест, по порядку предпочтения.
+         Препятствия двух сортов: кривые, точки и другие подписи —
+         жёсткие, на них подпись не ложится никогда, если есть другое
+         место; оси и пунктир фигур — мягкие: под подписью белая
+         подложка, и лечь на них лучше, чем на прямую. */
+      var hard = obstacleCloud(Object.assign({}, scene, { shapes: [] }), drawn, sx, sy,
+        { x: axisY, y: axisX }, field, labelBoxes, { axes: false });
+      var nearest = function (points, cx, cy) {
+        var clear = Infinity;
+        for (var c = 0; c < points.length; c++) {
+          clear = Math.min(clear, rectDist(points[c], cx, cy, halfW, halfH));
+          if (clear <= 0) { break; }
+        }
+        return clear;
+      };
+      /* Не нашлось свободного места — та же подпись пробуется кеглями
+         помельче (shape.smaller — число или список): мельче, но не
+         поверх линии. */
+      /* Мельче пробуем и тогда, когда место нашлось только на оси или
+         пунктире: мелкая подпись на свободном месте читается лучше
+         крупной поверх линии. Из всех кеглей берётся лучшее место,
+         при равенстве — крупнее. */
+      var sizes = [size].concat(shape.smaller || []);
+      var best = null;
+      var keep = function () {
+        var value = spot ? spot.score - 0.5 * sizes.indexOf(size) : -Infinity;
+        if (spot && (!best || value > best.score + 1e-9)) {
+          best = { x: spot.x, y: spot.y, score: value, size: size, halfW: halfW, halfH: halfH };
+        }
+      };
+      for (var attempt = 0; attempt < sizes.length; attempt += 1) {
+        if (attempt > 0) {
+          keep();
+          if (best && best.score >= 40) { break; }
+          size = sizes[attempt];
+          halfW = textWidth(shape.text, size, THEME.font.curveLabelTrack) / 2;
+          halfH = size * 0.62;
+          spot = null;
+        }
+        (shape.anchors || [shape.at]).forEach(function (anchor, index) {
+          var cx = sx(anchor[0]);
+          var cy = sy(anchor[1]);
+          if (cx - halfW < field.left || cx + halfW > field.right ||
+              cy - halfH < field.top || cy + halfH > field.bottom) { return; }
+          var hardClear = nearest(hard, cx, cy);
+          /* Чужие подписи — прямоугольником целиком, а не серединой. */
+          labelBoxes.forEach(function (box) {
+            var gapX = Math.abs(box.x - cx) - (box.halfW + halfW);
+            var gapY = Math.abs(box.y - cy) - (box.halfH + halfH);
+            hardClear = Math.min(hardClear, Math.max(gapX, gapY));
+          });
+          var softClear = nearest(cloud, cx, cy);
+          /* Кривая опрашивается через 5 пикселей: зазор меньше трёх мог
+             бы оказаться пересечением между точками опроса. */
+          var score = hardClear > 3
+            ? Math.min(hardClear, 6) + (softClear > 0 ? 40 : 0)
+            : hardClear - THEME.helper.overlapPenalty;
+          score -= index * 0.02;
+          if (!spot || score > spot.score + 1e-9) { spot = { x: cx, y: cy, score: score }; }
+        });
+      }
+      keep();
+      if (best) {
+        spot = { x: best.x, y: best.y, score: best.score };
+        size = best.size; halfW = best.halfW; halfH = best.halfH;
+      }
+      if (!spot) { spot = { x: sx(shape.at[0]), y: sy(shape.at[1]), score: 0 }; }
     } else {
       /* Якорей может быть несколько, но они перечислены по удалению
          от того места, где подпись уместнее всего: дальний берётся,
@@ -568,7 +710,9 @@ function renderGraph(scene, report) {
       });
     }
 
-    labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
+    /* Подпись треугольника наклона ставится в точное место, поэтому
+       для остальных подписей она — прямоугольник целиком. */
+    labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH, rect: !!shape.centered });
     collect(report, 'shapeLabel', shape.id, spot.x, spot.y, halfW, halfH);
     shapeLabelLayer.push('<g' + (shape.id ? ' id="' + esc(shape.id) + '"' : '') + '>' +
       svgText(shape.text, spot.x, spot.y + halfH * 0.55, 'middle', {
@@ -582,9 +726,6 @@ function renderGraph(scene, report) {
 
   /* Точки и их подписи: подпись уходит в свободную сторону,
      чтобы не садиться на линию, оси и числа. ------------------------- */
-  var field = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
-  var originPx = { x: axisY, y: axisX };
-
   (scene.points || []).forEach(function (point) {
     if (report) {
       if (!report.points) { report.points = []; }
@@ -597,55 +738,15 @@ function renderGraph(scene, report) {
       (open ? fill : THEME.colors.pointStroke) + '" stroke-width="' + THEME.width.pointStroke + '"/>');
   });
 
-  (scene.points || []).forEach(function (point) {
-    if (!point.label) { return; }
-    var size = strict ? THEME.font.pointLabelStrict : THEME.font.pointLabel;
-    var halfW = (strict ? pointTextWidth(point.label, size)
-                        : textWidth(point.label, size)) / 2;
-    var halfH = size * 0.62;
-    var cloud = obstacleCloud(scene, drawn, sx, sy, originPx, field,
-      strict ? [] : labelBoxes);
-    var spot;
-    if (strict) {
-      /* Зазор до точки — не больше половины клетки: подпись читается
-         как подпись именно этой точки, а не соседней. Кружок она при
-         этом не задевает. */
-      var gapStrict = Math.max(g.pointRadius + 2,
-        Math.min(THEME.gap.pointLabel + g.pointRadius, cell * 0.5));
-      spot = pointLabelSpot(sx(point.x), sy(point.y), halfW, halfH, gapStrict,
-        cloud, labelBoxes, field);
-    } else {
-      spot = bestLabelSpot(sx(point.x), sy(point.y), halfW, halfH,
-        THEME.gap.pointLabel + g.pointRadius, cloud, field);
-    }
+  if (!pointLabelsFirst) { placePointLabels(); }
 
-    labelBoxes.push({ x: spot.x, y: spot.y, halfW: halfW, halfH: halfH });
-    collect(report, 'pointLabel', null, spot.x, spot.y, halfW, halfH);
-    if (report) {
-      report.boxes[report.boxes.length - 1].at = { x: sx(point.x), y: sy(point.y) };
-    }
-    /* Координаты точки — тёмные, как числа осей: цветом кривой их
-       набирать незачем, а у общей точки двух кривых такого цвета и
-       нет. Белая подложка под текстом — общая для всех подписей. */
-    pointLayer.push(labelText(point.label, spot.x, spot.y + halfH * 0.55, 'middle',
-      size, strict ? THEME.colors.label : color(point.color)));
-  });
-
-  /* Подписи графиков: горизонтально, у самой линии, в стороне
-     от точек и пересечений с осями. -------------------------------------*/
-  drawn.forEach(function (item) {
-    if (!item.curve.label) { return; }
-    /* Зона может быть пустой: тогда места под подпись нет и её не рисуем. */
-    if (item.curve.labelZone === null) { return; }
-    curveLabelLayer.push(curveLabel(item, scene, win, sx, sy, drawn, labelBoxes, report, cell,
-      strict));
-  });
+  if (!pointLabelsFirst) { placeCurveLabels(); }
 
   var body = gridLayer.concat(axisLayer, shapeLayer);
   if (THEME.layers.labelsOnTop) {
-    body = body.concat(curveLayer, pointLayer, labelLayer, shapeLabelLayer);
+    body = body.concat(curveLayer, pointLayer, pointLabelLayer, labelLayer, shapeLabelLayer);
   } else {
-    body = body.concat(labelLayer, curveLayer, pointLayer, shapeLabelLayer);
+    body = body.concat(labelLayer, curveLayer, pointLayer, pointLabelLayer, shapeLabelLayer);
   }
   return head.concat(body, curveLabelLayer, '</svg>').join('');
 }
@@ -1126,7 +1227,7 @@ function obstacleCloud(scene, all, sx, sy, origin, field, labelBoxes, opts) {
   (labelBoxes || []).forEach(function (box) {
     /* Строгий режим: подпись занимает свой прямоугольник целиком.
        Обычный — только середину, как было до правил квадратичной. */
-    cloud.push(opts && opts.boxes === 'rect'
+    cloud.push((opts && opts.boxes === 'rect') || box.rect
       ? { x: box.x, y: box.y, halfW: box.halfW, halfH: box.halfH }
       : { x: box.x, y: box.y });
     cloud.push({ x: box.x - box.halfW, y: box.y - box.halfH });

@@ -788,23 +788,61 @@ body {
 .sheet-solution--full .sheet-solution-body {
   display: block;
   font-size: var(--sheet-fs-small);
+  line-height: 1.3;
   color: var(--sheet-ink-2);
 }
 .sheet-solution--full .sheet-steps {
-  gap: calc(var(--sheet-step) * 1);
-  /* Номера шагов нужны и на странице приложения, где сброс стилей
-     снимает маркеры списков. */
-  list-style: decimal;
+  gap: calc(var(--sheet-step) * 0.75);
+  /* Номер пункта стоит в заголовке: «3. Направление прямой». */
+  list-style: none;
+  padding-left: 0;
 }
-/* Заголовок шага и первая его строка — в одну линию: карточка
-   неделима, и каждая сэкономленная строка — меньше пустот внизу страниц. */
-.sheet-step-title { color: var(--sheet-ink); margin-right: calc(var(--sheet-step) * 1.5); }
-.sheet-step-row { margin-top: calc(var(--sheet-step) * 0.5); }
-.sheet-step-title + .sheet-step-row { display: inline; margin-top: 0; }
-/* Длинная выкладка переносится по знакам, а не вылезает за рамку. */
+/* Подзаголовок блока задачи с двумя функциями: «II. Находим g(x)». */
+.sheet-step-block {
+  margin: calc(var(--sheet-step) * 1.5) 0 calc(var(--sheet-step) * 0.75);
+  font-weight: 700;
+  color: var(--sheet-ink);
+  text-transform: none;
+}
+.sheet-step-block:first-child,
+.sheet-solution-figure + .sheet-step-block { margin-top: 0; }
+/* Пункт: жирный заголовок, под ним одна-две короткие строки. */
+.sheet-step-title { display: block; color: var(--sheet-ink); }
+.sheet-step-row { margin-top: calc(var(--sheet-step) * 0.25); }
+/* Вычисление — отдельной строкой, с отступом. Длинная выкладка
+   переносится по знакам, а не вылезает за рамку. */
 .sheet-solution--full .sheet-step .math { margin-left: 0; white-space: normal; }
-.sheet-solution--full .sheet-step-formula { display: inline-block; margin-left: calc(var(--sheet-step) * 1); }
-.sheet-solution--full .sheet-task-answer { margin-top: calc(var(--sheet-step) * 2); }
+.sheet-solution--full .sheet-step-formula { padding-left: calc(var(--sheet-step) * 4); color: var(--sheet-ink); }
+/* Ответ — отдельной строкой в рамке. */
+.sheet-solution--full .sheet-task-answer--box {
+  display: inline-block;
+  margin-top: calc(var(--sheet-step) * 1.5);
+  padding: calc(var(--sheet-step) * 0.75) calc(var(--sheet-step) * 3);
+  border: var(--sheet-chip-width) solid var(--sheet-num-line);
+  border-radius: var(--sheet-radius-sm);
+  background: var(--sheet-num-bg);
+  color: var(--sheet-ink);
+}
+/* Длинное решение — в две колонки; пункт и подзаголовок блока
+   между колонками не рвутся. */
+.sheet-solution--long .sheet-solution-body {
+  column-count: 2;
+  column-gap: calc(var(--sheet-step) * 6);
+}
+.sheet-solution--long .sheet-steps { display: block; }
+.sheet-solution--long .sheet-step {
+  break-inside: avoid;
+  margin-bottom: calc(var(--sheet-step) * 0.75);
+}
+.sheet-solution--long .sheet-step-block { break-after: avoid; }
+.sheet-solution--long .sheet-solution-figure {
+  break-inside: avoid;
+  margin: 0 0 calc(var(--sheet-step) * 2);
+}
+/* Чертёж с треугольником наклона — справа от шагов, мельче чертежа условия. */
+.sheet-solution-figure { flex: none; width: 50mm; margin: 0; align-self: flex-start; }
+.sheet-solution-figure svg { display: block; width: 100%; height: auto; }
+.sheet-solution--full .sheet-solution-body { flex: 1 1 auto; min-width: 0; }
 
 /* Строка ответа под решением — жирная, чернилами. */
 .sheet-task-answer {

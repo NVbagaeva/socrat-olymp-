@@ -28,6 +28,8 @@ import katex from 'katex';
 import generator from '../src/lib/graph/generate.js';
 import teacher from '../src/lib/graph/solution-teacher.js';
 import Line from '../src/lib/graph/families/line.js';
+import Slope from '../src/lib/graph/slope.js';
+import SlopeFigure from '../src/lib/graph/slope-figure.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
 function readSets(dir) {
@@ -35,8 +37,8 @@ function readSets(dir) {
   return fs.readdirSync(full).filter((name) => name.endsWith('.json')).sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(full, name), 'utf8')));
 }
-const prep = [...readSets('prep/12'), ...readSets('prep/12q')];
-const prototypes = [...readSets('prototypes/12'), ...readSets('prototypes/12q')];
+const prep = [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')];
+const prototypes = [...readSets('prototypes/12'), ...readSets('prototypes/12q'), ...readSets('prototypes/12r')];
 generator.setSets({ prep, prototypes });
 const SETS = [...prep, ...prototypes];
 
@@ -55,12 +57,17 @@ const show = (f) => (f.q === 1 ? String(f.p) : f.p + '/' + f.q);
 function valueOf(curve, x) {
   const X = typeof x === 'object' ? x : toFrac(x);
   if (curve.kind === 'line') { return add(mul(curve.k, X), curve.b); }
+  if (curve.kind === 'rational') { return add(Line.div(curve.m, Line.sub(X, curve.s)), curve.t); }
   return add(add(mul(curve.a, mul(X, X)), mul(curve.b, X)), curve.c);
 }
 
 /** Ответ ключа точной дробью: «−19,5» → −39/2. */
 function keyValue(answer) {
-  return toFrac(Number(String(answer).replace(/−/g, '-').replace(',', '.')));
+  const text = String(answer).replace(/−/g, '-').replace(',', '.').trim();
+  const [whole, part = ''] = text.split('.');
+  const q = 10 ** part.length;
+  const sign = whole.startsWith('-') ? -1 : 1;
+  return Line.frac(sign * (Math.abs(Number(whole)) * q + Number(part || 0)), q);
 }
 
 /** Все формулы решения: отдельные и внутри текста. */
@@ -82,6 +89,8 @@ const HYGIENE = [
   [/(^|[^\d}{\\a-z])1x/, 'единица перед x'],
   [/[a-z0-9})]-[\d\\a-z]/, 'минус без пробелов между слагаемыми'],
   [/[a-z](_\d)?\d\^/, 'буква вплотную к числу в степени'],
+  [/[ka] = \\dfrac\{[^{}]*\d - [^{}]*\}\{[^{}]*\d - /, 'k через разность координат'],
+  [/\\Delta/, 'k через разность координат'],
 ];
 
 function checkTask(task) {
@@ -106,6 +115,33 @@ function checkTask(task) {
       problems.push('точка (' + point.x + '; ' + point.y + ') не лежит на ' + (point.curve ? 'g' : 'f'));
     }
   });
+  /* Треугольник наклона: вершина прямого угла под прямой, катеты —
+     положительные целые, знак k — по направлению прямой, k из
+     треугольника равен точному k задачи. */
+  (check.triangles || []).forEach(({ curve: index, triangle: t }) => {
+    const curve = check.curves[index];
+    const name = index ? 'g' : 'f';
+    const exactK = curve.exact.k;
+    if (!same(t.k, exactK)) { problems.push(name + ': k по треугольнику ' + show(t.k) + ', в ключе ' + show(exactK)); }
+    if (t.flat) {
+      if (exactK.p !== 0) { problems.push(name + ': прямая не горизонтальна, а треугольник не построен'); }
+      return;
+    }
+    if (!(t.dx > 0 && t.dy > 0 && Number.isInteger(t.dx) && Number.isInteger(t.dy))) {
+      problems.push(name + ': катеты ' + t.dx + ' и ' + t.dy + ' — не положительные целые');
+    }
+    if (!Slope.vertexBelow(t, Line.create(curve.exact.k, curve.exact.b))) {
+      problems.push(name + ': вершина прямого угла (' + t.C.x + '; ' + t.C.y + ') не под прямой');
+    }
+    if (t.rising !== (exactK.p > 0)) { problems.push(name + ': знак k не совпадает с направлением прямой'); }
+  });
+  if (check.curves.some((curve) => curve.kind === 'line') && !(check.triangles || []).length &&
+      check.points.length) {
+    /* Прямая с чертежа без треугольника — k найден не тем способом. */
+    if (check.curves.some((curve, i) => curve.kind === 'line' && check.points.some((p) => p.curve === i))) {
+      problems.push('k найден без треугольника наклона');
+    }
+  }
   if (check.roots && check.curves.length === 2) {
     check.roots.forEach((r) => {
       const fv = valueOf(check.curves[0], r);
@@ -128,6 +164,50 @@ function checkTask(task) {
     problems.push('в решении нет ответа');
   }
 
+  /* Пункты: у каждого номер и заголовок; точки в пункте «Точки
+     с рисунка» — слева направо; в блоке с возрастающей прямой названа
+     вершина угла α, с убывающей — угла 180° − α. */
+  const blocks = new Map();
+  steps.forEach((step) => {
+    if (!step.no || !step.title) { problems.push('пункт без номера или заголовка'); }
+    const key = step.block || '';
+    if (!blocks.has(key)) { blocks.set(key, []); }
+    blocks.get(key).push(step);
+  });
+  blocks.forEach((list) => {
+    list.forEach((step, i) => { if (step.no !== i + 1) { problems.push('нумерация пунктов сбита: ' + step.title); } });
+    const text = list.map((step) => step.rows.map((item) => String(item.text || '') + ' ' + String(item.tex || '')).join(' ')).join(' ');
+    list.filter((step) => step.title === 'Точки с рисунка').forEach((step) => {
+      const tex = step.rows.map((item) => item.tex || '').join(' ');
+      const xs = [...tex.matchAll(/[A-Z]\((-?\d+);/g)].map((m) => Number(m[1]));
+      if (xs.length === 2 && xs[0] >= xs[1]) { problems.push('точки не слева направо: «' + tex + '»'); }
+    });
+    if (/Прямая возрастает/.test(text) && !/при вершине \$[^$]+\$ равен \$\\alpha\$/.test(text)) {
+      problems.push('у возрастающей прямой не названа вершина угла α');
+    }
+    if (/Прямая убывает/.test(text) && !/при вершине \$[^$]+\$ — смежный/.test(text)) {
+      problems.push('у убывающей прямой не названа вершина угла 180° − α');
+    }
+  });
+
+  /* Чертёж учителя: без треугольников — байт в байт чертёж ученика,
+     с ними — на нём есть катеты каждого треугольника. */
+  if (task.svg) {
+    if (teacher.figure(task, null, { triangles: false }) !== task.svg) {
+      problems.push('чертёж учителя без треугольников не совпадает с чертежом условия');
+    }
+    const drawn = (check.triangles || []).filter((item) => !item.triangle.flat);
+    if (drawn.length) {
+      const svg = teacher.figure(task, solved) || '';
+      drawn.forEach((item, i) => {
+        if (!svg.includes('id="teacher-leg-x-' + (i + 1) + '"')) { problems.push('на чертеже нет треугольника ' + (i + 1)); }
+      });
+    }
+  }
+
+  const drawnItems = (check.triangles || []).filter((item) => !item.triangle.flat);
+  if (task.svg && drawnItems.length) { problems.push(...SlopeFigure.layoutProblems(task, drawnItems)); }
+
   formulasOf(steps).forEach((tex) => {
     HYGIENE.forEach(([pattern, what]) => { if (pattern.test(tex)) { problems.push(what + ': «' + tex + '»'); } });
     try { katex.renderToString(tex, { throwOnError: true }); }
@@ -146,8 +226,10 @@ if (printAt >= 0) {
       const solved = teacher.build({ ...task, answerRule: rules[task.id] });
       console.log('\n━━ ' + task.id + ' — ' + set.title);
       console.log('Условие: ' + String(task.question || '').replace(/\s+/g, ' '));
-      solved.steps.forEach((step, i) => {
-        console.log((i + 1) + '. ' + step.title);
+      let block = null;
+      solved.steps.forEach((step) => {
+        if (step.block !== block) { block = step.block; if (block) { console.log('— ' + block); } }
+        console.log(step.no + '. ' + step.title);
         step.rows.forEach((item) => {
           console.log('   ' + [item.text, item.tex ? '$$ ' + item.tex + ' $$' : ''].filter(Boolean).join(' '));
         });

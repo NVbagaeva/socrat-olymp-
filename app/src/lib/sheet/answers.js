@@ -179,32 +179,62 @@ function inlineText(value) {
 }
 
 /**
- * Полное решение одной задачи для учителя: номер, шаги по порядку
- * и строка ответа. Класс sheet-solution тот же, что у краткого:
- * карточка так же не рвётся между страницами и так же считается
- * в отчёте сборки.
+ * Полное решение одной задачи для учителя по пунктам: у пункта номер
+ * и жирный заголовок, под ним короткие строки, вычисление — отдельной
+ * строкой; ответ — в рамке. Класс sheet-solution тот же, что у
+ * краткого: карточка так же не рвётся между страницами и так же
+ * считается в отчёте сборки.
  *
- * steps  — [{ title, rows: [{ text, tex }] }]: text — строка, где
- *          формулы стоят между знаками $…$; tex — формула строки
+ * steps  — [{ block, no, title, rows: [{ text, tex }] }]: block —
+ *          подзаголовок блока («II. Находим g(x)») или null, no — номер
+ *          пункта в блоке; text — строка, где формулы стоят между
+ *          знаками $…$; tex — формула отдельной строкой
  * answer — ответ разметкой, как в ключе
+ * figureSvg — чертёж условия с треугольником наклона, если он есть
  */
-function fullSolution(no, steps, answer) {
-  var list = steps.map(function (step) {
-    var rows = step.rows.map(function (item) {
-      return '<div class="sheet-step-row">' +
-        (item.text ? '<span class="sheet-step-text">' + inlineText(item.text) + '</span>' : '') +
-        (item.tex ? ' <span class="sheet-step-formula">' + mathSpan(item.tex) + '</span>' : '') +
-        '</div>';
+/* Сколько строк (заголовков пунктов и строк под ними) решение
+   держит в одну колонку. */
+var LONG_LINES = 34;
+
+function fullSolution(no, steps, answer, figureSvg) {
+  /* Пункты идут блоками («I. Находим f(x)» …); у задачи с одной функцией
+     блок один и без подзаголовка. Номер пункта — свой в каждом блоке. */
+  var groups = [];
+  steps.forEach(function (step, i) {
+    var last = groups[groups.length - 1];
+    if (!last || last.block !== (step.block || null)) {
+      last = { block: step.block || null, items: [] };
+      groups.push(last);
+    }
+    last.items.push({ step: step, no: step.no || i + 1 });
+  });
+
+  var body = groups.map(function (group) {
+    var items = group.items.map(function (entry) {
+      var rows = entry.step.rows.map(function (item) {
+        return (item.text ? '<div class="sheet-step-row">' + inlineText(item.text) + '</div>' : '') +
+          (item.tex ? '<div class="sheet-step-row sheet-step-formula">' + mathSpan(item.tex) + '</div>' : '');
+      }).join('');
+      return '<li class="sheet-step" value="' + entry.no + '">' +
+        '<b class="sheet-step-title">' + entry.no + '. ' + inlineText(entry.step.title) + '</b>' + rows + '</li>';
     }).join('');
-    return '<li class="sheet-step"><b class="sheet-step-title">' + inlineText(step.title) + '</b>' + rows + '</li>';
+    return (group.block ? '<p class="sheet-step-block">' + inlineText(group.block) + '</p>' : '') +
+      '<ol class="sheet-steps">' + items + '</ol>';
   }).join('');
 
-  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+  /* Длинное решение (две функции, десятки строк) в одну колонку выше
+     страницы, а рвать задачу между страницами нельзя. Тогда пункты идут
+     в две колонки, чертёж — в начале первой. */
+  var lines = steps.reduce(function (sum, step) { return sum + 1 + step.rows.length; }, 0);
+  var long = lines > LONG_LINES;
+  var figure = figureSvg ? '<figure class="sheet-figure sheet-solution-figure">' + figureSvg + '</figure>' : '';
+
+  return '<div class="sheet-item sheet-solution sheet-solution--full' + (long ? ' sheet-solution--long' : '') + '">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
-    '<div class="sheet-solution-body">' +
-      '<ol class="sheet-steps">' + list + '</ol>' +
-      '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answer) + '</b></p>' +
+    '<div class="sheet-solution-body">' + (long ? figure : '') + body +
+      '<p class="sheet-task-answer sheet-task-answer--box">Ответ: <b>' + typo.markup(answer) + '</b></p>' +
     '</div>' +
+    (long ? '' : figure) +
     '</div>';
 }
 

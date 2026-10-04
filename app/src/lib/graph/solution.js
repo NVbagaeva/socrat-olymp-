@@ -20,6 +20,7 @@
 */
 
 import Line from './families/line.js';
+import Slope from './slope.js';
 
 var MINUS = '−';
 
@@ -440,6 +441,19 @@ function pairLine(spec) {
   return { line: line, points: points };
 }
 
+/* Строки треугольника наклона (graph/slope.js) — блоками разбора:
+   формулы внутри текста стоят между знаками $…$. */
+function slopeBlocks(t, letter) {
+  var out = [];
+  Slope.teacherRows(t, letter).forEach(function (item) {
+    if (item.text) {
+      out.push(text(item.text.replace(/\$([^$]*)\$/g, function (_m, tx) { return math(tx, escapeAttr(tx)); })));
+    }
+    if (item.tex) { out.push(formula(item.tex)); }
+  });
+  return out;
+}
+
 /* Шаги 1 и 2: формула одной прямой пары по отмеченным точкам. */
 function stepPairFormula(name, item, win) {
   var line = item.line;
@@ -451,18 +465,11 @@ function stepPairFormula(name, item, win) {
   var blocks = [];
 
   if (p1 && p2) {
-    var dy = p2.y - p1.y;
-    var dx = p2.x - p1.x;
     blocks.push(text('Прямая ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') +
       ' проходит через отмеченные точки <b class="key">' + math(pointTex(p1), pointPlain(p1)) +
-      '</b> и <b class="key">' + math(pointTex(p2), pointPlain(p2)) + '</b>. ' +
-      'Угловой коэффициент — это отношение изменения ' + math('y', 'y') +
-      ' к изменению ' + math('x', 'x') + ' между ними:'));
-    var raw = fracTex(dy, dx);
-    var done = texExact(kf);
-    blocks.push(formula('k = \\dfrac{' + texNegative(p2.y) + ' - ' + texNegative(p1.y) + '}{' +
-      texNegative(p2.x) + ' - ' + texNegative(p1.x) + '} = ' + raw +
-      (raw === done ? '' : ' = ' + done)));
+      '</b> и <b class="key">' + math(pointTex(p2), pointPlain(p2)) + '</b>.'));
+    /* k — тангенс угла наклона, через треугольник под прямой. */
+    slopeBlocks(Slope.build(p1, p2), 'k').forEach(function (block) { blocks.push(block); });
   } else {
     blocks.push(text('Угловой коэффициент прямой ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') + ':'));
     blocks.push(formula('k = ' + texExact(kf)));

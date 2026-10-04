@@ -1,33 +1,32 @@
 /* graph/solution-teacher.js — полное решение для листа ответов учителя.
 
-   Разбор для ученика (solution.js, solution-quadratic.js) объясняет
-   и ведёт за руку; лист учителя нужен для другого — проверить работу
-   ученика на каждом шаге. Поэтому здесь нет пояснений «почему», зато
-   есть все выкладки по порядку:
-
-     1. f(x): точки с рисунка, подстановка, коэффициенты, формула;
-     2. то же для g(x), если функций две;
-     3. f(x) = g(x) с подставленными коэффициентами;
-     4. приведение к стандартному виду;
-     5. решение: дискриминант и оба корня, рядом — проверка по Виету;
-     6. выбор корня с пояснением;
-     7. ордината, если спрашивают её;
-     8. ответ.
+   Разбор для ученика объясняет и ведёт за руку; лист учителя нужен,
+   чтобы проверить работу ученика на каждом шаге. Решение набирается
+   по пунктам: у каждого пункта номер и заголовок («Общий вид», «Точки
+   с рисунка», «Направление прямой», «Треугольник», «Находим k»,
+   «Находим b», «Формула»), под ним — одна-две короткие строки и
+   формула. У задачи с двумя функциями пункты разбиты на блоки
+   «I. Находим f(x)», «II. Находим g(x)», «III. Точки пересечения»,
+   нумерация в каждом блоке своя.
 
    Всё строится из параметров задачи (task.meta): точных дробей
    коэффициентов, отмеченных точек и окна чертежа. Шаблонных чисел нет.
    Нецелые числа пишутся обыкновенной дробью; ответ — как в ключе.
 
    Модуль отдаёт структуру, а не разметку:
-     { steps: [{ title, rows: [{ text, tex }] }], check }
-   text — строка, где формулы внутри стоят между знаками $…$;
-   tex  — отдельная формула строки. check — что посчитано, для
-   автопроверки (scripts/check-teacher-solutions.mjs).
+     { steps: [{ block, no, title, rows: [{ text, tex }], slope? }], check }
+   text — строка, где формулы стоят между знаками $…$; tex — отдельная
+   формула строки; slope — треугольник наклона пункта «Треугольник».
+   check — что посчитано, для автопроверки
+   (scripts/check-teacher-solutions.mjs).
 */
 
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
+import R from './generate-rational.js';
 import { equationText as lineEquationText } from './generate.js';
+import Slope from './slope.js';
+import SlopeFigure from './slope-figure.js';
 
 var frac = Line.frac;
 var toFrac = Line.toFrac;
@@ -107,9 +106,6 @@ function withDecimal(f) {
 
 /** Значение функции: f(−3), f\left(\dfrac{27}{2}\right). */
 function fn(name, x) { return name + (isInt(x) ? '(' + N(x) + ')' : '\\left(' + N(x) + '\\right)'); }
-
-/** Число так, как оно записано в условии: 13,5 — десятичной, 1/3 — дробью. */
-function given(f) { return isInt(f) || !decimalFriendly(f) ? N(f) : D(f); }
 
 /** Строка перевода числа из условия в обыкновенную дробь, если она нужна. */
 function convertRow(f) {
@@ -204,8 +200,9 @@ function timesSquare(k, x) {
 function quadTerms(a, b, c) { return [{ c: a, power: 2 }, { c: b, power: 1 }, { c: c, power: 0 }]; }
 function lineTerms(k, b) { return [{ c: k, power: 1 }, { c: b, power: 0 }]; }
 
+
 /* ══════════════════════════════════════════════════════════
-   Строки решения
+   Пункты решения
    ══════════════════════════════════════════════════════════ */
 
 function row(textValue, texValue) {
@@ -215,45 +212,121 @@ function row(textValue, texValue) {
   return out;
 }
 
-/* ══════════════════════════════════════════════════════════
-   Прямая по двум точкам
-   ══════════════════════════════════════════════════════════ */
-
 /**
- * name — f или g, letter — буква свободного члена (b, а если она
- * занята коэффициентом параболы, — m). Возвращает строки и найденные k, b.
+ * Решение по пунктам. У задачи с двумя функциями пункты разбиты на блоки
+ * («I. Находим f(x)», «II. Находим g(x)», «III. Точки пересечения»), и в
+ * каждом блоке нумерация своя — с единицы. slope — треугольник наклона
+ * пункта «Треугольник»: по нему разбор опорной задачи рисует чертёж.
  */
-function lineFromPoints(name, letter, p1, p2, given) {
-  var rows = [];
-  var x1 = F(p1.x); var y1 = F(p1.y); var x2 = F(p2.x); var y2 = F(p2.y);
-  rows.push(row('Общий вид: $' + name + '(x) = kx + ' + letter + '$. С рисунка берём точки $' +
-    pt(p1.x, p1.y) + '$ и $' + pt(p2.x, p2.y) + '$' + (given ? ' (отмечены на рисунке).' : ' (узлы сетки на прямой).')));
-  var dy = sub(y2, y1);
-  var dx = sub(x2, x1);
-  var k = div(dy, dx);
-  var kChain = 'k = \\dfrac{' + N(y2) + ' - ' + P(y1) + '}{' + N(x2) + ' - ' + P(x1) + '} = ' +
-    '\\dfrac{' + N(dy) + '}{' + N(dx) + '}';
-  if (!(isInt(dy) && isInt(dx) && dx.p === 1)) { kChain += ' = ' + N(k); }
-  rows.push(row('Угловой коэффициент:', kChain));
+function Steps() {
+  this.list = [];
+  this.block = null;
+}
 
-  var b;
-  var onAxis = isZero(x1) ? p1 : isZero(x2) ? p2 : null;
-  if (onAxis) {
-    b = F(onAxis.y);
-    rows.push(row('Точка $' + pt(onAxis.x, onAxis.y) + '$ лежит на оси $Oy$, значит, $' +
-      letter + ' = ' + N(b) + '$.'));
-  } else {
-    b = sub(y1, mul(k, x1));
-    rows.push(row('Подставляем точку $' + pt(p1.x, p1.y) + '$:',
-      N(y1) + ' = ' + times(k, x1) + ' + ' + letter + ', \\quad ' +
-      letter + ' = ' + N(y1) + plus(neg(mul(k, x1))) + ' = ' + N(b)));
-  }
-  rows.push(row('Формула:', name + '(x) = ' + lineTex(k, b)));
-  return { rows: rows, k: k, b: b };
+Steps.prototype.start = function (block) { this.block = block; };
+
+Steps.prototype.add = function (title, rows, extra) {
+  var item = { block: this.block, title: title, rows: rows.filter(Boolean) };
+  if (extra) { Object.keys(extra).forEach(function (key) { item[key] = extra[key]; }); }
+  this.list.push(item);
+  return item;
+};
+
+Steps.prototype.done = function () {
+  var counters = {};
+  this.list.forEach(function (item) {
+    var key = item.block || '';
+    counters[key] = (counters[key] || 0) + 1;
+    item.no = counters[key];
+  });
+  return this.list;
+};
+
+var BLOCK_F = 'I. Находим $f(x)$';
+var BLOCK_G = 'II. Находим $g(x)$';
+var BLOCK_X = 'III. Точки пересечения';
+
+/** Число в заголовке пункта так, как оно стоит в условии: «Находим
+    $f(13{,}5)$» — десятичной записью, трети — дробью. */
+function givenTex(f) {
+  return isInt(f) || !decimalFriendly(f) ? N(f) : D(f);
 }
 
 /* ══════════════════════════════════════════════════════════
-   Парабола по точкам
+   Прямая по двум точкам: пункты «Общий вид» … «Формула»
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Пункты прямой. opts:
+ *   name     — f или g;
+ *   kLetter  — буква углового коэффициента (k, у прямой с гиперболой — a);
+ *   bLetter  — буква свободного члена (b, у прямой с параболой — m);
+ *   p1, p2   — точки прямой в узлах сетки; у точки может быть label —
+ *              её имя из условия (A), остальные зовутся M и N;
+ *   source   — откуда точки: 'marked' (отмечены) или 'grid' (узлы сетки);
+ *   notes    — пояснение к точке по имени: { A: 'отмеченная точка пересечения' }.
+ * Возвращает k, b, треугольник и имена точек.
+ */
+function lineSteps(S, opts) {
+  var name = opts.name;
+  var kL = opts.kLetter || 'k';
+  var bL = opts.bLetter || 'b';
+  var left = opts.p1.x < opts.p2.x ? opts.p1 : opts.p2;
+  var right = opts.p1.x < opts.p2.x ? opts.p2 : opts.p1;
+  /* Имена: из условия, иначе M и N — слева направо. */
+  var free = ['M', 'N'].filter(function (letter) { return letter !== left.label && letter !== right.label; });
+  var nameL = left.label || free.shift();
+  var nameR = right.label || free.shift();
+  var named = function (p, label) { return label + pt(p.x, p.y); };
+
+  S.add('Общий вид', [row('', name + '(x) = ' + kL + 'x + ' + bL)]);
+
+  var notes = opts.notes || {};
+  var pointRows = [row('', named(left, nameL) + ',\\quad ' + named(right, nameR))];
+  Object.keys(notes).forEach(function (label) {
+    if (label === nameL || label === nameR) { pointRows.push(row('$' + label + '$ — ' + notes[label] + '.')); }
+  });
+  /* Отмеченные точки названы самим заголовком «Точки с рисунка»;
+     пояснение нужно, только когда это просто узлы сетки на прямой. */
+  if (opts.source === 'grid') {
+    pointRows.push(row('Узлы сетки, через которые проходит прямая.'));
+  }
+  S.add('Точки с рисунка', pointRows);
+
+  var t = Slope.build(left, right);
+  var parts = Slope.pointedRows(t, { L: nameL, R: nameR }, kL);
+  S.add('Направление прямой', parts.direction.map(function (r) { return row(r.text, r.tex); }));
+  if (!t.flat) {
+    S.add('Треугольник', parts.triangle.map(function (r) { return row(r.text, r.tex); }),
+      { slope: { triangle: t, curve: opts.curve || 0 } });
+  }
+  S.add('Находим $' + kL + '$', parts.k.map(function (r) { return row(r.text, r.tex); }));
+  var k = t.k;
+
+  var b;
+  var onAxis = left.x === 0 ? left : right.x === 0 ? right : null;
+  if (onAxis) {
+    b = F(onAxis.y);
+    S.add('Находим $' + bL + '$', [row('$' + named(onAxis, onAxis === left ? nameL : nameR) +
+      '$ лежит на оси $Oy$ $\\Rightarrow$ $' + bL + ' = ' + N(b) + '$')]);
+  } else {
+    var base = left;
+    var baseName = nameL;
+    var X = F(base.x); var Y = F(base.y);
+    b = sub(Y, mul(k, X));
+    S.add('Находим $' + bL + '$', [
+      row('Подставляем $' + named(base, baseName) + '$ в $' + name + '(x) = ' + lineTex(k, F(0)).replace(/^0$/, '') +
+        (isZero(k) ? '' : ' + ') + bL + '$:'),
+      row('', N(Y) + ' = ' + times(k, X) + ' + ' + bL + ' \\;\\Rightarrow\\; ' + bL + ' = ' + N(Y) +
+        plus(neg(mul(k, X))) + ' = ' + N(b))
+    ]);
+  }
+  S.add('Формула', [row('', name + '(x) = ' + lineTex(k, b))]);
+  return { k: k, b: b, triangle: t, names: { L: nameL, R: nameR }, left: left, right: right };
+}
+
+/* ══════════════════════════════════════════════════════════
+   Парабола по рисунку
    ══════════════════════════════════════════════════════════ */
 
 function half(f) { return isInt(mul(frac(2), f)); }
@@ -284,97 +357,115 @@ function nearestToVertex(candidates, curve) {
   return best;
 }
 
+function pointNote(point) {
+  if (point.role === 'cross') { return 'отмеченная точка пересечения'; }
+  return point.marked === false ? 'узел сетки' : 'отмечена на рисунке';
+}
+
+function pointName(point) { return (point.label || '') + pt(point.x, point.y); }
+
 /**
- * Парабола по рисунку. letters — { a, b, c } для подписи коэффициентов
- * (у второй параболы — a₂, b₂, c₂). marks — отмеченные точки этой кривой.
- * knownA — старший коэффициент дан в условии.
+ * Пункты параболы. letters — { a, b, c } (у второй параболы — a₂, b₂, c₂),
+ * marks — отмеченные точки этой кривой, knownA — a дан в условии,
+ * onlyA — спрашивают только a.
  */
-function parabolaFromChart(name, letters, curve, win, marks, knownA, onlyA) {
-  var rows = [];
+function parabolaSteps(S, name, letters, curve, win, marks, knownA, onlyA) {
   var la = letters.a; var lb = letters.b; var lc = letters.c;
   var vertexMark = (marks || []).filter(function (point) { return point.role === 'vertex'; })[0] || null;
   var others = (marks || []).filter(function (point) { return point.role !== 'vertex'; });
   var used = [];
 
-  rows.push(row('Общий вид: $' + name + '(x) = ' + la + 'x^2 + ' + lb + 'x + ' + lc + '$.'));
+  S.add('Общий вид', [row('', name + '(x) = ' + la + 'x^2 + ' + lb + 'x + ' + lc)]);
 
   if (vertexReadable(curve, win, !!vertexMark)) {
     var x0 = curve.m; var y0 = curve.n;
     used.push({ x: num(x0), y: num(y0) });
-    rows.push(row('Вершина параболы' + (vertexMark ? ' отмечена на рисунке' : ' видна на рисунке') +
-      ': $(x_0;\\, y_0) = ' + pt(x0, y0) + '$. Запись через вершину: $' + name + '(x) = ' +
-      la + '(x - x_0)^2 + y_0$.'));
+    var node = null;
+    if (!knownA) {
+      node = nearestToVertex(others, curve) ||
+        nearestToVertex(gridNodes(curve, win).map(function (p) { return { x: p.x, y: p.y, marked: false }; }), curve);
+      if (!node) { throw new Error('solution-teacher: у параболы нет второй точки'); }
+      used.push({ x: node.x, y: node.y });
+    }
+    S.add('Точки с рисунка', [
+      row('Вершина: $(x_0;\\, y_0) = ' + pt(x0, y0) + '$' + (vertexMark ? ' (отмечена на рисунке).' : '.')),
+      node ? row('Точка графика: $' + pointName(node) + '$ — ' + pointNote(node) + '.') : null
+    ]);
     var A;
     if (knownA) {
       A = curve.a;
-      rows.push(row('Коэффициент $' + la + ' = ' + N(A) + '$ дан в условии.'));
+      S.add('Находим $' + la + '$', [row('Коэффициент $' + la + ' = ' + N(A) + '$ дан в условии.')]);
     } else {
-      var node = nearestToVertex(others, curve) || nearestToVertex(gridNodes(curve, win), curve);
-      if (!node) { throw new Error('solution-teacher: у параболы нет второй точки'); }
-      used.push({ x: node.x, y: node.y });
       var X = F(node.x); var Y = F(node.y);
       var dx = sub(X, x0); var dy = sub(Y, y0);
-      A = div(dy, mul(dx, dx));
       var dx2 = mul(dx, dx);
+      A = div(dy, dx2);
       var base = isZero(x0) ? ' \\cdot ' + Pw(X) : bracket(minus(N(X), x0), x0);
-      var aRow = N(Y) + ' = ' + la + base + '^2' + (isZero(y0) ? '' : plus(y0)) +
-        ', \\quad ' + (isInt(dx2) && dx2.p === 1 ? '' : N(dx2)) + la + ' = ' + N(dy);
+      var chain = N(Y) + ' = ' + la + base + '^2' + (isZero(y0) ? '' : plus(y0)) +
+        ' \\;\\Rightarrow\\; ' + (isInt(dx2) && dx2.p === 1 ? '' : N(dx2)) + la + ' = ' + N(dy);
       if (!(isInt(dx2) && dx2.p === 1)) {
-        aRow += ', \\quad ' + la + ' = ' + (isInt(dy) && isInt(dx2) ? '' : N(dy) + ' : ' + N(dx2) + ' = ') + N(A);
+        chain += ' \\;\\Rightarrow\\; ' + la + ' = ' + (isInt(dy) && isInt(dx2) ? '' : N(dy) + ' : ' + N(dx2) + ' = ') + N(A);
       }
-      rows.push(row('Ещё одна точка графика: $' + pt(node.x, node.y) + '$' +
-        (others.indexOf(node) >= 0 ? ' (отмечена на рисунке)' : ' (узел сетки)') + '. Подставляем в запись через вершину:',
-        aRow));
+      S.add('Находим $' + la + '$', [
+        row('Подставляем точку в $' + name + '(x) = ' + la + '(x - x_0)^2 + y_0$:'),
+        row('', chain)
+      ]);
     }
-    if (onlyA) { return { rows: rows, a: A, points: used, partial: true }; }
+    if (onlyA) { return { a: A, points: used, partial: true }; }
     var B = mul(frac(-2), mul(A, x0));
     var C = add(mul(A, mul(x0, x0)), y0);
-    rows.push(row('Раскрываем скобки: $' + name + '(x) = ' + vertexTex(A, x0, y0) + '$, откуда',
-      lb + ' = -2' + la + 'x_0 = -2 \\cdot ' + P(A) + ' \\cdot ' + P(x0) + ' = ' + N(B) + ', \\quad ' +
-      lc + ' = ' + la + 'x_0^2 + y_0 = ' + timesSquare(A, x0) + (isZero(y0) ? '' : plus(y0)) + ' = ' + N(C)));
-    rows.push(row('Формула:', name + '(x) = ' + quadTex(A, B, C)));
-    return { rows: rows, a: A, b: B, c: C, points: used };
+    S.add('Находим $' + lb + '$ и $' + lc + '$', [
+      row('Раскрываем скобки в $' + name + '(x) = ' + vertexTex(A, x0, y0) + '$:'),
+      row('', lb + ' = -2' + la + 'x_0 = -2 \\cdot ' + P(A) + ' \\cdot ' + P(x0) + ' = ' + N(B)),
+      row('', lc + ' = ' + la + 'x_0^2 + y_0 = ' + timesSquare(A, x0) + (isZero(y0) ? '' : plus(y0)) + ' = ' + N(C))
+    ]);
+    S.add('Формула', [row('', name + '(x) = ' + quadTex(A, B, C))]);
+    return { a: A, b: B, c: C, points: used };
   }
 
   /* Вершину не прочитать — три точки графика и система. */
   var pool = others.slice();
-  gridNodes(curve, win).forEach(function (node) {
-    if (!pool.some(function (p) { return p.x === node.x; })) { pool.push(node); }
+  gridNodes(curve, win).forEach(function (n) {
+    if (!pool.some(function (p) { return p.x === n.x; })) { pool.push({ x: n.x, y: n.y, marked: false }); }
   });
   var interceptPoint = pool.filter(function (p) { return p.x === 0; })[0] || null;
   var chosen = interceptPoint ? [interceptPoint] : [];
   pool.forEach(function (p) { if (chosen.length < 3 && chosen.indexOf(p) < 0) { chosen.push(p); } });
   if (chosen.length < 3) { throw new Error('solution-teacher: у параболы меньше трёх точек на рисунке'); }
   chosen.forEach(function (p) { used.push({ x: p.x, y: p.y }); });
-  rows.push(row('Берём с рисунка три точки графика: $' + chosen.map(function (p) { return pt(p.x, p.y); }).join('$, $') + '$.'));
+  S.add('Точки с рисунка', [row('', chosen.map(pointName).join(',\\quad ')),
+    row('Вершину с рисунка не прочитать — берём три точки графика.')]);
   var eqs = chosen.map(function (p) {
-    return N(F(p.y)) + ' = ' + la + ' \\cdot ' + P(F(p.x)) + '^2 + ' + lb + ' \\cdot ' + P(F(p.x)) + ' + ' + lc;
+    return N(F(p.y)) + ' = ' + la + ' \\cdot ' + Pw(F(p.x)) + '^2 + ' + lb + ' \\cdot ' + P(F(p.x)) + ' + ' + lc;
   });
-  rows.push(row('Подставляем в общий вид:', '\\begin{cases} ' + eqs.join(' \\\\ ') + ' \\end{cases}'));
+  S.add('Система', [row('Подставляем точки в общий вид:'),
+    row('', '\\begin{cases} ' + eqs.join(' \\\\ ') + ' \\end{cases}')]);
   var A2; var B2; var C2;
   var pts = chosen.map(function (p) { return { x: F(p.x), y: F(p.y) }; });
+  var solveRows;
   if (interceptPoint) {
     C2 = pts[0].y;
     var s1 = div(sub(pts[1].y, C2), pts[1].x);
     var s2 = div(sub(pts[2].y, C2), pts[2].x);
-    rows.push(row('Из первого уравнения $' + lc + ' = ' + N(C2) + '$. Подставляем в два других и делим на $x$:',
-      '\\begin{cases} ' + N(pts[1].x) + la + ' + ' + lb + ' = ' + N(s1) + ' \\\\ ' +
-      N(pts[2].x) + la + ' + ' + lb + ' = ' + N(s2) + ' \\end{cases}'));
     A2 = div(sub(s1, s2), sub(pts[1].x, pts[2].x));
     B2 = sub(s1, mul(A2, pts[1].x));
+    solveRows = [row('Из первого уравнения $' + lc + ' = ' + N(C2) + '$; два других делим на $x$:'),
+      row('', '\\begin{cases} ' + N(pts[1].x) + la + ' + ' + lb + ' = ' + N(s1) + ' \\\\ ' +
+        N(pts[2].x) + la + ' + ' + lb + ' = ' + N(s2) + ' \\end{cases}')];
   } else {
     var t1 = add(pts[1].x, pts[0].x); var r1 = div(sub(pts[1].y, pts[0].y), sub(pts[1].x, pts[0].x));
     var t2 = add(pts[2].x, pts[0].x); var r2 = div(sub(pts[2].y, pts[0].y), sub(pts[2].x, pts[0].x));
-    rows.push(row('Вычитаем первое уравнение из второго и третьего и делим на разность абсцисс:',
-      '\\begin{cases} ' + lineTexLetters(t1, la, lb) + ' = ' + N(r1) + ' \\\\ ' +
-      lineTexLetters(t2, la, lb) + ' = ' + N(r2) + ' \\end{cases}'));
     A2 = div(sub(r1, r2), sub(t1, t2));
     B2 = sub(r1, mul(A2, t1));
     C2 = sub(sub(pts[0].y, mul(A2, mul(pts[0].x, pts[0].x))), mul(B2, pts[0].x));
+    solveRows = [row('Вычитаем первое уравнение из второго и третьего, делим на разность абсцисс:'),
+      row('', '\\begin{cases} ' + lineTexLetters(t1, la, lb) + ' = ' + N(r1) + ' \\\\ ' +
+        lineTexLetters(t2, la, lb) + ' = ' + N(r2) + ' \\end{cases}')];
   }
-  rows.push(row('Отсюда:', la + ' = ' + N(A2) + ', \\quad ' + lb + ' = ' + N(B2) + ', \\quad ' + lc + ' = ' + N(C2)));
-  rows.push(row('Формула:', name + '(x) = ' + quadTex(A2, B2, C2)));
-  return { rows: rows, a: A2, b: B2, c: C2, points: used };
+  solveRows.push(row('', '\\Rightarrow\\; ' + la + ' = ' + N(A2) + ', \\quad ' + lb + ' = ' + N(B2) + ', \\quad ' + lc + ' = ' + N(C2)));
+  S.add('Решаем систему', solveRows);
+  S.add('Формула', [row('', name + '(x) = ' + quadTex(A2, B2, C2))]);
+  return { a: A2, b: B2, c: C2, points: used };
 }
 
 function lineTexLetters(t, la, lb) {
@@ -391,7 +482,7 @@ function vertexTex(a, x0, y0) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   Квадратное уравнение: дискриминант и Виета
+   Квадратное уравнение: стандартный вид, дискриминант и Виета
    ══════════════════════════════════════════════════════════ */
 
 /**
@@ -403,13 +494,13 @@ function normalize(A, B, C) {
   var L = [A, B, C].reduce(function (acc, f) { return lcm(acc, f.q); }, 1);
   if (L > 1) {
     A = mul(A, frac(L)); B = mul(B, frac(L)); C = mul(C, frac(L));
-    rows.push(row('Умножаем обе части на $' + L + '$:', quadTex(A, B, C) + ' = 0'));
+    rows.push(row('Умножаем обе части на $' + L + '$:'), row('', quadTex(A, B, C) + ' = 0'));
   }
   var g = [A, B, C].reduce(function (acc, f) { return gcd(acc, f.p); }, 0);
   if (A.p < 0) { g = -g; }
   if (g !== 1 && g !== 0) {
     A = div(A, frac(g)); B = div(B, frac(g)); C = div(C, frac(g));
-    rows.push(row('Делим обе части на $' + g + '$:', quadTex(A, B, C) + ' = 0'));
+    rows.push(row('Делим обе части на $' + g + '$:'), row('', quadTex(A, B, C) + ' = 0'));
   }
   return { rows: rows, A: A, B: B, C: C };
 }
@@ -424,55 +515,98 @@ function isqrt(n) {
  * Корни по дискриминанту и проверка по Виету. known — корень, который
  * уже известен (абсцисса отмеченной точки), или null.
  */
-function solveQuadratic(A, B, C, known) {
+function rootsRows(A, B, C, known, knownName) {
   var rows = [];
   var d = sub(mul(B, B), mul(frac(4), mul(A, C)));
   if (!isInt(d)) { throw new Error('solution-teacher: дискриминант не целый'); }
   var s = isqrt(d.p);
   if (s === null) { throw new Error('solution-teacher: дискриминант не полный квадрат'); }
-  rows.push(row('Здесь $A = ' + N(A) + ',\\; B = ' + N(B) + ',\\; C = ' + N(C) + '$. Дискриминант:', 'D = ' + P(B) + '^2 - 4 \\cdot ' + P(A) + ' \\cdot ' + P(C) +
-    ' = ' + N(mul(B, B)) + (mul(frac(4), mul(A, C)).p >= 0 ? ' - ' + N(mul(frac(4), mul(A, C))) : ' + ' + N(abs(mul(frac(4), mul(A, C))))) +
-    ' = ' + N(d) + (d.p > 0 ? ', \\quad \\sqrt{D} = ' + s : '')));
+  var fourAC = mul(frac(4), mul(A, C));
+  rows.push(row('$A = ' + N(A) + ',\\; B = ' + N(B) + ',\\; C = ' + N(C) + '$'));
+  rows.push(row('', 'D = ' + P(B) + '^2 - 4 \\cdot ' + P(A) + ' \\cdot ' + P(C) + ' = ' + N(mul(B, B)) +
+    (fourAC.p >= 0 ? ' - ' + N(fourAC) : ' + ' + N(abs(fourAC))) + ' = ' + N(d) +
+    (d.p > 0 ? ', \\quad \\sqrt{D} = ' + s : '')));
   var twoA = mul(frac(2), A);
   var x1 = div(sub(neg(B), frac(s)), twoA);
   var x2 = div(add(neg(B), frac(s)), twoA);
-  if (num(x1) > num(x2)) { var t = x1; x1 = x2; x2 = t; }
-  var roots = s === 0 ? [x1] : [x1, x2];
+  var roots = s === 0 ? [x1] : (num(x1) < num(x2) ? [x1, x2] : [x2, x1]);
   if (s === 0) {
-    rows.push(row('$D = 0$, корень один:', 'x = \\dfrac{' + N(neg(B)) + '}{' + N(twoA) + '} = ' + N(x1)));
+    rows.push(row('', 'x = \\dfrac{' + N(neg(B)) + '}{' + N(twoA) + '} = ' + N(x1)));
   } else {
-    var xMinus = div(sub(neg(B), frac(s)), twoA);
-    var xPlus = div(add(neg(B), frac(s)), twoA);
-    rows.push(row('Корни:', 'x_{1,2} = \\dfrac{' + N(neg(B)) + ' \\pm ' + s + '}{' + N(twoA) + '}' +
-      ', \\quad x_1 = \\dfrac{' + N(sub(neg(B), frac(s))) + '}{' + N(twoA) + '} = ' + N(xMinus) +
-      ', \\quad x_2 = \\dfrac{' + N(add(neg(B), frac(s))) + '}{' + N(twoA) + '} = ' + N(xPlus)));
+    rows.push(row('', 'x_{1,2} = \\dfrac{' + N(neg(B)) + ' \\pm ' + s + '}{' + N(twoA) + '}' +
+      ' \\;\\Rightarrow\\; x_1 = \\dfrac{' + N(sub(neg(B), frac(s))) + '}{' + N(twoA) + '} = ' + N(x1) +
+      ', \\quad x_2 = \\dfrac{' + N(add(neg(B), frac(s))) + '}{' + N(twoA) + '} = ' + N(x2)));
   }
-
-  /* Виета — альтернатива: сумма и произведение корней. */
+  /* Виета — другой способ: сумма и произведение корней. */
   var sum = div(neg(B), A);
   var prod = div(C, A);
-  var vieta = 'x_1 + x_2 = -\\dfrac{B}{A} = ' + N(sum) + ', \\quad x_1 x_2 = \\dfrac{C}{A} = ' + N(prod);
+  rows.push(row('Другой способ — теорема Виета:'));
+  rows.push(row('', 'x_1 + x_2 = -\\dfrac{B}{A} = ' + N(sum) + ', \\quad x_1 x_2 = \\dfrac{C}{A} = ' + N(prod)));
   if (known) {
-    var other = sub(sum, known);
-    rows.push(row('Другой способ — теорема Виета:', vieta));
-    rows.push(row('Один корень известен: $x = ' + N(known) + '$ (абсцисса отмеченной точки), второй:',
-      'x = ' + N(sum) + plus(neg(known)) + ' = ' + N(other)));
+    rows.push(row('Один корень известен — абсцисса точки $' + knownName + '$: $x = ' + N(known) + '$, второй:'));
+    rows.push(row('', 'x = ' + N(sum) + plus(neg(known)) + ' = ' + N(sub(sum, known))));
   } else if (roots.length === 2) {
-    rows.push(row('Другой способ — теорема Виета:', vieta + ' \\;\\Rightarrow\\; x_1 = ' + N(roots[0]) +
-      ', \\; x_2 = ' + N(roots[1])));
+    rows.push(row('', '\\Rightarrow\\; x_1 = ' + N(roots[0]) + ', \\; x_2 = ' + N(roots[1])));
   }
   return { rows: rows, roots: roots };
 }
 
 /* ══════════════════════════════════════════════════════════
-   Задачи о прямой (12.A, 12.B, 12.C, 12.D, P12-*)
+   Блок «Точки пересечения»
    ══════════════════════════════════════════════════════════ */
 
-function linePointsOf(line) {
-  var pts = line.points || [];
-  if (pts.length >= 2) { return { p1: pts[0], p2: pts[1], given: true }; }
-  return null;
+/**
+ * f и g — { tex, terms | value(x), name }. Уравнение f = g, его вид
+ * Ax² + Bx + C = 0 (A, B, C — из коэффициентов), корни, выбор корня
+ * и ордината с проверкой по второй функции.
+ */
+function crossSteps(S, opts) {
+  S.start(BLOCK_X);
+  S.add('Приравниваем', [row('', opts.equation)]);
+  var A = opts.A; var B = opts.B; var C = opts.C;
+  var std = (opts.prepare || []).slice();
+  std.push(row('', quadTex(A, B, C) + ' = 0'));
+  var roots;
+  var known = opts.known;
+  if (isZero(A)) {
+    std.push(row('Слагаемые с $x^2$ сократились — уравнение линейное.'));
+    S.add('Уравнение в стандартном виде', std);
+    var xLin = div(neg(C), B);
+    S.add('Корни', [row('', poly([{ c: B, v: 'x' }]) + ' = ' + N(neg(C)) + ' \\;\\Rightarrow\\; x = ' + N(xLin))]);
+    roots = [xLin];
+  } else {
+    var nq = normalize(A, B, C);
+    S.add('Уравнение в стандартном виде', std.concat(nq.rows));
+    var r = rootsRows(nq.A, nq.B, nq.C, known, opts.knownName);
+    S.add('Корни', r.rows);
+    roots = r.roots;
+  }
+  var askedX = opts.askedX;
+  if (known && roots.length === 2) {
+    S.add('Выбор корня', [
+      row('$x = ' + N(known) + '$ — абсцисса точки $' + opts.knownName + '$, она отмечена на рисунке.'),
+      row('Значит, искомая точка $' + opts.askedName + '$ имеет абсциссу $x = ' + withDecimal(askedX) + '$' +
+        (opts.where ? ' — ' + opts.where : '') + '.')
+    ]);
+  }
+  var answerValue = askedX;
+  if (opts.asksY) {
+    var main = opts.ordinate[0]; var second = opts.ordinate[1];
+    var y1 = main.at(askedX); var y2 = second.at(askedX);
+    S.add('Ордината', [
+      row('Подставляем $x = ' + N(askedX) + '$ в $' + main.name + '(x)$:'),
+      row('', 'y = ' + fn(main.name, askedX) + ' = ' + y1.tex + (isInt(y1.value) ? '' : ' = ' + D(y1.value))),
+      row('Проверка по $' + second.name + '(x)$:'),
+      row('', fn(second.name, askedX) + ' = ' + y2.tex + ' \\;\\checkmark')
+    ]);
+    answerValue = y1.value;
+  }
+  return { roots: roots, answerValue: answerValue };
 }
+
+/* ══════════════════════════════════════════════════════════
+   Задачи о прямой (12.A, 12.B, 12.C, 12.D, P12-*)
+   ══════════════════════════════════════════════════════════ */
 
 function optionByText(task, text) {
   var plainText = function (value) { return String(value).replace(/−/g, '-').replace(/\s+/g, ' ').trim(); };
@@ -482,61 +616,67 @@ function optionByText(task, text) {
 
 function lineTask(task, rule) {
   var meta = task.meta;
-  var steps = [];
-  var check = { rule: rule, curves: [], points: [] };
+  var S = new Steps();
+  var check = { rule: rule, curves: [], points: [], triangles: [] };
   var lines = meta.lines || [];
 
   /* Две прямые. */
   if (lines.length === 2) {
     var found = lines.map(function (line, i) {
       var name = i === 0 ? 'f' : 'g';
-      var source = linePointsOf(line);
-      var out = lineFromPoints(name, 'b', source.p1, source.p2, true);
-      steps.push({ title: 'Находим $' + name + '(x)$', rows: out.rows });
+      S.start(i === 0 ? BLOCK_F : BLOCK_G);
+      var out = lineSteps(S, { name: name, p1: line.points[0], p2: line.points[1], source: 'marked', curve: i });
       check.curves.push({ kind: 'line', k: out.k, b: out.b, exact: { k: F(line.kFraction), b: F(line.bFraction) } });
-      check.points.push({ curve: i, x: source.p1.x, y: source.p1.y }, { curve: i, x: source.p2.x, y: source.p2.y });
+      check.triangles.push({ curve: i, triangle: out.triangle });
+      check.points.push({ curve: i, x: line.points[0].x, y: line.points[0].y }, { curve: i, x: line.points[1].x, y: line.points[1].y });
       return out;
     });
     var f = found[0]; var g = found[1];
-    steps.push({ title: 'Приравниваем $f(x) = g(x)$', rows: [row('', lineTex(f.k, f.b) + ' = ' + lineTex(g.k, g.b))] });
+    S.start(BLOCK_X);
+    S.add('Приравниваем', [row('', lineTex(f.k, f.b) + ' = ' + lineTex(g.k, g.b))]);
     var K = sub(f.k, g.k); var Bv = sub(g.b, f.b);
     var x = div(Bv, K);
-    steps.push({ title: 'Переносим слагаемые', rows: [
-      row('Слагаемые с $x$ — влево, числа — вправо:', poly([{ c: f.k, v: 'x' }, { c: neg(g.k), v: 'x' }]) + ' = ' +
-        poly([{ c: g.b }, { c: neg(f.b) }]) + ', \\quad ' + poly([{ c: K, v: 'x' }]) + ' = ' + N(Bv))
-    ] });
-    if (!(isInt(K) && K.p === 1)) {
-      steps.push({ title: 'Решаем уравнение', rows: [
-        row('', 'x = ' + N(Bv) + ' : ' + P(K) + ' = ' + withDecimal(x))
-      ] });
-    }
     var y = add(mul(f.k, x), f.b);
-    var choice = [row('Уравнение линейное, корень один: прямые пересекаются в одной точке $' + pt(x, y) + '$' +
-      (meta.intersection && meta.intersection.inside === false ? ', она лежит за пределами рисунка.' : '.'))];
-    steps.push({ title: 'Точка пересечения', rows: choice });
+    var solveRows = [
+      row('Слагаемые с $x$ — влево, числа — вправо:'),
+      row('', poly([{ c: f.k, v: 'x' }, { c: neg(g.k), v: 'x' }]) + ' = ' + poly([{ c: g.b }, { c: neg(f.b) }]) +
+        ' \\;\\Rightarrow\\; ' + poly([{ c: K, v: 'x' }]) + ' = ' + N(Bv))
+    ];
+    if (!(isInt(K) && K.p === 1)) {
+      solveRows.push(row('', 'x = ' + N(Bv) + ' : ' + P(K) + ' = ' + withDecimal(x)));
+    }
+    solveRows.push(row('Прямые пересекаются в одной точке $' + pt(x, y) + '$' +
+      (meta.intersection && meta.intersection.inside === false ? ' — за пределами рисунка.' : '.')));
+    S.add('Решаем уравнение', solveRows);
     var answerValue = x;
     if (rule === 'intersection-y') {
-      var sub1 = substitute(lineTerms(f.k, f.b), x);
-      steps.push({ title: 'Находим ординату', rows: [row('Подставляем $x = ' + N(x) + '$ в $f(x)$:', 'y = ' + fn('f', x) + ' = ' + sub1.tex + (isInt(sub1.value) ? '' : ' = ' + D(sub1.value)))] });
-      answerValue = sub1.value;
+      var y1 = substitute(lineTerms(f.k, f.b), x);
+      var y2 = substitute(lineTerms(g.k, g.b), x);
+      S.add('Ордината', [
+        row('Подставляем $x = ' + N(x) + '$ в $f(x)$:'),
+        row('', 'y = ' + fn('f', x) + ' = ' + y1.tex + (isInt(y1.value) ? '' : ' = ' + D(y1.value))),
+        row('Проверка по $g(x)$:'),
+        row('', fn('g', x) + ' = ' + y2.tex + ' \\;\\checkmark')
+      ]);
+      answerValue = y1.value;
     }
     check.roots = [x];
     check.answerValue = answerValue;
-    return { steps: steps, check: check };
+    return { steps: S.done(), check: check };
   }
 
   /* Одна прямая. */
   var line = lines[0] || { kFraction: meta.kFraction, bFraction: meta.bFraction, points: meta.points };
   var k; var b;
-  var source1 = linePointsOf(line);
-  if (source1 && meta.window) {
-    var out1 = lineFromPoints('f', 'b', source1.p1, source1.p2, true);
-    steps.push({ title: 'Находим $f(x)$', rows: out1.rows });
+  var pts = line.points || [];
+  if (pts.length >= 2 && meta.window) {
+    var out1 = lineSteps(S, { name: 'f', p1: pts[0], p2: pts[1], source: 'marked', curve: 0 });
     k = out1.k; b = out1.b;
-    check.points.push({ curve: 0, x: source1.p1.x, y: source1.p1.y }, { curve: 0, x: source1.p2.x, y: source1.p2.y });
+    check.triangles.push({ curve: 0, triangle: out1.triangle });
+    check.points.push({ curve: 0, x: pts[0].x, y: pts[0].y }, { curve: 0, x: pts[1].x, y: pts[1].y });
   } else {
     k = F(meta.kFraction); b = F(meta.bFraction);
-    steps.push({ title: 'Формула дана в условии', rows: [row('', 'y = ' + lineTex(k, b) + ', \\quad k = ' + N(k) + ', \\quad b = ' + N(b))] });
+    S.add('Формула дана в условии', [row('', 'f(x) = ' + lineTex(k, b) + ', \\quad k = ' + N(k) + ', \\quad b = ' + N(b))]);
   }
   check.curves.push({ kind: 'line', k: k, b: b, exact: { k: F(line.kFraction || meta.kFraction), b: F(line.bFraction || meta.bFraction) } });
 
@@ -547,41 +687,40 @@ function lineTask(task, rule) {
   } else if (rule === 'value-at') {
     var x0 = F(meta.query.x0);
     var s0 = substitute(lineTerms(k, b), x0);
-    steps.push({ title: 'Подставляем $x = ' + given(x0) + '$', rows: [convertRow(x0),
-      row('', fn('f', x0) + ' = ' + s0.tex + (isInt(s0.value) ? '' : ' = ' + D(s0.value)))].filter(Boolean) });
+    S.add('Находим $f(' + givenTex(x0) + ')$', [convertRow(x0),
+      row('', fn('f', x0) + ' = ' + s0.tex + (isInt(s0.value) ? '' : ' = ' + D(s0.value)))]);
     check.answerValue = s0.value;
   } else if (rule === 'argument-for') {
     var y0 = F(meta.query.y0);
     var right = sub(y0, b);
     var xr = div(right, k);
     var unitK = isInt(k) && k.p === 1;
-    steps.push({ title: 'Решаем уравнение $f(x) = ' + given(y0) + '$', rows: [convertRow(y0),
-      row('', lineTex(k, b) + ' = ' + N(y0) + ', \\quad ' + poly([{ c: k, v: 'x' }]) + ' = ' + N(y0) + plus(neg(b)) + ' = ' +
-        (unitK ? withDecimal(right) : N(right))),
-      unitK ? null : row('', 'x = ' + N(right) + ' : ' + P(k) + ' = ' + withDecimal(xr))
-    ].filter(Boolean) });
+    S.add('Решаем уравнение $f(x) = ' + givenTex(y0) + '$', [convertRow(y0),
+      row('', lineTex(k, b) + ' = ' + N(y0) + ' \\;\\Rightarrow\\; ' + poly([{ c: k, v: 'x' }]) + ' = ' + N(y0) + plus(neg(b)) +
+        ' = ' + (unitK ? withDecimal(right) : N(right))),
+      unitK ? null : row('', 'x = ' + N(right) + ' : ' + P(k) + ' = ' + withDecimal(xr))]);
     check.answerValue = xr;
   } else if (rule === 'point-choice') {
     var probe = meta.probe;
-    var sp = substitute(lineTerms(k, b), F(probe.x));
-    var on = eq(sp.value, F(probe.y));
     var px = F(probe.x); var py = F(probe.y);
+    var sp = substitute(lineTerms(k, b), px);
+    var on = eq(sp.value, py);
     var probeY = isInt(py) || !decimalFriendly(py) ? N(py) : D(py) + ' = ' + N(py);
-    steps.push({ title: 'Проверяем точку $(' + given(px) + ';\\, ' + given(py) + ')$', rows: [convertRow(px),
-      row('Подставляем $x = ' + N(px) + '$:', fn('f', px) + ' = ' + sp.tex),
-      row(on ? 'Значение совпадает с ординатой точки $' + probeY + '$, точка принадлежит графику.'
-        : 'Значение не равно ординате точки $' + probeY + '$, точка графику не принадлежит.')
-    ].filter(Boolean) });
+    var probeName = (meta.pointName || 'A');
+    S.add('Проверяем точку $' + probeName + '(' + givenTex(px) + ';\\, ' + givenTex(py) + ')$', [convertRow(px),
+      row('Подставляем $x = ' + N(px) + '$:'),
+      row('', fn('f', px) + ' = ' + sp.tex),
+      row(on ? 'Совпадает с ординатой точки $' + probeY + '$ $\\Rightarrow$ точка принадлежит графику.'
+        : 'Не равно ординате точки $' + probeY + '$ $\\Rightarrow$ точка графику не принадлежит.')]);
     check.answerOption = optionByText(task, on ? 'Да' : 'Нет');
   } else if (rule === 'equation-choice') {
-    var text = lineEquationText(num(k), num(b));
-    var number = optionByText(task, text);
-    steps.push({ title: 'Выбираем вариант', rows: [row('Формуле $y = ' + lineTex(k, b) + '$ соответствует вариант ' + number + '.')] });
+    var number = optionByText(task, lineEquationText(num(k), num(b)));
+    S.add('Выбираем вариант', [row('Формула $y = ' + lineTex(k, b) + '$ — вариант ' + number + '.')]);
     check.answerOption = number;
   } else {
     throw new Error('solution-teacher: правило «' + rule + '» не поддержано');
   }
-  return { steps: steps, check: check };
+  return { steps: S.done(), check: check };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -590,187 +729,6 @@ function lineTask(task, rule) {
 
 /* Узлы сетки на прямой внутри окна. */
 function lineGridNodes(line, win) { return Line.integerPoints(Line.create(line.k, line.b), win); }
-
-function quadraticTask(task, rule) {
-  var meta = task.meta;
-  var steps = [];
-  var check = { rule: rule, curves: [], points: [] };
-  var curve = Q.exact(meta.aFraction, meta.bFraction, meta.cFraction);
-  var win = meta.window;
-  var marks = meta.points || [];
-
-  if (rule === 'sign-a') {
-    var up = curve.aValue > 0;
-    steps.push({ title: 'Направление ветвей', rows: [row('Ветви параболы направлены ' + (up ? 'вверх' : 'вниз') +
-      ', значит, $a ' + (up ? '>' : '<') + ' 0$.')] });
-    check.answerOption = optionByText(task, up ? 'a > 0' : 'a < 0');
-    return { steps: steps, check: check };
-  }
-
-  var two = meta.curves && meta.curves[1];
-  var intercept = marks.filter(function (p) { return p.role === 'intercept'; })[0];
-  if (rule === 'c' && intercept) {
-    steps.push({ title: 'Находим $c$', rows: [
-      row('При $x = 0$ получаем $y = a \\cdot 0^2 + b \\cdot 0 + c = c$, то есть $c$ — ордината точки пересечения графика с осью $Oy$.'),
-      row('На рисунке это точка $' + pt(intercept.x, intercept.y) + '$, значит, $c = ' + N(F(intercept.y)) + '$.')
-    ] });
-    check.curves.push({ kind: 'quadratic', c: F(intercept.y), exact: { c: curve.c }, partial: true });
-    check.points.push({ curve: 0, x: intercept.x, y: intercept.y });
-    check.answerValue = F(intercept.y);
-    return { steps: steps, check: check };
-  }
-
-  var ownMarks = marks.filter(function (p) { return p.role !== 'cross'; });
-  var crossMarks = marks.filter(function (p) { return p.role === 'cross'; });
-  var fFound = parabolaFromChart('f', { a: 'a', b: 'b', c: 'c' }, curve, win, ownMarks.concat(crossMarks), meta.knownA,
-    rule === 'a' && !two);
-  steps.push({ title: fFound.partial ? 'Находим $a$' : 'Находим $f(x)$', rows: fFound.rows });
-  check.curves.push({ kind: 'quadratic', a: fFound.a, b: fFound.b, c: fFound.c, partial: !!fFound.partial,
-    exact: { a: curve.a, b: curve.b, c: curve.c } });
-  fFound.points.forEach(function (p) { check.points.push({ curve: 0, x: p.x, y: p.y }); });
-  var fTerms = quadTerms(fFound.a, fFound.b, fFound.c);
-
-  if (!two) {
-    if (rule === 'a') { check.answerValue = fFound.a; return { steps: steps, check: check }; }
-    if (rule === 'b') { check.answerValue = fFound.b; return { steps: steps, check: check }; }
-    if (rule === 'c') { check.answerValue = fFound.c; return { steps: steps, check: check }; }
-    if (rule === 'value-at') {
-      var x0 = F(meta.query.x0);
-      var sv = substitute(fTerms, x0);
-      steps.push({ title: 'Подставляем $x = ' + given(x0) + '$', rows: [convertRow(x0),
-        row('', fn('f', x0) + ' = ' + sv.tex + (isInt(sv.value) ? '' : ' = ' + D(sv.value)))].filter(Boolean) });
-      check.answerValue = sv.value;
-      return { steps: steps, check: check };
-    }
-    if (rule === 'argument-for') {
-      var y0 = F(meta.query.y0);
-      var C0 = sub(fFound.c, y0);
-      steps.push({ title: 'Составляем уравнение $f(x) = ' + given(y0) + '$', rows: [convertRow(y0),
-        row('', quadTex(fFound.a, fFound.b, fFound.c) + ' = ' + N(y0)),
-        row('Переносим число в левую часть:', quadTex(fFound.a, fFound.b, C0) + ' = 0')
-      ].filter(Boolean) });
-      var nz = normalize(fFound.a, fFound.b, C0);
-      var sol = solveQuadratic(nz.A, nz.B, nz.C, null);
-      steps.push({ title: 'Решаем уравнение', rows: nz.rows.concat(sol.rows) });
-      var pickText = { larger: 'больший', smaller: 'меньший', positive: 'положительный', negative: 'отрицательный' };
-      var picked = pickRoot(sol.roots, meta.query.pick);
-      steps.push({ title: 'Выбираем корень', rows: [row('Спрашивают ' + (pickText[meta.query.pick] || 'нужный') +
-        ' корень' + (sol.roots.length === 2 ? ' из $x_1 = ' + N(sol.roots[0]) + '$ и $x_2 = ' + N(sol.roots[1]) + '$' : '') +
-        ': $x = ' + withDecimal(picked) + '$.')] });
-      check.roots = sol.roots;
-      check.rootsCheck = sol.roots.map(function (r) { return { x: r, f: Q.yAt(curve, r), g: y0 }; });
-      check.answerValue = picked;
-      return { steps: steps, check: check };
-    }
-    if (rule === 'equation-choice') {
-      var derived = Q.exact(fFound.a, fFound.b, fFound.c);
-      var form = meta.form || 'general';
-      var rowsChoice = [];
-      if (form === 'vertex') {
-        rowsChoice.push(row('Запись через вершину:', 'y = ' + vertexTex(derived.a, derived.m, derived.n)));
-      } else if (form === 'roots') {
-        var zeros = Q.rootsOf(derived);
-        rowsChoice.push(row('Нули функции: $f(x) = 0$ при $x = ' + N(zeros[0]) + '$ и $x = ' + N(zeros[1]) + '$. Запись через нули:',
-          'y = ' + (isInt(derived.a) && Math.abs(derived.a.p) === 1 ? (derived.a.p < 0 ? '-' : '') : N(derived.a)) +
-          rootFactor(zeros[0]) + rootFactor(zeros[1])));
-      }
-      var numberQ = optionByText(task, Q.equationText(derived, form));
-      rowsChoice.push(row('Этой формуле соответствует вариант ' + numberQ + '.'));
-      steps.push({ title: 'Выбираем вариант', rows: rowsChoice });
-      check.answerOption = numberQ;
-      return { steps: steps, check: check };
-    }
-    throw new Error('solution-teacher: правило «' + rule + '» не поддержано');
-  }
-
-  /* Две функции: парабола и прямая или две параболы. */
-  var cross = crossMarks[0] || null;
-  var gRows; var gTerms; var gTex; var gDesc;
-  if (two.kind === 'line') {
-    var lineExact = { k: F(two.kFraction), b: F(two.bFraction) };
-    var nodes = lineGridNodes(lineExact, win);
-    var first = cross || nodes[0];
-    var rest = nodes.filter(function (n) { return n.x !== first.x; });
-    var zeroNode = rest.filter(function (n) { return n.x === 0; })[0];
-    var second = zeroNode || rest.sort(function (p, q) { return Math.abs(p.x - first.x) - Math.abs(q.x - first.x); })
-      .filter(function (n) { return Math.abs(n.x - first.x) >= 2; })[0] || rest[0];
-    if (!first || !second) { throw new Error('solution-teacher: у прямой нет двух узлов сетки'); }
-    var gl = lineFromPoints('g', 'm', first, second, false);
-    gl.rows[0].text = 'Это прямая. Буква $b$ занята коэффициентом параболы, поэтому свободный член обозначим $m$: $g(x) = kx + m$. ' +
-      'С рисунка берём точки $' + pt(first.x, first.y) + '$' + (first === cross ? ' (отмеченная точка пересечения)' : '') +
-      ' и $' + pt(second.x, second.y) + '$ (узел сетки).';
-    gRows = gl.rows;
-    gTerms = lineTerms(gl.k, gl.b);
-    gTex = lineTex(gl.k, gl.b);
-    gDesc = { A: ZERO, B: gl.k, C: gl.b };
-    check.curves.push({ kind: 'line', k: gl.k, b: gl.b, exact: lineExact });
-    check.points.push({ curve: 1, x: first.x, y: first.y }, { curve: 1, x: second.x, y: second.y });
-  } else {
-    var gCurve = Q.exact(two.aFraction, two.bFraction, two.cFraction);
-    var gMarks = (two.points || []).map(function (p) { return { x: p.x, y: p.y, role: p.role }; });
-    if (cross) { gMarks.push(cross); }
-    var gq = parabolaFromChart('g', { a: 'a_2', b: 'b_2', c: 'c_2' }, gCurve, win, gMarks, false);
-    gq.rows[0].text = 'Вторая парабола, её коэффициенты обозначим $a_2, b_2, c_2$: $g(x) = a_2x^2 + b_2x + c_2$.';
-    gRows = gq.rows;
-    gTerms = quadTerms(gq.a, gq.b, gq.c);
-    gTex = quadTex(gq.a, gq.b, gq.c);
-    gDesc = { A: gq.a, B: gq.b, C: gq.c };
-    check.curves.push({ kind: 'quadratic', a: gq.a, b: gq.b, c: gq.c, exact: { a: gCurve.a, b: gCurve.b, c: gCurve.c } });
-    gq.points.forEach(function (p) { check.points.push({ curve: 1, x: p.x, y: p.y }); });
-  }
-  steps.push({ title: 'Находим $g(x)$', rows: gRows });
-
-  var fTex = quadTex(fFound.a, fFound.b, fFound.c);
-  steps.push({ title: 'Приравниваем $f(x) = g(x)$', rows: [row('', fTex + ' = ' + gTex)] });
-
-  var A = sub(fFound.a, gDesc.A); var B = sub(fFound.b, gDesc.B); var C = sub(fFound.c, gDesc.C);
-  var std = [row('Переносим всё в левую часть:', fTex + ' - ' + grouped(gTex) + ' = 0'),
-    row('Приводим подобные:', quadTex(A, B, C) + ' = 0')];
-  var known = cross ? F(cross.x) : null;
-  var roots;
-  var solveRows;
-  if (isZero(A)) {
-    var xLin = div(neg(C), B);
-    std.push(row('Слагаемые с $x^2$ сократились, уравнение линейное.'));
-    solveRows = [row('', poly([{ c: B, v: 'x' }]) + ' = ' + N(neg(C)) + ', \\quad x = ' + N(xLin))];
-    roots = [xLin];
-  } else {
-    var nq = normalize(A, B, C);
-    std = std.concat(nq.rows);
-    var sq = solveQuadratic(nq.A, nq.B, nq.C, known);
-    solveRows = sq.rows;
-    roots = sq.roots;
-  }
-  steps.push({ title: 'Приводим к виду $Ax^2 + Bx + C = 0$', rows: std });
-  steps.push({ title: 'Решаем уравнение', rows: solveRows });
-
-  var asked = meta.intersection.asked;
-  var askedX = F(asked.x);
-  var whereText = meta.intersection.hidden === 'fraction'
-    ? 'она не в узле сетки, и её координаты с рисунка не прочитать'
-    : 'она лежит за пределами рисунка';
-  var choiceRows = [];
-  if (cross && roots.length === 2) {
-    choiceRows.push(row('$x = ' + N(known) + '$ — абсцисса отмеченной точки пересечения $' + pt(cross.x, cross.y) +
-      '$, она видна на рисунке. Значит, вторая точка пересечения имеет абсциссу $x = ' + withDecimal(askedX) + '$ — ' + whereText + '.'));
-  } else {
-    choiceRows.push(row('Искомая точка пересечения имеет абсциссу $x = ' + withDecimal(askedX) + '$.'));
-  }
-  steps.push({ title: 'Выбираем корень', rows: choiceRows });
-
-  var answerValue = askedX;
-  if (rule === 'intersection-y') {
-    /* Подставляем в ту функцию, где считать проще: прямую, если она есть. */
-    var useG = two.kind === 'line';
-    var sy = substitute(useG ? gTerms : fTerms, askedX);
-    steps.push({ title: 'Находим ординату', rows: [row('Подставляем $x = ' + N(askedX) + '$ в $' + (useG ? 'g' : 'f') + '(x)$:',
-      'y = ' + fn(useG ? 'g' : 'f', askedX) + ' = ' + sy.tex + (isInt(sy.value) ? '' : ' = ' + D(sy.value)))] });
-    answerValue = sy.value;
-  }
-  check.roots = roots;
-  check.answerValue = answerValue;
-  return { steps: steps, check: check };
-}
 
 function rootFactor(r) {
   if (isZero(r)) { return 'x'; }
@@ -785,23 +743,430 @@ function pickRoot(roots, pick) {
   return hi;
 }
 
+/**
+ * Пара точек прямой g для треугольника: первая, у которой подписи на
+ * чертеже легли чисто. Сначала — отмеченная точка пересечения и узел на
+ * оси Oy (тогда свободный член читается сразу), потом она же и узел в
+ * двух–четырёх клетках, потом шире, в конце — два других узла: у точки
+ * пересечения рядом вторая кривая, и треугольник с вершиной в ней бывает
+ * зажат. Треугольник в одну клетку тесен — его подписи ложатся на кривые.
+ */
+function linePair(task, nodes, anchor, curveIndex) {
+  var span = function (p, q) { return Math.abs(p.x - q.x); };
+  var others = nodes.filter(function (n) { return n.x !== anchor.x; });
+  var pairs = [];
+  var zero = others.filter(function (n) { return n.x === 0 && span(n, anchor) >= 2; })[0];
+  if (zero) { pairs.push([anchor, zero]); }
+  others.filter(function (n) { return n !== zero && span(n, anchor) >= 2 && span(n, anchor) <= 4; })
+    .sort(function (p, q) { return Math.abs(span(p, anchor) - 3) - Math.abs(span(q, anchor) - 3); })
+    .forEach(function (n) { pairs.push([anchor, n]); });
+  others.filter(function (n) { return span(n, anchor) > 4; })
+    .sort(function (p, q) { return span(p, anchor) - span(q, anchor); })
+    .forEach(function (n) { pairs.push([anchor, n]); });
+  others.forEach(function (p, i) {
+    others.slice(i + 1).forEach(function (q) {
+      if (span(p, q) >= 2 && span(p, q) <= 4) { pairs.push([p, q]); }
+    });
+  });
+  others.filter(function (n) { return span(n, anchor) < 2; }).forEach(function (n) { pairs.push([anchor, n]); });
+  var best = null;
+  var fewest = Infinity;
+  for (var i = 0; i < pairs.length; i += 1) {
+    var issues;
+    try {
+      issues = SlopeFigure.layoutProblems(task, [{ triangle: Slope.build(pairs[i][0], pairs[i][1]), curve: curveIndex }]).length;
+    } catch { issues = Infinity; }
+    if (issues < fewest) { fewest = issues; best = pairs[i]; }
+    if (issues === 0) { break; }
+  }
+  if (!best) { throw new Error('solution-teacher: у прямой нет двух узлов сетки'); }
+  return best;
+}
+
+function quadraticTask(task, rule) {
+  var meta = task.meta;
+  var S = new Steps();
+  var check = { rule: rule, curves: [], points: [], triangles: [] };
+  var curve = Q.exact(meta.aFraction, meta.bFraction, meta.cFraction);
+  var win = meta.window;
+  var marks = meta.points || [];
+
+  if (rule === 'sign-a') {
+    var up = curve.aValue > 0;
+    S.add('Направление ветвей', [row('Ветви направлены ' + (up ? 'вверх' : 'вниз') + ' $\\Rightarrow$ $a ' + (up ? '>' : '<') + ' 0$')]);
+    check.answerOption = optionByText(task, up ? 'a > 0' : 'a < 0');
+    return { steps: S.done(), check: check };
+  }
+
+  var two = meta.curves && meta.curves[1];
+  var intercept = marks.filter(function (p) { return p.role === 'intercept'; })[0];
+  if (rule === 'c' && intercept) {
+    S.add('Общий вид', [row('', 'f(x) = ax^2 + bx + c')]);
+    S.add('Точка на оси Oy', [row('При $x = 0$: $f(0) = c$ — ордината точки на оси $Oy$.'),
+      row('$' + pt(intercept.x, intercept.y) + '$ отмечена на рисунке $\\Rightarrow$ $c = ' + N(F(intercept.y)) + '$')]);
+    check.curves.push({ kind: 'quadratic', c: F(intercept.y), exact: { c: curve.c }, partial: true });
+    check.points.push({ curve: 0, x: intercept.x, y: intercept.y });
+    check.answerValue = F(intercept.y);
+    return { steps: S.done(), check: check };
+  }
+
+  /* Отмеченная точка пересечения — A: так её зовут и в решении, и на чертеже. */
+  var crossMarks = marks.filter(function (p) { return p.role === 'cross'; })
+    .map(function (p) { return { x: p.x, y: p.y, role: 'cross', label: 'A' }; });
+  var ownMarks = marks.filter(function (p) { return p.role !== 'cross'; });
+  if (two) { S.start(BLOCK_F); }
+  var fFound = parabolaSteps(S, 'f', { a: 'a', b: 'b', c: 'c' }, curve, win, ownMarks.concat(crossMarks), meta.knownA,
+    rule === 'a' && !two);
+  check.curves.push({ kind: 'quadratic', a: fFound.a, b: fFound.b, c: fFound.c, partial: !!fFound.partial,
+    exact: { a: curve.a, b: curve.b, c: curve.c } });
+  fFound.points.forEach(function (p) { check.points.push({ curve: 0, x: p.x, y: p.y }); });
+  var fTerms = quadTerms(fFound.a, fFound.b, fFound.c);
+
+  if (!two) {
+    if (rule === 'a') { check.answerValue = fFound.a; return { steps: S.done(), check: check }; }
+    if (rule === 'b') { check.answerValue = fFound.b; return { steps: S.done(), check: check }; }
+    if (rule === 'c') { check.answerValue = fFound.c; return { steps: S.done(), check: check }; }
+    if (rule === 'value-at') {
+      var x0 = F(meta.query.x0);
+      var sv = substitute(fTerms, x0);
+      S.add('Находим $f(' + givenTex(x0) + ')$', [convertRow(x0),
+        row('', fn('f', x0) + ' = ' + sv.tex + (isInt(sv.value) ? '' : ' = ' + D(sv.value)))]);
+      check.answerValue = sv.value;
+      return { steps: S.done(), check: check };
+    }
+    if (rule === 'argument-for') {
+      var y0 = F(meta.query.y0);
+      var C0 = sub(fFound.c, y0);
+      var nz = normalize(fFound.a, fFound.b, C0);
+      S.add('Уравнение $f(x) = ' + givenTex(y0) + '$', [convertRow(y0),
+        row('', quadTex(fFound.a, fFound.b, fFound.c) + ' = ' + N(y0) + ' \\;\\Rightarrow\\; ' + quadTex(fFound.a, fFound.b, C0) + ' = 0')]
+        .concat(nz.rows));
+      var sol = rootsRows(nz.A, nz.B, nz.C, null);
+      S.add('Корни', sol.rows);
+      var pickText = { larger: 'больший', smaller: 'меньший', positive: 'положительный', negative: 'отрицательный' };
+      var picked = pickRoot(sol.roots, meta.query.pick);
+      S.add('Выбор корня', [row('Спрашивают ' + (pickText[meta.query.pick] || 'нужный') + ' корень $\\Rightarrow$ $x = ' + withDecimal(picked) + '$')]);
+      check.roots = sol.roots;
+      check.rootsCheck = sol.roots.map(function (r) { return { x: r, f: Q.yAt(curve, r), g: y0 }; });
+      check.answerValue = picked;
+      return { steps: S.done(), check: check };
+    }
+    if (rule === 'equation-choice') {
+      var derived = Q.exact(fFound.a, fFound.b, fFound.c);
+      var form = meta.form || 'general';
+      var rowsChoice = [];
+      if (form === 'vertex') {
+        rowsChoice.push(row('Запись через вершину:'), row('', 'y = ' + vertexTex(derived.a, derived.m, derived.n)));
+      } else if (form === 'roots') {
+        var zeros = Q.rootsOf(derived);
+        rowsChoice.push(row('Нули: $x = ' + N(zeros[0]) + '$ и $x = ' + N(zeros[1]) + '$. Запись через нули:'),
+          row('', 'y = ' + (isInt(derived.a) && Math.abs(derived.a.p) === 1 ? (derived.a.p < 0 ? '-' : '') : N(derived.a)) +
+            rootFactor(zeros[0]) + rootFactor(zeros[1])));
+      }
+      var numberQ = optionByText(task, Q.equationText(derived, form));
+      rowsChoice.push(row('Этой формуле соответствует вариант ' + numberQ + '.'));
+      S.add('Выбираем вариант', rowsChoice);
+      check.answerOption = numberQ;
+      return { steps: S.done(), check: check };
+    }
+    throw new Error('solution-teacher: правило «' + rule + '» не поддержано');
+  }
+
+  /* Две функции: парабола и прямая или две параболы. */
+  var cross = crossMarks[0] || null;
+  var g;
+  S.start(BLOCK_G);
+  if (two.kind === 'line') {
+    var lineExact = { k: F(two.kFraction), b: F(two.bFraction) };
+    var nodes = lineGridNodes(lineExact, win);
+    var anchor = cross ? nodes.filter(function (n) { return n.x === cross.x; })[0] || cross : nodes[0];
+    var pair = linePair(task, nodes, anchor, 1).map(function (p) {
+      return cross && p.x === cross.x ? { x: p.x, y: p.y, label: 'A' } : { x: p.x, y: p.y };
+    });
+    var gl = lineSteps(S, { name: 'g', bLetter: 'm', p1: pair[0], p2: pair[1], source: 'grid', curve: 1,
+      notes: { A: 'отмеченная точка пересечения' } });
+    /* Буква b занята коэффициентом параболы — сказано в общем виде прямой. */
+    S.list.filter(function (item) { return item.block === BLOCK_G && item.title === 'Общий вид'; })[0].rows
+      .push(row('Буква $b$ занята параболой, свободный член прямой — $m$.'));
+    g = { tex: lineTex(gl.k, gl.b), A: ZERO, B: gl.k, C: gl.b, terms: lineTerms(gl.k, gl.b) };
+    check.curves.push({ kind: 'line', k: gl.k, b: gl.b, exact: lineExact });
+    check.triangles.push({ curve: 1, triangle: gl.triangle });
+    check.points.push({ curve: 1, x: pair[0].x, y: pair[0].y }, { curve: 1, x: pair[1].x, y: pair[1].y });
+  } else {
+    var gCurve = Q.exact(two.aFraction, two.bFraction, two.cFraction);
+    var gMarks = (two.points || []).map(function (p) { return { x: p.x, y: p.y, role: p.role }; }).concat(crossMarks);
+    var gq = parabolaSteps(S, 'g', { a: 'a_2', b: 'b_2', c: 'c_2' }, gCurve, win, gMarks, false);
+    g = { tex: quadTex(gq.a, gq.b, gq.c), A: gq.a, B: gq.b, C: gq.c, terms: quadTerms(gq.a, gq.b, gq.c) };
+    check.curves.push({ kind: 'quadratic', a: gq.a, b: gq.b, c: gq.c, exact: { a: gCurve.a, b: gCurve.b, c: gCurve.c } });
+    gq.points.forEach(function (p) { check.points.push({ curve: 1, x: p.x, y: p.y }); });
+  }
+
+  var fTex = quadTex(fFound.a, fFound.b, fFound.c);
+  var asked = meta.intersection.asked;
+  var result = crossSteps(S, {
+    equation: fTex + ' = ' + g.tex,
+    prepare: [row('Переносим всё в левую часть:'), row('', fTex + ' - ' + grouped(g.tex) + ' = 0'), row('Приводим подобные:')],
+    A: sub(fFound.a, g.A), B: sub(fFound.b, g.B), C: sub(fFound.c, g.C),
+    known: cross ? F(cross.x) : null, knownName: 'A' + (cross ? pt(cross.x, cross.y) : ''),
+    askedName: 'B', askedX: F(asked.x),
+    where: meta.intersection.hidden === 'fraction' ? 'она не в узле сетки, с рисунка её не прочитать' : 'она за пределами рисунка',
+    asksY: rule === 'intersection-y',
+    /* Ордината — по прямой, если она есть: там считать проще. */
+    ordinate: two.kind === 'line'
+      ? [{ name: 'g', at: function (x) { return substitute(g.terms, x); } }, { name: 'f', at: function (x) { return substitute(fTerms, x); } }]
+      : [{ name: 'f', at: function (x) { return substitute(fTerms, x); } }, { name: 'g', at: function (x) { return substitute(g.terms, x); } }]
+  });
+  check.roots = result.roots;
+  check.answerValue = result.answerValue;
+  return { steps: S.done(), check: check };
+}
+
+/* ══════════════════════════════════════════════════════════
+   Задачи о гиперболе (12R.*, P12R-*)
+   ══════════════════════════════════════════════════════════ */
+
+function fracOf(o) { return o ? frac(o.p, o.q) : null; }
+
+/* Шаблоны записи условия. */
+var R_FORM = {
+  basic: 'f(x) = \\dfrac{k}{x}',
+  line: 'f(x) = \\dfrac{k}{x}',
+  'shift-y': 'f(x) = \\dfrac{k}{x} + a',
+  'shift-x': 'f(x) = \\dfrac{k}{x + a}',
+  'shift-xy': 'f(x) = \\dfrac{k}{x + a} + b',
+  linear: 'f(x) = \\dfrac{kx + a}{x + b}'
+};
+
+/** Формула гиперболы числами в записи условия. */
+function rationalTex(form, co) {
+  var tail = function (f) { return isZero(f) ? '' : plus(f); };
+  if (form === 'basic' || form === 'line') { return 'f(x) = \\dfrac{' + N(co.k) + '}{x}'; }
+  if (form === 'shift-y') { return 'f(x) = \\dfrac{' + N(co.k) + '}{x}' + tail(co.a); }
+  if (form === 'shift-x') { return 'f(x) = \\dfrac{' + N(co.k) + '}{' + minus('x', neg(co.a)) + '}'; }
+  if (form === 'shift-xy') { return 'f(x) = \\dfrac{' + N(co.k) + '}{' + minus('x', neg(co.a)) + '}' + tail(co.b); }
+  return 'f(x) = \\dfrac{' + poly([{ c: co.k, v: 'x' }, { c: co.a }]) + '}{' + minus('x', neg(co.b)) + '}';
+}
+
+/** Значение гиперболы в точке: m/(x − s) + t. */
+function rationalAt(c, x) { return add(div(c.m, sub(x, c.s)), c.t); }
+
+/** Подстановка x в формулу гиперболы — строкой. */
+function rationalSubstitute(form, co, c, x) {
+  var value = rationalAt(c, x);
+  var X = P(x);
+  var expr;
+  if (form === 'basic' || form === 'line') { expr = '\\dfrac{' + N(co.k) + '}{' + N(x) + '}'; }
+  else if (form === 'shift-y') { expr = '\\dfrac{' + N(co.k) + '}{' + N(x) + '}' + (isZero(co.a) ? '' : plus(co.a)); }
+  else if (form === 'shift-x') { expr = '\\dfrac{' + N(co.k) + '}{' + N(x) + plus(co.a) + '}'; }
+  else if (form === 'shift-xy') { expr = '\\dfrac{' + N(co.k) + '}{' + N(x) + plus(co.a) + '}' + (isZero(co.b) ? '' : plus(co.b)); }
+  else { expr = '\\dfrac{' + N(co.k) + ' \\cdot ' + X + plus(co.a) + '}{' + N(x) + plus(co.b) + '}'; }
+  return { tex: expr + ' = ' + N(value), value: value };
+}
+
+/**
+ * Пункты гиперболы: «Общий вид», «Асимптоты», «Сдвиги», «Находим k»
+ * (у (kx + a)/(x + b) — «Находим a»), «Формула».
+ */
+function hyperbolaSteps(S, task, c, form) {
+  var meta = task.meta;
+  var co = R.coefficients(c, form);
+  S.add('Общий вид', [row('', R_FORM[form])]);
+  S.add('Асимптоты', [row('Вертикальная: $x = ' + N(c.s) + '$, горизонтальная: $y = ' + N(c.t) + '$.')]);
+
+  var shiftRows = [];
+  if (form === 'basic' || form === 'line') {
+    shiftRows.push(row('Асимптоты — оси координат $\\Rightarrow$ сдвигов нет.'));
+  }
+  if (form === 'shift-x' || form === 'shift-xy') {
+    shiftRows.push(row('Знаменатель $x + a$ равен нулю при $x = -a$:'));
+    shiftRows.push(row('', '-a = ' + N(c.s) + ' \\;\\Rightarrow\\; a = ' + N(co.a)));
+    shiftRows.push(row('Внимание на знак: график сдвинут ' + (num(c.s) > 0 ? 'вправо' : 'влево') + ', а в знаменателе $' +
+      minus('x', c.s) + '$.'));
+  }
+  if (form === 'shift-y') {
+    shiftRows.push(row('Слагаемое $a$ сдвигает график вместе с асимптотой:'), row('', 'a = ' + N(c.t)));
+  }
+  if (form === 'shift-xy') {
+    shiftRows.push(row('Слагаемое $b$ сдвигает график по вертикали:'), row('', 'b = ' + N(c.t)));
+  }
+  if (form === 'basic' && !isZero(c.s)) { shiftRows = []; }
+  if (form === 'linear') {
+    shiftRows.push(row('Знаменатель $x + b$ равен нулю при $x = -b$:'));
+    shiftRows.push(row('', '-b = ' + N(c.s) + ' \\;\\Rightarrow\\; b = ' + N(co.b)));
+    shiftRows.push(row('Внимание на знак: асимптота $x = ' + N(c.s) + '$, а в знаменателе $' + minus('x', c.s) + '$.'));
+    shiftRows.push(row('Целая часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$ $\\Rightarrow$ горизонтальная асимптота $y = k$:'));
+    shiftRows.push(row('', 'k = ' + N(c.t)));
+  }
+  S.add('Сдвиги', shiftRows);
+
+  var marks = (meta.points || []).filter(function (p) { return p.role === 'mark' || p.role === 'cross'; });
+  var P0 = marks[0];
+  var X = F(P0.x); var Y = F(P0.y);
+  var label = P0.label ? P0.label : '';
+  var kRows = [row('Подставляем $' + label + pt(P0.x, P0.y) + '$' + (P0.role === 'cross' ? ' — точку пересечения графиков:' : ' (отмечена на рисунке):'))];
+  if (form === 'basic' || form === 'line') {
+    kRows.push(row('', N(Y) + ' = \\dfrac{k}{' + N(X) + '} \\;\\Rightarrow\\; k = ' + P(X) + ' \\cdot ' + P(Y) + ' = ' + N(co.k)));
+  } else if (form === 'shift-y') {
+    kRows.push(row('', N(Y) + ' = \\dfrac{k}{' + N(X) + '}' + plus(co.a) + ' \\;\\Rightarrow\\; k = (' + N(Y) + plus(neg(co.a)) +
+      ') \\cdot ' + P(X) + ' = ' + N(co.k)));
+  } else if (form === 'shift-x') {
+    kRows.push(row('', N(Y) + ' = \\dfrac{k}{' + N(X) + plus(co.a) + '} \\;\\Rightarrow\\; k = ' + P(Y) + ' \\cdot (' + N(X) +
+      plus(co.a) + ') = ' + N(co.k)));
+  } else if (form === 'shift-xy') {
+    kRows.push(row('', N(Y) + ' = \\dfrac{k}{' + N(X) + plus(co.a) + '}' + plus(co.b) + ' \\;\\Rightarrow\\; k = (' + N(Y) +
+      plus(neg(co.b)) + ') \\cdot (' + N(X) + plus(co.a) + ') = ' + N(co.k)));
+  } else {
+    kRows.push(row('', N(Y) + ' = \\dfrac{' + N(co.k) + ' \\cdot ' + P(X) + ' + a}{' + N(X) + plus(co.b) + '} \\;\\Rightarrow\\; a = ' +
+      P(Y) + ' \\cdot (' + N(X) + plus(co.b) + ')' + plus(neg(mul(co.k, X))) + ' = ' + N(co.a)));
+  }
+  S.add(form === 'linear' ? 'Находим $a$' : 'Находим $k$', kRows);
+  S.add('Формула', [row('', rationalTex(form, co))]);
+  return { co: co, point: P0 };
+}
+
+function rationalTask(task, rule) {
+  var meta = task.meta;
+  var S = new Steps();
+  var check = { rule: rule, curves: [], points: [], triangles: [] };
+  var c = R.curve(fracOf(meta.m), fracOf(meta.s), fracOf(meta.t));
+  var form = meta.form;
+  var exactCurve = { m: c.m, s: c.s, t: c.t };
+  /* m из отмеченной точки — как в пункте «Находим k»: m = (y − t)(x − s). */
+  var fromPoint = function (found) {
+    var p0 = found.point;
+    return { kind: 'rational', m: mul(sub(F(p0.y), c.t), sub(F(p0.x), c.s)), s: c.s, t: c.t, exact: exactCurve };
+  };
+
+  if (form === 'line') {
+    var A = meta.points.filter(function (p) { return p.role === 'cross'; })[0];
+    var Pl = meta.points.filter(function (p) { return p.role === 'line'; })[0];
+    var line = { k: fracOf(meta.line.k), b: fracOf(meta.line.b) };
+    var lineOnly = rule === 'line-a' || rule === 'line-b';
+    var gl;
+    if (!lineOnly) {
+      S.start(BLOCK_F);
+      check.curves.push(fromPoint(hyperbolaSteps(S, task, c, form)));
+      check.points.push({ curve: 0, x: A.x, y: A.y });
+      S.start(BLOCK_G);
+    }
+    /* Треугольник — по отмеченным A и второй точке прямой. */
+    var p1 = { x: A.x, y: A.y, label: A.label || 'A' };
+    var p2 = { x: Pl.x, y: Pl.y };
+    var source = 'marked';
+    /* Прямая на чертеже — вторая кривая (её цвет), даже когда спрашивают
+       только про неё. */
+    gl = lineSteps(S, { name: 'g', kLetter: 'a', p1: p1, p2: p2,
+      source: source, curve: 1, notes: { A: 'точка пересечения графиков' } });
+    check.curves.push({ kind: 'line', k: gl.k, b: gl.b, exact: { k: line.k, b: line.b } });
+    check.triangles.push({ curve: lineOnly ? 0 : 1, triangle: gl.triangle, lineIndex: lineOnly ? 0 : 1 });
+    check.points.push({ curve: lineOnly ? 0 : 1, x: p1.x, y: p1.y }, { curve: lineOnly ? 0 : 1, x: p2.x, y: p2.y });
+    if (lineOnly) {
+      check.answerValue = rule === 'line-a' ? gl.k : gl.b;
+      return { steps: S.done(), check: check };
+    }
+    var k = c.m;
+    var result = crossSteps(S, {
+      equation: '\\dfrac{' + N(k) + '}{x} = ' + lineTex(gl.k, gl.b),
+      prepare: [row('Умножаем на $x \\ne 0$ и переносим всё в левую часть:')],
+      A: gl.k, B: gl.b, C: neg(k),
+      known: F(A.x), knownName: 'A' + pt(A.x, A.y),
+      askedName: 'B', askedX: fracOf(meta.intersection.B.x),
+      where: 'она за пределами рисунка',
+      asksY: meta.intersection.axis === 'y',
+      ordinate: [
+        { name: 'f', at: function (x) { return rationalSubstitute(form, { k: k }, c, x); } },
+        { name: 'g', at: function (x) { return substitute(lineTerms(gl.k, gl.b), x); } }
+      ]
+    });
+    check.roots = result.roots;
+    check.answerValue = result.answerValue;
+    return { steps: S.done(), check: check };
+  }
+
+  var found = hyperbolaSteps(S, task, c, form);
+  var co = found.co;
+  check.curves.push(fromPoint(found));
+  (meta.points || []).forEach(function (p) { check.points.push({ curve: 0, x: p.x, y: p.y }); });
+  if (rule === 'value-at') {
+    var x0 = fracOf(meta.query.x0);
+    var sv = rationalSubstitute(form, co, c, x0);
+    S.add('Находим $f(' + givenTex(x0) + ')$', [row('', fn('f', x0) + ' = ' + sv.tex)]);
+    check.answerValue = sv.value;
+  } else if (rule === 'argument-for') {
+    var y0 = fracOf(meta.query.y0);
+    var d = sub(y0, c.t);
+    var shifted = div(c.m, d);
+    var x = add(shifted, c.s);
+    var den = minus('x', c.s);
+    var rows = [row('', rationalTex(form, co).replace('f(x) = ', '') + ' = ' + N(y0))];
+    if (!isZero(c.t)) {
+      rows.push(row('Переносим $' + N(c.t) + '$ вправо:'), row('', '\\dfrac{' + N(c.m) + '}{' + den + '} = ' + N(y0) + plus(neg(c.t)) + ' = ' + N(d)));
+    }
+    var quotient = '\\dfrac{' + N(c.m) + '}{' + N(d) + '}';
+    var chain = [quotient];
+    if (N(shifted) !== quotient) { chain.push(N(shifted)); }
+    if (isZero(c.s) && !isInt(shifted) && decimalFriendly(shifted)) { chain.push(D(shifted)); }
+    rows.push(row('', den + ' = ' + chain.join(' = ') +
+      (isZero(c.s) ? '' : ' \\;\\Rightarrow\\; x = ' + N(shifted) + plus(c.s) + ' = ' + withDecimal(x))));
+    S.add('Решаем уравнение $f(x) = ' + givenTex(y0) + '$', rows);
+    check.rootsCheck = [{ x: x, f: rationalAt(c, x), g: y0 }];
+    check.answerValue = x;
+  } else if (rule === 'coef-sum') {
+    var total = add(add(co.k, co.a), co.b);
+    S.add('Сумма коэффициентов', [row('', 'k + a + b = ' + N(co.k) + plus(co.a) + plus(co.b) + ' = ' + N(total))]);
+    check.answerValue = total;
+  } else if (rule === 'coef-k' || rule === 'coef-a' || rule === 'coef-b') {
+    check.answerValue = co[rule.slice(5)];
+  } else {
+    throw new Error('solution-teacher: правило «' + rule + '» не поддержано');
+  }
+  return { steps: S.done(), check: check };
+}
+
 /* ══════════════════════════════════════════════════════════
    Вход
    ══════════════════════════════════════════════════════════ */
 
 /**
- * Решение задачи для листа учителя.
+ * Решение задачи для листа учителя и разбора опорной задачи.
  * task — { meta, answer, options, answerRule }: то, что собрал движок,
  * и правило ответа из данных набора.
+ *
+ * Возвращает { steps: [{ block, no, title, rows, slope? }], check }.
  */
 function build(task) {
   var rule = task.answerRule || (task.meta && task.meta.rule);
   if (!rule) { throw new Error('solution-teacher: у задачи нет правила ответа'); }
-  if (task.meta && task.meta.family === 'quadratic') { return quadraticTask(task, rule); }
+  var family = task.meta && task.meta.family;
+  if (family === 'quadratic') { return quadraticTask(task, rule); }
+  if (family === 'rational') { return rationalTask(task, rule); }
   return lineTask(task, rule);
 }
 
-var api = { build: build };
+/* ══════════════════════════════════════════════════════════
+   Чертёж к решению
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Чертёж к решению для листа учителя: чертёж условия и поверх —
+ * треугольники наклона, по которым найдены угловые коэффициенты
+ * (graph/slope-figure.js). У горизонтальной прямой треугольника нет —
+ * чертёж условия как есть. Нет прямой с рисунка — null.
+ *
+ * options.triangles: false — без треугольников (для сверки с условием).
+ */
+function figure(task, solved, options) {
+  var all = (solved && solved.check.triangles) || [];
+  if (options && options.triangles === false) { return SlopeFigure.render(task, []); }
+  if (!all.length) { return null; }
+  /* У гиперболы прямая на чертеже всегда вторая — треугольник её цвета. */
+  var rational = task.meta && task.meta.family === 'rational';
+  return SlopeFigure.render(task, all.filter(function (item) { return !item.triangle.flat; }).map(function (item) {
+    return rational ? { triangle: item.triangle, curve: 1 } : item;
+  }));
+}
+
+var api = { build: build, figure: figure };
 
 export default api;
-export { build };
+export { build, figure };

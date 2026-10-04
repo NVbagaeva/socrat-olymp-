@@ -145,7 +145,16 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
                     </svg>
                   </span>
                   <span className="pstep__text">
-                    <span className="pstep__no">Шаг {item.number}</span>
+                    <span className="pstep__no">
+                      Шаг {item.label}
+                      {/* У задачи с двумя функциями — блок решения. */}
+                      {item.block !== null && item.block !== steps[i - 1]?.block ? (
+                        <>
+                          {' · '}
+                          <span dangerouslySetInnerHTML={{ __html: item.blockHtml ?? item.block }} />
+                        </>
+                      ) : null}
+                    </span>
                     <span className="pstep__title">
                       <TitleText title={item.title} html={item.titleHtml} />
                     </span>
@@ -158,9 +167,15 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
           <div className="psol__stage">
             <article className="solution-step">
               <div className="solution-number" aria-hidden="true">
-                {current.number}
+                {current.label}
               </div>
               <div>
+                {current.block === null ? null : (
+                  <p
+                    className="solution-block"
+                    dangerouslySetInnerHTML={{ __html: current.blockHtml ?? current.block }}
+                  />
+                )}
                 <div className="solution-head">
                   <h3 className="solution-title">
                     <TitleText title={current.title} html={current.titleHtml} />
@@ -181,7 +196,7 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
                 ))}
               </ol>
               {last ? null : (
-                <Button onClick={() => onStep(step + 1)}>Далее: Шаг {step + 2} →</Button>
+                <Button onClick={() => onStep(step + 1)}>Далее: Шаг {steps[step + 1]?.label} →</Button>
               )}
             </div>
           </div>

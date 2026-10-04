@@ -895,6 +895,8 @@ function analysis(id, seed) {
 
   var zone = Triangle.labelZone(triangle, line, task.meta.window);
   var scene = {
+    /* Сцена разбора: треугольник здесь и нужен. */
+    showSlopeTriangle: true,
     window: task.meta.window,
     grid: { step: 1, show: true },
     axes: { labelX: 'x', labelY: 'y', origin: '0' },

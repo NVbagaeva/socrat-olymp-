@@ -147,6 +147,14 @@ export function TrainerScreen({
   /* Цепочка пройдена: шагов больше не осталось. */
   const solvedByHint = hint && step >= steps.length;
   const current: TrainerStep | undefined = steps[step];
+  /* Чертёж: исходный, пока подсказка закрыта; в подсказке — тот, что
+     задал последний открытый шаг (с него на чертеже треугольник). */
+  const chart = hint
+    ? steps.slice(0, step + 1).reduce<string | null>(
+        (shown, item) => item.chartSvg ?? shown,
+        task.chartSvg,
+      )
+    : task.chartSvg;
 
   function fieldValue(stepNo: number, fieldNo: number): string {
     return fields[`${stepNo}:${fieldNo}`] ?? '';
@@ -209,7 +217,9 @@ export function TrainerScreen({
     }
     startClock();
     const right = current.fields.every((field, fieldNo) =>
-      sameNumber(fieldValue(step, fieldNo), field.answer),
+      field.choices === undefined
+        ? sameNumber(fieldValue(step, fieldNo), field.answer)
+        : fieldValue(step, fieldNo) === field.answer,
     );
     if (!right) {
       setStepMark('wrong');
@@ -315,9 +325,9 @@ export function TrainerScreen({
           {/* Условие собрал движок, формулы набрал KaTeX — обе
               на сборке. */}
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
-          {task.chartSvg === null ? null : (
+          {chart === null ? null : (
             <FigureZoom className="chart ptask__chart" label={`Чертёж к заданию ${index + 1}`}>
-              <span dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+              <span dangerouslySetInnerHTML={{ __html: chart }} />
             </FigureZoom>
           )}
         </div>
@@ -476,12 +486,32 @@ export function TrainerScreen({
         <div className="thint">
           {steps.slice(0, step + 1).map((item, i) => {
             const done = i < step;
+            /* Номер шага — номер пункта решения: «3», у задачи с двумя
+               функциями «II.3». С нового блока — его подзаголовок. */
+            const blockHead =
+              item.block != null && item.block !== (i === 0 ? null : steps[i - 1]?.block)
+                ? (item.blockHtml ?? item.block)
+                : null;
             return (
-              <article key={i} className={clsx('tstep', done && 'is-done')}>
+              <Fragment key={i}>
+              {blockHead === null ? null : (
+                <p className="tstep__block" dangerouslySetInnerHTML={{ __html: blockHead }} />
+              )}
+              <article className={clsx('tstep', done && 'is-done', item.fields.length === 0 && 'tstep--info')}>
                 <p className="tstep__no">
-                  Шаг <b>{i + 1}</b> из {steps.length}
+                  Шаг <b>{item.label ?? i + 1}</b>
+                  {item.stepTitle === undefined ? (
+                    ` из ${steps.length}`
+                  ) : (
+                    <>
+                      {' · '}
+                      <span dangerouslySetInnerHTML={{ __html: item.stepTitleHtml ?? item.stepTitle }} />
+                    </>
+                  )}
                 </p>
-                <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
+                {item.titleHtml === '' ? null : (
+                  <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
+                )}
                 <p className="tstep__text" dangerouslySetInnerHTML={{ __html: item.textHtml }} />
 
                 <div
@@ -501,17 +531,36 @@ export function TrainerScreen({
                           dangerouslySetInnerHTML={{ __html: field.labelHtml }}
                         />
                       )}
-                      <Input
-                        className="tstep__input"
-                        value={fieldValue(i, fieldNo)}
-                        state={
-                          done ? 'success' : stepMark === 'wrong' ? 'error' : 'default'
-                        }
-                        inputMode="text"
-                        autoComplete="off"
-                        readOnly={done}
-                        onChange={(event) => setFieldValue(i, fieldNo, event.target.value)}
-                      />
+                      {field.choices === undefined ? (
+                        <Input
+                          className="tstep__input"
+                          value={fieldValue(i, fieldNo)}
+                          state={
+                            done ? 'success' : stepMark === 'wrong' ? 'error' : 'default'
+                          }
+                          inputMode="text"
+                          autoComplete="off"
+                          readOnly={done}
+                          onChange={(event) => setFieldValue(i, fieldNo, event.target.value)}
+                        />
+                      ) : (
+                        /* Ответ выбором: «возрастает» / «убывает». */
+                        <span className="tstep__choices" role="radiogroup">
+                          {field.choices.map((choice) => (
+                            <Button
+                              key={choice}
+                              size="sm"
+                              variant={fieldValue(i, fieldNo) === choice ? 'primary' : 'secondary'}
+                              role="radio"
+                              aria-checked={fieldValue(i, fieldNo) === choice}
+                              disabled={done}
+                              onClick={() => setFieldValue(i, fieldNo, choice)}
+                            >
+                              {choice}
+                            </Button>
+                          ))}
+                        </span>
+                      )}
                     </Fragment>
                   ))}
                   {done ? (
@@ -523,7 +572,8 @@ export function TrainerScreen({
                       onClick={checkStep}
                       disabled={item.fields.some((_, fieldNo) => fieldValue(i, fieldNo).trim() === '')}
                     >
-                      Проверить
+                      {/* Пункт без полей только читают: «Общий вид», «Точки с рисунка». */}
+                      {item.fields.length === 0 ? 'Дальше' : 'Проверить'}
                     </Button>
                   )}
                 </div>
@@ -534,6 +584,7 @@ export function TrainerScreen({
                   <p className="tstep__note" dangerouslySetInnerHTML={{ __html: item.wrongHint }} />
                 )}
               </article>
+              </Fragment>
             );
           })}
 
