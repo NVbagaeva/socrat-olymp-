@@ -10,7 +10,7 @@
   "uniqueAnswers": true,
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 8
+    "count": 10
   },
   "tasks": [
     {
@@ -21,7 +21,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "positive"
+        "mSign": "positive",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -32,7 +34,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "negative"
+        "mSign": "negative",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -43,7 +47,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "positive"
+        "mSign": "positive",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -54,7 +60,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "negative"
+        "mSign": "negative",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -65,7 +73,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "positive"
+        "mSign": "positive",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -76,7 +86,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "negative"
+        "mSign": "negative",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -87,7 +99,9 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "positive"
+        "mSign": "positive",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     },
     {
@@ -98,7 +112,35 @@
       "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
       "form": "shift-xy",
       "constraints": {
-        "mSign": "negative"
+        "mSign": "negative",
+        "sAbsMax": 5,
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "P12R-4-09",
+      "question": "На рисунке изображён график функции вида $f(x) = {k}/(x + a) + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "sAbsMax": 5,
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "P12R-4-10",
+      "question": "На рисунке изображён график функции вида $f(x) = {k}/(x + a) + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Две асимптоты — два сдвига. Вертикальная $x = -a$ (знак!), горизонтальная $y = b$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "sAbsMax": 5,
+        "tAbsMax": 5
       }
     }
   ]
