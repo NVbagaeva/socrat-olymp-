@@ -124,7 +124,11 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: PODZAGOLOVOK_4,
     badge: 'Базовый уровень',
     tabs: TABS_4,
-    art: { src: assetUrl('/images/zadanie-04/shapka-veroyatnost-prostaya.webp'), width: 900, height: 423 },
+    art: {
+      src: assetUrl('/images/zadanie-04/shapka-veroyatnost-prostaya.webp'),
+      width: 900,
+      height: 423,
+    },
     /* Те же две карточки, что у задания №12. Файлы — сборник
        «Задание 4», который собирает scripts/build-pdf-4.mjs и кладёт
        в app/public по этим же путям (workflow «PDF 4»). Здесь стоят

@@ -44,27 +44,39 @@ const TXT = PAGE + 'index.txt';
 const failures = [];
 function check(ok, what) {
   console.log(`${ok ? '  ✓' : '  ✗'} ${what}`);
-  if (!ok) { failures.push(what); }
+  if (!ok) {
+    failures.push(what);
+  }
 }
 
 /* ── A. Исправление в Next.js на месте ─────────────────────────── */
 
 console.log('A. Исправление Next.js (patches/)');
 const nextDir = path.dirname(require.resolve('next/package.json'));
-const patched = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8')).pnpm?.patchedDependencies ?? {};
+const patched =
+  JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8')).pnpm?.patchedDependencies ??
+  {};
 const nextVersion = JSON.parse(fs.readFileSync(path.join(nextDir, 'package.json'), 'utf8')).version;
-check(Object.keys(patched).includes(`next@${nextVersion}`),
-  `патч объявлен для установленной версии next@${nextVersion} (сейчас: ${Object.keys(patched).join(', ') || 'нет'})`);
+check(
+  Object.keys(patched).includes(`next@${nextVersion}`),
+  `патч объявлен для установленной версии next@${nextVersion} (сейчас: ${Object.keys(patched).join(', ') || 'нет'})`,
+);
 for (const rel of ['dist/client', 'dist/esm/client']) {
   const file = path.join(nextDir, rel, 'components/router-reducer/fetch-server-response.js');
   const src = fs.readFileSync(file, 'utf8');
-  check(src.includes('budetege-patch: rsc-fallback-url') && src.includes('budetege-patch: rsc-no-cache'),
-    `${rel}: обе правки патча в установленном пакете`);
+  check(
+    src.includes('budetege-patch: rsc-fallback-url') &&
+      src.includes('budetege-patch: rsc-no-cache'),
+    `${rel}: обе правки патча в установленном пакете`,
+  );
 }
 const chunks = path.join(OUT, '_next/static/chunks');
-const bundled = fs.readdirSync(chunks, { recursive: true })
+const bundled = fs
+  .readdirSync(chunks, { recursive: true })
   .filter((f) => String(f).endsWith('.js'))
-  .some((f) => /cache:"no-cache",headers:/.test(fs.readFileSync(path.join(chunks, String(f)), 'utf8')));
+  .some((f) =>
+    /cache:"no-cache",headers:/.test(fs.readFileSync(path.join(chunks, String(f)), 'utf8')),
+  );
 check(bundled, 'правка попала в собранный код сайта (cache:"no-cache" у RSC-запроса)');
 
 /* ── B. Заголовки Apache ───────────────────────────────────────── */
@@ -81,18 +93,36 @@ async function head(url, headers = {}) {
 console.log('\nB. Заголовки (Apache + public/.htaccess)');
 {
   const html = await head(PAGE, { Accept: 'text/html' });
-  check(html.status === 200 && /^text\/html/.test(html.headers.get('content-type') ?? ''), 'страница: 200, text/html');
-  check(/no-cache/.test(html.headers.get('cache-control') ?? ''), `страница: Cache-Control no-cache (${html.headers.get('cache-control')})`);
+  check(
+    html.status === 200 && /^text\/html/.test(html.headers.get('content-type') ?? ''),
+    'страница: 200, text/html',
+  );
+  check(
+    /no-cache/.test(html.headers.get('cache-control') ?? ''),
+    `страница: Cache-Control no-cache (${html.headers.get('cache-control')})`,
+  );
 
   /* Так шлёт сценарий сайта: fetch с RSC: 1, Accept «звёздочка/звёздочка» и
      Sec-Fetch-Dest: empty (у старых Safari заголовка нет вовсе). */
-  for (const [label, extra] of [['современный браузер', { 'Sec-Fetch-Dest': 'empty' }], ['старый Safari', {}]]) {
+  for (const [label, extra] of [
+    ['современный браузер', { 'Sec-Fetch-Dest': 'empty' }],
+    ['старый Safari', {}],
+  ]) {
     const rsc = await head(TXT + '?_rsc=abc12', { Accept: '*/*', RSC: '1', ...extra });
     const vary = rsc.headers.get('vary') ?? '';
     check(rsc.status === 200, `RSC-запрос (${label}): 200, без перенаправления (${rsc.status})`);
-    check(/^text\/(plain|x-component)/.test(rsc.headers.get('content-type') ?? ''), `RSC-запрос (${label}): ${rsc.headers.get('content-type')}`);
-    check(/no-store/.test(rsc.headers.get('cache-control') ?? ''), `RSC-запрос (${label}): Cache-Control no-store`);
-    check(/Accept/.test(vary) && /Sec-Fetch-Dest/.test(vary), `RSC-запрос (${label}): Vary ${vary}`);
+    check(
+      /^text\/(plain|x-component)/.test(rsc.headers.get('content-type') ?? ''),
+      `RSC-запрос (${label}): ${rsc.headers.get('content-type')}`,
+    );
+    check(
+      /no-store/.test(rsc.headers.get('cache-control') ?? ''),
+      `RSC-запрос (${label}): Cache-Control no-store`,
+    );
+    check(
+      /Accept/.test(vary) && /Sec-Fetch-Dest/.test(vary),
+      `RSC-запрос (${label}): Vary ${vary}`,
+    );
   }
 
   for (const [label, headers] of [
@@ -100,8 +130,10 @@ console.log('\nB. Заголовки (Apache + public/.htaccess)');
     ['старый Safari, Accept text/html', { Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' }],
   ]) {
     const doc = await head(TXT + '?_rsc=abc12', headers);
-    check(doc.status === 302 && doc.headers.get('location')?.endsWith(PAGE),
-      `index.txt открыт как страница (${label}) → 302 на ${PAGE} (${doc.status} ${doc.headers.get('location')})`);
+    check(
+      doc.status === 302 && doc.headers.get('location')?.endsWith(PAGE),
+      `index.txt открыт как страница (${label}) → 302 на ${PAGE} (${doc.status} ${doc.headers.get('location')})`,
+    );
   }
 
   const index = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');
@@ -123,7 +155,9 @@ async function asNginx(page) {
   await page.route('**/index.txt*', async (route) => {
     const url = new URL(route.request().url());
     const file = path.join(OUT, decodeURIComponent(url.pathname));
-    if (!fs.existsSync(file)) { return route.fulfill({ status: 404, body: 'not found' }); }
+    if (!fs.existsSync(file)) {
+      return route.fulfill({ status: 404, body: 'not found' });
+    }
     return route.fulfill({
       status: 200,
       headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'max-age=31536000' },
@@ -137,32 +171,45 @@ async function scenario(server, name, act) {
   const page = await context.newPage();
   const documents = [];
   page.on('request', (r) => {
-    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) { documents.push(new URL(r.url()).pathname); }
+    if (r.isNavigationRequest() && r.frame() === page.mainFrame()) {
+      documents.push(new URL(r.url()).pathname);
+    }
   });
-  if (server === 'nginx') { await asNginx(page); }
+  if (server === 'nginx') {
+    await asNginx(page);
+  }
   await act(page);
   await page.waitForTimeout(2500);
   const type = await page.evaluate(() => document.contentType).catch(() => '');
   const text = await page.evaluate(() => document.body?.innerText ?? '').catch(() => '');
   const raw = /^\s*\d+:"\$Sreact|^\s*\d+:I\[/m.test(text) || type === 'text/plain';
   const toTxt = documents.some((p) => p.endsWith('.txt'));
-  check(!raw && !(server === 'nginx' && toTxt) && type === 'text/html',
-    `[${server}] ${name}: ${new URL(page.url()).pathname}, ${type}${toTxt ? ', был переход на .txt' : ''}`);
+  check(
+    !raw && !(server === 'nginx' && toTxt) && type === 'text/html',
+    `[${server}] ${name}: ${new URL(page.url()).pathname}, ${type}${toTxt ? ', был переход на .txt' : ''}`,
+  );
   await context.close();
 }
 
 const link = (page) => page.locator(`a[href="${PAGE}"]`).first();
 
 for (const server of ['apache', 'nginx']) {
-  console.log(`\nC. Сценарии в браузере — ${server === 'apache' ? 'Apache с .htaccess' : '.txt отдаёт nginx, без правил'}`);
+  console.log(
+    `\nC. Сценарии в браузере — ${server === 'apache' ? 'Apache с .htaccess' : '.txt отдаёт nginx, без правил'}`,
+  );
 
   await scenario(server, 'обычный переход по ссылке (без перезагрузки)', async (page) => {
     await page.goto(A + FROM, { waitUntil: 'networkidle' });
-    await page.evaluate(() => { window.__sameDocument = true; });
+    await page.evaluate(() => {
+      window.__sameDocument = true;
+    });
     await link(page).click();
     await page.waitForURL('**' + PAGE);
     await page.waitForTimeout(800);
-    check(await page.evaluate(() => window.__sameDocument === true), `[${server}] переход прошёл без полной перезагрузки`);
+    check(
+      await page.evaluate(() => window.__sameDocument === true),
+      `[${server}] переход прошёл без полной перезагрузки`,
+    );
   });
 
   await scenario(server, 'сеть не отвечает в момент нажатия', async (page) => {
@@ -179,14 +226,25 @@ for (const server of ['apache', 'nginx']) {
     await link(page).scrollIntoViewIfNeeded();
     await page.waitForTimeout(1500);
     await page.unroute('**' + TXT + '*');
-    if (server === 'nginx') { await asNginx(page); }
+    if (server === 'nginx') {
+      await asNginx(page);
+    }
     await link(page).click();
   });
 
   await scenario(server, 'вкладка ушла в фон во время подгрузки и вернулась', async (page) => {
     let release;
-    const gate = new Promise((r) => { release = r; });
-    await page.route('**' + TXT + '*', async (r) => { await gate; try { await r.continue(); } catch { /* запрос уже оборван */ } });
+    const gate = new Promise((r) => {
+      release = r;
+    });
+    await page.route('**' + TXT + '*', async (r) => {
+      await gate;
+      try {
+        await r.continue();
+      } catch {
+        /* запрос уже оборван */
+      }
+    });
     await page.goto(A + FROM, { waitUntil: 'load' });
     await page.waitForTimeout(800);
     await page.evaluate(() => {
@@ -195,7 +253,9 @@ for (const server of ['apache', 'nginx']) {
     });
     release();
     await page.unroute('**' + TXT + '*');
-    if (server === 'nginx') { await asNginx(page); }
+    if (server === 'nginx') {
+      await asNginx(page);
+    }
     await page.waitForTimeout(300);
     await link(page).click();
   });
@@ -223,7 +283,9 @@ const log = apache.stop();
 if (failures.length > 0) {
   console.error(`\nПроверка не прошла (${failures.length}):`);
   failures.forEach((f) => console.error('  ' + f));
-  if (log.trim()) { console.error('\nЖурнал Apache:\n' + log); }
+  if (log.trim()) {
+    console.error('\nЖурнал Apache:\n' + log);
+  }
   process.exit(1);
 }
 console.log('\nСырой RSC-текст не виден ни в одном сценарии.');

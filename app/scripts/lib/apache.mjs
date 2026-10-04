@@ -17,15 +17,23 @@ import { spawn, spawnSync } from 'node:child_process';
 const MODULES = ['mpm_event', 'authz_core', 'mime', 'dir', 'rewrite', 'headers'];
 
 function modulesDir() {
-  for (const dir of ['/usr/lib/apache2/modules', '/usr/libexec/apache2', '/usr/lib64/httpd/modules']) {
-    if (fs.existsSync(path.join(dir, 'mod_rewrite.so'))) { return dir; }
+  for (const dir of [
+    '/usr/lib/apache2/modules',
+    '/usr/libexec/apache2',
+    '/usr/lib64/httpd/modules',
+  ]) {
+    if (fs.existsSync(path.join(dir, 'mod_rewrite.so'))) {
+      return dir;
+    }
   }
   throw new Error('Не найден каталог модулей Apache: поставьте apache2');
 }
 
 function binary() {
   for (const bin of ['/usr/sbin/apache2', '/usr/sbin/httpd']) {
-    if (fs.existsSync(bin)) { return bin; }
+    if (fs.existsSync(bin)) {
+      return bin;
+    }
   }
   throw new Error('Не найден apache2: поставьте пакет apache2');
 }
@@ -42,8 +50,9 @@ export async function startApache(root, port) {
     'LogLevel warn',
     /* Часть модулей в сборке Apache бывает встроенной (unixd в Ubuntu):
        такие файлом не загружаются. */
-    ...MODULES.filter((m) => fs.existsSync(`${mods}/mod_${m}.so`))
-      .map((m) => `LoadModule ${m}_module "${mods}/mod_${m}.so"`),
+    ...MODULES.filter((m) => fs.existsSync(`${mods}/mod_${m}.so`)).map(
+      (m) => `LoadModule ${m}_module "${mods}/mod_${m}.so"`,
+    ),
     fs.existsSync('/etc/mime.types') ? 'TypesConfig /etc/mime.types' : '',
     'ServerName localhost',
     `DocumentRoot "${path.resolve(root)}"`,
@@ -56,11 +65,15 @@ export async function startApache(root, port) {
   ].join('\n');
   fs.writeFileSync(path.join(dir, 'httpd.conf'), conf);
 
-  const check = spawnSync(binary(), ['-t', '-f', path.join(dir, 'httpd.conf')], { encoding: 'utf8' });
+  const check = spawnSync(binary(), ['-t', '-f', path.join(dir, 'httpd.conf')], {
+    encoding: 'utf8',
+  });
   if (check.status !== 0) {
     throw new Error('Конфигурация Apache не прошла проверку:\n' + check.stderr);
   }
-  const proc = spawn(binary(), ['-f', path.join(dir, 'httpd.conf'), '-DFOREGROUND'], { stdio: 'inherit' });
+  const proc = spawn(binary(), ['-f', path.join(dir, 'httpd.conf'), '-DFOREGROUND'], {
+    stdio: 'inherit',
+  });
 
   const url = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 50; i++) {

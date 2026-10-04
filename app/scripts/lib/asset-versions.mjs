@@ -27,10 +27,19 @@ export function assetVersions(publicDir) {
   (function walk(dir) {
     for (const name of fs.readdirSync(dir).sort()) {
       const full = path.join(dir, name);
-      if (fs.statSync(full).isDirectory()) { walk(full); continue; }
+      if (fs.statSync(full).isDirectory()) {
+        walk(full);
+        continue;
+      }
       const rel = '/' + path.relative(publicDir, full).split(path.sep).join('/');
-      if (SKIP.test(rel)) { continue; }
-      out[rel] = crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex').slice(0, 8);
+      if (SKIP.test(rel)) {
+        continue;
+      }
+      out[rel] = crypto
+        .createHash('sha256')
+        .update(fs.readFileSync(full))
+        .digest('hex')
+        .slice(0, 8);
     }
   })(publicDir);
   return out;
