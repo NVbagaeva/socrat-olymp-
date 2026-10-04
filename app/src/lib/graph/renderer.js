@@ -18,6 +18,8 @@
      axes:       { labelX: 'x', labelY: 'y', origin: '0' },
      axisLabels: 'minimal' | 'full' | 'none',   // minimal: подписаны только 0, 1 и −1;
                                                 // none: засечки есть, чисел нет (миниатюры)
+     tickLabelsAvoid: false,                    // необязательно: число, на которое легла
+                                                // кривая или пунктир, уходит за ось
      curves:     [ { type: 'line', k, b, color: 'lineA', label: null,
                      style: 'solid' | 'dashed' } ],   // dashed — эталон рядом
      points:     [ { x, y, style: 'solid', label: null, color: 'lineA' } ]
@@ -503,15 +505,51 @@ function renderGraph(scene, report) {
     return [];
   }
 
+  /* Подпись деления, на которую легла кривая или пунктир фигуры, не
+     читается. У сцены с признаком tickLabelsAvoid (миниатюры навыков)
+     такая подпись уходит на другую сторону оси: у оси x — над осью,
+     у оси y — правее её; из двух мест берётся то, где просторнее.
+     У остальных сцен подписи стоят, как стояли: их чертежи не
+     меняются. */
+  var tickCloud = scene.tickLabelsAvoid
+    ? obstacleCloud(Object.assign({}, scene, { points: [] }), drawn, sx, sy, { x: axisY, y: axisX },
+        { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) },
+        [], { axes: false })
+    : null;
+  function clearance(box) {
+    var clear = Infinity;
+    for (var c = 0; c < tickCloud.length; c++) {
+      clear = Math.min(clear, rectDist(tickCloud[c], box.x, box.y, box.halfW, box.halfH));
+    }
+    return clear;
+  }
+  /* Место подписи: обычное или зеркальное относительно оси. */
+  function tickSpot(axis, item) {
+    var box = tickBox(axis, item.at, item.text);
+    var spot = axis === 'x'
+      ? { box: box, x: sx(item.at), y: axisX + THEME.gap.axisLabelX, anchor: 'middle' }
+      : { box: box, x: axisY - THEME.gap.axisLabelY, y: sy(item.at) + 4.5, anchor: 'end' };
+    if (!tickCloud || clearance(box) > 2) { return spot; }
+    var flipped = axis === 'x'
+      ? { x: box.x, y: 2 * axisX - box.y, halfW: box.halfW, halfH: box.halfH }
+      : { x: 2 * axisY - box.x, y: box.y, halfW: box.halfW, halfH: box.halfH };
+    if (clearance(flipped) <= clearance(box)) { return spot; }
+    return axis === 'x'
+      ? { box: flipped, x: flipped.x, y: flipped.y + THEME.font.axisLabel * 0.35, anchor: 'middle' }
+      : { box: flipped, x: axisY + THEME.gap.axisLabelY, y: sy(item.at) + 4.5, anchor: 'start' };
+  }
+
   axisLabels(ticksX, 'x').forEach(function (item) {
-    var box = tickBox('x', item.at, item.text);
-    labelLayer.push(numberText(item.text, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
+    var spot = tickSpot('x', item);
+    var box = spot.box;
+    labelLayer.push(numberText(item.text, spot.x, spot.y, spot.anchor));
     labelBoxes.push(box);
     collect(report, 'axisLabel', 'x', box.x, box.y, box.halfW, box.halfH);
   });
   axisLabels(ticksY, 'y').forEach(function (item) {
-    var box = tickBox('y', item.at, item.text);
-    labelLayer.push(numberText(item.text, axisY - THEME.gap.axisLabelY, sy(item.at) + 4.5, 'end'));
+    var spot = tickSpot('y', item);
+    var box = spot.box;
+    labelLayer.push(numberText(item.text, spot.x, spot.y, spot.anchor));
     labelBoxes.push(box);
     collect(report, 'axisLabel', 'y', box.x, box.y, box.halfW, box.halfH);
   });

@@ -427,9 +427,18 @@ export function verticalTestScene() {
    это ловит, но ловит поздно. */
 export type PrepSkillSceneId = PrepSkillId;
 
-/** Кегль подписи в миниатюре: на экране это около двенадцати пунктов. */
-const PREP_LABEL = 34;
+/** Кегль подписи в миниатюре (a, k, ?): чуть крупнее чисел на осях
+    (у них 12), не больше — подпись не должна спорить с чертежом. */
+const PREP_LABEL = 14;
 
+/**
+ * Подпись элемента миниатюры: буква коэффициента, «?», имя точки.
+ * (x, y) — сам элемент: конец асимптоты, отмеченная точка. dx, dy —
+ * только направление, с какой стороны от него подпись уместнее
+ * (знак по экрану: dy < 0 — выше). Рендерер ставит подпись вплотную
+ * к элементу с этой стороны и, если там занято линией, числом оси
+ * или другой подписью, переносит на свободную сторону.
+ */
 function prepLabel(
   text: string,
   x: number,
@@ -439,7 +448,7 @@ function prepLabel(
   color = 'label',
   size = PREP_LABEL,
 ) {
-  return { type: 'label', at: [x, y], offset: [dx, dy], text, size, color };
+  return { type: 'label', at: [x, y], offset: [dx, dy], text, size, color, gap: 5 };
 }
 
 export function prepSkillScene(id: PrepSkillSceneId) {
@@ -455,6 +464,9 @@ export function prepSkillScene(id: PrepSkillSceneId) {
        'minimal', и на осях стояли 1 и −1. Так карточки навыков и
        выпущены — режим закреплён явно, чтобы они не изменились. */
     axisLabels: 'minimal',
+    /* Число 1 или −1, на которое легла кривая или пунктир асимптоты,
+       уходит на другую сторону оси. */
+    tickLabelsAvoid: true,
     curves: [] as unknown[],
     points: [] as unknown[],
     shapes: [] as unknown[],
@@ -670,6 +682,9 @@ function rationalPrepScene(
   base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
           curves: unknown[]; points: unknown[]; shapes: unknown[] },
 ) {
+  /* Асимптоты не ближе 0,4 клетки к делениям ±1: иначе пунктир ложится
+     на подписи 1 и −1, и уводить их за ось бесполезно — там тот же
+     пунктир. */
   const vertical = (x: number) => dashed([x, -2], [x, 2]);
   const horizontal = (y: number) => dashed([-2, y], [2, y]);
 
@@ -679,21 +694,21 @@ function rationalPrepScene(
       ...base,
       curves: [miniHyperbola(1)],
       points: [miniDot(1, 1)],
-      shapes: [prepLabel('k', 1, 1, 16, -14, 'accent')],
+      shapes: [prepLabel('k', 1, 1, 1, -1, 'accent')],
     };
   }
   if (id === 'sdvig-vverh') {
     return {
       ...base,
-      curves: [miniHyperbola(0.5, 0, 0.8)],
-      shapes: [horizontal(0.8), prepLabel('a', -1.6, 0.8, 0, -16, 'accent')],
+      curves: [miniHyperbola(0.5, 0, 0.55)],
+      shapes: [horizontal(0.55), prepLabel('a', -1.85, 0.55, 1, -1, 'accent')],
     };
   }
   if (id === 'sdvig-vbok') {
     return {
       ...base,
-      curves: [miniHyperbola(0.5, -0.8, 0)],
-      shapes: [vertical(0.8), prepLabel('\u2212a', 0.8, -1.6, 22, 0, 'accent')],
+      curves: [miniHyperbola(0.5, -0.55, 0)],
+      shapes: [vertical(0.55), prepLabel('\u2212a', 0.55, -1.85, 1, -1, 'accent')],
     };
   }
   if (id === 'sdvig-oba' || id === 'vse-koef') {
@@ -707,9 +722,10 @@ function rationalPrepScene(
   if (id === 'celaya-chast') {
     return {
       ...base,
-      curves: [miniHyperbola(-0.6, 0.7, 0.9)],
-      points: [miniDot(-1.3, 1.9), miniDot(0.3, 0.3)],
-      shapes: [vertical(-0.7), horizontal(0.9), prepLabel('k', 1.6, 0.9, 0, -16, 'accent')],
+      /* y = −0,6/(x + 0,55) + 0,55; точки — на ветвях. */
+      curves: [miniHyperbola(-0.6, 0.55, 0.55)],
+      points: [miniDot(-1.3, 1.35), miniDot(0.45, -0.05)],
+      shapes: [vertical(-0.55), horizontal(0.55), prepLabel('k', 1.85, 0.55, -1, -1, 'accent')],
     };
   }
   if (id === 'znachenie') {
@@ -717,7 +733,7 @@ function rationalPrepScene(
       ...base,
       curves: [miniHyperbola(0.6, 0, 0)],
       points: [miniDot(1.5, 0.4, 'lineB')],
-      shapes: [dashed([1.5, 0], [1.5, 0.4]), prepLabel('?', 1.5, 0.4, 14, -14, 'accent')],
+      shapes: [dashed([1.5, 0], [1.5, 0.4]), prepLabel('?', 1.5, 0.4, 1, -1, 'accent')],
     };
   }
   if (id === 'argument') {
@@ -725,7 +741,7 @@ function rationalPrepScene(
       ...base,
       curves: [miniHyperbola(0.6, 0, 0)],
       points: [miniDot(0.5, 1.2, 'lineB')],
-      shapes: [dashed([0, 1.2], [0.5, 1.2]), prepLabel('?', 0.5, 1.2, 16, -12, 'accent')],
+      shapes: [dashed([0, 1.2], [0.5, 1.2]), prepLabel('?', 0.5, 1.2, 1, -1, 'accent')],
     };
   }
   if (id === 'pryamaya') {
@@ -741,8 +757,11 @@ function rationalPrepScene(
       ...base,
       curves: [miniHyperbola(1), { type: 'line', k: 1, b: 0.6, color: 'lineB', label: null }],
       points: [miniDot(0.75, 1.35, 'cross')],
-      shapes: [prepLabel('A', 0.75, 1.35, 16, 12, 'label'),
-        prepLabel('B ?', -1.3, 1.4, 0, 0, 'accent')],
+      /* B — вторая точка пересечения: x² + 0,6x − 1 = 0, x ≈ −1,35. */
+      /* У точки пересечения свободны только клинья между прямой и
+         ветвью: у A — справа, у B — снизу. */
+      shapes: [{ ...prepLabel('A', 0.75, 1.35, 1, 0, 'label'), gap: 9 },
+        { ...prepLabel('B ?', -1.35, -0.74, 0, 1, 'accent'), gap: 9 }],
     };
   }
   return null;
