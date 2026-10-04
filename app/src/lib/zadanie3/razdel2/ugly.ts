@@ -49,15 +49,15 @@ function triAngle(p: Params): number {
 export const P03_22: Prototype = {
   id: 'P03-22',
   razdel: 'II',
-  nazvanie: 'Угол AA₁ и BC₁ в правильной треугольной призме',
+  nazvanie: 'Угол $AA_1$ и $BC_1$ в правильной треугольной призме',
   tip: 'угол между боковым ребром и диагональю грани, ответ 45°',
   zadachnik: [74, 75],
   status: 'есть',
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной треугольной призме ${TRI_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `В правильной треугольной призме $${TRI_NAMES}$, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
+    `найдите угол между прямыми $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isFaceDiagonalPair(p),
   otvet: () => 45,
@@ -113,15 +113,15 @@ function isBaseEdgePair(p: Params): boolean {
 export const P03_23: Prototype = {
   id: 'P03-23',
   razdel: 'II',
-  nazvanie: 'Угол AA₁ и BC в правильной треугольной призме',
+  nazvanie: 'Угол $AA_1$ и $BC$ в правильной треугольной призме',
   tip: 'угол между боковым ребром и ребром основания, ответ 90°',
   zadachnik: [76, 77],
   status: 'добавить',
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной треугольной призме ${TRI_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `В правильной треугольной призме $${TRI_NAMES}$, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
+    `найдите угол между прямыми $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isBaseEdgePair(p),
   otvet: () => 90,
@@ -212,8 +212,8 @@ export const P03_35: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной шестиугольной призме ${HEX_NAMES}, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
-    `найдите угол между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}. Ответ дайте в градусах.`,
+    `В правильной шестиугольной призме $${HEX_NAMES}$, все рёбра которой равны ${ru(num(p, 'a'))}, ` +
+    `найдите угол между прямыми $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$. Ответ дайте в градусах.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && isNonParallelSidePair(p),
   otvet: () => 60,

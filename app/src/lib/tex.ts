@@ -19,49 +19,54 @@ import { katex } from './graph/katex';
  */
 export function typeset(text: string, strogo = false): string {
   return text.replace(/\$([^$]+)\$/g, (_match, formula: string) =>
-    katex.renderToString(formula, { throwOnError: strogo, displayMode: false }),
+    katex.renderToString(normalizeTex(formula), { throwOnError: strogo, displayMode: false }),
   );
 }
 
 /**
- * Тот же текст без разметки — для мест, где KaTeX не набрать:
- * заголовок вкладки браузера, подсказка title, aria-label. Формула
- * пишется обычными знаками: \dfrac{k}{x} → k/x, \cdot → ·.
+ * То же, что typeset, но для обычного текста из данных: всё вне
+ * формул экранируется (&, <, >). Нужен там, где строка раньше
+ * выводилась текстом и могла содержать эти знаки как есть.
  */
-export function texPlain(text: string): string {
-  return text.replace(/\$([^$]+)\$/g, (_match, formula: string) => plainFormula(formula));
+export function typesetText(text: string): string {
+  return text
+    .split(/(\$[^$]+\$)/)
+    .map((piece, index) =>
+      index % 2 === 1
+        ? typeset(piece)
+        : piece.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+    )
+    .join('');
 }
 
-function plainFormula(tex: string): string {
-  let out = tex;
-  /* Дроби изнутри наружу: в числителе может быть своя дробь. */
-  for (let i = 0; i < 4; i += 1) {
-    out = out.replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_m, a: string, b: string) => {
-      const wrap = (v: string) => (/^[\w.,]+$/.test(v) ? v : `(${v})`);
-      return `${wrap(a)}/${wrap(b)}`;
-    });
-  }
-  return out
-    .replace(/\\cdot/g, '·')
-    .replace(/\\times/g, '×')
-    .replace(/\\le(?:q)?(?![a-z])/g, '≤')
-    .replace(/\\ge(?:q)?(?![a-z])/g, '≥')
-    .replace(/\\ne(?:q)?(?![a-z])/g, '≠')
-    .replace(/\\pi/g, 'π')
-    .replace(/\\alpha/g, 'α')
-    .replace(/\\Delta\s*/g, 'Δ')
-    .replace(/\\sqrt\{([^{}]*)\}/g, '√$1')
-    .replace(/\{,\}/g, ',')
-    .replace(/\\[,;:! ]|\\quad|\\qquad/g, ' ')
-    .replace(/\\text\{([^{}]*)\}/g, '$1')
-    .replace(/\\[a-zA-Z]+/g, '')
-    .replace(/[{}]/g, '')
-    .replace(/\^2/g, '²')
-    .replace(/\^3/g, '³')
-    .replace(/-/g, '−')
-    .replace(/\s+/g, ' ')
-    .trim();
+/* Знаки, которые приходят в формулу из подстановок: имя вершины
+   «A₁», число «7,5» из ru(), «·» и «−» из текста. KaTeX их либо не
+   знает (₁), либо набирает не по-математически (запятая с отбивкой),
+   поэтому перед набором они переводятся в запись TeX. */
+const SUBSCRIPT = '₀₁₂₃₄₅₆₇₈₉';
+const VULGAR: Record<string, string> = { '½': '\\tfrac12', '⅓': '\\tfrac13', '⅔': '\\tfrac23', '¼': '\\tfrac14', '¾': '\\tfrac34' };
+
+export function normalizeTex(formula: string): string {
+  return formula
+    .replace(/[₀-₉]+/g, (digits) => `_{${[...digits].map((d) => SUBSCRIPT.indexOf(d)).join('')}}`)
+    .replace(/²/g, '^2')
+    .replace(/³/g, '^3')
+    .replace(/[½⅓⅔¼¾]/g, (ch) => VULGAR[ch] ?? ch)
+    .replace(/√\(([^()]*)\)/g, '\\sqrt{$1}')
+    .replace(/√([\w{}]+)/g, '\\sqrt{$1}')
+    .replace(/·/g, '\\cdot ')
+    .replace(/×/g, '\\times ')
+    .replace(/−/g, '-')
+    .replace(/≤/g, '\\le ')
+    .replace(/≥/g, '\\ge ')
+    .replace(/≠/g, '\\ne ')
+    .replace(/π/g, '\\pi ')
+    .replace(/(\d),(\d)/g, '$1{,}$2');
 }
+
+/* Формула обычным текстом — в отдельном модуле без KaTeX: его берут
+   и клиентские экраны (lib/texPlain.ts). */
+export { texPlain } from './texPlain';
 
 /* ── Выкладка: формула, которая рвётся по правилам тетради ──────── */
 
