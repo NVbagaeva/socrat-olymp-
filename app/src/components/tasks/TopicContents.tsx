@@ -1,10 +1,13 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { TitleText } from './TitleText';
 
 export interface ContentsItem {
   id: string;
   title: string;
+  /** Заголовок, набранный KaTeX на сервере. Нет — выводится title. */
+  titleHtml?: string;
 }
 
 export interface TopicContentsProps {
@@ -37,7 +40,9 @@ export function TopicContents({ items, active, onSelect, className }: TopicConte
             <span className="contents-item__no" aria-hidden="true">
               {index + 1}
             </span>
-            <span className="contents-item__title">{item.title}</span>
+            <span className="contents-item__title">
+              <TitleText title={item.title} html={item.titleHtml} />
+            </span>
           </button>
         </li>
       ))}

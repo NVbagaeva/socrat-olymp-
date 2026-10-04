@@ -100,9 +100,11 @@ export function hyperbolaAndLineScene() {
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
     axisLabels: 'minimal',
     curves: [
-      { type: 'rational', k: 4, a: 0, b: 0, color: 'lineA', label: 'y = k/x' },
-      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: 'y = ax + b' },
+      { type: 'rational', k: 4, a: 0, b: 0, color: 'lineA', label: null },
+      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: null },
     ],
+    /* Кривые не подписаны: формулы — в тексте рядом, набраны KaTeX,
+       а в подписи SVG их не набрать. Подписана только точка A. */
     points: [{ x: 2, y: 2, style: 'solid', color: 'cross', label: 'A' }],
     alt: 'Гипербола y = k/x и прямая y = ax + b',
   };

@@ -137,7 +137,7 @@ function stepVertical(c, form) {
   }
   if (form === 'linear') {
     var b = mul(frac(-1), s);
-    return step('vertical', 'Вертикальная асимптота → b', [
+    return step('vertical', 'Вертикальная асимптота → $b$', [
       text('Вертикальная пунктирная прямая — асимптота ' + m('x = ' + tex(s)) +
         '. В этой точке знаменатель дроби обращается в ноль: ' + m('x + b = 0') +
         ' при ' + m('x = -b') + '.'),
@@ -167,7 +167,7 @@ function stepHorizontal(c, form) {
     ]);
   }
   if (form === 'linear') {
-    return step('horizontal', 'Целая часть и горизонтальная асимптота → k', [
+    return step('horizontal', 'Целая часть и горизонтальная асимптота → $k$', [
       text('Выделим целую часть:'),
       formula('\\dfrac{kx + a}{x + b} = \\dfrac{k(x + b) + a - kb}{x + b} = k + \\dfrac{a - kb}{x + b}'),
       text('Дробь ' + m('\\dfrac{a - kb}{x + b}') + ' при больших ' + m('|x|') +
@@ -193,13 +193,13 @@ function stepK(c, form, points) {
   var lead = 'Отмеченная точка ' + m('(' + tex(x) + ';\\, ' + tex(y) + ')') +
     ' лежит на графике — подставим её координаты в формулу.';
   if (form === 'basic') {
-    return step('k', 'Находим k по точке', [
+    return step('k', 'Находим $k$ по точке', [
       text(lead + ' Для ' + m('y = \\dfrac{k}{x}') + ' это значит ' + m('k = x \\cdot y') + ':'),
       formula('k = ' + tb(x) + ' \\cdot ' + tb(y) + ' = ' + tex(co.k))
     ]);
   }
   if (form === 'shift-y') {
-    return step('k', 'Находим k по точке', [
+    return step('k', 'Находим $k$ по точке', [
       text(lead),
       formula(tex(y) + ' = \\dfrac{k}{' + tex(x) + '}' + term(co.a) +
         ' \\;\\Rightarrow\\; k = (' + tex(y) + term(mul(frac(-1), co.a)) + ') \\cdot ' + tb(x) +
@@ -207,14 +207,14 @@ function stepK(c, form, points) {
     ]);
   }
   if (form === 'shift-x') {
-    return step('k', 'Находим k по точке', [
+    return step('k', 'Находим $k$ по точке', [
       text(lead),
       formula(tex(y) + ' = \\dfrac{k}{' + tex(x) + term(co.a) + '} \\;\\Rightarrow\\; k = ' +
         tb(y) + ' \\cdot (' + tex(x) + term(co.a) + ') = ' + tex(co.k))
     ]);
   }
   if (form === 'shift-xy') {
-    return step('k', 'Находим k по точке', [
+    return step('k', 'Находим $k$ по точке', [
       text(lead),
       formula(tex(y) + ' = \\dfrac{k}{' + tex(x) + term(co.a) + '}' + term(co.b) +
         ' \\;\\Rightarrow\\; k = (' + tex(y) + term(mul(frac(-1), co.b)) + ') \\cdot (' +
@@ -235,7 +235,7 @@ function stepK(c, form, points) {
     blocks.push(formula('\\dfrac{' + tb(co.k) + ' \\cdot ' + tb(qx) + term(co.a) + '}{' + tex(qx) +
       term(co.b) + '} = ' + tex(qy) + ' \\;\\checkmark'));
   }
-  return step('k', 'Находим a по точке', blocks);
+  return step('k', 'Находим $a$ по точке', blocks);
 }
 
 function stepFormula(c, form) {
@@ -342,7 +342,7 @@ function lineSteps(c, task) {
   var steps = [];
 
   var lineOnly = meta.rule === 'line-a' || meta.rule === 'line-b';
-  if (!lineOnly) steps.push(step('k', 'Гипербола: находим k по точке A', [
+  if (!lineOnly) steps.push(step('k', 'Гипербола: находим $k$ по точке $A$', [
     text('Точка ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') + ' лежит на графике ' +
       m('f(x) = \\dfrac{k}{x}') + ', значит ' + m('k = x \\cdot y') + ' (' + m('k') +
       ' — коэффициент гиперболы ' + m('f(x)') + '):'),
@@ -351,7 +351,7 @@ function lineSteps(c, task) {
   ]));
 
   var dy = sub(yP, yA), dx = sub(xP, xA);
-  steps.push(step('line', 'Прямая: коэффициенты a и b функции g по двум точкам', [
+  steps.push(step('line', 'Прямая: коэффициенты $a$ и $b$ функции $g$ по двум точкам', [
     text(m('a') + ' и ' + m('b') + ' — коэффициенты прямой ' + m('g(x)') + '. Прямая ' + m('g(x) = ax + b') + ' проходит через ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') +
       ' и ' + m('(' + tex(xP) + ';\\, ' + tex(yP) + ')') + '. Угловой коэффициент прямой:'),
     formula('a = \\dfrac{' + tex(yP) + term(mul(frac(-1), yA)) + '}{' + tex(xP) + term(mul(frac(-1), xA)) +
@@ -411,7 +411,7 @@ function lineSteps(c, task) {
   ]));
 
   if (asksY) {
-    steps.push(step('ordinate', 'Ордината точки B', [
+    steps.push(step('ordinate', 'Ордината точки $B$', [
       text('Подставляем ' + m('x_B') + ' в формулу гиперболы:'),
       formula('y_B = f(x_B) = \\dfrac{' + tex(k) + '}{' + tb(xB) + '} = ' + tex(yB)),
       text('Проверка по прямой: ' + m('g(' + tex(xB) + ') = ' + tb(line.k) + ' \\cdot ' + tb(xB) +

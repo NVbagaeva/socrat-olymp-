@@ -27,7 +27,14 @@ export type TheoryBlockType = 'definition' | 'properties' | 'chart' | 'example' 
 
 export interface TheoryBlock {
   id: string;
+  /** Заголовок; формулы в нём — $…$. */
   title: string;
+  /**
+   * Тот же заголовок, набранный KaTeX. Ставит страница на сервере
+   * (FunctionTopicPage): лента вкладок — клиентский экран, и тянуть
+   * в него KaTeX ради заголовков незачем.
+   */
+  titleHtml?: string;
   type: TheoryBlockType;
   /** Содержимое блока обычным текстом. null — материала ещё нет. */
   content: string | null;
@@ -177,8 +184,8 @@ const LINEAR_THEORY: TheoryBlock[] = [
   },
   { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
   { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
-  { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },
-  { id: 'b', title: 'Коэффициент b', type: 'properties', content: null, status: 'empty' },
+  { id: 'k', title: 'Коэффициент $k$', type: 'properties', content: null, status: 'empty' },
+  { id: 'b', title: 'Коэффициент $b$', type: 'properties', content: null, status: 'empty' },
   { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
   {
     id: 'non-standard',

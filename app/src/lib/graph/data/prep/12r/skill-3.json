@@ -3,7 +3,7 @@
   "id": "P12R-3",
   "block": 3,
   "title": "Сдвиг влево-вправо",
-  "subtitle": "k известен: найти a в k/(x + a)",
+  "subtitle": "$k$ известен: найти $a$ в $\\frac{k}{x + a}$",
   "seed": 12403,
   "family": "rational",
   "axisLabels": "minimal",

@@ -1,6 +1,7 @@
 import { OPORNYE } from '@/content/opornye';
 import type { PrepSkill } from '@/content/prepSkills';
 import { buildPrepTasks } from '@/lib/prep';
+import { typeset } from '@/lib/tex';
 import { PrepShell } from './PrepShell';
 import { PrepTaskScreen } from './PrepTaskScreen';
 
@@ -25,9 +26,10 @@ export function PrepTasks({ type, skill, base }: PrepTasksProps) {
       <PrepTaskScreen
         skillId={skill.id}
         title={skill.title}
+        titleHtml={typeset(skill.title)}
         tasks={buildPrepTasks(skill)}
         listHref={`${base}/${OPORNYE.tail}`}
-        tip={skill.tip}
+        tip={typeset(skill.tip)}
       />
     </PrepShell>
   );

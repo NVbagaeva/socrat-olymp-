@@ -1,7 +1,8 @@
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { generatorPage } from '@/content/generator';
-import { skillLevelsFor } from '@/content/skills12';
+import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
+import { typeset } from '@/lib/tex';
 import { skillItems } from '../configurator';
 import { GeneratorScreen } from './GeneratorScreen';
 
@@ -28,7 +29,7 @@ export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
       base={base}
       family={subtopic.title}
       skills={skillItems(family)}
-      levels={skillLevelsFor(subtopic.id)}
+      levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
       note={subtopic.id === 'quadratic' || subtopic.id === 'rational'
         ? generatorPage.summary.noteOwn
         : generatorPage.summary.note}

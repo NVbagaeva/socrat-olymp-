@@ -18,6 +18,7 @@ import {
 import { firstLevel, skillCounts, skillLevels, type SkillLevel } from '@/content/skills12';
 import { trainerPage } from '@/content/trainerModes';
 import { counted } from '@/lib/plural';
+import { TitleText } from '../TitleText';
 
 /** Режим тренировки в конфигураторе. */
 export interface TrainerModeOption<M extends string = string> {
@@ -192,7 +193,7 @@ export function TrainerConfigurator<M extends string>({
                       checked={level === item.id}
                       onSelect={() => setLevel(item.id)}
                       title={item.title}
-                      lead={item.lead}
+                      lead={<TitleText title={item.lead} html={item.leadHtml} />}
                     />
                   ))}
                 </OptionGroup>
@@ -206,7 +207,9 @@ export function TrainerConfigurator<M extends string>({
             {words.summary.title}
           </h3>
           <Badge tone="info">{family}</Badge>
-          <p className="cfg-summary__skill">{skill.title}</p>
+          <p className="cfg-summary__skill">
+            <TitleText title={skill.title} html={skill.titleHtml} />
+          </p>
           <p className="cfg-summary__count">
             {counted(skill.count, 'задание', 'задания', 'заданий')}
           </p>
@@ -227,7 +230,8 @@ export function TrainerConfigurator<M extends string>({
           {words.start}
         </Button>
         <p className="cfg-bar__summary">
-          {family} · {skill.title} · {modeTitle} · {countLabel(chosenCount)}
+          {family} · <TitleText title={skill.title} html={skill.titleHtml} /> · {modeTitle} ·{' '}
+          {countLabel(chosenCount)}
         </p>
       </div>
 

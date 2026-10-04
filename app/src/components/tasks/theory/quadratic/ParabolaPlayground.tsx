@@ -88,14 +88,14 @@ export function ParabolaPlayground() {
           <p className="play__describe" aria-live="polite">
             {words}
             {a === 0 ? '. ' : ''}
-            {a === 0 ? <span className="play__zero">{playground.zero}</span> : null}
+            {a === 0 ? <span className="play__zero"><Phrases parts={phrases(playground.zero)} /></span> : null}
           </p>
         </div>
 
         <div className="play__controls">
           <div className="play__field">
             <label className="play__label" htmlFor={aId}>
-              {playground.a.label}
+              <Phrases parts={phrases(playground.a.label)} />
               <span className="play__value">a = {plain(a)}</span>
             </label>
             <input
@@ -131,12 +131,12 @@ export function ParabolaPlayground() {
                 </div>
               ))}
             </div>
-            <p className="play__hint">{playground.presets.hint}</p>
+            <p className="play__hint"><Phrases parts={phrases(playground.presets.hint)} /></p>
           </div>
 
           <div className="play__field">
             <label className="play__label" htmlFor={cId}>
-              {playground.c.label}
+              <Phrases parts={phrases(playground.c.label)} />
               <span className="play__value">c = {plain(c)}</span>
             </label>
             <input

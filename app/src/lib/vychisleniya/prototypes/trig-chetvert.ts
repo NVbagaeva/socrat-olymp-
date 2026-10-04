@@ -72,7 +72,7 @@ function drawMN(r: Rng, find: 'sin' | 'cos', wantBase: boolean): Draft | null {
 export const P8M: Prototype = {
   id: '8.M',
   group: 'III',
-  nazvanie: 'Найти sin α по cos α',
+  nazvanie: 'Найти $\\sin \\alpha$ по $\\cos \\alpha$',
   podtipy: [
     podtip('base', 'base', (r) => drawMN(r, 'sin', true)),
     podtip('adv', 'advanced', (r) => drawMN(r, 'sin', false)),
@@ -92,7 +92,7 @@ export const P8M: Prototype = {
 export const P8N: Prototype = {
   id: '8.N',
   group: 'III',
-  nazvanie: 'Найти cos α по sin α',
+  nazvanie: 'Найти $\\cos \\alpha$ по $\\sin \\alpha$',
   podtipy: [
     podtip('base', 'base', (r) => drawMN(r, 'cos', true)),
     podtip('adv', 'advanced', (r) => drawMN(r, 'cos', false)),
@@ -122,7 +122,7 @@ export const P8N: Prototype = {
 export const P8O: Prototype = {
   id: '8.O',
   group: 'III',
-  nazvanie: 'Найти tg α',
+  nazvanie: 'Найти $\\operatorname{tg} \\alpha$',
   podtipy: [
     podtip('triple', 'base', (r) => {
       /* Десятичные sin и cos с «хорошим» отношением дают только
@@ -247,7 +247,7 @@ function drawP(r: Rng, integer: boolean): Draft | null {
 export const P8P: Prototype = {
   id: '8.P',
   group: 'III',
-  nazvanie: 'Косинус двойного угла по sin или cos',
+  nazvanie: 'Косинус двойного угла по $\\sin$ или $\\cos$',
   podtipy: [
     podtip('int', 'base', (r) => drawP(r, true)),
     podtip('dec', 'advanced', (r) => drawP(r, false)),

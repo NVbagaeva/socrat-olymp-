@@ -78,8 +78,22 @@ function text(value) {
   return plain(escape(value));
 }
 
+/**
+ * Текст с формулами $…$ в разметку листа: текст набирается как text(),
+ * формула становится заглушкой <span class="math" data-tex>, которую
+ * KaTeX заменяет вёрсткой — и на сайте, и в PDF. Внутри заглушки —
+ * сама запись: её видно, только пока KaTeX не отработал.
+ */
+function mathText(value) {
+  return String(value).split(/(\$[^$]*\$)/).map(function (piece, index) {
+    if (index % 2 === 0) { return text(piece); }
+    var tex = piece.slice(1, -1);
+    return '<span class="math" data-tex="' + attr(tex) + '">' + escape(tex) + '</span>';
+  }).join('');
+}
+
 const api = { plain: plain, markup: markup, escape: escape, attr: attr, text: text,
-              NBSP: NBSP, MDASH: MDASH };
+              mathText: mathText, NBSP: NBSP, MDASH: MDASH };
 
 export default api;
-export { plain, markup, escape, attr, text, NBSP, MDASH };
+export { plain, markup, escape, attr, text, mathText, NBSP, MDASH };

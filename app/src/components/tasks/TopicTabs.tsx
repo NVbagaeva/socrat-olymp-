@@ -8,6 +8,7 @@ import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { markSectionRead } from '@/lib/theoryRead';
+import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
 import { TutorMenu } from './TutorMenu';
 
@@ -156,7 +157,7 @@ export function TopicTabs({
   const strip = useRef<HTMLDivElement>(null);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
-  const items = theory.map((item) => ({ id: item.id, title: item.title }));
+  const items = theory.map((item) => ({ id: item.id, title: item.title, titleHtml: item.titleHtml }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
      происходит, без ошибки в консоли. */
@@ -343,7 +344,9 @@ export function TopicTabs({
                   Содержание
                 </button>
                 {current !== undefined ? (
-                  <span className="topic-open__now">{current.title}</span>
+                  <span className="topic-open__now">
+                    <TitleText title={current.title} html={current.titleHtml} />
+                  </span>
                 ) : null}
               </div>
 
@@ -364,7 +367,7 @@ export function TopicTabs({
                             {item.badge}
                           </span>
                         ) : null}
-                        {item.title}
+                        <TitleText title={item.title} html={item.titleHtml} />
                       </h3>
                       {item.body !== undefined && bodies[item.body] !== undefined ? (
                         bodies[item.body]

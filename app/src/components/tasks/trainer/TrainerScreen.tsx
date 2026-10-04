@@ -460,7 +460,11 @@ export function TrainerScreen({
                   dangerouslySetInnerHTML={{ __html: task.method.svg }}
                 />
                 <div className="tmethod__text">
-                  <p className="tmethod__title">{task.method.title}</p>
+                  {/* Название набрано KaTeX вместе с заданием (lib/trainerMethod.ts). */}
+                  <p
+                    className="tmethod__title"
+                    dangerouslySetInnerHTML={{ __html: task.method.title }}
+                  />
                 </div>
               </div>
             </aside>

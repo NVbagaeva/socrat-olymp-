@@ -69,9 +69,9 @@ export const P03_55: Prototype = {
     const l = num(p, 'l');
     const h = round(Math.sqrt(l * l - r * r));
     return [
-      { text: `Высота: √(${ru(l)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
+      { text: `Высота: $\\sqrt{${ru(l)}^2 - ${ru(r)}^2} = ${ru(h)}$.`, value: h },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = ${ru(num(p, 'd'))} · ${ru(h)} : 2 = ${ru(round(r * h))}.`,
+        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = $${ru(num(p, 'd'))} \\cdot ${ru(h)} : 2 = ${ru(round(r * h))}$.`,
         value: r * h,
       },
     ];
@@ -129,9 +129,9 @@ export const P03_56: Prototype = {
     const l = num(p, 'l');
     const r = Math.sqrt(l * l - h * h);
     return [
-      { text: `Радиус: √(${ru(l)}² − ${ru(h)}²) = ${ru(r)}.`, value: r },
+      { text: `Радиус: $\\sqrt{${ru(l)}^2 - ${ru(h)}^2} = ${ru(r)}$.`, value: r },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}: площадь = ${ru(r)} · ${ru(h)} = ${ru(r * h)}.`,
+        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}: площадь = $${ru(r)} \\cdot ${ru(h)} = ${ru(r * h)}$.`,
         value: r * h,
       },
     ];
@@ -156,7 +156,7 @@ export const P03_56: Prototype = {
 export const P03_57: Prototype = {
   id: 'P03-57',
   razdel: 'IV',
-  nazvanie: 'Осевое сечение по площади основания kπ и высоте',
+  nazvanie: 'Осевое сечение по площади основания $k\\pi$ и высоте',
   tip: 'площадь осевого сечения по площади основания и высоте',
   zadachnik: [184, 187],
   status: 'добавить',
@@ -185,8 +185,8 @@ export const P03_57: Prototype = {
     const h = num(p, 'h');
     const r = Math.sqrt(k);
     return [
-      { text: `Площадь основания πr² = ${ru(k)}π, значит r = √${ru(k)} = ${ru(r)}.`, value: r },
-      { text: `Осевое сечение: ${ru(r)} · ${ru(h)} = ${ru(r * h)}.`, value: r * h },
+      { text: `Площадь основания $\\pi r^2 = ${ru(k)}\\pi$, значит $r = \\sqrt{${ru(k)}} = ${ru(r)}$.`, value: r },
+      { text: `Осевое сечение: $${ru(r)} \\cdot ${ru(h)} = ${ru(r * h)}$.`, value: r * h },
     ];
   },
 

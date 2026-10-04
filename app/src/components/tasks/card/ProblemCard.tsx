@@ -37,6 +37,7 @@ export type CardState = 'before' | 'correct' | 'incorrect' | 'revealed';
 
 export interface ProblemCardZadacha {
   id: string;
+  /** Условие — готовая вёрстка: формулы набраны KaTeX на сборке. */
   uslovie: string;
   /** Ключ задачи, с которым считан отпечаток (secret.ts). */
   klyuch: string;
@@ -205,7 +206,7 @@ export function ProblemCard({
       <article className={clsx('pc', 'pc--condition', className)}>
         {head}
         <div className="pc__uslovie">
-          <p className="pc__text">{zadacha.uslovie}</p>
+          <p className="pc__text" dangerouslySetInnerHTML={{ __html: zadacha.uslovie }} />
           {illyustratsiya}
         </div>
       </article>
@@ -253,7 +254,7 @@ export function ProblemCard({
 
       <div className="pc__grid">
         <div className="pc__part pc__part--uslovie">
-          <p className="pc__text">{zadacha.uslovie}</p>
+          <p className="pc__text" dangerouslySetInnerHTML={{ __html: zadacha.uslovie }} />
           {/* «Метод:» — часть решения: до ответа его нет, иначе он
               подсказывал бы структуру в смешанном режиме. */}
           {razbor !== null && (state === 'correct' || resheniyeVidno) && razbor.metod !== '' ? (

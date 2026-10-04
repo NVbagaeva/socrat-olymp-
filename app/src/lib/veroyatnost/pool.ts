@@ -45,7 +45,7 @@ import {
   type Step,
   type Variant,
 } from './types';
-import { nabratVykladku } from '../tex';
+import { nabratVykladku, typeset, typesetText } from '../tex';
 
 /**
  * Открытая часть модели задачи: метод и картинка. Параметров рисунка
@@ -306,7 +306,8 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
   );
   return {
     n: variant.n,
-    uslovie: prototype.uslovie(variant.params),
+    /* Условие — готовая вёрстка: формулы в нём набирает KaTeX. */
+    uslovie: typesetText(prototype.uslovie(variant.params)),
     seal,
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
@@ -383,7 +384,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
-    uslovie: zadacha.uslovie,
+    uslovie: typesetText(zadacha.uslovie),
     seal,
     steps: zapechatatRazbor(razbor, seal),
     ...(illustration === undefined ? {} : { illustration }),
@@ -459,9 +460,11 @@ function uznayVariant(
   const metodSeal = sealMetod(klyuch);
   return {
     n,
-    uslovie,
+    uslovie: typesetText(uslovie),
     metodSeal,
-    hints: sealText(JSON.stringify(metodika.methodHints), metodSeal),
+    /* Признаки метода набираются KaTeX здесь, на сборке: в закрытый
+       список уходит готовая вёрстка. */
+    hints: sealText(JSON.stringify(metodika.methodHints.map((hint) => typeset(hint))), metodSeal),
     ...(illustration === undefined ? {} : { illustration }),
   };
 }

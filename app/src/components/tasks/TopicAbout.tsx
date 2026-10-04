@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Chart } from '@/components/graph/Chart';
+import { Tex } from '@/components/ui/Tex';
 import type { ExamSection, Formulation, SectionAbout } from '@/content/sections';
 import { katex } from '@/lib/graph/katex';
 import { compareLinesScene } from '@/lib/scenes';
@@ -20,8 +21,12 @@ function FormCard({ item }: { item: Formulation }) {
       <span className="form-card__ico" aria-hidden="true">
         <FormulationIcon name={item.icon} />
       </span>
-      <h4 className="form-card__title">{item.title}</h4>
-      <p className="form-card__hint">{item.hint}</p>
+      <h4 className="form-card__title">
+        <Tex text={item.title} />
+      </h4>
+      <p className="form-card__hint">
+        <Tex text={item.hint} />
+      </p>
       {item.formula !== undefined ? (
         <p
           className="form-card__formula"
@@ -29,7 +34,11 @@ function FormCard({ item }: { item: Formulation }) {
           dangerouslySetInnerHTML={{ __html: formulaHtml(item.formula) }}
         />
       ) : null}
-      {item.example !== undefined ? <p className="form-card__example">{item.example}</p> : null}
+      {item.example !== undefined ? (
+        <p className="form-card__example">
+          <Tex text={item.example} />
+        </p>
+      ) : null}
     </li>
   );
 }
@@ -59,8 +68,12 @@ export function TopicAbout({
       <section className="about-lead">
         <div className="about-lead__text">
           <p className="about-lead__no">Задание №{section.no}</p>
-          <h3 className="t-h3 about-lead__title">{about.title}</h3>
-          <p className="about-lead__desc">{about.description}</p>
+          <h3 className="t-h3 about-lead__title">
+            <Tex text={about.title} />
+          </h3>
+          <p className="about-lead__desc">
+            <Tex text={about.description} />
+          </p>
         </div>
 
         {/* Лампочка — декор рядом с текстом, поэтому alt пустой. */}
@@ -72,7 +85,7 @@ export function TopicAbout({
             width={200}
             height={181}
           />
-          {about.hint}
+          <Tex text={about.hint} />
         </p>
       </section>
 
@@ -94,7 +107,7 @@ export function TopicAbout({
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <path d="m5 12.5 4.5 4.5L19 7.5" />
                 </svg>
-                {skill}
+                <Tex text={skill} />
               </li>
             ))}
           </ul>
@@ -109,7 +122,9 @@ export function TopicAbout({
 
       <section className="about-later">
         <h3 className="t-h4 about-sub">{about.later.title}</h3>
-        <p className="about-later__text">{about.later.text}</p>
+        <p className="about-later__text">
+          <Tex text={about.later.text} />
+        </p>
         {/* Задания №19 в проекте ещё нет: это анонс, а не ссылка.
             Поэтому span с aria-disabled, а не кнопка и не ссылка —
             в обход по Tab он не попадает и перехода не обещает. */}

@@ -64,9 +64,9 @@ export const P03_52: Prototype = {
     const r = num(p, 'd') / 2;
     const l = Math.hypot(h, r);
     return [
-      { text: `Радиус основания: ${ru(num(p, 'd'))} : 2 = ${ru(r)}.`, value: r },
+      { text: `Радиус основания: $${ru(num(p, 'd'))} : 2 = ${ru(r)}$.`, value: r },
       {
-        text: `Образующая — гипотенуза прямоугольного треугольника с катетами высотой и радиусом: √(${ru(h)}² + ${ru(r)}²) = ${ru(l)}.`,
+        text: `Образующая — гипотенуза прямоугольного треугольника с катетами высотой и радиусом: $\\sqrt{${ru(h)}^2 + ${ru(r)}^2} = ${ru(l)}$.`,
         value: l,
       },
     ];
@@ -126,10 +126,10 @@ export const P03_53: Prototype = {
     const r = Math.sqrt(l * l - h * h);
     return [
       {
-        text: `Радиус — катет прямоугольного треугольника с гипотенузой образующей: √(${ru(l)}² − ${ru(h)}²) = ${ru(r)}.`,
+        text: `Радиус — катет прямоугольного треугольника с гипотенузой образующей: $\\sqrt{${ru(l)}^2 - ${ru(h)}^2} = ${ru(r)}$.`,
         value: r,
       },
-      { text: `Диаметр: ${ru(r)} · 2 = ${ru(2 * r)}.`, value: 2 * r },
+      { text: `Диаметр: $${ru(r)} \\cdot 2 = ${ru(2 * r)}$.`, value: 2 * r },
     ];
   },
 
@@ -188,8 +188,8 @@ export const P03_54: Prototype = {
     const l = num(p, 'l');
     const h = Math.sqrt(l * l - r * r);
     return [
-      { text: `Радиус: ${ru(num(p, 'd'))} : 2 = ${ru(r)}.`, value: r },
-      { text: `Высота — катет: √(${ru(l)}² − ${ru(r)}²) = ${ru(h)}.`, value: h },
+      { text: `Радиус: $${ru(num(p, 'd'))} : 2 = ${ru(r)}$.`, value: r },
+      { text: `Высота — катет: $\\sqrt{${ru(l)}^2 - ${ru(r)}^2} = ${ru(h)}$.`, value: h },
     ];
   },
 

@@ -21,6 +21,25 @@ function Dot({ x, y }: { x: number; y: number }) {
   return <circle cx={x} cy={y} r="3.5" fill="currentColor" stroke="none" />;
 }
 
+/* Подпись множества внутри SVG: KaTeX в SVG не встраивается, поэтому
+   буква-переменная набирается его же математическим шрифтом курсивом
+   (класс mapping__var), остальной текст — как был. */
+function SetLabel({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\b([A-Z])\b/).map((piece, index) =>
+        index % 2 === 1 ? (
+          <tspan className="mapping__var" key={index}>
+            {piece}
+          </tspan>
+        ) : (
+          piece
+        ),
+      )}
+    </>
+  );
+}
+
 export function MappingDiagram({ setX, setY }: MappingDiagramProps) {
   return (
     <svg
@@ -35,10 +54,10 @@ export function MappingDiagram({ setX, setY }: MappingDiagramProps) {
       strokeLinejoin="round"
     >
       <text className="mapping__set" x="82" y="26" textAnchor="middle">
-        {setX}
+        <SetLabel text={setX} />
       </text>
       <text className="mapping__set" x="278" y="26" textAnchor="middle">
-        {setY}
+        <SetLabel text={setY} />
       </text>
 
       {/* Оба множества на одной светлой холодной заливке, контуры
