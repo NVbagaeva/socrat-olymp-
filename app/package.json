@@ -42,7 +42,8 @@
     "build:pdf-8": "node scripts/build-pdf-8.mjs",
     "build:pdf-8-sample": "node scripts/build-pdf-8.mjs --sample",
     "test:pdf-8": "node scripts/check-pdf-8.mjs",
-    "test:math-markup": "node scripts/check-math-markup.mjs"
+    "test:math-markup": "node scripts/check-math-markup.mjs",
+    "test:rsc-serving": "node scripts/check-rsc-serving.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -60,12 +61,12 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
-    "playwright": "^1.56.1",
     "eslint-config-next": "^15.5.25",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "playwright": "^1.56.1",
     "postcss": "^8.5.28",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
@@ -78,6 +79,9 @@
     "onlyBuiltDependencies": [
       "unrs-resolver",
       "sharp"
-    ]
+    ],
+    "patchedDependencies": {
+      "next@15.5.25": "patches/next@15.5.25.patch"
+    }
   }
 }

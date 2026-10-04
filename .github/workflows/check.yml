@@ -142,3 +142,20 @@ jobs:
       - name: Проверить, что ответов нет в сборке
         working-directory: app
         run: pnpm test:secrets
+
+      # Служебные файлы роутера (…/index.txt) никогда не видны учеником
+      # как сырой текст. Проверка поднимает настоящий Apache с нашим
+      # .htaccess над сборкой и гоняет в Chromium сценарии: упавшая
+      # фоновая подгрузка, уход вкладки в фон, новая версия сайта,
+      # прямое открытие index.txt. Заодно проверяет, что исправление
+      # Next.js (patches/) не потерялось. Подробно — в самом скрипте.
+      - name: Поставить Apache и Chromium для проверки служебных файлов
+        working-directory: app
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q apache2
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Проверить, что сырой RSC-текст не показывается
+        working-directory: app
+        run: pnpm test:rsc-serving
