@@ -12,6 +12,7 @@ import type { RazdelTab } from './vkladki';
 import { taskName } from './tasks';
 import type { TutorMaterial } from './sections';
 
+import { assetUrl } from '@/lib/assetUrl';
 /* Вкладка описывается общим типом: лента у всех заданий одна. */
 export type VychisleniyaTab = RazdelTab;
 
@@ -47,14 +48,14 @@ export const VYCHISLENIYA = {
         title: 'Рабочая тетрадь для репетиторов',
         lead: 'Готовые материалы для занятий',
         icon: 'doc',
-        file: '/materials/zadanie-8/zadanie-8-vychisleniya-uchenik.pdf',
+        file: assetUrl('/materials/zadanie-8/zadanie-8-vychisleniya-uchenik.pdf'),
       },
       {
         id: 'pdf',
         title: 'PDF-практикум',
         lead: 'Все задания по теме в одном файле',
         icon: 'pdf',
-        file: '/materials/zadanie-8/zadanie-8-vychisleniya-uchenik-chb.pdf',
+        file: assetUrl('/materials/zadanie-8/zadanie-8-vychisleniya-uchenik-chb.pdf'),
       },
     ] as TutorMaterial[],
   },

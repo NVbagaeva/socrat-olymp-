@@ -11,6 +11,7 @@ import {
 import { tasks, tasksPage } from '@/content/tasks';
 import { demoUser } from '@/data/demo';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -68,7 +69,7 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
           <div className="sidebar__decor">
             <Image
               className="sidebar__mountains"
-              src="/images/mountains-network.webp"
+              src={assetUrl('/images/mountains-network.webp')}
               alt=""
               width={900}
               height={329}

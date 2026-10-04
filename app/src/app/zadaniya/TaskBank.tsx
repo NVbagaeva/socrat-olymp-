@@ -8,6 +8,7 @@ import { HandNote } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
 import { tasks, tasksPage } from '@/content/tasks';
 
+import { assetUrl } from '@/lib/assetUrl';
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
   const q = query.trim().toLowerCase();
@@ -52,7 +53,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           </figcaption>
           <Image
             className="bank-quote__art"
-            src="/images/bust-galileo.webp"
+            src={assetUrl('/images/bust-galileo.webp')}
             alt=""
             width={814}
             height={700}
@@ -94,7 +95,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           {/* Книга и пирамида — декор: alt пустой, рядом свой текст. */}
           <Image
             className="bank-start__book"
-            src="/images/open-book.webp"
+            src={assetUrl('/images/open-book.webp')}
             alt=""
             width={700}
             height={445}
@@ -114,7 +115,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
         <div className="bank-start__decor" aria-hidden="true">
           <Image
             className="bank-start__pyramid"
-            src="/images/pyramid-network.webp"
+            src={assetUrl('/images/pyramid-network.webp')}
             alt=""
             width={1400}
             height={504}

@@ -20,6 +20,7 @@ import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
@@ -121,7 +122,7 @@ export function FunctionTopicPage({
             {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
             <Image
               className="topic-head__art"
-              src="/images/bust-galileo.webp"
+              src={assetUrl('/images/bust-galileo.webp')}
               alt=""
               width={814}
               height={700}
@@ -182,7 +183,7 @@ export function FunctionTopicPage({
           <div className="topic-side__decor" aria-hidden="true">
             <Image
               className="topic-side__pyramid"
-              src="/images/pyramid-network.webp"
+              src={assetUrl('/images/pyramid-network.webp')}
               alt=""
               width={1400}
               height={504}
