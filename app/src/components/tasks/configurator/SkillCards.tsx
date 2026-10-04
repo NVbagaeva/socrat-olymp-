@@ -3,11 +3,15 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
 import { CheckIcon } from '@/components/ui';
+import { TitleText } from '../TitleText';
 
 export interface SkillItem {
   /** Идентификатор набора движка: 12.A … */
   id: string;
+  /** Название; формулы в нём — $…$. */
   title: string;
+  /** То же название, набранное KaTeX на сервере. */
+  titleHtml?: string;
   /**
    * Подпись под названием на карточке. Не задана — идентификатор:
    * у наборов движка он и есть код, «12.A»; у методов вероятности
@@ -66,7 +70,9 @@ export function SkillCards({
               </span>
             ) : null}
             <span className="cfg-skill__text">
-              <span className="cfg-skill__title">{item.title}</span>
+              <span className="cfg-skill__title">
+                <TitleText title={item.title} html={item.titleHtml} />
+              </span>
               <span className="cfg-skill__code">{item.code ?? item.id}</span>
             </span>
           </button>

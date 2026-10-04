@@ -92,7 +92,7 @@ function checkChain(task, steps) {
     if (!choice) { problems.push(name + ': нет шага «возрастает или убывает»'); return; }
     const want = line.k > 0 ? 'возрастает' : line.k < 0 ? 'убывает' : 'параллельна оси Ox';
     if (first.fields[0].answer !== want) { problems.push(name + ': направление «' + first.fields[0].answer + '», а k = ' + line.k); }
-    const kStep = pick('Находим k') || pick('Находим a');
+    const kStep = pick('Находим $k$') || pick('Находим $a$');
     if (!kStep) { problems.push(name + ': нет шага «Находим k»'); return; }
     const k = num(kStep.fields[0].answer);
     if (line.k === 0) {

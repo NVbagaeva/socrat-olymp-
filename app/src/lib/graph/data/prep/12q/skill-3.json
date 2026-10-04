@@ -2,7 +2,7 @@
   "kind": "prep",
   "id": "P12Q-3",
   "block": 3,
-  "title": "Коэффициент c",
+  "title": "Коэффициент $c$",
   "subtitle": "Прочитать свободный член по оси Oy",
   "seed": 12103,
   "family": "quadratic",

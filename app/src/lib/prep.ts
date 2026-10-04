@@ -94,7 +94,12 @@ export interface PrepStep {
   label: string;
   /** Блок задачи с двумя функциями: «II. Находим g(x)». */
   block: string | null;
+  /** Заголовок шага; формулы в нём — $…$. */
   title: string;
+  /** Тот же заголовок, набранный KaTeX: экран разбора — клиентский. */
+  titleHtml?: string;
+  /** Блок, набранный KaTeX: «II. Находим $g(x)$». */
+  blockHtml?: string | null;
   /** Направление прямой: движок ставит его только у первого шага. */
   arrow: 'up' | 'down' | null;
   blocks: PrepBlock[];
@@ -387,10 +392,17 @@ export function solutionSteps(task: SolutionSource): PrepStep[] | null {
       label: roman === null ? String(step.no) : roman + '.' + step.no,
       block: step.block ?? null,
       title: step.title,
+      titleHtml: titleHtml(step.title),
+      blockHtml: step.block ? titleHtml(step.block) : null,
       arrow,
       blocks,
     };
   });
+}
+
+/** Заголовок шага с формулами ($…$) → вёрстка KaTeX. */
+export function titleHtml(title: string): string {
+  return typeset(GraphGenerate.typeset(title) as string);
 }
 
 /** Разбор опорной задачи по шагам — тот, что лежит в странице
@@ -417,7 +429,9 @@ export function buildPrepTasks(skill: PrepSkill): PrepTask[] {
       steps: solutionSteps(task),
       oshibki: Object.fromEntries(
         (task.options ?? []).flatMap((option) =>
-          option.error === null ? [] : [[option.number, option.error]],
+          /* Пояснение набирается KaTeX здесь, на сборке: экран
+             показывает готовую вёрстку. */
+          option.error === null ? [] : [[option.number, titleHtml(option.error)]],
         ),
       ),
     };

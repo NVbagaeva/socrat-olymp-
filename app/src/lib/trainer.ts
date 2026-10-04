@@ -67,7 +67,9 @@ export interface TrainerOption {
 
 /** Рисунок метода под разбором: миниатюра, название и приём. */
 export interface TrainerMethod {
+  /** Название приёма — вёрстка KaTeX (формулы в нём бывают). */
   title: string;
+  /** Приём одной строкой — вёрстка KaTeX. */
   tip: string;
   svg: string;
 }
@@ -112,6 +114,10 @@ export interface TrainerStep {
   label?: string;
   /** Заголовок пункта решения: «Направление прямой». */
   stepTitle?: string;
+  /** Тот же заголовок, набранный KaTeX. */
+  stepTitleHtml?: string;
+  /** Блок, набранный KaTeX. */
+  blockHtml?: string | null;
   /** Блок решения задачи с двумя функциями: «II. Находим g(x)». */
   block?: string | null;
   /** Чей это пункт решения — служебное, снимается при нумерации. */
@@ -483,7 +489,7 @@ function slopeSteps(
   const first = pair[0];
   const second = pair[1];
   if (first === undefined || second === undefined || first.x === second.x) {
-    return [tag(stepKOnly(k, letter), 'Находим ' + letter, part)];
+    return [tag(stepKOnly(k, letter), 'Находим $' + letter + '$', part)];
   }
   const t = Slope.build(first, second) as SlopeTriangle;
   const direction: TrainerStep = tag({
@@ -503,7 +509,7 @@ function slopeSteps(
     ],
     wrongHint: hintHtml('Смотри слева направо: куда идёт прямая — вверх или вниз?'),
   }, 'Направление прямой', part);
-  const kTitle = 'Находим ' + letter;
+  const kTitle = 'Находим $' + letter + '$';
   if (t.flat || t.C === null) {
     return [
       direction,
@@ -884,9 +890,9 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
   const drawn: SlopeItem[] = [];
   const steps = [
     ...slopeSteps(task, first.k, first.points, 'f', 0, drawn, 'F'),
-    tag(stepPairB(task, 'f', first), 'Находим b', 'F'),
+    tag(stepPairB(task, 'f', first), 'Находим $b$', 'F'),
     ...slopeSteps(task, second.k, second.points, 'g', 1, drawn, 'G'),
-    tag(stepPairB(task, 'g', second), 'Находим b', 'G'),
+    tag(stepPairB(task, 'g', second), 'Находим $b$', 'G'),
     tag(stepPairEquation(first, second), 'Приравниваем', 'X'),
     tag(stepCrossX(intersection.x), 'Решаем уравнение', 'X'),
   ];
@@ -909,7 +915,7 @@ function stepsFor(task: EngineTask): TrainerStep[] {
     ? []
     : [
         ...slopeSteps(task, k, task.meta.points, '', 0, []),
-        tag(stepB(task, b), 'Находим b', null),
+        tag(stepB(task, b), 'Находим $b$', null),
         tag(stepEquation(k, b), 'Формула', null),
         tag(last, '$last', null),
       ];
@@ -1050,7 +1056,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         '$a = y_0(x_0 + b) - k x_0$.',
       [field('a =', co.a ?? 0)],
       'Подставь именно координаты отмеченной точки и проверь знаки при раскрытии скобок.',
-      { title: 'Находим a', part: null },
+      { title: 'Находим $a$', part: null },
     ));
   } else {
     const formula = form === 'basic' ? 'k = x \\cdot y'
@@ -1063,7 +1069,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         (form === 'basic' ? '.' : ' (сдвиги ты уже нашёл(ла)).'),
       [field('k =', co.k ?? 0)],
       'Проверь, ту ли точку взял(а) — она должна быть отмечена на графике, — и знаки в скобках.',
-      { title: 'Находим k', part: null },
+      { title: 'Находим $k$', part: null },
     ));
   }
 
@@ -1123,7 +1129,7 @@ function rationalLineSteps(task: EngineTask, meta: RationalMeta): TrainerStep[] 
         'значит $k = x_A \\cdot y_A$.',
       [field('k =', k)],
       'Перемножь координаты точки $A$, следи за знаками.',
-      { title: 'Находим k', part: 'F' },
+      { title: 'Находим $k$', part: 'F' },
     ));
   }
   /* Угловой коэффициент прямой — как везде: a = tg α через треугольник
@@ -1135,7 +1141,7 @@ function rationalLineSteps(task: EngineTask, meta: RationalMeta): TrainerStep[] 
     'Подставь точку $A$: $b = y_A - a \\cdot x_A$.',
     [field('b =', b)],
     'Проверь знак произведения $a \\cdot x_A$.',
-    { title: 'Находим b', part: 'G' },
+    { title: 'Находим $b$', part: 'G' },
   ));
   if (meta.rule === 'line-b') { return steps; }
   steps.push(rationalStep(
@@ -1231,7 +1237,9 @@ function infoStep(item: PrepStep): TrainerStep {
     wrongHint: '',
     label: item.label,
     stepTitle: item.title,
+    stepTitleHtml: item.titleHtml ?? hintHtml(item.title),
     block: item.block,
+    blockHtml: item.blockHtml ?? null,
   };
 }
 
@@ -1277,7 +1285,15 @@ function numbered(chain: TrainerStep[], solution: PrepStep[] | null): TrainerSte
     }
     out.push({
       ...bare[n]!,
-      ...(found === undefined ? {} : { label: found.label, stepTitle: found.title, block: found.block }),
+      ...(found === undefined
+        ? {}
+        : {
+            label: found.label,
+            stepTitle: found.title,
+            stepTitleHtml: found.titleHtml ?? hintHtml(found.title),
+            block: found.block,
+            blockHtml: found.blockHtml ?? null,
+          }),
     });
   });
   return out;
@@ -1323,7 +1339,7 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     options: task.options == null ? null
       : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
     oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
-      option.error === null ? [] : [[option.number, typeset(option.error)]])),
+      option.error === null ? [] : [[option.number, hintHtml(option.error)]])),
     solution: quadratic ? solution : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };

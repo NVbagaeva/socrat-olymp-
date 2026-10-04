@@ -3,7 +3,7 @@
   "id": "P12R-8",
   "block": 8,
   "title": "Аргумент по значению",
-  "subtitle": "Найти x, при котором f(x) = c",
+  "subtitle": "Найти $x$, при котором $f(x) = c$",
   "seed": 12408,
   "family": "rational",
   "axisLabels": "minimal",

@@ -1,14 +1,16 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { markSectionRead } from '@/lib/theoryRead';
+import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
+import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
 
 export interface TopicTabsProps {
@@ -156,7 +158,7 @@ export function TopicTabs({
   const strip = useRef<HTMLDivElement>(null);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
-  const items = theory.map((item) => ({ id: item.id, title: item.title }));
+  const items = theory.map((item) => ({ id: item.id, title: item.title, titleHtml: item.titleHtml }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
      происходит, без ошибки в консоли. */
@@ -165,11 +167,12 @@ export function TopicTabs({
     if (node === null) {
       return;
     }
-    node.scrollIntoView({ behavior: motion(), block: 'start' });
+    scrollToSection(node);
   }, []);
 
   function pick(id: string) {
     setBlock(id);
+    pinBlock();
     setSheet(false);
     /* Шторка закрывается той же отрисовкой: прокрутка идёт следующим
        кадром, когда блокировка прокрутки уже снята. */
@@ -208,45 +211,9 @@ export function TopicTabs({
     }
   }, [tab, opensMenu]);
 
-  /* Подсветка в содержании следует за экраном. Наблюдатель видимости
-     дешевле обработчика прокрутки: браузер считает пересечения сам. */
-  useEffect(() => {
-    if (tab !== 'theory' || typeof IntersectionObserver === 'undefined') {
-      return undefined;
-    }
-
-    const nodes = theory
-      .map((item) => document.getElementById(blockId(item.id)))
-      .filter((node): node is HTMLElement => node !== null);
-    if (nodes.length === 0) {
-      return undefined;
-    }
-
-    const visible = new Set<string>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            visible.add(entry.target.id);
-          } else {
-            visible.delete(entry.target.id);
-          }
-        });
-        /* Активным считается верхний из видимых: так подсветка не
-           прыгает, когда в полосе видно два раздела сразу. */
-        const top = theory.find((item) => visible.has(blockId(item.id)));
-        if (top !== undefined) {
-          setBlock(top.id);
-        }
-      },
-      /* Полоса наблюдения — верхняя треть экрана: раздел становится
-         активным, когда его заголовок доходит до неё. */
-      { rootMargin: '-72px 0px -66% 0px' },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, [tab, theory]);
+  /* Подсветка в содержании следует за экраном. */
+  const theoryIds = useMemo(() => theory.map((item) => item.id), [theory]);
+  const pinBlock = useActiveSection(theoryIds, blockId, tab === 'theory', setBlock);
 
   /* Прочитанные разделы. Раздел засчитывается, когда ученик долистал
      до его конца: нижний край поднялся выше середины экрана. Считаем
@@ -334,7 +301,7 @@ export function TopicTabs({
               <div className="topic-open">
                 <button
                   type="button"
-                  className="btn btn--secondary topic-open__btn"
+                  className="btn btn--secondary btn--sm topic-open__btn"
                   onClick={() => setSheet(true)}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -343,7 +310,9 @@ export function TopicTabs({
                   Содержание
                 </button>
                 {current !== undefined ? (
-                  <span className="topic-open__now">{current.title}</span>
+                  <span className="topic-open__now">
+                    <TitleText title={current.title} html={current.titleHtml} />
+                  </span>
                 ) : null}
               </div>
 
@@ -364,7 +333,7 @@ export function TopicTabs({
                             {item.badge}
                           </span>
                         ) : null}
-                        {item.title}
+                        <TitleText title={item.title} html={item.titleHtml} />
                       </h3>
                       {item.body !== undefined && bodies[item.body] !== undefined ? (
                         bodies[item.body]

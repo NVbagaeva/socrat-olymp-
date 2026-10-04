@@ -3,7 +3,7 @@
   "id": "P12R-9",
   "block": 9,
   "title": "Прямая по двум точкам",
-  "subtitle": "Найти коэффициенты a и b прямой g(x) = ax + b",
+  "subtitle": "Найти коэффициенты $a$ и $b$ прямой $g(x) = ax + b$",
   "seed": 12409,
   "family": "rational",
   "axisLabels": "minimal",

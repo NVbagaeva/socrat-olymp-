@@ -11,6 +11,7 @@ import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/s
 import { tasksPage } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
+import { typeset } from '@/lib/tex';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
 import '../zadaniya.css';
@@ -67,7 +68,16 @@ export default async function SectionPage({ params }: { params: Params }) {
   const prototypes: PrototypeView[] = section.subtopics.flatMap((subtopic) =>
     bankSets(subtopic)
       .filter((set) => set.kind === 'prototype' && !seen.has(set.id) && seen.add(set.id))
-      .map((set) => ({ id: set.id, title: set.title, subtitle: set.subtitle, count: set.count })),
+      .map((set) => ({
+        id: set.id,
+        title: set.title,
+        subtitle: set.subtitle,
+        /* Формулы в названиях наборов ($…$) набираются здесь, на
+           сборке: вкладки — клиентский экран. */
+        titleHtml: typeset(set.title),
+        subtitleHtml: typeset(set.subtitle),
+        count: set.count,
+      })),
   );
 
   /* Первая открытая подтема — единственный осмысленный переход.

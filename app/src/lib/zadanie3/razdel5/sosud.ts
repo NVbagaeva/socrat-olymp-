@@ -66,9 +66,9 @@ export const P03_65: Prototype = {
     const dh = num(p, 'dh');
     const area = V / H;
     return [
-      { text: `Площадь дна: ${ru(V)} : ${ru(H)} = ${ru(area)} см².`, value: area },
+      { text: `Площадь дна: $${ru(V)} : ${ru(H)} = ${ru(area)}$ см².`, value: area },
       {
-        text: `Деталь вытеснила столбик высотой ${ru(dh)} см: ${ru(area)} · ${ru(dh)} = ${ru(area * dh)} см³.`,
+        text: `Деталь вытеснила столбик высотой ${ru(dh)} см: $${ru(area)} \\cdot ${ru(dh)} = ${ru(area * dh)}$ см³.`,
         value: area * dh,
       },
     ];
@@ -143,7 +143,7 @@ export const P03_66: Prototype = {
         text: `Дно не меняется, значит объём вырос во столько же раз, во сколько уровень: в ${ru(k)} ${razaWord(k)}.`,
       },
       {
-        text: `Деталь заняла разницу: ${ru(V)} · ${ru(k)} − ${ru(V)} = ${ru(round(V * (k - 1)))} ${unit}.`,
+        text: `Деталь заняла разницу: $${ru(V)} \\cdot ${ru(k)} - ${ru(V)} = ${ru(round(V * (k - 1)))} ${unit}$.`,
         value: V * (k - 1),
       },
     ];
@@ -223,7 +223,7 @@ function pourProto(
           value: n * n,
         },
         {
-          text: `Объём тот же, поэтому уровень изменится обратно площади: ${ru(h)} ${wider ? ':' : '·'} ${ru(n * n)} = ${ru(answer)} см.`,
+          text: `Объём тот же, поэтому уровень изменится обратно площади: ${ru(h)} ${wider ? ':' : '·'} $${ru(n * n)} = ${ru(answer)}$ см.`,
           value: answer,
         },
       ];

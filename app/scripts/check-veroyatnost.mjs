@@ -72,6 +72,7 @@ for (const file of [
   path.join(src, 'secret.ts'),
   path.join(src, 'plural.ts'),
   path.join(src, 'tex.ts'),
+  path.join(src, 'texPlain.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
 ]) {

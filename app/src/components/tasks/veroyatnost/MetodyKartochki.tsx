@@ -12,15 +12,18 @@ export interface TrenirovkaMetoda {
   /** Строка счётчика «задач в банке: N» — посчитана на сервере. */
   schet: string;
   /** Название набора. Не задано — строка счётчика идёт одна. */
-  nazvanie?: string;
+  nazvanie?: ReactNode;
 }
 
 /** Карточка метода, собранная на сервере: формула уже набрана KaTeX. */
 export interface KartochkaMetoda {
   id: string;
   nomer: number;
-  nazvanie: string;
-  opisanie: string;
+  /** Название: строка или уже набранная формулами разметка. */
+  nazvanie: ReactNode;
+  /** Название обычным текстом — для подписи кнопки (aria-label). */
+  nazvanieText?: string;
+  opisanie: ReactNode;
   /** Плашка с формулой; null — у метода формулы нет. */
   formula: ReactNode | null;
   /**
@@ -114,7 +117,7 @@ export function MetodyKartochki({ items }: MetodyKartochkiProps) {
               className="vmetod"
               onClick={() => setOtkryt(m.id)}
               aria-haspopup="dialog"
-              aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanie}`}
+              aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanieText ?? (typeof m.nazvanie === 'string' ? m.nazvanie : '')}`}
             >
               <span className="vmetod__no" aria-hidden="true">
                 {m.nomer}

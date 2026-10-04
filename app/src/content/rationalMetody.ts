@@ -16,8 +16,8 @@ export const RATIONAL_METODY: QuadraticMetod[] = [
   {
     id: 'k-po-tochke',
     nomer: 1,
-    nazvanie: 'k по точке',
-    opisanie: 'У y = k/x произведение координат любой точки равно k',
+    nazvanie: '$k$ по точке',
+    opisanie: 'У $y = \\frac{k}{x}$ произведение координат любой точки равно $k$',
     formula: 'k = x \\cdot y',
     navyki: ['koef-k'],
     kakUznat: [
@@ -39,7 +39,7 @@ export const RATIONAL_METODY: QuadraticMetod[] = [
     id: 'sdvigi',
     nomer: 2,
     nazvanie: 'Сдвиги по асимптотам',
-    opisanie: 'Вертикальная асимптота x = −a, горизонтальная y = b',
+    opisanie: 'Вертикальная асимптота $x = -a$, горизонтальная $y = b$',
     formula: 'y = \\dfrac{k}{x + a} + b',
     navyki: ['sdvig-vverh', 'sdvig-vbok', 'sdvig-oba'],
     kakUznat: [
@@ -61,7 +61,7 @@ export const RATIONAL_METODY: QuadraticMetod[] = [
     id: 'vse-koefficienty',
     nomer: 3,
     nazvanie: 'Формула по чертежу',
-    opisanie: 'Асимптоты → сдвиги → точка → k',
+    opisanie: 'Асимптоты → сдвиги → точка → $k$',
     formula: 'k = (y_0 - b)(x_0 + a)',
     navyki: ['vse-koef', 'znachenie', 'argument'],
     kakUznat: [
@@ -84,7 +84,7 @@ export const RATIONAL_METODY: QuadraticMetod[] = [
     id: 'celaya-chast',
     nomer: 4,
     nazvanie: 'Целая часть дроби',
-    opisanie: 'k — горизонтальная асимптота, −b — вертикальная, a — из точки',
+    opisanie: '$k$ — горизонтальная асимптота, $-b$ — вертикальная, $a$ — из точки',
     formula: '\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}',
     navyki: ['celaya-chast'],
     kakUznat: [
@@ -107,7 +107,7 @@ export const RATIONAL_METODY: QuadraticMetod[] = [
     id: 'giperbola-i-pryamaya',
     nomer: 5,
     nazvanie: 'Гипербола и прямая',
-    opisanie: 'Один корень — абсцисса A, второй — по Виета',
+    opisanie: 'Один корень — абсцисса $A$, второй — по Виета',
     formula: 'x_A \\cdot x_B = -\\dfrac{k}{a}',
     navyki: ['pryamaya', 'abscissa-b', 'ordinata-b'],
     kakUznat: [

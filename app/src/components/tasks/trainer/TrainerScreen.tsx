@@ -470,7 +470,11 @@ export function TrainerScreen({
                   dangerouslySetInnerHTML={{ __html: task.method.svg }}
                 />
                 <div className="tmethod__text">
-                  <p className="tmethod__title">{task.method.title}</p>
+                  {/* Название набрано KaTeX вместе с заданием (lib/trainerMethod.ts). */}
+                  <p
+                    className="tmethod__title"
+                    dangerouslySetInnerHTML={{ __html: task.method.title }}
+                  />
                 </div>
               </div>
             </aside>
@@ -485,14 +489,25 @@ export function TrainerScreen({
             /* Номер шага — номер пункта решения: «3», у задачи с двумя
                функциями «II.3». С нового блока — его подзаголовок. */
             const blockHead =
-              item.block != null && item.block !== (i === 0 ? null : steps[i - 1]?.block) ? item.block : null;
+              item.block != null && item.block !== (i === 0 ? null : steps[i - 1]?.block)
+                ? (item.blockHtml ?? item.block)
+                : null;
             return (
               <Fragment key={i}>
-              {blockHead === null ? null : <p className="tstep__block">{blockHead}</p>}
+              {blockHead === null ? null : (
+                <p className="tstep__block" dangerouslySetInnerHTML={{ __html: blockHead }} />
+              )}
               <article className={clsx('tstep', done && 'is-done', item.fields.length === 0 && 'tstep--info')}>
                 <p className="tstep__no">
                   Шаг <b>{item.label ?? i + 1}</b>
-                  {item.stepTitle === undefined ? ` из ${steps.length}` : ` · ${item.stepTitle}`}
+                  {item.stepTitle === undefined ? (
+                    ` из ${steps.length}`
+                  ) : (
+                    <>
+                      {' · '}
+                      <span dangerouslySetInnerHTML={{ __html: item.stepTitleHtml ?? item.stepTitle }} />
+                    </>
+                  )}
                 </p>
                 {item.titleHtml === '' ? null : (
                   <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />

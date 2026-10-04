@@ -242,15 +242,14 @@ Steps.prototype.done = function () {
   return this.list;
 };
 
-var BLOCK_F = 'I. Находим f(x)';
-var BLOCK_G = 'II. Находим g(x)';
+var BLOCK_F = 'I. Находим $f(x)$';
+var BLOCK_G = 'II. Находим $g(x)$';
 var BLOCK_X = 'III. Точки пересечения';
 
-/** Число в заголовке пункта — обычным текстом: «Находим f(13,5)». */
-function plainNumber(f) {
-  if (isInt(f)) { return String(f.p).replace('-', '−'); }
-  if (decimalFriendly(f)) { return String(num(f)).replace('.', ',').replace('-', '−'); }
-  return (f.p < 0 ? '−' : '') + Math.abs(f.p) + '/' + f.q;
+/** Число в заголовке пункта так, как оно стоит в условии: «Находим
+    $f(13{,}5)$» — десятичной записью, трети — дробью. */
+function givenTex(f) {
+  return isInt(f) || !decimalFriendly(f) ? N(f) : D(f);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -301,21 +300,21 @@ function lineSteps(S, opts) {
     S.add('Треугольник', parts.triangle.map(function (r) { return row(r.text, r.tex); }),
       { slope: { triangle: t, curve: opts.curve || 0 } });
   }
-  S.add('Находим ' + kL, parts.k.map(function (r) { return row(r.text, r.tex); }));
+  S.add('Находим $' + kL + '$', parts.k.map(function (r) { return row(r.text, r.tex); }));
   var k = t.k;
 
   var b;
   var onAxis = left.x === 0 ? left : right.x === 0 ? right : null;
   if (onAxis) {
     b = F(onAxis.y);
-    S.add('Находим ' + bL, [row('$' + named(onAxis, onAxis === left ? nameL : nameR) +
+    S.add('Находим $' + bL + '$', [row('$' + named(onAxis, onAxis === left ? nameL : nameR) +
       '$ лежит на оси $Oy$ $\\Rightarrow$ $' + bL + ' = ' + N(b) + '$')]);
   } else {
     var base = left;
     var baseName = nameL;
     var X = F(base.x); var Y = F(base.y);
     b = sub(Y, mul(k, X));
-    S.add('Находим ' + bL, [
+    S.add('Находим $' + bL + '$', [
       row('Подставляем $' + named(base, baseName) + '$ в $' + name + '(x) = ' + lineTex(k, F(0)).replace(/^0$/, '') +
         (isZero(k) ? '' : ' + ') + bL + '$:'),
       row('', N(Y) + ' = ' + times(k, X) + ' + ' + bL + ' \\;\\Rightarrow\\; ' + bL + ' = ' + N(Y) +
@@ -395,7 +394,7 @@ function parabolaSteps(S, name, letters, curve, win, marks, knownA, onlyA) {
     var A;
     if (knownA) {
       A = curve.a;
-      S.add('Находим ' + la, [row('Коэффициент $' + la + ' = ' + N(A) + '$ дан в условии.')]);
+      S.add('Находим $' + la + '$', [row('Коэффициент $' + la + ' = ' + N(A) + '$ дан в условии.')]);
     } else {
       var X = F(node.x); var Y = F(node.y);
       var dx = sub(X, x0); var dy = sub(Y, y0);
@@ -407,7 +406,7 @@ function parabolaSteps(S, name, letters, curve, win, marks, knownA, onlyA) {
       if (!(isInt(dx2) && dx2.p === 1)) {
         chain += ' \\;\\Rightarrow\\; ' + la + ' = ' + (isInt(dy) && isInt(dx2) ? '' : N(dy) + ' : ' + N(dx2) + ' = ') + N(A);
       }
-      S.add('Находим ' + la, [
+      S.add('Находим $' + la + '$', [
         row('Подставляем точку в $' + name + '(x) = ' + la + '(x - x_0)^2 + y_0$:'),
         row('', chain)
       ]);
@@ -415,7 +414,7 @@ function parabolaSteps(S, name, letters, curve, win, marks, knownA, onlyA) {
     if (onlyA) { return { a: A, points: used, partial: true }; }
     var B = mul(frac(-2), mul(A, x0));
     var C = add(mul(A, mul(x0, x0)), y0);
-    S.add('Находим ' + lb + ' и ' + lc, [
+    S.add('Находим $' + lb + '$ и $' + lc + '$', [
       row('Раскрываем скобки в $' + name + '(x) = ' + vertexTex(A, x0, y0) + '$:'),
       row('', lb + ' = -2' + la + 'x_0 = -2 \\cdot ' + P(A) + ' \\cdot ' + P(x0) + ' = ' + N(B)),
       row('', lc + ' = ' + la + 'x_0^2 + y_0 = ' + timesSquare(A, x0) + (isZero(y0) ? '' : plus(y0)) + ' = ' + N(C))
@@ -688,7 +687,7 @@ function lineTask(task, rule) {
   } else if (rule === 'value-at') {
     var x0 = F(meta.query.x0);
     var s0 = substitute(lineTerms(k, b), x0);
-    S.add('Находим f(' + plainNumber(x0) + ')', [convertRow(x0),
+    S.add('Находим $f(' + givenTex(x0) + ')$', [convertRow(x0),
       row('', fn('f', x0) + ' = ' + s0.tex + (isInt(s0.value) ? '' : ' = ' + D(s0.value)))]);
     check.answerValue = s0.value;
   } else if (rule === 'argument-for') {
@@ -696,7 +695,7 @@ function lineTask(task, rule) {
     var right = sub(y0, b);
     var xr = div(right, k);
     var unitK = isInt(k) && k.p === 1;
-    S.add('Решаем уравнение f(x) = ' + plainNumber(y0), [convertRow(y0),
+    S.add('Решаем уравнение $f(x) = ' + givenTex(y0) + '$', [convertRow(y0),
       row('', lineTex(k, b) + ' = ' + N(y0) + ' \\;\\Rightarrow\\; ' + poly([{ c: k, v: 'x' }]) + ' = ' + N(y0) + plus(neg(b)) +
         ' = ' + (unitK ? withDecimal(right) : N(right))),
       unitK ? null : row('', 'x = ' + N(right) + ' : ' + P(k) + ' = ' + withDecimal(xr))]);
@@ -708,7 +707,7 @@ function lineTask(task, rule) {
     var on = eq(sp.value, py);
     var probeY = isInt(py) || !decimalFriendly(py) ? N(py) : D(py) + ' = ' + N(py);
     var probeName = (meta.pointName || 'A');
-    S.add('Проверяем точку ' + probeName + '(' + plainNumber(px) + '; ' + plainNumber(py) + ')', [convertRow(px),
+    S.add('Проверяем точку $' + probeName + '(' + givenTex(px) + ';\\, ' + givenTex(py) + ')$', [convertRow(px),
       row('Подставляем $x = ' + N(px) + '$:'),
       row('', fn('f', px) + ' = ' + sp.tex),
       row(on ? 'Совпадает с ординатой точки $' + probeY + '$ $\\Rightarrow$ точка принадлежит графику.'
@@ -830,7 +829,7 @@ function quadraticTask(task, rule) {
     if (rule === 'value-at') {
       var x0 = F(meta.query.x0);
       var sv = substitute(fTerms, x0);
-      S.add('Находим f(' + plainNumber(x0) + ')', [convertRow(x0),
+      S.add('Находим $f(' + givenTex(x0) + ')$', [convertRow(x0),
         row('', fn('f', x0) + ' = ' + sv.tex + (isInt(sv.value) ? '' : ' = ' + D(sv.value)))]);
       check.answerValue = sv.value;
       return { steps: S.done(), check: check };
@@ -839,7 +838,7 @@ function quadraticTask(task, rule) {
       var y0 = F(meta.query.y0);
       var C0 = sub(fFound.c, y0);
       var nz = normalize(fFound.a, fFound.b, C0);
-      S.add('Уравнение f(x) = ' + plainNumber(y0), [convertRow(y0),
+      S.add('Уравнение $f(x) = ' + givenTex(y0) + '$', [convertRow(y0),
         row('', quadTex(fFound.a, fFound.b, fFound.c) + ' = ' + N(y0) + ' \\;\\Rightarrow\\; ' + quadTex(fFound.a, fFound.b, C0) + ' = 0')]
         .concat(nz.rows));
       var sol = rootsRows(nz.A, nz.B, nz.C, null);
@@ -1020,7 +1019,7 @@ function hyperbolaSteps(S, task, c, form) {
     kRows.push(row('', N(Y) + ' = \\dfrac{' + N(co.k) + ' \\cdot ' + P(X) + ' + a}{' + N(X) + plus(co.b) + '} \\;\\Rightarrow\\; a = ' +
       P(Y) + ' \\cdot (' + N(X) + plus(co.b) + ')' + plus(neg(mul(co.k, X))) + ' = ' + N(co.a)));
   }
-  S.add(form === 'linear' ? 'Находим a' : 'Находим k', kRows);
+  S.add(form === 'linear' ? 'Находим $a$' : 'Находим $k$', kRows);
   S.add('Формула', [row('', rationalTex(form, co))]);
   return { co: co, point: P0 };
 }
@@ -1091,7 +1090,7 @@ function rationalTask(task, rule) {
   if (rule === 'value-at') {
     var x0 = fracOf(meta.query.x0);
     var sv = rationalSubstitute(form, co, c, x0);
-    S.add('Находим f(' + plainNumber(x0) + ')', [row('', fn('f', x0) + ' = ' + sv.tex)]);
+    S.add('Находим $f(' + givenTex(x0) + ')$', [row('', fn('f', x0) + ' = ' + sv.tex)]);
     check.answerValue = sv.value;
   } else if (rule === 'argument-for') {
     var y0 = fracOf(meta.query.y0);
@@ -1109,7 +1108,7 @@ function rationalTask(task, rule) {
     if (isZero(c.s) && !isInt(shifted) && decimalFriendly(shifted)) { chain.push(D(shifted)); }
     rows.push(row('', den + ' = ' + chain.join(' = ') +
       (isZero(c.s) ? '' : ' \\;\\Rightarrow\\; x = ' + N(shifted) + plus(c.s) + ' = ' + withDecimal(x))));
-    S.add('Решаем уравнение f(x) = ' + plainNumber(y0), rows);
+    S.add('Решаем уравнение $f(x) = ' + givenTex(y0) + '$', rows);
     check.rootsCheck = [{ x: x, f: rationalAt(c, x), g: y0 }];
     check.answerValue = x;
   } else if (rule === 'coef-sum') {

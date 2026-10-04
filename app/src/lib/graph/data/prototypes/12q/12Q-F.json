@@ -3,7 +3,7 @@
   "id": "12Q.F",
   "block": 6,
   "title": "12Q.F · аргумент по значению",
-  "subtitle": "Решите уравнение f(x) = y и выберите нужный корень",
+  "subtitle": "Решите уравнение $f(x) = y$ и выберите нужный корень",
   "seed": 12206,
   "family": "quadratic",
   "axisLabels": "minimal",

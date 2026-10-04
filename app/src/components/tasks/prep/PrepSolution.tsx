@@ -4,11 +4,12 @@ import { clsx } from 'clsx';
 import { Button, Details as UiDetails } from '@/components/ui';
 import type { PrepBlock, PrepStep } from '@/lib/prep';
 import { HintIcon } from './PrepIcons';
+import { TitleText } from '../TitleText';
 
 export interface PrepSolutionProps {
   /** Шаги разбора. Пусто — движок его для этой задачи не строит. */
   steps: PrepStep[] | null;
-  /** Приём для плашки «Запомни!»: приходит из описания навыка. */
+  /** Приём для плашки «Запомни!»: из описания навыка, набран KaTeX. */
   tip: string;
   /** Номер открытого шага, 0…N−1. */
   step: number;
@@ -147,9 +148,16 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
                     <span className="pstep__no">
                       Шаг {item.label}
                       {/* У задачи с двумя функциями — блок решения. */}
-                      {item.block !== null && item.block !== steps[i - 1]?.block ? ` · ${item.block}` : null}
+                      {item.block !== null && item.block !== steps[i - 1]?.block ? (
+                        <>
+                          {' · '}
+                          <span dangerouslySetInnerHTML={{ __html: item.blockHtml ?? item.block }} />
+                        </>
+                      ) : null}
                     </span>
-                    <span className="pstep__title">{item.title}</span>
+                    <span className="pstep__title">
+                      <TitleText title={item.title} html={item.titleHtml} />
+                    </span>
                   </span>
                 </button>
               </li>
@@ -162,9 +170,16 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
                 {current.label}
               </div>
               <div>
-                {current.block === null ? null : <p className="solution-block">{current.block}</p>}
+                {current.block === null ? null : (
+                  <p
+                    className="solution-block"
+                    dangerouslySetInnerHTML={{ __html: current.blockHtml ?? current.block }}
+                  />
+                )}
                 <div className="solution-head">
-                  <h3 className="solution-title">{current.title}</h3>
+                  <h3 className="solution-title">
+                    <TitleText title={current.title} html={current.titleHtml} />
+                  </h3>
                   {current.arrow === null ? null : <ArrowIcon up={current.arrow === 'up'} />}
                 </div>
                 <Blocks blocks={current.blocks} />
@@ -195,7 +210,7 @@ export function PrepSolution({ steps, tip, step, onStep, onClose }: PrepSolution
           <HintIcon />
           Запомни!
         </p>
-        <p className="psol__tip-text">{tip}</p>
+        <p className="psol__tip-text" dangerouslySetInnerHTML={{ __html: tip }} />
       </aside>
     </section>
   );

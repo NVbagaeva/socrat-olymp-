@@ -26,7 +26,7 @@ function variant(
     : { n, source, ref, params, sourceAnswer };
 }
 
-const ALT = `Правильная четырёхугольная пирамида ${NAMES4}, O — центр основания, показаны высота SO и диагонали AC и BD`;
+const ALT = `Правильная четырёхугольная пирамида $${NAMES4}$, $O$ — центр основания, показаны высота $SO$ и диагонали $AC$ и $BD$`;
 
 /** Сторона квадрата, у которого настоящая диагональ BD равна bd: подбором, не через √2. */
 function sideByDiagonal(bd: number): number {
@@ -47,15 +47,15 @@ function lateralEdge(side: number, h: number): number {
 export const P03_41: Prototype = {
   id: 'P03-41',
   razdel: 'III',
-  nazvanie: 'Высота SO по боковому ребру и диагонали',
+  nazvanie: 'Высота $SO$ по боковому ребру и диагонали',
   tip: 'высота пирамиды по боковому ребру и диагонали основания',
   zadachnik: [126, 129],
   status: 'есть',
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной четырёхугольной пирамиде SABCD с вершиной S точка O — центр основания, ` +
-    `${text(p, 'edge')}=${ru(num(p, 'sd'))}, BD=${ru(num(p, 'bd'))}. Найдите длину отрезка SO.`,
+    `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
+    `${text(p, 'edge')}=${ru(num(p, 'sd'))}, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка $SO$.`,
 
   dopustimo: (p) => num(p, 'sd') > num(p, 'bd') / 2 && num(p, 'bd') > 0,
 
@@ -79,9 +79,9 @@ export const P03_41: Prototype = {
     const half = bd / 2;
     const so = Math.sqrt(sd * sd - half * half);
     return [
-      { text: `Половина диагонали: BD : 2 = ${ru(bd)} : 2 = ${ru(half)}.`, value: half },
+      { text: `Половина диагонали: $BD : 2 = ${ru(bd)} : 2 = ${ru(half)}$.`, value: half },
       {
-        text: `Треугольник, образованный высотой, половиной диагонали и боковым ребром, прямоугольный: SO = √(${ru(sd)}² − ${ru(half)}²) = ${ru(so)}.`,
+        text: `Треугольник, образованный высотой, половиной диагонали и боковым ребром, прямоугольный: $SO = \\sqrt{${ru(sd)}^2 - ${ru(half)}^2} = ${ru(so)}$.`,
         value: so,
       },
     ];
@@ -106,15 +106,15 @@ export const P03_41: Prototype = {
 export const P03_42: Prototype = {
   id: 'P03-42',
   razdel: 'III',
-  nazvanie: 'Боковое ребро по SO и диагонали',
+  nazvanie: 'Боковое ребро по $SO$ и диагонали',
   tip: 'боковое ребро пирамиды по высоте и диагонали основания',
   zadachnik: [130, 131],
   status: 'добавить',
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной четырёхугольной пирамиде SABCD с вершиной S точка O — центр основания, ` +
-    `SO=${ru(num(p, 'so'))}, BD=${ru(num(p, 'bd'))}. Найдите длину отрезка ${text(p, 'edge')}.`,
+    `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
+    `$SO=${ru(num(p, 'so'))}$, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка ${text(p, 'edge')}.`,
 
   dopustimo: (p) => num(p, 'so') > 0 && num(p, 'bd') > 0,
 
@@ -136,9 +136,9 @@ export const P03_42: Prototype = {
     const half = bd / 2;
     const sc = Math.sqrt(so * so + half * half);
     return [
-      { text: `Половина диагонали: BD : 2 = ${ru(bd)} : 2 = ${ru(half)}.`, value: half },
+      { text: `Половина диагонали: $BD : 2 = ${ru(bd)} : 2 = ${ru(half)}$.`, value: half },
       {
-        text: `Боковое ребро — гипотенуза прямоугольного треугольника с катетами SO и половиной диагонали: ${text(p, 'edge')} = √(${ru(so)}² + ${ru(half)}²) = ${ru(sc)}.`,
+        text: `Боковое ребро — гипотенуза прямоугольного треугольника с катетами $SO$ и половиной диагонали: ${text(p, 'edge')} = $\\sqrt{${ru(so)}^2 + ${ru(half)}^2} = ${ru(sc)}$.`,
         value: sc,
       },
     ];
@@ -163,15 +163,15 @@ export const P03_42: Prototype = {
 export const P03_43: Prototype = {
   id: 'P03-43',
   razdel: 'III',
-  nazvanie: 'Диагональ основания по SO и боковому ребру',
+  nazvanie: 'Диагональ основания по $SO$ и боковому ребру',
   tip: 'диагональ основания по высоте и боковому ребру пирамиды',
   zadachnik: [132, 135],
   status: 'добавить',
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной четырёхугольной пирамиде SABCD с вершиной S точка O — центр основания, ` +
-    `SO=${ru(num(p, 'so'))}, ${text(p, 'edge')}=${ru(num(p, 'edge_v'))}. Найдите длину отрезка ${text(p, 'diag')}.`,
+    `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
+    `$SO=${ru(num(p, 'so'))}$, ${text(p, 'edge')}=${ru(num(p, 'edge_v'))}. Найдите длину отрезка ${text(p, 'diag')}.`,
 
   dopustimo: (p) => num(p, 'edge_v') > num(p, 'so') && num(p, 'so') > 0,
 
@@ -197,10 +197,10 @@ export const P03_43: Prototype = {
     const half = Math.sqrt(ev * ev - so * so);
     return [
       {
-        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой ${text(p, 'edge')} и катетом SO: √(${ru(ev)}² − ${ru(so)}²) = ${ru(half)}.`,
+        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой ${text(p, 'edge')} и катетом $SO$: $\\sqrt{${ru(ev)}^2 - ${ru(so)}^2} = ${ru(half)}$.`,
         value: half,
       },
-      { text: `Диагональ ${text(p, 'diag')}: ${ru(half)} · 2 = ${ru(2 * half)}.`, value: 2 * half },
+      { text: `Диагональ ${text(p, 'diag')}: $${ru(half)} \\cdot 2 = ${ru(2 * half)}$.`, value: 2 * half },
     ];
   },
 

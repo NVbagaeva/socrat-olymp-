@@ -192,7 +192,7 @@ function stepSlope(t, kf) {
          'по треугольнику.')
   ] });
 
-  return { title: 'Находим k', blocks: blocks };
+  return { title: 'Находим $k$', blocks: blocks };
 }
 
 /* Тригонометрическая окружность: почему у смежных углов
@@ -304,7 +304,7 @@ function stepIntercept(t, line, win, k, b, points) {
     blocks.push(text('Смотрим на чертёж: пересечение в точке ' +
       '<b class="key">' + math('(0;\\, ' + tex(b) + ')', '(0; ' + num(b) + ')') + '</b>. Значит ' +
       '<b class="key">' + math('b = ' + tex(b), 'b = ' + num(b)) + '</b>.'));
-    return { title: 'Находим b', highlight: { x: 0, y: b }, blocks: blocks };
+    return { title: 'Находим $b$', highlight: { x: 0, y: b }, blocks: blocks };
   }
 
   /* b с графика не снять: пересечение за кадром или не в узле сетки. */
@@ -334,7 +334,7 @@ function stepIntercept(t, line, win, k, b, points) {
   blocks.push(formula(tex(base.y) + ' = ' + texNegative(product) + ' + b'));
   blocks.push(formula('b = ' + tex(base.y) + ' - ' + texNegative(product) + ' = ' + tex(b)));
 
-  return { title: 'Находим b', blocks: blocks };
+  return { title: 'Находим $b$', blocks: blocks };
 }
 
 /* Отрицательное число в формуле берётся в скобки: −2 · −3 нечитаемо. */

@@ -3,7 +3,7 @@
   "id": "P12R-5",
   "block": 5,
   "title": "Полная гипербола",
-  "subtitle": "Найти k, a и b в k/(x + a) + b",
+  "subtitle": "Найти $k$, $a$ и $b$ в $\\frac{k}{x + a} + b$",
   "seed": 12405,
   "family": "rational",
   "axisLabels": "minimal",

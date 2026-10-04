@@ -901,3 +901,6 @@ body {
 /* Широкий рисунок примера — под текстом, во всю ширину рамки. */
 .sheet-example--stack .sheet-figure { flex: 1 1 100%; display: flex; justify-content: center; }
 .sheet-example--stack .sheet-figure svg { width: auto; }
+
+/* Формула не рвётся переносом посередине — как на сайте (styles/base.css). */
+.katex .katex-html { white-space: nowrap; }

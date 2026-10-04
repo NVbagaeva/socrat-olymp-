@@ -5,6 +5,8 @@ import type { PrepSkillId } from '@/content/prepSkills';
 import { PrepCardMeter } from './PrepCardMeter';
 import { PrepCardLink } from './PrepScroll';
 import { TaskCountIcon } from './PrepIcons';
+import { Tex } from '@/components/ui/Tex';
+import { texPlain } from '@/lib/tex';
 
 export interface PrepSkillItem {
   id: PrepSkillId;
@@ -46,8 +48,8 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
                 {item.no}
               </span>
               <span className="prep-card__text">
-                <span className="prep-card__title">{item.title}</span>
-                <span className="prep-card__lead">{item.lead}</span>
+                <Tex className="prep-card__title" text={item.title} />
+                <Tex className="prep-card__lead" text={item.lead} />
                 {item.formula}
               </span>
               {/* Чертёж занимает две строки сетки — свою и строку
@@ -61,7 +63,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
               </span>
 
               <span className="prep-card__bottom">
-                <PrepCardMeter id={item.id} total={item.total} title={item.title} />
+                <PrepCardMeter id={item.id} total={item.total} title={texPlain(item.title)} />
                 <span className="prep-card__start">Начать →</span>
               </span>
             </PrepCardLink>
