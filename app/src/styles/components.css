@@ -2121,6 +2121,81 @@ a.task-card {
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Полоса «Содержание / текущий раздел» теории ───────────────
+   Одна на все теории: №12 (TopicTabs), №4–5 (TeoriyaShell), №3
+   (TeoriyaContents). На широком экране её нет — содержание стоит
+   правой колонкой; ниже 1024px колонку заменяют полоса и шторка. */
+
+/* Кнопка «Содержание»: нужна там, где правой колонки нет. */
+.topic-open {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.topic-open__btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.topic-open__now {
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1023.98px) {
+  /* Полоса «Содержание / текущий раздел» липнет к верху экрана всё
+     время чтения теории. Отсчёт сверху — --topic-sticky-top: ноль,
+     если над полосой ничего липкого нет (№12), и высота ленты
+     вкладок, если липнет и она (№4, №5 — veroyatnost.css).
+     Липкость работает потому, что полоса стоит прямо в панели
+     вкладки, которая тянется на всю теорию: в ячейке ростом с саму
+     кнопку ездить ей было бы некуда.
+     Фон во всю ширину колонки: разделы не просвечивают сбоку. */
+  .topic-open {
+    display: flex;
+    position: sticky;
+    top: var(--topic-sticky-top, 0px);
+    z-index: 4;
+    box-sizing: border-box;
+    height: var(--h-topic-open);
+    margin-bottom: var(--space-4);
+    margin-inline: calc(var(--space-5) * -1);
+    padding: var(--space-2) var(--space-5);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+  /* Название раздела — одной строкой: полоса не растёт в высоту и
+     не наезжает на текст, длинное название обрезается многоточием. */
+  .topic-open__now {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Переход по содержанию: заголовок раздела встаёт под полосой,
+     а не под ней прячется. */
+  .topic-panel .theory-block {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+  /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
+  .modal-backdrop:has(.contents-sheet) {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .contents-sheet {
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+}
+
 .contents-list {
   list-style: none;
   margin: 0;

@@ -7,10 +7,16 @@ import { katex } from '@/lib/graph/katex';
  * Переменные набирает KaTeX прямо на сборке, поэтому в браузер уходит
  * готовая разметка. В полужирном обороте переменная тоже полужирная —
  * иначе она выпадала бы из строки по весу.
+ *
+ * Куски обёрнуты одним строчным контейнером: заголовки карточек —
+ * flex (рядом иконка), и без обёртки каждый кусок и каждая формула
+ * становились отдельным flex-элементом — «Сдвиги по асимптотам, k по
+ * точке» рассыпался на столбики. Обёртка — один элемент, внутри
+ * которого текст и формулы идут обычной строкой.
  */
 export function Phrases({ parts }: { parts: Phrase[] }) {
   return (
-    <>
+    <span className="phrases">
       {parts.map((part, index) => {
         if (part.math === true) {
           const tex = part.strong === true ? `\\boldsymbol{${part.text}}` : part.text;
@@ -32,6 +38,6 @@ export function Phrases({ parts }: { parts: Phrase[] }) {
           <span key={index}>{part.text}</span>
         );
       })}
-    </>
+    </span>
   );
 }
