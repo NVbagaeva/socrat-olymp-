@@ -1534,16 +1534,16 @@
   }
 }
 @media (max-width: 1023.98px) {
-  .vteor-open {
-    position: sticky;
-    top: var(--h-tabs);
-    z-index: 4;
-    margin-bottom: 0;
-    /* Фон во всю ширину колонки, как у ленты вкладок: иначе разделы
-       просвечивали бы сбоку от кнопки. */
-    margin-inline: calc(var(--space-5) * -1);
-    padding: var(--space-3) var(--space-5);
-    background: var(--color-bg);
+  /* Сама полоса — общая (styles/components.css); здесь только отсчёт от низа
+     липкой ленты вкладок. */
+  .veroyatnost-main {
+    --topic-sticky-top: var(--h-tabs);
+  }
+  /* Переход по содержанию: заголовок встаёт под лентой и полосой.
+     Правило здесь, а не рядом с полосой в components.css: тот файл
+     в слое @layer, и базовое .vteor-razdel отсюда его перебило бы. */
+  .vteor .vteor-razdel {
+    scroll-margin-top: calc(var(--h-tabs) + var(--h-topic-open) + var(--space-4));
   }
 }
 
