@@ -167,3 +167,18 @@ svg {
 .katex .katex-html {
   white-space: nowrap;
 }
+
+/* Подписи типов заданий («$y = \frac{k}{x} + a$: значение функции»):
+   дробь крупнее строчной. В строке KaTeX набирает \frac мелко —
+   числитель и знаменатель около 70% кегля, на телефоне их не
+   разобрать. Здесь дробь увеличена на треть: читается, а строка
+   подписи растёт заметно меньше, чем от выносной \dfrac. Места —
+   карточки навыков, сводка конфигуратора, нижняя плашка, статистика
+   тренажёра и совет под ней. */
+.cfg-skill__title .katex .mfrac,
+.cfg-summary__skill .katex .mfrac,
+.cfg-bar__summary .katex .mfrac,
+.tkind__name .katex .mfrac,
+.tstats__advice .katex .mfrac {
+  font-size: 1.3em;
+}
