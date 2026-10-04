@@ -10,7 +10,7 @@
   "uniqueAnswers": true,
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 8
+    "count": 10
   },
   "tasks": [
     {
@@ -120,6 +120,36 @@
     },
     {
       "id": "P12R-8-08",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-09",
+      "question": "На рисунке показан график функции $f(x) = k/(x + a) + b$. В какой точке $x$ функция принимает значение ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "hint": "Восстанови формулу, затем реши уравнение $f(x) = c$: перенеси $b$, переверни дробь и вычти сдвиг.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-8-10",
       "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. При каком значении $x$ значение функции равно ${y0}$?",
       "answerRule": "argument-for",
       "answerType": "number",

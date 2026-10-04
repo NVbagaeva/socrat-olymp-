@@ -10,7 +10,7 @@
   "uniqueAnswers": true,
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 8
+    "count": 10
   },
   "tasks": [
     {
@@ -130,6 +130,36 @@
         "query": {
           "type": "value-at",
           "kind": "mixed"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-09",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-10",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
         }
       }
     }
