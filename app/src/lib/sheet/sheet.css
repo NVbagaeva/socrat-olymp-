@@ -850,3 +850,6 @@ body {
 
 /* Формула не рвётся переносом посередине — как на сайте (styles/base.css). */
 .katex .katex-html { white-space: nowrap; }
+/* Подпись типа в ключе ответов — дробь крупнее строчной, как на сайте
+   (styles/base.css, .cfg-skill__title и соседи). */
+.sheet-key-method .katex .mfrac { font-size: 1.3em; }
