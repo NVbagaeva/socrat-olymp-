@@ -42,8 +42,8 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function findVolumeOf(p: Params, names: readonly string[], wordVertices: string): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются ${wordVertices} ${names.join(', ')} ` +
-    `правильной треугольной призмы ${TRI_NAMES}, площадь основания которой равна ${ru(S)}, ` +
+    `Найдите объём многогранника, вершинами которого являются $${wordVertices} ${names.join(', ')}$ ` +
+    `правильной треугольной призмы $${TRI_NAMES}$, площадь основания которой равна ${ru(S)}, ` +
     `а боковое ребро равно ${ru(h)}.`
   );
 }
@@ -53,7 +53,7 @@ function findVolumeOf(p: Params, names: readonly string[], wordVertices: string)
 export const P03_28: Prototype = {
   id: 'P03-28',
   razdel: 'II',
-  nazvanie: 'Пирамида A, B, C, C₁ в правильной треугольной призме',
+  nazvanie: 'Пирамида $A$, $B$, $C$, $C_1$ в правильной треугольной призме',
   tip: 'объём пирамиды: основание призмы, вершина — соседняя верхняя',
   zadachnik: [94, 95],
   status: 'есть',
@@ -77,9 +77,9 @@ export const P03_28: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Это пирамида с основанием ABC (площадь S) и вершиной C₁; её высота — боковое ребро h, потому что C₁ лежит прямо над C.',
+        text: 'Это пирамида с основанием $ABC$ (площадь $S$) и вершиной $C_1$; её высота — боковое ребро $h$, потому что $C_1$ лежит прямо над $C$.',
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
   varianty: [
@@ -101,7 +101,7 @@ export const P03_28: Prototype = {
 export const P03_29: Prototype = {
   id: 'P03-29',
   razdel: 'II',
-  nazvanie: 'Пирамида A, B, C, A₁ (B₁) в правильной треугольной призме',
+  nazvanie: 'Пирамида $A$, $B$, $C$, $A_1 (B_1)$ в правильной треугольной призме',
   tip: 'объём пирамиды: основание призмы, вершина — соседняя верхняя',
   zadachnik: [96, 97],
   status: 'добавить',
@@ -129,9 +129,9 @@ export const P03_29: Prototype = {
     const apex = num(p, 'apex') === 1 ? 'A₁' : 'B₁';
     return [
       {
-        text: `Это пирамида с основанием ABC (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
+        text: `Это пирамида с основанием $ABC$ (площадь $S$) и вершиной $${apex}$; высота — боковое ребро $h$.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
   varianty: [
@@ -155,7 +155,7 @@ const BOTTOM_APEX = ['A', 'B', 'C'] as const;
 export const P03_30: Prototype = {
   id: 'P03-30',
   razdel: 'II',
-  nazvanie: 'Пирамида с основанием A₁B₁C₁ и вершиной внизу',
+  nazvanie: 'Пирамида с основанием $A_1B_1C_1$ и вершиной внизу',
   tip: 'объём пирамиды: основание — верх призмы, вершина — соседняя нижняя',
   zadachnik: [98, 101],
   status: 'добавить',
@@ -189,9 +189,9 @@ export const P03_30: Prototype = {
     const apex = BOTTOM_APEX[num(p, 'apex') % 3] as string;
     return [
       {
-        text: `Это пирамида с основанием A₁B₁C₁ (площадь S) и вершиной ${apex}; высота — боковое ребро h.`,
+        text: `Это пирамида с основанием $A_1B_1C_1$ (площадь $S$) и вершиной $${apex}$; высота — боковое ребро $h$.`,
       },
-      { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+      { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
   varianty: [
@@ -228,9 +228,9 @@ function fiveVertexProto(
     status,
     format: 'целое',
     uslovie: (p) =>
-      `Дана правильная треугольная призма ${TRI_NAMES}, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
+      `Дана правильная треугольная призма $${TRI_NAMES}$, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
       `а боковое ребро равно ${ru(num(p, 'h'))}. Найдите объём многогранника, вершинами которого ` +
-      `являются точки ${names.join(', ')}.`,
+      `являются точки $${names.join(', ')}$.`,
     dopustimo: (p) => SH(p).every((x) => x > 0),
     otvet: (p) => {
       const [S, h] = SH(p);
@@ -254,7 +254,7 @@ function fiveVertexProto(
           text: `Это призма без пирамиды с вершиной ${missingName}: у той пирамиды основание — половина боковой грани, а объём — треть призмы.`,
         },
         {
-          text: `Объём фигуры: ${ru(S)} · ${ru(h)} · ⅔ = ${ru((2 * S * h) / 3)}.`,
+          text: `Объём фигуры: $${ru(S)} \\cdot ${ru(h)} \\cdot \\tfrac{2}{3} = ${ru((2 * S * h) / 3)}$.`,
           value: (2 * S * h) / 3,
         },
       ];
@@ -265,7 +265,7 @@ function fiveVertexProto(
 
 export const P03_31 = fiveVertexProto(
   'P03-31',
-  'Многогранник A, C, A₁, B₁, C₁',
+  'Многогранник $A$, $C$, $A_1$, $B_1$, $C_1$',
   [102, 103],
   'есть',
   'B',
@@ -285,7 +285,7 @@ export const P03_31 = fiveVertexProto(
 
 export const P03_32 = fiveVertexProto(
   'P03-32',
-  'Многогранник B, C, A₁, B₁, C₁',
+  'Многогранник $B$, $C$, $A_1$, $B_1$, $C_1$',
   [104, 105],
   'добавить',
   'A',
@@ -322,8 +322,8 @@ function tetraProto(
     status: 'добавить',
     format: 'целое',
     uslovie: (p) =>
-      `Найдите объём многогранника, вершинами которого являются вершины ${names.join(', ')} ` +
-      `правильной треугольной призмы ${TRI_NAMES}. Площадь основания призмы равна ${ru(num(p, 'S'))}, ` +
+      `Найдите объём многогранника, вершинами которого являются вершины $${names.join(', ')}$ ` +
+      `правильной треугольной призмы $${TRI_NAMES}$. Площадь основания призмы равна ${ru(num(p, 'S'))}, ` +
       `а боковое ребро равно ${ru(num(p, 'h'))}.`,
     dopustimo: (p) => SH(p).every((x) => x > 0),
     otvet: (p) => {
@@ -342,7 +342,7 @@ function tetraProto(
         {
           text: 'Такой тетраэдр — одна из трёх равных частей, на которые призма делится диагональными сечениями: его объём — треть объёма призмы.',
         },
-        { text: `Объём: ${ru(S)} · ${ru(h)} : 3 = ${ru((S * h) / 3)}.`, value: (S * h) / 3 },
+        { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
       ];
     },
     varianty,
@@ -351,7 +351,7 @@ function tetraProto(
 
 export const P03_33 = tetraProto(
   'P03-33',
-  'Пирамида A, C, A₁, B₁',
+  'Пирамида $A$, $C$, $A_1$, $B_1$',
   [106, 107],
   ['A', 'C', 'A1', 'B1'],
   [
@@ -377,7 +377,7 @@ export const P03_33 = tetraProto(
 
 export const P03_34 = tetraProto(
   'P03-34',
-  'Пирамида A, C, B₁, C₁',
+  'Пирамида $A$, $C$, $B_1$, $C_1$',
   [108, 109],
   ['A', 'C', 'B1', 'C1'],
   [

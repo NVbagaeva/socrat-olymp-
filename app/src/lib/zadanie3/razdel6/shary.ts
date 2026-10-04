@@ -67,7 +67,7 @@ export const P03_71: Prototype = {
           `${ru(a)}² + ${ru(b)}² = ${ru(sum)}.`,
         value: sum,
       },
-      { text: `Радиус: √${ru(sum)} = ${ru(Math.sqrt(sum))}.`, value: Math.sqrt(sum) },
+      { text: `Радиус: $\\sqrt{${ru(sum)}} = ${ru(Math.sqrt(sum))}$.`, value: Math.sqrt(sum) },
     ];
   },
 
@@ -115,7 +115,7 @@ export const P03_72: Prototype = {
     return [
       { text: 'Площадь поверхности шара растёт как квадрат радиуса.' },
       {
-        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит поверхность — в ${ru(k)}² = ${ru(k * k)} ${razaWord(k * k)}.`,
+        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит поверхность — в $${ru(k)}^2 = ${ru(k * k)}$ ${razaWord(k * k)}.`,
         value: k * k,
       },
     ];
@@ -164,7 +164,7 @@ export const P03_73: Prototype = {
     return [
       { text: 'Объём шара растёт как куб радиуса.' },
       {
-        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит объём — в ${ru(k)}³ = ${ru(k ** 3)} ${razaWord(k ** 3)}.`,
+        text: `Радиус больше в ${ru(k)} ${razaWord(k)}, значит объём — в $${ru(k)}^3 = ${ru(k ** 3)}$ ${razaWord(k ** 3)}.`,
         value: k ** 3,
       },
     ];

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { trainerPage, trainerWordsFor } from '@/content/trainerModes';
-import { skillLevelsFor } from '@/content/skills12';
+import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
+import { typeset } from '@/lib/tex';
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { skillItems } from '../configurator';
@@ -55,7 +56,7 @@ export function TrainerShell({ subtopic, base, preset = null, children }: Traine
           family={subtopic.title}
           familyTotal={total}
           skills={skills}
-          levels={skillLevelsFor(subtopic.id)}
+          levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
           words={trainerWordsFor(subtopic.id)}
           /* Ответ выбором варианта — признак подтемы: у линейной его
              нет, и её тренажёр берёт только числовые ответы. */

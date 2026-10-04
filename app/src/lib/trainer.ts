@@ -65,7 +65,9 @@ export interface TrainerOption {
 
 /** Рисунок метода под разбором: миниатюра, название и приём. */
 export interface TrainerMethod {
+  /** Название приёма — вёрстка KaTeX (формулы в нём бывают). */
   title: string;
+  /** Приём одной строкой — вёрстка KaTeX. */
   tip: string;
   svg: string;
 }
@@ -1023,7 +1025,7 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     options: task.options == null ? null
       : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
     oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
-      option.error === null ? [] : [[option.number, typeset(option.error)]])),
+      option.error === null ? [] : [[option.number, hintHtml(option.error)]])),
     solution: quadratic ? quadraticSteps(task) : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };

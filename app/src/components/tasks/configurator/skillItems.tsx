@@ -2,6 +2,7 @@ import { Chart } from '@/components/graph/Chart';
 import { skillTitle } from '@/content/skills12';
 import type { ManifestFamily } from '@/lib/generator/manifest';
 import { generatorSkillScene } from '@/lib/scenes';
+import { typeset } from '@/lib/tex';
 import type { SkillItem } from './SkillCards';
 
 /**
@@ -23,6 +24,9 @@ export function skillItems(family: ManifestFamily | undefined): SkillItem[] {
     /* Набора без названия в конфиге нет, но если появится — на
        карточке будет его идентификатор, а не пустота. */
     title: skillTitle[skill.id] ?? skill.id,
+    /* Формулы в названии набираются здесь, на сервере: карточки и
+       сводка — клиентские экраны. */
+    titleHtml: typeset(skillTitle[skill.id] ?? skill.id),
     count: skill.count,
     levels: skill.levels,
     chart: <Chart className="cfg-chart" scene={generatorSkillScene(skill.id)} />,

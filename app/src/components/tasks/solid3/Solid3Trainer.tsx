@@ -9,6 +9,7 @@ import { recordTask, taskKey, useZ3Progress } from '@/lib/zadanie3/progress';
 import { answerMatches, klyuchZadachi, openText } from '@/lib/zadanie3/secret';
 import { restartZ3Round, swapZ3Task, useZ3Round } from '@/lib/zadanie3/useRound';
 import { Solid3Stats } from './Solid3Stats';
+import { TitleText } from '@/components/tasks/TitleText';
 
 export interface Solid3TrainerProps {
   pool: Pool;
@@ -99,11 +100,15 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
      в тренажёре раздела. */
   const filters = useMemo(() => {
     if (pool.razdel !== 'all') {
-      return pool.kinds.map((kind) => ({ id: kind.id, title: kind.title }));
+      return pool.kinds.map((kind) => ({ id: kind.id, title: kind.title, titleHtml: kind.titleHtml }));
     }
     const seen = new Map<string, string>();
     pool.kinds.forEach((kind) => seen.set(kind.group, kind.groupTitle));
-    return [...seen.entries()].map(([nomer, title]) => ({ id: `${GROUP}${nomer}`, title }));
+    return [...seen.entries()].map(([nomer, title]) => ({
+      id: `${GROUP}${nomer}`,
+      title,
+      titleHtml: undefined as string | undefined,
+    }));
   }, [pool]);
 
   const size = repeat
@@ -201,7 +206,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
             className={clsx('chip', !repeat && mode === item.id && 'is-active')}
             onClick={() => choose(item.id)}
           >
-            {item.title}
+            <TitleText title={item.title} html={item.titleHtml} />
           </button>
         ))}
       </nav>
@@ -212,7 +217,9 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
         <>
           <p className="z3t__count">
             Задание <b>{index + 1}</b> из {total}
-            <span className="z3t__kind">{kind.title}</span>
+            <span className="z3t__kind">
+              <TitleText title={kind.title} html={kind.titleHtml} />
+            </span>
           </p>
 
           {/* Полоса подхода: пройденное залито, текущее подсвечено. */}
@@ -235,7 +242,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
               className="z3t__question"
               dangerouslySetInnerHTML={{ __html: variant.uslovieHtml }}
             />
-            <FigureZoom className="z3t__fig" label={`Чертёж к заданию: ${kind.title}`}>
+            <FigureZoom className="z3t__fig" label={`Чертёж к заданию: ${kind.titlePlain}`}>
               <span dangerouslySetInnerHTML={{ __html: variant.svg ?? kind.svg }} />
             </FigureZoom>
           </article>
@@ -260,7 +267,7 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
               }}
             />
             {kind.format === 'на-пи' ? (
-              <p className="z3t__hint">Ответ уже делённый на π — саму π писать не нужно.</p>
+              <p className="z3t__hint" dangerouslySetInnerHTML={{ __html: pool.piHintHtml }} />
             ) : null}
 
             {checked === null ? null : (
@@ -291,7 +298,8 @@ export function Solid3Trainer({ pool, roundKey }: Solid3TrainerProps) {
             {solution ? (
               <ol className="z3t__steps">
                 {steps.map((step, i) => (
-                  <li key={i}>{step}</li>
+                  /* Шаг набран KaTeX на сборке (lib/zadanie3/pool.ts). */
+                  <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
                 ))}
               </ol>
             ) : null}

@@ -300,8 +300,9 @@ export function Sessiya({
                 {verno ? uznayTeksty.kakVidno : uznayTeksty.priznaki}
               </p>
               <ul className="z4-uznay__priznaki">
+                {/* Признаки набраны KaTeX на сборке (lib/veroyatnost/pool.ts). */}
                 {itog.priznaki.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li key={p} dangerouslySetInnerHTML={{ __html: p }} />
                 ))}
               </ul>
               <div className="z4-uznay__actions">

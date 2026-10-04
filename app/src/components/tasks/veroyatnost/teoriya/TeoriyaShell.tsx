@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
+import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
 
 export interface TeoriyaShellProps {
@@ -17,11 +18,6 @@ export interface TeoriyaShellProps {
 /** Якорь раздела на странице. */
 function razdelId(id: string): string {
   return `teoriya-${id}`;
-}
-
-/** Плавность прокрутки: при «уменьшить движение» переход мгновенный. */
-function motion(): ScrollBehavior {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 }
 
 /**
@@ -40,17 +36,22 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
   const [shtorka, setShtorka] = useState(false);
+  /* Подсветка в содержании и название в липкой полосе следуют за
+     экраном — тот же хук, что у теории №12. */
+  const ids = useMemo(() => razdely.map((razdel) => razdel.id), [razdely]);
+  const zakrepit = useActiveSection(ids, razdelId, true, setAktivnyy);
 
   const scrollTo = useCallback((id: string) => {
     const node = document.getElementById(razdelId(id));
     if (node === null) {
       return;
     }
-    node.scrollIntoView({ behavior: motion(), block: 'start' });
+    scrollToSection(node);
   }, []);
 
   function vybrat(id: string): void {
     setAktivnyy(id);
+    zakrepit();
     setShtorka(false);
     /* Шторка закрывается той же отрисовкой: прокрутка идёт следующим
        кадром, когда блокировка прокрутки уже снята. */

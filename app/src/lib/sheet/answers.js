@@ -13,6 +13,20 @@
 import marks from './marks.js';
 import typo from './typography.js';
 
+/* Название метода в ключе: с формулами $…$ — заглушки KaTeX,
+   иначе готовая разметка (у №4, №5 и №8 метод приходит HTML). */
+function methodHtml(method) {
+  return /\$/.test(method) ? typo.mathText(method) : typo.markup(method);
+}
+
+/* Числовой ответ набирается формулой: минус — настоящий, запятая —
+   десятичная. Ответ-не-число (номер варианта с текстом) — как есть. */
+function answerMath(answer) {
+  var value = String(answer);
+  if (!/^[-−]?\d+(?:[,.]\d+)?$/.test(value)) { return typo.markup(value); }
+  return typo.mathText('$' + value.replace('−', '-').replace(/[,.]/, '{,}') + '$');
+}
+
 /**
  * Полоса-заголовок раздела. Начинает новую страницу:
  * ответы не должны начинаться под последней задачей.
@@ -93,7 +107,7 @@ function keyTable(title, rows) {
       var shown = row.html || typo.markup(row.answer);
       return '<th scope="row">' + row.no + '</th>' +
         '<td class="sheet-key-answer" data-answer="' + typo.attr(row.answer) + '">' + shown + '</td>' +
-        '<td class="sheet-key-method">' + typo.markup(row.method || '') + '</td>';
+        '<td class="sheet-key-method">' + methodHtml(row.method || '') + '</td>';
     }).join('');
     for (var pad = chunk.length; pad < perRow; pad += 1) {
       cells += '<th scope="row"></th><td></td><td></td>';
@@ -127,7 +141,7 @@ function solution(no, formulas, answer) {
   return '<div class="sheet-item sheet-solution">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body">' + body + '</span>' +
-    '<span class="sheet-solution-answer">' + typo.markup(answer) + '</span>' +
+    '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
     '</div>';
 }
 

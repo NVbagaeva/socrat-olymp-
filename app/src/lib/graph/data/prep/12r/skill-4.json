@@ -3,7 +3,7 @@
   "id": "P12R-4",
   "block": 4,
   "title": "Совместный сдвиг",
-  "subtitle": "k известен: найти a или b в k/(x + a) + b",
+  "subtitle": "$k$ известен: найти $a$ или $b$ в $\\frac{k}{x + a} + b$",
   "seed": 12404,
   "family": "rational",
   "axisLabels": "minimal",

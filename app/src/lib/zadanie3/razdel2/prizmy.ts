@@ -71,11 +71,11 @@ export const P03_20: Prototype = {
     const area = (a * b) / 2;
     return [
       {
-        text: `Площадь основания — прямоугольного треугольника: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`,
+        text: `Площадь основания — прямоугольного треугольника: $${ru(a)} \\cdot ${ru(b)} : 2 = ${ru(area)}$.`,
         value: area,
       },
       {
-        text: `Объём прямой призмы: площадь основания на высоту: ${ru(area)} · ${ru(h)} = ${ru(area * h)}.`,
+        text: `Объём прямой призмы: площадь основания на высоту: $${ru(area)} \\cdot ${ru(h)} = ${ru(area * h)}$.`,
         value: area * h,
       },
     ];
@@ -141,9 +141,9 @@ export const P03_21: Prototype = {
     const area = (a * b) / 2;
     const h = V / area;
     return [
-      { text: `Площадь основания: ${ru(a)} · ${ru(b)} : 2 = ${ru(area)}.`, value: area },
+      { text: `Площадь основания: $${ru(a)} \\cdot ${ru(b)} : 2 = ${ru(area)}$.`, value: area },
       {
-        text: `Боковое ребро прямой призмы: объём делённый на площадь основания: ${ru(V)} : ${ru(area)} = ${ru(h)}.`,
+        text: `Боковое ребро прямой призмы: объём делённый на площадь основания: $${ru(V)} : ${ru(area)} = ${ru(h)}$.`,
         value: h,
       },
     ];

@@ -409,6 +409,12 @@
   stroke: none;
   font-size: 12px;
 }
+/* Буква-переменная в подписи множества: курсив математическим шрифтом
+   KaTeX — как формулы в тексте страницы. */
+.mapping__var {
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+}
 .mapping__point {
   fill: var(--color-text);
   stroke: none;
@@ -437,28 +443,6 @@
   height: 2px;
   border-radius: var(--radius-pill);
   background: var(--color-border-warm);
-}
-
-/* Кнопка «Содержание»: нужна там, где правой колонки нет. */
-.topic-open {
-  display: none;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-.topic-open__btn svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-}
-.topic-open__now {
-  min-width: 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
 }
 
 .topic-side__title {
@@ -684,20 +668,8 @@ a.tutor-card:hover {
   .topic-side {
     display: none;
   }
-  .topic-open {
-    display: flex;
-  }
-  /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
-  .modal-backdrop:has(.contents-sheet) {
-    place-items: end stretch;
-    padding: 0;
-  }
-  .contents-sheet {
-    max-width: none;
-    max-height: 80vh;
-    overflow-y: auto;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  }
+  /* Полоса «Содержание» и шторка — общие для всех теорий
+     (styles/components.css, рядом со списком содержания). */
 }
 
 @media (max-width: 1279.98px) {
