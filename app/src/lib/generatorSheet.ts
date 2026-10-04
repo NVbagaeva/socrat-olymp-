@@ -11,8 +11,7 @@
  */
 
 import GraphGenerate from '@/lib/graph/generate.js';
-import solutionBuilder from '@/lib/graph/solution.js';
-import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
+import teacherBuilder from '@/lib/graph/solution-teacher.js';
 import rationalBuilder from '@/lib/graph/solution-rational.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -415,9 +414,7 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
             title: variants.length > 1 ? `Вариант ${i + 1}` : null,
             blocks: list,
           })),
-          GraphGenerate,
-          solutionBuilder,
-          quadraticBuilder,
+          teacherBuilder,
           rationalBuilder,
         ),
     foot: content.foot,

@@ -146,30 +146,6 @@ function solution(no, formulas, answer) {
 }
 
 /**
- * Полное решение задачи для учителя: номер, затем шаги разбора —
- * заголовок шага и все его формулы подряд, — и ответ. Так печатается
- * гипербола: учителю нужна вся цепочка (асимптоты → сдвиги → точка →
- * k → формула; у задач с прямой — обе функции, уравнение, корни),
- * а не только итог каждого шага.
- *
- * items — [{ title, formulas: [tex] }]
- */
-function fullSolution(no, items, answer) {
-  var list = items.map(function (step) {
-    var body = step.formulas.map(function (tex) {
-      return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
-    }).join('<span class="sheet-solution-sep">;</span> ');
-    return '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
-      (body ? ':' : '') + '</span> ' + body + '</li>';
-  }).join('');
-  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
-    '<span class="sheet-solution-no">' + no + '</span>' +
-    '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
-    '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
-    '</div>';
-}
-
-/**
  * Решение по шагам внутри карточки задачи: текст шага и его формула,
  * затем строка ответа. Печатается в файле для учителя.
  *
@@ -188,6 +164,48 @@ function steps(items, answer) {
   }).join('');
   return '<ol class="sheet-steps">' + list + '</ol>' +
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
+}
+
+/* Формула разметкой листа: KaTeX заменит её вёрсткой. */
+function mathSpan(tex) {
+  return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+}
+
+/* Текст с формулами между знаками $…$. */
+function inlineText(value) {
+  return String(value).split('$').map(function (piece, i) {
+    return i % 2 ? mathSpan(piece) : typo.text(piece);
+  }).join('');
+}
+
+/**
+ * Полное решение одной задачи для учителя: номер, шаги по порядку
+ * и строка ответа. Класс sheet-solution тот же, что у краткого:
+ * карточка так же не рвётся между страницами и так же считается
+ * в отчёте сборки.
+ *
+ * steps  — [{ title, rows: [{ text, tex }] }]: text — строка, где
+ *          формулы стоят между знаками $…$; tex — формула строки
+ * answer — ответ разметкой, как в ключе
+ */
+function fullSolution(no, steps, answer) {
+  var list = steps.map(function (step) {
+    var rows = step.rows.map(function (item) {
+      return '<div class="sheet-step-row">' +
+        (item.text ? '<span class="sheet-step-text">' + inlineText(item.text) + '</span>' : '') +
+        (item.tex ? ' <span class="sheet-step-formula">' + mathSpan(item.tex) + '</span>' : '') +
+        '</div>';
+    }).join('');
+    return '<li class="sheet-step"><b class="sheet-step-title">' + inlineText(step.title) + '</b>' + rows + '</li>';
+  }).join('');
+
+  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+    '<span class="sheet-solution-no">' + no + '</span>' +
+    '<div class="sheet-solution-body">' +
+      '<ol class="sheet-steps">' + list + '</ol>' +
+      '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answer) + '</b></p>' +
+    '</div>' +
+    '</div>';
 }
 
 const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
