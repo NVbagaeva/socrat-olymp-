@@ -103,6 +103,59 @@ function teacherRows(t, letter) {
   ];
 }
 
+/**
+ * Пункты решения с именами точек: левая точка — names.L, правая —
+ * names.R, вершина прямого угла — C (треугольник LCR, гипотенуза LR).
+ * Возвращает строки трёх пунктов: direction («Направление прямой»),
+ * triangle («Треугольник», у горизонтальной прямой пусто) и k
+ * («Находим k»). Строки — { text, tex }, как у solution-teacher.js.
+ */
+function pointedRows(t, names, letter) {
+  var name = letter || 'k';
+  var tg = '\\operatorname{tg}';
+  var L = names.L; var R = names.R;
+  if (t.flat) {
+    return {
+      direction: [{ text: 'Прямая параллельна оси $Ox$: не возрастает и не убывает' }],
+      triangle: [],
+      k: [{ text: 'Прямая параллельна оси $Ox$ $\\Rightarrow$ $\\alpha = 0^\\circ$, $' + name + ' = ' + tg + ' 0^\\circ = 0$' }]
+    };
+  }
+  /* Отрезок называется по порядку слева направо: LC, CR. */
+  var vertical = t.rising ? 'C' + R : L + 'C';
+  var horizontal = t.rising ? L + 'C' : 'C' + R;
+  var triangle = [
+    { text: 'Строим под прямой прямоугольный треугольник $' + L + 'C' + R + '$, гипотенуза $' + L + R + '$.' },
+    { text: 'Вершина прямого угла: $C' + pt(t.C) + '$.' },
+    { text: 'Катеты: вертикальный $' + vertical + ' = ' + t.dy + '$, горизонтальный $' + horizontal + ' = ' + t.dx + '$.' },
+    { text: t.rising ? 'Угол при вершине $' + L + '$ равен $\\alpha$.'
+      : 'Угол при вершине $' + R + '$ — смежный с $\\alpha$, он равен $180^\\circ - \\alpha$.' }
+  ];
+  if (t.rising) {
+    return {
+      direction: [
+        { text: 'Прямая возрастает $\\Rightarrow$ $' + name + ' = ' + tg + ' \\alpha > 0$' },
+        { text: '($\\alpha$ — угол между прямой и положительным направлением оси $Ox$)' }
+      ],
+      triangle: triangle,
+      k: [{ tex: tg + ' \\alpha = ' + ratio(t.dy, t.dx) + ' \\;\\Rightarrow\\; ' + name + ' = ' + N(t.k) }]
+    };
+  }
+  var acute = frac(t.dy, t.dx);
+  return {
+    direction: [
+      { text: 'Прямая убывает $\\Rightarrow$ $\\alpha$ — тупой угол, $' + name + ' = ' + tg + ' \\alpha < 0$' },
+      { text: '($\\alpha$ — угол между прямой и положительным направлением оси $Ox$)' }
+    ],
+    triangle: triangle,
+    k: [
+      { tex: tg + '(180^\\circ - \\alpha) = ' + ratio(t.dy, t.dx) },
+      { tex: tg + ' \\alpha = -' + tg + '(180^\\circ - \\alpha) = ' + N(frac(-acute.p, acute.q)) +
+        ' \\;\\Rightarrow\\; ' + name + ' = ' + N(t.k) }
+    ]
+  };
+}
+
 /* ══════════════════════════════════════════════════════════
    Фигуры для чертежа: тонкий пунктир, длины катетов, угол
    ══════════════════════════════════════════════════════════ */
@@ -153,7 +206,14 @@ function legLabel(id, value, ink, from, to, side, other) {
   anchors = anchors.concat(ring({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }, 1.5));
   /* Подпись ближе к своему катету, чем к соседнему: иначе её читают
      как длину соседнего. */
-  anchors = anchors.filter(function (p) { return toSegment(p, from, to) + 0.3 < toSegment(p, other.from, other.to); });
+  /* Место напротив самого катета (проекция ложится на катет) читается
+     однозначно и у короткого катета в одну клетку — его не отсекаем. */
+  anchors = anchors.filter(function (p) {
+    var vx = to.x - from.x; var vy = to.y - from.y;
+    var share = ((p[0] - from.x) * vx + (p[1] - from.y) * vy) / (vx * vx + vy * vy);
+    if (share > 0.15 && share < 0.85) { return toSegment(p, from, to) + 0.1 < toSegment(p, other.from, other.to); }
+    return toSegment(p, from, to) + 0.3 < toSegment(p, other.from, other.to);
+  });
   return { type: 'label', id: id, text: String(value), color: ink, centered: true,
     at: anchors[0], anchors: anchors, size: LABEL_SIZE, smaller: [24, 20] };
 }
@@ -230,15 +290,22 @@ function shapes(t, suffix, color, options) {
      прямой читается как подпись другого угла. */
   var kValue = Line.num(t.k);
   anchors = anchors.filter(function (p) { return A.y + kValue * (p[0] - A.x) - p[1] > 0.45; });
-  list.push({ type: 'label', id: 'teacher-angle' + tail, color: ink, centered: true,
+  var angleLabel = { type: 'label', id: 'teacher-angle' + tail, color: ink, centered: true,
     text: t.rising ? 'α' : '180°−α', at: anchors[0], anchors: anchors, size: ANGLE_SIZE,
-    smaller: [21, 18, 15] });
+    smaller: [21, 18, 15] };
 
   /* Длины катетов — после подписи угла: они короткие и встают
-     вокруг неё, а не наоборот. */
-  if (!options || options.legLabels !== false) {
-    list.push(legLabel('teacher-label-x' + tail, t.dx, ink, C, horizontalTo, [0, -1],
-      { from: C, to: verticalTo }));
+     вокруг неё, а не наоборот. Исключение — горизонтальный катет
+     в одну клетку: место под ним одно, и широкая подпись угла не
+     должна его занять, она скорее станет мельче. */
+  var legs = !options || options.legLabels !== false;
+  var xLabel = legLabel('teacher-label-x' + tail, t.dx, ink, C, horizontalTo, [0, -1],
+    { from: C, to: verticalTo });
+  var shortX = legs && t.dx <= 1;
+  if (shortX) { list.push(xLabel); }
+  list.push(angleLabel);
+  if (legs) {
+    if (!shortX) { list.push(xLabel); }
     list.push(legLabel('teacher-label-y' + tail, t.dy, ink, C, verticalTo, [outward, 0],
       { from: C, to: horizontalTo }));
   }
@@ -256,7 +323,7 @@ function vertexBelow(t, line) {
   return value > t.C.y + 1e-9;
 }
 
-var api = { build: build, teacherRows: teacherRows, shapes: shapes, vertexBelow: vertexBelow };
+var api = { build: build, teacherRows: teacherRows, pointedRows: pointedRows, shapes: shapes, vertexBelow: vertexBelow };
 
 export default api;
-export { build, teacherRows, shapes, vertexBelow };
+export { build, teacherRows, pointedRows, shapes, vertexBelow };

@@ -12,7 +12,6 @@
 
 import GraphGenerate from '@/lib/graph/generate.js';
 import teacherBuilder from '@/lib/graph/solution-teacher.js';
-import rationalBuilder from '@/lib/graph/solution-rational.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
@@ -415,7 +414,6 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
             blocks: list,
           })),
           teacherBuilder,
-          rationalBuilder,
         ),
     foot: content.foot,
   };

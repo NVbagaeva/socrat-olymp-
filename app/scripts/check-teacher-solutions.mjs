@@ -37,8 +37,8 @@ function readSets(dir) {
   return fs.readdirSync(full).filter((name) => name.endsWith('.json')).sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(full, name), 'utf8')));
 }
-const prep = [...readSets('prep/12'), ...readSets('prep/12q')];
-const prototypes = [...readSets('prototypes/12'), ...readSets('prototypes/12q')];
+const prep = [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')];
+const prototypes = [...readSets('prototypes/12'), ...readSets('prototypes/12q'), ...readSets('prototypes/12r')];
 generator.setSets({ prep, prototypes });
 const SETS = [...prep, ...prototypes];
 
@@ -57,12 +57,17 @@ const show = (f) => (f.q === 1 ? String(f.p) : f.p + '/' + f.q);
 function valueOf(curve, x) {
   const X = typeof x === 'object' ? x : toFrac(x);
   if (curve.kind === 'line') { return add(mul(curve.k, X), curve.b); }
+  if (curve.kind === 'rational') { return add(Line.div(curve.m, Line.sub(X, curve.s)), curve.t); }
   return add(add(mul(curve.a, mul(X, X)), mul(curve.b, X)), curve.c);
 }
 
 /** Ответ ключа точной дробью: «−19,5» → −39/2. */
 function keyValue(answer) {
-  return toFrac(Number(String(answer).replace(/−/g, '-').replace(',', '.')));
+  const text = String(answer).replace(/−/g, '-').replace(',', '.').trim();
+  const [whole, part = ''] = text.split('.');
+  const q = 10 ** part.length;
+  const sign = whole.startsWith('-') ? -1 : 1;
+  return Line.frac(sign * (Math.abs(Number(whole)) * q + Number(part || 0)), q);
 }
 
 /** Все формулы решения: отдельные и внутри текста. */
@@ -159,21 +164,31 @@ function checkTask(task) {
     problems.push('в решении нет ответа');
   }
 
-  /* Точки в тексте — слева направо; у возрастающей прямой названа
-     вершина угла α, у убывающей — угла 180° − α. */
-  steps.forEach((step) => step.rows.forEach((item) => {
-    const textRow = String(item.text || '');
-    const pair = /(?:точками|берём точки) \$\((-?\d+);[^$]*\$[^$]*? и \$\((-?\d+);/.exec(textRow);
-    if (pair && Number(pair[1]) >= Number(pair[2])) {
-      problems.push('точки не слева направо: «' + textRow.slice(0, 120) + '»');
-    }
-    if (/Прямая возрастает/.test(textRow) && !/при вершине \$[^$]+\$ равен \$\\alpha\$/.test(textRow)) {
+  /* Пункты: у каждого номер и заголовок; точки в пункте «Точки
+     с рисунка» — слева направо; в блоке с возрастающей прямой названа
+     вершина угла α, с убывающей — угла 180° − α. */
+  const blocks = new Map();
+  steps.forEach((step) => {
+    if (!step.no || !step.title) { problems.push('пункт без номера или заголовка'); }
+    const key = step.block || '';
+    if (!blocks.has(key)) { blocks.set(key, []); }
+    blocks.get(key).push(step);
+  });
+  blocks.forEach((list) => {
+    list.forEach((step, i) => { if (step.no !== i + 1) { problems.push('нумерация пунктов сбита: ' + step.title); } });
+    const text = list.map((step) => step.rows.map((item) => String(item.text || '') + ' ' + String(item.tex || '')).join(' ')).join(' ');
+    list.filter((step) => step.title === 'Точки с рисунка').forEach((step) => {
+      const tex = step.rows.map((item) => item.tex || '').join(' ');
+      const xs = [...tex.matchAll(/[A-Z]\((-?\d+);/g)].map((m) => Number(m[1]));
+      if (xs.length === 2 && xs[0] >= xs[1]) { problems.push('точки не слева направо: «' + tex + '»'); }
+    });
+    if (/Прямая возрастает/.test(text) && !/при вершине \$[^$]+\$ равен \$\\alpha\$/.test(text)) {
       problems.push('у возрастающей прямой не названа вершина угла α');
     }
-    if (/Прямая убывает/.test(textRow) && !/при вершине \$[^$]+\$ — смежный/.test(textRow)) {
+    if (/Прямая убывает/.test(text) && !/при вершине \$[^$]+\$ — смежный/.test(text)) {
       problems.push('у убывающей прямой не названа вершина угла 180° − α');
     }
-  }));
+  });
 
   /* Чертёж учителя: без треугольников — байт в байт чертёж ученика,
      с ними — на нём есть катеты каждого треугольника. */
@@ -211,8 +226,10 @@ if (printAt >= 0) {
       const solved = teacher.build({ ...task, answerRule: rules[task.id] });
       console.log('\n━━ ' + task.id + ' — ' + set.title);
       console.log('Условие: ' + String(task.question || '').replace(/\s+/g, ' '));
-      solved.steps.forEach((step, i) => {
-        console.log((i + 1) + '. ' + step.title);
+      let block = null;
+      solved.steps.forEach((step) => {
+        if (step.block !== block) { block = step.block; if (block) { console.log('— ' + block); } }
+        console.log(step.no + '. ' + step.title);
         step.rows.forEach((item) => {
           console.log('   ' + [item.text, item.tex ? '$$ ' + item.tex + ' $$' : ''].filter(Boolean).join(' '));
         });

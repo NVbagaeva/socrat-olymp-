@@ -649,10 +649,22 @@ function renderGraph(scene, report) {
       /* Не нашлось свободного места — та же подпись пробуется кеглями
          помельче (shape.smaller — число или список): мельче, но не
          поверх линии. */
+      /* Мельче пробуем и тогда, когда место нашлось только на оси или
+         пунктире: мелкая подпись на свободном месте читается лучше
+         крупной поверх линии. Из всех кеглей берётся лучшее место,
+         при равенстве — крупнее. */
       var sizes = [size].concat(shape.smaller || []);
+      var best = null;
+      var keep = function () {
+        var value = spot ? spot.score - 0.5 * sizes.indexOf(size) : -Infinity;
+        if (spot && (!best || value > best.score + 1e-9)) {
+          best = { x: spot.x, y: spot.y, score: value, size: size, halfW: halfW, halfH: halfH };
+        }
+      };
       for (var attempt = 0; attempt < sizes.length; attempt += 1) {
         if (attempt > 0) {
-          if (spot && spot.score >= 0) { break; }
+          keep();
+          if (best && best.score >= 40) { break; }
           size = sizes[attempt];
           halfW = textWidth(shape.text, size, THEME.font.curveLabelTrack) / 2;
           halfH = size * 0.62;
@@ -679,6 +691,11 @@ function renderGraph(scene, report) {
           score -= index * 0.02;
           if (!spot || score > spot.score + 1e-9) { spot = { x: cx, y: cy, score: score }; }
         });
+      }
+      keep();
+      if (best) {
+        spot = { x: best.x, y: best.y, score: best.score };
+        size = best.size; halfW = best.halfW; halfH = best.halfH;
       }
       if (!spot) { spot = { x: sx(shape.at[0]), y: sy(shape.at[1]), score: 0 }; }
     } else {

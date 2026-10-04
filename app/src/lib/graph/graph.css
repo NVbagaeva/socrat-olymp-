@@ -98,6 +98,9 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Блок решения задачи с двумя функциями: «II. Находим g(x)». */
+.solution-block { margin: 0 0 var(--space-1, 4px); font-size: 0.875rem; font-weight: 600; color: var(--color-text-secondary, #5B6573); }
+
 .solution-head { display: flex; align-items: center; gap: var(--space-2, 8px); margin: 0 0 var(--space-2, 8px); }
 .solution-title { font-size: 1rem; font-weight: 600; margin: 0; }
 .solution-arrow { display: block; }

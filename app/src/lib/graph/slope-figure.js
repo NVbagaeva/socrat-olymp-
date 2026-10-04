@@ -14,6 +14,7 @@
 */
 
 import renderer from './renderer.js';
+import Rational from './families/rational.js';
 import Slope from './slope.js';
 import { loadSets } from './generate.js';
 import { pointText } from './text.js';
@@ -44,6 +45,31 @@ function taskScene(task) {
   var def = source.task;
   var axisLabels = def.axisLabels || set.axisLabels || 'minimal';
   var singleLabel = def.curveLabel === null ? null : (def.curveLabel || set.curveLabel || 'y = f(x)');
+
+  if (meta.family === 'rational') {
+    var value = function (f) { return f.p / f.q; };
+    /* Как sceneFor в generate-rational.js: кривые не подписаны. */
+    var hyper = { k: value(meta.m), a: -value(meta.s), b: value(meta.t) };
+    var rationalCurves = [{ type: 'rational', k: hyper.k, a: hyper.a, b: hyper.b, color: 'lineA', label: null }];
+    if (meta.line) {
+      rationalCurves.push({ type: 'line', k: value(meta.line.k), b: value(meta.line.b), color: 'lineB', label: null });
+    }
+    return {
+      window: meta.window,
+      grid: { step: 1, show: true },
+      axes: { labelX: 'x', labelY: 'y', origin: '0' },
+      labelRules: 'strict',
+      axisLabels: axisLabels,
+      curves: rationalCurves,
+      points: (meta.points || []).map(function (p) {
+        return { x: p.x, y: p.y, style: 'solid',
+                 color: p.role === 'cross' ? 'cross' : (p.role === 'line' ? 'lineB' : 'lineA'),
+                 label: p.label || null };
+      }),
+      shapes: Rational.asymptotes(hyper, meta.window),
+      alt: meta.line ? 'Графики гиперболы и прямой' : 'График гиперболы'
+    };
+  }
 
   if (meta.family === 'quadratic') {
     var curves = meta.curves || [];
@@ -124,7 +150,7 @@ function render(task, items, options, report) {
       { legLabels: legLabels }));
   });
   if (shapes.length) {
-    scene.shapes = shapes;
+    scene.shapes = (scene.shapes || []).concat(shapes);
     scene.showSlopeTriangle = true;
   }
   return renderer.renderGraph(scene, report);

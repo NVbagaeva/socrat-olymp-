@@ -9,11 +9,7 @@ import { prepSkillsFor, type PrepSkill, type PrepSkillId } from '@/content/prepS
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import SlopeFigure from '@/lib/graph/slope-figure.js';
-import GraphSolution from '@/lib/graph/solution.js';
-import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
-import GraphSolutionRational from '@/lib/graph/solution-rational.js';
-import Quadratic from '@/lib/graph/families/quadratic.js';
-import { renderGraph } from '@/lib/graph/renderer.js';
+import GraphTeacher from '@/lib/graph/solution-teacher.js';
 import { katex } from '@/lib/graph/katex';
 import { sealAnswer, sealChoice, sealText } from '@/lib/prepSecret';
 
@@ -92,7 +88,12 @@ export type PrepBlock =
   | { type: 'details'; title: string; blocks: PrepBlock[] };
 
 export interface PrepStep {
+  /** Порядковый номер шага в разборе: 1…N. */
   number: number;
+  /** Номер пункта, как в решении: «3», у задачи с двумя функциями — «II.3». */
+  label: string;
+  /** Блок задачи с двумя функциями: «II. Находим g(x)». */
+  block: string | null;
   title: string;
   /** Направление прямой: движок ставит его только у первого шага. */
   arrow: 'up' | 'down' | null;
@@ -203,49 +204,6 @@ function typeset(html: string): string {
 
 /* ── Сборка задач навыка ─────────────────────────────────────── */
 
-interface EngineBlock {
-  type: string;
-  html?: string;
-  tex?: string;
-  feature?: boolean;
-  title?: string;
-  scene?: unknown;
-  blocks?: EngineBlock[];
-}
-
-function viewBlock(block: EngineBlock): PrepBlock | null {
-  if (block.type === 'text') {
-    return { type: 'text', html: typeset(block.html ?? '') };
-  }
-  if (block.type === 'answer') {
-    return { type: 'answer', html: typeset(block.html ?? '') };
-  }
-  if (block.type === 'formula') {
-    return {
-      type: 'formula',
-      html: katexHtml(block.tex ?? '', true),
-      feature: block.feature === true,
-    };
-  }
-  if (block.type === 'scene') {
-    return { type: 'chart', svg: renderGraph(block.scene) as string };
-  }
-  if (block.type === 'chart-svg') {
-    return { type: 'chart', svg: block.html ?? '' };
-  }
-  if (block.type === 'callout') {
-    return { type: 'callout', title: block.title ?? '', blocks: viewBlocks(block.blocks ?? []) };
-  }
-  if (block.type === 'details') {
-    return { type: 'details', title: block.title ?? '', blocks: viewBlocks(block.blocks ?? []) };
-  }
-  return null;
-}
-
-function viewBlocks(blocks: EngineBlock[]): PrepBlock[] {
-  return blocks.map(viewBlock).filter((block): block is PrepBlock => block !== null);
-}
-
 /** Запись задачи в данных набора: рядом с условием лежит и правило. */
 interface TaskData {
   id: string;
@@ -253,22 +211,6 @@ interface TaskData {
   pointName?: string;
   /** Задачи о параболе: старший коэффициент дан в условии. */
   knownA?: boolean;
-}
-
-function taskData(taskId: string): TaskData | null {
-  const sets = prep as unknown as { tasks?: TaskData[] }[];
-  for (const set of sets) {
-    const found = (set.tasks ?? []).find((task) => task.id === taskId);
-    if (found !== undefined) {
-      return found;
-    }
-  }
-  return null;
-}
-
-/** Правило ответа задачи: лежит в данных набора, рядом с условием. */
-function answerRule(taskId: string): string | null {
-  return taskData(taskId)?.answerRule ?? null;
 }
 
 /** Опорная точка, отмеченная на чертеже задачи. */
@@ -318,487 +260,143 @@ interface EngineTask {
   };
 }
 
-interface Analysis {
-  triangle: unknown;
-  line: unknown;
-  scene: { window: unknown };
+/* ── Разбор по пунктам ───────────────────────────────────────────
+   Разбор опорной задачи — то же решение по пунктам, что в листе
+   ответов для учителя (graph/solution-teacher.js): «Общий вид»,
+   «Точки с рисунка», «Направление прямой», «Треугольник», «Находим k»,
+   «Находим b», «Формула». Номера пунктов те же, что у шагов подсказки
+   в тренажёре. У задачи с двумя функциями пункты разбиты на блоки
+   I, II, III, и номер шага — «II.3». */
+
+interface TeacherRow {
+  text?: string;
+  tex?: string;
 }
 
-/* Ответ в записи TeX. Числа приходят из движка в школьной записи:
-   запятая как разделитель и типографский минус в некоторых местах. */
-function answerTex(answer: string): string {
-  return answer.replace(/,/g, '{,}').replace(/\u2212/g, '-');
+interface TeacherStep {
+  block: string | null;
+  no: number;
+  title: string;
+  rows: TeacherRow[];
+  /** Треугольник наклона пункта «Треугольник». */
+  slope?: { triangle: unknown; curve: number };
 }
 
-/**
- * Разбор горизонтальной прямой.
- *
- * Треугольника наклона у неё нет, поэтому движок разбора не строит —
- * но задача законная и объясняется проще прочих. Это отдельная ветка
- * ровно на этот случай: обычный разбор она не подменяет, движок
- * не трогает.
- *
- * Число в ответе берётся из данных задачи, а не пишется руками.
- */
-function flatSteps(task: EngineTask): PrepStep[] {
-  const value = answerTex(task.answer);
-
-  return [
-    {
-      number: 1,
-      title: 'Смотрим на прямую',
-      arrow: null,
-      blocks: [
-        {
-          type: 'text',
-          html: 'Прямая горизонтальная: при движении вправо она не поднимается и не опускается.',
-        },
-      ],
-    },
-    {
-      number: 2,
-      title: 'Находим k',
-      arrow: null,
-      blocks: [
-        {
-          type: 'text',
-          html:
-            'Прямая параллельна оси ' + katexHtml('Ox') + ': угол между ней и положительным ' +
-            'направлением оси равен ' + katexHtml('\\alpha = 0^\\circ') + ', треугольник строить не нужно.',
-        },
-        {
-          type: 'formula',
-          html: katexHtml('k = \\operatorname{tg} 0^\\circ = ' + value, true),
-          feature: false,
-        },
-        {
-          type: 'answer',
-          html: 'Ответ: <b class="key">' + katexHtml('k = ' + value) + '</b>.',
-        },
-      ],
-    },
-  ];
-}
-
-/* ── Разбор подстановкой: набор без чертежа ──────────────────────
-   У задач с флагом noChart окна и опорных точек нет, поэтому движок
-   разбора не строит: треугольнику наклона не по чему строиться.
-   Разбор при этом простой и один и тот же — подставить абсциссу
-   точки в формулу и сравнить результат с её ординатой. Это отдельная
-   ветка ровно на такие задачи; движок она не подменяет и не трогает.
-
-   Все числа берутся из данных задачи: k, b и координаты точки
-   приходят в meta той же генерации, что собрала условие.
-   ══════════════════════════════════════════════════════════════════ */
-
-const MINUS = '\u2212';
-
-/** Число в школьной записи: запятая вместо точки, настоящий минус. */
-function schoolNumber(value: number): string {
-  return String(Math.round(value * 1000) / 1000)
-    .replace('.', ',')
-    .replace('-', MINUS);
-}
-
-/** То же число для KaTeX: десятичная запятая набирается как {,}. */
-function texNumber(value: number): string {
-  return String(Math.round(value * 1000) / 1000).replace('.', '{,}');
-}
-
-/** Коэффициент перед x: единица и минус единица не пишутся. */
-function slopeTex(k: number): string {
-  if (Math.abs(k - 1) < 1e-9) {
-    return '';
-  }
-  if (Math.abs(k + 1) < 1e-9) {
-    return '-';
-  }
-  return texNumber(k);
-}
-
-/** Формула функции той же записью, что и в условии задачи. */
-function equationTex(k: number, b: number): string {
-  const slope = slopeTex(k) + 'x';
-  if (Math.abs(b) < 1e-9) {
-    return 'y = ' + slope;
-  }
-  return 'y = ' + slope + (b > 0 ? ' + ' : ' - ') + texNumber(Math.abs(b));
-}
-
-/** Свободный член в выкладке: знак и число, у нуля — пусто. */
-function tailTex(b: number): string {
-  if (Math.abs(b) < 1e-9) {
-    return '';
-  }
-  return (b > 0 ? ' + ' : ' - ') + texNumber(Math.abs(b));
-}
-
-/**
- * Окно чертежа проверки.
- *
- * Готового окна у задачи нет — его и не считали, раз чертежа в
- * условии не будет. Здесь оно подбирается под то, что нужно увидеть:
- * начало координат, точку пересечения с осью Oy и саму проверяемую
- * точку, с запасом в две клетки. Пропорции держим не круче трёх к
- * двум — иначе чертёж вытягивается в полосу.
- */
-function checkWindow(b: number, probe: EngineProbe) {
-  const pad = 2;
-  let xmax = Math.max(3, Math.ceil(Math.abs(probe.x)) + pad);
-  let ymin = Math.floor(Math.min(0, probe.y, b)) - pad;
-  let ymax = Math.ceil(Math.max(0, probe.y, b)) + pad;
-
-  const height = () => ymax - ymin;
-  if (height() > 2 * xmax * 1.5) {
-    xmax = Math.ceil(height() / 3);
-  }
-  if (2 * xmax > height() * 1.5) {
-    const add = Math.ceil(((2 * xmax) / 1.5 - height()) / 2);
-    ymin -= add;
-    ymax += add;
-  }
-
-  return { xmin: -xmax, xmax, ymin, ymax };
-}
-
-/** Засечки оси: через шаг сетки, у нуля своя подпись. */
-function checkMarks(lo: number, hi: number, step: number) {
-  const marks: { at: number; label: string }[] = [];
-  for (let at = Math.ceil(lo / step) * step; at <= hi; at += step) {
-    if (at !== 0) {
-      marks.push({ at, label: schoolNumber(at) });
-    }
-  }
-  return marks;
-}
-
-/** Чертёж проверки: та же прямая движка и отмеченная на ней точка. */
-function checkChart(task: EngineTask, probe: EngineProbe): PrepBlock {
-  const { k, b } = task.meta;
-  const win = checkWindow(b, probe);
-  const span = Math.max(win.xmax - win.xmin, win.ymax - win.ymin);
-  /* Клеток поперёк чертежа не больше шестнадцати: дальше сетка
-     сливается в серое поле. */
-  const step = span <= 16 ? 1 : Math.ceil(span / 16);
-  const name = taskData(task.id)?.pointName ?? 'A';
-
-  const scene = {
-    window: win,
-    grid: { step, show: true },
-    axes: {
-      labelX: 'x',
-      labelY: 'y',
-      origin: '0',
-      ticks: {
-        x: checkMarks(win.xmin, win.xmax, step),
-        y: checkMarks(win.ymin, win.ymax, step),
-      },
-    },
-    axisLabels: 'full',
-    curves: [{ type: 'line', k, b, color: 'lineA', label: 'y = f(x)' }],
-    points: [
-      {
-        x: probe.x,
-        y: probe.y,
-        style: 'solid',
-        color: 'lineB',
-        label: name + '(' + schoolNumber(probe.x) + '; ' + schoolNumber(probe.y) + ')',
-      },
-    ],
-    alt: 'Проверка построением: прямая и отмеченная точка',
-  };
-
-  return { type: 'chart', svg: renderGraph(scene) as string };
-}
-
-/**
- * Четыре шага подстановки и чертёж под ними.
- *
- * Чертёж стоит последним блоком последнего шага: он иллюстрирует
- * уже полученный ответ, и увидеть его раньше вычислений нельзя.
- */
-function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
-  const { k, b } = task.meta;
-  const name = taskData(task.id)?.pointName ?? 'A';
-
-  const product = k * probe.x;
-  const value = product + b;
-  const same = Math.abs(value - probe.y) < 1e-9;
-  const tail = tailTex(b);
-  /* Отрицательная абсцисса подставляется в скобках: иначе два знака
-     подряд читаются как вычитание. */
-  const factor = probe.x < 0 ? '(' + texNumber(probe.x) + ')' : texNumber(probe.x);
-  const pointTex = name + '(' + texNumber(probe.x) + ';\\, ' + texNumber(probe.y) + ')';
-  const answer = task.options?.find((option) => option.number === task.answer)?.html ?? task.answer;
-
-  return [
-    {
-      number: 1,
-      title: 'Подставляем координату x точки в формулу',
-      arrow: null,
-      blocks: [
-        {
-          type: 'text',
-          html:
-            'Функция задана формулой ' +
-            katexHtml(equationTex(k, b)) +
-            ', а у точки ' +
-            katexHtml(pointTex) +
-            ' абсцисса ' +
-            katexHtml('x = ' + texNumber(probe.x)) +
-            '.',
-        },
-        {
-          type: 'text',
-          html: 'Подставим ' + katexHtml('x = ' + texNumber(probe.x)) + ' в формулу:',
-        },
-        {
-          type: 'formula',
-          html: katexHtml('y = ' + texNumber(k) + ' \\cdot ' + factor + tail, true),
-          feature: false,
-        },
-      ],
-    },
-    {
-      number: 2,
-      title: 'Вычисляем значение функции',
-      arrow: null,
-      blocks: [
-        { type: 'text', html: 'Сначала умножаем, потом прибавляем свободный член.' },
-        {
-          type: 'formula',
-          html: katexHtml('y = ' + texNumber(product) + tail, true),
-          feature: false,
-        },
-        { type: 'formula', html: katexHtml('y = ' + texNumber(value), true), feature: false },
-        {
-          type: 'text',
-          html:
-            'При ' +
-            katexHtml('x = ' + texNumber(probe.x)) +
-            ' функция принимает значение <b class="key">' +
-            schoolNumber(value) +
-            '</b>.',
-        },
-      ],
-    },
-    {
-      number: 3,
-      title: 'Сравниваем с координатой y точки',
-      arrow: null,
-      blocks: [
-        {
-          type: 'text',
-          html:
-            'Координата ' +
-            katexHtml('y') +
-            ' точки ' +
-            katexHtml(name) +
-            ' равна <b class="key">' +
-            schoolNumber(probe.y) +
-            '</b>.',
-        },
-        {
-          type: 'text',
-          html: same
-            ? 'Мы вычислили ' + katexHtml('y = ' + texNumber(value)) + ' — значения совпали.'
-            : 'Мы вычислили ' +
-              katexHtml('y = ' + texNumber(value)) +
-              ', а у точки ' +
-              katexHtml('y = ' + texNumber(probe.y)) +
-              ' — значения разные.',
-        },
-      ],
-    },
-    {
-      number: 4,
-      title: 'Делаем вывод',
-      arrow: null,
-      blocks: [
-        {
-          type: 'text',
-          html: same
-            ? 'Значения совпали, значит точка принадлежит графику.'
-            : 'Значения разные, значит точка не принадлежит графику.',
-        },
-        { type: 'answer', html: 'Ответ: <b class="key">' + answer + '</b>.' },
-        checkChart(task, probe),
-        { type: 'text', html: 'Проверим построением.' },
-      ],
-    },
-  ];
-}
-
-/**
- * Разбор задачи по шагам.
- *
- * Шаги и числа считает движок: заголовки, выкладки и ответ приходят
- * из него, а экран только расставляет их по разметке. Для прямой без
- * наклона треугольник не строится, и разбора у такой задачи нет —
- * это честное null, а не выдуманные шаги.
- */
-/* Вторая кривая сцены в том виде, в каком её ждёт разбор параболы. */
-/** Что разбору параболы нужно от задачи движка — и ничего сверх. */
-export interface QuadraticSource {
+/** Что разбору нужно от задачи движка — и ничего сверх. */
+export interface SolutionSource {
   id: string;
   answer: string;
-  meta: {
-    /* Точные дроби коэффициентов: разбор считает по ним, а не по
-       округлённым числам. */
-    aFraction?: unknown;
-    bFraction?: unknown;
-    cFraction?: unknown;
-    window?: unknown;
-    points?: unknown;
-    query?: unknown;
-    intersection?: unknown;
-    curves?: {
-      kind: string;
-      kFraction?: unknown;
-      bFraction?: unknown;
-      aFraction?: unknown;
-      cFraction?: unknown;
-    }[] | null;
-  };
+  options?: { number: string; html: string }[] | null;
+  meta: unknown;
 }
 
-function secondCurve(task: QuadraticSource): unknown {
-  const curve = task.meta.curves?.[1];
-  if (curve === undefined) {
-    return null;
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Строка с формулами между знаками $…$ — разметкой KaTeX. */
+function inlineHtml(text: string): string {
+  return text
+    .split('$')
+    .map((piece, i) => (i % 2 ? katexHtml(piece) : escapeHtml(piece)))
+    .join('');
+}
+
+/** Правило ответа: лежит в данных набора — опорного или прототипа. */
+function ruleOf(task: SolutionSource): string | null {
+  const sets = [...(prep as unknown as GraphSet[]), ...(prototypes as unknown as GraphSet[])];
+  for (const set of sets) {
+    const found = (set.tasks as TaskData[]).find((item) => item.id === task.id);
+    if (found !== undefined) {
+      return found.answerRule;
+    }
   }
-  if (curve.kind === 'line') {
-    return { kind: 'line', line: { k: curve.kFraction, b: curve.bFraction } };
-  }
-  return {
-    kind: 'quadratic',
-    curve: Quadratic.exact(curve.aFraction, curve.bFraction, curve.cFraction),
-  };
+  return (task.meta as { rule?: string }).rule ?? null;
+}
+
+/** Номер блока «II. Находим g(x)» → «II». */
+function blockNumber(block: string | null): string | null {
+  return block === null ? null : (block.split('.')[0] ?? null);
+}
+
+/** Ответ разбора: у задач с выбором — номер и текст варианта. */
+function answerHtml(task: SolutionSource): string {
+  const picked = (task.options ?? []).find((option) => option.number === task.answer);
+  const value = picked === undefined ? escapeHtml(task.answer) : task.answer + ') ' + typeset(picked.html);
+  return 'Ответ: <b class="key">' + value + '</b>';
 }
 
 /**
- * Разбор задачи о параболе: свой модуль, своя схема шагов. Числа
- * берутся из точных дробей meta, а не из округлённых значений.
- *
- * Принимает задачу движка по тем полям, которые разбору и нужны:
- * тренажёр зовёт эту же функцию, а его взгляд на задачу движка чуть
- * другой — там нет полей, которые нужны только экрану подготовки.
+ * Разбор задачи по пунктам. null — движок решения не строит:
+ * придумывать шаги вместо него нельзя.
  */
-export function quadraticSteps(task: QuadraticSource): PrepStep[] {
-  const data = taskData(task.id);
-  const steps = GraphSolutionQuadratic.build({
-    curve: Quadratic.exact(task.meta.aFraction, task.meta.bFraction, task.meta.cFraction),
-    window: task.meta.window,
-    points: task.meta.points,
-    second: secondCurve(task),
-    task: {
-      rule: data?.answerRule,
-      answer: task.answer,
-      knownA: data?.knownA === true,
-      query: task.meta.query,
-      intersection: task.meta.intersection,
-    },
-  }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
-
-  return steps.map((step) => ({
-    number: step.number,
-    title: step.title,
-    arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
-    blocks: viewBlocks(step.blocks.map((block) => slopeChart(task, block))),
-  }));
-}
-
-/* Блок slope из разбора — чертёж условия с треугольником наклона:
-   в разборе он нужен, на чертеже условия его нет (graph/slope-figure.js). */
-function slopeChart(task: QuadraticSource, block: EngineBlock): EngineBlock {
-  if (block.type !== 'slope') {
-    return block;
+export function solutionSteps(task: SolutionSource): PrepStep[] | null {
+  const rule = ruleOf(task);
+  if (rule === null) {
+    return null;
   }
-  const slope = block as EngineBlock & { triangle?: unknown; curve?: number };
-  let svg: string | null = null;
+  let steps: TeacherStep[];
   try {
-    svg = SlopeFigure.render(task, [{ triangle: slope.triangle, curve: slope.curve ?? 0 }]) as string | null;
+    steps = (GraphTeacher.build({ ...task, answerRule: rule }) as { steps: TeacherStep[] }).steps;
   } catch {
-    svg = null;
+    return null;
   }
-  return svg === null ? { type: 'skip' } : { type: 'chart-svg', html: svg };
+  if (steps.length === 0) {
+    return null;
+  }
+  return steps.map((step, i) => {
+    const blocks: PrepBlock[] = [];
+    /* Пункт «Треугольник» начинается с чертежа условия, на котором
+       треугольник построен: на чертеже ученика его нет. */
+    if (step.slope !== undefined) {
+      let svg: string | null = null;
+      try {
+        svg = SlopeFigure.render(task, [{ triangle: step.slope.triangle, curve: step.slope.curve }]) as
+          | string
+          | null;
+      } catch {
+        svg = null;
+      }
+      if (svg !== null) {
+        blocks.push({ type: 'chart', svg });
+      }
+    }
+    step.rows.forEach((row) => {
+      if (row.text) {
+        blocks.push({ type: 'text', html: inlineHtml(row.text) });
+      }
+      if (row.tex) {
+        blocks.push({ type: 'formula', html: katexHtml(row.tex, true), feature: false });
+      }
+    });
+    if (i === steps.length - 1) {
+      blocks.push({ type: 'answer', html: answerHtml(task) });
+    }
+    const text = step.rows.map((row) => row.text ?? '').join(' ');
+    const arrow =
+      step.title === 'Направление прямой'
+        ? /возрастает/.test(text)
+          ? 'up'
+          : /убывает/.test(text)
+            ? 'down'
+            : null
+        : null;
+    const roman = blockNumber(step.block ?? null);
+    return {
+      number: i + 1,
+      label: roman === null ? String(step.no) : roman + '.' + step.no,
+      block: step.block ?? null,
+      title: step.title,
+      arrow,
+      blocks,
+    };
+  });
 }
 
 /** Разбор опорной задачи по шагам — тот, что лежит в странице
     зашифрованным. Открыт для проверок (scripts/check-slope-visibility.mjs). */
 export function prepSolutionSteps(task: EngineTask): PrepStep[] | null {
-  return buildSteps(task);
-}
-
-/**
- * Разбор задачи о гиперболе: модуль solution-rational.js строит его
- * прямо по meta задачи — там лежат точные дроби кривой, отмеченные
- * точки, запрос и, у задач с прямой, её коэффициенты и точка B.
- */
-export function rationalSteps(task: { answer: string; meta: unknown }): PrepStep[] {
-  const steps = GraphSolutionRational.fromTask(task) as {
-    number: number;
-    title: string;
-    blocks: EngineBlock[];
-  }[];
-  return steps.map((step) => ({
-    number: step.number,
-    title: step.title,
-    arrow: null,
-    blocks: viewBlocks(step.blocks),
-  }));
-}
-
-function buildSteps(task: EngineTask): PrepStep[] | null {
-  if (task.meta.family === 'quadratic') {
-    return quadraticSteps(task);
-  }
-  if (task.meta.family === 'rational') {
-    return rationalSteps(task);
-  }
-
-  const found = GraphGenerate.analysis(task.id) as Analysis | null;
-  if (!found) {
-    /* Два случая без треугольника, которые мы умеем объяснить сами:
-       горизонтальная прямая и задача без чертежа, где всё решает
-       подстановка. Любая другая причина — по-прежнему null,
-       и экран честно скажет, что разбора нет. */
-    if (task.meta.k === 0) {
-      return flatSteps(task);
-    }
-    const probe = task.meta.probe;
-    if (task.svg === null && probe !== null && answerRule(task.id) === 'point-choice') {
-      return substitutionSteps(task, probe);
-    }
-    return null;
-  }
-
-  const steps = GraphSolution.build({
-    triangle: found.triangle,
-    line: found.line,
-    window: found.scene.window,
-    points: task.meta.points,
-    task: {
-      rule: answerRule(task.id),
-      answer: task.answer,
-      query: task.meta.query,
-      probe: task.meta.probe,
-    },
-  }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
-
-  /* Шаг «Находим k» начинается с чертежа треугольника наклона: сцена
-     разбора просит его явно (showSlopeTriangle), на чертеже условия
-     треугольника нет. */
-  const triangleChart: PrepBlock = { type: 'chart', svg: renderGraph(found.scene) as string };
-  return steps.map((step) => ({
-    number: step.number,
-    title: step.title,
-    arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
-    blocks:
-      step.title === 'Находим k'
-        ? [triangleChart, ...viewBlocks(step.blocks)]
-        : viewBlocks(step.blocks),
-  }));
+  return solutionSteps(task);
 }
 
 /**
@@ -816,7 +414,7 @@ export function buildPrepTasks(skill: PrepSkill): PrepTask[] {
        единственной записи. */
     const seal = choice ? sealChoice(task.answer, task.id) : sealAnswer(task.answer, task.id);
     const zakryto: PrepZakrytoe = {
-      steps: buildSteps(task),
+      steps: solutionSteps(task),
       oshibki: Object.fromEntries(
         (task.options ?? []).flatMap((option) =>
           option.error === null ? [] : [[option.number, option.error]],

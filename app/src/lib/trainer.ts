@@ -16,7 +16,7 @@ import SlopeFigure from '@/lib/graph/slope-figure.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import { solutionSteps, type PrepStep } from '@/lib/prep';
 import { methodFor } from '@/lib/trainerMethod';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
@@ -104,6 +104,31 @@ export interface TrainerStep {
    * треугольник», а на исходном чертеже задачи его нет.
    */
   chartSvg?: string | null;
+  /**
+   * Номер пункта решения, к которому относится шаг: «3», у задачи
+   * с двумя функциями — «II.3». Тот же, что в разборе и в листе
+   * учителя (graph/solution-teacher.js).
+   */
+  label?: string;
+  /** Заголовок пункта решения: «Направление прямой». */
+  stepTitle?: string;
+  /** Блок решения задачи с двумя функциями: «II. Находим g(x)». */
+  block?: string | null;
+  /** Чей это пункт решения — служебное, снимается при нумерации. */
+  key?: StepKey;
+}
+
+/** Часть решения: f, g, точки пересечения; null — функция одна. */
+type Part = 'F' | 'G' | 'X' | null;
+
+/** Пункт решения, к которому относится шаг подсказки. '$last' — последний пункт блока. */
+interface StepKey {
+  title: string;
+  part: Part;
+}
+
+function tag(step: TrainerStep, title: string, part: Part): TrainerStep {
+  return { ...step, key: { title, part } };
 }
 
 interface EngineQuery {
@@ -119,6 +144,8 @@ interface EngineCross {
 interface EnginePoint {
   x: number;
   y: number;
+  /** Имя точки из условия: «A». */
+  label?: string | null;
 }
 
 interface EngineWindow {
@@ -404,8 +431,15 @@ const RISING = 'возрастает';
 const FALLING = 'убывает';
 const FLAT = 'параллельна оси Ox';
 
-function pointMath(p: EnginePoint): string {
-  return '$(' + tex(p.x) + ';\\, ' + tex(p.y) + ')$';
+function pointMath(p: EnginePoint, name = ''): string {
+  return '$' + name + '(' + tex(p.x) + ';\\, ' + tex(p.y) + ')$';
+}
+
+/** Имена точек — как в решении: из условия (A), иначе M и N слева направо. */
+function pointNames(left: EnginePoint, right: EnginePoint): [string, string] {
+  const label = (p: EnginePoint): string | undefined => p.label ?? undefined;
+  const free = ['M', 'N'].filter((n) => n !== label(left) && n !== label(right));
+  return [label(left) ?? free.shift() ?? 'M', label(right) ?? free.shift() ?? 'N'];
 }
 
 /**
@@ -441,16 +475,18 @@ function slopeSteps(
   name: string,
   curveIndex: number,
   drawn: SlopeItem[],
+  part: Part = null,
+  letter = 'k',
 ): TrainerStep[] {
   const which = name === '' ? 'Прямая' : 'Прямая $' + curve(name) + '$';
   const pair = (points ?? []).filter((p) => whole(p.x) && whole(p.y));
   const first = pair[0];
   const second = pair[1];
   if (first === undefined || second === undefined || first.x === second.x) {
-    return [stepKOnly(k)];
+    return [tag(stepKOnly(k, letter), 'Находим ' + letter, part)];
   }
   const t = Slope.build(first, second) as SlopeTriangle;
-  const direction: TrainerStep = {
+  const direction: TrainerStep = tag({
     titleHtml: hintHtml(which + ' возрастает или убывает?'),
     textHtml: hintHtml(
       'Посмотри на прямую слева направо. Поднимается — $k = \\operatorname{tg} \\alpha > 0$, ' +
@@ -466,20 +502,22 @@ function slopeSteps(
       },
     ],
     wrongHint: hintHtml('Смотри слева направо: куда идёт прямая — вверх или вниз?'),
-  };
+  }, 'Направление прямой', part);
+  const kTitle = 'Находим ' + letter;
   if (t.flat || t.C === null) {
     return [
       direction,
-      {
-        titleHtml: hintHtml('Найди $k$.'),
-        textHtml: hintHtml('Прямая параллельна оси $Ox$: $\\alpha = 0^\\circ$, $k = \\operatorname{tg} 0^\\circ$.'),
+      tag({
+        titleHtml: hintHtml('Найди $' + letter + '$.'),
+        textHtml: hintHtml('Прямая параллельна оси $Ox$: $\\alpha = 0^\\circ$, $' + letter + ' = \\operatorname{tg} 0^\\circ$.'),
         shape: 'plain',
-        fields: [{ labelHtml: math('k ='), answer: plain(k) }],
+        fields: [{ labelHtml: math(letter + ' ='), answer: plain(k) }],
         wrongHint: hintHtml('Чему равен тангенс нулевого угла?'),
-      },
+      }, kTitle, part),
     ];
   }
   const vertex = t.C;
+  const names = pointNames(t.A, t.B);
   const item: SlopeItem = { triangle: t, curve: curveIndex };
   /* На шаге «Построй треугольник» он появляется на чертеже без длин
      катетов — их ученик считает на следующем шаге; после него длины
@@ -492,44 +530,38 @@ function slopeSteps(
   const exactK = (t.rising ? '' : '-') + t.dy + '/' + t.dx;
   return [
     direction,
-    {
+    tag({
       titleHtml: hintHtml('Построй треугольник под прямой по двум отмеченным точкам.'),
       chartSvg: bare,
       textHtml: hintHtml(
-        'Гипотенуза — отрезок между точками ' + pointMath(t.A) + ' и ' + pointMath(t.B) +
-          '. Катеты идут по линиям сетки, вершина прямого угла лежит ниже прямой. ' +
-          'Найди её координаты.',
+        'Гипотенуза — отрезок $' + names[0] + names[1] + '$ между точками ' + pointMath(t.A, names[0]) + ' и ' +
+          pointMath(t.B, names[1]) +
+          '. Катеты идут по линиям сетки, вершина прямого угла $C$ лежит ниже прямой. ' +
+          'Найди её координаты и посчитай катеты в клетках.',
       ),
       shape: 'plain',
       fields: [
-        { labelHtml: math('x ='), answer: plain(vertex.x) },
-        { labelHtml: math('y ='), answer: plain(vertex.y) },
+        { labelHtml: math('x_C ='), answer: plain(vertex.x) },
+        { labelHtml: math('y_C ='), answer: plain(vertex.y) },
+        { labelHtml: 'вертикальный катет', answer: plain(t.dy) },
+        { labelHtml: 'горизонтальный катет', answer: plain(t.dx) },
       ],
       wrongHint: hintHtml(
         'Вершина прямого угла — под прямой: у неё абсцисса одной отмеченной точки ' +
-          'и ордината другой, та, что меньше.',
+          'и ордината другой, та, что меньше. Катеты — сколько клеток от вершины $C$ ' +
+          'по вертикали и по горизонтали.',
       ),
-    },
-    {
-      titleHtml: hintHtml('Посчитай катеты в клетках.'),
-      textHtml: hintHtml('Длины катетов — положительные числа: сколько клеток по вертикали и по горизонтали.'),
-      shape: 'plain',
-      fields: [
-        { labelHtml: 'вертикальный', answer: plain(t.dy) },
-        { labelHtml: 'горизонтальный', answer: plain(t.dx) },
-      ],
-      wrongHint: hintHtml('Пересчитай клетки вдоль каждого катета от вершины прямого угла.'),
-    },
-    t.rising
+    }, 'Треугольник', part),
+    tag(t.rising
       ? {
-          titleHtml: hintHtml('Найди $k = \\operatorname{tg} \\alpha$.'),
+          titleHtml: hintHtml('Найди $' + letter + ' = \\operatorname{tg} \\alpha$.'),
           chartSvg: full,
           textHtml: hintHtml(
             'Угол $\\alpha$ острый и лежит в треугольнике: $\\operatorname{tg} \\alpha$ — ' +
               'вертикальный катет, делённый на горизонтальный.',
           ),
           shape: 'plain',
-          fields: [{ labelHtml: math('k ='), answer: exactK }],
+          fields: [{ labelHtml: math(letter + ' ='), answer: exactK }],
           wrongHint: hintHtml('Раздели вертикальный катет на горизонтальный.'),
         }
       : {
@@ -538,25 +570,25 @@ function slopeSteps(
           textHtml: hintHtml(
             'Острый угол треугольника смежный с $\\alpha$ и равен $180^\\circ - \\alpha$: ' +
               '$\\operatorname{tg}(180^\\circ - \\alpha)$ — вертикальный катет, делённый на горизонтальный. ' +
-              'А $k = \\operatorname{tg} \\alpha = -\\operatorname{tg}(180^\\circ - \\alpha)$.',
+              'А $' + letter + ' = \\operatorname{tg} \\alpha = -\\operatorname{tg}(180^\\circ - \\alpha)$.',
           ),
           shape: 'plain',
-          fields: [{ labelHtml: math('k ='), answer: exactK }],
-          wrongHint: hintHtml('Прямая убывает — $k$ отрицательный. Проверь деление катетов и знак.'),
-        },
+          fields: [{ labelHtml: math(letter + ' ='), answer: exactK }],
+          wrongHint: hintHtml('Прямая убывает — $' + letter + '$ отрицательный. Проверь деление катетов и знак.'),
+        }, kTitle, part),
   ];
 }
 
 /* Запасной шаг на случай, когда двух отмеченных точек нет. */
-function stepKOnly(k: number): TrainerStep {
+function stepKOnly(k: number, letter = 'k'): TrainerStep {
   return {
-    titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $k$.'),
+    titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $' + letter + '$.'),
     textHtml: hintHtml(
       'Построй под прямой прямоугольный треугольник по двум точкам в узлах сетки. ' +
         '$k = \\operatorname{tg} \\alpha$: вертикальный катет на горизонтальный, у убывающей прямой — со знаком минус.',
     ),
     shape: 'plain',
-    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
+    fields: [{ labelHtml: math(letter + ' ='), answer: plain(k) }],
     wrongHint: hintHtml('Проверь катеты и знак: прямая возрастает или убывает?'),
   };
 }
@@ -851,17 +883,17 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
   }
   const drawn: SlopeItem[] = [];
   const steps = [
-    ...slopeSteps(task, first.k, first.points, 'f', 0, drawn),
-    stepPairB(task, 'f', first),
-    ...slopeSteps(task, second.k, second.points, 'g', 1, drawn),
-    stepPairB(task, 'g', second),
-    stepPairEquation(first, second),
-    stepCrossX(intersection.x),
+    ...slopeSteps(task, first.k, first.points, 'f', 0, drawn, 'F'),
+    tag(stepPairB(task, 'f', first), 'Находим b', 'F'),
+    ...slopeSteps(task, second.k, second.points, 'g', 1, drawn, 'G'),
+    tag(stepPairB(task, 'g', second), 'Находим b', 'G'),
+    tag(stepPairEquation(first, second), 'Приравниваем', 'X'),
+    tag(stepCrossX(intersection.x), 'Решаем уравнение', 'X'),
   ];
   /* Набор 12.D спрашивает ординату: одного x мало, нужно подставить
      его обратно в уравнение. */
   if (set === '12.D') {
-    steps.push(stepCrossY(intersection.y));
+    steps.push(tag(stepCrossY(intersection.y), 'Ордината', 'X'));
   }
   return steps;
 }
@@ -875,7 +907,12 @@ function stepsFor(task: EngineTask): TrainerStep[] {
   const last = stepAnswer(task);
   return last === null
     ? []
-    : [...slopeSteps(task, k, task.meta.points, '', 0, []), stepB(task, b), stepEquation(k, b), last];
+    : [
+        ...slopeSteps(task, k, task.meta.points, '', 0, []),
+        tag(stepB(task, b), 'Находим b', null),
+        tag(stepEquation(k, b), 'Формула', null),
+        tag(last, '$last', null),
+      ];
 }
 
 /* ── Цепочка для гиперболы ───────────────────────────────────────
@@ -922,8 +959,15 @@ function field(label: string, value: number): TrainerField {
   return { labelHtml: math(label), answer: plain(value) };
 }
 
-function rationalStep(title: string, text: string, fields: TrainerField[], wrong: string): TrainerStep {
+function rationalStep(
+  title: string,
+  text: string,
+  fields: TrainerField[],
+  wrong: string,
+  key?: StepKey,
+): TrainerStep {
   return {
+    ...(key === undefined ? {} : { key }),
     titleHtml: hintHtml(title),
     textHtml: hintHtml(text),
     shape: 'plain',
@@ -937,6 +981,9 @@ function signedTex(v: number): string {
   if (Math.abs(v) < 1e-9) { return ''; }
   return (v > 0 ? ' + ' : ' - ') + tex(Math.abs(v));
 }
+
+const SHIFTS: StepKey = { title: 'Сдвиги', part: null };
+const LAST: StepKey = { title: '$last', part: null };
 
 function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
   const { form, rule } = meta;
@@ -957,6 +1004,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
       [field('a =', co.a ?? 0)],
       'Асимптота $x = 3$ значит знаменатель $x - 3$, то есть $a = -3$. Знак $a$ противоположен ' +
         'координате асимптоты.',
+      SHIFTS,
     ));
   }
   if (form === 'linear') {
@@ -966,6 +1014,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         'то есть $x = -b$. Чему равно $b$ функции $f$?',
       [field('b =', co.b ?? 0)],
       'Знак $b$ противоположен координате вертикальной асимптоты: $x = -b$.',
+      SHIFTS,
     ));
   }
 
@@ -979,6 +1028,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         '$ поднимает или опускает весь график. Чему равно $' + name + '$ функции $f$?',
       [field(name + ' =', form === 'shift-y' ? co.a ?? 0 : co.b ?? 0)],
       'Посмотри, на какой высоте проходит горизонтальный пунктир: это и есть сдвиг, знак тот же.',
+      SHIFTS,
     ));
   }
   if (form === 'linear') {
@@ -988,6 +1038,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         '$y = k$. Чему равно $k$?',
       [field('k =', co.k ?? 0)],
       '$k$ — высота горизонтальной асимптоты, знак тот же.',
+      SHIFTS,
     ));
   }
 
@@ -999,6 +1050,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         '$a = y_0(x_0 + b) - k x_0$.',
       [field('a =', co.a ?? 0)],
       'Подставь именно координаты отмеченной точки и проверь знаки при раскрытии скобок.',
+      { title: 'Находим a', part: null },
     ));
   } else {
     const formula = form === 'basic' ? 'k = x \\cdot y'
@@ -1011,6 +1063,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         (form === 'basic' ? '.' : ' (сдвиги ты уже нашёл(ла)).'),
       [field('k =', co.k ?? 0)],
       'Проверь, ту ли точку взял(а) — она должна быть отмечена на графике, — и знаки в скобках.',
+      { title: 'Находим k', part: null },
     ));
   }
 
@@ -1022,7 +1075,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
   }
   if (rule === 'coef-sum') {
     steps.push(rationalStep('Сложи найденные коэффициенты.', '$k + a + b$.',
-      [field('k + a + b =', val(meta.answer))], 'Проверь знаки слагаемых.'));
+      [field('k + a + b =', val(meta.answer))], 'Проверь знаки слагаемых.', LAST));
     return steps;
   }
   const q = meta.query;
@@ -1033,6 +1086,7 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         rtex(meta.t) + ' + \\dfrac{' + rtex(meta.m) + '}{x' + signedTex(-s) + '}$.',
       [field('f(' + rtex(q.x0) + ') =', val(meta.answer))],
       'Сначала посчитай знаменатель, потом дробь, потом прибавь сдвиг.',
+      LAST,
     ));
   }
   if (q !== null && q.type === 'argument-for' && q.y0 !== null) {
@@ -1042,12 +1096,13 @@ function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
         signedTex(-t) + '$, затем найди знаменатель и $x$.',
       [field('x =', val(meta.answer))],
       'Проверь, что вычел(ла) сдвиг до того, как перевернуть дробь.',
+      LAST,
     ));
   }
   return steps;
 }
 
-function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
+function rationalLineSteps(task: EngineTask, meta: RationalMeta): TrainerStep[] {
   const cross = meta.intersection;
   const line = meta.line;
   if (cross === null || line === null) { return []; }
@@ -1068,21 +1123,19 @@ function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
         'значит $k = x_A \\cdot y_A$.',
       [field('k =', k)],
       'Перемножь координаты точки $A$, следи за знаками.',
+      { title: 'Находим k', part: 'F' },
     ));
   }
-  steps.push(rationalStep(
-    'Проверим угловой коэффициент прямой $g(x)$.',
-    '$a$ и $b$ — коэффициенты прямой $g(x) = ax + b$. Она проходит через $A(' + tex(A.x) + '; ' +
-      tex(A.y) + ')$ и $(' + tex(P.x) + '; ' + tex(P.y) + ')$: $a = \\dfrac{\\Delta y}{\\Delta x}$.',
-    [field('a =', a)],
-    'Считай $\\Delta y$ и $\\Delta x$ от одной и той же точки к другой, в одном порядке.',
-  ));
+  /* Угловой коэффициент прямой — как везде: a = tg α через треугольник
+     под прямой по точкам A и второй отмеченной. */
+  steps.push(...slopeSteps(task, a, [{ ...A, label: 'A' }, P], 'g', 1, [], 'G', 'a'));
   if (meta.rule === 'line-a') { return steps; }
   steps.push(rationalStep(
     'Теперь свободный член прямой $g(x)$.',
     'Подставь точку $A$: $b = y_A - a \\cdot x_A$.',
     [field('b =', b)],
     'Проверь знак произведения $a \\cdot x_A$.',
+    { title: 'Находим b', part: 'G' },
   ));
   if (meta.rule === 'line-b') { return steps; }
   steps.push(rationalStep(
@@ -1091,6 +1144,7 @@ function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
       'Запиши коэффициенты этого уравнения.',
     [field('\\text{при } x^2:', a), field('\\text{при } x:', b), field('\\text{свободный член:}', -k)],
     'Свободный член — это $-k$: при переносе $k$ меняет знак.',
+    { title: 'Уравнение в стандартном виде', part: 'X' },
   ));
   steps.push(rationalStep(
     'Найди корни и выбери нужный.',
@@ -1098,6 +1152,7 @@ function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
       '$x_A \\cdot x_B = \\dfrac{-k}{a}$. Нужен корень, который не равен абсциссе $A$.',
     [field('x_B =', xB)],
     'Не бери абсциссу точки $A$ — она на рисунке. Точке $B$ соответствует другой корень.',
+    { title: 'Выбор корня', part: 'X' },
   ));
   if (cross.axis === 'y') {
     steps.push(rationalStep(
@@ -1105,6 +1160,7 @@ function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
       'Подставь $x_B$ в формулу гиперболы: $y_B = \\dfrac{k}{x_B}$. Проверь себя по прямой.',
       [field('y_B =', yB)],
       'Подставляй найденный $x_B$, а не абсциссу $A$.',
+      { title: 'Ордината', part: 'X' },
     ));
   }
   return steps;
@@ -1112,7 +1168,7 @@ function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
 
 function rationalSteps(task: EngineTask): TrainerStep[] {
   const meta = task.meta as unknown as RationalMeta;
-  return meta.form === 'line' ? rationalLineSteps(meta) : rationalSingleSteps(meta);
+  return meta.form === 'line' ? rationalLineSteps(task, meta) : rationalSingleSteps(meta);
 }
 
 /** Что проверить при неверном ответе: начало цепочки, без значения. */
@@ -1149,6 +1205,84 @@ function rationalRightHint(task: EngineTask): string {
   return hintHtml('По чертежу $' + (meta.equation ?? '') + '$, дальше вычисление.');
 }
 
+/* ── Номера шагов — по пунктам решения ───────────────────────────
+   Шаг подсказки знает, к какому пункту решения он относится
+   (StepKey): по нему он получает тот же номер, что в разборе и
+   в листе учителя, — «3», у задачи с двумя функциями «II.3». Пункты,
+   которые идут в блоке раньше первого шага с полями («Общий вид»,
+   «Точки с рисунка»), встают в цепочку шагами без полей: ученик
+   читает их и жмёт «Дальше». Пункты между шагами с полями не
+   вставляются — они выдали бы ответ следующего шага. */
+
+const ROMAN: Record<'F' | 'G' | 'X', string> = { F: 'I', G: 'II', X: 'III' };
+
+function infoStep(item: PrepStep): TrainerStep {
+  return {
+    titleHtml: '',
+    textHtml: item.blocks
+      .map((block) =>
+        block.type === 'text' || block.type === 'formula'
+          ? '<span class="tstep__line">' + block.html + '</span>'
+          : '',
+      )
+      .join(''),
+    shape: 'plain',
+    fields: [],
+    wrongHint: '',
+    label: item.label,
+    stepTitle: item.title,
+    block: item.block,
+  };
+}
+
+function numbered(chain: TrainerStep[], solution: PrepStep[] | null): TrainerStep[] {
+  const bare = chain.map(({ key: _key, ...step }) => step);
+  if (solution === null || chain.length === 0) {
+    return bare;
+  }
+  const blocks = solution.some((item) => item.block !== null);
+  const blockOf = (part: Part): string | null => {
+    if (!blocks || part === null) {
+      return null;
+    }
+    return solution.find((item) => (item.block ?? '').startsWith(ROMAN[part] + '.'))?.block ?? null;
+  };
+  const indexOf = (key: StepKey | undefined): number => {
+    if (key === undefined) {
+      return -1;
+    }
+    const block = blockOf(key.part);
+    const inBlock = solution.map((item, i) => ({ item, i })).filter(({ item }) => item.block === block);
+    if (key.title === '$last') {
+      return inBlock.length === 0 ? -1 : inBlock[inBlock.length - 1]!.i;
+    }
+    return inBlock.find(({ item }) => item.title === key.title)?.i ?? -1;
+  };
+  const places = chain.map((step) => indexOf(step.key));
+  const covered = new Set(places);
+  const opened = new Set<string>();
+  const out: TrainerStep[] = [];
+  chain.forEach((_step, n) => {
+    const at = places[n] ?? -1;
+    const found = at === -1 ? undefined : solution[at];
+    const block = found === undefined ? null : found.block;
+    const blockKey = block ?? '';
+    if (found !== undefined && !opened.has(blockKey)) {
+      opened.add(blockKey);
+      solution.forEach((item, i) => {
+        if (i < at && item.block === block && !covered.has(i)) {
+          out.push(infoStep(item));
+        }
+      });
+    }
+    out.push({
+      ...bare[n]!,
+      ...(found === undefined ? {} : { label: found.label, stepTitle: found.title, block: found.block }),
+    });
+  });
+  return out;
+}
+
 /* ── Задание тренажёра из задачи движка ──────────────────────────
    Условие набирается KaTeX, подсказки и цепочка шагов собираются
    вместе с заданием. Откуда пришла задача — с сборки или из браузера
@@ -1160,6 +1294,7 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  const solution = solutionSteps(task);
   if (rational) {
     return {
       id: task.id,
@@ -1169,10 +1304,10 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
       answer: task.answer,
       wrongHint: rationalWrongHint(task),
       rightHint: rationalRightHint(task),
-      steps: rationalSteps(task),
+      steps: numbered(rationalSteps(task), solution),
       options: null,
       oshibki: {},
-      solution: rationalSolution(task),
+      solution,
       method: methodFor(task.meta.set),
     };
   }
@@ -1184,12 +1319,12 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     answer: task.answer,
     wrongHint: quadratic ? '' : hintHtml(wrongHintFor(task) ?? ''),
     rightHint: quadratic ? '' : rightHintFor(task),
-    steps: quadratic ? [] : stepsFor(task),
+    steps: quadratic ? [] : numbered(stepsFor(task), solution),
     options: task.options == null ? null
       : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
     oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
       option.error === null ? [] : [[option.number, typeset(option.error)]])),
-    solution: quadratic ? quadraticSteps(task) : null,
+    solution: quadratic ? solution : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };
 }

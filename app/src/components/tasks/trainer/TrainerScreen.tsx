@@ -482,12 +482,21 @@ export function TrainerScreen({
         <div className="thint">
           {steps.slice(0, step + 1).map((item, i) => {
             const done = i < step;
+            /* Номер шага — номер пункта решения: «3», у задачи с двумя
+               функциями «II.3». С нового блока — его подзаголовок. */
+            const blockHead =
+              item.block != null && item.block !== (i === 0 ? null : steps[i - 1]?.block) ? item.block : null;
             return (
-              <article key={i} className={clsx('tstep', done && 'is-done')}>
+              <Fragment key={i}>
+              {blockHead === null ? null : <p className="tstep__block">{blockHead}</p>}
+              <article className={clsx('tstep', done && 'is-done', item.fields.length === 0 && 'tstep--info')}>
                 <p className="tstep__no">
-                  Шаг <b>{i + 1}</b> из {steps.length}
+                  Шаг <b>{item.label ?? i + 1}</b>
+                  {item.stepTitle === undefined ? ` из ${steps.length}` : ` · ${item.stepTitle}`}
                 </p>
-                <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
+                {item.titleHtml === '' ? null : (
+                  <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
+                )}
                 <p className="tstep__text" dangerouslySetInnerHTML={{ __html: item.textHtml }} />
 
                 <div
@@ -548,7 +557,8 @@ export function TrainerScreen({
                       onClick={checkStep}
                       disabled={item.fields.some((_, fieldNo) => fieldValue(i, fieldNo).trim() === '')}
                     >
-                      Проверить
+                      {/* Пункт без полей только читают: «Общий вид», «Точки с рисунка». */}
+                      {item.fields.length === 0 ? 'Дальше' : 'Проверить'}
                     </Button>
                   )}
                 </div>
@@ -559,6 +569,7 @@ export function TrainerScreen({
                   <p className="tstep__note" dangerouslySetInnerHTML={{ __html: item.wrongHint }} />
                 )}
               </article>
+              </Fragment>
             );
           })}
 

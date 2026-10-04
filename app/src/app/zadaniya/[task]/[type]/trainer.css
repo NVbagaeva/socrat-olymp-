@@ -229,6 +229,21 @@
 .tstep__no b {
   color: var(--color-text-brand);
 }
+/* Подзаголовок блока решения: «II. Находим g(x)». */
+.tstep__block {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text);
+}
+/* Строки пункта без полей: каждая формула — своей строкой. */
+.tstep__line {
+  display: block;
+}
+.tstep--info .tstep__text {
+  color: var(--color-text);
+}
 
 .tstep__title {
   margin: 0;
