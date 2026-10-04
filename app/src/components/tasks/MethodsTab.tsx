@@ -10,7 +10,7 @@ import {
   type KartochkaMetoda,
 } from '@/components/tasks/veroyatnost/MetodyKartochki';
 import { prepSkillTotal } from '@/lib/prep';
-import { typeset } from '@/lib/tex';
+import { texPlain, typeset } from '@/lib/tex';
 
 export interface MethodsTabProps {
   /** Подтема: её список методов. */
@@ -70,15 +70,16 @@ function kartochki(metody: QuadraticMetod[], type: string, base: string): Kartoc
   return metody.map((metod) => ({
     id: metod.id,
     nomer: metod.nomer,
-    nazvanie: metod.nazvanie,
-    opisanie: metod.opisanie,
+    nazvanie: <Tex text={metod.nazvanie} />,
+    nazvanieText: texPlain(metod.nazvanie),
+    opisanie: <Tex text={metod.opisanie} />,
     formula: <Tex text={`$${metod.formula}$`} />,
     trenirovki: metod.navyki.map((navyk) => ({
       href: `${base}/${OPORNYE.tail}${navyk}/`,
       schet: METODY_KARTOCHKI.modal.vBanke(prepSkillTotal(type, navyk)),
       /* Название набора нужно, только когда кнопок несколько: иначе
          оно повторяло бы заголовок окна. */
-      ...(odin(metod) ? {} : { nazvanie: nazvaniya.get(navyk) ?? navyk }),
+      ...(odin(metod) ? {} : { nazvanie: <Tex text={nazvaniya.get(navyk) ?? navyk} /> }),
     })),
     bloki: {
       kakUznat: <Abzatsy text={metod.kakUznat} />,

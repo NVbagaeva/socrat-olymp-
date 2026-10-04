@@ -3,8 +3,11 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { requestTabScroll } from '@/lib/tabScroll';
+import { TitleText } from '../TitleText';
 
 export interface PrepChip {
+  /** Название, набранное KaTeX на сервере (формулы в нём — $…$). */
+  titleHtml?: string;
   id: string;
   title: string;
   href: string;
@@ -49,7 +52,7 @@ export function PrepChips({ allLabel, listHref, items, active }: PrepChipsProps)
           aria-current={active === item.id ? 'page' : undefined}
           onClick={() => requestTabScroll('.ptask__head')}
         >
-          {item.title}
+          <TitleText title={item.title} html={item.titleHtml} />
         </Link>
       ))}
     </nav>

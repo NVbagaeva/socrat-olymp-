@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerResult } from '@/content/trainerModes';
+import { KindName } from './KindName';
 
 /** Чем закончилось задание: решено само или пройдено по подсказке. */
 export type TrainerMark = 'right' | 'hinted';
@@ -144,7 +145,7 @@ export function TrainerResult({
         <ul className="tdone__list">
           {kindRows(tasks, marks, kindTitle).map((row) => (
             <li className="tkind" key={row.title}>
-              <span className="tkind__name">{row.title}</span>
+              <KindName className="tkind__name" title={row.title} />
               <span className="tkind__bar">
                 <span
                   className="tkind__fill"

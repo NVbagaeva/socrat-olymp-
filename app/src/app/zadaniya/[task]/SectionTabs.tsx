@@ -5,6 +5,7 @@ import { EmptyState, Tabs } from '@/components/ui';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
+import { TitleText } from '@/components/tasks/TitleText';
 
 export interface SubtopicView {
   slug: string;
@@ -20,6 +21,9 @@ export interface PrototypeView {
   id: string;
   title: string;
   subtitle: string;
+  /** Название и подзаголовок, набранные KaTeX на сборке. */
+  titleHtml?: string;
+  subtitleHtml?: string;
   count: number;
 }
 
@@ -102,8 +106,12 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
                 <li className="proto" key={proto.id}>
                   <span className="proto__id">{proto.id}</span>
                   <span className="proto__text">
-                    <span className="proto__title">{proto.title}</span>
-                    <span className="proto__subtitle">{proto.subtitle}</span>
+                    <span className="proto__title">
+                      <TitleText title={proto.title} html={proto.titleHtml} />
+                    </span>
+                    <span className="proto__subtitle">
+                      <TitleText title={proto.subtitle} html={proto.subtitleHtml} />
+                    </span>
                   </span>
                   {/* Число берётся из состава набора движка, а не задаётся. */}
                   <span className="proto__count">{proto.count}</span>

@@ -30,7 +30,7 @@ function Card({ card, sceneFor }: { card: TheoryCard<string>; sceneFor: SceneFor
     >
       <h4 className="qth-card__title">
         {card.forward === true ? <ForwardIcon /> : null}
-        {card.title}
+        <Phrases parts={phrases(card.title)} />
       </h4>
 
       <div className="qth-card__text">

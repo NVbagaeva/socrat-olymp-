@@ -8,6 +8,7 @@ import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sectio
 import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { aboutScene } from '@/lib/scenes';
+import { typeset } from '@/lib/tex';
 import { prototypeSkills } from './configurator';
 import { GeneratorTab } from './generator';
 import { MethodsTab } from './MethodsTab';
@@ -144,7 +145,7 @@ export function FunctionTopicPage({
       <TopicTabs
         initial={initialTab}
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
-        theory={subtopic.theory}
+        theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
         bodies={theoryBodies}
         trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
         methods={

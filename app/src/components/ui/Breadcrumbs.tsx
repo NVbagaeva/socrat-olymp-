@@ -3,6 +3,11 @@ import Link from 'next/link';
 
 export interface Crumb {
   label: string;
+  /**
+   * Тот же пункт с формулами, набранными KaTeX (готовая вёрстка).
+   * Задан — показывается он, а label остаётся ключом и текстом.
+   */
+  labelHtml?: string;
   /** Без адреса пункт считается текущим: он последний и не ссылка. */
   href?: string;
 }
@@ -30,9 +35,17 @@ export function Breadcrumbs({ items, label = 'Вы здесь', className }: Bre
           return (
             <li className="crumbs__item" key={`${item.label}-${index}`}>
               {item.href !== undefined && !last ? (
-                <Link href={item.href}>{item.label}</Link>
-              ) : (
+                <Link href={item.href}>
+                  {item.labelHtml === undefined ? (
+                    item.label
+                  ) : (
+                    <span dangerouslySetInnerHTML={{ __html: item.labelHtml }} />
+                  )}
+                </Link>
+              ) : item.labelHtml === undefined ? (
                 <span aria-current="page">{item.label}</span>
+              ) : (
+                <span aria-current="page" dangerouslySetInnerHTML={{ __html: item.labelHtml }} />
               )}
             </li>
           );

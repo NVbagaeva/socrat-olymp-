@@ -3,7 +3,7 @@
   "id": "P12R-7",
   "block": 7,
   "title": "Значение функции",
-  "subtitle": "Найти f(x₀) по графику k/(x + a) + b",
+  "subtitle": "Найти $f(x_0)$ по графику $\\frac{k}{x + a} + b$",
   "seed": 12407,
   "family": "rational",
   "axisLabels": "minimal",

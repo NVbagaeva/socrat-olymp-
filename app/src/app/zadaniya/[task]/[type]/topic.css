@@ -409,6 +409,12 @@
   stroke: none;
   font-size: 12px;
 }
+/* Буква-переменная в подписи множества: курсив математическим шрифтом
+   KaTeX — как формулы в тексте страницы. */
+.mapping__var {
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+}
 .mapping__point {
   fill: var(--color-text);
   stroke: none;

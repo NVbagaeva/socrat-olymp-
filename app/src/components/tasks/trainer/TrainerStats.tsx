@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerStats } from '@/content/trainerModes';
+import { KindName } from './KindName';
 import {
   resetTrainer,
   summarize,
@@ -129,7 +130,7 @@ export function TrainerStats({ total }: TrainerStatsProps) {
             <ul className="tstats__list">
               {rows.map((row) => (
                 <li className="tkind" key={row.title}>
-                  <span className="tkind__name">{row.title}</span>
+                  <KindName className="tkind__name" title={row.title} />
                   <span className="tkind__bar">
                     <span
                       className="tkind__fill"
@@ -146,7 +147,7 @@ export function TrainerStats({ total }: TrainerStatsProps) {
 
           {weak === null ? null : (
             <p className="tstats__advice">
-              <b>{trainerStats.advice}</b> {weak.title} — {trainerStats.adviceTail}{' '}
+              <b>{trainerStats.advice}</b> <KindName title={weak.title} /> — {trainerStats.adviceTail}{' '}
               {weak.accuracy}%.
             </p>
           )}
@@ -156,7 +157,9 @@ export function TrainerStats({ total }: TrainerStatsProps) {
               <h3 className="tstats__title">{trainerStats.mistakes}</h3>
               <ul className="tstats__mistakes">
                 {progress.mistakes.map((id) => (
-                  <li key={id}>{mistakeText(id)}</li>
+                  <li key={id}>
+                    <KindName title={mistakeText(id)} />
+                  </li>
                 ))}
               </ul>
             </section>

@@ -15,6 +15,7 @@
 import { prepSkillsFor, type PrepSkillId } from '@/content/prepSkills';
 import { prepSkillScene } from '@/lib/scenes';
 import { renderGraph } from '@/lib/graph/renderer.js';
+import { titleHtml } from '@/lib/prep';
 import type { TrainerMethod } from '@/lib/trainer';
 
 /** Набор движка → навык подтемы. Девять к девяти, один в один. */
@@ -57,8 +58,9 @@ export function methodFor(setId: string): TrainerMethod | null {
     ? undefined
     : prepSkillsFor(typeOf(setId)).find((item) => item.id === id);
   const method = id === undefined || skill === undefined ? null : {
-    title: skill.title,
-    tip: skill.tip,
+    /* Название и приём — с формулами: набираются KaTeX здесь же. */
+    title: titleHtml(skill.title),
+    tip: titleHtml(skill.tip),
     svg: renderGraph(prepSkillScene(id)) as string,
   };
   cache.set(setId, method);

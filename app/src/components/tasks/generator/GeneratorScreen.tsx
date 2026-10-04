@@ -30,6 +30,7 @@ import { counted } from '@/lib/plural';
 import { planCounts } from '@/lib/sheetPlan';
 import { randomSeed } from '@/lib/trainerSession';
 import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
+import { TitleText } from '../TitleText';
 
 export interface GeneratorScreenProps {
   /** Адрес подтемы: страницы печати лежат под ним. */
@@ -262,7 +263,7 @@ export function GeneratorScreen({
                       checked={level === item.id}
                       onSelect={() => setLevel(item.id)}
                       title={item.title}
-                      lead={item.lead}
+                      lead={<TitleText title={item.lead} html={item.leadHtml} />}
                     />
                   ))}
                 </OptionGroup>
@@ -313,7 +314,7 @@ export function GeneratorScreen({
           <ul className="cfg-summary__list">
             {chosen.map((item) => (
               <li key={item.id}>
-                {item.title}
+                <TitleText title={item.title} html={item.titleHtml} />
                 <span className="cfg-summary__code"> {item.code ?? item.id}</span>
               </li>
             ))}
@@ -349,7 +350,14 @@ export function GeneratorScreen({
         </a>
         <p className="cfg-bar__summary">
           {family}
-          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} ·{' '}
+          {subtitle === '' ? '' : ` · ${subtitle}`} ·{' '}
+          {chosen.map((item, index) => (
+            <span key={item.id}>
+              {index === 0 ? '' : ', '}
+              <TitleText title={item.title} html={item.titleHtml} />
+            </span>
+          ))}{' '}
+          ·{' '}
           {countLabel(chosenCount)}
           {variants > 1 ? ` · ${variantsLabel(variants)}` : ''}
         </p>

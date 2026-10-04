@@ -235,7 +235,7 @@ function stepIntercept(p, win, points) {
       (marked ? ' отмечено — это точка ' : ' — это точка ') +
       keyMath(pointTex(frac(0), p.c), '(0; ' + plain(p.c) + ')') + '. Значит ' +
       keyMath('c = ' + tex(p.c), 'c = ' + plain(p.c)) + '.'));
-    return { title: 'Находим c по оси Oy', blocks: blocks, found: true };
+    return { title: 'Находим $c$ по оси $Oy$', blocks: blocks, found: true };
   }
 
   blocks.push(text(isInt(p.c)
@@ -244,7 +244,7 @@ function stepIntercept(p, win, points) {
       ' попадает не в узел сетки: точное значение с чертежа не снять.'));
   blocks.push(text('Угадывать нельзя — «примерно» в ответе не бывает. Найдём ' +
     math('c', 'c') + ' счётом, когда узнаем ' + math('a', 'a') + ' и вершину.'));
-  return { title: 'Находим c по оси Oy', blocks: blocks, found: false };
+  return { title: 'Находим $c$ по оси $Oy$', blocks: blocks, found: false };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -311,7 +311,7 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
   if (knownA) {
     blocks.push(text('Коэффициент ' + math('a', 'a') + ' дан в условии: ' +
       keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) + '. Считать его по чертежу не нужно.'));
-    return { title: 'Коэффициент a дан в условии', blocks: blocks, found: true };
+    return { title: 'Коэффициент $a$ дан в условии', blocks: blocks, found: true };
   }
 
   /* Вершина найдена по симметрии: известна только её абсцисса.
@@ -335,7 +335,7 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
         'a \\cdot ' + texBracket(x1) + term(p.c)));
       blocks.push(text('Остаётся одно уравнение с одним неизвестным:'));
       blocks.push(formula('a = ' + tex(p.a)));
-      return { title: 'Находим a подстановкой точки', blocks: blocks, found: true,
+      return { title: 'Находим $a$ подстановкой точки', blocks: blocks, found: true,
                bySubstitution: true };
     }
   }
@@ -365,7 +365,7 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
       ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) + '.'));
     blocks.push(formula('a = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(p.a)));
     blocks.push(text('Получили ' + keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) + '.'));
-    return { title: 'Находим a шагом от вершины', blocks: blocks, found: true };
+    return { title: 'Находим $a$ шагом от вершины', blocks: blocks, found: true };
   }
 
   /* Вершина неизвестна: a и b находятся вместе, из системы. */
@@ -389,12 +389,12 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
     blocks.push(text('Решаем систему — и сразу получаем оба коэффициента: ' +
       keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) + ' и ' +
       keyMath('b = ' + tex(p.b), 'b = ' + plain(p.b)) + '.'));
-    return { title: 'Находим a и b из системы', blocks: blocks, found: true, bySystem: true };
+    return { title: 'Находим $a$ и $b$ из системы', blocks: blocks, found: true, bySystem: true };
   }
 
   blocks.push(text('Отмеченных точек для счёта не хватает, поэтому ' + math('a', 'a') +
     ' возьмём из записи функции: ' + keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) + '.'));
-  return { title: 'Находим a', blocks: blocks, found: true };
+  return { title: 'Находим $a$', blocks: blocks, found: true };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -411,7 +411,7 @@ function stepB(p, vertexKnown, bySystem) {
       ' и ' + math('b', 'b') + ' во вторую отмеченную точку — равенство должно сойтись. ' +
       'Заодно по формуле вершины видно, где она стоит: ' +
       math('x_{\\text{в}} = -\\dfrac{b}{2a} = ' + tex(p.m), 'xв = ' + plain(p.m)) + '.'));
-    return { title: 'Находим b', blocks: blocks };
+    return { title: 'Находим $b$', blocks: blocks };
   }
 
   if (vertexKnown) {
@@ -422,14 +422,14 @@ function stepB(p, vertexKnown, bySystem) {
     blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
       ' = ' + tex(p.b)));
     blocks.push(text('Получили ' + keyMath('b = ' + tex(p.b), 'b = ' + plain(p.b)) + '.'));
-    return { title: 'Находим b', blocks: blocks };
+    return { title: 'Находим $b$', blocks: blocks };
   }
 
   blocks.push(text('Коэффициент ' + math('b', 'b') + ' считается по вершине и ' +
     math('a', 'a') + ': ' + math('b = -2a \\cdot x_{\\text{в}}', 'b = −2a · xв') + '.'));
   blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
     ' = ' + tex(p.b)));
-  return { title: 'Находим b', blocks: blocks };
+  return { title: 'Находим $b$', blocks: blocks };
 }
 
 /* ══════════════════════════════════════════════════════════
