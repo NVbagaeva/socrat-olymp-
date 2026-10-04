@@ -27,7 +27,29 @@ function answerHtml(task) {
 
     Не смог движок построить решение — задача не попадает в раздел
     решений, и её ответ остаётся в таблице. Придумывать решение нельзя. */
-function solutionItem(task, teacherBuilder) {
+/* Гипербола: полный разбор по шагам из graph/solution-rational.js —
+   заголовок шага и все его формулы — в формате карточки учителя.
+   Полное решение гиперболы в solution-teacher.js — отдельной задачей. */
+function rationalSteps(task, rationalBuilder) {
+  if (!rationalBuilder) { return null; }
+  let steps;
+  try { steps = rationalBuilder.fromTask(task); }
+  catch { return null; }
+  const rows = steps
+    .filter((step) => step.id !== 'answer' || step.blocks.some((b) => b.type === 'formula'))
+    .map((step) => ({
+      title: step.title,
+      rows: (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex)
+        .map((piece) => ({ tex: piece.tex })),
+    }));
+  return rows.length ? rows : null;
+}
+
+function solutionItem(task, teacherBuilder, rationalBuilder) {
+  if (task.meta && task.meta.family === 'rational') {
+    const steps = rationalSteps(task, rationalBuilder);
+    return steps ? answers.fullSolution(task.no, steps, answerHtml(task) || task.answer) : null;
+  }
   if (!teacherBuilder) { return null; }
   let solved;
   try { solved = teacherBuilder.build(task); }
@@ -49,7 +71,7 @@ function solutionItem(task, teacherBuilder) {
  * blocks — [{ title, tasks: [{ no, id, answer, answerHtml, options,
  *             answerRule, seed, meta }] }]
  */
-export function answersItems(blocks, teacherBuilder) {
+export function answersItems(blocks, teacherBuilder, rationalBuilder) {
   const items = [answers.sectionHead('Ответы', 'по блокам, сквозная нумерация')];
 
   blocks.forEach((block) => {
@@ -63,7 +85,7 @@ export function answersItems(blocks, teacherBuilder) {
   const solved = [];
   blocks.forEach((block) => {
     block.tasks.forEach((task) => {
-      const item = solutionItem(task, teacherBuilder);
+      const item = solutionItem(task, teacherBuilder, rationalBuilder);
       if (item) { solved.push(item); }
     });
   });
@@ -88,7 +110,7 @@ export function answersItems(blocks, teacherBuilder) {
  * variants — [{ title: 'Вариант 1' | null, blocks }]; у задачи
  *            сверх полей answersItems есть method
  */
-export function variantAnswersItems(variants, teacherBuilder) {
+export function variantAnswersItems(variants, teacherBuilder, rationalBuilder) {
   const many = variants.length > 1;
   const items = [answers.sectionHead('Ответы', 'Только для учителя', { section: many })];
 
@@ -111,7 +133,7 @@ export function variantAnswersItems(variants, teacherBuilder) {
     variant.blocks.forEach((block) => {
       block.tasks.forEach((task) => {
         total += 1;
-        const item = solutionItem(task, teacherBuilder);
+        const item = solutionItem(task, teacherBuilder, rationalBuilder);
         if (item) { own.push(item); }
       });
     });

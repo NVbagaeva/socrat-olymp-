@@ -1,0 +1,167 @@
+{
+  "kind": "prototype",
+  "id": "12R.E",
+  "block": 5,
+  "title": "12R.E · (kx + a)/(x + b): коэффициент k",
+  "subtitle": "Найти k по горизонтальной асимптоте",
+  "seed": 12305,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12R.E-01",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "branches": "any",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-02",
+      "question": "На рисунке изображён график функции вида $f(x) = (kx + a)/(x + b)$. Найдите значение $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-03",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $k$?",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-04",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$, где $k$, $a$ и $b$ — некоторые числа. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "branches": "any",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-05",
+      "question": "На рисунке показан график функции $f(x) = (kx + a)/(x + b)$. Определите коэффициент $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-06",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите коэффициент $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-07",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "branches": "any",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-08",
+      "question": "На рисунке изображён график функции вида $f(x) = (kx + a)/(x + b)$. Найдите значение $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-09",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $k$?",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "branches": "both",
+        "tAbsMax": 5
+      }
+    },
+    {
+      "id": "12R.E-10",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$, где $k$, $a$ и $b$ — некоторые числа. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "k — горизонтальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "branches": "any",
+        "tAbsMax": 5
+      }
+    }
+  ]
+}

@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui';
+import { pickSubtopic, useSubtopicPicked } from '@/lib/subtopicPick';
 
 export interface SubtopicCardProps {
   /** Название подтемы или раздела. */
@@ -37,6 +40,10 @@ export interface SubtopicCardProps {
  * с клавиатуры у них общие. Отличается только начинка — у №12
  * формула, у №3 чертёж и число прототипов, и то и другое приходит
  * сюда готовым.
+ *
+ * Стрелка в покое серая: синей она становится только у карточки, на
+ * которую нажали последней (lib/subtopicPick.ts). Иначе на странице
+ * все стрелки синие сразу, и выделение ничего не выделяет.
  */
 export function SubtopicCard({
   name,
@@ -46,6 +53,7 @@ export function SubtopicCard({
   media,
   meta,
 }: SubtopicCardProps) {
+  const picked = useSubtopicPicked(href);
   const body = (
     <>
       {media !== undefined ? (
@@ -92,7 +100,11 @@ export function SubtopicCard({
     );
   }
   return (
-    <Link className="subtopic" href={href}>
+    <Link
+      className={picked ? 'subtopic is-picked' : 'subtopic'}
+      href={href}
+      onClick={() => pickSubtopic(href)}
+    >
       {body}
     </Link>
   );

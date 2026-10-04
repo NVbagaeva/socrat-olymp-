@@ -27,6 +27,7 @@
     "test:teacher-solutions": "node scripts/check-teacher-solutions.mjs",
     "test:trainer-slope": "node scripts/check-trainer-slope.mjs",
     "test:slope-visibility": "node scripts/check-slope-visibility.mjs",
+    "test:graph-rational": "node scripts/check-graph-rational.mjs",
     "preview:shots": "node scripts/preview-shots.mjs",
     "test:secrets": "node scripts/check-bundle-secrets.mjs",
     "build:pdf-12": "node scripts/build-pdf-12.mjs",

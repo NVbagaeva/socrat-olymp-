@@ -3,6 +3,7 @@ import { OPORNYE } from '@/content/opornye';
 import { METODY } from '@/content/metody';
 import { prepSkillsFor } from '@/content/prepSkills';
 import { QUADRATIC_METODY, type QuadraticMetod } from '@/content/quadraticMetody';
+import { RATIONAL_METODY } from '@/content/rationalMetody';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import {
   MetodyKartochki,
@@ -98,7 +99,8 @@ function kartochki(metody: QuadraticMetod[], type: string, base: string): Kartoc
  * состояние.
  */
 export function MethodsTab({ type, base }: MethodsTabProps) {
-  const metody = type === 'quadratic' ? QUADRATIC_METODY : [];
+  const metody =
+    type === 'quadratic' ? QUADRATIC_METODY : type === 'rational' ? RATIONAL_METODY : [];
 
   return (
     <section className="methods">
