@@ -17,7 +17,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire, Module } from 'node:module';
+import { createRequire, Module, register } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -29,8 +29,14 @@ const require = createRequire(import.meta.url);
 let installed = false;
 
 function install() {
-  if (installed) { return; }
+  if (installed) {
+    return;
+  }
   installed = true;
+
+  /* CSS внутри ES-модулей (lib/graph/katex.js) — пустой модуль:
+     перехватчик require ниже до них не дотягивается. */
+  register('./css-stub.mjs', import.meta.url);
 
   const ts = require('typescript');
   const options = {
@@ -48,16 +54,21 @@ function install() {
   Module._extensions['.ts'] = compile;
   Module._extensions['.tsx'] = compile;
   /* Стили из компонентов: на сервере они ничего не значат. */
-  Module._extensions['.css'] = (module) => { module.exports = {}; };
+  Module._extensions['.css'] = (module) => {
+    module.exports = {};
+  };
 
   /* Псевдоним «@/» из tsconfig и импорты без расширения:
      «./types» может лежать как types.ts, types.tsx или types/index.ts. */
   const resolve = Module._resolveFilename;
   Module._resolveFilename = function (request, parent, ...rest) {
     let wanted = request;
-    if (wanted.startsWith('@/')) { wanted = path.join(SRC, wanted.slice(2)); }
+    if (wanted.startsWith('@/')) {
+      wanted = path.join(SRC, wanted.slice(2));
+    }
     if (wanted.startsWith('.') || path.isAbsolute(wanted)) {
-      const base = path.isAbsolute(wanted) ? wanted
+      const base = path.isAbsolute(wanted)
+        ? wanted
         : path.join(path.dirname(parent.filename), wanted);
       for (const ext of ['', '.ts', '.tsx', '.js', '.mjs', '/index.ts', '/index.js']) {
         const candidate = base + ext;

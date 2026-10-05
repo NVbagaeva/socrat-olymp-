@@ -32,6 +32,7 @@ import {
   KOSINUSY_DVA_ZNAKA,
   KOSINUSY_TRI_ZNAKA,
   OPORNYE_KOSINUS_TRI_ZNAKA,
+  POYASNENIE_TRI_ZNAKA,
 } from './opornye-kosinus';
 import { kosoy } from './troyki';
 import { emptyReport, renderVectorPlane } from './render';
@@ -39,6 +40,7 @@ import type { Box, Generated, Report, Risunok, Tochka, Vektor } from './types';
 import { BLOKI } from './prep/bloki';
 import { fixedSeed, generateMikro } from './prep/generate';
 import { STSENY_IDS, stsena } from './stseny';
+import { keySpec2, sheetBlocks2, sheetVariants2, type SheetParams2 } from './sheet2';
 import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { O_ZADANII } from '@/content/vektory';
 
@@ -834,4 +836,223 @@ export function checkStsenyITeksty(typeset: Typeset): GenReport {
     }
   }
   return { prototypes: STSENY_IDS.length, generated: teksty.length, problems };
+}
+
+/* ── Листы для печати ───────────────────────────────────────────── */
+
+const LIST_PARAMS: SheetParams2 = {
+  prototypes: ['A1', 'A6', 'B6', 'B9', 'C2'],
+  count: 10,
+  variants: 3,
+  seed: 'selftest',
+  theme: 'print',
+  layout: 'single',
+  kind: 'Проверка',
+  date: '',
+  bank: false,
+};
+
+/**
+ * Листы для печати: на листе ученика нет ни катетов, ни ответов, ни
+ * решений; на листе с решениями у каждой задачи разбор с заголовками
+ * шагов и строкой ответа, рисунок с катетами; варианты одной
+ * структуры отличаются числами; банк даёт ровно десять задач на
+ * прототип; ключ банка содержит все 190 ответов. Ответы на листе
+ * сверяются с независимым пересчётом генератора.
+ */
+export function checkListy(): GenReport {
+  const problems: Problem[] = [];
+  const push = (where: string, what: string) => problems.push({ where, what });
+  let generated = 0;
+
+  const student = sheetVariants2(LIST_PARAMS, false);
+  const teacher = sheetVariants2(LIST_PARAMS, true);
+  if (student.length !== LIST_PARAMS.variants)
+    push('лист ученика', `вариантов ${student.length}, а не ${LIST_PARAMS.variants}`);
+  const signatures = new Set<string>();
+  student.forEach((blocks, v) => {
+    const where = `лист ученика, вариант ${v + 1}`;
+    const total = blocks.reduce((sum, b) => sum + b.tasks.length, 0);
+    if (total !== LIST_PARAMS.count) push(where, `задач ${total}, а не ${LIST_PARAMS.count}`);
+    const ids: string[] = [];
+    for (const block of blocks) {
+      for (const task of block.tasks) {
+        generated += 1;
+        ids.push(task.id);
+        if (task.figureSvg !== null && task.figureSvg.includes('data-hint'))
+          push(where, `задача ${task.no}: катеты на рисунке ученика`);
+        if (task.solutionHtml !== null) push(where, `задача ${task.no}: решение на листе ученика`);
+        if (task.answer !== '') push(where, `задача ${task.no}: ответ на листе ученика`);
+        if (/Ответ:/.test(task.questionHtml)) push(where, `задача ${task.no}: «Ответ:» в условии`);
+      }
+    }
+    const key = ids.join('|');
+    if (signatures.has(key)) push(where, 'повторяет другой вариант');
+    signatures.add(key);
+    const tBlocks = teacher[v] ?? [];
+    const tIds = tBlocks.flatMap((b) => b.tasks.map((t) => t.id));
+    if (tIds.join('|') !== key) push(where, 'лист с решениями содержит другие задачи');
+    for (const block of tBlocks) {
+      for (const task of block.tasks) {
+        const [prototype, seed] = task.id.split('|');
+        const expected = ru(generate(prototype as string, seed as string).otvet);
+        if (task.answer !== expected)
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: ответ «${task.answer}», а генератор даёт «${expected}»`,
+          );
+        if (
+          task.solutionHtml === null ||
+          !/sheet-step/.test(task.solutionHtml) ||
+          !/Ответ:/.test(task.solutionHtml)
+        ) {
+          push(`лист с решениями, вариант ${v + 1}`, `задача ${task.no}: нет разбора по шагам`);
+        }
+        const grid = generate(prototype as string, seed as string).risunok?.grid !== false;
+        if (task.figureSvg !== null && grid && !task.figureSvg.includes('data-hint')) {
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: на рисунке учителя нет катетов`,
+          );
+        }
+      }
+    }
+  });
+
+  const bank = sheetBlocks2(
+    { ...LIST_PARAMS, prototypes: PROTOTYPES.map((p) => p.id), bank: true },
+    false,
+  );
+  if (bank.length !== PROTOTYPES.length)
+    push('лист банка', `блоков ${bank.length}, а не ${PROTOTYPES.length}`);
+  for (const block of bank) {
+    const entry = BANK.find((e) => e.prototype === block.id);
+    if (block.tasks.length !== (entry?.variants.length ?? 0))
+      push('лист банка', `${block.id}: задач ${block.tasks.length}`);
+    for (const task of block.tasks) {
+      generated += 1;
+      if (task.figureSvg !== null && task.figureSvg.includes('data-hint'))
+        push('лист банка', `${block.id} задача ${task.no}: катеты`);
+      if (task.answer !== '' || task.solutionHtml !== null)
+        push('лист банка', `${block.id} задача ${task.no}: ответ или решение`);
+    }
+  }
+
+  const key = keySpec2('print');
+  const otvetov = key.extraItems.reduce(
+    (sum, item) => sum + (item.match(/data-answer="/g)?.length ?? 0),
+    0,
+  );
+  const expected = BANK.reduce((sum, e) => sum + e.variants.length, 0);
+  if (otvetov !== expected) push('ключ ответов', `ответов ${otvetov}, а в банке ${expected}`);
+  for (const entry of BANK) {
+    for (const v of entry.variants) {
+      const answer = ru(generate(entry.prototype, v.seed).otvet).replace(/"/g, '&quot;');
+      if (!key.extraItems.some((item) => item.includes(`data-answer="${answer}"`))) {
+        push('ключ ответов', `${entry.prototype} №${v.n}: ответа «${answer}» нет`);
+      }
+    }
+  }
+  return { prototypes: LIST_PARAMS.prototypes.length, generated, problems };
+}
+
+/* ── Стрелки над векторами ──────────────────────────────────────── */
+
+/**
+ * Формулы раздела, где буква a, b или c стоит без \vec нарочно: это
+ * не векторы. Список явный: новая такая формула добавляется сюда, а
+ * не обходит проверку.
+ */
+export const ISKLYUCHENIYA_STRELKI: readonly string[] = [];
+
+/** Буквы векторов задач: a, b, c — и в условиях, и в разборах. */
+const BUKVY_VEKTOROV = /(?<![A-Za-z])[abc](?![A-Za-z])/;
+
+/**
+ * Все тексты раздела с формулами: условия и разборы задач на нескольких
+ * seed, микрозадачи и их варианты ответа, формулы карточек и плашек,
+ * теория, «О задании», блок повышенной сложности.
+ */
+function tekstyRazdela(seeds: number): { where: string; text: string }[] {
+  const out: { where: string; text: string }[] = [];
+  const add = (where: string, text: string) => out.push({ where, text });
+  for (const p of PROTOTYPES) {
+    add(`${p.id} формула карточки`, `$${p.formula}$`);
+    add(`${p.id} название`, p.nazvanie);
+    for (let i = 0; i < seeds; i += 1) {
+      const task = generate(p.id, `t${i}`);
+      add(`${p.id} условие`, task.uslovie);
+      for (const sh of task.shagi) {
+        add(`${p.id} шаг`, sh.zagolovok);
+        for (const line of sh.stroki) add(`${p.id} шаг`, line);
+      }
+    }
+  }
+  for (const b of BLOKI) {
+    add(`${b.id} формула карточки`, `$${b.formula}$`);
+    for (const f of b.formuly) add(`${b.id} «Запомни»`, `$${f}$`);
+    for (const m of b.zadachi) {
+      add(`${m.id} формула`, `$${m.formula}$`);
+      const t = generateMikro(m.id, fixedSeed(m));
+      add(`${m.id} условие`, t.uslovie);
+      for (const line of t.razbor) add(`${m.id} разбор`, line);
+      for (const v of t.vybory ?? []) add(`${m.id} вариант`, v.label);
+    }
+  }
+  for (const r of RAZDELY_TEORII) {
+    add(`теория ${r.id}`, r.section.lead);
+    for (const c of r.section.cards) {
+      add(`теория ${r.id}/${c.id}`, c.title);
+      if (c.formula !== undefined) add(`теория ${r.id}/${c.id}`, `$${c.formula}$`);
+      for (const x of [...(c.formulaNotes ?? []), ...c.text]) add(`теория ${r.id}/${c.id}`, x);
+      for (const x of c.lines ?? []) add(`теория ${r.id}/${c.id}`, `$${x}$`);
+      if (c.table !== undefined)
+        for (const x of [...c.table.head, ...c.table.rows.flat()]) add(`теория ${r.id}/${c.id}`, x);
+    }
+    for (const x of r.section.remember) add(`теория ${r.id} «Запомни»`, x);
+  }
+  add('о задании', O_ZADANII.format.text);
+  for (const o of O_ZADANII.oshibki) add(`о задании: ${o.id}`, o.text);
+  for (const x of POYASNENIE_TRI_ZNAKA) add('три знака', x);
+  for (const t of OPORNYE_KOSINUS_TRI_ZNAKA) {
+    add('три знака условие', t.uslovie);
+    for (const sh of t.shagi) for (const line of sh.stroki) add('три знака шаг', line);
+  }
+  return out;
+}
+
+/**
+ * Везде, где буква обозначает вектор, стоит \vec: в KaTeX-строках
+ * раздела буквы a, b, c вне \vec{…} не встречаются — ни в модулях, ни
+ * в скалярных произведениях, ни в линейных комбинациях, ни в
+ * координатах. Модуль везде одной формы: \left|…\right|, черта «|» без
+ * \left и \right рядом с вектором не стоит. Исключения — явным списком.
+ */
+export function checkStrelki(seeds = 5): GenReport {
+  const problems: Problem[] = [];
+  const seen = new Set<string>();
+  const teksty = tekstyRazdela(seeds);
+  let formul = 0;
+  for (const { where, text } of teksty) {
+    for (const m of text.matchAll(/\$([^$]+)\$/g)) {
+      const tex = m[1] as string;
+      formul += 1;
+      if (ISKLYUCHENIYA_STRELKI.includes(tex)) continue;
+      const bezVektorov = tex
+        .replace(/\\vec\{[^}]*\}/g, 'V')
+        .replace(/\\overrightarrow\{[^}]*\}/g, 'V')
+        .replace(/\\[A-Za-z]+/g, ' ');
+      const key = `${where} :: ${tex}`;
+      if (BUKVY_VEKTOROV.test(bezVektorov) && !seen.has(key)) {
+        seen.add(key);
+        problems.push({ where, what: `буква вектора без \\vec: «${tex}»` });
+      }
+      const bezModuley = tex.replace(/\\(?:left|right|bigl|bigr|big|Bigl|Bigr)\|/g, '');
+      if (tex.includes('\\vec') && bezModuley.includes('|') && !seen.has(`${key}|`)) {
+        seen.add(`${key}|`);
+        problems.push({ where, what: `модуль не через \\left|…\\right|: «${tex}»` });
+      }
+    }
+  }
+  return { prototypes: teksty.length, generated: formul, problems };
 }

@@ -213,7 +213,7 @@ export const BLOK_DLINA: Mikro[] = [1, 2, 3, 4, 5, 6].map((n) =>
   mikro(
     `P2-3-0${n}`,
     n <= 3 ? 'Длина по координатам' : 'Длина по рисунку',
-    '|\\vec{a}| = \\sqrt{x^2 + y^2}',
+    '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
     'number',
     n <= 3 ? dlinaPoKoordinatam : dlinaPoRisunku,
   ),

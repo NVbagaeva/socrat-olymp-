@@ -44,6 +44,7 @@ const SHEETS = [
   ['№4', '/zadaniya/4/pechat/', 's=p4-01&n=10&seed=print-check'],
   ['№5', '/zadaniya/5/pechat/', 's=p5-01&n=10&seed=print-check'],
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
+  ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
 ];
 
 /* Высоты бумаги для Chromium: A4 и печатные области, округлённые до
