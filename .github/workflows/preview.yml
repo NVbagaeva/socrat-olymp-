@@ -38,7 +38,7 @@ jobs:
   shots:
     name: Снимки страниц
     if: github.event.action != 'closed'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Забрать репозиторий
@@ -98,7 +98,7 @@ jobs:
       # Снимки нужны и сами по себе: артефакт живёт независимо
       # от ветки и годится, когда комментарий перезаписан.
       - name: Сохранить снимки артефактом
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: preview-${{ github.event.pull_request.number }}
           path: ${{ runner.temp }}/shots
@@ -170,7 +170,7 @@ jobs:
   cleanup:
     name: Убрать снимки закрытого pull request
     if: github.event.action == 'closed'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Стереть папку в ветке previews

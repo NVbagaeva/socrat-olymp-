@@ -19,7 +19,12 @@ concurrency:
 jobs:
   deploy:
     name: Сборка и публикация на FTP
-    runs-on: ubuntu-latest
+    # Версия Ubuntu закреплена во всех сценариях: ubuntu-latest с
+    # 19 октября 2026 года — Ubuntu 26, а Chromium для проверок и PDF
+    # ставится с системными пакетами под конкретную версию
+    # (playwright install --with-deps). Переезд — отдельной правкой,
+    # когда Playwright его поддержит. Подробнее — docs/DEPLOYMENT.md.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Забрать репозиторий
@@ -87,8 +92,12 @@ jobs:
             mirror --reverse --only-missing --no-perms --parallel=4 app/out/_next/ /public_html/_next/;
             bye"
 
+      # v4.4.0 работает на Node.js 24 (v4.3.5 — на Node.js 20, который
+      # GitHub выводит из обращения). Действие стороннее и получает пароль
+      # от хостинга, поэтому закреплено коммитом, а не меткой: метку автор
+      # может перевесить на другой код, коммит — нет.
       - name: Залить страницы на FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
