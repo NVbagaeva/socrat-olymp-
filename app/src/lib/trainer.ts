@@ -14,8 +14,11 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import RationalHints from '@/lib/graph/hints-rational.js';
+import QuadraticHints from '@/lib/graph/hints-quadratic.js';
+import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import { quadraticSteps as quadraticSolution, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import { methodFor } from '@/lib/trainerMethod';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
@@ -127,7 +130,48 @@ export interface TrainerStep {
   variants?: string[][];
   /** Какую асимптоту подсветить на рисунке, пока открыт шаг. */
   focus?: 'horizontal' | 'vertical' | null;
+  /**
+   * Шаг из частей по очереди (парабола): вопрос с кнопками или поля.
+   * Есть — шаг проходится по ним, questions и fields шага не нужны.
+   */
+  parts?: TrainerPart[];
+  /**
+   * Свой чертёж шага: вспомогательная система координат или точки и
+   * ось симметрии. Показывается вместо чертежа задачи, пока шаг
+   * открыт, начиная с части chartFrom.
+   */
+  chartSvg?: string;
+  chartFrom?: number;
 }
+
+/** Часть шага: вопрос с вариантами ответа кнопками. */
+export interface TrainerChoicePart {
+  kind: 'choice';
+  promptHtml: string;
+  options: TrainerChoice[];
+  rightHtml: string;
+}
+
+/** Часть шага: поля ввода. */
+export interface TrainerFieldsPart {
+  kind: 'fields';
+  textHtml: string;
+  fields: TrainerField[];
+  /** Другие верные наборы значений полей. */
+  variants?: string[][];
+  /**
+   * Значения первых полей, на которые нужно отдельное предупреждение:
+   * например, точка, подстановка которой даёт тождество.
+   */
+  traps?: { values: string[]; whyHtml: string }[];
+  /** Пояснение, если число в поле field введено с неверным знаком. */
+  sign?: { field: number; whyHtml: string };
+  wrongHint: string;
+  /** Что показать после верного ответа: подстановка и вычисление. */
+  afterHtml?: string;
+}
+
+export type TrainerPart = TrainerChoicePart | TrainerFieldsPart;
 
 interface EngineQuery {
   x0: number;
@@ -869,6 +913,100 @@ function rationalSteps(task: EngineTask): TrainerStep[] {
   });
 }
 
+/* ── Цепочка для параболы ────────────────────────────────────────
+
+   Шаги строит graph/hints-quadratic.js в порядке полного решения:
+   ветви → вершина в узле? → a во вспомогательной системе координат
+   (или ось симметрии по двум точкам) → c → b → формула → ответ.
+   Здесь шаги набираются KaTeX и получают свой чертёж: оси x′Oy′ от
+   вершины или точки с осью симметрии. На чертеже задачи их нет. */
+
+interface QuadraticHintPart {
+  kind: 'choice' | 'fields';
+  prompt?: string;
+  options?: { text: string; right: boolean; why: string | null }[];
+  right?: string;
+  text?: string;
+  fields?: { label: string; answer: string }[];
+  variants?: string[][] | null;
+  traps?: { values: string[]; why: string }[] | null;
+  sign?: { field: number; why: string } | null;
+  wrong?: string;
+  after?: string[] | null;
+}
+
+interface QuadraticHint {
+  title: string;
+  reminder: string | null;
+  chart: 'aux' | 'symmetry' | null;
+  chartFrom: number;
+  parts: QuadraticHintPart[];
+}
+
+interface QuadraticFacts {
+  point?: { x: number; y: number } | null;
+  pair?: { x: number; y: number }[];
+  x0?: { p: number; q: number };
+}
+
+function quadraticSteps(task: EngineTask): TrainerStep[] {
+  const hints = QuadraticHints.fromTask(task) as unknown as QuadraticHint[];
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const solution = (GraphSolutionQuadratic as unknown as {
+    fromTask: (source: unknown) => { id: string; facts: QuadraticFacts }[];
+  }).fromTask(task);
+  const facts = (id: string): QuadraticFacts => solution.find((step) => step.id === id)?.facts ?? {};
+  const meta = task.meta as unknown;
+
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      parts: hint.parts.map((part): TrainerPart => {
+        if (part.kind === 'choice') {
+          return {
+            kind: 'choice',
+            promptHtml: big(part.prompt ?? ''),
+            options: (part.options ?? []).map((option) => ({
+              html: big(option.text),
+              right: option.right,
+              whyHtml: option.why === null ? '' : big(option.why),
+            })),
+            rightHtml: big(part.right ?? ''),
+          };
+        }
+        const out: TrainerFieldsPart = {
+          kind: 'fields',
+          textHtml: big(part.text ?? ''),
+          fields: (part.fields ?? []).map((field) => ({ labelHtml: math(field.label), answer: field.answer })),
+          wrongHint: big(part.wrong ?? ''),
+        };
+        if (part.variants) { out.variants = part.variants; }
+        if (part.traps) { out.traps = part.traps.map((trap) => ({ values: trap.values, whyHtml: big(trap.why) })); }
+        if (part.sign) { out.sign = { field: part.sign.field, whyHtml: big(part.sign.why) }; }
+        if (part.after && part.after.length > 0) { out.afterHtml = afterHtml(part.after); }
+        return out;
+      }),
+    };
+    if (hint.reminder) {
+      step.reminderHtml = big(hint.reminder);
+    }
+    if (hint.chart === 'aux') {
+      const svg = QuadraticAux.auxSvg(meta, facts('slope').point ?? null) as string | null;
+      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+    } else if (hint.chart === 'symmetry') {
+      const f = facts('slope');
+      const x0 = f.x0 ? f.x0.p / f.x0.q : 0;
+      const svg = QuadraticAux.symmetrySvg(meta, f.pair ?? [], x0) as string | null;
+      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+    }
+    return step;
+  });
+}
+
 /* Асимптоты на чертеже — пунктиры цвета --graph-asymptote. Шагу о
    сдвиге нужно подсветить свою, поэтому каждая получает класс по
    направлению: вертикальная — chart-asym--v, горизонтальная — --h.
@@ -953,12 +1091,12 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     answer: task.answer,
     wrongHint: quadratic ? '' : hintHtml(wrongHintFor(task) ?? ''),
     rightHint: quadratic ? '' : rightHintFor(task),
-    steps: quadratic ? [] : stepsFor(task),
+    steps: quadratic ? quadraticSteps(task) : stepsFor(task),
     options: task.options == null ? null
       : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
     oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
       option.error === null ? [] : [[option.number, hintHtml(option.error)]])),
-    solution: quadratic ? quadraticSteps(task) : null,
+    solution: quadratic ? quadraticSolution(task) : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };
 }

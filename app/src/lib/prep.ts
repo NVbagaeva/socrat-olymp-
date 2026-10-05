@@ -689,6 +689,9 @@ export function quadraticSteps(task: QuadraticSource): PrepStep[] {
     window: task.meta.window,
     points: task.meta.points,
     second: secondCurve(task),
+    /* По meta.scene разбор рисует чертёж со вспомогательной системой
+       координат (graph/quadratic-aux.js). */
+    meta: task.meta,
     task: {
       rule: data?.answerRule,
       answer: task.answer,
