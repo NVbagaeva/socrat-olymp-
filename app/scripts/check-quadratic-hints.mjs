@@ -252,6 +252,9 @@ for (const set of PREP.concat(PROTO)) {
       const slope = hints.find((h) => h.id === 'slope');
       if (slope && slope.chart === 'aux') {
         auxCharts += 1;
+        if (!slope.reminder || !/a = 1/.test(slope.reminder)) {
+          note('нет приёма «на 1 вбок — на 1 вверх» на шаге 3а', `${where}`);
+        }
         const svg = Aux.auxSvg(meta, null);
         if (!svg || !svg.includes(Aux.AUX_CLASS) || !Aux.hasAux(meta)) {
           note('в шаге 3а нет вспомогательной системы', `${where}`);

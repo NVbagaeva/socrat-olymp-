@@ -426,6 +426,10 @@ function answerStep(p, task, sol, key) {
   return [];
 }
 
+/* Приём шага 3а — виден на шаге всегда. */
+var REMIND_AUX = 'Если от вершины на 1 клетку вбок — на 1 клетку вверх, то $a = 1$; ' +
+  'на 1 вниз — $a = -1$. Это видно сразу.';
+
 /* Где подсказка кончается: шаг, на котором найден ответ. */
 var STOP = { 'sign-a': 'direction', a: 'slope', c: 'intercept', b: 'b', 'equation-choice': 'formula' };
 
@@ -450,7 +454,8 @@ function fromTask(task) {
 
   for (var i = 0; i < solution.length; i++) {
     var sol = solution[i];
-    var base = { number: sol.number, title: sol.title, id: sol.id, chart: null, chartFrom: 0 };
+    var base = { number: sol.number, title: sol.title, id: sol.id, chart: null, chartFrom: 0,
+                 reminder: null };
     var parts = null;
     if (sol.id === 'direction') {
       parts = directionStep(p);
@@ -466,6 +471,7 @@ function fromTask(task) {
       } else if (sol.facts.point) {
         parts = auxStep(p, win, sol);
         base.chart = 'aux'; base.chartFrom = 0;
+        base.reminder = REMIND_AUX;
       } else {
         parts = [fields('Найди $a$.', [field('a =', p.a)], { wrong: 'Проверь по узлу сетки.',
           after: solutionTex(sol) })];

@@ -937,6 +937,7 @@ interface QuadraticHintPart {
 
 interface QuadraticHint {
   title: string;
+  reminder: string | null;
   chart: 'aux' | 'symmetry' | null;
   chartFrom: number;
   parts: QuadraticHintPart[];
@@ -990,6 +991,9 @@ function quadraticSteps(task: EngineTask): TrainerStep[] {
         return out;
       }),
     };
+    if (hint.reminder) {
+      step.reminderHtml = big(hint.reminder);
+    }
     if (hint.chart === 'aux') {
       const svg = QuadraticAux.auxSvg(meta, facts('slope').point ?? null) as string | null;
       if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
