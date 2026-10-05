@@ -13,6 +13,12 @@
    прототип. Опорные задачи повышенной сложности (косинус с тремя
    знаками) — отдельно: их значения в генераторах не встречаются.
 
+   Страницы раздела: девятнадцать опорных задач на зафиксированных
+   seed (рисунок с катетами чист), микрозадачи тренировок навыков на
+   зафиксированном и случайных seed (рисунок условия без катетов,
+   варианты различны, верный отвечает рисунку), сцены теории и все
+   формулы текстов — KaTeX строго.
+
    Запуск: pnpm test:vektory [seeds]
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
@@ -25,8 +31,15 @@ const katex = require('katex');
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
 const seeds = Number(process.argv[2] ?? 1000);
-const { checkRenderer, checkGenerators, checkBank, checkOpornyeKosinus } =
-  requireSrc('lib/vektory/selftest');
+const {
+  checkRenderer,
+  checkGenerators,
+  checkBank,
+  checkOpornyeKosinus,
+  checkOpornye,
+  checkMikro,
+  checkStsenyITeksty,
+} = requireSrc('lib/vektory/selftest');
 
 const renderer = checkRenderer(Math.min(seeds, 300));
 console.log(`движок рисунков: ${renderer.rendered} рисунков, проблем ${renderer.problems.length}`);
@@ -44,7 +57,28 @@ console.log(
   `опорные (косинус с тремя знаками): ${opornye.generated} задач, проблем ${opornye.problems.length}`,
 );
 
-const problems = [...renderer.problems, ...gen.problems, ...bank.problems, ...opornye.problems];
+const opornye19 = checkOpornye(typeset);
+console.log(
+  `опорные по прототипам: ${opornye19.generated} задач, проблем ${opornye19.problems.length}`,
+);
+const mikro = checkMikro(Math.min(seeds, 200), typeset);
+console.log(
+  `тренировки навыков: ${mikro.prototypes} микрозадач, ${mikro.generated} вариантов, проблем ${mikro.problems.length}`,
+);
+const stseny = checkStsenyITeksty(typeset);
+console.log(
+  `сцены теории и тексты: ${stseny.prototypes} сцен, ${stseny.generated} текстов, проблем ${stseny.problems.length}`,
+);
+
+const problems = [
+  ...renderer.problems,
+  ...gen.problems,
+  ...bank.problems,
+  ...opornye.problems,
+  ...opornye19.problems,
+  ...mikro.problems,
+  ...stseny.problems,
+];
 const shown = new Map();
 for (const p of problems) {
   const key = `${p.where} — ${p.what.slice(0, 100)}`;

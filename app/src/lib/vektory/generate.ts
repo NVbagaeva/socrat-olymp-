@@ -48,3 +48,8 @@ export function generate(prototypeId: string, seed: string): Generated {
   }
   throw new Error(`Прототип ${prototypeId}: не подобрались параметры на seed ${seed}`);
 }
+
+/** Seed опорной задачи прототипа: одна разобранная задача на прототип. */
+export function opornayaSeed(prototypeId: string): string {
+  return `${prototypeId}#opornaya`;
+}

@@ -1,11 +1,26 @@
 'use client';
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
 import { TopicContents } from '@/components/tasks/TopicContents';
 import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
+import { markSectionRead } from '@/lib/theoryRead';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
+
+export interface TeoriyaDekor {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  note: string;
+}
+
+/** Декор колонки содержания без картинки-файла: готовый узел (рисунок движка №2). */
+export interface TeoriyaDekorUzel {
+  kartinka: ReactNode;
+  note: string;
+}
 
 export interface TeoriyaShellProps {
   /** Название вкладки — заголовок панели (H2). */
@@ -13,6 +28,13 @@ export interface TeoriyaShellProps {
   razdely: readonly TeoriyaRazdel[];
   /** Готовые тела разделов по идентификатору. Нет тела — «Материал готовится». */
   tela: Record<string, ReactNode>;
+  /**
+   * Картинка с подписью под содержанием. Не задана — декор задания
+   * №4; другому заданию (№2) нужен свой.
+   */
+  dekor?: TeoriyaDekor | TeoriyaDekorUzel;
+  /** Разделы, до конца которых долистал ученик, запоминаются под этим ключом (lib/theoryRead). */
+  trackKey?: string;
 }
 
 /** Якорь раздела на странице. */
@@ -32,7 +54,13 @@ function razdelId(id: string): string {
  * пропадает из содержания: он есть в плане темы, просто ещё не
  * написан, и говорит об этом строкой.
  */
-export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
+export function TeoriyaShell({
+  vkladka,
+  razdely,
+  tela,
+  dekor = TEORIYA_DEKOR,
+  trackKey,
+}: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
   const [shtorka, setShtorka] = useState(false);
@@ -40,6 +68,46 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
      экраном — тот же хук, что у теории №12. */
   const ids = useMemo(() => razdely.map((razdel) => razdel.id), [razdely]);
   const zakrepit = useActiveSection(ids, razdelId, true, setAktivnyy);
+
+  /* Прочитанные разделы — тем же правилом, что у теории №12: раздел
+     засчитан, когда его нижний край поднялся выше середины экрана;
+     последний — когда долистали до низа страницы. Без ключа ничего
+     не считается. */
+  useEffect(() => {
+    if (trackKey === undefined) {
+      return undefined;
+    }
+    const key = trackKey;
+    const last = razdely[razdely.length - 1];
+    let waiting = false;
+    function scan() {
+      waiting = false;
+      const line = window.innerHeight / 2;
+      razdely.forEach((razdel) => {
+        const node = document.getElementById(razdelId(razdel.id));
+        if (node !== null && node.getBoundingClientRect().bottom <= line) {
+          markSectionRead(key, razdel.id);
+        }
+      });
+      const seen = window.scrollY + window.innerHeight;
+      if (last !== undefined && seen >= document.documentElement.scrollHeight - 4) {
+        markSectionRead(key, last.id);
+      }
+    }
+    function onScroll() {
+      if (waiting) {
+        return;
+      }
+      waiting = true;
+      requestAnimationFrame(scan);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [razdely, trackKey]);
 
   const scrollTo = useCallback((id: string) => {
     const node = document.getElementById(razdelId(id));
@@ -121,14 +189,18 @@ export function TeoriyaShell({ vkladka, razdely, tela }: TeoriyaShellProps) {
               не обрывается списком. На узком экране колонки нет, и
               декор не показывается вовсе. */}
           <div className="vteor-side__decor" aria-hidden="true">
-            <Image
-              className="vteor-side__kartinka"
-              src={TEORIYA_DEKOR.src}
-              alt={TEORIYA_DEKOR.alt}
-              width={TEORIYA_DEKOR.width}
-              height={TEORIYA_DEKOR.height}
-            />
-            <HandNote className="topic-side__note">{TEORIYA_DEKOR.note}</HandNote>
+            {'src' in dekor ? (
+              <Image
+                className="vteor-side__kartinka"
+                src={dekor.src}
+                alt={dekor.alt}
+                width={dekor.width}
+                height={dekor.height}
+              />
+            ) : (
+              <div className="vteor-side__kartinka">{dekor.kartinka}</div>
+            )}
+            <HandNote className="topic-side__note">{dekor.note}</HandNote>
           </div>
         </aside>
       </div>

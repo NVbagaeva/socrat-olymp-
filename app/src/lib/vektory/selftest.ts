@@ -24,7 +24,7 @@
 import { THEME } from '@/lib/graph/renderer.js';
 import { nice, ru } from '../vychisleniya/numbers';
 import { BANK } from './bank';
-import { generate, risunokChist } from './generate';
+import { generate, opornayaSeed, risunokChist } from './generate';
 import { pointSegDist, rectGap, segRectDist, segSegDist, type Rect, type Seg } from './geometry';
 import { OBRAZTSY } from './obraztsy';
 import { PROTOTYPES } from './prototypes';
@@ -36,6 +36,11 @@ import {
 import { kosoy } from './troyki';
 import { emptyReport, renderVectorPlane } from './render';
 import type { Box, Generated, Report, Risunok, Tochka, Vektor } from './types';
+import { BLOKI } from './prep/bloki';
+import { fixedSeed, generateMikro } from './prep/generate';
+import { STSENY_IDS, stsena } from './stseny';
+import { RAZDELY_TEORII } from '@/content/theoryVektory';
+import { O_ZADANII } from '@/content/vektory';
 
 export interface Problem {
   where: string;
@@ -650,4 +655,183 @@ export function checkOpornyeKosinus(typeset: Typeset): GenReport {
     problems.push({ where: 'опорные', what: 'задач повышенной сложности меньше двух' });
   }
   return { prototypes: 1, generated: OPORNYE_KOSINUS_TRI_ZNAKA.length, problems };
+}
+
+/* ── Страницы раздела: опорные задачи, тренировки, теория ───────── */
+
+/** Формулы в тексте: всё между долларами. */
+function formulyTeksta(text: string): string[] {
+  return [...text.matchAll(/\$([^$]+)\$/g)].map((m) => m[1] as string);
+}
+
+function proverit(push: (what: string) => void, typeset: Typeset, tex: string): void {
+  if (typeset === null) return;
+  try {
+    typeset(tex);
+  } catch (error) {
+    push(`KaTeX не принял «${tex}»: ${String(error)}`);
+  }
+}
+
+/**
+ * Опорные задачи по прототипам: девятнадцать задач на зафиксированных
+ * seed проходят проверку генератора, а их рисунок чист и в режиме
+ * подсказки — с катетами, которые здесь обязательны.
+ */
+export function checkOpornye(typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  let generated = 0;
+  for (const p of PROTOTYPES) {
+    const where = `опорная ${p.id}`;
+    const push = (what: string) => problems.push({ where, what });
+    let task: Generated;
+    try {
+      task = generate(p.id, opornayaSeed(p.id));
+    } catch (error) {
+      push(`не собралась: ${String(error)}`);
+      continue;
+    }
+    generated += 1;
+    problems.push(...checkTask(task, typeset));
+    if (task.risunok !== null) {
+      const sPodskazkoy: Risunok = { ...task.risunok, hints: true };
+      problems.push(...checkRisunok(`${where} (катеты)`, sPodskazkoy));
+      const svg = renderVectorPlane(sPodskazkoy);
+      if (task.risunok.grid !== false && !svg.includes('data-hint')) {
+        push('в режиме подсказки на рисунке нет катетов');
+      }
+    }
+  }
+  return { prototypes: PROTOTYPES.length, generated, problems };
+}
+
+/**
+ * Тренировки навыков: каждая микрозадача на зафиксированном seed и
+ * на N случайных. Ответ — число не длиннее двух знаков или номер
+ * варианта; варианты различны и верный отвечает рисунку; рисунок
+ * условия без катетов и по ограничениям, рисунок разбора с катетами
+ * чист; формулы собираются KaTeX строго. Шесть зафиксированных
+ * задач блока не повторяют друг друга.
+ */
+export function checkMikro(seeds: number, typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  let generated = 0;
+  let prototypes = 0;
+  for (const blok of BLOKI) {
+    for (const f of [blok.formula, ...blok.formuly]) {
+      proverit((what) => problems.push({ where: `блок ${blok.id}`, what }), typeset, f);
+    }
+    const fixed = new Set<string>();
+    for (const m of blok.zadachi) {
+      prototypes += 1;
+      proverit((what) => problems.push({ where: m.id, what }), typeset, m.formula);
+      const list = [fixedSeed(m), ...Array.from({ length: seeds }, (_, i) => `t${i}`)];
+      for (const seed of list) {
+        const where = `${m.id} seed=${seed}`;
+        const push = (what: string) => problems.push({ where, what });
+        let task;
+        try {
+          task = generateMikro(m.id, seed);
+        } catch (error) {
+          push(`не собралась: ${String(error)}`);
+          continue;
+        }
+        generated += 1;
+        const texts = [task.uslovie, ...task.razbor, ...(task.vybory ?? []).map((v) => v.label)];
+        if (/NaN|Infinity|undefined/.test(texts.join(''))) push('NaN или undefined в тексте');
+        if (task.razbor.length === 0) push('разбор пуст');
+        if (m.answerType === 'number') {
+          if (typeof task.otvet !== 'number' || !Number.isFinite(task.otvet)) {
+            push(`ответ не число: ${String(task.otvet)}`);
+          } else if (!nice(task.otvet, 2)) {
+            push(`ответ не целый и не десятичная дробь до 2 знаков: ${task.otvet}`);
+          }
+          if (task.vybory !== undefined) push('у числовой задачи есть варианты');
+        } else {
+          const vybory = task.vybory ?? [];
+          if (vybory.length !== 4) push(`вариантов ${vybory.length}, а не 4`);
+          if (new Set(vybory.map((v) => v.label)).size !== vybory.length)
+            push('варианты повторяются');
+          const verno = vybory.find((v) => v.number === task.otvet);
+          if (verno === undefined) {
+            push(`ответ «${String(task.otvet)}» не среди номеров вариантов`);
+          } else if (task.risunok !== null) {
+            /* Верный вариант — координаты вектора с рисунка: конец минус начало. */
+            const v = task.risunok.vectors[0] as Vektor;
+            const chisla = (verno.label.match(/-?\d+/g) ?? []).map(Number);
+            if (
+              chisla.length !== 2 ||
+              chisla[0] !== v.to[0] - v.from[0] ||
+              chisla[1] !== v.to[1] - v.from[1]
+            ) {
+              push(`верный вариант «${verno.label}» не отвечает рисунку`);
+            }
+          }
+        }
+        if (task.risunok !== null) {
+          problems.push(...checkRisunokZadachi(where, task.risunok));
+          problems.push(...checkRisunok(`${where} (разбор)`, { ...task.risunok, hints: true }));
+        }
+        for (const text of texts) {
+          for (const tex of formulyTeksta(text)) proverit(push, typeset, tex);
+        }
+        if (seed === fixedSeed(m)) {
+          const key =
+            task.uslovie +
+            JSON.stringify(task.risunok?.vectors ?? null) +
+            JSON.stringify(task.vybory ?? null);
+          if (fixed.has(key)) push('зафиксированная задача повторяет другую в блоке');
+          fixed.add(key);
+        }
+      }
+    }
+  }
+  return { prototypes, generated, problems };
+}
+
+/**
+ * Сцены теории и тексты вкладок: каждый рисунок собирается без NaN и
+ * с подписями на месте (векторы с общим началом и концом в сценах
+ * допустимы — это иллюстрации суммы и разности, не задачи), все
+ * формулы теории и вкладки «О задании» собираются KaTeX строго.
+ */
+export function checkStsenyITeksty(typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  for (const id of STSENY_IDS) {
+    const found = checkRisunok(`сцена ${id}`, stsena(id)).filter(
+      (p) => !/пересекаются или касаются|ближе клетки/.test(p.what),
+    );
+    problems.push(...found);
+  }
+  const teksty: { where: string; text: string }[] = [];
+  for (const r of RAZDELY_TEORII) {
+    const where = `теория ${r.id}`;
+    teksty.push({ where, text: r.section.lead });
+    for (const card of r.section.cards) {
+      if (card.formula !== undefined) teksty.push({ where, text: `$${card.formula}$` });
+      for (const t of [
+        ...card.text,
+        ...(card.formulaNotes ?? []),
+        ...(card.lines ?? []).map((l) => `$${l}$`),
+      ]) {
+        teksty.push({ where, text: t });
+      }
+      if (card.table !== undefined) {
+        for (const t of [...card.table.head, ...card.table.rows.flat()])
+          teksty.push({ where, text: t });
+      }
+      if (card.scene !== undefined && !STSENY_IDS.includes(card.scene)) {
+        problems.push({ where, what: `нет сцены ${card.scene}` });
+      }
+    }
+    for (const t of r.section.remember) teksty.push({ where, text: t });
+  }
+  teksty.push({ where: 'о задании', text: O_ZADANII.format.text });
+  for (const o of O_ZADANII.oshibki) teksty.push({ where: `о задании: ${o.id}`, text: o.text });
+  for (const { where, text } of teksty) {
+    for (const tex of formulyTeksta(text)) {
+      proverit((what) => problems.push({ where, what }), typeset, tex);
+    }
+  }
+  return { prototypes: STSENY_IDS.length, generated: teksty.length, problems };
 }
