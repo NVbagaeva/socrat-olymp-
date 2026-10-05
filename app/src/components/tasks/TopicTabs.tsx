@@ -12,6 +12,7 @@ import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
 import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
+import { useStickyTabs } from './useStickyTabs';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -156,9 +157,15 @@ export function TopicTabs({
   /* Лента вкладок прокручивается вбок: нужен сам узел, чтобы подводить
      к активной вкладке. */
   const strip = useRef<HTMLDivElement>(null);
+  /* Лента прилипает к верху экрана (общий хук всех разделов). */
+  useStickyTabs(strip);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
-  const items = theory.map((item) => ({ id: item.id, title: item.title, titleHtml: item.titleHtml }));
+  const items = theory.map((item) => ({
+    id: item.id,
+    title: item.title,
+    titleHtml: item.titleHtml,
+  }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
      происходит, без ошибки в консоли. */

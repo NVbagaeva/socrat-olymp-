@@ -1,6 +1,8 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRef } from 'react';
+import { useStickyTabs } from '@/components/tasks/useStickyTabs';
 import { EmptyState, Tabs } from '@/components/ui';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
@@ -53,6 +55,9 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const strip = useRef<HTMLDivElement>(null);
+  /* Лента прилипает к верху экрана (общий хук всех разделов). */
+  useStickyTabs(strip);
 
   const requested = params.get('tab');
   const active = requested !== null && IDS.has(requested) ? requested : 'subtopics';
@@ -65,7 +70,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
   return (
     <>
       <div className="topic-tabs-row">
-        <div className="topic-tabs">
+        <div className="topic-tabs" ref={strip}>
           <Tabs
             className="tabs--lenta"
             items={TABS}

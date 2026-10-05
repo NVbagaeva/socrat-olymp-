@@ -6,6 +6,7 @@ import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
+import { useStickyTabs } from './useStickyTabs';
 import { VkladkaIkonka } from './VkladkaIkonka';
 
 export interface RazdelTabsProps {
@@ -42,6 +43,8 @@ export interface RazdelTabsProps {
 export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) {
   const pathname = usePathname();
   const strip = useRef<HTMLDivElement>(null);
+  /* Лента прилипает к верху экрана (общий хук всех разделов). */
+  useStickyTabs(strip);
   const tail = pathname.replace(base, '').replace(/^\/+/, '');
   /* Адрес известен и на сборке, поэтому разметка сервера и первая
      отрисовка совпадают. */
