@@ -122,8 +122,8 @@ export function useActiveSection(
         }
       },
       /* Полоса наблюдения — от низа липких полос (лента вкладок и
-         «Содержание», вместе до ~90px) до верхних 40% экрана. */
-      { rootMargin: '-96px 0px -60% 0px' },
+         «Содержание», вместе до ~110px) до верхних 40% экрана. */
+      { rootMargin: '-112px 0px -60% 0px' },
     );
 
     nodes.forEach((node) => observer.observe(node));

@@ -401,7 +401,8 @@
   }
   .cfg-summary {
     position: sticky;
-    top: var(--space-6);
+    /* Под прилипшей лентой вкладок. */
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
   }
 }
 
