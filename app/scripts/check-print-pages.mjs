@@ -70,7 +70,14 @@ function pdfPages(file) {
   const pages = Number(/Pages:\s+(\d+)/.exec(execFileSync('pdfinfo', [file]).toString())[1]);
   let blank = 0;
   for (let i = 1; i <= pages; i++) {
-    const text = execFileSync('pdftotext', ['-f', String(i), '-l', String(i), file, '-']).toString();
+    const text = execFileSync('pdftotext', [
+      '-f',
+      String(i),
+      '-l',
+      String(i),
+      file,
+      '-',
+    ]).toString();
     if (text.trim() === '') {
       blank += 1;
     }
@@ -92,7 +99,10 @@ async function openSheet(browser, url) {
   /* Номер последней страницы из колонтитула «N / M». */
   const declared = await page.evaluate(() => {
     const pages = [...document.querySelectorAll('#sheet-pages .sheet-page')];
-    const last = pages.at(-1)?.innerText.match(/(\d+)\s*\/\s*(\d+)/g)?.at(-1);
+    const last = pages
+      .at(-1)
+      ?.innerText.match(/(\d+)\s*\/\s*(\d+)/g)
+      ?.at(-1);
     return { pages: pages.length, footer: last ? Number(last.split('/')[1]) : null };
   });
   return { page, declared };
@@ -139,7 +149,13 @@ for (const [name, route, query] of SHEETS) {
         });
       }
       const file = path.join(tmp, `${route.replace(/\W/g, '')}-${who}-${height}.pdf`);
-      await page.pdf({ path: file, width: '210mm', height, printBackground: true, preferCSSPageSize: label.startsWith('A4') });
+      await page.pdf({
+        path: file,
+        width: '210mm',
+        height,
+        printBackground: true,
+        preferCSSPageSize: label.startsWith('A4'),
+      });
       const { pages, blank } = pdfPages(file);
       check(
         pages === declared.pages && blank === 0,
@@ -147,7 +163,9 @@ for (const [name, route, query] of SHEETS) {
       );
       cells.push(`${pages}${blank ? ` (пустых ${blank})` : ''}`);
     }
-    rows.push(`${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`);
+    rows.push(
+      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`,
+    );
     await page.close();
   }
 }
@@ -160,7 +178,9 @@ try {
   safari = await webkit.launch();
 } catch (error) {
   if (process.env.CI) {
-    throw new Error('WebKit не установлен: pnpm exec playwright install --with-deps webkit\n' + error.message);
+    throw new Error(
+      'WebKit не установлен: pnpm exec playwright install --with-deps webkit\n' + error.message,
+    );
   }
   console.log('WebKit не установлен — его проверку пропускаю (в CI она обязательна).');
 }
@@ -177,7 +197,9 @@ if (safari !== null) {
       const g = await page.evaluate(() => {
         const pages = [...document.querySelectorAll('#sheet-pages .sheet-page')];
         const heights = pages.map((p) => p.getBoundingClientRect().height);
-        const breaks = pages.map((p) => getComputedStyle(p).breakAfter || getComputedStyle(p).pageBreakAfter);
+        const breaks = pages.map(
+          (p) => getComputedStyle(p).breakAfter || getComputedStyle(p).pageBreakAfter,
+        );
         const printed = document.documentElement.scrollHeight;
         const sum = heights.reduce((a, b) => a + b, 0);
         return {
@@ -190,15 +212,24 @@ if (safari !== null) {
         };
       });
       const maxH = Math.max(...g.heights);
-      check(maxH <= A4_PX - MM, `${name}, ${who}, WebKit: страница ${(maxH / MM).toFixed(2)} мм — нет запаса до A4`);
+      check(
+        maxH <= A4_PX - MM,
+        `${name}, ${who}, WebKit: страница ${(maxH / MM).toFixed(2)} мм — нет запаса до A4`,
+      );
       check(
         Math.abs(g.printed - g.sum) < 2,
         `${name}, ${who}, WebKit: при печати высота документа ${(g.printed / MM).toFixed(1)} мм, а страниц — ${(g.sum / MM).toFixed(1)} мм`,
       );
-      check(g.bg === g.paper, `${name}, ${who}, WebKit: фон при печати ${g.bg}, а не цвет бумаги ${g.paper}`);
+      check(
+        g.bg === g.paper,
+        `${name}, ${who}, WebKit: фон при печати ${g.bg}, а не цвет бумаги ${g.paper}`,
+      );
       const lastAuto = !/page|always/.test(g.breaks.at(-1));
       const othersPage = g.breaks.slice(0, -1).every((b) => /page|always/.test(b));
-      check(lastAuto && othersPage, `${name}, ${who}, WebKit: разрывы страниц ${g.breaks.join(', ')}`);
+      check(
+        lastAuto && othersPage,
+        `${name}, ${who}, WebKit: разрывы страниц ${g.breaks.join(', ')}`,
+      );
       rows.push(
         `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  WebKit: страница ${(maxH / MM).toFixed(1)} мм, ${Math.round(g.printed / A4_PX + 0.49)} листа A4 по высоте документа`,
       );
