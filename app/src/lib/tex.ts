@@ -11,16 +11,40 @@
  */
 
 import { katex } from './graph/katex';
+import { razmetka, type Kusok } from './razmetka';
+
+/** Формула куска: внутри выделения — полужирная, как текст вокруг. */
+function formulaHtml(kusok: Kusok, strogo: boolean): string {
+  const tex = normalizeTex(kusok.text);
+  return katex.renderToString(kusok.strong === true ? `\\boldsymbol{${tex}}` : tex, {
+    throwOnError: strogo,
+    displayMode: false,
+  });
+}
+
+function kuskiHtml(text: string, strogo: boolean, escape: boolean): string {
+  return razmetka(text)
+    .map((kusok) => {
+      if (kusok.math === true) {
+        return formulaHtml(kusok, strogo);
+      }
+      const body = escape
+        ? kusok.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        : kusok.text;
+      return kusok.strong === true ? `<strong>${body}</strong>` : body;
+    })
+    .join('');
+}
 
 /**
- * Текст с формулами → HTML: $...$ набирается KaTeX. `strogo` — ошибка
- * TeX роняет набор, а не оставляет формулу текстом: так набираются
- * разборы заданий №4 и №5, у которых формула обязана собраться.
+ * Текст с формулами → HTML: $...$ набирается KaTeX, **…** — полужирное,
+ * в том числе вокруг формул (разбор — lib/razmetka.ts). `strogo` —
+ * ошибка TeX роняет набор, а не оставляет формулу текстом: так
+ * набираются разборы заданий №4 и №5, у которых формула обязана
+ * собраться.
  */
 export function typeset(text: string, strogo = false): string {
-  return text.replace(/\$([^$]+)\$/g, (_match, formula: string) =>
-    katex.renderToString(normalizeTex(formula), { throwOnError: strogo, displayMode: false }),
-  );
+  return kuskiHtml(text, strogo, false);
 }
 
 /**
@@ -29,14 +53,7 @@ export function typeset(text: string, strogo = false): string {
  * выводилась текстом и могла содержать эти знаки как есть.
  */
 export function typesetText(text: string): string {
-  return text
-    .split(/(\$[^$]+\$)/)
-    .map((piece, index) =>
-      index % 2 === 1
-        ? typeset(piece)
-        : piece.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
-    )
-    .join('');
+  return kuskiHtml(text, false, true);
 }
 
 /* Знаки, которые приходят в формулу из подстановок: имя вершины
@@ -44,7 +61,13 @@ export function typesetText(text: string): string {
    знает (₁), либо набирает не по-математически (запятая с отбивкой),
    поэтому перед набором они переводятся в запись TeX. */
 const SUBSCRIPT = '₀₁₂₃₄₅₆₇₈₉';
-const VULGAR: Record<string, string> = { '½': '\\tfrac12', '⅓': '\\tfrac13', '⅔': '\\tfrac23', '¼': '\\tfrac14', '¾': '\\tfrac34' };
+const VULGAR: Record<string, string> = {
+  '½': '\\tfrac12',
+  '⅓': '\\tfrac13',
+  '⅔': '\\tfrac23',
+  '¼': '\\tfrac14',
+  '¾': '\\tfrac34',
+};
 
 export function normalizeTex(formula: string): string {
   return formula

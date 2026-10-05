@@ -186,7 +186,7 @@ export function collectBlocks(withAnswers) {
             no: number,
             id: model.id,
             method: model.method,
-            questionHtml: typo.escape(model.condition),
+            questionHtml: typo.mathText(model.condition),
             options: null,
             figureSvg: null,
             answer: model.answer.display,

@@ -35,10 +35,6 @@ export function Opornye2List({ bloki, listHref, pool }: Opornye2ListProps) {
                 <span className="prep-card__title">{b.nazvanie}</span>
                 <span className="prep-card__lead">{b.lead}</span>
               </span>
-              <span
-                className="prep-card__chart z2-card-formula"
-                dangerouslySetInnerHTML={{ __html: b.formulaHtml }}
-              />
               <span className="prep-card__count">
                 <TaskCountIcon />
                 {b.zadachi.length} заданий

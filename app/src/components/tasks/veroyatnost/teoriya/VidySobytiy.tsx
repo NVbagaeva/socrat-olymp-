@@ -5,6 +5,7 @@ import { PROVER_SEBYA, SVYAZANY, VIDY_SOBYTIY } from '@/content/veroyatnost-teor
 import { typeset } from '@/lib/tex';
 import { voprosyVidovSobytiy } from '@/lib/veroyatnost/teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
+import { Tex } from '../Tex';
 import { KrugiIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';
 import { ProverSebya } from './ProverSebya';
 
@@ -37,10 +38,12 @@ export function VidySobytiy() {
           {kartochki.map((karta) => (
             <li className={clsx('vvid', `vvid--${karta.ton}`)} key={karta.id}>
               <h4 className="vvid__title">{karta.title}</h4>
-              <p className="vvid__opredelenie">{karta.opredelenie}</p>
+              <p className="vvid__opredelenie">
+                <Tex text={karta.opredelenie} />
+              </p>
               <Formula tex={karta.formula} />
               <p className="vvid__primer">
-                <b>{primerLabel}</b> {karta.primer}
+                <b>{primerLabel}</b> <Tex text={karta.primer} />
               </p>
 
               {'kartinka' in karta ? (
@@ -161,12 +164,16 @@ export function VidySobytiy() {
               </span>
               <div className="vsvyaz__text">
                 <h4 className="vsvyaz__title">{karta.title}</h4>
-                <p className="vsvyaz__opredelenie">{karta.opredelenie}</p>
+                <p className="vsvyaz__opredelenie">
+                  <Tex text={karta.opredelenie} />
+                </p>
                 {'raznitsa' in karta ? (
-                  <p className="vsvyaz__opredelenie">{karta.raznitsa}</p>
+                  <p className="vsvyaz__opredelenie">
+                    <Tex text={karta.raznitsa} />
+                  </p>
                 ) : null}
                 <p className="vsvyaz__primer">
-                  <b>{primerLabel}</b> {karta.primer}
+                  <b>{primerLabel}</b> <Tex text={karta.primer} />
                 </p>
               </div>
               <figure className="vsvyaz__figura">

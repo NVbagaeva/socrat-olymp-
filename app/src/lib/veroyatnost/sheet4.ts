@@ -236,7 +236,7 @@ function blokiIz(vybor: Vybor[], withAnswers: boolean): Sheet4Block[] {
     return {
       no: i + 1,
       id: `${kind.id}-${variant.n}`,
-      questionHtml: typo.escape(variant.uslovie),
+      questionHtml: typo.mathText(variant.uslovie),
       options: null,
       figureSvg: null,
       answer: razbor === null ? '' : razbor.otvet,

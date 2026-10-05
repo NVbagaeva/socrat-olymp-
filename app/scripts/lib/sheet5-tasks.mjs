@@ -72,7 +72,7 @@ function konspektTask(zadacha, withAnswers) {
   const task = {
     id: zadacha.id,
     method: null,
-    questionHtml: typo.escape(zadacha.uslovie),
+    questionHtml: typo.mathText(zadacha.uslovie),
     options: null,
     figureSvg: null,
     answer,
@@ -98,7 +98,7 @@ function prototypeTask(prototype, withAnswers) {
   const task = {
     id: model.id,
     method: model.method,
-    questionHtml: typo.escape(model.condition),
+    questionHtml: typo.mathText(model.condition),
     options: null,
     figureSvg: null,
     answer: model.answer.display,

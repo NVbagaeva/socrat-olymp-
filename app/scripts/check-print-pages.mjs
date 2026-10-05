@@ -21,6 +21,11 @@
        помещается в A4 с запасом, вне страниц ничего не печатается, фон
        белый, разрыв после каждой страницы, кроме последней.
 
+   Сырой TeX — формула, которую KaTeX не набрал («$D$», «\\vec{a}»,
+   «0{,}6») — ищется в тексте каждого листа после набора, в каждом
+   напечатанном PDF и в готовых сборниках out/materials/**.pdf:
+   в видимом тексте его быть не должно (scripts/lib/math-markup.mjs).
+
    Запуск после pnpm build:  node scripts/check-print-pages.mjs
    Нужны apache2, Chromium и WebKit (Playwright). Без WebKit проверка
    падает в CI (переменная CI) и пропускает его на своём компьютере. */
@@ -32,6 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
+import { findRawTex } from './lib/math-markup.mjs';
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
@@ -65,6 +71,31 @@ function check(ok, what) {
     failures.push(what);
   }
   return ok;
+}
+
+/** Сырой TeX в тексте: короткая выдержка вокруг первых находок. */
+function syroyTex(text) {
+  const flat = text.replace(/\s+/g, ' ');
+  const hits = findRawTex(flat);
+  return hits.slice(0, 3).map((h) => `«${flat.slice(Math.max(0, h.at - 30), h.at + 30).trim()}»`);
+}
+
+function pdfText(file) {
+  return execFileSync('pdftotext', ['-q', file, '-']).toString();
+}
+
+/** Текст листа после набора — без MathML-копий формул: в них TeX законно. */
+async function sheetText(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector('#sheet-pages')?.cloneNode(true);
+    if (!root) {
+      return '';
+    }
+    root
+      .querySelectorAll('.katex-mathml, annotation, script, style, svg')
+      .forEach((n) => n.remove());
+    return root.textContent ?? '';
+  });
 }
 
 function pdfPages(file) {
@@ -128,6 +159,8 @@ for (const [name, route, query] of SHEETS) {
       declared.footer === declared.pages,
       `${name}, ${who}: в колонтитуле ${declared.footer} стр., а набрано ${declared.pages}`,
     );
+    const syroy = syroyTex(await sheetText(page));
+    check(syroy.length === 0, `${name}, ${who}: сырой TeX на листе — ${syroy.join(', ')}`);
     const cells = [];
     for (const [label, height] of PAPER) {
       if (!label.startsWith('A4')) {
@@ -158,6 +191,10 @@ for (const [name, route, query] of SHEETS) {
         preferCSSPageSize: label.startsWith('A4'),
       });
       const { pages, blank } = pdfPages(file);
+      if (label.startsWith('A4')) {
+        const vPdf = syroyTex(pdfText(file));
+        check(vPdf.length === 0, `${name}, ${who}: сырой TeX в PDF — ${vPdf.join(', ')}`);
+      }
       check(
         pages === declared.pages && blank === 0,
         `${name}, ${who}, бумага ${label}: PDF ${pages} стр. (пустых ${blank}), в листе ${declared.pages}`,
@@ -170,7 +207,29 @@ for (const [name, route, query] of SHEETS) {
     await page.close();
   }
 }
+/* Ключ ответов банка №2: лист без задач, только таблицы ответов. */
+for (const [name, route] of [['№2 ключ', '/zadaniya/2/pechat/klyuch/?t=print']]) {
+  const { page } = await openSheet(chrome, `${apache.url}${route}`);
+  const syroy = syroyTex(await sheetText(page));
+  check(syroy.length === 0, `${name}: сырой TeX на листе — ${syroy.join(', ')}`);
+  await page.close();
+}
 await chrome.close();
+
+/* ── Готовые сборники: PDF в out/materials ─────────────────────── */
+
+const materials = path.join(OUT, 'materials');
+const sborniki = fs.existsSync(materials)
+  ? fs
+      .readdirSync(materials, { recursive: true })
+      .map(String)
+      .filter((f) => f.endsWith('.pdf'))
+  : [];
+for (const rel of sborniki) {
+  const syroy = syroyTex(pdfText(path.join(materials, rel)));
+  check(syroy.length === 0, `сборник materials/${rel}: сырой TeX — ${syroy.join(', ')}`);
+}
+rows.push(`Сборники PDF в out/materials: ${sborniki.length}, проверены на сырой TeX`);
 
 /* ── WebKit: вёрстка в режиме печати ───────────────────────────── */
 

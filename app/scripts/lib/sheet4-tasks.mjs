@@ -150,7 +150,7 @@ export function collectSections(withAnswers) {
           no: number,
           id: model.id,
           method: model.method,
-          questionHtml: typo.escape(model.condition),
+          questionHtml: typo.mathText(model.condition),
           options: null,
           figureSvg: svg,
           figureWidth: size.width,
@@ -186,7 +186,7 @@ export function examples() {
     return {
       label: example.label,
       title: example.title,
-      conditionHtml: typo.escape(example.condition),
+      conditionHtml: typo.mathText(example.condition),
       solutionHtml: answers.steps(
         example.steps.map((step) => ({ text: step.text, tex: step.formula, plain: model.texPlain(step.formula) })),
         example.answer),

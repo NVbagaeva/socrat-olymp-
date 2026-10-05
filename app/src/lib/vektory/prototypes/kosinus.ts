@@ -36,7 +36,7 @@ export interface Para {
 const cache = new Map<number, Para[]>();
 
 /** Все пары с |x|, |y| ≤ bound, рациональным произведением длин и «хорошим» косинусом. */
-function pary(bound: number): Para[] {
+export function pary(bound: number): Para[] {
   const got = cache.get(bound);
   if (got !== undefined) {
     return got;

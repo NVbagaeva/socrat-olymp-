@@ -177,22 +177,6 @@
   line-height: var(--lh-body);
 }
 
-/* Формула на карточке блока: там, где у №12 чертёж. */
-.z2-card-formula {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 64px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  color: var(--color-text);
-  font-size: var(--fs-body);
-}
-.z2-card-formula .katex {
-  white-space: nowrap;
-}
-
 /* Рисунок условия микрозадачи: без катетов. */
 .z2-ptask__pic {
   width: 100%;

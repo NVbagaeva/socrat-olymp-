@@ -18,9 +18,8 @@ export const BLOKI: Blok[] = [
     no: '01',
     nazvanie: 'Координаты вектора по рисунку',
     lead: 'Катеты в клетках и знак по направлению',
-    formula: '\\vec{AB}\\,(x_2 - x_1;\\ y_2 - y_1)',
     formuly: [
-      '\\vec{AB}\\,(x_2 - x_1;\\ y_2 - y_1)',
+      '\\overrightarrow{AB}\\,(x_2 - x_1;\\ y_2 - y_1)',
       'x_2 > x_1 \\Rightarrow x > 0,\\quad x_2 < x_1 \\Rightarrow x < 0',
     ],
     zadachi: BLOK_KOORDINATY,
@@ -31,7 +30,6 @@ export const BLOKI: Blok[] = [
     no: '02',
     nazvanie: 'Действия с векторами',
     lead: 'Сумма, разность и умножение на число покоординатно',
-    formula: 'k\\vec{a} + m\\vec{b} = (kx_1 + mx_2;\\ ky_1 + my_2)',
     formuly: [
       '\\vec{a} + \\vec{b} = (x_1 + x_2;\\ y_1 + y_2)',
       '\\vec{a} - \\vec{b} = (x_1 - x_2;\\ y_1 - y_2)',
@@ -45,7 +43,6 @@ export const BLOKI: Blok[] = [
     no: '03',
     nazvanie: 'Длина вектора',
     lead: 'По координатам и по рисунку',
-    formula: '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
     formuly: [
       '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
       '3^2 + 4^2 = 5^2,\\quad 5^2 + 12^2 = 13^2,\\quad 8^2 + 15^2 = 17^2',
@@ -58,7 +55,6 @@ export const BLOKI: Blok[] = [
     no: '04',
     nazvanie: 'Скалярное произведение по координатам',
     lead: 'Абсциссы на абсциссы, ординаты на ординаты, сложить',
-    formula: '\\vec{a}\\cdot\\vec{b} = x_1x_2 + y_1y_2',
     formuly: [
       '\\vec{a}\\cdot\\vec{b} = x_1x_2 + y_1y_2',
       '\\vec{a}\\cdot\\vec{b} = \\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|\\cdot\\cos\\alpha',
@@ -71,8 +67,6 @@ export const BLOKI: Blok[] = [
     no: '05',
     nazvanie: 'Косинус угла',
     lead: 'Скалярное произведение, длины, деление',
-    formula:
-      '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}',
     formuly: [
       '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}',
       '\\cos\\alpha = \\dfrac{x_1x_2 + y_1y_2}{\\sqrt{x_1^2 + y_1^2}\\cdot\\sqrt{x_2^2 + y_2^2}}',
