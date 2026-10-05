@@ -393,3 +393,218 @@
     font-size: var(--fs-body);
   }
 }
+
+/* ── Вкладки «Тренажёр» и «Генератор» ─────────────────────────── */
+
+/* Миниатюра прототипа на карточке конфигуратора: рисунок движка или
+   формула — там, где у №12 чертёж. */
+.z2-mini {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.z2-formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z2-formula .katex {
+  white-space: nowrap;
+}
+.z2-summary-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.z2-summary-chart .z2-formula {
+  min-height: 72px;
+  font-size: var(--fs-lg);
+}
+.z2-summary-chart .z2-mini {
+  max-width: 240px;
+}
+
+/* Группа прототипов в конфигураторе: подпись с кодом группы над
+   карточками. */
+.z2-skills + .z2-skills {
+  margin-top: var(--space-5);
+}
+.z2-skills__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z2-skills__all {
+  margin-left: auto;
+}
+.cfg-summary__skill .katex,
+.cfg-summary__list .katex,
+.z2-skills .katex {
+  white-space: nowrap;
+}
+
+/* Seed варианта: поле и кнопка «Новый seed» в строку. */
+.z2-seed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z2-seed .cfg-input {
+  flex: 1 1 220px;
+}
+.z2-seed__lead {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.z2-seed__now {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--fs-caption);
+  color: var(--color-text);
+}
+
+/* Экран задания тренажёра: рисунок условия, подсказка под ответом. */
+.z2-ttask .ptask__chart {
+  width: 100%;
+  max-width: 420px;
+}
+.z2-ttask__hint {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.z2-ttask .z2-razbor__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── Вкладка «Для репетиторов» ────────────────────────────────── */
+
+.z2-rep__head {
+  max-width: 72ch;
+}
+.z2-rep__lead {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z2-rep__params {
+  margin-top: var(--space-4);
+}
+.z2-rep__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+.z2-rep-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z2-rep-card__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.z2-rep-card__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z2-rep-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z2-rep-card__note {
+  color: var(--color-text-secondary);
+}
+.z2-rep__sub {
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-2);
+}
+.z2-rep-group {
+  margin-top: var(--space-5);
+}
+.z2-rep-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z2-rep-table th,
+.z2-rep-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+.z2-rep-table thead th {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z2-rep-table__code {
+  width: 3em;
+  color: var(--color-text-brand);
+  font-weight: 700;
+}
+.z2-rep-table__n {
+  width: 6em;
+  text-align: center;
+}
+.z2-rep-table__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.z2-rep-table .katex {
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .z2-rep-table thead {
+    display: none;
+  }
+  .z2-rep-table tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .z2-rep-table th,
+  .z2-rep-table td {
+    padding: 0;
+    border: 0;
+  }
+  .z2-rep-table__n {
+    display: none;
+  }
+  .z2-rep-table__links {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    margin-top: var(--space-2);
+  }
+  .z2-ttask .ptask__chart,
+  .z2-summary-chart .z2-mini {
+    max-width: none;
+  }
+}

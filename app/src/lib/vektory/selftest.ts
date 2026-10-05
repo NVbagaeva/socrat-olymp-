@@ -39,6 +39,7 @@ import type { Box, Generated, Report, Risunok, Tochka, Vektor } from './types';
 import { BLOKI } from './prep/bloki';
 import { fixedSeed, generateMikro } from './prep/generate';
 import { STSENY_IDS, stsena } from './stseny';
+import { keySpec2, sheetBlocks2, sheetVariants2, type SheetParams2 } from './sheet2';
 import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { O_ZADANII } from '@/content/vektory';
 
@@ -834,4 +835,122 @@ export function checkStsenyITeksty(typeset: Typeset): GenReport {
     }
   }
   return { prototypes: STSENY_IDS.length, generated: teksty.length, problems };
+}
+
+/* ── Листы для печати ───────────────────────────────────────────── */
+
+const LIST_PARAMS: SheetParams2 = {
+  prototypes: ['A1', 'A6', 'B6', 'B9', 'C2'],
+  count: 10,
+  variants: 3,
+  seed: 'selftest',
+  theme: 'print',
+  layout: 'single',
+  kind: 'Проверка',
+  date: '',
+  bank: false,
+};
+
+/**
+ * Листы для печати: на листе ученика нет ни катетов, ни ответов, ни
+ * решений; на листе с решениями у каждой задачи разбор с заголовками
+ * шагов и строкой ответа, рисунок с катетами; варианты одной
+ * структуры отличаются числами; банк даёт ровно десять задач на
+ * прототип; ключ банка содержит все 190 ответов. Ответы на листе
+ * сверяются с независимым пересчётом генератора.
+ */
+export function checkListy(): GenReport {
+  const problems: Problem[] = [];
+  const push = (where: string, what: string) => problems.push({ where, what });
+  let generated = 0;
+
+  const student = sheetVariants2(LIST_PARAMS, false);
+  const teacher = sheetVariants2(LIST_PARAMS, true);
+  if (student.length !== LIST_PARAMS.variants)
+    push('лист ученика', `вариантов ${student.length}, а не ${LIST_PARAMS.variants}`);
+  const signatures = new Set<string>();
+  student.forEach((blocks, v) => {
+    const where = `лист ученика, вариант ${v + 1}`;
+    const total = blocks.reduce((sum, b) => sum + b.tasks.length, 0);
+    if (total !== LIST_PARAMS.count) push(where, `задач ${total}, а не ${LIST_PARAMS.count}`);
+    const ids: string[] = [];
+    for (const block of blocks) {
+      for (const task of block.tasks) {
+        generated += 1;
+        ids.push(task.id);
+        if (task.figureSvg !== null && task.figureSvg.includes('data-hint'))
+          push(where, `задача ${task.no}: катеты на рисунке ученика`);
+        if (task.solutionHtml !== null) push(where, `задача ${task.no}: решение на листе ученика`);
+        if (task.answer !== '') push(where, `задача ${task.no}: ответ на листе ученика`);
+        if (/Ответ:/.test(task.questionHtml)) push(where, `задача ${task.no}: «Ответ:» в условии`);
+      }
+    }
+    const key = ids.join('|');
+    if (signatures.has(key)) push(where, 'повторяет другой вариант');
+    signatures.add(key);
+    const tBlocks = teacher[v] ?? [];
+    const tIds = tBlocks.flatMap((b) => b.tasks.map((t) => t.id));
+    if (tIds.join('|') !== key) push(where, 'лист с решениями содержит другие задачи');
+    for (const block of tBlocks) {
+      for (const task of block.tasks) {
+        const [prototype, seed] = task.id.split('|');
+        const expected = ru(generate(prototype as string, seed as string).otvet);
+        if (task.answer !== expected)
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: ответ «${task.answer}», а генератор даёт «${expected}»`,
+          );
+        if (
+          task.solutionHtml === null ||
+          !/sheet-step/.test(task.solutionHtml) ||
+          !/Ответ:/.test(task.solutionHtml)
+        ) {
+          push(`лист с решениями, вариант ${v + 1}`, `задача ${task.no}: нет разбора по шагам`);
+        }
+        const grid = generate(prototype as string, seed as string).risunok?.grid !== false;
+        if (task.figureSvg !== null && grid && !task.figureSvg.includes('data-hint')) {
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: на рисунке учителя нет катетов`,
+          );
+        }
+      }
+    }
+  });
+
+  const bank = sheetBlocks2(
+    { ...LIST_PARAMS, prototypes: PROTOTYPES.map((p) => p.id), bank: true },
+    false,
+  );
+  if (bank.length !== PROTOTYPES.length)
+    push('лист банка', `блоков ${bank.length}, а не ${PROTOTYPES.length}`);
+  for (const block of bank) {
+    const entry = BANK.find((e) => e.prototype === block.id);
+    if (block.tasks.length !== (entry?.variants.length ?? 0))
+      push('лист банка', `${block.id}: задач ${block.tasks.length}`);
+    for (const task of block.tasks) {
+      generated += 1;
+      if (task.figureSvg !== null && task.figureSvg.includes('data-hint'))
+        push('лист банка', `${block.id} задача ${task.no}: катеты`);
+      if (task.answer !== '' || task.solutionHtml !== null)
+        push('лист банка', `${block.id} задача ${task.no}: ответ или решение`);
+    }
+  }
+
+  const key = keySpec2('print');
+  const otvetov = key.extraItems.reduce(
+    (sum, item) => sum + (item.match(/data-answer="/g)?.length ?? 0),
+    0,
+  );
+  const expected = BANK.reduce((sum, e) => sum + e.variants.length, 0);
+  if (otvetov !== expected) push('ключ ответов', `ответов ${otvetov}, а в банке ${expected}`);
+  for (const entry of BANK) {
+    for (const v of entry.variants) {
+      const answer = ru(generate(entry.prototype, v.seed).otvet).replace(/"/g, '&quot;');
+      if (!key.extraItems.some((item) => item.includes(`data-answer="${answer}"`))) {
+        push('ключ ответов', `${entry.prototype} №${v.n}: ответа «${answer}» нет`);
+      }
+    }
+  }
+  return { prototypes: LIST_PARAMS.prototypes.length, generated, problems };
 }
