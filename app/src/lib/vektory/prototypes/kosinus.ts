@@ -119,7 +119,7 @@ export function shagiKosinusa(p: Para, poRisunku: Shag | null): Shag[] {
 }
 
 /** Пара с нужным знаком косинуса (треть отрицательных); прямой вектор — изредка. */
-function vybratParu(
+export function vybratParu(
   r: { pick<T>(items: readonly T[]): T; next(): number },
   bound: number,
 ): Para | null {
