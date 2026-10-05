@@ -4,7 +4,7 @@ import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import { sameNumber } from '@/lib/answer';
-import type { TrainerStep, TrainerTask } from '@/lib/trainer';
+import type { TrainerQuestion, TrainerStep, TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
@@ -91,6 +91,10 @@ export function TrainerScreen({
   const [step, setStep] = useState(0);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [stepMark, setStepMark] = useState<'right' | 'wrong' | null>(null);
+  /* Шаг с вопросами (гипербола): сколько вопросов шага уже пройдено
+     и какой неверный вариант выбран на текущем — под ним пояснение. */
+  const [answered, setAnswered] = useState(0);
+  const [picked, setPicked] = useState<number | null>(null);
 
   /* Сколько раз ответ не сошёлся и сколько заняла тренировка. Время
      идёт от первой проверки: до неё ученик ещё читает условие, да
@@ -201,6 +205,8 @@ export function TrainerScreen({
     setStep(0);
     setStepMark(null);
     setFields({});
+    setAnswered(0);
+    setPicked(null);
   }
 
   function checkStep() {
@@ -208,8 +214,11 @@ export function TrainerScreen({
       return;
     }
     startClock();
-    const right = current.fields.every((field, fieldNo) =>
-      sameNumber(fieldValue(step, fieldNo), field.answer),
+    /* Верно по ключу шага или по любому другому верному набору —
+       например, по координатам другой отмеченной точки. */
+    const sets = [current.fields.map((field) => field.answer), ...(current.variants ?? [])];
+    const right = sets.some((answers) =>
+      answers.every((answer, fieldNo) => sameNumber(fieldValue(step, fieldNo), answer)),
     );
     if (!right) {
       setStepMark('wrong');
@@ -217,7 +226,36 @@ export function TrainerScreen({
       setMisses(misses + 1);
       return;
     }
+    advance();
+  }
+
+  /* Вариант ответа на вопрос шага. Неверный — пояснение и выбор ещё
+     раз; верный — вывод, следующий вопрос или следующий шаг. */
+  function pickOption(optionNo: number) {
+    const question = current?.questions?.[answered];
+    if (question === undefined) {
+      return;
+    }
+    startClock();
+    if (question.options[optionNo]?.right !== true) {
+      setPicked(optionNo);
+      failed.current = true;
+      setMisses(misses + 1);
+      return;
+    }
+    setPicked(null);
+    if (answered + 1 < (current?.questions?.length ?? 0)) {
+      setAnswered(answered + 1);
+      return;
+    }
+    advance();
+  }
+
+  /* Шаг пройден: следующий, а после последнего — задача решена. */
+  function advance() {
     setStepMark(null);
+    setAnswered(0);
+    setPicked(null);
     setStep(step + 1);
     if (step + 1 >= steps.length) {
       /* Задача пройдена по шагам: в верных она не числится. */
@@ -241,6 +279,8 @@ export function TrainerScreen({
     setStep(0);
     setFields({});
     setStepMark(null);
+    setAnswered(0);
+    setPicked(null);
   }
 
   const nextButton = last ? (
@@ -265,6 +305,8 @@ export function TrainerScreen({
     setStep(0);
     setFields({});
     setStepMark(null);
+    setAnswered(0);
+    setPicked(null);
     startedAt.current = null;
     taskStartedAt.current = null;
     failed.current = false;
@@ -317,7 +359,11 @@ export function TrainerScreen({
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
           {task.chartSvg === null ? null : (
             <FigureZoom className="chart ptask__chart" label={`Чертёж к заданию ${index + 1}`}>
-              <span dangerouslySetInnerHTML={{ __html: task.chartSvg }} />
+              {/* Шаг о сдвиге подсвечивает свою асимптоту. */}
+              <span
+                data-focus={(hint && current?.focus) || undefined}
+                dangerouslySetInnerHTML={{ __html: task.chartSvg }}
+              />
             </FigureZoom>
           )}
         </div>
@@ -482,8 +528,26 @@ export function TrainerScreen({
                   Шаг <b>{i + 1}</b> из {steps.length}
                 </p>
                 <h3 className="tstep__title" dangerouslySetInnerHTML={{ __html: item.titleHtml }} />
-                <p className="tstep__text" dangerouslySetInnerHTML={{ __html: item.textHtml }} />
+                {item.textHtml === '' ? null : (
+                  <p className="tstep__text" dangerouslySetInnerHTML={{ __html: item.textHtml }} />
+                )}
+                {item.reminderHtml === undefined ? null : (
+                  <p
+                    className={clsx('tstep__remind', item.reminderStrong && 'tstep__remind--strong')}
+                    dangerouslySetInnerHTML={{ __html: item.reminderHtml }}
+                  />
+                )}
 
+                {item.questions === undefined ? null : (
+                  <Questions
+                    questions={item.questions}
+                    answered={done ? item.questions.length : answered}
+                    picked={done ? null : picked}
+                    onPick={pickOption}
+                  />
+                )}
+
+                {item.questions !== undefined ? null : (
                 <div
                   className={clsx(
                     'tstep__row',
@@ -528,11 +592,17 @@ export function TrainerScreen({
                   )}
                 </div>
 
+                )}
+
                 {/* Что проверить на шаге. Правильное значение
                     не показывается. */}
                 {done || stepMark !== 'wrong' ? null : (
                   <p className="tstep__note" dangerouslySetInnerHTML={{ __html: item.wrongHint }} />
                 )}
+                {/* Шаг пройден — подстановка и вычисление из полного решения. */}
+                {done && item.afterHtml !== undefined ? (
+                  <p className="tstep__after" dangerouslySetInnerHTML={{ __html: item.afterHtml }} />
+                ) : null}
               </article>
             );
           })}
@@ -553,5 +623,60 @@ export function TrainerScreen({
         </div>
       ) : null}
     </section>
+  );
+}
+
+/* Вопросы шага по очереди: пройденные — с отмеченным верным вариантом
+   и выводом, текущий — кнопками. Неверный выбор подсвечен, под
+   кнопками — почему нет. */
+function Questions({
+  questions,
+  answered,
+  picked,
+  onPick,
+}: {
+  questions: TrainerQuestion[];
+  answered: number;
+  picked: number | null;
+  onPick: (optionNo: number) => void;
+}) {
+  return (
+    <>
+      {questions.slice(0, answered + 1).map((question, questionNo) => {
+        if (questionNo >= questions.length) {
+          return null;
+        }
+        const passed = questionNo < answered;
+        const wrong = !passed && picked !== null ? (question.options[picked] ?? null) : null;
+        return (
+          <div key={questionNo} className="tquest">
+            <p className="tquest__prompt" dangerouslySetInnerHTML={{ __html: question.promptHtml }} />
+            <div className="tquest__options" role="group">
+              {question.options.map((option, optionNo) => (
+                <button
+                  key={optionNo}
+                  type="button"
+                  className={clsx(
+                    'tquest__option',
+                    passed && option.right && 'is-right',
+                    !passed && picked === optionNo && 'is-wrong',
+                  )}
+                  disabled={passed}
+                  aria-pressed={passed ? option.right : picked === optionNo}
+                  onClick={() => onPick(optionNo)}
+                  dangerouslySetInnerHTML={{ __html: option.html }}
+                />
+              ))}
+            </div>
+            {wrong === null ? null : (
+              <p className="tstep__note" role="status" dangerouslySetInnerHTML={{ __html: wrong.whyHtml }} />
+            )}
+            {passed ? (
+              <p className="tquest__right" dangerouslySetInnerHTML={{ __html: question.rightHtml }} />
+            ) : null}
+          </div>
+        );
+      })}
+    </>
   );
 }
