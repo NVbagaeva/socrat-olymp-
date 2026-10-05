@@ -172,13 +172,22 @@ jobs:
       # фоновая подгрузка, уход вкладки в фон, новая версия сайта,
       # прямое открытие index.txt. Заодно проверяет, что исправление
       # Next.js (patches/) не потерялось. Подробно — в самом скрипте.
-      - name: Поставить Apache и Chromium для проверки служебных файлов
+      - name: Поставить Apache, Chromium и WebKit для проверок в браузере
         working-directory: app
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q apache2
-          pnpm exec playwright install --with-deps chromium
+          sudo apt-get install -y -q apache2 poppler-utils
+          pnpm exec playwright install --with-deps chromium webkit
 
       - name: Проверить, что сырой RSC-текст не показывается
         working-directory: app
         run: pnpm test:rsc-serving
+
+      # Лист генератора, напечатанный из браузера, — без пустых страниц.
+      # Листы ученика и учителя всех разделов: в Chromium печать в PDF
+      # на A4 и на бумаге 841/840 pt без @page (так печатает Safari на
+      # iPhone) — страниц столько же, сколько в листе; в WebKit — вёрстка
+      # печати: страница с запасом до A4, вне страниц ничего, фон белый.
+      - name: Проверить печать листов без пустых страниц
+        working-directory: app
+        run: pnpm test:print-pages
