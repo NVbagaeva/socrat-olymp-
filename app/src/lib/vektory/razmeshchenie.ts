@@ -23,15 +23,37 @@ function seg(v: Vektor): Seg {
   return { x1: v.from[0], y1: v.from[1], x2: v.to[0], y2: v.to[1] };
 }
 
-/** Проверка пары: не пересекаются, не касаются, дистанция ≥ 1 клетки. */
-function daleko(a: Vektor, b: Vektor): boolean {
-  const sa = seg(a);
-  const sb = seg(b);
-  const sharedStart = a.from[0] === b.from[0] && a.from[1] === b.from[1];
-  const d = sharedStart
-    ? Math.min(pointSegDist(a.to[0], a.to[1], sb), pointSegDist(b.to[0], b.to[1], sa))
-    : segSegDist(sa, sb);
-  return d >= 1;
+/** Три отрезка вектора с катетами: стержень и два катета подсказки. */
+function sKatetami(v: Vektor): Seg[] {
+  const [x1, y1] = v.from;
+  const [x2, y2] = v.to;
+  return [seg(v), { x1, y1, x2, y2: y1 }, { x1: x2, y1, x2, y2 }];
+}
+
+/**
+ * Проверка пары: не пересекаются, не касаются, дистанция ≥ 1 клетки.
+ * Считается вместе с катетами подсказки: иначе катеты соседних
+ * векторов ложатся в одну клетку и их подписи сходятся. Общее начало
+ * допускается только из начала координат (B6): там дистанция
+ * меряется от концов до чужого вектора.
+ */
+function daleko(a: Vektor, b: Vektor, izNachala: boolean): boolean {
+  if (izNachala) {
+    const sa = seg(a);
+    const sb = seg(b);
+    return Math.min(pointSegDist(a.to[0], a.to[1], sb), pointSegDist(b.to[0], b.to[1], sa)) >= 1;
+  }
+  const ka = sKatetami(a);
+  const kb = sKatetami(b);
+  for (let i = 0; i < ka.length; i += 1) {
+    for (let j = 0; j < kb.length; j += 1) {
+      /* Катет против катета — не ближе двух клеток: на соседних
+         линиях сетки их подписи встают вплотную друг к другу. */
+      const minDist = i > 0 && j > 0 ? 2 : 1;
+      if (segSegDist(ka[i] as Seg, kb[j] as Seg) < minDist) return false;
+    }
+  }
+  return true;
 }
 
 export interface RazmeshchenieOpts {
@@ -73,7 +95,7 @@ export function razmestit(
            Пересекать оси вектор может. */
         if (!opts.izNachala && (x1 === 0 || y1 === 0 || x2 === 0 || y2 === 0)) continue;
         const v: Vektor = { name, from: [x1, y1], to: [x2, y2] };
-        if (placed.every((p) => daleko(p, v))) {
+        if (placed.every((p) => daleko(p, v, opts.izNachala === true))) {
           found = v;
         }
       }
