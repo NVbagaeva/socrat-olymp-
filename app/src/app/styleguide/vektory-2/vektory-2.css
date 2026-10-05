@@ -84,3 +84,7 @@
 .v2__tip-svg svg {
   display: block;
 }
+
+.v2__zadacha {
+  margin-bottom: var(--space-4);
+}

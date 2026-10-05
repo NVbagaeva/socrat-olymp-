@@ -156,7 +156,9 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
   const cell = config.cell ?? THEME.geometry.cell;
   const g = THEME.geometry;
   const showGrid = config.grid !== false;
-  const hints = config.hints === true;
+  /* Без сетки координаты читаются по проекциям на оси, и катеты
+     легли бы прямо на них: в этом режиме подсказка катетов не нужна. */
+  const hints = config.hints === true && showGrid;
   const width = (win.xmax - win.xmin) * cell + g.pad * 2;
   const height = (win.ymax - win.ymin) * cell + g.pad * 2;
   const sx = (x: number) => g.pad + (x - win.xmin) * cell;
@@ -528,6 +530,15 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
       helperLayer.push(
         `<path class="vp-hint-leg" data-hint="${esc(v.name)}" d="${legs.join('')}" fill="none" stroke="${THEME.colors.accent}" stroke-width="${V.hint.width}" stroke-dasharray="${V.hint.dash}"/>`,
       );
+      /* Катет не должен проходить по подписям осей и чисел. */
+      const legSegs: Seg[] = [];
+      if (dx !== 0) legSegs.push({ x1: sx(v.from[0]), y1: cy, x2: cx, y2: cy });
+      if (dy !== 0) legSegs.push({ x1: cx, y1: cy, x2: cx, y2: sy(v.to[1]) });
+      for (const b of boxes) {
+        if (legSegs.some((leg) => segRectDist(leg, boxRect(b)) < 1.5)) {
+          problems.push(`катет вектора ${v.name} закрывает подпись ${b.id}`);
+        }
+      }
       if (dx !== 0) {
         /* Подпись Δx — с внешней стороны катета, напротив вектора. */
         obstacles.push({
@@ -682,9 +693,12 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
       h.nx === 0
         ? Math.abs(sx(h.v.to[0]) - sx(h.v.from[0])) / 2
         : Math.abs(sy(h.v.to[1]) - sy(h.v.from[1])) / 2;
-    let best: { box: Box; min: number; what: string } | null = null;
-    let chosen: Box | null = null;
-    outer: for (const off of [V.hint.gap, V.hint.gap + 7, V.hint.gap + 14]) {
+    /* Место — по лучшему счёту, а не первое свободное: иначе подписи
+       катетов соседних векторов сходятся в один просвет между ними.
+       Зазор ценится до 30 px, дальше считаются только смещение,
+       сдвиг вдоль катета и сторона (внешняя предпочтительнее). */
+    let best: { box: Box; score: number; min: number; what: string } | null = null;
+    for (const off of [V.hint.gap, V.hint.gap + 7, V.hint.gap + 14]) {
       for (const shift of [0, 0.3, -0.3, 0.6, -0.6]) {
         for (const side of [1, -1]) {
           const box: Box = {
@@ -700,18 +714,19 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
             rect.left >= 2 && rect.right <= width - 2 && rect.top >= 2 && rect.bottom <= height - 2;
           const c = clearance(rect, obstacles);
           const min = inField ? c.min : -1;
-          if (min >= V.label.gap) {
-            chosen = box;
-            break outer;
-          }
-          if (best === null || min > best.min) {
-            best = { box, min, what: inField ? c.what : 'край рисунка' };
+          const score =
+            Math.min(min, 30) -
+            (off - V.hint.gap) * 0.3 -
+            Math.abs(shift) * 4 -
+            (side === 1 ? 0 : 3);
+          if (best === null || score > best.score) {
+            best = { box, score, min, what: inField ? c.what : 'край рисунка' };
           }
         }
       }
     }
-    if (chosen === null) {
-      chosen = (best as { box: Box }).box;
+    const chosen = (best as { box: Box }).box;
+    if ((best as { min: number }).min < V.label.gap) {
       problems.push(
         `подпись катета ${h.id} не помещается: мешает ${(best as { what: string }).what}`,
       );
