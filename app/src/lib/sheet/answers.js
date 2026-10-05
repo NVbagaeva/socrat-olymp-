@@ -135,7 +135,8 @@ function keyTable(title, rows) {
  */
 function solution(no, formulas, answer) {
   var body = formulas.map(function (tex) {
-    return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+    return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+      typo.escape(tex) + '</span>';
   }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
   return '<div class="sheet-item sheet-solution">' +
@@ -157,7 +158,8 @@ function solution(no, formulas, answer) {
 function fullSolution(no, items, answer) {
   var list = items.map(function (step) {
     var body = step.formulas.map(function (tex) {
-      return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+      return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+        typo.escape(tex) + '</span>';
     }).join('<span class="sheet-solution-sep">;</span> ');
     return '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
       (body ? ':' : '') + '</span> ' + body + '</li>';

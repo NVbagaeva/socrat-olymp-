@@ -64,6 +64,33 @@ function coef(f) {
   return tex(f);
 }
 
+/** Коэффициент, умноженный на число при подстановке: 1 и −1 не
+ *  пишутся. arg — готовая запись числа (tb). */
+function times(f, arg) {
+  var c = coef(f);
+  if (c === '' || c === '-') { return c + arg; }
+  return tb(f) + ' \\cdot ' + arg;
+}
+
+/** Вычитание произведения k · x: « − 3 · 2». При k = ±1 множитель не
+ *  пишется, а знак сразу сводится: « − 2», « + 2». */
+function minusTimes(f, x) {
+  if (isInt(f) && (f.p === 1 || f.p === -1)) { return term(mul(mul(f, frac(-1)), x)) || ' - 0'; }
+  return ' - ' + tb(f) + ' \\cdot ' + tb(x);
+}
+
+/** « − 4ac» дискриминанта: при a = ±1 множитель не пишется —
+ *  « − 4 · 16», « + 4 · 48». */
+function fourAC(a, c) {
+  if (isInt(a) && a.p === 1) { return ' - 4 \\cdot ' + tb(c); }
+  if (isInt(a) && a.p === -1) { return ' + 4 \\cdot ' + tb(c); }
+  return ' - 4 \\cdot ' + tb(a) + ' \\cdot ' + tb(c);
+}
+
+/** Слагаемое из суммы чисел: как term, но нуль пишется — в строке
+ *  «k + a + b = …» видно, какое из слагаемых нулевое. */
+function termZero(f) { return isZero(f) ? ' + 0' : term(f); }
+
 /** Слагаемое с буквой со знаком: « + 2x», « - x». */
 function termX(f, letter) {
   if (isZero(f)) { return ''; }
@@ -225,14 +252,14 @@ function stepK(c, form, points) {
   var blocks = [
     text(lead + ' Из ' + m('y_0 = \\dfrac{kx_0 + a}{x_0 + b}') + ' получаем ' +
       m('a = y_0(x_0 + b) - k x_0') + ':'),
-    formula('a = ' + tb(y) + ' \\cdot (' + tex(x) + term(co.b) + ') - ' + tb(co.k) + ' \\cdot ' +
-      tb(x) + ' = ' + tex(co.a))
+    formula('a = ' + times(y, '(' + tex(x) + term(co.b) + ')') + minusTimes(co.k, x) +
+      ' = ' + tex(co.a))
   ];
   if (points[1]) {
     var Q = points[1];
     var qx = f0(Q.x), qy = f0(Q.y);
     blocks.push(text('Проверим по второй точке ' + m('(' + tex(qx) + ';\\, ' + tex(qy) + ')') + ':'));
-    blocks.push(formula('\\dfrac{' + tb(co.k) + ' \\cdot ' + tb(qx) + term(co.a) + '}{' + tex(qx) +
+    blocks.push(formula('\\dfrac{' + times(co.k, tb(qx)) + term(co.a) + '}{' + tex(qx) +
       term(co.b) + '} = ' + tex(qy) + ' \\;\\checkmark'));
   }
   return step('k', 'Находим $a$ по точке', blocks);
@@ -272,9 +299,12 @@ function valueBlocks(c, form, x0, value) {
   } else if (form === 'shift-xy') {
     expr = '\\dfrac{' + tex(co.k) + '}{' + tex(x0) + term(co.a) + '}' + term(co.b);
   } else {
-    expr = '\\dfrac{' + tb(co.k) + ' \\cdot ' + arg + term(co.a) + '}{' + tex(x0) + term(co.b) + '}';
+    expr = '\\dfrac{' + times(co.k, arg) + term(co.a) + '}{' + tex(x0) + term(co.b) + '}';
   }
-  blocks.push(formula('f\\left(' + tex(x0) + '\\right) = ' + expr + ' = ' + tex(value)));
+  /* Растянутые скобки — только вокруг дроби: у числа \\left( даёт
+     лишний зазор, f (−8). */
+  var call = decimalFriendly(x0) ? 'f(' + tex(x0) + ')' : 'f\\left(' + tex(x0) + '\\right)';
+  blocks.push(formula(call + ' = ' + expr + ' = ' + tex(value)));
   return blocks;
 }
 
@@ -311,7 +341,7 @@ function stepAnswerSingle(c, form, rule, query, answer) {
     blocks = argumentBlocks(c, form, exact(query.y0), answer);
   } else if (rule === 'coef-sum') {
     blocks = [text('Складываем найденные коэффициенты функции ' + m('f') + ':'),
-      formula('k + a + b = ' + tex(co.k) + ' + ' + tb(co.a) + ' + ' + tb(co.b) + ' = ' + tex(answer))];
+      formula('k + a + b = ' + tex(co.k) + termZero(co.a) + termZero(co.b) + ' = ' + tex(answer))];
   } else {
     var name = rule === 'coef-k' ? 'k' : (rule === 'coef-a' ? 'a' : 'b');
     blocks = [text('Спрашивают коэффициент ' + m(name) + ' функции ' + m('f') + ':'),
@@ -357,7 +387,7 @@ function lineSteps(c, task) {
     formula('a = \\dfrac{' + tex(yP) + term(mul(frac(-1), yA)) + '}{' + tex(xP) + term(mul(frac(-1), xA)) +
       '} = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)),
     text('Свободный член прямой — из точки ' + m('A') + ': ' + m('b = y_A - a\\,x_A') + ':'),
-    formula('b = ' + tex(yA) + ' - ' + tb(line.k) + ' \\cdot ' + tb(xA) + ' = ' + tex(line.b)),
+    formula('b = ' + tex(yA) + minusTimes(line.k, xA) + ' = ' + tex(line.b)),
     formula(lineTex(line))
   ]));
 
@@ -395,10 +425,10 @@ function lineSteps(c, task) {
     text('Один корень известен заранее — это абсцисса точки ' + m('A') + ': ' + m('x_A = ' + tex(xA)) +
       '. По теореме Виета произведение корней уравнения ' + m('ax^2 + bx - k = 0') + ' равно ' +
       m('\\dfrac{-k}{a}') + ':'),
-    formula(tex(xA) + ' \\cdot x_B = \\dfrac{' + tex(mul(k, frac(-1))) + '}{' + tex(line.k) +
+    formula(times(xA, 'x_B') + ' = \\dfrac{' + tex(mul(k, frac(-1))) + '}{' + tex(line.k) +
       '} \\;\\Rightarrow\\; x_B = ' + tex(xB)),
     text('Проверка через дискриминант:'),
-    formula('D = ' + tb(qb) + '^2 - 4 \\cdot ' + tb(qa) + ' \\cdot ' + tb(qc) + ' = ' + tex(D) +
+    formula('D = ' + tb(qb) + '^2' + fourAC(qa, qc) + ' = ' + tex(D) +
       ', \\quad \\sqrt{D} = ' + tex(sqrtD)),
     formula('x_{1,2} = \\dfrac{' + tex(mul(qb, frac(-1))) + ' \\pm ' + tex(sqrtD) + '}{' + tex(mul(qa, frac(2))) +
       '}: \\quad x_1 = ' + tex(xA) + ', \\; x_2 = ' + tex(xB))
@@ -414,7 +444,7 @@ function lineSteps(c, task) {
     steps.push(step('ordinate', 'Ордината точки $B$', [
       text('Подставляем ' + m('x_B') + ' в формулу гиперболы:'),
       formula('y_B = f(x_B) = \\dfrac{' + tex(k) + '}{' + tb(xB) + '} = ' + tex(yB)),
-      text('Проверка по прямой: ' + m('g(' + tex(xB) + ') = ' + tb(line.k) + ' \\cdot ' + tb(xB) +
+      text('Проверка по прямой: ' + m('g(' + tex(xB) + ') = ' + times(line.k, tb(xB)) +
         term(line.b) + ' = ' + tex(add(mul(line.k, xB), line.b))) + '.')
     ]));
   }
