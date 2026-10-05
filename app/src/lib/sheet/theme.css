@@ -109,6 +109,7 @@
   --graph-axis: #101728;
   --graph-grid: #cfdae8;
   --graph-accent: #e07a2f;
+  --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
   --solid-edge: #1f5fd0;
   --solid-face: #e8f0fc;
@@ -197,6 +198,9 @@
   --graph-axis: #000000;
   --graph-grid: #b9b9b9;
   --graph-accent: #000000;
+  /* Вспомогательные оси разбора — серым пунктиром: чёрные слились бы
+     с основными осями. */
+  --graph-aux-axis: #8a8a8a;
   --graph-asymptote: #6b6b6b;
   --solid-edge: #000000;
   --solid-face: transparent;

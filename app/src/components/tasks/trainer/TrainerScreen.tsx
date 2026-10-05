@@ -3,8 +3,8 @@
 import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
-import { sameNumber } from '@/lib/answer';
-import type { TrainerQuestion, TrainerStep, TrainerTask } from '@/lib/trainer';
+import { parseAnswer, sameNumber } from '@/lib/answer';
+import type { TrainerPart, TrainerQuestion, TrainerStep, TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
 import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
@@ -95,6 +95,9 @@ export function TrainerScreen({
      и какой неверный вариант выбран на текущем — под ним пояснение. */
   const [answered, setAnswered] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
+  /* Отдельное предупреждение к неверным полям части (парабола): точка,
+     дающая тождество, или неверный знак. null — общий текст шага. */
+  const [note, setNote] = useState<string | null>(null);
 
   /* Сколько раз ответ не сошёлся и сколько заняла тренировка. Время
      идёт от первой проверки: до неё ученик ещё читает условие, да
@@ -207,6 +210,7 @@ export function TrainerScreen({
     setFields({});
     setAnswered(0);
     setPicked(null);
+    setNote(null);
   }
 
   function checkStep() {
@@ -251,11 +255,88 @@ export function TrainerScreen({
     advance();
   }
 
+  /* Шаг из частей (парабола): поля текущей части. Неверно — общий
+     текст, а для ловушки или неверного знака — своё предупреждение. */
+  function partFieldValue(stepNo: number, partNo: number, fieldNo: number): string {
+    return fields[`${stepNo}:${partNo}:${fieldNo}`] ?? '';
+  }
+
+  function setPartFieldValue(stepNo: number, partNo: number, fieldNo: number, next: string) {
+    setFields({ ...fields, [`${stepNo}:${partNo}:${fieldNo}`]: next });
+    if (stepMark === 'wrong') {
+      setStepMark(null);
+      setNote(null);
+    }
+  }
+
+  function nextPart() {
+    setStepMark(null);
+    setPicked(null);
+    setNote(null);
+    if (answered + 1 < (current?.parts?.length ?? 0)) {
+      setAnswered(answered + 1);
+      return;
+    }
+    advance();
+  }
+
+  function checkPart() {
+    const part = current?.parts?.[answered];
+    if (part === undefined || part.kind !== 'fields') {
+      return;
+    }
+    startClock();
+    const values = part.fields.map((_, fieldNo) => partFieldValue(step, answered, fieldNo));
+    const sets = [part.fields.map((field) => field.answer), ...(part.variants ?? [])];
+    const right = sets.some((answers) =>
+      answers.every((answer, fieldNo) => sameNumber(values[fieldNo] ?? '', answer)),
+    );
+    if (right) {
+      nextPart();
+      return;
+    }
+    failed.current = true;
+    setMisses(misses + 1);
+    setStepMark('wrong');
+    const trap = (part.traps ?? []).find((item) =>
+      item.values.every((value, fieldNo) => sameNumber(values[fieldNo] ?? '', value)),
+    );
+    if (trap !== undefined) {
+      setNote(trap.whyHtml);
+      return;
+    }
+    if (part.sign !== undefined) {
+      const typed = parseAnswer(values[part.sign.field] ?? '');
+      const want = parseAnswer(part.fields[part.sign.field]?.answer ?? '');
+      if (typed !== null && want !== null && typed * want < 0) {
+        setNote(part.sign.whyHtml);
+        return;
+      }
+    }
+    setNote(null);
+  }
+
+  function pickPart(optionNo: number) {
+    const part = current?.parts?.[answered];
+    if (part === undefined || part.kind !== 'choice') {
+      return;
+    }
+    startClock();
+    if (part.options[optionNo]?.right !== true) {
+      setPicked(optionNo);
+      failed.current = true;
+      setMisses(misses + 1);
+      return;
+    }
+    nextPart();
+  }
+
   /* Шаг пройден: следующий, а после последнего — задача решена. */
   function advance() {
     setStepMark(null);
     setAnswered(0);
     setPicked(null);
+    setNote(null);
     setStep(step + 1);
     if (step + 1 >= steps.length) {
       /* Задача пройдена по шагам: в верных она не числится. */
@@ -281,6 +362,7 @@ export function TrainerScreen({
     setStepMark(null);
     setAnswered(0);
     setPicked(null);
+    setNote(null);
   }
 
   const nextButton = last ? (
@@ -307,6 +389,7 @@ export function TrainerScreen({
     setStepMark(null);
     setAnswered(0);
     setPicked(null);
+    setNote(null);
     startedAt.current = null;
     taskStartedAt.current = null;
     failed.current = false;
@@ -362,7 +445,14 @@ export function TrainerScreen({
               {/* Шаг о сдвиге подсвечивает свою асимптоту. */}
               <span
                 data-focus={(hint && current?.focus) || undefined}
-                dangerouslySetInnerHTML={{ __html: task.chartSvg }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                    hint &&
+                    current?.chartSvg !== undefined &&
+                    answered >= (current.chartFrom ?? 0)
+                      ? current.chartSvg
+                      : task.chartSvg,
+                }}
               />
             </FigureZoom>
           )}
@@ -538,6 +628,21 @@ export function TrainerScreen({
                   />
                 )}
 
+                {item.parts === undefined ? null : (
+                  <Parts
+                    parts={item.parts}
+                    stepNo={i}
+                    current={done ? item.parts.length : answered}
+                    picked={done ? null : picked}
+                    mark={done ? null : stepMark}
+                    note={note}
+                    value={partFieldValue}
+                    onChange={setPartFieldValue}
+                    onPick={pickPart}
+                    onCheck={checkPart}
+                  />
+                )}
+
                 {item.questions === undefined ? null : (
                   <Questions
                     questions={item.questions}
@@ -547,7 +652,7 @@ export function TrainerScreen({
                   />
                 )}
 
-                {item.questions !== undefined ? null : (
+                {item.questions !== undefined || item.parts !== undefined ? null : (
                 <div
                   className={clsx(
                     'tstep__row',
@@ -673,6 +778,114 @@ function Questions({
             )}
             {passed ? (
               <p className="tquest__right" dangerouslySetInnerHTML={{ __html: question.rightHtml }} />
+            ) : null}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+/* Шаг из частей по очереди: пройденные — с отмеченным ответом и
+   выводом, текущая — кнопками или полями. */
+function Parts({
+  parts,
+  stepNo,
+  current,
+  picked,
+  mark,
+  note,
+  value,
+  onChange,
+  onPick,
+  onCheck,
+}: {
+  parts: TrainerPart[];
+  stepNo: number;
+  current: number;
+  picked: number | null;
+  mark: 'right' | 'wrong' | null;
+  note: string | null;
+  value: (stepNo: number, partNo: number, fieldNo: number) => string;
+  onChange: (stepNo: number, partNo: number, fieldNo: number, next: string) => void;
+  onPick: (optionNo: number) => void;
+  onCheck: () => void;
+}) {
+  return (
+    <>
+      {parts.slice(0, current + 1).map((part, partNo) => {
+        const passed = partNo < current;
+        if (part.kind === 'choice') {
+          const wrong = !passed && picked !== null ? (part.options[picked] ?? null) : null;
+          return (
+            <div key={partNo} className="tquest">
+              <p className="tquest__prompt" dangerouslySetInnerHTML={{ __html: part.promptHtml }} />
+              <div className="tquest__options" role="group">
+                {part.options.map((option, optionNo) => (
+                  <button
+                    key={optionNo}
+                    type="button"
+                    className={clsx(
+                      'tquest__option',
+                      passed && option.right && 'is-right',
+                      !passed && picked === optionNo && 'is-wrong',
+                    )}
+                    disabled={passed}
+                    aria-pressed={passed ? option.right : picked === optionNo}
+                    onClick={() => onPick(optionNo)}
+                    dangerouslySetInnerHTML={{ __html: option.html }}
+                  />
+                ))}
+              </div>
+              {wrong === null ? null : (
+                <p className="tstep__note" role="status" dangerouslySetInnerHTML={{ __html: wrong.whyHtml }} />
+              )}
+              {passed ? (
+                <p className="tquest__right" dangerouslySetInnerHTML={{ __html: part.rightHtml }} />
+              ) : null}
+            </div>
+          );
+        }
+        const empty = part.fields.some((_, fieldNo) => value(stepNo, partNo, fieldNo).trim() === '');
+        return (
+          <div key={partNo} className="tquest">
+            {part.textHtml === '' ? null : (
+              <p className="tquest__prompt" dangerouslySetInnerHTML={{ __html: part.textHtml }} />
+            )}
+            <div className={clsx('tstep__row', part.fields.length > 2 && 'tstep__row--wide')}>
+              {part.fields.map((field, fieldNo) => (
+                <Fragment key={fieldNo}>
+                  <span className="tstep__label" dangerouslySetInnerHTML={{ __html: field.labelHtml }} />
+                  <Input
+                    className="tstep__input"
+                    value={value(stepNo, partNo, fieldNo)}
+                    state={passed ? 'success' : mark === 'wrong' ? 'error' : 'default'}
+                    inputMode="text"
+                    autoComplete="off"
+                    readOnly={passed}
+                    onChange={(event) => onChange(stepNo, partNo, fieldNo, event.target.value)}
+                  />
+                </Fragment>
+              ))}
+              {passed ? (
+                <span className="tstep__ok" aria-label="часть пройдена">
+                  <RightIcon />
+                </span>
+              ) : (
+                <Button onClick={onCheck} disabled={empty}>
+                  Проверить
+                </Button>
+              )}
+            </div>
+            {!passed && mark === 'wrong' ? (
+              <p
+                className="tstep__note"
+                role="status"
+                dangerouslySetInnerHTML={{ __html: note ?? part.wrongHint }}
+              />
+            ) : null}
+            {passed && part.afterHtml !== undefined ? (
+              <p className="tstep__after" dangerouslySetInnerHTML={{ __html: part.afterHtml }} />
             ) : null}
           </div>
         );

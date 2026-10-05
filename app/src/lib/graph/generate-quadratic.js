@@ -1130,6 +1130,11 @@ function result(set, task, built, seed, index) {
                      intersection: built.intersection, parts: built.parts, form: form,
                      task: task, set: set, seed: seed, index: index });
   var choice = value && value.type === 'choice' ? value : null;
+  /* Сцена чертежа — и в svg, и в meta: по ней разбор и подсказка
+     перерисовывают тот же чертёж со вспомогательной системой
+     координат (graph/quadratic-aux.js). Копия — до рисования. */
+  var scene = task.noChart ? null : sceneFor(built, task, set);
+  var sceneCopy = scene === null ? null : JSON.parse(JSON.stringify(scene));
 
   var query = built.query;
   var second = built.parts[1];
@@ -1152,7 +1157,7 @@ function result(set, task, built, seed, index) {
   return {
     id: task.id,
     kind: set.kind,
-    svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set), layout),
+    svg: scene === null ? null : renderer.renderGraph(scene, layout),
     layout: layout,
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),
@@ -1192,7 +1197,8 @@ function result(set, task, built, seed, index) {
          приходят вместе с задачей, и краткое решение для листа
          собирается без обратного поиска по данным. */
       rule: task.answerRule,
-      knownA: task.knownA === true
+      knownA: task.knownA === true,
+      scene: sceneCopy
     }
   };
 }
