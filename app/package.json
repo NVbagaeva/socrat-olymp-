@@ -46,7 +46,8 @@
     "test:math-markup": "node scripts/check-math-markup.mjs",
     "test:rsc-serving": "node scripts/check-rsc-serving.mjs",
     "test:asset-versions": "node scripts/check-asset-versions.mjs",
-    "test:print-pages": "node scripts/check-print-pages.mjs"
+    "test:print-pages": "node scripts/check-print-pages.mjs",
+    "test:repo-files": "node scripts/check-repo-files.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

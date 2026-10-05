@@ -13,6 +13,13 @@ app/.pdf-build/
 # запуска. Куда что ложится, решает app/src/lib/sheet/outputs.js
 app/pdf-private/
 
+# исходники сторонних авторов (задачники, тренажёры, конспекты) в
+# репозиторий не кладутся: в content-source/ и docs/sources/ остаются
+# только наши описания — соответствие прототипам, наблюдения, исключаемые
+# наборы чисел. Проверка: app/scripts/check-repo-files.mjs
+content-source/**/*.pdf
+docs/sources/**
+
 # системное
 .DS_Store
 *.log
