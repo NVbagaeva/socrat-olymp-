@@ -86,9 +86,13 @@ export function TrainerBuilder({
   );
 
   function start(request: TrainerRequest<TrainerModeId>) {
-    const { skill, mode } = request;
+    const { mode } = request;
     const session = buildSession({
-      skills: mode === 'mixed' || mode === 'mistakes' ? skills.map((item) => item.id) : [skill.id],
+      /* Отработка и контроль — по выбранным типам, остальное — по всем. */
+      skills:
+        mode === 'mixed' || mode === 'mistakes'
+          ? skills.map((item) => item.id)
+          : request.skills.map((item) => item.id),
       level: mode === 'mistakes' ? null : request.level,
       count: request.count,
       mode,

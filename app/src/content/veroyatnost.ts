@@ -264,7 +264,7 @@ export interface RezhimOpisanie {
 
 /** Режимы — как в референсе, слово в слово; четвёртый — «Узнай метод». */
 export const REZHIMY: readonly RezhimOpisanie[] = [
-  { id: 'practice', title: 'Отработка', lead: 'Один метод' },
+  { id: 'practice', title: 'Отработка', lead: 'Выбранные методы' },
   { id: 'mixed', title: 'Смешанная', lead: 'Все методы вперемешку' },
   { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
   { id: 'uznay', title: 'Узнай метод', lead: 'Только условие: назвать метод' },
@@ -279,8 +279,9 @@ export const KONFIGURATOR_SLOVA: typeof trainerPage = {
   ...trainerPage,
   skill: {
     step: '1',
-    title: 'Выбери метод',
-    lead: 'Какой метод отрабатываем в разделе «{family}»?',
+    title: 'Выбери методы',
+    lead: 'Какие методы отрабатываем в разделе «{family}»? Можно выбрать несколько.',
+    unit: ['метод', 'метода', 'методов'],
   },
   params: {
     ...trainerPage.params,
