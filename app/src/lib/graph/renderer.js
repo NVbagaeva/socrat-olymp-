@@ -1277,4 +1277,7 @@ const api = {
 };
 
 export default api;
-export { THEME, renderGraph, registerCurve, checkWindow, fmt };
+/* esc, px, textWidth и svgText нужны движку векторов (lib/vektory):
+   он рисует тем же пером — та же тема, то же гало под подписями, —
+   и второй копии этих четырёх функций в проекте нет. */
+export { THEME, renderGraph, registerCurve, checkWindow, fmt, esc, px, textWidth, svgText };
