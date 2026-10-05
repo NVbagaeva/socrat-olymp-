@@ -3,7 +3,8 @@
  *
  * Запускается служебным скриптом scripts/check-vektory.mjs; в браузер
  * не попадает. Проверяет то, что обещано движку: остриё ровно в узле
- * сетки, стержень укорочен под наконечник, ни одна подпись не
+ * сетки, стержень и линии осей кончаются у основания наконечника,
+ * подписи катетов без знаков, ни одна подпись не
  * касается отрезков, осей и других подписей, в режиме без сетки нет
  * сетки и есть проекции, катеты рисуются только по явному hints,
  * окно всегда вмещает векторы с запасом в клетку.
@@ -104,15 +105,55 @@ export function checkRisunok(where: string, config: Risunok): Problem[] {
       }
       const len = Math.hypot(tx - fx, ty - fy);
       const endLen = Math.hypot(Number(shaft[3]) - fx, Number(shaft[4]) - fy);
-      /* Стержень кончается под наконечником: короче вектора на длину
-         наконечника без одного пикселя захода. */
-      if (len - endLen < 8 || len - endLen > 16) {
-        push(`стержень ${rv.name} укорочен на ${round2(len - endLen)} px, ожидалось около 12`);
+      /* Стержень кончается у основания наконечника: не выходит за него
+         дальше половины своей толщины и не отстаёт больше чем на пиксель. */
+      const base = len - report.head.len;
+      if (endLen > base + report.head.shaftWidth / 2) {
+        push(`стержень ${rv.name} выходит за основание наконечника на ${round2(endLen - base)} px`);
+      } else if (endLen < base - 1) {
+        push(`стержень ${rv.name} не доходит до наконечника на ${round2(base - endLen)} px`);
       }
     }
     if (rv.label === null) {
       push(`у вектора ${rv.name} нет подписи`);
     }
+  }
+
+  /* Линии осей кончаются у основания наконечников, остриё — сама
+     точка tipX / tipY. */
+  const axes = /class="vp-axes" d="M[-\d.]+ [-\d.]+H([-\d.]+)M[-\d.]+ [-\d.]+V([-\d.]+)"/.exec(svg);
+  const heads = /class="vp-axes-heads" d="M([-\d.]+) ([-\d.]+)L.*?ZM([-\d.]+) ([-\d.]+)L/.exec(svg);
+  if (axes === null || heads === null) {
+    push('в SVG нет осей или их наконечников');
+  } else {
+    const halfAxis = THEME.width.axis / 2;
+    const baseX = report.axes.tipX - report.axes.arrowLen;
+    const baseY = report.axes.tipY + report.axes.arrowLen;
+    if (Number(axes[1]) > baseX + halfAxis || Number(axes[1]) < baseX - 1) {
+      push(`линия оси x кончается в ${axes[1]}, основание наконечника ${round2(baseX)}`);
+    }
+    if (Number(axes[2]) < baseY - halfAxis || Number(axes[2]) > baseY + 1) {
+      push(`линия оси y кончается в ${axes[2]}, основание наконечника ${round2(baseY)}`);
+    }
+    if (
+      Number(heads[1]) !== round2(report.axes.tipX) ||
+      Number(heads[2]) !== round2(report.axes.x)
+    ) {
+      push(
+        `остриё оси x в SVG (${heads[1]}; ${heads[2]}), в отчёте (${report.axes.tipX}; ${report.axes.x})`,
+      );
+    }
+    if (
+      Number(heads[3]) !== round2(report.axes.y) ||
+      Number(heads[4]) !== round2(report.axes.tipY)
+    ) {
+      push(
+        `остриё оси y в SVG (${heads[3]}; ${heads[4]}), в отчёте (${report.axes.y}; ${report.axes.tipY})`,
+      );
+    }
+  }
+  if (svg.includes('class="vp-head"') && /class="vp-head"[^>]*stroke="(?!none)/.test(svg)) {
+    push('у наконечника вектора есть обводка: она вылезла бы за узел');
   }
 
   /* Подписи: никаких пересечений между собой и с линиями. */
@@ -204,10 +245,16 @@ export function checkRisunok(where: string, config: Risunok): Problem[] {
       const dy = v.to[1] - v.from[1];
       for (const d of [dx, dy]) {
         if (d === 0) continue;
-        const text = (d < 0 ? THEME.minus : '+') + Math.abs(d);
+        const text = String(Math.abs(d));
         if (!svg.includes(`>${text}</text>`)) {
           push(`нет подписи катета «${text}» у вектора ${v.name}`);
         }
+      }
+    }
+    /* Подписи катетов — длины по модулю: ни плюса, ни минуса. */
+    for (const m of svg.matchAll(/<g data-hint="[^"]*"><text[^>]*>([^<]*)<\/text>/g)) {
+      if (/[+\-\u2212]/.test(m[1] ?? '')) {
+        push(`в подписи катета есть знак: «${m[1]}»`);
       }
     }
   } else if (hintCount !== 0) {

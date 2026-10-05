@@ -66,6 +66,10 @@ export interface Report {
   height: number;
   grid: boolean;
   hints: boolean;
+  /** Оси в пикселях: строка оси x, столбец оси y, острия стрелок, длина наконечника. */
+  axes: { x: number; y: number; tipX: number; tipY: number; arrowLen: number };
+  /** Наконечник вектора: длина, половина ширины основания, толщина стержня, заход. */
+  head: { len: number; half: number; shaftWidth: number; overlap: number };
   vectors: ReportVector[];
   /** Все подписи рисунка: осей, чисел, векторов, катетов. */
   boxes: Box[];

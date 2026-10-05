@@ -40,9 +40,18 @@ import {
 /* Оформление, которого нет в теме графиков: наконечник, подписи
    векторов, катеты, проекции. Всё, что есть в THEME, берётся оттуда. */
 const V = {
+  /* Вектор — цвет графика №12 (lineA, токен --color-primary): в ч/б
+     теме печати тот же токен становится чёрным. Своего цвета нет. */
+  color: THEME.colors.lineA,
   shaftWidth: THEME.width.curve,
-  headLen: 13,
-  headHalf: 5.2,
+  /* Наконечник узкий и вытянутый, как в задачах ЕГЭ: длина к половине
+     ширины — 4 : 1, ширина основания согласована со стержнем. */
+  headLen: 16,
+  headHalf: 4,
+  /* Заход стержня и оси под наконечник: без него на стыке при
+     сглаживании виден светлый зазор. Меньше половины толщины линии,
+     основание наконечника при этом не пересекается. */
+  overlap: 0.5,
   /* Подпись вектора: жирная курсивная антиква со стрелкой сверху. */
   label: {
     size: 20,
@@ -75,6 +84,8 @@ export function emptyReport(): Report {
     height: 0,
     grid: true,
     hints: false,
+    axes: { x: 0, y: 0, tipX: 0, tipY: 0, arrowLen: THEME.geometry.arrowLen },
+    head: { len: V.headLen, half: V.headHalf, shaftWidth: V.shaftWidth, overlap: V.overlap },
     vectors: [],
     boxes: [],
     ticks: [],
@@ -108,8 +119,10 @@ function clearance(rect: Rect, obstacles: Obstacle[]): { min: number; what: stri
   return { min, what };
 }
 
-function signed(value: number): string {
-  return (value < 0 ? THEME.minus : '+') + String(Math.abs(value));
+/* Подпись катета — длина в клетках, без знака: знак координаты
+   объясняется словами в подсказке и решении, а не на рисунке. */
+function dlina(value: number): string {
+  return String(Math.abs(value));
 }
 
 /** Окно рисунка: заданное или по умолчанию, расширенное под векторы с запасом в клетку. */
@@ -154,6 +167,8 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
   const tipY = sy(win.ymax) - g.arrowExtend;
 
   Object.assign(R, {
+    axes: { x: axisX, y: axisY, tipX, tipY, arrowLen: g.arrowLen },
+    head: { len: V.headLen, half: V.headHalf, shaftWidth: V.shaftWidth, overlap: V.overlap },
     window: win,
     cell,
     width,
@@ -246,9 +261,12 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
     );
   }
 
-  /* ── Оси со стрелками: геометрия та же, что у графиков ───────── */
+  /* ── Оси со стрелками: наконечники той же формы и размера, что у
+     графиков №12 (arrowLen, arrowHalf из THEME). Линия оси кончается
+     у основания наконечника: остриё острое, за него ничего не
+     выступает. ─────────────────────────────────────────────────── */
   axisLayer.push(
-    `<path class="vp-axes" d="M${px(sx(win.xmin))} ${px(axisX)}H${px(tipX)}M${px(axisY)} ${px(sy(win.ymin))}V${px(tipY)}" fill="none" stroke="${THEME.colors.axis}" stroke-width="${THEME.width.axis}" stroke-linecap="butt"/>`,
+    `<path class="vp-axes" d="M${px(sx(win.xmin))} ${px(axisX)}H${px(tipX - g.arrowLen + V.overlap)}M${px(axisY)} ${px(sy(win.ymin))}V${px(tipY + g.arrowLen - V.overlap)}" fill="none" stroke="${THEME.colors.axis}" stroke-width="${THEME.width.axis}" stroke-linecap="butt"/>`,
   );
   axisLayer.push(
     `<path class="vp-axes-heads" d="M${px(tipX)} ${px(axisX)}L${px(tipX - g.arrowLen)} ${px(axisX - g.arrowHalf)}L${px(tipX - g.arrowLen)} ${px(axisX + g.arrowHalf)}ZM${px(axisY)} ${px(tipY)}L${px(axisY - g.arrowHalf)} ${px(tipY + g.arrowLen)}L${px(axisY + g.arrowHalf)} ${px(tipY + g.arrowLen)}Z" fill="${THEME.colors.axis}"/>`,
@@ -447,16 +465,18 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
     const uy = len === 0 ? 0 : (ty - y1) / len;
     const bx = tx - ux * V.headLen;
     const by = ty - uy * V.headLen;
-    /* Стержень заходит на 1 px под основание наконечника: без этого
-       на стыке при сглаживании виден светлый зазор. */
-    const ex = bx + ux;
-    const ey = by + uy;
+    /* Стержень кончается у основания наконечника (с заходом overlap
+       внутрь него, где он шире стержня): торец butt не выступает,
+       остриё — сама точка узла. */
+    const ex = bx + ux * V.overlap;
+    const ey = by + uy * V.overlap;
     const w1 = { x: bx - uy * V.headHalf, y: by + ux * V.headHalf };
     const w2 = { x: bx + uy * V.headHalf, y: by - ux * V.headHalf };
     vectorLayer.push(
       `<g class="vp-vector" data-vector="${esc(v.name)}">` +
-        `<path class="vp-shaft" d="M${px(x1)} ${px(y1)}L${px(ex)} ${px(ey)}" fill="none" stroke="${THEME.colors.axis}" stroke-width="${V.shaftWidth}" stroke-linecap="butt"/>` +
-        `<path class="vp-head" d="M${px(tx)} ${px(ty)}L${px(w1.x)} ${px(w1.y)}L${px(w2.x)} ${px(w2.y)}Z" fill="${THEME.colors.axis}" stroke="${THEME.colors.axis}" stroke-width="0.8" stroke-linejoin="miter"/>` +
+        `<path class="vp-shaft" d="M${px(x1)} ${px(y1)}L${px(ex)} ${px(ey)}" fill="none" stroke="${V.color}" stroke-width="${V.shaftWidth}" stroke-linecap="butt"/>` +
+        /* Без обводки: обводка у острого угла вылезла бы за узел. */
+        `<path class="vp-head" d="M${px(tx)} ${px(ty)}L${px(w1.x)} ${px(w1.y)}L${px(w2.x)} ${px(w2.y)}Z" fill="${V.color}" stroke="none"/>` +
         '</g>',
     );
     const shaft: Seg = { x1, y1, x2: ex, y2: ey };
@@ -516,7 +536,7 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
           what: `катет Δx ${v.name}`,
         });
         hintLabels.push({
-          text: signed(dx),
+          text: dlina(dx),
           mx: (sx(v.from[0]) + cx) / 2,
           my: cy,
           nx: 0,
@@ -532,7 +552,7 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
           what: `катет Δy ${v.name}`,
         });
         hintLabels.push({
-          text: signed(dy),
+          text: dlina(dy),
           mx: cx,
           my: (cy + sy(v.to[1])) / 2,
           nx: dx > 0 ? 1 : -1,
@@ -626,8 +646,9 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
           family: V.label.family,
           weight: V.label.weight,
           style: 'italic',
+          fill: V.color,
         }) +
-        `<path d="M${px(ax1)} ${px(arrowY)}H${px(ax2)}M${px(ax2 - V.label.arrowHead)} ${px(arrowY - V.label.arrowHead * 0.7)}L${px(ax2)} ${px(arrowY)}L${px(ax2 - V.label.arrowHead)} ${px(arrowY + V.label.arrowHead * 0.7)}" fill="none" stroke="${THEME.colors.label}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>` +
+        `<path d="M${px(ax1)} ${px(arrowY)}H${px(ax2)}M${px(ax2 - V.label.arrowHead)} ${px(arrowY - V.label.arrowHead * 0.7)}L${px(ax2)} ${px(arrowY)}L${px(ax2 - V.label.arrowHead)} ${px(arrowY + V.label.arrowHead * 0.7)}" fill="none" stroke="${V.color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>` +
         '</g>',
     );
     addBox(chosen);

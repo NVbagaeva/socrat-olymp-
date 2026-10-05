@@ -31,6 +31,24 @@ function Tips({ config }: { config: RisunokConfig }) {
   const svg = renderVectorPlane(config, report);
   return (
     <div className="v2__tips">
+      <figure className="v2__tip">
+        <span
+          className="v2__tip-svg"
+          dangerouslySetInnerHTML={{
+            __html: crop(svg, report.axes.tipX - 6, report.axes.x, 24, 192),
+          }}
+        />
+        <figcaption className="t-sm">конец оси x, ×4</figcaption>
+      </figure>
+      <figure className="v2__tip">
+        <span
+          className="v2__tip-svg"
+          dangerouslySetInnerHTML={{
+            __html: crop(svg, report.axes.y, report.axes.tipY + 6, 24, 192),
+          }}
+        />
+        <figcaption className="t-sm">конец оси y, ×4</figcaption>
+      </figure>
       {report.vectors.map((v) => (
         <figure className="v2__tip" key={v.name}>
           <span
@@ -55,7 +73,8 @@ export default function VektoryShowcasePage() {
         <h1 className="t-h1">Рисунки задания №2</h1>
         <p className="v2__lead">
           Витрина движка lib/vektory: {OBRAZTSY.length} образцов — сетка, режим подсказки, режим без
-          сетки, окно по векторам. Ниже — полоса шириной с телефон и острия с увеличением.
+          сетки, окно по векторам. Ниже — полоса шириной с телефон и острия с увеличением. Те же
+          образцы в ч/б теме печати — на странице <a href="pechat/">pechat/</a>.
         </p>
       </header>
 
@@ -91,8 +110,9 @@ export default function VektoryShowcasePage() {
       <section className="v2__section" id="ostriya">
         <h2 className="t-h2">Острия наконечников</h2>
         <p className="v2__lead">
-          Квадрат 48 × 48 px вокруг конца каждого вектора, увеличен в четыре раза: остриё должно
-          стоять в пересечении линий сетки.
+          Квадрат 48 × 48 px вокруг концов осей и конца каждого вектора, увеличен в четыре раза:
+          остриё вектора должно стоять в пересечении линий сетки, линия оси — кончаться у основания
+          наконечника.
         </p>
         {OBRAZTSY.slice(0, 5).map((o) => (
           <div key={o.id}>
