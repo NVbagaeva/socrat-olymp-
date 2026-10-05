@@ -2079,7 +2079,8 @@ a.task-card {
 /* Переход по якорю оставляет над заголовком воздух: иначе он
    прилипает к верхней кромке экрана. */
 .theory-block {
-  scroll-margin-top: var(--space-5);
+  /* Под прилипшей лентой вкладок: её высота — --topic-sticky-top. */
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-5));
 }
 .theory-block__text {
   font-size: var(--fs-body);
@@ -2177,6 +2178,20 @@ a.task-card {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+  /* Полоса стоит сразу под прилипшей лентой — без щели; тень снизу
+     теперь у неё, а у ленты над ней тень убирается. */
+  .app-main:has(.topic-tabs-row.is-stuck) .topic-open {
+    box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
+  }
+  .app-main:has(.topic-open) .topic-tabs-row.is-stuck::before {
+    box-shadow: none;
+  }
+  /* Подложка ленты — до кромки экрана, не дальше: поле страницы
+     здесь --space-5 (.app-main выше). Шире — и страница на телефоне
+     становится шире экрана. */
+  .app-main {
+    --tabs-bleed: var(--space-5);
   }
   /* Переход по содержанию: заголовок раздела встаёт под полосой,
      а не под ней прячется. */
@@ -2288,6 +2303,42 @@ a.task-card {
 }
 .topic-tabs::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Липкая лента вкладок ──────────────────────────────────────
+   Лента прилипает к верху экрана во всех разделах: строка
+   .topic-tabs-row стоит прямо в main.app-main, который тянется на всю
+   страницу. Состояние «прилипла» (is-stuck), высоту для полос под
+   лентой (--topic-sticky-top) и выравнивание страницы ставит хук
+   components/tasks/useStickyTabs.ts.
+
+   Подложка непрозрачная и растянута на поля страницы псевдоэлементом:
+   по ширине самой строки меню «Для репетиторов» считает своё место,
+   раздвигать её нельзя. Поля main такие же, поэтому подложка не
+   выступает за страницу и горизонтальной прокрутки не даёт. */
+.topic-tabs-row {
+  position: sticky;
+  /* Под чёлкой iPhone лента не прячется: отступ — безопасная зона. */
+  top: env(safe-area-inset-top, 0px);
+  z-index: 6;
+}
+.topic-tabs-row::before {
+  content: '';
+  position: absolute;
+  /* В стороны — на поле страницы (--tabs-bleed), вверх — на вырез
+     экрана, к которому прилипает лента. */
+  inset: calc(env(safe-area-inset-top, 0px) * -1) calc(var(--tabs-bleed, var(--space-8)) * -1) 0;
+  z-index: -1;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+/* Прилипшая лента отходит от кромки экрана и отделяется тенью от
+   текста, который уезжает под неё. */
+.topic-tabs-row.is-stuck {
+  padding-block: var(--space-2);
+}
+.topic-tabs-row.is-stuck::before {
+  box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
 }
 .tabs--lenta {
   display: flex;
@@ -2853,4 +2904,39 @@ a.task-card {
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
+}
+
+/* Прилипшая лента на телефоне — компактная: значок и подпись в одну
+   строку, поля меньше. Вместе с полосой «Содержание» она занимает
+   около девятой части экрана. Лента по-прежнему прокручивается вбок,
+   активную вкладку в видимую часть подводит хук. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row.is-stuck {
+    padding-block: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .topic-tabs {
+    padding: 2px;
+    box-shadow: none;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta button,
+  .topic-tabs-row.is-stuck .tabs--lenta a[role='tab'],
+  .topic-tabs-row.is-stuck .topic-tabs__more {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__text,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__text {
+    max-width: none;
+    white-space: nowrap;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico {
+    width: 20px;
+    height: 20px;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico svg,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico svg {
+    width: 16px;
+    height: 16px;
+  }
 }

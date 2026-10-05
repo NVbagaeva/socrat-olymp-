@@ -88,28 +88,8 @@
 .veroyatnost-main {
   overflow-x: clip;
 }
-.veroyatnost-main .topic-tabs-row {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-/* Фон выходит на поля страницы подложкой, а не полями самой строки:
-   по ширине строки меню «Для репетиторов» считает своё место, и,
-   раздвинь её отрицательными полями, меню упёрлось бы в край окна. */
-.veroyatnost-main .topic-tabs-row::before {
-  content: '';
-  position: absolute;
-  inset: 0 calc(var(--space-8) * -1);
-  z-index: -1;
-  background: var(--color-bg);
-}
-@media (max-width: 1023.98px) {
-  /* Поля страницы на этом ярусе уже — подложка сужается вместе с
-     ними, иначе она вылезет за край экрана. */
-  .veroyatnost-main .topic-tabs-row::before {
-    inset: 0 calc(var(--space-5) * -1);
-  }
-}
+/* Сама лента липнет во всех разделах одинаково — styles/components.css
+   и хук components/tasks/useStickyTabs.ts. */
 
 /* ── Тренажёр ───────────────────────────────────────────────────── */
 
@@ -165,7 +145,7 @@
    Здесь только то, чего у №12 нет: карточка задачи вероятности и
    выход к списку блоков. */
 .vprep__zadacha {
-  scroll-margin-top: var(--space-4);
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
 }
 .vprep__gotovo {
   margin: 0;
@@ -239,7 +219,7 @@
    Здесь только то, чего у №12 нет: карточка задачи вероятности и
    выход к списку блоков. */
 .vprep__zadacha {
-  scroll-margin-top: var(--space-4);
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
 }
 .vprep__gotovo {
   margin: 0;
@@ -1530,20 +1510,17 @@
    разделов надо листать вверх через весь раздел. */
 @media (min-width: 1024px) {
   .vteor .topic-side {
-    top: calc(var(--h-tabs) + var(--space-5));
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-5));
   }
 }
 @media (max-width: 1023.98px) {
   /* Сама полоса — общая (styles/components.css); здесь только отсчёт от низа
      липкой ленты вкладок. */
-  .veroyatnost-main {
-    --topic-sticky-top: var(--h-tabs);
-  }
   /* Переход по содержанию: заголовок встаёт под лентой и полосой.
      Правило здесь, а не рядом с полосой в components.css: тот файл
      в слое @layer, и базовое .vteor-razdel отсюда его перебило бы. */
   .vteor .vteor-razdel {
-    scroll-margin-top: calc(var(--h-tabs) + var(--h-topic-open) + var(--space-4));
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
   }
 }
 
@@ -1580,7 +1557,7 @@
   display: grid;
   gap: var(--space-4);
   /* Заголовок не прячется под липкую шапку при переходе по содержанию. */
-  scroll-margin-top: var(--space-6);
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
 }
 .vteor-razdel__title {
   display: flex;
