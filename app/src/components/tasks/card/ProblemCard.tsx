@@ -11,6 +11,7 @@ import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { VykladkaKlient } from '../veroyatnost/VykladkaKlient';
 import { Vizualizatsiya, podpisRisunka } from './Vizualizatsiya';
 
+import { assetUrl } from '@/lib/assetUrl';
 /**
  * Карточка задачи — раздел 05 референса: условие · визуализация · решение.
  *
@@ -197,7 +198,7 @@ export function ProblemCard({
   const illyustratsiya =
     kartinka === undefined ? null : (
       <figure className="pc__ill">
-        <img src={kartinka.path} alt={kartinka.alt} loading="lazy" />
+        <img src={assetUrl(kartinka.path)} alt={kartinka.alt} loading="lazy" />
       </figure>
     );
 

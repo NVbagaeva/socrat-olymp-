@@ -151,7 +151,9 @@ function checkSiteLinks() {
   if (!fs.existsSync(file)) { fail('vychisleniya.ts: файла нет'); return; }
   const source = fs.readFileSync(file, 'utf8');
 
-  const paths = [...source.matchAll(/^\s*file:\s*'([^']+)'/gm)].map((m) => m[1]);
+  /* Адрес может быть обёрнут в assetUrl('…') — версия к ссылке
+     добавляется при сборке (lib/assetUrl.ts), сам файл тот же. */
+  const paths = [...source.matchAll(/^\s*file:\s*(?:assetUrl\()?'([^']+)'/gm)].map((m) => m[1]);
   if (!paths.length) {
     fail('vychisleniya.ts: ни одна карточка материалов не ведёт на файл');
     return;

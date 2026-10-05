@@ -6,6 +6,7 @@ import { katex } from '@/lib/graph/katex';
 import { compareLinesScene } from '@/lib/scenes';
 import { FormulationIcon } from './FormulationIcon';
 
+import { assetUrl } from '@/lib/assetUrl';
 /* Формулы вёрстываются на сборке: в браузер уходит готовая разметка,
    а не библиотека ради четырёх постоянных строк. */
 function formulaHtml(tex: string): string {
@@ -80,7 +81,7 @@ export function TopicAbout({
         <p className="subtopic-hint about-hint">
           <Image
             className="subtopic-hint__art"
-            src="/images/lightbulb.webp"
+            src={assetUrl('/images/lightbulb.webp')}
             alt=""
             width={200}
             height={181}

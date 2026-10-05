@@ -7,6 +7,7 @@
 
 import type { KindId, LineKindId } from '@/lib/scenes';
 
+import { assetUrl } from '@/lib/assetUrl';
 /**
  * Кусок текста: жирным выделяется то, что выделено автором.
  *
@@ -54,7 +55,7 @@ export const whatIsFunction: WhatIsFunctionContent = {
   /* Пузыри с подписями и рукописная надпись нарисованы внутри самого
      файла: рядом с ним ни карточек, ни HandNote быть не должно. */
   illustration: {
-    src: '/images/sloth-dependencies.webp',
+    src: assetUrl('/images/sloth-dependencies.webp'),
     width: 1517,
     height: 1024,
     alt: 'Ленивец в лавровом венке за тетрадью, вокруг — зависимость от кофе, игр, мнения окружающих и соцсетей',
@@ -233,7 +234,7 @@ export const graphNotFunction: GraphNotFunctionContent = {
   /* Облачко «Вот здесь чаще всего ошибаются!» нарисовано внутри
      самого файла: рядом с ним ни плашек, ни HandNote быть не должно. */
   illustration: {
-    src: '/images/sloth-pointer-mistake.webp',
+    src: assetUrl('/images/sloth-pointer-mistake.webp'),
     width: 1472,
     height: 999,
     alt: 'Ленивец с указкой предупреждает об ошибке',

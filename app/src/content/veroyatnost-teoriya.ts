@@ -1,3 +1,5 @@
+import { assetUrl } from '@/lib/assetUrl';
+
 /**
  * Тексты вкладки «Теория» задания №4.
  *
@@ -85,7 +87,7 @@ export const VIDY_SOBYTIY = {
       primer:
         'в сказке «Двенадцать месяцев» мачеха отправляет девушку в январе за подснежниками. В привычных зимних условиях это невозможно.',
       kartinka: {
-        src: '/images/zadanie-04/dvenadtsat-mesyatsev.webp',
+        src: assetUrl('/images/zadanie-04/dvenadtsat-mesyatsev.webp'),
         width: 1000,
         height: 563,
         alt: 'Девушка с корзиной подснежников в зимнем лесу',
@@ -103,7 +105,7 @@ export const VIDY_SOBYTIY = {
       primer:
         'при броске игральной кости выпадает число 6. Мы не можем заранее сказать, произойдёт это или нет, но такое событие возможно.',
       kartinka: {
-        src: '/images/zadanie-04/igralnye-kosti.webp',
+        src: assetUrl('/images/zadanie-04/igralnye-kosti.webp'),
         width: 800,
         height: 533,
         alt: 'Две игральные кости',
@@ -132,7 +134,7 @@ export const VIDY_SOBYTIY = {
     title: 'А что, если изменить условия?',
     text: 'В 2002 году в Белграде (Сербия) из-за аномально тёплой зимы в январе действительно зацвели подснежники. То, что кажется невозможным в одной ситуации, в другой может стать реальным.',
     kartinka: {
-      src: '/images/zadanie-04/podsnezhniki.webp',
+      src: assetUrl('/images/zadanie-04/podsnezhniki.webp'),
       width: 800,
       height: 533,
       alt: 'Подснежники, пробившиеся сквозь снег',
@@ -180,7 +182,7 @@ export const SVYAZANY = {
       primer:
         'мы дважды бросаем монету. Если в первый раз выпал орёл, второй бросок от этого никак не зависит: во второй раз может выпасть и орёл, и решка. Результат первого броска не влияет на второй — в этом и есть независимость.',
       kartinka: {
-        src: '/images/zadanie-04/monety.webp',
+        src: assetUrl('/images/zadanie-04/monety.webp'),
         width: 800,
         height: 400,
         alt: 'Две монеты',
@@ -203,7 +205,7 @@ export const SVYAZANY = {
         'Не путайте с независимыми событиями: там речь о нескольких опытах — бросили монету, потом ещё раз. Совместность — про один опыт: могут ли два исхода случиться в нём одновременно. При одном нажатии кнопки кофейный автомат не приготовит сразу и капучино, и латте — это несовместные события.',
       primer: 'вы пришли в торговый центр, а кофе в одном автомате закончился. Что вы сделаете?',
       kartinka: {
-        src: '/images/zadanie-04/kofeynyy-avtomat.webp',
+        src: assetUrl('/images/zadanie-04/kofeynyy-avtomat.webp'),
         width: 700,
         height: 737,
         alt: 'Кофейный автомат и стакан кофе',
@@ -260,7 +262,7 @@ export const KLASSICHESKAYA = {
     usloviye:
       'В коробке 8 конфет. Из них 2 покрыты белым шоколадом. Какова вероятность достать конфету, покрытую белым шоколадом?',
     kartinka: {
-      src: '/images/zadanie-04/korobka-konfet.webp',
+      src: assetUrl('/images/zadanie-04/korobka-konfet.webp'),
       width: 800,
       height: 454,
       alt: 'Коробка с восемью шоколадными конфетами, две из них покрыты белым шоколадом',
@@ -283,7 +285,7 @@ export const KLASSICHESKAYA = {
     primer:
       'при броске обычной игральной кости каждый из результатов 1, 2, 3, 4, 5, 6 считается равновозможным.',
     kartinka: {
-      src: '/images/zadanie-04/igralnye-kosti.webp',
+      src: assetUrl('/images/zadanie-04/igralnye-kosti.webp'),
       width: 800,
       height: 533,
       alt: 'Две игральные кости',
@@ -322,7 +324,7 @@ export const PROVER_PONIMANIE = {
 
 /** Декор правой колонки под содержанием: картинка и подпись. */
 export const TEORIYA_DEKOR = {
-  src: '/images/zadanie-04/veroyatnost-rost.webp',
+  src: assetUrl('/images/zadanie-04/veroyatnost-rost.webp'),
   width: 520,
   height: 346,
   /** Картинка decorative: подпись рядом говорит то же самое словами. */
@@ -377,7 +379,7 @@ export const IZOBRAZHENIE = {
   /* Блок про Эйлера. */
   eyler: {
     portret: {
-      src: '/images/zadanie-04/eyler-portret.png',
+      src: assetUrl('/images/zadanie-04/eyler-portret.png'),
       width: 1583,
       height: 993,
       alt: 'Леонард Эйлер на фоне гор, рядом стопка книг и «Энеида» Вергилия',
@@ -508,7 +510,7 @@ export const PRYAMAYA = {
       'Вероятность того, что чайник прослужит больше года, равна 0,96, а вероятность того, что он прослужит больше двух лет, — 0,85.',
     vopros: 'Какова вероятность того, что чайник прослужит от года до двух лет?',
     kartinka: {
-      src: '/images/zadanie-05/chaynik-vyklyuchen.webp',
+      src: assetUrl('/images/zadanie-05/chaynik-vyklyuchen.webp'),
       width: 572,
       height: 637,
       alt: 'Электрический чайник',
@@ -536,7 +538,7 @@ export const PRYAMAYA = {
       'Вероятность того, что чайник прослужит меньше двух лет, равна 0,85, а вероятность того, что он прослужит больше года, — 0,95.',
     vopros: 'Какова вероятность того, что чайник прослужит от года до двух лет?',
     kartinka: {
-      src: '/images/zadanie-05/chaynik-kipit.webp',
+      src: assetUrl('/images/zadanie-05/chaynik-kipit.webp'),
       width: 571,
       height: 616,
       alt: 'Стеклянный электрический чайник с кипящей водой',

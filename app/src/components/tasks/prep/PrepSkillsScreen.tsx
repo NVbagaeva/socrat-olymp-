@@ -8,6 +8,7 @@ import { TaskCountIcon } from './PrepIcons';
 import { Tex } from '@/components/ui/Tex';
 import { texPlain } from '@/lib/tex';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface PrepSkillItem {
   id: PrepSkillId;
   no: string;
@@ -76,7 +77,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
             текстом рядом. Фон у файла прозрачный. */}
         <Image
           className="prep-quote__art"
-          src="/images/bust-aristotle-glass.webp"
+          src={assetUrl('/images/bust-aristotle-glass.webp')}
           alt=""
           width={1027}
           height={1505}

@@ -3,6 +3,7 @@ import { SiteFooter, SiteHeader } from '@/components/layout';
 import { about } from '@/content/about';
 import './about.css';
 
+import { assetUrl } from '@/lib/assetUrl';
 export const metadata: Metadata = {
   title: about.meta.title,
   description: about.meta.description,
@@ -59,30 +60,30 @@ export default function AboutPage() {
           {/* Дальше — графика, снизу вверх по слоям. Порядок в разметке
               совпадает с глубиной. Всё декоративное скрыто от
               скринридера и не перехватывает курсор. */}
-          <img className="hero-layer hero-layer--net" src="/images/decor/network.png" alt="" aria-hidden="true" />
-          <img className="hero-layer hero-layer--arcs" src="/images/decor/circles-1.png" alt="" aria-hidden="true" />
+          <img className="hero-layer hero-layer--net" src={assetUrl('/images/decor/network.png')} alt="" aria-hidden="true" />
+          <img className="hero-layer hero-layer--arcs" src={assetUrl('/images/decor/circles-1.png')} alt="" aria-hidden="true" />
 
           {/* Обёртка нужна, чтобы тень-подложка считалась от самого бюста:
               её ширина и высота заданы долями его размеров. */}
           <span className="hero-bust" aria-hidden="true">
-            <img src="/images/author/bust-marble.png" alt="" />
+            <img src={assetUrl('/images/author/bust-marble.png')} alt="" />
           </span>
 
           <img
             className="hero-layer hero-layer--note"
-            src="/images/nadpisi/nadpis-opyt-vdohnovlyaet.png"
+            src={assetUrl('/images/nadpisi/nadpis-opyt-vdohnovlyaet.png')}
             alt=""
             aria-hidden="true"
           />
           <img
             className="hero-layer hero-layer--formula"
-            src="/images/formuly/formula-kvadratichnaya-funkciya.png"
+            src={assetUrl('/images/formuly/formula-kvadratichnaya-funkciya.png')}
             alt=""
             aria-hidden="true"
           />
           <img
             className="hero-layer hero-layer--crystal"
-            src="/images/glass/pyramid-truncated-wide.png"
+            src={assetUrl('/images/glass/pyramid-truncated-wide.png')}
             alt=""
             aria-hidden="true"
           />

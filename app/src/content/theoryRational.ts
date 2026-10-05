@@ -17,6 +17,7 @@ import type { RationalTheorySceneId } from '@/lib/scenes';
 import type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 import type { TheorySection } from './theoryQuadratic';
 
+import { assetUrl } from '@/lib/assetUrl';
 type Section = TheorySection<RationalTheorySceneId>;
 
 /* ── 1. Откуда название ─────────────────────────────────────── */
@@ -39,7 +40,7 @@ const name: Section = {
         'Название кривой ввёл древнегреческий математик **Аполлоний Пергский** (III–II вв. до н. э.) в трактате «Конические сечения». Он получал эллипс, параболу и гиперболу, разрезая конус плоскостью, и назвал их по тому, чего у сечения «недостаёт», «поровну» или «в избытке».',
       ],
       illustration: {
-        src: '/images/theory/12/hyperbola-apollonius.webp',
+        src: assetUrl('/images/theory/12/hyperbola-apollonius.webp'),
         width: 1672,
         height: 941,
         alt: 'Аполлоний Пергский чертит конус, рассечённый плоскостью; справа — график гиперболы y = 1/x',

@@ -37,11 +37,14 @@
 }
 /* Знак — угол наклона, отсылка к угловому коэффициенту прямой.
    Подложка и скругление живут внутри logo.svg, поэтому здесь только
-   коробка: размер 22×22 и отступ до текста (gap у .logo) не меняются. */
+   коробка: размер 22×22 и отступ до текста (gap у .logo) не меняются.
+   Путь относительный, а не /icons/logo.svg: так сборка кладёт файл в
+   _next/static/media с хешем в имени, и обновлённый знак не залипнет
+   в годовом кеше хостинга. */
 .logo i {
   width: 22px;
   height: 22px;
-  background: url('/icons/logo.svg') center / 22px 22px no-repeat;
+  background: url('../../public/icons/logo.svg') center / 22px 22px no-repeat;
   display: block;
   flex: none;
 }

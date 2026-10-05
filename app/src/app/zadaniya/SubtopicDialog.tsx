@@ -7,6 +7,7 @@ import { previewScene } from '@/lib/scenes';
 import { counted } from '@/lib/plural';
 import type { FunctionTypeId } from '@/data/functionTypes';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface SubtopicView {
   id: FunctionTypeId;
   /** Номер строки: 01 … 06. */
@@ -138,7 +139,7 @@ export function SubtopicDialog({
         {/* Лампочка — декор рядом с текстом, поэтому alt пустой. */}
         <Image
           className="subtopic-hint__art"
-          src="/images/lightbulb.webp"
+          src={assetUrl('/images/lightbulb.webp')}
           alt=""
           width={200}
           height={181}
