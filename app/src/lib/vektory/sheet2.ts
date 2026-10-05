@@ -249,8 +249,12 @@ export function subtitleOf2(params: Pick<SheetParams2, 'kind' | 'date' | 'bank'>
 
 /** Раздел «Ответы»: таблица на блок, у нескольких вариантов — с подзаголовком варианта. */
 function answersItems2(variants: SheetBlock2[][]): string[] {
+  /* Свой счёт страниц у раздела ответов — только при нескольких
+     вариантах (как у №12): у одного варианта колонтитул сквозной. */
   const items: string[] = [
-    answers.sectionHead('Ответы', 'по прототипам, сквозная нумерация', { section: true }),
+    answers.sectionHead('Ответы', 'по прототипам, сквозная нумерация', {
+      section: variants.length > 1,
+    }),
   ];
   variants.forEach((blocks, i) => {
     if (variants.length > 1) {
