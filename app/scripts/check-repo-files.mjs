@@ -46,8 +46,7 @@ const FOREIGN_NAME = [
 
 /* Явные исключения: путь → причина. */
 const ALLOWED = new Map([
-  ['content-source/veroyatnost/teorver-konspekt.pdf', 'конспект: ждёт решения автора, чей он'],
-  ['docs/sources/teorver-konspekt.pdf', 'конспект: ждёт решения автора, чей он'],
+  // Пока пусто. Формат: ['путь/к/файлу.pdf', 'почему ему можно здесь лежать'].
 ]);
 
 const files = execFileSync('git', ['-c', 'core.quotepath=off', 'ls-files', '-z'], {
