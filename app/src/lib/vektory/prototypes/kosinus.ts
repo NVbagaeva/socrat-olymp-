@@ -24,7 +24,7 @@ import {
   signatureOf,
 } from './common';
 
-interface Para {
+export interface Para {
   a: Tochka;
   b: Tochka;
   dot: number;
@@ -90,7 +90,16 @@ function shagDlinyKosinus(a: Tochka, b: Tochka, proizv: number): Shag {
   };
 }
 
-function shagiKosinusa(p: Para, poRisunku: Shag | null): Shag[] {
+/** Пара по двум векторам, если произведение длин рационально; косинус — любой. */
+export function paraIz(a: Tochka, b: Tochka): Para | null {
+  const q = (a[0] * a[0] + a[1] * a[1]) * (b[0] * b[0] + b[1] * b[1]);
+  if (!isSquare(q)) return null;
+  const proizv = Math.round(Math.sqrt(q));
+  const dot = skalyar(a, b);
+  return { a, b, dot, proizv, cos: dot / proizv };
+}
+
+export function shagiKosinusa(p: Para, poRisunku: Shag | null): Shag[] {
   const la = dlinaTex(p.a).tex;
   const lb = dlinaTex(p.b).tex;
   const kos: Shag = {
@@ -124,7 +133,7 @@ function vybratParu(
   return r.pick(fit);
 }
 
-const VOPROS = [
+export const VOPROS = [
   'Найдите косинус угла между ними.',
   `Найдите $\\cos\\alpha$, где $\\alpha$ — угол между векторами $${vec('a')}$ и $${vec('b')}$.`,
 ] as const;

@@ -28,6 +28,11 @@ import { generate, risunokChist } from './generate';
 import { pointSegDist, rectGap, segRectDist, segSegDist, type Rect, type Seg } from './geometry';
 import { OBRAZTSY } from './obraztsy';
 import { PROTOTYPES } from './prototypes';
+import {
+  KOSINUSY_DVA_ZNAKA,
+  KOSINUSY_TRI_ZNAKA,
+  OPORNYE_KOSINUS_TRI_ZNAKA,
+} from './opornye-kosinus';
 import { kosoy } from './troyki';
 import { emptyReport, renderVectorPlane } from './render';
 import type { Box, Generated, Report, Risunok, Tochka, Vektor } from './types';
@@ -437,15 +442,25 @@ function checkRisunokZadachi(where: string, risunok: Risunok): Problem[] {
 }
 
 /** Проверка одной задачи. */
-export function checkTask(task: Generated, typeset: Typeset): Problem[] {
+export function checkTask(task: Generated, typeset: Typeset, znakov = 2): Problem[] {
   const where = `${task.prototype} seed=${task.seed}`;
   const problems: Problem[] = [];
   const push = (what: string) => problems.push({ where, what });
   const prototype = PROTOTYPES.find((p) => p.id === task.prototype);
   if (!Number.isFinite(task.otvet)) {
     push(`ответ не число: ${String(task.otvet)}`);
-  } else if (!nice(task.otvet, 2)) {
-    push(`ответ не целый и не десятичная дробь до двух знаков: ${task.otvet}`);
+  } else if (!nice(task.otvet, znakov)) {
+    push(`ответ не целый и не десятичная дробь до ${znakov} знаков: ${task.otvet}`);
+  }
+  /* Косинус в тренажёре, генераторе и банке — только из восьми
+     двухзначных значений; три знака живут лишь в опорных задачах
+     повышенной сложности (opornye-kosinus.ts). */
+  if (
+    prototype !== undefined &&
+    prototype.gruppa === 'C' &&
+    !KOSINUSY_DVA_ZNAKA.includes(task.otvet)
+  ) {
+    push(`косинус ${task.otvet} вне допустимых двухзначных значений`);
   }
   if (!Number.isFinite(task.proverka) || Math.abs(task.proverka - task.otvet) > 1e-6) {
     push(`независимый счёт ${task.proverka} не сходится с ответом ${task.otvet}`);
@@ -603,4 +618,36 @@ export function checkBank(typeset: Typeset): GenReport {
     problems.push({ where: `банк ${id}`, what: 'прототипа нет в банке' });
   }
   return { prototypes: BANK.length, generated, problems };
+}
+
+/**
+ * Опорные задачи повышенной сложности (косинус с тремя знаками):
+ * ответы только ±0,936 и ±0,352, рисунок чист, формулы собираются;
+ * ни один их набор векторов не встречается в банке.
+ */
+export function checkOpornyeKosinus(typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  const bankSignatures = new Set<string>();
+  for (const entry of BANK) {
+    for (const v of entry.variants) {
+      bankSignatures.add(generate(entry.prototype, v.seed).signature);
+    }
+  }
+  for (const task of OPORNYE_KOSINUS_TRI_ZNAKA) {
+    const where = `опорная ${task.seed}`;
+    problems.push(...checkTask(task, typeset, 3));
+    if (!KOSINUSY_TRI_ZNAKA.includes(task.otvet)) {
+      problems.push({ where, what: `ответ ${task.otvet} не из ±0,936; ±0,352` });
+    }
+    if (task.risunok !== null) {
+      problems.push(...checkRisunokZadachi(where, task.risunok));
+    }
+    if (bankSignatures.has(task.signature)) {
+      problems.push({ where, what: 'такой набор векторов есть в банке' });
+    }
+  }
+  if (OPORNYE_KOSINUS_TRI_ZNAKA.length < 2) {
+    problems.push({ where: 'опорные', what: 'задач повышенной сложности меньше двух' });
+  }
+  return { prototypes: 1, generated: OPORNYE_KOSINUS_TRI_ZNAKA.length, problems };
 }
