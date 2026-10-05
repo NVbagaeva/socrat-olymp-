@@ -22,7 +22,6 @@ export function Podgotovka8List({ blocks, listHref }: Podgotovka8ListProps) {
               <span className="prep-card__title">{block.nazvanie}</span>
               <span className="prep-card__lead">{block.lead}</span>
             </span>
-            <span className="prep-card__chart z8-card-formula" dangerouslySetInnerHTML={{ __html: block.formulaHtml }} />
             <span className="prep-card__count">
               <TaskCountIcon />
               {block.zadachi.length} заданий

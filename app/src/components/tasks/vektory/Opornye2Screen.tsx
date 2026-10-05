@@ -19,7 +19,7 @@ type Attempt = 'wrong' | 'skipped';
 export interface Opornye2ScreenProps {
   blockId: string;
   title: string;
-  /** Шесть задач блока в закрытом виде, собраны на сборке. */
+  /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (MikroSealed & { no: number })[];
   /** Плашка «Запомни»: формулы блока, свёрстаны. */
   formulyHtml: string[];

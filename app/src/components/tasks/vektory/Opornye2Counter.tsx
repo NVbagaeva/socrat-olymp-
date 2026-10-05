@@ -8,7 +8,7 @@ export interface Opornye2CounterProps {
   totals: { id: string; total: number }[];
 }
 
-/** Строка «N из 30 заданий» и полоса под ней: счёт из хранилища браузера. */
+/** Строка «N из 50 заданий» и полоса под ней: счёт из хранилища браузера. */
 export function Opornye2Counter({ totals }: Opornye2CounterProps) {
   const progress = opornye2.useProgress();
   const total = totals.reduce((sum, item) => sum + item.total, 0);

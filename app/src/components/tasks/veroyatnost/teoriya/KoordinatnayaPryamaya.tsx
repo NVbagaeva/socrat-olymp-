@@ -91,7 +91,7 @@ function Vazhno({ children }: { children: string }) {
       <span className="vteor-vazhno__znak" aria-hidden="true">
         !
       </span>
-      <span className="vteor-vazhno__text">{children}</span>
+      <Tex className="vteor-vazhno__text" text={children} />
     </p>
   );
 }

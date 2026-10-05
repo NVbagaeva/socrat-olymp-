@@ -19,8 +19,6 @@ export interface PrepSkillItem {
   href: string;
   /** Миниатюра чертежа: её собирает движок на сервере. */
   chart: ReactNode;
-  /** Формула рядом с чертежом, набранная KaTeX. Есть не у всех. */
-  formula: ReactNode;
 }
 
 export interface PrepSkillsScreenProps {
@@ -51,7 +49,6 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
               <span className="prep-card__text">
                 <Tex className="prep-card__title" text={item.title} />
                 <Tex className="prep-card__lead" text={item.lead} />
-                {item.formula}
               </span>
               {/* Чертёж занимает две строки сетки — свою и строку
                   со счётчиком: иначе он один растягивал верхний ряд

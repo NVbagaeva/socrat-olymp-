@@ -720,10 +720,17 @@ export function checkMikro(seeds: number, typeset: Typeset): GenReport {
   let generated = 0;
   let prototypes = 0;
   for (const blok of BLOKI) {
-    for (const f of [blok.formula, ...blok.formuly]) {
+    for (const f of blok.formuly) {
       proverit((what) => problems.push({ where: `блок ${blok.id}`, what }), typeset, f);
     }
     const fixed = new Set<string>();
+    const zafiks: { otvet: number | string; v: Tochka | null; dano: Tochka[] }[] = [];
+    if (blok.zadachi.length !== ZADACH_V_BLOKE) {
+      problems.push({
+        where: `блок ${blok.id}`,
+        what: `задач ${blok.zadachi.length}, а не ${ZADACH_V_BLOKE}`,
+      });
+    }
     for (const m of blok.zadachi) {
       prototypes += 1;
       proverit((what) => problems.push({ where: m.id, what }), typeset, m.formula);
@@ -778,6 +785,14 @@ export function checkMikro(seeds: number, typeset: Typeset): GenReport {
           for (const tex of formulyTeksta(text)) proverit(push, typeset, tex);
         }
         if (seed === fixedSeed(m)) {
+          const v0 = task.risunok?.vectors[0];
+          zafiks.push({
+            otvet: task.otvet,
+            v: v0 === undefined ? null : [v0.to[0] - v0.from[0], v0.to[1] - v0.from[1]],
+            dano: [...task.uslovie.matchAll(/\((-?\d+);\\ (-?\d+)\)/g)].map(
+              (x) => [Number(x[1]), Number(x[2])] as Tochka,
+            ),
+          });
           const key =
             task.uslovie +
             JSON.stringify(task.risunok?.vectors ?? null) +
@@ -787,8 +802,54 @@ export function checkMikro(seeds: number, typeset: Typeset): GenReport {
         }
       }
     }
+    problems.push(...raznoobrazie(blok.id, zafiks));
   }
   return { prototypes, generated, problems };
+}
+
+/** Задач в каждом блоке тренировок навыков. */
+export const ZADACH_V_BLOKE = 10;
+
+/**
+ * Разнообразие зафиксированных задач блока: у координат и длин —
+ * все четыре четверти (у координат ещё и вектор вдоль оси), у
+ * скалярного произведения — положительный, отрицательный и нулевой
+ * ответ, у косинуса — острый и тупой угол.
+ */
+function raznoobrazie(
+  blokId: string,
+  zafiks: readonly { otvet: number | string; v: Tochka | null; dano: Tochka[] }[],
+): Problem[] {
+  const problems: Problem[] = [];
+  const push = (what: string) => problems.push({ where: `блок ${blokId}`, what });
+  const chetvert = (p: Tochka) => `${Math.sign(p[0])},${Math.sign(p[1])}`;
+  const vse = ['1,1', '-1,1', '-1,-1', '1,-1'];
+  if (blokId === 'P2-1') {
+    const est = new Set(zafiks.flatMap((z) => (z.v === null ? [] : [chetvert(z.v)])));
+    for (const q of vse) if (!est.has(q)) push(`нет вектора в четверти (${q})`);
+    if (![...est].some((q) => q.includes('0'))) push('нет вектора вдоль оси');
+  }
+  if (blokId === 'P2-3') {
+    const est = new Set(
+      zafiks.flatMap((z) => (z.v !== null ? [chetvert(z.v)] : z.dano.map(chetvert))),
+    );
+    for (const q of vse) if (!est.has(q)) push(`нет вектора в четверти (${q})`);
+  }
+  if (blokId === 'P2-4') {
+    const z = zafiks.map((x) => Math.sign(Number(x.otvet)));
+    for (const [znak, slovo] of [
+      [1, 'положительного'],
+      [-1, 'отрицательного'],
+      [0, 'нулевого'],
+    ] as const) {
+      if (!z.includes(znak)) push(`нет ${slovo} скалярного произведения`);
+    }
+  }
+  if (blokId === 'P2-5') {
+    const z = zafiks.map((x) => Math.sign(Number(x.otvet)));
+    if (!z.includes(1) || !z.includes(-1)) push('нужны и острый, и тупой угол');
+  }
+  return problems;
 }
 
 /**
@@ -989,7 +1050,6 @@ function tekstyRazdela(seeds: number): { where: string; text: string }[] {
     }
   }
   for (const b of BLOKI) {
-    add(`${b.id} формула карточки`, `$${b.formula}$`);
     for (const f of b.formuly) add(`${b.id} «Запомни»`, `$${f}$`);
     for (const m of b.zadachi) {
       add(`${m.id} формула`, `$${m.formula}$`);
@@ -1025,7 +1085,7 @@ function tekstyRazdela(seeds: number): { where: string; text: string }[] {
  * Везде, где буква обозначает вектор, стоит \vec: в KaTeX-строках
  * раздела буквы a, b, c вне \vec{…} не встречаются — ни в модулях, ни
  * в скалярных произведениях, ни в линейных комбинациях, ни в
- * координатах. Модуль везде одной формы: \left|…\right|, черта «|» без
+ * координатах; вектор из двух букв — \overrightarrow{AB}. Модуль везде одной формы: \left|…\right|, черта «|» без
  * \left и \right рядом с вектором не стоит. Исключения — явным списком.
  */
 export function checkStrelki(seeds = 5): GenReport {
@@ -1046,6 +1106,10 @@ export function checkStrelki(seeds = 5): GenReport {
       if (BUKVY_VEKTOROV.test(bezVektorov) && !seen.has(key)) {
         seen.add(key);
         problems.push({ where, what: `буква вектора без \\vec: «${tex}»` });
+      }
+      if (/\\vec\{[A-Z]{2}\}/.test(tex) && !seen.has(`${key}AB`)) {
+        seen.add(`${key}AB`);
+        problems.push({ where, what: `вектор из двух букв не через \\overrightarrow: «${tex}»` });
       }
       const bezModuley = tex.replace(/\\(?:left|right|bigl|bigr|big|Bigl|Bigr)\|/g, '');
       if (tex.includes('\\vec') && bezModuley.includes('|') && !seen.has(`${key}|`)) {

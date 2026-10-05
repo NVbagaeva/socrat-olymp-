@@ -17,7 +17,6 @@ export interface PoolBlok {
   no: string;
   nazvanie: string;
   lead: string;
-  formulaHtml: string;
   formulyHtml: string[];
   zadachi: (MikroSealed & { no: number })[];
 }
@@ -32,7 +31,6 @@ export function prepPool2(): PoolBlok[] {
     no: b.no,
     nazvanie: b.nazvanie,
     lead: b.lead,
-    formulaHtml: typeset(`$${b.formula}$`),
     formulyHtml: b.formuly.map((f) => typeset(`$${f}$`)),
     zadachi: b.zadachi.map((m, i) => ({ ...sealMikro(m, fixedSeed(m)), no: i + 1 })),
   }));
