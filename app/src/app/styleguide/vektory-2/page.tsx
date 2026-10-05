@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Risunok } from '@/components/tasks/vektory/Risunok';
+import { BANK } from '@/lib/vektory/bank';
+import { generate } from '@/lib/vektory/generate';
 import { OBRAZTSY } from '@/lib/vektory/obraztsy';
+import { PROTOTYPES } from '@/lib/vektory/prototypes';
 import { emptyReport, renderVectorPlane } from '@/lib/vektory/render';
 import type { Risunok as RisunokConfig } from '@/lib/vektory/types';
 import '@/lib/vektory/vektory.css';
@@ -89,6 +92,41 @@ export default function VektoryShowcasePage() {
             </figure>
           ))}
         </div>
+      </section>
+
+      <section className="v2__section" id="zadachi">
+        <h2 className="t-h2">Рисунки задач банка</h2>
+        <p className="v2__lead">
+          Первые два варианта банка каждого прототипа с рисунком: слева рисунок задачи, справа он же
+          в режиме подсказки, как в разборе. Ответы не выводятся.
+        </p>
+        {PROTOTYPES.filter((p) => p.format === 'grid' || p.format === 'nogrid').map((p) => {
+          const entry = BANK.find((e) => e.prototype === p.id);
+          const variants = entry === undefined ? [] : entry.variants.slice(0, 2);
+          return (
+            <div key={p.id} id={`zadachi-${p.id}`}>
+              <h3 className="t-h3">{p.id}</h3>
+              {variants.map((v) => {
+                const task = generate(p.id, v.seed);
+                if (task.risunok === null) return null;
+                return (
+                  <div className="v2__grid v2__zadacha" key={v.seed}>
+                    <figure className="v2__card">
+                      <Risunok config={task.risunok} />
+                      <figcaption className="t-sm">
+                        {v.seed} · {task.uslovie.replace(/\$[^$]*\$/g, '…')}
+                      </figcaption>
+                    </figure>
+                    <figure className="v2__card">
+                      <Risunok config={{ ...task.risunok, hints: true }} />
+                      <figcaption className="t-sm">{v.seed} · режим подсказки</figcaption>
+                    </figure>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
       </section>
 
       <section className="v2__section" id="telefon">

@@ -156,7 +156,9 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
   const cell = config.cell ?? THEME.geometry.cell;
   const g = THEME.geometry;
   const showGrid = config.grid !== false;
-  const hints = config.hints === true;
+  /* Без сетки координаты читаются по проекциям на оси, и катеты
+     легли бы прямо на них: в этом режиме подсказка катетов не нужна. */
+  const hints = config.hints === true && showGrid;
   const width = (win.xmax - win.xmin) * cell + g.pad * 2;
   const height = (win.ymax - win.ymin) * cell + g.pad * 2;
   const sx = (x: number) => g.pad + (x - win.xmin) * cell;

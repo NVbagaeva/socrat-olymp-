@@ -12,13 +12,25 @@
  * Проверка идёт по отчёту движка и по разметке SVG одновременно:
  * отчёт говорит, куда движок поставил остриё, а разметка — куда он
  * его нарисовал. Расхождение между ними — тоже ошибка.
+ *
+ * Вторая половина — генераторы и банк: на тысяче seed каждого
+ * прототипа ответ целый или конечная десятичная дробь не длиннее
+ * двух знаков, независимый пересчёт сходится, модули координат в
+ * пределах, рисунок чист по ограничениям (пересчитанным здесь
+ * заново, не доверяя движку), катетов на рисунке задачи нет,
+ * формулы собираются KaTeX; в банке десять разных вариантов.
  */
 
 import { THEME } from '@/lib/graph/renderer.js';
-import { rectGap, segRectDist, type Rect } from './geometry';
+import { nice, ru } from '../vychisleniya/numbers';
+import { BANK } from './bank';
+import { generate, risunokChist } from './generate';
+import { pointSegDist, rectGap, segRectDist, segSegDist, type Rect, type Seg } from './geometry';
 import { OBRAZTSY } from './obraztsy';
+import { PROTOTYPES } from './prototypes';
+import { kosoy } from './troyki';
 import { emptyReport, renderVectorPlane } from './render';
-import type { Box, Report, Risunok, Vektor } from './types';
+import type { Box, Generated, Report, Risunok, Tochka, Vektor } from './types';
 
 export interface Problem {
   where: string;
@@ -231,7 +243,7 @@ export function checkRisunok(where: string, config: Risunok): Problem[] {
     push('нет сетки');
   }
   const hintCount = (svg.match(/data-hint=/g) ?? []).length;
-  if (config.hints === true) {
+  if (config.hints === true && config.grid !== false) {
     const expect =
       config.vectors.reduce(
         (n, v) => n + (v.to[0] !== v.from[0] ? 1 : 0) + (v.to[1] !== v.from[1] ? 1 : 0),
@@ -260,7 +272,7 @@ export function checkRisunok(where: string, config: Risunok): Problem[] {
   } else if (hintCount !== 0) {
     push(`катеты нарисованы без hints: ${hintCount} элементов`);
   }
-  if (report.hints !== (config.hints === true)) {
+  if (report.hints !== (config.hints === true && config.grid !== false)) {
     push('report.hints не совпадает с конфигом');
   }
   return problems;
@@ -346,4 +358,249 @@ export function checkRenderer(randomCount: number): RendererReport {
     });
   }
   return { rendered, problems };
+}
+
+/* ── Генераторы и банк ──────────────────────────────────────────── */
+
+export interface GenReport {
+  prototypes: number;
+  generated: number;
+  problems: Problem[];
+}
+
+type Typeset = ((tex: string) => void) | null;
+
+/** Формулы условия и разбора: всё между долларами. */
+function formulas(task: Generated): string[] {
+  const out: string[] = [];
+  const texts = [task.uslovie, ...task.shagi.flatMap((s) => [s.zagolovok, ...s.stroki])];
+  for (const text of texts) {
+    for (const match of text.matchAll(/\$([^$]+)\$/g)) {
+      out.push(match[1] as string);
+    }
+  }
+  return out;
+}
+
+/** Координаты всех векторов задачи по подписи «x,y|x,y». */
+function vektoryIzSignature(task: Generated): Tochka[] {
+  if (!/^-?\d+,-?\d+(\|-?\d+,-?\d+)*$/.test(task.signature)) {
+    return [];
+  }
+  return task.signature.split('|').map((p) => p.split(',').map(Number) as unknown as Tochka);
+}
+
+/** Ограничения рисунка, пересчитанные независимо от движка. */
+function checkRisunokZadachi(where: string, risunok: Risunok): Problem[] {
+  const problems: Problem[] = [];
+  const push = (what: string) => problems.push({ where, what });
+  if (risunok.hints === true) {
+    push('на рисунке задачи включены катеты');
+  }
+  const win = typeof risunok.window === 'object' ? risunok.window : null;
+  const segs: { v: Vektor; seg: Seg }[] = risunok.vectors.map((v) => ({
+    v,
+    seg: { x1: v.from[0], y1: v.from[1], x2: v.to[0], y2: v.to[1] },
+  }));
+  for (const { v, seg } of segs) {
+    for (const p of [v.from, v.to]) {
+      if (!Number.isInteger(p[0]) || !Number.isInteger(p[1]))
+        push(`вектор ${v.name}: координаты не целые`);
+      if (
+        win !== null &&
+        (p[0] < win.xmin + 1 || p[0] > win.xmax - 1 || p[1] < win.ymin + 1 || p[1] > win.ymax - 1)
+      ) {
+        push(`вектор ${v.name}: конец ближе клетки к краю окна`);
+      }
+    }
+    if (Math.hypot(seg.x2 - seg.x1, seg.y2 - seg.y1) < 2) push(`вектор ${v.name} короче 2 клеток`);
+    if ((seg.y1 === 0 && seg.y2 === 0) || (seg.x1 === 0 && seg.x2 === 0))
+      push(`вектор ${v.name} лежит на оси`);
+  }
+  for (let i = 0; i < segs.length; i += 1) {
+    for (let j = i + 1; j < segs.length; j += 1) {
+      const a = segs[i]!;
+      const b = segs[j]!;
+      const shared = a.seg.x1 === b.seg.x1 && a.seg.y1 === b.seg.y1;
+      const dist = shared
+        ? Math.min(pointSegDist(a.seg.x2, a.seg.y2, b.seg), pointSegDist(b.seg.x2, b.seg.y2, a.seg))
+        : segSegDist(a.seg, b.seg);
+      if (dist < 1) push(`векторы ${a.v.name} и ${b.v.name} ближе клетки или пересекаются`);
+    }
+  }
+  if (!risunokChist(risunok)) {
+    push('движок нашёл нарушения на рисунке задачи');
+  }
+  const svg = renderVectorPlane(risunok);
+  if (svg.includes('data-hint')) push('в SVG рисунка задачи есть катеты');
+  return problems;
+}
+
+/** Проверка одной задачи. */
+export function checkTask(task: Generated, typeset: Typeset): Problem[] {
+  const where = `${task.prototype} seed=${task.seed}`;
+  const problems: Problem[] = [];
+  const push = (what: string) => problems.push({ where, what });
+  const prototype = PROTOTYPES.find((p) => p.id === task.prototype);
+  if (!Number.isFinite(task.otvet)) {
+    push(`ответ не число: ${String(task.otvet)}`);
+  } else if (!nice(task.otvet, 2)) {
+    push(`ответ не целый и не десятичная дробь до двух знаков: ${task.otvet}`);
+  }
+  if (!Number.isFinite(task.proverka) || Math.abs(task.proverka - task.otvet) > 1e-6) {
+    push(`независимый счёт ${task.proverka} не сходится с ответом ${task.otvet}`);
+  }
+  if (Math.abs(task.otvet) > 1000) push(`ответ слишком велик: ${task.otvet}`);
+  for (const p of vektoryIzSignature(task)) {
+    if (Math.abs(p[0]) > 31 || Math.abs(p[1]) > 31)
+      push(`координата больше 31: (${p[0]}; ${p[1]})`);
+  }
+  if (task.shagi.length < 2) push('в разборе меньше двух шагов');
+  const last = task.shagi[task.shagi.length - 1];
+  if (last === undefined || last.zagolovok !== 'Ответ') {
+    push('последний шаг — не «Ответ»');
+  } else {
+    const tail = (last.stroki[0] ?? '').replace(/\{,\}/g, ',').replace(/[$\s]/g, '');
+    if (tail !== ru(task.otvet)) push(`шаг «Ответ» содержит «${tail}», а ответ ${ru(task.otvet)}`);
+  }
+  for (const sh of task.shagi) {
+    if (sh.zagolovok.trim() === '' || sh.stroki.length === 0)
+      push('шаг без заголовка или без строк');
+  }
+  const allText = task.uslovie + task.shagi.map((s) => s.zagolovok + s.stroki.join('')).join('');
+  if (/NaN|Infinity|undefined/.test(allText)) push('NaN или undefined в тексте');
+  if (prototype !== undefined) {
+    const nuzhenRisunok = prototype.format === 'grid' || prototype.format === 'nogrid';
+    if (nuzhenRisunok !== (task.risunok !== null)) push('рисунок есть не у того формата');
+    if (task.risunok !== null) {
+      if (prototype.format === 'nogrid' && task.risunok.grid !== false)
+        push('рисунок без сетки с сеткой');
+      if (prototype.format === 'grid' && task.risunok.grid === false)
+        push('рисунок на сетке без сетки');
+      problems.push(...checkRisunokZadachi(where, task.risunok));
+    }
+  }
+  if (typeset !== null) {
+    for (const tex of formulas(task)) {
+      try {
+        typeset(tex);
+      } catch (error) {
+        push(`KaTeX не принял «${tex}»: ${String(error)}`);
+      }
+    }
+  }
+  return problems;
+}
+
+/** Генераторы на многих seed: каждый прототип. */
+export function checkGenerators(seeds: number, typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  let generated = 0;
+  for (const prototype of PROTOTYPES) {
+    const seen = new Map<string, number>();
+    let vektorov = 0;
+    let pryamykh = 0;
+    let otritsatelnykh = 0;
+    for (let i = 0; i < seeds; i += 1) {
+      const seed = `t${i}`;
+      let task: Generated;
+      try {
+        task = generate(prototype.id, seed);
+      } catch (error) {
+        problems.push({ where: `${prototype.id} seed=${seed}`, what: String(error) });
+        continue;
+      }
+      generated += 1;
+      problems.push(...checkTask(task, typeset));
+      seen.set(task.uslovie + task.signature, (seen.get(task.uslovie + task.signature) ?? 0) + 1);
+      if (task.risunok !== null) {
+        for (const v of task.risunok.vectors) {
+          vektorov += 1;
+          if (!kosoy([v.to[0] - v.from[0], v.to[1] - v.from[1]])) pryamykh += 1;
+        }
+      }
+      if (prototype.gruppa === 'C' && task.otvet < 0) otritsatelnykh += 1;
+    }
+    const max = Math.max(...seen.values());
+    if (seeds >= 100 && max > seeds / 4) {
+      problems.push({
+        where: prototype.id,
+        what: `одна задача повторилась ${max} раз из ${seeds}`,
+      });
+    }
+    /* Большинство векторов на рисунках — косые. */
+    if (vektorov >= 100 && pryamykh > vektorov / 4) {
+      problems.push({ where: prototype.id, what: `прямых векторов ${pryamykh} из ${vektorov}` });
+    }
+    if (
+      prototype.gruppa === 'C' &&
+      seeds >= 100 &&
+      (otritsatelnykh < seeds / 5 || otritsatelnykh > seeds / 2)
+    ) {
+      problems.push({
+        where: prototype.id,
+        what: `отрицательных косинусов ${otritsatelnykh} из ${seeds}, ждём около трети`,
+      });
+    }
+  }
+  return { prototypes: PROTOTYPES.length, generated, problems };
+}
+
+/**
+ * Банк: десять seed на прототип, условия и наборы векторов разные,
+ * ответы не повторяются, вид условия — не чаще трёх раз. У косинуса (C1, C2) ответ с двумя знаками
+ * после запятой бывает только одним из восьми значений (±0,28; ±0,6;
+ * ±0,8; ±0,96), поэтому там ответ допускается дважды.
+ */
+export function checkBank(typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  let generated = 0;
+  const ids = new Set(PROTOTYPES.map((p) => p.id));
+  for (const entry of BANK) {
+    const where = `банк ${entry.prototype}`;
+    if (!ids.has(entry.prototype)) {
+      problems.push({ where, what: 'нет такого прототипа' });
+      continue;
+    }
+    ids.delete(entry.prototype);
+    if (entry.variants.length !== 10) {
+      problems.push({ where, what: `вариантов ${entry.variants.length}, нужно 10` });
+    }
+    const statements = new Set<string>();
+    const signatures = new Set<string>();
+    const answers = new Map<string, number>();
+    const vidy = new Map<string, number>();
+    const maxAnswers = entry.prototype.startsWith('C') ? 2 : 1;
+    entry.variants.forEach((v, i) => {
+      if (v.n !== i + 1) problems.push({ where, what: `номер ${v.n} на месте ${i + 1}` });
+      let task: Generated;
+      try {
+        task = generate(entry.prototype, v.seed);
+      } catch (error) {
+        problems.push({ where: `${where} seed=${v.seed}`, what: String(error) });
+        return;
+      }
+      generated += 1;
+      problems.push(...checkTask(task, typeset));
+      if (statements.has(task.uslovie + task.signature))
+        problems.push({ where, what: `повтор условия: ${v.seed}` });
+      statements.add(task.uslovie + task.signature);
+      if (signatures.has(task.signature))
+        problems.push({ where, what: `повтор набора векторов: ${v.seed}` });
+      signatures.add(task.signature);
+      const key = ru(task.otvet);
+      answers.set(key, (answers.get(key) ?? 0) + 1);
+      if ((answers.get(key) as number) > maxAnswers)
+        problems.push({ where, what: `ответ ${key} повторяется` });
+      if (task.vid !== undefined) {
+        vidy.set(task.vid, (vidy.get(task.vid) ?? 0) + 1);
+        if ((vidy.get(task.vid) as number) > 3)
+          problems.push({ where, what: `вид условия ${task.vid} чаще трёх раз` });
+      }
+    });
+  }
+  for (const id of ids) {
+    problems.push({ where: `банк ${id}`, what: 'прототипа нет в банке' });
+  }
+  return { prototypes: BANK.length, generated, problems };
 }
