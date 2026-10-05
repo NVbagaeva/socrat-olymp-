@@ -38,6 +38,7 @@
     "test:pdf-5": "node scripts/check-pdf-5.mjs",
     "manifest:generator": "node scripts/print-generator-manifest.mjs",
     "test:vychisleniya": "node scripts/check-vychisleniya.mjs",
+    "test:vektory": "node scripts/check-vektory.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
     "build:pdf-8": "node scripts/build-pdf-8.mjs",
     "build:pdf-8-sample": "node scripts/build-pdf-8.mjs --sample",

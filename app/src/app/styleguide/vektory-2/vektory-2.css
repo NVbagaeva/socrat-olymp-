@@ -1,0 +1,86 @@
+/* Витрина движка рисунков задания №2. Только для разработки:
+   страница не входит в меню и не индексируется. */
+
+.v2 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.v2__head {
+  margin-bottom: var(--space-8);
+}
+
+.v2__lead {
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+
+.v2__section {
+  margin-top: var(--space-10);
+}
+
+.v2__grid {
+  display: grid;
+  /* minmax(0, …): иначе минимум колонки — собственная ширина SVG,
+     и на узком экране карточка вылезает за край. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .v2__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.v2__card {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-surface);
+}
+
+.v2__card figcaption,
+.v2__tip figcaption {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.v2__phones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+/* Полоса шириной с экран телефона: 360 px минус поля по 16 px. */
+.v2__phone {
+  width: 360px;
+  max-width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border: 1px dashed var(--color-border);
+}
+
+.v2__tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+.v2__tip {
+  margin: 0;
+}
+
+.v2__tip-svg {
+  display: block;
+  border: 1px solid var(--color-border);
+}
+
+.v2__tip-svg svg {
+  display: block;
+}
