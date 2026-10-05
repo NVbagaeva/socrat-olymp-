@@ -24,6 +24,10 @@
    сходящийся с генератором; варианты различны; банк — по десять задач
    на прототип; ключ банка содержит все ответы.
 
+   Стрелки над векторами: во всех KaTeX-строках раздела буквы a, b, c
+   стоят только внутри \vec{…}, модуль — только \left|…\right|;
+   исключения — явным списком ISKLYUCHENIYA_STRELKI в selftest.ts.
+
    Запуск: pnpm test:vektory [seeds]
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
@@ -45,6 +49,7 @@ const {
   checkMikro,
   checkStsenyITeksty,
   checkListy,
+  checkStrelki,
 } = requireSrc('lib/vektory/selftest');
 
 const renderer = checkRenderer(Math.min(seeds, 300));
@@ -81,7 +86,13 @@ console.log(
   `листы для печати: ${listy.generated} задач на листах и в банке, проблем ${listy.problems.length}`,
 );
 
+const strelki = checkStrelki();
+console.log(
+  `стрелки над векторами: ${strelki.generated} формул в ${strelki.prototypes} текстах, проблем ${strelki.problems.length}`,
+);
+
 const problems = [
+  ...strelki.problems,
   ...listy.problems,
   ...renderer.problems,
   ...gen.problems,

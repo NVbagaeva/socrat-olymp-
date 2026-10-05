@@ -157,7 +157,7 @@ const dlina: VektorySection = {
     {
       id: 'formula',
       title: 'Формула длины',
-      formula: '|\\vec{a}| = \\sqrt{x^2 + y^2}',
+      formula: '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
       text: [
         'Катеты прямоугольного треугольника — это $|x|$ и $|y|$, а вектор — его гипотенуза. Знаки координат под квадратом не важны: $(-8)^2 = 64$, как и $8^2$.',
       ],
@@ -165,7 +165,9 @@ const dlina: VektorySection = {
     {
       id: 'primer',
       title: 'Пример',
-      lines: ['|\\vec{a}| = \\sqrt{4^2 + 3^2} = \\sqrt{16 + 9} = \\sqrt{25} = 5'],
+      lines: [
+        '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{4^2 + 3^2} = \\sqrt{16 + 9} = \\sqrt{25} = 5',
+      ],
       text: [
         'Для $\\vec{a}\\,(4;\\ 3)$ длина равна $5$. В задании длина всегда получается целой или конечной десятичной дробью: числа подобраны по **пифагоровым тройкам** $3$–$4$–$5$, $5$–$12$–$13$, $8$–$15$–$17$, $7$–$24$–$25$ и их кратным.',
       ],
@@ -175,7 +177,7 @@ const dlina: VektorySection = {
       id: 'summa',
       title: 'Длина суммы',
       text: [
-        'Чтобы найти $|\\vec{a} + 3\\vec{b}|$, нельзя складывать длины: $|\\vec{a} + \\vec{b}| \\ne |\\vec{a}| + |\\vec{b}|$. Сначала находим **координаты** вектора $\\vec{a} + 3\\vec{b}$, а потом его длину по формуле.',
+        'Чтобы найти $\\left|\\,\\vphantom{\\vec{b}}\\vec{a} + 3\\vec{b}\\,\\right|$, нельзя складывать длины: $\\left|\\,\\vphantom{\\vec{b}}\\vec{a} + \\vec{b}\\,\\right| \\ne \\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| + \\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|$. Сначала находим **координаты** вектора $\\vec{a} + 3\\vec{b}$, а потом его длину по формуле.',
       ],
       forward: true,
     },
@@ -194,7 +196,8 @@ const skalyarnoe: VektorySection = {
     {
       id: 'cherez-ugol',
       title: 'Через длины и угол',
-      formula: '\\vec{a}\\cdot\\vec{b} = |\\vec{a}|\\cdot|\\vec{b}|\\cdot\\cos\\alpha',
+      formula:
+        '\\vec{a}\\cdot\\vec{b} = \\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|\\cdot\\cos\\alpha',
       formulaNotes: ['$\\alpha$ — угол между векторами'],
       text: [
         'Так считают, когда в условии даны длины и угол: «длины векторов равны $3$ и $5$, а угол между ними $60^\\circ$». Тогда $\\vec{a}\\cdot\\vec{b} = 3\\cdot 5\\cdot\\cos 60^\\circ = 15\\cdot\\dfrac{1}{2} = 7{,}5$.',
@@ -230,7 +233,7 @@ const skalyarnoe: VektorySection = {
     },
   ],
   remember: [
-    'Даны длины и угол — $|\\vec{a}|\\cdot|\\vec{b}|\\cdot\\cos\\alpha$. Даны координаты — $x_1x_2 + y_1y_2$. Результат — число, а не вектор.',
+    'Даны длины и угол — $\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|\\cdot\\cos\\alpha$. Даны координаты — $x_1x_2 + y_1y_2$. Результат — число, а не вектор.',
   ],
 };
 
@@ -244,7 +247,7 @@ const kosinus: VektorySection = {
       id: 'formula',
       title: 'Формула косинуса',
       formula:
-        '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{a}|\\cdot|\\vec{b}|} = \\dfrac{x_1x_2 + y_1y_2}{\\sqrt{x_1^2 + y_1^2}\\cdot\\sqrt{x_2^2 + y_2^2}}',
+        '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|} = \\dfrac{x_1x_2 + y_1y_2}{\\sqrt{x_1^2 + y_1^2}\\cdot\\sqrt{x_2^2 + y_2^2}}',
       text: [
         'В числителе — скалярное произведение по координатам, в знаменателе — произведение длин. Три шага: **скалярное произведение**, **длины**, **косинус**.',
       ],
@@ -254,7 +257,7 @@ const kosinus: VektorySection = {
       title: 'Пример',
       lines: [
         '\\vec{a}\\cdot\\vec{b} = 3\\cdot 5 + 4\\cdot 0 = 15',
-        '|\\vec{a}| = \\sqrt{9 + 16} = 5,\\quad |\\vec{b}| = \\sqrt{25 + 0} = 5',
+        '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{9 + 16} = 5,\\quad \\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right| = \\sqrt{25 + 0} = 5',
         '\\cos\\alpha = \\dfrac{15}{5\\cdot 5} = 0{,}6',
       ],
       text: [
@@ -272,7 +275,7 @@ const kosinus: VektorySection = {
     },
   ],
   remember: [
-    '$\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{a}|\\cdot|\\vec{b}|}$: сначала скалярное произведение, потом длины, потом деление.',
+    '$\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}$: сначала скалярное произведение, потом длины, потом деление.',
   ],
 };
 

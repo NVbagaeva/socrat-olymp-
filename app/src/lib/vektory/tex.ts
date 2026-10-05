@@ -43,11 +43,16 @@ export function kombinatsiya(terms: readonly (readonly [number, string])[]): str
     .join('');
 }
 
-/** |\vec{a}| или \left|\,8\vec{a}+\vec{b}\,\right|. */
+/**
+ * Модуль: \left|\,\vphantom{\vec{b}}…\,\right|.
+ *
+ * Черты одной высоты у всех модулей раздела: \left|…\right| растёт
+ * по содержимому, и |\vec a| выходил ниже, чем |\vec a+\vec b| (у b есть
+ * верхний выносной элемент). Невидимая распорка \vphantom{\vec{b}}
+ * выравнивает высоту, тонкие пробелы отводят стрелку от черты.
+ */
 export function modul(inner: string): string {
-  return inner.includes('+') || inner.includes('-')
-    ? `\\left|\\,${inner}\\,\\right|`
-    : `\\left|${inner}\\right|`;
+  return `\\left|\\,\\vphantom{\\vec{b}}${inner}\\,\\right|`;
 }
 
 /** \vec{a}\cdot\vec{b} */

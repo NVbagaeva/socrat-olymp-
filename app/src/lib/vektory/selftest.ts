@@ -32,6 +32,7 @@ import {
   KOSINUSY_DVA_ZNAKA,
   KOSINUSY_TRI_ZNAKA,
   OPORNYE_KOSINUS_TRI_ZNAKA,
+  POYASNENIE_TRI_ZNAKA,
 } from './opornye-kosinus';
 import { kosoy } from './troyki';
 import { emptyReport, renderVectorPlane } from './render';
@@ -953,4 +954,105 @@ export function checkListy(): GenReport {
     }
   }
   return { prototypes: LIST_PARAMS.prototypes.length, generated, problems };
+}
+
+/* ── Стрелки над векторами ──────────────────────────────────────── */
+
+/**
+ * Формулы раздела, где буква a, b или c стоит без \vec нарочно: это
+ * не векторы. Список явный: новая такая формула добавляется сюда, а
+ * не обходит проверку.
+ */
+export const ISKLYUCHENIYA_STRELKI: readonly string[] = [];
+
+/** Буквы векторов задач: a, b, c — и в условиях, и в разборах. */
+const BUKVY_VEKTOROV = /(?<![A-Za-z])[abc](?![A-Za-z])/;
+
+/**
+ * Все тексты раздела с формулами: условия и разборы задач на нескольких
+ * seed, микрозадачи и их варианты ответа, формулы карточек и плашек,
+ * теория, «О задании», блок повышенной сложности.
+ */
+function tekstyRazdela(seeds: number): { where: string; text: string }[] {
+  const out: { where: string; text: string }[] = [];
+  const add = (where: string, text: string) => out.push({ where, text });
+  for (const p of PROTOTYPES) {
+    add(`${p.id} формула карточки`, `$${p.formula}$`);
+    add(`${p.id} название`, p.nazvanie);
+    for (let i = 0; i < seeds; i += 1) {
+      const task = generate(p.id, `t${i}`);
+      add(`${p.id} условие`, task.uslovie);
+      for (const sh of task.shagi) {
+        add(`${p.id} шаг`, sh.zagolovok);
+        for (const line of sh.stroki) add(`${p.id} шаг`, line);
+      }
+    }
+  }
+  for (const b of BLOKI) {
+    add(`${b.id} формула карточки`, `$${b.formula}$`);
+    for (const f of b.formuly) add(`${b.id} «Запомни»`, `$${f}$`);
+    for (const m of b.zadachi) {
+      add(`${m.id} формула`, `$${m.formula}$`);
+      const t = generateMikro(m.id, fixedSeed(m));
+      add(`${m.id} условие`, t.uslovie);
+      for (const line of t.razbor) add(`${m.id} разбор`, line);
+      for (const v of t.vybory ?? []) add(`${m.id} вариант`, v.label);
+    }
+  }
+  for (const r of RAZDELY_TEORII) {
+    add(`теория ${r.id}`, r.section.lead);
+    for (const c of r.section.cards) {
+      add(`теория ${r.id}/${c.id}`, c.title);
+      if (c.formula !== undefined) add(`теория ${r.id}/${c.id}`, `$${c.formula}$`);
+      for (const x of [...(c.formulaNotes ?? []), ...c.text]) add(`теория ${r.id}/${c.id}`, x);
+      for (const x of c.lines ?? []) add(`теория ${r.id}/${c.id}`, `$${x}$`);
+      if (c.table !== undefined)
+        for (const x of [...c.table.head, ...c.table.rows.flat()]) add(`теория ${r.id}/${c.id}`, x);
+    }
+    for (const x of r.section.remember) add(`теория ${r.id} «Запомни»`, x);
+  }
+  add('о задании', O_ZADANII.format.text);
+  for (const o of O_ZADANII.oshibki) add(`о задании: ${o.id}`, o.text);
+  for (const x of POYASNENIE_TRI_ZNAKA) add('три знака', x);
+  for (const t of OPORNYE_KOSINUS_TRI_ZNAKA) {
+    add('три знака условие', t.uslovie);
+    for (const sh of t.shagi) for (const line of sh.stroki) add('три знака шаг', line);
+  }
+  return out;
+}
+
+/**
+ * Везде, где буква обозначает вектор, стоит \vec: в KaTeX-строках
+ * раздела буквы a, b, c вне \vec{…} не встречаются — ни в модулях, ни
+ * в скалярных произведениях, ни в линейных комбинациях, ни в
+ * координатах. Модуль везде одной формы: \left|…\right|, черта «|» без
+ * \left и \right рядом с вектором не стоит. Исключения — явным списком.
+ */
+export function checkStrelki(seeds = 5): GenReport {
+  const problems: Problem[] = [];
+  const seen = new Set<string>();
+  const teksty = tekstyRazdela(seeds);
+  let formul = 0;
+  for (const { where, text } of teksty) {
+    for (const m of text.matchAll(/\$([^$]+)\$/g)) {
+      const tex = m[1] as string;
+      formul += 1;
+      if (ISKLYUCHENIYA_STRELKI.includes(tex)) continue;
+      const bezVektorov = tex
+        .replace(/\\vec\{[^}]*\}/g, 'V')
+        .replace(/\\overrightarrow\{[^}]*\}/g, 'V')
+        .replace(/\\[A-Za-z]+/g, ' ');
+      const key = `${where} :: ${tex}`;
+      if (BUKVY_VEKTOROV.test(bezVektorov) && !seen.has(key)) {
+        seen.add(key);
+        problems.push({ where, what: `буква вектора без \\vec: «${tex}»` });
+      }
+      const bezModuley = tex.replace(/\\(?:left|right|bigl|bigr|big|Bigl|Bigr)\|/g, '');
+      if (tex.includes('\\vec') && bezModuley.includes('|') && !seen.has(`${key}|`)) {
+        seen.add(`${key}|`);
+        problems.push({ where, what: `модуль не через \\left|…\\right|: «${tex}»` });
+      }
+    }
+  }
+  return { prototypes: teksty.length, generated: formul, problems };
 }

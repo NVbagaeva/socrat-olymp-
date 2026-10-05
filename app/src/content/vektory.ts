@@ -89,12 +89,12 @@ export const O_ZADANII = {
     {
       id: 'modul-summy',
       title: 'Длина суммы — не сумма длин',
-      text: '$|\\vec{a} + \\vec{b}| \\ne |\\vec{a}| + |\\vec{b}|$. Сначала находим координаты вектора $\\vec{a} + \\vec{b}$, и только потом его длину по формуле $\\sqrt{x^2 + y^2}$.',
+      text: '$\\left|\\,\\vphantom{\\vec{b}}\\vec{a} + \\vec{b}\\,\\right| \\ne \\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| + \\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|$. Сначала находим координаты вектора $\\vec{a} + \\vec{b}$, и только потом его длину по формуле $\\sqrt{x^2 + y^2}$.',
     },
     {
       id: 'kosinus-dliny',
       title: 'Для косинуса не посчитаны длины',
-      text: 'Косинус — это $\\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{a}|\\cdot|\\vec{b}|}$, а не само скалярное произведение. Три шага: произведение, длины, деление — и ответ всегда между $-1$ и $1$.',
+      text: 'Косинус — это $\\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}$, а не само скалярное произведение. Три шага: произведение, длины, деление — и ответ всегда между $-1$ и $1$.',
     },
   ],
 } as const;

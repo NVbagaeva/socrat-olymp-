@@ -607,4 +607,24 @@
   .z2-summary-chart .z2-mini {
     max-width: none;
   }
+  /* Карточка прототипа на узком экране — столбиком: название, под ним
+     формула или рисунок. В строке длинная формула (B1) наезжала на
+     название. Тот же приём, что у карточек №8. */
+  .z2-skills .cfg-skill {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+  .z2-skills .cfg-skill__chart {
+    width: 100%;
+    max-width: none;
+  }
+  .z2-skills .z2-formula {
+    justify-content: flex-start;
+    min-height: 0;
+    font-size: var(--fs-body);
+    overflow-x: auto;
+  }
+  .z2-skills .z2-mini {
+    max-width: 200px;
+  }
 }

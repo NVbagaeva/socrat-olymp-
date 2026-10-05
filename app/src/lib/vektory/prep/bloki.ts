@@ -45,9 +45,9 @@ export const BLOKI: Blok[] = [
     no: '03',
     nazvanie: 'Длина вектора',
     lead: 'По координатам и по рисунку',
-    formula: '|\\vec{a}| = \\sqrt{x^2 + y^2}',
+    formula: '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
     formuly: [
-      '|\\vec{a}| = \\sqrt{x^2 + y^2}',
+      '\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right| = \\sqrt{x^2 + y^2}',
       '3^2 + 4^2 = 5^2,\\quad 5^2 + 12^2 = 13^2,\\quad 8^2 + 15^2 = 17^2',
     ],
     zadachi: BLOK_DLINA,
@@ -61,7 +61,7 @@ export const BLOKI: Blok[] = [
     formula: '\\vec{a}\\cdot\\vec{b} = x_1x_2 + y_1y_2',
     formuly: [
       '\\vec{a}\\cdot\\vec{b} = x_1x_2 + y_1y_2',
-      '\\vec{a}\\cdot\\vec{b} = |\\vec{a}|\\cdot|\\vec{b}|\\cdot\\cos\\alpha',
+      '\\vec{a}\\cdot\\vec{b} = \\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|\\cdot\\cos\\alpha',
     ],
     zadachi: BLOK_SKALYARNOE,
   },
@@ -71,9 +71,10 @@ export const BLOKI: Blok[] = [
     no: '05',
     nazvanie: 'Косинус угла',
     lead: 'Скалярное произведение, длины, деление',
-    formula: '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{a}|\\cdot|\\vec{b}|}',
+    formula:
+      '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}',
     formuly: [
-      '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{|\\vec{a}|\\cdot|\\vec{b}|}',
+      '\\cos\\alpha = \\dfrac{\\vec{a}\\cdot\\vec{b}}{\\left|\\,\\vphantom{\\vec{b}}\\vec{a}\\,\\right|\\cdot\\left|\\,\\vphantom{\\vec{b}}\\vec{b}\\,\\right|}',
       '\\cos\\alpha = \\dfrac{x_1x_2 + y_1y_2}{\\sqrt{x_1^2 + y_1^2}\\cdot\\sqrt{x_2^2 + y_2^2}}',
     ],
     zadachi: BLOK_KOSINUS,

@@ -55,6 +55,12 @@ svg {
   display: block;
   max-width: 100%;
 }
+/* Стрелки и крышки KaTeX (\vec, \hat) — svg с position: absolute внутри
+   обёртки нулевой ширины: предел «не шире родителя» давал им ширину
+   ноль, и стрелка над вектором не рисовалась. У формул предела нет. */
+.katex svg {
+  max-width: none;
+}
 
 :focus-visible {
   outline: 2px solid var(--color-primary);
