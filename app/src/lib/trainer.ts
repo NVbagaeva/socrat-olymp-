@@ -268,14 +268,22 @@ function rightHintFor(task: EngineTask): string {
 
   if (set === '12.A' && query !== null) {
     const value = k * query.x0 + b;
-    /* Отрицательная абсцисса подставляется в скобках: иначе два знака
-       подряд читаются как вычитание. */
+    /* Отрицательная абсцисса в выражении берётся в скобки: иначе два
+       знака подряд читаются как вычитание. В скобках самой функции —
+       без вторых: f(−4), а не f((−4)). Умножение на 1 и −1 не пишется,
+       отрицательный коэффициент — в скобках. */
     const factor = query.x0 < 0 ? '(' + tex(query.x0) + ')' : tex(query.x0);
+    const product =
+      Math.abs(k - 1) < 1e-9
+        ? factor
+        : Math.abs(k + 1) < 1e-9
+          ? '-' + factor
+          : (k < 0 ? '(' + tex(k) + ')' : tex(k)) + ' \\cdot ' + factor;
     const tail = Math.abs(b) < 1e-9 ? '' : (b > 0 ? ' + ' : ' - ') + tex(Math.abs(b));
     return (
       found +
       'Тогда ' +
-      math('f(' + factor + ') = ' + tex(k) + ' \\cdot ' + factor + tail + ' = ' + tex(value)) +
+      math('f(' + tex(query.x0) + ') = ' + product + tail + ' = ' + tex(value)) +
       '.'
     );
   }
@@ -501,8 +509,8 @@ function bySubstitution(
         '$' +
         texNum(point.y) +
         ' = ' +
-        texNum(k) +
-        ' \\cdot ' +
+        /* Умножение на 1 и −1 не пишется. */
+        (Math.abs(k - 1) < 1e-9 ? '' : Math.abs(k + 1) < 1e-9 ? '-' : texNum(k) + ' \\cdot ') +
         texFactor(point.x) +
         ' + b$<br>' +
         '$' +

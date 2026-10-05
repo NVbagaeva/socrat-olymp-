@@ -286,8 +286,8 @@ function stepVertex(p, win, points) {
       '.'));
     blocks.push(text('Парабола симметрична, поэтому такие точки стоят на равном расстоянии ' +
       'от оси симметрии: вершина ровно посередине между ними.'));
-    blocks.push(formula('x_{\\text{в}} = \\dfrac{' + tex(frac(pair[0].x)) + ' + ' +
-      texBracket(frac(pair[1].x)) + '}{2} = ' + tex(middle)));
+    blocks.push(formula('x_{\\text{в}} = \\dfrac{' + tex(frac(pair[0].x)) +
+      (frac(pair[1].x).p === 0 ? ' + 0' : term(frac(pair[1].x))) + '}{2} = ' + tex(middle)));
     blocks.push(text('Ординату вершины по симметрии не получить — её на чертеже нет. ' +
       'Но абсциссы уже хватает: через неё выражается ' + math('b', 'b') + '.'));
     return { title: 'Вершина и ось симметрии', blocks: blocks, known: true,
@@ -419,7 +419,7 @@ function stepB(p, vertexKnown, bySystem) {
     blocks.push(formula('x_{\\text{в}} = -\\dfrac{b}{2a}'));
     blocks.push(text('Подставим то, что уже знаем, и выразим ' + math('b', 'b') + ':'));
     blocks.push(formula(tex(p.m) + ' = -\\dfrac{b}{2 \\cdot ' + texBracket(p.a) + '}'));
-    blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
+    blocks.push(formula('b = ' + minusTwoA(p.a) + ' \\cdot ' + texBracket(p.m) +
       ' = ' + tex(p.b)));
     blocks.push(text('Получили ' + keyMath('b = ' + tex(p.b), 'b = ' + plain(p.b)) + '.'));
     return { title: 'Находим $b$', blocks: blocks };
@@ -427,7 +427,7 @@ function stepB(p, vertexKnown, bySystem) {
 
   blocks.push(text('Коэффициент ' + math('b', 'b') + ' считается по вершине и ' +
     math('a', 'a') + ': ' + math('b = -2a \\cdot x_{\\text{в}}', 'b = −2a · xв') + '.'));
-  blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
+  blocks.push(formula('b = ' + minusTwoA(p.a) + ' \\cdot ' + texBracket(p.m) +
     ' = ' + tex(p.b)));
   return { title: 'Находим $b$', blocks: blocks };
 }
@@ -549,6 +549,14 @@ function secondParabolaBlocks(q, win, points, blocks) {
 }
 
 /* Коэффициент с точкой умножения: «0,5 · », «−» или пусто. */
+/* Множитель −2a в b = −2a · xв: при a = ±1 умножение на 1 и на −1
+   не пишется — сразу −2 или 2. */
+function minusTwoA(a) {
+  if (isInt(a) && a.p === 1) { return '-2'; }
+  if (isInt(a) && a.p === -1) { return '2'; }
+  return '-2 \\cdot ' + texBracket(a);
+}
+
 function coefDot(f) {
   var body = coef(f);
   if (body === '' || body === '-') { return body; }
