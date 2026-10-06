@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { reloadOnceForChunkError } from '@/lib/chunkReload';
+import { reloadOnceForLoadError } from '@/lib/chunkReload';
 
 /**
  * Ошибка в любой странице сайта: вместо белого экрана — сообщение
@@ -13,7 +13,7 @@ import { reloadOnceForChunkError } from '@/lib/chunkReload';
  */
 export default function SiteError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    if (!reloadOnceForChunkError(error)) {
+    if (!reloadOnceForLoadError(error)) {
       console.error('Страница не отрисовалась', error);
     }
   }, [error]);

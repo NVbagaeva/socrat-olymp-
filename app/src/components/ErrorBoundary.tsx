@@ -2,7 +2,7 @@
 
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { reloadOnceForChunkError } from '@/lib/chunkReload';
+import { reloadOnceForLoadError } from '@/lib/chunkReload';
 import { ErrorFallback } from './ErrorFallback';
 
 export interface ErrorBoundaryProps {
@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   }
 
   override componentDidCatch(error: unknown, info: ErrorInfo) {
-    reloadOnceForChunkError(error);
+    reloadOnceForLoadError(error);
     /* В консоль, чтобы в отчёте «у меня белый экран» было что показать. */
     console.error('Блок не отрисовался', error, info.componentStack);
   }

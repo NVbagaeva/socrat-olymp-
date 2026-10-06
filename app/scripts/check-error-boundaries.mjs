@@ -18,7 +18,7 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 
 const failures = [];
@@ -31,8 +31,14 @@ function check(ok, what) {
 }
 
 /* ── 1. Логика перезагрузки ─────────────────────────────────── */
-const { isChunkLoadError, takeReloadTurn, CHUNK_RELOAD_KEY, CHUNK_RELOAD_WINDOW_MS } =
-  requireSrc('lib/chunkReload.ts');
+const {
+  isChunkLoadError,
+  isNetworkLoadError,
+  isRecoverableLoadError,
+  takeReloadTurn,
+  CHUNK_RELOAD_KEY,
+  CHUNK_RELOAD_WINDOW_MS,
+} = requireSrc('lib/chunkReload.ts');
 
 const named = Object.assign(new Error('x'), { name: 'ChunkLoadError' });
 check(isChunkLoadError(named), 'ChunkLoadError по имени');
@@ -54,6 +60,27 @@ check(
 check(
   !isChunkLoadError(null) && !isChunkLoadError(undefined) && !isChunkLoadError(42),
   'не ошибки',
+);
+
+check(
+  isNetworkLoadError(new TypeError('Load failed')),
+  'Safari: TypeError Load failed — обрыв сети',
+);
+check(isNetworkLoadError(new TypeError('Failed to fetch')), 'Chrome: Failed to fetch');
+check(isNetworkLoadError(new TypeError('network error')), 'Chrome: обрыв посреди тела ответа');
+check(
+  isNetworkLoadError(new TypeError('NetworkError when attempting to fetch resource.')),
+  'Firefox',
+);
+check(!isNetworkLoadError(new Error('Load failed')), 'не TypeError — это не сеть');
+check(
+  !isNetworkLoadError(new TypeError("Cannot read properties of undefined (reading 'x')")),
+  'TypeError в коде — не сеть',
+);
+check(!isNetworkLoadError(new TypeError('Load failed for the image')), 'похожая фраза — не сеть');
+check(
+  isRecoverableLoadError(named) && isRecoverableLoadError(new TypeError('Load failed')),
+  'лечится перезагрузкой: код и сеть',
 );
 
 function fakeMemory(initial) {
@@ -101,7 +128,13 @@ const MIME = {
   '.webp': 'image/webp',
   '.woff2': 'font/woff2',
 };
+/* Обрыв посреди ответа: отдаём половину тела и рвём соединение. */
+const cuts = [];
 const server = http.createServer((req, res) => {
+  const cut = cuts.find((rule) => rule.left > 0 && rule.match.test(req.url));
+  if (cut !== undefined) {
+    cut.left -= 1;
+  }
   let file = path.join(OUT, decodeURIComponent(req.url.split('?')[0]));
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
     file = path.join(file, 'index.html');
@@ -109,6 +142,16 @@ const server = http.createServer((req, res) => {
   if (!fs.existsSync(file)) {
     res.writeHead(404);
     res.end();
+    return;
+  }
+  if (cut !== undefined) {
+    const body = fs.readFileSync(file);
+    res.writeHead(200, {
+      'content-type': MIME[path.extname(file)] ?? 'application/octet-stream',
+      'content-length': body.length,
+    });
+    res.write(body.subarray(0, Math.floor(body.length / 2)));
+    setTimeout(() => req.socket.destroy(), 50);
     return;
   }
   res.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
@@ -251,6 +294,55 @@ async function breakSolutionDecode(context) {
   );
   await context.close();
   await context2.close();
+}
+
+/* Обрыв сети посреди ответа при переходе на вкладку и на страницу навыка:
+   без перехвата Safari/LTE давали белый экран. Страница должна открыться
+   сама после одной перезагрузки. Нужен WebKit (в CI он ставится). */
+let safari = null;
+try {
+  safari = await webkit.launch();
+} catch {
+  console.log('WebKit не установлен — сценарий обрыва сети пропущен (в CI он есть).');
+}
+if (safari !== null) {
+  for (const [what, match, target] of [
+    ['на вкладку «Опорные задачи»', /opornye-zadachi\/index\.txt\?_rsc=/, 'a.prep-card'],
+    ['на страницу навыка', new RegExp(`opornye-zadachi/${skill}/index\\.txt\\?_rsc=`), '.ptask'],
+  ]) {
+    const context = await safari.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+    });
+    const page = await context.newPage();
+    cuts.length = 0;
+    await page.goto(`${BASE}/zadaniya/12/rational/`, { waitUntil: 'load' });
+    await page.waitForTimeout(1500);
+    if (target === '.ptask') {
+      await page.getByRole('tab', { name: /Опорные задачи/ }).click();
+      await page.waitForSelector('a.prep-card');
+    }
+    cuts.push({ match, left: 1 });
+    if (target === '.ptask') {
+      await page.locator(`a.prep-card[href*="/${skill}/"]`).first().click();
+    } else {
+      await page.getByRole('tab', { name: /Опорные задачи/ }).click();
+    }
+    let opened = true;
+    await page.waitForSelector(target, { timeout: 20000 }).catch(() => {
+      opened = false;
+    });
+    const text = await page.innerText('body');
+    check(opened, `обрыв ответа при переходе ${what}: страница открылась сама`);
+    check(
+      !/Что-то пошло не так/.test(text),
+      `обрыв ответа при переходе ${what}: экран ошибки не остался`,
+    );
+    check(cuts[0].left === 0, `обрыв ответа при переходе ${what}: обрыв действительно был`);
+    await context.close();
+  }
+  await safari.close();
 }
 
 await browser.close();

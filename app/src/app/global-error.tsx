@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { reloadOnceForChunkError } from '@/lib/chunkReload';
+import { reloadOnceForLoadError } from '@/lib/chunkReload';
 
 /**
  * Последняя линия: ошибка в самой оболочке (в корневом layout). Тогда
@@ -13,7 +13,7 @@ import { reloadOnceForChunkError } from '@/lib/chunkReload';
  */
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    if (!reloadOnceForChunkError(error)) {
+    if (!reloadOnceForLoadError(error)) {
       console.error('Оболочка сайта не отрисовалась', error);
     }
   }, [error]);
