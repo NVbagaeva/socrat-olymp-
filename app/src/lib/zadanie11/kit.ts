@@ -61,8 +61,73 @@ export function etapy(...items: Array<[string, string[]] | null | false>): Etap[
     .map(([title, lines], i) => etap(i + 1, title, lines));
 }
 
-export function tablitsa(head: string[], rows: string[][]): Tablitsa {
-  return { head, rows };
+/** Таблица без особого порядка столбцов (клиенты банка и т. п.). */
+export function tablitsa(head: string[], rows: string[][], title?: string): Tablitsa {
+  return title ? { vid: 'prochee', title, head, rows } : { vid: 'prochee', head, rows };
+}
+
+/** Шапка таблицы движения: S | v | t. */
+export const HEAD_DVIZHENIE = ['', '$S$, км', '$v$, км/ч', '$t$, ч'];
+/** Шапка без единиц — когда путь принят за 1. */
+export const HEAD_DVIZHENIE_1 = ['', '$S$', '$v$', '$t$'];
+
+/** Таблица движения. Строка: [участник, S, v, t] — ячейки TeX без долларов. */
+export function dvizhenie(
+  rows: Array<[string, string, string, string]>,
+  head = HEAD_DVIZHENIE,
+  title?: string,
+): Tablitsa {
+  const t: Tablitsa = {
+    vid: 'dvizhenie',
+    head,
+    rows: rows.map(([label, S, v, tt]) => [label, `$${S}$`, `$${v}$`, `$${tt}$`]),
+  };
+  return title ? { ...t, title } : t;
+}
+
+/** Таблица работы. Строка: [участник, A, p, t]. Единицы — в шапке. */
+export function rabota(
+  rows: Array<[string, string, string, string]>,
+  units: [string, string, string] = ['', '', ''],
+): Tablitsa {
+  const [ua, up, ut] = units;
+  return {
+    vid: 'rabota',
+    head: ['', `$A$${ua}`, `$p$${up}`, `$t$${ut}`],
+    rows: rows.map(([label, A, pp, tt]) => [label, `$${A}$`, `$${pp}$`, `$${tt}$`]),
+  };
+}
+
+/** Подписи строк развёрнутой таблицы концентрации. */
+export const STROKI_KONC = ['$m_{\\text{в.в.}}$', '$m_{\\text{р-ра}}$', '$p\\,\\%$'];
+
+export interface Stolbets {
+  /** Подпись столбца: «1», «2», «1 + 2», «вода», «1*». */
+  label: string;
+  /** Масса вещества, TeX. */
+  mvv: string;
+  /** Масса раствора (смеси, сплава), TeX. */
+  mr: string;
+  /** Концентрация в процентах, TeX (без знака %). */
+  p: string;
+}
+
+/**
+ * Развёрнутая таблица концентрации: строки m_в.в., m_р-ра, p %;
+ * столбцы — участники смешивания.
+ */
+export function koncentraciya(cols: Stolbets[], title?: string): Tablitsa {
+  const [r1, r2, r3] = STROKI_KONC as [string, string, string];
+  const t: Tablitsa = {
+    vid: 'koncentraciya',
+    head: ['', ...cols.map((c) => c.label)],
+    rows: [
+      [r1, ...cols.map((c) => `$${c.mvv}$`)],
+      [r2, ...cols.map((c) => `$${c.mr}$`)],
+      [r3, ...cols.map((c) => `$${c.p}$`)],
+    ],
+  };
+  return title ? { ...t, title } : t;
 }
 
 /* ── Подсказки ──────────────────────────────────────────────────── */

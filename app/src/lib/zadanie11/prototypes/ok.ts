@@ -6,7 +6,7 @@
  * ОК-04 (стрелки часов) зарезервирован.
  */
 
-import { chtoSprashivayut, etapy, num, tablitsa, vopros, xxd } from '../kit';
+import { chtoSprashivayut, dvizhenie, etapy, num, vopros, xxd } from '../kit';
 import { d, div, fq, mul, q, txt, val } from '../num';
 import { plural } from '../../plural';
 import { sk, SLOVA } from '../sklonenie';
@@ -43,13 +43,12 @@ const OK01: Subtype = {
         ['Решение', [`$x=${d(v1)}-${fq(dv)}=${d(x)}$.`]],
         ['Ответ на вопрос задачи', ['Спрашивают скорость второго автомобиля.', otvet(x)]],
       ),
-      table: tablitsa(
-        ['', '$v$, км/ч', '$t$, ч', '$S$, км'],
-        [
-          ['Первый', `$${d(v1)}$`, `$${fq(T)}$`, `$${d(v1)}\\cdot${fq(T)}$`],
-          ['Второй', '$x$', `$${fq(T)}$`, `$${fq(T)}x$`],
-        ],
-      ),
+      tables: [
+        dvizhenie([
+          ['Первый', `${d(v1)}\\cdot${fq(T)}`, `${d(v1)}`, `${fq(T)}`],
+          ['Второй', `${fq(T)}x`, 'x', `${fq(T)}`],
+        ]),
+      ],
       hints: [
         vopros('Что значит «опережал на один круг»?', `проехал на $${d(L)}$ км больше`, [
           'проехал ровно один круг',
@@ -115,13 +114,12 @@ const OK02: Subtype = {
           ['Скорость положительна. Спрашивают скорость второго гонщика.', otvet(x)],
         ],
       ),
-      table: tablitsa(
-        ['', '$v$, км/ч', '$t$, ч', '$S$, км'],
-        [
-          ['Первый', `$x+${d(kk)}$`, `$\\dfrac{${d(total)}}{x+${d(kk)}}$`, `$${d(total)}$`],
-          ['Второй', '$x$', `$\\dfrac{${d(total)}}{x}$`, `$${d(total)}$`],
-        ],
-      ),
+      tables: [
+        dvizhenie([
+          ['Первый', `${d(total)}`, `x+${d(kk)}`, `\\dfrac{${d(total)}}{x+${d(kk)}}`],
+          ['Второй', `${d(total)}`, 'x', `\\dfrac{${d(total)}}{x}`],
+        ]),
+      ],
       hints: [
         vopros('Что даёт условие про первый обгон на круг?', 'разность скоростей', [
           'скорость первого',

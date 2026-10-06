@@ -33,8 +33,19 @@ export interface Etap {
   lines: string[];
 }
 
-/** Таблица модели: v–t–S, p–t–A, масса–%–вещество. Ячейки — текст с $…$. */
+/**
+ * Вид таблицы модели. Порядок столбцов и строк задан методикой:
+ * движение — S | v | t; работа — A | p | t; концентрация —
+ * развёрнутая таблица: строки m_в.в., m_р-ра, p %, столбцы —
+ * участники смешивания («1», «2», «1 + 2», «вода»…).
+ */
+export type TablitsaVid = 'dvizhenie' | 'rabota' | 'koncentraciya' | 'prochee';
+
+/** Таблица модели. Ячейки — текст с $…$. */
 export interface Tablitsa {
+  vid: TablitsaVid;
+  /** Подпись над таблицей: «Смешали равные массы». */
+  title?: string;
   head: string[];
   rows: string[][];
 }
@@ -60,7 +71,8 @@ export interface Solved {
   /** Ответ числом: целое или конечная десятичная дробь. */
   answer: number;
   etapy: Etap[];
-  table?: Tablitsa;
+  /** Таблицы модели: обычно одна, для «равных масс» — две. */
+  tables?: Tablitsa[];
   hints: HintStep[];
   lifehacks: LifehackId[];
   vybor?: Vybor;

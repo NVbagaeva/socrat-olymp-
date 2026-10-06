@@ -5,35 +5,38 @@
  * течения; на озере течения нет.
  */
 
-import { chtoSprashivayut, etapy, key, kvadrat, num, str, tablitsa, vopros } from '../kit';
+import { chtoSprashivayut, dvizhenie, etapy, key, kvadrat, num, str, vopros } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val, type Q } from '../num';
 import { chasy, sk, vremya, SLOVA } from '../sklonenie';
 import type { HintStep, Subtype } from '../types';
 import { otvet } from './common';
 
-const HEAD = ['', '$v$, км/ч', '$t$, ч', '$S$, км'];
-
 /** Время туда и обратно: S/(v + c) + S/(v − c) в TeX. */
 const tudaObratno = (S: string, v: string, c: string): string =>
   `\\dfrac{${S}}{${v}+${c}}+\\dfrac{${S}}{${v}-${c}}`;
 
+/** Таблица S | v | t для пути туда и обратно по реке. */
 function tablitsaReki(
   S: string,
   v: string,
   c: string,
   label: [string, string] = ['По течению', 'Против течения'],
 ) {
-  return tablitsa(HEAD, [
-    [label[0], `$${v}+${c}$`, `$\\dfrac{${S}}{${v}+${c}}$`, `$${S}$`],
-    [label[1], `$${v}-${c}$`, `$\\dfrac{${S}}{${v}-${c}}$`, `$${S}$`],
+  return dvizhenie([
+    [label[0], S, `${v}+${c}`, `\\dfrac{${S}}{${v}+${c}}`],
+    [label[1], S, `${v}-${c}`, `\\dfrac{${S}}{${v}-${c}}`],
   ]);
 }
 
-const HINT_SKOROSTI: HintStep = vopros(
-  'Какая скорость по течению и против течения?',
-  '$v+c$ и $v-c$',
-  ['$v-c$ и $v+c$', '$v$ и $c$'],
-);
+/** Вопрос подсказки о скорости против течения: собственная v, течение c (TeX). */
+function hintSkorosti(v: string, c: string): HintStep {
+  return vopros(
+    'Какова скорость против течения?',
+    `$${v}-${c}$`,
+    [`$${v}+${c}$`, `$${c}-${v}$`],
+    'Против течения скорость уменьшается на скорость течения.',
+  );
+}
 
 /**
  * Неизвестна собственная скорость x: T·x² − 2S·x − T·c² = 0, где T —
@@ -61,8 +64,8 @@ function techenie(S: number, v: number, T: Q): { lines: string[]; c: number } {
   const c = Math.sqrt(val(c2));
   return {
     lines: [
-      `Приводим к общему знаменателю: $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-c^2)$.`,
-      `$${d(v * v)}-c^2=${fq(div(q(2 * S * v), T))}$, $c^2=${fq(c2)}$, $c=\\pm${d(c)}$.`,
+      `Приводим к общему знаменателю: $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-x^2)$.`,
+      `$${d(v * v)}-x^2=${fq(div(q(2 * S * v), T))}$, $x^2=${fq(c2)}$, $x=\\pm${d(c)}$.`,
     ],
     c,
   };
@@ -107,7 +110,7 @@ const VD01: Subtype = {
           [`Спрашивают весь рейс — туда и обратно: $2\\cdot${d(S)}=${d(ans)}$ км.`, otvet(ans)],
         ],
       ),
-      table: tablitsaReki('S', d(v), d(c)),
+      tables: [tablitsaReki('S', d(v), d(c))],
       hints: [
         vopros('С какой скоростью теплоход идёт по течению?', `$${d(v + c)}$ км/ч`, [
           `$${d(v - c)}$ км/ч`,
@@ -161,9 +164,9 @@ const VD02: Subtype = {
         ['Решение', r.lines],
         ['Отбор корня и ответ', [`Скорость больше скорости течения: $x=${d(r.x)}$.`, otvet(r.x)]],
       ),
-      table: tablitsaReki(d(S), 'x', d(c)),
+      tables: [tablitsaReki(d(S), 'x', d(c))],
       hints: [
-        HINT_SKOROSTI,
+        hintSkorosti('x', d(c)),
         vopros('Сколько часов теплоход был в движении?', `$${d(move)}$`, [
           `$${d(T)}$`,
           `$${d(T + st)}$`,
@@ -203,23 +206,23 @@ const VD03: Subtype = {
       etapy: etapy(
         [
           'Обозначаем',
-          [`Скорость течения — $c$ км/ч. По течению $${d(v)}+c$, против — $${d(v)}-c$.`],
+          [`Скорость течения — $x$ км/ч. По течению $${d(v)}+x$, против — $${d(v)}-x$.`],
         ],
         ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
-        ['Уравнение', [`$${tudaObratno(d(S), d(v), 'c')}=${d(move)}$.`]],
+        ['Уравнение', [`$${tudaObratno(d(S), d(v), 'x')}=${d(move)}$.`]],
         ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $c=${d(r.c)}$.`, otvet(r.c)]],
+        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(r.c)}$.`, otvet(r.c)]],
       ),
-      table: tablitsaReki(d(S), d(v), 'c'),
+      tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
-        HINT_SKOROSTI,
+        hintSkorosti(d(v), 'x'),
         vopros('Сколько часов теплоход был в движении?', `$${d(move)}$`, [
           `$${d(T)}$`,
           `$${d(T + st)}$`,
         ]),
         vopros(
           'Какое уравнение получится после общего знаменателя?',
-          `неполное квадратное: $c^2=\\ldots$`,
+          `неполное квадратное: $x^2=\\ldots$`,
           ['линейное', 'кубическое'],
         ),
         chtoSprashivayut('скорость течения', ['скорость теплохода', 'время в пути']),
@@ -243,7 +246,7 @@ const VD04: Subtype = {
     const ask = str(p, 'ask', ['c', 'v'] as const);
     if (ask === 'c') {
       const v = num(p, 'v');
-      const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'c');
+      const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
       const c = val(sol.roots[1]);
       return {
         uslovie: `Моторная лодка прошла против течения реки ${txt(S)} км и вернулась в пункт отправления, затратив на обратный путь на ${sk(Dl, SLOVA.chas)} меньше. Найдите скорость течения, если скорость лодки в неподвижной воде равна ${txt(v)} км/ч. Ответ дайте в км/ч.`,
@@ -251,29 +254,29 @@ const VD04: Subtype = {
         etapy: etapy(
           [
             'Обозначаем',
-            [`Скорость течения — $c$ км/ч. Против течения $${d(v)}-c$, по течению $${d(v)}+c$.`],
+            [`Скорость течения — $x$ км/ч. Против течения $${d(v)}-x$, по течению $${d(v)}+x$.`],
           ],
           ['Таблица', ['Против течения лодка шла дольше.']],
-          ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-c}-\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$.`]],
+          ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
           [
             'Решение',
             [
-              `$${d(S)}(${d(v)}+c)-${d(S)}(${d(v)}-c)=${d(Dl)}(${d(v * v)}-c^2)$, $${d(2 * S)}c=${d(Dl)}(${d(v * v)}-c^2)$.`,
+              `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$, $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
               `$${sol.ishodnoe}$.`,
               ...sol.lines,
             ],
           ],
-          ['Отбор корня и ответ', [`Скорость течения положительна: $c=${d(c)}$.`, otvet(c)]],
+          ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(c)}$.`, otvet(c)]],
         ),
-        table: tablitsaReki(d(S), d(v), 'c', ['Обратно (по течению)', 'Туда (против течения)']),
+        tables: [tablitsaReki(d(S), d(v), 'x', ['Обратно (по течению)', 'Туда (против течения)'])],
         hints: [
           vopros('Какой путь занял больше времени?', 'против течения', ['по течению', 'одинаково']),
           vopros(
             'Какое уравнение?',
-            `$\\dfrac{${d(S)}}{${d(v)}-c}-\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$`,
+            `$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$`,
             [
-              `$\\dfrac{${d(S)}}{${d(v)}+c}-\\dfrac{${d(S)}}{${d(v)}-c}=${d(Dl)}$`,
-              `$\\dfrac{${d(S)}}{${d(v)}-c}+\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$`,
+              `$\\dfrac{${d(S)}}{${d(v)}+x}-\\dfrac{${d(S)}}{${d(v)}-x}=${d(Dl)}$`,
+              `$\\dfrac{${d(S)}}{${d(v)}-x}+\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$`,
             ],
           ),
           chtoSprashivayut('скорость течения', ['скорость лодки', 'время в пути']),
@@ -306,7 +309,7 @@ const VD04: Subtype = {
         ],
         ['Отбор корня и ответ', [`Скорость положительна: $x=${d(x)}$.`, otvet(x)]],
       ),
-      table: tablitsaReki(d(S), 'x', d(c), ['Обратно (по течению)', 'Туда (против течения)']),
+      tables: [tablitsaReki(d(S), 'x', d(c), ['Обратно (по течению)', 'Туда (против течения)'])],
       hints: [
         vopros('Какой путь занял больше времени?', 'против течения', ['по течению', 'одинаково']),
         vopros(
@@ -431,13 +434,13 @@ const VD05: Subtype = {
           ['Решение', r.lines],
           ['Отбор корня и ответ', [`Скорость больше скорости течения: $x=${d(r.x)}$.`, otvet(r.x)]],
         ),
-        table: tablitsaReki(d(S), 'x', d(c)),
+        tables: [tablitsaReki(d(S), 'x', d(c))],
         hints: [
           vopros('Сколько часов судно было в движении?', `$${fq(T)}$`, [
             `$${d(t1 - t0)}$`,
             `$${fq(sub(q(t1 - t0), naive), true)}$`,
           ]),
-          HINT_SKOROSTI,
+          hintSkorosti('x', d(c)),
           vopros('Какое уравнение?', `$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$`, [
             `$${tudaObratno(d(S), 'x', d(c))}=${d(t1 - t0)}$`,
             `$\\dfrac{${d(2 * S)}}{x}=${fq(T)}$`,
@@ -455,22 +458,22 @@ const VD05: Subtype = {
       etapy: etapy(
         [
           'Обозначаем',
-          [`Скорость течения — $c$ км/ч. По течению $${d(v)}+c$, против — $${d(v)}-c$.`],
+          [`Скорость течения — $x$ км/ч. По течению $${d(v)}+x$, против — $${d(v)}-x$.`],
         ],
         ['Время в движении', timeLines],
-        ['Уравнение', [`$${tudaObratno(d(S), d(v), 'c')}=${fq(T)}$.`]],
+        ['Уравнение', [`$${tudaObratno(d(S), d(v), 'x')}=${fq(T)}$.`]],
         ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $c=${d(r.c)}$.`, otvet(r.c)]],
+        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(r.c)}$.`, otvet(r.c)]],
       ),
-      table: tablitsaReki(d(S), d(v), 'c'),
+      tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
         vopros('Сколько часов судно было в движении?', `$${fq(T)}$`, [
           `$${d(t1 - t0)}$`,
           `$${fq(sub(q(t1 - t0), naive), true)}$`,
         ]),
-        HINT_SKOROSTI,
-        vopros('Какое уравнение?', `$${tudaObratno(d(S), d(v), 'c')}=${fq(T)}$`, [
-          `$${tudaObratno(d(S), d(v), 'c')}=${d(t1 - t0)}$`,
+        hintSkorosti(d(v), 'x'),
+        vopros('Какое уравнение?', `$${tudaObratno(d(S), d(v), 'x')}=${fq(T)}$`, [
+          `$${tudaObratno(d(S), d(v), 'x')}=${d(t1 - t0)}$`,
           `$\\dfrac{${d(2 * S)}}{${d(v)}}=${fq(T)}$`,
         ]),
         chtoSprashivayut('скорость течения', ['собственную скорость', 'время в пути']),
@@ -512,11 +515,13 @@ const VD06: Subtype = {
         ['Решение', r.lines],
         ['Отбор корня и ответ', [`Скорость яхты положительна: $x=${d(r.x)}$.`, otvet(r.x)]],
       ),
-      table: tablitsa(HEAD, [
-        ['Плот', `$${d(c)}$`, `$${fq(raft)}$`, `$${d(rr)}$`],
-        ['Яхта туда', `$x+${d(c)}$`, `$\\dfrac{${d(S)}}{x+${d(c)}}$`, `$${d(S)}$`],
-        ['Яхта обратно', `$x-${d(c)}$`, `$\\dfrac{${d(S)}}{x-${d(c)}}$`, `$${d(S)}$`],
-      ]),
+      tables: [
+        dvizhenie([
+          ['Плот', d(rr), d(c), fq(raft)],
+          ['Яхта туда', d(S), `x+${d(c)}`, `\\dfrac{${d(S)}}{x+${d(c)}}`],
+          ['Яхта обратно', d(S), `x-${d(c)}`, `\\dfrac{${d(S)}}{x-${d(c)}}`],
+        ]),
+      ],
       hints: [
         vopros('С какой скоростью плывёт плот?', 'со скоростью течения', [
           '$0$ — у плота нет скорости',
@@ -553,7 +558,7 @@ const VD07: Subtype = {
     const S = num(p, 'S');
     const Dl = num(p, 'delta');
     const v = num(p, 'v');
-    const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'c');
+    const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
     const c = val(sol.roots[1]);
     return {
       uslovie: `Пройдя ${txt(S)} км по течению реки, катер возвращается в исходную точку, причём обратный путь занимает на ${sk(Dl, SLOVA.chas)} больше времени. Найдите скорость течения, если скорость катера в неподвижной воде равна ${txt(v)} км/ч.`,
@@ -561,28 +566,28 @@ const VD07: Subtype = {
       etapy: etapy(
         [
           'Обозначаем',
-          [`Скорость течения — $c$ км/ч. По течению $${d(v)}+c$, против — $${d(v)}-c$.`],
+          [`Скорость течения — $x$ км/ч. По течению $${d(v)}+x$, против — $${d(v)}-x$.`],
         ],
         ['Таблица', ['Обратный путь — против течения, он дольше.']],
-        ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-c}-\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$.`]],
+        ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
         [
           'Решение',
-          [`$${d(2 * S)}c=${d(Dl)}(${d(v * v)}-c^2)$.`, `$${sol.ishodnoe}$.`, ...sol.lines],
+          [`$${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`, `$${sol.ishodnoe}$.`, ...sol.lines],
         ],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $c=${d(c)}$.`, otvet(c)]],
+        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(c)}$.`, otvet(c)]],
       ),
-      table: tablitsaReki(d(S), d(v), 'c'),
+      tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
         vopros('Какой путь дольше?', 'обратный — против течения', ['по течению', 'одинаково']),
         vopros(
           'Какое уравнение?',
-          `$\\dfrac{${d(S)}}{${d(v)}-c}-\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$`,
+          `$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$`,
           [
-            `$\\dfrac{${d(S)}}{${d(v)}+c}-\\dfrac{${d(S)}}{${d(v)}-c}=${d(Dl)}$`,
-            `$\\dfrac{${d(S)}}{${d(v)}-c}+\\dfrac{${d(S)}}{${d(v)}+c}=${d(Dl)}$`,
+            `$\\dfrac{${d(S)}}{${d(v)}+x}-\\dfrac{${d(S)}}{${d(v)}-x}=${d(Dl)}$`,
+            `$\\dfrac{${d(S)}}{${d(v)}-x}+\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$`,
           ],
         ),
-        vopros('Какой лайфхак поможет с корнем?', `подобрать целое $c$ и проверить подстановкой`, [
+        vopros('Какой лайфхак поможет с корнем?', `подобрать целое $x$ и проверить подстановкой`, [
           'взять среднее арифметическое',
           'перейти к минутам',
         ]),

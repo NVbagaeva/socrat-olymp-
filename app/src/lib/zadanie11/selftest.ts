@@ -12,7 +12,8 @@
 import { BANK, RAZMINKA } from './bank';
 import { d, nice } from './num';
 import { subtype } from './prototypes';
-import type { BankItem, Solved } from './types';
+import { STROKI_KONC } from './kit';
+import type { BankItem, Solved, Tablitsa } from './types';
 
 export interface Problem {
   where: string;
@@ -24,7 +25,11 @@ export function allTexts(s: Solved): string[] {
   return [
     s.uslovie,
     ...s.etapy.flatMap((e) => [e.title, ...e.lines]),
-    ...(s.table ? [...s.table.head, ...s.table.rows.flat()] : []),
+    ...(s.tables ?? []).flatMap((t) => [
+      ...(t.title ? [t.title] : []),
+      ...t.head,
+      ...t.rows.flat(),
+    ]),
     ...s.hints.flatMap((h) => [h.question, ...h.options, ...(h.comment ? [h.comment] : [])]),
     ...(s.vybor ? s.vybor.options : []),
   ];
@@ -88,11 +93,127 @@ export function checkSolved(where: string, s: Solved, typeset: (tex: string) => 
       add(`подсказка ${i + 1}: нет верного варианта`);
     }
   });
-  if (s.table) {
-    for (const row of s.table.rows) {
-      if (row.length !== s.table.head.length) {
+  for (const t of s.tables ?? []) {
+    for (const row of t.rows) {
+      if (row.length !== t.head.length) {
         add('строка таблицы не совпадает по длине с шапкой');
       }
+    }
+    problems.push(...checkTablitsa(where, t));
+  }
+  problems.push(...checkOboznacheniya(where, s));
+  return problems;
+}
+
+/* ── Методика: порядок столбцов и обозначения ─────────────────── */
+
+const PORYADOK: Record<string, string[]> = {
+  dvizhenie: ['$S$', '$v$', '$t$'],
+  rabota: ['$A$', '$p$', '$t$'],
+};
+
+/** Таблица по правилам: S | v | t, A | p | t, строки концентрации. */
+export function checkTablitsa(where: string, t: Tablitsa): Problem[] {
+  const problems: Problem[] = [];
+  const order = PORYADOK[t.vid];
+  if (order) {
+    const got = t.head.slice(1).map((h) => h.split('$').slice(0, 2).join('$') + '$');
+    if (got.join('|') !== order.join('|')) {
+      problems.push({
+        where,
+        what: `таблица «${t.vid}»: столбцы ${got.join(' | ')} вместо ${order.join(' | ')}`,
+      });
+    }
+  }
+  if (t.vid === 'koncentraciya') {
+    const labels = t.rows.map((r) => r[0]);
+    if (labels.join('|') !== STROKI_KONC.join('|')) {
+      problems.push({ where, what: `таблица концентрации: строки ${labels.join(' | ')}` });
+    }
+  }
+  return problems;
+}
+
+/**
+ * Неизвестная — x (вторая — y): буквы c (течение), k (множитель) и v
+ * в клетках таблиц не используются как неизвестные. Проверяются
+ * формулы разбора, подсказок и клетки таблиц (шапки — нет).
+ */
+export function checkOboznacheniya(where: string, s: Solved): Problem[] {
+  const texts = [
+    ...s.etapy.flatMap((e) => e.lines),
+    ...s.hints.flatMap((h) => [h.question, ...h.options, ...(h.comment ? [h.comment] : [])]),
+  ];
+  const cells = (s.tables ?? []).flatMap((t) => t.rows.flatMap((r) => r.slice(1)));
+  const problems: Problem[] = [];
+  const letters = (tex: string): string =>
+    tex.replace(/\\text\{[^}]*\}/g, ' ').replace(/\\[A-Za-z]+/g, ' ');
+  for (const text of texts) {
+    for (const tex of texPieces(text) ?? []) {
+      if (/(?<![A-Za-z])[ck](?![A-Za-z])/.test(letters(tex))) {
+        problems.push({ where, what: `неизвестная не x/y: «${tex.slice(0, 50)}»` });
+      }
+    }
+  }
+  for (const cell of cells) {
+    for (const tex of texPieces(cell) ?? []) {
+      if (/(?<![A-Za-z])[ckv](?![A-Za-z])/.test(letters(tex))) {
+        problems.push({ where, what: `в клетке таблицы буква вместо x/y: «${tex.slice(0, 50)}»` });
+      }
+    }
+  }
+  return problems;
+}
+
+/** Какой вид таблицы обязателен у раздела. */
+const VID_RAZDELA: Record<string, Tablitsa['vid']> = {
+  DP: 'dvizhenie',
+  PT: 'dvizhenie',
+  VD: 'dvizhenie',
+  OK: 'dvizhenie',
+  RB: 'rabota',
+  SM: 'koncentraciya',
+};
+
+/** Подтипы без таблицы модели: перевод единиц, система без таблицы. */
+const BEZ_TABLITSY = new Set(['DP-01', 'OK-03']);
+
+/** Подтипы «равных масс»: вторая таблица 1*, 2*, 1* + 2* и сокращение m. */
+const RAVNYE_MASSY = new Set(['SM-02', 'SM-07']);
+
+/**
+ * Методика раздела: вид таблицы по разделу, «примем всю работу за 1»,
+ * таблица равных масс и явное сокращение на m.
+ */
+export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
+  const problems: Problem[] = [];
+  const add = (what: string) => problems.push({ where, what });
+  const vid = VID_RAZDELA[id.split('-')[0] ?? ''];
+  const tables = s.tables ?? [];
+  if (vid) {
+    if (tables.length === 0 && !BEZ_TABLITSY.has(id)) {
+      add(`нет таблицы модели (${vid})`);
+    }
+    for (const t of tables) {
+      if (t.vid !== vid) {
+        add(`таблица вида ${t.vid}, а разделу нужна ${vid}`);
+      }
+    }
+  }
+  const text = s.etapy.flatMap((e) => e.lines).join(' ');
+  if (
+    tables.some((t) => t.vid === 'rabota' && t.rows.some((r) => r[1] === '$1$')) &&
+    !text.includes('Примем всю работу за $1$') &&
+    !/Примем всю работу \([^)]*\) за \$1\$/.test(text)
+  ) {
+    add('объём работы принят за 1, но в решении это не сказано');
+  }
+  if (RAVNYE_MASSY.has(id)) {
+    if (!tables.some((t) => t.head.includes('1*') && t.head.includes('1* + 2*'))) {
+      add('нет таблицы равных масс 1*, 2*, 1* + 2*');
+    }
+    if (!text.includes('Сокращаем на $m$')) {
+      add('не показано сокращение на m');
     }
   }
   return problems;
@@ -125,6 +246,7 @@ export function checkItems(
       problems.push({ where, what: `ответ solve ${s.answer} ≠ ответ банка ${item.answer}` });
     }
     problems.push(...checkSolved(where, s, typeset));
+    problems.push(...checkMetodika(where, item.id, s));
     solved.push({ where, s });
   });
   return { checked: items.length, problems, solved };

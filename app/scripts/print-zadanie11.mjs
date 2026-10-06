@@ -25,9 +25,10 @@ for (const item of pick) {
     console.log(`  ${e.title}`);
     for (const l of e.lines) console.log(`    ${l}`);
   }
-  if (s.table) {
-    console.log(`  | ${s.table.head.join(' | ')} |`);
-    for (const r of s.table.rows) console.log(`  | ${r.join(' | ')} |`);
+  for (const t of s.tables ?? []) {
+    console.log(`  [${t.vid}]${t.title ? ' ' + t.title : ''}`);
+    console.log(`  | ${t.head.join(' | ')} |`);
+    for (const r of t.rows) console.log(`  | ${r.join(' | ')} |`);
   }
   for (const h of s.hints) {
     console.log(`  ? ${h.question}`);
