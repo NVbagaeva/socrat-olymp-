@@ -10,8 +10,8 @@
    «answer», разбор со строкой «Ответ: …» или параметры рисунка, по
    которым ответ читается с картинки.
 
-   Проверка идёт по банкам всех разделов с закрытыми ответами — №3,
-   №4, №5, №8 и №12: банк читается из исходников, для каждой задачи
+   Проверка идёт по банкам всех разделов с закрытыми ответами — №2,
+   №3, №4, №5, №8 и №12: банк читается из исходников, для каждой задачи
    считается её ответ, а потом в собранных страницах ищется окно этой
    задачи (от её идентификатора до следующего) и в окне — сам ответ в
    тех формах, в каких он уезжал раньше: полем JSON, строкой «Ответ:»,
@@ -174,6 +174,35 @@ const otvety8 = BANK_8.flatMap((entry) =>
   entry.variants.flatMap((v) => formy(generate8(entry.prototype, v.seed, v.level).otvet)),
 );
 
+/* №2: микрозадачи тренировок с зафиксированным вариантом (окно —
+   объект задачи в странице блока; у задач с выбором ответ — номер
+   варианта, его искать бессмысленно) и банк для репетиторов — десять
+   seed на прототип. Листы банка и ключ считаются в браузере, в
+   страницы не идут; ответы банка всё равно ищутся по страницам
+   раздела. Исключение — вкладки «Теория» и «Опорные задачи»: там
+   выкладки и разобранные образцы с ответами намеренно, по своим
+   числам, не из банка. */
+const { BLOKI: BLOKI_2 } = requireSrc('lib/vektory/prep/bloki');
+const { fixedSeed: fixedSeed2, generateMikro } = requireSrc('lib/vektory/prep/generate');
+const { BANK: BANK_2 } = requireSrc('lib/vektory/bank');
+const { generate: generate2 } = requireSrc('lib/vektory/generate');
+const POLYA_2 = ['otvet', 'proverka', 'params', 'signature'];
+for (const blok of BLOKI_2) {
+  for (const micro of blok.zadachi) {
+    const task = generateMikro(micro.id, fixedSeed2(micro));
+    zadachi.push({
+      razdel: '№2',
+      id: micro.id,
+      variantov: 1,
+      otvety: typeof task.otvet === 'number' ? formy(task.otvet) : [],
+      polya: POLYA_2,
+    });
+  }
+}
+const otvety2 = BANK_2.flatMap((entry) =>
+  entry.variants.flatMap((v) => formy(generate2(entry.prototype, v.seed).otvet)),
+);
+
 /* №12: наборы движка graph/ по навыкам опорных задач. Ответ — число
    или номер верного варианта; в окне не должно быть ни поля
    «answer», ни открытого разбора, ни пометок вариантов «error». */
@@ -190,14 +219,18 @@ const readSets = (dir) =>
    для печати, и их ответы тоже не должны попадать в разметку. */
 GraphGenerate.setSets({
   prep: [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')],
-  prototypes: [...readSets('prototypes/12'), ...readSets('prototypes/12q'),
-    ...readSets('prototypes/12r')],
+  prototypes: [
+    ...readSets('prototypes/12'),
+    ...readSets('prototypes/12q'),
+    ...readSets('prototypes/12r'),
+  ],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
 /* Опорные задачи — по списку навыков; прототипы — по самим наборам:
    задачи тренажёра и листа для печати считает тот же движок, и их
    ответам в разметке страницы тоже не место. */
-const NABORY_12 = allPrepSkills.map((skill) => skill.setId)
+const NABORY_12 = allPrepSkills
+  .map((skill) => skill.setId)
   .concat(readSets('prototypes/12q').map((set) => set.id))
   .concat(readSets('prototypes/12r').map((set) => set.id));
 for (const setId of NABORY_12) {
@@ -308,14 +341,26 @@ function obekt(text, at) {
   for (let i = start; i < text.length; i++) {
     const ch = text[i];
     if (inString) {
-      if (ch === '\\') { i += 1; } else if (ch === '"') { inString = false; }
+      if (ch === '\\') {
+        i += 1;
+      } else if (ch === '"') {
+        inString = false;
+      }
       continue;
     }
-    if (ch === '"') { inString = true; continue; }
-    if (ch === '{') { depth += 1; continue; }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === '{') {
+      depth += 1;
+      continue;
+    }
     if (ch === '}') {
       depth -= 1;
-      if (depth === 0) { return text.slice(start, i + 1); }
+      if (depth === 0) {
+        return text.slice(start, i + 1);
+      }
     }
   }
   return null;
@@ -332,8 +377,7 @@ function okna(text, id) {
   let from = text.indexOf(marker);
   while (from !== -1) {
     const next = text.indexOf('"id":"', from + marker.length);
-    const okno = obekt(text, from) ??
-      text.slice(from, next === -1 ? text.length : next);
+    const okno = obekt(text, from) ?? text.slice(from, next === -1 ? text.length : next);
     const ssylki = [...okno.matchAll(/"\$([0-9a-f]+)"/g)].map((m) => stroka(text, m[1]));
     out.push([okno, ...ssylki].join('\n'));
     from = text.indexOf(marker, from + marker.length);
@@ -403,6 +447,24 @@ for (const file of files) {
     }
   }
 
+  /* Банк для репетиторов №2: по страницам раздела, кроме теории и
+     опорных задач — там выкладки с ответами стоят намеренно, и малые
+     целые («= 5») совпадают с ответами банка случайно. */
+  const put2 = rel.split(path.sep);
+  if (
+    put2.slice(0, 2).join('/') === 'zadaniya/2' &&
+    !['opornye-zadachi', 'teoriya'].includes(put2[2])
+  ) {
+    for (const otvet of otvety2) {
+      for (const [chto, re] of shablony(otvet)) {
+        const m = re.exec(text);
+        if (m !== null) {
+          problemy.push(`№2 банк для репетиторов: ${chto} «${otvet}» — …${m[0].slice(-70)}`);
+        }
+      }
+    }
+  }
+
   if (problemy.length > 0) {
     bad.push({ file: rel, problemy });
   }
@@ -418,6 +480,7 @@ for (const z of zadachi) {
   poRazdelam[z.razdel] = s;
 }
 poRazdelam['№8'].variantov += BANK_8.reduce((s, e) => s + e.variants.length, 0);
+poRazdelam['№2'].variantov += BANK_2.reduce((s, e) => s + e.variants.length, 0);
 console.log(
   `Просмотрено файлов сборки: ${files.length}; окон задач в страницах: ${oknaVsego}.\n` +
     `Проверено записей банков: ${zadachi.length}, вариантов с ответами: ` +

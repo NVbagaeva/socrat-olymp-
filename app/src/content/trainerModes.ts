@@ -16,8 +16,8 @@ export interface TrainerMode {
 }
 
 export const trainerModes: TrainerMode[] = [
-  { id: 'practice', title: 'Отработка', lead: 'Один тип задач' },
-  { id: 'mixed', title: 'Смешанная', lead: 'Несколько типов' },
+  { id: 'practice', title: 'Отработка', lead: 'Выбранные типы задач' },
+  { id: 'mixed', title: 'Смешанная', lead: 'Все типы вперемешку' },
   { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
   { id: 'control', title: 'Контроль', lead: 'Без подсказок' },
 ];
@@ -120,9 +120,11 @@ export const trainerPage = {
   builder: 'Собери свою тренировку',
   skill: {
     step: '1',
-    title: 'Выбери навык',
+    title: 'Выбери навыки',
     /* «{family}» подставляется названием семейства. */
-    lead: 'Что именно хочешь потренировать в разделе «{family}»?',
+    lead: 'Что хочешь потренировать в разделе «{family}»? Можно выбрать несколько.',
+    /* Сколько выбрано — в строке сводки: «3 типа задач». */
+    unit: ['тип задач', 'типа задач', 'типов задач'] as [string, string, string],
   },
   params: {
     step: '2',

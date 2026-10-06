@@ -12,7 +12,53 @@
 # держит их год.
 
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html|txt)$">
+  <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
+</IfModule>
+
+# ── Служебные ответы роутера: …/index.txt ───────────────────────────
+#
+# При переходе по сайту Next.js не грузит страницу целиком, а берёт
+# рядом с ней служебный файл index.txt (RSC) и дорисовывает экран.
+# Это данные для сценария сайта, а не страница: открытый в браузере
+# как документ, он показывает сырой текст «1:"$Sreact.fragment"…».
+#
+# 1. Открыли index.txt как страницу — уводим на саму страницу.
+#    Страницу браузер запрашивает с Sec-Fetch-Dest: document; у старых
+#    Safari этого заголовка нет, тогда признак — text/html в Accept.
+#    Сценарий сайта шлёт Accept: */* и Sec-Fetch-Dest: empty, его
+#    правило не трогает.
+# 2. Ответ не хранится ни браузером, ни промежуточным кешем: адрес
+#    …/index.txt?_rsc=… не зависит от версии сборки.
+# 3. Ответ зависит от Accept и Sec-Fetch-Dest — это сказано в Vary.
+#
+# Внимание: на хостинге .txt может отдавать сам nginx, минуя Apache и
+# этот файл (см. docs/DEPLOYMENT.md). Тогда правила здесь не действуют, а
+# от сырого текста защищает исправление в Next.js (patches/).
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Браузер говорит прямо: это переход на страницу.
+  RewriteCond %{HTTP:Sec-Fetch-Dest} =document
+  RewriteRule ^(.*/)?index\.txt$ /$1 [R=302,L,QSD]
+  # Старый Safari без Sec-Fetch-Dest: страницу он просит с text/html.
+  RewriteCond %{HTTP:Sec-Fetch-Dest} ^$
+  RewriteCond %{HTTP_ACCEPT} text/html
+  RewriteRule ^(.*/)?index\.txt$ /$1 [R=302,L,QSD]
+</IfModule>
+
+# Тип ответа — родной для RSC: Next.js его принимает (проверено
+# scripts/check-rsc-serving.mjs), а браузер не показывает его как
+# обычный текст.
+<Files "index.txt">
+  ForceType text/x-component
+</Files>
+
+<IfModule mod_headers.c>
+  <Files "index.txt">
+    Header always set Cache-Control "no-store"
+    Header always set Vary "Accept, Sec-Fetch-Dest"
+    Header always set X-Robots-Tag "noindex"
+  </Files>
 </IfModule>

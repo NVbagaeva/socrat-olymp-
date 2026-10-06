@@ -100,10 +100,32 @@ function trySet(setId: string, seed: string, tally: { rejected: number }): Engin
   }
 }
 
+/** Источник случайных чисел в [0, 1): Math.random в тренажёре. */
+export type Random = () => number;
+
+/** Перемешать копию списка (Фишер — Йейтс). */
+function shuffled<T>(list: T[], random: Random): T[] {
+  const out = list.slice();
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    const item = out[i] as T;
+    out[i] = out[j] as T;
+    out[j] = item;
+  }
+  return out;
+}
+
 /**
  * Задачи одного набора: want штук нужного уровня. Сначала разные
  * задачи набора, потом — те же задачи на других seed: числа у них
  * уже другие.
+ *
+ * random задан (тренажёр) — задачи набора берутся в случайном порядке,
+ * а не с начала. Иначе подход из пяти задач всегда брал бы одни и те
+ * же первые задачи набора, а задачи из его конца — например, парабола
+ * с вершиной не в узле сетки (12Q.E, 12Q.F) — не попадали бы никогда.
+ * Не задан (лист генератора) — по порядку: лист по одной ссылке
+ * должен собираться одинаково.
  */
 function fromSet(
   setId: string,
@@ -112,6 +134,7 @@ function fromSet(
   seedFor: SeedFor,
   tally: { rejected: number },
   choice: boolean,
+  random: Random | null,
 ): EngineTask[] {
   const picked: Picked[] = [];
   const seen = new Set<string>();
@@ -125,7 +148,8 @@ function fromSet(
       (level === null || levelOf(task) === level));
     /* Новые задачи — вперёд, повторы — только если новых уже нет. */
     const fresh = fit.filter((task) => !seen.has(task.id));
-    const queue = fresh.length > 0 ? fresh : fit;
+    const ordered = fresh.length > 0 ? fresh : fit;
+    const queue = random === null ? ordered : shuffled(ordered, random);
     queue.forEach((task) => {
       if (picked.length < want) {
         picked.push({ task, seedNo });
@@ -178,7 +202,11 @@ export interface PickedTasks {
  * Что с ними делать дальше — экран задания или карточка листа, —
  * решает тот, кто вызвал.
  */
-export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTasks {
+export function pickTasks(
+  request: SessionRequest,
+  seedFor: SeedFor,
+  random: Random | null = null,
+): PickedTasks {
   const tally = { rejected: 0 };
   const choice = request.choice === true;
   const want = Math.max(1, Math.floor(request.count));
@@ -198,7 +226,9 @@ export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTask
     sets.forEach((setId) => {
       const extra = rest > 0 ? 1 : 0;
       rest -= extra;
-      engine = engine.concat(fromSet(setId, request.level, base + extra, seedFor, tally, choice));
+      engine = engine.concat(
+        fromSet(setId, request.level, base + extra, seedFor, tally, choice, random),
+      );
     });
   }
 
@@ -207,7 +237,7 @@ export function pickTasks(request: SessionRequest, seedFor: SeedFor): PickedTask
 
 /** Собрать сессию тренажёра по запросу конфигуратора. */
 export function buildSession(request: SessionRequest): Session {
-  const picked = pickTasks(request, randomSeed);
+  const picked = pickTasks(request, randomSeed, Math.random);
   return {
     tasks: picked.tasks.map((task) => trainerTaskFrom(task)),
     shortage: picked.shortage,

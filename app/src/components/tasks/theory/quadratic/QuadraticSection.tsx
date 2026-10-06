@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Chart } from '@/components/graph/Chart';
 import { REMEMBER_TITLE, type TheoryCard, type TheorySection } from '@/content/theoryQuadratic';
@@ -19,7 +20,22 @@ function formula(tex: string, display = false) {
 /** Чертёж по ключу сцены: у каждой подтемы свой набор сцен. */
 type SceneFor = (id: string) => unknown;
 
-function Card({ card, sceneFor }: { card: TheoryCard<string>; sceneFor: SceneFor }) {
+/**
+ * Готовый рисунок по ключу — для разделов, где чертёж рисует не
+ * движок графиков, а другой (векторы задания №2). Задан — вместо
+ * Chart ставится то, что он вернул.
+ */
+type FigureFor = (id: string) => ReactNode;
+
+function Card({
+  card,
+  sceneFor,
+  figureFor,
+}: {
+  card: TheoryCard<string>;
+  sceneFor: SceneFor;
+  figureFor?: FigureFor;
+}) {
   return (
     <li
       className={clsx(
@@ -92,7 +108,11 @@ function Card({ card, sceneFor }: { card: TheoryCard<string>; sceneFor: SceneFor
       </div>
 
       {card.scene !== undefined ? (
-        <Chart className="qth-card__chart" scene={sceneFor(card.scene)} />
+        figureFor !== undefined ? (
+          figureFor(card.scene)
+        ) : (
+          <Chart className="qth-card__chart" scene={sceneFor(card.scene)} />
+        )
       ) : null}
 
       {card.illustration !== undefined ? (
@@ -132,10 +152,13 @@ function Card({ card, sceneFor }: { card: TheoryCard<string>; sceneFor: SceneFor
 export function QuadraticSection({
   section,
   sceneFor = quadraticTheoryScene as SceneFor,
+  figureFor,
 }: {
   section: TheorySection<string>;
   /** Чертежи подтемы. Не задано — сцены квадратичной функции. */
   sceneFor?: SceneFor;
+  /** Готовые рисунки по ключу вместо чертежей движка графиков. */
+  figureFor?: FigureFor;
 }) {
   return (
     <div className="qth">
@@ -145,7 +168,7 @@ export function QuadraticSection({
 
       <ul className="qth__cards">
         {section.cards.map((card) => (
-          <Card card={card} sceneFor={sceneFor} key={card.id} />
+          <Card card={card} sceneFor={sceneFor} figureFor={figureFor} key={card.id} />
         ))}
       </ul>
 

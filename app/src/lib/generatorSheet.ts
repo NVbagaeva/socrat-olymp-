@@ -14,6 +14,7 @@ import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import rationalBuilder from '@/lib/graph/solution-rational.js';
+import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
@@ -370,8 +371,27 @@ export function subtitleOf(params: Pick<SheetParams, 'kind' | 'date'>): string {
  * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
  * страницы. Рамки «Повторяем» на варианте нет.
  */
+/* Лист учителя: у параболы с вершиной в узле сетки на чертеже —
+   вспомогательная система координат x′Oy′ (graph/quadratic-aux.js),
+   как в разборе. В листе ученика чертёж задачи как есть. */
+function teacherFigures(variants: SheetBlock[][]): SheetBlock[][] {
+  return variants.map((blocks) =>
+    blocks.map((block) => ({
+      ...block,
+      tasks: block.tasks.map((task) => {
+        const meta = task.meta as unknown;
+        if (task.meta.family !== 'quadratic' || !QuadraticAux.hasAux(meta)) {
+          return task;
+        }
+        const svg = QuadraticAux.auxSvg(meta, null) as string | null;
+        return svg === null ? task : { ...task, figureSvg: svg };
+      }),
+    })),
+  );
+}
+
 export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
-  const variants = sheetVariants(params);
+  const variants = withAnswers ? teacherFigures(sheetVariants(params)) : sheetVariants(params);
   const blocks = variants[0] ?? [];
   /* Название подтемы приходит со страницы: лист собирается один на
      все подтемы задания, а в шапке должно стоять то, что печатают.

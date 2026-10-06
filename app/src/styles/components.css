@@ -2079,7 +2079,8 @@ a.task-card {
 /* Переход по якорю оставляет над заголовком воздух: иначе он
    прилипает к верхней кромке экрана. */
 .theory-block {
-  scroll-margin-top: var(--space-5);
+  /* Под прилипшей лентой вкладок: её высота — --topic-sticky-top. */
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-5));
 }
 .theory-block__text {
   font-size: var(--fs-body);
@@ -2119,6 +2120,95 @@ a.task-card {
   line-height: var(--lh-h4);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Полоса «Содержание / текущий раздел» теории ───────────────
+   Одна на все теории: №12 (TopicTabs), №4–5 (TeoriyaShell), №3
+   (TeoriyaContents). На широком экране её нет — содержание стоит
+   правой колонкой; ниже 1024px колонку заменяют полоса и шторка. */
+
+/* Кнопка «Содержание»: нужна там, где правой колонки нет. */
+.topic-open {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.topic-open__btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.topic-open__now {
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1023.98px) {
+  /* Полоса «Содержание / текущий раздел» липнет к верху экрана всё
+     время чтения теории. Отсчёт сверху — --topic-sticky-top: ноль,
+     если над полосой ничего липкого нет (№12), и высота ленты
+     вкладок, если липнет и она (№4, №5 — veroyatnost.css).
+     Липкость работает потому, что полоса стоит прямо в панели
+     вкладки, которая тянется на всю теорию: в ячейке ростом с саму
+     кнопку ездить ей было бы некуда.
+     Фон во всю ширину колонки: разделы не просвечивают сбоку. */
+  .topic-open {
+    display: flex;
+    position: sticky;
+    top: var(--topic-sticky-top, 0px);
+    z-index: 4;
+    box-sizing: border-box;
+    height: var(--h-topic-open);
+    margin-bottom: var(--space-4);
+    margin-inline: calc(var(--space-5) * -1);
+    padding: var(--space-2) var(--space-5);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+  /* Название раздела — одной строкой: полоса не растёт в высоту и
+     не наезжает на текст, длинное название обрезается многоточием. */
+  .topic-open__now {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Полоса стоит сразу под прилипшей лентой — без щели; тень снизу
+     теперь у неё, а у ленты над ней тень убирается. */
+  .app-main:has(.topic-tabs-row.is-stuck) .topic-open {
+    box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
+  }
+  .app-main:has(.topic-open) .topic-tabs-row.is-stuck::before {
+    box-shadow: none;
+  }
+  /* Подложка ленты — до кромки экрана, не дальше: поле страницы
+     здесь --space-5 (.app-main выше). Шире — и страница на телефоне
+     становится шире экрана. */
+  .app-main {
+    --tabs-bleed: var(--space-5);
+  }
+  /* Переход по содержанию: заголовок раздела встаёт под полосой,
+     а не под ней прячется. */
+  .topic-panel .theory-block {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+  /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
+  .modal-backdrop:has(.contents-sheet) {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .contents-sheet {
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
 }
 
 .contents-list {
@@ -2213,6 +2303,42 @@ a.task-card {
 }
 .topic-tabs::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Липкая лента вкладок ──────────────────────────────────────
+   Лента прилипает к верху экрана во всех разделах: строка
+   .topic-tabs-row стоит прямо в main.app-main, который тянется на всю
+   страницу. Состояние «прилипла» (is-stuck), высоту для полос под
+   лентой (--topic-sticky-top) и выравнивание страницы ставит хук
+   components/tasks/useStickyTabs.ts.
+
+   Подложка непрозрачная и растянута на поля страницы псевдоэлементом:
+   по ширине самой строки меню «Для репетиторов» считает своё место,
+   раздвигать её нельзя. Поля main такие же, поэтому подложка не
+   выступает за страницу и горизонтальной прокрутки не даёт. */
+.topic-tabs-row {
+  position: sticky;
+  /* Под чёлкой iPhone лента не прячется: отступ — безопасная зона. */
+  top: env(safe-area-inset-top, 0px);
+  z-index: 6;
+}
+.topic-tabs-row::before {
+  content: '';
+  position: absolute;
+  /* В стороны — на поле страницы (--tabs-bleed), вверх — на вырез
+     экрана, к которому прилипает лента. */
+  inset: calc(env(safe-area-inset-top, 0px) * -1) calc(var(--tabs-bleed, var(--space-8)) * -1) 0;
+  z-index: -1;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+/* Прилипшая лента отходит от кромки экрана и отделяется тенью от
+   текста, который уезжает под неё. */
+.topic-tabs-row.is-stuck {
+  padding-block: var(--space-2);
+}
+.topic-tabs-row.is-stuck::before {
+  box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
 }
 .tabs--lenta {
   display: flex;
@@ -2778,4 +2904,39 @@ a.task-card {
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
+}
+
+/* Прилипшая лента на телефоне — компактная: значок и подпись в одну
+   строку, поля меньше. Вместе с полосой «Содержание» она занимает
+   около девятой части экрана. Лента по-прежнему прокручивается вбок,
+   активную вкладку в видимую часть подводит хук. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row.is-stuck {
+    padding-block: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .topic-tabs {
+    padding: 2px;
+    box-shadow: none;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta button,
+  .topic-tabs-row.is-stuck .tabs--lenta a[role='tab'],
+  .topic-tabs-row.is-stuck .topic-tabs__more {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__text,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__text {
+    max-width: none;
+    white-space: nowrap;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico {
+    width: 20px;
+    height: 20px;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico svg,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico svg {
+    width: 16px;
+    height: 16px;
+  }
 }

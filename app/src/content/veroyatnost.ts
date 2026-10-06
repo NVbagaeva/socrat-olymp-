@@ -17,6 +17,7 @@ import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
 import { trainerPage } from './trainerModes';
 
+import { assetUrl } from '@/lib/assetUrl';
 /* Вкладка раздела описывается общим типом: лента у всех заданий одна
    (components/tasks/RazdelTabs). Имя оставлено прежним, чтобы
    не править импорты по всему разделу. */
@@ -123,7 +124,11 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     lead: PODZAGOLOVOK_4,
     badge: 'Базовый уровень',
     tabs: TABS_4,
-    art: { src: '/images/zadanie-04/shapka-veroyatnost-prostaya.webp', width: 900, height: 423 },
+    art: {
+      src: assetUrl('/images/zadanie-04/shapka-veroyatnost-prostaya.webp'),
+      width: 900,
+      height: 423,
+    },
     /* Те же две карточки, что у задания №12. Файлы — сборник
        «Задание 4», который собирает scripts/build-pdf-4.mjs и кладёт
        в app/public по этим же путям (workflow «PDF 4»). Здесь стоят
@@ -139,14 +144,14 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: 'Рабочая тетрадь для репетиторов',
           lead: 'Задачи с заготовками рисунков и строкой для ответа',
           icon: 'doc',
-          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf',
+          file: assetUrl('/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf'),
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
           lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
-          file: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf',
+          file: assetUrl('/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik-chb.pdf'),
         },
         /* Печатная база тренажёра: все прототипы, варианты 1–10.
            Собирает scripts/build-pdf-4-baza.mjs (workflow «PDF 4 база»);
@@ -156,7 +161,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: 'Печатная база задания 4',
           lead: 'Все прототипы тренажёра, по десять вариантов, без рисунков — со строкой для ответа',
           icon: 'pdf',
-          file: '/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf',
+          file: assetUrl('/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf'),
         },
       ],
     },
@@ -180,14 +185,14 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
           title: 'Рабочая тетрадь для репетиторов',
           lead: 'Задачи конспекта и прототипы с заготовками рисунков и строкой для ответа',
           icon: 'doc',
-          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf',
+          file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf'),
         },
         {
           id: 'pdf',
           title: 'PDF-практикум',
           lead: 'Те же задания чёрно-белым — для принтера',
           icon: 'pdf',
-          file: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb.pdf',
+          file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik-chb.pdf'),
         },
       ],
     },
@@ -259,7 +264,7 @@ export interface RezhimOpisanie {
 
 /** Режимы — как в референсе, слово в слово; четвёртый — «Узнай метод». */
 export const REZHIMY: readonly RezhimOpisanie[] = [
-  { id: 'practice', title: 'Отработка', lead: 'Один метод' },
+  { id: 'practice', title: 'Отработка', lead: 'Выбранные методы' },
   { id: 'mixed', title: 'Смешанная', lead: 'Все методы вперемешку' },
   { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
   { id: 'uznay', title: 'Узнай метод', lead: 'Только условие: назвать метод' },
@@ -274,8 +279,9 @@ export const KONFIGURATOR_SLOVA: typeof trainerPage = {
   ...trainerPage,
   skill: {
     step: '1',
-    title: 'Выбери метод',
-    lead: 'Какой метод отрабатываем в разделе «{family}»?',
+    title: 'Выбери методы',
+    lead: 'Какие методы отрабатываем в разделе «{family}»? Можно выбрать несколько.',
+    unit: ['метод', 'метода', 'методов'],
   },
   params: {
     ...trainerPage.params,

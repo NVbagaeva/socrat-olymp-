@@ -1,3 +1,5 @@
+import { assetUrl } from '../assetUrl';
+
 /**
  * Лабиринт паука: задача 33 конспекта.
  *
@@ -437,7 +439,7 @@ const RISUNOK_VYSOTA = 688;
 export function chertezhLabirinta(): string {
   const imena = vyhody().join(', ');
   return [
-    '<img src="/images/veroyatnost/labirint-glass.svg"',
+    '<img src="' + assetUrl('/images/veroyatnost/labirint-glass.svg') + '"',
     ` width="${RISUNOK_SHIRINA}" height="${RISUNOK_VYSOTA}"`,
     ` alt="Лабиринт: вход слева, выходы ${imena}, в лабиринте есть тупики"`,
     ' />',

@@ -3,13 +3,18 @@
    Порядок один на всю подтему, сколько бы действий ни требовалось:
 
      одна гипербола                    гипербола и прямая
-     1. Вертикальная асимптота         1. Находим k по точке A
-     2. Горизонтальная асимптота       2. Прямая по двум точкам
-     3. Находим k (или a) по точке     3. Приравниваем: k/x = ax + b
-     4. Формула функции                4. Корни уравнения
-     5. Ответ на вопрос                5. Выбираем корень (не абсцисса A!)
-                                       6. Ордината точки B — если спрашивают
-                                       7. Ответ
+     1. Горизонтальная асимптота —     1. Находим k по точке A
+        сдвиг вверх-вниз               2. Прямая по двум точкам
+     2. Вертикальная асимптота —       3. Приравниваем: k/x = ax + b
+        сдвиг влево-вправо             4. Корни уравнения
+     3. Находим k (или a) по точке     5. Выбираем корень (не абсцисса A!)
+        и записываем формулу           6. Ордината точки B — если спрашивают
+     4. Ответ на вопрос                7. Ответ
+
+   Асимптоты, которой сдвиг не нужен (ось координат), своим шагом нет:
+   об этом одна фраза в соседнем шаге. Номера и названия шагов те же,
+   что у подсказки тренажёра (graph/hints-rational.js): ученик и
+   учитель видят одну цепочку.
 
    Буквы a и b в разных записях значат разное: у k/x + a это сдвиг
    вверх-вниз, у k/(x + a) — влево-вправо, у прямой — наклон и
@@ -63,6 +68,33 @@ function coef(f) {
   if (isInt(f) && f.p === -1) { return '-'; }
   return tex(f);
 }
+
+/** Коэффициент, умноженный на число при подстановке: 1 и −1 не
+ *  пишутся. arg — готовая запись числа (tb). */
+function times(f, arg) {
+  var c = coef(f);
+  if (c === '' || c === '-') { return c + arg; }
+  return tb(f) + ' \\cdot ' + arg;
+}
+
+/** Вычитание произведения k · x: « − 3 · 2». При k = ±1 множитель не
+ *  пишется, а знак сразу сводится: « − 2», « + 2». */
+function minusTimes(f, x) {
+  if (isInt(f) && (f.p === 1 || f.p === -1)) { return term(mul(mul(f, frac(-1)), x)) || ' - 0'; }
+  return ' - ' + tb(f) + ' \\cdot ' + tb(x);
+}
+
+/** « − 4ac» дискриминанта: при a = ±1 множитель не пишется —
+ *  « − 4 · 16», « + 4 · 48». */
+function fourAC(a, c) {
+  if (isInt(a) && a.p === 1) { return ' - 4 \\cdot ' + tb(c); }
+  if (isInt(a) && a.p === -1) { return ' + 4 \\cdot ' + tb(c); }
+  return ' - 4 \\cdot ' + tb(a) + ' \\cdot ' + tb(c);
+}
+
+/** Слагаемое из суммы чисел: как term, но нуль пишется — в строке
+ *  «k + a + b = …» видно, какое из слагаемых нулевое. */
+function termZero(f) { return isZero(f) ? ' + 0' : term(f); }
 
 /** Слагаемое с буквой со знаком: « + 2x», « - x». */
 function termX(f, letter) {
@@ -129,12 +161,7 @@ function shiftWords(v, plus, minus) {
 
 function stepVertical(c, form) {
   var s = c.s;
-  if (form === 'basic' || form === 'shift-y') {
-    return step('vertical', 'Вертикальная асимптота', [
-      text('Ветви разделяет ось ' + m('Oy') + ': вертикальная асимптота ' + m('x = 0') +
-        '. Значит, влево-вправо график не сдвинут — в знаменателе стоит просто ' + m('x') + '.')
-    ]);
-  }
+  if (form === 'basic' || form === 'shift-y') { return null; }
   if (form === 'linear') {
     var b = mul(frac(-1), s);
     return step('vertical', 'Вертикальная асимптота → $b$', [
@@ -148,24 +175,24 @@ function stepVertical(c, form) {
     ]);
   }
   var a = mul(frac(-1), s);
-  return step('vertical', 'Вертикальная асимптота → сдвиг влево-вправо', [
+  var blocks = [
     text('Вертикальная пунктирная прямая — асимптота ' + m('x = ' + tex(s)) +
       '. Знаменатель ' + m('x + a') + ' равен нулю при ' + m('x = -a') + '.'),
     formula('-a = ' + tex(s) + ' \\;\\Rightarrow\\; a = ' + tex(a)),
     text('Внимание на знак: график сдвинут ' + shiftWords(s, 'вправо', 'влево') +
       ', а в знаменателе стоит ' + m('x' + term(a)) + '. При ' + m('a > 0') +
       ' сдвиг влево, при ' + m('a < 0') + ' — вправо.')
-  ]);
+  ];
+  if (form === 'shift-x') {
+    blocks.push(text('Горизонтальная асимптота — ось ' + m('Ox') + ', ' + m('y = 0') +
+      ': вверх-вниз график не сдвинут.'));
+  }
+  return step('vertical', 'Вертикальная асимптота → сдвиг влево-вправо', blocks);
 }
 
 function stepHorizontal(c, form) {
   var t = c.t;
-  if (form === 'basic' || form === 'shift-x') {
-    return step('horizontal', 'Горизонтальная асимптота', [
-      text('Горизонтальная асимптота — ось ' + m('Ox') + ', ' + m('y = 0') +
-        ': вверх-вниз график не сдвинут.')
-    ]);
-  }
+  if (form === 'basic' || form === 'shift-x') { return null; }
   if (form === 'linear') {
     return step('horizontal', 'Целая часть и горизонтальная асимптота → $k$', [
       text('Выделим целую часть:'),
@@ -182,7 +209,9 @@ function stepHorizontal(c, form) {
       '. Слагаемое ' + m(name) + ' в формуле ' + m(FORM_TEX[form]) +
       ' поднимает или опускает весь график, вместе с асимптотой:'),
     formula(name + ' = ' + tex(t)),
-    text('График сдвинут ' + shiftWords(t, 'вверх', 'вниз') + '.')
+    text('График сдвинут ' + shiftWords(t, 'вверх', 'вниз') + '.' +
+      (form === 'shift-y' ? ' Вертикальная асимптота — ось ' + m('Oy') + ', ' + m('x = 0') +
+        ': влево-вправо сдвига нет.' : ''))
   ]);
 }
 
@@ -194,7 +223,8 @@ function stepK(c, form, points) {
     ' лежит на графике — подставим её координаты в формулу.';
   if (form === 'basic') {
     return step('k', 'Находим $k$ по точке', [
-      text(lead + ' Для ' + m('y = \\dfrac{k}{x}') + ' это значит ' + m('k = x \\cdot y') + ':'),
+      text('Асимптоты — оси координат: график не сдвинут ни вверх-вниз, ни влево-вправо. ' +
+        lead + ' Для ' + m('y = \\dfrac{k}{x}') + ' это значит ' + m('k = x \\cdot y') + ':'),
       formula('k = ' + tb(x) + ' \\cdot ' + tb(y) + ' = ' + tex(co.k))
     ]);
   }
@@ -225,31 +255,39 @@ function stepK(c, form, points) {
   var blocks = [
     text(lead + ' Из ' + m('y_0 = \\dfrac{kx_0 + a}{x_0 + b}') + ' получаем ' +
       m('a = y_0(x_0 + b) - k x_0') + ':'),
-    formula('a = ' + tb(y) + ' \\cdot (' + tex(x) + term(co.b) + ') - ' + tb(co.k) + ' \\cdot ' +
-      tb(x) + ' = ' + tex(co.a))
+    formula('a = ' + times(y, '(' + tex(x) + term(co.b) + ')') + minusTimes(co.k, x) +
+      ' = ' + tex(co.a))
   ];
   if (points[1]) {
     var Q = points[1];
     var qx = f0(Q.x), qy = f0(Q.y);
     blocks.push(text('Проверим по второй точке ' + m('(' + tex(qx) + ';\\, ' + tex(qy) + ')') + ':'));
-    blocks.push(formula('\\dfrac{' + tb(co.k) + ' \\cdot ' + tb(qx) + term(co.a) + '}{' + tex(qx) +
+    blocks.push(formula('\\dfrac{' + times(co.k, tb(qx)) + term(co.a) + '}{' + tex(qx) +
       term(co.b) + '} = ' + tex(qy) + ' \\;\\checkmark'));
   }
   return step('k', 'Находим $a$ по точке', blocks);
 }
 
-function stepFormula(c, form) {
+/* Формула функции — итог шага с k (у (kx + a)/(x + b) — с a): все
+   коэффициенты найдены, и подсказка тренажёра показывает её там же. */
+function formulaBlocks(c, form) {
   var blocks = [formula(equationTex(c, form))];
   if (form === 'linear') {
     var co = R.coefficients(c, form);
-    blocks.unshift(text('Подставляем ' + m('k = ' + tex(co.k)) + ', ' + m('a = ' + tex(co.a)) +
-      ', ' + m('b = ' + tex(co.b)) + ':'));
+    blocks.unshift(text('Формула функции: подставляем ' + m('k = ' + tex(co.k)) + ', ' +
+      m('a = ' + tex(co.a)) + ', ' + m('b = ' + tex(co.b)) + ':'));
     blocks.push(text('Та же функция с выделенной целой частью: ' +
       m('f(x) = ' + tex(c.t) + ' + \\dfrac{' + tex(c.m) + '}{x' + term(mul(frac(-1), c.s)) + '}') + '.'));
   } else {
-    blocks.unshift(text('Все коэффициенты найдены:'));
+    blocks.unshift(text('Все коэффициенты найдены, формула функции:'));
   }
-  return step('formula', 'Формула функции', blocks);
+  return blocks;
+}
+
+function stepKWithFormula(c, form, points) {
+  var item = stepK(c, form, points);
+  item.blocks = item.blocks.concat(formulaBlocks(c, form));
+  return item;
 }
 
 /** Значение функции в точке — в записи условия. */
@@ -272,9 +310,12 @@ function valueBlocks(c, form, x0, value) {
   } else if (form === 'shift-xy') {
     expr = '\\dfrac{' + tex(co.k) + '}{' + tex(x0) + term(co.a) + '}' + term(co.b);
   } else {
-    expr = '\\dfrac{' + tb(co.k) + ' \\cdot ' + arg + term(co.a) + '}{' + tex(x0) + term(co.b) + '}';
+    expr = '\\dfrac{' + times(co.k, arg) + term(co.a) + '}{' + tex(x0) + term(co.b) + '}';
   }
-  blocks.push(formula('f\\left(' + tex(x0) + '\\right) = ' + expr + ' = ' + tex(value)));
+  /* Растянутые скобки — только вокруг дроби: у числа \\left( даёт
+     лишний зазор, f (−8). */
+  var call = decimalFriendly(x0) ? 'f(' + tex(x0) + ')' : 'f\\left(' + tex(x0) + '\\right)';
+  blocks.push(formula(call + ' = ' + expr + ' = ' + tex(value)));
   return blocks;
 }
 
@@ -311,7 +352,7 @@ function stepAnswerSingle(c, form, rule, query, answer) {
     blocks = argumentBlocks(c, form, exact(query.y0), answer);
   } else if (rule === 'coef-sum') {
     blocks = [text('Складываем найденные коэффициенты функции ' + m('f') + ':'),
-      formula('k + a + b = ' + tex(co.k) + ' + ' + tb(co.a) + ' + ' + tb(co.b) + ' = ' + tex(answer))];
+      formula('k + a + b = ' + tex(co.k) + termZero(co.a) + termZero(co.b) + ' = ' + tex(answer))];
   } else {
     var name = rule === 'coef-k' ? 'k' : (rule === 'coef-a' ? 'a' : 'b');
     blocks = [text('Спрашивают коэффициент ' + m(name) + ' функции ' + m('f') + ':'),
@@ -328,6 +369,15 @@ function lcm(a, b) {
   var x = a, y = b;
   while (y) { var t = x % y; x = y; y = t; }
   return a / x * b;
+}
+
+/* a = tg α = |Δy|/|Δx| у возрастающей, a = −tg(180° − α) = −|Δy|/|Δx|
+   у убывающей — запись та же, что k в разборе линейной функции. */
+function slopeByTriangle(dy, dx, k) {
+  var ratio = '\\dfrac{' + tex(frac(Math.abs(dy.p), dy.q)) + '}{' + tex(frac(Math.abs(dx.p), dx.q)) + '}';
+  var rising = num(k) > 0;
+  var lead = rising ? 'a = \\operatorname{tg} \\alpha = ' : 'a = -\\operatorname{tg}(180^\\circ - \\alpha) = -';
+  return lead + ratio + ' = ' + tex(k);
 }
 
 function lineSteps(c, task) {
@@ -353,11 +403,12 @@ function lineSteps(c, task) {
   var dy = sub(yP, yA), dx = sub(xP, xA);
   steps.push(step('line', 'Прямая: коэффициенты $a$ и $b$ функции $g$ по двум точкам', [
     text(m('a') + ' и ' + m('b') + ' — коэффициенты прямой ' + m('g(x)') + '. Прямая ' + m('g(x) = ax + b') + ' проходит через ' + m('A(' + tex(xA) + ';\\, ' + tex(yA) + ')') +
-      ' и ' + m('(' + tex(xP) + ';\\, ' + tex(yP) + ')') + '. Угловой коэффициент прямой:'),
-    formula('a = \\dfrac{' + tex(yP) + term(mul(frac(-1), yA)) + '}{' + tex(xP) + term(mul(frac(-1), xA)) +
-      '} = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)),
+      ' и ' + m('(' + tex(xP) + ';\\, ' + tex(yP) + ')') + '. Угловой коэффициент — через ' +
+      'треугольник наклона, как у линейной функции: катеты по клеткам, ' +
+      (num(line.k) > 0 ? 'прямая возрастает:' : 'прямая убывает, поэтому со знаком минус:')),
+    formula(slopeByTriangle(dy, dx, line.k)),
     text('Свободный член прямой — из точки ' + m('A') + ': ' + m('b = y_A - a\\,x_A') + ':'),
-    formula('b = ' + tex(yA) + ' - ' + tb(line.k) + ' \\cdot ' + tb(xA) + ' = ' + tex(line.b)),
+    formula('b = ' + tex(yA) + minusTimes(line.k, xA) + ' = ' + tex(line.b)),
     formula(lineTex(line))
   ]));
 
@@ -395,10 +446,10 @@ function lineSteps(c, task) {
     text('Один корень известен заранее — это абсцисса точки ' + m('A') + ': ' + m('x_A = ' + tex(xA)) +
       '. По теореме Виета произведение корней уравнения ' + m('ax^2 + bx - k = 0') + ' равно ' +
       m('\\dfrac{-k}{a}') + ':'),
-    formula(tex(xA) + ' \\cdot x_B = \\dfrac{' + tex(mul(k, frac(-1))) + '}{' + tex(line.k) +
+    formula(times(xA, 'x_B') + ' = \\dfrac{' + tex(mul(k, frac(-1))) + '}{' + tex(line.k) +
       '} \\;\\Rightarrow\\; x_B = ' + tex(xB)),
     text('Проверка через дискриминант:'),
-    formula('D = ' + tb(qb) + '^2 - 4 \\cdot ' + tb(qa) + ' \\cdot ' + tb(qc) + ' = ' + tex(D) +
+    formula('D = ' + tb(qb) + '^2' + fourAC(qa, qc) + ' = ' + tex(D) +
       ', \\quad \\sqrt{D} = ' + tex(sqrtD)),
     formula('x_{1,2} = \\dfrac{' + tex(mul(qb, frac(-1))) + ' \\pm ' + tex(sqrtD) + '}{' + tex(mul(qa, frac(2))) +
       '}: \\quad x_1 = ' + tex(xA) + ', \\; x_2 = ' + tex(xB))
@@ -414,7 +465,7 @@ function lineSteps(c, task) {
     steps.push(step('ordinate', 'Ордината точки $B$', [
       text('Подставляем ' + m('x_B') + ' в формулу гиперболы:'),
       formula('y_B = f(x_B) = \\dfrac{' + tex(k) + '}{' + tb(xB) + '} = ' + tex(yB)),
-      text('Проверка по прямой: ' + m('g(' + tex(xB) + ') = ' + tb(line.k) + ' \\cdot ' + tb(xB) +
+      text('Проверка по прямой: ' + m('g(' + tex(xB) + ') = ' + times(line.k, tb(xB)) +
         term(line.b) + ' = ' + tex(add(mul(line.k, xB), line.b))) + '.')
     ]));
   }
@@ -438,8 +489,10 @@ function fromTask(task) {
   } else {
     var marks = meta.points.filter(function (p) { return p.role === 'mark'; });
     var answer = exact(meta.answer);
-    steps = [stepVertical(c, meta.form), stepHorizontal(c, meta.form), stepK(c, meta.form, marks),
-      stepFormula(c, meta.form), stepAnswerSingle(c, meta.form, meta.rule, meta.query, answer)];
+    steps = [stepHorizontal(c, meta.form), stepVertical(c, meta.form),
+      stepKWithFormula(c, meta.form, marks),
+      stepAnswerSingle(c, meta.form, meta.rule, meta.query, answer)]
+      .filter(function (item) { return item !== null; });
   }
   return steps.map(function (item, index) {
     return { number: index + 1, id: item.id, title: item.title, arrow: null, blocks: item.blocks };

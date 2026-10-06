@@ -4,6 +4,7 @@ import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerResult } from '@/content/trainerModes';
 import { KindName } from './KindName';
 
+import { assetUrl } from '@/lib/assetUrl';
 /** Чем закончилось задание: решено само или пройдено по подсказке. */
 export type TrainerMark = 'right' | 'hinted';
 
@@ -93,7 +94,7 @@ export function TrainerResult({
           как два ряда текста. */}
       <Image
         className="tdone__cup"
-        src="/images/trophy-glass.webp"
+        src={assetUrl('/images/trophy-glass.webp')}
         alt={trainerResult.trophyAlt}
         width={1147}
         height={1201}

@@ -12,6 +12,10 @@
         текст страниц вне формул, чертежей и служебных тегов. Ловит то,
         что собралось из кусков и в исходниках по одной строке не видно.
 
+   На собранном сайте ищется и обратное — сырой TeX: формула, которую
+   KaTeX не набрал и которая видна как есть («$\vec{b}$», «0{,}6»,
+   «**жирный**»). Исключений у этого правила нет.
+
    Падает с кодом 1 и списком «файл:строка — признак — текст».
 
    Исключения — явные списки ниже, у каждого причина. Точечное
@@ -27,7 +31,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { codeTexts, jsonTexts, sourceFiles } from './lib/math-source.mjs';
-import { findPlainMath, stripDollarMath, visibleTexts } from './lib/math-markup.mjs';
+import { findPlainMath, findRawTex, stripDollarMath, visibleTexts } from './lib/math-markup.mjs';
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(app, 'src');
@@ -45,6 +49,7 @@ const SKIP_FILES = [
   { re: /answers\.json$/, why: 'ключи ответов, не текст' },
   { re: /^lib\/solid\/catalog\.ts$/, why: 'подписи каталога тел — только для /styleguide/' },
   { re: /^lib\/scenes\.ts$/, why: 'подписи внутри SVG-чертежей: KaTeX в <text> не встраивается' },
+  { re: /^lib\/vektory\/(?:render|obraztsy)\.ts$/, why: 'движок рисунков №2: подписи внутри SVG и образцы витрины' },
   { re: /^lib\/veroyatnost\/illyustratsii\.ts$/, why: 'alt картинок: атрибут, только обычный текст' },
 ];
 
@@ -120,6 +125,12 @@ function checkSite() {
   for (const file of files) {
     const html = fs.readFileSync(file, 'utf8');
     for (const text of visibleTexts(html)) {
+      const raw = findRawTex(text);
+      if (raw.length > 0) {
+        problems.push(`${path.relative(app, file)}:${lineOf(html, raw[0].match)} — сырой TeX: ` +
+          `${[...new Set(raw.map((h) => h.match))].join(' ')} — «${short(text)}»`);
+        continue;
+      }
       if (SITE_TEXT_OK.some((item) => item.re.test(text))) { continue; }
       const hits = findPlainMath(text)
         .filter((hit) => !SITE_HIT_OK.some((ok) => ok.rule === hit.rule && ok.re.test(hit.match)));

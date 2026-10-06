@@ -13,8 +13,12 @@
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
+import RationalHints from '@/lib/graph/hints-rational.js';
+import QuadraticHints from '@/lib/graph/hints-quadratic.js';
+import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import { quadraticSteps as quadraticSolution, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import { methodFor } from '@/lib/trainerMethod';
 
 /* Наборы движку передаются один раз на модуль: дальше он берёт их
@@ -79,6 +83,22 @@ export interface TrainerField {
   answer: string;
 }
 
+/** Вариант ответа на вопрос шага — кнопка. */
+export interface TrainerChoice {
+  html: string;
+  right: boolean;
+  /** Почему вариант неверен. У верного — пусто. */
+  whyHtml: string;
+}
+
+/** Вопрос шага с вариантами ответа кнопками. */
+export interface TrainerQuestion {
+  promptHtml: string;
+  options: TrainerChoice[];
+  /** Вывод после верного ответа. */
+  rightHtml: string;
+}
+
 export interface TrainerStep {
   /** Заголовок шага. Буквы в нём набраны формулами. */
   titleHtml: string;
@@ -92,7 +112,66 @@ export interface TrainerStep {
   fields: TrainerField[];
   /** Что проверить, если на шаге ошибка. Значения не выдаёт. */
   wrongHint: string;
+  /**
+   * Вопросы с вариантами ответа (гипербола). Есть — шаг проходится
+   * кнопками по очереди, полей у него нет.
+   */
+  questions?: TrainerQuestion[];
+  /** Напоминание правила: видно на шаге всегда. */
+  reminderHtml?: string;
+  /** Напоминание выделено — правило, на котором чаще всего ошибаются. */
+  reminderStrong?: boolean;
+  /** Что показать после верно заполненных полей: подстановка и вычисление. */
+  afterHtml?: string;
+  /**
+   * Другие верные наборы значений полей — например, координаты другой
+   * отмеченной точки. Поля проверяются по fields или по любому набору.
+   */
+  variants?: string[][];
+  /** Какую асимптоту подсветить на рисунке, пока открыт шаг. */
+  focus?: 'horizontal' | 'vertical' | null;
+  /**
+   * Шаг из частей по очереди (парабола): вопрос с кнопками или поля.
+   * Есть — шаг проходится по ним, questions и fields шага не нужны.
+   */
+  parts?: TrainerPart[];
+  /**
+   * Свой чертёж шага: вспомогательная система координат или точки и
+   * ось симметрии. Показывается вместо чертежа задачи, пока шаг
+   * открыт, начиная с части chartFrom.
+   */
+  chartSvg?: string;
+  chartFrom?: number;
 }
+
+/** Часть шага: вопрос с вариантами ответа кнопками. */
+export interface TrainerChoicePart {
+  kind: 'choice';
+  promptHtml: string;
+  options: TrainerChoice[];
+  rightHtml: string;
+}
+
+/** Часть шага: поля ввода. */
+export interface TrainerFieldsPart {
+  kind: 'fields';
+  textHtml: string;
+  fields: TrainerField[];
+  /** Другие верные наборы значений полей. */
+  variants?: string[][];
+  /**
+   * Значения первых полей, на которые нужно отдельное предупреждение:
+   * например, точка, подстановка которой даёт тождество.
+   */
+  traps?: { values: string[]; whyHtml: string }[];
+  /** Пояснение, если число в поле field введено с неверным знаком. */
+  sign?: { field: number; whyHtml: string };
+  wrongHint: string;
+  /** Что показать после верного ответа: подстановка и вычисление. */
+  afterHtml?: string;
+}
+
+export type TrainerPart = TrainerChoicePart | TrainerFieldsPart;
 
 interface EngineQuery {
   x0: number;
@@ -192,7 +271,10 @@ function closingSpan(html: string, from: number): number {
   return -1;
 }
 
-function typeset(html: string): string {
+/* bigFractions — дроби \\dfrac остаются крупными (напоминание правила
+   в подсказке гиперболы: строчная дробь там не читается). */
+function typeset(html: string, bigFractions = false): string {
+  const options = bigFractions ? ({ ...KATEX, displayFrac: true } as typeof KATEX) : KATEX;
   let rest = html;
   let out = '';
 
@@ -208,7 +290,7 @@ function typeset(html: string): string {
     }
     const before = rest.slice(0, open.index);
     rest = rest.slice(close + '</span>'.length);
-    const formula = katex.renderToString(unescapeTex(open[1] ?? ''), KATEX);
+    const formula = katex.renderToString(unescapeTex(open[1] ?? ''), options);
     /* Знак препинания после формулы уезжал на новую строку один.
        Формула и знак идут вместе, одним неразрывным куском. */
     const mark = /^[.,;:!?)]/.exec(rest);
@@ -268,14 +350,22 @@ function rightHintFor(task: EngineTask): string {
 
   if (set === '12.A' && query !== null) {
     const value = k * query.x0 + b;
-    /* Отрицательная абсцисса подставляется в скобках: иначе два знака
-       подряд читаются как вычитание. */
+    /* Отрицательная абсцисса в выражении берётся в скобки: иначе два
+       знака подряд читаются как вычитание. В скобках самой функции —
+       без вторых: f(−4), а не f((−4)). Умножение на 1 и −1 не пишется,
+       отрицательный коэффициент — в скобках. */
     const factor = query.x0 < 0 ? '(' + tex(query.x0) + ')' : tex(query.x0);
+    const product =
+      Math.abs(k - 1) < 1e-9
+        ? factor
+        : Math.abs(k + 1) < 1e-9
+          ? '-' + factor
+          : (k < 0 ? '(' + tex(k) + ')' : tex(k)) + ' \\cdot ' + factor;
     const tail = Math.abs(b) < 1e-9 ? '' : (b > 0 ? ' + ' : ' - ') + tex(Math.abs(b));
     return (
       found +
       'Тогда ' +
-      math('f(' + factor + ') = ' + tex(k) + ' \\cdot ' + factor + tail + ' = ' + tex(value)) +
+      math('f(' + tex(query.x0) + ') = ' + product + tail + ' = ' + tex(value)) +
       '.'
     );
   }
@@ -501,8 +591,8 @@ function bySubstitution(
         '$' +
         texNum(point.y) +
         ' = ' +
-        texNum(k) +
-        ' \\cdot ' +
+        /* Умножение на 1 и −1 не пишется. */
+        (Math.abs(k - 1) < 1e-9 ? '' : Math.abs(k + 1) < 1e-9 ? '-' : texNum(k) + ' \\cdot ') +
         texFactor(point.x) +
         ' + b$<br>' +
         '$' +
@@ -717,12 +807,12 @@ function stepsFor(task: EngineTask): TrainerStep[] {
 
 /* ── Цепочка для гиперболы ───────────────────────────────────────
 
-   Порядок — тот, в котором ошибка вероятнее всего: сначала знак
-   сдвига по вертикальной асимптоте, потом горизонтальная асимптота,
-   потом k по точке, у (kx + a)/(x + b) — a через точку, у задач с
-   прямой — прямая по двум точкам, уравнение, корни и выбор корня.
-   Каждый шаг говорит, к какой функции относится коэффициент:
-   буквы a и b в разных записях значат разное. */
+   Шаги строит graph/hints-rational.js: вопросы с вариантами ответа
+   кнопками о сдвигах (вверх-вниз, влево-вправо и знак в знаменателе),
+   затем k по отмеченной точке, у задач с прямой — прямая через
+   треугольник, уравнение, корни и выбор корня. Номера и названия
+   шагов — те же, что в полном решении листа учителя. Здесь шаги
+   только набираются KaTeX. */
 
 interface Exact {
   p: number;
@@ -755,201 +845,181 @@ function rtex(e: Exact): string {
   return (e.p < 0 ? '-' : '') + '\\dfrac{' + Math.abs(e.p) + '}{' + e.q + '}';
 }
 
-function field(label: string, value: number): TrainerField {
-  return { labelHtml: math(label), answer: plain(value) };
+/* Шаг подсказки из graph/hints-rational.js: тексты с формулами в $…$,
+   номер и название — из полного решения. */
+interface RationalHint {
+  title: string;
+  kind: 'questions' | 'fields';
+  focus?: 'horizontal' | 'vertical' | null;
+  reminder?: string | null;
+  strong?: boolean;
+  questions?: {
+    prompt: string;
+    options: { text: string; right: boolean; why: string | null }[];
+    right: string;
+  }[];
+  text?: string;
+  fields?: { label: string; answer: string }[];
+  variants?: string[][] | null;
+  wrong?: string;
+  after?: string[];
 }
 
-function rationalStep(title: string, text: string, fields: TrainerField[], wrong: string): TrainerStep {
-  return {
-    titleHtml: hintHtml(title),
-    textHtml: hintHtml(text),
-    shape: 'plain',
-    fields,
-    wrongHint: hintHtml(wrong),
-  };
-}
-
-/** Знак в формуле: «x - 3» при a = −3, «x + 2» при a = 2. */
-function signedTex(v: number): string {
-  if (Math.abs(v) < 1e-9) { return ''; }
-  return (v > 0 ? ' + ' : ' - ') + tex(Math.abs(v));
-}
-
-function rationalSingleSteps(meta: RationalMeta): TrainerStep[] {
-  const { form, rule } = meta;
-  const s = val(meta.s);
-  const t = val(meta.t);
-  const co = Object.fromEntries(Object.entries(meta.coefficients).map(([n, e]) => [n, val(e)]));
-  const mark = meta.points.find((p) => p.role === 'mark') ?? { x: 0, y: 0 };
-  const dot = '$(' + tex(mark.x) + '; ' + tex(mark.y) + ')$';
-  const steps: TrainerStep[] = [];
-
-  /* 1. Вертикальная асимптота: сдвиг влево-вправо и его знак. */
-  if (form === 'shift-x' || form === 'shift-xy') {
-    steps.push(rationalStep(
-      'Давай проверим, как ты нашёл(ла) вертикальную асимптоту и сдвиг влево-вправо.',
-      'Вертикальная пунктирная прямая — асимптота $x = ' + tex(s) + '$. Знаменатель $x + a$ ' +
-        'обращается в ноль при $x = -a$. Внимание на знак: сдвиг вправо даёт $a < 0$, ' +
-        'сдвиг влево — $a > 0$. Чему равно $a$ функции $f$?',
-      [field('a =', co.a ?? 0)],
-      'Асимптота $x = 3$ значит знаменатель $x - 3$, то есть $a = -3$. Знак $a$ противоположен ' +
-        'координате асимптоты.',
-    ));
-  }
-  if (form === 'linear') {
-    steps.push(rationalStep(
-      'Давай проверим, как ты нашёл(ла) вертикальную асимптоту.',
-      'Вертикальная асимптота $x = ' + tex(s) + '$ — там знаменатель $x + b$ равен нулю, ' +
-        'то есть $x = -b$. Чему равно $b$ функции $f$?',
-      [field('b =', co.b ?? 0)],
-      'Знак $b$ противоположен координате вертикальной асимптоты: $x = -b$.',
-    ));
-  }
-
-  /* 2. Горизонтальная асимптота: сдвиг вверх-вниз или k целой части. */
-  if (form === 'shift-y' || form === 'shift-xy') {
-    const name = form === 'shift-y' ? 'a' : 'b';
-    steps.push(rationalStep(
-      (steps.length === 0 ? 'Давай проверим, как ты нашёл(ла)' : 'Теперь проверим') +
-        ' горизонтальную асимптоту — сдвиг вверх-вниз.',
-      'Горизонтальная пунктирная прямая — асимптота $y = ' + name + '$. Слагаемое $' + name +
-        '$ поднимает или опускает весь график. Чему равно $' + name + '$ функции $f$?',
-      [field(name + ' =', form === 'shift-y' ? co.a ?? 0 : co.b ?? 0)],
-      'Посмотри, на какой высоте проходит горизонтальный пунктир: это и есть сдвиг, знак тот же.',
-    ));
-  }
-  if (form === 'linear') {
-    steps.push(rationalStep(
-      'Теперь выделим целую часть и проверим $k$.',
-      '$\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$, поэтому горизонтальная асимптота — ' +
-        '$y = k$. Чему равно $k$?',
-      [field('k =', co.k ?? 0)],
-      '$k$ — высота горизонтальной асимптоты, знак тот же.',
-    ));
-  }
-
-  /* 3. k по точке (у записи (kx + a)/(x + b) — a по точке). */
-  if (form === 'linear') {
-    steps.push(rationalStep(
-      'Проверим, как ты нашёл(ла) $a$.',
-      'Подставь отмеченную точку ' + dot + ' в $y_0 = \\dfrac{kx_0 + a}{x_0 + b}$: ' +
-        '$a = y_0(x_0 + b) - k x_0$.',
-      [field('a =', co.a ?? 0)],
-      'Подставь именно координаты отмеченной точки и проверь знаки при раскрытии скобок.',
-    ));
-  } else {
-    const formula = form === 'basic' ? 'k = x \\cdot y'
-      : form === 'shift-y' ? 'k = (y - a) \\cdot x'
-      : form === 'shift-x' ? 'k = y \\cdot (x + a)'
-      : 'k = (y - b) \\cdot (x + a)';
-    steps.push(rationalStep(
-      'Давай проверим, как ты нашёл(ла) $k$.',
-      'Подставь координаты отмеченной точки ' + dot + ' в формулу: $' + formula + '$' +
-        (form === 'basic' ? '.' : ' (сдвиги ты уже нашёл(ла)).'),
-      [field('k =', co.k ?? 0)],
-      'Проверь, ту ли точку взял(а) — она должна быть отмечена на графике, — и знаки в скобках.',
-    ));
-  }
-
-  /* 4. Итог. Вопрос о коэффициенте, найденном раньше, цепочку и заканчивает. */
-  const asked = { 'coef-k': 'k', 'coef-a': 'a', 'coef-b': 'b' }[rule];
-  if (asked !== undefined) {
-    const idx = steps.findIndex((step) => step.fields.some((f) => f.labelHtml === math(asked + ' =')));
-    return idx === -1 ? steps : steps.slice(0, idx + 1);
-  }
-  if (rule === 'coef-sum') {
-    steps.push(rationalStep('Сложи найденные коэффициенты.', '$k + a + b$.',
-      [field('k + a + b =', val(meta.answer))], 'Проверь знаки слагаемых.'));
-    return steps;
-  }
-  const q = meta.query;
-  if (q !== null && q.type === 'value-at' && q.x0 !== null) {
-    steps.push(rationalStep(
-      'Итоговое вычисление: подставь $x = ' + rtex(q.x0) + '$ в формулу.',
-      'Смешанную дробь удобнее перевести в неправильную. Функция: $f(x) = ' +
-        rtex(meta.t) + ' + \\dfrac{' + rtex(meta.m) + '}{x' + signedTex(-s) + '}$.',
-      [field('f(' + rtex(q.x0) + ') =', val(meta.answer))],
-      'Сначала посчитай знаменатель, потом дробь, потом прибавь сдвиг.',
-    ));
-  }
-  if (q !== null && q.type === 'argument-for' && q.y0 !== null) {
-    steps.push(rationalStep(
-      'Итоговое вычисление: реши уравнение $f(x) = ' + rtex(q.y0) + '$.',
-      'Перенеси сдвиг: $\\dfrac{' + rtex(meta.m) + '}{x' + signedTex(-s) + '} = ' + rtex(q.y0) +
-        signedTex(-t) + '$, затем найди знаменатель и $x$.',
-      [field('x =', val(meta.answer))],
-      'Проверь, что вычел(ла) сдвиг до того, как перевернуть дробь.',
-    ));
-  }
-  return steps;
-}
-
-function rationalLineSteps(meta: RationalMeta): TrainerStep[] {
-  const cross = meta.intersection;
-  const line = meta.line;
-  if (cross === null || line === null) { return []; }
-  const A = cross.A;
-  const P = meta.points.find((p) => p.role === 'line') ?? A;
-  const k = val(meta.m);
-  const a = val(line.k);
-  const b = val(line.b);
-  const xB = val(cross.B.x);
-  const yB = val(cross.B.y);
-  const steps: TrainerStep[] = [];
-  const lineOnly = meta.rule === 'line-a' || meta.rule === 'line-b';
-
-  if (!lineOnly) {
-    steps.push(rationalStep(
-      'Давай проверим, как ты нашёл(ла) $k$ — коэффициент гиперболы $f(x)$.',
-      'Точка $A(' + tex(A.x) + '; ' + tex(A.y) + ')$ лежит на графике $f(x) = \\dfrac{k}{x}$, ' +
-        'значит $k = x_A \\cdot y_A$.',
-      [field('k =', k)],
-      'Перемножь координаты точки $A$, следи за знаками.',
-    ));
-  }
-  steps.push(rationalStep(
-    'Проверим угловой коэффициент прямой $g(x)$.',
-    '$a$ и $b$ — коэффициенты прямой $g(x) = ax + b$. Она проходит через $A(' + tex(A.x) + '; ' +
-      tex(A.y) + ')$ и $(' + tex(P.x) + '; ' + tex(P.y) + ')$: $a = \\dfrac{\\Delta y}{\\Delta x}$.',
-    [field('a =', a)],
-    'Считай $\\Delta y$ и $\\Delta x$ от одной и той же точки к другой, в одном порядке.',
-  ));
-  if (meta.rule === 'line-a') { return steps; }
-  steps.push(rationalStep(
-    'Теперь свободный член прямой $g(x)$.',
-    'Подставь точку $A$: $b = y_A - a \\cdot x_A$.',
-    [field('b =', b)],
-    'Проверь знак произведения $a \\cdot x_A$.',
-  ));
-  if (meta.rule === 'line-b') { return steps; }
-  steps.push(rationalStep(
-    'Приравняй функции: $\\dfrac{k}{x} = ax + b$.',
-    'Домножь на $x$ и перенеси всё в одну часть: получится $ax^2 + bx - k = 0$. ' +
-      'Запиши коэффициенты этого уравнения.',
-    [field('\\text{при } x^2:', a), field('\\text{при } x:', b), field('\\text{свободный член:}', -k)],
-    'Свободный член — это $-k$: при переносе $k$ меняет знак.',
-  ));
-  steps.push(rationalStep(
-    'Найди корни и выбери нужный.',
-    'Один корень известен — это абсцисса $A$: $x = ' + tex(A.x) + '$. Второй — по теореме Виета: ' +
-      '$x_A \\cdot x_B = \\dfrac{-k}{a}$. Нужен корень, который не равен абсциссе $A$.',
-    [field('x_B =', xB)],
-    'Не бери абсциссу точки $A$ — она на рисунке. Точке $B$ соответствует другой корень.',
-  ));
-  if (cross.axis === 'y') {
-    steps.push(rationalStep(
-      'Итоговое вычисление: ордината точки $B$.',
-      'Подставь $x_B$ в формулу гиперболы: $y_B = \\dfrac{k}{x_B}$. Проверь себя по прямой.',
-      [field('y_B =', yB)],
-      'Подставляй найденный $x_B$, а не абсциссу $A$.',
-    ));
-  }
-  return steps;
+/* Подстановка и вычисление после верного шага — формулы полного
+   решения, по одной в строку, с крупными дробями. */
+function afterHtml(lines: string[]): string {
+  return lines
+    .map((line) => '<span class="tstep__line">' +
+      katex.renderToString(line, { ...KATEX, displayFrac: true } as typeof KATEX) + '</span>')
+    .join('');
 }
 
 function rationalSteps(task: EngineTask): TrainerStep[] {
-  const meta = task.meta as unknown as RationalMeta;
-  return meta.form === 'line' ? rationalLineSteps(meta) : rationalSingleSteps(meta);
+  const hints = RationalHints.fromTask(task) as RationalHint[];
+  /* Дроби в подсказке крупные: \\dfrac{k}{x - 3} строчной дробью на
+     телефоне не читается. */
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: hint.text === undefined ? '' : big(hint.text),
+      shape: 'plain',
+      fields: (hint.fields ?? []).map((field) => ({ labelHtml: math(field.label), answer: field.answer })),
+      wrongHint: hint.wrong === undefined ? '' : big(hint.wrong),
+      focus: hint.focus ?? null,
+    };
+    if (hint.reminder) {
+      step.reminderHtml = big(hint.reminder);
+      step.reminderStrong = hint.strong === true;
+    }
+    if (hint.questions) {
+      step.questions = hint.questions.map((question) => ({
+        promptHtml: big(question.prompt),
+        options: question.options.map((option) => ({
+          html: big(option.text),
+          right: option.right,
+          whyHtml: option.why === null ? '' : big(option.why),
+        })),
+        rightHtml: big(question.right),
+      }));
+    }
+    if (hint.variants) {
+      step.variants = hint.variants;
+    }
+    if (hint.after && hint.after.length > 0) {
+      step.afterHtml = afterHtml(hint.after);
+    }
+    return step;
+  });
+}
+
+/* ── Цепочка для параболы ────────────────────────────────────────
+
+   Шаги строит graph/hints-quadratic.js в порядке полного решения:
+   ветви → вершина в узле? → a во вспомогательной системе координат
+   (или ось симметрии по двум точкам) → c → b → формула → ответ.
+   Здесь шаги набираются KaTeX и получают свой чертёж: оси x′Oy′ от
+   вершины или точки с осью симметрии. На чертеже задачи их нет. */
+
+interface QuadraticHintPart {
+  kind: 'choice' | 'fields';
+  prompt?: string;
+  options?: { text: string; right: boolean; why: string | null }[];
+  right?: string;
+  text?: string;
+  fields?: { label: string; answer: string }[];
+  variants?: string[][] | null;
+  traps?: { values: string[]; why: string }[] | null;
+  sign?: { field: number; why: string } | null;
+  wrong?: string;
+  after?: string[] | null;
+}
+
+interface QuadraticHint {
+  title: string;
+  reminder: string | null;
+  chart: 'aux' | 'symmetry' | null;
+  chartFrom: number;
+  parts: QuadraticHintPart[];
+}
+
+interface QuadraticFacts {
+  point?: { x: number; y: number } | null;
+  pair?: { x: number; y: number }[];
+  x0?: { p: number; q: number };
+}
+
+function quadraticSteps(task: EngineTask): TrainerStep[] {
+  const hints = QuadraticHints.fromTask(task) as unknown as QuadraticHint[];
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const solution = (GraphSolutionQuadratic as unknown as {
+    fromTask: (source: unknown) => { id: string; facts: QuadraticFacts }[];
+  }).fromTask(task);
+  const facts = (id: string): QuadraticFacts => solution.find((step) => step.id === id)?.facts ?? {};
+  const meta = task.meta as unknown;
+
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      parts: hint.parts.map((part): TrainerPart => {
+        if (part.kind === 'choice') {
+          return {
+            kind: 'choice',
+            promptHtml: big(part.prompt ?? ''),
+            options: (part.options ?? []).map((option) => ({
+              html: big(option.text),
+              right: option.right,
+              whyHtml: option.why === null ? '' : big(option.why),
+            })),
+            rightHtml: big(part.right ?? ''),
+          };
+        }
+        const out: TrainerFieldsPart = {
+          kind: 'fields',
+          textHtml: big(part.text ?? ''),
+          fields: (part.fields ?? []).map((field) => ({ labelHtml: math(field.label), answer: field.answer })),
+          wrongHint: big(part.wrong ?? ''),
+        };
+        if (part.variants) { out.variants = part.variants; }
+        if (part.traps) { out.traps = part.traps.map((trap) => ({ values: trap.values, whyHtml: big(trap.why) })); }
+        if (part.sign) { out.sign = { field: part.sign.field, whyHtml: big(part.sign.why) }; }
+        if (part.after && part.after.length > 0) { out.afterHtml = afterHtml(part.after); }
+        return out;
+      }),
+    };
+    if (hint.reminder) {
+      step.reminderHtml = big(hint.reminder);
+    }
+    if (hint.chart === 'aux') {
+      const svg = QuadraticAux.auxSvg(meta, facts('slope').point ?? null) as string | null;
+      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+    } else if (hint.chart === 'symmetry') {
+      const f = facts('slope');
+      const x0 = f.x0 ? f.x0.p / f.x0.q : 0;
+      const svg = QuadraticAux.symmetrySvg(meta, f.pair ?? [], x0) as string | null;
+      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+    }
+    return step;
+  });
+}
+
+/* Асимптоты на чертеже — пунктиры цвета --graph-asymptote. Шагу о
+   сдвиге нужно подсветить свою, поэтому каждая получает класс по
+   направлению: вертикальная — chart-asym--v, горизонтальная — --h.
+   Подписей не добавляется: значение ученик определяет сам. */
+function markAsymptotes(svg: string): string {
+  return svg.replace(
+    /<path d="M([\d.]+) ([\d.]+)L([\d.]+) ([\d.]+)"([^>]*stroke="var\(--graph-asymptote)/g,
+    (whole, x1: string, y1: string, x2: string, y2: string, rest: string) => {
+      const dir = x1 === x2 ? 'v' : y1 === y2 ? 'h' : null;
+      return dir === null ? whole
+        : `<path class="chart-asym chart-asym--${dir}" d="M${x1} ${y1}L${x2} ${y2}"${rest}`;
+    },
+  );
 }
 
 /** Что проверить при неверном ответе: начало цепочки, без значения. */
@@ -1002,7 +1072,7 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
       id: task.id,
       kind: task.meta.set,
       questionHtml: typeset(task.questionHtml),
-      chartSvg: task.svg,
+      chartSvg: task.svg === null ? null : markAsymptotes(task.svg),
       answer: task.answer,
       wrongHint: rationalWrongHint(task),
       rightHint: rationalRightHint(task),
@@ -1021,12 +1091,12 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     answer: task.answer,
     wrongHint: quadratic ? '' : hintHtml(wrongHintFor(task) ?? ''),
     rightHint: quadratic ? '' : rightHintFor(task),
-    steps: quadratic ? [] : stepsFor(task),
+    steps: quadratic ? quadraticSteps(task) : stepsFor(task),
     options: task.options == null ? null
       : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
     oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
       option.error === null ? [] : [[option.number, hintHtml(option.error)]])),
-    solution: quadratic ? quadraticSteps(task) : null,
+    solution: quadratic ? quadraticSolution(task) : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };
 }

@@ -9,7 +9,8 @@
  * к делу на любой ширине.
  *
  * Шапку темы мы не прячем и не делаем липкой — она возвращена
- * намеренно. Двигается только видимая область.
+ * намеренно. Двигается только видимая область. Липкая лента вкладок
+ * раздела (useStickyTabs) закрывает верх экрана — узел встаёт под ней.
  */
 
 /** Куда прокрутить после перехода: селектор нужного заголовка. */
@@ -51,15 +52,7 @@ const CHECK_MS = 350;
 
 /* Признаки того, что человек взялся за прокрутку сам. Клавиши берём
    только прокручивающие: набор ответа в поле прокруткой не считается. */
-const SCROLL_KEYS = new Set([
-  'ArrowUp',
-  'ArrowDown',
-  'PageUp',
-  'PageDown',
-  'Home',
-  'End',
-  ' ',
-]);
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
 
 function inView(node: Element): boolean {
   const box = node.getBoundingClientRect();
@@ -82,7 +75,10 @@ export function scrollTabTo(selector: string, gap = 12): void {
     return;
   }
 
-  const top = () => node.getBoundingClientRect().top + window.scrollY - gap;
+  /* Высота прилипшей ленты вкладок: её пишет useStickyTabs. */
+  const sticky = () =>
+    parseFloat(getComputedStyle(node).getPropertyValue('--topic-sticky-top')) || 0;
+  const top = () => node.getBoundingClientRect().top + window.scrollY - gap - sticky();
   const smooth = behavior() === 'smooth';
   window.scrollTo({ top: top(), behavior: smooth ? 'smooth' : 'auto' });
 

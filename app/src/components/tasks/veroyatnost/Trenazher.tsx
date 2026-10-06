@@ -121,7 +121,7 @@ export function Trenazher({
     }
   });
 
-  function istochnik(rezhim: Rezhim, metod: string): RoundKind[] {
+  function istochnik(rezhim: Rezhim, metody: string[]): RoundKind[] {
     switch (rezhim) {
       case 'mistakes':
         return oshibochnye;
@@ -132,14 +132,14 @@ export function Trenazher({
         }));
       default:
         return pool.kinds
-          .filter((kind) => rezhim === 'mixed' || navykKind(kind) === metod)
+          .filter((kind) => rezhim === 'mixed' || metody.includes(navykKind(kind)))
           .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
     }
   }
 
   function start(request: TrainerRequest<Rezhim>) {
     const metod = request.skill.id;
-    const source = istochnik(request.mode, metod);
+    const source = istochnik(request.mode, request.skills.map((item) => item.id));
     if (source.length === 0) {
       return;
     }

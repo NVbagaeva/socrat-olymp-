@@ -29,19 +29,6 @@
   white-space: nowrap;
 }
 
-/* Формула на карточке блока подготовки: там, где у №12 чертёж. */
-.z8-card-formula {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 64px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  color: var(--color-text);
-  font-size: var(--fs-body);
-}
-
 /* Разбор: рамка с шагами, как у плашки подсказки. */
 .z8-razbor {
   margin-top: var(--space-4);

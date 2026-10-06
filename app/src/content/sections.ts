@@ -15,6 +15,7 @@ import { findManifestFamily } from '@/lib/generator/manifest';
 import { prepSkillsFor } from './prepSkills';
 import { taskName } from './tasks';
 
+import { assetUrl } from '@/lib/assetUrl';
 export type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 
 export type SubtopicStatus = 'active' | 'soon';
@@ -208,7 +209,7 @@ export const sections: ExamSection[] = [
              Здесь стоит файл для ученика, а не для учителя: меню
              открыто всем, кто зашёл на страницу темы, и ответы
              из него скачивались бы заодно. */
-          file: '/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf',
+          file: assetUrl('/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf'),
         },
       ],
     },

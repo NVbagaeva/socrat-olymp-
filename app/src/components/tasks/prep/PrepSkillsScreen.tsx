@@ -8,6 +8,7 @@ import { TaskCountIcon } from './PrepIcons';
 import { Tex } from '@/components/ui/Tex';
 import { texPlain } from '@/lib/tex';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface PrepSkillItem {
   id: PrepSkillId;
   no: string;
@@ -18,8 +19,6 @@ export interface PrepSkillItem {
   href: string;
   /** Миниатюра чертежа: её собирает движок на сервере. */
   chart: ReactNode;
-  /** Формула рядом с чертежом, набранная KaTeX. Есть не у всех. */
-  formula: ReactNode;
 }
 
 export interface PrepSkillsScreenProps {
@@ -50,7 +49,6 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
               <span className="prep-card__text">
                 <Tex className="prep-card__title" text={item.title} />
                 <Tex className="prep-card__lead" text={item.lead} />
-                {item.formula}
               </span>
               {/* Чертёж занимает две строки сетки — свою и строку
                   со счётчиком: иначе он один растягивал верхний ряд
@@ -76,7 +74,7 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
             текстом рядом. Фон у файла прозрачный. */}
         <Image
           className="prep-quote__art"
-          src="/images/bust-aristotle-glass.webp"
+          src={assetUrl('/images/bust-aristotle-glass.webp')}
           alt=""
           width={1027}
           height={1505}

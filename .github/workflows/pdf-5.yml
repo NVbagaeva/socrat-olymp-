@@ -43,7 +43,7 @@ concurrency:
 jobs:
   build:
     name: Сборка PDF
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Забрать репозиторий
@@ -135,7 +135,7 @@ jobs:
       # Папка pdf-private намеренно без точки в начале: скрытые
       # файлы upload-artifact по умолчанию пропускает.
       - name: Отдать файлы архивом
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zadanie-5-pdf
           path: |

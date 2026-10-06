@@ -52,8 +52,6 @@ export interface PrepBlock {
   no: string;
   nazvanie: string;
   lead: string;
-  /** Формула на карточке блока, TeX. */
-  formula: string;
   /** Плашка «Запомни!»: формулы блока, TeX. */
   formuly: string[];
   zadachi: PrepMicro[];

@@ -177,3 +177,33 @@ export function visibleTexts(html) {
   return out.map((text) => text.replace(/⟨формула⟩/g, ' ').replace(/\s+/g, ' ').trim())
     .filter(Boolean);
 }
+
+/* ── Сырой TeX в видимом тексте ────────────────────────────────
+   Формула, которую KaTeX не набрал, видна читателю как есть:
+   «от конца $\vec{b}$», «0{,}6», «**жирный**». Признаки ниже ищутся
+   в тексте, уже очищенном от набранных формул (visibleTexts), и в
+   тексте PDF и листов печати. Любое срабатывание — ошибка: в видимом
+   тексте ни знака доллара, ни команды TeX, ни разметки выделения
+   быть не должно. */
+
+export const RAW_TEX_RULES = [
+  { id: 'dollar', re: /\$/g },
+  { id: 'command', re: /\\(?:[A-Za-z]+|[,;:!{}|])/g },
+  { id: 'tex-comma', re: /\{,\}/g },
+  { id: 'braces', re: /[_^]\{|\}\{/g },
+  { id: 'bold-marks', re: /\*\*/g },
+];
+
+/** Сырой TeX в тексте. Возвращает [{ rule, match, at }]. */
+export function findRawTex(text) {
+  const found = [];
+  for (const rule of RAW_TEX_RULES) {
+    rule.re.lastIndex = 0;
+    let m = rule.re.exec(text);
+    while (m !== null) {
+      found.push({ rule: rule.id, match: m[0], at: m.index });
+      m = rule.re.exec(text);
+    }
+  }
+  return found;
+}

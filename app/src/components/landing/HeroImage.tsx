@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import { landing } from '@/content/landing';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface HeroImageProps {
   className?: string;
 }
@@ -33,7 +34,7 @@ export function HeroImage({ className }: HeroImageProps) {
           key={`desktop-${format.ext}`}
           media={SWITCH}
           type={format.type}
-          srcSet={`/hero/hero-desktop.${format.ext}`}
+          srcSet={assetUrl(`/hero/hero-desktop.${format.ext}`)}
           width={DESKTOP.width}
           height={DESKTOP.height}
         />
@@ -42,7 +43,7 @@ export function HeroImage({ className }: HeroImageProps) {
         <source
           key={`mobile-${format.ext}`}
           type={format.type}
-          srcSet={`/hero/hero-mobile.${format.ext}`}
+          srcSet={assetUrl(`/hero/hero-mobile.${format.ext}`)}
           width={MOBILE.width}
           height={MOBILE.height}
         />
@@ -51,7 +52,7 @@ export function HeroImage({ className }: HeroImageProps) {
           страница дёргалась бы, пока картинка грузится. */}
       <img
         className={clsx('hero__art', className)}
-        src="/hero/hero-mobile.png"
+        src={assetUrl('/hero/hero-mobile.png')}
         alt={landing.hero.image.alt}
         width={MOBILE.width}
         height={MOBILE.height}

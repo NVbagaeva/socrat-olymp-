@@ -1,15 +1,22 @@
 /* graph/solution-quadratic.js — разбор задачи о параболе: семь шагов.
 
    Схема одна и та же для всех задач подтемы, сколько бы действий ни
-   требовалось:
+   требовалось. Порядок — a → c → b:
 
-     1. Куда направлены ветви?
-     2. Находим c по оси Oy
-     3. Вершина и ось симметрии
-     4. Находим a шагом от вершины
-     5. Находим b
+     1. Куда направлены ветви? — знак a
+     2. Вершина в узле сетки?
+     3. а) вершина в узле: a во вспомогательной системе координат
+           с началом в вершине (y′ = a·x′²);
+        б) не в узле: ось симметрии по двум точкам на одной высоте,
+           b = −2a·x₀
+     4. Находим c по оси Oy
+     5. Находим b через абсциссу вершины (в случае «б» — a и b
+        подстановкой ещё одной точки)
      6. Записываем формулу целиком
      7. Отвечаем на вопрос задачи
+
+   Номера и названия шагов — те же, что у подсказки тренажёра
+   (graph/hints-quadratic.js): ученик и учитель видят одну цепочку.
 
    Ученик привыкает к порядку и не разгадывает каждый раз заново.
    Там, где шаг сделать нечем — точка (0; c) за кадром, вершина не
@@ -30,6 +37,7 @@
 
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
+import Aux from './quadratic-aux.js';
 
 var MINUS = '−';
 
@@ -286,8 +294,8 @@ function stepVertex(p, win, points) {
       '.'));
     blocks.push(text('Парабола симметрична, поэтому такие точки стоят на равном расстоянии ' +
       'от оси симметрии: вершина ровно посередине между ними.'));
-    blocks.push(formula('x_{\\text{в}} = \\dfrac{' + tex(frac(pair[0].x)) + ' + ' +
-      texBracket(frac(pair[1].x)) + '}{2} = ' + tex(middle)));
+    blocks.push(formula('x_{\\text{в}} = \\dfrac{' + tex(frac(pair[0].x)) +
+      (frac(pair[1].x).p === 0 ? ' + 0' : term(frac(pair[1].x))) + '}{2} = ' + tex(middle)));
     blocks.push(text('Ординату вершины по симметрии не получить — её на чертеже нет. ' +
       'Но абсциссы уже хватает: через неё выражается ' + math('b', 'b') + '.'));
     return { title: 'Вершина и ось симметрии', blocks: blocks, known: true,
@@ -419,7 +427,7 @@ function stepB(p, vertexKnown, bySystem) {
     blocks.push(formula('x_{\\text{в}} = -\\dfrac{b}{2a}'));
     blocks.push(text('Подставим то, что уже знаем, и выразим ' + math('b', 'b') + ':'));
     blocks.push(formula(tex(p.m) + ' = -\\dfrac{b}{2 \\cdot ' + texBracket(p.a) + '}'));
-    blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
+    blocks.push(formula('b = ' + minusTwoA(p.a) + ' \\cdot ' + texBracket(p.m) +
       ' = ' + tex(p.b)));
     blocks.push(text('Получили ' + keyMath('b = ' + tex(p.b), 'b = ' + plain(p.b)) + '.'));
     return { title: 'Находим $b$', blocks: blocks };
@@ -427,9 +435,188 @@ function stepB(p, vertexKnown, bySystem) {
 
   blocks.push(text('Коэффициент ' + math('b', 'b') + ' считается по вершине и ' +
     math('a', 'a') + ': ' + math('b = -2a \\cdot x_{\\text{в}}', 'b = −2a · xв') + '.'));
-  blocks.push(formula('b = -2 \\cdot ' + texBracket(p.a) + ' \\cdot ' + texBracket(p.m) +
+  blocks.push(formula('b = ' + minusTwoA(p.a) + ' \\cdot ' + texBracket(p.m) +
     ' = ' + tex(p.b)));
   return { title: 'Находим $b$', blocks: blocks };
+}
+
+/* ══════════════════════════════════════════════════════════
+   Новый порядок: вершина в узле → a → c → b
+   ══════════════════════════════════════════════════════════ */
+
+/** Вершина в узле сетки и внутри чертежа: её координаты читаются. */
+function vertexInNode(p, win) {
+  return isInt(p.m) && isInt(p.n) && !!win &&
+    num(p.m) > win.xmin && num(p.m) < win.xmax && num(p.n) > win.ymin && num(p.n) < win.ymax;
+}
+
+/* Узлы сетки на параболе внутри чертежа, кроме вершины. */
+function curveNodes(p, win) {
+  if (!win) { return []; }
+  return Q.integerPoints(p, win).filter(function (node) {
+    return Math.abs(node.x - p.mValue) > 1e-9;
+  });
+}
+
+/* Пара узлов на одной высоте — симметричны относительно оси. Сначала
+   из отмеченных точек, иначе из узлов самой кривой: ближайшая к оси. */
+function symmetricNodes(p, win, points) {
+  var marked = symmetricPair(plainMarks(points));
+  if (marked !== null) { return marked; }
+  var nodes = curveNodes(p, win);
+  var best = null;
+  nodes.forEach(function (a) {
+    nodes.forEach(function (b) {
+      if (a.x < b.x && a.y === b.y && (best === null || b.x - a.x < best[1].x - best[0].x)) {
+        best = [a, b];
+      }
+    });
+  });
+  return best;
+}
+
+/* Точка для шага во вспомогательной системе: отмеченная, ближайшая к
+   вершине, иначе ближайший к вершине узел сетки на кривой. */
+function auxPoint(p, win, points) {
+  var marked = stepPoint(plainMarks(points), p);
+  if (marked !== null) { return { x: marked.x, y: marked.y }; }
+  var node = gridNode(p, win, points);
+  return node === null ? null : { x: node.x, y: node.y };
+}
+
+function stepVertexNode(p, win) {
+  var blocks = [text('Найдём на чертеже вершину — точку поворота параболы.')];
+  if (vertexInNode(p, win)) {
+    blocks.push(text('Вершина стоит в узле сетки: ' +
+      keyMath(pointTex(p.m, p.n), pointText(p.m, p.n)) +
+      ' — координаты целые, их можно снять с чертежа.'));
+    return { title: 'Вершина в узле сетки?', blocks: blocks, inNode: true };
+  }
+  blocks.push(text('Вершина не попадает в узел сетки: точно снять её координаты с чертежа ' +
+    'нельзя. Пойдём другим путём — через симметричные точки.'));
+  return { title: 'Вершина в узле сетки?', blocks: blocks, inNode: false };
+}
+
+/* Шаг 3а. a во вспомогательной системе координат с началом в вершине. */
+function stepAuxA(p, win, points, meta) {
+  var point = auxPoint(p, win, points);
+  var blocks = [text('Перенесём начало координат в вершину ' +
+    math(pointTex(p.m, p.n), pointText(p.m, p.n)) + '. В новой системе ' +
+    math("x'Oy'", "x′Oy′") + ' с началом в вершине парабола имеет вид ' +
+    keyMath("y' = ax'^2", 'y′ = ax′²') + '.')];
+  /* В разборе — только сама система x′Oy′; подсветка выбранной точки
+     есть лишь в подсказке тренажёра. */
+  var scene = Aux.auxScene(meta, null);
+  if (scene !== null) { blocks.push({ type: 'scene', scene: scene }); }
+  if (point === null) {
+    blocks.push(formula('a = ' + tex(p.a)));
+    return { title: 'Находим $a$ во вспомогательной системе координат', blocks: blocks,
+             point: null };
+  }
+  var dx = sub(frac(point.x), p.m);
+  var dy = sub(frac(point.y), p.n);
+  blocks.push(text('Возьмём точку графика в узле сетки ' +
+    math(pointTex(frac(point.x), frac(point.y)), pointText(frac(point.x), frac(point.y))) +
+    '. В новой системе она на ' + key(plain(frac(Math.abs(dx.p), dx.q)) + ' кл.') + ' ' +
+    (num(dx) > 0 ? 'правее' : 'левее') + ' вершины и на ' +
+    key(plain(frac(Math.abs(dy.p), dy.q)) + ' кл.') + ' ' + (num(dy) > 0 ? 'выше' : 'ниже') +
+    ': ' + math("\\Delta x = " + tex(dx) + ",\; \\Delta y = " + tex(dy), 'Δx, Δy') + '.'));
+  blocks.push(text('Подставляем в ' + math("y' = ax'^2", 'y′ = ax′²') + ': ' +
+    math('\\Delta y = a \\cdot \\Delta x^2', 'Δy = a · Δx²') + '.'));
+  blocks.push(formula(tex(dy) + ' = a \\cdot ' + texBracket(dx) + '^2 \\;\\Rightarrow\\; a = ' + tex(p.a)));
+  return { title: 'Находим $a$ во вспомогательной системе координат', blocks: blocks,
+           point: point, dx: dx, dy: dy };
+}
+
+/* Шаг 3б. Вершина не в узле: ось симметрии по двум точкам на одной
+   высоте и связь b = −2a·x₀. */
+function stepSymmetryAxis(p, win, points) {
+  var pair = symmetricNodes(p, win, points);
+  if (pair === null) { return null; }
+  var x0 = div(add(frac(pair[0].x), frac(pair[1].x)), frac(2));
+  var blocks = [text('Найдём на графике две точки в узлах сетки с одинаковой ординатой: ' +
+    math(pointTex(frac(pair[0].x), frac(pair[0].y)), pointText(frac(pair[0].x), frac(pair[0].y))) +
+    ' и ' +
+    math(pointTex(frac(pair[1].x), frac(pair[1].y)), pointText(frac(pair[1].x), frac(pair[1].y))) +
+    '. Они симметричны относительно оси параболы.')];
+  /* Точки и ось симметрии подсвечиваются только в подсказке тренажёра. */
+  blocks.push(formula('x_0 = \\dfrac{x_1 + x_2}{2} = \\dfrac{' + tex(frac(pair[0].x)) +
+    (pair[1].x === 0 ? ' + 0' : term(frac(pair[1].x))) + '}{2} = ' + tex(x0)));
+  blocks.push(text('Абсцисса вершины ' + math('x_0 = -\\dfrac{b}{2a}', 'x₀ = −b/(2a)') +
+    ' — получаем простое уравнение:'));
+  blocks.push(formula('b = -2a \\cdot x_0 = ' + coef(mul(frac(-2), x0)) + 'a'));
+  return { title: 'Ось симметрии по двум точкам', blocks: blocks, pair: pair, x0: x0 };
+}
+
+function stepInterceptNew(p, win, points, later) {
+  var item = stepIntercept(p, win, points);
+  if (!item.found) {
+    item.blocks = item.blocks.slice(0, 2).concat([text(
+      (isInt(p.c) ? 'Здесь пересечение с осью ' + math('Oy', 'Oy') + ' за пределами чертежа'
+        : 'Здесь пересечение с осью ' + math('Oy', 'Oy') + ' не в узле сетки') +
+      ': ' + math('c', 'c') + ' с рисунка не определяем, найдём позже ' + later + '.')]);
+  }
+  return item;
+}
+
+/* Шаг 5 в случае «а»: b через абсциссу вершины. */
+function stepBVertex(p) {
+  return { title: 'Находим $b$ через абсциссу вершины', blocks: [
+    text('Абсцисса вершины: ' + math('x_0 = -\\dfrac{b}{2a}', 'x₀ = −b/(2a)') + ', отсюда ' +
+      math('b = -2a \\cdot x_0', 'b = −2a·x₀') + '.'),
+    formula('b = ' + minusTwoA(p.a) + ' \\cdot ' + texBracket(p.m) + ' = ' + tex(p.b)),
+    text('Получили ' + keyMath('b = ' + tex(p.b), 'b = ' + plain(p.b)) + '.')
+  ] };
+}
+
+/* Точки для подстановки в случае «б»: узлы на кривой, кроме пары, по
+   которой нашли ось (и вообще любой пары с той же высотой — новой
+   информации не даст), и кроме точки, симметричной (0; c), — при
+   известном c она даёт тождество. */
+function substitutionPoints(p, win, points, pair, x0, interceptFound) {
+  var mirror0 = num(mul(frac(2), x0));
+  /* Последней — отмеченная вершина: её координаты читаются по середине
+     клетки. Нужна, когда других узлов в окне нет. */
+  var vertexMark = markOf(points, 'vertex');
+  var pool = plainMarks(points).map(function (m) { return { x: m.x, y: m.y }; })
+    .concat(curveNodes(p, win))
+    .concat(vertexMark ? [{ x: vertexMark.x, y: vertexMark.y }] : []);
+  var seen = {};
+  return pool.filter(function (node) {
+    var key0 = node.x + ':' + node.y;
+    if (seen[key0]) { return false; }
+    seen[key0] = true;
+    if (node.x === pair[0].x || node.x === pair[1].x) { return false; }
+    if (node.x === 0) { return false; }
+    if (interceptFound && Math.abs(node.x - mirror0) < 1e-9) { return false; }
+    return true;
+  });
+}
+
+/* Шаг 5 в случае «б»: a и b подстановкой ещё одной (двух) точек. */
+function stepABSubstitution(p, win, points, axis, interceptFound) {
+  var x0 = axis.x0;
+  var k = mul(frac(-2), x0);                  /* b = k · a */
+  var pool = substitutionPoints(p, win, points, axis.pair, x0, interceptFound);
+  var need = interceptFound ? 1 : 2;
+  var chosen = pool.slice(0, need);
+  var blocks = [text('Подставим в ' + math('y = ax^2 + bx + c', 'y = ax² + bx + c') + ' ' +
+    (need === 1 ? 'координаты ещё одной точки графика' : 'координаты ещё двух точек графика') +
+    ' и ' + math('b = ' + coef(k) + 'a', 'b') + (interceptFound ? ', ' +
+      math('c = ' + tex(p.c), 'c') : '') + '.')];
+  chosen.forEach(function (point) {
+    var x = frac(point.x), y = frac(point.y);
+    var factor = add(mul(x, x), mul(k, x));   /* x² + k·x */
+    blocks.push(formula(tex(y) + ' = a \\cdot ' + texBracket(x) + '^2' + term(k, 'a') + ' \\cdot ' +
+      texBracket(x) +
+      (interceptFound ? term(p.c) : ' + c') + ' \\;\\Rightarrow\\; ' +
+      tex(interceptFound ? sub(y, p.c) : y) + ' = ' + coef(factor) + 'a' + (interceptFound ? '' : ' + c')));
+  });
+  blocks.push(text('Отсюда ' + keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) +
+    (interceptFound ? '' : ', ' + keyMath('c = ' + tex(p.c), 'c = ' + plain(p.c))) +
+    ', и ' + keyMath('b = ' + coef(k) + 'a = ' + tex(p.b), 'b = ' + plain(p.b)) + '.'));
+  return { title: 'Находим $a$ и $b$ подстановкой точки', blocks: blocks, points: chosen,
+           cFound: !interceptFound };
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -462,6 +649,9 @@ function lineTex(line, name) {
 function stepFormula(p, second, interceptFound, win, points) {
   var blocks = [];
 
+  if (interceptFound === 'system') {
+    interceptFound = true;
+  }
   if (!interceptFound) {
     blocks.push(text('Вернёмся к ' + math('c', 'c') + '. Это значение функции при ' +
       math('x = 0', 'x = 0') + ', а формулу через вершину мы уже знаем — подставим в неё ноль:'));
@@ -507,8 +697,12 @@ function secondLineBlocks(line, win, blocks) {
   blocks.push(text('Берём две точки прямой в узлах сетки: ' +
     math(pointTex(frac(A.x), frac(A.y)), pointText(frac(A.x), frac(A.y))) + ' и ' +
     math(pointTex(frac(B.x), frac(B.y)), pointText(frac(B.x), frac(B.y))) + '.'));
-  blocks.push(text('Наклон — это отношение сдвига по вертикали к сдвигу по горизонтали:'));
-  blocks.push(formula('k = \\dfrac{' + tex(dy) + '}{' + tex(dx) + '} = ' + tex(line.k)));
+  blocks.push(text('Наклон — через треугольник наклона, как у линейной функции: катеты по ' +
+    'клеткам, ' + (num(line.k) >= 0 ? 'прямая возрастает:' : 'прямая убывает, поэтому со знаком минус:')));
+  var ratio = '\\dfrac{' + tex(frac(Math.abs(dy.p), dy.q)) + '}{' + tex(frac(Math.abs(dx.p), dx.q)) + '}';
+  blocks.push(formula(num(line.k) >= 0
+    ? 'k = \\operatorname{tg} \\alpha = ' + ratio + ' = ' + tex(line.k)
+    : 'k = -\\operatorname{tg}(180^\\circ - \\alpha) = -' + ratio + ' = ' + tex(line.k)));
   blocks.push(text('Свободный член находим подстановкой одной из этих точек:'));
   blocks.push(formula(tex(frac(A.y)) + ' = ' + coefDot(line.k) + texBracket(frac(A.x)) + ' + m'));
   blocks.push(formula('m = ' + tex(line.b)));
@@ -549,6 +743,14 @@ function secondParabolaBlocks(q, win, points, blocks) {
 }
 
 /* Коэффициент с точкой умножения: «0,5 · », «−» или пусто. */
+/* Множитель −2a в b = −2a · xв: при a = ±1 умножение на 1 и на −1
+   не пишется — сразу −2 или 2. */
+function minusTwoA(a) {
+  if (isInt(a) && a.p === 1) { return '-2'; }
+  if (isInt(a) && a.p === -1) { return '2'; }
+  return '-2 \\cdot ' + texBracket(a);
+}
+
 function coefDot(f) {
   var body = coef(f);
   if (body === '' || body === '-') { return body; }
@@ -793,34 +995,55 @@ function build(options) {
   var second = options.second || null;
   var task = options.task || {};
   var knownA = task.knownA === true;
+  var meta = options.meta || null;
 
   var direction = stepDirection(p);
-  var intercept = stepIntercept(p, win, points);
-  var vertex = stepVertex(p, win, points);
-  var slope = stepSlope(p, win, points, knownA, vertex, intercept.found);
-  var b = stepB(p, vertex.known, slope.bySystem === true);
-  var formulaStep = stepFormula(p, second, intercept.found, win, points);
+  var vertex = stepVertexNode(p, win);
+  var slope;
+  var b;
+  var intercept;
+  var axis = null;
+  var aInB = false;
+
+  if (vertex.inNode) {
+    slope = knownA ? stepSlope(p, win, points, true, {}, false) : stepAuxA(p, win, points, meta);
+    intercept = stepInterceptNew(p, win, points, 'по формуле');
+    b = stepBVertex(p);
+  } else {
+    axis = knownA ? null : stepSymmetryAxis(p, win, points);
+    if (axis !== null) {
+      slope = axis;
+      intercept = stepInterceptNew(p, win, points, 'из той же подстановки');
+      b = stepABSubstitution(p, win, points, axis, intercept.found);
+      aInB = true;
+    } else {
+      /* Ни вершины в узле, ни пары точек на одной высоте: прежний путь —
+         система по c и двум точкам. */
+      intercept = stepIntercept(p, win, points);
+      var old = stepVertex(p, win, points);
+      slope = stepSlope(p, win, points, knownA, old, intercept.found);
+      b = stepB(p, old.known, slope.bySystem === true);
+    }
+  }
+  var formulaStep = stepFormula(p, second, intercept.found || (b.cFound === true ? 'system' : false),
+    win, points);
 
   direction.id = 'direction'; direction.needs = [];
-  intercept.id = 'intercept'; intercept.needs = [];
   vertex.id = 'vertex'; vertex.needs = [];
-  slope.id = 'slope';
-  slope.needs = knownA ? []
-    : slope.bySystem === true || slope.bySubstitution === true ? ['vertex', 'intercept']
-    : ['vertex'];
+  slope.id = 'slope'; slope.needs = knownA ? [] : ['vertex'];
+  intercept.id = 'intercept'; intercept.needs = [];
   b.id = 'b';
-  b.needs = slope.bySystem === true ? ['slope'] : ['vertex', 'slope'];
+  b.needs = aInB ? ['vertex', 'slope', 'intercept'] : ['vertex', 'slope'];
   formulaStep.id = 'formula';
-  formulaStep.needs = ['slope', 'b'].concat(intercept.found ? ['intercept'] : ['vertex']);
+  formulaStep.needs = ['slope', 'b', 'intercept'];
 
-  var all = [direction, intercept, vertex, slope, b, formulaStep];
+  var all = [direction, vertex, slope, intercept, b, formulaStep];
   var target = TARGET[task.rule] || 'formula';
+  /* В случае «б» a находится только вместе с b. */
+  if (target === 'slope' && aInB) { target = 'b'; }
   var chosen = neededSteps(all, target);
 
   var shown = all.filter(function (step) { return chosen[step.id]; });
-  /* Шаг про c, если он кончился словами «с чертежа не снять», в
-     дописку не идёт: там нет действия, только объяснение, почему
-     оно откладывается. Само c считается в шаге с формулой. */
   var folded = all.filter(function (step) {
     return !chosen[step.id] && !(step.id === 'intercept' && step.found === false);
   });
@@ -832,10 +1055,8 @@ function build(options) {
     intersection: task.intersection,
     second: second
   });
+  answer.id = 'answer';
 
-  /* Свёрнутый блок нужен там, где формула для ответа не понадобилась,
-     но дописать её есть чем. У знака a и свободного члена дописывать
-     нечего: формула в ответе не участвует. */
   var offerFormula = folded.length > 0 && target !== 'direction' && target !== 'intercept';
   if (offerFormula) {
     answer.blocks = answer.blocks.concat([{
@@ -847,12 +1068,19 @@ function build(options) {
   }
 
   return shown.concat([answer]).map(function (step, index) {
-    return { number: index + 1, title: step.title,
-             arrow: step.arrow || null, blocks: step.blocks };
+    return { number: index + 1, id: step.id, title: step.title,
+             arrow: step.arrow || null, blocks: step.blocks,
+             /* Что нашёл шаг — подсказке тренажёра (graph/hints-quadratic.js). */
+             facts: {
+               inNode: step.inNode, found: step.found, point: step.point, dx: step.dx,
+               dy: step.dy, pair: step.pair, x0: step.x0, points: step.points,
+               cFound: step.cFound, aInB: aInB, knownA: knownA
+             } };
   });
 }
 
-const api = { build: build, equationTex: equationTex, interceptVisible: interceptVisible };
+const api = { build: build, equationTex: equationTex, interceptVisible: interceptVisible,
+  vertexInNode: vertexInNode, curveNodes: curveNodes, substitutionPoints: substitutionPoints };
 
 /* Разбор прямо по задаче движка: всё, что нужно, лежит в её meta.
    Так краткое решение для листа с ответами собирается без обратного
@@ -872,6 +1100,7 @@ function fromTask(task) {
     window: meta.window,
     points: meta.points,
     second: second,
+    meta: meta,
     task: { rule: meta.rule, answer: task.answer, knownA: meta.knownA === true,
             query: meta.query, intersection: meta.intersection }
   });
@@ -880,4 +1109,4 @@ function fromTask(task) {
 api.fromTask = fromTask;
 
 export default api;
-export { build, fromTask, equationTex, interceptVisible };
+export { build, fromTask, equationTex, interceptVisible, vertexInNode, curveNodes, substitutionPoints };
