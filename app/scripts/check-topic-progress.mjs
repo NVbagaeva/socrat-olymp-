@@ -106,7 +106,9 @@ expect('из 2 разделов', caseOf(1, 2), 'Вы изучили 1 из 2 р
 expect('из 5 разделов', caseOf(2, 5), 'Вы изучили 2 из 5 разделов');
 expect('из 21 раздела', caseOf(3, 21), 'Вы изучили 3 из 21 раздела');
 expect('строка пункта', P.itemDetail({ id: 'theory', unit: 'sections', done: 1, need: 1, total: 1 }), '1 из 1 раздела');
-expect('строка опорных', P.itemDetail({ id: 'prep', unit: 'tasks', done: 34, need: 88, total: 110 }), '34 из 88 задач (нужно 80% из 110)');
+expect('строка опорных', P.itemDetail({ id: 'prep', unit: 'tasks', done: 34, need: 88, total: 110 }), 'Решено 34 из 110 · для зачёта нужно\u00a088');
+expect('строка опорных: решено больше нужного', P.itemDetail({ id: 'prep', unit: 'tasks', done: 90, need: 72, total: 90 }), 'Решено 90 из 90 · для зачёта нужно\u00a072');
+expect('строка опорных: ноль', P.itemDetail({ id: 'prep', unit: 'tasks', done: 0, need: 72, total: 90 }), 'Решено 0 из 90 · для зачёта нужно\u00a072');
 
 console.log('Проверок расчёта прогресса: ' + checks);
 if (failures.length) {

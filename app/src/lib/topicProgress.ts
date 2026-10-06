@@ -221,11 +221,12 @@ export function itemDetail(item: ProgressItem): string {
     methods: ['метода', 'методов', 'методов'],
     tasks: ['задачи', 'задач', 'задач'],
   }[item.unit] as [string, string, string];
+  /* Опорные задачи: решено из всех, для зачёта нужна доля (PREP_SHARE). */
+  if (item.id === 'prep') {
+    return `Решено ${Math.min(item.done, item.total)} из ${item.total} · для зачёта нужно\u00a0${item.need}`;
+  }
   const shown = Math.min(item.done, item.need);
   const base = `${shown} из ${item.need} ${plural(item.need, ...words)}`;
-  if (item.id === 'prep') {
-    return `${base} (нужно ${Math.round(PREP_SHARE * 100)}% из ${item.total})`;
-  }
   if (item.id === 'trainer') {
     return `${base}: по ${TRAINER_PER_KIND} каждого типа без подсказки`;
   }
