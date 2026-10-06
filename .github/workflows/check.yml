@@ -230,3 +230,9 @@ jobs:
       - name: Проверить кольцо прогресса на сайте
         working-directory: app
         run: pnpm test:topic-progress-site
+
+      # Ошибка в одном блоке не роняет страницу, сбой загрузки кода лечится
+      # одной перезагрузкой: сообщение по-русски вместо белого экрана.
+      - name: Проверить границы ошибок
+        working-directory: app
+        run: pnpm test:error-boundaries
