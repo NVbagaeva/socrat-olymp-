@@ -28,8 +28,8 @@ import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
 import { planCounts } from '@/lib/sheetPlan';
-import { randomSeed } from '@/lib/trainerSession';
-import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
+import { randomSeed } from '@/lib/randomSeed';
+import { sheetQuery, subtitleOf } from '@/lib/generatorQuery';
 import { TitleText } from '../TitleText';
 
 export interface GeneratorScreenProps {
@@ -89,7 +89,7 @@ export function GeneratorScreen({
      колонки и тема на задачи не влияют, поэтому в зависимостях их нет. */
   const selectedKey = selected.join(',');
   const seed = useMemo(
-    () => randomSeed('', 0),
+    () => randomSeed(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedKey, chosenCount, level],
   );

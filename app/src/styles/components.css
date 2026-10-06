@@ -1358,6 +1358,44 @@ a.task-card {
   margin: 0 auto var(--space-5);
 }
 
+/* Нажатая вкладка, пока открывается: ожидание на ней и приглушённая панель. */
+.tabs [role='tab'][data-busy='true']::after {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: var(--space-2);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: tabs-spin 0.7s linear infinite;
+}
+@keyframes tabs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabs [role='tab'][data-busy='true']::after {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.5;
+  }
+}
+html[data-tabs-pending] .topic-panel,
+.topic-panel.is-loading {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+/* Подгружается вкладка или блок: пока код едет по сети. */
+.lazy-loading {
+  margin: var(--space-6) 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
 /* Сообщение об ошибке: вместо страницы или одного блока. */
 .errfb {
   max-width: 560px;

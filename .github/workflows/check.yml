@@ -236,3 +236,10 @@ jobs:
       - name: Проверить границы ошибок
         working-directory: app
         run: pnpm test:error-boundaries
+
+      # Страница темы быстро «оживает» на слабой сети: бюджет размеров HTML и
+      # скриптов, тяжёлое (KaTeX, движок задач) не в первой загрузке, нажатие
+      # на вкладку до загрузки кода не теряется.
+      - name: Проверить первую загрузку страницы темы
+        working-directory: app
+        run: pnpm test:first-load

@@ -17,6 +17,7 @@
  */
 
 import GraphGenerate from '@/lib/graph/generate.js';
+import { randomSeed as lightSeed } from '@/lib/randomSeed';
 import { parseAnswer } from '@/lib/answer';
 import { trainerTaskFrom, type EngineTask, type TrainerTask } from '@/lib/trainer';
 import type { TrainerModeId } from '@/content/trainerModes';
@@ -61,9 +62,8 @@ const SEED_TRIES = 24;
  */
 export type SeedFor = (setId: string, attempt: number) => string;
 
-/** Случайный seed: время и шум. */
-export const randomSeed: SeedFor = () =>
-  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+/** Случайный seed: время и шум. Сама функция в лёгком модуле (lib/randomSeed.ts). */
+export const randomSeed: SeedFor = lightSeed;
 
 /** Воспроизводимый seed от одного базового слова. */
 export function seedFrom(base: string): SeedFor {
