@@ -11,7 +11,9 @@
 
 import { BANK, RAZMINKA } from './bank';
 import { d, nice } from './num';
-import { subtype } from './prototypes';
+import { generate, GENERATORS, paramsKey, pohozhaNaBank, type Generated } from './gen';
+import { subtype, SUBTYPES } from './prototypes';
+import { rngOf } from '../vychisleniya/rng';
 import { STROKI_KONC } from './kit';
 import type { BankItem, Solved, Tablitsa } from './types';
 
@@ -258,4 +260,103 @@ export function checkBank(typeset: (tex: string) => string) {
 
 export function checkRazminka(typeset: (tex: string) => string) {
   return checkItems(RAZMINKA, 'разминка', typeset);
+}
+
+/* ── Генератор ──────────────────────────────────────────────────── */
+
+/** Подтипы разминки, у которых генератор обязан давать разные случаи. */
+const SLUCHAI: Record<string, string[]> = {
+  'RZ-04': ['ostatok', 'nacelo'],
+  'RZ-05': ['ostatok', 'nacelo'],
+  'RZ-06': ['ostatok', 'nacelo'],
+  'RZ-07': ['vverh', 'vniz'],
+  'RZ-08': ['chetnoe', 'nechetnoe'],
+  'RZ-09': ['ostatok', 'nacelo'],
+};
+
+/**
+ * Генератор каждого подтипа на `seeds` seed: задача подбирается, все
+ * проверки разбора и методики проходят, параметры не из банка.
+ * Отдельно — сырой прогон генератора: каждая заготовка, которую
+ * решает solve, должна дать задуманный ответ (иначе генератор и
+ * solve расходятся, а generate молча отбросил бы такую заготовку).
+ */
+export function checkGenerators(seeds: number, typeset: (tex: string) => string) {
+  const problems: Problem[] = [];
+  const solved: Array<{ where: string; s: Solved }> = [];
+  const stats: Array<{ id: string; distinct: number; rejected: number }> = [];
+  let generated = 0;
+  for (const st of SUBTYPES) {
+    const gen = GENERATORS[st.id];
+    if (!gen) {
+      problems.push({ where: st.id, what: 'нет генератора' });
+      continue;
+    }
+    /* Сырой прогон. */
+    const r = rngOf(`selftest|${st.id}`);
+    let rejected = 0;
+    for (let i = 0; i < seeds * 20; i += 1) {
+      const z = gen(r);
+      if (!z) {
+        rejected += 1;
+        continue;
+      }
+      let s: Solved;
+      try {
+        s = st.solve(z.params);
+      } catch (e) {
+        problems.push({
+          where: `${st.id} ${JSON.stringify(z.params)}`,
+          what: `solve упал: ${(e as Error).message}`,
+        });
+        continue;
+      }
+      if (Math.abs(s.answer - z.answer) > 1e-9) {
+        problems.push({
+          where: `${st.id} ${JSON.stringify(z.params)}`,
+          what: `генератор задумал ${z.answer}, solve дал ${s.answer}`,
+        });
+      }
+    }
+    /* Задачи через generate. */
+    const keys = new Set<string>();
+    const sluchai = new Set<string>();
+    for (let i = 0; i < seeds; i += 1) {
+      const where = `${st.id} seed=${i}`;
+      let g: Generated;
+      try {
+        g = generate(st.id, String(i));
+      } catch (e) {
+        problems.push({ where, what: (e as Error).message });
+        continue;
+      }
+      generated += 1;
+      if (pohozhaNaBank(st.id, g.params)) {
+        problems.push({
+          where,
+          what: 'задача совпадает с банком или отличается от неё одним числом',
+        });
+      }
+      keys.add(paramsKey(st.id, g.params));
+      if (g.sluchay) {
+        sluchai.add(g.sluchay);
+      }
+      const w = `${where} ${JSON.stringify(g.params)}`;
+      problems.push(...checkSolved(w, g.solved, typeset), ...checkMetodika(w, st.id, g.solved));
+      solved.push({ where: w, s: g.solved });
+    }
+    if (keys.size < Math.min(5, seeds)) {
+      problems.push({
+        where: st.id,
+        what: `генератор однообразен: ${keys.size} разных задач на ${seeds} seed`,
+      });
+    }
+    for (const need of SLUCHAI[st.id] ?? []) {
+      if (!sluchai.has(need)) {
+        problems.push({ where: st.id, what: `генератор не выдаёт случай «${need}»` });
+      }
+    }
+    stats.push({ id: st.id, distinct: keys.size, rejected });
+  }
+  return { generated, problems, solved, stats };
 }

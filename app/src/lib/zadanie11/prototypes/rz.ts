@@ -6,7 +6,7 @@
  * калькулятора, здравый смысл при округлении.
  */
 
-import { chtoSprashivayut, etapy, num, str, vopros } from '../kit';
+import { chtoSprashivayut, etapy, key, num, str, vopros } from '../kit';
 import { d, div, fq, mul, q, round9, sub, txt, val } from '../num';
 import { plural } from '../../plural';
 import { chasy, sk, SLOVA } from '../sklonenie';
@@ -113,16 +113,48 @@ function frac2(a: number, b: number): string {
   return `\\dfrac{${d(a)}}{${d(b)}}`;
 }
 
+/** Города для РЗ-03: падежи и разница с Москвой. */
+export const GORODA: Record<
+  string,
+  { iz: string; v: string; s: string; dh: number; km: [number, number] }
+> = {
+  vladivostok: {
+    iz: 'Владивостока',
+    v: 'Владивостоке',
+    s: 'Владивостоком',
+    dh: 7,
+    km: [6300, 7000],
+  },
+  habarovsk: { iz: 'Хабаровска', v: 'Хабаровске', s: 'Хабаровском', dh: 7, km: [5900, 6400] },
+  irkutsk: { iz: 'Иркутска', v: 'Иркутске', s: 'Иркутском', dh: 5, km: [4000, 4500] },
+  novosibirsk: {
+    iz: 'Новосибирска',
+    v: 'Новосибирске',
+    s: 'Новосибирском',
+    dh: 4,
+    km: [2800, 3300],
+  },
+  omsk: { iz: 'Омска', v: 'Омске', s: 'Омском', dh: 3, km: [2200, 2600] },
+  ekaterinburg: {
+    iz: 'Екатеринбурга',
+    v: 'Екатеринбурге',
+    s: 'Екатеринбургом',
+    dh: 2,
+    km: [1400, 1800],
+  },
+};
+
 /* ── РЗ-03 Часовые пояса ─────────────────────────────────────── */
 
 const RZ03 = rz(
   'RZ-03',
   'Часовые пояса',
-  ['часовые пояса', 'самолёт', 'местному времени', 'Владивосток'],
+  ['часовые пояса', 'самолёт', 'местному времени', 'Владивосток', 'Новосибирск'],
   (p) => {
     const t0 = num(p, 't0'); // минуты от полуночи, местное время вылета
     const t1 = num(p, 't1'); // минуты, местное время прилёта (Москва)
-    const dh = num(p, 'dh');
+    const g = key(GORODA, str(p, 'gorod', Object.keys(GORODA)));
+    const dh = g.dh;
     const S = num(p, 'S');
     const dep = t0 - dh * 60;
     const flight = t1 - dep;
@@ -130,13 +162,13 @@ const RZ03 = rz(
     const ans = val(div(q(S), T));
     const wrongDep = t0 + dh * 60;
     return {
-      uslovie: `Самолёт вылетает из Владивостока в ${chasy(t0 / 60, false)} по местному времени и прилетает в Москву в ${chasy(t1 / 60, false)} по московскому времени того же дня. Разница во времени между Владивостоком и Москвой — ${sk(dh, SLOVA.chas)}. Найдите среднюю скорость самолёта (в км/ч), если длина воздушной трассы ${txt(S)} км.`,
+      uslovie: `Самолёт вылетает из ${g.iz} в ${chasy(t0 / 60, false)} по местному времени и прилетает в Москву в ${chasy(t1 / 60, false)} по московскому времени того же дня. Разница во времени между ${g.s} и Москвой — ${sk(dh, SLOVA.chas)}. Найдите среднюю скорость самолёта (в км/ч), если длина воздушной трассы ${txt(S)} км.`,
       answer: ans,
       etapy: etapy(
         [
           'Одно время',
           [
-            `Во Владивостоке на $${d(dh)}$ ч больше. Значит, в момент вылета (${chasy(t0 / 60, false)} во Владивостоке) в Москве было на ${sk(dh, SLOVA.chas)} меньше: ${chasy(dep / 60)}.`,
+            `В ${g.v} на $${d(dh)}$ ч больше. Значит, в момент вылета (${chasy(t0 / 60, false)} в ${g.v}) в Москве было на ${sk(dh, SLOVA.chas)} меньше: ${chasy(dep / 60)}.`,
           ],
         ],
         [
