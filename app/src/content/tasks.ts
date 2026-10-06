@@ -112,7 +112,7 @@ export const tasks = [
     slug: '10',
     status: 'soon',
   },
-  { no: '11', name: 'Текстовая задача', slug: '11', status: 'soon' },
+  { no: '11', name: 'Текстовые задачи', slug: '11', status: 'soon' },
   { no: '12', name: 'Графики функций', slug: '12', status: 'active' },
   {
     no: '13',

@@ -1,0 +1,664 @@
+/* Задание №11 «Текстовые задачи».
+
+   Оболочка, лента вкладок, кольцо прогресса и оболочка теории — общие
+   слои; здесь только своё: цвета разделов, карта маршрута, карточки
+   теории, таблицы модели. Значения — только токены. Макеты —
+   docs/mockups/zadanie-11. */
+
+.z11-head {
+  margin-bottom: var(--space-6);
+}
+
+/* ── Цвета разделов ───────────────────────────────────────────── */
+
+.z11-sec--rz {
+  --z11-c: var(--color-z11-rz);
+  --z11-c-soft: var(--color-z11-rz-soft);
+}
+.z11-sec--pr {
+  --z11-c: var(--color-z11-pr);
+  --z11-c-soft: var(--color-z11-pr-soft);
+}
+.z11-sec--sm {
+  --z11-c: var(--color-z11-sm);
+  --z11-c-soft: var(--color-z11-sm-soft);
+}
+.z11-sec--dp {
+  --z11-c: var(--color-z11-dp);
+  --z11-c-soft: var(--color-z11-dp-soft);
+}
+.z11-sec--pt {
+  --z11-c: var(--color-z11-pt);
+  --z11-c-soft: var(--color-z11-pt-soft);
+}
+.z11-sec--vd {
+  --z11-c: var(--color-z11-vd);
+  --z11-c-soft: var(--color-z11-vd-soft);
+}
+.z11-sec--ok {
+  --z11-c: var(--color-z11-ok);
+  --z11-c-soft: var(--color-z11-ok-soft);
+}
+.z11-sec--rb {
+  --z11-c: var(--color-z11-rb);
+  --z11-c-soft: var(--color-z11-rb-soft);
+}
+.z11-sec--pg {
+  --z11-c: var(--color-z11-pg);
+  --z11-c-soft: var(--color-z11-pg-soft);
+}
+
+/* ── Пиктограммы, значки, звёзды ──────────────────────────────── */
+
+.z11-pic {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.z11-ikonka {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--z11-c-soft, var(--color-surface-soft));
+  color: var(--z11-c, var(--color-primary));
+}
+.z11-ikonka .z11-pic {
+  width: 28px;
+  height: 28px;
+}
+.z11-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 104px;
+  height: 64px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--z11-c-soft, var(--color-surface-soft));
+  color: var(--z11-c, var(--color-primary));
+}
+.z11-mini .z11-pic {
+  width: 28px;
+  height: 28px;
+}
+.z11-mini .z11-pic--strelka {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+}
+.z11-zvezdy {
+  display: inline-flex;
+  gap: 2px;
+}
+.z11-zvezdy svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--color-star-off);
+}
+.z11-zvezdy svg.is-on {
+  fill: var(--color-star);
+}
+
+/* ── «О задании» ──────────────────────────────────────────────── */
+
+.z11-about {
+  display: grid;
+  gap: var(--space-8);
+}
+@media (min-width: 1280px) {
+  .z11-about {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+.z11-about__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.z11-about__title {
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+}
+.z11-about__answer {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z11-about__text {
+  max-width: 72ch;
+  margin-top: var(--space-3);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z11-about__sub {
+  margin-bottom: var(--space-4);
+}
+
+/* Карта маршрута: на телефоне — столбик с пунктиром между карточками,
+   от 768 — змейка по три в ряд. */
+.z11-map {
+  --z11-path: var(--color-border-info);
+  display: grid;
+  gap: var(--space-4);
+}
+.z11-map__group {
+  display: grid;
+  gap: var(--space-4);
+}
+.z11-map__row {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z11-map__item {
+  position: relative;
+}
+/* Пунктир между карточками столбика. */
+.z11-map__item:not(:last-child)::after,
+.z11-map__group:not(:last-child) .z11-map__item:last-child::after {
+  content: '';
+  position: absolute;
+  left: 44px;
+  bottom: calc(-1 * var(--space-4));
+  height: var(--space-4);
+  border-left: 2px dashed var(--z11-path);
+}
+.z11-map__turn {
+  display: none;
+}
+.z11-map__card {
+  position: relative;
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  height: 100%;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.z11-map__card:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.z11-map__item.is-razminka .z11-map__card {
+  border-color: var(--color-z11-rz);
+  background: var(--color-surface-warm);
+}
+.z11-map__no {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z11-map__icon {
+  margin-top: var(--space-2);
+}
+.z11-map__body {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+.z11-map__title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: var(--lh-body);
+}
+.z11-map__count,
+.z11-map__pct {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-map__bar {
+  max-width: 160px;
+  margin-top: var(--space-1);
+}
+.z11-map__stars {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--z11-c-soft);
+}
+
+@media (min-width: 768px) {
+  .z11-map {
+    gap: 0;
+  }
+  .z11-map__group {
+    gap: 0;
+  }
+  .z11-map__row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+  .z11-map__item::after,
+  .z11-map__group:not(:last-child) .z11-map__item:last-child::after {
+    display: none;
+  }
+  /* Пунктир между карточками ряда. */
+  .z11-map__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: calc(-1 * var(--space-8));
+    width: var(--space-8);
+    border-top: 2px dashed var(--z11-path);
+  }
+  /* Поворот змейки: от конца ряда вправо-вниз, через всю ширину
+     и вниз к началу следующего ряда. */
+  .z11-map__turn {
+    position: relative;
+    display: block;
+    height: var(--space-10);
+  }
+  .z11-map__turn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 8%;
+    right: var(--space-2);
+    height: 50%;
+    border-right: 2px dashed var(--z11-path);
+    border-bottom: 2px dashed var(--z11-path);
+    border-bottom-right-radius: var(--radius-xl);
+  }
+  .z11-map__turn::after {
+    content: '';
+    position: absolute;
+    top: calc(50% - 2px);
+    left: var(--space-2);
+    width: calc(8% - var(--space-2));
+    height: calc(50% + 2px);
+    border-top: 2px dashed var(--z11-path);
+    border-left: 2px dashed var(--z11-path);
+    border-top-left-radius: var(--radius-xl);
+  }
+}
+
+/* «С чего начать». */
+.z11-start {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.z11-start__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+}
+.z11-start__flag {
+  color: var(--color-primary);
+}
+.z11-start__list {
+  display: grid;
+  gap: var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z11-start__step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: var(--space-3);
+}
+.z11-start__no {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+}
+.z11-start__step-title {
+  display: block;
+  font-weight: 700;
+}
+.z11-start__step-text {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-sovet {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z11-sovet__icon {
+  color: var(--color-primary);
+}
+.z11-sovet__title {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.z11-sovet__text {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Порядок изучения. */
+.z11-order__list {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 1024px) {
+  .z11-order__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z11-order__item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z11-order__icon {
+  width: 40px;
+  height: 40px;
+}
+.z11-order__icon .z11-pic {
+  width: 22px;
+  height: 22px;
+}
+.z11-order__body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+.z11-order__name {
+  font-weight: 700;
+}
+.z11-order__desc,
+.z11-order__pered {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-order__pered {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Теория ───────────────────────────────────────────────────── */
+
+.z11-teor {
+  display: grid;
+  gap: var(--space-5);
+}
+.z11-teor__lead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z11-teor__pair,
+.z11-teor__grid,
+.z11-teor__stack {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .z11-teor__pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: start;
+  }
+  .z11-teor__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+.z11-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  container-type: inline-size;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z11-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.z11-card__icon {
+  color: var(--color-primary);
+}
+.z11-card__lead,
+.z11-card__text,
+.z11-card__note,
+.z11-card__list,
+.z11-card__steps {
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z11-card__lead {
+  color: var(--color-text-secondary);
+}
+.z11-card__list,
+.z11-card__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z11-card__formula {
+  overflow-x: auto;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.z11-card__formula .katex-display {
+  margin: 0;
+}
+.z11-card__podpis {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+.z11-card--layfhak {
+  border-color: var(--color-border-warm);
+  background: var(--color-surface-warm);
+}
+.z11-card--layfhak .z11-card__icon {
+  color: var(--color-star);
+}
+.z11-card--lovushka {
+  border-color: var(--color-error-soft);
+  background: var(--color-error-soft);
+}
+.z11-card--lovushka .z11-card__icon {
+  color: var(--color-error);
+}
+.z11-card__formula--warn {
+  background: var(--color-surface);
+}
+
+/* «Долго → быстро». */
+.z11-dolgo {
+  display: grid;
+  gap: var(--space-2);
+  align-items: center;
+}
+/* «Долго → быстро» в строку — только если карточка достаточно широка,
+   иначе формулы не помещаются и блоки идут друг под другом. */
+@container (min-width: 600px) {
+  .z11-dolgo {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .z11-dolgo__arrow {
+    transform: none;
+  }
+}
+.z11-dolgo__box {
+  display: grid;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.z11-dolgo__box .katex-display {
+  margin: var(--space-1) 0;
+}
+.z11-dolgo__box--bystro {
+  background: var(--color-success-soft);
+}
+.z11-dolgo__label {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z11-dolgo__box--bystro .z11-dolgo__label {
+  color: var(--color-success);
+}
+.z11-dolgo__arrow {
+  justify-self: center;
+  color: var(--color-success);
+  transform: rotate(90deg);
+}
+
+/* Таблица модели. */
+.z11-tab {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.z11-tab__title {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z11-tab__scroll {
+  overflow-x: auto;
+}
+.z11-tab table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+}
+.z11-tab th,
+.z11-tab td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.z11-tab thead th {
+  background: var(--color-surface-2);
+  font-weight: 600;
+}
+.z11-tab tbody th {
+  text-align: left;
+  font-weight: 600;
+  white-space: normal;
+}
+
+/* Плитки типов задач. */
+.z11-tipy__title {
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.z11-tipy__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z11-tip {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z11-tip__body {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+.z11-tip__code {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+.z11-tip__title {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: var(--lh-caption);
+}
+.z11-tip__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.z11-dekor {
+  width: 96px;
+  height: 96px;
+}
+.z11-dekor .z11-pic {
+  width: 48px;
+  height: 48px;
+}

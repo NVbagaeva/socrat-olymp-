@@ -88,6 +88,89 @@ for (const [word, id] of [
   }
 }
 
+/* Теория: у каждого раздела дерева — раздел теории, ссылки на
+   лайфхаки и ловушки целы, у каждого подтипа — мини-иллюстрация,
+   таблицы теории — по правилам методики, формулы набираются. */
+{
+  const { RAZDELY_TEORII_11, LAYFHAKI, LOVUSHKI } = requireSrc('content/teoriya11');
+  const { estScena } = requireSrc('components/tasks/zadanie11/Piktogrammy');
+  const { checkTablitsa, texPieces } = requireSrc('lib/zadanie11/selftest');
+  const { SECTIONS } = requireSrc('lib/zadanie11/taxonomy');
+  for (const sec of SECTIONS) {
+    if (!RAZDELY_TEORII_11.some((r) => r.section === sec.id)) {
+      problems.push({ where: 'теория', what: `нет раздела теории для ${sec.kod}` });
+    }
+  }
+  for (const st of SUBTYPES) {
+    if (!estScena(st.id)) {
+      problems.push({ where: 'теория', what: `у ${st.id} нет мини-иллюстрации` });
+    }
+  }
+  const texts = [];
+  for (const r of RAZDELY_TEORII_11) {
+    for (const id of r.layfhaki) {
+      if (!LAYFHAKI[id]) problems.push({ where: `теория ${r.id}`, what: `нет лайфхака ${id}` });
+    }
+    for (const id of r.lovushki) {
+      if (!LOVUSHKI[id]) problems.push({ where: `теория ${r.id}`, what: `нет ловушки ${id}` });
+    }
+    for (const t of r.tablitsa?.tables ?? []) {
+      problems.push(...checkTablitsa(`теория ${r.id}`, t));
+      texts.push(...t.head, ...t.rows.flat(), t.title ?? '');
+    }
+    texts.push(
+      r.lead,
+      ...r.idei,
+      r.formula?.podpis ?? '',
+      r.tablitsa?.primer ?? '',
+      r.tablitsa?.note ?? '',
+    );
+    for (const k of r.kartochki ?? []) texts.push(k.text);
+    for (const tex of [r.formula?.tex, ...(r.kartochki ?? []).map((k) => k.tex)]) {
+      if (tex) texts.push(`$${tex}$`);
+    }
+  }
+  for (const l of Object.values(LAYFHAKI)) {
+    texts.push(
+      l.lead,
+      l.dolgo.podpis,
+      l.bystro.podpis,
+      ...l.shagi,
+      `$${l.dolgo.tex}$`,
+      `$${l.bystro.tex}$`,
+    );
+    if (l.bystro.itog) texts.push(`$${l.bystro.itog}$`);
+  }
+  for (const l of Object.values(LOVUSHKI)) {
+    texts.push(l.text);
+    if (l.tex) texts.push(`$${l.tex}$`);
+  }
+  for (const text of texts) {
+    const pieces = texPieces(text);
+    if (pieces === null) {
+      problems.push({ where: 'теория', what: `непарный $: ${text.slice(0, 60)}` });
+      continue;
+    }
+    for (const tex of pieces) {
+      try {
+        typeset(tex);
+      } catch (e) {
+        problems.push({
+          where: 'теория',
+          what: `KaTeX: ${e.message.slice(0, 60)} в «${tex.slice(0, 50)}»`,
+        });
+      }
+    }
+    const plain = stripDollarMath(text).replace(/\*\*/g, '');
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+      problems.push({
+        where: 'теория',
+        what: `вне KaTeX (${f.rule}): «${f.match}» в «${text.slice(0, 60)}»`,
+      });
+    }
+  }
+}
+
 /* Склонения. */
 const expect = [
   [sk(1, SLOVA.chas), '1 час'],
