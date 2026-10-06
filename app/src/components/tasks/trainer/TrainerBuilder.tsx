@@ -13,6 +13,7 @@ import {
   type TrainerRequest,
   type TrainerWords,
 } from './TrainerConfigurator';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { TrainerScreen } from './TrainerScreen';
 import { TrainerStats } from './TrainerStats';
 
@@ -109,12 +110,14 @@ export function TrainerBuilder({
 
   if (started !== null) {
     return (
-      <TrainerScreen
-        pool={started.session.tasks}
-        roundKey={started.key}
-        backHref={base}
-        control={started.control}
-      />
+      <ErrorBoundary what="тренажёр" resetKey={started.key}>
+        <TrainerScreen
+          pool={started.session.tasks}
+          roundKey={started.key}
+          backHref={base}
+          control={started.control}
+        />
+      </ErrorBoundary>
     );
   }
 

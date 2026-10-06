@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from './Modal';
 
 export interface FigureZoomProps {
@@ -43,7 +44,7 @@ export function FigureZoom({ children, label, className }: FigureZoomProps) {
         onClick={() => setOpen(true)}
         aria-label={`${label}. Открыть чертёж во весь экран`}
       >
-        {children}
+        <ErrorBoundary what="рисунок">{children}</ErrorBoundary>
       </button>
 
       <Modal
@@ -56,7 +57,9 @@ export function FigureZoom({ children, label, className }: FigureZoomProps) {
         {/* Тот же чертёж, нарисованный крупнее: штриховые линии
             остаются штриховыми, подписи — подписями, потому что это
             вектор, а не увеличенная картинка. */}
-        <span className="figzoom__big">{children}</span>
+        <span className="figzoom__big">
+          <ErrorBoundary what="рисунок">{children}</ErrorBoundary>
+        </span>
       </Modal>
     </>
   );

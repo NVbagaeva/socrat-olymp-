@@ -215,3 +215,9 @@ jobs:
       - name: Проверить печать листов без пустых страниц
         working-directory: app
         run: pnpm test:print-pages
+
+      # Ошибка в одном блоке не роняет страницу, сбой загрузки кода лечится
+      # одной перезагрузкой: сообщение по-русски вместо белого экрана.
+      - name: Проверить границы ошибок
+        working-directory: app
+        run: pnpm test:error-boundaries

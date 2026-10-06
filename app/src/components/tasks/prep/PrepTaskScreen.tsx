@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import type { PrepTask, PrepZakrytoe } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
@@ -271,7 +272,12 @@ export function PrepTaskScreen({
               <HintIcon />
               Подсказка
             </p>
-            <div className="ptask__hint-text" dangerouslySetInnerHTML={{ __html: task.hintHtml }} />
+            <ErrorBoundary what="подсказку" resetKey={task.id}>
+              <div
+                className="ptask__hint-text"
+                dangerouslySetInnerHTML={{ __html: task.hintHtml }}
+              />
+            </ErrorBoundary>
           </aside>
         )}
       </article>
@@ -375,13 +381,15 @@ export function PrepTaskScreen({
       </div>
 
       {solution && zakryto !== null ? (
-        <PrepSolution
-          steps={zakryto.steps}
-          tip={tip}
-          step={step}
-          onStep={setStep}
-          onClose={() => setSolution(false)}
-        />
+        <ErrorBoundary what="разбор" resetKey={task.id}>
+          <PrepSolution
+            steps={zakryto.steps}
+            tip={tip}
+            step={step}
+            onStep={setStep}
+            onClose={() => setSolution(false)}
+          />
+        </ErrorBoundary>
       ) : null}
     </section>
   );

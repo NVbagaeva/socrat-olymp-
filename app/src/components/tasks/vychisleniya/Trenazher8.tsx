@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Badge, Button } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
@@ -86,7 +87,8 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
           ? chosen.map((item) => item.title).join(' и ')
           : counted(chosen.length, 'навык', 'навыка', 'навыков');
 
-  const allCount = mode === 'mixed' ? total : mode === 'mistakes' ? progress.mistakes.length : chosenTotal;
+  const allCount =
+    mode === 'mixed' ? total : mode === 'mistakes' ? progress.mistakes.length : chosenTotal;
   const modeTitle = trainerModes.find((item) => item.id === mode)?.title ?? '';
   const chosenCount = count ?? allCount;
 
@@ -95,7 +97,10 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
       return;
     }
     const tasks = buildSession8({
-      skills: mode === 'mixed' || mode === 'mistakes' ? skills.map((item) => item.id) : chosen.map((item) => item.id),
+      skills:
+        mode === 'mixed' || mode === 'mistakes'
+          ? skills.map((item) => item.id)
+          : chosen.map((item) => item.id),
       level: mode === 'mistakes' ? null : level,
       count: chosenCount,
       mode,
@@ -108,7 +113,16 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
   }
 
   if (started !== null) {
-    return <Trenazher8Screen pool={started.tasks} roundKey={started.key} backHref={base} control={started.control} />;
+    return (
+      <ErrorBoundary what="тренажёр" resetKey={started.key}>
+        <Trenazher8Screen
+          pool={started.tasks}
+          roundKey={started.key}
+          backHref={base}
+          control={started.control}
+        />
+      </ErrorBoundary>
+    );
   }
 
   return (
@@ -138,7 +152,12 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
           </section>
 
           <section className="cfg-step" aria-labelledby="z8-step-params">
-            <StepHead id="z8-step-params" no={trainerPage.params.step} title={trainerPage.params.title} lead={trainerPage.params.lead} />
+            <StepHead
+              id="z8-step-params"
+              no={trainerPage.params.step}
+              title={trainerPage.params.title}
+              lead={trainerPage.params.lead}
+            />
             <div className="cfg-params">
               <OptionGroup id="z8-param-mode" label={trainerPage.params.mode}>
                 {trainerModes.map((item) => {
@@ -170,7 +189,13 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
               {mode === 'mistakes' ? null : (
                 <OptionGroup id="z8-param-level" label={trainerPage.params.level}>
                   {LEVELS.map((item) => (
-                    <Option key={item.id} checked={level === item.id} onSelect={() => setLevel(item.id)} title={item.nazvanie} lead={item.lead} />
+                    <Option
+                      key={item.id}
+                      checked={level === item.id}
+                      onSelect={() => setLevel(item.id)}
+                      title={item.nazvanie}
+                      lead={item.lead}
+                    />
                   ))}
                 </OptionGroup>
               )}
@@ -184,7 +209,9 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
           </h3>
           <Badge tone="info">{VYCHISLENIYA.title}</Badge>
           <p className="cfg-summary__skill">{chosenTitle}</p>
-          <p className="cfg-summary__count">{counted(chosenCount, 'задание', 'задания', 'заданий')}</p>
+          <p className="cfg-summary__count">
+            {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          </p>
           {chosen.length === 1 && mode !== 'mixed' ? (
             <div className="cfg-summary__chart z8-formula z8-formula--big" aria-hidden="true">
               {skill.chart}
@@ -199,7 +226,8 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
           {trainerPage.start}
         </Button>
         <p className="cfg-bar__summary">
-          {VYCHISLENIYA.title} · {chosenTitle} · {modeTitle} · {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          {VYCHISLENIYA.title} · {chosenTitle} · {modeTitle} ·{' '}
+          {counted(chosenCount, 'задание', 'задания', 'заданий')}
         </p>
       </div>
 

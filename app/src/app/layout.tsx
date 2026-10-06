@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
 import { caveat, inter, ptSerif } from '@/lib/fonts';
 import { AppStateProvider } from '@/state/AppState';
 import '@/styles/globals.css';
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {/* Состояние раздела доступно на любой странице: провайдер
             клиентский, содержимое страниц остаётся серверным. */}
+        <ChunkReloadGuard />
         <AppStateProvider>{children}</AppStateProvider>
       </body>
     </html>
