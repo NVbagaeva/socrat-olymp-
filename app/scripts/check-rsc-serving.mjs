@@ -11,22 +11,31 @@
         перепроверяется (cache: 'no-cache').
      2. public/.htaccess — index.txt, открытый как страница, уводится
         на страницу; служебный ответ не хранится (no-store) и помечен
-        Vary.
+        Vary. На текущем хостинге (Timeweb) эти правила НЕ действуют:
+        .txt всегда отдаёт nginx, .htaccess к нему не применяется, и
+        изменить это нельзя (docs/DEPLOYMENT.md). Правила проверяются
+        на будущее — на случай переезда туда, где .txt отдаёт Apache.
+        Сейчас всю работу делает исправление в Next.js.
 
    Проверки:
      A. Исправление в Next.js на месте: в установленном пакете и в
         собранных файлах. Потеряется при обновлении Next.js — упадёт.
-     B. Заголовки настоящего Apache с нашим .htaccess (как на хостинге).
+     B. Заголовки настоящего Apache с нашим .htaccess. Так .txt
+        отдавался бы при переезде; на текущем хостинге .txt отдаёт nginx.
      C. Сценарии в браузере: обычный переход, упавшая фоновая подгрузка,
         уход вкладки в фон, новая версия сайта, прямое открытие
-        index.txt. Сценарии гоняются дважды: через Apache с .htaccess и
-        так, как сейчас отдаёт .txt nginx хостинга (без правил), —
-        исправление в Next.js должно справляться и без сервера.
+        index.txt. Сценарии гоняются дважды: через Apache с .htaccess
+        (на будущее) и так, как сейчас отдаёт .txt nginx хостинга (без
+        правил), — исправление в Next.js должно справляться само.
+     D. Годовой кеш .txt, как у nginx хостинга: после новой выкладки
+        браузер не берёт старый index.txt из кеша, а перепроверяет его
+        по ETag и получает новый; без выкладки — ответ 304.
 
    Запуск после pnpm build:  node scripts/check-rsc-serving.mjs
    Нужны apache2 и Chromium (Playwright). */
 
 import fs from 'node:fs';
+import http from 'node:http';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -90,7 +99,9 @@ async function head(url, headers = {}) {
   return res;
 }
 
-console.log('\nB. Заголовки (Apache + public/.htaccess)');
+console.log(
+  '\nB. Заголовки (Apache + public/.htaccess; на текущем хостинге .txt отдаёт nginx — на будущее)',
+);
 {
   const html = await head(PAGE, { Accept: 'text/html' });
   check(
@@ -195,7 +206,7 @@ const link = (page) => page.locator(`a[href="${PAGE}"]`).first();
 
 for (const server of ['apache', 'nginx']) {
   console.log(
-    `\nC. Сценарии в браузере — ${server === 'apache' ? 'Apache с .htaccess' : '.txt отдаёт nginx, без правил'}`,
+    `\nC. Сценарии в браузере — ${server === 'apache' ? 'Apache с .htaccess (на будущее)' : '.txt отдаёт nginx, без правил (как сейчас на хостинге)'}`,
   );
 
   await scenario(server, 'обычный переход по ссылке (без перезагрузки)', async (page) => {
@@ -276,6 +287,145 @@ for (const server of ['apache', 'nginx']) {
     });
   }
 }
+
+/* ── D. Годовой кеш .txt и новая версия сайта ──────────────────── */
+
+/* Так отдаёт .txt nginx хостинга (проверено на budetege.ru): кеш на
+   год (max-age=31536000), ETag и Last-Modified, на условный запрос —
+   304. Сценарии C этого не проверяют: page.route выключает кеш
+   браузера. Здесь настоящий HTTP-сервер, и кеш работает как у ученика.
+
+   Версия сайта переключается на лету: во второй версии у index.txt
+   другая шапка страницы и другие ETag и Last-Modified — как после
+   выкладки по FTP. Исправление в Next.js (cache: 'no-cache') должно
+   перепроверить закешированный ответ и показать новую шапку. */
+
+const OLD_TITLE = 'Задание №4. Вероятность: простая';
+const NEW_TITLE = 'Задание №4. Новая версия сайта';
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' };
+let release = 1;
+const txtLog = [];
+const nginx = http.createServer((req, res) => {
+  const url = new URL(req.url, 'http://localhost');
+  let file = path.join(OUT, decodeURIComponent(url.pathname));
+  if (file.endsWith('/')) {
+    file = path.join(file, 'index.html');
+  }
+  if (!file.startsWith(OUT) || !fs.existsSync(file)) {
+    res.writeHead(404).end('not found');
+    return;
+  }
+  let body = fs.readFileSync(file);
+  if (!file.endsWith('.txt')) {
+    res.writeHead(200, {
+      'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream',
+      'cache-control': file.endsWith('.html') ? 'no-cache' : 'max-age=31536000',
+    });
+    res.end(body);
+    return;
+  }
+  if (release === 2 && url.pathname === TXT) {
+    body = Buffer.from(body.toString('utf8').replaceAll(OLD_TITLE, NEW_TITLE));
+  }
+  const etag = `"${release === 1 ? '6ac3f000' : '6ac48a31'}-${body.length.toString(16)}"`;
+  const modified = new Date(Date.UTC(2026, 9, release === 1 ? 5 : 6)).toUTCString();
+  const fresh = req.headers['if-none-match'] === etag;
+  txtLog.push({
+    path: url.pathname,
+    release,
+    inm: req.headers['if-none-match'] ?? '',
+    status: fresh ? 304 : 200,
+  });
+  const headers = {
+    'content-type': 'text/plain; charset=utf-8',
+    'cache-control': 'max-age=31536000',
+    etag,
+    'last-modified': modified,
+  };
+  if (fresh) {
+    res.writeHead(304, headers).end();
+    return;
+  }
+  res.writeHead(200, headers).end(body);
+});
+await new Promise((resolve) => nginx.listen(4181, '127.0.0.1', resolve));
+const N = 'http://127.0.0.1:4181';
+
+console.log('\nD. Годовой кеш .txt (как nginx хостинга) и новая версия сайта');
+{
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const title = () => page.locator('h1').first().innerText();
+
+  /* Первый визит: переход без перезагрузки, ответ версии 1 ложится в
+     кеш браузера на год. */
+  await page.goto(N + FROM, { waitUntil: 'networkidle' });
+  await link(page).click();
+  await page.waitForURL('**' + PAGE);
+  await page.waitForTimeout(800);
+  check((await title()) === OLD_TITLE, `версия 1: на странице «${await title()}»`);
+  const first = txtLog.filter((r) => r.path === TXT);
+  check(
+    first.length > 0 && first.every((r) => r.status === 200),
+    'версия 1: index.txt получен с сервера',
+  );
+  const rscUrl = await page.evaluate(
+    (txt) =>
+      performance
+        .getEntriesByType('resource')
+        .map((e) => e.name)
+        .find((n) => new URL(n).pathname === txt) ?? '',
+    TXT,
+  );
+
+  /* Выкладка: на сервере версия 2. */
+  release = 2;
+
+  /* Так было бы без исправления: обычный fetch берёт ответ из кеша,
+     даже не спросив сервер, — ученик увидел бы прошлую версию. */
+  const before = txtLog.length;
+  const cached = await page.evaluate(
+    async (u) =>
+      (await (await fetch(u, { cache: 'default', headers: { RSC: '1' } })).text()).length,
+    rscUrl,
+  );
+  check(
+    rscUrl !== '' && cached > 0 && txtLog.length === before,
+    'контроль: без перепроверки браузер отдаёт index.txt прошлой версии из кеша, не спрашивая сервер',
+  );
+
+  /* Второй визит в той же вкладке: страница с нуля, затем переход. */
+  txtLog.length = 0;
+  await page.goto(N + FROM, { waitUntil: 'networkidle' });
+  await link(page).click();
+  await page.waitForURL('**' + PAGE);
+  await page.waitForTimeout(800);
+  const second = txtLog.filter((r) => r.path === TXT);
+  check(
+    second.some((r) => r.inm !== ''),
+    `версия 2: браузер перепроверил закешированный index.txt по ETag (${second.map((r) => `${r.status} If-None-Match ${r.inm || '—'}`).join('; ')})`,
+  );
+  check(
+    second.some((r) => r.status === 200 && r.release === 2),
+    'версия 2: сервер отдал новый index.txt (200), старый не использован',
+  );
+  check((await title()) === NEW_TITLE, `версия 2: на странице «${await title()}»`);
+
+  /* Без новой выкладки перепроверка стоит одного ответа 304. */
+  txtLog.length = 0;
+  await page.goto(N + FROM, { waitUntil: 'networkidle' });
+  await link(page).click();
+  await page.waitForURL('**' + PAGE);
+  await page.waitForTimeout(800);
+  const third = txtLog.filter((r) => r.path === TXT);
+  check(
+    third.length > 0 && third.every((r) => r.status === 304),
+    `без новой выкладки: ответ 304 без тела (${third.map((r) => r.status).join(', ')})`,
+  );
+  check((await title()) === NEW_TITLE, `без новой выкладки: на странице «${await title()}»`);
+  await context.close();
+}
+nginx.close();
 
 await browser.close();
 const log = apache.stop();
