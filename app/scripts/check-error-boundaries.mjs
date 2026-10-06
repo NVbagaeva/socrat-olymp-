@@ -243,6 +243,9 @@ async function breakSolutionDecode(context) {
   const page = await context.newPage();
   await page.goto(`${BASE}/zadaniya/12/rational/`);
   await page.waitForLoadState('load');
+  /* Слушатель сбоев ставится, когда страница ожила (TopicTabs ставит
+     метку __tabsReady). Раньше сбой послать бессмысленно: ловить некому. */
+  await page.waitForFunction(() => window.__tabsReady === true);
   await page.evaluate(() => {
     window.__marker = 'до';
   });
@@ -254,7 +257,7 @@ async function breakSolutionDecode(context) {
       );
     });
 
-  const reloaded = page.waitForEvent('load', { timeout: 5000 }).then(
+  const reloaded = page.waitForEvent('load', { timeout: 20000 }).then(
     () => true,
     () => false,
   );
@@ -269,6 +272,7 @@ async function breakSolutionDecode(context) {
     'перезагрузка записана в sessionStorage',
   );
 
+  await page.waitForFunction(() => window.__tabsReady === true);
   await page.evaluate(() => {
     window.__marker = 'после';
   });
