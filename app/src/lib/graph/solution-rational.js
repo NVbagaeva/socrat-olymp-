@@ -331,7 +331,7 @@ function argumentBlocks(c, form, y0, x) {
   var den = isZero(c.s) ? 'x' : 'x' + term(mul(frac(-1), c.s));
   var blocks = [text('Решаем уравнение ' + m('f(x) = ' + tex(y0)) + ':'),
     formula(lhs + ' = ' + tex(y0)),
-    text('ОДЗ: знаменатель не равен нулю.'),
+    text('ОДЗ (область допустимых значений): знаменатель не равен нулю.'),
     formula('\\text{ОДЗ: } ' + den + ' \\ne 0' + (isZero(c.s) ? '' : ', \\ x \\ne ' + tex(c.s)))];
   if (!isZero(c.t)) {
     blocks.push(formula('\\dfrac{' + tex(c.m) + '}{' + den + '} = ' + tex(y0) + term(mul(frac(-1), c.t)) +
@@ -437,7 +437,7 @@ function lineSteps(c, task) {
 
   /* Дробно-рациональное уравнение: ОДЗ — отдельным шагом. */
   steps.push(step('odz', 'ОДЗ', [
-    text('В знаменателе стоит ' + m('x') + ', а знаменатель не может быть равен нулю:'),
+    text('ОДЗ — область допустимых значений. В знаменателе стоит ' + m('x') + ', а знаменатель не может быть равен нулю:'),
     formula('\\text{ОДЗ: } x \\ne 0')
   ]));
 

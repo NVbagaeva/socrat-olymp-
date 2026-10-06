@@ -132,6 +132,13 @@ export function checkTablitsa(where: string, t: Tablitsa): Problem[] {
     if (labels.join('|') !== STROKI_KONC.join('|')) {
       problems.push({ where, what: `таблица концентрации: строки ${labels.join(' | ')}` });
     }
+    /* Столбцы — римскими цифрами (I, II, I + II, I*, …), вода или
+       название продукта (виноград, изюм); арабских цифр нет. */
+    for (const h of t.head.slice(1)) {
+      if (/[0-9]/.test(h) || !/^(?:(?:I{1,3}\*?|вода|[а-яё ]+)(?: \+ |$))+$/.test(h)) {
+        problems.push({ where, what: `таблица концентрации: столбец «${h}» не римскими цифрами` });
+      }
+    }
   }
   return problems;
 }
@@ -180,7 +187,7 @@ const VID_RAZDELA: Record<string, Tablitsa['vid']> = {
 /** Подтипы без таблицы модели: перевод единиц, система без таблицы. */
 const BEZ_TABLITSY = new Set(['DP-01', 'OK-03']);
 
-/** Подтипы «равных масс»: вторая таблица 1*, 2*, 1* + 2* и сокращение m. */
+/** Подтипы «равных масс»: вторая таблица I*, II*, I* + II* и сокращение m. */
 const RAVNYE_MASSY = new Set(['SM-02', 'SM-07']);
 
 /**
@@ -211,8 +218,8 @@ export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
     add('объём работы принят за 1, но в решении это не сказано');
   }
   if (RAVNYE_MASSY.has(id)) {
-    if (!tables.some((t) => t.head.includes('1*') && t.head.includes('1* + 2*'))) {
-      add('нет таблицы равных масс 1*, 2*, 1* + 2*');
+    if (!tables.some((t) => t.head.includes('I*') && t.head.includes('I* + II*'))) {
+      add('нет таблицы равных масс I*, II*, I* + II*');
     }
     if (!text.includes('Сокращаем на $m$')) {
       add('не показано сокращение на m');
@@ -274,7 +281,7 @@ export function checkDrobnye(where: string, s: Solved): Problem[] {
     add('дробное уравнение без шага «Отбор корней»');
   }
   const odz = s.etapy.find((e) => /\. ОДЗ$/.test(e.title));
-  if (odz && !odz.lines.some((l) => l.includes('ОДЗ:'))) {
+  if (odz && !odz.lines.some((l) => l.startsWith('**ОДЗ** (область допустимых значений):'))) {
     add('в шаге ОДЗ нет строки «ОДЗ: …»');
   }
   if (odz && !odz.lines.some((l) => l.includes('По смыслу задачи'))) {

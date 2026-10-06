@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Details } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
@@ -108,8 +109,38 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </p>
       </div>
 
+      {r.vvedenie ? (
+        <section className="z11-card z11-vved" aria-label={r.vvedenie.title}>
+          <h4 className="z11-card__title">
+            <Piktogramma name="drop" className="z11-card__icon" />
+            {r.vvedenie.title}
+          </h4>
+          <p className="z11-card__text">
+            <Tex text={r.vvedenie.opredelenie} />
+          </p>
+          <ul className="z11-vved__list">
+            {r.vvedenie.kartinki.map((k) => (
+              <li className="z11-vved__item" key={k.title}>
+                <Image className="z11-vved__pic" src={k.src} alt={k.alt} width={480} height={480} />
+                <span className="z11-vved__title">{k.title}</span>
+                <span className="z11-vved__text">
+                  <Tex text={k.text} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="z11-vved__glavnoe">
+            <Tex text={r.vvedenie.glavnoe} />
+          </p>
+        </section>
+      ) : null}
+
       {r.formula || r.tablitsa ? (
-        <div className="z11-teor__pair">
+        <div
+          className={
+            r.tablitsa?.legenda ? 'z11-teor__pair z11-teor__pair--stack' : 'z11-teor__pair'
+          }
+        >
           {r.formula ? (
             <section className="z11-card">
               <h4 className="z11-card__title">
@@ -131,6 +162,15 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
               <p className="z11-card__lead">
                 <Tex text={r.tablitsa.primer} />
               </p>
+              {r.tablitsa.legenda ? (
+                <ul className="z11-legenda">
+                  {r.tablitsa.legenda.map((l) => (
+                    <li key={l}>
+                      <Tex text={l} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {r.tablitsa.tables.map((t, i) => (
                 <Tablitsa11 table={t} key={i} />
               ))}

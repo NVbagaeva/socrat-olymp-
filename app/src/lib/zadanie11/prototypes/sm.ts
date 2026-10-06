@@ -57,9 +57,9 @@ const SM01: Subtype = {
       ),
       tables: [
         koncentraciya([
-          { label: '1', mvv: `${d(pp / 100)}\\cdot${d(V)}=${d(s)}`, mr: d(V), p: d(pp) },
+          { label: 'I', mvv: `${d(pp / 100)}\\cdot${d(V)}=${d(s)}`, mr: d(V), p: d(pp) },
           { label: 'вода', mvv: '0', mr: d(W), p: '0' },
-          { label: '1 + вода', mvv: `\\dfrac{x}{100}\\cdot${d(V + W)}`, mr: d(V + W), p: 'x' },
+          { label: 'I + вода', mvv: `\\dfrac{x}{100}\\cdot${d(V + W)}`, mr: d(V + W), p: 'x' },
         ]),
       ],
       hints: [
@@ -105,7 +105,7 @@ const SM02: Subtype = {
           [`В первом растворе $${vesh('m', p1)}$, во втором $${vesh('m', p2)}$ вещества.`],
         ],
         [
-          'Уравнение по строке $m_{\\text{в.в.}}$',
+          'Уравнение по строке $m_{\\text{в.в.}}$ (масса вещества)',
           [`$\\dfrac{x}{100}\\cdot 2m=${d(p1 / 100)}m+${d(p2 / 100)}m$.`],
         ],
         [
@@ -123,9 +123,9 @@ const SM02: Subtype = {
       tables: [
         koncentraciya(
           [
-            { label: '1*', mvv: `${d(p1 / 100)}m`, mr: 'm', p: d(p1) },
-            { label: '2*', mvv: `${d(p2 / 100)}m`, mr: 'm', p: d(p2) },
-            { label: '1* + 2*', mvv: '\\dfrac{x}{100}\\cdot2m', mr: '2m', p: 'x' },
+            { label: 'I*', mvv: `${d(p1 / 100)}m`, mr: 'm', p: d(p1) },
+            { label: 'II*', mvv: `${d(p2 / 100)}m`, mr: 'm', p: d(p2) },
+            { label: 'I* + II*', mvv: '\\dfrac{x}{100}\\cdot2m', mr: '2m', p: 'x' },
           ],
           'Берём растворов поровну — по $m$',
         ),
@@ -174,7 +174,7 @@ const SM03: Subtype = {
           [`$${vesh(String(m1), p1)}=${d(s1)}$ и $${vesh(String(m2), p2)}=${d(s2)}$.`],
         ],
         [
-          'Уравнение по строке $m_{\\text{в.в.}}$',
+          'Уравнение по строке $m_{\\text{в.в.}}$ (масса вещества)',
           [`$\\dfrac{x}{100}\\cdot${d(m1 + m2)}=${d(s1)}+${d(s2)}$.`],
         ],
         ['Решение', [`$x=${frac(d(round9(s1 + s2)) + '\\cdot100', m1 + m2)}=${d(c)}$.`]],
@@ -182,9 +182,9 @@ const SM03: Subtype = {
       ),
       tables: [
         koncentraciya([
-          { label: '1', mvv: `${d(p1 / 100)}\\cdot${d(m1)}=${d(s1)}`, mr: d(m1), p: d(p1) },
-          { label: '2', mvv: `${d(p2 / 100)}\\cdot${d(m2)}=${d(s2)}`, mr: d(m2), p: d(p2) },
-          { label: '1 + 2', mvv: `\\dfrac{x}{100}\\cdot${d(m1 + m2)}`, mr: d(m1 + m2), p: 'x' },
+          { label: 'I', mvv: `${d(p1 / 100)}\\cdot${d(m1)}=${d(s1)}`, mr: d(m1), p: d(p1) },
+          { label: 'II', mvv: `${d(p2 / 100)}\\cdot${d(m2)}=${d(s2)}`, mr: d(m2), p: d(p2) },
+          { label: 'I + II', mvv: `\\dfrac{x}{100}\\cdot${d(m1 + m2)}`, mr: d(m1 + m2), p: 'x' },
         ]),
       ],
       hints: [
@@ -265,18 +265,18 @@ const SM04: Subtype = {
       tables: [
         koncentraciya([
           {
-            label: '1',
+            label: 'I',
             mvv: `${d(p1 / 100)}${heavier === '2' ? 'x' : `(x+${d(dd)})`}`,
             mr: m1,
             p: d(p1),
           },
           {
-            label: '2',
+            label: 'II',
             mvv: `${d(p2 / 100)}${heavier === '2' ? `(x+${d(dd)})` : 'x'}`,
             mr: m2,
             p: d(p2),
           },
-          { label: '1 + 2', mvv: `${d(p3 / 100)}(2x+${d(dd)})`, mr: `2x+${d(dd)}`, p: d(p3) },
+          { label: 'I + II', mvv: `${d(p3 / 100)}(2x+${d(dd)})`, mr: `2x+${d(dd)}`, p: d(p3) },
         ]),
       ],
       hints: [
@@ -323,7 +323,7 @@ const SM05: Subtype = {
         ['Обозначаем', [`Масса первого сплава — $x$ кг, второго — $${d(M)}-x$ кг.`]],
         ['Таблица', ['Масса никеля в каждом сплаве — в таблице.']],
         [
-          'Уравнение по строке $m_{\\text{в.в.}}$',
+          'Уравнение по строке $m_{\\text{в.в.}}$ (масса вещества)',
           [`$${d(p1 / 100)}x+${d(p2 / 100)}(${d(M)}-x)=${d(p3 / 100)}\\cdot${d(M)}$.`],
         ],
         [
@@ -337,10 +337,10 @@ const SM05: Subtype = {
       ),
       tables: [
         koncentraciya([
-          { label: '1', mvv: `${d(p1 / 100)}x`, mr: 'x', p: d(p1) },
-          { label: '2', mvv: `${d(p2 / 100)}(${d(M)}-x)`, mr: `${d(M)}-x`, p: d(p2) },
+          { label: 'I', mvv: `${d(p1 / 100)}x`, mr: 'x', p: d(p1) },
+          { label: 'II', mvv: `${d(p2 / 100)}(${d(M)}-x)`, mr: `${d(M)}-x`, p: d(p2) },
           {
-            label: '1 + 2',
+            label: 'I + II',
             mvv: `${d(p3 / 100)}\\cdot${d(M)}=${d(round9((p3 * M) / 100))}`,
             mr: d(M),
             p: d(p3),
@@ -400,7 +400,7 @@ const SM06: Subtype = {
             ],
           ],
           [
-            'Уравнение по строке $m_{\\text{в.в.}}$',
+            'Уравнение по строке $m_{\\text{в.в.}}$ (масса вещества)',
             [`$${d((100 - w1) / 100)}x=${d((100 - w2) / 100)}\\cdot${d(R)}$.`],
           ],
           ['Решение', [`$x=\\dfrac{${d(100 - w2)}\\cdot${d(R)}}{${d(100 - w1)}}=${d(G)}$.`]],
@@ -577,10 +577,10 @@ const SM07: Subtype = {
       tables: [
         koncentraciya(
           [
-            { label: '1', mvv: `\\dfrac{x}{100}\\cdot${d(m1)}`, mr: d(m1), p: 'x' },
-            { label: '2', mvv: `\\dfrac{y}{100}\\cdot${d(m2)}`, mr: d(m2), p: 'y' },
+            { label: 'I', mvv: `\\dfrac{x}{100}\\cdot${d(m1)}`, mr: d(m1), p: 'x' },
+            { label: 'II', mvv: `\\dfrac{y}{100}\\cdot${d(m2)}`, mr: d(m2), p: 'y' },
             {
-              label: '1 + 2',
+              label: 'I + II',
               mvv: `${d(c / 100)}\\cdot${d(m1 + m2)}=${d(round9((c * (m1 + m2)) / 100))}`,
               mr: d(m1 + m2),
               p: d(c),
@@ -590,9 +590,9 @@ const SM07: Subtype = {
         ),
         koncentraciya(
           [
-            { label: '1*', mvv: '\\dfrac{x}{100}\\cdot m', mr: 'm', p: 'x' },
-            { label: '2*', mvv: '\\dfrac{y}{100}\\cdot m', mr: 'm', p: 'y' },
-            { label: '1* + 2*', mvv: `${d(e / 100)}\\cdot2m`, mr: '2m', p: d(e) },
+            { label: 'I*', mvv: '\\dfrac{x}{100}\\cdot m', mr: 'm', p: 'x' },
+            { label: 'II*', mvv: '\\dfrac{y}{100}\\cdot m', mr: 'm', p: 'y' },
+            { label: 'I* + II*', mvv: `${d(e / 100)}\\cdot2m`, mr: '2m', p: d(e) },
           ],
           'Смешали равные массы — по $m$',
         ),
@@ -678,21 +678,21 @@ const SM08: Subtype = {
       tables: [
         koncentraciya(
           [
-            { label: '1', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
-            { label: '2', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
+            { label: 'I', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
+            { label: 'II', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
             { label: 'вода', mvv: '0', mr: '10', p: '0' },
-            { label: '1 + 2 + вода', mvv: `${d(c / 100)}(x+y+10)`, mr: 'x+y+10', p: d(c) },
+            { label: 'I + II + вода', mvv: `${d(c / 100)}(x+y+10)`, mr: 'x+y+10', p: d(c) },
           ],
           'Добавили воду',
         ),
         koncentraciya(
           [
-            { label: '1', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
-            { label: '2', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
-            { label: '3', mvv: '0{,}5\\cdot10=5', mr: '10', p: '50' },
-            { label: '1 + 2 + 3', mvv: `${d(dd / 100)}(x+y+10)`, mr: 'x+y+10', p: d(dd) },
+            { label: 'I', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
+            { label: 'II', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
+            { label: 'III', mvv: '0{,}5\\cdot10=5', mr: '10', p: '50' },
+            { label: 'I + II + III', mvv: `${d(dd / 100)}(x+y+10)`, mr: 'x+y+10', p: d(dd) },
           ],
-          'Вместо воды — $50\\,\\%$-й раствор (столбец 3)',
+          'Вместо воды — $50\\,\\%$-й раствор (столбец III)',
         ),
       ],
       hints: [

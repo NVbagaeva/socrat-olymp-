@@ -125,6 +125,14 @@ for (const [word, id] of [
       r.tablitsa?.primer ?? '',
       r.tablitsa?.note ?? '',
     );
+    texts.push(...(r.tablitsa?.legenda ?? []));
+    if (r.vvedenie) {
+      texts.push(
+        r.vvedenie.opredelenie,
+        r.vvedenie.glavnoe,
+        ...r.vvedenie.kartinki.flatMap((k) => [k.title, k.text]),
+      );
+    }
     for (const k of r.kartochki ?? []) texts.push(k.text);
     for (const tex of [r.formula?.tex, ...(r.kartochki ?? []).map((k) => k.tex)]) {
       if (tex) texts.push(`$${tex}$`);

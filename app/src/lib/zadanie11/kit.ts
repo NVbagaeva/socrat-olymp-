@@ -99,10 +99,14 @@ export function rabota(
 }
 
 /** Подписи строк развёрнутой таблицы концентрации. */
-export const STROKI_KONC = ['$m_{\\text{в.в.}}$', '$m_{\\text{р-ра}}$', '$p\\,\\%$'];
+export const STROKI_KONC = [
+  '$m_{\\text{в.в.}}$ — масса вещества',
+  '$m_{\\text{р-ра}}$ — масса раствора',
+  '$p\\,\\%$ — концентрация',
+];
 
 export interface Stolbets {
-  /** Подпись столбца: «1», «2», «1 + 2», «вода», «1*». */
+  /** Подпись столбца — римскими цифрами: «I», «II», «I + II», «вода», «I + вода», «I*». */
   label: string;
   /** Масса вещества, TeX. */
   mvv: string;
@@ -113,8 +117,11 @@ export interface Stolbets {
 }
 
 /**
- * Развёрнутая таблица концентрации: строки m_в.в., m_р-ра, p %;
- * столбцы — участники смешивания.
+ * Развёрнутая таблица концентрации: строки m_в.в. (масса вещества),
+ * m_р-ра (масса раствора), p % (концентрация) — с расшифровкой в
+ * подписи строки; столбцы — участники смешивания римскими цифрами
+ * (I, II, I + II, вода, I + II + вода; для равных масс I*, II*,
+ * I* + II*). Методика — docs/zadanie-11/metodika.md.
  */
 export function koncentraciya(cols: Stolbets[], title?: string): Tablitsa {
   const [r1, r2, r3] = STROKI_KONC as [string, string, string];
@@ -378,7 +385,7 @@ export function drobnoe(o: Drobnoe): DrobnoeEtapy {
   const odz: [string, string[]] = [
     'ОДЗ',
     [
-      `**ОДЗ:** ${zaprety(o.nuli, x)} — знаменатели не равны нулю.`,
+      `**ОДЗ** (область допустимых значений): ${zaprety(o.nuli, x)} — знаменатели не равны нулю.`,
       `**По смыслу задачи:** ${smysl} — ${o.pochemu}.${o.uslovie ? ` По условию ещё $${x}>${d(o.uslovie.bolshe)}$ (${o.uslovie.text}).` : ''}`,
     ],
   ];

@@ -453,6 +453,10 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     align-items: start;
   }
+  /* Смеси: развёрнутая таблица широкая — формула и таблица друг под другом. */
+  .z11-teor__pair--stack {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .z11-teor__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
@@ -674,4 +678,49 @@
 }
 .z11-card__obosnovanie {
   border-left: 3px solid var(--color-success);
+}
+
+/* «Что такое концентрация»: определение и примеры из жизни с картинками. */
+.z11-vved__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z11-vved__item {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z11-vved__pic {
+  justify-self: center;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+}
+.z11-vved__title {
+  font-weight: 700;
+}
+.z11-vved__text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-vved__glavnoe {
+  padding: var(--space-3);
+  border-left: 4px solid var(--z11-c, var(--color-primary));
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z11-legenda {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
