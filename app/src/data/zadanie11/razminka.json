@@ -1,0 +1,26 @@
+[
+  { "id": "RZ-01", "params": { "c": 360, "g": 1750, "M": 1000 }, "answer": 370 },
+  { "id": "RZ-02", "params": { "S": 75, "t": 6 }, "answer": 45 },
+  { "id": "RZ-03", "params": { "t0": 800, "t1": 890, "dh": 7, "S": 6800 }, "answer": 800 },
+  { "id": "RZ-04", "params": { "cap": 45, "a": 312, "b": 14 }, "answer": 8 },
+  { "id": "RZ-05", "params": { "g": 120, "can": 900, "area": 32 }, "answer": 5 },
+  {
+    "id": "RZ-06",
+    "params": { "dose": 0.25, "times": 4, "days": 28, "pack": 20, "tab": 0.25 },
+    "answer": 6
+  },
+  { "id": "RZ-07", "params": { "form": "yahta", "k": 15, "unit": 1852 }, "answer": 28 },
+  { "id": "RZ-07", "params": { "form": "unciya", "k": 6, "unit": 28.35 }, "answer": 170 },
+  { "id": "RZ-08", "params": { "price": 45, "money": 700 }, "answer": 14 },
+  { "id": "RZ-09", "params": { "price": 30, "money": 1000, "p": 20 }, "answer": 27 },
+  { "id": "RZ-10", "params": { "p": 15, "N": 6630 }, "answer": 7800 },
+  { "id": "RZ-11", "params": { "p": 13, "N": 52200 }, "answer": 60000 },
+  { "id": "RZ-12", "params": { "N": 12000, "p1": 25, "p2": 40 }, "answer": 5400 },
+  { "id": "RZ-13", "params": { "a": 50, "b": 20, "ask": "bolshe" }, "answer": 150 },
+  { "id": "RZ-13", "params": { "a": 50, "b": 20, "ask": "menshe" }, "answer": 60 },
+  { "id": "RZ-14", "params": { "p": 25 }, "answer": 20 },
+  { "id": "RZ-15", "params": { "p1": 20, "p2": 40 }, "answer": 100 },
+  { "id": "RZ-16", "params": { "p1": 20, "p2": 50 }, "answer": 80 },
+  { "id": "RZ-17", "params": { "a": 8, "b": 35 }, "answer": 2.8 },
+  { "id": "RZ-18", "params": { "t0": 555, "br": 20, "t1": 665 }, "answer": 1.5 }
+]

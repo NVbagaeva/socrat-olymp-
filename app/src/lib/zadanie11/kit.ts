@@ -1,0 +1,251 @@
+/**
+ * Строительные блоки разборов и подсказок задания №11.
+ *
+ * Разбор каждого подтипа — пять этапов с подписями; подсказка —
+ * цепочка вопросов с кнопками. Здесь общие куски: вопрос с
+ * перемешанными вариантами, решение квадратного уравнения с
+ * отбором корня, подбор множителей для x(x + d) = S.
+ */
+
+import type { Etap, HintStep, Params, Tablitsa } from './types';
+import { d, fq, gcd, isqrt, q, val, type Q } from './num';
+
+/* ── Параметры ──────────────────────────────────────────────────── */
+
+export function num(p: Params, key: string): number {
+  const v = p[key];
+  if (typeof v !== 'number' || !Number.isFinite(v)) {
+    throw new Error(`параметр ${key}: ожидалось число, пришло ${String(v)}`);
+  }
+  return v;
+}
+
+/** Элемент массива по индексу; выход за границы — ошибка. */
+export function at<T>(items: readonly T[], i: number): T {
+  const v = items[i];
+  if (v === undefined) {
+    throw new Error(`нет элемента ${i}`);
+  }
+  return v;
+}
+
+/** Значение словаря по ключу; нет ключа — ошибка. */
+export function key<T>(rec: Readonly<Record<string, T>>, k: string): T {
+  const v = rec[k];
+  if (v === undefined) {
+    throw new Error(`нет ключа ${k}`);
+  }
+  return v;
+}
+
+export function str<T extends string>(p: Params, key: string, allowed: readonly T[]): T {
+  const v = p[key] ?? allowed[0];
+  if (typeof v !== 'string' || !allowed.includes(v as T)) {
+    throw new Error(
+      `параметр ${key}: ожидалось одно из ${allowed.join(', ')}, пришло ${String(v)}`,
+    );
+  }
+  return v as T;
+}
+
+/* ── Этапы ──────────────────────────────────────────────────────── */
+
+export function etap(no: number, title: string, lines: string[]): Etap {
+  return { title: `Шаг ${no}. ${title}`, lines };
+}
+
+/** Собрать этапы по порядку: номера ставятся сами. */
+export function etapy(...items: Array<[string, string[]] | null | false>): Etap[] {
+  return items
+    .filter((x): x is [string, string[]] => Array.isArray(x))
+    .map(([title, lines], i) => etap(i + 1, title, lines));
+}
+
+export function tablitsa(head: string[], rows: string[][]): Tablitsa {
+  return { head, rows };
+}
+
+/* ── Подсказки ──────────────────────────────────────────────────── */
+
+function hash(s: string): number {
+  let h = 0x811c9dc5;
+  for (const ch of s) {
+    h ^= ch.codePointAt(0) ?? 0;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h;
+}
+
+/**
+ * Вопрос подсказки. Верный вариант и неверные перемешиваются
+ * детерминированно (по тексту вопроса): у одной задачи порядок
+ * кнопок всегда один. Повторы среди неверных выбрасываются.
+ */
+export function vopros(
+  question: string,
+  right: string,
+  wrong: string[],
+  comment?: string,
+): HintStep {
+  const uniq = [...new Set(wrong.filter((w) => w !== right))].slice(0, 3);
+  const all = [right, ...uniq];
+  let seed = hash(question + right);
+  for (let i = all.length - 1; i > 0; i -= 1) {
+    seed = Math.imul(seed ^ (seed >>> 15), 0x2c1b3c6d) >>> 0;
+    const j = seed % (i + 1);
+    const tmp = at(all, i);
+    all[i] = at(all, j);
+    all[j] = tmp;
+  }
+  const step: HintStep = { question, options: all, correct: all.indexOf(right) };
+  if (comment) {
+    step.comment = comment;
+  }
+  return step;
+}
+
+/** Вопрос «что спрашивают» — последний шаг почти всех подсказок. */
+export function chtoSprashivayut(right: string, wrong: string[], comment?: string): HintStep {
+  return vopros('Что именно спрашивают в задаче?', right, wrong, comment);
+}
+
+/* ── Решение квадратного уравнения ─────────────────────────────── */
+
+export interface Kvadrat {
+  /** Строки решения с формулами. */
+  lines: string[];
+  /** Корни по возрастанию (рациональные). */
+  roots: [Q, Q];
+  /** Уравнение после сокращения: TeX без долларов. */
+  tex: string;
+  /** Уравнение до сокращения — с него начинается запись решения. */
+  ishodnoe: string;
+}
+
+/** Многочлен ax² + bx + c в TeX. */
+export function poly(a: number, b: number, c: number, x = 'x'): string {
+  const term = (k: number, v: string, first: boolean): string => {
+    if (k === 0) {
+      return '';
+    }
+    const sign = k < 0 ? '-' : first ? '' : '+';
+    const abs = Math.abs(k);
+    const coef = abs === 1 && v !== '' ? '' : d(abs);
+    return `${sign}${coef}${v}`;
+  };
+  let s = term(a, `${x}^2`, true);
+  s += term(b, x, s === '');
+  s += term(c, '', s === '');
+  return s === '' ? '0' : s;
+}
+
+/** Разложение числа на множители для «большого» дискриминанта. */
+function razlozhenie(D: number): string | null {
+  if (D < 10_000) {
+    return null;
+  }
+  const r = isqrt(D);
+  if (r === null) {
+    return null;
+  }
+  /* D = (k·m)²: показываем как k²·m², где k — степень 10 или 2 и 5. */
+  for (const k of [100, 50, 40, 30, 20, 10, 5, 4, 3, 2]) {
+    if (r % k === 0 && r / k > 1) {
+      return `${d(k * k)}\\cdot${d((r / k) ** 2)}=(${d(k)}\\cdot${d(r / k)})^2=${d(r)}^2`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Решить ax² + bx + c = 0 с целыми коэффициентами: сначала делим на
+ * общий множитель, затем дискриминант. Ожидается, что корни
+ * рациональные (задачи банка и генератор так устроены).
+ */
+export function kvadrat(a0: number, b0: number, c0: number, x = 'x'): Kvadrat {
+  let a = a0;
+  let b = b0;
+  let c = c0;
+  const lines: string[] = [];
+  if (a < 0) {
+    a = -a;
+    b = -b;
+    c = -c;
+  }
+  const ishodnoe = `${poly(a, b, c, x)}=0`;
+  const g = gcd(gcd(a, b), c);
+  if (g > 1) {
+    lines.push(`Делим обе части на $${d(g)}$: $${poly(a / g, b / g, c / g, x)}=0$.`);
+    a /= g;
+    b /= g;
+    c /= g;
+  }
+  const tex = `${poly(a, b, c, x)}=0`;
+  if (c === 0) {
+    lines.push(`Выносим $${x}$: $${x}(${poly(0, a, b, x)})=0$.`);
+    const other = q(-b, a);
+    const roots: [Q, Q] = val(other) < 0 ? [other, q(0)] : [q(0), other];
+    return { lines, roots, tex, ishodnoe };
+  }
+  if (b === 0) {
+    const r2 = q(-c, a);
+    lines.push(`$${x}^2=${fq(r2)}$.`);
+    const top = isqrt(r2.n);
+    const bottom = isqrt(r2.m);
+    if (top === null || bottom === null) {
+      throw new Error(`корень не рациональный: ${tex}`);
+    }
+    const r = q(top, bottom);
+    lines.push(`$${x}=\\pm${fq(r)}$.`);
+    return { lines, roots: [q(-top, bottom), r], tex, ishodnoe };
+  }
+  const D = b * b - 4 * a * c;
+  const sqrtD = isqrt(D);
+  if (sqrtD === null) {
+    throw new Error(`дискриминант не квадрат: ${tex}, D=${D}`);
+  }
+  const big = razlozhenie(D);
+  lines.push(
+    `$D=${b < 0 ? `(${d(b)})` : d(b)}^2-4\\cdot${d(a)}\\cdot${c < 0 ? `(${d(c)})` : d(c)}=${d(D)}${big ? `=${big}` : ''}$, $\\sqrt{D}=${d(sqrtD)}$.`,
+  );
+  const r1 = q(-b - sqrtD, 2 * a);
+  const r2 = q(-b + sqrtD, 2 * a);
+  lines.push(
+    `$${x}_1=\\dfrac{${d(-b)}-${d(sqrtD)}}{${d(2 * a)}}=${fq(r1, true)}$, $${x}_2=\\dfrac{${d(-b)}+${d(sqrtD)}}{${d(2 * a)}}=${fq(r2, true)}$.`,
+  );
+  return { lines, roots: [r1, r2], tex, ishodnoe };
+}
+
+/**
+ * Подбор для x(x + d) = S: два множителя S с разностью d. Возвращает
+ * x (положительный) и строку лайфхака.
+ */
+export function podbor(S: number, dd: number, x = 'x'): { x: number; line: string } {
+  for (let k = 1; k * k <= S + dd * dd; k += 1) {
+    if (k * (k + dd) === S) {
+      return {
+        x: k,
+        line: `Подбираем два множителя числа $${d(S)}$, которые отличаются на $${d(dd)}$: $${d(S)}=${d(k)}\\cdot${d(k + dd)}$, значит, $${x}=${d(k)}$.`,
+      };
+    }
+  }
+  throw new Error(`x(x+${dd})=${S}: целого корня нет`);
+}
+
+/**
+ * Уравнение вида x(x + d) = S: решение подбором множителей и
+ * проверка дискриминантом. Возвращает строки и положительный корень.
+ */
+export function xxd(S: number, dd: number, x = 'x'): { lines: string[]; root: number } {
+  const guess = podbor(S, dd, x);
+  const sol = kvadrat(1, dd, -S, x);
+  return {
+    lines: [
+      `$${x}(${x}+${d(dd)})=${d(S)}$.`,
+      `**Лайфхак:** ${guess.line}`,
+      `Проверка честным решением: $${sol.ishodnoe}$.`,
+      ...sol.lines,
+    ],
+    root: guess.x,
+  };
+}
