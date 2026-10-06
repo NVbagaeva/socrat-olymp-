@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { caveat, inter, ptSerif } from '@/lib/fonts';
-import { AppStateProvider } from '@/state/AppState';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -20,11 +19,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={`${inter.variable} ${caveat.variable} ${ptSerif.variable}`}>
-      <body>
-        {/* Состояние раздела доступно на любой странице: провайдер
-            клиентский, содержимое страниц остаётся серверным. */}
-        <AppStateProvider>{children}</AppStateProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

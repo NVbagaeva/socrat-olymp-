@@ -7,11 +7,13 @@ import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
+import { prepSkillTotal } from '@/lib/prep';
 import { aboutScene } from '@/lib/scenes';
+import type { ProgressPlan } from '@/lib/topicProgress';
 import { typeset } from '@/lib/tex';
 import { prototypeSkills } from './configurator';
 import { GeneratorTab } from './generator';
-import { MethodsTab } from './MethodsTab';
+import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
@@ -80,6 +82,24 @@ export function FunctionTopicPage({
   const tutors =
     subtopic.tutors === undefined ? section.tutors : { ...section.tutors, items: subtopic.tutors };
 
+  /* Пункты кольца прогресса — вкладки подтемы с содержанием. Пустые
+     разделы теории, вкладка методов без методов, опорные задачи и
+     тренажёр без наборов в счёт не идут. Ключи отметок свои у каждой
+     подтемы: подтемы друг на друга не влияют. */
+  const theoryKey = `theory:${section.slug}:${subtopic.id}`;
+  const methodsKey = `methods:${section.slug}:${subtopic.id}`;
+  const plan: ProgressPlan = {
+    theory: subtopic.theory.filter((block) => block.status !== 'empty').map((block) => block.id),
+    methods: subtopic.methods === true ? metodyFor(subtopic.id).map((metod) => metod.id) : [],
+    prep: hasPrep
+      ? prepSkillsFor(subtopic.id).map((skill) => ({
+          id: skill.id,
+          total: prepSkillTotal(subtopic.id, skill.id),
+        }))
+      : [],
+    trainer: hasTrainer ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id) : [],
+  };
+
   return (
     <main className="app-main">
       <ShapkaRazdela
@@ -128,17 +148,9 @@ export function FunctionTopicPage({
               height={700}
             />
 
-            {/* Прогресс по разделам теории темы. Общее число — длина того же
-                списка, из которого строится «Содержание»: второго источника
-                у этой пары нет. */}
-            {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
-                до конца которых ученик долистал; иначе витринное число. */}
-            <TopicProgress
-              total={subtopic.theory.length}
-              trackKey={
-                subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined
-              }
-            />
+            {/* Прогресс подтемы: пункты — её вкладки с содержанием,
+                изучено — то, что ученик сделал, а не открыл. */}
+            <TopicProgress plan={plan} theoryKey={theoryKey} methodsKey={methodsKey} />
           </>
         }
       />
@@ -148,9 +160,11 @@ export function FunctionTopicPage({
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
         bodies={theoryBodies}
-        trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
+        trackKey={theoryKey}
         methods={
-          subtopic.methods === true ? <MethodsTab type={subtopic.id} base={base} /> : undefined
+          subtopic.methods === true ? (
+            <MethodsTab type={subtopic.id} base={base} trackKey={methodsKey} />
+          ) : undefined
         }
         prep={
           prep ??
