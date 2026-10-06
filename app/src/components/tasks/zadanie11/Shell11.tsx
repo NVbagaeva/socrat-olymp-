@@ -4,6 +4,7 @@ import { tasksPage } from '@/content/tasks';
 import { ZADANIE11 } from '@/content/zadanie11';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
+import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { Progress11 } from './Progress11';
 
 /**
@@ -26,7 +27,12 @@ export function Shell11({ children }: { children: React.ReactNode }) {
           title={ZADANIE11.title}
           badge={ZADANIE11.badge}
           lead={ZADANIE11.lead}
-          media={<Progress11 razdely={RAZDELY_TEORII_11.map((r) => r.id)} />}
+          media={
+            <Progress11
+              razdely={RAZDELY_TEORII_11.map((r) => r.id)}
+              bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
+            />
+          }
         />
         <RazdelTabs base={base} tabs={ZADANIE11.tabs} />
         <div className="section-panel">{children}</div>

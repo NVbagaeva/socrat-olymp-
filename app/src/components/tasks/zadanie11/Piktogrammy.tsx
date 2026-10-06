@@ -148,6 +148,19 @@ const P: Record<string, ReactNode> = {
   ),
   table: <path d="M4 4h16v16H4zM4 9h16M4 14.5h16M10 4v16" />,
   flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
+  check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  grid: (
+    <>
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+    </>
+  ),
+  /* Гаечный ключ — «общие навыки»: инструменты для всех разделов. */
+  tools: (
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z" />
+  ),
 };
 
 export type PiktogrammaName = keyof typeof P;
@@ -200,6 +213,24 @@ export function IkonkaRazdela({ section, className }: { section: SectionId; clas
   return (
     <span className={clsx('z11-ikonka', tsvetRazdela(section), className)} aria-hidden="true">
       <Piktogramma name={ZNACHOK_RAZDELA[section]} />
+    </span>
+  );
+}
+
+/** Значок блока опорных задач: раздел или «общие навыки» (синий). */
+export function IkonkaBloka({
+  razdel,
+  className,
+}: {
+  razdel: SectionId | 'OB';
+  className?: string;
+}) {
+  if (razdel !== 'OB') {
+    return <IkonkaRazdela section={razdel} className={className} />;
+  }
+  return (
+    <span className={clsx('z11-ikonka', 'z11-sec--ob', className)} aria-hidden="true">
+      <Piktogramma name="tools" />
     </span>
   );
 }

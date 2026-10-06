@@ -724,3 +724,340 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
 }
+
+/* ── Вкладка «Опорные задачи» ─────────────────────────────────── */
+
+/* «Общие навыки»: нейтральный синий сайта, не цвет раздела. */
+.z11-sec--ob {
+  --z11-c: var(--color-primary);
+  --z11-c-soft: var(--color-surface-soft);
+}
+
+.z11-filtr {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-5) 0;
+  padding-bottom: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.z11-filtr__btn {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  flex: none;
+  min-width: 84px;
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.z11-filtr__btn:hover .z11-ikonka {
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+.z11-filtr__btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z11-filtr__btn .z11-ikonka {
+  width: 48px;
+  height: 48px;
+}
+.z11-filtr__label {
+  max-width: 96px;
+  text-align: center;
+  line-height: 1.25;
+}
+.z11-filtr__btn.is-active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.z11-filtr__btn.is-active .z11-ikonka {
+  box-shadow: 0 0 0 2px var(--z11-c, var(--color-primary));
+}
+.z11-filtr__vse {
+  --z11-c: var(--color-primary);
+  --z11-c-soft: var(--color-surface-soft);
+}
+.z11-filtr__btn.is-active .z11-filtr__vse {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.z11-bloki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+}
+.z11-bloki > li {
+  display: flex;
+}
+.z11-bloki__pusto {
+  color: var(--color-text-secondary);
+}
+.z11-blok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  width: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.z11-blok:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.z11-blok--razminka {
+  border-color: var(--color-z11-rz);
+  background: var(--color-surface-warm);
+}
+.z11-blok__ikonka {
+  align-self: start;
+}
+/* Текст занимает всю ширину справа от значка; кольцо и кнопка —
+   нижней строкой, чтобы длинные названия не упирались в кольцо. */
+.z11-blok__text {
+  grid-column: 2 / 4;
+  display: grid;
+  align-content: start;
+  align-self: start;
+  gap: var(--space-1);
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.z11-blok__badge {
+  justify-self: start;
+  white-space: nowrap;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-z11-rz-soft);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z11-blok__title {
+  font-weight: 600;
+  line-height: var(--lh-label);
+}
+.z11-blok__count {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-blok__btn {
+  justify-self: end;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.z11-blok:hover .z11-blok__btn {
+  background: var(--color-surface-soft);
+}
+
+.z11-kolco {
+  grid-column: 1 / 3;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+}
+.z11-kolco svg {
+  width: 56px;
+  height: 56px;
+}
+.z11-kolco__track,
+.z11-kolco__fill {
+  fill: none;
+  stroke-width: 5;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+.z11-kolco__track {
+  stroke: var(--color-track);
+}
+.z11-kolco__fill {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+}
+.z11-kolco.is-done .z11-kolco__fill {
+  stroke: var(--color-success);
+}
+.z11-kolco__c {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z11-kolco.is-done .z11-kolco__c {
+  color: var(--color-success);
+}
+
+.z11-prep__back {
+  display: inline-block;
+  margin: var(--space-4) 0 0;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z11-prep__back:hover {
+  text-decoration: underline;
+}
+
+.z11-ptask .ptask__head {
+  align-items: center;
+}
+.z11-ptask__ikonka {
+  width: 44px;
+  height: 44px;
+}
+.z11-ptask__ikonka .z11-pic {
+  width: 22px;
+  height: 22px;
+}
+.z11-ptask__tab {
+  margin-top: var(--space-4);
+}
+
+/* Подсказка по шагам: вопрос — кнопки. */
+.z11-hint__list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.z11-hint__step.is-passed .z11-hint__q {
+  color: var(--color-text-secondary);
+}
+.z11-hint__no {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-hint__q {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-serif);
+  line-height: var(--lh-lg);
+}
+.z11-hint__opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z11-hint__opt {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.z11-hint__opt:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.z11-hint__opt:disabled {
+  cursor: default;
+}
+.z11-hint__opt.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z11-hint__opt.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  opacity: 0.6;
+}
+.z11-hint__step.is-passed .z11-hint__opt:not(.is-right) {
+  display: none;
+}
+.z11-hint__comment {
+  margin-top: var(--space-1);
+  color: var(--color-success);
+}
+.z11-hint__oops {
+  margin-top: var(--space-1);
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.z11-hint__done {
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+
+.z11-razbor {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z11-razbor__title {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z11-razbor__lines {
+  display: grid;
+  gap: var(--space-2);
+}
+.z11-razbor__line {
+  font-family: var(--font-serif);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+
+.z11-memo {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z11-memo__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z11-memo__list {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .z11-blok {
+    padding: var(--space-4);
+    gap: var(--space-2) var(--space-3);
+  }
+  .z11-blok .z11-ikonka {
+    width: 44px;
+    height: 44px;
+  }
+  .z11-filtr__btn {
+    min-width: 72px;
+  }
+}

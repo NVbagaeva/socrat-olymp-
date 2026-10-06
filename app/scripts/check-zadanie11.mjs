@@ -18,6 +18,9 @@
    ответ с solve; новые задачи не совпадают с банком (и не отличаются
    от задачи банка одним числом); у разминки встречаются оба случая —
    с остатком и нацело, округление вверх и вниз.
+   Опорные задачи: 12 блоков по 10 микрозадач, разминка первая; на
+   каждую — зафиксированный вариант и новые: ответ, варианты,
+   подсказки, таблицы, KaTeX, отпечаток (lib/zadanie11/prep/selftest).
    Отдельно — склонения: «1 час / 2 часа / 5 часов» и т. п.
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
@@ -182,6 +185,17 @@ for (const [word, id] of [
   }
 }
 
+/* Опорные задачи: 12 блоков по 10 микрозадач, seeds вариантов на каждую. */
+const prepSeeds = Math.min(seeds, 100);
+const prep = requireSrc('lib/zadanie11/prep/selftest').checkPrep(prepSeeds, typeset);
+problems.push(...prep.problems);
+for (const { where, text } of prep.texts) {
+  const plain = stripDollarMath(text).replace(/\*\*/g, '');
+  for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+    problems.push({ where, what: `вне KaTeX (${f.rule}): «${f.match}» в «${text.slice(0, 70)}»` });
+  }
+}
+
 /* Склонения. */
 const expect = [
   [sk(1, SLOVA.chas), '1 час'],
@@ -221,6 +235,7 @@ for (const [got, want] of expect) {
 console.log(`подтипов: ${SUBTYPES.length}`);
 console.log(`банк: ${bank.checked}, разминка: ${razminka.checked} (задач)`);
 console.log(`генератор: ${gen.generated} задач, по ${seeds} seed на подтип`);
+console.log(`опорные задачи: ${prep.generated} вариантов, по ${prepSeeds} seed на микрозадачу`);
 const poor = gen.stats.filter((x) => x.distinct < seeds / 2);
 if (poor.length > 0) {
   console.log(`  мало разных задач: ${poor.map((x) => `${x.id} (${x.distinct})`).join(', ')}`);

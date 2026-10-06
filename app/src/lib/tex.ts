@@ -14,19 +14,20 @@ import { katex } from './graph/katex';
 import { razmetka, type Kusok } from './razmetka';
 
 /** Формула куска: внутри выделения — полужирная, как текст вокруг. */
-function formulaHtml(kusok: Kusok, strogo: boolean): string {
+function formulaHtml(kusok: Kusok, strogo: boolean, displayFrac = false): string {
   const tex = normalizeTex(kusok.text);
   return katex.renderToString(kusok.strong === true ? `\\boldsymbol{${tex}}` : tex, {
     throwOnError: strogo,
     displayMode: false,
+    displayFrac,
   });
 }
 
-function kuskiHtml(text: string, strogo: boolean, escape: boolean): string {
+function kuskiHtml(text: string, strogo: boolean, escape: boolean, displayFrac = false): string {
   return razmetka(text)
     .map((kusok) => {
       if (kusok.math === true) {
-        return formulaHtml(kusok, strogo);
+        return formulaHtml(kusok, strogo, displayFrac);
       }
       const body = escape
         ? kusok.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -45,6 +46,15 @@ function kuskiHtml(text: string, strogo: boolean, escape: boolean): string {
  */
 export function typeset(text: string, strogo = false): string {
   return kuskiHtml(text, strogo, false);
+}
+
+/**
+ * То же, что typeset, но \dfrac в строке остаётся крупной дробью
+ * (опция displayFrac, как в ключе учителя): «Опорные задачи» №11 —
+ * дроби 100/(x + 6) в вариантах ответа и подсказках должны читаться.
+ */
+export function typesetKrupno(text: string): string {
+  return kuskiHtml(text, false, false, true);
 }
 
 /**
