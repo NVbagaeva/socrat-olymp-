@@ -7,7 +7,7 @@ import { quadraticTheoryScene } from '@/lib/scenes';
 import { Phrases } from '../Phrases';
 import { WarnIcon } from '../VerdictIcons';
 import { ForwardIcon } from './ForwardIcon';
-import { ParabolaPlayground } from './ParabolaPlayground';
+import { ParabolaPlaygroundLazy } from './ParabolaPlaygroundLazy';
 import { phrases } from './markup';
 
 /** Формула набором KaTeX: разметка собирается на сборке. */
@@ -172,7 +172,7 @@ export function QuadraticSection({
         ))}
       </ul>
 
-      {section.playground === true ? <ParabolaPlayground /> : null}
+      {section.playground === true ? <ParabolaPlaygroundLazy /> : null}
 
       <section className="nofn-note nofn-note--warm qth__note">
         <h4 className="nofn-note__title">

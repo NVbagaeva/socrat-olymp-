@@ -11,7 +11,7 @@ import { prepSkillTotal } from '@/lib/prep';
 import { aboutScene } from '@/lib/scenes';
 import type { ProgressPlan } from '@/lib/topicProgress';
 import { typeset } from '@/lib/tex';
-import { prototypeSkills } from './configurator';
+import { prototypeSkills } from './configurator/skillItems';
 import { GeneratorTab } from './generator';
 import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
@@ -100,6 +100,16 @@ export function FunctionTopicPage({
     trainer: hasTrainer ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id) : [],
   };
 
+  /* Разметка теории — только разделов этой подтемы. Словарь theoryBodies
+     общий на все подтемы, и целиком он весил в странице гиперболы
+     ≈640 КБ чужой теории (линейная и квадратичная функции). */
+  const ownBodies = Object.fromEntries(
+    subtopic.theory.flatMap((block) => {
+      const body = block.body === undefined ? undefined : theoryBodies[block.body];
+      return block.body === undefined || body === undefined ? [] : [[block.body, body] as const];
+    }),
+  );
+
   return (
     <main className="app-main">
       <ShapkaRazdela
@@ -159,7 +169,7 @@ export function FunctionTopicPage({
         initial={initialTab}
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
-        bodies={theoryBodies}
+        bodies={ownBodies}
         trackKey={theoryKey}
         methods={
           subtopic.methods === true ? (

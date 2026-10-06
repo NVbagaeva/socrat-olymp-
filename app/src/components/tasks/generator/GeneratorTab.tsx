@@ -3,7 +3,7 @@ import { findManifestFamily } from '@/lib/generator/manifest';
 import { generatorPage } from '@/content/generator';
 import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
 import { typeset } from '@/lib/tex';
-import { skillItems } from '../configurator';
+import { skillItems } from '../configurator/skillItems';
 import { GeneratorScreen } from './GeneratorScreen';
 
 export interface GeneratorTabProps {

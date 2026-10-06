@@ -53,5 +53,9 @@ export const ptSerif = localFont({
   ],
   variable: '--font-pt-serif',
   display: 'swap',
+  /* Условия задач — на экранах задач, а не на странице темы. Без предзагрузки
+     браузер берёт шрифт, когда страница им пользуется, и ≈145 КБ не мешают
+     скриптам на слабой сети. */
+  preload: false,
   fallback: ['Georgia', 'Times New Roman', 'serif'],
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import type { ReactNode } from 'react';
 import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
@@ -15,6 +15,7 @@ import { TopicContents } from './TopicContents';
 import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
 import { useStickyTabs } from './useStickyTabs';
+import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -128,6 +129,9 @@ export function TopicTabs({
   const opensMenu = initial === 'tutors';
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
+  /* Вкладка, на которую нажали и ведёт переход на её адрес; пока он едет — ожидание. */
+  const [target, setTarget] = useState<string | null>(null);
+  const [navigating, startNavigation] = useTransition();
   /* Вкладки без содержимого в ленту не попадают: «Генератор» — без
      наборов прототипов, «Ключевые методы» — без признака у подтемы. */
   const tabs = TABS.filter(
@@ -146,11 +150,28 @@ export function TopicTabs({
     setMenu(false);
     const href = id === 'prep' ? prepHref : id === 'trainer' ? trainerHref : null;
     if (href !== null && pathname !== href) {
-      router.push(href);
+      /* Переход в переходе (transition): пока страница-назначение едет по
+         сети, вкладка уже подсвечена и на ней крутится ожидание. */
+      setTarget(id);
+      startNavigation(() => {
+        router.push(href);
+      });
       return;
     }
     setTab(id);
   }
+
+  /* Нажатие, сделанное до того, как страница ожила, исполняется здесь:
+     повторно жать не нужно (lib/tabTap.ts). Один раз при загрузке. */
+  useEffect(() => {
+    const pending = takePendingTabTap();
+    if (pending !== null && tabs.some((item) => item.id === pending)) {
+      /* Сразу после отрисовки, а не внутри эффекта: так состояние
+         меняется обычным порядком. */
+      queueMicrotask(() => choose(pending));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
+  }, []);
 
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
@@ -309,14 +330,21 @@ export function TopicTabs({
         <Tabs
           className="tabs--lenta"
           items={tabs}
-          value={tab}
+          value={navigating && target !== null ? target : tab}
+          {...(navigating && target !== null ? { busyId: target } : {})}
           onValueChange={choose}
           label="Разделы темы"
         />
       </TutorMenu>
 
+      {/* Нажатие на вкладку до загрузки кода не теряется (lib/tabTap.ts).
+          Вставка стоит сразу за лентой, а не в начале страницы: скрипт
+          в начале блокирует разбор и откладывает показ самой ленты на
+          секунду на слабой сети. */}
+      <script dangerouslySetInnerHTML={{ __html: TAB_TAP_SCRIPT }} />
+
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
-        <div className="topic-panel">
+        <div className={navigating ? 'topic-panel is-loading' : 'topic-panel'}>
           {tab === 'about' ? about : null}
 
           {tab === 'theory' ? (

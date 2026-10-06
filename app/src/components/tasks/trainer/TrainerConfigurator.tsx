@@ -77,6 +77,8 @@ export interface TrainerConfiguratorProps<M extends string> {
   words?: TrainerWords;
   /** «Начать тренировку»: сессию собирает тот, кто знает задачи. */
   onStart: (request: TrainerRequest<M>) => void;
+  /** Сессия собирается (движок подгружается): кнопка «Начать» показывает ожидание. */
+  starting?: boolean;
   /** Сводка сделанного под конфигуратором. */
   stats?: ReactNode;
 }
@@ -127,6 +129,7 @@ export function TrainerConfigurator<M extends string>({
   counts = skillCounts,
   words = trainerPage,
   onStart,
+  starting = false,
   stats,
 }: TrainerConfiguratorProps<M>) {
   const first = skills.find((item) => item.id === preset?.skill) ?? skills[0];
@@ -286,6 +289,7 @@ export function TrainerConfigurator<M extends string>({
           size="lg"
           onClick={start}
           disabled={chosenCount === null}
+          loading={starting}
         >
           {words.start}
         </Button>

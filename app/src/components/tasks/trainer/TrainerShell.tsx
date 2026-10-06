@@ -4,7 +4,7 @@ import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
 import { typeset } from '@/lib/tex';
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
-import { skillItems } from '../configurator';
+import { skillItems } from '../configurator/skillItems';
 import { TabScrollOnMount } from '../TabScroll';
 import { TrainerBuilder, type TrainerPreset } from './TrainerBuilder';
 

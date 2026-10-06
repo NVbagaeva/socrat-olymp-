@@ -5,7 +5,7 @@ import type { SkillItem } from '../configurator';
 import { trainerModes, type TrainerModeId } from '@/content/trainerModes';
 import type { SkillLevel } from '@/content/skills12';
 import { useTrainerProgress } from '@/lib/trainerProgress';
-import { buildSession, type Session } from '@/lib/trainerSession';
+import type { Session } from '@/lib/trainerSession';
 import {
   TrainerConfigurator,
   type ConfiguratorPreset,
@@ -66,6 +66,7 @@ export function TrainerBuilder({
   preset = null,
 }: TrainerBuilderProps) {
   const [started, setStarted] = useState<Started | null>(null);
+  const [starting, setStarting] = useState(false);
 
   /* История ошибок читается, но не пишется: «Повтор ошибок» есть
      только тогда, когда ученику есть что повторять. */
@@ -86,26 +87,38 @@ export function TrainerBuilder({
         : item,
   );
 
-  function start(request: TrainerRequest<TrainerModeId>) {
-    const { mode } = request;
-    const session = buildSession({
-      /* Отработка и контроль — по выбранным типам, остальное — по всем. */
-      skills:
-        mode === 'mixed' || mode === 'mistakes'
-          ? skills.map((item) => item.id)
-          : request.skills.map((item) => item.id),
-      level: mode === 'mistakes' ? null : request.level,
-      count: request.count,
-      mode,
-      mistakes: progress.mistakes,
-      choice,
-    });
-    if (session.tasks.length === 0) {
+  /* Движок задач и KaTeX весят сотни килобайт и нужны только здесь, по
+     «Начать тренировку»: на странице темы они не грузятся, а
+     подтягиваются по нажатию, пока на кнопке крутится ожидание. */
+  async function start(request: TrainerRequest<TrainerModeId>) {
+    if (starting) {
       return;
     }
-    /* Ключ подхода новый на каждый запуск: подход не переиспользует
-       прошлую раскладку. */
-    setStarted({ key: `session:${Date.now()}`, session, control: mode === 'control' });
+    setStarting(true);
+    try {
+      const { buildSession } = await import('@/lib/trainerSession');
+      const { mode } = request;
+      const session = buildSession({
+        /* Отработка и контроль — по выбранным типам, остальное — по всем. */
+        skills:
+          mode === 'mixed' || mode === 'mistakes'
+            ? skills.map((item) => item.id)
+            : request.skills.map((item) => item.id),
+        level: mode === 'mistakes' ? null : request.level,
+        count: request.count,
+        mode,
+        mistakes: progress.mistakes,
+        choice,
+      });
+      if (session.tasks.length === 0) {
+        return;
+      }
+      /* Ключ подхода новый на каждый запуск: подход не переиспользует
+         прошлую раскладку. */
+      setStarted({ key: `session:${Date.now()}`, session, control: mode === 'control' });
+    } finally {
+      setStarting(false);
+    }
   }
 
   if (started !== null) {
@@ -130,6 +143,7 @@ export function TrainerBuilder({
       {...(levels === undefined ? {} : { levels })}
       {...(words === undefined ? {} : { words })}
       onStart={start}
+      starting={starting}
       /* Что уже сделано: знаменатель — все задания прототипов семейства. */
       stats={<TrainerStats total={familyTotal} />}
     />

@@ -5,10 +5,8 @@ import { prepSkillsFor } from '@/content/prepSkills';
 import { QUADRATIC_METODY, type QuadraticMetod } from '@/content/quadraticMetody';
 import { RATIONAL_METODY } from '@/content/rationalMetody';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
-import {
-  MetodyKartochki,
-  type KartochkaMetoda,
-} from '@/components/tasks/veroyatnost/MetodyKartochki';
+import type { KartochkaMetoda } from '@/components/tasks/veroyatnost/MetodyKartochki';
+import { MetodyKartochkiLazy } from '@/components/tasks/veroyatnost/MetodyKartochkiLazy';
 import { prepSkillTotal } from '@/lib/prep';
 import { texPlain, typeset } from '@/lib/tex';
 import { ReadMark } from './ReadMark';
@@ -119,7 +117,7 @@ export function MethodsTab({ type, base, trackKey }: MethodsTabProps) {
         <EmptyState title={METODY.gotovitsya.title} description={METODY.gotovitsya.description} />
       ) : (
         <>
-          <MetodyKartochki
+          <MetodyKartochkiLazy
             items={kartochki(metody, type, base)}
             {...(trackKey === undefined ? {} : { trackKey })}
           />
