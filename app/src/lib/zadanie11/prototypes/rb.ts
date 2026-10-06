@@ -5,7 +5,19 @@
  * за 1; при совместной работе производительности складываются.
  */
 
-import { at, chtoSprashivayut, etapy, key, kvadrat, num, rabota, str, vopros, xxd } from '../kit';
+import {
+  at,
+  chtoSprashivayut,
+  drobnoe,
+  etapy,
+  key,
+  kvadrat,
+  num,
+  rabota,
+  str,
+  vopros,
+  xxd,
+} from '../kit';
 import { add, d, div, fq, q, sub, txt, val } from '../num';
 import { sk, vremya, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
@@ -30,6 +42,17 @@ const RB01: Subtype = {
       ask === 'second'
         ? `Сколько деталей за час изготавливает второй рабочий, если известно, что первый за час изготавливает на ${sk(dd, SLOVA.detal)} больше?`
         : `Сколько деталей в час делает первый рабочий, если известно, что он за час изготавливает на ${sk(dd, SLOVA.detal)} больше, чем второй?`;
+    const t = drobnoe({
+      nuli: [0, -dd],
+      lo: 0,
+      pochemu: 'производительность положительна',
+      znamenatel: `x(x+${d(dd)})`,
+      posle: [
+        `$${d(N)}(x+${d(dd)})-${d(N)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
+        ...res.lines,
+      ],
+      roots: res.roots,
+    });
     return {
       uslovie: `Заказ на изготовление ${txt(N)} ${detaley(N)} первый рабочий выполняет на ${sk(dd, SLOVA.chas)} быстрее, чем второй. ${vopr}`,
       answer: ans,
@@ -45,11 +68,12 @@ const RB01: Subtype = {
             `Второй работает дольше на $${d(dd)}$ ч: $\\dfrac{${d(N)}}{x}-\\dfrac{${d(N)}}{x+${d(dd)}}=${d(dd)}$.`,
           ],
         ],
-        ['Решение', [`Умножаем на $x(x+${d(dd)})$ и делим на $${d(dd)}$:`, ...res.lines]],
+        t.odz,
+        t.reshenie,
         [
-          'Отбор корня и ответ на вопрос задачи',
+          'Отбор корней и ответ на вопрос задачи',
           [
-            'Производительность положительна.',
+            ...t.otbor,
             ask === 'second'
               ? `Спрашивают второго: $x=${d(x)}$.`
               : `Спрашивают первого: $x+${d(dd)}=${d(ans)}$.`,
@@ -79,10 +103,12 @@ const RB01: Subtype = {
           `$\\dfrac{${d(N)}}{x+${d(dd)}}-\\dfrac{${d(N)}}{x}=${d(dd)}$`,
           `$\\dfrac{${d(N)}}{x}+\\dfrac{${d(N)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
+        t.hintOdz,
         vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(N)}$ — подбор`, [
           'среднее арифметическое',
           'перевести часы в минуты',
         ]),
+        t.hintKoren,
         chtoSprashivayut(
           ask === 'second'
             ? 'сколько деталей в час делает второй'
@@ -114,6 +140,18 @@ const RB02: Subtype = {
     const sol = kvadrat(Dl, Dl * dd - N2 + N1, -N2 * dd);
     const x = val(sol.roots[1]);
     const ans = ask === 'second' ? x : x + dd;
+    const t = drobnoe({
+      nuli: [0, -dd],
+      lo: 0,
+      pochemu: 'производительность положительна',
+      znamenatel: `x(x+${d(dd)})`,
+      posle: [
+        `$${d(N2)}(x+${d(dd)})-${d(N1)}x=${d(Dl)}x(x+${d(dd)})$.`,
+        `$${sol.ishodnoe}$.`,
+        ...sol.lines,
+      ],
+      roots: sol.roots.map(val),
+    });
     return {
       uslovie: `На изготовление ${txt(N1)} ${detaley(N1)} первый рабочий тратит на ${sk(Dl, SLOVA.chas)} меньше, чем второй рабочий на изготовление ${txt(N2)} таких же ${detaley(N2)}. Известно, что первый рабочий за час делает на ${sk(dd, SLOVA.detal)} больше, чем второй. Сколько деталей за час делает ${ask === 'second' ? 'второй' : 'первый'} рабочий?`,
       answer: ans,
@@ -124,18 +162,12 @@ const RB02: Subtype = {
           [`Время второго $\\dfrac{${d(N2)}}{x}$, первого $\\dfrac{${d(N1)}}{x+${d(dd)}}$.`],
         ],
         ['Уравнение', [`$\\dfrac{${d(N2)}}{x}-\\dfrac{${d(N1)}}{x+${d(dd)}}=${d(Dl)}$.`]],
+        t.odz,
+        t.reshenie,
         [
-          'Решение',
+          'Отбор корней и ответ на вопрос задачи',
           [
-            `Умножаем на $x(x+${d(dd)})$: $${d(N2)}(x+${d(dd)})-${d(N1)}x=${d(Dl)}x(x+${d(dd)})$.`,
-            `$${sol.ishodnoe}$.`,
-            ...sol.lines,
-          ],
-        ],
-        [
-          'Отбор корня и ответ на вопрос задачи',
-          [
-            'Производительность положительна.',
+            ...t.otbor,
             ask === 'second'
               ? `Спрашивают второго: $x=${d(x)}$.`
               : `Спрашивают первого: $x+${d(dd)}=${d(ans)}$.`,
@@ -166,6 +198,8 @@ const RB02: Subtype = {
             `$\\dfrac{${d(N1)}}{x}-\\dfrac{${d(N2)}}{x+${d(dd)}}=${d(Dl)}$`,
           ],
         ),
+        t.hintOdz,
+        t.hintKoren,
         chtoSprashivayut(
           ask === 'second' ? 'производительность второго' : 'производительность первого',
           ask === 'second'
@@ -202,6 +236,17 @@ const RB03: Subtype = {
       ask === 'first'
         ? `первая труба, если резервуар объёмом ${txt(V)} литров она заполняет на ${sk(dd, SLOVA.minutu)} дольше, чем вторая труба?`
         : `вторая труба, если резервуар объёмом ${txt(V)} литров она заполняет на ${sk(dd, SLOVA.minutu)} быстрее, чем первая труба?`;
+    const t = drobnoe({
+      nuli: [0, -dd],
+      lo: 0,
+      pochemu: 'пропускная способность трубы положительна',
+      znamenatel: `x(x+${d(dd)})`,
+      posle: [
+        `$${d(V)}(x+${d(dd)})-${d(V)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
+        ...res.lines,
+      ],
+      roots: res.roots,
+    });
     return {
       uslovie: `Первая труба пропускает на ${sk(dd, SLOVA.litr)} воды в минуту меньше, чем вторая. Сколько литров воды в минуту пропускает ${vopr}`,
       answer: ans,
@@ -212,10 +257,12 @@ const RB03: Subtype = {
           [`Время первой $\\dfrac{${d(V)}}{x}$ мин, второй $\\dfrac{${d(V)}}{x+${d(dd)}}$ мин.`],
         ],
         ['Уравнение', [`$\\dfrac{${d(V)}}{x}-\\dfrac{${d(V)}}{x+${d(dd)}}=${d(dd)}$.`]],
-        ['Решение', [`Умножаем на $x(x+${d(dd)})$ и делим на $${d(dd)}$:`, ...res.lines]],
+        t.odz,
+        t.reshenie,
         [
-          'Отбор корня и ответ на вопрос задачи',
+          'Отбор корней и ответ на вопрос задачи',
           [
+            ...t.otbor,
             ask === 'first'
               ? `Спрашивают первую трубу: $x=${d(x)}$.`
               : `Спрашивают вторую трубу: $x+${d(dd)}=${d(ans)}$.`,
@@ -238,10 +285,12 @@ const RB03: Subtype = {
           `$\\dfrac{${d(V)}}{x+${d(dd)}}-\\dfrac{${d(V)}}{x}=${d(dd)}$`,
           `$\\dfrac{${d(V)}}{x}+\\dfrac{${d(V)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
+        t.hintOdz,
         vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(V)}$ — подбор`, [
           'среднее арифметическое',
           'сложить производительности',
         ]),
+        t.hintKoren,
         chtoSprashivayut(
           ask === 'first'
             ? 'сколько литров в минуту пропускает первая'
@@ -353,6 +402,14 @@ const RB05: Subtype = {
     const [para, odna, drugaya] = key(IMENA, str(p, 'imena', ['katya', 'anya'] as const));
     const pr = sub(q(1, T), q(1, a));
     const ans = val(div(q(1), pr));
+    const t = drobnoe({
+      nuli: [0],
+      lo: 0,
+      pochemu: 'время работы положительно',
+      znamenatel: `${d(a * T)}x`,
+      posle: [`$${d(a * T)}+${d(T)}x=${d(a)}x$, $${d(a - T)}x=${d(a * T)}$, $x=${d(ans)}$.`],
+      roots: [ans],
+    });
     return {
       uslovie: `${para}, работая вместе, пропалывают грядку за ${sk(T, SLOVA.minutu)}, а одна ${odna} — за ${sk(a, SLOVA.minutu)}. За сколько минут пропалывает грядку одна ${drugaya}?`,
       answer: ans,
@@ -365,11 +422,9 @@ const RB05: Subtype = {
         ],
         ['Производительности', [`Вместе: $\\dfrac{1}{${d(T)}}$. ${odna}: $\\dfrac{1}{${d(a)}}$.`]],
         ['Уравнение', [`$\\dfrac{1}{x}+\\dfrac{1}{${d(a)}}=\\dfrac{1}{${d(T)}}$.`]],
-        [
-          'Решение',
-          [`$\\dfrac{1}{x}=\\dfrac{1}{${d(T)}}-\\dfrac{1}{${d(a)}}=${fq(pr)}$, $x=${d(ans)}$.`],
-        ],
-        ['Ответ на вопрос задачи', [otvet(ans)]],
+        t.odz,
+        t.reshenie,
+        ['Отбор корней и ответ на вопрос задачи', [...t.otbor, otvet(ans)]],
       ),
       tables: [
         rabota(
@@ -395,6 +450,8 @@ const RB05: Subtype = {
           `$\\dfrac{1}{${d(T)}}-\\dfrac{1}{${d(a)}}$`,
           [`$\\dfrac{1}{${d(a)}}-\\dfrac{1}{${d(T)}}$`, `$\\dfrac{1}{${d(a - T)}}$`],
         ),
+        t.hintOdz,
+        t.hintKoren,
         chtoSprashivayut(`за сколько минут справится ${drugaya}`, [
           'её производительность',
           'время совместной работы',
@@ -418,6 +475,18 @@ const RB06: Subtype = {
     const T = num(p, 'T');
     const sol = kvadrat(1, Dl - 2 * T, -T * Dl);
     const x = val(sol.roots[1]);
+    const t = drobnoe({
+      nuli: [0, -Dl],
+      lo: 0,
+      pochemu: 'время положительно',
+      znamenatel: `${d(T)}x(x+${d(Dl)})`,
+      posle: [
+        `$${d(T)}(x+${d(Dl)})+${d(T)}x=x(x+${d(Dl)})$, то есть $${d(T)}(2x+${d(Dl)})=x(x+${d(Dl)})$.`,
+        `$${sol.ishodnoe}$.`,
+        ...sol.lines,
+      ],
+      roots: sol.roots.map(val),
+    });
     return {
       uslovie: `Первая труба наполняет резервуар на ${sk(Dl, SLOVA.minutu)} дольше, чем вторая. Обе трубы, работая одновременно, наполняют этот же резервуар за ${sk(T, SLOVA.minutu)}. За сколько минут наполняет этот резервуар одна вторая труба?`,
       answer: x,
@@ -433,21 +502,9 @@ const RB06: Subtype = {
           [`$\\dfrac{1}{x}$ и $\\dfrac{1}{x+${d(Dl)}}$, вместе $\\dfrac{1}{${d(T)}}$.`],
         ],
         ['Уравнение', [`$\\dfrac{1}{x}+\\dfrac{1}{x+${d(Dl)}}=\\dfrac{1}{${d(T)}}$.`]],
-        [
-          'Решение',
-          [
-            `Умножаем на $${d(T)}x(x+${d(Dl)})$: $${d(T)}(2x+${d(Dl)})=x(x+${d(Dl)})$.`,
-            `$${sol.ishodnoe}$.`,
-            ...sol.lines,
-          ],
-        ],
-        [
-          'Отбор корня и ответ',
-          [
-            'Время положительно — отрицательный корень отбрасываем. Спрашивают время второй трубы.',
-            otvet(x),
-          ],
-        ],
+        t.odz,
+        t.reshenie,
+        ['Отбор корней и ответ', [...t.otbor, 'Спрашивают время второй трубы.', otvet(x)]],
       ),
       tables: [
         rabota(
@@ -472,6 +529,8 @@ const RB06: Subtype = {
           `$x+(x+${d(Dl)})=${d(T)}$`,
           `$\\dfrac{1}{x}-\\dfrac{1}{x+${d(Dl)}}=\\dfrac{1}{${d(T)}}$`,
         ]),
+        t.hintOdz,
+        t.hintKoren,
         chtoSprashivayut('время второй трубы', ['время первой трубы', 'время совместной работы']),
       ],
       lifehacks: ['fast-count'],

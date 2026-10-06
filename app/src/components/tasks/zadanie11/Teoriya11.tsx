@@ -28,6 +28,11 @@ function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
       <p className="z11-card__lead">
         <Tex text={l.lead} />
       </p>
+      {l.odz === undefined ? null : (
+        <p className="z11-card__odz">
+          <Tex text={l.odz} />
+        </p>
+      )}
       <div className="z11-dolgo">
         <div className="z11-dolgo__box">
           <Tex className="z11-dolgo__label" text={l.dolgo.podpis} />
@@ -42,6 +47,11 @@ function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
           )}
         </div>
       </div>
+      {l.obosnovanie === undefined ? null : (
+        <p className="z11-card__obosnovanie">
+          <Tex text={l.obosnovanie} />
+        </p>
+      )}
       {polnyy ? (
         <ol className="z11-card__steps">
           {l.shagi.map((s) => (

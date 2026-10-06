@@ -221,6 +221,84 @@ export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
   return problems;
 }
 
+/* ── Дробно-рациональные уравнения ──────────────────────────────── */
+
+/** Есть ли в формуле дробь с неизвестной в знаменателе. */
+export function drobnoeUravnenie(tex: string): boolean {
+  const re = /\\[dt]?frac\{(?:[^{}]|\{[^{}]*\})*\}\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+  let m = re.exec(tex);
+  while (m !== null) {
+    if (/(?<![A-Za-z\\])[xy](?![A-Za-z])/.test(m[1] ?? '')) {
+      return true;
+    }
+    m = re.exec(tex);
+  }
+  return false;
+}
+
+/** Знак равносильности допустим только внутри системы с ОДЗ. */
+const RAVNOSILNOST = /⇔|\\Leftrightarrow|\\iff|равносил/i;
+
+/**
+ * Методика дробно-рациональных уравнений: если в уравнении неизвестная
+ * стоит в знаменателе — в разборе есть шаги «ОДЗ» и «Отбор корней»,
+ * умножение на знаменатель записано «≠ 0 (по ОДЗ)», в подсказках —
+ * вопросы «Какие значения x недопустимы?» и «Какой корень подходит?».
+ * Знак равносильности нигде не используется вне системы с ОДЗ.
+ */
+export function checkDrobnye(where: string, s: Solved): Problem[] {
+  const problems: Problem[] = [];
+  const add = (what: string) => problems.push({ where, what });
+  const uravnenie = s.etapy
+    .filter((e) => /Уравнение|Система/.test(e.title))
+    .flatMap((e) => e.lines)
+    .some((line) => (texPieces(line) ?? []).some(drobnoeUravnenie));
+  for (const text of allTexts(s)) {
+    if (RAVNOSILNOST.test(text)) {
+      const vSisteme = (texPieces(text) ?? []).some(
+        (tex) => RAVNOSILNOST.test(tex) && /\\begin\{cases\}/.test(tex) && /\\ne/.test(tex),
+      );
+      if (!vSisteme) {
+        add(`знак равносильности вне системы с ОДЗ: ${text.slice(0, 60)}`);
+      }
+    }
+  }
+  if (!uravnenie) {
+    return problems;
+  }
+  const titles = s.etapy.map((e) => e.title);
+  if (!titles.some((t) => /\. ОДЗ$/.test(t))) {
+    add('дробное уравнение без шага «ОДЗ»');
+  }
+  if (!titles.some((t) => t.includes('Отбор корней'))) {
+    add('дробное уравнение без шага «Отбор корней»');
+  }
+  const odz = s.etapy.find((e) => /\. ОДЗ$/.test(e.title));
+  if (odz && !odz.lines.some((l) => l.includes('ОДЗ:'))) {
+    add('в шаге ОДЗ нет строки «ОДЗ: …»');
+  }
+  if (odz && !odz.lines.some((l) => l.includes('По смыслу задачи'))) {
+    add('в шаге ОДЗ нет условия по смыслу задачи');
+  }
+  const text = s.etapy.flatMap((e) => e.lines).join(' ');
+  if (/Умножаем на|Приводим к общему знаменателю/.test(text)) {
+    add('умножение на знаменатель без «≠ 0 (по ОДЗ)»');
+  }
+  if (!/Умножим обе части на \$[^$]*\\ne0\$ \(по ОДЗ\)/.test(text)) {
+    add('нет строки «Умножим обе части на … ≠ 0 (по ОДЗ)»');
+  }
+  if (!s.hints.some((h) => h.question.startsWith('Какие значения'))) {
+    add('в подсказке нет вопроса «Какие значения x недопустимы?»');
+  }
+  if (!s.hints.some((h) => h.question === 'Какой корень подходит?')) {
+    add('в подсказке нет вопроса «Какой корень подходит?»');
+  }
+  if (text.includes('Лайфхак') && !text.includes('Других подходящих корней нет')) {
+    add('подбор корня без обоснования, что других корней нет');
+  }
+  return problems;
+}
+
 /** Проверка задач из JSON (банк или разминка). */
 export function checkItems(
   items: BankItem[],
@@ -248,7 +326,7 @@ export function checkItems(
       problems.push({ where, what: `ответ solve ${s.answer} ≠ ответ банка ${item.answer}` });
     }
     problems.push(...checkSolved(where, s, typeset));
-    problems.push(...checkMetodika(where, item.id, s));
+    problems.push(...checkMetodika(where, item.id, s), ...checkDrobnye(where, s));
     solved.push({ where, s });
   });
   return { checked: items.length, problems, solved };
@@ -342,7 +420,11 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string)
         sluchai.add(g.sluchay);
       }
       const w = `${where} ${JSON.stringify(g.params)}`;
-      problems.push(...checkSolved(w, g.solved, typeset), ...checkMetodika(w, st.id, g.solved));
+      problems.push(
+        ...checkSolved(w, g.solved, typeset),
+        ...checkMetodika(w, st.id, g.solved),
+        ...checkDrobnye(w, g.solved),
+      );
       solved.push({ where: w, s: g.solved });
     }
     if (keys.size < Math.min(5, seeds)) {

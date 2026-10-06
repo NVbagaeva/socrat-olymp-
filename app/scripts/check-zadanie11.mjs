@@ -146,6 +146,9 @@ for (const [word, id] of [
     if (l.tex) texts.push(`$${l.tex}$`);
   }
   for (const text of texts) {
+    if (/⇔|\\Leftrightarrow|\\iff|равносил/i.test(text)) {
+      problems.push({ where: 'теория', what: `знак равносильности: ${text.slice(0, 60)}` });
+    }
     const pieces = texPieces(text);
     if (pieces === null) {
       problems.push({ where: 'теория', what: `непарный $: ${text.slice(0, 60)}` });

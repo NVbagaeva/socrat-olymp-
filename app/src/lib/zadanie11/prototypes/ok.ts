@@ -6,7 +6,7 @@
  * ОК-04 (стрелки часов) зарезервирован.
  */
 
-import { chtoSprashivayut, dvizhenie, etapy, num, vopros, xxd } from '../kit';
+import { chtoSprashivayut, drobnoe, dvizhenie, etapy, num, vopros, xxd } from '../kit';
 import { d, div, fq, mul, q, txt, val } from '../num';
 import { plural } from '../../plural';
 import { sk, SLOVA } from '../sklonenie';
@@ -89,6 +89,17 @@ const OK02: Subtype = {
     const kk = val(k);
     const res = xxd(P, kk);
     const x = res.root;
+    const t = drobnoe({
+      nuli: [0, -kk],
+      lo: 0,
+      pochemu: 'скорость положительна',
+      znamenatel: `x(x+${d(kk)})`,
+      posle: [
+        `$${d(total)}(x+${d(kk)})-${d(total)}x=${fq(q(dt, 60))}\\,x(x+${d(kk)})$, то есть $${d(total)}\\cdot${d(kk)}=${fq(q(dt, 60))}\\,x(x+${d(kk)})$, откуда`,
+        ...res.lines,
+      ],
+      roots: res.roots,
+    });
     return {
       uslovie: `Два гонщика участвуют в гонках. Им предстоит проехать ${txt(N)} ${slovoKrug(N)} по кольцевой трассе протяжённостью ${txt(L)} км. Оба гонщика стартовали одновременно, а на финиш первый пришёл раньше второго на ${sk(dt, SLOVA.minutu)}. Чему равнялась средняя скорость второго гонщика, если известно, что первый гонщик в первый раз обогнал второго на круг через ${sk(t1, SLOVA.minutu)}? Ответ дайте в км/ч.`,
       answer: x,
@@ -106,14 +117,9 @@ const OK02: Subtype = {
             `Вся дистанция $${d(N)}\\cdot${d(L)}=${d(total)}$ км. $\\dfrac{${d(total)}}{x}-\\dfrac{${d(total)}}{x+${d(kk)}}=${fq(q(dt, 60))}$.`,
           ],
         ],
-        [
-          'Решение',
-          [`$${d(total)}\\cdot${d(kk)}=${fq(q(dt, 60))}\\,x(x+${d(kk)})$, откуда`, ...res.lines],
-        ],
-        [
-          'Отбор корня и ответ',
-          ['Скорость положительна. Спрашивают скорость второго гонщика.', otvet(x)],
-        ],
+        t.odz,
+        t.reshenie,
+        ['Отбор корней и ответ', [...t.otbor, 'Спрашивают скорость второго гонщика.', otvet(x)]],
       ),
       tables: [
         dvizhenie([
@@ -131,6 +137,8 @@ const OK02: Subtype = {
           `$${d(t1)}$ км/ч`,
         ]),
         vopros('Какая длина всей дистанции?', `$${d(total)}$ км`, [`$${d(N)}$ км`, `$${d(L)}$ км`]),
+        t.hintOdz,
+        t.hintKoren,
         chtoSprashivayut('среднюю скорость второго гонщика', [
           'скорость первого гонщика',
           'время гонки',

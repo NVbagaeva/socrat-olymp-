@@ -330,7 +330,9 @@ function argumentBlocks(c, form, y0, x) {
     : tex(c.t) + ' + \\dfrac{' + tex(c.m) + '}{x' + term(mul(frac(-1), c.s)) + '}';
   var den = isZero(c.s) ? 'x' : 'x' + term(mul(frac(-1), c.s));
   var blocks = [text('Решаем уравнение ' + m('f(x) = ' + tex(y0)) + ':'),
-    formula(lhs + ' = ' + tex(y0))];
+    formula(lhs + ' = ' + tex(y0)),
+    text('ОДЗ: знаменатель не равен нулю.'),
+    formula('\\text{ОДЗ: } ' + den + ' \\ne 0' + (isZero(c.s) ? '' : ', \\ x \\ne ' + tex(c.s)))];
   if (!isZero(c.t)) {
     blocks.push(formula('\\dfrac{' + tex(c.m) + '}{' + den + '} = ' + tex(y0) + term(mul(frac(-1), c.t)) +
       ' = ' + tex(d)));
@@ -339,6 +341,9 @@ function argumentBlocks(c, form, y0, x) {
   if (!isZero(c.s)) {
     blocks.push(formula('x = ' + tex(shifted) + term(c.s) + ' = ' + tex(x)));
   }
+  blocks.push(text('Отбор корней: корень сверяем с ОДЗ.'));
+  blocks.push(formula('x = ' + tex(x) + ' \\ne ' + (isZero(c.s) ? '0' : tex(c.s)) +
+    ' \\;\\text{— входит в ОДЗ}'));
   return blocks;
 }
 
@@ -425,10 +430,19 @@ function lineSteps(c, task) {
   var L = lcm(line.k.q, line.b.q);
   var qa = mul(line.k, frac(L)), qb = mul(line.b, frac(L)), qc = mul(mul(k, frac(-1)), frac(L));
   var quad = coef(qa) + 'x^2' + termX(qb, 'x') + term(qc) + ' = 0';
-  var eqBlocks = [
+  steps.push(step('equation', 'Приравниваем функции', [
     text('В точках пересечения значения функций равны:'),
-    formula('\\dfrac{' + tex(k) + '}{x} = ' + coef(line.k) + 'x' + term(line.b)),
-    text('Домножаем на ' + m('x \\ne 0') + ' и переносим всё в одну часть — получаем ' +
+    formula('\\dfrac{' + tex(k) + '}{x} = ' + coef(line.k) + 'x' + term(line.b))
+  ]));
+
+  /* Дробно-рациональное уравнение: ОДЗ — отдельным шагом. */
+  steps.push(step('odz', 'ОДЗ', [
+    text('В знаменателе стоит ' + m('x') + ', а знаменатель не может быть равен нулю:'),
+    formula('\\text{ОДЗ: } x \\ne 0')
+  ]));
+
+  var eqBlocks = [
+    text('Умножим обе части на ' + m('x \\ne 0') + ' (по ОДЗ) и перенесём всё в одну часть — получаем ' +
       m('ax^2 + bx - k = 0') + ' (здесь ' + m('a') + ' и ' + m('b') + ' — коэффициенты прямой ' +
       m('g(x)') + ', ' + m('k') + ' — коэффициент гиперболы ' + m('f(x)') + '):'),
     formula(coef(line.k) + 'x^2' + termX(line.b, 'x') + term(mul(k, frac(-1))) + ' = 0')
@@ -437,7 +451,7 @@ function lineSteps(c, task) {
     eqBlocks.push(text('Умножим на ' + m(String(L)) + ', чтобы избавиться от дробей:'));
     eqBlocks.push(formula(quad));
   }
-  steps.push(step('equation', 'Приравниваем функции', eqBlocks));
+  steps.push(step('quadratic', 'Переходим к квадратному уравнению', eqBlocks));
 
   /* Дискриминант целого уравнения: корни рациональны, корень из D целый. */
   var D = sub(mul(qb, qb), mul(frac(4), mul(qa, qc)));
@@ -455,7 +469,9 @@ function lineSteps(c, task) {
       '}: \\quad x_1 = ' + tex(xA) + ', \\; x_2 = ' + tex(xB))
   ]));
 
-  steps.push(step('choose', 'Выбираем нужный корень', [
+  steps.push(step('choose', 'Отбор корней', [
+    text('Проверка по ОДЗ: оба корня не равны нулю.'),
+    formula('x_A = ' + tex(xA) + ' \\ne 0, \\quad x_B = ' + tex(xB) + ' \\ne 0 \\;\\text{— входят в ОДЗ}'),
     text('Корень ' + m('x = ' + tex(xA)) + ' — это абсцисса точки ' + m('A') + ', она отмечена на рисунке. ' +
       'Точке ' + m('B') + ' соответствует другой корень:'),
     formula('x_B = ' + tex(xB))

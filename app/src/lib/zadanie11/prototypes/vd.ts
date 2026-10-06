@@ -5,7 +5,18 @@
  * течения; на озере течения нет.
  */
 
-import { chtoSprashivayut, dvizhenie, etapy, key, kvadrat, num, str, vopros } from '../kit';
+import {
+  chtoSprashivayut,
+  drobnoe,
+  dvizhenie,
+  etapy,
+  key,
+  kvadrat,
+  num,
+  str,
+  vopros,
+  type DrobnoeEtapy,
+} from '../kit';
 import { d, div, fq, mul, q, sub, txt, val, type Q } from '../num';
 import { chasy, sk, vremya, SLOVA } from '../sklonenie';
 import type { HintStep, Subtype } from '../types';
@@ -40,35 +51,43 @@ function hintSkorosti(v: string, c: string): HintStep {
 
 /**
  * Неизвестна собственная скорость x: T·x² − 2S·x − T·c² = 0, где T —
- * время в движении (дробь). Возвращает строки решения и корень.
+ * время в движении (дробь). Возвращает шаги ОДЗ, решения и отбора
+ * корней (lib/zadanie11/kit drobnoe) и корень.
  */
-function sobstvennaya(S: number, c: number, T: Q): { lines: string[]; x: number } {
-  const a = T.n;
-  const b = -2 * S * T.m;
-  const cc = -c * c * T.n;
-  const sol = kvadrat(a, b, cc);
-  const x = val(sol.roots[1]);
-  return {
-    lines: [
-      `Приводим к общему знаменателю: $${d(S)}(x-${d(c)})+${d(S)}(x+${d(c)})=${fq(T)}(x^2-${d(c * c)})$, то есть $${d(2 * S)}x=${fq(T)}(x^2-${d(c * c)})$.`,
+function sobstvennaya(S: number, c: number, T: Q): { t: DrobnoeEtapy; x: number } {
+  const sol = kvadrat(T.n, -2 * S * T.m, -c * c * T.n);
+  const t = drobnoe({
+    nuli: [c, -c],
+    lo: c,
+    pochemu: `против течения скорость $x-${d(c)}$ положительна`,
+    znamenatel: `(x+${d(c)})(x-${d(c)})`,
+    posle: [
+      `$${d(S)}(x-${d(c)})+${d(S)}(x+${d(c)})=${fq(T)}(x^2-${d(c * c)})$, то есть $${d(2 * S)}x=${fq(T)}(x^2-${d(c * c)})$.`,
       `$${sol.ishodnoe}$.`,
       ...sol.lines,
     ],
-    x,
-  };
+    roots: sol.roots.map(val),
+  });
+  return { t, x: t.root };
 }
 
-/** Неизвестна скорость течения: c² = v² − 2Sv/T. */
-function techenie(S: number, v: number, T: Q): { lines: string[]; c: number } {
+/** Неизвестна скорость течения x: x² = v² − 2Sv/T. */
+function techenie(S: number, v: number, T: Q): { t: DrobnoeEtapy; c: number } {
   const c2 = sub(q(v * v), div(q(2 * S * v), T));
   const c = Math.sqrt(val(c2));
-  return {
-    lines: [
-      `Приводим к общему знаменателю: $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-x^2)$.`,
+  const t = drobnoe({
+    nuli: [v, -v],
+    lo: 0,
+    hi: v,
+    pochemu: 'скорость течения положительна и меньше собственной скорости',
+    znamenatel: `(${d(v)}+x)(${d(v)}-x)`,
+    posle: [
+      `$${d(S)}(${d(v)}-x)+${d(S)}(${d(v)}+x)=${fq(T)}(${d(v * v)}-x^2)$, то есть $${d(2 * S)}\\cdot${d(v)}=${fq(T)}(${d(v * v)}-x^2)$.`,
       `$${d(v * v)}-x^2=${fq(div(q(2 * S * v), T))}$, $x^2=${fq(c2)}$, $x=\\pm${d(c)}$.`,
     ],
-    c,
-  };
+    roots: [-c, c],
+  });
+  return { t, c: t.root };
 }
 
 /* ── ВД-01 Найти весь путь ───────────────────────────────────── */
@@ -161,8 +180,9 @@ const VD02: Subtype = {
         ],
         ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
         ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${d(move)}$.`]],
-        ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость больше скорости течения: $x=${d(r.x)}$.`, otvet(r.x)]],
+        r.t.odz,
+        r.t.reshenie,
+        ['Отбор корней и ответ', [...r.t.otbor, otvet(r.x)]],
       ),
       tables: [tablitsaReki(d(S), 'x', d(c))],
       hints: [
@@ -175,6 +195,8 @@ const VD02: Subtype = {
           `$${tudaObratno(d(S), 'x', d(c))}=${d(T)}$`,
           `$\\dfrac{${d(S)}}{x-${d(c)}}-\\dfrac{${d(S)}}{x+${d(c)}}=${d(move)}$`,
         ]),
+        r.t.hintOdz,
+        r.t.hintKoren,
         chtoSprashivayut('скорость в неподвижной воде', [
           'скорость по течению',
           'скорость течения',
@@ -210,8 +232,9 @@ const VD03: Subtype = {
         ],
         ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
         ['Уравнение', [`$${tudaObratno(d(S), d(v), 'x')}=${d(move)}$.`]],
-        ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(r.c)}$.`, otvet(r.c)]],
+        r.t.odz,
+        r.t.reshenie,
+        ['Отбор корней и ответ', [...r.t.otbor, otvet(r.c)]],
       ),
       tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
@@ -225,6 +248,8 @@ const VD03: Subtype = {
           `неполное квадратное: $x^2=\\ldots$`,
           ['линейное', 'кубическое'],
         ),
+        r.t.hintOdz,
+        r.t.hintKoren,
         chtoSprashivayut('скорость течения', ['скорость теплохода', 'время в пути']),
       ],
       lifehacks: ['fast-count'],
@@ -248,6 +273,19 @@ const VD04: Subtype = {
       const v = num(p, 'v');
       const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
       const c = val(sol.roots[1]);
+      const dr = drobnoe({
+        nuli: [v, -v],
+        lo: 0,
+        hi: v,
+        pochemu: 'скорость течения положительна и меньше скорости лодки',
+        znamenatel: `(${d(v)}-x)(${d(v)}+x)`,
+        posle: [
+          `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$, $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
+          `$${sol.ishodnoe}$.`,
+          ...sol.lines,
+        ],
+        roots: sol.roots.map(val),
+      });
       return {
         uslovie: `Моторная лодка прошла против течения реки ${txt(S)} км и вернулась в пункт отправления, затратив на обратный путь на ${sk(Dl, SLOVA.chas)} меньше. Найдите скорость течения, если скорость лодки в неподвижной воде равна ${txt(v)} км/ч. Ответ дайте в км/ч.`,
         answer: c,
@@ -258,15 +296,9 @@ const VD04: Subtype = {
           ],
           ['Таблица', ['Против течения лодка шла дольше.']],
           ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
-          [
-            'Решение',
-            [
-              `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$, $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
-              `$${sol.ishodnoe}$.`,
-              ...sol.lines,
-            ],
-          ],
-          ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(c)}$.`, otvet(c)]],
+          dr.odz,
+          dr.reshenie,
+          ['Отбор корней и ответ', [...dr.otbor, otvet(c)]],
         ),
         tables: [tablitsaReki(d(S), d(v), 'x', ['Обратно (по течению)', 'Туда (против течения)'])],
         hints: [
@@ -279,6 +311,8 @@ const VD04: Subtype = {
               `$\\dfrac{${d(S)}}{${d(v)}-x}+\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$`,
             ],
           ),
+          dr.hintOdz,
+          dr.hintKoren,
           chtoSprashivayut('скорость течения', ['скорость лодки', 'время в пути']),
         ],
         lifehacks: ['divide-equation'],
@@ -287,6 +321,18 @@ const VD04: Subtype = {
     const c = num(p, 'c');
     const sol = kvadrat(Dl, 0, -(2 * S * c + Dl * c * c), 'x');
     const x = val(sol.roots[1]);
+    const dr = drobnoe({
+      nuli: [c, -c],
+      lo: c,
+      pochemu: `против течения скорость $x-${d(c)}$ положительна`,
+      znamenatel: `(x-${d(c)})(x+${d(c)})`,
+      posle: [
+        `$${d(S)}(x+${d(c)})-${d(S)}(x-${d(c)})=${d(Dl)}(x^2-${d(c * c)})$, $${d(2 * S * c)}=${d(Dl)}x^2-${d(Dl * c * c)}$.`,
+        `$${sol.ishodnoe}$.`,
+        ...sol.lines,
+      ],
+      roots: sol.roots.map(val),
+    });
     return {
       uslovie: `Моторная лодка прошла против течения реки ${txt(S)} км и вернулась в пункт отправления, затратив на обратный путь на ${sk(Dl, SLOVA.chas)} меньше. Найдите скорость лодки в неподвижной воде, если скорость течения равна ${txt(c)} км/ч. Ответ дайте в км/ч.`,
       answer: x,
@@ -299,15 +345,9 @@ const VD04: Subtype = {
         ],
         ['Таблица', ['Против течения лодка шла дольше.']],
         ['Уравнение', [`$\\dfrac{${d(S)}}{x-${d(c)}}-\\dfrac{${d(S)}}{x+${d(c)}}=${d(Dl)}$.`]],
-        [
-          'Решение',
-          [
-            `$${d(S)}(x+${d(c)})-${d(S)}(x-${d(c)})=${d(Dl)}(x^2-${d(c * c)})$, $${d(2 * S * c)}=${d(Dl)}x^2-${d(Dl * c * c)}$.`,
-            `$${sol.ishodnoe}$.`,
-            ...sol.lines,
-          ],
-        ],
-        ['Отбор корня и ответ', [`Скорость положительна: $x=${d(x)}$.`, otvet(x)]],
+        dr.odz,
+        dr.reshenie,
+        ['Отбор корней и ответ', [...dr.otbor, otvet(x)]],
       ),
       tables: [tablitsaReki(d(S), 'x', d(c), ['Обратно (по течению)', 'Туда (против течения)'])],
       hints: [
@@ -325,6 +365,8 @@ const VD04: Subtype = {
           'неполное квадратное уравнение $x^2=\\ldots$',
           ['линейное уравнение', 'полное квадратное'],
         ),
+        dr.hintOdz,
+        dr.hintKoren,
         chtoSprashivayut('скорость лодки в неподвижной воде', [
           'скорость течения',
           'скорость против течения',
@@ -431,8 +473,9 @@ const VD05: Subtype = {
           ],
           ['Время в движении', timeLines],
           ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$.`]],
-          ['Решение', r.lines],
-          ['Отбор корня и ответ', [`Скорость больше скорости течения: $x=${d(r.x)}$.`, otvet(r.x)]],
+          r.t.odz,
+          r.t.reshenie,
+          ['Отбор корней и ответ', [...r.t.otbor, otvet(r.x)]],
         ),
         tables: [tablitsaReki(d(S), 'x', d(c))],
         hints: [
@@ -445,6 +488,8 @@ const VD05: Subtype = {
             `$${tudaObratno(d(S), 'x', d(c))}=${d(t1 - t0)}$`,
             `$\\dfrac{${d(2 * S)}}{x}=${fq(T)}$`,
           ]),
+          r.t.hintOdz,
+          r.t.hintKoren,
           chtoSprashivayut('собственную скорость', ['скорость течения', 'время в пути']),
         ],
         lifehacks: ['divide-equation', 'fast-count'],
@@ -462,8 +507,9 @@ const VD05: Subtype = {
         ],
         ['Время в движении', timeLines],
         ['Уравнение', [`$${tudaObratno(d(S), d(v), 'x')}=${fq(T)}$.`]],
-        ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(r.c)}$.`, otvet(r.c)]],
+        r.t.odz,
+        r.t.reshenie,
+        ['Отбор корней и ответ', [...r.t.otbor, otvet(r.c)]],
       ),
       tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
@@ -476,6 +522,8 @@ const VD05: Subtype = {
           `$${tudaObratno(d(S), d(v), 'x')}=${d(t1 - t0)}$`,
           `$\\dfrac{${d(2 * S)}}{${d(v)}}=${fq(T)}$`,
         ]),
+        r.t.hintOdz,
+        r.t.hintKoren,
         chtoSprashivayut('скорость течения', ['собственную скорость', 'время в пути']),
       ],
       lifehacks: ['fast-count'],
@@ -512,8 +560,9 @@ const VD06: Subtype = {
           ],
         ],
         ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$.`]],
-        ['Решение', r.lines],
-        ['Отбор корня и ответ', [`Скорость яхты положительна: $x=${d(r.x)}$.`, otvet(r.x)]],
+        r.t.odz,
+        r.t.reshenie,
+        ['Отбор корней и ответ', [...r.t.otbor, otvet(r.x)]],
       ),
       tables: [
         dvizhenie([
@@ -535,6 +584,8 @@ const VD06: Subtype = {
           `$${fq(raft)}$`,
           `$${fq(mul(q(2), raft))}$`,
         ]),
+        r.t.hintOdz,
+        r.t.hintKoren,
         chtoSprashivayut('скорость яхты в неподвижной воде', ['скорость течения', 'время яхты']),
       ],
       lifehacks: ['fast-count'],
@@ -560,6 +611,15 @@ const VD07: Subtype = {
     const v = num(p, 'v');
     const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
     const c = val(sol.roots[1]);
+    const dr = drobnoe({
+      nuli: [v, -v],
+      lo: 0,
+      hi: v,
+      pochemu: 'скорость течения положительна и меньше скорости катера',
+      znamenatel: `(${d(v)}-x)(${d(v)}+x)`,
+      posle: [`$${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`, `$${sol.ishodnoe}$.`, ...sol.lines],
+      roots: sol.roots.map(val),
+    });
     return {
       uslovie: `Пройдя ${txt(S)} км по течению реки, катер возвращается в исходную точку, причём обратный путь занимает на ${sk(Dl, SLOVA.chas)} больше времени. Найдите скорость течения, если скорость катера в неподвижной воде равна ${txt(v)} км/ч.`,
       answer: c,
@@ -570,11 +630,9 @@ const VD07: Subtype = {
         ],
         ['Таблица', ['Обратный путь — против течения, он дольше.']],
         ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
-        [
-          'Решение',
-          [`$${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`, `$${sol.ishodnoe}$.`, ...sol.lines],
-        ],
-        ['Отбор корня и ответ', [`Скорость течения положительна: $x=${d(c)}$.`, otvet(c)]],
+        dr.odz,
+        dr.reshenie,
+        ['Отбор корней и ответ', [...dr.otbor, otvet(c)]],
       ),
       tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
@@ -591,6 +649,8 @@ const VD07: Subtype = {
           'взять среднее арифметическое',
           'перейти к минутам',
         ]),
+        dr.hintOdz,
+        dr.hintKoren,
         chtoSprashivayut('скорость течения', ['скорость катера', 'время в пути']),
       ],
       lifehacks: ['root-guess'],

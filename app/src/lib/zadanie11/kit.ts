@@ -298,19 +298,137 @@ export function podbor(S: number, dd: number, x = 'x'): { x: number; line: strin
 }
 
 /**
- * Уравнение вида x(x + d) = S: решение подбором множителей и
- * проверка дискриминантом. Возвращает строки и положительный корень.
+ * Уравнение вида x(x + d) = S: решение подбором множителей,
+ * обоснование, что других подходящих корней нет (теорема Виета), и
+ * проверка дискриминантом. Возвращает строки, оба корня и
+ * положительный корень.
  */
-export function xxd(S: number, dd: number, x = 'x'): { lines: string[]; root: number } {
+export function xxd(
+  S: number,
+  dd: number,
+  x = 'x',
+): { lines: string[]; roots: number[]; root: number } {
   const guess = podbor(S, dd, x);
   const sol = kvadrat(1, dd, -S, x);
+  const vtoroy = -(guess.x + dd);
   return {
     lines: [
-      `$${x}(${x}+${d(dd)})=${d(S)}$.`,
+      `$${x}(${x}+${d(dd)})=${d(S)}$, то есть $${poly(1, dd, -S, x)}=0$.`,
       `**Лайфхак:** ${guess.line}`,
-      `Проверка честным решением: $${sol.ishodnoe}$.`,
+      `**Других подходящих корней нет:** по теореме Виета $${x}_1\\cdot ${x}_2=-${d(S)}$, поэтому второй корень $${x}_2=-\\dfrac{${d(S)}}{${d(guess.x)}}=${d(vtoroy)}<0$.`,
+      `Проверка дискриминантом: $${sol.ishodnoe}$.`,
       ...sol.lines,
     ],
+    roots: [vtoroy, guess.x],
     root: guess.x,
   };
+}
+
+/* ── Дробно-рациональные уравнения: ОДЗ и отбор корней ─────────── */
+
+export interface Drobnoe {
+  /** Значения переменной, при которых знаменатель равен нулю. */
+  nuli: number[];
+  /** По смыслу задачи: x > lo (и x < hi, если задано). */
+  lo: number;
+  hi?: number;
+  /** Почему: «скорость положительна». */
+  pochemu: string;
+  /** Дополнительное условие из текста задачи (ДП-12: «больше 48»). */
+  uslovie?: { bolshe: number; text: string };
+  /** Общий знаменатель в TeX — на него умножаем обе части. */
+  znamenatel: string;
+  /** Строки решения после умножения на знаменатель. */
+  posle: string[];
+  /** Все корни целого уравнения. */
+  roots: number[];
+  x?: string;
+}
+
+export interface DrobnoeEtapy {
+  odz: [string, string[]];
+  reshenie: [string, string[]];
+  /** Строки шага «Отбор корней»: вердикт по каждому корню. */
+  otbor: string[];
+  /** Подходящий корень. */
+  root: number;
+  /** Вопросы подсказки: «Какие значения x недопустимы?», «Какой корень подходит?». */
+  hintOdz: HintStep;
+  hintKoren: HintStep;
+}
+
+/** «$x\ne0$, $x\ne-3$» */
+function zaprety(nuli: number[], x: string): string {
+  return [...new Set(nuli)]
+    .sort((a, b) => Math.abs(a) - Math.abs(b) || a - b)
+    .map((v) => `$${x}\\ne${d(v)}$`)
+    .join(', ');
+}
+
+/**
+ * Шаги дробно-рационального уравнения по методике: ОДЗ отдельной
+ * строкой (знаменатели не равны нулю) и условие по смыслу задачи;
+ * умножение на общий знаменатель — «≠ 0 (по ОДЗ)», без знака
+ * равносильности; отбор корней — по ОДЗ и по смыслу, с вердиктом по
+ * каждому корню. Подходить должен ровно один корень.
+ */
+export function drobnoe(o: Drobnoe): DrobnoeEtapy {
+  const x = o.x ?? 'x';
+  const smysl = o.hi === undefined ? `$${x}>${d(o.lo)}$` : `$${d(o.lo)}<${x}<${d(o.hi)}$`;
+  const odz: [string, string[]] = [
+    'ОДЗ',
+    [
+      `**ОДЗ:** ${zaprety(o.nuli, x)} — знаменатели не равны нулю.`,
+      `**По смыслу задачи:** ${smysl} — ${o.pochemu}.${o.uslovie ? ` По условию ещё $${x}>${d(o.uslovie.bolshe)}$ (${o.uslovie.text}).` : ''}`,
+    ],
+  ];
+  const reshenie: [string, string[]] = [
+    'Решение',
+    [`Умножим обе части на $${o.znamenatel}\\ne0$ (по ОДЗ):`, ...o.posle],
+  ];
+  const otbor: string[] = ['Проверяем каждый корень по ОДЗ и по смыслу задачи.'];
+  const podhodyat: number[] = [];
+  for (const r of [...new Set(o.roots.map((v) => Math.round(v * 1e9) / 1e9))]) {
+    const pref = `$${x}=${d(r)}$`;
+    if (o.nuli.some((v) => Math.abs(v - r) < 1e-9)) {
+      otbor.push(`${pref} — не входит в ОДЗ: знаменатель обращается в ноль. Отбрасываем.`);
+    } else if (!(r > o.lo) || (o.hi !== undefined && !(r < o.hi))) {
+      otbor.push(
+        `${pref} — входит в ОДЗ, но не подходит по смыслу задачи: нужно ${smysl}. Отбрасываем.`,
+      );
+    } else if (o.uslovie && !(r > o.uslovie.bolshe)) {
+      otbor.push(
+        `${pref} — входит в ОДЗ, но не подходит по условию задачи: нужно $${x}>${d(o.uslovie.bolshe)}$. Отбрасываем.`,
+      );
+    } else {
+      otbor.push(`${pref} — входит в ОДЗ и подходит по смыслу задачи.`);
+      podhodyat.push(r);
+    }
+  }
+  if (podhodyat.length !== 1) {
+    throw new Error(`отбор корней: подходит ${podhodyat.length} корней из ${o.roots.join(', ')}`);
+  }
+  const root = podhodyat[0] as number;
+  const pravilno = zaprety(o.nuli, x);
+  const hintOdz = vopros(
+    `Какие значения $${x}$ недопустимы?`,
+    pravilno,
+    [
+      zaprety(
+        o.nuli.map((v) => (v === 0 ? 0 : -v)),
+        x,
+      ),
+      ...(o.nuli.length > 1 ? [zaprety([o.nuli[0] as number], x)] : []),
+      'ограничений нет',
+    ],
+    'ОДЗ: знаменатели дробей не равны нулю.',
+  );
+  const drugie = o.roots.filter((r) => Math.abs(r - root) > 1e-9).map((r) => `$${x}=${d(r)}$`);
+  const hintKoren = vopros(
+    'Какой корень подходит?',
+    `$${x}=${d(root)}$`,
+    [...drugie, 'оба корня'],
+    `Проверяем по ОДЗ и по смыслу задачи: ${smysl}.`,
+  );
+  return { odz, reshenie, otbor, root, hintOdz, hintKoren };
 }
