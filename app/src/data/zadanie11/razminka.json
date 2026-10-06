@@ -1,7 +1,11 @@
 [
   { "id": "RZ-01", "params": { "c": 360, "g": 1750, "M": 1000 }, "answer": 370 },
   { "id": "RZ-02", "params": { "S": 75, "t": 6 }, "answer": 45 },
-  { "id": "RZ-03", "params": { "t0": 800, "t1": 890, "gorod": "vladivostok", "S": 6800 }, "answer": 800 },
+  {
+    "id": "RZ-03",
+    "params": { "t0": 800, "t1": 890, "gorod": "vladivostok", "S": 6800 },
+    "answer": 800
+  },
   { "id": "RZ-04", "params": { "cap": 45, "a": 312, "b": 14 }, "answer": 8 },
   { "id": "RZ-05", "params": { "g": 120, "can": 900, "area": 32 }, "answer": 5 },
   {
