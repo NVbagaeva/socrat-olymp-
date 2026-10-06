@@ -23,6 +23,8 @@
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
+    "test:topic-progress": "node scripts/check-topic-progress.mjs",
+    "test:topic-progress-site": "node scripts/check-topic-progress-site.mjs",
     "test:graph-quadratic": "node scripts/check-graph-quadratic.mjs",
     "test:graph-rational": "node scripts/check-graph-rational.mjs",
     "test:solution-tex": "node scripts/check-solution-tex.mjs",
