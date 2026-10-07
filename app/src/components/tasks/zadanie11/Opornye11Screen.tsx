@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
+import { praviloOdinRaz } from './praviloProporcii';
 import { OPORNYE_11 } from '@/content/zadanie11';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { scrollTabTo } from '@/lib/tabScroll';
@@ -278,12 +279,17 @@ export function Opornye11Screen({
         )}
 
         {razbor === null ? null : (
-          <div className="z11-razbor" role="region" aria-label={OPORNYE_11.reshenie}>
+          <div
+            className="z11-razbor"
+            role="region"
+            aria-label={OPORNYE_11.reshenie}
+            ref={praviloOdinRaz}
+          >
             <p className="z11-razbor__title">{OPORNYE_11.reshenie}</p>
             {razbor.tablitsa === null ? null : <Tablitsa11 table={razbor.tablitsa} />}
             <div className="z11-razbor__lines">
               {razbor.stroki.map((line, i) => (
-                <p
+                <div
                   className="z11-razbor__line"
                   key={i}
                   dangerouslySetInnerHTML={{ __html: line }}

@@ -8,6 +8,7 @@ import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import '../pechat11.css';
+import '../../procenty.css';
 
 export const metadata: Metadata = {
   title: zadanie11Title(PECHAT_11.uchitel),
