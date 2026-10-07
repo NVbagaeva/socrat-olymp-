@@ -132,6 +132,8 @@ const SYUZHET = new Set([
   'poezdARod',
   'poezdB',
   'poezdBRod',
+  /* Вода: «лодка шла» / «катер шёл». */
+  'shla',
 ]);
 
 export function model(params: Params): Params {
@@ -576,6 +578,85 @@ const PRAVILA: Record<string, Pravilo> = {
       ...slovaVTekste(a, ['ktoRod']),
     ],
   },
+  /* ── Вода ── */
+  'VD-01': {
+    chisla: ['v', 'c', 'st', 'T'],
+    vopros: (a) => /за весь рейс/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...reka(a, num(a.params, 'v'), num(a.params, 'c')),
+      ...slovaVTekste(a, ['kto']),
+    ],
+  },
+  'VD-02': {
+    chisla: ['S', 'c', 'st', 'T'],
+    vopros: (a) => /в неподвижной воде/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...reka(a, a.answer, num(a.params, 'c')),
+      ...slovaVTekste(a, ['ktoRod']),
+    ],
+  },
+  'VD-03': {
+    chisla: ['S', 'v', 'st', 'T'],
+    vopros: (a) => /Найдите скорость течения/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...reka(a, num(a.params, 'v'), a.answer),
+      ...slovaVTekste(a, ['ktoRod']),
+    ],
+  },
+  'VD-04': {
+    chisla: (a) => (a.ask === 'c' ? ['S', 'delta', 'v'] : ['S', 'delta', 'c']),
+    vopros: (a) =>
+      a.ask === 'c'
+        ? /Найдите скорость течения/.test(poslednee(a.text))
+        : /в неподвижной воде/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...(a.ask === 'c'
+        ? reka(a, num(a.params, 'v'), a.answer)
+        : reka(a, a.answer, num(a.params, 'c'))),
+      ...slovaVTekste(a, ['ktoRod']),
+      ...(/против течения/.test(a.text) && /меньше/.test(a.text)
+        ? []
+        : ['нет «против течения … меньше»']),
+    ],
+  },
+  'VD-05': {
+    chisla: (a) => (a.ask === 'v' ? ['S', 'c'] : ['S', 'v']),
+    vopros: (a) =>
+      a.ask === (['kater', 'baidarka'].includes(String(a.params.form)) ? 'v' : 'c') &&
+      (a.ask === 'v'
+        ? /собственную скорость/.test(poslednee(a.text))
+        : /скорость течения/.test(poslednee(a.text))),
+    pravdopodobie: (a) => {
+      const out: string[] = [...vremyaVTekste(a, num(a.params, 'st'))];
+      for (const k of ['t0', 't1']) {
+        if (!a.text.includes(` ${num(a.params, k)}:00 `)) out.push(`в тексте нет времени ${k}`);
+      }
+      return [
+        ...out,
+        ...(a.ask === 'v'
+          ? reka(a, a.answer, num(a.params, 'c'))
+          : reka(a, num(a.params, 'v'), a.answer)),
+      ];
+    },
+  },
+  'VD-06': {
+    chisla: ['S', 'h', 'r', 'c'],
+    vopros: (a) => /в неподвижной воде/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...reka(a, a.answer, num(a.params, 'c')),
+      ...slovaVTekste(a, ['ktoRod']),
+      ...(/плот/.test(a.text) ? [] : ['нет плота']),
+    ],
+  },
+  'VD-07': {
+    chisla: ['S', 'delta', 'v'],
+    vopros: (a) => /Найдите скорость течения/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...reka(a, num(a.params, 'v'), a.answer),
+      ...slovaVTekste(a, ['ktoRod']),
+      ...(/по течению/.test(a.text) && /больше/.test(a.text) ? [] : ['нет «по течению … больше»']),
+    ],
+  },
   /* ── Разминка ── */
   'RZ-01': {
     chisla: ['c', 'M'],
@@ -764,6 +845,16 @@ const PRAVILA: Record<string, Pravilo> = {
     },
   },
 };
+
+/** Река: собственная скорость в пределах водного героя, течение 1–6 км/ч. */
+function reka(a: Analog, v: number, c: number): string[] {
+  const g = GEROI[String(a.params.geroy)];
+  if (g === undefined || !g.voda) return ['нужен водный герой'];
+  return [
+    ...vne('собственная скорость, км/ч', v, g.v[0], g.v[1]),
+    ...vne('скорость течения, км/ч', c, 1, 6),
+  ];
+}
 
 /** Поезда ПТ-02/03: длины и скорости в пределах, поезда названы, направление в тексте. */
 function poezda(a: Analog, napravlenie: RegExp): string[] {

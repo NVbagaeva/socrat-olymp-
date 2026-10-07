@@ -34,6 +34,9 @@ export const GEROI: Record<string, Geroy> = {
   plovec: { rod: 'пловца', voda: true, v: [2, 8] },
   snegohod: { rod: 'снегохода', voda: false, v: [20, 80] },
   turist: { rod: 'туриста', voda: false, v: [2, 7] },
+  baidarka: { rod: 'байдарки', voda: true, v: [3, 12] },
+  buksir: { rod: 'буксира', voda: true, v: [5, 25] },
+  parom: { rod: 'парома', voda: true, v: [10, 40] },
 };
 
 /** Вещество смеси: родительный падеж; сплав или раствор; допустимые %. */

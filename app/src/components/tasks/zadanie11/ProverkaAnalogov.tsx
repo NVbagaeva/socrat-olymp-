@@ -134,7 +134,7 @@ export function ProverkaAnalogov({ razdely }: { razdely: RazdelNaProverku[] }) {
                   const o = otmetki[a.id];
                   return (
                     <li key={a.id} className={clsx('z11-pr__analog', o && `is-${o.status}`)}>
-                      <p className="z11-pr__meta">
+                      <p className="z11-pr__meta no-math-check">
                         <b>{a.id}</b> · {a.plotTag} · вопрос: {a.ask}
                       </p>
                       <div

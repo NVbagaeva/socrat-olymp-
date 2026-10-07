@@ -13,12 +13,13 @@ import {
   key,
   kvadrat,
   num,
+  slovo,
   str,
   vopros,
   type DrobnoeEtapy,
 } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val, type Q } from '../num';
-import { chasy, sk, vremya, SLOVA } from '../sklonenie';
+import { chasy, sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
 import type { HintStep, Subtype } from '../types';
 import { otvet } from './common';
 
@@ -106,6 +107,8 @@ const VD01: Subtype = {
     const move = T - st;
     const S = val(div(q(move * (v * v - c * c)), q(2 * v)));
     const ans = 2 * S;
+    /* Аналог: катер, буксир, паром (мужской род). */
+    const kto = slovo(p, 'kto', 'теплоход');
     return {
       uslovie: `Теплоход, скорость которого в неподвижной воде равна ${txt(v)} км/ч, проходит по течению реки и после стоянки возвращается в исходный пункт. Скорость течения равна ${txt(c)} км/ч, стоянка длится ${sk(st, SLOVA.chas)}, а в исходный пункт теплоход возвращается через ${sk(T, SLOVA.chas)} после отправления из него. Сколько километров проходит теплоход за весь рейс?`,
       answer: ans,
@@ -131,11 +134,11 @@ const VD01: Subtype = {
       ),
       tables: [tablitsaReki('x', d(v), d(c))],
       hints: [
-        vopros('С какой скоростью теплоход идёт по течению?', `$${d(v + c)}$ км/ч`, [
+        vopros(`С какой скоростью ${kto} идёт по течению?`, `$${d(v + c)}$ км/ч`, [
           `$${d(v - c)}$ км/ч`,
           `$${d(v)}$ км/ч`,
         ]),
-        vopros('Сколько часов теплоход был в движении?', `$${d(move)}$`, [
+        vopros(`Сколько часов ${kto} был в движении?`, `$${d(move)}$`, [
           `$${d(T)}$`,
           `$${d(T + st)}$`,
         ]),
@@ -168,6 +171,9 @@ const VD02: Subtype = {
     const T = num(p, 'T');
     const move = T - st;
     const r = sobstvennaya(S, c, q(move));
+    /* Аналог: катер, буксир, паром (мужской род). */
+    const kto = slovo(p, 'kto', 'теплоход');
+    const ktoRod = slovo(p, 'ktoRod', 'теплохода');
     return {
       uslovie: `Теплоход проходит по течению реки до пункта назначения ${txt(S)} км и после стоянки возвращается в пункт отправления. Найдите скорость теплохода в неподвижной воде, если скорость течения равна ${txt(c)} км/ч, стоянка длится ${sk(st, SLOVA.chas)}, а в пункт отправления теплоход возвращается через ${sk(T, SLOVA.chas)}. Ответ дайте в км/ч.`,
       answer: r.x,
@@ -175,7 +181,7 @@ const VD02: Subtype = {
         [
           'Обозначаем',
           [
-            `Скорость теплохода в неподвижной воде — $x$ км/ч. По течению $x+${d(c)}$, против — $x-${d(c)}$.`,
+            `Скорость ${ktoRod} в неподвижной воде — $x$ км/ч. По течению $x+${d(c)}$, против — $x-${d(c)}$.`,
           ],
         ],
         ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
@@ -187,7 +193,7 @@ const VD02: Subtype = {
       tables: [tablitsaReki(d(S), 'x', d(c))],
       hints: [
         hintSkorosti('x', d(c)),
-        vopros('Сколько часов теплоход был в движении?', `$${d(move)}$`, [
+        vopros(`Сколько часов ${kto} был в движении?`, `$${d(move)}$`, [
           `$${d(T)}$`,
           `$${d(T + st)}$`,
         ]),
@@ -222,6 +228,9 @@ const VD03: Subtype = {
     const T = num(p, 'T');
     const move = T - st;
     const r = techenie(S, v, q(move));
+    /* Аналог: катер, буксир, паром (мужской род). */
+    const kto = slovo(p, 'kto', 'теплоход');
+    const ktoRod = slovo(p, 'ktoRod', 'теплохода');
     return {
       uslovie: `Теплоход проходит по течению реки до пункта назначения ${txt(S)} км и после стоянки возвращается в пункт отправления. Найдите скорость течения, если скорость теплохода в неподвижной воде равна ${txt(v)} км/ч, стоянка длится ${sk(st, SLOVA.chas)}, а в пункт отправления теплоход возвращается через ${sk(T, SLOVA.chas)}. Ответ дайте в км/ч.`,
       answer: r.c,
@@ -239,7 +248,7 @@ const VD03: Subtype = {
       tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [
         hintSkorosti(d(v), 'x'),
-        vopros('Сколько часов теплоход был в движении?', `$${d(move)}$`, [
+        vopros(`Сколько часов ${kto} был в движении?`, `$${d(move)}$`, [
           `$${d(T)}$`,
           `$${d(T + st)}$`,
         ]),
@@ -250,7 +259,7 @@ const VD03: Subtype = {
         ),
         r.t.hintOdz,
         r.t.hintKoren,
-        chtoSprashivayut('скорость течения', ['скорость теплохода', 'время в пути']),
+        chtoSprashivayut('скорость течения', [`скорость ${ktoRod}`, 'время в пути']),
       ],
       lifehacks: ['fast-count'],
     };
@@ -269,6 +278,9 @@ const VD04: Subtype = {
     const S = num(p, 'S');
     const Dl = num(p, 'delta');
     const ask = str(p, 'ask', ['c', 'v'] as const);
+    /* Аналог: катер, байдарка, буксир. */
+    const ktoRod = slovo(p, 'ktoRod', 'лодки');
+    const shla = slovo(p, 'shla', 'лодка шла');
     if (ask === 'c') {
       const v = num(p, 'v');
       const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
@@ -277,7 +289,7 @@ const VD04: Subtype = {
         nuli: [v, -v],
         lo: 0,
         hi: v,
-        pochemu: 'скорость течения положительна и меньше скорости лодки',
+        pochemu: `скорость течения положительна и меньше скорости ${ktoRod}`,
         znamenatel: `(${d(v)}-x)(${d(v)}+x)`,
         posle: [
           `$${d(S)}(${d(v)}+x)-${d(S)}(${d(v)}-x)=${d(Dl)}(${d(v * v)}-x^2)$, $${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`,
@@ -294,7 +306,7 @@ const VD04: Subtype = {
             'Обозначаем',
             [`Скорость течения — $x$ км/ч. Против течения $${d(v)}-x$, по течению $${d(v)}+x$.`],
           ],
-          ['Таблица', ['Против течения лодка шла дольше.']],
+          ['Таблица', [`Против течения ${shla} дольше.`]],
           ['Уравнение', [`$\\dfrac{${d(S)}}{${d(v)}-x}-\\dfrac{${d(S)}}{${d(v)}+x}=${d(Dl)}$.`]],
           dr.odz,
           dr.reshenie,
@@ -313,7 +325,7 @@ const VD04: Subtype = {
           ),
           dr.hintOdz,
           dr.hintKoren,
-          chtoSprashivayut('скорость течения', ['скорость лодки', 'время в пути']),
+          chtoSprashivayut('скорость течения', [`скорость ${ktoRod}`, 'время в пути']),
         ],
         lifehacks: ['divide-equation'],
       };
@@ -340,10 +352,10 @@ const VD04: Subtype = {
         [
           'Обозначаем',
           [
-            `Скорость лодки в неподвижной воде — $x$ км/ч. Против течения $x-${d(c)}$, по течению $x+${d(c)}$.`,
+            `Скорость ${ktoRod} в неподвижной воде — $x$ км/ч. Против течения $x-${d(c)}$, по течению $x+${d(c)}$.`,
           ],
         ],
-        ['Таблица', ['Против течения лодка шла дольше.']],
+        ['Таблица', [`Против течения ${shla} дольше.`]],
         ['Уравнение', [`$\\dfrac{${d(S)}}{x-${d(c)}}-\\dfrac{${d(S)}}{x+${d(c)}}=${d(Dl)}$.`]],
         dr.odz,
         dr.reshenie,
@@ -367,7 +379,7 @@ const VD04: Subtype = {
         ),
         dr.hintOdz,
         dr.hintKoren,
-        chtoSprashivayut('скорость лодки в неподвижной воде', [
+        chtoSprashivayut(`скорость ${ktoRod} в неподвижной воде`, [
           'скорость течения',
           'скорость против течения',
         ]),
@@ -547,16 +559,19 @@ const VD06: Subtype = {
     const raft = q(rr, c);
     const T = sub(raft, q(h));
     const r = sobstvennaya(S, c, T);
+    /* Аналог: моторная лодка, байдарка (женский род). */
+    const kto = slovo(p, 'kto', 'яхта');
+    const ktoRod = slovo(p, 'ktoRod', 'яхты');
     return {
       uslovie: `Расстояние между пристанями А и В равно ${txt(S)} км. Из А в В по течению реки отправился плот, а через ${sk(h, SLOVA.chas)} вслед за ним отправилась яхта, которая, прибыв в пункт В, тотчас повернула обратно и возвратилась в А. К этому времени плот проплыл ${txt(rr)} км. Найдите скорость яхты в неподвижной воде, если скорость течения реки равна ${txt(c)} км/ч. Ответ дайте в км/ч.`,
       answer: r.x,
       etapy: etapy(
-        ['Обозначаем', [`Скорость яхты в неподвижной воде — $x$ км/ч.`]],
+        ['Обозначаем', [`Скорость ${ktoRod} в неподвижной воде — $x$ км/ч.`]],
         [
-          'Время яхты',
+          `Время ${ktoRod}`,
           [
             `Плот плывёт со скоростью течения: $${d(rr)}$ км он проплыл за $${frac2(rr, c)}=${fq(raft)}$ ч.`,
-            `Яхта вышла на $${d(h)}$ ч позже: она в пути $${fq(raft)}-${d(h)}=${fq(T)}$ ч.`,
+            `${zaglavnaya(kto)} вышла на $${d(h)}$ ч позже: она в пути $${fq(raft)}-${d(h)}=${fq(T)}$ ч.`,
           ],
         ],
         ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$.`]],
@@ -567,26 +582,29 @@ const VD06: Subtype = {
       tables: [
         dvizhenie([
           ['Плот', d(rr), d(c), fq(raft)],
-          ['Яхта туда', d(S), `x+${d(c)}`, `\\dfrac{${d(S)}}{x+${d(c)}}`],
-          ['Яхта обратно', d(S), `x-${d(c)}`, `\\dfrac{${d(S)}}{x-${d(c)}}`],
+          [`${zaglavnaya(kto)} туда`, d(S), `x+${d(c)}`, `\\dfrac{${d(S)}}{x+${d(c)}}`],
+          [`${zaglavnaya(kto)} обратно`, d(S), `x-${d(c)}`, `\\dfrac{${d(S)}}{x-${d(c)}}`],
         ]),
       ],
       hints: [
         vopros('С какой скоростью плывёт плот?', 'со скоростью течения', [
           '$0$ — у плота нет скорости',
-          'со скоростью яхты',
+          `со скоростью ${ktoRod}`,
         ]),
         vopros('Сколько часов плыл плот?', `$${fq(raft)}$`, [
           `$${fq(sub(raft, q(h)))}$`,
           `$${d(rr)}$`,
         ]),
-        vopros('Сколько часов была в пути яхта?', `$${fq(T)}$`, [
+        vopros(`Сколько часов была в пути ${kto}?`, `$${fq(T)}$`, [
           `$${fq(raft)}$`,
           `$${fq(mul(q(2), raft))}$`,
         ]),
         r.t.hintOdz,
         r.t.hintKoren,
-        chtoSprashivayut('скорость яхты в неподвижной воде', ['скорость течения', 'время яхты']),
+        chtoSprashivayut(`скорость ${ktoRod} в неподвижной воде`, [
+          'скорость течения',
+          `время ${ktoRod}`,
+        ]),
       ],
       lifehacks: ['fast-count'],
     };
@@ -610,12 +628,14 @@ const VD07: Subtype = {
     const Dl = num(p, 'delta');
     const v = num(p, 'v');
     const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
+    /* Аналог: теплоход, лодка, буксир. */
+    const ktoRod = slovo(p, 'ktoRod', 'катера');
     const c = val(sol.roots[1]);
     const dr = drobnoe({
       nuli: [v, -v],
       lo: 0,
       hi: v,
-      pochemu: 'скорость течения положительна и меньше скорости катера',
+      pochemu: `скорость течения положительна и меньше скорости ${ktoRod}`,
       znamenatel: `(${d(v)}-x)(${d(v)}+x)`,
       posle: [`$${d(2 * S)}x=${d(Dl)}(${d(v * v)}-x^2)$.`, `$${sol.ishodnoe}$.`, ...sol.lines],
       roots: sol.roots.map(val),
@@ -651,7 +671,7 @@ const VD07: Subtype = {
         ]),
         dr.hintOdz,
         dr.hintKoren,
-        chtoSprashivayut('скорость течения', ['скорость катера', 'время в пути']),
+        chtoSprashivayut('скорость течения', [`скорость ${ktoRod}`, 'время в пути']),
       ],
       lifehacks: ['root-guess'],
     };
