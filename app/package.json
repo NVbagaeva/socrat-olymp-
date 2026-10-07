@@ -45,7 +45,7 @@
     "test:vychisleniya": "node scripts/check-vychisleniya.mjs",
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
-    "test:zadanie13": "node scripts/check-zadanie13.mjs",
+    "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
     "build:pdf-8": "node scripts/build-pdf-8.mjs",

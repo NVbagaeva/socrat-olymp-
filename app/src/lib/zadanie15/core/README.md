@@ -1,4 +1,4 @@
-# Ядро сечений, задание №13
+# Ядро сечений, задание №15
 
 Чистый TypeScript без графики и React. Рендер (three.js), инструменты
 ученика, обоснования и проверка заданий строятся поверх ядра.
@@ -67,4 +67,4 @@
 
 ## Тесты
 
-`pnpm test:zadanie13` (`scripts/check-zadanie13.mjs`, стоит в CI).
+`pnpm test:zadanie15` (`scripts/check-zadanie15.mjs`, стоит в CI).

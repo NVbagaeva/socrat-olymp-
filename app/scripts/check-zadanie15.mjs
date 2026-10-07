@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-/* scripts/check-zadanie13.mjs — автотест ядра задания №13 (сечения).
+/* scripts/check-zadanie15.mjs — автотест ядра задания №15 (сечения).
 
-   Запуск: pnpm test:zadanie13
+   Запуск: pnpm test:zadanie15
 
-   Ядро (src/lib/zadanie13/core) считает точно: дроби на BigInt,
+   Ядро (src/lib/zadanie15/core) считает точно: дроби на BigInt,
    длины и площади вида a√b. Здесь проверяется:
      — арифметика дробей и корней (сокращение, вынос из-под корня,
        приведение подобных);
@@ -22,7 +22,7 @@
 
 import { requireSrc } from './lib/load-ts.mjs';
 
-const K = requireSrc('lib/zadanie13/core/index.ts');
+const K = requireSrc('lib/zadanie15/core/index.ts');
 const { rat, sqrtRat, surdStr, sumStr, surdSum, surdOf, cube, box, Construction } = K;
 
 const problems = [];
@@ -322,7 +322,7 @@ const B234 = box(2, 3, 4);
 
 /* ── Итог ───────────────────────────────────────────────── */
 
-console.log(`Проверок ядра №13: ${checks}`);
+console.log(`Проверок ядра №15: ${checks}`);
 if (problems.length > 0) {
   console.log(`проблем: ${problems.length}`);
   for (const p of problems) console.log(`  ${p}`);
