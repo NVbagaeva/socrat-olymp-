@@ -9,6 +9,18 @@
  * как условия банка — без ответа (trenazher/dannye.ts).
  */
 
+import dp01 from '../../data/zadanie11/analogs/DP-01.json';
+import dp02 from '../../data/zadanie11/analogs/DP-02.json';
+import dp03 from '../../data/zadanie11/analogs/DP-03.json';
+import dp04 from '../../data/zadanie11/analogs/DP-04.json';
+import dp05 from '../../data/zadanie11/analogs/DP-05.json';
+import dp06 from '../../data/zadanie11/analogs/DP-06.json';
+import dp08 from '../../data/zadanie11/analogs/DP-08.json';
+import dp09 from '../../data/zadanie11/analogs/DP-09.json';
+import dp10 from '../../data/zadanie11/analogs/DP-10.json';
+import dp11 from '../../data/zadanie11/analogs/DP-11.json';
+import dp12 from '../../data/zadanie11/analogs/DP-12.json';
+import dp13 from '../../data/zadanie11/analogs/DP-13.json';
 import dp07 from '../../data/zadanie11/analogs/DP-07.json';
 import sm01 from '../../data/zadanie11/analogs/SM-01.json';
 import sm02 from '../../data/zadanie11/analogs/SM-02.json';
@@ -88,6 +100,18 @@ export const POOL_ANALOGOV: Record<string, Analog[]> = {
   'RZ-16': rz16 as unknown as Analog[],
   'RZ-17': rz17 as unknown as Analog[],
   'RZ-18': rz18 as unknown as Analog[],
+  'DP-01': dp01 as unknown as Analog[],
+  'DP-02': dp02 as unknown as Analog[],
+  'DP-03': dp03 as unknown as Analog[],
+  'DP-04': dp04 as unknown as Analog[],
+  'DP-05': dp05 as unknown as Analog[],
+  'DP-06': dp06 as unknown as Analog[],
+  'DP-08': dp08 as unknown as Analog[],
+  'DP-09': dp09 as unknown as Analog[],
+  'DP-10': dp10 as unknown as Analog[],
+  'DP-11': dp11 as unknown as Analog[],
+  'DP-12': dp12 as unknown as Analog[],
+  'DP-13': dp13 as unknown as Analog[],
   'DP-07': dp07 as unknown as Analog[],
   'SM-01': sm01 as unknown as Analog[],
   'SM-02': sm02 as unknown as Analog[],

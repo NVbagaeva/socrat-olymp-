@@ -15,12 +15,13 @@ import {
   key,
   kvadrat,
   num,
+  slovo,
   str,
   vopros,
   xxd,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
-import { sk, vremya, SLOVA } from '../sklonenie';
+import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
 import { GEROI, klyuch } from './syuzhety';
 import { otvet } from './common';
@@ -342,6 +343,9 @@ const DP04: Subtype = {
   },
 };
 
+/** Коэффициент при x: 1·x пишем как x. */
+const kx = (k: number): string => (k === 1 ? 'x' : `${d(k)}x`);
+
 /* ── ДП-05 Подъём и спуск ────────────────────────────────────── */
 
 const DP05: Subtype = {
@@ -357,6 +361,8 @@ const DP05: Subtype = {
     const dd = num(p, 'd');
     const tu = T - t;
     const v = round9((L + dd * tu) / T);
+    /* Аналог: лыжник, велосипедист вместо туриста. */
+    const kto = slovo(p, 'kto', 'турист');
     return {
       uslovie: `Дорога между пунктами А и В состоит из подъёма и спуска, а её длина равна ${txt(L)} км. Путь из А в В занял у туриста ${sk(T, SLOVA.chas)}, из которых ${sk(t, SLOVA.chas)} ${t === 1 ? 'ушёл' : 'ушло'} на спуск. Найдите скорость туриста на спуске, если она больше скорости на подъёме на ${txt(dd)} км/ч. Ответ дайте в км/ч.`,
       answer: v,
@@ -365,25 +371,25 @@ const DP05: Subtype = {
         ['Таблица', [`На подъём ушло $${d(T)}-${d(t)}=${d(tu)}$ ч.`]],
         [
           'Уравнение',
-          [`Подъём и спуск вместе — вся дорога: $${d(t)}x+${d(tu)}(x-${d(dd)})=${d(L)}$.`],
+          [`Подъём и спуск вместе — вся дорога: $${kx(t)}+${d(tu)}(x-${d(dd)})=${d(L)}$.`],
         ],
         ['Решение', [`$${d(T)}x=${d(L)}+${d(dd * tu)}$, $x=${frac(L + dd * tu, T)}=${d(v)}$.`]],
         ['Ответ на вопрос задачи', ['Спрашивают скорость на спуске.', otvet(v)]],
       ),
       tables: [
         dvizhenie([
-          ['Спуск', `${d(t)}x`, 'x', `${d(t)}`],
+          ['Спуск', `${kx(t)}`, 'x', `${d(t)}`],
           ['Подъём', `${d(tu)}(x-${d(dd)})`, `x-${d(dd)}`, `${d(tu)}`],
         ]),
       ],
       hints: [
-        vopros('Сколько часов турист поднимался?', `$${d(tu)}$`, [`$${d(T)}$`, `$${d(t)}$`]),
+        vopros(`Сколько часов ${kto} поднимался?`, `$${d(tu)}$`, [`$${d(T)}$`, `$${d(t)}$`]),
         vopros('Скорость на спуске $x$. Какая скорость на подъёме?', `$x-${d(dd)}$`, [
           `$x+${d(dd)}$`,
           `$${d(dd)}x$`,
         ]),
-        vopros('Какое уравнение?', `$${d(t)}x+${d(tu)}(x-${d(dd)})=${d(L)}$`, [
-          `$${d(t)}x-${d(tu)}(x-${d(dd)})=${d(L)}$`,
+        vopros('Какое уравнение?', `$${kx(t)}+${d(tu)}(x-${d(dd)})=${d(L)}$`, [
+          `$${kx(t)}-${d(tu)}(x-${d(dd)})=${d(L)}$`,
           `$${d(T)}x=${d(L)}$`,
         ]),
         chtoSprashivayut('скорость на спуске', ['скорость на подъёме', 'длину спуска']),
@@ -409,25 +415,28 @@ const DP06: Subtype = {
     const tau = q(D - s, v2);
     const T = add(tau, q(h));
     const x = val(div(q(s), T));
+    /* Аналог: мотоциклисты, автобусы, велосипедисты (мужской род). */
+    const kto = slovo(p, 'kto', 'автомобиль');
+    const ktoRod = slovo(p, 'ktoRod', 'автомобиля');
     return {
       uslovie: `Расстояние между городами А и В равно ${txt(D)} км. Из города А в город В выехал первый автомобиль, а через ${sk(h, SLOVA.chas)} после этого навстречу ему из города В выехал со скоростью ${txt(v2)} км/ч второй автомобиль. Найдите скорость первого автомобиля, если автомобили встретились на расстоянии ${txt(s)} км от города А. Ответ дайте в км/ч.`,
       answer: x,
       etapy: etapy(
-        ['Обозначаем', ['Скорость первого автомобиля — $x$ км/ч.']],
+        ['Обозначаем', [`Скорость первого ${ktoRod} — $x$ км/ч.`]],
         [
-          'Второй автомобиль',
+          `Второй ${kto}`,
           [
             `До встречи он проехал $${d(D)}-${d(s)}=${d(D - s)}$ км за $${frac(D - s, v2)}=${fq(tau)}$ ч.`,
           ],
         ],
         [
-          'Первый автомобиль',
+          `Первый ${kto}`,
           [
             `Он в пути на $${d(h)}$ ч дольше: $${fq(tau)}+${d(h)}=${fq(T)}$ ч и проехал $${d(s)}$ км.`,
           ],
         ],
         ['Уравнение и решение', [`$${fq(T)}x=${d(s)}$, $x=${d(x)}$.`]],
-        ['Ответ на вопрос задачи', ['Спрашивают скорость первого автомобиля.', otvet(x)]],
+        ['Ответ на вопрос задачи', [`Спрашивают скорость первого ${ktoRod}.`, otvet(x)]],
       ),
       tables: [
         dvizhenie([
@@ -436,7 +445,7 @@ const DP06: Subtype = {
         ]),
       ],
       hints: [
-        vopros('Сколько километров до встречи проехал второй автомобиль?', `$${d(D - s)}$`, [
+        vopros(`Сколько километров до встречи проехал второй ${kto}?`, `$${d(D - s)}$`, [
           `$${d(s)}$`,
           `$${d(D)}$`,
         ]),
@@ -448,8 +457,8 @@ const DP06: Subtype = {
           `$${fq(tau)}$`,
           `$${fq(sub(tau, q(h)).n > 0 ? sub(tau, q(h)) : q(h))}$`,
         ]),
-        chtoSprashivayut('скорость первого автомобиля', [
-          'скорость второго автомобиля',
+        chtoSprashivayut(`скорость первого ${ktoRod}`, [
+          `скорость второго ${ktoRod}`,
           'время до встречи',
         ]),
       ],
@@ -682,7 +691,13 @@ const DP09: Subtype = {
     const S = num(p, 'S');
     const dv = num(p, 'dv');
     const dt = num(p, 'dt'); // минуты
-    const [kto, kogo] = key(KTO09, str(p, 'kto', ['avto', 'moto'] as const));
+    const [kto0, kogo0] = key(KTO09, str(p, 'kto', ['avto', 'moto'] as const));
+    /* Аналог: свои быстрый и медленный участники (автобус и велосипедист,
+       велосипедист и пешеход). */
+    const kto = slovo(p, 'bys', kto0);
+    const kogo = slovo(p, 'bysRod', kogo0);
+    const medl = slovo(p, 'medl', 'велосипедист');
+    const medlRod = slovo(p, 'medlRod', 'велосипедиста');
     const T = q(dt, 60);
     const P = val(div(q(S * dv), T)); // x(x + dv) = P
     const res = xxd(P, dv);
@@ -705,12 +720,12 @@ const DP09: Subtype = {
         [
           'Обозначаем',
           [
-            `Скорость велосипедиста — $x$ км/ч, ${kogo} — $x+${d(dv)}$ км/ч. Разница во времени: ${vremya(dt)} $=${chasyTex(dt)}$ ч.`,
+            `Скорость ${medlRod} — $x$ км/ч, ${kogo} — $x+${d(dv)}$ км/ч. Разница во времени: ${vremya(dt)} $=${chasyTex(dt)}$ ч.`,
           ],
         ],
         [
           'Таблица',
-          [`Время велосипедиста $\\dfrac{${d(S)}}{x}$, ${kogo} $\\dfrac{${d(S)}}{x+${d(dv)}}$.`],
+          [`Время ${medlRod} $\\dfrac{${d(S)}}{x}$, ${kogo} $\\dfrac{${d(S)}}{x+${d(dv)}}$.`],
         ],
         ['Уравнение', [`$\\dfrac{${d(S)}}{x}-\\dfrac{${d(S)}}{x+${d(dv)}}=${chasyTex(dt)}$.`]],
         t.odz,
@@ -719,13 +734,8 @@ const DP09: Subtype = {
       ),
       tables: [
         dvizhenie([
-          ['Велосипедист', `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
-          [
-            kto.charAt(0).toUpperCase() + kto.slice(1),
-            `${d(S)}`,
-            `x+${d(dv)}`,
-            `\\dfrac{${d(S)}}{x+${d(dv)}}`,
-          ],
+          [zaglavnaya(medl), `${d(S)}`, 'x', `\\dfrac{${d(S)}}{x}`],
+          [zaglavnaya(kto), `${d(S)}`, `x+${d(dv)}`, `\\dfrac{${d(S)}}{x+${d(dv)}}`],
         ]),
       ],
       hints: [
@@ -733,7 +743,7 @@ const DP09: Subtype = {
           `$${d(round9(Math.floor(dt / 60) + (dt % 60) / 100))}$`,
           `$${d(dt)}$`,
         ]),
-        vopros(`Скорость велосипедиста $x$. Какая скорость у ${kogo}?`, `$x+${d(dv)}$`, [
+        vopros(`Скорость ${medlRod} $x$. Какая скорость у ${kogo}?`, `$x+${d(dv)}$`, [
           `$x-${d(dv)}$`,
           `$${d(dv)}x$`,
         ]),
@@ -747,7 +757,7 @@ const DP09: Subtype = {
         ),
         t.hintOdz,
         t.hintKoren,
-        chtoSprashivayut('скорость велосипедиста', [`скорость ${kogo}`, 'время в пути']),
+        chtoSprashivayut(`скорость ${medlRod}`, [`скорость ${kogo}`, 'время в пути']),
       ],
       lifehacks: ['x-x-plus-d', 'root-guess'],
     };
@@ -768,6 +778,13 @@ const DP10: Subtype = {
     /* x = AC: 2x² + (u − D)x − Du = 0 */
     const sol = kvadrat(2, u - D, -D * u);
     const x = val(sol.roots[1]);
+    /* Аналог: кто уехал первым (автобус, грузовик) и кто догонял. */
+    const avto = slovo(p, 'avto', 'автомобиль');
+    const avtoRod = slovo(p, 'avtoRod', 'автомобиля');
+    const avtoKr = slovo(p, 'avtoKr', 'Авто');
+    const dog = slovo(p, 'dog', 'мотоциклист');
+    const dogRod = slovo(p, 'dogRod', 'мотоциклиста');
+    const dogKr = slovo(p, 'dogKr', 'Мотоцикл');
     const t = drobnoe({
       nuli: [-u],
       lo: 0,
@@ -784,9 +801,9 @@ const DP10: Subtype = {
         [
           'Таблица',
           [
-            `Мотоциклист до С ехал $\\dfrac{x}{${d(u)}}$ ч, автомобиль — на час дольше: $\\dfrac{x}{${d(u)}}+1$ ч.`,
-            `Скорость автомобиля $x:\\left(\\dfrac{x}{${d(u)}}+1\\right)=\\dfrac{${d(u)}x}{x+${d(u)}}$.`,
-            `Весь путь автомобиля длился $1+\\dfrac{2x}{${d(u)}}=\\dfrac{${d(u)}+2x}{${d(u)}}$ ч (час форы плюс путь мотоциклиста туда и обратно).`,
+            `${zaglavnaya(dog)} до С ехал $\\dfrac{x}{${d(u)}}$ ч, ${avto} — на час дольше: $\\dfrac{x}{${d(u)}}+1$ ч.`,
+            `Скорость ${avtoRod} $x:\\left(\\dfrac{x}{${d(u)}}+1\\right)=\\dfrac{${d(u)}x}{x+${d(u)}}$.`,
+            `Весь путь ${avtoRod} длился $1+\\dfrac{2x}{${d(u)}}=\\dfrac{${d(u)}+2x}{${d(u)}}$ ч (час форы плюс путь ${dogRod} туда и обратно).`,
           ],
         ],
         [
@@ -799,27 +816,32 @@ const DP10: Subtype = {
       ),
       tables: [
         dvizhenie([
-          ['Мотоцикл до С', 'x', `${d(u)}`, `\\dfrac{x}{${d(u)}}`],
-          ['Авто до С', 'x', `\\dfrac{${d(u)}x}{x+${d(u)}}`, `\\dfrac{x}{${d(u)}}+1`],
-          ['Авто весь путь', `${d(D)}`, `\\dfrac{${d(u)}x}{x+${d(u)}}`, `1+\\dfrac{2x}{${d(u)}}`],
+          [`${dogKr} до С`, 'x', `${d(u)}`, `\\dfrac{x}{${d(u)}}`],
+          [`${avtoKr} до С`, 'x', `\\dfrac{${d(u)}x}{x+${d(u)}}`, `\\dfrac{x}{${d(u)}}+1`],
+          [
+            `${avtoKr}, весь путь`,
+            `${d(D)}`,
+            `\\dfrac{${d(u)}x}{x+${d(u)}}`,
+            `1+\\dfrac{2x}{${d(u)}}`,
+          ],
         ]),
       ],
       hints: [
         vopros('Что удобно обозначить за $x$?', 'расстояние АС — его и спрашивают', [
-          'скорость автомобиля',
+          `скорость ${avtoRod}`,
           'время до встречи',
         ]),
-        vopros('Сколько ехал автомобиль до С?', `$\\dfrac{x}{${d(u)}}+1$`, [
+        vopros(`Сколько ехал ${avto} до С?`, `$\\dfrac{x}{${d(u)}}+1$`, [
           `$\\dfrac{x}{${d(u)}}$`,
           `$\\dfrac{x}{${d(u)}}-1$`,
         ]),
-        vopros('Сколько всего ехал автомобиль из А в В?', `$1+\\dfrac{2x}{${d(u)}}$`, [
+        vopros(`Сколько всего ехал ${avto} из А в В?`, `$1+\\dfrac{2x}{${d(u)}}$`, [
           `$\\dfrac{2x}{${d(u)}}$`,
           `$1+\\dfrac{x}{${d(u)}}$`,
         ]),
         t.hintOdz,
         t.hintKoren,
-        chtoSprashivayut('расстояние от А до С', ['скорость автомобиля', 'время в пути']),
+        chtoSprashivayut('расстояние от А до С', [`скорость ${avtoRod}`, 'время в пути']),
       ],
       lifehacks: ['divide-equation', 'fast-count'],
     };
@@ -849,10 +871,17 @@ const DP11: Subtype = {
     const sol = kvadrat(L, -val(mul(b, q(L))), val(mul(c, q(L))));
     const x = val(sol.roots[1]);
     const tTex = fq(t);
+    /* Аналог: свои быстрый и медленный участники (автомобиль и автобус,
+       велосипедист и пешеход). */
+    const bys = slovo(p, 'bys', 'мотоциклист');
+    const bysRod = slovo(p, 'bysRod', 'мотоциклиста');
+    const medl = slovo(p, 'medl', 'велосипедист');
+    const medlRod = slovo(p, 'medlRod', 'велосипедиста');
+    const ehal = slovo(p, 'ehal', 'ехал');
     const dr = drobnoe({
       nuli: [0, Dl],
       lo: Dl,
-      pochemu: `велосипедист в пути дольше мотоциклиста, а время мотоциклиста $x-${d(Dl)}$ положительно`,
+      pochemu: `${medl} в пути дольше, чем ${bys}, а время ${bysRod} $x-${d(Dl)}$ положительно`,
       znamenatel: `x(x-${d(Dl)})`,
       posle: [
         `$${tTex}(2x-${d(Dl)})=x(x-${d(Dl)})$, $x^2-${fq(b, true)}x+${fq(c, true)}=0$; умножаем на $${d(L)}$:`,
@@ -868,13 +897,13 @@ const DP11: Subtype = {
         [
           'Обозначаем',
           [
-            `Расстояние АВ примем за $1$. Велосипедист в пути $x$ ч, мотоциклист — $x-${d(Dl)}$ ч. Встреча через ${vremya(tm, true)} $=${tTex}$ ч.`,
+            `Расстояние АВ примем за $1$. ${zaglavnaya(medl)} в пути $x$ ч, ${bys} — $x-${d(Dl)}$ ч. Встреча через ${vremya(tm, true)} $=${tTex}$ ч.`,
           ],
         ],
         [
           'Скорости',
           [
-            `Скорость велосипедиста $\\dfrac{1}{x}$, мотоциклиста $\\dfrac{1}{x-${d(Dl)}}$; скорость сближения — их сумма.`,
+            `Скорость ${medlRod} $\\dfrac{1}{x}$, ${bysRod} $\\dfrac{1}{x-${d(Dl)}}$; скорость сближения — их сумма.`,
           ],
         ],
         [
@@ -890,8 +919,8 @@ const DP11: Subtype = {
       tables: [
         dvizhenie(
           [
-            ['Велосипедист', '1', '\\dfrac{1}{x}', 'x'],
-            ['Мотоциклист', '1', `\\dfrac{1}{x-${d(Dl)}}`, `x-${d(Dl)}`],
+            [zaglavnaya(medl), '1', '\\dfrac{1}{x}', 'x'],
+            [zaglavnaya(bys), '1', `\\dfrac{1}{x-${d(Dl)}}`, `x-${d(Dl)}`],
           ],
           HEAD_DVIZHENIE_1,
         ),
@@ -901,7 +930,7 @@ const DP11: Subtype = {
           'задачу не решить',
           'взять $100$ км и подбирать',
         ]),
-        vopros('Время велосипедиста $x$. Сколько ехал мотоциклист?', `$x-${d(Dl)}$`, [
+        vopros(`Время ${medlRod} $x$. Сколько ${ehal} ${bys}?`, `$x-${d(Dl)}$`, [
           `$x+${d(Dl)}$`,
           `$${d(Dl)}x$`,
         ]),
@@ -915,7 +944,7 @@ const DP11: Subtype = {
         ),
         dr.hintOdz,
         dr.hintKoren,
-        chtoSprashivayut('время велосипедиста', ['время мотоциклиста', 'время до встречи']),
+        chtoSprashivayut(`время ${medlRod}`, [`время ${bysRod}`, 'время до встречи']),
       ],
       lifehacks: ['divide-equation'],
     };
@@ -938,6 +967,8 @@ const DP12: Subtype = {
     const sol = kvadrat(1, -(u + dd), 2 * u * dd);
     const roots = sol.roots.map(val);
     const x = roots.find((r) => r > bound);
+    /* Аналог: мотоциклисты, автобусы, велосипедисты (мужской род). */
+    const kto = slovo(p, 'kto', 'автомобиль');
     if (x === undefined) {
       throw new Error('ДП-12: нет корня больше границы');
     }
@@ -983,7 +1014,7 @@ const DP12: Subtype = {
           'взять $100$ км',
           'задачу не решить',
         ]),
-        vopros('Сколько времени ехал первый автомобиль?', '$\\dfrac{2}{x}$', [
+        vopros(`Сколько времени ехал первый ${kto}?`, '$\\dfrac{2}{x}$', [
           '$\\dfrac{1}{x}$',
           '$2x$',
         ]),
@@ -1012,6 +1043,8 @@ const DP13: Subtype = {
     const h = num(p, 'h');
     const res = xxd(S, h);
     const x = res.root;
+    /* Аналог: катера, автобусы, велосипедисты. */
+    const ktoRod = slovo(p, 'ktoRod', 'теплохода');
     const t = drobnoe({
       nuli: [0, -h],
       lo: 0,
@@ -1040,7 +1073,7 @@ const DP13: Subtype = {
         ],
         t.odz,
         t.reshenie,
-        ['Отбор корней и ответ', [...t.otbor, 'Спрашивают скорость первого теплохода.', otvet(x)]],
+        ['Отбор корней и ответ', [...t.otbor, `Спрашивают скорость первого ${ktoRod}.`, otvet(x)]],
       ),
       tables: [
         dvizhenie([
@@ -1060,8 +1093,8 @@ const DP13: Subtype = {
           'разложение на множители дискриминанта не нужно',
         ]),
         t.hintKoren,
-        chtoSprashivayut('скорость первого теплохода', [
-          'скорость второго теплохода',
+        chtoSprashivayut(`скорость первого ${ktoRod}`, [
+          `скорость второго ${ktoRod}`,
           'время в пути',
         ]),
       ],

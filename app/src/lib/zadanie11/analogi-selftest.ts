@@ -27,7 +27,7 @@ import {
   checkSolved,
   type Problem,
 } from './selftest';
-import { chasy, chislo, sk, SLOVA } from './sklonenie';
+import { chasy, chislo, sk, vremya, SLOVA } from './sklonenie';
 import { VO_SKOLKO } from './prototypes/common';
 import type { Params } from './types';
 
@@ -112,6 +112,20 @@ const SYUZHET = new Set([
   'gotPr',
   'gotRod',
   'osnova',
+  /* Движение: кто едет (быстрый и медленный, догоняющий). */
+  'geroy2',
+  'ktoRod',
+  'bys',
+  'bysRod',
+  'medl',
+  'medlRod',
+  'ehal',
+  'avto',
+  'avtoRod',
+  'avtoKr',
+  'dog',
+  'dogRod',
+  'dogKr',
 ]);
 
 export function model(params: Params): Params {
@@ -129,7 +143,7 @@ const prostye = (t: string): string => t.replace(/\s/g, ' ');
 /** Последнее предложение-вопрос условия. */
 function poslednee(text: string): string {
   const parts = text.split(/(?<=[.?!])\s+/);
-  return parts.filter((x) => x.includes('?') || /^Найдите/.test(x)).at(-1) ?? '';
+  return parts.filter((x) => x.includes('?') || /^(Найдите|Определите)/.test(x)).at(-1) ?? '';
 }
 
 /** Масса в граммах так, как её пишет разминка: 1250 → «1 кг 250 г». */
@@ -164,6 +178,132 @@ interface Pravilo {
 const num = (p: Params, k: string): number => Number(p[k]);
 
 const PRAVILA: Record<string, Pravilo> = {
+  /* ── Движение по прямой ── */
+  'DP-01': {
+    chisla: ['S', 't'],
+    vopros: (a) => /километрах в час/.test(a.text),
+    pravdopodobie: (a) => skorosti(a, 'geroy', [a.answer]),
+  },
+  'DP-02': {
+    chisla: ['v1', 't2', 'v2', 'v3'],
+    vopros: (a) => /среднюю скорость/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...skorosti(
+        a,
+        'geroy',
+        ['v1', 'v2', 'v3'].map((k) => num(a.params, k)),
+      ),
+      ...(/Первый час/.test(a.text) ? [] : ['нет «Первый час»']),
+      ...((
+        num(a.params, 't3') === 1
+          ? /последний час|затем 1 час/.test(a.text)
+          : prostye(a.text).includes(prostye(sk(num(a.params, 't3'), SLOVA.chas)))
+      )
+        ? []
+        : ['в тексте нет третьего участка t3']),
+    ],
+  },
+  'DP-03': {
+    chisla: (a) =>
+      a.params.form === 'treti' ? ['v1', 'v2', 'v3'] : ['s1', 'v1', 's2', 'v2', 's3', 'v3'],
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      /среднюю скорость/.test(poslednee(a.text)) &&
+      (a.ask === 'treti') === /треть/.test(a.text),
+    pravdopodobie: (a) =>
+      skorosti(
+        a,
+        'geroy',
+        ['v1', 'v2', 'v3'].map((k) => num(a.params, k)),
+      ),
+  },
+  'DP-04': {
+    chisla: ['v1', 'v2'],
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      (a.ask === 'vremya'
+        ? /половин[уа][^.,]*времени/i.test(a.text) && !POLOVINA_PUTI.test(a.text)
+        : POLOVINA_PUTI.test(a.text) && !/времени/.test(a.text)),
+    pravdopodobie: (a) => skorosti(a, 'geroy', [num(a.params, 'v1'), num(a.params, 'v2')]),
+  },
+  'DP-05': {
+    chisla: ['L', 'T', 't', 'd'],
+    vopros: (a) => /на спуске/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...skorosti(a, 'geroy', [a.answer, a.answer - num(a.params, 'd')]),
+      ...slovaVTekste(a, ['kto']),
+    ],
+  },
+  'DP-06': {
+    chisla: ['D', 'h', 'v2', 's'],
+    vopros: (a) => /скорость первого/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...skorosti(a, 'geroy', [a.answer, num(a.params, 'v2')]),
+      ...slovaVTekste(a, ['ktoRod']),
+    ],
+  },
+  'DP-08': {
+    chisla: ['S', 'd'],
+    vopros: (a) =>
+      a.ask === 'first'
+        ? /первым/.test(poslednee(a.text))
+        : /вторым|второй/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const x = a.ask === 'first' ? a.answer - num(a.params, 'd') : a.answer;
+      return skorosti(a, 'geroy', [x, x + num(a.params, 'd')]);
+    },
+  },
+  'DP-09': {
+    chisla: ['S', 'dv'],
+    vopros: (a) => poslednee(a.text).includes(`скорость ${String(a.params.medlRod)}`),
+    pravdopodobie: (a) => [
+      ...vremyaVTekste(a, num(a.params, 'dt')),
+      ...skorosti(a, 'geroy', [a.answer]),
+      ...skorosti(a, 'geroy2', [a.answer + num(a.params, 'dv')]),
+      ...slovaVTekste(a, ['bys', 'medl']),
+    ],
+  },
+  'DP-10': {
+    chisla: ['D', 'u'],
+    vopros: (a) => /расстояние от А до С/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const u = num(a.params, 'u');
+      return [
+        ...skorosti(a, 'geroy', [(u * a.answer) / (a.answer + u)]),
+        ...skorosti(a, 'geroy2', [u]),
+        ...slovaVTekste(a, ['avto', 'dog']),
+        ...(/через 1 час/.test(a.text) ? [] : ['нет «через 1 час»']),
+      ];
+    },
+  },
+  'DP-11': {
+    chisla: ['delta'],
+    vopros: (a) => poslednee(a.text).includes(String(a.params.medl).split(' ').at(-1) ?? '?'),
+    pravdopodobie: (a) => [
+      ...vremyaVTekste(a, num(a.params, 't')),
+      ...slovaVTekste(a, ['bys', 'medl']),
+    ],
+  },
+  'DP-12': {
+    chisla: ['d', 'u', 'bound'],
+    vopros: (a) => /скорость первого/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...skorosti(a, 'geroy', [a.answer, a.answer - num(a.params, 'd'), num(a.params, 'u')]),
+      ...(a.answer > num(a.params, 'bound') ? [] : ['ответ не больше границы']),
+    ],
+  },
+  'DP-13': {
+    chisla: ['S', 'h'],
+    vopros: (a) => /скорость перв/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const g = GEROI[String(a.params.geroy)];
+      return [
+        ...skorosti(a, 'geroy', [a.answer, a.answer + num(a.params, 'h')]),
+        ...slovaVTekste(a, ['ktoRod']),
+        ...(g?.voda === true && !/озер/.test(a.text) ? ['по воде без течения — нужно озеро'] : []),
+      ];
+    },
+  },
   'DP-07': {
     chisla: ['S', 'd'],
     vopros: (a) => {
@@ -585,6 +725,40 @@ const PRAVILA: Record<string, Pravilo> = {
     },
   },
 };
+
+/** «Половину пути / маршрута / дистанции» — вариант ДП-04 про путь. */
+const POLOVINA_PUTI = /половин[уа] (пути|маршрута|дистанции)/i;
+
+/** Скорости — в пределах героя (params[key]): лыжник 8–20 км/ч и т. п. */
+function skorosti(a: Analog, key: string, vv: number[]): string[] {
+  const g = GEROI[String(a.params[key])];
+  if (g === undefined) return [`неизвестный герой ${key}`];
+  return vv.flatMap((v) => vne(`скорость, км/ч (${key})`, v, g.v[0], g.v[1]));
+}
+
+/** Слова сюжета из параметров стоят в тексте (по первым буквам — падеж не важен). */
+function slovaVTekste(a: Analog, keys: string[]): string[] {
+  const t = a.text.toLowerCase();
+  return keys.flatMap((k) => {
+    const w =
+      String(a.params[k] ?? '')
+        .toLowerCase()
+        .split(' ')
+        .at(-1) ?? '';
+    return w !== '' && t.includes(w.slice(0, Math.max(4, w.length - 2)))
+      ? []
+      : [`в тексте нет «${w}»`];
+  });
+}
+
+/** Время в минутах так, как его пишет условие: «1 час 30 минут». */
+function vremyaVTekste(a: Analog, minuty: number): string[] {
+  const v = prostye(vremya(minuty, true));
+  /* «2 часа», но не «2 часа 10 минут» и не «12 часов». */
+  return new RegExp(`(?<!\\d)${v}(?!\\s\\d)`).test(prostye(a.text))
+    ? []
+    : [`в тексте нет времени «${v}»`];
+}
 
 /** Концентрации — в пределах вещества (соль не крепче 26 %), вещество названо в тексте. */
 function vVeshchestve(a: Analog, pp: number[]): string[] {
