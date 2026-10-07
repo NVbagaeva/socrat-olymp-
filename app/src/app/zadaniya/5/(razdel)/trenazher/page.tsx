@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostMeta, vkladka } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'trenazher')),
+  ...veroyatnostMeta('5', vkladka('5', 'trenazher')),
 };
 
 /**

@@ -25,7 +25,8 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(VYCHISLENIYA.no)}` },
           ]}
-          title={VYCHISLENIYA.title}
+          /* «Задание №8. Вычисления и преобразования» — как у №4, №5 и №12. */
+          title={`Задание №${Number(VYCHISLENIYA.no)}. ${VYCHISLENIYA.title}`}
           badge={VYCHISLENIYA.badge}
           lead={VYCHISLENIYA.lead}
         />

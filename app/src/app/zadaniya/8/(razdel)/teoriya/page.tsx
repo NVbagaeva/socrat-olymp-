@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/ui';
-import { vychisleniyaTitle } from '@/content/vychisleniya';
+import { vychisleniyaMeta } from '@/content/vychisleniya';
 
 export const metadata: Metadata = {
-  title: vychisleniyaTitle('Теория'),
+  ...vychisleniyaMeta('Теория'),
 };
 
 /**

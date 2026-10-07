@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Trenazher8Tab } from '@/components/tasks/vychisleniya/Trenazher8Tab';
-import { vychisleniyaTitle } from '@/content/vychisleniya';
+import { vychisleniyaMeta } from '@/content/vychisleniya';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: vychisleniyaTitle('Тренажёр'),
+  ...vychisleniyaMeta('Тренажёр'),
 };
 
 /** Вкладка «Тренажёр» задания №8: конфигуратор, сессия собирается в браузере. */

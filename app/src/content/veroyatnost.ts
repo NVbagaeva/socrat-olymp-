@@ -10,6 +10,8 @@
  * теории вероятностей» и «Вероятности событий».
  */
 
+import type { Metadata } from 'next';
+import { razdelMeta, vkladkaMeta, vkladkaTitle } from '@/lib/seo';
 import { OPORNYE } from './opornye';
 import type { RazdelTab } from './vkladki';
 import type { TutorMaterial } from './sections';
@@ -226,22 +228,31 @@ export function veroyatnostFamily(slug: string): string {
 }
 
 /**
- * Заголовок окна браузера: «Тема. Вкладка — задание №N — Будет на ЕГЭ».
- * Собирается здесь, чтобы название темы и номер не переписывались
- * руками в каждой из страниц.
- *
- * Номер задания приписывается, только если его нет в самом названии:
- * у №4 название начинается с «Задание №4», и повторять его дважды
- * в одной строке незачем.
+ * Заголовок окна браузера: «Вкладка · Задание 4 ЕГЭ — вероятность:
+ * простая | Будет на ЕГЭ». Собирается здесь, чтобы название темы и
+ * номер не переписывались руками в каждой из страниц. Название темы —
+ * из списка заданий (tasks.ts), без повтора «Задание №4» из заголовка.
  */
 export function veroyatnostTitle(slug: string, tab: string): string {
   const section = veroyatnostBySlug(slug);
   if (section === undefined) {
     throw new Error(`Нет раздела вероятности ${slug}`);
   }
-  const zadanie = `задание №${Number(section.no)}`;
-  const hvost = section.title.toLowerCase().includes(zadanie) ? '' : ` — ${zadanie}`;
-  return `${section.title}. ${tab}${hvost} — Будет на ЕГЭ`;
+  return vkladkaTitle(section.no, taskName(slug), tab);
+}
+
+/**
+ * Заголовок и описание вкладки для поисковика. Страница самого
+ * раздела (razdel: true) описывается как раздел целиком.
+ */
+export function veroyatnostMeta(slug: string, tab: string, razdel = false): Metadata {
+  const section = veroyatnostBySlug(slug);
+  if (section === undefined) {
+    throw new Error(`Нет раздела вероятности ${slug}`);
+  }
+  return razdel
+    ? razdelMeta(section.no, taskName(slug), section.lead)
+    : vkladkaMeta(section.no, taskName(slug), tab);
 }
 
 /* ── Слова тренажёра (раздел 07 референса) ───────────────────────── */

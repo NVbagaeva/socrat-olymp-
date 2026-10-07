@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostBySlug, veroyatnostMeta } from '@/content/veroyatnost';
 import Teoriya5Tab from '../page';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', veroyatnostBySlug('5')?.tutors?.title ?? 'Для репетиторов'),
+  ...veroyatnostMeta('5', veroyatnostBySlug('5')?.tutors?.title ?? 'Для репетиторов'),
 };
 
 /**

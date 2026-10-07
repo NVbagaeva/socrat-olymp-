@@ -33,7 +33,9 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(VEKTORY.no)}` },
           ]}
-          title={VEKTORY.title}
+          /* «Задание №2. Векторы» — как у №4, №5 и №12: из заголовка ясно,
+             какое это задание. */
+          title={`Задание №${Number(VEKTORY.no)}. ${VEKTORY.title}`}
           badge={VEKTORY.badge}
           lead={VEKTORY.lead}
           media={

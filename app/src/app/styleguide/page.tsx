@@ -15,6 +15,8 @@ import './styleguide.css';
 export const metadata: Metadata = {
   title: 'Будет на ЕГЭ — Design System',
   description: 'Токены и компоненты дизайн-системы.',
+  /* Витрина разработки: поисковику не нужна. */
+  robots: { index: false, follow: false },
 };
 
 const LINKS: { href: string; label: string }[] = [

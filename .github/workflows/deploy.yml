@@ -67,6 +67,12 @@ jobs:
         working-directory: app
         run: pnpm test:trailing-slash
 
+      # robots.txt и sitemap.xml обязаны уехать на хостинг вместе со
+      # страницами: без них поисковик не найдёт сайт.
+      - name: Проверить готовность к индексации
+        working-directory: app
+        run: pnpm test:seo
+
       # .htaccess (косая черта сразу с https, служебные index.txt)
       # обязан доехать до хостинга вместе со страницами.
       - name: Проверить, что .htaccess в выгрузке

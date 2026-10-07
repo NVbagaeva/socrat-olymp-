@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
 import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostFamily, veroyatnostMeta, vkladka } from '@/content/veroyatnost';
 import { bank5Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'generator')),
+  ...veroyatnostMeta('5', vkladka('5', 'generator')),
 };
 
 /**

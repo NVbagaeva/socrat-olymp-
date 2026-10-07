@@ -13,6 +13,7 @@ import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
 import { href, ZADANIYA } from '@/lib/paths';
+import { NOINDEX, razdelMeta } from '@/lib/seo';
 import { typeset } from '@/lib/tex';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
@@ -46,12 +47,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const section = findSection(slug);
   if (!section) {
     const task = stubTask(slug);
-    return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
+    /* Заглушка «Раздел в разработке»: содержимого нет, в поиск не идёт.
+       Когда раздел откроется, страница получит заголовок раздела. */
+    return task === undefined
+      ? {}
+      : { title: `${stubTitle(task)} — Будет на ЕГЭ`, robots: NOINDEX };
   }
-  return {
-    title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
-    description: section.description,
-  };
+  return razdelMeta(section.no, section.subtitle, section.description);
 }
 
 /* Формулы вёрстываются на сборке: в браузер уходит готовая разметка,
@@ -116,7 +118,9 @@ export default async function SectionPage({ params }: { params: Params }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${section.no}` },
           ]}
-          title={section.title}
+          /* «Задание 12. Графики функций» — как у №4 и №5: из одного
+             заголовка ясно, какое это задание и о чём оно. */
+          title={`${section.title}. ${section.subtitle}`}
           {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.description}
           actions={

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Teoriya2 } from '@/components/tasks/vektory/Teoriya2';
-import { VEKTORY, vektoryTitle } from '@/content/vektory';
+import { VEKTORY, vektoryMeta } from '@/content/vektory';
 
 const VKLADKA = VEKTORY.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
 export const metadata: Metadata = {
-  title: vektoryTitle(VKLADKA),
+  ...vektoryMeta(VKLADKA),
 };
 
 /**

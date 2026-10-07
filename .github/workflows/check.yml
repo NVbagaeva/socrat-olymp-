@@ -220,6 +220,12 @@ jobs:
       # кеширует их на год. Ссылка на такой файл несёт версию ?v=<хеш
       # содержимого> (lib/assetUrl.ts): перезалили файл — ссылка новая.
       # Проверка падает на ссылке без версии или с устаревшей.
+      # robots.txt, sitemap.xml, canonical, Schema.org и Open Graph:
+      # сайт должен быть виден поисковикам (scripts/check-seo.mjs).
+      - name: Проверить готовность к индексации
+        working-directory: app
+        run: pnpm test:seo
+
       - name: Проверить версии в ссылках на PDF и картинки
         working-directory: app
         run: pnpm test:asset-versions

@@ -1,0 +1,35 @@
+# Будет на ЕГЭ — budetege.ru
+#
+# Открыты все публичные страницы: главная, банк заданий, разделы
+# заданий ЕГЭ по профильной математике (теория, опорные задачи,
+# тренажёры, генераторы), страница об авторе.
+#
+# Закрыты только служебные адреса. Файлы сборки (/_next/) не
+# закрываются: без стилей и кода поисковик не сможет отрисовать
+# страницу так, как её видит ученик.
+
+User-agent: *
+# Витрина дизайн-системы и движков — служебные страницы разработки.
+Disallow: /styleguide/
+# Печатные листы (ученик, ответы, ключ): служебные страницы генератора.
+Disallow: /zadaniya/*/pechat/
+# Проверочные страницы для автора.
+Disallow: /zadaniya/11/proverka-analogov/
+Disallow: /zadaniya/15/vitrina/
+# Служебные данные роутера рядом с каждой страницей — не страницы.
+Disallow: /*/index.txt$
+Disallow: /index.txt$
+# Личные разделы кабинета: содержимого без входа у них нет.
+Disallow: /statistika/
+Disallow: /moi-materialy/
+Disallow: /moi-zadaniya/
+Disallow: /moi-konspekty/
+Disallow: /izbrannoe/
+Disallow: /istoriya-resheniy/
+Disallow: /nastroyki/
+Disallow: /uvedomleniya/
+Disallow: /eshche/
+# Папка 404 статического экспорта.
+Disallow: /404/
+
+Sitemap: https://budetege.ru/sitemap.xml

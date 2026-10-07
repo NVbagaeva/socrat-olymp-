@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { PodgotovkaList } from '@/components/tasks/veroyatnost/PodgotovkaList';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
 import { OPORNYE } from '@/content/opornye';
-import { veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostMeta } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', OPORNYE.title),
+  ...veroyatnostMeta('5', OPORNYE.title),
 };
 
 /**

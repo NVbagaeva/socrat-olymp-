@@ -5,6 +5,8 @@
  * их считает lib/zadanie11/taxonomy.ts из данных.
  */
 
+import type { Metadata } from 'next';
+import { razdelMeta, vkladkaMeta, vkladkaTitle } from '@/lib/seo';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
@@ -25,9 +27,19 @@ export const ZADANIE11 = {
   ] as readonly RazdelTab[],
 } as const;
 
-/** Заголовок окна браузера: «Вкладка · Текстовые задачи — Будет на ЕГЭ». */
+/** Заголовок окна браузера: «Вкладка · Задание 11 ЕГЭ — текстовые задачи | Будет на ЕГЭ». */
 export function zadanie11Title(tab: string): string {
-  return `${tab} · ${ZADANIE11.title} — Будет на ЕГЭ`;
+  return vkladkaTitle(ZADANIE11.no, ZADANIE11.title, tab);
+}
+
+/**
+ * Заголовок и описание вкладки для поисковика. У вкладки «О задании» —
+ * адрес самого раздела, и она описывается как раздел целиком.
+ */
+export function zadanie11Meta(tab: string): Metadata {
+  return tab === 'О задании'
+    ? razdelMeta(ZADANIE11.no, ZADANIE11.title, ZADANIE11.lead)
+    : vkladkaMeta(ZADANIE11.no, ZADANIE11.title, tab);
 }
 
 export const PROGRESS_11 = {

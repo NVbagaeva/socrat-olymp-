@@ -8,6 +8,8 @@
  * KaTeX.
  */
 
+import type { Metadata } from 'next';
+import { razdelMeta, vkladkaMeta, vkladkaTitle } from '@/lib/seo';
 import { OPORNYE } from './opornye';
 import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
@@ -36,9 +38,19 @@ export const VEKTORY = {
   },
 } as const;
 
-/** Заголовок окна браузера: «Вкладка · Векторы — Будет на ЕГЭ». */
+/** Заголовок окна браузера: «Вкладка · Задание 2 ЕГЭ — векторы | Будет на ЕГЭ». */
 export function vektoryTitle(tab: string): string {
-  return `${tab} · ${VEKTORY.title} — Будет на ЕГЭ`;
+  return vkladkaTitle(VEKTORY.no, VEKTORY.title, tab);
+}
+
+/**
+ * Заголовок и описание вкладки для поисковика. У вкладки «О задании» —
+ * адрес самого раздела, и она описывается как раздел целиком.
+ */
+export function vektoryMeta(tab: string): Metadata {
+  return tab === O_ZADANII.title
+    ? razdelMeta(VEKTORY.no, VEKTORY.title, VEKTORY.lead)
+    : vkladkaMeta(VEKTORY.no, VEKTORY.title, tab);
 }
 
 /* ── Вкладка «О задании» ────────────────────────────────────────── */

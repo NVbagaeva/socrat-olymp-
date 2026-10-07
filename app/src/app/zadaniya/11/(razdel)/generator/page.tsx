@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Generator11 } from '@/components/tasks/zadanie11/Generator11';
-import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { ZADANIE11, zadanie11Meta } from '@/content/zadanie11';
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
 import { ZADANIYA } from '@/lib/paths';
 
 const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
 
 export const metadata: Metadata = {
-  title: zadanie11Title(VKLADKA),
+  ...zadanie11Meta(VKLADKA),
 };
 
 /**

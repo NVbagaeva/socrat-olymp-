@@ -14,11 +14,13 @@ import '../zadaniya.css';
 import '../[task]/section.css';
 import './stereometria.css';
 import { href, ZADANIYA } from '@/lib/paths';
+import { razdelMeta } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: `${stereometria.title}. ${stereometria.subtitle} — Будет на ЕГЭ`,
-  description: stereometria.lead,
-};
+export const metadata: Metadata = razdelMeta(
+  stereometria.no,
+  stereometria.subtitle,
+  stereometria.lead,
+);
 
 /* Миниатюра раздела: чертёж движка, тот же, что в банке чертежей.
    Ключ собирается из римского номера, поэтому новый раздел не

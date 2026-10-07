@@ -26,7 +26,8 @@ export function Shell11({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE11.no)}` },
           ]}
-          title={ZADANIE11.title}
+          /* «Задание №11. Текстовые задачи» — как у №4, №5 и №12. */
+          title={`Задание №${Number(ZADANIE11.no)}. ${ZADANIE11.title}`}
           badge={ZADANIE11.badge}
           lead={ZADANIE11.lead}
           media={

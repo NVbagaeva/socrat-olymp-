@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { TeoriyaShell, telaRazdelov4 } from '@/components/tasks/veroyatnost/teoriya';
 import { RAZDELY_4 } from '@/content/veroyatnost-teoriya';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostMeta, vkladka } from '@/content/veroyatnost';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', vkladka('4', 'teoriya')),
+  ...veroyatnostMeta('4', vkladka('4', 'teoriya')),
 };
 
 /**

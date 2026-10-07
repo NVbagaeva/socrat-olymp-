@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { OZadanii4 } from '@/components/tasks/veroyatnost/OZadanii4';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostBySlug, veroyatnostMeta } from '@/content/veroyatnost';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', veroyatnostBySlug('4')?.tutors?.title ?? 'Для репетиторов'),
+  ...veroyatnostMeta('4', veroyatnostBySlug('4')?.tutors?.title ?? 'Для репетиторов'),
 };
 
 /**

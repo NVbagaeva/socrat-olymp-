@@ -208,6 +208,24 @@ PT Serif — антиква карточки задачи (условие, «Р�
 (поддиапазоны latin, latin-ext, cyrillic, cyrillic-ext и знаки сравнения) — по одному
 файлу на начертание, как и у Inter. Лицензия OFL, уведомление — в том же `LICENSE`.
 
+## Поисковики
+
+Сайт статический, и поисковик получает готовый HTML каждой страницы —
+заголовок, описание, H1 и текст в нём есть без JavaScript. Что для
+поиска собрано специально:
+
+| Что | Где |
+| --- | --- |
+| `robots.txt` | `public/robots.txt` — закрыты только служебные адреса: витрина, печатные листы, кабинет, `index.txt`. Глобального `Disallow: /` нет и быть не должно |
+| `sitemap.xml` | считается после `next build` из `out/` скриптом `scripts/build-sitemap.mjs` (входит в `pnpm build`): все страницы без `noindex`, адреса из их же canonical |
+| canonical, Open Graph, manifest | корневой `src/app/layout.tsx`: `metadataBase` — `https://budetege.ru`, canonical `./` даёт каждой странице её собственный адрес с «/» на конце |
+| Schema.org | `src/app/page.tsx`: Organization, WebSite, WebPage — только название, домен, логотип и описание |
+| заголовки разделов заданий | `src/lib/seo.ts`: «Задание 12 ЕГЭ по математике — графики функций \| Будет на ЕГЭ», у вкладок — с названием вкладки; описания оттуда же |
+| закрытые страницы | `NOINDEX` из `src/lib/seo.ts`: заглушки разделов, кабинет, печатные листы, несобранные подтемы |
+| картинка для ссылки | `public/og/budetege-og.png`, собирается `pnpm build:og` (Playwright + Inter из `src/fonts`) |
+| страница 404 | `src/app/not-found.tsx` → `out/404.html`; код 404 отдаёт Apache (`ErrorDocument` в `public/.htaccess`) |
+| проверка | `pnpm test:seo` после сборки — robots, sitemap, canonical, H1, Schema.org, Open Graph; идёт в Check и в Deploy |
+
 ## Снимки страниц к pull request
 
 Превью-сборки у проекта нет: сайт выкладывается только из `main`,

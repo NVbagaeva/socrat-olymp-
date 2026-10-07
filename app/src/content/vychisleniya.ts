@@ -7,6 +7,8 @@
  * «Материал готовится».
  */
 
+import type { Metadata } from 'next';
+import { razdelMeta, vkladkaMeta, vkladkaTitle } from '@/lib/seo';
 import { OPORNYE } from './opornye';
 import type { RazdelTab } from './vkladki';
 import { taskName } from './tasks';
@@ -111,9 +113,19 @@ export const SKILL_FORMULA: Record<string, string> = {
   S11: '\\sqrt{a}\\cdot\\sqrt{b} = \\sqrt{ab}',
 };
 
-/** Заголовок окна браузера: «Вкладка · Вычисления и преобразования — Будет на ЕГЭ». */
+/** Заголовок окна браузера: «Вкладка · Задание 8 ЕГЭ — вычисления и преобразования | Будет на ЕГЭ». */
 export function vychisleniyaTitle(tab: string): string {
-  return `${tab} · ${VYCHISLENIYA.title} — Будет на ЕГЭ`;
+  return vkladkaTitle(VYCHISLENIYA.no, VYCHISLENIYA.title, tab);
+}
+
+/**
+ * Заголовок и описание вкладки для поисковика. У вкладки «О задании» —
+ * адрес самого раздела, и она описывается как раздел целиком.
+ */
+export function vychisleniyaMeta(tab: string): Metadata {
+  return tab === 'О задании'
+    ? razdelMeta(VYCHISLENIYA.no, VYCHISLENIYA.title, VYCHISLENIYA.lead)
+    : vkladkaMeta(VYCHISLENIYA.no, VYCHISLENIYA.title, tab);
 }
 
 /** Подписи вкладки опорных задач. */

@@ -70,8 +70,8 @@ export function lacksSlash(href) {
     return false;
   }
   const last = p.slice(p.lastIndexOf('/') + 1);
-  // Файл с расширением: .pdf, .png, .ico, index.txt…
-  return !/\.[a-z0-9]{1,5}$/i.test(last);
+  // Файл с расширением: .pdf, .png, .ico, index.txt… и manifest.webmanifest
+  return !/\.([a-z0-9]{1,5}|webmanifest)$/i.test(last);
 }
 
 /* href="…" в разметке и "href":"…" в данных роутера (RSC, в т.ч.

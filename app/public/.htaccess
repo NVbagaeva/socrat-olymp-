@@ -47,6 +47,27 @@ Options -Indexes
   RewriteRule ^ - [E=SITE_SCHEME:http]
 </IfModule>
 
+# ── Один адрес сайта: https://budetege.ru, без www ──────────────────
+#
+# www.budetege.ru отдавал те же страницы под вторым именем, и поисковик
+# видел два сайта с одинаковым содержимым. Канонический адрес — без
+# www (canonical в <head> каждой страницы, lib/seo.ts). Запрос к www
+# уводим на него одним редиректом: папка без «/» на конце получает
+# «/» здесь же, а не вторым прыжком. С http на https перекидывает
+# nginx хостинга ещё до Apache.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Условие с именем сервера стоит последним: %1 берётся из последнего
+  # сработавшего RewriteCond, а у двух других условий групп нет.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1/ [R=301,L]
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+</IfModule>
+
 # Без mod_rewrite DirectorySlash не выключаем: пусть лучше редирект
 # Apache, чем папка без страницы.
 <IfModule mod_rewrite.c>
@@ -104,3 +125,12 @@ Options -Indexes
     Header always set X-Robots-Tag "noindex"
   </Files>
 </IfModule>
+
+# ── Страница 404 ─────────────────────────────────────────────────────
+#
+# Несуществующий адрес и так получает код 404, но страницу Apache
+# показывал свою, на английском. Next.js собирает 404.html в корне
+# экспорта (src/app/not-found.tsx) — отдаём её. Код ответа остаётся
+# 404: поисковик не примет несуществующую страницу за настоящую.
+
+ErrorDocument 404 /404.html

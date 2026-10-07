@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Repetitory2 } from '@/components/tasks/vektory/Repetitory2';
-import { O_ZADANII, REPETITORY_2, VEKTORY, vektoryTitle } from '@/content/vektory';
+import { O_ZADANII, REPETITORY_2, VEKTORY, vektoryMeta } from '@/content/vektory';
 import { typeset } from '@/lib/tex';
 import { BANK } from '@/lib/vektory/bank';
 import { PROTOTYPES } from '@/lib/vektory/prototypes';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: vektoryTitle(REPETITORY_2.title),
+  ...vektoryMeta(REPETITORY_2.title),
 };
 
 /**

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Trenazher2Tab } from '@/components/tasks/vektory/Trenazher2Tab';
-import { TRENAZHER_2, VEKTORY, vektoryTitle } from '@/content/vektory';
+import { TRENAZHER_2, VEKTORY, vektoryMeta } from '@/content/vektory';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: vektoryTitle(TRENAZHER_2.title),
+  ...vektoryMeta(TRENAZHER_2.title),
 };
 
 /** Вкладка «Тренажёр» задания №2: конфигуратор, сессия собирается в браузере. */

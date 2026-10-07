@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/seo';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { appNavMore, appNavMorePage } from '@/content/appNav';
 import './eshche.css';
 
 export const metadata: Metadata = {
+  /* Экран меню, не содержание: в поиске не нужен. */
+  robots: NOINDEX,
   title: `${appNavMorePage.label} — Будет на ЕГЭ`,
 };
 

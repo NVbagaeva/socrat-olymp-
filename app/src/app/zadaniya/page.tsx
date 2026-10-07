@@ -9,8 +9,8 @@ import './zadaniya.css';
 import { href, ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: `${tasksPage.title} — Будет на ЕГЭ`,
-  description: tasksPage.lead,
+  title: `${tasksPage.title} по профильной математике — Будет на ЕГЭ`,
+  description: `${tasksPage.lead} Задания 1–20 ЕГЭ по профильной математике: теория, опорные задачи, тренажёры и генераторы вариантов.`,
 };
 
 /* Раздел с окном выбора подтемы — тот, что открыт в банке. */

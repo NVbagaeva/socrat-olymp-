@@ -148,6 +148,37 @@ Run workflow**. Пригодится, если, например, поменял
 
 ---
 
+### Поисковики: robots.txt, sitemap.xml, один адрес сайта
+
+Вместе со страницами на хостинг уезжают `robots.txt` (из
+`app/public/`) и `sitemap.xml` (считается при сборке по всем
+страницам без `noindex`, `app/scripts/build-sitemap.mjs`). Сборка без
+них не выкладывается: `pnpm test:seo` в Deploy проверяет оба файла,
+canonical на каждой странице и разметку главной.
+
+Канонический адрес сайта — `https://budetege.ru`, без `www`.
+С `http` на `https` перекидывает nginx хостинга; с `www` на адрес
+без `www` — правило в `app/public/.htaccess`, одним редиректом 301.
+Несуществующий адрес получает код 404 и нашу страницу «Страница не
+найдена» (`ErrorDocument` там же).
+
+Проверка после выкладки:
+
+- `https://budetege.ru/robots.txt` — открывается, в конце строка
+  `Sitemap: https://budetege.ru/sitemap.xml`;
+- `https://budetege.ru/sitemap.xml` — список адресов, первый —
+  главная;
+- `curl -sI https://www.budetege.ru/zadaniya` → `301` и
+  `location: https://budetege.ru/zadaniya/`;
+- `curl -sI https://budetege.ru/net-takoy/` → `404`, а в браузере —
+  страница сайта, не стандартная Apache.
+
+Дальше — руками, один раз: добавить сайт в Яндекс Вебмастер и
+Google Search Console, указать там карту сайта и отправить главную
+на переобход.
+
+---
+
 ## Пароли от хостинга
 
 Пароли не лежат в коде — иначе их увидел бы каждый, у кого есть доступ к
