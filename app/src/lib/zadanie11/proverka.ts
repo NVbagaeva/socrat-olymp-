@@ -8,7 +8,7 @@
 import { typesetKrupno as typeset } from '../tex';
 import { POOL_ANALOGOV } from './analogi';
 import { BANK, RAZMINKA } from './bank';
-import { strokiEtapa } from './kit';
+import { strokaHtml } from './proporciya/html';
 import { kodNaSayte } from './kod';
 import { d, txt } from './num';
 import { subtype } from './prototypes';
@@ -50,10 +50,7 @@ function resheniye(s: Solved): string {
   const etapy = s.etapy
     .map(
       (e) =>
-        `<li><b>${typeset(e.title)}.</b> ${strokiEtapa(
-          e.title,
-          e.lines.map((l) => typeset(l)),
-        )}</li>`,
+        `<li><b>${typeset(e.title)}.</b> ${e.lines.map((l) => strokaHtml(l, { typeset, praviloOtkryto: true })).join(' ')}</li>`,
     )
     .join('');
   return `${tab}<ol class="z11-pr__etapy">${etapy}</ol>`;

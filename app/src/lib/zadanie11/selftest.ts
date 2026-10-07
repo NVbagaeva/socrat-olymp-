@@ -14,7 +14,9 @@ import { d, nice } from './num';
 import { generate, GENERATORS, paramsKey, pohozhaNaBank, type Generated } from './gen';
 import { subtype, SUBTYPES } from './prototypes';
 import { rngOf } from '../vychisleniya/rng';
-import { KRATKAYA_ZAPIS, podpisStolbtsa, STROKI_KONC } from './kit';
+import { podpisStolbtsa, STROKI_KONC } from './kit';
+import { izStroki, tekstyStroki } from './proporciya/bloki';
+import { proveritSokrashchenie } from './proporciya/sokrashchenie';
 import type { BankItem, Solved, Tablitsa } from './types';
 
 export interface Problem {
@@ -26,7 +28,7 @@ export interface Problem {
 export function allTexts(s: Solved): string[] {
   return [
     s.uslovie,
-    ...s.etapy.flatMap((e) => [e.title, ...e.lines]),
+    ...s.etapy.flatMap((e) => [e.title, ...e.lines.flatMap(tekstyStroki)]),
     ...(s.tables ?? []).flatMap((t) => [
       ...(t.title ? [t.title] : []),
       ...t.head,
@@ -160,7 +162,7 @@ export function checkTablitsa(where: string, t: Tablitsa): Problem[] {
  */
 export function checkOboznacheniya(where: string, s: Solved): Problem[] {
   const texts = [
-    ...s.etapy.flatMap((e) => e.lines),
+    ...s.etapy.flatMap((e) => e.lines.flatMap(tekstyStroki)),
     ...s.hints.flatMap((h) => [h.question, ...h.options, ...(h.comment ? [h.comment] : [])]),
   ];
   const cells = (s.tables ?? []).flatMap((t) => t.rows.flatMap((r) => r.slice(1)));
@@ -210,29 +212,64 @@ const RAVNYE_MASSY = new Set(['SM-02', 'SM-07']);
  * Методика раздела: вид таблицы по разделу, «примем всю работу за 1»,
  * таблица равных масс и явное сокращение на m.
  */
-/** Задачи на проценты: разбор начинается с краткой записи «100 % — …». */
-const S_KRATKOY_ZAPISYU = new Set([
-  'RZ-09',
-  'RZ-10',
-  'RZ-11',
-  'RZ-12',
-  'RZ-13',
-  'RZ-14',
-  'RZ-15',
-  'RZ-16',
-  'RZ-17',
+/** Задачи на проценты: разбор по схеме «100 % → запись → x → пропорция → сокращение». */
+export const ZADACHI_NA_PROCENTY = new Set([
+  ...['01', '02', '03', '04', '05', '06', '07'].map((n) => `PR-${n}`),
+  ...['09', '10', '11', '12', '13', '14', '15', '16', '17'].map((n) => `RZ-${n}`),
 ]);
+
+/**
+ * Схема разбора задачи на проценты: шаги «что за 100 %», «краткая
+ * запись», «вместо „?“ вводим x», «пропорция», «считаем» (сокращение
+ * или «сократить нельзя»); у задач с несколькими изменениями — по
+ * записи и пропорции на звено. Все сокращения арифметически верны.
+ */
+export function checkProcenty(where: string, s: Solved): Problem[] {
+  const problems: Problem[] = [];
+  const add = (what: string) => problems.push({ where, what });
+  const titles = s.etapy.map((e) => e.title);
+  const est = (re: RegExp, what: string) => {
+    if (!titles.some((t) => re.test(t))) add(`проценты: нет шага «${what}»`);
+  };
+  if (!/100\\%/.test(titles[0] ?? '')) add('проценты: первый шаг — не «что принимаем за 100 %»');
+  est(/Краткая запись/, 'краткая запись');
+  est(/Вместо «\?» вводим/, 'вместо «?» вводим x');
+  est(/пропорци/i, 'пропорция');
+  est(/^Шаг \d+\. Считаем/, 'считаем (сокращение)');
+  const bloki = s.etapy
+    .flatMap((e) => e.lines)
+    .map(izStroki)
+    .filter((b) => b !== null);
+  if (
+    !bloki.some(
+      (b) => b.vid === 'zapis' && b.stroki.some((r) => r.l.neizv === '?' || r.r.neizv === '?'),
+    )
+  ) {
+    add('проценты: в краткой записи нет «?»');
+  }
+  if (!bloki.some((b) => b.vid === 'zapis' && b.zamena === true)) {
+    add('проценты: нет записи с заменой «?» на букву');
+  }
+  if (!bloki.some((b) => b.vid === 'proporciya')) add('проценты: нет пропорции');
+  if (!bloki.some((b) => b.vid === 'pravilo')) add('проценты: нет карточки правила пропорции');
+  for (const b of bloki) {
+    if (b.vid === 'sokr') {
+      const err = proveritSokrashchenie(b.chislitel, b.znamenatel, {
+        shagi: b.shagi,
+        itog: b.itog,
+        sokratili: b.shagi.some((x) => x.na > 1),
+      });
+      for (const e of err) add(`сокращение: ${e}`);
+    }
+  }
+  return problems;
+}
 
 export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
   const problems: Problem[] = [];
   const add = (what: string) => problems.push({ where, what });
-  if (id.startsWith('PR-') || S_KRATKOY_ZAPISYU.has(id)) {
-    const first = s.etapy[0];
-    if (!first?.title.endsWith(KRATKAYA_ZAPIS) || first.lines.length < 2) {
-      add('задача на проценты: первый шаг — не краткая запись');
-    } else if (!first.lines.every((l) => l.includes(' — '))) {
-      add('краткая запись: строка без тире «100 % — …»');
-    }
+  if (ZADACHI_NA_PROCENTY.has(id)) {
+    problems.push(...checkProcenty(where, s));
   }
   const vid = VID_RAZDELA[id.split('-')[0] ?? ''];
   const tables = s.tables ?? [];

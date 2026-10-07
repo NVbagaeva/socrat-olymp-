@@ -70,33 +70,6 @@ export function etapy(...items: Array<[string, string[]] | null | false>): Etap[
     .map(([title, lines], i) => etap(i + 1, title, lines));
 }
 
-/** Заголовок первого этапа у задач на проценты. */
-export const KRATKAYA_ZAPIS = 'Краткая запись';
-
-/**
- * Краткая запись задачи на проценты — как в тетради:
- *
- *   100 % — 200 (ч.)
- *   125 % — ? (ч.)
- *
- * Строка: [слева, справа] — текст с формулами в $…$; каждая строка
- * записи — отдельная строка этапа (на телефоне длинная переносится).
- */
-export function kratkayaZapis(...rows: Array<[string, string]>): [string, string[]] {
-  return [KRATKAYA_ZAPIS, rows.map(([l, r]) => `${l} — ${r}`)];
-}
-
-/** Величина с единицей для краткой записи: «$200$ (ч.)», «$?$ (руб.)». */
-export const sEd = (x: string, ed: string): string => `$${x}$ (${ed})`;
-
-/**
- * Готовые (набранные) строки этапа в одном абзаце листа: краткую
- * запись — столбиком с новой строки, остальное — подряд.
- */
-export function strokiEtapa(title: string, html: string[]): string {
-  return title.endsWith(KRATKAYA_ZAPIS) ? `<br>${html.join('<br>')}` : html.join(' ');
-}
-
 /** Таблица без особого порядка столбцов (клиенты банка и т. п.). */
 export function tablitsa(head: string[], rows: string[][], title?: string): Tablitsa {
   return title ? { vid: 'prochee', title, head, rows } : { vid: 'prochee', head, rows };
