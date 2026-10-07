@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx';
 import { useMemo, useState } from 'react';
-import { Button, Checkbox, Input } from '@/components/ui';
+import { Button, Checkbox, EmptyState, Input } from '@/components/ui';
 import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
 import { TRENAZHER_11 } from '@/content/zadanie11';
@@ -404,7 +404,12 @@ export function Generator11({
 
         <div className="z11-a4">
           {list === null ? (
-            <p className="z11-a4__pusto">{GENERATOR_11.pusto}</p>
+            <EmptyState
+              className="z11-a4__pusto"
+              icon={<Piktogramma name="layers" />}
+              title={GENERATOR_11.pustoTitle}
+              description={GENERATOR_11.pusto}
+            />
           ) : (
             <>
               <h3 className="z11-a4__title">

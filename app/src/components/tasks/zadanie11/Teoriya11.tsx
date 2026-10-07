@@ -129,7 +129,10 @@ function FormulaSoSledstviyami({ r }: { r: RazdelTeorii11 }) {
   }
   return (
     <section className="z11-card z11-glavnaya" id={`${r.id}-formula`}>
-      <h4 className="z11-blok-title">Главная формула</h4>
+      <h4 className="z11-card__title">
+        <Piktogramma name="book" className="z11-card__icon" />
+        Главная формула
+      </h4>
       <div className="z11-glavnaya__body">
         <div className="z11-glavnaya__formula">
           <Krupno className="z11-card__formula" tex={f.tex} />
@@ -219,7 +222,10 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
 
       {r.vvedenie ? (
         <section className="z11-card z11-vved" id={`${r.id}-opredelenie`}>
-          <h4 className="z11-blok-title">{r.vvedenie.title}</h4>
+          <h4 className="z11-card__title">
+            <Piktogramma name="flag" className="z11-card__icon" />
+            {r.vvedenie.title}
+          </h4>
           <p className="z11-vved__opredelenie">
             <Tex text={r.vvedenie.opredelenie} />
           </p>
@@ -371,7 +377,10 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
 
       {tipy.length > 0 ? (
         <section className="z11-tipy" aria-label="Типы задач этого раздела" id={`${r.id}-tipy`}>
-          <h4 className="z11-tipy__title">Типы задач этого раздела</h4>
+          <h4 className="z11-tipy__title">
+            <Piktogramma name="grid" />
+            Типы задач этого раздела
+          </h4>
           <ul className="z11-tipy__list">
             {tipy.map((st) => (
               <li className="z11-tip" key={st.id}>

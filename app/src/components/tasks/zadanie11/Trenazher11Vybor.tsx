@@ -215,6 +215,7 @@ export function Trenazher11Vybor({
                     className="z11-akk__ves"
                     checked={ves}
                     indeterminate={k > 0 && !ves}
+                    aria-label={`${TRENAZHER_11.vesRazdel}: ${r.nazvanie}`}
                     onChange={(e) =>
                       pereklyuchit(
                         r.podtipy.map((p) => p.id),
@@ -222,7 +223,7 @@ export function Trenazher11Vybor({
                       )
                     }
                   >
-                    {TRENAZHER_11.vesRazdel}
+                    <span className="z11-akk__ves-text">{TRENAZHER_11.vesRazdel}</span>
                   </Checkbox>
                 </div>
                 {otkryt ? (

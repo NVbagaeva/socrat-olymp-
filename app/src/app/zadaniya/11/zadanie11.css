@@ -3,7 +3,12 @@
    Оболочка, лента вкладок, кольцо прогресса и оболочка теории — общие
    слои; здесь только своё: цвета разделов, карта маршрута, карточки
    теории, таблицы модели. Значения — только токены. Макеты —
-   docs/mockups/zadanie-11. */
+   docs/mockups/zadanie-11.
+
+   Медиазапросы — только системные пороги 768 / 1024 / 1280
+   (app/README.md). Раскладки внутри карточек считаются по ширине
+   контейнера (@container): рядом стоят боковое меню и «Содержание»,
+   и колонка бывает узкой при широком окне. */
 
 .z11-head {
   margin-bottom: var(--space-6);
@@ -193,8 +198,8 @@
   color: inherit;
   text-decoration: none;
   transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+    border-color var(--dur-hover),
+    box-shadow var(--dur-hover);
 }
 .z11-map__card:hover {
   border-color: var(--color-accent-soft);
@@ -425,7 +430,7 @@
   line-height: var(--lh-caption);
 }
 .z11-order__pered {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 /* ── Теория ───────────────────────────────────────────────────── */
@@ -461,6 +466,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
+  /* Нечётная последняя карточка — во всю ширину, без «сироты». */
+  .z11-teor__grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 .z11-card {
   display: grid;
@@ -476,7 +485,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  color: var(--color-text-brand);
   font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 700;
 }
 .z11-card__icon {
@@ -511,7 +522,8 @@
 }
 .z11-card__podpis {
   color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   text-align: center;
 }
 .z11-card--layfhak {
@@ -588,6 +600,17 @@
 }
 .z11-tab__scroll {
   overflow-x: auto;
+  /* Тень по краю показывает, что таблица прокручивается вбок: тень
+     закрепляется за окном прокрутки, белые «шторки» — за содержимым
+     и закрывают её, пока край не достигнут. */
+  --z11-shade: color-mix(in srgb, var(--color-text) 16%, transparent);
+  background:
+    linear-gradient(to right, var(--color-surface) 40%, transparent) 0 0 / 56px 100%,
+    linear-gradient(to left, var(--color-surface) 40%, transparent) 100% 0 / 56px 100%,
+    radial-gradient(farthest-side at 0 50%, var(--z11-shade), transparent) 0 0 / 16px 100%,
+    radial-gradient(farthest-side at 100% 50%, var(--z11-shade), transparent) 100% 0 / 16px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
 }
 .z11-tab table {
   width: 100%;
@@ -649,14 +672,20 @@
   transform: translateY(-50%) rotate(45deg);
 }
 
-/* Плитки типов задач. */
+/* Плитки типов задач. Заголовок — как у карточек теории (16/700 с
+   иконкой): синяя черта остаётся только у заголовков вкладок. */
 .z11-tipy__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-3);
-  padding-left: var(--space-3);
-  border-left: 4px solid var(--color-primary);
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 700;
+}
+.z11-tipy__title .z11-pic {
+  color: var(--color-primary);
 }
 .z11-tipy__list {
   display: grid;
@@ -682,7 +711,7 @@
   flex: 1;
 }
 .z11-tip__code {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: var(--fs-caption);
 }
 .z11-tip__title {
@@ -721,7 +750,7 @@
 /* «Что такое концентрация»: определение и примеры из жизни с картинками. */
 .z11-vved__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--space-3);
   list-style: none;
   margin: 0;
@@ -782,7 +811,7 @@
   text-align: center;
   line-height: var(--lh-lg);
 }
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .z11-vved__list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -837,7 +866,7 @@
 }
 /* Главная формула — крупно, как на макете. */
 .z11-glavnaya__formula .z11-card__formula {
-  font-size: 1.35em;
+  font-size: var(--fs-h4);
 }
 .z11-legenda--tsvet {
   padding-left: 0;
@@ -981,7 +1010,7 @@
 .z11-treug__m {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 1.05em;
+  font-size: var(--fs-body);
   white-space: nowrap;
 }
 .z11-treug__m--verh {
@@ -1027,6 +1056,15 @@
   padding-bottom: var(--space-1);
   overflow-x: auto;
   scrollbar-width: thin;
+  /* Тень по краю — признак прокрутки, как у таблицы модели. */
+  --z11-shade: color-mix(in srgb, var(--color-text) 14%, transparent);
+  background:
+    linear-gradient(to right, var(--color-bg) 40%, transparent) 0 0 / 48px 100%,
+    linear-gradient(to left, var(--color-bg) 40%, transparent) 100% 0 / 48px 100%,
+    radial-gradient(farthest-side at 0 50%, var(--z11-shade), transparent) 0 0 / 14px 100%,
+    radial-gradient(farthest-side at 100% 50%, var(--z11-shade), transparent) 100% 0 / 14px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
 }
 .z11-filtr__btn {
   display: grid;
@@ -1102,8 +1140,8 @@
   color: inherit;
   text-decoration: none;
   transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+    border-color var(--dur-hover),
+    box-shadow var(--dur-hover);
 }
 .z11-blok:hover {
   border-color: var(--color-accent-soft);
@@ -1139,7 +1177,7 @@
 }
 .z11-blok__title {
   font-weight: 600;
-  line-height: var(--lh-label);
+  line-height: var(--lh-caption);
 }
 .z11-blok__count {
   color: var(--color-text-secondary);
@@ -1147,15 +1185,18 @@
 }
 .z11-blok__btn {
   justify-self: end;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-info);
-  color: var(--color-primary);
-  font-size: var(--fs-label);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
   font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--dur-hover);
 }
 .z11-blok:hover .z11-blok__btn {
-  background: var(--color-surface-soft);
+  background: var(--color-primary);
 }
 
 .z11-kolco {
@@ -1224,6 +1265,21 @@
 .z11-ptask__tab {
   margin-top: var(--space-4);
 }
+/* Подсказка по шагам — под условием во всю ширину (а не узкой
+   колонкой справа, которая растягивала карточку), в стиле карточки
+   подсказки тренажёра. */
+.z11-ptask .ptask__card {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z11-ptask .z11-hint {
+  border: 1px solid var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.z11-ptask .z11-hint .ptask__hint-head {
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
 
 /* Подсказка по шагам: вопрос — кнопки. */
 .z11-hint__list {
@@ -1250,7 +1306,8 @@
   gap: var(--space-2);
 }
 .z11-hint__opt {
-  padding: var(--space-1) var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -1299,10 +1356,20 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
-.z11-razbor__title {
-  font-size: var(--fs-label);
+.z11-razbor__title,
+.z11-memo__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   font-weight: 600;
-  color: var(--color-text-secondary);
+}
+.z11-razbor__title .z11-pic,
+.z11-memo__title .z11-pic {
+  color: var(--color-primary);
 }
 .z11-razbor__lines {
   display: grid;
@@ -1323,9 +1390,9 @@
 }
 .z11-memo__title {
   margin-bottom: var(--space-3);
-  font-size: var(--fs-label);
-  font-weight: 600;
-  color: var(--color-text-brand);
+}
+.z11-memo__title .z11-pic {
+  color: var(--color-star);
 }
 .z11-memo__list {
   display: grid;
@@ -1335,7 +1402,7 @@
   overflow-x: auto;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767.98px) {
   .z11-blok {
     padding: var(--space-4);
     gap: var(--space-2) var(--space-3);
@@ -1368,7 +1435,7 @@
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
-@media (min-width: 1180px) {
+@media (min-width: 1280px) {
   .z11-tr {
     grid-template-columns: minmax(0, 1fr) 340px;
     align-items: start;
@@ -1490,7 +1557,7 @@
   border-radius: var(--radius-pill);
   background: var(--color-error);
   color: var(--color-text-inverse);
-  font-size: 12px;
+  font-size: var(--fs-label);
   font-weight: 700;
   line-height: 20px;
   text-align: center;
@@ -1582,7 +1649,7 @@
   width: 20px;
   height: 20px;
   color: var(--color-text-secondary);
-  transition: transform 0.15s;
+  transition: transform var(--dur-hover);
 }
 .is-open .z11-akk__chevron {
   transform: rotate(180deg);
@@ -1619,12 +1686,22 @@
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
-@media (max-width: 640px) {
+@media (max-width: 767.98px) {
   .z11-akk__count {
     display: none;
   }
   .z11-akk__list {
     padding-left: var(--space-3);
+  }
+  /* Подпись «весь раздел» уходит: иначе названия разделов ломались
+     на две-три строки; чекбокс остаётся с aria-label. */
+  .z11-akk__ves-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
   .z11-akk__podtip {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1731,10 +1808,11 @@
   font-weight: 600;
 }
 .z11-vybrannaya__x {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: 0;
   border-radius: 50%;
   background: none;
@@ -1745,8 +1823,18 @@
   background: var(--color-surface-2);
 }
 .z11-vybrannaya__x .z11-pic {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+}
+/* Зона нажатия 44 px у маленьких иконочных кнопок: визуально 36 px,
+   невидимый припуск по 4 px с каждой стороны. */
+.z11-vybrannaya__x::before,
+.z11-a4__zamena::before,
+.z11-gen__vbtn::before,
+.z11-stepper button::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
 }
 .z11-vybrannaya__row {
   display: flex;
@@ -1761,6 +1849,7 @@
   gap: var(--space-2);
 }
 .z11-stepper button {
+  position: relative;
   width: 36px;
   height: 36px;
   border: 0;
@@ -1768,7 +1857,7 @@
   background: var(--color-surface-info);
   color: var(--color-primary);
   font: inherit;
-  font-size: 20px;
+  font-size: var(--fs-h4);
   cursor: pointer;
 }
 .z11-stepper button:disabled {
@@ -1950,7 +2039,7 @@
 }
 .z11-resh__chevron {
   color: var(--color-primary);
-  transition: transform 0.15s;
+  transition: transform var(--dur-hover);
 }
 .z11-resh__hint.is-open .z11-resh__chevron {
   transform: rotate(180deg);
@@ -1980,7 +2069,7 @@
   background: var(--color-surface);
   color: inherit;
   font: inherit;
-  font-size: 1.1em;
+  font-size: var(--fs-lg);
   cursor: pointer;
 }
 .z11-resh__opt:hover:not(:disabled) {
@@ -2019,7 +2108,7 @@
   display: block;
   width: 100%;
   min-width: 64px;
-  min-height: 36px;
+  min-height: 44px;
   border: 1.5px dashed var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -2058,6 +2147,11 @@
 }
 .z11-resh__link .z11-pic {
   color: var(--color-star);
+}
+@media (max-width: 767.98px) {
+  .z11-resh__links {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .z11-resh__razbor {
   gap: var(--space-3);
@@ -2108,6 +2202,22 @@
 }
 .z11-resh__bar-bottom > .btn:only-child {
   grid-column: 1 / -1;
+}
+/* Вердикт — в закреплённой строке над полем, компактно: ученик
+   вводит ответ внизу экрана и там же видит «верно / пока неверно». */
+.z11-resh__bar-bottom .pverdict {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  max-width: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+}
+.z11-resh__bar-bottom .pverdict__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
 
 /* ── Итог тренировки ──────────────────────────────────────────── */
@@ -2191,7 +2301,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
-@media (max-width: 640px) {
+@media (max-width: 767.98px) {
   .z11-itog__item {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
@@ -2212,14 +2322,19 @@
   }
 }
 
-/* Таблица модели на телефоне: поуже, чтобы S | v | t влезали целиком. */
-@media (max-width: 480px) {
+/* Таблица модели на телефоне: поуже, чтобы S | v | t влезали целиком;
+   подпись строки переносится по слогам, а не растягивает таблицу. */
+@media (max-width: 767.98px) {
   .z11-tab th,
   .z11-tab td {
     padding: var(--space-1) var(--space-2);
   }
   .z11-tab tbody th {
+    max-width: 9em;
     font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
   .z11-tab__pusto {
     min-width: 44px;
@@ -2233,7 +2348,7 @@
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
-@media (min-width: 1180px) {
+@media (min-width: 1280px) {
   .z11-gen {
     grid-template-columns: minmax(340px, 0.85fr) minmax(0, 1.15fr);
     align-items: start;
@@ -2364,13 +2479,13 @@
 }
 .z11-gen__podtip .z11-stepper button {
   width: 28px;
-  height: 28px;
-  font-size: 16px;
+  height: 36px;
+  font-size: var(--fs-body);
 }
 .z11-gen__podtip .z11-stepper output {
   min-width: 20px;
 }
-@media (max-width: 640px) {
+@media (max-width: 767.98px) {
   .z11-gen__podtip {
     grid-template-columns: minmax(0, 1fr) auto;
   }
@@ -2435,6 +2550,7 @@
   gap: var(--space-1);
 }
 .z11-gen__tab {
+  min-height: 40px;
   padding: var(--space-2) var(--space-3);
   border: 0;
   border-radius: var(--radius-md);
@@ -2457,8 +2573,9 @@
   color: var(--color-text-secondary);
 }
 .z11-gen__vbtn {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  width: 36px;
+  height: 36px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -2499,8 +2616,10 @@
 }
 .z11-a4__pusto {
   align-self: center;
-  color: var(--color-text-secondary);
-  text-align: center;
+}
+.z11-a4__pusto .z11-pic {
+  width: 28px;
+  height: 28px;
 }
 .z11-a4__title {
   font-size: var(--fs-h4);
@@ -2576,10 +2695,11 @@
   color: var(--color-text);
 }
 .z11-a4__zamena {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: 0;
   border-radius: 50%;
   background: none;
@@ -2625,7 +2745,7 @@
   padding: 0;
   list-style: none;
 }
-@media (max-width: 640px) {
+@media (max-width: 767.98px) {
   .z11-a4 {
     padding: var(--space-4) var(--space-3);
   }
@@ -2645,7 +2765,7 @@
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
-@media (min-width: 1180px) {
+@media (min-width: 1280px) {
   .z11-rep {
     grid-template-columns: minmax(0, 1fr) 300px;
     align-items: start;
@@ -2736,7 +2856,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--fs-label);
 }
 .z11-urok__btns {
   display: flex;
@@ -2787,7 +2907,7 @@
   display: grid;
   gap: var(--space-4);
 }
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .z11-zametki {
     grid-template-columns: 240px minmax(0, 1fr);
     align-items: start;
@@ -2808,6 +2928,7 @@
   align-items: center;
   gap: var(--space-2);
   width: 100%;
+  min-height: 40px;
   padding: var(--space-1) var(--space-2);
   border: 0;
   border-radius: var(--radius-md);
@@ -2851,7 +2972,7 @@
 .z11-zametka--poryadok {
   grid-column: 1 / -1;
 }
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .z11-zametka--poryadok ol {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: var(--space-6);

@@ -322,17 +322,6 @@ export function Trenazher11Reshenie({
         )}
       </nav>
 
-      {checked === null ? null : (
-        <div className={clsx('pverdict', `pverdict--${checked}`)} role="status">
-          <p className="pverdict__title">
-            {checked === 'right' ? TRENAZHER_11.verno : TRENAZHER_11.neverno}
-          </p>
-          <p className="pverdict__lead">
-            {checked === 'right' ? TRENAZHER_11.vernoLead : TRENAZHER_11.nevernoLead}
-          </p>
-        </div>
-      )}
-
       {razbor === null ? null : (
         <section className="z11-card z11-resh__razbor" aria-label={TRENAZHER_11.reshenie}>
           <h3 className="z11-resh__h">{TRENAZHER_11.reshenie}</h3>
@@ -389,8 +378,20 @@ export function Trenazher11Reshenie({
         )}
       </div>
 
-      {/* Закреплено внизу экрана, как на макете: ответ и главная кнопка. */}
+      {/* Закреплено внизу экрана, как на макете: ответ и главная кнопка.
+          Вердикт — здесь же, над полем: ученик вводит ответ внизу
+          экрана и обратную связь видит там, где нажал «Проверить». */}
       <div className="z11-resh__bar-bottom">
+        {checked === null ? null : (
+          <div className={clsx('pverdict', `pverdict--${checked}`)} role="status">
+            <p className="pverdict__title">
+              {checked === 'right' ? TRENAZHER_11.verno : TRENAZHER_11.neverno}
+            </p>
+            <p className="pverdict__lead">
+              {checked === 'right' ? TRENAZHER_11.vernoLead : TRENAZHER_11.nevernoLead}
+            </p>
+          </div>
+        )}
         {z.answerType === 'choice' ? null : (
           <Input
             className="z11-resh__input"

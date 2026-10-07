@@ -20,7 +20,7 @@ import { mikroItog11, mikroZapisat11, opornye11 } from '@/lib/zadanie11/progress
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie11/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { HintFlow11 } from './HintFlow11';
-import { IkonkaBloka } from './Piktogrammy';
+import { IkonkaBloka, Piktogramma } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
 
 type Attempt = 'wrong' | 'skipped';
@@ -279,7 +279,10 @@ export function Opornye11Screen({
 
         {razbor === null ? null : (
           <div className="z11-razbor" role="region" aria-label={OPORNYE_11.reshenie}>
-            <p className="z11-razbor__title">{OPORNYE_11.reshenie}</p>
+            <p className="z11-razbor__title">
+              <Piktogramma name="book" />
+              {OPORNYE_11.reshenie}
+            </p>
             {razbor.tablitsa === null ? null : <Tablitsa11 table={razbor.tablitsa} />}
             <div className="z11-razbor__lines">
               {razbor.stroki.map((line, i) => (
@@ -335,7 +338,10 @@ export function Opornye11Screen({
       </div>
 
       <aside className="z11-memo">
-        <p className="z11-memo__title">{OPORNYE_11.zapomni}</p>
+        <p className="z11-memo__title">
+          <Piktogramma name="bulb" />
+          {OPORNYE_11.zapomni}
+        </p>
         <ul className="z11-memo__list">
           {zapomniHtml.map((html, i) => (
             <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
