@@ -53,5 +53,11 @@ export interface Blok {
   lead: string;
   /** Плашка «Запомни»: строки с формулами в $…$. */
   zapomni: string[];
+  /** Зачем этот навык — строка на карточке (content/opornye11.ts). */
+  zachem: string;
+  /** «Теория к этому блоку»: правило → пример, строки с $…$. */
+  teoriya: string[];
+  /** Раздел теории для кнопки «Теория раздела». */
+  teoriyaRazdel: string;
   zadachi: Mikro[];
 }

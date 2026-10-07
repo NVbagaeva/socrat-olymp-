@@ -107,7 +107,7 @@ export function checkPrep(seeds: number, typeset: (tex: string) => string) {
     if (/\$|\\/.test(b.nazvanie)) {
       problems.push({ where: b.id, what: 'формула в названии блока' });
     }
-    for (const line of [b.lead, ...b.zapomni]) {
+    for (const line of [b.lead, b.zachem, ...b.teoriya, ...b.zapomni]) {
       texts.push({ where: `${b.id} запомни`, text: line });
       for (const tex of texPieces(line) ?? []) {
         try {

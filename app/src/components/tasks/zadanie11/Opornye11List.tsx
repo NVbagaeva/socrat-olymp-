@@ -13,6 +13,8 @@ export interface BlokKartochka {
   slug: string;
   razdel: RazdelBloka;
   nazvanie: string;
+  /** Зачем этот навык — строка под названием. */
+  zachem: string;
   total: number;
   /** Разделы фильтра, в которых карточка видна. */
   filtry: RazdelBloka[];
@@ -67,11 +69,14 @@ export function Opornye11List({
   bloki,
   filtry,
   listHref,
+  opisaniya,
 }: {
   bloki: BlokKartochka[];
   /** Кнопки фильтра без «Все»: разделы и «Общие навыки». */
   filtry: FiltrKnopka[];
   listHref: string;
+  /** Абзац «что уметь до раздела» по разделу и строки «зачем» по блоку — свёрстаны на сервере. */
+  opisaniya: { razdely: Record<string, string>; zachem: Record<string, string> };
 }) {
   const progress = opornye11.useProgress();
   const [filtr, setFiltr] = useState<Filtr>('all');
@@ -109,6 +114,13 @@ export function Opornye11List({
         ))}
       </div>
 
+      {filtr !== 'all' && filtr !== 'OB' && opisaniya.razdely[filtr] !== undefined ? (
+        <p
+          className="z11-filtr__opis"
+          dangerouslySetInnerHTML={{ __html: opisaniya.razdely[filtr] ?? '' }}
+        />
+      ) : null}
+
       <ul className="z11-bloki">
         {vidny.map((b) => {
           const solved = mikroResheno11(progress, b.id, b.total);
@@ -131,6 +143,10 @@ export function Opornye11List({
                     <span className="z11-blok__badge">{OPORNYE_11.razminkaBadge}</span>
                   ) : null}
                   <span className="z11-blok__title">{b.nazvanie}</span>
+                  <span
+                    className="z11-blok__zachem"
+                    dangerouslySetInnerHTML={{ __html: opisaniya.zachem[b.id] ?? '' }}
+                  />
                   <span className="z11-blok__count">{OPORNYE_11.zadach(b.total)}</span>
                 </span>
                 <Kolco solved={solved} total={b.total} />

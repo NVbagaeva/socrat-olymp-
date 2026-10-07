@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
+import { BLOK_11 } from '@/content/opornye11';
 import { OPORNYE_11 } from '@/content/zadanie11';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { scrollTabTo } from '@/lib/tabScroll';
@@ -20,7 +21,7 @@ import { mikroItog11, mikroZapisat11, opornye11 } from '@/lib/zadanie11/progress
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie11/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { HintFlow11 } from './HintFlow11';
-import { IkonkaBloka } from './Piktogrammy';
+import { IkonkaBloka, Piktogramma } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
 
 type Attempt = 'wrong' | 'skipped';
@@ -33,7 +34,17 @@ export interface Opornye11ScreenProps {
   tasks: (MikroSealed11 & { no: number })[];
   /** Плашка «Запомни», свёрстана. */
   zapomniHtml: string[];
+  /** Зачем этот навык — строка под заголовком, свёрстана. */
+  zachem: string;
+  /** «Теория к этому блоку», свёрстана. */
+  teoriyaHtml: string[];
   listHref: string;
+  /** Куда дальше после 10/10. */
+  dalee: {
+    teoriyaHref: string;
+    sled: { href: string; nazvanie: string } | null;
+    trenazher: { href: string; razdel: string } | null;
+  };
 }
 
 const VERDICT = {
@@ -69,9 +80,15 @@ export function Opornye11Screen({
   title,
   tasks,
   zapomniHtml,
+  zachem,
+  teoriyaHtml,
   listHref,
+  dalee,
 }: Opornye11ScreenProps) {
   const progress = opornye11.useProgress();
+  /* Теория свёрнута, пока не понадобилась: раскрывается кнопкой и
+     сама — после первой ошибки. */
+  const [teoriyaOpen, setTeoriyaOpen] = useState(false);
   const [attempts, setAttempts] = useState<Record<number, Attempt>>({});
   const [picked, setPicked] = useState<number | null>(null);
   const [value, setValue] = useState('');
@@ -126,6 +143,7 @@ export function Opornye11Screen({
     mikroZapisat11(blockId, base.no, correct ? 'right' : 'wrong');
     if (!correct) {
       setAttempts((prev) => ({ ...prev, [base.no]: 'wrong' }));
+      setTeoriyaOpen(true);
     }
   }
 
@@ -175,6 +193,42 @@ export function Opornye11Screen({
           </span>
         </p>
       </header>
+
+      <p className="z11-ptask__zachem">
+        <span className="z11-ptask__zachem-label">{BLOK_11.zachem}:</span>{' '}
+        <span dangerouslySetInnerHTML={{ __html: zachem }} />
+      </p>
+
+      <section className={clsx('z11-bteor', teoriyaOpen && 'is-open')}>
+        <button
+          type="button"
+          className="z11-bteor__head"
+          aria-expanded={teoriyaOpen}
+          onClick={() => setTeoriyaOpen(!teoriyaOpen)}
+        >
+          <Piktogramma name="book" className="z11-bteor__ikonka" />
+          <span className="z11-bteor__title">{BLOK_11.teoriya}</span>
+          <span className="z11-bteor__toggle">{teoriyaOpen ? BLOK_11.skryt : BLOK_11.pokazat}</span>
+          <Piktogramma name="chevron" className="z11-bteor__chev" />
+        </button>
+        {teoriyaOpen ? (
+          <div className="z11-bteor__body">
+            <ul className="z11-bteor__list">
+              {teoriyaHtml.map((html, i) => (
+                <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
+              ))}
+            </ul>
+            <div className="z11-memo z11-memo--v-teorii">
+              <p className="z11-memo__title">{OPORNYE_11.zapomni}</p>
+              <ul className="z11-memo__list">
+                {zapomniHtml.map((html, i) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : null}
+      </section>
 
       <p className="ptask__counter">
         Задание <b>{base.no}</b> из {total} · {task.nazvanie}
@@ -334,14 +388,33 @@ export function Opornye11Screen({
         </div>
       </div>
 
-      <aside className="z11-memo">
-        <p className="z11-memo__title">{OPORNYE_11.zapomni}</p>
-        <ul className="z11-memo__list">
-          {zapomniHtml.map((html, i) => (
-            <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
-          ))}
-        </ul>
-      </aside>
+      {right >= total ? (
+        <aside className="z11-proyden" aria-label={BLOK_11.proyden.title}>
+          <p className="z11-proyden__title">
+            <Piktogramma name="check" />
+            {BLOK_11.proyden.title}
+          </p>
+          <p className="z11-proyden__lead">{BLOK_11.proyden.lead}</p>
+          <div className="z11-proyden__btns">
+            <Link className="btn btn--secondary btn--sm" href={dalee.teoriyaHref}>
+              <Piktogramma name="book" />
+              {BLOK_11.proyden.teoriya}
+            </Link>
+            {dalee.sled === null ? null : (
+              <Link className="btn btn--secondary btn--sm" href={dalee.sled.href}>
+                <Piktogramma name="tools" />
+                {BLOK_11.proyden.sled}: {dalee.sled.nazvanie}
+              </Link>
+            )}
+            {dalee.trenazher === null ? null : (
+              <Link className="btn btn--primary btn--sm" href={dalee.trenazher.href}>
+                <Piktogramma name="play" />
+                {BLOK_11.proyden.trenazher(dalee.trenazher.razdel)}
+              </Link>
+            )}
+          </div>
+        </aside>
+      ) : null}
     </section>
   );
 }
