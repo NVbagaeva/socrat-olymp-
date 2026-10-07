@@ -15,6 +15,7 @@ import { BANK, RAZMINKA } from './bank';
 import { POOL_ANALOGOV, type Analog } from './analogi';
 import { paramsKey, pohozhaNa } from './gen/core';
 import { kodNaSayte } from './kod';
+import { METALL } from './prototypes/sm';
 import { nice, txt } from './num';
 import { subtype } from './prototypes';
 import { GORODA } from './prototypes/rz';
@@ -94,6 +95,23 @@ const SYUZHET = new Set([
   'cKto',
   'cTitle',
   'cDohod',
+  /* Смеси: металл, единицы, вещество и продукт. */
+  'metal',
+  'vesh',
+  'veshIm',
+  'smesPr',
+  'perv',
+  'syroe',
+  'syroeRod',
+  'syroePr',
+  'suhoe',
+  'suhoeRod',
+  'suhoePr',
+  'suhIm',
+  'suhPr',
+  'gotPr',
+  'gotRod',
+  'osnova',
 ]);
 
 export function model(params: Params): Params {
@@ -170,6 +188,95 @@ const PRAVILA: Record<string, Pravilo> = {
       if (!new RegExp(`(?<!\\d)${st} час`).test(a.text)) out.push(`в тексте нет остановки ${st} ч`);
       return out;
     },
+  },
+  /* ── Смеси ── */
+  'SM-01': {
+    chisla: ['V', 'p', 'W'],
+    vopros: (a) => /процент/.test(poslednee(a.text)) || /Ответ дайте в процентах/.test(a.text),
+    pravdopodobie: (a) => [
+      ...vVeshchestve(a, [num(a.params, 'p'), a.answer]),
+      ...((a.params.ed === 'kg' ? /\d кг/.test(a.text) : /литр/.test(a.text))
+        ? []
+        : ['единицы в тексте не совпадают с ed']),
+      ...vne('раствор', num(a.params, 'V'), 1, 100),
+      ...vne('вода', num(a.params, 'W'), 1, 100),
+    ],
+  },
+  'SM-02': {
+    chisla: ['p1', 'p2'],
+    vopros: (a) => /процент/.test(poslednee(a.text)) || /Ответ дайте в процентах/.test(a.text),
+    pravdopodobie: (a) => [
+      ...vVeshchestve(a, [num(a.params, 'p1'), num(a.params, 'p2')]),
+      ...(/таким же количеством|такое же количество|равн|столько же/.test(a.text)
+        ? []
+        : ['нет «равных количеств»']),
+    ],
+  },
+  'SM-03': {
+    chisla: ['p1', 'p2', 'm1', 'm2'],
+    vopros: (a) => /процент/.test(poslednee(a.text)) || /Ответ дайте в процентах/.test(a.text),
+    pravdopodobie: (a) => [
+      ...vne('объём I, л', num(a.params, 'm1'), 1, 20),
+      ...vne('объём II, л', num(a.params, 'm2'), 1, 20),
+      ...(num(a.params, 'm1') === num(a.params, 'm2') ? ['равные объёмы — это СМ-02'] : []),
+    ],
+  },
+  'SM-04': {
+    chisla: ['p1', 'p2', 'd', 'p3'],
+    vopros: (a) =>
+      /массу (третьего|получившегося) сплава/.test(a.text) && a.ask === a.params.heavier,
+    pravdopodobie: (a) => {
+      const t = a.text.toLowerCase();
+      const kto = a.params.heavier === '2' ? 'второ' : 'перв';
+      const ok = new RegExp(`масса ${kto}[^.]*больше|${kto}[а-я]* сплав[^.]*тяжелее`).test(t);
+      return [
+        ...metallVTekste(a),
+        ...(ok
+          ? []
+          : [`в тексте тяжелее не ${a.params.heavier === '2' ? 'второй' : 'первый'} сплав`]),
+        ...vne('масса третьего, кг', a.answer, 5, 500),
+      ];
+    },
+  },
+  'SM-05': {
+    chisla: ['p1', 'p2', 'M', 'p3'],
+    vopros: (a) => /меньше массы второго/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...metallVTekste(a),
+      ...vne('масса третьего, кг', num(a.params, 'M'), 5, 500),
+    ],
+  },
+  'SM-06': {
+    chisla: (a) => (a.params.form === 'pyure' ? ['m', 'w1', 'w2'] : ['R', 'w1', 'w2']),
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      (a.ask === 'pyure'
+        ? /Сколько граммов воды/.test(poslednee(a.text))
+        : /Сколько килограммов/.test(poslednee(a.text))),
+    pravdopodobie: (a) => {
+      const w1 = num(a.params, 'w1');
+      const w2 = num(a.params, 'w2');
+      if (a.params.form === 'pyure') {
+        return [...vne('вода в сухом, %', w1, 1, 15), ...vne('вода в готовом, %', w2, 60, 95)];
+      }
+      const slova = [a.params.syroeRod, a.params.suhoeRod].map(String);
+      return [
+        ...vne('вода в свежем, %', w1, 70, 95),
+        ...vne('вода в сушёном, %', w2, 5, 30),
+        ...slova.filter((w) => !a.text.includes(w)).map((w) => `в тексте нет «${w}»`),
+      ];
+    },
+  },
+  'SM-08': {
+    chisla: ['a', 'b', 'c', 'd'],
+    vopros: (a) =>
+      poslednee(a.text).includes(`${num(a.params, 'a')}-процентного`) &&
+      /Сколько килограммов/.test(poslednee(a.text)),
+    pravdopodobie: (a) =>
+      vVeshchestve(
+        a,
+        ['a', 'b', 'c', 'd'].map((k) => num(a.params, k)),
+      ),
   },
   'SM-07': {
     chisla: ['m1', 'm2', 'c', 'e'],
@@ -479,6 +586,23 @@ const PRAVILA: Record<string, Pravilo> = {
   },
 };
 
+/** Концентрации — в пределах вещества (соль не крепче 26 %), вещество названо в тексте. */
+function vVeshchestve(a: Analog, pp: number[]): string[] {
+  const v = VESHCHESTVA[String(a.params.vv)];
+  if (v === undefined) return ['неизвестное вещество'];
+  const koren = v.rod.slice(0, 4);
+  return [
+    ...pp.flatMap((x) => vne('концентрация, %', x, v.p[0], v.p[1])),
+    ...(a.text.includes(koren) ? [] : [`в тексте нет вещества «${v.rod}»`]),
+  ];
+}
+
+/** Металл сплава назван в тексте. */
+function metallVTekste(a: Analog): string[] {
+  const m = METALL[String(a.params.metal ?? 'med')];
+  return m !== undefined && a.text.includes(m) ? [] : ['металл в тексте не совпадает с metal'];
+}
+
 /** Склонения часов и минут в тексте: «1 час», «2 часа», «5 часов». */
 function sklonenia(text: string): string[] {
   const out: string[] = [];
@@ -505,7 +629,8 @@ function sklonenia(text: string): string[] {
 
 export function checkAnalogi(typeset: (tex: string) => string) {
   const problems: Problem[] = [];
-  const pohozha = pohozhaNa([...BANK, ...RAZMINKA]);
+  /* Банк сравниваем без слов сюжета (металл в СМ-04 — тоже сюжет). */
+  const pohozha = pohozhaNa([...BANK, ...RAZMINKA].map((b) => ({ ...b, params: model(b.params) })));
   let checked = 0;
   for (const [proto, list] of Object.entries(POOL_ANALOGOV)) {
     const add = (where: string, what: string) => problems.push({ where, what });

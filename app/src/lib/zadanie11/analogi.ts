@@ -10,6 +10,13 @@
  */
 
 import dp07 from '../../data/zadanie11/analogs/DP-07.json';
+import sm01 from '../../data/zadanie11/analogs/SM-01.json';
+import sm02 from '../../data/zadanie11/analogs/SM-02.json';
+import sm03 from '../../data/zadanie11/analogs/SM-03.json';
+import sm04 from '../../data/zadanie11/analogs/SM-04.json';
+import sm05 from '../../data/zadanie11/analogs/SM-05.json';
+import sm06 from '../../data/zadanie11/analogs/SM-06.json';
+import sm08 from '../../data/zadanie11/analogs/SM-08.json';
 import sm07 from '../../data/zadanie11/analogs/SM-07.json';
 import pr01 from '../../data/zadanie11/analogs/PR-01.json';
 import pr02 from '../../data/zadanie11/analogs/PR-02.json';
@@ -82,6 +89,13 @@ export const POOL_ANALOGOV: Record<string, Analog[]> = {
   'RZ-17': rz17 as unknown as Analog[],
   'RZ-18': rz18 as unknown as Analog[],
   'DP-07': dp07 as unknown as Analog[],
+  'SM-01': sm01 as unknown as Analog[],
+  'SM-02': sm02 as unknown as Analog[],
+  'SM-03': sm03 as unknown as Analog[],
+  'SM-04': sm04 as unknown as Analog[],
+  'SM-05': sm05 as unknown as Analog[],
+  'SM-06': sm06 as unknown as Analog[],
+  'SM-08': sm08 as unknown as Analog[],
   'SM-07': sm07 as unknown as Analog[],
 };
 
