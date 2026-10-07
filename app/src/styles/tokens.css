@@ -226,6 +226,16 @@
   --solid-face: var(--blue-100);
   --solid-liquid: var(--blue-300);
 
+  /* Плоскости сцены задания №15 (сечения): до четырёх построенных
+     плоскостей, у каждой свой цвет; плоскость грани — светлая. Цвет
+     линии пересечения двух плоскостей — смесь их цветов (color-mix
+     в самой сцене). */
+  --color-plane-1: var(--blue-600);
+  --color-plane-2: var(--teal-600);
+  --color-plane-3: var(--violet-600);
+  --color-plane-4: var(--terracotta);
+  --color-plane-face: var(--blue-400);
+
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Рукописная подпись на полях. Caveat — только обычное начертание,
      подмножество cyrillic: латиницу и цифры отрисует запасной cursive. */

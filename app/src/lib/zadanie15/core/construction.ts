@@ -23,6 +23,7 @@ import {
   isZero,
   lt,
   rat,
+  ratStr,
   sub as rsub,
 } from './rational';
 import {
@@ -32,11 +33,14 @@ import {
   coplanarLines,
   dot,
   intersectLines,
+  intersectPlanes,
   lerp,
   lineThrough,
+  onLine,
   onPlane,
   parallelLines,
   parallelPlanes,
+  paramOn,
   planeThrough,
   sameLine,
   veq,
@@ -63,7 +67,13 @@ export type Origin =
   /** Прямая через точку параллельно данной. */
   | { op: 'parallel'; line: ObjId; through: ObjId; plane: PlaneRef | null; reason: ParallelReason }
   /** Плоскость через три точки. */
-  | { op: 'plane3'; a: ObjId; b: ObjId; c: ObjId };
+  | { op: 'plane3'; a: ObjId; b: ObjId; c: ObjId }
+  /**
+   * Прямая пересечения двух плоскостей (грани или построенной).
+   * Общие точки, через которые она проходит, не хранятся: они могут
+   * появиться позже, и считаются по запросу — meetThrough().
+   */
+  | { op: 'planeMeet'; a: PlaneRef; b: PlaneRef };
 
 /**
  * На что опирается параллельная прямая:
@@ -94,6 +104,8 @@ export interface PlaneObj {
   id: ObjId;
   kind: 'plane';
   plane: Plane;
+  /** Подпись в TeX: «\\alpha», «\\beta». Нет — по трём точкам: (MNK). */
+  label?: string;
   origin: Origin;
 }
 
@@ -112,6 +124,8 @@ export interface Refusal {
     | 'point-on-line'
     | 'name-taken'
     | 'name-invalid'
+    | 'parallel-planes'
+    | 'same-plane'
     | 'unknown';
   message: string;
 }
@@ -124,6 +138,10 @@ const NAME_POOL = ['M', 'N', 'K', 'L', 'P', 'Q', 'R', 'S', 'T', 'E', 'F', 'G', '
 
 /** Имя точки: буква, индекс через «_», штрихи. A, M_1, K', X_{12}''. */
 export const NAME_RE = /^[A-ZА-Я](_(\d+|\{\d+\}))?'{0,3}$/;
+
+/** Аксиома, на которую опирается каждая линия пересечения плоскостей. */
+export const AKSIOMA_PLOSKOSTEY =
+  'аксиома: если две различные плоскости имеют общую точку, то они пересекаются по прямой, проходящей через эту точку';
 
 export class Construction {
   readonly poly: Polyhedron;
@@ -466,15 +484,203 @@ export class Construction {
     };
   }
 
-  /** Плоскость через три точки (плоскость сечения MNK). */
-  plane3(a: ObjId, b: ObjId, c: ObjId): Result<ObjId> {
+  /** Плоскость через три точки (плоскость сечения MNK). label — TeX: «\\alpha». */
+  plane3(a: ObjId, b: ObjId, c: ObjId, label?: string): Result<ObjId> {
     const pl = planeThrough(this.point(a).p, this.point(b).p, this.point(c).p);
     if (pl === null)
       return refuse('collinear', 'Точки лежат на одной прямой — плоскость не определена.');
     return {
       ok: true,
-      value: this.put({ id: '', kind: 'plane', plane: pl, origin: { op: 'plane3', a, b, c } }),
+      value: this.put({
+        id: '',
+        kind: 'plane',
+        plane: pl,
+        ...(label === undefined ? {} : { label }),
+        origin: { op: 'plane3', a, b, c },
+      }),
     };
+  }
+
+  /* ── Пересечение плоскостей ───────────────────────────────── */
+
+  /**
+   * Прямая пересечения двух плоскостей: граней многогранника или
+   * построенных. Параллельные и совпадающие плоскости — отказ с
+   * текстом для ученика. Одна и та же пара даёт одну прямую: повторный
+   * вызов возвращает уже построенную.
+   */
+  planeMeet(a: PlaneRef, b: PlaneRef): Result<ObjId> {
+    if (sameRef(a, b)) return refuse('same-plane', 'Это одна и та же плоскость.');
+    const A = this.planeOf(a);
+    const B = this.planeOf(b);
+    const meet = intersectPlanes(A, B);
+    if (meet.kind === 'same') {
+      return refuse('same-plane', 'Плоскости совпадают — общая у них вся плоскость.');
+    }
+    if (meet.kind === 'parallel') {
+      return refuse('parallel-planes', 'Плоскости параллельны — общей линии нет.');
+    }
+    const existing = this.all().find(
+      (o): o is LineObj => o.kind === 'line' && sameLine(o.line, meet.line),
+    );
+    if (existing !== undefined) return { ok: true, value: existing.id };
+    return {
+      ok: true,
+      value: this.put({
+        id: '',
+        kind: 'line',
+        line: meet.line,
+        through: null,
+        origin: { op: 'planeMeet', a, b },
+      }),
+    };
+  }
+
+  /** Прямая пересечения, если она уже построена. */
+  findMeet(a: PlaneRef, b: PlaneRef): ObjId | null {
+    const found = this.all().find(
+      (o): o is LineObj =>
+        o.kind === 'line' &&
+        o.origin.op === 'planeMeet' &&
+        ((sameRef(o.origin.a, a) && sameRef(o.origin.b, b)) ||
+          (sameRef(o.origin.a, b) && sameRef(o.origin.b, a))),
+    );
+    return found?.id ?? null;
+  }
+
+  /**
+   * Построенные точки, лежащие в обеих плоскостях прямой пересечения,
+   * — те, через которые её можно обосновать: «M ∈ α, M ∈ β». Берутся
+   * первые две разные; вершины многогранника считаются тоже.
+   */
+  meetThrough(lineId: ObjId): ObjId[] {
+    const l = this.line(lineId);
+    if (l.origin.op !== 'planeMeet') return l.through === null ? [] : [...l.through];
+    const out: ObjId[] = [];
+    for (const o of this.all()) {
+      if (o.kind !== 'point' || !onLine(l.line, o.p)) continue;
+      if (out.some((id) => veq(this.point(id).p, o.p))) continue;
+      out.push(o.id);
+      if (out.length === 2) break;
+    }
+    return out;
+  }
+
+  /**
+   * Где прямая пересекает рёбра многогранника и их продолжения —
+   * кандидаты в вершины сечения. Точка в вершине засчитывается один
+   * раз, со всеми рёбрами, через которые она прошла.
+   */
+  lineEdgeHits(lineId: ObjId): EdgeHit[] {
+    const l = this.line(lineId).line;
+    const hits: EdgeHit[] = [];
+    this.poly.edges.forEach((e, ei) => {
+      const A = at(this.poly.vertices, e.a).p;
+      const B = at(this.poly.vertices, e.b).p;
+      const el = lineThrough(A, B);
+      if (sameLine(l, el) || parallelLines(l, el) || !coplanarLines(l, el)) return;
+      const x = intersectLines(l, el);
+      if (x === null) return;
+      const t = paramOn(A, B, x);
+      const onSegment = !lt(t, ZERO) && !lt(ONE, t);
+      const same = hits.find((h) => veq(h.p, x));
+      if (same !== undefined) {
+        same.edges.push(ei);
+        same.onSegment = same.onSegment || onSegment;
+        return;
+      }
+      hits.push({ p: x, edge: ei, edges: [ei], t, onSegment });
+    });
+    return hits;
+  }
+
+  /* ── Пересчёт ─────────────────────────────────────────────── */
+
+  /**
+   * Сдвинуть точку условия по ребру: новый параметр t и пересчёт
+   * всего, что от неё зависит, в порядке построения. Если какое-то
+   * построение при этом перестаёт существовать (прямые стали
+   * параллельны, три точки легли на прямую), сдвиг отменяется.
+   */
+  setEdgeParam(id: ObjId, t: Rat): Result<ObjId> {
+    const p = this.point(id);
+    if (p.origin.op !== 'onEdge') return refuse('unknown', 'Эта точка не на ребре.');
+    const was = p.origin.t;
+    const e = at(this.poly.edges, p.origin.edge);
+    this.objs.set(id, {
+      ...p,
+      p: lerp(at(this.poly.vertices, e.a).p, at(this.poly.vertices, e.b).p, t),
+      origin: { ...p.origin, t },
+    });
+    const broken = this.recompute();
+    if (broken.length > 0) {
+      this.objs.set(id, {
+        ...p,
+        p: lerp(at(this.poly.vertices, e.a).p, at(this.poly.vertices, e.b).p, was),
+        origin: { ...p.origin, t: was },
+      });
+      this.recompute();
+      return refuse('unknown', 'В этом положении построение распадается.');
+    }
+    return { ok: true, value: id };
+  }
+
+  /** Пересчитать геометрию всех объектов по их происхождению. */
+  recompute(): ObjId[] {
+    const broken: ObjId[] = [];
+    for (const id of this.order) {
+      const o = this.get(id);
+      const g = o.origin;
+      switch (g.op) {
+        case 'line': {
+          const a = this.point(g.a).p;
+          const b = this.point(g.b).p;
+          if (veq(a, b)) {
+            broken.push(id);
+            break;
+          }
+          this.objs.set(id, { ...(o as LineObj), line: lineThrough(a, b) });
+          break;
+        }
+        case 'intersect': {
+          const x = intersectLines(this.line(g.l1).line, this.line(g.l2).line);
+          if (x === null) {
+            broken.push(id);
+            break;
+          }
+          this.objs.set(id, { ...(o as PointObj), p: x });
+          break;
+        }
+        case 'parallel': {
+          this.objs.set(id, {
+            ...(o as LineObj),
+            line: { p: this.point(g.through).p, dir: this.line(g.line).line.dir },
+          });
+          break;
+        }
+        case 'plane3': {
+          const pl = planeThrough(this.point(g.a).p, this.point(g.b).p, this.point(g.c).p);
+          if (pl === null) {
+            broken.push(id);
+            break;
+          }
+          this.objs.set(id, { ...(o as PlaneObj), plane: pl });
+          break;
+        }
+        case 'planeMeet': {
+          const m = intersectPlanes(this.planeOf(g.a), this.planeOf(g.b));
+          if (m.kind !== 'line') {
+            broken.push(id);
+            break;
+          }
+          this.objs.set(id, { ...(o as LineObj), line: m.line });
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    return broken;
   }
 
   /* ── Зависимости ───────────────────────────────────────── */
@@ -491,6 +697,8 @@ export class Construction {
         return [g.line, g.through];
       case 'plane3':
         return [g.a, g.b, g.c];
+      case 'planeMeet':
+        return [g.a, g.b].flatMap((r) => (r.kind === 'plane' ? [r.id] : []));
       case 'edgeLine':
         /* Прямая ребра опирается на его концы — вершины. */
         return o.kind === 'line' && o.through !== null ? [...o.through] : [];
@@ -517,6 +725,17 @@ export class Construction {
       }
     }
     return out;
+  }
+
+  /** Прямые пересечения, построенные с плоскостью грани. */
+  linesOfFace(face: number): ObjId[] {
+    return this.all().flatMap((o) =>
+      o.kind === 'line' &&
+      o.origin.op === 'planeMeet' &&
+      [o.origin.a, o.origin.b].some((r) => r.kind === 'face' && r.face === face)
+        ? [o.id]
+        : [],
+    );
   }
 
   /** Удалить объект со всем, что от него зависит. Вершины не удаляются. */
@@ -563,13 +782,37 @@ export class Construction {
 
   /* ── Подписи ───────────────────────────────────────────── */
 
-  /** «MN», «AB» — имя прямой по двум её точкам; у параллельной — «a». */
+  /**
+   * «MN», «AB» — имя прямой по двум её точкам; у параллельной — «MN'»;
+   * у прямой пересечения — «(α ∩ (ABC))», в скобках, чтобы стоять
+   * внутри формулы.
+   */
   lineName(id: ObjId): string {
     const l = this.line(id);
     if (l.through !== null)
       return `${this.point(l.through[0]).name}${this.point(l.through[1]).name}`;
     if (l.origin.op === 'parallel') return `${this.lineName(l.origin.line)}'`;
+    if (l.origin.op === 'planeMeet') {
+      const th = this.meetThrough(id);
+      if (th.length === 2) return th.map((pid) => this.point(pid).name).join('');
+      return `(${this.lineTex(id)})`;
+    }
     return id;
+  }
+
+  /** Имена вершин грани в порядке, в каком они стоят в её имени: «ABCD» → A, B, C, D. */
+  faceVertexNames(face: number): string[] {
+    const f = at(this.poly.faces, face);
+    const names = f.idx.map((i) => at(this.poly.vertices, i).name);
+    const out: string[] = [];
+    let rest = f.name;
+    while (rest.length > 0) {
+      const hit = names.filter((n) => rest.startsWith(n)).sort((a, b) => b.length - a.length)[0];
+      if (hit === undefined) break;
+      out.push(hit);
+      rest = rest.slice(hit.length);
+    }
+    return out.length === names.length ? out : names;
   }
 
   planeName(ref: PlaneRef): string {
@@ -578,6 +821,109 @@ export class Construction {
     return o.op === 'plane3'
       ? `${this.point(o.a).name}${this.point(o.b).name}${this.point(o.c).name}`
       : ref.id;
+  }
+
+  /**
+   * Подпись плоскости в TeX: у построенной — её label («\\alpha») или
+   * «(MNK)»; у грани — три первые вершины: «(ABC)» для основания ABCD.
+   */
+  planeTex(ref: PlaneRef): string {
+    if (ref.kind === 'face') return `(${this.faceVertexNames(ref.face).slice(0, 3).join('')})`;
+    const pl = this.plane(ref.id);
+    return pl.label ?? `(${this.planeName(ref)})`;
+  }
+
+  /** Подпись прямой в TeX: «MN», «\\alpha \\cap (ABC)». */
+  lineTex(id: ObjId): string {
+    const l = this.line(id);
+    if (l.origin.op === 'planeMeet') {
+      return `${this.planeTex(l.origin.a)} \\cap ${this.planeTex(l.origin.b)}`;
+    }
+    return this.lineName(id);
+  }
+
+  /** Плоскости, которым принадлежит прямая пересечения. */
+  meetPlanes(id: ObjId): [PlaneRef, PlaneRef] | null {
+    const l = this.line(id);
+    return l.origin.op === 'planeMeet' ? [l.origin.a, l.origin.b] : null;
+  }
+
+  /* ── Шаги и обоснования ───────────────────────────────────── */
+
+  /** Шаги построения: всё, кроме вершин, в порядке создания. */
+  steps(): ObjId[] {
+    return this.order.filter((id) => this.get(id).origin.op !== 'vertex');
+  }
+
+  /**
+   * Текст шага с обоснованием — с формулами в $…$. Для прямой
+   * пересечения: «M ∈ α, M ∈ (ABC); N ∈ α, N ∈ (ABC) ⇒ MN = α ∩ (ABC)».
+   */
+  describe(id: ObjId): string {
+    const o = this.get(id);
+    const g = o.origin;
+    const P = (pid: ObjId) => `$${this.point(pid).name}$`;
+    switch (g.op) {
+      case 'vertex':
+        return `Вершина ${P(id)}.`;
+      case 'onEdge': {
+        const e = at(this.poly.edges, g.edge);
+        const a = at(this.poly.vertices, e.a).name;
+        const b = at(this.poly.vertices, e.b).name;
+        const M = this.point(id).name;
+        const inside = !lt(g.t, ZERO) && !lt(ONE, g.t);
+        return inside
+          ? `Точка $${M}$ на ребре $${a}${b}$, $${a}${M} : ${M}${b} = ${ratio(g.t)}$.`
+          : `Точка $${M}$ на продолжении ребра $${a}${b}$: $${a}${M} = ${ratStr(g.t)} \\cdot ${a}${b}$.`;
+      }
+      case 'free':
+        return `Точка ${P(id)} поставлена на глаз — построения у неё нет.`;
+      case 'edgeLine':
+        return `Продолжим ребро $${this.edgeName(g.edge)}$.`;
+      case 'line':
+        return `Прямая $${this.lineName(id)}$: точки ${P(g.a)} и ${P(g.b)} лежат в плоскости $${this.planeTex(g.plane)}$.`;
+      case 'intersect': {
+        const where =
+          g.plane === null ? '' : ` — обе прямые лежат в плоскости $${this.planeTex(g.plane)}$`;
+        return `$${this.point(id).name} = ${this.lineName(g.l1)} \\cap ${this.lineName(g.l2)}$${where}.`;
+      }
+      case 'parallel': {
+        const why =
+          g.reason === 'parallel-faces'
+            ? 'плоскость пересекает параллельные грани по параллельным прямым'
+            : g.reason === 'in-plane'
+              ? 'в одной плоскости через точку проходит одна параллельная'
+              : 'через точку вне прямой проходит одна параллельная ей прямая';
+        return `Через ${P(g.through)} проведём прямую параллельно $${this.lineName(g.line)}$: ${why}.`;
+      }
+      case 'plane3':
+        return `Плоскость $${this.planeTex({ kind: 'plane', id })}$ через точки ${P(g.a)}, ${P(g.b)}, ${P(g.c)}.`;
+      case 'planeMeet': {
+        const A = this.planeTex(g.a);
+        const B = this.planeTex(g.b);
+        const th = this.meetThrough(id);
+        const name = this.lineTex(id);
+        if (th.length === 2) {
+          const [m, n] = th as [ObjId, ObjId];
+          const M = this.point(m).name;
+          const N = this.point(n).name;
+          return (
+            `$${M} \\in ${A}$ и $${M} \\in ${B}$, $${N} \\in ${A}$ и $${N} \\in ${B}$, $${M} \\ne ${N}$. ` +
+            `Плоскости $${A}$ и $${B}$ различны и имеют общие точки, значит, они пересекаются по прямой (${AKSIOMA_PLOSKOSTEY}). ` +
+            `Обе точки $${M}$ и $${N}$ лежат на этой прямой, значит, $${A} \\cap ${B} = ${M}${N}$.`
+          );
+        }
+        if (th.length === 1) {
+          const M = this.point(th[0] as ObjId).name;
+          return (
+            `$${M} \\in ${A}$ и $${M} \\in ${B}$. ` +
+            `Плоскости $${A}$ и $${B}$ различны и имеют общую точку $${M}$, значит, они пересекаются по прямой, проходящей через $${M}$ (${AKSIOMA_PLOSKOSTEY}). ` +
+            `Чтобы назвать прямую $${name}$ двумя буквами, нужна вторая общая точка — она там, где эта прямая пересекает ребро или его продолжение.`
+          );
+        }
+        return `Плоскости $${A}$ и $${B}$ различны и не параллельны, значит, они пересекаются по прямой $${name}$. Чтобы её провести, нужны две общие точки плоскостей.`;
+      }
+    }
   }
 
   edgeName = (ei: number): string => edgeName(this.poly, at(this.poly.edges, ei));
@@ -619,3 +965,41 @@ function paramIfOn(A: V3, B: V3, P: V3): Rat | null {
 }
 
 const mulR = (a: Rat, b: Rat): Rat => rat(a.n * b.n, a.d * b.d);
+
+/** Одна и та же плоскость по ссылке. */
+export function sameRef(a: PlaneRef, b: PlaneRef): boolean {
+  return a.kind === 'face' && b.kind === 'face'
+    ? a.face === b.face
+    : a.kind === 'plane' && b.kind === 'plane' && a.id === b.id;
+}
+
+/** Точка пересечения прямой с ребром или его продолжением. */
+export interface EdgeHit {
+  p: V3;
+  /** Первое ребро, на прямой которого лежит точка. */
+  edge: number;
+  /** Все рёбра через эту точку (в вершине их несколько). */
+  edges: number[];
+  /** Параметр от первого конца ребра edge. */
+  t: Rat;
+  /** На самом ребре (0 ≤ t ≤ 1), а не на продолжении. */
+  onSegment: boolean;
+}
+
+/** Отношение t : (1 − t) целыми: «1:2». */
+function ratio(t: Rat): string {
+  const rest = rsub(ONE, t);
+  let p = t.n * rest.d;
+  let q = rest.n * t.d;
+  const g = gcdBig(p, q);
+  p /= g;
+  q /= g;
+  return `${p}:${q}`;
+}
+
+function gcdBig(a: bigint, b: bigint): bigint {
+  let x = a < 0n ? -a : a;
+  let y = b < 0n ? -b : b;
+  while (y !== 0n) [x, y] = [y, x % y];
+  return x || 1n;
+}

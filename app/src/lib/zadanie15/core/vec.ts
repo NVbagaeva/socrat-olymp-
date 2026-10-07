@@ -141,3 +141,31 @@ export function paramOn(a: V3, b: V3, x: V3): Rat {
   if (k === null) throw new Error('paramOn: точки a и b совпадают');
   return k;
 }
+
+/* ── Пересечение плоскостей ─────────────────────────────────────── */
+
+/** Исход пересечения двух плоскостей. */
+export type PlanesMeet = { kind: 'line'; line: Line3 } | { kind: 'parallel' } | { kind: 'same' };
+
+/**
+ * Пересечение двух плоскостей — точно. Направление прямой —
+ * векторное произведение нормалей. Точка на прямой: одна из
+ * координат, по которой направление не нулевое, берётся нулём,
+ * остальные две — из системы двух уравнений по правилу Крамера;
+ * её определитель — как раз эта ненулевая координата направления.
+ */
+export function intersectPlanes(a: Plane, b: Plane): PlanesMeet {
+  const dir = cross(a.n, b.n);
+  if (isNull(dir)) return samePlane(a, b) ? { kind: 'same' } : { kind: 'parallel' };
+  const keys = ['x', 'y', 'z'] as const;
+  const k = keys.find((key) => !isZero(dir[key])) as 'x' | 'y' | 'z';
+  const [u, v] = keys.filter((key) => key !== k) as ['x' | 'y' | 'z', 'x' | 'y' | 'z'];
+  // a.n[u]·U + a.n[v]·V = a.c;  b.n[u]·U + b.n[v]·V = b.c.
+  const det = rsub(rmul(a.n[u], b.n[v]), rmul(a.n[v], b.n[u]));
+  const U = rdiv(rsub(rmul(a.c, b.n[v]), rmul(a.n[v], b.c)), det);
+  const V = rdiv(rsub(rmul(a.n[u], b.c), rmul(a.c, b.n[u])), det);
+  const p = { x: rat(0), y: rat(0), z: rat(0) } as { x: Rat; y: Rat; z: Rat };
+  p[u] = U;
+  p[v] = V;
+  return { kind: 'line', line: { p: v3(p.x, p.y, p.z), dir } };
+}

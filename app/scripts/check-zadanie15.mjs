@@ -324,6 +324,294 @@ const B234 = box(2, 3, 4);
   ok(!line3.ok && line3.code === 'collinear', 'три точки на прямой — отказ');
 }
 
+/* ── Пересечение плоскостей ─────────────────────────────── */
+
+{
+  const faces = (poly, name) => poly.faces[K.faceIndex(poly, name)].plane;
+  const base = faces(C6, 'ABCD');
+  const top = faces(C6, 'A_1B_1C_1D_1');
+  const front = faces(C6, 'AA_1B_1B');
+  ok(K.intersectPlanes(base, top).kind === 'parallel', 'основания куба параллельны');
+  ok(K.intersectPlanes(base, base).kind === 'same', 'плоскость сама с собой — совпадает');
+  const m = K.intersectPlanes(base, front);
+  ok(m.kind === 'line', 'ABCD ∩ AA_1B_1B — прямая');
+  if (m.kind === 'line') {
+    ok(K.onLine(m.line, K.v3n(0, 0, 0)) && K.onLine(m.line, K.v3n(6, 0, 0)), 'это прямая AB');
+    ok(K.onPlane(base, m.line.p) && K.onPlane(front, m.line.p), 'точка прямой в обеих плоскостях');
+  }
+  // Плоскость через M (середина A_1B_1), N (середина A_1D_1) и C: след на основании.
+  const c = new Construction(cube(6));
+  const M = c.pointOnEdge('A_1', 'B_1', rat(1, 2), 'M').value;
+  const N = c.pointOnEdge('A_1', 'D_1', rat(1, 2), 'N').value;
+  const Cv = c.vertex('C');
+  const pl = c.plane3(M, N, Cv, '\\alpha');
+  ok(pl.ok, 'плоскость α задана');
+  const alpha = { kind: 'plane', id: pl.value };
+  const baseRef = { kind: 'face', face: K.faceIndex(C6, 'ABCD') };
+  const topRef = { kind: 'face', face: K.faceIndex(C6, 'A_1B_1C_1D_1') };
+  eqStr(c.planeTex(alpha), '\\alpha', 'подпись α');
+  eqStr(c.planeTex(baseRef), '(ABC)', 'подпись плоскости грани — три первые вершины имени');
+
+  const same = c.planeMeet(alpha, alpha);
+  ok(!same.ok && same.code === 'same-plane', 'плоскость с собой — отказ');
+  const par = c.planeMeet(baseRef, topRef);
+  ok(!par.ok && par.code === 'parallel-planes', 'параллельные грани — отказ');
+  ok(!par.ok && /параллельны/.test(par.message), 'текст отказа про параллельные плоскости');
+
+  const L = c.planeMeet(alpha, baseRef);
+  ok(L.ok, 'α ∩ (ABC) строится');
+  const l = L.value;
+  eqStr(c.lineTex(l), '\\alpha \\cap (ABC)', 'подпись прямой пересечения');
+  // Через C — общая точка обеих плоскостей.
+  eqStr(
+    c
+      .meetThrough(l)
+      .map((id) => c.point(id).name)
+      .join(','),
+    'C',
+    'пока одна общая точка — C',
+  );
+  ok(/общая точка/.test(c.describe(l)), 'обоснование с одной общей точкой');
+  ok(c.planeMeet(baseRef, alpha).value === l, 'та же пара плоскостей — та же прямая');
+  ok(c.findMeet(alpha, baseRef) === l, 'findMeet находит прямую');
+
+  // Кандидаты: след пересекает прямые рёбер основания.
+  const hits = c.lineEdgeHits(l);
+  const names = hits
+    .map((h) => `${K.toArray(h.p).join(',')}${h.onSegment ? '' : '*'}`)
+    .sort()
+    .join(' ');
+  // Прямая через C(6,6,0) с направлением (1,-1,0): проходит через C
+  // (вершина, два ребра) и продолжения AB (12,0,0) и AD (0,12,0).
+  eqStr(names, '0,12,0* 12,0,0* 6,6,0', 'кандидаты: C и две точки на продолжениях');
+  const atC = hits.find((h) => h.onSegment);
+  ok(
+    atC !== undefined && atC.edges.length === 3,
+    'вершина C засчитана один раз, с тремя рёбрами (BC, CD, CC_1)',
+  );
+
+  // Вторая общая точка: X = MN ∩ … нет; построим точку на следе через
+  // пересечение с продолжением AB — через прямые одной плоскости.
+  const ab = c.edgeLine('A', 'B');
+  const X = c.intersect(l, ab, 'X');
+  ok(X.ok, 'X = (α ∩ ABC) ∩ AB строится');
+  eqStr(K.toArray(c.point(X.value).p).join(','), '12,0,0', 'X на продолжении AB');
+  eqStr(
+    c
+      .meetThrough(l)
+      .map((id) => c.point(id).name)
+      .join(','),
+    'C,X',
+    'теперь две общие точки',
+  );
+  eqStr(
+    c.describe(l),
+    '$C \\in \\alpha$ и $C \\in (ABC)$, $X \\in \\alpha$ и $X \\in (ABC)$, $C \\ne X$. ' +
+      'Плоскости $\\alpha$ и $(ABC)$ различны и имеют общие точки, значит, они пересекаются по прямой ' +
+      '(аксиома: если две различные плоскости имеют общую точку, то они пересекаются по прямой, проходящей через эту точку). ' +
+      'Обе точки $C$ и $X$ лежат на этой прямой, значит, $\\alpha \\cap (ABC) = CX$.',
+    'полное школьное обоснование прямой пересечения',
+  );
+
+  eqStr(
+    c.describe(X.value),
+    '$X = CX \\cap AB$ — обе прямые лежат в плоскости $(ABC)$.',
+    'описание точки пересечения со следом',
+  );
+  eqStr(
+    c.faceVertexNames(K.faceIndex(C6, 'BB_1C_1C')).join(' '),
+    'B B_1 C_1 C',
+    'имена вершин грани по её имени',
+  );
+
+  // Шаги: вершины не считаются.
+  eqStr(c.steps().length, 6, 'шагов построения: M, N, α, прямая, AB, X');
+  ok(
+    c.steps().every((id) => c.get(id).origin.op !== 'vertex'),
+    'в шагах нет вершин',
+  );
+  ok(/на ребре \$A_1B_1\$, \$A_1M : MB_1 = 1:1\$/.test(c.describe(M)), 'описание точки на ребре');
+
+  // Удаление α уносит прямую пересечения и X.
+  const dep = c.dependents(pl.value);
+  ok(dep.includes(l) && dep.includes(X.value), 'прямая пересечения зависит от плоскости');
+
+  // Перетаскивание: M сдвигается, плоскость и след пересчитываются.
+  const before = c.line(l).line;
+  const mv = c.setEdgeParam(M, rat(1, 3));
+  ok(mv.ok, 'сдвиг M по ребру');
+  eqStr(K.toArray(c.point(M).p).join(','), '2,0,6', 'M на 1/3 ребра');
+  ok(!K.sameLine(before, c.line(l).line), 'след пересчитан');
+  ok(K.onPlane(c.plane(pl.value).plane, c.point(M).p), 'плоскость проходит через новое M');
+  ok(K.onLine(c.line(l).line, c.point(X.value).p), 'X пересчитана и лежит на следе');
+  // В вершину A_1 (t = 0) M, N, C остаются не на одной прямой — сдвиг разрешён;
+  // а вот сдвиг, ломающий построение, отменяется: сделаем N совпадающей с M.
+  const c2 = new Construction(cube(6));
+  const m2 = c2.pointOnEdge('A', 'B', rat(1, 2), 'M').value;
+  const n2 = c2.pointOnEdge('A', 'B', rat(1, 3), 'N').value;
+  const l2 = c2.lineThrough(m2, n2);
+  ok(l2.ok, 'прямая по двум точкам одного ребра');
+  const bad = c2.setEdgeParam(n2, rat(1, 2));
+  ok(!bad.ok, 'сдвиг N в M ломает прямую — отменён');
+  eqStr(K.ratStr(c2.point(n2).origin.t), '1/3', 'параметр N остался прежним');
+
+  // Прямые пересечения грани: снимаются вместе с плоскостью грани.
+  eqStr(c.linesOfFace(baseRef.face).join(','), l, 'прямая числится за гранью ABCD');
+}
+
+/* ── Сцена: плоскости и линии на экране ─────────────────── */
+
+{
+  const S = requireSrc('lib/zadanie15/scene/index.ts');
+  const opts = (c, extra) => ({
+    camera: S.DEFAULT_CAMERA,
+    mode: 'learn',
+    facePlanes: [],
+    ...extra,
+  });
+
+  // Все сценарии витрины собираются без отказов.
+  for (const sc of S.SCENARIOS) {
+    const { c, facePlanes } = sc.build();
+    const scene = S.buildScene(c, opts(c, { facePlanes }));
+    ok(scene.edges.length === 12 && scene.faces.length === 6, `${sc.id}: куб на сцене`);
+    ok(
+      scene.points.every((p) => Number.isFinite(p.p[0]) && Number.isFinite(p.p[1])),
+      `${sc.id}: точки спроецированы`,
+    );
+    ok(
+      scene.lines
+        .filter((l) => l.kind === 'meet')
+        .every((l) => l.runs.length > 0 && l.label !== null),
+      `${sc.id}: у линий пересечения есть отрезки и подпись`,
+    );
+    ok(
+      scene.sheets.every((sh) => sh.points.length >= 3),
+      `${sc.id}: листы плоскостей — многоугольники`,
+    );
+    ok(scene.notice === null, `${sc.id}: без сообщения о параллельности`);
+  }
+
+  // Сценарий 1: линии появляются только в режиме изучения или после показа.
+  const sled = S.SCENARIOS.find((sc) => sc.id === 'sled');
+  const { c, facePlanes } = sled.build();
+  const faces = facePlanes;
+  const learn = S.buildScene(c, opts(c, { facePlanes: faces }));
+  const meets = learn.lines.filter((l) => l.kind === 'meet');
+  eqStr(meets.length, 2, 'изучение: две линии пересечения');
+  ok(
+    meets.every((l) => l.through.length === 2),
+    'у каждой линии две общие точки для обоснования',
+  );
+  ok(learn.candidates.length > 0, 'кандидаты в вершины отмечены');
+  ok(learn.sections.length === 1 && learn.sections[0].points.length >= 3, 'сечение показано');
+  const train = S.buildScene(c, opts(c, { facePlanes: faces, mode: 'train' }));
+  eqStr(train.lines.filter((l) => l.kind === 'meet').length, 0, 'тренажёр: линий нет');
+  eqStr(train.sections.length, 0, 'тренажёр: сечения нет');
+  const reveal = S.buildScene(c, opts(c, { facePlanes: faces, mode: 'train', reveal: true }));
+  eqStr(reveal.lines.filter((l) => l.kind === 'meet').length, 2, 'после проверки линии показаны');
+  ok(reveal.candidates.length > 0, 'после проверки кандидаты показаны');
+  // Тренажёр: пустых кружков-кандидатов нет ни в одном сценарии, пока не нажали «Показать».
+  for (const sc of S.SCENARIOS) {
+    const b = sc.build();
+    const t = S.buildScene(b.c, opts(b.c, { facePlanes: b.facePlanes, mode: 'train' }));
+    eqStr(t.candidates.length, 0, `тренажёр, ${sc.id}: кандидатов нет`);
+    eqStr(t.lines.filter((l) => l.kind === 'meet').length, 0, `тренажёр, ${sc.id}: линий нет`);
+  }
+  // Камера всегда ортогональная: следы в параллельных гранях параллельны
+  // на экране при любом повороте (проекция линейная, без перспективы).
+  {
+    const pts = [
+      [0, 0, 0],
+      [6, 3, 0],
+      [0, 0, 6],
+      [6, 3, 6],
+    ];
+    for (let i = 0; i < 40; i += 1) {
+      const cam = { yaw: i * 0.37, pitch: ((i % 9) - 4) * 0.33 };
+      const b = S.basisOf(cam);
+      const P = pts.map((p) => S.project(b, p));
+      const u = [P[1][0] - P[0][0], P[1][1] - P[0][1]];
+      const v = [P[3][0] - P[2][0], P[3][1] - P[2][1]];
+      const cr = u[0] * v[1] - u[1] * v[0];
+      if (Math.abs(cr) > 1e-9) {
+        ok(false, `камера ${i}: параллельные отрезки на экране не параллельны (${cr})`);
+        break;
+      }
+    }
+    ok(true, 'камера ортогональная: параллельность сохраняется при 40 поворотах');
+  }
+  // Пошаговый показ: до первого шага — только фигура.
+  const start = S.buildScene(c, opts(c, { facePlanes: faces, upTo: -1 }));
+  eqStr(start.lines.length, 0, 'шаг «фигура»: линий нет');
+  eqStr(start.points.length, 8, 'шаг «фигура»: только вершины');
+  // Выбранная линия подсвечивает обе плоскости и общие точки.
+  const sel = S.buildScene(c, opts(c, { facePlanes: faces, selected: meets[0].id }));
+  eqStr(sel.sheets.filter((sh) => sh.highlighted).length, 2, 'подсвечены обе плоскости');
+  eqStr(sel.points.filter((p) => p.highlighted).length, 2, 'подсвечены общие точки');
+  // Подписи не накладываются: ни одна пара центров ближе 12 px по обеим осям.
+  const labels = [
+    ...learn.points.map((p) => p.label),
+    ...learn.sheets.map((sh) => sh.label.p),
+    ...learn.lines.flatMap((l) => (l.label === null ? [] : [l.label.p])),
+  ];
+  let clash = 0;
+  for (let i = 0; i < labels.length; i++)
+    for (let j = i + 1; j < labels.length; j++)
+      if (Math.abs(labels[i][0] - labels[j][0]) < 12 && Math.abs(labels[i][1] - labels[j][1]) < 12)
+        clash += 1;
+  eqStr(clash, 0, 'подписи разведены');
+  // На телефоне подписи крупнее относительно чертежа — и всё равно не налезают.
+  for (const sc of S.SCENARIOS) {
+    const b2 = sc.build();
+    const k = 1.9;
+    const ph = S.buildScene(b2.c, opts(b2.c, { facePlanes: b2.facePlanes, labelScale: k }));
+    const ls = [
+      ...ph.points.map((p) => p.label),
+      ...ph.sheets.map((sh) => sh.label.p),
+      ...ph.lines.flatMap((l) => (l.label === null ? [] : [l.label.p])),
+    ];
+    let hits = 0;
+    for (let i = 0; i < ls.length; i++)
+      for (let j = i + 1; j < ls.length; j++)
+        if (Math.abs(ls[i][0] - ls[j][0]) < 12 * k && Math.abs(ls[i][1] - ls[j][1]) < 12 * k)
+          hits += 1;
+    eqStr(hits, 0, `${sc.id}: подписи разведены и на телефоне`);
+    ok(
+      ls.every((p) => p[0] >= 0 && p[0] <= ph.size && p[1] >= 0 && p[1] <= ph.size),
+      `${sc.id}: подписи в пределах сцены на телефоне`,
+    );
+    // Подпись точки остаётся рядом с точкой.
+    const far = ph.points.filter(
+      (p) => Math.hypot(p.label[0] - p.p[0], p.label[1] - p.p[1]) > 60 * k,
+    );
+    eqStr(far.map((p) => p.tex).join(','), '', `${sc.id}: подписи точек рядом с точками`);
+  }
+
+  // Параллельные плоскости: основание и верхняя грань — сообщение, линии нет.
+  const top = K.faceIndex(c.poly, 'A_1B_1C_1D_1');
+  const base = K.faceIndex(c.poly, 'ABCD');
+  const par = c.planeMeet({ kind: 'face', face: base }, { kind: 'face', face: top });
+  ok(!par.ok && par.code === 'parallel-planes', 'ядро: грани параллельны');
+  const parScene = S.buildScene(c, opts(c, { facePlanes: [base, top] }));
+  ok(
+    typeof parScene.notice === 'string' && parScene.notice.includes('параллельны'),
+    'сцена: сообщение о параллельности',
+  );
+
+  // Камера «смотреть на плоскость прямо»: взгляд вдоль нормали плоскости.
+  const n = S.vnorm([1, 2, 3]);
+  const cam = S.facingPlane(n, S.DEFAULT_CAMERA);
+  const b = S.basisOf(cam);
+  ok(S.vlen(S.vcross(b.toward, n)) < 1e-9, 'камера перпендикулярна плоскости');
+  ok(S.vdot(b.toward, n) > 0, 'камера с ближней стороны плоскости');
+  // Поворот и плавный переход камеры не выходят за пределы наклона.
+  const turned = S.orbit(S.DEFAULT_CAMERA, 500, -5000);
+  ok(Math.abs(turned.pitch) <= S.MAX_PITCH + 1e-9, 'наклон камеры ограничен');
+  const mid = S.lerpCamera(S.DEFAULT_CAMERA, cam, 0.5);
+  ok(Number.isFinite(mid.yaw) && Number.isFinite(mid.pitch), 'промежуточная камера');
+}
+
 /* ── Рисунок ────────────────────────────────────────────── */
 
 const R = {
