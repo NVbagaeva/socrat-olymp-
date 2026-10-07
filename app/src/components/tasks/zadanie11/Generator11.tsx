@@ -2,28 +2,51 @@
 
 import { clsx } from 'clsx';
 import { useMemo, useState } from 'react';
-import { Button, Checkbox, Details, Input } from '@/components/ui';
+import { Button, Checkbox, Details, Input, Select } from '@/components/ui';
 import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
-import { TRENAZHER_11, UROVNI_11 } from '@/content/zadanie11';
+import { TRENAZHER_11, UROVNI_11, VARIANT_EGE_11 } from '@/content/zadanie11';
 import type { SheetParams11, SobrannyyList } from '@/lib/zadanie11/sheet11';
-import type { Istochnik, RazdelInfo, UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
+import type {
+  Istochnik,
+  PodtipInfo,
+  RazdelInfo,
+  UslovieBanka,
+} from '@/lib/zadanie11/trenazher/sessiya';
 import type { Level, SectionId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, Piktogramma, Zvezdy } from './Piktogrammy';
 
+type Preset = 'ege' | 'urok' | 'svoy';
+
 const IKONKA_ISTOCHNIKA: Record<Istochnik, string> = { bank: 'doc', mix: 'layers', new: 'sparkle' };
 
-/** Состав по умолчанию: по задаче на раздел — вариант в формате ЕГЭ. */
-const PO_UMOLCHANIYU: Record<string, number> = {
-  'PR-04': 1,
-  'SM-04': 1,
-  'DP-07': 1,
-  'PT-02': 1,
-  'VD-05': 1,
-  'OK-01': 1,
-  'RB-01': 1,
-  'PG-01': 1,
-};
+/** Состав «вариант ЕГЭ»: по задаче из каждого раздела, кроме разминки. */
+function sostavEge(): Record<string, number> {
+  return Object.fromEntries(VARIANT_EGE_11.map((id) => [id, 1]));
+}
+
+/**
+ * Состав «урок по разделу»: n задач одного раздела от ★ к ★★★. Типов
+ * больше, чем задач, — берём равномерно по уровням; меньше — по
+ * несколько задач на тип, лишние достаются первым.
+ */
+function sostavUroka(podtipy: PodtipInfo[], n: number): Record<string, number> {
+  const tipy = [...podtipy].sort((a, b) => a.level - b.level);
+  const out: Record<string, number> = {};
+  if (tipy.length === 0) return out;
+  if (tipy.length >= n) {
+    for (let i = 0; i < n; i += 1) {
+      const idx = n === 1 ? 0 : Math.round((i * (tipy.length - 1)) / (n - 1));
+      const id = tipy[idx]?.id ?? '';
+      out[id] = (out[id] ?? 0) + 1;
+    }
+  } else {
+    tipy.forEach((p, i) => {
+      out[p.id] = Math.floor(n / tipy.length) + (i < n % tipy.length ? 1 : 0);
+    });
+  }
+  return out;
+}
 
 function sluchaynyySeed(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -88,7 +111,11 @@ export function Generator11({
   const [istochnik, setIstochnik] = useState<Istochnik>('mix');
   const [rezhim, setRezhim] = useState<'otrabotka' | 'komplekt'>('komplekt');
   const [variants, setVariants] = useState(4);
-  const [sostav, setSostav] = useState<Record<string, number>>(PO_UMOLCHANIYU);
+  const [preset, setPreset] = useState<Preset>('ege');
+  const [urokRazdel, setUrokRazdel] = useState<SectionId>('PR');
+  const [urokN, setUrokN] = useState(6);
+  const [sostav, setSostav] = useState<Record<string, number>>(sostavEge);
+  /* Фильтр списка типов в «Своём составе»: что показывать, не что брать. */
   const [uroven, setUroven] = useState<0 | Level>(0);
   const [otkryty, setOtkryty] = useState<Set<SectionId>>(new Set());
   const [seedInput, setSeedInput] = useState('');
@@ -104,13 +131,29 @@ export function Generator11({
   const vse = useMemo(() => razdely.flatMap((r) => r.podtipy), [razdely]);
   const podhodit = (level: Level) => uroven === 0 || level === uroven;
   const vybrano = vse.filter(
-    (p) =>
-      (sostav[p.id] ?? 0) > 0 && podhodit(p.level) && !(istochnik === 'bank' && p.section === 'RZ'),
+    (p) => (sostav[p.id] ?? 0) > 0 && !(istochnik === 'bank' && p.section === 'RZ'),
   );
   const vsegoZadach = vybrano.reduce((s, p) => s + (sostav[p.id] ?? 0), 0);
 
   function postavit(id: string, n: number) {
     setSostav((prev) => ({ ...prev, [id]: n }));
+  }
+
+  function vybratPreset(next: Preset) {
+    setPreset(next);
+    if (next === 'ege') {
+      setSostav(sostavEge());
+      setRezhim('komplekt');
+    } else if (next === 'urok') {
+      setSostav(sostavUroka(razdely.find((r) => r.id === urokRazdel)?.podtipy ?? [], urokN));
+      setRezhim('otrabotka');
+    }
+  }
+
+  function urok(sec: SectionId, n: number) {
+    setUrokRazdel(sec);
+    setUrokN(n);
+    setSostav(sostavUroka(razdely.find((r) => r.id === sec)?.podtipy ?? [], n));
   }
 
   async function sobrat(p: SheetParams11) {
@@ -215,9 +258,66 @@ export function Generator11({
         <section className="z11-card z11-gen__blok">
           <h2 className="z11-gen__h">
             <Piktogramma name="doc" />
-            {rezhim === 'komplekt' ? GENERATOR_11.sostavVarianta : GENERATOR_11.sostav}
+            {GENERATOR_11.sostav}
           </h2>
-          <ul className="z11-gen__sostav">
+          <div className="z11-gen__presety" role="radiogroup" aria-label={GENERATOR_11.sostav}>
+            {(['ege', 'urok', 'svoy'] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="radio"
+                aria-checked={preset === k}
+                className={clsx('z11-gen__preset', preset === k && 'is-active')}
+                onClick={() => vybratPreset(k)}
+              >
+                <b>{GENERATOR_11.presety[k].title}</b>
+                <span>{GENERATOR_11.presety[k].note}</span>
+              </button>
+            ))}
+          </div>
+          {preset === 'ege' ? <p className="z11-istochnik__note">{GENERATOR_11.egeLead}</p> : null}
+          {preset === 'urok' ? (
+            <div className="z11-gen__urok">
+              <label className="z11-gen__urok-label" htmlFor="z11-gen-urok-razdel">
+                {GENERATOR_11.razdel}
+              </label>
+              <Select
+                id="z11-gen-urok-razdel"
+                value={urokRazdel}
+                onChange={(e) => urok(e.target.value as SectionId, urokN)}
+              >
+                {vidimye.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nazvanie}
+                  </option>
+                ))}
+              </Select>
+              <div className="z11-vybrannaya__row">
+                <span>{GENERATOR_11.zadachVUroke}</span>
+                <Stepper
+                  value={urokN}
+                  min={2}
+                  max={12}
+                  onChange={(n) => urok(urokRazdel, n)}
+                  label={GENERATOR_11.zadachVUroke}
+                />
+              </div>
+              <p className="z11-istochnik__note">{GENERATOR_11.urokLead}</p>
+            </div>
+          ) : null}
+          {preset !== 'svoy' ? (
+            <ul className="z11-gen__vybrannye">
+              {vybrano.map((p) => (
+                <li key={p.id} className="z11-gen__vybrannyy" title={p.kod}>
+                  <IkonkaRazdela section={p.section} className="z11-gen__vybrannyy-ikonka" />
+                  <span className="z11-gen__vybrannyy-name">{p.title}</span>
+                  <Zvezdy level={p.level} section={p.section} />
+                  <b className="z11-gen__vybrannyy-n">×{sostav[p.id] ?? 0}</b>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <ul className={clsx('z11-gen__sostav', preset !== 'svoy' && 'is-hidden')}>
             {vidimye.map((r) => {
               const podtipy = r.podtipy.filter((p) => podhodit(p.level));
               if (podtipy.length === 0) return null;
@@ -292,26 +392,32 @@ export function Generator11({
         </section>
 
         <section className="z11-card z11-gen__blok">
-          <div className="z11-gen__blok-row">
-            <h2 className="z11-gen__h">
-              <Piktogramma name="chart" />
-              {GENERATOR_11.slozhnost}
-            </h2>
-            <div className="z11-gen__urovni" role="radiogroup" aria-label={GENERATOR_11.slozhnost}>
-              {([0, 1, 2, 3] as const).map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  role="radio"
-                  aria-checked={uroven === u}
-                  className={clsx('z11-gen__uroven', uroven === u && 'is-active')}
-                  onClick={() => setUroven(u)}
-                >
-                  {u === 0 ? GENERATOR_11.vse : <Zvezdy level={u} />}
-                </button>
-              ))}
-            </div>
-          </div>
+          <h2 className="z11-gen__h">
+            <Piktogramma name="chart" />
+            {GENERATOR_11.slozhnost}
+          </h2>
+          {preset === 'svoy' ? (
+            <>
+              <div className="z11-gen__blok-row">
+                <span className="z11-gen__urok-label">{GENERATOR_11.spisok}:</span>
+                <div className="z11-gen__urovni" role="radiogroup" aria-label={GENERATOR_11.spisok}>
+                  {([0, 1, 2, 3] as const).map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      role="radio"
+                      aria-checked={uroven === u}
+                      className={clsx('z11-gen__uroven', uroven === u && 'is-active')}
+                      onClick={() => setUroven(u)}
+                    >
+                      {u === 0 ? GENERATOR_11.vse : <Zvezdy level={u} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="z11-uroven__note">{GENERATOR_11.filtrNote}</p>
+            </>
+          ) : null}
           <p className="z11-uroven__note">{TRENAZHER_11.urovenNote}</p>
           <Details title={GENERATOR_11.slozhnostTablitsa} className="z11-urovni-tab">
             <ul className="z11-urovni">
@@ -333,9 +439,9 @@ export function Generator11({
           </Details>
         </section>
 
-        <section className="z11-card z11-gen__blok">
-          <label className="z11-gen__h" htmlFor="z11-gen-seed">
-            {GENERATOR_11.seed}
+        <Details title={GENERATOR_11.dopolnitelno} className="z11-gen__dop">
+          <label className="z11-gen__urok-label" htmlFor="z11-gen-seed">
+            {GENERATOR_11.kodLista}
           </label>
           <Input
             id="z11-gen-seed"
@@ -345,8 +451,8 @@ export function Generator11({
             autoComplete="off"
             spellCheck={false}
           />
-          <p className="z11-istochnik__note">{GENERATOR_11.seedLead}</p>
-        </section>
+          <p className="z11-istochnik__note">{GENERATOR_11.kodListaLead}</p>
+        </Details>
 
         <Button
           className="z11-gen__go"
@@ -355,7 +461,7 @@ export function Generator11({
           onClick={sgenerirovat}
         >
           <Piktogramma name="play" />
-          {zagruzka ? GENERATOR_11.gotovim : GENERATOR_11.sgenerirovat}
+          {zagruzka ? GENERATOR_11.gotovim : GENERATOR_11.sobrat}
         </Button>
       </div>
 

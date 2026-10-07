@@ -3621,3 +3621,86 @@
   width: 18px;
   height: 18px;
 }
+
+/* ── Генератор: пресеты состава, выбранные типы, «Дополнительно» ── */
+
+.z11-gen__presety {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+@media (max-width: 480px) {
+  .z11-gen__presety {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z11-gen__preset {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z11-gen__preset span {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-gen__preset.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z11-gen__urok {
+  display: grid;
+  gap: var(--space-2);
+}
+.z11-gen__urok-label {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z11-gen__vybrannye {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-gen__vybrannyy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--fs-caption);
+}
+.z11-gen__vybrannyy-ikonka {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+.z11-gen__vybrannyy-ikonka .z11-pic {
+  width: 14px;
+  height: 14px;
+}
+.z11-gen__vybrannyy-name {
+  flex: 1;
+  min-width: 0;
+}
+.z11-gen__vybrannyy-n {
+  flex: none;
+  color: var(--color-text-secondary);
+}
+.z11-gen__sostav.is-hidden {
+  display: none;
+}
+.z11-gen__dop .solution-details-body > div {
+  display: grid;
+  gap: var(--space-2);
+}
