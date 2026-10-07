@@ -3845,3 +3845,26 @@
   width: 14px;
   height: 14px;
 }
+
+/* Превью: «Найди ошибку». */
+.z11-a4 .z11-sheet-osh {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.z11-a4 .z11-sheet-osh__lead {
+  font-weight: 600;
+}
+.z11-a4 .z11-sheet-osh__steps {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.z11-a4 .z11-sheet-osh__steps li + li {
+  margin-top: var(--space-1);
+}

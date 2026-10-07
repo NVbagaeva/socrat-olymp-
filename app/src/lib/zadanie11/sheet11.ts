@@ -18,8 +18,9 @@
  * знать» (формула, таблица, лайфхак и ловушка разделов листа — из
  * теории), «Разобранный пример» (задача банка с решением — и у
  * ученика), «Разминка навыка» (опорные микрозадачи к разделам листа),
- * «Задачи» (состав), «Попробуй сам» (две похожие задачи ★) и
- * «Домашняя работа» — отдельной страницей, те же типы, другие задачи.
+ * «Задачи» (состав), «Найди ошибку» (наш разбор с одной типичной
+ * ошибкой раздела — oshibki.ts), «Попробуй сам» (две похожие задачи ★)
+ * и «Домашняя работа» — отдельной страницей, те же типы, другие задачи.
  * Лист учителя — решения и ответы ко всему, домашняя работа — своей
  * таблицей ответов.
  */
@@ -34,6 +35,7 @@ import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
 import { kodNaSayte } from './kod';
 import { d } from './num';
+import { naytiOshibku, type Etap, type NaydennayaOshibka } from './oshibki';
 import { BLOKI } from './prep/bloki';
 import { generateMikro } from './prep/generate';
 import { subtype } from './prototypes';
@@ -44,7 +46,7 @@ import type { Params, SectionId, Solved, Tablitsa } from './types';
 export type Rezhim = 'otrabotka' | 'komplekt' | 'marshrut';
 
 /** Блок рабочего листа. «Задачи» есть всегда. */
-export type BlokLista = 'znat' | 'primer' | 'razminka' | 'zadachi' | 'sam' | 'dz';
+export type BlokLista = 'znat' | 'primer' | 'razminka' | 'zadachi' | 'oshibka' | 'sam' | 'dz';
 
 /** Все блоки в порядке по умолчанию. */
 export const BLOKI_LISTA: readonly BlokLista[] = [
@@ -52,6 +54,7 @@ export const BLOKI_LISTA: readonly BlokLista[] = [
   'primer',
   'razminka',
   'zadachi',
+  'oshibka',
   'sam',
   'dz',
 ];
@@ -211,7 +214,32 @@ function opornyeDlya(razdely: SectionId[]) {
  * «вариант.позиция») не зависят от других блоков; затем разминка,
  * разобранный пример, «Попробуй сам» и домашняя работа.
  */
-function shablony(p: SheetParams11): Shablon[] {
+/**
+ * Тип для «Найди ошибку»: первый тип состава (от сложных к простым —
+ * у сложных разбор длиннее и ошибок больше), к разбору которого
+ * применима хоть одна ошибка словаря; проверяется на задаче банка и
+ * на новой задаче. Нет такого — null, блока на листе не будет.
+ */
+function tipDlyaOshibki(p: SheetParams11, bank: readonly UslovieBanka[]): string | null {
+  const pohozha = pohozhaNa(bank);
+  for (const id of [...tipyPoUrovnyu(p)].reverse()) {
+    const st = subtype(id);
+    const probы: Etap[][] = [];
+    const b = bank.find((x) => x.id === id && x.analog === undefined);
+    if (b !== undefined) probы.push(st.solve(b.params as Params).etapy);
+    try {
+      probы.push(generateBez(id, `${p.seed}|osh`, pohozha).solved.etapy);
+    } catch {
+      /* Не подобралось — хватит задачи банка. */
+    }
+    if (probы.length > 0 && probы.every((e) => naytiOshibku(e, st.section, 'x') !== null)) {
+      return id;
+    }
+  }
+  return null;
+}
+
+function shablony(p: SheetParams11, bank: readonly UslovieBanka[]): Shablon[] {
   if (p.rezhim === 'marshrut') {
     const m = MARSHRUTY_11.find((x) => x.no === p.marshrut) ?? MARSHRUTY_11[0];
     if (m === undefined) return [];
@@ -249,6 +277,10 @@ function shablony(p: SheetParams11): Shablon[] {
       blok: 'primer',
       chast: 'primer',
     });
+  }
+  if (p.bloki.includes('oshibka')) {
+    const id = tipDlyaOshibki(p, bank);
+    if (id !== null) out.push({ id, istochnik: ist, blok: 'oshibka', chast: 'oshibka' });
   }
   if (p.bloki.includes('sam')) {
     for (let i = 0; i < SAM_N; i += 1) {
@@ -298,7 +330,7 @@ function novayaZadacha(
 }
 
 export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): PlanLista {
-  const sh = shablony(p);
+  const sh = shablony(p, bank);
   const pohozha = pohozhaNa(bank);
   const zanyatoNovye = new Set<string>();
   const ochered = new Map<string, UslovieBanka[]>();
@@ -397,6 +429,8 @@ export interface ListZadacha {
   answerHtml: string;
   /** Решение по этапам с таблицами: для листа учителя. */
   solutionHtml: string;
+  /** «Найди ошибку»: что внесено в разбор. */
+  oshibka?: NaydennayaOshibka;
 }
 
 /** Таблица модели для листа: та же методика, что на сайте. */
@@ -432,6 +466,30 @@ function reshenieHtml(etapy: { title: string; lines: string[] }[], tables: Tabli
     })
     .join('');
   return `${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol>`;
+}
+
+/** Разбор с ошибкой для ученика: таблицы и шаги, без ответа и без пометок. */
+function oshibkaUcheniku(o: NaydennayaOshibka, tables: Tablitsa[]): string {
+  const tab = tables.map((t) => tablitsaHtml(t)).join('');
+  const items = o.etapy
+    .map((e) => {
+      const lines = e.lines.filter((l) => !/^\*\*Ответ:\*\*/.test(l));
+      if (lines.length === 0) return '';
+      return `<li><b>${typeset(e.title)}.</b> ${lines.map((l) => typeset(l)).join(' ')}</li>`;
+    })
+    .join('');
+  return `<div class="z11-sheet-osh"><p class="z11-sheet-osh__lead">${SHEET_11.oshibka.lead}</p>${tab}<ol class="z11-sheet-osh__steps">${items}</ol></div>`;
+}
+
+/** Разбор ошибки для учителя: где, что не так, как было и как верно. */
+function oshibkaUchitelyu(o: NaydennayaOshibka): string {
+  const { gde, bylo, verno } = SHEET_11.oshibka;
+  return (
+    `<p class="z11-sheet-osh__gde"><b>${gde}: ${o.shag}.</b> ${typeset(o.oshibka.chto)}</p>` +
+    `<p>${bylo}: ${typeset(o.stalo)}</p>` +
+    `<p>${verno}: ${typeset(o.bylo)}</p>` +
+    `<p>${typeset(o.oshibka.verno)}</p>`
+  );
 }
 
 function zadachaIzBanka(
@@ -534,11 +592,12 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
   const plan = planLista(p, bank);
   const pohozha = pohozhaNa(bank);
   const poVariantam = plan.poVariantam.map((row, vi) =>
-    row.map((poz, i): ListZadacha => {
+    row.map((pozIsh, i): ListZadacha => {
       const pos = `${vi + 1}.${i + 1}`;
       const blok = plan.bloki[i] ?? '';
       const chast = plan.chasti[i] ?? 'zadachi';
-      if (poz.vid === 'mikro') {
+      if (pozIsh.vid === 'mikro') {
+        const poz = pozIsh;
         const z = generateMikro(poz.id, poz.seed);
         const blokInfo = BLOKI.find((b) => b.id === poz.blok);
         const otvet =
@@ -579,8 +638,43 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
               .join('')}</ol>`,
         };
       }
-      const s = zadachaIzBanka(poz, bank, pohozha);
+      let poz: Exclude<Pozitsiya, { vid: 'mikro' }> = pozIsh;
+      let s = zadachaIzBanka(poz, bank, pohozha);
       const st = subtype(poz.id);
+      if (chast === 'oshibka') {
+        /* К этой задаче ошибка не подобралась — берём новую того же
+           типа (seed позиции), пока не подберётся. */
+        let o = naytiOshibku(s.etapy, st.section, `${p.seed}|${pos}`);
+        for (let k = 1; o === null && k <= 12; k += 1) {
+          try {
+            const g = generateBez(poz.id, `${p.seed}|${pos}|osh${k}`, pohozha);
+            const kand = naytiOshibku(g.solved.etapy, st.section, `${p.seed}|${pos}|${k}`);
+            if (kand !== null) {
+              s = g.solved;
+              poz = { vid: 'new', id: poz.id, seed: `${p.seed}|${pos}|osh${k}` };
+              o = kand;
+            }
+          } catch {
+            /* Следующий seed. */
+          }
+        }
+        if (o !== null) {
+          return {
+            no: 0,
+            pos,
+            poz,
+            blok,
+            chast,
+            kod: kodNaSayte(poz.id),
+            title: st.title,
+            questionHtml: typeset(s.uslovie) + oshibkaUcheniku(o, s.tables ?? []),
+            answer: o.shag,
+            answerHtml: o.shag,
+            solutionHtml: oshibkaUchitelyu(o),
+            oshibka: o,
+          };
+        }
+      }
       const vybor = s.vybor;
       const otvetVybor = vybor === undefined ? null : (vybor.options[vybor.correct] ?? '');
       return {

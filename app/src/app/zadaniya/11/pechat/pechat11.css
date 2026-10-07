@@ -124,3 +124,28 @@
   margin-top: var(--sheet-step);
   font-weight: 600;
 }
+
+/* ── «Найди ошибку»: решение в рамке, без пометок ────────────────── */
+.z11-sheet-osh {
+  margin-top: calc(var(--sheet-step) * 2);
+  padding: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3);
+  border: var(--sheet-rule-width) dashed var(--sheet-ink-3);
+  border-radius: var(--sheet-radius-lg);
+}
+.z11-sheet-osh__lead {
+  margin: 0 0 var(--sheet-step);
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+}
+.z11-sheet-osh__steps {
+  margin: var(--sheet-step) 0 0;
+  padding-left: calc(var(--sheet-step) * 4);
+  font-size: var(--sheet-fs-small);
+  line-height: 1.4;
+}
+.z11-sheet-osh__steps li + li {
+  margin-top: calc(var(--sheet-step) * 0.5);
+}
+.z11-sheet-osh__gde {
+  margin: 0 0 var(--sheet-step);
+}
