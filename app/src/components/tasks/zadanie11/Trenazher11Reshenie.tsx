@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, ProgressBar } from '@/components/ui';
+import { LAYFHAKI } from '@/content/teoriya11';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import { trenazher11 } from '@/lib/zadanie11/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie11/secret';
@@ -301,26 +302,57 @@ export function Trenazher11Reshenie({
         </section>
       ) : null}
 
-      <nav className="z11-resh__links" aria-label="Материалы к задаче">
-        {layfhak === undefined ? null : (
-          <Link className="z11-resh__link" href={`${base}/teoriya/#layfhak-${layfhak}`}>
-            <Piktogramma name="bolt" />
-            {TRENAZHER_11.layfhak}
-          </Link>
-        )}
-        {ssylka.teoriya === '' ? null : (
-          <Link className="z11-resh__link" href={`${base}/teoriya/#teoriya-${ssylka.teoriya}`}>
-            <Piktogramma name="book" />
-            {TRENAZHER_11.teoriya}
-          </Link>
-        )}
-        {ssylka.opornyy === null ? null : (
-          <Link className="z11-resh__link" href={`${base}/opornye-zadachi/${ssylka.opornyy.slug}/`}>
-            <Piktogramma name="tools" />
-            {TRENAZHER_11.opornyy}
-          </Link>
-        )}
-      </nav>
+      {zakrytaZadacha ? null : (
+        <section
+          className={clsx('z11-card z11-pomosh', checked === 'wrong' && 'is-urgent')}
+          aria-label={TRENAZHER_11.nePoluchaetsya.title}
+        >
+          <h3 className="z11-resh__h">{TRENAZHER_11.nePoluchaetsya.title}</h3>
+          <p className="z11-pomosh__lead">
+            {checked === 'wrong'
+              ? TRENAZHER_11.nePoluchaetsya.urgent
+              : TRENAZHER_11.nePoluchaetsya.lead}
+          </p>
+          <nav className="z11-resh__links" aria-label="Материалы к задаче">
+            {sPodskazkami && shagi.length > 0 && shag < shagi.length ? (
+              <button
+                type="button"
+                className="z11-resh__link z11-resh__link--btn"
+                onClick={() => {
+                  setHintOpen(true);
+                  document
+                    .querySelector('.z11-resh__hint')
+                    ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                }}
+              >
+                <HintIcon />
+                {TRENAZHER_11.nePoluchaetsya.podskazka}
+              </button>
+            ) : null}
+            {ssylka.teoriya === '' ? null : (
+              <Link className="z11-resh__link" href={`${base}/teoriya/#teoriya-${ssylka.teoriya}`}>
+                <Piktogramma name="book" />
+                {TRENAZHER_11.teoriya}: {nazvaniya[z.section]}
+              </Link>
+            )}
+            {ssylka.opornyy === null ? null : (
+              <Link
+                className="z11-resh__link"
+                href={`${base}/opornye-zadachi/${ssylka.opornyy.slug}/`}
+              >
+                <Piktogramma name="tools" />
+                {TRENAZHER_11.opornyy}: {ssylka.opornyy.nazvanie}
+              </Link>
+            )}
+            {layfhak === undefined ? null : (
+              <Link className="z11-resh__link" href={`${base}/teoriya/#layfhak-${layfhak}`}>
+                <Piktogramma name="bolt" />
+                {TRENAZHER_11.layfhak}: {LAYFHAKI[layfhak].title}
+              </Link>
+            )}
+          </nav>
+        </section>
+      )}
 
       {checked === null ? null : (
         <div className={clsx('pverdict', `pverdict--${checked}`)} role="status">

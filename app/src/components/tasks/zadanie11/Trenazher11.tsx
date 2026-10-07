@@ -154,6 +154,8 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     <>
       <Trenazher11Vybor
         razdely={dannye.razdely}
+        ssylki={dannye.ssylki}
+        base={base}
         n={n}
         izmenit={izmenit}
         vBankeVsego={vBankeVsego}

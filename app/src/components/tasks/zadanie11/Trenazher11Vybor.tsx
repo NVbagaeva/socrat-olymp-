@@ -1,11 +1,13 @@
 'use client';
 
 import { clsx } from 'clsx';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Button, Checkbox, Details, Radio } from '@/components/ui';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import { plural } from '@/lib/plural';
 import type { StoreProgress } from '@/lib/progressStore';
+import type { SsylkiRazdela } from '@/lib/zadanie11/trenazher/dannye';
 import { trenazher11 } from '@/lib/zadanie11/progress';
 import {
   primernoeVremya,
@@ -24,6 +26,9 @@ const DVIZHENIE: SectionId[] = ['DP', 'PT', 'VD', 'OK'];
 
 export interface Trenazher11VyborProps {
   razdely: RazdelInfo[];
+  /** Ссылки раздела: якорь теории — для кнопки «Теория» в шапке раздела. */
+  ssylki: Record<SectionId, SsylkiRazdela>;
+  base: string;
   n: Nastroyki;
   izmenit: (patch: Partial<Nastroyki>) => void;
   /** Сколько задач банка есть по выбранным типам. */
@@ -55,6 +60,8 @@ function podkhodit(p: PodtipInfo, needle: string): boolean {
  */
 export function Trenazher11Vybor({
   razdely,
+  ssylki,
+  base,
   n,
   izmenit,
   vBankeVsego,
@@ -117,9 +124,43 @@ export function Trenazher11Vybor({
     },
   ];
 
+  const vsegoResheno = Object.values(progress.kinds).reduce((s, k) => s + (k?.done ?? 0), 0);
+  const vsegoVerno = Object.values(progress.kinds).reduce((s, k) => s + (k?.right ?? 0), 0);
+  const osvoeno = vse.filter((p) => (progress.kinds[p.id]?.right ?? 0) > 0).length;
+
   return (
     <div className="z11-tr">
       <div className="z11-tr__main">
+        <section className="z11-tr__progress" aria-label={TRENAZHER_11.progress.title}>
+          <div className="z11-tr__progress-text">
+            <p className="z11-tr__progress-title">{TRENAZHER_11.progress.title}</p>
+            {vsegoResheno === 0 ? (
+              <p className="z11-tr__progress-lead">{TRENAZHER_11.progress.pusto}</p>
+            ) : (
+              <p className="z11-tr__progress-lead">
+                {TRENAZHER_11.progress.resheno(vsegoVerno, vsegoResheno)} ·{' '}
+                {TRENAZHER_11.progress.tipov(osvoeno, vse.length)}
+                {oshibokZadach > 0 ? ` · ${TRENAZHER_11.progress.oshibok(oshibokZadach)}` : ''}
+              </p>
+            )}
+          </div>
+          <div className="z11-tr__progress-btns">
+            <button
+              type="button"
+              className="z11-preset z11-preset--oshibki"
+              disabled={oshibki.length === 0}
+              onClick={() => preset(oshibki)}
+            >
+              <Piktogramma name="alert" />
+              {TRENAZHER_11.presety.oshibki}
+              {oshibokZadach > 0 ? (
+                <span className="z11-preset__badge">{oshibokZadach}</span>
+              ) : null}
+            </button>
+          </div>
+          <Statistika razdely={razdely} progress={progress} />
+        </section>
+
         <section className="z11-tr__blok">
           <h2 className="z11-blok-title">{TRENAZHER_11.otkuda}</h2>
           <div className="z11-istochnik" role="radiogroup" aria-label={TRENAZHER_11.otkuda}>
@@ -151,18 +192,6 @@ export function Trenazher11Vybor({
                 {p.label}
               </button>
             ))}
-            <button
-              type="button"
-              className="z11-preset z11-preset--oshibki"
-              disabled={oshibki.length === 0}
-              onClick={() => preset(oshibki)}
-            >
-              <Piktogramma name="alert" />
-              {TRENAZHER_11.presety.oshibki}
-              {oshibokZadach > 0 ? (
-                <span className="z11-preset__badge">{oshibokZadach}</span>
-              ) : null}
-            </button>
           </div>
           <label className="z11-poisk">
             <Piktogramma name="search" />
@@ -211,6 +240,16 @@ export function Trenazher11Vybor({
                     </span>
                     <Piktogramma name="chevron" className="z11-akk__chevron" />
                   </button>
+                  {ssylki[r.id]?.teoriya ? (
+                    <Link
+                      className="z11-akk__teoriya"
+                      href={`${base}/teoriya/#teoriya-${ssylki[r.id].teoriya}`}
+                      title={`${TRENAZHER_11.teoriyaRazdela}: ${r.nazvanie}`}
+                    >
+                      <Piktogramma name="book" />
+                      <span>{TRENAZHER_11.teoriyaRazdela}</span>
+                    </Link>
+                  ) : null}
                   <Checkbox
                     className="z11-akk__ves"
                     checked={ves}
@@ -254,8 +293,6 @@ export function Trenazher11Vybor({
         {needle !== '' && vidimye.every((r) => !r.podtipy.some((p) => podkhodit(p, needle))) ? (
           <p className="z11-tr__pusto">{TRENAZHER_11.nichego}</p>
         ) : null}
-
-        <Statistika razdely={razdely} progress={progress} />
       </div>
 
       <aside className="z11-tr__side">
