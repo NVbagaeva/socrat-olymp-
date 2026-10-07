@@ -1,0 +1,474 @@
+/* Сцена задания №15: плоскости и линии их пересечения.
+   Цвета — только токенами; --c у плоскости и линии ставит сцена. */
+
+.s15 {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* ── Панель над чертежом ─────────────────────────────────────── */
+
+.s15-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.s15-tools__look {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.s15-tools__label {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.s15-tools__select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--h-control-sm);
+}
+.s15-tools__reset {
+  height: var(--h-control-sm);
+  padding: 0 var(--space-3);
+}
+
+/* ── Сцена ───────────────────────────────────────────────────── */
+
+.s15-stage {
+  position: relative;
+  /* Квадрат: подписи-HTML лежат поверх SVG в процентах, поэтому
+     область SVG должна совпадать со сценой без полей по бокам. */
+  width: min(100%, 72vh);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  overflow: hidden;
+  /* Жесты страницы не мешают повороту и перетаскиванию пальцем. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.s15-stage.is-dragging {
+  cursor: grabbing;
+}
+.s15-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Грани тела: светлая заливка, как у чертежей solid/. */
+.s15-face {
+  fill: var(--solid-face);
+  fill-opacity: 0.78;
+  stroke: none;
+  cursor: pointer;
+  transition: fill-opacity var(--dur-hover) var(--ease);
+}
+.s15-face:hover {
+  fill-opacity: 0.92;
+}
+
+.s15-edge {
+  fill: none;
+  stroke: var(--solid-edge);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.s15-edge--hid {
+  stroke-width: 1.7;
+  stroke-opacity: 0.62;
+  stroke-dasharray: 7 5;
+}
+
+/* ── Листы плоскостей ────────────────────────────────────────── */
+
+.s15-sheet {
+  pointer-events: none;
+  transform-box: view-box;
+}
+.s15-sheet__stop {
+  stop-color: var(--c);
+}
+.s15-sheet__stop--in {
+  stop-opacity: 0.34;
+}
+.s15-sheet__stop--mid {
+  stop-opacity: 0.2;
+}
+.s15-sheet__stop--out {
+  stop-opacity: 0.03;
+}
+.s15-sheet--face .s15-sheet__stop--in {
+  stop-opacity: 0.22;
+}
+.s15-sheet--face .s15-sheet__stop--mid {
+  stop-opacity: 0.12;
+}
+.s15-sheet__rim {
+  fill: none;
+  stroke: var(--c);
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+}
+.s15-sheet--face .s15-sheet__rim {
+  stroke-opacity: 0.22;
+}
+.s15-sheet.is-hl .s15-sheet__rim {
+  stroke-opacity: 0.9;
+  stroke-width: 2;
+}
+.s15-sheet--front .s15-sheet__body {
+  /* Перед телом лист чуть плотнее: видно, что он спереди. */
+  opacity: 0.9;
+}
+/* Появление: лист вырастает из трёх задающих точек. */
+.s15-sheet.is-new {
+  animation: s15-grow 600ms var(--ease) both;
+}
+@keyframes s15-grow {
+  from {
+    transform: scale(0.04);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Сечение ─────────────────────────────────────────────────── */
+
+.s15-section {
+  fill: var(--c);
+  fill-opacity: 0.22;
+  stroke: none;
+  pointer-events: none;
+}
+.s15-section-outline {
+  pointer-events: none;
+}
+.s15-section__vis {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.s15-section__hid {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.8;
+  stroke-opacity: 0.6;
+  stroke-dasharray: 7 5;
+}
+
+/* ── Линии ───────────────────────────────────────────────────── */
+
+.s15-line__hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 22;
+  stroke-linecap: round;
+}
+.s15-line--meet {
+  cursor: pointer;
+}
+.s15-line__vis {
+  fill: none;
+  stroke: var(--c);
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.s15-line__hid {
+  fill: none;
+  stroke: var(--c);
+  stroke-linecap: round;
+  stroke-dasharray: 7 5;
+  pointer-events: none;
+}
+/* Линия пересечения толще рёбер. */
+.s15-line--meet .s15-line__vis {
+  stroke-width: 3.2;
+}
+.s15-line--meet .s15-line__hid {
+  stroke-width: 2.4;
+  stroke-opacity: 0.6;
+}
+.s15-line--meet.is-selected .s15-line__vis {
+  stroke-width: 4.4;
+}
+.s15-line--meet.is-selected .s15-line__hid {
+  stroke-width: 3.2;
+}
+/* Прямые построения и продолжения рёбер — тоньше, акцентом. */
+.s15-line--aux .s15-line__vis,
+.s15-line--ext .s15-line__vis {
+  stroke-width: 1.7;
+}
+.s15-line--aux .s15-line__hid,
+.s15-line--ext .s15-line__hid {
+  stroke-width: 1.5;
+  stroke-opacity: 0.6;
+}
+.s15-line--ext .s15-line__vis,
+.s15-line--ext .s15-line__hid {
+  stroke-dasharray: 3 4;
+}
+
+/* Вспышка общих точек перед прочерчиванием. */
+.s15-flash {
+  fill: var(--c);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+  pointer-events: none;
+  animation: s15-flash 350ms var(--ease) both;
+}
+@keyframes s15-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(2.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+.s15-flash {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── Кандидаты и точки ───────────────────────────────────────── */
+
+.s15-cand {
+  fill: var(--color-surface);
+  stroke: var(--c);
+  stroke-width: 2;
+  pointer-events: none;
+}
+.s15-cand--ext {
+  stroke-dasharray: 3 2.5;
+}
+
+.s15-point__dot {
+  fill: var(--solid-edge);
+  stroke: var(--color-surface);
+  stroke-width: 1.8;
+}
+.s15-point--built .s15-point__dot {
+  fill: var(--graph-accent);
+}
+.s15-point--onEdge .s15-point__dot {
+  fill: var(--color-primary);
+  stroke-width: 2.4;
+}
+.s15-point.is-drag {
+  cursor: grab;
+}
+.s15-point.is-active .s15-point__dot {
+  r: 8;
+}
+.s15-point__hit {
+  fill: transparent;
+  stroke: none;
+}
+.s15-point__ring {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-opacity: 0.6;
+  animation: s15-pulse 1.2s ease-in-out infinite;
+}
+@keyframes s15-pulse {
+  0%,
+  100% {
+    stroke-opacity: 0.25;
+  }
+  50% {
+    stroke-opacity: 0.9;
+  }
+}
+
+/* ── Подписи ─────────────────────────────────────────────────── */
+
+.s15-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-size: 16px;
+}
+.s15-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  color: var(--color-text);
+  /* Ореол, как у подписей чертежей: читается поверх линий. */
+  text-shadow:
+    0 0 3px var(--color-surface),
+    0 0 3px var(--color-surface),
+    0 0 6px var(--color-surface);
+  /* Позиция меняется без переходов: при перетаскивании подпись
+     идёт за точкой, а не догоняет её. */
+  transition: none;
+}
+.s15-label--plane,
+.s15-label--meet {
+  color: var(--c);
+  font-size: 17px;
+}
+.s15-label--face {
+  opacity: 0.8;
+}
+.s15-label--aux {
+  color: var(--graph-accent);
+  font-size: 14px;
+}
+.s15-label.is-hl {
+  font-weight: 700;
+}
+
+/* ── Сообщение и обоснование ─────────────────────────────────── */
+
+.s15-notice {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+  animation: s15-fade 240ms var(--ease) both;
+}
+@keyframes s15-fade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.s15-hint {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+
+.s15-why {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.s15-why__title {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.s15-why__text {
+  line-height: var(--lh-lg);
+}
+
+/* ── Шаги ────────────────────────────────────────────────────── */
+
+.s15-steps {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.s15-steps__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.s15-steps__btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+.s15-steps__btn:hover {
+  background: var(--color-surface-soft);
+}
+.s15-steps__btn:disabled {
+  color: var(--color-text-tertiary);
+  cursor: default;
+  background: var(--color-surface-2);
+}
+.s15-steps__count {
+  min-width: 9ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.s15-steps__play {
+  margin-left: auto;
+  height: var(--h-control-sm);
+}
+.s15-steps__text {
+  min-height: 1.5em;
+  line-height: var(--lh-lg);
+}
+.s15-steps__hint {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+
+@media (max-width: 767.98px) {
+  .s15-stage {
+    width: 100%;
+    border-radius: var(--radius-lg);
+  }
+  .s15-labels {
+    font-size: 14px;
+  }
+  .s15-label--plane,
+  .s15-label--meet {
+    font-size: 15px;
+  }
+  .s15-steps__play {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s15-sheet.is-new,
+  .s15-flash,
+  .s15-point__ring,
+  .s15-notice {
+    animation: none;
+  }
+}
