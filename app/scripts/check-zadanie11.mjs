@@ -150,6 +150,15 @@ for (const [word, id] of [
       );
     }
     for (const k of r.kartochki ?? []) texts.push(k.text);
+    /* Приёмы быстрого счёта: правило, пример, вопросы «попробуй сам». */
+    for (const pr of r.priemy ?? []) {
+      texts.push(pr.pravilo, ...pr.primer, ...pr.poprobuy.map((z) => z.q));
+      for (const z of pr.poprobuy) {
+        if (!/^\d+(,\d+)?$/.test(z.otvet)) {
+          problems.push({ where: `теория ${r.id}`, what: `ответ «${z.otvet}» не число` });
+        }
+      }
+    }
     for (const tex of [r.formula?.tex, ...(r.kartochki ?? []).map((k) => k.tex)]) {
       if (tex) texts.push(`$${tex}$`);
     }

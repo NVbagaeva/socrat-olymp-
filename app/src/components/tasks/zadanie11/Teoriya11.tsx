@@ -3,14 +3,53 @@ import Link from 'next/link';
 import { Details } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
-import { LAYFHAKI, LOVUSHKI, RAZDELY_TEORII_11, type RazdelTeorii11 } from '@/content/teoriya11';
-import { PROGRESS_11 } from '@/content/zadanie11';
+import {
+  LAYFHAKI,
+  LOVUSHKI,
+  RAZDELY_TEORII_11,
+  TEORIYA_11,
+  type Priem,
+  type RazdelTeorii11,
+} from '@/content/teoriya11';
+import { OPORNYE } from '@/content/opornye';
+import { O_ZADANII_11, PROGRESS_11, VSTUPLENIYA_11 } from '@/content/zadanie11';
 import { katex } from '@/lib/graph/katex';
+import { typeset } from '@/lib/tex';
+import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { kodNaSayte } from '@/lib/zadanie11/taxonomy';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
-import type { LifehackId } from '@/lib/zadanie11/types';
-import { IkonkaRazdela, MiniKartinka, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
+import type { LifehackId, SectionId } from '@/lib/zadanie11/types';
+import {
+  IkonkaBloka,
+  IkonkaRazdela,
+  MiniKartinka,
+  Piktogramma,
+  tsvetRazdela,
+  Zvezdy,
+} from './Piktogrammy';
+import { PoprobuySam11 } from './PoprobuySam11';
 import { Tablitsa11 } from './Tablitsa11';
+
+/** Разделы с задачами — без вступления и сводных списков. */
+const RAZDELY_ZADACH = RAZDELY_TEORII_11.filter((r) => r.section);
+
+/**
+ * В каком разделе карточка лайфхака или ловушки встречается впервые:
+ * там она получает якорь (#layfhak-id, #lovushka-id), туда ведут
+ * сводные списки и ссылки из тренажёра. Повторы в других разделах —
+ * без якоря: один id на странице.
+ */
+function pervyeVhozhdeniya(key: 'layfhaki' | 'lovushki'): Map<string, RazdelTeorii11> {
+  const out = new Map<string, RazdelTeorii11>();
+  for (const r of RAZDELY_TEORII_11.filter((x) => x.id !== 'layfhaki' && x.id !== 'lovushki')) {
+    for (const id of r[key]) {
+      if (!out.has(id)) out.set(id, r);
+    }
+  }
+  return out;
+}
+const PERVYY_LAYFHAK = pervyeVhozhdeniya('layfhaki');
+const PERVAYA_LOVUSHKA = pervyeVhozhdeniya('lovushki');
 
 /** Формула крупно (display), набранная на сервере. */
 function Krupno({ tex, className }: { tex: string; className?: string }) {
@@ -18,10 +57,10 @@ function Krupno({ tex, className }: { tex: string; className?: string }) {
   return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
+function KartaLayfhak({ id, yakor }: { id: LifehackId; yakor: boolean }) {
   const l = LAYFHAKI[id];
   return (
-    <section className="z11-card z11-card--layfhak" id={`layfhak-${id}`}>
+    <section className="z11-card z11-card--layfhak" id={yakor ? `layfhak-${id}` : undefined}>
       <h4 className="z11-card__title">
         <Piktogramma name="bulb" className="z11-card__icon" />
         {l.title}
@@ -53,7 +92,7 @@ function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
           <Tex text={l.obosnovanie} />
         </p>
       )}
-      {polnyy ? (
+      <Details title="Как это работает">
         <ol className="z11-card__steps">
           {l.shagi.map((s) => (
             <li key={s}>
@@ -61,28 +100,24 @@ function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
             </li>
           ))}
         </ol>
-      ) : (
-        <Details title="Как это работает">
-          <ol className="z11-card__steps">
-            {l.shagi.map((s) => (
-              <li key={s}>
-                <Tex text={s} />
-              </li>
-            ))}
-          </ol>
-        </Details>
-      )}
+      </Details>
+      {id === 'fast-count' ? (
+        <a className="z11-card__link" href="#teoriya-bystryy-schet">
+          <Piktogramma name="bolt" />
+          {TEORIYA_11.kBystromu}
+        </a>
+      ) : null}
     </section>
   );
 }
 
-function KartaLovushka({ id }: { id: string }) {
+function KartaLovushka({ id, yakor }: { id: string; yakor: boolean }) {
   const l = LOVUSHKI[id];
   if (!l) {
     return null;
   }
   return (
-    <section className="z11-card z11-card--lovushka">
+    <section className="z11-card z11-card--lovushka" id={yakor ? `lovushka-${id}` : undefined}>
       <h4 className="z11-card__title">
         <Piktogramma name="alert" className="z11-card__icon" />
         {l.title}
@@ -97,17 +132,34 @@ function KartaLovushka({ id }: { id: string }) {
   );
 }
 
-/** Подпункты раздела в содержании: что есть в теле раздела, по порядку. */
+/**
+ * Подпункты раздела в содержании — одна схема для всех разделов с
+ * задачами: Что это и зачем → Формулы → Таблица → Лайфхаки → Ловушки →
+ * Типы задач → Теперь — задачи (чего нет в разделе, то скрыто). У
+ * вводного раздела и «Быстрого счёта» — свои пункты.
+ */
 export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
   const out: { id: string; title: string }[] = [];
-  if (r.vvedenie) out.push({ id: `${r.id}-opredelenie`, title: 'Определение' });
-  if (r.formula) out.push({ id: `${r.id}-formula`, title: 'Главная формула' });
-  if (r.tablitsa || r.paraTablits) out.push({ id: `${r.id}-tablitsa`, title: 'Таблица' });
+  if (r.priemy) {
+    return r.priemy.map((p) => ({ id: `${r.id}-${p.id}`, title: p.kratko }));
+  }
+  if (r.section) out.push({ id: `${r.id}-vstup`, title: TEORIYA_11.vstup.title });
+  if (r.idei.length > 0 && !r.section) {
+    out.push({ id: `${r.id}-idei`, title: r.ideiTitle ?? TEORIYA_11.idei });
+  }
+  if (r.formula) out.push({ id: `${r.id}-formula`, title: 'Формулы' });
+  if (r.tablitsa || r.paraTablits) {
+    out.push({ id: `${r.id}-tablitsa`, title: r.section ? 'Таблица' : 'Три таблицы' });
+  }
+  if (r.kartochki && !r.section) out.push({ id: `${r.id}-kartochki`, title: 'ОДЗ и смысл задачи' });
   if (r.zapomnit || r.layfhaki.length > 0) {
     out.push({ id: `${r.id}-layfhaki`, title: 'Лайфхаки' });
   }
   if (r.lovushki.length > 0) out.push({ id: `${r.id}-lovushki`, title: 'Ловушки' });
-  if (r.section) out.push({ id: `${r.id}-tipy`, title: 'Типы задач' });
+  if (r.section) {
+    out.push({ id: `${r.id}-tipy`, title: 'Типы задач' });
+    out.push({ id: `${r.id}-teper`, title: TEORIYA_11.teper.title });
+  }
   return out;
 }
 
@@ -115,6 +167,157 @@ export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
 function Strochno({ tex, className }: { tex: string; className?: string }) {
   const html = katex.renderToString(tex, { throwOnError: true, displayFrac: true });
   return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/** «Что это и зачем» — то же вступление, что в карточке на «О задании». */
+function Vstup({ r }: { r: RazdelTeorii11 & { section: SectionId } }) {
+  const v = VSTUPLENIYA_11[r.section];
+  const { vstup } = TEORIYA_11;
+  return (
+    <section className="z11-vstup z11-vstup--teor" id={`${r.id}-vstup`}>
+      <div className="z11-vstup__blok">
+        <p className="z11-vstup__label">{vstup.chto}</p>
+        <p className="z11-vstup__chto">
+          <Tex text={v.chto} />
+        </p>
+      </div>
+      <div className="z11-vstup__blok">
+        <p className="z11-vstup__label">{vstup.zachem}</p>
+        <p className="z11-vstup__text">
+          <Tex text={v.zachem} />
+        </p>
+      </div>
+      <div className="z11-vstup__blok">
+        <p className="z11-vstup__label">{vstup.glavnoe}</p>
+        <ol className="z11-vstup__glavnoe">
+          {v.glavnoe.map((t) => (
+            <li key={t}>
+              <Tex text={t} />
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * «Теперь — задачи»: опорные блоки раздела (свои и те, что нужны перед
+ * ним — O_ZADANII_11.pered) и кнопка в тренажёр по типам раздела.
+ */
+function Teper({ r, base }: { r: RazdelTeorii11 & { section: SectionId }; base: string }) {
+  const pered = O_ZADANII_11.pered[r.section] ?? [];
+  const bloki = BLOKI.filter((b) => b.razdel === r.section || pered.includes(b.nazvanie));
+  const tipy = SUBTYPES.filter((st) => st.section === r.section);
+  const t = TEORIYA_11.teper;
+  return (
+    <section className="z11-card z11-teper" id={`${r.id}-teper`}>
+      <h4 className="z11-card__title">
+        <Piktogramma name="flag" className="z11-card__icon" />
+        {t.title}
+      </h4>
+      <p className="z11-card__lead">{t.lead}</p>
+      {bloki.length === 0 ? null : (
+        <ul className="z11-teper__bloki">
+          {bloki.map((b) => (
+            <li key={b.id}>
+              <Link className="z11-teper__blok" href={`${base}/${OPORNYE.tail}${b.slug}/`}>
+                <IkonkaBloka razdel={b.razdel} className="z11-teper__ikonka" />
+                <span className="z11-teper__name">{b.nazvanie}</span>
+                <span className="z11-teper__count">{t.zadach(b.zadachi.length)}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Link
+        className="btn btn--primary z11-teper__go"
+        href={`${base}/trenazher/?tipy=${tipy.map((st) => st.id).join(',')}`}
+      >
+        <Piktogramma name="play" />
+        {t.reshat(tipy.length)}
+      </Link>
+    </section>
+  );
+}
+
+/** Приём быстрого счёта: правило → пример → «попробуй сам». */
+function KartaPriem({ r, p }: { r: RazdelTeorii11; p: Priem }) {
+  const t = TEORIYA_11.priem;
+  return (
+    <section className="z11-card z11-priem" id={`${r.id}-${p.id}`}>
+      <h4 className="z11-card__title">
+        <Piktogramma name="bolt" className="z11-card__icon" />
+        {p.title}
+      </h4>
+      <div className="z11-priem__zony">
+        <div className="z11-priem__zona">
+          <p className="z11-priem__label">{t.pravilo}</p>
+          <p className="z11-priem__text">
+            <Tex text={p.pravilo} />
+          </p>
+        </div>
+        <div className="z11-priem__zona z11-priem__zona--primer">
+          <p className="z11-priem__label">{t.primer}</p>
+          <ol className="z11-priem__primer">
+            {p.primer.map((line) => (
+              <li key={line}>
+                <Tex text={line} />
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="z11-priem__zona z11-priem__zona--sam">
+          <p className="z11-priem__label">{t.poprobuy}</p>
+          <PoprobuySam11
+            zadaniya={p.poprobuy.map((z) => ({ qHtml: typeset(z.q), otvet: z.otvet }))}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Сводный список лайфхаков или ловушек: одна строка — ссылка в раздел. */
+function Svod({ vid }: { vid: 'layfhaki' | 'lovushki' }) {
+  const items =
+    vid === 'layfhaki'
+      ? Object.values(LAYFHAKI).map((l) => ({
+          id: l.id,
+          title: l.title,
+          text: l.lead,
+          razdel: PERVYY_LAYFHAK.get(l.id),
+          href: `#layfhak-${l.id}`,
+        }))
+      : Object.values(LOVUSHKI).map((l) => ({
+          id: l.id,
+          title: l.title,
+          text: l.text,
+          razdel: PERVAYA_LOVUSHKA.get(l.id),
+          href: `#lovushka-${l.id}`,
+        }));
+  return (
+    <ul className={`z11-svod z11-svod--${vid}`}>
+      {items.map((it) => (
+        <li key={it.id} className="z11-svod__item">
+          <Piktogramma name={vid === 'layfhaki' ? 'bulb' : 'alert'} className="z11-svod__ikonka" />
+          <span className="z11-svod__body">
+            <a className="z11-svod__title" href={it.razdel === undefined ? undefined : it.href}>
+              {it.title}
+            </a>
+            <span className="z11-svod__text">
+              <Tex text={it.text} />
+            </span>
+            {it.razdel === undefined ? null : (
+              <span className="z11-svod__razdel">
+                {TEORIYA_11.svod.vRazdele} «{it.razdel.title}»
+              </span>
+            )}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /**
@@ -128,7 +331,7 @@ function FormulaSoSledstviyami({ r }: { r: RazdelTeorii11 }) {
     return null;
   }
   return (
-    <section className="z11-card z11-glavnaya" id={`${r.id}-formula`}>
+    <section className="z11-card z11-glavnaya">
       <h4 className="z11-blok-title">Главная формула</h4>
       <div className="z11-glavnaya__body">
         <div className="z11-glavnaya__formula">
@@ -205,9 +408,22 @@ function Zapomnit({ z }: { z: NonNullable<RazdelTeorii11['zapomnit']> }) {
   );
 }
 
-function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
+function Telo({ r, base }: { r: RazdelTeorii11; base: string }) {
   const tipy = r.section ? SUBTYPES.filter((st) => st.section === r.section) : [];
-  const polnyy = r.id === 'layfhaki';
+  const sSektsiey = r.section ? (r as RazdelTeorii11 & { section: SectionId }) : null;
+  if (r.id === 'layfhaki' || r.id === 'lovushki') {
+    return (
+      <div className="z11-teor">
+        <div className="z11-teor__lead">
+          <p>
+            <Tex text={r.lead} />
+          </p>
+        </div>
+        <p className="z11-svod__lead">{TEORIYA_11.svod[r.id]}</p>
+        <Svod vid={r.id} />
+      </div>
+    );
+  }
   return (
     <div className={`z11-teor${r.section ? ` ${tsvetRazdela(r.section)}` : ''}`}>
       <div className="z11-teor__lead">
@@ -217,8 +433,10 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </p>
       </div>
 
+      {sSektsiey ? <Vstup r={sSektsiey} /> : null}
+
       {r.vvedenie ? (
-        <section className="z11-card z11-vved" id={`${r.id}-opredelenie`}>
+        <section className="z11-card z11-vved">
           <h4 className="z11-blok-title">{r.vvedenie.title}</h4>
           <p className="z11-vved__opredelenie">
             <Tex text={r.vvedenie.opredelenie} />
@@ -240,8 +458,24 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </section>
       ) : null}
 
+      {r.idei.length > 0 && !r.section ? (
+        <section className="z11-card z11-card--idei" id={`${r.id}-idei`}>
+          <h4 className="z11-card__title">
+            <Piktogramma name="flag" className="z11-card__icon" />
+            {r.ideiTitle ?? TEORIYA_11.idei}
+          </h4>
+          <ul className="z11-card__list">
+            {r.idei.map((t) => (
+              <li key={t}>
+                <Tex text={t} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {r.formula?.sledstviya ? (
-        <div className="z11-teor__formula-ryad">
+        <div className="z11-teor__formula-ryad" id={`${r.id}-formula`}>
           <FormulaSoSledstviyami r={r} />
           {r.zapomnit ? (
             <div id={`${r.id}-layfhaki`}>
@@ -252,12 +486,15 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.paraTablits ? (
-        <div className="z11-teor__para" id={`${r.id}-tablitsa`}>
+        <div
+          className={`z11-teor__para z11-teor__para--${r.paraTablits.length}`}
+          id={r.tablitsa ? undefined : `${r.id}-tablitsa`}
+        >
           {r.paraTablits.map((pt) => (
             <section className="z11-card" key={pt.title}>
               <h4 className="z11-card__title">
                 <Piktogramma name="table" className="z11-card__icon" />
-                {pt.title}
+                <Tex text={pt.title} />
               </h4>
               <p className="z11-card__lead">
                 <Tex text={pt.primer} />
@@ -320,11 +557,11 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </div>
       ) : null}
 
-      {r.idei.length > 0 ? (
+      {r.idei.length > 0 && r.section ? (
         <section className="z11-card z11-card--idei">
           <h4 className="z11-card__title">
             <Piktogramma name="flag" className="z11-card__icon" />
-            Главное
+            {r.ideiTitle ?? TEORIYA_11.idei}
           </h4>
           <ul className="z11-card__list">
             {r.idei.map((t) => (
@@ -337,7 +574,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.kartochki ? (
-        <div className="z11-teor__grid">
+        <div className="z11-teor__grid" id={r.section ? undefined : `${r.id}-kartochki`}>
           {r.kartochki.map((k) => (
             <section className="z11-card" key={k.title}>
               <h4 className="z11-card__title">{k.title}</h4>
@@ -350,13 +587,18 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </div>
       ) : null}
 
+      {r.priemy ? (
+        <div className="z11-teor__stack">
+          {r.priemy.map((p) => (
+            <KartaPriem r={r} p={p} key={p.id} />
+          ))}
+        </div>
+      ) : null}
+
       {r.layfhaki.length > 0 ? (
-        <div
-          className={polnyy ? 'z11-teor__stack' : 'z11-teor__grid'}
-          id={r.zapomnit ? undefined : `${r.id}-layfhaki`}
-        >
+        <div className="z11-teor__grid" id={r.zapomnit ? undefined : `${r.id}-layfhaki`}>
           {r.layfhaki.map((id) => (
-            <KartaLayfhak id={id} polnyy={polnyy} key={id} />
+            <KartaLayfhak id={id} yakor={PERVYY_LAYFHAK.get(id) === r} key={id} />
           ))}
         </div>
       ) : null}
@@ -364,7 +606,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       {r.lovushki.length > 0 ? (
         <div className="z11-teor__grid" id={`${r.id}-lovushki`}>
           {r.lovushki.map((id) => (
-            <KartaLovushka id={id} key={id} />
+            <KartaLovushka id={id} yakor={PERVAYA_LOVUSHKA.get(id) === r} key={id} />
           ))}
         </div>
       ) : null}
@@ -374,16 +616,15 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
           <h4 className="z11-tipy__title">Типы задач этого раздела</h4>
           <ul className="z11-tipy__list">
             {tipy.map((st) => (
-              <li className="z11-tip" key={st.id}>
+              <li className="z11-tip" key={st.id} title={kodNaSayte(st.id)}>
                 <MiniKartinka id={st.id} section={st.section} className="z11-tip__pic" />
                 <span className="z11-tip__body">
-                  <span className="z11-tip__code">{kodNaSayte(st.id)}</span>
                   <span className="z11-tip__title">{st.title}</span>
                   <span className="z11-tip__foot">
                     <Zvezdy level={st.level} />
                     <Link
                       className="btn btn--secondary btn--sm z11-tip__btn"
-                      href={`${trenazher}?tip=${st.id}`}
+                      href={`${base}/trenazher/?tip=${st.id}`}
                     >
                       Решать
                     </Link>
@@ -394,6 +635,8 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
           </ul>
         </section>
       ) : null}
+
+      {sSektsiey ? <Teper r={sSektsiey} base={base} /> : null}
     </div>
   );
 }
@@ -402,14 +645,13 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
  * Вкладка «Теория» задания №11 (макет docs/mockups/zadanie-11/
  * teoriya.png): разделы подряд, содержание рядом — общая оболочка
  * теории (TeoriyaShell), та же, что у №2 и №4. Тексты —
- * content/teoriya11.ts, плитки типов — из дерева подтипов.
+ * content/teoriya11.ts, плитки типов — из дерева подтипов. У каждого
+ * раздела с задачами одна схема: что это и зачем → формулы → таблица
+ * → лайфхаки → ловушки → типы задач → «Теперь — задачи».
  */
 export function Teoriya11({ vkladka, base }: { vkladka: string; base: string }) {
   const tela = Object.fromEntries(
-    RAZDELY_TEORII_11.map((r) => [
-      r.id,
-      <Telo r={r} trenazher={`${base}/trenazher/`} key={r.id} />,
-    ]),
+    RAZDELY_TEORII_11.map((r) => [r.id, <Telo r={r} base={base} key={r.id} />]),
   );
   return (
     <TeoriyaShell
@@ -428,3 +670,5 @@ export function Teoriya11({ vkladka, base }: { vkladka: string; base: string }) 
     />
   );
 }
+
+export { RAZDELY_ZADACH };
