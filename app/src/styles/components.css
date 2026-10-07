@@ -2375,6 +2375,35 @@ html[data-tabs-pending] .topic-panel,
 .contents-item.is-active .contents-item__no {
   color: var(--color-primary);
 }
+/* Подпункты открытого раздела (теория №11): отступ под номер. */
+.contents-sub {
+  display: grid;
+  gap: 1px;
+  margin: 2px 0 var(--space-1);
+  padding: 0 0 0 calc(24px + var(--space-3) + var(--space-3));
+  list-style: none;
+}
+.contents-sub__item {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-left: 2px solid var(--color-border);
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.contents-sub__item:hover {
+  border-left-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.contents-sub__item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
 
 /* На узком экране кружок с номером меньше. */
 @media (max-width: 767.98px) {

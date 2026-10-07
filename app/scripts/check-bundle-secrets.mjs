@@ -18,9 +18,11 @@
    концом выкладки «= 0,25». Отдельно ищутся поля параметров рисунка
    у №4 и №5, открытый разбор и пометки вариантов у №12, поля ответа
    у №8. Кроме окон задач, во всех кусках сборки ищется след целого
-   банка: имена полей прототипа и начала первых шагов разборов.
+   банка: имена полей прототипа, начала первых шагов разборов и
+   строковые параметры банка №11.
 
-   Витрина /styleguide/ — единственное исключение: она служебная,
+   Витрина /styleguide/ и вычитка аналогов /zadaniya/11/proverka-
+   analogov/ — исключения: они служебные,
    помечена noindex и показывает ответы намеренно.
 
    Ненулевой код возврата — в сборке лежит то, чего там быть не должно.
@@ -260,6 +262,34 @@ const marks = [...BANK_3, ...BANK_4, ...BANK_5, ...KONSPEKT_4]
 /* Имена полей прототипа: если они есть в куске, уехал весь банк. */
 const FIELDS = ['poModeli:', 'perebor:', 'dopustimo:', 'varianty:'];
 
+/* Банк №11 хранит параметры и ответ задачи (data/zadanie11/bank.json);
+   с ответами в браузер он уезжать не должен. Тренажёру условия банка
+   нужны — они идут в страницу без поля answer (trenazher/dannye.ts),
+   ответ считает движок и сразу закрывает отпечатком, как у №2.
+   След банка — строковые параметры («kto: popov»): они переживают
+   сжатие кода, в отличие от чисел. Три разные пары в одном куске и
+   рядом с параметрами поле ответа — значит, уехал банк с ответами. */
+/* Признак — запись банка целиком из литералов: параметры-числа и строки
+   и ответ-число. В коде генератора та же форма, но со значениями-
+   переменными ({params:{a:n},answer:t}) — она не считается. */
+const LIT_11 = '(?:"[^"]*"|-?[0-9.]+(?:e[0-9]+)?)';
+const OTVET_11 = new RegExp(
+  `(?:"params"|\\bparams):\\{(?:"?\\w+"?:${LIT_11},?)+\\},(?:"answer"|answer):-?[0-9.]+(?:e[0-9]+)?[,}]`,
+);
+const SLED_11 = [
+  ...new Set(
+    JSON.parse(fs.readFileSync(path.join(root, 'src/data/zadanie11/bank.json'), 'utf8')).flatMap(
+      (item) =>
+        Object.entries(item.params)
+          .filter(([, v]) => typeof v === 'string' && v.length >= 4)
+          .map(([k, v]) => `${k}|${v}`),
+    ),
+  ),
+].map((pair) => {
+  const [k, v] = pair.split('|');
+  return { pair, re: new RegExp(`(?:"${escapeRe(k)}"|\\b${escapeRe(k)}):"${escapeRe(v)}"`) };
+});
+
 /* ── Поиск ──────────────────────────────────────────────────────── */
 
 /**
@@ -295,7 +325,11 @@ if (!fs.existsSync(outDir)) {
 }
 
 /* Витрина показывает ответы намеренно: она служебная и noindex. */
-const allowed = (file) => path.relative(outDir, file).split(path.sep).includes('styleguide');
+const allowed = (file) => {
+  const parts = path.relative(outDir, file).split(path.sep);
+  /* Вычитка аналогов №11 — тоже служебная, noindex, ответы показывает намеренно. */
+  return parts.includes('styleguide') || parts.includes('proverka-analogov');
+};
 
 const files = walk(outDir, (f) => /\.(js|html|txt|json)$/.test(f)).filter((f) => !allowed(f));
 
@@ -402,6 +436,11 @@ for (const file of files) {
     problemy.push(
       `разборы прототипов: ${hits.slice(0, 8).join(', ')}${hits.length > 8 ? ` и ещё ${hits.length - 8}` : ''}`,
     );
+  }
+
+  const sled11 = SLED_11.filter((m) => m.re.test(text)).map((m) => m.pair);
+  if (sled11.length >= 3 && OTVET_11.test(text)) {
+    problemy.push(`банк №11 с ответами: ${sled11.slice(0, 5).join(', ')}`);
   }
 
   /* Окна задач. */

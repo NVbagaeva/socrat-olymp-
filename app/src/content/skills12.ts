@@ -88,6 +88,9 @@ export const skillCounts: (number | null)[] = [5, 10, 20, null];
  * Уровни с подписями, набранными KaTeX. Зовёт серверная часть вкладки
  * (TrainerShell, GeneratorTab): конфигуратор — клиентский экран.
  */
-export function levelsWithHtml(levels: SkillLevel[], typeset: (text: string) => string): SkillLevel[] {
+export function levelsWithHtml(
+  levels: SkillLevel[],
+  typeset: (text: string) => string,
+): SkillLevel[] {
   return levels.map((level) => ({ ...level, leadHtml: typeset(level.lead) }));
 }

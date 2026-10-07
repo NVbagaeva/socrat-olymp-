@@ -28,8 +28,14 @@ export const trainerModes: TrainerMode[] = [
  * ярлыка нет — тренировка собирается там же, где и без него.
  */
 export type TrainerShortcutId =
-  'value' | 'argument' | 'intersection' | 'mixed' |
-  'koefficienty' | 'znachenie' | 'formula' | 'peresechenie';
+  | 'value'
+  | 'argument'
+  | 'intersection'
+  | 'mixed'
+  | 'koefficienty'
+  | 'znachenie'
+  | 'formula'
+  | 'peresechenie';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -85,7 +91,12 @@ const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
     skills: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.I'],
     mode: 'mixed',
   },
-  { id: 'koefficienty', title: 'Коэффициенты по графику', skills: ['12R.E', '12R.F', '12R.J'], mode: 'mixed' },
+  {
+    id: 'koefficienty',
+    title: 'Коэффициенты по графику',
+    skills: ['12R.E', '12R.F', '12R.J'],
+    mode: 'mixed',
+  },
   { id: 'peresechenie', title: 'Гипербола и прямая', skills: ['12R.G', '12R.H'], mode: 'mixed' },
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
@@ -99,9 +110,15 @@ export const trainerShortcuts = LINEAR_SHORTCUTS;
  * открывается обычным адресом.
  */
 export function trainerShortcutsFor(type: string): TrainerShortcut[] {
-  if (type === 'linear') { return LINEAR_SHORTCUTS; }
-  if (type === 'quadratic') { return QUADRATIC_SHORTCUTS; }
-  if (type === 'rational') { return RATIONAL_SHORTCUTS; }
+  if (type === 'linear') {
+    return LINEAR_SHORTCUTS;
+  }
+  if (type === 'quadratic') {
+    return QUADRATIC_SHORTCUTS;
+  }
+  if (type === 'rational') {
+    return RATIONAL_SHORTCUTS;
+  }
   return [];
 }
 
@@ -152,7 +169,9 @@ export const trainerPage = {
  * в поле note самих наборов.
  */
 export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic' && type !== 'rational') { return trainerPage; }
+  if (type !== 'quadratic' && type !== 'rational') {
+    return trainerPage;
+  }
   return {
     ...trainerPage,
     summary: {
@@ -218,7 +237,8 @@ export const trainerResult = {
 
 /** Сводка тренажёра на вкладке. */
 export const trainerStats = {
-  empty: 'Здесь появится ваша статистика: сколько заданий решено, с какой точностью и какой тип стоит повторить.',
+  empty:
+    'Здесь появится ваша статистика: сколько заданий решено, с какой точностью и какой тип стоит повторить.',
   rows: {
     total: 'Всего заданий',
     done: 'Решено',

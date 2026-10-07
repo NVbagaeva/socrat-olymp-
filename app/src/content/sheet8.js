@@ -28,9 +28,14 @@ export const foot = {
   course: 'Профильная математика',
   social: [
     { icon: 'telegram', label: 't.me/budet_na_ege_math', href: 'https://t.me/budet_na_ege_math' },
-    { icon: 'youtube', label: 'youtube.com/@math_princess', href: 'https://youtube.com/@math_princess' },
+    {
+      icon: 'youtube',
+      label: 'youtube.com/@math_princess',
+      href: 'https://youtube.com/@math_princess',
+    },
   ],
-  rights: 'Материалы платформы "Будет на ЕГЭ". Авторские материалы Багаевой Н.В. ' +
+  rights:
+    'Материалы платформы "Будет на ЕГЭ". Авторские материалы Багаевой Н.В. ' +
     'Распространение без разрешения автора запрещено.',
 };
 

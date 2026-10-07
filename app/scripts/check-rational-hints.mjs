@@ -10,7 +10,8 @@
         k/(x + a) — влево-вправо → k; k/(x + a) + b — вверх-вниз →
         влево-вправо → k; (kx + a)/(x + b) — вверх-вниз (k) →
         влево-вправо (b) → a; гипербола и прямая — k → прямая →
-        уравнение → корни → выбор корня → ордината.
+        уравнение → ОДЗ → квадратное уравнение → корни → отбор корней →
+        ордината.
      3. В каждом вопросе с кнопками верный вариант ровно один, и он
         совпадает с ключом, посчитанным здесь заново по чертежу
         (сдвиг, знак в знаменателе, корень); неверные с верным не
@@ -93,7 +94,7 @@ function expectedIds(meta) {
     if (rule === 'line-a' || rule === 'line-b') {
       return ['line'];
     }
-    return ['k', 'line', 'equation', 'roots', 'choose'].concat(
+    return ['k', 'line', 'equation', 'odz', 'quadratic', 'roots', 'choose'].concat(
       meta.intersection.axis === 'y' ? ['ordinate'] : [],
     );
   }
@@ -126,6 +127,12 @@ function expectedAnswers(step, meta) {
   }
   if (step.id === 'choose') {
     return ['x=' + plain(val(meta.intersection.B.x))];
+  }
+  if (step.id === 'equation') {
+    return ['eq'];
+  }
+  if (step.id === 'odz') {
+    return ['x!=0'];
   }
   return [];
 }
