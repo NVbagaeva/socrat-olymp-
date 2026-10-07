@@ -268,3 +268,10 @@ jobs:
       - name: Проверить первую загрузку страницы темы
         working-directory: app
         run: pnpm test:first-load
+
+      # Чертёж задания №15: three.js грузится только на /zadaniya/15/…,
+      # витрина закрыта от поиска; на телефоне 390 px поворот пальцем,
+      # щипок и пересчёт штрихов невидимых линий.
+      - name: Проверить чертёж задания №15 на сайте
+        working-directory: app
+        run: pnpm test:zadanie15-vitrina
