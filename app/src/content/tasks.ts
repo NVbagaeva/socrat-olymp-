@@ -1,6 +1,8 @@
 /**
- * Список заданий ЕГЭ. Номера и названия заданы заказчиком и правятся
- * только здесь: в разметке текста заданий нет.
+ * Список заданий ЕГЭ — единый конфиг. Из него строятся плашки банка,
+ * список в сайдбаре, страницы-заглушки и счётчики частей. Номера и
+ * названия заданы заказчиком и правятся только здесь: в разметке
+ * текста заданий нет.
  *
  * Раздел описывается данными, а не разметкой. Чтобы открыть новое
  * задание, достаточно поменять статус здесь — страница списка
@@ -8,14 +10,13 @@
  */
 
 /**
- * active — раздел открыт: карточка ведёт в него.
- * dev — раздел в разработке: карточка ведёт на страницу-заглушку
- *       /zadaniya/{slug} и помечена бейджем «В разработке».
- * soon — раздела нет: карточка неинтерактивна, бейдж «Скоро».
+ * ready — раздел открыт: плашка ведёт в него.
+ * soon — раздела ещё нет: плашка приглушена и помечена «Скоро».
+ *        Ссылки у неё нет, если не задан stub.
  */
-export type TaskStatus = 'active' | 'dev' | 'soon';
+export type TaskStatus = 'ready' | 'soon';
 
-/** Часть экзамена: 1 — краткий ответ, 2 — развёрнутое решение. */
+/** Часть экзамена: 1 — краткий ответ, 2 — развёрнутый ответ. */
 export type TaskPart = 1 | 2;
 
 export interface ExamTask {
@@ -23,25 +24,27 @@ export interface ExamTask {
   no: string;
   name: string;
   /**
-   * Короткое название для узких мест — списка в сайдбаре. Задано
-   * только там, где полное не укладывается в две строки; не задано —
+   * Короткое название для узких мест — списка в сайдбаре. Не задано —
    * берётся полное. На карточках банка всегда полное название.
    */
   shortTitle?: string;
-  /** Часть адреса: /zadaniya/{slug}. */
+  /** Часть адреса: /zadaniya/{slug}/. */
   slug: string;
+  part: TaskPart;
   status: TaskStatus;
-  /** Часть экзамена. Не задана — первая. */
-  part?: TaskPart;
-  /** Пометка о смене структуры экзамена, если она есть в источнике. */
-  badge?: string;
   /**
-   * Формат миниатюры карточки: файл /images/task-{no}.{format}.
-   * Не задан — растровый webp, как у большинства заданий.
-   * placeholder — файла ещё нет: на его месте линейный значок-заглушка
-   * (components/tasks/TaskPlaceholderArt.tsx).
+   * У неоткрытого задания есть страница-заглушка /zadaniya/{slug}/:
+   * плашка и пункт сайдбара остаются приглушёнными, но ведут на неё.
+   * Когда раздел откроется (status: 'ready'), поле не нужно.
    */
-  illustration?: 'svg' | 'placeholder';
+  stub?: true;
+  /** Голубые бейджи на плашке: пометка о смене структуры экзамена и т. п. */
+  badges?: readonly string[];
+  /**
+   * Иконка плашки: файл /images/task-{no}.{icon}. Не задана — растровый
+   * webp, как у большинства заданий; svg — у векторных чертежей.
+   */
+  icon?: 'webp' | 'svg';
 }
 
 export const tasksPage = {
@@ -64,24 +67,54 @@ export const tasksPage = {
   },
   /** Адрес страницы списка: используется в хлебных крошках разделов. */
   href: '/zadaniya',
+  /* Страница-заглушка неоткрытого задания: /zadaniya/{slug}/. */
+  stub: {
+    crumb: 'Банк заданий ЕГЭ',
+    badge: 'Скоро',
+    title: 'Раздел в разработке',
+    text: 'Мы готовим теорию, опорные задачи, тренажёр и генератор. Раздел скоро появится. А пока можно заниматься другими заданиями.',
+    action: 'К банку заданий',
+  },
 } as const;
 
 /**
- * Блоки банка «Часть 1» / «Часть 2». Задания попадают в блок по полю
- * part; диапазон номеров в подписи считается из списка заданий.
+ * Части экзамена: подписи переключателя и заголовков над сеткой.
+ * Задания попадают в часть по полю part.
  */
 export const taskParts = [
-  { part: 1, title: 'Часть 1', lead: 'краткий ответ' },
-  { part: 2, title: 'Часть 2', lead: 'развёрнутое решение' },
-] as const satisfies readonly { part: TaskPart; title: string; lead: string }[];
+  {
+    part: 1,
+    title: 'Часть 1',
+    caption: 'Задания с кратким ответом',
+    heading: 'задания с кратким ответом',
+  },
+  {
+    part: 2,
+    title: 'Часть 2',
+    caption: 'Задания с развёрнутым ответом',
+    heading: 'задания с развёрнутым ответом',
+  },
+] as const satisfies readonly { part: TaskPart; title: string; caption: string; heading: string }[];
 
-export function taskPart(task: ExamTask): TaskPart {
-  return task.part ?? 1;
+/** У задания есть своя страница: открытый раздел или заглушка. */
+export function taskHasPage(task: ExamTask): boolean {
+  return task.status === 'ready' || task.stub === true;
 }
 
-/** Адрес раздела есть у открытых заданий и у заданий в разработке. */
-export function taskHasPage(task: ExamTask): boolean {
-  return task.status !== 'soon';
+/** Адрес страницы задания. */
+export function taskHref(task: ExamTask): string {
+  return `${tasksPage.href}/${task.slug}`;
+}
+
+/** Задания одной части в порядке номеров. */
+export function tasksOfPart(part: TaskPart): ExamTask[] {
+  return tasks.filter((task) => task.part === part);
+}
+
+/** «01–13»: первый и последний номер части. */
+export function partRange(part: TaskPart): string {
+  const list = tasksOfPart(part);
+  return `${list[0]?.no ?? ''}–${list[list.length - 1]?.no ?? ''}`;
 }
 
 /**
@@ -97,31 +130,34 @@ export function taskName(slug: string): string {
 }
 
 export const tasks = [
+  /* ── Часть 1: задания с кратким ответом ── */
+
   /* Миниатюра №1 — вектор: чертёж посчитан точно, и в SVG касание
      окружностей не расплывается при любом масштабе. */
-  { no: '01', name: 'Планиметрия', slug: '1', status: 'soon', illustration: 'svg' },
+  { no: '01', name: 'Планиметрия', slug: '1', part: 1, status: 'soon', icon: 'svg' },
   /* Раздел открыт: шесть вкладок, генераторы 19 прототипов и банк
      для репетиторов — в lib/vektory. */
-  { no: '02', name: 'Векторы', slug: '2', status: 'active' },
+  { no: '02', name: 'Векторы', slug: '2', part: 1, status: 'ready' },
   /* Раздел открыт: банк из 91 прототипа собран в lib/zadanie3.
      Старый статический тренажёр в корне репозитория живёт отдельно
      и в сборку Next.js по-прежнему не входит. */
-  { no: '03', name: 'Стереометрия', slug: '3', status: 'active' },
+  { no: '03', name: 'Стереометрия', slug: '3', part: 1, status: 'ready' },
   /* Названия разделов вероятности — те же слова, что в заголовке
      страницы задания: заголовок раздела собирается из этого же
      списка (content/veroyatnost.ts), и двух имён у одной темы быть
      не должно. */
-  { no: '04', name: 'Вероятность: простая', slug: '4', status: 'active' },
-  { no: '05', name: 'Вероятность: сложная', slug: '5', status: 'active' },
+  { no: '04', name: 'Вероятность: простая', slug: '4', part: 1, status: 'ready' },
+  { no: '05', name: 'Вероятность: сложная', slug: '5', part: 1, status: 'ready' },
   {
     no: '06',
     name: 'Случайные величины и распределения',
     shortTitle: 'Случайные величины',
     slug: '6',
+    part: 1,
     status: 'soon',
-    badge: 'структура 2027',
+    badges: ['структура 2027'],
   },
-  { no: '07', name: 'Уравнения', slug: '7', status: 'soon' },
+  { no: '07', name: 'Уравнения', slug: '7', part: 1, status: 'soon' },
   /* Раздел открыт: банк из 26 прототипов, тренажёр, опорные задачи,
      генератор и листы. Вкладка «Теория» пока с надписью «Материал
      готовится»: текст пишет автор отдельно. */
@@ -130,13 +166,15 @@ export const tasks = [
     name: 'Вычисления и преобразования',
     shortTitle: 'Вычисления',
     slug: '8',
-    status: 'active',
+    part: 1,
+    status: 'ready',
   },
   {
     no: '09',
     name: 'Производная и первообразная',
     shortTitle: 'Производная',
     slug: '9',
+    part: 1,
     status: 'soon',
   },
   {
@@ -144,73 +182,56 @@ export const tasks = [
     name: 'Задачи с физическим смыслом',
     shortTitle: 'Физический смысл',
     slug: '10',
+    part: 1,
     status: 'soon',
   },
-  { no: '11', name: 'Текстовая задача', slug: '11', status: 'soon' },
-  { no: '12', name: 'Графики функций', slug: '12', status: 'active' },
+  { no: '11', name: 'Текстовая задача', slug: '11', part: 1, status: 'soon' },
+  { no: '12', name: 'Графики функций', slug: '12', part: 1, status: 'ready' },
   {
     no: '13',
     name: 'Финансовая грамотность и экономические задачи',
     shortTitle: 'Финансовая грамотность',
     slug: '13',
+    part: 1,
     status: 'soon',
-    badge: 'структура 2027',
+    badges: ['структура 2027'],
   },
 
-  /* Часть 2. Разделов пока нет: карточки ведут на заглушку
-     /zadaniya/{slug}. Открыть раздел — сменить status на 'active'
-     и завести его страницу; миниатюра — положить task-{no}.webp
-     и убрать illustration. */
-  { no: '14', name: 'Уравнение', slug: '14', status: 'dev', part: 2, illustration: 'placeholder' },
-  {
-    no: '15',
-    name: 'Стереометрия',
-    slug: '15',
-    status: 'dev',
-    part: 2,
-    illustration: 'placeholder',
-  },
-  {
-    no: '16',
-    name: 'Неравенство',
-    slug: '16',
-    status: 'dev',
-    part: 2,
-    illustration: 'placeholder',
-  },
+  /* ── Часть 2: задания с развёрнутым ответом ──
+     Разделов пока нет: плашки ведут на заглушки /zadaniya/{slug}/.
+     Иконки — векторные чертежи public/images/task-{no}.svg. */
+  { no: '14', name: 'Уравнение', slug: '14', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  { no: '15', name: 'Стереометрия', slug: '15', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  { no: '16', name: 'Неравенство', slug: '16', part: 2, status: 'soon', stub: true, icon: 'svg' },
   {
     no: '17',
     name: 'Задача на оптимизацию',
     shortTitle: 'Оптимизация',
     slug: '17',
-    status: 'dev',
     part: 2,
-    illustration: 'placeholder',
+    status: 'soon',
+    stub: true,
+    icon: 'svg',
   },
-  {
-    no: '18',
-    name: 'Планиметрия',
-    slug: '18',
-    status: 'dev',
-    part: 2,
-    illustration: 'placeholder',
-  },
+  { no: '18', name: 'Планиметрия', slug: '18', part: 2, status: 'soon', stub: true, icon: 'svg' },
   {
     no: '19',
     name: 'Задача с параметром',
     shortTitle: 'Параметр',
     slug: '19',
-    status: 'dev',
     part: 2,
-    illustration: 'placeholder',
+    status: 'soon',
+    stub: true,
+    icon: 'svg',
   },
   {
     no: '20',
     name: 'Олимпиадная задача',
     shortTitle: 'Олимпиадная',
     slug: '20',
-    status: 'dev',
     part: 2,
-    illustration: 'placeholder',
+    status: 'soon',
+    stub: true,
+    icon: 'svg',
   },
 ] satisfies ExamTask[];

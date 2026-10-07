@@ -258,3 +258,76 @@ a.subtopic:hover {
     text-align: left;
   }
 }
+
+/* ── Заглушка неоткрытого задания (/zadaniya/14/ … /20/) ─────────── */
+
+/* Бейдж «Скоро» у заголовка — как на плашке неоткрытого раздела:
+   нейтральный текст на белом. Серый фон бейджа по умолчанию на фоне
+   страницы не читается, поэтому поверхность и тонкая рамка. */
+.task-stub-head .badge {
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  font-size: 13px;
+}
+
+/* Карточка «Раздел в разработке»: крупная иконка задания слева,
+   текст и кнопка справа. На телефоне — столбиком. */
+.task-stub {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.task-stub__art {
+  display: grid;
+  place-items: center;
+  width: 280px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.task-stub__art img {
+  display: block;
+  width: 78%;
+  height: auto;
+}
+.task-stub__text {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+.task-stub__lead {
+  max-width: 52ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.task-stub__cta {
+  margin-top: var(--space-2);
+}
+.task-stub__cta svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 767.98px) {
+  .task-stub {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+  .task-stub__art {
+    width: 100%;
+    max-width: 280px;
+    justify-self: center;
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Числовая прямая: интервалы и знаки плюс, минус, плюс">
+  <!-- Метод интервалов: точки 105 и 195 на прямой y = 175, дуги над
+       интервалами и знаки +, −, +. Промежутки со знаком «+» выделены
+       полосой под прямой.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa,
+       лёгкая заливка #7FAEEA с прозрачностью 0.12, обводка 1.5–2, точки r 5–6.
+       Фона нет — его даёт плашка карточки. -->
+
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <!-- решение: промежутки со знаком «+» -->
+    <rect x="32" y="175" width="73" height="16" rx="3" fill="#c3dffa" stroke="none"/>
+    <rect x="195" y="175" width="67" height="16" rx="3" fill="#c3dffa" stroke="none"/>
+    <!-- прямая -->
+    <path d="M30 175 H 268" stroke-width="2"/>
+    <path d="M259 179.95 L268 175 L259 170.05" stroke-width="1.5"/>
+    <!-- дуги над интервалами -->
+    <path d="M40 169 Q 72.5 119 105 169" stroke-width="1.5"/>
+    <path d="M105 169 Q 150.0 109 195 169" stroke-width="1.5"/>
+    <path d="M195 169 Q 225.5 119 256 169" stroke-width="1.5"/>
+    <!-- знаки -->
+    <path d="M63.5 113 H 81.5 M72.5 104 V 122" stroke-width="2.5"/>
+    <path d="M141.0 103 H 159.0" stroke-width="2.5"/>
+    <path d="M216.5 113 H 234.5 M225.5 104 V 122" stroke-width="2.5"/>
+  </g>
+  <g fill="#0c3ebc" stroke="#0c3ebc" stroke-width="2">
+    <circle cx="105" cy="175" r="6"/>
+    <circle cx="195" cy="175" r="6" fill="#ffffff"/>
+  </g>
+</svg>

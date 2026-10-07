@@ -74,6 +74,21 @@ export const VKLADKI_PODTEMY: readonly RazdelTab[] = [
 ];
 
 /**
+ * Вкладки страницы-заглушки неоткрытого задания (№14–20). Разделов
+ * ещё нет, поэтому хвостов у вкладок нет: все ведут на саму заглушку,
+ * активна «О задании». Когда раздел откроется, у вкладок появятся
+ * хвосты, как у №2.
+ */
+export const VKLADKI_ZAGLUSHKI: readonly RazdelTab[] = [
+  { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
+  { id: 'teoriya', label: 'Теория', tail: '', icon: 'book' },
+  { id: 'opornye', label: OPORNYE.title, tail: '', icon: 'target' },
+  { id: 'trenazher', label: 'Тренажёр', tail: '', icon: 'dumbbell' },
+  { id: 'generator', label: 'Генератор', tail: '', icon: 'settings' },
+  { id: 'repetitory', label: 'Для репетиторов', tail: '', icon: 'materials' },
+];
+
+/**
  * Вкладки оглавления задания №12. Здесь вкладки переключают
  * содержимое на одной странице, а не ведут на свои адреса, поэтому
  * хвоста у них нет — только идентификатор, подпись и значок.

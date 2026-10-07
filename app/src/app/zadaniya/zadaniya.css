@@ -103,9 +103,99 @@
   color: var(--color-text-secondary);
 }
 
+/* ── Переключатель частей экзамена ──────────────────────────── */
+
+/* Два сегмента во всю ширину контента. Активный — синий, тем же
+   градиентом, что активная вкладка ленты раздела: это тот же
+   элемент управления — выбор одного из нескольких. */
+.part-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-2);
+  margin-bottom: var(--space-8);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.part-switch__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 64px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.part-switch__seg:hover {
+  background: var(--color-surface-info);
+}
+.part-switch__seg.is-active {
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+/* Диапазон номеров — на плашке: голубой у неактивного сегмента,
+   полупрозрачный белый у активного. */
+.part-switch__range {
+  flex: none;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.part-switch__seg.is-active .part-switch__range {
+  background: var(--color-tab-plate);
+  color: var(--color-text-inverse);
+}
+.part-switch__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.part-switch__title {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.part-switch__caption {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+}
+.part-switch__seg.is-active .part-switch__caption {
+  color: var(--color-on-brand-text);
+}
+
+/* Заголовок над сеткой: часть слева, число заданий справа. */
+.bank-part-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.bank-part-head__title {
+  color: var(--color-text-brand);
+}
+.bank-part-head__count {
+  flex: none;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Раскладка по ширинам ───────────────────────────────────── */
-
-
 
 /* ── Нижний блок: с чего начать ─────────────────────────────────── */
 
@@ -401,5 +491,36 @@
   }
   .bank-search {
     flex: none;
+  }
+  /* Переключатель во всю ширину; в сегменте всё в столбик по центру:
+     диапазон, название части, подпись. */
+  .part-switch {
+    margin-bottom: var(--space-6);
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+  .part-switch__seg {
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    padding: var(--space-2) var(--space-2);
+    text-align: center;
+  }
+  .part-switch__range {
+    padding: 0;
+    background: none;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  .part-switch__seg.is-active .part-switch__range {
+    background: none;
+  }
+  .part-switch__title {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .part-switch__caption {
+    font-size: 11px;
+    line-height: 14px;
   }
 }

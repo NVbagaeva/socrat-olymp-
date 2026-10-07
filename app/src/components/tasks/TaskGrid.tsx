@@ -1,8 +1,7 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
-import { taskHasPage, tasksPage } from '@/content/tasks';
+import { taskHasPage, taskHref } from '@/content/tasks';
 import { TaskImage } from './TaskImage';
-import { TaskPlaceholderArt } from './TaskPlaceholderArt';
 
 export interface TaskGridProps {
   tasks: readonly ExamTask[];
@@ -34,31 +33,22 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
   return (
     <ul className="tasks-grid">
       {tasks.map((task) => {
-        /* Ссылка есть у открытого раздела и у раздела в разработке:
-           второй ведёт на заглушку. */
+        /* Ссылка есть у открытого раздела и у неоткрытого с заглушкой. */
         const open = taskHasPage(task);
-        const byHandler = task.status === 'active' && openInDialog?.slug === task.slug;
+        const byHandler = task.status === 'ready' && openInDialog?.slug === task.slug;
         return (
         <li key={task.no}>
           <TaskCard
             className="task-card--bank"
             number={task.no}
             title={task.name}
-            href={open && !byHandler ? `${tasksPage.href}/${task.slug}` : undefined}
+            href={open && !byHandler ? taskHref(task) : undefined}
             {...(byHandler && openInDialog !== undefined
               ? { onClick: (event) => openInDialog.onOpen(task, event.currentTarget) }
               : {})}
-            comingSoon={task.status === 'soon'}
-            inDevelopment={task.status === 'dev'}
-            difficulty={task.badge}
-            difficultyTone="info"
-            illustration={
-              task.illustration === 'placeholder' ? (
-                <TaskPlaceholderArt no={task.no} />
-              ) : (
-                <TaskImage no={task.no} format={task.illustration} />
-              )
-            }
+            comingSoon={task.status !== 'ready'}
+            badges={task.badges?.map((label) => ({ label, tone: 'info' as const }))}
+            illustration={<TaskImage no={task.no} format={task.icon} />}
           />
         </li>
         );

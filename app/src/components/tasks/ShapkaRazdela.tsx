@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
-import { Badge, Breadcrumbs } from '@/components/ui';
+import { Badge, Breadcrumbs, type BadgeTone } from '@/components/ui';
 import type { Crumb } from '@/components/ui';
 
 export interface ShapkaRazdelaProps {
@@ -14,6 +14,8 @@ export interface ShapkaRazdelaProps {
   subtitle?: ReactNode;
   /** Уровень задания. Не задан — бейджа нет: у страниц фигур №3 его нет. */
   badge?: ReactNode;
+  /** Тон бейджа. Не задан — голубой; у заглушек — нейтральный «Скоро». */
+  badgeTone?: BadgeTone;
   lead?: ReactNode;
   /**
    * Правая колонка: иллюстрация раздела, чертёж фигуры, график.
@@ -43,6 +45,7 @@ export function ShapkaRazdela({
   title,
   subtitle,
   badge,
+  badgeTone = 'info',
   lead,
   media,
   actions,
@@ -57,7 +60,7 @@ export function ShapkaRazdela({
         <div className="section-head__text">
           <div className="section-head__title">
             <h1 className="t-h1">{title}</h1>
-            {badge === undefined ? null : <Badge tone="info">{badge}</Badge>}
+            {badge === undefined ? null : <Badge tone={badgeTone}>{badge}</Badge>}
           </div>
           {subtitle}
           {lead === undefined ? null : <p className="section-head__lead">{lead}</p>}

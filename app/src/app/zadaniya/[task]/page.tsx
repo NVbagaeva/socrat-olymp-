@@ -4,12 +4,12 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { katex } from '@/lib/graph/katex';
 import { AppShell } from '@/components/layout/AppShell';
-import { StubPage } from '@/components/layout/StubPage';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
+import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
 import { Chart } from '@/components/graph/Chart';
 import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
-import { tasks, tasksPage, type ExamTask } from '@/content/tasks';
+import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
 import { typeset } from '@/lib/tex';
@@ -18,24 +18,21 @@ import { SectionTabs } from './SectionTabs';
 import '../zadaniya.css';
 import './section.css';
 
-/* Задания в разработке: у них своего раздела ещё нет, и по их адресу
-   собирается заглушка. Раздел с собственной страницей в списке не
-   участвует — заглушка его не перекроет. */
-function devTask(slug: string): ExamTask | undefined {
-  return tasks.find((task) => task.slug === slug && task.status === 'dev');
-}
-
-/** «Задание №14. Уравнение» — заголовок заглушки. */
-function stubTitle(task: ExamTask): string {
-  return `Задание №${Number(task.no)}. ${task.name}`;
+/* Неоткрытое задание со страницей-заглушкой (stub в content/tasks.ts).
+   Своего раздела у него нет — по его адресу собирается заглушка. */
+function stubTask(slug: string): ExamTask | undefined {
+  return tasks.find(
+    (task: ExamTask) => task.slug === slug && task.status !== 'ready' && taskHasPage(task),
+  );
 }
 
 /* Статический экспорт: список страниц известен до сборки и считается
-   из конфига. Незаявленные адреса не собираются и не открываются. */
+   из конфига. Незаявленные адреса не собираются и не открываются.
+   Раздел со своей страницей заглушкой не перекрывается. */
 export function generateStaticParams() {
   const own = sectionParams();
   const stubs = tasks
-    .filter((task) => task.status === 'dev' && !own.some((p) => p.task === task.slug))
+    .filter((task) => stubTask(task.slug) !== undefined && !own.some((p) => p.task === task.slug))
     .map((task) => ({ task: task.slug }));
   return [...own, ...stubs];
 }
@@ -47,7 +44,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const slug = (await params).task;
   const section = findSection(slug);
   if (!section) {
-    const task = devTask(slug);
+    const task = stubTask(slug);
     return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
   }
   return {
@@ -77,26 +74,11 @@ export default async function SectionPage({ params }: { params: Params }) {
   const slug = (await params).task;
   const section = findSection(slug);
   if (!section) {
-    const task = devTask(slug);
+    const task = stubTask(slug);
     if (task === undefined) {
       notFound();
     }
-    /* Заглушка задания в разработке: та же оболочка кабинета, что у
-       банка, заголовок «Задание №N. Название» и «Раздел в разработке». */
-    return (
-      <StubPage
-        title={stubTitle(task)}
-        active="tasks"
-        crumbs={[
-          { label: 'Главная', href: '/' },
-          { label: 'Банк заданий', href: tasksPage.href },
-          { label: `№${task.no}` },
-        ]}
-        stateTitle="Раздел в разработке"
-        stateText="Материалы к этому заданию появятся здесь, когда раздел будет собран."
-        back={{ label: 'Вернуться в банк заданий', href: tasksPage.href }}
-      />
-    );
+    return <TaskStub task={task} />;
   }
 
   const subtopics = section.subtopics.map((item) => toView(section.slug, item));

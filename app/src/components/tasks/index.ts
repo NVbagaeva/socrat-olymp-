@@ -11,7 +11,6 @@
 export { SubtopicCard, type SubtopicCardProps } from './SubtopicCard';
 export { TaskGrid, type TaskGridProps } from './TaskGrid';
 export { TaskImage, type TaskImageProps } from './TaskImage';
-export { TaskParts, type TaskPartsProps } from './TaskParts';
 /* Рисованные миниатюры больше не показываются, но остаются
    в проекте: решение о них ещё не принято. */
 export { IllustrationFrame, TaskIllustration } from './illustrations';
