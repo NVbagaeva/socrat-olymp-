@@ -138,6 +138,16 @@ const SYUZHET = new Set([
   'ehalDog',
   'proehal',
   'proehat',
+  /* Работа: изделия, имена, дело. */
+  'edMn',
+  'edKr',
+  'para',
+  'odna',
+  'drugaya',
+  'vtoroy',
+  'delo',
+  'imena3',
+  'imena3Rod',
 ]);
 
 export function model(params: Params): Params {
@@ -695,6 +705,59 @@ const PRAVILA: Record<string, Pravilo> = {
       ...(/по течению/.test(a.text) && /больше/.test(a.text) ? [] : ['нет «по течению … больше»']),
     ],
   },
+  /* ── Работа ── */
+  'RB-01': {
+    chisla: ['N', 'd'],
+    vopros: (a) => kogoSprashivayut(a),
+    pravdopodobie: (a) => proizvoditelnost(a, num(a.params, 'd')),
+  },
+  'RB-02': {
+    chisla: ['N1', 'N2', 'delta', 'd'],
+    vopros: (a) => kogoSprashivayut(a),
+    pravdopodobie: (a) => proizvoditelnost(a, num(a.params, 'd')),
+  },
+  'RB-03': {
+    chisla: ['V', 'd'],
+    vopros: (a) =>
+      a.ask === 'first' ? /пропускает первая/.test(a.text) : /пропускает вторая/.test(a.text),
+    pravdopodobie: (a) => {
+      const x = a.ask === 'first' ? a.answer : a.answer - num(a.params, 'd');
+      return [x, x + num(a.params, 'd')].flatMap((v) => vne('труба, л/мин', v, 2, 40));
+    },
+  },
+  'RB-04': {
+    chisla: ['a', 'b'],
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      (a.ask === 'mastera'
+        ? /За сколько часов/.test(poslednee(a.text))
+        : /За сколько минут/.test(poslednee(a.text))),
+    pravdopodobie: (a) => (a.params.form === 'nasosy' ? vremyaVTekste(a, num(a.params, 'c')) : []),
+  },
+  'RB-05': {
+    chisla: ['T', 'a'],
+    vopros: (a) =>
+      /За сколько минут/.test(poslednee(a.text)) &&
+      poslednee(a.text).includes(String(a.params.drugaya)),
+    pravdopodobie: (a) => [
+      ...slovaVTekste(a, ['odna', 'drugaya']),
+      ...(num(a.params, 'T') < num(a.params, 'a') ? [] : ['вместе не быстрее, чем одна']),
+    ],
+  },
+  'RB-06': {
+    chisla: ['delta', 'T'],
+    vopros: (a) => /одна вторая труба/.test(poslednee(a.text)),
+    pravdopodobie: (a) => vne('время второй трубы, мин', a.answer, 5, 180),
+  },
+  'RB-07': {
+    chisla: ['a', 'b', 'c'],
+    vopros: (a) => /втроём/.test(poslednee(a.text)),
+    pravdopodobie: (a) =>
+      String(a.params.imena3)
+        .split('|')
+        .filter((im) => !a.text.includes(im))
+        .map((im) => `в тексте нет имени «${im}»`),
+  },
   /* ── Разминка ── */
   'RZ-01': {
     chisla: ['c', 'M'],
@@ -884,6 +947,22 @@ const PRAVILA: Record<string, Pravilo> = {
   },
 };
 
+/** РБ-01/02: вопрос про того, кого спрашивают (ask), изделия названы в тексте. */
+function kogoSprashivayut(a: Analog): boolean {
+  const q = poslednee(a.text);
+  const kto = a.ask === 'second' ? 'второй' : 'первый';
+  return new RegExp(`^Сколько [^,]* (за|в) час [^,]* ${kto} `).test(q);
+}
+
+/** Производительность обоих — 5–60 изделий в час, изделия названы в тексте. */
+function proizvoditelnost(a: Analog, d: number): string[] {
+  const x = a.ask === 'second' ? a.answer : a.answer - d;
+  return [
+    ...[x, x + d].flatMap((v) => vne('производительность, шт./ч', v, 5, 60)),
+    ...slovaVTekste(a, ['edMn', 'kto']),
+  ];
+}
+
 /** Река: собственная скорость в пределах водного героя, течение 1–6 км/ч. */
 function reka(a: Analog, v: number, c: number): string[] {
   const g = GEROI[String(a.params.geroy)];
@@ -970,6 +1049,10 @@ function sklonenia(text: string): string[] {
     const re = new RegExp(`(\\d+) (${forms.join('|')})(?![а-яё])`, 'g');
     for (const m of text.matchAll(re)) {
       const n = Number(m[1]);
+      /* «на изготовление 432 деталей», «таких же 22 деталей» — родительный
+         падеж от управляющего слова, это верно. */
+      const pered = text.slice(0, m.index);
+      if (m[2] === forms[2] && /(изготовлени[ея]|таких же) $/.test(pered)) continue;
       /* sk ставит неразрывный пробел — сравниваем по словам. */
       const ok = [sk(n, forms), sk(n, SLOVA.minuta), sk(n, SLOVA.minutu)].map((x) =>
         x.replace(/\s/g, ' '),

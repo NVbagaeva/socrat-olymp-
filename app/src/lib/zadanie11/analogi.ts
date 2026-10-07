@@ -51,6 +51,13 @@ import vd04 from '../../data/zadanie11/analogs/VD-04.json';
 import vd05 from '../../data/zadanie11/analogs/VD-05.json';
 import vd06 from '../../data/zadanie11/analogs/VD-06.json';
 import vd07 from '../../data/zadanie11/analogs/VD-07.json';
+import rb01 from '../../data/zadanie11/analogs/RB-01.json';
+import rb02 from '../../data/zadanie11/analogs/RB-02.json';
+import rb03 from '../../data/zadanie11/analogs/RB-03.json';
+import rb04 from '../../data/zadanie11/analogs/RB-04.json';
+import rb05 from '../../data/zadanie11/analogs/RB-05.json';
+import rb06 from '../../data/zadanie11/analogs/RB-06.json';
+import rb07 from '../../data/zadanie11/analogs/RB-07.json';
 import rz01 from '../../data/zadanie11/analogs/RZ-01.json';
 import rz02 from '../../data/zadanie11/analogs/RZ-02.json';
 import rz03 from '../../data/zadanie11/analogs/RZ-03.json';
@@ -110,6 +117,13 @@ export const POOL_ANALOGOV: Record<string, Analog[]> = {
   'VD-05': vd05 as unknown as Analog[],
   'VD-06': vd06 as unknown as Analog[],
   'VD-07': vd07 as unknown as Analog[],
+  'RB-01': rb01 as unknown as Analog[],
+  'RB-02': rb02 as unknown as Analog[],
+  'RB-03': rb03 as unknown as Analog[],
+  'RB-04': rb04 as unknown as Analog[],
+  'RB-05': rb05 as unknown as Analog[],
+  'RB-06': rb06 as unknown as Analog[],
+  'RB-07': rb07 as unknown as Analog[],
   'RZ-01': rz01 as unknown as Analog[],
   'RZ-02': rz02 as unknown as Analog[],
   'RZ-03': rz03 as unknown as Analog[],

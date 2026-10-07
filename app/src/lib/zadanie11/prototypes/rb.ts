@@ -14,12 +14,13 @@ import {
   kvadrat,
   num,
   rabota,
+  slovo,
   str,
   vopros,
   xxd,
 } from '../kit';
 import { add, d, div, fq, q, sub, txt, val } from '../num';
-import { sk, vremya, SLOVA } from '../sklonenie';
+import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
 import { otvet } from './common';
 
@@ -38,6 +39,11 @@ const RB01: Subtype = {
     const res = xxd(N, dd);
     const x = res.root;
     const ans = ask === 'second' ? x : x + dd;
+    /* Аналог: наборщики и страницы, пекари и пирожки… */
+    const kto = slovo(p, 'kto', 'рабочий');
+    const ktoRod = slovo(p, 'ktoRod', 'рабочего');
+    const edMn = slovo(p, 'edMn', 'деталей');
+    const edKr = slovo(p, 'edKr', 'дет.');
     const vopr =
       ask === 'second'
         ? `Сколько деталей за час изготавливает второй рабочий, если известно, что первый за час изготавливает на ${sk(dd, SLOVA.detal)} больше?`
@@ -57,7 +63,7 @@ const RB01: Subtype = {
       uslovie: `Заказ на изготовление ${txt(N)} ${detaley(N)} первый рабочий выполняет на ${sk(dd, SLOVA.chas)} быстрее, чем второй. ${vopr}`,
       answer: ans,
       etapy: etapy(
-        ['Обозначаем', [`Второй рабочий делает $x$ деталей в час, первый — $x+${d(dd)}$.`]],
+        ['Обозначаем', [`Второй ${kto} делает $x$ ${edMn} в час, первый — $x+${d(dd)}$.`]],
         [
           'Таблица',
           [`Время второго $\\dfrac{${d(N)}}{x}$, первого $\\dfrac{${d(N)}}{x+${d(dd)}}$.`],
@@ -87,13 +93,13 @@ const RB01: Subtype = {
             ['Первый', `${d(N)}`, `x+${d(dd)}`, `\\dfrac{${d(N)}}{x+${d(dd)}}`],
             ['Второй', `${d(N)}`, 'x', `\\dfrac{${d(N)}}{x}`],
           ],
-          [', дет.', ', дет./ч', ', ч'],
+          [`, ${edKr}`, `, ${edKr}/ч`, ', ч'],
         ),
       ],
       hints: [
-        vopros('Что обозначим за $x$?', 'производительность второго рабочего', [
+        vopros('Что обозначим за $x$?', `производительность второго ${ktoRod}`, [
           'время второго',
-          'число деталей',
+          `число ${edMn}`,
         ]),
         vopros('Сколько часов работает второй?', `$\\dfrac{${d(N)}}{x}$`, [
           `$${d(N)}x$`,
@@ -111,11 +117,11 @@ const RB01: Subtype = {
         t.hintKoren,
         chtoSprashivayut(
           ask === 'second'
-            ? 'сколько деталей в час делает второй'
-            : 'сколько деталей в час делает первый',
+            ? `сколько ${edMn} в час делает второй`
+            : `сколько ${edMn} в час делает первый`,
           ask === 'second'
-            ? ['сколько деталей в час делает первый', 'время работы']
-            : ['сколько деталей в час делает второй', 'время работы'],
+            ? [`сколько ${edMn} в час делает первый`, 'время работы']
+            : [`сколько ${edMn} в час делает второй`, 'время работы'],
         ),
       ],
       lifehacks: ['x-x-plus-d', 'root-guess', 'divide-equation'],
@@ -140,6 +146,10 @@ const RB02: Subtype = {
     const sol = kvadrat(Dl, Dl * dd - N2 + N1, -N2 * dd);
     const x = val(sol.roots[1]);
     const ans = ask === 'second' ? x : x + dd;
+    /* Аналог: наборщики и страницы, пекари и пирожки… */
+    const kto = slovo(p, 'kto', 'рабочий');
+    const edMn = slovo(p, 'edMn', 'деталей');
+    const edKr = slovo(p, 'edKr', 'дет.');
     const t = drobnoe({
       nuli: [0, -dd],
       lo: 0,
@@ -156,7 +166,7 @@ const RB02: Subtype = {
       uslovie: `На изготовление ${txt(N1)} ${detaley(N1)} первый рабочий тратит на ${sk(Dl, SLOVA.chas)} меньше, чем второй рабочий на изготовление ${txt(N2)} таких же ${detaley(N2)}. Известно, что первый рабочий за час делает на ${sk(dd, SLOVA.detal)} больше, чем второй. Сколько деталей за час делает ${ask === 'second' ? 'второй' : 'первый'} рабочий?`,
       answer: ans,
       etapy: etapy(
-        ['Обозначаем', [`Второй делает $x$ деталей в час, первый — $x+${d(dd)}$.`]],
+        ['Обозначаем', [`Второй делает $x$ ${edMn} в час, первый — $x+${d(dd)}$.`]],
         [
           'Таблица',
           [`Время второго $\\dfrac{${d(N2)}}{x}$, первого $\\dfrac{${d(N1)}}{x+${d(dd)}}$.`],
@@ -181,11 +191,11 @@ const RB02: Subtype = {
             ['Первый', `${d(N1)}`, `x+${d(dd)}`, `\\dfrac{${d(N1)}}{x+${d(dd)}}`],
             ['Второй', `${d(N2)}`, 'x', `\\dfrac{${d(N2)}}{x}`],
           ],
-          [', дет.', ', дет./ч', ', ч'],
+          [`, ${edKr}`, `, ${edKr}/ч`, ', ч'],
         ),
       ],
       hints: [
-        vopros('Кто тратит больше времени?', 'второй рабочий', ['первый рабочий', 'одинаково']),
+        vopros('Кто тратит больше времени?', `второй ${kto}`, [`первый ${kto}`, 'одинаково']),
         vopros('Сколько часов тратит первый?', `$\\dfrac{${d(N1)}}{x+${d(dd)}}$`, [
           `$\\dfrac{${d(N1)}}{x}$`,
           `$\\dfrac{${d(N2)}}{x+${d(dd)}}$`,
@@ -399,7 +409,13 @@ const RB05: Subtype = {
   solve(p) {
     const T = num(p, 'T');
     const a = num(p, 'a');
-    const [para, odna, drugaya] = key(IMENA, str(p, 'imena', ['katya', 'anya'] as const));
+    const [para0, odna0, drugaya0] = key(IMENA, str(p, 'imena', ['katya', 'anya'] as const));
+    const para = slovo(p, 'para', para0);
+    const odna = slovo(p, 'odna', odna0);
+    const drugaya = slovo(p, 'drugaya', drugaya0);
+    /* Аналог: свои имена (женские) и своё дело. */
+    const delo = slovo(p, 'delo', 'прополоть грядку');
+    const vtoroy = slovo(p, 'vtoroy', 'второй девочки');
     const pr = sub(q(1, T), q(1, a));
     const ans = val(div(q(1), pr));
     const t = drobnoe({
@@ -417,10 +433,13 @@ const RB05: Subtype = {
         [
           'Обозначаем',
           [
-            `**Примем всю работу (прополоть грядку) за $1$.** ${drugaya} пропалывает её за $x$ минут, её производительность $\\dfrac{1}{x}$.`,
+            `**Примем всю работу (${delo}) за $1$.** ${zaglavnaya(drugaya)} справляется одна за $x$ минут, её производительность $\\dfrac{1}{x}$.`,
           ],
         ],
-        ['Производительности', [`Вместе: $\\dfrac{1}{${d(T)}}$. ${odna}: $\\dfrac{1}{${d(a)}}$.`]],
+        [
+          'Производительности',
+          [`Вместе: $\\dfrac{1}{${d(T)}}$. ${zaglavnaya(odna)}: $\\dfrac{1}{${d(a)}}$.`],
+        ],
         ['Уравнение', [`$\\dfrac{1}{x}+\\dfrac{1}{${d(a)}}=\\dfrac{1}{${d(T)}}$.`]],
         t.odz,
         t.reshenie,
@@ -429,8 +448,8 @@ const RB05: Subtype = {
       tables: [
         rabota(
           [
-            [drugaya, '1', '\\dfrac{1}{x}', 'x'],
-            [odna, '1', `\\dfrac{1}{${d(a)}}`, `${d(a)}`],
+            [zaglavnaya(drugaya), '1', '\\dfrac{1}{x}', 'x'],
+            [zaglavnaya(odna), '1', `\\dfrac{1}{${d(a)}}`, `${d(a)}`],
             ['Вместе', '1', `\\dfrac{1}{${d(T)}}`, `${d(T)}`],
           ],
           ['', '', ', мин'],
@@ -446,7 +465,7 @@ const RB05: Subtype = {
           'объёмы работы',
         ]),
         vopros(
-          'Как найти производительность второй девочки?',
+          `Как найти производительность ${vtoroy}?`,
           `$\\dfrac{1}{${d(T)}}-\\dfrac{1}{${d(a)}}$`,
           [`$\\dfrac{1}{${d(a)}}-\\dfrac{1}{${d(T)}}$`, `$\\dfrac{1}{${d(a - T)}}$`],
         ),
@@ -553,6 +572,18 @@ const RB07: Subtype = {
     const sum2 = add(add(q(1, a), q(1, b)), q(1, c));
     const sum = div(sum2, q(2));
     const ans = val(div(q(1), sum));
+    /* Аналог: свои имена и своё дело. */
+    const [A, B, C] = slovo(p, 'imena3', 'Игорь|Паша|Володя').split('|') as [
+      string,
+      string,
+      string,
+    ];
+    const [aRod, bRod, cRod] = slovo(p, 'imena3Rod', 'Игоря|Паши|Володи').split('|') as [
+      string,
+      string,
+      string,
+    ];
+    const delo = slovo(p, 'delo', 'покрасить забор');
     return {
       uslovie: `Игорь и Паша красят забор за ${sk(a, SLOVA.chas)}. Паша и Володя красят этот же забор за ${sk(b, SLOVA.chas)}, а Володя и Игорь — за ${sk(c, SLOVA.chas)}. За сколько часов мальчики покрасят забор, работая втроём?`,
       answer: ans,
@@ -560,7 +591,7 @@ const RB07: Subtype = {
         [
           'Обозначаем',
           [
-            '**Примем всю работу (покрасить забор) за $1$.** Производительности Игоря, Паши и Володи — $x$, $y$, $z$.',
+            `**Примем всю работу (${delo}) за $1$.** Производительности ${aRod}, ${bRod} и ${cRod} — $x$, $y$, $z$.`,
           ],
         ],
         [
@@ -581,9 +612,9 @@ const RB07: Subtype = {
       tables: [
         rabota(
           [
-            ['Игорь и Паша', '1', 'x+y', d(a)],
-            ['Паша и Володя', '1', 'y+z', d(b)],
-            ['Володя и Игорь', '1', 'z+x', d(c)],
+            [`${A} и ${B}`, '1', 'x+y', d(a)],
+            [`${B} и ${C}`, '1', 'y+z', d(b)],
+            [`${C} и ${A}`, '1', 'z+x', d(c)],
             ['Втроём', '1', 'x+y+z', fq(div(q(1), sum))],
           ],
           ['', '', ', ч'],
@@ -599,7 +630,7 @@ const RB07: Subtype = {
           'найти каждого отдельно',
           'перемножить уравнения',
         ]),
-        chtoSprashivayut('время работы втроём', ['производительность втроём', 'время Игоря']),
+        chtoSprashivayut('время работы втроём', ['производительность втроём', `время ${aRod}`]),
       ],
       lifehacks: ['fast-count'],
     };
