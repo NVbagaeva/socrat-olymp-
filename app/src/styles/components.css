@@ -1932,11 +1932,59 @@ html[data-tabs-pending] .topic-panel,
   opacity: 0.5;
 }
 
+/* Раздел в разработке. Карточка живая — ведёт на заглушку раздела,
+   поэтому поверхность, наведение и стрелка те же, что у открытой.
+   Отличия два: бейдж «В разработке» и приглушённая миниатюра. */
+.task-card--dev .task-card__ill {
+  opacity: 0.6;
+}
+/* Бейдж «В разработке»: нейтральный, как «Скоро», но с точкой
+   акцентного цвета перед словом — так он не путается с закрытым
+   разделом, и янтарный «предупреждающий» тон не тратится. */
+.badge--dev {
+  gap: 6px;
+}
+.badge--dev::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex: none;
+}
+
+/* ── Блоки «Часть 1» / «Часть 2» ───────────────────────────── */
+
+.task-part + .task-part {
+  margin-top: var(--space-10);
+}
+/* Заголовок части и подпись в одну строку по базовой линии; на
+   узком экране подпись переносится под заголовок. */
+.task-part__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+.task-part__title {
+  color: var(--color-text-brand);
+}
+.task-part__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
 /* Ниже 768 карточки идут в один столбец, и шаг между ними меньше:
    на узком экране крупный зазор съедает половину списка. */
 @media (max-width: 767.98px) {
   .tasks-grid {
     gap: var(--space-3);
+  }
+  .task-part + .task-part {
+    margin-top: var(--space-8);
   }
 }
 

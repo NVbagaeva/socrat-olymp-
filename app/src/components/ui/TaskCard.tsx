@@ -19,6 +19,12 @@ interface TaskCardOwnProps {
   href?: string;
   /** Раздел ещё не открыт: карточка неинтерактивна и помечена бейджем. */
   comingSoon?: boolean;
+  /**
+   * Раздел в разработке: карточка остаётся ссылкой (ведёт на заглушку
+   * раздела), но помечена бейджем «В разработке» и приглушённой
+   * миниатюрой.
+   */
+  inDevelopment?: boolean;
   /** Миниатюра раздела. Оформление — за страницей, здесь только место. */
   illustration?: ReactNode;
 }
@@ -41,6 +47,7 @@ export function TaskCard({
   statusTone = 'neutral',
   href,
   comingSoon = false,
+  inDevelopment = false,
   illustration,
   className,
   ...rest
@@ -61,6 +68,7 @@ export function TaskCard({
         </span>
         <span className="task-card__meta">
           {comingSoon ? <Badge>Скоро</Badge> : null}
+          {inDevelopment && !comingSoon ? <Badge className="badge--dev">В разработке</Badge> : null}
           {difficulty !== undefined ? <Badge tone={difficultyTone}>{difficulty}</Badge> : null}
           {status !== undefined ? (
             <span className={clsx('t-caption', STATUS[statusTone])}>{status}</span>
@@ -99,7 +107,7 @@ export function TaskCard({
   /* Раздел открыт: ссылка целиком, а не только заголовок. */
   if (href !== undefined) {
     return (
-      <Link className={clsx('task-card', className)} href={href}>
+      <Link className={clsx('task-card', inDevelopment && 'task-card--dev', className)} href={href}>
         {body}
       </Link>
     );
@@ -107,7 +115,11 @@ export function TaskCard({
 
   /* Ни один из новых пропов не передан — поведение прежнее. */
   return (
-    <button type="button" className={clsx('task-card', className)} {...rest}>
+    <button
+      type="button"
+      className={clsx('task-card', inDevelopment && 'task-card--dev', className)}
+      {...rest}
+    >
       {body}
     </button>
   );

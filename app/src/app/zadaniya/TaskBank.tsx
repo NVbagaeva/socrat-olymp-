@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
-import { TaskGrid } from '@/components/tasks';
+import { TaskParts } from '@/components/tasks';
 import { HandNote } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
 import { tasks, tasksPage } from '@/content/tasks';
@@ -68,7 +68,12 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           <label className="sr-only" htmlFor={searchId}>
             Поиск по заданиям
           </label>
-          <svg className="bank-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <svg
+            className="bank-search__icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
             <circle cx="11" cy="11" r="7" />
             <path d="M16.5 16.5 L 21 21" />
           </svg>
@@ -87,7 +92,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
+        <TaskParts tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
       )}
 
       <section className="bank-start">

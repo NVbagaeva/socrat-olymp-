@@ -7,7 +7,16 @@
  * и маршруты подхватят это сами.
  */
 
-export type TaskStatus = 'active' | 'soon';
+/**
+ * active — раздел открыт: карточка ведёт в него.
+ * dev — раздел в разработке: карточка ведёт на страницу-заглушку
+ *       /zadaniya/{slug} и помечена бейджем «В разработке».
+ * soon — раздела нет: карточка неинтерактивна, бейдж «Скоро».
+ */
+export type TaskStatus = 'active' | 'dev' | 'soon';
+
+/** Часть экзамена: 1 — краткий ответ, 2 — развёрнутое решение. */
+export type TaskPart = 1 | 2;
 
 export interface ExamTask {
   /** Номер задания в экзамене, две цифры — как в источнике. */
@@ -22,13 +31,17 @@ export interface ExamTask {
   /** Часть адреса: /zadaniya/{slug}. */
   slug: string;
   status: TaskStatus;
+  /** Часть экзамена. Не задана — первая. */
+  part?: TaskPart;
   /** Пометка о смене структуры экзамена, если она есть в источнике. */
   badge?: string;
   /**
    * Формат миниатюры карточки: файл /images/task-{no}.{format}.
    * Не задан — растровый webp, как у большинства заданий.
+   * placeholder — файла ещё нет: на его месте линейный значок-заглушка
+   * (components/tasks/TaskPlaceholderArt.tsx).
    */
-  illustration?: 'svg';
+  illustration?: 'svg' | 'placeholder';
 }
 
 export const tasksPage = {
@@ -52,6 +65,24 @@ export const tasksPage = {
   /** Адрес страницы списка: используется в хлебных крошках разделов. */
   href: '/zadaniya',
 } as const;
+
+/**
+ * Блоки банка «Часть 1» / «Часть 2». Задания попадают в блок по полю
+ * part; диапазон номеров в подписи считается из списка заданий.
+ */
+export const taskParts = [
+  { part: 1, title: 'Часть 1', lead: 'краткий ответ' },
+  { part: 2, title: 'Часть 2', lead: 'развёрнутое решение' },
+] as const satisfies readonly { part: TaskPart; title: string; lead: string }[];
+
+export function taskPart(task: ExamTask): TaskPart {
+  return task.part ?? 1;
+}
+
+/** Адрес раздела есть у открытых заданий и у заданий в разработке. */
+export function taskHasPage(task: ExamTask): boolean {
+  return task.status !== 'soon';
+}
 
 /**
  * Название задания по части адреса — для заголовков разделов, чтобы
@@ -124,5 +155,62 @@ export const tasks = [
     slug: '13',
     status: 'soon',
     badge: 'структура 2027',
+  },
+
+  /* Часть 2. Разделов пока нет: карточки ведут на заглушку
+     /zadaniya/{slug}. Открыть раздел — сменить status на 'active'
+     и завести его страницу; миниатюра — положить task-{no}.webp
+     и убрать illustration. */
+  { no: '14', name: 'Уравнение', slug: '14', status: 'dev', part: 2, illustration: 'placeholder' },
+  {
+    no: '15',
+    name: 'Стереометрия',
+    slug: '15',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
+  },
+  {
+    no: '16',
+    name: 'Неравенство',
+    slug: '16',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
+  },
+  {
+    no: '17',
+    name: 'Задача на оптимизацию',
+    shortTitle: 'Оптимизация',
+    slug: '17',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
+  },
+  {
+    no: '18',
+    name: 'Планиметрия',
+    slug: '18',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
+  },
+  {
+    no: '19',
+    name: 'Задача с параметром',
+    shortTitle: 'Параметр',
+    slug: '19',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
+  },
+  {
+    no: '20',
+    name: 'Олимпиадная задача',
+    shortTitle: 'Олимпиадная',
+    slug: '20',
+    status: 'dev',
+    part: 2,
+    illustration: 'placeholder',
   },
 ] satisfies ExamTask[];

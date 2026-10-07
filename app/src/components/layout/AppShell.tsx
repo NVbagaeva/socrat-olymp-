@@ -8,7 +8,7 @@ import {
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
-import { tasks, tasksPage } from '@/content/tasks';
+import { taskHasPage, tasks, tasksPage } from '@/content/tasks';
 import { demoUser } from '@/data/demo';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -37,7 +37,8 @@ function taskItems(): NavItem[] {
        из конфига. Не задана — остаётся полная. */
     ...(task.shortTitle !== undefined ? { short: task.shortTitle } : {}),
     href: `${tasksPage.href}/${task.slug}`,
-    disabled: task.status !== 'active',
+    /* Задание в разработке ведёт на заглушку раздела — пункт живой. */
+    disabled: !taskHasPage(task),
   }));
 }
 
@@ -50,10 +51,7 @@ function taskItems(): NavItem[] {
  * нижняя панель — пункты у неё те же, что в шапке.
  */
 export function AppShell({ active, search = true, children }: AppShellProps) {
-  const bottomItems = withActive(
-    [...appNavPrimary, appNavMorePage],
-    bottomNavActive(active),
-  );
+  const bottomItems = withActive([...appNavPrimary, appNavMorePage], bottomNavActive(active));
 
   return (
     <div className="shell shell--responsive app-shell">

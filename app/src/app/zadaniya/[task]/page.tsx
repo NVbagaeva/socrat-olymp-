@@ -4,11 +4,12 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { katex } from '@/lib/graph/katex';
 import { AppShell } from '@/components/layout/AppShell';
+import { StubPage } from '@/components/layout/StubPage';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { Chart } from '@/components/graph/Chart';
 import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
-import { tasksPage } from '@/content/tasks';
+import { tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
 import { typeset } from '@/lib/tex';
@@ -17,19 +18,37 @@ import { SectionTabs } from './SectionTabs';
 import '../zadaniya.css';
 import './section.css';
 
+/* Задания в разработке: у них своего раздела ещё нет, и по их адресу
+   собирается заглушка. Раздел с собственной страницей в списке не
+   участвует — заглушка его не перекроет. */
+function devTask(slug: string): ExamTask | undefined {
+  return tasks.find((task) => task.slug === slug && task.status === 'dev');
+}
+
+/** «Задание №14. Уравнение» — заголовок заглушки. */
+function stubTitle(task: ExamTask): string {
+  return `Задание №${Number(task.no)}. ${task.name}`;
+}
+
 /* Статический экспорт: список страниц известен до сборки и считается
    из конфига. Незаявленные адреса не собираются и не открываются. */
 export function generateStaticParams() {
-  return sectionParams();
+  const own = sectionParams();
+  const stubs = tasks
+    .filter((task) => task.status === 'dev' && !own.some((p) => p.task === task.slug))
+    .map((task) => ({ task: task.slug }));
+  return [...own, ...stubs];
 }
 export const dynamicParams = false;
 
 type Params = Promise<{ task: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const section = findSection((await params).task);
+  const slug = (await params).task;
+  const section = findSection(slug);
   if (!section) {
-    return {};
+    const task = devTask(slug);
+    return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
   }
   return {
     title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
@@ -55,9 +74,29 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
 }
 
 export default async function SectionPage({ params }: { params: Params }) {
-  const section = findSection((await params).task);
+  const slug = (await params).task;
+  const section = findSection(slug);
   if (!section) {
-    notFound();
+    const task = devTask(slug);
+    if (task === undefined) {
+      notFound();
+    }
+    /* Заглушка задания в разработке: та же оболочка кабинета, что у
+       банка, заголовок «Задание №N. Название» и «Раздел в разработке». */
+    return (
+      <StubPage
+        title={stubTitle(task)}
+        active="tasks"
+        crumbs={[
+          { label: 'Главная', href: '/' },
+          { label: 'Банк заданий', href: tasksPage.href },
+          { label: `№${task.no}` },
+        ]}
+        stateTitle="Раздел в разработке"
+        stateText="Материалы к этому заданию появятся здесь, когда раздел будет собран."
+        back={{ label: 'Вернуться в банк заданий', href: tasksPage.href }}
+      />
+    );
   }
 
   const subtopics = section.subtopics.map((item) => toView(section.slug, item));

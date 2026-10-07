@@ -1,7 +1,8 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
-import { tasksPage } from '@/content/tasks';
+import { taskHasPage, tasksPage } from '@/content/tasks';
 import { TaskImage } from './TaskImage';
+import { TaskPlaceholderArt } from './TaskPlaceholderArt';
 
 export interface TaskGridProps {
   tasks: readonly ExamTask[];
@@ -33,8 +34,10 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
   return (
     <ul className="tasks-grid">
       {tasks.map((task) => {
-        const open = task.status === 'active';
-        const byHandler = open && openInDialog?.slug === task.slug;
+        /* Ссылка есть у открытого раздела и у раздела в разработке:
+           второй ведёт на заглушку. */
+        const open = taskHasPage(task);
+        const byHandler = task.status === 'active' && openInDialog?.slug === task.slug;
         return (
         <li key={task.no}>
           <TaskCard
@@ -45,10 +48,17 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
             {...(byHandler && openInDialog !== undefined
               ? { onClick: (event) => openInDialog.onOpen(task, event.currentTarget) }
               : {})}
-            comingSoon={task.status !== 'active'}
+            comingSoon={task.status === 'soon'}
+            inDevelopment={task.status === 'dev'}
             difficulty={task.badge}
             difficultyTone="info"
-            illustration={<TaskImage no={task.no} format={task.illustration} />}
+            illustration={
+              task.illustration === 'placeholder' ? (
+                <TaskPlaceholderArt no={task.no} />
+              ) : (
+                <TaskImage no={task.no} format={task.illustration} />
+              )
+            }
           />
         </li>
         );

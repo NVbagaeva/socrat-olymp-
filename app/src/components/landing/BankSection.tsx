@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TaskGrid } from '@/components/tasks';
+import { TaskParts } from '@/components/tasks';
 import { landing } from '@/content/landing';
 import { tasks, tasksPage } from '@/content/tasks';
 
@@ -21,7 +21,7 @@ export function BankSection() {
           <p>{bank.lead}</p>
         </div>
 
-        <TaskGrid tasks={tasks} />
+        <TaskParts tasks={tasks} headingLevel={3} />
 
         <p className="bank-note">{bank.note}</p>
 
