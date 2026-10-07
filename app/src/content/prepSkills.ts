@@ -13,14 +13,34 @@ import { OPORNYE } from './opornye';
 
 export type PrepSkillId =
   /* Линейная подтема. */
-  | 'k' | 'b' | 'b-point' | 'equation' | 'point'
+  | 'k'
+  | 'b'
+  | 'b-point'
+  | 'equation'
+  | 'point'
   /* Квадратичная подтема: девять навыков, P12Q-1 … P12Q-9. */
-  | 'sign-a' | 'value-a' | 'value-c' | 'value-b' | 'value-at'
-  | 'argument-for' | 'formula' | 'cross-line' | 'cross-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'value-at'
+  | 'argument-for'
+  | 'formula'
+  | 'cross-line'
+  | 'cross-parabola'
   /* Гипербола: одиннадцать навыков, P12R-1 … P12R-11. Адреса свои:
      value-at и argument-for уже заняты параболой. */
-  | 'koef-k' | 'sdvig-vverh' | 'sdvig-vbok' | 'sdvig-oba' | 'vse-koef'
-  | 'celaya-chast' | 'znachenie' | 'argument' | 'pryamaya' | 'abscissa-b' | 'ordinata-b';
+  | 'koef-k'
+  | 'sdvig-vverh'
+  | 'sdvig-vbok'
+  | 'sdvig-oba'
+  | 'vse-koef'
+  | 'celaya-chast'
+  | 'znachenie'
+  | 'argument'
+  | 'pryamaya'
+  | 'abscissa-b'
+  | 'ordinata-b';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */
@@ -263,7 +283,7 @@ export const rationalSkills: PrepSkill[] = [
     title: 'Аргумент по значению',
     lead: 'Найти $x$, при котором $f(x)$ равно заданному числу',
     formula: 'f(x) = c',
-    tip: 'У гиперболы одному значению отвечает ровно один $x$. Перенесите сдвиг $b$, затем $x + a = k : (c - b)$, и вычтите $a$.',
+    tip: 'У гиперболы одному значению отвечает ровно один $x$. ОДЗ: $x + a \\ne 0$. Перенесите сдвиг $b$, затем $x + a = k : (c - b)$, вычтите $a$ и проверьте корень по ОДЗ.',
     setId: 'P12R-8',
   },
   {
@@ -281,7 +301,7 @@ export const rationalSkills: PrepSkill[] = [
     title: 'Абсцисса второй точки',
     lead: 'Гипербола и прямая: найти абсциссу точки $B$',
     formula: '\\dfrac{k}{x} = ax + b',
-    tip: '$k$ гиперболы $f(x)$ — из точки $A$, $a$ и $b$ прямой $g(x)$ — по двум точкам. Уравнение $\\frac{k}{x} = ax + b$ сводится к $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета: $x_A \\cdot x_B = -k : a$.',
+    tip: '$k$ гиперболы $f(x)$ — из точки $A$, $a$ и $b$ прямой $g(x)$ — по двум точкам. Уравнение $\\frac{k}{x} = ax + b$ (ОДЗ: $x \\ne 0$) умножением на $x \\ne 0$ сводится к $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета: $x_A \\cdot x_B = -k : a$.',
     setId: 'P12R-10',
   },
   {

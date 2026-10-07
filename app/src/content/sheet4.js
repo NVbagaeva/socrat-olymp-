@@ -87,12 +87,28 @@ export const examples = [
  * так решил автор. note — приписка справа в полосе заголовка.
  */
 export const sections = [
-  { method: 'direct-count', title: 'Прямой пересчёт исходов', note: 'все исходы и благоприятные — считаем' },
+  {
+    method: 'direct-count',
+    title: 'Прямой пересчёт исходов',
+    note: 'все исходы и благоприятные — считаем',
+  },
   { method: 'outcome-table', title: 'Таблица исходов', note: 'все пары — в таблицу' },
-  { method: 'coordinate-line', title: 'Координатная прямая', note: 'отношение длин, дуг и площадей' },
-  { method: 'probability-tree', title: 'Дерево вероятностей', note: 'вдоль пути умножаем, пути складываем' },
-  { method: 'convenient-number', title: 'Условная вероятность', note: 'доля брака — считаем в штуках',
-    ids: ['p4-19', 'p4-20', 'p4-21'] },
+  {
+    method: 'coordinate-line',
+    title: 'Координатная прямая',
+    note: 'отношение длин, дуг и площадей',
+  },
+  {
+    method: 'probability-tree',
+    title: 'Дерево вероятностей',
+    note: 'вдоль пути умножаем, пути складываем',
+  },
+  {
+    method: 'convenient-number',
+    title: 'Условная вероятность',
+    note: 'доля брака — считаем в штуках',
+    ids: ['p4-19', 'p4-20', 'p4-21'],
+  },
 ];
 
 /** Раздел «Ответы» файла для учителя. */
