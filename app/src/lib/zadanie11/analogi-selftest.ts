@@ -126,6 +126,12 @@ const SYUZHET = new Set([
   'dog',
   'dogRod',
   'dogKr',
+  /* Протяжённые тела: что проходит поезд, какие поезда. */
+  'prep',
+  'poezdA',
+  'poezdARod',
+  'poezdB',
+  'poezdBRod',
 ]);
 
 export function model(params: Params): Params {
@@ -537,6 +543,39 @@ const PRAVILA: Record<string, Pravilo> = {
         ? vne('снижение скорости, %', num(a.params, 'p'), 1, 80)
         : vne('рост скорости, %', num(a.params, 'p'), 1, 400),
   },
+  /* ── Протяжённые тела ── */
+  'PT-01': {
+    chisla: ['L1', 'L2', 'v'],
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      /минут/.test(poslednee(a.text)) &&
+      (a.ask === 'tonnel') === /через/.test(a.text),
+    pravdopodobie: (a) => [
+      ...vne('длина поезда, м', num(a.params, 'L1'), 100, 1500),
+      ...vne('скорость поезда, км/ч', num(a.params, 'v'), 40, 150),
+      ...slovaVTekste(a, ['prep']),
+    ],
+  },
+  'PT-02': {
+    chisla: ['v1', 'v2', 'L', 't'],
+    vopros: (a) => poslednee(a.text).includes(`длину ${String(a.params.poezdARod)}`),
+    pravdopodobie: (a) => poezda(a, /навстречу/i),
+  },
+  'PT-03': {
+    chisla: ['v1', 'v2', 'L', 't'],
+    vopros: (a) => poslednee(a.text).includes(`длину ${String(a.params.poezdARod)}`),
+    pravdopodobie: (a) => poezda(a, /в одном направлении/i),
+  },
+  'PT-04': {
+    chisla: ['L1', 'L2', 'a', 'b', 't'],
+    vopros: (a) => /километров в час/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...vne('длина I, м', num(a.params, 'L1'), 50, 400),
+      ...vne('длина II, м', num(a.params, 'L2'), 50, 400),
+      ...vne('разность скоростей, км/ч', a.answer, 1, 20),
+      ...slovaVTekste(a, ['ktoRod']),
+    ],
+  },
   /* ── Разминка ── */
   'RZ-01': {
     chisla: ['c', 'M'],
@@ -726,6 +765,17 @@ const PRAVILA: Record<string, Pravilo> = {
   },
 };
 
+/** Поезда ПТ-02/03: длины и скорости в пределах, поезда названы, направление в тексте. */
+function poezda(a: Analog, napravlenie: RegExp): string[] {
+  return [
+    ...vne('длина поезда, м', a.answer, 100, 1500),
+    ...vne('длина второго поезда, м', num(a.params, 'L'), 100, 1500),
+    ...['v1', 'v2'].flatMap((k) => vne('скорость поезда, км/ч', num(a.params, k), 40, 150)),
+    ...slovaVTekste(a, ['poezdARod', 'poezdBRod']),
+    ...(napravlenie.test(a.text) ? [] : ['направление движения не то']),
+  ];
+}
+
 /** «Половину пути / маршрута / дистанции» — вариант ДП-04 про путь. */
 const POLOVINA_PUTI = /половин[уа] (пути|маршрута|дистанции)/i;
 
@@ -745,7 +795,7 @@ function slovaVTekste(a: Analog, keys: string[]): string[] {
         .toLowerCase()
         .split(' ')
         .at(-1) ?? '';
-    return w !== '' && t.includes(w.slice(0, Math.max(4, w.length - 2)))
+    return w !== '' && t.includes(w.slice(0, Math.max(3, w.length - 2)))
       ? []
       : [`в тексте нет «${w}»`];
   });
@@ -806,6 +856,14 @@ export function checkAnalogi(typeset: (tex: string) => string) {
   /* Банк сравниваем без слов сюжета (металл в СМ-04 — тоже сюжет). */
   const pohozha = pohozhaNa([...BANK, ...RAZMINKA].map((b) => ({ ...b, params: model(b.params) })));
   let checked = 0;
+  /* Слово сюжета не может совпадать с числовым параметром модели банка. */
+  for (const b of [...BANK, ...RAZMINKA]) {
+    for (const [k, v] of Object.entries(b.params)) {
+      if (typeof v === 'number' && SYUZHET.has(k)) {
+        problems.push({ where: b.id, what: `ключ сюжета «${k}» — числовой параметр модели` });
+      }
+    }
+  }
   for (const [proto, list] of Object.entries(POOL_ANALOGOV)) {
     const add = (where: string, what: string) => problems.push({ where, what });
     const st = subtype(proto);

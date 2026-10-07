@@ -37,6 +37,10 @@ import pr04 from '../../data/zadanie11/analogs/PR-04.json';
 import pr05 from '../../data/zadanie11/analogs/PR-05.json';
 import pr06 from '../../data/zadanie11/analogs/PR-06.json';
 import pr07 from '../../data/zadanie11/analogs/PR-07.json';
+import pt01 from '../../data/zadanie11/analogs/PT-01.json';
+import pt02 from '../../data/zadanie11/analogs/PT-02.json';
+import pt03 from '../../data/zadanie11/analogs/PT-03.json';
+import pt04 from '../../data/zadanie11/analogs/PT-04.json';
 import rz01 from '../../data/zadanie11/analogs/RZ-01.json';
 import rz02 from '../../data/zadanie11/analogs/RZ-02.json';
 import rz03 from '../../data/zadanie11/analogs/RZ-03.json';
@@ -82,6 +86,10 @@ export const POOL_ANALOGOV: Record<string, Analog[]> = {
   'PR-05': pr05 as unknown as Analog[],
   'PR-06': pr06 as unknown as Analog[],
   'PR-07': pr07 as unknown as Analog[],
+  'PT-01': pt01 as unknown as Analog[],
+  'PT-02': pt02 as unknown as Analog[],
+  'PT-03': pt03 as unknown as Analog[],
+  'PT-04': pt04 as unknown as Analog[],
   'RZ-01': rz01 as unknown as Analog[],
   'RZ-02': rz02 as unknown as Analog[],
   'RZ-03': rz03 as unknown as Analog[],
