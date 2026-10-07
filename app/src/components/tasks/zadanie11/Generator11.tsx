@@ -6,7 +6,16 @@ import { Button, Checkbox, Details, Input, Select } from '@/components/ui';
 import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
 import { TRENAZHER_11, UROVNI_11, VARIANT_EGE_11 } from '@/content/zadanie11';
-import type { SheetParams11, SobrannyyList } from '@/lib/zadanie11/sheet11';
+import {
+  BLOKI_LISTA,
+  DZ_MAX,
+  DZ_PO_UMOLCHANIYU,
+  type BlokLista,
+  type Chast,
+  type ListZadacha,
+  type SheetParams11,
+  type SobrannyyList,
+} from '@/lib/zadanie11/sheet11';
 import type {
   Istochnik,
   PodtipInfo,
@@ -17,6 +26,18 @@ import type { Level, SectionId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, Piktogramma, Zvezdy } from './Piktogrammy';
 
 type Preset = 'ege' | 'urok' | 'svoy';
+type Vkladka = 'uchenik' | 'uchitel' | 'dz';
+
+/** Блоки листа по пресету: вариант ЕГЭ — одни задачи, урок — весь рабочий лист. */
+const BLOKI_PRESETA: Record<Exclude<Preset, 'svoy'>, readonly BlokLista[]> = {
+  ege: ['zadachi'],
+  urok: BLOKI_LISTA,
+};
+
+/** Части листа в порядке блоков — для предпросмотра. */
+function chastiPoPoryadku(bloki: readonly BlokLista[]): Chast[] {
+  return bloki.filter((b): b is Chast => b !== 'znat' && b !== 'dz');
+}
 
 const IKONKA_ISTOCHNIKA: Record<Istochnik, string> = { bank: 'doc', mix: 'layers', new: 'sparkle' };
 
@@ -115,13 +136,17 @@ export function Generator11({
   const [urokRazdel, setUrokRazdel] = useState<SectionId>('PR');
   const [urokN, setUrokN] = useState(6);
   const [sostav, setSostav] = useState<Record<string, number>>(sostavEge);
+  /* Блоки листа: порядок — всех шести, включённые — отдельно; «Задачи» всегда. */
+  const [poryadok, setPoryadok] = useState<BlokLista[]>([...BLOKI_LISTA]);
+  const [vkl, setVkl] = useState<Set<BlokLista>>(() => new Set(BLOKI_PRESETA.ege));
+  const [dzN, setDzN] = useState(DZ_PO_UMOLCHANIYU);
   /* Фильтр списка типов в «Своём составе»: что показывать, не что брать. */
   const [uroven, setUroven] = useState<0 | Level>(0);
   const [otkryty, setOtkryty] = useState<Set<SectionId>>(new Set());
   const [seedInput, setSeedInput] = useState('');
   const [params, setParams] = useState<SheetParams11 | null>(null);
   const [list, setList] = useState<SobrannyyList | null>(null);
-  const [vkladka, setVkladka] = useState<'uchenik' | 'uchitel'>('uchenik');
+  const [vkladka, setVkladka] = useState<Vkladka>('uchenik');
   const [variant, setVariant] = useState(0);
   const [zagruzka, setZagruzka] = useState(false);
   /* Адрес листа печати: тот же лист, что в превью (seed и замены). */
@@ -134,6 +159,27 @@ export function Generator11({
     (p) => (sostav[p.id] ?? 0) > 0 && !(istochnik === 'bank' && p.section === 'RZ'),
   );
   const vsegoZadach = vybrano.reduce((s, p) => s + (sostav[p.id] ?? 0), 0);
+  const bloki = poryadok.filter((b) => b === 'zadachi' || vkl.has(b));
+
+  function perelozhit(b: BlokLista, shag: -1 | 1) {
+    setPoryadok((prev) => {
+      const i = prev.indexOf(b);
+      const j = i + shag;
+      if (i < 0 || j < 0 || j >= prev.length || prev[j] === 'dz') return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j] as BlokLista, next[i] as BlokLista];
+      return next;
+    });
+  }
+
+  function vklyuchit(b: BlokLista, da: boolean) {
+    setVkl((prev) => {
+      const next = new Set(prev);
+      if (da) next.add(b);
+      else next.delete(b);
+      return next;
+    });
+  }
 
   function postavit(id: string, n: number) {
     setSostav((prev) => ({ ...prev, [id]: n }));
@@ -144,9 +190,11 @@ export function Generator11({
     if (next === 'ege') {
       setSostav(sostavEge());
       setRezhim('komplekt');
+      setVkl(new Set(BLOKI_PRESETA.ege));
     } else if (next === 'urok') {
       setSostav(sostavUroka(razdely.find((r) => r.id === urokRazdel)?.podtipy ?? [], urokN));
       setRezhim('otrabotka');
+      setVkl(new Set(BLOKI_PRESETA.urok));
     }
   }
 
@@ -180,6 +228,8 @@ export function Generator11({
       zameny: {},
       marshrut: 1,
       theme: 'color',
+      bloki,
+      dz: dzN,
     });
   }
 
@@ -189,6 +239,51 @@ export function Generator11({
   }
 
   const zadachi = list?.poVariantam[variant] ?? [];
+  const uchitel = vkladka === 'uchitel';
+  /* Части на странице предпросмотра: домашняя работа — на своей вкладке. */
+  const chasti =
+    params === null
+      ? []
+      : vkladka === 'dz'
+        ? (['dz'] as Chast[])
+        : params.rezhim === 'marshrut'
+          ? (['zadachi'] as Chast[])
+          : chastiPoPoryadku(params.bloki);
+  const estDz = params?.bloki.includes('dz') ?? false;
+  const primer = zadachi.find((z) => z.chast === 'primer');
+  const sPolosami = chasti.length > 1 || vkladka === 'dz' || (list?.znat.length ?? 0) > 0;
+
+  function Zadacha({ z }: { z: ListZadacha }) {
+    return (
+      <li className="z11-a4__task">
+        <span className="z11-a4__no">{z.no}</span>
+        <div className="z11-a4__body">
+          <div dangerouslySetInnerHTML={{ __html: z.questionHtml }} />
+          {uchitel ? (
+            <div className="z11-a4__reshenie">
+              <div dangerouslySetInnerHTML={{ __html: z.solutionHtml }} />
+              <p className="z11-a4__otvet">
+                {GENERATOR_11.otvet}: <b dangerouslySetInnerHTML={{ __html: z.answerHtml }} />
+              </p>
+            </div>
+          ) : null}
+        </div>
+        <span className={clsx('z11-a4__badge', `z11-a4__badge--${z.poz.vid}`)}>
+          {SHEET_11.bejdzh[z.poz.vid]}
+        </span>
+        <button
+          type="button"
+          className="z11-a4__zamena"
+          aria-label={`${GENERATOR_11.zamenit} ${z.no}`}
+          title={GENERATOR_11.zamenit}
+          disabled={zagruzka}
+          onClick={() => zamenit(z.pos)}
+        >
+          <Piktogramma name="cycle" />
+        </button>
+      </li>
+    );
+  }
 
   return (
     <div className="z11-gen">
@@ -439,6 +534,73 @@ export function Generator11({
           </Details>
         </section>
 
+        <section className="z11-card z11-gen__blok">
+          <h2 className="z11-gen__h">
+            <Piktogramma name="table" />
+            {GENERATOR_11.blokiLista}
+          </h2>
+          <p className="z11-istochnik__note">{GENERATOR_11.blokiLead}</p>
+          <ol className="z11-gen__bloki">
+            {poryadok.map((b, i) => {
+              const na = b === 'zadachi' || vkl.has(b);
+              const fiks = b === 'dz';
+              return (
+                <li key={b} className={clsx('z11-gen__blok-item', !na && 'is-off')}>
+                  {b === 'zadachi' ? (
+                    /* «Задачи» на листе всегда: вместо галочки — пометка. */
+                    <span className="check check--box z11-gen__fiks">
+                      <span className="z11-gen__fiks-mark" aria-hidden="true">
+                        <Piktogramma name="check" />
+                      </span>
+                      <span className="z11-gen__blok-name">
+                        <b>{GENERATOR_11.bloki[b].title}</b>
+                        <span>{GENERATOR_11.bloki[b].note}</span>
+                      </span>
+                    </span>
+                  ) : (
+                    <Checkbox checked={na} onChange={(e) => vklyuchit(b, e.target.checked)}>
+                      <span className="z11-gen__blok-name">
+                        <b>{GENERATOR_11.bloki[b].title}</b>
+                        <span>{GENERATOR_11.bloki[b].note}</span>
+                      </span>
+                    </Checkbox>
+                  )}
+                  {fiks ? (
+                    na ? (
+                      <Stepper
+                        value={dzN}
+                        min={1}
+                        max={DZ_MAX}
+                        onChange={setDzN}
+                        label={GENERATOR_11.zadachDz}
+                      />
+                    ) : null
+                  ) : (
+                    <span className="z11-gen__strelki">
+                      <button
+                        type="button"
+                        aria-label={`${GENERATOR_11.bloki[b].title}: ${GENERATOR_11.vyshe}`}
+                        disabled={i === 0}
+                        onClick={() => perelozhit(b, -1)}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`${GENERATOR_11.bloki[b].title}: ${GENERATOR_11.nizhe}`}
+                        disabled={poryadok[i + 1] === undefined || poryadok[i + 1] === 'dz'}
+                        onClick={() => perelozhit(b, 1)}
+                      >
+                        ↓
+                      </button>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
         <Details title={GENERATOR_11.dopolnitelno} className="z11-gen__dop">
           <label className="z11-gen__urok-label" htmlFor="z11-gen-seed">
             {GENERATOR_11.kodLista}
@@ -468,7 +630,7 @@ export function Generator11({
       <section className="z11-gen__preview" aria-label="Лист">
         <div className="z11-gen__toolbar">
           <div className="z11-gen__tabs" role="tablist">
-            {(['uchenik', 'uchitel'] as const).map((v) => (
+            {(['uchenik', 'uchitel', ...(estDz ? (['dz'] as const) : [])] as Vkladka[]).map((v) => (
               <button
                 key={v}
                 type="button"
@@ -477,7 +639,11 @@ export function Generator11({
                 className={clsx('z11-gen__tab', vkladka === v && 'is-active')}
                 onClick={() => setVkladka(v)}
               >
-                {v === 'uchenik' ? GENERATOR_11.listUchenika : GENERATOR_11.listUchitelya}
+                {v === 'uchenik'
+                  ? GENERATOR_11.listUchenika
+                  : v === 'uchitel'
+                    ? GENERATOR_11.listUchitelya
+                    : GENERATOR_11.listDz}
               </button>
             ))}
           </div>
@@ -501,7 +667,7 @@ export function Generator11({
             <span className="z11-gen__pdf">
               <a
                 className="btn btn--secondary btn--sm"
-                href={`${base}/pechat/${vkladka === 'uchitel' ? 'otvety/' : ''}?${query}`}
+                href={`${base}/pechat/${uchitel ? 'otvety/' : ''}?${query}`}
                 target="_blank"
                 rel="noopener"
               >
@@ -535,42 +701,79 @@ export function Generator11({
               <h3 className="z11-a4__title">
                 {SHEET_11.title.chip}. {SHEET_11.title.text}
                 {list.poVariantam.length > 1 ? `. Вариант ${variant + 1}` : ''}
+                {vkladka === 'dz' ? `. ${SHEET_11.chasti.dz}` : ''}
               </h3>
               <p className="z11-a4__fio">
                 {GENERATOR_11.familiya} <span />
               </p>
-              <ol className="z11-a4__list">
-                {zadachi.map((z) => (
-                  <li key={z.pos} className="z11-a4__task">
-                    <span className="z11-a4__no">{z.no}</span>
-                    <div className="z11-a4__body">
-                      <div dangerouslySetInnerHTML={{ __html: z.questionHtml }} />
-                      {vkladka === 'uchitel' ? (
+              {vkladka === 'dz' && !zadachi.some((z) => z.chast === 'dz') ? (
+                <p className="z11-a4__pusto">{GENERATOR_11.dzPusto}</p>
+              ) : null}
+              {(vkladka === 'dz' ? [] : (params?.bloki ?? [])).map((b) => {
+                if (b === 'dz') return null;
+                if (b === 'znat') {
+                  return list.znat.length === 0 ? null : (
+                    <section key={b} className="z11-a4__chast">
+                      <h4 className="z11-a4__h">{SHEET_11.chasti.znat}</h4>
+                      {list.znat.map((k) => (
+                        <div
+                          key={k.section}
+                          className="z11-a4__znat"
+                          dangerouslySetInnerHTML={{ __html: k.html }}
+                        />
+                      ))}
+                    </section>
+                  );
+                }
+                if (b === 'primer') {
+                  return primer === undefined ? null : (
+                    <section key={b} className="z11-a4__chast">
+                      <h4 className="z11-a4__h">{SHEET_11.chasti.primer}</h4>
+                      <div className="z11-a4__primer">
+                        <p className="z11-a4__primer-title">{primer.title}</p>
+                        <div dangerouslySetInnerHTML={{ __html: primer.questionHtml }} />
                         <div className="z11-a4__reshenie">
-                          <div dangerouslySetInnerHTML={{ __html: z.solutionHtml }} />
+                          <div dangerouslySetInnerHTML={{ __html: primer.solutionHtml }} />
                           <p className="z11-a4__otvet">
                             {GENERATOR_11.otvet}:{' '}
-                            <b dangerouslySetInnerHTML={{ __html: z.answerHtml }} />
+                            <b dangerouslySetInnerHTML={{ __html: primer.answerHtml }} />
                           </p>
                         </div>
-                      ) : null}
-                    </div>
-                    <span className={clsx('z11-a4__badge', `z11-a4__badge--${z.poz.vid}`)}>
-                      {SHEET_11.bejdzh[z.poz.vid]}
-                    </span>
-                    <button
-                      type="button"
-                      className="z11-a4__zamena"
-                      aria-label={`${GENERATOR_11.zamenit} ${z.no}`}
-                      title={GENERATOR_11.zamenit}
-                      disabled={zagruzka}
-                      onClick={() => zamenit(z.pos)}
-                    >
-                      <Piktogramma name="cycle" />
-                    </button>
-                  </li>
-                ))}
-              </ol>
+                        <button
+                          type="button"
+                          className="z11-a4__zamena z11-a4__zamena--primer"
+                          aria-label={`${GENERATOR_11.zamenit}: ${SHEET_11.chasti.primer}`}
+                          title={GENERATOR_11.zamenit}
+                          disabled={zagruzka}
+                          onClick={() => zamenit(primer.pos)}
+                        >
+                          <Piktogramma name="cycle" />
+                        </button>
+                      </div>
+                    </section>
+                  );
+                }
+                const svoi = zadachi.filter((z) => z.chast === b);
+                return svoi.length === 0 ? null : (
+                  <section key={b} className="z11-a4__chast">
+                    {sPolosami ? <h4 className="z11-a4__h">{SHEET_11.chasti[b]}</h4> : null}
+                    <ol className="z11-a4__list">
+                      {svoi.map((z) => (
+                        <Zadacha key={z.pos} z={z} />
+                      ))}
+                    </ol>
+                  </section>
+                );
+              })}
+              {vkladka === 'dz' ? (
+                <ol className="z11-a4__list">
+                  {zadachi
+                    .filter((z) => z.chast === 'dz')
+                    .map((z) => (
+                      <Zadacha key={z.pos} z={z} />
+                    ))}
+                </ol>
+              ) : null}
               <p className="z11-a4__podpis">{SHEET_11.podpis}</p>
             </>
           )}

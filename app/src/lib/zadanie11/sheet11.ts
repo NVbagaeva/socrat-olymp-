@@ -2,10 +2,10 @@
  * Лист задания №11: адрес → план → задачи → описание листа.
  *
  * Всё, что определяет лист, живёт в адресе: режим, источник, состав,
- * число вариантов, seed и замены отдельных задач. Один адрес — один
- * и тот же лист; листы ученика и учителя по одному адресу содержат
- * одни и те же задачи. Задачи считает движок №11 в браузере, лист
- * раскладывает общий шаблон lib/sheet/.
+ * число вариантов, блоки листа, seed и замены отдельных задач. Один
+ * адрес — один и тот же лист; листы ученика и учителя по одному
+ * адресу содержат одни и те же задачи. Задачи считает движок №11 в
+ * браузере, лист раскладывает общий шаблон lib/sheet/.
  *
  * Режимы: «Задания для отработки» (по N задач на тип, блоками по
  * типам), «Варианты» (K вариантов; на позиции i во всех вариантах —
@@ -13,10 +13,22 @@
  * Без повторов внутри листа: задача банка берётся один раз, новые —
  * с разными параметрами. Замена задачи («перегенерировать одну»)
  * берёт следующий кандидат того же типа и не трогает остальные.
+ *
+ * Блоки рабочего листа (вкл/выкл и порядок — в адресе): «Что нужно
+ * знать» (формула, таблица, лайфхак и ловушка разделов листа — из
+ * теории), «Разобранный пример» (задача банка с решением — и у
+ * ученика), «Разминка навыка» (опорные микрозадачи к разделам листа),
+ * «Задачи» (состав), «Попробуй сам» (две похожие задачи ★) и
+ * «Домашняя работа» — отдельной страницей, те же типы, другие задачи.
+ * Лист учителя — решения и ответы ко всему, домашняя работа — своей
+ * таблицей ответов.
  */
 
 import { MARSHRUTY_11, SHEET_11 } from '@/content/repetitory11';
+import { LAYFHAKI, LOVUSHKI, RAZDELY_TEORII_11 } from '@/content/teoriya11';
+import { O_ZADANII_11 } from '@/content/zadanie11';
 import answers from '@/lib/sheet/answers.js';
+import sheet from '@/lib/sheet/sheet.js';
 import { typesetKrupno as typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
@@ -25,10 +37,32 @@ import { d } from './num';
 import { BLOKI } from './prep/bloki';
 import { generateMikro } from './prep/generate';
 import { subtype } from './prototypes';
+import { SECTIONS } from './taxonomy';
 import type { Istochnik, UslovieBanka } from './trenazher/sessiya';
-import type { Params, Solved, Tablitsa } from './types';
+import type { Params, SectionId, Solved, Tablitsa } from './types';
 
 export type Rezhim = 'otrabotka' | 'komplekt' | 'marshrut';
+
+/** Блок рабочего листа. «Задачи» есть всегда. */
+export type BlokLista = 'znat' | 'primer' | 'razminka' | 'zadachi' | 'sam' | 'dz';
+
+/** Все блоки в порядке по умолчанию. */
+export const BLOKI_LISTA: readonly BlokLista[] = [
+  'znat',
+  'primer',
+  'razminka',
+  'zadachi',
+  'sam',
+  'dz',
+];
+
+/** Лист без адреса блоков — только задачи: так же, как раньше. */
+export const BLOKI_PO_UMOLCHANIYU: readonly BlokLista[] = ['zadachi'];
+export const DZ_PO_UMOLCHANIYU = 4;
+export const DZ_MAX = 10;
+/** Микрозадач в «Разминке навыка» и задач в «Попробуй сам». */
+const RAZMINKA_N = 4;
+const SAM_N = 2;
 
 export interface SheetParams11 {
   rezhim: Rezhim;
@@ -42,6 +76,10 @@ export interface SheetParams11 {
   /** Номер маршрута урока (режим «marshrut»). */
   marshrut: number;
   theme: 'color' | 'print';
+  /** Блоки листа в порядке печати; «zadachi» — всегда. В маршруте не используется. */
+  bloki: BlokLista[];
+  /** Задач в домашней работе (блок «dz»). */
+  dz: number;
 }
 
 export const VARIANTS_MAX_11 = 8;
@@ -65,7 +103,21 @@ export function sheetQuery11(p: SheetParams11): string {
   const z = Object.entries(p.zameny).filter(([, k]) => k > 0);
   if (z.length > 0) q.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
   if (p.theme === 'print') q.set('t', 'print');
+  if (p.bloki.join() !== BLOKI_PO_UMOLCHANIYU.join()) q.set('b', p.bloki.join(','));
+  if (p.bloki.includes('dz') && p.dz !== DZ_PO_UMOLCHANIYU) q.set('d', String(p.dz));
   return q.toString();
+}
+
+/** Блоки из адреса: только известные, без повторов, «Задачи» обязательно. */
+export function normBloki(spisok: readonly string[]): BlokLista[] {
+  const out: BlokLista[] = [];
+  for (const b of spisok) {
+    if ((BLOKI_LISTA as readonly string[]).includes(b) && !out.includes(b as BlokLista)) {
+      out.push(b as BlokLista);
+    }
+  }
+  if (!out.includes('zadachi')) out.push('zadachi');
+  return out;
 }
 
 export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
@@ -81,6 +133,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     .filter((x) => /^[A-Z]{2}-\d{2}$/.test(x.id) && subtypeEst(x.id));
   const v = Number(q.get('v'));
   const r = Number(q.get('r'));
+  const dz = Number(q.get('d'));
   const zameny: Record<string, number> = {};
   for (const item of (q.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
@@ -95,6 +148,8 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     zameny,
     marshrut: MARSHRUTY_11.some((m) => m.no === r) ? r : 1,
     theme: q.get('t') === 'print' ? 'print' : 'color',
+    bloki: normBloki((q.get('b') ?? BLOKI_PO_UMOLCHANIYU.join(',')).split(',')),
+    dz: Number.isFinite(dz) && dz >= 1 ? Math.min(DZ_MAX, Math.floor(dz)) : DZ_PO_UMOLCHANIYU,
   };
 }
 
@@ -115,6 +170,9 @@ export type Pozitsiya =
   | { vid: 'new'; id: string; seed: string }
   | { vid: 'mikro'; id: string; seed: string; blok: string };
 
+/** Часть листа, в которой стоит задача. */
+export type Chast = Exclude<BlokLista, 'znat'>;
+
 /** Шаблон позиции: что нужно, без конкретной задачи. */
 interface Shablon {
   /** Подтип или опорный блок (P11-…). */
@@ -122,22 +180,87 @@ interface Shablon {
   istochnik: 'bank' | 'new' | 'mix' | 'mikro';
   /** Блок листа: тип задачи, «опорные», «банк», «новые». */
   blok: string;
+  chast: Chast;
 }
 
+/** Разделы задач состава — в порядке изучения. */
+function razdelySostava(p: SheetParams11): SectionId[] {
+  const est = new Set(p.sostav.map((x) => subtype(x.id).section));
+  return SECTIONS.map((s) => s.id).filter((id) => est.has(id));
+}
+
+/** Типы состава от ★ к ★★★ (устойчиво: при равном уровне — порядок состава). */
+function tipyPoUrovnyu(p: SheetParams11): string[] {
+  return p.sostav
+    .map((x, i) => ({ id: x.id, level: subtype(x.id).level, i }))
+    .sort((a, b) => a.level - b.level || a.i - b.i)
+    .map((x) => x.id);
+}
+
+/** Опорные блоки к разделам листа: свои и те, что нужны перед разделом. */
+function opornyeDlya(razdely: SectionId[]) {
+  const nuzhny = razdely.flatMap((s) => O_ZADANII_11.pered[s] ?? []);
+  const svoi = BLOKI.filter(
+    (b) => razdely.includes(b.razdel as SectionId) || nuzhny.includes(b.nazvanie),
+  );
+  return svoi.length > 0 ? svoi : BLOKI.slice(0, 1);
+}
+
+/**
+ * Шаблоны позиций. Сначала «Задачи» — их номера позиций (замены
+ * «вариант.позиция») не зависят от других блоков; затем разминка,
+ * разобранный пример, «Попробуй сам» и домашняя работа.
+ */
 function shablony(p: SheetParams11): Shablon[] {
   if (p.rezhim === 'marshrut') {
     const m = MARSHRUTY_11.find((x) => x.no === p.marshrut) ?? MARSHRUTY_11[0];
     if (m === undefined) return [];
+    const chast = 'zadachi' as const;
     return [
-      ...m.opornye.map((id) => ({ id, istochnik: 'mikro' as const, blok: 'opornye' })),
-      ...m.bank.map((id) => ({ id, istochnik: 'bank' as const, blok: 'bank' })),
-      ...m.novye.map((id) => ({ id, istochnik: 'new' as const, blok: 'novye' })),
+      ...m.opornye.map((id) => ({ id, istochnik: 'mikro' as const, blok: 'opornye', chast })),
+      ...m.bank.map((id) => ({ id, istochnik: 'bank' as const, blok: 'bank', chast })),
+      ...m.novye.map((id) => ({ id, istochnik: 'new' as const, blok: 'novye', chast })),
     ];
   }
   const ist = p.istochnik === 'mix' ? 'mix' : p.istochnik === 'new' ? 'new' : 'bank';
-  return p.sostav.flatMap((x) =>
-    Array.from({ length: x.n }, () => ({ id: x.id, istochnik: ist, blok: x.id }) as Shablon),
+  const out: Shablon[] = p.sostav.flatMap((x) =>
+    Array.from(
+      { length: x.n },
+      () => ({ id: x.id, istochnik: ist, blok: x.id, chast: 'zadachi' }) as Shablon,
+    ),
   );
+  if (p.sostav.length === 0) return out;
+  const tipy = tipyPoUrovnyu(p);
+  if (p.bloki.includes('razminka')) {
+    const bloki = opornyeDlya(razdelySostava(p));
+    for (let i = 0; i < RAZMINKA_N; i += 1) {
+      const b = bloki[i % bloki.length];
+      if (b !== undefined) {
+        out.push({ id: b.id, istochnik: 'mikro', blok: 'razminka', chast: 'razminka' });
+      }
+    }
+  }
+  if (p.bloki.includes('primer')) {
+    /* Пример — самый простой тип листа, из банка (как на экзамене);
+       в режиме «похожие» — похожая. */
+    out.push({
+      id: tipy[0] ?? '',
+      istochnik: ist === 'new' ? 'new' : 'bank',
+      blok: 'primer',
+      chast: 'primer',
+    });
+  }
+  if (p.bloki.includes('sam')) {
+    for (let i = 0; i < SAM_N; i += 1) {
+      out.push({ id: tipy[i] ?? tipy[0] ?? '', istochnik: 'new', blok: 'sam', chast: 'sam' });
+    }
+  }
+  if (p.bloki.includes('dz')) {
+    for (let i = 0; i < p.dz; i += 1) {
+      out.push({ id: tipy[i % tipy.length] ?? '', istochnik: ist, blok: 'dz', chast: 'dz' });
+    }
+  }
+  return out;
 }
 
 export interface PlanLista {
@@ -145,6 +268,8 @@ export interface PlanLista {
   poVariantam: Pozitsiya[][];
   /** Шаблоны позиций: блок листа у каждой. */
   bloki: string[];
+  /** Шаблоны позиций: часть листа у каждой. */
+  chasti: Chast[];
   /** Сколько позиций «из банка» пришлось заменить новыми: банк кончился. */
   nehvatka: number;
 }
@@ -245,17 +370,24 @@ export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): Plan
     }
     row[i - 1] = next;
   }
-  return { poVariantam, bloki: sh.map((s) => s.blok), nehvatka };
+  return {
+    poVariantam,
+    bloki: sh.map((s) => s.blok),
+    chasti: sh.map((s) => s.chast),
+    nehvatka,
+  };
 }
 
 /* ── Задачи ─────────────────────────────────────────────────────── */
 
 export interface ListZadacha {
+  /** Номер на листе: сквозной по частям, домашняя работа — с единицы, пример — 0. */
   no: number;
   /** «вариант.позиция» — для кнопки замены. */
   pos: string;
   poz: Pozitsiya;
   blok: string;
+  chast: Chast;
   kod: string;
   title: string;
   questionHtml: string;
@@ -314,10 +446,87 @@ function zadachaIzBanka(
   return subtype(b.id).solve(b.params as Params);
 }
 
+/** Карточка «Что нужно знать» одного раздела: готовая разметка листа. */
+export interface ZnatKarta {
+  section: SectionId;
+  nazvanie: string;
+  html: string;
+}
+
 export interface SobrannyyList {
   poVariantam: ListZadacha[][];
   bloki: string[];
   nehvatka: number;
+  /** «Что нужно знать» по разделам листа; пусто — блок выключен. */
+  znat: ZnatKarta[];
+}
+
+/**
+ * «Что нужно знать» — по карточке на раздел листа: главная формула,
+ * таблица модели (если разделов не больше двух — иначе лист распухает),
+ * первый лайфхак и первая ловушка раздела из теории.
+ */
+function znatKarty(razdely: SectionId[]): ZnatKarta[] {
+  const sTablitsey = razdely.length <= 2;
+  return razdely.flatMap((sec): ZnatKarta[] => {
+    const r = RAZDELY_TEORII_11.find((x) => x.section === sec);
+    const nazvanie = SECTIONS.find((s) => s.id === sec)?.nazvanie ?? sec;
+    if (r === undefined) return [];
+    const stroki: string[] = [];
+    if (r.formula !== undefined) {
+      stroki.push(
+        `<p class="z11-znat__row"><b>${SHEET_11.znat.zapomni}.</b> <span class="z11-znat__formula">${typeset(`$${r.formula.tex}$`)}</span> — ${typeset(r.formula.podpis)}</p>`,
+      );
+    } else if (r.idei[0] !== undefined) {
+      stroki.push(
+        `<p class="z11-znat__row"><b>${SHEET_11.znat.zapomni}.</b> ${typeset(r.idei[0])}</p>`,
+      );
+    }
+    const tab = r.tablitsa?.tables[0];
+    if (sTablitsey && tab !== undefined) stroki.push(tablitsaHtml(tab));
+    const lh = r.layfhaki[0];
+    if (lh !== undefined) {
+      stroki.push(
+        `<p class="z11-znat__row"><b>${SHEET_11.znat.layfhak}.</b> ${typeset(LAYFHAKI[lh].title)}: ${typeset(LAYFHAKI[lh].lead)}</p>`,
+      );
+    }
+    const lv = r.lovushki.map((id) => LOVUSHKI[id]).find((x) => x !== undefined);
+    if (lv !== undefined) {
+      stroki.push(
+        `<p class="z11-znat__row"><b>${SHEET_11.znat.lovushka}.</b> ${typeset(lv.title)}: ${typeset(lv.text)}</p>`,
+      );
+    }
+    return [
+      {
+        section: sec,
+        nazvanie,
+        html: `<section class="sheet-recap z11-znat"><div class="sheet-recap-main"><h2 class="sheet-recap-title">${nazvanie}</h2>${stroki.join('')}</div></section>`,
+      },
+    ];
+  });
+}
+
+/**
+ * Номера задач на листе: сквозные по частям в порядке блоков листа;
+ * домашняя работа — отдельная страница, с единицы; пример без номера.
+ */
+function pronumerovat(p: SheetParams11, zs: ListZadacha[]): void {
+  let n = 0;
+  for (const b of p.rezhim === 'marshrut' ? (['zadachi'] as const) : p.bloki) {
+    if (b === 'znat' || b === 'primer') continue;
+    if (b === 'dz') {
+      zs.filter((z) => z.chast === 'dz').forEach((z, i) => {
+        z.no = i + 1;
+      });
+      continue;
+    }
+    for (const z of zs) {
+      if (z.chast === b) {
+        n += 1;
+        z.no = n;
+      }
+    }
+  }
 }
 
 /** Задачи листа по вариантам: условия, ответы, решения. */
@@ -328,6 +537,7 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
     row.map((poz, i): ListZadacha => {
       const pos = `${vi + 1}.${i + 1}`;
       const blok = plan.bloki[i] ?? '';
+      const chast = plan.chasti[i] ?? 'zadachi';
       if (poz.vid === 'mikro') {
         const z = generateMikro(poz.id, poz.seed);
         const blokInfo = BLOKI.find((b) => b.id === poz.blok);
@@ -345,10 +555,11 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
                 )
                 .join('')}</ol>`;
         return {
-          no: i + 1,
+          no: 0,
           pos,
           poz,
           blok,
+          chast,
           kod: blokInfo?.no ?? '',
           title: blokInfo?.nazvanie ?? '',
           questionHtml:
@@ -373,10 +584,11 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       const vybor = s.vybor;
       const otvetVybor = vybor === undefined ? null : (vybor.options[vybor.correct] ?? '');
       return {
-        no: i + 1,
+        no: 0,
         pos,
         poz,
         blok,
+        chast,
         kod: kodNaSayte(poz.id),
         title: st.title,
         questionHtml: typeset(
@@ -389,7 +601,10 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       };
     }),
   );
-  return { poVariantam, bloki: plan.bloki, nehvatka: plan.nehvatka };
+  for (const zs of poVariantam) pronumerovat(p, zs);
+  const znat =
+    p.rezhim !== 'marshrut' && p.bloki.includes('znat') ? znatKarty(razdelySostava(p)) : [];
+  return { poVariantam, bloki: plan.bloki, nehvatka: plan.nehvatka, znat };
 }
 
 /* ── Описание листа для шаблона lib/sheet ───────────────────────── */
@@ -419,10 +634,33 @@ interface SheetTask {
   solutionHtml: string | null;
 }
 
-/** Блоки листа: по типам (отработка), по этапам урока или один без полосы. */
-function blokiLista(p: SheetParams11, zadachi: ListZadacha[], task: (z: ListZadacha) => SheetTask) {
+interface SheetBlock {
+  head?: false;
+  title: string;
+  note: string;
+  tasks?: SheetTask[];
+  /** Готовые куски потока: рамки «что нужно знать», разобранный пример. */
+  items?: string[];
+}
+
+type Task = (z: ListZadacha) => SheetTask;
+
+/**
+ * Блоки части «Задачи»: по типам (отработка), по этапам урока
+ * (маршрут) или один; без полосы, если на листе нет других блоков.
+ */
+function blokiZadach(
+  p: SheetParams11,
+  zadachi: ListZadacha[],
+  task: Task,
+  sPolosoy: boolean,
+): SheetBlock[] {
   if (p.rezhim === 'komplekt') {
-    return [{ head: false, title: '', note: '', tasks: zadachi.map(task) }];
+    return [
+      sPolosoy
+        ? { title: SHEET_11.chasti.zadachi, note: '', tasks: zadachi.map(task) }
+        : { head: false, title: '', note: '', tasks: zadachi.map(task) },
+    ];
   }
   const order: string[] = [];
   for (const z of zadachi) if (!order.includes(z.blok)) order.push(z.blok);
@@ -433,6 +671,71 @@ function blokiLista(p: SheetParams11, zadachi: ListZadacha[], task: (z: ListZada
       ? { title: BLOK_ROUTE[b] ?? b, note: '', tasks: tasks.map(task) }
       : { title: first?.title ?? b, note: '', tasks: tasks.map(task) };
   });
+}
+
+/** Разобранный пример: условие, решение по этапам и ответ — виден и ученику. */
+function primerItem(z: ListZadacha): string {
+  return sheet.exampleItem({
+    label: SHEET_11.chasti.primer,
+    title: z.title,
+    conditionHtml: z.questionHtml,
+    solutionHtml: `${z.solutionHtml}<p class="z11-sheet-primer-otvet">${SHEET_11.otvet}: <b>${z.answerHtml}</b></p>`,
+    figureSvg: null,
+  });
+}
+
+/**
+ * Блоки страницы варианта в порядке блоков листа (без домашней работы —
+ * она на своей странице). Маршрут урока — как прежде: опорные → банк → новые.
+ */
+function blokiStranitsy(
+  p: SheetParams11,
+  zs: ListZadacha[],
+  znat: ZnatKarta[],
+  task: Task,
+): SheetBlock[] {
+  if (p.rezhim === 'marshrut') return blokiZadach(p, zs, task, false);
+  const drugie = p.bloki.some(
+    (b) =>
+      b !== 'zadachi' &&
+      b !== 'dz' &&
+      (b === 'znat' ? znat.length > 0 : zs.some((z) => z.chast === b)),
+  );
+  const out: SheetBlock[] = [];
+  for (const b of p.bloki) {
+    if (b === 'dz') continue;
+    if (b === 'znat') {
+      if (znat.length > 0) {
+        out.push({
+          title: SHEET_11.chasti.znat,
+          note: '',
+          items: znat.map((k) => `<div class="sheet-item">${k.html}</div>`),
+        });
+      }
+      continue;
+    }
+    if (b === 'primer') {
+      const z = zs.find((x) => x.chast === 'primer');
+      if (z !== undefined) out.push({ head: false, title: '', note: '', items: [primerItem(z)] });
+      continue;
+    }
+    if (b === 'zadachi') {
+      out.push(
+        ...blokiZadach(
+          p,
+          zs.filter((z) => z.chast === 'zadachi'),
+          task,
+          drugie,
+        ),
+      );
+      continue;
+    }
+    const tasks = zs.filter((z) => z.chast === b);
+    if (tasks.length > 0) {
+      out.push({ title: SHEET_11.chasti[b], note: SHEET_11.chastiNote[b], tasks: tasks.map(task) });
+    }
+  }
+  return out;
 }
 
 const STROKA_OTVETA =
@@ -448,14 +751,19 @@ function bejdzh(z: ListZadacha): string {
 /**
  * Описание листа. Ученику — условия и строка «Ответ: ____»; учителю —
  * те же задачи с решением по этапам (таблицы по методике), ответом и
- * пометкой «банк» / «новая», в конце — таблица ответов. «Всё одним
- * файлом» — листы учеников всех вариантов, затем листы учителя.
+ * пометкой «банк» / «новая», в конце — таблица ответов. Домашняя
+ * работа — отдельной страницей после варианта, у учителя — своей
+ * таблицей ответов. «Всё одним файлом» — листы учеников всех
+ * вариантов, затем листы учителя.
  */
 export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista) {
-  const title = (variant?: string, uchitel = false) => ({
+  const title = (variant?: string, uchitel = false, dz = false) => ({
     chip: SHEET_11.title.chip,
     text: SHEET_11.title.text,
-    subtitle: subtitleOf(p) + (uchitel ? ` · ${SHEET_11.resheniya}` : ''),
+    subtitle:
+      subtitleOf(p) +
+      (dz ? ` · ${SHEET_11.chasti.dz}` : '') +
+      (uchitel ? ` · ${SHEET_11.resheniya}` : ''),
     ...(variant === undefined ? {} : { variant }),
   });
   const uchenikTask =
@@ -478,40 +786,55 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
   });
   const nV = list.poVariantam.length;
   const variantTitle = (i: number) => (nV > 1 ? `Вариант ${i + 1}` : undefined);
+  /* Страницы одного вида: вариант, за ним — его домашняя работа. */
+  const stranitsy = (task: Task, uchitel: boolean) =>
+    list.poVariantam.flatMap((zs, i) => {
+      const dz = zs.filter((z) => z.chast === 'dz');
+      return [
+        { title: title(variantTitle(i), uchitel), blocks: blokiStranitsy(p, zs, list.znat, task) },
+        ...(dz.length === 0
+          ? []
+          : [
+              {
+                title: title(variantTitle(i), uchitel, true),
+                blocks: [{ head: false as const, title: '', note: '', tasks: dz.map(task) }],
+              },
+            ]),
+      ];
+    });
   const poVariantam =
     vid === 'uchenik'
-      ? list.poVariantam.map((zs, i) => ({
-          title: title(variantTitle(i)),
-          blocks: blokiLista(p, zs, uchenikTask(false)),
-        }))
+      ? stranitsy(uchenikTask(false), false)
       : vid === 'uchitel'
-        ? list.poVariantam.map((zs, i) => ({
-            title: title(variantTitle(i), true),
-            blocks: blokiLista(p, zs, uchitelTask),
-          }))
-        : [
-            ...list.poVariantam.map((zs, i) => ({
-              title: title(variantTitle(i)),
-              blocks: blokiLista(p, zs, uchenikTask(true)),
-            })),
-            ...list.poVariantam.map((zs, i) => ({
-              title: title(variantTitle(i), true),
-              blocks: blokiLista(p, zs, uchitelTask),
-            })),
-          ];
+        ? stranitsy(uchitelTask, true)
+        : [...stranitsy(uchenikTask(true), false), ...stranitsy(uchitelTask, true)];
+  const tablitsa = (zs: ListZadacha[]) =>
+    answers.table(
+      SHEET_11.otvety,
+      zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
+      5,
+    );
   const otvety: string[] =
     vid === 'uchenik'
       ? []
       : [
           answers.sectionHead(SHEET_11.otvety, SHEET_11.otvetyNote, { section: nV > 1 }),
-          ...list.poVariantam.flatMap((zs, i) => [
-            ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
-            answers.table(
-              SHEET_11.otvety,
-              zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
-              5,
-            ),
-          ]),
+          ...list.poVariantam.flatMap((zs, i) => {
+            const osnovnye = zs.filter((z) => z.chast !== 'dz' && z.chast !== 'primer');
+            const dz = zs.filter((z) => z.chast === 'dz');
+            return [
+              ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
+              tablitsa(osnovnye),
+              ...(dz.length === 0
+                ? []
+                : [
+                    answers.subHead(
+                      nV > 1 ? `Вариант ${i + 1}. ${SHEET_11.chasti.dz}` : SHEET_11.chasti.dz,
+                    ),
+                    tablitsa(dz),
+                  ]),
+            ];
+          }),
         ];
   const one = poVariantam.length === 1 ? poVariantam[0] : undefined;
   return {

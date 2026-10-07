@@ -441,7 +441,16 @@ const listy = { zadach: 0 };
   const { buildDocument } = await import('../src/lib/sheet/sheet.js');
   const bank = dannyeTrenazhera().bank;
   const add = (what) => problems.push({ where: 'листы', what });
-  const base = { variants: 1, seed: 's', zameny: {}, marshrut: 1, theme: 'color', sostav: [] };
+  const base = {
+    variants: 1,
+    seed: 's',
+    zameny: {},
+    marshrut: 1,
+    theme: 'color',
+    sostav: [],
+    bloki: ['zadachi'],
+    dz: 4,
+  };
 
   /* Маршруты: все разделы покрыты, блоки и подтипы существуют. */
   const pokryty = new Set(MARSHRUTY_11.flatMap((m) => m.razdely));
@@ -521,9 +530,37 @@ const listy = { zadach: 0 };
       variants: 2,
       marshrut: m.no,
     })),
+    /* Рабочий лист к уроку: все блоки, порядок не по умолчанию, ДЗ из 3 задач. */
+    {
+      ...base,
+      rezhim: 'otrabotka',
+      istochnik: 'mix',
+      sostav: [
+        { id: 'SM-01', n: 2 },
+        { id: 'SM-04', n: 1 },
+        { id: 'SM-06', n: 1 },
+      ],
+      bloki: ['znat', 'razminka', 'primer', 'zadachi', 'sam', 'dz'],
+      dz: 3,
+    },
+    /* Варианты с рабочим листом: на позиции i во всех вариантах — один тип, и в ДЗ тоже. */
+    {
+      ...base,
+      rezhim: 'komplekt',
+      istochnik: 'bank',
+      variants: 2,
+      sostav: [
+        { id: 'DP-07', n: 1 },
+        { id: 'RB-01', n: 1 },
+      ],
+      bloki: ['primer', 'zadachi', 'sam', 'dz'],
+      dz: 2,
+    },
   ];
   for (const p of sluchai) {
-    const where = `${p.rezhim}${p.rezhim === 'marshrut' ? ' ' + p.marshrut : ''}`;
+    const where = `${p.rezhim}${p.rezhim === 'marshrut' ? ' ' + p.marshrut : ''}${
+      p.bloki.length > 1 ? ' (рабочий лист)' : ''
+    }`;
     const q = L.sheetQuery11(p);
     const kanon = (o) => JSON.stringify(o, Object.keys(o).sort());
     const back = L.parseSheetQuery11(new URLSearchParams(q));
@@ -562,14 +599,66 @@ const listy = { zadach: 0 };
         add(`${where} ${z.pos}: нет ответа или решения`);
       if (/\$/.test(z.questionHtml + z.solutionHtml)) add(`${where} ${z.pos}: формула не набрана`);
     }
-    /* Лист ученика — без ответов и решений; учителя — с таблицей ответов. */
+    /* Лист ученика — без ответов и решений (решение — только у
+       разобранного примера); учителя — с таблицей ответов. */
     const uch = buildDocument(L.sheetSpec11(p, list, 'uchenik'), {});
     const uchit = buildDocument(L.sheetSpec11(p, list, 'uchitel'), {});
     buildDocument(L.sheetSpec11(p, list, 'vse'), {});
-    if (/sheet-task-answer|sheet-steps|z11-sheet-badge/.test(uch))
+    const primerov = list.poVariantam.flat().filter((z) => z.chast === 'primer').length;
+    if (/sheet-task-answer|z11-sheet-badge/.test(uch))
       add(`${where}: в листе ученика есть ответы или решения`);
+    if ((uch.match(/sheet-steps/g) ?? []).length !== primerov * 2)
+      add(`${where}: решения в листе ученика не только у разобранного примера`);
     if (!/sheet-task-answer/.test(uchit) || !/Ответы/.test(uchit))
       add(`${where}: в листе учителя нет ответов`);
+    /* Рабочий лист: блоки на листе в заданном порядке, ДЗ — своей
+       страницей и своей таблицей ответов, нумерация сквозная. */
+    if (p.bloki.length > 1) {
+      const zs = list.poVariantam[0];
+      const est = (ch) => zs.some((z) => z.chast === ch);
+      if (p.bloki.includes('znat') && list.znat.length === 0)
+        add(`${where}: нет «Что нужно знать»`);
+      for (const ch of ['razminka', 'primer', 'sam', 'dz'])
+        if (p.bloki.includes(ch) && !est(ch)) add(`${where}: нет части «${ch}»`);
+      const dz = zs.filter((z) => z.chast === 'dz');
+      if (p.bloki.includes('dz') && dz.length !== p.dz) add(`${where}: в ДЗ ${dz.length} задач`);
+      if (dz.map((z) => z.no).join() !== dz.map((_, i) => i + 1).join())
+        add(`${where}: ДЗ нумеруется не с единицы`);
+      const osnovnye = zs.filter((z) => z.chast !== 'dz' && z.chast !== 'primer');
+      const nomera = osnovnye.map((z) => z.no).sort((a, b) => a - b);
+      if (nomera.join() !== nomera.map((_, i) => i + 1).join())
+        add(`${where}: номера на листе не сквозные (${nomera.join()})`);
+      const poryadok = p.bloki.filter((b) => b !== 'znat' && b !== 'primer' && b !== 'dz');
+      const vPoryadke = poryadok
+        .flatMap((b) => osnovnye.filter((z) => z.chast === b))
+        .map((z) => z.no);
+      if (vPoryadke.join() !== vPoryadke.map((_, i) => i + 1).join())
+        add(`${where}: номера не следуют порядку блоков`);
+      const nazvaniya = {
+        znat: 'Что нужно знать',
+        primer: 'Разобранный пример',
+        razminka: 'Разминка навыка',
+        sam: 'Попробуй сам',
+      };
+      for (const [b, t] of Object.entries(nazvaniya))
+        if (p.bloki.includes(b) && !uch.includes(t)) add(`${where}: на листе ученика нет «${t}»`);
+      const pozDz = uch.indexOf('Домашняя работа');
+      if (pozDz < 0 || !uch.slice(0, pozDz).includes('Попробуй сам'))
+        add(`${where}: домашняя работа не отдельной страницей после листа`);
+      if (!uchit.includes('Домашняя работа') || (uchit.match(/Домашняя работа/g) ?? []).length < 2)
+        add(`${where}: у учителя нет ДЗ с ответами`);
+      if (zs.some((z) => z.chast === 'primer' && z.poz.vid === 'mikro'))
+        add(`${where}: пример — микрозадача`);
+      /* Адрес без блоков — лист как раньше. */
+      const bezBlokov = L.parseSheetQuery11(new URLSearchParams('m=o&i=b&s=DP-07:2&seed=x'));
+      if (bezBlokov.bloki.join() !== 'zadachi' || bezBlokov.dz !== 4)
+        add('адрес без блоков читается не как «только задачи»');
+      const bezZadach = L.parseSheetQuery11(
+        new URLSearchParams('m=o&i=b&s=DP-07:2&seed=x&b=znat,xx,sam'),
+      );
+      if (bezZadach.bloki.join() !== 'znat,sam,zadachi')
+        add(`блоки из адреса читаются неверно: ${bezZadach.bloki.join()}`);
+    }
   }
   /* Замена одной задачи меняет только её. */
   const p0 = sluchai[1];

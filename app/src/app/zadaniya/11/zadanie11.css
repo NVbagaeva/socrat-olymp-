@@ -3704,3 +3704,144 @@
   display: grid;
   gap: var(--space-2);
 }
+
+/* ── Генератор: блоки рабочего листа ──────────────────────────── */
+
+.z11-gen__bloki {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-gen__blok-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z11-gen__blok-item.is-off {
+  background: var(--color-surface);
+}
+.z11-gen__blok-item .check {
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+.z11-gen__blok-name {
+  display: grid;
+  gap: 2px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-gen__blok-name span {
+  color: var(--color-text-secondary);
+}
+.z11-gen__blok-item.is-off .z11-gen__blok-name b {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.z11-gen__strelki {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+}
+.z11-gen__strelki button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+.z11-gen__strelki button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.z11-gen__blok-item .z11-stepper {
+  flex: none;
+}
+.z11-gen__blok-item .z11-stepper button {
+  width: 32px;
+  height: 32px;
+}
+
+/* ── Предпросмотр: части рабочего листа ───────────────────────── */
+
+.z11-a4__chast {
+  display: grid;
+  gap: var(--space-2);
+}
+.z11-a4__h {
+  padding: var(--space-1) var(--space-3);
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-surface-info);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.z11-a4__znat,
+.z11-a4__primer {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-info);
+  overflow-x: auto;
+}
+.z11-a4__znat .sheet-recap {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.z11-a4__znat .sheet-recap-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-body);
+  color: var(--color-primary);
+}
+.z11-a4__znat .z11-znat__row {
+  margin: 0;
+}
+.z11-a4__znat .z11-znat__row + .z11-znat__row {
+  margin-top: var(--space-1);
+}
+.z11-a4__primer-title {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.z11-a4__primer .z11-a4__reshenie {
+  background: var(--color-surface);
+}
+.z11-a4__zamena--primer {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+.z11-gen__fiks {
+  cursor: default;
+}
+.z11-gen__fiks-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z11-gen__fiks-mark .z11-pic {
+  width: 14px;
+  height: 14px;
+}
