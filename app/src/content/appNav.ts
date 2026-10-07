@@ -22,8 +22,20 @@ export const topNav: NavItem[] = [
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное
      название в ячейку шириной в четверть экрана не помещается. */
-  { id: 'materials', label: 'Мои материалы', short: 'Материалы', href: '/moi-materialy/', icon: 'materials' },
-  { id: 'teacher', label: 'Для учителя', short: 'Учитель', href: '/dlya-uchitelya/', icon: 'teacher' },
+  {
+    id: 'materials',
+    label: 'Мои материалы',
+    short: 'Материалы',
+    href: '/moi-materialy/',
+    icon: 'materials',
+  },
+  {
+    id: 'teacher',
+    label: 'Для учителя',
+    short: 'Учитель',
+    href: '/dlya-uchitelya/',
+    icon: 'teacher',
+  },
 ];
 
 /** Уведомления живут за колокольчиком, в списке меню их нет. */

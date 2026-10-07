@@ -45,10 +45,16 @@ export interface UslovieBanka {
   id: string;
   params: Params;
   razminka: boolean;
+  /**
+   * Аналог из пула: «новая» задача с готовым условием. Номер аналога
+   * («ДП-07-a01»), его текст и метка сюжета; ответа нет и здесь.
+   */
+  analog?: { kod: string; tekst: string; plotTag: string };
 }
 
 export type ZadachaPlan =
-  { vid: 'bank' | 'razminka'; no: number; id: string } | { vid: 'new'; id: string; seed: string };
+  | { vid: 'bank' | 'razminka' | 'analog'; no: number; id: string }
+  | { vid: 'new'; id: string; seed: string };
 
 export interface Zapros {
   podtipy: string[];
@@ -61,7 +67,7 @@ export function klyuchZadachi(plan: ZadachaPlan): string {
   if (plan.vid === 'new') {
     return `${plan.id}|n${plan.seed}`;
   }
-  return `${plan.id}|${plan.vid === 'bank' ? 'b' : 'r'}${plan.no}`;
+  return `${plan.id}|${plan.vid === 'bank' ? 'b' : plan.vid === 'analog' ? 'a' : 'r'}${plan.no}`;
 }
 
 /** Подтип по ключу задачи из списка ошибок. */
@@ -79,7 +85,18 @@ export function bankDlya(
     return [];
   }
   const nuzhny = new Set(podtipy);
-  return bank.filter((b) => nuzhny.has(b.id) && (istochnik === 'mix' || !b.razminka));
+  return bank.filter(
+    (b) => nuzhny.has(b.id) && b.analog === undefined && (istochnik === 'mix' || !b.razminka),
+  );
+}
+
+/** Аналоги из пула для подтипов: «новые» задачи с готовым условием. */
+export function analogiDlya(
+  podtipy: readonly string[],
+  bank: readonly UslovieBanka[],
+): UslovieBanka[] {
+  const nuzhny = new Set(podtipy);
+  return bank.filter((b) => nuzhny.has(b.id) && b.analog !== undefined);
 }
 
 /**
@@ -126,13 +143,23 @@ export function planSessii(
   const izBanka: ZadachaPlan[] = cheredovat(bankDlya(podtipy, bank, zapros.istochnik), r).map(
     (b) => ({ vid: b.razminka ? 'razminka' : 'bank', no: b.no, id: b.id }),
   );
+  /* Новые задачи: сначала аналоги из пула (без повторов), потом —
+     генератор на лету. Подтипы идут по кругу. */
+  const pul = new Map<string, UslovieBanka[]>();
+  for (const a of r.sample(analogiDlya(podtipy, bank), analogiDlya(podtipy, bank).length)) {
+    pul.set(a.id, [...(pul.get(a.id) ?? []), a]);
+  }
   const novye = (n: number): ZadachaPlan[] => {
     const krug = r.sample(podtipy, podtipy.length);
-    return Array.from({ length: n }, (_, i) => ({
-      vid: 'new' as const,
-      id: krug[i % krug.length] as string,
-      seed: `${seed}-${i}`,
-    }));
+    return Array.from({ length: n }, (_, i) => {
+      const id = krug[i % krug.length] as string;
+      const a = pul.get(id)?.shift();
+      const plan: ZadachaPlan =
+        a === undefined
+          ? { vid: 'new', id, seed: `${seed}-${i}` }
+          : { vid: 'analog', no: a.no, id };
+      return plan;
+    });
   };
   if (zapros.istochnik === 'bank') {
     return izBanka.slice(0, zapros.count);

@@ -111,7 +111,7 @@ function subtypeEst(id: string): boolean {
 
 /** Что стоит на позиции листа. */
 export type Pozitsiya =
-  | { vid: 'bank' | 'razminka'; id: string; no: number }
+  | { vid: 'bank' | 'razminka' | 'analog'; id: string; no: number }
   | { vid: 'new'; id: string; seed: string }
   | { vid: 'mikro'; id: string; seed: string; blok: string };
 
@@ -183,11 +183,24 @@ export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): Plan
     if (o === undefined) {
       const r = rngOf(`z11-list|${p.seed}|${id}`);
       /* Разминка — не открытый банк: её задачи идут только в «банк + новые». */
-      const svoi = bank.filter((b) => b.id === id && (!b.razminka || p.istochnik === 'mix'));
+      const svoi = bank.filter(
+        (b) => b.id === id && b.analog === undefined && (!b.razminka || p.istochnik === 'mix'),
+      );
       o = r.sample(svoi, svoi.length);
       ochered.set(id, o);
     }
     return o;
+  }
+  /* Пул аналогов подтипа: «новые» задачи берутся сначала из него. */
+  const pul = new Map<string, UslovieBanka[]>();
+  function analogDlya(id: string): UslovieBanka | undefined {
+    let o = pul.get(id);
+    if (o === undefined) {
+      const svoi = bank.filter((b) => b.id === id && b.analog !== undefined);
+      o = rngOf(`z11-analog|${p.seed}|${id}`).sample(svoi, svoi.length);
+      pul.set(id, o);
+    }
+    return o.shift();
   }
   let nehvatka = 0;
   const vybrat = (s: Shablon, v: number, i: number, zamena: number): Pozitsiya => {
@@ -207,6 +220,10 @@ export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): Plan
         return { vid: b.razminka ? 'razminka' : 'bank', id: b.id, no: b.no };
       }
       if (s.istochnik === 'bank') nehvatka += 1;
+    }
+    const a = analogDlya(s.id);
+    if (a !== undefined) {
+      return { vid: 'analog', id: a.id, no: a.no };
     }
     return { vid: 'new', id: s.id, ...novayaZadacha(s.id, seed, pohozha, zanyatoNovye) };
   };
@@ -362,7 +379,10 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
         blok,
         kod: kodNaSayte(poz.id),
         title: st.title,
-        questionHtml: typeset(s.uslovie),
+        questionHtml: typeset(
+          (poz.vid === 'new' ? undefined : bank.find((b) => b.no === poz.no)?.analog?.tekst) ??
+            s.uslovie,
+        ),
         answer: otvetVybor === null ? chislo(s.answer) : otvetVybor.replace(/\$/g, ''),
         answerHtml: otvetVybor === null ? typeset(`$${d(s.answer)}$`) : typeset(otvetVybor),
         solutionHtml: reshenieHtml(s.etapy, s.tables ?? []),
@@ -419,7 +439,9 @@ const STROKA_OTVETA =
   '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
 
 function bejdzh(z: ListZadacha): string {
-  return `<span class="z11-sheet-badge">${SHEET_11.bejdzh[z.poz.vid]}</span>`;
+  /* У аналога учителю видно, к какому прототипу банка он относится. */
+  const proto = z.poz.vid === 'analog' ? ` · ${SHEET_11.analogK} ${z.kod}` : '';
+  return `<span class="z11-sheet-badge">${SHEET_11.bejdzh[z.poz.vid]}${proto}</span>`;
 }
 
 /**

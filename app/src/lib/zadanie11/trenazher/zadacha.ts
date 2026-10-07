@@ -78,6 +78,8 @@ export function reshitPlan(plan: ZadachaPlan, bank: readonly UslovieBanka[]): So
 export function sobratZadachu(plan: ZadachaPlan, bank: readonly UslovieBanka[]): Zadacha11 {
   const st = subtype(plan.id);
   const s = reshit(plan, bank, pohozhaDlya(bank));
+  /* У аналога условие написано вручную; решение — то же solve. */
+  const analog = plan.vid === 'new' ? undefined : bank.find((b) => b.no === plan.no)?.analog;
   const choice = s.vybor !== undefined;
   const seal = choice ? sealChoice(String((s.vybor?.correct ?? 0) + 1)) : sealAnswer(s.answer);
   const podskazki: Podskazki11 = {
@@ -103,7 +105,7 @@ export function sobratZadachu(plan: ZadachaPlan, bank: readonly UslovieBanka[]):
     section: st.section,
     level: st.level,
     title: st.title,
-    uslovieHtml: typeset(s.uslovie),
+    uslovieHtml: typeset(analog?.tekst ?? s.uslovie),
     answerType: choice ? 'choice' : 'number',
     vybory: choice
       ? (s.vybor?.options ?? []).map((o, i) => ({ number: String(i + 1), label: typeset(o) }))

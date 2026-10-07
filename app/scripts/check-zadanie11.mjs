@@ -283,6 +283,7 @@ const trenazher = { zadach: 0 };
   const { kodNaSayte } = requireSrc('lib/zadanie11/kod');
   const { SECTIONS: SEKCII } = requireSrc('lib/zadanie11/taxonomy');
   const { BANK, RAZMINKA } = requireSrc('lib/zadanie11/bank');
+  const { ANALOGI } = requireSrc('lib/zadanie11/analogi');
   const add = (what) => problems.push({ where: 'тренажёр', what });
 
   for (const sec of SEKCII) {
@@ -291,8 +292,9 @@ const trenazher = { zadach: 0 };
   }
   const d = dannyeTrenazhera();
   if (JSON.stringify(d).includes('"answer"')) add('в данных страницы есть поле answer');
-  if (d.bank.length !== BANK.length + RAZMINKA.length)
-    add('в данных не все задачи банка и разминки');
+  if (d.bank.length !== BANK.length + RAZMINKA.length + ANALOGI.length) {
+    add('в данных не все задачи банка, разминки и пула аналогов');
+  }
   if (d.razdely.map((r) => r.id).join() !== SEKCII.map((x) => x.id).join())
     add('разделы не по порядку');
   for (const r of d.razdely) {
@@ -335,7 +337,21 @@ const trenazher = { zadach: 0 };
     d.bank,
     's4',
   );
-  if (novye.length !== 12 || novye.some((x) => x.vid !== 'new')) add('«только новые»: не то');
+  if (novye.length !== 12 || novye.some((x) => x.vid !== 'new' && x.vid !== 'analog')) {
+    add('«только новые»: не то');
+  }
+  /* Новые задачи берутся сначала из пула аналогов, без повторов. */
+  const izPula = planSessii({ podtipy: ['DP-07'], istochnik: 'new', count: 14 }, d.bank, 's6');
+  const analogov = izPula.filter((x) => x.vid === 'analog');
+  if (analogov.length !== 10 || new Set(analogov.map((x) => x.no)).size !== 10) {
+    add(`«только новые» ДП-07: аналогов ${analogov.length} из 10 или повторы`);
+  }
+  if (
+    izPula.slice(10).some((x) => x.vid !== 'new') &&
+    izPula.filter((x) => x.vid === 'new').length !== 4
+  ) {
+    add('«только новые»: после пула не включился генератор');
+  }
   if (planSessii({ podtipy: ['RZ-01'], istochnik: 'bank', count: 5 }, d.bank, 's5').length !== 0) {
     add('«банк»: разминка не скрыта');
   }
@@ -363,7 +379,9 @@ const trenazher = { zadach: 0 };
     ...d.bank.map((b) => ({ vid: b.razminka ? 'razminka' : 'bank', no: b.no, id: b.id })),
     ...ids.flatMap((id) => [0, 1, 2].map((k) => ({ vid: 'new', id, seed: `t${k}` }))),
   ];
-  const otvetBanka = new Map(d.bank.map((b, i) => [b.no, [...BANK, ...RAZMINKA][i].answer]));
+  const otvetBanka = new Map(
+    d.bank.map((b, i) => [b.no, [...BANK, ...RAZMINKA, ...ANALOGI][i].answer]),
+  );
   for (const plan of plany) {
     let z;
     try {
@@ -560,6 +578,19 @@ const listy = { zadach: 0 };
     add('нехватка банка считается неверно');
 }
 
+/* Пул аналогов: по 10 вычитанных «новых» задач на прототип. */
+const analogi = requireSrc('lib/zadanie11/analogi-selftest').checkAnalogi(typeset);
+problems.push(...analogi.problems);
+{
+  const { ANALOGI } = requireSrc('lib/zadanie11/analogi');
+  for (const a of ANALOGI) {
+    const plain = stripDollarMath(a.text);
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+      problems.push({ where: a.id, what: `вне KaTeX (${f.rule}): «${f.match}»` });
+    }
+  }
+}
+
 /* Склонения. */
 const expect = [
   [sk(1, SLOVA.chas), '1 час'],
@@ -606,6 +637,7 @@ if (poor.length > 0) {
 }
 console.log(`тренажёр: ${trenazher.zadach} задач собрано в закрытом виде`);
 console.log(`листы генератора и маршрутов: ${listy.zadach} задач`);
+console.log(`аналоги: ${analogi.checked} задач в пуле`);
 console.log(`проблем: ${problems.length}`);
 for (const p of problems.slice(0, 80)) {
   console.log(`  ${p.where} — ${p.what}`);

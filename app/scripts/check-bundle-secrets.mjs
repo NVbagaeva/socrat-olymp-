@@ -21,7 +21,8 @@
    банка: имена полей прототипа, начала первых шагов разборов и
    строковые параметры банка №11.
 
-   Витрина /styleguide/ — единственное исключение: она служебная,
+   Витрина /styleguide/ и вычитка аналогов /zadaniya/11/proverka-
+   analogov/ — исключения: они служебные,
    помечена noindex и показывает ответы намеренно.
 
    Ненулевой код возврата — в сборке лежит то, чего там быть не должно.
@@ -324,7 +325,11 @@ if (!fs.existsSync(outDir)) {
 }
 
 /* Витрина показывает ответы намеренно: она служебная и noindex. */
-const allowed = (file) => path.relative(outDir, file).split(path.sep).includes('styleguide');
+const allowed = (file) => {
+  const parts = path.relative(outDir, file).split(path.sep);
+  /* Вычитка аналогов №11 — тоже служебная, noindex, ответы показывает намеренно. */
+  return parts.includes('styleguide') || parts.includes('proverka-analogov');
+};
 
 const files = walk(outDir, (f) => /\.(js|html|txt|json)$/.test(f)).filter((f) => !allowed(f));
 

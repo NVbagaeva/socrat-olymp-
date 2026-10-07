@@ -37,7 +37,8 @@ export const SHEET_11 = {
   otvet: 'Ответ',
   otvetyNote: 'сквозная нумерация',
   resheniya: 'Решения',
-  bejdzh: { bank: 'банк', razminka: 'разминка', new: 'новая', mikro: 'опорная' },
+  bejdzh: { bank: 'банк', razminka: 'разминка', new: 'новая', analog: 'новая', mikro: 'опорная' },
+  analogK: 'аналог',
   foot: {
     course: 'Профильная математика',
     social: [

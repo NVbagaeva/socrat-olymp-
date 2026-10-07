@@ -187,7 +187,7 @@ export const TRENAZHER_11 = {
   /* Экран решения. */
   nazad: 'Назад',
   zadacha: (i: number, n: number) => `Задача ${i} из ${n}`,
-  badge: { bank: 'банк ФИПИ', razminka: 'разминка', new: 'новая' },
+  badge: { bank: 'банк ФИПИ', razminka: 'разминка', new: 'новая', analog: 'новая' },
   uslovie: 'Условие',
   podskazka: 'Подсказка',
   shag: (i: number, n: number) => `шаг ${i} из ${n}`,

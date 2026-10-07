@@ -13,14 +13,34 @@ import { OPORNYE } from './opornye';
 
 export type PrepSkillId =
   /* Линейная подтема. */
-  | 'k' | 'b' | 'b-point' | 'equation' | 'point'
+  | 'k'
+  | 'b'
+  | 'b-point'
+  | 'equation'
+  | 'point'
   /* Квадратичная подтема: девять навыков, P12Q-1 … P12Q-9. */
-  | 'sign-a' | 'value-a' | 'value-c' | 'value-b' | 'value-at'
-  | 'argument-for' | 'formula' | 'cross-line' | 'cross-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'value-at'
+  | 'argument-for'
+  | 'formula'
+  | 'cross-line'
+  | 'cross-parabola'
   /* Гипербола: одиннадцать навыков, P12R-1 … P12R-11. Адреса свои:
      value-at и argument-for уже заняты параболой. */
-  | 'koef-k' | 'sdvig-vverh' | 'sdvig-vbok' | 'sdvig-oba' | 'vse-koef'
-  | 'celaya-chast' | 'znachenie' | 'argument' | 'pryamaya' | 'abscissa-b' | 'ordinata-b';
+  | 'koef-k'
+  | 'sdvig-vverh'
+  | 'sdvig-vbok'
+  | 'sdvig-oba'
+  | 'vse-koef'
+  | 'celaya-chast'
+  | 'znachenie'
+  | 'argument'
+  | 'pryamaya'
+  | 'abscissa-b'
+  | 'ordinata-b';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */

@@ -22,6 +22,7 @@ import {
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
+import { GEROI, klyuch } from './syuzhety';
 import { otvet } from './common';
 
 /** Часы дробью в TeX: 1 ч 20 мин = 4/3. */
@@ -469,13 +470,17 @@ const DP07: Subtype = {
     const form = str(p, 'form', ['velo', 'barzha'] as const);
     const S = num(p, 'S');
     const dd = num(p, 'd');
-    const st = form === 'velo' ? dd : num(p, 'st');
-    const ask = form === 'velo' ? str(p, 'ask', ['AB', 'BA'] as const) : 'AB';
+    /* У велосипедиста банка остановка равна прибавке скорости; аналог
+       может задать её отдельно (st). */
+    const st = form === 'velo' && p.st === undefined ? dd : num(p, 'st');
+    const ask =
+      form === 'velo' || p.ask !== undefined ? str(p, 'ask', ['AB', 'BA'] as const) : 'AB';
     const P = round9((S * dd) / st); // x(x + d) = P
     const res = xxd(P, dd);
     const x = res.root;
     const ans = ask === 'AB' ? x : x + dd;
-    const kto = form === 'velo' ? 'велосипедиста' : 'баржи';
+    /* Герой аналога (лыжник, катер…) — только слова решения. */
+    const kto = klyuch(GEROI, p.geroy, form).rod;
     const uslovie =
       form === 'velo'
         ? `Велосипедист выехал с постоянной скоростью из города А в город В, расстояние между которыми равно ${txt(S)} км. На следующий день он отправился обратно в А со скоростью на ${txt(dd)} км/ч больше прежней. По дороге он сделал остановку на ${sk(st, SLOVA.chas)}. В результате он затратил на обратный путь столько же времени, сколько на путь из А в В. Найдите скорость велосипедиста на пути из ${ask === 'AB' ? 'А в В' : 'В в А'}. Ответ дайте в км/ч.`

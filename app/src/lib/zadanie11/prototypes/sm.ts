@@ -8,6 +8,7 @@
 import { chtoSprashivayut, etapy, koncentraciya, num, str, vopros } from '../kit';
 import { d, frac, round9, txt } from '../num';
 import type { Subtype } from '../types';
+import { klyuch, TARY, VESHCHESTVA } from './syuzhety';
 import { otvet, pct } from './common';
 
 /** Масса вещества: m·p/100 в TeX. */
@@ -530,6 +531,9 @@ const SM07: Subtype = {
     const c = num(p, 'c');
     const e = num(p, 'e');
     const ask = str(p, 'ask', ['pct', 'kg'] as const);
+    /* Сюжет аналога: вещество (соль, серебро…) и ёмкость (бочка, слиток). */
+    const vv = klyuch(VESHCHESTVA, p.vv, 'kislota').rod;
+    const tara = klyuch(TARY, p.tara, 'sosud');
     /* m1·x + m2·y = c(m1 + m2); x + y = 2e */
     const x = round9((c * (m1 + m2) - 2 * e * m2) / (m1 - m2));
     const y = round9(2 * e - x);
@@ -543,7 +547,7 @@ const SM07: Subtype = {
       uslovie: `Имеются два сосуда. Первый содержит ${txt(m1)} кг, а второй — ${txt(m2)} кг раствора кислоты различной концентрации. Если эти растворы смешать, то получится раствор, содержащий ${txt(c)}% кислоты. Если же смешать равные массы этих растворов, то получится раствор, содержащий ${txt(e)}% кислоты. ${vopr}`,
       answer: ans,
       etapy: etapy(
-        ['Обозначаем', ['Концентрация в первом сосуде — $x\\%$, во втором — $y\\%$.']],
+        ['Обозначаем', [`Концентрация ${vv} ${tara.v1} — $x\\%$, ${tara.v2} — $y\\%$.`]],
         [
           'Таблица',
           [
@@ -567,9 +571,9 @@ const SM07: Subtype = {
         [
           'Ответ на вопрос задачи',
           ask === 'pct'
-            ? ['Спрашивают концентрацию в первом сосуде — в процентах.', otvet(ans)]
+            ? [`Спрашивают концентрацию ${vv} ${tara.v1} — в процентах.`, otvet(ans)]
             : [
-                `Спрашивают килограммы кислоты: $${d(x / 100)}\\cdot${d(m1)}=${d(kg)}$ кг.`,
+                `Спрашивают килограммы ${vv}: $${d(x / 100)}\\cdot${d(m1)}=${d(kg)}$ кг.`,
                 otvet(ans),
               ],
         ],
@@ -600,7 +604,7 @@ const SM07: Subtype = {
       hints: [
         HINT_STROKA,
         vopros('Сколько неизвестных удобно ввести?', 'две: концентрации $x$ и $y$', [
-          'одну: массу кислоты',
+          `одну: массу ${vv}`,
           'три',
         ]),
         vopros('Чему равна концентрация, если смешать равные массы?', '$\\dfrac{x+y}{2}$', [
@@ -613,11 +617,14 @@ const SM07: Subtype = {
         ]),
         chtoSprashivayut(
           ask === 'pct'
-            ? 'концентрацию в первом сосуде, в процентах'
-            : 'массу кислоты в первом сосуде, в килограммах',
+            ? `концентрацию ${vv} ${tara.v1}, в процентах`
+            : `массу ${vv} ${tara.v1}, в килограммах`,
           ask === 'pct'
-            ? ['массу кислоты в первом сосуде', 'концентрацию во втором сосуде']
-            : ['концентрацию в первом сосуде', 'массу раствора в первом сосуде'],
+            ? [`массу ${vv} ${tara.v1}`, `концентрацию ${tara.v2}`]
+            : [
+                `концентрацию ${tara.v1}`,
+                `массу ${klyuch(VESHCHESTVA, p.vv, 'kislota').splav ? 'сплава' : 'раствора'} ${tara.v1}`,
+              ],
         ),
       ],
       lifehacks: ['equal-mass-average'],

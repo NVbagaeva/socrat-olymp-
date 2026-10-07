@@ -1875,7 +1875,8 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.z11-resh__badge--new {
+.z11-resh__badge--new,
+.z11-resh__badge--analog {
   background: var(--color-success-soft);
   color: var(--color-success);
 }
@@ -2564,7 +2565,8 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.z11-a4__badge--new {
+.z11-a4__badge--new,
+.z11-a4__badge--analog {
   background: var(--color-success-soft);
   color: var(--color-success);
 }

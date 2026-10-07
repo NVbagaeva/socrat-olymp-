@@ -53,9 +53,14 @@ export const foot = {
   course: 'Профильная математика',
   social: [
     { icon: 'telegram', label: 't.me/budet_na_ege_math', href: 'https://t.me/budet_na_ege_math' },
-    { icon: 'youtube', label: 'youtube.com/@math_princess', href: 'https://youtube.com/@math_princess' },
+    {
+      icon: 'youtube',
+      label: 'youtube.com/@math_princess',
+      href: 'https://youtube.com/@math_princess',
+    },
   ],
-  rights: 'Материалы платформы "Будет на ЕГЭ". Авторские материалы Багаевой Н.В. ' +
+  rights:
+    'Материалы платформы "Будет на ЕГЭ". Авторские материалы Багаевой Н.В. ' +
     'Распространение без разрешения автора запрещено.',
 };
 
@@ -66,20 +71,47 @@ export const foot = {
  * note — приписка справа в полосе заголовка.
  */
 export const blocks = [
-  { set: 'P12-1', title: 'Угловой коэффициент <span class="math" data-tex="k"><i>k</i></span> по графику', note: 'найти наклон по двум точкам' },
-  { set: 'P12-2', title: 'Свободный член <span class="math" data-tex="b"><i>b</i></span> по графику', note: 'найти, где прямая пересекает ось <span class="math" data-tex="y"><i>y</i></span>' },
+  {
+    set: 'P12-1',
+    title: 'Угловой коэффициент <span class="math" data-tex="k"><i>k</i></span> по графику',
+    note: 'найти наклон по двум точкам',
+  },
+  {
+    set: 'P12-2',
+    title: 'Свободный член <span class="math" data-tex="b"><i>b</i></span> по графику',
+    note: 'найти, где прямая пересекает ось <span class="math" data-tex="y"><i>y</i></span>',
+  },
   /* Блок появился после утверждения порядка: набор P12-6 добрался
      до main, пока шёл пилот. Место выбрано по смыслу — тот же
      свободный член, но другим приёмом, сразу за блоком 2. */
-  { set: 'P12-6', title: 'Свободный член <span class="math" data-tex="b"><i>b</i></span> через точку',
-    note: 'найти подстановкой точки' },
+  {
+    set: 'P12-6',
+    title: 'Свободный член <span class="math" data-tex="b"><i>b</i></span> через точку',
+    note: 'найти подстановкой точки',
+  },
   { set: 'P12-3', title: 'Уравнение прямой по графику', note: 'выбрать формулу функции' },
   { set: 'P12-4', title: 'Принадлежность точки: по графику', note: 'лежит ли точка на прямой' },
   { set: 'P12-5', title: 'Принадлежность точки: подстановкой', note: 'без чертежа, вычислением' },
-  { set: '12.A', title: 'Значение функции по значению аргумента', note: 'найти <span class="math" data-tex="y"><i>y</i></span>, если известен <span class="math" data-tex="x"><i>x</i></span>' },
-  { set: '12.B', title: 'Значение аргумента по значению функции', note: 'найти <span class="math" data-tex="x"><i>x</i></span>, если известен <span class="math" data-tex="y"><i>y</i></span>' },
-  { set: '12.C', title: 'Абсцисса точки пересечения графиков', note: 'найти <span class="math" data-tex="x"><i>x</i></span> точки пересечения' },
-  { set: '12.D', title: 'Ордината точки пересечения графиков', note: 'найти <span class="math" data-tex="y"><i>y</i></span> точки пересечения' },
+  {
+    set: '12.A',
+    title: 'Значение функции по значению аргумента',
+    note: 'найти <span class="math" data-tex="y"><i>y</i></span>, если известен <span class="math" data-tex="x"><i>x</i></span>',
+  },
+  {
+    set: '12.B',
+    title: 'Значение аргумента по значению функции',
+    note: 'найти <span class="math" data-tex="x"><i>x</i></span>, если известен <span class="math" data-tex="y"><i>y</i></span>',
+  },
+  {
+    set: '12.C',
+    title: 'Абсцисса точки пересечения графиков',
+    note: 'найти <span class="math" data-tex="x"><i>x</i></span> точки пересечения',
+  },
+  {
+    set: '12.D',
+    title: 'Ордината точки пересечения графиков',
+    note: 'найти <span class="math" data-tex="y"><i>y</i></span> точки пересечения',
+  },
 ];
 
 /** Названия файлов сборника. */
