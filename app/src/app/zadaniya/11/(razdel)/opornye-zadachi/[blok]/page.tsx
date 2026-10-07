@@ -4,9 +4,11 @@ import { Opornye11Screen } from '@/components/tasks/zadanie11/Opornye11Screen';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
 import { tasksPage } from '@/content/tasks';
-import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI, blokBySlug } from '@/lib/zadanie11/prep/bloki';
 import { prepPool11 } from '@/lib/zadanie11/prep/pool';
+import { SUBTYPES } from '@/lib/zadanie11/prototypes';
+import { SECTIONS } from '@/lib/zadanie11/taxonomy';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -33,7 +35,16 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
   if (found === undefined) {
     notFound();
   }
-  const listHref = `${tasksPage.href}/${ZADANIE11.slug}/${OPORNYE.tail}`;
+  const base = `${tasksPage.href}/${ZADANIE11.slug}`;
+  const listHref = `${base}/${OPORNYE.tail}`;
+  /* Куда дальше после 10/10: теория раздела, следующий блок, задачи
+     ЕГЭ раздела — своего или первого, перед которым этот блок нужен. */
+  const index = BLOKI.findIndex((b) => b.id === found.id);
+  const sled = BLOKI[index + 1];
+  const razdel =
+    SECTIONS.find((s) => s.id === found.razdel) ??
+    SECTIONS.find((s) => (O_ZADANII_11.pered[s.id] ?? []).includes(found.nazvanie));
+  const tipy = razdel === undefined ? [] : SUBTYPES.filter((st) => st.section === razdel.id);
   return (
     <Opornye11Shell
       listHref={listHref}
@@ -44,9 +55,25 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
         blockId={found.id}
         razdel={found.razdel}
         title={found.nazvanie}
+        zachem={found.zachem}
+        teoriyaHtml={found.teoriyaHtml}
         tasks={found.zadachi}
         zapomniHtml={found.zapomniHtml}
         listHref={listHref}
+        dalee={{
+          teoriyaHref: `${base}/teoriya/#teoriya-${found.teoriyaRazdel}`,
+          sled:
+            sled === undefined
+              ? null
+              : { href: `${listHref}${sled.slug}/`, nazvanie: sled.nazvanie },
+          trenazher:
+            razdel === undefined || tipy.length === 0
+              ? null
+              : {
+                  href: `${base}/trenazher/?tipy=${tipy.map((st) => st.id).join(',')}`,
+                  razdel: razdel.nazvanie,
+                },
+        }}
       />
     </Opornye11Shell>
   );

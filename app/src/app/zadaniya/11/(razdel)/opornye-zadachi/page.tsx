@@ -6,11 +6,13 @@ import {
 } from '@/components/tasks/zadanie11/Opornye11List';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
+import { DLYA_RAZDELA_11 } from '@/content/opornye11';
 import { tasksPage } from '@/content/tasks';
 import { OPORNYE_11, O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import type { RazdelBloka } from '@/lib/zadanie11/prep/types';
 import { SECTIONS } from '@/lib/zadanie11/taxonomy';
+import { typeset } from '@/lib/tex';
 
 export const metadata: Metadata = {
   title: zadanie11Title(OPORNYE.title),
@@ -36,6 +38,7 @@ export default function Opornye11Tab() {
       slug: b.slug,
       razdel: b.razdel,
       nazvanie: b.nazvanie,
+      zachem: b.zachem,
       total: b.zadachi.length,
       filtry,
     };
@@ -49,7 +52,17 @@ export default function Opornye11Tab() {
   ];
   return (
     <Opornye11Shell listHref={listHref} totals={bloki.map((b) => ({ id: b.id, total: b.total }))}>
-      <Opornye11List bloki={bloki} filtry={filtry} listHref={listHref} />
+      <Opornye11List
+        bloki={bloki}
+        filtry={filtry}
+        listHref={listHref}
+        opisaniya={{
+          razdely: Object.fromEntries(
+            Object.entries(DLYA_RAZDELA_11).map(([id, text]) => [id, typeset(text)]),
+          ),
+          zachem: Object.fromEntries(BLOKI.map((b) => [b.id, typeset(b.zachem)])),
+        }}
+      />
     </Opornye11Shell>
   );
 }
