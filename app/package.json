@@ -46,6 +46,7 @@
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
+    "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
     "build:pdf-8": "node scripts/build-pdf-8.mjs",
@@ -66,7 +67,8 @@
     "katex": "^0.16.11",
     "next": "15.5.27",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
@@ -75,6 +77,7 @@
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.180.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "15.5.27",
     "eslint-plugin-import": "^2.32.0",

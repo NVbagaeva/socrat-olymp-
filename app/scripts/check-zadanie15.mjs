@@ -16,7 +16,11 @@
        только точки одной грани, пересекать только прямые одной
        плоскости), параллельная через точку с обоснованием, цепочка
        до точек условия, точка «на глаз» не обоснована, имена,
-       удаление со всеми зависимыми.
+       удаление со всеми зависимыми;
+     — рисунок (src/lib/zadanie15/render): видимость рёбер, сторон
+       сечения и вспомогательных прямых для параллельной и центральной
+       проекции, разрез тела на две части, натуральная величина,
+       раскладка подписей, SVG для экспорта, сцены витрины.
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
@@ -400,10 +404,13 @@ const B234 = box(2, 3, 4);
     'C,X',
     'теперь две общие точки',
   );
-  ok(
-    c.describe(l) ===
-      '$C \\in \\alpha,\\ C \\in (ABC);\\ X \\in \\alpha,\\ X \\in (ABC) \\Rightarrow CX = \\alpha \\cap (ABC)$.',
-    'полное обоснование прямой пересечения',
+  eqStr(
+    c.describe(l),
+    '$C \\in \\alpha$ и $C \\in (ABC)$, $X \\in \\alpha$ и $X \\in (ABC)$, $C \\ne X$. ' +
+      'Плоскости $\\alpha$ и $(ABC)$ различны и имеют общие точки, значит, они пересекаются по прямой ' +
+      '(аксиома: если две различные плоскости имеют общую точку, то они пересекаются по прямой, проходящей через эту точку). ' +
+      'Обе точки $C$ и $X$ лежат на этой прямой, значит, $\\alpha \\cap (ABC) = CX$.',
+    'полное школьное обоснование прямой пересечения',
   );
 
   eqStr(
@@ -503,6 +510,37 @@ const B234 = box(2, 3, 4);
   eqStr(train.sections.length, 0, 'тренажёр: сечения нет');
   const reveal = S.buildScene(c, opts(c, { facePlanes: faces, mode: 'train', reveal: true }));
   eqStr(reveal.lines.filter((l) => l.kind === 'meet').length, 2, 'после проверки линии показаны');
+  ok(reveal.candidates.length > 0, 'после проверки кандидаты показаны');
+  // Тренажёр: пустых кружков-кандидатов нет ни в одном сценарии, пока не нажали «Показать».
+  for (const sc of S.SCENARIOS) {
+    const b = sc.build();
+    const t = S.buildScene(b.c, opts(b.c, { facePlanes: b.facePlanes, mode: 'train' }));
+    eqStr(t.candidates.length, 0, `тренажёр, ${sc.id}: кандидатов нет`);
+    eqStr(t.lines.filter((l) => l.kind === 'meet').length, 0, `тренажёр, ${sc.id}: линий нет`);
+  }
+  // Камера всегда ортогональная: следы в параллельных гранях параллельны
+  // на экране при любом повороте (проекция линейная, без перспективы).
+  {
+    const pts = [
+      [0, 0, 0],
+      [6, 3, 0],
+      [0, 0, 6],
+      [6, 3, 6],
+    ];
+    for (let i = 0; i < 40; i += 1) {
+      const cam = { yaw: i * 0.37, pitch: ((i % 9) - 4) * 0.33 };
+      const b = S.basisOf(cam);
+      const P = pts.map((p) => S.project(b, p));
+      const u = [P[1][0] - P[0][0], P[1][1] - P[0][1]];
+      const v = [P[3][0] - P[2][0], P[3][1] - P[2][1]];
+      const cr = u[0] * v[1] - u[1] * v[0];
+      if (Math.abs(cr) > 1e-9) {
+        ok(false, `камера ${i}: параллельные отрезки на экране не параллельны (${cr})`);
+        break;
+      }
+    }
+    ok(true, 'камера ортогональная: параллельность сохраняется при 40 поворотах');
+  }
   // Пошаговый показ: до первого шага — только фигура.
   const start = S.buildScene(c, opts(c, { facePlanes: faces, upTo: -1 }));
   eqStr(start.lines.length, 0, 'шаг «фигура»: линий нет');
@@ -546,6 +584,182 @@ const B234 = box(2, 3, 4);
   ok(Math.abs(turned.pitch) <= S.MAX_PITCH + 1e-9, 'наклон камеры ограничен');
   const mid = S.lerpCamera(S.DEFAULT_CAMERA, cam, 0.5);
   ok(Number.isFinite(mid.yaw) && Number.isFinite(mid.pitch), 'промежуточная камера');
+}
+
+/* ── Рисунок ────────────────────────────────────────────── */
+
+const R = {
+  ...requireSrc('lib/zadanie15/render/scena.ts'),
+  ...requireSrc('lib/zadanie15/render/vidimost.ts'),
+  ...requireSrc('lib/zadanie15/render/razrez.ts'),
+  ...requireSrc('lib/zadanie15/render/naturalnaya.ts'),
+  ...requireSrc('lib/zadanie15/render/metki.ts'),
+  ...requireSrc('lib/zadanie15/render/eksport.ts'),
+  ...requireSrc('lib/zadanie15/render/primery.ts'),
+};
+const unit = (v) => {
+  const l = Math.hypot(...v);
+  return v.map((x) => x / l);
+};
+/* Взгляд спереди-справа-сверху: ближе всех B_1, дальше всех D. */
+const K0 = unit([0.4, -1, 0.6]);
+const orto = { vid: 'orto', k: K0 };
+const persp = { vid: 'persp', glaz: K0.map((x, i) => 3 + x * 400 + (i === 2 ? 0 : 0)) };
+const near = (a, b) => Math.abs(a - b) < 1e-6;
+const ptEq = (a, b) => a.every((x, i) => near(x, b[i]));
+
+// Куб: невидимы ровно три ребра — те, что сходятся в D.
+{
+  const sc = R.scena(cube(6));
+  const D = [0, 6, 0];
+  for (const [kam, nm] of [
+    [orto, 'параллельная'],
+    [persp, 'центральная'],
+  ]) {
+    const ls = R.linii(sc, kam);
+    const hidden = ls.filter((l) => !l.vidno);
+    eqStr(hidden.length, 3, `куб, ${nm} проекция — невидимых рёбер`);
+    ok(
+      hidden.every((l) => ptEq(l.a, D) || ptEq(l.b, D)),
+      `куб, ${nm} проекция — невидимые рёбра сходятся в D`,
+    );
+  }
+}
+
+// Стороны сечения A_1BD: A_1B в передней грани видна, BD (в основании)
+// и A_1D (в левой грани) — штрихом.
+{
+  const sc = R.PRIMERY.find((p) => p.id === 'kub-treugolnik').build();
+  const ls = R.linii(sc, orto).filter((l) => l.vid === 'sechenie');
+  eqStr(ls.length, 3, 'A_1BD — сторон без разрывов');
+  const A1 = [0, 0, 6];
+  const B = [6, 0, 0];
+  const side = (p, q) =>
+    ls.find((l) => (ptEq(l.a, p) && ptEq(l.b, q)) || (ptEq(l.a, q) && ptEq(l.b, p)));
+  ok(side(A1, B)?.vidno === true, 'A_1BD — сторона A_1B видна');
+  ok(side(B, [0, 6, 0])?.vidno === false, 'A_1BD — сторона BD штрихом');
+  ok(side(A1, [0, 6, 0])?.vidno === false, 'A_1BD — сторона A_1D штрихом');
+}
+
+// Вспомогательные прямые пятиугольника: куски покрывают отрезок без
+// дыр; след YC в задней грани закрыт, его продолжение за куб — нет.
+{
+  const sc = R.PRIMERY.find((p) => p.id === 'kub-pyatiugolnik').build();
+  const T = sc.tela;
+  const eps = sc.razmer * 1e-7;
+  for (const o of sc.otrezki) {
+    const k = R.kuskiOtrezka(o.a, o.b, T, orto, eps);
+    ok(
+      near(k[0].t0, 0) &&
+        near(k.at(-1).t1, 1) &&
+        k.every((x, i) => i === 0 || near(k[i - 1].t1, x.t0)),
+      'отрезок построения разбит на куски без дыр',
+    );
+  }
+  const C = [6, 6, 0];
+  const Y = [-3, 6, 6];
+  const yc = sc.otrezki.find((o) => o.vid === 'vspom' && ptEq(o.a, Y) && ptEq(o.b, C));
+  ok(yc !== undefined, 'пятиугольник — есть след YC');
+  if (yc) {
+    const k = R.kuskiOtrezka(yc.a, yc.b, T, orto, eps);
+    ok(k.some((x) => x.vidno) && k.some((x) => !x.vidno), 'след YC: часть видна, часть штрихом');
+    // Точка следа внутри задней грани CC_1D_1D (x = 3) — закрыта.
+    ok(R.zakrytaKemTo([3, 6, 2], T, orto, eps), 'точка задней грани закрыта');
+    ok(!R.zakrytaKemTo([3, 0, 2], T, orto, eps), 'точка передней грани видна');
+  }
+  eqStr(
+    sc.metki
+      .filter((m) => m.vid === 'tochka')
+      .map((m) => m.name)
+      .join(','),
+    'M,N,X,Y,K,L',
+    'пятиугольник — точки построения',
+  );
+  eqStr(
+    sc.sechenie.names.filter(Boolean).sort().join(','),
+    'C,K,L,M,N',
+    'пятиугольник — имена вершин сечения',
+  );
+}
+
+// Разрез: объёмы частей в сумме — объём куба; A_1BD отрезает 1/6.
+{
+  const sc = R.PRIMERY.find((p) => p.id === 'kub-treugolnik').build();
+  const vol = (t) =>
+    t.grani.reduce((s, g) => {
+      let a = [0, 0, 0];
+      g.pts.forEach((p, i) => {
+        const q = g.pts[(i + 1) % g.pts.length];
+        a = [
+          a[0] + p[1] * q[2] - p[2] * q[1],
+          a[1] + p[2] * q[0] - p[0] * q[2],
+          a[2] + p[0] * q[1] - p[1] * q[0],
+        ];
+      });
+      const area = (a[0] * g.n[0] + a[1] * g.n[1] + a[2] * g.n[2]) / 2;
+      return s + (area * g.c) / 3;
+    }, 0);
+  const { plyus, minus } = R.razrezat(sc.tela[0], sc.sechenie, sc.razmer);
+  const [v1, v2] = [vol(plyus), vol(minus)].sort((a, b) => a - b);
+  ok(near(v1, 36) && near(v2, 180), `разрез куба по A_1BD — объёмы ${v1}, ${v2}`);
+  eqStr(Math.min(plyus.grani.length, minus.grani.length), 4, 'отрезанная часть — тетраэдр');
+  ok(
+    [plyus, minus].every((t) => t.rebra.every((r) => r.f[0] !== r.f[1])),
+    'у частей каждое ребро — общее у двух граней',
+  );
+}
+
+// Натуральная величина: правильный шестиугольник со стороной 3√2.
+{
+  const sc = R.PRIMERY.find((p) => p.id === 'kub-shestiugolnik').build();
+  const nv = R.naturalnaya(sc.sechenie);
+  eqStr(nv.pts.length, 6, 'шестиугольник — вершин в натуральную величину');
+  ok(
+    nv.storony.every((x) => near(x, 3 * Math.SQRT2)),
+    'шестиугольник — стороны 3√2',
+  );
+}
+
+// Подписи не налезают друг на друга.
+{
+  const z = [
+    { p: [100, 100], w: 20, h: 20 },
+    { p: [104, 100], w: 20, h: 20 },
+    { p: [100, 106], w: 20, h: 20 },
+  ];
+  const pos = R.razlozhit(z, [], [100, 100]);
+  const boxes = pos.map((q, i) => [q.x, q.y, q.x + z[i].w, q.y + z[i].h]);
+  const inter = (a, b) =>
+    Math.min(a[2], b[2]) > Math.max(a[0], b[0]) && Math.min(a[3], b[3]) > Math.max(a[1], b[1]);
+  ok(
+    !inter(boxes[0], boxes[1]) && !inter(boxes[0], boxes[2]) && !inter(boxes[1], boxes[2]),
+    'подписи не пересекаются',
+  );
+}
+
+// Школьный ракурс: сечение не смотрит ребром, D остаётся невидимой.
+for (const p of R.PRIMERY) {
+  const sc = p.build();
+  const k = R.shkolnyyRakurs(sc);
+  const cos = Math.abs(k[0] * sc.sechenie.n[0] + k[1] * sc.sechenie.n[1] + k[2] * sc.sechenie.n[2]);
+  ok(cos > 0.2, `${p.id}: сечение в школьном ракурсе видно (cos = ${cos.toFixed(2)})`);
+  ok(k[0] > 0 && k[1] < 0 && k[2] > 0, `${p.id}: ракурс спереди-справа-сверху`);
+}
+
+// SVG для экспорта: все сцены витрины собираются; у куба три штриха.
+{
+  for (const p of R.PRIMERY) {
+    const svg = R.chertezhSvg(p.build(), K0, [0, 0, 1]);
+    ok(svg.startsWith('<svg') && svg.includes('<polygon'), `SVG витрины: ${p.id}`);
+  }
+  const svg = R.chertezhSvg(R.scena(cube(6)), K0, [0, 0, 1]);
+  eqStr((svg.match(/stroke-dasharray/g) ?? []).length, 3, 'SVG куба — штрихом три ребра');
+  eqStr(
+    R.imyaSvg('A_1'),
+    '<tspan font-style="italic">A</tspan><tspan baseline-shift="sub" font-size="70%">1</tspan>',
+    'имя A_1 в SVG',
+  );
+  ok(R.imyaSvg("K'").includes('′'), "имя K' в SVG — со штрихом");
 }
 
 /* ── Итог ───────────────────────────────────────────────── */

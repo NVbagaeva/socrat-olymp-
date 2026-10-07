@@ -20,6 +20,7 @@ import answers from '@/lib/sheet/answers.js';
 import { typesetKrupno as typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
+import { type Kontekst, strokaHtml } from './proporciya/html';
 import { kodNaSayte } from './kod';
 import { d } from './num';
 import { BLOKI } from './prep/bloki';
@@ -290,13 +291,17 @@ function chislo(x: number): string {
   return String(Math.round(x * 1e9) / 1e9).replace('.', ',');
 }
 
-function reshenieHtml(etapy: { title: string; lines: string[] }[], tables: Tablitsa[]): string {
+function reshenieHtml(
+  etapy: { title: string; lines: string[] }[],
+  tables: Tablitsa[],
+  k: Kontekst,
+): string {
   const tab = tables.map((t) => tablitsaHtml(t)).join('');
   const items = etapy
     .map((e) => {
       const lines = e.lines.filter((l) => !/^\*\*Ответ:\*\*/.test(l));
       if (lines.length === 0) return '';
-      return `<li class="sheet-step"><b>${typeset(e.title)}.</b> ${lines.map((l) => typeset(l)).join(' ')}</li>`;
+      return `<li class="sheet-step"><b>${typeset(e.title)}.</b> ${lines.map((l) => strokaHtml(l, k)).join(' ')}</li>`;
     })
     .join('');
   return `${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol>`;
@@ -324,8 +329,11 @@ export interface SobrannyyList {
 export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): SobrannyyList {
   const plan = planLista(p, bank);
   const pohozha = pohozhaNa(bank);
-  const poVariantam = plan.poVariantam.map((row, vi) =>
-    row.map((poz, i): ListZadacha => {
+  const poVariantam = plan.poVariantam.map((row, vi) => {
+    /* Правило пропорции и признаки делимости печатаются целиком один
+       раз на вариант, дальше — строкой-ссылкой. */
+    const k: Kontekst = { typeset, pechat: true, pokazano: { pravilo: false, priznaki: false } };
+    return row.map((poz, i): ListZadacha => {
       const pos = `${vi + 1}.${i + 1}`;
       const blok = plan.bloki[i] ?? '';
       if (poz.vid === 'mikro') {
@@ -364,7 +372,7 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
             (z.razborTablitsa === undefined ? '' : tablitsaHtml(z.razborTablitsa)) +
             `<ol class="sheet-steps z11-sheet-steps">${z.razbor
               .filter((l) => !/^\*\*Ответ:\*\*/.test(l))
-              .map((l) => `<li class="sheet-step">${typeset(l)}</li>`)
+              .map((l) => `<li class="sheet-step">${strokaHtml(l, k)}</li>`)
               .join('')}</ol>`,
         };
       }
@@ -385,10 +393,10 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
         ),
         answer: otvetVybor === null ? chislo(s.answer) : otvetVybor.replace(/\$/g, ''),
         answerHtml: otvetVybor === null ? typeset(`$${d(s.answer)}$`) : typeset(otvetVybor),
-        solutionHtml: reshenieHtml(s.etapy, s.tables ?? []),
+        solutionHtml: reshenieHtml(s.etapy, s.tables ?? [], k),
       };
-    }),
-  );
+    });
+  });
   return { poVariantam, bloki: plan.bloki, nehvatka: plan.nehvatka };
 }
 

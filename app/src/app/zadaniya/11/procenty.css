@@ -1,0 +1,362 @@
+/* Разбор задач на проценты (задание №11): краткая запись, пропорция,
+   правило пропорции, сокращение, признаки делимости, плашка, справка
+   «Правило 100 %». HTML строит lib/zadanie11/proporciya/html.ts; стиль
+   общий для сайта, листа учителя и печати — размеры в em. */
+
+.prc-kray {
+  color: #1f5fd0;
+  font-weight: 600;
+}
+.prc-sred {
+  color: #c75f12;
+  font-weight: 600;
+}
+
+/* ── Краткая запись: столбцы по тире ──────────────────────────── */
+
+.prc-zapis {
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  align-items: baseline;
+  column-gap: 0.6em;
+  row-gap: 0.35em;
+  width: max-content;
+  max-width: 100%;
+  margin: 0.45em 0;
+  padding: 0.55em 1em;
+  border-left: 3px solid var(--color-accent, #e07a2f);
+  border-radius: 0 8px 8px 0;
+  background: var(--color-accent-soft-surface, #fdf1ea);
+  font-size: 1.12em;
+}
+.prc-zapis__l {
+  justify-self: end;
+}
+.prc-zapis__t {
+  color: var(--color-text-secondary, #4a5363);
+}
+.prc-zapis__note {
+  margin-left: 0.4em;
+  color: var(--color-text-secondary, #4a5363);
+  font-size: 0.8em;
+}
+.prc-ed,
+.prc-pct {
+  margin-left: 0.25em;
+}
+.prc-q {
+  color: var(--color-accent, #e07a2f);
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* «?» уплывает вверх, на его место встаёт x. */
+.prc-x {
+  position: relative;
+  display: inline-block;
+}
+.prc-x .katex {
+  color: var(--color-accent, #e07a2f);
+}
+.prc-x__q {
+  position: absolute;
+  inset: 0;
+  color: var(--color-accent, #e07a2f);
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+}
+.prc-x--zamena .prc-x__q {
+  animation: prc-q-uhodit 0.9s ease 0.35s backwards;
+}
+.prc-x--zamena .prc-x__v {
+  display: inline-block;
+  animation: prc-x-prihodit 0.9s ease 0.35s backwards;
+}
+@keyframes prc-q-uhodit {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.7em);
+  }
+}
+@keyframes prc-x-prihodit {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-x--zamena .prc-x__q,
+  .prc-x--zamena .prc-x__v {
+    animation: none;
+  }
+}
+
+/* ── Пропорция ─────────────────────────────────────────────────── */
+
+.prc-prop {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.2em 0.7em;
+  margin: 0.5em 0;
+  font-size: 1.3em;
+}
+.prc-prop__eq {
+  align-self: center;
+  margin-top: -0.9em;
+}
+.prc-drob {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+.prc-drob__podpis {
+  margin-top: 0.15em;
+  color: var(--color-text-secondary, #4a5363);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  max-width: 10em;
+  font-size: 0.5em;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* ── Сворачиваемые карточки ────────────────────────────────────── */
+
+.prc-pravilo,
+.prc-priznaki {
+  margin: 0.55em 0;
+  border: 1px solid var(--color-border, #dfe5ee);
+  border-radius: 12px;
+  background: var(--color-surface, #fff);
+}
+.prc-pravilo > summary,
+.prc-priznaki > summary,
+.prc-pravilo__summary,
+.prc-priznaki__summary {
+  padding: 0.55em 0.9em;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-weight: 600;
+  font-size: 0.95em;
+  color: var(--color-primary, #1f5fd0);
+  cursor: pointer;
+}
+.prc-pravilo__summary,
+.prc-priznaki__summary {
+  margin: 0;
+  color: inherit;
+  cursor: auto;
+}
+.prc-pravilo[open] .prc-pravilo__closed,
+.prc-pravilo:not([open]) .prc-pravilo__open,
+.prc-priznaki[open] .prc-priznaki__closed,
+.prc-priznaki:not([open]) .prc-priznaki__open {
+  display: none;
+}
+.prc-pravilo__telo,
+.prc-priznaki__list,
+.prc-priznaki__sovet {
+  padding: 0 0.9em 0.7em;
+}
+.prc-pravilo__telo > p {
+  margin: 0.45em 0;
+}
+.prc-pravilo__zapisi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4em 1.2em;
+  font-size: 1.2em;
+}
+.prc-pravilo__ili {
+  font-size: 0.75em;
+  color: var(--color-text-secondary, #4a5363);
+}
+.prc-pravilo__formula {
+  font-size: 1.12em;
+}
+.prc-pravilo__kak {
+  margin: 0.3em 0;
+  padding-left: 1.2em;
+}
+.prc-pravilo__nash {
+  padding: 0.5em 0.7em;
+  border-radius: 8px;
+  background: var(--color-surface-soft, #e8f0fc);
+}
+
+/* «Крест-накрест»: a/b = c/d, стрелки a→d и b→c. */
+.prc-krest {
+  position: relative;
+  display: grid;
+  width: max-content;
+  grid-template-columns: 3.4em 1.4em 3.4em;
+  grid-template-rows: 1.5em 0.5em 1.5em;
+  grid-template-areas:
+    'a . c'
+    'l1 eq l2'
+    'b . d';
+  place-items: center;
+  margin: 0.4em 0 0.4em 0.6em;
+  font-size: 1.25em;
+}
+.prc-krest__a {
+  grid-area: a;
+}
+.prc-krest__b {
+  grid-area: b;
+}
+.prc-krest__c {
+  grid-area: c;
+}
+.prc-krest__d {
+  grid-area: d;
+}
+.prc-krest__eq {
+  grid-area: eq;
+}
+.prc-krest__l1,
+.prc-krest__l2 {
+  width: 70%;
+  border-top: 1.5px solid currentColor;
+}
+.prc-krest__l1 {
+  grid-area: l1;
+}
+.prc-krest__l2 {
+  grid-area: l2;
+}
+.prc-krest__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.prc-krest__svg line {
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 4 3;
+  opacity: 0.7;
+}
+.prc-krest__kray {
+  stroke: #1f5fd0;
+}
+.prc-krest__sred {
+  stroke: #c75f12;
+}
+
+.prc-priznaki__list {
+  margin: 0;
+  padding-left: 2.1em;
+}
+.prc-priznaki__list li {
+  margin: 0.25em 0;
+}
+.prc-priznaki__sovet {
+  margin: 0.4em 0 0;
+}
+
+/* ── Сокращение ───────────────────────────────────────────────── */
+
+.prc-sokr {
+  margin: 0.4em 0;
+  padding-left: 1.8em;
+  list-style: decimal;
+}
+.prc-sokr__vvod {
+  margin: 0.3em 0;
+}
+.prc-sokr li {
+  margin: 0.45em 0;
+}
+.prc-sokr__t,
+.prc-sokr__f {
+  margin: 0.15em 0;
+}
+.prc-sokr__f {
+  font-size: 1.15em;
+}
+
+/* ── Плашка-акцент ────────────────────────────────────────────── */
+
+.prc-plashka {
+  margin: 0.5em 0;
+  padding: 0.6em 0.9em;
+  border-left: 4px solid var(--color-accent, #e07a2f);
+  border-radius: 0 10px 10px 0;
+  background: var(--color-accent-soft-surface, #fdf1ea);
+}
+
+/* ── Справка «Правило 100 %» ──────────────────────────────────── */
+
+.prc-spravka {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.2em;
+}
+.prc-spravka > summary {
+  display: inline;
+  list-style: none;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.85em;
+  color: var(--color-primary, #1f5fd0);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.prc-spravka > summary::-webkit-details-marker {
+  display: none;
+}
+.prc-spravka__telo {
+  position: absolute;
+  z-index: 5;
+  top: 1.8em;
+  left: 0;
+  width: min(22em, 80vw);
+  padding: 0.7em 0.9em;
+  border: 1px solid var(--color-border, #dfe5ee);
+  border-radius: 10px;
+  background: var(--color-surface, #fff);
+  box-shadow: 0 8px 24px rgb(16 23 40 / 12%);
+  font-size: 0.92em;
+}
+
+/* ── Печать и лист учителя: без фона, всё видно в ч/б ─────────── */
+
+.is-print.prc-pravilo,
+.is-print.prc-priznaki {
+  border-color: currentColor;
+}
+.prc-pravilo--ssylka,
+.prc-priznaki--ssylka {
+  margin: 0.3em 0;
+  font-style: italic;
+}
+@media print {
+  .prc-zapis,
+  .prc-plashka,
+  .prc-pravilo__nash {
+    background: none;
+    border-color: currentColor;
+  }
+  .prc-x__q {
+    display: none;
+  }
+  .prc-x--zamena .prc-x__v {
+    animation: none;
+    opacity: 1;
+  }
+  .prc-spravka {
+    display: none;
+  }
+}
