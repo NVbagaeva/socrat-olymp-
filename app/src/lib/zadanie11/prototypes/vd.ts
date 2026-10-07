@@ -113,15 +113,15 @@ const VD01: Subtype = {
         [
           'Обозначаем',
           [
-            `Расстояние в одну сторону — $S$ км. Скорость по течению $${d(v + c)}$, против — $${d(v - c)}$ км/ч.`,
+            `Расстояние в одну сторону — $x$ км. Скорость по течению $${d(v + c)}$, против — $${d(v - c)}$ км/ч.`,
           ],
         ],
         ['Время в движении', [`$${d(T)}-${d(st)}=${d(move)}$ ч.`]],
-        ['Уравнение', [`$\\dfrac{S}{${d(v + c)}}+\\dfrac{S}{${d(v - c)}}=${d(move)}$.`]],
+        ['Уравнение', [`$\\dfrac{x}{${d(v + c)}}+\\dfrac{x}{${d(v - c)}}=${d(move)}$.`]],
         [
           'Решение',
           [
-            `$S\\cdot\\dfrac{${d(v - c)}+${d(v + c)}}{${d(v + c)}\\cdot${d(v - c)}}=${d(move)}$, $S\\cdot\\dfrac{${d(2 * v)}}{${d(v * v - c * c)}}=${d(move)}$, $S=${d(S)}$.`,
+            `$x\\cdot\\dfrac{${d(v - c)}+${d(v + c)}}{${d(v + c)}\\cdot${d(v - c)}}=${d(move)}$, $x\\cdot\\dfrac{${d(2 * v)}}{${d(v * v - c * c)}}=${d(move)}$, $x=${d(S)}$.`,
           ],
         ],
         [
@@ -129,7 +129,7 @@ const VD01: Subtype = {
           [`Спрашивают весь рейс — туда и обратно: $2\\cdot${d(S)}=${d(ans)}$ км.`, otvet(ans)],
         ],
       ),
-      tables: [tablitsaReki('S', d(v), d(c))],
+      tables: [tablitsaReki('x', d(v), d(c))],
       hints: [
         vopros('С какой скоростью теплоход идёт по течению?', `$${d(v + c)}$ км/ч`, [
           `$${d(v - c)}$ км/ч`,
@@ -139,9 +139,9 @@ const VD01: Subtype = {
           `$${d(T)}$`,
           `$${d(T + st)}$`,
         ]),
-        vopros('Какое уравнение?', `$\\dfrac{S}{${d(v + c)}}+\\dfrac{S}{${d(v - c)}}=${d(move)}$`, [
-          `$\\dfrac{S}{${d(v + c)}}+\\dfrac{S}{${d(v - c)}}=${d(T)}$`,
-          `$\\dfrac{S}{${d(v + c)}}-\\dfrac{S}{${d(v - c)}}=${d(move)}$`,
+        vopros('Какое уравнение?', `$\\dfrac{x}{${d(v + c)}}+\\dfrac{x}{${d(v - c)}}=${d(move)}$`, [
+          `$\\dfrac{x}{${d(v + c)}}+\\dfrac{x}{${d(v - c)}}=${d(T)}$`,
+          `$\\dfrac{x}{${d(v + c)}}-\\dfrac{x}{${d(v - c)}}=${d(move)}$`,
         ]),
         chtoSprashivayut('путь за весь рейс — туда и обратно', [
           'путь в одну сторону',

@@ -5,6 +5,7 @@ import { ZADANIE11 } from '@/content/zadanie11';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
+import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { Progress11 } from './Progress11';
 
 /**
@@ -31,6 +32,7 @@ export function Shell11({ children }: { children: React.ReactNode }) {
             <Progress11
               razdely={RAZDELY_TEORII_11.map((r) => r.id)}
               bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
+              podtipy={SUBTYPES.map((st) => st.id)}
             />
           }
         />

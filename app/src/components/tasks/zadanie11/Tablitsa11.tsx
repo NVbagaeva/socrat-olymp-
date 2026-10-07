@@ -32,7 +32,21 @@ export const PODPIS_URAVNENIYA = 'уравнение — по этой стро�
  * Выноска стоит в отдельном столбце без рамок: так она всегда на
  * высоте своей строки, на любой ширине.
  */
-export function Tablitsa11({ table, className }: { table: Tablitsa; className?: string }) {
+export function Tablitsa11({
+  table,
+  className,
+  skryto,
+  onOtkryt,
+}: {
+  table: Tablitsa;
+  className?: string;
+  /**
+   * Тренажёр: клетки «строка:столбец», которые ещё не заполнены, —
+   * пунктирные. Нажатие открывает клетку (onOtkryt).
+   */
+  skryto?: ReadonlySet<string>;
+  onOtkryt?: (key: string) => void;
+}) {
   const vynoska = table.uravnenie !== undefined;
   return (
     <figure className={clsx('z11-tab', `z11-tab--${table.vid}`, className)}>
@@ -63,7 +77,16 @@ export function Tablitsa11({ table, className }: { table: Tablitsa; className?: 
                     </th>
                   ) : (
                     <td key={c}>
-                      <Yacheyka text={cell} />
+                      {skryto?.has(`${r}:${c}`) ? (
+                        <button
+                          type="button"
+                          className="z11-tab__pusto"
+                          aria-label="Открыть клетку"
+                          onClick={() => onOtkryt?.(`${r}:${c}`)}
+                        />
+                      ) : (
+                        <Yacheyka text={cell} />
+                      )}
                     </td>
                   ),
                 )}

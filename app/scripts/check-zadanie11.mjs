@@ -271,6 +271,133 @@ for (const { where, text } of prep.texts) {
   }
 }
 
+/* Тренажёр: данные страницы без ответов, план тренировки по
+   источнику, задача в закрытом виде узнаёт свой ответ. */
+const trenazher = { zadach: 0 };
+{
+  const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye');
+  const { planSessii, bankDlya, klyuchZadachi, podtipKlyucha, primernoeVremya, vTrenirovke } =
+    requireSrc('lib/zadanie11/trenazher/sessiya');
+  const { sobratZadachu } = requireSrc('lib/zadanie11/trenazher/zadacha');
+  const { answerMatches, choiceMatches, openText } = requireSrc('lib/zadanie11/secret');
+  const { kodNaSayte } = requireSrc('lib/zadanie11/kod');
+  const { SECTIONS: SEKCII } = requireSrc('lib/zadanie11/taxonomy');
+  const { BANK, RAZMINKA } = requireSrc('lib/zadanie11/bank');
+  const add = (what) => problems.push({ where: 'тренажёр', what });
+
+  for (const sec of SEKCII) {
+    if (kodNaSayte(`${sec.id}-01`) !== `${sec.kod}-01`)
+      add(`код ${sec.id} → ${kodNaSayte(`${sec.id}-01`)}`);
+  }
+  const d = dannyeTrenazhera();
+  if (JSON.stringify(d).includes('"answer"')) add('в данных страницы есть поле answer');
+  if (d.bank.length !== BANK.length + RAZMINKA.length)
+    add('в данных не все задачи банка и разминки');
+  if (d.razdely.map((r) => r.id).join() !== SEKCII.map((x) => x.id).join())
+    add('разделы не по порядку');
+  for (const r of d.razdely) {
+    if (!d.ssylki[r.id] || d.ssylki[r.id].teoriya === '') add(`у ${r.id} нет ссылки на теорию`);
+  }
+  const vse = d.razdely.flatMap((r) => r.podtipy);
+  const ids = vse.map((x) => x.id);
+
+  /* План: «только банк» — без разминки и повторов, не больше банка. */
+  const bankPlan = planSessii({ podtipy: ids, istochnik: 'bank', count: 500 }, d.bank, 's1');
+  if (bankPlan.some((x) => x.vid !== 'bank' || x.id.startsWith('RZ-')))
+    add('в режиме «банк» есть не банк');
+  if (bankPlan.length !== BANK.length)
+    add(`«банк»: ${bankPlan.length} задач вместо ${BANK.length}`);
+  if (new Set(bankPlan.map(klyuchZadachi)).size !== bankPlan.length)
+    add('«банк»: задачи повторяются');
+  for (let i = 1; i < bankPlan.length; i += 1) {
+    if (
+      bankPlan[i].id === bankPlan[i - 1].id &&
+      new Set(bankPlan.map((x) => x.id)).size > 1 &&
+      i < 30
+    ) {
+      add('«банк»: подряд две задачи одного подтипа');
+      break;
+    }
+  }
+  const malo = planSessii({ podtipy: ['DP-07'], istochnik: 'bank', count: 50 }, d.bank, 's2');
+  if (malo.length !== bankDlya(['DP-07'], d.bank, 'bank').length) add('«банк»: план длиннее банка');
+  const mix = planSessii(
+    { podtipy: ['DP-07', 'RZ-01'], istochnik: 'mix', count: 20 },
+    d.bank,
+    's3',
+  );
+  if (mix.length !== 20 || !mix.some((x) => x.vid === 'new') || !mix.some((x) => x.vid !== 'new')) {
+    add('«банк + новые»: нет смеси или не та длина');
+  }
+  if (!mix.some((x) => x.vid === 'razminka')) add('«банк + новые»: нет задач разминки для РЗ');
+  const novye = planSessii(
+    { podtipy: ['VD-01', 'RB-03'], istochnik: 'new', count: 12 },
+    d.bank,
+    's4',
+  );
+  if (novye.length !== 12 || novye.some((x) => x.vid !== 'new')) add('«только новые»: не то');
+  if (planSessii({ podtipy: ['RZ-01'], istochnik: 'bank', count: 5 }, d.bank, 's5').length !== 0) {
+    add('«банк»: разминка не скрыта');
+  }
+  if (podtipKlyucha(klyuchZadachi({ vid: 'new', id: 'DP-07', seed: 'x' })) !== 'DP-07')
+    add('ключ задачи');
+  const n0 = {
+    istochnik: 'bank',
+    podtipy: ['RZ-01', 'DP-07', 'DP-10'],
+    count: 5,
+    uroven: 3,
+    podskazki: true,
+  };
+  if (
+    vTrenirovke(n0, vse)
+      .map((x) => x.id)
+      .join() !== 'DP-10'
+  )
+    add('фильтр уровня и разминки');
+  const [lo, hi] = primernoeVremya([1, 2, 3], 15);
+  if (!(lo > 0 && hi > lo)) add('примерное время');
+
+  /* Каждая задача банка и разминки, по 3 новых на подтип: закрытый
+     ответ узнаётся, подсказки и разбор открываются. */
+  const plany = [
+    ...d.bank.map((b) => ({ vid: b.razminka ? 'razminka' : 'bank', no: b.no, id: b.id })),
+    ...ids.flatMap((id) => [0, 1, 2].map((k) => ({ vid: 'new', id, seed: `t${k}` }))),
+  ];
+  const otvetBanka = new Map(d.bank.map((b, i) => [b.no, [...BANK, ...RAZMINKA][i].answer]));
+  for (const plan of plany) {
+    let z;
+    try {
+      z = sobratZadachu(plan, d.bank);
+    } catch (e) {
+      add(`${klyuchZadachi(plan)}: не собралась — ${e.message}`);
+      continue;
+    }
+    trenazher.zadach += 1;
+    if (plan.vid !== 'new') {
+      const a = otvetBanka.get(plan.no);
+      const ok =
+        z.answerType === 'choice'
+          ? z.vybory.length >= 2
+          : answerMatches(String(a).replace('.', ','), z.seal);
+      if (!ok) add(`${klyuchZadachi(plan)}: отпечаток не узнаёт ответ ${a}`);
+    }
+    if (z.answerType === 'choice' && !z.vybory.some((v) => choiceMatches(v.number, z.seal))) {
+      add(`${klyuchZadachi(plan)}: нет верного варианта`);
+    }
+    try {
+      const p = JSON.parse(openText(z.podskazki, z.seal));
+      const r = JSON.parse(openText(z.razbor, z.seal));
+      if (!Array.isArray(p.shagi) || p.shagi.length === 0)
+        add(`${klyuchZadachi(plan)}: нет подсказок`);
+      if (!Array.isArray(r.etapy) || r.etapy.length === 0)
+        add(`${klyuchZadachi(plan)}: нет разбора`);
+    } catch {
+      add(`${klyuchZadachi(plan)}: подсказки или разбор не открываются`);
+    }
+    if (z.uslovieHtml.includes('$')) add(`${klyuchZadachi(plan)}: формула не набрана`);
+  }
+}
+
 /* Склонения. */
 const expect = [
   [sk(1, SLOVA.chas), '1 час'],
@@ -315,6 +442,7 @@ const poor = gen.stats.filter((x) => x.distinct < seeds / 2);
 if (poor.length > 0) {
   console.log(`  мало разных задач: ${poor.map((x) => `${x.id} (${x.distinct})`).join(', ')}`);
 }
+console.log(`тренажёр: ${trenazher.zadach} задач собрано в закрытом виде`);
 console.log(`проблем: ${problems.length}`);
 for (const p of problems.slice(0, 80)) {
   console.log(`  ${p.where} — ${p.what}`);

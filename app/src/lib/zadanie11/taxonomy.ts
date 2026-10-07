@@ -8,6 +8,7 @@
  */
 
 import { BANK } from './bank';
+import { kodNaSayte } from './kod';
 import { SUBTYPES } from './prototypes';
 import type { Level, SectionId, Subtype } from './types';
 
@@ -76,13 +77,8 @@ export const SECTIONS: Section[] = [
   { id: 'PG', kod: 'ПГ', nazvanie: 'Прогрессии', opisanie: 'Сумма арифметической прогрессии.' },
 ];
 
-const KIRILLITSA: Record<string, string> = Object.fromEntries(SECTIONS.map((s) => [s.id, s.kod]));
-
-/** Код подтипа для сайта: DP-07 → ДП-07. */
-export function kodNaSayte(id: string): string {
-  const [sec = '', no = ''] = id.split('-');
-  return `${KIRILLITSA[sec] ?? sec}-${no}`;
-}
+/** Код подтипа для сайта: DP-07 → ДП-07 (lib/zadanie11/kod.ts). */
+export { kodNaSayte };
 
 export interface SectionInfo extends Section {
   subtypes: Subtype[];

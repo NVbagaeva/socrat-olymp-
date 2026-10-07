@@ -148,6 +148,22 @@ const P: Record<string, ReactNode> = {
   ),
   table: <path d="M4 4h16v16H4zM4 9h16M4 14.5h16M10 4v16" />,
   flag: <path d="M5 21V4M5 4h11l-2 4 2 4H5" />,
+  layers: <path d="M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 17l9 5 9-5" />,
+  sparkle: (
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />
+  ),
+  doc: <path d="M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5" />,
+  chevron: <path d="m6 9 6 6 6-6" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  trash: <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />,
+  play: <path d="M8 5v14l11-7z" />,
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6" />
+      <path d="m20 20-4.5-4.5" />
+    </>
+  ),
+  back: <path d="M15 5 8 12l7 7" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   grid: (
     <>

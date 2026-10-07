@@ -174,10 +174,16 @@ export function checkOboznacheniya(where: string, s: Solved): Problem[] {
       }
     }
   }
+  /* В клетках таблиц модели из букв — только неизвестные x, y, z и
+     масса m у равных масс: S, t, v — подписи столбцов, а не неизвестные. */
   for (const cell of cells) {
     for (const tex of texPieces(cell) ?? []) {
-      if (/(?<![A-Za-z])[ckv](?![A-Za-z])/.test(letters(tex))) {
-        problems.push({ where, what: `в клетке таблицы буква вместо x/y: «${tex.slice(0, 50)}»` });
+      const m = /(?<![A-Za-z])([A-Za-wA-Z])(?![A-Za-z])/.exec(letters(tex).replace(/[xyzm]/g, ' '));
+      if (m !== null) {
+        problems.push({
+          where,
+          what: `в клетке таблицы буква «${m[1] ?? ''}» вместо x/y/z: «${tex.slice(0, 50)}»`,
+        });
       }
     }
   }
