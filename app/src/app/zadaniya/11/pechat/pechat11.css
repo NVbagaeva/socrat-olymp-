@@ -1,0 +1,87 @@
+/* Страницы печати задания №11: только лист, без оболочки сайта. Та же
+   основа, что у pechat2.css; плюс таблицы модели и пометки
+   «банк» / «новая» на листе учителя. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+  .z11-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .z11-print-bar__lead {
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--color-text-secondary);
+  }
+}
+
+@media print {
+  .z11-print-bar {
+    display: none;
+  }
+}
+
+/* Таблица модели: S | v | t, A | p | t, развёрнутая таблица смесей. */
+.z11-sheet-tab {
+  margin: calc(var(--sheet-step) * 2) 0;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-small);
+}
+.z11-sheet-tab caption {
+  margin-bottom: var(--sheet-step);
+  text-align: left;
+  font-weight: 600;
+}
+.z11-sheet-tab th,
+.z11-sheet-tab td {
+  min-width: 14mm;
+  padding: calc(var(--sheet-step) * 1) calc(var(--sheet-step) * 2);
+  border: 0.3mm solid var(--sheet-ink-3);
+  text-align: center;
+  vertical-align: middle;
+}
+.z11-sheet-tab tbody th {
+  text-align: left;
+  font-weight: 600;
+}
+.z11-sheet-tab td:empty::after {
+  content: '?';
+  opacity: 0.5;
+}
+/* Строка уравнения (масса вещества) — выделена жирной рамкой: в ч/б
+   цвета нет, смысл держит толщина линии. */
+.z11-sheet-tab tr.is-uravnenie > * {
+  border-top-width: 0.6mm;
+  border-bottom-width: 0.6mm;
+}
+.z11-sheet-steps {
+  margin-top: var(--sheet-step);
+}
+.z11-sheet-badge {
+  display: inline-block;
+  margin-right: calc(var(--sheet-step) * 1);
+  padding: 0 calc(var(--sheet-step) * 1.5);
+  border: 0.3mm solid currentColor;
+  border-radius: 1mm;
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  opacity: 0.75;
+}

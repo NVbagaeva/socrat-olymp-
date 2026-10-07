@@ -15,6 +15,7 @@ import { findManifestFamily } from '@/lib/generator/manifest';
 import { prepSkillsFor } from './prepSkills';
 import { taskName } from './tasks';
 
+import { assetUrl } from '@/lib/assetUrl';
 export type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 
 export type SubtopicStatus = 'active' | 'soon';
@@ -145,29 +146,29 @@ export const sections: ExamSection[] = [
         {
           no: '01',
           title: 'Найти значение функции',
-          hint: 'Найти y, если известен x.',
+          hint: 'Найти $y$, если известен $x$.',
           icon: 'value',
           formula: 'f(x) = 2x + 3',
-          example: 'Найдите f(4).',
+          example: 'Найдите $f(4)$.',
         },
         {
           no: '02',
           title: 'Найти аргумент',
-          hint: 'Найти x, если известно y.',
+          hint: 'Найти $x$, если известно $y$.',
           icon: 'argument',
           formula: 'f(x) = 2x + 3',
-          example: 'Найдите x, если f(x) = 11.',
+          example: 'Найдите $x$, если $f(x) = 11$.',
         },
         {
           no: '03',
           title: 'Найти абсциссу точки пересечения',
-          hint: 'Найти x точки пересечения графиков функций.',
+          hint: 'Найти $x$ точки пересечения графиков функций.',
           icon: 'abscissa',
         },
         {
           no: '04',
           title: 'Найти ординату точки пересечения',
-          hint: 'Найти y точки пересечения графиков функций.',
+          hint: 'Найти $y$ точки пересечения графиков функций.',
           icon: 'ordinate',
         },
       ],
@@ -208,7 +209,7 @@ export const sections: ExamSection[] = [
              Здесь стоит файл для ученика, а не для учителя: меню
              открыто всем, кто зашёл на страницу темы, и ответы
              из него скачивались бы заодно. */
-          file: '/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf',
+          file: assetUrl('/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf'),
         },
       ],
     },

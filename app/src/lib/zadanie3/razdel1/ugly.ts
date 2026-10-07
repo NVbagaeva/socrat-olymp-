@@ -48,8 +48,8 @@ function cubeAngle(p: Params): number {
 
 function cubeUslovie(p: Params): string {
   return (
-    `В кубе ${NAMES} найдите угол между прямыми ${segment(pair(p, 'l1'))} ` +
-    `и ${segment(pair(p, 'l2'))}. Ответ дайте в градусах.`
+    `В кубе $${NAMES}$ найдите угол между прямыми $${segment(pair(p, 'l1'))}$ ` +
+    `и $${segment(pair(p, 'l2'))}$. Ответ дайте в градусах.`
   );
 }
 
@@ -214,9 +214,9 @@ export const P03_09: Prototype = {
   format: 'целое',
 
   uslovie: (p) =>
-    `В правильной четырёхугольной призме ${NAMES} известно, что ` +
+    `В правильной четырёхугольной призме $${NAMES}$ известно, что ` +
     `${segment(pair(p, 'd'))}=${ru(num(p, 'k'))}${segment(pair(p, 'e'))}. ` +
-    `Найдите угол между диагоналями ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}. ` +
+    `Найдите угол между диагоналями $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$. ` +
     'Ответ дайте в градусах.',
 
   dopustimo: (p) => {
@@ -264,10 +264,10 @@ export const P03_09: Prototype = {
     const l2 = segment(pair(p, 'l2'));
     return [
       {
-        text: `Пусть ребро основания равно 1. Тогда диагональ призмы равна ${ru(k)}, а её квадрат: 1² + 1² + h² = ${ru(k * k)}.`,
+        text: `Пусть ребро основания равно 1. Тогда диагональ призмы равна ${ru(k)}, а её квадрат: $1^2 + 1^2 + h^2 = ${ru(k * k)}$.`,
       },
       {
-        text: `Отсюда h² = ${ru(k * k - 2)}, то есть h = √${ru(k * k - 2)}.`,
+        text: `Отсюда $h^2 = ${ru(k * k - 2)}$, то есть $h = \\sqrt{${ru(k * k - 2)}}$.`,
         value: Math.sqrt(k * k - 2),
       },
       {
@@ -363,9 +363,9 @@ export const P03_10: Prototype = {
   format: 'десятичная',
 
   uslovie: (p) =>
-    `В прямоугольном параллелепипеде ${NAMES} известны длины рёбер: ` +
+    `В прямоугольном параллелепипеде $${NAMES}$ известны длины рёбер: ` +
     `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
-    `Найдите синус угла между прямыми ${segment(pair(p, 'l1'))} и ${segment(pair(p, 'l2'))}.`,
+    `Найдите синус угла между прямыми $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && num(p, 'b') > 0 && num(p, 'c') > 0 && differentLines(p),
 

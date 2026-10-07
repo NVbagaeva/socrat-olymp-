@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import type { PrepTask, PrepZakrytoe } from '@/lib/prep';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
@@ -11,6 +12,7 @@ import { answerMatches, choiceMatches, openText } from '@/lib/prepSecret';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { HintIcon, RightIcon, WrongIcon } from './PrepIcons';
 import { PrepSolution } from './PrepSolution';
+import { TitleText } from '../TitleText';
 
 /** Как закончилась работа над задачей. Пусто — ещё не бралась. */
 type Status = TaskStatus;
@@ -23,11 +25,13 @@ export interface PrepTaskScreenProps {
   skillId: string;
   /** Название навыка: заголовок экрана. */
   title: string;
+  /** То же название, набранное KaTeX на сборке. */
+  titleHtml?: string;
   /** Десять задач навыка, собранные на сборке. */
   tasks: PrepTask[];
   /** Адрес списка навыков: туда ведёт кнопка с последней задачи. */
   listHref: string;
-  /** Приём навыка для плашки «Запомни!» в разборе. */
+  /** Приём навыка для плашки «Запомни!» в разборе — вёрстка KaTeX. */
   tip: string;
 }
 
@@ -66,7 +70,14 @@ const VERDICT = {
  * и пояснения к вариантам лежат закрытыми и раскрываются только
  * после проверки ответа.
  */
-export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTaskScreenProps) {
+export function PrepTaskScreen({
+  skillId,
+  title,
+  titleHtml,
+  tasks,
+  listHref,
+  tip,
+}: PrepTaskScreenProps) {
   /* Решённые задачи приходят из хранилища браузера, ошибки
      и пропуски живут только в этой сессии: сегодня ошибся, завтра
      решил — вчерашняя ошибка ничего не значит. */
@@ -191,7 +202,9 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
   return (
     <section className="ptask">
       <header className="ptask__head">
-        <h2 className="ptask__title">{title}</h2>
+        <h2 className="ptask__title">
+          <TitleText title={title} html={titleHtml} />
+        </h2>
         <p className="ptask__score">
           <span className="ptask__score-item ptask__score-item--right">
             <RightIcon />
@@ -259,7 +272,12 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
               <HintIcon />
               Подсказка
             </p>
-            <div className="ptask__hint-text" dangerouslySetInnerHTML={{ __html: task.hintHtml }} />
+            <ErrorBoundary what="подсказку" resetKey={task.id}>
+              <div
+                className="ptask__hint-text"
+                dangerouslySetInnerHTML={{ __html: task.hintHtml }}
+              />
+            </ErrorBoundary>
           </aside>
         )}
       </article>
@@ -310,7 +328,10 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
           <div className={clsx('pverdict', `pverdict--${checked}`)} role="status">
             <p className="pverdict__title">{VERDICT[checked].title}</p>
             <p className="pverdict__lead">{VERDICT[checked].lead}</p>
-            {reason === null ? null : <p className="pverdict__reason">{reason}</p>}
+            {/* Пояснение набрано KaTeX на сборке (lib/prep.ts). */}
+            {reason === null ? null : (
+              <p className="pverdict__reason" dangerouslySetInnerHTML={{ __html: reason }} />
+            )}
           </div>
         )}
 
@@ -360,13 +381,15 @@ export function PrepTaskScreen({ skillId, title, tasks, listHref, tip }: PrepTas
       </div>
 
       {solution && zakryto !== null ? (
-        <PrepSolution
-          steps={zakryto.steps}
-          tip={tip}
-          step={step}
-          onStep={setStep}
-          onClose={() => setSolution(false)}
-        />
+        <ErrorBoundary what="разбор" resetKey={task.id}>
+          <PrepSolution
+            steps={zakryto.steps}
+            tip={tip}
+            step={step}
+            onStep={setStep}
+            onClose={() => setSolution(false)}
+          />
+        </ErrorBoundary>
       ) : null}
     </section>
   );

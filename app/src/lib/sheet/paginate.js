@@ -14,7 +14,11 @@
      2. Кусок с data-keep-with-next не остаётся последним на
         странице: заголовок блока уезжает вниз вместе с первой
         задачей блока.
-     3. Кусок с data-page-break начинает новую страницу.
+     3. Кусок с data-page-break начинает новую страницу. Если у него
+        ещё и data-full-head — страница получает полную шапку, как
+        первая: так начинается каждый вариант листа.
+     4. Кусок с data-section-start открывает свою нумерацию страниц
+        «N / M»: у каждого варианта она своя.
 */
 
 (function () {
@@ -33,20 +37,34 @@
     var pages = [];
     var overflowing = [];
 
-    /* Новая страница: шапка по номеру, поток, подвал. */
-    function addPage() {
+    /* Новая страница: шапка по номеру, поток, подвал. full — полная
+       шапка не на первой странице; at — вставить перед страницей
+       с этим номером, а не в конец. */
+    function addPage(full, at) {
       var first = pages.length === 0;
       var page = document.createElement('section');
       page.className = 'sheet-page';
       page.innerHTML = spec.arcs +
-        (first ? spec.fullHead : spec.compactHead) +
+        (first || full ? spec.fullHead : spec.compactHead) +
         (first ? spec.opening : '') +
         '<div class="sheet-flow"></div>' +
         spec.footer;
-      host.appendChild(page);
       var flow = page.querySelector('.sheet-flow');
-      pages.push({ page: page, flow: flow });
+      if (at === undefined || at >= pages.length) {
+        host.appendChild(page);
+        pages.push({ page: page, flow: flow });
+      } else {
+        host.insertBefore(page, pages[at].page);
+        pages.splice(at, 0, { page: page, flow: flow });
+      }
       return flow;
+    }
+
+    /* Страница начинается с принудительного разрыва: на неё нельзя
+       переносить куски с предыдущей — они чужого варианта. */
+    function startsFresh(item) {
+      var head = item.flow.firstElementChild;
+      return Boolean(head && head.getAttribute('data-page-break') === '1');
     }
 
     /* Влезло ли содержимое потока в отведённую высоту. clientHeight
@@ -65,7 +83,7 @@
       var breakBefore = node.getAttribute('data-page-break') === '1';
 
       if (breakBefore && flow.childElementCount > 0) {
-        flow = addPage();
+        flow = addPage(node.getAttribute('data-full-head') === '1');
       }
 
       flow.appendChild(node);
@@ -92,7 +110,8 @@
        Проверяется после набора — тогда видно, кто у кого последний. */
     for (var p = 0; p < pages.length - 1; p += 1) {
       var last = pages[p].flow.lastElementChild;
-      while (last && last.getAttribute('data-keep-with-next') === '1') {
+      while (last && last.getAttribute('data-keep-with-next') === '1' &&
+             !startsFresh(pages[p + 1])) {
         var next = pages[p + 1].flow;
         next.insertBefore(last, next.firstChild);
         last = pages[p].flow.lastElementChild;
@@ -116,9 +135,9 @@
              pages[q].flow.childElementCount > 1) {
         var moved = pages[q].flow.lastElementChild;
         var target = pages[q + 1];
-        if (!target) {
-          addPage();
-          target = pages[pages.length - 1];
+        if (!target || startsFresh(target)) {
+          addPage(false, q + 1);
+          target = pages[q + 1];
         }
         target.flow.insertBefore(moved, target.flow.firstChild);
       }
@@ -130,10 +149,22 @@
       pages.pop();
     }
 
-    /* Номера страниц: «N / M». Раньше набора их не знает никто. */
+    /* Номера страниц: «N / M». Раньше набора их не знает никто.
+       Без разделов — сквозные; с разделами (варианты) — свои в
+       каждом, начиная со страницы, где стоит data-section-start. */
+    var sections = [];
     pages.forEach(function (item, index) {
-      var slot = item.page.querySelector('[data-page-number]');
-      if (slot) { slot.textContent = (index + 1) + ' / ' + pages.length; }
+      var head = item.flow.firstElementChild;
+      if (index === 0 || (head && head.getAttribute('data-section-start') === '1')) {
+        sections.push([]);
+      }
+      sections[sections.length - 1].push(item);
+    });
+    sections.forEach(function (list) {
+      list.forEach(function (item, index) {
+        var slot = item.page.querySelector('[data-page-number]');
+        if (slot) { slot.textContent = (index + 1) + ' / ' + list.length; }
+      });
     });
 
     /* Отчёт о ГОТОВОМ документе, а не о спецификации: проверять надо

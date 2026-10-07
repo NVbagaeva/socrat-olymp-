@@ -63,7 +63,7 @@ export const P03_69: Prototype = {
         value: b * b,
       },
       {
-        text: `Высота уменьшилась в ${ru(a)} ${razaWord(a)}: объём равен ${ru(V)} · ${ru(b * b)} : ${ru(a)} = ${ru((V * b * b) / a)}.`,
+        text: `Высота уменьшилась в ${ru(a)} ${razaWord(a)}: объём равен $${ru(V)} \\cdot ${ru(b * b)} : ${ru(a)} = ${ru((V * b * b) / a)}$.`,
         value: (V * b * b) / a,
       },
     ];
@@ -165,7 +165,7 @@ export const P03_70: Prototype = {
         value: wk * wk,
       },
       {
-        text: `Но она ниже в ${ru(hk)} ${razaWord(hk)}, поэтому отношение объёмов: ${ru(wk * wk)} : ${ru(hk)} = ${ru((wk * wk) / hk)}.`,
+        text: `Но она ниже в ${ru(hk)} ${razaWord(hk)}, поэтому отношение объёмов: $${ru(wk * wk)} : ${ru(hk)} = ${ru((wk * wk) / hk)}$.`,
         value: (wk * wk) / hk,
       },
     ];

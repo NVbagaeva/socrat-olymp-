@@ -24,7 +24,13 @@
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:usluga": "node scripts/check-usluga.mjs",
     "test:imports": "node scripts/check-imports.mjs",
+    "test:topic-progress": "node scripts/check-topic-progress.mjs",
+    "test:topic-progress-site": "node scripts/check-topic-progress-site.mjs",
     "test:graph-quadratic": "node scripts/check-graph-quadratic.mjs",
+    "test:graph-rational": "node scripts/check-graph-rational.mjs",
+    "test:solution-tex": "node scripts/check-solution-tex.mjs",
+    "test:rational-hints": "node scripts/check-rational-hints.mjs",
+    "test:quadratic-hints": "node scripts/check-quadratic-hints.mjs",
     "preview:shots": "node scripts/preview-shots.mjs",
     "test:secrets": "node scripts/check-bundle-secrets.mjs",
     "build:pdf-12": "node scripts/build-pdf-12.mjs",
@@ -39,33 +45,48 @@
     "test:pdf-5": "node scripts/check-pdf-5.mjs",
     "manifest:generator": "node scripts/print-generator-manifest.mjs",
     "test:vychisleniya": "node scripts/check-vychisleniya.mjs",
+    "test:vektory": "node scripts/check-vektory.mjs",
+    "test:zadanie11": "node scripts/check-zadanie11.mjs",
+    "test:zadanie15": "node scripts/check-zadanie15.mjs",
+    "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
+    "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
     "build:pdf-8": "node scripts/build-pdf-8.mjs",
     "build:pdf-8-sample": "node scripts/build-pdf-8.mjs --sample",
-    "test:pdf-8": "node scripts/check-pdf-8.mjs"
+    "test:pdf-8": "node scripts/check-pdf-8.mjs",
+    "test:math-markup": "node scripts/check-math-markup.mjs",
+    "test:rsc-serving": "node scripts/check-rsc-serving.mjs",
+    "test:asset-versions": "node scripts/check-asset-versions.mjs",
+    "test:print-pages": "node scripts/check-print-pages.mjs",
+    "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
+    "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
+    "test:first-load": "node scripts/check-first-load.mjs",
+    "test:repo-files": "node scripts/check-repo-files.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "clsx": "^2.1.1",
     "katex": "^0.16.11",
-    "next": "^15.5.25",
+    "next": "15.5.27",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
-    "@next/eslint-plugin-next": "^15.5.25",
+    "@next/eslint-plugin-next": "15.5.27",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.180.0",
     "eslint": "^9.39.5",
-    "playwright": "^1.56.1",
-    "eslint-config-next": "^15.5.25",
+    "eslint-config-next": "15.5.27",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "playwright": "^1.56.1",
     "postcss": "^8.5.28",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
@@ -78,6 +99,9 @@
     "onlyBuiltDependencies": [
       "unrs-resolver",
       "sharp"
-    ]
+    ],
+    "patchedDependencies": {
+      "next@15.5.27": "patches/next@15.5.27.patch"
+    }
   }
 }

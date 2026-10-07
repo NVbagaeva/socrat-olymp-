@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { TaskGrid } from '@/components/tasks';
 import { landing } from '@/content/landing';
-import { tasks, tasksPage } from '@/content/tasks';
+import { tasksOfPart, tasksPage } from '@/content/tasks';
 
 const { bank } = landing;
 
@@ -21,7 +21,9 @@ export function BankSection() {
           <p>{bank.lead}</p>
         </div>
 
-        <TaskGrid tasks={tasks} />
+        {/* На главной — первая часть, как и раньше; вторая часть
+            и переключатель живут на странице банка. */}
+        <TaskGrid tasks={tasksOfPart(1)} />
 
         <p className="bank-note">{bank.note}</p>
 

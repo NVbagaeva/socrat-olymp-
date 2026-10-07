@@ -1,10 +1,13 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRef } from 'react';
+import { useStickyTabs } from '@/components/tasks/useStickyTabs';
 import { EmptyState, Tabs } from '@/components/ui';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
+import { TitleText } from '@/components/tasks/TitleText';
 
 export interface SubtopicView {
   slug: string;
@@ -20,6 +23,9 @@ export interface PrototypeView {
   id: string;
   title: string;
   subtitle: string;
+  /** Название и подзаголовок, набранные KaTeX на сборке. */
+  titleHtml?: string;
+  subtitleHtml?: string;
   count: number;
 }
 
@@ -49,6 +55,9 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const strip = useRef<HTMLDivElement>(null);
+  /* Лента прилипает к верху экрана (общий хук всех разделов). */
+  useStickyTabs(strip);
 
   const requested = params.get('tab');
   const active = requested !== null && IDS.has(requested) ? requested : 'subtopics';
@@ -61,7 +70,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
   return (
     <>
       <div className="topic-tabs-row">
-        <div className="topic-tabs">
+        <div className="topic-tabs" ref={strip}>
           <Tabs
             className="tabs--lenta"
             items={TABS}
@@ -102,8 +111,12 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
                 <li className="proto" key={proto.id}>
                   <span className="proto__id">{proto.id}</span>
                   <span className="proto__text">
-                    <span className="proto__title">{proto.title}</span>
-                    <span className="proto__subtitle">{proto.subtitle}</span>
+                    <span className="proto__title">
+                      <TitleText title={proto.title} html={proto.titleHtml} />
+                    </span>
+                    <span className="proto__subtitle">
+                      <TitleText title={proto.subtitle} html={proto.subtitleHtml} />
+                    </span>
                   </span>
                   {/* Число берётся из состава набора движка, а не задаётся. */}
                   <span className="proto__count">{proto.count}</span>

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
 import { prepPage, type PrepSkillId } from '@/content/prepSkills';
 import { prepOverview } from '@/lib/prep';
+import { typeset } from '@/lib/tex';
 import { PrepChips } from './PrepChips';
 import { PrepCounter } from './PrepCounter';
 import { TabScrollOnMount } from '../TabScroll';
@@ -55,6 +56,7 @@ export function PrepShell({ type, base, active, children }: PrepShellProps) {
         items={overview.skills.map((view) => ({
           id: view.skill.id,
           title: view.skill.title,
+          titleHtml: typeset(view.skill.title),
           href: `${listHref}${view.skill.id}/`,
         }))}
       />

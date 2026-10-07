@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
@@ -35,13 +36,15 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
   const base = `${tasksPage.href}/8`;
   return (
     <Podgotovka8Shell base={base} active={block.slug}>
-      <Podgotovka8Screen
-        blockId={block.id}
-        title={block.nazvanie}
-        tasks={block.zadachi}
-        formulyHtml={block.formulyHtml}
-        listHref={`${base}/podgotovka/`}
-      />
+      <ErrorBoundary what="задачи">
+        <Podgotovka8Screen
+          blockId={block.id}
+          title={block.nazvanie}
+          tasks={block.zadachi}
+          formulyHtml={block.formulyHtml}
+          listHref={`${base}/podgotovka/`}
+        />
+      </ErrorBoundary>
     </Podgotovka8Shell>
   );
 }

@@ -1,0 +1,137 @@
+{
+  "kind": "prep",
+  "id": "P12R-10",
+  "block": 10,
+  "title": "Гипербола и прямая: абсцисса $B$",
+  "subtitle": "Найти абсциссу второй точки пересечения",
+  "seed": 12410,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-10-01",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-02",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, пересекающиеся в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-03",
+      "question": "Графики функций $f(x) = k/x$ и $g(x) = ax + b$ пересекаются в точках $A$ и $B$ (см. рисунок). Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-04",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$. Они пересекаются в точке $A$ и ещё в одной точке $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-05",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-06",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точке $A$ и ещё в одной точке. Найдите абсциссу второй точки пересечения графиков.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-07",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите $x_B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    },
+    {
+      "id": "P12R-10-08",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "hint": "$k$ — из точки $A$, прямая — по двум точкам. Приравняй $k/x = ax + b$; ОДЗ: $x \\ne 0$; умножь на $x \\ne 0$ — получится $ax^2 + bx - k = 0$. Один корень — абсцисса $A$, второй — по теореме Виета.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "x"
+        }
+      }
+    }
+  ]
+}

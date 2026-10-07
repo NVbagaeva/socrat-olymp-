@@ -1,15 +1,21 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import type { ReactNode } from 'react';
 import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
 import { EmptyState, Modal, Tabs } from '@/components/ui';
 import type { ExamSection, TheoryBlock } from '@/content/sections';
 import { markSectionRead } from '@/lib/theoryRead';
+import { READ_DWELL_MS } from '@/lib/topicProgress';
+import { ReadMark } from './ReadMark';
+import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
+import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
+import { useStickyTabs } from './useStickyTabs';
+import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -44,10 +50,10 @@ export interface TopicTabsProps {
   /** Свёрстанные разделы теории по ключу body из конфига. */
   bodies: Record<string, ReactNode>;
   /**
-   * Ключ подтемы в хранилище прочитанных разделов. Задан — раздел
-   * засчитывается прочитанным, когда ученик долистал до его конца,
-   * и кольцо в шапке считает по этим отметкам. Не задан — ничего не
-   * запоминается: так было и остаётся у линейной подтемы.
+   * Ключ прочитанных разделов теории: «theory:12:rational». Раздел
+   * засчитывается, когда ученик долистал до его конца и раздел пробыл
+   * на экране не меньше READ_DWELL_MS; кольцо в шапке считает по этим
+   * отметкам. Не задан — ничего не запоминается.
    */
   trackKey?: string;
   /**
@@ -123,6 +129,9 @@ export function TopicTabs({
   const opensMenu = initial === 'tutors';
   const [tab, setTab] = useState(opensMenu ? 'about' : initial);
   const [menu, setMenu] = useState(opensMenu);
+  /* Вкладка, на которую нажали и ведёт переход на её адрес; пока он едет — ожидание. */
+  const [target, setTarget] = useState<string | null>(null);
+  const [navigating, startNavigation] = useTransition();
   /* Вкладки без содержимого в ленту не попадают: «Генератор» — без
      наборов прототипов, «Ключевые методы» — без признака у подтемы. */
   const tabs = TABS.filter(
@@ -141,11 +150,28 @@ export function TopicTabs({
     setMenu(false);
     const href = id === 'prep' ? prepHref : id === 'trainer' ? trainerHref : null;
     if (href !== null && pathname !== href) {
-      router.push(href);
+      /* Переход в переходе (transition): пока страница-назначение едет по
+         сети, вкладка уже подсвечена и на ней крутится ожидание. */
+      setTarget(id);
+      startNavigation(() => {
+        router.push(href);
+      });
       return;
     }
     setTab(id);
   }
+
+  /* Нажатие, сделанное до того, как страница ожила, исполняется здесь:
+     повторно жать не нужно (lib/tabTap.ts). Один раз при загрузке. */
+  useEffect(() => {
+    const pending = takePendingTabTap();
+    if (pending !== null && tabs.some((item) => item.id === pending)) {
+      /* Сразу после отрисовки, а не внутри эффекта: так состояние
+         меняется обычным порядком. */
+      queueMicrotask(() => choose(pending));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
+  }, []);
 
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
@@ -154,9 +180,15 @@ export function TopicTabs({
   /* Лента вкладок прокручивается вбок: нужен сам узел, чтобы подводить
      к активной вкладке. */
   const strip = useRef<HTMLDivElement>(null);
+  /* Лента прилипает к верху экрана (общий хук всех разделов). */
+  useStickyTabs(strip);
 
   const current = theory.find((item) => item.id === block) ?? theory[0];
-  const items = theory.map((item) => ({ id: item.id, title: item.title }));
+  const items = theory.map((item) => ({
+    id: item.id,
+    title: item.title,
+    titleHtml: item.titleHtml,
+  }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
      происходит, без ошибки в консоли. */
@@ -165,11 +197,12 @@ export function TopicTabs({
     if (node === null) {
       return;
     }
-    node.scrollIntoView({ behavior: motion(), block: 'start' });
+    scrollToSection(node);
   }, []);
 
   function pick(id: string) {
     setBlock(id);
+    pinBlock();
     setSheet(false);
     /* Шторка закрывается той же отрисовкой: прокрутка идёт следующим
        кадром, когда блокировка прокрутки уже снята. */
@@ -208,79 +241,58 @@ export function TopicTabs({
     }
   }, [tab, opensMenu]);
 
-  /* Подсветка в содержании следует за экраном. Наблюдатель видимости
-     дешевле обработчика прокрутки: браузер считает пересечения сам. */
-  useEffect(() => {
-    if (tab !== 'theory' || typeof IntersectionObserver === 'undefined') {
-      return undefined;
-    }
-
-    const nodes = theory
-      .map((item) => document.getElementById(blockId(item.id)))
-      .filter((node): node is HTMLElement => node !== null);
-    if (nodes.length === 0) {
-      return undefined;
-    }
-
-    const visible = new Set<string>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            visible.add(entry.target.id);
-          } else {
-            visible.delete(entry.target.id);
-          }
-        });
-        /* Активным считается верхний из видимых: так подсветка не
-           прыгает, когда в полосе видно два раздела сразу. */
-        const top = theory.find((item) => visible.has(blockId(item.id)));
-        if (top !== undefined) {
-          setBlock(top.id);
-        }
-      },
-      /* Полоса наблюдения — верхняя треть экрана: раздел становится
-         активным, когда его заголовок доходит до неё. */
-      { rootMargin: '-72px 0px -66% 0px' },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, [tab, theory]);
+  /* Подсветка в содержании следует за экраном. */
+  const theoryIds = useMemo(() => theory.map((item) => item.id), [theory]);
+  const pinBlock = useActiveSection(theoryIds, blockId, tab === 'theory', setBlock);
 
   /* Прочитанные разделы. Раздел засчитывается, когда ученик долистал
-     до его конца: нижний край поднялся выше середины экрана. Считаем
-     сами при прокрутке, а не наблюдателем видимости: наблюдатель
-     сообщает только о смене состояния, и разделы, пролистанные
-     одним махом, он пропускает. Семь измерений на кадр прокрутки
-     дешевле, чем неверный счёт.
+     до его конца — нижний край поднялся выше середины экрана — и раздел
+     пробыл на экране не меньше READ_DWELL_MS. Время копится, пока раздел
+     хоть краем виден и вкладка браузера открыта; пролистанное одним
+     рывком (переход по «Содержанию», клавиша End) его не набирает.
+     Считаем сами по таймеру и при прокрутке, а не наблюдателем
+     видимости: наблюдатель сообщает только о смене состояния.
 
-     При открытии вкладки не считается ничего: пока ученик не тронул
-     страницу, прочитанных разделов у него нет. */
+     Пустые разделы («Материал готовится») в счёт не идут. При открытии
+     вкладки не считается ничего: время только начинает копиться. */
   useEffect(() => {
     if (tab !== 'theory' || trackKey === undefined) {
       return undefined;
     }
     const key = trackKey;
-    const last = theory[theory.length - 1];
+    const counted = theory.filter((item) => item.status !== 'empty');
+    const last = counted[counted.length - 1];
+    const dwell = new Map<string, number>();
+    let before = performance.now();
     let waiting = false;
 
     function scan() {
       waiting = false;
+      const now = performance.now();
+      /* Шаг таймера — не больше секунды: после спящей вкладки или
+         зависшего кадра время не должно прийти разом. */
+      const step = document.hidden ? 0 : Math.min(now - before, 1000);
+      before = now;
       const line = window.innerHeight / 2;
-      theory.forEach((item) => {
+      const seen = window.scrollY + window.innerHeight;
+      const bottom = seen >= document.documentElement.scrollHeight - 4;
+      counted.forEach((item) => {
         const node = document.getElementById(blockId(item.id));
-        if (node !== null && node.getBoundingClientRect().bottom <= line) {
+        if (node === null) {
+          return;
+        }
+        const rect = node.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          dwell.set(item.id, (dwell.get(item.id) ?? 0) + step);
+        }
+        /* Последний раздел кончается вместе со страницей, и выше
+           середины экрана его нижний край может не подняться. Низ
+           страницы засчитывает его отдельно. */
+        const ended = rect.bottom <= line || (item === last && bottom);
+        if (ended && (dwell.get(item.id) ?? 0) >= READ_DWELL_MS) {
           markSectionRead(key, item.id);
         }
       });
-      /* Последний раздел кончается вместе со страницей, и выше
-         середины экрана его нижний край может не подняться. Низ
-         страницы засчитывает его отдельно. */
-      const seen = window.scrollY + window.innerHeight;
-      if (last !== undefined && seen >= document.documentElement.scrollHeight - 4) {
-        markSectionRead(key, last.id);
-      }
     }
 
     function onScroll() {
@@ -291,9 +303,11 @@ export function TopicTabs({
       requestAnimationFrame(scan);
     }
 
+    const timer = window.setInterval(scan, 500);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     return () => {
+      window.clearInterval(timer);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
@@ -316,14 +330,21 @@ export function TopicTabs({
         <Tabs
           className="tabs--lenta"
           items={tabs}
-          value={tab}
+          value={navigating && target !== null ? target : tab}
+          {...(navigating && target !== null ? { busyId: target } : {})}
           onValueChange={choose}
           label="Разделы темы"
         />
       </TutorMenu>
 
+      {/* Нажатие на вкладку до загрузки кода не теряется (lib/tabTap.ts).
+          Вставка стоит сразу за лентой, а не в начале страницы: скрипт
+          в начале блокирует разбор и откладывает показ самой ленты на
+          секунду на слабой сети. */}
+      <script dangerouslySetInnerHTML={{ __html: TAB_TAP_SCRIPT }} />
+
       <div className={tab === 'theory' ? 'topic-body topic-body--theory' : 'topic-body'}>
-        <div className="topic-panel">
+        <div className={navigating ? 'topic-panel is-loading' : 'topic-panel'}>
           {tab === 'about' ? about : null}
 
           {tab === 'theory' ? (
@@ -334,7 +355,7 @@ export function TopicTabs({
               <div className="topic-open">
                 <button
                   type="button"
-                  className="btn btn--secondary topic-open__btn"
+                  className="btn btn--secondary btn--sm topic-open__btn"
                   onClick={() => setSheet(true)}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -343,7 +364,9 @@ export function TopicTabs({
                   Содержание
                 </button>
                 {current !== undefined ? (
-                  <span className="topic-open__now">{current.title}</span>
+                  <span className="topic-open__now">
+                    <TitleText title={current.title} html={current.titleHtml} />
+                  </span>
                 ) : null}
               </div>
 
@@ -364,7 +387,7 @@ export function TopicTabs({
                             {item.badge}
                           </span>
                         ) : null}
-                        {item.title}
+                        <TitleText title={item.title} html={item.titleHtml} />
                       </h3>
                       {item.body !== undefined && bodies[item.body] !== undefined ? (
                         bodies[item.body]
@@ -378,6 +401,15 @@ export function TopicTabs({
                       )}
                     </article>
                   ))}
+                  {/* Отметить всю теорию разом — тому, кто прочитал её
+                      раньше или читал не подряд. */}
+                  {trackKey === undefined ? null : (
+                    <ReadMark
+                      storeKey={trackKey}
+                      ids={theory.filter((item) => item.status !== 'empty').map((item) => item.id)}
+                      done="Теория прочитана"
+                    />
+                  )}
                 </div>
               )}
             </>

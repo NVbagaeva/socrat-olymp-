@@ -1,0 +1,113 @@
+{
+  "kind": "prep",
+  "id": "P12R-6",
+  "block": 6,
+  "title": "Целая часть дроби",
+  "subtitle": "Найти $k$, $b$ и $a$ в $\\frac{kx + a}{x + b}$",
+  "seed": 12406,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-6-01",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-02",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-03",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-04",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $k$?",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-05",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $b$?",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-06",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $a$?",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-07",
+      "question": "На рисунке показан график функции вида $f(x) = (kx + a)/(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "P12R-6-08",
+      "question": "На рисунке показан график функции вида $f(x) = (kx + a)/(x + b)$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Выдели целую часть: $\\dfrac{kx + a}{x + b} = k + \\dfrac{a - kb}{x + b}$. Горизонтальная асимптота — $y = k$, вертикальная — $x = -b$ (знак обратный), а $a$ найдёшь подстановкой точки.",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    }
+  ]
+}

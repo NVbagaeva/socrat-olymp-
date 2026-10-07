@@ -83,11 +83,115 @@
   flex: 0 0 auto;
 }
 .topic-progress__text {
+  display: grid;
+  gap: var(--space-1);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
   text-align: center;
-  max-width: 20ch;
+  max-width: 22ch;
+}
+
+/* Кольцо с подписью — кнопка: по нажатию раскрывается список пунктов. */
+.topic-progress__toggle {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+}
+.topic-progress__toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+.topic-progress__more {
+  color: var(--color-text-brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Список пунктов: галочка у пройденного, доля у остальных. */
+.topic-progress__list {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  min-width: 15rem;
+  max-width: 22rem;
+}
+.topic-progress__item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  text-align: left;
+}
+.topic-progress__mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: grid;
+  place-items: center;
+}
+.topic-progress__item.is-done .topic-progress__mark {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+.topic-progress__mark svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.topic-progress__label {
+  display: grid;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.topic-progress__detail {
+  font-weight: 400;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* «Прочитано» внизу теории и методов. */
+.read-mark {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+.read-mark__done {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-success);
+}
+.read-mark__done svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ── Вкладка «Ключевые методы решения» ──────────────────────── */
@@ -409,6 +513,12 @@
   stroke: none;
   font-size: 12px;
 }
+/* Буква-переменная в подписи множества: курсив математическим шрифтом
+   KaTeX — как формулы в тексте страницы. */
+.mapping__var {
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+}
 .mapping__point {
   fill: var(--color-text);
   stroke: none;
@@ -437,28 +547,6 @@
   height: 2px;
   border-radius: var(--radius-pill);
   background: var(--color-border-warm);
-}
-
-/* Кнопка «Содержание»: нужна там, где правой колонки нет. */
-.topic-open {
-  display: none;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-.topic-open__btn svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-}
-.topic-open__now {
-  min-width: 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
 }
 
 .topic-side__title {
@@ -490,9 +578,8 @@
 /* Раздела с содержимым здесь нет — есть два файла для скачивания.
    Кнопка стоит шестой в ленте, а меню лежит рядом с лентой: сама
    лента прокручивается вбок и подрезала бы всё, что из неё торчит. */
-.topic-tabs-row {
-  position: relative;
-}
+/* Строка ленты липкая (styles/components.css) — она же и опора меню:
+   у липкого элемента своя система координат. */
 /* Кнопка занимает в ленте ровно столько же, сколько вкладка: те же
    поля и тот же кегль. Заливку несёт внутренняя плашка — её поля
    выбраны отрицательными отступами, поэтому раскрытая кнопка красится,
@@ -675,7 +762,8 @@ a.tutor-card:hover {
   }
   .topic-side {
     position: sticky;
-    top: var(--space-6);
+    /* Под прилипшей лентой вкладок. */
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
   }
 }
 
@@ -684,20 +772,8 @@ a.tutor-card:hover {
   .topic-side {
     display: none;
   }
-  .topic-open {
-    display: flex;
-  }
-  /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
-  .modal-backdrop:has(.contents-sheet) {
-    place-items: end stretch;
-    padding: 0;
-  }
-  .contents-sheet {
-    max-width: none;
-    max-height: 80vh;
-    overflow-y: auto;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  }
+  /* Полоса «Содержание» и шторка — общие для всех теорий
+     (styles/components.css, рядом со списком содержания). */
 }
 
 @media (max-width: 1279.98px) {
@@ -736,10 +812,19 @@ a.tutor-card:hover {
   }
   /* Кольцо уменьшается вместе с шапкой и встаёт рядом с подписью. */
   .topic-progress {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    width: 100%;
+  }
+  .topic-progress__toggle {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     justify-items: start;
     gap: var(--space-4);
+  }
+  .topic-progress__list {
+    min-width: 0;
+    max-width: none;
   }
   .topic-progress .progress-ring {
     width: 112px;
@@ -1335,6 +1420,38 @@ a.tutor-card:hover {
   max-width: 300px;
   margin-inline: auto;
   align-self: end;
+}
+
+/* Место под иллюстрацию автора (теория гиперболы): пока картинки нет,
+   рамка пунктиром и подпись — чтобы было видно, что здесь будет. */
+.qth-illustration {
+  margin-block: 0;
+  /* Иллюстрация широкая (16:9): в 300px чертежа она мельчила бы,
+     поэтому занимает всю ширину карточки и сжимается вместе с ней. */
+  max-width: 100%;
+}
+.qth-illustration__empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+.qth-illustration__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+.qth-illustration__caption {
+  margin-top: var(--space-2);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 /* Текстовая карточка со значком: на голубой подложке, без чертежа. */
 .qth-card--forward {

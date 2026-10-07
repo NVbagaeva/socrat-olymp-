@@ -1,0 +1,167 @@
+{
+  "kind": "prototype",
+  "id": "12R.J",
+  "block": 10,
+  "title": "12R.J · $\\frac{kx + a}{x + b}$: $b$ и значение функции",
+  "subtitle": "Найти $b$ по вертикальной асимптоте или $f(x_0)$",
+  "seed": 12310,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12R.J-01",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "b — вертикальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "12R.J-02",
+      "question": "На рисунке изображён график функции вида $f(x) = (kx + a)/(x + b)$. Найдите значение $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "b — вертикальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    },
+    {
+      "id": "12R.J-03",
+      "question": "График функции $f(x) = (kx + a)/(x + b)$ изображён на рисунке. Чему равен коэффициент $b$?",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "b — вертикальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "12R.J-04",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$, где $k$, $a$ и $b$ — некоторые числа. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "b — вертикальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2
+      }
+    },
+    {
+      "id": "12R.J-05",
+      "question": "На рисунке показан график функции $f(x) = (kx + a)/(x + b)$. Определите коэффициент $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "b — вертикальная асимптота",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2
+      }
+    },
+    {
+      "id": "12R.J-06",
+      "question": "На рисунке показан график функции $f(x) = (kx + a)/(x + b)$. Вычислите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "сначала формула, затем подстановка",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.J-07",
+      "question": "Функция задана формулой $f(x) = (kx + a)/(x + b)$, её график изображён на рисунке. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "сначала формула, затем подстановка",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12R.J-08",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Какое значение принимает функция при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "сначала формула, затем подстановка",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.J-09",
+      "question": "На рисунке изображён график функции $f(x) = (kx + a)/(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "сначала формула, затем подстановка",
+      "form": "linear",
+      "constraints": {
+        "mSign": "positive",
+        "marks": 2,
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12R.J-10",
+      "question": "На рисунке изображён график функции вида $f(x) = (kx + a)/(x + b)$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "сначала формула, затем подстановка",
+      "form": "linear",
+      "constraints": {
+        "mSign": "negative",
+        "marks": 2,
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    }
+  ]
+}

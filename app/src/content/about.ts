@@ -1,3 +1,5 @@
+import { assetUrl } from '@/lib/assetUrl';
+
 /**
  * Тексты страницы «Об авторе». Отдельно от лендинга: разметка страницы
  * ничего не знает о формулировках, они меняются только здесь.
@@ -36,7 +38,8 @@ export const about = {
        заданная вручную строка вылезла бы за колонку. Внутри названия
        продукта стоят неразрывные пробелы: «Будет на ЕГЭ» не должно
        разрываться между строками. */
-    title: 'Я создала «Будет\u00A0на\u00A0ЕГЭ», потому что знаю, сколько времени забирает подготовка',
+    title:
+      'Я создала «Будет\u00A0на\u00A0ЕГЭ», потому что знаю, сколько времени забирает подготовка',
     lead: 'Я учитель математики и создатель платформы для подготовки к ЕГЭ по профильной математике.',
     actions: {
       primary: { label: 'Перейти в банк заданий →', href: '/#bank' },
@@ -48,35 +51,34 @@ export const about = {
         подложки, поэтому кружок под ними задаётся стилями одинаково. */
     credibility: [
       {
-        icon: '/images/ikonki/ikonka-nastavnik.png',
+        icon: assetUrl('/images/ikonki/ikonka-nastavnik.png'),
         line1: 'Учитель',
         line2: 'по призванию',
       },
       {
-        icon: '/images/ikonki/ikonka-diplom.png',
+        icon: assetUrl('/images/ikonki/ikonka-diplom.png'),
         line1: 'Математическое',
         line2: 'образование',
       },
       {
-        icon: '/images/ikonki/ikonka-tetrad.png',
+        icon: assetUrl('/images/ikonki/ikonka-tetrad.png'),
         line1: 'Реальный опыт',
         line2: 'школьной работы',
       },
       {
-        icon: '/images/ikonki/ikonka-varianty.png',
+        icon: assetUrl('/images/ikonki/ikonka-varianty.png'),
         line1: 'Эксперт',
         line2: 'ЕГЭ',
       },
     ] satisfies HeroCredential[],
 
     photo: {
-      src: '/images/author/nata-portrait.webp',
+      src: assetUrl('/images/author/nata-portrait.webp'),
       /* Ширины файлов в пикселях, а не множители плотности: исходник
          874 px, настоящего двойного к 600 из него не выйдет. Браузер
          сам умножит ширину показа на плотность экрана и возьмёт
          подходящий файл — лишний не скачается. */
-      srcSet:
-        '/images/author/nata-portrait.webp 600w, /images/author/nata-portrait-large.webp 874w',
+      srcSet: `${assetUrl('/images/author/nata-portrait.webp')} 600w, ${assetUrl('/images/author/nata-portrait-large.webp')} 874w`,
       /* Сколько места портрет занимает на экране: на телефоне во всю
          ширину, дальше — фиксированная колонка. Без этого браузер
          считает, что картинка во весь экран, и берёт файл крупнее. */

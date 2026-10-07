@@ -2,7 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerResult } from '@/content/trainerModes';
+import { KindName } from './KindName';
 
+import { assetUrl } from '@/lib/assetUrl';
 /** Чем закончилось задание: решено само или пройдено по подсказке. */
 export type TrainerMark = 'right' | 'hinted';
 
@@ -92,7 +94,7 @@ export function TrainerResult({
           как два ряда текста. */}
       <Image
         className="tdone__cup"
-        src="/images/trophy-glass.webp"
+        src={assetUrl('/images/trophy-glass.webp')}
         alt={trainerResult.trophyAlt}
         width={1147}
         height={1201}
@@ -144,7 +146,7 @@ export function TrainerResult({
         <ul className="tdone__list">
           {kindRows(tasks, marks, kindTitle).map((row) => (
             <li className="tkind" key={row.title}>
-              <span className="tkind__name">{row.title}</span>
+              <KindName className="tkind__name" title={row.title} />
               <span className="tkind__bar">
                 <span
                   className="tkind__fill"

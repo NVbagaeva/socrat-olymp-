@@ -62,8 +62,10 @@ const src = path.join(root, 'src', 'lib');
 
 /* Банк тянет за собой разбор ответа из lib/answer.ts, общее
    устройство печатей из lib/secret.ts, источник случайных чисел
-   генератора из lib/zadanie3/podhod.ts, набор формул из lib/tex.ts и
-   склонение из lib/plural.ts (его просят слова вкладки подготовки) —
+   генератора из lib/zadanie3/podhod.ts, набор формул из lib/tex.ts (с
+   разбором строки lib/razmetka.ts) и
+   склонение из lib/plural.ts (его просят слова вкладки подготовки) и
+   план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts) —
    переводим их вместе с папкой раздела. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
@@ -71,7 +73,11 @@ for (const file of [
   path.join(src, 'secret.ts'),
   path.join(src, 'plural.ts'),
   path.join(src, 'tex.ts'),
+  path.join(src, 'razmetka.ts'),
+  path.join(src, 'texPlain.ts'),
+  path.join(src, 'assetUrl.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
+  path.join(src, 'sheetPlan.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },

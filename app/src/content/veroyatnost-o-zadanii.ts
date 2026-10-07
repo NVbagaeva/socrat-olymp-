@@ -13,6 +13,7 @@
 import { tasksPage } from './tasks';
 import { ZAGOLOVOK_5 } from './veroyatnost';
 
+import { assetUrl } from '@/lib/assetUrl';
 /**
  * Карточка статистики: решаемость задания на экзамене.
  *
@@ -53,7 +54,7 @@ export const V_ZADANII_5 = {
 /** Фотография к блоку «Немного истории». */
 export const FOTO_4 = {
   /** Путь от корня public. Нет файла — вкладка покажет пустое место. */
-  src: '/images/zadanie-04/pamyatnik-porokam.jpg',
+  src: assetUrl('/images/zadanie-04/pamyatnik-porokam.jpg'),
   /** Свои размеры файла: по ним считается место до загрузки. */
   width: 1672,
   height: 941,

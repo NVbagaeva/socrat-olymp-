@@ -19,7 +19,12 @@ concurrency:
 jobs:
   deploy:
     name: Сборка и публикация на FTP
-    runs-on: ubuntu-latest
+    # Версия Ubuntu закреплена во всех сценариях: ubuntu-latest с
+    # 19 октября 2026 года — Ubuntu 26, а Chromium для проверок и PDF
+    # ставится с системными пакетами под конкретную версию
+    # (playwright install --with-deps). Переезд — отдельной правкой,
+    # когда Playwright его поддержит. Подробнее — docs/DEPLOYMENT.md.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Забрать репозиторий
@@ -56,8 +61,43 @@ jobs:
       - name: Проверить, что экспорт не пустой
         run: test -f app/out/index.html
 
-      - name: Залить на FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      # Порядок заливки: сначала файлы сборки (_next), потом страницы.
+      # Иначе в окне между шагами новая страница ссылалась бы на файлы,
+      # которых на сервере ещё нет.
+      #
+      # _next заливается без удаления: открытая у ученика вкладка
+      # прошлой версии догружает свои куски кода по старым именам, и
+      # удалить их — значит сломать ей переход. Имена в _next собраны
+      # по содержимому, поэтому заливаются только новые файлы
+      # (--only-missing), а старые остаются. Чистить их — отдельной
+      # задачей, когда понадобится.
+      #
+      # lftp, а не действие ниже: действие синхронизирует папку и
+      # удаляет с сервера то, что исчезло из сборки. Пароль передаётся
+      # через окружение (--env-password), в командную строку не
+      # попадает. Подключение незашифрованное — как и у действия ниже,
+      # это ограничение хостинга (docs/DEPLOYMENT.md).
+      - name: Залить файлы сборки (_next) — только новые, без удаления
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q lftp
+          lftp --env-password -u "$FTP_USERNAME" -p 21 "$FTP_SERVER" -e "
+            set ftp:ssl-allow no;
+            set net:max-retries 3;
+            set net:timeout 30;
+            mirror --reverse --only-missing --no-perms --parallel=4 app/out/_next/ /public_html/_next/;
+            bye"
+
+      # v4.4.0 работает на Node.js 24 (v4.3.5 — на Node.js 20, который
+      # GitHub выводит из обращения). Действие стороннее и получает пароль
+      # от хостинга, поэтому закреплено коммитом, а не меткой: метку автор
+      # может перевесить на другой код, коммит — нет.
+      - name: Залить страницы на FTP
+        uses: SamKirkland/FTP-Deploy-Action@110f9186c050f71550953127052e77650219c287 # v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -73,8 +113,19 @@ jobs:
           port: 21
           local-dir: ./app/out/
           server-dir: /public_html/
-          # Заливка только добавляющая.
+          # Чужие файлы действие не трогает: удаляет оно только то, что
+          # само залило раньше и что исчезло из новой сборки (по своему
+          # файлу состояния .ftp-deploy-sync-state.json).
           # dangerous-clean-slate — единственный режим действия, который стирает
           # содержимое папки на сервере перед загрузкой. Он выключен явно,
           # чтобы случайно не удалить ege/, about.html и остальные рабочие страницы.
           dangerous-clean-slate: false
+          # _next залит шагом выше. Исключённое действие и не заливает,
+          # и не удаляет. Первые три строки — исключения действия по
+          # умолчанию: заданный список их заменяет, поэтому они повторены.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            _next/**
+            **/_next/**

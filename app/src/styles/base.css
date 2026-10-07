@@ -55,6 +55,12 @@ svg {
   display: block;
   max-width: 100%;
 }
+/* Стрелки и крышки KaTeX (\vec, \hat) — svg с position: absolute внутри
+   обёртки нулевой ширины: предел «не шире родителя» давал им ширину
+   ноль, и стрелка над вектором не рисовалась. У формул предела нет. */
+.katex svg {
+  max-width: none;
+}
 
 :focus-visible {
   outline: 2px solid var(--color-primary);
@@ -157,4 +163,13 @@ svg {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Формула KaTeX не рвётся переносом посередине: между её частями
+   (.base) браузер мог бы перенести строку — «k = x ·» на одной, «y» на
+   другой. Если формула не помещается, она уходит на новую строку
+   целиком. Правило одно на весь сайт; в листах для печати — такое же
+   (lib/sheet/sheet.css). */
+.katex .katex-html {
+  white-space: nowrap;
 }

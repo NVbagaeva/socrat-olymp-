@@ -46,7 +46,7 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
     id: 'sign-a',
     nomer: 1,
     nazvanie: 'Знак старшего коэффициента',
-    opisanie: 'Куда направлены ветви — таков и знак a',
+    opisanie: 'Куда направлены ветви — таков и знак $a$',
     formula: 'y = ax^2 + bx + c',
     navyki: ['sign-a'],
     kakUznat: [
@@ -69,7 +69,7 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
     id: 'value-a',
     nomer: 2,
     nazvanie: 'Старший коэффициент шагом от вершины',
-    opisanie: 'Один шаг в сторону от вершины — изменение ровно на a',
+    opisanie: 'Один шаг в сторону от вершины — изменение ровно на $a$',
     formula: 'y = a(x - m)^2 + n',
     navyki: ['value-a'],
     kakUznat: [
@@ -94,7 +94,7 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
     id: 'value-c',
     nomer: 3,
     nazvanie: 'Свободный член по оси Oy',
-    opisanie: 'c — ордината точки, где парабола пересекает ось Oy',
+    opisanie: '$c$ — ордината точки, где парабола пересекает ось $Oy$',
     formula: 'y = a \\cdot 0^2 + b \\cdot 0 + c = c',
     navyki: ['value-c'],
     kakUznat: [
@@ -142,8 +142,8 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
   {
     id: 'value-b',
     nomer: 5,
-    nazvanie: 'Коэффициент b: через вершину или через систему',
-    opisanie: 'Знаете a и вершину — b находится сразу; не знаете — составьте систему',
+    nazvanie: 'Коэффициент $b$: через вершину или через систему',
+    opisanie: 'Знаете $a$ и вершину — $b$ находится сразу; не знаете — составьте систему',
     formula: `${XV} = -\\dfrac{b}{2a}`,
     navyki: ['value-b'],
     kakUznat: [
@@ -192,7 +192,7 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
     id: 'argument-for',
     nomer: 7,
     nazvanie: 'Аргумент по значению: уравнение и выбор корня',
-    opisanie: 'Уравнение f(x) = y₀ даёт два корня — нужный называет условие',
+    opisanie: 'Уравнение $f(x) = y_0$ даёт два корня — нужный называет условие',
     formula: 'a(x - m)^2 + n = y_0',
     navyki: ['argument-for'],
     kakUznat: [
@@ -217,7 +217,7 @@ export const QUADRATIC_METODY: QuadraticMetod[] = [
     id: 'formula',
     nomer: 8,
     nazvanie: 'Формула по графику',
-    opisanie: 'Знак a, вершина, проверка точкой — и вариант остаётся один',
+    opisanie: 'Знак $a$, вершина, проверка точкой — и вариант остаётся один',
     formula: 'y = ax^2 + bx + c',
     navyki: ['formula'],
     kakUznat: [

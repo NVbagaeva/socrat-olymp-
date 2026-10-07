@@ -1,4 +1,6 @@
+import path from 'node:path';
 import type { NextConfig } from 'next';
+import { assetVersions } from './scripts/lib/asset-versions.mjs';
 
 const nextConfig: NextConfig = {
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
@@ -8,6 +10,12 @@ const nextConfig: NextConfig = {
   // Каждая страница выгружается папкой с index.html — так путь работает без правил сервера.
   trailingSlash: true,
   reactStrictMode: true,
+  // Версии файлов из public/ (PDF, картинки): хеш содержимого, считается
+  // на каждой сборке. lib/assetUrl.ts добавляет его к ссылке как ?v=…,
+  // чтобы перезалитый под тем же именем файл не залипал в годовом кеше.
+  env: {
+    ASSET_VERSIONS: JSON.stringify(assetVersions(path.join(process.cwd(), 'public'))),
+  },
 };
 
 export default nextConfig;

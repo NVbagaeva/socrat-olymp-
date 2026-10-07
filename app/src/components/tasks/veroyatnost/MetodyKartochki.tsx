@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import Link from 'next/link';
 import { Modal } from '@/components/ui';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
+import { markSectionRead } from '@/lib/theoryRead';
+import { READ_DWELL_MS } from '@/lib/topicProgress';
 
 /** Куда метод ведёт тренироваться: адрес, счётчик и, если тренировок
     несколько, название набора — иначе кнопки не различить. */
@@ -12,15 +14,18 @@ export interface TrenirovkaMetoda {
   /** Строка счётчика «задач в банке: N» — посчитана на сервере. */
   schet: string;
   /** Название набора. Не задано — строка счётчика идёт одна. */
-  nazvanie?: string;
+  nazvanie?: ReactNode;
 }
 
 /** Карточка метода, собранная на сервере: формула уже набрана KaTeX. */
 export interface KartochkaMetoda {
   id: string;
   nomer: number;
-  nazvanie: string;
-  opisanie: string;
+  /** Название: строка или уже набранная формулами разметка. */
+  nazvanie: ReactNode;
+  /** Название обычным текстом — для подписи кнопки (aria-label). */
+  nazvanieText?: string;
+  opisanie: ReactNode;
   /** Плашка с формулой; null — у метода формулы нет. */
   formula: ReactNode | null;
   /**
@@ -38,6 +43,66 @@ export interface KartochkaMetoda {
 
 export interface MetodyKartochkiProps {
   items: readonly KartochkaMetoda[];
+  /**
+   * Ключ прочитанных методов: «methods:12:rational». Метод отмечается
+   * прочитанным, когда его окно было открыто не меньше READ_DWELL_MS и
+   * прокручено до конца. Не задан — ничего не отмечается (задания №4
+   * и №5).
+   */
+  trackKey?: string;
+}
+
+/** Ближайший предок с собственной прокруткой — тело окна. */
+function scroller(node: HTMLElement): HTMLElement | null {
+  let current: HTMLElement | null = node.parentElement;
+  while (current !== null) {
+    const { overflowY } = window.getComputedStyle(current);
+    if (overflowY === 'auto' || overflowY === 'scroll') {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return null;
+}
+
+/**
+ * Следит за открытым окном метода: время открытия и дочитано ли до
+ * конца. Окно без прокрутки дочитано сразу, ему нужно только время.
+ */
+function useReadWatch(id: string | null, body: RefObject<HTMLDivElement | null>, trackKey?: string) {
+  useEffect(() => {
+    if (id === null || trackKey === undefined) {
+      return undefined;
+    }
+    const key = trackKey;
+    const metod = id;
+    const opened = performance.now();
+    let ended = false;
+    let fired = false;
+
+    function check() {
+      const node = body.current;
+      if (node === null || fired) {
+        return;
+      }
+      const box = scroller(node) ?? document.documentElement;
+      if (box.scrollTop + box.clientHeight >= box.scrollHeight - 4) {
+        ended = true;
+      }
+      if (ended && performance.now() - opened >= READ_DWELL_MS) {
+        fired = true;
+        markSectionRead(key, metod);
+      }
+    }
+
+    const timer = window.setInterval(check, 500);
+    /* Прокрутка внутри окна до window не всплывает: слушаем захватом. */
+    document.addEventListener('scroll', check, { capture: true, passive: true });
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('scroll', check, { capture: true });
+    };
+  }, [id, body, trackKey]);
 }
 
 /**
@@ -99,8 +164,10 @@ function Podval({ trenirovki }: { trenirovki: TrenirovkaMetoda[] }) {
   );
 }
 
-export function MetodyKartochki({ items }: MetodyKartochkiProps) {
+export function MetodyKartochki({ items, trackKey }: MetodyKartochkiProps) {
   const [otkryt, setOtkryt] = useState<string | null>(null);
+  const body = useRef<HTMLDivElement | null>(null);
+  useReadWatch(otkryt, body, trackKey);
   const tekushchiy = items.find((m) => m.id === otkryt) ?? null;
   const { modal } = METODY_KARTOCHKI;
 
@@ -114,7 +181,7 @@ export function MetodyKartochki({ items }: MetodyKartochkiProps) {
               className="vmetod"
               onClick={() => setOtkryt(m.id)}
               aria-haspopup="dialog"
-              aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanie}`}
+              aria-label={`${METODY_KARTOCHKI.otkryt}: ${m.nazvanieText ?? (typeof m.nazvanie === 'string' ? m.nazvanie : '')}`}
             >
               <span className="vmetod__no" aria-hidden="true">
                 {m.nomer}
@@ -148,7 +215,7 @@ export function MetodyKartochki({ items }: MetodyKartochkiProps) {
         footer={tekushchiy === null ? undefined : <Podval trenirovki={tekushchiy.trenirovki} />}
       >
         {tekushchiy === null ? null : (
-          <div className="vmetod-modal__body">
+          <div className="vmetod-modal__body" ref={body}>
             {tekushchiy.formula === null ? null : (
               <div className="vmetod__formula vmetod-modal__formula">{tekushchiy.formula}</div>
             )}

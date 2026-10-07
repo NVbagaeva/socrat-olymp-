@@ -520,6 +520,15 @@ a.task-card {
   border-color: var(--color-border);
   box-shadow: none;
 }
+/* Неоткрытый раздел со страницей-заглушкой: вид тот же, приглушённый,
+   но карточка — ссылка, и на наведение отзывается как открытая. */
+a.task-card--soon {
+  cursor: pointer;
+}
+a.task-card--soon:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
 
 .task-card__no {
   width: 44px;
@@ -1058,6 +1067,37 @@ a.task-card {
   align-items: flex-start;
   line-height: 18px;
 }
+/* Неоткрытый раздел со страницей-заглушкой: приглушён, как закрытый,
+   но это ссылка — на наведение проявляется. */
+.snav a.is-dim {
+  opacity: 0.55;
+}
+.snav a.is-dim:hover {
+  opacity: 0.85;
+}
+
+/* Список заданий по частям экзамена: подпись группы капителью,
+   между группами тонкий разделитель. */
+.snav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.snav__group + .snav__group {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-on-brand-border);
+}
+.snav__group-label {
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-on-brand);
+}
+
 /* Стрелка у текущего задания. */
 .snav__go {
   width: 16px;
@@ -1356,6 +1396,75 @@ a.task-card {
   font-size: 14px;
   max-width: 38ch;
   margin: 0 auto var(--space-5);
+}
+
+/* Нажатая вкладка, пока открывается: ожидание на ней и приглушённая панель. */
+.tabs [role='tab'][data-busy='true']::after {
+  content: '';
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: var(--space-2);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: tabs-spin 0.7s linear infinite;
+}
+@keyframes tabs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabs [role='tab'][data-busy='true']::after {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.5;
+  }
+}
+html[data-tabs-pending] .topic-panel,
+.topic-panel.is-loading {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+/* Подгружается вкладка или блок: пока код едет по сети. */
+.lazy-loading {
+  margin: var(--space-6) 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Сообщение об ошибке: вместо страницы или одного блока. */
+.errfb {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.errfb--block {
+  margin: var(--space-4) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.errfb--block .state {
+  padding: var(--space-6) var(--space-4);
+}
+.errfb__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+.errfb__details {
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+.errfb__details pre {
+  margin: var(--space-2) 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .toast {
@@ -1840,11 +1949,12 @@ a.task-card {
    на тач-устройствах наведения нет, показывать стрелку там нечему и
    незачем — карточка и без неё нажимается целиком.
 
-   Карточки закрытых разделов сюда не попадают: у них нет ни ссылки,
-   ни обработчика, поэтому разметка стрелки им и не рисуется. */
+   Правило — для карточек-ссылок и карточек-кнопок. У закрытых
+   разделов без заглушки нет ни ссылки, ни обработчика: это span,
+   и разметка стрелки им не рисуется. */
 @media (hover: hover) {
-  .task-card--bank:not(.task-card--soon):hover .task-card__go,
-  .task-card--bank:not(.task-card--soon):focus-visible .task-card__go {
+  .task-card--bank:is(a, button):hover .task-card__go,
+  .task-card--bank:is(a, button):focus-visible .task-card__go {
     opacity: 1;
     transform: none;
   }
@@ -2000,7 +2110,8 @@ a.task-card {
   /* Свёрнутый сайдбар: от списка заданий остаются номера. */
   .shell--responsive .sidebar__caption,
   .shell--responsive .sidebar__decor,
-  .shell--responsive .snav__go {
+  .shell--responsive .snav__go,
+  .shell--responsive .snav__group-label {
     display: none;
   }
   .shell--responsive .snav .is-soon {
@@ -2079,7 +2190,8 @@ a.task-card {
 /* Переход по якорю оставляет над заголовком воздух: иначе он
    прилипает к верхней кромке экрана. */
 .theory-block {
-  scroll-margin-top: var(--space-5);
+  /* Под прилипшей лентой вкладок: её высота — --topic-sticky-top. */
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-5));
 }
 .theory-block__text {
   font-size: var(--fs-body);
@@ -2119,6 +2231,95 @@ a.task-card {
   line-height: var(--lh-h4);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Полоса «Содержание / текущий раздел» теории ───────────────
+   Одна на все теории: №12 (TopicTabs), №4–5 (TeoriyaShell), №3
+   (TeoriyaContents). На широком экране её нет — содержание стоит
+   правой колонкой; ниже 1024px колонку заменяют полоса и шторка. */
+
+/* Кнопка «Содержание»: нужна там, где правой колонки нет. */
+.topic-open {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.topic-open__btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.topic-open__now {
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1023.98px) {
+  /* Полоса «Содержание / текущий раздел» липнет к верху экрана всё
+     время чтения теории. Отсчёт сверху — --topic-sticky-top: ноль,
+     если над полосой ничего липкого нет (№12), и высота ленты
+     вкладок, если липнет и она (№4, №5 — veroyatnost.css).
+     Липкость работает потому, что полоса стоит прямо в панели
+     вкладки, которая тянется на всю теорию: в ячейке ростом с саму
+     кнопку ездить ей было бы некуда.
+     Фон во всю ширину колонки: разделы не просвечивают сбоку. */
+  .topic-open {
+    display: flex;
+    position: sticky;
+    top: var(--topic-sticky-top, 0px);
+    z-index: 4;
+    box-sizing: border-box;
+    height: var(--h-topic-open);
+    margin-bottom: var(--space-4);
+    margin-inline: calc(var(--space-5) * -1);
+    padding: var(--space-2) var(--space-5);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+  /* Название раздела — одной строкой: полоса не растёт в высоту и
+     не наезжает на текст, длинное название обрезается многоточием. */
+  .topic-open__now {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Полоса стоит сразу под прилипшей лентой — без щели; тень снизу
+     теперь у неё, а у ленты над ней тень убирается. */
+  .app-main:has(.topic-tabs-row.is-stuck) .topic-open {
+    box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
+  }
+  .app-main:has(.topic-open) .topic-tabs-row.is-stuck::before {
+    box-shadow: none;
+  }
+  /* Подложка ленты — до кромки экрана, не дальше: поле страницы
+     здесь --space-5 (.app-main выше). Шире — и страница на телефоне
+     становится шире экрана. */
+  .app-main {
+    --tabs-bleed: var(--space-5);
+  }
+  /* Переход по содержанию: заголовок раздела встаёт под полосой,
+     а не под ней прячется. */
+  .topic-panel .theory-block {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+  /* Шторка снизу: то же окно, прижатое к нижнему краю экрана. */
+  .modal-backdrop:has(.contents-sheet) {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .contents-sheet {
+    max-width: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
 }
 
 .contents-list {
@@ -2174,6 +2375,35 @@ a.task-card {
 .contents-item.is-active .contents-item__no {
   color: var(--color-primary);
 }
+/* Подпункты открытого раздела (теория №11): отступ под номер. */
+.contents-sub {
+  display: grid;
+  gap: 1px;
+  margin: 2px 0 var(--space-1);
+  padding: 0 0 0 calc(24px + var(--space-3) + var(--space-3));
+  list-style: none;
+}
+.contents-sub__item {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-left: 2px solid var(--color-border);
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.contents-sub__item:hover {
+  border-left-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.contents-sub__item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
 
 /* На узком экране кружок с номером меньше. */
 @media (max-width: 767.98px) {
@@ -2213,6 +2443,42 @@ a.task-card {
 }
 .topic-tabs::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Липкая лента вкладок ──────────────────────────────────────
+   Лента прилипает к верху экрана во всех разделах: строка
+   .topic-tabs-row стоит прямо в main.app-main, который тянется на всю
+   страницу. Состояние «прилипла» (is-stuck), высоту для полос под
+   лентой (--topic-sticky-top) и выравнивание страницы ставит хук
+   components/tasks/useStickyTabs.ts.
+
+   Подложка непрозрачная и растянута на поля страницы псевдоэлементом:
+   по ширине самой строки меню «Для репетиторов» считает своё место,
+   раздвигать её нельзя. Поля main такие же, поэтому подложка не
+   выступает за страницу и горизонтальной прокрутки не даёт. */
+.topic-tabs-row {
+  position: sticky;
+  /* Под чёлкой iPhone лента не прячется: отступ — безопасная зона. */
+  top: env(safe-area-inset-top, 0px);
+  z-index: 6;
+}
+.topic-tabs-row::before {
+  content: '';
+  position: absolute;
+  /* В стороны — на поле страницы (--tabs-bleed), вверх — на вырез
+     экрана, к которому прилипает лента. */
+  inset: calc(env(safe-area-inset-top, 0px) * -1) calc(var(--tabs-bleed, var(--space-8)) * -1) 0;
+  z-index: -1;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+/* Прилипшая лента отходит от кромки экрана и отделяется тенью от
+   текста, который уезжает под неё. */
+.topic-tabs-row.is-stuck {
+  padding-block: var(--space-2);
+}
+.topic-tabs-row.is-stuck::before {
+  box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
 }
 .tabs--lenta {
   display: flex;
@@ -2778,4 +3044,39 @@ a.task-card {
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
+}
+
+/* Прилипшая лента на телефоне — компактная: значок и подпись в одну
+   строку, поля меньше. Вместе с полосой «Содержание» она занимает
+   около девятой части экрана. Лента по-прежнему прокручивается вбок,
+   активную вкладку в видимую часть подводит хук. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row.is-stuck {
+    padding-block: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .topic-tabs {
+    padding: 2px;
+    box-shadow: none;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta button,
+  .topic-tabs-row.is-stuck .tabs--lenta a[role='tab'],
+  .topic-tabs-row.is-stuck .topic-tabs__more {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__text,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__text {
+    max-width: none;
+    white-space: nowrap;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico {
+    width: 20px;
+    height: 20px;
+  }
+  .topic-tabs-row.is-stuck .tabs--lenta .tabs__ico svg,
+  .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico svg {
+    width: 16px;
+    height: 16px;
+  }
 }

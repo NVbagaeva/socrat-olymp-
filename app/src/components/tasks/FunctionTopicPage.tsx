@@ -7,10 +7,13 @@ import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
+import { prepSkillTotal } from '@/lib/prep';
 import { aboutScene } from '@/lib/scenes';
-import { prototypeSkills } from './configurator';
+import type { ProgressPlan } from '@/lib/topicProgress';
+import { typeset } from '@/lib/tex';
+import { prototypeSkills } from './configurator/skillItems';
 import { GeneratorTab } from './generator';
-import { MethodsTab } from './MethodsTab';
+import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
@@ -19,6 +22,7 @@ import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
@@ -78,6 +82,34 @@ export function FunctionTopicPage({
   const tutors =
     subtopic.tutors === undefined ? section.tutors : { ...section.tutors, items: subtopic.tutors };
 
+  /* Пункты кольца прогресса — вкладки подтемы с содержанием. Пустые
+     разделы теории, вкладка методов без методов, опорные задачи и
+     тренажёр без наборов в счёт не идут. Ключи отметок свои у каждой
+     подтемы: подтемы друг на друга не влияют. */
+  const theoryKey = `theory:${section.slug}:${subtopic.id}`;
+  const methodsKey = `methods:${section.slug}:${subtopic.id}`;
+  const plan: ProgressPlan = {
+    theory: subtopic.theory.filter((block) => block.status !== 'empty').map((block) => block.id),
+    methods: subtopic.methods === true ? metodyFor(subtopic.id).map((metod) => metod.id) : [],
+    prep: hasPrep
+      ? prepSkillsFor(subtopic.id).map((skill) => ({
+          id: skill.id,
+          total: prepSkillTotal(subtopic.id, skill.id),
+        }))
+      : [],
+    trainer: hasTrainer ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id) : [],
+  };
+
+  /* Разметка теории — только разделов этой подтемы. Словарь theoryBodies
+     общий на все подтемы, и целиком он весил в странице гиперболы
+     ≈640 КБ чужой теории (линейная и квадратичная функции). */
+  const ownBodies = Object.fromEntries(
+    subtopic.theory.flatMap((block) => {
+      const body = block.body === undefined ? undefined : theoryBodies[block.body];
+      return block.body === undefined || body === undefined ? [] : [[block.body, body] as const];
+    }),
+  );
+
   return (
     <main className="app-main">
       <ShapkaRazdela
@@ -120,23 +152,15 @@ export function FunctionTopicPage({
             {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
             <Image
               className="topic-head__art"
-              src="/images/bust-galileo.webp"
+              src={assetUrl('/images/bust-galileo.webp')}
               alt=""
               width={814}
               height={700}
             />
 
-            {/* Прогресс по разделам теории темы. Общее число — длина того же
-                списка, из которого строится «Содержание»: второго источника
-                у этой пары нет. */}
-            {/* Кольцо: у подтемы с признаком — честный счёт по разделам,
-                до конца которых ученик долистал; иначе витринное число. */}
-            <TopicProgress
-              total={subtopic.theory.length}
-              trackKey={
-                subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined
-              }
-            />
+            {/* Прогресс подтемы: пункты — её вкладки с содержанием,
+                изучено — то, что ученик сделал, а не открыл. */}
+            <TopicProgress plan={plan} theoryKey={theoryKey} methodsKey={methodsKey} />
           </>
         }
       />
@@ -144,11 +168,13 @@ export function FunctionTopicPage({
       <TopicTabs
         initial={initialTab}
         about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
-        theory={subtopic.theory}
-        bodies={theoryBodies}
-        trackKey={subtopic.theoryProgress === true ? `${section.slug}:${subtopic.id}` : undefined}
+        theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
+        bodies={ownBodies}
+        trackKey={theoryKey}
         methods={
-          subtopic.methods === true ? <MethodsTab type={subtopic.id} base={base} /> : undefined
+          subtopic.methods === true ? (
+            <MethodsTab type={subtopic.id} base={base} trackKey={methodsKey} />
+          ) : undefined
         }
         prep={
           prep ??
@@ -181,7 +207,7 @@ export function FunctionTopicPage({
           <div className="topic-side__decor" aria-hidden="true">
             <Image
               className="topic-side__pyramid"
-              src="/images/pyramid-network.webp"
+              src={assetUrl('/images/pyramid-network.webp')}
               alt=""
               width={1400}
               height={504}

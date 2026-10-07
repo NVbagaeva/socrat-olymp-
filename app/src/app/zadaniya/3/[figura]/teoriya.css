@@ -15,7 +15,8 @@
 }
 .teoriya__side {
   position: sticky;
-  top: var(--space-5);
+  /* Под прилипшей лентой вкладок. */
+  top: calc(var(--topic-sticky-top, 0px) + var(--space-5));
 }
 .teoriya__side-title {
   font-size: var(--fs-body);
@@ -86,13 +87,16 @@
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
-  /* На узком экране содержание встаёт над разделами: листать вверх
-     за оглавлением неудобно. */
-  .teoriya__blocks {
-    order: 0;
+  /* На узком экране колонки нет: её заменяют липкая полоса
+     «Содержание» и шторка (components.css). */
+  .teoriya {
+    margin-top: 0;
   }
   .teoriya__side {
-    position: static;
+    display: none;
+  }
+  .teoriya .theory-block {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
   }
 }
 

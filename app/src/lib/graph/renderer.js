@@ -43,6 +43,9 @@ var THEME = {
     lineA:       'var(--color-primary, #1F5FD0)',
     lineB:       'var(--graph-accent, #E07A2F)',
     accent:      'var(--graph-accent, #E07A2F)',   /* треугольник наклона   */
+    /* Вспомогательная система координат разбора параболы: цветом
+       подсказок, а в ч/б печати — серым, чтобы не спутать с осями. */
+    aux:         'var(--graph-aux-axis, var(--graph-accent, #E07A2F))',
     pointFill:   null,                             /* null — цвет кривой    */
     pointStroke: 'var(--color-surface, #FFFFFF)',
     halo:        'var(--color-surface, #FFFFFF)',
@@ -853,10 +856,22 @@ function renderShape(shape, sx, sy, cell) {
   /* Отрезок рисуется как path: анимация берёт у него длину
      и прочерчивает штрихом, у line длины нет. */
   if (shape.type === 'segment') {
-    return '<path' + id + ' d="M' + px(sx(shape.from[0])) + ' ' + px(sy(shape.from[1])) +
+    var cls = shape.className ? ' class="' + esc(shape.className) + '"' : '';
+    var line = '<path' + id + cls + ' d="M' + px(sx(shape.from[0])) + ' ' + px(sy(shape.from[1])) +
       'L' + px(sx(shape.to[0])) + ' ' + px(sy(shape.to[1])) +
-      '" fill="none" stroke="' + stroke + '" stroke-width="' + THEME.width.helper +
+      '" fill="none" stroke="' + stroke + '" stroke-width="' + (shape.width || THEME.width.helper) +
       '" stroke-linecap="round"' + dash + '/>';
+    if (!shape.arrow) { return line; }
+    /* Стрелка на конце to — как у основных осей, тем же цветом. */
+    var tx = sx(shape.to[0]), ty = sy(shape.to[1]);
+    var fx = sx(shape.from[0]), fy = sy(shape.from[1]);
+    var len = Math.sqrt((tx - fx) * (tx - fx) + (ty - fy) * (ty - fy)) || 1;
+    var ux = (tx - fx) / len, uy = (ty - fy) / len;
+    var g = THEME.geometry;
+    var bx = tx - ux * g.arrowLen, by = ty - uy * g.arrowLen;
+    return line + '<path' + cls + ' d="M' + px(tx) + ' ' + px(ty) +
+      'L' + px(bx - uy * g.arrowHalf) + ' ' + px(by + ux * g.arrowHalf) +
+      'L' + px(bx + uy * g.arrowHalf) + ' ' + px(by - ux * g.arrowHalf) + 'Z" fill="' + stroke + '"/>';
   }
 
   if (shape.type === 'polygon') {
@@ -1277,4 +1292,7 @@ const api = {
 };
 
 export default api;
-export { THEME, renderGraph, registerCurve, checkWindow, fmt };
+/* esc, px, textWidth и svgText нужны движку векторов (lib/vektory):
+   он рисует тем же пером — та же тема, то же гало под подписями, —
+   и второй копии этих четырёх функций в проекте нет. */
+export { THEME, renderGraph, registerCurve, checkWindow, fmt, esc, px, textWidth, svgText };

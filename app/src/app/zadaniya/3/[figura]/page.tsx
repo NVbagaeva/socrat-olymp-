@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SheetBlock } from '@/components/tasks/SheetBlock';
+import { TeoriyaContents } from '@/components/tasks/solid3/TeoriyaContents';
 import { theoryBlocks } from '@/content/stereometria';
 import { SHPARGALKI } from '@/content/shpargalki';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
    уронит сборку здесь, а не покажется ученику красной строкой. */
 assertSheetsOk();
 
-/** Якорь раздела теории в разметке. */
+/** Якорь раздела теории в разметке (та же приставка — у TeoriyaContents). */
 function blockId(id: string): string {
   return `theory-${id}`;
 }
@@ -51,28 +52,15 @@ export default async function TeoriyaTab({ params }: { params: Params }) {
   const ready = theoryBlocks.filter((block) => block.id === 'pomnit' && sheet.length > 0).length;
 
   return (
-    <div className="teoriya">
-      <aside className="teoriya__side">
-        <p className="teoriya__side-title">Содержание темы</p>
-        <ol className="contents-list">
-          {theoryBlocks.map((block, index) => (
-            <li key={block.id}>
-              {/* Оглавление — ссылки на якоря: работает без сценариев,
-                  адрес раздела можно отправить. */}
-              <a className="contents-item" href={`#${blockId(block.id)}`}>
-                <span className="contents-item__no" aria-hidden="true">
-                  {index + 1}
-                </span>
-                <span className="contents-item__title">{block.title}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
+    <TeoriyaContents
+      items={theoryBlocks.map((block) => ({ id: block.id, title: block.title }))}
+      prefix="theory-"
+      footer={
         <p className="teoriya__count">
           Готово <b>{ready}</b> из <b>{theoryBlocks.length}</b> разделов
         </p>
-      </aside>
-
+      }
+    >
       <div className="theory teoriya__blocks">
         {theoryBlocks.map((block, index) => {
           const filled = block.id === 'pomnit' && sheet.length > 0;
@@ -96,6 +84,6 @@ export default async function TeoriyaTab({ params }: { params: Params }) {
           );
         })}
       </div>
-    </div>
+    </TeoriyaContents>
   );
 }

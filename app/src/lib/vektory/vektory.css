@@ -1,0 +1,27 @@
+/* vektory/vektory.css — рисунок задания №2 на странице.
+   Цвета внутри SVG берутся из токенов (--graph-axis, --graph-grid,
+   --graph-accent, --color-surface); здесь только размещение. */
+
+.vp-wrap {
+  display: block;
+  max-width: 100%;
+}
+
+.vp-wrap .vp {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Увеличенный рисунок в просмотрщике FigureZoom: размер держит
+   только высота, как у чертежей стереометрии. */
+.figzoom__big .vp-wrap,
+.figzoom__big .vp-wrap .vp {
+  max-width: none;
+}
+.figzoom__big .vp-wrap .vp {
+  width: 100%;
+  height: auto;
+  max-height: min(70vh, 720px);
+  margin: 0 auto;
+}

@@ -10,6 +10,7 @@
  */
 
 import '@/lib/graph/families/index.js';
+import { registerCurve } from '@/lib/graph/renderer.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { playground as PLAY } from '@/content/theoryQuadratic';
@@ -91,11 +92,32 @@ export function parabolaAndLineScene() {
   };
 }
 
+/** Гипербола и прямая — чертёж вкладки «О задании» гиперболы. */
+export function hyperbolaAndLineScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'rational', k: 4, a: 0, b: 0, color: 'lineA', label: null },
+      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: null },
+    ],
+    /* Кривые не подписаны: формулы — в тексте рядом, набраны KaTeX,
+       а в подписи SVG их не набрать. Подписана только точка A. */
+    points: [{ x: 2, y: 2, style: 'solid', color: 'cross', label: 'A' }],
+    alt: 'Гипербола y = k/x и прямая y = ax + b',
+  };
+}
+
 /**
  * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
- * у квадратичной — парабола и прямая.
+ * у квадратичной — парабола и прямая, у гиперболы — гипербола и прямая.
  */
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'rational') {
+    return hyperbolaAndLineScene();
+  }
   return type === 'quadratic' ? parabolaAndLineScene() : compareLinesScene();
 }
 
@@ -185,7 +207,7 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 };
 
 export function generatorSkillScene(setId: string) {
-  const quadratic = QUADRATIC_SKILL_SCENE[setId];
+  const quadratic = QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -496,6 +518,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return quadratic;
   }
 
+  const rational = rationalPrepScene(id, base);
+  if (rational !== null) {
+    return rational;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -627,6 +654,114 @@ function quadraticPrepScene(
 
   return null;
 }
+
+
+/* ── Миниатюры навыков гиперболы ──────────────────────────────────
+   Окно то же тесное, ±2. Гипербола задаётся сдвигами: k/(x + a) + b.
+   Асимптоты пунктиром — тем же цветом подсказки, что пунктиры
+   других миниатюр. Числа — параметры чертежа. */
+
+function miniHyperbola(k: number, a = 0, b = 0, color = 'lineA') {
+  return { type: 'rational', k, a, b, color, label: null };
+}
+
+function rationalPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  const vertical = (x: number) => dashed([x, -2], [x, 2]);
+  const horizontal = (y: number) => dashed([-2, y], [2, y]);
+
+  if (id === 'koef-k') {
+    /* Точка в узле: k = x · y. */
+    return {
+      ...base,
+      curves: [miniHyperbola(1)],
+      points: [miniDot(1, 1)],
+      shapes: [prepLabel('k', 1, 1, 16, -14, 'accent')],
+    };
+  }
+  if (id === 'sdvig-vverh') {
+    return {
+      ...base,
+      curves: [miniHyperbola(0.5, 0, 0.8)],
+      shapes: [horizontal(0.8), prepLabel('a', -1.6, 0.8, 0, -16, 'accent')],
+    };
+  }
+  if (id === 'sdvig-vbok') {
+    return {
+      ...base,
+      curves: [miniHyperbola(0.5, -0.8, 0)],
+      shapes: [vertical(0.8), prepLabel('\u2212a', 0.8, -1.6, 22, 0, 'accent')],
+    };
+  }
+  if (id === 'sdvig-oba' || id === 'vse-koef') {
+    return {
+      ...base,
+      curves: [miniHyperbola(0.5, -0.6, 0.6)],
+      points: id === 'vse-koef' ? [miniDot(1.6, 1.1)] : [],
+      shapes: [vertical(0.6), horizontal(0.6)],
+    };
+  }
+  if (id === 'celaya-chast') {
+    return {
+      ...base,
+      curves: [miniHyperbola(-0.6, 0.7, 0.9)],
+      points: [miniDot(-1.3, 1.9), miniDot(0.3, 0.3)],
+      shapes: [vertical(-0.7), horizontal(0.9), prepLabel('k', 1.6, 0.9, 0, -16, 'accent')],
+    };
+  }
+  if (id === 'znachenie') {
+    return {
+      ...base,
+      curves: [miniHyperbola(0.6, 0, 0)],
+      points: [miniDot(1.5, 0.4, 'lineB')],
+      shapes: [dashed([1.5, 0], [1.5, 0.4]), prepLabel('?', 1.5, 0.4, 14, -14, 'accent')],
+    };
+  }
+  if (id === 'argument') {
+    return {
+      ...base,
+      curves: [miniHyperbola(0.6, 0, 0)],
+      points: [miniDot(0.5, 1.2, 'lineB')],
+      shapes: [dashed([0, 1.2], [0.5, 1.2]), prepLabel('?', 0.5, 1.2, 16, -12, 'accent')],
+    };
+  }
+  if (id === 'pryamaya') {
+    return {
+      ...base,
+      curves: [{ type: 'line', k: 0.5, b: 0.5, color: 'lineB', label: null }],
+      points: [miniDot(-1, 0, 'lineB'), miniDot(1, 1, 'lineB')],
+      shapes: [dashed([-1, 0], [1, 0]), dashed([1, 0], [1, 1])],
+    };
+  }
+  if (id === 'abscissa-b' || id === 'ordinata-b') {
+    return {
+      ...base,
+      curves: [miniHyperbola(1), { type: 'line', k: 1, b: 0.6, color: 'lineB', label: null }],
+      points: [miniDot(0.75, 1.35, 'cross')],
+      shapes: [prepLabel('A', 0.75, 1.35, 16, 12, 'label'),
+        prepLabel('B ?', -1.3, 1.4, 0, 0, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* Набор прототипов гиперболы → навык подтемы: у карточки
+   конфигуратора та же миниатюра, что у карточки навыка. */
+const RATIONAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12R.A': 'sdvig-vverh',
+  '12R.B': 'argument',
+  '12R.C': 'sdvig-vbok',
+  '12R.D': 'argument',
+  '12R.E': 'celaya-chast',
+  '12R.F': 'celaya-chast',
+  '12R.G': 'abscissa-b',
+  '12R.H': 'ordinata-b',
+  '12R.I': 'koef-k',
+  '12R.J': 'celaya-chast',
+};
 
 
 /* ── Чертежи теории квадратичной функции ──────────────────────
@@ -1031,4 +1166,179 @@ export function playgroundScene(a: number, c: number) {
     curves: [parabola(1, 0, 0, { color: 'lineB', style: 'dashed' }), live],
     points: [...standard, ...marks],
   };
+}
+
+/* ── Чертежи теории гиперболы ─────────────────────────────────────
+   По одному чертежу на карточку раздела (content/theoryRational.ts).
+   Гипербола задаётся сдвигами: y = k/(x + a) + b — тем же семейством
+   движка, что и в задачах. Асимптоты — пунктиром цвета асимптоты,
+   эталон y = k/x до сдвига — пунктирной кривой.
+
+   Для двух примеров «асимптоту график пересекает» нужны кривые не из
+   семейств движка; их точки считаются здесь же и отдаются рендереру
+   готовой ломаной (тип polyline). Числа — параметры чертежа, они же
+   стоят в текстах карточек. */
+
+registerCurve('polyline', (curve: { pieces: { x: number; y: number }[][] }) => curve.pieces);
+
+/** Ломаная по формуле: шаг мелкий, на изгибах углов не видно. */
+function polyline(fn: (x: number) => number, from: number, to: number, color = 'lineA') {
+  const steps = 240;
+  const piece: { x: number; y: number }[] = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const x = from + ((to - from) * i) / steps;
+    piece.push({ x, y: fn(x) });
+  }
+  return { type: 'polyline', pieces: [piece], color, label: null };
+}
+
+function hyperbola(k: number, a = 0, b = 0, extra: Record<string, unknown> = {}) {
+  return { type: 'rational', k, a, b, color: 'lineA', label: null, ...extra };
+}
+
+function asymptoteLine(from: [number, number], to: [number, number]) {
+  return { type: 'segment', from, to, color: 'asymptote', style: 'dashed' };
+}
+
+export type RationalTheorySceneId =
+  | 'k-positive'
+  | 'k-negative'
+  | 'k-product'
+  | 'asymptotes'
+  | 'cross-asymptote'
+  | 'part-on-asymptote'
+  | 'shift-up'
+  | 'shift-down'
+  | 'shift-left'
+  | 'shift-right'
+  | 'shift-both'
+  | 'not-one'
+  | 'find-coefficients'
+  | 'linear-form'
+  | 'line-example';
+
+export function rationalTheoryScene(id: RationalTheorySceneId) {
+  const base = theoryBase(squareWindow(6));
+  switch (id) {
+    /* y = 4/x: ветви в I и III четвертях. */
+    case 'k-positive':
+      return {
+        ...base,
+        curves: [hyperbola(4, 0, 0, { label: 'y = 4/x' })],
+        shapes: [note('I', [4, 4], [0, 0]), note('III', [-4, -4], [0, 0])],
+      };
+    /* y = −4/x: ветви во II и IV четвертях. */
+    case 'k-negative':
+      return {
+        ...base,
+        curves: [hyperbola(-4, 0, 0, { label: 'y = −4/x' })],
+        shapes: [note('II', [-4, 4], [0, 0]), note('IV', [4, -4], [0, 0])],
+      };
+    /* y = 6/x: у всех узлов произведение координат одно — 6. */
+    case 'k-product':
+      return {
+        ...base,
+        curves: [hyperbola(6)],
+        points: [mark(1, 6), mark(2, 3, true), mark(3, 2, true), mark(-2, -3, true)],
+        shapes: [dashedSegment([2, 0], [2, 3]), dashedSegment([0, 3], [2, 3])],
+      };
+    /* y = 2/(x − 2) + 1: асимптоты x = 2 и y = 1. */
+    case 'asymptotes':
+      return {
+        ...base,
+        curves: [hyperbola(2, -2, 1)],
+        shapes: [asymptoteLine([2, -6], [2, 6]), asymptoteLine([-6, 1], [6, 1]),
+          note('x = 2', [2, 5.2], [30, 0]), note('y = 1', [-5, 1], [0, -16])],
+      };
+    /* y = 1 + 4x/(x² + 1): при |x| → ∞ стремится к 1, но в нуле
+       проходит через саму асимптоту. */
+    case 'cross-asymptote':
+      return {
+        ...base,
+        curves: [polyline((x) => 1 + (4 * x) / (x * x + 1), -6, 6)],
+        points: [mark(0, 1, true)],
+        shapes: [asymptoteLine([-6, 1], [6, 1]), note('y = 1', [-5, 1], [0, -16])],
+      };
+    /* Левая часть лежит на прямой y = 1, правая к ней стремится. */
+    case 'part-on-asymptote':
+      return {
+        ...base,
+        curves: [
+          polyline(() => 1, -6, 0),
+          polyline((x) => 1 + (3 * x) / (x * x + 1), 0, 6),
+        ],
+        shapes: [asymptoteLine([0, 1], [6, 1]), note('y = 1', [5, 1], [0, 16])],
+      };
+    case 'shift-up':
+      return {
+        ...base,
+        curves: [hyperbola(3, 0, 0, { style: 'dashed', color: 'lineB' }), hyperbola(3, 0, 2)],
+        shapes: [asymptoteLine([-6, 2], [6, 2]), note('y = 2', [-5, 2], [0, -16]),
+          ...arrow([-4, -0.75], [-4, 1.25])],
+      };
+    case 'shift-down':
+      return {
+        ...base,
+        curves: [hyperbola(3, 0, 0, { style: 'dashed', color: 'lineB' }), hyperbola(3, 0, -2)],
+        shapes: [asymptoteLine([-6, -2], [6, -2]), note('y = −2', [-5, -2], [0, 16]),
+          ...arrow([4, 0.75], [4, -1.25])],
+      };
+    case 'shift-left':
+      return {
+        ...base,
+        curves: [hyperbola(3, 0, 0, { style: 'dashed', color: 'lineB' }), hyperbola(3, 3, 0)],
+        shapes: [asymptoteLine([-3, -6], [-3, 6]), note('x = −3', [-3, 5.2], [-34, 0]),
+          ...arrow([1, 3], [-2, 3])],
+      };
+    case 'shift-right':
+      return {
+        ...base,
+        curves: [hyperbola(3, 0, 0, { style: 'dashed', color: 'lineB' }), hyperbola(3, -2, 0)],
+        shapes: [asymptoteLine([2, -6], [2, 6]), note('x = 2', [2, 5.2], [30, 0]),
+          ...arrow([-1, -3], [1, -3])],
+      };
+    /* y = −2/(x + 1) + 3: влево на 1, вверх на 3. */
+    case 'shift-both':
+      return {
+        ...base,
+        curves: [hyperbola(-2, 0, 0, { style: 'dashed', color: 'lineB' }), hyperbola(-2, 1, 3)],
+        shapes: [asymptoteLine([-1, -6], [-1, 6]), asymptoteLine([-6, 3], [6, 3]),
+          note('x = −1', [-1, -5.2], [-34, 0]), note('y = 3', [5, 3], [0, -16])],
+      };
+    /* 1/(2x − 5) = 0,5/(x − 2,5): асимптота x = 2,5, а не 5. */
+    case 'not-one':
+      return {
+        ...base,
+        curves: [hyperbola(0.5, -2.5, 0)],
+        shapes: [asymptoteLine([2.5, -6], [2.5, 6]), note('x = 2,5', [2.5, 5.2], [36, 0]),
+          asymptoteLine([5, -6], [5, 6]), note('не 5!', [5, -5.2], [30, 0], 'wrong')],
+      };
+    /* y = 3/(x − 2) + 1: асимптоты и точка (5; 2). */
+    case 'find-coefficients':
+      return {
+        ...base,
+        curves: [hyperbola(3, -2, 1)],
+        points: [mark(5, 2, true), mark(-1, 0)],
+        shapes: [asymptoteLine([2, -6], [2, 6]), asymptoteLine([-6, 1], [6, 1])],
+      };
+    /* (2x + 1)/(x − 1) = 2 + 3/(x − 1). */
+    case 'linear-form':
+      return {
+        ...base,
+        curves: [hyperbola(3, -1, 2)],
+        points: [mark(2, 5, true), mark(4, 3, true)],
+        shapes: [asymptoteLine([1, -6], [1, 6]), asymptoteLine([-6, 2], [6, 2]),
+          note('y = 2', [-5, 2], [0, -16]), note('x = 1', [1, -5.2], [26, 0])],
+      };
+    /* f(x) = 6/x и g(x) = 0,5x + 2: A(2; 3) на чертеже, B(−6; −1) за рамкой. */
+    case 'line-example':
+      return {
+        ...theoryBase(squareWindow(5)),
+        curves: [hyperbola(6), { type: 'line', k: 0.5, b: 2, color: 'lineB', label: null }],
+        points: [{ x: 2, y: 3, style: 'solid', color: 'cross', label: 'A' },
+          { x: -2, y: 1, style: 'solid', color: 'lineB', label: null }],
+      };
+    default:
+      return base;
+  }
 }

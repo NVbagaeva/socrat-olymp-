@@ -19,7 +19,6 @@ export interface PrepPoolBlock {
   no: string;
   nazvanie: string;
   lead: string;
-  formulaHtml: string;
   formulyHtml: string[];
   zadachi: (PrepSealed & { no: number })[];
 }
@@ -34,7 +33,6 @@ export function prepPool(): PrepPoolBlock[] {
     no: block.no,
     nazvanie: block.nazvanie,
     lead: block.lead,
-    formulaHtml: typeset(`$${block.formula}$`),
     formulyHtml: block.formuly.map((f) => typeset(`$${f}$`)),
     zadachi: block.zadachi.map((micro, i) => ({ ...sealPrep(micro, fixedSeed(micro)), no: i + 1 })),
   }));

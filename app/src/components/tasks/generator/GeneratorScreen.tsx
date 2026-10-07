@@ -1,21 +1,36 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
+import { clsx } from 'clsx';
 import { Badge, Input } from '@/components/ui';
-import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
+import {
+  CountPicker,
+  Note,
+  Option,
+  OptionGroup,
+  SkillCards,
+  StepHead,
+  countLabel,
+  countOf,
+  useCountChoice,
+  type SkillItem,
+} from '../configurator';
 import {
   generatorPage,
   sheetLayouts,
   sheetThemes,
+  variantCounts,
   workKinds,
   type SheetLayoutId,
   type SheetThemeId,
 } from '@/content/generator';
-import { firstLevel, skillCounts, skillLevels, type SkillLevel, type SkillLevelId }
+import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
-import { randomSeed } from '@/lib/trainerSession';
-import { sheetQuery, subtitleOf } from '@/lib/generatorSheet';
+import { planCounts } from '@/lib/sheetPlan';
+import { randomSeed } from '@/lib/randomSeed';
+import { sheetQuery, subtitleOf } from '@/lib/generatorQuery';
+import { TitleText } from '../TitleText';
 
 export interface GeneratorScreenProps {
   /** Адрес подтемы: страницы печати лежат под ним. */
@@ -27,6 +42,11 @@ export interface GeneratorScreenProps {
   levels?: readonly SkillLevel[];
   /** Плашка под сводкой: откуда взяты задания. Не задана — общая. */
   note?: string;
+}
+
+/** «2 варианта» для сводки. */
+function variantsLabel(n: number): string {
+  return counted(n, 'вариант', 'варианта', 'вариантов');
 }
 
 /** Значение «своё название» в группе видов работы. */
@@ -53,39 +73,68 @@ export function GeneratorScreen({
   const [date, setDate] = useState('');
   const dateId = useId();
   const [selected, setSelected] = useState<string[]>(skills[0] === undefined ? [] : [skills[0].id]);
-  const [count, setCount] = useState<number | null>(10);
+  const [count, setCount] = useCountChoice();
   const [level, setLevel] = useState<SkillLevelId | null>(firstLevel(skills[0]?.levels ?? []));
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
+  const [variants, setVariants] = useState(1);
 
   const chosen = skills.filter((item) => selected.includes(item.id));
+  /* «Все» — сколько задач в выбранных наборах на самом деле. */
+  const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
+  /* null — в поле «Своё» пусто: лист не собирается. */
+  const chosenCount = countOf(count, allCount);
   /* Seed считается заново при любой смене того, что влияет на задачи:
      тот же выбор — тот же вариант, другой выбор — другой. Вид работы,
      колонки и тема на задачи не влияют, поэтому в зависимостях их нет. */
   const selectedKey = selected.join(',');
   const seed = useMemo(
-    () => randomSeed('', 0),
+    () => randomSeed(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, count, level],
+    [selectedKey, chosenCount, level],
   );
-  /* «Все» — сколько задач в выбранных наборах на самом деле. */
-  const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
   const levelsOfChosen = chosen.flatMap((item) => item.levels);
   const shownLevels = levels.filter((item) => levelsOfChosen.includes(item.id));
-  const chosenCount = count ?? allCount;
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
   const query = sheetQuery({
     skills: chosen.map((item) => item.id),
-    count: chosenCount,
+    count: chosenCount ?? 0,
     level,
     seed,
     theme,
     layout,
     kind: kindTitle,
     date,
+    variants,
   });
+  /* Доли навыков на листе — тот же план, что у страницы печати:
+     нехватку у навыка учитель видит до печати. */
+  const plan = planCounts(
+    chosen.map((item) => ({ id: item.id, capacity: item.count })),
+    chosenCount ?? 0,
+  );
+  /* Банк кончился у всех навыков — отдавать некому, и про отдачу
+     говорить нечего: одна фраза о том, сколько всего есть. */
+  const warnings = [
+    ...(plan.overflow > 0 ? [] : plan.shortages).map((item) => {
+      const title = chosen.find((skill) => skill.id === item.id)?.title ?? item.id;
+      return generatorPage.params.shortage
+        .replace('{title}', title)
+        .replace('{have}', counted(item.have, 'задача', 'задачи', 'задач'))
+        .replace('{give}', String(item.want - item.have));
+    }),
+    ...(plan.overflow > 0
+      ? [
+          generatorPage.params.overflow
+            .replace('{have}', counted(allCount, 'задача', 'задачи', 'задач'))
+            .replace('{want}', String(chosenCount ?? 0)),
+        ]
+      : []),
+  ];
+  /* Пустое поле «Своё» — листа нет, ссылки выключены. */
+  const ready = chosenCount !== null;
   const studentHref = `${base}/pechat/?${query}`;
   const teacherHref = `${base}/pechat/otvety/?${query}`;
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
@@ -192,16 +241,19 @@ export function GeneratorScreen({
               lead={generatorPage.params.lead}
             />
             <div className="cfg-params">
-              <OptionGroup id="gen-param-count" label={generatorPage.params.count} compact>
-                {skillCounts.map((item) => (
-                  <Option
-                    key={item ?? 'all'}
-                    checked={count === item}
-                    onSelect={() => setCount(item)}
-                    title={item === null ? `${generatorPage.params.all} (${allCount})` : item}
-                  />
-                ))}
-              </OptionGroup>
+              <CountPicker
+                id="gen-param-count"
+                label={generatorPage.params.count}
+                max={allCount}
+                value={count}
+                onChange={setCount}
+                allWord={generatorPage.params.all}
+              />
+              {warnings.map((text) => (
+                <Note key={text} tone="warning">
+                  {text}
+                </Note>
+              ))}
 
               {shownLevels.length === 0 ? null : (
                 <OptionGroup id="gen-param-level" label={generatorPage.params.level}>
@@ -211,11 +263,22 @@ export function GeneratorScreen({
                       checked={level === item.id}
                       onSelect={() => setLevel(item.id)}
                       title={item.title}
-                      lead={item.lead}
+                      lead={<TitleText title={item.lead} html={item.leadHtml} />}
                     />
                   ))}
                 </OptionGroup>
               )}
+
+              <OptionGroup id="gen-param-variants" label={generatorPage.params.variants} compact>
+                {variantCounts.map((item) => (
+                  <Option
+                    key={item}
+                    checked={variants === item}
+                    onSelect={() => setVariants(item)}
+                    title={item}
+                  />
+                ))}
+              </OptionGroup>
 
               <OptionGroup id="gen-param-layout" label={generatorPage.params.layout}>
                 {sheetLayouts.map((item) => (
@@ -251,13 +314,14 @@ export function GeneratorScreen({
           <ul className="cfg-summary__list">
             {chosen.map((item) => (
               <li key={item.id}>
-                {item.title}
+                <TitleText title={item.title} html={item.titleHtml} />
                 <span className="cfg-summary__code"> {item.code ?? item.id}</span>
               </li>
             ))}
           </ul>
           <p className="cfg-summary__count">
-            {counted(chosenCount, 'задание', 'задания', 'заданий')} · {layoutTitle} · {themeTitle}
+            {countLabel(chosenCount)}
+            {variants > 1 ? ` · ${variantsLabel(variants)}` : ''} · {layoutTitle} · {themeTitle}
           </p>
           <Note>{note}</Note>
         </aside>
@@ -267,16 +331,18 @@ export function GeneratorScreen({
         {/* Ссылки, а не кнопки: лист открывается в новой вкладке, адрес
             можно скопировать и открыть снова — лист будет тем же. */}
         <a
-          className="btn btn--primary btn--lg cfg-bar__start"
-          href={studentHref}
+          className={clsx('btn btn--primary btn--lg cfg-bar__start', ready || 'is-disabled')}
+          href={ready ? studentHref : undefined}
+          aria-disabled={!ready || undefined}
           target="_blank"
           rel="noopener"
         >
           {generatorPage.student}
         </a>
         <a
-          className="btn btn--secondary btn--lg cfg-bar__start"
-          href={teacherHref}
+          className={clsx('btn btn--secondary btn--lg cfg-bar__start', ready || 'is-disabled')}
+          href={ready ? teacherHref : undefined}
+          aria-disabled={!ready || undefined}
           target="_blank"
           rel="noopener"
         >
@@ -284,8 +350,16 @@ export function GeneratorScreen({
         </a>
         <p className="cfg-bar__summary">
           {family}
-          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} ·{' '}
-          {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          {subtitle === '' ? '' : ` · ${subtitle}`} ·{' '}
+          {chosen.map((item, index) => (
+            <span key={item.id}>
+              {index === 0 ? '' : ', '}
+              <TitleText title={item.title} html={item.titleHtml} />
+            </span>
+          ))}{' '}
+          ·{' '}
+          {countLabel(chosenCount)}
+          {variants > 1 ? ` · ${variantsLabel(variants)}` : ''}
         </p>
       </div>
     </section>

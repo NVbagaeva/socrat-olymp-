@@ -19,7 +19,11 @@ import type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 const XV = 'x_{\\text{в}}';
 const YV = 'y_{\\text{в}}';
 
-export interface QuadraticCard {
+/**
+ * Карточка раздела теории. Общая для подтем: у параболы и гиперболы
+ * разные только ключи чертежей, поэтому тип сцены — параметр.
+ */
+export interface TheoryCard<S extends string = QuadraticTheorySceneId> {
   id: string;
   title: string;
   /** Абзацы текста с формулами $…$ и выделениями **…**. */
@@ -31,22 +35,38 @@ export interface QuadraticCard {
   /** Выкладка: строки TeX одна под другой. */
   lines?: string[];
   /** Чертёж: ключ сцены в lib/scenes.ts. */
-  scene?: QuadraticTheorySceneId;
+  scene?: S;
+  /**
+   * Место под иллюстрацию автора: рамка с подписью. Картинку автор
+   * добавляет сам — пока её нет, рамка честно говорит, что здесь будет.
+   */
+  illustration?: {
+    caption: string;
+    src?: string;
+    alt?: string;
+    /** Размеры файла в пикселях: браузер держит место до загрузки. */
+    width?: number;
+    height?: number;
+  };
   /** Маленькая таблица значений: шапка и строки, ячейки с $…$. */
   table?: { head: string[]; rows: string[][] };
   /** Текстовая карточка со значком «дальше»: без чертежа и формулы. */
   forward?: boolean;
 }
 
-export interface QuadraticSection {
+export type QuadraticCard = TheoryCard<QuadraticTheorySceneId>;
+
+export interface TheorySection<S extends string = QuadraticTheorySceneId> {
   id: string;
   lead: string;
-  cards: QuadraticCard[];
+  cards: TheoryCard<S>[];
   /** Плашка «Запомни»: абзацы. */
   remember: string[];
   /** Интерактивный блок «Поиграй с параболой» после карточек. */
   playground?: boolean;
 }
+
+export type QuadraticSection = TheorySection<QuadraticTheorySceneId>;
 
 /** Заголовок плашки, общий для всех разделов. */
 export const REMEMBER_TITLE = 'Запомни';
@@ -55,8 +75,7 @@ export const REMEMBER_TITLE = 'Запомни';
 
 export const whatIsQuadratic: QuadraticSection = {
   id: 'what-is-quadratic',
-  lead:
-    'Квадратичная функция — одна из самых важных в школьной математике. С неё начинаются квадратные уравнения и неравенства, физика полёта и задачи с параметром. Здесь мы учимся читать её график.',
+  lead: 'Квадратичная функция — одна из самых важных в школьной математике. С неё начинаются квадратные уравнения и неравенства, физика полёта и задачи с параметром. Здесь мы учимся читать её график.',
   cards: [
     {
       id: 'definition',
@@ -77,7 +96,7 @@ export const whatIsQuadratic: QuadraticSection = {
     },
     {
       id: 'a-not-zero',
-      title: 'Почему a ≠ 0',
+      title: 'Почему $a \\ne 0$',
       text: [
         'Если $a = 0$, слагаемое с $x^2$ исчезает, остаётся $y = bx + c$ — линейная функция, и график её прямая. Квадратичной функция становится ровно тогда, когда при $x^2$ стоит ненулевое число.',
       ],
@@ -113,7 +132,7 @@ export const coefficientA: QuadraticSection = {
     },
     {
       id: 'standard',
-      title: 'Обычная парабола y = x²',
+      title: 'Обычная парабола $y = x^2$',
       text: [
         'Парабола $y = x^2$ — эталон, от которого удобно считать. Она проходит через стандартные точки: $(0;\\,0)$, $(\\pm 1;\\,1)$, $(\\pm 2;\\,4)$, $(\\pm 3;\\,9)$. Эти точки стоит помнить наизусть: по ним парабола строится за минуту, и с ними сравниваются все остальные.',
       ],
@@ -131,7 +150,7 @@ export const coefficientA: QuadraticSection = {
     },
     {
       id: 'step',
-      title: 'Как прочитать a с графика: шаг от вершины',
+      title: 'Как прочитать $a$ с графика: шаг от вершины',
       text: [
         'У параболы $y = a(x - m)^2 + n$ при шаге от вершины на 1 вправо или влево значение меняется ровно на $a$, при шаге на 2 — на $4a$. Значит, $a$ читается с чертежа: отступи от вершины на одну клетку в сторону и посмотри, на сколько клеток и в какую сторону сдвинулась ветвь.',
         'На чертеже вершина $(1;\\,3)$, шаг вправо на 1 — ветвь опустилась на 2: $a = -2$. Если узла нет на шаге 1 (например, при $a = 0{,}5$), шагни на 2 и раздели на 4.',
@@ -168,7 +187,7 @@ export const coefficientC: QuadraticSection = {
   cards: [
     {
       id: 'substitute',
-      title: 'Подставь x = 0',
+      title: 'Подставь $x = 0$',
       formula: 'y = a \\cdot 0^2 + b \\cdot 0 + c = c',
       text: [
         'При $x = 0$ слагаемые с $x^2$ и с $x$ обращаются в ноль, и остаётся $y = c$. Значит, парабола пересекает ось $Oy$ в точке $(0;\\,c)$ — и всегда ровно в одной точке, потому что при каждом $x$ у функции одно значение.',
@@ -213,7 +232,7 @@ export const coefficientB: QuadraticSection = {
     },
     {
       id: 'b-sign',
-      title: 'Знак b без счёта',
+      title: 'Знак $b$ без счёта',
       text: [
         `Из $${XV} = -\\dfrac{b}{2a}$ видно: знак $b$ **противоположен** знаку $a$, если вершина правее оси $Oy$, и **совпадает** с ним, если левее. Вершина на оси $Oy$ — $b = 0$.`,
         'На чертеже ветви обеих парабол вверх, $a > 0$: у той, что справа, $b < 0$, у той, что слева, $b > 0$.',
@@ -237,7 +256,12 @@ export const coefficientB: QuadraticSection = {
         'Если $a$ не дано, берём точки графика с целыми координатами и подставляем их в $y = ax^2 + bx + c$. Обычно $c$ читается сразу как точка на оси $Oy$, и остаётся система из двух уравнений на $a$ и $b$.',
         'Пример: парабола проходит через $(0;\\,3)$, $(1;\\,0)$ и $(5;\\,8)$. Из первой точки $c = 3$. Подставляем две другие: $a + b + 3 = 0$ и $25a + 5b + 3 = 8$. Из второго уравнения $5a + b = 1$; вычитаем первое, $a + b = -3$, и получаем $4a = 4$.',
       ],
-      lines: ['c = 3', 'a + b = -3, \\quad 5a + b = 1', '4a = 4, \\quad a = 1, \\quad b = -4', 'y = x^2 - 4x + 3'],
+      lines: [
+        'c = 3',
+        'a + b = -3, \\quad 5a + b = 1',
+        '4a = 4, \\quad a = 1, \\quad b = -4',
+        'y = x^2 - 4x + 3',
+      ],
       scene: 'path-system',
     },
     {
@@ -395,7 +419,7 @@ export const playground = {
   title: 'Поиграй с параболой',
   lead: 'Двигай ползунки и смотри, как коэффициенты меняют график. Пунктиром — обычная парабола $y = x^2$, сплошной — твоя.',
   a: {
-    label: 'Коэффициент a',
+    label: 'Коэффициент $a$',
     aria: 'Коэффициент a, от минус трёх до трёх',
     min: -3,
     max: 3,
@@ -404,7 +428,7 @@ export const playground = {
     initial: 2,
   },
   c: {
-    label: 'Коэффициент c',
+    label: 'Коэффициент $c$',
     aria: 'Коэффициент c, от минус пяти до пяти',
     min: -5,
     max: 5,
@@ -415,10 +439,10 @@ export const playground = {
     title: 'Крайние случаи',
     /* Значения кнопок; ряд с минусом собирается из них же. */
     values: [0.01, 0.1, 0.5, 1, 2, 10, 100],
-    hint: 'При a = 100 парабола встаёт почти вертикально, при a = 0,01 почти ложится на ось.',
+    hint: 'При $a = 100$ парабола встаёт почти вертикально, при $a = 0{,}01$ почти ложится на ось.',
   },
   /* При a = 0 квадрата нет: чертёж показывает прямую y = c. */
-  zero: 'a = 0 — это уже не парабола, а прямая',
+  zero: '$a = 0$ — это уже не парабола, а прямая',
   /* Описание чертежа для экранного чтеца. */
   describe: {
     up: 'ветви вверх',
@@ -454,9 +478,9 @@ export const QUADRATIC_SECTIONS: QuadraticSection[] = [
  */
 const BLOCKS: { id: string; title: string; type: TheoryBlockType }[] = [
   { id: 'what-is-quadratic', title: 'Что такое квадратичная функция', type: 'definition' },
-  { id: 'coefficient-a', title: 'Коэффициент a', type: 'properties' },
-  { id: 'coefficient-c', title: 'Коэффициент c', type: 'properties' },
-  { id: 'coefficient-b', title: 'Коэффициент b и вершина параболы', type: 'properties' },
+  { id: 'coefficient-a', title: 'Коэффициент $a$', type: 'properties' },
+  { id: 'coefficient-c', title: 'Коэффициент $c$', type: 'properties' },
+  { id: 'coefficient-b', title: 'Коэффициент $b$ и вершина параболы', type: 'properties' },
   { id: 'vertex-form', title: 'Построение сдвигами: выделение полного квадрата', type: 'chart' },
   { id: 'roots-form', title: 'Построение через нули', type: 'chart' },
   { id: 'where-it-appears', title: 'Где встречается квадратичная функция', type: 'note' },

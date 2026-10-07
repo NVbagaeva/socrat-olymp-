@@ -15,6 +15,7 @@
 import { prepSkillsFor, type PrepSkillId } from '@/content/prepSkills';
 import { prepSkillScene } from '@/lib/scenes';
 import { renderGraph } from '@/lib/graph/renderer.js';
+import { titleHtml } from '@/lib/prep';
 import type { TrainerMethod } from '@/lib/trainer';
 
 /** Набор движка → навык подтемы. Девять к девяти, один в один. */
@@ -28,7 +29,19 @@ const SKILL_BY_SET: Record<string, PrepSkillId> = {
   'P12Q-7': 'formula', '12Q.G': 'formula',
   'P12Q-8': 'cross-line', '12Q.H': 'cross-line',
   'P12Q-9': 'cross-parabola', '12Q.I': 'cross-parabola',
+  /* Гипербола: опорные навыки один в один, прототипы — по приёму. */
+  'P12R-1': 'koef-k', 'P12R-2': 'sdvig-vverh', 'P12R-3': 'sdvig-vbok', 'P12R-4': 'sdvig-oba',
+  'P12R-5': 'vse-koef', 'P12R-6': 'celaya-chast', 'P12R-7': 'znachenie', 'P12R-8': 'argument',
+  'P12R-9': 'pryamaya', 'P12R-10': 'abscissa-b', 'P12R-11': 'ordinata-b',
+  '12R.A': 'znachenie', '12R.B': 'argument', '12R.C': 'znachenie', '12R.D': 'argument',
+  '12R.E': 'celaya-chast', '12R.F': 'celaya-chast', '12R.G': 'abscissa-b',
+  '12R.H': 'ordinata-b', '12R.I': 'koef-k', '12R.J': 'celaya-chast',
 };
+
+/* Подтема набора: по префиксу идентификатора. */
+function typeOf(setId: string): string {
+  return /^(P12R-|12R\.)/.test(setId) ? 'rational' : 'quadratic';
+}
 
 /* Миниатюра одна на навык и от задачи не зависит: рисуется один раз
    и дальше берётся из памяти. Сессия тренажёра — десятки задач, и
@@ -43,10 +56,11 @@ export function methodFor(setId: string): TrainerMethod | null {
   const id = SKILL_BY_SET[setId];
   const skill = id === undefined
     ? undefined
-    : prepSkillsFor('quadratic').find((item) => item.id === id);
+    : prepSkillsFor(typeOf(setId)).find((item) => item.id === id);
   const method = id === undefined || skill === undefined ? null : {
-    title: skill.title,
-    tip: skill.tip,
+    /* Название и приём — с формулами: набираются KaTeX здесь же. */
+    title: titleHtml(skill.title),
+    tip: titleHtml(skill.tip),
     svg: renderGraph(prepSkillScene(id)) as string,
   };
   cache.set(setId, method);

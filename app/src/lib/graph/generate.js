@@ -20,6 +20,7 @@ import math from './math.js';
 import Line from './families/line.js';
 import Triangle from './triangle.js';
 import Quadratic from './generate-quadratic.js';
+import Rational from './generate-rational.js';
 import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
 import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
          answerText } from './text.js';
@@ -27,7 +28,8 @@ import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
 const FAMILIES = { line: Line };
 
 /* Семейство задачи: своё у задачи, иначе у набора, иначе прямая.
-   Парабола собирается своим модулем (generate-quadratic.js), общими
+   Парабола и гипербола собираются своими модулями (generate-quadratic.js,
+   generate-rational.js), общими
    остаются перебор с возвратом, состав набора и файл ответов. */
 function familyOf(task, set) {
   return task.family || set.family || 'line';
@@ -523,6 +525,7 @@ function equationChoice(ctx) {
    ══════════════════════════════════════════════════════════ */
 function taskCandidates(task, set, seed) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'rational') { return Rational.candidates(task, set, seed); }
   var constraints = task.constraints || {};
   if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
@@ -787,6 +790,7 @@ function sceneFor(built, task, set) {
 
 function taskResult(set, task, built, seed, index) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'rational') { return Rational.result(set, task, built, seed, index); }
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
@@ -883,7 +887,7 @@ function analysis(id, seed) {
   var task = generate(id, seed);
   if (!task.svg || !task.meta.window) { return null; }
   /* Разбор с треугольником наклона — только у прямой. */
-  if (task.meta.family === 'quadratic') { return null; }
+  if (task.meta.family === 'quadratic' || task.meta.family === 'rational') { return null; }
 
   var line = Line.create(task.meta.kFraction, task.meta.bFraction);
   var triangle = Triangle.build(line, task.meta.window, task.meta.points);

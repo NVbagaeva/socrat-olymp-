@@ -10,6 +10,7 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import GraphSolution from '@/lib/graph/solution.js';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
+import GraphSolutionRational from '@/lib/graph/solution-rational.js';
 import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
 import { katex } from '@/lib/graph/katex';
@@ -91,7 +92,10 @@ export type PrepBlock =
 
 export interface PrepStep {
   number: number;
+  /** Заголовок шага; формулы в нём — $…$. */
   title: string;
+  /** Тот же заголовок, набранный KaTeX: экран разбора — клиентский. */
+  titleHtml?: string;
   /** Направление прямой: движок ставит его только у первого шага. */
   arrow: 'up' | 'down' | null;
   blocks: PrepBlock[];
@@ -352,7 +356,7 @@ function flatSteps(task: EngineTask): PrepStep[] {
     },
     {
       number: 2,
-      title: 'Находим k',
+      title: 'Находим $k$',
       arrow: null,
       blocks: [
         {
@@ -528,7 +532,7 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
   return [
     {
       number: 1,
-      title: 'Подставляем координату x точки в формулу',
+      title: 'Подставляем координату $x$ точки в формулу',
       arrow: null,
       blocks: [
         {
@@ -578,7 +582,7 @@ function substitutionSteps(task: EngineTask, probe: EngineProbe): PrepStep[] {
     },
     {
       number: 3,
-      title: 'Сравниваем с координатой y точки',
+      title: 'Сравниваем с координатой $y$ точки',
       arrow: null,
       blocks: [
         {
@@ -685,6 +689,9 @@ export function quadraticSteps(task: QuadraticSource): PrepStep[] {
     window: task.meta.window,
     points: task.meta.points,
     second: secondCurve(task),
+    /* По meta.scene разбор рисует чертёж со вспомогательной системой
+       координат (graph/quadratic-aux.js). */
+    meta: task.meta,
     task: {
       rule: data?.answerRule,
       answer: task.answer,
@@ -694,17 +701,53 @@ export function quadraticSteps(task: QuadraticSource): PrepStep[] {
     },
   }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
 
-  return steps.map((step) => ({
+  return withTitles(steps.map((step) => ({
     number: step.number,
     title: step.title,
     arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
     blocks: viewBlocks(step.blocks),
-  }));
+  })));
+}
+
+/**
+ * Разбор задачи о гиперболе: модуль solution-rational.js строит его
+ * прямо по meta задачи — там лежат точные дроби кривой, отмеченные
+ * точки, запрос и, у задач с прямой, её коэффициенты и точка B.
+ */
+export function rationalSteps(task: { answer: string; meta: unknown }): PrepStep[] {
+  const steps = GraphSolutionRational.fromTask(task) as {
+    number: number;
+    title: string;
+    blocks: EngineBlock[];
+  }[];
+  return withTitles(steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: null,
+    blocks: viewBlocks(step.blocks),
+  })));
+}
+
+/** Заголовок шага с формулами ($…$) → вёрстка KaTeX. */
+export function titleHtml(title: string): string {
+  return typeset(GraphGenerate.typeset(title) as string);
+}
+
+function withTitles(steps: PrepStep[]): PrepStep[] {
+  return steps.map((step) => ({ ...step, titleHtml: titleHtml(step.title) }));
 }
 
 function buildSteps(task: EngineTask): PrepStep[] | null {
+  const steps = buildStepsRaw(task);
+  return steps === null ? null : withTitles(steps);
+}
+
+function buildStepsRaw(task: EngineTask): PrepStep[] | null {
   if (task.meta.family === 'quadratic') {
     return quadraticSteps(task);
+  }
+  if (task.meta.family === 'rational') {
+    return rationalSteps(task);
   }
 
   const found = GraphGenerate.analysis(task.id) as Analysis | null;
@@ -762,7 +805,9 @@ export function buildPrepTasks(skill: PrepSkill): PrepTask[] {
       steps: buildSteps(task),
       oshibki: Object.fromEntries(
         (task.options ?? []).flatMap((option) =>
-          option.error === null ? [] : [[option.number, option.error]],
+          /* Пояснение набирается KaTeX здесь, на сборке: экран
+             показывает готовую вёрстку. */
+          option.error === null ? [] : [[option.number, titleHtml(option.error)]],
         ),
       ),
     };

@@ -1,6 +1,8 @@
 import { OPORNYE } from '@/content/opornye';
 import type { PrepSkill } from '@/content/prepSkills';
 import { buildPrepTasks } from '@/lib/prep';
+import { typeset } from '@/lib/tex';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PrepShell } from './PrepShell';
 import { PrepTaskScreen } from './PrepTaskScreen';
 
@@ -22,13 +24,16 @@ export interface PrepTasksProps {
 export function PrepTasks({ type, skill, base }: PrepTasksProps) {
   return (
     <PrepShell type={type} base={base} active={skill.id}>
-      <PrepTaskScreen
-        skillId={skill.id}
-        title={skill.title}
-        tasks={buildPrepTasks(skill)}
-        listHref={`${base}/${OPORNYE.tail}`}
-        tip={skill.tip}
-      />
+      <ErrorBoundary what="задачи">
+        <PrepTaskScreen
+          skillId={skill.id}
+          title={skill.title}
+          titleHtml={typeset(skill.title)}
+          tasks={buildPrepTasks(skill)}
+          listHref={`${base}/${OPORNYE.tail}`}
+          tip={typeset(skill.tip)}
+        />
+      </ErrorBoundary>
     </PrepShell>
   );
 }

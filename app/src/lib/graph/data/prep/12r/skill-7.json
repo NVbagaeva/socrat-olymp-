@@ -1,0 +1,137 @@
+{
+  "kind": "prep",
+  "id": "P12R-7",
+  "block": 7,
+  "title": "Значение функции",
+  "subtitle": "Найти $f(x_0)$ по графику $\\frac{k}{x + a} + b$",
+  "seed": 12407,
+  "family": "rational",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 8
+  },
+  "tasks": [
+    {
+      "id": "P12R-7-01",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k/(x + a) + b$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-03",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-04",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-05",
+      "question": "График функции $f(x) = k/(x + a) + b$ изображён на рисунке. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-06",
+      "question": "На рисунке показан график функции $f(x) = k/(x + a) + b$. Вычислите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-07",
+      "question": "Функция задана формулой $f(x) = k/(x + a) + b$, её график изображён на рисунке. Найдите значение функции при $x = {x0}$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12R-7-08",
+      "question": "На рисунке изображён график функции $f(x) = k/(x + a) + b$. Какое значение принимает функция при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "hint": "С чертежа значение не прочитать: точка далеко или не в узле. Сначала восстанови формулу (асимптоты и точка), потом подставь $x$.",
+      "form": "shift-xy",
+      "constraints": {
+        "mSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "mixed"
+        }
+      }
+    }
+  ]
+}

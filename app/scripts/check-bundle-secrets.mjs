@@ -10,17 +10,19 @@
    «answer», разбор со строкой «Ответ: …» или параметры рисунка, по
    которым ответ читается с картинки.
 
-   Проверка идёт по банкам всех разделов с закрытыми ответами — №3,
-   №4, №5, №8 и №12: банк читается из исходников, для каждой задачи
+   Проверка идёт по банкам всех разделов с закрытыми ответами — №2,
+   №3, №4, №5, №8 и №12: банк читается из исходников, для каждой задачи
    считается её ответ, а потом в собранных страницах ищется окно этой
    задачи (от её идентификатора до следующего) и в окне — сам ответ в
    тех формах, в каких он уезжал раньше: полем JSON, строкой «Ответ:»,
    концом выкладки «= 0,25». Отдельно ищутся поля параметров рисунка
    у №4 и №5, открытый разбор и пометки вариантов у №12, поля ответа
    у №8. Кроме окон задач, во всех кусках сборки ищется след целого
-   банка: имена полей прототипа и начала первых шагов разборов.
+   банка: имена полей прототипа, начала первых шагов разборов и
+   строковые параметры банка №11.
 
-   Витрина /styleguide/ — единственное исключение: она служебная,
+   Витрина /styleguide/ и вычитка аналогов /zadaniya/11/proverka-
+   analogov/ — исключения: они служебные,
    помечена noindex и показывает ответы намеренно.
 
    Ненулевой код возврата — в сборке лежит то, чего там быть не должно.
@@ -174,6 +176,35 @@ const otvety8 = BANK_8.flatMap((entry) =>
   entry.variants.flatMap((v) => formy(generate8(entry.prototype, v.seed, v.level).otvet)),
 );
 
+/* №2: микрозадачи тренировок с зафиксированным вариантом (окно —
+   объект задачи в странице блока; у задач с выбором ответ — номер
+   варианта, его искать бессмысленно) и банк для репетиторов — десять
+   seed на прототип. Листы банка и ключ считаются в браузере, в
+   страницы не идут; ответы банка всё равно ищутся по страницам
+   раздела. Исключение — вкладки «Теория» и «Опорные задачи»: там
+   выкладки и разобранные образцы с ответами намеренно, по своим
+   числам, не из банка. */
+const { BLOKI: BLOKI_2 } = requireSrc('lib/vektory/prep/bloki');
+const { fixedSeed: fixedSeed2, generateMikro } = requireSrc('lib/vektory/prep/generate');
+const { BANK: BANK_2 } = requireSrc('lib/vektory/bank');
+const { generate: generate2 } = requireSrc('lib/vektory/generate');
+const POLYA_2 = ['otvet', 'proverka', 'params', 'signature'];
+for (const blok of BLOKI_2) {
+  for (const micro of blok.zadachi) {
+    const task = generateMikro(micro.id, fixedSeed2(micro));
+    zadachi.push({
+      razdel: '№2',
+      id: micro.id,
+      variantov: 1,
+      otvety: typeof task.otvet === 'number' ? formy(task.otvet) : [],
+      polya: POLYA_2,
+    });
+  }
+}
+const otvety2 = BANK_2.flatMap((entry) =>
+  entry.variants.flatMap((v) => formy(generate2(entry.prototype, v.seed).otvet)),
+);
+
 /* №12: наборы движка graph/ по навыкам опорных задач. Ответ — число
    или номер верного варианта; в окне не должно быть ни поля
    «answer», ни открытого разбора, ни пометок вариантов «error». */
@@ -185,19 +216,25 @@ const readSets = (dir) =>
     .filter((name) => name.endsWith('.json'))
     .sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(graphData, dir, name), 'utf8')));
-/* Наборы обеих подтем: прямой из prep/12, параболы из prep/12q.
+/* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы из prep/12r.
    Наборы прототипов — оттуда задачи берут тренажёр, генератор и лист
    для печати, и их ответы тоже не должны попадать в разметку. */
 GraphGenerate.setSets({
-  prep: [...readSets('prep/12'), ...readSets('prep/12q')],
-  prototypes: [...readSets('prototypes/12'), ...readSets('prototypes/12q')],
+  prep: [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')],
+  prototypes: [
+    ...readSets('prototypes/12'),
+    ...readSets('prototypes/12q'),
+    ...readSets('prototypes/12r'),
+  ],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
 /* Опорные задачи — по списку навыков; прототипы — по самим наборам:
    задачи тренажёра и листа для печати считает тот же движок, и их
    ответам в разметке страницы тоже не место. */
-const NABORY_12 = allPrepSkills.map((skill) => skill.setId)
-  .concat(readSets('prototypes/12q').map((set) => set.id));
+const NABORY_12 = allPrepSkills
+  .map((skill) => skill.setId)
+  .concat(readSets('prototypes/12q').map((set) => set.id))
+  .concat(readSets('prototypes/12r').map((set) => set.id));
 for (const setId of NABORY_12) {
   for (const task of GraphGenerate.generateSet(setId)) {
     zadachi.push({
@@ -224,6 +261,34 @@ const marks = [...BANK_3, ...BANK_4, ...BANK_5, ...KONSPEKT_4]
 
 /* Имена полей прототипа: если они есть в куске, уехал весь банк. */
 const FIELDS = ['poModeli:', 'perebor:', 'dopustimo:', 'varianty:'];
+
+/* Банк №11 хранит параметры и ответ задачи (data/zadanie11/bank.json);
+   с ответами в браузер он уезжать не должен. Тренажёру условия банка
+   нужны — они идут в страницу без поля answer (trenazher/dannye.ts),
+   ответ считает движок и сразу закрывает отпечатком, как у №2.
+   След банка — строковые параметры («kto: popov»): они переживают
+   сжатие кода, в отличие от чисел. Три разные пары в одном куске и
+   рядом с параметрами поле ответа — значит, уехал банк с ответами. */
+/* Признак — запись банка целиком из литералов: параметры-числа и строки
+   и ответ-число. В коде генератора та же форма, но со значениями-
+   переменными ({params:{a:n},answer:t}) — она не считается. */
+const LIT_11 = '(?:"[^"]*"|-?[0-9.]+(?:e[0-9]+)?)';
+const OTVET_11 = new RegExp(
+  `(?:"params"|\\bparams):\\{(?:"?\\w+"?:${LIT_11},?)+\\},(?:"answer"|answer):-?[0-9.]+(?:e[0-9]+)?[,}]`,
+);
+const SLED_11 = [
+  ...new Set(
+    JSON.parse(fs.readFileSync(path.join(root, 'src/data/zadanie11/bank.json'), 'utf8')).flatMap(
+      (item) =>
+        Object.entries(item.params)
+          .filter(([, v]) => typeof v === 'string' && v.length >= 4)
+          .map(([k, v]) => `${k}|${v}`),
+    ),
+  ),
+].map((pair) => {
+  const [k, v] = pair.split('|');
+  return { pair, re: new RegExp(`(?:"${escapeRe(k)}"|\\b${escapeRe(k)}):"${escapeRe(v)}"`) };
+});
 
 /* ── Поиск ──────────────────────────────────────────────────────── */
 
@@ -260,7 +325,11 @@ if (!fs.existsSync(outDir)) {
 }
 
 /* Витрина показывает ответы намеренно: она служебная и noindex. */
-const allowed = (file) => path.relative(outDir, file).split(path.sep).includes('styleguide');
+const allowed = (file) => {
+  const parts = path.relative(outDir, file).split(path.sep);
+  /* Вычитка аналогов №11 — тоже служебная, noindex, ответы показывает намеренно. */
+  return parts.includes('styleguide') || parts.includes('proverka-analogov');
+};
 
 const files = walk(outDir, (f) => /\.(js|html|txt|json)$/.test(f)).filter((f) => !allowed(f));
 
@@ -306,14 +375,26 @@ function obekt(text, at) {
   for (let i = start; i < text.length; i++) {
     const ch = text[i];
     if (inString) {
-      if (ch === '\\') { i += 1; } else if (ch === '"') { inString = false; }
+      if (ch === '\\') {
+        i += 1;
+      } else if (ch === '"') {
+        inString = false;
+      }
       continue;
     }
-    if (ch === '"') { inString = true; continue; }
-    if (ch === '{') { depth += 1; continue; }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === '{') {
+      depth += 1;
+      continue;
+    }
     if (ch === '}') {
       depth -= 1;
-      if (depth === 0) { return text.slice(start, i + 1); }
+      if (depth === 0) {
+        return text.slice(start, i + 1);
+      }
     }
   }
   return null;
@@ -330,8 +411,7 @@ function okna(text, id) {
   let from = text.indexOf(marker);
   while (from !== -1) {
     const next = text.indexOf('"id":"', from + marker.length);
-    const okno = obekt(text, from) ??
-      text.slice(from, next === -1 ? text.length : next);
+    const okno = obekt(text, from) ?? text.slice(from, next === -1 ? text.length : next);
     const ssylki = [...okno.matchAll(/"\$([0-9a-f]+)"/g)].map((m) => stroka(text, m[1]));
     out.push([okno, ...ssylki].join('\n'));
     from = text.indexOf(marker, from + marker.length);
@@ -356,6 +436,11 @@ for (const file of files) {
     problemy.push(
       `разборы прототипов: ${hits.slice(0, 8).join(', ')}${hits.length > 8 ? ` и ещё ${hits.length - 8}` : ''}`,
     );
+  }
+
+  const sled11 = SLED_11.filter((m) => m.re.test(text)).map((m) => m.pair);
+  if (sled11.length >= 3 && OTVET_11.test(text)) {
+    problemy.push(`банк №11 с ответами: ${sled11.slice(0, 5).join(', ')}`);
   }
 
   /* Окна задач. */
@@ -401,6 +486,24 @@ for (const file of files) {
     }
   }
 
+  /* Банк для репетиторов №2: по страницам раздела, кроме теории и
+     опорных задач — там выкладки с ответами стоят намеренно, и малые
+     целые («= 5») совпадают с ответами банка случайно. */
+  const put2 = rel.split(path.sep);
+  if (
+    put2.slice(0, 2).join('/') === 'zadaniya/2' &&
+    !['opornye-zadachi', 'teoriya'].includes(put2[2])
+  ) {
+    for (const otvet of otvety2) {
+      for (const [chto, re] of shablony(otvet)) {
+        const m = re.exec(text);
+        if (m !== null) {
+          problemy.push(`№2 банк для репетиторов: ${chto} «${otvet}» — …${m[0].slice(-70)}`);
+        }
+      }
+    }
+  }
+
   if (problemy.length > 0) {
     bad.push({ file: rel, problemy });
   }
@@ -416,6 +519,7 @@ for (const z of zadachi) {
   poRazdelam[z.razdel] = s;
 }
 poRazdelam['№8'].variantov += BANK_8.reduce((s, e) => s + e.variants.length, 0);
+poRazdelam['№2'].variantov += BANK_2.reduce((s, e) => s + e.variants.length, 0);
 console.log(
   `Просмотрено файлов сборки: ${files.length}; окон задач в страницах: ${oknaVsego}.\n` +
     `Проверено записей банков: ${zadachi.length}, вариантов с ответами: ` +

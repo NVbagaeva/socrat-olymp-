@@ -11,17 +11,95 @@
  */
 
 import { katex } from './graph/katex';
+import { razmetka, type Kusok } from './razmetka';
+
+/** Формула куска: внутри выделения — полужирная, как текст вокруг. */
+function formulaHtml(kusok: Kusok, strogo: boolean, displayFrac = false): string {
+  const tex = normalizeTex(kusok.text);
+  return katex.renderToString(kusok.strong === true ? `\\boldsymbol{${tex}}` : tex, {
+    throwOnError: strogo,
+    displayMode: false,
+    displayFrac,
+  });
+}
+
+function kuskiHtml(text: string, strogo: boolean, escape: boolean, displayFrac = false): string {
+  return razmetka(text)
+    .map((kusok) => {
+      if (kusok.math === true) {
+        return formulaHtml(kusok, strogo, displayFrac);
+      }
+      const body = escape
+        ? kusok.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        : kusok.text;
+      return kusok.strong === true ? `<strong>${body}</strong>` : body;
+    })
+    .join('');
+}
 
 /**
- * Текст с формулами → HTML: $...$ набирается KaTeX. `strogo` — ошибка
- * TeX роняет набор, а не оставляет формулу текстом: так набираются
- * разборы заданий №4 и №5, у которых формула обязана собраться.
+ * Текст с формулами → HTML: $...$ набирается KaTeX, **…** — полужирное,
+ * в том числе вокруг формул (разбор — lib/razmetka.ts). `strogo` —
+ * ошибка TeX роняет набор, а не оставляет формулу текстом: так
+ * набираются разборы заданий №4 и №5, у которых формула обязана
+ * собраться.
  */
 export function typeset(text: string, strogo = false): string {
-  return text.replace(/\$([^$]+)\$/g, (_match, formula: string) =>
-    katex.renderToString(formula, { throwOnError: strogo, displayMode: false }),
-  );
+  return kuskiHtml(text, strogo, false);
 }
+
+/**
+ * То же, что typeset, но \dfrac в строке остаётся крупной дробью
+ * (опция displayFrac, как в ключе учителя): «Опорные задачи» №11 —
+ * дроби 100/(x + 6) в вариантах ответа и подсказках должны читаться.
+ */
+export function typesetKrupno(text: string): string {
+  return kuskiHtml(text, false, false, true);
+}
+
+/**
+ * То же, что typeset, но для обычного текста из данных: всё вне
+ * формул экранируется (&, <, >). Нужен там, где строка раньше
+ * выводилась текстом и могла содержать эти знаки как есть.
+ */
+export function typesetText(text: string): string {
+  return kuskiHtml(text, false, true);
+}
+
+/* Знаки, которые приходят в формулу из подстановок: имя вершины
+   «A₁», число «7,5» из ru(), «·» и «−» из текста. KaTeX их либо не
+   знает (₁), либо набирает не по-математически (запятая с отбивкой),
+   поэтому перед набором они переводятся в запись TeX. */
+const SUBSCRIPT = '₀₁₂₃₄₅₆₇₈₉';
+const VULGAR: Record<string, string> = {
+  '½': '\\tfrac12',
+  '⅓': '\\tfrac13',
+  '⅔': '\\tfrac23',
+  '¼': '\\tfrac14',
+  '¾': '\\tfrac34',
+};
+
+export function normalizeTex(formula: string): string {
+  return formula
+    .replace(/[₀-₉]+/g, (digits) => `_{${[...digits].map((d) => SUBSCRIPT.indexOf(d)).join('')}}`)
+    .replace(/²/g, '^2')
+    .replace(/³/g, '^3')
+    .replace(/[½⅓⅔¼¾]/g, (ch) => VULGAR[ch] ?? ch)
+    .replace(/√\(([^()]*)\)/g, '\\sqrt{$1}')
+    .replace(/√([\w{}]+)/g, '\\sqrt{$1}')
+    .replace(/·/g, '\\cdot ')
+    .replace(/×/g, '\\times ')
+    .replace(/−/g, '-')
+    .replace(/≤/g, '\\le ')
+    .replace(/≥/g, '\\ge ')
+    .replace(/≠/g, '\\ne ')
+    .replace(/π/g, '\\pi ')
+    .replace(/(\d),(\d)/g, '$1{,}$2');
+}
+
+/* Формула обычным текстом — в отдельном модуле без KaTeX: его берут
+   и клиентские экраны (lib/texPlain.ts). */
+export { texPlain } from './texPlain';
 
 /* ── Выкладка: формула, которая рвётся по правилам тетради ──────── */
 

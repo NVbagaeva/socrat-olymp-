@@ -64,7 +64,7 @@ export const P03_74: Prototype = {
         value: side,
       },
       {
-        text: `Высота та же, что у цилиндра, поэтому объём: ${ru(side)} · ${ru(side)} · ${ru(r)} = ${ru(side * side * r)}.`,
+        text: `Высота та же, что у цилиндра, поэтому объём: $${ru(side)} \\cdot ${ru(side)} \\cdot ${ru(r)} = ${ru(side * side * r)}$.`,
         value: side * side * r,
       },
     ];
@@ -119,11 +119,11 @@ export const P03_75: Prototype = {
     const base = 4 * r * r;
     return [
       {
-        text: `Основание — квадрат со стороной ${ru(2 * r)}, его площадь: ${ru(2 * r)} · ${ru(2 * r)} = ${ru(base)}.`,
+        text: `Основание — квадрат со стороной ${ru(2 * r)}, его площадь: $${ru(2 * r)} \\cdot ${ru(2 * r)} = ${ru(base)}$.`,
         value: base,
       },
       {
-        text: `Высота: ${ru(V)} : ${ru(base)} = ${ru(V / base)}.`,
+        text: `Высота: $${ru(V)} : ${ru(base)} = ${ru(V / base)}$.`,
         value: V / base,
       },
     ];

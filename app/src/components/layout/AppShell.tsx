@@ -1,5 +1,12 @@
 import Image from 'next/image';
-import { BottomNavigation, HandNote, Sidebar, Topbar, type NavItem } from '@/components/ui';
+import {
+  BottomNavigation,
+  HandNote,
+  Sidebar,
+  Topbar,
+  type NavGroup,
+  type NavItem,
+} from '@/components/ui';
 import {
   appNavMorePage,
   appNavPrimary,
@@ -8,9 +15,10 @@ import {
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
-import { tasks, tasksPage } from '@/content/tasks';
+import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
 import { demoUser } from '@/data/demo';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -27,16 +35,28 @@ function withActive(items: NavItem[], active: string | undefined): NavItem[] {
    названия и статус берутся оттуда же, откуда карточки банка.
    Текущий пункт здесь не отмечается: сайдбар сам сверяет адрес
    пункта с открытым маршрутом, и странице сообщать об этом нечего. */
-function taskItems(): NavItem[] {
-  return tasks.map((task) => ({
+function taskItem(task: ExamTask): NavItem {
+  return {
     id: task.slug,
     no: task.no,
     label: task.name,
     /* Столбец узкий: длинные названия показываются короткой формой
        из конфига. Не задана — остаётся полная. */
     ...(task.shortTitle !== undefined ? { short: task.shortTitle } : {}),
-    href: `${tasksPage.href}/${task.slug}`,
-    disabled: task.status !== 'active',
+    href: taskHref(task),
+    /* Неоткрытый раздел приглушён; если у него есть заглушка, пункт
+       остаётся ссылкой на неё. */
+    disabled: !taskHasPage(task),
+    dim: task.status !== 'ready',
+  };
+}
+
+/* Список по частям экзамена: «ЧАСТЬ 1», под ней 01–13, разделитель,
+   «ЧАСТЬ 2» и 14–20. */
+function taskGroups(): NavGroup[] {
+  return taskParts.map((part) => ({
+    label: part.title,
+    items: tasks.filter((task) => task.part === part.part).map(taskItem),
   }));
 }
 
@@ -49,10 +69,7 @@ function taskItems(): NavItem[] {
  * нижняя панель — пункты у неё те же, что в шапке.
  */
 export function AppShell({ active, search = true, children }: AppShellProps) {
-  const bottomItems = withActive(
-    [...appNavPrimary, appNavMorePage],
-    bottomNavActive(active),
-  );
+  const bottomItems = withActive([...appNavPrimary, appNavMorePage], bottomNavActive(active));
 
   return (
     <div className="shell shell--responsive app-shell">
@@ -60,7 +77,8 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
         brand="Будет на ЕГЭ"
         caption={{ title: 'Задания ЕГЭ', subtitle: 'Профильная математика' }}
         label="Задания ЕГЭ"
-        items={taskItems()}
+        items={tasks.map(taskItem)}
+        groups={taskGroups()}
         secondaryItems={withActive(sidebarExtras, active)}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
@@ -68,7 +86,7 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
           <div className="sidebar__decor">
             <Image
               className="sidebar__mountains"
-              src="/images/mountains-network.webp"
+              src={assetUrl('/images/mountains-network.webp')}
               alt=""
               width={900}
               height={329}

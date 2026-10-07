@@ -6,6 +6,7 @@ import { Button } from '@/components/ui';
 import { trainerResult } from '@/content/trainerModes';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
 
+import { assetUrl } from '@/lib/assetUrl';
 /** Чем закончилось задание: решено само или открыто решение. */
 export type Mark8 = 'right' | 'hinted';
 
@@ -57,7 +58,7 @@ export function Trenazher8Result({ tasks, marks, misses, seconds, backHref, onAg
 
   return (
     <section className="tdone">
-      <Image className="tdone__cup" src="/images/trophy-glass.webp" alt={trainerResult.trophyAlt} width={1147} height={1201} />
+      <Image className="tdone__cup" src={assetUrl('/images/trophy-glass.webp')} alt={trainerResult.trophyAlt} width={1147} height={1201} />
 
       <header className="tdone__head">
         <h3 className="tdone__title">{trainerResult.title}</h3>

@@ -153,7 +153,7 @@ export function Kalkulyator() {
         </div>
 
         <div className="svc-itog" aria-live="polite">
-          <ul className="svc-itog__stroki">
+          <ul className="svc-itog__stroki no-math-check">
             {r.stroki.map((st) => (
               <li key={st.chto}>
                 <span>{st.chto}</span>

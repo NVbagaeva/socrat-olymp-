@@ -33,10 +33,20 @@ export interface TabsProps {
   /** Название набора вкладок для скринридера. */
   label: string;
   className?: string;
+  /** Вкладка, которая открывается, но ещё не открылась: на ней крутится ожидание. */
+  busyId?: string;
 }
 
 /** Табы с блуждающим фокусом: стрелки, Home и End переключают вкладку. */
-export function Tabs({ items, value, defaultValue, onValueChange, label, className }: TabsProps) {
+export function Tabs({
+  items,
+  value,
+  defaultValue,
+  onValueChange,
+  label,
+  className,
+  busyId,
+}: TabsProps) {
   const autoId = useId();
   const first = items[0];
   const [inner, setInner] = useState(defaultValue ?? first?.id ?? '');
@@ -76,6 +86,7 @@ export function Tabs({ items, value, defaultValue, onValueChange, label, classNa
           id: `${autoId}-tab-${item.id}`,
           'aria-controls': `${autoId}-panel-${item.id}`,
           'aria-selected': selected,
+          ...(busyId === item.id ? { 'data-busy': 'true', 'aria-busy': true } : {}),
           tabIndex: selected ? 0 : -1,
           ref: (node: HTMLElement | null) => {
             if (node) refs.current.set(item.id, node);

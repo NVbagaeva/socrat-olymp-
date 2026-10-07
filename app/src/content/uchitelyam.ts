@@ -10,6 +10,7 @@
  * его разделом (§2.1). Адрес при этом не меняется.
  */
 
+import { assetUrl } from '@/lib/assetUrl';
 import { counted } from '@/lib/plural';
 import type { Uroven, Zakaz } from '@/lib/usluga/raschet';
 
@@ -72,7 +73,7 @@ export const uchitelyam = {
     trust: {
       name: 'Наталия Багаева, гимназия «Сократ»',
       line: 'Учитель математики высшей категории, эксперт ЕГЭ и ОГЭ. Каждый ответ проверяется дважды, второй раз — на следующий день.',
-      photo: '/images/author/nata-portrait.webp',
+      photo: assetUrl('/images/author/nata-portrait.webp'),
     },
     art: {
       label: 'Рукописная самостоятельная и она же, набранная в четырёх вариантах',
@@ -91,15 +92,18 @@ export const uchitelyam = {
    * варианта одной работы. Перед публикацией заменить фотографией
    * настоящего рукописного листа и четырьмя его вариантами, файлы
    * положить под теми же именами в public/images/uchitelyam/.
+   *
+   * Все пути к файлам из public/ здесь обёрнуты в assetUrl(): контент
+   * уходит в клиентский код, и версия ?v= должна стоять уже в нём.
    */
   kartinki: {
     uslovno: true,
-    ishodnik: '/images/uchitelyam/ishodnik.webp',
+    ishodnik: assetUrl('/images/uchitelyam/ishodnik.webp'),
     listy: [
-      '/images/uchitelyam/variant-1.webp',
-      '/images/uchitelyam/variant-2.webp',
-      '/images/uchitelyam/variant-3.webp',
-      '/images/uchitelyam/variant-4.webp',
+      assetUrl('/images/uchitelyam/variant-1.webp'),
+      assetUrl('/images/uchitelyam/variant-2.webp'),
+      assetUrl('/images/uchitelyam/variant-3.webp'),
+      assetUrl('/images/uchitelyam/variant-4.webp'),
     ],
     shirina: 600,
     vysota: 848,
@@ -148,38 +152,38 @@ export const uchitelyam = {
       {
         id: 'z12-cvet',
         podpis: 'Линейная функция, цветной лист',
-        kartinka: '/images/uchitelyam/galereya-z12-cvet.webp',
-        pdf: '/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z12-cvet.webp'),
+        pdf: assetUrl('/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik.pdf'),
       },
       {
         id: 'z12-chb',
         podpis: 'Тот же лист для чёрно-белой печати',
-        kartinka: '/images/uchitelyam/galereya-z12-chb.webp',
-        pdf: '/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik-chb.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z12-chb.webp'),
+        pdf: assetUrl('/materials/zadanie-12/zadanie-12-lineynaya-funkciya-uchenik-chb.pdf'),
       },
       {
         id: 'z4',
         podpis: 'Теория вероятностей: схемы и таблицы',
-        kartinka: '/images/uchitelyam/galereya-z4.webp',
-        pdf: '/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z4.webp'),
+        pdf: assetUrl('/materials/zadanie-4/zadanie-4-teoriya-veroyatnostey-uchenik.pdf'),
       },
       {
         id: 'z5',
         podpis: 'Вероятности событий: деревья исходов',
-        kartinka: '/images/uchitelyam/galereya-z5.webp',
-        pdf: '/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z5.webp'),
+        pdf: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf'),
       },
       {
         id: 'z8',
         podpis: 'Вычисления: дроби, степени, корни',
-        kartinka: '/images/uchitelyam/galereya-z8.webp',
-        pdf: '/materials/zadanie-8/zadanie-8-vychisleniya-uchenik.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z8.webp'),
+        pdf: assetUrl('/materials/zadanie-8/zadanie-8-vychisleniya-uchenik.pdf'),
       },
       {
         id: 'z4-baza',
         podpis: 'Печатная база: все прототипы задания',
-        kartinka: '/images/uchitelyam/galereya-z4-baza.webp',
-        pdf: '/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf',
+        kartinka: assetUrl('/images/uchitelyam/galereya-z4-baza.webp'),
+        pdf: assetUrl('/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf'),
       },
     ],
   },
@@ -370,7 +374,7 @@ export const uchitelyam = {
     name: 'Наталия Витальевна Багаева',
     text: 'Учитель математики высшей категории, гимназия «Сократ». Эксперт ОГЭ и ЕГЭ, руководитель методического объединения, автор платформы «Будет на ЕГЭ». Все заказы делаю сама — никому не передаю.',
     link: { label: 'Подробнее обо мне', href: '/about' },
-    photo: '/images/author/nata-portrait.webp',
+    photo: assetUrl('/images/author/nata-portrait.webp'),
   },
 
   /* ── Экран 9. Отзывы: только реальные, с письменного согласия (§6, п. 12 решений) ── */

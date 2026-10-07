@@ -13,15 +13,44 @@
 import marks from './marks.js';
 import typo from './typography.js';
 
+/* Название метода в ключе: с формулами $…$ — заглушки KaTeX,
+   иначе готовая разметка (у №4, №5 и №8 метод приходит HTML). */
+function methodHtml(method) {
+  return /\$/.test(method) ? typo.mathText(method) : typo.markup(method);
+}
+
+/* Числовой ответ набирается формулой: минус — настоящий, запятая —
+   десятичная. Ответ-не-число (номер варианта с текстом) — как есть. */
+function answerMath(answer) {
+  var value = String(answer);
+  if (!/^[-−]?\d+(?:[,.]\d+)?$/.test(value)) { return typo.markup(value); }
+  return typo.mathText('$' + value.replace('−', '-').replace(/[,.]/, '{,}') + '$');
+}
+
 /**
  * Полоса-заголовок раздела. Начинает новую страницу:
  * ответы не должны начинаться под последней задачей.
  */
-function sectionHead(title, note) {
-  return '<div class="sheet-item sheet-block" data-keep-with-next="1" data-page-break="1">' +
+function sectionHead(title, note, options) {
+  /* section — своя нумерация страниц раздела: у листа с вариантами
+     ответы не продолжают счёт страниц последнего варианта. */
+  var section = options && options.section ? ' data-section-start="1"' : '';
+  return '<div class="sheet-item sheet-block" data-keep-with-next="1" data-page-break="1"' +
+    section + '>' +
     '<header class="sheet-block-head">' +
       '<h2 class="sheet-block-title">' + typo.text(title) + '</h2>' +
       (note ? '<span class="sheet-block-note">' + typo.text(note) + '</span>' : '') +
+    '</header></div>';
+}
+
+/**
+ * Подзаголовок внутри раздела: «Вариант 2» над его таблицами.
+ * Оформлен как блок второго уровня и не остаётся один внизу страницы.
+ */
+function subHead(title) {
+  return '<div class="sheet-item sheet-block sheet-block--sub" data-keep-with-next="1">' +
+    '<header class="sheet-block-head">' +
+      '<h2 class="sheet-block-title">' + typo.text(title) + '</h2>' +
     '</header></div>';
 }
 
@@ -63,6 +92,42 @@ function table(title, rows, columns) {
 }
 
 /**
+ * Ключ для учителя: у каждой задачи номер, ответ и метод. Метод на
+ * листе ученика не подписан — он есть только здесь, чтобы проверять
+ * было удобно. Две задачи в строке. Возвращает список кусков потока.
+ *
+ * rows — [{ no, answer, html, method }]
+ */
+function keyTable(title, rows) {
+  var perRow = 2;
+  var lines = [];
+  for (var i = 0; i < rows.length; i += perRow) {
+    var chunk = rows.slice(i, i + perRow);
+    var cells = chunk.map(function (row) {
+      var shown = row.html || typo.markup(row.answer);
+      return '<th scope="row">' + row.no + '</th>' +
+        '<td class="sheet-key-answer" data-answer="' + typo.attr(row.answer) + '">' + shown + '</td>' +
+        '<td class="sheet-key-method">' + methodHtml(row.method || '') + '</td>';
+    }).join('');
+    for (var pad = chunk.length; pad < perRow; pad += 1) {
+      cells += '<th scope="row"></th><td></td><td></td>';
+    }
+    lines.push('<tr>' + cells + '</tr>');
+  }
+  /* Длинный ключ режется на куски по десять строк: кусок потока
+     неделим, и таблица на сотню задач не влезла бы на страницу. */
+  var out = [];
+  for (var j = 0; j < lines.length; j += 10) {
+    out.push('<div class="sheet-item sheet-answers">' +
+      '<table class="sheet-key-table">' +
+        (title && j === 0 ? '<caption>' + typo.markup(title) + '</caption>' : '') +
+        '<tbody>' + lines.slice(j, j + 10).join('') + '</tbody>' +
+      '</table></div>');
+  }
+  return out;
+}
+
+/**
  * Краткое решение одной задачи.
  *
  * steps — уже отобранные куски: [{ tex }] для формул и строка
@@ -70,13 +135,39 @@ function table(title, rows, columns) {
  */
 function solution(no, formulas, answer) {
   var body = formulas.map(function (tex) {
-    return '<span class="math" data-tex="' + typo.attr(tex) + '">' + typo.escape(tex) + '</span>';
+    return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+      typo.escape(tex) + '</span>';
   }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
   return '<div class="sheet-item sheet-solution">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body">' + body + '</span>' +
-    '<span class="sheet-solution-answer">' + typo.markup(answer) + '</span>' +
+    '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
+    '</div>';
+}
+
+/**
+ * Полное решение задачи для учителя: номер, затем шаги разбора —
+ * заголовок шага и все его формулы подряд, — и ответ. Так печатается
+ * гипербола: учителю нужна вся цепочка (асимптоты → сдвиги → точка →
+ * k → формула; у задач с прямой — обе функции, уравнение, корни),
+ * а не только итог каждого шага.
+ *
+ * items — [{ title, formulas: [tex] }]
+ */
+function fullSolution(no, items, answer) {
+  var list = items.map(function (step) {
+    var body = step.formulas.map(function (tex) {
+      return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+        typo.escape(tex) + '</span>';
+    }).join('<span class="sheet-solution-sep">;</span> ');
+    return '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
+      (body ? ':' : '') + '</span> ' + body + '</li>';
+  }).join('');
+  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+    '<span class="sheet-solution-no">' + no + '</span>' +
+    '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
+    '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
     '</div>';
 }
 
@@ -101,7 +192,8 @@ function steps(items, answer) {
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
 }
 
-const api = { sectionHead: sectionHead, table: table, solution: solution, steps: steps };
+const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
+              solution: solution, fullSolution: fullSolution, steps: steps };
 
 export default api;
-export { sectionHead, table, solution, steps };
+export { sectionHead, subHead, table, keyTable, solution, fullSolution, steps };

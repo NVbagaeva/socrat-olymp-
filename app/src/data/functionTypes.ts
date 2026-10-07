@@ -12,6 +12,8 @@
 import { OPORNYE } from '@/content/opornye';
 import { QUADRATIC } from '@/content/quadratic';
 import { QUADRATIC_THEORY } from '@/content/theoryQuadratic';
+import { RATIONAL } from '@/content/rational';
+import { RATIONAL_THEORY } from '@/content/theoryRational';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -25,7 +27,14 @@ export type TheoryBlockType = 'definition' | 'properties' | 'chart' | 'example' 
 
 export interface TheoryBlock {
   id: string;
+  /** Заголовок; формулы в нём — $…$. */
   title: string;
+  /**
+   * Тот же заголовок, набранный KaTeX. Ставит страница на сервере
+   * (FunctionTopicPage): лента вкладок — клиентский экран, и тянуть
+   * в него KaTeX ради заголовков незачем.
+   */
+  titleHtml?: string;
   type: TheoryBlockType;
   /** Содержимое блока обычным текстом. null — материала ещё нет. */
   content: string | null;
@@ -91,13 +100,6 @@ export interface FunctionType {
   about?: Omit<SectionAbout, 'hint'>;
   /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
   methods?: boolean;
-  /**
-   * Кольцо разделов считает честно: раздел засчитывается, когда
-   * ученик долистал до его конца, и запоминается в браузере
-   * (lib/theoryRead.ts). Не задано — кольцо показывает витринное
-   * число кабинета, как у линейной подтемы.
-   */
-  theoryProgress?: boolean;
   /**
    * Подтема заведена после того, как вкладку «Подготовительные
    * задачи» переименовали в «Опорные задачи». Прежнего адреса
@@ -175,8 +177,8 @@ const LINEAR_THEORY: TheoryBlock[] = [
   },
   { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
   { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
-  { id: 'k', title: 'Коэффициент k', type: 'properties', content: null, status: 'empty' },
-  { id: 'b', title: 'Коэффициент b', type: 'properties', content: null, status: 'empty' },
+  { id: 'k', title: 'Коэффициент $k$', type: 'properties', content: null, status: 'empty' },
+  { id: 'b', title: 'Коэффициент $b$', type: 'properties', content: null, status: 'empty' },
   { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
   {
     id: 'non-standard',
@@ -247,24 +249,37 @@ export const functionTypes: FunctionType[] = [
     head: QUADRATIC.head,
     about: QUADRATIC.about,
     methods: true,
-    theoryProgress: true,
     bezStarogoAdresa: true,
     choiceAnswers: true,
     sheetTitle: 'Квадратичная функция',
     tutors: QUADRATIC.tutors,
   },
+  /* Подтема «Гипербола» открыта на месте дробно-рациональных функций:
+     y = k/x, её сдвиги и дробь (kx + a)/(x + b). Признаки — как у
+     квадратичной, тексты в content/rational.ts. */
   {
     id: 'rational',
     no: '03',
-    title: 'Дробно-рациональные функции',
-    shortTitle: 'Дробно-рациональные',
-    formula: 'y = \\dfrac{ax + b}{cx + d}',
+    title: 'Гипербола',
+    shortTitle: 'Гипербола',
+    formula: 'y = \\dfrac{k}{x + a} + b',
     description: '',
-    theory: [],
+    theory: RATIONAL_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12R-1', 'P12R-2', 'P12R-3', 'P12R-4', 'P12R-5', 'P12R-6',
+             'P12R-7', 'P12R-8', 'P12R-9', 'P12R-10', 'P12R-11'],
+      prototypes: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.E',
+                   '12R.F', '12R.G', '12R.H', '12R.I', '12R.J'],
+    },
+    status: 'active',
+    head: RATIONAL.head,
+    about: RATIONAL.about,
+    methods: true,
+    bezStarogoAdresa: true,
+    sheetTitle: 'Гипербола',
+    tutors: RATIONAL.tutors,
   },
   {
     id: 'logarithmic',

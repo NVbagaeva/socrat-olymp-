@@ -74,8 +74,30 @@ function titleBlock(title) {
         '<h1 class="sheet-title">' + typo.text(title.text) + '</h1>' +
         (title.subtitle ? '<p class="sheet-subtitle">' + typo.text(title.subtitle) + '</p>' : '') +
       '</div>' +
+      (title.variant ? '<span class="sheet-variant">' + typo.text(title.variant) + '</span>' : '') +
     '</div>' +
     '</div>';
+}
+
+/* Строка полей ученика под названием: фамилия, класс, дата. Дату,
+   выбранную в генераторе, лист ставит сам — иначе пустая линия. */
+function fieldsLine(fields) {
+  if (!fields) { return ''; }
+  var date = fields.date
+    ? '<span class="sheet-field-value">' + typo.escape(fields.date) + '</span>'
+    : '<span class="sheet-field-blank"></span>';
+  return '<div class="sheet-fields">' +
+    '<span class="sheet-field sheet-field--wide">Фамилия, имя<span class="sheet-field-blank"></span></span>' +
+    '<span class="sheet-field">Класс<span class="sheet-field-blank"></span></span>' +
+    '<span class="sheet-field">Дата' + date + '</span>' +
+    '</div>';
+}
+
+/* Начало варианта в потоке: с новой страницы, с полной шапкой,
+   названием и строкой полей; нумерация страниц варианта — своя. */
+function variantOpening(title, fields) {
+  return '<div class="sheet-item sheet-opening" data-page-break="1" data-full-head="1"' +
+    ' data-section-start="1">' + titleBlock(title) + fieldsLine(fields) + '</div>';
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -288,8 +310,12 @@ function flowItems(spec) {
     /* Блок второго уровня — подзаголовок внутри раздела: плашка
        прототипа в печатной базе. Оформляется легче полосы раздела. */
     var sub = block.level === 2 ? ' sheet-block--sub' : '';
-    out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
-      blockHead(block) + '</div>');
+    /* head: false — блок без полосы: на листе генератора навык или
+       метод задачи не подписывается. */
+    if (block.head !== false) {
+      out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
+        blockHead(block) + '</div>');
+    }
 
     var tasks = block.tasks || [];
     if (layout === 'double' || layout === 'double-side') {
@@ -337,9 +363,15 @@ function flowItems(spec) {
  *            (рисунок под условием) и solutionHtml (для учителя).
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
- *            даёт одну полосу заголовка
+ *            даёт одну полосу заголовка; head: false — блок без полосы
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
+ *   fields   { date } — строка «Фамилия, имя / Класс / Дата» под
+ *            названием; не задано — строки нет (сборники)
+ *   variants [ { title: { chip, text, subtitle, variant }, blocks[] } ]
+ *            — несколько вариантов: каждый с новой страницы, с полной
+ *            шапкой и своей нумерацией страниц. Задано — blocks,
+ *            leadItems и recap не используются
  *   withAnswerLine  ставить ли строку «Ответ: ____»
  *   extraItems  куски потока после задач: раздел «Ответы».
  *               Первый из них помечается data-page-break, чтобы
@@ -356,7 +388,17 @@ function buildDocument(spec, assets) {
     throw new Error('sheet: неизвестная раскладка «' + spec.layout + '»');
   }
 
-  var items = (spec.leadItems || []).concat(flowItems(spec));
+  /* Несколько вариантов: у каждого своё начало страницы и свои блоки,
+     название в потоке, а не в шапке первой страницы. Один вариант —
+     лист как прежде. */
+  var variants = spec.variants || null;
+  var items = variants
+    ? variants.reduce(function (out, variant) {
+        return out.concat([variantOpening(variant.title, spec.fields)],
+          flowItems({ blocks: variant.blocks, cell: spec.cell, frame: spec.frame,
+                      layout: spec.layout, withAnswerLine: spec.withAnswerLine }));
+      }, [])
+    : (spec.leadItems || []).concat(flowItems(spec));
 
   return '<!doctype html>\n<html lang="ru" data-sheet-theme="' + spec.theme +
     '" data-sheet-layout="' + spec.layout + '">\n<head>\n' +
@@ -374,7 +416,7 @@ function buildDocument(spec, assets) {
         arcs: marks.arcs(),
         fullHead: fullHead(spec.head),
         compactHead: compactHead(spec.head, spec.runner || spec.title.text),
-        opening: titleBlock(spec.title) + recapBlock(spec.recap),
+        opening: variants ? '' : titleBlock(spec.title) + recapBlock(spec.recap) + fieldsLine(spec.fields),
         items: items.concat(spec.extraItems || []),
         footer: footer(spec.foot)
       }).replace(/<\//g, '<\\/') +

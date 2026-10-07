@@ -40,7 +40,7 @@ export function sides(
   names.forEach((name, i) => {
     const value = values[i];
     if (value === undefined) {
-      throw new Error(`Нет числа для ребра ${name}`);
+      throw new Error(`Нет числа для ребра $${name}$`);
     }
     out[dimOf(name)] = value;
   });
@@ -95,7 +95,7 @@ export function pointOf(name: string, a: number, b: number, c: number): Vec3 {
   };
   const xy = flat[base];
   if (xy === undefined) {
-    throw new Error(`${name} — не вершина параллелепипеда`);
+    throw new Error(`$${name}$ — не вершина параллелепипеда`);
   }
   return [xy[0], xy[1], top ? c : 0];
 }

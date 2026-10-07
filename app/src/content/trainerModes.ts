@@ -16,8 +16,8 @@ export interface TrainerMode {
 }
 
 export const trainerModes: TrainerMode[] = [
-  { id: 'practice', title: 'Отработка', lead: 'Один тип задач' },
-  { id: 'mixed', title: 'Смешанная', lead: 'Несколько типов' },
+  { id: 'practice', title: 'Отработка', lead: 'Выбранные типы задач' },
+  { id: 'mixed', title: 'Смешанная', lead: 'Все типы вперемешку' },
   { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
   { id: 'control', title: 'Контроль', lead: 'Без подсказок' },
 ];
@@ -28,8 +28,14 @@ export const trainerModes: TrainerMode[] = [
  * ярлыка нет — тренировка собирается там же, где и без него.
  */
 export type TrainerShortcutId =
-  'value' | 'argument' | 'intersection' | 'mixed' |
-  'koefficienty' | 'znachenie' | 'formula' | 'peresechenie';
+  | 'value'
+  | 'argument'
+  | 'intersection'
+  | 'mixed'
+  | 'koefficienty'
+  | 'znachenie'
+  | 'formula'
+  | 'peresechenie';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -76,6 +82,25 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Гипербола: те же связки действий — значение и аргумент, коэффициенты
+   по асимптотам, две кривые на одном чертеже. */
+const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
+  {
+    id: 'znachenie',
+    title: 'Значение и аргумент',
+    skills: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.I'],
+    mode: 'mixed',
+  },
+  {
+    id: 'koefficienty',
+    title: 'Коэффициенты по графику',
+    skills: ['12R.E', '12R.F', '12R.J'],
+    mode: 'mixed',
+  },
+  { id: 'peresechenie', title: 'Гипербола и прямая', skills: ['12R.G', '12R.H'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -85,8 +110,15 @@ export const trainerShortcuts = LINEAR_SHORTCUTS;
  * открывается обычным адресом.
  */
 export function trainerShortcutsFor(type: string): TrainerShortcut[] {
-  if (type === 'linear') { return LINEAR_SHORTCUTS; }
-  if (type === 'quadratic') { return QUADRATIC_SHORTCUTS; }
+  if (type === 'linear') {
+    return LINEAR_SHORTCUTS;
+  }
+  if (type === 'quadratic') {
+    return QUADRATIC_SHORTCUTS;
+  }
+  if (type === 'rational') {
+    return RATIONAL_SHORTCUTS;
+  }
   return [];
 }
 
@@ -105,9 +137,11 @@ export const trainerPage = {
   builder: 'Собери свою тренировку',
   skill: {
     step: '1',
-    title: 'Выбери навык',
+    title: 'Выбери навыки',
     /* «{family}» подставляется названием семейства. */
-    lead: 'Что именно хочешь потренировать в разделе «{family}»?',
+    lead: 'Что хочешь потренировать в разделе «{family}»? Можно выбрать несколько.',
+    /* Сколько выбрано — в строке сводки: «3 типа задач». */
+    unit: ['тип задач', 'типа задач', 'типов задач'] as [string, string, string],
   },
   params: {
     step: '2',
@@ -130,12 +164,14 @@ export const trainerPage = {
 /**
  * Подписи конфигуратора подтемы.
  *
- * У квадратичной наборы — собственный материал платформы, в открытый
+ * У квадратичной и гиперболы наборы — собственный материал платформы, в открытый
  * банк ФИПИ они не входят, и обещать обратное нельзя: так и сказано
  * в поле note самих наборов.
  */
 export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic') { return trainerPage; }
+  if (type !== 'quadratic' && type !== 'rational') {
+    return trainerPage;
+  }
   return {
     ...trainerPage,
     summary: {
@@ -155,10 +191,10 @@ export const trainerKindTitle: Record<string, string> = {
   '12.D': 'Точка пересечения графиков',
   /* Квадратичная: по этим именам подход раскладывает задания так,
      чтобы одинаковые не шли подряд, и по ним же собирается сводка. */
-  '12Q.A': 'Знак коэффициента a',
-  '12Q.B': 'Значение коэффициента a',
-  '12Q.C': 'Свободный член c',
-  '12Q.D': 'Коэффициент b',
+  '12Q.A': 'Знак коэффициента $a$',
+  '12Q.B': 'Значение коэффициента $a$',
+  '12Q.C': 'Свободный член $c$',
+  '12Q.D': 'Коэффициент $b$',
   '12Q.E': 'Значение функции',
   '12Q.F': 'Аргумент по значению',
   '12Q.G': 'Формула по графику',
@@ -166,6 +202,18 @@ export const trainerKindTitle: Record<string, string> = {
      действие: приравнять формулы и найти второй корень. */
   '12Q.H': 'Два графика на одном чертеже',
   '12Q.I': 'Два графика на одном чертеже',
+  /* Гипербола: значение и аргумент — по записи функции, точки B —
+     одним типом, как у параболы. */
+  '12R.A': 'Значение функции $\\frac{k}{x} + a$',
+  '12R.B': 'Аргумент: $\\frac{k}{x} + a$',
+  '12R.C': 'Значение функции $\\frac{k}{x + a}$',
+  '12R.D': 'Аргумент: $\\frac{k}{x + a}$',
+  '12R.E': 'Коэффициент $k$ в $\\frac{kx + a}{x + b}$',
+  '12R.F': 'Коэффициент $a$ в $\\frac{kx + a}{x + b}$',
+  '12R.G': 'Гипербола и прямая',
+  '12R.H': 'Гипербола и прямая',
+  '12R.I': 'Гипербола $y = \\frac{k}{x}$',
+  '12R.J': 'Коэффициент $b$ и значение $\\frac{kx + a}{x + b}$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */
@@ -189,7 +237,8 @@ export const trainerResult = {
 
 /** Сводка тренажёра на вкладке. */
 export const trainerStats = {
-  empty: 'Здесь появится ваша статистика: сколько заданий решено, с какой точностью и какой тип стоит повторить.',
+  empty:
+    'Здесь появится ваша статистика: сколько заданий решено, с какой точностью и какой тип стоит повторить.',
   rows: {
     total: 'Всего заданий',
     done: 'Решено',

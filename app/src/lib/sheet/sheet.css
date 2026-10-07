@@ -34,7 +34,10 @@ body {
   text-rendering: geometricPrecision;
 }
 
-/* Лист. Ровно A4, поэтому лишней пустой страницы за последней не встаёт. */
+/* Страница листа — на 2 мм ниже A4 (theme.css, --sheet-height): так
+   она помещается в печатную область любого браузера, и подвал не
+   уезжает на отдельную пустую страницу. Разрыв — после каждой
+   страницы, кроме последней; всё лишнее обрезается границей страницы. */
 .sheet-page {
   position: relative;
   width: var(--sheet-width);
@@ -51,6 +54,15 @@ body {
 .sheet-page:last-child {
   break-after: auto;
   page-break-after: auto;
+}
+
+/* Печать. Поля задаёт сама страница листа (@page без полей — это же
+   убирает колонтитулы браузера с адресом и датой там, где браузер это
+   умеет). Фон вокруг страниц на экране светлый; на бумаге он попал бы
+   в запас под страницей, поэтому при печати он белый, как бумага. */
+@media print {
+  html, body { background: var(--sheet-paper); }
+  #sheet-measure { display: none; }
 }
 
 /* Поток содержимого между шапкой и подвалом. */
@@ -228,6 +240,40 @@ body {
   font-size: var(--sheet-fs-lead);
   color: var(--sheet-ink-3);
 }
+
+/* Номер варианта — справа в строке названия, плашкой той же формы. */
+.sheet-variant {
+  flex: none;
+  padding: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 4);
+  border-radius: var(--sheet-radius-md);
+  border: var(--sheet-rule-width) solid var(--sheet-ink);
+  color: var(--sheet-ink);
+  font-size: var(--sheet-fs-badge);
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Строка полей ученика: фамилия, класс, дата. Линии — как у строки
+   «Ответ: ____», чтобы на листе был один вид поля для письма. */
+.sheet-fields {
+  display: flex;
+  gap: calc(var(--sheet-step) * 6);
+  margin: calc(var(--sheet-step) * -2) 0 calc(var(--sheet-step) * 5);
+  color: var(--sheet-ink-2);
+}
+.sheet-field {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 2);
+}
+.sheet-field--wide { flex: 1 1 auto; }
+.sheet-field-blank {
+  flex: 1 1 auto;
+  min-width: calc(var(--sheet-step) * 14);
+  border-bottom: var(--sheet-rule-width) solid var(--sheet-blank);
+}
+.sheet-field-value { color: var(--sheet-ink); }
 
 /* ══════════════════════════════════════════════════════════
    Рамка «Повторяем:»
@@ -617,6 +663,43 @@ body {
 
 .sheet-solution { break-inside: avoid; }
 
+/* Ключ генератора: номер, ответ, метод — две задачи в строке. */
+.sheet-key-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-body);
+  table-layout: fixed;
+}
+.sheet-key-table caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: calc(var(--sheet-step) * 2);
+}
+.sheet-key-table th,
+.sheet-key-table td {
+  border: var(--sheet-rule-width) solid var(--sheet-card-line);
+  padding: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 2);
+  text-align: left;
+  vertical-align: top;
+}
+.sheet-key-table th[scope='row'] {
+  width: calc(var(--sheet-step) * 7);
+  text-align: center;
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  color: var(--sheet-num-ink);
+  background: var(--sheet-num-bg);
+  font-variant-numeric: tabular-nums;
+}
+.sheet-key-answer {
+  width: 18%;
+  font-variant-numeric: tabular-nums;
+}
+.sheet-key-method {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
 /* ══════════════════════════════════════════════════════════
    Служебное: контейнер обмера. На печать не идёт.
    ══════════════════════════════════════════════════════════ */
@@ -691,6 +774,14 @@ body {
 }
 
 .sheet-arrow { display: block; }
+
+/* Полное решение (гипербола): шаги списком, ответ справа сверху. */
+.sheet-solution--full { align-items: flex-start; }
+.sheet-solution--full .sheet-solution-no { align-self: flex-start; }
+.sheet-solution--full .sheet-solution-body { display: block; }
+.sheet-solution--full .sheet-steps { margin: 0; padding-left: calc(var(--sheet-step) * 5); }
+.sheet-solution--full .sheet-step + .sheet-step { margin-top: calc(var(--sheet-step) * 1); }
+.sheet-solution-sep { color: var(--sheet-ink-3); }
 
 .sheet-solution-answer {
   flex: none;
@@ -774,3 +865,6 @@ body {
 /* Широкий рисунок примера — под текстом, во всю ширину рамки. */
 .sheet-example--stack .sheet-figure { flex: 1 1 100%; display: flex; justify-content: center; }
 .sheet-example--stack .sheet-figure svg { width: auto; }
+
+/* Формула не рвётся переносом посередине — как на сайте (styles/base.css). */
+.katex .katex-html { white-space: nowrap; }

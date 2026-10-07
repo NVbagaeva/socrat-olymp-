@@ -1,12 +1,13 @@
+import type { ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Chart } from '@/components/graph/Chart';
-import { REMEMBER_TITLE, type QuadraticCard, type QuadraticSection as Section } from '@/content/theoryQuadratic';
+import { REMEMBER_TITLE, type TheoryCard, type TheorySection } from '@/content/theoryQuadratic';
 import { katex } from '@/lib/graph/katex';
 import { quadraticTheoryScene } from '@/lib/scenes';
 import { Phrases } from '../Phrases';
 import { WarnIcon } from '../VerdictIcons';
 import { ForwardIcon } from './ForwardIcon';
-import { ParabolaPlayground } from './ParabolaPlayground';
+import { ParabolaPlaygroundLazy } from './ParabolaPlaygroundLazy';
 import { phrases } from './markup';
 
 /** Формула набором KaTeX: разметка собирается на сборке. */
@@ -16,18 +17,36 @@ function formula(tex: string, display = false) {
   };
 }
 
-function Card({ card }: { card: QuadraticCard }) {
+/** Чертёж по ключу сцены: у каждой подтемы свой набор сцен. */
+type SceneFor = (id: string) => unknown;
+
+/**
+ * Готовый рисунок по ключу — для разделов, где чертёж рисует не
+ * движок графиков, а другой (векторы задания №2). Задан — вместо
+ * Chart ставится то, что он вернул.
+ */
+type FigureFor = (id: string) => ReactNode;
+
+function Card({
+  card,
+  sceneFor,
+  figureFor,
+}: {
+  card: TheoryCard<string>;
+  sceneFor: SceneFor;
+  figureFor?: FigureFor;
+}) {
   return (
     <li
       className={clsx(
         'qth-card',
-        card.scene !== undefined && 'qth-card--chart',
+        (card.scene !== undefined || card.illustration !== undefined) && 'qth-card--chart',
         card.forward === true && 'qth-card--forward',
       )}
     >
       <h4 className="qth-card__title">
         {card.forward === true ? <ForwardIcon /> : null}
-        {card.title}
+        <Phrases parts={phrases(card.title)} />
       </h4>
 
       <div className="qth-card__text">
@@ -89,7 +108,33 @@ function Card({ card }: { card: QuadraticCard }) {
       </div>
 
       {card.scene !== undefined ? (
-        <Chart className="qth-card__chart" scene={quadraticTheoryScene(card.scene)} />
+        figureFor !== undefined ? (
+          figureFor(card.scene)
+        ) : (
+          <Chart className="qth-card__chart" scene={sceneFor(card.scene)} />
+        )
+      ) : null}
+
+      {card.illustration !== undefined ? (
+        <figure className="qth-card__chart qth-illustration">
+          {card.illustration.src === undefined ? (
+            <span className="qth-illustration__empty" aria-hidden="true">
+              Здесь будет иллюстрация
+            </span>
+          ) : (
+            /* Картинку автор кладёт в public; размеры задаёт CSS. */
+            <img
+              className="qth-illustration__img"
+              src={card.illustration.src}
+              alt={card.illustration.alt ?? ''}
+              width={card.illustration.width}
+              height={card.illustration.height}
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+          <figcaption className="qth-illustration__caption">{card.illustration.caption}</figcaption>
+        </figure>
       ) : null}
     </li>
   );
@@ -104,7 +149,17 @@ function Card({ card }: { card: QuadraticCard }) {
  * всём проекте. Плашка «Запомни» — та же тёплая плашка, что у
  * линейной подтемы.
  */
-export function QuadraticSection({ section }: { section: Section }) {
+export function QuadraticSection({
+  section,
+  sceneFor = quadraticTheoryScene as SceneFor,
+  figureFor,
+}: {
+  section: TheorySection<string>;
+  /** Чертежи подтемы. Не задано — сцены квадратичной функции. */
+  sceneFor?: SceneFor;
+  /** Готовые рисунки по ключу вместо чертежей движка графиков. */
+  figureFor?: FigureFor;
+}) {
   return (
     <div className="qth">
       <p className="qth__lead">
@@ -113,11 +168,11 @@ export function QuadraticSection({ section }: { section: Section }) {
 
       <ul className="qth__cards">
         {section.cards.map((card) => (
-          <Card card={card} key={card.id} />
+          <Card card={card} sceneFor={sceneFor} figureFor={figureFor} key={card.id} />
         ))}
       </ul>
 
-      {section.playground === true ? <ParabolaPlayground /> : null}
+      {section.playground === true ? <ParabolaPlaygroundLazy /> : null}
 
       <section className="nofn-note nofn-note--warm qth__note">
         <h4 className="nofn-note__title">

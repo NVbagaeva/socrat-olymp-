@@ -14,15 +14,25 @@ export const skillTitle: Record<string, string> = {
   '12.B': 'Аргумент по значению',
   '12.C': 'Абсцисса пересечения',
   '12.D': 'Ордината пересечения',
-  '12Q.A': 'Знак коэффициента a',
-  '12Q.B': 'Значение коэффициента a',
-  '12Q.C': 'Свободный член c',
-  '12Q.D': 'Коэффициент b',
+  '12Q.A': 'Знак коэффициента $a$',
+  '12Q.B': 'Значение коэффициента $a$',
+  '12Q.C': 'Свободный член $c$',
+  '12Q.D': 'Коэффициент $b$',
   '12Q.E': 'Значение функции',
   '12Q.F': 'Аргумент по значению',
   '12Q.G': 'Формула по графику',
   '12Q.H': 'Парабола и прямая',
   '12Q.I': 'Парабола и парабола',
+  '12R.A': '$\\frac{k}{x} + a$: значение функции',
+  '12R.B': '$\\frac{k}{x} + a$: аргумент по значению',
+  '12R.C': '$\\frac{k}{x + a}$: значение функции',
+  '12R.D': '$\\frac{k}{x + a}$: аргумент по значению',
+  '12R.E': '$\\frac{kx + a}{x + b}$: коэффициент $k$',
+  '12R.F': '$\\frac{kx + a}{x + b}$: коэффициент $a$',
+  '12R.G': 'Гипербола и прямая: абсцисса $B$',
+  '12R.H': 'Гипербола и прямая: ордината $B$',
+  '12R.I': '$\\frac{k}{x}$: значение и аргумент',
+  '12R.J': '$\\frac{kx + a}{x + b}$: $b$ и значение',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -31,13 +41,16 @@ export interface SkillLevel {
   /** Значение поля level у задач набора. */
   id: SkillLevelId;
   title: string;
+  /** Подпись; формулы в ней — $…$. */
   lead: string;
+  /** Подпись, набранная KaTeX на сервере (levelsHtml). */
+  leadHtml?: string;
 }
 
 /** Уровни в порядке показа. Показываются только те, что есть у набора. */
 export const skillLevels: SkillLevel[] = [
-  { id: 'lucky', title: 'Базовая', lead: 'b читается с графика' },
-  { id: 'unlucky', title: 'Повышенная', lead: 'b нужно вычислить' },
+  { id: 'lucky', title: 'Базовая', lead: '$b$ читается с графика' },
+  { id: 'unlucky', title: 'Повышенная', lead: '$b$ нужно вычислить' },
 ];
 
 /* У параболы читается с чертежа не b, а то, что спрашивают: знак
@@ -48,8 +61,18 @@ const QUADRATIC_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'ответ нужно вычислить' },
 ];
 
-/** Уровни подтемы: у квадратичной свои подписи. */
+/* У гиперболы уровни различаются числами: целые аргументы и ответы
+   против десятичных и смешанных дробей. */
+const RATIONAL_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'целые числа' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'дроби и подстановка' },
+];
+
+/** Уровни подтемы: у квадратичной и гиперболы свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'rational') {
+    return RATIONAL_LEVELS;
+  }
   return type === 'quadratic' ? QUADRATIC_LEVELS : skillLevels;
 }
 
@@ -60,3 +83,14 @@ export function firstLevel(levels: string[]): SkillLevelId | null {
 
 /** Количество заданий. null — «Все»: число берётся из манифеста. */
 export const skillCounts: (number | null)[] = [5, 10, 20, null];
+
+/**
+ * Уровни с подписями, набранными KaTeX. Зовёт серверная часть вкладки
+ * (TrainerShell, GeneratorTab): конфигуратор — клиентский экран.
+ */
+export function levelsWithHtml(
+  levels: SkillLevel[],
+  typeset: (text: string) => string,
+): SkillLevel[] {
+  return levels.map((level) => ({ ...level, leadHtml: typeset(level.lead) }));
+}

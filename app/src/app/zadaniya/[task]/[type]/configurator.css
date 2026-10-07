@@ -268,6 +268,17 @@
   font-weight: 600;
   color: var(--color-text-brand);
 }
+/* Несколько выбранных навыков — списком, мельче одиночного названия. */
+.cfg-summary__skills {
+  margin: 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: var(--space-1);
+}
+.cfg-summary__skills .cfg-summary__skill {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
 .cfg-summary__count {
   margin-top: calc(-1 * var(--space-2));
   font-size: var(--fs-caption);
@@ -306,6 +317,26 @@
   max-width: 200px;
 }
 
+/* Поле «Своё» количество: крупное, кегль не меньше 16px — иначе
+   iOS увеличивает страницу при фокусе. Отступ прокрутки снизу —
+   на высоту прилипшей панели запуска, чтобы поле под неё не ушло. */
+.cfg-count {
+  gap: var(--space-1);
+}
+.cfg-count__input {
+  max-width: 200px;
+  height: var(--h-control-lg);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  scroll-margin-bottom: calc(var(--h-bnav) + 200px);
+}
+.cfg-count__hint {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+
 /* Плашка под чертежом: голубая подложка, значок слева. */
 .cfg-note {
   display: flex;
@@ -329,6 +360,14 @@
   border: 1px solid var(--color-border-info);
   color: var(--color-primary);
 }
+.cfg-note--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+.cfg-note--warning .cfg-note__ico {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
 .cfg-note__ico svg {
   width: 16px;
   height: 16px;
@@ -350,6 +389,12 @@
 .cfg-bar--two {
   grid-template-columns: auto auto minmax(0, 1fr);
 }
+/* Ссылка на лист без адреса: количество не выбрано. Вид — как у
+   выключенной кнопки. */
+.cfg-bar__start.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
 .cfg-bar__summary {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
@@ -367,7 +412,8 @@
   }
   .cfg-summary {
     position: sticky;
-    top: var(--space-6);
+    /* Под прилипшей лентой вкладок. */
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
   }
 }
 

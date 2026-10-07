@@ -130,7 +130,7 @@ export const P03_05: Prototype = {
     const per = profilePerimeter(s);
     return [
       {
-        text: `Тело — призма над ступенчатым профилем. Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text: `Тело — призма над ступенчатым профилем. Площадь профиля: $${ru(s.W)} \\cdot ${ru(s.h)} + ${ru(s.w)} \\cdot ${ru(s.H - s.h)} = ${ru(area)}$.`,
         value: area,
       },
       {
@@ -138,7 +138,7 @@ export const P03_05: Prototype = {
         value: per,
       },
       {
-        text: `Поверхность: два профиля плюс боковая: 2 · ${ru(area)} + ${ru(per)} · ${ru(s.depth)} = ${ru(2 * area + per * s.depth)}.`,
+        text: `Поверхность: два профиля плюс боковая: $2 \\cdot ${ru(area)} + ${ru(per)} \\cdot ${ru(s.depth)} = ${ru(2 * area + per * s.depth)}$.`,
         value: 2 * area + per * s.depth,
       },
     ];
@@ -184,11 +184,11 @@ export const P03_11: Prototype = {
         text: 'Тело — призма над ступенчатым профилем: объём равен площади профиля на глубину.',
       },
       {
-        text: `Площадь профиля: ${ru(s.W)} · ${ru(s.h)} + ${ru(s.w)} · ${ru(s.H - s.h)} = ${ru(area)}.`,
+        text: `Площадь профиля: $${ru(s.W)} \\cdot ${ru(s.h)} + ${ru(s.w)} \\cdot ${ru(s.H - s.h)} = ${ru(area)}$.`,
         value: area,
       },
       {
-        text: `Объём: ${ru(area)} · ${ru(s.depth)} = ${ru(area * s.depth)}.`,
+        text: `Объём: $${ru(area)} \\cdot ${ru(s.depth)} = ${ru(area * s.depth)}$.`,
         value: area * s.depth,
       },
     ];

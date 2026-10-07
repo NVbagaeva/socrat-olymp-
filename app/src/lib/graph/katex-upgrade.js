@@ -12,6 +12,29 @@
 
 var OPTIONS = { throwOnError: false, displayMode: false, output: 'html' };
 
+/* Формула в строке текста не должна раздувать высоту строки: дробь
+   \dfrac (выносной размер) набирается как \tfrac. Правило одно на
+   сайт и на листы для печати — здесь и в graph/katex.js. */
+function inlineTex(tex) {
+  return String(tex).replace(/\\dfrac(?![a-zA-Z])/g, '\\tfrac');
+}
+
+/* Исключение — формула с классом math--display-frac: решения в ключе
+   учителя стоят отдельной строкой, а не внутри текста, и строчная
+   дробь там мелкая — на телефоне и в печати не читается. Там \dfrac
+   остаётся крупной. */
+var DISPLAY_FRAC = 'math--display-frac';
+
+/* Сам KaTeX проекта (graph/katex.js) тоже сводит \dfrac к \tfrac у
+   формулы в строке — ему признак передаётся опцией displayFrac. KaTeX
+   незнакомую опцию пропускает. */
+var DISPLAY_FRAC_OPTIONS = { throwOnError: false, displayMode: false, output: 'html',
+                             displayFrac: true };
+
+function displayFrac(node) {
+  return !!(node.classList && node.classList.contains(DISPLAY_FRAC));
+}
+
 /* Обработанные формулы помечаются, поэтому повторный вызов
    на том же куске страницы ничего не ломает. */
 function upgrade(root, katex) {
@@ -22,7 +45,9 @@ function upgrade(root, katex) {
 
   Array.prototype.forEach.call(nodes, function (node) {
     try {
-      katex.render(node.getAttribute('data-tex'), node, OPTIONS);
+      var tex = node.getAttribute('data-tex');
+      if (displayFrac(node)) { katex.render(tex, node, DISPLAY_FRAC_OPTIONS); }
+      else { katex.render(inlineTex(tex), node, OPTIONS); }
       node.setAttribute('data-katex', 'on');
       done++;
     } catch {
@@ -36,12 +61,12 @@ function upgrade(root, katex) {
 
 function render(tex, node, katex) {
   if (!katex || !node) { return false; }
-  katex.render(tex, node, OPTIONS);
+  katex.render(inlineTex(tex), node, OPTIONS);
   node.setAttribute('data-katex', 'on');
   return true;
 }
 
-const api = { upgrade: upgrade, render: render, OPTIONS: OPTIONS };
+const api = { upgrade: upgrade, render: render, inlineTex: inlineTex, OPTIONS: OPTIONS };
 
 export default api;
-export { upgrade, render, OPTIONS };
+export { upgrade, render, inlineTex, OPTIONS };

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Куб с закрашенным треугольным сечением">
+  <!-- Куб: передняя грань (60,110)–(190,240), задняя смещена на (+50,−50).
+       Сечение — через три вершины, смежные с ближней нижней правой:
+       (190,110), (60,240), (240,190). Невидимые рёбра и часть сечения
+       по нижней грани — пунктиром.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa,
+       лёгкая заливка #7FAEEA с прозрачностью 0.12, обводка 1.5–2, точки r 5–6.
+       Фона нет — его даёт плашка карточки. -->
+
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <!-- сечение -->
+    <polygon points="190,110 60,240 240,190" fill="#c3dffa" fill-opacity="0.85" stroke="none"/>
+    <!-- видимые рёбра -->
+    <path d="M60 110 H 190 V 240 H 60 Z" stroke-width="1.5"/>
+    <path d="M60 110 L110 60 H 240 V 190 L190 240 M190 110 L240 60" stroke-width="1.5"/>
+    <!-- невидимые рёбра -->
+    <path d="M110 60 V 190 M110 190 L60 240 M110 190 H 240" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <!-- стороны сечения -->
+    <path d="M60 240 L190 110 L240 190" stroke-width="2"/>
+    <path d="M60 240 L240 190" stroke-width="2" stroke-dasharray="6 5"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="190" cy="110" r="6"/>
+    <circle cx="60" cy="240" r="6"/>
+    <circle cx="240" cy="190" r="6"/>
+  </g>
+</svg>

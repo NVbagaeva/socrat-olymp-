@@ -1,5 +1,6 @@
 import Image from 'next/image';
 
+import { assetUrl } from '@/lib/assetUrl';
 export interface TaskImageProps {
   /** Номер задания двумя цифрами — он же номер файла картинки. */
   no: string;
@@ -26,7 +27,7 @@ export function TaskImage({ no, format = 'webp' }: TaskImageProps) {
   return (
     <Image
       className="ill-photo"
-      src={`/images/task-${no}.${format}`}
+      src={assetUrl(`/images/task-${no}.${format}`)}
       alt=""
       width={96}
       height={96}

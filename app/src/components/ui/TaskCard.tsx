@@ -17,8 +17,14 @@ interface TaskCardOwnProps {
   statusTone?: TaskStatusTone;
   /** Адрес раздела. Задан — карточка становится ссылкой целиком. */
   href?: string;
-  /** Раздел ещё не открыт: карточка неинтерактивна и помечена бейджем. */
+  /**
+   * Раздел ещё не открыт: карточка приглушена и помечена бейджем
+   * «Скоро». Без href она неинтерактивна; с href — ведёт на
+   * страницу-заглушку раздела.
+   */
   comingSoon?: boolean;
+  /** Дополнительные бейджи после уровня сложности: «структура 2027». */
+  badges?: readonly { label: ReactNode; tone?: BadgeTone }[];
   /** Миниатюра раздела. Оформление — за страницей, здесь только место. */
   illustration?: ReactNode;
 }
@@ -41,6 +47,7 @@ export function TaskCard({
   statusTone = 'neutral',
   href,
   comingSoon = false,
+  badges,
   illustration,
   className,
   ...rest
@@ -62,6 +69,11 @@ export function TaskCard({
         <span className="task-card__meta">
           {comingSoon ? <Badge>Скоро</Badge> : null}
           {difficulty !== undefined ? <Badge tone={difficultyTone}>{difficulty}</Badge> : null}
+          {badges?.map((badge, index) => (
+            <Badge key={index} tone={badge.tone ?? 'neutral'}>
+              {badge.label}
+            </Badge>
+          ))}
           {status !== undefined ? (
             <span className={clsx('t-caption', STATUS[statusTone])}>{status}</span>
           ) : null}
@@ -84,6 +96,16 @@ export function TaskCard({
       ) : null}
     </>
   );
+
+  /* Раздел не открыт, но у него есть страница-заглушка: вид
+     неоткрытого раздела, а сама карточка — ссылка на заглушку. */
+  if (comingSoon && href !== undefined) {
+    return (
+      <Link className={clsx('task-card', 'task-card--soon', className)} href={href}>
+        {body}
+      </Link>
+    );
+  }
 
   /* Раздел не открыт: ни ссылки, ни кнопки, ни обработчика. Обычный
      span не попадает в обход по Tab и не обещает кликабельности,

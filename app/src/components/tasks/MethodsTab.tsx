@@ -3,19 +3,26 @@ import { OPORNYE } from '@/content/opornye';
 import { METODY } from '@/content/metody';
 import { prepSkillsFor } from '@/content/prepSkills';
 import { QUADRATIC_METODY, type QuadraticMetod } from '@/content/quadraticMetody';
+import { RATIONAL_METODY } from '@/content/rationalMetody';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
-import {
-  MetodyKartochki,
-  type KartochkaMetoda,
-} from '@/components/tasks/veroyatnost/MetodyKartochki';
+import type { KartochkaMetoda } from '@/components/tasks/veroyatnost/MetodyKartochki';
+import { MetodyKartochkiLazy } from '@/components/tasks/veroyatnost/MetodyKartochkiLazy';
 import { prepSkillTotal } from '@/lib/prep';
-import { typeset } from '@/lib/tex';
+import { texPlain, typeset } from '@/lib/tex';
+import { ReadMark } from './ReadMark';
 
 export interface MethodsTabProps {
   /** Подтема: её список методов. */
   type: string;
   /** Адрес подтемы: от него считаются ссылки на опорные задачи. */
   base: string;
+  /** Ключ прочитанных методов для кольца прогресса: «methods:12:rational». */
+  trackKey?: string;
+}
+
+/** Методы подтемы; пустой список — вкладка ещё готовится. */
+export function metodyFor(type: string): QuadraticMetod[] {
+  return type === 'quadratic' ? QUADRATIC_METODY : type === 'rational' ? RATIONAL_METODY : [];
 }
 
 /** Текст с формулами → готовая разметка. Набор идёт на сборке. */
@@ -69,15 +76,16 @@ function kartochki(metody: QuadraticMetod[], type: string, base: string): Kartoc
   return metody.map((metod) => ({
     id: metod.id,
     nomer: metod.nomer,
-    nazvanie: metod.nazvanie,
-    opisanie: metod.opisanie,
+    nazvanie: <Tex text={metod.nazvanie} />,
+    nazvanieText: texPlain(metod.nazvanie),
+    opisanie: <Tex text={metod.opisanie} />,
     formula: <Tex text={`$${metod.formula}$`} />,
     trenirovki: metod.navyki.map((navyk) => ({
       href: `${base}/${OPORNYE.tail}${navyk}/`,
       schet: METODY_KARTOCHKI.modal.vBanke(prepSkillTotal(type, navyk)),
       /* Название набора нужно, только когда кнопок несколько: иначе
          оно повторяло бы заголовок окна. */
-      ...(odin(metod) ? {} : { nazvanie: nazvaniya.get(navyk) ?? navyk }),
+      ...(odin(metod) ? {} : { nazvanie: <Tex text={nazvaniya.get(navyk) ?? navyk} /> }),
     })),
     bloki: {
       kakUznat: <Abzatsy text={metod.kakUznat} />,
@@ -97,8 +105,8 @@ function kartochki(metody: QuadraticMetod[], type: string, base: string): Kartoc
  * у подтемы без списка методов под заголовком стоит честное пустое
  * состояние.
  */
-export function MethodsTab({ type, base }: MethodsTabProps) {
-  const metody = type === 'quadratic' ? QUADRATIC_METODY : [];
+export function MethodsTab({ type, base, trackKey }: MethodsTabProps) {
+  const metody = metodyFor(type);
 
   return (
     <section className="methods">
@@ -108,7 +116,15 @@ export function MethodsTab({ type, base }: MethodsTabProps) {
       {metody.length === 0 ? (
         <EmptyState title={METODY.gotovitsya.title} description={METODY.gotovitsya.description} />
       ) : (
-        <MetodyKartochki items={kartochki(metody, type, base)} />
+        <>
+          <MetodyKartochkiLazy
+            items={kartochki(metody, type, base)}
+            {...(trackKey === undefined ? {} : { trackKey })}
+          />
+          {trackKey === undefined ? null : (
+            <ReadMark storeKey={trackKey} ids={metody.map((metod) => metod.id)} done="Методы прочитаны" />
+          )}
+        </>
       )}
     </section>
   );
