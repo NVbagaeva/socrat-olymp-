@@ -1,9 +1,9 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Checkbox, Details, Input, Select } from '@/components/ui';
-import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
+import { GENERATOR_11, MARSHRUTY_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
 import { TRENAZHER_11, UROVNI_11, VARIANT_EGE_11 } from '@/content/zadanie11';
 import {
@@ -23,13 +23,19 @@ import type {
   UslovieBanka,
 } from '@/lib/zadanie11/trenazher/sessiya';
 import type { Level, SectionId } from '@/lib/zadanie11/types';
+import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { IkonkaRazdela, Piktogramma, Zvezdy } from './Piktogrammy';
 
-type Preset = 'ege' | 'urok' | 'svoy';
+/** Названия опорных блоков по идентификатору — для состава готового урока. */
+const BLOKI_NAZVANIYA: Record<string, string> = Object.fromEntries(
+  BLOKI.map((b) => [b.id, b.nazvanie]),
+);
+
+type Preset = 'ege' | 'urok' | 'marshrut' | 'svoy';
 type Vkladka = 'uchenik' | 'uchitel' | 'dz';
 
 /** Блоки листа по пресету: вариант ЕГЭ — одни задачи, урок — весь рабочий лист. */
-const BLOKI_PRESETA: Record<Exclude<Preset, 'svoy'>, readonly BlokLista[]> = {
+const BLOKI_PRESETA: Record<Exclude<Preset, 'svoy' | 'marshrut'>, readonly BlokLista[]> = {
   ege: ['zadachi'],
   urok: BLOKI_LISTA,
 };
@@ -131,6 +137,8 @@ export function Generator11({
 }) {
   const [istochnik, setIstochnik] = useState<Istochnik>('mix');
   const [rezhim, setRezhim] = useState<'otrabotka' | 'komplekt'>('komplekt');
+  /* Готовый урок (маршрут): номер; выбирается пресетом или адресом ?urok=N. */
+  const [marshrut, setMarshrut] = useState(1);
   const [variants, setVariants] = useState(4);
   const [preset, setPreset] = useState<Preset>('ege');
   const [urokRazdel, setUrokRazdel] = useState<SectionId>('PR');
@@ -158,7 +166,11 @@ export function Generator11({
   const vybrano = vse.filter(
     (p) => (sostav[p.id] ?? 0) > 0 && !(istochnik === 'bank' && p.section === 'RZ'),
   );
-  const vsegoZadach = vybrano.reduce((s, p) => s + (sostav[p.id] ?? 0), 0);
+  const gotovyy = MARSHRUTY_11.find((m) => m.no === marshrut) ?? MARSHRUTY_11[0];
+  const vMarshrute =
+    gotovyy === undefined ? 0 : gotovyy.opornye.length + gotovyy.bank.length + gotovyy.novye.length;
+  const vsegoZadach =
+    preset === 'marshrut' ? vMarshrute : vybrano.reduce((s, p) => s + (sostav[p.id] ?? 0), 0);
   const bloki = poryadok.filter((b) => b === 'zadachi' || vkl.has(b));
 
   function perelozhit(b: BlokLista, shag: -1 | 1) {
@@ -187,6 +199,7 @@ export function Generator11({
 
   function vybratPreset(next: Preset) {
     setPreset(next);
+    if (next === 'marshrut') setRezhim('otrabotka');
     if (next === 'ege') {
       setSostav(sostavEge());
       setRezhim('komplekt');
@@ -216,22 +229,45 @@ export function Generator11({
     }
   }
 
-  function sgenerirovat() {
+  function sgenerirovat(urok?: number) {
     const seed = seedInput.trim() === '' ? sluchaynyySeed() : seedInput.trim();
     setVariant(0);
+    const gotov = urok !== undefined || preset === 'marshrut';
     void sobrat({
-      rezhim,
+      rezhim: gotov ? 'marshrut' : rezhim,
       istochnik,
       sostav: vybrano.map((p) => ({ id: p.id, n: sostav[p.id] ?? 1 })),
-      variants: rezhim === 'komplekt' ? variants : 1,
+      variants: gotov || rezhim === 'komplekt' ? variants : 1,
       seed,
       zameny: {},
-      marshrut: 1,
+      marshrut: urok ?? marshrut,
       theme: 'color',
       bloki,
       dz: dzN,
     });
   }
+
+  /* Адрес с «Для репетиторов»: ?urok=N — готовый урок, сразу собранный;
+     ?razdel=ID — пресет «Урок по разделу» с этим разделом. */
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const n = Number(q.get('urok'));
+    const sec = q.get('razdel');
+    if (MARSHRUTY_11.some((m) => m.no === n)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- состояние из адреса при открытии
+      setPreset('marshrut');
+      setMarshrut(n);
+      setRezhim('otrabotka');
+      setVariants(1);
+      sgenerirovat(n);
+    } else if (sec !== null && razdely.some((r) => r.id === sec)) {
+      setPreset('urok');
+      setRezhim('otrabotka');
+      setVkl(new Set(BLOKI_PRESETA.urok));
+      urok(sec as SectionId, urokN);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при открытии
+  }, []);
 
   function zamenit(pos: string) {
     if (params === null) return;
@@ -318,7 +354,26 @@ export function Generator11({
             <Piktogramma name="gear" />
             {GENERATOR_11.rezhim}
           </h2>
-          <div className="z11-gen__rezhimy" role="radiogroup" aria-label={GENERATOR_11.rezhim}>
+          {preset === 'marshrut' ? (
+            <>
+              <p className="z11-istochnik__note">{GENERATOR_11.marshrutRezhim}</p>
+              <div className="z11-vybrannaya__row">
+                <span>{GENERATOR_11.variantov}</span>
+                <Stepper
+                  value={variants}
+                  min={1}
+                  max={8}
+                  onChange={setVariants}
+                  label={GENERATOR_11.variantov}
+                />
+              </div>
+            </>
+          ) : null}
+          <div
+            className={clsx('z11-gen__rezhimy', preset === 'marshrut' && 'is-hidden')}
+            role="radiogroup"
+            aria-label={GENERATOR_11.rezhim}
+          >
             {GENERATOR_11.rezhimy.map((r) => (
               <button
                 key={r.id}
@@ -336,7 +391,7 @@ export function Generator11({
               </button>
             ))}
           </div>
-          {rezhim === 'komplekt' ? (
+          {rezhim === 'komplekt' && preset !== 'marshrut' ? (
             <div className="z11-vybrannaya__row">
               <span>{GENERATOR_11.variantov}</span>
               <Stepper
@@ -356,7 +411,7 @@ export function Generator11({
             {GENERATOR_11.sostav}
           </h2>
           <div className="z11-gen__presety" role="radiogroup" aria-label={GENERATOR_11.sostav}>
-            {(['ege', 'urok', 'svoy'] as const).map((k) => (
+            {(['ege', 'urok', 'marshrut', 'svoy'] as const).map((k) => (
               <button
                 key={k}
                 type="button"
@@ -371,6 +426,43 @@ export function Generator11({
             ))}
           </div>
           {preset === 'ege' ? <p className="z11-istochnik__note">{GENERATOR_11.egeLead}</p> : null}
+          {preset === 'marshrut' ? (
+            <div className="z11-gen__urok">
+              <label className="z11-gen__urok-label" htmlFor="z11-gen-marshrut">
+                {GENERATOR_11.urokGotovyy}
+              </label>
+              <Select
+                id="z11-gen-marshrut"
+                value={String(marshrut)}
+                onChange={(e) => setMarshrut(Number(e.target.value))}
+              >
+                {MARSHRUTY_11.map((m) => (
+                  <option key={m.no} value={String(m.no)}>
+                    {GENERATOR_11.urokNo(m.no)}. {m.title}
+                  </option>
+                ))}
+              </Select>
+              <p className="z11-istochnik__note">{GENERATOR_11.marshrutLead}</p>
+              {gotovyy === undefined ? null : (
+                <ul className="z11-gen__etapy">
+                  {(['opornye', 'bank', 'novye'] as const).map((k) => (
+                    <li key={k}>
+                      <b>{SHEET_11.bloki[k]}</b>
+                      <span>
+                        {k === 'opornye'
+                          ? [...new Set(gotovyy.opornye)]
+                              .map((id) => BLOKI_NAZVANIYA[id] ?? id)
+                              .join(' · ')
+                          : gotovyy[k]
+                              .map((id) => vse.find((p) => p.id === id)?.title ?? id)
+                              .join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : null}
           {preset === 'urok' ? (
             <div className="z11-gen__urok">
               <label className="z11-gen__urok-label" htmlFor="z11-gen-urok-razdel">
@@ -400,7 +492,7 @@ export function Generator11({
               <p className="z11-istochnik__note">{GENERATOR_11.urokLead}</p>
             </div>
           ) : null}
-          {preset !== 'svoy' ? (
+          {preset !== 'svoy' && preset !== 'marshrut' ? (
             <ul className="z11-gen__vybrannye">
               {vybrano.map((p) => (
                 <li key={p.id} className="z11-gen__vybrannyy" title={p.kod}>
@@ -483,7 +575,9 @@ export function Generator11({
               );
             })}
           </ul>
-          <p className="z11-gen__itogo">{GENERATOR_11.itogo(vsegoZadach, rezhim === 'komplekt')}</p>
+          <p className="z11-gen__itogo">
+            {GENERATOR_11.itogo(vsegoZadach, preset === 'marshrut' || rezhim === 'komplekt')}
+          </p>
         </section>
 
         <section className="z11-card z11-gen__blok">
@@ -539,8 +633,10 @@ export function Generator11({
             <Piktogramma name="table" />
             {GENERATOR_11.blokiLista}
           </h2>
-          <p className="z11-istochnik__note">{GENERATOR_11.blokiLead}</p>
-          <ol className="z11-gen__bloki">
+          <p className="z11-istochnik__note">
+            {preset === 'marshrut' ? GENERATOR_11.blokiMarshruta : GENERATOR_11.blokiLead}
+          </p>
+          <ol className={clsx('z11-gen__bloki', preset === 'marshrut' && 'is-hidden')}>
             {poryadok.map((b, i) => {
               const na = b === 'zadachi' || vkl.has(b);
               const fiks = b === 'dz';
@@ -620,7 +716,7 @@ export function Generator11({
           className="z11-gen__go"
           size="lg"
           disabled={vsegoZadach === 0 || zagruzka}
-          onClick={sgenerirovat}
+          onClick={() => sgenerirovat()}
         >
           <Piktogramma name="play" />
           {zagruzka ? GENERATOR_11.gotovim : GENERATOR_11.sobrat}
@@ -754,7 +850,24 @@ export function Generator11({
                   );
                 }
                 const svoi = zadachi.filter((z) => z.chast === b);
-                return svoi.length === 0 ? null : (
+                if (svoi.length === 0) return null;
+                if (params?.rezhim === 'marshrut') {
+                  /* Готовый урок: этапы опорные → банк → новые. */
+                  return (['opornye', 'bank', 'novye'] as const).map((k) => {
+                    const etap = svoi.filter((z) => z.blok === k);
+                    return etap.length === 0 ? null : (
+                      <section key={k} className="z11-a4__chast">
+                        <h4 className="z11-a4__h">{SHEET_11.bloki[k]}</h4>
+                        <ol className="z11-a4__list">
+                          {etap.map((z) => (
+                            <Zadacha key={z.pos} z={z} />
+                          ))}
+                        </ol>
+                      </section>
+                    );
+                  });
+                }
+                return (
                   <section key={b} className="z11-a4__chast">
                     {sPolosami ? <h4 className="z11-a4__h">{SHEET_11.chasti[b]}</h4> : null}
                     <ol className="z11-a4__list">

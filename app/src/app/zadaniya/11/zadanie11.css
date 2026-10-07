@@ -2904,16 +2904,6 @@
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
-@media (min-width: 1180px) {
-  .z11-rep {
-    grid-template-columns: minmax(0, 1fr) 300px;
-    align-items: start;
-  }
-  .z11-rep__side {
-    position: sticky;
-    top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
-  }
-}
 .z11-rep__main {
   display: grid;
   gap: var(--space-6);
@@ -3626,7 +3616,7 @@
 
 .z11-gen__presety {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
 @media (max-width: 480px) {
@@ -3867,4 +3857,50 @@
 }
 .z11-a4 .z11-sheet-osh__steps li + li {
   margin-top: var(--space-1);
+}
+
+/* ── Для репетиторов: ссылки у заметок; генератор: готовый урок ── */
+.z11-zametki__ssylki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z11-zametka__note {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-gen__rezhimy.is-hidden,
+.z11-gen__bloki.is-hidden {
+  display: none;
+}
+.z11-gen__etapy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-gen__etapy li {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z11-gen__etapy span {
+  color: var(--color-text-secondary);
+}
+/* Карточка урока не шире колонки: кнопка переносится на две строки. */
+.z11-urok {
+  min-width: 0;
+}
+.z11-urok__btns .btn {
+  min-width: 0;
+  white-space: normal;
+  text-align: left;
 }
