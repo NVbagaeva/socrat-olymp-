@@ -126,7 +126,26 @@ export function TeoriyaShell({
     requestAnimationFrame(() => scrollTo(id));
   }
 
-  const spisok = <TopicContents items={[...razdely]} active={aktivnyy} onSelect={vybrat} />;
+  /* Подпункт открытого раздела (теория №11): элемент на странице по id. */
+  function vybratPodpunkt(id: string): void {
+    zakrepit();
+    setShtorka(false);
+    requestAnimationFrame(() => {
+      const node = document.getElementById(id);
+      if (node !== null) {
+        scrollToSection(node);
+      }
+    });
+  }
+
+  const spisok = (
+    <TopicContents
+      items={[...razdely]}
+      active={aktivnyy}
+      onSelect={vybrat}
+      onSelectPodpunkt={vybratPodpunkt}
+    />
+  );
   const otkryto = razdely.find((razdel) => razdel.id === aktivnyy);
 
   return (

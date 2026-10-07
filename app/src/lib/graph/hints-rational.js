@@ -69,6 +69,13 @@ function term(f) {
 function words(f) { return R.valueText(f); }
 
 function exact(o) { return o ? frac(o.p, o.q) : null; }
+
+/* Правая часть прямой ax + b: «2x - 3», «-x + 1», «0,5x». */
+function lineTexShort(a, b) {
+  var n = num(a);
+  var lead = n === 1 ? '' : n === -1 ? '-' : tex(a);
+  return lead + 'x' + term(b);
+}
 function f0(v) { return Line.toFrac(v); }
 function neg(f) { return mul(frac(-1), f); }
 
@@ -300,9 +307,10 @@ function answerStep(sol, meta, c) {
     return step;
   }
   var y0 = exact(q.y0);
-  step.text = 'Реши уравнение $f(x) = ' + tex(y0) + '$: перенеси сдвиг вверх-вниз, ' +
+  step.text = 'Реши уравнение $f(x) = ' + tex(y0) + '$. ОДЗ: знаменатель не равен нулю, $' +
+    (isZero(s) ? 'x \\ne 0' : 'x \\ne ' + tex(s)) + '$. Перенеси сдвиг вверх-вниз, ' +
     '$\\dfrac{' + tex(c.m) + '}{x' + term(neg(s)) + '} = ' + tex(y0) + term(neg(t)) +
-    '$, затем найди знаменатель и $x$.';
+    '$, затем найди знаменатель и $x$ и проверь, что корень входит в ОДЗ.';
   step.fields = [{ label: 'x =', answer: plain(answer) }];
   step.wrong = 'Проверь, что вычел(ла) сдвиг до того, как перевернуть дробь.';
   return step;
@@ -397,9 +405,42 @@ function lineHints(task, solution) {
         after: solutionTex(sol)
       }));
     } else if (sol.id === 'equation') {
+      var eqRight = '$\\dfrac{' + tex(k) + '}{x} = ' + lineTexShort(a, b) + '$';
+      steps.push(Object.assign(base(sol), {
+        kind: 'questions', focus: null, reminder: null, strong: false,
+        questions: [{
+          prompt: 'Какое уравнение задаёт точки пересечения графиков?',
+          options: shuffle([
+            { text: eqRight, right: true, why: null, key: 'eq' },
+            { text: '$\\dfrac{' + tex(k) + '}{x} = 0$', right: false, key: 'eq-zero',
+              why: 'Нет: в точках пересечения равны значения двух функций — гиперболы и прямой.' },
+            { text: '$' + tex(k) + 'x = ' + lineTexShort(a, b) + '$', right: false, key: 'eq-kx',
+              why: 'Нет: у гиперболы $f(x) = \\dfrac{k}{x}$, а не $kx$.' }
+          ], key + ':eq'),
+          right: 'Верно: значения функций в точке пересечения равны.',
+          answer: 'eq'
+        }]
+      }));
+    } else if (sol.id === 'odz') {
+      steps.push(Object.assign(base(sol), {
+        kind: 'questions', focus: null, reminder: null, strong: false,
+        questions: [{
+          prompt: 'Какие значения $x$ недопустимы?',
+          options: shuffle([
+            { text: '$x \\ne 0$', right: true, why: null, key: 'x!=0' },
+            { text: '$x \\ne ' + tex(xA) + '$', right: false, key: 'x!=xA',
+              why: 'Нет: при $x = ' + tex(xA) + '$ знаменатель не равен нулю — это абсцисса точки $A$.' },
+            { text: 'ограничений нет', right: false, key: 'none',
+              why: 'Нет: $x$ стоит в знаменателе, а на ноль делить нельзя.' }
+          ], key + ':odz'),
+          right: 'Верно: ОДЗ — $x \\ne 0$, знаменатель не равен нулю.',
+          answer: 'x!=0'
+        }]
+      }));
+    } else if (sol.id === 'quadratic') {
       steps.push(Object.assign(base(sol), {
         kind: 'fields',
-        text: 'Приравняй функции: $\\dfrac{k}{x} = ax + b$. Домножь на $x$ и перенеси всё в одну часть: ' +
+        text: 'Умножь обе части на $x \\ne 0$ (по ОДЗ) и перенеси всё в одну часть: ' +
           'получится $ax^2 + bx - k = 0$. Запиши коэффициенты этого уравнения.',
         fields: [{ label: '\\text{при } x^2:', answer: plain(a) }, { label: '\\text{при } x:', answer: plain(b) },
           { label: '\\text{свободный член:}', answer: plain(neg(k)) }],
@@ -427,7 +468,7 @@ function lineHints(task, solution) {
       steps.push(Object.assign(base(sol), {
         kind: 'questions', focus: null, reminder: null, strong: false,
         questions: [{
-          prompt: 'Какой из корней — абсцисса точки $B$?',
+          prompt: 'Какой корень подходит — абсцисса точки $B$? (Оба корня не равны нулю и входят в ОДЗ.)',
           options: shuffle(options, key + ':root'),
           right: 'Верно: $x_B = ' + tex(xB) + '$ — точка $A$ уже отмечена, $B$ — второй корень.',
           answer: 'x=' + plain(xB)
