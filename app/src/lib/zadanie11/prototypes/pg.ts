@@ -5,7 +5,7 @@
  * Сумма арифметической прогрессии: S = (a₁ + aₙ)·n / 2.
  */
 
-import { chtoSprashivayut, etapy, num, str, vopros } from '../kit';
+import { chtoSprashivayut, etapy, num, slovo, str, vopros } from '../kit';
 import { d, frac, txt } from '../num';
 import { sk, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
@@ -19,6 +19,13 @@ const PG01: Subtype = {
   keywords: ['улитка', 'прогрессия', 'каждый день больше', 'задачи'],
   solve(p) {
     const form = str(p, 'form', ['ulitka', 'vasya'] as const);
+    /* Аналог: страницы книги, слова, отжимания — что растёт по дням. */
+    const chto = slovo(p, 'chto', form === 'ulitka' ? 'Расстояния по дням' : 'Задачи по дням');
+    const posled = slovo(
+      p,
+      'posled',
+      form === 'ulitka' ? 'расстояние за последний день' : 'число задач в последний день',
+    );
     if (form === 'ulitka') {
       const S = num(p, 'S');
       const s = num(p, 's');
@@ -29,9 +36,7 @@ const PG01: Subtype = {
         etapy: etapy(
           [
             'Обозначаем',
-            [
-              'Расстояния по дням — арифметическая прогрессия $a_1, a_2, \\ldots, a_n$; $n$ — число дней.',
-            ],
+            [`${chto} — арифметическая прогрессия $a_1, a_2, \\ldots, a_n$; $n$ — число дней.`],
           ],
           ['Формула суммы', ['$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$.']],
           ['Уравнение', [`$a_1+a_n=${d(s)}$, $S_n=${d(S)}$: $\\dfrac{${d(s)}n}{2}=${d(S)}$.`]],
@@ -48,7 +53,7 @@ const PG01: Subtype = {
             '$S_n=a_1+a_n$',
           ]),
           vopros('Чему равно $a_1+a_n$?', `$${d(s)}$`, [`$${d(S)}$`, `$${d(S - s)}$`]),
-          chtoSprashivayut('число дней', ['расстояние за последний день', 'разность прогрессии']),
+          chtoSprashivayut('число дней', [posled, 'разность прогрессии']),
         ],
         lifehacks: ['fast-count'],
       };
@@ -64,7 +69,7 @@ const PG01: Subtype = {
         [
           'Обозначаем',
           [
-            `Задачи по дням — арифметическая прогрессия, $a_1=${d(a1)}$, $n=${d(n)}$, $S_n=${d(S)}$; ищем $a_n$.`,
+            `${chto} — арифметическая прогрессия, $a_1=${d(a1)}$, $n=${d(n)}$, $S_n=${d(S)}$; ищем $a_n$.`,
           ],
         ],
         ['Формула суммы', ['$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$.']],
@@ -82,7 +87,7 @@ const PG01: Subtype = {
         ]),
         vopros('Что известно?', '$a_1$, $n$ и сумма $S_n$', ['$a_1$ и разность', 'только сумма']),
         vopros('Чему равно $a_1+a_n$?', `$${d((2 * S) / n)}$`, [`$${d(S / n)}$`, `$${d(S)}$`]),
-        chtoSprashivayut('число задач в последний день', ['разность прогрессии', 'число дней']),
+        chtoSprashivayut(posled, ['разность прогрессии', 'число дней']),
       ],
       lifehacks: ['fast-count'],
     };

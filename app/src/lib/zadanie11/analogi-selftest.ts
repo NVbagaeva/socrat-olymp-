@@ -148,6 +148,9 @@ const SYUZHET = new Set([
   'delo',
   'imena3',
   'imena3Rod',
+  /* Прогрессии: что растёт по дням. */
+  'chto',
+  'posled',
 ]);
 
 export function model(params: Params): Params {
@@ -499,6 +502,22 @@ const PRAVILA: Record<string, Pravilo> = {
         ...(/во второй раз/.test(a.text) ? [] : ['нет «во второй раз»']),
       ];
     },
+  },
+  /* ── Прогрессии ── */
+  'PG-01': {
+    chisla: (a) => (a.params.form === 'ulitka' ? ['S', 's'] : ['S', 'a1', 'n']),
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      (a.ask === 'ulitka'
+        ? /(Сколько|сколько) дней|За сколько дней/.test(a.text)
+        : /в последний день/.test(poslednee(a.text))),
+    pravdopodobie: (a) => [
+      ...(/на одно и то же/.test(a.text) ? [] : ['нет «на одно и то же»']),
+      ...(a.params.form === 'vasya' && a.answer <= num(a.params, 'a1')
+        ? ['последний день не больше первого']
+        : []),
+      ...vne('дней', a.params.form === 'ulitka' ? a.answer : num(a.params, 'n'), 3, 40),
+    ],
   },
   /* ── Проценты ── */
   'PR-01': {
@@ -1068,6 +1087,12 @@ export function checkAnalogi(typeset: (tex: string) => string) {
   /* Банк сравниваем без слов сюжета (металл в СМ-04 — тоже сюжет). */
   const pohozha = pohozhaNa([...BANK, ...RAZMINKA].map((b) => ({ ...b, params: model(b.params) })));
   let checked = 0;
+  /* У каждого прототипа банка и подтипа разминки — пул аналогов. */
+  for (const id of new Set([...BANK, ...RAZMINKA].map((b) => b.id))) {
+    if (POOL_ANALOGOV[id] === undefined) {
+      problems.push({ where: id, what: 'нет пула аналогов' });
+    }
+  }
   /* Слово сюжета не может совпадать с числовым параметром модели банка. */
   for (const b of [...BANK, ...RAZMINKA]) {
     for (const [k, v] of Object.entries(b.params)) {
