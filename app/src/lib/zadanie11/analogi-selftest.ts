@@ -11,12 +11,13 @@
  * методики, что задачи банка; склонения «1 час / 2 часа / 5 часов».
  */
 
-import { BANK } from './bank';
+import { BANK, RAZMINKA } from './bank';
 import { POOL_ANALOGOV, type Analog } from './analogi';
 import { paramsKey, pohozhaNa } from './gen/core';
 import { kodNaSayte } from './kod';
 import { nice, txt } from './num';
 import { subtype } from './prototypes';
+import { GORODA } from './prototypes/rz';
 import { GEROI, TARY, VESHCHESTVA } from './prototypes/syuzhety';
 import {
   checkDrobnye,
@@ -25,19 +26,90 @@ import {
   checkSolved,
   type Problem,
 } from './selftest';
-import { sk, SLOVA } from './sklonenie';
+import { chasy, sk, SLOVA } from './sklonenie';
 import type { Params } from './types';
 
 /** Ключи сюжета: на модель не влияют, в сравнении с банком не участвуют. */
-const SYUZHET = new Set(['geroy', 'vv', 'tara']);
+const SYUZHET = new Set([
+  'geroy',
+  'vv',
+  'tara',
+  /* Слова сюжета разминки: товар, ёмкость, «кто» и «что» в процентах. */
+  'tovar',
+  'trRod',
+  'eshche',
+  'ostavit',
+  'mat',
+  'taraIm',
+  'taraPr',
+  'taraRod',
+  'produkt',
+  'ed',
+  'edMn',
+  'predmet',
+  'lishniy',
+  'mesto',
+  'vse',
+  'vseRod',
+  'gr',
+  'detiRod',
+  'chast',
+  'neTitle',
+  'otvetChto',
+  'grTitle',
+  'tozhe',
+  'oboz',
+  'drob',
+  'chisl',
+  'znam',
+  'novyy',
+  'vel',
+  'velVin',
+  'mnozh',
+  'zan',
+  'zanRod',
+  'pervaya',
+  'dve',
+  'per',
+  'perRod',
+]);
 
 export function model(params: Params): Params {
   return Object.fromEntries(Object.entries(params).filter(([k]) => !SYUZHET.has(k)));
 }
 
-/** Число так, как оно пишется в условии: 15,2. */
+/** Число так, как оно пишется в условии: 15,2; 27 200 — пробелы сравниваем как обычные. */
 function vTekste(x: number): string {
-  return txt(x);
+  return txt(x).replace(/\s/g, ' ');
+}
+
+/** Текст с обычными пробелами вместо неразрывных. */
+const prostye = (t: string): string => t.replace(/\s/g, ' ');
+
+/** Последнее предложение-вопрос условия. */
+function poslednee(text: string): string {
+  const parts = text.split(/(?<=[.?!])\s+/);
+  return parts.filter((x) => x.includes('?') || /^Найдите/.test(x)).at(-1) ?? '';
+}
+
+/** Масса в граммах так, как её пишет разминка: 1250 → «1 кг 250 г». */
+function massa(g: number): string {
+  const kg = Math.floor(g / 1000);
+  const gr = g - kg * 1000;
+  return [kg > 0 ? `${kg} кг` : '', gr > 0 ? `${gr} г` : ''].filter(Boolean).join(' ');
+}
+
+/** Делится ли нацело: вариант вопроса «nacelo» / «ostatok» разминки. */
+function nacelo(a: Analog, top: number, bottom: number): string[] {
+  const ok = Math.abs(top / bottom - Math.round(top / bottom)) < 1e-9;
+  return (a.ask === 'nacelo') === ok
+    ? []
+    : [`ask = ${a.ask}, а ${top} : ${bottom} ${ok ? 'нацело' : 'с остатком'}`];
+}
+
+/** Число в промежутке. */
+function vne(what: string, x: number, lo: number, hi: number): string[] {
+  return x < lo || x > hi ? [`${what} ${x} вне ${lo}–${hi}`] : [];
 }
 
 interface Pravilo {
@@ -103,12 +175,206 @@ const PRAVILA: Record<string, Pravilo> = {
       return out;
     },
   },
+  /* ── Разминка ── */
+  'RZ-01': {
+    chisla: ['c', 'M'],
+    vopros: (a) => /сдач/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const g = num(a.params, 'g');
+      const cost = (num(a.params, 'c') * g) / 1000;
+      return [
+        ...(a.text.includes(massa(g)) ? [] : [`в тексте нет массы «${massa(g)}»`]),
+        ...vne('цена за кг', num(a.params, 'c'), 50, 1500),
+        ...vne('масса, г', g, 100, 5000),
+        ...(cost < num(a.params, 'M') ? [] : ['денег не хватает на покупку']),
+      ];
+    },
+  },
+  'RZ-02': {
+    chisla: ['S', 't'],
+    vopros: (a) => /скорост/.test(a.text) && /километрах в час/.test(a.text),
+    pravdopodobie: (a) => {
+      const g = GEROI[String(a.params.geroy)];
+      if (g === undefined) return ['неизвестный герой'];
+      return vne('скорость, км/ч', a.answer, g.v[0], g.v[1]);
+    },
+  },
+  'RZ-03': {
+    chisla: ['S'],
+    vopros: (a) => /среднюю скорость/.test(a.text),
+    pravdopodobie: (a) => {
+      const g = GORODA[String(a.params.gorod)];
+      if (g === undefined) return ['неизвестный город'];
+      const out: string[] = [];
+      for (const t of [num(a.params, 't0'), num(a.params, 't1')]) {
+        if (!a.text.includes(` ${chasy(t / 60, false)} `))
+          out.push(`в тексте нет времени ${chasy(t / 60, false)}`);
+        if (t % 5 !== 0) out.push(`минуты ${t % 60} не кратны 5`);
+      }
+      if (!prostye(a.text).includes(sk(g.dh, SLOVA.chas).replace(/\s/g, ' ')))
+        out.push(`в тексте нет разницы ${g.dh} ч`);
+      if (!a.text.includes(g.iz)) out.push('в тексте нет города');
+      return [
+        ...out,
+        ...vne('скорость самолёта', a.answer, 600, 950),
+        ...vne('длина трассы', num(a.params, 'S'), g.km[0], g.km[1]),
+      ];
+    },
+  },
+  'RZ-04': {
+    chisla: ['cap', 'a', 'b'],
+    vopros: (a) => /наименьшее число/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...nacelo(a, num(a.params, 'a') + num(a.params, 'b'), num(a.params, 'cap')),
+      ...vne('вместимость', num(a.params, 'cap'), 2, 60),
+    ],
+  },
+  'RZ-05': {
+    chisla: ['g', 'area'],
+    vopros: (a) => /наименьшее число/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const can = num(a.params, 'can');
+      return [
+        ...(new RegExp(`(?<![\\d,])${vTekste(can / 1000).replace(',', '\\,')} кг`).test(
+          prostye(a.text),
+        )
+          ? []
+          : [`в тексте нет ёмкости ${vTekste(can / 1000)} кг`]),
+        ...nacelo(a, num(a.params, 'g') * num(a.params, 'area'), can),
+        ...vne('масса ёмкости, кг', can / 1000, 0.5, 50),
+      ];
+    },
+  },
+  'RZ-06': {
+    chisla: ['dose', 'times', 'days', 'pack', 'tab'],
+    vopros: (a) => /наименьшего количества/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const perDose = num(a.params, 'dose') / num(a.params, 'tab');
+      const tablets = perDose * num(a.params, 'times') * num(a.params, 'days');
+      return [
+        ...(Number.isInteger(Math.round(perDose * 1e9) / 1e9)
+          ? []
+          : ['доза — не целое число таблеток']),
+        ...nacelo(a, Math.round(tablets), num(a.params, 'pack')),
+        ...vne('приёмов в день', num(a.params, 'times'), 1, 4),
+        ...vne('дней курса', num(a.params, 'days'), 3, 90),
+      ];
+    },
+  },
+  'RZ-07': {
+    chisla: ['k', 'unit'],
+    vopros: (a) => /округл/.test(a.text) && a.ask === a.params.form,
+    pravdopodobie: (a) => {
+      const k = num(a.params, 'k');
+      const unit = num(a.params, 'unit');
+      if (a.params.form === 'yahta') {
+        const g = GEROI[String(a.params.geroy)];
+        if (g === undefined || !g.voda) return ['нужен водный герой'];
+        return [
+          ...vne('скорость, км/ч', (k * unit) / 1000, g.v[0], g.v[1]),
+          ...(/узл|узел/.test(a.text) ? [] : ['нет узлов']),
+        ];
+      }
+      return [
+        ...vne('масса, г', k * unit, 20, 2000),
+        ...(/унци|фунт/.test(a.text) ? [] : ['нет унций или фунтов']),
+      ];
+    },
+  },
+  'RZ-08': {
+    chisla: ['price', 'money'],
+    vopros: (a) => /наибольш/.test(poslednee(a.text)) && a.ask === a.params.chetnost,
+    pravdopodobie: (a) =>
+      (a.params.chetnost === 'nechet') === /нечётн/.test(a.text) && /чётн/.test(a.text)
+        ? []
+        : ['чётность в тексте не совпадает с параметром'],
+  },
+  'RZ-09': {
+    chisla: ['price', 'p', 'money'],
+    vopros: (a) => /наибольшее число/.test(a.text),
+    pravdopodobie: (a) => vne('повышение, %', num(a.params, 'p'), 1, 99),
+  },
+  'RZ-10': {
+    chisla: ['p', 'N'],
+    vopros: (a) => /до (снижения|скидки|уценки|распродажи)|первоначальн/.test(poslednee(a.text)),
+    pravdopodobie: (a) => vne('скидка, %', num(a.params, 'p'), 1, 99),
+  },
+  'RZ-11': {
+    chisla: ['p', 'N'],
+    vopros: (a) => /заработн|зарплат|заработал/.test(poslednee(a.text)),
+    pravdopodobie: (a) => vne('зарплата', a.answer, 15000, 300000),
+  },
+  'RZ-12': {
+    chisla: ['N', 'p1', 'p2'],
+    vopros: (a) => /^Сколько/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...vne('p1, %', num(a.params, 'p1'), 1, 99),
+      ...vne('p2, %', num(a.params, 'p2'), 1, 99),
+    ],
+  },
+  'RZ-13': {
+    chisla: ['a', 'b'],
+    vopros: (a) => {
+      const q = poslednee(a.text);
+      return a.ask === 'bolshe'
+        ? /больше|дороже|выше|длиннее|тяжелее/.test(q)
+        : /меньше|дешевле|ниже|короче|легче/.test(q);
+    },
+    pravdopodobie: (a) =>
+      num(a.params, 'a') > num(a.params, 'b') ? [] : ['первое число не больше второго'],
+  },
+  'RZ-14': {
+    chisla: ['p'],
+    vopros: (a) => {
+      const q = poslednee(a.text);
+      return a.ask === 'bolshe' ? /больше|дороже/.test(q) : /меньше|дешевле/.test(q);
+    },
+    pravdopodobie: (a) =>
+      a.ask === 'bolshe'
+        ? vne('p, %', num(a.params, 'p'), 1, 99)
+        : vne('p, %', num(a.params, 'p'), 1, 400),
+  },
+  'RZ-15': {
+    chisla: ['p1', 'p2'],
+    vopros: (a) => /На сколько процентов (увеличилась|выросла)/.test(poslednee(a.text)),
+    pravdopodobie: (a) => vne('p2, %', num(a.params, 'p2'), 1, 99),
+  },
+  'RZ-16': {
+    chisla: ['p1', 'p2'],
+    vopros: (a) => /На сколько процентов/.test(poslednee(a.text)),
+    pravdopodobie: () => [],
+  },
+  'RZ-17': {
+    chisla: ['a', 'b'],
+    vopros: (a) => /Что больше/.test(a.text),
+    pravdopodobie: () => [],
+  },
+  'RZ-18': {
+    chisla: ['br'],
+    vopros: (a) => /в часах/.test(a.text),
+    pravdopodobie: (a) => {
+      const out: string[] = [];
+      for (const t of [num(a.params, 't0'), num(a.params, 't1')]) {
+        if (!a.text.includes(chasy(t / 60, false)))
+          out.push(`в тексте нет времени ${chasy(t / 60, false)}`);
+        if (t % 5 !== 0 || t >= 24 * 60) out.push(`время ${t} мин не по расписанию`);
+      }
+      return [...out, ...vne('длительность, ч', a.answer, 0.25, 4)];
+    },
+  },
 };
 
 /** Склонения часов и минут в тексте: «1 час», «2 часа», «5 часов». */
 function sklonenia(text: string): string[] {
   const out: string[] = [];
-  for (const forms of [SLOVA.chas, SLOVA.minuta, SLOVA.minutu, SLOVA.detal, SLOVA.litr]) {
+  for (const forms of [
+    SLOVA.chas,
+    SLOVA.minuta,
+    SLOVA.minutu,
+    SLOVA.sekundu,
+    SLOVA.detal,
+    SLOVA.litr,
+  ]) {
     const re = new RegExp(`(\\d+) (${forms.join('|')})(?![а-яё])`, 'g');
     for (const m of text.matchAll(re)) {
       const n = Number(m[1]);
@@ -124,7 +390,7 @@ function sklonenia(text: string): string[] {
 
 export function checkAnalogi(typeset: (tex: string) => string) {
   const problems: Problem[] = [];
-  const pohozha = pohozhaNa(BANK);
+  const pohozha = pohozhaNa([...BANK, ...RAZMINKA]);
   let checked = 0;
   for (const [proto, list] of Object.entries(POOL_ANALOGOV)) {
     const add = (where: string, what: string) => problems.push({ where, what });
@@ -172,7 +438,7 @@ export function checkAnalogi(typeset: (tex: string) => string) {
       if (pravilo !== undefined) {
         for (const k of pravilo.chisla) {
           const n = vTekste(num(m, k));
-          if (!new RegExp(`(?<![\\d,])${n.replace(',', '\\,')}(?![\\d,])`).test(a.text)) {
+          if (!new RegExp(`(?<![\\d,])${n.replace(',', '\\,')}(?![\\d,])`).test(prostye(a.text))) {
             add(where, `в тексте нет числа ${k} = ${n}`);
           }
         }
@@ -186,7 +452,9 @@ export function checkAnalogi(typeset: (tex: string) => string) {
     for (const a of list) po.set(a.ask, (po.get(a.ask) ?? 0) + 1);
     const vsegoVariantov = new Set([
       ...list.map((a) => a.ask),
-      ...BANK.filter((b) => b.id === proto).map((b) => String(b.params.ask ?? '')),
+      ...[...BANK, ...RAZMINKA]
+        .filter((b) => b.id === proto)
+        .map((b) => String(b.params.ask ?? '')),
     ]);
     vsegoVariantov.delete('');
     if (vsegoVariantov.size > 1) {

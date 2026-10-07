@@ -7,7 +7,7 @@
 
 import { typesetKrupno as typeset } from '../tex';
 import { POOL_ANALOGOV } from './analogi';
-import { BANK } from './bank';
+import { BANK, RAZMINKA } from './bank';
 import { kodNaSayte } from './kod';
 import { d, txt } from './num';
 import { subtype } from './prototypes';
@@ -31,6 +31,8 @@ export interface PrototipNaProverku {
   kod: string;
   title: string;
   level: number;
+  /** «Задача банка» или «Задача разминки» (РЗ — не открытый банк). */
+  bankPodpis: string;
   bankHtml: string;
   bankOtvetHtml: string;
   analogi: AnalogNaProverku[];
@@ -58,13 +60,14 @@ export function dannyeProverki(): RazdelNaProverku[] {
       .filter(([id]) => subtype(id).section === sec.id)
       .map(([id, list]) => {
         const st = subtype(id);
-        const b = BANK.find((x) => x.id === id);
+        const b = [...BANK, ...RAZMINKA].find((x) => x.id === id);
         const bs = b === undefined ? null : st.solve(b.params);
         return {
           id,
           kod: kodNaSayte(id),
           title: st.title,
           level: st.level,
+          bankPodpis: sec.id === 'RZ' ? 'Задача разминки' : 'Задача банка',
           bankHtml: bs === null ? '' : typeset(bs.uslovie),
           bankOtvetHtml: bs === null ? '' : typeset(`$${d(bs.answer)}$`),
           analogi: list.map((a) => {

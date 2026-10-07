@@ -5,7 +5,7 @@
  * в поле sluchay, автотест проверяет, что встречаются оба.
  */
 
-import { GORODA } from '../prototypes/rz';
+import { GORODA, GORODA_GENERATORA } from '../prototypes/rz';
 import { cel, des, shag, type Gen, type Rng, type Zagotovka } from './types';
 
 /** Округление вверх с выбором случая: ровно или с остатком. */
@@ -47,7 +47,7 @@ export const GEN_RZ: Record<string, Gen> = {
 
   /* Длина трассы — правдоподобная для города, скорость лайнера 600–900 км/ч. */
   'RZ-03': (r): Zagotovka | null => {
-    const gorod = r.pick(Object.keys(GORODA));
+    const gorod = r.pick(GORODA_GENERATORA);
     const g = GORODA[gorod];
     if (!g) {
       return null;

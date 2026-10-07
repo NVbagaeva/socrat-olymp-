@@ -123,7 +123,7 @@ export function ProverkaAnalogov({ razdely }: { razdely: RazdelNaProverku[] }) {
                 {p.kod}. {p.title} <span className="z11-pr__level">{ZVEZDY[p.level]}</span>
               </h3>
               <div className="z11-pr__bank">
-                <p className="z11-pr__label">Задача банка</p>
+                <p className="z11-pr__label">{p.bankPodpis}</p>
                 <div dangerouslySetInnerHTML={{ __html: p.bankHtml }} />
                 <p className="z11-pr__otvet">
                   Ответ: <span dangerouslySetInnerHTML={{ __html: p.bankOtvetHtml }} />

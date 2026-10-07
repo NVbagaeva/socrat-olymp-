@@ -328,7 +328,9 @@ const trenazher = { zadach: 0 };
     d.bank,
     's3',
   );
-  if (mix.length !== 20 || !mix.some((x) => x.vid === 'new') || !mix.some((x) => x.vid !== 'new')) {
+  /* «Новые» в смеси — аналоги из пула и генератор. */
+  const novaya = (x) => x.vid === 'new' || x.vid === 'analog';
+  if (mix.length !== 20 || !mix.some(novaya) || !mix.some((x) => !novaya(x))) {
     add('«банк + новые»: нет смеси или не та длина');
   }
   if (!mix.some((x) => x.vid === 'razminka')) add('«банк + новые»: нет задач разминки для РЗ');

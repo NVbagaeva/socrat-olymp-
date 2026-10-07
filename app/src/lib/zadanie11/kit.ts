@@ -38,6 +38,15 @@ export function key<T>(rec: Readonly<Record<string, T>>, k: string): T {
   return v;
 }
 
+/**
+ * Слово сюжета из параметров аналога («лодок», «сахара»); у задачи
+ * банка его нет — тогда слово прототипа.
+ */
+export function slovo(p: Params, key: string, poUmolchaniyu: string): string {
+  const v = p[key];
+  return typeof v === 'string' && v.trim() !== '' ? v : poUmolchaniyu;
+}
+
 export function str<T extends string>(p: Params, key: string, allowed: readonly T[]): T {
   const v = p[key] ?? allowed[0];
   if (typeof v !== 'string' || !allowed.includes(v as T)) {
