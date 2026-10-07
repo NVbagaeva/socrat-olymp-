@@ -198,9 +198,11 @@ export const tasks = [
   },
 
   /* ── Часть 2: задания с развёрнутым ответом ──
-     Разделов пока нет: плашки ведут на заглушки /zadaniya/{slug}/.
      Иконки — векторные чертежи public/images/task-{no}.svg. */
-  { no: '14', name: 'Уравнение', slug: '14', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  /* Раздел открыт: вкладка «О задании» (app/zadaniya/14), остальные
+     вкладки — «Материал готовится». */
+  { no: '14', name: 'Уравнение', slug: '14', part: 2, status: 'ready', icon: 'svg' },
+  /* Разделов пока нет: плашки ведут на заглушки /zadaniya/{slug}/. */
   { no: '15', name: 'Стереометрия', slug: '15', part: 2, status: 'soon', stub: true, icon: 'svg' },
   { no: '16', name: 'Неравенство', slug: '16', part: 2, status: 'soon', stub: true, icon: 'svg' },
   {
