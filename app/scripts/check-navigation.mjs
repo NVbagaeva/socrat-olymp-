@@ -19,8 +19,11 @@
       нет). То же после того, как вкладка пролежала открытой 11 минут
       (часы страницы переводятся вперёд).
    C. Страховка components/NavigationGuard.tsx: ссылка без «/» уводит на
-      адрес с «/», а повисший переход (данные страницы не пришли)
-      через 12 с открывает целевую страницу целиком.
+      адрес с «/»; переход, который так и не случился, через 12 с (не
+      раньше и не сильно позже) открывает целевую страницу целиком.
+      Отдельно: данные страницы банка не пришли вовсе — банк всё равно
+      открывается (это делает сам Next.js, обычным переходом браузера,
+      ещё до страховки).
 
    Запуск после pnpm build:  node scripts/check-navigation.mjs
    Нужны apache2 и браузеры Playwright (в CI ставятся). Без WebKit
@@ -207,16 +210,27 @@ for (const [name, browser] of browsers) {
       a.textContent = 'Банк без косой';
       document.body.prepend(a);
     });
+    /* Страховка уводит сразу на /zadaniya/: запроса на адрес без «/»
+       (и редиректа сервера с него) быть не должно. */
+    const bezKosoy = [];
+    page.on('request', (r) => {
+      if (/^\/zadaniya(\.txt)?$/.test(new URL(r.url()).pathname)) {
+        bezKosoy.push(new URL(r.url()).pathname);
+      }
+    });
     await page.click('#bez-kosoy');
     await page.waitForURL((u) => u.pathname === '/zadaniya/', { timeout: 15000 }).catch(() => {});
     check(
-      new URL(page.url()).pathname === '/zadaniya/',
-      `ссылка /zadaniya → открыт /zadaniya/ (${page.url()})`,
+      new URL(page.url()).pathname === '/zadaniya/' && bezKosoy.length === 0,
+      `ссылка /zadaniya → открыт /zadaniya/ без запроса на адрес без «/» (${page.url()}` +
+        (bezKosoy.length ? `; запросы: ${bezKosoy.join(', ')}` : '') +
+        ')',
     );
     await context.close();
   }
   {
-    /* Данные страницы банка не приходят вовсе: переход повис. */
+    /* Данные страницы банка не приходят вовсе. Next.js сам уходит в
+       обычный переход браузера — страховке тут делать нечего. */
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.route(/\/zadaniya\/index\.txt\?_rsc=/, () => {});
@@ -228,7 +242,41 @@ for (const [name, browser] of browsers) {
     } catch (error) {
       console.log(`     ${error.message.split('\n')[0]}`);
     }
-    check(ok, 'переход повис → через 12 с банк открыт целиком');
+    check(ok, 'запрос данных повис → банк всё равно открыт');
+    await context.close();
+  }
+  {
+    /* Переход не случился вовсе: ссылку нажали, а адрес не сменился
+       (так выглядел белый экран). Страховка ставит таймер на стадии
+       перехвата, а обработчик самой ссылки после неё гасит переход. */
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.goto(A + '/zadaniya/12/', { waitUntil: 'load' });
+    await page.waitForTimeout(800);
+    await page.evaluate(() => {
+      const a = document.createElement('a');
+      a.href = '/zadaniya/';
+      a.id = 'zavis';
+      a.textContent = 'Переход, который не случится';
+      a.addEventListener('click', (event) => event.preventDefault());
+      document.body.prepend(a);
+    });
+    const start = Date.now();
+    await page.click('#zavis');
+    await page.waitForTimeout(10_000);
+    const still = new URL(page.url()).pathname;
+    check(still === '/zadaniya/12/', `страховка не торопится: через 10 с ещё ${still}`);
+    let opened = true;
+    await page
+      .waitForURL((u) => u.pathname === '/zadaniya/', { timeout: 10_000 })
+      .catch(() => {
+        opened = false;
+      });
+    const seconds = (Date.now() - start) / 1000;
+    check(
+      opened && seconds >= 11.5 && seconds <= 16,
+      `переход не случился → страховка открыла банк через ${seconds.toFixed(1)} с (ждём 12)`,
+    );
     await context.close();
   }
   await browser.close();
