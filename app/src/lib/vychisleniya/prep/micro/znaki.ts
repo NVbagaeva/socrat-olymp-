@@ -110,4 +110,39 @@ export const ZNAKI: PrepMicro[] = [
       proverka: Math.cos(2 * (given === 'sin' ? Math.asin(s) : Math.acos(s))),
     };
   }),
+  micro('P8-3-09', 'Знак произведения', '(+)(+) = +,\\quad (-)(-) = +,\\quad (+)(-) = -', (r) => {
+    const q = r.pick([1, 2, 3, 4] as const);
+    const [f, g] = r.pick([
+      ['sin', 'cos'],
+      ['sin', 'tg'],
+      ['cos', 'tg'],
+    ] as const);
+    const degrees = r.int(0, 1) === 0;
+    const where = degrees ? `${DEG[q][0]}^\\circ < \\alpha < ${DEG[q][1]}^\\circ` : `\\alpha \\in ${quarterInterval(q)}`;
+    const sf = SIGN[f][q];
+    const sg = SIGN[g][q];
+    const plus = sf * sg > 0;
+    const mark = (s: number) => (s > 0 ? '> 0' : '< 0');
+    return {
+      uslovie: `Определите знак $${fn(f)}\\alpha \\cdot ${fn(g)}\\alpha$, если $${where}$.`,
+      otvet: plus ? '1' : '2',
+      razbor: `$\\alpha$ в ${ROMAN[q]} четверти: $${fn(f)}\\alpha ${mark(sf)}$, $${fn(g)}\\alpha ${mark(sg)}$, поэтому произведение ${plus ? 'положительно' : 'отрицательно'}: знак «${plus ? 'плюс' : 'минус'}»`,
+      proverka: null,
+    };
+  }, ZNAK),
+  micro('P8-3-10', 'Значение с учётом четверти', '\\cos\\alpha = \\pm\\sqrt{1 - \\sin^2\\alpha},\\quad \\sin\\alpha = \\pm\\sqrt{1 - \\cos^2\\alpha}', (r) => {
+    const [a, b, c] = r.pick(TRIPLES);
+    const q = r.pick([2, 3, 4] as const);
+    const given = r.pick(['sin', 'cos'] as const);
+    const find = given === 'sin' ? 'cos' : 'sin';
+    const [gAbs, fAbs] = r.int(0, 1) === 0 ? [a / c, b / c] : [b / c, a / c];
+    const g = SIGN[given][q] * gAbs;
+    const f = SIGN[find][q] * fAbs;
+    return {
+      uslovie: `Найдите $${fn(find)}\\alpha$, если $${fn(given)}\\alpha = ${d(round9(g))}$ и $\\alpha \\in ${quarterInterval(q)}$.`,
+      otvet: round9(f),
+      razbor: `$${fn(find)}^2\\alpha = 1 - ${d(round9(g * g))} = ${d(round9(f * f))}$; в ${ROMAN[q]} четверти $${fn(find)}\\alpha ${f > 0 ? '> 0' : '< 0'}$, поэтому $${fn(find)}\\alpha = ${d(round9(f))}$`,
+      proverka: f,
+    };
+  }),
 ];
