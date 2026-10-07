@@ -404,10 +404,13 @@ const B234 = box(2, 3, 4);
     'C,X',
     'теперь две общие точки',
   );
-  ok(
-    c.describe(l) ===
-      '$C \\in \\alpha,\\ C \\in (ABC);\\ X \\in \\alpha,\\ X \\in (ABC) \\Rightarrow CX = \\alpha \\cap (ABC)$.',
-    'полное обоснование прямой пересечения',
+  eqStr(
+    c.describe(l),
+    '$C \\in \\alpha$ и $C \\in (ABC)$, $X \\in \\alpha$ и $X \\in (ABC)$, $C \\ne X$. ' +
+      'Плоскости $\\alpha$ и $(ABC)$ различны и имеют общие точки, значит, они пересекаются по прямой ' +
+      '(аксиома: если две различные плоскости имеют общую точку, то они пересекаются по прямой, проходящей через эту точку). ' +
+      'Обе точки $C$ и $X$ лежат на этой прямой, значит, $\\alpha \\cap (ABC) = CX$.',
+    'полное школьное обоснование прямой пересечения',
   );
 
   eqStr(
@@ -507,6 +510,37 @@ const B234 = box(2, 3, 4);
   eqStr(train.sections.length, 0, 'тренажёр: сечения нет');
   const reveal = S.buildScene(c, opts(c, { facePlanes: faces, mode: 'train', reveal: true }));
   eqStr(reveal.lines.filter((l) => l.kind === 'meet').length, 2, 'после проверки линии показаны');
+  ok(reveal.candidates.length > 0, 'после проверки кандидаты показаны');
+  // Тренажёр: пустых кружков-кандидатов нет ни в одном сценарии, пока не нажали «Показать».
+  for (const sc of S.SCENARIOS) {
+    const b = sc.build();
+    const t = S.buildScene(b.c, opts(b.c, { facePlanes: b.facePlanes, mode: 'train' }));
+    eqStr(t.candidates.length, 0, `тренажёр, ${sc.id}: кандидатов нет`);
+    eqStr(t.lines.filter((l) => l.kind === 'meet').length, 0, `тренажёр, ${sc.id}: линий нет`);
+  }
+  // Камера всегда ортогональная: следы в параллельных гранях параллельны
+  // на экране при любом повороте (проекция линейная, без перспективы).
+  {
+    const pts = [
+      [0, 0, 0],
+      [6, 3, 0],
+      [0, 0, 6],
+      [6, 3, 6],
+    ];
+    for (let i = 0; i < 40; i += 1) {
+      const cam = { yaw: i * 0.37, pitch: ((i % 9) - 4) * 0.33 };
+      const b = S.basisOf(cam);
+      const P = pts.map((p) => S.project(b, p));
+      const u = [P[1][0] - P[0][0], P[1][1] - P[0][1]];
+      const v = [P[3][0] - P[2][0], P[3][1] - P[2][1]];
+      const cr = u[0] * v[1] - u[1] * v[0];
+      if (Math.abs(cr) > 1e-9) {
+        ok(false, `камера ${i}: параллельные отрезки на экране не параллельны (${cr})`);
+        break;
+      }
+    }
+    ok(true, 'камера ортогональная: параллельность сохраняется при 40 поворотах');
+  }
   // Пошаговый показ: до первого шага — только фигура.
   const start = S.buildScene(c, opts(c, { facePlanes: faces, upTo: -1 }));
   eqStr(start.lines.length, 0, 'шаг «фигура»: линий нет');

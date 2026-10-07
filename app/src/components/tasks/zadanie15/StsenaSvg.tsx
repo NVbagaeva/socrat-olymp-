@@ -55,6 +55,8 @@ function Sheet({ s, age: liveAge }: { s: SceneSheet; age: number | undefined }) 
       className={[
         's15-sheet',
         s.isFace ? 's15-sheet--face' : '',
+        /* Номер плоскости — для типа линии края: в ч/б цвета нет. */
+        `s15-sheet--n${/plane-(\d)/.exec(s.color)?.[1] ?? 'f'}`,
         s.highlighted ? 'is-hl' : '',
         age !== undefined ? 'is-new' : '',
       ].join(' ')}
@@ -139,6 +141,13 @@ function Line({ l, age: liveAge }: { l: SceneLine; age: number | undefined }) {
             d={seg(s.a, s.b)}
           />
         ))}
+        {/* Линия пересечения — двойная (светлая середина): в ч/б и в печати
+            её не спутать с ребром или прямой построения. */}
+        {l.kind === 'meet'
+          ? l.runs
+              .filter((s) => s.visible)
+              .map((s, i) => <path key={`c${i}`} className="s15-line__core" d={seg(s.a, s.b)} />)
+          : null}
       </g>
     </g>
   );
