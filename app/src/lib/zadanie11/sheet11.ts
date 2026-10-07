@@ -431,7 +431,7 @@ function blokiLista(p: SheetParams11, zadachi: ListZadacha[], task: (z: ListZada
     const first = tasks[0];
     return p.rezhim === 'marshrut'
       ? { title: BLOK_ROUTE[b] ?? b, note: '', tasks: tasks.map(task) }
-      : { id: first?.kod ?? b, title: first?.title ?? b, note: '', tasks: tasks.map(task) };
+      : { title: first?.title ?? b, note: '', tasks: tasks.map(task) };
   });
 }
 
@@ -439,9 +439,10 @@ const STROKA_OTVETA =
   '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
 
 function bejdzh(z: ListZadacha): string {
-  /* У аналога учителю видно, к какому прототипу банка он относится. */
-  const proto = z.poz.vid === 'analog' ? ` · ${SHEET_11.analogK} ${z.kod}` : '';
-  return `<span class="z11-sheet-badge">${SHEET_11.bejdzh[z.poz.vid]}${proto}</span>`;
+  /* Код типа — только учителю и мелко: по нему задача находится в тренажёре и генераторе. */
+  const kod =
+    z.poz.vid === 'mikro' ? '' : `<span class="z11-sheet-kod">${SHEET_11.tip} ${z.kod}</span>`;
+  return `<span class="z11-sheet-badge">${SHEET_11.bejdzh[z.poz.vid]}</span>${kod}`;
 }
 
 /**

@@ -228,12 +228,12 @@ export function Trenazher11Vybor({
                 {otkryt ? (
                   <ul className="z11-akk__list">
                     {podtipy.map((p) => (
-                      <li key={p.id} className="z11-akk__podtip">
+                      <li key={p.id} className="z11-akk__podtip" title={p.kod}>
                         <Checkbox
                           checked={vybrano.has(p.id)}
                           onChange={(e) => pereklyuchit([p.id], e.target.checked)}
                         >
-                          <span className="z11-akk__kod">{p.kod}</span> {p.title}
+                          {p.title}
                         </Checkbox>
                         <span className="z11-akk__bank">
                           {novye
@@ -242,7 +242,7 @@ export function Trenazher11Vybor({
                               ? TRENAZHER_11.vRazminke(p.vBanke)
                               : TRENAZHER_11.vBanke(p.vBanke)}
                         </span>
-                        <Zvezdy level={p.level} />
+                        <Zvezdy level={p.level} section={p.section} />
                       </li>
                     ))}
                   </ul>
@@ -285,7 +285,7 @@ export function Trenazher11Vybor({
                   <IkonkaRazdela section={p.section} className="z11-vybrannaya__ikonka" />
                   <span className="z11-vybrannaya__text">
                     <span className="z11-vybrannaya__name">{p.title}</span>
-                    <Zvezdy level={p.level} />
+                    <Zvezdy level={p.level} section={p.section} />
                   </span>
                   <button
                     type="button"
@@ -341,6 +341,7 @@ export function Trenazher11Vybor({
                 )}
               </Radio>
             ))}
+            <p className="z11-uroven__note">{TRENAZHER_11.urovenNote}</p>
           </fieldset>
 
           <Checkbox
@@ -398,10 +399,8 @@ function Statistika({ razdely, progress }: { razdely: RazdelInfo[]; progress: St
           {stroki.map((p) => {
             const t = progress.kinds[p.id];
             return (
-              <tr key={p.id}>
-                <th scope="row">
-                  <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                </th>
+              <tr key={p.id} title={p.kod}>
+                <th scope="row">{p.title}</th>
                 <td>
                   {t?.right ?? 0} из {t?.done ?? 0}
                 </td>

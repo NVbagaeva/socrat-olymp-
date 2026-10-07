@@ -149,11 +149,9 @@ export function Repetitory11({
                       {m[k].map((id, j) => {
                         const p = podtip(id);
                         return p === undefined ? null : (
-                          <li key={`${id}-${j}`}>
-                            <span>
-                              <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                            </span>
-                            <Zvezdy level={p.level} />
+                          <li key={`${id}-${j}`} title={p.kod}>
+                            <span>{p.title}</span>
+                            <Zvezdy level={p.level} section={p.section} />
                           </li>
                         );
                       })}
@@ -238,11 +236,9 @@ export function Repetitory11({
                     {[...(info?.podtipy ?? [])]
                       .sort((a, b) => a.level - b.level)
                       .map((p) => (
-                        <li key={p.id}>
-                          <span>
-                            <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                          </span>
-                          <Zvezdy level={p.level} />
+                        <li key={p.id} title={p.kod}>
+                          <span>{p.title}</span>
+                          <Zvezdy level={p.level} section={p.section} />
                         </li>
                       ))}
                   </ol>

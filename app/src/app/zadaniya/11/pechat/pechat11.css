@@ -85,3 +85,12 @@
   font-weight: 600;
   opacity: 0.75;
 }
+
+/* Код типа на листе учителя: мелко, серым, после бейджа. */
+.z11-sheet-kod {
+  display: inline-block;
+  margin-right: calc(var(--sheet-step) * 1);
+  font-size: var(--sheet-fs-small);
+  opacity: 0.55;
+  white-space: nowrap;
+}

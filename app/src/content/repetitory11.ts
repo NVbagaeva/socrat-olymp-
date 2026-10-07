@@ -37,8 +37,15 @@ export const SHEET_11 = {
   otvet: 'Ответ',
   otvetyNote: 'сквозная нумерация',
   resheniya: 'Решения',
-  bejdzh: { bank: 'банк', razminka: 'разминка', new: 'новая', analog: 'новая', mikro: 'опорная' },
-  analogK: 'аналог',
+  bejdzh: {
+    bank: 'банк',
+    razminka: 'разминка',
+    new: 'похожая',
+    analog: 'похожая',
+    mikro: 'опорная',
+  },
+  /** Код типа мелко на листе учителя: «тип ДП-07». */
+  tip: 'тип',
   foot: {
     course: 'Профильная математика',
     social: [
@@ -87,6 +94,7 @@ export const GENERATOR_11 = {
   itogo: (n: number, poVariantam: boolean) =>
     `${poVariantam ? 'В варианте' : 'На листе'} ${n} ${plural(n, 'задача', 'задачи', 'задач')}`,
   slozhnost: 'Сложность',
+  slozhnostTablitsa: 'Что значат звёзды в каждом разделе',
   vse: 'Все',
   seed: 'Номер листа (seed)',
   seedLead: 'Тот же номер — тот же лист. Пусто — новый лист при каждой генерации.',

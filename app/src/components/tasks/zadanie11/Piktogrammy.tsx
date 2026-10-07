@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
+import { podpisUrovnya } from '@/content/zadanie11';
 import type { Level, SectionId } from '@/lib/zadanie11/types';
 
 /**
@@ -348,13 +349,19 @@ export function MiniKartinka({
 }
 
 /** Звёзды сложности: только целые, ★ … ★★★. */
-export function Zvezdy({ level, className }: { level: Level; className?: string }) {
+export function Zvezdy({
+  level,
+  className,
+  section,
+}: {
+  level: Level;
+  className?: string;
+  /** Раздел — для расшифровки во всплывающей подсказке. */
+  section?: SectionId;
+}) {
+  const podpis = podpisUrovnya(level, section);
   return (
-    <span
-      className={clsx('z11-zvezdy', className)}
-      role="img"
-      aria-label={`Сложность ${level} из 3`}
-    >
+    <span className={clsx('z11-zvezdy', className)} role="img" aria-label={podpis} title={podpis}>
       {[1, 2, 3].map((n) => (
         <svg
           key={n}

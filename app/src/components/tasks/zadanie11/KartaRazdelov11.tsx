@@ -75,7 +75,7 @@ export function KartaRazdelov11({
             <span className="z11-vstup__meta">
               {p.tipov} {plural(p.tipov, ...O_ZADANII_11.tipov)}
               {p.razminka ? ` · ${O_ZADANII_11.razminka}` : ''} · {vstup.slozhnostDo}{' '}
-              <Zvezdy level={p.maxLevel} />
+              <Zvezdy level={p.maxLevel} section={p.id} />
             </span>
           </span>
           <button
@@ -160,7 +160,7 @@ export function KartaRazdelov11({
                         />
                         <span className="z11-map__pct">{O_ZADANII_11.resheno(pct)}</span>
                         <span className="z11-map__stars" title={O_ZADANII_11.slozhnost}>
-                          <Zvezdy level={p.maxLevel} />
+                          <Zvezdy level={p.maxLevel} section={p.id} />
                         </span>
                       </span>
                       <Piktogramma name="chevron" className="z11-map__chev" />

@@ -2,10 +2,10 @@
 
 import { clsx } from 'clsx';
 import { useMemo, useState } from 'react';
-import { Button, Checkbox, Input } from '@/components/ui';
+import { Button, Checkbox, Details, Input } from '@/components/ui';
 import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
-import { TRENAZHER_11 } from '@/content/zadanie11';
+import { TRENAZHER_11, UROVNI_11 } from '@/content/zadanie11';
 import type { SheetParams11, SobrannyyList } from '@/lib/zadanie11/sheet11';
 import type { Istochnik, RazdelInfo, UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 import type { Level, SectionId } from '@/lib/zadanie11/types';
@@ -265,16 +265,14 @@ export function Generator11({
                   {otkryt ? (
                     <ul className="z11-gen__podtipy">
                       {podtipy.map((p) => (
-                        <li key={p.id} className="z11-gen__podtip">
-                          <span className="z11-gen__podtip-name">
-                            <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                          </span>
+                        <li key={p.id} className="z11-gen__podtip" title={p.kod}>
+                          <span className="z11-gen__podtip-name">{p.title}</span>
                           <span className="z11-akk__bank">
                             {istochnik === 'new'
                               ? TRENAZHER_11.generiruyutsya
                               : TRENAZHER_11.vBanke(p.vBanke)}
                           </span>
-                          <Zvezdy level={p.level} />
+                          <Zvezdy level={p.level} section={p.section} />
                           <Stepper
                             value={sostav[p.id] ?? 0}
                             min={0}
@@ -293,25 +291,46 @@ export function Generator11({
           <p className="z11-gen__itogo">{GENERATOR_11.itogo(vsegoZadach, rezhim === 'komplekt')}</p>
         </section>
 
-        <section className="z11-card z11-gen__blok z11-gen__blok--row">
-          <h2 className="z11-gen__h">
-            <Piktogramma name="chart" />
-            {GENERATOR_11.slozhnost}
-          </h2>
-          <div className="z11-gen__urovni" role="radiogroup" aria-label={GENERATOR_11.slozhnost}>
-            {([0, 1, 2, 3] as const).map((u) => (
-              <button
-                key={u}
-                type="button"
-                role="radio"
-                aria-checked={uroven === u}
-                className={clsx('z11-gen__uroven', uroven === u && 'is-active')}
-                onClick={() => setUroven(u)}
-              >
-                {u === 0 ? GENERATOR_11.vse : <Zvezdy level={u} />}
-              </button>
-            ))}
+        <section className="z11-card z11-gen__blok">
+          <div className="z11-gen__blok-row">
+            <h2 className="z11-gen__h">
+              <Piktogramma name="chart" />
+              {GENERATOR_11.slozhnost}
+            </h2>
+            <div className="z11-gen__urovni" role="radiogroup" aria-label={GENERATOR_11.slozhnost}>
+              {([0, 1, 2, 3] as const).map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  role="radio"
+                  aria-checked={uroven === u}
+                  className={clsx('z11-gen__uroven', uroven === u && 'is-active')}
+                  onClick={() => setUroven(u)}
+                >
+                  {u === 0 ? GENERATOR_11.vse : <Zvezdy level={u} />}
+                </button>
+              ))}
+            </div>
           </div>
+          <p className="z11-uroven__note">{TRENAZHER_11.urovenNote}</p>
+          <Details title={GENERATOR_11.slozhnostTablitsa} className="z11-urovni-tab">
+            <ul className="z11-urovni">
+              {razdely.map((r) => (
+                <li key={r.id} className="z11-urovni__razdel">
+                  <span className="z11-urovni__name">{r.nazvanie}</span>
+                  <ul className="z11-urovni__list">
+                    {UROVNI_11[r.id].map((t, i) =>
+                      t === '' ? null : (
+                        <li key={i}>
+                          <span className="z11-urovni__zv">{'★'.repeat(i + 1)}</span> {t}
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </Details>
         </section>
 
         <section className="z11-card z11-gen__blok">

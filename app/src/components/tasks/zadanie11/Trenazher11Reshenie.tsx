@@ -214,7 +214,7 @@ export function Trenazher11Reshenie({
           <span className="z11-resh__razdel-name">{nazvaniya[z.section]}</span>
           <span className="z11-resh__podtip">{z.title}</span>
         </span>
-        <Zvezdy level={z.level} />
+        <Zvezdy level={z.level} section={z.section} />
       </div>
 
       <article className="z11-card z11-resh__uslovie">

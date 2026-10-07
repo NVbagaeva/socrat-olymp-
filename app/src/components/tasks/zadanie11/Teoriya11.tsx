@@ -621,7 +621,7 @@ function Telo({ r, base }: { r: RazdelTeorii11; base: string }) {
                 <span className="z11-tip__body">
                   <span className="z11-tip__title">{st.title}</span>
                   <span className="z11-tip__foot">
-                    <Zvezdy level={st.level} />
+                    <Zvezdy level={st.level} section={st.section} />
                     <Link
                       className="btn btn--secondary btn--sm z11-tip__btn"
                       href={`${base}/trenazher/?tip=${st.id}`}
