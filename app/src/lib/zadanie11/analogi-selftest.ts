@@ -134,6 +134,10 @@ const SYUZHET = new Set([
   'poezdBRod',
   /* Вода: «лодка шла» / «катер шёл». */
   'shla',
+  /* Окружность: как движется догоняющий. */
+  'ehalDog',
+  'proehal',
+  'proehat',
 ]);
 
 export function model(params: Params): Params {
@@ -450,6 +454,40 @@ const PRAVILA: Record<string, Pravilo> = {
       }
       if (v.splav !== /сплав/.test(a.text)) out.push('сплав/раствор не совпадает с веществом');
       return out;
+    },
+  },
+  /* ── Окружность ── */
+  'OK-01': {
+    chisla: ['L', 'v1', 't'],
+    vopros: (a) => poslednee(a.text).includes(`скорость второго ${String(a.params.ktoRod)}`),
+    pravdopodobie: (a) => [
+      ...skorosti(a, 'geroy', [num(a.params, 'v1'), a.answer]),
+      ...(/на один круг/.test(a.text) ? [] : ['нет «на один круг»']),
+    ],
+  },
+  'OK-02': {
+    chisla: ['N', 'L', 'dt', 't1'],
+    vopros: (a) => a.text.includes(`скорость второго ${String(a.params.ktoRod)}`),
+    pravdopodobie: (a) => {
+      const k = (num(a.params, 'L') * 60) / num(a.params, 't1');
+      return [
+        ...skorosti(a, 'geroy', [a.answer, a.answer + k]),
+        ...(/обогнал второго на круг/.test(a.text) ? [] : ['нет «обогнал на круг»']),
+      ];
+    },
+  },
+  'OK-03': {
+    chisla: ['t0', 't1', 't2', 'L'],
+    vopros: (a) => a.text.includes(`скорость ${String(a.params.dogRod)}`),
+    pravdopodobie: (a) => {
+      const L = num(a.params, 'L');
+      const y = (60 * L * num(a.params, 't1')) / (num(a.params, 't0') * num(a.params, 't2'));
+      return [
+        ...skorosti(a, 'geroy', [y]),
+        ...skorosti(a, 'geroy2', [a.answer]),
+        ...slovaVTekste(a, ['dog', 'medl']),
+        ...(/во второй раз/.test(a.text) ? [] : ['нет «во второй раз»']),
+      ];
     },
   },
   /* ── Проценты ── */

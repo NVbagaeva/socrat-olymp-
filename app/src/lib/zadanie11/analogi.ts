@@ -30,6 +30,9 @@ import sm05 from '../../data/zadanie11/analogs/SM-05.json';
 import sm06 from '../../data/zadanie11/analogs/SM-06.json';
 import sm08 from '../../data/zadanie11/analogs/SM-08.json';
 import sm07 from '../../data/zadanie11/analogs/SM-07.json';
+import ok01 from '../../data/zadanie11/analogs/OK-01.json';
+import ok02 from '../../data/zadanie11/analogs/OK-02.json';
+import ok03 from '../../data/zadanie11/analogs/OK-03.json';
 import pr01 from '../../data/zadanie11/analogs/PR-01.json';
 import pr02 from '../../data/zadanie11/analogs/PR-02.json';
 import pr03 from '../../data/zadanie11/analogs/PR-03.json';
@@ -86,6 +89,9 @@ export interface Analog {
 
 /** Пул по прототипам; новый прототип — новая строка. */
 export const POOL_ANALOGOV: Record<string, Analog[]> = {
+  'OK-01': ok01 as unknown as Analog[],
+  'OK-02': ok02 as unknown as Analog[],
+  'OK-03': ok03 as unknown as Analog[],
   'PR-01': pr01 as unknown as Analog[],
   'PR-02': pr02 as unknown as Analog[],
   'PR-03': pr03 as unknown as Analog[],
