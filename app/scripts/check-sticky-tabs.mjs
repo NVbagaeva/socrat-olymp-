@@ -98,6 +98,21 @@ async function zamer(page) {
   });
 }
 
+/* Что не так с лентой после прокрутки; null — всё верно. */
+function oshibka(z, home) {
+  const expected = Math.max(0, home - z.sy);
+  if (Math.abs(z.top - expected) > 1.5) {
+    return `прокрутка ${Math.round(z.sy)}: верх ленты ${Math.round(z.top)} вместо ${Math.round(expected)}`;
+  }
+  if (z.sy > home + 2 && !z.stuck) {
+    return `прокрутка ${Math.round(z.sy)}: лента у верха, но без is-stuck`;
+  }
+  if (z.sy > home + 2 && z.bottom > z.vh / 3) {
+    return `прокрутка ${Math.round(z.sy)}: лента закрывает середину экрана`;
+  }
+  return null;
+}
+
 async function proverit(engine, browserType) {
   let browser;
   try {
@@ -131,17 +146,19 @@ async function proverit(engine, browserType) {
       const bad = [];
       for (let y = 0; y <= start.max + 400; y += Math.round(size.height * 0.6)) {
         await page.evaluate((to) => window.scrollTo(0, to), y);
-        await page.waitForTimeout(60);
-        const z = await zamer(page);
-        const expected = Math.max(0, home - z.sy);
-        if (Math.abs(z.top - expected) > 1.5) {
-          bad.push(
-            `прокрутка ${Math.round(z.sy)}: верх ленты ${Math.round(z.top)} вместо ${Math.round(expected)}`,
-          );
-        } else if (z.sy > home + 2 && !z.stuck) {
-          bad.push(`прокрутка ${Math.round(z.sy)}: лента у верха, но без is-stuck`);
-        } else if (z.sy > home + 2 && z.bottom > z.vh / 3) {
-          bad.push(`прокрутка ${Math.round(z.sy)}: лента закрывает середину экрана`);
+        /* Хук обновляет ленту в requestAnimationFrame; на тяжёлой
+           странице в WebKit кадр приходит позже. Ждём, пока замер
+           сойдётся, но не дольше полутора секунд. */
+        let problem = null;
+        for (let attempt = 0; attempt < 25; attempt += 1) {
+          await page.waitForTimeout(60);
+          problem = oshibka(await zamer(page), home);
+          if (problem === null) {
+            break;
+          }
+        }
+        if (problem !== null) {
+          bad.push(problem);
         }
       }
       check(bad.length === 0, `${where}: ${bad.slice(0, 3).join('; ')}`);
