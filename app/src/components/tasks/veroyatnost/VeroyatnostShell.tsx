@@ -5,6 +5,7 @@ import { type VeroyatnostSection } from '@/content/veroyatnost';
 import { TUTORS_TAIL } from '@/content/vkladki';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { RazdelTabs } from '../RazdelTabs';
+import { ZADANIYA } from '@/lib/paths';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -21,7 +22,7 @@ export interface VeroyatnostShellProps {
  * не мигает и не исчезает.
  */
 export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
-  const base = `${tasksPage.href}/${section.slug}`;
+  const base = `${ZADANIYA}/${section.slug}`;
 
   return (
     <AppShell active="tasks">

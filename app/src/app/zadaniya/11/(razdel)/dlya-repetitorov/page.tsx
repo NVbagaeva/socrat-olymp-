@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Repetitory11 } from '@/components/tasks/zadanie11/Repetitory11';
-import { tasksPage } from '@/content/tasks';
 import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
+import { ZADANIYA } from '@/lib/paths';
 
 const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'repetitory')?.label ?? '';
 
@@ -20,7 +20,7 @@ export default function Repetitory11Tab() {
     <Repetitory11
       razdely={dannyeTrenazhera().razdely}
       bloki={BLOKI.map((b) => ({ id: b.id, slug: b.slug, nazvanie: b.nazvanie, razdel: b.razdel }))}
-      base={`${tasksPage.href}/${ZADANIE11.slug}`}
+      base={`${ZADANIYA}/${ZADANIE11.slug}`}
     />
   );
 }

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
 import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
-import { tasksPage } from '@/content/tasks';
 import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool } from '@/lib/veroyatnost/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('5', vkladka('5', 'generator')),
@@ -25,7 +25,7 @@ export default function Generator5Tab() {
           заголовок ниже, общий с заданием №12. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'generator')}</h2>
       <GeneratorScreen
-        base={`${tasksPage.href}/5`}
+        base={`${ZADANIYA}/5`}
         family={veroyatnostFamily('5')}
         skills={navykiPrototipov(bank5Pool())}
       />

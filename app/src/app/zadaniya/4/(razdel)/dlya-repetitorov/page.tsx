@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { OZadanii4 } from '@/components/tasks/veroyatnost/OZadanii4';
-import { tasksPage } from '@/content/tasks';
 import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', veroyatnostBySlug('4')?.tutors?.title ?? 'Для репетиторов'),
@@ -14,5 +14,5 @@ export const metadata: Metadata = {
  * Содержимое — первая вкладка, «О задании».
  */
 export default function Repetitoram4Page() {
-  return <OZadanii4 base={`${tasksPage.href}/4`} />;
+  return <OZadanii4 base={`${ZADANIYA}/4`} />;
 }

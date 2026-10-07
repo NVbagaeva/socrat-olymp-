@@ -3,10 +3,10 @@ import { notFound } from 'next/navigation';
 import { Opornye11Screen } from '@/components/tasks/zadanie11/Opornye11Screen';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
-import { tasksPage } from '@/content/tasks';
 import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI, blokBySlug } from '@/lib/zadanie11/prep/bloki';
 import { prepPool11 } from '@/lib/zadanie11/prep/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -33,7 +33,7 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
   if (found === undefined) {
     notFound();
   }
-  const listHref = `${tasksPage.href}/${ZADANIE11.slug}/${OPORNYE.tail}`;
+  const listHref = `${ZADANIYA}/${ZADANIE11.slug}/${OPORNYE.tail}`;
   return (
     <Opornye11Shell
       listHref={listHref}

@@ -9,6 +9,8 @@
  * и маршруты подхватят это сами.
  */
 
+import { href, ZADANIYA } from '@/lib/paths';
+
 /**
  * ready — раздел открыт: плашка ведёт в него.
  * soon — раздела ещё нет: плашка приглушена и помечена «Скоро».
@@ -65,8 +67,8 @@ export const tasksPage = {
     text: 'Математика — это язык, на котором написаны законы гармонии Вселенной.',
     author: 'Г. Галилей',
   },
-  /** Адрес страницы списка: используется в хлебных крошках разделов. */
-  href: '/zadaniya',
+  /** Адрес страницы списка: шапка, нижняя панель, хлебные крошки разделов. */
+  href: href(ZADANIYA),
   /* Страница-заглушка неоткрытого задания: /zadaniya/{slug}/. */
   stub: {
     crumb: 'Банк заданий ЕГЭ',
@@ -101,9 +103,14 @@ export function taskHasPage(task: ExamTask): boolean {
   return task.status === 'ready' || task.stub === true;
 }
 
-/** Адрес страницы задания. */
+/** Начало адресов раздела задания без «/» на конце: к нему дописывают вкладку. */
+export function taskBase(task: ExamTask): string {
+  return `${ZADANIYA}/${task.slug}`;
+}
+
+/** Адрес страницы задания (ссылка): /zadaniya/4/. */
 export function taskHref(task: ExamTask): string {
-  return `${tasksPage.href}/${task.slug}`;
+  return href(ZADANIYA, task.slug);
 }
 
 /** Задания одной части в порядке номеров. */

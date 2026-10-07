@@ -58,7 +58,9 @@
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
-    "test:repo-files": "node scripts/check-repo-files.mjs"
+    "test:repo-files": "node scripts/check-repo-files.mjs",
+    "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
+    "test:navigation": "node scripts/check-navigation.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

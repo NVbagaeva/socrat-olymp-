@@ -15,7 +15,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
-      <SiteHeader currentHref="/about" />
+      <SiteHeader currentHref="/about/" />
 
       <main>
         <section className="about-hero" aria-labelledby="about-title">

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
+import { NavigationGuard } from '@/components/NavigationGuard';
 import { caveat, inter, ptSerif } from '@/lib/fonts';
 import '@/styles/globals.css';
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={`${inter.variable} ${caveat.variable} ${ptSerif.variable}`}>
       <body>
         <ChunkReloadGuard />
+        <NavigationGuard />
         {children}
       </body>
     </html>

@@ -5,7 +5,6 @@ import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
 import { TrainerShell } from '@/components/tasks/trainer';
 import { findSection, findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { findTrainerShortcut, trainerPage, trainerShortcutIds } from '@/content/trainerModes';
-import { tasksPage } from '@/content/tasks';
 import 'katex/dist/katex.min.css';
 import '@/lib/graph/graph.css';
 import '../../../../zadaniya.css';
@@ -14,6 +13,7 @@ import '../../topic.css';
 import '../../prep.css';
 import '../../trainer.css';
 import '../../configurator.css';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Адреса перечислимы на сборке: подтемы с тренажёром × их ярлыки. */
 export function generateStaticParams() {
@@ -48,7 +48,7 @@ export default async function Page({ params }: { params: Params }) {
     notFound();
   }
 
-  const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
+  const base = `${ZADANIYA}/${section.slug}/${subtopic.id}`;
 
   return (
     <AppShell active="tasks">

@@ -1,4 +1,3 @@
-import { tasksPage } from '@/content/tasks';
 import type { Zadanie } from '@/content/veroyatnost';
 import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
@@ -8,6 +7,7 @@ import { zadachVBanke, type Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
 import { yarlyki } from './navyki';
 import { Tex } from './Tex';
+import { ZADANIYA } from '@/lib/paths';
 
 /**
  * Вкладка «Ключевые методы решения» заданий №4 и №5.
@@ -34,7 +34,7 @@ export interface KlyuchevyeMetodyProps {
 function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
   const metody: readonly Metod[] = zadanie === 4 ? KLYUCHEVYE_4 : METODY_5;
   const pool = zadanie === 4 ? bank4Pool() : bank5Pool();
-  const trenazher = `${tasksPage.href}/${zadanie}/trenazher/`;
+  const trenazher = `${ZADANIYA}/${zadanie}/trenazher/`;
   const presety = new Set(yarlyki(pool, zadanie).map((y) => y.id));
   return metody.map((m) => ({
     id: m.id,
