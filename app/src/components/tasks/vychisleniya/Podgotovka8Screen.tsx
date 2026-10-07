@@ -19,7 +19,7 @@ type Attempt = 'wrong' | 'skipped';
 export interface Podgotovka8ScreenProps {
   blockId: string;
   title: string;
-  /** Восемь задач блока в закрытом виде, собраны на сборке. */
+  /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (PrepSealed & { no: number })[];
   /** Плашка «Запомни!»: формулы блока, свёрстаны. */
   formulyHtml: string[];
