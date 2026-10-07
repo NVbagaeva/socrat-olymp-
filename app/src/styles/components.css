@@ -520,6 +520,15 @@ a.task-card {
   border-color: var(--color-border);
   box-shadow: none;
 }
+/* Неоткрытый раздел со страницей-заглушкой: вид тот же, приглушённый,
+   но карточка — ссылка, и на наведение отзывается как открытая. */
+a.task-card--soon {
+  cursor: pointer;
+}
+a.task-card--soon:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
 
 .task-card__no {
   width: 44px;
@@ -1058,6 +1067,37 @@ a.task-card {
   align-items: flex-start;
   line-height: 18px;
 }
+/* Неоткрытый раздел со страницей-заглушкой: приглушён, как закрытый,
+   но это ссылка — на наведение проявляется. */
+.snav a.is-dim {
+  opacity: 0.55;
+}
+.snav a.is-dim:hover {
+  opacity: 0.85;
+}
+
+/* Список заданий по частям экзамена: подпись группы капителью,
+   между группами тонкий разделитель. */
+.snav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.snav__group + .snav__group {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-on-brand-border);
+}
+.snav__group-label {
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-on-brand);
+}
+
 /* Стрелка у текущего задания. */
 .snav__go {
   width: 16px;
@@ -1909,11 +1949,12 @@ html[data-tabs-pending] .topic-panel,
    на тач-устройствах наведения нет, показывать стрелку там нечему и
    незачем — карточка и без неё нажимается целиком.
 
-   Карточки закрытых разделов сюда не попадают: у них нет ни ссылки,
-   ни обработчика, поэтому разметка стрелки им и не рисуется. */
+   Правило — для карточек-ссылок и карточек-кнопок. У закрытых
+   разделов без заглушки нет ни ссылки, ни обработчика: это span,
+   и разметка стрелки им не рисуется. */
 @media (hover: hover) {
-  .task-card--bank:not(.task-card--soon):hover .task-card__go,
-  .task-card--bank:not(.task-card--soon):focus-visible .task-card__go {
+  .task-card--bank:is(a, button):hover .task-card__go,
+  .task-card--bank:is(a, button):focus-visible .task-card__go {
     opacity: 1;
     transform: none;
   }
@@ -2069,7 +2110,8 @@ html[data-tabs-pending] .topic-panel,
   /* Свёрнутый сайдбар: от списка заданий остаются номера. */
   .shell--responsive .sidebar__caption,
   .shell--responsive .sidebar__decor,
-  .shell--responsive .snav__go {
+  .shell--responsive .snav__go,
+  .shell--responsive .snav__group-label {
     display: none;
   }
   .shell--responsive .snav .is-soon {

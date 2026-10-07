@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="График функции с отмеченной точкой максимума">
+  <!-- Кривая Безье (55,235)–(95,40)–(205,40)–(258,215); максимум найден
+       численно: (154.8, 86.15). Пунктир — проекции на оси, у вершины
+       горизонтальная касательная.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa,
+       лёгкая заливка #7FAEEA с прозрачностью 0.12, обводка 1.5–2, точки r 5–6.
+       Фона нет — его даёт плашка карточки. -->
+
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <!-- площадь под графиком -->
+    <path d="M55 250 L55 235 C95 40 205 40 258 215 L258 250 Z" fill="#7FAEEA" fill-opacity="0.12" stroke="none"/>
+    <!-- оси -->
+    <path d="M45 268 V 32 M32 250 H 268" stroke-width="1.5"/>
+    <path d="M49.95 41 L45 32 L40.05 41" stroke-width="1.5"/>
+    <path d="M259 254.95 L268 250 L259 245.05" stroke-width="1.5"/>
+    <!-- график -->
+    <path d="M55 235 C95 40 205 40 258 215" stroke-width="2.5"/>
+    <!-- проекции максимума -->
+    <path d="M154.8 86.15 V 250 M154.8 86.15 H 45" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <!-- касательная в вершине -->
+    <path d="M112.8 86.15 H 196.8" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="154.8" cy="86.15" r="7" fill="#c3dffa" stroke="#0c3ebc" stroke-width="2.5"/>
+    <circle cx="154.8" cy="250" r="4"/>
+    <circle cx="45" cy="86.15" r="4"/>
+  </g>
+</svg>

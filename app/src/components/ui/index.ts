@@ -53,7 +53,7 @@ export { Notification, type NotificationProps } from './Notification';
 export { AlertIcon, CheckIcon, TrajectoryIcon } from './StateIcons';
 export { GlassBadge, type GlassBadgeProps } from './GlassBadge';
 
-export { Sidebar, type NavItem, type SidebarProps } from './Sidebar';
+export { Sidebar, type NavGroup, type NavItem, type SidebarProps } from './Sidebar';
 export { NavIcon, type NavIconName, type NavIconProps } from './NavIcons';
 export { Topbar, type TopbarProps } from './Topbar';
 export { BottomNavigation, type BottomNavigationProps } from './BottomNavigation';

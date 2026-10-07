@@ -1,6 +1,6 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
-import { tasksPage } from '@/content/tasks';
+import { taskHasPage, taskHref } from '@/content/tasks';
 import { TaskImage } from './TaskImage';
 
 export interface TaskGridProps {
@@ -33,22 +33,22 @@ export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
   return (
     <ul className="tasks-grid">
       {tasks.map((task) => {
-        const open = task.status === 'active';
-        const byHandler = open && openInDialog?.slug === task.slug;
+        /* Ссылка есть у открытого раздела и у неоткрытого с заглушкой. */
+        const open = taskHasPage(task);
+        const byHandler = task.status === 'ready' && openInDialog?.slug === task.slug;
         return (
         <li key={task.no}>
           <TaskCard
             className="task-card--bank"
             number={task.no}
             title={task.name}
-            href={open && !byHandler ? `${tasksPage.href}/${task.slug}` : undefined}
+            href={open && !byHandler ? taskHref(task) : undefined}
             {...(byHandler && openInDialog !== undefined
               ? { onClick: (event) => openInDialog.onOpen(task, event.currentTarget) }
               : {})}
-            comingSoon={task.status !== 'active'}
-            difficulty={task.badge}
-            difficultyTone="info"
-            illustration={<TaskImage no={task.no} format={task.illustration} />}
+            comingSoon={task.status !== 'ready'}
+            badges={task.badges?.map((label) => ({ label, tone: 'info' as const }))}
+            illustration={<TaskImage no={task.no} format={task.icon} />}
           />
         </li>
         );

@@ -25,12 +25,28 @@ export interface NavItem {
   no?: string;
   /** Раздел ещё не открыт: пункт не ссылка и не берёт фокус. */
   disabled?: boolean;
+  /**
+   * Раздел ещё не открыт, но у него есть страница-заглушка: пункт
+   * приглушён так же, как закрытый, но остаётся ссылкой.
+   */
+  dim?: boolean;
+}
+
+/** Группа пунктов с подписью: «Часть 1», «Часть 2». */
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
 }
 
 export interface SidebarProps {
   /** Название продукта в шапке меню. */
   brand: string;
   items: NavItem[];
+  /**
+   * Тот же список, разбитый на группы с подписями. Задан — показывается
+   * он, а items не используется.
+   */
+  groups?: NavGroup[];
   /** Подпись над списком: чему посвящён этот столбец. */
   caption?: { title: string; subtitle: string };
   /** Нижняя группа: личные разделы. */
@@ -116,12 +132,34 @@ function NavLink({ item, className }: { item: NavItem; className?: string }) {
   return (
     <a
       href={item.href}
-      className={clsx(className, active && 'is-active')}
+      className={clsx(className, active && 'is-active', item.dim === true && !active && 'is-dim')}
       aria-current={active ? 'page' : undefined}
       aria-label={item.short !== undefined ? item.label : undefined}
     >
       {body}
     </a>
+  );
+}
+
+/**
+ * Список заданий по частям: подпись группы, под ней пункты, между
+ * группами тонкий разделитель. Одна навигация на все группы — для
+ * скринридера это один список заданий с подзаголовками.
+ */
+function NavGroups({ groups, label }: { groups: NavGroup[]; label: string }) {
+  return (
+    <nav className="snav snav--numbered snav--grouped" aria-label={label}>
+      {groups.map((group) => (
+        <div key={group.label} className="snav__group" role="group" aria-label={group.label}>
+          <span className="snav__group-label" aria-hidden="true">
+            {group.label}
+          </span>
+          {group.items.map((item) => (
+            <NavLink key={item.id} item={item} />
+          ))}
+        </div>
+      ))}
+    </nav>
   );
 }
 
@@ -154,6 +192,7 @@ function NavList({
 export function Sidebar({
   brand,
   items,
+  groups,
   caption,
   secondaryItems,
   user,
@@ -175,7 +214,11 @@ export function Sidebar({
         </div>
       ) : null}
 
-      <NavList items={items} label={label} />
+      {groups !== undefined ? (
+        <NavGroups groups={groups} label={label} />
+      ) : (
+        <NavList items={items} label={label} />
+      )}
 
       {secondaryItems !== undefined || user !== undefined || footer !== undefined ? (
         <div className="sidebar__foot">

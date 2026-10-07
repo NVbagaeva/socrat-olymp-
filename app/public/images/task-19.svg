@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Семейство параллельных прямых и окружность">
+  <!-- Окружность R = 58 с центром (150,150) и прямые x + y = const
+       (в координатах рисунка) на расстояниях 0, ±58, ±105 от центра.
+       Две касательные выделены, точки касания отмечены.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa,
+       лёгкая заливка #7FAEEA с прозрачностью 0.12, обводка 1.5–2, точки r 5–6.
+       Фона нет — его даёт плашка карточки. -->
+
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="150" cy="150" r="58" fill="#c3dffa" fill-opacity="0.75" stroke-width="2"/>
+    <line x1="35" y1="116.51" x2="116.51" y2="35" stroke-width="1.5" stroke-opacity="0.55"/>
+    <line x1="35" y1="182.98" x2="182.98" y2="35" stroke-width="2.5"/>
+    <line x1="35" y1="265" x2="265" y2="35" stroke-width="1.5" stroke-opacity="0.55"/>
+    <line x1="117.02" y1="265" x2="265" y2="117.02" stroke-width="2.5"/>
+    <line x1="183.49" y1="265" x2="265" y2="183.49" stroke-width="1.5" stroke-opacity="0.55"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="108.99" cy="108.99" r="6"/>
+    <circle cx="191.01" cy="191.01" r="6"/>
+    <circle cx="150" cy="150" r="4"/>
+  </g>
+</svg>

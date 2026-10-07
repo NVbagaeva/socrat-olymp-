@@ -5,10 +5,11 @@ import { Suspense } from 'react';
 import { katex } from '@/lib/graph/katex';
 import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
+import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
 import { Chart } from '@/components/graph/Chart';
 import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
-import { tasksPage } from '@/content/tasks';
+import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
 import { typeset } from '@/lib/tex';
@@ -17,19 +18,34 @@ import { SectionTabs } from './SectionTabs';
 import '../zadaniya.css';
 import './section.css';
 
+/* Неоткрытое задание со страницей-заглушкой (stub в content/tasks.ts).
+   Своего раздела у него нет — по его адресу собирается заглушка. */
+function stubTask(slug: string): ExamTask | undefined {
+  return tasks.find(
+    (task: ExamTask) => task.slug === slug && task.status !== 'ready' && taskHasPage(task),
+  );
+}
+
 /* Статический экспорт: список страниц известен до сборки и считается
-   из конфига. Незаявленные адреса не собираются и не открываются. */
+   из конфига. Незаявленные адреса не собираются и не открываются.
+   Раздел со своей страницей заглушкой не перекрывается. */
 export function generateStaticParams() {
-  return sectionParams();
+  const own = sectionParams();
+  const stubs = tasks
+    .filter((task) => stubTask(task.slug) !== undefined && !own.some((p) => p.task === task.slug))
+    .map((task) => ({ task: task.slug }));
+  return [...own, ...stubs];
 }
 export const dynamicParams = false;
 
 type Params = Promise<{ task: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const section = findSection((await params).task);
+  const slug = (await params).task;
+  const section = findSection(slug);
   if (!section) {
-    return {};
+    const task = stubTask(slug);
+    return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
   }
   return {
     title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
@@ -55,9 +71,14 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
 }
 
 export default async function SectionPage({ params }: { params: Params }) {
-  const section = findSection((await params).task);
+  const slug = (await params).task;
+  const section = findSection(slug);
   if (!section) {
-    notFound();
+    const task = stubTask(slug);
+    if (task === undefined) {
+      notFound();
+    }
+    return <TaskStub task={task} />;
   }
 
   const subtopics = section.subtopics.map((item) => toView(section.slug, item));

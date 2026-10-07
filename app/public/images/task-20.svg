@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Кубок со звездой">
+  <!-- Кубок: чаша, две ручки, ножка и подставка; в чаше пятиконечная
+       звезда (внешний радиус 30, внутренний 12.5) с центром (150,118).
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa,
+       лёгкая заливка #7FAEEA с прозрачностью 0.12, обводка 1.5–2, точки r 5–6.
+       Фона нет — его даёт плашка карточки. -->
+
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <!-- ручки -->
+    <path d="M92 82 C 48 82, 46 146, 104 154" stroke-width="2"/>
+    <path d="M208 82 C 252 82, 254 146, 196 154" stroke-width="2"/>
+    <!-- чаша -->
+    <path d="M90 62 H 210 V 100 C 210 152, 184 182, 150 186 C 116 182, 90 152, 90 100 Z" fill="#7FAEEA" fill-opacity="0.12" stroke-width="2"/>
+    <path d="M90 62 H 210" stroke-width="2.5"/>
+    <!-- ножка и подставка -->
+    <path d="M140 186 V 214 M160 186 V 214" stroke-width="2"/>
+    <path d="M124 214 H 176 L 186 240 H 114 Z" fill="#c3dffa" stroke-width="2"/>
+    <path d="M104 248 H 196" stroke-width="2"/>
+    <!-- звезда -->
+    <polygon points="150,88 157.35,107.89 178.53,108.73 161.89,121.86 167.63,142.27 150,130.5 132.37,142.27 138.11,121.86 121.47,108.73 142.65,107.89" fill="#c3dffa" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="150" cy="118" r="4"/>
+  </g>
+</svg>
