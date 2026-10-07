@@ -11,6 +11,13 @@
 
 import dp07 from '../../data/zadanie11/analogs/DP-07.json';
 import sm07 from '../../data/zadanie11/analogs/SM-07.json';
+import pr01 from '../../data/zadanie11/analogs/PR-01.json';
+import pr02 from '../../data/zadanie11/analogs/PR-02.json';
+import pr03 from '../../data/zadanie11/analogs/PR-03.json';
+import pr04 from '../../data/zadanie11/analogs/PR-04.json';
+import pr05 from '../../data/zadanie11/analogs/PR-05.json';
+import pr06 from '../../data/zadanie11/analogs/PR-06.json';
+import pr07 from '../../data/zadanie11/analogs/PR-07.json';
 import rz01 from '../../data/zadanie11/analogs/RZ-01.json';
 import rz02 from '../../data/zadanie11/analogs/RZ-02.json';
 import rz03 from '../../data/zadanie11/analogs/RZ-03.json';
@@ -49,6 +56,13 @@ export interface Analog {
 
 /** Пул по прототипам; новый прототип — новая строка. */
 export const POOL_ANALOGOV: Record<string, Analog[]> = {
+  'PR-01': pr01 as unknown as Analog[],
+  'PR-02': pr02 as unknown as Analog[],
+  'PR-03': pr03 as unknown as Analog[],
+  'PR-04': pr04 as unknown as Analog[],
+  'PR-05': pr05 as unknown as Analog[],
+  'PR-06': pr06 as unknown as Analog[],
+  'PR-07': pr07 as unknown as Analog[],
   'RZ-01': rz01 as unknown as Analog[],
   'RZ-02': rz02 as unknown as Analog[],
   'RZ-03': rz03 as unknown as Analog[],

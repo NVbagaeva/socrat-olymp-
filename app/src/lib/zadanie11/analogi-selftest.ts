@@ -26,7 +26,8 @@ import {
   checkSolved,
   type Problem,
 } from './selftest';
-import { chasy, sk, SLOVA } from './sklonenie';
+import { chasy, chislo, sk, SLOVA } from './sklonenie';
+import { VO_SKOLKO } from './prototypes/common';
 import type { Params } from './types';
 
 /** Ключи сюжета: на модель не влияют, в сравнении с банком не участвуют. */
@@ -72,6 +73,27 @@ const SYUZHET = new Set([
   'dve',
   'per',
   'perRod',
+  /* Проценты: кто получает доход, что дорожает, мелкая и крупная покупка. */
+  'kto',
+  'rost',
+  'baza',
+  'etap1',
+  'etap2',
+  'kogda1',
+  'melk',
+  'melkRod',
+  'odna',
+  'odnoy',
+  'krupRod',
+  'aKto',
+  'aTitle',
+  'aDohod',
+  'bKto',
+  'bTitle',
+  'bDohod',
+  'cKto',
+  'cTitle',
+  'cDohod',
 ]);
 
 export function model(params: Params): Params {
@@ -114,7 +136,7 @@ function vne(what: string, x: number, lo: number, hi: number): string[] {
 
 interface Pravilo {
   /** Какие параметры модели обязаны стоять в тексте числами. */
-  chisla: string[];
+  chisla: string[] | ((a: Analog) => string[]);
   /** Вопрос текста соответствует ask. */
   vopros: (a: Analog) => boolean;
   /** Правдоподобие чисел для сюжета: список нарушений. */
@@ -174,6 +196,99 @@ const PRAVILA: Record<string, Pravilo> = {
       if (v.splav !== /сплав/.test(a.text)) out.push('сплав/раствор не совпадает с веществом');
       return out;
     },
+  },
+  /* ── Проценты ── */
+  'PR-01': {
+    chisla: ['p', 'N'],
+    vopros: (a) => /заработн/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...vne('зарплата', a.answer, 15000, 300000),
+      ...(/налог/.test(a.text) ? [] : ['нет налога']),
+    ],
+  },
+  'PR-02': {
+    chisla: ['a', 'b'],
+    vopros: (a) =>
+      a.ask === 'umen' ? /уменьшил/.test(poslednee(a.text)) : /увеличил/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...vne('подорожание, %', num(a.params, 'a'), 1, 99),
+      ...vne('подешевление, %', num(a.params, 'b'), 1, 99),
+    ],
+  },
+  'PR-03': {
+    chisla: ['d'],
+    vopros: (a) => /На сколько процентов подорожал/.test(poslednee(a.text)),
+    pravdopodobie: (a) => [
+      ...vne('изменение, %', a.answer, 1, 99),
+      ...(/на то же самое число процентов/.test(a.text)
+        ? []
+        : ['нет «то же самое число процентов»']),
+    ],
+  },
+  'PR-04': {
+    chisla: ['p'],
+    vopros: (a) =>
+      /На сколько процентов/.test(poslednee(a.text)) && /дороже/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const n = num(a.params, 'n');
+      const m = num(a.params, 'm');
+      const t = a.text.toLowerCase();
+      const odna = (100 - num(a.params, 'p')) / n;
+      return [
+        ...(new RegExp(`(^|\\s)${chislo(n)}\\s`).test(t) ? [] : [`в тексте нет «${chislo(n)}»`]),
+        ...(new RegExp(`(^|\\s)${chislo(m)}\\s`).test(t) ? [] : [`в тексте нет «${chislo(m)}»`]),
+        ...(nice(odna, 2) ? [] : [`одна вещь стоит ${odna}% — не «красиво»`]),
+        ...vne('доля одной вещи, %', odna, 5, 40),
+      ];
+    },
+  },
+  'PR-05': {
+    chisla: ['a', 'b'],
+    vopros: (a) => /Сколько процентов/.test(poslednee(a.text)),
+    pravdopodobie: (a) => {
+      const k = num(a.params, 'k');
+      const z = (num(a.params, 'b') * k) / (k - 1);
+      return [
+        ...(a.text.includes(`уменьшилась ${VO_SKOLKO[k] ?? '?'}`)
+          ? []
+          : [`нет «уменьшилась ${VO_SKOLKO[k] ?? '?'}»`]),
+        ...(/увеличилась вдвое/.test(a.text) ? [] : ['нет «увеличилась вдвое»']),
+        ...vne('доля третьего, %', z, 3, 25),
+        ...vne('доля второго, %', a.answer, 15, 60),
+      ];
+    },
+  },
+  'PR-06': {
+    chisla: (a) => (a.params.form === 'vklad' ? ['S', 'diff'] : ['P0', 'P2']),
+    vopros: (a) =>
+      a.ask === a.params.form &&
+      (a.ask === 'vklad'
+        ? /процент годовых/.test(poslednee(a.text))
+        : /На сколько процентов/.test(poslednee(a.text))),
+    pravdopodobie: (a) =>
+      a.params.form === 'vklad'
+        ? [
+            ...vne('процент годовых', a.answer, 1, 30),
+            ...vne('вклад', num(a.params, 'S'), 1000, 1000000),
+            ...(/клиент А\./.test(a.text) && /клиент Б\./.test(a.text)
+              ? []
+              : ['нет клиентов А. и Б.']),
+          ]
+        : [
+            ...vne('снижение в год, %', a.answer, 1, 30),
+            ...vne('цена', num(a.params, 'P0'), 5000, 2000000),
+          ],
+  },
+  'PR-07': {
+    chisla: ['p'],
+    vopros: (a) =>
+      a.ask === 'bolshe'
+        ? /больше времени/.test(poslednee(a.text))
+        : /меньше времени/.test(poslednee(a.text)),
+    pravdopodobie: (a) =>
+      a.ask === 'bolshe'
+        ? vne('снижение скорости, %', num(a.params, 'p'), 1, 80)
+        : vne('рост скорости, %', num(a.params, 'p'), 1, 400),
   },
   /* ── Разминка ── */
   'RZ-01': {
@@ -436,7 +551,8 @@ export function checkAnalogi(typeset: (tex: string) => string) {
       if (teksty.has(a.text)) add(where, 'текст повторяет другой аналог');
       teksty.add(a.text);
       if (pravilo !== undefined) {
-        for (const k of pravilo.chisla) {
+        const chisla = typeof pravilo.chisla === 'function' ? pravilo.chisla(a) : pravilo.chisla;
+        for (const k of chisla) {
           const n = vTekste(num(m, k));
           if (!new RegExp(`(?<![\\d,])${n.replace(',', '\\,')}(?![\\d,])`).test(prostye(a.text))) {
             add(where, `в тексте нет числа ${k} = ${n}`);

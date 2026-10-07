@@ -37,7 +37,7 @@
 функция `solve`, что у задачи банка, другие числа и сюжет. Запись:
 `id` («ДП-07-a01»), `prototypeId`, `source: "analog"`, `level`,
 `params` (модель + слова сюжета: `geroy`, `vv`, `tara` — словари в
-`lib/zadanie11/prototypes/syuzhety.ts`; у разминки — свободные слова
+`lib/zadanie11/prototypes/syuzhety.ts`; у разминки и процентов — свободные слова
 вроде `tovar`, `mat`, `zan`, их читает `slovo()` из `kit.ts`, а без
 них `solve` пишет слова задачи разминки), `text` (условие, написано
 вручную), `ask`, `answer`, `plotTag`. Для разминки (РЗ) аналоги
