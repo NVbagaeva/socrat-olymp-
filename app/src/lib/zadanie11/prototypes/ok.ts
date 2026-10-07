@@ -6,8 +6,18 @@
  * ОК-04 (стрелки часов) зарезервирован.
  */
 
-import { chtoSprashivayut, drobnoe, dvizhenie, etapy, num, slovo, vopros, xxd } from '../kit';
-import { d, div, fq, mul, q, txt, val } from '../num';
+import {
+  chtoSprashivayut,
+  drobnoe,
+  dvizhenie,
+  etapy,
+  kvadrat,
+  num,
+  slovo,
+  vopros,
+  xxd,
+} from '../kit';
+import { d, div, fq, mul, q, txt, val, type Q } from '../num';
 import { plural } from '../../plural';
 import { sk, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
@@ -90,9 +100,14 @@ const OK02: Subtype = {
     const t1 = num(p, 't1'); // минуты
     const k = div(q(L), q(t1, 60));
     const total = N * L;
-    const P = val(div(mul(q(total), k), q(dt, 60))); // x(x + k) = P
+    const Pq = div(mul(q(total), k), q(dt, 60)); // x(x + k) = P
+    const P = val(Pq);
     const kk = val(k);
-    const res = xxd(P, kk);
+    /* Целые k и P — подбор множителей (x(x + k) = P). Дробные (разность
+       скоростей 7,5 км/ч) — умножаем на общий знаменатель и решаем
+       через дискриминант: подбором дробные множители не найти. */
+    const celye = k.m === 1 && Pq.m === 1;
+    const res = celye ? xxd(P, kk) : drobnyKvadrat(k, Pq);
     const x = res.root;
     /* Аналог: велогонщики, картингисты. */
     const ktoRod = slovo(p, 'ktoRod', 'гонщика');
@@ -151,10 +166,30 @@ const OK02: Subtype = {
           'время гонки',
         ]),
       ],
-      lifehacks: ['closing-speed', 'x-x-plus-d', 'root-guess'],
+      lifehacks: celye ? ['closing-speed', 'x-x-plus-d', 'root-guess'] : ['closing-speed'],
     };
   },
 };
+
+/** x(x + k) = P с дробными k или P: x² + kx − P = 0, умноженное на общий знаменатель. */
+function drobnyKvadrat(k: Q, P: Q): { lines: string[]; roots: number[]; root: number } {
+  const L = (k.m * P.m) / nod(k.m, P.m);
+  const sol = kvadrat(L, (k.n * L) / k.m, -(P.n * L) / P.m);
+  const roots = sol.roots.map(val);
+  const root = Math.max(...roots);
+  return {
+    lines: [
+      `$x(x+${fq(k, true)})=${fq(P, true)}$, то есть $x^2+${fq(k, true)}x-${fq(P, true)}=0$. Коэффициенты дробные — умножаем обе части на $${d(L)}$: $${sol.ishodnoe}$.`,
+      ...sol.lines,
+    ],
+    roots,
+    root,
+  };
+}
+
+function nod(a: number, b: number): number {
+  return b === 0 ? a : nod(b, a % b);
+}
 
 function slovoKrug(n: number): string {
   return plural(n, ...SLOVA.krug);
