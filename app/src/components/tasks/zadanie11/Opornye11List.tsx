@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OPORNYE_11 } from '@/content/zadanie11';
 import { mikroResheno11, opornye11 } from '@/lib/zadanie11/progress';
 import type { RazdelBloka } from '@/lib/zadanie11/prep/types';
@@ -75,6 +75,15 @@ export function Opornye11List({
 }) {
   const progress = opornye11.useProgress();
   const [filtr, setFiltr] = useState<Filtr>('all');
+  /* Ссылка «Опорные задачи» из вступления раздела на «О задании»
+     (?razdel=SM) открывает список сразу на этом разделе. */
+  useEffect(() => {
+    const r = new URLSearchParams(window.location.search).get('razdel');
+    if (r !== null && filtry.some((k) => k.id === r)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- адрес читается только в браузере
+      setFiltr(r as Filtr);
+    }
+  }, [filtry]);
   const knopki: { id: Filtr; label: string }[] = [{ id: 'all', label: OPORNYE_11.vse }, ...filtry];
   const vidny = bloki.filter((b) => filtr === 'all' || b.filtry.includes(filtr));
   return (

@@ -32,14 +32,20 @@ export function Progress11({
     total,
   );
   const text = PROGRESS_11.text(done, total);
+  const sostav = PROGRESS_11.sostav(
+    razdely.length,
+    bloki.reduce((sum, b) => sum + b.total, 0),
+    podtipy.length,
+  );
   return (
-    <div className="topic-progress">
+    <div className="topic-progress" title={sostav}>
       <ProgressRing
         value={total === 0 ? 0 : (done / total) * 100}
         label={PROGRESS_11.label}
         srLabel={text}
       />
       <p className="topic-progress__text">{text}</p>
+      <p className="topic-progress__note z11-progress__note">{sostav}</p>
     </div>
   );
 }

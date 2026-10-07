@@ -52,8 +52,9 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [dannye],
   );
 
-  /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07) или маршрут
-     урока у репетиторов (?tipy=PR-01,PR-04) — отмечаем только их. */
+  /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07), маршрут урока
+     у репетиторов или раздел с «О задании» (?tipy=PR-01,PR-04) —
+     отмечаем только их. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const tipy = [q.get('tip') ?? '', ...(q.get('tipy') ?? '').split(',')].filter((id) =>
@@ -63,10 +64,13 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
       return;
     }
     const s = nastroykiSeychas();
+    /* «Проверить себя» на «О задании»: вариант из 8 задач (?n=8). */
+    const n = Number(q.get('n'));
     zapisatNastroyki({
       ...s,
       podtipy: tipy,
       uroven: 0,
+      count: Number.isInteger(n) && n >= 1 && n <= 50 ? n : s.count,
       istochnik:
         tipy.some((id) => id.startsWith('RZ-')) && s.istochnik === 'bank' ? 'mix' : s.istochnik,
     });
