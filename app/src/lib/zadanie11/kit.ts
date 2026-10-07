@@ -100,7 +100,7 @@ export function rabota(
 
 /** Подписи строк развёрнутой таблицы концентрации. */
 export const STROKI_KONC = [
-  '$m_{\\text{в.в.}}$ — масса вещества',
+  '$m_{\\text{в-ва}}$ — масса вещества',
   '$m_{\\text{р-ра}}$ — масса раствора',
   '$p\\,\\%$ — концентрация',
 ];
@@ -117,22 +117,48 @@ export interface Stolbets {
 }
 
 /**
- * Развёрнутая таблица концентрации: строки m_в.в. (масса вещества),
- * m_р-ра (масса раствора), p % (концентрация) — с расшифровкой в
+ * Подпись столбца в шапке: римские цифры прямым шрифтом, звёздочка
+ * равных масс — верхним индексом. «I* + II*» → $\text{I}^{*}+\text{II}^{*}$;
+ * подписи без звёздочки («I + вода») остаются текстом.
+ */
+export function podpisStolbtsa(label: string): string {
+  if (!label.includes('*')) {
+    return label;
+  }
+  const tex = label
+    .split(' + ')
+    .map((part) => {
+      const m = /^(I{1,3})(\*?)$/.exec(part);
+      if (m === null) {
+        return `\\text{${part}}`;
+      }
+      return `\\text{${m[1] ?? ''}}${m[2] === '*' ? '^{*}' : ''}`;
+    })
+    .join('+');
+  return `$${tex}$`;
+}
+
+/**
+ * Развёрнутая таблица концентрации: строки m_{\text{в-ва}} (масса вещества),
+ * m_{\text{р-ра}} (масса раствора), p % (концентрация) — с расшифровкой в
  * подписи строки; столбцы — участники смешивания римскими цифрами
  * (I, II, I + II, вода, I + II + вода; для равных масс I*, II*,
- * I* + II*). Методика — docs/zadanie-11/metodika.md.
+ * I* + II* со звёздочкой в верхнем индексе). Строка массы вещества
+ * помечена: уравнение составляют по ней. Методика —
+ * docs/zadanie-11/metodika.md.
  */
 export function koncentraciya(cols: Stolbets[], title?: string): Tablitsa {
   const [r1, r2, r3] = STROKI_KONC as [string, string, string];
   const t: Tablitsa = {
     vid: 'koncentraciya',
-    head: ['', ...cols.map((c) => c.label)],
+    head: ['', ...cols.map((c) => podpisStolbtsa(c.label))],
     rows: [
       [r1, ...cols.map((c) => `$${c.mvv}$`)],
       [r2, ...cols.map((c) => `$${c.mr}$`)],
       [r3, ...cols.map((c) => `$${c.p}$`)],
     ],
+    /* Уравнение — по строке массы вещества: она подсвечена. */
+    uravnenie: 0,
   };
   return title ? { ...t, title } : t;
 }

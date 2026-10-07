@@ -610,6 +610,44 @@
   font-weight: 600;
   white-space: normal;
 }
+/* Строка уравнения (у смесей — масса вещества): светло-зелёная. */
+.z11-tab tr.is-uravnenie > th,
+.z11-tab tr.is-uravnenie > td:not(.z11-tab__vyn) {
+  background: var(--color-success-soft);
+}
+/* Столбец выноски: без рамок и фона, только подпись у своей строки. */
+.z11-tab .z11-tab__vyn {
+  width: 1%;
+  padding: 0 0 0 var(--space-3);
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.z11-tab__vynoska {
+  position: relative;
+  display: inline-block;
+  max-width: 120px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+  white-space: normal;
+}
+.z11-tab__vynoska::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  border-left: 1px solid var(--color-success);
+  border-bottom: 1px solid var(--color-success);
+  background: var(--color-success-soft);
+  transform: translateY(-50%) rotate(45deg);
+}
 
 /* Плитки типов задач. */
 .z11-tipy__title {
@@ -683,7 +721,7 @@
 /* «Что такое концентрация»: определение и примеры из жизни с картинками. */
 .z11-vved__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: var(--space-3);
   list-style: none;
   margin: 0;
@@ -723,6 +761,255 @@
   padding-left: var(--space-5);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
+}
+
+/* ── Смеси: макет teoriya-smesi.png ───────────────────────────── */
+
+/* Заголовок блока с синей чертой слева, как «Что такое концентрация». */
+.z11-blok-title {
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+/* Определение — в рамке, по центру. */
+.z11-vved__opredelenie {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  text-align: center;
+  line-height: var(--lh-lg);
+}
+@media (min-width: 900px) {
+  .z11-vved__list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.z11-vved__item {
+  justify-items: center;
+  text-align: center;
+}
+.z11-vved__pic {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* Формула со следствиями и жёлтый лайфхак — одной строкой на широком. */
+.z11-teor__formula-ryad,
+.z11-teor__para {
+  display: grid;
+  gap: var(--space-4);
+}
+/* Ширину считаем по колонке теории, а не по окну: рядом стоят
+   боковое меню сайта и «Содержание», и колонка бывает узкой. */
+.z11-teor {
+  container: z11teor / inline-size;
+}
+@container z11teor (min-width: 1040px) {
+  .z11-teor__formula-ryad {
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+@container z11teor (min-width: 1100px) {
+  .z11-teor__para {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+.z11-glavnaya__body {
+  display: grid;
+  gap: var(--space-4);
+}
+@container (min-width: 620px) {
+  .z11-glavnaya__body {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+.z11-glavnaya__formula {
+  display: grid;
+  gap: var(--space-3);
+}
+/* Главная формула — крупно, как на макете. */
+.z11-glavnaya__formula .z11-card__formula {
+  font-size: 1.35em;
+}
+.z11-legenda--tsvet {
+  padding-left: 0;
+  list-style: none;
+}
+.z11-legenda__item {
+  display: grid;
+  grid-template-columns: 12px auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0 var(--space-2);
+}
+.z11-legenda__dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--z11-metka);
+  transform: translateY(1px);
+}
+.z11-metka--zel {
+  --z11-metka: var(--color-success);
+  --z11-metka-soft: var(--color-success-soft);
+}
+.z11-metka--sin {
+  --z11-metka: var(--color-primary);
+  --z11-metka-soft: var(--color-surface-soft);
+}
+.z11-metka--oran {
+  --z11-metka: var(--color-warning);
+  --z11-metka-soft: var(--color-warning-soft);
+}
+.z11-sledstviya {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-sledstvie {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+/* Первое следствие — масса вещества (зелёное), второе — раствора (синее). */
+.z11-sledstvie--0 {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z11-sledstvie--1 {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.z11-sledstvie__title {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z11-sledstvie__tex {
+  overflow-x: auto;
+}
+.z11-sledstvie__tex .katex-display {
+  margin: 0;
+}
+.z11-sledstvie__podpis {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+/* Стрелка от формулы к следствию: видна, когда они рядом. */
+.z11-sledstvie__arrow {
+  display: none;
+}
+@container (min-width: 620px) {
+  .z11-sledstvie__arrow {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: calc(var(--space-4) * -1 - 14px);
+    width: 22px;
+    height: 22px;
+    transform: translateY(-50%);
+  }
+  .z11-sledstvie--0 .z11-sledstvie__arrow {
+    color: var(--color-success);
+    transform: translateY(-50%) rotate(-20deg);
+  }
+  .z11-sledstvie--1 .z11-sledstvie__arrow {
+    color: var(--color-primary);
+    transform: translateY(-50%) rotate(20deg);
+  }
+}
+
+/* Жёлтый лайфхак с треугольником. */
+.z11-zapomnit {
+  align-content: start;
+  height: 100%;
+  border-color: var(--color-z11-rz);
+  background: var(--color-z11-rz-soft);
+}
+.z11-zapomnit .z11-card__icon {
+  color: var(--color-star);
+}
+.z11-zapomnit__body {
+  display: grid;
+  gap: var(--space-3);
+}
+@container (min-width: 420px) {
+  .z11-zapomnit__body {
+    grid-template-columns: minmax(150px, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+  }
+}
+.z11-treug {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 200 / 170;
+}
+.z11-treug svg {
+  width: 100%;
+  height: 100%;
+}
+.z11-treug__verh {
+  fill: var(--color-success-soft);
+}
+.z11-treug__levo {
+  fill: var(--color-surface-soft);
+}
+.z11-treug__pravo {
+  fill: var(--color-warning-soft);
+}
+.z11-treug__kontur {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.z11-treug__m {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 1.05em;
+  white-space: nowrap;
+}
+.z11-treug__m--verh {
+  top: 40%;
+  left: 50%;
+  color: var(--color-success);
+}
+.z11-treug__m--levo {
+  top: 76%;
+  left: 31%;
+  color: var(--color-primary);
+}
+.z11-treug__m--pravo {
+  top: 76%;
+  left: 69%;
+  color: var(--color-warning);
+}
+.z11-zapomnit__text {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-zapomnit__pravilo,
+.z11-zapomnit__sovet {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
 }
 
 /* ── Вкладка «Опорные задачи» ─────────────────────────────────── */
@@ -1059,5 +1346,17 @@
   }
   .z11-filtr__btn {
     min-width: 72px;
+  }
+}
+
+/* Подпункты содержания: блок встаёт под липкой лентой вкладок. */
+.z11-teor [id] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
+}
+@media (max-width: 1023.98px) {
+  .z11-teor [id] {
+    scroll-margin-top: calc(
+      var(--topic-sticky-top, 0px) + var(--h-topic-open, 0px) + var(--space-4)
+    );
   }
 }

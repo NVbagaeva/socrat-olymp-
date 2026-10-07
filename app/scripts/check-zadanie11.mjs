@@ -117,9 +117,22 @@ for (const [word, id] of [
     for (const id of r.lovushki) {
       if (!LOVUSHKI[id]) problems.push({ where: `теория ${r.id}`, what: `нет ловушки ${id}` });
     }
-    for (const t of r.tablitsa?.tables ?? []) {
+    for (const t of [...(r.tablitsa?.tables ?? []), ...(r.paraTablits ?? []).map((x) => x.table)]) {
       problems.push(...checkTablitsa(`теория ${r.id}`, t));
       texts.push(...t.head, ...t.rows.flat(), t.title ?? '');
+    }
+    for (const x of r.paraTablits ?? []) {
+      texts.push(x.primer, x.note);
+    }
+    for (const l of r.formula?.legenda ?? []) {
+      texts.push(`$${l.tex}$`, l.text);
+    }
+    for (const sl of r.formula?.sledstviya ?? []) {
+      texts.push(`$${sl.tex}$`, sl.podpis);
+    }
+    if (r.zapomnit) {
+      const z = r.zapomnit;
+      texts.push(`$${z.verh}$`, ...z.niz.map((t) => `$${t}$`), z.pravilo, z.sovet);
     }
     texts.push(
       r.lead,
@@ -193,6 +206,68 @@ for (const { where, text } of prep.texts) {
   const plain = stripDollarMath(text).replace(/\*\*/g, '');
   for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
     problems.push({ where, what: `вне KaTeX (${f.rule}): «${f.match}» в «${text.slice(0, 70)}»` });
+  }
+}
+
+/* Обозначения смесей: m_{\text{в-ва}}, m_{\text{р-ра}} — индекс прямым
+   шрифтом и полностью. «в.в.», «в-в» и курсивный индекс m_{в…} — ошибка. */
+{
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { APP } = await import('./lib/load-ts.mjs');
+  const files = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (/\.(ts|tsx|json)$/.test(e.name)) files.push(full);
+    }
+  };
+  for (const dir of [
+    'src/lib/zadanie11',
+    'src/content',
+    'src/components/tasks/zadanie11',
+    'src/data/zadanie11',
+  ]) {
+    walk(path.join(APP, dir));
+  }
+  for (const file of files) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const [re, what] of [
+      [/в\.в\./, 'обозначение «в.в.» вместо «в-ва»'],
+      [/в-в(?!а)/, 'обозначение «в-в» вместо «в-ва»'],
+      [/m_\{?(?:в|р)/, 'индекс m без \\text{…}: курсив вместо прямого'],
+    ]) {
+      const m = re.exec(text);
+      if (m !== null) {
+        problems.push({
+          where: path.relative(APP, file),
+          what: `${what}: «${text.slice(m.index - 10, m.index + 20)}»`,
+        });
+      }
+    }
+  }
+}
+
+/* Подпись столбца равных масс: звёздочка — верхний индекс. */
+{
+  const { podpisStolbtsa } = requireSrc('lib/zadanie11/kit');
+  const { checkTablitsa } = requireSrc('lib/zadanie11/selftest');
+  for (const [got, want] of [
+    [podpisStolbtsa('I*'), '$\\text{I}^{*}$'],
+    [podpisStolbtsa('I* + II*'), '$\\text{I}^{*}+\\text{II}^{*}$'],
+    [podpisStolbtsa('I + вода'), 'I + вода'],
+  ]) {
+    if (got !== want) problems.push({ where: 'столбцы', what: `«${got}» вместо «${want}»` });
+  }
+  /* Звёздочка строкой, арабская цифра, неподсвеченная строка — проверка их ловит. */
+  const plokhaya = {
+    vid: 'koncentraciya',
+    head: ['', 'I*', '1'],
+    rows: [],
+  };
+  if (checkTablitsa('мутация', plokhaya).length < 3) {
+    problems.push({ where: 'столбцы', what: 'checkTablitsa пропустила «I*», «1» или подсветку' });
   }
 }
 

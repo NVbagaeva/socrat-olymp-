@@ -97,6 +97,114 @@ function KartaLovushka({ id }: { id: string }) {
   );
 }
 
+/** Подпункты раздела в содержании: что есть в теле раздела, по порядку. */
+export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
+  const out: { id: string; title: string }[] = [];
+  if (r.vvedenie) out.push({ id: `${r.id}-opredelenie`, title: 'Определение' });
+  if (r.formula) out.push({ id: `${r.id}-formula`, title: 'Главная формула' });
+  if (r.tablitsa || r.paraTablits) out.push({ id: `${r.id}-tablitsa`, title: 'Таблица' });
+  if (r.zapomnit || r.layfhaki.length > 0) {
+    out.push({ id: `${r.id}-layfhaki`, title: 'Лайфхаки' });
+  }
+  if (r.lovushki.length > 0) out.push({ id: `${r.id}-lovushki`, title: 'Ловушки' });
+  if (r.section) out.push({ id: `${r.id}-tipy`, title: 'Типы задач' });
+  return out;
+}
+
+/** Строчная формула набором KaTeX с крупными дробями. */
+function Strochno({ tex, className }: { tex: string; className?: string }) {
+  const html = katex.renderToString(tex, { throwOnError: true, displayFrac: true });
+  return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/**
+ * Главная формула с легендой и карточками-следствиями (макет
+ * teoriya-smesi.png): слева формула и цветные метки обозначений,
+ * справа — две формулы, выраженные из неё, со стрелками.
+ */
+function FormulaSoSledstviyami({ r }: { r: RazdelTeorii11 }) {
+  const f = r.formula;
+  if (!f) {
+    return null;
+  }
+  return (
+    <section className="z11-card z11-glavnaya" id={`${r.id}-formula`}>
+      <h4 className="z11-blok-title">Главная формула</h4>
+      <div className="z11-glavnaya__body">
+        <div className="z11-glavnaya__formula">
+          <Krupno className="z11-card__formula" tex={f.tex} />
+          {f.legenda ? (
+            <ul className="z11-legenda z11-legenda--tsvet">
+              {f.legenda.map((l) => (
+                <li key={l.tex} className={`z11-legenda__item z11-metka--${l.tsvet}`}>
+                  <span className="z11-legenda__dot" aria-hidden="true" />
+                  <Strochno tex={l.tex} className="z11-legenda__tex" />
+                  <span>
+                    — <Tex text={l.text} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="z11-card__podpis">
+            <Tex text={f.podpis} />
+          </p>
+        </div>
+        {f.sledstviya ? (
+          <ul className="z11-sledstviya">
+            {f.sledstviya.map((sl, i) => (
+              <li key={sl.title} className={`z11-sledstvie z11-sledstvie--${i}`}>
+                <Piktogramma name="arrow" className="z11-sledstvie__arrow" />
+                <span className="z11-sledstvie__title">{sl.title}:</span>
+                <Krupno className="z11-sledstvie__tex" tex={sl.tex} />
+                <span className="z11-sledstvie__podpis">{sl.podpis}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+/** Жёлтый лайфхак «как запомнить»: треугольник формулы. */
+function Zapomnit({ z }: { z: NonNullable<RazdelTeorii11['zapomnit']> }) {
+  return (
+    <section className="z11-card z11-zapomnit">
+      <h4 className="z11-card__title">
+        <Piktogramma name="bulb" className="z11-card__icon" />
+        {z.title}
+      </h4>
+      <div className="z11-zapomnit__body">
+        <div
+          className="z11-treug"
+          role="img"
+          aria-label="Треугольник: масса вещества сверху, масса раствора и p/100 снизу"
+        >
+          <svg viewBox="0 0 200 170" aria-hidden="true" focusable="false">
+            <polygon className="z11-treug__verh" points="100,8 48,95 152,95" />
+            <polygon className="z11-treug__levo" points="48,95 8,162 100,162 100,95" />
+            <polygon className="z11-treug__pravo" points="100,95 100,162 192,162 152,95" />
+            <polygon className="z11-treug__kontur" points="100,8 8,162 192,162" />
+            <path className="z11-treug__kontur" d="M48 95H152M100 95V162" />
+          </svg>
+          <Strochno tex={z.verh} className="z11-treug__m z11-treug__m--verh" />
+          <Strochno tex={z.niz[0]} className="z11-treug__m z11-treug__m--levo" />
+          <Strochno tex={z.niz[1]} className="z11-treug__m z11-treug__m--pravo" />
+        </div>
+        <div className="z11-zapomnit__text">
+          <p className="z11-zapomnit__pravilo">
+            <Tex text={z.pravilo} />
+          </p>
+          <p className="z11-zapomnit__sovet">
+            <Tex text={z.sovet} />
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
   const tipy = r.section ? SUBTYPES.filter((st) => st.section === r.section) : [];
   const polnyy = r.id === 'layfhaki';
@@ -110,12 +218,9 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       </div>
 
       {r.vvedenie ? (
-        <section className="z11-card z11-vved" aria-label={r.vvedenie.title}>
-          <h4 className="z11-card__title">
-            <Piktogramma name="drop" className="z11-card__icon" />
-            {r.vvedenie.title}
-          </h4>
-          <p className="z11-card__text">
+        <section className="z11-card z11-vved" id={`${r.id}-opredelenie`}>
+          <h4 className="z11-blok-title">{r.vvedenie.title}</h4>
+          <p className="z11-vved__opredelenie">
             <Tex text={r.vvedenie.opredelenie} />
           </p>
           <ul className="z11-vved__list">
@@ -135,14 +240,45 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         </section>
       ) : null}
 
-      {r.formula || r.tablitsa ? (
+      {r.formula?.sledstviya ? (
+        <div className="z11-teor__formula-ryad">
+          <FormulaSoSledstviyami r={r} />
+          {r.zapomnit ? (
+            <div id={`${r.id}-layfhaki`}>
+              <Zapomnit z={r.zapomnit} />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {r.paraTablits ? (
+        <div className="z11-teor__para" id={`${r.id}-tablitsa`}>
+          {r.paraTablits.map((pt) => (
+            <section className="z11-card" key={pt.title}>
+              <h4 className="z11-card__title">
+                <Piktogramma name="table" className="z11-card__icon" />
+                {pt.title}
+              </h4>
+              <p className="z11-card__lead">
+                <Tex text={pt.primer} />
+              </p>
+              <Tablitsa11 table={pt.table} />
+              <p className="z11-card__note">
+                <Tex text={pt.note} />
+              </p>
+            </section>
+          ))}
+        </div>
+      ) : null}
+
+      {(r.formula && !r.formula.sledstviya) || r.tablitsa ? (
         <div
           className={
             r.tablitsa?.legenda ? 'z11-teor__pair z11-teor__pair--stack' : 'z11-teor__pair'
           }
         >
-          {r.formula ? (
-            <section className="z11-card">
+          {r.formula && !r.formula.sledstviya ? (
+            <section className="z11-card" id={`${r.id}-formula`}>
               <h4 className="z11-card__title">
                 <Piktogramma name="book" className="z11-card__icon" />
                 Главная формула
@@ -154,7 +290,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
             </section>
           ) : null}
           {r.tablitsa ? (
-            <section className="z11-card">
+            <section className="z11-card" id={`${r.id}-tablitsa`}>
               <h4 className="z11-card__title">
                 <Piktogramma name="table" className="z11-card__icon" />
                 {r.tablitsa.title}
@@ -215,7 +351,10 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.layfhaki.length > 0 ? (
-        <div className={polnyy ? 'z11-teor__stack' : 'z11-teor__grid'}>
+        <div
+          className={polnyy ? 'z11-teor__stack' : 'z11-teor__grid'}
+          id={r.zapomnit ? undefined : `${r.id}-layfhaki`}
+        >
           {r.layfhaki.map((id) => (
             <KartaLayfhak id={id} polnyy={polnyy} key={id} />
           ))}
@@ -223,7 +362,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.lovushki.length > 0 ? (
-        <div className="z11-teor__grid">
+        <div className="z11-teor__grid" id={`${r.id}-lovushki`}>
           {r.lovushki.map((id) => (
             <KartaLovushka id={id} key={id} />
           ))}
@@ -231,7 +370,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {tipy.length > 0 ? (
-        <section className="z11-tipy" aria-label="Типы задач этого раздела">
+        <section className="z11-tipy" aria-label="Типы задач этого раздела" id={`${r.id}-tipy`}>
           <h4 className="z11-tipy__title">Типы задач этого раздела</h4>
           <ul className="z11-tipy__list">
             {tipy.map((st) => (
@@ -275,7 +414,11 @@ export function Teoriya11({ vkladka, base }: { vkladka: string; base: string }) 
   return (
     <TeoriyaShell
       vkladka={vkladka}
-      razdely={RAZDELY_TEORII_11.map((r) => ({ id: r.id, title: r.title }))}
+      razdely={RAZDELY_TEORII_11.map((r) => ({
+        id: r.id,
+        title: r.title,
+        podpunkty: podpunkty(r),
+      }))}
       tela={tela}
       dekor={{
         kartinka: <IkonkaRazdela section="DP" className="z11-dekor" />,

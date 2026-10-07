@@ -14,7 +14,7 @@ import { d, nice } from './num';
 import { generate, GENERATORS, paramsKey, pohozhaNaBank, type Generated } from './gen';
 import { subtype, SUBTYPES } from './prototypes';
 import { rngOf } from '../vychisleniya/rng';
-import { STROKI_KONC } from './kit';
+import { podpisStolbtsa, STROKI_KONC } from './kit';
 import type { BankItem, Solved, Tablitsa } from './types';
 
 export interface Problem {
@@ -132,12 +132,22 @@ export function checkTablitsa(where: string, t: Tablitsa): Problem[] {
     if (labels.join('|') !== STROKI_KONC.join('|')) {
       problems.push({ where, what: `таблица концентрации: строки ${labels.join(' | ')}` });
     }
-    /* Столбцы — римскими цифрами (I, II, I + II, I*, …), вода или
-       название продукта (виноград, изюм); арабских цифр нет. */
+    /* Столбцы — римскими цифрами (I, II, I + II, …), вода или
+       название продукта (виноград, изюм); арабских цифр нет.
+       Звёздочка равных масс — только верхним индексом в KaTeX:
+       $\text{I}^{*}+\text{II}^{*}$. */
     for (const h of t.head.slice(1)) {
-      if (/[0-9]/.test(h) || !/^(?:(?:I{1,3}\*?|вода|[а-яё ]+)(?: \+ |$))+$/.test(h)) {
+      const star =
+        /^\$((?:\\text\{I{1,3}\}(?:\^\{\*\})?)(?:\+\\text\{I{1,3}\}(?:\^\{\*\})?)*)\$$/.test(h);
+      if (h.includes('*') && !star) {
+        problems.push({ where, what: `таблица концентрации: звёздочка не в индексе — «${h}»` });
+      }
+      if (!star && (/[0-9]/.test(h) || !/^(?:(?:I{1,3}|вода|[а-яё ]+)(?: \+ |$))+$/.test(h))) {
         problems.push({ where, what: `таблица концентрации: столбец «${h}» не римскими цифрами` });
       }
+    }
+    if (t.uravnenie !== 0) {
+      problems.push({ where, what: 'таблица концентрации: строка массы вещества не подсвечена' });
     }
   }
   return problems;
@@ -218,7 +228,11 @@ export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
     add('объём работы принят за 1, но в решении это не сказано');
   }
   if (RAVNYE_MASSY.has(id)) {
-    if (!tables.some((t) => t.head.includes('I*') && t.head.includes('I* + II*'))) {
+    if (
+      !tables.some(
+        (t) => t.head.includes(podpisStolbtsa('I*')) && t.head.includes(podpisStolbtsa('I* + II*')),
+      )
+    ) {
       add('нет таблицы равных масс I*, II*, I* + II*');
     }
     if (!text.includes('Сокращаем на $m$')) {

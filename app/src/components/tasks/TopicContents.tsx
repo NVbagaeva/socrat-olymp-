@@ -8,6 +8,8 @@ export interface ContentsItem {
   title: string;
   /** Заголовок, набранный KaTeX на сервере. Нет — выводится title. */
   titleHtml?: string;
+  /** Подпункты: видны под открытым разделом (теория №11). */
+  podpunkty?: { id: string; title: string }[];
 }
 
 export interface TopicContentsProps {
@@ -15,6 +17,8 @@ export interface TopicContentsProps {
   /** Открытый раздел: подсвечивается в списке. */
   active: string;
   onSelect: (id: string) => void;
+  /** Переход к подпункту открытого раздела: id элемента на странице. */
+  onSelectPodpunkt?: (id: string) => void;
   className?: string;
 }
 
@@ -24,7 +28,13 @@ export interface TopicContentsProps {
  * Один и тот же список стоит и правой колонкой на широком экране, и
  * в шторке на узком — второго списка в проекте нет.
  */
-export function TopicContents({ items, active, onSelect, className }: TopicContentsProps) {
+export function TopicContents({
+  items,
+  active,
+  onSelect,
+  onSelectPodpunkt,
+  className,
+}: TopicContentsProps) {
   return (
     <ol className={clsx('contents-list', className)}>
       {items.map((item, index) => (
@@ -44,6 +54,21 @@ export function TopicContents({ items, active, onSelect, className }: TopicConte
               <TitleText title={item.title} html={item.titleHtml} />
             </span>
           </button>
+          {item.id === active && item.podpunkty !== undefined && onSelectPodpunkt !== undefined ? (
+            <ul className="contents-sub">
+              {item.podpunkty.map((sub) => (
+                <li key={sub.id}>
+                  <button
+                    type="button"
+                    className="contents-sub__item"
+                    onClick={() => onSelectPodpunkt(sub.id)}
+                  >
+                    {sub.title}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </li>
       ))}
     </ol>

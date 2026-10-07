@@ -55,6 +55,7 @@
     "test:asset-versions": "node scripts/check-asset-versions.mjs",
     "test:print-pages": "node scripts/check-print-pages.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
+    "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs"
   },

@@ -18,13 +18,22 @@ function Yacheyka({ text }: { text: string }) {
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+/** Подпись строки уравнения: стоит справа от неё, у таблицы смесей. */
+export const PODPIS_URAVNENIYA = 'уравнение — по этой строке';
+
 /**
  * Таблица модели задачи №11: S | v | t, A | p | t или развёрнутая
  * таблица концентрации. Ячейки — текст с формулами в $…$, набирает
  * KaTeX. Первая колонка — подписи строк. Одна разметка на теорию,
  * тренажёр и лист учителя.
+ *
+ * Строка уравнения (table.uravnenie — у смесей это масса вещества)
+ * подсвечена, справа от неё — выноска «уравнение — по этой строке».
+ * Выноска стоит в отдельном столбце без рамок: так она всегда на
+ * высоте своей строки, на любой ширине.
  */
 export function Tablitsa11({ table, className }: { table: Tablitsa; className?: string }) {
+  const vynoska = table.uravnenie !== undefined;
   return (
     <figure className={clsx('z11-tab', `z11-tab--${table.vid}`, className)}>
       {table.title === undefined ? null : (
@@ -41,11 +50,12 @@ export function Tablitsa11({ table, className }: { table: Tablitsa; className?: 
                   <Tex text={h} />
                 </th>
               ))}
+              {vynoska ? <td className="z11-tab__vyn" aria-hidden="true" /> : null}
             </tr>
           </thead>
           <tbody>
             {table.rows.map((row, r) => (
-              <tr key={r}>
+              <tr key={r} className={r === table.uravnenie ? 'is-uravnenie' : undefined}>
                 {row.map((cell, c) =>
                   c === 0 ? (
                     <th key={c} scope="row">
@@ -57,6 +67,13 @@ export function Tablitsa11({ table, className }: { table: Tablitsa; className?: 
                     </td>
                   ),
                 )}
+                {vynoska ? (
+                  <td className="z11-tab__vyn">
+                    {r === table.uravnenie ? (
+                      <span className="z11-tab__vynoska">{PODPIS_URAVNENIYA}</span>
+                    ) : null}
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
