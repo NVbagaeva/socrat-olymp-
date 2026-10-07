@@ -8,6 +8,7 @@
 import { typesetKrupno as typeset } from '../tex';
 import { POOL_ANALOGOV } from './analogi';
 import { BANK, RAZMINKA } from './bank';
+import { strokiEtapa } from './kit';
 import { kodNaSayte } from './kod';
 import { d, txt } from './num';
 import { subtype } from './prototypes';
@@ -47,7 +48,13 @@ export interface RazdelNaProverku {
 function resheniye(s: Solved): string {
   const tab = (s.tables ?? []).map((t) => tablitsaHtml(t)).join('');
   const etapy = s.etapy
-    .map((e) => `<li><b>${typeset(e.title)}.</b> ${e.lines.map((l) => typeset(l)).join(' ')}</li>`)
+    .map(
+      (e) =>
+        `<li><b>${typeset(e.title)}.</b> ${strokiEtapa(
+          e.title,
+          e.lines.map((l) => typeset(l)),
+        )}</li>`,
+    )
     .join('');
   return `${tab}<ol class="z11-pr__etapy">${etapy}</ol>`;
 }

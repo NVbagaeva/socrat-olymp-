@@ -20,6 +20,7 @@ import answers from '@/lib/sheet/answers.js';
 import { typesetKrupno as typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
+import { strokiEtapa } from './kit';
 import { kodNaSayte } from './kod';
 import { d } from './num';
 import { BLOKI } from './prep/bloki';
@@ -296,7 +297,10 @@ function reshenieHtml(etapy: { title: string; lines: string[] }[], tables: Tabli
     .map((e) => {
       const lines = e.lines.filter((l) => !/^\*\*Ответ:\*\*/.test(l));
       if (lines.length === 0) return '';
-      return `<li class="sheet-step"><b>${typeset(e.title)}.</b> ${lines.map((l) => typeset(l)).join(' ')}</li>`;
+      return `<li class="sheet-step"><b>${typeset(e.title)}.</b> ${strokiEtapa(
+        e.title,
+        lines.map((l) => typeset(l)),
+      )}</li>`;
     })
     .join('');
   return `${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol>`;

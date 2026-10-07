@@ -14,7 +14,7 @@ import { d, nice } from './num';
 import { generate, GENERATORS, paramsKey, pohozhaNaBank, type Generated } from './gen';
 import { subtype, SUBTYPES } from './prototypes';
 import { rngOf } from '../vychisleniya/rng';
-import { podpisStolbtsa, STROKI_KONC } from './kit';
+import { KRATKAYA_ZAPIS, podpisStolbtsa, STROKI_KONC } from './kit';
 import type { BankItem, Solved, Tablitsa } from './types';
 
 export interface Problem {
@@ -210,9 +210,30 @@ const RAVNYE_MASSY = new Set(['SM-02', 'SM-07']);
  * Методика раздела: вид таблицы по разделу, «примем всю работу за 1»,
  * таблица равных масс и явное сокращение на m.
  */
+/** Задачи на проценты: разбор начинается с краткой записи «100 % — …». */
+const S_KRATKOY_ZAPISYU = new Set([
+  'RZ-09',
+  'RZ-10',
+  'RZ-11',
+  'RZ-12',
+  'RZ-13',
+  'RZ-14',
+  'RZ-15',
+  'RZ-16',
+  'RZ-17',
+]);
+
 export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
   const problems: Problem[] = [];
   const add = (what: string) => problems.push({ where, what });
+  if (id.startsWith('PR-') || S_KRATKOY_ZAPISYU.has(id)) {
+    const first = s.etapy[0];
+    if (!first?.title.endsWith(KRATKAYA_ZAPIS) || first.lines.length < 2) {
+      add('задача на проценты: первый шаг — не краткая запись');
+    } else if (!first.lines.every((l) => l.includes(' — '))) {
+      add('краткая запись: строка без тире «100 % — …»');
+    }
+  }
   const vid = VID_RAZDELA[id.split('-')[0] ?? ''];
   const tables = s.tables ?? [];
   if (vid) {
