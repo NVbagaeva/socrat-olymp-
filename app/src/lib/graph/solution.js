@@ -552,7 +552,10 @@ function stepPairSolve(first, second, x0) {
       'и приводим подобные:'),
     formula(slopeTexExact(dk) + 'x = ' + texExact(db))
   ];
-  if (!(dk.p === 1 && dk.q === 1)) {
+  if (Line.isZero(db)) {
+    /* Делить ноль — лишняя строка: сразу ответ. */
+    blocks.push(formula('x = ' + texExact(x0)));
+  } else if (!(dk.p === 1 && dk.q === 1)) {
     blocks.push(formula(divideTex(db, dk, x0)));
   }
   return { title: 'Решаем уравнение', blocks: blocks };

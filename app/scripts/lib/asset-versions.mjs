@@ -18,8 +18,9 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-/* Что версия не нужна: служебные файлы сервера и описания папок. */
-const SKIP = /(^|\/)(\.htaccess|README\.md)$/;
+/* Что версия не нужна: служебные файлы сервера и описания папок, а также
+   PHP-обработчики — их сервер выполняет, а не отдаёт из кеша. */
+const SKIP = /(^|\/)(\.htaccess|\.user\.ini|README\.md)$|\.php$/;
 
 /** Таблица { '/materials/x.pdf': '3f9a1c2e', … } для папки public. */
 export function assetVersions(publicDir) {

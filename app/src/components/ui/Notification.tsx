@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 export interface NotificationProps {
   title: ReactNode;
-  /** Автор и время: «Наталья В. · 12 минут назад». */
+  /** Автор и время: «Наталия В. · 12 минут назад». */
   meta: ReactNode;
   unread?: boolean;
   className?: string;

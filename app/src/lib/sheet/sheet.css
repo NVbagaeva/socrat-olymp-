@@ -490,6 +490,12 @@ body {
 .sheet-task--double .sheet-task-body { flex-direction: column; }
 .sheet-task--double .sheet-task-text { justify-content: flex-start; }
 
+/* Две колонки, чертёж справа от условия (double-side): карточка
+   устроена как в одну колонку, только уже — строка ответа остаётся
+   в колонке условия, под текстом. */
+.sheet-task--double-side .sheet-task-body { flex-direction: row; align-items: stretch; }
+.sheet-task--double-side .sheet-figure { align-self: center; }
+
 /* Условие идёт сверху, вровень с номером задачи. */
 .sheet-task-text {
   flex: 1 1 auto;

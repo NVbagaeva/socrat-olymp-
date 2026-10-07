@@ -18,7 +18,10 @@ import marks from './marks.js';
 import typo from './typography.js';
 
 var THEMES = ['color', 'print'];
-var LAYOUTS = ['single', 'double'];
+/* double-side — две колонки карточек, в каждой чертёж справа от
+   условия, как в одну колонку. Раскладка комплектов для учителей;
+   сборники и генератор на сайте её не используют. */
+var LAYOUTS = ['single', 'double', 'double-side'];
 
 /* ══════════════════════════════════════════════════════════
    Шапка
@@ -225,8 +228,10 @@ function taskCard(task, options) {
      Широкий рисунок (ось, дерево) справа от текста не встаёт: тогда
      задача помечена figureBelow, и рисунок идёт под условием. */
   var size = { cell: options.cell, frame: options.frame, width: task.figureWidth };
-  var stacked = options.layout === 'single' && task.figureBelow;
-  var body = options.layout === 'single' && !stacked
+  /* Чертёж справа от условия — в одну колонку и в double-side. */
+  var side = options.layout === 'single' || options.layout === 'double-side';
+  var stacked = side && task.figureBelow;
+  var body = side && !stacked
     ? '<div class="sheet-task-text">' + question + solution + answer + '</div>' +
       figure(task.figureSvg, size)
     : '<div class="sheet-task-text">' + question + solution + '</div>' +
@@ -313,7 +318,7 @@ function flowItems(spec) {
     }
 
     var tasks = block.tasks || [];
-    if (layout === 'double') {
+    if (layout === 'double' || layout === 'double-side') {
       /* В две колонки единица набора — строка из двух карточек:
          карточка не делится, а строка либо встаёт целиком,
          либо уходит на следующую страницу. */
@@ -342,7 +347,8 @@ function flowItems(spec) {
  *
  * spec:
  *   theme    'color' | 'print'
- *   layout   'single' | 'double'
+ *   layout   'single' | 'double' | 'double-side' (две колонки, чертёж
+ *            справа от условия)
  *   cell     размер клетки чертежа в мм (одна клетка на все задачи)
  *   frame    размер рамки чертежа в мм (одна рамка на все задачи);
  *            задаётся вместо cell, не вместе с ним

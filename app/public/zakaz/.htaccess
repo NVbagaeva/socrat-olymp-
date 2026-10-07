@@ -1,0 +1,19 @@
+# Обработчик заявок. Снаружи доступен только otpravit.php;
+# lib/ и служебные файлы закрыты. Листинг папки выключен.
+Options -Indexes
+
+<FilesMatch "^(?!otpravit\.php$).*$">
+  Require all denied
+</FilesMatch>
+
+# Лимиты PHP для этой папки, если хостинг принимает их отсюда
+# (Apache с mod_php). Иначе они берутся из .user.ini рядом.
+<IfModule mod_php.c>
+  php_value upload_max_filesize 25M
+  php_value post_max_size 30M
+  # 11: лишний файл должен дойти до проверки, а не пропасть молча.
+  php_value max_file_uploads 11
+  php_value max_execution_time 60
+  php_value memory_limit 256M
+  php_flag display_errors off
+</IfModule>
