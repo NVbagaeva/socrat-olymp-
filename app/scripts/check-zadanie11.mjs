@@ -398,6 +398,168 @@ const trenazher = { zadach: 0 };
   }
 }
 
+/* Генератор листов и «Для репетиторов»: адрес листа, режимы, без
+   повторов, замена одной задачи, лист ученика без ответов, маршруты
+   и заметки. */
+const listy = { zadach: 0 };
+{
+  const L = requireSrc('lib/zadanie11/sheet11');
+  const { MARSHRUTY_11, ZAMETKI_11, REPETITORY_11 } = requireSrc('content/repetitory11');
+  const { BLOKI: BL } = requireSrc('lib/zadanie11/prep/bloki');
+  const { subtype: st } = requireSrc('lib/zadanie11/prototypes');
+  const { SECTIONS: SEKCII } = requireSrc('lib/zadanie11/taxonomy');
+  const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye');
+  const { buildDocument } = await import('../src/lib/sheet/sheet.js');
+  const bank = dannyeTrenazhera().bank;
+  const add = (what) => problems.push({ where: 'листы', what });
+  const base = { variants: 1, seed: 's', zameny: {}, marshrut: 1, theme: 'color', sostav: [] };
+
+  /* Маршруты: все разделы покрыты, блоки и подтипы существуют. */
+  const pokryty = new Set(MARSHRUTY_11.flatMap((m) => m.razdely));
+  for (const sec of SEKCII) {
+    if (!pokryty.has(sec.id)) add(`раздел ${sec.id} не входит ни в один маршрут`);
+    const z = ZAMETKI_11[sec.id];
+    if (!z || z.kakObyasnyat.length === 0 || z.oshibki.length === 0)
+      add(`нет заметок для ${sec.id}`);
+  }
+  if (MARSHRUTY_11.length !== 5) add('маршрутов не 5');
+  for (const m of MARSHRUTY_11) {
+    for (const id of m.opornye)
+      if (!BL.some((b) => b.id === id)) add(`маршрут ${m.no}: нет блока ${id}`);
+    for (const id of [...m.bank, ...m.novye]) {
+      try {
+        st(id);
+      } catch {
+        add(`маршрут ${m.no}: нет подтипа ${id}`);
+      }
+    }
+    for (const id of m.bank)
+      if (!bank.some((b) => b.id === id && !b.razminka)) add(`маршрут ${m.no}: ${id} нет в банке`);
+    const n = m.opornye.length + m.bank.length + m.novye.length;
+    if (n < 15 || n > 20) add(`маршрут ${m.no}: ${n} задач, а нужно 15–20`);
+  }
+  /* Заметки: формулы набираются, вне $…$ формул нет. */
+  for (const z of Object.values(ZAMETKI_11)) {
+    for (const text of [...z.kakObyasnyat, ...z.oshibki]) {
+      for (const tex of (text.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
+        try {
+          typeset(tex);
+        } catch (e) {
+          add(`заметка: KaTeX ${e.message.slice(0, 40)}`);
+        }
+      }
+      const plain = stripDollarMath(text);
+      for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+        add(`заметка вне KaTeX (${f.rule}): «${f.match}»`);
+      }
+    }
+  }
+  void REPETITORY_11;
+
+  const sluchai = [
+    {
+      ...base,
+      rezhim: 'otrabotka',
+      istochnik: 'bank',
+      sostav: [
+        { id: 'DP-07', n: 5 },
+        { id: 'SM-06', n: 3 },
+      ],
+    },
+    {
+      ...base,
+      rezhim: 'komplekt',
+      istochnik: 'mix',
+      variants: 4,
+      sostav: ['PR-04', 'SM-04', 'DP-07', 'PT-02', 'VD-05', 'OK-01', 'RB-01', 'PG-01'].map(
+        (id) => ({ id, n: 1 }),
+      ),
+    },
+    {
+      ...base,
+      rezhim: 'komplekt',
+      istochnik: 'new',
+      variants: 3,
+      sostav: [
+        { id: 'RZ-04', n: 1 },
+        { id: 'RB-07', n: 2 },
+      ],
+    },
+    ...MARSHRUTY_11.map((m) => ({
+      ...base,
+      rezhim: 'marshrut',
+      istochnik: 'mix',
+      variants: 2,
+      marshrut: m.no,
+    })),
+  ];
+  for (const p of sluchai) {
+    const where = `${p.rezhim}${p.rezhim === 'marshrut' ? ' ' + p.marshrut : ''}`;
+    const q = L.sheetQuery11(p);
+    const kanon = (o) => JSON.stringify(o, Object.keys(o).sort());
+    const back = L.parseSheetQuery11(new URLSearchParams(q));
+    if (kanon(back) !== kanon(p) || JSON.stringify(back.sostav) !== JSON.stringify(p.sostav)) {
+      add(`${where}: адрес не восстанавливает лист (${q})`);
+    }
+    let list;
+    try {
+      list = L.sobratList(p, bank);
+    } catch (e) {
+      add(`${where}: лист не собрался — ${e.message}`);
+      continue;
+    }
+    listy.zadach += list.poVariantam.flat().length;
+    const html = list.poVariantam.flat().map((z) => z.questionHtml);
+    if (new Set(html).size !== html.length) add(`${where}: задачи повторяются`);
+    if (p.istochnik === 'bank' && list.poVariantam.flat().some((z) => z.poz.vid === 'razminka')) {
+      add(`${where}: разминка в режиме «только банк»`);
+    }
+    if (p.rezhim === 'komplekt') {
+      const tipy = list.poVariantam.map((v) => v.map((z) => z.poz.id).join());
+      if (new Set(tipy).size !== 1) add(`${where}: на позиции i в вариантах разные типы`);
+    }
+    if (p.rezhim === 'marshrut') {
+      const vidy = (list.poVariantam[0] ?? []).map((z) => z.blok);
+      const m = MARSHRUTY_11.find((x) => x.no === p.marshrut);
+      const want = [
+        ...m.opornye.map(() => 'opornye'),
+        ...m.bank.map(() => 'bank'),
+        ...m.novye.map(() => 'novye'),
+      ];
+      if (vidy.join() !== want.join()) add(`${where}: порядок опорные → банк → новые нарушен`);
+    }
+    for (const z of list.poVariantam.flat()) {
+      if (z.answer === '' || z.solutionHtml === '')
+        add(`${where} ${z.pos}: нет ответа или решения`);
+      if (/\$/.test(z.questionHtml + z.solutionHtml)) add(`${where} ${z.pos}: формула не набрана`);
+    }
+    /* Лист ученика — без ответов и решений; учителя — с таблицей ответов. */
+    const uch = buildDocument(L.sheetSpec11(p, list, 'uchenik'), {});
+    const uchit = buildDocument(L.sheetSpec11(p, list, 'uchitel'), {});
+    buildDocument(L.sheetSpec11(p, list, 'vse'), {});
+    if (/sheet-task-answer|sheet-steps|z11-sheet-badge/.test(uch))
+      add(`${where}: в листе ученика есть ответы или решения`);
+    if (!/sheet-task-answer/.test(uchit) || !/Ответы/.test(uchit))
+      add(`${where}: в листе учителя нет ответов`);
+  }
+  /* Замена одной задачи меняет только её. */
+  const p0 = sluchai[1];
+  const a = L.sobratList(p0, bank);
+  const b = L.sobratList({ ...p0, zameny: { 2.3: 1 } }, bank);
+  const izm = a.poVariantam
+    .flat()
+    .filter((z, i) => z.questionHtml !== b.poVariantam.flat()[i].questionHtml);
+  if (izm.length !== 1 || izm[0].pos !== '2.3')
+    add(`замена 2.3 изменила: ${izm.map((z) => z.pos).join(', ')}`);
+  /* Банка не хватило — новые задачи того же типа и счётчик нехватки. */
+  const malo = L.sobratList(
+    { ...base, rezhim: 'otrabotka', istochnik: 'bank', sostav: [{ id: 'RB-07', n: 4 }] },
+    bank,
+  );
+  if (malo.nehvatka !== 3 || malo.poVariantam[0].some((z) => z.poz.id !== 'RB-07'))
+    add('нехватка банка считается неверно');
+}
+
 /* Склонения. */
 const expect = [
   [sk(1, SLOVA.chas), '1 час'],
@@ -443,6 +605,7 @@ if (poor.length > 0) {
   console.log(`  мало разных задач: ${poor.map((x) => `${x.id} (${x.distinct})`).join(', ')}`);
 }
 console.log(`тренажёр: ${trenazher.zadach} задач собрано в закрытом виде`);
+console.log(`листы генератора и маршрутов: ${listy.zadach} задач`);
 console.log(`проблем: ${problems.length}`);
 for (const p of problems.slice(0, 80)) {
   console.log(`  ${p.where} — ${p.what}`);

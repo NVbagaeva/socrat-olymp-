@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
-import { SKORO_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { Repetitory11 } from '@/components/tasks/zadanie11/Repetitory11';
+import { tasksPage } from '@/content/tasks';
+import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { BLOKI } from '@/lib/zadanie11/prep/bloki';
+import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
 
 const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'repetitory')?.label ?? '';
 
@@ -9,10 +12,15 @@ export const metadata: Metadata = {
 };
 
 /**
- * Вкладка задания №11. Данные и движок уже собраны
- * (lib/zadanie11), экран вкладки — в следующих частях раздела;
- * до тех пор вкладка честно об этом говорит.
+ * Вкладка «Для репетиторов» задания №11 (макет dlya-repetitorov.png):
+ * маршруты уроков, методические заметки, быстрый лист.
  */
 export default function Repetitory11Tab() {
-  return <EmptyState title={SKORO_11.title} description={SKORO_11.text} />;
+  return (
+    <Repetitory11
+      razdely={dannyeTrenazhera().razdely}
+      bloki={BLOKI.map((b) => ({ id: b.id, slug: b.slug, nazvanie: b.nazvanie, razdel: b.razdel }))}
+      base={`${tasksPage.href}/${ZADANIE11.slug}`}
+    />
+  );
 }

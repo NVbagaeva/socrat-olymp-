@@ -70,6 +70,11 @@ function pohozhaDlya(bank: readonly UslovieBanka[]): Pohozha {
   return pamyat.pohozha;
 }
 
+/** Решение задачи плана целиком — для листа учителя (lib/zadanie11/sheet11.ts). */
+export function reshitPlan(plan: ZadachaPlan, bank: readonly UslovieBanka[]): Solved {
+  return reshit(plan, bank, pohozhaDlya(bank));
+}
+
 export function sobratZadachu(plan: ZadachaPlan, bank: readonly UslovieBanka[]): Zadacha11 {
   const st = subtype(plan.id);
   const s = reshit(plan, bank, pohozhaDlya(bank));

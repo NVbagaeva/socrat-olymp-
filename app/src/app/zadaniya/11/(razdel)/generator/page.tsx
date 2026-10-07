@@ -1,18 +1,23 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
-import { SKORO_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { Generator11 } from '@/components/tasks/zadanie11/Generator11';
+import { tasksPage } from '@/content/tasks';
+import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
 
-const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'generator')?.label ?? '';
+const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
 
 export const metadata: Metadata = {
   title: zadanie11Title(VKLADKA),
 };
 
 /**
- * Вкладка задания №11. Данные и движок уже собраны
- * (lib/zadanie11), экран вкладки — в следующих частях раздела;
- * до тех пор вкладка честно об этом говорит.
+ * Вкладка «Генератор» задания №11 (макет generator.png): лист
+ * ученика и лист учителя, варианты, PDF. Разделы и условия банка
+ * без ответов собираются на сборке, лист — в браузере.
  */
 export default function Generator11Tab() {
-  return <EmptyState title={SKORO_11.title} description={SKORO_11.text} />;
+  const d = dannyeTrenazhera();
+  return (
+    <Generator11 razdely={d.razdely} bank={d.bank} base={`${tasksPage.href}/${ZADANIE11.slug}`} />
+  );
 }

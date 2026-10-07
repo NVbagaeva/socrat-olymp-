@@ -52,18 +52,23 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [dannye],
   );
 
-  /* Подтип из ссылки «Решать» (?tip=DP-07) — отмечаем только его. */
+  /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07) или маршрут
+     урока у репетиторов (?tipy=PR-01,PR-04) — отмечаем только их. */
   useEffect(() => {
-    const tip = new URLSearchParams(window.location.search).get('tip');
-    if (tip === null || !vse.some((p) => p.id === tip)) {
+    const q = new URLSearchParams(window.location.search);
+    const tipy = [q.get('tip') ?? '', ...(q.get('tipy') ?? '').split(',')].filter((id) =>
+      vse.some((p) => p.id === id),
+    );
+    if (tipy.length === 0) {
       return;
     }
     const s = nastroykiSeychas();
     zapisatNastroyki({
       ...s,
-      podtipy: [tip],
+      podtipy: tipy,
       uroven: 0,
-      istochnik: tip.startsWith('RZ-') && s.istochnik === 'bank' ? 'mix' : s.istochnik,
+      istochnik:
+        tipy.some((id) => id.startsWith('RZ-')) && s.istochnik === 'bank' ? 'mix' : s.istochnik,
     });
   }, [vse]);
 

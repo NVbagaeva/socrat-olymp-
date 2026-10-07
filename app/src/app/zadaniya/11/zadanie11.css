@@ -2224,3 +2224,678 @@
     min-width: 44px;
   }
 }
+
+/* ── Вкладка «Генератор» ──────────────────────────────────────── */
+
+.z11-gen {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+@media (min-width: 1180px) {
+  .z11-gen {
+    grid-template-columns: minmax(340px, 0.85fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+  .z11-gen__preview {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+  }
+}
+.z11-gen__side {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z11-gen__blok {
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+.z11-gen__blok--row {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+.z11-gen__h {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.z11-gen__h .z11-pic {
+  color: var(--color-primary);
+}
+.z11-gen .z11-istochnik__btn {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: 1.25;
+}
+.z11-gen__rezhimy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.z11-gen__rezhim {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.z11-gen__rezhim.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z11-gen__radio {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 50%;
+}
+.is-active > .z11-gen__radio {
+  border: 5px solid var(--color-primary);
+}
+.z11-gen__rezhim-lead {
+  display: block;
+  color: var(--color-text-secondary);
+}
+.z11-gen__sostav {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-gen__razdel {
+  border-bottom: 1px solid var(--color-border);
+}
+.z11-gen__razdel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z11-gen__razdel-toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.z11-gen__summa {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.z11-akk__chevron.is-open {
+  transform: rotate(180deg);
+}
+.z11-gen__podtipy {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+  padding: 0 0 0 var(--space-6);
+  list-style: none;
+}
+.z11-gen__podtip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+}
+.z11-gen__podtip .z11-stepper button {
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+}
+.z11-gen__podtip .z11-stepper output {
+  min-width: 20px;
+}
+@media (max-width: 640px) {
+  .z11-gen__podtip {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .z11-gen__podtip .z11-akk__bank {
+    display: none;
+  }
+  .z11-gen__rezhimy {
+    grid-template-columns: 1fr;
+  }
+}
+.z11-gen__itogo {
+  font-weight: 600;
+}
+.z11-gen__urovni {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z11-gen__uroven {
+  flex: 1;
+  min-height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.z11-gen__uroven.is-active {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.z11-gen__go {
+  width: 100%;
+  gap: var(--space-2);
+}
+.z11-gen__go .z11-pic {
+  fill: currentColor;
+}
+.z11-gen__preview {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+}
+.z11-gen__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z11-gen__tabs {
+  display: flex;
+  gap: var(--space-1);
+}
+.z11-gen__tab {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.z11-gen__tab.is-active {
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.z11-gen__varianty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.z11-gen__vbtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.z11-gen__vbtn.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z11-gen__pdf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.z11-gen__pdf .btn {
+  gap: var(--space-1);
+}
+.z11-gen__pdf .z11-pic {
+  width: 16px;
+  height: 16px;
+}
+
+/* Превью листа А4: белая страница с тенью, как на макете. */
+.z11-a4 {
+  display: grid;
+  gap: var(--space-3);
+  min-height: 420px;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-a4__pusto {
+  align-self: center;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.z11-a4__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  text-align: center;
+}
+.z11-a4__fio {
+  display: flex;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.z11-a4__fio span {
+  flex: 1;
+  border-bottom: 1px solid var(--color-text);
+}
+.z11-a4__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-a4__task {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+.z11-a4__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  font-weight: 700;
+}
+.z11-a4__body {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-x: auto;
+}
+.z11-a4__reshenie {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-success);
+  background: var(--color-success-soft);
+}
+.z11-a4__reshenie .sheet-steps {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+}
+.z11-a4__otvet {
+  margin-top: var(--space-1);
+}
+.z11-a4__badge {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.z11-a4__badge--new {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.z11-a4__badge--razminka,
+.z11-a4__badge--mikro {
+  background: var(--color-z11-rz-soft);
+  color: var(--color-text);
+}
+.z11-a4__zamena {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.z11-a4__zamena:hover:not(:disabled) {
+  background: var(--color-surface-info);
+}
+.z11-a4__zamena .z11-pic {
+  width: 18px;
+  height: 18px;
+}
+.z11-a4__podpis {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-text);
+  text-align: right;
+}
+/* Таблица модели в превью и на листе. */
+.z11-sheet-tab {
+  margin: var(--space-2) 0;
+  border-collapse: collapse;
+}
+.z11-sheet-tab th,
+.z11-sheet-tab td {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.z11-sheet-tab tbody th {
+  text-align: left;
+}
+.z11-sheet-tab tr.is-uravnenie > * {
+  background: var(--color-success-soft);
+}
+.z11-a4 .sheet-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 640px) {
+  .z11-a4 {
+    padding: var(--space-4) var(--space-3);
+  }
+  .z11-a4__task {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .z11-a4__badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* ── Вкладка «Для репетиторов» ────────────────────────────────── */
+
+.z11-rep {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+@media (min-width: 1180px) {
+  .z11-rep {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+  .z11-rep__side {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+  }
+}
+.z11-rep__main {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.z11-rep__main > section {
+  display: grid;
+  gap: var(--space-4);
+}
+.z11-rep__lead {
+  color: var(--color-text-secondary);
+}
+.z11-rep__label {
+  font-weight: 600;
+}
+.z11-rep__marshruty {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-urok {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z11-urok.is-open {
+  border-color: var(--color-primary);
+}
+.z11-urok__title {
+  min-height: 3em;
+  line-height: var(--lh-label);
+}
+.z11-urok__title b {
+  display: block;
+}
+.z11-urok__ikonki {
+  display: flex;
+  gap: var(--space-2);
+}
+.z11-urok__ikonki .z11-ikonka {
+  width: 44px;
+  height: 44px;
+}
+.z11-urok__ikonki .z11-pic {
+  width: 22px;
+  height: 22px;
+}
+.z11-urok__count {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-urok__polosa {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.z11-urok__polosa span {
+  flex-basis: 0;
+}
+.z11-urok__polosa .is-o {
+  background: var(--color-z11-pg);
+}
+.z11-urok__polosa .is-b {
+  background: var(--color-primary);
+}
+.z11-urok__polosa .is-n {
+  background: var(--color-success);
+}
+.z11-urok__legend {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.z11-urok__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.z11-urok-plan__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  font-size: var(--fs-caption);
+}
+.z11-urok-plan__cols ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-urok-plan__cols li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z11-urok-plan__cols li:has(> .z11-ikonka) {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.z11-urok-plan__h {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+.z11-urok-plan__ikonka {
+  width: 28px;
+  height: 28px;
+}
+.z11-urok-plan__ikonka .z11-pic {
+  width: 16px;
+  height: 16px;
+}
+.z11-urok-plan__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z11-zametki {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 900px) {
+  .z11-zametki {
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.z11-zametki__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  list-style: none;
+}
+.z11-zametki__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-caption);
+  text-align: left;
+  cursor: pointer;
+}
+.z11-zametki__item.is-active {
+  background: var(--color-z11-rz-soft);
+  font-weight: 600;
+}
+.z11-zametki__ikonka {
+  width: 28px;
+  height: 28px;
+}
+.z11-zametki__ikonka .z11-pic {
+  width: 16px;
+  height: 16px;
+}
+.z11-zametki__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z11-zametki__head > span {
+  display: grid;
+}
+.z11-zametki__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-zametki__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+/* Порядок задач — во всю ширину и в две колонки: подтипов много. */
+.z11-zametka--poryadok {
+  grid-column: 1 / -1;
+}
+@media (min-width: 640px) {
+  .z11-zametka--poryadok ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+}
+.z11-zametka {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z11-zametka ol {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z11-zametka--poryadok li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.z11-zametka__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+.z11-zametka--kak {
+  background: var(--color-surface-info);
+}
+.z11-zametka--kak .z11-pic {
+  color: var(--color-primary);
+}
+.z11-zametka--oshibki {
+  background: var(--color-error-soft);
+}
+.z11-zametka--oshibki .z11-pic {
+  color: var(--color-error);
+}
+.z11-zametka--poryadok {
+  background: var(--color-surface-warm);
+}
+.z11-zametka--poryadok .z11-pic {
+  color: var(--color-star);
+}
