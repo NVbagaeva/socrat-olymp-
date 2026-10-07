@@ -210,6 +210,9 @@ const RAVNYE_MASSY = new Set(['SM-02', 'SM-07']);
  * Методика раздела: вид таблицы по разделу, «примем всю работу за 1»,
  * таблица равных масс и явное сокращение на m.
  */
+/** Подтипы, где число ищут по его проценту: разбор — через краткую запись и пропорцию. */
+const KRATKAYA_ZAPIS = new Set(['PR-01', 'RZ-10', 'RZ-11']);
+
 export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
   const problems: Problem[] = [];
   const add = (what: string) => problems.push({ where, what });
@@ -226,6 +229,19 @@ export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
     }
   }
   const text = s.etapy.flatMap((e) => e.lines).join(' ');
+  /* Проценты «число по его проценту» — по методике: за 100 % берём то,
+     с чем сравниваем, краткая запись, пропорция. */
+  if (KRATKAYA_ZAPIS.has(id)) {
+    if (!s.etapy.some((e) => e.title.includes('Краткая запись'))) {
+      add('нет шага «Краткая запись»');
+    }
+    if (!text.includes('произведение крайних равно произведению средних')) {
+      add('пропорция без правила крайних и средних');
+    }
+  }
+  if (/Делим на \$1\$|=1x\(/.test(text)) {
+    add('артефакт «Делим на 1» или множитель 1x');
+  }
   if (
     tables.some((t) => t.vid === 'rabota' && t.rows.some((r) => r[1] === '$1$')) &&
     !text.includes('Примем всю работу за $1$') &&

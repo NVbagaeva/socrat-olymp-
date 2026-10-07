@@ -19,6 +19,7 @@ import {
   str,
   vopros,
   xxd,
+  kKvadratnomu,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -499,12 +500,7 @@ const DP07: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        st === dd
-          ? `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`
-          : `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(st)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(st)}x(x+${d(dd)})$. Делим на $${d(st)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, st), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -603,10 +599,7 @@ const DP08: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -1050,10 +1043,7 @@ const DP13: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(h)})`,
-      posle: [
-        `$${d(S)}(x+${d(h)})-${d(S)}x=${d(h)}x(x+${d(h)})$. Делим на $${d(h)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, h, h), ...res.lines],
       roots: res.roots,
     });
     return {
