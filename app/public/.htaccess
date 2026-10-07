@@ -17,6 +17,47 @@
   </FilesMatch>
 </IfModule>
 
+# ── Косая черта на конце адреса — сразу с https ─────────────────────
+#
+# Каждая страница — папка с index.html: настоящий адрес /zadaniya/, а не
+# /zadaniya. На адрес без косой черты Apache сам (DirectorySlash) отвечает
+# 301 на http://…/zadaniya/ — с понижением до http: он стоит за nginx и не
+# знает, что запрос пришёл по https. Chrome это проглатывает, а Safari
+# при переходе внутри сайта блокирует такой редирект, и ученик видит
+# белый экран.
+#
+# Ссылки на сайте все с косой чертой (lib/paths.ts, проверка
+# scripts/check-trailing-slash.mjs). Это — страховка для старых ссылок
+# из закладок и поисковиков: косую черту добавляем сами, одним
+# редиректом и сразу на https.
+#
+# Options -Indexes обязательно: при DirectorySlash Off Apache иначе мог
+# бы показать список файлов папки.
+#
+# Схема в адресе перенаправления — https. Исключение — сервер на
+# localhost/127.0.0.1: так Apache поднимают проверки в CI (без https).
+# Правило ^ - [E=…] адрес не меняет, только запоминает схему.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^ - [E=SITE_SCHEME:https]
+  RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$
+  RewriteRule ^ - [E=SITE_SCHEME:http]
+</IfModule>
+
+# Без mod_rewrite DirectorySlash не выключаем: пусть лучше редирект
+# Apache, чем папка без страницы.
+<IfModule mod_rewrite.c>
+  <IfModule mod_dir.c>
+    DirectorySlash Off
+  </IfModule>
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^(.*)$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/$1/ [R=301,L]
+</IfModule>
+
 # ── Служебные ответы роутера: …/index.txt ───────────────────────────
 #
 # При переходе по сайту Next.js не грузит страницу целиком, а берёт
@@ -28,7 +69,8 @@
 #    Страницу браузер запрашивает с Sec-Fetch-Dest: document; у старых
 #    Safari этого заголовка нет, тогда признак — text/html в Accept.
 #    Сценарий сайта шлёт Accept: */* и Sec-Fetch-Dest: empty, его
-#    правило не трогает.
+#    правило не трогает. Адрес — абсолютный, со схемой SITE_SCHEME
+#    (см. выше): относительный Apache дописал бы через http.
 # 2. Ответ не хранится ни браузером, ни промежуточным кешем: адрес
 #    …/index.txt?_rsc=… не зависит от версии сборки.
 # 3. Ответ зависит от Accept и Sec-Fetch-Dest — это сказано в Vary.
@@ -41,11 +83,11 @@
   RewriteEngine On
   # Браузер говорит прямо: это переход на страницу.
   RewriteCond %{HTTP:Sec-Fetch-Dest} =document
-  RewriteRule ^(.*/)?index\.txt$ /$1 [R=302,L,QSD]
+  RewriteRule ^(.*/)?index\.txt$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/$1 [R=302,L,QSD]
   # Старый Safari без Sec-Fetch-Dest: страницу он просит с text/html.
   RewriteCond %{HTTP:Sec-Fetch-Dest} ^$
   RewriteCond %{HTTP_ACCEPT} text/html
-  RewriteRule ^(.*/)?index\.txt$ /$1 [R=302,L,QSD]
+  RewriteRule ^(.*/)?index\.txt$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/$1 [R=302,L,QSD]
 </IfModule>
 
 # Тип ответа — родной для RSC: Next.js его принимает (проверено

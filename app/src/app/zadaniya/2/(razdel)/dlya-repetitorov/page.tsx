@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Repetitory2 } from '@/components/tasks/vektory/Repetitory2';
-import { tasksPage } from '@/content/tasks';
 import { O_ZADANII, REPETITORY_2, VEKTORY, vektoryTitle } from '@/content/vektory';
 import { typeset } from '@/lib/tex';
 import { BANK } from '@/lib/vektory/bank';
 import { PROTOTYPES } from '@/lib/vektory/prototypes';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: vektoryTitle(REPETITORY_2.title),
@@ -19,7 +19,7 @@ export default function Repetitory2Page() {
   const perPrototype = new Map(BANK.map((entry) => [entry.prototype, entry.variants.length]));
   return (
     <Repetitory2
-      base={`${tasksPage.href}/${VEKTORY.slug}`}
+      base={`${ZADANIYA}/${VEKTORY.slug}`}
       gruppy={O_ZADANII.gruppy.map((g) => ({ id: g.id, title: g.title }))}
       prototypes={PROTOTYPES.map((p) => ({
         id: p.id,

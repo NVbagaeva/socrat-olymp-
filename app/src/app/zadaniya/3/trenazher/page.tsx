@@ -12,6 +12,7 @@ import '../../zadaniya.css';
 import '../../[task]/section.css';
 import '../stereometria.css';
 import '../[figura]/trenazher.css';
+import { href, ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: 'Общий тренажёр — задание №3 — Будет на ЕГЭ',
@@ -40,7 +41,7 @@ export default function Solid3TrainerPage() {
             { label: 'Задания', href: tasksPage.href },
             {
               label: `№${Number(stereometria.no)} ${stereometria.subtitle}`,
-              href: `${tasksPage.href}/${stereometria.slug}`,
+              href: href(ZADANIYA, stereometria.slug),
             },
             { label: 'Общий тренажёр' },
           ]}

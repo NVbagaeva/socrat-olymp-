@@ -10,10 +10,10 @@
  * методов, а не вместе с текстом карточки.
  */
 
-import { tasksPage } from './tasks';
 import { ZAGOLOVOK_5 } from './veroyatnost';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { ZADANIYA } from '@/lib/paths';
 /**
  * Карточка статистики: решаемость задания на экзамене.
  *
@@ -48,7 +48,7 @@ export const V_ZADANII_5 = {
     'не нужна вовсе — она пригодится на олимпиадах.',
   /** Ссылка под текстом: подпись и адрес раздела. */
   ssylka: ZAGOLOVOK_5,
-  href: `${tasksPage.href}/5/`,
+  href: `${ZADANIYA}/5/`,
 } as const;
 
 /** Фотография к блоку «Немного истории». */

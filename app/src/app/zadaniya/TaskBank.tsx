@@ -9,6 +9,7 @@ import type { ExamTask, TaskPart } from '@/content/tasks';
 import { partRange, taskParts, tasks, tasksPage } from '@/content/tasks';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { href } from '@/lib/paths';
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
   const q = query.trim().toLowerCase();
@@ -156,7 +157,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
             <a
               key={item.part}
               className={active ? 'part-switch__seg is-active' : 'part-switch__seg'}
-              href={item.part === 1 ? `${tasksPage.href}/` : `${tasksPage.href}/?part=${item.part}`}
+              href={item.part === 1 ? tasksPage.href : href(tasksPage.href, `?part=${item.part}`)}
               aria-current={active ? 'true' : undefined}
               onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {

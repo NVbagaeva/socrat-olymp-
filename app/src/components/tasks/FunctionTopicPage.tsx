@@ -23,6 +23,7 @@ import { ShapkaRazdela } from './ShapkaRazdela';
 import { TopicTabs } from './TopicTabs';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { href, ZADANIYA } from '@/lib/paths';
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
@@ -63,7 +64,7 @@ export function FunctionTopicPage({
   trail = [],
 }: FunctionTopicPageProps) {
   const { topic } = section;
-  const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
+  const base = `${ZADANIYA}/${section.slug}/${subtopic.id}`;
   /* Вкладка ведёт по адресу только тогда, когда за ней есть материал
      этой подтемы: у опорных задач — список навыков, у тренажёра
      и генератора — наборы прототипов в данных движка. Иначе вкладка
@@ -118,7 +119,7 @@ export function FunctionTopicPage({
           { label: 'Задания', href: tasksPage.href },
           {
             label: `№${section.no}. ${section.subtitle}`,
-            href: `${tasksPage.href}/${section.slug}`,
+            href: href(ZADANIYA, section.slug),
           },
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,

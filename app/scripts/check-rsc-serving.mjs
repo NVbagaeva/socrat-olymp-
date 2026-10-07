@@ -191,7 +191,8 @@ async function scenario(server, name, act) {
   await context.close();
 }
 
-const link = (page) => page.locator(`a[href="${PAGE}"]`).first();
+/* Видимая: та же ссылка есть и в сайдбаре, скрытом на ширине телефона. */
+const link = (page) => page.locator(`a[href="${PAGE}"]:visible`).first();
 
 for (const server of ['apache', 'nginx']) {
   console.log(

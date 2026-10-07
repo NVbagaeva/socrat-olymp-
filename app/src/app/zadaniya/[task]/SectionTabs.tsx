@@ -8,6 +8,7 @@ import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
 import { TitleText } from '@/components/tasks/TitleText';
+import { href } from '@/lib/paths';
 
 export interface SubtopicView {
   slug: string;
@@ -64,7 +65,10 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
 
   function select(id: string) {
     /* scroll: false — вкладка меняет содержимое, а не место на странице. */
-    router.replace(id === 'subtopics' ? pathname : `${pathname}?tab=${id}`, { scroll: false });
+    /* href(): адрес всегда с «/» на конце, как у страниц экспорта. */
+    router.replace(id === 'subtopics' ? href(pathname) : href(pathname, `?tab=${id}`), {
+      scroll: false,
+    });
   }
 
   return (

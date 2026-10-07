@@ -6,11 +6,11 @@ import {
 } from '@/components/tasks/zadanie11/Opornye11List';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
-import { tasksPage } from '@/content/tasks';
 import { OPORNYE_11, O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import type { RazdelBloka } from '@/lib/zadanie11/prep/types';
 import { SECTIONS } from '@/lib/zadanie11/taxonomy';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: zadanie11Title(OPORNYE.title),
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
  * (O_ZADANII_11.pered).
  */
 export default function Opornye11Tab() {
-  const listHref = `${tasksPage.href}/${ZADANIE11.slug}/${OPORNYE.tail}`;
+  const listHref = `${ZADANIYA}/${ZADANIE11.slug}/${OPORNYE.tail}`;
   const bloki: BlokKartochka[] = BLOKI.map((b) => {
     const filtry: RazdelBloka[] = [b.razdel];
     for (const s of SECTIONS) {

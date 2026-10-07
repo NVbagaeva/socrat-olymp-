@@ -3,10 +3,10 @@ import { notFound } from 'next/navigation';
 import { Opornye2Screen } from '@/components/tasks/vektory/Opornye2Screen';
 import { Opornye2Shell } from '@/components/tasks/vektory/Opornye2Shell';
 import { OPORNYE } from '@/content/opornye';
-import { tasksPage } from '@/content/tasks';
 import { VEKTORY, vektoryTitle } from '@/content/vektory';
 import { BLOKI, blokBySlug } from '@/lib/vektory/prep/bloki';
 import { prepPool2 } from '@/lib/vektory/prep/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -33,7 +33,7 @@ export default async function Opornye2BlokPage({ params }: { params: Params }) {
   if (found === undefined) {
     notFound();
   }
-  const base = `${tasksPage.href}/${VEKTORY.slug}`;
+  const base = `${ZADANIYA}/${VEKTORY.slug}`;
   return (
     <Opornye2Shell base={base} active={found.slug}>
       <Opornye2Screen
