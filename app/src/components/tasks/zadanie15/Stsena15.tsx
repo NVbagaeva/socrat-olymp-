@@ -47,6 +47,8 @@ const PLAY_STEP = 1400;
 const NOTICE_MS = 2600;
 /** Плоскостей на сцене одновременно, построенных и граней вместе. */
 const MAX_PLANES = 4;
+/** Сторона viewBox сцены. */
+const SCENE_SIZE = 600;
 
 const tex = (() => {
   const cache = new Map<string, string>();
@@ -162,6 +164,27 @@ export function Stsena15({ build, mode, reveal = false, onFps }: Stsena15Props) 
     [c, version],
   );
 
+  /* Масштаб подписей: сколько единиц viewBox занимает пиксель подписи
+     при текущей ширине сцены и шрифте. Меряется после монтирования и
+     при смене ширины; до замера — расчётный (десктоп). */
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [labelScale, setLabelScale] = useState(1);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (stage === null || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const width = stage.clientWidth;
+      if (width <= 0) return;
+      const labels = stage.querySelector('.s15-labels');
+      const font = labels === null ? 16 : parseFloat(getComputedStyle(labels).fontSize) || 16;
+      const k = Math.round((SCENE_SIZE / width) * (font / 16) * 100) / 100;
+      setLabelScale(Math.max(0.5, k));
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, []);
+
   const scene: Scene2D = useMemo(
     () =>
       buildScene(c, {
@@ -171,9 +194,11 @@ export function Stsena15({ build, mode, reveal = false, onFps }: Stsena15Props) 
         facePlanes: [...facePlanes],
         upTo,
         selected,
+        size: SCENE_SIZE,
+        labelScale,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [c, camera, mode, reveal, facePlanes, upTo, selected, version],
+    [c, camera, mode, reveal, facePlanes, upTo, selected, labelScale, version],
   );
 
   /* Сообщение о параллельных плоскостях: показывается, пока они на
@@ -221,7 +246,6 @@ export function Stsena15({ build, mode, reveal = false, onFps }: Stsena15Props) 
 
   /* ── Указатель: поворот, перетаскивание, тапы ─────────────── */
 
-  const stageRef = useRef<HTMLDivElement>(null);
   const gesture = useRef<Gesture | null>(null);
   const dragFrame = useRef(0);
   const fpsFrame = useRef(0);

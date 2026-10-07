@@ -70,6 +70,13 @@ export interface SceneOptions {
   size?: number;
   /** Во сколько раз рамка листов больше тела. */
   frame?: number;
+  /**
+   * Размер подписей в единицах viewBox относительно расчётного (1 —
+   * сцена шириной 600 px и шрифт 16 px). На телефоне сцена мельче, а
+   * шрифт подписей почти тот же, поэтому подписи занимают больше места
+   * на чертеже — раскладка учитывает это, чтобы они не налезали.
+   */
+  labelScale?: number;
 }
 
 export interface Seg2 {
@@ -540,7 +547,7 @@ export function buildScene(c: Construction, opts: SceneOptions): Scene2D {
     });
   }
 
-  spreadLabels(points, sheets, lines, size);
+  spreadLabels(points, sheets, lines, size, opts.labelScale ?? 1);
 
   return {
     size,
@@ -566,7 +573,7 @@ function texWidth(tex: string): number {
     .replace(/\\cap/g, 'n')
     .replace(/\\(alpha|beta|gamma|delta)/g, 'a')
     .replace(/[\\_{}^ ]/g, '');
-  return 9 * Math.max(plain.length, 1) + 6;
+  return 11 * Math.max(plain.length, 1) + 8;
 }
 
 const boxAt = (p: P2, w: number, h: number): LabelBox => ({
@@ -576,28 +583,26 @@ const boxAt = (p: P2, w: number, h: number): LabelBox => ({
   h,
 });
 
-const overlaps = (a: LabelBox, b: LabelBox): boolean =>
-  a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-
 /**
  * Подписи расставляются по очереди: точки, плоскости, линии. Если
- * подпись налезает на уже расставленные, она сдвигается: вниз, вверх,
- * ниже, выше… пока не найдётся свободное место (не больше шести
- * попыток). Раскладка детерминирована: одна и та же сцена даёт одни и
- * те же места, поэтому подписи не мигают при перерисовке.
+ * подпись налезает на уже расставленные, она сдвигается на ближайшее
+ * свободное место. Раскладка детерминирована: одна и та же сцена даёт
+ * одни и те же места, поэтому подписи не мигают при перерисовке.
  */
 function spreadLabels(
   points: ScenePoint[],
   sheets: SceneSheet[],
   lines: SceneLine[],
   size: number,
+  k: number,
 ): void {
   const placed: LabelBox[] = [];
-  const movable: { p: P2; tex: string; set: (p: P2) => void }[] = [
+  const movable: { p: P2; tex: string; point?: boolean; set: (p: P2) => void }[] = [
     /* Сначала точки: их подписи важнее и сдвигаются друг от друга. */
     ...points.map((pt) => ({
       p: pt.label,
       tex: pt.tex,
+      point: true,
       set: (p: P2) => {
         pt.label = p;
       },
@@ -623,24 +628,58 @@ function spreadLabels(
           ],
     ),
   ];
-  const step = 22;
+  const h = 24 * k;
+  const edge = 14 * k;
+  const area = (a: LabelBox, b: LabelBox): number =>
+    Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) *
+    Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   for (const m of movable) {
-    const w = texWidth(m.tex);
+    const w = texWidth(m.tex) * k;
+    /* Кандидаты по близости. Подпись точки — только в маленьком
+       кольце вокруг исходного места: подпись вдали от точки путает
+       сильнее, чем лёгкое наложение. Подписи плоскостей и линий могут
+       уйти дальше: выше-ниже на 1–4 строки и вбок на полширины. Первый
+       свободный — берём; иначе — тот, что меньше всего перекрывается. */
+    const shifts: [number, number][] = [];
+    if (m.point) {
+      for (const [dx, dy] of [
+        [0, 0],
+        [0.8, 0],
+        [-0.8, 0],
+        [0, -0.8],
+        [0, 0.8],
+        [0.7, -0.7],
+        [-0.7, -0.7],
+        [0.7, 0.7],
+        [-0.7, 0.7],
+      ] as const) {
+        shifts.push([dx * w, dy * h]);
+      }
+    } else {
+      for (const dx of [0, 0.6, -0.6]) {
+        for (let i = 0; i <= 8; i++) {
+          const dy = i === 0 ? 0 : (i % 2 === 1 ? 1 : -1) * Math.ceil(i / 2);
+          shifts.push([dx * w, dy * h]);
+        }
+      }
+    }
     let best: P2 = m.p;
-    for (let k = 0; k <= 6; k++) {
-      const dy = k === 0 ? 0 : (k % 2 === 1 ? 1 : -1) * Math.ceil(k / 2) * step;
+    let bestCost = Infinity;
+    for (const [dx, dy] of shifts) {
       const cand: P2 = [
-        Math.min(Math.max(m.p[0], w / 2 + 4), size - w / 2 - 4),
-        Math.min(Math.max(m.p[1] + dy, 14), size - 14),
+        Math.min(Math.max(m.p[0] + dx, w / 2 + 4), size - w / 2 - 4),
+        Math.min(Math.max(m.p[1] + dy, edge), size - edge),
       ];
-      const box = boxAt(cand, w, 22);
-      if (!placed.some((b) => overlaps(b, box))) {
+      const box = boxAt(cand, w, h);
+      const cost = placed.reduce((acc, b) => acc + area(b, box), 0);
+      if (cost < bestCost) {
         best = cand;
-        break;
+        bestCost = cost;
+        if (cost === 0) break;
       }
     }
     m.set(best);
-    placed.push(boxAt(best, w, 22));
+    placed.push(boxAt(best, w, h));
   }
 }
 

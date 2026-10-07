@@ -16,6 +16,7 @@
 }
 .s15-tools__look {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
   flex: 1 1 280px;
@@ -28,7 +29,8 @@
   white-space: nowrap;
 }
 .s15-tools__select {
-  flex: 1 1 auto;
+  /* Не уже подписи «— выбрать —»: на телефоне уходит на свою строку. */
+  flex: 1 1 160px;
   min-width: 0;
   height: var(--h-control-sm);
 }

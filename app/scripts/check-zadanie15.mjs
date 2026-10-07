@@ -527,6 +527,32 @@ const B234 = box(2, 3, 4);
       if (Math.abs(labels[i][0] - labels[j][0]) < 12 && Math.abs(labels[i][1] - labels[j][1]) < 12)
         clash += 1;
   eqStr(clash, 0, 'подписи разведены');
+  // На телефоне подписи крупнее относительно чертежа — и всё равно не налезают.
+  for (const sc of S.SCENARIOS) {
+    const b2 = sc.build();
+    const k = 1.9;
+    const ph = S.buildScene(b2.c, opts(b2.c, { facePlanes: b2.facePlanes, labelScale: k }));
+    const ls = [
+      ...ph.points.map((p) => p.label),
+      ...ph.sheets.map((sh) => sh.label.p),
+      ...ph.lines.flatMap((l) => (l.label === null ? [] : [l.label.p])),
+    ];
+    let hits = 0;
+    for (let i = 0; i < ls.length; i++)
+      for (let j = i + 1; j < ls.length; j++)
+        if (Math.abs(ls[i][0] - ls[j][0]) < 12 * k && Math.abs(ls[i][1] - ls[j][1]) < 12 * k)
+          hits += 1;
+    eqStr(hits, 0, `${sc.id}: подписи разведены и на телефоне`);
+    ok(
+      ls.every((p) => p[0] >= 0 && p[0] <= ph.size && p[1] >= 0 && p[1] <= ph.size),
+      `${sc.id}: подписи в пределах сцены на телефоне`,
+    );
+    // Подпись точки остаётся рядом с точкой.
+    const far = ph.points.filter(
+      (p) => Math.hypot(p.label[0] - p.p[0], p.label[1] - p.p[1]) > 60 * k,
+    );
+    eqStr(far.map((p) => p.tex).join(','), '', `${sc.id}: подписи точек рядом с точками`);
+  }
 
   // Параллельные плоскости: основание и верхняя грань — сообщение, линии нет.
   const top = K.faceIndex(c.poly, 'A_1B_1C_1D_1');
