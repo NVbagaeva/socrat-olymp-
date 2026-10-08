@@ -20,6 +20,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const failures = [];
 let checks = 0;
@@ -190,6 +191,7 @@ async function breakSolutionDecode(context) {
 
 {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await welcomeSeen(context);
   await breakSolutionDecode(context);
   const page = await context.newPage();
   await page.goto(TASKS);
@@ -240,6 +242,7 @@ async function breakSolutionDecode(context) {
 {
   /* Сбой загрузки кода: одна перезагрузка и ни одной лишней. */
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await welcomeSeen(context);
   const page = await context.newPage();
   await page.goto(`${BASE}/zadaniya/12/rational/`);
   await page.waitForLoadState('load');
@@ -285,6 +288,7 @@ async function breakSolutionDecode(context) {
 
   /* Обычная ошибка кода автоперезагрузку не запускает. */
   const context2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await welcomeSeen(context2);
   const page2 = await context2.newPage();
   await page2.goto(`${BASE}/zadaniya/12/rational/`);
   await page2.evaluate(() => {
@@ -319,6 +323,7 @@ if (safari !== null) {
       hasTouch: true,
       isMobile: true,
     });
+    await welcomeSeen(context);
     const page = await context.newPage();
     cuts.length = 0;
     await page.goto(`${BASE}/zadaniya/12/rational/`, { waitUntil: 'load' });

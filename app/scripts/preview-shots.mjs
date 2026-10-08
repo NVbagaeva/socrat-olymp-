@@ -15,6 +15,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(root, 'out');
@@ -112,6 +113,7 @@ async function main() {
           viewport: { width: shirina, height: 900 },
           deviceScaleFactor: 1,
         });
+        await welcomeSeen(page);
         const otvet = await page.goto(`http://127.0.0.1:${PORT}${put}`, {
           waitUntil: 'networkidle',
         });

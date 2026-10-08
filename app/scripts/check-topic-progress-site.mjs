@@ -30,6 +30,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
@@ -98,6 +99,7 @@ async function ring(page) {
 
 async function fresh(sub) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  await welcomeSeen(context);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
