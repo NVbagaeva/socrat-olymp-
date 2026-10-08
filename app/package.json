@@ -62,7 +62,8 @@
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
-    "test:navigation": "node scripts/check-navigation.mjs"
+    "test:navigation": "node scripts/check-navigation.mjs",
+    "test:trenazher11": "node scripts/check-trenazher11-webkit.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
