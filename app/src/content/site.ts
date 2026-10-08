@@ -4,36 +4,36 @@
  * Меняется здесь, в разметке текста нет.
  */
 
-import { tasksPage } from '@/content/tasks';
+import { startHref, tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
   label: string;
   href: string;
 }
 
+/**
+ * В меню, шапке и подвале — только ссылки на то, что существует.
+ * Пунктов «Тарифы», «Войти», «Оферта», «Обработка данных» и «Контакты»
+ * здесь нет: страниц и авторизации у них пока нет, а ссылка на «#»
+ * выглядит сломанной. Когда появятся — добавляются сюда одной строкой,
+ * шапка и подвал подхватят сами.
+ */
 export const site = {
   brand: 'Будет на ЕГЭ',
 
-  /** Первый пункт — отдельная страница; остальные пока якоря лендинга. */
   nav: [
-    { label: 'Об авторе', href: '/about/' },
     { label: 'Банк заданий', href: tasksPage.href },
-    { label: 'Учителям', href: '/#teachers' },
-    /* Раздела с тарифами на странице пока нет — ссылка ждёт его. */
-    { label: 'Тарифы', href: '#' },
+    { label: 'Для репетиторов', href: '/#tutors' },
+    { label: 'Об авторе', href: '/about/' },
   ] satisfies SiteLink[],
 
   headerActions: {
-    login: { label: 'Войти', href: '#' } satisfies SiteLink,
-    signup: { label: 'Начать бесплатно', href: '#' } satisfies SiteLink,
+    /* Слово «бесплатно» остаётся: регистрации нет, и это правда. */
+    signup: { label: 'Начать бесплатно', href: startHref } satisfies SiteLink,
   },
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
-    links: [
-      { label: 'Оферта', href: '#' },
-      { label: 'Обработка данных', href: '#' },
-      { label: 'Контакты', href: '#' },
-    ] satisfies SiteLink[],
+    links: [] as SiteLink[],
   },
 } as const;

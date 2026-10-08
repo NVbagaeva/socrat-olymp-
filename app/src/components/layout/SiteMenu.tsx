@@ -85,10 +85,9 @@ export function SiteMenu() {
     button.current?.focus();
   };
 
-  const items = [
-    ...site.nav.map((link) => ({ ...link, separated: false })),
-    { ...site.headerActions.login, separated: true },
-  ];
+  /* Пункты панели — те же, что в меню шапки. Отдельного «Войти» нет:
+     авторизации в проекте пока нет, и в панель ей нечего добавить. */
+  const items = site.nav.map((link) => ({ ...link, separated: false }));
 
   return (
     <>
