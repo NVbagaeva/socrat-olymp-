@@ -23,16 +23,23 @@ export function PodgotovkaSchet({ zadanie, bloki }: PodgotovkaSchetProps) {
   const vsego = bloki.reduce((sum, blok) => sum + blok.zadachi.length, 0);
   const resheno = bloki.reduce((sum, blok) => sum + prepResheno(progress, blok.zadachi), 0);
 
+  const dolya = vsego === 0 ? 0 : (resheno / vsego) * 100;
   return (
     <>
       <p className="prep__counter">
         <b>{resheno}</b> из {vsego} заданий
       </p>
-      <ProgressBar
-        className="prep__meter"
-        value={vsego === 0 ? 0 : (resheno / vsego) * 100}
-        label={`${OPORNYE.title}: решено ${resheno} из ${vsego}`}
-      />
+      <div className="prep__meter-row">
+        <ProgressBar
+          className="prep__meter"
+          value={dolya}
+          label={`${OPORNYE.title}: решено ${resheno} из ${vsego}`}
+        />
+        {/* Процент — только у дорожки №4 (по макету); у списка №5 он спрятан стилем. */}
+        <span className="prep__percent" aria-hidden="true">
+          {Math.round(dolya)}%
+        </span>
+      </div>
     </>
   );
 }

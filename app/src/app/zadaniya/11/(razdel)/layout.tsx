@@ -8,6 +8,7 @@ import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../zadanie11.css';
+import '../procenty.css';
 
 /**
  * Оболочка задания №11: крошки, заголовок, кольцо прогресса и лента

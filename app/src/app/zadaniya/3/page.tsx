@@ -13,6 +13,7 @@ import '@/lib/solid/solid.css';
 import '../zadaniya.css';
 import '../[task]/section.css';
 import './stereometria.css';
+import { href, ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: `${stereometria.title}. ${stereometria.subtitle} — Будет на ЕГЭ`,
@@ -78,7 +79,7 @@ export default function Stereometria3Page() {
             <li key={razdel.slug}>
               <SubtopicCard
                 name={razdel.nazvanie}
-                href={`${tasksPage.href}/${stereometria.slug}/${razdel.slug}`}
+                href={href(ZADANIYA, stereometria.slug, razdel.slug)}
                 media={<Solid model={thumb(razdel.nomer)} />}
                 meta={
                   <>

@@ -1,7 +1,7 @@
 import { Redirect, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
-import { tasksPage } from '@/content/tasks';
 import { RAZDELY } from '@/lib/zadanie3';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Те же адреса, что были: по разделу на фигуру. */
 export function generateStaticParams() {
@@ -20,5 +20,5 @@ type Params = Promise<{ figura: string }>;
  */
 export default async function Page({ params }: { params: Params }) {
   const { figura } = await params;
-  return <Redirect href={`${tasksPage.href}/3/${figura}/${OPORNYE.tail}`} title={OPORNYE.title} />;
+  return <Redirect href={`${ZADANIYA}/3/${figura}/${OPORNYE.tail}`} title={OPORNYE.title} />;
 }

@@ -15,6 +15,7 @@ import '../../zadaniya.css';
 import '../../[task]/section.css';
 import '../stereometria.css';
 import './figura.css';
+import { href, ZADANIYA } from '@/lib/paths';
 
 function thumb(nomer: string): Model {
   const model = THUMBS[`thumb-${nomer}`];
@@ -45,7 +46,7 @@ export default async function FiguraLayout({
     notFound();
   }
 
-  const base = `${tasksPage.href}/${stereometria.slug}/${razdel.slug}`;
+  const base = `${ZADANIYA}/${stereometria.slug}/${razdel.slug}`;
   const variants = razdel.prototipy.reduce((sum, p) => sum + p.varianty.length, 0);
 
   return (
@@ -57,7 +58,7 @@ export default async function FiguraLayout({
             { label: 'Задания', href: tasksPage.href },
             {
               label: `№${Number(stereometria.no)} ${stereometria.subtitle}`,
-              href: `${tasksPage.href}/${stereometria.slug}`,
+              href: href(ZADANIYA, stereometria.slug),
             },
             { label: razdel.nazvanie },
           ]}

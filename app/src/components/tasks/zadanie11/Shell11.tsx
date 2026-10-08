@@ -7,6 +7,7 @@ import { ShapkaRazdela } from '../ShapkaRazdela';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { Progress11 } from './Progress11';
+import { ZADANIYA } from '@/lib/paths';
 
 /**
  * Оболочка задания №11: крошки, заголовок, кольцо прогресса и лента
@@ -14,7 +15,7 @@ import { Progress11 } from './Progress11';
  * маршрута: при переходе между вкладками остаётся на месте.
  */
 export function Shell11({ children }: { children: React.ReactNode }) {
-  const base = `${tasksPage.href}/${ZADANIE11.slug}`;
+  const base = `${ZADANIYA}/${ZADANIE11.slug}`;
   return (
     <AppShell active="tasks">
       <main className="app-main z11-shell">

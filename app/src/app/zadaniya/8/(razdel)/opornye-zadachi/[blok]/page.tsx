@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
 import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
-import { tasksPage } from '@/content/tasks';
 import { OPORNYE } from '@/content/opornye';
 import { vychisleniyaTitle } from '@/content/vychisleniya';
 import { PREP_BLOCKS } from '@/lib/vychisleniya/prep/blocks';
 import { prepPool } from '@/lib/vychisleniya/prep/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -33,7 +33,7 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
   if (block === undefined) {
     notFound();
   }
-  const base = `${tasksPage.href}/8`;
+  const base = `${ZADANIYA}/8`;
   return (
     <Podgotovka8Shell base={base} active={block.slug}>
       <ErrorBoundary what="задачи">

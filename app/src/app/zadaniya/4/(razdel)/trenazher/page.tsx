@@ -1,18 +1,17 @@
 import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
-import { tasksPage } from '@/content/tasks';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', vkladka('4', 'trenazher')),
 };
 
 /**
- * Вкладка «Тренажёр» задания №4 — раздел 07 референса на конфигураторе
- * задания №12: метод, режим, количество задач; «Узнай метод» — один
- * из режимов.
+ * Вкладка «Тренажёр» задания №4 — по макету trenazher.png: методы,
+ * режим, количество задач; «Узнай метод» — один из режимов.
  *
  * Банк собирается на сборке: 21 прототип, у каждого варианты
  * задачника и десять сгенерированных. Вниз уезжают условия, открытые
@@ -30,9 +29,8 @@ export default function Trenazher4Tab() {
         pool={pool}
         uznay={uznayMetodPool(4)}
         zadanie={4}
-        base={`${tasksPage.href}/4/trenazher/`}
-        family={veroyatnostFamily('4')}
-        skills={navykiMetodov(pool, 4)}
+        base={`${ZADANIYA}/4/trenazher/`}
+        metody={navykiMetodov(pool, 4)}
       />
     </>
   );

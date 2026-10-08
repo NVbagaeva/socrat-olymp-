@@ -12,6 +12,7 @@ import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/s
 import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { lineScene } from '@/lib/scenes';
+import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
@@ -66,7 +67,7 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
     /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
-    href: subtopicBuilt(subtopic) ? `/zadaniya/${sectionSlug}/${subtopic.id}` : null,
+    href: subtopicBuilt(subtopic) ? href(ZADANIYA, sectionSlug, subtopic.id) : null,
   };
 }
 
@@ -122,7 +123,7 @@ export default async function SectionPage({ params }: { params: Params }) {
             entry === undefined ? null : (
               <Link
                 className="btn btn--primary section-head__cta"
-                href={`/zadaniya/${section.slug}/${entry.id}`}
+                href={href(ZADANIYA, section.slug, entry.id)}
               >
                 Продолжить подготовку
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

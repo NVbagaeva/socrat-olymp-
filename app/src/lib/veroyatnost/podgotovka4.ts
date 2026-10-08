@@ -48,18 +48,24 @@ import { KONSPEKT_4 } from './bank4/konspekt';
 import { OPORNYE_4 } from './metody4';
 import { type PrepBlok, type PrepZadacha, type Prototype } from './types';
 
-/** Задача конспекта из варианта 1 её прототипа. */
-function izPrototipa(P: Prototype, nomer: number): PrepZadacha {
-  const pervyy = P.varianty[0];
-  if (pervyy === undefined) {
-    throw new Error(`У прототипа ${P.id} нет вариантов`);
+/**
+ * Задача конспекта из варианта её прототипа: вариант 1 — сама задача
+ * автора, варианты 2 и дальше — тот же сюжет с другими числами, ими
+ * блок добирается до десяти задач. У такой задачи свой идентификатор
+ * `k4-11-2`: прогресс и отпечаток ответа считаются по нему.
+ */
+function izPrototipa(P: Prototype, nomer: number, n = 1): PrepZadacha {
+  const variant = P.varianty.find((v) => v.n === n);
+  if (variant === undefined) {
+    throw new Error(`У прототипа ${P.id} нет варианта ${n}`);
   }
-  const p = pervyy.params;
+  const p = variant.params;
   const znakov = P.okruglenie(p);
   const metodika = P.metodika;
   return {
-    id: P.id,
+    id: n === 1 ? P.id : `${P.id}-${n}`,
     nomer,
+    ...(n === 1 ? {} : { variant: n }),
     uslovie: P.uslovie(p),
     otvet: P.otvet(p),
     proverka: P.perebor(p),
@@ -104,7 +110,7 @@ const METOD_ZADACHI: Record<string, string> = {
   'k4-18': 'geometricheskoe', // колечко в саду: доля площади
 };
 
-function po(id: string, nomer: number): PrepZadacha {
+function po(id: string, nomer: number, n = 1): PrepZadacha {
   const P = KONSPEKT_4.find((k) => k.id === id);
   if (P === undefined) {
     throw new Error(`В конспекте нет прототипа ${id}`);
@@ -116,15 +122,70 @@ function po(id: string, nomer: number): PrepZadacha {
   if (!OPORNYE_4.some((m) => m.id === blok)) {
     throw new Error(`У задачи конспекта ${id} метод «${blok}» не назван в типологии`);
   }
-  return { ...izPrototipa(P, nomer), blok };
+  return { ...izPrototipa(P, nomer, n), blok };
 }
 
-/** Три блока подготовки задания №4 — заголовки из конспекта. */
+/**
+ * Добор блока до десяти задач: за задачами конспекта идут варианты
+ * 2, 3, … тех же прототипов по кругу — те же сюжеты, другие числа.
+ * Номер конспекта у добранной задачи — номер её основы: это та же
+ * задача автора на других числах, а не новая задача конспекта.
+ */
+const V_BLOKE = 10;
+
+function dobrat(ids: readonly string[], pervyyNomer: number): PrepZadacha[] {
+  const osnova = ids.map((id, i) => po(id, pervyyNomer + i));
+  const dobor: PrepZadacha[] = [];
+  for (let k = 0; osnova.length + dobor.length < V_BLOKE; k += 1) {
+    const id = ids[k % ids.length];
+    if (id === undefined) {
+      break;
+    }
+    dobor.push(po(id, pervyyNomer + (k % ids.length), Math.floor(k / ids.length) + 2));
+  }
+  return [...osnova, ...dobor];
+}
+
+/**
+ * Превью блоков: объёмная картинка из макета вкладки и задача, которая
+ * на ней нарисована. Числа в задаче — то, что видно на картинке:
+ * в чаше 7 шаров (5 белых и 2 красных), у стола 5 стульев, выделенный
+ * участок — около четверти отрезка. Поменялась картинка — пересчитай
+ * предметы и поправь текст.
+ */
+const KARTINKI = {
+  chasha: {
+    src: '/images/veroyatnost-4/chasha.webp',
+    alt: 'Прозрачная ваза: пять белых и два красных шара',
+    primer:
+      'В прозрачной вазе 7 шаров: 5 белых и 2 красных. Вы выбираете наугад один шар. Какова вероятность, что он красный?',
+  },
+  stol: {
+    src: '/images/veroyatnost-4/kruglyj-stol.webp',
+    alt: 'Круглый стол и пять стульев вокруг него',
+    primer:
+      'За круглый стол на 5 стульев в случайном порядке садятся 3 мальчика и 2 девочки. Какова вероятность, что девочки окажутся рядом?',
+  },
+  otrezok: {
+    src: '/images/veroyatnost-4/otrezok.webp',
+    alt: 'Отрезок с выделенным участком и точкой на нём',
+    primer:
+      'На отрезке длиной 4\u00a0см выделен участок длиной 1\u00a0см. На отрезок наугад ставят точку. Какова вероятность, что она попадёт на выделенный участок?',
+  },
+} as const;
+
+/**
+ * Три блока подготовки задания №4 — заголовки из конспекта, по десять
+ * задач в каждом. Метод блока — тот, который он отрабатывает: по нему
+ * на карточке стоит значок метода (как в тренажёре и генераторе).
+ */
 export const PODGOTOVKA_4: readonly PrepBlok[] = [
   {
     id: 'opredelenie',
     nazvanie: 'Определение вероятности',
     tip: 'Считаем благоприятные исходы и делим на все',
+    metod: 'klassicheskaya',
+    kartinka: KARTINKI.chasha,
     zadachi: Array.from({ length: 10 }, (_, i) =>
       po(`k4-${String(i + 1).padStart(2, '0')}`, i + 1),
     ),
@@ -133,12 +194,18 @@ export const PODGOTOVKA_4: readonly PrepBlok[] = [
     id: 'zhrebiy',
     nazvanie: 'Жребий, две группы, круглый стол',
     tip: 'Одного фиксируем, второй занимает одно из оставшихся мест',
-    zadachi: Array.from({ length: 5 }, (_, i) => po(`k4-${i + 11}`, i + 11)),
+    metod: 'kruglyy-stol',
+    kartinka: KARTINKI.stol,
+    /* Пять задач конспекта (11–15) и пять их вторых вариантов. */
+    zadachi: dobrat(['k4-11', 'k4-12', 'k4-13', 'k4-14', 'k4-15'], 11),
   },
   {
     id: 'geometricheskaya',
     nazvanie: 'Геометрическая вероятность',
     tip: 'Делим не число исходов, а длину, площадь или время',
-    zadachi: Array.from({ length: 3 }, (_, i) => po(`k4-${i + 16}`, i + 16)),
+    metod: 'geometricheskoe',
+    kartinka: KARTINKI.otrezok,
+    /* Три задачи конспекта (16–18) и семь вариантов тех же прототипов. */
+    zadachi: dobrat(['k4-16', 'k4-17', 'k4-18'], 16),
   },
 ];

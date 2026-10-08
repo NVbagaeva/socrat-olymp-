@@ -95,12 +95,16 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
       if (window.sheetPagination !== undefined) {
         window.clearInterval(timer);
         setDone(true);
-        if (window.sheetPagination.error === undefined) {
+        /* Предпросмотр из генератора (preview=1): лист показывается,
+           печать не вызывается — её запускают сами, когда посмотрят. */
+        if (window.sheetPagination.error === undefined && query.get('preview') !== '1') {
           window.print();
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
+    /* Адрес за жизнь страницы не меняется. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spec, done]);
 
   return (

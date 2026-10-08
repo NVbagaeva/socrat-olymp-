@@ -7,6 +7,7 @@
  * набираются KaTeX; отпечаток узнаёт свой ответ.
  */
 
+import { tekstyStroki } from '../proporciya/bloki';
 import { nice } from '../num';
 import { checkTablitsa, texPieces } from '../selftest';
 import { answerMatches, choiceMatches } from '../secret';
@@ -27,7 +28,7 @@ export function mikroTexts(z: MikroZadacha): string[] {
   );
   return [
     z.uslovie,
-    ...z.razbor,
+    ...z.razbor.flatMap(tekstyStroki),
     ...(z.vybory ?? []).map((v) => v.label),
     ...z.hints.flatMap((h) => [h.question, ...h.options, h.comment ?? '']),
     ...tab,

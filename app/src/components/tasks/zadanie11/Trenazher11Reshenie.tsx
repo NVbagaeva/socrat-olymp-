@@ -13,6 +13,7 @@ import type { Podskazki11, Razbor11, Zadacha11 } from '@/lib/zadanie11/trenazher
 import type { SectionId, Tablitsa } from '@/lib/zadanie11/types';
 import { HintIcon } from '../prep/PrepIcons';
 import { IkonkaRazdela, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
+import { praviloOdinRaz } from './praviloProporcii';
 import { Tablitsa11 } from './Tablitsa11';
 import type { Otmetka } from './Trenazher11Itog';
 
@@ -370,7 +371,11 @@ export function Trenazher11Reshenie({
       )}
 
       {razbor === null ? null : (
-        <section className="z11-card z11-resh__razbor" aria-label={TRENAZHER_11.reshenie}>
+        <section
+          className="z11-card z11-resh__razbor"
+          aria-label={TRENAZHER_11.reshenie}
+          ref={praviloOdinRaz}
+        >
           <h3 className="z11-resh__h">{TRENAZHER_11.reshenie}</h3>
           {razbor.tables.map((t, i) => (
             <Tablitsa11 key={i} table={t} />
@@ -379,7 +384,11 @@ export function Trenazher11Reshenie({
             <div key={i} className="z11-resh__etap">
               <p className="z11-resh__etap-title" dangerouslySetInnerHTML={{ __html: e.title }} />
               {e.stroki.map((line, j) => (
-                <p key={j} className="z11-resh__line" dangerouslySetInnerHTML={{ __html: line }} />
+                <div
+                  key={j}
+                  className="z11-resh__line"
+                  dangerouslySetInnerHTML={{ __html: line }}
+                />
               ))}
             </div>
           ))}

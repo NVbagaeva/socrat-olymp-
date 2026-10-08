@@ -65,7 +65,8 @@ const src = path.join(root, 'src', 'lib');
    генератора из lib/zadanie3/podhod.ts, набор формул из lib/tex.ts (с
    разбором строки lib/razmetka.ts) и
    склонение из lib/plural.ts (его просят слова вкладки подготовки) и
-   план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts) —
+   план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts),
+   адреса страниц из lib/paths.ts (их просит content/tasks.ts) —
    переводим их вместе с папкой раздела. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
@@ -78,6 +79,7 @@ for (const file of [
   path.join(src, 'assetUrl.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
+  path.join(src, 'paths.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
@@ -140,6 +142,8 @@ prep.bad
   .forEach((item) => console.log(`   ${item}`));
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
+console.log(`  ошибок в списках картинок: ${prep.kartinki.length}`);
+prep.kartinki.forEach((item) => console.log(`   ${item}`));
 
 /* Модель задачи (раздел 04 референса): метод у каждой задачи №4,
    рисунок собирается из параметров и показывает тот же ответ. */
@@ -391,7 +395,7 @@ if (raskladka.problems.length > 0) {
   process.exit(1);
 }
 
-if (prep.bad.length > 0 || prep.duplicates.length > 0) {
+if (prep.bad.length > 0 || prep.duplicates.length > 0 || prep.kartinki.length > 0) {
   console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
   prep.bad.forEach((row) =>
     console.error(`  ${row.id} (конспект № ${row.n}): ${row.problems.join('; ')}`),
