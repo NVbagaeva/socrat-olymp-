@@ -14,7 +14,7 @@ const FOCUSABLE = 'a[href], button:not([disabled])';
 const NARROW = '(max-width: 939.98px)';
 
 /**
- * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,
+ * Бургер-меню узкой шапки: пункты навигации (и «Войти», когда вход есть) уезжают сюда,
  * логотип и кнопка «Начать бесплатно» остаются в шапке.
  */
 export function SiteMenu() {
@@ -85,9 +85,10 @@ export function SiteMenu() {
     button.current?.focus();
   };
 
+  const login = site.headerActions.login;
   const items = [
     ...site.nav.map((link) => ({ ...link, separated: false })),
-    { ...site.headerActions.login, separated: true },
+    ...(login !== null ? [{ ...login, separated: true }] : []),
   ];
 
   return (

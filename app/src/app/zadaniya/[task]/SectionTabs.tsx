@@ -131,10 +131,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
         ) : null}
 
         {active === 'stats' ? (
-          <EmptyState
-            title="Статистика появится вместе с личным кабинетом"
-            description="Хранилища результатов в проекте пока нет, поэтому показывать нечего."
-          />
+          <EmptyState title="Раздел в разработке" description="Статистики по заданию пока нет." />
         ) : null}
 
         {active === 'materials' ? (
