@@ -30,8 +30,8 @@ type Sostoyanie = 'proyden' | 'tekushchiy' | 'vperedi';
  * шага и линия к следующему, справа карточка блока — значок метода,
  * название, приём, полоса решённого и кнопка. Пройденный блок помечен
  * галочкой, первый непройденный — бейджем «Ты здесь», остальные
- * приглушены. В карточке справа — превью первой задачи блока с
- * объёмной картинкой. Внизу — подсказка: прошёл все блоки, иди в
+ * приглушены. В карточке справа — превью: объёмная картинка и задача,
+ * которая на ней нарисована. Внизу — подсказка: прошёл все блоки, иди в
  * тренажёр.
  *
  * Счёт решённого читается из хранилища подготовки задания, как и у
@@ -67,7 +67,6 @@ export function OpornyeDorozhka({ zadanie, bloki, listHref, trenazherHref }: Opo
               : gotovo > 0
                 ? DOROZHKA_SLOVA.knopka.prodolzhit
                 : DOROZHKA_SLOVA.knopka.nachat;
-          const pervaya = blok.zadachi[0];
           const href = `${listHref}${blok.id}/`;
 
           return (
@@ -137,23 +136,23 @@ export function OpornyeDorozhka({ zadanie, bloki, listHref, trenazherHref }: Opo
                   </div>
                 </div>
 
-                {pervaya === undefined ? null : (
+                {blok.kartinka === undefined ? null : (
                   <div className="vop-blok__preview">
                     <p className="sr-only">{DOROZHKA_SLOVA.preview}</p>
-                    {/* Условие — готовая вёрстка: формулы набраны KaTeX на сборке. */}
+                    {/* Задача, нарисованная на картинке: числа в ней — то,
+                        что видно на картинке. Готовая вёрстка, формулы
+                        набраны KaTeX на сборке. */}
                     <p
                       className="vop-blok__uslovie"
-                      dangerouslySetInnerHTML={{ __html: pervaya.uslovie }}
+                      dangerouslySetInnerHTML={{ __html: blok.kartinka.primer }}
                     />
-                    {blok.kartinka === undefined ? null : (
-                      <img
-                        className="vop-blok__kartinka"
-                        src={assetUrl(blok.kartinka.src)}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    )}
+                    <img
+                      className="vop-blok__kartinka"
+                      src={assetUrl(blok.kartinka.src)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 )}
               </article>
