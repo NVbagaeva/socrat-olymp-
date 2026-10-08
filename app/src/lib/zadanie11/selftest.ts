@@ -252,6 +252,17 @@ export function checkProcenty(where: string, s: Solved): Problem[] {
   }
   if (!bloki.some((b) => b.vid === 'proporciya')) add('проценты: нет пропорции');
   if (!bloki.some((b) => b.vid === 'pravilo')) add('проценты: нет карточки правила пропорции');
+  /* Только схема сайта: никакого второго способа — «Иначе», «другой
+     способ», уравнения с десятичным множителем 0,87x = … или деления
+     на десятичный множитель. */
+  for (const t of s.etapy.flatMap((e) => e.lines.flatMap(tekstyStroki))) {
+    if (/Иначе|[Дд]ругой способ|Замечание/.test(t)) {
+      add(`проценты: второй способ решения — «${t.slice(0, 60)}»`);
+    }
+    if (/\d\{,\}\d+\s*(?:\\cdot\s*)?x\s*=/.test(t) || /:\s*0\{,\}\d/.test(t)) {
+      add(`проценты: уравнение или деление с десятичным множителем — «${t.slice(0, 60)}»`);
+    }
+  }
   for (const b of bloki) {
     if (b.vid === 'sokr') {
       const err = proveritSokrashchenie(b.chislitel, b.znamenatel, {
