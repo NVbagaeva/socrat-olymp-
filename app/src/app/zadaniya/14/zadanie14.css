@@ -1,0 +1,318 @@
+/* Задание №14 «Уравнение».
+
+   Оболочка, лента вкладок и пустые вкладки — общие слои; здесь
+   только своё: иллюстрация в шапке и вкладка «О задании». Колонки
+   и «С чего начать» устроены как у №11. Значения — только токены. */
+
+.z14-head {
+  margin-bottom: var(--space-6);
+}
+.z14-head__art {
+  display: block;
+  width: 180px;
+  height: auto;
+}
+/* На телефоне картинка — декор, который отодвигает ленту вкладок
+   на пол-экрана; убирается, как декор банка заданий. */
+@media (max-width: 767.98px) {
+  .z14-head .section-head__media {
+    display: none;
+  }
+}
+
+.z14-pic {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* ── «О задании» ──────────────────────────────────────────────── */
+
+.z14-about {
+  display: grid;
+  gap: var(--space-8);
+}
+@media (min-width: 1280px) {
+  .z14-about {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+.z14-about__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.z14-about__title {
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+}
+.z14-about__answer {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z14-about__text {
+  max-width: 72ch;
+  margin-top: var(--space-3);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z14-about__sub {
+  margin-bottom: var(--space-4);
+}
+
+/* Условие и критерии — две карточки рядом от 1024, ниже столбиком. */
+.z14-pair {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .z14-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+.z14-card {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.z14-primer {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z14-primer__item {
+  display: flex;
+  gap: var(--space-2);
+  line-height: var(--lh-lg);
+}
+.z14-primer__punkt {
+  flex: none;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.z14-kriterii {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z14-kriterii__item {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.z14-kriterii__bally {
+  justify-self: start;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.z14-kriterii__item--0 .z14-kriterii__bally {
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+}
+.z14-kriterii__text {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Виды уравнений: две колонки от 1024. */
+.z14-vidy {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 1024px) {
+  .z14-vidy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z14-vid {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z14-vid__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.z14-vid__icon .z14-pic {
+  width: 22px;
+  height: 22px;
+}
+.z14-vid__body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+.z14-vid__name {
+  font-weight: 700;
+}
+.z14-vid__desc {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Способы отбора корней: нумерованные шаги, две колонки от 1024. */
+.z14-otbor {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 1024px) {
+  .z14-otbor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z14-otbor__item {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z14-otbor__no {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.z14-otbor__name {
+  display: block;
+  font-weight: 700;
+}
+.z14-otbor__text {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* На чём теряют баллы: тёплая плашка-уточнение. */
+.z14-oshibki {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-xl);
+  background: var(--color-accent-soft-surface);
+}
+.z14-oshibki__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: var(--lh-lg);
+}
+.z14-oshibki__list li::marker {
+  color: var(--color-accent);
+}
+
+/* «С чего начать». */
+.z14-start {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.z14-start__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+}
+.z14-start__flag {
+  color: var(--color-primary);
+}
+.z14-start__list {
+  display: grid;
+  gap: var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.z14-start__step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: var(--space-3);
+}
+.z14-start__no {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+}
+.z14-start__step-title {
+  display: block;
+  font-weight: 700;
+}
+.z14-start__step-text {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z14-sovet {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z14-sovet__title {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.z14-sovet__text {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
