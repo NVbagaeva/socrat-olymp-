@@ -10,6 +10,7 @@ import type { TrainerKindTally } from '@/lib/trainerProgress';
 import { counted } from '@/lib/plural';
 import { HintIcon, TaskCountIcon } from '../prep/PrepIcons';
 import { MetodIkonka } from './MetodIkonka';
+import { MetodKartinka } from './MetodKartinka';
 import type { MetodKarta } from './navyki';
 
 /** Режим в конфигураторе: описание плюс состояние из банка и хранилища. */
@@ -212,7 +213,7 @@ export function TrenazherKonfigurator({
                         <CheckIcon />
                       </span>
                     ) : null}
-                    <MetodIkonka zadanie={zadanie} metod={m.id} />
+                    <MetodKartinka zadanie={zadanie} metod={m.id} nazvanie={m.title} />
                     <span className="vtr-karta__title">{m.title}</span>
                     <span className="vtr-karta__count">{slova.metody.vBanke(m.count)}</span>
                     <span className="vtr-karta__dolya">
