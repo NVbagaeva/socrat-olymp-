@@ -92,13 +92,14 @@
 }
 
 .hero__title {
-  /* Верхняя ступень — display из общей шкалы, на широких экранах
-     растёт вместе с ней. Ниже кегль убавляется по ширине колонки,
-     чтобы ручной перенос держался и строка не ломалась сама.
-     Коэффициент: длинная строка «Учителю учителю —» занимает 9.83 кегля,
-     10cqi оставляет запас около 1.7%. */
-  font-size: clamp(30px, 10cqi, var(--fs-display));
-  line-height: 1.08;
+  /* Верхняя ступень — 56px: с заголовком в три строки по 26 знаков
+     display-кегль 64px не помещался в колонку. Ниже кегль убавляется
+     по ширине колонки, чтобы ручной перенос держался и строка не
+     ломалась сама. Коэффициент: самая длинная строка «по профильной
+     математике —» занимает 12.6 кегля, 7.6cqi оставляет запас 4%. */
+  font-size: clamp(28px, 7.6cqi, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   margin-bottom: var(--space-6);
 }
 .hero__title span {
@@ -128,22 +129,19 @@
   color: var(--color-text-secondary);
   margin-top: var(--space-4);
 }
-
-.hero__metrics {
-  /* Ровно по числу показателей: пустых ячеек не бывает.
-     Правило перебивает общий свёрток .metric-row на 900px. */
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: var(--space-10);
+.hero__note-sep {
+  margin: 0 var(--space-2);
 }
-.hero__metrics .metric {
-  padding: var(--space-4);
-}
-.hero__metrics .metric__val {
-  font-size: 32px;
-  line-height: 40px;
-}
-.hero__metrics .metric__lbl {
+/* Ссылка для репетитора — текстом, а не третьей кнопкой: вход для
+   репетитора не должен спорить с главным действием ученика. */
+.hero__tutors {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
   white-space: nowrap;
+}
+.hero__tutors:hover {
+  text-decoration: underline;
 }
 
 section.band {
@@ -169,35 +167,147 @@ section.band--soft {
   color: var(--color-text-secondary);
   margin-top: var(--space-4);
 }
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
+/* Подпись под лидом блока: число открытых разделов, считается из конфига. */
+.band__head .band__caption {
+  font-size: 15px;
+  line-height: 23px;
+  margin-top: var(--space-3);
 }
-.step {
-  padding-top: var(--space-5);
-  border-top: 2px solid var(--color-primary);
-}
-.step:nth-child(n + 2) {
-  border-top-color: var(--color-border-strong);
-}
-.step b {
-  display: block;
+/* Надзаголовок второстепенного блока — тот же приём, что в герое. */
+.band__eyebrow {
   font-size: 13px;
+  line-height: 16px;
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-primary);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
-.step h3 {
-  font-size: 18px;
+
+/* ══════════════════════════════════════════════
+   МАРШРУТ ПОДГОТОВКИ
+   Шесть шагов-ссылок в две строки по три. Карточка — тот же язык,
+   что у карточек банка: белая поверхность, тонкая рамка, крупный
+   синий номер; значок шага — значок вкладки из ленты раздела.
+   ══════════════════════════════════════════════ */
+
+.route {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.route__step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-5);
+  height: 100%;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.route__step:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--glow-accent);
+}
+.route__step:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.route__no {
+  font-size: 28px;
+  line-height: 32px;
   font-weight: 600;
-  margin-bottom: var(--space-2);
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
 }
-.step p {
+.route__body {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+.route__verb {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.route__section {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.route__ico {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.route__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.route__text {
   font-size: 15px;
   line-height: 23px;
   color: var(--color-text-secondary);
+}
+.route__note {
+  margin-top: var(--space-6);
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--color-text-secondary);
+  max-width: 72ch;
+}
+
+/* ══════════════════════════════════════════════
+   ДЛЯ РЕПЕТИТОРОВ
+   Текст слева, список инструментов справа — без таблиц и чисел.
+   ══════════════════════════════════════════════ */
+
+.split--top {
+  align-items: start;
+}
+.split__note {
+  margin-top: var(--space-5);
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-text-tertiary);
+  max-width: 46ch;
+}
+.tools {
+  display: grid;
+  gap: var(--space-4);
+}
+.tool {
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.tool h4 {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+/* Перебивает общий .split p: текст инструмента короче и плотнее лида. */
+.split .tool p {
+  font-size: 15px;
+  line-height: 23px;
+  max-width: none;
 }
 
 .split {
@@ -224,45 +334,6 @@ section.band--soft {
   display: flex;
   gap: var(--space-4);
   flex-wrap: wrap;
-}
-
-.checklist {
-  margin-top: var(--space-6);
-  display: grid;
-  gap: var(--space-3);
-}
-.checklist li {
-  display: flex;
-  gap: var(--space-3);
-  font-size: 15px;
-  line-height: 23px;
-}
-.checklist svg {
-  flex: none;
-  margin-top: 5px;
-  color: var(--color-primary);
-}
-
-/* Карточка результата диагностики: отступы из эталона. */
-.diag__score {
-  margin: 2px 0 var(--space-6);
-}
-.diag__unit {
-  font-size: 20px;
-  font-weight: 500;
-}
-.diag__weak-label {
-  margin-bottom: var(--space-3);
-}
-.diag__action {
-  margin-top: var(--space-6);
-}
-.topic-list--roomy .topic {
-  padding: 8px 0;
-}
-
-.teachers__note {
-  margin-top: var(--space-4);
 }
 
 /* Четыре колонки по 300px с зазорами 16 требуют 1248px под сетку.
@@ -349,8 +420,8 @@ section.band--soft {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-10);
   }
-  .steps {
-    grid-template-columns: 1fr 1fr;
+  .route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -385,6 +456,18 @@ section.band--soft {
     max-width: none;
     padding: var(--space-8) var(--space-5) var(--space-12);
   }
+  /* Ручной перенос в три строки по 26 знаков на телефоне не держится:
+     самая длинная строка не влезает в колонку даже минимальным кеглем.
+     Здесь строки идут подряд и переносятся по ширине, balance ровняет
+     их длину. */
+  .hero__title {
+    font-size: clamp(28px, 8.4cqi, 40px);
+    text-wrap: balance;
+  }
+  .hero__title span {
+    display: inline;
+    white-space: normal;
+  }
   .hero__lead {
     font-size: 17px;
     line-height: 27px;
@@ -414,22 +497,6 @@ section.band--soft {
   }
 }
 
-/* Три ячейки в строку, пока помещаются; иначе столбец
-   с горизонтальными разделителями. Порог — по самой длинной подписи
-   «заданий первой части» с полями ячейки. */
-@container (max-width: 554px) {
-  .hero__metrics {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .hero__metrics .metric {
-    border-left: 0;
-    border-top: 1px solid var(--color-border);
-  }
-  .hero__metrics .metric:first-child {
-    border-top: 0;
-  }
-}
-
 @media (max-width: 760px) {
   section.band {
     padding: var(--space-12) 0;
@@ -438,9 +505,12 @@ section.band--soft {
     font-size: 28px;
     line-height: 36px;
   }
-  .steps {
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
+  .route {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .route__step {
+    padding: var(--space-5);
+    gap: var(--space-4);
   }
   .split h3 {
     font-size: 24px;

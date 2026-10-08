@@ -1,9 +1,7 @@
 export { HeroSection } from './HeroSection';
 export { HeroImage, type HeroImageProps } from './HeroImage';
 export { HeroLines } from './HeroLines';
-export { HowSection } from './HowSection';
-export { DiagnosticsSection } from './DiagnosticsSection';
-export { PathSection } from './PathSection';
+export { RouteSection } from './RouteSection';
 export { BankSection } from './BankSection';
-export { TeachersSection } from './TeachersSection';
+export { TutorsSection } from './TutorsSection';
 export { CtaSection } from './CtaSection';
