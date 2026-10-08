@@ -21,6 +21,7 @@
     "test:zadanie3": "node scripts/check-zadanie3.mjs",
     "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
+    "test:opornye-5": "node scripts/check-opornye-5.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
     "test:topic-progress": "node scripts/check-topic-progress.mjs",

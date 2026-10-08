@@ -375,6 +375,9 @@ export function uznaySlova(zadanie: Zadanie) {
 export const PODGOTOVKA_SLOVA = {
   title: OPORNYE.title,
   lead: 'Задачи авторского конспекта. Блоки идут в порядке конспекта: это последовательность, а не каталог.',
+  /** Подзаголовок №5: там блоки — методы, а не заголовки конспекта. */
+  leadPoMetodam:
+    'Блоки идут по методам из «Ключевых методов решения»: в каждом десять задач, от простой к сложной.',
   allLabel: 'Все блоки',
   /** Строка над рядом кружков. */
   schet: (nomer: number, vsego: number): string => `Задача ${nomer} из ${vsego}`,
