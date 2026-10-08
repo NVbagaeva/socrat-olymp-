@@ -189,7 +189,7 @@ export const about = {
   cta: {
     title: 'Пусть время учителя остаётся для главного',
     lead: 'Создайте первый вариант за несколько секунд.',
-    primaryAction: { label: 'Создать вариант →', href: '#' },
+    primaryAction: { label: 'Создать вариант →', href: '/zadaniya/11/generator/' },
     secondaryAction: { label: 'Перейти в банк заданий', href: '/#bank' },
   },
 } as const;

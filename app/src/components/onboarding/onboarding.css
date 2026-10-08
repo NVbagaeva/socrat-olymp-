@@ -1,0 +1,546 @@
+/*
+ * Онбординг: тур, окно «Впервые здесь?», кнопка «?».
+ *
+ * Слои: кнопка «?» — 40 (под окнами и меню сайта, над нижней панелью
+ * кабинета: та стоит на 20), окно приветствия — 55 (над модальными
+ * окнами страницы, они на 50), тур — 60–62, выше всего.
+ * Цвета только семантические. Затемнение — тон основного текста
+ * с прозрачностью, как у модальных окон.
+ */
+
+.tour,
+.welcome,
+.help-fab {
+  --onb-veil: color-mix(in srgb, var(--color-text) 48%, transparent);
+}
+
+/* ── Тур ───────────────────────────────────────────────────────── */
+
+.tour__veil {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+.tour__veil--dim {
+  background: var(--onb-veil);
+}
+
+/* «Окно» в затемнении: тень на весь экран вокруг подсвеченного места. */
+.tour__hole {
+  position: fixed;
+  z-index: 61;
+  border-radius: var(--radius-lg);
+  outline: 2px solid var(--color-primary);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--color-primary) 22%, transparent),
+    0 0 0 200vmax var(--onb-veil);
+  pointer-events: none;
+  transition:
+    top var(--dur-state) var(--ease),
+    left var(--dur-state) var(--ease),
+    width var(--dur-state) var(--ease),
+    height var(--dur-state) var(--ease);
+}
+
+.tour-card {
+  position: fixed;
+  z-index: 62;
+  width: min(380px, calc(100vw - 32px));
+  padding: var(--space-5) var(--space-6) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-text);
+  outline: none;
+  transition: opacity var(--dur-switch) var(--ease);
+}
+.tour-card.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+.tour-card--center,
+.tour-card--final {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.tour-card--final {
+  width: min(600px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: var(--space-8);
+}
+
+.tour-card__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+}
+.tour-card__close:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.tour-card__close svg,
+.welcome__close svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.tour-card__step {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.tour-card__title {
+  margin: var(--space-2) var(--space-8) 0 0;
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.tour-card__text {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.tour-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+.tour-card__dots {
+  display: flex;
+  gap: 6px;
+}
+.tour-card__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+.tour-card__dot.is-current {
+  background: var(--color-primary);
+}
+
+/* Финал: галочка в стиле сайта вместо хлопушки. */
+.tour-card__done {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: var(--space-4);
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.tour-card__done svg,
+.tour-card__tick svg,
+.tour-panel__no svg {
+  width: 60%;
+  height: 60%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tour-card--final .tour-card__title {
+  font-size: 24px;
+}
+.tour-card__skills {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+.tour-card__skills-title {
+  font-weight: 600;
+}
+.tour-card__skills ul {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.tour-card__skills li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+.tour-card__tick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.tour-card__foot--final {
+  flex-wrap: wrap;
+}
+
+/* Нижний лист на телефоне: крупные кнопки, во всю ширину. */
+.tour-card--sheet {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  max-height: 70vh;
+  overflow-y: auto;
+  transform: none;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--space-5) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+}
+.tour-card--sheet .btn {
+  min-height: 48px;
+}
+.tour-card--sheet .tour-card__foot--final {
+  flex-direction: column-reverse;
+  align-items: stretch;
+}
+.tour-card--sheet.tour-card--final {
+  max-height: 88vh;
+  padding-top: var(--space-6);
+}
+.tour-card--sheet.tour-card--final .tour-card__skills {
+  margin-top: var(--space-4);
+}
+
+/* Панель «Как проходит тур?» — от 1280px, поверх сайдбара. */
+.tour-panel {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .tour-panel {
+    position: fixed;
+    z-index: 62;
+    top: 96px;
+    left: var(--space-4);
+    width: calc(var(--w-sidebar) - var(--space-8));
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+  }
+}
+.tour-panel__title {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+.tour-panel__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.tour-panel__no {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  font-size: 12px;
+  font-weight: 600;
+}
+.tour-panel__item.is-current {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.tour-panel__item.is-current .tour-panel__no {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.tour-panel__item.is-past .tour-panel__no {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.tour-panel__note {
+  margin-top: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* ── Окно «Впервые здесь?» ─────────────────────────────────────── */
+
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: var(--onb-veil);
+}
+.welcome__panel {
+  position: relative;
+  width: min(680px, 100%);
+  padding: var(--space-8);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+}
+.welcome__grip {
+  display: none;
+}
+.welcome__close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+}
+.welcome__close:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.welcome__eyebrow {
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.welcome__title {
+  margin-top: var(--space-2);
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+.welcome__lead {
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.welcome__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.welcome__choice {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: left;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.welcome__choice:hover,
+.welcome__choice:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+.welcome__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.welcome__icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.welcome__choice-title {
+  color: var(--color-text-brand);
+  font-size: 18px;
+  font-weight: 700;
+}
+.welcome__choice-text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.welcome__arrow {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  color: var(--color-primary);
+  font-size: 20px;
+}
+.welcome__later {
+  display: block;
+  margin: var(--space-5) auto 0;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-primary);
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+  .welcome {
+    align-items: end;
+    padding: 0;
+  }
+  .welcome__panel {
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-6) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .welcome__grip {
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: calc(-1 * var(--space-3)) auto var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--color-border-strong);
+  }
+  .welcome__close {
+    top: var(--space-3);
+    right: var(--space-3);
+  }
+  .welcome__title {
+    font-size: 28px;
+  }
+  .welcome__choices {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .welcome__choice {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Кнопка «?» ────────────────────────────────────────────────── */
+
+.help-fab {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 40;
+}
+.help-fab__button {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-lg);
+  transition: background var(--dur-hover) var(--ease);
+}
+.help-fab__button:hover {
+  background: var(--color-primary-hover);
+}
+.help-fab__button svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.help-fab__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-3));
+  width: 280px;
+  display: grid;
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.help-fab__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 15px;
+  text-align: left;
+}
+.help-fab__item:hover {
+  background: var(--color-surface-2);
+}
+.help-fab__item--soon,
+.help-fab__item--soon:hover {
+  background: none;
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+
+@media (max-width: 767.98px) {
+  .help-fab {
+    right: var(--space-4);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  }
+  .help-fab__button {
+    width: 48px;
+    height: 48px;
+  }
+}
+/* В кабинете ниже 1024px внизу нижняя панель навигации: кнопка над ней. */
+@media (max-width: 1023.98px) {
+  body:has(.bnav--shell) .help-fab {
+    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-4));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour__hole,
+  .tour-card,
+  .welcome__choice,
+  .help-fab__button {
+    transition: none;
+  }
+}

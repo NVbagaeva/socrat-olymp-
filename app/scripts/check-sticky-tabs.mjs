@@ -22,6 +22,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(OUT)) {
@@ -131,6 +132,7 @@ async function proverit(engine, browserType) {
       isMobile: size.isMobile && engine === 'Chromium',
       hasTouch: size.isMobile,
     });
+    await welcomeSeen(context);
     for (const url of PAGES) {
       const page = await context.newPage();
       await page.goto(BASE + url, { waitUntil: 'networkidle' });

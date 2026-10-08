@@ -34,7 +34,7 @@ export function MobileSection() {
         <div className="phone">
           <div className="phone__head">
             <span className="phone__name">Будет на ЕГЭ</span>
-            <span className="bell bell--sm">
+            <span className="bell bell--sm bell--unread">
               <span className="bell__ico" aria-hidden="true" />
             </span>
           </div>
