@@ -1,13 +1,17 @@
+import Link from 'next/link';
+import { Fragment } from 'react';
 import { HeroImage } from './HeroImage';
 import { HeroLines } from './HeroLines';
-import { Metric, MetricRow } from '@/components/ui';
 import { landing } from '@/content/landing';
 
-const { hero, metrics } = landing;
+const { hero } = landing;
 
 /**
  * Первый экран. Слева изображение во всю высоту экрана от самого края окна,
- * справа текст. Полоса показателей строится по длине массива metrics.
+ * справа текст: надзаголовок → заголовок → подзаголовок → кнопки.
+ *
+ * Полосы показателей под кнопками больше нет: её числа («9 980+ задач»)
+ * не были выверены, а непроверенных цифр на странице быть не должно.
  */
 export function HeroSection() {
   return (
@@ -21,30 +25,38 @@ export function HeroSection() {
       <div className="hero__body">
         <p className="hero__eyebrow">{hero.eyebrow}</p>
 
+        {/* Пробел между строками нужен телефону: там строки идут
+            в строку и переносятся сами, см. landing.css. */}
         <h1 className="t-display hero__title">
-          {hero.titleLines.map((line) => (
-            <span key={line}>{line}</span>
+          {hero.titleLines.map((line, index) => (
+            <Fragment key={line}>
+              {index > 0 ? ' ' : null}
+              <span>{line}</span>
+            </Fragment>
           ))}
         </h1>
 
         <p className="hero__lead">{hero.lead}</p>
 
         <div className="hero__actions">
-          <a className="btn btn--primary btn--lg" href={hero.primaryAction.href}>
+          <Link className="btn btn--primary btn--lg" href={hero.primaryAction.href}>
             {hero.primaryAction.label}
-          </a>
-          <a className="btn btn--secondary btn--lg" href={hero.secondaryAction.href}>
+          </Link>
+          <Link className="btn btn--secondary btn--lg" href={hero.secondaryAction.href}>
             {hero.secondaryAction.label}
-          </a>
+          </Link>
         </div>
 
-        <p className="hero__note">{hero.note}</p>
-
-        <MetricRow className="hero__metrics" columns={3}>
-          {metrics.map((metric) => (
-            <Metric key={metric.label} value={metric.value} label={metric.label} />
-          ))}
-        </MetricRow>
+        <p className="hero__note">
+          {hero.note}
+          <span className="hero__note-sep" aria-hidden="true">
+            ·
+          </span>
+          <a className="hero__tutors" href={hero.tutorsLink.href}>
+            {hero.tutorsLink.label}
+            <span aria-hidden="true"> →</span>
+          </a>
+        </p>
       </div>
     </section>
   );

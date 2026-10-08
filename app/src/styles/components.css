@@ -1247,7 +1247,10 @@ a.task-card--soon:hover {
   place-items: center;
   flex: none;
 }
-.bell::after {
+/* Точка «есть новые» — только когда шапке сказали, что они есть:
+   раньше она рисовалась всегда, и колокольчик без уведомлений
+   обещал то, чего нет. */
+.bell.is-unread::after {
   content: '';
   position: absolute;
   top: 8px;
@@ -1262,7 +1265,7 @@ a.task-card--soon:hover {
   width: 28px;
   height: 28px;
 }
-.bell--sm::after {
+.bell--sm.is-unread::after {
   top: 5px;
   right: 5px;
   width: 6px;

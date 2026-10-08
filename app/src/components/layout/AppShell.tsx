@@ -16,7 +16,6 @@ import {
   topNav,
 } from '@/content/appNav';
 import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
-import { demoUser } from '@/data/demo';
 
 import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
@@ -102,7 +101,9 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
-          user={demoUser}
+          /* Аккаунтов и уведомлений в проекте нет: без имени в шапке
+             и без точки «есть новые» на колокольчике. */
+          unread={false}
         />
         {children}
       </div>

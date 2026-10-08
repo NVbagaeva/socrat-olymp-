@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { landing } from '@/content/landing';
 
 const { cta } = landing;
@@ -25,9 +26,9 @@ export function CtaSection() {
         <h2 id="cta-title">{cta.title}</h2>
         <p>{cta.lead}</p>
         <div className="cta__actions">
-          <a className="btn btn--primary btn--lg" href={cta.primaryAction.href}>
+          <Link className="btn btn--primary btn--lg" href={cta.primaryAction.href}>
             {cta.primaryAction.label}
-          </a>
+          </Link>
           <a className="btn btn--secondary btn--lg" href={cta.secondaryAction.href}>
             {cta.secondaryAction.label}
           </a>

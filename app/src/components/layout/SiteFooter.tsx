@@ -11,13 +11,16 @@ export function SiteFooter({ className }: SiteFooterProps) {
     <footer className={clsx('site-foot', className)}>
       <div className="wrap site-foot__in">
         <span>{site.footer.copyright}</span>
-        <nav className="site-foot__links" aria-label="Правовая информация">
-          {site.footer.links.map((link) => (
-            <a key={link.label} href={link.href}>
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        {/* Правовых страниц пока нет: пустой список ссылок не рисуется. */}
+        {site.footer.links.length > 0 ? (
+          <nav className="site-foot__links" aria-label="Правовая информация">
+            {site.footer.links.map((link) => (
+              <a key={link.label} href={link.href}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
       </div>
     </footer>
   );

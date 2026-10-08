@@ -74,11 +74,19 @@ export function Topbar({
       {/* Колокольчик: ссылка, когда страница уведомлений есть, и кнопка,
           когда её нет, — чтобы не обещать переход в никуда. */}
       {notificationsHref !== undefined ? (
-        <a className="bell" href={notificationsHref} aria-label={bellLabel}>
+        <a
+          className={clsx('bell', unread && 'is-unread')}
+          href={notificationsHref}
+          aria-label={bellLabel}
+        >
           <NavIcon name="notifications" />
         </a>
       ) : (
-        <button type="button" className="bell" aria-label={bellLabel}>
+        <button
+          type="button"
+          className={clsx('bell', unread && 'is-unread')}
+          aria-label={bellLabel}
+        >
           <span className="bell__ico" aria-hidden="true" />
         </button>
       )}
@@ -92,9 +100,7 @@ export function Topbar({
               подписью к аватару. */}
           <span className="topbar__who">
             <span className="topbar__name">{user.name}</span>
-            {user.role !== undefined ? (
-              <span className="topbar__role">{user.role}</span>
-            ) : null}
+            {user.role !== undefined ? <span className="topbar__role">{user.role}</span> : null}
           </span>
         </span>
       ) : null}

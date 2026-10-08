@@ -1,4 +1,6 @@
 import { assetUrl } from '@/lib/assetUrl';
+import { href } from '@/lib/paths';
+import { tutorsExampleBase } from '@/content/tasks';
 
 /**
  * Тексты страницы «Об авторе». Отдельно от лендинга: разметка страницы
@@ -189,7 +191,8 @@ export const about = {
   cta: {
     title: 'Пусть время учителя остаётся для главного',
     lead: 'Создайте первый вариант за несколько секунд.',
-    primaryAction: { label: 'Создать вариант →', href: '#' },
+    /* Генератор живёт внутри раздела задания; ссылка — в задание-пример. */
+    primaryAction: { label: 'Создать вариант →', href: href(tutorsExampleBase, 'generator') },
     secondaryAction: { label: 'Перейти в банк заданий', href: '/#bank' },
   },
 } as const;
