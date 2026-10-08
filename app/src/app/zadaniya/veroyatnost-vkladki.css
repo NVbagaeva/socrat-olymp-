@@ -491,6 +491,14 @@
 .vtr-karta .mikon {
   --mikon-size: 64px;
 }
+/* Объёмная иллюстрация метода вместо значка (MetodKartinka): место
+   задано заранее, вёрстка не прыгает, пока картинка грузится. */
+.vtr-karta .metod-kartinka {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
 .vtr-karta__title {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
@@ -970,6 +978,10 @@
   }
   .vtr-karta .mikon {
     --mikon-size: 48px;
+  }
+  .vtr-karta .metod-kartinka {
+    width: 72px;
+    height: 72px;
   }
   .vtr-progress__metody {
     grid-template-columns: minmax(0, 1fr);
