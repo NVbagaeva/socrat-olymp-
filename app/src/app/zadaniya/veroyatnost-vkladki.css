@@ -1,0 +1,1492 @@
+/* Задания №4 и №5 — вкладки по макетам docs/mockups/veroyatnost-4:
+   «Опорные задачи» (дорожка блоков), «Тренажёр» (карточки методов,
+   плитки режима, закреплённая сводка), «Генератор» (сюжеты по методам)
+   и страница «Для репетиторов». Значки методов — один слой на все
+   вкладки. Значения — только токены. */
+
+/* ── Значок метода ───────────────────────────────────────────────── */
+
+/* Линейный значок на светлом кружке. Цвет кружка — по заданию: у №4
+   синяя гамма, у №5 фиолетовая (токены --color-metod-N). Размер
+   задаёт место: 28 в строках сводки, 48 на карточках, 72 на дорожке. */
+.mikon {
+  --mikon-size: 48px;
+  --mikon-color: var(--color-metod-4);
+  --mikon-soft: var(--color-metod-4-soft);
+  --mikon-border: var(--color-metod-4-border);
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--mikon-size);
+  height: var(--mikon-size);
+  border: 1px solid var(--mikon-border);
+  border-radius: var(--radius-pill);
+  background: var(--mikon-soft);
+  color: var(--mikon-color);
+}
+.mikon--5 {
+  --mikon-color: var(--color-metod-5);
+  --mikon-soft: var(--color-metod-5-soft);
+  --mikon-border: var(--color-metod-5-border);
+}
+.mikon--sm {
+  --mikon-size: 28px;
+}
+.mikon--lg {
+  --mikon-size: 72px;
+}
+.mikon svg {
+  width: 54%;
+  height: 54%;
+}
+.mikon--sm svg {
+  width: 64%;
+  height: 64%;
+}
+
+/* ── Опорные задачи: шапка дорожки ───────────────────────────────── */
+
+/* Шапка по макету: заголовок с подписью слева, счёт «12 из 30 задач»
+   с полосой и процентом справа. У списка №5 шапка остаётся прежней:
+   строка счёта под подписью, без процента. */
+.prep__head-text,
+.prep__head-schet {
+  display: grid;
+  gap: var(--space-2);
+}
+.prep__meter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.prep__meter-row .prep__meter {
+  flex: 1 1 auto;
+}
+.prep__percent {
+  display: none;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.prep--dorozhka .prep__percent {
+  display: block;
+}
+.prep--dorozhka .prep__counter {
+  margin-top: 0;
+}
+@media (min-width: 1024px) {
+  .prep--dorozhka .prep__head {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: end;
+    gap: var(--space-6);
+  }
+  .prep--dorozhka .prep__head-schet {
+    justify-items: start;
+  }
+}
+
+/* ── Опорные задачи: дорожка блоков ──────────────────────────────── */
+
+.vop {
+  display: grid;
+  gap: var(--space-5);
+}
+.vop__shagi {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vop__shag {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+/* Кружок шага и линия к следующему. Линия тянется до низа карточки:
+   кружок занимает всю высоту строки сетки. */
+.vop__kruzhok {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 100%;
+}
+.vop__nomer {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.vop__shag--tekushchiy .vop__nomer {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.vop__shag--vperedi .vop__nomer {
+  border-color: var(--color-border);
+  color: var(--color-text-tertiary);
+}
+.vop__galka {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.vop__galka svg {
+  width: 16px;
+  height: 16px;
+}
+.vop__tochka {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+.vop__shag--vperedi .vop__tochka {
+  background: var(--color-border-strong);
+}
+.vop__liniya {
+  width: 2px;
+  flex: 1 1 auto;
+  min-height: var(--space-4);
+  justify-self: center;
+  align-self: stretch;
+  height: 100%;
+  background: var(--color-border-info);
+}
+/* Линия занимает остаток высоты: кружок растянут на всю строку. */
+.vop__kruzhok {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+/* Карточка блока: слева значок, текст и полоса с кнопкой, справа
+   превью первой задачи на голубой подложке. */
+.vop-blok {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.vop__shag--tekushchiy .vop-blok {
+  border: 2px solid var(--color-primary);
+  padding: calc(var(--space-4) - 1px);
+}
+.vop__shag--vperedi .vop-blok {
+  box-shadow: none;
+}
+.vop__shag--vperedi .vop-blok__title,
+.vop__shag--vperedi .vop-blok__lead,
+.vop__shag--vperedi .vop-blok__uslovie {
+  color: var(--color-text-tertiary);
+}
+.vop__shag--vperedi .mikon {
+  --mikon-color: var(--color-text-tertiary);
+  --mikon-soft: var(--color-surface-2);
+  --mikon-border: var(--color-border);
+}
+.vop__shag--vperedi .vop-blok__kartinka {
+  opacity: 0.7;
+}
+.vop-blok__zdes {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  right: var(--space-5);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+}
+.vop-blok__osnova {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  min-width: 0;
+}
+.vop-blok__ikonka {
+  --mikon-size: 96px;
+}
+.vop-blok__text {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.vop-blok__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vop-blok__lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vop-blok__niz {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+.vop-blok__meter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.vop-blok__meter .pbar {
+  flex: 1 1 auto;
+}
+.vop-blok__schet {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.vop-blok__proydeno {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.vop-blok__knopka {
+  flex: none;
+}
+
+/* Превью: условие первой задачи и объёмная картинка справа. */
+.vop-blok__preview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.vop-blok__uslovie {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+  /* Превью, а не вся задача: длинное условие обрезается многоточием. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+.vop-blok__kartinka {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 132px;
+  object-fit: contain;
+}
+
+/* Подсказка внизу: лампочка, две строки и кнопка в тренажёр. */
+.vop__podskazka {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+}
+.vop__lampa {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.vop__lampa svg {
+  width: 36px;
+  height: 36px;
+}
+.vop__podskazka-text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.vop__podskazka-title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vop__podskazka-lead {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 1023.98px) {
+  .vop-blok {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767.98px) {
+  .vop__shag {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .vop__nomer {
+    width: 36px;
+    height: 36px;
+    font-size: var(--fs-body);
+  }
+  .vop__galka {
+    width: 22px;
+    height: 22px;
+  }
+  .vop-blok__ikonka {
+    --mikon-size: 56px;
+  }
+  .vop-blok__niz {
+    flex-wrap: wrap;
+  }
+  .vop-blok__knopka {
+    width: 100%;
+  }
+  .vop-blok__preview {
+    grid-template-columns: minmax(0, 1fr) 88px;
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+  .vop-blok__zdes {
+    right: var(--space-3);
+  }
+  .vop__podskazka {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+  .vop__podskazka-knopka {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .vop__lampa {
+    width: 48px;
+    height: 48px;
+  }
+  .vop__lampa svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ── Тренажёр: конфигуратор по макету ────────────────────────────── */
+
+/* Раскладка и сводка берутся у общего конфигуратора (.cfg__layout,
+   .cfg-summary в configurator.css): две колонки от 1024, сводка липнет
+   под лентой. Здесь — то, чего у общего нет. */
+.vtr-step {
+  gap: var(--space-4);
+}
+/* Шаги 2 и 3 — в ряд на широком экране. */
+.vtr-dva {
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 1024px) {
+  .vtr-dva {
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* Карточки методов: значок, название, «в банке», кружок доли верных. */
+.vtr-karty {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.vtr-karta {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.vtr-karta:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.vtr-karta:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vtr-karta.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.vtr-karta__check {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.vtr-karta__check svg {
+  width: 14px;
+  height: 14px;
+}
+.vtr-karta .mikon {
+  --mikon-size: 64px;
+}
+.vtr-karta__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-text-brand);
+  hyphens: auto;
+}
+.vtr-karta__count {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.vtr-karta__dolya {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.vtr-karta__ring {
+  width: 18px;
+  height: 18px;
+}
+.vtr-karta__ring-track,
+.vtr-karta__ring-fill {
+  fill: none;
+  stroke-width: 3;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+.vtr-karta__ring-track {
+  stroke: var(--color-track);
+}
+.vtr-karta__ring-fill {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+}
+/* Плитка «Выбрать все»: пунктирная рамка и плюс в кружке. */
+.vtr-karta--vse {
+  border-style: dashed;
+  justify-content: center;
+  align-content: center;
+}
+.vtr-karta__plus {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Плитки режима. */
+.vtr-rezhimy {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.vtr-rezhim {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.vtr-rezhim:hover:not(:disabled) {
+  border-color: var(--color-accent-soft);
+}
+.vtr-rezhim:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vtr-rezhim.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.vtr-rezhim:disabled {
+  cursor: default;
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.vtr-rezhim__check {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.vtr-rezhim__check svg {
+  width: 12px;
+  height: 12px;
+}
+.vtr-rezhim__ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-primary);
+}
+.vtr-rezhim:disabled .vtr-rezhim__ico {
+  color: var(--color-text-tertiary);
+}
+.vtr-rezhim__ico svg {
+  width: 26px;
+  height: 26px;
+}
+.vtr-rezhim__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vtr-rezhim:disabled .vtr-rezhim__title {
+  color: var(--color-text-secondary);
+}
+.vtr-rezhim__lead {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+/* Красный счётчик ошибок в углу плитки. */
+.vtr-rezhim__schet {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* У выбранной плитки повтора галочка важнее счётчика. */
+.vtr-rezhim.is-checked .vtr-rezhim__schet {
+  display: none;
+}
+.vtr-rezhim__novoe {
+  position: absolute;
+  top: calc(-1 * var(--space-2));
+  right: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+}
+
+/* Сводка. */
+.vtr-svodka {
+  gap: var(--space-2);
+  justify-items: stretch;
+}
+.vtr-svodka__label {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vtr-svodka__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vtr-svodka__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.vtr-svodka__row--plashka {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.vtr-svodka__ico {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.vtr-svodka__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.vtr-svodka__name {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-brand);
+}
+.vtr-svodka__name b {
+  font-weight: 600;
+}
+.vtr-svodka__name small {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.vtr-svodka__x {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+}
+.vtr-svodka__x:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.vtr-svodka__x:focus-visible {
+  outline: 2px solid var(--color-primary);
+}
+.vtr-svodka__x svg {
+  width: 14px;
+  height: 14px;
+}
+.vtr-svodka__start {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.vtr-svodka__minut {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Переключатель «Показывать подсказки»: подпись слева, тумблер справа. */
+.vtr-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  cursor: pointer;
+}
+.vtr-toggle__label {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.vtr-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.vtr-toggle__track {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+  transition: background var(--dur-switch) var(--ease);
+}
+.vtr-toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-switch) var(--ease);
+}
+.vtr-toggle input:checked + .vtr-toggle__track {
+  background: var(--color-primary);
+}
+.vtr-toggle input:checked + .vtr-toggle__track::after {
+  transform: translateX(20px);
+}
+.vtr-toggle input:focus-visible + .vtr-toggle__track {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Панель запуска снизу — только на узком экране, где сводка под шагами. */
+.vtr-bar {
+  display: none;
+}
+
+/* Подпись группы чипов повторяет заголовок шага — остаётся только озвучке. */
+.vtr-skolko > .cfg-param > .cfg-param__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.vtr-skolko > .cfg-param {
+  position: relative;
+}
+
+/* Прогресс по методам. */
+.vtr-progress {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.vtr-progress__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.vtr-progress__text {
+  display: grid;
+  gap: var(--space-1);
+}
+.vtr-progress__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vtr-progress__lead,
+.vtr-progress__empty {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vtr-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+.vtr-switch__btn {
+  padding: var(--space-1) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.vtr-switch__btn.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.vtr-switch__btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vtr-progress__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+.vtr-progress__ring {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+.vtr-progress__metody {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vtr-progress__metod {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(80px, 0.8fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vtr-progress__name {
+  color: var(--color-text-secondary);
+}
+.vtr-progress__count {
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.vtr-progress__count b {
+  color: var(--color-text-brand);
+}
+
+@media (max-width: 1023.98px) {
+  .vtr-karty {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .vtr-rezhimy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Сводка под шагами не липнет; запуск — липкой панелью снизу. */
+  .vtr-svodka .vtr-svodka__start,
+  .vtr-svodka .vtr-svodka__minut {
+    display: none;
+  }
+  .vtr-bar {
+    display: grid;
+  }
+  .vtr-progress__body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+  .vtr-progress__metody {
+    width: 100%;
+  }
+}
+@media (max-width: 767.98px) {
+  .vtr-karty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vtr-karta {
+    padding: var(--space-4) var(--space-2) var(--space-3);
+  }
+  .vtr-karta .mikon {
+    --mikon-size: 48px;
+  }
+  .vtr-progress__metody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vtr-progress__metod {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .vtr-progress__bar {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Генератор: сюжеты по методам ────────────────────────────────── */
+
+/* Вид работы и дата — в одной строке на широком экране. */
+.vgen-vid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .vgen-vid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .vgen-vid__data {
+    padding-left: var(--space-5);
+    border-left: 1px solid var(--color-border);
+  }
+}
+
+/* Шаг 2: список методов слева, сюжеты открытого метода справа. */
+.vgen-vybor {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 768px) {
+  .vgen-vybor {
+    grid-template-columns: 260px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.vgen-metody {
+  display: grid;
+  gap: var(--space-2);
+}
+.vgen-metod {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.vgen-metod:hover {
+  border-color: var(--color-accent-soft);
+}
+.vgen-metod:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vgen-metod.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-soft);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.vgen-metod .mikon {
+  --mikon-size: 36px;
+}
+.vgen-metod__name {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.vgen-metod__schet {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.vgen-metod.has-chosen .vgen-metod__schet {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.vgen-syuzhety {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.vgen-syuzhety__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.vgen-syuzhety__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vgen-syuzhety__links {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vgen-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.vgen-link:hover {
+  text-decoration: underline;
+}
+.vgen-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Карточки сюжетов: картинка, название, код, чекбокс в углу. */
+.vgen-karty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.vgen-karta {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.vgen-karta:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.vgen-karta:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vgen-karta.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.vgen-karta__box {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-inverse);
+}
+.vgen-karta__box.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+.vgen-karta__box svg {
+  width: 13px;
+  height: 13px;
+}
+.vgen-karta__pic {
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 100%;
+  height: 104px;
+  margin-bottom: var(--space-1);
+}
+.vgen-karta__pic img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.vgen-karta__title {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.vgen-karta__code {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Шаг 3: четыре группы в ряд. */
+.vgen-params {
+  display: grid;
+  gap: var(--space-4);
+}
+/* На широком экране группы идут в ряд, каждая своей ширины: чипы не
+   переносятся, при нехватке места на вторую строку уходит вся группа. */
+@media (min-width: 1024px) {
+  .vgen-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-6);
+  }
+  .vgen-params > * + * {
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--color-border);
+  }
+  .vgen-params .cfg-param__options {
+    flex-wrap: nowrap;
+  }
+}
+/* Панель листов снизу — только на узком экране. */
+.vgen-bar {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .vgen-bar {
+    display: grid;
+  }
+}
+
+/* Сводка. */
+.vgen-svodka {
+  gap: var(--space-2);
+  justify-items: stretch;
+}
+.vgen-svodka__vid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.vgen-svodka__ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.vgen-svodka__ico svg {
+  width: 20px;
+  height: 20px;
+}
+.vgen-svodka__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-brand);
+}
+.vgen-svodka__text b {
+  font-weight: 600;
+}
+.vgen-svodka__text small {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  color: var(--color-text-secondary);
+}
+.vgen-svodka__edit,
+.vgen-svodka__x {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.vgen-svodka__x {
+  color: var(--color-text-tertiary);
+}
+.vgen-svodka__edit:hover,
+.vgen-svodka__x:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.vgen-svodka__edit:focus-visible,
+.vgen-svodka__x:focus-visible {
+  outline: 2px solid var(--color-primary);
+}
+.vgen-svodka__edit svg,
+.vgen-svodka__x svg {
+  width: 16px;
+  height: 16px;
+}
+.vgen-svodka__label {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.vgen-svodka__pusto {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.vgen-svodka__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vgen-svodka__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.vgen-svodka__name {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-brand);
+}
+.vgen-svodka__itogo {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vgen-svodka__list-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+.vgen-svodka__list-btn:first-of-type {
+  margin-top: var(--space-2);
+}
+.vgen-svodka__list-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.vgen-svodka__list-btn.is-disabled,
+.vgen-svodka__preview.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.vgen-svodka__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.vgen-svodka__preview svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 1023.98px) {
+  .vgen-karty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767.98px) {
+  /* Методы — лентой вбок, как чипы блоков в опорных задачах. */
+  .vgen-metody {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: var(--space-1);
+  }
+  .vgen-metody::-webkit-scrollbar {
+    display: none;
+  }
+  .vgen-metod {
+    flex: 0 0 auto;
+    grid-template-columns: auto auto;
+    max-width: 240px;
+  }
+  .vgen-metod__name {
+    white-space: nowrap;
+  }
+  .vgen-metod__schet {
+    grid-column: 2;
+  }
+  .vgen-karta__pic {
+    height: 80px;
+  }
+}
+
+/* ── «О задании» №5 ──────────────────────────────────────────────── */
+
+.z5-about__text + .z5-about__text {
+  margin-top: var(--space-3);
+}
+/* Десять методов списком со значками: в две колонки, на телефоне в одну. */
+.z5-metody {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z5-metody__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+@media (max-width: 767.98px) {
+  .z5-metody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── «Для репетиторов» ───────────────────────────────────────────── */
+
+.vrep {
+  display: grid;
+  gap: var(--space-4);
+}
+.vrep__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.vrep__head .vtab__title {
+  margin-bottom: 0;
+}
+.vrep__lead {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-secondary);
+}
+.vrep__title {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vrep__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .vrep__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.vrep__list .tutor-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+.vrep__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}

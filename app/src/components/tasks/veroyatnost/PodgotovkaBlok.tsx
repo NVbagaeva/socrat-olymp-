@@ -122,10 +122,13 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
 
       <p className="ptask__counter">{PODGOTOVKA_SLOVA.schet(index + 1, zadachi.length)}</p>
 
+      {/* В кружках — место задачи в блоке, а не номер конспекта: блок
+          добран вариантами прототипов, и номера конспекта шли бы с
+          разрывом (11–15, потом 19–23). */}
       <PrepDots
         items={zadachi.map((item, i) => ({
           id: item.id,
-          no: item.nomer,
+          no: i + 1,
           state: sostoyaniya[i] ?? null,
         }))}
         current={index}

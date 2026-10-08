@@ -1,17 +1,21 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { Repetitory45 } from '@/components/tasks/veroyatnost/Repetitory45';
 import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
-import Teoriya5Tab from '../page';
+
+const TUTORS = veroyatnostBySlug('5')?.tutors;
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', veroyatnostBySlug('5')?.tutors?.title ?? 'Для репетиторов'),
+  title: veroyatnostTitle('5', TUTORS?.title ?? 'Для репетиторов'),
 };
 
 /**
- * Прямой заход на материалы для репетиторов задания №5 — как у №12:
- * та же страница раздела, меню материалов раскрыто сразу
- * (VeroyatnostTabs смотрит на адрес). Содержимое — первая вкладка,
- * «Теория».
+ * Вкладка «Для репетиторов» задания №5: страница с карточками
+ * материалов для скачивания — вместо прежнего выпадающего меню в ленте.
  */
 export default function Repetitoram5Page() {
-  return <Teoriya5Tab />;
+  if (TUTORS === undefined) {
+    notFound();
+  }
+  return <Repetitory45 tutors={TUTORS} />;
 }

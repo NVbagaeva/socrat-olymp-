@@ -1,27 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import type { SkillItem } from '@/components/tasks/configurator';
-import {
-  TrainerConfigurator,
-  type ConfiguratorPreset,
-  type TrainerModeOption,
-  type TrainerRequest,
-} from '@/components/tasks/trainer';
-import {
-  KONFIGURATOR_SLOVA,
-  REZHIMY,
-  trenazherSlova,
-  uznaySlova,
-  type Rezhim,
-  type Zadanie,
-} from '@/content/veroyatnost';
+import { REZHIMY, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import type { RoundKind } from '@/lib/veroyatnost/useRound';
 import { navykKind, navykiZadaniya, seychas, zadachaId } from './metody';
-import { ProgressMetody } from './ProgressMetody';
+import type { MetodKarta } from './navyki';
+import { ProgressPoMetodam } from './ProgressPoMetodam';
 import { Sessiya, type SessiyaPlan } from './Sessiya';
+import {
+  TrenazherKonfigurator,
+  type RezhimPlitka,
+  type TrenazherPreset,
+  type TrenazherZapros,
+} from './TrenazherKonfigurator';
 
 export interface TrenazherProps {
   pool: Pool;
@@ -31,24 +24,21 @@ export interface TrenazherProps {
   zadanie: Zadanie;
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
   base: string;
-  /** Название темы: в подзаголовке, бейдже и сводке. */
-  family: string;
   /** Карточки методов, собранные на сервере (navyki.tsx). */
-  skills: SkillItem[];
+  metody: MetodKarta[];
   /** Что выбрано при заходе по ярлыку адреса. */
-  preset?: ConfiguratorPreset<Rezhim> | null;
+  preset?: TrenazherPreset | null;
 }
 
 /**
- * Тренажёр заданий №4 и №5 — раздел 07 референса на конфигураторе
- * задания №12.
+ * Тренажёр заданий №4 и №5 — по макету trenazher.png.
  *
- * Конфигуратор тот же, что у №12 (TrainerConfigurator): метод вместо
- * навыка, четыре режима — «Отработка» (один метод), «Смешанная» (все
- * методы, названия метода в шапке карточки нет), «Повтор ошибок»
- * (задачи, где ответ не сошёлся или было открыто решение) и «Узнай
- * метод» (только условие и кнопки методов, считать не нужно), —
- * и количество задач. Уровней сложности у задач вероятности нет.
+ * Конфигуратор свой (TrenazherKonfigurator): карточки методов со
+ * значками, четыре режима — «Отработка» (выбранные методы),
+ * «Вперемешку» (все методы, названия метода в шапке карточки нет),
+ * «Повтор ошибок» (задачи, где ответ не сошёлся или было открыто
+ * решение) и «Узнай метод» (только условие и кнопки методов), —
+ * количество задач и переключатель подсказок.
  *
  * «Начать тренировку» собирает подход из банка тут же, в браузере, и
  * экран задачи (Sessiya) встаёт на место конфигуратора. Прогресс
@@ -72,24 +62,19 @@ const UZNAY_STORES: Record<Zadanie, ProgressStore> = {
   5: createProgressStore('budetege:veroyatnost-5-uznay:v2'),
 };
 
+/* Пока статистики нет, задача считается за полторы минуты: столько
+   в среднем уходит на задачу №4 с проверкой ответа. */
+const SEKUND_NA_ZADACHU = 90;
+
 function vsegoVariantov(kinds: readonly { variants: readonly unknown[] }[]): number {
   return kinds.reduce((sum, kind) => sum + kind.variants.length, 0);
 }
 
-export function Trenazher({
-  pool,
-  uznay,
-  zadanie,
-  base,
-  family,
-  skills,
-  preset = null,
-}: TrenazherProps) {
+export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }: TrenazherProps) {
   const store = STORES[zadanie];
   const uznayStore = UZNAY_STORES[zadanie];
   const progress = store.useProgress();
-  const slova = trenazherSlova(zadanie);
-  const metody = navykiZadaniya(zadanie);
+  const spisokMetodov = navykiZadaniya(zadanie);
   const [plan, setPlan] = useState<SessiyaPlan | null>(null);
 
   /* Ошибки — только те, что есть в банке: прототип могли переименовать. */
@@ -103,8 +88,8 @@ export function Trenazher({
     }))
     .filter((kind) => kind.variants.length > 0);
 
-  /* «Все» в режиме на всё задание — сколько задач в нём на самом деле. */
-  const modes: TrainerModeOption<Rezhim>[] = REZHIMY.map((item) => {
+  /* Сколько задач в каждом режиме на самом деле. */
+  const rezhimy: RezhimPlitka[] = REZHIMY.map((item) => {
     switch (item.id) {
       case 'mixed':
         return { ...item, total: vsegoVariantov(pool.kinds) };
@@ -117,11 +102,16 @@ export function Trenazher({
       case 'uznay':
         return { ...item, total: vsegoVariantov(uznay.kinds) };
       default:
-        return item;
+        return { ...item, total: vsegoVariantov(pool.kinds) };
     }
   });
 
-  function istochnik(rezhim: Rezhim, metody: string[]): RoundKind[] {
+  /* Средняя длительность закрытой задачи — по хранилищу тренажёра. */
+  const zakryto = Object.values(progress.kinds).reduce((sum, t) => sum + t.done, 0);
+  const sekund = Object.values(progress.kinds).reduce((sum, t) => sum + t.seconds, 0);
+  const sekundNaZadachu = zakryto >= 5 && sekund > 0 ? sekund / zakryto : SEKUND_NA_ZADACHU;
+
+  function istochnik(rezhim: Rezhim, vybrannye: string[]): RoundKind[] {
     switch (rezhim) {
       case 'mistakes':
         return oshibochnye;
@@ -132,25 +122,25 @@ export function Trenazher({
         }));
       default:
         return pool.kinds
-          .filter((kind) => rezhim === 'mixed' || metody.includes(navykKind(kind)))
+          .filter((kind) => rezhim === 'mixed' || vybrannye.includes(navykKind(kind)))
           .map((kind) => ({ id: kind.id, variants: kind.variants.map((v) => ({ n: v.n })) }));
     }
   }
 
-  function start(request: TrainerRequest<Rezhim>) {
-    const metod = request.skill.id;
-    const source = istochnik(request.mode, request.skills.map((item) => item.id));
+  function start(zapros: TrenazherZapros) {
+    const source = istochnik(zapros.rezhim, zapros.metody);
     if (source.length === 0) {
       return;
     }
     /* Ключ подхода новый на каждый запуск: подход не переиспользует
        прошлую раскладку. */
     setPlan({
-      key: `v${zadanie}:${request.mode}:${seychas()}`,
-      rezhim: request.mode,
-      metod,
+      key: `v${zadanie}:${zapros.rezhim}:${seychas()}`,
+      rezhim: zapros.rezhim,
+      metod: zapros.metody[0] ?? '',
       source,
-      size: request.count,
+      size: zapros.count,
+      podskazki: zapros.podskazki,
     });
   }
 
@@ -170,19 +160,21 @@ export function Trenazher({
   }
 
   return (
-    <TrainerConfigurator
-      family={family}
-      skills={skills}
-      modes={modes}
+    <TrenazherKonfigurator
+      zadanie={zadanie}
+      metody={metody}
+      rezhimy={rezhimy}
+      tally={progress.kinds}
       preset={preset}
-      levels={[]}
-      words={KONFIGURATOR_SLOVA}
+      sekundNaZadachu={sekundNaZadachu}
       onStart={start}
       stats={
-        <>
-          <ProgressMetody store={store} slova={slova.progress} metody={metody} />
-          <ProgressMetody store={uznayStore} slova={uznaySlova(zadanie).progress} metody={metody} />
-        </>
+        <ProgressPoMetodam
+          zadanie={zadanie}
+          store={store}
+          uznayStore={uznayStore}
+          metody={spisokMetodov}
+        />
       }
     />
   );

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { GeneratorScreen } from '@/components/tasks/generator/GeneratorScreen';
-import { navykiPrototipov } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { GeneratorSyuzhety } from '@/components/tasks/veroyatnost/GeneratorSyuzhety';
+import { navykiZadaniya } from '@/components/tasks/veroyatnost/metody';
+import { syuzhetyPrototipov } from '@/components/tasks/veroyatnost/navyki';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
@@ -10,24 +11,25 @@ export const metadata: Metadata = {
 };
 
 /**
- * Вкладка «Генератор» задания №5: вариант для печати.
+ * Вкладка «Генератор» задания №5: вариант для печати по макету.
  *
- * Экран — тот же GeneratorScreen, что у заданий №12 и №4, без правок.
- * Навыки — тринадцать прототипов банка №5: название, число вариантов
- * и миниатюра по модели первого варианта. Кнопки ведут на страницы
- * печати раздела: там лист собирается из тех же прототипов по
- * параметрам адреса.
+ * Сюжеты — прототипы банка, сгруппированные по методам автора.
+ * Картинок сюжетов у №5 пока нет: на карточках стоят значки
+ * методов.
+ * Кнопки ведут на страницы печати раздела: там лист собирается из тех
+ * же прототипов по параметрам адреса.
  */
 export default function Generator5Tab() {
   return (
     <>
-      {/* Название вкладки — H2 панели; у экрана генератора свой
-          заголовок ниже, общий с заданием №12. */}
+      {/* Название вкладки — H2 панели; у экрана генератора свой заголовок ниже. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'generator')}</h2>
-      <GeneratorScreen
+      <GeneratorSyuzhety
+        zadanie={5}
         base={`${ZADANIYA}/5`}
-        family={veroyatnostFamily('5')}
-        skills={navykiPrototipov(bank5Pool())}
+        metody={navykiZadaniya(5)}
+        syuzhety={syuzhetyPrototipov(bank5Pool())}
+        kartinki={{}}
       />
     </>
   );

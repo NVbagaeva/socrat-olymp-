@@ -2,7 +2,6 @@ import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
-import { TUTORS_TAIL } from '@/content/vkladki';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { RazdelTabs } from '../RazdelTabs';
 import { ZADANIYA } from '@/lib/paths';
@@ -38,7 +37,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
             { label: `№${Number(section.no)}` },
           ]}
           title={section.title}
-          badge={section.badge}
+          {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.lead}
           {...(section.art === undefined
             ? {}
@@ -59,12 +58,9 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
               })}
         />
 
-        <RazdelTabs
-          base={base}
-          tabs={section.tabs}
-          tutorsTail={TUTORS_TAIL}
-          {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
-        />
+        {/* «Для репетиторов» — обычная вкладка ленты со своей страницей,
+            меню материалов в ленте больше нет. */}
+        <RazdelTabs base={base} tabs={section.tabs} />
 
         <div className="section-panel veroyatnost-panel">{children}</div>
       </main>

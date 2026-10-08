@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
@@ -29,8 +29,7 @@ export default function Trenazher5Tab() {
         uznay={uznayMetodPool(5)}
         zadanie={5}
         base={`${ZADANIYA}/5/trenazher/`}
-        family={veroyatnostFamily('5')}
-        skills={navykiMetodov(pool, 5)}
+        metody={navykiMetodov(pool, 5)}
       />
     </>
   );

@@ -1,18 +1,21 @@
 import type { Metadata } from 'next';
-import { OZadanii4 } from '@/components/tasks/veroyatnost/OZadanii4';
+import { notFound } from 'next/navigation';
+import { Repetitory45 } from '@/components/tasks/veroyatnost/Repetitory45';
 import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
-import { ZADANIYA } from '@/lib/paths';
+
+const TUTORS = veroyatnostBySlug('4')?.tutors;
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('4', veroyatnostBySlug('4')?.tutors?.title ?? 'Для репетиторов'),
+  title: veroyatnostTitle('4', TUTORS?.title ?? 'Для репетиторов'),
 };
 
 /**
- * Прямой заход на материалы для репетиторов — как у задания №12:
- * та же страница раздела с той же лентой вкладок, только меню
- * материалов раскрыто сразу (VeroyatnostTabs смотрит на адрес).
- * Содержимое — первая вкладка, «О задании».
+ * Вкладка «Для репетиторов» задания №4: страница с карточками
+ * материалов для скачивания — вместо прежнего выпадающего меню в ленте.
  */
 export default function Repetitoram4Page() {
-  return <OZadanii4 base={`${ZADANIYA}/4`} />;
+  if (TUTORS === undefined) {
+    notFound();
+  }
+  return <Repetitory45 tutors={TUTORS} />;
 }

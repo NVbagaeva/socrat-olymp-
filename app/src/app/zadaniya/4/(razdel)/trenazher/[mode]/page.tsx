@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
@@ -41,8 +41,7 @@ export default async function Page({ params }: { params: Params }) {
         uznay={uznayMetodPool(4)}
         zadanie={4}
         base={`${ZADANIYA}/4/trenazher/`}
-        family={veroyatnostFamily('4')}
-        skills={navykiMetodov(pool, 4)}
+        metody={navykiMetodov(pool, 4)}
         preset={{ skill: found.skill, mode: found.mode }}
       />
     </>
