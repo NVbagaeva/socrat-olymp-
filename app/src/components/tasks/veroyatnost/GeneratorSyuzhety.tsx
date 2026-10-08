@@ -29,6 +29,7 @@ import { counted } from '@/lib/plural';
 import { randomSeed } from '@/lib/randomSeed';
 import { planCounts } from '@/lib/sheetPlan';
 import { MetodIkonka } from './MetodIkonka';
+import { MetodKartinka } from './MetodKartinka';
 import type { Navyk } from './metody';
 import type { Syuzhet } from './navyki';
 
@@ -46,6 +47,12 @@ export interface GeneratorSyuzhetyProps {
 
 /** Значение «своё название» в группе видов работы. */
 const CUSTOM = '';
+
+/**
+ * Список методов слева: у №5 — объёмные картинки методов, те же, что
+ * на карточках тренажёра; у №4 пока значки.
+ */
+const KARTINKI_V_SPISKE: Record<Zadanie, boolean> = { 4: false, 5: true };
 
 /** Карандаш: изменить дату. */
 function PencilIcon() {
@@ -303,7 +310,11 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
                       className={clsx('vgen-metod', aktiven && 'is-active', vMetode > 0 && 'has-chosen')}
                       onClick={() => setOtkryt(g.metod.id)}
                     >
-                      {metodIkonka(g.metod.id)}
+                      {KARTINKI_V_SPISKE[zadanie] ? (
+                        <MetodKartinka zadanie={zadanie} metod={g.metod.id} nazvanie={g.metod.nazvanie} />
+                      ) : (
+                        metodIkonka(g.metod.id)
+                      )}
                       <span className="vgen-metod__name">{g.metod.nazvanie}</span>
                       <span className="vgen-metod__schet">
                         {slova.zadachi.vybrano(vMetode, g.syuzhety.length)}

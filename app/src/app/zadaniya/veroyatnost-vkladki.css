@@ -1055,6 +1055,18 @@
 .vgen-metod .mikon {
   --mikon-size: 36px;
 }
+/* Объёмная иллюстрация метода (MetodKartinka, №5) — чуть крупнее
+   значка: у рисунка нет кружка-подложки, и в 36px он теряется.
+   max-width снят: общий предел «не шире родителя» давал картинке
+   ширину ноль в чипах на телефоне, где длинное название не
+   переносится и забирает всю строку. */
+.vgen-metod .metod-kartinka {
+  display: block;
+  width: 48px;
+  max-width: none;
+  height: 48px;
+  object-fit: contain;
+}
 .vgen-metod__name {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
@@ -1455,6 +1467,10 @@
   }
   .vgen-metod__name {
     white-space: nowrap;
+  }
+  .vgen-metod .metod-kartinka {
+    width: 40px;
+    height: 40px;
   }
   .vgen-metod__schet {
     grid-column: 2;
