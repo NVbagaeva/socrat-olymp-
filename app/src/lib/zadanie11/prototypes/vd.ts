@@ -13,6 +13,7 @@ import {
   key,
   kvadrat,
   num,
+  osh,
   slovo,
   str,
   vopros,
@@ -442,6 +443,7 @@ const VD05: Subtype = {
   title: 'Время по часам: вышел в 10:00, вернулся в 18:00',
   level: 2,
   keywords: ['катер', 'баржа', 'байдарка', 'лодка', 'вернулся в', 'того же дня'],
+  oshibki: ['stoyanka', 'ne-ta-velichina'],
   solve(p) {
     const form = str(p, 'form', ['kater', 'barzha', 'lodka', 'baidarka'] as const);
     const s = key(SUDNO, form);
@@ -450,7 +452,12 @@ const VD05: Subtype = {
     const st = num(p, 'st'); // минуты
     const t1 = num(p, 't1');
     const lead = form !== 'lodka';
-    const move = sub(sub(q(t1 * 60), q(t0 * 60)), q(st));
+    /* «Найди ошибку»: стоянка не вычтена или в ответ записана скорость по течению. */
+    const oshibka = osh(p);
+    const move =
+      oshibka === 'stoyanka'
+        ? sub(q(t1 * 60), q(t0 * 60))
+        : sub(sub(q(t1 * 60), q(t0 * 60)), q(st));
     const T = div(move, q(60));
     /* Типичная ошибка: «1 ч 30 мин» как 1,3 ч. */
     const naive = q(Math.floor(st / 60) * 100 + (st % 60), 100);
@@ -467,15 +474,22 @@ const VD05: Subtype = {
         ? `Определите ${form === 'kater' ? 'собственную скорость катера (в км/ч)' : '(в км/ч) собственную скорость байдарки'}, если известно, что скорость течения реки ${txt(num(p, 'c'))} км/ч.`
         : `Определите (в км/ч) скорость течения реки, если известно, что собственная скорость ${kogo} равна ${txt(num(p, 'v'))} км/ч.`;
     const uslovie = `${s.kto} в ${chasy(t0, lead)} ${s.vyshel}${s.potech ? ' по течению реки' : ''} из пункта А в пункт В, расположенный в ${txt(S)} км от А. Пробыв в пункте В ${vremya(st, true)}, ${s.probyv} назад и ${s.vernulsya} в пункт А в ${chasy(t1, lead)} того же дня. ${vopr}`;
-    const timeLines = [
-      `С ${chasy(t0, lead)} до ${chasy(t1, lead)} прошло $${d(t1 - t0)}$ ч, из них ${vremya(st)} — стоянка. В движении: $${d(t1 - t0)}-${fq(q(st, 60))}=${fq(T)}$ ч.`,
-    ];
+    const timeLines =
+      oshibka === 'stoyanka'
+        ? [
+            `С ${chasy(t0, lead)} до ${chasy(t1, lead)} прошло $${d(t1 - t0)}$ ч — это время в движении.`,
+          ]
+        : [
+            `С ${chasy(t0, lead)} до ${chasy(t1, lead)} прошло $${d(t1 - t0)}$ ч, из них ${vremya(st)} — стоянка. В движении: $${d(t1 - t0)}-${fq(q(st, 60))}=${fq(T)}$ ч.`,
+          ];
     if (s.ask === 'v') {
       const c = num(p, 'c');
       const r = sobstvennaya(S, c, T);
+      const potech = oshibka === 'ne-ta-velichina';
+      const ans = potech ? r.x + c : r.x;
       return {
         uslovie,
-        answer: r.x,
+        answer: ans,
         etapy: etapy(
           [
             'Обозначаем',
@@ -487,7 +501,14 @@ const VD05: Subtype = {
           ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$.`]],
           r.t.odz,
           r.t.reshenie,
-          ['Отбор корней и ответ', [...r.t.otbor, otvet(r.x)]],
+          [
+            'Отбор корней и ответ',
+            [
+              ...r.t.otbor,
+              ...(potech ? [`Скорость по течению: $x+${d(c)}=${d(ans)}$ км/ч.`] : []),
+              otvet(ans),
+            ],
+          ],
         ),
         tables: [tablitsaReki(d(S), 'x', d(c))],
         hints: [
@@ -509,9 +530,11 @@ const VD05: Subtype = {
     }
     const v = num(p, 'v');
     const r = techenie(S, v, T);
+    const potech = oshibka === 'ne-ta-velichina';
+    const ans = potech ? v + r.c : r.c;
     return {
       uslovie,
-      answer: r.c,
+      answer: ans,
       etapy: etapy(
         [
           'Обозначаем',
@@ -521,7 +544,14 @@ const VD05: Subtype = {
         ['Уравнение', [`$${tudaObratno(d(S), d(v), 'x')}=${fq(T)}$.`]],
         r.t.odz,
         r.t.reshenie,
-        ['Отбор корней и ответ', [...r.t.otbor, otvet(r.c)]],
+        [
+          'Отбор корней и ответ',
+          [
+            ...r.t.otbor,
+            ...(potech ? [`Скорость по течению: $${d(v)}+x=${d(ans)}$ км/ч.`] : []),
+            otvet(ans),
+          ],
+        ],
       ),
       tables: [tablitsaReki(d(S), d(v), 'x')],
       hints: [

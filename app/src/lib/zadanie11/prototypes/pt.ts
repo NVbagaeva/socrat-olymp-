@@ -6,7 +6,7 @@
  * системы отсчёта одного из поездов.
  */
 
-import { chtoSprashivayut, dvizhenie, etapy, num, slovo, str, vopros } from '../kit';
+import { chtoSprashivayut, dvizhenie, etapy, num, osh, slovo, str, vopros } from '../kit';
 import { d, div, fq, mul, q, sub, txt, val } from '../num';
 import { sk, zaglavnaya, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
@@ -72,14 +72,20 @@ const PT02: Subtype = {
   title: 'Два поезда навстречу',
   level: 1,
   keywords: ['скорый', 'пассажирский', 'навстречу', 'параллельным путям', 'длину поезда'],
+  oshibki: ['navstrechu', 'put-mimo'],
   solve(p) {
     const v1 = num(p, 'v1');
     const v2 = num(p, 'v2');
     const L = num(p, 'L');
     const t = num(p, 't');
-    const ms = q((v1 + v2) * 5, 18);
+    /* «Найди ошибку»: скорости вычли или путь «мимо» — одна длина. */
+    const oshibka = osh(p);
+    const vychli = oshibka === 'navstrechu';
+    const odnaDlina = oshibka === 'put-mimo';
+    const vs = vychli ? Math.abs(v1 - v2) : v1 + v2;
+    const ms = q(vs * 5, 18);
     const path = mul(ms, q(t));
-    const ans = val(sub(path, q(L)));
+    const ans = odnaDlina ? val(path) : val(sub(path, q(L)));
     /* Аналог: другие поезда (скоростной и пригородный, пассажирский и товарный). */
     const a = slovo(p, 'poezdA', 'скорый');
     const aRod = slovo(p, 'poezdARod', 'скорого');
@@ -91,7 +97,9 @@ const PT02: Subtype = {
         [
           'Скорость сближения',
           [
-            `Навстречу скорости складываются: $${d(v1)}+${d(v2)}=${d(v1 + v2)}$ км/ч $=${d(v1 + v2)}\\cdot\\dfrac{1000}{3600}=${fq(ms)}$ м/с.`,
+            vychli
+              ? `Скорости вычитаются: $${d(Math.max(v1, v2))}-${d(Math.min(v1, v2))}=${d(vs)}$ км/ч $=${d(vs)}\\cdot\\dfrac{1000}{3600}=${fq(ms)}$ м/с.`
+              : `Навстречу скорости складываются: $${d(v1)}+${d(v2)}=${d(vs)}$ км/ч $=${d(vs)}\\cdot\\dfrac{1000}{3600}=${fq(ms)}$ м/с.`,
           ],
         ],
         [
@@ -100,17 +108,24 @@ const PT02: Subtype = {
             `За $${d(t)}$ с поезда сместились друг относительно друга на $${fq(ms)}\\cdot${d(t)}=${fq(path)}$ м.`,
           ],
         ],
-        ['Уравнение', ['Этот путь — сумма длин поездов: $x+' + d(L) + '=' + fq(path) + '$.']],
+        odnaDlina
+          ? ['Уравнение', [`Этот путь — длина ${aRod} поезда: $x=${fq(path)}$.`]]
+          : ['Уравнение', ['Этот путь — сумма длин поездов: $x+' + d(L) + '=' + fq(path) + '$.']],
         [
           'Ответ на вопрос задачи',
-          [`$x=${fq(path)}-${d(L)}=${d(ans)}$ м — длина ${aRod} поезда.`, otvet(ans)],
+          [
+            odnaDlina
+              ? `$x=${d(ans)}$ м — длина ${aRod} поезда.`
+              : `$x=${fq(path)}-${d(L)}=${d(ans)}$ м — длина ${aRod} поезда.`,
+            otvet(ans),
+          ],
         ],
       ),
       tables: [
         dvizhenie(
-          [[`${zaglavnaya(a)} относительно ${bRod}`, `x+${d(L)}`, fq(ms), d(t)]],
+          [[`${zaglavnaya(a)} относительно ${bRod}`, odnaDlina ? 'x' : `x+${d(L)}`, fq(ms), d(t)]],
           ['', '$S$, м', '$v$, м/с', '$t$, с'],
-          `Смотрим из ${bRod} поезда: скорости складываются`,
+          `Смотрим из ${bRod} поезда: скорости ${vychli ? 'вычитаются' : 'складываются'}`,
         ),
       ],
       hints: [

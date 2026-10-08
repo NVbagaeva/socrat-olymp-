@@ -9,7 +9,16 @@
  * и своя краткая запись.
  */
 
-import { chtoSprashivayut, etapy, key, num, slovo as slovoSyuzheta, str, vopros } from '../kit';
+import {
+  chtoSprashivayut,
+  etapy,
+  key,
+  num,
+  osh,
+  slovo as slovoSyuzheta,
+  str,
+  vopros,
+} from '../kit';
 import { d, isqrt, round9, txt, val, q, div } from '../num';
 import { blokStroka } from '../proporciya/bloki';
 import {
@@ -49,11 +58,14 @@ const PR01: Subtype = {
   title: 'Число по его проценту: налог, зарплата',
   level: 1,
   keywords: ['налог', 'зарплата', 'процент от числа'],
+  oshibki: ['procent-znak'],
   solve(p) {
     const nalog = num(p, 'p');
     const N = num(p, 'N');
     const who = key(KTO, str(p, 'kto', Object.keys(KTO)));
-    const ost = 100 - nalog;
+    /* «Найди ошибку»: удержание налога записано как прибавка. */
+    const znak = osh(p) === 'procent-znak' ? '+' : '-';
+    const ost = znak === '+' ? 100 + nalog : 100 - nalog;
     const x = round9((N * 100) / ost);
     const z = {
       stroki: [
@@ -64,7 +76,7 @@ const PR01: Subtype = {
       podpisi: ['проценты', 'рубли'] as [string, string],
       notes: ['зарплата', 'на руки'] as [string, string],
       prelyudiya: [
-        `$100\\%-${pct(nalog)}=${pct(ost)}$ — после удержания налога остаётся $${pct(ost)}$ зарплаты.`,
+        `$100\\%${znak}${pct(nalog)}=${pct(ost)}$ — после удержания налога остаётся $${pct(ost)}$ зарплаты.`,
       ],
       pervoe: true,
     };
@@ -80,11 +92,7 @@ const PR01: Subtype = {
         ...r.etapy,
         [
           'Ответ на вопрос задачи',
-          [
-            'Спрашивают зарплату до удержания налога — это и есть $x$.',
-            `Замечание: то же самое одним делением — $x=${d(N)}:${d(ost / 100)}=${d(x)}$.`,
-            otvet(x),
-          ],
+          ['Спрашивают зарплату до удержания налога — это и есть $x$.', otvet(x)],
         ],
       ),
       hints: [
@@ -328,12 +336,19 @@ const PR04: Subtype = {
   title: 'Рубашки и куртка: дешевле на p%, дороже на ?',
   level: 1,
   keywords: ['рубашки', 'куртка', 'дешевле', 'дороже'],
+  oshibki: ['procent-znak', 'ne-ta-velichina'],
   solve(p) {
     const n = num(p, 'n');
     const pp = num(p, 'p');
     const mm = num(p, 'm');
-    const many = val(div(q((100 - pp) * mm), q(n)));
-    const ans = round9(many - 100);
+    /* «Найди ошибку»: «дешевле на p %» записано как «дороже». */
+    const znak = osh(p) === 'procent-znak' ? '+' : '-';
+    const dolya = znak === '+' ? 100 + pp : 100 - pp;
+    const many = val(div(q(dolya * mm), q(n)));
+    /* «Найди ошибку»: в ответ записано, сколько процентов цены стоят
+       вещи, а не на сколько они дороже. */
+    const skolko = osh(p) === 'ne-ta-velichina';
+    const ans = skolko ? many : round9(many - 100);
     const first = zaglavnaya(
       shtuk(n, ['одинаковые', 'одинаковых'], ['рубашка', 'рубашки', 'рубашек']),
     );
@@ -343,14 +358,14 @@ const PR04: Subtype = {
     const second = shtuk(mm, ['таких же', 'таких же'], ['рубашка', 'рубашки', 'рубашек']);
     const z = {
       stroki: [
-        [100 - pp, n],
+        [dolya, n],
         [null, mm],
       ] as [[number, number], [null, number]],
       ed: 'шт.',
       podpisi: ['проценты', 'штуки'] as [string, string],
       notes: [`$${d(n)}$ ${slovo(n, RUB)}`, `$${d(mm)}$ ${slovo(mm, RUB)}`] as [string, string],
       prelyudiya: [
-        `$${d(n)}$ ${slovo(n, RUB)} ${n === 1 ? 'стоит' : 'стоят'} на $${pct(pp)}$ меньше: $100\\%-${pct(pp)}=${pct(100 - pp)}$ цены ${kurtki}.`,
+        `$${d(n)}$ ${slovo(n, RUB)} ${n === 1 ? 'стоит' : 'стоят'} на $${pct(pp)}$ меньше: $100\\%${znak}${pct(pp)}=${pct(dolya)}$ цены ${kurtki}.`,
       ],
       pochemu: `Величины прямо пропорциональны: во сколько раз больше штук, во столько раз больше процентов цены ${kurtki}. Поэтому отношения в столбцах равны — составляем пропорцию.`,
       pervoe: true,
@@ -368,7 +383,9 @@ const PR04: Subtype = {
         [
           'Ответ на вопрос задачи',
           [
-            `$${d(mm)}$ ${slovo(mm, RUB)} ${mm === 1 ? 'стоит' : 'стоят'} $${pct(many)}$ цены ${kurtki}: $${pct(many)}-100\\%=${pct(ans)}$ — на столько дороже.`,
+            skolko
+              ? `$${d(mm)}$ ${slovo(mm, RUB)} ${mm === 1 ? 'стоит' : 'стоят'} $${pct(many)}$ цены ${kurtki} — на столько дороже.`
+              : `$${d(mm)}$ ${slovo(mm, RUB)} ${mm === 1 ? 'стоит' : 'стоят'} $${pct(many)}$ цены ${kurtki}: $${pct(many)}-100\\%=${pct(ans)}$ — на столько дороже.`,
             otvet(ans),
           ],
         ],

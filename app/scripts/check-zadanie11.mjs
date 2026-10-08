@@ -150,6 +150,15 @@ for (const [word, id] of [
       );
     }
     for (const k of r.kartochki ?? []) texts.push(k.text);
+    /* Приёмы быстрого счёта: правило, пример, вопросы «попробуй сам». */
+    for (const pr of r.priemy ?? []) {
+      texts.push(pr.pravilo, ...pr.primer, ...pr.poprobuy.map((z) => z.q));
+      for (const z of pr.poprobuy) {
+        if (!/^\d+(,\d+)?$/.test(z.otvet)) {
+          problems.push({ where: `теория ${r.id}`, what: `ответ «${z.otvet}» не число` });
+        }
+      }
+    }
     for (const tex of [r.formula?.tex, ...(r.kartochki ?? []).map((k) => k.tex)]) {
       if (tex) texts.push(`$${tex}$`);
     }
@@ -432,7 +441,17 @@ const listy = { zadach: 0 };
   const { buildDocument } = await import('../src/lib/sheet/sheet.js');
   const bank = dannyeTrenazhera().bank;
   const add = (what) => problems.push({ where: 'листы', what });
-  const base = { variants: 1, seed: 's', zameny: {}, marshrut: 1, theme: 'color', sostav: [] };
+  const base = {
+    variants: 1,
+    seed: 's',
+    zameny: {},
+    marshrut: 1,
+    theme: 'color',
+    sostav: [],
+    bloki: ['zadachi'],
+    dz: 4,
+    mesto: false,
+  };
 
   /* Маршруты: все разделы покрыты, блоки и подтипы существуют. */
   const pokryty = new Set(MARSHRUTY_11.flatMap((m) => m.razdely));
@@ -512,9 +531,38 @@ const listy = { zadach: 0 };
       variants: 2,
       marshrut: m.no,
     })),
+    /* Рабочий лист к уроку: все блоки, порядок не по умолчанию, ДЗ из 3 задач. */
+    {
+      ...base,
+      rezhim: 'otrabotka',
+      istochnik: 'mix',
+      sostav: [
+        { id: 'SM-01', n: 2 },
+        { id: 'SM-04', n: 1 },
+        { id: 'SM-06', n: 1 },
+      ],
+      bloki: ['znat', 'razminka', 'primer', 'zadachi', 'oshibka', 'sam', 'dz'],
+      dz: 3,
+      mesto: true,
+    },
+    /* Варианты с рабочим листом: на позиции i во всех вариантах — один тип, и в ДЗ тоже. */
+    {
+      ...base,
+      rezhim: 'komplekt',
+      istochnik: 'bank',
+      variants: 2,
+      sostav: [
+        { id: 'DP-07', n: 1 },
+        { id: 'RB-01', n: 1 },
+      ],
+      bloki: ['primer', 'zadachi', 'oshibka', 'sam', 'dz'],
+      dz: 2,
+    },
   ];
   for (const p of sluchai) {
-    const where = `${p.rezhim}${p.rezhim === 'marshrut' ? ' ' + p.marshrut : ''}`;
+    const where = `${p.rezhim}${p.rezhim === 'marshrut' ? ' ' + p.marshrut : ''}${
+      p.bloki.length > 1 ? ' (рабочий лист)' : ''
+    }`;
     const q = L.sheetQuery11(p);
     const kanon = (o) => JSON.stringify(o, Object.keys(o).sort());
     const back = L.parseSheetQuery11(new URLSearchParams(q));
@@ -553,14 +601,191 @@ const listy = { zadach: 0 };
         add(`${where} ${z.pos}: нет ответа или решения`);
       if (/\$/.test(z.questionHtml + z.solutionHtml)) add(`${where} ${z.pos}: формула не набрана`);
     }
-    /* Лист ученика — без ответов и решений; учителя — с таблицей ответов. */
+    /* Лист ученика — без ответов и решений (решение — только у
+       разобранного примера); учителя — с таблицей ответов. */
     const uch = buildDocument(L.sheetSpec11(p, list, 'uchenik'), {});
     const uchit = buildDocument(L.sheetSpec11(p, list, 'uchitel'), {});
     buildDocument(L.sheetSpec11(p, list, 'vse'), {});
-    if (/sheet-task-answer|sheet-steps|z11-sheet-badge/.test(uch))
+    const primerov = list.poVariantam.flat().filter((z) => z.chast === 'primer').length;
+    if (/sheet-task-answer|z11-sheet-badge/.test(uch))
       add(`${where}: в листе ученика есть ответы или решения`);
+    if ((uch.match(/sheet-steps/g) ?? []).length !== primerov * 2)
+      add(`${where}: решения в листе ученика не только у разобранного примера`);
     if (!/sheet-task-answer/.test(uchit) || !/Ответы/.test(uchit))
       add(`${where}: в листе учителя нет ответов`);
+    /* Место для решения: у ученика — под каждой задачей, кроме опорных
+       микрозадач и примера; у учителя — нет. */
+    const poley = (uch.match(/z11-sheet-mesto(?![-\w])/g) ?? []).length;
+    const nuzhno = p.mesto
+      ? list.poVariantam
+          .flat()
+          .filter((z) => z.poz.vid !== 'mikro' && z.chast !== 'razminka' && z.chast !== 'primer')
+          .length
+      : 0;
+    if (poley !== nuzhno) add(`${where}: полей для решения ${poley}, а нужно ${nuzhno}`);
+    if (/z11-sheet-mesto/.test(uchit)) add(`${where}: поле для решения на листе учителя`);
+    /* Рабочий лист: блоки на листе в заданном порядке, ДЗ — своей
+       страницей и своей таблицей ответов, нумерация сквозная. */
+    if (p.bloki.length > 1) {
+      const zs = list.poVariantam[0];
+      const est = (ch) => zs.some((z) => z.chast === ch);
+      if (p.bloki.includes('znat') && list.znat.length === 0)
+        add(`${where}: нет «Что нужно знать»`);
+      for (const ch of ['razminka', 'primer', 'oshibka', 'sam', 'dz'])
+        if (p.bloki.includes(ch) && !est(ch)) add(`${where}: нет части «${ch}»`);
+      /* «Найди ошибку»: у задачи есть ошибка; ученику — решение ученика
+         с неверным ответом в строке «Ответ», без пометок; учителю — где
+         ошибка, ответ ученика и верный; в таблице ответов — «Шаг N; ответ». */
+      for (const z of list.poVariantam.flat().filter((x) => x.chast === 'oshibka')) {
+        if (!z.oshibka) add(`${where} ${z.pos}: «Найди ошибку» без ошибки`);
+        else {
+          if (!/^Шаг \d+; ответ /.test(z.answer))
+            add(`${where} ${z.pos}: ответ «${z.answer}» — не «Шаг N; ответ …»`);
+          if (!z.questionHtml.includes('z11-sheet-osh__steps') || !/Ответ:/.test(z.questionHtml))
+            add(`${where} ${z.pos}: у ученика нет решения с ошибкой или строки «Ответ»`);
+          if (/Ошибка|Верно/.test(z.questionHtml))
+            add(`${where} ${z.pos}: у ученика есть пометка, где ошибка`);
+          if (!z.solutionHtml.includes(z.oshibka.shag))
+            add(`${where} ${z.pos}: учителю не сказано, где ошибка`);
+        }
+      }
+      const dz = zs.filter((z) => z.chast === 'dz');
+      if (p.bloki.includes('dz') && dz.length !== p.dz) add(`${where}: в ДЗ ${dz.length} задач`);
+      if (dz.map((z) => z.no).join() !== dz.map((_, i) => i + 1).join())
+        add(`${where}: ДЗ нумеруется не с единицы`);
+      const osnovnye = zs.filter((z) => z.chast !== 'dz' && z.chast !== 'primer');
+      const nomera = osnovnye.map((z) => z.no).sort((a, b) => a - b);
+      if (nomera.join() !== nomera.map((_, i) => i + 1).join())
+        add(`${where}: номера на листе не сквозные (${nomera.join()})`);
+      const poryadok = p.bloki.filter((b) => b !== 'znat' && b !== 'primer' && b !== 'dz');
+      const vPoryadke = poryadok
+        .flatMap((b) => osnovnye.filter((z) => z.chast === b))
+        .map((z) => z.no);
+      if (vPoryadke.join() !== vPoryadke.map((_, i) => i + 1).join())
+        add(`${where}: номера не следуют порядку блоков`);
+      const nazvaniya = {
+        znat: 'Что нужно знать',
+        primer: 'Разобранный пример',
+        razminka: 'Разминка навыка',
+        oshibka: 'Найди ошибку',
+        sam: 'Попробуй сам',
+      };
+      for (const [b, t] of Object.entries(nazvaniya))
+        if (p.bloki.includes(b) && !uch.includes(t)) add(`${where}: на листе ученика нет «${t}»`);
+      const pozDz = uch.indexOf('Домашняя работа');
+      if (pozDz < 0 || !uch.slice(0, pozDz).includes('Попробуй сам'))
+        add(`${where}: домашняя работа не отдельной страницей после листа`);
+      if (!uchit.includes('Домашняя работа') || (uchit.match(/Домашняя работа/g) ?? []).length < 2)
+        add(`${where}: у учителя нет ДЗ с ответами`);
+      if (zs.some((z) => z.chast === 'primer' && z.poz.vid === 'mikro'))
+        add(`${where}: пример — микрозадача`);
+      /* Адрес без блоков — лист как раньше. */
+      const bezBlokov = L.parseSheetQuery11(new URLSearchParams('m=o&i=b&s=DP-07:2&seed=x'));
+      if (bezBlokov.bloki.join() !== 'zadachi' || bezBlokov.dz !== 4)
+        add('адрес без блоков читается не как «только задачи»');
+      const bezZadach = L.parseSheetQuery11(
+        new URLSearchParams('m=o&i=b&s=DP-07:2&seed=x&b=znat,xx,sam'),
+      );
+      if (bezZadach.bloki.join() !== 'znat,sam,zadachi')
+        add(`блоки из адреса читаются неверно: ${bezZadach.bloki.join()}`);
+    }
+  }
+  /* «Найди ошибку»: каждый раздел покрыт — есть подтип с ошибками; у
+     каждой ошибки подтипа есть запись в словаре. На задачах варианта
+     ЕГЭ (банк и 20 новых на тип) ошибка подбирается всегда, и для
+     каждой ошибки, которая к задаче подходит: ответ ученика ≠ верному,
+     строка «Ответ» у ученика — его неверный ответ, верного ответа в
+     решении ученика нет; решение после ошибочной строки пересчитано:
+     отличается от верного не одной строкой, а ошибкой и всем, что из неё
+     следует, вплоть до ответа; формулы набираются. */
+  {
+    const { OSHIBKI, naytiOshibku, vnestiOshibku, rabotaUchenika } =
+      requireSrc('lib/zadanie11/oshibki');
+    const { generateBez, pohozhaNa } = requireSrc('lib/zadanie11/gen/core');
+    const { VARIANT_EGE_11 } = requireSrc('content/zadanie11');
+    const { tekstyStroki } = requireSrc('lib/zadanie11/proporciya/bloki');
+    const { d } = requireSrc('lib/zadanie11/num');
+    const pohozha = pohozhaNa(bank);
+    const vSlovare = new Set(OSHIBKI.map((o) => o.id));
+    if (vSlovare.size !== OSHIBKI.length) add('словарь ошибок: повторяются идентификаторы');
+    for (const sec of SEKCII) {
+      if (!SUBTYPES.some((x) => x.section === sec.id && (x.oshibki ?? []).length > 0))
+        add(`«Найди ошибку»: в разделе ${sec.id} нет подтипа с ошибками`);
+    }
+    for (const x of SUBTYPES)
+      for (const id of x.oshibki ?? [])
+        if (!vSlovare.has(id)) add(`${x.id}: ошибки «${id}» нет в словаре`);
+    for (const o of OSHIBKI) {
+      if (!SUBTYPES.some((x) => (x.oshibki ?? []).includes(o.id)))
+        add(`словарь ошибок: «${o.id}» не вносит ни один подтип`);
+      for (const text of [o.chto, o.verno]) {
+        for (const tex of (text.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
+          try {
+            typeset(tex);
+          } catch (e) {
+            add(`ошибка ${o.id}: KaTeX ${e.message.slice(0, 40)}`);
+          }
+        }
+      }
+    }
+    const tekst = (etapy) => etapy.flatMap((e) => e.lines);
+    let proverki = 0;
+    for (const id of VARIANT_EGE_11) {
+      const sub = st(id);
+      const zadachi = bank.filter((b) => b.id === id && !b.analog).map((b) => b.params);
+      for (let k = 0; k < 20; k += 1) {
+        try {
+          zadachi.push(generateBez(id, `osh-test-${k}`, pohozha).params);
+        } catch {
+          /* seed не подобрался */
+        }
+      }
+      for (const params of zadachi) {
+        const where = `${id} ${JSON.stringify(params)}`;
+        if (!naytiOshibku(sub, params, 'test')) {
+          add(`${where}: к задаче не подобралась ни одна ошибка`);
+          continue;
+        }
+        const verno = sub.solve(params);
+        for (const oid of sub.oshibki ?? []) {
+          const o = vnestiOshibku(sub, params, oid);
+          if (!o) continue;
+          proverki += 1;
+          const w = `${where} «${oid}»`;
+          const bylo = tekst(rabotaUchenika(verno.etapy));
+          const stalo = tekst(o.etapy);
+          if (Math.abs(o.otvetUchenika - verno.answer) < 1e-9) add(`${w}: ответ ученика верный`);
+          const otvetStroka = stalo.filter((l) => /^\*\*Ответ:\*\*/.test(l));
+          if (otvetStroka.length !== 1 || !otvetStroka[0].includes(`$${d(o.otvetUchenika)}$`))
+            add(`${w}: в строке «Ответ» не ответ ученика: ${otvetStroka.join(' | ')}`);
+          if (
+            stalo.some(
+              (l) =>
+                l === `**Ответ:** $${d(verno.answer)}$.` ||
+                l.includes(`**Ответ:** $${d(verno.answer)}$`),
+            )
+          )
+            add(`${w}: в решении ученика верный ответ`);
+          const ot = bylo.findIndex((l, i) => l !== stalo[i]);
+          const raznye =
+            stalo.filter((l, i) => l !== bylo[i]).length + Math.abs(stalo.length - bylo.length);
+          if (ot < 0 || raznye < 2)
+            add(
+              `${w}: решение ученика отличается от верного ${raznye} строкой — ошибка не доведена до ответа`,
+            );
+          for (const line of stalo.flatMap(tekstyStroki)) {
+            for (const tex of (line.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
+              try {
+                typeset(tex);
+              } catch (e) {
+                add(`${w}: KaTeX ${e.message.slice(0, 40)}`);
+              }
+            }
+          }
+        }
+      }
+    }
+    listy.oshibok = proverki;
   }
   /* Замена одной задачи меняет только её. */
   const p0 = sluchai[1];
@@ -638,7 +863,9 @@ if (poor.length > 0) {
   console.log(`  мало разных задач: ${poor.map((x) => `${x.id} (${x.distinct})`).join(', ')}`);
 }
 console.log(`тренажёр: ${trenazher.zadach} задач собрано в закрытом виде`);
-console.log(`листы генератора и маршрутов: ${listy.zadach} задач`);
+console.log(
+  `листы генератора и маршрутов: ${listy.zadach} задач, «найди ошибку»: ${listy.oshibok} разборов`,
+);
 console.log(`аналоги: ${analogi.checked} задач в пуле`);
 console.log(`проблем: ${problems.length}`);
 for (const p of problems.slice(0, 80)) {

@@ -52,8 +52,9 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [dannye],
   );
 
-  /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07) или маршрут
-     урока у репетиторов (?tipy=PR-01,PR-04) — отмечаем только их. */
+  /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07), маршрут урока
+     у репетиторов или раздел с «О задании» (?tipy=PR-01,PR-04) —
+     отмечаем только их. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const tipy = [q.get('tip') ?? '', ...(q.get('tipy') ?? '').split(',')].filter((id) =>
@@ -63,10 +64,13 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
       return;
     }
     const s = nastroykiSeychas();
+    /* «Проверить себя» на «О задании»: вариант из 8 задач (?n=8). */
+    const n = Number(q.get('n'));
     zapisatNastroyki({
       ...s,
       podtipy: tipy,
       uroven: 0,
+      count: Number.isInteger(n) && n >= 1 && n <= 50 ? n : s.count,
       istochnik:
         tipy.some((id) => id.startsWith('RZ-')) && s.istochnik === 'bank' ? 'mix' : s.istochnik,
     });
@@ -99,8 +103,8 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     try {
       const { sobratZadachu } = await import('@/lib/zadanie11/trenazher/zadacha');
       const zadachi = plan.map((p) => sobratZadachu(p, dannye.bank));
+      /* К условию задачи прокручивает экран решения (Trenazher11Reshenie). */
       setEkran({ vid: 'reshenie', zadachi, podskazki: nastroyki.podskazki });
-      window.scrollTo({ top: 0 });
     } catch (e) {
       setOshibka((e as Error).message);
       setEkran({ vid: 'vybor' });
@@ -150,6 +154,8 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     <>
       <Trenazher11Vybor
         razdely={dannye.razdely}
+        ssylki={dannye.ssylki}
+        base={base}
         n={n}
         izmenit={izmenit}
         vBankeVsego={vBankeVsego}

@@ -16,6 +16,7 @@ import {
   slovo,
   vopros,
   xxd,
+  osh,
 } from '../kit';
 import { d, div, fq, mul, q, txt, val, type Q } from '../num';
 import { plural } from '../../plural';
@@ -31,13 +32,20 @@ const OK01: Subtype = {
   title: 'Одновременный старт: опередил на круг',
   level: 1,
   keywords: ['кольцевая дорога', 'опережал на один круг', 'автомобили'],
+  oshibki: ['minuty', 'ne-ta-velichina'],
   solve(p) {
     const L = num(p, 'L');
     const v1 = num(p, 'v1');
     const t = num(p, 't'); // минуты
-    const T = q(t, 60);
+    /* «Найди ошибку»: минуты как десятичная дробь часа или в ответ
+       записана разность скоростей. */
+    const oshibka = osh(p);
+    const minuty = oshibka === 'minuty';
+    const raznost = oshibka === 'ne-ta-velichina';
+    const T = minuty ? q(t, 100) : q(t, 60);
+    const Ttex = minuty ? d(t / 100) : fq(T);
     const dv = div(q(L), T);
-    const x = v1 - val(dv);
+    const x = raznost ? val(dv) : v1 - val(dv);
     /* Аналог: мотоциклисты, велосипедисты, лыжники. */
     const ktoRod = slovo(p, 'ktoRod', 'автомобиля');
     /* Бегуны и лыжники не «проезжают». */
@@ -51,17 +59,19 @@ const OK01: Subtype = {
         [
           'Скорость сближения',
           [
-            `Опередить на круг — ${proehat} на $${d(L)}$ км больше. За $${fq(T)}$ ч это даёт разность скоростей $${d(L)}:${fq(T)}=${fq(dv)}$ км/ч.`,
+            `Опередить на круг — ${proehat} на $${d(L)}$ км больше. За ${minuty ? `$${d(t)}$ мин $=${Ttex}$` : `$${Ttex}$`} ч это даёт разность скоростей $${d(L)}:${Ttex}=${fq(dv)}$ км/ч.`,
           ],
         ],
-        ['Уравнение', [`$${d(v1)}-x=${fq(dv)}$.`]],
-        ['Решение', [`$x=${d(v1)}-${fq(dv)}=${d(x)}$.`]],
+        raznost
+          ? ['Уравнение', [`Скорость второго — это и есть разность скоростей: $x=${fq(dv)}$.`]]
+          : ['Уравнение', [`$${d(v1)}-x=${fq(dv)}$.`]],
+        raznost ? null : ['Решение', [`$x=${d(v1)}-${fq(dv)}=${d(x)}$.`]],
         ['Ответ на вопрос задачи', [`Спрашивают скорость второго ${ktoRod}.`, otvet(x)]],
       ),
       tables: [
         dvizhenie([
-          ['Первый', `${d(v1)}\\cdot${fq(T)}`, `${d(v1)}`, `${fq(T)}`],
-          ['Второй', `${fq(T)}x`, 'x', `${fq(T)}`],
+          ['Первый', `${d(v1)}\\cdot${Ttex}`, `${d(v1)}`, `${Ttex}`],
+          ['Второй', `${Ttex}x`, 'x', `${Ttex}`],
         ]),
       ],
       hints: [

@@ -5,7 +5,7 @@
  * Сумма арифметической прогрессии: S = (a₁ + aₙ)·n / 2.
  */
 
-import { chtoSprashivayut, etapy, num, slovo, str, vopros } from '../kit';
+import { chtoSprashivayut, etapy, num, osh, slovo, str, vopros } from '../kit';
 import { d, frac, txt } from '../num';
 import { sk, SLOVA } from '../sklonenie';
 import type { Subtype } from '../types';
@@ -17,7 +17,11 @@ const PG01: Subtype = {
   title: 'Арифметическая прогрессия: улитка, задачи по дням',
   level: 1,
   keywords: ['улитка', 'прогрессия', 'каждый день больше', 'задачи'],
+  oshibki: ['summa-progressii'],
   solve(p) {
+    /* «Найди ошибку»: в формуле суммы потеряно деление на 2. */
+    const bezDvuh = osh(p) === 'summa-progressii';
+    const formula = bezDvuh ? '$S_n=(a_1+a_n)\\cdot n$.' : '$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$.';
     const form = str(p, 'form', ['ulitka', 'vasya'] as const);
     /* Аналог: страницы книги, слова, отжимания — что растёт по дням. */
     const chto = slovo(p, 'chto', form === 'ulitka' ? 'Расстояния по дням' : 'Задачи по дням');
@@ -29,7 +33,7 @@ const PG01: Subtype = {
     if (form === 'ulitka') {
       const S = num(p, 'S');
       const s = num(p, 's');
-      const n = (2 * S) / s;
+      const n = bezDvuh ? S / s : (2 * S) / s;
       return {
         uslovie: `Улитка ползёт от одного дерева до другого. Каждый день она проползает на одно и то же расстояние больше, чем в предыдущий день. Известно, что за первый и последний дни улитка проползла в общей сложности ${txt(s)} метров. Определите, сколько дней улитка потратила на весь путь, если расстояние между деревьями равно ${txt(S)} метрам.`,
         answer: n,
@@ -38,9 +42,23 @@ const PG01: Subtype = {
             'Обозначаем',
             [`${chto} — арифметическая прогрессия $a_1, a_2, \\ldots, a_n$; $n$ — число дней.`],
           ],
-          ['Формула суммы', ['$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$.']],
-          ['Уравнение', [`$a_1+a_n=${d(s)}$, $S_n=${d(S)}$: $\\dfrac{${d(s)}n}{2}=${d(S)}$.`]],
-          ['Решение', [`$n=${frac(`2\\cdot${d(S)}`, d(s))}=${d(n)}$.`]],
+          ['Формула суммы', [formula]],
+          [
+            'Уравнение',
+            [
+              bezDvuh
+                ? `$a_1+a_n=${d(s)}$, $S_n=${d(S)}$: $${d(s)}n=${d(S)}$.`
+                : `$a_1+a_n=${d(s)}$, $S_n=${d(S)}$: $\\dfrac{${d(s)}n}{2}=${d(S)}$.`,
+            ],
+          ],
+          [
+            'Решение',
+            [
+              bezDvuh
+                ? `$n=${frac(d(S), d(s))}=${d(n)}$.`
+                : `$n=${frac(`2\\cdot${d(S)}`, d(s))}=${d(n)}$.`,
+            ],
+          ],
           ['Ответ на вопрос задачи', [otvet(n)]],
         ),
         hints: [
@@ -61,7 +79,8 @@ const PG01: Subtype = {
     const S = num(p, 'S');
     const a1 = num(p, 'a1');
     const n = num(p, 'n');
-    const an = (2 * S) / n - a1;
+    const summa = bezDvuh ? S / n : (2 * S) / n;
+    const an = summa - a1;
     return {
       uslovie: `Васе надо решить ${sk(S, SLOVA.zadachu)}. Ежедневно он решает на одно и то же количество задач больше по сравнению с предыдущим днём. Известно, что за первый день Вася решил ${sk(a1, SLOVA.zadachu)}. Определите, сколько задач решил Вася в последний день, если со всеми задачами он справился за ${sk(n, SLOVA.den)}.`,
       answer: an,
@@ -72,11 +91,20 @@ const PG01: Subtype = {
             `${chto} — арифметическая прогрессия, $a_1=${d(a1)}$, $n=${d(n)}$, $S_n=${d(S)}$; ищем $a_n$.`,
           ],
         ],
-        ['Формула суммы', ['$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$.']],
-        ['Уравнение', [`$\\dfrac{(${d(a1)}+a_n)\\cdot${d(n)}}{2}=${d(S)}$.`]],
+        ['Формула суммы', [formula]],
+        [
+          'Уравнение',
+          [
+            bezDvuh
+              ? `$(${d(a1)}+a_n)\\cdot${d(n)}=${d(S)}$.`
+              : `$\\dfrac{(${d(a1)}+a_n)\\cdot${d(n)}}{2}=${d(S)}$.`,
+          ],
+        ],
         [
           'Решение',
-          [`$${d(a1)}+a_n=${frac(`2\\cdot${d(S)}`, d(n))}=${d((2 * S) / n)}$, $a_n=${d(an)}$.`],
+          [
+            `$${d(a1)}+a_n=${bezDvuh ? frac(d(S), d(n)) : frac(`2\\cdot${d(S)}`, d(n))}=${d(summa)}$, $a_n=${d(an)}$.`,
+          ],
         ],
         ['Ответ на вопрос задачи', [otvet(an)]],
       ),

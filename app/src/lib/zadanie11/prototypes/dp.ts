@@ -19,6 +19,8 @@ import {
   str,
   vopros,
   xxd,
+  kKvadratnomu,
+  osh,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -475,6 +477,7 @@ const DP07: Subtype = {
   title: 'Обратный путь быстрее, но с остановкой',
   level: 2,
   keywords: ['велосипедист', 'баржа', 'обратный путь', 'остановку', 'озеро'],
+  oshibki: ['ne-ta-velichina'],
   solve(p) {
     const form = str(p, 'form', ['velo', 'barzha'] as const);
     const S = num(p, 'S');
@@ -487,7 +490,9 @@ const DP07: Subtype = {
     const P = round9((S * dd) / st); // x(x + d) = P
     const res = xxd(P, dd);
     const x = res.root;
-    const ans = ask === 'AB' ? x : x + dd;
+    /* «Найди ошибку»: в ответ записана скорость на другом участке. */
+    const otvetNa = osh(p) === 'ne-ta-velichina' ? (ask === 'AB' ? 'BA' : 'AB') : ask;
+    const ans = otvetNa === 'AB' ? x : x + dd;
     /* Герой аналога (лыжник, катер…) — только слова решения. */
     const kto = klyuch(GEROI, p.geroy, form).rod;
     const uslovie =
@@ -499,12 +504,7 @@ const DP07: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        st === dd
-          ? `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`
-          : `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(st)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(st)}x(x+${d(dd)})$. Делим на $${d(st)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, st), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -533,7 +533,7 @@ const DP07: Subtype = {
           'Отбор корней и ответ на вопрос задачи',
           [
             ...t.otbor,
-            ask === 'AB'
+            otvetNa === 'AB'
               ? `Спрашивают скорость на пути из А в В: $x=${d(x)}$ км/ч.`
               : `Спрашивают скорость на пути из В в А: $x+${d(dd)}=${d(ans)}$ км/ч.`,
             otvet(ans),
@@ -565,7 +565,7 @@ const DP07: Subtype = {
           `$\\dfrac{${d(S)}}{x}+\\dfrac{${d(S)}}{x+${d(dd)}}=${d(st)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(P)}$ — подбор множителей`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(P)}$ — подбор множителей`, [
           'сразу считать дискриминант без сокращения',
           'взять среднее арифметическое',
         ]),
@@ -603,10 +603,7 @@ const DP08: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -657,7 +654,7 @@ const DP08: Subtype = {
           `$\\dfrac{${d(S)}}{x}+\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(S)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(S)}$ — подбор`, [
           'среднее арифметическое',
           'перевести минуты в часы',
         ]),
@@ -1050,10 +1047,7 @@ const DP13: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(h)})`,
-      posle: [
-        `$${d(S)}(x+${d(h)})-${d(S)}x=${d(h)}x(x+${d(h)})$. Делим на $${d(h)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, h, h), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -1088,7 +1082,7 @@ const DP13: Subtype = {
           `$\\dfrac{${d(S)}}{x}=\\dfrac{${d(S)}}{x+${d(h)}}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(h)})=${d(S)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(h)})=${d(S)}$ — подбор`, [
           'среднее арифметическое',
           'разложение на множители дискриминанта не нужно',
         ]),

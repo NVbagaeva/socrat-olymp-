@@ -18,7 +18,7 @@ export function Shell11({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE11.slug}`;
   return (
     <AppShell active="tasks">
-      <main className="app-main">
+      <main className="app-main z11-shell">
         <ShapkaRazdela
           className="z11-head"
           crumbs={[

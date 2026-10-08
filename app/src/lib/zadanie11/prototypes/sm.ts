@@ -5,7 +5,7 @@
  * столько стало». Таблица: масса смеси | % | масса вещества.
  */
 
-import { chtoSprashivayut, etapy, koncentraciya, num, slovo, str, vopros } from '../kit';
+import { chtoSprashivayut, etapy, koncentraciya, num, osh, slovo, str, vopros } from '../kit';
 import { d, frac, round9, txt } from '../num';
 import type { Params, Subtype } from '../types';
 import { klyuch, TARY, VESHCHESTVA } from './syuzhety';
@@ -34,12 +34,16 @@ const SM01: Subtype = {
   title: 'Разбавление водой',
   level: 1,
   keywords: ['раствор', 'добавили воды', 'разбавление', 'сосуд'],
+  oshibki: ['obem-ne-izmenen'],
   solve(p) {
     const V = num(p, 'V');
     const pp = num(p, 'p');
     const W = num(p, 'W');
     const s = round9((V * pp) / 100);
-    const c = round9((s / (V + W)) * 100);
+    /* «Найди ошибку»: воду не прибавили к раствору. */
+    const bezVody = osh(p) === 'obem-ne-izmenen';
+    const novyy = bezVody ? V : V + W;
+    const c = round9((s / novyy) * 100);
     /* Аналог: раствор в килограммах и названное вещество (соль, сахар). */
     const kg = str(p, 'ed', ['l', 'kg'] as const) === 'kg';
     const ed = kg ? 'кг' : 'л';
@@ -59,17 +63,19 @@ const SM01: Subtype = {
         [
           'Уравнение',
           [
-            `${kg ? 'Новая масса' : 'Новый объём'} $${d(V)}+${d(W)}=${d(V + W)}$ ${ed}: $\\dfrac{x}{100}\\cdot${d(V + W)}=${d(s)}$.`,
+            bezVody
+              ? `${kg ? 'Масса' : 'Объём'} раствора $${d(V)}$ ${ed}: $\\dfrac{x}{100}\\cdot${d(V)}=${d(s)}$.`
+              : `${kg ? 'Новая масса' : 'Новый объём'} $${d(V)}+${d(W)}=${d(V + W)}$ ${ed}: $\\dfrac{x}{100}\\cdot${d(V + W)}=${d(s)}$.`,
           ],
         ],
-        ['Решение', [`$x=${frac(d(s) + '\\cdot100', V + W)}=${d(c)}$.`]],
+        ['Решение', [`$x=${frac(d(s) + '\\cdot100', novyy)}=${d(c)}$.`]],
         ['Ответ на вопрос задачи', [otvet(c)]],
       ),
       tables: [
         koncentraciya([
           { label: 'I', mvv: `${d(pp / 100)}\\cdot${d(V)}=${d(s)}`, mr: d(V), p: d(pp) },
           { label: 'вода', mvv: '0', mr: d(W), p: '0' },
-          { label: 'I + вода', mvv: `\\dfrac{x}{100}\\cdot${d(V + W)}`, mr: d(V + W), p: 'x' },
+          { label: 'I + вода', mvv: `\\dfrac{x}{100}\\cdot${d(novyy)}`, mr: d(novyy), p: 'x' },
         ]),
       ],
       hints: [
@@ -243,6 +249,7 @@ const SM04: Subtype = {
   title: 'Два сплава: разность масс известна, найти массу третьего',
   level: 2,
   keywords: ['сплав', 'медь', 'серебро', 'третий сплав', 'масса больше'],
+  oshibki: ['massa-tretego', 'ne-ta-velichina'],
   solve(p) {
     const p1 = num(p, 'p1');
     const p2 = num(p, 'p2');
@@ -253,14 +260,21 @@ const SM04: Subtype = {
     /* Лёгкий сплав — x, тяжёлый — x + d. */
     const pl = heavier === '2' ? p1 : p2;
     const ph = heavier === '2' ? p2 : p1;
-    const x = round9((dd * (p3 - ph)) / (pl + ph - 2 * p3));
-    const M = round9(2 * x + dd);
+    /* «Найди ошибку»: масса третьего сплава записана как 2x (без d) или
+       в ответ записана масса лёгкого сплава. */
+    const oshibka = osh(p);
+    const bezD = oshibka === 'massa-tretego';
+    const tretya = bezD ? '2x' : `2x+${d(dd)}`;
+    const k = pl + ph - 2 * p3;
+    const free = bezD ? -ph * dd : dd * (p3 - ph);
+    const x = round9(free / k);
+    if (!(x > 0)) throw new Error('СМ-04: масса сплава не положительна');
+    const M3 = round9(bezD ? 2 * x : 2 * x + dd);
+    const M = oshibka === 'ne-ta-velichina' ? x : M3;
     const m1 = heavier === '2' ? 'x' : `x+${d(dd)}`;
     const m2 = heavier === '2' ? `x+${d(dd)}` : 'x';
     const [bolshe, menshe] = heavier === '2' ? ['второго', 'первого'] : ['первого', 'второго'];
     const lhs = `${d(p1 / 100)}${heavier === '2' ? 'x' : `(x+${d(dd)})`}+${d(p2 / 100)}${heavier === '2' ? `(x+${d(dd)})` : 'x'}`;
-    const k = pl + ph - 2 * p3;
-    const free = dd * (p3 - ph);
     return {
       uslovie: `Имеется два сплава. Первый сплав содержит ${txt(p1)}% ${met}, второй — ${txt(p2)}% ${met}. Масса ${bolshe} сплава больше массы ${menshe} на ${txt(dd)} кг. Из этих двух сплавов получили третий сплав, содержащий ${txt(p3)}% ${met}. Найдите массу третьего сплава. Ответ дайте в килограммах.`,
       answer: M,
@@ -268,26 +282,38 @@ const SM04: Subtype = {
         [
           'Обозначаем',
           [
-            `Масса ${menshe} сплава — $x$ кг, ${bolshe} — $x+${d(dd)}$ кг, третьего — $2x+${d(dd)}$ кг.`,
+            `Масса ${menshe} сплава — $x$ кг, ${bolshe} — $x+${d(dd)}$ кг, третьего — $${tretya}$ кг.`,
           ],
         ],
-        ['Таблица', ['Заполняем таблицу: масса, процент, масса металла.']],
+        [
+          'Таблица',
+          [
+            `Заполняем таблицу: масса вещества (${met}), масса сплава, концентрация. Уравнение — по строке массы вещества.`,
+          ],
+        ],
         [
           'Уравнение',
           [
-            `Металла в третьем сплаве столько же, сколько в двух первых: $${lhs}=${d(p3 / 100)}(2x+${d(dd)})$.`,
+            `Металла в третьем сплаве столько же, сколько в двух первых: $${lhs}=${d(p3 / 100)}${bezD ? '\\cdot2x' : `(2x+${d(dd)})`}$.`,
           ],
         ],
         [
           'Решение',
           [
-            `Умножаем на $100$: $${d(p1)}${heavier === '2' ? 'x' : `(x+${d(dd)})`}+${d(p2)}${heavier === '2' ? `(x+${d(dd)})` : 'x'}=${d(p3)}(2x+${d(dd)})$.`,
+            `Умножаем на $100$: $${d(p1)}${heavier === '2' ? 'x' : `(x+${d(dd)})`}+${d(p2)}${heavier === '2' ? `(x+${d(dd)})` : 'x'}=${d(p3)}${bezD ? '\\cdot2x' : `(2x+${d(dd)})`}$.`,
             `$${d(k)}x=${d(free)}$, $x=${d(x)}$.`,
           ],
         ],
         [
           'Ответ на вопрос задачи',
-          [`Спрашивают массу третьего сплава: $2\\cdot${d(x)}+${d(dd)}=${d(M)}$ кг.`, otvet(M)],
+          [
+            oshibka === 'ne-ta-velichina'
+              ? `Спрашивают массу сплава: $x=${d(x)}$ кг.`
+              : bezD
+                ? `Спрашивают массу третьего сплава: $2\\cdot${d(x)}=${d(M)}$ кг.`
+                : `Спрашивают массу третьего сплава: $2\\cdot${d(x)}+${d(dd)}=${d(M)}$ кг.`,
+            otvet(M),
+          ],
         ],
       ),
       tables: [
@@ -304,7 +330,12 @@ const SM04: Subtype = {
             mr: m2,
             p: d(p2),
           },
-          { label: 'I + II', mvv: `${d(p3 / 100)}(2x+${d(dd)})`, mr: `2x+${d(dd)}`, p: d(p3) },
+          {
+            label: 'I + II',
+            mvv: `${d(p3 / 100)}${bezD ? '\\cdot2x' : `(2x+${d(dd)})`}`,
+            mr: tretya,
+            p: d(p3),
+          },
         ]),
       ],
       hints: [

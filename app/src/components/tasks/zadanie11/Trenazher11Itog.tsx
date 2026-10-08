@@ -48,9 +48,8 @@ export function Trenazher11Itog({
         {zadachi.map((z, i) => {
           const o = otmetki[i] ?? 'wrong';
           return (
-            <li key={z.key} className={clsx('z11-itog__item', `is-${o}`)}>
+            <li key={z.key} className={clsx('z11-itog__item', `is-${o}`)} title={kodNaSayte(z.id)}>
               <IkonkaRazdela section={z.section} className="z11-itog__ikonka" />
-              <span className="z11-itog__kod">{kodNaSayte(z.id)}</span>
               <span className="z11-itog__title">{z.title}</span>
               <span className="z11-itog__badge">{TRENAZHER_11.badge[z.vid]}</span>
               <span className="z11-itog__mark">

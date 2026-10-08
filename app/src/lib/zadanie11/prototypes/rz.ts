@@ -6,7 +6,7 @@
  * калькулятора, здравый смысл при округлении.
  */
 
-import { chtoSprashivayut, etapy, key, num, slovo, str, vopros } from '../kit';
+import { chtoSprashivayut, etapy, key, num, osh, slovo, str, vopros } from '../kit';
 import {
   type Zveno,
   podskazkiZvena,
@@ -21,8 +21,14 @@ import { chasy, sk, SLOVA } from '../sklonenie';
 import type { Solved, Subtype } from '../types';
 import { otvet, pct } from './common';
 
-function rz(id: string, title: string, keywords: string[], solve: Subtype['solve']): Subtype {
-  return { id, section: 'RZ', title, level: 1, keywords, solve };
+function rz(
+  id: string,
+  title: string,
+  keywords: string[],
+  solve: Subtype['solve'],
+  oshibki?: readonly string[],
+): Subtype {
+  return { id, section: 'RZ', title, level: 1, keywords, solve, ...(oshibki ? { oshibki } : {}) };
 }
 
 /** Масса в граммах текстом: 1750 → «1 кг 750 г». */
@@ -563,54 +569,56 @@ const RZ09 = rz(
 
 /* ── РЗ-10 Цена до изменения ─────────────────────────────────── */
 
-const RZ10 = rz('RZ-10', 'Цена до изменения', ['цена снизилась', 'до снижения', 'пылесос'], (p) => {
-  const pp = num(p, 'p');
-  const nw = num(p, 'N');
-  const old = val(div(q(nw * 100), q(100 - pp)));
-  const z: Zveno = {
-    stroki: [
-      [100, null],
-      [100 - pp, nw],
-    ],
-    ed: 'руб.',
-    podpisi: ['проценты', 'рубли'],
-    notes: ['цена до снижения', 'цена после снижения'],
-    prelyudiya: [
-      `Цена снизилась на $${pct(pp)}$: $100\\%-${pct(pp)}=${pct(100 - pp)}$ — столько процентов старой цены осталось.`,
-    ],
-    pervoe: true,
-  };
-  const r = reshitZveno(z);
-  sverit(r, old, 'РЗ-10');
-  return {
-    uslovie: `Цена пылесоса снизилась на ${txt(pp)}% и составила ${txt(nw)} рублей. Сколько рублей стоил пылесос до снижения цены?`,
-    answer: old,
-    etapy: etapy(
-      shag100(
-        'Скидку считают **от старой цены** — с ней сравнивают. Значит, старая цена — $100\\%$.',
-      ),
-      ...r.etapy,
-      [
-        'Ответ на вопрос задачи',
-        [
-          'Спрашивают цену до снижения — это и есть $x$.',
-          `Замечание: то же самое одним делением — $x=${d(nw)}:${d((100 - pp) / 100)}=${d(old)}$.`,
-          otvet(old),
-        ],
+const RZ10 = rz(
+  'RZ-10',
+  'Цена до изменения',
+  ['цена снизилась', 'до снижения', 'пылесос'],
+  (p) => {
+    const pp = num(p, 'p');
+    const nw = num(p, 'N');
+    /* «Найди ошибку»: снижение записано как повышение. */
+    const znak = osh(p) === 'procent-znak' ? '+' : '-';
+    const dolya = znak === '+' ? 100 + pp : 100 - pp;
+    const old = val(div(q(nw * 100), q(dolya)));
+    const z: Zveno = {
+      stroki: [
+        [100, null],
+        [dolya, nw],
       ],
-    ),
-    hints: [
-      vopros('Что принимаем за $100\\%$?', 'старую цену', ['новую цену', 'скидку']),
-      vopros('Сколько процентов составляет новая цена?', `$${pct(100 - pp)}$`, [
-        `$${pct(pp)}$`,
-        `$${pct(100 + pp)}$`,
-      ]),
-      ...podskazkiZvena(z, r),
-      chtoSprashivayut('цену до снижения', ['размер скидки', 'новую цену']),
-    ],
-    lifehacks: ['fast-count'],
-  };
-});
+      ed: 'руб.',
+      podpisi: ['проценты', 'рубли'],
+      notes: ['цена до снижения', 'цена после снижения'],
+      prelyudiya: [
+        `Цена снизилась на $${pct(pp)}$: $100\\%${znak}${pct(pp)}=${pct(dolya)}$ — столько процентов старой цены осталось.`,
+      ],
+      pervoe: true,
+    };
+    const r = reshitZveno(z);
+    sverit(r, old, 'РЗ-10');
+    return {
+      uslovie: `Цена пылесоса снизилась на ${txt(pp)}% и составила ${txt(nw)} рублей. Сколько рублей стоил пылесос до снижения цены?`,
+      answer: old,
+      etapy: etapy(
+        shag100(
+          'Скидку считают **от старой цены** — с ней сравнивают. Значит, старая цена — $100\\%$.',
+        ),
+        ...r.etapy,
+        ['Ответ на вопрос задачи', ['Спрашивают цену до снижения — это и есть $x$.', otvet(old)]],
+      ),
+      hints: [
+        vopros('Что принимаем за $100\\%$?', 'старую цену', ['новую цену', 'скидку']),
+        vopros('Сколько процентов составляет новая цена?', `$${pct(100 - pp)}$`, [
+          `$${pct(pp)}$`,
+          `$${pct(100 + pp)}$`,
+        ]),
+        ...podskazkiZvena(z, r),
+        chtoSprashivayut('цену до снижения', ['размер скидки', 'новую цену']),
+      ],
+      lifehacks: ['fast-count'],
+    };
+  },
+  ['procent-znak'],
+);
 
 /* ── РЗ-11 Налог ─────────────────────────────────────────────── */
 
@@ -621,17 +629,20 @@ const RZ11 = rz(
   (p) => {
     const pp = num(p, 'p');
     const N = num(p, 'N');
-    const x = val(div(q(N * 100), q(100 - pp)));
+    /* «Найди ошибку»: удержание налога записано как прибавка. */
+    const znak = osh(p) === 'procent-znak' ? '+' : '-';
+    const dolya = znak === '+' ? 100 + pp : 100 - pp;
+    const x = val(div(q(N * 100), q(dolya)));
     const z: Zveno = {
       stroki: [
         [100, null],
-        [100 - pp, N],
+        [dolya, N],
       ],
       ed: 'руб.',
       podpisi: ['проценты', 'рубли'],
       notes: ['зарплата', 'на руки'],
       prelyudiya: [
-        `$100\\%-${pct(pp)}=${pct(100 - pp)}$ — после удержания налога остаётся $${pct(100 - pp)}$ зарплаты.`,
+        `$100\\%${znak}${pct(pp)}=${pct(dolya)}$ — после удержания налога остаётся $${pct(dolya)}$ зарплаты.`,
       ],
       pervoe: true,
     };
@@ -647,11 +658,7 @@ const RZ11 = rz(
         ...r.etapy,
         [
           'Ответ на вопрос задачи',
-          [
-            'Спрашивают зарплату до удержания налога — это и есть $x$.',
-            `Замечание: то же самое одним делением — $x=${d(N)}:${d((100 - pp) / 100)}=${d(x)}$.`,
-            otvet(x),
-          ],
+          ['Спрашивают зарплату до удержания налога — это и есть $x$.', otvet(x)],
         ],
       ),
       hints: [
@@ -666,6 +673,7 @@ const RZ11 = rz(
       lifehacks: ['fast-count'],
     };
   },
+  ['procent-znak'],
 );
 
 /* ── РЗ-12 «За 100% — каждый раз своё» ───────────────────────── */

@@ -21,6 +21,11 @@ export function num(p: Params, key: string): number {
 }
 
 /** Элемент массива по индексу; выход за границы — ошибка. */
+/** Ошибка «Найди ошибку», с которой решается задача (oshibki.ts), или null. */
+export function osh(p: Params): string | null {
+  return typeof p.osh === 'string' ? p.osh : null;
+}
+
 export function at<T>(items: readonly T[], i: number): T {
   const v = items[i];
   if (v === undefined) {
@@ -351,19 +356,34 @@ export function xxd(
   x = 'x',
 ): { lines: string[]; roots: number[]; root: number } {
   const guess = podbor(S, dd, x);
-  const sol = kvadrat(1, dd, -S, x);
   const vtoroy = -(guess.x + dd);
+  const D = dd * dd + 4 * S;
+  const sqrtD = isqrt(D) ?? 0;
   return {
     lines: [
       `$${x}(${x}+${d(dd)})=${d(S)}$, то есть $${poly(1, dd, -S, x)}=0$.`,
       `**Лайфхак:** ${guess.line}`,
       `**Других подходящих корней нет:** по теореме Виета $${x}_1\\cdot ${x}_2=-${d(S)}$, поэтому второй корень $${x}_2=-\\dfrac{${d(S)}}{${d(guess.x)}}=${d(vtoroy)}<0$.`,
-      `Проверка дискриминантом: $${sol.ishodnoe}$.`,
-      ...sol.lines,
+      /* Второй путь — одной строкой: подбор с обоснованием уже полное решение. */
+      `**Иначе — через дискриминант:** $D=${d(dd)}^2+4\\cdot${d(S)}=${d(D)}$, $\\sqrt D=${d(sqrtD)}$, корни $\\dfrac{${d(-dd)}\\pm${d(sqrtD)}}{2}$ — те же $${d(guess.x)}$ и $${d(vtoroy)}$.`,
     ],
     roots: [vtoroy, guess.x],
     root: guess.x,
   };
+}
+
+/**
+ * Строка перехода от дробного уравнения к $x(x+d)=S$ после умножения
+ * на общий знаменатель: $S(x+d)-Sx=k\,x(x+d)$ и «делим на k». При
+ * $k=1$ множитель и деление не пишутся: «$=1x(x+1)$. Делим на 1» —
+ * артефакт, а не решение.
+ */
+export function kKvadratnomu(S: number, dd: number, k: number, x = 'x'): string {
+  const levo = `${d(S)}(${x}+${d(dd)})-${d(S)}${x}`;
+  if (k === 1) {
+    return `$${levo}=${x}(${x}+${d(dd)})$:`;
+  }
+  return `$${levo}=${d(k)}${x}(${x}+${d(dd)})$. Делим на $${d(k)}$:`;
 }
 
 /* ── Дробно-рациональные уравнения: ОДЗ и отбор корней ─────────── */

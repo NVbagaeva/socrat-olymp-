@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Button, Checkbox, Select } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { MARSHRUTY_11, REPETITORY_11, ZAMETKI_11, type Marshrut11 } from '@/content/repetitory11';
 import { Tex } from '@/components/ui/Tex';
 import type { PodtipInfo, RazdelInfo } from '@/lib/zadanie11/trenazher/sessiya';
@@ -19,7 +19,7 @@ export interface BlokKratko {
 
 const MINUT: Record<Level, number> = { 1: 2, 2: 3, 3: 5 };
 
-/** Задачи и минуты маршрута: опорная — полторы минуты, остальные по уровню. */
+/** Задачи и минуты урока: опорная — полторы минуты, остальные по уровню. */
 function obyom(m: Marshrut11, podtip: (id: string) => PodtipInfo | undefined) {
   const n = m.opornye.length + m.bank.length + m.novye.length;
   const t =
@@ -28,24 +28,24 @@ function obyom(m: Marshrut11, podtip: (id: string) => PodtipInfo | undefined) {
   return { n, minut: Math.max(10, Math.round(t / 5) * 5) };
 }
 
-function seed(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-}
-
 /**
- * Вкладка «Для репетиторов» задания №11 (макет dlya-repetitorov.png):
- * пять маршрутов уроков (опорные → банк → новые) с листом на урок,
- * методические заметки по каждому разделу и «Быстрый лист».
- * Лист маршрута собирается тем же движком, что генератор: адрес
- * печати /zadaniya/11/pechat/?m=r&r=N.
+ * Вкладка «Для репетиторов» задания №11: пять готовых уроков
+ * (опорные → банк → новые) и методические заметки по разделу.
+ * Листы не собираются здесь: урок открывается в генераторе
+ * пресетом «Готовый урок» (адрес generator/?urok=N) — там варианты,
+ * замена задач и печать. У заметок — ссылки в теорию раздела,
+ * опорные блоки, тренажёр и лист урока по разделу.
  */
 export function Repetitory11({
   razdely,
   bloki,
+  teoriya,
   base,
 }: {
   razdely: RazdelInfo[];
   bloki: BlokKratko[];
+  /** Якорь раздела теории по разделу задач. */
+  teoriya: Record<SectionId, string>;
   base: string;
 }) {
   const vse = razdely.flatMap((r) => r.podtipy);
@@ -53,19 +53,11 @@ export function Repetitory11({
   const blok = (id: string) => bloki.find((b) => b.id === id);
   const [otkryt, setOtkryt] = useState<number | null>(null);
   const [razdel, setRazdel] = useState<SectionId>('DP');
-  const [urok, setUrok] = useState(1);
-  const [variantov, setVariantov] = useState(1);
-  const [sOtvetami, setSOtvetami] = useState(true);
-
-  function list(no: number, n: number, otvety: boolean) {
-    const q = new URLSearchParams({ m: 'r', i: 'm', r: String(no), seed: seed() });
-    if (n > 1) q.set('v', String(n));
-    window.open(`${base}/pechat/${otvety ? 'vse/' : ''}?${q.toString()}`, '_blank', 'noopener');
-  }
 
   const m = MARSHRUTY_11.find((x) => x.no === otkryt);
   const zametki = ZAMETKI_11[razdel];
   const info = razdely.find((r) => r.id === razdel);
+  const tipyRazdela = (info?.podtipy ?? []).map((p) => p.id);
 
   return (
     <div className="z11-rep">
@@ -77,6 +69,7 @@ export function Repetitory11({
 
         <section>
           <h3 className="z11-blok-title">{REPETITORY_11.marshruty}</h3>
+          <p className="z11-rep__lead">{REPETITORY_11.marshrutyLead}</p>
           <ul className="z11-rep__marshruty">
             {MARSHRUTY_11.map((x) => {
               const { n, minut } = obyom(x, podtip);
@@ -111,9 +104,13 @@ export function Repetitory11({
                     >
                       {otkryt === x.no ? REPETITORY_11.skryt : REPETITORY_11.otkryt}
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => list(x.no, 1, false)}>
-                      {REPETITORY_11.sgenerirovat}
-                    </Button>
+                    <Link
+                      className="btn btn--primary btn--sm"
+                      href={`${base}/generator/?urok=${x.no}`}
+                    >
+                      <Piktogramma name="doc" />
+                      {REPETITORY_11.vGeneratore}
+                    </Link>
                   </span>
                 </li>
               );
@@ -149,11 +146,9 @@ export function Repetitory11({
                       {m[k].map((id, j) => {
                         const p = podtip(id);
                         return p === undefined ? null : (
-                          <li key={`${id}-${j}`}>
-                            <span>
-                              <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                            </span>
-                            <Zvezdy level={p.level} />
+                          <li key={`${id}-${j}`} title={p.kod}>
+                            <span>{p.title}</span>
+                            <Zvezdy level={p.level} section={p.section} />
                           </li>
                         );
                       })}
@@ -166,11 +161,13 @@ export function Repetitory11({
                   className="btn btn--secondary btn--sm"
                   href={`${base}/trenazher/?tipy=${[...new Set([...m.bank, ...m.novye])].join(',')}`}
                 >
+                  <Piktogramma name="play" />
                   {REPETITORY_11.vTrenazhere}
                 </Link>
-                <Button size="sm" onClick={() => list(m.no, 1, true)}>
-                  {REPETITORY_11.sgenerirovat}
-                </Button>
+                <Link className="btn btn--primary btn--sm" href={`${base}/generator/?urok=${m.no}`}>
+                  <Piktogramma name="doc" />
+                  {REPETITORY_11.vGeneratore}
+                </Link>
               </div>
             </div>
           )}
@@ -202,6 +199,36 @@ export function Repetitory11({
                   <span className="z11-zametki__lead">{REPETITORY_11.zametkiLead}</span>
                 </span>
               </div>
+              <div className="z11-zametki__ssylki">
+                <Link
+                  className="btn btn--secondary btn--sm"
+                  href={`${base}/teoriya/#${teoriya[razdel]}`}
+                >
+                  <Piktogramma name="book" />
+                  {REPETITORY_11.ssylki.teoriya}
+                </Link>
+                <Link
+                  className="btn btn--secondary btn--sm"
+                  href={`${base}/opornye-zadachi/?razdel=${razdel}`}
+                >
+                  <Piktogramma name="tools" />
+                  {REPETITORY_11.ssylki.opornye}
+                </Link>
+                <Link
+                  className="btn btn--secondary btn--sm"
+                  href={`${base}/trenazher/?tipy=${tipyRazdela.join(',')}`}
+                >
+                  <Piktogramma name="play" />
+                  {REPETITORY_11.ssylki.trenazher}
+                </Link>
+                <Link
+                  className="btn btn--primary btn--sm"
+                  href={`${base}/generator/?razdel=${razdel}`}
+                >
+                  <Piktogramma name="doc" />
+                  {REPETITORY_11.ssylki.urok}
+                </Link>
+              </div>
               <div className="z11-zametki__cards">
                 <div className="z11-zametka z11-zametka--kak">
                   <p className="z11-zametka__title">
@@ -228,6 +255,7 @@ export function Repetitory11({
                       </li>
                     ))}
                   </ol>
+                  <p className="z11-zametka__note">{REPETITORY_11.oshibkiNote}</p>
                 </div>
                 <div className="z11-zametka z11-zametka--poryadok">
                   <p className="z11-zametka__title">
@@ -238,11 +266,9 @@ export function Repetitory11({
                     {[...(info?.podtipy ?? [])]
                       .sort((a, b) => a.level - b.level)
                       .map((p) => (
-                        <li key={p.id}>
-                          <span>
-                            <span className="z11-akk__kod">{p.kod}</span> {p.title}
-                          </span>
-                          <Zvezdy level={p.level} />
+                        <li key={p.id} title={p.kod}>
+                          <span>{p.title}</span>
+                          <Zvezdy level={p.level} section={p.section} />
                         </li>
                       ))}
                   </ol>
@@ -252,63 +278,6 @@ export function Repetitory11({
           </div>
         </section>
       </div>
-
-      <aside className="z11-rep__side">
-        <div className="z11-vybrannaya">
-          <h3 className="z11-vybrannaya__title">{REPETITORY_11.bystryy}</h3>
-          <p className="z11-istochnik__note">{REPETITORY_11.bystryyLead}</p>
-          <label className="z11-rep__label" htmlFor="z11-rep-urok">
-            {REPETITORY_11.vyberiteUrok}
-          </label>
-          <Select
-            id="z11-rep-urok"
-            value={String(urok)}
-            onChange={(e) => setUrok(Number(e.target.value))}
-          >
-            {MARSHRUTY_11.map((x) => (
-              <option key={x.no} value={String(x.no)}>
-                {REPETITORY_11.urok(x.no)} {x.title}
-              </option>
-            ))}
-          </Select>
-          <div className="z11-vybrannaya__row">
-            <span>{REPETITORY_11.variantov}</span>
-            <span className="z11-stepper">
-              <button
-                type="button"
-                aria-label="Меньше вариантов"
-                disabled={variantov <= 1}
-                onClick={() => setVariantov(variantov - 1)}
-              >
-                −
-              </button>
-              <output>{variantov}</output>
-              <button
-                type="button"
-                aria-label="Больше вариантов"
-                disabled={variantov >= 8}
-                onClick={() => setVariantov(variantov + 1)}
-              >
-                +
-              </button>
-            </span>
-          </div>
-          <Checkbox checked={sOtvetami} onChange={(e) => setSOtvetami(e.target.checked)}>
-            {REPETITORY_11.sOtvetami}
-          </Checkbox>
-          <Button
-            className="z11-vybrannaya__start"
-            onClick={() => list(urok, variantov, sOtvetami)}
-          >
-            <Piktogramma name="doc" />
-            {REPETITORY_11.pdf}
-          </Button>
-          <p className="z11-istochnik__note">
-            {REPETITORY_11.pdfNote}
-            {sOtvetami ? REPETITORY_11.pdfNoteOtvety : ''}.
-          </p>
-        </div>
-      </aside>
     </div>
   );
 }

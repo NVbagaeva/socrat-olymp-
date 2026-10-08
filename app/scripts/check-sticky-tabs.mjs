@@ -174,6 +174,18 @@ async function proverit(engine, browserType) {
     const where = `${engine}, ${size.name}, содержание теории №11`;
     const smesi = page.locator('.contents-item', { hasText: 'Смеси и сплавы' }).last();
     await smesi.click();
+    /* WebKit на широком экране: networkidle наступает раньше, чем React
+       оживит страницу, и первый щелчок по содержанию пропадает (раздел
+       не открывается, подпунктов нет). Щёлкаем снова, пока раздел не
+       станет открытым, — не дольше трёх секунд. На телефоне содержание
+       в шторке: до щелчка её открывают, это и есть ожидание. */
+    for (let i = 0; !size.isMobile && i < 10; i += 1) {
+      if (await smesi.evaluate((el) => el.classList.contains('is-active'))) {
+        break;
+      }
+      await page.waitForTimeout(300);
+      await smesi.click();
+    }
     await page.waitForTimeout(900);
     if (size.isMobile) {
       await page.locator('.topic-open__btn').click();

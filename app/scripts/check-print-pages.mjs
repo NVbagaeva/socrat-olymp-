@@ -51,6 +51,22 @@ const SHEETS = [
   ['№5', '/zadaniya/5/pechat/', 's=p5-01&n=10&seed=print-check'],
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №11 — адреса те же, что собирает генератор (lib/zadanie11/sheet11.ts,
+     sheetQuery11): пресет «Вариант ЕГЭ» (один вариант из 8 задач),
+     пресет «Урок по разделу» для смесей со всеми блоками и полем для
+     решения, отработка 4 + 4 задачи двух типов. */
+  [
+    '№11 вариант',
+    '/zadaniya/11/pechat/',
+    'm=v&i=m&s=PR-04:1,SM-04:1,DP-07:1,PT-02:1,VD-05:1,OK-01:1,RB-01:1,PG-01:1&seed=print-check',
+  ],
+  [
+    '№11 урок смеси',
+    '/zadaniya/11/pechat/',
+    'm=o&i=m&s=SM-01:1,SM-02:1,SM-04:1,SM-06:1,SM-07:1,SM-08:1&seed=print-check' +
+      '&b=znat,primer,razminka,zadachi,oshibka,sam,dz&p=1',
+  ],
+  ['№11 отработка', '/zadaniya/11/pechat/', 'm=o&i=m&s=DP-07:4,RB-01:4&seed=print-check'],
 ];
 
 /* Высоты бумаги для Chromium: A4 и печатные области, округлённые до
@@ -128,14 +144,32 @@ async function openSheet(browser, url) {
   if (error !== undefined) {
     throw new Error(`${url}: набор листа не удался — ${error}`);
   }
-  /* Номер последней страницы из колонтитула «N / M». */
+  /* Страниц по колонтитулам «N / M». В листе бывает несколько
+     документов со своей нумерацией (у урока №11 домашняя работа —
+     отдельный лист: «1 / 8 … 8 / 8», затем «1 / 2, 2 / 2»). Каждый
+     документ должен идти подряд от 1 до M; страниц по колонтитулам —
+     сумма M всех документов. Нумерация с разрывом — null. */
   const declared = await page.evaluate(() => {
     const pages = [...document.querySelectorAll('#sheet-pages .sheet-page')];
-    const last = pages
-      .at(-1)
-      ?.innerText.match(/(\d+)\s*\/\s*(\d+)/g)
-      ?.at(-1);
-    return { pages: pages.length, footer: last ? Number(last.split('/')[1]) : null };
+    const nums = pages.map((p) => {
+      const m = p.innerText
+        .match(/(\d+)\s*\/\s*(\d+)/g)
+        ?.at(-1)
+        ?.split('/')
+        .map(Number);
+      return m ? { n: m[0], of: m[1] } : null;
+    });
+    let footer = 0;
+    let want = 1;
+    let of = 0;
+    for (const x of nums) {
+      if (x === null) return { pages: pages.length, footer: null };
+      if (want === 1) of = x.of;
+      if (x.n !== want || x.of !== of) return { pages: pages.length, footer: null };
+      want = want === of ? 1 : want + 1;
+      if (want === 1) footer += of;
+    }
+    return { pages: pages.length, footer: want === 1 ? footer : null };
   });
   return { page, declared };
 }
@@ -202,7 +236,7 @@ for (const [name, route, query] of SHEETS) {
       cells.push(`${pages}${blank ? ` (пустых ${blank})` : ''}`);
     }
     rows.push(
-      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`,
+      `${name.padEnd(16)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`,
     );
     await page.close();
   }
@@ -291,7 +325,7 @@ if (safari !== null) {
         `${name}, ${who}, WebKit: разрывы страниц ${g.breaks.join(', ')}`,
       );
       rows.push(
-        `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  WebKit: страница ${(maxH / MM).toFixed(1)} мм, ${Math.round(g.printed / A4_PX + 0.49)} листа A4 по высоте документа`,
+        `${name.padEnd(16)} ${who.padEnd(8)} лист ${declared.pages}  WebKit: страница ${(maxH / MM).toFixed(1)} мм, ${Math.round(g.printed / A4_PX + 0.49)} листа A4 по высоте документа`,
       );
       await page.close();
     }
