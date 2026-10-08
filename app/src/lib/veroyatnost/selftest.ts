@@ -275,10 +275,15 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
         duplicates.push(`повторяется идентификатор ${zadacha.id}`);
       }
       vidennye.add(zadacha.id);
-      if (nomera.has(zadacha.nomer)) {
-        duplicates.push(`повторяется номер конспекта ${zadacha.nomer}`);
+      /* Номер конспекта свой у каждой задачи автора; задача-вариант
+         того же прототипа (variant > 1) носит номер своей основы —
+         это не повтор, а тот же сюжет с другими числами. */
+      if (zadacha.variant === undefined) {
+        if (nomera.has(zadacha.nomer)) {
+          duplicates.push(`повторяется номер конспекта ${zadacha.nomer}`);
+        }
+        nomera.add(zadacha.nomer);
       }
-      nomera.add(zadacha.nomer);
 
       if (Math.abs(zadacha.otvet - zadacha.proverka) > TOCHNOST) {
         problems.push(`ответ ${zadacha.otvet} ≠ проверка ${zadacha.proverka}`);

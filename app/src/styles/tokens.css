@@ -218,6 +218,15 @@
   --color-z11-rb-soft: var(--green-50);
   --color-z11-pg: var(--pink-600);
   --color-z11-pg-soft: var(--pink-50);
+  /* Значки методов заданий №4 и №5: линия и подложка кружка. У №4 —
+     синяя гамма, у №5 — фиолетовая; один и тот же значок метода стоит
+     на опорных задачах, в тренажёре, генераторе и сводке варианта. */
+  --color-metod-4: var(--blue-600);
+  --color-metod-4-soft: var(--blue-100);
+  --color-metod-4-border: var(--blue-200);
+  --color-metod-5: var(--violet-600);
+  --color-metod-5-soft: var(--violet-50);
+  --color-metod-5-border: color-mix(in srgb, var(--violet-600) 22%, var(--white));
   /* Звёзды сложности. */
   --color-star: var(--sun-500);
   --color-star-off: var(--grey-300);

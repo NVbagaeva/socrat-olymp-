@@ -80,6 +80,12 @@ export interface ProblemCardProps {
   /** Раскрыто решение — задача не засчитывается; сообщается один раз. */
   onReveal?: () => void;
   disabled?: boolean;
+  /**
+   * Подсказки включены (по умолчанию). Выключены — кнопки «Показать
+   * решение» до первой проверки нет: ученик сначала отвечает сам, а
+   * решение открывается после верного или неверного ответа.
+   */
+  podskazki?: boolean;
   className?: string;
 }
 
@@ -108,6 +114,7 @@ export function ProblemCard({
   nextLabel = 'Следующая',
   onReveal,
   disabled = false,
+  podskazki = true,
   className,
 }: ProblemCardProps) {
   const [value, setValue] = useState('');
@@ -324,9 +331,11 @@ export function ProblemCard({
                 <Button onClick={proverit} disabled={disabled || value.trim() === ''}>
                   Проверить
                 </Button>
-                <Button variant="ghost" onClick={raskryt} disabled={disabled}>
-                  {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
-                </Button>
+                {podskazki || state === 'incorrect' ? (
+                  <Button variant="ghost" onClick={raskryt} disabled={disabled}>
+                    {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
+                  </Button>
+                ) : null}
               </>
             )}
             {onNext === undefined ? null : (

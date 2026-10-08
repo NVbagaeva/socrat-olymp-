@@ -30,7 +30,6 @@ import {
   texPlain,
   zadanieIllyustratsii,
   type Method,
-  type Parametry,
 } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import type { Razbor, RazborShag } from './razbor';
@@ -279,20 +278,6 @@ function otkrytayaModel(model: ReturnType<typeof modelVarianta>, id: string, n: 
   };
 }
 
-/**
- * Параметры рисунка для миниатюры навыка: первый вариант прототипа.
- * Считается на сборке прямо по банку — в пуле параметров нет, и
- * карточка навыка получает готовый рисунок, а не числа.
- */
-export function parametryMiniatyury(kindId: string): Parametry | undefined {
-  const prototype = [...BANK_4, ...BANK_5].find((p) => p.id === kindId);
-  const variant = prototype?.varianty[0];
-  if (prototype === undefined || variant === undefined || prototype.metodika === undefined) {
-    return undefined;
-  }
-  return modelVarianta(prototype, variant).parameters;
-}
-
 function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
   const otvet = otvetUchenika(prototype, variant.params);
   /* Отпечаток — с ключом задачи: у одного ответа в двух вариантах
@@ -371,6 +356,10 @@ export interface PrepPoolBlok {
   nazvanie: string;
   tip: string;
   zadachi: PrepPoolZadacha[];
+  /** Метод блока — значок на карточке (есть у блоков №4). */
+  metod?: string;
+  /** Картинка превью первой задачи блока (есть у блоков №4). */
+  kartinka?: { src: string; alt: string };
 }
 
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
@@ -378,9 +367,16 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const seal = sealAnswer(otvet, klyuchZadachi(zadacha.id));
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
+  /* Картинка — по прототипу задачи и её варианту; у варианта без
+     своего файла — картинка варианта 1: прототипы конспекта меняют
+     только числа, сюжет у всех вариантов один. */
+  const kartinkaId = zadacha.prototip?.id ?? zadacha.id;
+  const kartinka =
+    illyustratsiyaVarianta(kartinkaId, zadacha.variant ?? 1) ??
+    illyustratsiyaVarianta(kartinkaId, 1);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
-  const illustration = model === null ? illyustratsiyaVarianta(zadacha.id, 1) : undefined;
+  const illustration = model === null ? kartinka : undefined;
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
@@ -389,7 +385,9 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     steps: zapechatatRazbor(razbor, seal),
     ...(illustration === undefined ? {} : { illustration }),
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
-    ...(model === null ? {} : { model: otkrytayaModel(model, zadacha.id, 1) }),
+    ...(model === null
+      ? {}
+      : { model: { method: model.method, ...(kartinka === undefined ? {} : { illustration: kartinka }) } }),
   };
 }
 
@@ -404,6 +402,8 @@ function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
     nazvanie: blok.nazvanie,
     tip: blok.tip,
     zadachi: blok.zadachi.map((zadacha) => prepZadachaPool(zadacha)),
+    ...(blok.metod === undefined ? {} : { metod: blok.metod }),
+    ...(blok.kartinka === undefined ? {} : { kartinka: blok.kartinka }),
   }));
 }
 

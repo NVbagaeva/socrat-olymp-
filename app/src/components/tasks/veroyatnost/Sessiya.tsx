@@ -24,6 +24,11 @@ export interface SessiyaPlan {
   metod: string;
   source: RoundKind[];
   size: number;
+  /**
+   * Показывать подсказки: название метода в шапке карточки и кнопку
+   * «Показать решение» до ответа. Выключено — ученик сначала отвечает.
+   */
+  podskazki: boolean;
 }
 
 export interface SessiyaProps {
@@ -340,10 +345,11 @@ export function Sessiya({
         }}
         /* Метод в шапке — только в отработке: в смешанном режиме и
            в повторе ученик должен узнать его сам. */
-        {...(plan.rezhim === 'practice' && navyk !== undefined
+        {...(plan.rezhim === 'practice' && plan.podskazki && navyk !== undefined
           ? { metodLabel: navyk.nazvanie }
           : {})}
         istochnik={kind.istochnik}
+        podskazki={plan.podskazki}
         onResult={(right) => otvet(right, seychas())}
         onReveal={() => zapisat(false, false, seychas())}
         onNext={dalshe}

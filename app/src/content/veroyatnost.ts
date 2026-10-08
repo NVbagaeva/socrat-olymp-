@@ -11,13 +11,14 @@
  */
 
 import { OPORNYE } from './opornye';
-import type { RazdelTab } from './vkladki';
+import { TUTORS_TAIL, type RazdelTab } from './vkladki';
 import type { TutorMaterial } from './sections';
 import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
-import { trainerPage } from './trainerModes';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
+import { METODY_5 } from '@/lib/veroyatnost/metody5';
 /* Вкладка раздела описывается общим типом: лента у всех заданий одна
    (components/tasks/RazdelTabs). Имя оставлено прежним, чтобы
    не править импорты по всему разделу. */
@@ -38,16 +39,14 @@ export interface VeroyatnostSection {
   korotko?: string;
   /** Одна строка под заголовком. Про устройство раздела, не про предмет. */
   lead: string;
-  /** Пометка уровня рядом с заголовком. */
-  badge: string;
-  /**
-   * Вкладки раздела по порядку. У заданий они разные: у №4 есть
-   * «О задании», у №5 её пока нет.
-   */
+  /** Пометка уровня рядом с заголовком. Нет поля — бейджа нет (№5: профильный уровень без пометки). */
+  badge?: string;
+  /** Вкладки раздела по порядку — у №4 и №5 они одинаковые. */
   tabs: readonly VeroyatnostTab[];
   /**
-   * Меню «Для репетиторов» в ленте вкладок — то же, что у задания №12.
-   * Нет поля — нет и кнопки.
+   * Материалы вкладки «Для репетиторов»: заголовок, строка под ним и
+   * карточки файлов. Вкладка — обычная страница раздела
+   * (components/tasks/veroyatnost/Repetitory45).
    */
   tutors?: { title: string; lead: string; items: TutorMaterial[] };
   /**
@@ -60,34 +59,23 @@ export interface VeroyatnostSection {
 }
 
 /**
- * Вкладки задания №4 — по референсу тренажёра: О задании · Теория ·
- * Ключевые методы решения · Опорные задачи · Тренажёр ·
- * Генератор; «Для репетиторов» стоит в той же ленте кнопкой меню.
- * Теория живёт на своём адресе, а сам адрес раздела — это «О задании».
- * «Узнай метод» — режим тренажёра, а не вкладка: как и остальные
- * режимы, он выбирается в конфигураторе тренировки.
+ * Вкладки заданий №4 и №5 — одни и те же: О задании · Теория ·
+ * Ключевые методы решения · Опорные задачи · Тренажёр · Генератор ·
+ * Для репетиторов. Сам адрес раздела — это «О задании», теория живёт
+ * на своём адресе. «Для репетиторов» — обычная вкладка со страницей,
+ * а не меню в ленте. «Узнай метод» — режим тренажёра, а не вкладка.
  */
-const TABS_4: readonly VeroyatnostTab[] = [
+const TABS: readonly VeroyatnostTab[] = [
   { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
   { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
   { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/', icon: 'bulb' },
   { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
   { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
   { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
+  { id: 'repetitory', label: 'Для репетиторов', tail: TUTORS_TAIL, icon: 'materials' },
 ];
-
-/**
- * Вкладки задания №5: Теория · Ключевые методы решения ·
- * Опорные задачи · Тренажёр · Генератор. Вкладки «О задании»
- * нет — её текст для №5 автор ещё не писал; появится вместе с текстом.
- */
-const TABS_5: readonly VeroyatnostTab[] = [
-  { id: 'teoriya', label: 'Теория', tail: '', icon: 'book' },
-  { id: 'metody', label: 'Ключевые методы решения', tail: 'metody/', icon: 'bulb' },
-  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
-  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
-  { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
-];
+const TABS_4 = TABS;
+const TABS_5 = TABS;
 
 /**
  * Короткое имя темы №4 — для тренажёра и генератора: там страница уже
@@ -107,13 +95,16 @@ export const ZAGOLOVOK_4 = `Задание №4. ${KOROTKO_4}`;
 export const KOROTKO_5 = taskName('5');
 export const ZAGOLOVOK_5 = `Задание №5. ${KOROTKO_5}`;
 
-/** Подзаголовок раздела №4: пять методов списка А (lib/veroyatnost/metody4.ts). */
-export const PODZAGOLOVOK_4 =
-  'Одно задание — 5 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
-
-/** Подзаголовок раздела №5: десять методов автора (lib/veroyatnost/metody5.ts). */
-export const PODZAGOLOVOK_5 =
-  'Одно задание — 10 методов. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.';
+/**
+ * Подзаголовок раздела: число методов — то, что ученик видит в
+ * тренажёре и на опорных задачах (у №4 семь разделов списка Б,
+ * lib/veroyatnost/metody4.ts; у №5 десять методов автора).
+ */
+function podzagolovok(metodov: number): string {
+  return `Одно задание — ${counted(metodov, 'метод', 'метода', 'методов')}. Ученик смотрит на условие, узнаёт структуру и берёт подходящий метод.`;
+}
+export const PODZAGOLOVOK_4 = podzagolovok(OPORNYE_4.length);
+export const PODZAGOLOVOK_5 = podzagolovok(METODY_5.length);
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
@@ -172,7 +163,8 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     title: ZAGOLOVOK_5,
     korotko: KOROTKO_5,
     lead: PODZAGOLOVOK_5,
-    badge: 'Базовый уровень',
+    /* Бейджа уровня нет: задание №5 — профильный уровень, и пометки
+       «Базовый уровень» у него быть не должно. */
     tabs: TABS_5,
     /* Сборник «Задание 5»: scripts/build-pdf-5.mjs, workflow «PDF 5».
        Как и у №4, здесь только файлы для ученика. */
@@ -262,43 +254,74 @@ export interface RezhimOpisanie {
   lead: string;
 }
 
-/** Режимы — как в референсе, слово в слово; четвёртый — «Узнай метод». */
+/** Режимы — подписи по макету тренажёра; четвёртый — «Узнай метод». */
 export const REZHIMY: readonly RezhimOpisanie[] = [
-  { id: 'practice', title: 'Отработка', lead: 'Выбранные методы' },
-  { id: 'mixed', title: 'Смешанная', lead: 'Все методы вперемешку' },
-  { id: 'mistakes', title: 'Повтор ошибок', lead: 'Только ошибки' },
-  { id: 'uznay', title: 'Узнай метод', lead: 'Только условие: назвать метод' },
+  { id: 'practice', title: 'Отработка', lead: 'выбранные методы' },
+  { id: 'mixed', title: 'Вперемешку', lead: 'все методы' },
+  { id: 'mistakes', title: 'Повтор ошибок', lead: 'только ошибки' },
+  { id: 'uznay', title: 'Узнай метод', lead: 'только условие: назови метод' },
 ];
 
 /**
- * Слова конфигуратора тренировки — те же, что у задания №12, кроме
- * первого шага: здесь выбирают не навык, а метод. Уровней сложности у
- * задач вероятности нет, и конфигуратор этот ряд не показывает.
+ * Слова конфигуратора тренировки заданий №4 и №5 — по макету
+ * trenazher.png: три шага, закреплённая сводка справа, прогресс по
+ * методам внизу. Числа в подписях приходят из банка и хранилища.
  */
-export const KONFIGURATOR_SLOVA: typeof trainerPage = {
-  ...trainerPage,
-  skill: {
+export const TRENAZHER_SLOVA = {
+  metody: {
     step: '1',
     title: 'Выбери методы',
-    lead: 'Какие методы отрабатываем в разделе «{family}»? Можно выбрать несколько.',
-    unit: ['метод', 'метода', 'методов'],
+    lead: 'Отметь, по каким методам хочешь решать задачи.',
+    vBanke: (n: number): string => `В банке: ${counted(n, 'задача', 'задачи', 'задач')}`,
+    vse: 'Выбрать все',
+    vseLead: (n: number): string => `Все методы (${counted(n, 'задача', 'задачи', 'задач')})`,
+    /** Подпись кружка прогресса на карточке для озвучки. */
+    progress: 'решено верно',
   },
-  params: {
-    ...trainerPage.params,
-    lead: 'Выбери формат и количество задач',
+  rezhim: {
+    step: '2',
+    title: 'Режим',
+    lead: 'Выбери, как тренироваться.',
+    oshibok: (n: number): string => counted(n, 'задача', 'задачи', 'задач'),
+    netOshibok: 'ошибок пока нет',
+    novoe: 'Новое',
   },
-  summary: {
+  skolko: {
+    step: '3',
+    title: 'Сколько задач',
+    lead: 'Выбери количество задач.',
+    all: 'Все',
+  },
+  svodka: {
     title: 'Выбранная тренировка',
-    note: 'Все задачи соответствуют реальным прототипам ЕГЭ.',
+    metody: (n: number): string => `Выбраны методы (${n})`,
+    vseMetody: 'Все методы',
+    ubrat: 'Убрать метод',
+    rezhim: 'Режим',
+    skolko: 'Количество задач',
+    podskazki: 'Показывать подсказки',
+    start: 'Начать тренировку',
+    minut: (n: number): string => `≈ ${counted(n, 'минута', 'минуты', 'минут')}`,
   },
-};
+  progress: {
+    title: 'Мой прогресс по методам',
+    lead: 'Доля верно решённых задач в тренажёре.',
+    leadUznay: 'Доля верно узнанных методов в режиме «Узнай метод».',
+    trenazher: 'Тренажёр',
+    uznay: 'Узнай метод',
+    ring: 'решено верно',
+    ringUznay: 'узнано верно',
+    pusto: 'Пока ни одной закрытой задачи',
+    sbros: 'Сбросить прогресс',
+  },
+} as const;
 
 /**
  * Ярлыки к конфигуратору — как у задания №12: адрес /trenazher/{id}/
  * открывает ту же вкладку с уже выбранным методом или режимом.
  */
 export const YARLYKI_REZHIMOV: readonly { id: string; title: string; mode: Rezhim }[] = [
-  { id: 'mixed', title: 'Смешанная тренировка', mode: 'mixed' },
+  { id: 'mixed', title: 'Вперемешку', mode: 'mixed' },
   { id: 'uznay-metod', title: 'Узнай метод', mode: 'uznay' },
 ];
 
@@ -363,6 +386,29 @@ export const PODGOTOVKA_SLOVA = {
   kSpisku: 'К списку блоков →',
   /** Подпись под карточкой блока в списке. */
   zadach: (vsego: number): string => counted(vsego, 'задача', 'задачи', 'задач'),
+  /** Строка «12 из 30 задач» над общей полосой. */
+  izVsego: (resheno: number, vsego: number): string =>
+    `${resheno} из ${counted(vsego, 'задача', 'задач', 'задач')}`,
+} as const;
+
+/**
+ * Слова дорожки блоков задания №4 — вкладка «Опорные задачи» по
+ * макету: шаги конспекта один за другим, карточка блока с кнопкой
+ * и превью первой задачи, внизу подсказка про тренажёр.
+ */
+export const DOROZHKA_SLOVA = {
+  lead: 'Идём по шагам конспекта: каждый блок — 10 задач на один приём.',
+  tyZdes: 'Ты здесь',
+  proydeno: (vsego: number): string => `Пройдено ${vsego}/${vsego}`,
+  schet: (resheno: number, vsego: number): string => `${resheno}/${vsego}`,
+  knopka: { povtorit: 'Повторить', prodolzhit: 'Продолжить', nachat: 'Начать' },
+  /** Подпись превью для озвучки: что это за текст справа. */
+  preview: 'Первая задача блока',
+  podskazka: {
+    title: 'Прошёл все блоки?',
+    text: 'Переходи в Тренажёр — там задачи всех методов вперемешку.',
+    knopka: 'В тренажёр',
+  },
 } as const;
 
 /* ── Слова листа для печати: вкладка «Генератор» ─────────────────── */
