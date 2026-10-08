@@ -167,6 +167,12 @@ for (const [name, browser] of browsers) {
         isMobile: name !== 'Firefox',
         hasTouch: true,
       });
+      /* Окно «Впервые здесь?» уже закрыто: иначе через 2,5 с (а при
+         переводе часов — сразу) оно ложится поверх нижней панели.
+         Проверяется навигация, не онбординг. */
+      await context.addInitScript(() =>
+        localStorage.setItem('budetege:onboarding:v1', JSON.stringify({ welcomeSeen: true })),
+      );
       const page = await context.newPage();
       const requested = [];
       page.on('request', (r) => requested.push(new URL(r.url()).pathname));
