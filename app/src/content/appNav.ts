@@ -8,6 +8,7 @@
  */
 
 import type { NavItem } from '@/components/ui';
+import { HOWTO_HREF } from '@/content/onboarding';
 import { tasksPage } from '@/content/tasks';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
@@ -35,6 +36,14 @@ export const topNav: NavItem[] = [
     short: 'Учитель',
     href: '/dlya-uchitelya/',
     icon: 'teacher',
+  },
+  /* Инструкция и тур. В нижнюю панель не входит — живёт на экране «Ещё». */
+  {
+    id: 'help',
+    label: 'Как пользоваться',
+    short: 'Инструкция',
+    href: HOWTO_HREF,
+    icon: 'help',
   },
 ];
 

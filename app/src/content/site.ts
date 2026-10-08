@@ -4,6 +4,7 @@
  * Меняется здесь, в разметке текста нет.
  */
 
+import { HOWTO_HREF } from '@/content/onboarding';
 import { tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
@@ -28,6 +29,7 @@ export const site = {
   nav: [
     { label: 'Об авторе', href: '/about/' },
     { label: 'Банк заданий', href: tasksPage.href },
+    { label: 'Как пользоваться', href: HOWTO_HREF },
     { label: 'Учителям', href: '/#how' },
   ] satisfies SiteLink[],
 
