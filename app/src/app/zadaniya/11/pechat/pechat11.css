@@ -149,3 +149,63 @@
 .z11-sheet-osh__gde {
   margin: 0 0 var(--sheet-step);
 }
+
+/* ── Таблица модели: строка уравнения ─────────────────────────────
+   В цвете — светло-зелёная, как на сайте; в ч/б — толстая рамка
+   (выше). Подпись — под таблицей: сбоку на листе места нет. */
+[data-sheet-theme='color'] .z11-sheet-tab tr.is-uravnenie > * {
+  background: #e6f5ec;
+}
+.z11-sheet-tab-vyn {
+  margin: calc(var(--sheet-step) * -1) 0 calc(var(--sheet-step) * 1.5);
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  color: var(--sheet-ink-2);
+}
+[data-sheet-theme='color'] .z11-sheet-tab-vyn {
+  color: #1d7a45;
+}
+
+/* ── Решение на листе учителя: узкая таблица справа от шагов ────── */
+.z11-sheet-resh::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+.z11-sheet-resh--sboku > .z11-sheet-tab {
+  float: right;
+  margin: 0 0 calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 4);
+}
+/* Шаги — блоком, а не колонкой flex: так строки обтекают таблицу. */
+.z11-sheet-resh--sboku > .z11-sheet-steps {
+  display: block;
+  margin-top: 0;
+}
+.z11-sheet-resh--sboku > .z11-sheet-steps > .sheet-step + .sheet-step {
+  margin-top: calc(var(--sheet-step) * 0.75);
+}
+
+/* ── Место для решения на листе ученика: поле в клетку 5 мм ─────── */
+.z11-sheet-mesto {
+  height: 40mm;
+  margin-top: calc(var(--sheet-step) * 2);
+  border: var(--sheet-rule-width) solid var(--sheet-ink-3);
+  border-radius: 1mm;
+  background-image:
+    linear-gradient(to right, #d5dbe4 0.2mm, transparent 0.2mm),
+    linear-gradient(to bottom, #d5dbe4 0.2mm, transparent 0.2mm);
+  background-size: 5mm 5mm;
+  background-position: -0.1mm -0.1mm;
+}
+.z11-sheet-mesto--malo {
+  height: 20mm;
+}
+
+/* Шаги решения плотнее: на листе учителя решение полное, по методике,
+   и каждая лишняя строка — лишняя страница. */
+.z11-sheet-steps {
+  line-height: 1.35;
+}
+.z11-sheet-steps .katex {
+  line-height: 1.15;
+}

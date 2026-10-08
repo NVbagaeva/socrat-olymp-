@@ -5,6 +5,7 @@
  * их считает lib/zadanie11/taxonomy.ts из данных.
  */
 
+import { plural } from '@/lib/plural';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { SectionId } from '@/lib/zadanie11/types';
@@ -366,6 +367,8 @@ export const TRENAZHER_11 = {
   maloNote: 'Тренировка будет короче — или добавьте новые задачи тех же типов.',
   dobavitNovye: 'Добавить новые',
   start: 'Начать тренировку',
+  startMob: (tipov: number, zadach: number) =>
+    `${zadach} ${plural(zadach, 'задача', 'задачи', 'задач')} · ${tipov} ${plural(tipov, 'тип', 'типа', 'типов')}`,
   vremya: (a: number, b: number) => `Примерное время: ${a}–${b} минут`,
   tipov: ['тип задач', 'типа задач', 'типов задач'] as const,
   /* Экран решения. */

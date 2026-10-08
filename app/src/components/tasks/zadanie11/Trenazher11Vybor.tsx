@@ -417,6 +417,23 @@ export function Trenazher11Vybor({
           ) : null}
         </div>
       </aside>
+      {/* Телефон и планшет: карточка выбора — в конце страницы, поэтому
+          кнопка старта закреплена внизу экрана, пока что-то выбрано. */}
+      {itog.length > 0 ? (
+        <div className="z11-tr__start-mob">
+          <span className="z11-tr__start-mob-text">
+            {TRENAZHER_11.startMob(itog.length, n.count)}
+          </span>
+          <Button
+            size="sm"
+            disabled={zagruzka || (n.istochnik === 'bank' && vBankeVsego === 0)}
+            onClick={onStart}
+          >
+            <Piktogramma name="play" />
+            {zagruzka ? TRENAZHER_11.gotovim : TRENAZHER_11.start}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

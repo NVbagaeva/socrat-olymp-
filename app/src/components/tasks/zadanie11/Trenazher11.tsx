@@ -103,8 +103,8 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     try {
       const { sobratZadachu } = await import('@/lib/zadanie11/trenazher/zadacha');
       const zadachi = plan.map((p) => sobratZadachu(p, dannye.bank));
+      /* К условию задачи прокручивает экран решения (Trenazher11Reshenie). */
       setEkran({ vid: 'reshenie', zadachi, podskazki: nastroyki.podskazki });
-      window.scrollTo({ top: 0 });
     } catch (e) {
       setOshibka((e as Error).message);
       setEkran({ vid: 'vybor' });

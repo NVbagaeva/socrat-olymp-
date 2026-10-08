@@ -3904,3 +3904,174 @@
   white-space: normal;
   text-align: left;
 }
+
+/* ══ Телефон (PR 12): шапка, лента вкладок, таблица, старт ══════ */
+
+/* Строка прогресса вместо кольца — только на телефоне. */
+.z11-progress__line {
+  display: none;
+}
+/* Подпись строки уравнения под таблицей — только на узком экране. */
+.z11-tab__vynoska-pod {
+  display: none;
+}
+/* Экран решения встаёт под липкую ленту вкладок. */
+.z11-resh {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-3));
+}
+/* Липкая кнопка старта — пока карточка выбора не стоит сбоку. */
+.z11-tr__start-mob {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0 calc(var(--space-2) * -1);
+  padding: var(--space-3) var(--space-2) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+.z11-tr__start-mob-text {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+@media (min-width: 1180px) {
+  .z11-tr__start-mob {
+    display: none;
+  }
+}
+@media (max-width: 1023.98px) {
+  .z11-tr__start-mob {
+    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: var(--space-3);
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* Шапка раздела: заголовок, бейдж и лид — плотнее; кольцо прогресса
+     заменено строкой с полосой. */
+  .z11-shell .z11-head {
+    gap: var(--space-3);
+    margin: var(--space-3) 0 var(--space-4);
+  }
+  .z11-shell .z11-head .section-head__lead {
+    margin-bottom: 0;
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .z11-shell .z11-head .section-head__media {
+    max-width: none;
+  }
+  .z11-progress {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: stretch;
+    gap: var(--space-1) var(--space-3);
+  }
+  .z11-progress .progress-ring,
+  .z11-progress .z11-progress__note {
+    display: none;
+  }
+  .z11-progress__line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .z11-progress__line b {
+    font-size: var(--fs-caption);
+  }
+  .z11-progress__bar {
+    width: 72px;
+  }
+  .z11-progress .topic-progress__text {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: none;
+    text-align: left;
+  }
+
+  /* Лента вкладок шире экрана: края, за которыми есть вкладки,
+     растворяются — видно, что ленту можно прокрутить. */
+  .z11-shell .topic-tabs {
+    --z11-fade-l: 0px;
+    --z11-fade-r: 32px;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--z11-fade-l),
+      #000 calc(100% - var(--z11-fade-r)),
+      transparent 100%
+    );
+  }
+  @supports (animation-timeline: scroll()) {
+    .z11-shell .topic-tabs {
+      animation: z11-lenta-kraya linear both;
+      animation-timeline: scroll(self inline);
+    }
+  }
+}
+@property --z11-fade-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --z11-fade-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 32px;
+}
+@keyframes z11-lenta-kraya {
+  0% {
+    --z11-fade-l: 0px;
+    --z11-fade-r: 32px;
+  }
+  8% {
+    --z11-fade-l: 32px;
+  }
+  92% {
+    --z11-fade-r: 32px;
+  }
+  100% {
+    --z11-fade-l: 32px;
+    --z11-fade-r: 0px;
+  }
+}
+
+/* Таблица смесей уже 640 px: столбец выноски скрыт, подпись — под
+   таблицей, а не в прокрутке вбок. */
+@media (max-width: 639.98px) {
+  .z11-tab .z11-tab__vyn {
+    display: none;
+  }
+  .z11-tab__vynoska-pod {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--color-success);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    font-weight: 600;
+  }
+}
+
+/* Генератор: «Место для решения» и поле в клетку в превью. */
+.z11-gen__mesto {
+  align-items: flex-start;
+  margin-top: var(--space-2);
+}
+.z11-a4__mesto {
+  height: 96px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+.z11-a4__mesto--malo {
+  height: 48px;
+}

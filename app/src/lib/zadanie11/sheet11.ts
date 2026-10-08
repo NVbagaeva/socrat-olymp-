@@ -83,6 +83,8 @@ export interface SheetParams11 {
   bloki: BlokLista[];
   /** Задач в домашней работе (блок «dz»). */
   dz: number;
+  /** Место для решения (поле в клетку) под задачами на листе ученика. */
+  mesto: boolean;
 }
 
 export const VARIANTS_MAX_11 = 8;
@@ -108,6 +110,7 @@ export function sheetQuery11(p: SheetParams11): string {
   if (p.theme === 'print') q.set('t', 'print');
   if (p.bloki.join() !== BLOKI_PO_UMOLCHANIYU.join()) q.set('b', p.bloki.join(','));
   if (p.bloki.includes('dz') && p.dz !== DZ_PO_UMOLCHANIYU) q.set('d', String(p.dz));
+  if (p.mesto) q.set('p', '1');
   return q.toString();
 }
 
@@ -153,6 +156,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     theme: q.get('t') === 'print' ? 'print' : 'color',
     bloki: normBloki((q.get('b') ?? BLOKI_PO_UMOLCHANIYU.join(',')).split(',')),
     dz: Number.isFinite(dz) && dz >= 1 ? Math.min(DZ_MAX, Math.floor(dz)) : DZ_PO_UMOLCHANIYU,
+    mesto: q.get('p') === '1',
   };
 }
 
@@ -448,7 +452,13 @@ export function tablitsaHtml(t: Tablitsa, skryt = false): string {
     )
     .join('');
   const title = t.title === undefined ? '' : `<caption>${cell(t.title)}</caption>`;
-  return `<table class="z11-sheet-tab">${title}<thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  /* Строка уравнения подписана под таблицей; в условии (skryt) — нет:
+     там это подсказка. */
+  const vyn =
+    !skryt && t.uravnenie !== undefined
+      ? `<p class="z11-sheet-tab-vyn">${SHEET_11.uravnenie}</p>`
+      : '';
+  return `<table class="z11-sheet-tab">${title}<thead>${head}</thead><tbody>${rows}</tbody></table>${vyn}`;
 }
 
 /** Число для ответа: 2.25 → «2,25». */
@@ -458,6 +468,14 @@ function chislo(x: number): string {
 
 function reshenieHtml(etapy: { title: string; lines: string[] }[], tables: Tablitsa[]): string {
   const tab = tables.map((t) => tablitsaHtml(t)).join('');
+  /* Узкая таблица S | v | t или A | p | t — справа от шагов, шаги её
+     обтекают: решение на листе учителя короче на высоту таблицы. */
+  const t0 = tables[0];
+  const sboku =
+    tables.length === 1 &&
+    t0 !== undefined &&
+    (t0.vid === 'dvizhenie' || t0.vid === 'rabota') &&
+    t0.head.length <= 4;
   const items = etapy
     .map((e) => {
       const lines = e.lines.filter((l) => !/^\*\*Ответ:\*\*/.test(l));
@@ -465,7 +483,7 @@ function reshenieHtml(etapy: { title: string; lines: string[] }[], tables: Tabli
       return `<li class="sheet-step"><b>${typeset(e.title)}.</b> ${lines.map((l) => typeset(l)).join(' ')}</li>`;
     })
     .join('');
-  return `${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol>`;
+  return `<div class="z11-sheet-resh${sboku ? ' z11-sheet-resh--sboku' : ''}">${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol></div>`;
 }
 
 /** Разбор с ошибкой для ученика: таблицы и шаги, без ответа и без пометок. */
@@ -860,16 +878,25 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
       (uchitel ? ` · ${SHEET_11.resheniya}` : ''),
     ...(variant === undefined ? {} : { variant }),
   });
+  /* Поле для решения: у задач листа, кроме опорных микрозадач; у
+     «Найди ошибку» — пониже, там пишут одну исправленную строку. */
+  const mesto = (z: ListZadacha): string =>
+    !p.mesto || z.poz.vid === 'mikro' || z.chast === 'razminka' || z.chast === 'primer'
+      ? ''
+      : `<div class="z11-sheet-mesto${z.chast === 'oshibka' ? ' z11-sheet-mesto--malo' : ''}"></div>`;
   const uchenikTask =
     (sStrokoy: boolean) =>
-    (z: ListZadacha): SheetTask => ({
-      no: z.no,
-      id: z.pos,
-      questionHtml: z.questionHtml,
-      options: null,
-      figureSvg: null,
-      solutionHtml: sStrokoy ? STROKA_OTVETA : null,
-    });
+    (z: ListZadacha): SheetTask => {
+      const html = mesto(z) + (sStrokoy ? STROKA_OTVETA : '');
+      return {
+        no: z.no,
+        id: z.pos,
+        questionHtml: z.questionHtml,
+        options: null,
+        figureSvg: null,
+        solutionHtml: html === '' ? null : html,
+      };
+    };
   const uchitelTask = (z: ListZadacha): SheetTask => ({
     no: z.no,
     id: z.pos,
@@ -912,7 +939,15 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
     vid === 'uchenik'
       ? []
       : [
-          answers.sectionHead(SHEET_11.otvety, SHEET_11.otvetyNote, { section: nV > 1 }),
+          /* Один вариант без домашней работы — ответы сразу за последней
+             задачей, если помещаются: отдельная страница ради таблицы в
+             одну строку не нужна. Вариантов несколько или есть домашняя
+             работа (своя страница) — раздел ответов с новой страницы. */
+          nV > 1 || list.poVariantam.some((zs) => zs.some((z) => z.chast === 'dz'))
+            ? answers.sectionHead(SHEET_11.otvety, SHEET_11.otvetyNote, { section: nV > 1 })
+            : answers
+                .sectionHead(SHEET_11.otvety, SHEET_11.otvetyNote, { section: false })
+                .replace(' data-page-break="1"', ''),
           ...list.poVariantam.flatMap((zs, i) => {
             const osnovnye = zs.filter((z) => z.chast !== 'dz' && z.chast !== 'primer');
             const dz = zs.filter((z) => z.chast === 'dz');

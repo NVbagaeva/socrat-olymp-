@@ -450,6 +450,7 @@ const listy = { zadach: 0 };
     sostav: [],
     bloki: ['zadachi'],
     dz: 4,
+    mesto: false,
   };
 
   /* Маршруты: все разделы покрыты, блоки и подтипы существуют. */
@@ -542,6 +543,7 @@ const listy = { zadach: 0 };
       ],
       bloki: ['znat', 'razminka', 'primer', 'zadachi', 'oshibka', 'sam', 'dz'],
       dz: 3,
+      mesto: true,
     },
     /* Варианты с рабочим листом: на позиции i во всех вариантах — один тип, и в ДЗ тоже. */
     {
@@ -611,6 +613,17 @@ const listy = { zadach: 0 };
       add(`${where}: решения в листе ученика не только у разобранного примера`);
     if (!/sheet-task-answer/.test(uchit) || !/Ответы/.test(uchit))
       add(`${where}: в листе учителя нет ответов`);
+    /* Место для решения: у ученика — под каждой задачей, кроме опорных
+       микрозадач и примера; у учителя — нет. */
+    const poley = (uch.match(/z11-sheet-mesto(?![-\w])/g) ?? []).length;
+    const nuzhno = p.mesto
+      ? list.poVariantam
+          .flat()
+          .filter((z) => z.poz.vid !== 'mikro' && z.chast !== 'razminka' && z.chast !== 'primer')
+          .length
+      : 0;
+    if (poley !== nuzhno) add(`${where}: полей для решения ${poley}, а нужно ${nuzhno}`);
+    if (/z11-sheet-mesto/.test(uchit)) add(`${where}: поле для решения на листе учителя`);
     /* Рабочий лист: блоки на листе в заданном порядке, ДЗ — своей
        страницей и своей таблицей ответов, нумерация сквозная. */
     if (p.bloki.length > 1) {

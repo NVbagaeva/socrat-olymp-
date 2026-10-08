@@ -90,8 +90,13 @@ export function Trenazher11Reshenie({
   const [razbor, setRazbor] = useState<Razbor11 | null>(null);
   /* Начало задачи — для времени в статистике; ставится эффектом. */
   const nachalo = useRef<number | null>(null);
+  /* Экран решения: при старте и на каждой задаче — к её началу, под
+     липкую ленту вкладок (scroll-margin-top в CSS), а не к верху
+     страницы: на телефоне шапка раздела заняла бы весь первый экран. */
+  const ekran = useRef<HTMLElement>(null);
   useEffect(() => {
     nachalo.current = Date.now();
+    ekran.current?.scrollIntoView({ block: 'start', behavior: index === 0 ? 'auto' : 'smooth' });
   }, [index]);
 
   const zadacha = zadachi[index];
@@ -184,13 +189,12 @@ export function Trenazher11Reshenie({
     setMimo([]);
     setOtkrytye(new Set());
     setRazbor(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   const tekShag = shagi[shag];
 
   return (
-    <section className={clsx('z11-resh', tsvetRazdela(z.section))}>
+    <section ref={ekran} className={clsx('z11-resh', tsvetRazdela(z.section))}>
       <header className="z11-resh__top">
         <button type="button" className="z11-resh__nazad" onClick={onNazad}>
           <Piktogramma name="back" />

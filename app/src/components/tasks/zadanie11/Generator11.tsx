@@ -148,6 +148,8 @@ export function Generator11({
   const [poryadok, setPoryadok] = useState<BlokLista[]>([...BLOKI_LISTA]);
   const [vkl, setVkl] = useState<Set<BlokLista>>(() => new Set(BLOKI_PRESETA.ege));
   const [dzN, setDzN] = useState(DZ_PO_UMOLCHANIYU);
+  /* Поле для решения у ученика: по умолчанию — у урока, не у варианта ЕГЭ. */
+  const [mesto, setMesto] = useState(false);
   /* Фильтр списка типов в «Своём составе»: что показывать, не что брать. */
   const [uroven, setUroven] = useState<0 | Level>(0);
   const [otkryty, setOtkryty] = useState<Set<SectionId>>(new Set());
@@ -204,10 +206,12 @@ export function Generator11({
       setSostav(sostavEge());
       setRezhim('komplekt');
       setVkl(new Set(BLOKI_PRESETA.ege));
+      setMesto(false);
     } else if (next === 'urok') {
       setSostav(sostavUroka(razdely.find((r) => r.id === urokRazdel)?.podtipy ?? [], urokN));
       setRezhim('otrabotka');
       setVkl(new Set(BLOKI_PRESETA.urok));
+      setMesto(true);
     }
   }
 
@@ -244,6 +248,7 @@ export function Generator11({
       theme: 'color',
       bloki,
       dz: dzN,
+      mesto,
     });
   }
 
@@ -264,6 +269,7 @@ export function Generator11({
       setPreset('urok');
       setRezhim('otrabotka');
       setVkl(new Set(BLOKI_PRESETA.urok));
+      setMesto(true);
       urok(sec as SectionId, urokN);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- только при открытии
@@ -295,6 +301,12 @@ export function Generator11({
         <span className="z11-a4__no">{z.no}</span>
         <div className="z11-a4__body">
           <div dangerouslySetInnerHTML={{ __html: z.questionHtml }} />
+          {!uchitel && params?.mesto === true && z.poz.vid !== 'mikro' && z.chast !== 'razminka' ? (
+            <div
+              className={clsx('z11-a4__mesto', z.chast === 'oshibka' && 'z11-a4__mesto--malo')}
+              aria-hidden="true"
+            />
+          ) : null}
           {uchitel ? (
             <div className="z11-a4__reshenie">
               <div dangerouslySetInnerHTML={{ __html: z.solutionHtml }} />
@@ -695,6 +707,16 @@ export function Generator11({
               );
             })}
           </ol>
+          <Checkbox
+            className="z11-gen__mesto"
+            checked={mesto}
+            onChange={(e) => setMesto(e.target.checked)}
+          >
+            <span className="z11-gen__blok-name">
+              <b>{GENERATOR_11.mesto}</b>
+              <span>{GENERATOR_11.mestoNote}</span>
+            </span>
+          </Checkbox>
         </section>
 
         <Details title={GENERATOR_11.dopolnitelno} className="z11-gen__dop">
