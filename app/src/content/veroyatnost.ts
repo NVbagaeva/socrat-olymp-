@@ -5,9 +5,8 @@
  * рекламных фраз нет намеренно: их пишет автор, а пустое место
  * честнее придуманного текста.
  *
- * Названия разделов взяты из кодификатора ФИПИ и из задачников
- * Е. А. Ширяевой, по которым собираются банки: «Основные понятия
- * теории вероятностей» и «Вероятности событий».
+ * Названия разделов — «Вероятность: простая» и «Вероятность:
+ * сложная» — по позициям заданий №4 и №5 в кодификаторе ФИПИ.
  */
 
 import { OPORNYE } from './opornye';
@@ -175,7 +174,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
         {
           id: 'workbook',
           title: 'Рабочая тетрадь для репетиторов',
-          lead: 'Задачи конспекта и прототипы с заготовками рисунков и строкой для ответа',
+          lead: 'Опорные задачи и прототипы с заготовками рисунков и строкой для ответа',
           icon: 'doc',
           file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf'),
         },
@@ -353,7 +352,7 @@ export function uznaySlova(zadanie: Zadanie) {
     pravilnyy: 'Правильный метод:',
     priznaki: 'Признаки в условии:',
     kakVidno: 'Как это было видно:',
-    istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Задача конспекта' },
+    istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Опорная задача' },
     progress: {
       title: 'Прогресс «Узнай метод»',
       lead: 'Считается отдельно от решённых задач: узнано верно из показанных, по каждому методу.',
@@ -374,7 +373,7 @@ export function uznaySlova(zadanie: Zadanie) {
  */
 export const PODGOTOVKA_SLOVA = {
   title: OPORNYE.title,
-  lead: 'Задачи авторского конспекта. Блоки идут в порядке конспекта: это последовательность, а не каталог.',
+  lead: 'Блоки идут по порядку: каждый следующий опирается на предыдущий.',
   allLabel: 'Все блоки',
   /** Строка над рядом кружков. */
   schet: (nomer: number, vsego: number): string => `Задача ${nomer} из ${vsego}`,
@@ -397,7 +396,7 @@ export const PODGOTOVKA_SLOVA = {
  * и превью первой задачи, внизу подсказка про тренажёр.
  */
 export const DOROZHKA_SLOVA = {
-  lead: 'Идём по шагам конспекта: каждый блок — 10 задач на один приём.',
+  lead: 'Идём шаг за шагом: каждый блок — 10 задач на один приём.',
   tyZdes: 'Ты здесь',
   proydeno: (vsego: number): string => `Пройдено ${vsego}/${vsego}`,
   schet: (resheno: number, vsego: number): string => `${resheno}/${vsego}`,

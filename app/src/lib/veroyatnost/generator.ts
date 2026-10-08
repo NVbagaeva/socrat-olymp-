@@ -18,7 +18,7 @@
  */
 
 import { seeded } from '../zadanie3/podhod';
-import type { Params, Prototype, Variant } from './types';
+import { round, type Params, type Prototype, type Variant } from './types';
 
 /** Сколько вариантов добавляет генератор к исходным. */
 export const SKOLKO = 10;
@@ -113,9 +113,52 @@ export function sgenerirovat(prototype: PrototipSGeneratorom, skolko = SKOLKO): 
   return out;
 }
 
-/** Прототип целиком: исходные варианты плюс сгенерированные. */
+/**
+ * Ответ строго между 0 и 1 — общее правило для всех прототипов №4 и
+ * №5, кроме тех, где ответ — число попыток (формат «целое»).
+ *
+ * Проверяется ответ в том виде, в каком его пишет ученик: после
+ * округления, если условие его просит. Вариант «50 спортсменов, из них
+ * 50 из России» даёт ровно 1, а «1 сумка из 292, до сотых» — 0,9966,
+ * то есть тоже 1 после округления; оба не годятся.
+ */
+export function otvetVIntervale(
+  prototype: Pick<Prototype, 'format' | 'otvet' | 'okruglenie'>,
+  params: Params,
+): boolean {
+  if (prototype.format === 'целое') {
+    return true;
+  }
+  const tochno = prototype.otvet(params);
+  const znakov = prototype.okruglenie(params);
+  const otvet = Math.round((znakov === null ? tochno : round(tochno, znakov)) * 1e9) / 1e9;
+  return Number.isFinite(otvet) && otvet > 0 && otvet < 1;
+}
+
+/**
+ * Правила генерации по идентификатору прототипа. Нужны автотесту: он
+ * гоняет каждое правило на сотнях зёрен, а в сам прототип правило не
+ * попадает — варианты прототипа зафиксированы на сборке.
+ */
+export const GENERATORY_PROTOTIPOV = new Map<string, (r: Rng) => Params>();
+
+/**
+ * Прототип целиком: исходные варианты плюс сгенерированные.
+ *
+ * Допустимость прототипа дополняется общим правилом otvetVIntervale:
+ * генератор отбрасывает вырожденный кандидат и берёт следующий, а
+ * автотест той же проверкой ловит вырожденный вариант из источника.
+ */
 export function prototip(opisanie: PrototipSGeneratorom): Prototype {
-  const { generator, ...rest } = opisanie;
-  void generator;
-  return { ...rest, varianty: [...opisanie.varianty, ...sgenerirovat(opisanie)] };
+  const { generator, dopustimo, ...rest } = opisanie;
+  const prototype: PrototipSGeneratorom = {
+    ...opisanie,
+    dopustimo: (p) => dopustimo(p) && otvetVIntervale(opisanie, p),
+  };
+  GENERATORY_PROTOTIPOV.set(opisanie.id, generator);
+  return {
+    ...rest,
+    dopustimo: prototype.dopustimo,
+    varianty: [...opisanie.varianty, ...sgenerirovat(prototype)],
+  };
 }
