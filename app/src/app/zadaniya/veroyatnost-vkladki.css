@@ -175,7 +175,7 @@
 }
 
 /* Карточка блока: слева значок, текст и полоса с кнопкой, справа
-   превью первой задачи на голубой подложке. */
+   превью — задача по картинке на голубой подложке. */
 .vop-blok {
   position: relative;
   display: grid;
@@ -302,11 +302,7 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
-  /* Превью, а не вся задача: длинное условие обрезается многоточием. */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  overflow: hidden;
+  /* Короткая задача по картинке видна целиком, без обрезки. */
 }
 .vop-blok__kartinka {
   display: block;
@@ -1110,19 +1106,32 @@
   outline-offset: 2px;
 }
 
-/* Карточки сюжетов: картинка, название, код, чекбокс в углу. */
+/* Карточки сюжетов — по макету generator.png. Карточка — колонка:
+   сверху зона картинки фиксированной высоты на голубой подложке,
+   картинка вписана в неё целиком; под зоной, в потоке, название
+   (не больше двух строк) и код прототипа. Поверх зоны лежит только
+   чекбокс на белом кружке. Карточки ряда одной высоты: ячейка сетки
+   тянется по самой высокой, карточка занимает ячейку целиком.
+
+   Карточка — <button>, и раскладку несёт flex, а не grid: сетка на
+   кнопке в части браузеров не работает, а в той, что работает,
+   картинка с max-height: 100% в строке auto не ужималась и
+   наезжала на название. */
 .vgen-karty {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
 }
 .vgen-karta {
+  --vgen-pic: 132px;
   position: relative;
-  display: grid;
-  justify-items: start;
-  align-content: start;
-  gap: var(--space-1);
-  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -1132,8 +1141,7 @@
   cursor: pointer;
   transition:
     border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease),
-    background var(--dur-hover) var(--ease);
+    box-shadow var(--dur-hover) var(--ease);
 }
 .vgen-karta:hover {
   border-color: var(--color-accent-soft);
@@ -1143,22 +1151,48 @@
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+/* Выбранная: синяя рамка (вторая линия тенью, чтобы карточка не
+   прыгала на пиксель), фон остаётся белым — как на макете. */
 .vgen-karta.is-checked {
   border-color: var(--color-primary);
-  background: var(--color-surface-info);
   box-shadow: 0 0 0 1px var(--color-primary);
 }
+
+/* Зона картинки: своя высота, голубая подложка, картинка по центру
+   целиком — без обрезки и без выхода за зону. */
+.vgen-karta__pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: var(--vgen-pic);
+  padding: var(--space-2);
+  overflow: hidden;
+  background: var(--color-surface-info);
+  border-bottom: 1px solid var(--color-border-info);
+}
+.vgen-karta__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Чекбокс — в правом верхнем углу поверх зоны картинки, на белом
+   кружке, чтобы читался на любой картинке. */
 .vgen-karta__box {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--color-border-strong);
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   color: var(--color-text-inverse);
 }
 .vgen-karta__box.is-checked {
@@ -1166,32 +1200,35 @@
   background: var(--color-primary);
 }
 .vgen-karta__box svg {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
 }
-.vgen-karta__pic {
-  display: grid;
-  place-items: center;
-  justify-self: center;
-  width: 100%;
-  height: 104px;
-  margin-bottom: var(--space-1);
-}
-.vgen-karta__pic img {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
+
+/* Текст — под картинкой, в потоке. Название не длиннее двух строк,
+   дальше многоточие; полное название — в подсказке title и в имени
+   кнопки для озвучки. */
+.vgen-karta__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-3);
 }
 .vgen-karta__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-brand);
+  overflow-wrap: anywhere;
 }
 .vgen-karta__code {
+  margin-top: auto;
   font-size: var(--fs-label);
   line-height: var(--lh-label);
   color: var(--color-text-tertiary);
@@ -1383,6 +1420,9 @@
   .vgen-karty {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .vgen-karta {
+    --vgen-pic: 124px;
+  }
 }
 @media (max-width: 767.98px) {
   /* Методы — лентой вбок, как чипы блоков в опорных задачах. */
@@ -1407,8 +1447,12 @@
   .vgen-metod__schet {
     grid-column: 2;
   }
-  .vgen-karta__pic {
-    height: 80px;
+  /* Телефон: одна колонка. */
+  .vgen-karty {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vgen-karta {
+    --vgen-pic: 140px;
   }
 }
 
