@@ -1546,3 +1546,11 @@
   line-height: var(--lh-caption);
   color: var(--color-text-tertiary);
 }
+
+/* ── Опорные задачи №5: значок метода на карточке блока ──────────
+   Встаёт в угол, отведённый у карточки под миниатюру навыка. */
+.prep-card__metod {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
