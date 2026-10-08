@@ -24,7 +24,7 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { altIllyustratsii } from './illyustratsii';
+import { altIllyustratsii, KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import {
   imyaIllyustratsii,
   texPlain,
@@ -358,8 +358,27 @@ export interface PrepPoolBlok {
   zadachi: PrepPoolZadacha[];
   /** Метод блока — значок на карточке (есть у блоков №4). */
   metod?: string;
-  /** Картинка превью первой задачи блока (есть у блоков №4). */
-  kartinka?: { src: string; alt: string };
+  /** Картинка превью и задача по ней, условие набрано (есть у блоков №4). */
+  kartinka?: { src: string; alt: string; primer: string };
+}
+
+/**
+ * Картинка опорной задачи — по прототипу задачи и её варианту. Своего
+ * файла у варианта нет — картинка варианта 1, но только если она
+ * подходит и к его числам (KARTINKA_OSNOVY_PODHODIT). Картинка,
+ * которая расходится с условием (KARTINKA_NE_PO_USLOVIYU), не
+ * показывается вовсе.
+ */
+function kartinkaOpornoy(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
+  if (zadacha.id in KARTINKA_NE_PO_USLOVIYU) {
+    return undefined;
+  }
+  const kartinkaId = zadacha.prototip?.id ?? zadacha.id;
+  const svoya = illyustratsiyaVarianta(kartinkaId, zadacha.variant ?? 1);
+  if (svoya !== undefined || zadacha.variant === undefined) {
+    return svoya;
+  }
+  return zadacha.id in KARTINKA_OSNOVY_PODHODIT ? illyustratsiyaVarianta(kartinkaId, 1) : undefined;
 }
 
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
@@ -367,13 +386,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const seal = sealAnswer(otvet, klyuchZadachi(zadacha.id));
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
-  /* Картинка — по прототипу задачи и её варианту; у варианта без
-     своего файла — картинка варианта 1: прототипы конспекта меняют
-     только числа, сюжет у всех вариантов один. */
-  const kartinkaId = zadacha.prototip?.id ?? zadacha.id;
-  const kartinka =
-    illyustratsiyaVarianta(kartinkaId, zadacha.variant ?? 1) ??
-    illyustratsiyaVarianta(kartinkaId, 1);
+  const kartinka = kartinkaOpornoy(zadacha);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
   const illustration = model === null ? kartinka : undefined;
@@ -403,7 +416,9 @@ function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
     tip: blok.tip,
     zadachi: blok.zadachi.map((zadacha) => prepZadachaPool(zadacha)),
     ...(blok.metod === undefined ? {} : { metod: blok.metod }),
-    ...(blok.kartinka === undefined ? {} : { kartinka: blok.kartinka }),
+    ...(blok.kartinka === undefined
+      ? {}
+      : { kartinka: { ...blok.kartinka, primer: typesetText(blok.kartinka.primer) } }),
   }));
 }
 
@@ -516,7 +531,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
           id: zadacha.id,
           istochnik: 'konspekt',
           variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1), blok),
+            uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok),
           ],
         },
       ];

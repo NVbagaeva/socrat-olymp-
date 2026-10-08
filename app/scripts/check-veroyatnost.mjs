@@ -142,6 +142,8 @@ prep.bad
   .forEach((item) => console.log(`   ${item}`));
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
+console.log(`  ошибок в списках картинок: ${prep.kartinki.length}`);
+prep.kartinki.forEach((item) => console.log(`   ${item}`));
 
 /* Модель задачи (раздел 04 референса): метод у каждой задачи №4,
    рисунок собирается из параметров и показывает тот же ответ. */
@@ -393,7 +395,7 @@ if (raskladka.problems.length > 0) {
   process.exit(1);
 }
 
-if (prep.bad.length > 0 || prep.duplicates.length > 0) {
+if (prep.bad.length > 0 || prep.duplicates.length > 0 || prep.kartinki.length > 0) {
   console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
   prep.bad.forEach((row) =>
     console.error(`  ${row.id} (конспект № ${row.n}): ${row.problems.join('; ')}`),

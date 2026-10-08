@@ -332,22 +332,24 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
                       const checked = vybrano.includes(s.id);
                       const kartinka = kartinki[s.id];
                       return (
+                        /* Карточка — колонка из двух частей: сверху зона картинки
+                           своей высоты, под ней текст. Текст стоит в потоке, а не
+                           поверх картинки; поверх зоны лежит только чекбокс. */
                         <button
                           key={s.id}
                           type="button"
                           role="checkbox"
                           aria-checked={checked}
                           className={clsx('vgen-karta', checked && 'is-checked')}
+                          title={s.title}
                           onClick={() => pereklyuchit(s.id)}
                         >
-                          <span className={clsx('vgen-karta__box', checked && 'is-checked')} aria-hidden="true">
-                            {checked ? <CheckIcon /> : null}
-                          </span>
                           <span className="vgen-karta__pic" aria-hidden="true">
                             {kartinka === undefined ? (
                               <MetodIkonka zadanie={zadanie} metod={s.metod} size="lg" />
                             ) : (
                               <img
+                                className="vgen-karta__img"
                                 src={assetUrl(kartinka.src)}
                                 alt=""
                                 loading="lazy"
@@ -355,8 +357,13 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
                               />
                             )}
                           </span>
-                          <span className="vgen-karta__title">{s.title}</span>
-                          <span className="vgen-karta__code">{s.id}</span>
+                          <span className={clsx('vgen-karta__box', checked && 'is-checked')} aria-hidden="true">
+                            {checked ? <CheckIcon /> : null}
+                          </span>
+                          <span className="vgen-karta__text">
+                            <span className="vgen-karta__title">{s.title}</span>
+                            <span className="vgen-karta__code">{s.id}</span>
+                          </span>
                         </button>
                       );
                     })}
