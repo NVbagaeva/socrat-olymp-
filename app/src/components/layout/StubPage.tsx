@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Breadcrumbs, EmptyState } from '@/components/ui';
+import { tasksPage } from '@/content/tasks';
 
 export interface StubPageProps {
   /** Заголовок раздела: он же последняя хлебная крошка. */
@@ -21,9 +23,16 @@ export function StubPage({ title, active }: StubPageProps) {
       <main className="app-main">
         <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: title }]} />
         <h1 className="t-h1 stub__title">{title}</h1>
+        {/* Те же слова, что у заглушки неоткрытого задания: состояние
+            «в разработке» на сайте одно. */}
         <EmptyState
-          title="Раздел готовится"
-          description="Этой страницы ещё нет. Она появится, когда раздел будет собран."
+          title={tasksPage.stub.title}
+          description="Этой страницы ещё нет. Пока можно заниматься открытыми заданиями."
+          action={
+            <Link className="btn btn--primary" href={tasksPage.href}>
+              {tasksPage.stub.action}
+            </Link>
+          }
         />
       </main>
     </AppShell>
