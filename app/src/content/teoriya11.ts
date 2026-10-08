@@ -366,7 +366,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
     ideiTitle: 'Семь шагов решения',
     paraTablits: [
       {
-        title: 'Движение: S | v | t',
+        title: 'Движение: $S \\mid v \\mid t$',
         primer:
           'Велосипедист проехал $50$ км со скоростью $x$ км/ч, автомобилист — на $30$ км/ч быстрее.',
         table: dvizhenie([
@@ -376,7 +376,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
         note: 'Строки — участники, время всегда $t=\\dfrac{S}{v}$.',
       },
       {
-        title: 'Работа: A | p | t',
+        title: 'Работа: $A \\mid p \\mid t$',
         primer:
           'Первый мастер делает заказ за $30$ ч, второй — за $15$ ч. **Примем всю работу за $1$.**',
         table: rabota(

@@ -2117,6 +2117,13 @@
   flex: 1;
   min-width: 100px;
 }
+/* На телефоне бейдж источника — в одной строке с полосой прогресса. */
+@media (max-width: 479.98px) {
+  .z11-resh__bar {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
 .z11-resh__count {
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
@@ -3093,8 +3100,14 @@
 }
 .z11-zametki__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
+}
+/* «Как объяснять» и «Типичные ошибки» — две колонки во всю ширину, без пустой третьей. */
+@media (min-width: 640px) {
+  .z11-zametki__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 /* Порядок задач — во всю ширину и в две колонки: подтипов много. */
 .z11-zametka--poryadok {
@@ -3903,6 +3916,10 @@
   min-width: 0;
   white-space: normal;
   text-align: left;
+  /* Кнопка в две строки не обрезается по высоте .btn--sm. */
+  height: auto;
+  min-height: var(--h-control-sm);
+  padding-block: 6px;
 }
 
 /* ══ Телефон (PR 12): шапка, лента вкладок, таблица, старт ══════ */

@@ -511,7 +511,7 @@ export function Generator11({
                   <IkonkaRazdela section={p.section} className="z11-gen__vybrannyy-ikonka" />
                   <span className="z11-gen__vybrannyy-name">{p.title}</span>
                   <Zvezdy level={p.level} section={p.section} />
-                  <b className="z11-gen__vybrannyy-n">×{sostav[p.id] ?? 0}</b>
+                  <b className="z11-gen__vybrannyy-n">{sostav[p.id] ?? 0} шт.</b>
                 </li>
               ))}
             </ul>
