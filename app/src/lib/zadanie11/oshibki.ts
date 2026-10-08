@@ -1,268 +1,192 @@
 /**
- * «Найди ошибку»: типичная ошибка вносится в наш же разбор.
+ * «Найди ошибку»: решение ученика с типичной ошибкой.
  *
- * Словарь ошибок — по разделам задания №11 (docs/audit/zadanie-11.md,
- * таблица 4.3): разность времён наоборот, скорость против течения
- * $c-x$, стоянка не вычтена, снижение записано как повышение, проценты
- * сложены вместо произведения множителей, уравнение смеси по строке
- * концентрации, вода «добавляет вещество», скорости навстречу вычли,
- * на круге скорости сложили, в сумме прогрессии потеряно деление на 2,
- * корень не проверен по смыслу, сложены времена вместо
- * производительностей.
+ * Ошибка вносится не в готовый текст, а в саму модель задачи: подтип
+ * решает задачу так, как решил бы ученик с этой ошибкой
+ * (solve({ ...params, osh: id }), см. Subtype.oshibki). Поэтому всё
+ * после ошибки — таблица, уравнение, корни, ответ — посчитано из
+ * неверной строки и согласовано с ней, как в настоящей работе: в
+ * строке «Ответ» ученик пишет неверный ответ, к которому ошибка привела.
  *
- * Ошибка меняет ровно одну строку разбора: остальные строки остаются
- * верными, и несогласованность с ними — подсказка ученику. Учителю
- * отдаётся, где ошибка (шаг), что не так, строка как было и как верно.
+ * Словарь — по разделам задания №11 (docs/audit/zadanie-11.md,
+ * таблица 4.3). Учителю отдаётся, где ошибка (шаг), что не так, строка
+ * как написано и как верно, ответ ученика и верный ответ.
  */
 
 import { rngOf } from '../vychisleniya/rng';
-import type { SectionId } from './types';
+import { izStroki } from './proporciya/bloki';
+import type { Etap, Params, Subtype, Tablitsa } from './types';
 
-export interface Etap {
-  title: string;
-  lines: string[];
-}
+export type { Etap } from './types';
 
 export interface Oshibka {
   id: string;
-  /** Разделы, где ошибка типична. */
-  razdely: readonly SectionId[];
   /** Что не так — коротко, для учителя. */
   chto: string;
   /** Как верно — правило, формулы в $…$. */
   verno: string;
-  /** Испортить строку разбора; null — к этой строке ошибка не применима. */
-  primenit(line: string, title: string): string | null;
-}
-
-const DROB = '\\\\dfrac\\{[^{}]+\\}\\{[^{}]+\\}';
-const vUravnenii = (title: string) => /Уравнение/.test(title);
-
-/** Процент из десятичной записи «0{,}05» → 5. */
-function procent(dec: string): number {
-  return Math.round(Number(`0.${dec}`) * 100 * 1000) / 1000;
 }
 
 export const OSHIBKI: readonly Oshibka[] = [
   {
-    id: 'znak-raznosti',
-    razdely: ['DP', 'RB', 'VD', 'OK', 'PT'],
-    chto: 'Разность записана наоборот: из меньшего времени вычли большее.',
-    verno: 'Из большего времени вычитаем меньшее — получаем разницу из условия.',
-    primenit(line, title) {
-      if (!vUravnenii(title)) return null;
-      const re = new RegExp(`(${DROB})-(${DROB})=`);
-      const m = re.exec(line);
-      if (m === null) return null;
-      return line.replace(re, `${m[2]}-${m[1]}=`);
-    },
-  },
-  {
-    id: 'protiv-techeniya',
-    razdely: ['VD'],
-    chto: 'Скорость против течения записана как «течение минус собственная».',
-    verno: 'Против течения скорость $x-c$: собственная скорость минус скорость течения.',
-    primenit(line) {
-      const m = /против — \$x-(\d+)\$/.exec(line);
-      if (m === null) return null;
-      return line.replace(m[0], `против — $${m[1]}-x$`);
-    },
-  },
-  {
-    id: 'stoyanka',
-    razdely: ['VD', 'DP'],
-    chto: 'Время стоянки не вычтено: всё время от отплытия до возвращения принято за время в движении.',
-    verno: 'Стоянку вычитаем из общего времени до составления уравнения.',
-    primenit(line) {
-      const m = /^(.*?)\$(\d+)-(\d+)=(\d+)\$ ч\.$/.exec(line);
-      if (m === null) return null;
-      return `${m[1]}$${m[2]}$ ч.`;
-    },
-  },
-  {
     id: 'procent-znak',
-    razdely: ['RZ', 'PR'],
     chto: 'Снижение (удержание) на несколько процентов записано как повышение.',
     verno:
       'Стало меньше — от $100\\%$ отнимаем: новая величина составляет $100\\%-p\\%$ от старой.',
-    primenit(line) {
-      const m = /\$100\\%-(\d+)\\%=(\d+)\\%\$/.exec(line);
-      if (m === null) return null;
-      const p = Number(m[1]);
-      return line.replace(m[0], `$100\\%+${p}\\%=${100 + p}\\%$`);
-    },
   },
   {
-    id: 'procenty-slozheny',
-    razdely: ['PR'],
-    chto: 'Проценты сложили: подорожание и подешевление на одно число процентов «дали ноль».',
+    id: 'massa-tretego',
+    chto: 'Масса третьего сплава записана как $2x$: разность масс $d$ потеряна.',
+    verno: 'Масса третьего сплава — сумма масс двух первых: $x+(x+d)=2x+d$.',
+  },
+  {
+    id: 'obem-ne-izmenen',
+    chto: 'Масса (объём) раствора не пересчитана: воду не прибавили к раствору.',
     verno:
-      'Последовательные изменения — произведение множителей: $1{,}15\\cdot0{,}85$, а не $+15\\%-15\\%$.',
-    primenit(line) {
-      const m = /\$1\\cdot1\{,\}(\d+)\\cdot0\{,\}(\d+)=([^$]+)\$/.exec(line);
-      if (m === null) return null;
-      return line.replace(m[0], `$1+0{,}${m[1]}-0{,}${m[1]}=1$`);
-    },
+      'Вещества после добавления воды столько же, а раствора стало больше: $m_{\\text{р-ра}}+m_{\\text{воды}}$.',
   },
   {
-    id: 'po-kontsentratsii',
-    razdely: ['SM'],
-    chto: 'Уравнение составлено по строке концентрации: проценты сложили.',
-    verno: 'Уравнение — только по строке массы вещества: сколько было, столько стало.',
-    primenit(line, title) {
-      if (!vUravnenii(title)) return null;
-      const m = /\$([^$]*)\$\.?$/.exec(line);
-      const tex = m?.[1];
-      if (m === null || tex === undefined) return null;
-      const dec = [...tex.matchAll(/0\{,\}(\d+)/g)].map((x) => procent(x[1] ?? '0'));
-      if (dec.length < 3 || !/=/.test(tex)) return null;
-      const levo = dec
-        .slice(0, -1)
-        .map((x) => `${x}\\%`)
-        .join('+');
-      const pravo = `${dec[dec.length - 1]}\\%`;
-      return line.replace(m[0], `$${levo}=${pravo}$.`);
-    },
-  },
-  {
-    id: 'voda',
-    razdely: ['SM'],
-    chto: 'Вода «добавила вещество»: у воды концентрация вещества $0\\%$.',
-    verno: 'Вода вещества не добавляет — в строке массы вещества у воды стоит $0$.',
-    primenit(line) {
-      if (!/Вода вещества не добавляет\./.test(line)) return null;
-      return line.replace(
-        'Вода вещества не добавляет.',
-        'Вода добавляет столько же вещества, сколько её долили.',
-      );
-    },
-  },
-  {
-    id: 'suhoe',
-    razdely: ['SM'],
-    chto: 'За долю сухого вещества взят процент воды.',
-    verno:
-      'Сухое вещество — всё, кроме воды: $100\\%-p_{\\text{воды}}$. Уравнение — по массе сухого вещества, оно при сушке не меняется.',
-    primenit(line) {
-      const m = /сухого вещества \$100\\%-(\d+)\\%=(\d+)\\%\$/.exec(line);
-      if (m === null) return null;
-      return line.replace(m[0], `сухого вещества $${m[1]}\\%$`);
-    },
+    id: 'stoyanka',
+    chto: 'Время стоянки не вычтено: всё время от отплытия до возвращения принято за время в движении.',
+    verno: 'Стоянку вычитаем из общего времени до составления уравнения.',
   },
   {
     id: 'navstrechu',
-    razdely: ['PT', 'DP'],
     chto: 'При встречном движении скорости вычли.',
     verno: 'Навстречу скорости складываются, в одном направлении — вычитаются.',
-    primenit(line) {
-      const m = /Навстречу скорости складываются: \$(\d+)\+(\d+)=(\d+)\$/.exec(line);
-      if (m === null) return null;
-      const a = Number(m[1]);
-      const b = Number(m[2]);
-      return line.replace(
-        m[0],
-        `Навстречу скорости вычитаются: $${Math.max(a, b)}-${Math.min(a, b)}=${Math.abs(a - b)}$`,
-      );
-    },
   },
   {
-    id: 'krug',
-    razdely: ['OK'],
-    chto: 'Скорости при движении в одном направлении сложили.',
-    verno: 'В одном направлении скорость сближения — разность скоростей.',
-    primenit(line, title) {
-      if (!vUravnenii(title)) return null;
-      const m = /^\$(\d+)-x=(\d+)\$\.$/.exec(line);
-      if (m === null) return null;
-      return `$${m[1]}+x=${m[2]}$.`;
-    },
+    id: 'put-mimo',
+    chto: 'Путь «мимо» принят за длину одного поезда: длину второго поезда не учли.',
+    verno: 'Чтобы пройти мимо встречного поезда, нужно сместиться на сумму длин обоих поездов.',
+  },
+  {
+    id: 'minuty',
+    chto: 'Минуты переведены в часы как десятичная дробь: $40$ мин записали как $0{,}4$ ч.',
+    verno: 'В часе $60$ минут: $40$ мин $=\\dfrac{40}{60}=\\dfrac{2}{3}$ ч.',
   },
   {
     id: 'summa-progressii',
-    razdely: ['PG'],
     chto: 'В формуле суммы потеряно деление на $2$.',
     verno:
       '$S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}$ — сумма равна полусумме крайних, умноженной на число членов.',
-    primenit(line) {
-      const bylo = 'S_n=\\dfrac{(a_1+a_n)\\cdot n}{2}';
-      if (!line.includes(bylo)) return null;
-      return line.replace(bylo, 'S_n=(a_1+a_n)\\cdot n');
-    },
   },
   {
-    id: 'otbor-kornya',
-    razdely: ['DP', 'VD', 'RB', 'OK', 'PG'],
-    chto: 'Корень проверен только по ОДЗ: проверка по смыслу задачи пропущена, отрицательный корень оставлен.',
-    verno:
-      'Каждый корень сверяем и с ОДЗ, и с условием по смыслу задачи; не подходит — отбрасываем и пишем почему.',
-    primenit(line) {
-      const m =
-        /^(\$x=[^$]+\$) — входит в ОДЗ, но не подходит по смыслу задачи: нужно \$[^$]+\$\. Отбрасываем\.$/.exec(
-          line,
-        );
-      if (m === null) return null;
-      return `${m[1]} — входит в ОДЗ, значит, подходит.`;
-    },
-  },
-  {
-    id: 'vremena-slozheny',
-    razdely: ['RB'],
-    chto: 'Сложили времена работы, а не производительности.',
-    verno: 'При совместной работе складываются производительности — части работы за час.',
-    primenit(line) {
-      const m = /^Складываем: \$\\dfrac\{1\}\{(\d+)\}\+\\dfrac\{1\}\{(\d+)\}=[^$]+\$\.$/.exec(line);
-      if (m === null) return null;
-      const a = Number(m[1]);
-      const b = Number(m[2]);
-      return `Складываем времена: $${a}+${b}=${a + b}$ ч — общее время работы.`;
-    },
+    id: 'ne-ta-velichina',
+    chto: 'Уравнение решено верно, но в ответ записана не та величина, которую спрашивают.',
+    verno: 'Перечитываем вопрос задачи и выражаем через $x$ именно то, что спрашивают.',
   },
 ];
 
+const PO_ID = new Map(OSHIBKI.map((o) => [o.id, o]));
+
+export function oshibkaPoId(id: string): Oshibka {
+  const o = PO_ID.get(id);
+  if (o === undefined) throw new Error(`нет ошибки «${id}» в словаре`);
+  return o;
+}
+
 export interface NaydennayaOshibka {
   oshibka: Oshibka;
-  /** Индекс этапа и строки в разборе. */
+  /** Первая неверная строка: индекс этапа и строки в разборе ученика. */
   etap: number;
   stroka: number;
   /** Номер шага для ученика и учителя: «Шаг 3». */
   shag: string;
+  /** Строка как верно (в нашем разборе) и как написал ученик. */
   bylo: string;
   stalo: string;
-  /** Разбор с внесённой ошибкой — отличается от исходного ровно одной строкой. */
+  /** Работа ученика целиком: с ошибкой и всем, что из неё следует (без пояснений методики). */
   etapy: Etap[];
+  tables: Tablitsa[];
+  /** Ответ ученика и верный ответ. */
+  otvetUchenika: number;
+  otvet: number;
+}
+
+/* Пояснения методики, которых нет в тетради ученика: карточки и
+   плашки разбора, «зачем» и «почему» шагов, лайфхаки и второй способ. */
+const KARTOCHKI = new Set(['spravka100', 'plashka', 'pravilo', 'priznaki']);
+const POYASNENIYA = [
+  /^Сначала решаем главный вопрос/,
+  /^Краткая запись помогает/,
+  /^Для удобства вместо знака вопроса/,
+  /^Величины (прямо|обратно) пропорциональны/,
+  /^Неизвестный (средний|крайний) член/,
+  /^\*\*Лайфхак:\*\*/,
+  /^\*\*Иначе/,
+];
+
+/** Решение в виде работы ученика: только его записи и вычисления. */
+export function rabotaUchenika(etapy: readonly Etap[]): Etap[] {
+  return etapy.map((e) => ({
+    title: e.title,
+    lines: e.lines.filter((l) => {
+      const b = izStroki(l);
+      if (b !== null) return !KARTOCHKI.has(b.vid);
+      return !POYASNENIYA.some((re) => re.test(l));
+    }),
+  }));
+}
+
+/** Ответ, который ученик мог бы записать: положительное число, не больше трёх знаков после запятой. */
+function pravdopodobnyy(x: number): boolean {
+  return Number.isFinite(x) && x > 0 && Math.abs(x * 1000 - Math.round(x * 1000)) < 1e-6;
+}
+
+/** Ошибка id в решении задачи: решение ученика или null, если с этими числами ошибка не получается. */
+export function vnestiOshibku(st: Subtype, params: Params, id: string): NaydennayaOshibka | null {
+  let verno;
+  let uchenik;
+  try {
+    verno = st.solve(params);
+    uchenik = st.solve({ ...params, osh: id });
+  } catch {
+    return null;
+  }
+  if (!pravdopodobnyy(uchenik.answer) || Math.abs(uchenik.answer - verno.answer) < 1e-9) {
+    return null;
+  }
+  const rabota = rabotaUchenika(uchenik.etapy);
+  const obrazec = rabotaUchenika(verno.etapy);
+  for (let ei = 0; ei < rabota.length; ei += 1) {
+    const e = rabota[ei] as Etap;
+    const ev = obrazec[ei];
+    for (let li = 0; li < e.lines.length; li += 1) {
+      const stalo = e.lines[li] as string;
+      const bylo = ev?.lines[li];
+      if (bylo === stalo) continue;
+      return {
+        oshibka: oshibkaPoId(id),
+        etap: ei,
+        stroka: li,
+        shag: /^Шаг \d+/.exec(e.title)?.[0] ?? `Шаг ${ei + 1}`,
+        bylo: bylo ?? '',
+        stalo,
+        etapy: rabota,
+        tables: uchenik.tables ?? [],
+        otvetUchenika: uchenik.answer,
+        otvet: verno.answer,
+      };
+    }
+  }
+  return null;
 }
 
 /**
- * Подобрать ошибку к разбору. Среди применимых ошибок раздела выбор —
- * по seed, чтобы на листе встречались разные. Нет применимых — null.
+ * Подобрать ошибку к задаче. Среди ошибок подтипа, которые с этими
+ * числами дают правдоподобный неверный ответ, выбор — по seed, чтобы
+ * на листе встречались разные. Нет таких — null.
  */
-export function naytiOshibku(
-  etapy: readonly Etap[],
-  section: SectionId,
-  seed: string,
-): NaydennayaOshibka | null {
-  const varianty: NaydennayaOshibka[] = [];
-  for (const o of OSHIBKI) {
-    if (!o.razdely.includes(section)) continue;
-    let gotovo = false;
-    etapy.forEach((e, ei) => {
-      if (gotovo) return;
-      e.lines.forEach((l, li) => {
-        if (gotovo) return;
-        const stalo = o.primenit(l, e.title);
-        if (stalo === null || stalo === l) return;
-        gotovo = true;
-        const novye = etapy.map((x, xi) =>
-          xi === ei
-            ? { title: x.title, lines: x.lines.map((y, yi) => (yi === li ? stalo : y)) }
-            : x,
-        );
-        const shag = /^Шаг \d+/.exec(e.title)?.[0] ?? `Шаг ${ei + 1}`;
-        varianty.push({ oshibka: o, etap: ei, stroka: li, shag, bylo: l, stalo, etapy: novye });
-      });
-    });
-  }
+export function naytiOshibku(st: Subtype, params: Params, seed: string): NaydennayaOshibka | null {
+  const varianty = (st.oshibki ?? [])
+    .map((id) => vnestiOshibku(st, params, id))
+    .filter((o) => o !== null);
   if (varianty.length === 0) return null;
-  const i = Math.floor(rngOf(`z11-oshibka|${seed}`).next() * varianty.length);
-  return varianty[Math.min(i, varianty.length - 1)] ?? null;
+  /* Ошибка в модели (до ответа) показательнее, чем «не та величина» в
+     ответе: она берётся, когда с этими числами получается. */
+  const vModeli = varianty.filter((o) => o.oshibka.id !== 'ne-ta-velichina');
+  const iz = vModeli.length > 0 ? vModeli : varianty;
+  const i = Math.floor(rngOf(`z11-oshibka|${seed}`).next() * iz.length);
+  return iz[Math.min(i, iz.length - 1)] ?? null;
 }

@@ -20,6 +20,7 @@ import {
   vopros,
   xxd,
   kKvadratnomu,
+  osh,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -476,6 +477,7 @@ const DP07: Subtype = {
   title: 'Обратный путь быстрее, но с остановкой',
   level: 2,
   keywords: ['велосипедист', 'баржа', 'обратный путь', 'остановку', 'озеро'],
+  oshibki: ['ne-ta-velichina'],
   solve(p) {
     const form = str(p, 'form', ['velo', 'barzha'] as const);
     const S = num(p, 'S');
@@ -488,7 +490,9 @@ const DP07: Subtype = {
     const P = round9((S * dd) / st); // x(x + d) = P
     const res = xxd(P, dd);
     const x = res.root;
-    const ans = ask === 'AB' ? x : x + dd;
+    /* «Найди ошибку»: в ответ записана скорость на другом участке. */
+    const otvetNa = osh(p) === 'ne-ta-velichina' ? (ask === 'AB' ? 'BA' : 'AB') : ask;
+    const ans = otvetNa === 'AB' ? x : x + dd;
     /* Герой аналога (лыжник, катер…) — только слова решения. */
     const kto = klyuch(GEROI, p.geroy, form).rod;
     const uslovie =
@@ -529,7 +533,7 @@ const DP07: Subtype = {
           'Отбор корней и ответ на вопрос задачи',
           [
             ...t.otbor,
-            ask === 'AB'
+            otvetNa === 'AB'
               ? `Спрашивают скорость на пути из А в В: $x=${d(x)}$ км/ч.`
               : `Спрашивают скорость на пути из В в А: $x+${d(dd)}=${d(ans)}$ км/ч.`,
             otvet(ans),

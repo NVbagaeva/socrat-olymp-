@@ -36,7 +36,7 @@ import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
 import { type Kontekst, strokaHtml } from './proporciya/html';
 import { kodNaSayte } from './kod';
 import { d } from './num';
-import { naytiOshibku, type Etap, type NaydennayaOshibka } from './oshibki';
+import { naytiOshibku, type NaydennayaOshibka } from './oshibki';
 import { BLOKI } from './prep/bloki';
 import { generateMikro } from './prep/generate';
 import { subtype } from './prototypes';
@@ -229,16 +229,16 @@ function tipDlyaOshibki(p: SheetParams11, bank: readonly UslovieBanka[]): string
   const pohozha = pohozhaNa(bank);
   for (const id of [...tipyPoUrovnyu(p)].reverse()) {
     const st = subtype(id);
-    const probы: Etap[][] = [];
-    const b = bank.find((x) => x.id === id && x.analog === undefined);
-    if (b !== undefined) probы.push(st.solve(b.params as Params).etapy);
-    try {
-      probы.push(generateBez(id, `${p.seed}|osh`, pohozha).solved.etapy);
-    } catch {
-      /* Не подобралось — хватит задачи банка. */
-    }
-    if (probы.length > 0 && probы.every((e) => naytiOshibku(e, st.section, 'x') !== null)) {
-      return id;
+    if ((st.oshibki ?? []).length === 0) continue;
+    /* Ошибка должна получаться хоть на одной из задач этого типа:
+       к задаче, где не получается, лист возьмёт новую того же типа. */
+    for (let k = 0; k < 12; k += 1) {
+      try {
+        const g = generateBez(id, `${p.seed}|osh${k}`, pohozha);
+        if (naytiOshibku(st, g.params, 'x') !== null) return id;
+      } catch {
+        /* Следующий seed. */
+      }
     }
   }
   return null;
@@ -491,28 +491,43 @@ function reshenieHtml(
   return `<div class="z11-sheet-resh${sboku ? ' z11-sheet-resh--sboku' : ''}">${tab}<ol class="sheet-steps z11-sheet-steps">${items}</ol></div>`;
 }
 
-/** Разбор с ошибкой для ученика: таблицы и шаги, без ответа и без пометок. */
-function oshibkaUcheniku(o: NaydennayaOshibka, tables: Tablitsa[]): string {
-  const tab = tables.map((t) => tablitsaHtml(t)).join('');
+/**
+ * Решение ученика для «Найди ошибку»: таблица и шаги с ошибкой и всем,
+ * что из неё следует, и строка «Ответ» с неверным ответом — без пометок.
+ */
+function oshibkaUcheniku(o: NaydennayaOshibka, k: Kontekst): string {
+  const tab = o.tables.map((t) => tablitsaHtml(t)).join('');
   const items = o.etapy
     .map((e) => {
-      const lines = e.lines.filter((l) => !/^\*\*Ответ:\*\*/.test(l));
-      if (lines.length === 0) return '';
-      return `<li><b>${typeset(e.title)}.</b> ${lines.map((l) => typeset(l)).join(' ')}</li>`;
+      if (e.lines.length === 0) return '';
+      return `<li><b>${typeset(e.title)}.</b> ${e.lines.map((l) => strokaHtml(l, k)).join(' ')}</li>`;
     })
     .join('');
   return `<div class="z11-sheet-osh"><p class="z11-sheet-osh__lead">${SHEET_11.oshibka.lead}</p>${tab}<ol class="z11-sheet-osh__steps">${items}</ol></div>`;
 }
 
-/** Разбор ошибки для учителя: где, что не так, как было и как верно. */
-function oshibkaUchitelyu(o: NaydennayaOshibka): string {
-  const { gde, bylo, verno } = SHEET_11.oshibka;
+/** Разбор ошибки для учителя: где, что не так, как написано и как верно, оба ответа. */
+function oshibkaUchitelyu(o: NaydennayaOshibka, k: Kontekst): string {
+  const { gde, bylo, verno, otvetUchenika, otvetVerno } = SHEET_11.oshibka;
   return (
     `<p class="z11-sheet-osh__gde"><b>${gde}: ${o.shag}.</b> ${typeset(o.oshibka.chto)}</p>` +
-    `<p>${bylo}: ${typeset(o.stalo)}</p>` +
-    `<p>${verno}: ${typeset(o.bylo)}</p>` +
-    `<p>${typeset(o.oshibka.verno)}</p>`
+    `<p>${bylo}: ${strokaHtml(o.stalo, k)}</p>` +
+    `<p>${verno}: ${strokaHtml(o.bylo, k)}</p>` +
+    `<p>${typeset(o.oshibka.verno)}</p>` +
+    `<p>${otvetUchenika}: ${typeset(`$${d(o.otvetUchenika)}$`)}; ${otvetVerno.toLowerCase()}: ${typeset(`$${d(o.otvet)}$`)}.</p>`
   );
+}
+
+/** Параметры задачи позиции: из банка или сгенерированной. */
+function parametryZadachi(
+  poz: Exclude<Pozitsiya, { vid: 'mikro' }>,
+  bank: readonly UslovieBanka[],
+  pohozha: Pohozha,
+): Params {
+  if (poz.vid === 'new') {
+    return generateBez(poz.id, poz.seed, pohozha).params;
+  }
+  return (bank.find((x) => x.no === poz.no) as UslovieBanka).params as Params;
 }
 
 function zadachaIzBanka(
@@ -668,16 +683,17 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       let s = zadachaIzBanka(poz, bank, pohozha);
       const st = subtype(poz.id);
       if (chast === 'oshibka') {
-        /* К этой задаче ошибка не подобралась — берём новую того же
-           типа (seed позиции), пока не подберётся. */
-        let o = naytiOshibku(s.etapy, st.section, `${p.seed}|${pos}`);
-        for (let k = 1; o === null && k <= 12; k += 1) {
+        /* К этой задаче ошибка не подобралась (с её числами неверный
+           ответ неправдоподобен) — берём новую того же типа, пока не
+           подберётся. */
+        let o = naytiOshibku(st, parametryZadachi(poz, bank, pohozha), `${p.seed}|${pos}`);
+        for (let n = 1; o === null && n <= 40; n += 1) {
           try {
-            const g = generateBez(poz.id, `${p.seed}|${pos}|osh${k}`, pohozha);
-            const kand = naytiOshibku(g.solved.etapy, st.section, `${p.seed}|${pos}|${k}`);
+            const g = generateBez(poz.id, `${p.seed}|${pos}|osh${n}`, pohozha);
+            const kand = naytiOshibku(st, g.params, `${p.seed}|${pos}|${n}`);
             if (kand !== null) {
               s = g.solved;
-              poz = { vid: 'new', id: poz.id, seed: `${p.seed}|${pos}|osh${k}` };
+              poz = { vid: 'new', id: poz.id, seed: `${p.seed}|${pos}|osh${n}` };
               o = kand;
             }
           } catch {
@@ -693,10 +709,10 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
             chast,
             kod: kodNaSayte(poz.id),
             title: st.title,
-            questionHtml: typeset(s.uslovie) + oshibkaUcheniku(o, s.tables ?? []),
-            answer: o.shag,
-            answerHtml: o.shag,
-            solutionHtml: oshibkaUchitelyu(o),
+            questionHtml: typeset(s.uslovie) + oshibkaUcheniku(o, k),
+            answer: `${o.shag}; ответ ${chislo(o.otvet)}`,
+            answerHtml: `${o.shag}; ответ ${typeset(`$${d(o.otvet)}$`)}`,
+            solutionHtml: oshibkaUchitelyu(o, k),
             oshibka: o,
           };
         }

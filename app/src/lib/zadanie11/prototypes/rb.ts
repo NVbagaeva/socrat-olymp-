@@ -19,6 +19,7 @@ import {
   vopros,
   xxd,
   kKvadratnomu,
+  osh,
 } from '../kit';
 import { add, d, div, fq, q, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -33,13 +34,16 @@ const RB01: Subtype = {
   title: 'Одинаковый заказ: быстрее на столько часов, на сколько деталей в час больше',
   level: 2,
   keywords: ['рабочий', 'детали', 'заказ', 'быстрее'],
+  oshibki: ['ne-ta-velichina'],
   solve(p) {
     const N = num(p, 'N');
     const dd = num(p, 'd');
     const ask = str(p, 'ask', ['second', 'first'] as const);
     const res = xxd(N, dd);
     const x = res.root;
-    const ans = ask === 'second' ? x : x + dd;
+    /* «Найди ошибку»: в ответ записана производительность другого. */
+    const otvetNa = osh(p) === 'ne-ta-velichina' ? (ask === 'second' ? 'first' : 'second') : ask;
+    const ans = otvetNa === 'second' ? x : x + dd;
     /* Аналог: наборщики и страницы, пекари и пирожки… */
     const kto = slovo(p, 'kto', 'рабочий');
     const ktoRod = slovo(p, 'ktoRod', 'рабочего');
@@ -78,7 +82,7 @@ const RB01: Subtype = {
           'Отбор корней и ответ на вопрос задачи',
           [
             ...t.otbor,
-            ask === 'second'
+            otvetNa === 'second'
               ? `Спрашивают второго: $x=${d(x)}$.`
               : `Спрашивают первого: $x+${d(dd)}=${d(ans)}$.`,
             otvet(ans),

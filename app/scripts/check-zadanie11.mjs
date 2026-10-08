@@ -633,14 +633,18 @@ const listy = { zadach: 0 };
         add(`${where}: нет «Что нужно знать»`);
       for (const ch of ['razminka', 'primer', 'oshibka', 'sam', 'dz'])
         if (p.bloki.includes(ch) && !est(ch)) add(`${where}: нет части «${ch}»`);
-      /* «Найди ошибку»: у задачи есть ошибка, ученику — решение без
-         ответа и без пометки, учителю — где ошибка; ответ — «Шаг N». */
+      /* «Найди ошибку»: у задачи есть ошибка; ученику — решение ученика
+         с неверным ответом в строке «Ответ», без пометок; учителю — где
+         ошибка, ответ ученика и верный; в таблице ответов — «Шаг N; ответ». */
       for (const z of list.poVariantam.flat().filter((x) => x.chast === 'oshibka')) {
         if (!z.oshibka) add(`${where} ${z.pos}: «Найди ошибку» без ошибки`);
         else {
-          if (!/^Шаг \d+$/.test(z.answer)) add(`${where} ${z.pos}: ответ «${z.answer}» — не шаг`);
-          if (!z.questionHtml.includes('z11-sheet-osh__steps') || /Ответ:/.test(z.questionHtml))
-            add(`${where} ${z.pos}: у ученика нет решения с ошибкой или есть ответ`);
+          if (!/^Шаг \d+; ответ /.test(z.answer))
+            add(`${where} ${z.pos}: ответ «${z.answer}» — не «Шаг N; ответ …»`);
+          if (!z.questionHtml.includes('z11-sheet-osh__steps') || !/Ответ:/.test(z.questionHtml))
+            add(`${where} ${z.pos}: у ученика нет решения с ошибкой или строки «Ответ»`);
+          if (/Ошибка|Верно/.test(z.questionHtml))
+            add(`${where} ${z.pos}: у ученика есть пометка, где ошибка`);
           if (!z.solutionHtml.includes(z.oshibka.shag))
             add(`${where} ${z.pos}: учителю не сказано, где ошибка`);
         }
@@ -686,21 +690,34 @@ const listy = { zadach: 0 };
         add(`блоки из адреса читаются неверно: ${bezZadach.bloki.join()}`);
     }
   }
-  /* Словарь ошибок: каждый раздел покрыт, к разборам типов варианта ЕГЭ
-     ошибка подбирается на всех задачах банка и на новых задачах, и
-     отличается от разбора ровно одной строкой. */
+  /* «Найди ошибку»: каждый раздел покрыт — есть подтип с ошибками; у
+     каждой ошибки подтипа есть запись в словаре. На задачах варианта
+     ЕГЭ (банк и 20 новых на тип) ошибка подбирается всегда, и для
+     каждой ошибки, которая к задаче подходит: ответ ученика ≠ верному,
+     строка «Ответ» у ученика — его неверный ответ, верного ответа в
+     решении ученика нет; решение после ошибочной строки пересчитано:
+     отличается от верного не одной строкой, а ошибкой и всем, что из неё
+     следует, вплоть до ответа; формулы набираются. */
   {
-    const { OSHIBKI, naytiOshibku } = requireSrc('lib/zadanie11/oshibki');
+    const { OSHIBKI, naytiOshibku, vnestiOshibku, rabotaUchenika } =
+      requireSrc('lib/zadanie11/oshibki');
     const { generateBez, pohozhaNa } = requireSrc('lib/zadanie11/gen/core');
     const { VARIANT_EGE_11 } = requireSrc('content/zadanie11');
+    const { tekstyStroki } = requireSrc('lib/zadanie11/proporciya/bloki');
+    const { d } = requireSrc('lib/zadanie11/num');
     const pohozha = pohozhaNa(bank);
+    const vSlovare = new Set(OSHIBKI.map((o) => o.id));
+    if (vSlovare.size !== OSHIBKI.length) add('словарь ошибок: повторяются идентификаторы');
     for (const sec of SEKCII) {
-      if (!OSHIBKI.some((o) => o.razdely.includes(sec.id)))
-        add(`словарь ошибок: нет ошибок для раздела ${sec.id}`);
+      if (!SUBTYPES.some((x) => x.section === sec.id && (x.oshibki ?? []).length > 0))
+        add(`«Найди ошибку»: в разделе ${sec.id} нет подтипа с ошибками`);
     }
-    const ids = OSHIBKI.map((o) => o.id);
-    if (new Set(ids).size !== ids.length) add('словарь ошибок: повторяются идентификаторы');
+    for (const x of SUBTYPES)
+      for (const id of x.oshibki ?? [])
+        if (!vSlovare.has(id)) add(`${x.id}: ошибки «${id}» нет в словаре`);
     for (const o of OSHIBKI) {
+      if (!SUBTYPES.some((x) => (x.oshibki ?? []).includes(o.id)))
+        add(`словарь ошибок: «${o.id}» не вносит ни один подтип`);
       for (const text of [o.chto, o.verno]) {
         for (const tex of (text.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
           try {
@@ -711,37 +728,58 @@ const listy = { zadach: 0 };
         }
       }
     }
+    const tekst = (etapy) => etapy.flatMap((e) => e.lines);
     let proverki = 0;
     for (const id of VARIANT_EGE_11) {
       const sub = st(id);
-      const razbory = bank
-        .filter((b) => b.id === id && !b.analog)
-        .map((b) => sub.solve(b.params).etapy);
+      const zadachi = bank.filter((b) => b.id === id && !b.analog).map((b) => b.params);
       for (let k = 0; k < 20; k += 1) {
         try {
-          razbory.push(generateBez(id, `osh-test-${k}`, pohozha).solved.etapy);
+          zadachi.push(generateBez(id, `osh-test-${k}`, pohozha).params);
         } catch {
           /* seed не подобрался */
         }
       }
-      for (const etapy of razbory) {
-        const o = naytiOshibku(etapy, sub.section, 'test');
-        proverki += 1;
-        if (!o) {
-          add(`${id}: к разбору не подобралась ни одна ошибка`);
+      for (const params of zadachi) {
+        const where = `${id} ${JSON.stringify(params)}`;
+        if (!naytiOshibku(sub, params, 'test')) {
+          add(`${where}: к задаче не подобралась ни одна ошибка`);
           continue;
         }
-        const bylo = etapy.flatMap((e) => e.lines);
-        const stalo = o.etapy.flatMap((e) => e.lines);
-        const raznitsa = bylo.filter((l, i) => l !== stalo[i]).length;
-        if (bylo.length !== stalo.length || raznitsa !== 1)
-          add(`${id}: ошибка «${o.oshibka.id}» меняет ${raznitsa} строк, а не одну`);
-        if (/\$[^$]*\$/.test(o.stalo)) {
-          for (const tex of (o.stalo.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
-            try {
-              typeset(tex);
-            } catch (e) {
-              add(`${id}: ошибка «${o.oshibka.id}»: KaTeX ${e.message.slice(0, 40)}`);
+        const verno = sub.solve(params);
+        for (const oid of sub.oshibki ?? []) {
+          const o = vnestiOshibku(sub, params, oid);
+          if (!o) continue;
+          proverki += 1;
+          const w = `${where} «${oid}»`;
+          const bylo = tekst(rabotaUchenika(verno.etapy));
+          const stalo = tekst(o.etapy);
+          if (Math.abs(o.otvetUchenika - verno.answer) < 1e-9) add(`${w}: ответ ученика верный`);
+          const otvetStroka = stalo.filter((l) => /^\*\*Ответ:\*\*/.test(l));
+          if (otvetStroka.length !== 1 || !otvetStroka[0].includes(`$${d(o.otvetUchenika)}$`))
+            add(`${w}: в строке «Ответ» не ответ ученика: ${otvetStroka.join(' | ')}`);
+          if (
+            stalo.some(
+              (l) =>
+                l === `**Ответ:** $${d(verno.answer)}$.` ||
+                l.includes(`**Ответ:** $${d(verno.answer)}$`),
+            )
+          )
+            add(`${w}: в решении ученика верный ответ`);
+          const ot = bylo.findIndex((l, i) => l !== stalo[i]);
+          const raznye =
+            stalo.filter((l, i) => l !== bylo[i]).length + Math.abs(stalo.length - bylo.length);
+          if (ot < 0 || raznye < 2)
+            add(
+              `${w}: решение ученика отличается от верного ${raznye} строкой — ошибка не доведена до ответа`,
+            );
+          for (const line of stalo.flatMap(tekstyStroki)) {
+            for (const tex of (line.match(/\$[^$]+\$/g) ?? []).map((x) => x.slice(1, -1))) {
+              try {
+                typeset(tex);
+              } catch (e) {
+                add(`${w}: KaTeX ${e.message.slice(0, 40)}`);
+              }
             }
           }
         }

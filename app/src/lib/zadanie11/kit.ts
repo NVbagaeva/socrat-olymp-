@@ -21,6 +21,11 @@ export function num(p: Params, key: string): number {
 }
 
 /** Элемент массива по индексу; выход за границы — ошибка. */
+/** Ошибка «Найди ошибку», с которой решается задача (oshibki.ts), или null. */
+export function osh(p: Params): string | null {
+  return typeof p.osh === 'string' ? p.osh : null;
+}
+
 export function at<T>(items: readonly T[], i: number): T {
   const v = items[i];
   if (v === undefined) {
