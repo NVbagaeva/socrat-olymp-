@@ -175,7 +175,7 @@
 }
 
 /* Карточка блока: слева значок, текст и полоса с кнопкой, справа
-   превью первой задачи на голубой подложке. */
+   превью — задача по картинке на голубой подложке. */
 .vop-blok {
   position: relative;
   display: grid;
@@ -302,11 +302,7 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
-  /* Превью, а не вся задача: длинное условие обрезается многоточием. */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  overflow: hidden;
+  /* Короткая задача по картинке видна целиком, без обрезки. */
 }
 .vop-blok__kartinka {
   display: block;
