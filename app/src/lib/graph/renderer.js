@@ -1283,9 +1283,65 @@ function labelText(value, x, y, anchor, size, fill) {
   });
 }
 
+/* ══════════════════════════════════════════════════════════
+   Режим рисунка: где он стоит — на листе ученика, в разборе для
+   учителя или на сайте.
+
+     student          — лист ученика и рисунок в условии у учителя:
+                        сетка, оси, графики, подписи графиков и точки,
+                        у которых есть подпись (названные в условии:
+                        A, A(2; 3)). Ни одной фигуры построения —
+                        пунктиров, асимптот, треугольников, дуг,
+                        вспомогательных осей, — ни безымянных «удобных»
+                        точек, ни подписей с вопросом;
+     teacherSolution  — рисунок к разбору на листе учителя: сцена
+                        построения целиком;
+     site             — теория, опорные задачи, тренажёр: как прежде.
+
+   Всё печатное рисуется через renderFigure, и режим у неё обязателен:
+   по ошибке «сайтовый» рисунок на лист не попадёт. Листы №12 берут
+   рисунки из lib/sheet/figures12.js: условие — 'student', рисунок
+   к разбору — 'teacherSolution'.
+   ══════════════════════════════════════════════════════════ */
+var FIGURE_MODES = ['student', 'teacherSolution', 'site'];
+
+function hasQuestion(text) { return /\?/.test(String(text || '')); }
+
+/** Сцена без построений: только то, что разрешено на листе ученика. */
+function studentScene(scene) {
+  return Object.assign({}, scene, {
+    shapes: [],
+    curves: (scene.curves || [])
+      .filter(function (curve) { return curve.style !== 'dashed'; })
+      .map(function (curve) {
+        return hasQuestion(curve.label) ? Object.assign({}, curve, { label: null }) : curve;
+      }),
+    points: (scene.points || []).filter(function (point) {
+      return point.label !== null && point.label !== undefined && point.label !== '' &&
+        !hasQuestion(point.label);
+    })
+  });
+}
+
+function sceneForMode(scene, mode) {
+  if (FIGURE_MODES.indexOf(mode) === -1) {
+    throw new Error('renderer: неизвестный режим рисунка «' + mode + '»');
+  }
+  return mode === 'student' ? studentScene(scene) : scene;
+}
+
+/** Рисунок в заданном режиме. Режим обязателен; report — как у renderGraph. */
+function renderFigure(scene, mode, report) {
+  return renderGraph(sceneForMode(scene, mode), report);
+}
+
 const api = {
   THEME: THEME,
   renderGraph: renderGraph,
+  renderFigure: renderFigure,
+  studentScene: studentScene,
+  sceneForMode: sceneForMode,
+  FIGURE_MODES: FIGURE_MODES,
   registerCurve: registerCurve,
   checkWindow: checkWindow,
   fmt: fmt
@@ -1295,4 +1351,5 @@ export default api;
 /* esc, px, textWidth и svgText нужны движку векторов (lib/vektory):
    он рисует тем же пером — та же тема, то же гало под подписями, —
    и второй копии этих четырёх функций в проекте нет. */
-export { THEME, renderGraph, registerCurve, checkWindow, fmt, esc, px, textWidth, svgText };
+export { THEME, renderGraph, renderFigure, studentScene, sceneForMode, FIGURE_MODES, registerCurve,
+         checkWindow, fmt, esc, px, textWidth, svgText };

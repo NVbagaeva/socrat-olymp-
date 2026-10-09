@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
 import { answersItems } from '../src/lib/sheet/answers12.js';
+import { conditionSvg } from '../src/lib/sheet/figures12.js';
 import content from '../src/content/sheet12.js';
 import { buildSheet } from './lib/sheet-build.mjs';
 
@@ -85,7 +86,9 @@ function collectBlocks(limitBlocks, limitTasks) {
           id: task.id,
           questionHtml: task.questionHtml,
           options: task.options,
-          figureSvg: task.svg,
+          /* Чертёж условия — чистый, режим 'student': без отмеченных
+             «удобных» узлов и построений (sheet/figures12.js). */
+          figureSvg: task.svg ? conditionSvg(task) : null,
           answer: task.answer,
           /* Ответ, набранный движком: обыкновенная дробь приходит
              дробью, а не строкой с косой чертой. */

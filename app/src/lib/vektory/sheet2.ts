@@ -29,7 +29,7 @@ import { generate } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
 import { renderVectorPlane } from './render';
 import { ru } from './tex';
-import type { Generated } from './types';
+import type { Generated, Risunok } from './types';
 
 export interface SheetParams2 {
   /** Прототипы: A1 … C2. */
@@ -135,22 +135,50 @@ function razborHtml(task: Generated, answerText: string): string {
   return `<ol class="sheet-steps">${items}</ol><p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
 }
 
-/** Карточка задачи листа. Ученику — рисунок без катетов и ни одного ответа. */
+/* Клетка рисунка к разбору, мм: он стоит в колонке разбора и мельче
+   рисунка условия. У движка клетка — 34 единицы viewBox. */
+const SOLUTION_CELL_MM = 2.6;
+const CELL_UNITS = 34;
+
+/**
+ * Рисунок к разбору: катеты-подсказки отдельным рисунком рядом с
+ * решением. null — если катетов нет (рисунок без сетки) и он совпал
+ * бы с рисунком условия.
+ */
+function solutionFigureHtml(risunok: Risunok, condition: string): string {
+  const svg = renderVectorPlane({ ...risunok, hints: true });
+  if (svg === condition) {
+    return '';
+  }
+  const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
+  const width =
+    box === null
+      ? ''
+      : ` style="width:${Math.round((Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM * 100) / 100}mm"`;
+  return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float"${width}>${svg}</figure>`;
+}
+
+/**
+ * Карточка задачи листа. Рисунок условия один и тот же у ученика и
+ * учителя — без катетов-подсказок; у учителя катеты стоят отдельным
+ * рисунком в разборе.
+ */
 function sheetTask(task: Generated, no: number, withAnswers: boolean): SheetTask2 {
   const answerText = ru(task.otvet);
   const risunok = task.risunok;
+  const condition = risunok === null ? null : renderVectorPlane(risunok);
   return {
     no,
     id: `${task.prototype}|${task.seed}`,
     questionHtml: typeset(task.uslovie),
     options: null,
-    figureSvg:
-      risunok === null
-        ? null
-        : renderVectorPlane(withAnswers ? { ...risunok, hints: true } : risunok),
+    figureSvg: condition,
     answer: withAnswers ? answerText : '',
     answerHtml: null,
-    solutionHtml: withAnswers ? razborHtml(task, answerText) : null,
+    solutionHtml: withAnswers
+      ? (risunok === null || condition === null ? '' : solutionFigureHtml(risunok, condition)) +
+        razborHtml(task, answerText)
+      : null,
   };
 }
 

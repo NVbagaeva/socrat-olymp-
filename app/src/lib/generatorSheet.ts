@@ -15,8 +15,7 @@ import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import rationalSolution from '@/lib/graph/solution-rational.js';
 import sqrtSolution from '@/lib/graph/solution-sqrt.js';
-import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
-import QuadraticAux from '@/lib/graph/quadratic-aux.js';
+import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
 import content from '@/content/sheet12.js';
@@ -51,7 +50,12 @@ interface SheetTask {
   id: string;
   questionHtml: string;
   options: unknown;
+  /** Рисунок условия в режиме 'student' — один на оба листа комплекта. */
   figureSvg: string | null;
+  /** Сцена движка: по ней лист учителя рисует построения к разбору. */
+  scene: unknown;
+  /** Рисунок к разбору — только на листе учителя. */
+  solutionFigure?: { svg: string; width: number | null } | null;
   answer: string;
   answerHtml: string | null;
   answerRule: string | undefined;
@@ -118,7 +122,14 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
       count <= 0
         ? []
         : pickTasks(
-            { skills: [id], level: params.level, count, mode: 'practice', mistakes: [], choice: true },
+            {
+              skills: [id],
+              level: params.level,
+              count,
+              mode: 'practice',
+              mistakes: [],
+              choice: true,
+            },
             seedFrom(params.seed),
           ).tasks,
     ]),
@@ -157,13 +168,17 @@ function usable(task: EngineExtra): boolean {
 }
 
 function sheetTaskFrom(task: EngineTask, no: number, rules: Record<string, string>): SheetTask {
-  const engine = task as EngineExtra & { answerHtml?: string | null };
+  const engine = task as EngineExtra & { answerHtml?: string | null; scene?: unknown };
   return {
     no,
     id: task.id,
     questionHtml: task.questionHtml,
     options: engine.options ?? null,
-    figureSvg: task.svg,
+    /* На печать — только чистый рисунок: без пунктиров, асимптот,
+       треугольников и отмеченных «удобных» узлов (graph/renderer.js,
+       режим 'student'). Рисунок сайта task.svg сюда не идёт. */
+    figureSvg: task.svg === null ? null : (conditionSvg(engine) as string | null),
+    scene: engine.scene ?? null,
     answer: task.answer,
     answerHtml: engine.answerHtml ?? null,
     answerRule: rules[task.id],
@@ -245,8 +260,11 @@ function nextVariant(
         for (const candidate of batch(attempt)) {
           const engine = candidate as EngineExtra;
           const same = candidate.id === sample.id;
-          if (!same && ((candidate.meta.level ?? null) !== sampleLevel ||
-              (engine.answerType ?? 'number') !== sampleType)) {
+          if (
+            !same &&
+            ((candidate.meta.level ?? null) !== sampleLevel ||
+              (engine.answerType ?? 'number') !== sampleType)
+          ) {
             continue;
           }
           if (!usable(engine)) {
@@ -299,32 +317,18 @@ export function sheetVariants(params: SheetParams): SheetBlock[][] {
   return out;
 }
 
-/**
- * Описание листа для шаблона. Ученику — строка «Ответ: ____» и ни
- * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
- * страницы. Рамки «Повторяем» на варианте нет.
- */
-/* Лист учителя: у параболы с вершиной в узле сетки на чертеже —
-   вспомогательная система координат x′Oy′ (graph/quadratic-aux.js),
-   как в разборе; у графика корня с прямой — треугольник наклона.
-   В листе ученика чертёж задачи как есть. */
-function teacherFigures(variants: SheetBlock[][]): SheetBlock[][] {
+/* Лист учителя: рисунок условия тот же, что у ученика, а построения
+   (система x′Oy′ у параболы, треугольник наклона у прямой и у корня,
+   асимптоты у гиперболы) — отдельным рисунком рядом с разбором
+   (sheet/figures12.js). */
+function withSolutionFigures(variants: SheetBlock[][], cell: number): SheetBlock[][] {
   return variants.map((blocks) =>
     blocks.map((block) => ({
       ...block,
-      tasks: block.tasks.map((task) => {
-        const meta = task.meta as unknown;
-        /* График корня с прямой: треугольник наклона — только у учителя. */
-        if (task.meta.family === 'sqrt') {
-          const svg = sqrtTriangleSvg(meta);
-          return svg === null ? task : { ...task, figureSvg: svg };
-        }
-        if (task.meta.family !== 'quadratic' || !QuadraticAux.hasAux(meta)) {
-          return task;
-        }
-        const svg = QuadraticAux.auxSvg(meta, null) as string | null;
-        return svg === null ? task : { ...task, figureSvg: svg };
-      }),
+      tasks: block.tasks.map((task) => ({
+        ...task,
+        solutionFigure: solutionFigure(task, GraphGenerate, cell) as SheetTask['solutionFigure'],
+      })),
     })),
   );
 }
@@ -333,12 +337,21 @@ function teacherFigures(variants: SheetBlock[][]): SheetBlock[][] {
    каждого свой модуль, выбор по семейству задачи. */
 const rationalBuilder = {
   fromTask(task: { meta: { family?: string } }) {
-    return task.meta.family === 'sqrt' ? sqrtSolution.fromTask(task) : rationalSolution.fromTask(task);
+    return task.meta.family === 'sqrt'
+      ? sqrtSolution.fromTask(task)
+      : rationalSolution.fromTask(task);
   },
 };
 
+/**
+ * Описание листа для шаблона. Ученику — строка «Ответ: ____» и ни
+ * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
+ * страницы. Рамки «Повторяем» на варианте нет.
+ */
 export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
-  const variants = withAnswers ? teacherFigures(sheetVariants(params)) : sheetVariants(params);
+  const variants = withAnswers
+    ? withSolutionFigures(sheetVariants(params), CELL[params.layout])
+    : sheetVariants(params);
   const blocks = variants[0] ?? [];
   /* Название подтемы приходит со страницы: лист собирается один на
      все подтемы задания, а в шапке должно стоять то, что печатают.
@@ -352,8 +365,10 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
     head: content.head,
     /* Бегунок собран в конфиге листа целиком: у другой подтемы в нём
        меняется только название, остальное остаётся как было. */
-    runner: subtopic === undefined ? content.runner
-      : content.runner.replace(content.title.text, subtopic),
+    runner:
+      subtopic === undefined
+        ? content.runner
+        : content.runner.replace(content.title.text, subtopic),
     title: { chip: content.title.chip, text: name, subtitle: subtitleOf(params) },
     recap: null,
     blocks,

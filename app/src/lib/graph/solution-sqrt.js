@@ -22,6 +22,7 @@
 */
 
 import Line from './families/line.js';
+import hidden from './hidden.js';
 import S from './generate-sqrt.js';
 
 var frac = Line.frac, add = Line.add, sub = Line.sub, mul = Line.mul,
@@ -406,11 +407,13 @@ function lineSteps(c, task) {
   }
 
   var right = num(xB) > num(xA);
-  var W = meta.window.xmax;
-  var far = num(xB) > W || Math.abs(num(yB)) > W;
+  /* B за рамкой — по общему правилу «невидимой» точки (hidden.js). */
+  var far = hidden.isPointHidden({ x: num(xB), y: num(yB) }, meta.window);
+  var where = num(xB) > meta.window.xmax ? 'справа, за рамкой рисунка'
+    : num(yB) > meta.window.ymax ? 'выше рамки рисунка' : 'ниже рамки рисунка';
   steps.push(step('answer', 'Ответ и проверка', [
     text('Проверка по картинке: ' + (far
-      ? 'прямая и график корня после точки ' + m('A') + ' расходятся и снова сходятся далеко справа, за рамкой рисунка, — '
+      ? 'прямая и график корня после точки ' + m('A') + ' расходятся и снова сходятся ' + where + ', — '
       : 'вторая точка пересечения видна на рисунке ' + (right ? 'правее' : 'левее') + ' точки ' + m('A') + ', не в узле сетки, — ') +
       m('x_B = ' + tex(xB)) + (right ? ' больше ' : ' меньше ') + m('x_A = ' + tex(xA)) + '. Похоже на правду.'),
     text(asksY ? 'Ордината точки ' + m('B') + ':' : 'Абсцисса точки ' + m('B') + ':'),
