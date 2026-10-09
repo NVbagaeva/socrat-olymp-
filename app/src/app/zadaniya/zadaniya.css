@@ -362,32 +362,34 @@
   width: 14px;
   height: 14px;
 }
+/* Не выбран: пустой кружок с тонкой серой рамкой. */
+.subtopic-card__check--empty {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+}
+/* Раздел в предпросмотре: тонкая серая рамка, иконка чуть приглушена. */
+.subtopic-card--preview {
+  border-color: var(--color-border);
+}
 
-/* Миниатюра из движка: холст квадратный, размер задаёт место вставки.
-   Высота считается от ширины, поэтому ничего не обрезается.
-   Подложку холста движок берёт из токена поверхности; на голубой и
-   серой карточке белый квадрат читался бы заплаткой, поэтому в
-   пределах миниатюры поверхность прозрачная. */
-.subtopic-card__chart {
-  --color-surface: var(--color-transparent);
-  display: block;
+/* Иконка раздела (общий компонент RazdelIkonka). Компьютер и планшет:
+   три-две карточки в ряд, иконка над текстом. Телефон — ниже. */
+.subtopic-card__ico {
   width: 96px;
+  transition: transform 180ms var(--ease);
 }
-.subtopic-card__chart svg {
-  display: block;
-  width: 100%;
-  height: auto;
+@media (hover: hover) {
+  a.subtopic-card:hover .subtopic-card__ico {
+    transform: translateY(-3px);
+  }
 }
-/* Линии не худеют вместе с чертежом: при уменьшении почти втрое
-   двухпиксельный штрих стал бы волосяным. */
-.subtopic-card__chart svg path,
-.subtopic-card__chart svg line,
-.subtopic-card__chart svg polyline,
-.subtopic-card__chart svg circle {
-  vector-effect: non-scaling-stroke;
-}
-.subtopic-card--soon .subtopic-card__chart {
-  opacity: 0.5;
+@media (prefers-reduced-motion: reduce) {
+  .subtopic-card__ico {
+    transition: none;
+  }
+  a.subtopic-card:hover .subtopic-card__ico {
+    transform: none;
+  }
 }
 
 .subtopic-card__text {
@@ -400,7 +402,9 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--color-text-brand);
-  hyphens: auto;
+  /* Названия не рвутся посреди слова. */
+  hyphens: manual;
+  overflow-wrap: normal;
 }
 .subtopic-card__graph {
   font-size: var(--fs-caption);
@@ -426,25 +430,46 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-/* Телефон: одна колонка, миниатюра справа от текста. */
+/* Телефон: одна колонка, иконка справа от текста, отметка выбора в
+   углу карточки поверх уголка иконки. Название не переносится по слову:
+   иконка 72px на самых узких экранах, шрифт чуть меньше. */
 @media (max-width: 767.98px) {
   .subtopic-list {
     grid-template-columns: minmax(0, 1fr);
   }
   .subtopic-card {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 88px;
     align-items: center;
-    padding-right: var(--space-10);
+    column-gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   }
   .subtopic-card__text {
-    order: -1;
+    grid-column: 1;
+    grid-row: 1;
   }
-  .subtopic-card__chart {
-    width: 64px;
+  .subtopic-card__ico {
+    grid-column: 2;
+    grid-row: 1;
+    width: 88px;
   }
   .subtopic-card__check {
-    top: 50%;
-    transform: translateY(-50%);
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+  }
+}
+@media (max-width: 430px) {
+  .subtopic-card {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    column-gap: var(--space-2);
+    padding: var(--space-3) 10px var(--space-3) 14px;
+  }
+  .subtopic-card__ico {
+    width: 72px;
+  }
+  .subtopic-card__title {
+    font-size: 14px;
   }
 }
 

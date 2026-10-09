@@ -1,8 +1,11 @@
 'use client';
 
+import { clsx } from 'clsx';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { pickSubtopic, useSubtopicPicked } from '@/lib/subtopicPick';
 
 export interface SubtopicCardProps {
@@ -17,6 +20,12 @@ export interface SubtopicCardProps {
   soon?: boolean;
   /** Подпись под названием: у №12 — название графика, «График — парабола». */
   caption?: string;
+  /**
+   * Иконка раздела (у №12). Не задана — раскладка прежняя: текст и
+   * стрелка без картинки. С иконкой: на компьютере текст слева, иконка
+   * справа сверху, стрелка внизу справа; на телефоне иконка слева.
+   */
+  icon?: IkonkaRazdela | undefined;
   /**
    * Формула, свёрстанная KaTeX на сборке. Есть у типов функций
    * задания №12; у разделов стереометрии формулы нет.
@@ -52,6 +61,7 @@ export function SubtopicCard({
   href,
   soon = href === null,
   caption,
+  icon,
   formulaHtml,
   media,
   meta,
@@ -59,6 +69,14 @@ export function SubtopicCard({
   const picked = useSubtopicPicked(href);
   const body = (
     <>
+      {icon === undefined ? null : (
+        <RazdelIkonka
+          icon={icon}
+          sizes="(min-width: 768px) 112px, 88px"
+          soon={soon}
+          className="subtopic__ico"
+        />
+      )}
       {media !== undefined ? (
         <span className="subtopic__media" aria-hidden="true">
           {media}
@@ -98,14 +116,21 @@ export function SubtopicCard({
 
   if (href === null) {
     return (
-      <span className="subtopic subtopic--soon" aria-disabled="true">
+      <span
+        className={
+          icon === undefined
+            ? 'subtopic subtopic--soon'
+            : 'subtopic subtopic--soon subtopic--ikonka'
+        }
+        aria-disabled="true"
+      >
         {body}
       </span>
     );
   }
   return (
     <Link
-      className={picked ? 'subtopic is-picked' : 'subtopic'}
+      className={clsx('subtopic', picked && 'is-picked', icon !== undefined && 'subtopic--ikonka')}
       href={href}
       onClick={() => pickSubtopic(href)}
     >

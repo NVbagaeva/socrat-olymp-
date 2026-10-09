@@ -9,31 +9,13 @@ import { OPORNYE } from '@/content/opornye';
 import { prepSkillsFor } from '@/content/prepSkills';
 import type { ExamSection, Subtopic } from '@/content/sections';
 import { subtopicBuilt } from '@/data/functionTypes';
-import { assetUrl } from '@/lib/assetUrl';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { href, ZADANIYA } from '@/lib/paths';
 import { prototypeSkills } from '../configurator/skillItems';
-import { VKLADKA_PARAM, type IkonkaRazdela, type RazdelyData } from './types';
+import { ikonkaRazdela } from './ikonka';
+import { VKLADKA_PARAM, type RazdelyData } from './types';
 
-/** Ширины файлов иконок — как в scripts/build-razdely-icons.mjs. */
-const WIDTHS = [96, 192, 384] as const;
-/** Пропорции иконок: исходник 1024×923. */
-const ICON_W = 1024;
-const ICON_H = 923;
-
-/** Иконка раздела: файлы public/images/razdely/<задание>/<имя>-<ширина>.*. */
-export function ikonkaRazdela(task: string, name: string): IkonkaRazdela {
-  const file = (width: number, ext: string) =>
-    assetUrl(`/images/razdely/${task}/${name}-${width}.${ext}`);
-  const set = (ext: string) => WIDTHS.map((width) => `${file(width, ext)} ${width}w`).join(', ');
-  return {
-    webp: set('webp'),
-    png: set('png'),
-    src: file(192, 'png'),
-    width: ICON_W,
-    height: ICON_H,
-  };
-}
+export { ikonkaRazdela };
 
 /**
  * Какие вкладки с материалом есть у подтемы. Те же условия, по которым

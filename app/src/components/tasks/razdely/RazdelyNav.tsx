@@ -355,7 +355,12 @@ export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
         onClick={() => open(plashka.current)}
       >
         {tekushchiy === undefined ? null : (
-          <RazdelIkonka icon={tekushchiy.icon} sizes="48px" className="razdely-plashka__ico" />
+          <RazdelIkonka
+            icon={tekushchiy.icon}
+            sizes="48px"
+            eager
+            className="razdely-plashka__ico"
+          />
         )}
         <span className="razdely-plashka__text">
           <span className="sr-only">Раздел задания №{no}: </span>

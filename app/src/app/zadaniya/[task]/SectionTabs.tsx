@@ -9,12 +9,15 @@ import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
 import { TitleText } from '@/components/tasks/TitleText';
 import { href } from '@/lib/paths';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 
 export interface SubtopicView {
   slug: string;
   name: string;
   /** Название графика: «График — парабола». */
   caption?: string;
+  /** Иконка раздела. Нет — карточка без иконки, как раньше. */
+  icon?: IkonkaRazdela;
   /** Формула, уже свёрстанная KaTeX на сборке. */
   formulaHtml: string;
   status: 'active' | 'soon';
@@ -95,6 +98,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
                 <SubtopicCard
                   name={item.name}
                   {...(item.caption === undefined ? {} : { caption: item.caption })}
+                  icon={item.icon}
                   href={item.href}
                   soon={item.status === 'soon'}
                   formulaHtml={item.formulaHtml}
