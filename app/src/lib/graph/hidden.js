@@ -44,7 +44,29 @@ function isPointHidden(point, win, margin) {
   return outsideBy(point, win) >= m - 1e-9;
 }
 
-const api = { HIDDEN_MARGIN: HIDDEN_MARGIN, outsideBy: outsideBy, isPointHidden: isPointHidden };
+/**
+ * Первая половина объяснения ученику, почему точку нельзя прочитать по
+ * рисунку: общая для условия-подсказки, подсказки тренажёра и разбора,
+ * чтобы везде говорилось одно и то же. Вторую половину — «находи её из
+ * уравнения …» — каждое место дописывает само, своими средствами набора
+ * формул. fraction — у точки нецелые координаты.
+ */
+function whyHidden(fraction) {
+  return (
+    'Вторая точка пересечения за рамкой чертежа' +
+    (fraction ? ', и её координаты нецелые' : '') +
+    ': на рисунке её нет, и по клеткам ' +
+    (fraction ? 'их' : 'её координаты') +
+    ' не прочитать.'
+  );
+}
+
+const api = {
+  HIDDEN_MARGIN: HIDDEN_MARGIN,
+  outsideBy: outsideBy,
+  isPointHidden: isPointHidden,
+  whyHidden: whyHidden,
+};
 
 export default api;
-export { HIDDEN_MARGIN, outsideBy, isPointHidden };
+export { HIDDEN_MARGIN, outsideBy, isPointHidden, whyHidden };

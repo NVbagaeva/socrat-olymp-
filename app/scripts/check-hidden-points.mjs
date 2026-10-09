@@ -32,6 +32,7 @@ import HintsQ from '../src/lib/graph/hints-quadratic.js';
 import SolutionR from '../src/lib/graph/solution-rational.js';
 import HintsR from '../src/lib/graph/hints-rational.js';
 import { HIDDEN_MARGIN, isPointHidden, outsideBy } from '../src/lib/graph/hidden.js';
+import { stepText } from './lib/quadratic-solution-text.mjs';
 import { requireSrc } from './lib/load-ts.mjs';
 
 const args = process.argv.slice(2);
@@ -169,6 +170,24 @@ function checkTask(set, source, task) {
     }
   } catch (error) {
     fail(`${id}: разбор или подсказка не собрались`, `${where}: ${error.message}`);
+  }
+  /* Ученику прямо сказано, почему точку нельзя прочитать по рисунку и
+     что её находят из уравнения: в готовой подсказке (если она есть),
+     в подсказке тренажёра и в разборе. */
+  if (task.meta.family === 'quadratic' && extra.length === 2) {
+    const [solution, hints] = extra;
+    const why = 'на рисунке её нет';
+    const solutionText = solution.map((step) => stepText(step)).join('\n');
+    if (!solutionText.includes(why) || !/из уравнения/.test(solutionText)) {
+      fail(`${id}: разбор не объясняет, почему точку не прочитать по рисунку`, where);
+    }
+    const hintsText = JSON.stringify(hints);
+    if (!hintsText.includes(why) || !/из уравнения/.test(hintsText)) {
+      fail(`${id}: подсказка тренажёра не объясняет, почему точку не прочитать по рисунку`, where);
+    }
+    if (task.hint !== null && !(task.hint.includes(why) && /из уравнения/.test(task.hint))) {
+      fail(`${id}: готовая подсказка не объясняет, почему точку не прочитать по рисунку`, where);
+    }
   }
   for (const scene of scenesIn(extra)) {
     const shown = sceneShowsPoint(scene, P);

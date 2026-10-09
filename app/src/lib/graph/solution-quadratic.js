@@ -38,6 +38,7 @@
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
 import Aux from './quadratic-aux.js';
+import { whyHidden } from './hidden.js';
 
 var MINUS = '−';
 
@@ -520,7 +521,7 @@ function stepAuxA(p, win, points, meta) {
     '. В новой системе она на ' + key(plain(frac(Math.abs(dx.p), dx.q)) + ' кл.') + ' ' +
     (num(dx) > 0 ? 'правее' : 'левее') + ' вершины и на ' +
     key(plain(frac(Math.abs(dy.p), dy.q)) + ' кл.') + ' ' + (num(dy) > 0 ? 'выше' : 'ниже') +
-    ': ' + math("\\Delta x = " + tex(dx) + ",\; \\Delta y = " + tex(dy), 'Δx, Δy') + '.'));
+    ': ' + math("\\Delta x = " + tex(dx) + ",\\; \\Delta y = " + tex(dy), 'Δx, Δy') + '.'));
   blocks.push(text('Подставляем в ' + math("y' = ax'^2", 'y′ = ax′²') + ': ' +
     math('\\Delta y = a \\cdot \\Delta x^2', 'Δy = a · Δx²') + '.'));
   blocks.push(formula(tex(dy) + ' = a \\cdot ' + texBracket(dx) + '^2 \\;\\Rightarrow\\; a = ' + tex(p.a)));
@@ -867,8 +868,9 @@ function stepIntersectionAnswer(p, options, blocks) {
   var A = sub(p.a, a2);
   var B = sub(p.b, b2);
 
-  blocks.push(text('Точки пересечения — это те ' + math('x', 'x') +
-    ', при которых значения обеих функций совпадают. Приравниваем формулы:'));
+  blocks.push(text(whyHidden(cross.hidden === 'fraction') +
+    ' Поэтому находим её не по рисунку, а из уравнения: точки пересечения — это те ' +
+    math('x', 'x') + ', при которых значения обеих функций совпадают. Приравниваем формулы:'));
   blocks.push(formula(equationTex(p, 'f(x)').replace('f(x) = ', '') + ' = ' +
     (second.kind === 'line' ? lineTex(second.line, 'g(x)').replace('g(x) = ', '')
                             : equationTex(second.curve, 'g(x)').replace('g(x) = ', ''))));
@@ -922,7 +924,8 @@ function stepIntersectionAnswer(p, options, blocks) {
   blocks.push(text('Вторая точка пересечения — ' +
     keyMath(pointTex(Q.toExact(asked.x), Q.toExact(asked.y)),
       pointText(Q.toExact(asked.x), Q.toExact(asked.y))) +
-    '. С чертежа её было не прочитать: она лежит за рамкой окна.'));
+    '. На чертеже её нет — она за рамкой окна, поэтому её координаты мы вычислили, а не прочитали ' +
+    'по клеткам.'));
   blocks.push(answerBlock(options.answer));
   return { title: 'Отвечаем на вопрос', blocks: blocks };
 }

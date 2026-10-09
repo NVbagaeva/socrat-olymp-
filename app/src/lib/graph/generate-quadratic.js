@@ -58,7 +58,7 @@ import renderer from './renderer.js';
 import math from './math.js';
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
-import { HIDDEN_MARGIN, isPointHidden } from './hidden.js';
+import { HIDDEN_MARGIN, isPointHidden, whyHidden } from './hidden.js';
 import { rng, shuffled, answerPlaces } from './random.js';
 import { numberText, pointText, plainText, typesetText, fillTemplate, answerText,
          decimalFriendly } from './text.js';
@@ -1158,6 +1158,16 @@ function result(set, task, built, seed, index) {
       : Q.equationText(second.curve, task.secondForm || set.secondForm || 'general')) : ''
   };
 
+  /* Вторая точка пересечения на рисунке не видна: подсказка к такой
+     задаче сперва говорит, почему её не прочитать, и только потом —
+     что делать. Фраза общая с подсказками тренажёра и разбором. */
+  var cross = built.intersection;
+  var hintText = task.hint ? fillTemplate(task.hint, values) : null;
+  if (hintText !== null && cross && cross.oneVisible) {
+    hintText = whyHidden(cross.hidden === 'fraction') + ' ' +
+      'Находи её не по рисунку, а из уравнения $f(x) = g(x)$. ' + hintText;
+  }
+
   return {
     id: task.id,
     kind: set.kind,
@@ -1165,8 +1175,8 @@ function result(set, task, built, seed, index) {
     layout: layout,
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),
-    hint: task.hint ? plainText(fillTemplate(task.hint, values)) : null,
-    hintHtml: task.hint ? typesetText(fillTemplate(task.hint, values)) : null,
+    hint: hintText === null ? null : plainText(hintText),
+    hintHtml: hintText === null ? null : typesetText(hintText),
     answer: choice ? choice.answer : answerText(value),
     answerHtml: choice ? null : math.html(answerText(value)),
     options: choice ? choice.options.map(function (option) {
