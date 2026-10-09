@@ -13,7 +13,7 @@
 const PREFIX = 'budetege:';
 
 /** Есть ли хранилище: на сервере при статической сборке его нет. */
-function store(): Storage | null {
+export function browserStorage(): Storage | null {
   try {
     return typeof window === 'undefined' ? null : window.localStorage;
   } catch {
@@ -24,7 +24,7 @@ function store(): Storage | null {
 export const storage = {
   /** Значение по ключу. Нет значения или оно испорчено — fallback. */
   get<T>(key: string, fallback: T): T {
-    const target = store();
+    const target = browserStorage();
     if (target === null) {
       return fallback;
     }
@@ -37,7 +37,7 @@ export const storage = {
   },
 
   set<T>(key: string, value: T): void {
-    const target = store();
+    const target = browserStorage();
     if (target === null) {
       return;
     }
@@ -50,7 +50,7 @@ export const storage = {
   },
 
   remove(key: string): void {
-    const target = store();
+    const target = browserStorage();
     try {
       target?.removeItem(PREFIX + key);
     } catch {
@@ -60,7 +60,7 @@ export const storage = {
 
   /** Только свои ключи: чужие в том же домене не трогаются. */
   clear(): void {
-    const target = store();
+    const target = browserStorage();
     if (target === null) {
       return;
     }

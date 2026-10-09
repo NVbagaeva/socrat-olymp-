@@ -16,6 +16,12 @@ export interface TabItem {
   icon?: ReactNode;
   disabled?: boolean;
   /**
+   * Метка на вкладке: маленькая точка с подписью для скринридера.
+   * Нужна, чтобы показать, что внутри вкладки есть незаконченное дело
+   * (например, начатая тренировка).
+   */
+  badge?: string;
+  /**
    * Адрес вкладки. Задан — вкладка становится ссылкой: её можно
    * открыть в новой вкладке браузера, скопировать и вернуться к ней
    * кнопкой «назад». Не задан — вкладка переключает содержимое на
@@ -108,6 +114,9 @@ export function Tabs({
               </span>
             )}
             <span className="tabs__text">{item.label}</span>
+            {item.badge === undefined ? null : (
+              <span className="tabs__dot" role="img" aria-label={item.badge} title={item.badge} />
+            )}
           </>
         );
 

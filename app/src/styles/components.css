@@ -2551,6 +2551,26 @@ html[data-tabs-pending] .topic-panel,
 .tabs--lenta a[role='tab'][aria-selected='true'] .tabs__ico {
   background: var(--color-tab-plate);
 }
+/* Метка «есть незавершённое дело» (тренировка): точка в углу вкладки.
+   Вынута из потока, поэтому размеры вкладки и ленты не меняются.
+   На активной вкладке заливка синяя, и точка получает светлую кайму. */
+.tabs--lenta button:has(> .tabs__dot),
+.tabs--lenta a[role='tab']:has(> .tabs__dot) {
+  position: relative;
+}
+.tabs__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+.tabs--lenta [aria-selected='true'] .tabs__dot {
+  box-shadow: 0 0 0 2px var(--color-tab-bottom);
+}
 /* Подпись тёмная, пока вкладка не активна и на неё не наводят;
    в обоих этих случаях она принимает цвет вкладки — белый
    на заливке, синий под курсором. */

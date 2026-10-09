@@ -1,0 +1,228 @@
+/* Оболочка сессии тренажёра: панель управления, пауза, итоги.
+   Подключается самим компонентом: тренажёры живут на разных страницах
+   со своими стилями, а оболочка у них одна. */
+
+.tsess {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Панель: прогресс слева, время и кнопки справа. На узком экране
+   занимает две строки: сведения, затем кнопки на всю ширину. */
+.tsess__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.tsess__progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tsess__progress b {
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+.tsess__solved {
+  font-size: var(--fs-caption);
+}
+.tsess__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-brand);
+  margin-left: auto;
+}
+.tsess__timer svg {
+  color: var(--color-primary);
+}
+.tsess__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.tsess__finish-short {
+  display: none;
+}
+@media (max-width: 639.98px) {
+  .tsess__bar {
+    padding: var(--space-3);
+  }
+  .tsess__actions {
+    flex: 1 0 100%;
+  }
+  .tsess__actions .btn {
+    flex: 1 1 0;
+  }
+  .tsess__finish-long {
+    display: none;
+  }
+  .tsess__finish-short {
+    display: inline;
+  }
+}
+
+/* Ненавязчивая подсказка: прогресс не сохраняется. */
+.tsess__nosave,
+.tsess__notice {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.tsess__nosave {
+  padding: 0 var(--space-1);
+}
+.tsess__notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+
+/* Пауза и остановка другой вкладкой: вместо заданий — карточка. */
+.tsess__cover {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+  text-align: center;
+}
+.tsess__cover--warn {
+  border-style: solid;
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+.tsess__cover-title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.tsess__cover-text {
+  max-width: 46ch;
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.tsess__body[hidden] {
+  display: none;
+}
+
+/* ── Итоги: список заданий ─────────────────────────────────── */
+
+.tsum__list-wrap {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 720px;
+  margin-top: var(--space-2);
+}
+.tsum__list {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tsum__item {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  min-width: 0;
+}
+.tsum__item--right {
+  border-left-color: var(--color-success);
+}
+.tsum__item--wrong {
+  border-left-color: var(--color-error);
+}
+.tsum__item--hinted {
+  border-left-color: var(--color-primary);
+}
+.tsum__item--skipped {
+  border-left-color: var(--color-text-tertiary);
+}
+.tsum__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.tsum__no {
+  font-weight: 700;
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+.tsum__mark {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+}
+.tsum__mark--right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.tsum__mark--wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.tsum__mark--hinted {
+  background: var(--color-surface-2);
+  color: var(--color-primary);
+}
+.tsum__kind {
+  color: var(--color-text-secondary);
+}
+.tsum__question {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow-x: auto;
+  min-width: 0;
+}
+.tsum__question p {
+  margin: 0;
+}
+.tsum__toggle {
+  justify-self: start;
+}
+.tsum__review {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  min-width: 0;
+  overflow-x: auto;
+}

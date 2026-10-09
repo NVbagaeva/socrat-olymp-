@@ -33,16 +33,18 @@ function subscribe(listener: () => void): () => void {
  * при отрисовке на сервере и при гидратации так и остаётся, а сразу
  * после монтирования браузер отдаёт разложенный подход.
  */
-export function useRound(key: string, build: () => number[]): number[] {
+export function useRound(key: string, build: () => number[], restored?: number[] | null): number[] {
   const read = useCallback(() => {
     const found = rounds.get(key);
     if (found !== undefined) {
       return found;
     }
-    const made = build();
+    /* Подход восстановлен из сохранённой тренировки: раскладка та же,
+       что была, а не новая (её допустимость проверил вызывающий). */
+    const made = restored !== undefined && restored !== null && restored.length > 0 ? restored : build();
     rounds.set(key, made);
     return made;
-  }, [key, build]);
+  }, [key, build, restored]);
 
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }
