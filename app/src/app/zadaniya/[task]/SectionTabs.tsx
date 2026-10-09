@@ -13,6 +13,8 @@ import { href } from '@/lib/paths';
 export interface SubtopicView {
   slug: string;
   name: string;
+  /** Название графика: «График — парабола». */
+  caption?: string;
   /** Формула, уже свёрстанная KaTeX на сборке. */
   formulaHtml: string;
   status: 'active' | 'soon';
@@ -92,6 +94,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
               <li key={item.slug}>
                 <SubtopicCard
                   name={item.name}
+                  {...(item.caption === undefined ? {} : { caption: item.caption })}
                   href={item.href}
                   soon={item.status === 'soon'}
                   formulaHtml={item.formulaHtml}

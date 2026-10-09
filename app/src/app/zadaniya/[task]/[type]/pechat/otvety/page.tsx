@@ -20,7 +20,12 @@ type Params = Promise<{ task: string; type: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type } = await params;
   const subtopic = findSubtopic(task, type);
-  return subtopic ? { title: `${generatorPage.teacher} · ${subtopic.title} — Будет на ЕГЭ`, robots: { index: false } } : {};
+  return subtopic
+    ? {
+        title: `${generatorPage.teacher} · ${subtopic.title} — Будет на ЕГЭ`,
+        robots: { index: false },
+      }
+    : {};
 }
 
 /**
@@ -36,7 +41,7 @@ export default async function Page({ params }: { params: Params }) {
   }
   return (
     <Suspense fallback={null}>
-      <SheetPage withAnswers {...(subtopic.sheetTitle === undefined ? {} : { subtopic: subtopic.sheetTitle })} />
+      <SheetPage withAnswers subtopic={subtopic.title} />
     </Suspense>
   );
 }

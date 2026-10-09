@@ -15,6 +15,8 @@ export interface SubtopicCardProps {
    * это предпросмотр — карточка ведёт на страницы, но бейдж остаётся.
    */
   soon?: boolean;
+  /** Подпись под названием: у №12 — название графика, «График — парабола». */
+  caption?: string;
   /**
    * Формула, свёрстанная KaTeX на сборке. Есть у типов функций
    * задания №12; у разделов стереометрии формулы нет.
@@ -49,6 +51,7 @@ export function SubtopicCard({
   name,
   href,
   soon = href === null,
+  caption,
   formulaHtml,
   media,
   meta,
@@ -64,6 +67,7 @@ export function SubtopicCard({
 
       <span className="subtopic__head">
         <span className="subtopic__name">{name}</span>
+        {caption === undefined ? null : <span className="subtopic__caption">{caption}</span>}
         {/* Формула свёрстана на сборке: обычным текстом она не выводится. */}
         {formulaHtml !== undefined ? (
           <span

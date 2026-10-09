@@ -13,6 +13,8 @@ export interface SubtopicView {
   /** Номер строки: 01 … 06. */
   no: string;
   title: string;
+  /** Название графика: «График — парабола». */
+  graphName: string;
   status: 'active' | 'soon';
   /** Сколько наборов прототипов и задач в них — из манифеста. */
   prototypes: number;
@@ -62,6 +64,7 @@ function Card({ item }: { item: SubtopicView }) {
       ) : null}
       <span className="subtopic-card__text">
         <span className="subtopic-card__title">{item.title}</span>
+        <span className="subtopic-card__graph">{item.graphName}</span>
         {/* Числа только у открытого семейства: у закрытого в данных
             нулей, и вместо них честная подпись. */}
         {open ? (

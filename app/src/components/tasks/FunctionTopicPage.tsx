@@ -80,8 +80,12 @@ export function FunctionTopicPage({
   /* Чем подтема отличается от линейной — признаками в её конфиге;
      не задано — берётся общее для раздела. Плашка-подсказка вкладки
      «О задании» у раздела одна, подтема её не переопределяет. */
-  const about =
-    subtopic.about === undefined ? section.about : { ...subtopic.about, hint: section.about.hint };
+  const about = {
+    ...(subtopic.about === undefined ? section.about : subtopic.about),
+    hint: section.about.hint,
+    /* Заголовок вкладки — название раздела из общего списка. */
+    title: subtopic.title,
+  };
   const tutors =
     subtopic.tutors === undefined ? section.tutors : { ...section.tutors, items: subtopic.tutors };
 
@@ -129,19 +133,23 @@ export function FunctionTopicPage({
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
-        /* Шапка по признаку подтемы: H1 общий на задание, название
-           подтемы — подзаголовком. Без признака H1 — сама подтема. */
+        /* Шапка по признаку подтемы: H1 общий на задание, название раздела
+           — подзаголовком, под ним название графика. Без признака H1 —
+           сам раздел. Названия — из data/functionTypes.ts. */
         title={
           subtopic.head === undefined
             ? subtopic.title
             : `Задание №${section.no}. ${section.subtitle}`
         }
         subtitle={
-          subtopic.head === undefined ? undefined : (
-            <p className="t-h3 topic-head__subtitle topic-head__subtitle--wide">
-              {subtopic.head.subtitle}
-            </p>
-          )
+          <>
+            {subtopic.head === undefined ? null : (
+              <p className="t-h3 topic-head__subtitle topic-head__subtitle--wide">
+                {subtopic.title}
+              </p>
+            )}
+            <p className="topic-head__graph">{subtopic.graphName}</p>
+          </>
         }
         badge={topic.badge}
         lead={topic.lead}
