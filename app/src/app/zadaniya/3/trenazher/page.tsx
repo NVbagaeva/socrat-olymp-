@@ -13,6 +13,7 @@ import '../../[task]/section.css';
 import '../stereometria.css';
 import '../[figura]/trenazher.css';
 import { href, ZADANIYA } from '@/lib/paths';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
 
 export const metadata: Metadata = {
   title: 'Общий тренажёр — задание №3 — Будет на ЕГЭ',
@@ -49,7 +50,11 @@ export default function Solid3TrainerPage() {
           lead={`Задания всех восьми разделов вперемешку: ${variants} вариантов по 91 прототипу.`}
         />
 
-        <Solid3Trainer pool={wholePool()} roundKey="z3:all" />
+        <Solid3Trainer
+          pool={wholePool()}
+          scope={scopeOfPath(href(ZADANIYA, stereometria.slug)) ?? stereometria.slug}
+          backHref={href(ZADANIYA, stereometria.slug)}
+        />
       </main>
     </AppShell>
   );

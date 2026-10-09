@@ -1,24 +1,32 @@
 'use client';
 
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import { parseAnswer, sameNumber } from '@/lib/answer';
 import type { TrainerPart, TrainerQuestion, TrainerStep, TrainerTask } from '@/lib/trainer';
 import { trainerKindTitle } from '@/content/trainerModes';
 import { recordAttempt } from '@/lib/trainerProgress';
-import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
+import { pickRound, useRound } from '@/lib/trainerRound';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { PrepSolution } from '../prep/PrepSolution';
-import { TrainerResult, type TrainerMark } from './TrainerResult';
+import { useSessionReport } from '../session/useSessionReport';
+import type { TaskMark } from '@/lib/trainerSession/types';
+import type { TrainerUi } from './trainerUi';
 
 export interface TrainerScreenProps {
   /** Все задания сессии: подход раскладывается из них в браузере. */
   pool: TrainerTask[];
   /** Под каким именем помнить подход: у каждой сессии свой. */
   roundKey: string;
-  /** Куда ведёт кнопка с итогового экрана. */
-  backHref: string;
+  /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
+  restored: TrainerUi | null;
+  /** Сообщить оболочке сессии о новом состоянии (она его сохранит). */
+  report: (ui: TrainerUi) => void;
+  /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
+  elapsed: () => number;
+  /** Последнее задание решено: показать итоги. */
+  onFinish: () => void;
   /** Сколько заданий в подходе. По умолчанию — весь пул. */
   roundSize?: number;
   /**
@@ -52,7 +60,10 @@ const VERDICT = {
 export function TrainerScreen({
   pool,
   roundKey,
-  backHref,
+  restored,
+  report,
+  elapsed,
+  onFinish,
   roundSize = pool.length,
   control = false,
 }: TrainerScreenProps) {
@@ -63,7 +74,7 @@ export function TrainerScreen({
     [pool],
   );
   const build = useCallback(() => pickRound(kinds, roundSize), [kinds, roundSize]);
-  const order = useRound(roundKey, build);
+  const order = useRound(roundKey, build, restored?.order);
   /* Пока подход не собран — на сервере и при гидратации — показываем
      начало пула: экран не мигает пустотой, а через мгновение браузер
      отдаёт разложенный подход. */
@@ -75,57 +86,61 @@ export function TrainerScreen({
     [order, pool, roundSize],
   );
 
-  const [index, setIndex] = useState(0);
-  const [value, setValue] = useState('');
-  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
+  /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
+     вернувшись в тренажёр, он продолжает с того же места. */
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  const [value, setValue] = useState(restored?.value ?? '');
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
   /* Чем закончилось каждое задание подхода: полоса берёт вид оттуда. */
-  const [marks, setMarks] = useState<Record<number, TrainerMark>>({});
+  const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
+  /* Задания, в которых была ошибка: на итогах они отличаются от пропущенных. */
+  const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
 
   /* Подсказка: открыта ли она, какой шаг идёт, что набрано в полях
      и как проверился текущий шаг. */
-  const [hint, setHint] = useState(false);
+  const [hint, setHint] = useState(restored?.hint ?? false);
   /* Разбор параболы: у неё нет цепочки шагов с полями, зато есть
      тот же разбор, что во вкладке опорных задач. */
-  const [solution, setSolution] = useState(false);
-  const [solutionStep, setSolutionStep] = useState(0);
-  const [step, setStep] = useState(0);
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const [stepMark, setStepMark] = useState<'right' | 'wrong' | null>(null);
+  const [solution, setSolution] = useState(restored?.solution ?? false);
+  const [solutionStep, setSolutionStep] = useState(restored?.solutionStep ?? 0);
+  const [step, setStep] = useState(restored?.step ?? 0);
+  const [fields, setFields] = useState<Record<string, string>>(restored?.fields ?? {});
+  const [stepMark, setStepMark] = useState<'right' | 'wrong' | null>(restored?.stepMark ?? null);
   /* Шаг с вопросами (гипербола): сколько вопросов шага уже пройдено
      и какой неверный вариант выбран на текущем — под ним пояснение. */
-  const [answered, setAnswered] = useState(0);
-  const [picked, setPicked] = useState<number | null>(null);
+  const [answered, setAnswered] = useState(restored?.answered ?? 0);
+  const [picked, setPicked] = useState<number | null>(restored?.picked ?? null);
   /* Отдельное предупреждение к неверным полям части (парабола): точка,
      дающая тождество, или неверный знак. null — общий текст шага. */
-  const [note, setNote] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(restored?.note ?? null);
 
-  /* Сколько раз ответ не сошёлся и сколько заняла тренировка. Время
-     идёт от первой проверки: до неё ученик ещё читает условие, да
-     и часы на сервере ни при чём — расхождения гидратации нет. */
-  const [misses, setMisses] = useState(0);
-  /* Итог подхода: открывается с последнего задания. */
-  const [result, setResult] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const startedAt = useRef<number | null>(null);
-  const taskStartedAt = useRef<number | null>(null);
+  /* Сколько раз ответ не сошёлся. Время тренировки считает оболочка
+     сессии (только активное: пауза и скрытая вкладка не в счёт); здесь
+     остаётся время на одно задание — от первой проверки, пока ученик
+     читает условие, оно не идёт. */
+  const [misses, setMisses] = useState(restored?.misses ?? 0);
+  const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
   /* Была ли ошибка в текущем задании: начисто пройденное уходит
      из списка ошибочных, остальное в нём остаётся. */
-  const failed = useRef(false);
+  const [failed, setFailed] = useState(restored?.failed ?? false);
 
   function startClock() {
-    const now = Date.now();
-    if (startedAt.current === null) {
-      startedAt.current = now;
-    }
-    if (taskStartedAt.current === null) {
-      taskStartedAt.current = now;
+    if (taskFrom === null) {
+      setTaskFrom(elapsed());
     }
   }
 
   /** Сколько секунд ушло на текущее задание. */
   function taskSeconds(): number {
-    const from = taskStartedAt.current;
-    return from === null ? 0 : (Date.now() - from) / 1000;
+    const from = taskFrom;
+    return from === null ? 0 : (elapsed() - from) / 1000;
+  }
+
+  /* Неверный ответ — в поле, в шаге подсказки или в вопросе шага. */
+  function miss() {
+    setFailed(true);
+    setMisses(misses + 1);
+    setTried({ ...tried, [index]: true });
   }
 
   /* Закрытое задание уходит в хранилище: счётчики вкладки считаются
@@ -134,10 +149,28 @@ export function TrainerScreen({
     recordAttempt({ kind: item.kind, taskId: item.id, right, clean, seconds: taskSeconds() });
   }
 
-  function stopClock() {
-    const from = startedAt.current;
-    setSeconds(from === null ? 0 : (Date.now() - from) / 1000);
-  }
+  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
+     каждом изменении, а при возвращении отдаёт обратно (restored). */
+  useSessionReport<TrainerUi>(report, {
+    index,
+    marks,
+    tried,
+    order: order.length === 0 ? null : order,
+    value,
+    checked,
+    hint,
+    solution,
+    solutionStep,
+    step,
+    fields,
+    stepMark,
+    answered,
+    picked,
+    note,
+    misses,
+    failed,
+    taskFrom,
+  });
 
   const found = tasks[index];
   if (found === undefined) {
@@ -177,13 +210,9 @@ export function TrainerScreen({
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
-      remember(task, true, failed.current === false);
-      if (last) {
-        stopClock();
-      }
+      remember(task, true, failed === false);
     } else {
-      failed.current = true;
-      setMisses(misses + 1);
+      miss();
     }
   }
 
@@ -194,12 +223,9 @@ export function TrainerScreen({
     setSolution(true);
     setSolutionStep(0);
     setChecked(null);
-    failed.current = true;
+    setFailed(true);
     setMarks({ ...marks, [index]: 'hinted' });
     remember(task, false, false);
-    if (last) {
-      stopClock();
-    }
   }
 
   function openHint() {
@@ -226,8 +252,7 @@ export function TrainerScreen({
     );
     if (!right) {
       setStepMark('wrong');
-      failed.current = true;
-      setMisses(misses + 1);
+      miss();
       return;
     }
     advance();
@@ -243,8 +268,7 @@ export function TrainerScreen({
     startClock();
     if (question.options[optionNo]?.right !== true) {
       setPicked(optionNo);
-      failed.current = true;
-      setMisses(misses + 1);
+      miss();
       return;
     }
     setPicked(null);
@@ -295,8 +319,7 @@ export function TrainerScreen({
       nextPart();
       return;
     }
-    failed.current = true;
-    setMisses(misses + 1);
+    miss();
     setStepMark('wrong');
     const trap = (part.traps ?? []).find((item) =>
       item.values.every((value, fieldNo) => sameNumber(values[fieldNo] ?? '', value)),
@@ -324,8 +347,7 @@ export function TrainerScreen({
     startClock();
     if (part.options[optionNo]?.right !== true) {
       setPicked(optionNo);
-      failed.current = true;
-      setMisses(misses + 1);
+      miss();
       return;
     }
     nextPart();
@@ -342,15 +364,12 @@ export function TrainerScreen({
       /* Задача пройдена по шагам: в верных она не числится. */
       setMarks({ ...marks, [index]: 'hinted' });
       remember(task, false, false);
-      if (last) {
-        stopClock();
-      }
     }
   }
 
   function next() {
-    taskStartedAt.current = null;
-    failed.current = false;
+    setTaskFrom(null);
+    setFailed(false);
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -366,54 +385,15 @@ export function TrainerScreen({
   }
 
   const nextButton = last ? (
-    <Button onClick={() => setResult(true)}>Смотреть результат →</Button>
+    <Button onClick={onFinish}>Смотреть результат →</Button>
   ) : (
     <Button onClick={next}>Следующее задание →</Button>
   );
 
-  function again() {
-    /* Новый подход: другие задания и другой порядок. */
-    restartRound(roundKey);
-    setResult(false);
-    setIndex(0);
-    setValue('');
-    setChecked(null);
-    setMarks({});
-    setMisses(0);
-    setSeconds(0);
-    setHint(false);
-    setSolution(false);
-    setSolutionStep(0);
-    setStep(0);
-    setFields({});
-    setStepMark(null);
-    setAnswered(0);
-    setPicked(null);
-    setNote(null);
-    startedAt.current = null;
-    taskStartedAt.current = null;
-    failed.current = false;
-  }
-
-  if (result) {
-    return (
-      <TrainerResult
-        tasks={tasks}
-        marks={marks}
-        misses={misses}
-        seconds={seconds}
-        backHref={backHref}
-        onAgain={again}
-      />
-    );
-  }
-
   return (
     <section className="ttask">
-      <p className="ttask__count">
-        Задание <b>{index + 1}</b> из {total}
-      </p>
-
+      {/* Номер задания, решённое и время показывает панель тренировки
+          над экраном (components/tasks/session). */}
       {/* Кружки подхода — те же, что у шагов в подготовке: решённое
           залито зелёным с галочкой, пройденное с подсказкой — синим,
           текущее обведено. Выбирать задание нельзя, поэтому это не

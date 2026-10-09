@@ -1,14 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { TrainerSessionHost } from '@/components/tasks/session';
 import { REZHIMY, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
 import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
-import type { RoundKind } from '@/lib/veroyatnost/useRound';
-import { navykKind, navykiZadaniya, seychas, zadachaId } from './metody';
+import { sealMetod } from '@/lib/veroyatnost/secret';
+import { sobratPodhod, type RoundKind } from '@/lib/veroyatnost/useRound';
+import { navykKind, navykiZadaniya, zadachaId } from './metody';
 import type { MetodKarta } from './navyki';
 import { ProgressPoMetodam } from './ProgressPoMetodam';
-import { Sessiya, type SessiyaPlan } from './Sessiya';
+import { Sessiya } from './Sessiya';
+import { SessiyaRazbor, UznayRazbor } from './SessiyaRazbor';
+import {
+  isSessiyaPayload,
+  zadachiPodhoda,
+  type SessiyaPayload,
+} from './sessiyaPayload';
+import { readSessiyaUi, type SessiyaUi } from './sessiyaUi';
 import {
   TrenazherKonfigurator,
   type RezhimPlitka,
@@ -41,7 +51,9 @@ export interface TrenazherProps {
  * количество задач и переключатель подсказок.
  *
  * «Начать тренировку» собирает подход из банка тут же, в браузере, и
- * экран задачи (Sessiya) встаёт на место конфигуратора. Прогресс
+ * отдаёт его оболочке сессии (components/tasks/session): она хранит
+ * задачи целиком, ведёт таймер и паузу, показывает итоги и возвращает
+ * ученика в незавершённую тренировку. Прогресс
  * считается отдельно по каждому методу и живёт в своих хранилищах:
  * у каждого задания своё, у «Узнай метод» — своё, сброс здесь не
  * трогает ни задание №12, ни соседнее задание.
@@ -75,7 +87,15 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
   const uznayStore = UZNAY_STORES[zadanie];
   const progress = store.useProgress();
   const spisokMetodov = navykiZadaniya(zadanie);
-  const [plan, setPlan] = useState<SessiyaPlan | null>(null);
+  /* Название навыка по идентификатору и отпечатки навыков «Узнай метод». */
+  const nazvaniya = useMemo(
+    () => Object.fromEntries(spisokMetodov.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
+    [spisokMetodov],
+  );
+  const otpechatki = useMemo(
+    () => new Map(spisokMetodov.map((m) => [sealMetod(m.id), m.id])),
+    [spisokMetodov],
+  );
 
   /* Ошибки — только те, что есть в банке: прототип могли переименовать. */
   const oshibki = new Set(progress.mistakes);
@@ -127,55 +147,91 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
     }
   }
 
-  function start(zapros: TrenazherZapros) {
+  /** Собрать подход и отдать его оболочке сессии; пустой — не начинать. */
+  function start(zapros: TrenazherZapros, begin: (payload: SessiyaPayload) => void) {
     const source = istochnik(zapros.rezhim, zapros.metody);
     if (source.length === 0) {
       return;
     }
-    /* Ключ подхода новый на каждый запуск: подход не переиспользует
-       прошлую раскладку. */
-    setPlan({
-      key: `v${zadanie}:${zapros.rezhim}:${seychas()}`,
+    const tasks = zadachiPodhoda(
+      sobratPodhod(source, zapros.count),
+      zapros.rezhim,
+      pool,
+      uznay,
+    );
+    if (tasks.length === 0) {
+      return;
+    }
+    begin({
+      zadanie,
       rezhim: zapros.rezhim,
       metod: zapros.metody[0] ?? '',
-      source,
-      size: zapros.count,
       podskazki: zapros.podskazki,
+      tasks,
     });
   }
 
-  if (plan !== null) {
-    return (
-      <Sessiya
-        zadanie={zadanie}
-        pool={pool}
-        uznay={uznay}
-        plan={plan}
-        store={store}
-        uznayStore={uznayStore}
-        backHref={base}
-        onAgain={() => setPlan({ ...plan, key: `v${zadanie}:${plan.rezhim}:${seychas()}` })}
-      />
-    );
-  }
-
   return (
-    <TrenazherKonfigurator
-      zadanie={zadanie}
-      metody={metody}
-      rezhimy={rezhimy}
-      tally={progress.kinds}
-      preset={preset}
-      sekundNaZadachu={sekundNaZadachu}
-      onStart={start}
-      stats={
-        <ProgressPoMetodam
+    <TrainerSessionHost<SessiyaPayload, SessiyaUi>
+      /* Раздел вкладок считает тот же scopeOfPath от адреса вкладки. */
+      scope={scopeOfPath(base) ?? String(zadanie)}
+      what="тренажёр"
+      backHref={base}
+      isPayload={isSessiyaPayload}
+      count={(payload) => payload.tasks.length}
+      describe={(payload, at) => {
+        const task = payload.tasks[at];
+        if (task === undefined) {
+          throw new Error('Нет задачи');
+        }
+        if (payload.rezhim === 'uznay') {
+          const verny = otpechatki.get(task.metodSeal) ?? '';
+          return {
+            kind: nazvaniya[verny] ?? payload.metod,
+            html: task.uslovie,
+            review: () => <UznayRazbor task={task} zadanie={payload.zadanie} verny={verny} />,
+          };
+        }
+        return {
+          kind: nazvaniya[task.metod] ?? payload.metod,
+          html: task.uslovie,
+          review: () => <SessiyaRazbor task={task} />,
+        };
+      }}
+      subset={(payload, indexes) => ({
+        ...payload,
+        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
+      })}
+      configurator={(api) => (
+        <TrenazherKonfigurator
           zadanie={zadanie}
+          metody={metody}
+          rezhimy={rezhimy}
+          tally={progress.kinds}
+          preset={preset}
+          sekundNaZadachu={sekundNaZadachu}
+          onStart={(zapros) => start(zapros, api.start)}
+          stats={
+            <ProgressPoMetodam
+              zadanie={zadanie}
+              store={store}
+              uznayStore={uznayStore}
+              metody={spisokMetodov}
+            />
+          }
+        />
+      )}
+      screen={({ payload, restored, report, elapsed, finish }) => (
+        <Sessiya
+          payload={payload}
+          restored={restored === null ? null : readSessiyaUi(restored)}
+          report={report}
+          elapsed={elapsed}
+          onFinish={finish}
           store={store}
           uznayStore={uznayStore}
-          metody={spisokMetodov}
         />
-      }
+      )}
     />
   );
 }

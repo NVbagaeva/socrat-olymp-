@@ -1,49 +1,38 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
-import { ProblemCard } from '@/components/tasks/card';
+import { ProblemCard, type ProblemCardSnapshot } from '@/components/tasks/card';
 import { PrepDots } from '@/components/tasks/prep/PrepDots';
 import { RightIcon, WrongIcon } from '@/components/tasks/prep/PrepIcons';
-import { TrainerResult, type TrainerMark } from '@/components/tasks/trainer';
-import { trenazherSlova, uznaySlova, type Rezhim, type Zadanie } from '@/content/veroyatnost';
+import { useSessionReport } from '@/components/tasks/session/useSessionReport';
+import { trenazherSlova, uznaySlova } from '@/content/veroyatnost';
 import type { ProgressStore } from '@/lib/progressStore';
-import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
-import { klyuchZadachi, openText, sealMetod } from '@/lib/veroyatnost/secret';
-import { useVeroyatnostRound, type RoundKind } from '@/lib/veroyatnost/useRound';
+import type { TaskMark } from '@/lib/trainerSession/types';
+import { openText, sealMetod } from '@/lib/veroyatnost/secret';
 import { MethodPicker } from './MethodPicker';
-import { navykKind, navykPoId, navykiZadaniya, seychas, zadachaId } from './metody';
-
-/** Что собрал конфигуратор: режим, метод, откуда брать задачи и сколько. */
-export interface SessiyaPlan {
-  /** Ключ подхода: новый на каждый запуск. */
-  key: string;
-  rezhim: Rezhim;
-  /** Метод отработки; в остальных режимах не важен. */
-  metod: string;
-  source: RoundKind[];
-  size: number;
-  /**
-   * Показывать подсказки: название метода в шапке карточки и кнопку
-   * «Показать решение» до ответа. Выключено — ученик сначала отвечает.
-   */
-  podskazki: boolean;
-}
+import { navykPoId, navykiZadaniya } from './metody';
+import type { SessiyaPayload } from './sessiyaPayload';
+import { PUSTAYA_KARTOCHKA, type SessiyaUi } from './sessiyaUi';
 
 export interface SessiyaProps {
-  zadanie: Zadanie;
-  pool: Pool;
-  uznay: UznayPool;
-  plan: SessiyaPlan;
+  payload: SessiyaPayload;
+  /** Состояние экрана из сохранённой тренировки; null — тренировка только началась. */
+  restored: SessiyaUi | null;
+  /** Сообщить оболочке сессии о состоянии экрана. */
+  report: (ui: SessiyaUi) => void;
+  /** Мс активного времени с начала тренировки (пауза не считается). */
+  elapsed: () => number;
+  /** Ученик решил последнее задание и жмёт «Смотреть результат». */
+  onFinish: () => void;
   /** Хранилище решённых задач и хранилище «Узнай метод». */
   store: ProgressStore;
   uznayStore: ProgressStore;
-  /** Куда ведёт кнопка возврата с итогового экрана. */
-  backHref: string;
-  /** Собрать новый подход с теми же настройками. */
-  onAgain: () => void;
 }
+
+/* Последняя задача: за ней идёт экран итогов оболочки. */
+const REZULTAT = 'Смотреть результат →';
 
 interface Itog {
   vybor: string;
@@ -53,7 +42,8 @@ interface Itog {
 
 /**
  * Подход тренажёра заданий №4 и №5: задачи одна за другой, кружки
- * подхода и итог — те же, что у задания №12.
+ * подхода — те же, что у задания №12; итог и таймер ведёт оболочка
+ * сессии (components/tasks/session).
  *
  * В режимах отработки, смешанном и повторе ошибок задача — ProblemCard:
  * условие, рисунок по модели, решение по шагам; правильных ответов в
@@ -61,193 +51,169 @@ interface Itog {
  * методов: метода в разметке тоже нет, кнопка сверяется с отпечатком,
  * а признаки открываются им же после ответа.
  *
- * Порядок подхода собирает хранилище в useRound после монтирования:
- * при отрисовке компонент ни часов, ни случайных чисел не спрашивает,
- * поэтому разметка сервера и первая отрисовка в браузере совпадают.
+ * Задачи приходят готовыми в payload (собраны в Trenazher при запуске),
+ * поэтому при возвращении в тренировку подход тот же, что был. Всё,
+ * что ученик успел на задаче, берётся из restored: карточка получает
+ * ответ и шаг решения, «Узнай метод» — сделанный выбор.
  */
 export function Sessiya({
-  zadanie,
-  pool,
-  uznay,
-  plan,
+  payload,
+  restored,
+  report,
+  elapsed,
+  onFinish,
   store,
   uznayStore,
-  backHref,
-  onAgain,
 }: SessiyaProps) {
+  const { zadanie, rezhim, tasks } = payload;
   const slova = trenazherSlova(zadanie);
   const uznayTeksty = uznaySlova(zadanie);
   const metody = navykiZadaniya(zadanie);
-  const uznayRezhim = plan.rezhim === 'uznay';
-  /* Название метода по идентификатору — для статистики итога, и
-     отпечатки всех методов задания — чтобы после ответа назвать верный. */
-  const nazvaniya = useMemo(
-    () => Object.fromEntries(metody.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
-    [metody],
-  );
+  const uznayRezhim = rezhim === 'uznay';
+  /* Отпечатки всех методов задания — чтобы после ответа назвать верный. */
   const otpechatki = useMemo(() => new Map(metody.map((m) => [sealMetod(m.id), m.id])), [metody]);
 
-  const round = useVeroyatnostRound(plan.key, plan.source, plan.size);
-  const byId = useMemo(() => new Map(pool.kinds.map((kind) => [kind.id, kind])), [pool]);
-  const uznayById = useMemo(() => new Map(uznay.kinds.map((kind) => [kind.id, kind])), [uznay]);
-
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(restored?.index ?? 0);
   /* Чем закончилось каждое задание подхода: кружки и итог берут отсюда. */
-  const [marks, setMarks] = useState<Record<number, TrainerMark>>({});
-  /* Метод каждой задачи подхода — для статистики итога. В «Узнай
-     метод» он становится известен только после ответа. */
-  const [metodyZadach, setMetodyZadach] = useState<Record<number, string>>({});
-  const [misses, setMisses] = useState(0);
-  const [result, setResult] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [itog, setItog] = useState<Itog | null>(null);
+  const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
+  /* Задания, в которых была ошибка: на итогах они отличаются от пропущенных. */
+  const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
+  /* Состояние карточки текущей задачи: она сообщает его сама. */
+  const [card, setCard] = useState<ProblemCardSnapshot>(restored?.card ?? PUSTAYA_KARTOCHKA);
+  /* «Узнай метод»: что нажато на текущей задаче. */
+  const [vybor, setVybor] = useState<string | null>(restored?.vybor ?? null);
 
-  const startedAt = useRef<number | null>(null);
-  const nachalo = useRef(0);
-  /* Задача закрывается один раз: первым ответом или открытым
-     решением. Второй ответ после ошибки счётчиков не меняет. */
-  const zakryto = useRef<string | null>(null);
-  const oshibsya = useRef(false);
-  useEffect(() => {
-    nachalo.current = Date.now();
-    oshibsya.current = false;
-  }, [plan.key, index]);
+  /* Время на задачу идёт от появления задачи на экране, в активных
+     миллисекундах оболочки: пауза и скрытая вкладка в него не входят. */
+  const [taskFrom, setTaskFrom] = useState(() => restored?.taskFrom ?? elapsed());
+  /* Задача закрывается один раз: первым ответом или открытым решением.
+     Второй ответ после ошибки счётчиков не меняет. */
+  const zakryto = useRef<number | null>(
+    restored !== null && restored.marks[restored.index] !== undefined ? restored.index : null,
+  );
+  const oshibsya = useRef(restored?.tried[restored.index] === true);
 
-  const item = round[index];
-  const total = round.length;
+  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
+     каждом изменении, а при возвращении отдаёт обратно (restored). */
+  useSessionReport<SessiyaUi>(report, {
+    index,
+    marks,
+    tried,
+    order: null,
+    card,
+    vybor,
+    taskFrom,
+  });
+
+  const task = tasks[index];
+  const total = tasks.length;
   const last = index === total - 1;
-  const id = item === undefined ? '' : zadachaId(item.kind, item.n);
 
-  function otmetit(mark: TrainerMark | null, metod: string) {
-    if (mark !== null) {
-      setMarks((was) => ({ ...was, [index]: mark }));
-    }
-    setMetodyZadach((was) => ({ ...was, [index]: metod }));
+  /** Сколько секунд ушло на текущую задачу. */
+  function sekundy(): number {
+    return (elapsed() - taskFrom) / 1000;
   }
 
-  /* Время идёт от первой проверки: до неё ученик ещё читает условие. */
-  function tik(vremya: number) {
-    if (startedAt.current === null) {
-      startedAt.current = vremya;
-    }
-    if (last) {
-      setSeconds((vremya - startedAt.current) / 1000);
-    }
+  function oshibka() {
+    oshibsya.current = true;
+    setTried((was) => ({ ...was, [index]: true }));
   }
 
   /** Закрыть задачу тренажёра: верный ответ или открытое решение. */
-  function zapisat(right: boolean, clean: boolean, vremya: number) {
-    if (item === undefined || zakryto.current === id) {
+  function zapisat(right: boolean, clean: boolean) {
+    if (task === undefined || zakryto.current === index || task.metod === '') {
       return;
     }
-    const kind = byId.get(item.kind);
-    const metod = kind === undefined ? undefined : navykKind(kind);
-    if (metod === undefined) {
-      return;
-    }
-    zakryto.current = id;
+    zakryto.current = index;
     store.recordAttempt({
-      kind: metod,
-      taskId: id,
+      kind: task.metod,
+      taskId: task.id,
       right,
       clean,
-      seconds: (vremya - nachalo.current) / 1000,
+      seconds: sekundy(),
     });
-    otmetit(right ? 'right' : 'hinted', metod);
-    tik(vremya);
+    setMarks((was) => ({ ...was, [index]: right ? 'right' : 'hinted' }));
   }
 
-  function otvet(right: boolean, vremya: number) {
+  function otvet(right: boolean) {
     if (right) {
-      zapisat(true, !oshibsya.current, vremya);
+      zapisat(true, !oshibsya.current);
       return;
     }
-    oshibsya.current = true;
-    setMisses((n) => n + 1);
-    tik(vremya);
+    oshibka();
   }
+
+  /** Признаки и верный метод задачи «Узнай метод» — только после выбора. */
+  const itog = useMemo<Itog | null>(() => {
+    if (!uznayRezhim || vybor === null || task === undefined) {
+      return null;
+    }
+    const verny = otpechatki.get(task.metodSeal);
+    if (verny === undefined) {
+      return null;
+    }
+    const priznaki = JSON.parse(openText(task.hints, task.metodSeal)) as string[];
+    return { vybor, verny, priznaki };
+  }, [uznayRezhim, vybor, task, otpechatki]);
 
   /** «Узнай метод»: сверить выбор с отпечатком и открыть признаки. */
-  function vybrat(metod: string, vremya: number) {
-    const kind = item === undefined ? undefined : uznayById.get(item.kind);
-    const variant = kind?.variants.find((v) => v.n === item?.n);
-    if (item === undefined || variant === undefined || itog !== null) {
+  function vybrat(metod: string) {
+    if (task === undefined || vybor !== null) {
       return;
     }
-    const verny = otpechatki.get(variant.metodSeal);
+    const verny = otpechatki.get(task.metodSeal);
     if (verny === undefined) {
       return;
     }
-    const right = sealMetod(metod) === variant.metodSeal;
-    const priznaki = JSON.parse(openText(variant.hints, variant.metodSeal)) as string[];
-    setItog({ vybor: metod, verny, priznaki });
+    const right = sealMetod(metod) === task.metodSeal;
+    setVybor(metod);
     uznayStore.recordAttempt({
       kind: verny,
-      taskId: id,
+      taskId: task.id,
       right,
       clean: right,
-      seconds: (vremya - nachalo.current) / 1000,
+      seconds: sekundy(),
     });
-    if (!right) {
-      setMisses((n) => n + 1);
+    if (right) {
+      zakryto.current = index;
+      setMarks((was) => ({ ...was, [index]: 'right' }));
+    } else {
+      oshibka();
     }
-    otmetit(right ? 'right' : null, verny);
-    tik(vremya);
   }
 
   function dalshe() {
     if (last) {
-      setResult(true);
+      onFinish();
       return;
     }
     setIndex((n) => n + 1);
-    setItog(null);
+    setCard(PUSTAYA_KARTOCHKA);
+    setVybor(null);
+    setTaskFrom(elapsed());
+    zakryto.current = null;
+    oshibsya.current = false;
   }
 
-  if (result) {
-    return (
-      <TrainerResult
-        tasks={round.map((_, i) => ({ kind: metodyZadach[i] ?? plan.metod }))}
-        marks={marks}
-        misses={misses}
-        seconds={seconds}
-        backHref={backHref}
-        onAgain={onAgain}
-        kindTitle={nazvaniya}
-      />
-    );
+  if (task === undefined) {
+    return null;
   }
 
-  if (item === undefined) {
-    /* До монтирования подхода нет: показываем место под него,
-       а не пустой экран, который тут же сменится задачей. */
-    return <p className="vtrainer__wait">{slova.zhdem}</p>;
-  }
-
+  /* Точки подхода — те же, что в подготовке: цвет говорит, что с задачей
+     стало. Номер задания и таймер показывает панель оболочки. Прыгать
+     по подходу нельзя, поэтому ряд без ссылок. */
   const kruzhki = (
-    <>
-      <p className="ttask__count">
-        Задача <b>{index + 1}</b> из {total}
-      </p>
-      {/* Кружки — те же, что в подготовке: цвет говорит, что с задачей
-          стало. Прыгать по подходу нельзя, поэтому ряд без ссылок. */}
-      <PrepDots
-        items={round.map((z, i) => ({
-          id: `${i}-${z.kind}-${z.n}`,
-          no: i + 1,
-          state: marks[i] === 'right' ? 'right' : marks[i] === 'hinted' ? 'revealed' : null,
-        }))}
-        current={index}
-      />
-    </>
+    <PrepDots
+      items={tasks.map((z, i) => ({
+        id: `${i}-${z.id}`,
+        no: i + 1,
+        state: marks[i] === 'right' ? 'right' : marks[i] === 'hinted' ? 'revealed' : null,
+      }))}
+      current={index}
+    />
   );
 
   if (uznayRezhim) {
-    const kind = uznayById.get(item.kind);
-    const variant = kind?.variants.find((v) => v.n === item.n);
-    if (kind === undefined || variant === undefined) {
-      return null;
-    }
     const verno = itog !== null && itog.vybor === itog.verny;
     return (
       <section className="ttask z4-uznay">
@@ -259,25 +225,27 @@ export function Sessiya({
           )}
         >
           <ProblemCard
-            key={id}
+            key={task.id}
             variant="condition"
             zadacha={{
-              id,
-              uslovie: variant.uslovie,
+              id: task.id,
+              uslovie: task.uslovie,
               /* Числового ответа у условия нет: ни ключа, ни отпечатка. */
               klyuch: '',
               seal: '',
               steps: '',
-              ...(variant.illustration === undefined ? {} : { illustration: variant.illustration }),
+              ...(task.illustration === undefined ? {} : { illustration: task.illustration }),
             }}
-            istochnik={uznayTeksty.istochnik[kind.istochnik]}
+            istochnik={
+              uznayTeksty.istochnik[task.istochnik === 'konspekt' ? 'konspekt' : 'prototip']
+            }
           />
 
           <p className="z4-uznay__vopros">{uznayTeksty.vopros}</p>
           <MethodPicker
             vybor={itog?.vybor ?? null}
             verny={itog?.verny ?? null}
-            onPick={(metod) => vybrat(metod, seychas())}
+            onPick={vybrat}
             label={uznayTeksty.vopros}
             metody={metody}
           />
@@ -311,7 +279,7 @@ export function Sessiya({
                 ))}
               </ul>
               <div className="z4-uznay__actions">
-                <Button onClick={dalshe}>{last ? slova.zavershit : slova.dalshe}</Button>
+                <Button onClick={dalshe}>{last ? REZULTAT : slova.dalshe}</Button>
               </div>
             </div>
           ) : null}
@@ -320,13 +288,7 @@ export function Sessiya({
     );
   }
 
-  const kind = byId.get(item.kind);
-  const variant = kind?.variants.find((v) => v.n === item.n);
-  if (kind === undefined || variant === undefined) {
-    return null;
-  }
-  const metod = navykKind(kind);
-  const navyk = metod === undefined ? undefined : navykPoId(zadanie, metod);
+  const navyk = navykPoId(zadanie, task.metod);
 
   return (
     <section className="ttask">
@@ -334,26 +296,28 @@ export function Sessiya({
       {/* Ключ — сама задача: следующая карточка начинается с чистого
           состояния, а не наследует введённый ответ. */}
       <ProblemCard
-        key={id}
+        key={task.id}
         zadacha={{
-          id,
-          uslovie: variant.uslovie,
-          klyuch: klyuchZadachi(kind.id, variant.n),
-          seal: variant.seal,
-          steps: variant.steps,
-          ...(variant.model === undefined ? {} : { model: variant.model }),
+          id: task.id,
+          uslovie: task.uslovie,
+          klyuch: task.klyuch,
+          seal: task.seal,
+          steps: task.steps,
+          ...(task.model === undefined ? {} : { model: task.model }),
         }}
         /* Метод в шапке — только в отработке: в смешанном режиме и
            в повторе ученик должен узнать его сам. */
-        {...(plan.rezhim === 'practice' && plan.podskazki && navyk !== undefined
+        {...(rezhim === 'practice' && payload.podskazki && navyk !== undefined
           ? { metodLabel: navyk.nazvanie }
           : {})}
-        istochnik={kind.istochnik}
-        podskazki={plan.podskazki}
-        onResult={(right) => otvet(right, seychas())}
-        onReveal={() => zapisat(false, false, seychas())}
+        istochnik={task.istochnik}
+        podskazki={payload.podskazki}
+        initial={card}
+        onChange={setCard}
+        onResult={otvet}
+        onReveal={() => zapisat(false, false)}
         onNext={dalshe}
-        nextLabel={last ? slova.zavershit : slova.dalshe}
+        nextLabel={last ? REZULTAT : slova.dalshe}
       />
     </section>
   );

@@ -16,6 +16,9 @@ import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
 import { useStickyTabs } from './useStickyTabs';
 import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
+import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
+import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
+import { sessionText } from './session/text';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -138,6 +141,12 @@ export function TopicTabs({
     (item) =>
       (item.id !== 'generator' || generator !== undefined) &&
       (item.id !== 'methods' || methods !== undefined),
+  );
+  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  const active = useActiveTrainerScopes();
+  const trainerActive = trainerHref !== null && hasActiveScope(active, scopeOfPath(trainerHref));
+  const marked = tabs.map((item) =>
+    item.id === 'trainer' && trainerActive ? { ...item, badge: sessionText.menuDot } : item,
   );
 
   /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
@@ -329,7 +338,7 @@ export function TopicTabs({
       >
         <Tabs
           className="tabs--lenta"
-          items={tabs}
+          items={marked}
           value={navigating && target !== null ? target : tab}
           {...(navigating && target !== null ? { busyId: target } : {})}
           onValueChange={choose}
