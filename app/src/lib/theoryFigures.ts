@@ -389,19 +389,84 @@ function exValue(): TheoryFigure {
   };
 }
 
-function exArgument(): TheoryFigure {
-  const w = win(-9, 3, -1, 8);
+/* Пример 8.2, «Найти x, если f(x) = …». Ответ нельзя прочитать с
+   рисунка: искомая точка либо в окне, но x не в узле сетки (пример 1),
+   либо за рамкой (пример 2). Подписи крупные и жирные: \boldsymbol. */
+
+/** Пример 1: f(x) = −2/3·x + 1, f(x) = 4. Точка (−4,5; 4) в окне. */
+function exArgumentVisible(): TheoryFigure {
+  const w = win(-6, 5, -3, 6);
+  const X = -4.5;
+  const Y = 4;
+  return {
+    scene: {
+      ...base(w),
+      curves: [line(-2 / 3, 1)],
+      points: [dot(0, 1), dot(3, -1), dot(X, Y, 'lineB')],
+      shapes: [
+        fill([
+          [0, 1],
+          [0, -1],
+          [3, -1],
+        ]),
+        seg([0, -1], [3, -1]),
+        seg([0, 1], [0, -1]),
+        rightAngle([0, -1], 1, 1),
+        /* Два пунктира от искомой точки: к Oy (значение 4) и к Ox. Тот,
+           что к Ox, падает между вертикалями x = −5 и x = −4. */
+        seg([X, Y], [0, Y], 'lineB'),
+        seg([X, Y], [X, 0], 'lineB'),
+      ],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 0], text: '$1$', dy: 14, size: 13, tone: 'muted' },
+      /* Деление y = 1 стоит ниже и левее: выше, у самого узла, через него идёт прямая. */
+      { at: [0, 1], text: '$1$', dx: -11, dy: 11, size: 13, tone: 'muted' },
+      { at: [1.5, -1], text: '$\\boldsymbol{3}$', dy: 17, tone: 'accent', size: 20 },
+      { at: [0, -0.5], text: '$\\boldsymbol{2}$', dx: 13, tone: 'accent', size: 20 },
+      { at: [0, Y], text: '$\\boldsymbol{4}$', dx: 14, tone: 'accent', size: 20 },
+      { at: [X, 0], text: '$\\boldsymbol{x = \\,?}$', dy: 18, tone: 'accent', size: 20 },
+    ],
+  };
+}
+
+/** Пример 2: f(x) = −0,5x + 3, f(x) = 7. Точка (−8; 7) за рамкой. */
+function exArgumentOutside(): TheoryFigure {
+  const w = win(-5, 5, -3, 5);
   return {
     scene: {
       ...base(w),
       curves: [line(-0.5, 3)],
-      points: [dot(0, 3), dot(2, 2), dot(-8, 7, 'lineB')],
-      shapes: [seg([0, 7], [-8, 7], 'lineB')],
+      points: [dot(0, 3), dot(2, 2)],
+      shapes: [
+        fill([
+          [0, 3],
+          [0, 2],
+          [2, 2],
+        ]),
+        seg([0, 2], [2, 2]),
+        seg([0, 3], [0, 2]),
+        rightAngle([0, 2], 1, 1),
+        /* Стрелка рядом с прямой, вдоль неё: прямая уходит за рамку вверх
+           и влево. Сама линия не перекрыта. */
+        {
+          type: 'segment',
+          from: [-2.67, 3.66],
+          to: [-3.74, 4.2],
+          color: 'accent',
+          width: 3,
+          arrow: true,
+        },
+      ],
     },
     labels: [
       ...axisLabels(w),
-      { at: [0, 7], text: '$7$', dx: 12, tone: 'accent' },
-      { at: [-8, 7], text: '$x = \\,?$', dy: -16, tone: 'accent' },
+      { at: [1, 2], text: '$\\boldsymbol{2}$', dy: 17, tone: 'accent', size: 20 },
+      { at: [0, 2.5], text: '$\\boldsymbol{1}$', dx: -14, tone: 'accent', size: 20 },
+      /* Подпись к стрелке — в две строки: в одну она не помещается левее оси. */
+      { at: [-4.85, 3.35], text: 'до $y = 7$', tone: 'accent', size: 16, anchor: 'left' },
+      { at: [-4.85, 2.75], text: 'за рамкой', tone: 'accent', size: 16, anchor: 'left' },
     ],
   };
 }
@@ -601,7 +666,8 @@ const FIGURES = {
   'lin-b-node': bNode,
   'lin-b-off': bOff,
   'lin-ex-value': exValue,
-  'lin-ex-argument': exArgument,
+  'lin-ex-argument-visible': exArgumentVisible,
+  'lin-ex-argument-outside': exArgumentOutside,
   'lin-ex-cross-zero': exCrossZero,
   'lin-ex-cross-int': exCrossInt,
   'sqrt-table': sqrtTable,
