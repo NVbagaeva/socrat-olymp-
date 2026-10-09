@@ -20,7 +20,12 @@ export interface RazdelKartochkaProps {
 export function RazdelKartochka({ razdel, sizes, metki, end }: RazdelKartochkaProps) {
   return (
     <>
-      <RazdelIkonka icon={razdel.icon} sizes={sizes} className="razdel-karta__ico" />
+      <RazdelIkonka
+        icon={razdel.icon}
+        sizes={sizes}
+        soon={razdel.soon}
+        className="razdel-karta__ico"
+      />
       <span className="razdel-karta__text">
         <span className="razdel-karta__title">{razdel.title}</span>
         <span className="razdel-karta__caption">{razdel.graphName}</span>

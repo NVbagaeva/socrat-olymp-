@@ -1,6 +1,8 @@
 'use client';
 
 import { useId, useState } from 'react';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { Badge, Input } from '@/components/ui';
 import {
   CountPicker,
@@ -36,6 +38,8 @@ export interface GeneratorScreenProps {
   base: string;
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
+  /** Иконка раздела рядом с названием в сводке. */
+  familyIcon?: IkonkaRazdela | undefined;
   skills: SkillItem[];
   /** Подписи уровней подтемы. Не заданы — общие. */
   levels?: readonly SkillLevel[];
@@ -62,6 +66,7 @@ const CUSTOM = '';
 export function GeneratorScreen({
   base,
   family,
+  familyIcon,
   skills,
   levels = skillLevels,
   note = generatorPage.summary.note,
@@ -302,7 +307,10 @@ export function GeneratorScreen({
           <h3 className="cfg-summary__title" id="gen-summary-title">
             {generatorPage.summary.title}
           </h3>
-          <Badge tone="info">{family}</Badge>
+          <div className="cfg-summary__family">
+            <RazdelIkonka icon={familyIcon} sizes="56px" className="cfg-summary__ico" />
+            <Badge tone="info">{family}</Badge>
+          </div>
           {subtitle === '' ? null : <p className="cfg-summary__skill">{subtitle}</p>}
           <ul className="cfg-summary__list">
             {chosen.map((item) => (

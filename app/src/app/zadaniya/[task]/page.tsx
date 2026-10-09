@@ -11,6 +11,7 @@ import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { lineScene } from '@/lib/scenes';
 import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
@@ -65,6 +66,7 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
     slug: subtopic.id,
     name: subtopic.title,
     caption: subtopic.graphName,
+    icon: ikonkaRazdela(sectionSlug, subtopic.icon),
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
     /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
