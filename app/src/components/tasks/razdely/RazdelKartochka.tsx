@@ -23,10 +23,7 @@ export function RazdelKartochka({ razdel, sizes, metki, end }: RazdelKartochkaPr
       <RazdelIkonka icon={razdel.icon} sizes={sizes} className="razdel-karta__ico" />
       <span className="razdel-karta__text">
         <span className="razdel-karta__title">{razdel.title}</span>
-        <span
-          className="razdel-karta__caption"
-          dangerouslySetInnerHTML={{ __html: razdel.captionHtml }}
-        />
+        <span className="razdel-karta__caption">{razdel.graphName}</span>
         {metki === undefined ? null : <span className="razdel-karta__metki">{metki}</span>}
       </span>
       <span className="razdel-karta__end">{end}</span>

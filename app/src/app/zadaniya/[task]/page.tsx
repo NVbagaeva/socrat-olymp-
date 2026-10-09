@@ -64,6 +64,7 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
   return {
     slug: subtopic.id,
     name: subtopic.title,
+    caption: subtopic.graphName,
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
     /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
