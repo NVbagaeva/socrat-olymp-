@@ -200,6 +200,99 @@ a.subtopic:hover {
   transition: stroke var(--dur-hover) var(--ease);
 }
 
+/* ── Карточка подтемы с иконкой раздела ─────────────────────────
+   Компьютер: текст слева, иконка справа сверху (112px), стрелка внизу
+   справа — ниже иконки, не наезжая на неё. Высота у карточек ряда
+   одна (сетка растягивает их), формула остаётся в колонке текста.
+   Телефон: иконка слева (88px), справа название, подпись, формула и
+   стрелка — так же, как в блоке «Другие разделы». Карточка без иконки
+   (другие задания) этого блока не касается. */
+.subtopic--ikonka {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-3);
+  align-content: start;
+  /* Иконка (≈101px) + отступ + стрелка (32px) + поля. */
+  min-height: 196px;
+}
+.subtopic--ikonka .subtopic__ico {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  width: 112px;
+  transition: transform 180ms var(--ease);
+}
+.subtopic--ikonka .subtopic__head {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.subtopic--ikonka .subtopic__note,
+.subtopic--ikonka .subtopic__meta {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  margin-top: var(--space-4);
+}
+.subtopic--ikonka .subtopic__name {
+  /* Название переносится по словам и не обрезается. */
+  overflow-wrap: break-word;
+}
+.subtopic--ikonka .subtopic__formula {
+  /* Формула целиком, без прокрутки: колонка текста ей достаточна. */
+  overflow-x: visible;
+}
+@media (hover: hover) {
+  a.subtopic--ikonka:hover .subtopic__ico {
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .subtopic--ikonka .subtopic__ico {
+    transition: none;
+  }
+  a.subtopic--ikonka:hover .subtopic__ico {
+    transform: none;
+  }
+}
+@media (max-width: 767.98px) {
+  .subtopic--ikonka {
+    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: var(--space-4);
+    align-items: center;
+    min-height: 0;
+    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
+  }
+  .subtopic--ikonka .subtopic__ico {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 88px;
+  }
+  .subtopic--ikonka .subtopic__head {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    /* Справа место под стрелку: текст под неё не заходит. */
+    padding-right: 40px;
+  }
+  .subtopic--ikonka .subtopic__note,
+  .subtopic--ikonka .subtopic__meta {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: var(--space-2);
+  }
+  .subtopic--ikonka .subtopic__go {
+    right: var(--space-4);
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
 /* ── Прототипы ──────────────────────────────────────────────── */
 
 .proto-list {

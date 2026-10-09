@@ -3,6 +3,7 @@ import { trainerPage, trainerWordsFor } from '@/content/trainerModes';
 import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
 import { typeset } from '@/lib/tex';
 import type { Subtopic } from '@/content/sections';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { skillItems } from '../configurator/skillItems';
 import { TabScrollOnMount } from '../TabScroll';
@@ -14,6 +15,8 @@ export interface TrainerShellProps {
   base: string;
   /** Что выбрано при заходе по ярлыку прежнего адреса. */
   preset?: TrainerPreset | null;
+  /** Иконка раздела для сводки. */
+  icon?: IkonkaRazdela | undefined;
   /** Экран сессии: подставляется вместо конфигуратора. */
   children?: ReactNode;
 }
@@ -27,7 +30,7 @@ export interface TrainerShellProps {
  * Карточки навыков собираются здесь, на сервере: движок рисует
  * миниатюры на сборке, в браузер уходит готовая разметка.
  */
-export function TrainerShell({ subtopic, base, preset = null, children }: TrainerShellProps) {
+export function TrainerShell({ subtopic, base, icon, preset = null, children }: TrainerShellProps) {
   const family = findManifestFamily(subtopic.id);
   /* Ярлык может вести не в один набор, а в связку: тогда
      конфигуратор показывает только её наборы, и «Смешанная» идёт
@@ -36,9 +39,10 @@ export function TrainerShell({ subtopic, base, preset = null, children }: Traine
   const group = preset?.skills ?? [];
   const all = skillItems(family);
   const skills = group.length > 1 ? all.filter((item) => group.includes(item.id)) : all;
-  const total = group.length > 1
-    ? skills.reduce((sum, item) => sum + item.count, 0)
-    : (family?.prototypes.tasks ?? 0);
+  const total =
+    group.length > 1
+      ? skills.reduce((sum, item) => sum + item.count, 0)
+      : (family?.prototypes.tasks ?? 0);
 
   return (
     <section className="trainer">
@@ -54,6 +58,7 @@ export function TrainerShell({ subtopic, base, preset = null, children }: Traine
         <TrainerBuilder
           base={base}
           family={subtopic.title}
+          familyIcon={icon}
           familyTotal={total}
           skills={skills}
           levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}

@@ -424,6 +424,107 @@ for (const size of SIZES) {
   });
   check(!longName.cut, where(`название на плашке обрезано: ${longName.text}`));
 
+  /* Иконки разделов на странице «Подтемы»: одна на раздел, из общего
+     компонента, декоративные, с размерами и srcset; «Скоро» — бледные. */
+  await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
+  const podtemy = await page.evaluate(() => {
+    const cards = Array.from(document.querySelectorAll('.subtopic'));
+    return {
+      cards: cards.length,
+      withIcon: cards.filter((c) => c.querySelector('picture.razdel-ico img') !== null).length,
+      oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
+      bad: Array.from(document.querySelectorAll('.subtopic picture.razdel-ico img')).filter(
+        (img) =>
+          img.getAttribute('alt') !== '' ||
+          img.getAttribute('aria-hidden') !== 'true' ||
+          !img.getAttribute('width') ||
+          !img.getAttribute('height') ||
+          !/96w.*192w.*384w/.test(img.getAttribute('srcset') ?? '') ||
+          !img.complete ||
+          img.naturalWidth === 0,
+      ).length,
+      soonDim: document.querySelectorAll('.subtopic--soon picture.razdel-ico--soon').length,
+      soonCards: document.querySelectorAll('.subtopic--soon').length,
+      overlap: cards.filter((c) => {
+        const go = c.querySelector('.subtopic__go')?.getBoundingClientRect();
+        const ico = c.querySelector('picture')?.getBoundingClientRect();
+        return (
+          go &&
+          ico &&
+          !(
+            go.bottom <= ico.top ||
+            go.top >= ico.bottom ||
+            go.right <= ico.left ||
+            go.left >= ico.right
+          )
+        );
+      }).length,
+    };
+  });
+  check(
+    podtemy.cards === 7 && podtemy.withIcon === 7,
+    where(`«Подтемы»: иконок ${podtemy.withIcon} из ${podtemy.cards}`),
+  );
+  check(
+    podtemy.bad === 0,
+    where(
+      `«Подтемы»: у ${podtemy.bad} иконок нет alt="", aria-hidden, размеров, srcset или файл не загрузился`,
+    ),
+  );
+  check(
+    podtemy.soonCards === 3 && podtemy.soonDim === 3,
+    where('«Подтемы»: иконки «Скоро» не бледные'),
+  );
+  check(podtemy.overlap === 0, where('«Подтемы»: стрелка налезает на иконку'));
+
+  /* Окно выбора типа функции: иконки на месте, старых схем нет, названия
+     не рвутся по слову (на телефоне), отметки: галочка у открытых. */
+  await page.goto(BASE + '/zadaniya/', { waitUntil: 'networkidle' });
+  await page
+    .locator('.tasks-grid button, .tasks-grid [role=button]')
+    .filter({ hasText: /Графики функций/ })
+    .first()
+    .click();
+  await page.waitForSelector('.subtopic-modal');
+  await page.waitForTimeout(500);
+  const okno = await page.evaluate(() => {
+    const cards = Array.from(document.querySelectorAll('.subtopic-card'));
+    const title = (name) =>
+      Array.from(document.querySelectorAll('.subtopic-card__title')).find(
+        (t) => t.textContent === name,
+      );
+    const quad = title('Квадратичная функция');
+    return {
+      cards: cards.length,
+      icons: document.querySelectorAll('.subtopic-card picture.razdel-ico img').length,
+      oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
+      checks: document.querySelectorAll('.subtopic-card__check:not(.subtopic-card__check--empty)')
+        .length,
+      soonDim: document.querySelectorAll('.subtopic-card--soon picture.razdel-ico--soon').length,
+      quadLines:
+        quad === undefined
+          ? -1
+          : Math.round(
+              quad.getBoundingClientRect().height /
+                parseFloat(getComputedStyle(quad).lineHeight || '20'),
+            ),
+      quadSize: quad === undefined ? 0 : parseFloat(getComputedStyle(quad).lineHeight),
+    };
+  });
+  check(
+    okno.cards === 7 && okno.icons === 7,
+    where(`окно выбора: иконок ${okno.icons} из ${okno.cards}`),
+  );
+  check(okno.oldCharts === 0, where('в окне выбора остались старые схематичные значки'));
+  check(
+    okno.checks === 4,
+    where(`окно выбора: галочек ${okno.checks}, нужно 4 (открытые разделы)`),
+  );
+  check(okno.soonDim === 3, where('окно выбора: иконки «Скоро» не бледные'));
+  if (size.isMobile) {
+    check(okno.quadLines === 1, where('в окне выбора «Квадратичная функция» переносится по слову'));
+  }
+
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
   await page.goto(BASE + '/zadaniya/12/logarithmic/', { waitUntil: 'networkidle' });
   check(

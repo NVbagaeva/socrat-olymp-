@@ -140,50 +140,6 @@ export function aboutScene(type: FunctionTypeId) {
   return type === 'quadratic' ? parabolaAndLineScene() : compareLinesScene();
 }
 
-/* ── Миниатюры типов функций ──────────────────────────────────────
-   По одному представителю на семейство: коэффициенты подобраны так,
-   чтобы кривая в окне читалась характерной формой, а не куском.
-   Числа здесь — параметры чертежа, а не содержание задания. */
-
-interface Curve {
-  type: string;
-  [key: string]: unknown;
-}
-
-const PREVIEW: Record<FunctionTypeId, { curve: Curve; half: number }> = {
-  linear: { curve: { type: 'line', k: 1, b: 0.5 }, half: 3 },
-  quadratic: { curve: { type: 'quadratic', a: 1, b: 0, c: -1.5 }, half: 3 },
-  rational: { curve: { type: 'rational', k: 1.5, b: 0 }, half: 3 },
-  irrational: { curve: { type: 'sqrt', a: 1.5, c: -2.5, d: -1.5 }, half: 3 },
-  logarithmic: { curve: { type: 'logarithmic', a: 2, c: 0 }, half: 3 },
-  exponential: { curve: { type: 'exponential', a: 2, d: 0 }, half: 3 },
-  trigonometric: { curve: { type: 'trigonometric', a: 2, b: 1.4, c: 0, d: 0 }, half: 3 },
-};
-
-/**
- * Миниатюра типа функции: одна кривая, только оси.
- *
- * Сетка выключена, окно тесное: в кадре 56px клетки сливаются в серое
- * пятно, а форма кривой — единственное, что должно читаться. Чертёж
- * декоративный — рядом стоят название и формула, поэтому alt не
- * задаётся и чертёж не читается вслух дважды.
- */
-export function previewScene(id: FunctionTypeId) {
-  const preset = PREVIEW[id];
-  return {
-    window: squareWindow(preset.half),
-    grid: { step: 1, show: false },
-    axes: { labelX: '', labelY: '', origin: '' },
-    /* Оси с засечками, но без чисел: в карточке шириной сто пикселей
-       цифры всё равно нечитаемы, а обрезанными они выглядят грязью. */
-    axisLabels: 'none',
-    curves: [{ ...preset.curve, color: 'lineA', label: null }],
-    points: [],
-    shapes: [],
-  };
-}
-
-
 /* ── Миниатюры навыков ────────────────────────────────────────────
    Навык — набор прототипов; по одной картинке на набор: что дано
    и что ищут. Искомая координата показана пунктиром до оси — тем же
@@ -297,6 +253,11 @@ export function generatorSkillScene(setId: string) {
    не задаётся и график не читается вслух дважды. */
 
 export type KindId = 'linear' | 'quadratic' | 'rational' | 'sqrt';
+
+interface Curve {
+  type: string;
+  [key: string]: unknown;
+}
 
 /* Коэффициенты подобраны так, чтобы в окне читалась характерная
    форма: прямая идёт через оба края, у параболы видны обе ветви и

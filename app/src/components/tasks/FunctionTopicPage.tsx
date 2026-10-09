@@ -77,6 +77,7 @@ export function FunctionTopicPage({
   /* Навигация по разделам задания: плашка над вкладками, меню и блок
      «Другие разделы» внизу. Данные — из того же списка подтем. */
   const razdely = razdelyZadaniya(section, subtopic.id);
+  const icon = razdely.razdely.find((item) => item.id === subtopic.id)?.icon;
   /* Чем подтема отличается от линейной — признаками в её конфиге;
      не задано — берётся общее для раздела. Плашка-подсказка вкладки
      «О задании» у раздела одна, подтема её не переопределяет. */
@@ -209,7 +210,7 @@ export function FunctionTopicPage({
         trainer={
           trainer ??
           (hasTrainer ? (
-            <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />
+            <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} icon={icon} />
           ) : (
             <EmptyState
               title={PODTEMA_SKORO.trainer.title}
@@ -218,7 +219,7 @@ export function FunctionTopicPage({
           ))
         }
         trainerHref={hasTrainer ? `${base}/trenazher/` : null}
-        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
+        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined}
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
         razdely={razdely}

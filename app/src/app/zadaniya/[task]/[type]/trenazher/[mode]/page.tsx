@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
@@ -60,6 +61,7 @@ export default async function Page({ params }: { params: Params }) {
         trainer={
           <TrainerShell
             subtopic={subtopic}
+            icon={ikonkaRazdela(section.slug, subtopic.icon)}
             base={`${base}/trenazher/`}
             preset={{ skill: found.skills[0] ?? null, skills: found.skills, mode: found.mode }}
           />

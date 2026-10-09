@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import type { SkillItem } from '../configurator';
 import { trainerModes, type TrainerModeId } from '@/content/trainerModes';
 import type { SkillLevel } from '@/content/skills12';
@@ -25,6 +26,7 @@ export interface TrainerBuilderProps {
   base: string;
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
+  familyIcon?: IkonkaRazdela | undefined;
   /** Сколько задач во всех наборах прототипов семейства. */
   familyTotal: number;
   skills: SkillItem[];
@@ -58,6 +60,7 @@ interface Started {
 export function TrainerBuilder({
   base,
   family,
+  familyIcon,
   familyTotal,
   skills,
   levels,
@@ -137,6 +140,7 @@ export function TrainerBuilder({
   return (
     <TrainerConfigurator
       family={family}
+      familyIcon={familyIcon}
       skills={skills}
       modes={modes}
       preset={preset}

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import type { ReactNode } from 'react';
 import { Badge, Button } from '@/components/ui';
 import {
@@ -67,6 +69,8 @@ export type TrainerWords = typeof trainerPage;
 export interface TrainerConfiguratorProps<M extends string> {
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
+  /** Иконка раздела рядом с названием в сводке. Нет — сводка как раньше. */
+  familyIcon?: IkonkaRazdela | undefined;
   skills: SkillItem[];
   modes: readonly TrainerModeOption<M>[];
   preset?: ConfiguratorPreset<M> | null;
@@ -122,6 +126,7 @@ function chosenTitle(chosen: SkillItem[], unit: [string, string, string]): React
  */
 export function TrainerConfigurator<M extends string>({
   family,
+  familyIcon,
   skills,
   modes,
   preset = null,
@@ -252,7 +257,10 @@ export function TrainerConfigurator<M extends string>({
           <h3 className="cfg-summary__title" id="trainer-summary-title">
             {words.summary.title}
           </h3>
-          <Badge tone="info">{family}</Badge>
+          <div className="cfg-summary__family">
+            <RazdelIkonka icon={familyIcon} sizes="56px" className="cfg-summary__ico" />
+            <Badge tone="info">{family}</Badge>
+          </div>
           {chosen.length === 1 ? (
             <>
               <p className="cfg-summary__skill">

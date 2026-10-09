@@ -1,4 +1,5 @@
 import type { Subtopic } from '@/content/sections';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { generatorPage } from '@/content/generator';
 import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
@@ -10,6 +11,8 @@ export interface GeneratorTabProps {
   subtopic: Subtopic;
   /** Адрес подтемы: от него считаются адреса страниц печати. */
   base: string;
+  /** Иконка раздела для сводки. */
+  icon?: IkonkaRazdela | undefined;
 }
 
 /**
@@ -19,7 +22,7 @@ export interface GeneratorTabProps {
  * миниатюры: движок graph/ рисует их на сборке, как на карточках
  * навыков подготовки, и в браузер не попадает.
  */
-export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
+export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
   const family = findManifestFamily(subtopic.id);
   /* Подписи уровней и плашка «откуда задания» — подтемы: у
      квадратичной наборы собственные, и обещать прототипы ФИПИ
@@ -28,11 +31,14 @@ export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
     <GeneratorScreen
       base={base}
       family={subtopic.title}
+      familyIcon={icon}
       skills={skillItems(family)}
       levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-      note={subtopic.id === 'quadratic' || subtopic.id === 'rational' || subtopic.id === 'irrational'
-        ? generatorPage.summary.noteOwn
-        : generatorPage.summary.note}
+      note={
+        subtopic.id === 'quadratic' || subtopic.id === 'rational' || subtopic.id === 'irrational'
+          ? generatorPage.summary.noteOwn
+          : generatorPage.summary.note
+      }
     />
   );
 }

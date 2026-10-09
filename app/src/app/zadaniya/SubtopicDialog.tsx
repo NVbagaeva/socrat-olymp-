@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { Chart } from '@/components/graph/Chart';
 import { Badge, CheckIcon, Modal } from '@/components/ui';
-import { previewScene } from '@/lib/scenes';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { counted } from '@/lib/plural';
 import type { FunctionTypeId } from '@/data/functionTypes';
 
@@ -15,6 +15,8 @@ export interface SubtopicView {
   title: string;
   /** Название графика: «График — парабола». */
   graphName: string;
+  /** Иконка раздела. Нет — карточка без иконки. */
+  icon?: IkonkaRazdela;
   status: 'active' | 'soon';
   /** Сколько наборов прототипов и задач в них — из манифеста. */
   prototypes: number;
@@ -52,15 +54,22 @@ function Card({ item }: { item: SubtopicView }) {
   const linked = item.href !== null;
   const body = (
     <>
-      {/* Миниатюра из движка graph/: своего SVG для графиков нет.
-          Оси без чисел — режим 'none' рендерера. */}
-      <span className="subtopic-card__chart" aria-hidden="true">
-        <Chart scene={previewScene(item.id)} />
-      </span>
+      <RazdelIkonka
+        icon={item.icon}
+        sizes="88px"
+        soon={!linked}
+        dim={linked && !open}
+        className="subtopic-card__ico"
+      />
+      {/* Отметка в углу: у открытого раздела — галочка, у раздела в
+          предпросмотре — пустой кружок (страницы есть, задач ещё нет).
+          У закрытого отметки нет: там честная подпись «Готовится». */}
       {open ? (
         <span className="subtopic-card__check" aria-hidden="true">
           <CheckIcon />
         </span>
+      ) : linked ? (
+        <span className="subtopic-card__check subtopic-card__check--empty" aria-hidden="true" />
       ) : null}
       <span className="subtopic-card__text">
         <span className="subtopic-card__title">{item.title}</span>
