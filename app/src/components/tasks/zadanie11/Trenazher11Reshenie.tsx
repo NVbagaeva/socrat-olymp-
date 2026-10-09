@@ -2,8 +2,10 @@
 
 import { clsx } from 'clsx';
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Input, ProgressBar } from '@/components/ui';
+import { useSessionReport } from '../session/useSessionReport';
+import type { TaskMark } from '@/lib/trainerSession/types';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import { trenazher11 } from '@/lib/zadanie11/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie11/secret';
@@ -14,7 +16,7 @@ import { HintIcon } from '../prep/PrepIcons';
 import { IkonkaRazdela, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
 import { praviloOdinRaz } from './praviloProporcii';
 import { Tablitsa11 } from './Tablitsa11';
-import type { Otmetka } from './Trenazher11Itog';
+import type { Trenazher11Ui } from './trenazher11Sessiya';
 
 export interface Trenazher11ResheniePropsy {
   zadachi: Zadacha11[];
@@ -22,11 +24,17 @@ export interface Trenazher11ResheniePropsy {
   ssylki: Record<SectionId, SsylkiRazdela>;
   nazvaniya: Record<SectionId, string>;
   base: string;
-  onNazad: () => void;
-  onKonets: (otmetki: Otmetka[]) => void;
+  /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
+  restored: Trenazher11Ui | null;
+  /** Сообщить оболочке сессии о новом состоянии (она его сохранит). */
+  report: (ui: Trenazher11Ui) => void;
+  /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
+  elapsed: () => number;
+  /** Последняя задача закрыта: показать итоги. */
+  onKonets: () => void;
 }
 
-function otkryt<T>(z: Zadacha11, blob: string): T | null {
+export function otkryt<T>(z: Zadacha11, blob: string): T | null {
   try {
     return JSON.parse(openText(blob, z.seal)) as T;
   } catch {
@@ -75,30 +83,61 @@ export function Trenazher11Reshenie({
   ssylki,
   nazvaniya,
   base,
-  onNazad,
+  restored,
+  report,
+  elapsed,
   onKonets,
 }: Trenazher11ResheniePropsy) {
-  const [index, setIndex] = useState(0);
-  const [otmetki, setOtmetki] = useState<(Otmetka | null)[]>(() => zadachi.map(() => null));
-  const [value, setValue] = useState('');
-  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
-  const [oshibalsya, setOshibalsya] = useState(false);
-  const [hintOpen, setHintOpen] = useState(false);
-  const [shag, setShag] = useState(0);
-  const [mimo, setMimo] = useState<number[]>([]);
-  const [otkrytye, setOtkrytye] = useState<Set<string>>(new Set());
-  const [razbor, setRazbor] = useState<Razbor11 | null>(null);
-  /* Начало задачи — для времени в статистике; ставится эффектом. */
-  const nachalo = useRef<number | null>(null);
-  useEffect(() => {
-    nachalo.current = Date.now();
-  }, [index]);
+  /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
+     вернувшись в тренажёр, он продолжает с того же места. */
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  /* Отметки общие для сессии: 'right' — начисто, 'hinted' — с подсказкой
+     или после ошибки. Неверные и пропущенные отметки не получают:
+     ошибка запоминается в tried, пропуск — отсутствием записи. */
+  const [otmetki, setOtmetki] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
+  const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
+  const [value, setValue] = useState(restored?.value ?? '');
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
+  const [oshibalsya, setOshibalsya] = useState(restored?.oshibalsya ?? false);
+  const [hintOpen, setHintOpen] = useState(restored?.hintOpen ?? false);
+  const [shag, setShag] = useState(restored?.shag ?? 0);
+  const [mimo, setMimo] = useState<number[]>(restored?.mimo ?? []);
+  const [otkrytye, setOtkrytye] = useState<Set<string>>(new Set(restored?.otkrytye ?? []));
+  /* Решение открыто: сам разбор достаётся из отпечатка заново. */
+  const [razborOtkryt, setRazborOtkryt] = useState(restored?.razborOtkryt ?? false);
+  /* Начало задачи (мс активного времени оболочки) — для времени
+     в статистике; на следующей задаче ставится при переходе. */
+  const [nachalo, setNachalo] = useState(() => restored?.taskFrom ?? elapsed());
 
   const zadacha = zadachi[index];
   const p = useMemo(
     () => (zadacha === undefined ? null : otkryt<Podskazki11>(zadacha, zadacha.podskazki)),
     [zadacha],
   );
+  const razbor = useMemo(
+    () =>
+      zadacha === undefined || !razborOtkryt ? null : otkryt<Razbor11>(zadacha, zadacha.razbor),
+    [zadacha, razborOtkryt],
+  );
+
+  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
+     каждом изменении, а при возвращении отдаёт обратно (restored). */
+  useSessionReport<Trenazher11Ui>(report, {
+    index,
+    marks: otmetki,
+    tried,
+    order: null,
+    value,
+    checked,
+    oshibalsya,
+    hintOpen,
+    shag,
+    mimo,
+    otkrytye: [...otkrytye],
+    razborOtkryt,
+    taskFrom: nachalo,
+  });
+
   if (zadacha === undefined) {
     return null;
   }
@@ -110,21 +149,26 @@ export function Trenazher11Reshenie({
   /* Пройдено k шагов из n — открыта такая же доля пустых клеток. */
   const poShagam = shagi.length === 0 ? 0 : Math.round((pustye.length * shag) / shagi.length);
   const zakryto = new Set(
-    razbor !== null || checked === 'right'
+    razborOtkryt || checked === 'right'
       ? []
       : pustye.filter((k, i) => i >= poShagam && !otkrytye.has(k)),
   );
   const podskazkaByla = shag > 0 || otkrytye.size > 0 || mimo.length > 0;
-  const zakrytaZadacha = checked === 'right' || razbor !== null;
+  const zakrytaZadacha = checked === 'right' || razborOtkryt;
   const ssylka = ssylki[z.section];
   const layfhak = z.lifehacks[0];
 
   function sekund(): number {
-    return nachalo.current === null ? 0 : (Date.now() - nachalo.current) / 1000;
+    return nachalo === null ? 0 : (elapsed() - nachalo) / 1000;
   }
 
-  function otmetit(o: Otmetka) {
-    setOtmetki((prev) => prev.map((x, i) => (i === index ? (x ?? o) : x)));
+  function otmetit(o: TaskMark) {
+    setOtmetki((prev) => (prev[index] === undefined ? { ...prev, [index]: o } : prev));
+  }
+
+  /* Ошибка в задаче: неверный ответ или открытое решение. */
+  function oshibka() {
+    setTried((prev) => ({ ...prev, [index]: true }));
   }
 
   function zapisat(itog: 'right' | 'wrong' | 'revealed', chisto: boolean) {
@@ -151,30 +195,28 @@ export function Trenazher11Reshenie({
       otmetit(chisto ? 'right' : 'hinted');
     } else {
       setOshibalsya(true);
+      oshibka();
     }
   }
 
   function pokazatReshenie() {
-    setRazbor(otkryt<Razbor11>(z, z.razbor));
+    setRazborOtkryt(true);
     if (checked !== 'right') {
       zapisat('revealed', false);
-      otmetit('wrong');
+      oshibka();
     }
   }
 
   function dalshe() {
-    let itog = otmetki[index] ?? null;
-    if (itog === null) {
+    if (otmetki[index] === undefined && !razborOtkryt) {
       /* Ушёл, не решив: задача не засчитана и попадает в ошибки. */
       zapisat('wrong', false);
-      itog = 'wrong';
     }
-    const next = otmetki.map((x, i) => (i === index ? itog : x));
-    setOtmetki(next);
     if (index + 1 >= total) {
-      onKonets(next.map((x) => x ?? 'wrong'));
+      onKonets();
       return;
     }
+    setNachalo(elapsed());
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -183,7 +225,7 @@ export function Trenazher11Reshenie({
     setShag(0);
     setMimo([]);
     setOtkrytye(new Set());
-    setRazbor(null);
+    setRazborOtkryt(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -192,18 +234,11 @@ export function Trenazher11Reshenie({
   return (
     <section className={clsx('z11-resh', tsvetRazdela(z.section))}>
       <header className="z11-resh__top">
-        <button type="button" className="z11-resh__nazad" onClick={onNazad}>
-          <Piktogramma name="back" />
-          {TRENAZHER_11.nazad}
-        </button>
         <ProgressBar
           className="z11-resh__bar"
           value={((index + 1) / total) * 100}
           label={TRENAZHER_11.zadacha(index + 1, total)}
         />
-        <span className="z11-resh__count">
-          Задача <b>{index + 1}</b> из {total}
-        </span>
         <span className={clsx('z11-resh__badge', `z11-resh__badge--${z.vid}`)}>
           {TRENAZHER_11.badge[z.vid]}
         </span>
@@ -278,7 +313,7 @@ export function Trenazher11Reshenie({
         </section>
       ) : null}
 
-      {sPodskazkami && tables.length > 0 && razbor === null ? (
+      {sPodskazkami && tables.length > 0 && !razborOtkryt ? (
         <section className="z11-card z11-resh__tablitsa">
           <h3 className="z11-resh__h">
             <Piktogramma name="table" />
@@ -334,30 +369,7 @@ export function Trenazher11Reshenie({
         </div>
       )}
 
-      {razbor === null ? null : (
-        <section
-          className="z11-card z11-resh__razbor"
-          aria-label={TRENAZHER_11.reshenie}
-          ref={praviloOdinRaz}
-        >
-          <h3 className="z11-resh__h">{TRENAZHER_11.reshenie}</h3>
-          {razbor.tables.map((t, i) => (
-            <Tablitsa11 key={i} table={t} />
-          ))}
-          {razbor.etapy.map((e, i) => (
-            <div key={i} className="z11-resh__etap">
-              <p className="z11-resh__etap-title" dangerouslySetInnerHTML={{ __html: e.title }} />
-              {e.stroki.map((line, j) => (
-                <div
-                  key={j}
-                  className="z11-resh__line"
-                  dangerouslySetInnerHTML={{ __html: line }}
-                />
-              ))}
-            </div>
-          ))}
-        </section>
-      )}
+      {razbor === null ? null : <Razbor11Blok razbor={razbor} />}
 
       {z.answerType === 'choice' && z.vybory !== null ? (
         <ul className="z11-resh__vybory" aria-label={TRENAZHER_11.otvet}>
@@ -386,7 +398,7 @@ export function Trenazher11Reshenie({
       ) : null}
 
       <div className="z11-resh__dop">
-        {razbor === null && (checked !== null || shag >= shagi.length) ? (
+        {!razborOtkryt && (checked !== null || shag >= shagi.length) ? (
           <Button variant="ghost" onClick={pokazatReshenie}>
             {TRENAZHER_11.pokazatReshenie}
           </Button>
@@ -456,4 +468,34 @@ function PredShag({
       {posledniy ? <p className="z11-resh__pred-done">{TRENAZHER_11.vseShagi}</p> : null}
     </div>
   );
+}
+
+/** Решение задачи по этапам: на экране задачи и в разборе на итогах. */
+export function Razbor11Blok({ razbor }: { razbor: Razbor11 }) {
+  return (
+    <section
+      className="z11-card z11-resh__razbor"
+      aria-label={TRENAZHER_11.reshenie}
+      ref={praviloOdinRaz}
+    >
+      <h3 className="z11-resh__h">{TRENAZHER_11.reshenie}</h3>
+      {razbor.tables.map((t, i) => (
+        <Tablitsa11 key={i} table={t} />
+      ))}
+      {razbor.etapy.map((e, i) => (
+        <div key={i} className="z11-resh__etap">
+          <p className="z11-resh__etap-title" dangerouslySetInnerHTML={{ __html: e.title }} />
+          {e.stroki.map((line, j) => (
+            <div key={j} className="z11-resh__line" dangerouslySetInnerHTML={{ __html: line }} />
+          ))}
+        </div>
+      ))}
+    </section>
+  );
+}
+
+/** Разбор задачи на итогах: решение по этапам, последняя строка — ответ. */
+export function Trenazher11Review({ zadacha }: { zadacha: Zadacha11 }) {
+  const razbor = useMemo(() => otkryt<Razbor11>(zadacha, zadacha.razbor), [zadacha]);
+  return razbor === null ? null : <Razbor11Blok razbor={razbor} />;
 }
