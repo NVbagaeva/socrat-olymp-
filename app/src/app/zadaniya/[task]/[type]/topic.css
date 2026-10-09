@@ -2186,3 +2186,7 @@ a.tutor-card:hover {
     font-size: 1.35rem;
   }
 }
+/* Подпункт «Содержания» берёт заголовок подраздела целиком: номер и текст. */
+.contents-sub__item .rich-sub__no {
+  margin-right: 0.35em;
+}
