@@ -2,16 +2,9 @@ import { Chart } from '@/components/graph/Chart';
 import { Tex } from '@/components/ui/Tex';
 import type { Formulation } from '@/content/sections';
 import { typeScene, type TypeSceneId } from '@/lib/scenes';
-import { RichExampleBlock } from '../theory/rich/RichExample';
+import { ANALYSIS_ATTR, ANALYSIS_WORDS, analysisHref, practiceHref } from './AnalysisPage';
 import { FormulationIcon } from '../FormulationIcon';
 import { TypesDisclosure, type TypeItem } from './TypesDisclosure';
-
-const WORDS = {
-  back: 'К типам задач',
-  practice: 'Потренироваться',
-  open: 'Открыть разбор',
-  close: 'Свернуть разбор',
-};
 
 const HEADING_ID = 'about-types-title';
 
@@ -29,8 +22,10 @@ export interface AboutTypesProps {
  * примерами (то же оформление, что примеры теории) и ссылкой в
  * тренажёр этого типа.
  *
- * Всё, кроме раскрытия, собирается здесь, на сервере: формулы и
- * рисунки — готовая разметка, в браузер не уходят ни KaTeX, ни движок.
+ * Плашки собираются здесь, на сервере. Разборы — отдельные статические
+ * страницы (AnalysisPage): формулы и рисунки там — готовая разметка, и
+ * под плашку она подгружается по клику; в браузер не уходят ни KaTeX,
+ * ни движок.
  */
 export function AboutTypes({ title, forms, base }: AboutTypesProps) {
   const items: TypeItem[] = forms.flatMap((item) => {
@@ -42,7 +37,8 @@ export function AboutTypes({ title, forms, base }: AboutTypesProps) {
       {
         id: analysis.id,
         label: item.title.replace(/\$/g, ''),
-        practiceHref: `${base ?? ''}/trenazher/${analysis.trainer}/`,
+        href: analysisHref(base ?? '', analysis.id),
+        practiceHref: practiceHref(base ?? '', analysis.trainer),
         card: (
           <>
             <span className="form-card__no" aria-hidden="true">
@@ -74,9 +70,6 @@ export function AboutTypes({ title, forms, base }: AboutTypesProps) {
             </div>
           </>
         ),
-        examples: analysis.examples.map((example) => (
-          <RichExampleBlock key={example.title} block={example} wide />
-        )),
       },
     ];
   });
@@ -86,7 +79,12 @@ export function AboutTypes({ title, forms, base }: AboutTypesProps) {
       <h3 className="t-h4 about-sub" id={HEADING_ID}>
         {title}
       </h3>
-      <TypesDisclosure items={items} headingId={HEADING_ID} words={WORDS} />
+      <TypesDisclosure
+        items={items}
+        headingId={HEADING_ID}
+        attr={ANALYSIS_ATTR}
+        words={ANALYSIS_WORDS}
+      />
     </section>
   );
 }

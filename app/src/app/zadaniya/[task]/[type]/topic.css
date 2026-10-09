@@ -1735,6 +1735,15 @@ a.tutor-card:hover {
   flex-wrap: wrap;
   gap: var(--space-3);
 }
+.about-type__status {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Отдельная страница разбора (…/razbor/{id}/). */
+.about-razbor {
+  display: grid;
+  gap: var(--space-5);
+}
 
 /* ── Теория блоками (components/tasks/theory/rich) ─────────────── */
 

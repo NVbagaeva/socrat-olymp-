@@ -37,6 +37,11 @@ export interface SessionRequest {
    * и фильтр остаётся прежним — только числовой ответ.
    */
   choice?: boolean;
+  /**
+   * Правила ответа, которыми сужены наборы (ярлык «Потренироваться»
+   * из разбора типа задачи). Не задано или пусто — все задачи.
+   */
+  rules?: string[];
 }
 
 export interface Session {
@@ -83,6 +88,11 @@ function answerable(task: EngineTask & { answerType?: string }, choice: boolean)
 
 function levelOf(task: EngineTask): string | null {
   return task.meta.level ?? null;
+}
+
+/** Задача подходит под фильтр по правилу ответа. */
+function ruleFits(task: EngineTask, rules: string[] | null): boolean {
+  return rules === null || rules.includes(task.meta.rule ?? '');
 }
 
 interface Picked {
@@ -135,6 +145,7 @@ function fromSet(
   tally: { rejected: number },
   choice: boolean,
   random: Random | null,
+  rules: string[] | null,
 ): EngineTask[] {
   const picked: Picked[] = [];
   const seen = new Set<string>();
@@ -144,7 +155,7 @@ function fromSet(
     if (tasks === null) {
       continue;
     }
-    const fit = tasks.filter((task) => answerable(task, choice) &&
+    const fit = tasks.filter((task) => answerable(task, choice) && ruleFits(task, rules) &&
       (level === null || levelOf(task) === level));
     /* Новые задачи — вперёд, повторы — только если новых уже нет. */
     const fresh = fit.filter((task) => !seen.has(task.id));
@@ -167,6 +178,7 @@ function fromMistakes(
   seedFor: SeedFor,
   tally: { rejected: number },
   choice: boolean,
+  rules: string[] | null,
 ): EngineTask[] {
   const out: EngineTask[] = [];
   const bySet = new Map<string, EngineTask[]>();
@@ -183,7 +195,7 @@ function fromMistakes(
         bySet.set(setId, tasks);
       }
       const found = tasks.find((task) => task.id === id);
-      if (found !== undefined && answerable(found, choice)) {
+      if (found !== undefined && answerable(found, choice) && ruleFits(found, rules)) {
         out.push(found);
       }
     }
@@ -210,13 +222,14 @@ export function pickTasks(
   const tally = { rejected: 0 };
   const choice = request.choice === true;
   const want = Math.max(1, Math.floor(request.count));
+  const rules = request.rules !== undefined && request.rules.length > 0 ? request.rules : null;
   let engine: EngineTask[] = [];
 
   if (request.mode === 'mistakes') {
     const known = request.mistakes.filter((id) =>
       request.skills.some((setId) => id.startsWith(`${setId}-`)),
     );
-    engine = fromMistakes(known, want, seedFor, tally, choice);
+    engine = fromMistakes(known, want, seedFor, tally, choice, rules);
   } else {
     const sets = request.skills;
     /* Поровну с каждого набора, остаток — первым. Порядок задач
@@ -227,7 +240,7 @@ export function pickTasks(
       const extra = rest > 0 ? 1 : 0;
       rest -= extra;
       engine = engine.concat(
-        fromSet(setId, request.level, base + extra, seedFor, tally, choice, random),
+        fromSet(setId, request.level, base + extra, seedFor, tally, choice, random, rules),
       );
     });
   }

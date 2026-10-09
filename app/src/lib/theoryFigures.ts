@@ -751,7 +751,7 @@ function qLineVisible(asks: 'x' | 'y'): TheoryFigure {
   return {
     scene: crossScene(
       figure,
-      [dot(0, -4), dot(0, -1, 'alt'), dot(4, 1, 'alt'), dot(X, Y, 'lineB')],
+      [dot(0, -4), dot(0, -1, 'alt'), dot(4, 1, 'alt')],
       [...RISE_TRIANGLE, seg([X, Y], [X, 0], 'lineB'), seg([X, Y], [0, Y], 'lineB')],
     ),
     labels: [
@@ -817,7 +817,7 @@ function qParabVisible(asks: 'x' | 'y'): TheoryFigure {
   return {
     scene: crossScene(
       figure,
-      [dot(0, -4), dot(1, 0, 'alt'), dot(0, -2, 'alt'), dot(X, Y, 'lineB')],
+      [dot(0, -4), dot(1, 0, 'alt'), dot(0, -2, 'alt')],
       [seg([X, Y], [X, 0], 'lineB'), seg([X, Y], [0, Y], 'lineB')],
     ),
     labels: [

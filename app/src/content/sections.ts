@@ -313,6 +313,27 @@ export function prepRedirectParams(): { task: string; type: string }[] {
  * Подтемы, у которых есть тренажёр и генератор: собранные и с
  * наборами прототипов в данных движка. Решает манифест, не конфиг.
  */
+/**
+ * Разборы типов задач со вкладки «О задании»: у каждого — своя
+ * статическая страница …/razbor/{id}/. Вкладка подгружает её по клику
+ * на плашку, а не держит восемь примеров в разметке страницы темы.
+ */
+export function analysisParams(): { task: string; type: string; id: string }[] {
+  return sections.flatMap((section) =>
+    section.subtopics.flatMap((item) =>
+      (item.about?.forms ?? []).flatMap((form) =>
+        form.analysis === undefined
+          ? []
+          : [{ task: section.slug, type: item.id, id: form.analysis.id }],
+      ),
+    ),
+  );
+}
+
+export function findAnalysis(task: string, type: string, id: string): Formulation | undefined {
+  return findSubtopic(task, type)?.about?.forms.find((form) => form.analysis?.id === id);
+}
+
 export function trainerSubtopicParams(): { task: string; type: string }[] {
   return builtSubtopicParams().filter(
     (params) => (findManifestFamily(params.type)?.prototypes.sets ?? 0) > 0,
