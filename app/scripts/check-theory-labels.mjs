@@ -36,11 +36,25 @@ if (BASE === '') {
     console.error('Нет папки сборки out: сначала pnpm build');
     process.exit(1);
   }
-  const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp' };
+  const MIME = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'text/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.svg': 'image/svg+xml',
+    '.woff2': 'font/woff2',
+    '.png': 'image/png',
+    '.webp': 'image/webp',
+  };
   server = http.createServer((req, res) => {
     let file = path.join(OUT, decodeURIComponent(req.url.split('?')[0]));
-    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
-    if (!fs.existsSync(file)) { res.writeHead(404); res.end(); return; }
+    if (fs.existsSync(file) && fs.statSync(file).isDirectory())
+      file = path.join(file, 'index.html');
+    if (!fs.existsSync(file)) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
     res.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
     fs.createReadStream(file).pipe(res);
   });
@@ -64,17 +78,26 @@ function inspect(scope) {
     if (frame.width === 0) return;
     const svg = fig.querySelector('svg');
     const m = svg.getScreenCTM();
-    const name = (fig.closest('.rich-example, .rich-card, .rich-main, .rich-fork__branch')?.querySelector('h4, h5, .rich-example__title')?.textContent ?? '').trim().slice(0, 40);
+    const name = (
+      fig
+        .closest('.rich-example, .rich-card, .rich-main, .rich-fork__branch')
+        ?.querySelector('h4, h5, .rich-example__title')?.textContent ?? ''
+    )
+      .trim()
+      .slice(0, 40);
     const where = `рисунок ${index + 1}${name === '' ? '' : ` («${name}»)`}`;
     const labels = [...fig.querySelectorAll('.kfig__label')].map((el) => {
       const plain = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim() !== '');
-      const box = plain ? el.getBoundingClientRect() : (el.querySelector('.katex') ?? el).getBoundingClientRect();
+      const box = plain
+        ? el.getBoundingClientRect()
+        : (el.querySelector('.katex') ?? el).getBoundingClientRect();
       return { text: el.textContent.replace(/\s+/g, ' ').trim().slice(0, 18), box };
     });
     /* Синие линии графика: точки пути в координатах окна. */
     const samples = [];
     svg.querySelectorAll('path').forEach((p) => {
-      if (!/1F5FD0/i.test(p.getAttribute('stroke') ?? '') || p.getAttribute('fill') !== 'none') return;
+      if (!/1F5FD0/i.test(p.getAttribute('stroke') ?? '') || p.getAttribute('fill') !== 'none')
+        return;
       const length = p.getTotalLength();
       for (let s = 0; s <= length; s += 2) {
         const q = p.getPointAtLength(s);
@@ -84,14 +107,35 @@ function inspect(scope) {
     const pad = 1.5;
     labels.forEach((a, i) => {
       labels.forEach((b, j) => {
-        if (j > i && !(a.box.right < b.box.left || b.box.right < a.box.left || a.box.bottom < b.box.top || b.box.bottom < a.box.top)) {
+        if (
+          j > i &&
+          !(
+            a.box.right < b.box.left ||
+            b.box.right < a.box.left ||
+            a.box.bottom < b.box.top ||
+            b.box.bottom < a.box.top
+          )
+        ) {
           problems.push(`${where}: «${a.text}» и «${b.text}» пересекаются`);
         }
       });
-      if (samples.some(([x, y]) => x > a.box.left - pad && x < a.box.right + pad && y > a.box.top - pad && y < a.box.bottom + pad)) {
+      if (
+        samples.some(
+          ([x, y]) =>
+            x > a.box.left - pad &&
+            x < a.box.right + pad &&
+            y > a.box.top - pad &&
+            y < a.box.bottom + pad,
+        )
+      ) {
         problems.push(`${where}: «${a.text}» лежит на линии графика`);
       }
-      if (a.box.left < frame.left - 1 || a.box.right > frame.right + 1 || a.box.top < frame.top - 1 || a.box.bottom > frame.bottom + 1) {
+      if (
+        a.box.left < frame.left - 1 ||
+        a.box.right > frame.right + 1 ||
+        a.box.top < frame.top - 1 ||
+        a.box.bottom > frame.bottom + 1
+      ) {
         problems.push(`${where}: «${a.text}» за краем рисунка`);
       }
     });
@@ -105,11 +149,18 @@ for (const width of SIZES) {
   const page = await browser.newPage({ viewport: { width, height: 900 } });
   for (const url of PAGES) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
-    await page.click('[role=tab][id$="-tab-teoriya"], [role=tab][id$="-tab-theory"]').catch(() => {});
+    await page
+      .click('[role=tab][id$="-tab-teoriya"], [role=tab][id$="-tab-theory"]')
+      .catch(() => {});
     await page.waitForSelector('.kfig', { state: 'attached', timeout: 15000 });
     await page.waitForTimeout(800);
-    figures += await page.$$eval(SCOPE + '.kfig', (list) => list.filter((f) => f.getBoundingClientRect().width > 0).length);
-    (await page.evaluate(inspect, SCOPE)).forEach((p) => failures.push(`${width} px, ${url}: ${p}`));
+    figures += await page.$$eval(
+      SCOPE + '.kfig',
+      (list) => list.filter((f) => f.getBoundingClientRect().width > 0).length,
+    );
+    (await page.evaluate(inspect, SCOPE)).forEach((p) =>
+      failures.push(`${width} px, ${url}: ${p}`),
+    );
   }
   await page.close();
 }
