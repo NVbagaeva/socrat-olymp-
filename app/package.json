@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "build:hero": "node scripts/build-hero-images.mjs",
+    "build:razdely": "node scripts/build-razdely-icons.mjs",
     "validate:graph": "node scripts/validate-graph.mjs",
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
     "test:zadanie3": "node scripts/check-zadanie3.mjs",
