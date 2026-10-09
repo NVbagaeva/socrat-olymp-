@@ -30,6 +30,7 @@
     "test:graph-rational": "node scripts/check-graph-rational.mjs",
     "test:graph-sqrt": "node scripts/check-graph-sqrt.mjs",
     "test:komplekty": "node scripts/check-komplekty.mjs",
+    "test:theory-labels": "node scripts/check-theory-labels.mjs",
     "test:solution-tex": "node scripts/check-solution-tex.mjs",
     "test:rational-hints": "node scripts/check-rational-hints.mjs",
     "test:quadratic-hints": "node scripts/check-quadratic-hints.mjs",
