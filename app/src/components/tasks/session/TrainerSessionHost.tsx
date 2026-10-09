@@ -103,9 +103,7 @@ interface Run<P> {
 }
 
 type View<P> =
-  | { kind: 'config' }
-  | { kind: 'run'; run: Run<P> }
-  | { kind: 'summary'; data: SummaryData };
+  { kind: 'config' } | { kind: 'run'; run: Run<P> } | { kind: 'summary'; data: SummaryData };
 
 /** Почему эта вкладка больше не пишет в тренировку. */
 type Blocked = 'taken' | 'replaced' | 'gone';
@@ -114,6 +112,13 @@ type Blocked = 'taken' | 'replaced' | 'gone';
 type Notice = 'version' | 'broken' | 'restore';
 
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/* Вызов функции-«слота» внутри собственной отрисовки: так конфигуратор
+   и экран, которым оболочка отдаёт колбэки, отрисовываются как обычные
+   дочерние компоненты. */
+function Slot<A>({ render, arg }: { render: (arg: A) => ReactNode; arg: A }) {
+  return <>{render(arg)}</>;
+}
 
 /* Ловит ошибку отрисовки экрана. Для восстановленной тренировки это
    значит «сохранённое не подошло»: оболочка сбросит её и предложит новую. */
@@ -173,14 +178,15 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
   /* Новая тренировка при незавершённой: ждёт ответа ученика. */
-  const [pending, setPending] = useState<{ payload: P; solved: number; total: number } | null>(null);
+  const [pending, setPending] = useState<{ payload: P; solved: number; total: number } | null>(
+    null,
+  );
   /* Прогресс для панели: перерисовывается только панель, не экран. */
   const [bar, setBar] = useState({ index: 0, total: 0, solved: 0 });
 
   /* Изменяемое состояние тренировки живёт в ref: запись в хранилище и
      часы не должны зависеть от перерисовок. */
   const viewRef = useRef(view);
-  viewRef.current = view;
   const uiRef = useRef<BaseUi | null>(null);
   const revRef = useRef(0);
   const pausedRef = useRef(false);
@@ -372,7 +378,6 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       resume();
     }
     // Один раз при входе: дальше состоянием управляет сама оболочка.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Итоги по последнему состоянию экрана. */
@@ -676,7 +681,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     return (
       <>
         {noticeBlock}
-        {configurator({ start })}
+        <Slot render={configurator} arg={{ start }} />
         {confirmStart}
       </>
     );
@@ -735,14 +740,17 @@ export function TrainerSessionHost<P, U extends BaseUi>({
             )
           }
         >
-          {screen({
-            payload: run.payload,
-            sessionId: run.id,
-            restored: run.restored as U | null,
-            report,
-            elapsed,
-            finish,
-          })}
+          <Slot
+            render={screen}
+            arg={{
+              payload: run.payload,
+              sessionId: run.id,
+              restored: run.restored as U | null,
+              report,
+              elapsed,
+              finish,
+            }}
+          />
         </RunBoundary>
       </div>
 

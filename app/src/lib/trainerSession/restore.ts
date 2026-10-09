@@ -54,7 +54,8 @@ export function asStringRecord(value: unknown): Record<string, string> {
 
 /** Список чисел; если хоть один элемент не число — пустой. */
 export function asNumberList(value: unknown): number[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'number' && Number.isFinite(item))
+  return Array.isArray(value) &&
+    value.every((item) => typeof item === 'number' && Number.isFinite(item))
     ? (value as number[])
     : [];
 }
@@ -76,7 +77,13 @@ export function asOrder(value: unknown, poolSize: number): number[] | null {
   }
   const seen = new Set<number>();
   for (const item of value) {
-    if (typeof item !== 'number' || !Number.isInteger(item) || item < 0 || item >= poolSize || seen.has(item)) {
+    if (
+      typeof item !== 'number' ||
+      !Number.isInteger(item) ||
+      item < 0 ||
+      item >= poolSize ||
+      seen.has(item)
+    ) {
       return null;
     }
     seen.add(item);

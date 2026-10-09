@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import { parseAnswer, sameNumber } from '@/lib/answer';
@@ -119,26 +119,26 @@ export function TrainerScreen({
      остаётся время на одно задание — от первой проверки, пока ученик
      читает условие, оно не идёт. */
   const [misses, setMisses] = useState(restored?.misses ?? 0);
-  const taskStartedAt = useRef<number | null>(restored?.taskFrom ?? null);
+  const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
   /* Была ли ошибка в текущем задании: начисто пройденное уходит
      из списка ошибочных, остальное в нём остаётся. */
-  const failed = useRef(restored?.failed ?? false);
+  const [failed, setFailed] = useState(restored?.failed ?? false);
 
   function startClock() {
-    if (taskStartedAt.current === null) {
-      taskStartedAt.current = elapsed();
+    if (taskFrom === null) {
+      setTaskFrom(elapsed());
     }
   }
 
   /** Сколько секунд ушло на текущее задание. */
   function taskSeconds(): number {
-    const from = taskStartedAt.current;
+    const from = taskFrom;
     return from === null ? 0 : (elapsed() - from) / 1000;
   }
 
   /* Неверный ответ — в поле, в шаге подсказки или в вопросе шага. */
   function miss() {
-    failed.current = true;
+    setFailed(true);
     setMisses(misses + 1);
     setTried({ ...tried, [index]: true });
   }
@@ -168,8 +168,8 @@ export function TrainerScreen({
     picked,
     note,
     misses,
-    failed: failed.current,
-    taskFrom: taskStartedAt.current,
+    failed,
+    taskFrom,
   });
 
   const found = tasks[index];
@@ -210,7 +210,7 @@ export function TrainerScreen({
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
-      remember(task, true, failed.current === false);
+      remember(task, true, failed === false);
     } else {
       miss();
     }
@@ -223,7 +223,7 @@ export function TrainerScreen({
     setSolution(true);
     setSolutionStep(0);
     setChecked(null);
-    failed.current = true;
+    setFailed(true);
     setMarks({ ...marks, [index]: 'hinted' });
     remember(task, false, false);
   }
@@ -368,8 +368,8 @@ export function TrainerScreen({
   }
 
   function next() {
-    taskStartedAt.current = null;
-    failed.current = false;
+    setTaskFrom(null);
+    setFailed(false);
     setIndex(index + 1);
     setValue('');
     setChecked(null);

@@ -26,15 +26,26 @@ export interface SessionBarProps {
 function SessionClock({ elapsed }: { elapsed: () => number }) {
   const [ms, setMs] = useState(0);
   useEffect(() => {
-    setMs(elapsed());
-    const timer = setInterval(() => setMs(elapsed()), 500);
-    return () => clearInterval(timer);
+    const tick = () => setMs(elapsed());
+    const first = setTimeout(tick, 0);
+    const timer = setInterval(tick, 500);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+    };
   }, [elapsed]);
   return (
     <span className="tsess__timer" role="timer" aria-label={sessionText.timer}>
       <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">
         <circle cx="10" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M10 7.8V11l2.2 1.4M8 2.5h4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M10 7.8V11l2.2 1.4M8 2.5h4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
       {clockText(ms)}
     </span>

@@ -217,7 +217,9 @@ let attached = false;
 
 /** Раздел из ключа записи; null — ключ чужой. */
 function scopeOfKey(key: string): string | null {
-  return key.startsWith(PREFIX) && key.endsWith(SUFFIX) && key.length > PREFIX.length + SUFFIX.length
+  return key.startsWith(PREFIX) &&
+    key.endsWith(SUFFIX) &&
+    key.length > PREFIX.length + SUFFIX.length
     ? key.slice(PREFIX.length, key.length - SUFFIX.length)
     : null;
 }
@@ -262,7 +264,9 @@ export function notifySessionsChanged(): void {
   cache = null;
   const after = snapshot();
   const same =
-    before !== null && before.length === after.length && before.every((item, i) => item === after[i]);
+    before !== null &&
+    before.length === after.length &&
+    before.every((item, i) => item === after[i]);
   if (same) {
     cache = before;
     return;
