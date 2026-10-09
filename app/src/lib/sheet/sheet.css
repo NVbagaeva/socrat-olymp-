@@ -800,7 +800,7 @@ body {
 .sheet-solution-figure {
   flex: none;
   margin: 0;
-  max-width: 45%;
+  max-width: min(34%, 44mm);
 }
 .sheet-solution-figure svg { display: block; width: 100%; height: auto; }
 /* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */

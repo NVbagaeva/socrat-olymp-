@@ -22,10 +22,34 @@ import Sqrt from '../graph/generate-sqrt.js';
 import Line from '../graph/families/line.js';
 import Triangle from '../graph/triangle.js';
 
+/* Названа ли точка в условии: буква её подписи (A из «A(2; 3)»)
+   стоит в тексте отдельным словом. Текст — простой, без разметки. */
+export function namedInCondition(label, question) {
+  var letter = /^[A-Z]/.exec(String(label || ''));
+  if (!letter) { return false; }
+  return new RegExp('(^|[^A-Za-z])' + letter[0] + '([^A-Za-z]|$)').test(String(question || ''));
+}
+
+/**
+ * Сцена рисунка условия: режим 'student' (без построений и безымянных
+ * узлов) и только те подписанные точки, что названы в условии. Точка A
+ * у задачи «Найдите a» на рисунке сайта подписана — разбор на неё
+ * ссылается, — а в условии её нет, и ученику она не нужна.
+ */
+export function conditionScene(task) {
+  if (!task || !task.scene) { return null; }
+  var scene = renderer.sceneForMode(task.scene, 'student');
+  return Object.assign({}, scene, {
+    points: scene.points.filter(function (point) {
+      return namedInCondition(point.label, task.question);
+    })
+  });
+}
+
 /** Рисунок условия: чистый, как на листе ученика. Нет сцены — нет рисунка. */
 export function conditionSvg(task) {
-  if (!task || !task.scene) { return null; }
-  return renderer.renderFigure(task.scene, 'student');
+  var scene = conditionScene(task);
+  return scene === null ? null : renderer.renderGraph(scene);
 }
 
 /* Сцена построения к разбору — или null, если строить нечего. */
@@ -81,6 +105,7 @@ export function solutionFigure(task, generator, cell) {
   return { svg: svg, width: box ? Number(box[1]) / CELL_UNITS * cell : null };
 }
 
-const api = { conditionSvg: conditionSvg, solutionSvg: solutionSvg, solutionFigure: solutionFigure };
+const api = { namedInCondition: namedInCondition, conditionScene: conditionScene,
+  conditionSvg: conditionSvg, solutionSvg: solutionSvg, solutionFigure: solutionFigure };
 
 export default api;

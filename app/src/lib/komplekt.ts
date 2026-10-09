@@ -54,8 +54,8 @@ export interface Kit {
   settings: string;
   /** Когда комплект скачан впервые, ISO. Черновик — null. */
   createdAt: string | null;
-  /** Отпечаток условий и ответов — пишет лист при первой печати. */
-  fingerprint: string | null;
+  /** Отпечатки листов (условия и ответы) — пишет лист при первой печати. */
+  fingerprints: Record<SheetWhich, string | null>;
   downloaded: Record<SheetWhich, boolean>;
 }
 
@@ -183,16 +183,19 @@ export function specTasks(spec: SpecLike): SpecTask[] {
 }
 
 /**
- * Отпечаток условий листа: текст, рисунок, варианты ответа каждой
- * задачи. Условия ученика и учителя одного комплекта одинаковы — и
- * отпечаток у обоих листов один (автотест это сверяет).
+ * Отпечаток листа: текст, рисунок, варианты и ответ каждой задачи.
+ * У листа ученика ответов нет — отпечаток по условиям; у листа
+ * учителя в него входят и ответы. Сравнивается с отпечатком того же
+ * листа при первой печати: один и тот же адрес обязан дать побайтно
+ * тот же лист.
  */
-export function conditionsFingerprint(spec: SpecLike): string {
+export function sheetFingerprint(spec: SpecLike): string {
   return fnv(
     specTasks(spec)
-      .map(
-        (task) =>
-          `${task.questionHtml ?? ''}\u0001${task.figureSvg ?? ''}\u0001${JSON.stringify(task.options ?? null)}`,
+      .map((task) =>
+        [task.questionHtml ?? '', task.figureSvg ?? '', JSON.stringify(task.options ?? null), task.answer ?? ''].join(
+          '\u0001',
+        ),
       )
       .join('\u0002'),
   );
@@ -345,7 +348,7 @@ export function makeKit(options: {
     count: options.count,
     settings: settingsOf(hrefs.student),
     createdAt: null,
-    fingerprint: null,
+    fingerprints: { student: null, teacher: null },
     downloaded: { student: false, teacher: false },
   };
 }
@@ -361,7 +364,7 @@ export interface KitCheck {
 
 /**
  * Лист перед печатью сверяет себя с сохранённым комплектом:
- *   • первая печать — записывает отпечаток условий;
+ *   • первая печать — записывает отпечаток листа;
  *   • отпечаток есть и сошёлся — молча печатает;
  *   • не сошёлся — генератор менялся, комплект точно не восстановить;
  *   • отпечатка нет, а версия в коде не та — совпадение не гарантировано.
@@ -379,25 +382,28 @@ export function checkKitSheet(
     return { code: null, warning: null };
   }
   const code = kitCode(parsed.id, parsed.version);
-  const fingerprint = conditionsFingerprint(spec);
+  const fingerprint = sheetFingerprint(spec);
   const changed = parsed.version !== generatorVersion(scope);
   const saved = findKit(code, scope);
+  const before = saved?.fingerprints?.[which] ?? null;
   let warning: string | null = null;
-  if (saved !== null && saved.fingerprint !== null && saved.fingerprint !== fingerprint) {
+  if (before !== null && before !== fingerprint) {
     warning =
       `Комплект ${code} собран прежней версией генератора, и задания теперь другие: ` +
       'точно восстановить его нельзя. Напечатать лист с новыми заданиями?';
-  } else if ((saved === null || saved.fingerprint === null) && changed) {
+  } else if (before === null && changed) {
     warning =
       `Комплект ${code} собран прежней версией генератора (${parsed.version}, ` +
       `сейчас ${generatorVersion(scope)}). Задания могут не совпасть с теми, что ` +
       'печатали раньше. Напечатать всё равно?';
   }
   if (saved !== null) {
-    markDownloaded(
-      { ...saved, fingerprint: saved.fingerprint ?? (warning === null ? fingerprint : null) },
-      which,
-    );
+    const fingerprints = {
+      student: saved.fingerprints?.student ?? null,
+      teacher: saved.fingerprints?.teacher ?? null,
+      [which]: before ?? (warning === null ? fingerprint : null),
+    };
+    markDownloaded({ ...saved, fingerprints }, which);
   }
   return { code, warning };
 }

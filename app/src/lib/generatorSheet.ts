@@ -49,6 +49,8 @@ interface SheetTask {
   no: number;
   id: string;
   questionHtml: string;
+  /** Условие простым текстом: по нему рисунок оставляет названные точки. */
+  question: string;
   options: unknown;
   /** Рисунок условия в режиме 'student' — один на оба листа комплекта. */
   figureSvg: string | null;
@@ -153,9 +155,10 @@ const VARIANT_TRIES = 24;
 
 type EngineExtra = EngineTask & { options?: unknown; answerType?: string };
 
-/** Что видит ученик: условие, чертёж, варианты ответа. */
-function shownKey(task: SheetTask): string {
-  return `${task.questionHtml}\u0000${task.figureSvg ?? ''}\u0000${JSON.stringify(task.options)}`;
+/** Что видит ученик: условие, чертёж (по сцене), варианты ответа. Сцена,
+ *  а не SVG: так кандидата следующего варианта не нужно рисовать. */
+function shownKey(task: { questionHtml: string; scene?: unknown; options?: unknown }): string {
+  return `${task.questionHtml}\u0000${JSON.stringify(task.scene ?? null)}\u0000${JSON.stringify(task.options ?? null)}`;
 }
 
 /** Задача годится листу: ответ есть и проверяется. */
@@ -168,11 +171,12 @@ function usable(task: EngineExtra): boolean {
 }
 
 function sheetTaskFrom(task: EngineTask, no: number, rules: Record<string, string>): SheetTask {
-  const engine = task as EngineExtra & { answerHtml?: string | null; scene?: unknown };
+  const engine = task as EngineExtra & { answerHtml?: string | null; scene?: unknown; question?: string };
   return {
     no,
     id: task.id,
     questionHtml: task.questionHtml,
+    question: engine.question ?? '',
     options: engine.options ?? null,
     /* На печать — только чистый рисунок: без пунктиров, асимптот,
        треугольников и отмеченных «удобных» узлов (graph/renderer.js,
@@ -270,14 +274,14 @@ function nextVariant(
           if (!usable(engine)) {
             continue;
           }
-          const task = sheetTaskFrom(candidate, 0, rules);
-          if (memory.shown.has(shownKey(task))) {
+          if (memory.shown.has(shownKey(engine))) {
             continue;
           }
-          const fresh = !slotAnswers.has(task.answer);
+          const fresh = !slotAnswers.has(candidate.answer);
           const tier = same ? (fresh ? 1 : 2) : fresh ? 3 : 4;
           if (tier < bestTier) {
-            best = task;
+            /* Рисунок листа — только у взятой задачи. */
+            best = sheetTaskFrom(candidate, 0, rules);
             bestTier = tier;
             if (tier === 1) {
               break;

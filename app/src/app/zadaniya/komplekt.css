@@ -162,6 +162,11 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-3);
 }
+.kit-history__links a,
+.kit-restore__message a {
+  color: var(--color-primary);
+  text-underline-offset: 3px;
+}
 
 @media (max-width: 1023.98px) {
   /* Блок высокий: прилипшим к низу экрана он закрыл бы настройки. */
@@ -191,9 +196,15 @@
   .kit-history {
     padding: var(--space-3) var(--space-4);
   }
+  /* Строка: раздел; дата, число заданий, код; ссылки. */
   .kit-history__row {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--space-1) var(--space-3);
+  }
+  .kit-history__code {
+    grid-column: 3;
+    grid-row: 2;
+    text-align: right;
   }
   .kit-history__section {
     grid-column: 1 / -1;
