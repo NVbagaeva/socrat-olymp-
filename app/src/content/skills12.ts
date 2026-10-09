@@ -68,8 +68,18 @@ const RATIONAL_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'дроби и подстановка' },
 ];
 
-/** Уровни подтемы: у квадратичной и гиперболы свои подписи. */
+/* У графика корня: под корнем целый квадрат против десятичного,
+   ответ целый против дробного. */
+const IRRATIONAL_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'целые числа' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'десятичные дроби' },
+];
+
+/** Уровни подтемы: у квадратичной, гиперболы и корня свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'irrational') {
+    return IRRATIONAL_LEVELS;
+  }
   if (type === 'rational') {
     return RATIONAL_LEVELS;
   }

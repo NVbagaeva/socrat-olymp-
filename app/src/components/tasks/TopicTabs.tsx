@@ -71,6 +71,12 @@ export interface TopicTabsProps {
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
+interface Podpunkt {
+  id: string;
+  title: string;
+  titleHtml: string;
+}
+
 function blockId(id: string): string {
   return `theory-${id}`;
 }
@@ -183,11 +189,40 @@ export function TopicTabs({
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
 
+  /* Подпункты «Содержания» — подразделы с якорями внутри раздела
+     (.rich-sub: «8.1 Найти f(3)»). Берутся из самой разметки раздела
+     после отрисовки: второго списка заголовков нет, и разойтись
+     содержанию с текстом нечем. */
+  const [podpunkty, setPodpunkty] = useState<Record<string, Podpunkt[]>>({});
+  useEffect(() => {
+    if (tab !== 'theory') {
+      return undefined;
+    }
+    /* Читается следующим кадром: разделы к этому времени уже в DOM. */
+    const frame = requestAnimationFrame(() => {
+      const found: Record<string, Podpunkt[]> = {};
+      theory.forEach((item) => {
+        const node = document.getElementById(blockId(item.id));
+        const subs =
+          node === null ? [] : Array.from(node.querySelectorAll<HTMLElement>('.rich-sub[id]'));
+        if (subs.length > 0) {
+          found[item.id] = subs.map((sub) => {
+            const head = sub.querySelector('.rich-sub__title');
+            return { id: sub.id, title: head?.textContent ?? '', titleHtml: head?.innerHTML ?? '' };
+          });
+        }
+      });
+      setPodpunkty(found);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tab, theory]);
+
   const current = theory.find((item) => item.id === block) ?? theory[0];
   const items = theory.map((item) => ({
     id: item.id,
     title: item.title,
     titleHtml: item.titleHtml,
+    ...(podpunkty[item.id] === undefined ? {} : { podpunkty: podpunkty[item.id] }),
   }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
@@ -199,6 +234,22 @@ export function TopicTabs({
     }
     scrollToSection(node);
   }, []);
+
+  /* Подпункт раздела: якорь внутри него. Раздел подсвечивается свой. */
+  function pickPodpunkt(id: string) {
+    const owner = theory.find((item) => podpunkty[item.id]?.some((sub) => sub.id === id));
+    if (owner !== undefined) {
+      setBlock(owner.id);
+      pinBlock();
+    }
+    setSheet(false);
+    requestAnimationFrame(() => {
+      const node = document.getElementById(id);
+      if (node !== null) {
+        scrollToSection(node);
+      }
+    });
+  }
 
   function pick(id: string) {
     setBlock(id);
@@ -429,7 +480,13 @@ export function TopicTabs({
         {tab === 'theory' ? (
           <aside className="topic-side" aria-label="Содержание темы">
             <h3 className="topic-side__title">Содержание</h3>
-            <TopicContents items={items} active={block} onSelect={pick} />
+            <TopicContents
+              items={items}
+              active={block}
+              onSelect={pick}
+              onSelectPodpunkt={pickPodpunkt}
+              podpunktyVsegda
+            />
             {contentsDecor}
           </aside>
         ) : null}
@@ -445,7 +502,13 @@ export function TopicTabs({
         title="Содержание"
         description="Выберите раздел темы"
       >
-        <TopicContents items={items} active={block} onSelect={pick} />
+        <TopicContents
+              items={items}
+              active={block}
+              onSelect={pick}
+              onSelectPodpunkt={pickPodpunkt}
+              podpunktyVsegda
+            />
       </Modal>
     </>
   );

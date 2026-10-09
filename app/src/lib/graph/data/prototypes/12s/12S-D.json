@@ -1,0 +1,177 @@
+{
+  "kind": "prototype",
+  "id": "12S.D",
+  "block": 4,
+  "title": "Корень и прямая: ордината",
+  "subtitle": "Найти ординату второй точки пересечения",
+  "seed": 12604,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12S.D-01",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.D-02",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.D-03",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.D-04",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.D-05",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.D-06",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.D-07",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.D-08",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.D-09",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.D-10",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        },
+        "answerKind": "decimal"
+      }
+    }
+  ]
+}

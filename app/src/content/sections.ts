@@ -38,6 +38,10 @@ export interface Formulation {
   formula?: string;
   /** Условие примера обычным текстом. */
   example?: string;
+  /** Миниатюра карточки: ключ сцены навыка (lib/scenes.ts, prepSkillScene). */
+  scene?: string;
+  /** Стрелка карточки ведёт в тренажёр: ярлык /trenazher/{trainer}/. */
+  trainer?: string;
 }
 
 /** Вкладка «О задании»: всё её содержимое приходит отсюда. */

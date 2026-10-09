@@ -1,5 +1,5 @@
 /**
- * Шесть типов функций задания №12 — единственный их список в проекте.
+ * Семь типов функций задания №12 — единственный их список в проекте.
  *
  * Отсюда берут данные и карточки выбора типа, и страницы подтем, и
  * маршруты статического экспорта. Чтобы открыть тип, достаточно
@@ -9,18 +9,26 @@
  * честное «материала ещё нет», а не повод что-то придумать.
  */
 
-import { OPORNYE } from '@/content/opornye';
 import { QUADRATIC } from '@/content/quadratic';
 import { QUADRATIC_THEORY } from '@/content/theoryQuadratic';
 import { RATIONAL } from '@/content/rational';
 import { RATIONAL_THEORY } from '@/content/theoryRational';
+import { IRRATIONAL } from '@/content/irrational';
+import { IRRATIONAL_THEORY } from '@/content/theoryIrrational';
+import { LINEAR_RICH_THEORY } from '@/content/theoryLinearRich';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
 import { taskTypes } from '@/data/taskTypes';
 
 export type FunctionTypeId =
-  'linear' | 'quadratic' | 'rational' | 'logarithmic' | 'exponential' | 'trigonometric';
+  | 'linear'
+  | 'quadratic'
+  | 'rational'
+  | 'irrational'
+  | 'logarithmic'
+  | 'exponential'
+  | 'trigonometric';
 
 /** Что лежит в блоке теории. Определяет, чем блок будет наполнен. */
 export type TheoryBlockType = 'definition' | 'properties' | 'chart' | 'example' | 'note';
@@ -129,80 +137,12 @@ export interface FunctionType {
   tutors?: TutorMaterial[];
 }
 
-/* Заголовки блоков теории заданы автором: четырнадцать пунктов в том
-   порядке, в каком они стоят в содержании темы. Это счётчик внутри
-   одной подтемы, с прогрессом по разделам кабинета он не связан.
-
-   Тип блока — служебное поле: оно говорит, чем блок будет наполнен,
-   и ни на один видимый текст не влияет. Содержимого нет ни у одного,
-   поэтому все empty: пустой блок честно показывает «Материал
-   готовится». */
-const LINEAR_THEORY: TheoryBlock[] = [
-  {
-    id: 'what',
-    title: 'Что такое функция?',
-    type: 'definition',
-    content: null,
-    body: 'what-is-function',
-    badge: '1',
-    status: 'ready',
-  },
-  {
-    id: 'inside',
-    title: 'Как устроена функция',
-    type: 'definition',
-    content: null,
-    status: 'empty',
-  },
-  {
-    id: 'kinds',
-    title: 'Какие бывают функции',
-    type: 'properties',
-    content: null,
-    body: 'kinds-of-functions',
-    badge: '3',
-    status: 'ready',
-  },
-  /* Пункт собран из двух прежних: «Что не является функцией» и
-     «Особые прямые». Идентификатор оставлен прежний — на него уже
-     ведут якоря, и менять его без нужды значит их оборвать. */
-  {
-    id: 'not-function',
-    title: 'Когда график не функция',
-    type: 'chart',
-    content: null,
-    body: 'graph-not-function',
-    badge: '4',
-    status: 'ready',
-  },
-  { id: 'for-19', title: 'Это пригодится в №19', type: 'note', content: null, status: 'empty' },
-  { id: 'linear', title: 'Линейная функция', type: 'definition', content: null, status: 'empty' },
-  { id: 'k', title: 'Коэффициент $k$', type: 'properties', content: null, status: 'empty' },
-  { id: 'b', title: 'Коэффициент $b$', type: 'properties', content: null, status: 'empty' },
-  { id: 'build', title: 'Как построить прямую', type: 'chart', content: null, status: 'empty' },
-  {
-    id: 'non-standard',
-    title: 'Функция не в стандартном виде',
-    type: 'example',
-    content: null,
-    status: 'empty',
-  },
-  {
-    id: 'from-chart',
-    title: 'Коэффициенты по графику',
-    type: 'chart',
-    content: null,
-    status: 'empty',
-  },
-  {
-    id: 'equation',
-    title: 'Составление уравнения прямой',
-    type: 'example',
-    content: null,
-    status: 'empty',
-  },
-  { id: 'prep', title: OPORNYE.title, type: 'example', content: null, status: 'empty' },
-];
+/* Теория линейной функции — восемь пунктов «Содержания» и итоги,
+   свёрстанные блоками: тексты в content/theoryLinearRich.ts. Прежние
+   общие разделы («Что такое функция?», «Какие бывают функции», «Когда
+   график не функция») из содержания убраны, их разметка осталась в
+   components/tasks/theory. */
+const LINEAR_THEORY: TheoryBlock[] = LINEAR_RICH_THEORY;
 
 /** Все четыре типа заданий: вопрос не зависит от вида функции. */
 const ALL_TASK_TYPES: TaskTypeId[] = taskTypes.map((type) => type.id);
@@ -281,9 +221,34 @@ export const functionTypes: FunctionType[] = [
     sheetTitle: 'Гипербола',
     tutors: RATIONAL.tutors,
   },
+  /* Подтема «Иррациональная функция (график корня)»: f(x) = k√x и
+     f(x) = k√(x − x₀) + y₀, иногда вместе с прямой. Признаки — как у
+     гиперболы, тексты в content/irrational.ts; вкладки «Ключевые
+     методы решения» у подтемы нет. */
+  {
+    id: 'irrational',
+    no: '04',
+    title: 'Иррациональная функция',
+    shortTitle: 'Иррациональная',
+    formula: 'y = k\\sqrt{x}',
+    description: '',
+    theory: IRRATIONAL_THEORY,
+    taskTypes: ALL_TASK_TYPES,
+    materials: [],
+    bank: {
+      prep: ['P12S-1', 'P12S-2', 'P12S-3', 'P12S-4', 'P12S-5'],
+      prototypes: ['12S.A', '12S.B', '12S.C', '12S.D'],
+    },
+    status: 'active',
+    head: IRRATIONAL.head,
+    about: IRRATIONAL.about,
+    bezStarogoAdresa: true,
+    sheetTitle: 'График корня',
+    tutors: IRRATIONAL.tutors,
+  },
   {
     id: 'logarithmic',
-    no: '04',
+    no: '05',
     title: 'Логарифмические функции',
     shortTitle: 'Логарифмические',
     formula: 'y = \\log_a x',
@@ -296,7 +261,7 @@ export const functionTypes: FunctionType[] = [
   },
   {
     id: 'exponential',
-    no: '05',
+    no: '06',
     title: 'Показательные функции',
     shortTitle: 'Показательные',
     formula: 'y = a^x',
@@ -309,7 +274,7 @@ export const functionTypes: FunctionType[] = [
   },
   {
     id: 'trigonometric',
-    no: '06',
+    no: '07',
     title: 'Тригонометрические функции',
     shortTitle: 'Тригонометрические',
     formula: 'y = \\sin x',

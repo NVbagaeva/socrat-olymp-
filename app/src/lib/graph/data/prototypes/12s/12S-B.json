@@ -1,0 +1,177 @@
+{
+  "kind": "prototype",
+  "id": "12S.B",
+  "block": 2,
+  "title": "Аргумент по значению",
+  "subtitle": "Найти $x$ по известному значению функции",
+  "seed": 12602,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12S.B-01",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.B-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.B-03",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.B-04",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика изображён на рисунке. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.B-05",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.B-06",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.B-07",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.B-08",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.B-09",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Найдите $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.B-10",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика изображён на рисунке. При каком значении $x$ значение функции равно ${y0}$?",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      }
+    }
+  ]
+}

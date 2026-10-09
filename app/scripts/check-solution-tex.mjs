@@ -2,7 +2,7 @@
 /* scripts/check-solution-tex.mjs — запись подстановки в решениях №12.
 
    Решения на листе учителя (краткие у прямой и параболы, по шагам у
-   гиперболы) и разборы тренажёра собирает движок разборов
+   гиперболы и графика корня) и разборы тренажёра собирает движок разборов
    (lib/graph/solution*.js). Проверка строит задачи всех наборов
    подтем на серии seed, берёт формулы каждого шага разбора и ищет
    записи, которых в решении быть не должно:
@@ -27,7 +27,8 @@ import { fileURLToPath } from 'node:url';
 import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
 import quadraticBuilder from '../src/lib/graph/solution-quadratic.js';
-import rationalBuilder from '../src/lib/graph/solution-rational.js';
+import rationalSolution from '../src/lib/graph/solution-rational.js';
+import sqrtBuilder from '../src/lib/graph/solution-sqrt.js';
 import { variantAnswersItems } from '../src/lib/sheet/answers12.js';
 
 const args = process.argv.slice(2);
@@ -77,14 +78,22 @@ const SUBTOPICS = [
   ['прямая', '12'],
   ['парабола', '12q'],
   ['гипербола', '12r'],
+  ['корень', '12s'],
 ];
+
+/* Разбор по шагам на листе учителя: гипербола и график корня — как
+   в lib/generatorSheet.ts, модуль по семейству задачи. */
+const rationalBuilder = {
+  fromTask: (task) =>
+    task.meta.family === 'sqrt' ? sqrtBuilder.fromTask(task) : rationalSolution.fromTask(task),
+};
 
 function stepsOf(task) {
   const family = task.meta && task.meta.family;
   if (family === 'quadratic') {
     return quadraticBuilder.fromTask(task);
   }
-  if (family === 'rational') {
+  if (family === 'rational' || family === 'sqrt') {
     return rationalBuilder.fromTask(task);
   }
   const lines = task.meta && task.meta.lines;

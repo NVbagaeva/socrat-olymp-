@@ -1,0 +1,177 @@
+{
+  "kind": "prototype",
+  "id": "12S.C",
+  "block": 3,
+  "title": "Корень и прямая: абсцисса",
+  "subtitle": "Найти абсциссу второй точки пересечения",
+  "seed": 12603,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12S.C-01",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.C-02",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.C-03",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.C-04",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.C-05",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "ответ целый",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "integer"
+      }
+    },
+    {
+      "id": "12S.C-06",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.C-07",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.C-08",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.C-09",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "decimal"
+      }
+    },
+    {
+      "id": "12S.C-10",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "ответ — десятичная дробь",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        },
+        "answerKind": "decimal"
+      }
+    }
+  ]
+}

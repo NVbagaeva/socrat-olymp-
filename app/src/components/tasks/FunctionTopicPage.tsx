@@ -168,7 +168,9 @@ export function FunctionTopicPage({
 
       <TopicTabs
         initial={initialTab}
-        about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
+        about={
+          <TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} base={base} />
+        }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
         bodies={ownBodies}
         trackKey={theoryKey}
@@ -205,7 +207,10 @@ export function FunctionTopicPage({
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
         contentsDecor={
-          <div className="topic-side__decor" aria-hidden="true">
+          /* Ключ — от ложного предупреждения React о списке: серверный
+             элемент в пропсе клиентской ленты при большой теории
+             приходит отдельным куском и проверяется как элемент списка. */
+          <div className="topic-side__decor" aria-hidden="true" key="decor">
             <Image
               className="topic-side__pyramid"
               src={assetUrl('/images/pyramid-network.webp')}
