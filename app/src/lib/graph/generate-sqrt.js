@@ -28,14 +28,16 @@
      answerKind: 'integer' | 'decimal'
      query: { type: 'value-at' | 'argument-for', kind: 'integer' | 'decimal' | 'any' }
      line:  { absMin, absMax }           — наклон прямой
-     intersection: { axis: 'x' | 'y', offscreenMin } — спрошенная координата B
-                   не читается: B за рамкой или эта координата нецелая
+     intersection: { axis: 'x' | 'y', offscreenMin } — точка B за рамкой
+                   не ближе offscreenMin клеток (graph/hidden.js)
 
    Пересечение корня и прямой: замена t = √x, t ≥ 0, даёт
    a·t² − k·t + b = 0. Один корень известен — t_A = √x_A у точки A,
    второй по Виету: t_B = k/a − t_A. Точка B существует, только если
-   t_B > 0. Её координаты только вычисляются: она за рамкой, или
-   спрошенная координата нецелая и с клеток не снимается.
+   t_B > 0. Её координаты только вычисляются: она за рамкой не ближе
+   клетки (graph/hidden.js) — на рисунке её нет вовсе. Раньше B могла
+   стоять в поле, если спрошенная координата нецелая; так больше
+   нельзя: точку видно, и вторую координату можно снять с сетки.
 */
 
 'use strict';
@@ -43,6 +45,7 @@
 import renderer from './renderer.js';
 import math from './math.js';
 import Line from './families/line.js';
+import hidden from './hidden.js';
 import './families/sqrt.js';
 import { rng, shuffled } from './random.js';
 import { plainText, typesetText, fillTemplate, answerText, decimalFriendly } from './text.js';
@@ -287,8 +290,10 @@ function singleCandidates(task, set, seed) {
    Корень и прямая: f(x) = k√x, g(x) = ax + b
    A — общая точка в узле сетки, P — ещё одна точка прямой в узле.
    ══════════════════════════════════════════════════════════ */
+/* B за рамкой окна не ближе min клеток — общее правило «невидимой»
+   точки (graph/hidden.js), запас не меньше его HIDDEN_MARGIN. */
 function offscreen(B, win, min) {
-  return Math.abs(num(B.x)) >= win.xmax + min - 1e-9 || Math.abs(num(B.y)) >= win.ymax + min - 1e-9;
+  return hidden.isPointHidden({ x: num(B.x), y: num(B.y) }, win, Math.max(min, hidden.HIDDEN_MARGIN));
 }
 
 function lineCandidates(task, set, seed) {
@@ -296,7 +301,11 @@ function lineCandidates(task, set, seed) {
   var spec = constraints.line || {};
   var cross = constraints.intersection || {};
   var axis = cross.axis || 'x';
-  var offscreenMin = cross.offscreenMin === undefined ? OFFSCREEN_MIN : cross.offscreenMin;
+  /* Целый ответ — B далеко за рамкой (OFFSCREEN_MIN). Дробный ответ
+     у точки в узле не получить, и B с дробной абсциссой ближе к рамке:
+     для неё запас — общий минимум hidden.js, одна клетка. */
+  var offscreenMin = cross.offscreenMin !== undefined ? cross.offscreenMin
+    : constraints.answerKind === 'decimal' ? hidden.HIDDEN_MARGIN : OFFSCREEN_MIN;
   var base = set.id + ':' + task.id + ':' + seed;
   var random = rng(base);
   var absMin = spec.absMin === undefined ? 0.2 : spec.absMin;
@@ -331,13 +340,9 @@ function lineCandidates(task, set, seed) {
           var asked = task.answerRule === 'line-a' ? line.k
             : task.answerRule === 'line-b' ? line.b
             : axis === 'x' ? B.x : B.y;
-          /* Спрошенная координата B с рисунка не читается: B за рамкой
-             или внутри поля, но спрошенная координата нецелая. */
-          if (!lineOnly && !offscreen(B, win, offscreenMin)) {
-            if (isInt(asked)) { continue; }
-            /* У самого начала координат точка B сливается с ним. */
-            if (num(tB) < 0.5) { continue; }
-          }
+          /* Спрошенная точка B на рисунке не видна: за рамкой не ближе
+             offscreenMin клеток. */
+          if (!lineOnly && !offscreen(B, win, offscreenMin)) { continue; }
           if (!answerKindOk(asked, constraints.answerKind) || Math.abs(num(asked)) > ANSWER_MAX) { continue; }
 
           var sig = key(k) + '|' + A.x + ';' + A.y + '|' + px + ';' + py;
@@ -430,6 +435,7 @@ function result(set, task, built, seed) {
     id: task.id,
     kind: set.kind,
     svg: renderer.renderGraph(sceneFor(built, task, set)),
+    scene: sceneFor(built, task, set),
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),
     hint: task.hint ? plainText(task.hint) : null,

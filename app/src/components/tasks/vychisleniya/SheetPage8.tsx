@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery8, sheetSpec8 } from '@/lib/vychisleniya/sheet8';
 
 declare global {
@@ -38,6 +39,8 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
   const params = parseSheetQuery8(query);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -55,9 +58,13 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheetSpec8(params, withAnswers), {});
+    const built = sheetSpec8(params, withAnswers);
+    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+    const kit = checkKitSheet(query, '8', withAnswers ? 'teacher' : 'student', built);
+    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
+        setWarning(kit.warning);
         setSpec(specJson(html));
       }
     });
@@ -78,12 +85,12 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
         window.clearInterval(timer);
         setDone(true);
         if (window.sheetPagination.error === undefined) {
-          window.print();
+          printKitSheet(warning);
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done]);
+  }, [spec, done, warning]);
 
   return (
     <>

@@ -820,6 +820,9 @@ function taskResult(set, task, built, seed, index) {
     id: task.id,
     kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
     svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    /* Сцена — для листов: их рисунки рисуются в своём режиме
+       (renderer.renderFigure), без построений сайта. */
+    scene: task.noChart ? null : sceneFor(built, task, set),
     /* Значения подставляются обычным текстом, и только потом
        размеченные долларами куски набираются как формулы. */
     question: plainText(fillTemplate(task.question, values)),

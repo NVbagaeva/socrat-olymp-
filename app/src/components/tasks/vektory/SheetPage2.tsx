@@ -6,6 +6,7 @@ import { REPETITORY_2 } from '@/content/vektory';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { keySpec2, parseSheetQuery2, sheetSpec2 } from '@/lib/vektory/sheet2';
 
 declare global {
@@ -44,6 +45,8 @@ export function SheetPage2({ vid }: SheetPage2Props) {
   const params = parseSheetQuery2(query);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
+  const [warning, setWarning] = useState<string | null>(null);
   const withAnswers = vid !== 'uchenik';
 
   useEffect(() => {
@@ -62,12 +65,13 @@ export function SheetPage2({ vid }: SheetPage2Props) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(
-      vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers),
-      {},
-    );
+    const built = vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers);
+    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+    const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
+    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
+        setWarning(kit.warning);
         setSpec(specJson(html));
       }
     });
@@ -88,12 +92,12 @@ export function SheetPage2({ vid }: SheetPage2Props) {
         window.clearInterval(timer);
         setDone(true);
         if (vid !== 'klyuch' && window.sheetPagination.error === undefined) {
-          window.print();
+          printKitSheet(warning);
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done, vid]);
+  }, [spec, done, vid, warning]);
 
   return (
     <>

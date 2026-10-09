@@ -70,13 +70,17 @@ function stepwise(task) {
   return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt');
 }
 
+/* task.solutionFigure — рисунок к разбору ({ svg, width }), его
+   готовит тот, кто собирает лист (sheet/figures12.js). Построения
+   печатаются только здесь, рядом с решением, — не в условии. */
 function solutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder) {
+  const figure = task.solutionFigure || null;
   if (stepwise(task)) {
     const full = fullSolutionRational(task, rationalBuilder);
-    return full ? answers.fullSolution(task.no, full, task.answer) : null;
+    return full ? answers.fullSolution(task.no, full, task.answer, figure) : null;
   }
   const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
-  return formulas ? answers.solution(task.no, formulas, task.answer) : null;
+  return formulas ? answers.solution(task.no, formulas, task.answer, figure) : null;
 }
 
 function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {

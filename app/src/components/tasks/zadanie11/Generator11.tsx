@@ -2,13 +2,15 @@
 
 import { clsx } from 'clsx';
 import { useMemo, useState } from 'react';
-import { Button, Checkbox, Input } from '@/components/ui';
+import { Button, Checkbox } from '@/components/ui';
 import { GENERATOR_11, SHEET_11 } from '@/content/repetitory11';
 import { plural } from '@/lib/plural';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import type { SheetParams11, SobrannyyList } from '@/lib/zadanie11/sheet11';
 import type { Istochnik, RazdelInfo, UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 import type { Level, SectionId } from '@/lib/zadanie11/types';
+import { newKitId } from '@/lib/komplekt';
+import { KitBar } from '../generator/KitBar';
 import { IkonkaRazdela, Piktogramma, Zvezdy } from './Piktogrammy';
 
 const IKONKA_ISTOCHNIKA: Record<Istochnik, string> = { bank: 'doc', mix: 'layers', new: 'sparkle' };
@@ -24,10 +26,6 @@ const PO_UMOLCHANIYU: Record<string, number> = {
   'RB-01': 1,
   'PG-01': 1,
 };
-
-function sluchaynyySeed(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-}
 
 function Stepper({
   value,
@@ -91,7 +89,9 @@ export function Generator11({
   const [sostav, setSostav] = useState<Record<string, number>>(PO_UMOLCHANIYU);
   const [uroven, setUroven] = useState<0 | Level>(0);
   const [otkryty, setOtkryty] = useState<Set<SectionId>>(new Set());
-  const [seedInput, setSeedInput] = useState('');
+  /* Seed текущего комплекта: его выдаёт KitBar, и только «Новый
+     комплект» его меняет. «Сгенерировать» собирает лист по нему. */
+  const [kitSeed, setKitSeed] = useState<string | null>(null);
   const [params, setParams] = useState<SheetParams11 | null>(null);
   const [list, setList] = useState<SobrannyyList | null>(null);
   const [vkladka, setVkladka] = useState<'uchenik' | 'uchitel'>('uchenik');
@@ -126,7 +126,7 @@ export function Generator11({
   }
 
   function sgenerirovat() {
-    const seed = seedInput.trim() === '' ? sluchaynyySeed() : seedInput.trim();
+    const seed = kitSeed ?? newKitId();
     setVariant(0);
     void sobrat({
       rezhim,
@@ -143,6 +143,25 @@ export function Generator11({
   function zamenit(pos: string) {
     if (params === null) return;
     void sobrat({ ...params, zameny: { ...params.zameny, [pos]: (params.zameny[pos] ?? 0) + 1 } });
+  }
+
+  /* Адреса листов комплекта: адрес собранного листа с seed комплекта. */
+  function kitHrefs(seed: string) {
+    const q = new URLSearchParams(query);
+    q.set('seed', seed);
+    return {
+      student: `${base}/pechat/?${q.toString()}`,
+      teacher: `${base}/pechat/otvety/?${q.toString()}`,
+    };
+  }
+
+  /* Комплект сменился («Новый комплект», код из «Моих комплектов») —
+     превью пересобирается на его seed. */
+  function smenitSeed(seed: string) {
+    setKitSeed(seed);
+    if (params !== null && params.seed !== seed) {
+      void sobrat({ ...params, seed });
+    }
   }
 
   const zadachi = list?.poVariantam[variant] ?? [];
@@ -314,21 +333,6 @@ export function Generator11({
           </div>
         </section>
 
-        <section className="z11-card z11-gen__blok">
-          <label className="z11-gen__h" htmlFor="z11-gen-seed">
-            {GENERATOR_11.seed}
-          </label>
-          <Input
-            id="z11-gen-seed"
-            value={seedInput}
-            onChange={(e) => setSeedInput(e.target.value)}
-            placeholder={params?.seed ?? ''}
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <p className="z11-istochnik__note">{GENERATOR_11.seedLead}</p>
-        </section>
-
         <Button
           className="z11-gen__go"
           size="lg"
@@ -376,15 +380,6 @@ export function Generator11({
             <span className="z11-gen__pdf">
               <a
                 className="btn btn--secondary btn--sm"
-                href={`${base}/pechat/${vkladka === 'uchitel' ? 'otvety/' : ''}?${query}`}
-                target="_blank"
-                rel="noopener"
-              >
-                <Piktogramma name="doc" />
-                {GENERATOR_11.pdf}
-              </a>
-              <a
-                className="btn btn--secondary btn--sm"
                 href={`${base}/pechat/vse/?${query}`}
                 target="_blank"
                 rel="noopener"
@@ -395,6 +390,17 @@ export function Generator11({
             </span>
           )}
         </div>
+
+        <KitBar
+          scope="11"
+          slot={base}
+          section={`№11 · ${SHEET_11.title.text}`}
+          count={params === null ? 0 : vsegoZadach * params.variants}
+          ready={params !== null && query !== ''}
+          hrefs={kitHrefs}
+          {...(params === null ? {} : { seed: params.seed })}
+          onSeed={smenitSeed}
+        />
 
         {list !== null && list.nehvatka > 0 ? (
           <p className="z11-malo z11-gen__nehvatka" role="status">

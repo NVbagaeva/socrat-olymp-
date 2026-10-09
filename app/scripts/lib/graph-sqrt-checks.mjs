@@ -8,8 +8,9 @@
      • ответ — целое число или конечная десятичная дробь (≤ 2 знаков)
        и сходится при подстановке обратно в формулу;
      • ответ задач на f(x₀) и на x по значению не читается с рисунка;
-     • с прямой: A — общая точка, B — тоже, B ≠ A; спрошенная
-       координата B не читается (B за рамкой или координата нецелая);
+     • с прямой: A — общая точка, B — тоже, B ≠ A; спрошенная точка
+       B на рисунке не видна — за рамкой не ближе клетки, по общему
+       правилу graph/hidden.js;
        вторая точка прямой не на корне; прямая видна не меньше шести
        клеток;
      • на чертеже нет подписей кривых — подписана только точка A;
@@ -22,6 +23,7 @@
 import solution from '../../src/lib/graph/solution-sqrt.js';
 import hints from '../../src/lib/graph/hints-sqrt.js';
 import Line from '../../src/lib/graph/families/line.js';
+import hidden from '../../src/lib/graph/hidden.js';
 
 const EPS = 1e-9;
 const v = (o) => o.p / o.q;
@@ -80,8 +82,9 @@ export function checkSqrtTask(set, task) {
     if (P.x >= M.x0 && near(f(P.x), P.y)) { bad('вторая точка прямой лежит на графике корня'); }
     if (M.rule === 'cross-x' || M.rule === 'cross-y') {
       const asked = M.rule === 'cross-x' ? B.x : B.y;
-      const far = Math.abs(B.x) >= W + 3 - EPS || Math.abs(B.y) >= W + 3 - EPS;
-      if (!far && Number.isInteger(asked)) { bad(`B (${B.x}; ${B.y}) в поле, и спрошенная координата целая`); }
+      if (!hidden.isPointHidden(B, M.window)) {
+        bad(`B (${B.x}; ${B.y}) видна: за рамкой ближе клетки (${hidden.outsideBy(B, M.window).toFixed(2)})`);
+      }
       if (!near(asked, answer)) { bad('ответ не совпадает с координатой B'); }
     } else {
       const asked = M.rule === 'line-a' ? v(M.line.k) : v(M.line.b);

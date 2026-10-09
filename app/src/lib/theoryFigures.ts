@@ -562,18 +562,20 @@ function sqrtExArgument(): TheoryFigure {
   };
 }
 
+/* Точка B(9; 6) — за рамкой: окно до x = 7 и y = 5, и на рисунке её
+   нет (правило «невидимой» точки, graph/hidden.js). Её абсциссу
+   находят только из уравнения — ровно как в задачах генератора. */
 function sqrtExCross(): TheoryFigure {
-  const w = win(-4, 10, -1, 7);
+  const w = win(-4, 7, -1, 5);
   return {
     scene: {
       ...base(w),
       curves: [sqrt(2), line(0.5, 1.5, 'lineB')],
-      points: [dot(-3, 0, 'lineB'), dot(1, 2, 'cross'), dot(9, 6, 'cross')],
+      points: [dot(-3, 0, 'lineB'), dot(1, 2, 'cross')],
     },
     labels: [
       ...axisLabels(w),
       { at: [1, 2], text: '$A$', dx: -6, dy: -16, size: 17 },
-      { at: [9, 6], text: '$B$', dx: 4, dy: -18, size: 17 },
       {
         at: [-3, 0],
         text: '$(-3;\\, 0)$',
