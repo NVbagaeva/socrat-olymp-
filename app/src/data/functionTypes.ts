@@ -135,6 +135,15 @@ export interface FunctionType {
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
   tutors?: TutorMaterial[];
+  /**
+   * Карточка подтемы в меню «Все разделы задания №12» и в блоке
+   * «Другие разделы №12» внизу вкладок (components/tasks/razdely).
+   * Название — как ученик называет раздел, а не как на карточке
+   * выбора: «Парабола», а не «Квадратичные функции». Подпись может
+   * содержать формулу в $…$ — набирается KaTeX. Иконка — имя файлов
+   * в public/images/razdely/12 (scripts/build-razdely-icons.mjs).
+   */
+  razdel: { title: string; caption: string; icon: string };
 }
 
 /* Теория линейной функции — восемь пунктов «Содержания» и итоги,
@@ -156,6 +165,7 @@ export const functionTypes: FunctionType[] = [
     no: '01',
     title: 'Линейные функции',
     shortTitle: 'Линейные',
+    razdel: { title: 'Линейная функция', caption: 'Прямая и её наклон', icon: 'linear' },
     formula: 'y = kx + b',
     description: '',
     theory: LINEAR_THEORY,
@@ -174,6 +184,7 @@ export const functionTypes: FunctionType[] = [
     no: '02',
     title: 'Квадратичные функции',
     shortTitle: 'Квадратичные',
+    razdel: { title: 'Парабола', caption: 'Квадратичная функция', icon: 'quadratic' },
     formula: 'y = ax^2 + bx + c',
     description: '',
     theory: QUADRATIC_THEORY,
@@ -202,6 +213,7 @@ export const functionTypes: FunctionType[] = [
     no: '03',
     title: 'Гипербола',
     shortTitle: 'Гипербола',
+    razdel: { title: 'Гипербола', caption: 'Обратная пропорциональность', icon: 'rational' },
     formula: 'y = \\dfrac{k}{x + a} + b',
     description: '',
     theory: RATIONAL_THEORY,
@@ -230,6 +242,7 @@ export const functionTypes: FunctionType[] = [
     no: '04',
     title: 'Иррациональная функция',
     shortTitle: 'Иррациональная',
+    razdel: { title: 'Иррациональная функция', caption: 'График квадратного корня', icon: 'irrational' },
     formula: 'y = k\\sqrt{x}',
     description: '',
     theory: IRRATIONAL_THEORY,
@@ -247,11 +260,12 @@ export const functionTypes: FunctionType[] = [
     tutors: IRRATIONAL.tutors,
   },
   {
-    id: 'logarithmic',
+    id: 'exponential',
     no: '05',
-    title: 'Логарифмические функции',
-    shortTitle: 'Логарифмические',
-    formula: 'y = \\log_a x',
+    title: 'Показательные функции',
+    shortTitle: 'Показательные',
+    razdel: { title: 'Показательная функция', caption: '$y = a^x$', icon: 'exponential' },
+    formula: 'y = a^x',
     description: '',
     theory: [],
     taskTypes: ALL_TASK_TYPES,
@@ -260,11 +274,12 @@ export const functionTypes: FunctionType[] = [
     status: 'soon',
   },
   {
-    id: 'exponential',
+    id: 'logarithmic',
     no: '06',
-    title: 'Показательные функции',
-    shortTitle: 'Показательные',
-    formula: 'y = a^x',
+    title: 'Логарифмические функции',
+    shortTitle: 'Логарифмические',
+    razdel: { title: 'Логарифмическая функция', caption: '$y = \\log_a x$', icon: 'logarithmic' },
+    formula: 'y = \\log_a x',
     description: '',
     theory: [],
     taskTypes: ALL_TASK_TYPES,
@@ -277,6 +292,7 @@ export const functionTypes: FunctionType[] = [
     no: '07',
     title: 'Тригонометрические функции',
     shortTitle: 'Тригонометрические',
+    razdel: { title: 'Тригонометрические функции', caption: 'Синус, косинус, тангенс', icon: 'trig' },
     formula: 'y = \\sin x',
     description: '',
     theory: [],
