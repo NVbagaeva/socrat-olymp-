@@ -217,24 +217,6 @@ export const trainerKindTitle: Record<string, string> = {
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */
-export const trainerResult = {
-  title: 'Тренировка завершена!',
-  lead: 'Отличная работа!',
-  scoreLabel: 'Правильных ответов',
-  percentLabel: 'Результат',
-  rows: {
-    total: 'Всего заданий',
-    right: 'Правильных ответов',
-    wrong: 'Ошибок',
-    hinted: 'Решено с подсказкой',
-    time: 'Потраченное время',
-  },
-  kinds: 'Статистика по типам заданий',
-  again: 'Начать заново',
-  back: 'Вернуться к заданиям',
-  trophyAlt: 'Кубок',
-};
-
 /** Сводка тренажёра на вкладке. */
 export const trainerStats = {
   empty:
