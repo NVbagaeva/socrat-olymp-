@@ -2,50 +2,11 @@ import { clsx } from 'clsx';
 import { Fragment, type ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import type { RichBlock, RichSection as Section } from '@/content/theoryRich';
-import { katex } from '@/lib/graph/katex';
 import { WarnIcon } from '../VerdictIcons';
 import { Collapse } from './Collapse';
+import { Display, Lines, Paras } from './parts';
+import { RichExampleBlock } from './RichExample';
 import { KatexFigure } from './KatexFigure';
-
-/** Выносная формула: KaTeX на сборке, крупные дроби. */
-function Display({ tex, className }: { tex: string; className?: string }) {
-  return (
-    <span
-      className={clsx('rich-formula', className)}
-      dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
-      }}
-    />
-  );
-}
-
-function Paras({ paras, className }: { paras: string[] | undefined; className?: string }) {
-  if (paras === undefined) {
-    return null;
-  }
-  return (
-    <>
-      {paras.map((para) => (
-        <p className={clsx('rich-p', className)} key={para}>
-          <Tex text={para} />
-        </p>
-      ))}
-    </>
-  );
-}
-
-function Lines({ lines }: { lines: string[] | undefined }) {
-  if (lines === undefined) {
-    return null;
-  }
-  return (
-    <div className="rich-lines">
-      {lines.map((line) => (
-        <Display tex={line} key={line} />
-      ))}
-    </div>
-  );
-}
 
 /* Блок — обычная функция разметки, а не компонент: вложенные блоки
    (врезка, подраздел) зовут её же, ключ стоит на Fragment вокруг. */
@@ -163,38 +124,7 @@ function renderBlock(block: RichBlock): ReactNode {
       );
 
     case 'example':
-      return (
-        <article className="rich-example">
-          <div className="rich-example__head">
-            <h4 className="rich-example__title">
-              <Tex text={block.title} />
-            </h4>
-            <p className="rich-example__condition">
-              <Tex text={block.condition} />
-            </p>
-          </div>
-          <div className="rich-example__grid">
-            <KatexFigure id={block.figure} className="rich-example__figure" />
-            <ol className="rich-example__steps">
-              {block.steps.map((item) => (
-                <li
-                  className={clsx('rich-example__step', item.check === true && 'is-check')}
-                  key={item.label}
-                >
-                  <span className="rich-example__label">
-                    <Tex text={item.label} />
-                  </span>
-                  <Paras paras={item.paras} />
-                  <Lines lines={item.lines} />
-                </li>
-              ))}
-            </ol>
-          </div>
-          <p className="rich-example__answer">
-            Ответ: <Tex text={block.answer} />
-          </p>
-        </article>
-      );
+      return <RichExampleBlock block={block} />;
 
     case 'sub':
       return (

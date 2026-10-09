@@ -9,6 +9,7 @@
  * показывает честное пустое состояние, а не придуманный текст.
  */
 
+import type { RichExample } from './theoryRich';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import { functionTypes, subtopicBuilt, type FunctionType } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
@@ -42,6 +43,26 @@ export interface Formulation {
   scene?: string;
   /** Стрелка карточки ведёт в тренажёр: ярлык /trenazher/{trainer}/. */
   trainer?: string;
+  /**
+   * Чистая миниатюра плашки типа задачи: только графики, без искомой
+   * точки и подсказок (lib/scenes.ts, typeScene).
+   */
+  typeScene?: string;
+  /**
+   * Разбор типа задачи: плашка открывает его по клику под собой.
+   * id — якорь (#abscissa-line), trainer — ярлык тренажёра этого типа.
+   */
+  analysis?: FormulationAnalysis;
+}
+
+/** Разбор типа задачи на вкладке «О задании». */
+export interface FormulationAnalysis {
+  /** Якорь: по ссылке …/#id разбор раскрыт и прокручен к плашке. */
+  id: string;
+  /** Примеры — те же блоки, что в теории (content/theoryRich.ts). */
+  examples: RichExample[];
+  /** «Потренироваться»: ярлык тренажёра /trenazher/{trainer}/. */
+  trainer: string;
 }
 
 /** Вкладка «О задании»: всё её содержимое приходит отсюда. */

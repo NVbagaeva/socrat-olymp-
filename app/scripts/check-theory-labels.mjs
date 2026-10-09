@@ -6,10 +6,15 @@
            pnpm test:theory-labels --all            все рисунки двух разделов
            THEORY_LABELS_URL=http://localhost:3000 pnpm test:theory-labels  (dev-сервер)
 
-   По умолчанию проверяются примеры 8.2 «Найти x по значению»
-   (#lin-q-argument): их рисунки сверстаны под правило «без наложений».
-   Остальные рисунки теории — в отчёте --all: часть подписей там стоит
-   вплотную к линии сознательно (f у прямой, k > 0 у графика). 
+   По умолчанию проверяются рисунки, сверстанные под правило «без
+   наложений»: примеры 8.2 теории линейной функции (#lin-q-argument),
+   разборы типов задач квадратичной на вкладке «О задании» (каждый
+   открывается своим якорем) и рисунки «Что нужно уметь» квадратичной и
+   линейной. Остальные рисунки теории — в отчёте --all: часть подписей
+   там стоит вплотную к линии сознательно (f у прямой, k > 0 у графика).
+
+   Препятствия подписи — графики (синий и зелёный), оранжевые построения
+   (пунктиры, катеты, стрелки) и точки; числа осей — такие же подписи. 
    Каждый рисунок теории (.kfig) открывается в Chromium на ширине
    компьютера и телефона. Подписи — настоящие блоки KaTeX поверх SVG,
    поэтому проверяется живая вёрстка, а не расчёт:
@@ -24,8 +29,23 @@ import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 
 const ALL = process.argv.includes('--all');
-const PAGES = ALL ? ['/zadaniya/12/linear/', '/zadaniya/12/irrational/'] : ['/zadaniya/12/linear/'];
-const SCOPE = ALL ? '' : '#lin-q-argument ';
+/* Что проверять: адрес, вкладка «Теория» или нет, и где искать рисунки. */
+const TYPES = ['abscissa-line', 'abscissa-parabola', 'ordinate-line', 'ordinate-parabola'];
+const TARGETS = ALL
+  ? [
+      { url: '/zadaniya/12/linear/', theory: true, scope: '' },
+      { url: '/zadaniya/12/irrational/', theory: true, scope: '' },
+    ]
+  : [
+      { url: '/zadaniya/12/linear/', theory: true, scope: '#lin-q-argument ' },
+      ...TYPES.map((id) => ({
+        url: `/zadaniya/12/quadratic/#${id}`,
+        theory: false,
+        scope: `#${id}-razbor `,
+      })),
+      { url: '/zadaniya/12/quadratic/', theory: false, scope: '.about-skills ' },
+      { url: '/zadaniya/12/linear/', theory: false, scope: '.about-skills ' },
+    ];
 const SIZES = [1440, 390];
 
 let BASE = process.env.THEORY_LABELS_URL ?? '';
@@ -93,17 +113,20 @@ function inspect(scope) {
         : (el.querySelector('.katex') ?? el).getBoundingClientRect();
       return { text: el.textContent.replace(/\s+/g, ' ').trim().slice(0, 18), box };
     });
-    /* Синие линии графика: точки пути в координатах окна. */
+    /* Линии графиков (синий, зелёный) и оранжевые построения: точки
+       пути в координатах окна. Сетка и оси сюда не входят. */
     const samples = [];
     svg.querySelectorAll('path').forEach((p) => {
-      if (!/1F5FD0/i.test(p.getAttribute('stroke') ?? '') || p.getAttribute('fill') !== 'none')
-        return;
+      const stroke = p.getAttribute('stroke') ?? '';
+      if (!/1F5FD0|graph-alt|E07A2F/i.test(stroke) || p.getAttribute('fill') !== 'none') return;
       const length = p.getTotalLength();
       for (let s = 0; s <= length; s += 2) {
         const q = p.getPointAtLength(s);
         samples.push([q.x * m.a + m.e, q.y * m.d + m.f]);
       }
     });
+    /* Точки рисунка: кружки. */
+    const dots = [...svg.querySelectorAll('circle')].map((c) => c.getBoundingClientRect());
     const pad = 1.5;
     labels.forEach((a, i) => {
       labels.forEach((b, j) => {
@@ -128,7 +151,15 @@ function inspect(scope) {
             y < a.box.bottom + pad,
         )
       ) {
-        problems.push(`${where}: «${a.text}» лежит на линии графика`);
+        problems.push(`${where}: «${a.text}» лежит на линии`);
+      }
+      if (
+        dots.some(
+          (d) =>
+            !(d.right < a.box.left || a.box.right < d.left || d.bottom < a.box.top || a.box.bottom < d.top),
+        )
+      ) {
+        problems.push(`${where}: «${a.text}» лежит на точке`);
       }
       if (
         a.box.left < frame.left - 1 ||
@@ -147,18 +178,27 @@ const failures = [];
 let figures = 0;
 for (const width of SIZES) {
   const page = await browser.newPage({ viewport: { width, height: 900 } });
-  for (const url of PAGES) {
+  for (const { url, theory, scope } of TARGETS) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
-    await page
-      .click('[role=tab][id$="-tab-teoriya"], [role=tab][id$="-tab-theory"]')
-      .catch(() => {});
-    await page.waitForSelector('.kfig', { state: 'attached', timeout: 15000 });
+    if (theory) {
+      await page
+        .click('[role=tab][id$="-tab-teoriya"], [role=tab][id$="-tab-theory"]')
+        .catch(() => {});
+    }
+    const found = await page
+      .waitForSelector(scope + '.kfig', { state: 'attached', timeout: 15000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!found) {
+      failures.push(`${width} px, ${url}: нет рисунков ${scope.trim() || '.kfig'}`);
+      continue;
+    }
     await page.waitForTimeout(800);
     figures += await page.$$eval(
-      SCOPE + '.kfig',
+      scope + '.kfig',
       (list) => list.filter((f) => f.getBoundingClientRect().width > 0).length,
     );
-    (await page.evaluate(inspect, SCOPE)).forEach((p) =>
+    (await page.evaluate(inspect, scope)).forEach((p) =>
       failures.push(`${width} px, ${url}: ${p}`),
     );
   }
