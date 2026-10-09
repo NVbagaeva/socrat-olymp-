@@ -6,6 +6,7 @@ import { PECHAT_11 } from '@/content/repetitory11';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery11, sheetSpec11, sobratList, type VidLista } from '@/lib/zadanie11/sheet11';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
 
@@ -36,6 +37,8 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
   const params = parseSheetQuery11(query);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -53,9 +56,13 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheetSpec11(params, sobratList(params, bank), vid), {});
+    const built = sheetSpec11(params, sobratList(params, bank), vid);
+    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+    const kit = checkKitSheet(query, '11', vid === 'uchenik' ? 'student' : 'teacher', built);
+    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
+        setWarning(kit.warning);
         setSpec(specJson(html));
       }
     });
@@ -76,12 +83,12 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
         window.clearInterval(timer);
         setDone(true);
         if (window.sheetPagination.error === undefined) {
-          window.print();
+          printKitSheet(warning);
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done]);
+  }, [spec, done, warning]);
 
   return (
     <>

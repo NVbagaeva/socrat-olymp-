@@ -9,6 +9,7 @@ import '../../[task]/section.css';
    подключаются без правок. */
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
+import '../../komplekt.css';
 import '../../[task]/[type]/trainer.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';

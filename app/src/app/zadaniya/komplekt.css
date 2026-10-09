@@ -1,0 +1,205 @@
+/* Блок комплекта под генератором (components/tasks/generator/KitBar.tsx):
+   код комплекта, кнопки листов, «Мои комплекты». Стили вне слоя —
+   как у configurator.css, чьи правила .cfg-bar здесь уточняются. */
+
+.kit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.kit-bar,
+.kit-bar.cfg-bar {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.kit-bar__code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+.kit-code {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.kit-bar__status {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: var(--fs-label);
+  line-height: 1.6;
+}
+.kit-bar__status.is-done {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.kit-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.kit-bar__btn.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.kit-bar__fresh {
+  margin-left: auto;
+}
+
+.kit-bar__note {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text);
+}
+
+/* ── Мои комплекты ─────────────────────────────────────────────── */
+
+.kit-history {
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.kit-history__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.kit-history__count {
+  min-width: 1.5em;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  font-size: var(--fs-label);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.kit-restore {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.kit-restore__label {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+.kit-restore__input {
+  width: 9.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kit-restore__message,
+.kit-history__empty {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.kit-history__list {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Строка: раздел, дата, код, число заданий, ссылки на листы. */
+.kit-history__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 6.5em 9em 7em minmax(0, 1.4fr);
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-caption);
+}
+
+.kit-history__date,
+.kit-history__count-cell {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.kit-history__code {
+  display: flex;
+  flex-direction: column;
+}
+
+.kit-history__changed {
+  font-size: var(--fs-label);
+  color: var(--color-warning);
+}
+
+.kit-history__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+
+@media (max-width: 1023.98px) {
+  /* Блок высокий: прилипшим к низу экрана он закрыл бы настройки. */
+  .kit-bar.cfg-bar {
+    position: static;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .kit-bar.cfg-bar {
+    padding: var(--space-3) var(--space-4);
+  }
+  /* Кнопки — сеткой два на два, во всю ширину. */
+  .kit-bar__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kit-bar__btn {
+    width: 100%;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+  .kit-bar__fresh {
+    margin-left: 0;
+  }
+  .kit-history {
+    padding: var(--space-3) var(--space-4);
+  }
+  .kit-history__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-3);
+  }
+  .kit-history__section {
+    grid-column: 1 / -1;
+    font-weight: 600;
+  }
+  .kit-history__links {
+    grid-column: 1 / -1;
+  }
+}

@@ -8,6 +8,7 @@ import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../zadanie11.css';
+import '../../komplekt.css';
 import '../procenty.css';
 
 /**

@@ -1,7 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
-import { clsx } from 'clsx';
+import { useId, useState } from 'react';
 import { Badge, Input } from '@/components/ui';
 import {
   CountPicker,
@@ -28,9 +27,9 @@ import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
 import { planCounts } from '@/lib/sheetPlan';
-import { randomSeed } from '@/lib/randomSeed';
 import { sheetQuery, subtitleOf } from '@/lib/generatorQuery';
 import { TitleText } from '../TitleText';
+import { KitBar } from './KitBar';
 
 export interface GeneratorScreenProps {
   /** Адрес подтемы: страницы печати лежат под ним. */
@@ -55,10 +54,10 @@ const CUSTOM = '';
 /**
  * Экран вкладки «Генератор»: вид работы, навыки, параметры листа.
  *
- * Выбор живёт в памяти страницы. Кнопки открывают страницы печати
- * в новой вкладке; все параметры — в адресе. Seed варианта один на
- * набор параметров: лист ученика и лист с ответами по нему
- * совпадают, а смена любого параметра даёт новый вариант.
+ * Выбор живёт в памяти страницы. Листы печатает блок комплекта
+ * (KitBar): лист ученика и лист учителя одного комплекта собраны из
+ * одних заданий, код комплекта и адреса листов хранятся в браузере,
+ * а новые задания даёт только «Новый комплект».
  */
 export function GeneratorScreen({
   base,
@@ -84,31 +83,27 @@ export function GeneratorScreen({
   const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
   /* null — в поле «Своё» пусто: лист не собирается. */
   const chosenCount = countOf(count, allCount);
-  /* Seed считается заново при любой смене того, что влияет на задачи:
-     тот же выбор — тот же вариант, другой выбор — другой. Вид работы,
-     колонки и тема на задачи не влияют, поэтому в зависимостях их нет. */
-  const selectedKey = selected.join(',');
-  const seed = useMemo(
-    () => randomSeed(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, chosenCount, level],
-  );
   const levelsOfChosen = chosen.flatMap((item) => item.levels);
   const shownLevels = levels.filter((item) => levelsOfChosen.includes(item.id));
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
-  const query = sheetQuery({
-    skills: chosen.map((item) => item.id),
-    count: chosenCount ?? 0,
-    level,
-    seed,
-    theme,
-    layout,
-    kind: kindTitle,
-    date,
-    variants,
-  });
+  /* Адреса листов по seed комплекта: seed выдаёт блок комплекта
+     (KitBar), и только «Новый комплект» его меняет. */
+  const sheetHrefs = (seed: string) => {
+    const query = sheetQuery({
+      skills: chosen.map((item) => item.id),
+      count: chosenCount ?? 0,
+      level,
+      seed,
+      theme,
+      layout,
+      kind: kindTitle,
+      date,
+      variants,
+    });
+    return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
+  };
   /* Доли навыков на листе — тот же план, что у страницы печати:
      нехватку у навыка учитель видит до печати. */
   const plan = planCounts(
@@ -135,8 +130,6 @@ export function GeneratorScreen({
   ];
   /* Пустое поле «Своё» — листа нет, ссылки выключены. */
   const ready = chosenCount !== null;
-  const studentHref = `${base}/pechat/?${query}`;
-  const teacherHref = `${base}/pechat/otvety/?${query}`;
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
 
   function toggleSkill(id: string) {
@@ -327,41 +320,28 @@ export function GeneratorScreen({
         </aside>
       </div>
 
-      <div className="cfg-bar cfg-bar--two">
-        {/* Ссылки, а не кнопки: лист открывается в новой вкладке, адрес
-            можно скопировать и открыть снова — лист будет тем же. */}
-        <a
-          className={clsx('btn btn--primary btn--lg cfg-bar__start', ready || 'is-disabled')}
-          href={ready ? studentHref : undefined}
-          aria-disabled={!ready || undefined}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.student}
-        </a>
-        <a
-          className={clsx('btn btn--secondary btn--lg cfg-bar__start', ready || 'is-disabled')}
-          href={ready ? teacherHref : undefined}
-          aria-disabled={!ready || undefined}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.teacher}
-        </a>
-        <p className="cfg-bar__summary">
-          {family}
-          {subtitle === '' ? '' : ` · ${subtitle}`} ·{' '}
-          {chosen.map((item, index) => (
-            <span key={item.id}>
-              {index === 0 ? '' : ', '}
-              <TitleText title={item.title} html={item.titleHtml} />
-            </span>
-          ))}{' '}
-          ·{' '}
-          {countLabel(chosenCount)}
-          {variants > 1 ? ` · ${variantsLabel(variants)}` : ''}
-        </p>
-      </div>
+      <KitBar
+        scope="12"
+        slot={base}
+        section={`№12 · ${family}`}
+        count={(chosenCount ?? 0) * variants}
+        ready={ready}
+        hrefs={sheetHrefs}
+        summary={
+          <>
+            {family}
+            {subtitle === '' ? '' : ` · ${subtitle}`} ·{' '}
+            {chosen.map((item, index) => (
+              <span key={item.id}>
+                {index === 0 ? '' : ', '}
+                <TitleText title={item.title} html={item.titleHtml} />
+              </span>
+            ))}{' '}
+            · {countLabel(chosenCount)}
+            {variants > 1 ? ` · ${variantsLabel(variants)}` : ''}
+          </>
+        }
+      />
     </section>
   );
 }

@@ -155,10 +155,6 @@ export const TRENAZHER_2 = {
 /* ── Вкладка «Генератор» ────────────────────────────────────────── */
 
 export const GENERATOR_2 = {
-  seed: 'Seed варианта',
-  seedLead: 'Пусто — случайный. Одинаковый seed даёт одинаковый лист; он стоит в адресе листа.',
-  seedPlaceholder: 'например, 2026-10-a',
-  seedNovyy: 'Новый seed',
   gruppa: 'Группа',
   vse: 'Все',
 } as const;

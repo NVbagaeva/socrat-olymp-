@@ -618,6 +618,17 @@ body {
   line-height: 1.35;
 }
 
+/* Код комплекта: мелко, у номера страницы. */
+.sheet-kit-code {
+  flex: none;
+  align-self: flex-end;
+  font-size: 6.5pt;
+  letter-spacing: 0.04em;
+  color: var(--sheet-ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .sheet-page-no {
   flex: none;
   align-self: center;
