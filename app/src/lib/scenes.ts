@@ -92,7 +92,12 @@ export function parabolaAndLineScene() {
   };
 }
 
-/** Гипербола и прямая — чертёж вкладки «О задании» гиперболы. */
+/**
+ * Гипербола и прямая — чертёж вкладки «О задании» гиперболы. Рядом
+ * карточка «Точка B не видна на рисунке», и это правда: y = 4/x и
+ * y = 0,25x + 1,5 пересекаются в A(2; 2) и B(−8; −0,5), а окно ±6 —
+ * B за рамкой на две клетки (проверка — test:hidden-points).
+ */
 export function hyperbolaAndLineScene() {
   return {
     window: squareWindow(6),
@@ -101,7 +106,7 @@ export function hyperbolaAndLineScene() {
     axisLabels: 'minimal',
     curves: [
       { type: 'rational', k: 4, a: 0, b: 0, color: 'lineA', label: null },
-      { type: 'line', k: 0.5, b: 1, color: 'lineB', label: null },
+      { type: 'line', k: 0.25, b: 1.5, color: 'lineB', label: null },
     ],
     /* Кривые не подписаны: формулы — в тексте рядом, набраны KaTeX,
        а в подписи SVG их не набрать. Подписана только точка A. */
@@ -179,12 +184,13 @@ const SKILL_HALF = 2;
 const SKILL_LINE = { k: 0.6, b: 0.5 };
 const SKILL_PROBE = { x: 1.4, y: 1.34 };
 
-/** Две прямые для 12.C и 12.D; пересекаются внутри окна. */
+/** Две прямые для 12.C и 12.D: сходятся вправо, а пересекаются за
+    рамкой, в (4; 1,3) — как в задачах прототипов, где искомая точка
+    на рисунке не видна. Знак вопроса стоит у края, куда они сходятся. */
 const SKILL_PAIR = [
-  { k: 0.75, b: 0.5 },
-  { k: -0.5, b: 1.5 },
+  { k: 0.2, b: 0.5 },
+  { k: 0.7, b: -1.5 },
 ];
-const SKILL_CROSS = { x: 0.8, y: 1.1 };
 
 function dashed(from: [number, number], to: [number, number]) {
   return { type: 'segment', from, to, color: 'accent', style: 'dashed' };
@@ -221,7 +227,6 @@ export function generatorSkillScene(setId: string) {
     shapes: [] as unknown[],
   };
   const probe = { ...SKILL_PROBE, style: 'solid', color: 'lineB', label: null };
-  const cross = { ...SKILL_CROSS, style: 'solid', color: 'lineB', label: null };
 
   if (setId === '12.A') {
     /* Дан x — ищут y: пунктир от оси абсцисс к точке. */
@@ -245,20 +250,14 @@ export function generatorSkillScene(setId: string) {
     { type: 'line', ...SKILL_PAIR[0], color: 'lineA', label: null },
     { type: 'line', ...SKILL_PAIR[1], color: 'lineB', label: null },
   ];
-  if (setId === '12.C') {
+  if (setId === '12.C' || setId === '12.D') {
+    /* Искомая точка за рамкой: на миниатюре её нет — только вопрос
+       у края, куда сходятся прямые. */
     return {
       ...base,
       curves: pair,
-      points: [cross],
-      shapes: [dashed([SKILL_CROSS.x, 0], [SKILL_CROSS.x, SKILL_CROSS.y])],
-    };
-  }
-  if (setId === '12.D') {
-    return {
-      ...base,
-      curves: pair,
-      points: [cross],
-      shapes: [dashed([0, SKILL_CROSS.y], [SKILL_CROSS.x, SKILL_CROSS.y])],
+      points: [],
+      shapes: [prepLabel(setId === '12.C' ? 'x ?' : 'y ?', 1.45, 1.55, 0, 0, 'accent')],
     };
   }
   /* Набор без своей картинки: одна прямая, без точек. Такого набора
@@ -632,23 +631,25 @@ function quadraticPrepScene(
   }
 
   if (id === 'cross-line') {
-    /* Парабола и прямая: одна точка пересечения отмечена. */
+    /* Парабола и прямая: отмечена точка (−1; −0,5); вторая —
+       (2,5; 4,75), за рамкой, на миниатюре её нет. */
     return {
       ...base,
       curves: [
         miniParabola(1, 0, -1.5),
-        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+        { type: 'line', k: 1.5, b: 1, color: 'lineB', label: null },
       ],
-      points: [miniDot(1, 0.5, 'lineB')],
+      points: [miniDot(-1, -0.5, 'lineB')],
     };
   }
 
   if (id === 'cross-parabola') {
-    /* Две параболы: отмечена одна общая точка. */
+    /* Две параболы: отмечена общая точка (0,23; −0,97); вторая —
+       при x ≈ −4, за рамкой. */
     return {
       ...base,
       curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
-      points: [miniDot(-0.2, -1.41, 'lineB')],
+      points: [miniDot(0.226, -0.973, 'lineB')],
     };
   }
 
@@ -737,11 +738,13 @@ function rationalPrepScene(
     };
   }
   if (id === 'abscissa-b' || id === 'ordinata-b') {
+    /* y = 1/x и y = 0,25x + 1,05: A(0,8; 1,25) на рисунке, B(−5; −0,2)
+       за рамкой — у левого края только вопрос, куда уходит прямая. */
     return {
       ...base,
-      curves: [miniHyperbola(1), { type: 'line', k: 1, b: 0.6, color: 'lineB', label: null }],
-      points: [miniDot(0.75, 1.35, 'cross')],
-      shapes: [prepLabel('A', 0.75, 1.35, 16, 12, 'label'),
+      curves: [miniHyperbola(1), { type: 'line', k: 0.25, b: 1.05, color: 'lineB', label: null }],
+      points: [miniDot(0.8, 1.25, 'cross')],
+      shapes: [prepLabel('A', 0.8, 1.25, 16, 12, 'label'),
         prepLabel('B ?', -1.3, 1.4, 0, 0, 'accent')],
     };
   }
@@ -1331,12 +1334,14 @@ export function rationalTheoryScene(id: RationalTheorySceneId) {
           note('y = 2', [-5, 2], [0, -16]), note('x = 1', [1, -5.2], [26, 0])],
       };
     /* f(x) = 6/x и g(x) = 0,5x + 2: A(2; 3) на чертеже, B(−6; −1) за рамкой. */
+    /* y = 6/x и y = 0,25x + 2,5: A(2; 3) и точка прямой (−2; 2) на
+       рисунке, B(−12; −0,5) — за рамкой окна ±5 на семь клеток. */
     case 'line-example':
       return {
         ...theoryBase(squareWindow(5)),
-        curves: [hyperbola(6), { type: 'line', k: 0.5, b: 2, color: 'lineB', label: null }],
+        curves: [hyperbola(6), { type: 'line', k: 0.25, b: 2.5, color: 'lineB', label: null }],
         points: [{ x: 2, y: 3, style: 'solid', color: 'cross', label: 'A' },
-          { x: -2, y: 1, style: 'solid', color: 'lineB', label: null }],
+          { x: -2, y: 2, style: 'solid', color: 'lineB', label: null }],
       };
     default:
       return base;

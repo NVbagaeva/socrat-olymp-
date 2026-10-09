@@ -922,9 +922,7 @@ function stepIntersectionAnswer(p, options, blocks) {
   blocks.push(text('Вторая точка пересечения — ' +
     keyMath(pointTex(Q.toExact(asked.x), Q.toExact(asked.y)),
       pointText(Q.toExact(asked.x), Q.toExact(asked.y))) +
-    '. С чертежа её было не прочитать: ' +
-    (cross.hidden === 'fraction' ? 'она не попадает в узел сетки.'
-                                 : 'она лежит за рамкой окна.')));
+    '. С чертежа её было не прочитать: она лежит за рамкой окна.'));
   blocks.push(answerBlock(options.answer));
   return { title: 'Отвечаем на вопрос', blocks: blocks };
 }

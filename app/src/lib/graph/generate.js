@@ -22,6 +22,7 @@ import Triangle from './triangle.js';
 import Quadratic from './generate-quadratic.js';
 import Rational from './generate-rational.js';
 import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
+import { HIDDEN_MARGIN, isPointHidden } from './hidden.js';
 import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
          answerText } from './text.js';
 
@@ -285,9 +286,10 @@ function pairCandidates(task, set, seed) {
       var offscreenBy = Math.max(Math.abs(cx) - win.xmax, Math.abs(cy) - win.ymax);
 
       if (wanted.inside === true && !inside) { continue; }
-      if (wanted.inside === false && !outside) { continue; }
-      if (wanted.inside === false && leastOffscreen !== undefined &&
-          offscreenBy < leastOffscreen - 1e-9) { continue; }
+      /* Точка «за кадром» скрыта по общей проверке hidden.js: за рамкой
+         не ближе клетки (или запаса набора, если он больше). */
+      if (wanted.inside === false && (!outside || !isPointHidden({ x: cx, y: cy }, win,
+          Math.max(HIDDEN_MARGIN, leastOffscreen === undefined ? 0 : leastOffscreen)))) { continue; }
 
       /* «За кадром» — это про точку целиком: достаточно, чтобы за рамку
          вышла хотя бы одна координата. Задаче на абсциссу этого мало:

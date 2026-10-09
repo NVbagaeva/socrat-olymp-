@@ -36,19 +36,19 @@
                    'right' | 'upper' | 'lower' | 'visible', axis: 'x' | 'y',
                    hidden: 'offscreen' | 'fraction',
                    marks: 'visible' | 'both' | 'asked' | 'other' | 'none',
-                   labels, avoidAxes, gapMax, margin, offscreenMin, angleMin,
-                   insideMargin, separation }
+                   labels, avoidAxes, gapMax, margin, offscreenMin, angleMin }
                    При visible: 'one' очевидная точка стоит в узле не ближе
                    margin клеток к рамке, угол в ней не меньше angleMin,
-                   а вопрос — всегда о второй точке. Вторая точка по
-                   hidden: 'offscreen' (по умолчанию) — вынесена за рамку
-                   не меньше чем на offscreenMin, и зазор между кривыми
-                   на видимой части не убывает; 'fraction' — только
-                   с прямой: точка внутри окна, но не в узле сетки,
-                   спрошенная координата нецелая, точка не ближе
-                   insideMargin клеток к рамке и не ближе separation
-                   клеток к очевидной. Ответ — конечная десятичная дробь.
-                   Отмечается только очевидная точка.
+                   а вопрос — всегда о второй точке. Вторая точка на
+                   рисунке не видна никогда (hidden.js): вынесена за рамку
+                   не меньше чем на offscreenMin клеток, и зазор между
+                   кривыми на видимой части не убывает. Вариант hidden:
+                   'offscreen' (по умолчанию) — вторая точка целая, вторая
+                   кривая проведена через две целые точки параболы;
+                   'fraction' — только с прямой: прямая идёт через
+                   очевидную точку под читаемым наклоном, спрошенная
+                   координата второй точки нецелая, ответ — конечная
+                   десятичная дробь. Отмечается только очевидная точка.
      options:    число вариантов формулы (по умолчанию 6)
 */
 
@@ -58,6 +58,7 @@ import renderer from './renderer.js';
 import math from './math.js';
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
+import { HIDDEN_MARGIN, isPointHidden } from './hidden.js';
 import { rng, shuffled, answerPlaces } from './random.js';
 import { numberText, pointText, plainText, typesetText, fillTemplate, answerText,
          decimalFriendly } from './text.js';
@@ -545,7 +546,7 @@ function pointPairs(p, win, spec) {
     var y = Q.yAt(p, x);
     if (!isInt(y)) { continue; }
     var value = num(y);
-    if (Q.offscreenBy({ x: x, y: value }, win) < least - 1e-9) { continue; }
+    if (!isPointHidden({ x: x, y: value }, win, Math.max(HIDDEN_MARGIN, least))) { continue; }
     if (Math.abs(value) > win.ymax + gap * 3) { continue; }
     outside.push({ x: x, y: value, visible: false, shown: false });
   }
@@ -565,17 +566,19 @@ function pointPairs(p, win, spec) {
 var FRACTION_SLOPES = [[1, 4], [1, 3], [1, 2], [2, 3], [3, 4], [1, 1], [4, 3], [3, 2],
                        [2, 1], [5, 2], [3, 1]];
 
-/* Второй вариант скрытой точки: обе точки пересечения в окне, но
-   вторая — не в узле сетки. Прямая проводится через очевидную точку
-   с заданным наклоном; вторая точка считается точно, и берётся
-   только тогда, когда её спрошенная координата нецелая, а обе —
-   конечные десятичные. Точка стоит не у рамки и не сливается
-   с очевидной. Возвращает пары [очевидная, скрытая] вместе с прямой. */
+/* Второй вариант скрытой точки: вторая точка нецелая и, как всегда,
+   за рамкой. Прямая проводится через очевидную точку с заданным
+   наклоном; вторая точка считается точно, и берётся только тогда,
+   когда её спрошенная координата нецелая, обе — конечные десятичные,
+   а сама точка скрыта (hidden.js): за рамкой не ближе offscreenMin
+   клеток и не дальше gapMax. Возвращает пары [очевидная, скрытая]
+   вместе с прямой. */
 function fractionPairs(p, win, spec, axis) {
   var avoidAxes = spec.avoidAxes === undefined ? !!spec.labels : spec.avoidAxes;
   var margin = spec.margin === undefined ? Q.RULES.crossMargin : spec.margin;
-  var insideMargin = spec.insideMargin === undefined ? Q.RULES.crossInsideMargin : spec.insideMargin;
-  var apart = spec.separation === undefined ? Q.RULES.crossSeparation : spec.separation;
+  var least = Math.max(HIDDEN_MARGIN,
+    spec.offscreenMin === undefined ? Q.RULES.crossOffscreenMin : spec.offscreenMin);
+  var gap = spec.gapMax === undefined ? 6 : spec.gapMax;
   var shown = Q.integerPoints(p, win).filter(function (point) {
     return (!avoidAxes || (point.x !== 0 && point.y !== 0)) &&
       Math.abs(point.x) <= win.xmax - margin + 1e-9 && Math.abs(point.y) <= win.ymax - margin + 1e-9;
@@ -595,10 +598,11 @@ function fractionPairs(p, win, spec, axis) {
            бланка, 0,9375 — нет. */
         if (100 % other.x.q !== 0 || 100 % other.y.q !== 0) { return; }
         if (isInt(axis === 'y' ? other.y : other.x)) { return; }
-        var b = { x: num(other.x), y: num(other.y), visible: true, shown: false,
+        var b = { x: num(other.x), y: num(other.y), visible: false, shown: false,
                   xFraction: other.x, yFraction: other.y };
-        if (!Q.pointInside(b, win, insideMargin)) { return; }
-        if (Math.hypot(b.x - a.x, b.y - a.y) < apart - 1e-9) { return; }
+        /* На рисунке её нет: за рамкой с запасом, но не в бесконечности. */
+        if (!isPointHidden(b, win, least)) { return; }
+        if (Math.abs(b.x) > win.xmax + gap || Math.abs(b.y) > win.ymax + gap * 3) { return; }
         pairs.push({ points: [{ x: a.x, y: a.y, visible: true, shown: true }, b], line: line });
       });
     });
@@ -706,10 +710,10 @@ function pairCandidates(task, set, seed) {
       /* Очевидная точка очевидна: кривые пересекаются под заметным
          углом, а не касаются и не идут рядом. */
       if (Q.crossAngle(firstPart, other, visible.x) < angleMin - 1e-9) { return; }
-      /* За рамкой скрытая не угадывается: на видимой части кривые
-         не сходятся. Внутри окна они сходятся к ней по построению,
-         и там её прячет нецелость — это проверено при подборе. */
-      if (variant === 'offscreen' && !Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
+      /* Скрытая точка на рисунке не видна никогда — и не угадывается:
+         на видимой части кривые не сходятся к ней. */
+      if (!isPointHidden(hidden, win)) { return; }
+      if (!Q.gapGrows(firstPart, other, win, visible, hidden)) { return; }
       /* Ответ не читается с очевидной точки. */
       if (answer === visible.x || answer === visible.y) { return; }
       /* Очевидная точка не садится на уже отмеченную: две отметки
@@ -761,7 +765,7 @@ function pairCandidates(task, set, seed) {
 
     if (variant === 'fraction') {
       /* Прямая через очевидную точку под читаемым наклоном; вторая
-         точка нецелая и внутри окна — уже отобрана в fractionPairs. */
+         точка нецелая и за рамкой — уже отобрана в fractionPairs. */
       fractionPairs(p, win, spec, axis).forEach(function (pair) {
         if (!lineOk(pair.line, win, constraints.line)) { return; }
         consider(first, pair.points, { kind: 'line', line: pair.line, color: 'lineB' });
