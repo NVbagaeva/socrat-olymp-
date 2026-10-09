@@ -40,7 +40,9 @@ for (const task of await readdir(SRC)) {
     const name = file.replace(/\.webp$/, '');
     const source = path.join(dir, file);
     const meta = await sharp(source).metadata();
-    console.log(`\n${task}/${name} — ${meta.width}×${meta.height}, ${kb((await stat(source)).size)}`);
+    console.log(
+      `\n${task}/${name} — ${meta.width}×${meta.height}, ${kb((await stat(source)).size)}`,
+    );
     if (!meta.hasAlpha) {
       console.error('  ✗ в исходнике нет альфа-канала');
       failed = true;

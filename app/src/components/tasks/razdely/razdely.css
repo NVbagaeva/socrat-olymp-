@@ -1,0 +1,508 @@
+/* ── Навигация по разделам задания ──────────────────────────────
+   Макет: экран 1 и «Вариант А» — плашка отдельной строкой над лентой
+   вкладок; экран 2 — выезжающая панель «Все разделы задания №12»;
+   экран 3 — блок «Другие разделы №12» в конце вкладки.
+   Цвета, скругления и тени — переменные сайта (styles/tokens.css). */
+
+/* Иконка раздела: стеклянная плитка с прозрачным фоном. */
+.razdel-ico {
+  display: block;
+  flex: 0 0 auto;
+}
+.razdel-ico img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── «‹ Все разделы №12» над заголовком ─────────────────────── */
+.razdely-vse {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  box-shadow: var(--glow-accent);
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--dur-hover) var(--ease);
+}
+/* Шапка стоит сразу под кнопкой: просвет как между крошками и
+   заголовком, а не двойной. */
+.razdely-vse + .section-head {
+  margin-top: var(--space-4);
+}
+.razdely-vse svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Плашка над лентой вкладок ─────────────────────────────────
+   Строка целиком — одна кнопка: нажимается в любом месте, высота
+   не меньше 44px. */
+.razdely-plashka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-1) var(--space-4) var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--glow-accent);
+  color: var(--color-text-brand);
+  font: inherit;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.razdely-plashka:focus-visible,
+.razdely-vse:focus-visible,
+.razdel-karta:focus-visible,
+.razdely-menu__x:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.razdely-plashka__ico {
+  width: 48px;
+}
+.razdely-plashka__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.razdely-plashka__arrow {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--dur-switch) var(--ease);
+}
+.razdely-plashka[aria-expanded='true'] .razdely-plashka__arrow {
+  transform: rotate(180deg);
+}
+/* Прилипшая строка на телефоне компактнее: плашка ниже, но зона
+   нажатия по-прежнему 44px. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row.is-stuck .razdely-plashka {
+    min-height: 44px;
+    margin-bottom: var(--space-1);
+    padding-block: 2px;
+    box-shadow: none;
+  }
+  .topic-tabs-row.is-stuck .razdely-plashka__ico {
+    width: 36px;
+  }
+}
+/* На широком экране плашка по ширине содержимого: строка во всю
+   ширину страницы читалась бы как ещё одна лента. */
+@media (min-width: 1024px) {
+  .razdely-plashka {
+    width: auto;
+    min-width: 360px;
+    max-width: 100%;
+  }
+}
+
+/* ── Выезжающее меню ───────────────────────────────────────────
+   Слой над страницей. На телефоне и планшете панель встаёт над
+   нижней панелью приложения, как на макете: та остаётся видна. */
+.razdely-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+@media (max-width: 1023.98px) {
+  .razdely-layer {
+    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom, 0px));
+  }
+}
+.razdely-fon {
+  position: absolute;
+  inset: 0;
+  background: rgb(16 23 40 / 0.45);
+  animation: razdely-fon-in var(--dur-reveal) var(--ease) both;
+}
+.razdely-layer.is-closing .razdely-fon {
+  animation: razdely-fon-out var(--dur-state) var(--ease) both;
+}
+.razdely-menu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 85vh;
+  max-height: 85dvh;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+  transform: translateY(var(--razdely-drag, 0px));
+  transition: transform var(--dur-state) var(--ease);
+  animation: razdely-in var(--dur-reveal) var(--ease) both;
+}
+.razdely-menu.is-dragging {
+  transition: none;
+}
+.razdely-layer.is-closing .razdely-menu {
+  animation: razdely-out var(--dur-state) var(--ease) both;
+}
+.razdely-menu__head {
+  position: relative;
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-12) var(--space-3) var(--space-5);
+}
+.razdely-menu__grip {
+  display: block;
+  width: 40px;
+  height: 5px;
+  margin: 0 auto var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+}
+.razdely-menu__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.razdely-menu__x {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.razdely-menu__x svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+/* Карточек больше, чем помещается: прокручивается список, а не
+   страница под ним. */
+.razdely-menu__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* На широком экране — окно по центру: панель от нижнего края
+   экрана компьютера читается хуже. */
+@media (min-width: 1024px) {
+  .razdely-layer {
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-8);
+  }
+  .razdely-menu {
+    width: min(640px, 100%);
+    border-radius: var(--radius-xl);
+    animation-name: razdely-pop;
+  }
+  .razdely-layer.is-closing .razdely-menu {
+    animation-name: razdely-unpop;
+  }
+  .razdely-menu__grip {
+    display: none;
+  }
+  .razdely-menu__head {
+    padding-top: var(--space-5);
+  }
+}
+
+@keyframes razdely-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes razdely-out {
+  from {
+    transform: translateY(var(--razdely-drag, 0px));
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes razdely-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+@keyframes razdely-unpop {
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+@keyframes razdely-fon-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes razdely-fon-out {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .razdely-menu,
+  .razdely-fon,
+  .razdely-layer.is-closing .razdely-menu,
+  .razdely-layer.is-closing .razdely-fon {
+    animation: none;
+    transition: none;
+  }
+  .razdely-plashka__arrow {
+    transition: none;
+  }
+}
+
+/* ── Карточка раздела: меню и блок «Другие разделы» ─────────── */
+.razdel-karta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.razdel-karta__ico {
+  width: 88px;
+  border-radius: var(--radius-md);
+}
+.razdel-karta__text {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.razdel-karta__title {
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+.razdel-karta__caption {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.razdel-karta__metki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+.razdel-karta__end {
+  flex: 0 0 auto;
+}
+.razdel-karta__go,
+.razdel-karta__check {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.razdel-karta__go svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.razdel-karta__check {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.razdel-karta__check svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Текущий раздел: синяя рамка, галочка и метка «Сейчас здесь». */
+.razdel-karta.is-current {
+  border: 2px solid var(--color-primary);
+  background: var(--color-surface-info);
+  padding: calc(var(--space-2) - 1px) calc(var(--space-3) - 1px) calc(var(--space-2) - 1px)
+    calc(var(--space-2) - 1px);
+}
+/* Раздела ещё нет на сайте: бледная карточка, не ссылка. */
+.razdel-karta.is-soon {
+  border-style: dashed;
+  background: var(--color-surface-2);
+  cursor: default;
+}
+.razdel-karta.is-soon .razdel-karta__ico,
+.razdel-karta.is-soon .razdel-karta__text {
+  opacity: 0.55;
+}
+
+.razdel-metka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.razdel-metka svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.razdel-metka--zdes {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.razdel-metka--trenirovka {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.razdel-metka--skoro {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
+}
+
+/* ── «Другие разделы №12» в конце вкладки ─────────────────────── */
+.drugie-razdely {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+.drugie-razdely__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+}
+.drugie-razdely__lead {
+  margin: var(--space-1) 0 var(--space-5);
+  color: var(--color-text-secondary);
+}
+.drugie-razdely__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .drugie-razdely__list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+.razdel-karta--krupno {
+  min-height: 104px;
+  padding: var(--space-3);
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+.razdel-karta--krupno .razdel-karta__ico {
+  width: 104px;
+}
+@media (min-width: 768px) {
+  .razdel-karta--krupno .razdel-karta__ico {
+    width: 112px;
+  }
+}
+
+/* ── Шапка подтемы ниже 1024px ─────────────────────────────────
+   Вместо крошек — «‹ Все разделы №12», вместо подзаголовка с
+   названием подтемы — плашка над вкладками: название в ней то же. */
+@media (max-width: 1023.98px) {
+  .crumbs--wide {
+    display: none;
+  }
+  .razdely-vse {
+    margin-top: 0;
+  }
+  .topic-head__subtitle--wide {
+    display: none;
+  }
+}
+
+/* Подсветка при наведении — только там, где наводят мышью: на
+   телефоне она залипала бы на карточке после касания. */
+@media (hover: hover) {
+  .razdely-vse:hover {
+    background: var(--color-surface-soft);
+  }
+  .razdely-plashka:hover {
+    border-color: var(--color-accent-soft);
+    background: var(--color-surface-info);
+  }
+  .razdely-menu__x:hover {
+    background: var(--color-surface-2);
+  }
+  a.razdel-karta:hover {
+    border-color: var(--color-accent-soft);
+    box-shadow: var(--shadow-sm);
+  }
+}
