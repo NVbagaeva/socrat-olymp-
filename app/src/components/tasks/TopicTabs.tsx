@@ -1,7 +1,16 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { flushSync } from 'react-dom';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import type { ReactNode } from 'react';
 import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
@@ -14,6 +23,8 @@ import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
 import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
+import { DrugieRazdely, RazdelyNav, type RazdelyData } from './razdely';
+import { sbrositVkladku, vkladkaIzAdresa } from './razdely/vkladka';
 import { useStickyTabs } from './useStickyTabs';
 import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
 
@@ -68,6 +79,11 @@ export interface TopicTabsProps {
    * месте, как «О задании» и «Теория».
    */
   prepHref: string | null;
+  /**
+   * Разделы задания: плашка над вкладками, меню всех разделов и блок
+   * «Другие разделы» в конце вкладки. Не заданы — ничего этого нет.
+   */
+  razdely?: RazdelyData;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
@@ -127,6 +143,7 @@ export function TopicTabs({
   trackKey,
   initial = 'about',
   prepHref,
+  razdely,
 }: TopicTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -154,6 +171,8 @@ export function TopicTabs({
   function choose(id: string) {
     /* Переход на любую вкладку закрывает меню материалов. */
     setMenu(false);
+    /* Пришли по ?vkladka= — адрес больше не про открытую вкладку. */
+    sbrositVkladku(id);
     const href = id === 'prep' ? prepHref : id === 'trainer' ? trainerHref : null;
     if (href !== null && pathname !== href) {
       /* Переход в переходе (transition): пока страница-назначение едет по
@@ -175,6 +194,24 @@ export function TopicTabs({
       /* Сразу после отрисовки, а не внутри эффекта: так состояние
          меняется обычным порядком. */
       queueMicrotask(() => choose(pending));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
+  }, []);
+
+  /* Пришли из другого раздела с вкладки без своего адреса («Теория»,
+     «Методы», «Генератор»): она в параметре ?vkladka=, открываем её.
+     До первой отрисовки на экране — без мелькания «О задании». Такой
+     вкладки у раздела нет — параметр убирается, остаётся «О задании». */
+  useLayoutEffect(() => {
+    const wanted = vkladkaIzAdresa();
+    if (wanted === null) {
+      return;
+    }
+    if (tabs.some((item) => item.id === wanted)) {
+      /* Синхронно и до отрисовки кадра: «О задании» не мелькает. */
+      queueMicrotask(() => flushSync(() => setTab(wanted)));
+    } else {
+      sbrositVkladku(tab);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
   }, []);
@@ -377,6 +414,7 @@ export function TopicTabs({
         open={menu}
         onOpenChange={setMenu}
         stripRef={strip}
+        before={razdely === undefined ? undefined : <RazdelyNav {...razdely} vkladka={tab} />}
       >
         <Tabs
           className="tabs--lenta"
@@ -492,6 +530,10 @@ export function TopicTabs({
         ) : null}
       </div>
 
+      {/* Другие разделы задания — в конце любой вкладки, под колонкой
+          содержания, во всю ширину. */}
+      {razdely === undefined ? null : <DrugieRazdely {...razdely} vkladka={tab} />}
+
       {/* Шторка: то же окно, что и на выборе типа функции. Своего
           компонента для неё в проекте нет и не заводится. */}
       <Modal
@@ -503,12 +545,12 @@ export function TopicTabs({
         description="Выберите раздел темы"
       >
         <TopicContents
-              items={items}
-              active={block}
-              onSelect={pick}
-              onSelectPodpunkt={pickPodpunkt}
-              podpunktyVsegda
-            />
+          items={items}
+          active={block}
+          onSelect={pick}
+          onSelectPodpunkt={pickPodpunkt}
+          podpunktyVsegda
+        />
       </Modal>
     </>
   );

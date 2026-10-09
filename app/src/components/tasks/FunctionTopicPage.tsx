@@ -1,11 +1,10 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
-import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { prepSkillsFor } from '@/content/prepSkills';
+import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
-import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { prepSkillTotal } from '@/lib/prep';
 import { aboutScene } from '@/lib/scenes';
@@ -20,6 +19,8 @@ import { TopicAbout } from './TopicAbout';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
+import { VseRazdelyKnopka } from './razdely';
+import { podtemaVkladki, razdelyZadaniya } from './razdely/razdely12';
 import { TopicTabs } from './TopicTabs';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -72,9 +73,10 @@ export function FunctionTopicPage({
      уводит на 404, а до нажатия не показываются навыки чужой подтемы.
      Адреса под вкладки собираются по тем же условиям (lib/prep.ts,
      content/sections.ts). У закрытой подтемы страниц нет вовсе. */
-  const built = subtopicBuilt(subtopic);
-  const hasPrep = built && prepSkillsFor(subtopic.id).length > 0;
-  const hasTrainer = built && prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
+  const { prep: hasPrep, trainer: hasTrainer } = podtemaVkladki(subtopic);
+  /* Навигация по разделам задания: плашка над вкладками, меню и блок
+     «Другие разделы» внизу. Данные — из того же списка подтем. */
+  const razdely = razdelyZadaniya(section, subtopic.id);
   /* Чем подтема отличается от линейной — признаками в её конфиге;
      не задано — берётся общее для раздела. Плашка-подсказка вкладки
      «О задании» у раздела одна, подтема её не переопределяет. */
@@ -98,7 +100,9 @@ export function FunctionTopicPage({
           total: prepSkillTotal(subtopic.id, skill.id),
         }))
       : [],
-    trainer: hasTrainer ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id) : [],
+    trainer: hasTrainer
+      ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id)
+      : [],
   };
 
   /* Разметка теории — только разделов этой подтемы. Словарь theoryBodies
@@ -115,6 +119,7 @@ export function FunctionTopicPage({
     <main className="app-main">
       <ShapkaRazdela
         className="topic-head"
+        back={<VseRazdelyKnopka no={section.no} href={href(ZADANIYA, section.slug)} />}
         crumbs={[
           { label: 'Задания', href: tasksPage.href },
           {
@@ -133,7 +138,9 @@ export function FunctionTopicPage({
         }
         subtitle={
           subtopic.head === undefined ? undefined : (
-            <p className="t-h3 topic-head__subtitle">{subtopic.head.subtitle}</p>
+            <p className="t-h3 topic-head__subtitle topic-head__subtitle--wide">
+              {subtopic.head.subtitle}
+            </p>
           )
         }
         badge={topic.badge}
@@ -206,6 +213,7 @@ export function FunctionTopicPage({
         generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
+        razdely={razdely}
         contentsDecor={
           /* Ключ — от ложного предупреждения React о списке: серверный
              элемент в пропсе клиентской ленты при большой теории
