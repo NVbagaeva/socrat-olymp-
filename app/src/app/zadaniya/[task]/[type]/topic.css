@@ -336,7 +336,7 @@
   font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
-.about-skills__list svg {
+.about-skills__list > li > svg {
   width: 20px;
   height: 20px;
   margin-top: 2px;
@@ -1619,4 +1619,574 @@ a.tutor-card:hover {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   color: var(--color-text-secondary);
+}
+
+/* ── Карточка формулировки: миниатюра и стрелка в тренажёр ─────── */
+.form-card__foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+.form-card--chart {
+  grid-template-rows: auto auto auto 1fr;
+}
+.form-card__chart {
+  display: block;
+  width: 96px;
+  flex: none;
+}
+.form-card__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+.form-card__go {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.form-card__go:hover {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-info);
+}
+.form-card__go:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.form-card__go svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Теория блоками (components/tasks/theory/rich) ─────────────── */
+
+.rich {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.rich-text {
+  display: grid;
+  gap: var(--space-3);
+}
+.rich-p {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.rich-text--lead .rich-p:first-child {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.rich-formula {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.rich-formula .katex-display {
+  margin: 0;
+}
+.rich-lines {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+/* Чертёж с подписями KaTeX: подписи стоят поверх SVG в процентах,
+   кегль — в долях ширины контейнера. */
+.kfig {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  container-type: inline-size;
+}
+.kfig__svg,
+.kfig__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.kfig__label {
+  position: absolute;
+  white-space: nowrap;
+  line-height: 1;
+  pointer-events: none;
+  /* Подложка цвета поля: подпись читается поверх сетки. */
+  text-shadow:
+    0 0 3px var(--color-surface),
+    0 0 3px var(--color-surface),
+    0 0 2px var(--color-surface);
+}
+.kfig__label .katex {
+  font-size: 1em;
+}
+.kfig__label--ink {
+  color: var(--graph-axis);
+}
+.kfig__label--primary {
+  color: var(--color-primary);
+}
+.kfig__label--accent {
+  color: var(--graph-accent);
+}
+.kfig__label--alt {
+  color: var(--graph-alt, var(--color-success));
+}
+.kfig__label--muted {
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+}
+
+/* «Главная формула»: тёплая рамка с меткой, формула крупно. */
+.rich-main {
+  display: grid;
+  gap: var(--space-5);
+  align-items: center;
+}
+.rich-main--figure {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+.rich-main__frame {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  border: 2px solid var(--color-border-accent);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-warm);
+}
+.rich-main__chip {
+  justify-self: start;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.rich-main__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+}
+.rich-main__formula {
+  font-size: 2rem;
+  padding-right: var(--space-5);
+  border-right: 1px solid var(--color-border-warm);
+}
+.rich-main__note {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.rich-main__figure {
+  max-width: 420px;
+}
+
+/* Карточки раздела. */
+.rich-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.rich-cards--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.rich-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  min-width: 0;
+}
+.rich-card__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.rich-card__figure {
+  max-width: 360px;
+}
+.rich-card__result {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-warm);
+}
+.rich-card__caption {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* Шаги алгоритма: нумерованные карточки, развилка внутри шага. */
+.rich-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.rich-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.rich-step__no {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}
+.rich-step__body {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.rich-step__title {
+  margin: 0;
+  padding-top: 6px;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.rich-step__boxed {
+  justify-self: start;
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-border-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-warm);
+  font-size: 1.25rem;
+}
+.rich-fork {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.rich-fork__branch {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.rich-fork__branch--warn {
+  border-color: var(--color-border-warm);
+  background: var(--color-surface-warm);
+}
+.rich-fork__label {
+  justify-self: start;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid currentColor;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--fs-caption);
+}
+.rich-fork__branch--warn .rich-fork__label {
+  color: var(--color-accent);
+}
+.rich-fork__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+.rich-fork__branch .rich-p {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.rich-fork__figure {
+  max-width: 260px;
+}
+
+/* Сворачиваемая врезка. */
+.rich-collapse {
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.rich-collapse__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-info);
+}
+.rich-collapse__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.rich-collapse__tag {
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+.rich-collapse__toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.rich-collapse__toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.rich-collapse__toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s ease;
+}
+.rich-collapse:not(.is-open) .rich-collapse__toggle svg {
+  transform: rotate(180deg);
+}
+.rich-collapse__body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+.rich-collapse__body[hidden] {
+  display: none;
+}
+
+/* Подраздел с якорем (8.1, 8.2 …): отступ сверху под липкую ленту. */
+.rich-sub {
+  display: grid;
+  gap: var(--space-4);
+  scroll-margin-top: 140px;
+}
+.rich-sub__title {
+  margin: var(--space-3) 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.rich-sub__no {
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Разобранный пример: условие, рисунок и решение по шагам. */
+.rich-example {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.rich-example__head {
+  display: grid;
+  gap: var(--space-2);
+}
+.rich-example__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.rich-example__condition {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.rich-example__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.rich-example__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.rich-example__step {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--color-border-info);
+}
+.rich-example__step.is-check {
+  padding: var(--space-3);
+  border-left-color: var(--color-success);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-success-soft);
+}
+.rich-example__label {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.rich-example__step.is-check .rich-example__label {
+  color: var(--color-success);
+}
+.rich-example__step .rich-lines {
+  justify-self: start;
+  padding: var(--space-2) var(--space-3);
+}
+.rich-example__answer {
+  margin: 0;
+  justify-self: start;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  font-weight: 600;
+}
+
+.rich-remember {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* Памятка-итог. */
+.rich-memo {
+  margin: 0;
+  padding: var(--space-5) var(--space-5) var(--space-5) var(--space-10);
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.rich-memo li::marker {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 1023px) {
+  .rich-main--figure,
+  .rich-example__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rich-example__figure {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 719px) {
+  .rich-cards,
+  .rich-cards--3,
+  .rich-fork {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rich-main__frame {
+    padding: var(--space-5) var(--space-4) var(--space-4);
+  }
+  .rich-main__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .rich-main__formula {
+    padding-right: 0;
+    padding-bottom: var(--space-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-warm);
+  }
+  .rich-step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+  .rich-card,
+  .rich-example {
+    padding: var(--space-4);
+  }
+  .rich-memo {
+    padding-left: var(--space-8);
+  }
+}
+.rich-figure {
+  max-width: 560px;
+}
+/* Рамка формулы рядом с рисунком уже: формула над пояснением. */
+.rich-main--figure .rich-main__body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.rich-main--figure .rich-main__formula {
+  padding-right: 0;
+  padding-bottom: var(--space-3);
+  border-right: 0;
+  border-bottom: 1px solid var(--color-border-warm);
+}
+.rich-memo {
+  list-style: decimal;
+}
+@media (max-width: 719px) {
+  .rich-main__formula {
+    font-size: 1.35rem;
+  }
+}
+/* Подпункт «Содержания» берёт заголовок подраздела целиком: номер и текст. */
+.contents-sub__item .rich-sub__no {
+  margin-right: 0.35em;
 }

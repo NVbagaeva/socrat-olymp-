@@ -1,0 +1,167 @@
+{
+  "kind": "prep",
+  "id": "P12S-2",
+  "block": 2,
+  "title": "Значение функции",
+  "subtitle": "Найти значение функции, которое не читается с рисунка",
+  "seed": 12502,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12S-2-01",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Чему равно значение функции при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-03",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-04",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-05",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Чему равно значение функции при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-06",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-07",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика, изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-08",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Чему равно значение функции при $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-09",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    },
+    {
+      "id": "P12S-2-10",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика, изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "hint": "Сначала восстанови формулу: начало графика и $k$ по целой точке. Потом подставь $x$ — под корнем получится точный квадрат."
+    }
+  ]
+}

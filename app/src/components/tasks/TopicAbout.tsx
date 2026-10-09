@@ -3,7 +3,7 @@ import { Chart } from '@/components/graph/Chart';
 import { Tex } from '@/components/ui/Tex';
 import type { ExamSection, Formulation, SectionAbout } from '@/content/sections';
 import { katex } from '@/lib/graph/katex';
-import { compareLinesScene } from '@/lib/scenes';
+import { compareLinesScene, prepSkillScene, type PrepSkillSceneId } from '@/lib/scenes';
 import { FormulationIcon } from './FormulationIcon';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -13,9 +13,9 @@ function formulaHtml(tex: string): string {
   return katex.renderToString(tex, { throwOnError: false, displayMode: false });
 }
 
-function FormCard({ item }: { item: Formulation }) {
+function FormCard({ item, base }: { item: Formulation; base?: string }) {
   return (
-    <li className="form-card">
+    <li className={item.scene === undefined ? 'form-card' : 'form-card form-card--chart'}>
       <span className="form-card__no" aria-hidden="true">
         {item.no}
       </span>
@@ -40,6 +40,24 @@ function FormCard({ item }: { item: Formulation }) {
           <Tex text={item.example} />
         </p>
       ) : null}
+      {item.scene !== undefined || item.trainer !== undefined ? (
+        <div className="form-card__foot">
+          {item.scene !== undefined ? (
+            <Chart className="form-card__chart" scene={prepSkillScene(item.scene as PrepSkillSceneId)} />
+          ) : null}
+          {item.trainer !== undefined && base !== undefined ? (
+            <a
+              className="form-card__go"
+              href={`${base}/trenazher/${item.trainer}/`}
+              aria-label={`Открыть тренажёр: ${item.title.replace(/\$/g, '')}`}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </a>
+          ) : null}
+        </div>
+      ) : null}
     </li>
   );
 }
@@ -50,6 +68,8 @@ export interface TopicAboutProps {
   about?: SectionAbout;
   /** Сцена чертежа в блоке «Что нужно уметь». По умолчанию — две прямые. */
   scene?: unknown;
+  /** Адрес подтемы: от него стрелки карточек ведут в тренажёр. */
+  base?: string;
 }
 
 /**
@@ -63,6 +83,7 @@ export function TopicAbout({
   section,
   about = section.about,
   scene = compareLinesScene(),
+  base,
 }: TopicAboutProps) {
   return (
     <div className="about">
@@ -94,7 +115,7 @@ export function TopicAbout({
         <h3 className="t-h4 about-sub">{about.formsTitle}</h3>
         <ul className="about-forms__list">
           {about.forms.map((item) => (
-            <FormCard key={item.no} item={item} />
+            <FormCard key={item.no} item={item} {...(base === undefined ? {} : { base })} />
           ))}
         </ul>
       </section>

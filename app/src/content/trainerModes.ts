@@ -101,6 +101,19 @@ const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* График корня: значение, аргумент и корень с прямой. */
+const IRRATIONAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12S.A'], mode: 'practice' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12S.B'], mode: 'practice' },
+  {
+    id: 'peresechenie',
+    title: 'Корень и прямая',
+    skills: ['12S.C', '12S.D'],
+    mode: 'mixed',
+  },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -118,6 +131,9 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'rational') {
     return RATIONAL_SHORTCUTS;
+  }
+  if (type === 'irrational') {
+    return IRRATIONAL_SHORTCUTS;
   }
   return [];
 }
@@ -169,7 +185,7 @@ export const trainerPage = {
  * в поле note самих наборов.
  */
 export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic' && type !== 'rational') {
+  if (type !== 'quadratic' && type !== 'rational' && type !== 'irrational') {
     return trainerPage;
   }
   return {
@@ -214,6 +230,11 @@ export const trainerKindTitle: Record<string, string> = {
   '12R.H': 'Гипербола и прямая',
   '12R.I': 'Гипербола $y = \\frac{k}{x}$',
   '12R.J': 'Коэффициент $b$ и значение $\\frac{kx + a}{x + b}$',
+  /* График корня: точки B — одним типом, как у гиперболы. */
+  '12S.A': 'Значение функции',
+  '12S.B': 'Аргумент по значению',
+  '12S.C': 'Корень и прямая',
+  '12S.D': 'Корень и прямая',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

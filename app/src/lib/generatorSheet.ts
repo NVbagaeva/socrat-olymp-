@@ -13,7 +13,9 @@
 import GraphGenerate from '@/lib/graph/generate.js';
 import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
-import rationalBuilder from '@/lib/graph/solution-rational.js';
+import rationalSolution from '@/lib/graph/solution-rational.js';
+import sqrtSolution from '@/lib/graph/solution-sqrt.js';
+import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -304,13 +306,19 @@ export function sheetVariants(params: SheetParams): SheetBlock[][] {
  */
 /* Лист учителя: у параболы с вершиной в узле сетки на чертеже —
    вспомогательная система координат x′Oy′ (graph/quadratic-aux.js),
-   как в разборе. В листе ученика чертёж задачи как есть. */
+   как в разборе; у графика корня с прямой — треугольник наклона.
+   В листе ученика чертёж задачи как есть. */
 function teacherFigures(variants: SheetBlock[][]): SheetBlock[][] {
   return variants.map((blocks) =>
     blocks.map((block) => ({
       ...block,
       tasks: block.tasks.map((task) => {
         const meta = task.meta as unknown;
+        /* График корня с прямой: треугольник наклона — только у учителя. */
+        if (task.meta.family === 'sqrt') {
+          const svg = sqrtTriangleSvg(meta);
+          return svg === null ? task : { ...task, figureSvg: svg };
+        }
         if (task.meta.family !== 'quadratic' || !QuadraticAux.hasAux(meta)) {
           return task;
         }
@@ -320,6 +328,14 @@ function teacherFigures(variants: SheetBlock[][]): SheetBlock[][] {
     })),
   );
 }
+
+/* Разбор по шагам на листе учителя: гипербола и график корня — у
+   каждого свой модуль, выбор по семейству задачи. */
+const rationalBuilder = {
+  fromTask(task: { meta: { family?: string } }) {
+    return task.meta.family === 'sqrt' ? sqrtSolution.fromTask(task) : rationalSolution.fromTask(task);
+  },
+};
 
 export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
   const variants = withAnswers ? teacherFigures(sheetVariants(params)) : sheetVariants(params);

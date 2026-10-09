@@ -46,8 +46,10 @@ function shortSolutionQuadratic(task, quadraticBuilder) {
   return formulas.length < 2 ? null : formulas;
 }
 
-/* Гипербола: полное решение по шагам — заголовок шага и все его
-   формулы. Шаг без формул (асимптота на оси) печатается одной строкой. */
+/* Гипербола и график корня: полное решение по шагам — заголовок шага
+   и все его формулы. Шаг без формул (асимптота на оси) печатается
+   одной строкой. rationalBuilder — сборщик разбора по шагам: у листа
+   с задачами двух семейств он сам выбирает модуль по meta.family. */
 function fullSolutionRational(task, rationalBuilder) {
   if (!rationalBuilder) { return null; }
   let steps;
@@ -63,8 +65,13 @@ function fullSolutionRational(task, rationalBuilder) {
 
 /* Решение задачи для листа: у гиперболы полное, у прямой и параболы
    краткое. Возвращает готовый кусок листа или null. */
+/* Семейства с полным решением по шагам: у каждого этапа подпись. */
+function stepwise(task) {
+  return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt');
+}
+
 function solutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder) {
-  if (task.meta && task.meta.family === 'rational') {
+  if (stepwise(task)) {
     const full = fullSolutionRational(task, rationalBuilder);
     return full ? answers.fullSolution(task.no, full, task.answer) : null;
   }
@@ -206,7 +213,7 @@ export function variantAnswersItems(variants, generator, solutionBuilder, quadra
         const item = solutionItem(task, generator, solutionBuilder, quadraticBuilder,
           rationalBuilder);
         if (item) { own.push(item); }
-        if (task.meta && task.meta.family === 'rational') { full = true; }
+        if (stepwise(task)) { full = true; }
       });
     });
     count += own.length;
