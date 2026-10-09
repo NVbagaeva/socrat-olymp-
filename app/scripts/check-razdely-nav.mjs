@@ -8,7 +8,7 @@
    Собранный сайт открывается в Chromium на ширине телефона (390, с
    касаниями) и компьютера (1440). Проверяется:
      — плашка стоит в липкой строке над лентой, зона нажатия ≥ 44px;
-     — сценарий: иррациональная → «Теория» → плашка → «Парабола» →
+     — сценарий: иррациональная → «Теория» → плашка → «Квадратичная функция» →
        открылась «Теория» параболы без перезагрузки → «Назад» вернул в
        иррациональную на «Теорию»;
      — с «Опорных задач» переход ведёт на «Опорные задачи» раздела;
@@ -172,7 +172,7 @@ for (const size of SIZES) {
   check(plate.img, where('иконка на плашке не загрузилась'));
   check(plate.imgHidden && plate.alt === '', where('иконка не декоративная (alt / aria-hidden)'));
 
-  /* Сценарий: «Теория» → меню → «Парабола». */
+  /* Сценарий: «Теория» → меню → «Квадратичная функция». */
   await page.getByRole('tab', { name: 'Теория' }).click();
   await page.waitForTimeout(300);
   const historyBefore = await page.evaluate(() => history.length);
@@ -194,7 +194,10 @@ for (const size of SIZES) {
       icons: Array.from(node.querySelectorAll('img')).every(
         (img) => img.complete && img.naturalWidth > 0,
       ),
-      formula: node.querySelector('.razdel-karta__caption .katex') !== null,
+      captions: Array.from(node.querySelectorAll('.razdel-karta__caption')).map(
+        (c) => c.textContent,
+      ),
+      titles: Array.from(node.querySelectorAll('.razdel-karta__title')).map((c) => c.textContent),
     };
   }, MENU);
   check(
@@ -211,7 +214,48 @@ for (const size of SIZES) {
   );
   check(dialog.current.includes('Сейчас здесь'), where('текущий раздел не отмечен «Сейчас здесь»'));
   check(dialog.icons, where('не все иконки в меню загрузились'));
-  check(dialog.formula, where('подписи с формулами не набраны KaTeX'));
+  /* Подписи и названия не обрезаны многоточием: переносятся. */
+  const cut = await page.evaluate(
+    (sel) =>
+      Array.from(
+        document.querySelectorAll(
+          `${sel} .razdel-karta__title, ${sel} .razdel-karta__caption, .razdely-plashka__text`,
+        ),
+      )
+        .filter(
+          (n) =>
+            getComputedStyle(n).textOverflow === 'ellipsis' || n.scrollWidth > n.clientWidth + 1,
+        )
+        .map((n) => n.textContent),
+    MENU,
+  );
+  check(cut.length === 0, where(`названия обрезаны: ${JSON.stringify(cut)}`));
+  check(
+    JSON.stringify(dialog.titles) ===
+      JSON.stringify([
+        'Линейная функция',
+        'Квадратичная функция',
+        'Дробно-линейная функция',
+        'Иррациональная функция',
+        'Показательная функция',
+        'Логарифмическая функция',
+        'Тригонометрические функции',
+      ]),
+    where(`названия в меню ${JSON.stringify(dialog.titles)}`),
+  );
+  check(
+    JSON.stringify(dialog.captions) ===
+      JSON.stringify([
+        'График — прямая',
+        'График — парабола',
+        'График — гипербола',
+        'График — ветвь параболы',
+        'График — экспонента',
+        'График — логарифмическая кривая',
+        'Графики — синусоида, косинусоида, тангенсоида',
+      ]),
+    where(`подписи в меню ${JSON.stringify(dialog.captions)}`),
+  );
 
   /* «Скоро» не нажимается: меню на месте, адрес тот же. */
   const urlBefore = page.url();
@@ -223,7 +267,7 @@ for (const size of SIZES) {
   await page.evaluate(() => {
     window.__bezPerezagruzki = true;
   });
-  await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Парабола' }).click();
+  await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Квадратичная функция' }).click();
   await page.waitForURL(/\/zadaniya\/12\/quadratic\//);
   await page.waitForTimeout(600);
   check(
@@ -304,7 +348,7 @@ for (const size of SIZES) {
   /* С «Опорных задач» — на «Опорные задачи» другого раздела. */
   await page.goto(BASE + '/zadaniya/12/irrational/opornye-zadachi/', { waitUntil: 'networkidle' });
   await openByPlate(page);
-  await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Гипербола' }).click();
+  await page.locator(`${MENU} a.razdel-karta`, { hasText: 'Дробно-линейная функция' }).click();
   await page.waitForURL(/\/zadaniya\/12\/rational\//);
   await page.waitForTimeout(400);
   check(
@@ -349,7 +393,7 @@ for (const size of SIZES) {
       .map((card) => card.querySelector('.razdel-karta__title')?.textContent),
   );
   check(
-    JSON.stringify(metki) === '["Парабола"]',
+    JSON.stringify(metki) === '["Квадратичная функция"]',
     where(`метка тренировки у ${JSON.stringify(metki)}`),
   );
   await page.keyboard.press('Escape');
@@ -366,6 +410,19 @@ for (const size of SIZES) {
   await page.keyboard.press('Escape');
   check(await waitClosed(page), where('при reduced-motion меню не закрылось'));
   await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+  /* Самое длинное название на плашке: помещается, без многоточия. */
+  await page.goto(BASE + '/zadaniya/12/trigonometric/', { waitUntil: 'networkidle' });
+  const longName = await page.evaluate(() => {
+    const node = document.querySelector('.razdely-plashka__text');
+    return {
+      cut:
+        getComputedStyle(node).textOverflow === 'ellipsis' ||
+        node.scrollWidth > node.clientWidth + 1,
+      text: node.textContent,
+    };
+  });
+  check(!longName.cut, where(`название на плашке обрезано: ${longName.text}`));
 
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
   await page.goto(BASE + '/zadaniya/12/logarithmic/', { waitUntil: 'networkidle' });

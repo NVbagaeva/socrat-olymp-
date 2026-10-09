@@ -402,6 +402,11 @@
   color: var(--color-text-brand);
   hyphens: auto;
 }
+.subtopic-card__graph {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
 .subtopic-card--soon .subtopic-card__title {
   color: inherit;
 }

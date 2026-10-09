@@ -30,6 +30,7 @@ const dialog = {
       id: item.id,
       no: String(index + 1).padStart(2, '0'),
       title: item.title,
+      graphName: item.graphName,
       status: item.status,
       prototypes: family?.prototypes.sets ?? 0,
       tasks: family?.prototypes.tasks ?? 0,

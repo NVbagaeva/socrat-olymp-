@@ -12,7 +12,6 @@ import { subtopicBuilt } from '@/data/functionTypes';
 import { assetUrl } from '@/lib/assetUrl';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { href, ZADANIYA } from '@/lib/paths';
-import { typeset } from '@/lib/tex';
 import { prototypeSkills } from '../configurator/skillItems';
 import { VKLADKA_PARAM, type IkonkaRazdela, type RazdelyData } from './types';
 
@@ -72,9 +71,9 @@ export function razdelyZadaniya(section: ExamSection, current: string): RazdelyD
     podzagolovok: 'Перейдите к другим типам графиков функций',
     razdely: section.subtopics.map((subtopic) => ({
       id: subtopic.id,
-      title: subtopic.razdel.title,
-      captionHtml: typeset(subtopic.razdel.caption),
-      icon: ikonkaRazdela(section.slug, subtopic.razdel.icon),
+      title: subtopic.title,
+      graphName: subtopic.graphName,
+      icon: ikonkaRazdela(section.slug, subtopic.icon),
       soon: !subtopicBuilt(subtopic),
       /* У закрытой подтемы страница есть (на ней «Скоро»), а вкладок
          с материалом нет. */

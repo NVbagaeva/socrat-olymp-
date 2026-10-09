@@ -86,9 +86,8 @@
 .razdely-plashka__text {
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  /* Длинное название переносится на вторую строку, а не обрезается. */
+  line-height: var(--lh-body);
 }
 .razdely-plashka__arrow {
   flex: 0 0 auto;

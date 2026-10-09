@@ -28,7 +28,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!subtopic) {
     return {};
   }
-  return { title: `${subtopic.title} — Будет на ЕГЭ` };
+  /* Название и название графика — из общего списка разделов
+     (data/functionTypes.ts), одни и те же в заголовке, описании и
+     карточке при отправке ссылки. */
+  const title = `${subtopic.title} — Будет на ЕГЭ`;
+  const description = `Задание №${task}. ${subtopic.title}. ${subtopic.graphName}.`;
+  return { title, description, openGraph: { title, description } };
 }
 
 export default async function SubtopicPage({ params }: { params: Params }) {
