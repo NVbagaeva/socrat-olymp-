@@ -682,6 +682,37 @@ function quadraticPrepScene(
 }
 
 
+/* ── Миниатюры плашек типов задач ───────────────────────────────
+   Вкладка «О задании», блок «Типы задач в этом разделе». Миниатюра
+   чистая: только графики — без искомой точки, «?» и пунктиров. Что
+   найти, говорит название плашки, как решать — разбор под ней. */
+
+export type TypeSceneId = 'cross-line' | 'cross-parabola';
+
+export function typeScene(id: TypeSceneId) {
+  const base = {
+    window: squareWindow(2),
+    grid: { step: 1, show: true },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  if (id === 'cross-line') {
+    return {
+      ...base,
+      curves: [
+        miniParabola(1, 0, -1.5),
+        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+      ],
+    };
+  }
+  return {
+    ...base,
+    curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
+  };
+}
+
 /* ── Миниатюры навыков гиперболы ──────────────────────────────────
    Окно то же тесное, ±2. Гипербола задаётся сдвигами: k/(x + a) + b.
    Асимптоты пунктиром — тем же цветом подсказки, что пунктиры

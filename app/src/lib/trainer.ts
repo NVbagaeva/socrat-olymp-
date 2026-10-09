@@ -230,6 +230,8 @@ export interface EngineTask {
     level?: string | null;
     /** Семейство кривой: 'line', 'quadratic', 'rational' или 'sqrt'. */
     family?: string;
+    /** Правило ответа задачи (answerRule набора): например, intersection-x. */
+    rule?: string;
   };
   answerType?: string;
   /**
