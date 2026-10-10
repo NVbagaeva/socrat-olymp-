@@ -67,7 +67,7 @@ export function shagiK(A: Tochka, B: Tochka) {
     shag(
       'Считаем',
       vozr ? `$k=\\dfrac{${dy}}{${dx}}$` : `$k=-\\dfrac{${dy}}{${dx}}$`,
-      ...drobSSokrascheniem(dy, dx).map((s) => (vozr ? s : s.replace(/^\$\\dfrac/, '$-\\dfrac'))),
+      ...drobSSokrascheniem(dy, dx, !vozr),
       `$k=${d(k)}$`,
     ),
   ];

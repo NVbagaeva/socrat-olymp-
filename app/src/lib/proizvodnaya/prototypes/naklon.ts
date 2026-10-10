@@ -17,20 +17,24 @@ export function nod(a: number, b: number): number {
   return b === 0 ? Math.abs(a) : nod(b, a % b);
 }
 
-/** Дробь Δy/Δx с сокращением в TeX и десятичной записью. */
-export function drobSSokrascheniem(dy: number, dx: number): string[] {
+/** Сокращение дроби Δy/Δx и перевод в десятичную: отдельные строки, без повторения дроби. */
+export function drobSSokrascheniem(dy: number, dx: number, minus = false): string[] {
   const g = nod(dy, dx);
   const n = dy / g;
   const m = dx / g;
   const val = dy / dx;
   const rows: string[] = [];
+  const sg = minus ? '-' : '';
   if (g > 1) {
+    const result = m === 1 ? String(n) : `\\dfrac{${n}}{${m}}`;
     rows.push(
-      `$\\dfrac{${dy}}{${dx}}=\\dfrac{${dy}:${g}}{${dx}:${g}}=\\dfrac{${n}}{${m}}$ — числитель и знаменатель делятся на $${g}$.`,
+      `Числитель и знаменатель делятся на $${g}$: $${sg}\\dfrac{${dy}}{${dx}}=${sg}\\dfrac{${dy}:${g}}{${dx}:${g}}=${sg}${result}$.`,
     );
+  } else if (m !== 1) {
+    rows.push(`Дробь $${sg}\\dfrac{${n}}{${m}}$ несократима.`);
   }
   if (m !== 1) {
-    rows.push(`$\\dfrac{${n}}{${m}}=${d(val)}$`);
+    rows.push(`В десятичной записи $${sg}\\dfrac{${n}}{${m}}=${d(minus ? -val : val)}$.`);
   }
   return rows;
 }
@@ -61,7 +65,7 @@ export function shagiNaklon(A: Tochka, B: Tochka): Shag[] {
       vozr
         ? `$\\operatorname{tg}\\alpha=\\dfrac{\\Delta y}{\\Delta x}=\\dfrac{${dy}}{${dx}}$`
         : `$\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)=-\\dfrac{\\Delta y}{\\Delta x}=-\\dfrac{${dy}}{${dx}}$`,
-      ...drobSSokrascheniem(dy, dx),
+      ...drobSSokrascheniem(dy, dx, !vozr),
       `$k=${kText}$`,
     ),
   ];
