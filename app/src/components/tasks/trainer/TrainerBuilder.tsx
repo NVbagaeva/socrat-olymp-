@@ -109,6 +109,7 @@ export function TrainerBuilder({
         mode,
         mistakes: progress.mistakes,
         choice,
+        ...(preset?.rules === undefined ? {} : { rules: preset.rules }),
       });
       if (session.tasks.length === 0) {
         return;

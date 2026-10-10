@@ -15,6 +15,29 @@
   gap: var(--space-2);
 }
 
+/* Фильтр ярлыка «Потренироваться» из разбора типа задачи: что
+   осталось в тренировке и как вернуть все задачи. */
+.trainer__filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.trainer__filter-text {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.trainer__filter-reset {
+  color: var(--color-text-brand);
+}
+
 /* ── Экран задания ──────────────────────────────────────────── */
 
 /* Карточка условия, поле ответа и подпись над ним берутся у вкладки

@@ -110,11 +110,30 @@ export function hyperbolaAndLineScene() {
   };
 }
 
+/** Корень f(x) = 2√x и прямая через A(1; 2): чертёж вкладки «О задании». */
+export function sqrtAndLineScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'sqrt', a: 2, c: 0, d: 0, color: 'lineA', label: null },
+      { type: 'line', k: 0.5, b: 1.5, color: 'lineB', label: null },
+    ],
+    points: [{ x: 1, y: 2, style: 'solid', color: 'cross', label: 'A' }],
+    alt: 'График корня и прямая',
+  };
+}
+
 /**
  * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
  * у квадратичной — парабола и прямая, у гиперболы — гипербола и прямая.
  */
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'irrational') {
+    return sqrtAndLineScene();
+  }
   if (type === 'rational') {
     return hyperbolaAndLineScene();
   }
@@ -135,6 +154,7 @@ const PREVIEW: Record<FunctionTypeId, { curve: Curve; half: number }> = {
   linear: { curve: { type: 'line', k: 1, b: 0.5 }, half: 3 },
   quadratic: { curve: { type: 'quadratic', a: 1, b: 0, c: -1.5 }, half: 3 },
   rational: { curve: { type: 'rational', k: 1.5, b: 0 }, half: 3 },
+  irrational: { curve: { type: 'sqrt', a: 1.5, c: -2.5, d: -1.5 }, half: 3 },
   logarithmic: { curve: { type: 'logarithmic', a: 2, c: 0 }, half: 3 },
   exponential: { curve: { type: 'exponential', a: 2, d: 0 }, half: 3 },
   trigonometric: { curve: { type: 'trigonometric', a: 2, b: 1.4, c: 0, d: 0 }, half: 3 },
@@ -207,7 +227,8 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 };
 
 export function generatorSkillScene(setId: string) {
-  const quadratic = QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId];
+  const quadratic =
+    QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -523,6 +544,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return rational;
   }
 
+  const irrational = irrationalPrepScene(id, base);
+  if (irrational !== null) {
+    return irrational;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -656,6 +682,37 @@ function quadraticPrepScene(
 }
 
 
+/* ── Миниатюры плашек типов задач ───────────────────────────────
+   Вкладка «О задании», блок «Типы задач в этом разделе». Миниатюра
+   чистая: только графики — без искомой точки, «?» и пунктиров. Что
+   найти, говорит название плашки, как решать — разбор под ней. */
+
+export type TypeSceneId = 'cross-line' | 'cross-parabola';
+
+export function typeScene(id: TypeSceneId) {
+  const base = {
+    window: squareWindow(2),
+    grid: { step: 1, show: true },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  if (id === 'cross-line') {
+    return {
+      ...base,
+      curves: [
+        miniParabola(1, 0, -1.5),
+        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+      ],
+    };
+  }
+  return {
+    ...base,
+    curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
+  };
+}
+
 /* ── Миниатюры навыков гиперболы ──────────────────────────────────
    Окно то же тесное, ±2. Гипербола задаётся сдвигами: k/(x + a) + b.
    Асимптоты пунктиром — тем же цветом подсказки, что пунктиры
@@ -747,6 +804,73 @@ function rationalPrepScene(
   }
   return null;
 }
+
+/* ── Миниатюры навыков графика корня ──────────────────────────────
+   Окно то же тесное, ±2. Корень задаётся началом и множителем:
+   k√(x − x₀) + y₀. Пунктиры — тем же цветом подсказки. Числа —
+   параметры чертежа. */
+
+function miniSqrt(k: number, x0: number, y0: number, color = 'lineA') {
+  return { type: 'sqrt', a: k, c: x0, d: y0, color, label: null };
+}
+
+function irrationalPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'koren-k') {
+    /* От начала вправо на 1 и вверх на k: катеты пунктиром. */
+    return {
+      ...base,
+      curves: [miniSqrt(1.4, -1.5, -1.2)],
+      points: [miniDot(-1.5, -1.2), miniDot(-0.5, 0.2)],
+      shapes: [dashed([-1.5, -1.2], [-0.5, -1.2]), dashed([-0.5, -1.2], [-0.5, 0.2])],
+    };
+  }
+  if (id === 'koren-znachenie') {
+    return {
+      ...base,
+      curves: [miniSqrt(1, -1.8, -1)],
+      points: [miniDot(1.2, -1 + Math.sqrt(3), 'lineB')],
+      shapes: [dashed([1.2, 0], [1.2, -1 + Math.sqrt(3)]),
+        prepLabel('?', 1.2, -1 + Math.sqrt(3), 14, -14, 'accent')],
+    };
+  }
+  if (id === 'koren-argument') {
+    return {
+      ...base,
+      curves: [miniSqrt(1.2, -1.8, -1)],
+      points: [miniDot(0.45, 0.8, 'lineB')],
+      shapes: [dashed([0, 0.8], [0.45, 0.8]), prepLabel('?', 0.45, 0.8, 16, -12, 'accent')],
+    };
+  }
+  if (id === 'koren-pryamaya') {
+    return {
+      ...base,
+      curves: [miniSqrt(1, -1.8, -1.2), { type: 'line', k: 0.5, b: 0.5, color: 'lineB', label: null }],
+      points: [miniDot(-1, 0, 'lineB'), miniDot(1, 1, 'lineB')],
+      shapes: [dashed([-1, 0], [1, 0]), dashed([1, 0], [1, 1])],
+    };
+  }
+  if (id === 'koren-peresechenie') {
+    return {
+      ...base,
+      curves: [miniSqrt(1.5, -1.6, -1.2), { type: 'line', k: 0.45, b: 0.048, color: 'lineB', label: null }],
+      points: [miniDot(-1.6 + 0.16, -1.2 + 1.5 * 0.4, 'cross')],
+      shapes: [prepLabel('A', -1.44, -0.6, -4, -16, 'label'), prepLabel('B ?', 1.3, 1.4, 0, 0, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* Набор прототипов корня → навык подтемы. */
+const IRRATIONAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12S.A': 'koren-znachenie',
+  '12S.B': 'koren-argument',
+  '12S.C': 'koren-peresechenie',
+  '12S.D': 'koren-peresechenie',
+};
 
 /* Набор прототипов гиперболы → навык подтемы: у карточки
    конфигуратора та же миниатюра, что у карточки навыка. */

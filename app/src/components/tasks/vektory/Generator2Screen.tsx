@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useId, useState } from 'react';
 import { Badge, Button, Input } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import {
@@ -14,8 +14,8 @@ import {
 } from '@/content/generator';
 import { GENERATOR_2, O_ZADANII, VEKTORY } from '@/content/vektory';
 import { counted } from '@/lib/plural';
-import { randomSeed } from '@/lib/vektory/session';
 import { sheetQuery2, subtitleOf2 } from '@/lib/vektory/sheet2';
+import { KitBar } from '../generator/KitBar';
 
 export interface Generator2ScreenProps {
   /** Адрес раздела: страницы печати лежат под ним. */
@@ -27,13 +27,13 @@ const CUSTOM = '';
 
 /**
  * Экран вкладки «Генератор» задания №2: вид работы, прототипы,
- * параметры листа. Тот же порядок шагов, что у №8 и №12, плюс поле
- * seed: пустое — случайный, одинаковый seed даёт одинаковый лист, и
- * он стоит в адресе листа. До четырёх вариантов одной структуры.
+ * параметры листа. Тот же порядок шагов, что у №8 и №12. Листы
+ * печатает блок комплекта (KitBar): код комплекта — seed листа, и
+ * только «Новый комплект» даёт новые задания. До четырёх вариантов
+ * одной структуры.
  */
 export function Generator2Screen({ base, skills }: Generator2ScreenProps) {
   const customId = useId();
-  const seedId = useId();
   const dateId = useId();
   const [kind, setKind] = useState(workKinds[0] ?? CUSTOM);
   const [customKind, setCustomKind] = useState('');
@@ -43,37 +43,27 @@ export function Generator2Screen({ base, skills }: Generator2ScreenProps) {
   const [variants, setVariants] = useState<number>(1);
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
-  const [seedInput, setSeedInput] = useState('');
-  const [nonce, setNonce] = useState(0);
 
   const chosen = skills.filter((item) => selected.includes(item.id));
-  const selectedKey = selected.join(',');
-  /* Случайный seed — свой на каждый выбор, как у №8 и №12. На сборке
-     он один, в браузере другой: строка seed на экране помечена
-     suppressHydrationWarning, адреса листов React не сверяет. */
-  const autoSeed = useMemo(
-    () => randomSeed(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, count, variants, nonce],
-  );
-  const seed = seedInput.trim() === '' ? autoSeed : seedInput.trim();
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf2({ kind: kindTitle, date, bank: false });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
-  const query = sheetQuery2({
-    prototypes: chosen.map((item) => item.id),
-    count,
-    variants,
-    seed,
-    theme,
-    layout,
-    kind: kindTitle,
-    date,
-    bank: false,
-  });
-  const studentHref = `${base}/pechat/?${query}`;
-  const teacherHref = `${base}/pechat/otvety/?${query}`;
+  /* Адреса листов по seed комплекта: его выдаёт KitBar. */
+  const sheetHrefs = (seed: string) => {
+    const query = sheetQuery2({
+      prototypes: chosen.map((item) => item.id),
+      count,
+      variants,
+      seed,
+      theme,
+      layout,
+      kind: kindTitle,
+      date,
+      bank: false,
+    });
+    return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
+  };
 
   function toggleSkill(id: string) {
     /* Последний выбранный прототип снять нельзя: пустой вариант не собирается. */
@@ -221,37 +211,6 @@ export function Generator2Screen({ base, skills }: Generator2ScreenProps) {
                 ))}
               </OptionGroup>
 
-              <div className="cfg-param">
-                <label className="cfg-param__label" htmlFor={seedId}>
-                  {GENERATOR_2.seed}
-                </label>
-                <div className="z2-seed">
-                  <Input
-                    id={seedId}
-                    className="cfg-input"
-                    value={seedInput}
-                    onChange={(event) => setSeedInput(event.target.value)}
-                    placeholder={GENERATOR_2.seedPlaceholder}
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setNonce(nonce + 1)}
-                    disabled={seedInput.trim() !== ''}
-                  >
-                    {GENERATOR_2.seedNovyy}
-                  </Button>
-                </div>
-                <p className="z2-seed__lead t-caption">
-                  {GENERATOR_2.seedLead}{' '}
-                  <code className="z2-seed__now" suppressHydrationWarning>
-                    {seed}
-                  </code>
-                </p>
-              </div>
-
               <OptionGroup id="z2-gen-param-layout" label={generatorPage.params.layout}>
                 {sheetLayouts.map((item) => (
                   <Option
@@ -301,29 +260,21 @@ export function Generator2Screen({ base, skills }: Generator2ScreenProps) {
         </aside>
       </div>
 
-      <div className="cfg-bar cfg-bar--two">
-        <a
-          className="btn btn--primary btn--lg cfg-bar__start"
-          href={studentHref}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.student}
-        </a>
-        <a
-          className="btn btn--secondary btn--lg cfg-bar__start"
-          href={teacherHref}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.teacher}
-        </a>
-        <p className="cfg-bar__summary no-math-check">
-          {VEKTORY.title}
-          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.id).join(', ')} ·{' '}
-          {counted(count, 'задание', 'задания', 'заданий')}
-        </p>
-      </div>
+      <KitBar
+        scope="2"
+        slot={base}
+        section={`№2 · ${VEKTORY.title}`}
+        count={count * variants}
+        ready
+        hrefs={sheetHrefs}
+        summary={
+          <span className="no-math-check">
+            {VEKTORY.title}
+            {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.id).join(', ')} ·{' '}
+            {counted(count, 'задание', 'задания', 'заданий')}
+          </span>
+        }
+      />
     </section>
   );
 }

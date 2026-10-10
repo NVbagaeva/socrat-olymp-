@@ -14,10 +14,17 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import RationalHints from '@/lib/graph/hints-rational.js';
+import SqrtHints from '@/lib/graph/hints-sqrt.js';
+import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps as quadraticSolution, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import {
+  quadraticSteps as quadraticSolution,
+  rationalSteps as rationalSolution,
+  sqrtSteps as sqrtSolution,
+  type PrepStep,
+} from '@/lib/prep';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import { methodFor } from '@/lib/trainerMethod';
 
@@ -221,8 +228,10 @@ export interface EngineTask {
     lines: EngineLine[];
     /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
     level?: string | null;
-    /** Семейство кривой: 'line', 'quadratic' или 'rational'. */
+    /** Семейство кривой: 'line', 'quadratic', 'rational' или 'sqrt'. */
     family?: string;
+    /** Правило ответа задачи (answerRule набора): например, intersection-x. */
+    rule?: string;
   };
   answerType?: string;
   /**
@@ -1056,6 +1065,59 @@ function rationalRightHint(task: EngineTask): string {
   return hintHtml('По чертежу $' + (meta.equation ?? '') + '$, дальше вычисление.');
 }
 
+/* ── Цепочка для графика корня ───────────────────────────────────
+
+   Шаги строит graph/hints-sqrt.js: лестница вопросов с кнопками —
+   где начало графика, через какую целую точку он проходит, чему
+   равно k, что спрашивают, ответ с проверкой по картинке; у задач с
+   прямой — ещё прямая через треугольник, уравнение, замена t = √x и
+   отбор корня. Здесь шаги набираются KaTeX, а шагу о прямой
+   достаётся свой чертёж — с треугольником наклона. */
+
+interface SqrtHint {
+  title: string;
+  chart?: 'triangle';
+  questions: {
+    prompt: string;
+    options: { text: string; right: boolean; why: string | null }[];
+    right: string;
+  }[];
+  after?: string[];
+}
+
+function sqrtSteps(task: EngineTask): TrainerStep[] {
+  const hints = SqrtHints.fromTask(task) as SqrtHint[];
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const triangle = sqrtTriangleSvg(task.meta);
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      focus: null,
+      questions: hint.questions.map((question) => ({
+        promptHtml: big(question.prompt),
+        options: question.options.map((option) => ({
+          html: big(option.text),
+          right: option.right,
+          whyHtml: option.why === null ? '' : big(option.why),
+        })),
+        rightHtml: big(question.right),
+      })),
+    };
+    if (hint.after && hint.after.length > 0) {
+      step.afterHtml = afterHtml(hint.after);
+    }
+    if (hint.chart === 'triangle' && triangle !== null) {
+      step.chartSvg = triangle;
+      step.chartFrom = 0;
+    }
+    return step;
+  });
+}
+
 /* ── Задание тренажёра из задачи движка ──────────────────────────
    Условие набирается KaTeX, подсказки и цепочка шагов собираются
    вместе с заданием. Откуда пришла задача — с сборки или из браузера
@@ -1067,6 +1129,25 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  if (task.meta.family === 'sqrt') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: начало графика, целая точка правее начала на $1$, $4$ или $9$ клеток, ' +
+          '$k$ — подъём делить на $\\sqrt{\\text{сдвига}}$, затем вычисление.',
+      ),
+      rightHint: hintHtml('По рисунку восстановлена формула, дальше вычисление.'),
+      steps: sqrtSteps(task),
+      options: null,
+      oshibki: {},
+      solution: sqrtSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   if (rational) {
     return {
       id: task.id,

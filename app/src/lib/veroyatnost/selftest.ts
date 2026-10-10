@@ -32,6 +32,7 @@ import {
 } from './labirint';
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
+import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import { klyuchZadachi, sealAnswer } from './secret';
 import { konechnaya, round, type PrepBlok, type Prototype, type Step, type Variant } from './types';
 
@@ -317,6 +318,11 @@ export interface PrepReport {
   vykladki: number;
   /** Повторяющиеся идентификаторы или номера конспекта. */
   duplicates: string[];
+  /**
+   * Списки картинок опорных задач (illyustratsii.ts) ссылаются на
+   * задачу, которой нет, или превью блока без задачи по картинке.
+   */
+  kartinki: string[];
   bad: BadVariant[];
 }
 
@@ -395,6 +401,27 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     }
   }
 
+  /* Списки картинок сверены вручную по id задачи: id без задачи —
+     опечатка или задачу убрали, и картинка снова показывается. */
+  const kartinki: string[] = [];
+  const poId = new Map(bloki.flatMap((blok) => blok.zadachi).map((z) => [z.id, z]));
+  for (const id of Object.keys(KARTINKA_NE_PO_USLOVIYU)) {
+    if (!poId.has(id)) {
+      kartinki.push(`KARTINKA_NE_PO_USLOVIYU: нет опорной задачи ${id}`);
+    }
+  }
+  for (const id of Object.keys(KARTINKA_OSNOVY_PODHODIT)) {
+    if (poId.get(id)?.variant === undefined) {
+      kartinki.push(`KARTINKA_OSNOVY_PODHODIT: ${id} — не вариант опорной задачи`);
+    }
+  }
+  for (const blok of bloki) {
+    const primer = blok.kartinka?.primer;
+    if (primer !== undefined && (primer.trim() === '' || /undefined|NaN/.test(primer))) {
+      kartinki.push(`блок ${blok.id}: пустая задача превью`);
+    }
+  }
+
   return {
     bloki: bloki.length,
     zadachi,
@@ -403,6 +430,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     badFormat,
     vykladki,
     duplicates,
+    kartinki,
     bad,
   };
 }

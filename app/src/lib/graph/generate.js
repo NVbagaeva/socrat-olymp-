@@ -21,6 +21,7 @@ import Line from './families/line.js';
 import Triangle from './triangle.js';
 import Quadratic from './generate-quadratic.js';
 import Rational from './generate-rational.js';
+import Sqrt from './generate-sqrt.js';
 import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
 import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
          answerText } from './text.js';
@@ -526,6 +527,7 @@ function equationChoice(ctx) {
 function taskCandidates(task, set, seed) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.candidates(task, set, seed); }
   if (familyOf(task, set) === 'rational') { return Rational.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'sqrt') { return Sqrt.candidates(task, set, seed); }
   var constraints = task.constraints || {};
   if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
@@ -791,6 +793,7 @@ function sceneFor(built, task, set) {
 function taskResult(set, task, built, seed, index) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.result(set, task, built, seed, index); }
   if (familyOf(task, set) === 'rational') { return Rational.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'sqrt') { return Sqrt.result(set, task, built, seed, index); }
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
@@ -817,6 +820,9 @@ function taskResult(set, task, built, seed, index) {
     id: task.id,
     kind: set.kind,                    /* 'prep' или 'prototype' — не смешиваются */
     svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    /* Сцена — для листов: их рисунки рисуются в своём режиме
+       (renderer.renderFigure), без построений сайта. */
+    scene: task.noChart ? null : sceneFor(built, task, set),
     /* Значения подставляются обычным текстом, и только потом
        размеченные долларами куски набираются как формулы. */
     question: plainText(fillTemplate(task.question, values)),
@@ -887,7 +893,8 @@ function analysis(id, seed) {
   var task = generate(id, seed);
   if (!task.svg || !task.meta.window) { return null; }
   /* Разбор с треугольником наклона — только у прямой. */
-  if (task.meta.family === 'quadratic' || task.meta.family === 'rational') { return null; }
+  if (task.meta.family === 'quadratic' || task.meta.family === 'rational' ||
+      task.meta.family === 'sqrt') { return null; }
 
   var line = Line.create(task.meta.kFraction, task.meta.bFraction);
   var triangle = Triangle.build(line, task.meta.window, task.meta.points);

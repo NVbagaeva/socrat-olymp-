@@ -6,6 +6,7 @@ import { listSlova, type Zadanie } from '@/content/veroyatnost';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import type { Pool } from '@/lib/veroyatnost/pool';
 import { parseSheet4Query, sheet4Spec } from '@/lib/veroyatnost/sheet4';
 
@@ -50,6 +51,8 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
   const params = parseSheet4Query(query);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
+  const [warning, setWarning] = useState<string | null>(null);
 
   /* Тема и раскладка — атрибуты на <html>: так их читает theme.css. */
   useEffect(() => {
@@ -71,9 +74,13 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheet4Spec(pool, params, withAnswers, list), {});
+    const built = sheet4Spec(pool, params, withAnswers, list);
+    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+    const kit = checkKitSheet(query, zadanie === 5 ? '5' : '4', withAnswers ? 'teacher' : 'student', built);
+    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
+        setWarning(kit.warning);
         setSpec(specJson(html));
       }
     });
@@ -98,14 +105,14 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
         /* Предпросмотр из генератора (preview=1): лист показывается,
            печать не вызывается — её запускают сами, когда посмотрят. */
         if (window.sheetPagination.error === undefined && query.get('preview') !== '1') {
-          window.print();
+          printKitSheet(warning);
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
     /* Адрес за жизнь страницы не меняется. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spec, done]);
+  }, [spec, done, warning]);
 
   return (
     <>
