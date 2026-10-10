@@ -55,6 +55,11 @@ export interface Otchet {
   problems: string[];
 }
 
+/** Дефис перед числом — типографский минус. */
+function minusify(text: string): string {
+  return text.replace(/-(?=\d)/g, THEME.minus);
+}
+
 export function pustoyOtchet(): Otchet {
   return { width: 0, height: 0, cell: 0, boxes: [], propushcheny: [], problems: [] };
 }
@@ -725,7 +730,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   }
   for (const item of aux) {
     if (item.t === 'vert' && item.podpis !== undefined && item.podpis !== '') {
-      const text = item.podpis;
+      const text = minusify(item.podpis);
       const halfW = textWidth(text, V.tick.size) / 2 + 2;
       const b = place(`подпись ${text}`, 'aux', halfW, V.tick.size * 0.5, { x: sx(item.x), y: axisX }, ['below', 'above'], [14, 22]);
       layers.labels.push(svgText(text, b.x, b.y + V.tick.size * 0.35, 'middle', { ...tickOpts, fill: V.aux }));
@@ -735,14 +740,14 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       /* Число уже поставлено как обычная подпись оси. */
     }
     if (item.t === 'goriz' && item.podpis !== undefined && item.podpis !== '') {
-      const text = item.podpis;
+      const text = minusify(item.podpis);
       const halfW = textWidth(text, 15) / 2 + 3;
       const b = place(`подпись ${text}`, 'aux', halfW, 9, { x: sx(win.xmax) - halfW - 6, y: sy(item.y) }, ['above', 'below'], [10, 18]);
       layers.labels.push(svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux, style: 'italic' }));
       addBox(b);
     }
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
-      const text = item.podpis;
+      const text = minusify(item.podpis);
       const halfW = textWidth(text, 15) / 2 + 3;
       const b = place(`подпись ${text}`, 'aux', halfW, 9, { x: sx(item.x), y: sy(item.y) }, ['above-right', 'below-right', 'above-left'], [10, 18]);
       layers.labels.push(svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }));
