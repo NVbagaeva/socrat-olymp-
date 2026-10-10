@@ -213,11 +213,11 @@ export function checkEngine(n: number): Report {
   return { prototypes: 0, generated: rendered, problems };
 }
 
-function nice(x: number): boolean {
+function nice(x: number, places = 2): boolean {
   if (!Number.isFinite(x)) {
     return false;
   }
-  const scaled = x * 100;
+  const scaled = x * 10 ** places;
   return Math.abs(scaled - Math.round(scaled)) < 1e-6;
 }
 
@@ -232,7 +232,7 @@ export function stroki(t: Generated): string[] {
     if (q.itog !== undefined) {
       out.push(q.itog);
     }
-    for (const v of q.varianty) {
+    for (const v of q.knopki) {
       out.push(v.tekst);
       if (v.pochemu !== undefined) {
         out.push(v.pochemu);
@@ -366,20 +366,20 @@ export function checkGenerators(
         problems.push({ where, what: 'в подсказке меньше двух вопросов' });
       }
       for (const q of t.podskazka) {
-        const right = q.varianty.filter((v) => v.verno).length;
+        const right = q.knopki.filter((v) => v.verno).length;
         if (right !== 1) {
           problems.push({
             where,
             what: `в вопросе «${q.vopros.slice(0, 40)}» верных вариантов ${right}`,
           });
         }
-        if (q.varianty.length < 2 || q.varianty.length > 5) {
+        if (q.knopki.length < 2 || q.knopki.length > 5) {
           problems.push({
             where,
-            what: `в вопросе «${q.vopros.slice(0, 40)}» ${q.varianty.length} вариантов`,
+            what: `в вопросе «${q.vopros.slice(0, 40)}» ${q.knopki.length} вариантов`,
           });
         }
-        for (const v of q.varianty) {
+        for (const v of q.knopki) {
           if (!v.verno && (v.pochemu === undefined || v.pochemu.trim() === '')) {
             problems.push({
               where,
@@ -387,7 +387,7 @@ export function checkGenerators(
             });
           }
         }
-        const texts = q.varianty.map((v) => v.tekst);
+        const texts = q.knopki.map((v) => v.tekst);
         if (new Set(texts).size !== texts.length) {
           problems.push({ where, what: 'варианты ответа повторяются' });
         }
@@ -454,4 +454,113 @@ export function checkBank(
     }
   }
   return { prototypes: bank.length, generated, problems };
+}
+
+/** Опорные задачи: шесть блоков по десять микрозадач, у каждой ответ, разбор, подсказка и рисунок без построений. */
+export function checkPrep(
+  seeds: number,
+  blocks: {
+    id: string;
+    lead: string;
+    zapomni: string[];
+    zadachi: { id: string; answerType: 'number' | 'choice' }[];
+  }[],
+  gen: (
+    blockId: string,
+    no: number,
+    seed: string,
+  ) => {
+    uslovie: string;
+    risunok: Figura | null;
+    otvet: number;
+    knopki?: string[];
+    proverka: number;
+    razbor: string[];
+    podskazka: Generated['podskazka'];
+  },
+  typeset: (tex: string) => string,
+  textCheck: TextCheck,
+): Report {
+  const problems: Problem[] = [];
+  let generated = 0;
+  for (const block of blocks) {
+    if (block.zadachi.length !== 10) {
+      problems.push({
+        where: block.id,
+        what: `в блоке ${block.zadachi.length} микрозадач вместо 10`,
+      });
+    }
+    if (block.lead.includes('$') || /\\[A-Za-z]/.test(block.lead)) {
+      problems.push({ where: block.id, what: 'на карточке блока есть формула' });
+    }
+    problems.push(...proveritStroki(block.zapomni, typeset, textCheck, `${block.id} запомни`));
+    block.zadachi.forEach((micro, i) => {
+      const seen = new Set<string>();
+      for (let s = 1; s <= seeds; s += 1) {
+        const where = `${micro.id} s${s}`;
+        try {
+          const t = gen(block.id, i + 1, `chk#${s}`);
+          generated += 1;
+          seen.add(
+            t.uslovie + (t.risunok === null ? '' : JSON.stringify(t.risunok.uzly)) + t.otvet,
+          );
+          if (!nice(t.otvet, 3) && micro.answerType === 'number') {
+            problems.push({ where, what: `ответ ${t.otvet} не годится` });
+          }
+          if (micro.answerType === 'choice') {
+            if (
+              t.knopki === undefined ||
+              t.knopki.length < 2 ||
+              !Number.isInteger(t.otvet) ||
+              t.otvet < 0 ||
+              t.otvet >= t.knopki.length
+            ) {
+              problems.push({
+                where,
+                what: 'у задачи на выбор нет вариантов или индекс верного вне диапазона',
+              });
+            } else if (new Set(t.knopki).size !== t.knopki.length) {
+              problems.push({ where, what: 'варианты выбора повторяются' });
+            }
+          }
+          if (Math.abs(t.proverka - t.otvet) > 1e-6) {
+            problems.push({ where, what: `независимый счёт ${t.proverka} ≠ ${t.otvet}` });
+          }
+          if (t.razbor.length === 0) {
+            problems.push({ where, what: 'нет разбора' });
+          }
+          for (const q of t.podskazka) {
+            if (q.knopki.filter((v) => v.verno).length !== 1) {
+              problems.push({ where, what: 'в вопросе подсказки не один верный вариант' });
+            }
+            for (const v of q.knopki) {
+              if (!v.verno && (v.pochemu ?? '').trim() === '') {
+                problems.push({ where, what: 'у неверного варианта подсказки нет объяснения' });
+              }
+            }
+          }
+          if (t.risunok !== null) {
+            const rep = pustoyOtchet();
+            const svg = renderFigura(t.risunok, { rezhim: 'student' }, rep);
+            problems.push(...rep.problems.map((what) => ({ where, what })));
+            problems.push(...studentSvgChist(svg).map((what) => ({ where, what })));
+          }
+          const lines = [t.uslovie, ...t.razbor, ...(t.knopki ?? [])];
+          for (const q of t.podskazka) {
+            lines.push(q.vopros, ...(q.itog === undefined ? [] : [q.itog]));
+            for (const v of q.knopki) {
+              lines.push(v.tekst, ...(v.pochemu === undefined ? [] : [v.pochemu]));
+            }
+          }
+          problems.push(...proveritStroki(lines, typeset, textCheck, where));
+        } catch (e) {
+          problems.push({ where, what: `не сгенерировалась: ${(e as Error).message}` });
+        }
+      }
+      if (seeds >= 20 && micro.answerType === 'number' && seen.size < seeds * 0.2) {
+        problems.push({ where: micro.id, what: `различных задач ${seen.size} из ${seeds}` });
+      }
+    });
+  }
+  return { prototypes: blocks.length, generated, problems };
 }

@@ -256,7 +256,7 @@ export function Opornye9Screen({
               <div className="z9-lesenka__now">
                 <p className="z9-lesenka__q" dangerouslySetInnerHTML={{ __html: q.voprosHtml }} />
                 <ul className="z9-lesenka__options">
-                  {q.varianty.map((v, i) => (
+                  {q.knopki.map((v, i) => (
                     <li key={i}>
                       <button
                         type="button"
@@ -277,7 +277,7 @@ export function Opornye9Screen({
                     className="z9-lesenka__why"
                     role="status"
                     dangerouslySetInnerHTML={{
-                      __html: q.varianty[lesenka.wrong]?.pochemuHtml ?? '',
+                      __html: q.knopki[lesenka.wrong]?.pochemuHtml ?? '',
                     }}
                   />
                 )}
@@ -299,9 +299,9 @@ export function Opornye9Screen({
           Ваш ответ:
         </p>
 
-        {task.answerType === 'choice' && task.varianty !== null ? (
+        {task.answerType === 'choice' && task.knopki !== null ? (
           <ul className="ptask__options" aria-labelledby="p9-answer-label">
-            {task.varianty.map((html, i) => (
+            {task.knopki.map((html, i) => (
               <li key={i}>
                 <button
                   type="button"

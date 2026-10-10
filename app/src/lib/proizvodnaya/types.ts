@@ -166,7 +166,7 @@ export interface Variant {
 /** Вопрос подсказки: формулировка и кнопки ответа. */
 export interface Vopros {
   vopros: string;
-  varianty: Variant[];
+  knopki: Variant[];
   /** Что ученик узнаёт, ответив верно: короткая строка, формулы в $…$. */
   itog?: string;
   /** С какого шага рисунок показывает вспомогательные построения. */

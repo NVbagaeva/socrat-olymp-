@@ -92,7 +92,7 @@ const m01 = micro(
     return {
       uslovie: `На рисунке изображён график функции $y=f(x)$, отмечена точка $x_1$. Каков знак производной $${FP}(x_1)$?`,
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -182,7 +182,7 @@ const m02 = micro(
     return {
       uslovie: `На рисунке изображён график функции $y=f(x)$, отмечены точки $x_1$, $x_2$, $x_3$. В какой из них производная равна нулю?`,
       risunok: fig,
-      varianty: IDX,
+      knopki: IDX,
       otvet: pos,
       proverka: pos,
       razbor: razborIz([
@@ -295,7 +295,7 @@ const m03 = micro(
         uslovie:
           'На рисунке изображён график функции $y=f(x)$, отмечены точки $x_1$ и $x_2$. В какой из них производная положительна?',
         risunok: fig,
-        varianty: v.varianty,
+        knopki: v.knopki,
         otvet: v.otvet,
         proverka: v.otvet,
         razbor: razborIz([
@@ -672,7 +672,7 @@ const m08 = micro(
     return {
       uslovie: `На рисунке изображён график функции $y=f(x)$. Что можно сказать о знаке производной на промежутке $${interval(p, q)}$?`,
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -848,7 +848,7 @@ const m10 = micro(
     return {
       uslovie: `На рисунке изображён график функции $y=f(x)$. На каком из промежутков производная отрицательна на всём промежутке?`,
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([

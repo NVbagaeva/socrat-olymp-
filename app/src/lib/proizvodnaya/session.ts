@@ -28,7 +28,7 @@ export interface Variant9 {
 
 export interface Vopros9 {
   voprosHtml: string;
-  varianty: Variant9[];
+  knopki: Variant9[];
   /** Что узнаёт ученик, ответив верно. */
   itogHtml: string | null;
   /** Какие построения показывает рисунок на этом вопросе. */
@@ -86,7 +86,7 @@ export function taskId(prototype: string, seed: string): string {
 function voprosHtml(v: Vopros, index: number): Vopros9 {
   return {
     voprosHtml: typeset(v.vopros),
-    varianty: v.varianty.map((item) => ({
+    knopki: v.knopki.map((item) => ({
       tekstHtml: typeset(item.tekst),
       verno: item.verno,
       pochemuHtml: item.pochemu === undefined || item.pochemu === '' ? '' : typeset(item.pochemu),

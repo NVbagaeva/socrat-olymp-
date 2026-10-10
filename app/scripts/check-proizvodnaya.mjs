@@ -16,7 +16,8 @@
    вариант и у каждого неверного — объяснение; все формулы $…$ собираются
    KaTeX строго, вне формул нет сырого TeX и «плоской» математики.
 
-   Банк: десять разных вариантов на прототип.
+   Банк: десять разных вариантов на прототип. Опорные задачи: шесть блоков
+   по десять микрозадач, у каждой ответ, разбор, подсказка, рисунок без построений.
 
    Запуск: pnpm test:proizvodnaya [seeds]
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
@@ -35,23 +36,31 @@ const textCheck = (text) => [
 ];
 
 const seeds = Number(process.argv[2] ?? 200);
-const { checkEngine, checkGenerators, checkBank } = requireSrc('lib/proizvodnaya/selftest');
+const { checkEngine, checkGenerators, checkBank, checkPrep } = requireSrc(
+  'lib/proizvodnaya/selftest',
+);
 
 const engine = checkEngine(Math.min(seeds * 2, 400));
 console.log(`движок графиков: ${engine.generated} рисунков, проблем ${engine.problems.length}`);
 
 const gen = checkGenerators(seeds, typeset, textCheck);
-console.log(`генераторы: ${gen.prototypes} прототипов, ${gen.generated} задач, проблем ${gen.problems.length}`);
+console.log(
+  `генераторы: ${gen.prototypes} прототипов, ${gen.generated} задач, проблем ${gen.problems.length}`,
+);
 const slow = Object.entries(gen.ms ?? {}).filter(([, ms]) => ms > 400);
 if (slow.length > 0) {
-  console.log(`  медленные прототипы (мс на задачу): ${slow.map(([id, ms]) => `${id}=${ms}`).join(', ')}`);
+  console.log(
+    `  медленные прототипы (мс на задачу): ${slow.map(([id, ms]) => `${id}=${ms}`).join(', ')}`,
+  );
 }
 
 let bankProblems = [];
 try {
   const { BANK } = requireSrc('lib/proizvodnaya/bank');
   const bank = checkBank(BANK, typeset, textCheck);
-  console.log(`банк: ${bank.prototypes} прототипов, ${bank.generated} вариантов, проблем ${bank.problems.length}`);
+  console.log(
+    `банк: ${bank.prototypes} прототипов, ${bank.generated} вариантов, проблем ${bank.problems.length}`,
+  );
   bankProblems = bank.problems;
 } catch (e) {
   if (e && e.code === 'MODULE_NOT_FOUND') {
@@ -61,7 +70,14 @@ try {
   }
 }
 
-const problems = [...engine.problems, ...gen.problems, ...bankProblems];
+const { PREP_BLOCKS } = requireSrc('lib/proizvodnaya/prep/blocks');
+const { generatePrep } = requireSrc('lib/proizvodnaya/prep/generate');
+const prep = checkPrep(Math.min(seeds, 40), PREP_BLOCKS, generatePrep, typeset, textCheck);
+console.log(
+  `опорные задачи: ${prep.prototypes} блоков, ${prep.generated} задач, проблем ${prep.problems.length}`,
+);
+
+const problems = [...engine.problems, ...gen.problems, ...bankProblems, ...prep.problems];
 const shown = new Map();
 for (const p of problems) {
   const key = `${p.where.replace(/#\d+/g, '#N')} — ${p.what.slice(0, 110)}`;

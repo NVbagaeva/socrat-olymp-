@@ -37,7 +37,7 @@ function tipy(uzly: readonly Uzel[]): Nul[] {
 }
 
 /** Неверные варианты: без повторов, не больше трёх. */
-function varianty(verno: string, kandidaty: readonly Nevernyy[]): Nevernyy[] {
+function knopki(verno: string, kandidaty: readonly Nevernyy[]): Nevernyy[] {
   const out: Nevernyy[] = [];
   const seen = new Set<string>([verno]);
   for (const c of kandidaty) {
@@ -220,7 +220,7 @@ function metkiNaMonotonnosti(id: string, znak: 1 | -1) {
             r,
             `В каких отмеченных точках график $f'$ лежит ${vyshe} оси $Ox$?`,
             xSpisok(idxNuzh),
-            varianty(xSpisok(idxNuzh), [
+            knopki(xSpisok(idxNuzh), [
               {
                 tekst: xSpisok(idxProch),
                 pochemu: `В этих точках график $f'$ лежит ${nizhe} оси: функция там ${vozr ? 'убывает' : 'возрастает'}.`,
@@ -400,7 +400,7 @@ function tochkaEkstremuma(id: string, tip: 'max' | 'min') {
             r,
             `Где график $f'$ пересекает ось $Ox$ ${mx ? 'сверху вниз' : 'снизу вверх'}?`,
             `$x=${d(ans)}$`,
-            varianty(`$x=${d(ans)}$`, [
+            knopki(`$x=${d(ans)}$`, [
               ...lovushki.map((z) => ({
                 tekst: `$x=${d(z.x)}$`,
                 pochemu: `Здесь график пересекает ось ${mx ? 'снизу вверх' : 'сверху вниз'}: знак меняется ${protivSmena}, это точка ${protivSlovo}.`,
@@ -620,7 +620,7 @@ function chisloNaOtrezke(id: string, t: TipSchyota) {
             r,
             `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
             spisok(v),
-            varianty(spisok(v), [
+            knopki(spisok(v), [
               {
                 tekst: spisok(nuli),
                 pochemu:
@@ -641,7 +641,7 @@ function chisloNaOtrezke(id: string, t: TipSchyota) {
             r,
             `Какие из них — точки ${slovo}?`,
             spisok(vTipa),
-            varianty(spisok(vTipa), [
+            knopki(spisok(vTipa), [
               ...(t === 'extr'
                 ? [
                     {
@@ -776,7 +776,7 @@ const P948 = proto({
           r,
           `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
           `$x=${d(ans)}$`,
-          varianty(
+          knopki(
             `$x=${d(ans)}$`,
             vne.slice(0, 3).map((z) => ({
               tekst: `$x=${d(z.x)}$`,
@@ -1015,7 +1015,7 @@ function naibNaimOtrezok(id: string, naib: boolean) {
             r,
             "Как график $f'$ расположен относительно оси $Ox$ на отрезке $" + otrezok(p, q) + '$?',
             op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
-            varianty(
+            knopki(
               op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
               (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
                 .filter((s) => s !== stsenariy)
@@ -1033,7 +1033,7 @@ function naibNaimOtrezok(id: string, naib: boolean) {
             r,
             'Как ведёт себя функция $f$ на этом отрезке?',
             op.f.charAt(0).toUpperCase() + op.f.slice(1),
-            varianty(
+            knopki(
               op.f.charAt(0).toUpperCase() + op.f.slice(1),
               (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
                 .filter((s) => s !== stsenariy)
@@ -1051,7 +1051,7 @@ function naibNaimOtrezok(id: string, naib: boolean) {
             r,
             `В какой точке отрезка значение функции ${slovo}?`,
             `$x=${d(ans)}$`,
-            varianty(`$x=${d(ans)}$`, [
+            knopki(`$x=${d(ans)}$`, [
               ...kandidaty
                 .filter((x) => x !== ans)
                 .map((x) => ({

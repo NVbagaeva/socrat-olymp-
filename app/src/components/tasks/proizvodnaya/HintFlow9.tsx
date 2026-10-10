@@ -42,7 +42,7 @@ export function HintFlow9({ voprosy, step, wrong, onPick }: HintFlow9Props) {
               </p>
               <div className="z9-hint__q" dangerouslySetInnerHTML={{ __html: q.voprosHtml }} />
               <div className="z9-hint__opts">
-                {q.varianty.map((v, k) => {
+                {q.knopki.map((v, k) => {
                   const right = passed && v.verno;
                   const off = !passed && wrong.includes(k);
                   if (passed && !v.verno) {
@@ -65,7 +65,7 @@ export function HintFlow9({ voprosy, step, wrong, onPick }: HintFlow9Props) {
               ) : null}
               {!passed
                 ? wrong.map((k) => {
-                    const why = q.varianty[k]?.pochemuHtml ?? '';
+                    const why = q.knopki[k]?.pochemuHtml ?? '';
                     return (
                       <div
                         key={k}

@@ -41,7 +41,7 @@ interface SKasat {
 }
 
 /** Волна с узлом касания: наклон в нём задан явно и равен p/q. */
-function volnaSKasat(r: Rng): SKasat | null {
+function volnaSKasat(r: Rng, down: boolean): SKasat | null {
   const w = volna(r, { n: [2, 3], shag: 3 });
   if (w === null) {
     return null;
@@ -49,7 +49,9 @@ function volnaSKasat(r: Rng): SKasat | null {
   /* Сегменты шириной от трёх клеток: внутри есть целая абсцисса с запасом. */
   const segs: number[] = [];
   for (let i = 0; i < w.uzly.length - 1; i += 1) {
-    if ((w.uzly[i + 1] as Uzel).x - (w.uzly[i] as Uzel).x >= 3) {
+    const u0 = w.uzly[i] as Uzel;
+    const u1 = w.uzly[i + 1] as Uzel;
+    if (u1.x - u0.x >= 3 && u1.y < u0.y === down) {
       segs.push(i);
     }
   }
@@ -119,7 +121,7 @@ const P921 = proto({
   kratko: "Найти $f'(x_0)$ по касательной",
   risunok: true,
   generate(r: Rng): Draft | null {
-    const s = volnaSKasat(r);
+    const s = volnaSKasat(r, r.next() < 0.4);
     if (s === null) {
       return null;
     }
@@ -131,7 +133,7 @@ const P921 = proto({
     const [A, B] = pair;
     const k = s.p / s.q;
     /* Разнообразие: убывающих касательных не меньше трети, наклон ±1 — реже остальных. */
-    if (k < 0 !== r.next() < 0.4 || (Math.abs(k) === 1 && r.next() < 0.6)) {
+    if (Math.abs(k) === 1 && r.next() < 0.5) {
       return null;
     }
     const fig: Figura = {
@@ -422,6 +424,85 @@ function volnaSPeresecheniem(
   return { uzly, a: w.a, b: w.b, xk: c.x };
 }
 
+/**
+ * Волна f′ с единственным пересечением прямой y = k: горб с узлом (x*, k)
+ * выше |k|, остальные горбы того же знака ниже |k| хотя бы на единицу, так
+ * что график больше нигде не доходит до горизонтали.
+ */
+function volnaSEdinstvennym(
+  r: Rng,
+  k: number,
+): { uzly: Uzel[]; a: number; b: number; xk: number } | null {
+  const w = volnaP(r, { n: [2, 4], shag: 2 });
+  if (w === null) {
+    return null;
+  }
+  const sk = k > 0 ? 1 : -1;
+  const ak = Math.abs(k);
+  /* Горбы: серии подряд идущих ненулевых узлов. */
+  const runs: [number, number][] = [];
+  let start = -1;
+  w.uzly.forEach((u, i) => {
+    if (u.y !== 0 && start < 0) {
+      start = i;
+    }
+    if ((u.y === 0 || i === w.uzly.length - 1) && start >= 0) {
+      runs.push([start, u.y === 0 ? i - 1 : i]);
+      start = -1;
+    }
+  });
+  const same = runs.filter(([from]) => Math.sign((w.uzly[from] as Uzel).y) === sk);
+  if (same.length === 0 || (ak === 1 && same.length > 1)) {
+    return null;
+  }
+  const chosen = r.pick(same);
+  const uzly = w.uzly.map((u) => ({ ...u }));
+  for (const [from, to] of same) {
+    const own = from === chosen[0];
+    for (let i = from; i <= to; i += 1) {
+      const u = uzly[i] as Uzel;
+      u.y = sk * (own ? Math.abs(u.y) : Math.min(Math.abs(u.y), ak - 1));
+    }
+    if (own) {
+      let top = from;
+      for (let i = from; i <= to; i += 1) {
+        if (Math.abs((uzly[i] as Uzel).y) > Math.abs((uzly[top] as Uzel).y)) {
+          top = i;
+        }
+      }
+      const height = Math.min(5, ak + r.int(1, 2));
+      (uzly[top] as Uzel).y = sk * height;
+      for (let i = from; i <= to; i += 1) {
+        if (i !== top && Math.abs((uzly[i] as Uzel).y) >= height) {
+          (uzly[i] as Uzel).y = sk * (height - 1);
+        }
+      }
+    }
+  }
+  /* Узел пересечения: между соседними узлами горба, где k лежит строго между значениями. */
+  const cands: { i: number; x: number }[] = [];
+  for (let i = chosen[0] - 1; i <= chosen[1]; i += 1) {
+    const u0 = uzly[i];
+    const u1 = uzly[i + 1];
+    if (u0 === undefined || u1 === undefined) {
+      continue;
+    }
+    const lo = Math.min(u0.y, u1.y);
+    const hi = Math.max(u0.y, u1.y);
+    if (lo < k && k < hi) {
+      for (let x = u0.x + 1; x <= u1.x - 1; x += 1) {
+        cands.push({ i, x });
+      }
+    }
+  }
+  if (cands.length === 0) {
+    return null;
+  }
+  const c = r.pick(cands);
+  uzly.splice(c.i + 1, 0, { x: c.x, y: k });
+  return { uzly, a: w.a, b: w.b, xk: c.x };
+}
+
 function tekstPryamoy(k: number, m: number): string {
   const kk = k === 1 ? '' : k === -1 ? '-' : String(k);
   const mm = m === 0 ? '' : m > 0 ? `+${m}` : String(m);
@@ -438,7 +519,7 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
     generate(r: Rng): Draft | null {
       const k = schitat ? r.pick([0, 1, 1, 2, -1, -2, 3]) : r.pick([1, 2, 3, -1, -2]);
       const m = r.pick([-9, -7, -5, -3, -2, -1, 0, 1, 2, 3, 4, 6, 8]);
-      const w = volnaSPeresecheniem(r, k);
+      const w = schitat ? volnaSPeresecheniem(r, k) : volnaSEdinstvennym(r, k);
       if (w === null) {
         return null;
       }

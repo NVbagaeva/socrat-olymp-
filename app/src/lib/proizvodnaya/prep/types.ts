@@ -18,7 +18,7 @@ export interface PrepGenerated {
   /** Ответ числом (для answerType 'number') или индекс верного варианта (для 'choice'). */
   otvet: number;
   /** Варианты кнопок для answerType 'choice': тексты с формулами. */
-  varianty?: string[];
+  knopki?: string[];
   /** Независимый второй счёт ответа. */
   proverka: number;
   /** Разбор по этапам: строки с формулами в $…$. */

@@ -64,14 +64,14 @@ export function vopros(
   shagNomer?: number,
 ): Vopros {
   const seen = new Set<string>([verno]);
-  const varianty: Variant[] = [{ tekst: verno, verno: true }];
+  const knopki: Variant[] = [{ tekst: verno, verno: true }];
   for (const n of neverno) {
     if (!seen.has(n.tekst)) {
       seen.add(n.tekst);
-      varianty.push({ tekst: n.tekst, verno: false, pochemu: n.pochemu });
+      knopki.push({ tekst: n.tekst, verno: false, pochemu: n.pochemu });
     }
   }
-  const out: Vopros = { vopros: text, varianty: peremeshat(r, varianty) };
+  const out: Vopros = { vopros: text, knopki: peremeshat(r, knopki) };
   if (itog !== undefined) {
     out.itog = itog;
   }

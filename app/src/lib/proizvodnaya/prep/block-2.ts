@@ -42,7 +42,7 @@ const m01 = micro(
     return {
       uslovie: 'На рисунке изображена прямая $y=kx+m$. Какой знак имеет угловой коэффициент $k$?',
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -130,7 +130,7 @@ const m02 = micro(
       uslovie:
         'На рисунке изображена прямая. Каким является угол $\\alpha$ между этой прямой и положительным направлением оси $Ox$?',
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -377,7 +377,7 @@ const m06 = micro(
     return {
       uslovie: `Какое из равенств верно?`,
       risunok: null,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -497,7 +497,7 @@ const m08 = micro(
     return {
       uslovie: `Прямая образует с положительным направлением оси $Ox$ ${tup ? 'тупой' : 'острый'} угол. Какое из чисел может быть её угловым коэффициентом?`,
       risunok: null,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -617,7 +617,7 @@ const m10 = micro(
     return {
       uslovie: `Прямая задана уравнением $${tex}$. Каким является угол между этой прямой и положительным направлением оси $Ox$: острым, тупым или нулевым?`,
       risunok: null,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([

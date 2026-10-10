@@ -75,9 +75,9 @@ export function vybor(
   r: Rng,
   verno: string,
   neverno: string[],
-): { varianty: string[]; otvet: number } {
+): { knopki: string[]; otvet: number } {
   const all = peremeshat(r, [verno, ...neverno]);
-  return { varianty: all, otvet: all.indexOf(verno) };
+  return { knopki: all, otvet: all.indexOf(verno) };
 }
 
 export function okoshko(xs: [number, number], ys: [number, number], pole = 1): Okno {

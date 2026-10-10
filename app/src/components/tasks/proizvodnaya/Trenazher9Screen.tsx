@@ -271,7 +271,7 @@ export function Trenazher9Screen({ session }: Trenazher9ScreenProps) {
     if (q === undefined || item === undefined) {
       return;
     }
-    if (q.varianty[k]?.verno === true) {
+    if (q.knopki[k]?.verno === true) {
       patchItem({ hintStep: item.hintStep + 1, hintWrong: [] });
     } else if (!item.hintWrong.includes(k)) {
       patchItem({ hintWrong: [...item.hintWrong, k] });

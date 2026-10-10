@@ -22,7 +22,7 @@ export interface PrepVariantHtml {
 
 export interface PrepVoprosHtml {
   voprosHtml: string;
-  varianty: PrepVariantHtml[];
+  knopki: PrepVariantHtml[];
   itogHtml: string;
   /** С какого шага показывать построения: ключ в PrepZakryto.risunki. */
   shag: number;
@@ -47,7 +47,7 @@ export interface PrepSealed {
   risunokSvg: string | null;
   answerType: 'number' | 'choice';
   /** Варианты кнопок: набранные подписи. У числового ответа — null. */
-  varianty: string[] | null;
+  knopki: string[] | null;
   /** Отпечаток ответа. */
   seal: string;
   /** JSON PrepZakryto, закрытый отпечатком. */
@@ -75,7 +75,7 @@ export function sealPrep(micro: PrepMicro, seed: string): PrepSealed {
       voprosHtml: typeset(q.vopros),
       itogHtml: typeset(q.itog ?? ''),
       shag: q.shag ?? 0,
-      varianty: q.varianty.map((v) => ({
+      knopki: q.knopki.map((v) => ({
         html: typeset(v.tekst),
         verno: v.verno,
         pochemuHtml: typeset(v.pochemu ?? ''),
@@ -90,7 +90,7 @@ export function sealPrep(micro: PrepMicro, seed: string): PrepSealed {
     uslovieHtml: typeset(task.uslovie),
     risunokSvg: fig === null ? null : renderFigura(fig, { rezhim: 'student' }),
     answerType: micro.answerType,
-    varianty: task.varianty === undefined ? null : task.varianty.map((v) => typeset(v)),
+    knopki: task.knopki === undefined ? null : task.knopki.map((v) => typeset(v)),
     seal,
     zakryto: sealText(JSON.stringify(zakryto), seal),
   };

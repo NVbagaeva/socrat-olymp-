@@ -201,7 +201,7 @@ const m01 = micro(
       uslovie:
         "На рисунке изображён график производной $y=f'(x)$ функции $f(x)$. Точка $x_1$ — нуль производной. Что можно сказать о точке $x_1$ для функции $f(x)$?",
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -239,7 +239,7 @@ const m02 = micro(
       uslovie:
         "На рисунке изображён график производной $y=f'(x)$. Точка $x_1$ — нуль производной. Функция $f(x)$ в точке $x_1$ имеет точку…",
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -427,7 +427,7 @@ const m05 = micro(
       uslovie:
         "На рисунке изображён график производной $y=f'(x)$ функции $f(x)$. Каков знак $f'(x_1)$ в отмеченной точке $x_1$?",
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
@@ -612,7 +612,7 @@ const m08 = micro(
       uslovie:
         "На рисунке изображён график производной $y=f'(x)$ функции $f(x)$. На каком из промежутков функция $f(x)$ возрастает?",
       risunok: fig,
-      varianty: v.varianty,
+      knopki: v.knopki,
       otvet: v.otvet,
       proverka: v.otvet,
       razbor: razborIz([
