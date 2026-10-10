@@ -2,7 +2,7 @@ import { Chart } from '@/components/graph/Chart';
 import { Tex } from '@/components/ui/Tex';
 import type { Formulation } from '@/content/sections';
 import { typeScene, type TypeSceneId } from '@/lib/scenes';
-import { ANALYSIS_ATTR, ANALYSIS_WORDS, analysisHref, practiceHref } from './AnalysisPage';
+import { ANALYSIS_ATTR, ANALYSIS_WORDS, analysisHref, practiceLinks } from './AnalysisPage';
 import { FormulationIcon } from '../FormulationIcon';
 import { TypesDisclosure, type TypeItem } from './TypesDisclosure';
 
@@ -38,7 +38,8 @@ export function AboutTypes({ title, forms, base }: AboutTypesProps) {
         id: analysis.id,
         label: item.title.replace(/\$/g, ''),
         href: analysisHref(base ?? '', analysis.id),
-        practiceHref: practiceHref(base ?? '', analysis.trainer),
+        practiceHref: practiceLinks(base ?? '', analysis).practice,
+        trainerHref: practiceLinks(base ?? '', analysis).trainer,
         card: (
           <>
             <span className="form-card__no" aria-hidden="true">

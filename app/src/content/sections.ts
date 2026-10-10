@@ -61,8 +61,14 @@ export interface FormulationAnalysis {
   id: string;
   /** Примеры — те же блоки, что в теории (content/theoryRich.ts). */
   examples: RichExample[];
-  /** «Потренироваться»: ярлык тренажёра /trenazher/{trainer}/. */
+  /** Ярлык тренажёра /trenazher/{trainer}/. */
   trainer: string;
+  /**
+   * Свой набор опорных задач P12Q-n (/opornye-zadachi/{prep}/): тогда
+   * «Потренироваться» ведёт в него, а тренажёр — второй ссылкой.
+   * Нет — «Потренироваться» ведёт в тренажёр.
+   */
+  prep?: string;
 }
 
 /** Вкладка «О задании»: всё её содержимое приходит отсюда. */
