@@ -562,7 +562,8 @@ function sqrtShift(): TheoryFigure {
       shapes: [seg([-3, -2], [1, -2]), seg([1, -2], [1, 1])],
     },
     labels: [
-      ...axisLabels(w),
+      /* Штрих x = 1 идёт через деление 1 оси Ox: подпись деления — правее штриха. */
+      ...axisLabels(w).map((l) => (l.text === '$1$' && l.at[1] === 0 ? { ...l, dx: 9 } : l)),
       { at: [-3, -2], text: '$(x_0;\\, y_0)$', tone: 'accent', auto: true },
       { at: [-1, -2], text: '$4 = 2^2$', dy: 16, tone: 'accent', size: 16 },
       { at: [1, -1.3], text: '$3$', dx: 12, tone: 'accent' },
@@ -648,7 +649,8 @@ function sqrtExCross(): TheoryFigure {
       points: [dot(-3, 0, 'lineB'), dot(1, 2, 'cross')],
     },
     labels: [
-      ...axisLabels(w),
+      /* Прямая g пересекает Oy в 1,5 — подпись деления 1 на Oy опущена чуть ниже. */
+      ...axisLabels(w).map((l) => (l.text === '$1$' && l.at[0] === 0 ? { ...l, dy: 5 } : l)),
       { at: [1, 2], text: '$A$', size: 17, auto: true },
       { at: [-3, 0], text: '$(-3;\\, 0)$', size: 14, tone: 'accent', auto: true },
     ],

@@ -33,6 +33,10 @@ export interface PlacedLabel {
   /** Центр рамки, пиксели чертежа. */
   x: number;
   y: number;
+  /** Точка привязки ручной подписи (at + dx, dy): страница ставит подпись
+   *  от неё по настоящей ширине, как раньше; рамка по оценке ширины
+   *  нужна только как препятствие для подписей точек. */
+  anchorX: number;
   halfW: number;
   halfH: number;
   auto: boolean;
@@ -82,7 +86,17 @@ export function layoutFigure(figure: TheoryFigure): FigureLayout {
     const ax = px(label.at[0]) + (label.dx ?? 0);
     const ay = py(label.at[1]) + (label.dy ?? 0);
     const x = label.anchor === 'left' ? ax + halfW : label.anchor === 'right' ? ax - halfW : ax;
-    placed.push({ label, x, y: ay, halfW, halfH, auto: false, leader: null, free: true });
+    placed.push({
+      label,
+      x,
+      y: ay,
+      anchorX: ax,
+      halfW,
+      halfH,
+      auto: false,
+      leader: null,
+      free: true,
+    });
     boxes.push({ x, y: ay, halfW, halfH });
   });
 
@@ -130,6 +144,7 @@ export function layoutFigure(figure: TheoryFigure): FigureLayout {
       label,
       x: spot.x,
       y: spot.y,
+      anchorX: spot.x,
       halfW,
       halfH,
       auto: true,

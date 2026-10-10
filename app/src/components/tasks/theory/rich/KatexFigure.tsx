@@ -50,6 +50,15 @@ export function KatexFigure({ id, className }: { id: TheoryFigureId; className?:
       {layout.labels.map((item, index) => {
         const label = item.label;
         const size = label.size ?? LABEL_SIZE;
+        /* Подпись точки — по центру подобранной рамки; ручная подпись —
+           от точки привязки по настоящей ширине (anchor). */
+        const shift = item.auto
+          ? '-50%, -50%'
+          : label.anchor === 'left'
+            ? '0, -50%'
+            : label.anchor === 'right'
+              ? '-100%, -50%'
+              : '-50%, -50%';
         return (
           <span
             key={index}
@@ -59,10 +68,10 @@ export function KatexFigure({ id, className }: { id: TheoryFigureId; className?:
               item.auto && 'kfig__label--point',
             )}
             style={{
-              left: `${((item.x / width) * 100).toFixed(3)}%`,
+              left: `${((item.anchorX / width) * 100).toFixed(3)}%`,
               top: `${((item.y / height) * 100).toFixed(3)}%`,
               fontSize: `clamp(${LABEL_MIN}px, ${((size / width) * 100).toFixed(3)}cqw, ${size}px)`,
-              transform: 'translate(-50%, -50%)',
+              transform: `translate(${shift})`,
             }}
             dangerouslySetInnerHTML={{ __html: typeset(label.text) }}
           />
