@@ -10,10 +10,14 @@
  */
 
 import '@/lib/graph/families/index.js';
-import { registerCurve } from '@/lib/graph/renderer.js';
+import { THEME, registerCurve } from '@/lib/graph/renderer.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { playground as PLAY } from '@/content/theoryQuadratic';
+
+/* Зелёный второй график миниатюр плашек «О задании» — тот же цвет, что у g
+   в разборах (lib/theoryFigures.ts): ключ добавляется в THEME, как там. */
+(THEME.colors as unknown as Record<string, string>).alt ??= 'var(--graph-alt, var(--color-success))';
 
 /** Квадратное симметричное окно — иного renderGraph не принимает. */
 function squareWindow(half: number) {
@@ -662,7 +666,7 @@ function quadraticPrepScene(
     return {
       ...base,
       curves: [
-        thin(miniParabola(1, 0, -1.5)),
+        miniParabola(1, 0, -1.5),
         { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
       ],
       points: [miniDot(1, 0.5, 'lineB')],
@@ -673,7 +677,7 @@ function quadraticPrepScene(
     /* Две параболы: отмечена одна общая точка. */
     return {
       ...base,
-      curves: [thin(miniParabola(1, -0.5, -1.5)), thin(miniParabola(0.5, 0.9, -1.2, 'lineB'))],
+      curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
       points: [miniDot(-0.2, -1.41, 'lineB')],
     };
   }
@@ -732,18 +736,19 @@ export function typeScene(id: TypeSceneId) {
   if (basic !== undefined) {
     return { ...base, curves: [basic] };
   }
+  /* Второй график — зелёный, как g в разборах под плашкой. */
   if (id === 'cross-line') {
     return {
       ...base,
       curves: [
-        miniParabola(1, 0, -1.5),
-        { type: 'line', k: 1, b: -0.5, color: 'lineB', label: null },
+        thin(miniParabola(1, 0, -1.5)),
+        { type: 'line', k: 1, b: -0.5, color: 'alt', label: null },
       ],
     };
   }
   return {
     ...base,
-    curves: [miniParabola(1, -0.5, -1.5), miniParabola(0.5, 0.9, -1.2, 'lineB')],
+    curves: [thin(miniParabola(1, -0.5, -1.5)), thin(miniParabola(0.5, 0.9, -1.2, 'alt'))],
   };
 }
 
