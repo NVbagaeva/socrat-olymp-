@@ -53,6 +53,8 @@
     "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
+    "build:bank-9": "node scripts/build-bank-9.mjs",
+    "build:bank-9-open": "node scripts/build-bank-9-open.mjs",
     "build:pdf-8": "node scripts/build-pdf-8.mjs",
     "build:pdf-8-sample": "node scripts/build-pdf-8.mjs --sample",
     "test:pdf-8": "node scripts/check-pdf-8.mjs",
