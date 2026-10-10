@@ -976,7 +976,10 @@ function qbValueB(): TheoryFigure {
   return {
     scene: basicScene(figure, []),
     labels: [
-      ...zeroAt(crossAxisLabels(ex.window, 'above'), 10),
+      /* Деление 1 по Oy не подписано: через (0; 1) идёт сама парабола. */
+      ...zeroAt(crossAxisLabels(ex.window, 'above'), 10).filter(
+        (item) => !(item.at[0] === 0 && item.at[1] === 1),
+      ),
       bold([-2, 4.9], 'y = x^2 + bx + c', 'primary', { anchor: 'center' }),
     ],
   };
