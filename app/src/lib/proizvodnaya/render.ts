@@ -739,31 +739,36 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     halfH: V.tick.size * 0.42,
   });
   const chislaX = fig.chisla ?? 'vse';
+  const obyaz = new Set(fig.obyazatelnye ?? []);
   for (let x = win.xmin + 1; x < win.xmax; x += 1) {
     if (x === 0 || otmecheno.has(x)) {
       continue;
     }
-    const wantIt = chislaX === 'vse' || x === 1 || auxZasechki.has(x);
+    const forced = obyaz.has(x);
+    const wantIt = forced || chislaX === 'vse' || x === 1 || auxZasechki.has(x);
     if (!wantIt) {
       continue;
     }
     const text = (x < 0 ? THEME.minus : '') + String(Math.abs(x));
-    let done = false;
-    for (const side of [1]) {
+    /* Обычное число — только под осью; обязательное (корень, граница) при
+       нехватке места уходит на другую сторону и ставится в любом случае. */
+    let best: { b: Podpis; min: number } | null = null;
+    for (const side of forced ? [1, -1] : [1]) {
       const b = numberBox(
         text,
         sx(x),
         axisX + side * V.tick.gapX - V.tick.size * 0.35 + (side === -1 ? -V.tick.size * 0.1 : 0),
       );
-      const rect = boxRect(b);
-      if (zazor(rect, obstacles).min >= V.gap - 1) {
-        layers.labels.push(svgText(text, sx(x), b.y + V.tick.size * 0.35, 'middle', tickOpts));
-        addBox(b);
-        done = true;
-        break;
+      const min = zazor(boxRect(b), obstacles).min;
+      if (best === null || min > best.min) {
+        best = { b, min };
       }
     }
-    if (!done) {
+    const chosen = best as { b: Podpis; min: number };
+    if (forced || chosen.min >= V.gap - 1) {
+      layers.labels.push(svgText(text, sx(x), chosen.b.y + V.tick.size * 0.35, 'middle', tickOpts));
+      addBox(chosen.b);
+    } else {
       R.propushcheny.push(`x=${x}`);
     }
   }

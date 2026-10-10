@@ -218,6 +218,8 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
     }
     case 'prirashchenie':
       return integral(y, p, q);
+    case 'ploshchad':
+      return Math.abs(integral(y, p, q));
     default:
       return null;
   }
@@ -327,7 +329,7 @@ export function problemy(fig: Figura, zapros: Zapros | null): string[] {
     }
   }
 
-  if (zapros !== null) {
+  if (zapros !== null && zapros.t !== 'prirashchenie' && zapros.t !== 'ploshchad') {
     out.push(...problemyZaprosa(fig, zapros, f));
   }
 

@@ -597,7 +597,7 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
         ],
         params: { k, m, xk: w.xk, a: w.a, b: w.b },
         signature: podp(w.uzly) + `|${k}`,
-        vid: `k${k}`,
+        vid: `k${k}-${w.xk > 0 ? 'r' : 'l'}`,
       });
     },
   });

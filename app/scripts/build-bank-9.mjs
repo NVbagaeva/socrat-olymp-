@@ -30,7 +30,7 @@ const { chislaOtvet } = requireSrc('lib/proizvodnaya/otvet');
 const MAX_ATTEMPTS = Number(process.env.BANK9_ATTEMPTS ?? 300);
 const PER_PROTOTYPE = 10;
 const MAX_SAME_VID = 4;
-const MAX_SAME_ANSWER = 3;
+const MAX_SAME_ANSWER = 4;
 
 /** Проблемы рисунка во всех трёх режимах. */
 function risunokProblems(fig) {
@@ -72,7 +72,8 @@ for (const prototype of PROTOTYPES) {
       refuse('генератор не подобрал параметры');
       continue;
     }
-    if (statements.has(task.uslovie)) {
+    /* У задач с рисунком условие одно и то же, различает их рисунок (signature и узлы). */
+    if (task.risunok === null && statements.has(task.uslovie)) {
       refuse('то же условие');
       continue;
     }
@@ -82,12 +83,12 @@ for (const prototype of PROTOTYPES) {
     }
     const vid = task.vid ?? '';
     if (vid !== '' && (vids.get(vid) ?? 0) >= MAX_SAME_VID) {
-      refuse('больше трёх одного вида');
+      refuse('больше четырёх одного вида');
       continue;
     }
     const answer = chislaOtvet(task.otvet);
     if ((answers.get(answer) ?? 0) >= MAX_SAME_ANSWER) {
-      refuse('ответ повторяется чаще трёх раз');
+      refuse('ответ повторяется чаще четырёх раз');
       continue;
     }
     if (task.risunok !== null) {

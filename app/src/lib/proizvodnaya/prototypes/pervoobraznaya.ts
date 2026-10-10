@@ -827,6 +827,7 @@ function risunokParaboly(P: Parabola, c: number, pom: Pomoshch[]): Figura {
     chisla: 'vse',
     chislaY: 'vse',
     zalivka: { a: P.alpha, b: c },
+    obyazatelnye: [P.alpha, P.beta],
     cell: razmerKletki(okno),
     pomoshch: pom,
   };
@@ -940,7 +941,7 @@ function ploshchadParaboly(polnaya: boolean) {
     const hodNa = gorka
       ? 'выше оси, значит $S=F(' + d(hi) + ')-F(' + d(lo) + ')$'
       : 'ниже оси, значит $S=-(F(' + d(hi) + ')-F(' + d(lo) + '))$';
-    return sobratRu(fig, { t: 'prirashchenie', p: lo, q: hi }, S, gorka ? 1 : -1, {
+    return sobratRu(fig, { t: 'ploshchad', p: lo, q: hi }, S, 1, {
       uslovie,
       shagi: shagiSt,
       podskazka: [

@@ -95,6 +95,8 @@ export interface Figura {
   chisla?: 'vse' | 'minimum';
   /** Подписи чисел по оси y: те же варианты. */
   chislaY?: 'vse' | 'minimum';
+  /** Числа на оси x, которые подписываются непременно (корни, границы): если рядом график, подпись уходит на другую сторону оси. */
+  obyazatelnye?: number[];
   pomoshch?: Pomoshch[];
   /** Пикселей на клетку; по умолчанию подбирается под ширину. */
   cell?: number;
@@ -123,7 +125,8 @@ export type ZaprosT =
   | 'naim-metka'
   | 'kasat-znachenie'
   | 'chislo-nuley-f'
-  | 'prirashchenie';
+  | 'prirashchenie'
+  | 'ploshchad';
 
 export interface Zapros {
   t: ZaprosT;
