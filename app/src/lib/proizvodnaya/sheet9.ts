@@ -15,9 +15,9 @@
  * разобранных примеров на группу (по умолчанию 2).
  *
  * Рисунки. У ученика — режим 'student': только то, что даёт условие.
- * У учителя рисунок условия тот же (по нему сверяются наборы), а
- * рядом с разбором стоит рисунок режима 'teacher' со вспомогательными
- * построениями, если они есть. Разобранные примеры в рамках теории —
+ * У учителя на том же месте — режим 'teacher' со вспомогательными
+ * построениями; рисунок ученика лежит в task.figureCondition, по нему
+ * проверка комплекта сверяет, что наборы одни. Разобранные примеры в рамках теории —
  * всегда режима 'teacher': пример показывает, как решают.
  *
  * Ответ и разбор по этапам считаются только для листа учителя и
@@ -148,8 +148,7 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
 
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
 const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
-/** Клетка рисунка к разбору и в разобранном примере, мм. */
-const SOLUTION_CELL_MM = 2.6;
+/** Клетка рисунка в разобранном примере, мм. */
 const EXAMPLE_CELL_MM = 2.8;
 
 export interface SheetTask9 {
@@ -160,6 +159,8 @@ export interface SheetTask9 {
   figureSvg: string | null;
   /** Ширина рисунка условия, мм: клетка у всех окон одна. */
   figureWidth?: number;
+  /** Рисунок условия в режиме 'student' — один и тот же на обоих листах. */
+  figureCondition: string | null;
   answer: string;
   answerHtml: null;
   solutionHtml: string | null;
@@ -208,15 +209,6 @@ function razborHtml(task: Generated, answerText: string): string {
   return `<ol class="sheet-steps">${items}</ol>${answerLine(answerText)}`;
 }
 
-/** Рисунок учителя рядом с разбором: только если построения что-то добавили. */
-function teacherFigureHtml(task: Generated, condition: string | null): string {
-  const drawn = drawFigure(task, 'teacher');
-  if (drawn === null || drawn.svg === condition) {
-    return '';
-  }
-  return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float" style="width:${drawn.width(SOLUTION_CELL_MM)}mm">${drawn.svg}</figure>`;
-}
-
 function sheetTask(
   task: Generated,
   no: number,
@@ -225,19 +217,21 @@ function sheetTask(
 ): SheetTask9 {
   const answerText = ru(task.otvet);
   const condition = drawFigure(task, 'student');
+  /* У учителя на месте рисунка условия стоит тот же рисунок в режиме
+     'teacher' (со вспомогательными построениями); рисунок ученика
+     лежит в figureCondition — по нему проверка сверяет наборы. */
+  const shown = withAnswers ? drawFigure(task, 'teacher') : condition;
   return {
     no,
     id: `${task.prototype}|${task.seed}`,
     questionHtml: typo.mathText(task.uslovie),
     options: null,
-    figureSvg: condition === null ? null : condition.svg,
-    ...(condition === null ? {} : { figureWidth: condition.width(CELL[layout]) }),
+    figureSvg: shown === null ? null : shown.svg,
+    ...(shown === null ? {} : { figureWidth: shown.width(CELL[layout]) }),
+    figureCondition: condition === null ? null : condition.svg,
     answer: withAnswers ? answerText : '',
     answerHtml: null,
-    solutionHtml: withAnswers
-      ? teacherFigureHtml(task, condition === null ? null : condition.svg) +
-        razborHtml(task, answerText)
-      : null,
+    solutionHtml: withAnswers ? razborHtml(task, answerText) : null,
   };
 }
 

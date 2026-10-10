@@ -55,6 +55,15 @@ export function qChislo(
       list.push({ tekst: `$${d(n.v)}$`, pochemu: n.w });
     }
   }
+  for (const v of [verno + 1, verno - 1, -verno, verno * 2, verno + 2]) {
+    if (list.length >= 2) {
+      break;
+    }
+    if (!seen.has(d(v))) {
+      seen.add(d(v));
+      list.push({ tekst: `$${d(v)}$`, pochemu: 'Вычислительная ошибка: пересчитайте этот шаг ещё раз.' });
+    }
+  }
   return vopros(r, text, `$${d(verno)}$`, list.slice(0, 3), itog, shagNomer);
 }
 

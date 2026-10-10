@@ -23,14 +23,7 @@ import type { Draft, Figura, Pomoshch, Uzel, Zapros } from '../types';
 import { grafikP, metkiTekst } from '../uslovie';
 import { podpisUzlov, proto, shag, sobrat, vopros } from './common';
 import type { Nevernyy } from './common';
-import {
-  neverniyeChisla,
-  promezhutki,
-  tochek,
-  xRavno,
-  xSpisok,
-  znakiPomoshch,
-} from './chtenie-pom';
+import { neverniyeChisla, promezhutki, xRavno, xSpisok, znakiPomoshch } from './chtenie-pom';
 import type { Promezhutok } from './chtenie-pom';
 
 /** Нуль f′ с типом: sleva = +1 — смена «+» на «−», то есть максимум f. */
@@ -69,10 +62,9 @@ const PLUS_MINUS = 'с $+$ на $-$';
 /** Вершина графика f′ (узел не на оси) — ловушка «путают нули и вершины». */
 function vershina(uzly: readonly Uzel[], iskl: readonly number[]): number | null {
   const kand = uzly.filter((u) => u.y !== 0 && !iskl.includes(u.x));
-  const best = kand.find((u, i) => {
+  const best = kand.find((u) => {
     const prev = uzly[uzly.indexOf(u) - 1];
     const next = uzly[uzly.indexOf(u) + 1];
-    void i;
     return prev !== undefined && next !== undefined;
   });
   return best === undefined ? null : best.x;
@@ -451,10 +443,6 @@ function razdelit(nuli: readonly Nul[], s: Otrezok): { v: Nul[]; vne: Nul[] } {
     v: nuli.filter((z) => z.x >= s.p && z.x <= s.q),
     vne: nuli.filter((z) => z.x < s.p || z.x > s.q),
   };
-}
-
-function slovoTipa(t: 'max' | 'min'): string {
-  return t === 'max' ? 'максимум' : 'минимum'.replace('минимum', 'минимум');
 }
 
 function opisanieNulya(z: Nul): string {
@@ -1089,8 +1077,5 @@ function naibNaimOtrezok(id: string, naib: boolean) {
 
 const P949 = naibNaimOtrezok('9.4.9', true);
 const P9410 = naibNaimOtrezok('9.4.10', false);
-
-void tochek;
-void slovoTipa;
 
 export const PO_GRAFIKU_FPRIME = [P941, P942, P943, P944, P945, P946, P947, P948, P949, P9410];

@@ -23,10 +23,7 @@ export interface FiguraSvg9Props {
 export function FiguraSvg9({ svg, label, className }: FiguraSvg9Props) {
   const width = shirinaSvg(svg);
   return (
-    <FigureZoom
-      label={label}
-      className={clsx('z9-fig', className)}
-    >
+    <FigureZoom label={label} className={clsx('z9-fig', className)}>
       <span
         className="z9-fig__svg"
         style={width === null ? undefined : { maxWidth: `${width}px` }}

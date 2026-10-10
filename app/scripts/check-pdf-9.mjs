@@ -35,7 +35,9 @@ const LINKS = ['https://t.me/budet_na_ege_math', 'https://youtube.com/@math_prin
 const PLACEHOLDERS = ['ВПИШИТЕ ФРАЗУ', 'Lorem', 'lorem', 'TODO', 'placeholder'];
 
 const errors = [];
-function fail(message) { errors.push(message); }
+function fail(message) {
+  errors.push(message);
+}
 
 /* ══════════════════════════════════════════════════════════
    Банк: ответы считает движок, а не файл ответов. План сборника
@@ -53,7 +55,12 @@ for (const block of plan) {
   for (const item of block.tasks) {
     const task = generate(item.prototype, item.seed);
     number += 1;
-    expected.push({ no: number, id: item.prototype + '#' + item.n, answer: ru(task.otvet), set: block.group });
+    expected.push({
+      no: number,
+      id: item.prototype + '#' + item.n,
+      answer: ru(task.otvet),
+      set: block.group,
+    });
   }
 }
 
@@ -61,7 +68,13 @@ for (const block of plan) {
    PDF: шрифты, цвета, ссылки — общая проверка листа
    ══════════════════════════════════════════════════════════ */
 function checkPdf(name, expectMono, strictFonts, withAnswers) {
-  checkPdfFile(pdfPath(name, withAnswers), { name, mono: expectMono, strictFonts, links: LINKS, fail });
+  checkPdfFile(pdfPath(name, withAnswers), {
+    name,
+    mono: expectMono,
+    strictFonts,
+    links: LINKS,
+    fail,
+  });
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -81,12 +94,26 @@ function checkReport(name, withAnswers) {
 
   const wrong = report.taskNumbers.findIndex((value, index) => value !== index + 1);
   if (wrong >= 0) {
-    fail(name + ': нумерация не сквозная — на месте ' + (wrong + 1) + ' стоит номер ' + report.taskNumbers[wrong]);
+    fail(
+      name +
+        ': нумерация не сквозная — на месте ' +
+        (wrong + 1) +
+        ' стоит номер ' +
+        report.taskNumbers[wrong],
+    );
   }
 
   expected.forEach((task, index) => {
     if (report.taskIds[index] !== task.id) {
-      fail(name + ': на месте ' + task.no + ' задача ' + report.taskIds[index] + ', а банк даёт ' + task.id);
+      fail(
+        name +
+          ': на месте ' +
+          task.no +
+          ' задача ' +
+          report.taskIds[index] +
+          ', а банк даёт ' +
+          task.id,
+      );
     }
   });
 
@@ -101,8 +128,10 @@ function checkReport(name, withAnswers) {
 
   const total = report.pages;
   report.pageNumbers.forEach((label, index) => {
-    const want = (index + 1) + ' / ' + total;
-    if (label !== want) { fail(name + ': номер страницы «' + label + '», ожидался «' + want + '»'); }
+    const want = index + 1 + ' / ' + total;
+    if (label !== want) {
+      fail(name + ': номер страницы «' + label + '», ожидался «' + want + '»');
+    }
   });
 
   PLACEHOLDERS.forEach((mark) => {
@@ -116,8 +145,13 @@ function checkReport(name, withAnswers) {
       fail(name + ': строк «Ответ: ____» — ' + report.answerLines + ', задач ' + expected.length);
     }
     if (report.answerRows.length || report.solutions) {
-      fail(name + ': в файле для ученика есть ответы — строк таблицы ' + report.answerRows.length +
-        ', решений ' + report.solutions);
+      fail(
+        name +
+          ': в файле для ученика есть ответы — строк таблицы ' +
+          report.answerRows.length +
+          ', решений ' +
+          report.solutions,
+      );
     }
     if (/Ответы|Краткие решения/.test(report.text)) {
       fail(name + ': в файле для ученика есть раздел ответов');
@@ -127,15 +161,33 @@ function checkReport(name, withAnswers) {
       fail(name + ': в файле для учителя остались строки «Ответ: ____» — ' + report.answerLines);
     }
     if (report.answerRows.length !== expected.length) {
-      fail(name + ': в таблице ответов ' + report.answerRows.length + ' строк, задач ' + expected.length);
+      fail(
+        name +
+          ': в таблице ответов ' +
+          report.answerRows.length +
+          ' строк, задач ' +
+          expected.length,
+      );
     }
     const byNo = new Map(report.answerRows.map((row) => [row.no, row.answer]));
     expected.forEach((task) => {
       const cell = byNo.get(task.no);
-      if (cell === undefined) { fail(name + ': в таблице нет номера ' + task.no); return; }
+      if (cell === undefined) {
+        fail(name + ': в таблице нет номера ' + task.no);
+        return;
+      }
       const same = cell.replace(/−/g, '-');
       if (!same.includes(task.answer.replace(/−/g, '-'))) {
-        fail(name + ': ответ на задачу ' + task.no + ' в таблице «' + cell + '», банк даёт «' + task.answer + '»');
+        fail(
+          name +
+            ': ответ на задачу ' +
+            task.no +
+            ' в таблице «' +
+            cell +
+            '», банк даёт «' +
+            task.answer +
+            '»',
+        );
       }
     });
   }
@@ -156,7 +208,8 @@ console.log('  план: групп ' + plan.length + ', задач ' + expected
 
 files.forEach((file) => {
   const report = path.join(BUILD, file.name + '.json');
-  const withKatex = fs.existsSync(report) && JSON.parse(fs.readFileSync(report, 'utf8')).katex === true;
+  const withKatex =
+    fs.existsSync(report) && JSON.parse(fs.readFileSync(report, 'utf8')).katex === true;
 
   checkPdf(file.name, file.mono, withKatex, file.answers);
   checkReport(file.name, file.answers);

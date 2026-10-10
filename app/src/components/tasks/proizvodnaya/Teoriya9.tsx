@@ -18,15 +18,7 @@ import { FiguraSvg9 } from './FiguraSvg9';
 import { Display9, Primer9, PrimerIzZadachi } from './Primer9';
 
 /** Рисунок сцены теории: движок рисует в режиме, заданном сценой. */
-function Stsena9({
-  id,
-  className,
-  label,
-}: {
-  id: StsenaId;
-  className?: string;
-  label?: string;
-}) {
+function Stsena9({ id, className, label }: { id: StsenaId; className?: string; label?: string }) {
   const s = stsena(id);
   const svg = renderFigura(s.fig, { rezhim: s.rezhim });
   return (
@@ -274,7 +266,10 @@ export function Teoriya9({ vkladka }: { vkladka: string }) {
   /* Декор колонки содержания — наклон касательной без подписи:
      рядом стоит подпись словами, сам рисунок для скринридера — украшение. */
   const dekor = stsena('naklon-vverh');
-  const dekorSvg = renderFigura({ ...dekor.fig, alt: '', pomoshch: undefined }, { rezhim: 'student' });
+  const dekorSvg = renderFigura(
+    { ...dekor.fig, alt: '', pomoshch: undefined },
+    { rezhim: 'student' },
+  );
   return (
     <TeoriyaShell
       vkladka={vkladka}

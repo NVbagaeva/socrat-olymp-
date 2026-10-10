@@ -42,10 +42,7 @@ function naklonVverh(): Stsena {
   ];
   const fig = figura('f', 'f(x)', uzly, {
     kasatelnaya: { a: [-4, -2], b: [4, 4], x0: 0 },
-    pomoshch: [
-      { t: 'vert', x: 0 },
-      { t: 'treugolnik' },
-    ],
+    pomoshch: [{ t: 'vert', x: 0 }, { t: 'treugolnik' }],
     alt: 'График функции, касательная в точке касания и прямоугольный треугольник на двух узлах сетки; угол альфа острый',
   });
   return { fig, rezhim: 'teacher' };
@@ -59,10 +56,7 @@ function naklonVniz(): Stsena {
   ];
   const fig = figura('f', 'f(x)', uzly, {
     kasatelnaya: { a: [-4, 5], b: [4, 1], x0: 0 },
-    pomoshch: [
-      { t: 'vert', x: 0 },
-      { t: 'treugolnik' },
-    ],
+    pomoshch: [{ t: 'vert', x: 0 }, { t: 'treugolnik' }],
     alt: 'График функции, убывающая касательная и прямоугольный треугольник; угол альфа тупой, смежный с ним угол бета острый',
   });
   return { fig, rezhim: 'teacher' };

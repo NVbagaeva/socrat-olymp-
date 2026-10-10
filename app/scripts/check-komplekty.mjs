@@ -306,8 +306,14 @@ for (const gen of generators) {
       if (task.questionHtml !== teacherOnly(other.questionHtml)) {
         where(kit.code, `задача ${n + 1}: условие у учителя другое`);
       }
-      if ((task.figureSvg ?? null) !== (other.figureSvg ?? null)) {
+      /* №9: у учителя на месте рисунка — режим 'teacher'; рисунок
+         условия (режим 'student') лежит рядом, по нему и сверяем. */
+      const otherFigure = gen.scope === '9' ? (other.figureCondition ?? null) : (other.figureSvg ?? null);
+      if ((task.figureSvg ?? null) !== otherFigure) {
         where(kit.code, `задача ${n + 1}: рисунок условия у учителя другой`);
+      }
+      if (gen.scope === '9' && Boolean(task.figureSvg) !== Boolean(other.figureSvg)) {
+        where(kit.code, `задача ${n + 1}: рисунок есть не на обоих листах`);
       }
       if (JSON.stringify(task.options ?? null) !== JSON.stringify(other.options ?? null)) {
         where(kit.code, `задача ${n + 1}: варианты ответа у учителя другие`);

@@ -25,7 +25,9 @@ const { renderFigura, pustoyOtchet } = requireSrc('lib/proizvodnaya/render');
 const { podpisUzlov } = requireSrc('lib/proizvodnaya/prototypes/common');
 const { chislaOtvet } = requireSrc('lib/proizvodnaya/otvet');
 
-const MAX_ATTEMPTS = 5000;
+/* Генератор рисунка считает до 0,4 с на задачу: перебор ограничен. Не набралось
+   десять за столько попыток — прототип мало разнообразен, он попадёт в отчёт. */
+const MAX_ATTEMPTS = Number(process.env.BANK9_ATTEMPTS ?? 300);
 const PER_PROTOTYPE = 10;
 const MAX_SAME_VID = 3;
 const MAX_SAME_ANSWER = 3;
@@ -50,6 +52,7 @@ function refuse(reason) {
   refusals.set(reason, (refusals.get(reason) ?? 0) + 1);
 }
 
+const started = Date.now();
 for (const prototype of PROTOTYPES) {
   if (prototype.zaglushka) {
     stubs.push(prototype.id);
@@ -77,6 +80,16 @@ for (const prototype of PROTOTYPES) {
       refuse('та же signature');
       continue;
     }
+    const vid = task.vid ?? '';
+    if (vid !== '' && (vids.get(vid) ?? 0) >= MAX_SAME_VID) {
+      refuse('больше трёх одного вида');
+      continue;
+    }
+    const answer = chislaOtvet(task.otvet);
+    if ((answers.get(answer) ?? 0) >= MAX_SAME_ANSWER) {
+      refuse('ответ повторяется чаще трёх раз');
+      continue;
+    }
     if (task.risunok !== null) {
       const key = podpisUzlov(task.risunok);
       if (drawings.has(key)) {
@@ -88,16 +101,6 @@ for (const prototype of PROTOTYPES) {
         continue;
       }
       drawings.add(key);
-    }
-    const vid = task.vid ?? '';
-    if (vid !== '' && (vids.get(vid) ?? 0) >= MAX_SAME_VID) {
-      refuse('больше трёх одного вида');
-      continue;
-    }
-    const answer = chislaOtvet(task.otvet);
-    if ((answers.get(answer) ?? 0) >= MAX_SAME_ANSWER) {
-      refuse('ответ повторяется чаще трёх раз');
-      continue;
     }
     statements.add(task.uslovie);
     signatures.add(task.signature);
@@ -112,6 +115,9 @@ for (const prototype of PROTOTYPES) {
     process.exitCode = 1;
   }
   entries.push({ prototype: prototype.id, variants });
+  console.error(
+    `  ${prototype.id}: ${variants.length} вариантов, ${((Date.now() - started) / 1000).toFixed(1)} с`,
+  );
 }
 
 const lines = [

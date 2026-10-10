@@ -125,8 +125,8 @@ export function volna(r: Rng, o: OpcVolny): Volna | null {
   }
   const y0 = ys[0] as number;
   const yEnd = ys[ys.length - 1] as number;
-  const ya = firstExt.tip === 'max' ? y0 - r.int(1, 3) : y0 + r.int(1, 3);
-  const yb = lastExt.tip === 'max' ? yEnd - r.int(1, 3) : yEnd + r.int(1, 3);
+  const ya = firstExt.tip === 'max' ? y0 - r.int(2, 3) : y0 + r.int(2, 3);
+  const yb = lastExt.tip === 'max' ? yEnd - r.int(2, 3) : yEnd + r.int(2, 3);
   uzly.push({ x: a, y: ya });
   ext.forEach((e, i) => uzly.push({ x: e.x, y: ys[i] as number }));
   uzly.push({ x: b, y: yb });

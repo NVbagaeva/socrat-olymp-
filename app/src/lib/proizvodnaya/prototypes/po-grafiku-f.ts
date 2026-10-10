@@ -24,13 +24,10 @@ import { grafikF, metkiTekst } from '../uslovie';
 import { podpisUzlov, proto, shag, sobrat, vopros } from './common';
 import type { Nevernyy } from './common';
 import {
-  chislaSpisok,
   neverniyeChisla,
   ploskoe,
   promezhutki,
   skobki,
-  tochek,
-  xRavno,
   xSpisok,
   znakiPomoshch,
 } from './chtenie-pom';
@@ -374,9 +371,6 @@ function celyeZnak(id: string, znak: 1 | -1) {
       const slag = nuzhnye.map((p) => p.hi - p.lo - 1);
       const summa = slag.length > 1 ? `Всего: $${slag.join('+')}=${k}$.` : `Всего: $${k}$.`;
       const exSpisok = exs.map((e) => e.x);
-      const [e0, e1] = [exs[0] as { x: number; tip: 'max' | 'min' }, exs[1] as { x: number }];
-      void e1;
-      const chislaProm = (p: { lo: number; hi: number }) => p.hi - p.lo - 1;
       const pervyZnak = (ps[0] as { znak: number }).znak;
       return sobrat(fig, { t: 'celye-znak', znak }, k, {
         uslovie,
@@ -485,8 +479,6 @@ function celyeZnak(id: string, znak: 1 | -1) {
         signature: podpisUzlov(fig) + `|${znak}`,
         vid: `v${variant}e${exs.length}${pervyZnak > 0 ? 'u' : 'd'}`,
       });
-      void e0;
-      void chislaProm;
     },
   });
 }
@@ -737,9 +729,5 @@ const P936 = proto({
     });
   },
 });
-
-void chislaSpisok;
-void tochek;
-void xRavno;
 
 export const PO_GRAFIKU_F = [P931, P932, P933, P934, P935, P936];

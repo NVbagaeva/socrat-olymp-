@@ -193,8 +193,13 @@ const m03 = micro('P9-3-03', 'Где производная положитель
   ]) as number[];
   const pools = [1, -1].map((s) => c.obychnye.filter((x) => znak(c, x) === s));
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    const x1 = r.pick(pools[(pattern[0] as number) > 0 ? 0 : 1] as number[]);
-    const x2 = r.pick(pools[(pattern[1] as number) > 0 ? 0 : 1] as number[]);
+    const p1 = pools[(pattern[0] as number) > 0 ? 0 : 1] as number[];
+    const p2 = pools[(pattern[1] as number) > 0 ? 0 : 1] as number[];
+    if (p1.length === 0 || p2.length === 0) {
+      return null;
+    }
+    const x1 = r.pick(p1);
+    const x2 = r.pick(p2);
     if (x1 === undefined || x2 === undefined || Math.abs(x1 - x2) < 2) {
       continue;
     }

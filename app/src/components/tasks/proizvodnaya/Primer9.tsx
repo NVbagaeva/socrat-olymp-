@@ -29,7 +29,10 @@ function odnaFormula(line: string): string | null {
 
 /** «**Ответ: -0,5**» → «$-0{,}5$»; не число — как есть. */
 export function otvetTex(line: string | undefined): string {
-  const raw = (line ?? '').replace(/\*\*/g, '').replace(/^Ответ:\s*/, '').trim();
+  const raw = (line ?? '')
+    .replace(/\*\*/g, '')
+    .replace(/^Ответ:\s*/, '')
+    .trim();
   return /^-?\d+([.,]\d+)?$/.test(raw) ? `$${raw.replace(/[.,]/, '{,}')}$` : raw;
 }
 
@@ -100,7 +103,9 @@ export interface Primer9Props {
  */
 export function Primer9({ title, uslovie, svg, alt, shagi, answer, className }: Primer9Props) {
   return (
-    <article className={clsx('rich-example z9-primer', svg === null && 'z9-primer--bez', className)}>
+    <article
+      className={clsx('rich-example z9-primer', svg === null && 'z9-primer--bez', className)}
+    >
       <div className="rich-example__head">
         <h4 className="rich-example__title">{title}</h4>
         <p className="rich-example__condition">
@@ -108,14 +113,15 @@ export function Primer9({ title, uslovie, svg, alt, shagi, answer, className }: 
         </p>
       </div>
       <div className="rich-example__grid z9-primer__grid">
-        {svg === null ? null : <FiguraSvg9 className="rich-example__figure" svg={svg} label={alt} />}
+        {svg === null ? null : (
+          <FiguraSvg9 className="rich-example__figure" svg={svg} label={alt} />
+        )}
         <ol className="rich-example__steps">
           {shagi.map((item) => (
-            <li
-              className={clsx('rich-example__step', item.check && 'is-check')}
-              key={item.label}
-            >
-              <span className="rich-example__label">{item.label}</span>
+            <li className={clsx('rich-example__step', item.check && 'is-check')} key={item.label}>
+              <span className="rich-example__label">
+                <Tex text={item.label} />
+              </span>
               <StrokiShaga stroki={item.stroki} />
             </li>
           ))}

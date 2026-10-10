@@ -48,7 +48,9 @@ export const EXTRA_CSS = fs.readFileSync(
 export function variantsOf(prototypeId) {
   const file = path.join(APP, 'src', 'lib', 'proizvodnaya', 'bank.ts');
   if (fs.existsSync(file)) {
-    const entry = requireSrc('lib/proizvodnaya/bank.ts').BANK.find((e) => e.prototype === prototypeId);
+    const entry = requireSrc('lib/proizvodnaya/bank.ts').BANK.find(
+      (e) => e.prototype === prototypeId,
+    );
     if (entry !== undefined) {
       return entry.variants.map((v) => ({ prototype: prototypeId, seed: v.seed, n: v.n }));
     }
@@ -78,7 +80,11 @@ function blocksOf(plan, withAnswers) {
 
 function specOf(blocks, options) {
   return S9.printSpec9({
-    ...S9.specOfBlocks9(blocks, { theme: options.theme, layout: 'single', kind: '', date: '' }, options.withAnswers),
+    ...S9.specOfBlocks9(
+      blocks,
+      { theme: options.theme, layout: 'single', kind: '', date: '' },
+      options.withAnswers,
+    ),
   });
 }
 
