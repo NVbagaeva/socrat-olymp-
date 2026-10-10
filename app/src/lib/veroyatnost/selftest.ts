@@ -14,8 +14,13 @@
  *  5. в условии не осталось «undefined» и «NaN»;
  *  6. вариантов не меньше десяти и они не повторяются;
  *  7. отпечатки ответов не сталкиваются.
+ *
+ * Отдельно checkGeneratory гоняет правило генерации каждого прототипа
+ * на сотнях зёрен — шире, чем десять вариантов, которые уходят на
+ * сайт, — и проверяет каждый принятый вариант теми же правилами.
  */
 
+import { GENERATORY_PROTOTIPOV, rng } from './generator';
 import { otvetUchenika, prepOtvet } from './index';
 import {
   LABIRINT,
@@ -108,11 +113,13 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   }
 
   const otvet = otvetUchenika(prototype, p);
-  /* Вероятность обязана лежать в (0; 1]. У прототипов с целым ответом
-     («сколько патронов дать стрелку») ответ — не вероятность, и это
-     правило к нему не относится. */
-  if (prototype.format === 'десятичная' && (otvet <= 0 || otvet > 1)) {
-    problems.push(`вероятность вне (0; 1]: ${otvet}`);
+  /* Вероятность обязана лежать строго в (0; 1): ответ 0 или 1 — это
+     невозможное или достоверное событие, а не задача. Проверяется
+     ответ ученика, то есть уже после округления. У прототипов с целым
+     ответом («сколько патронов дать стрелку») ответ — не вероятность,
+     и это правило к нему не относится. */
+  if (prototype.format === 'десятичная' && (otvet <= 0 || otvet >= 1)) {
+    problems.push(`вероятность вне (0; 1): ${otvet}`);
   }
   if (prototype.format === 'целое' && !Number.isInteger(otvet)) {
     problems.push(`ответ должен быть целым: ${otvet}`);
@@ -144,6 +151,72 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   problems.push(...problemyShagov(shagi));
 
   return problems;
+}
+
+/** Итог прогона правил генерации на многих зёрнах. */
+export interface GeneratorReport {
+  /** Прототипов с правилом генерации. */
+  prototypes: number;
+  /** Зёрен на прототип. */
+  zeren: number;
+  /** Принятых вариантов всего. */
+  vsego: number;
+  /** Прототипы без правила генерации в реестре. */
+  bezPravila: string[];
+  /** Нарушения: прототип, зерно, параметры и что не так. */
+  problems: string[];
+}
+
+/** Сколько кандидатов правило может отбросить подряд на одном зерне. */
+const POPYTOK_NA_ZERNO = 2000;
+
+/**
+ * Прогон правил генерации: на каждом зерне берётся первый кандидат,
+ * прошедший допустимость прототипа (в неё уже входит правило «ответ
+ * строго в (0; 1)»), и проверяется так же, как вариант банка: формула
+ * против перебора, ответ в (0; 1) после округления, запись в клетки,
+ * последний шаг разбора, подстановки в тексте. Зерно, на котором за
+ * POPYTOK_NA_ZERNO попыток не нашлось ни одного кандидата, — тоже
+ * нарушение: генератор и ограничения разошлись.
+ */
+export function checkGeneratory(bank: readonly Prototype[], zeren = 500): GeneratorReport {
+  const problems: string[] = [];
+  const bezPravila: string[] = [];
+  let vsego = 0;
+  let prototypes = 0;
+  for (const prototype of bank) {
+    const pravilo = GENERATORY_PROTOTIPOV.get(prototype.id);
+    if (pravilo === undefined) {
+      bezPravila.push(prototype.id);
+      continue;
+    }
+    prototypes += 1;
+    for (let zerno = 1; zerno <= zeren; zerno += 1) {
+      /* Зёрна разнесены умножением: соседние числа дают похожие ряды. */
+      const r = rng(Math.imul(zerno, 0x9e3779b1) >>> 0);
+      let params: Variant['params'] | null = null;
+      for (let i = 0; i < POPYTOK_NA_ZERNO && params === null; i += 1) {
+        const kandidat = pravilo(r);
+        if (prototype.dopustimo(kandidat)) {
+          params = kandidat;
+        }
+      }
+      if (params === null) {
+        problems.push(
+          `${prototype.id}, зерно ${zerno}: за ${POPYTOK_NA_ZERNO} попыток нет допустимого варианта`,
+        );
+        continue;
+      }
+      vsego += 1;
+      const oshibki = problemsOf(prototype, { n: 0, source: 'новый', ref: 'генератор', params });
+      if (oshibki.length > 0) {
+        problems.push(
+          `${prototype.id}, зерно ${zerno}, ${JSON.stringify(params)}: ${oshibki.join('; ')}`,
+        );
+      }
+    }
+  }
+  return { prototypes, zeren, vsego, bezPravila, problems };
 }
 
 export function checkBank(bank: readonly Prototype[]): Report {

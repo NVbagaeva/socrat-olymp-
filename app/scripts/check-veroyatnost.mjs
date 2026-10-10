@@ -90,9 +90,8 @@ for (const file of [
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep, checkLabirint, checkModel, checkRaskladku } = require0(
-  path.join(out, 'veroyatnost', 'selftest.js'),
-);
+const { checkBank, checkGeneratory, checkPrep, checkLabirint, checkModel, checkRaskladku } =
+  require0(path.join(out, 'veroyatnost', 'selftest.js'));
 const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
   path.join(out, 'veroyatnost', 'index.js'),
 );
@@ -256,7 +255,7 @@ if (katexPut !== undefined) {
     try {
       const razbor = shagiRazbora(shagi);
       tex.shagov += razbor.length;
-      tex.formul += razbor.filter((shag) => shag.html !== undefined).length;
+      tex.formul += razbor.filter((shag) => shag.vykladka !== undefined).length;
     } catch (error) {
       tex.oshibki.push(`${imya}: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -367,7 +366,28 @@ console.log(`\nлист генератора: собрано ${listy.sobrano}, �
 console.log(`  нарушений: ${listy.oshibki.length}`);
 listy.oshibki.forEach((item) => console.log(`   ${item}`));
 
+/* Правила генерации на многих зёрнах: шире, чем варианты на сайте.
+   Каждый принятый вариант проверяется как вариант банка, в том числе
+   правилом «ответ строго между 0 и 1 после округления». */
+const ZEREN = 500;
+const generatory = checkGeneratory([...BANK_4, ...BANK_5, ...KONSPEKT_4], ZEREN);
+console.log(
+  `\nгенераторы: прототипов ${generatory.prototypes}, зёрен на прототип ${generatory.zeren}, ` +
+    `вариантов проверено ${generatory.vsego}`,
+);
+/* Прототипы без правила генерации — с вариантами, заданными списком
+   (p4-22, p4-23): их варианты проверены выше вместе с банком. */
+console.log(`  вариантов списком, без правила генерации: ${generatory.bezPravila.length}`);
+generatory.bezPravila.forEach((id) => console.log(`   ${id}`));
+console.log(`  нарушений: ${generatory.problems.length}`);
+generatory.problems.slice(0, 40).forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (generatory.problems.length > 0) {
+  console.error('\nПравила генерации дают недопустимые варианты.');
+  process.exit(1);
+}
 
 if (listy.oshibki.length > 0) {
   console.error('\nНа листе генератора есть картинки задач.');
