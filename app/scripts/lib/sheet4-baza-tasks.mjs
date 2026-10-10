@@ -87,10 +87,16 @@ export function prototypesBySection() {
     const section = sections.find((s) => s.id === blok.id);
     if (!section) { throw new Error('блок конспекта ' + blok.id + ' не описан в content'); }
     blok.zadachi.forEach((zadacha) => {
-      if (content.dvoyniki[zadacha.id]) { return; }
-      const prototype = bank.KONSPEKT_4.find((p) => p.id === zadacha.id);
-      if (!prototype) { throw new Error('у задачи конспекта ' + zadacha.id + ' нет прототипа'); }
-      section.prototypes.push(prototype);
+      /* Блок добран до десяти задач вариантами тех же прототипов
+         (k4-11-2 — это k4-11, вариант 2): прототип берётся из самой
+         задачи, и в базу каждый прототип идёт один раз. */
+      const id = zadacha.prototip?.id ?? zadacha.id;
+      if (content.dvoyniki[id]) { return; }
+      const prototype = bank.KONSPEKT_4.find((p) => p.id === id);
+      if (!prototype) { throw new Error('у опорной задачи ' + zadacha.id + ' нет прототипа'); }
+      if (!section.prototypes.includes(prototype)) {
+        section.prototypes.push(prototype);
+      }
     });
   });
 
