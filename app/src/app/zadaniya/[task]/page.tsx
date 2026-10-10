@@ -7,6 +7,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
 import { Chart } from '@/components/graph/Chart';
+import { ZadanieHero } from '@/components/tasks/ZadanieHero';
 import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
@@ -117,6 +118,7 @@ export default async function SectionPage({ params }: { params: Params }) {
             { label: `№${section.no}` },
           ]}
           title={section.title}
+          {...(section.hero === undefined ? {} : { className: 'section-head--hero' })}
           {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.description}
           actions={
@@ -134,10 +136,14 @@ export default async function SectionPage({ params }: { params: Params }) {
           }
           media={
             <>
-              <Chart
-                className="section-head__chart"
-                scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
-              />
+              {section.hero === undefined ? (
+                <Chart
+                  className="section-head__chart"
+                  scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
+                />
+              ) : (
+                <ZadanieHero task={section.hero} />
+              )}
               <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
             </>
           }

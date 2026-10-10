@@ -106,6 +106,12 @@ export interface ExamSection {
   subtitle: string;
   description: string;
   badge?: string;
+  /**
+   * Иллюстрация справа в верхнем блоке страницы задания: папка файлов в
+   * public/images/zadaniya (scripts/build-zadanie-hero.mjs). Не задана —
+   * справа прежний график y = f(x) с подписью.
+   */
+  hero?: string;
   /** Подсказка внизу окна выбора типа функции. */
   dialogHint: string;
   /** Вкладка «О задании» страницы подтемы. */
@@ -160,6 +166,7 @@ export const sections: ExamSection[] = [
     description:
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
     badge: 'Базовый и средний уровни',
+    hero: '12',
     dialogHint: HINT_12,
     about: {
       title: taskName('12'),
