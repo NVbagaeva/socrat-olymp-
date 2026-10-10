@@ -53,7 +53,7 @@ export function conditionSvg(task) {
 }
 
 /* Сцена построения к разбору — или null, если строить нечего. */
-function solutionScene(task, generator) {
+export function solutionScene(task, generator) {
   var meta = task.meta || {};
   if (meta.family === 'quadratic') {
     return QuadraticAux.hasAux(meta) ? QuadraticAux.auxScene(meta, null) : task.scene;
@@ -105,7 +105,7 @@ export function solutionFigure(task, generator, cell) {
   return { svg: svg, width: box ? Number(box[1]) / CELL_UNITS * cell : null };
 }
 
-const api = { namedInCondition: namedInCondition, conditionScene: conditionScene,
+const api = { solutionScene: solutionScene, namedInCondition: namedInCondition, conditionScene: conditionScene,
   conditionSvg: conditionSvg, solutionSvg: solutionSvg, solutionFigure: solutionFigure };
 
 export default api;

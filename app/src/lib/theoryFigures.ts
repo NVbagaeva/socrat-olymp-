@@ -45,6 +45,12 @@ export interface FigureLabel {
   size?: number;
   /** Чем подпись прижата к точке: серединой, левым или правым краем. */
   anchor?: 'center' | 'left' | 'right';
+  /**
+   * Подпись точки: место подбирает общий модуль graph/labels.js
+   * (lib/theoryLabels.ts) — dx, dy и anchor игнорируются. Рамка не
+   * пересекает кривую, оси, пунктиры и другие подписи.
+   */
+  auto?: boolean;
 }
 
 export interface TheoryFigure {
@@ -356,8 +362,8 @@ function bOff(): TheoryFigure {
     },
     labels: [
       ...axisLabels(w),
-      { at: [0, 4 / 3], text: '$b = \\,?$', dx: 12, dy: -12, tone: 'accent', anchor: 'left' },
-      { at: [1, 2], text: '$(1;\\, 2)$', dx: -8, dy: -14, anchor: 'right', size: 15 },
+      { at: [0, 4 / 3], text: '$b = \\,?$', tone: 'accent', auto: true },
+      { at: [1, 2], text: '$(1;\\, 2)$', size: 15, auto: true },
     ],
   };
 }
@@ -385,7 +391,7 @@ function exValue(): TheoryFigure {
       ...axisLabels(w),
       { at: [1, -2], text: '$2$', dy: 15, tone: 'accent' },
       { at: [2, -0.5], text: '$3$', dx: 12, tone: 'accent' },
-      { at: [3, 2.5], text: '$f(3)$', dx: 10, dy: -12, tone: 'accent', anchor: 'left' },
+      { at: [3, 2.5], text: '$f(3)$', tone: 'accent', auto: true },
     ],
   };
 }
@@ -484,7 +490,7 @@ function exCrossZero(): TheoryFigure {
     },
     labels: [
       ...axisLabels(w),
-      { at: [1.6, 3.2], text: '$f$', dx: 12, tone: 'primary' },
+      { at: [1.6, 3.2], text: '$f$', tone: 'primary', auto: true },
       { at: [3.4, 1.3], text: '$g$', dy: -14, tone: 'accent' },
     ],
   };
@@ -506,7 +512,7 @@ function exCrossInt(): TheoryFigure {
     },
     labels: [
       ...axisLabels(w),
-      { at: [2.2, 3.6], text: '$f$', dx: 12, tone: 'primary' },
+      { at: [2.2, 3.6], text: '$f$', tone: 'primary', auto: true },
       { at: [3.4, 2.7], text: '$g$', dy: -14, tone: 'accent' },
     ],
   };
@@ -522,9 +528,9 @@ function sqrtTable(): TheoryFigure {
     scene: { ...base(SQ), curves: [sqrt(1)], points: [dot(0, 0), dot(1, 1), dot(4, 2), dot(9, 3)] },
     labels: [
       ...axisLabels(SQ),
-      { at: [1, 1], text: '$(1;\\, 1)$', dx: 10, dy: 12, size: 15, anchor: 'left' },
-      { at: [4, 2], text: '$(4;\\, 2)$', dy: -18, size: 15 },
-      { at: [9, 3], text: '$(9;\\, 3)$', dy: -18, size: 15 },
+      { at: [1, 1], text: '$(1;\\, 1)$', size: 15, auto: true },
+      { at: [4, 2], text: '$(4;\\, 2)$', size: 15, auto: true },
+      { at: [9, 3], text: '$(9;\\, 3)$', size: 15, auto: true },
     ],
   };
 }
@@ -539,15 +545,15 @@ function sqrtSigns(): TheoryFigure {
     },
     labels: [
       ...axisLabels(w),
-      { at: [7, 4], text: '$k > 0$', dy: -16, tone: 'primary' },
-      { at: [7, -4], text: '$k < 0$', dy: 16, tone: 'accent' },
+      { at: [7, 4], text: '$k > 0$', tone: 'primary', auto: true },
+      { at: [7, -4], text: '$k < 0$', tone: 'accent', auto: true },
     ],
   };
 }
 
 /** y = 1,5√(x + 3) − 2: начало (−3; −2), целая точка (1; 1). */
 function sqrtShift(): TheoryFigure {
-  const w = win(-4, 7, -3, 4);
+  const w = win(-6, 7, -3, 4);
   return {
     scene: {
       ...base(w),
@@ -556,11 +562,12 @@ function sqrtShift(): TheoryFigure {
       shapes: [seg([-3, -2], [1, -2]), seg([1, -2], [1, 1])],
     },
     labels: [
-      ...axisLabels(w),
-      { at: [-3, -2], text: '$(x_0;\\, y_0)$', dx: -6, dy: -16, tone: 'accent', anchor: 'right' },
+      /* Штрих x = 1 идёт через деление 1 оси Ox: подпись деления — правее штриха. */
+      ...axisLabels(w).map((l) => (l.text === '$1$' && l.at[1] === 0 ? { ...l, dx: 9 } : l)),
+      { at: [-3, -2], text: '$(x_0;\\, y_0)$', tone: 'accent', auto: true },
       { at: [-1, -2], text: '$4 = 2^2$', dy: 16, tone: 'accent', size: 16 },
-      { at: [1, -0.5], text: '$3$', dx: 12, tone: 'accent' },
-      { at: [1, 1], text: '$(1;\\, 1)$', dx: 10, dy: -12, anchor: 'left', size: 15 },
+      { at: [1, -1.3], text: '$3$', dx: 12, tone: 'accent' },
+      { at: [1, 1], text: '$(1;\\, 1)$', size: 15, auto: true },
     ],
   };
 }
@@ -579,8 +586,8 @@ function sqrtK(): TheoryFigure {
       ...axisLabels(w),
       { at: [2, 0], text: '$4 = 2^2$', dy: 16, tone: 'accent', size: 16 },
       { at: [4, 1.5], text: '$3$', dx: 12, tone: 'accent' },
-      { at: [4, 3], text: '$(4;\\, 3)$', dx: -8, dy: -14, anchor: 'right', size: 15 },
-      { at: [9, 4.5], text: '$(9;\\, 4{,}5)$', dy: -18, size: 15 },
+      { at: [4, 3], text: '$(4;\\, 3)$', size: 15, auto: true },
+      { at: [9, 4.5], text: '$(9;\\, 4{,}5)$', size: 15, auto: true },
     ],
   };
 }
@@ -607,7 +614,7 @@ function sqrtExValue(): TheoryFigure {
         anchor: 'right',
         size: 15,
       },
-      { at: [4, 3], text: '$(4;\\, 3)$', dx: 8, dy: 14, anchor: 'left', size: 14 },
+      { at: [4, 3], text: '$(4;\\, 3)$', size: 14, auto: true },
     ],
   };
 }
@@ -624,8 +631,8 @@ function sqrtExArgument(): TheoryFigure {
     labels: [
       ...axisLabels(w),
       { at: [0, 5], text: '$5$', dx: -12, tone: 'accent' },
-      { at: [6.25, 5], text: '$x = \\,?$', dy: -16, tone: 'accent' },
-      { at: [4, 4], text: '$(4;\\, 4)$', dx: 10, dy: 12, anchor: 'left', size: 14 },
+      { at: [6.25, 5], text: '$x = \\,?$', tone: 'accent', auto: true },
+      { at: [4, 4], text: '$(4;\\, 4)$', size: 14, auto: true },
     ],
   };
 }
@@ -642,17 +649,10 @@ function sqrtExCross(): TheoryFigure {
       points: [dot(-3, 0, 'lineB'), dot(1, 2, 'cross')],
     },
     labels: [
-      ...axisLabels(w),
-      { at: [1, 2], text: '$A$', dx: -6, dy: -16, size: 17 },
-      {
-        at: [-3, 0],
-        text: '$(-3;\\, 0)$',
-        dx: 4,
-        dy: -14,
-        size: 14,
-        tone: 'accent',
-        anchor: 'left',
-      },
+      /* Прямая g пересекает Oy в 1,5 — подпись деления 1 на Oy опущена чуть ниже. */
+      ...axisLabels(w).map((l) => (l.text === '$1$' && l.at[0] === 0 ? { ...l, dy: 5 } : l)),
+      { at: [1, 2], text: '$A$', size: 17, auto: true },
+      { at: [-3, 0], text: '$(-3;\\, 0)$', size: 14, tone: 'accent', auto: true },
     ],
   };
 }
@@ -940,6 +940,9 @@ const FIGURES = {
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;
+
+/** Все рисунки теории: по ним автотест проверяет подписи точек. */
+export const THEORY_FIGURE_IDS = Object.keys(FIGURES) as TheoryFigureId[];
 
 export function theoryFigure(id: TheoryFigureId): TheoryFigure {
   return FIGURES[id]();
