@@ -35,7 +35,11 @@ export type TrainerShortcutId =
   | 'koefficienty'
   | 'znachenie'
   | 'formula'
-  | 'peresechenie';
+  | 'peresechenie'
+  | 'abscissa-line'
+  | 'abscissa-parabola'
+  | 'ordinate-line'
+  | 'ordinate-parabola';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -49,6 +53,14 @@ export interface TrainerShortcut {
    */
   skills: string[];
   mode: TrainerModeId;
+  /**
+   * Правила ответа (answerRule движка), которыми ярлык сужает наборы:
+   * например, в 12Q.H только задачи на абсциссу второй точки. Не
+   * задано — все задачи наборов.
+   */
+  rules?: string[];
+  /** Что оставил фильтр: строка над конфигуратором. */
+  filter?: string;
 }
 
 const LINEAR_SHORTCUTS: TrainerShortcut[] = [
@@ -80,6 +92,41 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
     mode: 'mixed',
   },
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+  /* Ссылки «Потренироваться» из разборов на вкладке «О задании»
+     (content/quadraticTypes.ts): тот же набор, но только задачи
+     того же типа — абсцисса или ордината второй точки. */
+  {
+    id: 'abscissa-line',
+    title: 'Парабола и прямая: абсцисса',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'abscissa-parabola',
+    title: 'Две параболы: абсцисса',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-line',
+    title: 'Парабола и прямая: ордината',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-parabola',
+    title: 'Две параболы: ордината',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
 ];
 
 /* Гипербола: те же связки действий — значение и аргумент, коэффициенты
@@ -101,6 +148,19 @@ const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* График корня: значение, аргумент и корень с прямой. */
+const IRRATIONAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12S.A'], mode: 'practice' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12S.B'], mode: 'practice' },
+  {
+    id: 'peresechenie',
+    title: 'Корень и прямая',
+    skills: ['12S.C', '12S.D'],
+    mode: 'mixed',
+  },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -118,6 +178,9 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'rational') {
     return RATIONAL_SHORTCUTS;
+  }
+  if (type === 'irrational') {
+    return IRRATIONAL_SHORTCUTS;
   }
   return [];
 }
@@ -169,7 +232,7 @@ export const trainerPage = {
  * в поле note самих наборов.
  */
 export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic' && type !== 'rational') {
+  if (type !== 'quadratic' && type !== 'rational' && type !== 'irrational') {
     return trainerPage;
   }
   return {
@@ -214,6 +277,11 @@ export const trainerKindTitle: Record<string, string> = {
   '12R.H': 'Гипербола и прямая',
   '12R.I': 'Гипербола $y = \\frac{k}{x}$',
   '12R.J': 'Коэффициент $b$ и значение $\\frac{kx + a}{x + b}$',
+  /* График корня: точки B — одним типом, как у гиперболы. */
+  '12S.A': 'Значение функции',
+  '12S.B': 'Аргумент по значению',
+  '12S.C': 'Корень и прямая',
+  '12S.D': 'Корень и прямая',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

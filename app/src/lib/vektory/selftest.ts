@@ -969,11 +969,26 @@ export function checkListy(): GenReport {
         ) {
           push(`лист с решениями, вариант ${v + 1}`, `задача ${task.no}: нет разбора по шагам`);
         }
-        const grid = generate(prototype as string, seed as string).risunok?.grid !== false;
-        if (task.figureSvg !== null && grid && !task.figureSvg.includes('data-hint')) {
+        /* Рисунок условия у учителя тот же, что у ученика, — без
+           катетов; катеты стоят отдельным рисунком в разборе. */
+        const studentTask = student[v]?.flatMap((b) => b.tasks).find((t) => t.no === task.no);
+        if (studentTask !== undefined && studentTask.figureSvg !== task.figureSvg) {
           push(
             `лист с решениями, вариант ${v + 1}`,
-            `задача ${task.no}: на рисунке учителя нет катетов`,
+            `задача ${task.no}: рисунок условия не совпадает с листом ученика`,
+          );
+        }
+        if (task.figureSvg !== null && task.figureSvg.includes('data-hint')) {
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: катеты на рисунке условия`,
+          );
+        }
+        const grid = generate(prototype as string, seed as string).risunok?.grid !== false;
+        if (task.figureSvg !== null && grid && !(task.solutionHtml ?? '').includes('data-hint')) {
+          push(
+            `лист с решениями, вариант ${v + 1}`,
+            `задача ${task.no}: в разборе нет рисунка с катетами`,
           );
         }
       }

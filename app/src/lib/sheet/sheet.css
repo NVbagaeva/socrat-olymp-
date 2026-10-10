@@ -618,6 +618,17 @@ body {
   line-height: 1.35;
 }
 
+/* Код комплекта: мелко, у номера страницы. */
+.sheet-kit-code {
+  flex: none;
+  align-self: flex-end;
+  font-size: 6.5pt;
+  letter-spacing: 0.04em;
+  color: var(--sheet-ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .sheet-page-no {
   flex: none;
   align-self: center;
@@ -782,6 +793,19 @@ body {
   font-weight: 700;
   color: var(--sheet-ink);
 }
+
+/* Рисунок к разбору — справа от решения, на листе учителя. */
+.sheet-solution--figure { align-items: flex-start; }
+.sheet-solution--figure .sheet-solution-no { align-self: flex-start; }
+.sheet-solution-figure {
+  flex: none;
+  margin: 0;
+  max-width: min(34%, 44mm);
+}
+.sheet-solution-figure svg { display: block; width: 100%; height: auto; }
+/* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */
+.sheet-solution-figure--float { float: right; margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3); }
+.sheet-task-solution::after { content: ''; display: block; clear: both; }
 
 /* ══════════════════════════════════════════════════════════
    Решение по шагам в карточке — файл «Для учителя»
