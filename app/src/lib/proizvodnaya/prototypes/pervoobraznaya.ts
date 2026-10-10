@@ -26,7 +26,7 @@ import { lomanayaY, postroit } from '../spline';
 import { d, interval, otrezok, xi } from '../tex';
 import type { Draft, Figura, Okno, Pomoshch, Uzel, Zapros } from '../types';
 import { grafikBigF, metkiTekst } from '../uslovie';
-import { podpisUzlov, proto, shag, sobrat, vopros } from './common';
+import { podpisUzlov, proto, shag, vopros } from './common';
 import type { Nevernyy } from './common';
 
 /* ── Общие кирпичi ──────────────────────────────────────────────── */
@@ -87,17 +87,51 @@ function promezhutkiTekst(ps: Promezhutok[], vozr: boolean): string {
     .join(', ');
 }
 
+/** Проверка читаемости и независимый пересчёт ответа (как sobrat из common.ts). */
+function sobrat(
+  fig: Figura,
+  zapros: Zapros,
+  otvet: number,
+  rest: Omit<Draft, 'risunok' | 'zapros' | 'otvet' | 'proverka'>,
+): Draft | null {
+  const pr = problemy(fig, zapros);
+  if (pr.length > 0) {
+    if (process.env.PDBG) console.log('P', pr[0]);
+    return null;
+  }
+  const ch = risunokChist(fig);
+  if (ch.length > 0) {
+    if (process.env.PDBG) console.log('C', ch[0]);
+    return null;
+  }
+  const proverka = reshit(fig, zapros);
+  if (proverka === null || Math.abs(proverka - otvet) > 1e-6) {
+    return null;
+  }
+  return { risunok: fig, zapros, otvet, proverka, ...rest };
+}
+
 /* ── 9.5.1 и 9.5.2: знак f в отмеченных точках по графику F ─────── */
 
 function znakVMetkah(sgn: 1 | -1) {
   return (r: Rng): Draft | null => {
-    const w = volna(r, { n: [2, 4], shag: 2 });
+    const w = volna(r, { n: [2, 3], shag: 3, a: [-9, -6], b: [6, 9], vysota: [2, 4] });
     if (w === null) {
+      if (process.env.PDBG) console.log('G volna');
       return null;
     }
-    const n = r.int(6, 9);
     const spl = postroit(w.uzly);
-    const metki = vybratMetki(r, w.a, w.b, n, (x) => Math.abs(spl.dy(x)) >= 0.6);
+    const godnaya = (x: number) => x !== 0 && Math.abs(spl.dy(x)) >= 0.55 && Math.abs(spl.y(x)) >= 0.9;
+    let pool = 0;
+    for (let x = w.a + 1; x < w.b; x += 1) {
+      pool += godnaya(x) ? 1 : 0;
+    }
+    if (pool < 6) {
+      if (process.env.PDBG) console.log('G pool');
+      return null;
+    }
+    const n = r.int(6, Math.min(9, pool));
+    const metki = vybratMetki(r, w.a, w.b, n, godnaya);
     if (metki === null) {
       return null;
     }
@@ -106,13 +140,13 @@ function znakVMetkah(sgn: 1 | -1) {
     const bad = idxAll.filter((i) => !good.includes(i));
     const k = good.length;
     if (k < 2 || bad.length < 2) {
+      if (process.env.PDBG) console.log('G bal');
       return null;
     }
     const ps = promezhutki(w.uzly);
     const exts = w.ekstremumy.map((e) => e.x);
     const pom: Pomoshch[] = [
       ...exts.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 1 })),
-      ...ps.map((p): Pomoshch => ({ t: 'znak', x0: p.from, x1: p.to, znak: p.vozr ? 1 : -1, shag: 2 })),
     ];
     const fig: Figura = {
       rezhim: 'F',

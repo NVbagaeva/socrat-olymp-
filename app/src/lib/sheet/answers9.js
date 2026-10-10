@@ -19,11 +19,17 @@ export function answerHtml(answer) {
 export function answersItems(blocks, title, note) {
   const items = [answers.sectionHead(title, note)];
   blocks.forEach((block) => {
-    items.push(answers.table(
-      block.title,
-      block.tasks.map((task) => ({ no: task.no, answer: task.answer, html: answerHtml(task.answer) })),
-      5,
-    ));
+    items.push(
+      answers.table(
+        block.title,
+        block.tasks.map((task) => ({
+          no: task.no,
+          answer: task.answer,
+          html: answerHtml(task.answer),
+        })),
+        5,
+      ),
+    );
   });
   return items;
 }

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { Trenazher9Tab } from '@/components/tasks/proizvodnaya/Trenazher9Tab';
 import { proizvodnayaTitle } from '@/content/proizvodnaya';
 
 export const metadata: Metadata = {
   title: proizvodnayaTitle('Тренажёр'),
 };
 
-/** Вкладка «Тренажёр» задания №9 (заготовка: страницу заменяет рабочий экран). */
-export default function Trenazher9Tab() {
-  return <EmptyState title="Раздел собирается" description="Эта вкладка скоро заработает." />;
+/** Вкладка «Тренажёр» задания №9: конфигуратор; сессия собирается в браузере. */
+export default function Trenazher9Page() {
+  return <Trenazher9Tab />;
 }

@@ -29,12 +29,31 @@ import contentSheet9 from '@/content/sheet9.js';
 import { answerHtml, answersItems } from '@/lib/sheet/answers9.js';
 import { buildDocument, exampleItem } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
-import { generate, opornayaSeed } from './generate';
+import { generate as generateRaw, opornayaSeed } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
 import { pustoyOtchet, renderFigura } from './render';
 import { GRUPPY, gruppaById } from './skills';
 import { ru } from './tex';
 import type { Generated, Gruppa } from './types';
+
+/* Задача считается долго (движок подбирает рисунок), а лист ученика,
+   лист учителя и проверка комплекта просят одни и те же seed: результат
+   запоминается. Функция чистая, поэтому запоминание ничего не меняет. */
+const CACHE_MAX = 400;
+const generated = new Map<string, Generated>();
+function generate(prototypeId: string, seed: string): Generated {
+  const key = `${prototypeId}|${seed}`;
+  const hit = generated.get(key);
+  if (hit !== undefined) {
+    return hit;
+  }
+  const task = generateRaw(prototypeId, seed);
+  if (generated.size >= CACHE_MAX) {
+    generated.clear();
+  }
+  generated.set(key, task);
+  return task;
+}
 
 export interface SheetParams9 {
   /** Группы прототипов: I … V. */
@@ -198,7 +217,12 @@ function teacherFigureHtml(task: Generated, condition: string | null): string {
   return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float" style="width:${drawn.width(SOLUTION_CELL_MM)}mm">${drawn.svg}</figure>`;
 }
 
-function sheetTask(task: Generated, no: number, layout: SheetLayoutId, withAnswers: boolean): SheetTask9 {
+function sheetTask(
+  task: Generated,
+  no: number,
+  layout: SheetLayoutId,
+  withAnswers: boolean,
+): SheetTask9 {
   const answerText = ru(task.otvet);
   const condition = drawFigure(task, 'student');
   return {
@@ -211,7 +235,8 @@ function sheetTask(task: Generated, no: number, layout: SheetLayoutId, withAnswe
     answer: withAnswers ? answerText : '',
     answerHtml: null,
     solutionHtml: withAnswers
-      ? teacherFigureHtml(task, condition === null ? null : condition.svg) + razborHtml(task, answerText)
+      ? teacherFigureHtml(task, condition === null ? null : condition.svg) +
+        razborHtml(task, answerText)
       : null,
   };
 }
@@ -333,10 +358,7 @@ function theoryOf(group: Gruppa, pool: string[], ramki: number): string[] {
 }
 
 /** Блоки листа: по одному на группу, сквозная нумерация задач. */
-export function sheetBlocks9(
-  params: SheetParams9,
-  withAnswers: boolean,
-): SheetBlock9[] {
+export function sheetBlocks9(params: SheetParams9, withAnswers: boolean): SheetBlock9[] {
   const numberRef = { n: 0 };
   const groups = params.groups;
   const base = Math.floor(params.count / Math.max(1, groups.length));
@@ -355,6 +377,49 @@ export function sheetBlocks9(
         set: group,
         tasks,
         theory: theoryOf(group, pool, params.ramki),
+      };
+    })
+    .filter((block) => block.tasks.length > 0);
+}
+
+/** Задача фиксированного набора: прототип и seed (банк сборника PDF). */
+export interface FixedTask9 {
+  prototype: string;
+  seed: string;
+  /** Номер варианта в банке: попадает в идентификатор задачи. */
+  n: number;
+}
+
+/**
+ * Блоки по фиксированному набору задач — для сборника PDF: те же
+ * карточки, рамки и разбор, что у листа генератора, но задачи берутся
+ * не по seed адреса, а из банка.
+ */
+export function fixedBlocks9(
+  plan: { group: Gruppa; tasks: FixedTask9[] }[],
+  options: { layout: SheetLayoutId; ramki: 0 | 1 | 2 },
+  withAnswers: boolean,
+): SheetBlock9[] {
+  let no = 0;
+  return plan
+    .map(({ group, tasks }) => {
+      const pool = PROTOTYPES.filter((p) => p.gruppa === group).map((p) => p.id);
+      return {
+        id: group,
+        title: gruppaById(group)?.nazvanie ?? group,
+        note: '',
+        set: group,
+        tasks: tasks.map((item) => {
+          no += 1;
+          const built = sheetTask(
+            generate(item.prototype, item.seed),
+            no,
+            options.layout,
+            withAnswers,
+          );
+          return { ...built, id: `${item.prototype}#${item.n}` };
+        }),
+        theory: theoryOf(group, pool, options.ramki),
       };
     })
     .filter((block) => block.tasks.length > 0);
@@ -386,7 +451,8 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
   const open = html.indexOf('<script type="application/json" id="sheet-spec">');
   const start = html.indexOf('>', open) + 1;
   const end = html.indexOf('</script>', start);
-  const items = (JSON.parse(html.slice(start, end).replace(/<\\\//g, '</')) as { items: string[] }).items;
+  const items = (JSON.parse(html.slice(start, end).replace(/<\\\//g, '</')) as { items: string[] })
+    .items;
   /* Первый кусок — полоса группы, за ней рамки, затем задачи. */
   return [items[0] as string, ...block.theory, ...items.slice(1)];
 }
@@ -401,7 +467,15 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
  * `printSpec9(spec)` — тот же набор, но с готовым потоком.
  */
 export function sheetSpec9(params: SheetParams9, withAnswers: boolean) {
-  const blocks = sheetBlocks9(params, withAnswers);
+  return specOfBlocks9(sheetBlocks9(params, withAnswers), params, withAnswers);
+}
+
+/** Описание листа по готовым блокам: лист генератора и сборник PDF. */
+export function specOfBlocks9(
+  blocks: SheetBlock9[],
+  params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'>,
+  withAnswers: boolean,
+) {
   const base = {
     theme: params.theme,
     layout: params.layout,

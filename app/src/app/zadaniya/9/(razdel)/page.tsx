@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
-import { proizvodnayaTitle } from '@/content/proizvodnaya';
+import { OZadanii9 } from '@/components/tasks/proizvodnaya/OZadanii9';
+import { O_ZADANII_9, proizvodnayaTitle } from '@/content/proizvodnaya';
 
 export const metadata: Metadata = {
-  title: proizvodnayaTitle('О задании'),
+  title: proizvodnayaTitle(O_ZADANII_9.title),
 };
 
-/** Вкладка «О задании» задания №9 (заготовка: страницу заменяет рабочий экран). */
+/** Вкладка «О задании» живёт на адресе самого раздела, как у №2, №8 и №12. */
 export default function OZadanii9Tab() {
-  return <EmptyState title="Раздел собирается" description="Эта вкладка скоро заработает." />;
+  return <OZadanii9 />;
 }

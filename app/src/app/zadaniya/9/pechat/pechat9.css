@@ -1,0 +1,41 @@
+/* Страница печати задания №9: только лист, без оболочки сайта.
+   Копия pechat8.css плюс рисунки графиков (.pr) на чёрно-белом листе. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Рисунки графиков: в ч/б теме кривая — чёрная и толстая, касательная
+   и построения — серые и тоньше. Различие — тоном и толщиной, штриха
+   на рисунке ученика нет. */
+[data-sheet-theme='print'] svg.pr {
+  --graph-accent: #6b6b6b;
+}
+[data-sheet-theme='print'] svg.pr .pr-tangent {
+  stroke-width: 2px;
+}
+[data-sheet-theme='print'] svg.pr .pr-fill {
+  fill: #000000;
+  fill-opacity: 0.14;
+}
+
+/* Рамки теории: рисунок к примеру не сжимается, текст не наезжает. */
+.sheet-example .sheet-figure {
+  flex: none;
+}
+.sheet-zapomni .sheet-recap {
+  margin-bottom: 0;
+}

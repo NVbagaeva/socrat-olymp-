@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:komplekty [--kits N]   (по умолчанию 200 на генератор)
 
-   Для каждого генератора с печатью (№2, №4, №5, №8, №11 и четыре
+   Для каждого генератора с печатью (№2, №4, №5, №8, №9, №11 и четыре
    подтемы №12) собирается N комплектов — так же, как их собирает
    экран: seed — код комплекта (lib/komplekt.ts), настройки — случайный
    набор навыков, число задач и вариантов. И проверяется:
@@ -82,6 +82,8 @@ const P4 = requireSrc('lib/veroyatnost/pool.ts');
 const { listSlova } = requireSrc('content/veroyatnost.ts');
 const S8 = requireSrc('lib/vychisleniya/sheet8.ts');
 const { SKILLS: SKILLS8 } = requireSrc('lib/vychisleniya/skills.ts');
+const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
+const { GRUPPY: GRUPPY9, prototypesOfGroup: protoOfGroup9 } = requireSrc('lib/proizvodnaya/skills.ts');
 const S11 = requireSrc('lib/zadanie11/sheet11.ts');
 const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye.ts');
 
@@ -166,6 +168,29 @@ generators.push({
     return { student: `/zadaniya/8/pechat/?${q}`, teacher: `/zadaniya/8/pechat/otvety/?${q}` };
   },
   spec: (href, teacher) => S8.sheetSpec8(S8.parseSheetQuery8(query(href)), teacher),
+});
+
+/* №9: группы, число задач и число разобранных примеров (0, 1, 2) —
+   как их выбирает экран. Лист строится по группам, в которых уже есть
+   прототипы (пока раздел собирается, групп может быть меньше пяти). */
+const GROUPS_9 = GRUPPY9.map((g) => g.id).filter((id) => protoOfGroup9(id).length > 0);
+generators.push({
+  name: '№9',
+  scope: '9',
+  settings: (random) => ({
+    groups: sample(GROUPS_9, 1 + Math.floor(random() * Math.min(3, GROUPS_9.length)), random),
+    count: 3 + Math.floor(random() * 6),
+    ramki: Math.floor(random() * 3),
+    layout: random() < 0.3 ? 'double' : 'single',
+  }),
+  hrefs: (s, seed) => {
+    const q = S9.sheetQuery9({
+      groups: s.groups, prototypes: [], count: s.count, seed, theme: 'color', layout: s.layout,
+      kind: '', date: '', ramki: s.ramki,
+    });
+    return { student: `/zadaniya/9/pechat/?${q}`, teacher: `/zadaniya/9/pechat/otvety/?${q}` };
+  },
+  spec: (href, teacher) => S9.sheetSpec9(S9.parseSheetQuery9(query(href)), teacher),
 });
 
 const bank11 = dannyeTrenazhera().bank;
@@ -288,6 +313,26 @@ for (const gen of generators) {
         where(kit.code, `задача ${n + 1}: варианты ответа у учителя другие`);
       }
     });
+
+    /* №9: рамки теории и число примеров на листах одни; ответов и
+       разбора у ученика в карточках нет, а у учителя разбор есть. */
+    if (gen.scope === '9') {
+      student.blocks.forEach((block, n) => {
+        const other = teacher.blocks[n];
+        if (other === undefined || JSON.stringify(block.theory) !== JSON.stringify(other.theory)) {
+          where(kit.code, `блок ${n + 1}: рамки теории у ученика и учителя разные`);
+        }
+        const settings = new URLSearchParams(kit.studentHref.split('?')[1]);
+        const wantExamples = Number(settings.get('r'));
+        const examples = block.theory.filter((item) => item.includes('sheet-example')).length;
+        if (examples !== wantExamples) where(kit.code, `блок ${n + 1}: примеров ${examples}, а выбрано ${wantExamples}`);
+        if (wantExamples > 0 && !block.theory[0].includes('sheet-recap')) where(kit.code, `блок ${n + 1}: нет рамки «Запомни»`);
+      });
+      a.forEach((task, n) => {
+        if (task.answer !== '' || task.solutionHtml !== null) where(kit.code, `задача ${n + 1}: у ученика есть ответ или разбор`);
+        if (!b[n].solutionHtml || !b[n].solutionHtml.includes('sheet-step')) where(kit.code, `задача ${n + 1}: у учителя нет разбора по этапам`);
+      });
+    }
 
     /* 3. Сохранили — прочитали — те же задания и ответы. */
     const fingerprints = { student: K.sheetFingerprint(student), teacher: K.sheetFingerprint(teacher) };

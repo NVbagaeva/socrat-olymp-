@@ -102,3 +102,13 @@ export function slovoZnaka(s: 1 | -1, kogda: 'proizv' | 'funk' = 'proizv'): stri
   }
   return s > 0 ? 'положительна' : 'отрицательна';
 }
+
+/** Есть ли «площадка»: соседние узлы волны отличаются по высоте меньше чем на 2. */
+export function ploskoe(uzly: readonly { y: number }[]): boolean {
+  for (let i = 1; i < uzly.length; i += 1) {
+    if (Math.abs((uzly[i] as { y: number }).y - (uzly[i - 1] as { y: number }).y) < 2) {
+      return true;
+    }
+  }
+  return false;
+}

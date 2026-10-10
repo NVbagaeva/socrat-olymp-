@@ -149,7 +149,9 @@ const bankPath = path.join(APP, 'src', 'lib', 'proizvodnaya', 'bank.ts');
 fs.writeFileSync(bankPath, lines.join('\n'));
 
 const total = entries.reduce((sum, e) => sum + e.variants.length, 0);
-console.log(`банк №9: ${entries.length} прототипов, ${total} вариантов → ${path.relative(APP, bankPath)}`);
+console.log(
+  `банк №9: ${entries.length} прототипов, ${total} вариантов → ${path.relative(APP, bankPath)}`,
+);
 if (stubs.length > 0) {
   console.log(`заглушки: ${stubs.join(', ')}`);
 }

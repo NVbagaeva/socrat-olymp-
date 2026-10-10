@@ -80,7 +80,9 @@ records.forEach((record, index) => {
       kartinka = clean;
     }
   }
-  const razbor = Array.isArray(record.razbor) ? record.razbor.filter((l) => typeof l === 'string') : [];
+  const razbor = Array.isArray(record.razbor)
+    ? record.razbor.filter((l) => typeof l === 'string')
+    : [];
   if (errors.length === 0) {
     const seal = sealAnswer(record.otvet);
     tasks.push({

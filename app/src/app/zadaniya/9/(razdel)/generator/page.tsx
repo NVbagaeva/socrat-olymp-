@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/ui';
+import { Generator9Tab } from '@/components/tasks/proizvodnaya/Generator9Tab';
 import { proizvodnayaTitle } from '@/content/proizvodnaya';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: proizvodnayaTitle('Генератор'),
 };
 
-/** Вкладка «Генератор» задания №9 (заготовка: страницу заменяет рабочий экран). */
-export default function Generator9Tab() {
-  return <EmptyState title="Раздел собирается" description="Эта вкладка скоро заработает." />;
+/** Вкладка «Генератор» задания №9: вариант для печати. */
+export default function Generator9Page() {
+  return <Generator9Tab base={`${ZADANIYA}/9`} />;
 }

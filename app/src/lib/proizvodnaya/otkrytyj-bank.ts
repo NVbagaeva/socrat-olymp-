@@ -21,5 +21,4 @@ export interface OpenBankTask {
   istochnik: 'otkrytyj-bank';
 }
 
-export const OPEN_BANK: OpenBankTask[] = [
-];
+export const OPEN_BANK: OpenBankTask[] = [];
