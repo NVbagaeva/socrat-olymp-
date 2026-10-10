@@ -176,13 +176,15 @@ export const tasks = [
     part: 1,
     status: 'ready',
   },
+  /* Раздел открыт: 31 прототип в lib/proizvodnaya, движок графиков
+     производной, тренажёр, опорные задачи, генератор и листы. */
   {
     no: '09',
     name: 'Производная и первообразная',
     shortTitle: 'Производная',
     slug: '9',
     part: 1,
-    status: 'soon',
+    status: 'ready',
   },
   {
     no: '10',

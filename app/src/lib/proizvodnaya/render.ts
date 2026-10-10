@@ -555,18 +555,41 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       `<path class="pr-ticks" d="${ticks.join('')}" stroke="${THEME.colors.axis}" stroke-width="${THEME.width.tick}"/>`,
     );
   }
-  /* Нуль. */
+  /* Нуль: в той из четырёх четвертей у начала координат, где свободно. */
   {
     const zeroW = textWidth('0', V.tick.size);
-    layers.labels.push(svgText('0', axisY - V.tick.origin, axisX + V.tick.gapX, 'end', tickOpts));
-    addBox({
-      kind: 'tick',
-      id: '0',
-      x: axisY - V.tick.origin - zeroW / 2,
-      y: axisX + V.tick.gapX - V.tick.size * 0.35,
-      halfW: zeroW / 2 + 1.5,
-      halfH: V.tick.size * 0.42,
-    });
+    const halfW = zeroW / 2 + 1.5;
+    const halfH = V.tick.size * 0.42;
+    const spots: [number, number, 'end' | 'start'][] = [
+      [axisY - V.tick.origin, axisX + V.tick.gapX, 'end'],
+      [axisY + V.tick.origin, axisX + V.tick.gapX, 'start'],
+      [axisY - V.tick.origin, axisX - 8, 'end'],
+      [axisY + V.tick.origin, axisX - 8, 'start'],
+    ];
+    let best: { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number } | null = null;
+    for (const [x, y, anchor] of spots) {
+      const b: Podpis = {
+        kind: 'tick',
+        id: '0',
+        x: anchor === 'end' ? x - zeroW / 2 : x + zeroW / 2,
+        y: y - V.tick.size * 0.35,
+        halfW,
+        halfH,
+      };
+      const min = zazor(boxRect(b), obstacles.filter((o) => o.what !== 'ось x' && o.what !== 'ось y')).min;
+      if (best === null || min > best.min) {
+        best = { b, x, y, anchor, min };
+      }
+      if (min >= V.gap) {
+        break;
+      }
+    }
+    const chosen = best as { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number };
+    if (chosen.min < V.gap - 1) {
+      problems.push('подпись 0 не помещается: мешает график');
+    }
+    layers.labels.push(svgText('0', chosen.x, chosen.y, chosen.anchor, tickOpts));
+    addBox(chosen.b);
   }
   /* Подписи отмеченных точек раньше чисел: у них приоритет. */
   metki.forEach((m, i) => {

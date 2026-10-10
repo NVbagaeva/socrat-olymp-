@@ -19,7 +19,7 @@
 
 import type { Rng } from '../../veroyatnost/generator';
 import { chislaOtvet } from '../otvet';
-import { nuliUzlov, vybratMetki } from '../chtenie';
+import { nuliUzlov } from '../chtenie';
 import { blizhayshiyNaklon, figura, volna, volnaP } from '../krivye';
 import { naklony, postroit } from '../spline';
 import { d, otrezok } from '../tex';
@@ -512,11 +512,26 @@ function naibNaim(id: string, naib: boolean) {
         return null;
       }
       const n = r.pick([4, 4, 5]);
-      const metki = vybratMetki(r, w.a, w.b, n, () => true);
-      if (metki === null) {
+      const spl = postroit(w.uzly);
+      /* Выигрывает одна точка, отрыв от остальных не меньше единицы: на глаз различим. */
+      const all: { x: number; s: number }[] = [];
+      for (let x = w.a + 1; x < w.b; x += 1) {
+        const sl = spl.dy(x);
+        if (Math.abs(sl) >= 0.5) {
+          all.push({ x, s: sl });
+        }
+      }
+      const winners = all.filter((c) => (naib ? c.s >= 1 : c.s <= -1));
+      if (winners.length === 0) {
         return null;
       }
-      const spl = postroit(w.uzly);
+      const win = r.pick(winners);
+      const others = all.filter((c) => c.x !== win.x && (naib ? c.s <= win.s - 1 : c.s >= win.s + 1));
+      if (others.length < n - 1) {
+        return null;
+      }
+      const picked = [win, ...r.sample(others, n - 1)].sort((p, q) => p.x - q.x);
+      const metki = picked.map((c) => c.x);
       const slopes = metki.map((x) => spl.dy(x));
       const target = naib ? Math.max(...slopes) : Math.min(...slopes);
       const idx = slopes.findIndex((s) => Math.abs(s - target) < 1e-9);
