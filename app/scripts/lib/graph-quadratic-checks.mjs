@@ -673,9 +673,11 @@ export function checkLabels(set, task) {
     }
   }
 
-  /* Подпись точки стоит у своей точки: не дальше половины клетки. */
+  /* Подпись точки стоит у своей точки: не дальше половины клетки. У
+     подписи с выноской (места рядом нет) расстояние другое: к точке
+     её ведёт линия. */
   const limit = layout.cell * 0.5 + 1e-6;
-  boxes.filter((box) => box.kind === 'pointLabel' && box.at).forEach((box) => {
+  boxes.filter((box) => box.kind === 'pointLabel' && box.at && !box.leader).forEach((box) => {
     const gap = gapToBox(box, box.at);
     if (gap > limit) {
       errors.push(`${where}: подпись точки в ${gap.toFixed(1)} px от неё, ` +

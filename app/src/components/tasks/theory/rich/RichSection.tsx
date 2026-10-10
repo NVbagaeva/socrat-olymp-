@@ -7,13 +7,25 @@ import { WarnIcon } from '../VerdictIcons';
 import { Collapse } from './Collapse';
 import { KatexFigure } from './KatexFigure';
 
-/** Выносная формула: KaTeX на сборке, крупные дроби. */
+/**
+ * Выносная формула: KaTeX на сборке, крупные дроби.
+ *
+ * Выкладки набираются в строчном режиме KaTeX с размером «отдельной»
+ * формулы (\displaystyle): в строчном режиме формула переносится по
+ * знакам равенства и операций, а в режиме display KaTeX её не переносит,
+ * и на телефоне длинная цепочка «… = 1,5 · 2,6 = 3,9» обрывалась у
+ * края экрана без результата. Теперь цепочка переходит на следующую
+ * строку, ничего не обрезается.
+ */
 function Display({ tex, className }: { tex: string; className?: string }) {
   return (
     <span
       className={clsx('rich-formula', className)}
       dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
+        __html: katex.renderToString('\\displaystyle ' + tex, {
+          throwOnError: false,
+          displayMode: false,
+        }),
       }}
     />
   );
@@ -186,6 +198,12 @@ function renderBlock(block: RichBlock): ReactNode {
                   </span>
                   <Paras paras={item.paras} />
                   <Lines lines={item.lines} />
+                  {(item.more ?? []).map((part, index) => (
+                    <Fragment key={index}>
+                      <Paras paras={part.paras} />
+                      <Lines lines={part.lines} />
+                    </Fragment>
+                  ))}
                 </li>
               ))}
             </ol>
