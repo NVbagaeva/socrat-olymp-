@@ -26,7 +26,15 @@ import { funkciya } from './reshit';
 import { postroit } from './spline';
 import type { Figura, Konets, Pomoshch, Tochka } from './types';
 
-type Napr = 'below' | 'above' | 'right' | 'left' | 'below-right' | 'above-right' | 'below-left' | 'above-left';
+type Napr =
+  | 'below'
+  | 'above'
+  | 'right'
+  | 'left'
+  | 'below-right'
+  | 'above-right'
+  | 'below-left'
+  | 'above-left';
 
 export type RezhimRisunka = 'student' | 'hint' | 'teacher';
 
@@ -97,6 +105,23 @@ function zazor(rect: Rect, obstacles: readonly Prep[]): { min: number; what: str
   let min = Infinity;
   let what = '';
   for (const o of obstacles) {
+    /* Дальние препятствия не могут улучшить минимум: отсекаем по рамке отрезка. */
+    if (o.seg) {
+      const r = o.r ?? 0;
+      const gx = Math.max(
+        Math.min(o.seg.x1, o.seg.x2) - r - rect.right,
+        rect.left - Math.max(o.seg.x1, o.seg.x2) - r,
+        0,
+      );
+      const gy = Math.max(
+        Math.min(o.seg.y1, o.seg.y2) - r - rect.bottom,
+        rect.top - Math.max(o.seg.y1, o.seg.y2) - r,
+        0,
+      );
+      if (Math.hypot(gx, gy) >= min) {
+        continue;
+      }
+    }
     const d = o.seg ? segRectDist(o.seg, rect) - (o.r ?? 0) : rectGap(o.rect as Rect, rect);
     if (d < min) {
       min = d;
@@ -138,9 +163,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   const cell = fig.cell ?? g.cell;
   const showAux = opts.rezhim !== 'student';
   const shagNow = opts.shag ?? Number.POSITIVE_INFINITY;
-  const aux = showAux
-    ? (fig.pomoshch ?? []).filter((p: Pomoshch) => (p.shag ?? 0) <= shagNow)
-    : [];
+  const aux = showAux ? (fig.pomoshch ?? []).filter((p: Pomoshch) => (p.shag ?? 0) <= shagNow) : [];
   const width = (win.xmax - win.xmin) * cell + g.pad * 2;
   const height = (win.ymax - win.ymin) * cell + g.pad * 2;
   const sx = (x: number) => g.pad + (x - win.xmin) * cell;
@@ -149,7 +172,12 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   const axisY = sx(0);
   const tipX = sx(win.xmax) + g.arrowExtend;
   const tipY = sy(win.ymax) - g.arrowExtend;
-  const field: Rect = { left: V.field, right: width - V.field, top: V.field, bottom: height - V.field };
+  const field: Rect = {
+    left: V.field,
+    right: width - V.field,
+    top: V.field,
+    bottom: height - V.field,
+  };
 
   R.width = width;
   R.height = height;
@@ -184,7 +212,9 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   if (fig.alt) {
     layers.head.push(`<title>${esc(fig.alt)}</title>`);
   }
-  layers.head.push(`<rect x="0" y="0" width="${px(width)}" height="${px(height)}" fill="${THEME.colors.bg}"/>`);
+  layers.head.push(
+    `<rect x="0" y="0" width="${px(width)}" height="${px(height)}" fill="${THEME.colors.bg}"/>`,
+  );
 
   /* ── Сетка ───────────────────────────────────────────────────── */
   {
@@ -210,20 +240,36 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     { seg: { x1: sx(win.xmin), y1: axisX, x2: tipX, y2: axisX }, r: axisR, what: 'ось x' },
     { seg: { x1: axisY, y1: sy(win.ymin), x2: axisY, y2: tipY }, r: axisR, what: 'ось y' },
     {
-      seg: { x1: tipX - g.arrowLen, y1: axisX - g.arrowHalf, x2: tipX - g.arrowLen, y2: axisX + g.arrowHalf },
+      seg: {
+        x1: tipX - g.arrowLen,
+        y1: axisX - g.arrowHalf,
+        x2: tipX - g.arrowLen,
+        y2: axisX + g.arrowHalf,
+      },
       r: 0,
       what: 'стрелка оси x',
     },
     {
-      seg: { x1: axisY - g.arrowHalf, y1: tipY + g.arrowLen, x2: axisY + g.arrowHalf, y2: tipY + g.arrowLen },
+      seg: {
+        x1: axisY - g.arrowHalf,
+        y1: tipY + g.arrowLen,
+        x2: axisY + g.arrowHalf,
+        y2: tipY + g.arrowLen,
+      },
       r: 0,
       what: 'стрелка оси y',
     },
   );
   const nameW = (t: string) => textWidth(t, V.axisName.size);
   layers.labels.push(
-    svgText('x', tipX - 3, axisX + V.axisName.belowX, 'end', { size: V.axisName.size, style: 'italic' }),
-    svgText('y', axisY - V.axisName.leftY, tipY + V.axisName.downY, 'end', { size: V.axisName.size, style: 'italic' }),
+    svgText('x', tipX - 3, axisX + V.axisName.belowX, 'end', {
+      size: V.axisName.size,
+      style: 'italic',
+    }),
+    svgText('y', axisY - V.axisName.leftY, tipY + V.axisName.downY, 'end', {
+      size: V.axisName.size,
+      style: 'italic',
+    }),
   );
   addBox({
     kind: 'axisName',
@@ -316,7 +362,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     layers.dots.push(
       `<circle class="pr-end" cx="${px(sx(x))}" cy="${px(sy(y))}" r="${V.endR}" fill="${kind === 'open' ? THEME.colors.bg : V.curve}" stroke="${V.curve}" stroke-width="2.6"/>`,
     );
-    obstacles.push({ seg: { x1: sx(x), y1: sy(y), x2: sx(x), y2: sy(y) }, r: V.endR + 1.5, what: 'конец графика' });
+    obstacles.push({
+      seg: { x1: sx(x), y1: sy(y), x2: sx(x), y2: sy(y) },
+      r: V.endR + 1.5,
+      what: 'конец графика',
+    });
   }
   if (fig.rezhim === 'lomanaya') {
     /* Вершины ломаной — узлы сетки, отмечены точками. */
@@ -349,7 +399,9 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       const yAt = (x: number) => ay + k * (x - ax);
       /* Обрезка по рамке окна: пересечения с левой и правой сторонами и с верхом и низом. */
       const clipX = (y: number) => ax + (y - ay) / k;
-      const xs = [x1, x2, clipX(win.ymin), clipX(win.ymax)].filter((x) => x >= x1 - 1e-9 && x <= x2 + 1e-9);
+      const xs = [x1, x2, clipX(win.ymin), clipX(win.ymax)].filter(
+        (x) => x >= x1 - 1e-9 && x <= x2 + 1e-9,
+      );
       xs.sort((p, q) => p - q);
       const xa = xs[0] as number;
       const xb = xs[xs.length - 1] as number;
@@ -372,7 +424,13 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       dotsPoints.push({ x: p[0], y: p[1], fill: V.aux, r: V.dotR, what: 'узел прямой' });
     }
     if (kas.x0 !== null) {
-      dotsPoints.push({ x: kas.x0, y: f.y(kas.x0), fill: THEME.colors.axis, r: V.dotR, what: 'точка касания' });
+      dotsPoints.push({
+        x: kas.x0,
+        y: f.y(kas.x0),
+        fill: THEME.colors.axis,
+        r: V.dotR,
+        what: 'точка касания',
+      });
     }
   }
 
@@ -384,7 +442,16 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
 
   /* ── Вспомогательные построения ─────────────────────────────── */
   const auxDots: { x: number; y: number; fill: string }[] = [];
-  const auxLabels: { text: string; sub?: string; x: number; y: number; kind: string; id: string; fill: string; pref: Napr }[] = [];
+  const auxLabels: {
+    text: string;
+    sub?: string;
+    x: number;
+    y: number;
+    kind: string;
+    id: string;
+    fill: string;
+    pref: Napr;
+  }[] = [];
   for (const item of aux) {
     switch (item.t) {
       case 'vert': {
@@ -392,7 +459,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         layers.aux.push(
           `<path class="pr-aux" d="M${px(sx(item.x))} ${px(axisX)}V${px(sy(yv))}" fill="none" stroke="${V.aux}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
         );
-        obstacles.push({ seg: { x1: sx(item.x), y1: axisX, x2: sx(item.x), y2: sy(yv) }, r: 1, what: 'пунктир' });
+        obstacles.push({
+          seg: { x1: sx(item.x), y1: axisX, x2: sx(item.x), y2: sy(yv) },
+          r: 1,
+          what: 'пунктир',
+        });
         auxDots.push({ x: item.x, y: yv, fill: V.aux });
         break;
       }
@@ -431,8 +502,12 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const dy = B[1] - A[1];
     const rising = dy > 0;
     const C: Tochka = rising ? [B[0], A[1]] : [A[0], B[1]];
-    const legH = rising ? `M${px(sx(A[0]))} ${px(sy(A[1]))}H${px(sx(C[0]))}` : `M${px(sx(C[0]))} ${px(sy(C[1]))}H${px(sx(B[0]))}`;
-    const legV = rising ? `M${px(sx(C[0]))} ${px(sy(C[1]))}V${px(sy(B[1]))}` : `M${px(sx(A[0]))} ${px(sy(A[1]))}V${px(sy(C[1]))}`;
+    const legH = rising
+      ? `M${px(sx(A[0]))} ${px(sy(A[1]))}H${px(sx(C[0]))}`
+      : `M${px(sx(C[0]))} ${px(sy(C[1]))}H${px(sx(B[0]))}`;
+    const legV = rising
+      ? `M${px(sx(C[0]))} ${px(sy(C[1]))}V${px(sy(B[1]))}`
+      : `M${px(sx(A[0]))} ${px(sy(A[1]))}V${px(sy(C[1]))}`;
     layers.aux.push(
       `<path class="pr-tri" d="M${px(sx(A[0]))} ${px(sy(A[1]))}L${px(sx(B[0]))} ${px(sy(B[1]))}L${px(sx(C[0]))} ${px(sy(C[1]))}Z" fill="${V.aux}" fill-opacity="0.1" stroke="none"/>`,
       `<path class="pr-tri-legs" d="${legH}${legV}" fill="none" stroke="${V.aux}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
@@ -454,8 +529,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       );
       auxLabels.push({
         text: 'α',
-        x: sx(A[0]) + (rArc + 13) * Math.cos((theta / 2 * Math.PI) / 180),
-        y: sy(A[1]) - (rArc + 13) * Math.sin((theta / 2 * Math.PI) / 180),
+        x: sx(A[0]) + (rArc + 13) * Math.cos(((theta / 2) * Math.PI) / 180),
+        y: sy(A[1]) - (rArc + 13) * Math.sin(((theta / 2) * Math.PI) / 180),
         kind: 'alpha',
         id: 'α',
         fill: V.aux,
@@ -501,7 +576,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       },
       {
         text: String(Math.abs(dy)),
-        x: (rising ? sx(C[0]) + 14 : sx(A[0]) - 14),
+        x: rising ? sx(C[0]) + 14 : sx(A[0]) - 14,
         y: (sy(A[1]) + sy(B[1])) / 2 + 5,
         kind: 'leg',
         id: 'Δy',
@@ -516,13 +591,21 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     layers.dots.push(
       `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR - 0.8}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.6"/>`,
     );
-    obstacles.push({ seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) }, r: V.dotR, what: 'точка' });
+    obstacles.push({
+      seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) },
+      r: V.dotR,
+      what: 'точка',
+    });
   }
   for (const d of dotsPoints) {
     layers.dots.push(
       `<circle class="pr-dot" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${d.r}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.8"/>`,
     );
-    obstacles.push({ seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) }, r: d.r + 1, what: d.what });
+    obstacles.push({
+      seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) },
+      r: d.r + 1,
+      what: d.what,
+    });
   }
 
   /* ── Числа на осях ──────────────────────────────────────────── */
@@ -566,7 +649,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       [axisY - V.tick.origin, axisX - 8, 'end'],
       [axisY + V.tick.origin, axisX - 8, 'start'],
     ];
-    let best: { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number } | null = null;
+    let best: { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number } | null =
+      null;
     for (const [x, y, anchor] of spots) {
       const b: Podpis = {
         kind: 'tick',
@@ -576,7 +660,10 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         halfW,
         halfH,
       };
-      const min = zazor(boxRect(b), obstacles.filter((o) => o.what !== 'ось x' && o.what !== 'ось y')).min;
+      const min = zazor(
+        boxRect(b),
+        obstacles.filter((o) => o.what !== 'ось x' && o.what !== 'ось y'),
+      ).min;
       if (best === null || min > best.min) {
         best = { b, x, y, anchor, min };
       }
@@ -584,7 +671,13 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         break;
       }
     }
-    const chosen = best as { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number };
+    const chosen = best as {
+      b: Podpis;
+      x: number;
+      y: number;
+      anchor: 'end' | 'start';
+      min: number;
+    };
     if (chosen.min < V.gap - 1) {
       problems.push('подпись 0 не помещается: мешает график');
     }
@@ -608,8 +701,15 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
           halfH,
         };
         const rect = boxRect(b);
-        const inside = rect.left >= field.left && rect.right <= field.right && rect.top >= field.top && rect.bottom <= field.bottom;
-        const c = zazor(rect, obstacles.filter((o) => o.what !== 'отмеченная точка'));
+        const inside =
+          rect.left >= field.left &&
+          rect.right <= field.right &&
+          rect.top >= field.top &&
+          rect.bottom <= field.bottom;
+        const c = zazor(
+          rect,
+          obstacles.filter((o) => o.what !== 'отмеченная точка'),
+        );
         const min = inside ? c.min : -1;
         if (best === null || min > best.min) {
           best = { b, min, what: inside ? c.what : 'край рисунка' };
@@ -650,12 +750,14 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const text = (x < 0 ? THEME.minus : '') + String(Math.abs(x));
     let done = false;
     for (const side of [1]) {
-      const b = numberBox(text, sx(x), axisX + side * V.tick.gapX - V.tick.size * 0.35 + (side === -1 ? -V.tick.size * 0.1 : 0));
+      const b = numberBox(
+        text,
+        sx(x),
+        axisX + side * V.tick.gapX - V.tick.size * 0.35 + (side === -1 ? -V.tick.size * 0.1 : 0),
+      );
       const rect = boxRect(b);
       if (zazor(rect, obstacles).min >= V.gap - 1) {
-        layers.labels.push(
-          svgText(text, sx(x), (b.y + V.tick.size * 0.35), 'middle', tickOpts),
-        );
+        layers.labels.push(svgText(text, sx(x), b.y + V.tick.size * 0.35, 'middle', tickOpts));
         addBox(b);
         done = true;
         break;
@@ -681,7 +783,13 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       const b = numberBox(text, bx, sy(y));
       if (zazor(boxRect(b), obstacles).min >= V.gap - 1) {
         layers.labels.push(
-          svgText(text, side === -1 ? axisY - V.tick.gapY : axisY + V.tick.gapY, sy(y) + V.tick.size * 0.36, side === -1 ? 'end' : 'start', tickOpts),
+          svgText(
+            text,
+            side === -1 ? axisY - V.tick.gapY : axisY + V.tick.gapY,
+            sy(y) + V.tick.size * 0.36,
+            side === -1 ? 'end' : 'start',
+            tickOpts,
+          ),
         );
         addBox(b);
         done = true;
@@ -714,7 +822,17 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       'below-left': [-0.7, 0.7],
       'above-left': [-0.7, -0.7],
     } as const;
-    const order = [...prefer, 'below', 'above', 'right', 'left', 'below-right', 'above-right', 'below-left', 'above-left'] as (keyof typeof dirs)[];
+    const order = [
+      ...prefer,
+      'below',
+      'above',
+      'right',
+      'left',
+      'below-right',
+      'above-right',
+      'below-left',
+      'above-left',
+    ] as (keyof typeof dirs)[];
     for (let di = 0; di < order.length; di += 1) {
       const [dx, dy] = dirs[order[di] as keyof typeof dirs];
       for (const off of offs) {
@@ -727,7 +845,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
           halfH,
         };
         const rect = boxRect(b);
-        const inside = rect.left >= field.left && rect.right <= field.right && rect.top >= field.top && rect.bottom <= field.bottom;
+        const inside =
+          rect.left >= field.left &&
+          rect.right <= field.right &&
+          rect.top >= field.top &&
+          rect.bottom <= field.bottom;
         const c = zazor(rect, obstacles);
         const min = inside ? c.min : -1;
         const score = Math.min(min, 12) * 10 - di * 6 - off * 0.2;
@@ -747,7 +869,15 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const tx = sx(kas.x0);
     const ty = sy(f.y(kas.x0));
     const w = shirinaX('0') / 2 + 1.5;
-    const b = place('x0', 'x0', w, V.mark.size * 0.5, { x: tx, y: ty }, ['above-left', 'below-right'], [12, 20, 28]);
+    const b = place(
+      'x0',
+      'x0',
+      w,
+      V.mark.size * 0.5,
+      { x: tx, y: ty },
+      ['above-left', 'below-right'],
+      [12, 20, 28],
+    );
     layers.labels.push(podpisX('0', b.x, b.y + V.mark.size * 0.35, THEME.colors.axis));
     addBox(b);
   }
@@ -755,8 +885,18 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     if (item.t === 'vert' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
       const halfW = textWidth(text, V.tick.size) / 2 + 2;
-      const b = place(`подпись ${text}`, 'aux', halfW, V.tick.size * 0.5, { x: sx(item.x), y: axisX }, ['below', 'above'], [14, 22]);
-      layers.labels.push(svgText(text, b.x, b.y + V.tick.size * 0.35, 'middle', { ...tickOpts, fill: V.aux }));
+      const b = place(
+        `подпись ${text}`,
+        'aux',
+        halfW,
+        V.tick.size * 0.5,
+        { x: sx(item.x), y: axisX },
+        ['below', 'above'],
+        [14, 22],
+      );
+      layers.labels.push(
+        svgText(text, b.x, b.y + V.tick.size * 0.35, 'middle', { ...tickOpts, fill: V.aux }),
+      );
       addBox(b);
     }
     if (item.t === 'zasechka' && item.podpis !== undefined) {
@@ -765,15 +905,40 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     if (item.t === 'goriz' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
       const halfW = textWidth(text, 15) / 2 + 3;
-      const b = place(`подпись ${text}`, 'aux', halfW, 9, { x: sx(win.xmax) - halfW - 6, y: sy(item.y) }, ['above', 'below'], [10, 18]);
-      layers.labels.push(svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux, style: 'italic' }));
+      const b = place(
+        `подпись ${text}`,
+        'aux',
+        halfW,
+        9,
+        { x: sx(win.xmax) - halfW - 6, y: sy(item.y) },
+        ['above', 'below'],
+        [10, 18],
+      );
+      layers.labels.push(
+        svgText(text, b.x, b.y + 5, 'middle', {
+          size: 15,
+          weight: 600,
+          fill: V.aux,
+          style: 'italic',
+        }),
+      );
       addBox(b);
     }
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
       const halfW = textWidth(text, 15) / 2 + 3;
-      const b = place(`подпись ${text}`, 'aux', halfW, 9, { x: sx(item.x), y: sy(item.y) }, ['above-right', 'below-right', 'above-left'], [10, 18]);
-      layers.labels.push(svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }));
+      const b = place(
+        `подпись ${text}`,
+        'aux',
+        halfW,
+        9,
+        { x: sx(item.x), y: sy(item.y) },
+        ['above-right', 'below-right', 'above-left'],
+        [10, 18],
+      );
+      layers.labels.push(
+        svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }),
+      );
       addBox(b);
     }
     if (item.t === 'znak') {
@@ -790,7 +955,9 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         item.znak > 0 ? ['above', 'below'] : ['below', 'above'],
         [6, 16, 28],
       );
-      layers.labels.push(svgText(glyph, b.x, b.y + 7, 'middle', { size: 22, weight: 700, fill: V.aux }));
+      layers.labels.push(
+        svgText(glyph, b.x, b.y + 7, 'middle', { size: 22, weight: 700, fill: V.aux }),
+      );
       addBox(b);
     }
   }
@@ -818,7 +985,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const halfH = V.curveLabel.size * 0.62;
     let best: { b: Podpis; score: number; min: number; what: string } | null = null;
     const n = polyline.length;
-    for (let ti = Math.round(n * 0.06); ti <= Math.round(n * 0.94); ti += Math.max(1, Math.round(n / 45))) {
+    for (
+      let ti = Math.round(n * 0.06);
+      ti <= Math.round(n * 0.94);
+      ti += Math.max(1, Math.round(n / 45))
+    ) {
       const p0 = polyline[Math.max(0, ti - 1)] as { x: number; y: number };
       const p1 = polyline[Math.min(n - 1, ti + 1)] as { x: number; y: number };
       const mx = sx((p0.x + p1.x) / 2);
@@ -840,7 +1011,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
             halfH,
           };
           const rect = boxRect(b);
-          const inside = rect.left >= field.left && rect.right <= field.right && rect.top >= field.top && rect.bottom <= field.bottom;
+          const inside =
+            rect.left >= field.left &&
+            rect.right <= field.right &&
+            rect.top >= field.top &&
+            rect.bottom <= field.bottom;
           const c = zazor(rect, obstacles);
           const min = inside ? c.min : -1;
           const score = Math.min(min, 22) * 4 - off * 0.3;

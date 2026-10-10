@@ -61,14 +61,21 @@ export function qChislo(
     }
     if (!seen.has(d(v))) {
       seen.add(d(v));
-      list.push({ tekst: `$${d(v)}$`, pochemu: 'Вычислительная ошибка: пересчитайте этот шаг ещё раз.' });
+      list.push({
+        tekst: `$${d(v)}$`,
+        pochemu: 'Вычислительная ошибка: пересчитайте этот шаг ещё раз.',
+      });
     }
   }
   return vopros(r, text, `$${d(verno)}$`, list.slice(0, 3), itog, shagNomer);
 }
 
 /** Выбор из вариантов-строк: порядок по seed, otvet — индекс верного. */
-export function vybor(r: Rng, verno: string, neverno: string[]): { varianty: string[]; otvet: number } {
+export function vybor(
+  r: Rng,
+  verno: string,
+  neverno: string[],
+): { varianty: string[]; otvet: number } {
   const all = peremeshat(r, [verno, ...neverno]);
   return { varianty: all, otvet: all.indexOf(verno) };
 }
@@ -82,7 +89,13 @@ export function okoshko(xs: [number, number], ys: [number, number], pole = 1): O
   };
 }
 
-function bazovaya(rezhim: Figura['rezhim'], podpis: string, uzly: Uzel[], okno: Okno, extra: Partial<Figura>): Figura {
+function bazovaya(
+  rezhim: Figura['rezhim'],
+  podpis: string,
+  uzly: Uzel[],
+  okno: Okno,
+  extra: Partial<Figura>,
+): Figura {
   return {
     rezhim,
     okno,
@@ -103,7 +116,11 @@ export function figPryamaya(A: Tochka, B: Tochka, pom: Pomoshch[] = []): Figura 
     { x: A[0], y: A[1] },
     { x: B[0], y: B[1] },
   ];
-  const win = okoshko([Math.min(A[0], B[0]), Math.max(A[0], B[0])], [Math.min(A[1], B[1]), Math.max(A[1], B[1])], 1);
+  const win = okoshko(
+    [Math.min(A[0], B[0]), Math.max(A[0], B[0])],
+    [Math.min(A[1], B[1]), Math.max(A[1], B[1])],
+    1,
+  );
   const fig = bazovaya('pryamaya', '', uzly, win, { pomoshch: pom });
   return risunokChist(fig).length === 0 ? fig : null;
 }
@@ -111,8 +128,16 @@ export function figPryamaya(A: Tochka, B: Tochka, pom: Pomoshch[] = []): Figura 
 /** Рисунок «ломаная»: вершины на узлах сетки. */
 export function figLomanaya(uzly: Uzel[], pom: Pomoshch[] = []): Figura | null {
   const ys = uzly.map((u) => u.y);
-  const win = okoshko([(uzly[0] as Uzel).x, (uzly[uzly.length - 1] as Uzel).x], [Math.min(...ys), Math.max(...ys)], 1);
-  const fig = bazovaya('lomanaya', 'f(x)', uzly, win, { levyy: 'closed', pravyy: 'closed', pomoshch: pom });
+  const win = okoshko(
+    [(uzly[0] as Uzel).x, (uzly[uzly.length - 1] as Uzel).x],
+    [Math.min(...ys), Math.max(...ys)],
+    1,
+  );
+  const fig = bazovaya('lomanaya', 'f(x)', uzly, win, {
+    levyy: 'closed',
+    pravyy: 'closed',
+    pomoshch: pom,
+  });
   return risunokChist(fig).length === 0 ? fig : null;
 }
 

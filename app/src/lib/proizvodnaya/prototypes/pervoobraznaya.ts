@@ -71,7 +71,7 @@ function promezhutki(uzly: readonly Uzel[]): Promezhutok[] {
     const next = uzly[i + 1];
     if (next === undefined) {
       out.push({ from: start, to: u.x, vozr });
-    } else if ((next.y > u.y) !== vozr) {
+    } else if (next.y > u.y !== vozr) {
       out.push({ from: start, to: u.x, vozr });
       start = u.x;
       vozr = !vozr;
@@ -121,7 +121,8 @@ function znakVMetkah(sgn: 1 | -1) {
       return null;
     }
     const spl = postroit(w.uzly);
-    const godnaya = (x: number) => x !== 0 && Math.abs(spl.dy(x)) >= 0.55 && Math.abs(spl.y(x)) >= 0.9;
+    const godnaya = (x: number) =>
+      x !== 0 && Math.abs(spl.dy(x)) >= 0.55 && Math.abs(spl.y(x)) >= 0.9;
     let pool = 0;
     for (let x = w.a + 1; x < w.b; x += 1) {
       pool += godnaya(x) ? 1 : 0;
@@ -171,8 +172,8 @@ function znakVMetkah(sgn: 1 | -1) {
           'Связь графика $F$ и функции $f$',
           "$F$ — первообразная функции $f$, поэтому $F'(x)=f(x)$.",
           polozh
-            ? "Значит, $f(x)>0$ там, где $F$ возрастает, а $f(x)<0$ там, где $F$ убывает."
-            : "Значит, $f(x)<0$ там, где $F$ убывает, а $f(x)>0$ там, где $F$ возрастает.",
+            ? 'Значит, $f(x)>0$ там, где $F$ возрастает, а $f(x)<0$ там, где $F$ убывает.'
+            : 'Значит, $f(x)<0$ там, где $F$ убывает, а $f(x)>0$ там, где $F$ возрастает.',
         ),
         shag(
           'Промежутки монотонности $F$',
@@ -194,18 +195,28 @@ function znakVMetkah(sgn: 1 | -1) {
           `График $F$ в этой точке ${khod}`,
           [
             {
-              tekst: polozh ? 'График $F$ в этой точке лежит выше оси $Ox$' : 'График $F$ в этой точке лежит ниже оси $Ox$',
-              pochemu: "Положение $F$ относительно оси говорит о знаке самой $F$, а знак $f=F'$ показывает направление графика.",
+              tekst: polozh
+                ? 'График $F$ в этой точке лежит выше оси $Ox$'
+                : 'График $F$ в этой точке лежит ниже оси $Ox$',
+              pochemu:
+                "Положение $F$ относительно оси говорит о знаке самой $F$, а знак $f=F'$ показывает направление графика.",
             },
             {
-              tekst: polozh ? 'График $F$ в этой точке убывает (идёт вниз)' : 'График $F$ в этой точке возрастает (идёт вверх)',
+              tekst: polozh
+                ? 'График $F$ в этой точке убывает (идёт вниз)'
+                : 'График $F$ в этой точке возрастает (идёт вверх)',
               pochemu: polozh
                 ? "Убывание $F$ означает $F'(x)=f(x)<0$, а не $>0$."
                 : "Возрастание $F$ означает $F'(x)=f(x)>0$, а не $<0$.",
             },
-            { tekst: 'График $F$ в этой точке имеет вершину', pochemu: "В вершине $F'(x)=0$, то есть $f(x)=0$: ни плюса, ни минуса." },
+            {
+              tekst: 'График $F$ в этой точке имеет вершину',
+              pochemu: "В вершине $F'(x)=0$, то есть $f(x)=0$: ни плюса, ни минуса.",
+            },
           ],
-          polozh ? "$f(x)=F'(x)>0$ там, где $F$ идёт вверх." : "$f(x)=F'(x)<0$ там, где $F$ идёт вниз.",
+          polozh
+            ? "$f(x)=F'(x)>0$ там, где $F$ идёт вверх."
+            : "$f(x)=F'(x)<0$ там, где $F$ идёт вниз.",
           1,
         ),
         vopros(
@@ -213,7 +224,10 @@ function znakVMetkah(sgn: 1 | -1) {
           `Какие из отмеченных точек лежат там, где график $F$ ${polozh ? 'идёт вверх' : 'идёт вниз'}?`,
           `$${perechen(good)}$`,
           [
-            { tekst: `$${perechen(bad)}$`, pochemu: 'Это точки противоположного направления: перепутаны возрастание и убывание.' },
+            {
+              tekst: `$${perechen(bad)}$`,
+              pochemu: 'Это точки противоположного направления: перепутаны возрастание и убывание.',
+            },
             {
               tekst: `$${perechen(good.slice(1))}$`,
               pochemu: `Пропущена точка $${xi(good[0] as number)}$: она тоже лежит на нужном промежутке.`,
@@ -302,7 +316,13 @@ const P953 = proto({
     const exts = w.ekstremumy.map((e) => e.x);
     const inside = exts.filter((x) => x > p && x < q);
     const outside = exts.filter((x) => x < p || x > q);
-    if (inside.length < 1 || inside.length > 3 || outside.length < 1 || exts.includes(p) || exts.includes(q)) {
+    if (
+      inside.length < 1 ||
+      inside.length > 3 ||
+      outside.length < 1 ||
+      exts.includes(p) ||
+      exts.includes(q)
+    ) {
       return null;
     }
     const k = inside.length;
@@ -344,12 +364,21 @@ const P953 = proto({
       podskazka: [
         vopros(
           r,
-          "Что происходит с графиком $F$ в точке, где $f(x)=0$?",
+          'Что происходит с графиком $F$ в точке, где $f(x)=0$?',
           'Касательная к графику $F$ горизонтальна (вершина графика)',
           [
-            { tekst: 'График $F$ пересекает ось $Ox$', pochemu: "Пересечение оси даёт $F(x)=0$, а не $f(x)=F'(x)=0$." },
-            { tekst: 'График $F$ имеет излом', pochemu: 'Первообразная — гладкая функция, изломов у неё нет.' },
-            { tekst: 'График $F$ проходит через начало координат', pochemu: 'Ни $f(x)=0$, ни начало координат между собой не связаны.' },
+            {
+              tekst: 'График $F$ пересекает ось $Ox$',
+              pochemu: "Пересечение оси даёт $F(x)=0$, а не $f(x)=F'(x)=0$.",
+            },
+            {
+              tekst: 'График $F$ имеет излом',
+              pochemu: 'Первообразная — гладкая функция, изломов у неё нет.',
+            },
+            {
+              tekst: 'График $F$ проходит через начало координат',
+              pochemu: 'Ни $f(x)=0$, ни начало координат между собой не связаны.',
+            },
           ],
           "$f(x)=F'(x)=0$ — вершины графика $F$.",
           1,
@@ -361,7 +390,10 @@ const P953 = proto({
           [
             { v: exts.length + 1, w: 'Лишняя вершина: концы интервала вершинами не считаются.' },
             { v: exts.length - 1, w: 'Одна вершина пропущена: пересчитайте «горки» и «ямки».' },
-            { v: exts.length + 2, w: 'Концы интервала посчитаны как вершины, а они не входят в интервал.' },
+            {
+              v: exts.length + 2,
+              w: 'Концы интервала посчитаны как вершины, а они не входят в интервал.',
+            },
           ],
           `Вершин всего $${exts.length}$.`,
           1,
@@ -412,7 +444,13 @@ function sobratRu(
     return null;
   }
   /* Draft.zapros для «чаши» пустой: reshit вернул бы отрицательное число. */
-  return { risunok: fig, zapros: znakOtveta === 1 ? zapros : null, otvet, proverka: proverka * znakOtveta, ...rest };
+  return {
+    risunok: fig,
+    zapros: znakOtveta === 1 ? zapros : null,
+    otvet,
+    proverka: proverka * znakOtveta,
+    ...rest,
+  };
 }
 
 function okoshko(xs: [number, number], ys: [number, number], pole = 1): Okno {
@@ -454,7 +492,11 @@ function nazvanieFigury(k: Kusok): 'pryamougolnik' | 'treugolnik' | 'trapeciya' 
   return 'trapeciya';
 }
 
-const IMYA = { pryamougolnik: 'прямоугольник', treugolnik: 'треугольник', trapeciya: 'трапеция' } as const;
+const IMYA = {
+  pryamougolnik: 'прямоугольник',
+  treugolnik: 'треугольник',
+  trapeciya: 'трапеция',
+} as const;
 
 /** Площадь куска (по модулю) с записью вычисления в TeX. */
 function ploshchadKuska(k: Kusok): { val: number; tex: string } {
@@ -477,9 +519,7 @@ function ploshchadKuska(k: Kusok): { val: number; tex: string } {
 }
 
 function sumTex(vals: number[]): string {
-  return vals
-    .map((v, i) => (i === 0 ? d(v) : v < 0 ? `-${d(-v)}` : `+${d(v)}`))
-    .join('');
+  return vals.map((v, i) => (i === 0 ? d(v) : v < 0 ? `-${d(-v)}` : `+${d(v)}`)).join('');
 }
 
 function lomanayaFigura(r: Rng): { uzly: Uzel[]; a: number; b: number } | null {
@@ -493,7 +533,9 @@ function lomanayaFigura(r: Rng): { uzly: Uzel[]; a: number; b: number } | null {
   const horizFirst = r.next() < 0.5;
   for (let i = 0; i < pieces; i += 1) {
     const dx = (xs[i + 1] as number) - (xs[i] as number);
-    const choices = [0, 1, -1, 2, -2, 0.5, -0.5].filter((s) => (Math.abs(s) === 0.5 ? dx % 2 === 0 : true));
+    const choices = [0, 1, -1, 2, -2, 0.5, -0.5].filter((s) =>
+      Math.abs(s) === 0.5 ? dx % 2 === 0 : true,
+    );
     const s = i === 0 && horizFirst ? 0 : r.pick(choices);
     if (i > 0 && s === slopes[i - 1]) {
       return null;
@@ -519,7 +561,10 @@ function lomanayaFigura(r: Rng): { uzly: Uzel[]; a: number; b: number } | null {
     const y0 = ys[i] as number;
     const y1 = ys[i + 1] as number;
     if (y0 * y1 < 0) {
-      const xz = (xs[i] as number) + (((xs[i + 1] as number) - (xs[i] as number)) * Math.abs(y0)) / (Math.abs(y0) + Math.abs(y1));
+      const xz =
+        (xs[i] as number) +
+        (((xs[i + 1] as number) - (xs[i] as number)) * Math.abs(y0)) /
+          (Math.abs(y0) + Math.abs(y1));
       if (Math.abs(xz - Math.round(xz)) > 1e-9) {
         return null;
       }
@@ -548,7 +593,10 @@ const P954 = proto({
     }
     const { uzly, a, b } = g;
     const ysAll = uzly.map((u) => u.y);
-    const okno = okoshko([uzly[0]!.x, uzly[uzly.length - 1]!.x], [Math.min(...ysAll), Math.max(...ysAll)]);
+    const okno = okoshko(
+      [uzly[0]!.x, uzly[uzly.length - 1]!.x],
+      [Math.min(...ysAll), Math.max(...ysAll)],
+    );
     /* Точки разбиения отрезка [a; b]: концы, вершины, пересечения оси. */
     const bp = new Set<number>([a, b]);
     for (const u of uzly) {
@@ -587,7 +635,13 @@ const P954 = proto({
       { t: 'vert', x: a, podpis: d(a), shag: 1 },
       { t: 'vert', x: b, podpis: d(b), shag: 1 },
       ...pts.slice(1, -1).map((x): Pomoshch => ({ t: 'vert', x, shag: 2 })),
-      ...kuski.map((k, i): Pomoshch => ({ t: 'znak', x0: k.u, x1: k.v, znak: znaki[i] as 1 | -1, shag: 2 })),
+      ...kuski.map((k, i): Pomoshch => ({
+        t: 'znak',
+        x0: k.u,
+        x1: k.v,
+        znak: znaki[i] as 1 | -1,
+        shag: 2,
+      })),
     ];
     const fig: Figura = {
       rezhim: 'lomanaya',
@@ -603,7 +657,10 @@ const P954 = proto({
     };
     const uslovie = `На рисунке изображён график функции $y=f(x)$. Пользуясь рисунком, вычислите $F(${d(b)})-F(${d(a)})$, где $F(x)$ — одна из первообразных функции $f(x)$.`;
     const kuskiSt = kuski
-      .map((k, i) => `$S_{${i + 1}}$ — ${IMYA[nazvanieFigury(k)]} на $${otrezok(k.u, k.v)}$ (${(znaki[i] as number) > 0 ? 'над осью, знак «+»' : 'под осью, знак «−»'})`)
+      .map(
+        (k, i) =>
+          `$S_{${i + 1}}$ — ${IMYA[nazvanieFigury(k)]} на $${otrezok(k.u, k.v)}$ (${(znaki[i] as number) > 0 ? 'над осью, знак «+»' : 'под осью, знак «−»'})`,
+      )
       .join('; ');
     const rasch = kuski.map((_, i) => {
       const s = znaki[i] as number;
@@ -620,7 +677,7 @@ const P954 = proto({
       shagi: [
         shag(
           'Что такое $F(b)-F(a)$',
-          "Приращение первообразной на отрезке равно площади фигуры под графиком $f$ на этом отрезке, взятой со знаком: «+» над осью $Ox$ и «−» под осью.",
+          'Приращение первообразной на отрезке равно площади фигуры под графиком $f$ на этом отрезке, взятой со знаком: «+» над осью $Ox$ и «−» под осью.',
           `Нам нужна площадь со знаком на отрезке $${otrezok(a, b)}$.`,
         ),
         shag(
@@ -641,9 +698,21 @@ const P954 = proto({
           `Чему равно $F(${d(b)})-F(${d(a)})$?`,
           'Площади фигуры под графиком $f$ на $' + otrezok(a, b) + '$, взятой со знаком',
           [
-            { tekst: `Разности $f(${d(b)})-f(${d(a)})$`, pochemu: 'Это приращение самой $f$. Приращение первообразной $F$ — площадь под графиком $f$.' },
-            { tekst: `Произведению $f(${d(b)})\\cdot(${d(b - a)})$`, pochemu: 'Так считают площадь прямоугольника, но график $f$ на отрезке не обязан быть горизонтальным.' },
-            { tekst: 'Угловому коэффициенту графика $f$', pochemu: 'Угловой коэффициент — это производная, а мы идём в обратную сторону — к первообразной.' },
+            {
+              tekst: `Разности $f(${d(b)})-f(${d(a)})$`,
+              pochemu:
+                'Это приращение самой $f$. Приращение первообразной $F$ — площадь под графиком $f$.',
+            },
+            {
+              tekst: `Произведению $f(${d(b)})\\cdot(${d(b - a)})$`,
+              pochemu:
+                'Так считают площадь прямоугольника, но график $f$ на отрезке не обязан быть горизонтальным.',
+            },
+            {
+              tekst: 'Угловому коэффициенту графика $f$',
+              pochemu:
+                'Угловой коэффициент — это производная, а мы идём в обратную сторону — к первообразной.',
+            },
           ],
           'Приращение $F$ — площадь со знаком под графиком $f$.',
           1,
@@ -653,9 +722,21 @@ const P954 = proto({
           `Чему равна площадь первой фигуры на $${otrezok(first.u, first.v)}$ вместе со знаком?`,
           firstS,
           [
-            { v: -firstS, w: firstZ > 0 ? 'Фигура над осью, знак «+»: минус ставить не нужно.' : 'Фигура под осью, поэтому её площадь входит со знаком «−».' },
-            { v: Math.abs(firstS) * 2, w: 'Забыли множитель $\\dfrac12$ у треугольника или полусумму оснований у трапеции.' },
-            { v: Math.abs(firstS) + (firstZ > 0 ? 1 : -1) * (first.v - first.u), w: 'Площадь посчитана по неверным основаниям или высоте.' },
+            {
+              v: -firstS,
+              w:
+                firstZ > 0
+                  ? 'Фигура над осью, знак «+»: минус ставить не нужно.'
+                  : 'Фигура под осью, поэтому её площадь входит со знаком «−».',
+            },
+            {
+              v: Math.abs(firstS) * 2,
+              w: 'Забыли множитель $\\dfrac12$ у треугольника или полусумму оснований у трапеции.',
+            },
+            {
+              v: Math.abs(firstS) + (firstZ > 0 ? 1 : -1) * (first.v - first.u),
+              w: 'Площадь посчитана по неверным основаниям или высоте.',
+            },
           ],
           `Первая фигура даёт $${d(firstS)}$.`,
           2,
@@ -667,7 +748,10 @@ const P954 = proto({
           [
             { v: -otvet, w: 'Перепутан знак итога: сверьте, какая из площадей больше.' },
             { v: absSum, w: 'Площади сложены без учёта знаков: части под осью надо вычитать.' },
-            { v: otvet - (znachenia[znachenia.length - 1] as number), w: 'Последняя фигура не учтена в сумме.' },
+            {
+              v: otvet - (znachenia[znachenia.length - 1] as number),
+              w: 'Последняя фигура не учтена в сумме.',
+            },
           ],
           `$F(${d(b)})-F(${d(a)})=${d(otvet)}$.`,
           2,
@@ -787,7 +871,7 @@ function ploshchadParaboly(polnaya: boolean) {
     const w = beta - alpha;
     const c = polnaya ? beta : r.next() < 0.5 ? beta : r.int(alpha + 1, beta);
     const gorka = a < 0;
-    const peak = Math.abs(a) * (w * w) / 4;
+    const peak = (Math.abs(a) * (w * w)) / 4;
     if (peak > 9.5 || P.uzly.some((u) => !Number.isInteger(u.y))) {
       return null;
     }
@@ -795,7 +879,10 @@ function ploshchadParaboly(polnaya: boolean) {
     /* Независимая проверка формулы: ∫ a(x−α)(x−β) от α до c. */
     const dd = c - alpha;
     const forma = (a * dd * dd * (2 * dd - 3 * w)) / 6;
-    if (Math.abs(forma - delta) > 1e-9 || Math.abs(Fvalue(P, c) - Fvalue(P, alpha) - delta) > 1e-9) {
+    if (
+      Math.abs(forma - delta) > 1e-9 ||
+      Math.abs(Fvalue(P, c) - Fvalue(P, alpha) - delta) > 1e-9
+    ) {
       return null;
     }
     const S = Math.abs(delta);
@@ -816,7 +903,9 @@ function ploshchadParaboly(polnaya: boolean) {
         ];
     const fig = risunokParaboly(P, c, pom);
     const Fs = formulaF(P);
-    const znakTeks = gorka ? `F(${d(c)})-F(${d(alpha)})` : `-\\bigl(F(${d(c)})-F(${d(alpha)})\\bigr)`;
+    const znakTeks = gorka
+      ? `F(${d(c)})-F(${d(alpha)})`
+      : `-\\bigl(F(${d(c)})-F(${d(alpha)})\\bigr)`;
     const uslovie = polnaya
       ? `На рисунке изображён график функции $y=f(x)$; закрашена фигура, ограниченная этим графиком и осью абсцисс. Функция $${Fs}$ — одна из первообразных функции $f(x)$. Найдите площадь закрашенной фигуры.`
       : c === beta
@@ -834,14 +923,28 @@ function ploshchadParaboly(polnaya: boolean) {
       shag(
         'Выбираем знак',
         gorka
-          ? 'Фигура лежит над осью $Ox$, значит $f(x)\\geqslant 0$ и площадь равна $S=F(' + d(hi) + ')-F(' + d(lo) + ')$.'
-          : 'Фигура лежит под осью $Ox$, значит $f(x)\\leqslant 0$ и разность $F(' + d(hi) + ')-F(' + d(lo) + ')$ отрицательна. Площадь положительна, поэтому $S=-\\bigl(F(' + d(hi) + ')-F(' + d(lo) + ')\\bigr)$.',
+          ? 'Фигура лежит над осью $Ox$, значит $f(x)\\geqslant 0$ и площадь равна $S=F(' +
+              d(hi) +
+              ')-F(' +
+              d(lo) +
+              ')$.'
+          : 'Фигура лежит под осью $Ox$, значит $f(x)\\leqslant 0$ и разность $F(' +
+              d(hi) +
+              ')-F(' +
+              d(lo) +
+              ')$ отрицательна. Площадь положительна, поэтому $S=-\\bigl(F(' +
+              d(hi) +
+              ')-F(' +
+              d(lo) +
+              ')\\bigr)$.',
       ),
       shag('Считаем разность без лишних вычислений', ...stroki),
       shag('Площадь', `$S=${znakTeks}=${d(S)}$`),
       shag('Ответ', `**Ответ: ${chislaOtvet(S)}**`),
     ];
-    const hodNa = gorka ? 'выше оси, значит $S=F(' + d(hi) + ')-F(' + d(lo) + ')$' : 'ниже оси, значит $S=-(F(' + d(hi) + ')-F(' + d(lo) + '))$';
+    const hodNa = gorka
+      ? 'выше оси, значит $S=F(' + d(hi) + ')-F(' + d(lo) + ')$'
+      : 'ниже оси, значит $S=-(F(' + d(hi) + ')-F(' + d(lo) + '))$';
     return sobratRu(fig, { t: 'prirashchenie', p: lo, q: hi }, S, gorka ? 1 : -1, {
       uslovie,
       shagi: shagiSt,
@@ -851,41 +954,88 @@ function ploshchadParaboly(polnaya: boolean) {
           `Как по первообразной найти площадь под графиком $f$ на $${otrezok(lo, hi)}$ (фигура над осью)?`,
           `$F(${d(hi)})-F(${d(lo)})$`,
           [
-            { tekst: `$F(${d(hi)})+F(${d(lo)})$`, pochemu: 'Площадь — это приращение первообразной, то есть разность значений, а не сумма.' },
-            { tekst: `$f(${d(hi)})-f(${d(lo)})$`, pochemu: 'Это разность значений самой $f$, а не площадь под её графиком.' },
-            { tekst: `$F(${d(hi)})\\cdot(${d(hi - lo)})$`, pochemu: 'Так считают площадь прямоугольника, а график $f$ не горизонтален.' },
+            {
+              tekst: `$F(${d(hi)})+F(${d(lo)})$`,
+              pochemu:
+                'Площадь — это приращение первообразной, то есть разность значений, а не сумма.',
+            },
+            {
+              tekst: `$f(${d(hi)})-f(${d(lo)})$`,
+              pochemu: 'Это разность значений самой $f$, а не площадь под её графиком.',
+            },
+            {
+              tekst: `$F(${d(hi)})\\cdot(${d(hi - lo)})$`,
+              pochemu: 'Так считают площадь прямоугольника, а график $f$ не горизонтален.',
+            },
           ],
           `$S=F(${d(hi)})-F(${d(lo)})$ для фигуры над осью.`,
           1,
         ),
         vopros(
           r,
-          polnaya ? 'В каких точках график пересекает ось $Ox$ (границы фигуры)?' : 'Где левая граница закрашенной фигуры?',
+          polnaya
+            ? 'В каких точках график пересекает ось $Ox$ (границы фигуры)?'
+            : 'Где левая граница закрашенной фигуры?',
           polnaya ? `$x=${d(alpha)}$ и $x=${d(beta)}$` : `$x=${d(alpha)}$`,
           polnaya
             ? [
-                { tekst: `$x=${d(alpha + 1)}$ и $x=${d(beta + 1)}$`, pochemu: 'Границы сдвинуты на клетку: смотрите, где график ровно на оси.' },
-                { tekst: `$x=${d(alpha - 1)}$ и $x=${d(beta)}$`, pochemu: 'Левая граница сдвинута на клетку.' },
-                { tekst: `$x=${d(alpha)}$ и $x=${d(beta - 1)}$`, pochemu: 'Правая граница сдвинута на клетку.' },
+                {
+                  tekst: `$x=${d(alpha + 1)}$ и $x=${d(beta + 1)}$`,
+                  pochemu: 'Границы сдвинуты на клетку: смотрите, где график ровно на оси.',
+                },
+                {
+                  tekst: `$x=${d(alpha - 1)}$ и $x=${d(beta)}$`,
+                  pochemu: 'Левая граница сдвинута на клетку.',
+                },
+                {
+                  tekst: `$x=${d(alpha)}$ и $x=${d(beta - 1)}$`,
+                  pochemu: 'Правая граница сдвинута на клетку.',
+                },
               ]
             : [
-                { tekst: `$x=${d(alpha + 1)}$`, pochemu: 'Здесь график уже над (под) осью, а фигура начинается там, где он выходит на ось.' },
-                { tekst: `$x=${d(alpha - 1)}$`, pochemu: 'Левее фигуры нет: её граница на клетку правее.' },
+                {
+                  tekst: `$x=${d(alpha + 1)}$`,
+                  pochemu:
+                    'Здесь график уже над (под) осью, а фигура начинается там, где он выходит на ось.',
+                },
+                {
+                  tekst: `$x=${d(alpha - 1)}$`,
+                  pochemu: 'Левее фигуры нет: её граница на клетку правее.',
+                },
                 { tekst: '$x=0$', pochemu: 'Ось $Oy$ не является границей фигуры.' },
               ],
-          polnaya ? `Границы: $x=${d(alpha)}$ и $x=${d(beta)}$.` : `Левая граница: $x=${d(alpha)}$.`,
+          polnaya
+            ? `Границы: $x=${d(alpha)}$ и $x=${d(beta)}$.`
+            : `Левая граница: $x=${d(alpha)}$.`,
           1,
         ),
         vopros(
           r,
           'Где расположена фигура и какое выражение даёт её площадь?',
-          gorka ? `Над осью: $S=F(${d(hi)})-F(${d(lo)})$` : `Под осью: $S=-\\bigl(F(${d(hi)})-F(${d(lo)})\\bigr)$`,
+          gorka
+            ? `Над осью: $S=F(${d(hi)})-F(${d(lo)})$`
+            : `Под осью: $S=-\\bigl(F(${d(hi)})-F(${d(lo)})\\bigr)$`,
           [
             {
-              tekst: gorka ? `Под осью: $S=-\\bigl(F(${d(hi)})-F(${d(lo)})\\bigr)$` : `Над осью: $S=F(${d(hi)})-F(${d(lo)})$`,
-              pochemu: gorka ? 'Фигура выше оси, там $f>0$, и разность $F(' + d(hi) + ')-F(' + d(lo) + ')$ положительна.' : 'Фигура ниже оси: разность $F(' + d(hi) + ')-F(' + d(lo) + ')$ отрицательна, а площадь не может быть отрицательной.',
+              tekst: gorka
+                ? `Под осью: $S=-\\bigl(F(${d(hi)})-F(${d(lo)})\\bigr)$`
+                : `Над осью: $S=F(${d(hi)})-F(${d(lo)})$`,
+              pochemu: gorka
+                ? 'Фигура выше оси, там $f>0$, и разность $F(' +
+                  d(hi) +
+                  ')-F(' +
+                  d(lo) +
+                  ')$ положительна.'
+                : 'Фигура ниже оси: разность $F(' +
+                  d(hi) +
+                  ')-F(' +
+                  d(lo) +
+                  ')$ отрицательна, а площадь не может быть отрицательной.',
             },
-            { tekst: `Всегда $S=F(${d(lo)})-F(${d(hi)})$`, pochemu: 'Знак зависит от расположения фигуры относительно оси, а не фиксирован.' },
+            {
+              tekst: `Всегда $S=F(${d(lo)})-F(${d(hi)})$`,
+              pochemu: 'Знак зависит от расположения фигуры относительно оси, а не фиксирован.',
+            },
           ],
           `Фигура ${hodNa}.`,
           2,
@@ -895,8 +1045,14 @@ function ploshchadParaboly(polnaya: boolean) {
           `Чему равна разность $F(${d(hi)})-F(${d(lo)})$?`,
           delta,
           [
-            { v: -delta, w: 'Знак разности перепутан: найдите значения $F$ в обеих точках и вычтите из большего номера меньший.' },
-            { v: delta + P.C0, w: 'Константа $C_0$ при вычитании сокращается и в ответ не входит.' },
+            {
+              v: -delta,
+              w: 'Знак разности перепутан: найдите значения $F$ в обеих точках и вычтите из большего номера меньший.',
+            },
+            {
+              v: delta + P.C0,
+              w: 'Константа $C_0$ при вычитании сокращается и в ответ не входит.',
+            },
             { v: Fvalue(P, hi) + Fvalue(P, lo), w: 'Вместо разности найдена сумма значений $F$.' },
           ],
           `Разность равна $${d(delta)}$${gorka ? '' : ', площадь — число, противоположное ей'}.`,

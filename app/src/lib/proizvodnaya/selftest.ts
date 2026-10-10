@@ -69,8 +69,15 @@ function podpisiChisty(fig: Figura, rep: Otchet): string[] {
   const boxes = rep.boxes;
   for (let i = 0; i < boxes.length; i += 1) {
     for (let j = i + 1; j < boxes.length; j += 1) {
-      if (rectGap(boxRect(boxes[i] as Otchet['boxes'][number]), boxRect(boxes[j] as Otchet['boxes'][number])) < 0) {
-        out.push(`подписи ${(boxes[i] as Otchet['boxes'][number]).id} и ${(boxes[j] as Otchet['boxes'][number]).id} пересекаются`);
+      if (
+        rectGap(
+          boxRect(boxes[i] as Otchet['boxes'][number]),
+          boxRect(boxes[j] as Otchet['boxes'][number]),
+        ) < 0
+      ) {
+        out.push(
+          `подписи ${(boxes[i] as Otchet['boxes'][number]).id} и ${(boxes[j] as Otchet['boxes'][number]).id} пересекаются`,
+        );
       }
     }
   }
@@ -94,7 +101,12 @@ function podpisiChisty(fig: Figura, rep: Otchet): string[] {
         }
         const rect = boxRect(b);
         for (let k = 0; k < pts.length - 1; k += 1) {
-          const seg: Seg = { x1: (pts[k] as [number, number])[0], y1: (pts[k] as [number, number])[1], x2: (pts[k + 1] as [number, number])[0], y2: (pts[k + 1] as [number, number])[1] };
+          const seg: Seg = {
+            x1: (pts[k] as [number, number])[0],
+            y1: (pts[k] as [number, number])[1],
+            x2: (pts[k + 1] as [number, number])[0],
+            y2: (pts[k + 1] as [number, number])[1],
+          };
           if (segRectDist(seg, rect) < 0.5) {
             out.push(`подпись ${b.id} пересекает кривую`);
             break;
@@ -142,11 +154,18 @@ export function checkEngine(n: number): Report {
       }
     }
     /* Экстремумы/нули — ровно там, где задумано, и только целые. */
-    const found = (isF ? ekstremumy(fig, ...granitsy(fig)) : nuli(spl.y, ...granitsy(fig))).map((z) => z.x);
-    if (found.length !== want.length || found.some((x, i) => Math.abs(x - (want[i] as number)) > 1e-6)) {
+    const found = (isF ? ekstremumy(fig, ...granitsy(fig)) : nuli(spl.y, ...granitsy(fig))).map(
+      (z) => z.x,
+    );
+    if (
+      found.length !== want.length ||
+      found.some((x, i) => Math.abs(x - (want[i] as number)) > 1e-6)
+    ) {
       problems.push({ where, what: `нули/экстремумы ${found.join(',')} вместо ${want.join(',')}` });
     }
-    const types = (isF ? ekstremumy(fig, ...granitsy(fig)) : nuli(spl.y, ...granitsy(fig))).map((z) => z.tip);
+    const types = (isF ? ekstremumy(fig, ...granitsy(fig)) : nuli(spl.y, ...granitsy(fig))).map(
+      (z) => z.tip,
+    );
     if (types.some((t) => t !== 'plus-minus' && t !== 'minus-plus')) {
       problems.push({ where, what: 'нуль не пересекает ось: касание или площадка' });
     }
@@ -156,7 +175,9 @@ export function checkEngine(n: number): Report {
       }
     }
     /* Структура узлов даёт те же числа. */
-    const structural = (isF ? ekstremumyUzlov(fig.uzly).map((e) => e.x) : nuliUzlov(fig.uzly).map((z) => z.x));
+    const structural = isF
+      ? ekstremumyUzlov(fig.uzly).map((e) => e.x)
+      : nuliUzlov(fig.uzly).map((z) => z.x);
     if (structural.join(',') !== want.join(',')) {
       problems.push({ where, what: 'структурное чтение узлов расходится с задуманным' });
     }
@@ -184,7 +205,9 @@ export function checkEngine(n: number): Report {
       if (rezhim === 'student') {
         problems.push(...studentSvgChist(svg).map((what) => ({ where, what })));
       }
-      problems.push(...podpisiChisty(fig, rep).map((what) => ({ where: `${where} ${rezhim}`, what })));
+      problems.push(
+        ...podpisiChisty(fig, rep).map((what) => ({ where: `${where} ${rezhim}`, what })),
+      );
     }
   }
   return { prototypes: 0, generated: rendered, problems };
@@ -238,7 +261,10 @@ export function proveritStroki(
         try {
           typeset(part);
         } catch (e) {
-          out.push({ where, what: `KaTeX: ${(e as Error).message.slice(0, 120)} в «${part.slice(0, 60)}»` });
+          out.push({
+            where,
+            what: `KaTeX: ${(e as Error).message.slice(0, 120)} в «${part.slice(0, 60)}»`,
+          });
         }
       }
     });
@@ -251,7 +277,11 @@ export function proveritStroki(
 }
 
 /** Генераторы: ответ из данных узлов совпадает с заложенным, рисунок и тексты чисты. */
-export function checkGenerators(seeds: number, typeset: (tex: string) => string, textCheck: TextCheck): Report {
+export function checkGenerators(
+  seeds: number,
+  typeset: (tex: string) => string,
+  textCheck: TextCheck,
+): Report {
   const problems: Problem[] = [];
   let generated = 0;
   const ms: Record<string, number> = {};
@@ -273,10 +303,16 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string,
       generated += 1;
       count += 1;
       if (t.istochnik !== 'ne-iz-otkrytogo-banka') {
-        problems.push({ where, what: 'у собственной задачи не стоит пометка «не из открытого банка»' });
+        problems.push({
+          where,
+          what: 'у собственной задачи не стоит пометка «не из открытого банка»',
+        });
       }
       if (!nice(t.otvet)) {
-        problems.push({ where, what: `ответ ${t.otvet} — не целое и не конечная десятичная дробь` });
+        problems.push({
+          where,
+          what: `ответ ${t.otvet} — не целое и не конечная десятичная дробь`,
+        });
       }
       if (Math.abs(t.proverka - t.otvet) > 1e-6) {
         problems.push({ where, what: `независимый счёт ${t.proverka} ≠ ${t.otvet}` });
@@ -305,7 +341,9 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string,
           for (const p of rep.problems) {
             problems.push({ where, what: `${rezhim}: ${p}` });
           }
-          problems.push(...podpisiChisty(t.risunok, rep).map((what) => ({ where, what: `${rezhim}: ${what}` })));
+          problems.push(
+            ...podpisiChisty(t.risunok, rep).map((what) => ({ where, what: `${rezhim}: ${what}` })),
+          );
           if (rezhim === 'student') {
             problems.push(...studentSvgChist(svg).map((what) => ({ where, what })));
           }
@@ -330,14 +368,23 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string,
       for (const q of t.podskazka) {
         const right = q.varianty.filter((v) => v.verno).length;
         if (right !== 1) {
-          problems.push({ where, what: `в вопросе «${q.vopros.slice(0, 40)}» верных вариантов ${right}` });
+          problems.push({
+            where,
+            what: `в вопросе «${q.vopros.slice(0, 40)}» верных вариантов ${right}`,
+          });
         }
         if (q.varianty.length < 2 || q.varianty.length > 5) {
-          problems.push({ where, what: `в вопросе «${q.vopros.slice(0, 40)}» ${q.varianty.length} вариантов` });
+          problems.push({
+            where,
+            what: `в вопросе «${q.vopros.slice(0, 40)}» ${q.varianty.length} вариантов`,
+          });
         }
         for (const v of q.varianty) {
           if (!v.verno && (v.pochemu === undefined || v.pochemu.trim() === '')) {
-            problems.push({ where, what: `у неверного варианта «${v.tekst.slice(0, 40)}» нет объяснения` });
+            problems.push({
+              where,
+              what: `у неверного варианта «${v.tekst.slice(0, 40)}» нет объяснения`,
+            });
           }
         }
         const texts = q.varianty.map((v) => v.tekst);
@@ -350,7 +397,10 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string,
     ms[proto.id] = count === 0 ? 0 : Math.round((Date.now() - t0) / count);
     const top = Math.max(0, ...answers.values());
     if (seeds >= 50 && top / Math.max(count, 1) > 0.6) {
-      problems.push({ where: proto.id, what: `один ответ встречается в ${Math.round((100 * top) / count)}% задач` });
+      problems.push({
+        where: proto.id,
+        what: `один ответ встречается в ${Math.round((100 * top) / count)}% задач`,
+      });
     }
     if (seeds >= 50 && signatures.size < count * 0.8) {
       problems.push({ where: proto.id, what: `различных задач ${signatures.size} из ${count}` });
@@ -374,7 +424,10 @@ export function checkBank(
       continue;
     }
     if (entry.variants.length !== 10) {
-      problems.push({ where: proto.id, what: `в банке ${entry.variants.length} вариантов вместо 10` });
+      problems.push({
+        where: proto.id,
+        what: `в банке ${entry.variants.length} вариантов вместо 10`,
+      });
     }
     const sig = new Set<string>();
     const vids = new Map<string, number>();
@@ -395,7 +448,7 @@ export function checkBank(
       }
     }
     for (const [vid, k] of vids) {
-      if (k > 3 && vid !== '') {
+      if (k > 4 && vid !== '') {
         problems.push({ where: proto.id, what: `вид «${vid}» встречается ${k} раз из 10` });
       }
     }

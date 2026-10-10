@@ -27,7 +27,13 @@ export interface Volna {
 }
 
 /** Целая абсцисса не ближе `gap` друг к другу: выбор n значений из отрезка. */
-export function raznesennye(r: Rng, lo: number, hi: number, n: number, gap: number): number[] | null {
+export function raznesennye(
+  r: Rng,
+  lo: number,
+  hi: number,
+  n: number,
+  gap: number,
+): number[] | null {
   if (n === 0) {
     return [];
   }
@@ -176,7 +182,7 @@ export function volnaP(r: Rng, o: OpcVolnyP): VolnaP | null {
   const uzly: Uzel[] = [];
   const nuli: NulProizvodnoy[] = [];
   /* Доля i лежит между нулями i−1 и i; знак чередуется. */
-  const sign = (i: number): 1 | -1 => (i % 2 === 0 ? s0 : ((-s0) as 1 | -1));
+  const sign = (i: number): 1 | -1 => (i % 2 === 0 ? s0 : (-s0 as 1 | -1));
   const bounds = [a, ...zs, b];
   const lobes = bounds.length - 1;
   for (let i = 0; i < lobes; i += 1) {

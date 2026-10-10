@@ -204,7 +204,9 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       }
       const slopes = metki.map((x) => dy(x));
       const target = zapros.t === 'naib-metka' ? Math.max(...slopes) : Math.min(...slopes);
-      const idx = slopes.map((s, i) => (Math.abs(s - target) < 1e-6 ? i : -1)).filter((i) => i >= 0);
+      const idx = slopes
+        .map((s, i) => (Math.abs(s - target) < 1e-6 ? i : -1))
+        .filter((i) => i >= 0);
       return idx.length === 1 ? (idx[0] as number) + 1 : null;
     }
     case 'kasat-znachenie': {
@@ -304,7 +306,9 @@ export function problemy(fig: Figura, zapros: Zapros | null): string[] {
     }
     for (const m of metki) {
       if (Math.abs(f.y(m)) < MIN_ZNACHENIE) {
-        out.push(`в отмеченной точке x = ${m} значение f′ ${f.y(m).toFixed(2)} слишком близко к оси`);
+        out.push(
+          `в отмеченной точке x = ${m} значение f′ ${f.y(m).toFixed(2)} слишком близко к оси`,
+        );
       }
     }
   }
@@ -348,7 +352,12 @@ export function problemy(fig: Figura, zapros: Zapros | null): string[] {
       out.push('узлы касательной ближе двух клеток по x');
     }
     for (const pt of [a, b]) {
-      if (pt[0] < ok.xmin + 0.5 || pt[0] > ok.xmax - 0.5 || pt[1] < ok.ymin + 0.5 || pt[1] > ok.ymax - 0.5) {
+      if (
+        pt[0] < ok.xmin + 0.5 ||
+        pt[0] > ok.xmax - 0.5 ||
+        pt[1] < ok.ymin + 0.5 ||
+        pt[1] > ok.ymax - 0.5
+      ) {
         out.push('узел касательной у края окна');
       }
     }
@@ -364,7 +373,9 @@ function problemyZaprosa(
   const out: string[] = [];
   const [lo, hi] = granitsy(fig);
   const metki = fig.metki ?? [];
-  const zeros = (fig.rezhim === 'fprime' ? nuli(f.y, lo, hi) : ekstremumy(fig, lo, hi)).map((z) => z.x);
+  const zeros = (fig.rezhim === 'fprime' ? nuli(f.y, lo, hi) : ekstremumy(fig, lo, hi)).map(
+    (z) => z.x,
+  );
   const p = zapros.p;
   const q = zapros.q;
   if (p !== undefined && q !== undefined) {
@@ -380,13 +391,20 @@ function problemyZaprosa(
       }
     }
     /* Хотя бы один нуль снаружи — иначе «на отрезке» ничего не проверяет. */
-    if (zeros.filter((z) => z < p || z > q).length === 0 && zapros.t !== 'naib-na-otrezke' && zapros.t !== 'naim-na-otrezke') {
+    if (
+      zeros.filter((z) => z < p || z > q).length === 0 &&
+      zapros.t !== 'naib-na-otrezke' &&
+      zapros.t !== 'naim-na-otrezke'
+    ) {
       out.push('все нули внутри отрезка: отбор по отрезку не нужен');
     }
   }
   for (const m of metki) {
     for (const z of zeros) {
-      if (Math.abs(z - m) < 1 - 1e-9 && (zapros.t === 'metki-na-vozrastanii' || zapros.t === 'znak-v-metkah')) {
+      if (
+        Math.abs(z - m) < 1 - 1e-9 &&
+        (zapros.t === 'metki-na-vozrastanii' || zapros.t === 'znak-v-metkah')
+      ) {
         out.push(`отмеченная точка ${m} ближе клетки к нулю ${z}`);
       }
     }

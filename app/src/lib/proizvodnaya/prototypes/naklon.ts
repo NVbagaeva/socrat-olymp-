@@ -25,7 +25,9 @@ export function drobSSokrascheniem(dy: number, dx: number): string[] {
   const val = dy / dx;
   const rows: string[] = [];
   if (g > 1) {
-    rows.push(`$\\dfrac{${dy}}{${dx}}=\\dfrac{${dy}:${g}}{${dx}:${g}}=\\dfrac{${n}}{${m}}$ — числитель и знаменатель делятся на $${g}$.`);
+    rows.push(
+      `$\\dfrac{${dy}}{${dx}}=\\dfrac{${dy}:${g}}{${dx}:${g}}=\\dfrac{${n}}{${m}}$ — числитель и знаменатель делятся на $${g}$.`,
+    );
   }
   if (m !== 1) {
     rows.push(`$\\dfrac{${n}}{${m}}=${d(val)}$`);
