@@ -18,6 +18,7 @@
 
 import { THEME } from '@/lib/graph/renderer.js';
 import '@/lib/graph/families/sqrt.js';
+import { exampleOfFigure, secondPoint, type CrossExample, type Quad } from '@/lib/quadraticCross';
 
 /* Цвет второго угла (180° − α): острый угол внутри треугольника
    выделен не цветом подсказки, а своим. Ключ добавляется в THEME —
@@ -425,12 +426,14 @@ function exArgumentVisible(): TheoryFigure {
       ],
     },
     labels: [
+      /* Деление 1 — только по Oy: под осью Ox у (1; 0) — подпись катета,
+         над ней — прямая. */
       ...axisLabels(w, false),
-      { at: [1, 0], text: '$1$', dy: 14, size: 13, tone: 'muted' },
       /* Деление y = 1 стоит ниже и левее: выше, у самого узла, через него идёт прямая. */
       { at: [0, 1], text: '$1$', dx: -11, dy: 11, size: 13, tone: 'muted' },
       { at: [1.5, -1], text: '$\\boldsymbol{3}$', dy: 17, tone: 'accent', size: 20 },
-      { at: [0, -0.5], text: '$\\boldsymbol{2}$', dx: 13, tone: 'accent', size: 20 },
+      /* Правее квадратика прямого угла у (0; −1). */
+      { at: [0, -0.4], text: '$\\boldsymbol{2}$', dx: 24, tone: 'accent', size: 20 },
       { at: [0, Y], text: '$\\boldsymbol{4}$', dx: 14, tone: 'accent', size: 20 },
       { at: [X, 0], text: '$\\boldsymbol{x = \\,?}$', dy: 18, tone: 'accent', size: 20 },
     ],
@@ -652,6 +655,255 @@ function sqrtExCross(): TheoryFigure {
   };
 }
 
+/* ── Квадратичная: пересечение двух графиков ───────────────────
+   Разборы типов задач на вкладке «О задании» (content/quadraticTypes.ts).
+   Числа — из lib/quadraticCross.ts, его же пересчитывает автотест.
+   f — синяя, g — зелёная, построения — оранжевые. Подписи графиков —
+   «y = f(x)» и «y = g(x)», как на рисунках задания: формулы ученик
+   находит сам, по рисунку. */
+
+function quad(q: Quad, color = 'lineA') {
+  return q.a === 0
+    ? { type: 'line', k: q.b, b: q.c, color, label: null }
+    : { type: 'quadratic', a: q.a, b: q.b, c: q.c, color, label: null };
+}
+
+/** Подпись крупно и жирно: KaTeX \boldsymbol, 20 px. */
+function bold(
+  at: [number, number],
+  tex: string,
+  tone: FigureTone,
+  more: Partial<FigureLabel> = {},
+): FigureLabel {
+  return { at, text: `$\\boldsymbol{${tex}}$`, tone, size: 20, ...more };
+}
+
+function crossExample(figure: string): CrossExample {
+  const found = exampleOfFigure(figure);
+  if (found === undefined) {
+    throw new Error(`theoryFigures: нет примера ${figure}`);
+  }
+  return found;
+}
+
+/** Сцена разбора: оба графика, узлы, общая точка, построения. */
+function crossScene(figure: string, points: unknown[], shapes: unknown[]) {
+  const ex = crossExample(figure);
+  return {
+    ...base(ex.window, true, ex.cell),
+    curves: [quad(ex.f), quad(ex.g, 'alt')],
+    points: [...points, { ...dot(...ex.common), color: 'cross' }],
+    shapes,
+  };
+}
+
+/* Треугольник наклона прямой g(x) = 0,5x − 1 под ней: узлы (2; 0) и (4; 1). */
+const RISE_TRIANGLE = [
+  fill([
+    [2, 0],
+    [4, 0],
+    [4, 1],
+  ]),
+  seg([2, 0], [4, 0]),
+  seg([4, 0], [4, 1]),
+  rightAngle([4, 0], -1, 1),
+];
+
+/**
+ * Подписи осей разборов: x, y, 0 и деление 1 по Oy. Деление по Ox — над
+ * осью (под ней у прямой там график) или вовсе нет: у парабол в точке
+ * (1; 0) узел графика.
+ */
+function crossAxisLabels(w: Win, unitX: 'above' | 'none'): FigureLabel[] {
+  const out = axisLabels(w, false);
+  out.push({ at: [0, 1], text: '$1$', dx: -10, size: 13, tone: 'muted' });
+  if (unitX === 'above') {
+    out.push({ at: [1, 0], text: '$1$', dy: -13, size: 13, tone: 'muted' });
+  }
+  return out;
+}
+
+/* Стрелка «за рамкой»: слева от левой ветви f = x² − 4 у верхнего края,
+   вдоль неё; подпись — ниже стрелки, тоже левее ветви. */
+const OUTSIDE_ARROW = {
+  type: 'segment',
+  from: [-3.3, 4.0],
+  to: [-3.55, 5.5],
+  color: 'accent',
+  width: 3,
+  arrow: true,
+};
+const OUTSIDE_LABEL: FigureLabel = {
+  at: [-4.95, 3.25],
+  text: 'за рамкой',
+  tone: 'accent',
+  size: 14,
+  anchor: 'left',
+};
+
+/** Парабола и прямая, точка в окне. asks — какая координата неизвестна. */
+function qLineVisible(asks: 'x' | 'y'): TheoryFigure {
+  const figure = asks === 'x' ? 'q-line-visible-x' : 'q-line-visible-y';
+  const ex = crossExample(figure);
+  const [X, Y] = secondPoint(ex);
+  return {
+    scene: crossScene(
+      figure,
+      [dot(0, -4), dot(0, -1, 'alt'), dot(4, 1, 'alt')],
+      [...RISE_TRIANGLE, seg([X, Y], [X, 0], 'lineB'), seg([X, Y], [0, Y], 'lineB')],
+    ),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      bold([3, 0], '2', 'accent', { dy: 17 }),
+      bold([4, 0.5], '1', 'accent', { dx: 13 }),
+      bold([X, 0], asks === 'x' ? 'x = \\,?' : '-1{,}5', 'accent', {
+        dx: -6,
+        dy: -14,
+        anchor: 'left',
+      }),
+      /* Подпись у Oy: y₂ узкая — под пунктиром, «y = ?» широкая — над
+         ним (под пунктиром справа её задела бы парабола). */
+      bold([0, Y], asks === 'x' ? 'y_2' : 'y = \\,?', 'accent', {
+        dx: asks === 'x' ? 7 : 10,
+        dy: asks === 'x' ? 22 : -19,
+        anchor: 'left',
+      }),
+      bold([2.7, 4.8], 'y = f(x)', 'primary', { anchor: 'right' }),
+      bold([4.9, 2.3], 'y = g(x)', 'alt', { anchor: 'right' }),
+    ],
+  };
+}
+
+/** Парабола и прямая, точка за рамкой: стрелка у края, вдоль графика. */
+function qLineOutside(): TheoryFigure {
+  const figure = 'q-line-outside';
+  const ex = crossExample(figure);
+  return {
+    scene: crossScene(
+      figure,
+      [dot(0, -4), dot(0, 4, 'alt'), dot(1, 2, 'alt')],
+      [
+        fill([
+          [0, 4],
+          [0, 2],
+          [1, 2],
+        ]),
+        seg([0, 2], [1, 2]),
+        seg([0, 4], [0, 2]),
+        rightAngle([0, 2], 1, 1),
+        OUTSIDE_ARROW,
+      ],
+    ),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      bold([0, 3], '2', 'accent', { dx: -14 }),
+      bold([0.5, 2], '1', 'accent', { dy: 17 }),
+      OUTSIDE_LABEL,
+      /* Наверху у Oy тесно: прямая (или вторая ветвь) и узлы — подпись f
+         под её вершиной. */
+      bold([0.35, -4.9], 'y = f(x)', 'primary', { anchor: 'left' }),
+      bold([3.2, -1.6], 'y = g(x)', 'alt', { anchor: 'left' }),
+    ],
+  };
+}
+
+/** Две параболы, точка в окне. */
+function qParabVisible(asks: 'x' | 'y'): TheoryFigure {
+  const figure = asks === 'x' ? 'q-parab-visible-x' : 'q-parab-visible-y';
+  const ex = crossExample(figure);
+  const [X, Y] = secondPoint(ex);
+  return {
+    scene: crossScene(
+      figure,
+      [dot(0, -4), dot(1, 0, 'alt'), dot(0, -2, 'alt')],
+      [seg([X, Y], [X, 0], 'lineB'), seg([X, Y], [0, Y], 'lineB')],
+    ),
+    labels: [
+      ...crossAxisLabels(ex.window, 'none'),
+      bold([X, 0], asks === 'x' ? 'x = \\,?' : '-0{,}5', 'accent', {
+        dx: 8,
+        dy: -14,
+        anchor: 'right',
+      }),
+      /* Справа от Oy на высоте точки — ветвь f: подпись ниже вершины. */
+      bold([0, Y], asks === 'x' ? 'y_2' : 'y = \\,?', 'accent', {
+        dx: 7,
+        dy: 34,
+        anchor: 'left',
+      }),
+      bold([2.7, 4.8], 'y = f(x)', 'primary', { anchor: 'right' }),
+      bold([3.25, -2.0], 'y = g(x)', 'alt', { anchor: 'left' }),
+    ],
+  };
+}
+
+/** Две параболы, точка за рамкой: стрелка у края, вдоль f. */
+function qParabOutside(): TheoryFigure {
+  const figure = 'q-parab-outside';
+  const ex = crossExample(figure);
+  return {
+    scene: crossScene(figure, [dot(0, -4), dot(0, 0, 'alt'), dot(4, 4, 'alt')], [OUTSIDE_ARROW]),
+    labels: [
+      ...crossAxisLabels(ex.window, 'none'),
+      OUTSIDE_LABEL,
+      /* Наверху у Oy тесно: прямая (или вторая ветвь) и узлы — подпись f
+         под её вершиной. */
+      bold([0.35, -4.9], 'y = f(x)', 'primary', { anchor: 'left' }),
+      bold([3.15, 0.75], 'y = g(x)', 'alt', { anchor: 'left' }),
+    ],
+  };
+}
+
+/* ── Рисунки «Что нужно уметь» вкладки «О задании» ─────────────
+   Подпись каждого графика — вплотную к своему графику и его цветом,
+   набрана KaTeX крупно и жирно. Подписей столбиком под рисунком нет.
+   Окно шире по x справа: подписям нужно место у концов графиков. */
+
+/** Парабола y = 0,5x² − 2 и прямая y = 0,5x + 1. */
+/* Подписи осей рисунков «Что нужно уметь»: x, y, 0 и деление 1 по Ox.
+   По Oy деления нет: через (0; 1) идёт прямая. */
+function aboutAxisLabels(w: Win): FigureLabel[] {
+  return [...axisLabels(w, false), { at: [1, 0], text: '$1$', dy: 14, size: 13, tone: 'muted' }];
+}
+
+function aboutQuadratic(): TheoryFigure {
+  const w = win(-6, 8, -3, 6);
+  return {
+    scene: {
+      ...base(w),
+      curves: [
+        { type: 'quadratic', a: 0.5, b: 0, c: -2, color: 'lineA', label: null },
+        line(0.5, 1, 'lineB'),
+      ],
+    },
+    labels: [
+      ...aboutAxisLabels(w),
+      /* У правой ветви параболы, снаружи, ниже прямой. */
+      bold([1.75, -1.1], 'y = ax^2 + bx + c', 'primary', { anchor: 'left' }),
+      /* У правого конца прямой, над ней и правее ветви параболы. */
+      bold([7.85, 5.5], 'y = kx + b', 'accent', { anchor: 'right' }),
+    ],
+  };
+}
+
+/** Две прямые y = x + 1 и y = −0,5x − 2. */
+function aboutLinear(): TheoryFigure {
+  const w = win(-6, 7, -6, 6);
+  return {
+    scene: {
+      ...base(w),
+      curves: [line(1, 1), line(-0.5, -2, 'lineB')],
+    },
+    labels: [
+      ...aboutAxisLabels(w),
+      /* Правее первой прямой у её верхнего конца. */
+      bold([2.75, 3.0], 'y = k_1x + b_1', 'primary', { anchor: 'left' }),
+      /* Над второй прямой у её правого конца. */
+      bold([6.85, -3.0], 'y = k_2x + b_2', 'accent', { anchor: 'right' }),
+    ],
+  };
+}
+
 /* ── Реестр ───────────────────────────────────────────────────── */
 
 const FIGURES = {
@@ -675,6 +927,14 @@ const FIGURES = {
   'sqrt-ex-value': sqrtExValue,
   'sqrt-ex-argument': sqrtExArgument,
   'sqrt-ex-cross': sqrtExCross,
+  'about-quadratic': aboutQuadratic,
+  'about-linear': aboutLinear,
+  'q-line-visible-x': () => qLineVisible('x'),
+  'q-line-visible-y': () => qLineVisible('y'),
+  'q-line-outside': qLineOutside,
+  'q-parab-visible-x': () => qParabVisible('x'),
+  'q-parab-visible-y': () => qParabVisible('y'),
+  'q-parab-outside': qParabOutside,
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;

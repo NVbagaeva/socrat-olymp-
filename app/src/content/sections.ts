@@ -9,6 +9,7 @@
  * показывает честное пустое состояние, а не придуманный текст.
  */
 
+import type { RichExample } from './theoryRich';
 import { prep, prototypes } from '@/lib/graph/data/index.js';
 import { functionTypes, subtopicBuilt, type FunctionType } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
@@ -42,6 +43,26 @@ export interface Formulation {
   scene?: string;
   /** Стрелка карточки ведёт в тренажёр: ярлык /trenazher/{trainer}/. */
   trainer?: string;
+  /**
+   * Чистая миниатюра плашки типа задачи: только графики, без искомой
+   * точки и подсказок (lib/scenes.ts, typeScene).
+   */
+  typeScene?: string;
+  /**
+   * Разбор типа задачи: плашка открывает его по клику под собой.
+   * id — якорь (#abscissa-line), trainer — ярлык тренажёра этого типа.
+   */
+  analysis?: FormulationAnalysis;
+}
+
+/** Разбор типа задачи на вкладке «О задании». */
+export interface FormulationAnalysis {
+  /** Якорь: по ссылке …/#id разбор раскрыт и прокручен к плашке. */
+  id: string;
+  /** Примеры — те же блоки, что в теории (content/theoryRich.ts). */
+  examples: RichExample[];
+  /** «Потренироваться»: ярлык тренажёра /trenazher/{trainer}/. */
+  trainer: string;
 }
 
 /** Вкладка «О задании»: всё её содержимое приходит отсюда. */
@@ -85,6 +106,12 @@ export interface ExamSection {
   subtitle: string;
   description: string;
   badge?: string;
+  /**
+   * Иллюстрация справа в верхнем блоке страницы задания: папка файлов в
+   * public/images/zadaniya (scripts/build-zadanie-hero.mjs). Не задана —
+   * справа прежний график y = f(x) с подписью.
+   */
+  hero?: string;
   /** Подсказка внизу окна выбора типа функции. */
   dialogHint: string;
   /** Вкладка «О задании» страницы подтемы. */
@@ -139,6 +166,7 @@ export const sections: ExamSection[] = [
     description:
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
     badge: 'Базовый и средний уровни',
+    hero: '12',
     dialogHint: HINT_12,
     about: {
       title: taskName('12'),
@@ -292,6 +320,27 @@ export function prepRedirectParams(): { task: string; type: string }[] {
  * Подтемы, у которых есть тренажёр и генератор: собранные и с
  * наборами прототипов в данных движка. Решает манифест, не конфиг.
  */
+/**
+ * Разборы типов задач со вкладки «О задании»: у каждого — своя
+ * статическая страница …/razbor/{id}/. Вкладка подгружает её по клику
+ * на плашку, а не держит восемь примеров в разметке страницы темы.
+ */
+export function analysisParams(): { task: string; type: string; id: string }[] {
+  return sections.flatMap((section) =>
+    section.subtopics.flatMap((item) =>
+      (item.about?.forms ?? []).flatMap((form) =>
+        form.analysis === undefined
+          ? []
+          : [{ task: section.slug, type: item.id, id: form.analysis.id }],
+      ),
+    ),
+  );
+}
+
+export function findAnalysis(task: string, type: string, id: string): Formulation | undefined {
+  return findSubtopic(task, type)?.about?.forms.find((form) => form.analysis?.id === id);
+}
+
 export function trainerSubtopicParams(): { task: string; type: string }[] {
   return builtSubtopicParams().filter(
     (params) => (findManifestFamily(params.type)?.prototypes.sets ?? 0) > 0,
