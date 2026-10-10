@@ -96,12 +96,10 @@ function sobrat(
 ): Draft | null {
   const pr = problemy(fig, zapros);
   if (pr.length > 0) {
-    if (process.env.PDBG) console.log('P', pr[0]);
     return null;
   }
   const ch = risunokChist(fig);
   if (ch.length > 0) {
-    if (process.env.PDBG) console.log('C', ch[0]);
     return null;
   }
   const proverka = reshit(fig, zapros);
@@ -117,7 +115,6 @@ function znakVMetkah(sgn: 1 | -1) {
   return (r: Rng): Draft | null => {
     const w = volna(r, { n: [2, 3], shag: 3, a: [-9, -6], b: [6, 9], vysota: [2, 4] });
     if (w === null) {
-      if (process.env.PDBG) console.log('G volna');
       return null;
     }
     const spl = postroit(w.uzly);
@@ -128,7 +125,6 @@ function znakVMetkah(sgn: 1 | -1) {
       pool += godnaya(x) ? 1 : 0;
     }
     if (pool < 6) {
-      if (process.env.PDBG) console.log('G pool');
       return null;
     }
     const n = r.int(6, Math.min(9, pool));
@@ -141,7 +137,6 @@ function znakVMetkah(sgn: 1 | -1) {
     const bad = idxAll.filter((i) => !good.includes(i));
     const k = good.length;
     if (k < 2 || bad.length < 2) {
-      if (process.env.PDBG) console.log('G bal');
       return null;
     }
     const ps = promezhutki(w.uzly);
