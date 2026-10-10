@@ -30,7 +30,19 @@ import { APP } from './lib/load-ts.mjs';
 
 const ALL = process.argv.includes('--all');
 /* Что проверять: адрес, вкладка «Теория» или нет, и где искать рисунки. */
-const TYPES = ['abscissa-line', 'abscissa-parabola', 'ordinate-line', 'ordinate-parabola'];
+const TYPES = [
+  'sign-a',
+  'value-a',
+  'value-c',
+  'value-b',
+  'formula',
+  'value-at',
+  'argument-for',
+  'abscissa-line',
+  'abscissa-parabola',
+  'ordinate-line',
+  'ordinate-parabola',
+];
 const TARGETS = ALL
   ? [
       { url: '/zadaniya/12/linear/', theory: true, scope: '' },

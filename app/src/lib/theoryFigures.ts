@@ -18,7 +18,9 @@
 
 import { THEME } from '@/lib/graph/renderer.js';
 import '@/lib/graph/families/sqrt.js';
+import '@/lib/graph/families/quadratic.js';
 import { exampleOfFigure, secondPoint, type CrossExample, type Quad } from '@/lib/quadraticCross';
+import { basicOfFigure, type BasicExample } from '@/lib/quadraticBasics';
 
 /* Цвет второго угла (180° − α): острый угол внутри треугольника
    выделен не цветом подсказки, а своим. Ключ добавляется в THEME —
@@ -856,6 +858,212 @@ function qParabOutside(): TheoryFigure {
   };
 }
 
+/* ── Квадратичная: основные типы задач ─────────────────────────
+   Разборы знака a, значения a, c, b, формулы, значения функции и
+   аргумента (content/quadraticBasics.ts). Числа — из
+   lib/quadraticBasics.ts, их пересчитывает автотест. Парабола одна,
+   синяя; построения оранжевые; отмеченные точки — вершина и узлы.
+   Ответ с рисунка не читается: точка за рамкой — стрелка вдоль
+   графика, точка в окне — пунктиры к обеим осям. */
+
+function basicExample(figure: string): BasicExample {
+  const found = basicOfFigure(figure);
+  if (found === undefined) {
+    throw new Error(`theoryFigures: нет примера ${figure}`);
+  }
+  return found;
+}
+
+/** Сцена разбора: парабола, отмеченные точки, построения. */
+function basicScene(figure: string, shapes: unknown[]) {
+  const ex = basicExample(figure);
+  return {
+    ...base(ex.window, true, ex.cell),
+    curves: [quad(ex.f)],
+    points: ex.marks.map(([x, y]) => dot(x, y)),
+    shapes,
+  };
+}
+
+/** Подпись «0» сдвинута: у начала координат проходит график или стоит узел. */
+function zeroAt(labels: FigureLabel[], dx: number, dy = 13): FigureLabel[] {
+  return labels.map((item) => (item.text === '$0$' ? { ...item, dx, dy } : item));
+}
+
+/** Знак a: вершина ниже оси Ox, а ветви вверх. */
+function qbSignA(): TheoryFigure {
+  const figure = 'qb-sign-a';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, []),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      bold([1, 4.7], 'y = ax^2 + bx + c', 'primary', { anchor: 'center' }),
+    ],
+  };
+}
+
+/** Значение a: шаг от вершины (−2; 1) к узлу (0; 0). */
+function qbValueA(): TheoryFigure {
+  const figure = 'qb-value-a';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, [
+      fill([
+        [-2, 1],
+        [0, 1],
+        [0, 0],
+      ]),
+      seg([-2, 1], [0, 1]),
+      seg([0, 1], [0, 0]),
+      rightAngle([0, 1], -1, -1),
+    ]),
+    labels: [
+      ...zeroAt(axisLabels(ex.window, false), -16, 17),
+      bold([-1, 1], '2', 'accent', { dy: -14 }),
+      bold([0, 0.5], '1', 'accent', { dx: 14 }),
+      bold([-2, 2.8], 'y = ax^2 + bx + c', 'primary', { anchor: 'center' }),
+    ],
+  };
+}
+
+/* Стрелка «за рамкой» вдоль левой ветви y = (x − 1)² − 4 у верхнего
+   края; подпись — левее ветви. Как у разборов пересечений, сдвинуто
+   вправо на вершину. */
+const BASIC_ARROW_LEFT = {
+  type: 'segment',
+  from: [-2.3, 4.0],
+  to: [-2.55, 5.5],
+  color: 'accent',
+  width: 3,
+  arrow: true,
+};
+const BASIC_LABEL_LEFT: FigureLabel = {
+  at: [-3.95, 3.25],
+  text: 'за рамкой',
+  tone: 'accent',
+  size: 14,
+  anchor: 'left',
+};
+
+/** Свободный член c: пересечение с Oy (0; 15) — за рамкой сверху. */
+function qbValueC(): TheoryFigure {
+  const figure = 'qb-value-c';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, [
+      {
+        type: 'segment',
+        from: [2.2, 4.0],
+        to: [1.95, 5.5],
+        color: 'accent',
+        width: 3,
+        arrow: true,
+      },
+    ]),
+    labels: [
+      ...crossAxisLabels(ex.window, 'none'),
+      { at: [2.6, 4.7], text: 'за рамкой', tone: 'accent', size: 14, anchor: 'left' },
+      bold([3.2, -2.4], 'y = ax^2 + bx + c', 'primary', { anchor: 'center' }),
+    ],
+  };
+}
+
+/** Коэффициент b: y = x² + bx + c, вершина (−2; −3). */
+function qbValueB(): TheoryFigure {
+  const figure = 'qb-value-b';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, []),
+    labels: [
+      ...zeroAt(crossAxisLabels(ex.window, 'above'), 10),
+      bold([-2, 4.9], 'y = x^2 + bx + c', 'primary', { anchor: 'center' }),
+    ],
+  };
+}
+
+/** Формула по графику: вершина (1; 3), узлы (−1; 1) и (3; 1). */
+function qbFormula(): TheoryFigure {
+  const figure = 'qb-formula';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, []),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      bold([4.95, 5.1], 'y = ax^2 + bx + c', 'primary', { anchor: 'right' }),
+    ],
+  };
+}
+
+/** Значение функции, точка в окне: f(2) = 1,5. Известен x — пунктир к Ox. */
+function qbAtVisible(): TheoryFigure {
+  const figure = 'qb-at-visible';
+  const ex = basicExample(figure);
+  const y = 1.5;
+  return {
+    scene: basicScene(figure, [seg([2, y], [2, 0], 'lineB'), seg([2, y], [0, y], 'lineB')]),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      bold([2, 0], '2', 'accent', { dy: 17 }),
+      bold([0, y], 'f(2) = \\,?', 'accent', { dx: -10, anchor: 'right' }),
+      bold([4.95, 0.6], 'y = f(x)', 'primary', { anchor: 'right' }),
+    ],
+  };
+}
+
+/** Значение функции, x₀ = 7 — за рамкой справа: стрелка вдоль правой ветви. */
+function qbAtOutside(): TheoryFigure {
+  const figure = 'qb-at-outside';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, [
+      {
+        type: 'segment',
+        from: [3.3, 3.6],
+        to: [3.55, 5.3],
+        color: 'accent',
+        width: 3,
+        arrow: true,
+      },
+    ]),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      { at: [3.0, 4.0], text: 'за рамкой', tone: 'accent', size: 14, anchor: 'right' },
+      bold([0.45, -5.0], 'y = f(x)', 'primary', { anchor: 'left' }),
+    ],
+  };
+}
+
+/** Аргумент, корень в окне: f(x) = 0,5, больший x = 2,5. Известен y. */
+function qbArgVisible(): TheoryFigure {
+  const figure = 'qb-arg-visible';
+  const ex = basicExample(figure);
+  const x = 2.5;
+  return {
+    scene: basicScene(figure, [seg([x, 0.5], [x, 0], 'lineB'), seg([x, 0.5], [0, 0.5], 'lineB')]),
+    labels: [
+      ...zeroAt(crossAxisLabels(ex.window, 'none'), 10),
+      bold([0, 0.5], '0{,}5', 'accent', { dx: 8, dy: -14, anchor: 'left' }),
+      bold([x, 0], 'x = \\,?', 'accent', { dx: 14, dy: -14, anchor: 'left' }),
+      bold([0.3, 5.3], 'y = f(x)', 'primary', { anchor: 'left' }),
+    ],
+  };
+}
+
+/** Аргумент, корень x = −6 — за рамкой слева: стрелка вдоль левой ветви. */
+function qbArgOutside(): TheoryFigure {
+  const figure = 'qb-arg-outside';
+  const ex = basicExample(figure);
+  return {
+    scene: basicScene(figure, [BASIC_ARROW_LEFT]),
+    labels: [
+      ...crossAxisLabels(ex.window, 'above'),
+      BASIC_LABEL_LEFT,
+      bold([0.45, -5.0], 'y = f(x)', 'primary', { anchor: 'left' }),
+    ],
+  };
+}
+
 /* ── Рисунки «Что нужно уметь» вкладки «О задании» ─────────────
    Подпись каждого графика — вплотную к своему графику и его цветом,
    набрана KaTeX крупно и жирно. Подписей столбиком под рисунком нет.
@@ -937,6 +1145,15 @@ const FIGURES = {
   'q-parab-visible-x': () => qParabVisible('x'),
   'q-parab-visible-y': () => qParabVisible('y'),
   'q-parab-outside': qParabOutside,
+  'qb-sign-a': qbSignA,
+  'qb-value-a': qbValueA,
+  'qb-value-c': qbValueC,
+  'qb-value-b': qbValueB,
+  'qb-formula': qbFormula,
+  'qb-at-visible': qbAtVisible,
+  'qb-at-outside': qbAtOutside,
+  'qb-arg-visible': qbArgVisible,
+  'qb-arg-outside': qbArgOutside,
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;
