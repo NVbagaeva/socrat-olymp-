@@ -131,6 +131,15 @@ export interface MnOpisanie {
   mOshibki?: readonly number[];
 }
 
+/**
+ * Вычисление из шага разбора — комментарий к верной кнопке. Если в
+ * разборе просто «n = 50», комментарий повторил бы кнопку: его нет.
+ */
+function vychislenie(shag: Step | undefined): string | undefined {
+  const formula = shag?.formula ?? '';
+  return (formula.match(/=/g) ?? []).length > 1 ? `$${formula}$` : undefined;
+}
+
 /** Число шага разбора: у «m из n» оно есть у первых двух шагов. */
 function znachenie(shag: Step | undefined, kto: string): number {
   if (shag?.value === undefined || shag.formula === undefined) {
@@ -170,7 +179,7 @@ export function mnPodskazka(
       opisanie.geom === true ? `Чему равна вся мера $${N}$?` : `Сколько всего исходов $${N}$?`,
       bukva(N, n),
       nNe.map((x) => bukva(N, x)),
-      `$${shagi[0]?.formula ?? ''}$`,
+      vychislenie(shagi[0]),
     ),
     vopros(
       opisanie.geom === true
@@ -178,7 +187,7 @@ export function mnPodskazka(
         : `Сколько благоприятных исходов $${M}$ — ${opisanie.blago}?`,
       bukva(M, m),
       mNe.map((x) => bukva(M, x)),
-      `$${shagi[1]?.formula ?? ''}$`,
+      vychislenie(shagi[1]),
     ),
     vopros(
       'Какое выражение даёт ответ?',
