@@ -103,7 +103,7 @@ export function sgenerirovat(prototype: PrototipSGeneratorom, skolko = SKOLKO): 
     }
     bylo.add(klyuch);
     n += 1;
-    out.push({ n, source: 'новый', ref: 'генератор', params });
+    out.push({ n, source: 'novyj', sourceNote: 'генератор', params });
   }
   if (out.length < skolko) {
     throw new Error(

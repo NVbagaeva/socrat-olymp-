@@ -101,10 +101,10 @@ const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
 const report = checkBank([...BANK_4, ...BANK_5, ...KONSPEKT_4]);
 
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
-console.log(`   сгенерировано ${report.bySource.новый} (пометка «генератор» у каждого прототипа)`);
+console.log(`   сгенерировано ${report.bySource.novyj} (пометка «генератор» у каждого прототипа)`);
 console.log(
-  `2. из задачника ${report.bySource.задачник}, из конспекта ${report.bySource.конспект}, ` +
-    `создано заново ${report.bySource.новый}`,
+  `2. из сборника ${report.bySource.sbornik}, из урока ${report.bySource.urok}, ` +
+    `создано заново ${report.bySource.novyj}`,
 );
 console.log(`3. ответ по формуле разошёлся с ответом перебором: ${report.mismatchPerebor}`);
 console.log(`4. последний шаг разбора не равен ответу: ${report.mismatchSteps}`);
@@ -119,7 +119,7 @@ report.bad
   .slice(0, 20)
   .forEach((item) => console.log(`   ${item}`));
 console.log(`6. варианты из источников с проблемами: ${report.sourceProblems.length}`);
-report.sourceProblems.slice(0, 20).forEach((item) => console.log(`   ${item.ref}: ${item.why}`));
+report.sourceProblems.slice(0, 20).forEach((item) => console.log(`   ${item.sourceNote}: ${item.why}`));
 console.log(`7. совпадающих вариантов: ${report.duplicates.length}`);
 report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`столкновений отпечатков ответа: ${report.collisions.length}`);

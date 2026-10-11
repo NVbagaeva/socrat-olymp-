@@ -352,7 +352,7 @@ export function uznaySlova(zadanie: Zadanie) {
     pravilnyy: 'Правильный метод:',
     priznaki: 'Признаки в условии:',
     kakVidno: 'Как это было видно:',
-    istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Опорная задача' },
+    istochnik: { prototip: `Прототип задания ${zadanie}`, opornaya: 'Опорная задача' },
     progress: {
       title: 'Прогресс «Узнай метод»',
       lead: 'Считается отдельно от решённых задач: узнано верно из показанных, по каждому методу.',

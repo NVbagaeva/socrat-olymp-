@@ -23,8 +23,11 @@ import type { Pryamaya } from './pryamaya';
 /** Формат ответа, как его ждёт ЕГЭ. */
 export type AnswerFormat = 'целое' | 'десятичная';
 
-/** Откуда взят вариант. */
-export type Source = 'задачник' | 'конспект' | 'новый';
+/**
+ * Откуда взят вариант: из сборника задач, из опорных задач урока или
+ * составлен заново. Служебное поле, на экран не выводится.
+ */
+export type Source = 'sbornik' | 'urok' | 'novyj';
 
 /** Значения параметров варианта. */
 export type Params = Record<string, number | string>;
@@ -33,8 +36,8 @@ export interface Variant {
   /** Номер варианта от 1 до 10. */
   n: number;
   source: Source;
-  /** Ссылка на источник: «задачник 04, № 17». */
-  ref: string;
+  /** Служебная пометка об источнике: «№ 17», «урок, № 3», «новый». На экран не выводится. */
+  sourceNote: string;
   params: Params;
 }
 
@@ -90,8 +93,8 @@ export interface Prototype {
   nazvanie: string;
   /** Что именно ищут — одной строкой. */
   tip: string;
-  /** Диапазон номеров задачника, откуда прототип собран. */
-  zadachnik: readonly [number, number];
+  /** Служебный диапазон номеров сборника, откуда прототип собран; [0, 0] — составлен заново. На экран не выводится. */
+  sourceRange: readonly [number, number];
   format: AnswerFormat;
   /**
    * До скольких знаков округляется ответ у этого варианта. null —

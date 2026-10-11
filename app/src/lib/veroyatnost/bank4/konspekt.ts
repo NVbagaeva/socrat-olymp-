@@ -126,7 +126,7 @@ const K01: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Пирожки трёх видов',
   tip: 'Классическое определение вероятности',
-  zadachnik: [1, 1],
+  sourceRange: [1, 1],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -164,8 +164,8 @@ const K01: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 1',
+      source: 'urok',
+      sourceNote: 'урок, № 1',
       params: { m: 7, k: 5, v: 4, ischem: 'varenye' },
     },
   ],
@@ -217,7 +217,7 @@ const K02: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Фильмы: «не будет драмой»',
   tip: 'Благоприятные через вычитание',
-  zadachnik: [2, 2],
+  sourceRange: [2, 2],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -254,8 +254,8 @@ const K02: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 2',
+      source: 'urok',
+      sourceNote: 'урок, № 2',
       params: { kom: 20, boev: 15, dram: 15, ne: 'drama' },
     },
   ],
@@ -306,7 +306,7 @@ const K03: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: '«Мафия»: карты',
   tip: 'Классическое определение вероятности',
-  zadachnik: [3, 3],
+  sourceRange: [3, 3],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -323,7 +323,7 @@ const K03: Prototype = prototip({
     shagP(num(p, 'k'), num(p, 'N')),
   ],
   varianty: [
-    { n: 1, source: 'конспект', ref: 'конспект, задача 3', params: { N: 10, k: 2, imya: 'Антон' } },
+    { n: 1, source: 'urok', sourceNote: 'урок, № 3', params: { N: 10, k: 2, imya: 'Антон' } },
   ],
   generator: (r: Rng): Params => ({ N: r.int(8, 25), k: r.int(1, 4), imya: r.pick(IGROKI) }),
   metodika: {
@@ -347,7 +347,7 @@ const K04: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Кот в подъездах',
   tip: 'Классическое определение вероятности',
-  zadachnik: [4, 4],
+  sourceRange: [4, 4],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -373,7 +373,7 @@ const K04: Prototype = prototip({
     },
     shagP(num(p, 'k'), num(p, 'N')),
   ],
-  varianty: [{ n: 1, source: 'конспект', ref: 'конспект, задача 4', params: { N: 10, k: 2 } }],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 4', params: { N: 10, k: 2 } }],
   generator: (r: Rng): Params => ({ N: r.int(5, 25), k: r.pick([2, 3]) }),
   metodika: {
     metod: 'direct-count',
@@ -416,7 +416,7 @@ const K05: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Рэпер выступает последним',
   tip: 'Перебор порядков',
-  zadachnik: [5, 5],
+  sourceRange: [5, 5],
   format: 'десятичная',
   okruglenie: () => 2,
   uslovie: (p) => {
@@ -464,8 +464,8 @@ const K05: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 5',
+      source: 'urok',
+      sourceNote: 'урок, № 5',
       params: { reper: 'Клим', soperniki: 'Гога, Алекс' },
     },
   ],
@@ -513,7 +513,7 @@ const K06: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Сад: отношение количеств',
   tip: 'Доля по отношению',
-  zadachnik: [6, 6],
+  sourceRange: [6, 6],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -542,8 +542,8 @@ const K06: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 6',
+      source: 'urok',
+      sourceNote: 'урок, № 6',
       params: { a: 8, b: 1, c: 3, ischem: 'vishnya' },
     },
   ],
@@ -608,7 +608,7 @@ const K07: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Соперник из России',
   tip: 'Одного фиксируем',
-  zadachnik: [7, 7],
+  sourceRange: [7, 7],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -648,8 +648,8 @@ const K07: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 7',
+      source: 'urok',
+      sourceNote: 'урок, № 7',
       params: { N: 46, r: 19, vid: 'теннису', imya: 'Ярослав Исаков' },
     },
   ],
@@ -679,7 +679,7 @@ const K08: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Вертолёт: первый рейс',
   tip: 'Место в очереди',
-  zadachnik: [8, 8],
+  sourceRange: [8, 8],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -705,7 +705,7 @@ const K08: Prototype = prototip({
     shagP(num(p, 'k'), num(p, 'N')),
   ],
   varianty: [
-    { n: 1, source: 'конспект', ref: 'конспект, задача 8', params: { N: 30, k: 6, kto: 'П.' } },
+    { n: 1, source: 'urok', sourceNote: 'урок, № 8', params: { N: 30, k: 6, kto: 'П.' } },
   ],
   generator: (r: Rng): Params => {
     const k = r.int(2, 20);
@@ -733,7 +733,7 @@ const K09: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Конференция: чей доклад по счёту',
   tip: 'Позиция в жеребьёвке',
-  zadachnik: [9, 9],
+  sourceRange: [9, 9],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -776,8 +776,8 @@ const K09: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 9',
+      source: 'urok',
+      sourceNote: 'урок, № 9',
       params: { k1: 3, s1: 'Норвегии', k2: 3, s2: 'России', k3: 4, s3: 'Испании', m: 8, ischem: 2 },
     },
   ],
@@ -908,7 +908,7 @@ const K10: Prototype = prototip({
   blok: 'opredelenie',
   nazvanie: 'Кость дважды',
   tip: 'Таблица $6\\times 6$',
-  zadachnik: [10, 10],
+  sourceRange: [10, 10],
   format: 'десятичная',
   okruglenie: () => 2,
   uslovie: (p) =>
@@ -929,7 +929,7 @@ const K10: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'конспект', ref: 'конспект, задача 10', params: { rezhim: 'sovpadayut' } },
+    { n: 1, source: 'urok', sourceNote: 'урок, № 10', params: { rezhim: 'sovpadayut' } },
   ],
   generator: (r: Rng): Params => ({ rezhim: r.pick(Object.keys(KOST)) }),
   metodika: {
@@ -967,7 +967,7 @@ const K11: Prototype = prototip({
   blok: 'zhrebiy',
   nazvanie: 'Полёт на Марс: жребий',
   tip: 'Жребий на несколько мест',
-  zadachnik: [11, 11],
+  sourceRange: [11, 11],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1006,8 +1006,8 @@ const K11: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 11',
+      source: 'urok',
+      sourceNote: 'урок, № 11',
       params: { k: 3, a: 4, b: 8, kto: 'Д.' },
     },
   ],
@@ -1053,7 +1053,7 @@ const K12: Prototype = prototip({
   blok: 'zhrebiy',
   nazvanie: 'Братья в двух автобусах',
   tip: 'Одного фиксируем',
-  zadachnik: [12, 12],
+  sourceRange: [12, 12],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1088,8 +1088,8 @@ const K12: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 12',
+      source: 'urok',
+      sourceNote: 'урок, № 12',
       params: { N: 26, k: 13, para: 'братьев', a: 'Олег', aR: 'Олега', b: 'Юрий', bR: 'Юрия' },
     },
   ],
@@ -1124,7 +1124,7 @@ const K13: Prototype = prototip({
   blok: 'zhrebiy',
   nazvanie: 'Друзья в одной группе',
   tip: 'Одного фиксируем',
-  zadachnik: [13, 13],
+  sourceRange: [13, 13],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1160,8 +1160,8 @@ const K13: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 13',
+      source: 'urok',
+      sourceNote: 'урок, № 13',
       params: {
         N: 9,
         g: 3,
@@ -1203,7 +1203,7 @@ const K14: Prototype = prototip({
   blok: 'zhrebiy',
   nazvanie: 'В круге рядом',
   tip: 'Одного фиксируем',
-  zadachnik: [14, 14],
+  sourceRange: [14, 14],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1232,8 +1232,8 @@ const K14: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'конспект',
-      ref: 'конспект, задача 14',
+      source: 'urok',
+      sourceNote: 'урок, № 14',
       params: { N: 11, a: 'Маша', aR: 'Машу', aT: 'Машей', b: 'Артем', bR: 'Артёма' },
     },
   ],
@@ -1266,7 +1266,7 @@ const K15: Prototype = prototip({
   blok: 'zhrebiy',
   nazvanie: 'Круглый стол: через одного',
   tip: 'Одного фиксируем',
-  zadachnik: [15, 15],
+  sourceRange: [15, 15],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1295,7 +1295,7 @@ const K15: Prototype = prototip({
       shagP(2, N - 1),
     ];
   },
-  varianty: [{ n: 1, source: 'конспект', ref: 'конспект, задача 15', params: { N: 201 } }],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 15', params: { N: 201 } }],
   generator: (r: Rng): Params => ({
     N: r.pick([11, 21, 26, 41, 51, 81, 101, 126, 201, 251, 401, 501, 1001]),
   }),
@@ -1328,7 +1328,7 @@ const K16: Prototype = prototip({
   blok: 'geometricheskaya',
   nazvanie: 'Часы: где встала стрелка',
   tip: 'Отношение дуг',
-  zadachnik: [16, 16],
+  sourceRange: [16, 16],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -1361,7 +1361,7 @@ const K16: Prototype = prototip({
       shagLL(l, 12, l / 12),
     ];
   },
-  varianty: [{ n: 1, source: 'конспект', ref: 'конспект, задача 16', params: { a: 10, b: 1 } }],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 16', params: { a: 10, b: 1 } }],
   generator: (r: Rng): Params => {
     const a = r.int(1, 12);
     const d = r.pick([3, 6, 9]);
@@ -1385,7 +1385,7 @@ const K17: Prototype = prototip({
   blok: 'geometricheskaya',
   nazvanie: 'Озеро и домик для уточки',
   tip: 'Отношение площадей',
-  zadachnik: [17, 17],
+  sourceRange: [17, 17],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -1415,7 +1415,7 @@ const K17: Prototype = prototip({
       shagLL(`${String(r * r).replace('.', '{,}')}\\pi`, `${R * R}\\pi`, (r * r) / (R * R)),
     ];
   },
-  varianty: [{ n: 1, source: 'конспект', ref: 'конспект, задача 17', params: { R: 5, d: 1 } }],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 17', params: { R: 5, d: 1 } }],
   generator: (r: Rng): Params => ({ R: r.pick([2, 4, 5, 6, 8, 10, 20]), d: r.int(1, 8) }),
   metodika: {
     metod: 'coordinate-line',
@@ -1435,7 +1435,7 @@ const K18: Prototype = prototip({
   blok: 'geometricheskaya',
   nazvanie: 'Колечко в саду',
   tip: 'Отношение площадей',
-  zadachnik: [18, 18],
+  sourceRange: [18, 18],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1469,7 +1469,7 @@ const K18: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'конспект', ref: 'конспект, задача 18', params: { S: 800, t: 5, T: 40 } },
+    { n: 1, source: 'urok', sourceNote: 'урок, № 18', params: { S: 800, t: 5, T: 40 } },
   ],
   generator: (r: Rng): Params => {
     const t = r.pick([2, 4, 5, 10]);
@@ -1557,7 +1557,7 @@ export const KONSPEKT_4: readonly Prototype[] = [
 for (const P of KONSPEKT_4) {
   const pervyy = P.varianty[0];
   const ishodnoe = ISHODNYE[P.id];
-  if (pervyy === undefined || pervyy.source !== 'конспект') {
+  if (pervyy === undefined || pervyy.source !== 'urok') {
     throw new Error(`${P.id}: первый вариант должен быть задачей конспекта`);
   }
   if (ishodnoe === undefined || P.uslovie(pervyy.params) !== ishodnoe) {

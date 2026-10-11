@@ -35,7 +35,7 @@ const P01: Prototype = prototip({
   blok: 'nesovmestnye',
   nazvanie: 'Экзамен: вопрос по одной из двух тем',
   tip: 'Несовместные события: складываем',
-  zadachnik: [1, 4],
+  sourceRange: [1, 4],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -75,26 +75,26 @@ const P01: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 05, № 1',
+      source: 'sbornik',
+      sourceNote: '№ 1',
       params: { p1: 0.2, p2: 0.35, t1: 'Вписанная окружность', t2: 'Внешние углы' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 05, № 2',
+      source: 'sbornik',
+      sourceNote: '№ 2',
       params: { p1: 0.25, p2: 0.35, t1: 'Тригонометрия', t2: 'Параллелограмм' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 05, № 3',
+      source: 'sbornik',
+      sourceNote: '№ 3',
       params: { p1: 0.25, p2: 0.1, t1: 'Треугольник', t2: 'Трапеция' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 05, № 4',
+      source: 'sbornik',
+      sourceNote: '№ 4',
       params: { p1: 0.45, p2: 0.45, t1: 'Площадь', t2: 'Углы' },
     },
   ],
@@ -121,7 +121,7 @@ const P02: Prototype = prototip({
   blok: 'protivopolozhnoe',
   nazvanie: 'Температура тела: «или выше»',
   tip: 'Через противоположное событие',
-  zadachnik: [5, 8],
+  sourceRange: [5, 8],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -147,10 +147,10 @@ const P02: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 5', params: { p: 0.87, t: '36,8' } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 6', params: { p: 0.94, t: '36,8' } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 7', params: { p: 0.89, t: '36,8' } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 8', params: { p: 0.91, t: '36,8' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 5', params: { p: 0.87, t: '36,8' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 6', params: { p: 0.94, t: '36,8' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 7', params: { p: 0.89, t: '36,8' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 8', params: { p: 0.91, t: '36,8' } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.75, 0.98, 2), t: r.pick(['36,8', '36,6', '36,9']) }),
   metodika: {
@@ -172,7 +172,7 @@ const P04: Prototype = prototip({
   blok: 'sovmestnye',
   nazvanie: 'Два автомата: кофе останется в обоих',
   tip: 'Совместные события: общая часть',
-  zadachnik: [21, 24],
+  sourceRange: [21, 24],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -209,10 +209,10 @@ const P04: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 21', params: { p: 0.1, p12: 0.03 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 22', params: { p: 0.1, p12: 0.05 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 23', params: { p: 0.2, p12: 0.05 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 24', params: { p: 0.2, p12: 0.06 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 21', params: { p: 0.1, p12: 0.03 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 22', params: { p: 0.1, p12: 0.05 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 23', params: { p: 0.2, p12: 0.05 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 24', params: { p: 0.2, p12: 0.06 } },
   ],
   generator: (r: Rng): Params => {
     const q = r.int(1, 6) * 0.05;
@@ -250,7 +250,7 @@ const P12: Prototype = prototip({
   blok: 'do-uspeha',
   nazvanie: 'Стрелок стреляет, пока не попадёт',
   tip: 'Пробуем до первой удачи',
-  zadachnik: [55, 58],
+  sourceRange: [55, 58],
   format: 'целое',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -303,10 +303,10 @@ const P12: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 55', params: { p: 0.5, q: 0.7 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 56', params: { p: 0.5, q: 0.8 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 57', params: { p: 0.4, q: 0.7 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 58', params: { p: 0.6, q: 0.8 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 55', params: { p: 0.5, q: 0.7 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 56', params: { p: 0.5, q: 0.8 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 57', params: { p: 0.4, q: 0.7 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 58', params: { p: 0.6, q: 0.8 } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.3, 0.7, 1), q: r.dec(0.7, 0.95, 2) }),
   metodika: {
