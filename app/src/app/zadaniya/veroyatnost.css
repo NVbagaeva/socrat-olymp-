@@ -1170,8 +1170,13 @@
   display: grid;
   gap: var(--space-4);
 }
+/* Фигура — две строки: рукописная цитата и под ней портрет. Цитата не
+   лежит поверх картинки, а занимает свою строку, поэтому не касается
+   портрета ни на одной ширине. */
 .vizo-eylerblok__figura {
-  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  row-gap: var(--space-2);
   margin: 0;
 }
 /* Портрет по высоте не выше текста рядом: картинка вписана в свою
@@ -1183,6 +1188,7 @@
   max-height: 320px;
   object-fit: contain;
   object-position: center bottom;
+  align-self: end;
 }
 .vizo-eylerblok__pusto {
   display: grid;
@@ -1192,17 +1198,18 @@
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-lg);
 }
-/* Рукописная цитата — над горами слева от портрета, чуть с наклоном,
-   как на макете. Рукописный шрифт узкий, поэтому кегль на ступень
-   выше основного. */
+/* Рукописная цитата — над портретом, чуть с наклоном, как на макете.
+   Рукописный шрифт узкий, поэтому на широкой карточке кегль на ступень
+   выше основного; на узкой — основной, между ними кегль плавно растёт
+   вместе с шириной раздела (3% ширины). Интерлиньяж — кегль плюс
+   --space-2: на концах это ровно --lh-body и --lh-h4. На узкой карточке
+   цитата идёт во всю ширину отдельной строкой над картинкой. */
 .vizo-eylerblok__ruka {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  max-width: 45%;
+  max-width: 100%;
   display: grid;
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
+  justify-self: start;
+  font-size: clamp(var(--fs-body), 3cqi, var(--fs-h4));
+  line-height: calc(1em + var(--space-2));
   rotate: -6deg;
 }
 .vizo-eylerblok__avtor {
@@ -1441,13 +1448,12 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
     align-items: stretch;
   }
-  /* Портрет — не выше текстовой колонки: ячейка растёт по тексту,
-     картинка вписывается в неё. */
+  /* Цитата — узкой колонкой в левом верхнем углу, над небом портрета;
+     портрет прижат к низу ячейки, ячейка растёт по тексту рядом. */
+  .vizo-eylerblok__ruka {
+    max-width: 45%;
+  }
   .vizo-eylerblok__portret {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
     max-height: none;
   }
   .vizo-tabl {
