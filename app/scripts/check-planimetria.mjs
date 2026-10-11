@@ -14,6 +14,15 @@
    — живые чертежи: случайные перетаскивания вершин, каждое принятое
      положение рисуется чисто, величины выполняют свойство карточки.
 
+   Банк: 214 задач Блока 1 и по двадцать аналогов на прототип — ответ
+   ЕГЭ (целое или конечная дробь), сходится с измерением на фигуре и с
+   решением по шагам; все формулы набираются KaTeX строго; в формулах
+   нет «1x», «+ −», «−(−» и лишних скобок; отпечатки задач (числа
+   условия и конфигурация, поворот и отражение не в счёт) не
+   повторяются; у аналогов не меньше 12 различных ответов и ни один не
+   встречается больше двух раз (исключения — с причиной, в отчёт);
+   файл аналогов совпадает с подбором заново.
+
    Источники: в файлах №1 нет имён авторов и названий сторонних
    источников (список слов — только локально, в _sources/zadanie-1/).
 
@@ -21,10 +30,16 @@
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { requireSrc } from './lib/load-ts.mjs';
 import { proveritZapret } from './lib/istochniki-1.mjs';
 
+const require = createRequire(import.meta.url);
+const katex = require('katex');
+const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
+
 const n = Number(process.argv[2] ?? 1000);
+const { checkBank } = requireSrc('lib/planimetriya/bank/selftest');
 const { checkObraztsy, checkStress, checkZhivye } = requireSrc('lib/planimetriya/selftest');
 
 const obr = checkObraztsy();
@@ -33,6 +48,12 @@ const st = checkStress(n);
 console.log(`стресс-тест: ${n} генераций, ${st.risunkov} рисунков, проблем ${st.problems.length}`);
 const zh = checkZhivye(300);
 console.log(`живые чертежи: ${zh.risunkov} положений, проблем ${zh.problems.length}`);
+
+const bank = checkBank(typeset);
+console.log(
+  `банк: ${bank.zadach} задач (214 ФИПИ, образцы и аналоги), проблем ${bank.problems.length}`,
+);
+for (const i of bank.isklucheniya) console.log(`  исключение: прототип ${i.proto} — ${i.prichina}`);
 
 const zapret = proveritZapret();
 if (zapret === null) {
@@ -54,6 +75,7 @@ const vse = [
   ...obr.problems,
   ...st.problems,
   ...zh.problems,
+  ...bank.problems,
   ...(zapret ?? []).map((z) => `упоминание источника: ${z}`),
 ];
 if (vse.length > 0) {

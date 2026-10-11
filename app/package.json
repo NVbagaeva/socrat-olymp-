@@ -52,6 +52,8 @@
     "test:vychisleniya": "node scripts/check-vychisleniya.mjs",
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:planimetria": "node scripts/check-planimetria.mjs",
+    "test:galereya-1": "node scripts/check-galereya-1.mjs",
+    "build:bank-1": "node scripts/build-bank-1.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",

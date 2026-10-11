@@ -29,7 +29,10 @@ const MESTA = [
   'app/src/content/repetitory1.ts',
   'app/scripts/check-planimetria.mjs',
   'app/scripts/lib/istochniki-1.mjs',
+  'app/scripts/build-bank-1.mjs',
+  'app/scripts/check-galereya-1.mjs',
   'docs/zadanie-1-otchet.md',
+  'docs/zadanie-1-bank.md',
   'docs/zadanie-1-snimki',
 ];
 
