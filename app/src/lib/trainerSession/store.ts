@@ -370,7 +370,28 @@ export function useActiveTrainerScopes(): readonly string[] {
  * прежние ключи: у учеников они больше не читаются и только занимают
  * место. Ключи прогресса (счётчики, ошибки) сюда не попадают — они живы.
  */
-export const LEGACY_SESSION_KEYS: readonly string[] = [];
+export const LEGACY_SESSION_KEYS: readonly string[] = [
+  /* №9: сессия и итог последней тренировки (лежали в sessionStorage). */
+  'budetege:proizvodnaya-9:session:v1',
+  'budetege:proizvodnaya-9:result:v1',
+];
+
+/**
+ * Прежние ключи из sessionStorage: часть тренажёров (№9) держала сессию
+ * там. Убираются так же, как из localStorage; ошибки доступа молча
+ * пропускаются.
+ */
+function sweepLegacySessionStorage(): void {
+  try {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const target = window.sessionStorage;
+    LEGACY_SESSION_KEYS.forEach((key) => target.removeItem(key));
+  } catch {
+    /* Хранилище недоступно — убирать нечего. */
+  }
+}
 
 let swept = false;
 
@@ -384,6 +405,7 @@ export function sweepStaleSessions(): void {
     return;
   }
   swept = true;
+  sweepLegacySessionStorage();
   const target = browserStorage();
   if (target === null) {
     return;
