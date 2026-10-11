@@ -66,6 +66,19 @@ export interface TrainerTask {
   solution: PrepStep[] | null;
   /** Рисунок метода: чем эта задача решается. null — рисунка нет. */
   method: TrainerMethod | null;
+  /**
+   * Откуда задание: seed набора движка и контрольная подпись условия
+   * и ответа. По ним сессия тренажёра хранит задание рецептом и
+   * собирает заново (lib/trainerSession.ts). Нет — задание собрано
+   * не сессией тренажёра.
+   */
+  origin?: TrainerOrigin;
+}
+
+/** Seed набора и подпись задачи: рецепт, по которому задание собирается заново. */
+export interface TrainerOrigin {
+  seed: string;
+  sig: string;
 }
 
 /** Вариант ответа: номер и готовая разметка. */

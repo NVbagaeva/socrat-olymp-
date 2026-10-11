@@ -248,12 +248,137 @@ export function pickTasks(
   return { tasks: engine, shortage: Math.max(0, want - engine.length), rejected: tally.rejected };
 }
 
+/**
+ * Контрольная подпись задачи: короткий хеш (FNV-1a, 32 бита) условия,
+ * ответа, чертежа и вариантов. Сайт обновился и тот же seed дал другую
+ * задачу — подпись не сойдётся, и сохранённая тренировка честно
+ * сбросится, а не подменит ученику задания. Условия и ответа мало: у
+ * задач с выбором варианта (12Q.A, 12Q.B) они одни и те же на любом
+ * seed, меняются только чертёж и варианты.
+ */
+export function signatureOf(task: EngineTask): string {
+  const text = [task.questionHtml, task.answer, task.svg ?? '', JSON.stringify(task.options ?? null)]
+    .join('\u0000');
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+/** Задание тренажёра вместе с рецептом: seed набора и подписью. */
+function sessionTask(task: EngineTask): TrainerTask {
+  return {
+    ...trainerTaskFrom(task),
+    origin: { seed: task.meta.seed, sig: signatureOf(task) },
+  };
+}
+
 /** Собрать сессию тренажёра по запросу конфигуратора. */
 export function buildSession(request: SessionRequest): Session {
   const picked = pickTasks(request, randomSeed, Math.random);
   return {
-    tasks: picked.tasks.map((task) => trainerTaskFrom(task)),
+    tasks: picked.tasks.map(sessionTask),
     shortage: picked.shortage,
     rejected: picked.rejected,
   };
+}
+
+/**
+ * Рецепт задания в сохранённой сессии: набор, seed, задача набора и
+ * подпись. Движок детерминирован по (набор, seed), так что больше
+ * ничего не нужно: режим, уровень, фильтр по правилам и история
+ * ошибок уже сделали своё при выборе задачи.
+ */
+export interface TaskRecipe {
+  set: string;
+  seed: string;
+  id: string;
+  sig: string;
+}
+
+/**
+ * Собрать задания по рецептам — тем же кодом, что и при старте.
+ * null — хоть одно задание не собралось или не совпало по подписи:
+ * тренировка устарела.
+ */
+export function restoreTasks(recipes: TaskRecipe[]): TrainerTask[] | null {
+  const sets = new Map<string, EngineTask[] | null>();
+  const out: TrainerTask[] = [];
+  for (const recipe of recipes) {
+    const key = `${recipe.set}\u0000${recipe.seed}`;
+    let tasks = sets.get(key);
+    if (tasks === undefined) {
+      tasks = trySet(recipe.set, recipe.seed, { rejected: 0 });
+      sets.set(key, tasks);
+    }
+    const found = tasks?.find((task) => task.id === recipe.id);
+    if (found === undefined || signatureOf(found) !== recipe.sig) {
+      return null;
+    }
+    out.push(sessionTask(found));
+  }
+  return out;
+}
+
+/**
+ * Похожие задачи: для каждой — та же задача набора (тот же прототип)
+ * на новом seed, с другими числами. У задач с закреплёнными числами
+ * новый seed ничего не меняет — тогда берётся другая задача того же
+ * набора, уровня и правила ответа, а если и такой нет — того же
+ * набора и уровня. Совсем ничего — null на месте задачи: тренажёр
+ * повторит её как есть.
+ */
+export function similarTasks(recipes: TaskRecipe[], choice: boolean): (TrainerTask | null)[] {
+  const tally = { rejected: 0 };
+  /* Seed по номеру попытки — свой у каждого набора: задачи одного
+     набора берутся из одних и тех же собранных наборов. */
+  const seeds = new Map<string, string>();
+  const built = new Map<string, EngineTask[] | null>();
+  const setOn = (setId: string, attempt: number): EngineTask[] => {
+    const key = `${setId}\u0000${attempt}`;
+    let seed = seeds.get(key);
+    if (seed === undefined) {
+      seed = randomSeed(setId, attempt);
+      seeds.set(key, seed);
+    }
+    let tasks = built.get(key);
+    if (tasks === undefined) {
+      tasks = trySet(setId, seed, tally);
+      built.set(key, tasks);
+    }
+    return tasks ?? [];
+  };
+  /* Чего уже не надо давать: прежние задачи и уже выданные аналоги. */
+  const taken = new Set(recipes.map((recipe) => recipe.sig));
+
+  return recipes.map((recipe) => {
+    let same: EngineTask | null = null;
+    let kin: EngineTask | null = null;
+    let near: EngineTask | null = null;
+    for (let attempt = 0; attempt < SEED_TRIES; attempt += 1) {
+      const tasks = setOn(recipe.set, attempt);
+      const proto = tasks.find((task) => task.id === recipe.id);
+      if (proto === undefined) {
+        continue;
+      }
+      if (!taken.has(signatureOf(proto))) {
+        same = proto;
+        break;
+      }
+      const fresh = (task: EngineTask) =>
+        task.id !== recipe.id && answerable(task, choice) && !taken.has(signatureOf(task)) &&
+        levelOf(task) === levelOf(proto);
+      kin ??= shuffled(tasks.filter((task) => fresh(task) && task.meta.rule === proto.meta.rule),
+        Math.random)[0] ?? null;
+      near ??= shuffled(tasks.filter(fresh), Math.random)[0] ?? null;
+    }
+    const chosen = same ?? kin ?? near;
+    if (chosen === null) {
+      return null;
+    }
+    taken.add(signatureOf(chosen));
+    return sessionTask(chosen);
+  });
 }
