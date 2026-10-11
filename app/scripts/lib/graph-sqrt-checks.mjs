@@ -102,6 +102,41 @@ export function checkSqrtTask(set, task) {
   if (!last || last.text.replace('−', '-') !== task.answer) {
     bad(`ответ разбора ${last ? last.text : '—'} не совпадает с ключом ${task.answer}`);
   }
+  /* Подробный разбор: слова перед каждой формулой, вычисление доведено до числа. */
+  if (M.form !== 'line') {
+    const answerTex = last ? last.tex : '';
+    const tail = (tex) => tex.split('=').pop().trim();
+    for (const step of steps) {
+      if (step.id === 'answer') { continue; }
+      if (step.blocks[0].type !== 'text') { bad(`шаг «${step.title}» начинается с формулы без слов`); }
+      let previous = null;
+      for (const block of step.blocks) {
+        if (block.type === 'formula' && previous && previous.type === 'formula') {
+          bad(`в шаге «${step.title}» две формулы подряд без фразы`);
+        }
+        if (block.type === 'formula' && /(=|\\Rightarrow\\?;?)\s*$/.test(block.tex)) {
+          bad(`в шаге «${step.title}» формула оборвана: ${block.tex}`);
+        }
+        previous = block;
+      }
+    }
+    const kStep = steps.find((item) => item.id === 'k');
+    const kText = kStep ? kStep.blocks.filter((b) => b.type === 'text').map((b) => b.html).join(' ') : '';
+    if (!/формула теперь выглядит так/.test(kText)) { bad('после нахождения k нет фразы «формула теперь выглядит так»'); }
+    if (M.form === 'shift') {
+      const start = steps.find((item) => item.id === 'start');
+      if (!start || !/формула теперь выглядит так/.test(start.blocks.map((b) => b.html || '').join(' '))) {
+        bad('у сдвинутого графика нет шага с началом и записью формулы');
+      }
+    }
+    const asked = steps.find((item) => item.id === 'asked');
+    const doneTex = asked ? asked.blocks.filter((b) => b.type === 'formula').pop() : null;
+    const shown = (answerTex || '').replace(/\\dfrac/g, '\\dfrac');
+    if (!doneTex || tail(doneTex.tex) !== tail(shown)) {
+      bad(`вычисление не доведено до ответа: ${doneTex ? doneTex.tex : '—'} ≠ ${shown}`);
+    }
+  }
+
   for (const step of steps) {
     for (const block of step.blocks) {
       const tex = block.tex || '';
