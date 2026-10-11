@@ -124,3 +124,24 @@
     overflow-x: auto;
   }
 }
+
+.g10__most {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-3);
+}
+
+.g10__most figure {
+  margin: 0;
+}
+
+.g10__most figcaption {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.g10__ill {
+  display: block;
+  max-width: 420px;
+  margin: var(--space-3) 0;
+}
