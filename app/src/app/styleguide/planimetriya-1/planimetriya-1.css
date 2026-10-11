@@ -1,0 +1,117 @@
+/* Витрина движка чертежей задания №1. Только для разработки:
+   страница не входит в меню и не индексируется. */
+
+.pl1 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.pl1__lead {
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+
+.pl1__toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.pl1__section {
+  margin-top: var(--space-10);
+  scroll-margin-top: var(--space-4);
+}
+
+.pl1__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .pl1__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .pl1__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pl1__card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--color-surface);
+}
+
+.pl1__title {
+  margin: 0;
+}
+
+.pl1__meta {
+  margin: var(--space-1) 0;
+  color: var(--color-text-secondary);
+}
+
+.pl1__uslovie {
+  display: block;
+  margin-top: var(--space-2);
+}
+
+.pl1__varianty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.pl1__varianty .pl1__grid {
+  width: 100%;
+}
+
+.pl1__phones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+/* Полоса шириной с экран телефона: 360 px минус поля по 16 px. */
+.pl1__phone {
+  display: grid;
+  gap: var(--space-3);
+  width: 328px;
+  max-width: 100%;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+}
+
+.pl1__stress {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+
+.pl1__itog {
+  max-width: 100%;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Лист ученика и лист учителя рядом. */
+.pl1__para {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: center;
+}
