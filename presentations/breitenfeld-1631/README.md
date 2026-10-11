@@ -9,7 +9,7 @@
 - `breitenfeld-1631.pdf` статичная версия для печати.
 
 Картинки лежат в `assets/img`. Если файла нет, на слайде показывается заглушка с его именем:
-`musk.jpg`, `pikeman.png`, `turn_cannons.png`, `victory.png`. Достаточно положить файл с этим именем в `assets/img`.
+`musk.jpg`, `pikeman.png`. Достаточно положить файл с этим именем в `assets/img`.
 
 Библиотеки (GSAP 3.12.5, Three.js r160) и шрифты (Cormorant Garamond, Manrope) лежат локально в `assets/vendor` и `assets/fonts`.
 Карта Европы построена по открытым данным Natural Earth (world-atlas).

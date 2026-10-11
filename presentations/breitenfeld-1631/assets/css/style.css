@@ -332,6 +332,7 @@ ul.points.compact li{font-size:30px}
 
 /* режим печати / PDF-кадров */
 body.print-mode .caret{display:none}
+body.print-mode .steps li{transition:none}
 
 @media (prefers-reduced-motion: reduce){
   #bubble .caret{animation:none}
