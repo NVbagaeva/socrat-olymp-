@@ -1,0 +1,203 @@
+/* Задание №10 «Прикладные задачи»: теория и вкладки раздела.
+   Цвета — токены сайта; «голубое стекло» — полупрозрачная голубая
+   подложка с тонкой рамкой. Печать — ч/б. */
+
+.z10-teoriya__lead {
+  max-width: 72ch;
+  font-size: var(--fs-lg);
+  color: var(--color-text-secondary);
+}
+
+.z10-spisok {
+  list-style: decimal;
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+  line-height: 1.7;
+}
+
+.z10-spisok li + li {
+  margin-top: var(--space-1);
+}
+
+/* ── Таблица ── */
+.z10-tablica {
+  margin: var(--space-6) 0;
+  overflow-x: auto;
+  break-inside: avoid;
+}
+
+.z10-tablica__title {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+
+.z10-tablica table {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+.z10-tablica th,
+.z10-tablica td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.z10-tablica th {
+  background: var(--color-surface-info);
+}
+
+/* ── Живые графики ── */
+.z10-zhivoy {
+  max-width: 560px;
+  margin: var(--space-6) 0;
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-soft) 55%, var(--color-surface));
+  break-inside: avoid;
+}
+
+.z10-zhivoy svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.z10-zhivoy__polzunok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-3);
+}
+
+.z10-zhivoy__polzunok input {
+  flex: 1 1 200px;
+  accent-color: var(--color-primary);
+}
+
+.z10-zhivoy figcaption {
+  margin-top: var(--space-2);
+  line-height: 1.6;
+}
+
+/* ── Где на ЕГЭ ── */
+.z10-gde {
+  margin: var(--space-8) 0 var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+
+.z10-gde__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+}
+
+.z10-gde__lead {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.z10-gde__spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.z10-gde__chip {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.z10-gde__chip:hover {
+  background: var(--color-surface-soft);
+}
+
+/* ── Физика в двух словах ── */
+.z10-fizika__gruppa + .z10-fizika__gruppa {
+  margin-top: var(--space-8);
+}
+
+.z10-fizika__title {
+  margin: 0 0 var(--space-3);
+}
+
+.z10-fizika__setka {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.z10-fizika__karta {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  break-inside: avoid;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+
+.z10-fizika__karta h5 {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+}
+
+.z10-fizika__karta p {
+  margin: var(--space-2) 0;
+  line-height: 1.55;
+}
+
+.z10-fizika__formula {
+  overflow-x: auto;
+}
+
+.z10-fizika__bukvy {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.z10-fizika__ill {
+  margin-bottom: var(--space-2);
+}
+
+.z10-metka {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: 12px;
+}
+
+.z10-lovushka__oshibka {
+  color: var(--color-text-secondary);
+}
+
+@media print {
+  .z10-zhivoy__polzunok,
+  .z10-gde {
+    display: none;
+  }
+
+  .z10-zhivoy,
+  .z10-gde,
+  .z10-tablica th {
+    background: none;
+  }
+}
