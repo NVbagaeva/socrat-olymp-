@@ -1,0 +1,65 @@
+/* planimetriya/planimetriya.css — чертёж задания №1 на странице.
+   Цвета внутри SVG — токены (--graph-axis, --color-primary,
+   --graph-accent, --color-surface): в ч/б теме печати они чернеют
+   сами. Здесь только размещение и появление шагов подсказки. */
+
+.pl-wrap {
+  display: block;
+  max-width: 100%;
+}
+
+.pl-wrap .pl {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Новый слой подсказки проявляется, а не выскакивает. */
+.pl-anim .pl-novoe {
+  animation: pl-poyavlenie 0.5s ease-out both;
+}
+
+@keyframes pl-poyavlenie {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-anim .pl-novoe {
+    animation: none;
+  }
+}
+
+/* Пошаговый чертёж: рисунок и кнопки шагов под ним. */
+.pl-shagi {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.pl-shagi__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pl-shagi__status {
+  color: var(--color-text-secondary);
+}
+
+/* Увеличенный рисунок в просмотрщике FigureZoom. */
+.figzoom__big .pl-wrap .pl {
+  width: 100%;
+  max-height: min(70vh, 720px);
+}
+
+@media print {
+  .pl-shagi__knopki {
+    display: none;
+  }
+}
