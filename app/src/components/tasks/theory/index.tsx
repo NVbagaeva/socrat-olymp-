@@ -7,6 +7,8 @@ import { rationalTheoryScene } from '@/lib/scenes';
 import { WhatIsFunction } from './WhatIsFunction';
 import { GraphNotFunction } from './GraphNotFunction';
 import { WhatKinds } from './WhatKinds';
+import { IstoriyaBanner } from './quadratic/IstoriyaBanner';
+import { RazgovorApolloniev } from './quadratic/RazgovorApolloniev';
 import { QuadraticSection } from './quadratic/QuadraticSection';
 import { RichSection } from './rich/RichSection';
 
@@ -20,6 +22,13 @@ export const theoryBodies: Record<string, ReactNode> = {
   'what-is-function': <WhatIsFunction />,
   'kinds-of-functions': <WhatKinds />,
   'graph-not-function': <GraphNotFunction />,
+  /* Немного истории: баннер, под ним разговор двух Аполлониев. */
+  history: (
+    <div className="istor-razdel">
+      <IstoriyaBanner />
+      <RazgovorApolloniev />
+    </div>
+  ),
   /* Разделы квадратичной подтемы: одна разметка, семь наборов данных. */
   ...Object.fromEntries(
     QUADRATIC_SECTIONS.map((section) => [

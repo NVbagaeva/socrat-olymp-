@@ -1,0 +1,70 @@
+<!-- Стеклянный значок с книгой: плашка «Разговор продолжается…»
+     в исторической врезке задания №12. Шар, свечение, блик и ободок —
+     те же, что у значка статистики (zadanie-04/glass-badge-statistika.svg);
+     отличается только фигура под клипом: раскрытая книга вместо
+     столбиков, и подложки-черты под ней нет.
+     Компонент: app/src/components/ui/GlassBadge.tsx, glif="kniga". -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <defs>
+    <radialGradient id="body" cx="45%" cy="38%" r="68%">
+      <stop offset="0%" stop-color="#2A64DB" />
+      <stop offset="45%" stop-color="#2D72E8" />
+      <stop offset="75%" stop-color="#3C93F5" />
+      <stop offset="100%" stop-color="#5CB8FF" />
+    </radialGradient>
+    <radialGradient id="refract" cx="55%" cy="95%" r="55%">
+      <stop offset="0%" stop-color="#A8ECFF" stop-opacity="1" />
+      <stop offset="55%" stop-color="#6CCBFF" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#6CCBFF" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="sheen" cx="40%" cy="20%" r="45%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="rim" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.45" />
+      <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.08" />
+      <stop offset="70%" stop-color="#8FDCFF" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#B8F0FF" stop-opacity="0.95" />
+    </linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#CFE9FF" stop-opacity="0.7" />
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="55%" r="50%">
+      <stop offset="72%" stop-color="#4FB0FF" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#4FB0FF" stop-opacity="0" />
+    </radialGradient>
+    <filter id="blur-s" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4" />
+    </filter>
+    <filter id="blur-m" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" />
+    </filter>
+    <clipPath id="clip">
+      <circle cx="80" cy="80" r="52" />
+    </clipPath>
+  </defs>
+
+  <circle cx="80" cy="84" r="64" fill="url(#halo)" />
+  <circle cx="80" cy="80" r="52" fill="url(#body)" />
+
+  <g clip-path="url(#clip)">
+    <ellipse cx="82" cy="116" rx="52" ry="30" fill="url(#refract)" filter="url(#blur-m)" />
+    <ellipse cx="70" cy="42" rx="38" ry="22" fill="url(#sheen)" filter="url(#blur-m)" />
+
+    <!-- тень под книгой -->
+    <g fill="#1B4DB8" opacity="0.25" filter="url(#blur-s)" transform="translate(1,2)">
+      <path d="M80,68 C72,61 62,59 54,61 L54,93 C62,91 72,93 80,99 Z" />
+      <path d="M80,68 C88,61 98,59 106,61 L106,93 C98,91 88,93 80,99 Z" />
+    </g>
+    <!-- сама книга: два полупрозрачных разворота -->
+    <g fill="url(#page)">
+      <path d="M80,68 C72,61 62,59 54,61 L54,93 C62,91 72,93 80,99 Z" />
+      <path d="M80,68 C88,61 98,59 106,61 L106,93 C98,91 88,93 80,99 Z" />
+    </g>
+  </g>
+  <path d="M42,62 A52,52 0 0 1 100,32" fill="none" stroke="#FFFFFF" stroke-width="3"
+        stroke-linecap="round" opacity="0.22" filter="url(#blur-s)" clip-path="url(#clip)" />
+  <circle cx="80" cy="80" r="51.2" fill="none" stroke="url(#rim)" stroke-width="1.6" />
+</svg>
