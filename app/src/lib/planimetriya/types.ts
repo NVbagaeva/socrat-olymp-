@@ -278,8 +278,11 @@ export interface Scena {
 export type Rezhim =
   /** Лист ученика и «Задания для отработки»: только слой условия. */
   | { rezhim: 'uchenik' }
-  /** Подсказка: слой условия и шаги 1…shag, шаг shag подсвечен. */
-  | { rezhim: 'podskazka'; shag: number }
+  /**
+   * Подсказка: слой условия и шаги 1…shag, шаг shag подсвечен.
+   * vopros — шаг задан вопросом: числа шага shag не подписываются.
+   */
+  | { rezhim: 'podskazka'; shag: number; vopros?: boolean }
   /** Лист учителя: все слои. */
   | { rezhim: 'uchitel' };
 

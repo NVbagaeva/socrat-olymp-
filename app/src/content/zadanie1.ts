@@ -19,6 +19,9 @@ export const ZADANIE1 = {
     { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
+    { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+    { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
+    { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
 } as const;
 
@@ -229,4 +232,112 @@ export const OPORNYE_1 = {
   priznaki: 'Как сокращали: признаки делимости',
   sverka: 'Сверка с рисунком',
   neIzBanka: 'не из открытого банка',
+} as const;
+
+/* ── Вкладка «Тренажёр» ─────────────────────────────────────────── */
+
+const zadach = (n: number) =>
+  n % 10 === 1 && n % 100 !== 11
+    ? 'задача'
+    : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
+      ? 'задачи'
+      : 'задач';
+
+export const TRENAZHER_1 = {
+  title: 'Тренажёр',
+  otkuda: 'Откуда брать задачи',
+  istochniki: [
+    {
+      id: 'bank',
+      label: 'Только открытый банк',
+      note: 'Открытый банк — 214 задач ФИПИ, такие будут на экзамене. Чертёж — как в банке.',
+    },
+    {
+      id: 'mix',
+      label: 'Банк + новые',
+      note: 'Половина задач — из открытого банка, половина — новые: другие числа, фигура повёрнута, точки названы иначе.',
+    },
+    {
+      id: 'new',
+      label: 'Только новые',
+      note: 'Новые задачи тех же типов: другие числа и буквы, фигура повёрнута или отражена. Каждая тренировка — новая.',
+    },
+  ] as const,
+  bystrye: 'Быстрые настройки',
+  presety: {
+    vse: 'Всё задание 1',
+    treugolniki: 'Треугольники',
+    chetyrehugolniki: 'Четырёхугольники и площади',
+    trigonometriya: 'Синус, косинус, тангенс',
+    okruzhnost: 'Окружность',
+    trudnye: 'Только',
+    oshibki: 'Мои ошибки',
+  },
+  poisk: 'Найти тип задачи: биссектриса, ромб, касательная…',
+  nichego: 'Ничего не нашлось. Попробуйте другое слово: «медиана», «трапеция», «хорда».',
+  vybrano: (k: number, n: number) => `выбрано ${k} из ${n}`,
+  vesRazdel: 'весь блок',
+  vBanke: (n: number) => `в банке: ${n}`,
+  neIzBanka: 'не из банка',
+  generiruyutsya: 'генерируются',
+  vybrannaya: 'Выбранная тренировка',
+  ochistit: 'Очистить всё',
+  pustoVybor: 'Отметьте типы задач слева или выберите быструю настройку.',
+  kolichestvo: 'Количество задач',
+  uroven: 'Уровень сложности',
+  vseUrovni: 'Все уровни',
+  tolko: 'Только',
+  podskazki: 'Показывать подсказки',
+  malo: (n: number) => `В банке только ${n} ${zadach(n)}`,
+  maloNote: 'Тренировка будет короче — или добавьте новые задачи тех же типов.',
+  dobavitNovye: 'Добавить новые',
+  start: 'Начать тренировку',
+  vremya: (a: number, b: number) => `Примерное время: ${a}–${b} минут`,
+  tipov: ['тип задач', 'типа задач', 'типов задач'] as const,
+  /* Тренировка на паузе. */
+  naPauze: 'Тренировка на паузе',
+  naPauzeText: (i: number, n: number, k: number) =>
+    `Задача ${i} из ${n}, пройдено ${k}. Можно продолжить с того же места.`,
+  prodolzhit: 'Продолжить',
+  /* Экран решения. */
+  pauza: 'Поставить на паузу',
+  zadacha: (i: number, n: number) => `Задача ${i} из ${n}`,
+  badge: { bank: 'банк ФИПИ', new: 'новая', analog: 'новая' },
+  fipi: (n: number) => `№${n} банка`,
+  uslovie: 'Условие',
+  risunok: 'Чертёж к задаче',
+  podskazka: 'Подсказка',
+  shag: (i: number, n: number) => `шаг ${i} из ${n}`,
+  nevernoHint: 'Не совсем. Посмотрите на выделенное на чертеже и выберите другой вариант.',
+  vseShagi: 'Все шаги пройдены — посчитайте и введите ответ.',
+  layfhak: 'Полезный факт',
+  teoriya: 'Теория',
+  opornyy: 'Опорный блок',
+  razborTipa: 'Разбор типа',
+  otvet: 'Ваш ответ',
+  proverit: 'Проверить',
+  verno: 'Верно!',
+  vernoLead: 'Отлично! Переходим к следующей задаче.',
+  neverno: 'Пока неверно',
+  nevernoLead: 'Попробуйте ещё раз или откройте подсказку.',
+  pokazatReshenie: 'Показать решение',
+  reshenie: 'Решение по шагам',
+  risunokReshenie: 'Чертёж с построениями',
+  priznaki: 'Как сокращали: признаки делимости',
+  sverka: 'Сверка с рисунком',
+  otvetReshenie: 'Ответ',
+  dalee: 'Следующая задача →',
+  propustit: 'Пропустить задачу',
+  zavershit: 'Завершить тренировку',
+  gotovim: 'Собираем задачи…',
+  neUdalos: 'Не удалось собрать тренировку, попробуйте ещё раз.',
+  /* Итог. */
+  itog: 'Тренировка завершена',
+  vernoItog: 'верно',
+  sPodskazkoy: 'с подсказкой',
+  neResheno: 'не решено',
+  eshche: 'Ещё тренировка',
+  oshibkiBtn: 'Работа над ошибками',
+  statistika: 'Статистика по типам задач',
+  sbros: 'Сбросить статистику',
 } as const;

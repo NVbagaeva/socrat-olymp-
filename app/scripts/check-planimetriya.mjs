@@ -17,6 +17,11 @@
    ЕГЭ, сходится с измерением на фигуре и с решением по шагам, все
    формулы набираются KaTeX строго, файл аналогов совпадает с подбором.
 
+   Тренажёр и листы: задачи всех прототипов из банка, аналогов и
+   новые — ответ ЕГЭ, ответ не подписан на чертеже условия и вопросов
+   подсказки, буквы согласованы, отпечаток открывает подсказку и
+   решение; сессии всех источников; листы всех уроков и режимов.
+
    Запуск: pnpm test:planimetriya [N]
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
@@ -31,6 +36,7 @@ const n = Number(process.argv[2] ?? 1000);
 const { checkObraztsy, checkStress } = requireSrc('lib/planimetriya/selftest');
 const { checkBank } = requireSrc('lib/planimetriya/bank/selftest');
 const { checkPrep } = requireSrc('lib/planimetriya/prep/selftest');
+const { checkTrenazher } = requireSrc('lib/planimetriya/trenazher/selftest');
 
 const obr = checkObraztsy();
 console.log(`образцы: ${obr.risunkov} рисунков, проблем ${obr.problems.length}`);
@@ -45,7 +51,12 @@ console.log(
 const prep = checkPrep(30, typeset);
 console.log(`опорные задачи: ${prep.zadach} вариантов микрозадач, проблем ${prep.problems.length}`);
 
-const vse = [...obr.problems, ...st.problems, ...bank.problems, ...prep.problems];
+const tr = checkTrenazher(3);
+console.log(
+  `тренажёр и листы: ${tr.zadach} задач, ${tr.listov} листов, проблем ${tr.problems.length}`,
+);
+
+const vse = [...obr.problems, ...st.problems, ...bank.problems, ...prep.problems, ...tr.problems];
 if (vse.length > 0) {
   for (const p of vse.slice(0, 200)) console.log(`  ✗ ${p}`);
   if (vse.length > 200) console.log(`  … и ещё ${vse.length - 200}`);

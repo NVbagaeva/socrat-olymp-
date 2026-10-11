@@ -823,6 +823,9 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   for (const z of zadaniyaZnach) {
     const e = z.e;
     if (e.znachenie === undefined) continue;
+    /* Вопрос подсказки: элемент шага подсвечен, его число — ответ на
+       вопрос и появится только на следующем шаге. */
+    if (rezhim.rezhim === 'podskazka' && rezhim.vopros === true && sloyOf(e) === shag) continue;
     if (e.otvet && !naUchitel) continue;
     /* Слой условия: на листе ученика числа — только по настройке chisla;
        в подсказке подписаны данные, у учителя — данные и ответ. */

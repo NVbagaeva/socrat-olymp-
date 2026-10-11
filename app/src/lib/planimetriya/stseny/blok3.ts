@@ -1197,7 +1197,8 @@ function kasatelnaya(p: Params, porog: number, sDiametrom: boolean): Scena {
         ...(sDiametrom ? { D: { naDuge: { okr: 'w', gradus: 180 } } } : {}),
       },
       okruzhnosti: OKR,
-      elementy: sDiametrom ? [...elementy, tochka('O')] : elementy,
+      /* B и D названы в условии: B — точка на секущей, её подписываем сразу. */
+      elementy: sDiametrom ? [...elementy, tochka('O'), tochka('B')] : elementy,
       proverki: [{ naOkruzhnosti: 'w', tochki: ['A', 'B'] }],
       otvet: gr(sDiametrom ? ans : p.k ? 90 - p.u : ans),
     },
