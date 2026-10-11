@@ -47,6 +47,7 @@ const TARGETS = ALL
   ? [
       { url: '/zadaniya/12/linear/', theory: true, scope: '' },
       { url: '/zadaniya/12/irrational/', theory: true, scope: '' },
+      { url: '/zadaniya/12/exponential/', theory: true, scope: '' },
     ]
   : [
       { url: '/zadaniya/12/linear/', theory: true, scope: '#lin-q-argument ' },

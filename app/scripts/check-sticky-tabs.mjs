@@ -68,6 +68,7 @@ const PAGES = [
   '/zadaniya/2/teoriya/',
   /* №12: над лентой в той же липкой строке — плашка разделов. */
   '/zadaniya/12/irrational/',
+  '/zadaniya/12/exponential/',
   '/zadaniya/12/quadratic/opornye-zadachi/',
 ];
 const SIZES = [

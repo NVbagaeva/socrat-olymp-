@@ -37,6 +37,10 @@ export const skillTitle: Record<string, string> = {
   '12S.B': 'Аргумент по значению',
   '12S.C': 'Корень и прямая: абсцисса $B$',
   '12S.D': 'Корень и прямая: ордината $B$',
+  '12E.A': '$a^x$: значение функции',
+  '12E.B': '$a^x + b$: значение функции',
+  '12E.C': '$a^x + b$: аргумент по значению',
+  '12E.D': '$a^{x+b}$: аргумент по значению',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -79,8 +83,18 @@ const IRRATIONAL_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'десятичные дроби' },
 ];
 
-/** Уровни подтемы: у квадратичной, гиперболы и корня свои подписи. */
+/* У показательной: основание целое или 1/n, одна из точек — (0; 1 + b),
+   ответ целый — против дробного ответа, «дальних» точек и √2 в основании. */
+const EXPONENTIAL_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'целое основание, целый ответ' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'дробный ответ, корень в основании' },
+];
+
+/** Уровни подтемы: у квадратичной, гиперболы, корня и показательной свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'exponential') {
+    return EXPONENTIAL_LEVELS;
+  }
   if (type === 'irrational') {
     return IRRATIONAL_LEVELS;
   }

@@ -63,6 +63,19 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = 'http://127.0.0.1:' + server.address().port;
 
+/* Какие разделы открыты, а какие «Скоро», — из data/functionTypes.ts:
+   флаг снимается одной строкой, и тест не надо править вместе с ним. */
+const TYPES_SRC = fs.readFileSync(path.join(APP, 'src', 'data', 'functionTypes.ts'), 'utf8');
+const RAZDELY = Array.from(
+  TYPES_SRC.matchAll(/id: '([a-z]+)',\n\s+no: '\d+',[\s\S]*?status: '(active|soon)'/g),
+).map((m) => ({ id: m[1], open: m[2] === 'active' }));
+const SOON = RAZDELY.filter((r) => !r.open).length;
+const OPEN = RAZDELY.filter((r) => r.open).length;
+if (RAZDELY.length !== 7) {
+  console.error(`В data/functionTypes.ts найдено разделов ${RAZDELY.length}, ожидалось 7`);
+  process.exit(1);
+}
+
 const SIZES = [
   { name: 'телефон', width: 390, height: 844, isMobile: true },
   { name: 'компьютер', width: 1440, height: 900, isMobile: false },
@@ -233,7 +246,7 @@ for (const size of SIZES) {
   check(dialog.height <= dialog.vh * 0.85 + 1, where(`меню выше 85 % экрана: ${dialog.height}`));
   check(dialog.history === historyBefore + 1, where('открытие меню не добавило запись в историю'));
   check(
-    dialog.soon === 3 && dialog.soonLinks === 0,
+    dialog.soon === SOON && dialog.soonLinks === 0,
     where(`«Скоро»: ${dialog.soon}, ссылок ${dialog.soonLinks}`),
   );
   check(dialog.current.includes('Сейчас здесь'), where('текущий раздел не отмечен «Сейчас здесь»'));
@@ -398,11 +411,9 @@ for (const size of SIZES) {
   if (drugie !== null) {
     check(
       JSON.stringify(drugie.links) ===
-        JSON.stringify([
-          '/zadaniya/12/linear/',
-          '/zadaniya/12/quadratic/',
-          '/zadaniya/12/rational/',
-        ]),
+        JSON.stringify(
+          RAZDELY.filter((r) => r.open && r.id !== 'irrational').map((r) => `/zadaniya/12/${r.id}/`),
+        ),
       where(`в «Других разделах» ${JSON.stringify(drugie.links)}`),
     );
   }
@@ -496,7 +507,7 @@ for (const size of SIZES) {
     ),
   );
   check(
-    podtemy.soonCards === 3 && podtemy.soonDim === 3,
+    podtemy.soonCards === SOON && podtemy.soonDim === SOON,
     where('«Подтемы»: иконки «Скоро» не бледные'),
   );
   check(podtemy.overlap === 0, where('«Подтемы»: стрелка налезает на иконку'));
@@ -541,10 +552,10 @@ for (const size of SIZES) {
   );
   check(okno.oldCharts === 0, where('в окне выбора остались старые схематичные значки'));
   check(
-    okno.checks === 4,
-    where(`окно выбора: галочек ${okno.checks}, нужно 4 (открытые разделы)`),
+    okno.checks === OPEN,
+    where(`окно выбора: галочек ${okno.checks}, нужно ${OPEN} (открытые разделы)`),
   );
-  check(okno.soonDim === 3, where('окно выбора: иконки «Скоро» не бледные'));
+  check(okno.soonDim === SOON, where('окно выбора: иконки «Скоро» не бледные'));
   if (size.isMobile) {
     check(okno.quadLines === 1, where('в окне выбора «Квадратичная функция» переносится по слову'));
   }

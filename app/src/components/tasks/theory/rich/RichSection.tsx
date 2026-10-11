@@ -7,6 +7,7 @@ import { Collapse } from './Collapse';
 import { Display, Lines, Paras } from './parts';
 import { RichExampleBlock } from './RichExample';
 import { KatexFigure } from './KatexFigure';
+import { ExpPlaygroundLazy } from '../live/ExpPlaygroundLazy';
 
 /* Блок — обычная функция разметки, а не компонент: вложенные блоки
    (врезка, подраздел) зовут её же, ключ стоит на Fragment вокруг. */
@@ -167,6 +168,9 @@ function renderBlock(block: RichBlock): ReactNode {
           ))}
         </ol>
       );
+
+    case 'live':
+      return block.id === 'exp-play' ? <ExpPlaygroundLazy /> : null;
 
     default:
       return null;

@@ -15,6 +15,7 @@ import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import rationalSolution from '@/lib/graph/solution-rational.js';
 import sqrtSolution from '@/lib/graph/solution-sqrt.js';
+import exponentialSolution from '@/lib/graph/solution-exponential.js';
 import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -341,6 +342,9 @@ function withSolutionFigures(variants: SheetBlock[][], cell: number): SheetBlock
    каждого свой модуль, выбор по семейству задачи. */
 const rationalBuilder = {
   fromTask(task: { meta: { family?: string } }) {
+    if (task.meta.family === 'exponential') {
+      return exponentialSolution.fromTask(task);
+    }
     return task.meta.family === 'sqrt'
       ? sqrtSolution.fromTask(task)
       : rationalSolution.fromTask(task);

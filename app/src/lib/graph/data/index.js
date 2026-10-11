@@ -47,6 +47,13 @@ import sqrt3 from './prep/12s/skill-3.json';
 import sqrt4 from './prep/12s/skill-4.json';
 import sqrt5 from './prep/12s/skill-5.json';
 
+/* Подтема «Показательная функция»: пять опорных навыков, P12E-1 … P12E-5. */
+import exp1 from './prep/12e/skill-1.json';
+import exp2 from './prep/12e/skill-2.json';
+import exp3 from './prep/12e/skill-3.json';
+import exp4 from './prep/12e/skill-4.json';
+import exp5 from './prep/12e/skill-5.json';
+
 import protoA from './prototypes/12/12-A.json';
 import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
@@ -85,6 +92,13 @@ import sqrtB from './prototypes/12s/12S-B.json';
 import sqrtC from './prototypes/12s/12S-C.json';
 import sqrtD from './prototypes/12s/12S-D.json';
 
+/* Прототипы показательной функции: четыре типа открытого банка ФИПИ —
+   задачи банка дословно и по 20 аналогов на тип. */
+import expA from './prototypes/12e/12E-A.json';
+import expB from './prototypes/12e/12E-B.json';
+import expC from './prototypes/12e/12E-C.json';
+import expD from './prototypes/12e/12E-D.json';
+
 /** Подготовка: собственный материал платформы, в покрытие банка не входит.
     Сначала наборы линейной подтемы, потом квадратичной, потом гиперболы: порядок в этом
     списке задаёт порядок записей в answers.json, и линейные записи от
@@ -94,6 +108,7 @@ export const prep = [
   quad1, quad2, quad3, quad4, quad5, quad6, quad7, quad8, quad9,
   rat1, rat2, rat3, rat4, rat5, rat6, rat7, rat8, rat9, rat10, rat11,
   sqrt1, sqrt2, sqrt3, sqrt4, sqrt5,
+  exp1, exp2, exp3, exp4, exp5,
 ];
 
 /** Прототипы: у линейной — банк ФИПИ, у квадратичной — свой материал.
@@ -105,5 +120,6 @@ export const prototypes = [
   quadA, quadB, quadC, quadD, quadE, quadF, quadG, quadH, quadI,
   ratA, ratB, ratC, ratD, ratE, ratF, ratG, ratH, ratI, ratJ,
   sqrtA, sqrtB, sqrtC, sqrtD,
+  expA, expB, expC, expD,
 ];
 

@@ -16,6 +16,8 @@ import { RATIONAL_THEORY } from '@/content/theoryRational';
 import { IRRATIONAL } from '@/content/irrational';
 import { IRRATIONAL_THEORY } from '@/content/theoryIrrational';
 import { LINEAR_RICH_THEORY } from '@/content/theoryLinearRich';
+import { EXPONENTIAL } from '@/content/exponential';
+import { EXPONENTIAL_THEORY } from '@/content/theoryExponential';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -278,6 +280,9 @@ export const functionTypes: FunctionType[] = [
     bezStarogoAdresa: true,
     tutors: IRRATIONAL.tutors,
   },
+  /* Подтема «Показательная функция»: f(x) = aˣ, aˣ + b и a^(x + b) —
+     четыре типа открытого банка ФИПИ, задачи банка и по 20 аналогов.
+     Признаки — как у иррациональной, тексты в content/exponential.ts. */
   {
     id: 'exponential',
     no: '05',
@@ -286,11 +291,18 @@ export const functionTypes: FunctionType[] = [
     icon: 'exponential',
     formula: 'y = a^x',
     description: '',
-    theory: [],
+    theory: EXPONENTIAL_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12E-1', 'P12E-2', 'P12E-3', 'P12E-4', 'P12E-5'],
+      prototypes: ['12E.A', '12E.B', '12E.C', '12E.D'],
+    },
+    status: 'active',
+    head: EXPONENTIAL.head,
+    about: EXPONENTIAL.about,
+    bezStarogoAdresa: true,
+    tutors: EXPONENTIAL.tutors,
   },
   {
     id: 'logarithmic',
