@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
+import { CookieNotice } from '@/components/CookieNotice';
 import { NavigationGuard } from '@/components/NavigationGuard';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import '@/styles/globals.css';
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ChunkReloadGuard />
         <NavigationGuard />
         {children}
+        <CookieNotice />
       </body>
     </html>
   );

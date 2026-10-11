@@ -41,6 +41,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
+import { bezBanneraCookie } from './lib/cookie-notice.mjs';
 import { APP } from './lib/load-ts.mjs';
 
 const OUT = path.join(APP, 'out');
@@ -381,12 +382,17 @@ async function installMock(context, mock) {
 
 /* ── Браузер ───────────────────────────────────────────────────── */
 
-const browser = await chromium.launch({
-  args: ['--no-sandbox'],
-  ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
-    : {}),
-});
+/* Баннер cookie (components/CookieNotice.tsx) на телефоне закрывает низ
+   экрана, и клик по кнопке формы попадал бы в него. Здесь проверяется
+   вход, а не баннер: браузер — с уже прочитанным баннером. */
+const browser = bezBanneraCookie(
+  await chromium.launch({
+    args: ['--no-sandbox'],
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {}),
+  }),
+);
 
 if (SHOTS !== null) fs.mkdirSync(SHOTS, { recursive: true });
 async function shot(page, name) {

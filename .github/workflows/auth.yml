@@ -24,6 +24,11 @@ concurrency:
   group: auth-${{ github.ref }}
   cancel-in-progress: true
 
+# Как в check.yml: сборка не публикуется, правовые документы собираются
+# черновиком с незаполненными [ФИО], [ПОЧТА], [ДАТА] (docs/legal/README.md).
+env:
+  LEGAL_DRAFT: '1'
+
 jobs:
   auth:
     name: Вход и кабинет в браузере

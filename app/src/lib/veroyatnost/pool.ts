@@ -359,6 +359,8 @@ export interface PrepPoolZadacha {
   seal: string;
   /** Закрытый разбор: JSON формы `Razbor`, зашифрованный отпечатком. */
   steps: string;
+  /** Подсказка-вопросы тем же отпечатком; есть у задач с прототипом. */
+  podskazka?: string;
   /**
    * Картинка к условию у задачи без модели (подготовка №5): у задач
    * с моделью она идёт через модель. Только если файл есть.
@@ -405,6 +407,13 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
   const kartinka = kartinkaOpornoy(zadacha);
+  /* Подсказка — от прототипа, на числах того варианта, из которого
+     взята задача (вариант 1 — сама задача конспекта). */
+  const params = zadacha.prototip?.varianty.find((v) => v.n === (zadacha.variant ?? 1))?.params;
+  const podskazka =
+    zadacha.prototip?.podskazka === undefined || params === undefined
+      ? undefined
+      : zapechatatPodskazku(zadacha.prototip.podskazka(params), seal);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
   const illustration = model === null ? kartinka : undefined;
@@ -414,6 +423,7 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     uslovie: typesetText(zadacha.uslovie),
     seal,
     steps: zapechatatRazbor(razbor, seal),
+    ...(podskazka === undefined ? {} : { podskazka }),
     ...(illustration === undefined ? {} : { illustration }),
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
     ...(model === null

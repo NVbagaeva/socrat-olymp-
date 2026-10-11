@@ -4,6 +4,7 @@
  * Меняется здесь, в разметке текста нет.
  */
 
+import { legalDocs } from '@/content/legal/documents';
 import { tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
@@ -34,9 +35,12 @@ export const site = {
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
     links: [
+      { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
+      { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Оферта', href: '#' },
-      { label: 'Обработка данных', href: '#' },
       { label: 'Контакты', href: '#' },
     ] satisfies SiteLink[],
+    /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
+    operatorLabel: 'Оператор персональных данных:',
   },
 } as const;
