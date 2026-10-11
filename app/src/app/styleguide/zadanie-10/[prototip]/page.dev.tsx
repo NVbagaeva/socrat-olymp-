@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Illyustraciya10 } from '@/components/tasks/zadanie10/Illyustraciya10';
+import { Most10 } from '@/components/tasks/zadanie10/Most10';
 import { Razbor10 } from '@/components/tasks/zadanie10/Razbor10';
 import { Tex } from '@/components/ui/Tex';
 import { ISKLYUCHENIYA, pravila } from '@/lib/zadanie10/bank/analogi';
@@ -50,6 +52,18 @@ function Zadacha({ item }: { item: BankItem }) {
       <p className="g10__text">
         <Tex text={item.text} />
       </p>
+      {item.prototypeId === 'P01' ? (
+        <div className="g10__most">
+          <figure>
+            <figcaption>Лист ученика</figcaption>
+            <Most10 params={item.params} rezhim="uchenik" />
+          </figure>
+          <figure>
+            <figcaption>Лист учителя</figcaption>
+            <Most10 params={item.params} rezhim="uchitel" />
+          </figure>
+        </div>
+      ) : null}
       {s ? (
         <details className="g10__razbor">
           <summary>Разбор и подсказки</summary>
@@ -89,6 +103,7 @@ export default async function GalereyaPrototipa10({
         <h1 className="t-h2">
           {kodNaSayte(p.id)}. {p.title} <span className="g10__group">группа {p.group}</span>
         </h1>
+        <Illyustraciya10 id={p.id} className="g10__ill" />
         <p className="g10__formula">
           <Tex text={`$${p.formula}$`} /> — ищем <Tex text={p.ask} />.{' '}
           {p.fipiNos

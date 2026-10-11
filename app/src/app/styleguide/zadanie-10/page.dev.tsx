@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Tex } from '@/components/ui/Tex';
 import { ISKLYUCHENIYA, pravila } from '@/lib/zadanie10/bank/analogi';
 import { zadachiPrototipa } from '@/lib/zadanie10/bank/index';
+import { slotyIllyustraciy } from '@/lib/zadanie10/illyustracii';
 import { GROUPS, kodNaSayte, prototypesOfGroup } from '@/lib/zadanie10/prototypes';
 import 'katex/dist/katex.min.css';
 import './galereya10.css';
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default function GalereyaBanka10() {
+  const sloty = slotyIllyustraciy();
   return (
     <main className="g10">
       <header>
@@ -45,6 +47,7 @@ export default function GalereyaBanka10() {
                 <th scope="col">Аналоги</th>
                 <th scope="col">Разных ответов</th>
                 <th scope="col">Макс. повтор</th>
+                <th scope="col">Картинка</th>
               </tr>
             </thead>
             <tbody>
@@ -72,6 +75,9 @@ export default function GalereyaBanka10() {
                     </td>
                     <td>
                       {Math.max(0, ...otvety.values())} / ≤ {pr.maxPovtor}
+                    </td>
+                    <td>
+                      {sloty.find((s) => s.id === p.id)?.est ? 'есть' : `пусто: ${p.id}.webp/.png`}
                     </td>
                   </tr>
                 );

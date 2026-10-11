@@ -95,3 +95,55 @@
     background: none;
   }
 }
+
+/* ── Чертёж моста и иллюстрации сюжетов ── */
+
+.z10-most-wrap {
+  max-width: 640px;
+  margin: var(--space-3) 0;
+  padding: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface-soft) 60%, var(--color-surface)),
+    var(--color-surface)
+  );
+  break-inside: avoid;
+}
+
+.z10-most-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.z10-ill img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+}
+
+.z10-ill__svernuto summary {
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+@media print {
+  /* Ч/б печать: вода — без заливки, выделенная ванта — чёрная и толстая,
+     голубое стекло рамки не печатается. */
+  .z10-most-wrap {
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
+  .z10-most .z10-most__voda {
+    fill: none;
+  }
+
+  .z10-most .z10-most__vanta-iskomaya {
+    stroke: #000;
+  }
+}

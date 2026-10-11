@@ -39,6 +39,32 @@ for (const { where, item, s } of solved) {
   }
 }
 
+/* Чертёж моста (П-01): все задачи банка, оба режима. */
+const { chertezhMosta } = requireSrc('lib/zadanie10/chertezh/most');
+let mostov = 0;
+for (const { where, item } of solved.filter((x) => x.item.prototypeId === 'P01')) {
+  const dlina = String(item.answer).replace('.', ',') + ' м';
+  for (const rezhim of ['uchenik', 'uchitel']) {
+    const { svg, report } = chertezhMosta(item.params, rezhim);
+    mostov += 1;
+    report.nalozheniya.forEach((n) => problems.push({ where: `${where} мост (${rezhim})`, what: n }));
+    for (const slovo of ['цепь', 'ванта', 'пилон', 'полотно моста']) {
+      if (!svg.includes(`>${slovo}<`)) {
+        problems.push({ where: `${where} мост (${rezhim})`, what: `нет подписи «${slovo}»` });
+      }
+    }
+    const vydelena = svg.includes('z10-most__vanta-iskomaya');
+    const podpisana = svg.includes(`>${dlina}<`);
+    if (rezhim === 'uchenik' && (vydelena || podpisana)) {
+      problems.push({ where: `${where} мост (ученик)`, what: 'ванта из условия выделена или подписана' });
+    }
+    if (rezhim === 'uchitel' && !(vydelena && podpisana)) {
+      problems.push({ where: `${where} мост (учитель)`, what: 'ванта из условия не выделена или длина не подписана' });
+    }
+  }
+}
+console.log(`Чертежей моста проверено: ${mostov}.`);
+
 const fipi = solved.filter((x) => x.item.source === 'fipi').length;
 const analogi = solved.filter((x) => x.item.source === 'analog').length;
 console.log(`Прототипов: ${PROTOTYPES.length}; задач ФИПИ: ${fipi}; аналогов: ${analogi}.`);
