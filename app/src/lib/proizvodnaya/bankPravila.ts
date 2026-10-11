@@ -17,6 +17,9 @@
  * ISKLYUCHENIYA_BANKA с причиной, и решение за автором раздела.
  */
 
+import { ekstremumyUzlov, nuliUzlov } from './chtenie';
+import type { Figura } from './types';
+
 export const V_BANKE = 20;
 
 /** Прототипы, где ответ — количество или номер точки. */
@@ -56,6 +59,54 @@ export function pravilaOtvetov(prototypeId: string): PravilaOtvetov {
 export const MAX_V_KLASSE = 7;
 
 /**
+ * Сколько задач должно быть в банке прототипа. У 9.4.5 и 9.4.6 возможных
+ * ответов только четыре (см. ISKLYUCHENIYA_BANKA), при правиле «не чаще
+ * четырёх раз» больше 16 не набрать, а после отбора «одной пилы» — и
+ * того меньше: порог для них 14, для остальных — 20.
+ */
+export function minVBanke(prototypeId: string): number {
+  return prototypeId === '9.4.5' || prototypeId === '9.4.6' ? 14 : V_BANKE;
+}
+
+/** Прототипы, где пила одной формы (см. formaPily) — не больше одной, а пил всего — не больше MAX_PIL. */
+export const ODNA_PILA = new Set(['9.4.5', '9.4.6']);
+
+/**
+ * «Пила» — кривая с ровным шагом: не меньше пяти нулей f′ (экстремумов
+ * f), и все промежутки между соседними одинаковые. У 9.4.5 и 9.4.6 так
+ * выглядит любой рисунок с ответом 4: восемь нулей в окне 17 клеток
+ * встают только с шагом 2, а зубец при таком шаге — высотой 1 или 2.
+ * Пилы различаются лишь рядом высот зубцов, поэтому ключ — режим, число
+ * нулей, шаг и ряд высот (с точностью до отражения); null — не пила.
+ */
+export function formaPily(fig: Figura | null): string | null {
+  if (fig === null || (fig.rezhim !== 'fprime' && fig.rezhim !== 'f' && fig.rezhim !== 'F')) {
+    return null;
+  }
+  const xs =
+    fig.rezhim === 'fprime'
+      ? nuliUzlov(fig.uzly).map((z) => z.x)
+      : ekstremumyUzlov(fig.uzly).map((e) => e.x);
+  if (xs.length < 5) {
+    return null;
+  }
+  const shagi = new Set(xs.slice(1).map((x, i) => x - (xs[i] as number)));
+  if (shagi.size !== 1) {
+    return null;
+  }
+  /* Высоты зубцов между соседними нулями (для f — между экстремумами). */
+  const vysoty = xs.slice(1).map((x, i) => {
+    const mezhdu = fig.uzly.filter((u) => u.x > (xs[i] as number) && u.x < x);
+    return Math.max(0, ...mezhdu.map((u) => Math.abs(u.y)));
+  });
+  const ryad = [vysoty.join(','), [...vysoty].reverse().join(',')].sort()[0];
+  return `${fig.rezhim}|${xs.length}|${[...shagi][0]}|${ryad}`;
+}
+
+/** Сколько пил (любых) может быть в банке прототипа из ODNA_PILA. */
+export const MAX_PIL = 2;
+
+/**
  * Прототипы, которые правилам банка не отвечают, и почему. Ключ — что
  * именно нарушено: «otvety» (разнообразие ответов) или «formy».
  */
@@ -63,10 +114,11 @@ export const ISKLYUCHENIYA_BANKA: Record<string, { chto: 'otvety' | 'formy'; pri
   '9.4.5': {
     chto: 'otvety',
     prichina:
-      'возможных ответов четыре (от одного до четырёх): каждый следующий максимум на отрезке требует ещё двух нулей производной с шагом две клетки и нуля снаружи, и в окне рисунка до 17 клеток больше четырёх максимумов не помещается; при правиле «не чаще четырёх раз» в банке 16 задач, а не 20',
+      'возможных ответов четыре (от одного до четырёх): каждый следующий максимум на отрезке требует ещё двух нулей производной с шагом две клетки и нуля снаружи, и в окне рисунка до 17 клеток больше четырёх максимумов не помещается; решение автора — окно не расширять, банк не меньше 14 задач, пила не больше одной',
   },
   '9.4.6': {
     chto: 'otvety',
-    prichina: 'то же для минимумов: 4 возможных ответа, в банке 16 задач, а не 20',
+    prichina:
+      'то же для минимумов: четыре возможных ответа, банк не меньше 14 задач, пила не больше одной',
   },
 };

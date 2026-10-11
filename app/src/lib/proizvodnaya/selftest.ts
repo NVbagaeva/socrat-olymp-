@@ -23,9 +23,13 @@ import { ekstremumy, granitsy, nuli, problemy, reshit } from './reshit';
 import { ru } from './tex';
 import {
   ISKLYUCHENIYA_BANKA,
+  MAX_PIL,
   MAX_V_KLASSE,
+  ODNA_PILA,
   SCHETNYE,
   V_BANKE,
+  formaPily,
+  minVBanke,
   pravilaOtvetov,
 } from './bankPravila';
 import { klassFormy, otpechatokZadachi } from './otpechatokRisunka';
@@ -522,9 +526,15 @@ export function checkBank(
     const isk = ISKLYUCHENIYA_BANKA[proto.id];
     const narushenie = (what: string) =>
       (isk === undefined ? problems : warnings).push({ where: proto.id, what });
-    if (entry.variants.length !== V_BANKE) {
-      narushenie(`в банке ${entry.variants.length} вариантов вместо ${V_BANKE}`);
+    /* Размер банка: 20, у 9.4.5 и 9.4.6 — не меньше 14 (решение автора). */
+    const nuzhno = minVBanke(proto.id);
+    if (entry.variants.length < nuzhno || entry.variants.length > V_BANKE) {
+      problems.push({
+        where: proto.id,
+        what: `в банке ${entry.variants.length} вариантов, нужно ${nuzhno === V_BANKE ? V_BANKE : `от ${nuzhno} до ${V_BANKE}`}`,
+      });
     }
+    const pily = new Map<string, string>();
     const otp = new Map<string, string>();
     const klassy = new Map<string, number>();
     const vids = new Map<string, number>();
@@ -545,6 +555,17 @@ export function checkBank(
         otp.set(o, v.seed);
         const k = klassFormy(t.risunok);
         klassy.set(k, (klassy.get(k) ?? 0) + 1);
+        const pila = formaPily(t.risunok);
+        if (ODNA_PILA.has(proto.id) && pila !== null) {
+          const prevPila = pily.get(pila);
+          if (prevPila !== undefined) {
+            problems.push({ where, what: `вторая «пила» той же формы, что у ${prevPila}` });
+          }
+          pily.set(pila, v.seed);
+          if (pily.size > MAX_PIL) {
+            problems.push({ where, what: `пил в банке больше ${MAX_PIL}` });
+          }
+        }
         otvety.set(t.otvet, (otvety.get(t.otvet) ?? 0) + 1);
         const vid = t.vid ?? '';
         vids.set(vid, (vids.get(vid) ?? 0) + 1);

@@ -72,6 +72,8 @@
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",
+    "test:seriya-9": "node scripts/check-seriya-9.mjs",
+    "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:navigation": "node scripts/check-navigation.mjs"
   },

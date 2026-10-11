@@ -12,15 +12,18 @@
  * Адрес: g=I,II — группы; p=9.2.1,… — конкретные прототипы (пусто —
  * все прототипы групп); n — число задач; seed; t=color|print;
  * c=1|2 — колонки; k — вид работы; d — дата; r=0|1|2 — число
- * разобранных примеров на группу (по умолчанию 2); s — серия уроков,
- * u — номер урока в серии (0, 1, …).
+ * разобранных примеров на группу (по умолчанию 2); u — номер урока в
+ * серии (0 — первый урок, в адресе не пишется).
  *
- * Задачи берутся из банка (bank.ts, двадцать вариантов на прототип).
- * Порядок вариантов прототипа задаёт серия; урок u продолжает поток
- * с того места, где закончился урок u − 1. Поэтому повторная
- * генерация урока с теми же настройками не повторяет задачи, пока в
- * банке есть неиспользованные; когда банк прототипа исчерпан, поток
- * идёт по нему заново в том же порядке.
+ * Серия уроков. Задачи берутся из банка (bank.ts, до двадцати
+ * вариантов на прототип). Код комплекта (seed) задаёт порядок вариантов
+ * каждого прототипа, номер урока — место в этом порядке: урок u
+ * продолжает поток с того места, где закончился урок u − 1. Всё, что
+ * нужно уроку, выводится из кода и номера урока (seedUroka) — ни
+ * истории, ни localStorage: серия восстанавливается по коду на любом
+ * устройстве и в любом порядке. Уроки одной серии не повторяют задачи,
+ * пока в банке есть неиспользованные; когда банк прототипа исчерпан,
+ * поток идёт по нему заново в том же порядке.
  *
  * Рисунки. У ученика — режим 'student': только то, что даёт условие.
  * У учителя на том же месте — режим 'teacher' со вспомогательными
@@ -35,7 +38,7 @@
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import contentSheet9 from '@/content/sheet9.js';
 import { answerHtml, answersItems } from '@/lib/sheet/answers9.js';
-import { buildDocument, exampleItem } from '@/lib/sheet/sheet.js';
+import { buildDocument, exampleItem, figure as sheetFigure } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
 import { generate as generateRaw, opornayaSeed } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
@@ -80,9 +83,7 @@ export interface SheetParams9 {
   date: string;
   /** Разобранных примеров на тип (группу): 0, 1 или 2. */
   ramki: 0 | 1 | 2;
-  /** Серия уроков: задаёт порядок вариантов банка. Пусто — серия по seed. */
-  seriya: string;
-  /** Номер урока в серии: 0, 1, … — сдвиг по потоку вариантов банка. */
+  /** Номер урока в серии: 0, 1, … — сдвиг по потоку вариантов банка (серия — seed). */
   urok: number;
 }
 
@@ -100,7 +101,6 @@ export function defaultSheetParams9(): SheetParams9 {
     kind: '',
     date: '',
     ramki: RAMKI_DEFAULT,
-    seriya: '',
     urok: 0,
   };
 }
@@ -123,9 +123,6 @@ export function sheetQuery9(params: SheetParams9): string {
     query.set('d', params.date);
   }
   query.set('r', String(params.ramki));
-  if (params.seriya !== '') {
-    query.set('s', params.seriya);
-  }
   if (params.urok > 0) {
     query.set('u', String(params.urok));
   }
@@ -164,7 +161,6 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
     kind: query.get('k') ?? '',
     date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
     ramki: ramki === '0' ? 0 : ramki === '1' ? 1 : RAMKI_DEFAULT,
-    seriya: query.get('s') ?? '',
     urok: Number.isFinite(urok) && urok > 0 ? Math.floor(urok) : 0,
   };
 }
@@ -195,6 +191,8 @@ export interface SheetTask9 {
   figureCondition: string | null;
   /** Рисунок под условием, на всю ширину колонки (лист учителя). */
   figureBelow?: boolean;
+  /** Лист учителя: задача кусками потока — условие с рисунком и этапы разбора. */
+  kuski?: string[];
   answer: string;
   answerHtml: null;
   solutionHtml: string | null;
@@ -209,12 +207,17 @@ export interface SheetBlock9 {
   tasks: SheetTask9[];
   /** Рамка «Запомни» и разобранные примеры группы — готовые куски потока. */
   theory: string[];
+  /** Разобранные примеры группы «прототип|seed»: по ним проверка сверяет листы. */
+  primery: string[];
 }
 
 interface Drawn {
   svg: string;
   /** Ширина в миллиметрах при заданной клетке. */
   width: (cellMm: number) => number;
+  /** Размер рисунка в клетках: по нему решается, встанет ли он сбоку. */
+  kletokX: number;
+  kletokY: number;
 }
 
 function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
@@ -223,7 +226,12 @@ function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | nul
   }
   const report = pustoyOtchet();
   const svg = renderFigura(task.risunok, { rezhim }, report);
-  return { svg, width: (cellMm) => Math.round((report.width / report.cell) * cellMm * 100) / 100 };
+  return {
+    svg,
+    width: (cellMm) => Math.round((report.width / report.cell) * cellMm * 100) / 100,
+    kletokX: report.width / report.cell,
+    kletokY: report.height / report.cell,
+  };
 }
 
 /** Ответ-число формулой (настоящий минус, десятичная запятая). */
@@ -231,17 +239,177 @@ function answerLine(answerText: string): string {
   return `<p class="sheet-task-answer">${typo.text(contentSheet9.labels.answer)}: <b>${answerHtml(answerText)}</b></p>`;
 }
 
+/** Этапы разбора без шага «Ответ»: ответ стоит строкой под списком. */
+function etapy(task: Generated): Generated['shagi'] {
+  return task.shagi.filter((s) => s.zagolovok !== 'Ответ');
+}
+
+/** Один этап: «Заголовок этапа.» и строки — каждая с новой строки, выкладки не сливаются. */
+function etapHtml(s: Generated['shagi'][number]): string {
+  const lines = s.stroki.map((line) => typo.mathText(line.replace(/\*\*/g, ''))).join('<br>');
+  return `<li class="sheet-step"><b>${typo.mathText(s.zagolovok)}.</b><br>${lines}</li>`;
+}
+
+/** Список этапов с номера start (нумерация не сбивается, когда разбор перенесён). */
+function etapyHtml(list: Generated['shagi'], start: number): string {
+  const from = start > 1 ? ` start="${start}"` : '';
+  return `<ol class="sheet-steps z9-razbor"${from}>${list.map(etapHtml).join('')}</ol>`;
+}
+
 /** Разбор ЭТАПАМИ: «Заголовок этапа.» и строки; шаг «Ответ» — строкой под списком. */
 function razborHtml(task: Generated, answerText: string): string {
-  const items = task.shagi
-    .filter((s) => s.zagolovok !== 'Ответ')
-    .map((s) => {
-      /* Строки этапа — каждая с новой строки: выкладки не сливаются. */
-      const lines = s.stroki.map((line) => typo.mathText(line.replace(/\*\*/g, ''))).join('<br>');
-      return `<li class="sheet-step"><b>${typo.mathText(s.zagolovok)}.</b><br>${lines}</li>`;
-    })
-    .join('');
-  return `<ol class="sheet-steps z9-razbor">${items}</ol>${answerLine(answerText)}`;
+  return `${etapyHtml(etapy(task), 1)}${answerLine(answerText)}`;
+}
+
+/* ── Лист учителя: задача кусками ─────────────────────────────────── */
+
+/** Ширина текста карточки задачи в одну колонку, мм: лист 210 − поля 2·14 − номер и отступы. */
+const KOLONKA_MM = 164;
+/** Ширина текста рамки примера, мм: слева у рамки ещё плашка «Пример». */
+const KOLONKA_PRIMERA_MM = 148;
+/** Клетка рисунка, который стоит справа от разбора, мм. */
+const SBOKU_CELL_MM = 4.5;
+/** Зазор между разбором и рисунком и отступ списка этапов, мм. */
+const ZAZOR_MM = 8;
+/* Оценка высоты этапа: строка разбора (10,5 pt с интерлиньяжем) — около
+   5,6 мм, средний знак — около 1,9 мм. Нужна только для того, чтобы
+   решить, сколько этапов поставить рядом с рисунком; ошибка оценки
+   меняет лишь то, где разбор перенесётся, а не его целостность. */
+const STROKA_MM = 5.6;
+const ZNAK_MM = 1.9;
+
+interface MestoRisunka {
+  html: string;
+  widthMm: number;
+  heightMm: number;
+  sboku: boolean;
+}
+
+/**
+ * Где стоит рисунок учителя. Если при клетке 4,5 мм он не шире
+ * половины колонки — справа от разбора; иначе — под условием, клетка
+ * 6 мм, не шире колонки.
+ */
+function mestoRisunka(drawn: Drawn, kolonka: number): MestoRisunka {
+  const sbokuW = drawn.kletokX * SBOKU_CELL_MM;
+  if (sbokuW <= kolonka / 2) {
+    return {
+      html: sheetFigure(drawn.svg, { width: sbokuW }),
+      widthMm: sbokuW,
+      heightMm: drawn.kletokY * SBOKU_CELL_MM,
+      sboku: true,
+    };
+  }
+  const w = Math.min(drawn.width(TEACHER_CELL.single), TEACHER_MAX_MM.single, kolonka);
+  return {
+    html: sheetFigure(drawn.svg, { width: w }),
+    widthMm: w,
+    heightMm: (w * drawn.kletokY) / drawn.kletokX,
+    sboku: false,
+  };
+}
+
+function dlinaTeksta(line: string): number {
+  return line.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}$^_*]/g, '').length;
+}
+
+function vysotaEtapa(etap: Generated['shagi'][number], shirinaMm: number): number {
+  const naStroku = Math.max(10, Math.floor(shirinaMm / ZNAK_MM));
+  let lines = 1;
+  for (const line of etap.stroki) {
+    lines += Math.max(1, Math.ceil(dlinaTeksta(line) / naStroku));
+  }
+  return lines * STROKA_MM + 1;
+}
+
+type Obertka = (inner: string, kind: 'first' | 'cont', last: boolean) => string;
+
+/**
+ * Куски потока разобранной задачи на листе учителя.
+ *
+ * Первый кусок неделим: условие и рисунок никогда не расходятся по
+ * страницам; у разобранного примера с ними неделим и первый этап. Рисунок сбоку стоит
+ * рядом с первыми этапами, их столько, сколько по высоте закрывают
+ * рисунок. Остальные этапы — по куску на этап: разбор переносится на
+ * следующую страницу только между этапами. Ответ — вместе с последним
+ * этапом.
+ */
+function kuskiRazbora(
+  golova: string,
+  task: Generated,
+  drawn: Drawn | null,
+  kolonka: number,
+  obertka: Obertka,
+  sPervymEtapom: boolean,
+): string[] {
+  const list = etapy(task);
+  const answer = answerLine(ru(task.otvet));
+  const mesto = drawn === null ? null : mestoRisunka(drawn, kolonka);
+  let n: number;
+  let first: string;
+  if (mesto !== null && mesto.sboku) {
+    const tekstW = kolonka - mesto.widthMm - ZAZOR_MM;
+    let h = 0;
+    n = 0;
+    while (n < list.length && h < mesto.heightMm * 0.85) {
+      h += vysotaEtapa(list[n] as Generated['shagi'][number], tekstW);
+      n += 1;
+    }
+    first =
+      golova +
+      `<div class="z9-ryad"><div class="z9-ryad-tekst">${etapyHtml(list.slice(0, n), 1)}</div>` +
+      `${mesto.html}</div>` +
+      (n >= list.length ? answer : '');
+  } else {
+    /* Под широким рисунком: у примера с ним неделим и первый этап (пример
+       начинается там, где видно, как его решают), у задачи — только
+       условие с рисунком, этапы переносятся по одному. */
+    n = Math.min(sPervymEtapom ? 1 : 0, list.length);
+    first =
+      golova +
+      (mesto === null ? '' : `<div class="z9-pod-usloviem">${mesto.html}</div>`) +
+      (n > 0 ? etapyHtml(list.slice(0, n), 1) : '') +
+      (n >= list.length ? answer : '');
+  }
+  const out = [obertka(first, 'first', n >= list.length)];
+  for (let i = n; i < list.length; i += 1) {
+    const last = i === list.length - 1;
+    out.push(
+      obertka(
+        etapyHtml([list[i] as Generated['shagi'][number]], i + 1) + (last ? answer : ''),
+        'cont',
+        last,
+      ),
+    );
+  }
+  return out;
+}
+
+function klassKuska(kind: 'first' | 'cont', last: boolean): string {
+  return `z9-kusok z9-kusok--${kind}${last ? ' z9-kusok--last' : ''}`;
+}
+
+/** Задача учителя кусками: одна карточка .sheet-task с номером, дальше — продолжение. */
+function kuskiZadachi(task: Generated, no: number, id: string): string[] {
+  const golova = `<p class="sheet-task-question">${typo.mathText(task.uslovie)}</p>`;
+  return kuskiRazbora(
+    golova,
+    task,
+    drawFigure(task, 'teacher'),
+    KOLONKA_MM,
+    obertkaZadachi(no, id),
+    false,
+  );
+}
+
+function obertkaZadachi(no: number, id: string): Obertka {
+  return (inner, kind, last) =>
+    kind === 'first'
+      ? `<div class="sheet-item sheet-tasks sheet-tasks--single ${klassKuska(kind, last)}">` +
+        `<article class="sheet-task sheet-task--single z9-zadacha" data-task="${typo.attr(id)}">` +
+        `<span class="sheet-task-no">${no}</span><div class="sheet-task-body z9-telo">${inner}</div>` +
+        '</article></div>'
+      : `<div class="sheet-item ${klassKuska(kind, last)}"><div class="z9-prodolzhenie">${inner}</div></div>`;
 }
 
 function sheetTask(
@@ -249,6 +417,7 @@ function sheetTask(
   no: number,
   layout: SheetLayoutId,
   withAnswers: boolean,
+  id = `${task.prototype}|${task.seed}`,
 ): SheetTask9 {
   const answerText = ru(task.otvet);
   const condition = drawFigure(task, 'student');
@@ -258,7 +427,7 @@ function sheetTask(
   const shown = withAnswers ? drawFigure(task, 'teacher') : condition;
   return {
     no,
-    id: `${task.prototype}|${task.seed}`,
+    id,
     questionHtml: typo.mathText(task.uslovie),
     options: null,
     figureSvg: shown === null ? null : shown.svg,
@@ -274,6 +443,7 @@ function sheetTask(
     answer: withAnswers ? answerText : '',
     answerHtml: null,
     solutionHtml: withAnswers ? razborHtml(task, answerText) : null,
+    ...(withAnswers ? { kuski: kuskiZadachi(task, no, id) } : {}),
   };
 }
 
@@ -286,7 +456,16 @@ function poolOf(group: Gruppa, params: SheetParams9): string[] {
   return chosen.length > 0 ? chosen : all;
 }
 
-/** Варианты банка прототипа в порядке серии: перестановка по seed серии. */
+/**
+ * Seed урока серии: код комплекта и номер урока, больше ничего. Первый
+ * урок — сам код (лист как до серий). Им строятся задачи, которых нет в
+ * банке, — порядок вариантов банка задаёт код, а место в нём — номер урока.
+ */
+export function seedUroka(kod: string, urok: number): string {
+  return urok === 0 ? kod : `${kod}~u${urok}`;
+}
+
+/** Варианты банка прототипа в порядке серии: перестановка по коду комплекта. */
 function bankOrder(proto: string, seriya: string): string[] {
   const seeds = (BANK.find((e) => e.prototype === proto)?.variants ?? []).map((v) => v.seed);
   return rngOf(`${seriya}|${proto}`).sample(seeds, seeds.length);
@@ -310,8 +489,8 @@ function tasksForGroup(
   if (pool.length === 0) {
     return out;
   }
-  const seriya = params.seriya !== '' ? params.seriya : params.seed;
-  const orders = new Map(pool.map((proto) => [proto, bankOrder(proto, seriya)]));
+  const orders = new Map(pool.map((proto) => [proto, bankOrder(proto, params.seed)]));
+  const zapasnoy = seedUroka(params.seed, params.urok);
   const seen = new Set<string>();
   const start = params.urok * want;
   let i = start;
@@ -327,7 +506,7 @@ function tasksForGroup(
     const seed =
       fromBank !== undefined && !seen.has(`${proto}|${fromBank}`)
         ? fromBank
-        : `${params.seed}:${proto}:${occurrence}`;
+        : `${zapasnoy}:${proto}:${occurrence}`;
     try {
       const task = generate(proto, seed);
       const key = `${proto}|${task.seed}`;
@@ -402,18 +581,67 @@ function exampleOf(prototypeId: string, seed: string): string {
   });
 }
 
-function theoryOf(group: Gruppa, pool: string[], ramki: number): string[] {
+/**
+ * Разобранный пример на листе учителя — кусками, как задача: заголовок,
+ * условие, рисунок и первый этап неделимы, дальше этапы по одному.
+ * Так пример начинается на странице с «Запомни», если на ней хватает
+ * места под условие, рисунок и первый этап.
+ */
+function exampleKuski(prototypeId: string, seed: string): string[] {
+  let task: Generated;
+  try {
+    task = generate(prototypeId, seed);
+  } catch {
+    return [];
+  }
+  const label = typo.text(contentSheet9.labels.example);
+  const golova =
+    `<p class="sheet-example-title">${typo.mathText(prototypeById(prototypeId)?.nazvanie ?? '')}</p>` +
+    `<p class="sheet-task-question">${typo.mathText(task.uslovie)}</p>`;
+  return kuskiRazbora(
+    golova,
+    task,
+    drawFigure(task, 'teacher'),
+    KOLONKA_PRIMERA_MM,
+    (inner, kind, last) =>
+      `<div class="sheet-item sheet-example z9-primer ${klassKuska(kind, last)}">` +
+      (kind === 'first'
+        ? `<span class="sheet-example-label">${label}</span>`
+        : `<span class="sheet-example-label z9-nevidim" aria-hidden="true">${label}</span>`) +
+      `<div class="sheet-example-text">${inner}</div></div>`,
+    true,
+  );
+}
+
+/** Разобранные примеры группы: прототип и seed — одни на листах ученика и учителя. */
+function primeryOf(pool: string[], ramki: number): { proto: string; seed: string }[] {
   if (ramki === 0 || pool.length === 0) {
     return [];
   }
   const real = pool.filter((id) => prototypeById(id)?.zaglushka !== true);
   const from = real.length > 0 ? real : pool;
-  const out: string[] = [zapomniItem(group)];
+  const out: { proto: string; seed: string }[] = [];
   for (let i = 0; i < ramki; i += 1) {
     const second = i === 1;
     const proto = from[i % from.length] as string;
-    const seed = second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto);
-    out.push(exampleOf(proto, seed));
+    out.push({ proto, seed: second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto) });
+  }
+  return out;
+}
+
+function theoryOf(group: Gruppa, pool: string[], ramki: number, withAnswers: boolean): string[] {
+  const primery = primeryOf(pool, ramki);
+  if (primery.length === 0) {
+    return [];
+  }
+  const out: string[] = [zapomniItem(group)];
+  for (const { proto, seed } of primery) {
+    /* Лист ученика не меняется: пример там — одна рамка. */
+    if (withAnswers) {
+      out.push(...exampleKuski(proto, seed));
+    } else {
+      out.push(exampleOf(proto, seed));
+    }
   }
   return out.filter((item) => item !== '');
 }
@@ -437,7 +665,8 @@ export function sheetBlocks9(params: SheetParams9, withAnswers: boolean): SheetB
         note: '',
         set: group,
         tasks,
-        theory: theoryOf(group, pool, params.ramki),
+        theory: theoryOf(group, pool, params.ramki, withAnswers),
+        primery: primeryOf(pool, params.ramki).map((p) => `${p.proto}|${p.seed}`),
       };
     })
     .filter((block) => block.tasks.length > 0);
@@ -472,15 +701,16 @@ export function fixedBlocks9(
         set: group,
         tasks: tasks.map((item) => {
           no += 1;
-          const built = sheetTask(
+          return sheetTask(
             generate(item.prototype, item.seed),
             no,
             raskladka(options.layout, withAnswers),
             withAnswers,
+            `${item.prototype}#${item.n}`,
           );
-          return { ...built, id: `${item.prototype}#${item.n}` };
         }),
-        theory: theoryOf(group, pool, options.ramki),
+        theory: theoryOf(group, pool, options.ramki, withAnswers),
+        primery: primeryOf(pool, options.ramki).map((p) => `${p.proto}|${p.seed}`),
       };
     })
     .filter((block) => block.tasks.length > 0);
@@ -493,8 +723,13 @@ export function dateText9(date: string): string {
 }
 
 /** Подзаголовок листа: вид работы и дата, что есть. */
-export function subtitleOf9(params: Pick<SheetParams9, 'kind' | 'date'>): string {
-  return [params.kind, params.date === '' ? '' : dateText9(params.date)]
+export function subtitleOf9(
+  params: Pick<SheetParams9, 'kind' | 'date'> & { urok?: number },
+): string {
+  /* Урок серии со второго: по коду комплекта и этому номеру лист
+     восстанавливается. Первый урок номера не пишет — лист как до серий. */
+  const urok = params.urok !== undefined && params.urok > 0 ? `урок ${params.urok + 1}` : '';
+  return [params.kind, params.date === '' ? '' : dateText9(params.date), urok]
     .filter((part) => part !== '')
     .join(' · ');
 }
@@ -514,8 +749,12 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
   const end = html.indexOf('</script>', start);
   const items = (JSON.parse(html.slice(start, end).replace(/<\\\//g, '</')) as { items: string[] })
     .items;
-  /* Первый кусок — полоса группы, за ней рамки, затем задачи. */
-  return [items[0] as string, ...block.theory, ...items.slice(1)];
+  /* Первый кусок — полоса группы, за ней рамки, затем задачи. У листа
+     учителя задачи свои — кусками (kuskiZadachi), карточки шаблона не нужны. */
+  const zadachi = block.tasks.every((t) => t.kuski !== undefined)
+    ? block.tasks.flatMap((t) => t.kuski as string[])
+    : items.slice(1);
+  return [items[0] as string, ...block.theory, ...zadachi];
 }
 
 /**
@@ -546,7 +785,7 @@ export function raskladka(layout: SheetLayoutId, withAnswers: boolean): SheetLay
 /** Описание листа по готовым блокам: лист генератора и сборник PDF. */
 export function specOfBlocks9(
   blocks: SheetBlock9[],
-  params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'>,
+  params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'> & { urok?: number },
   withAnswers: boolean,
 ) {
   const layout = raskladka(params.layout, withAnswers);
@@ -573,8 +812,13 @@ export function specOfBlocks9(
     ...base,
     blocks,
     leadItems: flow,
+    /* Таблица «Ответы» у учителя идёт сразу за задачами, а не с новой
+       страницы: полный разбор уже стоит в каждой задаче, отдельная
+       страница под короткую таблицу листу не нужна. */
     extraItems: withAnswers
-      ? answersItems(blocks, contentSheet9.labels.answers, contentSheet9.labels.answersNote)
+      ? answersItems(blocks, contentSheet9.labels.answers, contentSheet9.labels.answersNote).map(
+          (item: string) => item.replace(' data-page-break="1"', ''),
+        )
       : [],
   };
 }

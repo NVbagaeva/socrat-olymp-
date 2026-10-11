@@ -34,9 +34,17 @@ const { PROTOTYPES } = requireSrc('lib/proizvodnaya/prototypes/index');
 const { generate } = requireSrc('lib/proizvodnaya/generate');
 const { renderFigura, pustoyOtchet } = requireSrc('lib/proizvodnaya/render');
 const { otpechatokZadachi, klassFormy } = requireSrc('lib/proizvodnaya/otpechatokRisunka');
-const { V_BANKE, MAX_V_KLASSE, SCHETNYE, pravilaOtvetov, ISKLYUCHENIYA_BANKA } = requireSrc(
-  'lib/proizvodnaya/bankPravila',
-);
+const {
+  V_BANKE,
+  MAX_V_KLASSE,
+  SCHETNYE,
+  pravilaOtvetov,
+  ISKLYUCHENIYA_BANKA,
+  minVBanke,
+  ODNA_PILA,
+  MAX_PIL,
+  formaPily,
+} = requireSrc('lib/proizvodnaya/bankPravila');
 const { chislaOtvet } = requireSrc('lib/proizvodnaya/otvet');
 
 const KANDIDATOV = Number(process.env.BANK9_KANDIDATOV ?? 700);
@@ -74,6 +82,7 @@ function kandidaty(prototype) {
       otvet: chislaOtvet(task.otvet),
       otp: otpechatokZadachi(task),
       klass: klassFormy(task.risunok),
+      pila: formaPily(task.risunok),
       vid: task.vid ?? '',
       uslovie: task.uslovie,
       risunok: task.risunok,
@@ -101,11 +110,19 @@ function podobrat(prototype, list) {
   const vidy = new Map();
   const otvety = new Map();
   const chistye = new Map();
+  const pily = new Set();
+  const odnaPila = ODNA_PILA.has(prototype.id);
+  /* Пила допустима только для ответа, у которого других рисунков нет
+     (у 9.4.5 и 9.4.6 — ответ 4): иначе её место займёт непохожий рисунок. */
+  const bezPily = new Set(list.filter((k) => k.pila === null).map((k) => k.otvet));
 
   const goden = (k, maxPovtor) => {
     if (otp.has(k.otp)) return false;
     if (k.risunok === null && usloviya.has(k.uslovie)) return false;
     if (KLASSY_RISUNKA.test(k.klass) && (klassy.get(k.klass) ?? 0) >= MAX_V_KLASSE) return false;
+    if (odnaPila && k.pila !== null) {
+      if (bezPily.has(k.otvet) || pily.has(k.pila) || pily.size >= MAX_PIL) return false;
+    }
     if (k.vid !== '' && (vidy.get(k.vid) ?? 0) >= MAX_SAME_VID) return false;
     if ((otvety.get(k.otvet) ?? 0) >= maxPovtor) return false;
     if (k.risunok !== null) {
@@ -121,6 +138,7 @@ function podobrat(prototype, list) {
     klassy.set(k.klass, (klassy.get(k.klass) ?? 0) + 1);
     if (k.vid !== '') vidy.set(k.vid, (vidy.get(k.vid) ?? 0) + 1);
     otvety.set(k.otvet, (otvety.get(k.otvet) ?? 0) + 1);
+    if (k.pila !== null) pily.add(k.pila);
   };
 
   /* Проход 1: покрытие — по одной задаче на каждый возможный ответ, редкие первыми. */
@@ -141,7 +159,8 @@ function podobrat(prototype, list) {
   }
 
   const narusheniya = [];
-  if (chosen.length < V_BANKE) narusheniya.push(`набрано ${chosen.length} из ${V_BANKE}`);
+  if (chosen.length < minVBanke(prototype.id))
+    narusheniya.push(`набрано ${chosen.length}, нужно не меньше ${minVBanke(prototype.id)}`);
   const raznyh = otvety.size;
   if (SCHETNYE.has(prototype.id)) {
     const net = vozmozhnye.filter((o) => !otvety.has(o));
@@ -178,7 +197,8 @@ for (const prototype of PROTOTYPES) {
       : isk
         ? `исключение: ${isk.prichina}`
         : `НАРУШЕНО: ${narusheniya.join('; ')}`;
-  if (narusheniya.length > 0 && !isk) bad += 1;
+  /* Размер банка ниже порога — ошибка и у прототипа-исключения. */
+  if ((narusheniya.length > 0 && !isk) || chosen.length < minVBanke(prototype.id)) bad += 1;
   otchet.push(`  ${prototype.id}: ${chosen.length} · ${svodka} · ${status}`);
   console.error(`  ${prototype.id}: ${((Date.now() - started) / 1000).toFixed(0)} с`);
 }

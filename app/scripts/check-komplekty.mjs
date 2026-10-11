@@ -320,13 +320,17 @@ for (const gen of generators) {
       }
     });
 
-    /* №9: рамки теории и число примеров на листах одни; ответов и
-       разбора у ученика в карточках нет, а у учителя разбор есть. */
+    /* №9: разобранные примеры на листах одни и те же задачи; у ученика
+       пример — одна рамка, у учителя — куски (условие с рисунком, этапы),
+       поэтому сверяются задачи примеров, а не разметка. */
     if (gen.scope === '9') {
       student.blocks.forEach((block, n) => {
         const other = teacher.blocks[n];
-        if (other === undefined || JSON.stringify(block.theory) !== JSON.stringify(other.theory)) {
-          where(kit.code, `блок ${n + 1}: рамки теории у ученика и учителя разные`);
+        if (other === undefined || JSON.stringify(block.primery) !== JSON.stringify(other.primery)) {
+          where(kit.code, `блок ${n + 1}: разобранные примеры у ученика и учителя разные`);
+        }
+        if (other !== undefined && !other.theory[0]?.includes('sheet-recap') && block.primery.length > 0) {
+          where(kit.code, `блок ${n + 1}: у учителя нет рамки «Запомни»`);
         }
         const settings = new URLSearchParams(kit.studentHref.split('?')[1]);
         const wantExamples = Number(settings.get('r'));

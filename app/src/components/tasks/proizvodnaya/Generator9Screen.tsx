@@ -13,7 +13,6 @@ import {
 } from '@/content/generator';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ekran } from '@/content/sheet9.js';
-import { loadKits, settingsOf } from '@/lib/komplekt';
 import { counted } from '@/lib/plural';
 import { sheetQuery9, subtitleOf9, RAMKI_DEFAULT } from '@/lib/proizvodnaya/sheet9';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
@@ -44,17 +43,21 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
   const [ramki, setRamki] = useState<0 | 1 | 2>(RAMKI_DEFAULT);
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
+  /* Номер урока серии, с единицы. Только настройка экрана: лист урока
+     выводится из кода комплекта и этого номера, без истории. */
+  const [urok, setUrok] = useState(1);
 
   const chosen = skills.filter((item) => selected.includes(item.id));
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
-  const subtitle = subtitleOf9({ kind: kindTitle, date });
+  const subtitle = subtitleOf9({ kind: kindTitle, date, urok: urok - 1 });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
   const ramkiTitle = RAMKI_OPTIONS.find((item) => item.n === ramki)?.title ?? '';
 
-  /* Адреса листов по seed комплекта: его выдаёт KitBar. */
+  /* Адреса листов по seed комплекта: его выдаёт KitBar. Урок серии —
+     в адресе (u), seed урока выводится из кода и номера урока. */
   const sheetHrefs = (seed: string) => {
-    const params = {
+    const query = sheetQuery9({
       groups: chosen.map((item) => item.id as Gruppa),
       prototypes: [],
       count,
@@ -64,28 +67,8 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
       kind: kindTitle,
       date,
       ramki,
-      seriya: '',
-      urok: 0,
-    };
-    /* Следующий урок продолжает серию последнего скачанного комплекта с
-       теми же настройками: задачи банка идут дальше по потоку и не
-       повторяются, пока есть неиспользованные. Первый урок серии целиком
-       задаётся seed комплекта. */
-    const settings = settingsOf(`${base}/pechat/?${sheetQuery9(params)}`);
-    const prev = loadKits().find(
-      (kit) =>
-        kit.scope === '9' &&
-        kit.slot === base &&
-        kit.createdAt !== null &&
-        kit.id !== seed &&
-        kit.settings === settings,
-    );
-    if (prev !== undefined) {
-      const query = new URLSearchParams(prev.studentHref.split('?')[1] ?? '');
-      params.seriya = query.get('s') ?? prev.id;
-      params.urok = (Number(query.get('u')) || 0) + 1;
-    }
-    const query = sheetQuery9(params);
+      urok: urok - 1,
+    });
     return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
   };
 
@@ -196,6 +179,18 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
                 ))}
               </OptionGroup>
 
+              <OptionGroup id="z9-gen-param-urok" label={ekran.urok.label} compact>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+                  <Option
+                    key={item}
+                    checked={urok === item}
+                    onSelect={() => setUrok(item)}
+                    title={item}
+                  />
+                ))}
+              </OptionGroup>
+              <Note>{ekran.urok.note}</Note>
+
               <OptionGroup id="z9-gen-param-ramki" label={ekran.ramki.label}>
                 {RAMKI_OPTIONS.map((item) => (
                   <Option
@@ -262,6 +257,7 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
         count={count}
         ready
         hrefs={sheetHrefs}
+        seriya
         summary={
           <>
             {PROIZVODNAYA.title}
