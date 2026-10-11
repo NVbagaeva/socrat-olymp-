@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useId, useRef, useState } from 'react';
-import type { KeyboardEvent, ReactNode } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 export interface TabItem {
   id: string;
@@ -35,6 +35,11 @@ export interface TabsProps {
   className?: string;
   /** Вкладка, которая открывается, но ещё не открылась: на ней крутится ожидание. */
   busyId?: string;
+  /**
+   * Клик по вкладке-ссылке. Вызов preventDefault() отменяет обычный
+   * переход Link — так лента раздела запускает плавный переход.
+   */
+  onLinkClick?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
 
 /** Табы с блуждающим фокусом: стрелки, Home и End переключают вкладку. */
@@ -46,6 +51,7 @@ export function Tabs({
   label,
   className,
   busyId,
+  onLinkClick,
 }: TabsProps) {
   const autoId = useId();
   const first = items[0];
@@ -112,8 +118,16 @@ export function Tabs({
         );
 
         if (item.href !== undefined && !item.disabled) {
+          const href = item.href;
           return (
-            <Link key={item.id} href={item.href} {...common}>
+            <Link
+              key={item.id}
+              href={item.href}
+              {...common}
+              {...(onLinkClick === undefined
+                ? {}
+                : { onClick: (e: MouseEvent<HTMLAnchorElement>) => onLinkClick(e, href) })}
+            >
               {inside}
             </Link>
           );
