@@ -1023,7 +1023,11 @@ if (chosen.some((item) => item.scope === '11')) {
 }
 console.log('\n10. Вход по ссылке на набор');
 for (const [name, link, tag] of [
-  ['№12 linear', '/zadaniya/12/linear/trenazher/value/', '№12 linear, ярлык «Найти значение функции»'],
+  [
+    '№12 linear',
+    '/zadaniya/12/linear/trenazher/value/',
+    '№12 linear, ярлык «Найти значение функции»',
+  ],
   ['№11', '/zadaniya/11/trenazher/?tip=RZ-17', '№11, ссылка ?tip=RZ-17'],
 ]) {
   const trainer = chosen.find((item) => item.name === name);
