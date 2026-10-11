@@ -32,7 +32,7 @@ const P05: Prototype = prototip({
   id: 'p5-05',
   blok: 'uslovnaya',
   nazvanie: 'Две кости: сумма при известном условии',
-  tip: 'Условная вероятность',
+  tip: 'Вероятность при условии',
   zadachnik: [25, 28],
   format: 'десятичная',
   okruglenie: tochno,
