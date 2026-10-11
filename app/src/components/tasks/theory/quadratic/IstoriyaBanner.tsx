@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { istoriya } from '@/content/theoryQuadratic';
 import { katex } from '@/lib/graph/katex';
+import { Strelka } from './Strelka';
 
 /**
  * Баннер раздела «Немного истории».
@@ -13,22 +14,6 @@ import { katex } from '@/lib/graph/katex';
  * нарисована на ней самой, поверх неё ничего не рисуется. Подписи от
  * руки — текст рукописным шрифтом, а не картинка.
  */
-
-
-/** Стрелка от подписи к тому, что она подписывает. */
-function Strelka({ d, ostriyo, className }: { d: string; ostriyo: string; className?: string }) {
-  return (
-    <svg
-      className={className === undefined ? 'istor__strelka' : `istor__strelka ${className}`}
-      viewBox="0 0 120 120"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d={d} />
-      <path d={ostriyo} />
-    </svg>
-  );
-}
 
 export function IstoriyaBanner() {
   const formula = katex.renderToString(istoriya.formula, {
@@ -62,7 +47,7 @@ export function IstoriyaBanner() {
               долях: остриё должно упираться в саму кривую сечения,
               а кривая нарисована на картинке и едет вместе с ней. */}
           <Strelka
-            className="istor__strelka--konus"
+            className="istor__strelka istor__strelka--konus"
             d="M 8 24 C 44 36 72 56 92 84"
             ostriyo="M 80 80 L 94 88 L 88 74"
           />
@@ -86,14 +71,22 @@ export function IstoriyaBanner() {
 
       <span className="istor__zametka istor__zametka--sleva">
         {istoriya.zametki.sleva}
-        <Strelka d="M 10 20 C 45 35 70 60 86 88" ostriyo="M 74 84 L 88 92 L 82 78" />
+        <Strelka
+          className="istor__strelka"
+          d="M 10 20 C 45 35 70 60 86 88"
+          ostriyo="M 74 84 L 88 92 L 82 78"
+        />
       </span>
 
       <span className="istor__zametka istor__zametka--konus">{istoriya.zametki.konus}</span>
 
       <span className="istor__zametka istor__zametka--sprava">
         {istoriya.zametki.sprava}
-        <Strelka d="M 110 20 C 76 36 50 60 34 88" ostriyo="M 46 84 L 32 92 L 38 78" />
+        <Strelka
+          className="istor__strelka"
+          d="M 110 20 C 76 36 50 60 34 88"
+          ostriyo="M 46 84 L 32 92 L 38 78"
+        />
       </span>
     </figure>
   );
