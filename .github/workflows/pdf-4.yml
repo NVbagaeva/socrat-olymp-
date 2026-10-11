@@ -39,6 +39,13 @@ concurrency:
   group: pdf-4-${{ github.ref }}
   cancel-in-progress: true
 
+# Эта сборка не публикуется, поэтому правовые документы можно собрать
+# черновиком, с незаполненными [ФИО], [ПОЧТА], [ДАТА]. deploy.yml
+# переменную не ставит: там сборка падает, пока не заполнен
+# app/src/content/legal/operator.json (scripts/lib/legal-config.mjs).
+env:
+  LEGAL_DRAFT: '1'
+
 jobs:
   build:
     name: Сборка PDF

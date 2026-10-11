@@ -7,6 +7,7 @@ import type { RazdelTab } from '@/content/vkladki';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
 import { useStickyTabs } from './useStickyTabs';
+import { useVkladkaPerehod } from './useVkladkaPerehod';
 import { VkladkaIkonka } from './VkladkaIkonka';
 
 export interface RazdelTabsProps {
@@ -45,6 +46,8 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
   const strip = useRef<HTMLDivElement>(null);
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
+  /* Плавный переход между вкладками (styles/perehody.css). */
+  const perehod = useVkladkaPerehod();
   const tail = pathname.replace(base, '').replace(/^\/+/, '');
   /* Адрес известен и на сборке, поэтому разметка сервера и первая
      отрисовка совпадают. */
@@ -78,6 +81,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
       className="tabs--lenta"
       label="Разделы темы"
       value={active?.id ?? ''}
+      onLinkClick={perehod}
       items={tabs.map((tab) => ({
         id: tab.id,
         label: tab.label,
