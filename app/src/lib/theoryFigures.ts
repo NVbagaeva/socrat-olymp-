@@ -20,6 +20,7 @@ import { THEME } from '@/lib/graph/renderer.js';
 import '@/lib/graph/families/sqrt.js';
 import '@/lib/graph/families/quadratic.js';
 import '@/lib/graph/families/expo.js';
+import '@/lib/graph/families/loga.js';
 import { exampleOfFigure, secondPoint, type CrossExample, type Quad } from '@/lib/quadraticCross';
 import { basicOfFigure, type BasicExample } from '@/lib/quadraticBasics';
 
@@ -1295,6 +1296,188 @@ function expExShiftXArgument(): TheoryFigure {
   };
 }
 
+/* ── Логарифмическая функция ─────────────────────────────────────
+   Окна подобраны так, чтобы у рамки кривая отстояла от асимптоты не
+   меньше чем на 0,2 клетки. Числа — те же, что в
+   content/theoryLogarithmic.ts и content/logarithmic.ts. */
+
+function loga(a: number, c = 0, d = 0, color = 'lineA') {
+  return { type: 'loga', a, c, d, color, label: null };
+}
+
+function vasym(w: Win, x: number) {
+  return { type: 'segment', from: [x, w.ymin], to: [x, w.ymax], style: 'dashed', color: 'asymptote' };
+}
+
+/** y = log₂ x: точки (1; 0), (2; 1), (4; 2), (8; 3). */
+function logUp(): TheoryFigure {
+  const w = win(-1, 9, -2, 4);
+  return {
+    scene: { ...base(w), curves: [loga(2)], points: [dot(1, 0), dot(2, 1), dot(4, 2), dot(8, 3)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 0], text: '$(1;\\, 0)$', size: 14, auto: true },
+      { at: [2, 1], text: '$(2;\\, 1)$', size: 14, auto: true },
+      { at: [4, 2], text: '$(4;\\, 2)$', size: 14, auto: true },
+      { at: [8, 3], text: '$(8;\\, 3)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = log_{1/2} x: точки (1; 0), (2; −1), (4; −2), (8; −3). */
+function logDown(): TheoryFigure {
+  const w = win(-1, 9, -4, 2);
+  return {
+    scene: { ...base(w), curves: [loga(0.5)], points: [dot(1, 0), dot(2, -1), dot(4, -2), dot(8, -3)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 0], text: '$(1;\\, 0)$', size: 14, auto: true },
+      { at: [2, -1], text: '$(2;\\, -1)$', size: 14, auto: true },
+      { at: [4, -2], text: '$(4;\\, -2)$', size: 14, auto: true },
+      { at: [8, -3], text: '$(8;\\, -3)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = 2ˣ и y = log₂ x симметричны относительно прямой y = x. */
+function logMirror(): TheoryFigure {
+  const w = win(-2, 5, -2, 5);
+  return {
+    scene: {
+      ...base(w),
+      curves: [expo(2, 0, 0, 'lineB'), loga(2)],
+      points: [dot(0, 1, 'lineB'), dot(1, 2, 'lineB'), dot(1, 0), dot(2, 1)],
+      shapes: [seg([w.xmin, w.ymin], [w.xmax, w.ymax], 'muted')],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 2], text: '$(1;\\, 2)$', size: 14, auto: true },
+      { at: [2, 1], text: '$(2;\\, 1)$', size: 14, auto: true },
+      { at: [4, 4], text: '$y = x$', dx: 10, dy: 18, size: 14, tone: 'muted' },
+    ],
+  };
+}
+
+/** y = log₂ x − 2: точка (1; 0) уехала вниз на 2. */
+function logShiftY(): TheoryFigure {
+  const w = win(-1, 9, -4, 3);
+  return {
+    scene: {
+      ...base(w),
+      curves: [loga(2, 0, -2)],
+      points: [dot(1, 0, 'muted'), dot(1, -2), dot(4, 0)],
+      shapes: [move([1, -0.3], [1, -1.7])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, -2], text: '$(1;\\, -2)$', size: 14, auto: true },
+      { at: [4, 0], text: '$(4;\\, 0)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = log₂(x + 3): асимптота x = −3, точка (1; 0) уехала в (−2; 0). */
+function logShiftX(): TheoryFigure {
+  const w = win(-4, 6, -2, 4);
+  return {
+    scene: {
+      ...base(w),
+      curves: [loga(2, 3)],
+      points: [dot(-2, 0), dot(-1, 1), dot(1, 2)],
+      shapes: [vasym(w, -3)],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [-2, 0], text: '$(-2;\\, 0)$', size: 14, auto: true },
+      { at: [1, 2], text: '$(1;\\, 2)$', size: 14, auto: true },
+      { at: [-3, 3], text: '$x = -3$', dx: -34, dy: 0, size: 14, tone: 'muted' },
+    ],
+  };
+}
+
+/** y = log₂(x + 3) по двум точкам A(−2; 0), B(1; 2): метод раздела. */
+function logTwoPoints(): TheoryFigure {
+  const w = win(-4, 6, -2, 4);
+  return {
+    scene: {
+      ...base(w),
+      curves: [loga(2, 3)],
+      points: [dot(-2, 0), dot(1, 2)],
+      shapes: [vasym(w, -3), seg([1, 0], [1, 2]), seg([0, 2], [1, 2])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [-2, 0], text: '$A(-2;\\, 0)$', size: 14, auto: true },
+      { at: [1, 2], text: '$B(1;\\, 2)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 1: f(x) = log₃ x, точки (1; 0) и (3; 1). */
+function logExValue(): TheoryFigure {
+  const w = win(-1, 9, -1, 4);
+  return {
+    scene: { ...base(w), curves: [loga(3)], points: [dot(1, 0), dot(3, 1)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 0], text: '$(1;\\, 0)$', size: 14, auto: true },
+      { at: [3, 1], text: '$(3;\\, 1)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 2: f(x) = 1 + log_{1/2} x, точки (1; 1) и (2; 0). */
+function logExShiftValue(): TheoryFigure {
+  const w = win(-1, 9, -3, 3);
+  return {
+    scene: { ...base(w), curves: [loga(0.5, 0, 1)], points: [dot(1, 1), dot(2, 0)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 1], text: '$(1;\\, 1)$', size: 14, auto: true },
+      { at: [2, 0], text: '$(2;\\, 0)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 3: f(x) = −1 + log₃ x, точки (1; −1) и (3; 0). */
+function logExShiftArgument(): TheoryFigure {
+  const w = win(-1, 9, -2, 3);
+  return {
+    scene: { ...base(w), curves: [loga(3, 0, -1)], points: [dot(1, -1), dot(3, 0)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, -1], text: '$(1;\\, -1)$', size: 14, auto: true },
+      { at: [3, 0], text: '$(3;\\, 0)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 4: f(x) = log₄(x + 2), точки (−1; 0) и (2; 1). */
+function logExShiftXValue(): TheoryFigure {
+  const w = win(-3, 6, -1, 3);
+  return {
+    scene: { ...base(w), curves: [loga(4, 2)], points: [dot(-1, 0), dot(2, 1)], shapes: [vasym(w, -2)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [-1, 0], text: '$(-1;\\, 0)$', size: 14, auto: true },
+      { at: [2, 1], text: '$(2;\\, 1)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 5: f(x) = log₂(x − 1), точки (2; 0) и (3; 1). */
+function logExShiftXArgument(): TheoryFigure {
+  const w = win(-1, 8, -2, 4);
+  return {
+    scene: { ...base(w), curves: [loga(2, -1)], points: [dot(2, 0), dot(3, 1)], shapes: [vasym(w, 1)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [2, 0], text: '$(2;\\, 0)$', size: 14, auto: true },
+      { at: [3, 1], text: '$(3;\\, 1)$', size: 14, auto: true },
+    ],
+  };
+}
+
 const FIGURES = {
   'lin-rise-mini': riseMini,
   'lin-fall-mini': fallMini,
@@ -1343,6 +1526,17 @@ const FIGURES = {
   'exp-ex-shift-value': expExShiftValue,
   'exp-ex-shift-argument': expExShiftArgument,
   'exp-ex-shiftx-argument': expExShiftXArgument,
+  'log-up': logUp,
+  'log-down': logDown,
+  'log-mirror': logMirror,
+  'log-shift-y': logShiftY,
+  'log-shift-x': logShiftX,
+  'log-two-points': logTwoPoints,
+  'log-ex-value': logExValue,
+  'log-ex-shift-value': logExShiftValue,
+  'log-ex-shift-argument': logExShiftArgument,
+  'log-ex-shiftx-value': logExShiftXValue,
+  'log-ex-shiftx-argument': logExShiftXArgument,
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;

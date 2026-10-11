@@ -460,7 +460,7 @@ function fromTask(task) {
 }
 
 const api = { fromTask: fromTask, equationTex: equationTex, formTex: formTex, orderedMarks: orderedMarks,
-              powerExplain: powerExplain };
+              powerExplain: powerExplain, solveA: solveA, chain: chain };
 
 export default api;
-export { fromTask, equationTex, formTex, orderedMarks, powerExplain };
+export { fromTask, equationTex, formTex, orderedMarks, powerExplain, solveA, chain };

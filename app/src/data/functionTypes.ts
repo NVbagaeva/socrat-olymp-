@@ -18,6 +18,8 @@ import { IRRATIONAL_THEORY } from '@/content/theoryIrrational';
 import { LINEAR_RICH_THEORY } from '@/content/theoryLinearRich';
 import { EXPONENTIAL } from '@/content/exponential';
 import { EXPONENTIAL_THEORY } from '@/content/theoryExponential';
+import { LOGARITHMIC } from '@/content/logarithmic';
+import { LOGARITHMIC_THEORY } from '@/content/theoryLogarithmic';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -304,6 +306,10 @@ export const functionTypes: FunctionType[] = [
     bezStarogoAdresa: true,
     tutors: EXPONENTIAL.tutors,
   },
+  /* Подтема «Логарифмическая функция»: f(x) = logₐ x, b + logₐ x и
+     logₐ(x + b) — пять типов открытого банка ФИПИ, задачи банка и по
+     20 аналогов. Признаки — как у показательной, тексты в
+     content/logarithmic.ts. */
   {
     id: 'logarithmic',
     no: '06',
@@ -312,11 +318,18 @@ export const functionTypes: FunctionType[] = [
     icon: 'logarithmic',
     formula: 'y = \\log_a x',
     description: '',
-    theory: [],
+    theory: LOGARITHMIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12L-1', 'P12L-2', 'P12L-3', 'P12L-4', 'P12L-5'],
+      prototypes: ['12L.A', '12L.B', '12L.C', '12L.D', '12L.E'],
+    },
+    status: 'active',
+    head: LOGARITHMIC.head,
+    about: LOGARITHMIC.about,
+    bezStarogoAdresa: true,
+    tutors: LOGARITHMIC.tutors,
   },
   {
     id: 'trigonometric',

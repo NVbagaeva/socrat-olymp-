@@ -154,7 +154,30 @@ export function exponentialScene() {
   };
 }
 
+/** Логарифмическая f(x) = log₂(x + 2) − 1: асимптота x = −2 пунктиром, две точки в узлах. */
+export function logarithmicScene() {
+  /* Нижний край — там, где хвост ещё на 0,25 клетки правее асимптоты. */
+  const win = { xmin: -3, xmax: 5, ymin: -3, ymax: 3 };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'loga', a: 2, c: 2, d: -1, color: 'lineA', label: null }],
+    points: [
+      { x: -1, y: -1, style: 'solid', color: 'lineA', label: null },
+      { x: 2, y: 1, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [{ type: 'segment', from: [-2, win.ymin], to: [-2, win.ymax], style: 'dashed', color: 'asymptote' }],
+    alt: 'График логарифмической функции и её асимптота',
+  };
+}
+
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'logarithmic') {
+    return logarithmicScene();
+  }
   if (type === 'exponential') {
     return exponentialScene();
   }
@@ -212,7 +235,7 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 export function generatorSkillScene(setId: string) {
   const quadratic =
     QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId] ??
-    EXPONENTIAL_SKILL_SCENE[setId];
+    EXPONENTIAL_SKILL_SCENE[setId] ?? LOGARITHMIC_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -543,6 +566,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return exponential;
   }
 
+  const logarithmic = logarithmicPrepScene(id, base);
+  if (logarithmic !== null) {
+    return logarithmic;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -694,7 +722,11 @@ export type TypeSceneId =
   /* Показательная функция. */
   | 'exp-value'
   | 'exp-shift'
-  | 'exp-shift-x';
+  | 'exp-shift-x'
+  /* Логарифмическая функция. */
+  | 'log-value'
+  | 'log-shift'
+  | 'log-shift-x';
 
 /* Миниатюры основных типов: одна парабола, чуть разная у каждого типа —
    ветви вниз, шире и уже, выше и ниже, вершина левее и правее. Только
@@ -742,6 +774,17 @@ export function typeScene(id: TypeSceneId) {
   if (id === 'exp-shift-x') {
     return { ...base, curves: [{ type: 'expo', a: 2, c: 1, d: -1.5, color: 'lineA', label: null, steps: MINI_STEPS }],
       shapes: [{ type: 'segment', from: [-2, -1.5], to: [2, -1.5], style: 'dashed', color: 'asymptote' }] };
+  }
+  /* Логарифмическая: кривая и асимптота (если она не ось), без отметок. */
+  if (id === 'log-value') {
+    return { ...base, curves: [{ type: 'loga', a: 2, c: 0, d: 0, color: 'lineA', label: null, steps: MINI_STEPS }] };
+  }
+  if (id === 'log-shift') {
+    return { ...base, curves: [{ type: 'loga', a: 0.5, c: 0, d: 0.5, color: 'lineA', label: null, steps: MINI_STEPS }] };
+  }
+  if (id === 'log-shift-x') {
+    return { ...base, curves: [{ type: 'loga', a: 2, c: 1.3, d: 0, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-1.3, -2], to: [-1.3, 2], style: 'dashed', color: 'asymptote' }] };
   }
   /* Второй график — зелёный, как g в разборах под плашкой. */
   if (id === 'cross-line') {
@@ -972,6 +1015,78 @@ function exponentialPrepScene(
   }
   return null;
 }
+
+/* ── Миниатюры навыков логарифмической функции ────────────────────
+   Окно ±2, кривая y = logₐ(x + c) + d; асимптота x = −c — пунктир
+   цветом асимптоты, если она не ось; искомое — пунктир цветом подсказки. */
+
+function miniLoga(a: number, c: number, d: number, color = 'lineA') {
+  return { type: 'loga', a, c, d, color, label: null };
+}
+
+function miniVAsymptote(x: number) {
+  return { type: 'segment', from: [x, -2], to: [x, 2], style: 'dashed', color: 'asymptote' };
+}
+
+function logarithmicPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'log-osnovanie') {
+    /* (1; 0) и (a; 1): по второй точке видно основание. */
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, 0)],
+      points: [miniDot(1, 0), miniDot(2, 1)],
+      shapes: [dashed([2, 0], [2, 1]), prepLabel('a', 2, 0, -16, -10, 'accent')],
+    };
+  }
+  if (id === 'log-znachenie') {
+    const y = Math.log(1.6) / Math.log(0.5);
+    return {
+      ...base,
+      curves: [miniLoga(0.5, 0, 0)],
+      points: [miniDot(1, 0), miniDot(1.6, y, 'lineB')],
+      shapes: [dashed([1.6, 0], [1.6, y]), prepLabel('?', 1.6, y, 16, 4, 'accent')],
+    };
+  }
+  if (id === 'log-sdvig-vverh') {
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, -1)],
+      points: [miniDot(1, -1), miniDot(2, 0)],
+      shapes: [],
+    };
+  }
+  if (id === 'log-sdvig-vbok') {
+    return {
+      ...base,
+      curves: [miniLoga(2, 1.5, 0)],
+      points: [miniDot(-0.5, 0), miniDot(0.5, 1)],
+      shapes: [miniVAsymptote(-1.5)],
+    };
+  }
+  if (id === 'log-argument') {
+    const x = Math.pow(2, 0.7);
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, 0.5)],
+      points: [miniDot(x, 1.2, 'lineB')],
+      shapes: [dashed([0, 1.2], [x, 1.2]), prepLabel('?', x, 1.2, 16, 4, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* Набор прототипов логарифмической функции → навык подтемы. */
+const LOGARITHMIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12L.A': 'log-znachenie',
+  '12L.B': 'log-sdvig-vverh',
+  '12L.C': 'log-argument',
+  '12L.D': 'log-sdvig-vbok',
+  '12L.E': 'log-argument',
+};
 
 /* Набор прототипов показательной функции → навык подтемы. */
 const EXPONENTIAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {

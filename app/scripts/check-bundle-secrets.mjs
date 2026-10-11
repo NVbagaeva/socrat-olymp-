@@ -227,6 +227,7 @@ GraphGenerate.setSets({
     ...readSets('prep/12r'),
     ...readSets('prep/12s'),
     ...readSets('prep/12e'),
+    ...readSets('prep/12l'),
   ],
   prototypes: [
     ...readSets('prototypes/12'),
@@ -234,6 +235,7 @@ GraphGenerate.setSets({
     ...readSets('prototypes/12r'),
     ...readSets('prototypes/12s'),
     ...readSets('prototypes/12e'),
+    ...readSets('prototypes/12l'),
   ],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
@@ -245,7 +247,8 @@ const NABORY_12 = allPrepSkills
   .concat(readSets('prototypes/12q').map((set) => set.id))
   .concat(readSets('prototypes/12r').map((set) => set.id))
   .concat(readSets('prototypes/12s').map((set) => set.id))
-  .concat(readSets('prototypes/12e').map((set) => set.id));
+  .concat(readSets('prototypes/12e').map((set) => set.id))
+  .concat(readSets('prototypes/12l').map((set) => set.id));
 for (const setId of NABORY_12) {
   for (const task of GraphGenerate.generateSet(setId)) {
     zadachi.push({

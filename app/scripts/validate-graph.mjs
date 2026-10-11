@@ -24,6 +24,7 @@ import { checkQuadraticComposition, checkQuadraticTask } from './lib/graph-quadr
 import { checkRationalComposition, checkRationalTask } from './lib/graph-rational-checks.mjs';
 import { checkSqrtComposition, checkSqrtTask } from './lib/graph-sqrt-checks.mjs';
 import { checkExponentialComposition, checkExponentialTask } from './lib/graph-exponential-checks.mjs';
+import { checkLogarithmicComposition, checkLogarithmicTask } from './lib/graph-logarithmic-checks.mjs';
 
 const THEME = renderer.THEME;
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
@@ -854,9 +855,10 @@ function loadAll() {
      из prep/12r и prototypes/12r, графика корня из prep/12s и
      prototypes/12s. Проверки каждая выбирает по семейству набора. */
   var prep = readSets('prep/12').concat(readSets('prep/12q')).concat(readSets('prep/12r'))
-    .concat(readSets('prep/12s')).concat(readSets('prep/12e'));
+    .concat(readSets('prep/12s')).concat(readSets('prep/12e')).concat(readSets('prep/12l'));
   var prototypes = readSets('prototypes/12').concat(readSets('prototypes/12r'))
-    .concat(readSets('prototypes/12s')).concat(readSets('prototypes/12e'));
+    .concat(readSets('prototypes/12s')).concat(readSets('prototypes/12e'))
+    .concat(readSets('prototypes/12l'));
   generator.setSets({
     prep: prep.map(function (item) { return item.data; }),
     prototypes: prototypes.map(function (item) { return item.data; })
@@ -898,6 +900,11 @@ function run() {
         errors = errors.concat(checkRationalTask(set, task));
       });
       errors = errors.concat(checkRationalComposition(set, tasks));
+    } else if (set.family === 'logarithmic') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkLogarithmicTask(set, task));
+      });
+      errors = errors.concat(checkLogarithmicComposition(set, tasks));
     } else if (set.family === 'exponential') {
       tasks.forEach(function (task) {
         errors = errors.concat(checkExponentialTask(set, task));

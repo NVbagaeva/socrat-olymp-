@@ -23,6 +23,7 @@ import Quadratic from './generate-quadratic.js';
 import Rational from './generate-rational.js';
 import Sqrt from './generate-sqrt.js';
 import Exponential from './generate-exponential.js';
+import Logarithmic from './generate-logarithmic.js';
 import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
 import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
          answerText } from './text.js';
@@ -530,6 +531,7 @@ function taskCandidates(task, set, seed) {
   if (familyOf(task, set) === 'rational') { return Rational.candidates(task, set, seed); }
   if (familyOf(task, set) === 'sqrt') { return Sqrt.candidates(task, set, seed); }
   if (familyOf(task, set) === 'exponential') { return Exponential.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'logarithmic') { return Logarithmic.candidates(task, set, seed); }
   var constraints = task.constraints || {};
   if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
@@ -825,6 +827,7 @@ function taskResult(set, task, built, seed, index) {
   if (familyOf(task, set) === 'rational') { return Rational.result(set, task, built, seed, index); }
   if (familyOf(task, set) === 'sqrt') { return Sqrt.result(set, task, built, seed, index); }
   if (familyOf(task, set) === 'exponential') { return Exponential.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'logarithmic') { return Logarithmic.result(set, task, built, seed, index); }
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
@@ -925,7 +928,8 @@ function analysis(id, seed) {
   if (!task.svg || !task.meta.window) { return null; }
   /* Разбор с треугольником наклона — только у прямой. */
   if (task.meta.family === 'quadratic' || task.meta.family === 'rational' ||
-      task.meta.family === 'sqrt' || task.meta.family === 'exponential') { return null; }
+      task.meta.family === 'sqrt' || task.meta.family === 'exponential' ||
+      task.meta.family === 'logarithmic') { return null; }
 
   var line = Line.create(task.meta.kFraction, task.meta.bFraction);
   var triangle = Triangle.build(line, task.meta.window, task.meta.points);

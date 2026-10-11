@@ -182,6 +182,13 @@ const EXPONENTIAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Логарифмическая функция: значение — три типа банка, аргумент — два. */
+const LOGARITHMIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12L.A', '12L.B', '12L.D'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12L.C', '12L.E'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -205,6 +212,9 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'exponential') {
     return EXPONENTIAL_SHORTCUTS;
+  }
+  if (type === 'logarithmic') {
+    return LOGARITHMIC_SHORTCUTS;
   }
   return [];
 }
@@ -311,6 +321,12 @@ export const trainerKindTitle: Record<string, string> = {
   '12E.B': 'Значение $a^x + b$',
   '12E.C': 'Аргумент: $a^x + b$',
   '12E.D': 'Аргумент: $a^{x+b}$',
+  /* Логарифмическая функция: пять типов открытого банка. */
+  '12L.A': 'Значение $\\log_a x$',
+  '12L.B': 'Значение $b + \\log_a x$',
+  '12L.C': 'Аргумент: $b + \\log_a x$',
+  '12L.D': 'Значение $\\log_a(x + b)$',
+  '12L.E': 'Аргумент: $\\log_a(x + b)$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */
