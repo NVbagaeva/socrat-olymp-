@@ -529,15 +529,16 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         } else {
           const k = (by - ay) / (bx - ax);
           const yAt = (x: number) => ay + k * (x - ax);
-          const xs = [win.xmin, win.xmax];
+          const xLev = Math.max(win.xmin, item.ot ?? win.xmin);
+          const xs = [xLev, win.xmax];
           if (Math.abs(k) > 1e-9) {
             xs.push(ax + (win.ymin - ay) / k, ax + (win.ymax - ay) / k);
           }
           const inside = xs
-            .filter((x) => x >= win.xmin - 1e-9 && x <= win.xmax + 1e-9)
+            .filter((x) => x >= xLev - 1e-9 && x <= win.xmax + 1e-9)
             .filter((x) => yAt(x) >= win.ymin - 1e-9 && yAt(x) <= win.ymax + 1e-9)
             .sort((p, q) => p - q);
-          const xa = inside[0] ?? win.xmin;
+          const xa = inside[0] ?? xLev;
           const xb = inside[inside.length - 1] ?? win.xmax;
           p1 = [xa, yAt(xa)];
           p2 = [xb, yAt(xb)];
@@ -584,7 +585,32 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
             pref: vert ? 'right' : rastyot ? 'below-right' : 'below-left',
           });
         }
-        if (item.ugol !== undefined && Math.abs(by - ay) > 1e-9) {
+        if (item.ugol !== undefined && item.ugolU === 'tochka' && bx > ax) {
+          /* Угол в точке a: горизонтальный луч вправо (параллелен Ox) и прямая. */
+          const deg = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+          const r = 30;
+          const cx = sx(ax);
+          const cy = sy(ay);
+          layers.aux.push(
+            `<path class="pr-aux" d="M${px(cx)} ${px(cy)}H${px(cx + r + 12)}" fill="none" stroke="${stroke}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
+            `<path class="pr-ugol" d="${duga(cx, cy, r, 0, deg)}" fill="none" stroke="${stroke}" stroke-width="2.4" stroke-linecap="round"/>`,
+          );
+          obstacles.push({
+            seg: { x1: cx, y1: cy, x2: cx + r + 12, y2: cy },
+            r: 1,
+            what: `луч угла ${item.ugol}`,
+          });
+          const mid = ((deg / 2) * Math.PI) / 180;
+          auxLabels.push({
+            text: item.ugol,
+            x: cx + (r + 13) * Math.cos(mid),
+            y: cy - (r + 13) * Math.sin(mid),
+            kind: 'alpha',
+            id: `угол ${item.ugol}`,
+            fill: stroke,
+            pref: 'right',
+          });
+        } else if (item.ugol !== undefined && Math.abs(by - ay) > 1e-9) {
           /* Угол с положительным направлением Ox — там, где прямая пересекает ось. */
           const x0 = Math.abs(bx - ax) < 1e-9 ? ax : ax - (ay * (bx - ax)) / (by - ay);
           if (x0 > win.xmin && x0 < win.xmax) {

@@ -58,7 +58,7 @@ export const PONYATIE_9 = {
       'Дадим аргументу приращение $\\Delta x$ и возьмём на графике точку $M_1\\bigl(x + \\Delta x;\\,f(x + \\Delta x)\\bigr)$. Значение функции получает приращение $\\Delta f = f(x + \\Delta x) - f(x)$.',
     ],
     hod: [
-      `Секущая $MM_1$ образует с осью $Ox$ угол $\\beta$. Из прямоугольного треугольника $MAM_1$ с катетами $\\Delta x$ и $\\Delta f$: $k_{\\text{сек}} = ${TG}\\beta = \\dfrac{\\Delta f}{\\Delta x}$.`,
+      `Секущая $MM_1$ образует с осью $Ox$ угол $\\beta$. Катет $MA$ параллелен оси $Ox$, поэтому угол $AMM_1$ тоже равен $\\beta$ — на рисунке он отмечен в точке $M$. Из прямоугольного треугольника $MAM_1$ с катетами $\\Delta x$ и $\\Delta f$: $k_{\\text{сек}} = ${TG}\\beta = \\dfrac{\\Delta f}{\\Delta x}$.`,
       `Если $\\Delta x \\to 0$, то точка $M_1$ стремится к $M$, секущая — к касательной, а угол $\\beta$ — к углу $\\alpha$ касательной: $${LIM('\\Delta x\\to 0')}\\beta = \\alpha$. Значит, и $${LIM('\\Delta x\\to 0')}${TG}\\beta = ${TG}\\alpha$.`,
     ],
     formula: `k_{\\text{кас}} = ${TG}\\alpha = ${LIM('\\Delta x\\to 0')}\\dfrac{\\Delta y}{\\Delta x}`,

@@ -68,8 +68,10 @@ export function sekushchayaFig(dx: number, podrobno: boolean): Figura {
   const y0 = SEK.f(x0);
   const x1 = x0 + dx;
   const y1 = SEK.f(x1);
-  /* Угол β подписывается, пока секущая заметно отходит от касательной:
-     ближе их дуги у оси сливаются, а числа видны на панели рядом. */
+  /* Угол α касательной — у оси Ox, угол β секущей — в точке M, между
+     лучом MA (он параллелен Ox) и секущей: это угол треугольника MAM₁.
+     Секущая начинается чуть левее M и не заходит в угол α у оси.
+     Пока M₁ близко к M, дуга β сливается с касательной — числа на панели. */
   const pomoshch: Pomoshch[] = [
     { t: 'liniya', a: [x0, y0], b: [x0 + 1, y0 + SEK.tgAlpha], podpis: 'T', ugol: 'α' },
     {
@@ -77,7 +79,8 @@ export function sekushchayaFig(dx: number, podrobno: boolean): Figura {
       a: [x0, y0],
       b: [x1, y1],
       vid: 'blednaya',
-      ...(dx >= 1.2 ? { ugol: 'β' } : {}),
+      ot: x0 - 0.7,
+      ...(dx >= 1 ? { ugol: 'β', ugolU: 'tochka' as const } : {}),
     },
   ];
   if (podrobno) {
@@ -100,7 +103,7 @@ export function sekushchayaFig(dx: number, podrobno: boolean): Figura {
     pomoshch,
     alt:
       `График функции, точка M и точка M₁, сдвинутая по оси абсцисс на ${String(dx).replace('.', ',')}; ` +
-      'секущая MM₁ образует с осью абсцисс угол бета, касательная MT — угол альфа',
+      'секущая MM₁ образует с осью абсцисс угол бета (он отмечен в точке M), касательная MT — угол альфа',
   });
 }
 
@@ -206,7 +209,7 @@ export function galochkaFig(dx?: number): Figura {
           },
         ]
       : [
-          { t: 'liniya', a: [0, 0], b: [dx, Math.abs(dx)] },
+          { t: 'liniya', a: [0, 0], b: [dx, Math.abs(dx)], vid: 'blednaya' },
           /* Совсем рядом с нулём подписи M₁ места нет: точку видно по секущей. */
           { t: 'tochka', x: dx, y: Math.abs(dx), ...(Math.abs(dx) >= 0.5 ? { podpis: 'M₁' } : {}) },
         ];

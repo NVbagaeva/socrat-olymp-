@@ -64,6 +64,37 @@
   color: var(--color-text-inverse);
 }
 
+/* Алгоритм в определении: шаги с номерами в кружках. */
+.ramka__algoritm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: algoritm;
+}
+.ramka__algoritm > li {
+  position: relative;
+  padding-left: var(--space-10);
+  counter-increment: algoritm;
+}
+.ramka__algoritm > li::before {
+  content: counter(algoritm);
+  position: absolute;
+  top: 0.15em;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 800;
+}
+
 /* Главная формула: двойная рамка по центру, крупная формула. */
 .ramka--formula {
   max-width: 34rem;
@@ -221,7 +252,8 @@
   .ramka__formula--glavnaya {
     font-size: 1.05em;
   }
-  .ramka__shag {
+  .ramka__shag,
+  .ramka__algoritm > li {
     padding-left: var(--space-8);
   }
   /* Выкладки шагов на узком экране чуть мельче: строка помещается целиком. */
@@ -262,7 +294,8 @@
     color: #000;
     border-color: #000;
   }
-  .ramka__shag::before {
+  .ramka__shag::before,
+  .ramka__algoritm > li::before {
     background: none;
     color: #000;
     border: 1.5px solid #000;
