@@ -15,8 +15,15 @@ import path from 'node:path';
 import { APP } from './lib/load-ts.mjs';
 
 const OUT = path.join(APP, 'out');
-const DEV_ROUTES = ['styleguide/zadanie-10', 'styleguide/soglasiya'];
-const MARKERS = ['/styleguide/zadanie-10', 'g10__stat', '/styleguide/soglasiya', 'sgl__grid'];
+const DEV_ROUTES = ['styleguide/zadanie-7', 'styleguide/zadanie-10', 'styleguide/soglasiya'];
+const MARKERS = [
+  '/styleguide/zadanie-7',
+  'g7__stat',
+  '/styleguide/zadanie-10',
+  'g10__stat',
+  '/styleguide/soglasiya',
+  'sgl__grid',
+];
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
