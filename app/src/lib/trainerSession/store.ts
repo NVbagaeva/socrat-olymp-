@@ -376,36 +376,24 @@ export const LEGACY_SESSION_KEYS: readonly string[] = [
   'budetege:proizvodnaya-9:result:v1',
 ];
 
-/**
- * Прежние ключи из sessionStorage: часть тренажёров (№9) держала сессию
- * там. Убираются так же, как из localStorage; ошибки доступа молча
- * пропускаются.
- */
-function sweepLegacySessionStorage(): void {
-  try {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const target = window.sessionStorage;
-    LEGACY_SESSION_KEYS.forEach((key) => target.removeItem(key));
-  } catch {
-    /* Хранилище недоступно — убирать нечего. */
-  }
-}
-
 let swept = false;
 
 /**
  * Убрать то, что больше не прочтётся: записи сессий другой версии схемы
  * (в том числе версии 1, где задания лежали целиком) и прежние ключи
- * тренажёров. Один раз за жизнь страницы.
+ * тренажёров — и в localStorage, и в sessionStorage. Один раз за жизнь
+ * страницы.
+ *
+ * Запись своего раздела (keep) не трогается: её разбирает чтение и,
+ * если она устарела или испорчена, показывает ученику плашку «сброшена».
+ * Иначе тренировка пропадала бы молча.
  */
-export function sweepStaleSessions(): void {
+export function sweepStaleSessions(keep: string | null = null): void {
   if (swept) {
     return;
   }
   swept = true;
-  sweepLegacySessionStorage();
+  sweepLegacy(sessionStore());
   const target = browserStorage();
   if (target === null) {
     return;
@@ -421,7 +409,8 @@ export function sweepStaleSessions(): void {
         doomed.push(key);
         continue;
       }
-      if (scopeOfKey(key) === null) {
+      const scope = scopeOfKey(key);
+      if (scope === null || scope === keep) {
         continue;
       }
       const head = peekHead(target.getItem(key) ?? '');
@@ -435,6 +424,27 @@ export function sweepStaleSessions(): void {
   }
   if (doomed.length > 0) {
     notifySessionsChanged();
+  }
+}
+
+/** sessionStorage вкладки: в приватном окне доступ к нему тоже может бросить. */
+function sessionStore(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** Прежние ключи тренажёров в хранилище вкладки. */
+function sweepLegacy(target: Storage | null): void {
+  if (target === null) {
+    return;
+  }
+  try {
+    LEGACY_SESSION_KEYS.forEach((key) => target.removeItem(key));
+  } catch {
+    /* Запрет на запись — убирать нечем. */
   }
 }
 

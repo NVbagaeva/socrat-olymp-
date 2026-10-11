@@ -24,11 +24,14 @@ export interface Solid3Ui extends BaseUi {
   missed: boolean;
   /** Когда начато текущее задание, мс активного времени. null — ещё не начато. */
   taskFrom: number | null;
+  /** Неверных проверок за тренировку: строка «Неверных попыток» в итогах. */
+  misses: number;
 }
 
 /** Достать из сохранённого состояния поля экрана; что не прочиталось — по умолчанию. */
 export function readSolid3Ui(base: BaseUi): Solid3Ui {
   const raw: Record<string, unknown> = isRecord(base) ? base : {};
+  const misses = asNumberOrNull(raw['misses']);
   return {
     ...base,
     value: asString(raw['value']),
@@ -36,5 +39,6 @@ export function readSolid3Ui(base: BaseUi): Solid3Ui {
     solution: asBool(raw['solution']),
     missed: asBool(raw['missed']),
     taskFrom: asNumberOrNull(raw['taskFrom']),
+    misses: misses !== null && Number.isInteger(misses) && misses >= 0 ? misses : 0,
   };
 }

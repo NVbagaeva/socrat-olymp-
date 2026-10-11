@@ -15,6 +15,9 @@ import { Sessiya } from './Sessiya';
 import { SessiyaRazbor, UznayRazbor } from './SessiyaRazbor';
 import {
   isSessiyaPayload,
+  pohozhieZadachi,
+  raspakovat,
+  upakovat,
   zadachiPodhoda,
   type SessiyaPayload,
 } from './sessiyaPayload';
@@ -51,9 +54,11 @@ export interface TrenazherProps {
  * количество задач и переключатель подсказок.
  *
  * «Начать тренировку» собирает подход из банка тут же, в браузере, и
- * отдаёт его оболочке сессии (components/tasks/session): она хранит
- * задачи целиком, ведёт таймер и паузу, показывает итоги и возвращает
- * ученика в незавершённую тренировку. Прогресс
+ * отдаёт его оболочке сессии (components/tasks/session): она ведёт
+ * таймер и паузу, показывает итоги и возвращает ученика в
+ * незавершённую тренировку. В хранилище задачи лежат ссылками на банк
+ * страницы с контрольной подписью (sessiyaPayload.ts) и при возвращении
+ * собираются из того же pool, что пришёл в пропсах. Прогресс
  * считается отдельно по каждому методу и живёт в своих хранилищах:
  * у каждого задания своё, у «Узнай метод» — своё, сброс здесь не
  * трогает ни задание №12, ни соседнее задание.
@@ -178,6 +183,8 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
       what="тренажёр"
       backHref={base}
       isPayload={isSessiyaPayload}
+      pack={upakovat}
+      unpack={(packed) => raspakovat(packed, pool, uznay)}
       count={(payload) => payload.tasks.length}
       describe={(payload, at) => {
         const task = payload.tasks[at];
@@ -202,6 +209,7 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
         ...payload,
         tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
       })}
+      similar={(payload, indexes) => pohozhieZadachi(payload, indexes, pool, uznay)}
       configurator={(api) => (
         <TrenazherKonfigurator
           zadanie={zadanie}
