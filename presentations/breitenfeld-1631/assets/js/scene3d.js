@@ -179,7 +179,7 @@
         weapon: edge ? "musket" : "pike", lean: edge ? 0.9 : 0 });
     }
     flags.push({ x: c[0] - 2, z: c[1], c1: 0xf4efe6, c2: 0xb3342f, h: 7.2, cross: true });
-    flags.push({ x: c[0] + 2.5, z: c[1] + 1, c1: 0xb3342f, c2: 0xf4efe6, h: 7.0, cross: true });
+    flags.push({ x: c[0] + 2.5, z: c[1] + 1, c1: 0xf4efe6, c2: 0xb3342f, h: 7.0, cross: true });
   });
 
   /* конница */
@@ -237,7 +237,11 @@
     var cv = document.createElement("canvas"); cv.width = 64; cv.height = 44; var g = cv.getContext("2d");
     g.fillStyle = "#" + new T.Color(c1).getHexString(); g.fillRect(0, 0, 64, 44);
     g.fillStyle = "#" + new T.Color(c2).getHexString();
-    if (cross) { g.fillRect(27, 0, 10, 44); g.fillRect(0, 17, 64, 10); }
+    if (cross) { // бургундский крест: красный косой крест из сучковатых ветвей на белом поле
+      g.strokeStyle = g.fillStyle; g.lineWidth = 7; g.lineCap = "round";
+      g.beginPath(); g.moveTo(6, 4); g.lineTo(58, 40); g.moveTo(58, 4); g.lineTo(6, 40); g.stroke();
+      [[18, 12], [46, 32], [46, 12], [18, 32], [32, 22]].forEach(function (k) { g.beginPath(); g.arc(k[0], k[1], 4.5, 0, 7); g.fill(); });
+    }
     else { g.fillRect(18, 0, 8, 44); g.fillRect(0, 18, 64, 8); }
     var t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; return t;
   }

@@ -160,7 +160,7 @@
     var p = sv("path", { d: d, "class": "arrow " + cls }, g);
     var len = p.getTotalLength(), e = p.getPointAtLength(len), e0 = p.getPointAtLength(len - 2);
     var ang = Math.atan2(e.y - e0.y, e.x - e0.x) * 180 / Math.PI;
-    var col = { r: "#b3342f", b: "#1f3561", y: "#c58f18" }[cls];
+    var col = { r: "#b3342f", b: "#1f3561", y: "#c58f18", s: "#6f95c6" }[cls];
     var head = sv("path", { d: "M10,0 L-22,-20 L-14,0 L-22,20Z", fill: col, transform: "translate(" + e.x + "," + e.y + ") rotate(" + ang + ")" }, g);
     p.style.strokeDasharray = len; p.style.strokeDashoffset = len; head.style.opacity = 0;
     return { g: g, p: p, head: head, len: len };
@@ -195,7 +195,7 @@
     U.sax = sv("g", {}, svg);
     [110, 176, 242, 308, 374].forEach(function (x) { unit(U.sax, "s", x, 600, 56, 30, ""); });
     unit(U.sax, "s", 60, 650, 100, 30, ""); unit(U.sax, "s", 230, 650, 100, 30, "");
-    var st = sv("text", { x: 250, y: 728, "text-anchor": "middle", style: "font:700 22px Manrope,sans-serif;fill:#2f4f8f" }, U.sax); st.textContent = "саксонцы";
+    var st = sv("text", { x: 250, y: 728, "text-anchor": "middle", style: "font:700 22px Manrope,sans-serif;fill:#3e6a9e" }, U.sax); st.textContent = "саксонцы";
     U.horn = sv("g", {}, svg); unit(U.horn, "b", 462, 586, 66, 30, "Горн"); unit(U.horn, "b", 462, 636, 66, 30, "");
     U.front = sv("g", {}, svg);
     [560, 646, 732, 818].forEach(function (x) { unit(U.front, "b", x, 588, 74, 28, ""); });
@@ -213,7 +213,7 @@
     pap2: arrow(qs("#board1"), "M1040,570 C1060,470 1040,400 1010,340", "b"),
     fur: arrow(qs("#board1"), "M190,330 C200,420 220,500 240,580", "r"),
     ter: arrow(qs("#board1"), "M450,420 C420,480 380,530 330,585", "r"),
-    flee: arrow(qs("#board1"), "M250,700 C220,740 160,770 90,790", "r")
+    flee: arrow(qs("#board1"), "M120,730 C90,762 60,784 22,800", "s")
   };
   var A2 = {
     ter: arrow(qs("#board2"), "M380,520 C430,560 460,600 450,650", "r"),
@@ -226,7 +226,7 @@
   var pf2 = puffs(qs("#board2"), [[470, 120], [560, 120], [650, 120]], "p2");
   var lbl = function (svg, x, y, t, col) { var e = sv("text", { x: x, y: y, "text-anchor": "middle", opacity: 0, style: "font:700 italic 34px Cormorant,serif;fill:" + col }, svg); e.textContent = t; return e; };
   var x7 = lbl(qs("#board1"), 930, 470, "×7", "#7e1f2a");
-  var fleeL = lbl(qs("#board1"), 150, 560, "бегство!", "#7e1f2a");
+  var fleeL = lbl(qs("#board1"), 360, 800, "бегство!", "#3e6a9e");
   var frontL = lbl(qs("#board2"), 470, 800, "новый фронт", "#1f3561");
   var retL = lbl(qs("#board2"), 330, 222, "Тилли отступает", "#7e1f2a");
 
@@ -249,15 +249,15 @@
     drawArrow(tl, A1.ter, 6.6, 1.0);
     tl.to(U.terc, { x: -110, y: 120, duration: 2.0, ease: "power1.inOut" }, 6.7);
     tl.call(set, [3], 8.6);
-    tl.to(U.sax, { x: -80, y: 160, opacity: 0.15, duration: 1.6, ease: "power2.in" }, 8.7);
+    tl.to(U.sax, { x: -30, y: 30, duration: 1.4, ease: "power2.in" }, 8.7);
     drawArrow(tl, A1.flee, 8.9, 1.0);
     tl.to(fleeL, { opacity: 1, duration: 0.4 }, 9.3);
-    tl.to(U.furst, { x: -40, y: 360, opacity: 0.6, duration: 1.6, ease: "power2.in" }, 8.9);
+    tl.to(U.furst, { x: -60, y: 250, duration: 1.6, ease: "power2.inOut" }, 8.9);
   }
   function battle2(tl) {
     var set = stepper("steps2"); set(-1);
     var U = B2;
-    gsap.set(U.terc, { x: -110, y: 120 }); gsap.set(qs("text", U.terc), { opacity: 0 }); gsap.set(U.sax, { opacity: 0 }); gsap.set(U.furst, { x: -40, y: 360, opacity: 0.2 }); gsap.set(U.papp, { opacity: 0.55 });
+    gsap.set(U.terc, { x: -110, y: 120 }); gsap.set(qs("text", U.terc), { opacity: 0 }); gsap.set(U.sax, { opacity: 0 }); gsap.set(U.furst, { x: -60, y: 250, opacity: 0.35 }); gsap.set(U.papp, { opacity: 0.55 });
     tl.from(qs("#board2").children, { opacity: 0, duration: 0.6, stagger: 0.01 }, 0.2);
     tl.call(set, [0], 1.0);
     drawArrow(tl, A2.ter, 1.1, 1.0);
@@ -429,7 +429,7 @@
     }
     if (id === "s8") { resetArrows(A1); gsap.set([x7, fleeL], { opacity: 0 }); battle1(tl, instant); }
     if (id === "s9") { resetArrows(A2); gsap.set([frontL, retL], { opacity: 0 }); battle2(tl); }
-    if (id === "s14") tl.call(function () { if (PRINT) confetti.still(); else confetti.start(); }, null, instant ? 0 : 0.6);
+    if (id === "s14") if (!PRINT) tl.call(function () { confetti.start(); }, null, instant ? 0 : 0.6);
 
     guideIn(tl, slide, instant);
     return tl;
@@ -582,7 +582,7 @@
       if (s.id === "s8") stepper("steps1")(3);
       if (s.id === "s9") stepper("steps2")(3);
       if (s.id === "s13") qsa(".q", s).forEach(function (q) { q.classList.add("open"); qs(".qa", q).style.height = "auto"; });
-      if (s.id === "s14") confetti.still();
+      if (s.id === "s14") confetti.stop();
       if (s.id === "s1" && window.Diorama) window.Diorama.setTime(30);
       bubble.textContent = s.dataset.say || "";
     }
