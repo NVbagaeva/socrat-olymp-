@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { Fragment } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import type { RichExample } from '@/content/theoryRich';
 import { KatexFigure } from './KatexFigure';
@@ -43,6 +44,12 @@ export function RichExampleBlock({ block, wide = false }: RichExampleBlockProps)
               </span>
               <Paras paras={item.paras} />
               <Lines lines={item.lines} />
+              {(item.more ?? []).map((part, index) => (
+                <Fragment key={index}>
+                  <Paras paras={part.paras} />
+                  <Lines lines={part.lines} />
+                </Fragment>
+              ))}
             </li>
           ))}
         </ol>

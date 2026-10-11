@@ -30,6 +30,7 @@
     "test:graph-quadratic": "node scripts/check-graph-quadratic.mjs",
     "test:graph-rational": "node scripts/check-graph-rational.mjs",
     "test:graph-sqrt": "node scripts/check-graph-sqrt.mjs",
+    "test:point-labels": "node scripts/check-point-labels.mjs",
     "test:komplekty": "node scripts/check-komplekty.mjs",
     "test:theory-labels": "node scripts/check-theory-labels.mjs",
     "test:about-examples": "node scripts/check-about-examples.mjs",
@@ -66,6 +67,7 @@
     "test:math-markup": "node scripts/check-math-markup.mjs",
     "test:rsc-serving": "node scripts/check-rsc-serving.mjs",
     "test:asset-versions": "node scripts/check-asset-versions.mjs",
+    "test:illustrations": "node scripts/check-illustrations.mjs",
     "test:print-pages": "node scripts/check-print-pages.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
@@ -73,7 +75,8 @@
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
-    "test:navigation": "node scripts/check-navigation.mjs"
+    "test:navigation": "node scripts/check-navigation.mjs",
+    "test:trainer-session": "node scripts/check-trainer-session.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
