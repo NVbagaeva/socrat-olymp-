@@ -14,6 +14,7 @@
 import { prototip, type Rng } from '../generator';
 import { shagP } from '../bank4/vizual';
 import { dec, konechnaya, num, text, type Params, type Prototype, type Step } from '../types';
+import { vopros, zapisShag } from '../podskazka';
 import { setka } from './vizual5';
 import { shtuk, tex, texInt, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -86,8 +87,8 @@ const P03: Prototype = prototip({
   id: 'p5-03',
   blok: 'koordinatnaya',
   nazvanie: 'Вложенные события: «между» через 100 объектов',
-  tip: 'Координатная прямая',
-  zadachnik: [9, 16],
+  tip: 'Промежутки на числовой прямой',
+  sourceRange: [9, 16],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -193,53 +194,89 @@ const P03: Prototype = prototip({
         return [];
     }
   },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const a = shtuk(p1, 100);
+    const b = shtuk(p2, 100);
+    /* Какое событие шире и какое уже — словами сюжета. */
+    const [shire, uzhe] = ((): [string, string] => {
+      switch (syuzhet(p)) {
+        case 'test':
+          return [`«больше ${num(p, 'k') - 1} задач»`, `«больше ${num(p, 'k')} задач»`];
+        case 'pribor':
+          return ['«больше года»', '«больше двух лет»'];
+        default:
+          return [`«меньше ${num(p, 'b')} пассажиров»`, `«меньше ${num(p, 'a')} пассажиров»`];
+      }
+    })();
+    return [
+      vopros(
+        `Как связаны события ${shire} и ${uzhe}?`,
+        `Второе — часть первого: всё, что ${uzhe.slice(1, -1)}, входит в ${shire}`,
+        ['Они несовместны — вместе не бывают', 'Они противоположны — одно из них обязательно'],
+        'Искомое событие — разница между ними: входит в первое, но не во второе.',
+      ),
+      vopros(
+        `Возьмём 100 случаев. В скольких из них ${shire.slice(1, -1)} и ${uzhe.slice(1, -1)}?`,
+        `$${a}$ и $${b}$`,
+        [`$${100 - a}$ и $${100 - b}$`, `$${b}$ и $${a}$`],
+        `$100 \\cdot ${tex(p1)} = ${a}$, $100 \\cdot ${tex(p2)} = ${b}$.`,
+      ),
+      vopros('Как получить число случаев, которые нужны?', `Вычесть: $${a} - ${b}$`, [
+        `Сложить: $${a} + ${b}$`,
+        `Вычесть из ста: $100 - ${a}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 05, № 9',
+      source: 'sbornik',
+      sourceNote: '№ 9',
       params: { syuzhet: 'test', predmet: 'математике', k: 9, p1: 0.75, p2: 0.63 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 05, № 10',
+      source: 'sbornik',
+      sourceNote: '№ 10',
       params: { syuzhet: 'test', predmet: 'физике', k: 6, p1: 0.83, p2: 0.77 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 05, № 11',
+      source: 'sbornik',
+      sourceNote: '№ 11',
       params: { syuzhet: 'test', predmet: 'математике', k: 11, p1: 0.76, p2: 0.66 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 05, № 12',
+      source: 'sbornik',
+      sourceNote: '№ 12',
       params: { syuzhet: 'test', predmet: 'физике', k: 6, p1: 0.66, p2: 0.61 },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 05, № 13',
+      source: 'sbornik',
+      sourceNote: '№ 13',
       params: { syuzhet: 'pribor', pribor: 'сканер', p1: 0.94, p2: 0.87 },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 05, № 14',
+      source: 'sbornik',
+      sourceNote: '№ 14',
       params: { syuzhet: 'pribor', pribor: 'тостер', p1: 0.93, p2: 0.82 },
     },
     {
       n: 7,
-      source: 'задачник',
-      ref: 'задачник 05, № 15',
+      source: 'sbornik',
+      sourceNote: '№ 15',
       params: { syuzhet: 'avtobus', a: 14, b: 23, p1: 0.87, p2: 0.61 },
     },
     {
       n: 8,
-      source: 'задачник',
-      ref: 'задачник 05, № 16',
+      source: 'sbornik',
+      sourceNote: '№ 16',
       params: { syuzhet: 'avtobus', a: 11, b: 20, p1: 0.79, p2: 0.61 },
     },
   ],
@@ -323,8 +360,8 @@ const P13: Prototype = prototip({
   id: 'p5-13',
   blok: 'sovmestnye',
   nazvanie: 'Масса буханки: между двумя границами',
-  tip: 'Совместные события',
-  zadachnik: [17, 20],
+  tip: 'Совместные события: общая часть',
+  sourceRange: [17, 20],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -373,29 +410,58 @@ const P13: Prototype = prototip({
       shagP(m, 100),
     ];
   },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const a = shtuk(p1, 100);
+    const b = shtuk(p2, 100);
+    const aa = num(p, 'a');
+    const bb = num(p, 'b');
+    return [
+      vopros(
+        `Могут ли события «легче ${bb} г» и «тяжелее ${aa} г» случиться одновременно?`,
+        `Да — когда масса между ${aa} и ${bb} г, это и есть искомое`,
+        ['Нет — они несовместны', 'Нет — они противоположны'],
+        'События совместны: их общая часть и нужна.',
+      ),
+      vopros(
+        `Возьмём 100 буханок. Сколько из них тяжелее ${bb} г?`,
+        `$100 - ${a} = ${100 - a}$`,
+        [`$${a}$`, `$${b}$`],
+        `Легче ${bb} г — $${a}$ буханок, остальные тяжелее.`,
+      ),
+      vopros(
+        `А сколько легче ${aa} г?`,
+        `$100 - ${b} = ${100 - b}$`,
+        [`$${b}$`, `$${100 - a}$`],
+        `Тяжелее ${aa} г — $${b}$ буханок, остальные легче.`,
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 05, № 17',
+      source: 'sbornik',
+      sourceNote: '№ 17',
       params: { a: 790, b: 810, p1: 0.96, p2: 0.82 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 05, № 18',
+      source: 'sbornik',
+      sourceNote: '№ 18',
       params: { a: 790, b: 810, p1: 0.98, p2: 0.83 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 05, № 19',
+      source: 'sbornik',
+      sourceNote: '№ 19',
       params: { a: 785, b: 815, p1: 0.98, p2: 0.86 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 05, № 20',
+      source: 'sbornik',
+      sourceNote: '№ 20',
       params: { a: 795, b: 805, p1: 0.95, p2: 0.81 },
     },
   ],
@@ -433,8 +499,8 @@ const P11: Prototype = prototip({
   id: 'p5-11',
   blok: 'polnaya',
   nazvanie: 'Батарейки: система контроля забракует',
-  tip: 'Формула полной вероятности: решаем через дерево',
-  zadachnik: [49, 54],
+  tip: 'Полная вероятность: несколько путей',
+  sourceRange: [49, 54],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -486,13 +552,39 @@ const P11: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const q1 = veroyatnost(p, 'q1');
+    const q2 = veroyatnost(p, 'q2');
+    const { neispr, ispr, z1, z2 } = zabrakovano(p);
+    return [
+      vopros(
+        `Возьмём ${texInt(BAZA).replace('\\,', ' ')} батареек. Сколько из них неисправных?`,
+        `$${texInt(neispr)}$`,
+        [`$${texInt(ispr)}$`, `$${texInt(z1)}$`],
+        `$${texInt(BAZA)} \\cdot ${tex(q)} = ${texInt(neispr)}$, исправных — $${texInt(ispr)}$.`,
+      ),
+      vopros(
+        'Какие батарейки система забракует?',
+        'Неисправные, которые она поймала, и исправные, забракованные по ошибке',
+        ['Только неисправные', 'Только исправные'],
+      ),
+      vopros(
+        'Сколько батареек будет забраковано?',
+        `$${texInt(z1)} + ${texInt(z2)} = ${texInt(z1 + z2)}$`,
+        [`$${texInt(z1)}$`, `$${texInt(neispr)}$`],
+        `$${texInt(neispr)} \\cdot ${tex(q1)} = ${texInt(z1)}$, $${texInt(ispr)} \\cdot ${tex(q2)} = ${texInt(z2)}$.`,
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 49', params: { p: 0.01, q1: 0.96, q2: 0.06 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 50', params: { p: 0.01, q1: 0.95, q2: 0.05 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 51', params: { p: 0.02, q1: 0.97, q2: 0.02 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 52', params: { p: 0.02, q1: 0.98, q2: 0.03 } },
-    { n: 5, source: 'задачник', ref: 'задачник 05, № 53', params: { p: 0.05, q1: 0.99, q2: 0.01 } },
-    { n: 6, source: 'задачник', ref: 'задачник 05, № 54', params: { p: 0.03, q1: 0.91, q2: 0.01 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 49', params: { p: 0.01, q1: 0.96, q2: 0.06 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 50', params: { p: 0.01, q1: 0.95, q2: 0.05 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 51', params: { p: 0.02, q1: 0.97, q2: 0.02 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 52', params: { p: 0.02, q1: 0.98, q2: 0.03 } },
+    { n: 5, source: 'sbornik', sourceNote: '№ 53', params: { p: 0.05, q1: 0.99, q2: 0.01 } },
+    { n: 6, source: 'sbornik', sourceNote: '№ 54', params: { p: 0.03, q1: 0.91, q2: 0.01 } },
   ],
   generator: (r: Rng): Params => ({
     p: r.dec(0.01, 0.05, 2),
