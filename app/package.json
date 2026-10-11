@@ -56,6 +56,8 @@
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:planimetria": "node scripts/check-planimetria.mjs",
     "test:seriya-1": "node scripts/check-seriya-1.mjs",
+    "test:spravochnik-1": "node scripts/check-spravochnik-1.mjs",
+    "build:spravochnik-1": "node scripts/build-spravochnik-1.mjs",
     "test:galereya-1": "node scripts/check-galereya-1.mjs",
     "build:bank-1": "node scripts/build-bank-1.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
@@ -85,7 +87,10 @@
     "test:prikladnye": "node scripts/check-prikladnye.mjs",
     "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
-    "test:seriya-10": "node scripts/check-seriya-10.mjs"
+    "test:seriya-10": "node scripts/check-seriya-10.mjs",
+    "test:legal": "node scripts/check-legal.mjs",
+    "test:soglasiya-sql": "node scripts/check-soglasiya-sql.mjs",
+    "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
