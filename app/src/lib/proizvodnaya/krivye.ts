@@ -71,6 +71,8 @@ export interface OpcVolny {
   pervyy?: 'max' | 'min';
   /** Длина интервала b − a: от и до (по умолчанию 8…17). */
   shirina?: [number, number];
+  /** Готовые абсциссы экстремумов (по возрастанию): тогда n и shag не используются. */
+  tochki?: readonly number[];
 }
 
 /** Волна для графика f: чередующиеся максимумы и минимумы. */
@@ -83,9 +85,10 @@ export function volna(r: Rng, o: OpcVolny): Volna | null {
   if (b - a < wLo || b - a > wHi) {
     return null;
   }
-  const n = r.int(o.n[0], o.n[1]);
-  const gap = o.shag ?? 2;
-  const xs = raznesennye(r, a + 1, b - 1, n, gap);
+  const xs =
+    o.tochki !== undefined
+      ? [...o.tochki]
+      : raznesennye(r, a + 1, b - 1, r.int(o.n[0], o.n[1]), o.shag ?? 2);
   if (xs === null) {
     return null;
   }
@@ -166,6 +169,8 @@ export interface OpcVolnyP {
   pervyy?: 1 | -1;
   /** Длина интервала b − a: от и до (по умолчанию 8…17). */
   shirina?: [number, number];
+  /** Готовые абсциссы нулей (по возрастанию): тогда n и shag не используются. */
+  tochki?: readonly number[];
 }
 
 /** Волна для графика f′: узлы-нули на оси, между ними горбы. */
@@ -178,9 +183,10 @@ export function volnaP(r: Rng, o: OpcVolnyP): VolnaP | null {
   if (b - a < wLo || b - a > wHi) {
     return null;
   }
-  const n = r.int(o.n[0], o.n[1]);
-  const gap = o.shag ?? 2;
-  const zs = raznesennye(r, a + 1, b - 1, n, gap);
+  const zs =
+    o.tochki !== undefined
+      ? [...o.tochki]
+      : raznesennye(r, a + 1, b - 1, r.int(o.n[0], o.n[1]), o.shag ?? 2);
   if (zs === null || zs.length === 0) {
     return null;
   }

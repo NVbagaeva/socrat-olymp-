@@ -31,6 +31,23 @@ import { pointSegDist, rectGap, segRectDist, type Rect, type Seg } from '../vekt
  */
 export const MIN_RAZNYH_OTVETOV = 6;
 
+/**
+ * Исключения из порога — решение за автором раздела. Окно рисунка не
+ * расширяется ради разнообразия ответов, поэтому у этих прототипов
+ * ответов меньше шести.
+ */
+export const ISKLYUCHENIYA_RAZNYH: Record<string, { porog: number; prichina: string }> = {
+  '9.4.5': {
+    porog: 4,
+    prichina:
+      'k максимумов на отрезке требуют 2k − 1 нулей производной с шагом 2 и нуль снаружи; при длине интервала ≤ 17 клеток k ≤ 4',
+  },
+  '9.4.6': {
+    porog: 4,
+    prichina: 'то же для минимумов: при длине интервала ≤ 17 клеток не больше четырёх',
+  },
+};
+
 export interface Problem {
   where: string;
   what: string;
@@ -434,10 +451,11 @@ export function checkGenerators(
         what: `один ответ встречается в ${Math.round((100 * top) / count)}% задач`,
       });
     }
-    if (seeds >= 100 && answers.size < MIN_RAZNYH_OTVETOV) {
+    const porog = ISKLYUCHENIYA_RAZNYH[proto.id]?.porog ?? MIN_RAZNYH_OTVETOV;
+    if (seeds >= 100 && answers.size < porog) {
       problems.push({
         where: proto.id,
-        what: `различных ответов ${answers.size} — меньше порога ${MIN_RAZNYH_OTVETOV}`,
+        what: `различных ответов ${answers.size} — меньше порога ${porog}`,
       });
     }
     razneOtvety.set(proto.id, answers.size);
@@ -489,9 +507,9 @@ export function checkBank(
       }
     }
     /* Ответы в банке разные; если у прототипа возможных ответов меньше
-       десяти — один ответ не больше двух раз. */
+       десяти — не больше двух раз (при четырёх возможных — трёх). */
     const vozmozhno = razneOtvety.get(proto.id) ?? 10;
-    const dopusk = vozmozhno >= 10 ? 1 : 2;
+    const dopusk = vozmozhno >= 10 ? 1 : Math.max(2, Math.ceil(10 / vozmozhno));
     for (const [otvet, k] of otvety) {
       if (k > dopusk) {
         problems.push({

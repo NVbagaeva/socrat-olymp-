@@ -32,9 +32,20 @@
   fill-opacity: 0.14;
 }
 
-/* Рамки теории: рисунок к примеру не сжимается, текст не наезжает. */
-.sheet-example .sheet-figure {
+/* Рамки теории: рисунок к примеру не сжимается, текст не наезжает.
+   Пример №9 — с рисунком под текстом на всю ширину рамки. */
+.sheet-example:not(.sheet-example--stack) .sheet-figure {
   flex: none;
+}
+.sheet-example--stack .sheet-example-text {
+  flex: 1 1 100%;
+}
+.sheet-example--stack .sheet-figure {
+  flex: 0 0 auto;
+  margin: calc(var(--sheet-step) * 2) auto 0;
+}
+.sheet-example--stack .sheet-figure svg {
+  width: 100%;
 }
 .sheet-zapomni .sheet-recap {
   margin-bottom: 0;

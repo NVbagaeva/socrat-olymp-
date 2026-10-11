@@ -23,7 +23,18 @@ import type { Draft, Figura, Pomoshch, Uzel, Zapros } from '../types';
 import { grafikP, metkiTekst } from '../uslovie';
 import { podpisUzlov, proto, shag, sobrat, vopros } from './common';
 import type { Nevernyy } from './common';
-import { neverniyeChisla, promezhutki, xRavno, xSpisok, znakiPomoshch } from './chtenie-pom';
+import {
+  celevoy,
+  intervalShiriny,
+  neverniyeChisla,
+  promezhutki,
+  sdvigPod,
+  sdvinut,
+  tochkiSOsyu,
+  xRavno,
+  xSpisok,
+  znakiPomoshch,
+} from './chtenie-pom';
 import type { Promezhutok } from './chtenie-pom';
 
 /** Нуль f′ с типом: sleva = +1 — смена «+» на «−», то есть максимум f. */
@@ -34,6 +45,34 @@ interface Nul {
 
 function tipy(uzly: readonly Uzel[]): Nul[] {
   return nuliUzlov(uzly).map((z) => ({ x: z.x, tip: z.sleva > 0 ? 'max' : 'min' }));
+}
+
+/**
+ * Высота узла не больше расстояния до ближайшего нуля (по модулю, но не
+ * меньше 1; с вероятностью dobavka — на клетку больше): иначе в узких
+ * горбах график пересекает ось почти вертикально и подписи нулей не
+ * помещаются. Случайная добавка нужна, чтобы плотные волны не выходили
+ * одинаковыми.
+ */
+function smyagchit(uzly: Uzel[], r: Rng, dobavka: number): void {
+  const nuliX = uzly.filter((u) => u.y === 0).map((u) => u.x);
+  for (let i = 0; i < uzly.length; i += 1) {
+    const u = uzly[i] as Uzel;
+    if (u.y === 0) {
+      continue;
+    }
+    const dist = Math.min(...nuliX.map((z) => Math.abs(z - u.x)));
+    /* Широкая доля (от 4 клеток) с горбом у края — не плоская «полка» высотой 1. */
+    const sleva = Math.max(...[(uzly[0] as Uzel).x, ...nuliX.filter((z) => z < u.x)]);
+    const sprava = Math.min(
+      ...[(uzly[uzly.length - 1] as Uzel).x, ...nuliX.filter((z) => z > u.x)],
+    );
+    const shirokaya = sprava - sleva >= 4 ? 1 : 0;
+    const lim = Math.max(1, dist + shirokaya + (r.next() < dobavka ? 1 : 0));
+    if (Math.abs(u.y) > lim) {
+      uzly[i] = { x: u.x, y: Math.sign(u.y) * lim };
+    }
+  }
 }
 
 /** Неверные варианты: без повторов, не больше трёх. */
@@ -96,181 +135,188 @@ function metkiNaMonotonnosti(id: string, znak: 1 | -1) {
     kratko: vozr ? 'Отмеченные точки на возрастании' : 'Отмеченные точки на убывании',
     risunok: true,
     generate(r: Rng): Draft | null {
-      const w = volnaP(r, { n: [2, 4], a: [-9, -5], b: [5, 9] });
-      if (w === null) {
-        return null;
+      /* Сначала ответ k (равномерно), потом число отмеченных точек n и рисунок под них. */
+      const k = celevoy(r, 1, 8);
+      const n = k + r.int(k <= 2 ? 2 : 1, Math.min(4, 10 - k));
+      for (let popytka = 0; popytka < 150; popytka += 1) {
+        const draft = postroitMetki(r, k, n);
+        if (draft !== null) {
+          return draft;
+        }
       }
-      const spl = postroit(w.uzly);
-      const podhodit = (s: number) => (x: number) =>
-        x !== 0 && znakZnacheniya(w.uzly, x) === s && Math.abs(spl.y(x)) >= 1;
-      let nuzhP = 0;
-      let prochP = 0;
-      for (let x = w.a + 1; x < w.b; x += 1) {
-        nuzhP += podhodit(znak)(x) ? 1 : 0;
-        prochP += podhodit(-znak)(x) ? 1 : 0;
-      }
-      const nMax = Math.min(8, nuzhP + prochP);
-      if (nMax < 5) {
-        return null;
-      }
-      const n = r.int(5, nMax);
-      const kLo = Math.max(1, n - prochP);
-      const kHi = Math.min(n - 1, nuzhP);
-      if (kLo > kHi) {
-        return null;
-      }
-      const k = r.int(kLo, kHi);
-      const nuzhnye = vybratMetki(r, w.a, w.b, k, podhodit(znak));
-      if (nuzhnye === null) {
-        return null;
-      }
-      const ostalnye = vybratMetki(
-        r,
-        w.a,
-        w.b,
-        n - k,
-        (x) => podhodit(-znak)(x) && !nuzhnye.includes(x),
-      );
-      if (ostalnye === null) {
-        return null;
-      }
-      const metki = [...nuzhnye, ...ostalnye].sort((p, q) => p - q);
-      const sg = metki.map((x) => znakZnacheniya(w.uzly, x));
-      const idxNuzh = sg.map((s, i) => (s === znak ? i : -1)).filter((i) => i >= 0);
-      const idxProch = sg.map((s, i) => (s === -znak ? i : -1)).filter((i) => i >= 0);
-      /* Ловушка: точки, около которых график f′ поднимается (путают f′ и f). */
-      const idxVverh = metki.map((x, i) => (spl.dy(x) > 0.2 ? i : -1)).filter((i) => i >= 0);
-      const zs = w.nuli.map((z) => z.x);
-      const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
-      const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
-        metki,
-        pomoshch: [
-          ...metki.map((x): Pomoshch => ({ t: 'vert', x, shag: 1 })),
-          ...znakiPomoshch(ps, 2),
-        ],
-      });
-      const variant = r.int(0, 2);
-      const vopr = (FORMULIROVKI_VOZR[vozr ? '1' : '-1'] as string[])[variant] as string;
-      const uslovie = `${grafikP(w.a, w.b)} ${metkiTekst(n)} ${vopr}`;
-      const vyshe = vozr ? 'выше' : 'ниже';
-      const nizhe = vozr ? 'ниже' : 'выше';
-      const znakStr = vozr ? '>' : '<';
-      const sosed = (rows: number[]) => rows.map((i) => `$x_{${i + 1}}$`).join(', ');
-      return sobrat(fig, { t: 'metki-na-vozrastanii', znak }, k, {
-        uslovie,
-        shagi: [
-          shag(
-            'Что изображено на рисунке',
-            "Здесь нарисован график производной $y=f'(x)$, а не самой функции $f$. Поэтому смотрим не на то, куда идёт график, а на то, выше или ниже оси $Ox$ он расположен.",
-          ),
-          shag(
-            'Связь знака производной с монотонностью',
-            "Если $f'(x)>0$ (график $f'$ выше оси $Ox$), функция $f$ возрастает. Если $f'(x)<0$ (график $f'$ ниже оси), функция $f$ убывает.",
-          ),
-          shag(
-            'Промежутки возрастания и убывания',
-            `График пересекает ось $Ox$ при $x=${zs.map((x) => d(x)).join('$, $x=')}$. Эти точки делят интервал на промежутки:`,
-            ...ps.map(strokaPromezhutka),
-          ),
-          shag(
-            'Где лежат отмеченные точки',
-            `График $f'$ ${vyshe} оси $Ox$ в точках ${sosed(idxNuzh)}: там $f'(x)${znakStr}0$, функция ${vozr ? 'возрастает' : 'убывает'}.`,
-            `В точках ${sosed(idxProch)} график $f'$ ${nizhe} оси, функция ${vozr ? 'убывает' : 'возрастает'}.`,
-            `Нужных точек: $${k}$. Проверка: $${k}+${n - k}=${n}$.`,
-          ),
-          shag('Ответ', `**Ответ: ${k}**`),
-        ],
-        podskazka: [
-          vopros(
-            r,
-            'Какая функция изображена на рисунке?',
-            "Производная $f'$",
-            [
-              {
-                tekst: 'Сама функция $f$',
-                pochemu:
-                  "В условии сказано: изображён график $y=f'(x)$ — производной. Поведение $f$ придётся выводить по нему.",
-              },
-              {
-                tekst: 'Первообразная функции $f$',
-                pochemu:
-                  "Про первообразную в условии ничего нет: нарисован график производной $f'$.",
-              },
-            ],
-            "График $y=f'(x)$ — производной функции $f$.",
-          ),
-          vopros(
-            r,
-            `Когда функция $f$ ${vozr ? 'возрастает' : 'убывает'}?`,
-            `Когда $f'(x)${znakStr}0$: график $f'$ лежит ${vyshe} оси $Ox$`,
-            [
-              {
-                tekst: `Когда график $f'$ идёт ${vozr ? 'вверх' : 'вниз'}`,
-                pochemu: `Направление графика $f'$ говорит лишь о том, как меняется сама производная. Для $f$ важен знак $f'$: ${vyshe} оси график или ${nizhe}.`,
-              },
-              {
-                tekst: `Когда $f'(x)${vozr ? '<' : '>'}0$: график $f'$ лежит ${nizhe} оси $Ox$`,
-                pochemu: `Так выглядит промежуток, на котором функция ${vozr ? 'убывает' : 'возрастает'}.`,
-              },
-            ],
-            `Функция ${vozr ? 'возрастает' : 'убывает'}, где график $f'$ лежит ${vyshe} оси $Ox$.`,
-            1,
-          ),
-          vopros(
-            r,
-            `В каких отмеченных точках график $f'$ лежит ${vyshe} оси $Ox$?`,
-            xSpisok(idxNuzh),
-            knopki(xSpisok(idxNuzh), [
-              {
-                tekst: xSpisok(idxProch),
-                pochemu: `В этих точках график $f'$ лежит ${nizhe} оси: функция там ${vozr ? 'убывает' : 'возрастает'}.`,
-              },
-              {
-                tekst: xSpisok(idxVverh),
-                pochemu: `Это точки, около которых график $f'$ идёт вверх. Но поведение $f$ определяет знак $f'$ (${vyshe} или ${nizhe} оси), а не направление графика $f'$.`,
-              },
-              {
-                tekst: xSpisok(idxNuzh.slice(1)),
-                pochemu:
-                  'Одна подходящая точка пропущена: проверьте положение графика относительно оси в каждой точке.',
-              },
-              {
-                tekst: xSpisok([...idxNuzh, ...idxProch.slice(0, 1)].sort((p, q) => p - q)),
-                pochemu: 'В список попала лишняя точка, где график лежит по другую сторону от оси.',
-              },
-            ]),
-            `Нужные точки: ${xSpisok(idxNuzh)}.`,
-            2,
-          ),
-          vopros(
-            r,
-            'Сколько таких точек?',
-            `$${k}$`,
-            neverniyeChisla(
-              k,
-              [
-                { v: n - k, w: `Посчитаны точки с противоположным знаком $f'$: их $${n - k}$.` },
-                ...(idxVverh.length !== k && idxVverh.length > 0
-                  ? [
-                      {
-                        v: idxVverh.length,
-                        w: "Посчитаны точки, где график $f'$ идёт вверх: это не то же самое, что $f'(x)>0$.",
-                      },
-                    ]
-                  : []),
-              ],
-              1,
-            ),
-            `Таких точек $${k}$.`,
-            2,
-          ),
-        ],
-        params: { n, k, a: w.a, b: w.b, znak },
-        signature: podpisUzlov(fig) + `|${znak}`,
-        vid: `v${variant}n${n}`,
-      });
+      return null;
     },
   });
+
+  function postroitMetki(r: Rng, k: number, n: number): Draft | null {
+    const shirina = r.int(Math.min(17, Math.max(10, n + 6)), 17);
+    const { a, b } = intervalShiriny(r, shirina);
+    const nZ = r.int(1, k >= 6 ? 2 : 4);
+    const w = volnaP(r, { n: [nZ, nZ], a: [a, a], b: [b, b], shirina: [shirina, shirina] });
+    if (w === null) {
+      return null;
+    }
+    const spl = postroit(w.uzly);
+    const podhodit = (s: number) => (x: number) =>
+      x !== 0 && znakZnacheniya(w.uzly, x) === s && Math.abs(spl.y(x)) >= 1;
+    let nuzhP = 0;
+    let prochP = 0;
+    for (let x = w.a + 1; x < w.b; x += 1) {
+      nuzhP += podhodit(znak)(x) ? 1 : 0;
+      prochP += podhodit(-znak)(x) ? 1 : 0;
+    }
+    if (nuzhP < k || prochP < n - k) {
+      return null;
+    }
+    const nuzhnye = vybratMetki(r, w.a, w.b, k, podhodit(znak));
+    if (nuzhnye === null) {
+      return null;
+    }
+    const ostalnye = vybratMetki(
+      r,
+      w.a,
+      w.b,
+      n - k,
+      (x) => podhodit(-znak)(x) && !nuzhnye.includes(x),
+    );
+    if (ostalnye === null) {
+      return null;
+    }
+    const metki = [...nuzhnye, ...ostalnye].sort((p, q) => p - q);
+    const sg = metki.map((x) => znakZnacheniya(w.uzly, x));
+    const idxNuzh = sg.map((s, i) => (s === znak ? i : -1)).filter((i) => i >= 0);
+    const idxProch = sg.map((s, i) => (s === -znak ? i : -1)).filter((i) => i >= 0);
+    /* Ловушка: точки, около которых график f′ поднимается (путают f′ и f). */
+    const idxVverh = metki.map((x, i) => (spl.dy(x) > 0.2 ? i : -1)).filter((i) => i >= 0);
+    const zs = w.nuli.map((z) => z.x);
+    const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
+    const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
+      metki,
+      pomoshch: [
+        ...metki.map((x): Pomoshch => ({ t: 'vert', x, shag: 1 })),
+        ...znakiPomoshch(ps, 2),
+      ],
+    });
+    const variant = r.int(0, 2);
+    const vopr = (FORMULIROVKI_VOZR[vozr ? '1' : '-1'] as string[])[variant] as string;
+    const uslovie = `${grafikP(w.a, w.b)} ${metkiTekst(n)} ${vopr}`;
+    const vyshe = vozr ? 'выше' : 'ниже';
+    const nizhe = vozr ? 'ниже' : 'выше';
+    const znakStr = vozr ? '>' : '<';
+    const sosed = (rows: number[]) => rows.map((i) => `$x_{${i + 1}}$`).join(', ');
+    return sobrat(fig, { t: 'metki-na-vozrastanii', znak }, k, {
+      uslovie,
+      shagi: [
+        shag(
+          'Что изображено на рисунке',
+          "Здесь нарисован график производной $y=f'(x)$, а не самой функции $f$. Поэтому смотрим не на то, куда идёт график, а на то, выше или ниже оси $Ox$ он расположен.",
+        ),
+        shag(
+          'Связь знака производной с монотонностью',
+          "Если $f'(x)>0$ (график $f'$ выше оси $Ox$), функция $f$ возрастает. Если $f'(x)<0$ (график $f'$ ниже оси), функция $f$ убывает.",
+        ),
+        shag(
+          'Промежутки возрастания и убывания',
+          `График пересекает ось $Ox$ при $x=${zs.map((x) => d(x)).join('$, $x=')}$. Эти точки делят интервал на промежутки:`,
+          ...ps.map(strokaPromezhutka),
+        ),
+        shag(
+          'Где лежат отмеченные точки',
+          `График $f'$ ${vyshe} оси $Ox$ в точках ${sosed(idxNuzh)}: там $f'(x)${znakStr}0$, функция ${vozr ? 'возрастает' : 'убывает'}.`,
+          `В точках ${sosed(idxProch)} график $f'$ ${nizhe} оси, функция ${vozr ? 'убывает' : 'возрастает'}.`,
+          `Нужных точек: $${k}$. Проверка: $${k}+${n - k}=${n}$.`,
+        ),
+        shag('Ответ', `**Ответ: ${k}**`),
+      ],
+      podskazka: [
+        vopros(
+          r,
+          'Какая функция изображена на рисунке?',
+          "Производная $f'$",
+          [
+            {
+              tekst: 'Сама функция $f$',
+              pochemu:
+                "В условии сказано: изображён график $y=f'(x)$ — производной. Поведение $f$ придётся выводить по нему.",
+            },
+            {
+              tekst: 'Первообразная функции $f$',
+              pochemu: "Про первообразную в условии ничего нет: нарисован график производной $f'$.",
+            },
+          ],
+          "График $y=f'(x)$ — производной функции $f$.",
+        ),
+        vopros(
+          r,
+          `Когда функция $f$ ${vozr ? 'возрастает' : 'убывает'}?`,
+          `Когда $f'(x)${znakStr}0$: график $f'$ лежит ${vyshe} оси $Ox$`,
+          [
+            {
+              tekst: `Когда график $f'$ идёт ${vozr ? 'вверх' : 'вниз'}`,
+              pochemu: `Направление графика $f'$ говорит лишь о том, как меняется сама производная. Для $f$ важен знак $f'$: ${vyshe} оси график или ${nizhe}.`,
+            },
+            {
+              tekst: `Когда $f'(x)${vozr ? '<' : '>'}0$: график $f'$ лежит ${nizhe} оси $Ox$`,
+              pochemu: `Так выглядит промежуток, на котором функция ${vozr ? 'убывает' : 'возрастает'}.`,
+            },
+          ],
+          `Функция ${vozr ? 'возрастает' : 'убывает'}, где график $f'$ лежит ${vyshe} оси $Ox$.`,
+          1,
+        ),
+        vopros(
+          r,
+          `В каких отмеченных точках график $f'$ лежит ${vyshe} оси $Ox$?`,
+          xSpisok(idxNuzh),
+          knopki(xSpisok(idxNuzh), [
+            {
+              tekst: xSpisok(idxProch),
+              pochemu: `В этих точках график $f'$ лежит ${nizhe} оси: функция там ${vozr ? 'убывает' : 'возрастает'}.`,
+            },
+            {
+              tekst: xSpisok(idxVverh),
+              pochemu: `Это точки, около которых график $f'$ идёт вверх. Но поведение $f$ определяет знак $f'$ (${vyshe} или ${nizhe} оси), а не направление графика $f'$.`,
+            },
+            {
+              tekst: xSpisok(idxNuzh.slice(1)),
+              pochemu:
+                'Одна подходящая точка пропущена: проверьте положение графика относительно оси в каждой точке.',
+            },
+            {
+              tekst: xSpisok([...idxNuzh, ...idxProch.slice(0, 1)].sort((p, q) => p - q)),
+              pochemu: 'В список попала лишняя точка, где график лежит по другую сторону от оси.',
+            },
+          ]),
+          `Нужные точки: ${xSpisok(idxNuzh)}.`,
+          2,
+        ),
+        vopros(
+          r,
+          'Сколько таких точек?',
+          `$${k}$`,
+          neverniyeChisla(
+            k,
+            [
+              { v: n - k, w: `Посчитаны точки с противоположным знаком $f'$: их $${n - k}$.` },
+              ...(idxVverh.length !== k && idxVverh.length > 0
+                ? [
+                    {
+                      v: idxVverh.length,
+                      w: "Посчитаны точки, где график $f'$ идёт вверх: это не то же самое, что $f'(x)>0$.",
+                    },
+                  ]
+                : []),
+            ],
+            1,
+          ),
+          `Таких точек $${k}$.`,
+          2,
+        ),
+      ],
+      params: { n, k, a: w.a, b: w.b, znak },
+      signature: podpisUzlov(fig) + `|${znak}`,
+      vid: `v${variant}n${n}`,
+    });
+  }
 }
 
 const P941 = metkiNaMonotonnosti('9.4.1', 1);
@@ -306,125 +352,143 @@ function tochkaEkstremuma(id: string, tip: 'max' | 'min') {
     kratko: mx ? "Найти точку максимума по $f'$" : "Найти точку минимума по $f'$",
     risunok: true,
     generate(r: Rng): Draft | null {
-      /* Ровно один нуль нужного типа и хотя бы один противоположного:
-         нулей два (любой порядок) или три (нужный тип — в середине). */
-      const nZer = r.int(2, 3);
-      const first: 1 | -1 = nZer === 2 ? (r.next() < 0.5 ? 1 : -1) : mx ? -1 : 1;
-      const w = volnaP(r, { n: [nZer, nZer], pervyy: first, shag: 2 });
-      if (w === null) {
-        return null;
+      /* Сначала ответ (равномерно), потом рисунок, сдвинутый под него. */
+      const cel = celevoy(r, -8, 8);
+      for (let popytka = 0; popytka < 150; popytka += 1) {
+        const draft = postroitTochku(r, cel);
+        if (draft !== null) {
+          return draft;
+        }
       }
-      const nuli = tipy(w.uzly);
-      const nuzhnye = nuli.filter((z) => z.tip === tip);
-      const lovushki = nuli.filter((z) => z.tip !== tip);
-      if (nuzhnye.length !== 1 || lovushki.length < 1) {
-        return null;
-      }
-      const ans = (nuzhnye[0] as Nul).x;
-      const zs = nuli.map((z) => z.x);
-      const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
-      const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
-        pomoshch: [
-          ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 1 })),
-          ...znakiPomoshch(ps, 2),
-        ],
-      });
-      const variant = r.int(0, 2);
-      const vopr = (FORMULIROVKI_TOCHKA[tip][variant] as (a: number, b: number) => string)(
-        w.a,
-        w.b,
-      );
-      const uslovie = `${grafikP(w.a, w.b)} ${vopr}`;
-      const vershinaX = vershina(w.uzly, zs);
-      const stroki = ps.map(strokaPromezhutka);
-      return sobrat(fig, { t: mx ? 'tochka-max' : 'tochka-min' }, ans, {
-        uslovie,
-        shagi: [
-          shag(
-            `Что такое точка ${slovo}`,
-            `Точка ${slovo} функции $f$ — это точка, в которой возрастание сменяется убыванием (для максимума) или убывание — возрастанием (для минимума).`,
-            `Для максимума $f'$ меняет знак ${PLUS_MINUS}, для минимума — ${MINUS_PLUS}. Поэтому ищем нули $f'$, в которых график пересекает ось.`,
-          ),
-          shag(
-            'Находим нули производной',
-            `График $f'$ пересекает ось $Ox$ при $x=${zs.map((x) => d(x)).join('$, $x=')}$. В остальных точках $f'(x)\\ne0$, так что других кандидатов нет.`,
-          ),
-          shag('Определяем знаки производной', ...stroki),
-          shag(
-            'Выбираем нужную смену знака',
-            `При $x=${d(ans)}$ знак $f'$ меняется ${smena}: это точка ${slovo}.`,
-            `При ${xRavno(lovushki.map((z) => z.x))} знак меняется ${protivSmena}: ${lovushki.length === 1 ? 'это точка' : 'это точки'} ${protivSlovo}.`,
-          ),
-          shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
-        ],
-        podskazka: [
-          vopros(
-            r,
-            'Какой график изображён на рисунке?',
-            "График производной $f'$",
-            [
-              {
-                tekst: 'График самой функции $f$',
-                pochemu:
-                  "В условии сказано, что изображён график $y=f'(x)$. Значит, максимумы и минимумы $f$ нужно искать по знаку $f'$, а не по вершинам этого графика.",
-              },
-              {
-                tekst: 'График первообразной',
-                pochemu:
-                  "Нарисован график производной $f'$, про первообразную в условии нет ни слова.",
-              },
-            ],
-            "Нарисован график $y=f'(x)$.",
-          ),
-          vopros(
-            r,
-            `Как меняется знак $f'$ при переходе через точку ${slovo} функции $f$?`,
-            `Знак меняется ${smena}`,
-            [
-              {
-                tekst: `Знак меняется ${protivSmena}`,
-                pochemu: `Так меняется знак у точки ${protivSlovo}: функция ${mx ? 'убывала, потом стала возрастать' : 'возрастала, потом стала убывать'}.`,
-              },
-              {
-                tekst: 'Знак не меняется',
-                pochemu:
-                  'Без смены знака $f' +
-                  "'" +
-                  '$ функция не меняет характер монотонности, и экстремума нет.',
-              },
-            ],
-            `У точки ${slovo} знак $f'$ меняется ${smena}.`,
-            1,
-          ),
-          vopros(
-            r,
-            `Где график $f'$ пересекает ось $Ox$ ${mx ? 'сверху вниз' : 'снизу вверх'}?`,
-            `$x=${d(ans)}$`,
-            knopki(`$x=${d(ans)}$`, [
-              ...lovushki.map((z) => ({
-                tekst: `$x=${d(z.x)}$`,
-                pochemu: `Здесь график пересекает ось ${mx ? 'снизу вверх' : 'сверху вниз'}: знак меняется ${protivSmena}, это точка ${protivSlovo}.`,
-              })),
-              ...(vershinaX === null
-                ? []
-                : [
-                    {
-                      tekst: `$x=${d(vershinaX)}$`,
-                      pochemu:
-                        "Это вершина графика $f'$, а не его пересечение с осью. В вершине $f'\\ne0$, и характер монотонности $f$ не меняется.",
-                    },
-                  ]),
-            ]),
-            `Подходит $x=${d(ans)}$.`,
-            2,
-          ),
-        ],
-        params: { a: w.a, b: w.b, ans, n: zs.length },
-        signature: podpisUzlov(fig),
-        vid: `v${variant}n${zs.length}`,
-      });
+      return null;
     },
   });
+
+  function postroitTochku(r: Rng, cel: number): Draft | null {
+    /* Ровно один нуль нужного типа и хотя бы один противоположного:
+         нулей два (любой порядок) или три (нужный тип — в середине). */
+    const nZer = r.int(2, 3);
+    const first: 1 | -1 = nZer === 2 ? (r.next() < 0.5 ? 1 : -1) : mx ? -1 : 1;
+    const w0 = volnaP(r, { n: [nZer, nZer], pervyy: first, shag: r.int(2, 3) });
+    if (w0 === null) {
+      return null;
+    }
+    const nuzhnye0 = tipy(w0.uzly).filter((z) => z.tip === tip);
+    if (nuzhnye0.length !== 1) {
+      return null;
+    }
+    const s = sdvigPod(cel, (nuzhnye0[0] as Nul).x, w0.a, w0.b);
+    if (s === null) {
+      return null;
+    }
+    const w = { ...w0, uzly: sdvinut(w0.uzly, s), a: w0.a + s, b: w0.b + s };
+    const nuli = tipy(w.uzly);
+    const nuzhnye = nuli.filter((z) => z.tip === tip);
+    const lovushki = nuli.filter((z) => z.tip !== tip);
+    if (nuzhnye.length !== 1 || lovushki.length < 1) {
+      return null;
+    }
+    const ans = (nuzhnye[0] as Nul).x;
+    const zs = nuli.map((z) => z.x);
+    const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
+    const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
+      pomoshch: [
+        ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 1 })),
+        ...znakiPomoshch(ps, 2),
+      ],
+    });
+    const variant = r.int(0, 2);
+    const vopr = (FORMULIROVKI_TOCHKA[tip][variant] as (a: number, b: number) => string)(w.a, w.b);
+    const uslovie = `${grafikP(w.a, w.b)} ${vopr}`;
+    const vershinaX = vershina(w.uzly, zs);
+    const stroki = ps.map(strokaPromezhutka);
+    return sobrat(fig, { t: mx ? 'tochka-max' : 'tochka-min' }, ans, {
+      uslovie,
+      shagi: [
+        shag(
+          `Что такое точка ${slovo}`,
+          `Точка ${slovo} функции $f$ — это точка, в которой возрастание сменяется убыванием (для максимума) или убывание — возрастанием (для минимума).`,
+          `Для максимума $f'$ меняет знак ${PLUS_MINUS}, для минимума — ${MINUS_PLUS}. Поэтому ищем нули $f'$, в которых график пересекает ось.`,
+        ),
+        shag(
+          'Находим нули производной',
+          `График $f'$ пересекает ось $Ox$ при $x=${zs.map((x) => d(x)).join('$, $x=')}$. В остальных точках $f'(x)\\ne0$, так что других кандидатов нет.`,
+        ),
+        shag('Определяем знаки производной', ...stroki),
+        shag(
+          'Выбираем нужную смену знака',
+          `При $x=${d(ans)}$ знак $f'$ меняется ${smena}: это точка ${slovo}.`,
+          `При ${xRavno(lovushki.map((z) => z.x))} знак меняется ${protivSmena}: ${lovushki.length === 1 ? 'это точка' : 'это точки'} ${protivSlovo}.`,
+        ),
+        shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
+      ],
+      podskazka: [
+        vopros(
+          r,
+          'Какой график изображён на рисунке?',
+          "График производной $f'$",
+          [
+            {
+              tekst: 'График самой функции $f$',
+              pochemu:
+                "В условии сказано, что изображён график $y=f'(x)$. Значит, максимумы и минимумы $f$ нужно искать по знаку $f'$, а не по вершинам этого графика.",
+            },
+            {
+              tekst: 'График первообразной',
+              pochemu:
+                "Нарисован график производной $f'$, про первообразную в условии нет ни слова.",
+            },
+          ],
+          "Нарисован график $y=f'(x)$.",
+        ),
+        vopros(
+          r,
+          `Как меняется знак $f'$ при переходе через точку ${slovo} функции $f$?`,
+          `Знак меняется ${smena}`,
+          [
+            {
+              tekst: `Знак меняется ${protivSmena}`,
+              pochemu: `Так меняется знак у точки ${protivSlovo}: функция ${mx ? 'убывала, потом стала возрастать' : 'возрастала, потом стала убывать'}.`,
+            },
+            {
+              tekst: 'Знак не меняется',
+              pochemu:
+                'Без смены знака $f' +
+                "'" +
+                '$ функция не меняет характер монотонности, и экстремума нет.',
+            },
+          ],
+          `У точки ${slovo} знак $f'$ меняется ${smena}.`,
+          1,
+        ),
+        vopros(
+          r,
+          `Где график $f'$ пересекает ось $Ox$ ${mx ? 'сверху вниз' : 'снизу вверх'}?`,
+          `$x=${d(ans)}$`,
+          knopki(`$x=${d(ans)}$`, [
+            ...lovushki.map((z) => ({
+              tekst: `$x=${d(z.x)}$`,
+              pochemu: `Здесь график пересекает ось ${mx ? 'снизу вверх' : 'сверху вниз'}: знак меняется ${protivSmena}, это точка ${protivSlovo}.`,
+            })),
+            ...(vershinaX === null
+              ? []
+              : [
+                  {
+                    tekst: `$x=${d(vershinaX)}$`,
+                    pochemu:
+                      "Это вершина графика $f'$, а не его пересечение с осью. В вершине $f'\\ne0$, и характер монотонности $f$ не меняется.",
+                  },
+                ]),
+          ]),
+          `Подходит $x=${d(ans)}$.`,
+          2,
+        ),
+      ],
+      params: { a: w.a, b: w.b, ans, n: zs.length },
+      signature: podpisUzlov(fig),
+      vid: `v${variant}n${zs.length}`,
+    });
+  }
 }
 
 const P943 = tochkaEkstremuma('9.4.3', 'max');
@@ -475,214 +539,250 @@ function chisloNaOtrezke(id: string, t: TipSchyota) {
     kratko: `Сколько точек ${slovo} на отрезке`,
     risunok: true,
     generate(r: Rng): Draft | null {
-      const w = volnaP(r, { n: [6, 7], a: [-9, -6], b: [6, 9] });
-      if (w === null) {
-        return null;
-      }
-      const nuli = tipy(w.uzly);
-      const zs = nuli.map((z) => z.x);
-      /* Окна из подряд идущих нулей [i; j]: отрезок охватывает их и не задевает остальные. */
-      const okna = new Map<number, { i: number; j: number }[]>();
-      for (let i = 0; i < nuli.length; i += 1) {
-        for (let j = i + 1; j < nuli.length; j += 1) {
-          if (i === 0 && j === nuli.length - 1) {
-            continue;
-          }
-          const vnutri = nuli.slice(i, j + 1);
-          const kk = vnutri.filter(podhodit).length;
-          if (kk < 1 || (t !== 'extr' && kk === vnutri.length)) {
-            continue;
-          }
-          const lst = okna.get(kk) ?? [];
-          lst.push({ i, j });
-          okna.set(kk, lst);
+      /* Сначала ответ (равномерно), потом число нулей и отрезок под него. */
+      const cel = t === 'extr' ? celevoy(r, 1, 7) : celevoy(r, 1, 4);
+      for (let popytka = 0; popytka < 40; popytka += 1) {
+        const draft = postroitSchet(r, cel);
+        if (draft !== null) {
+          return draft;
         }
       }
-      const znacheniya = [...okna.keys()].sort((x, y) => x - y);
-      if (znacheniya.length === 0) {
-        return null;
-      }
-      /* Целевое число точек выбираем равномерно среди возможных. */
-      const zel = r.pick(znacheniya);
-      const okno = r.pick(okna.get(zel) as { i: number; j: number }[]);
-      const prev = okno.i === 0 ? w.a : (nuli[okno.i - 1] as Nul).x;
-      const next = okno.j === nuli.length - 1 ? w.b : (nuli[okno.j + 1] as Nul).x;
-      const p = r.int(prev + 1, (nuli[okno.i] as Nul).x - 1);
-      const q = r.int((nuli[okno.j] as Nul).x + 1, next - 1);
-      if (p < w.a + 1 || q > w.b - 1 || q - p < 3) {
-        return null;
-      }
-      const { v, vne } = razdelit(nuli, { p, q });
-      if (v.length < 2 || vne.length < 1) {
-        return null;
-      }
-      const nuzhnye = v.filter(podhodit);
-      const k = nuzhnye.length;
-      const vseTipa = nuli.filter(podhodit).length;
-      const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
-      const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
-        pomoshch: [
-          { t: 'otrezok', p, q, shag: 1 },
-          ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
-          ...znakiPomoshch(ps, 3),
-        ],
-      });
-      const variant = r.int(0, 2);
-      const uslovie = `${grafikP(w.a, w.b)} ${formulSchet(t, { p, q })[variant] as string}`;
-      const opredelenie =
-        t === 'max'
-          ? "Точка максимума — точка, где возрастание $f$ сменяется убыванием: $f'$ меняет знак с $+$ на $-$ (график $f'$ пересекает ось сверху вниз)."
-          : t === 'min'
-            ? "Точка минимума — точка, где убывание $f$ сменяется возрастанием: $f'$ меняет знак с $-$ на $+$ (график $f'$ пересекает ось снизу вверх)."
-            : "Точка экстремума — точка максимума или минимума: в ней $f'$ меняет знак (график $f'$ пересекает ось в любую сторону).";
-      const spisok = (rows: Nul[]) => (rows.length === 0 ? 'нет' : xRavno(rows.map((z) => z.x)));
-      const vTipa = v.filter(podhodit);
-      const maxV = v.filter((z) => z.tip === 'max').length;
-      const minV = v.filter((z) => z.tip === 'min').length;
-      const lovCnt: { v: number; w: string }[] = [
-        {
-          v: v.length,
-          w: `Посчитаны все нули на отрезке ($${v.length}$), но среди них есть точки другого типа.`,
-        },
-        { v: vseTipa, w: 'Посчитаны точки нужного типа на всём графике, а не только на отрезке.' },
-        {
-          v: t === 'max' ? minV : maxV,
-          w: 'Посчитаны точки противоположного типа: максимум и минимум перепутаны.',
-        },
-      ];
-      return sobrat(fig, { t: zaprosT, p, q }, k, {
-        uslovie,
-        shagi: [
-          shag(
-            'Что нужно найти',
-            opredelenie,
-            "Значит, нужно отобрать нули $f'$ со сменой знака нужного вида.",
-          ),
-          shag(
-            'Нули производной и смена знака',
-            `График $f'$ пересекает ось $Ox$ при ${xRavno(zs)}. Определим тип каждого нуля:`,
-            ...nuli.map(opisanieNulya),
-          ),
-          shag(
-            'Отбираем нули из отрезка',
-            `Отрезок $${otrezok(p, q)}$ содержит нули ${spisok(v)}.`,
-            `Вне отрезка лежат нули ${spisok(vne)} — они не учитываются.`,
-          ),
-          shag(
-            'Считаем',
-            t === 'extr'
-              ? `Все нули на отрезке — точки экстремума: ${spisok(vTipa)}. Их $${k}$.`
-              : `Из нулей на отрезке точками ${slovo} являются ${spisok(vTipa)}. Их $${k}$.`,
-          ),
-          shag('Ответ', `**Ответ: ${k}**`),
-        ],
-        podskazka: [
-          vopros(
-            r,
-            `Как должен вести себя $f'$ около точки ${slovo}?`,
-            t === 'max'
-              ? 'Менять знак с $+$ на $-$'
-              : t === 'min'
-                ? 'Менять знак с $-$ на $+$'
-                : 'Менять знак (в любую сторону)',
-            [
-              ...(t === 'extr'
-                ? [
-                    {
-                      tekst: 'Быть равной нулю, не меняя знак',
-                      pochemu: 'Если знак не меняется, монотонность не меняется и экстремума нет.',
-                    },
-                    {
-                      tekst: 'Достигать наибольшего значения',
-                      pochemu:
-                        "Вершина графика $f'$ — экстремум самой производной, а нужны нули $f'$ со сменой знака.",
-                    },
-                  ]
-                : [
-                    {
-                      tekst: t === 'max' ? 'Менять знак с $-$ на $+$' : 'Менять знак с $+$ на $-$',
-                      pochemu: `Так меняется знак у точки ${t === 'max' ? 'минимума' : 'максимума'}.`,
-                    },
-                    {
-                      tekst: 'Достигать наибольшего значения',
-                      pochemu:
-                        "Вершина графика $f'$ — экстремум самой производной, а нужны нули $f'$ со сменой знака.",
-                    },
-                  ]),
-            ],
-            t === 'max'
-              ? "У максимума знак $f'$ меняется с $+$ на $-$."
-              : t === 'min'
-                ? "У минимума знак $f'$ меняется с $-$ на $+$."
-                : "У экстремума знак $f'$ меняется.",
-          ),
-          vopros(
-            r,
-            `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
-            spisok(v),
-            knopki(spisok(v), [
-              {
-                tekst: spisok(nuli),
-                pochemu:
-                  'Это все нули графика, а отрезок $[' +
-                  `${p};\\ ${q}` +
-                  ']$ охватывает лишь часть из них.',
-              },
-              { tekst: spisok(vne), pochemu: 'Это нули вне отрезка: условие их не касается.' },
-              {
-                tekst: spisok(v.slice(1)),
-                pochemu: 'Один из нулей отрезка пропущен: проверьте края отрезка.',
-              },
-            ]),
-            `На отрезке лежат нули ${spisok(v)}.`,
-            1,
-          ),
-          vopros(
-            r,
-            `Какие из них — точки ${slovo}?`,
-            spisok(vTipa),
-            knopki(spisok(vTipa), [
-              ...(t === 'extr'
-                ? [
-                    {
-                      tekst: spisok(v.filter((z) => z.tip === 'max')),
-                      pochemu: 'Это только максимумы. Минимумы — тоже экстремумы.',
-                    },
-                    {
-                      tekst: spisok(v.filter((z) => z.tip === 'min')),
-                      pochemu: 'Это только минимумы. Максимумы — тоже экстремумы.',
-                    },
-                  ]
-                : [
-                    {
-                      tekst: spisok(v.filter((z) => z.tip !== t)),
-                      pochemu: `Здесь знак меняется в другую сторону: это точки ${t === 'max' ? 'минимума' : 'максимума'}.`,
-                    },
-                    {
-                      tekst: spisok(v),
-                      pochemu:
-                        'Здесь взяты все нули на отрезке, но часть из них — точки другого типа.',
-                    },
-                  ]),
-            ]),
-            `Точки ${slovo} на отрезке: ${spisok(vTipa)}.`,
-            3,
-          ),
-          vopros(
-            r,
-            'Сколько их?',
-            `$${k}$`,
-            neverniyeChisla(k, lovCnt, 1),
-            `Таких точек $${k}$.`,
-            3,
-          ),
-        ],
-        params: { a: w.a, b: w.b, p, q, k, n: zs.length },
-        signature: podpisUzlov(fig) + `|${p}|${q}`,
-        vid: `v${variant}k${k}`,
-      });
+      return null;
     },
   });
+
+  function postroitSchet(r: Rng, cel: number): Draft | null {
+    /* Нулей на отрезке L; первый из них — нужного или другого типа. */
+    const protiv: 'max' | 'min' = t === 'max' ? 'min' : 'max';
+    let L: number;
+    let pervyyVnutri: 'max' | 'min';
+    if (t === 'extr') {
+      L = cel;
+      pervyyVnutri = r.next() < 0.5 ? 'max' : 'min';
+    } else {
+      L = r.pick([2 * cel - 1, 2 * cel, 2 * cel + 1].filter((x) => x >= 2 && x <= 7));
+      pervyyVnutri =
+        L === 2 * cel - 1 ? t : L === 2 * cel + 1 ? protiv : r.next() < 0.5 ? t : protiv;
+    }
+    const vneVsego = r.int(1, Math.max(1, Math.min(3, 8 - L)));
+    const oL = r.int(0, vneVsego);
+    const oR = vneVsego - oL;
+    const N = L + vneVsego;
+    /* Нули с шагом не меньше 2; у края без внешнего нуля — запас под конец отрезка. */
+    const zapasL = oL === 0 ? 2 : 1;
+    const zapasR = oR === 0 ? 2 : 1;
+    /* Интервал не длиннее 17 клеток, шаг нулей не меньше 2. */
+    const shirMin = Math.max(8, 2 * (N - 1) + zapasL + zapasR);
+    if (shirMin > 17) {
+      {
+        return null;
+      }
+    }
+    const shirina = r.int(shirMin, 17);
+    const raz = tochkiSOsyu(r, shirina, N, 2, zapasL, zapasR);
+    if (raz === null) {
+      {
+        return null;
+      }
+    }
+    const { a, b, tochki } = raz;
+    const tipPervogo = oL % 2 === 0 ? pervyyVnutri : pervyyVnutri === 'max' ? 'min' : 'max';
+    const w = volnaP(r, {
+      n: [N, N],
+      a: [a, a],
+      b: [b, b],
+      shirina: [shirina, shirina],
+      pervyy: tipPervogo === 'max' ? 1 : -1,
+      tochki,
+    });
+    if (w === null) {
+      {
+        return null;
+      }
+    }
+    smyagchit(w.uzly, r, 0.45);
+    const nuli = tipy(w.uzly);
+    if (nuli.length !== N) {
+      {
+        return null;
+      }
+    }
+    const zs = nuli.map((z) => z.x);
+    const okno = { i: oL, j: oL + L - 1 };
+    const prev = okno.i === 0 ? w.a : (nuli[okno.i - 1] as Nul).x;
+    const next = okno.j === nuli.length - 1 ? w.b : (nuli[okno.j + 1] as Nul).x;
+    const p = r.int(prev + 1, (nuli[okno.i] as Nul).x - 1);
+    const q = r.int((nuli[okno.j] as Nul).x + 1, next - 1);
+    if (p < w.a + 1 || q > w.b - 1 || q - p < 3) {
+      {
+        return null;
+      }
+    }
+    const { v, vne } = razdelit(nuli, { p, q });
+    if (v.length < 1 || vne.length < 1 || v.filter(podhodit).length !== cel) {
+      {
+        return null;
+      }
+    }
+    const nuzhnye = v.filter(podhodit);
+    const k = nuzhnye.length;
+    const vseTipa = nuli.filter(podhodit).length;
+    const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
+    const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
+      pomoshch: [
+        { t: 'otrezok', p, q, shag: 1 },
+        ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
+        ...znakiPomoshch(ps, 3),
+      ],
+    });
+    const variant = r.int(0, 2);
+    const uslovie = `${grafikP(w.a, w.b)} ${formulSchet(t, { p, q })[variant] as string}`;
+    const opredelenie =
+      t === 'max'
+        ? "Точка максимума — точка, где возрастание $f$ сменяется убыванием: $f'$ меняет знак с $+$ на $-$ (график $f'$ пересекает ось сверху вниз)."
+        : t === 'min'
+          ? "Точка минимума — точка, где убывание $f$ сменяется возрастанием: $f'$ меняет знак с $-$ на $+$ (график $f'$ пересекает ось снизу вверх)."
+          : "Точка экстремума — точка максимума или минимума: в ней $f'$ меняет знак (график $f'$ пересекает ось в любую сторону).";
+    const spisok = (rows: Nul[]) => (rows.length === 0 ? 'нет' : xRavno(rows.map((z) => z.x)));
+    const vTipa = v.filter(podhodit);
+    const maxV = v.filter((z) => z.tip === 'max').length;
+    const minV = v.filter((z) => z.tip === 'min').length;
+    const lovCnt: { v: number; w: string }[] = [
+      {
+        v: v.length,
+        w: `Посчитаны все нули на отрезке ($${v.length}$), но среди них есть точки другого типа.`,
+      },
+      { v: vseTipa, w: 'Посчитаны точки нужного типа на всём графике, а не только на отрезке.' },
+      {
+        v: t === 'max' ? minV : maxV,
+        w: 'Посчитаны точки противоположного типа: максимум и минимум перепутаны.',
+      },
+    ];
+    return sobrat(fig, { t: zaprosT, p, q }, k, {
+      uslovie,
+      shagi: [
+        shag(
+          'Что нужно найти',
+          opredelenie,
+          "Значит, нужно отобрать нули $f'$ со сменой знака нужного вида.",
+        ),
+        shag(
+          'Нули производной и смена знака',
+          `График $f'$ пересекает ось $Ox$ при ${xRavno(zs)}. Определим тип каждого нуля:`,
+          ...nuli.map(opisanieNulya),
+        ),
+        shag(
+          'Отбираем нули из отрезка',
+          `Отрезок $${otrezok(p, q)}$ содержит нули ${spisok(v)}.`,
+          `Вне отрезка лежат нули ${spisok(vne)} — они не учитываются.`,
+        ),
+        shag(
+          'Считаем',
+          t === 'extr'
+            ? `Все нули на отрезке — точки экстремума: ${spisok(vTipa)}. Их $${k}$.`
+            : `Из нулей на отрезке точками ${slovo} являются ${spisok(vTipa)}. Их $${k}$.`,
+        ),
+        shag('Ответ', `**Ответ: ${k}**`),
+      ],
+      podskazka: [
+        vopros(
+          r,
+          `Как должен вести себя $f'$ около точки ${slovo}?`,
+          t === 'max'
+            ? 'Менять знак с $+$ на $-$'
+            : t === 'min'
+              ? 'Менять знак с $-$ на $+$'
+              : 'Менять знак (в любую сторону)',
+          [
+            ...(t === 'extr'
+              ? [
+                  {
+                    tekst: 'Быть равной нулю, не меняя знак',
+                    pochemu: 'Если знак не меняется, монотонность не меняется и экстремума нет.',
+                  },
+                  {
+                    tekst: 'Достигать наибольшего значения',
+                    pochemu:
+                      "Вершина графика $f'$ — экстремум самой производной, а нужны нули $f'$ со сменой знака.",
+                  },
+                ]
+              : [
+                  {
+                    tekst: t === 'max' ? 'Менять знак с $-$ на $+$' : 'Менять знак с $+$ на $-$',
+                    pochemu: `Так меняется знак у точки ${t === 'max' ? 'минимума' : 'максимума'}.`,
+                  },
+                  {
+                    tekst: 'Достигать наибольшего значения',
+                    pochemu:
+                      "Вершина графика $f'$ — экстремум самой производной, а нужны нули $f'$ со сменой знака.",
+                  },
+                ]),
+          ],
+          t === 'max'
+            ? "У максимума знак $f'$ меняется с $+$ на $-$."
+            : t === 'min'
+              ? "У минимума знак $f'$ меняется с $-$ на $+$."
+              : "У экстремума знак $f'$ меняется.",
+        ),
+        vopros(
+          r,
+          `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
+          spisok(v),
+          knopki(spisok(v), [
+            {
+              tekst: spisok(nuli),
+              pochemu:
+                'Это все нули графика, а отрезок $[' +
+                `${p};\\ ${q}` +
+                ']$ охватывает лишь часть из них.',
+            },
+            { tekst: spisok(vne), pochemu: 'Это нули вне отрезка: условие их не касается.' },
+            {
+              tekst: spisok(v.slice(1)),
+              pochemu: 'Один из нулей отрезка пропущен: проверьте края отрезка.',
+            },
+          ]),
+          `На отрезке лежат нули ${spisok(v)}.`,
+          1,
+        ),
+        vopros(
+          r,
+          `Какие из них — точки ${slovo}?`,
+          spisok(vTipa),
+          knopki(spisok(vTipa), [
+            ...(t === 'extr'
+              ? [
+                  {
+                    tekst: spisok(v.filter((z) => z.tip === 'max')),
+                    pochemu: 'Это только максимумы. Минимумы — тоже экстремумы.',
+                  },
+                  {
+                    tekst: spisok(v.filter((z) => z.tip === 'min')),
+                    pochemu: 'Это только минимумы. Максимумы — тоже экстремумы.',
+                  },
+                ]
+              : [
+                  {
+                    tekst: spisok(v.filter((z) => z.tip !== t)),
+                    pochemu: `Здесь знак меняется в другую сторону: это точки ${t === 'max' ? 'минимума' : 'максимума'}.`,
+                  },
+                  {
+                    tekst: spisok(v),
+                    pochemu:
+                      'Здесь взяты все нули на отрезке, но часть из них — точки другого типа.',
+                  },
+                ]),
+          ]),
+          `Точки ${slovo} на отрезке: ${spisok(vTipa)}.`,
+          3,
+        ),
+        vopros(r, 'Сколько их?', `$${k}$`, neverniyeChisla(k, lovCnt, 1), `Таких точек $${k}$.`, 3),
+      ],
+      params: { a: w.a, b: w.b, p, q, k, n: zs.length },
+      signature: podpisUzlov(fig) + `|${p}|${q}`,
+      vid: `v${variant}k${k}`,
+    });
+  }
 }
 
 const P945 = chisloNaOtrezke('9.4.5', 'max');
@@ -698,127 +798,145 @@ const P948 = proto({
   kratko: 'Точка экстремума на отрезке',
   risunok: true,
   generate(r: Rng): Draft | null {
-    const w = volnaP(r, { n: [3, 5], a: [-9, -5], b: [5, 9] });
-    if (w === null) {
-      return null;
+    /* Сначала ответ (равномерно), потом рисунок, сдвинутый под него. */
+    const cel = celevoy(r, -8, 8);
+    for (let popytka = 0; popytka < 150; popytka += 1) {
+      const draft = extrNaOtrezke(r, cel);
+      if (draft !== null) {
+        return draft;
+      }
     }
-    const nuli = tipy(w.uzly);
-    const zs = nuli.map((z) => z.x);
-    const z0 = r.pick(nuli);
-    const p = z0.x - r.int(1, 3);
-    const q = z0.x + r.int(1, 3);
-    if (p < w.a + 1 || q > w.b - 1) {
-      return null;
-    }
-    const { v, vne } = razdelit(nuli, { p, q });
-    if (v.length !== 1 || vne.length < 1) {
-      return null;
-    }
-    const ans = z0.x;
-    const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
-    const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
-      pomoshch: [
-        { t: 'otrezok', p, q, shag: 1 },
-        ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
-        ...znakiPomoshch(ps, 3),
-      ],
-    });
-    const variant = r.int(0, 2);
-    const vopr = [
-      `Найдите точку экстремума функции $f(x)$, принадлежащую отрезку $${otrezok(p, q)}$.`,
-      `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ имеет экстремум?`,
-      `Укажите точку экстремума функции $f(x)$ на отрезке $${otrezok(p, q)}$.`,
-    ][variant] as string;
-    const vershinaX = vershina(w.uzly, zs);
-    const tipNul = z0.tip === 'max' ? 'максимума' : 'минимума';
-    const spisokVne = vne.map((z) => z.x);
-    return sobrat(fig, { t: 'extr-na-otrezke', p, q }, ans, {
-      uslovie: `${grafikP(w.a, w.b)} ${vopr}`,
-      shagi: [
-        shag(
-          'Что такое точка экстремума',
-          "Точка экстремума функции $f$ — точка максимума или минимума. В ней $f'(x)=0$ и $f'$ меняет знак, то есть график $f'$ пересекает ось $Ox$.",
-        ),
-        shag(
-          'Находим нули производной и смену знака',
-          `График $f'$ пересекает ось $Ox$ при ${xRavno(zs)}.`,
-          ...nuli.map(opisanieNulya),
-        ),
-        shag(
-          'Выбираем нуль из отрезка',
-          `Отрезок $${otrezok(p, q)}$ содержит один нуль: $x=${d(ans)}$ (${d(p)}<${d(ans)}<${d(q)}).`.replace(
-            `(${d(p)}<${d(ans)}<${d(q)})`,
-            `($${d(p)}<${d(ans)}<${d(q)}$)`,
-          ),
-          `Нули ${xRavno(spisokVne)} лежат вне отрезка.`,
-          `В точке $x=${d(ans)}$ знак $f'$ меняется, поэтому это точка ${tipNul}.`,
-        ),
-        shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
-      ],
-      podskazka: [
-        vopros(
-          r,
-          "Что должно происходить с $f'$ в точке экстремума функции $f$?",
-          "$f'$ обращается в нуль и меняет знак",
-          [
-            {
-              tekst: "$f'$ достигает наибольшего значения",
-              pochemu: "Вершина графика $f'$ — это экстремум производной, а не функции $f$.",
-            },
-            {
-              tekst: "$f'$ положительна",
-              pochemu: "Если $f'>0$, функция $f$ просто возрастает: экстремума в такой точке нет.",
-            },
-          ],
-          "В точке экстремума график $f'$ пересекает ось $Ox$.",
-        ),
-        vopros(
-          r,
-          `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
-          `$x=${d(ans)}$`,
-          knopki(
-            `$x=${d(ans)}$`,
-            vne.slice(0, 3).map((z) => ({
-              tekst: `$x=${d(z.x)}$`,
-              pochemu: `В этой точке $f'$ тоже меняет знак, но она вне отрезка $${otrezok(p, q)}$.`,
-            })),
-          ),
-          `На отрезке лежит единственный нуль $x=${d(ans)}$.`,
-          1,
-        ),
-        vopros(
-          r,
-          `Меняет ли $f'$ знак в точке $x=${d(ans)}$?`,
-          `Да, знак меняется ${z0.tip === 'max' ? PLUS_MINUS : MINUS_PLUS}`,
-          [
-            {
-              tekst: `Да, знак меняется ${z0.tip === 'max' ? MINUS_PLUS : PLUS_MINUS}`,
-              pochemu: 'Посмотрите на знаки по обе стороны от нуля: слева и справа они другие.',
-            },
-            {
-              tekst: 'Нет, знак не меняется',
-              pochemu: 'График в этой точке пересекает ось, а не касается её: знак меняется.',
-            },
-            ...(vershinaX === null
-              ? []
-              : [
-                  {
-                    tekst: `Ответом является $x=${d(vershinaX)}$`,
-                    pochemu:
-                      "Это вершина графика $f'$, в ней $f'\\ne0$: экстремума функции $f$ там нет.",
-                  },
-                ]),
-          ].slice(0, 3),
-          `Знак меняется, значит $x=${d(ans)}$ — точка экстремума.`,
-          3,
-        ),
-      ],
-      params: { a: w.a, b: w.b, p, q, ans, n: zs.length },
-      signature: podpisUzlov(fig) + `|${p}|${q}`,
-      vid: `v${variant}t${z0.tip}`,
-    });
+    return null;
   },
 });
+
+function extrNaOtrezke(r: Rng, cel: number): Draft | null {
+  const w0 = volnaP(r, { n: [2, 5], shag: r.int(2, 3), a: [-9, -4], b: [4, 9] });
+  if (w0 === null) {
+    return null;
+  }
+  const i0 = r.int(0, tipy(w0.uzly).length - 1);
+  const s = sdvigPod(cel, (tipy(w0.uzly)[i0] as Nul).x, w0.a, w0.b);
+  if (s === null) {
+    return null;
+  }
+  const w = { ...w0, uzly: sdvinut(w0.uzly, s), a: w0.a + s, b: w0.b + s };
+  const nuli = tipy(w.uzly);
+  const zs = nuli.map((z) => z.x);
+  const z0 = nuli[i0] as Nul;
+  const p = z0.x - r.int(1, 3);
+  const q = z0.x + r.int(1, 3);
+  if (p < w.a + 1 || q > w.b - 1) {
+    return null;
+  }
+  const { v, vne } = razdelit(nuli, { p, q });
+  if (v.length !== 1 || vne.length < 1) {
+    return null;
+  }
+  const ans = z0.x;
+  const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
+  const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
+    pomoshch: [
+      { t: 'otrezok', p, q, shag: 1 },
+      ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
+      ...znakiPomoshch(ps, 3),
+    ],
+  });
+  const variant = r.int(0, 2);
+  const vopr = [
+    `Найдите точку экстремума функции $f(x)$, принадлежащую отрезку $${otrezok(p, q)}$.`,
+    `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ имеет экстремум?`,
+    `Укажите точку экстремума функции $f(x)$ на отрезке $${otrezok(p, q)}$.`,
+  ][variant] as string;
+  const vershinaX = vershina(w.uzly, zs);
+  const tipNul = z0.tip === 'max' ? 'максимума' : 'минимума';
+  const spisokVne = vne.map((z) => z.x);
+  return sobrat(fig, { t: 'extr-na-otrezke', p, q }, ans, {
+    uslovie: `${grafikP(w.a, w.b)} ${vopr}`,
+    shagi: [
+      shag(
+        'Что такое точка экстремума',
+        "Точка экстремума функции $f$ — точка максимума или минимума. В ней $f'(x)=0$ и $f'$ меняет знак, то есть график $f'$ пересекает ось $Ox$.",
+      ),
+      shag(
+        'Находим нули производной и смену знака',
+        `График $f'$ пересекает ось $Ox$ при ${xRavno(zs)}.`,
+        ...nuli.map(opisanieNulya),
+      ),
+      shag(
+        'Выбираем нуль из отрезка',
+        `Отрезок $${otrezok(p, q)}$ содержит один нуль: $x=${d(ans)}$ (${d(p)}<${d(ans)}<${d(q)}).`.replace(
+          `(${d(p)}<${d(ans)}<${d(q)})`,
+          `($${d(p)}<${d(ans)}<${d(q)}$)`,
+        ),
+        `Нули ${xRavno(spisokVne)} лежат вне отрезка.`,
+        `В точке $x=${d(ans)}$ знак $f'$ меняется, поэтому это точка ${tipNul}.`,
+      ),
+      shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
+    ],
+    podskazka: [
+      vopros(
+        r,
+        "Что должно происходить с $f'$ в точке экстремума функции $f$?",
+        "$f'$ обращается в нуль и меняет знак",
+        [
+          {
+            tekst: "$f'$ достигает наибольшего значения",
+            pochemu: "Вершина графика $f'$ — это экстремум производной, а не функции $f$.",
+          },
+          {
+            tekst: "$f'$ положительна",
+            pochemu: "Если $f'>0$, функция $f$ просто возрастает: экстремума в такой точке нет.",
+          },
+        ],
+        "В точке экстремума график $f'$ пересекает ось $Ox$.",
+      ),
+      vopros(
+        r,
+        `Какие нули $f'$ лежат на отрезке $${otrezok(p, q)}$?`,
+        `$x=${d(ans)}$`,
+        knopki(
+          `$x=${d(ans)}$`,
+          vne.slice(0, 3).map((z) => ({
+            tekst: `$x=${d(z.x)}$`,
+            pochemu: `В этой точке $f'$ тоже меняет знак, но она вне отрезка $${otrezok(p, q)}$.`,
+          })),
+        ),
+        `На отрезке лежит единственный нуль $x=${d(ans)}$.`,
+        1,
+      ),
+      vopros(
+        r,
+        `Меняет ли $f'$ знак в точке $x=${d(ans)}$?`,
+        `Да, знак меняется ${z0.tip === 'max' ? PLUS_MINUS : MINUS_PLUS}`,
+        [
+          {
+            tekst: `Да, знак меняется ${z0.tip === 'max' ? MINUS_PLUS : PLUS_MINUS}`,
+            pochemu: 'Посмотрите на знаки по обе стороны от нуля: слева и справа они другие.',
+          },
+          {
+            tekst: 'Нет, знак не меняется',
+            pochemu: 'График в этой точке пересекает ось, а не касается её: знак меняется.',
+          },
+          ...(vershinaX === null
+            ? []
+            : [
+                {
+                  tekst: `Ответом является $x=${d(vershinaX)}$`,
+                  pochemu:
+                    "Это вершина графика $f'$, в ней $f'\\ne0$: экстремума функции $f$ там нет.",
+                },
+              ]),
+        ].slice(0, 3),
+        `Знак меняется, значит $x=${d(ans)}$ — точка экстремума.`,
+        3,
+      ),
+    ],
+    params: { a: w.a, b: w.b, p, q, ans, n: zs.length },
+    signature: podpisUzlov(fig) + `|${p}|${q}`,
+    vid: `v${variant}t${z0.tip}`,
+  });
+}
 
 /* ── 9.4.9 и 9.4.10: наибольшее / наименьшее значение на отрезке ── */
 
@@ -914,165 +1032,185 @@ function naibNaimOtrezok(id: string, naib: boolean) {
     kratko: naib ? 'Где на отрезке наибольшее значение' : 'Где на отрезке наименьшее значение',
     risunok: true,
     generate(r: Rng): Draft | null {
-      const w = volnaP(r, { n: [2, 4], a: [-9, -5], b: [5, 9] });
-      if (w === null) {
-        return null;
+      /* Сначала ответ (равномерно), потом рисунок, сдвинутый под него. */
+      const cel = celevoy(r, -8, 8);
+      for (let popytka = 0; popytka < 150; popytka += 1) {
+        const draft = postroitNaib(r, cel);
+        if (draft !== null) {
+          return draft;
+        }
       }
-      const stsenariy: Stsenariy = naib
-        ? r.pick(['plus', 'minus', 'pm', 'pm'] as const)
-        : r.pick(['plus', 'minus', 'mp', 'mp'] as const);
-      const vy = vyborOtrezka(r, w.uzly, w.a, w.b, stsenariy);
-      if (vy === null) {
-        return null;
-      }
-      const { p, q, z } = vy;
-      /* Ответ из задуманного сценария. */
-      let ans: number;
-      if (stsenariy === 'plus') {
-        ans = naib ? q : p;
-      } else if (stsenariy === 'minus') {
-        ans = naib ? p : q;
-      } else {
-        ans = z as number;
-      }
-      const nuli = tipy(w.uzly);
-      const zs = nuli.map((x) => x.x);
-      const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
-      const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
-        pomoshch: [
-          { t: 'otrezok', p, q, shag: 1 },
-          ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
-          ...znakiPomoshch(ps, 2),
-        ],
-      });
-      const variant = r.int(0, 2);
-      const vopr = naib
-        ? [
-            `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ принимает наибольшее значение?`,
-            `Найдите точку отрезка $${otrezok(p, q)}$, в которой функция $f(x)$ принимает наибольшее значение.`,
-            `В какой точке отрезка $${otrezok(p, q)}$ значение функции $f(x)$ наибольшее?`,
-          ][variant]
-        : [
-            `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ принимает наименьшее значение?`,
-            `Найдите точку отрезка $${otrezok(p, q)}$, в которой функция $f(x)$ принимает наименьшее значение.`,
-            `В какой точке отрезка $${otrezok(p, q)}$ значение функции $f(x)$ наименьшее?`,
-          ][variant];
-      const op = opisanieStsenariya(stsenariy);
-      const vneNuli = nuli.filter((x) => x.x < p || x.x > q);
-      const vOtrezke = nuli.filter((x) => x.x >= p && x.x <= q);
-      const vyvod = (() => {
-        if (stsenariy === 'plus') {
-          return naib
-            ? `Возрастающая функция принимает наибольшее значение на правом конце отрезка: $x=${d(q)}$.`
-            : `Возрастающая функция принимает наименьшее значение на левом конце отрезка: $x=${d(p)}$.`;
-        }
-        if (stsenariy === 'minus') {
-          return naib
-            ? `Убывающая функция принимает наибольшее значение на левом конце отрезка: $x=${d(p)}$.`
-            : `Убывающая функция принимает наименьшее значение на правом конце отрезка: $x=${d(q)}$.`;
-        }
-        return stsenariy === 'pm'
-          ? `Слева от $x=${d(ans)}$ функция возрастает, справа убывает, значит в точке $x=${d(ans)}$ (точка максимума) её значение наибольшее на отрезке.`
-          : `Слева от $x=${d(ans)}$ функция убывает, справа возрастает, значит в точке $x=${d(ans)}$ (точка минимума) её значение наименьшее на отрезке.`;
-      })();
-      const opisKand = (x: number): string => {
-        if (x === p) {
-          return 'левый конец отрезка';
-        }
-        if (x === q) {
-          return 'правый конец отрезка';
-        }
-        return 'внутренняя точка смены знака';
-      };
-      const kandidaty = [p, q, ...(z === null ? [] : [z])];
-      return sobrat(fig, { t: naib ? 'naib-na-otrezke' : 'naim-na-otrezke', p, q }, ans, {
-        uslovie: `${grafikP(w.a, w.b)} ${vopr as string}`,
-        shagi: [
-          shag(
-            'Связь знака производной и поведения функции',
-            "Если $f'(x)>0$ (график $f'$ выше оси $Ox$), функция $f$ возрастает; если $f'(x)<0$ (график ниже оси), $f$ убывает.",
-          ),
-          shag(
-            "Знак $f'$ на отрезке",
-            `Рассмотрим отрезок $${otrezok(p, q)}$: ${op.f1}${
-              vOtrezke.length === 0 && vneNuli.length > 0
-                ? ` (ближайшие нули лежат вне отрезка: ${xRavno(vneNuli.slice(0, 3).map((x) => x.x))})`
-                : ''
-            }.`,
-            ...(vOtrezke.length === 1
-              ? [`Единственный нуль на отрезке: $x=${d((vOtrezke[0] as Nul).x)}$.`]
-              : []),
-          ),
-          shag('Как ведёт себя функция', `Значит, ${op.f}.`, vyvod),
-          shag(
-            'Ответ',
-            `Искомая точка: $x=${d(ans)}$ — ${opisKand(ans)}.`,
-            `**Ответ: ${chislaOtvet(ans)}**`,
-          ),
-        ],
-        podskazka: [
-          vopros(
-            r,
-            "Как график $f'$ расположен относительно оси $Ox$ на отрезке $" + otrezok(p, q) + '$?',
-            op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
-            knopki(
-              op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
-              (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
-                .filter((s) => s !== stsenariy)
-                .map((s) => ({
-                  tekst:
-                    opisanieStsenariya(s).f1.charAt(0).toUpperCase() +
-                    opisanieStsenariya(s).f1.slice(1),
-                  pochemu: `Нет: на этом отрезке ${op.f1}.`,
-                })),
-            ),
-            `На отрезке ${op.f1}.`,
-            1,
-          ),
-          vopros(
-            r,
-            'Как ведёт себя функция $f$ на этом отрезке?',
-            op.f.charAt(0).toUpperCase() + op.f.slice(1),
-            knopki(
-              op.f.charAt(0).toUpperCase() + op.f.slice(1),
-              (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
-                .filter((s) => s !== stsenariy)
-                .map((s) => ({
-                  tekst:
-                    opisanieStsenariya(s).f.charAt(0).toUpperCase() +
-                    opisanieStsenariya(s).f.slice(1),
-                  pochemu: `Нет: по знаку $f'$ на отрезке ${op.f}.`,
-                })),
-            ),
-            `На отрезке ${op.f}.`,
-            2,
-          ),
-          vopros(
-            r,
-            `В какой точке отрезка значение функции ${slovo}?`,
-            `$x=${d(ans)}$`,
-            knopki(`$x=${d(ans)}$`, [
-              ...kandidaty
-                .filter((x) => x !== ans)
-                .map((x) => ({
-                  tekst: `$x=${d(x)}$`,
-                  pochemu: `В точке $x=${d(x)}$ (${opisKand(x)}) значение функции ${naib ? 'меньше' : 'больше'}, чем в точке $x=${d(ans)}$: так показывает знак $f'$ на отрезке.`,
-                })),
-              ...vneNuli.slice(0, 1).map((x) => ({
-                tekst: `$x=${d(x.x)}$`,
-                pochemu: `Эта точка лежит вне отрезка $${otrezok(p, q)}$, а ответ нужно искать на отрезке.`,
-              })),
-            ]),
-            `${slovo.charAt(0).toUpperCase() + slovo.slice(1)} значение — в точке $x=${d(ans)}$.`,
-            2,
-          ),
-        ],
-        params: { a: w.a, b: w.b, p, q, ans, stsenariy },
-        signature: podpisUzlov(fig) + `|${p}|${q}`,
-        vid: `${stsenariy}v${variant}`,
-      });
+      return null;
     },
   });
+
+  function postroitNaib(r: Rng, cel: number): Draft | null {
+    const w0 = volnaP(r, { n: [1, 4], shag: r.int(2, 3), a: [-9, -4], b: [4, 9] });
+    if (w0 === null) {
+      return null;
+    }
+    const stsenariy: Stsenariy = naib
+      ? r.pick(['plus', 'minus', 'pm', 'pm'] as const)
+      : r.pick(['plus', 'minus', 'mp', 'mp'] as const);
+    const vy = vyborOtrezka(r, w0.uzly, w0.a, w0.b, stsenariy);
+    if (vy === null) {
+      return null;
+    }
+    /* Ответ из задуманного сценария. */
+    let ans0: number;
+    if (stsenariy === 'plus') {
+      ans0 = naib ? vy.q : vy.p;
+    } else if (stsenariy === 'minus') {
+      ans0 = naib ? vy.p : vy.q;
+    } else {
+      ans0 = vy.z as number;
+    }
+    const s = sdvigPod(cel, ans0, w0.a, w0.b);
+    if (s === null) {
+      return null;
+    }
+    const w = { ...w0, uzly: sdvinut(w0.uzly, s), a: w0.a + s, b: w0.b + s };
+    const p = vy.p + s;
+    const q = vy.q + s;
+    const z = vy.z === null ? null : vy.z + s;
+    const ans = ans0 + s;
+    const nuli = tipy(w.uzly);
+    const zs = nuli.map((x) => x.x);
+    const ps = promezhutki([w.a, ...zs, w.b], (m) => znakZnacheniya(w.uzly, m));
+    const fig: Figura = figura('fprime', "f'(x)", w.uzly, {
+      pomoshch: [
+        { t: 'otrezok', p, q, shag: 1 },
+        ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
+        ...znakiPomoshch(ps, 2),
+      ],
+    });
+    const variant = r.int(0, 2);
+    const vopr = naib
+      ? [
+          `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ принимает наибольшее значение?`,
+          `Найдите точку отрезка $${otrezok(p, q)}$, в которой функция $f(x)$ принимает наибольшее значение.`,
+          `В какой точке отрезка $${otrezok(p, q)}$ значение функции $f(x)$ наибольшее?`,
+        ][variant]
+      : [
+          `В какой точке отрезка $${otrezok(p, q)}$ функция $f(x)$ принимает наименьшее значение?`,
+          `Найдите точку отрезка $${otrezok(p, q)}$, в которой функция $f(x)$ принимает наименьшее значение.`,
+          `В какой точке отрезка $${otrezok(p, q)}$ значение функции $f(x)$ наименьшее?`,
+        ][variant];
+    const op = opisanieStsenariya(stsenariy);
+    const vneNuli = nuli.filter((x) => x.x < p || x.x > q);
+    const vOtrezke = nuli.filter((x) => x.x >= p && x.x <= q);
+    const vyvod = (() => {
+      if (stsenariy === 'plus') {
+        return naib
+          ? `Возрастающая функция принимает наибольшее значение на правом конце отрезка: $x=${d(q)}$.`
+          : `Возрастающая функция принимает наименьшее значение на левом конце отрезка: $x=${d(p)}$.`;
+      }
+      if (stsenariy === 'minus') {
+        return naib
+          ? `Убывающая функция принимает наибольшее значение на левом конце отрезка: $x=${d(p)}$.`
+          : `Убывающая функция принимает наименьшее значение на правом конце отрезка: $x=${d(q)}$.`;
+      }
+      return stsenariy === 'pm'
+        ? `Слева от $x=${d(ans)}$ функция возрастает, справа убывает, значит в точке $x=${d(ans)}$ (точка максимума) её значение наибольшее на отрезке.`
+        : `Слева от $x=${d(ans)}$ функция убывает, справа возрастает, значит в точке $x=${d(ans)}$ (точка минимума) её значение наименьшее на отрезке.`;
+    })();
+    const opisKand = (x: number): string => {
+      if (x === p) {
+        return 'левый конец отрезка';
+      }
+      if (x === q) {
+        return 'правый конец отрезка';
+      }
+      return 'внутренняя точка смены знака';
+    };
+    const kandidaty = [p, q, ...(z === null ? [] : [z])];
+    return sobrat(fig, { t: naib ? 'naib-na-otrezke' : 'naim-na-otrezke', p, q }, ans, {
+      uslovie: `${grafikP(w.a, w.b)} ${vopr as string}`,
+      shagi: [
+        shag(
+          'Связь знака производной и поведения функции',
+          "Если $f'(x)>0$ (график $f'$ выше оси $Ox$), функция $f$ возрастает; если $f'(x)<0$ (график ниже оси), $f$ убывает.",
+        ),
+        shag(
+          "Знак $f'$ на отрезке",
+          `Рассмотрим отрезок $${otrezok(p, q)}$: ${op.f1}${
+            vOtrezke.length === 0 && vneNuli.length > 0
+              ? ` (ближайшие нули лежат вне отрезка: ${xRavno(vneNuli.slice(0, 3).map((x) => x.x))})`
+              : ''
+          }.`,
+          ...(vOtrezke.length === 1
+            ? [`Единственный нуль на отрезке: $x=${d((vOtrezke[0] as Nul).x)}$.`]
+            : []),
+        ),
+        shag('Как ведёт себя функция', `Значит, ${op.f}.`, vyvod),
+        shag(
+          'Ответ',
+          `Искомая точка: $x=${d(ans)}$ — ${opisKand(ans)}.`,
+          `**Ответ: ${chislaOtvet(ans)}**`,
+        ),
+      ],
+      podskazka: [
+        vopros(
+          r,
+          "Как график $f'$ расположен относительно оси $Ox$ на отрезке $" + otrezok(p, q) + '$?',
+          op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
+          knopki(
+            op.f1.charAt(0).toUpperCase() + op.f1.slice(1),
+            (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
+              .filter((s) => s !== stsenariy)
+              .map((s) => ({
+                tekst:
+                  opisanieStsenariya(s).f1.charAt(0).toUpperCase() +
+                  opisanieStsenariya(s).f1.slice(1),
+                pochemu: `Нет: на этом отрезке ${op.f1}.`,
+              })),
+          ),
+          `На отрезке ${op.f1}.`,
+          1,
+        ),
+        vopros(
+          r,
+          'Как ведёт себя функция $f$ на этом отрезке?',
+          op.f.charAt(0).toUpperCase() + op.f.slice(1),
+          knopki(
+            op.f.charAt(0).toUpperCase() + op.f.slice(1),
+            (['plus', 'minus', 'pm', 'mp'] as Stsenariy[])
+              .filter((s) => s !== stsenariy)
+              .map((s) => ({
+                tekst:
+                  opisanieStsenariya(s).f.charAt(0).toUpperCase() +
+                  opisanieStsenariya(s).f.slice(1),
+                pochemu: `Нет: по знаку $f'$ на отрезке ${op.f}.`,
+              })),
+          ),
+          `На отрезке ${op.f}.`,
+          2,
+        ),
+        vopros(
+          r,
+          `В какой точке отрезка значение функции ${slovo}?`,
+          `$x=${d(ans)}$`,
+          knopki(`$x=${d(ans)}$`, [
+            ...kandidaty
+              .filter((x) => x !== ans)
+              .map((x) => ({
+                tekst: `$x=${d(x)}$`,
+                pochemu: `В точке $x=${d(x)}$ (${opisKand(x)}) значение функции ${naib ? 'меньше' : 'больше'}, чем в точке $x=${d(ans)}$: так показывает знак $f'$ на отрезке.`,
+              })),
+            ...vneNuli.slice(0, 1).map((x) => ({
+              tekst: `$x=${d(x.x)}$`,
+              pochemu: `Эта точка лежит вне отрезка $${otrezok(p, q)}$, а ответ нужно искать на отрезке.`,
+            })),
+          ]),
+          `${slovo.charAt(0).toUpperCase() + slovo.slice(1)} значение — в точке $x=${d(ans)}$.`,
+          2,
+        ),
+      ],
+      params: { a: w.a, b: w.b, p, q, ans, stsenariy },
+      signature: podpisUzlov(fig) + `|${p}|${q}`,
+      vid: `${stsenariy}v${variant}n${zs.length}`,
+    });
+  }
 }
 
 const P949 = naibNaimOtrezok('9.4.9', true);

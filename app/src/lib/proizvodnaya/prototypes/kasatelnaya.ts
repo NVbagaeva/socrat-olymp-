@@ -25,6 +25,7 @@ import { naklony, postroit } from '../spline';
 import { d, otrezok } from '../tex';
 import type { Draft, Figura, Pomoshch, Uzel } from '../types';
 import { grafikF, grafikP, metkiTekst } from '../uslovie';
+import { pustoyOtchet, renderFigura } from '../render';
 import { proto, shag, sobrat, vopros } from './common';
 import { shagiNaklon } from './naklon';
 
@@ -40,8 +41,28 @@ interface SKasat {
   q: number;
 }
 
-/** Волна с узлом касания: наклон в нём задан явно и равен p/q. */
-function volnaSKasat(r: Rng, down: boolean): SKasat | null {
+/**
+ * Загадываемые угловые коэффициенты касательной в 9.2.1 (со знаком «±»)
+ * и их веса. Круче 1 касательная не проходит через два узла сетки вне
+ * кривой и внутри окна, поэтому пологие наклоны с q = 4, 5 добавлены
+ * для разнообразия. Веса обратны доле удачных рисунков — ответы поровну.
+ */
+const CELI_921: { p: number; q: number; ves: number }[] = [
+  { p: 1, q: 5, ves: 7.9 },
+  { p: 1, q: 4, ves: 4.5 },
+  { p: 2, q: 5, ves: 4.5 },
+  { p: 1, q: 2, ves: 1 },
+  { p: 3, q: 5, ves: 10 },
+  { p: 3, q: 4, ves: 8.5 },
+  { p: 1, q: 1, ves: 1.1 },
+];
+
+/**
+ * Волна с узлом касания: наклон в нём задан явно и равен p/q. `cel` —
+ * загаданный наклон: он должен быть близок к естественному наклону кривой
+ * (от половины до двух), иначе кривая выйдет неестественной.
+ */
+function volnaSKasat(r: Rng, down: boolean, cel?: { p: number; q: number }): SKasat | null {
   const w = volna(r, { n: [2, 3], shag: 3 });
   if (w === null) {
     return null;
@@ -70,12 +91,57 @@ function volnaSKasat(r: Rng, down: boolean): SKasat | null {
   const withNode = [...w.uzly.slice(0, i + 1), { x: x0, y: y0 }, ...w.uzly.slice(i + 1)];
   const idx = i + 1;
   const mNat = naklony(withNode)[idx] as number;
-  const pq = blizhayshiyNaklon(mNat);
+  let pq = blizhayshiyNaklon(mNat);
+  if (cel !== undefined) {
+    const k = cel.p / cel.q;
+    const ratio = k / mNat;
+    pq = ratio >= 0.4 && ratio <= 2.5 ? cel : null;
+  }
   if (pq === null) {
     return null;
   }
   const uzly = withNode.map((u, j) => (j === idx ? { ...u, m: pq.p / pq.q } : u));
   return { uzly, a: w.a, b: w.b, x0, y0, p: pq.p, q: pq.q };
+}
+
+/**
+ * Дуга угла α на листе учителя не касается кривой (та же мера, что в
+ * автотесте: ближе 3,4 px — касание). Пологие касательные ставят дугу
+ * у самой кривой, поэтому проверяем заранее.
+ */
+function dugaChista(fig: Figura): boolean {
+  const rep = pustoyOtchet();
+  renderFigura(fig, { rezhim: 'teacher' }, rep);
+  const cell = rep.cell;
+  const pad = (rep.width - (fig.okno.xmax - fig.okno.xmin) * cell) / 2;
+  const spl = postroit(fig.uzly);
+  const first = (fig.uzly[0] as Uzel).x;
+  const last = (fig.uzly[fig.uzly.length - 1] as Uzel).x;
+  const pts: [number, number][] = [];
+  for (let x = first; x <= last + 1e-9; x += 0.05) {
+    pts.push([pad + (x - fig.okno.xmin) * cell, pad + (fig.okno.ymax - spl.y(x)) * cell]);
+  }
+  for (const arc of rep.dugi) {
+    const n = Math.max(8, Math.ceil(Math.abs(arc.t1 - arc.t0) / 2));
+    for (let i = 0; i <= n; i += 1) {
+      const t = ((arc.t0 + ((arc.t1 - arc.t0) * i) / n) * Math.PI) / 180;
+      const ax = arc.cx + arc.r * Math.cos(t);
+      const ay = arc.cy - arc.r * Math.sin(t);
+      for (let k = 0; k < pts.length - 1; k += 1) {
+        const [x1, y1] = pts[k] as [number, number];
+        const [x2, y2] = pts[k + 1] as [number, number];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len2 = dx * dx + dy * dy;
+        const u =
+          len2 === 0 ? 0 : Math.max(0, Math.min(1, ((ax - x1) * dx + (ay - y1) * dy) / len2));
+        if (Math.hypot(x1 + u * dx - ax, y1 + u * dy - ay) < 3.6) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 /** Два узла касательной внутри окна. */
@@ -103,7 +169,7 @@ function dvaUzla(
     for (let j = i + 1; j < cand.length; j += 1) {
       const A = cand[i] as [number, number];
       const B = cand[j] as [number, number];
-      if (B[0] - A[0] >= 3 && B[0] - A[0] <= 9) {
+      if (B[0] - A[0] >= 3 && B[0] - A[0] <= 10) {
         far.push([A, B]);
       }
     }
@@ -121,7 +187,13 @@ const P921 = proto({
   kratko: "Найти $f'(x_0)$ по касательной",
   risunok: true,
   generate(r: Rng): Draft | null {
-    const s = volnaSKasat(r, r.next() < 0.4);
+    /* Сначала ответ: наклон ±p/q с весами, потом кривая под него. */
+    const nomer = r.next() * CELI_921.reduce((acc, c) => acc + c.ves, 0);
+    let acc = 0;
+    const cel =
+      CELI_921.find((c) => (acc += c.ves) > nomer) ?? (CELI_921[0] as { p: number; q: number });
+    const down = r.next() < 0.55;
+    const s = volnaSKasat(r, down, { p: down ? -cel.p : cel.p, q: cel.q });
     if (s === null) {
       return null;
     }
@@ -132,10 +204,6 @@ const P921 = proto({
     }
     const [A, B] = pair;
     const k = s.p / s.q;
-    /* Разнообразие: убывающих касательных не меньше трети, наклон ±1 — реже остальных. */
-    if (Math.abs(k) === 1 && r.next() < 0.5) {
-      return null;
-    }
     const fig: Figura = {
       ...base,
       kasatelnaya: { a: A, b: B, x0: s.x0 },
@@ -167,6 +235,9 @@ const P921 = proto({
         w: 'Катет сосчитан с ошибкой на клетку: пересчитайте по узлам.',
       },
     ];
+    if (!dugaChista(fig)) {
+      return null;
+    }
     const draft = sobrat(fig, { t: 'kasat-znachenie' }, k, {
       uslovie,
       shagi: [
@@ -267,7 +338,7 @@ const P921 = proto({
       ],
       params: { x0: s.x0, y0: s.y0, p: s.p, q: s.q, ax: A[0], ay: A[1], bx: B[0], by: B[1] },
       signature: `${s.p}/${s.q}|${s.x0}|${A}|${B}`,
-      vid: `${k > 0 ? 'up' : 'down'}-${Math.abs(k) < 1 ? 'flat' : Math.abs(k) === 1 ? '45' : 'steep'}`,
+      vid: `${k > 0 ? 'up' : 'down'}-${Math.abs(s.p)}/${s.q}`,
     });
     return draft;
   },
@@ -279,6 +350,20 @@ function otvetTekst(x: number): string {
   return chislaOtvet(x);
 }
 
+/** Веса абсциссы-ответа −8…8: края подбираются реже, их загадываем чаще. */
+const VESA_ABSCISSY = [
+  2.6, 2.1, 1.64, 1.47, 1.3, 1.28, 1.13, 1.06, 1, 1.06, 1.13, 1.28, 1.3, 1.47, 1.64, 2.1, 2.6,
+];
+
+/** Сдвиг волны по x на s клеток: интервал по-прежнему охватывает начало координат. */
+function sdvigGoden(w: { a: number; b: number }, s: number): boolean {
+  return w.a + s <= -2 && w.b + s >= 2;
+}
+
+function sdvinut<W extends { uzly: Uzel[]; a: number; b: number }>(w: W, s: number): W {
+  return { ...w, uzly: w.uzly.map((u) => ({ ...u, x: u.x + s })), a: w.a + s, b: w.b + s };
+}
+
 const P922 = proto({
   id: '9.2.2',
   gruppa: 'II',
@@ -286,13 +371,21 @@ const P922 = proto({
   kratko: 'Где касательная параллельна $Ox$',
   risunok: true,
   generate(r: Rng): Draft | null {
-    const w = volnaP(r, { n: [3, 5] });
-    if (w === null) {
+    /* Сначала ответ: абсцисса T от −8 до 8, потом волна, сдвинутая так,
+       чтобы один из её нулей пришёлся на T (интервал остаётся вокруг 0). */
+    const T = vzveshenno(r, VESA_ABSCISSY) - 9;
+    const w0 = volnaP(r, { n: [3, 5] });
+    if (w0 === null) {
       return null;
     }
+    const goden = nuliUzlov(w0.uzly).filter((z) => sdvigGoden(w0, T - z.x));
+    if (goden.length === 0) {
+      return null;
+    }
+    const w = sdvinut(w0, T - r.pick(goden).x);
     const zs = nuliUzlov(w.uzly);
     /* Отрезок длиной 4–6 клеток с одним нулём внутри. */
-    const zero = r.pick(zs).x;
+    const zero = T;
     const p = zero - r.int(1, 3);
     const q = zero + r.int(1, 3);
     if (p < w.a + 1 || q > w.b - 1 || q - p < 3) {
@@ -392,38 +485,134 @@ function podp(uzly: readonly Uzel[]): string {
 
 /* ── 9.2.3 и 9.2.4: касательная параллельна прямой y = kx + m ───── */
 
+/** Веса загадываемого числа точек T = 1…7 в 9.2.4: обратны доле удачных волн. */
+const VESA_924 = [1, 0.92, 1.55, 1.53, 1.63, 1.31, 1.9];
+
+/** Номер 1…n с весами `vesa`. */
+function vzveshenno(r: Rng, vesa: readonly number[]): number {
+  const total = vesa.reduce((s, v) => s + v, 0);
+  let t = r.next() * total;
+  for (let i = 0; i < vesa.length; i += 1) {
+    t -= vesa[i] as number;
+    if (t < 0) {
+      return i + 1;
+    }
+  }
+  return vesa.length;
+}
+
+/** Горбы волны f′: серии подряд идущих ненулевых узлов [от; до]. */
+function gorby(uzly: readonly Uzel[]): [number, number][] {
+  const runs: [number, number][] = [];
+  let start = -1;
+  uzly.forEach((u, i) => {
+    if (u.y !== 0 && start < 0) {
+      start = i;
+    }
+    if ((u.y === 0 || i === uzly.length - 1) && start >= 0) {
+      runs.push([start, u.y === 0 ? i - 1 : i]);
+      start = -1;
+    }
+  });
+  return runs;
+}
+
 /**
- * Волна f′ с узлом (x*, k) на подъёме или спуске: по нему график
- * пересекает прямую y = k в целой точке. unique: true — пересечение
- * единственное в интервале.
+ * n целых абсцисс из [lo; hi] по возрастанию, соседние — не ближе `gap`:
+ * случайная раскладка свободного места по промежуткам, без перебора.
  */
-function volnaSPeresecheniem(
+function rasstavit(r: Rng, lo: number, hi: number, n: number, gap: number): number[] | null {
+  const svobodno = hi - lo - gap * (n - 1);
+  if (n < 1 || svobodno < 0) {
+    return null;
+  }
+  const sdvig = Array.from({ length: n }, () => r.int(0, svobodno)).sort((p, q) => p - q);
+  return sdvig.map((s, i) => lo + s + gap * i);
+}
+
+/** Волна f′ ровно с n нулями (шаг ≥ 2) на интервале длиной не больше 17. */
+function volnaPsNulyami(r: Rng, n: number) {
+  const shir = r.int(Math.min(17, Math.max(8, 2 * n + 4)), 17);
+  const a = r.int(Math.max(3 - shir, -10), -3);
+  const tochki = rasstavit(r, a + 1, a + shir - 1, n, 2);
+  if (tochki === null) {
+    return null;
+  }
+  return volnaP(r, { n: [n, n], a: [a, a], b: [a + shir, a + shir], tochki });
+}
+
+/**
+ * Волна f′, которую горизонталь y = k пересекает ровно T раз. Сначала
+ * загадано T, потом каждому горбу знака k назначено, сколько раз он
+ * пересечёт горизонталь: внутренний — 0 или 2 (вершина ниже или выше |k|
+ * хотя бы на клетку), крайний — 0, 1 (конец выше |k|, без вершины) или 2
+ * (конец ниже, вершина выше). Узлов на самой прямой y = k нет.
+ */
+function volnaPodChislo(
   r: Rng,
   k: number,
-): { uzly: Uzel[]; a: number; b: number; xk: number } | null {
-  const w = volnaP(r, { n: [2, 4], shag: 2 });
+  T: number,
+): { uzly: Uzel[]; a: number; b: number } | null {
+  if (k === 0) {
+    const w = volnaPsNulyami(r, T);
+    return w === null ? null : { uzly: w.uzly, a: w.a, b: w.b };
+  }
+  const sk = k > 0 ? 1 : -1;
+  const ak = Math.abs(k);
+  const w = volnaPsNulyami(r, r.int(Math.max(1, T - 2), Math.min(7, T + 1)));
   if (w === null) {
     return null;
   }
-  /* Участки «нуль — горб» одного знака с k, где горб выше |k|. */
-  const cands: { i: number; x: number }[] = [];
-  for (let i = 0; i < w.uzly.length - 1; i += 1) {
-    const u0 = w.uzly[i] as Uzel;
-    const u1 = w.uzly[i + 1] as Uzel;
-    const lo = Math.min(u0.y, u1.y);
-    const hi = Math.max(u0.y, u1.y);
-    if (lo < k && k < hi && u1.x - u0.x >= 2) {
-      for (let x = u0.x + 1; x <= u1.x - 1; x += 1) {
-        cands.push({ i, x });
-      }
+  const last = w.uzly.length - 1;
+  const svoi = gorby(w.uzly).filter(([from]) => Math.sign((w.uzly[from] as Uzel).y) === sk);
+  const varianty = svoi.map(([from, to]) => {
+    const kray = from === 0 || to === last;
+    const out: number[] = [];
+    if (ak >= 2) {
+      out.push(0);
+    }
+    if (kray) {
+      out.push(1);
+    }
+    if (!kray || (ak >= 2 && to > from)) {
+      out.push(2);
+    }
+    return out;
+  });
+  let plan: number[] | null = null;
+  for (let attempt = 0; attempt < 40 && plan === null; attempt += 1) {
+    const p = varianty.map((v) => r.pick(v));
+    if (p.reduce((s, v) => s + v, 0) === T) {
+      plan = p;
     }
   }
-  if (cands.length === 0) {
+  if (plan === null) {
     return null;
   }
-  const c = r.pick(cands);
-  const uzly = [...w.uzly.slice(0, c.i + 1), { x: c.x, y: k }, ...w.uzly.slice(c.i + 1)];
-  return { uzly, a: w.a, b: w.b, xk: c.x };
+  const vyshe = () => sk * r.int(ak + 1, Math.min(5, ak + 2));
+  const nizhe = () => sk * r.int(1, ak - 1);
+  const uzly = w.uzly.map((u) => ({ ...u }));
+  const ubrat = new Set<number>();
+  svoi.forEach(([from, to], j) => {
+    const cel = plan[j] as number;
+    const kray = from === 0 || to === last;
+    if (!kray) {
+      (uzly[from] as Uzel).y = cel === 2 ? vyshe() : nizhe();
+      return;
+    }
+    const konec = from === 0 ? from : to;
+    const vershina = from === 0 ? to : from;
+    if (cel === 2) {
+      (uzly[konec] as Uzel).y = nizhe();
+      (uzly[vershina] as Uzel).y = vyshe();
+    } else {
+      (uzly[konec] as Uzel).y = cel === 1 ? vyshe() : nizhe();
+      if (vershina !== konec) {
+        ubrat.add(vershina);
+      }
+    }
+  });
+  return { uzly: uzly.filter((_, i) => !ubrat.has(i)), a: w.a, b: w.b };
 }
 
 /**
@@ -441,18 +630,7 @@ function volnaSEdinstvennym(
   }
   const sk = k > 0 ? 1 : -1;
   const ak = Math.abs(k);
-  /* Горбы: серии подряд идущих ненулевых узлов. */
-  const runs: [number, number][] = [];
-  let start = -1;
-  w.uzly.forEach((u, i) => {
-    if (u.y !== 0 && start < 0) {
-      start = i;
-    }
-    if ((u.y === 0 || i === w.uzly.length - 1) && start >= 0) {
-      runs.push([start, u.y === 0 ? i - 1 : i]);
-      start = -1;
-    }
-  });
+  const runs = gorby(w.uzly);
   const same = runs.filter(([from]) => Math.sign((w.uzly[from] as Uzel).y) === sk);
   if (same.length === 0 || (ak === 1 && same.length > 1)) {
     return null;
@@ -505,6 +683,22 @@ function volnaSEdinstvennym(
   return { uzly, a: w.a, b: w.b, xk: c.x };
 }
 
+/** Веса абсциссы-ответа −8…8 в 9.2.3: обратны доле удачных сдвигов (у нуля подпись мешает чаще). */
+const VESA_923 = [
+  1.4, 1.44, 1.29, 1.19, 1.16, 1.19, 1.17, 1, 1.8, 1, 1.17, 1.19, 1.16, 1.19, 1.29, 1.44, 1.4,
+];
+
+/** Сдвиг волны с точкой пересечения xk так, чтобы xk = T; null — интервал ушёл от нуля. */
+function podAbscissu(
+  w: { uzly: Uzel[]; a: number; b: number; xk: number } | null,
+  T: number,
+): { uzly: Uzel[]; a: number; b: number; xk: number } | null {
+  if (w === null || !sdvigGoden(w, T - w.xk)) {
+    return null;
+  }
+  return { ...sdvinut(w, T - w.xk), xk: T };
+}
+
 function tekstPryamoy(k: number, m: number): string {
   const kk = k === 1 ? '' : k === -1 ? '-' : String(k);
   const mm = m === 0 ? '' : m > 0 ? `+${m}` : String(m);
@@ -521,10 +715,15 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
     generate(r: Rng): Draft | null {
       const k = schitat ? r.pick([0, 1, 1, 2, -1, -2, 3]) : r.pick([1, 2, 3, -1, -2]);
       const m = r.pick([-9, -7, -5, -3, -2, -1, 0, 1, 2, 3, 4, 6, 8]);
-      const w = schitat ? volnaSPeresecheniem(r, k) : volnaSEdinstvennym(r, k);
+      /* 9.2.4: сначала число точек T, потом волна под него. */
+      /* 9.2.3: сначала абсцисса-ответ T, потом волна, сдвинутая под неё. */
+      const w = schitat
+        ? volnaPodChislo(r, k, vzveshenno(r, VESA_924))
+        : podAbscissu(volnaSEdinstvennym(r, k), vzveshenno(r, VESA_923) - 9);
       if (w === null) {
         return null;
       }
+      const xk = 'xk' in w ? (w.xk as number) : 0;
       const zapros = schitat
         ? ({ t: 'kasat-chislo', k } as const)
         : ({ t: 'kasat-abscissa', k } as const);
@@ -540,8 +739,8 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
       if ((w.uzly[w.uzly.length - 1] as Uzel).y === k) {
         count += 1;
       }
-      const otvet = schitat ? count : w.xk;
-      if (schitat ? count < 1 || count > 4 : count !== 1) {
+      const otvet = schitat ? count : xk;
+      if (schitat ? count < 1 || count > 7 : count !== 1) {
         return null;
       }
       const pryamaya = tekstPryamoy(k, m);
@@ -549,7 +748,7 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
         { t: 'goriz', y: k, podpis: k === 0 ? 'y = 0' : `y = ${k}`, shag: 2 },
       ];
       if (!schitat) {
-        pomoshch.push({ t: 'vert', x: w.xk, podpis: d(w.xk), shag: 3 });
+        pomoshch.push({ t: 'vert', x: xk, podpis: d(xk), shag: 3 });
       }
       const fig = figura('fprime', "f'(x)", w.uzly, { pomoshch });
       const zadanie = schitat
@@ -577,7 +776,7 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
               )
             : shag(
                 'Читаем абсциссу',
-                `Единственная точка пересечения имеет абсциссу $x=${d(w.xk)}$.`,
+                `Единственная точка пересечения имеет абсциссу $x=${d(xk)}$.`,
               ),
           shag('Ответ', `**Ответ: ${otvetTekst(otvet)}**`),
         ],
@@ -596,7 +795,17 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
                 tekst: `$${d(-k)}$`,
                 pochemu: 'Знак потерян: угловой коэффициент — число перед $x$ со своим знаком.',
               },
-            ].filter((o) => !(k === 0 && o.tekst === '$0$')),
+              k === 0
+                ? {
+                    tekst: '$1$',
+                    pochemu:
+                      'В записи прямой нет слагаемого с $x$: коэффициент при $x$ равен нулю, прямая горизонтальна.',
+                  }
+                : {
+                    tekst: `$${d(k + (k > 0 ? 1 : -1))}$`,
+                    pochemu: 'Угловой коэффициент — ровно то число, которое стоит перед $x$.',
+                  },
+            ].filter((o) => o.tekst !== `$${d(k)}$` && !(k === 0 && o.tekst === '$0$')),
             `$k=${d(k)}$.`,
           ),
           vopros(
@@ -659,7 +868,7 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
                   }))
               : [
                   {
-                    tekst: `$${d(w.xk + 1)}$`,
+                    tekst: `$${d(xk + 1)}$`,
                     pochemu: 'Это соседняя клетка: сверьтесь с сеткой.',
                   },
                   {
@@ -667,20 +876,18 @@ function kasatParallel(id: string, nazvanie: string, kratko: string, schitat: bo
                     pochemu: 'Число $k$ — это ордината точки пересечения, а нужна абсцисса.',
                   },
                   {
-                    tekst: `$${d(-w.xk)}$`,
+                    tekst: `$${d(-xk)}$`,
                     pochemu:
                       'Знак абсциссы перепутан: отсчитывайте клетки от начала координат с учётом стороны.',
                   },
                 ].filter((o) => o.tekst !== `$${d(otvet)}$`),
-            schitat
-              ? `Точек пересечения — ${otvet}.`
-              : `Абсцисса точки пересечения: $x=${d(w.xk)}$.`,
+            schitat ? `Точек пересечения — ${otvet}.` : `Абсцисса точки пересечения: $x=${d(xk)}$.`,
             3,
           ),
         ],
-        params: { k, m, xk: w.xk, a: w.a, b: w.b },
+        params: schitat ? { k, m, n: count, a: w.a, b: w.b } : { k, m, xk, a: w.a, b: w.b },
         signature: podp(w.uzly) + `|${k}`,
-        vid: `k${k}-${w.xk > 0 ? 'r' : 'l'}`,
+        vid: schitat ? `k${k}-c${count}` : `k${k}-${xk > 0 ? 'r' : 'l'}`,
       });
     },
   });
@@ -701,6 +908,9 @@ const P924 = kasatParallel(
 
 /* ── 9.2.5 и 9.2.6: в какой отмеченной точке производная наибольшая / наименьшая ── */
 
+/** Веса числа точек n = 4, 5, 6, 7: обратны доле удачных рисунков с n точками. */
+const VESA_925 = [3.5, 25, 55, 340];
+
 function naibNaim(id: string, naib: boolean) {
   return proto({
     id,
@@ -711,32 +921,61 @@ function naibNaim(id: string, naib: boolean) {
     kratko: naib ? "Где $f'$ наибольшая" : "Где $f'$ наименьшая",
     risunok: true,
     generate(r: Rng): Draft | null {
-      const w = volna(r, { n: [2, 4], vysota: [2, 4] });
+      /* Сначала ответ: число точек n = 4…7 и номер «победителя» 1…n поровну.
+         Много точек подбирается реже, поэтому n = 6, 7 загадываются чаще:
+         номера 5–7 встречаются не реже прочих. */
+      const n = 3 + vzveshenno(r, VESA_925);
+      const nomer = r.int(1, n);
+      const w = volna(r, {
+        n: [3, 4],
+        shag: 3,
+        vysota: [3, 5],
+        a: [-10, -5],
+        b: [5, 10],
+        shirina: [13, 17],
+      });
       if (w === null) {
         return null;
       }
-      const n = r.pick([4, 4, 5]);
       const spl = postroit(w.uzly);
       /* Выигрывает одна точка, отрыв от остальных не меньше единицы: на глаз различим. */
       const all: { x: number; s: number }[] = [];
       for (let x = w.a + 1; x < w.b; x += 1) {
         const sl = spl.dy(x);
-        if (Math.abs(sl) >= 0.5) {
+        /* Не на оси Oy и не у самой оси Ox: подпись x_i встанет свободно. */
+        if (Math.abs(sl) >= 0.5 && x !== 0 && Math.abs(spl.y(x)) >= 0.3) {
           all.push({ x, s: sl });
         }
       }
-      const winners = all.filter((c) => (naib ? c.s >= 1 : c.s <= -1));
+      /* Победитель: слева от него nomer − 1 подходящих точек, справа — n − nomer. */
+      const ostalnye = (win: { x: number; s: number }) =>
+        all.filter((c) => c.x !== win.x && (naib ? c.s <= win.s - 1 : c.s >= win.s + 1));
+      const winners = all.filter((c) => {
+        if (naib ? c.s < 1 : c.s > -1) {
+          return false;
+        }
+        const o = ostalnye(c);
+        return (
+          o.filter((q) => q.x < c.x).length >= nomer - 1 &&
+          o.filter((q) => q.x > c.x).length >= n - nomer
+        );
+      });
       if (winners.length === 0) {
         return null;
       }
       const win = r.pick(winners);
-      const others = all.filter(
-        (c) => c.x !== win.x && (naib ? c.s <= win.s - 1 : c.s >= win.s + 1),
-      );
-      if (others.length < n - 1) {
-        return null;
-      }
-      const picked = [win, ...r.sample(others, n - 1)].sort((p, q) => p.x - q.x);
+      const others = ostalnye(win);
+      const picked = [
+        ...r.sample(
+          others.filter((c) => c.x < win.x),
+          nomer - 1,
+        ),
+        win,
+        ...r.sample(
+          others.filter((c) => c.x > win.x),
+          n - nomer,
+        ),
+      ].sort((p, q) => p.x - q.x);
       const metki = picked.map((c) => c.x);
       const slopes = metki.map((x) => spl.dy(x));
       const target = naib ? Math.max(...slopes) : Math.min(...slopes);

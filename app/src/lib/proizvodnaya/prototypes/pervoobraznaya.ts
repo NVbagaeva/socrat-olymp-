@@ -111,32 +111,67 @@ function sobrat(
 
 /* ── 9.5.1 и 9.5.2: знак f в отмеченных точках по графику F ─────── */
 
+/** Веса загадываемого ответа k = 1, 2, …: обратны доле волн, где k точек нашлось. */
+const VESA_K = [1.45, 1.1, 1.2, 1.6, 3.6, 11, 30];
+
+/** Номер 1…n с весами `vesa`. */
+function vzveshenno(r: Rng, vesa: readonly number[]): number {
+  const total = vesa.reduce((s, v) => s + v, 0);
+  let t = r.next() * total;
+  for (let i = 0; i < vesa.length; i += 1) {
+    t -= vesa[i] as number;
+    if (t < 0) {
+      return i + 1;
+    }
+  }
+  return vesa.length;
+}
+
 function znakVMetkah(sgn: 1 | -1) {
   return (r: Rng): Draft | null => {
-    const w = volna(r, { n: [2, 3], shag: 3, a: [-9, -6], b: [6, 9], vysota: [2, 4] });
+    /* Сначала ответ: k подходящих точек (1…7), потом рисунок под него. Большие k
+       подбираются реже, поэтому и загадываются чаще: ответы выходят поровну. */
+    const kCel = vzveshenno(r, VESA_K);
+    const w = volna(r, {
+      n: [3, 4],
+      shag: 3,
+      a: [-10, -6],
+      b: [6, 10],
+      vysota: [3, 5],
+      shirina: [14, 17],
+    });
     if (w === null) {
       return null;
     }
     const spl = postroit(w.uzly);
     const godnaya = (x: number) =>
       x !== 0 && Math.abs(spl.dy(x)) >= 0.55 && Math.abs(spl.y(x)) >= 0.9;
-    let pool = 0;
+    const nuzhnye = (x: number) => godnaya(x) && znakProizvodnoy(w.uzly, x) === sgn;
+    const chuzhie = (x: number) => godnaya(x) && znakProizvodnoy(w.uzly, x) === -sgn;
+    let poolN = 0;
+    let poolC = 0;
     for (let x = w.a + 1; x < w.b; x += 1) {
-      pool += godnaya(x) ? 1 : 0;
+      poolN += nuzhnye(x) ? 1 : 0;
+      poolC += chuzhie(x) ? 1 : 0;
     }
-    if (pool < 6) {
+    /* Всего точек 5…10, «чужих» хотя бы одна (при k ≤ 2 — хотя бы две). */
+    const cLo = Math.max(kCel <= 2 ? 2 : 1, 5 - kCel);
+    const cHi = Math.min(poolC, 10 - kCel);
+    if (poolN < kCel || cHi < cLo) {
       return null;
     }
-    const n = r.int(6, Math.min(9, pool));
-    const metki = vybratMetki(r, w.a, w.b, n, godnaya);
-    if (metki === null) {
+    const mGood = vybratMetki(r, w.a, w.b, kCel, nuzhnye);
+    const mBad = vybratMetki(r, w.a, w.b, r.int(cLo, cHi), chuzhie);
+    if (mGood === null || mBad === null) {
       return null;
     }
+    const metki = [...mGood, ...mBad].sort((p, q) => p - q);
+    const n = metki.length;
     const idxAll = metki.map((_, i) => i + 1);
     const good = idxAll.filter((i) => znakProizvodnoy(w.uzly, metki[i - 1] as number) === sgn);
     const bad = idxAll.filter((i) => !good.includes(i));
     const k = good.length;
-    if (k < 2 || bad.length < 2) {
+    if (k !== kCel || bad.length < 1) {
       return null;
     }
     const ps = promezhutki(w.uzly);
@@ -223,10 +258,14 @@ function znakVMetkah(sgn: 1 | -1) {
               tekst: `$${perechen(bad)}$`,
               pochemu: 'Это точки противоположного направления: перепутаны возрастание и убывание.',
             },
-            {
-              tekst: `$${perechen(good.slice(1))}$`,
-              pochemu: `Пропущена точка $${xi(good[0] as number)}$: она тоже лежит на нужном промежутке.`,
-            },
+            ...(good.length > 1
+              ? [
+                  {
+                    tekst: `$${perechen(good.slice(1))}$`,
+                    pochemu: `Пропущена точка $${xi(good[0] as number)}$: она тоже лежит на нужном промежутке.`,
+                  },
+                ]
+              : []),
             {
               tekst: `$${perechen([...good, bad[0] as number].sort((p, q) => p - q))}$`,
               pochemu: `Лишняя точка $${xi(bad[0] as number)}$: она лежит на промежутке противоположного направления.`,
@@ -295,6 +334,22 @@ const P952 = proto({
 
 /* ── 9.5.3: число решений f(x)=0 на отрезке по графику F ────────── */
 
+/**
+ * n целых абсцисс из [lo; hi] по возрастанию, соседние — не ближе `gap`:
+ * случайная раскладка свободного места по промежуткам, без перебора.
+ */
+function rasstavit(r: Rng, lo: number, hi: number, n: number, gap: number): number[] | null {
+  const svobodno = hi - lo - gap * (n - 1);
+  if (n < 1 || svobodno < 0) {
+    return null;
+  }
+  const sdvig = Array.from({ length: n }, () => r.int(0, svobodno)).sort((p, q) => p - q);
+  return sdvig.map((s, i) => lo + s + gap * i);
+}
+
+/** Веса ответа k = 1…6: обратны доле удачных волн с k + 1 … k + 2 вершинами. */
+const VESA_953 = [1, 1.03, 1.12, 1.46, 2.14, 5.15];
+
 const P953 = proto({
   id: '9.5.3',
   gruppa: 'V',
@@ -302,22 +357,36 @@ const P953 = proto({
   kratko: 'Сколько решений $f(x)=0$ на отрезке',
   risunok: true,
   generate(r: Rng): Draft | null {
-    const w = volna(r, { n: [3, 5], shag: 2 });
+    /* Сначала ответ: k вершин на отрезке (1…6), снаружи — ещё одна-две.
+       Вершины расставляются сразу с шагом не меньше 2 (без перебора),
+       интервал — не длиннее 17 клеток. */
+    const kCel = vzveshenno(r, VESA_953);
+    const nExt = Math.min(7, kCel + r.int(1, 2));
+    const shir = r.int(Math.min(17, Math.max(10, 2 * nExt + 3)), 17);
+    const a = r.int(Math.max(3 - shir, -10), -3);
+    const tochki = rasstavit(r, a + 1, a + shir - 1, nExt, 2);
+    if (tochki === null) {
+      return null;
+    }
+    const w = volna(r, { n: [nExt, nExt], a: [a, a], b: [a + shir, a + shir], tochki });
     if (w === null) {
       return null;
     }
-    const p = r.int(w.a + 1, w.b - 4);
-    const q = r.int(p + 3, w.b - 1);
     const exts = w.ekstremumy.map((e) => e.x);
+    /* Отрезок [p; q] охватывает вершины s, …, s + k − 1, концы — между вершинами. */
+    const s = r.int(0, exts.length - kCel);
+    const pLo = s === 0 ? w.a + 1 : (exts[s - 1] as number) + 1;
+    const pHi = (exts[s] as number) - 1;
+    const qLo = (exts[s + kCel - 1] as number) + 1;
+    const qHi = s + kCel === exts.length ? w.b - 1 : (exts[s + kCel] as number) - 1;
+    if (pLo > pHi || qLo > qHi) {
+      return null;
+    }
+    const p = r.int(pLo, pHi);
+    const q = r.int(qLo, qHi);
     const inside = exts.filter((x) => x > p && x < q);
     const outside = exts.filter((x) => x < p || x > q);
-    if (
-      inside.length < 1 ||
-      inside.length > 3 ||
-      outside.length < 1 ||
-      exts.includes(p) ||
-      exts.includes(q)
-    ) {
+    if (inside.length !== kCel || outside.length < 1 || q - p < 3) {
       return null;
     }
     const k = inside.length;
@@ -761,13 +830,48 @@ const P954 = proto({
 
 /* ── 9.5.5 и 9.5.6: площадь под параболой по формуле F ──────────── */
 
+/**
+ * Формы параболы f = a(x − α)(x − β): |a| и ширина w = β − α. Площадь
+ * между параболой и осью S = |a|·w³/6. Коэффициенты первообразной
+ * a/3, a(α + β)/2, aαβ — конечные дроби; ширина до 5 клеток, вершина
+ * |a|w²/4 — от 1,2 до 9,4 клетки (окно — в прежних пределах).
+ */
 const FORMY: { a: number; w: number }[] = [
+  { a: 0.3, w: 5 },
+  { a: 0.6, w: 3 },
+  { a: 0.6, w: 4 },
+  { a: 0.6, w: 5 },
+  { a: 0.75, w: 4 },
+  { a: 0.9, w: 3 },
+  { a: 0.9, w: 4 },
+  { a: 0.9, w: 5 },
+  { a: 1.2, w: 2 },
+  { a: 1.2, w: 3 },
+  { a: 1.2, w: 4 },
+  { a: 1.2, w: 5 },
+  { a: 1.5, w: 2 },
+  { a: 1.5, w: 3 },
+  { a: 1.5, w: 4 },
+  { a: 1.5, w: 5 },
+  { a: 1.8, w: 2 },
+  { a: 1.8, w: 3 },
+  { a: 1.8, w: 4 },
+  { a: 2.4, w: 2 },
+  { a: 2.4, w: 3 },
   { a: 3, w: 2 },
   { a: 3, w: 3 },
-  { a: 6, w: 2 },
-  { a: 1.5, w: 3 },
-  { a: 1.5, w: 5 },
+  { a: 4.5, w: 2 },
 ];
+
+/** Не больше двух знаков после запятой (с допуском на двоичную запись). */
+function dvaZnaka(x: number): boolean {
+  return Math.abs(x * 100 - Math.round(x * 100)) < 1e-6;
+}
+
+/** Округление до сотых — убирает двоичный «хвост» 0,1 + 0,2. */
+function sotye(x: number): number {
+  return Math.round(x * 100) / 100;
+}
 
 interface Parabola {
   a: number;
@@ -780,18 +884,29 @@ interface Parabola {
   uzly: Uzel[];
 }
 
-function parabola(r: Rng): Parabola {
+function parabola(r: Rng): Parabola | null {
   const f = r.pick(FORMY);
   const znak = r.next() < 0.5 ? -1 : 1;
   const a = znak * f.a;
   const alpha = r.int(-5, 1);
   const beta = alpha + f.w;
+  const A = a / 3;
+  const B = (-a * (alpha + beta)) / 2;
+  const C = a * alpha * beta;
+  if (![A, B, C].every(dvaZnaka)) {
+    return null;
+  }
+  /* Узлы — только в узлах сетки; наклоны заданы точно, поэтому эрмитов
+     сплайн совпадает с параболой и между узлами. Корни — узлы всегда. */
   const uzly: Uzel[] = [];
   for (let x = alpha; x <= beta; x += 1) {
-    uzly.push({ x, y: a * (x - alpha) * (x - beta), m: a * (2 * x - alpha - beta) });
+    const y = a * (x - alpha) * (x - beta);
+    if (Math.abs(y - Math.round(y)) < 1e-9) {
+      uzly.push({ x, y: Math.round(y), m: a * (2 * x - alpha - beta) });
+    }
   }
   const C0 = r.pick([-9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  return { a, alpha, beta, A: a / 3, B: (-a * (alpha + beta)) / 2, C: a * alpha * beta, C0, uzly };
+  return { a, alpha, beta, A: sotye(A), B: sotye(B), C: sotye(C), C0, uzly };
 }
 
 /** Многочлен от x по убыванию степеней в TeX. */
@@ -815,8 +930,13 @@ function Fvalue(P: Parabola, x: number): number {
 }
 
 function risunokParaboly(P: Parabola, c: number, pom: Pomoshch[]): Figura {
-  const ys = P.uzly.map((u) => u.y);
-  const okno = okoshko([P.alpha - 2, P.beta + 2], [Math.min(...ys, 0), Math.max(...ys, 0)], 1);
+  const w = P.beta - P.alpha;
+  const vershina = (-P.a * w * w) / 4;
+  const okno = okoshko(
+    [P.alpha - 2, P.beta + 2],
+    [Math.min(vershina, 0), Math.max(vershina, 0)],
+    1,
+  );
   return {
     rezhim: 'zalivka',
     okno,
@@ -863,14 +983,13 @@ function formulaF(P: Parabola): string {
 function ploshchadParaboly(polnaya: boolean) {
   return (r: Rng): Draft | null => {
     const P = parabola(r);
+    if (P === null) {
+      return null;
+    }
     const { alpha, beta, a } = P;
     const w = beta - alpha;
     const c = polnaya ? beta : r.next() < 0.5 ? beta : r.int(alpha + 1, beta);
     const gorka = a < 0;
-    const peak = (Math.abs(a) * (w * w)) / 4;
-    if (peak > 9.5 || P.uzly.some((u) => !Number.isInteger(u.y))) {
-      return null;
-    }
     const { stroki, delta } = raznostFTeks(P, c);
     /* Независимая проверка формулы: ∫ a(x−α)(x−β) от α до c. */
     const dd = c - alpha;
@@ -881,7 +1000,10 @@ function ploshchadParaboly(polnaya: boolean) {
     ) {
       return null;
     }
-    const S = Math.abs(delta);
+    if (!dvaZnaka(delta)) {
+      return null;
+    }
+    const S = sotye(Math.abs(delta));
     if (S === 0) {
       return null;
     }

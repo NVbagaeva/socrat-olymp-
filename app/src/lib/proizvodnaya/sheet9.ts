@@ -149,13 +149,14 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
 const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
 /** Клетка рисунка в разобранном примере, мм. */
-const EXAMPLE_CELL_MM = 4.2;
+const EXAMPLE_CELL_MM = 5.6;
 /* Лист учителя читают с рисунком построений и разбором: рисунок
    стоит под условием на всю ширину колонки, клетка крупнее, чем у
    ученика, но не шире колонки. */
-const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 4.6, double: 3.6 };
-const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 150, double: 84 };
-const EXAMPLE_MAX_MM = 140;
+/* 6 мм на клетку: числа осей печатаются кеглем около 6,5 pt, подпись графика — около 10 pt. */
+const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 6.0, double: 3.6 };
+const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 };
+const EXAMPLE_MAX_MM = 150;
 
 export interface SheetTask9 {
   no: number;
@@ -210,8 +211,9 @@ function razborHtml(task: Generated, answerText: string): string {
   const items = task.shagi
     .filter((s) => s.zagolovok !== 'Ответ')
     .map((s) => {
-      const lines = s.stroki.map((line) => typo.mathText(line.replace(/\*\*/g, ''))).join(' ');
-      return `<li class="sheet-step"><b>${typo.mathText(s.zagolovok)}.</b> ${lines}</li>`;
+      /* Строки этапа — каждая с новой строки: выкладки не сливаются. */
+      const lines = s.stroki.map((line) => typo.mathText(line.replace(/\*\*/g, ''))).join('<br>');
+      return `<li class="sheet-step"><b>${typo.mathText(s.zagolovok)}.</b><br>${lines}</li>`;
     })
     .join('');
   return `<ol class="sheet-steps z9-razbor">${items}</ol>${answerLine(answerText)}`;
@@ -313,7 +315,11 @@ function zapomniItem(group: Gruppa): string {
     )
     .join('');
   return (
-    '<div class="sheet-item sheet-zapomni" data-keep-with-next="1"><section class="sheet-recap">' +
+    /* «Запомни» не держится за следующим куском: пример с крупным рисунком
+       может не поместиться, и тогда цепочка «заголовок → Запомни → пример»
+       оставляла бы заголовок группы один на странице. Заголовок держится
+       за «Запомни», а пример при нехватке места уходит на следующую. */
+    '<div class="sheet-item sheet-zapomni"><section class="sheet-recap">' +
     '<div class="sheet-recap-main">' +
     `<h2 class="sheet-recap-title">${typo.text(contentSheet9.labels.zapomni)}</h2>` +
     `<ul class="sheet-recap-list">${items}</ul>` +
@@ -425,7 +431,7 @@ export function fixedBlocks9(
           const built = sheetTask(
             generate(item.prototype, item.seed),
             no,
-            options.layout,
+            raskladka(options.layout, withAnswers),
             withAnswers,
           );
           return { ...built, id: `${item.prototype}#${item.n}` };
@@ -478,7 +484,19 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
  * `printSpec9(spec)` — тот же набор, но с готовым потоком.
  */
 export function sheetSpec9(params: SheetParams9, withAnswers: boolean) {
-  return specOfBlocks9(sheetBlocks9(params, withAnswers), params, withAnswers);
+  const own = { ...params, layout: raskladka(params.layout, withAnswers) };
+  return specOfBlocks9(sheetBlocks9(own, withAnswers), own, withAnswers);
+}
+
+/**
+ * Лист учителя всегда в одну колонку: рисунок с построениями стоит под
+ * условием на всю ширину, а решение этапами в половину страницы не
+ * помещается — в две колонки строка задач занимала бы целую страницу.
+ * Набор задач от раскладки не зависит, поэтому листы ученика и учителя
+ * по-прежнему содержат одни и те же задачи.
+ */
+export function raskladka(layout: SheetLayoutId, withAnswers: boolean): SheetLayoutId {
+  return withAnswers ? 'single' : layout;
 }
 
 /** Описание листа по готовым блокам: лист генератора и сборник PDF. */
@@ -487,10 +505,11 @@ export function specOfBlocks9(
   params: Pick<SheetParams9, 'theme' | 'layout' | 'kind' | 'date'>,
   withAnswers: boolean,
 ) {
+  const layout = raskladka(params.layout, withAnswers);
   const base = {
     theme: params.theme,
-    layout: params.layout,
-    cell: CELL[params.layout],
+    layout,
+    cell: CELL[layout],
     documentTitle:
       `${contentSheet9.title.chip}. ${contentSheet9.title.text}` +
       (params.kind ? ` — ${params.kind}` : ''),
