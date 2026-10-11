@@ -47,6 +47,7 @@ function Slider({
   return (
     <div className="z9-zhivoy__slider">
       <label htmlFor={id} className="z9-zhivoy__label">
+        <span className="z9-zhivoy__glagol">Сдвиньте: </span>
         <Tex text={`${label} = $${chislo(value)}$`} />
       </label>
       <input
@@ -89,7 +90,7 @@ export function ZhivayaSekushchaya() {
       <FiguraSvg9 svg={svg} label="Секущая поворачивается к касательной" />
       <div className="z9-zhivoy__ruchki">
         <Slider
-          label="Сдвиньте: $\Delta x$"
+          label="$\Delta x$"
           slovami="приращение аргумента"
           values={DX}
           index={i}
@@ -125,7 +126,7 @@ export function ZhivayaSkorost() {
           <Tex text="Закон движения $s(t)=\tfrac{t^2}{2}$ (метры, секунды), момент $t=2$." />
         </p>
         <Slider
-          label="Сдвиньте: $\Delta t$"
+          label="$\Delta t$"
           slovami="промежуток времени"
           values={DT}
           index={i}
@@ -157,7 +158,7 @@ export function ZhivoyModul() {
       <FiguraSvg9 svg={svg} label="Секущая графика модуля" />
       <div className="z9-zhivoy__ruchki">
         <Slider
-          label="Сдвиньте: $\Delta x$"
+          label="$\Delta x$"
           slovami="приращение аргумента"
           values={DX_MODUL}
           index={i}

@@ -16,6 +16,21 @@
   color: var(--color-text);
   break-inside: avoid;
 }
+/* Задача и пример длиннее страницы: переносятся между шагами и рисунками,
+   а шаг, рисунок и заголовок с условием не разрываются. */
+.ramka--zadacha,
+.ramka--primer {
+  break-inside: auto;
+}
+.ramka__shag,
+.ramka__risunok,
+.ramka__formula {
+  break-inside: avoid;
+}
+.ramka__zagolovok,
+.ramka__plashka {
+  break-after: avoid;
+}
 .ramka > :first-child {
   margin-top: 0;
 }
@@ -43,7 +58,8 @@
   color: var(--color-text-brand);
 }
 .ramka__plashka {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   margin-bottom: var(--space-3);
   padding: 2px var(--space-3);
   border-radius: var(--radius-pill);

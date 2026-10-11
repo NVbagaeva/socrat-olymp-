@@ -672,15 +672,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Алгоритм в рамке определения — нумерованный список. */
-.ramka__algoritm {
-  margin: 0;
-  padding-left: var(--space-6);
-}
-.ramka__algoritm li + li {
-  margin-top: var(--space-2);
-}
-
 /* Ссылки на другие разделы и «Где это на ЕГЭ». */
 .z9-ssylka a,
 .z9-ponyatie .ramka a {
@@ -714,11 +705,55 @@
 }
 
 @media print {
+  /* Сетка при разбиении на страницы в Chromium не учитывает блок,
+     перенесённый на новый лист, и следующий блок ложится поверх него.
+     На печати столбики теории (разделы, подразделы, примеры, шаги) —
+     обычные блоки, промежутки — отступами. Файл подключён только к №9:
+     другие задания это не меняет. */
+  .vteor__main,
+  .vteor-razdel,
+  .z9-teoriya,
+  .z9-teoriya
+    :is(
+      .rich-sub,
+      .rich-text,
+      .rich-steps,
+      .rich-example,
+      .rich-example__grid,
+      .rich-example__steps,
+      .rich-memo
+    ) {
+    display: block;
+  }
+  .vteor__main > * + * {
+    margin-top: var(--space-8);
+  }
+  .vteor-razdel > * + *,
+  .z9-teoriya > * + *,
+  .z9-teoriya :is(.rich-sub, .rich-steps, .rich-example, .rich-example__grid) > * + * {
+    margin-top: var(--space-4);
+  }
+  .z9-teoriya :is(.rich-text, .rich-example__steps, .rich-memo) > * + * {
+    margin-top: var(--space-3);
+  }
+
   /* Печать — статичный кадр: слайдер не нужен, рисунок и числа остаются. */
   .z9-zhivoy__slider input[type='range'] {
     display: none;
   }
+  /* На листе — рисунок над числами: панели хватает ширины, формулы целиком. */
   .z9-zhivoy {
+    display: block;
     break-inside: avoid;
+  }
+  .z9-zhivoy > :first-child {
+    max-width: 26rem;
+    margin: 0 auto var(--space-3);
+  }
+  .z9-zhivoy__glagol {
+    display: none;
+  }
+  .z9-zhivoy__panel dd {
+    overflow: visible;
   }
 }
