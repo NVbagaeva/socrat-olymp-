@@ -1,20 +1,28 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
+import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { assetVersions } from './scripts/lib/asset-versions.mjs';
 import { generatorVersions } from './scripts/lib/generator-versions.mjs';
+import {
+  legalConfigError,
+  legalConfigProblems,
+  readLegalConfig,
+} from './scripts/lib/legal-config.mjs';
 
 /* Служебные страницы-галереи банков (файлы page.dev.tsx) становятся
    маршрутами только в `next dev` или со флагом GALEREYA=1
    (GALEREYA_1=1, GALEREYA_9=1 и GALEREYA_10=1 — то же для заданий №1,
-   №9 и №10). Галереи показывают ответы; в обычной сборке их нет —
-   адрес отдаёт 404, это проверяют scripts/check-dev-pages.mjs и
+   №9 и №10, SOGLASIYA=1 — для витрины согласий /styleguide/soglasiya/).
+   Галереи показывают ответы; в обычной сборке их нет — адрес отдаёт
+   404, это проверяют scripts/check-dev-pages.mjs и
    scripts/check-galereya-1.mjs. */
 const devPages =
   process.env.NODE_ENV === 'development' ||
   process.env.GALEREYA === '1' ||
   process.env.GALEREYA_1 === '1' ||
   process.env.GALEREYA_9 === '1' ||
-  process.env.GALEREYA_10 === '1';
+  process.env.GALEREYA_10 === '1' ||
+  process.env.SOGLASIYA === '1';
 
 const nextConfig: NextConfig = {
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
@@ -36,4 +44,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/* Правовые документы с «[ФИО]» вместо имени оператора на сайт не
+   выкладываются: продакшен-сборка падает, пока не заполнен
+   src/content/legal/operator.json. Черновик для превью и проверок
+   CI — LEGAL_DRAFT=1 (scripts/lib/legal-config.mjs). */
+export default function config(phase: string): NextConfig {
+  if (phase === PHASE_PRODUCTION_BUILD && process.env.LEGAL_DRAFT !== '1') {
+    const problems = legalConfigProblems(readLegalConfig());
+    if (problems.length > 0) {
+      throw new Error(legalConfigError(problems));
+    }
+  }
+  return nextConfig;
+}
