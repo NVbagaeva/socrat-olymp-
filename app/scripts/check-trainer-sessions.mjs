@@ -793,6 +793,45 @@ async function choiceScenario() {
   });
 }
 
+/* ── 10. Вход по ссылке на набор при незавершённой тренировке ─ */
+
+/* Ярлык режима (/trenazher/<режим>/) или ?tip= не уводят молча в старую
+   тренировку: оболочка спрашивает. «Продолжить старую» — та же
+   тренировка; «Начать новую» — запись стёрта, открыт выбор по ссылке. */
+async function entryLinkScenario(trainer, link, tag) {
+  await inContext(tag, async (context) => {
+    const page = await newPage(context);
+    await open(page, trainer.url);
+    const record = await startRun(page, trainer);
+    if (!check(record !== null, `${tag}: тренировка начата`)) {
+      return;
+    }
+    const question = await questionOf(page);
+    const dialog = page.getByRole('dialog');
+
+    await open(page, link);
+    await dialog.waitFor({ state: 'visible', timeout: 30_000 });
+    check(
+      /незавершённая тренировка/.test((await dialog.textContent()) ?? ''),
+      `${tag}: по ссылке — вопрос «продолжить или начать новую»`,
+    );
+    check((await page.locator('.tsess__bar').count()) === 0, `${tag}: молча в старую не увело`);
+    await dialog.getByRole('button', { name: 'Продолжить старую' }).click();
+    await waitBar(page);
+    check((await questionOf(page)) === question, `${tag}: «Продолжить старую» — та же тренировка`);
+
+    await open(page, link);
+    await dialog.waitFor({ state: 'visible', timeout: 30_000 });
+    await dialog.getByRole('button', { name: 'Начать новую' }).click();
+    check(await waitNoRecord(page, trainer.scope), `${tag}: «Начать новую» — старая запись стёрта`);
+    check(
+      (await page.locator('.tsess__bar').count()) === 0 &&
+        (await page.getByRole('button', { name: /Начать тренировку|Начать|Решать/ }).count()) > 0,
+      `${tag}: открыт выбор тренировки`,
+    );
+  });
+}
+
 /* ── 7. Переполнение хранилища ──────────────────────────────── */
 
 /** Старая тренировка другого раздела: шапка как у настоящей, задания — балласт. */
@@ -981,6 +1020,16 @@ for (const trainer of reps) {
 if (chosen.some((item) => item.scope === '11')) {
   console.log('\n6. №11: вариант ответа после перезагрузки');
   await choiceScenario();
+}
+console.log('\n10. Вход по ссылке на набор');
+for (const [name, link, tag] of [
+  ['№12 linear', '/zadaniya/12/linear/trenazher/value/', '№12 linear, ярлык «Найти значение функции»'],
+  ['№11', '/zadaniya/11/trenazher/?tip=RZ-17', '№11, ссылка ?tip=RZ-17'],
+]) {
+  const trainer = chosen.find((item) => item.name === name);
+  if (trainer !== undefined) {
+    await entryLinkScenario(trainer, link, tag);
+  }
 }
 console.log('\n7. Переполнение хранилища');
 for (const trainer of reps) {
