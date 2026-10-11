@@ -3,9 +3,11 @@
  *
  * Цепь — парабола конкретной задачи $y=ax^2+bx+c$ между пилонами
  * ($x=0$ и $x=L$, где $L=-\frac{b}{a}$ — там цепь снова на высоте $c$),
- * ванты — вертикально с равным шагом 10 м, полотно — ось $Ox$ ($y=0$),
- * под ним стилизованная вода. Ось $Oy$ идёт вдоль левого пилона, 0 — у
- * его основания (на уровне полотна).
+ * ванты — вертикально с равным шагом 10 м, полотно — ось $Ox$ ($y=0$).
+ * Композиция — как на рисунке к задаче в открытом банке: цепь крепится к
+ * вершинам пилонов, от вершин к берегам идут растяжки, полотно лежит на
+ * берегах, под ним русло с водой, пилоны уходят в дно. Ось $Oy$ идёт
+ * вдоль левого пилона, 0 — у его основания (на уровне полотна).
  *
  * Перо, цвета, толщины, шрифт и белое гало под подписями — из THEME
  * движка графиков (lib/graph/renderer.js), как у чертежей векторов.
@@ -54,7 +56,9 @@ export interface OtchetMosta {
 
 const W = 640;
 const H = 380;
-const POLE = { left: 46, right: 74, top: 34, bottom: 78 };
+const POLE = { left: 14, right: 40, top: 34, bottom: 22 };
+/** Растяжки пилонов опускаются на берег на такой доле длины моста. */
+const OTKOS = 0.2;
 const SHAG_VANT = 10;
 const KEGL = 14;
 const ZAZOR = 4;
@@ -108,15 +112,19 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
   const L = -b / a;
   const y = (x: number) => a * x * x + b * x + c;
   const yMin = y(L / 2);
-  const verh = c * 1.32;
-  const glubina = c * 0.32;
+  const verh = c * 1.15;
+  const glubina = c * 0.34;
+  const otkos = L * OTKOS;
 
-  /* Масштабы: по горизонтали — вся длина моста, по вертикали — от дна
-     воды до верха пилонов (вертикаль растянута, как на схемах банка). */
-  const sx = (W - POLE.left - POLE.right) / L;
+  /* Масштабы: по горизонтали — мост с берегами, по вертикали — от дна
+     русла до верха оси (вертикаль растянута, как на схемах банка). */
+  const sx = (W - POLE.left - POLE.right) / (L + 2 * otkos);
   const sy = (H - POLE.top - POLE.bottom) / (verh + glubina);
-  const X = (x: number) => POLE.left + x * sx;
+  const X = (x: number) => POLE.left + (x + otkos) * sx;
   const Y = (v: number) => POLE.top + (verh - v) * sy;
+  /* Дно русла: от бровки берега (у основания растяжки) вниз и обратно. */
+  const dno = (x: number) =>
+    -glubina * Math.pow(Math.max(0, Math.sin((Math.PI * (x + otkos)) / (L + 2 * otkos))), 0.6);
 
   const C = THEME.colors;
   const Wd = THEME.width;
@@ -128,47 +136,79 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
       `<line x1="${px(s.x0)}" y1="${px(s.y0)}" x2="${px(s.x1)}" y2="${px(s.y1)}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round"${extra}/>`,
     );
   };
-
-  /* ── Вода: стилизованные волны под полотном ── */
-  const vodaVerh = Y(0) + 10;
-  const vodaNiz = Y(-glubina) - 4;
-  parts.push(
-    `<rect class="z10-most__voda" x="${px(X(0))}" y="${px(vodaVerh)}" width="${px(X(L) - X(0))}" height="${px(vodaNiz - vodaVerh)}" fill="var(--color-surface-soft, #E6EFFC)"/>`,
-  );
-  for (let k = 0; k < 3; k += 1) {
-    const yy = vodaVerh + ((k + 1) * (vodaNiz - vodaVerh)) / 4;
-    const tochki: string[] = [];
-    const shag = 6;
-    let prev: [number, number] | null = null;
-    for (let xx = X(0) + 14; xx <= X(L) - 14; xx += shag) {
-      const yv = yy + 3 * Math.sin((xx - X(0)) / 9 + k);
-      tochki.push(`${px(xx)},${px(yv)}`);
-      if (prev) {
-        linii.push({ x0: prev[0], y0: prev[1], x1: xx, y1: yv });
+  /* fon: волны — фон, подпись с белым гало может лечь поверх них. */
+  const lomanaya = (tochki: [number, number][], attrs: string, fon = false) => {
+    tochki.forEach((t, i) => {
+      if (fon) {
+        return;
       }
-      prev = [xx, yv];
-    }
+      const pr = tochki[i - 1];
+      if (pr) {
+        linii.push({ x0: pr[0], y0: pr[1], x1: t[0], y1: t[1] });
+      }
+    });
     parts.push(
-      `<polyline points="${tochki.join(' ')}" fill="none" stroke="var(--color-primary, #1F5FD0)" stroke-opacity="0.45" stroke-width="1.2"/>`,
+      `<polyline points="${tochki.map(([u, v]) => `${px(u)},${px(v)}`).join(' ')}" fill="none" ${attrs}/>`,
+    );
+  };
+
+  /* ── Русло и вода ── */
+  const NR = 160;
+  const ruslo: [number, number][] = [];
+  for (let i = 0; i <= NR; i += 1) {
+    const xx = -otkos + ((L + 2 * otkos) * i) / NR;
+    ruslo.push([X(xx), Y(dno(xx))]);
+  }
+  const poverhnost = -glubina * 0.12;
+  const voda = ruslo.filter(([, v]) => v > Y(poverhnost));
+  const pervaya = voda[0];
+  const poslednyaya = voda[voda.length - 1];
+  if (pervaya && poslednyaya) {
+    parts.push(
+      `<polygon class="z10-most__voda" points="${px(pervaya[0])},${px(Y(poverhnost))} ${voda.map(([u, v]) => `${px(u)},${px(v)}`).join(' ')} ${px(poslednyaya[0])},${px(Y(poverhnost))}" fill="var(--color-surface-soft, #E6EFFC)"/>`,
     );
   }
+  for (let k = 0; k < 3; k += 1) {
+    const uroven = poverhnost - ((k + 0.7) * glubina) / 4.2;
+    const tochki: [number, number][] = [];
+    for (let xx = X(-otkos); xx <= X(L + otkos); xx += 6) {
+      const xm = (xx - POLE.left) / sx - otkos;
+      const yv = Y(uroven) + 3 * Math.sin((xx - X(0)) / 9 + k);
+      if (yv < Y(dno(xm)) - 5) {
+        tochki.push([xx, yv]);
+      } else if (tochki.length > 0) {
+        break;
+      }
+    }
+    lomanaya(
+      tochki,
+      'stroke="var(--color-primary, #1F5FD0)" stroke-opacity="0.45" stroke-width="1.2"',
+      true,
+    );
+  }
+  lomanaya(ruslo, `stroke="${C.axis}" stroke-width="${Wd.helper}"`);
 
-  /* ── Пилоны (со своими опорами в воде) ── */
+  /* ── Пилоны: от дна до вершины, где крепится цепь; растяжки к берегам ── */
   const shirinaPilona = 7;
-  for (const xp of [0, L]) {
+  for (const [xp, xb] of [
+    [0, -otkos],
+    [L, L + otkos],
+  ] as const) {
     const xx = X(xp);
+    const niz = Y(dno(xp));
     parts.push(
-      `<rect x="${px(xx - shirinaPilona / 2)}" y="${px(Y(verh))}" width="${shirinaPilona}" height="${px(Y(-glubina) - Y(verh))}" fill="var(--color-surface, #FFFFFF)" stroke="${C.axis}" stroke-width="${Wd.helper}"/>`,
+      `<rect x="${px(xx - shirinaPilona / 2)}" y="${px(Y(c))}" width="${shirinaPilona}" height="${px(niz - Y(c))}" fill="var(--color-surface, #FFFFFF)" stroke="${C.axis}" stroke-width="${Wd.helper}"/>`,
     );
     linii.push(
-      { x0: xx - shirinaPilona / 2, y0: Y(verh), x1: xx - shirinaPilona / 2, y1: Y(-glubina) },
-      { x0: xx + shirinaPilona / 2, y0: Y(verh), x1: xx + shirinaPilona / 2, y1: Y(-glubina) },
-      { x0: xx - shirinaPilona / 2, y0: Y(verh), x1: xx + shirinaPilona / 2, y1: Y(verh) },
+      { x0: xx - shirinaPilona / 2, y0: Y(c), x1: xx - shirinaPilona / 2, y1: niz },
+      { x0: xx + shirinaPilona / 2, y0: Y(c), x1: xx + shirinaPilona / 2, y1: niz },
+      { x0: xx - shirinaPilona / 2, y0: Y(c), x1: xx + shirinaPilona / 2, y1: Y(c) },
     );
+    line({ x0: xx, y0: Y(c), x1: X(xb), y1: Y(0) }, C.axis, Wd.helper + 0.4);
   }
 
   /* ── Полотно моста = ось Ox ── */
-  line({ x0: X(0), y0: Y(0), x1: X(L), y1: Y(0) }, C.axis, Wd.axis + 1.4);
+  line({ x0: X(-otkos), y0: Y(0), x1: X(L + otkos), y1: Y(0) }, C.axis, Wd.axis + 1.4);
 
   /* ── Ванты ── */
   const vanty: number[] = [];
@@ -205,8 +245,8 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
   parts.push(
     `<polyline points="${cep.join(' ')}" fill="none" stroke="${C.lineA}" stroke-width="${Wd.curve}" stroke-linejoin="round"/>`,
   );
-  /* Узлы крепления вант к цепи. */
-  for (const xv of vanty) {
+  /* Узлы крепления вант к цепи и цепи к пилонам. */
+  for (const xv of [0, ...vanty, L]) {
     parts.push(`<circle cx="${px(X(xv))}" cy="${px(Y(y(xv)))}" r="2.6" fill="${C.lineA}"/>`);
   }
 
@@ -218,11 +258,11 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
     const ny = dx;
     return `<path d="M${px(x1)},${px(y1)} L${px(x1 - dx * al + nx * ah)},${px(y1 - dy * al + ny * ah)} L${px(x1 - dx * al - nx * ah)},${px(y1 - dy * al - ny * ah)} Z" fill="${C.axis}"/>`;
   };
-  const yTop = Y(verh) - 22;
+  const yTop = Y(verh) - 18;
   line({ x0: X(0), y0: Y(0), x1: X(0), y1: yTop }, C.axis, Wd.axis);
   parts.push(strelka(X(0), yTop, 0, -1));
-  const xRight = X(L) + 34;
-  line({ x0: X(L), y0: Y(0), x1: xRight, y1: Y(0) }, C.axis, Wd.axis);
+  const xRight = X(L + otkos) + 30;
+  line({ x0: X(L + otkos), y0: Y(0), x1: xRight, y1: Y(0) }, C.axis, Wd.axis);
   parts.push(strelka(xRight, Y(0), 1, 0));
 
   const ramki: Ramka[] = [];
@@ -303,13 +343,13 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
   const vPodpis =
     vanty.find((xv) => xv !== nuzhnaya && y(xv) > yMin * 1.3) ?? vanty[0] ?? SHAG_VANT;
   const xCep = L * 0.78;
-  svynoskoy('пилон', 'пилон', X(L) + shirinaPilona / 2, Y(verh * 0.55));
+  svynoskoy('пилон', 'пилон', X(L) + shirinaPilona / 2, Y(c * 0.45));
   svynoskoy('цепь', 'цепь', X(xCep), Y(y(xCep)));
   svynoskoy('ванта', 'ванта', X(vPodpis), Y(y(vPodpis) * 0.6));
   svynoskoy(
     'полотно моста',
     'полотно моста',
-    X(L * 0.42),
+    X(Math.abs(xVanty - L * 0.42) < L * 0.2 ? L * 0.8 : L * 0.42),
     Y(0),
     undefined,
     KEGL,
@@ -357,7 +397,8 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
   }
 
   const label =
-    title ?? 'Схема висячего моста: пилоны, провисающая цепь, вертикальные ванты и полотно моста';
+    title ??
+    'Схема висячего моста: пилоны с растяжками, провисающая цепь, вертикальные ванты, полотно моста над рекой';
   const svg =
     `<svg class="z10-most z10-most--${rezhim}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">` +
     `<title>${esc(label)}</title>` +
