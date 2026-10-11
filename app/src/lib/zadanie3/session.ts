@@ -103,3 +103,40 @@ export function spareFor(
   }
   return free.length === 0 ? null : (free[Math.floor(random() * free.length)] ?? null);
 }
+
+/**
+ * «Похожие задачи»: на каждое задание с ошибкой — другой вариант того
+ * же прототипа, которого в тренировке не было (ни в подходе, ни среди
+ * заданий с ошибкой). У прототипа варианты кончились — задание
+ * пропускается; не осталось ни одного — null.
+ */
+export function similarSolid3(
+  payload: Solid3Payload,
+  indexes: readonly number[],
+  byId: ReadonlyMap<string, PoolKind>,
+  random: () => number,
+): Solid3Payload | null {
+  const key = (item: RoundItem) => `${item.kind}:${item.n}`;
+  const used = new Set(
+    [...payload.pool.slice(0, payload.size), ...indexes.flatMap((at) => payload.pool[at] ?? [])].map(
+      key,
+    ),
+  );
+  const items: RoundItem[] = [];
+  for (const at of indexes) {
+    const current = payload.pool[at];
+    const kind = current === undefined ? undefined : byId.get(current.kind);
+    if (kind === undefined) {
+      continue;
+    }
+    const free = kind.variants
+      .map((variant): RoundItem => ({ kind: kind.id, n: variant.n }))
+      .filter((item) => !used.has(key(item)));
+    const pick = free[Math.floor(random() * free.length)];
+    if (pick !== undefined) {
+      used.add(key(pick));
+      items.push(pick);
+    }
+  }
+  return items.length === 0 ? null : makeSolid3Payload(items, byId);
+}

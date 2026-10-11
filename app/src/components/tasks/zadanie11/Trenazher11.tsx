@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { TRENAZHER_11 } from '@/content/zadanie11';
+import { kodNaSayte } from '@/lib/zadanie11/kod';
 import { trenazher11 } from '@/lib/zadanie11/progress';
 import {
   bankDlya,
@@ -19,11 +20,14 @@ import {
 } from '@/lib/zadanie11/trenazher/nastroyki';
 import type { SectionId } from '@/lib/zadanie11/types';
 import { TrainerSessionHost, type ConfiguratorApi } from '../session';
+import { IkonkaRazdela } from './Piktogrammy';
 import { Trenazher11Review, Trenazher11Reshenie } from './Trenazher11Reshenie';
 import { Trenazher11Vybor } from './Trenazher11Vybor';
 import {
   isTrenazher11Payload,
+  raspakovat11,
   readTrenazher11Ui,
+  upakovat11,
   type Trenazher11Payload,
   type Trenazher11Ui,
 } from './trenazher11Sessiya';
@@ -37,8 +41,10 @@ function novyySeed(): string {
  * Вкладка «Тренажёр» №11: выбор задач → решение → итог.
  *
  * Решение и итог ведёт оболочка сессии (components/tasks/session):
- * она сохраняет собранные задачи и состояние экрана, ведёт паузу
- * и время и показывает общий итоговый экран.
+ * она сохраняет тренировку и состояние экрана, ведёт паузу и время и
+ * показывает общий итоговый экран. В хранилище идёт план задач с
+ * подписями (trenazher11Sessiya.ts), при возвращении задачи собираются
+ * заново по банку страницы.
  *
  * Выбор (источник, подтипы, количество, уровень, подсказки) хранится
  * в sessionStorage — на время сессии браузера. Ссылка «Решать» из
@@ -93,7 +99,11 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [progress.mistakes, vse],
   );
 
-  async function nachat(nastroyki: Nastroyki, begin: ConfiguratorApi<Trenazher11Payload>['start']) {
+  /**
+   * Собрать тренировку по выбору: план, затем задачи. Движок решений
+   * подгружается здесь, по требованию. Пустой план — null.
+   */
+  async function sobrat(nastroyki: Nastroyki): Promise<Trenazher11Payload | null> {
     const podtipy = vTrenirovke(nastroyki, vse).map((p) => p.id);
     const plan = planSessii(
       { podtipy, istochnik: nastroyki.istochnik, count: nastroyki.count },
@@ -101,21 +111,52 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
       novyySeed(),
     );
     if (plan.length === 0) {
-      return;
+      return null;
     }
+    const { sobratZadachu } = await import('@/lib/zadanie11/trenazher/zadacha');
+    return {
+      zadachi: plan.map((p) => sobratZadachu(p, dannye.bank)),
+      podskazki: nastroyki.podskazki,
+    };
+  }
+
+  async function nachat(nastroyki: Nastroyki, begin: ConfiguratorApi<Trenazher11Payload>['start']) {
     setOshibka(null);
     setZagruzka(true);
     try {
-      const { sobratZadachu } = await import('@/lib/zadanie11/trenazher/zadacha');
-      const zadachi = plan.map((p) => sobratZadachu(p, dannye.bank));
-      /* Оболочка сохранит задачи целиком и вернёт ученика в них
-         при любом заходе, пока тренировка не завершена. */
-      begin({ zadachi, podskazki: nastroyki.podskazki });
+      const payload = await sobrat(nastroyki);
+      if (payload === null) {
+        return;
+      }
+      begin(payload);
       window.scrollTo({ top: 0 });
     } catch (e) {
       setOshibka((e as Error).message);
     } finally {
       setZagruzka(false);
+    }
+  }
+
+  /**
+   * «Похожие задачи» — как прежняя кнопка «ошибки» на итогах: новые
+   * задачи тех же подтипов, где были ошибки, с прежним источником.
+   * Задач столько же, сколько ошибок, — как обещает подпись кнопки
+   * «Похожие задачи (N)». Выбор подтипов запоминается, как при ручном.
+   */
+  async function pohozhie(
+    payload: Trenazher11Payload,
+    indexes: readonly number[],
+  ): Promise<Trenazher11Payload | null> {
+    const podtipy = [...new Set(indexes.flatMap((at) => payload.zadachi[at]?.id ?? []))];
+    if (podtipy.length === 0) {
+      return null;
+    }
+    const s: Nastroyki = { ...nastroykiSeychas(), podtipy, uroven: 0 };
+    izmenit(s);
+    try {
+      return await sobrat({ ...s, count: indexes.length });
+    } catch {
+      return null;
     }
   }
 
@@ -130,6 +171,8 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
       what="тренажёр"
       backHref={base}
       isPayload={isTrenazher11Payload}
+      pack={upakovat11}
+      unpack={(packed) => raspakovat11(packed, dannye.bank)}
       count={(payload) => payload.zadachi.length}
       describe={(payload, at) => {
         const z = payload.zadachi[at];
@@ -139,6 +182,9 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
         return {
           kind: z.title,
           html: z.uslovieHtml,
+          icon: <IkonkaRazdela section={z.section} />,
+          code: kodNaSayte(z.id),
+          badge: TRENAZHER_11.badge[z.vid],
           /* Решение закрыто отпечатком до итогов: открывается только здесь. */
           review: () => <Trenazher11Review zadacha={z} />,
         };
@@ -147,6 +193,7 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
         ...payload,
         zadachi: indexes.flatMap((at) => payload.zadachi[at] ?? []),
       })}
+      similar={pohozhie}
       configurator={(api) => (
         <>
           <Trenazher11Vybor

@@ -51,8 +51,8 @@ interface Itog {
  * методов: метода в разметке тоже нет, кнопка сверяется с отпечатком,
  * а признаки открываются им же после ответа.
  *
- * Задачи приходят готовыми в payload (собраны в Trenazher при запуске),
- * поэтому при возвращении в тренировку подход тот же, что был. Всё,
+ * Задачи приходят готовыми в payload (собраны в Trenazher при запуске
+ * или из ссылок записи при возвращении), поэтому подход тот же, что был. Всё,
  * что ученик успел на задаче, берётся из restored: карточка получает
  * ответ и шаг решения, «Узнай метод» — сделанный выбор.
  */
@@ -82,6 +82,8 @@ export function Sessiya({
   const [card, setCard] = useState<ProblemCardSnapshot>(restored?.card ?? PUSTAYA_KARTOCHKA);
   /* «Узнай метод»: что нажато на текущей задаче. */
   const [vybor, setVybor] = useState<string | null>(restored?.vybor ?? null);
+  /* Неверные ответы за всю тренировку: строка «Неверных попыток» в итогах. */
+  const [misses, setMisses] = useState(restored?.misses ?? 0);
 
   /* Время на задачу идёт от появления задачи на экране, в активных
      миллисекундах оболочки: пауза и скрытая вкладка в него не входят. */
@@ -103,6 +105,7 @@ export function Sessiya({
     card,
     vybor,
     taskFrom,
+    misses,
   });
 
   const task = tasks[index];
@@ -116,6 +119,7 @@ export function Sessiya({
 
   function oshibka() {
     oshibsya.current = true;
+    setMisses((n) => n + 1);
     setTried((was) => ({ ...was, [index]: true }));
   }
 

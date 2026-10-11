@@ -10,6 +10,7 @@ import { answerMatches, klyuchZadachi, openText } from '@/lib/zadanie3/secret';
 import {
   isSolid3Payload,
   makeSolid3Payload,
+  similarSolid3,
   spareFor,
   type Solid3Payload,
 } from '@/lib/zadanie3/session';
@@ -88,6 +89,7 @@ export function Solid3Trainer({ pool, scope, backHref }: Solid3TrainerProps) {
           byId,
         )
       }
+      similar={(payload, indexes) => similarSolid3(payload, indexes, byId, seeded(freshSeed()))}
       configurator={(api) => <Solid3Setup pool={pool} byId={byId} api={api} />}
       screen={({ payload, restored, report, elapsed, finish }) => (
         <Solid3Screen
@@ -310,6 +312,8 @@ function Solid3Screen({
      решённое с ошибкой или с разбором отличается от пропущенного. */
   const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
   const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
+  /* Неверные проверки за всю тренировку: строка «Неверных попыток» в итогах. */
+  const [misses, setMisses] = useState(restored?.misses ?? 0);
 
   useSessionReport<Solid3Ui>(report, {
     index,
@@ -321,6 +325,7 @@ function Solid3Screen({
     solution,
     missed,
     taskFrom,
+    misses,
   });
 
   const total = order.length;
@@ -373,6 +378,7 @@ function Solid3Screen({
       }
     } else {
       setMissed(true);
+      setMisses(misses + 1);
       setTried({ ...tried, [index]: true });
     }
   }
