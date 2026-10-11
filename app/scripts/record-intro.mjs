@@ -14,7 +14,9 @@
    3. Частота кадров в реальном времени: компьютер; «слабый телефон» —
       телефонный режим и замедление процессора в 4 раза.
    4. Память: куча JS до показа, во время и после закрытия (после сборки
-      мусора), и сколько объектов WebGL осталось живыми.
+      мусора); после закрытия в документе нет ни холстов, ни заставки.
+   5. Вес: чанки заставки (gzip) и слои для ширин 768 и 1536.
+   Плюс кадры стыка корона → чашечка (1,55 и 1,65 с) рядом.
 
    Результат — docs/screenshots/intro/ и сводка в консоли (report.json). */
 
@@ -22,6 +24,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import zlib from 'node:zlib';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 
@@ -196,6 +199,35 @@ for (const v of VIEWS) {
     '80',
     path.join(OUT, `sravnenie-${v.id}.jpg`),
   ]);
+
+  /* Стык корона → чашечка: 1,55 и 1,65 с рядом. */
+  const seam = [];
+  for (const t of [1.55, 1.65]) {
+    const shot = path.join(OUT, `.${v.id}-styk-${t}.png`);
+    execFileSync('ffmpeg', [
+      '-y',
+      '-loglevel',
+      'error',
+      '-ss',
+      String(t),
+      '-i',
+      video,
+      '-frames:v',
+      '1',
+      shot,
+    ]);
+    seam.push(shot);
+  }
+  execFileSync('convert', [
+    ...seam,
+    '+append',
+    '-resize',
+    v.id === 'desktop' ? '1600x' : '900x',
+    '-quality',
+    '82',
+    path.join(OUT, `styk-${v.id}.jpg`),
+  ]);
+  for (const f of seam) fs.rmSync(f);
 }
 
 /* ── 3. Частота кадров в реальном времени ───────────────────── */
@@ -247,9 +279,6 @@ report.fps = {
   await page.waitForSelector('.intro[data-phase="card"]', { timeout: 60000 });
   await page.waitForTimeout(1500);
   const during = await heap();
-  const liveDuring = Number(
-    (await page.textContent('.dev-intro__info')).match(/WebGL-объектов: (\d+)/)?.[1],
-  );
   await page.click('.intro-card__later');
   await page.waitForTimeout(1000);
   const after = await heap();
@@ -258,10 +287,51 @@ report.fps = {
     heapKbBefore: before,
     heapKbOpen: during,
     heapKbAfter: after,
-    webglObjectsOpen: liveDuring,
     canvasesAfter: canvases,
+    introNodesAfter: await page.locator('.intro').count(),
   };
   await context.close();
+}
+
+/* ── 5. Вес: чанки заставки и слои для каждой ширины ───────── */
+{
+  const chunks = path.join(ROOT, '_next', 'static');
+  const walk = (dir) =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const p = path.join(dir, e.name);
+      return e.isDirectory() ? walk(p) : [p];
+    });
+  const gz = (buf) => zlib.gzipSync(buf, { level: 6 }).length;
+  const code = [];
+  for (const f of walk(chunks)) {
+    if (!/\.(js|css)$/.test(f)) continue;
+    const text = fs.readFileSync(f, 'utf8');
+    /* Чанки заставки: её классы есть только в ней и в прототипе. */
+    if (text.includes('intro__stage') && !text.includes('dev-intro__panel')) {
+      code.push({ file: path.relative(ROOT, f), gzKb: Math.round(gz(fs.readFileSync(f)) / 1024) });
+    }
+  }
+  const layers = {};
+  for (const width of [768, 1536]) {
+    let bytes = 0;
+    for (const name of [
+      'F-oktaedr',
+      'G-korona',
+      'B-chashechka',
+      'C-vneshnie',
+      'D-vnutrennie',
+      'E-tychinki',
+    ]) {
+      bytes += fs.statSync(path.join(APP, 'public', 'intro', `${name}-${width}.webp`)).size;
+    }
+    layers[width] = {
+      animatedKb: Math.round(bytes / 1024),
+      staticKb: Math.round(
+        fs.statSync(path.join(APP, 'public', 'intro', `A-cvetok-${width}.webp`)).size / 1024,
+      ),
+    };
+  }
+  report.weight = { code, layers };
 }
 
 await browser.close();
