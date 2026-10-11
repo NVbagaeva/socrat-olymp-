@@ -15,6 +15,7 @@ import {
   readSession,
   sessionKey,
   storageAvailable,
+  sweepStaleSessions,
   writeRaw,
 } from '@/lib/trainerSession/store';
 import { TRAINER_SCHEMA_VERSION, type BaseUi } from '@/lib/trainerSession/types';
@@ -53,6 +54,23 @@ export interface DescribedTask {
   html: string;
   /** Разбор по нажатию «Показать разбор». Нет — кнопки нет. */
   review?: () => ReactNode;
+  /** Значок раздела или типа (№11 — иконка раздела задачника). */
+  icon?: ReactNode;
+  /** Код задачи на сайте, если он есть: «11.3.2-07». */
+  code?: string;
+  /** Откуда задача: «Открытый банк», «Аналог», «Новая». */
+  badge?: string;
+}
+
+/** Что ещё показать на экране итогов: у каждого тренажёра своё. */
+export interface SummaryOptions {
+  /**
+   * Как назвать задания, закрытые с подсказкой: у №8 и №2 это
+   * «Решено с открытым решением». По умолчанию — «Решено с подсказкой».
+   */
+  hintedLabel?: string;
+  /** Свой блок под общими строками итогов: рекомендации, ссылки на теорию. */
+  extra?: (data: SummaryData) => ReactNode;
 }
 
 export interface ConfiguratorApi<P> {
@@ -80,6 +98,29 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
    * задана — кнопки нет.
    */
   subset?: (payload: P, poolIndexes: number[]) => P;
+  /**
+   * Новая тренировка из аналогов тех же прототипов (подтипов) — для
+   * «Похожие задачи». Может собираться асинхронно (движок подгружается
+   * по требованию). null — аналогов собрать не вышло. Не задана —
+   * кнопки нет: у тренажёра нет генерации аналогов.
+   */
+  similar?: (payload: P, poolIndexes: number[]) => P | null | Promise<P | null>;
+  /**
+   * Упаковать задания для записи: вместо готовых чертежей и разборов —
+   * параметры, по которым они собираются заново. Нужна, когда задания
+   * целиком весят много (чертежи SVG, разборы с формулами). Не задана —
+   * задания пишутся как есть.
+   */
+  pack?: (payload: P) => unknown;
+  /**
+   * Собрать задания из упакованного вида. Может быть асинхронной: движок
+   * задач грузится по требованию. null — собрать нельзя (сайт обновился
+   * и параметры больше не дают тех же заданий): тренировка сбрасывается
+   * как устаревшая.
+   */
+  unpack?: (packed: unknown) => P | null | Promise<P | null>;
+  /** Дополнения к экрану итогов. */
+  summary?: SummaryOptions;
   /** Куда ведёт ссылка с экрана итогов. */
   backHref?: string;
   /** Экран выбора тренировки. */
@@ -94,7 +135,10 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
 interface Run<P> {
   id: string;
   payload: P;
+  /** Задания для записи: уже упакованные и в виде строки. */
   payloadJson: string;
+  /** Сколько заданий: пишется в запись рядом со служебными полями. */
+  total: number;
   createdAt: number;
   /** Состояние экрана при входе. null — новая тренировка. */
   restored: BaseUi | null;
@@ -103,7 +147,11 @@ interface Run<P> {
 }
 
 type View<P> =
-  { kind: 'config' } | { kind: 'run'; run: Run<P> } | { kind: 'summary'; data: SummaryData };
+  | { kind: 'config' }
+  /** Задания собираются из упакованного вида: секунда ожидания при входе. */
+  | { kind: 'restoring' }
+  | { kind: 'run'; run: Run<P> }
+  | { kind: 'summary'; data: SummaryData };
 
 /** Почему эта вкладка больше не пишет в тренировку. */
 type Blocked = 'taken' | 'replaced' | 'gone';
@@ -165,6 +213,10 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   count,
   describe,
   subset,
+  similar,
+  pack,
+  unpack,
+  summary,
   backHref,
   configurator,
   screen,
@@ -174,7 +226,10 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const [paused, setPaused] = useState(false);
   const [blocked, setBlocked] = useState<Blocked | null>(null);
   const [available, setAvailable] = useState(true);
-  const [saveFailed, setSaveFailed] = useState(false);
+  /* Почему не пишется: хранилища нет или в нём кончилось место. */
+  const [saveProblem, setSaveProblem] = useState<'quota' | 'denied' | null>(null);
+  /* «Похожие задачи» собираются: на кнопке крутится ожидание. */
+  const [building, setBuilding] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
   /* Новая тренировка при незавершённой: ждёт ответа ученика. */
@@ -192,7 +247,8 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const pausedRef = useRef(false);
   const blockedRef = useRef<Blocked | null>(null);
   const availableRef = useRef(true);
-  const failedRef = useRef(false);
+  const problemRef = useRef<'quota' | 'denied' | null>(null);
+  const aliveRef = useRef(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clockRef = useRef<{ base: number; since: number | null }>({ base: 0, since: null });
   const epochRef = useRef(0);
@@ -250,14 +306,16 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         writer: TAB_ID,
         paused: pausedRef.current,
         activeMs: elapsed(),
+        total: run.total,
       },
       JSON.stringify(uiRef.current),
       run.payloadJson,
     );
-    const ok = writeRaw(scope, raw);
-    if (failedRef.current === ok) {
-      failedRef.current = !ok;
-      setSaveFailed(!ok);
+    const result = writeRaw(scope, raw);
+    const problem = result === 'ok' ? null : result;
+    if (problemRef.current !== problem) {
+      problemRef.current = problem;
+      setSaveProblem(problem);
     }
   }, [scope, elapsed]);
 
@@ -302,7 +360,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     (payload: P) => {
       let payloadJson: string;
       try {
-        payloadJson = JSON.stringify(payload);
+        payloadJson = JSON.stringify(pack === undefined ? payload : pack(payload));
       } catch {
         payloadJson = 'null';
         availableRef.current = false;
@@ -312,6 +370,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         id: newSessionId(),
         payload,
         payloadJson,
+        total: count(payload),
         createdAt: Date.now(),
         restored: null,
         epoch: 0,
@@ -322,33 +381,60 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       flush();
       notifySessionsChanged();
     },
-    [enter, flush],
+    [enter, flush, pack, count],
   );
 
-  /** Разобрать запись из хранилища. null — запись не подошла этому тренажёру. */
+  const toConfig = useCallback(() => {
+    viewRef.current = { kind: 'config' };
+    setView({ kind: 'config' });
+  }, []);
+
+  /**
+   * Собрать тренировку из записи. Упакованные задания распаковывает
+   * тренажёр (может асинхронно). 'outdated' — параметры больше не дают
+   * тех же заданий; 'broken' — запись не подошла по форме.
+   */
   const restoreFrom = useCallback(
-    (stored: { id: string; createdAt: number; payload: unknown; ui: unknown }): Run<P> | null => {
-      if (!isPayload(stored.payload)) {
-        return null;
-      }
-      const payload = stored.payload;
+    async (stored: {
+      id: string;
+      createdAt: number;
+      payload: unknown;
+      ui: unknown;
+    }): Promise<Run<P> | 'outdated' | 'broken'> => {
       if (stored.ui !== null && !isBaseUi(stored.ui)) {
-        return null;
+        return 'broken';
       }
+      let payload: unknown = stored.payload;
+      if (unpack !== undefined) {
+        try {
+          payload = await unpack(stored.payload);
+        } catch {
+          payload = null;
+        }
+        if (payload === null) {
+          return 'outdated';
+        }
+      }
+      if (!isPayload(payload)) {
+        return 'broken';
+      }
+      const total = count(payload);
       return {
         id: stored.id,
         payload,
-        payloadJson: JSON.stringify(payload),
+        /* Пишется ровно то, что прочитано: упаковывать заново незачем. */
+        payloadJson: JSON.stringify(stored.payload),
+        total,
         createdAt: stored.createdAt,
-        restored: stored.ui === null ? null : normalizeBase(stored.ui, count(payload)),
+        restored: stored.ui === null ? null : normalizeBase(stored.ui, total),
         epoch: 0,
       };
     },
-    [isPayload, count],
+    [isPayload, count, unpack],
   );
 
   /** Вернуться в сохранённую тренировку. false — возвращаться не во что. */
-  const resume = useCallback((): boolean => {
+  const resume = useCallback(async (): Promise<boolean> => {
     const read = readSession(scope);
     if (read.status === 'reset') {
       setNotice(read.reason);
@@ -358,25 +444,39 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     if (read.status === 'none') {
       return false;
     }
-    const run = restoreFrom(read.session);
-    if (run === null) {
+    if (unpack !== undefined) {
+      viewRef.current = { kind: 'restoring' };
+      setView({ kind: 'restoring' });
+    }
+    const run = await restoreFrom(read.session);
+    if (!aliveRef.current) {
+      return false;
+    }
+    if (run === 'outdated' || run === 'broken') {
       clearSession(scope);
-      setNotice('restore');
+      setNotice(run === 'outdated' ? 'version' : 'restore');
+      toConfig();
       return false;
     }
     enter(run, read.session.activeMs, read.session.paused, read.session.rev);
     return true;
-  }, [scope, restoreFrom, enter]);
+  }, [scope, restoreFrom, enter, unpack, toConfig]);
 
   /* Вход в тренажёр: если есть незавершённая тренировка — сразу в неё.
      Эффект до отрисовки: ученик не видит мелькнувший выбор тренировки. */
   useBrowserLayoutEffect(() => {
+    aliveRef.current = true;
     const ok = storageAvailable();
     availableRef.current = ok;
     setAvailable(ok);
     if (ok) {
-      resume();
+      /* Записи прежних версий и старые ключи тренажёров — прочь. */
+      sweepStaleSessions();
+      void resume();
     }
+    return () => {
+      aliveRef.current = false;
+    };
     // Один раз при входе: дальше состоянием управляет сама оболочка.
   }, []);
 
@@ -402,10 +502,19 @@ export function TrainerSessionHost<P, U extends BaseUi>({
           kind: described.kind,
           html: described.html,
           review: described.review,
+          icon: described.icon,
+          code: described.code,
+          badge: described.badge,
           mark: mark ?? (ui?.tried[position] === true ? 'wrong' : 'skipped'),
         });
       }
-      return { items, seconds: Math.round(elapsed() / 1000), payload: run.payload };
+      const misses = typeof ui?.misses === 'number' && ui.misses >= 0 ? ui.misses : undefined;
+      return {
+        items,
+        seconds: Math.round(elapsed() / 1000),
+        payload: run.payload,
+        ...(misses === undefined ? {} : { misses }),
+      };
     },
     [count, describe, elapsed],
   );
@@ -549,11 +658,12 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const takeOver = useCallback(() => {
     blockedRef.current = null;
     setBlocked(null);
-    if (!resume()) {
-      viewRef.current = { kind: 'config' };
-      setView({ kind: 'config' });
-    }
-  }, [resume]);
+    void resume().then((ok) => {
+      if (!ok && aliveRef.current) {
+        toConfig();
+      }
+    });
+  }, [resume, toConfig]);
 
   const leaveToConfig = useCallback(() => {
     blockedRef.current = null;
@@ -571,35 +681,57 @@ export function TrainerSessionHost<P, U extends BaseUi>({
          как открыт этот выбор: смотрим в хранилище в момент нажатия. */
       const read = availableRef.current ? readSession(scope) : ({ status: 'none' } as const);
       if (read.status === 'ok') {
-        const old = restoreFrom(read.session);
-        if (old !== null) {
-          setPending({
-            payload,
-            solved: old.restored === null ? 0 : Object.keys(old.restored.marks).length,
-            total: old.restored?.order?.length ?? count(old.payload),
-          });
-          return;
-        }
+        /* Распаковывать задания ради вопроса незачем: число заданий
+           лежит в записи, решённые — в состоянии экрана. */
+        const ui = isBaseUi(read.session.ui) ? read.session.ui : null;
+        setPending({
+          payload,
+          solved: ui === null ? 0 : Object.keys(ui.marks).length,
+          total: ui?.order?.length ?? read.session.total,
+        });
+        return;
       }
       begin(payload);
     },
-    [scope, restoreFrom, count, begin],
+    [scope, begin],
   );
 
-  const retryErrors = useCallback(
+  /** Ошибки тренировки: неверные и закрытые с подсказкой — по номерам пула. */
+  const mistakesOf = (data: SummaryData) =>
+    data.items
+      .filter((item) => item.mark === 'wrong' || item.mark === 'hinted')
+      .map((item) => item.poolIndex);
+
+  const retrySame = useCallback(
     (data: SummaryData) => {
-      if (subset === undefined) {
-        return;
-      }
-      const wrong = data.items
-        .filter((item) => item.mark === 'wrong' || item.mark === 'hinted')
-        .map((item) => item.poolIndex);
-      if (wrong.length === 0) {
+      const wrong = mistakesOf(data);
+      if (subset === undefined || wrong.length === 0) {
         return;
       }
       begin(subset(data.payload as P, wrong));
     },
     [subset, begin],
+  );
+
+  const retrySimilar = useCallback(
+    async (data: SummaryData) => {
+      const wrong = mistakesOf(data);
+      if (similar === undefined || wrong.length === 0) {
+        return;
+      }
+      setBuilding(true);
+      try {
+        const next = await similar(data.payload as P, wrong);
+        if (next !== null && aliveRef.current) {
+          begin(next);
+        }
+      } finally {
+        if (aliveRef.current) {
+          setBuilding(false);
+        }
+      }
+    },
+    [similar, begin],
   );
 
   /* Сохранённое не отрисовалось: сбросить и предложить начать заново. */
@@ -608,10 +740,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     if (current.kind === 'run' && current.run.restored !== null) {
       clearSession(scope);
       setNotice('restore');
-      viewRef.current = { kind: 'config' };
-      setView({ kind: 'config' });
+      toConfig();
     }
-  }, [scope]);
+  }, [scope, toConfig]);
 
   /* ── Разметка ───────────────────────────────────────────────── */
 
@@ -639,7 +770,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
             variant="secondary"
             onClick={() => {
               setPending(null);
-              resume();
+              void resume();
             }}
           >
             {sessionText.keepOld}
@@ -668,12 +799,21 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       <TrainerSummary
         data={view.data}
         backHref={backHref}
-        onNew={() => {
-          viewRef.current = { kind: 'config' };
-          setView({ kind: 'config' });
-        }}
-        onRetry={subset === undefined ? undefined : () => retryErrors(view.data)}
+        hintedLabel={summary?.hintedLabel}
+        extra={summary?.extra === undefined ? undefined : summary.extra(view.data)}
+        onNew={toConfig}
+        onRetrySame={subset === undefined ? undefined : () => retrySame(view.data)}
+        onRetrySimilar={similar === undefined ? undefined : () => void retrySimilar(view.data)}
+        buildingSimilar={building}
       />
+    );
+  }
+
+  if (view.kind === 'restoring') {
+    return (
+      <p className="tsess__restoring" role="status" aria-busy="true">
+        {sessionText.restoring}
+      </p>
     );
   }
 
@@ -701,9 +841,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         onResume={unpause}
         onFinish={() => setConfirmFinish(true)}
       />
-      {available && !saveFailed ? null : (
+      {available && saveProblem === null ? null : (
         <p className="tsess__nosave" role="status">
-          {sessionText.noSave}
+          {saveProblem === 'quota' ? sessionText.noSpace : sessionText.noSave}
         </p>
       )}
 

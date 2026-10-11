@@ -20,7 +20,13 @@ export interface SummaryItem {
   /** Условие, набранное KaTeX. */
   html: string;
   mark: SummaryMark;
-  review?: () => ReactNode;
+  review?: (() => ReactNode) | undefined;
+  /** Значок раздела или типа. */
+  icon?: ReactNode;
+  /** Код задачи на сайте. */
+  code?: string | undefined;
+  /** Откуда задача: «Открытый банк», «Аналог». */
+  badge?: string | undefined;
 }
 
 export interface SummaryData {
@@ -29,14 +35,24 @@ export interface SummaryData {
   seconds: number;
   /** Задания тренировки: нужны, чтобы собрать из них часть заново. */
   payload: unknown;
+  /** Сколько раз ответ не сошёлся. Нет — экран счётчика не ведёт. */
+  misses?: number;
 }
 
 export interface TrainerSummaryProps {
   data: SummaryData;
   backHref?: string | undefined;
   onNew: () => void;
-  /** Не задан — кнопки «Прорешать ошибки» нет. */
-  onRetry?: (() => void) | undefined;
+  /** «Прорешать те же задачи». Не задан — кнопки нет. */
+  onRetrySame?: (() => void) | undefined;
+  /** «Похожие задачи»: аналоги тех же прототипов. Не задан — кнопки нет. */
+  onRetrySimilar?: (() => void) | undefined;
+  /** Похожие задачи собираются: на кнопке ожидание. */
+  buildingSimilar?: boolean;
+  /** Подпись строки «с подсказкой»; у №8 и №2 — «с открытым решением». */
+  hintedLabel?: string | undefined;
+  /** Свой блок тренажёра под строками итогов. */
+  extra?: ReactNode;
 }
 
 interface KindRow {
@@ -72,7 +88,14 @@ function Row({ item, no }: { item: SummaryItem; no: number }) {
         <span className={clsx('tsum__mark', `tsum__mark--${item.mark}`)}>
           {sessionText.marks[item.mark]}
         </span>
+        {item.icon === undefined ? null : (
+          <span className="tsum__icon" aria-hidden="true">
+            {item.icon}
+          </span>
+        )}
+        {item.code === undefined ? null : <span className="tsum__code">{item.code}</span>}
         <KindName className="tsum__kind" title={item.kind} />
+        {item.badge === undefined ? null : <span className="tsum__badge">{item.badge}</span>}
       </div>
       {item.html === '' ? null : (
         <div className="tsum__question" dangerouslySetInnerHTML={{ __html: item.html }} />
@@ -103,7 +126,16 @@ function Row({ item, no }: { item: SummaryItem; no: number }) {
  * Класс tdone — оформление итога из тренажёра №12, чтобы выглядел
  * он так же, как раньше.
  */
-export function TrainerSummary({ data, backHref, onNew, onRetry }: TrainerSummaryProps) {
+export function TrainerSummary({
+  data,
+  backHref,
+  onNew,
+  onRetrySame,
+  onRetrySimilar,
+  buildingSimilar = false,
+  hintedLabel,
+  extra,
+}: TrainerSummaryProps) {
   const t = sessionText.summary;
   const { items } = data;
   const total = items.length;
@@ -162,8 +194,14 @@ export function TrainerSummary({ data, backHref, onNew, onRetry }: TrainerSummar
         </div>
         {hinted === 0 ? null : (
           <div className="tdone__row">
-            <dt>{t.rows.hinted}</dt>
+            <dt>{hintedLabel ?? t.rows.hinted}</dt>
             <dd>{hinted}</dd>
+          </div>
+        )}
+        {data.misses === undefined ? null : (
+          <div className="tdone__row">
+            <dt>{t.misses}</dt>
+            <dd>{data.misses}</dd>
           </div>
         )}
         <div className="tdone__row">
@@ -174,9 +212,14 @@ export function TrainerSummary({ data, backHref, onNew, onRetry }: TrainerSummar
 
       <div className="tdone__actions">
         <Button onClick={onNew}>{t.newTraining}</Button>
-        {onRetry === undefined || retryCount === 0 ? null : (
-          <Button variant="secondary" onClick={onRetry}>
-            {t.retry(retryCount)}
+        {onRetrySame === undefined || retryCount === 0 ? null : (
+          <Button variant="secondary" onClick={onRetrySame}>
+            {t.retrySame(retryCount)}
+          </Button>
+        )}
+        {onRetrySimilar === undefined || retryCount === 0 ? null : (
+          <Button variant="secondary" onClick={onRetrySimilar} loading={buildingSimilar}>
+            {t.retrySimilar(retryCount)}
           </Button>
         )}
         {backHref === undefined ? null : (
@@ -186,7 +229,11 @@ export function TrainerSummary({ data, backHref, onNew, onRetry }: TrainerSummar
         )}
       </div>
 
-      {kindRows(items).length < 2 ? null : (
+      {extra === undefined || extra === null ? null : <div className="tsum__extra">{extra}</div>}
+
+      {/* Статистика по типам — как на прежних итогах всех тренажёров:
+         и при одном типе, чтобы было видно, сколько из скольких. */}
+      {kindRows(items).length === 0 ? null : (
         <section className="tdone__kinds">
           <h4 className="tdone__kinds-title">{t.kinds}</h4>
           <ul className="tdone__list">

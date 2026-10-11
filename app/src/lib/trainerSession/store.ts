@@ -20,6 +20,7 @@ import {
   type ReadResult,
   type SessionHead,
   type StoredSession,
+  type WriteResult,
 } from './types';
 
 const PREFIX = 'budetege:trainer:';
@@ -73,23 +74,80 @@ export function encodeSession(head: SessionHead, uiJson: string, payloadJson: st
     `,"writer":${JSON.stringify(head.writer)}` +
     `,"paused":${head.paused ? 'true' : 'false'}` +
     `,"activeMs":${Math.max(0, Math.round(head.activeMs))}` +
+    `,"total":${Math.max(0, Math.round(head.total))}` +
     `,"ui":${uiJson}` +
     `,"payload":${payloadJson}}`
   );
 }
 
-/** Записать готовую строку. false — не вышло (квота, запрет). */
-export function writeRaw(scope: string, raw: string): boolean {
-  const target = browserStorage();
-  if (target === null) {
+/** Кончилось ли место: имена исключения в браузерах разные. */
+function isQuotaError(error: unknown): boolean {
+  if (!(error instanceof DOMException)) {
     return false;
   }
+  return (
+    error.name === 'QuotaExceededError' ||
+    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+    error.code === 22 ||
+    error.code === 1014
+  );
+}
+
+/**
+ * Записать готовую строку.
+ *
+ * Не хватило места — по одной убираются незавершённые тренировки других
+ * разделов, начиная с самой давней, и запись повторяется. Своя запись
+ * и чужие данные сайта (прогресс, отметки теории) не трогаются. Не
+ * помогло — 'quota': тренировка идёт дальше без сохранения.
+ */
+export function writeRaw(scope: string, raw: string): WriteResult {
+  const target = browserStorage();
+  if (target === null) {
+    return 'denied';
+  }
+  const key = sessionKey(scope);
+  for (;;) {
+    try {
+      target.setItem(key, raw);
+      return 'ok';
+    } catch (error) {
+      if (!isQuotaError(error)) {
+        return 'denied';
+      }
+      if (!evictOldest(target, scope)) {
+        return 'quota';
+      }
+    }
+  }
+}
+
+/** Убрать самую давнюю тренировку другого раздела. false — убирать нечего. */
+function evictOldest(target: Storage, keep: string): boolean {
+  let oldest: { key: string; at: number } | null = null;
   try {
-    target.setItem(sessionKey(scope), raw);
-    return true;
+    for (let i = 0; i < target.length; i += 1) {
+      const key = target.key(i);
+      const scope = key === null ? null : scopeOfKey(key);
+      if (key === null || scope === null || scope === keep) {
+        continue;
+      }
+      const head = peekHead(target.getItem(key) ?? '');
+      /* Запись не читается — она и есть самая ненужная. */
+      const at = head === null ? -1 : head.updatedAt;
+      if (oldest === null || at < oldest.at) {
+        oldest = { key, at };
+      }
+    }
+    if (oldest === null) {
+      return false;
+    }
+    target.removeItem(oldest.key);
   } catch {
     return false;
   }
+  notifySessionsChanged();
+  return true;
 }
 
 /** Удалить запись и сообщить меню: метка на вкладке гаснет. */
@@ -126,7 +184,7 @@ export function decodeSession(raw: string, scope: string): StoredSession | 'vers
   if (data['schemaVersion'] !== TRAINER_SCHEMA_VERSION) {
     return 'version';
   }
-  const { id, writer, paused, createdAt, updatedAt, rev, activeMs } = data;
+  const { id, writer, paused, createdAt, updatedAt, rev, activeMs, total } = data;
   if (
     data['scope'] !== scope ||
     typeof id !== 'string' ||
@@ -137,6 +195,7 @@ export function decodeSession(raw: string, scope: string): StoredSession | 'vers
     !isFiniteNumber(updatedAt) ||
     !isFiniteNumber(rev) ||
     !isFiniteNumber(activeMs) ||
+    !isFiniteNumber(total) ||
     !('payload' in data)
   ) {
     return null;
@@ -151,6 +210,7 @@ export function decodeSession(raw: string, scope: string): StoredSession | 'vers
     writer,
     paused,
     activeMs: Math.max(0, activeMs),
+    total: Math.max(0, total),
     ui: data['ui'] ?? null,
     payload: data['payload'],
   };
@@ -187,12 +247,13 @@ export function readSession(scope: string): ReadResult {
 export interface PeekedHead {
   schemaVersion: number;
   id: string;
+  updatedAt: number;
   rev: number;
   writer: string;
 }
 
 const HEAD =
-  /^\{"schemaVersion":(\d+),"scope":"[^"]*","id":"([^"]*)","createdAt":\d+,"updatedAt":\d+,"rev":(\d+),"writer":"([^"]*)"/;
+  /^\{"schemaVersion":(\d+),"scope":"[^"]*","id":"([^"]*)","createdAt":\d+,"updatedAt":(\d+),"rev":(\d+),"writer":"([^"]*)"/;
 
 /** Быстрый взгляд на запись: чья она и какая по счёту. null — не наша запись. */
 export function peekHead(raw: string): PeekedHead | null {
@@ -203,8 +264,9 @@ export function peekHead(raw: string): PeekedHead | null {
   return {
     schemaVersion: Number(found[1]),
     id: found[2] ?? '',
-    rev: Number(found[3]),
-    writer: found[4] ?? '',
+    updatedAt: Number(found[3]),
+    rev: Number(found[4]),
+    writer: found[5] ?? '',
   };
 }
 
@@ -298,4 +360,63 @@ function subscribe(listener: () => void): () => void {
 /** Разделы с незавершённой тренировкой. На сервере — пусто. */
 export function useActiveTrainerScopes(): readonly string[] {
   return useSyncExternalStore(subscribe, snapshot, () => EMPTY);
+}
+
+/* ── Старые записи ──────────────────────────────────────────────── */
+
+/**
+ * Ключи, под которыми тренажёры хранили свои сессии до общего модуля.
+ * Тренажёр, переведённый на общую оболочку, дописывает сюда свои
+ * прежние ключи: у учеников они больше не читаются и только занимают
+ * место. Ключи прогресса (счётчики, ошибки) сюда не попадают — они живы.
+ */
+export const LEGACY_SESSION_KEYS: readonly string[] = [];
+
+let swept = false;
+
+/**
+ * Убрать то, что больше не прочтётся: записи сессий другой версии схемы
+ * (в том числе версии 1, где задания лежали целиком) и прежние ключи
+ * тренажёров. Один раз за жизнь страницы.
+ */
+export function sweepStaleSessions(): void {
+  if (swept) {
+    return;
+  }
+  swept = true;
+  const target = browserStorage();
+  if (target === null) {
+    return;
+  }
+  const doomed: string[] = [];
+  try {
+    for (let i = 0; i < target.length; i += 1) {
+      const key = target.key(i);
+      if (key === null) {
+        continue;
+      }
+      if (LEGACY_SESSION_KEYS.includes(key)) {
+        doomed.push(key);
+        continue;
+      }
+      if (scopeOfKey(key) === null) {
+        continue;
+      }
+      const head = peekHead(target.getItem(key) ?? '');
+      if (head === null || head.schemaVersion !== TRAINER_SCHEMA_VERSION) {
+        doomed.push(key);
+      }
+    }
+    doomed.forEach((key) => target.removeItem(key));
+  } catch {
+    return;
+  }
+  if (doomed.length > 0) {
+    notifySessionsChanged();
+  }
+}
+
+/** Только для проверок: разрешить повторную уборку. */
+export function resetSweepForTests(): void {
+  swept = false;
 }

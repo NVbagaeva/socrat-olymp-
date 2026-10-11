@@ -226,3 +226,35 @@
   min-width: 0;
   overflow-x: auto;
 }
+
+.tsum__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+.tsum__icon svg,
+.tsum__icon img {
+  width: 100%;
+  height: 100%;
+}
+.tsum__code {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+.tsum__badge {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+.tsum__extra {
+  width: 100%;
+  max-width: 720px;
+}
+.tsess__restoring {
+  margin: 0;
+  padding: var(--space-10) var(--space-5);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
