@@ -39,3 +39,21 @@
 .sheet-zapomni .sheet-recap {
   margin-bottom: 0;
 }
+
+/* Лист учителя: разбор основным кеглем и чернилами, а не мелким серым,
+   формулы KaTeX на ступень крупнее — всё читается на A4 без лупы. */
+.z9-razbor {
+  font-size: var(--sheet-fs-body);
+  color: var(--sheet-ink);
+}
+.z9-razbor .katex,
+.sheet-task-answer .katex {
+  font-size: 1.12em;
+}
+.sheet-example-text .sheet-task-question {
+  font-size: var(--sheet-fs-body);
+}
+/* Рисунок учителя под условием — по центру колонки. */
+.sheet-task--stack .sheet-figure {
+  align-self: center;
+}

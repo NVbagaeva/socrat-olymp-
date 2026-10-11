@@ -22,7 +22,14 @@ import { SHAG, postroit } from './spline';
 import { ekstremumy, granitsy, nuli, problemy, reshit } from './reshit';
 import { ru } from './tex';
 import type { Figura, Generated } from './types';
-import { rectGap, segRectDist, type Rect, type Seg } from '../vektory/geometry';
+import { pointSegDist, rectGap, segRectDist, type Rect, type Seg } from '../vektory/geometry';
+
+/**
+ * Порог разнообразия: сколько различных ответов должен давать прототип
+ * на серии из 100+ seed. Исключений нет: если у типа задач ответов
+ * мало, генератор расширяется (число узлов, отрезок, число меток).
+ */
+export const MIN_RAZNYH_OTVETOV = 6;
 
 export interface Problem {
   where: string;
@@ -94,6 +101,27 @@ function podpisiChisty(fig: Figura, rep: Otchet): string[] {
       const pts: [number, number][] = [];
       for (let x = first.x; x <= last.x + 1e-9; x += 0.05) {
         pts.push([sx(x), sy(spl.y(x))]);
+      }
+      /* Дуга угла α не пересекает и не касается кривой. */
+      for (const arc of rep.dugi) {
+        const n = Math.max(8, Math.ceil(Math.abs(arc.t1 - arc.t0) / 2));
+        let hit = false;
+        for (let i = 0; i <= n && !hit; i += 1) {
+          const t = ((arc.t0 + ((arc.t1 - arc.t0) * i) / n) * Math.PI) / 180;
+          const ax = arc.cx + arc.r * Math.cos(t);
+          const ay = arc.cy - arc.r * Math.sin(t);
+          for (let k = 0; k < pts.length - 1; k += 1) {
+            const p0 = pts[k] as [number, number];
+            const p1 = pts[k + 1] as [number, number];
+            if (pointSegDist(ax, ay, { x1: p0[0], y1: p0[1], x2: p1[0], y2: p1[1] }) < 3.4) {
+              hit = true;
+              break;
+            }
+          }
+        }
+        if (hit) {
+          out.push(`дуга угла ${arc.id} пересекает кривую`);
+        }
       }
       for (const b of boxes) {
         if (b.kind === 'axisName') {
@@ -276,6 +304,9 @@ export function proveritStroki(
   return out;
 }
 
+/** Число различных ответов прототипа в последнем прогоне генераторов: им пользуется проверка банка. */
+export const razneOtvety = new Map<string, number>();
+
 /** Генераторы: ответ из данных узлов совпадает с заложенным, рисунок и тексты чисты. */
 export function checkGenerators(
   seeds: number,
@@ -285,6 +316,7 @@ export function checkGenerators(
   const problems: Problem[] = [];
   let generated = 0;
   const ms: Record<string, number> = {};
+  razneOtvety.clear();
   for (const proto of PROTOTYPES) {
     const t0 = Date.now();
     const answers = new Map<number, number>();
@@ -402,6 +434,13 @@ export function checkGenerators(
         what: `один ответ встречается в ${Math.round((100 * top) / count)}% задач`,
       });
     }
+    if (seeds >= 100 && answers.size < MIN_RAZNYH_OTVETOV) {
+      problems.push({
+        where: proto.id,
+        what: `различных ответов ${answers.size} — меньше порога ${MIN_RAZNYH_OTVETOV}`,
+      });
+    }
+    razneOtvety.set(proto.id, answers.size);
     if (seeds >= 50 && signatures.size < count * 0.8) {
       problems.push({ where: proto.id, what: `различных задач ${signatures.size} из ${count}` });
     }
@@ -431,6 +470,7 @@ export function checkBank(
     }
     const sig = new Set<string>();
     const vids = new Map<string, number>();
+    const otvety = new Map<number, number>();
     for (const v of entry.variants) {
       const where = `${proto.id} ${v.seed}`;
       try {
@@ -440,11 +480,24 @@ export function checkBank(
           problems.push({ where, what: 'повтор варианта в банке' });
         }
         sig.add(t.signature);
+        otvety.set(t.otvet, (otvety.get(t.otvet) ?? 0) + 1);
         const vid = t.vid ?? '';
         vids.set(vid, (vids.get(vid) ?? 0) + 1);
         problems.push(...proveritStroki(stroki(t), typeset, textCheck, where));
       } catch (e) {
         problems.push({ where, what: `не сгенерировался: ${(e as Error).message}` });
+      }
+    }
+    /* Ответы в банке разные; если у прототипа возможных ответов меньше
+       десяти — один ответ не больше двух раз. */
+    const vozmozhno = razneOtvety.get(proto.id) ?? 10;
+    const dopusk = vozmozhno >= 10 ? 1 : 2;
+    for (const [otvet, k] of otvety) {
+      if (k > dopusk) {
+        problems.push({
+          where: proto.id,
+          what: `в банке ответ ${otvet} встречается ${k} раз (допустимо ${dopusk})`,
+        });
       }
     }
     for (const [vid, k] of vids) {

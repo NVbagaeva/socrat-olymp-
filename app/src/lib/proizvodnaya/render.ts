@@ -21,7 +21,7 @@
  */
 
 import { THEME, esc, px, svgText, textWidth } from '@/lib/graph/renderer.js';
-import { type Rect, type Seg, rectGap, segRectDist } from '../vektory/geometry';
+import { type Rect, type Seg, pointSegDist, rectGap, segRectDist } from '../vektory/geometry';
 import { funkciya } from './reshit';
 import { postroit } from './spline';
 import type { Figura, Konets, Pomoshch, Tochka } from './types';
@@ -60,6 +60,16 @@ export interface Otchet {
   boxes: Podpis[];
   /** Подписи чисел на оси, которым не нашлось места. */
   propushcheny: string[];
+  /** Дуги углов: центр и радиус в пикселях, углы в градусах; vynoska — подпись вынесена. */
+  dugi: {
+    id: string;
+    cx: number;
+    cy: number;
+    r: number;
+    t0: number;
+    t1: number;
+    vynoska: boolean;
+  }[];
   problems: string[];
 }
 
@@ -69,7 +79,7 @@ function minusify(text: string): string {
 }
 
 export function pustoyOtchet(): Otchet {
-  return { width: 0, height: 0, cell: 0, boxes: [], propushcheny: [], problems: [] };
+  return { width: 0, height: 0, cell: 0, boxes: [], propushcheny: [], dugi: [], problems: [] };
 }
 
 const V = {
@@ -146,6 +156,14 @@ function shirinaX(sub: string): number {
 }
 
 /** Дуга угла между направлениями t0 → t1 (против часовой, в градусах математических). */
+/** Короткий луч в положительном направлении Ox от вершины угла (в пикселях). */
+function arcRay(cx: number, cy: number, r: number): [number, number][] {
+  return [
+    [cx, cy],
+    [cx + r + 12, cy],
+  ];
+}
+
 function duga(cx: number, cy: number, r: number, t0: number, t1: number): string {
   const rad = (t: number) => (t * Math.PI) / 180;
   const x0 = cx + r * Math.cos(rad(t0));
@@ -184,6 +202,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   R.cell = cell;
   R.boxes = [];
   R.propushcheny = [];
+  R.dugi = [];
   R.problems = [];
   const problems = R.problems;
   const obstacles: Prep[] = [];
@@ -451,6 +470,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     id: string;
     fill: string;
     pref: Napr;
+    /** Точка на дуге, от которой к подписи идёт выноска. */
+    vynoska?: [number, number];
   }[] = [];
   for (const item of aux) {
     switch (item.t) {
@@ -520,48 +541,129 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     layers.aux.push(
       `<path d="M${px(sxC + ux * cs)} ${px(syC)}v${px(uy * cs)}h${px(-ux * cs)}" fill="none" stroke="${V.aux}" stroke-width="1.6"/>`,
     );
-    /* Угол α: от положительного направления Ox до прямой, жирно. */
-    const theta = (Math.atan2(rising ? dy : -dy, dx) * 180) / Math.PI; // острый угол при катете
-    const rArc = Math.min(cell * 1.0, 0.45 * Math.hypot(dx, dy) * cell);
-    if (rising) {
+    /* Угол α: от положительного направления Ox до прямой, жирно. Место
+       выбирается как у подписей: перебираются вершина (узел A или B — в
+       обоих угол α один и тот же: соответственные углы) и радиус; дуга не
+       должна задевать кривую, подписи, оси и точки. Если места нет ни при
+       каком радиусе, дуга берётся маленькой, а «α» выносится подписью с
+       короткой выноской. */
+    const acute = (Math.atan2(Math.abs(dy), dx) * 180) / Math.PI;
+    const alphaDeg = rising ? acute : 180 - acute;
+    const hyp = Math.hypot(dx, dy) * cell;
+    const vershiny: { v: Tochka; luch: boolean }[] = rising
+      ? [
+          { v: A, luch: false },
+          { v: B, luch: true },
+        ]
+      : [
+          { v: B, luch: true },
+          { v: A, luch: true },
+        ];
+    const arcPoints = (cx: number, cy: number, r: number, t0: number, t1: number) => {
+      const pts: [number, number][] = [];
+      const n = Math.max(6, Math.ceil(Math.abs(t1 - t0) / 4));
+      for (let i = 0; i <= n; i += 1) {
+        const t = ((t0 + ((t1 - t0) * i) / n) * Math.PI) / 180;
+        pts.push([cx + r * Math.cos(t), cy - r * Math.sin(t)]);
+      }
+      return pts;
+    };
+    const ignore = new Set(['касательная', 'узел прямой', 'точка касания']);
+    const pointClear = (x: number, y: number): number => {
+      let min = Infinity;
+      for (const o of obstacles) {
+        if (ignore.has(o.what)) {
+          continue;
+        }
+        const d = o.seg
+          ? pointSegDist(x, y, o.seg) - (o.r ?? 0)
+          : rectGap(o.rect as Rect, { left: x, right: x, top: y, bottom: y });
+        if (d < min) {
+          min = d;
+        }
+      }
+      return min;
+    };
+    const ARC_W = 3.6;
+    const maxR = Math.min(cell * 1.05, 0.45 * hyp);
+    const radii = [1, 0.85, 0.7, 0.58, 0.47].map((f) => Math.max(12, maxR * f));
+    let chosen: { v: Tochka; luch: boolean; r: number; clear: number } | null = null;
+    let bestBad: { v: Tochka; luch: boolean; r: number; clear: number } | null = null;
+    outer: for (const r of radii) {
+      for (const cand of vershiny) {
+        const cx = sx(cand.v[0]);
+        const cy = sy(cand.v[1]);
+        const pts = arcPoints(cx, cy, r, 0, alphaDeg);
+        /* Луч +Ox от вершины тоже должен быть свободен. */
+        const ray = cand.luch ? arcRay(cx, cy, r) : [];
+        const clear = Math.min(...[...pts, ...ray].map(([x, y]) => pointClear(x, y))) - ARC_W / 2;
+        const item = { ...cand, r, clear };
+        if (clear >= 2) {
+          chosen = item;
+          break outer;
+        }
+        if (bestBad === null || clear > bestBad.clear) {
+          bestBad = item;
+        }
+      }
+    }
+    const vynoska = chosen === null;
+    const arc = chosen ?? {
+      ...(bestBad as { v: Tochka; luch: boolean; r: number; clear: number }),
+      r: 12,
+    };
+    const acx = sx(arc.v[0]);
+    const acy = sy(arc.v[1]);
+    if (arc.luch) {
+      const [[x1, y1], [x2, y2]] = arcRay(acx, acy, arc.r) as [[number, number], [number, number]];
       layers.aux.push(
-        `<path class="pr-alpha" d="${duga(sx(A[0]), sy(A[1]), rArc, 0, theta)}" fill="none" stroke="${V.aux}" stroke-width="3.6" stroke-linecap="round"/>`,
+        `<path class="pr-alpha-ray" d="M${px(x1)} ${px(y1)}L${px(x2)} ${px(y2)}" fill="none" stroke="${V.aux}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
+      );
+    }
+    layers.aux.push(
+      `<path class="pr-alpha" d="${duga(acx, acy, arc.r, 0, alphaDeg)}" fill="none" stroke="${V.aux}" stroke-width="${ARC_W}" stroke-linecap="round"/>`,
+    );
+    const arcPts = arcPoints(acx, acy, arc.r, 0, alphaDeg);
+    for (let i = 0; i < arcPts.length - 1; i += 1) {
+      const p1 = arcPts[i] as [number, number];
+      const p2 = arcPts[i + 1] as [number, number];
+      obstacles.push({
+        seg: { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] },
+        r: ARC_W / 2,
+        what: 'дуга α',
+      });
+    }
+    R.dugi.push({ id: 'α', cx: acx, cy: acy, r: arc.r, t0: 0, t1: alphaDeg, vynoska });
+    const mid = ((alphaDeg / 2) * Math.PI) / 180;
+    auxLabels.push({
+      text: 'α',
+      x: acx + (arc.r + (vynoska ? 26 : 13)) * Math.cos(mid),
+      y: acy - (arc.r + (vynoska ? 26 : 13)) * Math.sin(mid),
+      kind: 'alpha',
+      id: 'α',
+      fill: V.aux,
+      pref: rising ? 'right' : 'above',
+      ...(vynoska
+        ? {
+            vynoska: [acx + arc.r * Math.cos(mid), acy - arc.r * Math.sin(mid)] as [number, number],
+          }
+        : {}),
+    });
+    if (!rising) {
+      /* Острый угол треугольника β = 180° − α — при вершине B, тонко. */
+      const rb = Math.max(10, Math.min(arc.r, maxR) * 0.7);
+      layers.aux.push(
+        `<path class="pr-beta" d="${duga(sx(B[0]), sy(B[1]), rb, alphaDeg, 180)}" fill="none" stroke="${V.aux}" stroke-width="1.8"/>`,
       );
       auxLabels.push({
-        text: 'α',
-        x: sx(A[0]) + (rArc + 13) * Math.cos(((theta / 2) * Math.PI) / 180),
-        y: sy(A[1]) - (rArc + 13) * Math.sin(((theta / 2) * Math.PI) / 180),
-        kind: 'alpha',
-        id: 'α',
+        text: 'β',
+        x: sx(B[0]) + (rb + 13) * Math.cos((((alphaDeg + 180) / 2) * Math.PI) / 180),
+        y: sy(B[1]) - (rb + 13) * Math.sin((((alphaDeg + 180) / 2) * Math.PI) / 180),
+        kind: 'beta',
+        id: 'β',
         fill: V.aux,
-        pref: 'right',
+        pref: 'left',
       });
-    } else {
-      const alphaDeg = 180 - theta;
-      layers.aux.push(
-        `<path class="pr-alpha" d="${duga(sx(B[0]), sy(B[1]), rArc, 0, alphaDeg)}" fill="none" stroke="${V.aux}" stroke-width="3.6" stroke-linecap="round"/>`,
-        `<path class="pr-beta" d="${duga(sx(B[0]), sy(B[1]), rArc * 0.7, alphaDeg, 180)}" fill="none" stroke="${V.aux}" stroke-width="1.8"/>`,
-      );
-      auxLabels.push(
-        {
-          text: 'α',
-          x: sx(B[0]) + (rArc + 13) * Math.cos(((alphaDeg / 2) * Math.PI) / 180),
-          y: sy(B[1]) - (rArc + 13) * Math.sin(((alphaDeg / 2) * Math.PI) / 180),
-          kind: 'alpha',
-          id: 'α',
-          fill: V.aux,
-          pref: 'above',
-        },
-        {
-          text: 'β',
-          x: sx(B[0]) + (rArc * 0.7 + 13) * Math.cos((((alphaDeg + 180) / 2) * Math.PI) / 180),
-          y: sy(B[1]) - (rArc * 0.7 + 13) * Math.sin((((alphaDeg + 180) / 2) * Math.PI) / 180),
-          kind: 'beta',
-          id: 'β',
-          fill: V.aux,
-          pref: 'left',
-        },
-      );
     }
     /* Длины катетов. */
     auxLabels.push(
@@ -970,6 +1072,16 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const halfW = textWidth(al.text, V.helper.size) / 2 + 3;
     const halfH = V.helper.size * 0.55;
     const b = place(al.id, al.kind, halfW, halfH, { x: al.x, y: al.y }, [al.pref], [0, 6, 12]);
+    if (al.vynoska !== undefined) {
+      /* Выноска: от середины дуги к краю подписи. */
+      const [vx, vy] = al.vynoska;
+      const len = Math.hypot(b.x - vx, b.y - vy) || 1;
+      const ex = b.x - ((b.x - vx) / len) * (Math.max(halfW, halfH) + 2);
+      const ey = b.y - ((b.y - vy) / len) * (Math.max(halfW, halfH) + 2);
+      layers.labels.push(
+        `<path class="pr-alpha-vynoska" d="M${px(vx)} ${px(vy)}L${px(ex)} ${px(ey)}" fill="none" stroke="${V.aux}" stroke-width="1.4"/>`,
+      );
+    }
     layers.labels.push(
       svgText(al.text, b.x, b.y + V.helper.size * 0.36, 'middle', {
         size: al.kind === 'alpha' || al.kind === 'beta' ? 19 : V.helper.size,

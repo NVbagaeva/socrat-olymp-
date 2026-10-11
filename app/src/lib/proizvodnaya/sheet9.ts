@@ -149,7 +149,13 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
 const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
 /** Клетка рисунка в разобранном примере, мм. */
-const EXAMPLE_CELL_MM = 2.8;
+const EXAMPLE_CELL_MM = 4.2;
+/* Лист учителя читают с рисунком построений и разбором: рисунок
+   стоит под условием на всю ширину колонки, клетка крупнее, чем у
+   ученика, но не шире колонки. */
+const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 4.6, double: 3.6 };
+const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 150, double: 84 };
+const EXAMPLE_MAX_MM = 140;
 
 export interface SheetTask9 {
   no: number;
@@ -161,6 +167,8 @@ export interface SheetTask9 {
   figureWidth?: number;
   /** Рисунок условия в режиме 'student' — один и тот же на обоих листах. */
   figureCondition: string | null;
+  /** Рисунок под условием, на всю ширину колонки (лист учителя). */
+  figureBelow?: boolean;
   answer: string;
   answerHtml: null;
   solutionHtml: string | null;
@@ -206,7 +214,7 @@ function razborHtml(task: Generated, answerText: string): string {
       return `<li class="sheet-step"><b>${typo.mathText(s.zagolovok)}.</b> ${lines}</li>`;
     })
     .join('');
-  return `<ol class="sheet-steps">${items}</ol>${answerLine(answerText)}`;
+  return `<ol class="sheet-steps z9-razbor">${items}</ol>${answerLine(answerText)}`;
 }
 
 function sheetTask(
@@ -227,7 +235,14 @@ function sheetTask(
     questionHtml: typo.mathText(task.uslovie),
     options: null,
     figureSvg: shown === null ? null : shown.svg,
-    ...(shown === null ? {} : { figureWidth: shown.width(CELL[layout]) }),
+    ...(shown === null
+      ? {}
+      : withAnswers
+        ? {
+            figureWidth: Math.min(shown.width(TEACHER_CELL[layout]), TEACHER_MAX_MM[layout]),
+            figureBelow: true,
+          }
+        : { figureWidth: shown.width(CELL[layout]) }),
     figureCondition: condition === null ? null : condition.svg,
     answer: withAnswers ? answerText : '',
     answerHtml: null,
@@ -331,7 +346,9 @@ function exampleOf(prototypeId: string, seed: string): string {
     conditionHtml: typo.mathText(task.uslovie),
     solutionHtml: razborHtml(task, answerText),
     figureSvg: drawn === null ? null : drawn.svg,
-    figureWidth: drawn === null ? undefined : drawn.width(EXAMPLE_CELL_MM),
+    figureWidth:
+      drawn === null ? undefined : Math.min(drawn.width(EXAMPLE_CELL_MM), EXAMPLE_MAX_MM),
+    figureBelow: true,
   });
 }
 

@@ -8,7 +8,8 @@
    — разные signature (и разная подпись узлов рисунка);
    — разные условия;
    — не больше четырёх с одним `vid`;
-   — один и тот же ответ встречается не чаще трёх раз;
+   — ответы все разные; если у прототипа меньше десяти возможных
+     ответов — один ответ не чаще двух (в крайнем случае трёх) раз;
    — рисунок чист во всех режимах: ученик, подсказка, учитель.
 
    Результат пишется в src/lib/proizvodnaya/bank.ts: только seed,
@@ -53,10 +54,9 @@ function refuse(reason) {
 }
 
 const started = Date.now();
-for (const prototype of PROTOTYPES) {
-  if (prototype.zaglushka) {
-    stubs.push(prototype.id);
-  }
+
+/** Подбор десяти вариантов при ограничении «ответ повторяется не чаще maxSame раз». */
+function podobrat(prototype, maxSame) {
   const variants = [];
   const statements = new Set();
   const signatures = new Set();
@@ -87,8 +87,8 @@ for (const prototype of PROTOTYPES) {
       continue;
     }
     const answer = chislaOtvet(task.otvet);
-    if ((answers.get(answer) ?? 0) >= MAX_SAME_ANSWER) {
-      refuse('ответ повторяется чаще четырёх раз');
+    if ((answers.get(answer) ?? 0) >= maxSame) {
+      refuse('ответ уже есть в банке');
       continue;
     }
     if (task.risunok !== null) {
@@ -110,6 +110,28 @@ for (const prototype of PROTOTYPES) {
     }
     answers.set(answer, (answers.get(answer) ?? 0) + 1);
     variants.push({ n: variants.length + 1, seed });
+  }
+  return variants;
+}
+
+const povtory = [];
+for (const prototype of PROTOTYPES) {
+  if (prototype.zaglushka) {
+    stubs.push(prototype.id);
+  }
+  /* Сначала — десять разных ответов. Если у прототипа возможных ответов
+     меньше десяти (счёт точек на читаемом рисунке), разрешается повтор:
+     не больше двух, потом трёх одинаковых. */
+  let variants = [];
+  let maxSame = 1;
+  for (; maxSame <= MAX_SAME_ANSWER; maxSame += 1) {
+    variants = podobrat(prototype, maxSame);
+    if (variants.length >= PER_PROTOTYPE) {
+      break;
+    }
+  }
+  if (maxSame > 1) {
+    povtory.push(`${prototype.id}: ответ повторяется до ${maxSame} раз`);
   }
   if (variants.length < PER_PROTOTYPE) {
     short.push(`${prototype.id}: ${variants.length}`);
@@ -167,6 +189,9 @@ if (refusals.size > 0) {
   for (const [reason, count] of [...refusals].sort((a, b) => b[1] - a[1])) {
     console.log(`  ${reason}: ${count}`);
   }
+}
+if (povtory.length > 0) {
+  console.log(`ответы не все разные (возможных ответов меньше десяти): ${povtory.join('; ')}`);
 }
 if (short.length > 0) {
   console.error(`! не набрано десять вариантов: ${short.join('; ')}`);
