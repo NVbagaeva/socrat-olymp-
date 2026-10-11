@@ -90,7 +90,7 @@ const P22: Prototype = {
   blok: BLOK,
   nazvanie: 'Отрезок: промежуток внутри',
   tip: 'Отношение длины промежутка к длине отрезка',
-  zadachnik: [0, 0],
+  sourceRange: [0, 0],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -145,8 +145,8 @@ const P22: Prototype = {
   varianty: [
     {
       n: 1,
-      source: 'новый',
-      ref: 'макет карточки',
+      source: 'novyj',
+      sourceNote: 'макет карточки',
       params: {
         vstuplenie: 'из печи вынимают один хлеб',
         izvestno: 'масса хлеба',
@@ -162,8 +162,8 @@ const P22: Prototype = {
     },
     {
       n: 2,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с конвейера берут одну пачку сахара',
         izvestno: 'масса пачки',
@@ -179,8 +179,8 @@ const P22: Prototype = {
     },
     {
       n: 3,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на рынке покупают одну дыню',
         izvestno: 'масса дыни',
@@ -196,8 +196,8 @@ const P22: Prototype = {
     },
     {
       n: 4,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с конвейера снимают одну деталь',
         izvestno: 'длина детали',
@@ -213,8 +213,8 @@ const P22: Prototype = {
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'пассажир приходит на остановку автобуса, который ходит каждые 20 минут',
         izvestno: 'время ожидания',
@@ -230,8 +230,8 @@ const P22: Prototype = {
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'из ящика берут одну лампочку',
         izvestno: 'срок службы лампочки',
@@ -247,8 +247,8 @@ const P22: Prototype = {
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'из бака разливают воду по бутылкам и берут одну из них',
         izvestno: 'объём воды в бутылке',
@@ -264,8 +264,8 @@ const P22: Prototype = {
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на складе взвешивают один мешок муки',
         izvestno: 'масса мешка',
@@ -281,8 +281,8 @@ const P22: Prototype = {
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на стройку привозят одну доску',
         izvestno: 'длина доски',
@@ -298,8 +298,8 @@ const P22: Prototype = {
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с плантации срывают один апельсин',
         izvestno: 'масса апельсина',
@@ -343,7 +343,7 @@ const P23: Prototype = {
   blok: BLOK,
   nazvanie: 'Отрезок: промежуток до края',
   tip: 'Одна граница; промежуток упирается в край отрезка',
-  zadachnik: [0, 0],
+  sourceRange: [0, 0],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -398,8 +398,8 @@ const P23: Prototype = {
   varianty: [
     {
       n: 1,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с дерева снимают одно яблоко',
         izvestno: 'масса яблока',
@@ -415,8 +415,8 @@ const P23: Prototype = {
     },
     {
       n: 2,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'из печи вынимают один хлеб',
         izvestno: 'масса хлеба',
@@ -432,8 +432,8 @@ const P23: Prototype = {
     },
     {
       n: 3,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с конвейера снимают одну деталь',
         izvestno: 'длина детали',
@@ -449,8 +449,8 @@ const P23: Prototype = {
     },
     {
       n: 4,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'пассажир приходит на остановку автобуса, который ходит каждые 20 минут',
         izvestno: 'время ожидания',
@@ -466,8 +466,8 @@ const P23: Prototype = {
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'из ящика берут одну лампочку',
         izvestno: 'срок службы лампочки',
@@ -483,8 +483,8 @@ const P23: Prototype = {
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'из бака разливают воду по бутылкам и берут одну из них',
         izvestno: 'объём воды в бутылке',
@@ -500,8 +500,8 @@ const P23: Prototype = {
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на складе взвешивают один мешок муки',
         izvestno: 'масса мешка',
@@ -517,8 +517,8 @@ const P23: Prototype = {
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на стройку привозят одну доску',
         izvestno: 'длина доски',
@@ -534,8 +534,8 @@ const P23: Prototype = {
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'с плантации срывают один апельсин',
         izvestno: 'масса апельсина',
@@ -551,8 +551,8 @@ const P23: Prototype = {
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         vstuplenie: 'на рынке покупают одну дыню',
         izvestno: 'масса дыни',

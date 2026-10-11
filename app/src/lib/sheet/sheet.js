@@ -315,6 +315,12 @@ function flowItems(spec) {
       out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
         blockHead(block) + '</div>');
     }
+    /* Рамка «Повторяем» и разобранные примеры перед задачами блока:
+       генератор №1 ставит их к каждому типу задач. */
+    if (block.recap) {
+      out.push('<div class="sheet-item sheet-block-recap">' + recapBlock(block.recap) + '</div>');
+    }
+    (block.leadItems || []).forEach(function (item) { out.push(item); });
 
     var tasks = block.tasks || [];
     if (layout === 'double') {
@@ -361,7 +367,9 @@ function flowItems(spec) {
  *            (рисунок под условием) и solutionHtml (для учителя).
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
- *            даёт одну полосу заголовка; head: false — блок без полосы
+ *            даёт одну полосу заголовка; head: false — блок без полосы;
+ *            recap — рамка «Повторяем» блока, leadItems — куски потока
+ *            перед его задачами (разобранные примеры, exampleItem)
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
  *   fields   { date } — строка «Фамилия, имя / Класс / Дата» под
