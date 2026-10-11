@@ -3,6 +3,7 @@ export {
   type ConfiguratorApi,
   type DescribedTask,
   type ScreenContext,
+  type SummaryOptions,
   type TrainerSessionHostProps,
 } from './TrainerSessionHost';
 export {
@@ -12,3 +13,4 @@ export {
   type SummaryMark,
 } from './TrainerSummary';
 export { useSessionReport } from './useSessionReport';
+export { useBeforeFinish } from './useBeforeFinish';

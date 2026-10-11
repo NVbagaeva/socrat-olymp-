@@ -152,8 +152,11 @@ check('asString', R.asString(5, 'z') === 'z' && R.asStringRecord({ a: 'b', c: 1 
   store.setItem(S.sessionKey('5'), '{"schemaVersion":1,"scope":"5","id":"old","createdAt":1,"updatedAt":1,"rev":1,"writer":"t"}');
   store.setItem(S.sessionKey('4'), 'мусор');
   S.writeRaw('8', S.encodeSession(head({ scope: '8' }), 'null', '{}'));
+  store.setItem(S.sessionKey('11'), '{"schemaVersion":1}');
   S.resetSweepForTests();
-  S.sweepStaleSessions();
+  S.sweepStaleSessions('11');
+  check('уборка: свой раздел не тронут (его разберёт чтение с плашкой)', store.getItem(S.sessionKey('11')) !== null);
+  check('уборка: чтение своего раздела сообщает «устарела»', S.readSession('11').status === 'reset');
   check('уборка: версия 1 убрана', store.getItem(S.sessionKey('5')) === null);
   check('уборка: мусор убран', store.getItem(S.sessionKey('4')) === null);
   check('уборка: живая запись цела', store.getItem(S.sessionKey('8')) !== null);

@@ -15,7 +15,13 @@ import {
 } from './TrainerConfigurator';
 import { TrainerScreen } from './TrainerScreen';
 import { TrainerStats } from './TrainerStats';
-import { isTrainerPayload, type TrainerPayload } from './trainerPayload';
+import {
+  isTrainerPayload,
+  packTrainer,
+  readTrainerRecipe,
+  recipesOf,
+  type TrainerPayload,
+} from './trainerPayload';
 import { TrainerReview } from './TrainerReview';
 import { readTrainerUi, type TrainerUi } from './trainerUi';
 
@@ -114,7 +120,7 @@ export function TrainerBuilder({
       if (session.tasks.length === 0) {
         return;
       }
-      /* Оболочка сессии сохранит задания целиком и вернёт ученика
+      /* Оболочка сессии сохранит рецепты заданий и вернёт ученика
          в них при любом заходе, пока тренировка не завершена. */
       begin({ tasks: session.tasks, control: mode === 'control' });
     } finally {
@@ -122,9 +128,42 @@ export function TrainerBuilder({
     }
   }
 
+  /* В хранилище — рецепты заданий: набор, seed, задача и подпись.
+     Задания с чертежами и разборами собираются заново тем же
+     движком, что и при старте; он грузится только здесь. */
+  async function unpack(packed: unknown): Promise<TrainerPayload | null> {
+    /* Задания без рецепта packTrainer пишет как есть. */
+    if (isTrainerPayload(packed)) {
+      return packed;
+    }
+    const recipe = readTrainerRecipe(packed);
+    if (recipe === null) {
+      return null;
+    }
+    const { restoreTasks } = await import('@/lib/trainerSession');
+    const tasks = restoreTasks(recipe.tasks);
+    return tasks === null ? null : { tasks, control: recipe.control };
+  }
+
+  /* «Похожие задачи»: те же прототипы на новых seed. */
+  async function similar(payload: TrainerPayload, indexes: number[]) {
+    const recipes = recipesOf(payload, indexes);
+    if (recipes === null) {
+      return null;
+    }
+    const { similarTasks } = await import('@/lib/trainerSession');
+    const fresh = similarTasks(recipes, choice);
+    /* Аналога нет — задача повторяется как есть. */
+    const tasks = fresh.flatMap((task, at) => task ?? payload.tasks[indexes[at] ?? -1] ?? []);
+    return tasks.length === 0 ? null : { tasks, control: payload.control };
+  }
+
   return (
     <TrainerSessionHost<TrainerPayload, TrainerUi>
       scope={scope}
+      /* Ярлык режима (/trenazher/<режим>/) — вход по ссылке на набор:
+         при незавершённой тренировке оболочка спросит, что делать. */
+      entryIntent={preset !== null}
       what="тренажёр"
       backHref={base}
       isPayload={isTrainerPayload}
@@ -141,6 +180,9 @@ export function TrainerBuilder({
           review: () => <TrainerReview task={task} />,
         };
       }}
+      pack={packTrainer}
+      unpack={unpack}
+      similar={similar}
       subset={(payload, indexes) => ({
         ...payload,
         tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),

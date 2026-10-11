@@ -24,6 +24,8 @@ export interface SessiyaUi extends BaseUi {
   vybor: string | null;
   /** Когда начато текущее задание, мс активного времени. */
   taskFrom: number | null;
+  /** Неверных ответов за тренировку: в поле и выбором метода. */
+  misses: number;
 }
 
 export const PUSTAYA_KARTOCHKA: ProblemCardSnapshot = {
@@ -38,6 +40,7 @@ export function readSessiyaUi(base: BaseUi): SessiyaUi {
   const raw: Record<string, unknown> = isRecord(base) ? base : {};
   const card = isRecord(raw['card']) ? raw['card'] : {};
   const shagov = asNumberOrNull(card['shagov']);
+  const misses = asNumberOrNull(raw['misses']);
   return {
     ...base,
     card: {
@@ -48,5 +51,6 @@ export function readSessiyaUi(base: BaseUi): SessiyaUi {
     },
     vybor: typeof raw['vybor'] === 'string' ? raw['vybor'] : null,
     taskFrom: asNumberOrNull(raw['taskFrom']),
+    misses: misses !== null && Number.isInteger(misses) && misses >= 0 ? misses : 0,
   };
 }

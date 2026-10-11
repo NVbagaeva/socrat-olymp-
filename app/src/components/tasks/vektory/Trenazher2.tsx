@@ -12,7 +12,13 @@ import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { TrainerSessionHost, type ConfiguratorApi } from '../session';
 import { Trenazher2Screen, razborOf } from './Trenazher2Screen';
 import { Trenazher2Stats } from './Trenazher2Stats';
-import { isTrenazher2Payload, type Trenazher2Payload } from './trenazher2Payload';
+import {
+  isTrenazher2Payload,
+  packTrenazher2,
+  similarTrenazher2,
+  unpackTrenazher2,
+  type Trenazher2Payload,
+} from './trenazher2Payload';
 import { readTrenazher2Ui, type Trenazher2Ui } from './trenazher2Ui';
 
 export interface Trenazher2Props {
@@ -28,8 +34,8 @@ const COUNTS: (number | null)[] = [5, 10, 20, null];
 
 /**
  * Тренажёр задания №2: оболочка сессии вокруг конфигуратора и экрана.
- * Задания собираются в браузере и сохраняются целиком вместе с
- * закрытыми ответами: открытые числа в хранилище не попадают.
+ * Задания собираются в браузере; в хранилище уходит только рецепт
+ * (идентификаторы задач и подписи), открытые числа туда не попадают.
  */
 export function Trenazher2({ base, skills, total }: Trenazher2Props) {
   return (
@@ -55,6 +61,12 @@ export function Trenazher2({ base, skills, total }: Trenazher2Props) {
         ...payload,
         tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
       })}
+      similar={similarTrenazher2}
+      /* В записи — рецепт (идентификаторы и подписи): задачи по нему
+         собираются заново тем же генератором. */
+      pack={packTrenazher2}
+      unpack={unpackTrenazher2}
+      summary={{ hintedLabel: TRENAZHER_2.sOtkrytymResheniem }}
       configurator={(api) => <Trenazher2Configurator skills={skills} total={total} api={api} />}
       screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
         <Trenazher2Screen
@@ -144,7 +156,7 @@ function Trenazher2Configurator({
     if (tasks.length === 0) {
       return;
     }
-    /* Оболочка сессии сохранит задания целиком и вернёт ученика в них. */
+    /* Оболочка сессии сохранит рецепт заданий и вернёт ученика в них. */
     api.start({ tasks, control: mode === 'control' });
   }
 
