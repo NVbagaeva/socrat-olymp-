@@ -40,6 +40,13 @@ import rat9 from './prep/12r/skill-9.json';
 import rat10 from './prep/12r/skill-10.json';
 import rat11 from './prep/12r/skill-11.json';
 
+/* Подтема «Иррациональная функция»: пять опорных навыков, P12S-1 … P12S-5. */
+import sqrt1 from './prep/12s/skill-1.json';
+import sqrt2 from './prep/12s/skill-2.json';
+import sqrt3 from './prep/12s/skill-3.json';
+import sqrt4 from './prep/12s/skill-4.json';
+import sqrt5 from './prep/12s/skill-5.json';
+
 import protoA from './prototypes/12/12-A.json';
 import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
@@ -71,6 +78,13 @@ import ratH from './prototypes/12r/12R-H.json';
 import ratI from './prototypes/12r/12R-I.json';
 import ratJ from './prototypes/12r/12R-J.json';
 
+/* Прототипы графика корня: значение, аргумент и две координаты точки
+   пересечения с прямой. Собственный материал платформы. */
+import sqrtA from './prototypes/12s/12S-A.json';
+import sqrtB from './prototypes/12s/12S-B.json';
+import sqrtC from './prototypes/12s/12S-C.json';
+import sqrtD from './prototypes/12s/12S-D.json';
+
 /** Подготовка: собственный материал платформы, в покрытие банка не входит.
     Сначала наборы линейной подтемы, потом квадратичной, потом гиперболы: порядок в этом
     списке задаёт порядок записей в answers.json, и линейные записи от
@@ -79,6 +93,7 @@ export const prep = [
   block1, block2, block3, block4, block5, block6,
   quad1, quad2, quad3, quad4, quad5, quad6, quad7, quad8, quad9,
   rat1, rat2, rat3, rat4, rat5, rat6, rat7, rat8, rat9, rat10, rat11,
+  sqrt1, sqrt2, sqrt3, sqrt4, sqrt5,
 ];
 
 /** Прототипы: у линейной — банк ФИПИ, у квадратичной — свой материал.
@@ -89,5 +104,6 @@ export const prototypes = [
   protoA, protoB, protoC, protoD,
   quadA, quadB, quadC, quadD, quadE, quadF, quadG, quadH, quadI,
   ratA, ratB, ratC, ratD, ratE, ratF, ratG, ratH, ratI, ratJ,
+  sqrtA, sqrtB, sqrtC, sqrtD,
 ];
 

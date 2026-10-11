@@ -1,0 +1,157 @@
+{
+  "kind": "prep",
+  "id": "P12S-4",
+  "block": 4,
+  "title": "Формула прямой по графику",
+  "subtitle": "Найти коэффициенты $a$ и $b$ прямой",
+  "seed": 12504,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12S-4-01",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-02",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-03",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-04",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-05",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $a$.",
+      "answerRule": "line-a",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-06",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-07",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-08",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-09",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    },
+    {
+      "id": "P12S-4-10",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$. Найдите $b$.",
+      "answerRule": "line-b",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Угловой коэффициент прямой — через треугольник: $a = \\operatorname{tg} \\alpha$. Если прямая пересекает $Oy$ не в узле, $b$ находят подстановкой точки."
+    }
+  ]
+}

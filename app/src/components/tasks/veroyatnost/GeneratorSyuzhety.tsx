@@ -21,13 +21,13 @@ import {
   type SheetLayoutId,
   type SheetThemeId,
 } from '@/content/generator';
-import type { Zadanie } from '@/content/veroyatnost';
+import { veroyatnostBySlug, type Zadanie } from '@/content/veroyatnost';
 import { GENERATOR_SLOVA, type KartinkaSyuzheta } from '@/content/veroyatnost-syuzhety';
 import { assetUrl } from '@/lib/assetUrl';
 import { dateText, sheetQuery } from '@/lib/generatorQuery';
 import { counted } from '@/lib/plural';
-import { randomSeed } from '@/lib/randomSeed';
 import { planCounts } from '@/lib/sheetPlan';
+import { KitBar } from '../generator/KitBar';
 import { MetodIkonka } from './MetodIkonka';
 import { MetodKartinka } from './MetodKartinka';
 import type { Navyk } from './metody';
@@ -144,25 +144,25 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
   const vybrannye = syuzhety.filter((s) => vybrano.includes(s.id));
   const allCount = vybrannye.reduce((sum, s) => sum + s.count, 0);
   const chosenCount = countOf(count, allCount);
-  const selectedKey = vybrano.join(',');
-  /* Seed считается заново при смене того, что влияет на задачи. */
-  const seed = useMemo(
-    () => randomSeed(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, chosenCount],
-  );
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
-  const query = sheetQuery({
-    skills: vybrano,
-    count: chosenCount ?? 0,
-    level: null,
-    seed,
-    theme,
-    layout,
-    kind: kindTitle,
-    date,
-    variants,
-  });
+  /* Адреса листов по seed комплекта: его выдаёт KitBar, и только
+     «Новый комплект» его меняет. */
+  const sheetHrefs = (seed: string) => {
+    const query = sheetQuery({
+      skills: vybrano,
+      count: chosenCount ?? 0,
+      level: null,
+      seed,
+      theme,
+      layout,
+      kind: kindTitle,
+      date,
+      variants,
+    });
+    return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
+  };
+  /* Seed текущего комплекта — для предпросмотра того же листа. */
+  const [kitSeed, setKitSeed] = useState<string | null>(null);
   const plan = planCounts(
     vybrannye.map((s) => ({ id: s.id, capacity: s.count })),
     chosenCount ?? 0,
@@ -184,9 +184,7 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
       : []),
   ];
   const ready = vybrano.length > 0 && chosenCount !== null;
-  const studentHref = `${base}/pechat/?${query}`;
-  const teacherHref = `${base}/pechat/otvety/?${query}`;
-  const previewHref = `${studentHref}&preview=1`;
+  const previewHref = kitSeed === null ? null : `${sheetHrefs(kitSeed).student}&preview=1`;
 
   const tekushchaya = gruppy.find((g) => g.metod.id === otkryt) ?? gruppy[0];
 
@@ -495,32 +493,10 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
             {counted(variants, 'вариант', 'варианта', 'вариантов')}
           </p>
 
-          {/* Ссылки, а не кнопки: лист открывается в новой вкладке, адрес
-              можно скопировать и открыть снова — лист будет тем же. */}
           <a
-            className={clsx('btn btn--primary btn--lg vgen-svodka__list-btn', ready || 'is-disabled')}
-            href={ready ? studentHref : undefined}
-            aria-disabled={!ready || undefined}
-            target="_blank"
-            rel="noopener"
-          >
-            <SheetIcon />
-            {generatorPage.student} →
-          </a>
-          <a
-            className={clsx('btn btn--secondary btn--lg vgen-svodka__list-btn', ready || 'is-disabled')}
-            href={ready ? teacherHref : undefined}
-            aria-disabled={!ready || undefined}
-            target="_blank"
-            rel="noopener"
-          >
-            <SheetIcon />
-            {generatorPage.teacher}
-          </a>
-          <a
-            className={clsx('vgen-svodka__preview', ready || 'is-disabled')}
-            href={ready ? previewHref : undefined}
-            aria-disabled={!ready || undefined}
+            className={clsx('vgen-svodka__preview', (ready && previewHref !== null) || 'is-disabled')}
+            href={ready && previewHref !== null ? previewHref : undefined}
+            aria-disabled={!ready || previewHref === null || undefined}
             target="_blank"
             rel="noopener"
           >
@@ -530,31 +506,21 @@ export function GeneratorSyuzhety({ zadanie, base, metody, syuzhety, kartinki }:
         </aside>
       </div>
 
-      {/* На узком экране сводка под шагами: кнопки листов липнут снизу. */}
-      <div className="cfg-bar cfg-bar--two vgen-bar">
-        <a
-          className={clsx('btn btn--primary btn--lg cfg-bar__start', ready || 'is-disabled')}
-          href={ready ? studentHref : undefined}
-          aria-disabled={!ready || undefined}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.student}
-        </a>
-        <a
-          className={clsx('btn btn--secondary btn--lg cfg-bar__start', ready || 'is-disabled')}
-          href={ready ? teacherHref : undefined}
-          aria-disabled={!ready || undefined}
-          target="_blank"
-          rel="noopener"
-        >
-          {generatorPage.teacher}
-        </a>
-        <p className="cfg-bar__summary">
-          {slova.svodka.syuzhety(vybrannye.length)} ·{' '}
-          {!ready ? '—' : counted(chosenCount, 'задача', 'задачи', 'задач')}
-        </p>
-      </div>
+      <KitBar
+        scope={zadanie === 5 ? '5' : '4'}
+        slot={base}
+        section={veroyatnostBySlug(String(zadanie))?.title ?? `Задание №${zadanie}`}
+        count={(chosenCount ?? 0) * variants}
+        ready={ready}
+        hrefs={sheetHrefs}
+        onSeed={setKitSeed}
+        summary={
+          <>
+            {slova.svodka.syuzhety(vybrannye.length)} ·{' '}
+            {!ready ? '—' : counted(chosenCount, 'задача', 'задачи', 'задач')}
+          </>
+        }
+      />
     </section>
   );
 }

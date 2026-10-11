@@ -554,6 +554,7 @@ function result(set, task, built, seed) {
     id: task.id,
     kind: set.kind,
     svg: task.noChart ? null : renderer.renderGraph(sceneFor(built, task, set)),
+    scene: task.noChart ? null : sceneFor(built, task, set),
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),
     hint: task.hint ? plainText(fillTemplate(task.hint, values)) : null,

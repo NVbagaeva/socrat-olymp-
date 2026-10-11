@@ -127,22 +127,34 @@ function keyTable(title, rows) {
   return out;
 }
 
+/* Рисунок к разбору: построения (треугольник наклона, асимптоты,
+   вспомогательные оси) — отдельным рисунком рядом с решением, а не
+   на рисунке условия. Ширина — как у рисунка задачи на листе. */
+function solutionFigure(figure) {
+  if (!figure || !figure.svg) { return ''; }
+  var width = figure.width ? ' style="width:' + (Math.round(figure.width * 100) / 100) + 'mm"' : '';
+  return '<figure class="sheet-figure sheet-solution-figure"' + width + '>' + figure.svg + '</figure>';
+}
+
 /**
  * Краткое решение одной задачи.
  *
  * steps — уже отобранные куски: [{ tex }] для формул и строка
  * ответа. Ничего не досочиняется: что пришло, то и печатается.
+ * figure — необязательный рисунок к разбору: { svg, width (мм) }.
  */
-function solution(no, formulas, answer) {
+function solution(no, formulas, answer, figure) {
   var body = formulas.map(function (tex) {
     return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
       typo.escape(tex) + '</span>';
   }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
-  return '<div class="sheet-item sheet-solution">' +
+  var drawn = solutionFigure(figure);
+  return '<div class="sheet-item sheet-solution' + (drawn ? ' sheet-solution--figure' : '') + '">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body">' + body + '</span>' +
     '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
+    drawn +
     '</div>';
 }
 
@@ -153,9 +165,10 @@ function solution(no, formulas, answer) {
  * k → формула; у задач с прямой — обе функции, уравнение, корни),
  * а не только итог каждого шага.
  *
- * items — [{ title, formulas: [tex] }]
+ * items  — [{ title, formulas: [tex] }]
+ * figure — необязательный рисунок к разбору, как у solution.
  */
-function fullSolution(no, items, answer) {
+function fullSolution(no, items, answer, figure) {
   var list = items.map(function (step) {
     var body = step.formulas.map(function (tex) {
       return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
@@ -164,10 +177,13 @@ function fullSolution(no, items, answer) {
     return '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
       (body ? ':' : '') + '</span> ' + body + '</li>';
   }).join('');
-  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+  var drawn = solutionFigure(figure);
+  return '<div class="sheet-item sheet-solution sheet-solution--full' +
+    (drawn ? ' sheet-solution--figure' : '') + '">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
     '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
+    drawn +
     '</div>';
 }
 

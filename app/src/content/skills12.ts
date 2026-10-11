@@ -33,6 +33,10 @@ export const skillTitle: Record<string, string> = {
   '12R.H': 'Гипербола и прямая: ордината $B$',
   '12R.I': '$\\frac{k}{x}$: значение и аргумент',
   '12R.J': '$\\frac{kx + a}{x + b}$: $b$ и значение',
+  '12S.A': 'Значение функции',
+  '12S.B': 'Аргумент по значению',
+  '12S.C': 'Корень и прямая: абсцисса $B$',
+  '12S.D': 'Корень и прямая: ордината $B$',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -68,8 +72,18 @@ const RATIONAL_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'дроби и подстановка' },
 ];
 
-/** Уровни подтемы: у квадратичной и гиперболы свои подписи. */
+/* У графика корня: под корнем целый квадрат против десятичного,
+   ответ целый против дробного. */
+const IRRATIONAL_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'целые числа' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'десятичные дроби' },
+];
+
+/** Уровни подтемы: у квадратичной, гиперболы и корня свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'irrational') {
+    return IRRATIONAL_LEVELS;
+  }
   if (type === 'rational') {
     return RATIONAL_LEVELS;
   }

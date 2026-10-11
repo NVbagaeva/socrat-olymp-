@@ -30,7 +30,7 @@ export function GeneratorTab({ subtopic, base }: GeneratorTabProps) {
       family={subtopic.title}
       skills={skillItems(family)}
       levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-      note={subtopic.id === 'quadratic' || subtopic.id === 'rational'
+      note={subtopic.id === 'quadratic' || subtopic.id === 'rational' || subtopic.id === 'irrational'
         ? generatorPage.summary.noteOwn
         : generatorPage.summary.note}
     />
