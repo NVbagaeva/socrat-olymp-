@@ -172,6 +172,30 @@ for (const size of SIZES) {
   check(plate.img, where('иконка на плашке не загрузилась'));
   check(plate.imgHidden && plate.alt === '', where('иконка не декоративная (alt / aria-hidden)'));
 
+  /* Шапка: название функции под H1 видно на любой ширине, под ним —
+     «График — …» (правило названий сайта). */
+  const head = await page.evaluate(() => {
+    const sub = document.querySelector('.topic-head__subtitle');
+    const graph = document.querySelector('.topic-head__graph');
+    const shown = (node) => node !== null && node.getBoundingClientRect().height > 0;
+    return {
+      sub: shown(sub) ? sub.textContent : null,
+      graph: shown(graph) ? graph.textContent : null,
+      order:
+        sub !== null && graph !== null
+          ? sub.getBoundingClientRect().bottom <= graph.getBoundingClientRect().top + 1
+          : false,
+    };
+  });
+  check(
+    head.sub === 'Иррациональная функция',
+    where(`под H1 не видно названия функции: «${head.sub}»`),
+  );
+  check(
+    head.graph === 'График — ветвь параболы' && head.order,
+    where(`под названием функции нет «График — …»: «${head.graph}»`),
+  );
+
   /* Сценарий: «Теория» → меню → «Квадратичная функция». */
   await page.getByRole('tab', { name: 'Теория' }).click();
   await page.waitForTimeout(300);
@@ -525,6 +549,68 @@ for (const size of SIZES) {
     check(okno.quadLines === 1, where('в окне выбора «Квадратичная функция» переносится по слову'));
   }
 
+  /* Статистика тренажёра: иконка раздела и только свои наборы. Счётчики
+     всех разделов лежат в одной записи budetege:trainer:v1. */
+  await page.goto(BASE + '/zadaniya/12/quadratic/trenazher/', { waitUntil: 'networkidle' });
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'budetege:trainer:v1',
+      JSON.stringify({
+        kinds: {
+          '12.A': { done: 5, right: 5, seconds: 50 },
+          '12Q.A': { done: 2, right: 1, seconds: 20 },
+        },
+        mistakes: ['12.A-01', '12Q.A-02'],
+      }),
+    ),
+  );
+  await page.reload({ waitUntil: 'networkidle' });
+  const stats = await page.evaluate(() => {
+    const box = document.querySelector('.tstats');
+    const img = box?.querySelector('.tstats__razdel img');
+    return {
+      counter: box?.querySelector('.tstats__counter b')?.textContent ?? null,
+      razdel: box?.querySelector('.tstats__razdel')?.textContent?.trim() ?? null,
+      img: img
+        ? {
+            alt: img.getAttribute('alt'),
+            hidden: img.getAttribute('aria-hidden'),
+            w: img.getAttribute('width'),
+            h: img.getAttribute('height'),
+          }
+        : null,
+      mistakes: box?.querySelectorAll('.tstats__mistakes li').length ?? 0,
+    };
+  });
+  check(
+    stats.counter === '2',
+    where(`статистика параболы считает чужие наборы: «${stats.counter}» вместо 2`),
+  );
+  check(stats.mistakes === 1, where(`в ошибках параболы ${stats.mistakes} задач вместо 1`));
+  check(
+    stats.razdel === 'Квадратичная функция',
+    where(`в статистике нет названия раздела: «${stats.razdel}»`),
+  );
+  check(
+    stats.img !== null &&
+      stats.img.alt === '' &&
+      stats.img.hidden === 'true' &&
+      stats.img.w !== null &&
+      stats.img.h !== null,
+    where('в статистике нет иконки раздела с alt="", aria-hidden и размерами'),
+  );
+  await page.getByRole('button', { name: 'Сбросить' }).click();
+  const left = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('budetege:trainer:v1') ?? '{}'),
+  );
+  check(
+    left.kinds?.['12.A']?.done === 5 &&
+      left.kinds?.['12Q.A'] === undefined &&
+      left.mistakes?.join() === '12.A-01',
+    where('«Сбросить» на параболе стёр счётчики линейной или оставил свои'),
+  );
+  await page.evaluate(() => localStorage.removeItem('budetege:trainer:v1'));
+
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
   await page.goto(BASE + '/zadaniya/12/logarithmic/', { waitUntil: 'networkidle' });
   check(
@@ -538,6 +624,31 @@ for (const size of SIZES) {
 
 await browser.close();
 server.close();
+
+/* Один ключ тренировки на раздел: budetege:trainer:<раздел>:session.
+   Меню читает ключи сам (razdely/trenirovki.ts), тренажёр пишет их через
+   lib/trainerSession/store.ts (PR #131). Когда хранилище в проекте,
+   приставка и окончание ключа обязаны совпадать. */
+{
+  const read = (rel) => {
+    const file = path.join(APP, rel);
+    return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+  };
+  const part = (src, name) => src?.match(new RegExp(`const ${name} = '([^']*)'`))?.[1] ?? null;
+  const menu = read('src/components/tasks/razdely/trenirovki.ts');
+  check(
+    part(menu, 'PREFIX') === 'budetege:trainer:' && part(menu, 'SUFFIX') === ':session',
+    'ключ тренировки в меню не budetege:trainer:<раздел>:session',
+  );
+  const store = read('src/lib/trainerSession/store.ts');
+  if (store !== null) {
+    check(
+      part(store, 'PREFIX') === part(menu, 'PREFIX') &&
+        part(store, 'SUFFIX') === part(menu, 'SUFFIX'),
+      'ключ тренировки в меню и в хранилище тренажёра разный',
+    );
+  }
+}
 
 console.log(`Навигация по разделам №12: проверок ${checks}, ошибок ${failures.length}.`);
 for (const f of failures) {

@@ -27,6 +27,8 @@ export interface TrainerBuilderProps {
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
   familyIcon?: IkonkaRazdela | undefined;
+  /** Все наборы прототипов раздела: по ним сводка отбирает свои счётчики. */
+  familySets?: readonly string[] | undefined;
   /** Сколько задач во всех наборах прототипов семейства. */
   familyTotal: number;
   skills: SkillItem[];
@@ -61,6 +63,7 @@ export function TrainerBuilder({
   base,
   family,
   familyIcon,
+  familySets,
   familyTotal,
   skills,
   levels,
@@ -150,7 +153,13 @@ export function TrainerBuilder({
       onStart={start}
       starting={starting}
       /* Что уже сделано: знаменатель — все задания прототипов семейства. */
-      stats={<TrainerStats total={familyTotal} />}
+      stats={
+        <TrainerStats
+          total={familyTotal}
+          sets={familySets}
+          razdel={{ title: family, icon: familyIcon }}
+        />
+      }
     />
   );
 }

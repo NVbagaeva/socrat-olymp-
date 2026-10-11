@@ -75,6 +75,7 @@ export function TrainerShell({ subtopic, base, icon, preset = null, children }: 
           base={base}
           family={subtopic.title}
           familyIcon={icon}
+          familySets={all.map((item) => item.id)}
           familyTotal={total}
           skills={skills}
           levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
