@@ -1,0 +1,54 @@
+/* Служебная галерея банка задания №9: только токены. */
+.g9 {
+  padding: var(--space-6);
+  display: grid;
+  gap: var(--space-6);
+}
+.g9__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.g9__nav a {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.g9__nav a[aria-current='page'] {
+  background: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+}
+.g9__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+.g9__card {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.g9__card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.g9__card figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
+.g9__card b {
+  color: var(--color-text);
+}
+.g9__card.is-povtor {
+  border-color: var(--color-danger, #c0392b);
+}
+.g9__stat {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
