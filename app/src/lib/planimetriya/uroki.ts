@@ -201,31 +201,33 @@ function razlozhit(
   const dop = urok.dop.map(klyuchProto);
   const raz = (n: number, f: () => ZadachaPlan) => Array.from({ length: n }, f);
 
-  /* Сначала открытый банк — разбор и ДЗ, затем аналоги. */
-  const razbor = bank.flatMap((id) => raz(k.razbor, () => fipi(id)));
-  const dzFipi = k.dz - Math.floor(k.dz / 3);
-  const dzBank = new Map(bank.map((id) => [id, raz(dzFipi, () => fipi(id))]));
-  const sam = [
-    ...bank.flatMap((id) => raz(k.sam, () => analog(id))),
-    ...dop.flatMap((id) => raz(Math.min(1, k.sam), () => analog(id))),
+  /* Сначала открытый банк — разбор и ДЗ, затем аналоги. Прототипы
+     50+ (без ФИПИ): один аналог в «Разборе» — тип ученик впервые видит
+     с учителем, в «Самостоятельно» их нет, в «ДЗ» — один аналог.
+     ДЗ на прототип банка: половина (с округлением вверх) — ФИПИ,
+     остальное — аналоги: по умолчанию 1 + 1. */
+  const razbor = [
+    ...bank.flatMap((id) => raz(k.razbor, () => fipi(id))),
+    ...dop.flatMap((id) => raz(Math.min(1, k.razbor), () => analog(id))),
   ];
+  const dzFipi = Math.ceil(k.dz / 2);
+  const dzBank = new Map(bank.map((id) => [id, raz(dzFipi, () => fipi(id))]));
+  const sam = bank.flatMap((id) => raz(k.sam, () => analog(id)));
   const dz = [
-    ...bank.flatMap((id) => [
-      ...(dzBank.get(id) ?? []),
-      ...raz(Math.floor(k.dz / 3), () => analog(id)),
-    ]),
+    ...bank.flatMap((id) => [...(dzBank.get(id) ?? []), ...raz(k.dz - dzFipi, () => analog(id))]),
     ...dop.flatMap((id) => raz(Math.min(1, k.dz), () => analog(id))),
   ];
   const zanyatoBlokami = new Set(vzyato);
   const nehvatkaBlokov = nehvatka;
 
-  /* Запас для следующего урока: по кругу прототипов урока. */
+  /* Запас для следующего урока (мини-проверка и разминка): только
+     аналоги, по кругу прототипов урока — ФИПИ на них не тратим. */
   const krug = [...bank, ...dop];
   let i = 0;
   const sleduyushchaya = () => {
     const id = krug[i % krug.length]!;
     i += 1;
-    return bank.includes(id) ? fipi(id) : analog(id);
+    return analog(id);
   };
   const proverka = sZapasom && krug.length > 0 ? raz(ZAPAS_PROVERKA, sleduyushchaya) : [];
   const razminka = sZapasom && krug.length > 0 ? raz(ZAPAS_RAZMINKA, sleduyushchaya) : [];
@@ -252,69 +254,102 @@ export interface Seriya {
   zanyato: Set<string>;
   /** Занято до урока N (для раскладки урока с настройками учителя). */
   doUroka: Map<number, Set<string>>;
+  /** Пул уроков: ФИПИ без резерва итоговой и все аналоги. */
   pul: Pul;
+  rezerv: Rezerv;
 }
 
-/** Итоговая работа поколения 0: по две задачи банка с каждого урока. */
-function otlozhitItog(osnova: string, pul: Pul): ZadachaPlan[][] {
-  const rng = rngOf(`z1-itog|${osnova}|0`);
+/* ── Резерв итоговой работы ──────────────────────────────────────── */
+
+/** ФИПИ на прототип для уроков по умолчанию: «Разбор» 1 + «ДЗ» 1. */
+const FIPI_V_UROKAH = KOLICHESTVO_1.razbor + Math.ceil(KOLICHESTVO_1.dz / 2);
+
+export interface Rezerv {
+  /** ФИПИ прототипа, которые могут взять уроки 1–11. */
+  uroki: Map<string, number[]>;
+  /** ФИПИ прототипа, отложенные для итоговой: в уроки не идут никогда. */
+  itog: Map<string, number[]>;
+}
+
+/**
+ * Резерв итоговой — до сборки серии. ФИПИ каждого прототипа банка
+ * перемешиваются по коду: урокам — не больше FIPI_V_UROKAH, но так,
+ * чтобы для итоговой осталась хотя бы одна задача; всё остальное —
+ * резерв итоговой. Если ФИПИ не хватает и на уроки, и на резерв, урок
+ * получает аналог, а задача банка остаётся итоговой.
+ */
+export function rezervItoga(osnova: string, pul: Pul): Rezerv {
+  const uroki = new Map<string, number[]>();
+  const itog = new Map<string, number[]>();
+  for (const u of UROKI_1.slice(0, ITOG_1.uroki)) {
+    for (const id of u.bank.map(klyuchProto)) {
+      const vse = pul.fipi.get(id) ?? [];
+      const smes = rngOf(`z1-rezerv|${osnova}|${id}`).sample(vse, vse.length);
+      const vUroki = Math.max(0, Math.min(FIPI_V_UROKAH, smes.length - 1));
+      uroki.set(id, smes.slice(0, vUroki));
+      itog.set(id, smes.slice(vUroki));
+    }
+  }
+  return { uroki, itog };
+}
+
+/** Прототипы, где ФИПИ не хватает и на уроки, и на резерв: в уроки идёт аналог. */
+export function nehvatkaFipi(pul: Pul): { proto: number; fipi: number }[] {
+  return UROKI_1.slice(0, ITOG_1.uroki)
+    .flatMap((u) => u.bank)
+    .map((proto) => ({ proto, fipi: (pul.fipi.get(klyuchProto(proto)) ?? []).length }))
+    .filter((x) => x.fipi - 1 < FIPI_V_UROKAH);
+}
+
+/**
+ * Итоговая поколения g: по задаче на урок 1–11 в каждом варианте,
+ * только из резерва. Каждое поколение берёт задачи, которых не было в
+ * прежних поколениях; когда резерв урока кончается — хотя бы не из
+ * предыдущего поколения, так что две перегенерации подряд не
+ * пересекаются.
+ */
+function itogPokoleniya(
+  osnova: string,
+  g: number,
+  rezerv: Rezerv,
+  prezhnie: ReadonlySet<string>,
+  predydushchee: ReadonlySet<string>,
+): ZadachaPlan[][] {
+  const rng = rngOf(`z1-itog|${osnova}|${g}`);
   const varianty: ZadachaPlan[][] = Array.from({ length: ITOG_1.variantov }, () => []);
   for (const u of UROKI_1.slice(0, ITOG_1.uroki)) {
-    const ids = u.bank.map(klyuchProto).filter((id) => (pul.fipi.get(id) ?? []).length > 0);
-    const protos = rng.sample(ids, ids.length);
-    const vzyato = new Set<number>();
+    const ids = rng.sample(u.bank.map(klyuchProto), u.bank.length);
+    const vzyato = new Set<string>();
     varianty.forEach((v, vi) => {
       /* Варианты — по возможности разные прототипы урока. */
-      for (let t = 0; t < protos.length; t += 1) {
-        const id = protos[(vi + t) % protos.length]!;
-        const svobodnye = (pul.fipi.get(id) ?? []).filter((no) => !vzyato.has(no));
-        if (svobodnye.length === 0) continue;
-        const no = rng.pick(svobodnye);
-        vzyato.add(no);
-        v.push({ vid: 'bank', id, no });
-        return;
+      const poryadok = ids.map((_, t) => ids[(vi + t) % ids.length]!);
+      for (const filtr of [
+        (key: string) => !prezhnie.has(key),
+        (key: string) => !predydushchee.has(key),
+        () => true,
+      ]) {
+        for (const id of poryadok) {
+          const svobodnye = (rezerv.itog.get(id) ?? []).filter(
+            (no) => !vzyato.has(kBank(no)) && filtr(kBank(no)),
+          );
+          if (svobodnye.length === 0) continue;
+          const no = rng.pick(svobodnye);
+          vzyato.add(kBank(no));
+          v.push({ vid: 'bank', id, no });
+          return;
+        }
       }
     });
   }
   return varianty;
 }
 
-/** Итоговая работа поколения g > 0: задачи банка, свободные в серии. */
-function itogPokoleniya(
-  osnova: string,
-  g: number,
-  pul: Pul,
-  zanyato: ReadonlySet<string>,
-  zapasnoy: ZadachaPlan[][],
-): ZadachaPlan[][] {
-  const rng = rngOf(`z1-itog|${osnova}|${g}`);
-  const vzyato = new Set<string>();
-  return zapasnoy.map((v) =>
-    v.map((prezhnyaya, ui) => {
-      const u = UROKI_1[ui]!;
-      const ids = rng.sample(u.bank.map(klyuchProto), u.bank.length);
-      for (const id of ids) {
-        const svobodnye = (pul.fipi.get(id) ?? []).filter(
-          (no) => !zanyato.has(kBank(no)) && !vzyato.has(kBank(no)),
-        );
-        if (svobodnye.length > 0) {
-          const no = rng.pick(svobodnye);
-          vzyato.add(kBank(no));
-          return { vid: 'bank', id, no } as ZadachaPlan;
-        }
-      }
-      /* Банк уроков исчерпан: остаётся отложенная задача — итоговая
-         и так только из открытого банка. */
-      vzyato.add(klyuchPoz(prezhnyaya));
-      return prezhnyaya;
-    }),
-  );
-}
-
 export function seriya(kod: KodSerii, bank: readonly UslovieBanka[]): Seriya {
   const pul = pulIz(bank);
-  const otlozheno = otlozhitItog(kod.osnova, pul);
-  const zanyato = new Set(otlozheno.flat().map(klyuchPoz));
+  const rezerv = rezervItoga(kod.osnova, pul);
+  /* Уроки видят только свою часть ФИПИ: резерв итоговой им недоступен. */
+  const pulUrokov: Pul = { fipi: rezerv.uroki, analogi: pul.analogi };
+  const zanyato = new Set<string>();
   const uroki = new Map<number, RaskladkaUroka>();
   const doUroka = new Map<number, Set<string>>();
   for (const u of UROKI_1.slice(0, ITOG_1.uroki)) {
@@ -323,7 +358,7 @@ export function seriya(kod: KodSerii, bank: readonly UslovieBanka[]): Seriya {
     let isklyuchit = new Set<string>();
     let r: RaskladkaUroka | null = null;
     for (let h = 0; h <= g; h += 1) {
-      r = razlozhit(kod.osnova, u, h, pul, zanyato, isklyuchit, KOLICHESTVO_1, true);
+      r = razlozhit(kod.osnova, u, h, pulUrokov, zanyato, isklyuchit, KOLICHESTVO_1, true);
       if (h < g) isklyuchit = new Set([...isklyuchit, ...r.zanyatoBlokami, ...r.zanyatoZapasom]);
     }
     uroki.set(u.no, r!);
@@ -331,14 +366,16 @@ export function seriya(kod: KodSerii, bank: readonly UslovieBanka[]): Seriya {
   }
   doUroka.set(12, new Set(zanyato));
   const g12 = kod.regen[12] ?? 0;
-  let itog = otlozheno;
-  const bylo = new Set(zanyato);
-  for (let h = 1; h <= g12; h += 1) {
-    itog = itogPokoleniya(kod.osnova, h, pul, bylo, otlozheno);
-    for (const p of itog.flat()) bylo.add(klyuchPoz(p));
+  let itog: ZadachaPlan[][] = [];
+  const prezhnie = new Set<string>();
+  let predydushchee = new Set<string>();
+  for (let h = 0; h <= g12; h += 1) {
+    itog = itogPokoleniya(kod.osnova, h, rezerv, prezhnie, predydushchee);
+    predydushchee = new Set(itog.flat().map(klyuchPoz));
+    for (const key of predydushchee) prezhnie.add(key);
   }
   for (const p of itog.flat()) zanyato.add(klyuchPoz(p));
-  return { kod, uroki, itog, zanyato, doUroka, pul };
+  return { kod, uroki, itog, zanyato, doUroka, pul: pulUrokov, rezerv };
 }
 
 /* ── План листа урока ────────────────────────────────────────────── */
@@ -348,6 +385,8 @@ export interface NastroykiUroka {
   vykl: readonly BlokUroka1[];
   /** Число задач блока, если отличается от KOLICHESTVO_1. */
   n: Partial<Record<BlokUroka1, number>>;
+  /** Лист учителя: полные решения у всех задач, а не только у «Разбора». */
+  polnye?: boolean;
 }
 
 export const NASTROYKI_PO_UMOLCHANIYU: NastroykiUroka = { vykl: [], n: {} };
@@ -438,4 +477,4 @@ export function zadachUroka(p: PlanUroka): number {
   return p.bloki.reduce((s, b) => s + b.pozicii.length, 0);
 }
 
-export { klyuchPoz };
+export { klyuchPoz, pulIz };

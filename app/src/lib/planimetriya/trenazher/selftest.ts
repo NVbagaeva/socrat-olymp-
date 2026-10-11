@@ -116,6 +116,7 @@ export function checkTrenazher(seedov = 3): ItogTrenazhera {
   const adresa = [
     ...UROKI_1.map((u) => `m=u&i=m&u=${u.no}&k=K7Q2AB-3.1&seed=K7Q2AB`),
     'm=u&i=m&u=4&k=Z9X1C0&b=shpargalka,sam&n=razbor:2,dz:6,proverka:8&seed=Z9X1C0',
+    'm=u&i=m&u=6&k=Z9X1C0-6.1&pr=1&seed=Z9X1C0',
     'm=o&i=m&s=p01:2,p05:2,p24:2,p35:2,p41:1,p62:1&f=2&seed=o',
     'm=o&i=b&s=p03:3,p14:3&seed=ob',
     'm=v&i=m&s=p01:1,p13:1,p17:1,p24:1,p35:1,p41:1,p46:1,p49:1&v=4&f=0&seed=v',

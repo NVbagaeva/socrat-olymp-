@@ -79,6 +79,7 @@ export function sheetQuery1(p: SheetParams1): string {
     q.set('u', String(p.urok));
     q.set('k', p.kod);
     if (p.nastroyki.vykl.length > 0) q.set('b', p.nastroyki.vykl.join(','));
+    if (p.nastroyki.polnye === true) q.set('pr', '1');
     const n = Object.entries(p.nastroyki.n).filter(([, x]) => x !== undefined);
     if (n.length > 0) q.set('n', n.map(([b, x]) => `${b}:${x}`).join(','));
   } else {
@@ -130,7 +131,7 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
     zameny,
     urok: UROKI_1.some((x) => x.no === u) ? u : 1,
     kod: q.get('k') ?? '',
-    nastroyki: { vykl, n },
+    nastroyki: { vykl, n, ...(q.get('pr') === '1' ? { polnye: true } : {}) },
     theme: q.get('t') === 'print' ? 'print' : 'color',
     ramka: f === '0' || f === '1' || f === '2' ? Number(f) : -1,
   };
@@ -285,6 +286,8 @@ export interface ListZadacha {
   answer: string;
   answerHtml: string;
   solutionHtml: string;
+  /** Ключевой шаг решения одной строкой — таблица ответов учителя. */
+  klyuchShagHtml: string;
 }
 
 /** Ответ строкой для таблицы ответов: 4.5 → «4,5». */
@@ -343,6 +346,7 @@ export function sobratList(p: SheetParams1, bank: readonly UslovieBanka[]): Sobr
           solutionHtml: `<ol class="sheet-steps z1-sheet-steps">${z.razbor
             .map((l) => `<li class="sheet-step">${typeset(l)}</li>`)
             .join('')}</ol>`,
+          klyuchShagHtml: typeset(z.razbor[z.razbor.length - 1] ?? ''),
         };
       }
       const r = razreshit(poz, bank);
@@ -361,6 +365,7 @@ export function sobratList(p: SheetParams1, bank: readonly UslovieBanka[]): Sobr
         answer: chisloOtveta(s.otvet),
         answerHtml: s.razbor.otvetHtml,
         solutionHtml: s.reshenieLista,
+        klyuchShagHtml: s.klyuchShag,
       };
     }),
   );
@@ -651,6 +656,23 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
       solutionHtml: `<div class="z1-sheet-reshenie">${pic}${z.solutionHtml}<p class="sheet-task-answer">${SHEET_1.otvet}: <b>${z.answerHtml}</b></p></div>`,
     };
   };
+  /* Урок: полное решение с чертежом — только у «Разбора» (или у всех,
+     если учитель включил «Полные решения»). Остальные задачи у учителя —
+     условие и рисунок, как у ученика; ответ и ключевой шаг — в таблице
+     ответов в конце листа. */
+  const kratko = (z: ListZadacha) =>
+    p.rezhim === 'urok' && p.nastroyki.polnye !== true && z.blok !== 'razbor';
+  const uchitelKratko = (z: ListZadacha): SheetTask => ({
+    no: z.no,
+    id: z.pos,
+    questionHtml: `${bejdzh(z)} ${z.questionHtml}`,
+    options: null,
+    figureSvg: z.figureSvg,
+    figureWidth: shirinaRisunka(z.figureSvg),
+    solutionHtml: null,
+  });
+  const uchitelZadacha = (z: ListZadacha): SheetTask =>
+    kratko(z) ? uchitelKratko(z) : uchitelTask(z);
   const nV = list.poVariantam.length;
   const variantTitle = (i: number) => (nV > 1 ? `Вариант ${i + 1}` : undefined);
   const uchenik = (sStrokoy: boolean) =>
@@ -661,7 +683,7 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
   const uchitel = () =>
     list.poVariantam.map((zs, i) => ({
       title: title(variantTitle(i), true),
-      blocks: blokiLista(p, zs, uchitelTask, ramki, list.poryadok),
+      blocks: blokiLista(p, zs, uchitelZadacha, ramki, list.poryadok),
     }));
   const poVariantam =
     vid === 'uchenik'
@@ -672,17 +694,19 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
   const otvety: string[] =
     vid === 'uchenik'
       ? []
-      : [
-          answers.sectionHead(SHEET_1.otvety, SHEET_1.otvetyNote, { section: nV > 1 }),
-          ...list.poVariantam.flatMap((zs, i) => [
-            ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
-            answers.table(
-              SHEET_1.otvety,
-              zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
-              5,
-            ),
-          ]),
-        ];
+      : p.rezhim === 'urok'
+        ? tablitsaOtvetov(list.poVariantam.flat())
+        : [
+            answers.sectionHead(SHEET_1.otvety, SHEET_1.otvetyNote, { section: nV > 1 }),
+            ...list.poVariantam.flatMap((zs, i) => [
+              ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
+              answers.table(
+                SHEET_1.otvety,
+                zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
+                5,
+              ),
+            ]),
+          ];
   const one = poVariantam.length === 1 ? poVariantam[0] : undefined;
   return {
     theme: p.theme,
@@ -699,6 +723,36 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
     extraItems: otvety,
     foot: SHEET_1.foot,
   };
+}
+
+/**
+ * Таблица ответов листа учителя урока: номер, ответ и ключевой шаг
+ * одной строкой. Таблица режется на куски по TABLITSA_STROK строк —
+ * каждый кусок отдельный элемент потока, и раскладка листа переносит
+ * таблицу на новую страницу между кусками.
+ */
+const TABLITSA_STROK = 10;
+
+function tablitsaOtvetov(zadachi: ListZadacha[]): string[] {
+  const golova = `<thead><tr><th>${SHEET_1.otvetyTab.no}</th><th>${SHEET_1.otvetyTab.otvet}</th><th>${SHEET_1.otvetyTab.shag}</th></tr></thead>`;
+  const kuski: string[] = [];
+  for (let i = 0; i < zadachi.length; i += TABLITSA_STROK) {
+    const stroki = zadachi
+      .slice(i, i + TABLITSA_STROK)
+      .map(
+        (z) =>
+          `<tr><td class="z1-otvety__no">${z.no}</td><td class="z1-otvety__otvet">${z.answerHtml}</td><td class="z1-otvety__shag">${z.klyuchShagHtml}</td></tr>`,
+      )
+      .join('');
+    kuski.push(
+      `<div class="sheet-item z1-otvety"><table class="z1-otvety__tab">${golova}<tbody>${stroki}</tbody></table></div>`,
+    );
+  }
+  /* Заголовок без начала новой страницы (у общего answers.sectionHead
+     она есть): компактная таблица урока идёт сразу за задачами и не
+     оставляет полстраницы пустыми; один внизу страницы он не остаётся. */
+  const zagolovok = `<div class="sheet-item sheet-block" data-keep-with-next="1"><header class="sheet-block-head"><h2 class="sheet-block-title">${SHEET_1.otvety}</h2></header></div>`;
+  return [zagolovok, ...kuski];
 }
 
 /** Ответ задачи листа для превью генератора: число с запятой. */

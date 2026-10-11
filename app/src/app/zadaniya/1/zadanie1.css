@@ -572,6 +572,10 @@ a.z1-gde__chip:hover {
   line-height: var(--lh-caption);
   white-space: nowrap;
 }
+.z1-urok__polnye {
+  display: grid;
+  gap: var(--space-1);
+}
 .z1-urok__btns {
   display: flex;
   flex-wrap: wrap;

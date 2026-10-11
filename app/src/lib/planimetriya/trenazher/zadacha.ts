@@ -250,10 +250,19 @@ export function sostavZadachi(z: RazreshennayaZadacha) {
       return `<li class="sheet-step"><b>${typeset(ren(s.zagolovok))}.</b> ${[...tekst, ...formuly].join(' ')}</li>`;
     })
     .join('')}</ol>`;
+  /* Ключевой шаг одной строкой — для таблицы ответов листа учителя:
+     последняя выкладка решения, а если выкладок нет — текст шага. */
+  const sFormuloy = [...r.shagi].reverse().find((s) => (s.formuly ?? []).length > 0);
+  const posledniy = r.shagi[r.shagi.length - 1];
+  const klyuchShag =
+    sFormuloy !== undefined
+      ? typeset(`$${ren(sFormuloy.formuly![sFormuloy.formuly!.length - 1]!)}$`)
+      : typeset(ren(posledniy?.tekst.find((t) => t !== '') ?? ''));
   return {
     title: ren(p.nazvanie),
     uslovie: ren(p.uslovie(z.params)),
     reshenieLista,
+    klyuchShag,
     risunokSvg: risunok({ rezhim: 'uchenik' }),
     otvet,
     razbor,

@@ -321,6 +321,20 @@ export function Repetitory1({
                           );
                         })}
                       </ul>
+                      <div className="z1-urok__polnye">
+                        <Checkbox
+                          checked={n.polnye === true}
+                          onChange={(e) =>
+                            izmenit(u.no, (m) => {
+                              const { polnye: _p, ...rest } = m;
+                              return e.target.checked ? { ...rest, polnye: true } : rest;
+                            })
+                          }
+                        >
+                          {REPETITORY_1.polnye}
+                        </Checkbox>
+                        <span className="z1-urok__note">{REPETITORY_1.polnyeNote}</span>
+                      </div>
                       {g === 0 ? null : (
                         <p className="z11-istochnik__note">{REPETITORY_1.peregenerirovatNote(g)}</p>
                       )}

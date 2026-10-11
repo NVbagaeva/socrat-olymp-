@@ -116,6 +116,43 @@ for (const kod of KODY) {
     problems.push(`код ${kod}, свои настройки: повторы ${dup.slice(0, 3).join(', ')}`);
 }
 
+/* 3а. Резерв итоговой: задачи итоговой не встречаются в уроках 1–11
+   той же серии (и с настройками учителя), две перегенерации итоговой
+   подряд не пересекаются. */
+for (const kod of KODY) {
+  const osn = U.parseKodSerii(kod).osnova;
+  for (let g = 0; g <= 3; g += 1) {
+    const k = U.parseKodSerii(g === 0 ? osn : `${osn}-12.${g}`);
+    const s = U.seriya(k, bank);
+    const itog = new Set(s.itog.flat().map(klyuch));
+    for (const nast of [{}, { vykl: [], n: { razbor: 3, sam: 4, dz: 6 } }]) {
+      for (let n = 1; n <= 11; n += 1) {
+        for (const b of U.planUroka(s, n, nast.n === undefined ? undefined : nast).bloki)
+          for (const z of b.pozicii)
+            if (itog.has(klyuch(z)))
+              problems.push(
+                `код ${U.kodSeriiText(k)}: задача итоговой ${klyuch(z)} в уроке ${n} (${b.id})`,
+              );
+      }
+    }
+    if (g > 0) {
+      const pred = U.seriya(U.parseKodSerii(g === 1 ? osn : `${osn}-12.${g - 1}`), bank);
+      const bylo = new Set(pred.itog.flat().map(klyuch));
+      const obshchie = [...itog].filter((x) => bylo.has(x));
+      if (obshchie.length > 0)
+        problems.push(
+          `код ${osn}: итоговая поколений ${g - 1} и ${g} пересекаются: ${obshchie.join(', ')}`,
+        );
+    }
+  }
+}
+{
+  const nehv = U.nehvatkaFipi(U.pulIz(bank));
+  console.log(
+    `прототипы, где ФИПИ не хватает и на уроки, и на резерв (в уроки — аналог): ${nehv.map((x) => `${x.proto} (ФИПИ ${x.fipi})`).join(', ')}`,
+  );
+}
+
 /* 4. Перегенерация. */
 {
   const osnova = 'K7Q2AB';

@@ -85,6 +85,32 @@
   display: none;
 }
 
+/* Таблица ответов листа учителя урока: номер, ответ, ключевой шаг. */
+.z1-otvety__tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-small);
+}
+.z1-otvety__tab th,
+.z1-otvety__tab td {
+  padding: calc(var(--sheet-step) * 0.8) calc(var(--sheet-step) * 2);
+  border: var(--sheet-rule-width) solid var(--sheet-recap-line);
+  text-align: left;
+  vertical-align: middle;
+}
+.z1-otvety__tab th {
+  background: var(--sheet-recap-bg);
+  font-weight: 700;
+}
+.z1-otvety__no {
+  width: 8mm;
+  text-align: center;
+}
+.z1-otvety__otvet {
+  width: 22mm;
+  font-weight: 600;
+}
+
 /* ── Справочник и шпаргалки ─────────────────────────────────────── */
 
 .spr {
