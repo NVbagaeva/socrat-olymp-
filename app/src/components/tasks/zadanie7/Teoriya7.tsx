@@ -12,7 +12,6 @@ import {
 import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import {
-  BLOKI_KARTOCHKI_7,
   RAZDELY_TEORII_7,
   TEORIYA_7_TEKSTY,
   type BlokTeorii7,
@@ -23,6 +22,7 @@ import { PROGRESS_7 } from '@/content/zadanie7';
 import { BANK } from '@/lib/zadanie7/bank/index';
 import { kodNaSayte, prototype } from '@/lib/zadanie7/prototypes';
 import type { BankItem } from '@/lib/zadanie7/types';
+import { KartochkaTelo7 } from './KartochkaTelo7';
 import { Razbor7 } from './Razbor7';
 import { ZhivoyKrug7 } from './ZhivoyKrug7';
 
@@ -140,30 +140,10 @@ export function Kartochka7({
   bezPrimera?: boolean;
 }) {
   return (
-    <article className="z7-k" id={`k-${k.id}`}>
-      <h4 className="z7-k__title">
-        <Tex text={k.title} />
-      </h4>
-      <div className="z7-k__bloki">
-        {k.bloki.map((b, i) => (
-          <section className={`z7-blok z7-blok--${b.vid}`} key={`${k.id}-${i}`}>
-            <span className="z7-blok__plashka">{BLOKI_KARTOCHKI_7[b.vid]}</span>
-            {b.tekst.map((t) => (
-              <p className="z7-blok__p" key={t}>
-                <Tex text={t} />
-              </p>
-            ))}
-            {b.formula ? (
-              <p className="z7-blok__formula">
-                <Tex text={`$\\displaystyle ${b.formula}$`} />
-              </p>
-            ) : null}
-          </section>
-        ))}
-      </div>
+    <KartochkaTelo7 k={k}>
       {trenazher ? <GdeNaEge7 prototipy={k.prototipy} trenazher={trenazher} /> : null}
       {k.primer && !bezPrimera ? <PrimerKartochki zadacha={k.primer} /> : null}
-    </article>
+    </KartochkaTelo7>
   );
 }
 

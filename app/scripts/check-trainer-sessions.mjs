@@ -54,7 +54,9 @@
      №4, №5   — otvetUchenika(прототип, параметры варианта) из банка
                 lib/veroyatnost; «Узнай метод» — метод, чей отпечаток
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
-     №3       — prototype.otvet(параметры варианта) из lib/zadanie3.
+     №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
+     №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
+                (в записи — условие и параметры задачи, без ответа).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -210,6 +212,13 @@ function answer3(payload, at) {
   return { text: numberText(prototype.otvet(variant.params)) };
 }
 
+/** №7: задача записи {prototypeId, params} → решатель прототипа. */
+function answer7(payload, at) {
+  const { prototype } = requireSrc('lib/zadanie7/prototypes/index');
+  const z = payload.zadachi[at];
+  return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
 /* ── Тренажёры ──────────────────────────────────────────────────
 
    Один объект — один адрес тренажёра:
@@ -273,6 +282,23 @@ const TRAINERS = [
       await pressStart(page);
     },
     rep: true,
+  },
+  {
+    name: '№7',
+    url: '/zadaniya/7/trenazher/',
+    scope: '7',
+    answer: answer7,
+    /* Прототипы по умолчанию не отмечены: вся группа I флажком группы. */
+    start: async (page) => {
+      await page
+        .getByRole('checkbox', { name: /^Группа I\./ })
+        .first()
+        .check();
+      await page
+        .getByRole('button', { name: /^Начать/ })
+        .first()
+        .click();
+    },
   },
   { name: '№4', url: '/zadaniya/4/trenazher/', scope: '4', answer: answer45, rep: true },
   { name: '№5', url: '/zadaniya/5/trenazher/', scope: '5', answer: answer45 },
@@ -356,11 +382,18 @@ const ANSWER_INPUT = [
   'input.z11-resh__input',
   'input.pc__input',
   'input.z3t__input',
+  'input.z7-otvet__input',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
 /** Условие текущего задания. */
-const QUESTION = ['.ptask__question', '.z11-resh__text', '.pc__text', '.z3t__question']
+const QUESTION = [
+  '.ptask__question',
+  '.z11-resh__text',
+  '.pc__text',
+  '.z3t__question',
+  '.z7-uslovie__text',
+]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
 

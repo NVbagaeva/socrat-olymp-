@@ -7,6 +7,7 @@ import '../../[task]/section.css';
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
+import '../../komplekt.css';
 import '@/components/tasks/zadanie7/razbor7.css';
 import '../zadanie7.css';
 
