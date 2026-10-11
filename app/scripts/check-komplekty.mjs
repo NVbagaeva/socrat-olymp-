@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:komplekty [--kits N]   (по умолчанию 200 на генератор)
 
-   Для каждого генератора с печатью (№2, №4, №5, №8, №9, №11 и четыре
+   Для каждого генератора с печатью (№1, №2, №4, №5, №8, №9, №11 и четыре
    подтемы №12) собирается N комплектов — так же, как их собирает
    экран: seed — код комплекта (lib/komplekt.ts), настройки — случайный
    набор навыков, число задач и вариантов. И проверяется:
@@ -11,7 +11,8 @@
      1. Лист ученика чистый. В рисунках условия нет пунктиров
         (stroke-dasharray), заливок (polygon), дуг (команда A в path),
         подписей с «?», безымянных отмеченных точек и точек, которых
-        нет в условии; у №12 — по сцене рисунка (режим 'student',
+        нет в условии; у №1 — по слоям движка (дуги углов и пунктир
+        продолжения стороны — данные условия); у №12 — по сцене рисунка (режим 'student',
         graph/renderer.js). Исключение одно и задокументировано: у №2
         без сетки координаты концов векторов — пунктирные проекции на
         оси (vp-proj), это данные условия, как в ФИПИ.
@@ -86,6 +87,8 @@ const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
 const { GRUPPY: GRUPPY9, prototypesOfGroup: protoOfGroup9 } = requireSrc('lib/proizvodnaya/skills.ts');
 const S11 = requireSrc('lib/zadanie11/sheet11.ts');
 const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye.ts');
+const S1 = requireSrc('lib/planimetriya/sheet1.ts');
+const { dannyeTrenazhera1 } = requireSrc('lib/planimetriya/trenazher/dannye.ts');
 
 const query = (href) => new URLSearchParams(href.split('?')[1] ?? '');
 
@@ -215,6 +218,28 @@ generators.push({
   },
 });
 
+const bank1 = dannyeTrenazhera1().bank;
+const TIPY_1 = ['p01', 'p05', 'p13', 'p17', 'p24', 'p35', 'p41', 'p46', 'p49', 'p62'];
+generators.push({
+  name: '№1',
+  scope: '1',
+  settings: (random) => ({
+    sostav: sample(TIPY_1, 2 + Math.floor(random() * 4), random).map((id) => ({ id, n: 1 })),
+    variants: random() < 0.05 ? 2 : 1,
+  }),
+  hrefs: (s, seed) => {
+    const q = S1.sheetQuery1({
+      rezhim: 'komplekt', istochnik: 'mix', sostav: s.sostav, variants: s.variants, seed,
+      zameny: {}, urok: 1, kod: '', nastroyki: { vykl: [], n: {} }, theme: 'color', ramka: -1,
+    });
+    return { student: `/zadaniya/1/pechat/?${q}`, teacher: `/zadaniya/1/pechat/otvety/?${q}` };
+  },
+  spec: (href, teacher) => {
+    const p = S1.parseSheetQuery1(query(href));
+    return S1.sheetSpec1(p, S1.sobratList(p, bank1), teacher ? 'uchitel' : 'uchenik');
+  },
+});
+
 /* ── Проверки ─────────────────────────────────────────────────── */
 
 /* Что нельзя рисовать на листе ученика (SVG рисунка условия). */
@@ -229,6 +254,19 @@ function figureProblems(svg, allowProjections) {
   const texts = svg.match(/<text[^>]*>[\s\S]*?<\/text>/g) ?? [];
   if (texts.some((t) => /\?/.test(t.replace(/<[^>]*>/g, '')))) out.push('подпись с «?»');
   if (/data-hint|vp-hint-leg|chart-aux|chart-sym/.test(svg)) out.push('построение подсказки');
+  return out;
+}
+
+/* №1: чертёж условия законно несёт дуги отмеченных углов, дуги
+   окружности и пунктир продолжения стороны — это данные условия, как
+   в ФИПИ. Нельзя другого: слоёв подсказки и решения движка (pl-shag,
+   pl-reshenie, pl-novoe) и подписей с «?». Ответа на рисунке нет —
+   это проверяет pnpm test:planimetria. */
+function figureProblems1(svg) {
+  const out = [];
+  if (/pl-shag|pl-reshenie|pl-novoe/.test(svg)) out.push('построение подсказки или решения');
+  const texts = svg.match(/<text[^>]*>[\s\S]*?<\/text>/g) ?? [];
+  if (texts.some((t) => /\?/.test(t.replace(/<[^>]*>/g, '')))) out.push('подпись с «?»');
   return out;
 }
 
@@ -254,7 +292,8 @@ function sceneProblems(task) {
 /* Плашка «откуда задача» у №11 стоит перед условием только на листе
    учителя («новая · аналог ПР-04»): это пометка для учителя, не
    условие. При сравнении условий она снимается. */
-const teacherOnly = (html) => String(html ?? '').replace(/^<span class="z11-sheet-badge">[^<]*<\/span>\s*/, '');
+const teacherOnly = (html) =>
+  String(html ?? '').replace(/^<span class="z(?:1|11)-sheet-badge">[^<]*<\/span>\s*/, '');
 
 const tasksOf = (spec) => K.specTasks(spec);
 const problems = [];
@@ -291,7 +330,9 @@ for (const gen of generators) {
 
     /* 1. Лист ученика чистый. */
     a.forEach((task, n) => {
-      if (task.figureSvg) {
+      if (task.figureSvg && gen.scope === '1') {
+        figureProblems1(task.figureSvg).forEach((p) => where(kit.code, `задача ${n + 1}: ${p}`));
+      } else if (task.figureSvg) {
         const noGrid = gen.scope === '2' && /class="vp-proj"/.test(task.figureSvg);
         figureProblems(task.figureSvg, noGrid).forEach((p) => where(kit.code, `задача ${n + 1}: ${p}`));
       }

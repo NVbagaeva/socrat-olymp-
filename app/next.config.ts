@@ -3,14 +3,21 @@ import type { NextConfig } from 'next';
 import { assetVersions } from './scripts/lib/asset-versions.mjs';
 import { generatorVersions } from './scripts/lib/generator-versions.mjs';
 
-/* Служебные страницы (page.dev.tsx) — только для разработки: галерея
-   банка №9 показывает ответы и в сборку сайта попадать не должна.
-   Страницами они становятся в `next dev` или со флагом GALEREYA_9=1;
-   в обычной сборке Next их не видит, и маршрута нет (404). Проверка —
-   scripts/check-dev-pages.mjs. */
-const devPages = process.env.NODE_ENV === 'development' || process.env.GALEREYA_9 === '1';
+/* Служебные страницы-галереи банков (файлы page.dev.tsx) становятся
+   маршрутами только в `next dev` или со флагом GALEREYA=1
+   (GALEREYA_1=1, GALEREYA_9=1 и GALEREYA_10=1 — то же для заданий №1,
+   №9 и №10). Галереи показывают ответы; в обычной сборке их нет —
+   адрес отдаёт 404, это проверяют scripts/check-dev-pages.mjs и
+   scripts/check-galereya-1.mjs. */
+const devPages =
+  process.env.NODE_ENV === 'development' ||
+  process.env.GALEREYA === '1' ||
+  process.env.GALEREYA_1 === '1' ||
+  process.env.GALEREYA_9 === '1' ||
+  process.env.GALEREYA_10 === '1';
 
 const nextConfig: NextConfig = {
+  pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
   pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],

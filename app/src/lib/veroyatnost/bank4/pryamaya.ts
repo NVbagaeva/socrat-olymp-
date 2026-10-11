@@ -15,6 +15,7 @@
  * `pryamaya`: по ней карточка рисует чертёж из тех же чисел.
  */
 
+import { sPodskazkoy } from '../podskazka';
 import type { Pryamaya } from '../pryamaya';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
 import { otrezok as otrezokVizual, shagLL } from './vizual';
@@ -569,4 +570,22 @@ const P23: Prototype = {
   ],
 };
 
-export const PRYAMAYA: readonly Prototype[] = [P22, P23];
+/* Подсказки-вопросы (podskazka.ts): длины берутся из шагов разбора. */
+export const PRYAMAYA: readonly Prototype[] = [
+  sPodskazkoy(P22, (p) => ({
+    vse: 'Весь отрезок, на котором распределена величина',
+    vseNe: ['Нужный промежуток', 'Отрезок от нуля до правого конца'],
+    blago: 'длина нужного промежутка',
+    geom: true,
+    nOshibki: [num(p, 'b')],
+    mOshibki: [num(p, 'd')],
+  })),
+  sPodskazkoy(P23, (p) => ({
+    vse: 'Весь отрезок, на котором распределена величина',
+    vseNe: ['Нужный промежуток', 'Отрезок от нуля до правого конца'],
+    blago: 'длина промежутка от границы до конца отрезка',
+    geom: true,
+    nOshibki: [num(p, 'b')],
+    mOshibki: [num(p, 'g')],
+  })),
+];

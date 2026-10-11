@@ -16,6 +16,7 @@ import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
 
 import { assetUrl } from '@/lib/assetUrl';
+import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
 /* Вкладка раздела описывается общим типом: лента у всех заданий одна
@@ -54,7 +55,7 @@ export interface VeroyatnostSection {
    * одноколоночная, и текст занимает всю ширину. У №5 своей картинки
    * пока нет, поэтому поле необязательное.
    */
-  art?: { src: string; width: number; height: number };
+  art?: ShapkaArt;
 }
 
 /**
