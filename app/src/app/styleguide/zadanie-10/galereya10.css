@@ -1,0 +1,126 @@
+/* Галерея банка №10 — служебная страница, только в разработке. */
+
+.g10 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.g10__lead {
+  max-width: 82ch;
+  color: var(--color-text-secondary);
+}
+
+.g10__toc p {
+  margin: var(--space-1) 0;
+}
+
+.g10__toc a {
+  margin-right: var(--space-2);
+}
+
+.g10__section {
+  margin-top: var(--space-10);
+  scroll-margin-top: var(--space-4);
+}
+
+.g10__group {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.g10__formula,
+.g10__stat {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+}
+
+.g10__iskl {
+  color: var(--color-warning);
+}
+
+.g10__sub {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 16px;
+}
+
+.g10__list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.g10__item {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.g10__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.g10__id {
+  font-weight: 600;
+}
+
+.g10__badge {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+
+.g10__badge--modern {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+}
+
+.g10__otvet {
+  margin-left: auto;
+}
+
+.g10__text {
+  margin: var(--space-2) 0;
+  line-height: 1.7;
+}
+
+.g10__razbor summary {
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+.g10__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.g10__table th,
+.g10__table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.g10__row--iskl td:nth-last-child(-n + 2) {
+  color: var(--color-warning);
+}
+
+@media (max-width: 720px) {
+  .g10__table {
+    display: block;
+    overflow-x: auto;
+  }
+}

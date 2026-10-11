@@ -3,7 +3,17 @@ import type { NextConfig } from 'next';
 import { assetVersions } from './scripts/lib/asset-versions.mjs';
 import { generatorVersions } from './scripts/lib/generator-versions.mjs';
 
+/* Служебные страницы-галереи банков (файлы page.dev.tsx) становятся
+   маршрутами только в `next dev` или со флагом GALEREYA=1
+   (GALEREYA_10=1 — то же для задания №10). В обычной сборке их нет —
+   адрес отдаёт 404, это проверяет scripts/check-dev-pages.mjs. */
+const devPages =
+  process.env.NODE_ENV === 'development' ||
+  process.env.GALEREYA === '1' ||
+  process.env.GALEREYA_10 === '1';
+
 const nextConfig: NextConfig = {
+  pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
   // При экспорте оптимизация изображений недоступна.
