@@ -392,7 +392,7 @@ function exampleOf(prototypeId: string, seed: string): string {
   const drawn = drawFigure(task, 'teacher');
   return exampleItem({
     label: contentSheet9.labels.example,
-    title: prototypeById(prototypeId)?.nazvanie ?? '',
+    title: typo.mathText(prototypeById(prototypeId)?.nazvanie ?? ''),
     conditionHtml: typo.mathText(task.uslovie),
     solutionHtml: razborHtml(task, answerText),
     figureSvg: drawn === null ? null : drawn.svg,
