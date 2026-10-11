@@ -55,6 +55,7 @@ export const PL = {
   font: {
     bukva: "KaTeX_Math, 'Latin Modern Roman', 'Times New Roman', serif",
     chislo: "KaTeX_Main, 'Latin Modern Roman', 'Times New Roman', serif",
+    slovo: THEME.font.family,
     razmer: 19,
     razmerZnach: 15,
   },
@@ -200,6 +201,16 @@ function hash(s: string): string {
 }
 
 const ZNACHENIE_CHISLO = /^[\d\s,.√°+\-−]+$/;
+
+/* Знак «°»: в KaTeX_Main его нет, браузер берёт запасной шрифт с
+   широким левым полем — «33 °». Знак набирается шрифтом сайта
+   вплотную к числу. */
+function gradus(t: string): string {
+  return t
+    .split('°')
+    .map(esc)
+    .join(`<tspan font-family="${PL.font.slovo}" font-style="normal">°</tspan>`);
+}
 
 /* ── Рендер ──────────────────────────────────────────────────────── */
 
@@ -823,6 +834,8 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     }
     const tekst = e.znachenie;
     const chislo = ZNACHENIE_CHISLO.test(tekst);
+    /* Слова («гипотенуза») — шрифтом сайта: в KaTeX_Math нет кириллицы. */
+    const slovo = /[а-яё]/i.test(tekst);
     const zs = PL.font.razmerZnach;
     const w = shirinaTeksta(tekst, zs) + 3;
     const h = zs * 0.78;
@@ -893,7 +906,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
           ? PL.iskomoe
           : PL.ink;
     sloyPodpisi.push(
-      `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${chislo ? PL.font.chislo : PL.font.bukva}"${chislo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${esc(tekst)}</text>`,
+      `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
     );
     R.teksty.push(tekst);
   }

@@ -13,20 +13,39 @@
    углы не меньше порога схематичного рисунка, на листе ученика нет
    подсказок, построений и чисел, ответ не читается с рисунка.
 
+   Банк: 214 задач Блока 1 и по десять аналогов на прототип — ответ
+   ЕГЭ, сходится с измерением на фигуре и с решением по шагам, все
+   формулы набираются KaTeX строго, файл аналогов совпадает с подбором.
+
    Запуск: pnpm test:planimetriya [N]
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
+import { createRequire } from 'node:module';
 import { requireSrc } from './lib/load-ts.mjs';
+
+const require = createRequire(import.meta.url);
+const katex = require('katex');
+const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
 const n = Number(process.argv[2] ?? 1000);
 const { checkObraztsy, checkStress } = requireSrc('lib/planimetriya/selftest');
+const { checkBank } = requireSrc('lib/planimetriya/bank/selftest');
+const { checkPrep } = requireSrc('lib/planimetriya/prep/selftest');
 
 const obr = checkObraztsy();
 console.log(`образцы: ${obr.risunkov} рисунков, проблем ${obr.problems.length}`);
 const st = checkStress(n);
 console.log(`стресс-тест: ${n} генераций, ${st.risunkov} рисунков, проблем ${st.problems.length}`);
 
-const vse = [...obr.problems, ...st.problems];
+const bank = checkBank(typeset);
+console.log(
+  `банк: ${bank.zadach} задач (214 ФИПИ, образцы и аналоги), проблем ${bank.problems.length}`,
+);
+
+const prep = checkPrep(30, typeset);
+console.log(`опорные задачи: ${prep.zadach} вариантов микрозадач, проблем ${prep.problems.length}`);
+
+const vse = [...obr.problems, ...st.problems, ...bank.problems, ...prep.problems];
 if (vse.length > 0) {
   for (const p of vse.slice(0, 200)) console.log(`  ✗ ${p}`);
   if (vse.length > 200) console.log(`  … и ещё ${vse.length - 200}`);

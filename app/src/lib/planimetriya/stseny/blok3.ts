@@ -277,12 +277,17 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     blok: 'V',
     nazvanie: '$\\sin A$ → $\\sin B$',
     fipi: [105, 106],
-    uslovie: (p) => `${PRYAMOY_C}, $\\sin A=${tex(p.s)}$. Найдите $\\sin B$.`,
-    otvet: (p) => Math.round(Math.sqrt(1 - p.s * p.s) * 1e6) / 1e6,
-    primer: { s: 0.8 },
-    sluchaynye: (r) => ({ s: r.int(1, 99) / 100 }),
+    /* sin A = n√m / d; dec = 1 — записать десятичной дробью (как в ФИПИ: 0,8). */
+    uslovie: (p) =>
+      `${PRYAMOY_C}, $\\sin A=${drobTex(p.n, p.d, p.m, p.dec === 1)}$. Найдите $\\sin B$.`,
+    otvet: (p) => {
+      const s = (p.n * Math.sqrt(p.m)) / p.d;
+      return Math.round(Math.sqrt(1 - s * s) * 1e6) / 1e6;
+    },
+    primer: { n: 4, d: 5, m: 1, dec: 1 },
+    sluchaynye: (r) => ({ n: r.int(1, 99), d: 100, m: 1, dec: 1 }),
     stsena: (p, porog) => {
-      const A0 = Math.asin(p.s) / RAD;
+      const A0 = Math.asin((p.n * Math.sqrt(p.m)) / p.d) / RAD;
       const { t, sk } = pryamoy(90 - A0, porog, 'gipotenuza');
       return scena(
         {
@@ -673,7 +678,9 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     uslovie: (p) =>
       p.k
         ? `Найдите угол $ACO$, если его сторона $CA$ касается окружности с центром $O$, отрезок $CO$ пересекает окружность в точке $B$ (см. рис.), а дуга $AB$ окружности, заключённая внутри этого угла, равна $${grTex(p.u)}$. ${VGRADUSAH}`
-        : `Угол $ACO$ равен $${grTex(p.u)}$, где $O$ — центр окружности. Его сторона $CA$ касается окружности. Сторона $CO$ пересекает окружность в точке $B$ (см. рис.). Найдите величину меньшей дуги $AB$ окружности. ${VGRADUSAH}`,
+        : p.v
+          ? `Угол $ACO$ равен $${grTex(p.u)}$. Его сторона $CA$ касается окружности с центром в точке $O$. Отрезок $CO$ пересекает окружность в точке $B$ (см. рис.). Найдите градусную меру дуги $AB$ окружности, заключённой внутри этого угла. ${VGRADUSAH}`
+          : `Угол $ACO$ равен $${grTex(p.u)}$, где $O$ — центр окружности. Его сторона $CA$ касается окружности. Сторона $CO$ пересекает окружность в точке $B$ (см. рис.). Найдите величину меньшей дуги $AB$ окружности. ${VGRADUSAH}`,
     otvet: (p) => 90 - p.u,
     primer: { u: 27, k: 0 },
     /* u = 45: угол AOB в подсказке равен ответу. */

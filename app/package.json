@@ -53,6 +53,7 @@
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
     "test:planimetriya": "node scripts/check-planimetriya.mjs",
+    "build:bank-1": "node scripts/build-bank-1.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
