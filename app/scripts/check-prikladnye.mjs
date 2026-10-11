@@ -65,6 +65,73 @@ for (const { where, item } of solved.filter((x) => x.item.prototypeId === 'P01')
 }
 console.log(`Чертежей моста проверено: ${mostov}.`);
 
+/* Теория: формулы рамок и строки с $…$ — KaTeX строго и «чисто»;
+   примеры — задачи банка; «Где на ЕГЭ» — существующие прототипы. */
+const { RAZDELY_TEORII_10, FIZIKA_10 } = requireSrc('content/teoriya10');
+const { UROKI_10 } = requireSrc('content/uroki10');
+const { gigienaFormuly, formuly } = requireSrc('lib/zadanie10/selftest');
+const idsBanka = new Set(solved.map((x) => x.item.id));
+const idsProto = new Set(PROTOTYPES.map((p) => p.id));
+const strokiTeorii = [];
+const display = (tex, where) => {
+  try {
+    katex.renderToString(tex, { throwOnError: true, strict: 'error', displayMode: true });
+  } catch (e) {
+    problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)}` });
+  }
+  gigienaFormuly(tex).forEach((b) => problems.push({ where, what: `формула: ${b} в «${tex.slice(0, 60)}»` }));
+};
+if (RAZDELY_TEORII_10.length !== 9) {
+  problems.push({ where: 'теория', what: `разделов ${RAZDELY_TEORII_10.length}, нужно 9` });
+}
+for (const r of RAZDELY_TEORII_10) {
+  const where = `теория ${r.id}`;
+  strokiTeorii.push([where, r.lead]);
+  r.prototipy.forEach((id) => idsProto.has(id) || problems.push({ where, what: `нет прототипа ${id}` }));
+  for (const b of r.bloki) {
+    for (const k of ['paras', 'spisok']) {
+      (b[k] ?? []).forEach((t) => strokiTeorii.push([where, t]));
+    }
+    for (const k of ['title', 'podpis', 'oshibka', 'pravilno']) {
+      if (typeof b[k] === 'string') strokiTeorii.push([where, b[k]]);
+    }
+    if (b.formula) display(b.formula, where);
+    /* Плашки рамок (Определение, Важно!, Вывод) — обычный текст без KaTeX. */
+    if (['opredelenie', 'vazhno', 'vyvod', 'tablica', 'lovushka'].includes(b.vid) && /\$/.test(b.title ?? '')) {
+      problems.push({ where, what: `формула в плашке рамки: «${b.title}»` });
+    }
+    if (b.rows) [b.head, ...b.rows].flat().forEach((t) => strokiTeorii.push([where, t]));
+    if ((b.vid === 'primer' || b.vid === 'most') && !idsBanka.has(b.zadacha)) {
+      problems.push({ where, what: `пример ${b.zadacha} не из банка` });
+    }
+  }
+}
+for (const p of PROTOTYPES) {
+  if (!FIZIKA_10[p.id]) problems.push({ where: `теория fizika ${p.id}`, what: 'нет карточки «Физика в двух словах»' });
+  else strokiTeorii.push([`теория fizika ${p.id}`, FIZIKA_10[p.id]]);
+}
+const vUrokah = UROKI_10.flatMap((u) => u.prototipy);
+for (const p of PROTOTYPES) {
+  if (vUrokah.filter((x) => x === p.id).length !== 1) {
+    problems.push({ where: `уроки`, what: `прототип ${p.id} должен быть ровно в одном уроке` });
+  }
+}
+for (const [where, t] of strokiTeorii) {
+  for (const f of formuly(t)) {
+    try {
+      typeset(f);
+    } catch (e) {
+      problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)} в «${f.slice(0, 60)}»` });
+    }
+    gigienaFormuly(f).forEach((b) => problems.push({ where, what: `формула: ${b} в «${f.slice(0, 60)}»` }));
+  }
+  const plain = stripDollarMath(t).replace(/\*\*/g, '');
+  for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+    problems.push({ where, what: `вне KaTeX (${f.rule}): «${f.match}» в «${t.slice(0, 60)}»` });
+  }
+}
+console.log(`Теория: разделов ${RAZDELY_TEORII_10.length}, строк проверено ${strokiTeorii.length}.`);
+
 const fipi = solved.filter((x) => x.item.source === 'fipi').length;
 const analogi = solved.filter((x) => x.item.source === 'analog').length;
 console.log(`Прототипов: ${PROTOTYPES.length}; задач ФИПИ: ${fipi}; аналогов: ${analogi}.`);
