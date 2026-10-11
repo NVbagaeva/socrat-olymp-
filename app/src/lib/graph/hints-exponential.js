@@ -76,7 +76,7 @@ function pointsQuestion(meta, cv, A, B, seedKey) {
   var wrongs = [
     { text: 'Асимптоту и точку на ней', key: 'asym',
       why: 'Нет: асимптоту на глаз не берём — и на ней точек графика нет, кривая её не касается.' },
-    { text: point(A.y, A.x) + ' и ' + point(B.y, B.x), key: 'swap',
+    { text: point(A.y, A.x) + ' и ' + point(B.y, B.x), key: A.x === A.y && B.x === B.y ? 'pts' : 'swap',
       why: 'Нет: координаты перепутаны местами — сначала $x$, потом $y$.' },
     { text: 'Любые две точки кривой «на глаз»', key: 'eye',
       why: 'Нет: между узлами сетки координаты точно не прочитать. Берём только отмеченные точки в узлах.' }
@@ -95,7 +95,7 @@ function systemQuestion(meta, A, B, seedKey) {
   }
   var right = texOption(eq(A.x, A.y) + ', \\; ' + eq(B.x, B.y), 'sys');
   var wrongs = [
-    texOption(eq(A.x, A.y, true) + ', \\; ' + eq(B.x, B.y, true), 'sys-swap',
+    texOption(eq(A.x, A.y, true) + ', \\; ' + eq(B.x, B.y, true), A.x === A.y && B.x === B.y ? 'sys' : 'sys-swap',
       'Нет: в показатель ставим $x$ — абсциссу, а справа — $y$, ординату.'),
     texOption((form === 'shiftY' ? 'a \\cdot ' + tex(f0(A.x)) + ' + b = ' + tex(f0(A.y))
       : 'a \\cdot ' + tex(f0(A.x)) + ' = ' + tex(f0(A.y))), 'sys-lin',
