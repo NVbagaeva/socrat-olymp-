@@ -14,7 +14,7 @@
  * методов, в фильтрах тренажёра и в счётчиках.
  *
  * Названия и подписи — свои: название говорит, что ученик видит в
- * условии и что делать. Диапазоны номеров (`zadachnik`) — внутренняя
+ * условии и что делать. Диапазоны номеров (`sourceRanges`) — внутренняя
  * нумерация исходных задач банка №4 (1–102), по ней считаются счётчики.
  */
 
@@ -45,7 +45,7 @@ const KLASSICHESKAYA: Metod4 = {
   nomer: 1,
   nazvanie: 'Подсчёт исходов',
   opisanie: 'Все исходы равновозможны: считаем подходящие и делим на число всех',
-  zadachnik: [
+  sourceRanges: [
     [1, 16],
     [23, 34],
     [39, 62],
@@ -63,7 +63,7 @@ const KUBIKI: Metod4 = {
   nomer: 2,
   nazvanie: 'Игральные кости',
   opisanie: 'Кость бросают несколько раз — выписываем пары исходов в таблицу',
-  zadachnik: [[85, 88]],
+  sourceRanges: [[85, 88]],
 };
 
 const MONETY: Metod4 = {
@@ -71,7 +71,7 @@ const MONETY: Metod4 = {
   nomer: 3,
   nazvanie: 'Броски монеты',
   opisanie: 'Монету бросают несколько раз — перечисляем все цепочки орлов и решек',
-  zadachnik: [[71, 84]],
+  sourceRanges: [[71, 84]],
 };
 
 const KRUGLYY_STOL: Metod4 = {
@@ -79,7 +79,7 @@ const KRUGLYY_STOL: Metod4 = {
   nomer: 4,
   nazvanie: 'Жеребьёвка и рассадка',
   opisanie: 'Пары, группы, места за столом: ставим одного участника и смотрим, куда попадёт второй',
-  zadachnik: [[63, 70]],
+  sourceRanges: [[63, 70]],
 };
 
 const PROTIVOPOLOZHNYE: Metod4 = {
@@ -87,7 +87,7 @@ const PROTIVOPOLOZHNYE: Metod4 = {
   nomer: 5,
   nazvanie: 'Через противоположное событие',
   opisanie: 'Спрашивают, что событие не случится: считаем от обратного',
-  zadachnik: [
+  sourceRanges: [
     [17, 18],
     [35, 38],
   ],
@@ -125,7 +125,7 @@ export const OPORNYE_4: readonly Metod4[] = [
     nomer: 6,
     nazvanie: 'Доля длины и площади',
     opisanie: 'Исходов бесконечно много: делим длину, дугу или площадь',
-    zadachnik: [[19, 22]],
+    sourceRanges: [[19, 22]],
     ideya:
       'Исходов бесконечно много, считаем долю дуги циферблата, формула m/n напрямую не работает. В подсказке объяснить переход к доле.',
     flagi: { dolya: true },
@@ -135,7 +135,7 @@ export const OPORNYE_4: readonly Metod4[] = [
     nomer: 7,
     nazvanie: 'Вероятность по частоте',
     opisanie: 'Вероятность оценивают по наблюдениям: делим число случаев на число проверок',
-    zadachnik: [[89, 102]],
+    sourceRanges: [[89, 102]],
     podtipy: [
       {
         zadachi: [99, 102],

@@ -55,7 +55,7 @@ export interface Report {
   /** Выкладка в тексте шага или формула не в TeX. */
   vykladki: number;
   /** Варианты, взятые из источника, с проблемами. */
-  sourceProblems: { ref: string; why: string }[];
+  sourceProblems: { sourceNote: string; why: string }[];
   /** Совпадающие варианты внутри прототипа. */
   duplicates: { a: string; b: string }[];
   /** Прототипы, где вариантов меньше десяти. */
@@ -208,7 +208,7 @@ export function checkGeneratory(bank: readonly Prototype[], zeren = 500): Genera
         continue;
       }
       vsego += 1;
-      const oshibki = problemsOf(prototype, { n: 0, source: 'новый', ref: 'генератор', params });
+      const oshibki = problemsOf(prototype, { n: 0, source: 'novyj', sourceNote: 'генератор', params });
       if (oshibki.length > 0) {
         problems.push(
           `${prototype.id}, зерно ${zerno}, ${JSON.stringify(params)}: ${oshibki.join('; ')}`,
@@ -220,9 +220,9 @@ export function checkGeneratory(bank: readonly Prototype[], zeren = 500): Genera
 }
 
 export function checkBank(bank: readonly Prototype[]): Report {
-  const bySource: Record<string, number> = { задачник: 0, конспект: 0, новый: 0 };
+  const bySource: Record<string, number> = { sbornik: 0, urok: 0, novyj: 0 };
   const bad: BadVariant[] = [];
-  const sourceProblems: { ref: string; why: string }[] = [];
+  const sourceProblems: { sourceNote: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
   const malo: string[] = [];
   const collisions: { a: string; b: string }[] = [];
@@ -264,8 +264,8 @@ export function checkBank(bank: readonly Prototype[]): Report {
       const problems = problemsOf(prototype, variant);
       if (problems.length > 0) {
         bad.push({ id: prototype.id, n: variant.n, problems });
-        if (variant.source !== 'новый') {
-          sourceProblems.push({ ref: variant.ref, why: problems.join('; ') });
+        if (variant.source !== 'novyj') {
+          sourceProblems.push({ sourceNote: variant.sourceNote, why: problems.join('; ') });
         }
         mismatchPerebor += problems.some((x) => x.includes('перебор')) ? 1 : 0;
         mismatchSteps += problems.some((x) => x.includes('последний шаг')) ? 1 : 0;
@@ -647,7 +647,7 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
 export interface RazdelDiapazonov {
   id: string;
   nazvanie: string;
-  zadachnik: readonly (readonly [number, number])[];
+  sourceRanges: readonly (readonly [number, number])[];
 }
 
 export interface RaskladkaRazdel {
@@ -678,7 +678,7 @@ export interface RaskladkaReport {
  *     иначе прототип собран из задач двух разных методов;
  *  4. каждый номер от 1 до N встречается ровно один раз.
  *
- * Прототип с нулевым диапазоном (`zadachnik: [0, 0]`) в задачнике не
+ * Прототип с нулевым диапазоном (`sourceRange: [0, 0]`) в сборнике не
  * значится — он составлен по схеме автора и в счёт номеров не идёт.
  */
 export function checkRaskladku(
@@ -691,7 +691,7 @@ export function checkRaskladku(
   /* 1. Диапазоны: без пересечений и без дыр. */
   const hozyain = new Map<number, string>();
   for (const razdel of razdely) {
-    for (const [ot, do_] of razdel.zadachnik) {
+    for (const [ot, do_] of razdel.sourceRanges) {
       for (let n = ot; n <= do_; n += 1) {
         const bylo = hozyain.get(n);
         if (bylo !== undefined) {
@@ -722,18 +722,18 @@ export function checkRaskladku(
       problems.push(`у прототипа ${prototype.id} блок «${prototype.blok}» не назван в типологии`);
       continue;
     }
-    if (prototype.zadachnik[0] === 0) {
+    if (prototype.sourceRange[0] === 0) {
       vneZadachnika.push(prototype.id);
       continue;
     }
     for (const variant of prototype.varianty) {
-      if (variant.source !== 'задачник') {
+      if (variant.source !== 'sbornik') {
         continue;
       }
-      const nomer = Number(variant.ref.split('№')[1]);
+      const nomer = Number(variant.sourceNote.split('№')[1]);
       if (!Number.isInteger(nomer)) {
         problems.push(
-          `у варианта ${prototype.id}-${variant.n} не читается номер: «${variant.ref}»`,
+          `у варианта ${prototype.id}-${variant.n} не читается номер: «${variant.sourceNote}»`,
         );
         continue;
       }
@@ -743,7 +743,7 @@ export function checkRaskladku(
       }
       vstrecheno.set(nomer, prototype.id);
       poRazdelam.set(razdel.id, (poRazdelam.get(razdel.id) ?? 0) + 1);
-      if (!razdel.zadachnik.some(([ot, do_]) => nomer >= ot && nomer <= do_)) {
+      if (!razdel.sourceRanges.some(([ot, do_]) => nomer >= ot && nomer <= do_)) {
         problems.push(
           `задача ${nomer} лежит в прототипе ${prototype.id} раздела «${razdel.nazvanie}», ` +
             `а по типологии она в «${hozyain.get(nomer) ?? 'ниоткуда'}»`,
@@ -762,7 +762,7 @@ export function checkRaskladku(
     razdely: razdely.map((r) => ({
       id: r.id,
       nazvanie: r.nazvanie,
-      nomerov: r.zadachnik.reduce((sum, [ot, do_]) => sum + (do_ - ot + 1), 0),
+      nomerov: r.sourceRanges.reduce((sum, [ot, do_]) => sum + (do_ - ot + 1), 0),
       zadach: poRazdelam.get(r.id) ?? 0,
     })),
     vneZadachnika,

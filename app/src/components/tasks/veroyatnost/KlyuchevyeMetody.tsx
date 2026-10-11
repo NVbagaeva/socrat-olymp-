@@ -4,9 +4,9 @@ import { METODY_KARTOCHKI } from '@/content/veroyatnost-metody';
 import { KLYUCHEVYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
 import { bank4Pool, bank5Pool, prep4Pool, prep5Pool } from '@/lib/veroyatnost/pool';
-import { zadachVBanke, type Metod } from '@/lib/veroyatnost/tipologiya';
+import type { Metod } from '@/lib/veroyatnost/tipologiya';
 import { MetodyKartochki, type KartochkaMetoda } from './MetodyKartochki';
-import { yarlyki } from './navyki';
+import { navykiMetodov, yarlyki } from './navyki';
 import { Tex } from './Tex';
 import { ZADANIYA } from '@/lib/paths';
 
@@ -19,8 +19,8 @@ import { ZADANIYA } from '@/lib/paths';
  * название, подпись, формула в плашке там, где она есть. Карточка
  * открывает модалку (MetodyKartochki).
  *
- * Счётчик «задач в банке» — число задач задачника, отнесённых к методу
- * (диапазоны из конфига); сгенерированные варианты не считаются.
+ * Счётчик «задач в банке» — число задач метода в банке сайта, то же,
+ * что на карточке метода в тренажёре: все варианты всех прототипов.
  * Ссылка «Потренироваться» ведёт на тренажёр с уже выбранным методом,
  * если у тренажёра есть такой ярлык, иначе на вкладку тренажёра.
  * Исключение — методы из OPORNYE_VMESTO_TRENAZHERA: их ссылка ведёт
@@ -50,6 +50,7 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
   const trenazher = `${ZADANIYA}/${zadanie}/trenazher/`;
   const presety = new Set(yarlyki(pool, zadanie).map((y) => y.id));
   const opornye = zadanie === 4 ? prep4Pool() : prep5Pool();
+  const vBanke = new Map(navykiMetodov(pool, zadanie).map((k) => [k.id, k.count]));
   return metody.map((m) => {
     const blokId = OPORNYE_VMESTO_TRENAZHERA[zadanie][m.id];
     const blok = blokId === undefined ? undefined : opornye.find((b) => b.id === blokId);
@@ -64,7 +65,7 @@ function kartochki(zadanie: Zadanie): KartochkaMetoda[] {
       trenirovki: [
         blok === undefined
           ? {
-              schet: METODY_KARTOCHKI.modal.vBanke(zadachVBanke(m)),
+              schet: METODY_KARTOCHKI.modal.vBanke(vBanke.get(m.id) ?? 0),
               href: presety.has(m.id) ? `${trenazher}${m.id}/` : trenazher,
             }
           : {

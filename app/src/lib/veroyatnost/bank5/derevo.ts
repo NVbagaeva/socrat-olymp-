@@ -20,7 +20,7 @@ const P06: Prototype = prototip({
   blok: 'nezavisimye',
   nazvanie: 'Шахматист: выиграет обе партии',
   tip: 'Независимые события: перемножаем',
-  zadachnik: [29, 32],
+  sourceRange: [29, 32],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -52,10 +52,10 @@ const P06: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 29', params: { pb: 0.5, pc: 0.32 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 30', params: { pb: 0.6, pc: 0.45 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 31', params: { pb: 0.5, pc: 0.3 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 32', params: { pb: 0.6, pc: 0.4 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 29', params: { pb: 0.5, pc: 0.32 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 30', params: { pb: 0.6, pc: 0.45 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 31', params: { pb: 0.5, pc: 0.3 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 32', params: { pb: 0.6, pc: 0.4 } },
   ],
   generator: (r: Rng): Params => ({ pb: r.dec(0.3, 0.7, 2), pc: r.dec(0.25, 0.6, 2) }),
   metodika: {
@@ -106,7 +106,7 @@ const P07: Prototype = prototip({
   blok: 'nezavisimye',
   nazvanie: 'Стрелок: четыре мишени по одному выстрелу',
   tip: 'Независимые события: перемножаем',
-  zadachnik: [33, 36],
+  sourceRange: [33, 36],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -155,10 +155,10 @@ const P07: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 33', params: { p: 0.9, shema: 'pmmm' } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 34', params: { p: 0.8, shema: 'pmmm' } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 35', params: { p: 0.6, shema: 'pppm' } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 36', params: { p: 0.7, shema: 'ppmm' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 33', params: { p: 0.9, shema: 'pmmm' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 34', params: { p: 0.8, shema: 'pmmm' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 35', params: { p: 0.6, shema: 'pppm' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 36', params: { p: 0.7, shema: 'ppmm' } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.5, 0.9, 1), shema: r.pick(Object.keys(SHEMY)) }),
   metodika: {
@@ -227,7 +227,7 @@ const P08: Prototype = prototip({
   blok: 'hotya-by',
   nazvanie: 'Лампы: хотя бы одна не перегорит',
   tip: '«Хотя бы один»: через «ни одного»',
-  zadachnik: [37, 40],
+  sourceRange: [37, 40],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -275,10 +275,10 @@ const P08: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 37', params: { n: 3, p: 0.8 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 38', params: { n: 3, p: 0.9 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 39', params: { n: 3, p: 0.7 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 40', params: { n: 3, p: 0.6 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 37', params: { n: 3, p: 0.8 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 38', params: { n: 3, p: 0.9 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 39', params: { n: 3, p: 0.7 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 40', params: { n: 3, p: 0.6 } },
   ],
   /* Две лампы — вероятность с двумя знаками (ответ до четырёх),
      три и четыре — с одним. */
@@ -334,7 +334,7 @@ const P09: Prototype = prototip({
   blok: 'dva-predmeta',
   nazvanie: 'Фломастеры: один синий и один красный',
   tip: 'Два предмета без возвращения',
-  zadachnik: [41, 44],
+  sourceRange: [41, 44],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -410,10 +410,10 @@ const P09: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 41', params: { a: 11, b: 6, c: 8 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 42', params: { a: 12, b: 6, c: 7 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 43', params: { a: 10, b: 3, c: 12 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 44', params: { a: 12, b: 4, c: 9 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 41', params: { a: 11, b: 6, c: 8 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 42', params: { a: 12, b: 6, c: 7 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 43', params: { a: 10, b: 3, c: 12 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 44', params: { a: 12, b: 4, c: 9 } },
   ],
   generator: (r: Rng): Params => {
     const n = r.int(15, 30);
@@ -473,7 +473,7 @@ const P10: Prototype = prototip({
   blok: 'nezavisimye',
   nazvanie: 'Футбол: хотя бы 4 очка в двух играх',
   tip: 'Независимые события: перемножаем',
-  zadachnik: [45, 48],
+  sourceRange: [45, 48],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -523,10 +523,10 @@ const P10: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 45', params: { p: 0.3 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 46', params: { p: 0.4 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 47', params: { p: 0.2 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 48', params: { p: 0.1 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 45', params: { p: 0.3 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 46', params: { p: 0.4 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 47', params: { p: 0.2 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 48', params: { p: 0.1 } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.1, 0.45, 2) }),
   metodika: {
