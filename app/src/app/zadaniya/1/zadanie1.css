@@ -8,6 +8,24 @@
 .z1-head {
   margin-bottom: var(--space-6);
 }
+/* Справа в шапке — иллюстрация (общая метка section-head--art), а
+   кольцо прогресса — в текстовой колонке под подзаголовком: кольцо
+   слева, подпись справа от него строкой. */
+.z1-head .topic-progress {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: var(--space-4);
+}
+.z1-head .topic-progress__text {
+  text-align: left;
+}
+/* Текстовая колонка с кольцом выше картинки: подставка стоит на
+   нижней границе шапки, как у №4, где картинка и есть высота шапки,
+   а не висит посередине колонки. */
+.z1-head .section-head__media {
+  align-self: end;
+}
 
 /* ── Вкладка «О задании» ──────────────────────────────────────── */
 
