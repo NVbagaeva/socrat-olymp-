@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { WELCOME_INTRO } from '@/content/onboarding';
 import { assetUrl } from '@/lib/assetUrl';
-import { decideIntro, MIN_FPS, type IntroDecision, type StaticReason } from './detect';
-import { STILL, finalAnchor, stillBox, type Anchor } from './layout';
-import type { IntroScene, SceneLayout, Tier } from './scene';
+import { decideIntro, MIN_FPS, type IntroDecision, type StaticReason, type Tier } from './detect';
+import { FlowerDom, layerStyle } from './flower';
+import { Fx2D } from './fx2d';
+import { BASE, CORE, FRAME, LAYERS, ORDER, type LayerId } from './layers.gen';
+import { finalStage, introStage, stageAt, type Stage } from './stage';
 import { IDLE_STOP_S, T_CARD, T_CARD_IN, T_SKIP_VISIBLE } from './timeline';
 import { WelcomeCard, type WelcomeChoice } from './WelcomeCard';
 import './intro.css';
@@ -14,10 +16,8 @@ export interface SplashInfo {
   animated: boolean;
   reason: StaticReason | null;
   tier: Tier;
-  /** Средняя частота кадров первой секунды (после неё). */
+  /** Средняя частота кадров первой секунды. */
   fps: number | null;
-  /** Живые объекты WebGL; после закрытия — 0. */
-  liveObjects: number;
 }
 
 export interface IntroSplashProps {
@@ -39,14 +39,38 @@ export interface IntroSplashProps {
 
 declare global {
   interface Window {
-    __intro?: { set: (t: number) => void };
+    __intro?: { set: (t: number) => Promise<void> };
   }
 }
 
+/** Слои анимации: октаэдр, корона, затем цветок снизу вверх. A — статичный режим. */
+const FLOWER: readonly LayerId[] = ['F', 'G', ...ORDER];
+
+/** Файл слоя для этой ширины рамки на экране (CSS px). */
+function layerSrc(id: LayerId, frameCssPx: number, ext: 'webp' | 'png'): string {
+  const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+  const width = frameCssPx * dpr > 900 ? 1536 : 768;
+  return assetUrl(`/intro/${LAYERS[id].file}-${width}.${ext}`);
+}
+
+function preload(srcs: string[]): Promise<void> {
+  return Promise.all(
+    srcs.map(
+      (src) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          img.src = src;
+          img.decode().then(resolve, () => resolve());
+        }),
+    ),
+  ).then(() => undefined);
+}
+
 /**
- * Заставка первого визита: стеклянный октаэдр → цветок → окно
- * приветствия (макеты docs/mockups/intro/). Сцена — отдельный чанк
- * scene.ts: в статичном режиме его даже не скачивают.
+ * Заставка первого визита (макеты docs/mockups/intro/): анимация готовых
+ * слоёв с прозрачным фоном (flower.ts) — октаэдр, корона, чашечка и ярусы
+ * цветка; частицы и искры — canvas 2D (fx2d.ts). Статичный режим — сразу
+ * собранный цветок A и окно; слои анимации тогда не грузятся.
  *
  * «Пропустить», Esc и клик по фону во время анимации ведут к финальному
  * кадру с окном. Когда окно на месте, Esc и клик мимо окна его закрывают.
@@ -63,7 +87,8 @@ export function IntroSplash(props: IntroSplashProps) {
     onInfo,
   } = props;
   const root = useRef<HTMLDivElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const canvasFx = useRef<HTMLCanvasElement>(null);
+  const stageEl = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const leadId = useId();
@@ -75,16 +100,11 @@ export function IntroSplash(props: IntroSplashProps) {
   const [skipShown, setSkipShown] = useState(false);
   const [sheet, setSheet] = useState(force?.sheet ?? false);
   const [view, setView] = useState<{ w: number; h: number } | null>(null);
-  const [anchor, setAnchor] = useState<Anchor | null>(null);
-
-  const scene = useRef<IntroScene | null>(null);
+  const [stages, setStages] = useState<{ intro: Stage; final: Stage } | null>(null);
   const skipRequest = useRef<() => void>(() => {});
-  /* «Пропустить» нажали раньше, чем загрузилась сцена. */
   const skippedEarly = useRef(false);
-  /* Последняя раскладка и перерисовка последнего кадра — для смены размера
-     после остановки (холст при смене размера очищается). */
-  const layoutRef = useRef<SceneLayout | null>(null);
   const redraw = useRef<() => void>(() => {});
+  const stagesRef = useRef<{ intro: Stage; final: Stage } | null>(null);
   const fps = useRef<number | null>(null);
 
   const info = useCallback(
@@ -94,14 +114,13 @@ export function IntroSplash(props: IntroSplashProps) {
         reason,
         tier: decision.tier,
         fps: fps.current,
-        liveObjects: scene.current?.liveObjects() ?? 0,
         ...patch,
       });
     },
     [animated, reason, decision.tier, onInfo],
   );
 
-  /* Размер холста и раскладка: на узком экране окно — нижний лист. */
+  /* Размер и раскладка: на узком экране окно — нижний лист. */
   useLayoutEffect(() => {
     const el = root.current;
     if (el === null) return;
@@ -117,26 +136,28 @@ export function IntroSplash(props: IntroSplashProps) {
     return () => ro.disconnect();
   }, [force?.sheet]);
 
-  /* Место окна → где встанет цветок. Окно в разметке с самого начала. */
+  /* Где цветок: в центре кадра и над окном (окно в разметке с начала). */
   useLayoutEffect(() => {
     const el = card.current;
     if (el === null || view === null) return;
-    const top = el.offsetTop;
-    const cx = el.offsetLeft + el.offsetWidth / 2;
-    setAnchor((a) => {
-      const next = finalAnchor(view, { top, cx }, sheet);
-      return a !== null && a.x === next.x && a.y === next.y && a.unitPx === next.unitPx ? a : next;
-    });
+    const next = {
+      intro: introStage(view, sheet),
+      final: finalStage(view, { top: el.offsetTop, cx: el.offsetLeft + el.offsetWidth / 2 }, sheet),
+    };
+    stagesRef.current = next;
+    setStages(next);
   }, [view, sheet]);
 
+  /* Статичный режим: собранный цветок над окном. */
+  useLayoutEffect(() => {
+    if (animated || stages === null || stageEl.current === null) return;
+    new FlowerDom(stageEl.current).renderStatic(stages.final);
+  }, [animated, stages]);
+
   useEffect(() => {
-    if (view === null || anchor === null) return;
-    layoutRef.current = { w: view.w, h: view.h, final: anchor, phone: sheet };
-    if (scene.current !== null) {
-      scene.current.setLayout(layoutRef.current);
-      redraw.current();
-    }
-  }, [view, anchor, sheet]);
+    if (view === null) return;
+    redraw.current();
+  }, [view, stages]);
 
   const goStatic = useCallback((why: StaticReason) => {
     setReason(why);
@@ -144,33 +165,42 @@ export function IntroSplash(props: IntroSplashProps) {
     setCardShown(true);
   }, []);
 
-  /* Живая сцена: загрузить чанк, крутить кадры, пауза в скрытой вкладке. */
-  const ready = view !== null && anchor !== null;
+  /* Анимация: сначала слои (картинки), потом часы.  */
+  const ready = view !== null && stages !== null;
   useEffect(() => {
-    if (!animated || !ready) return;
+    if (!animated || !ready || stageEl.current === null || canvasFx.current === null) return;
     let disposed = false;
     let raf = 0;
     let start: number | null = null;
-    let offset = 0;
+    let offset = skippedEarly.current ? T_CARD : 0;
     let hiddenAt: number | null = null;
     let stopped = false;
-    let checked = !fpsGuard;
+    let checked = !fpsGuard || skippedEarly.current;
     let frames = 0;
-    let last = 0;
-    let skipShownLocal = false;
-    let cardShownLocal = false;
+    let last = offset;
+    let skipLocal = false;
+    let cardLocal = skippedEarly.current;
+    const v = view;
+    const flower = new FlowerDom(stageEl.current);
+    const fx = new Fx2D(canvasFx.current, decision.tier === 'low');
+    fx.setView(v.w, v.h);
+
+    const frameCss = Math.max(stages.intro.k, stages.final.k) * FRAME;
+    const layersLoad = preload(FLOWER.map((id) => layerSrc(id, frameCss, 'webp')));
 
     const step = (t: number) => {
-      const s = scene.current;
-      if (s === null) return;
-      s.render(t);
+      const st = stagesRef.current;
+      if (st === null) return;
+      const stage = stageAt(t, st.intro, st.final);
+      flower.render(t, stage);
+      fx.render(t, stage);
       last = t;
-      if (!skipShownLocal && t >= T_SKIP_VISIBLE) {
-        skipShownLocal = true;
+      if (!skipLocal && t >= T_SKIP_VISIBLE) {
+        skipLocal = true;
         setSkipShown(true);
       }
-      if (!cardShownLocal && t >= T_CARD_IN) {
-        cardShownLocal = true;
+      if (!cardLocal && t >= T_CARD_IN) {
+        cardLocal = true;
         setCardShown(true);
       }
     };
@@ -213,46 +243,38 @@ export function IntroSplash(props: IntroSplashProps) {
     };
 
     redraw.current = () => {
-      if (start !== null || manualClock) scene.current?.render(last);
+      fx.setView(root.current?.clientWidth ?? v.w, root.current?.clientHeight ?? v.h);
+      step(last);
     };
 
     skipRequest.current = () => {
       checked = true;
-      if (manualClock) {
-        step(Math.max(last, T_CARD));
-      } else if (last < T_CARD) {
-        offset += T_CARD - last;
-      }
-      cardShownLocal = true;
+      if (manualClock) step(Math.max(last, T_CARD));
+      else if (last < T_CARD) offset += T_CARD - last;
+      cardLocal = true;
       setCardShown(true);
     };
 
-    void import('./scene').then(({ createIntroScene }) => {
-      if (disposed || canvas.current === null) return;
-      let created: IntroScene | null = null;
-      try {
-        created = createIntroScene(canvas.current, decision.tier);
-      } catch {
-        created = null;
-      }
-      if (created === null) {
-        goStatic('no-webgl');
-        return;
-      }
-      scene.current = created;
-      created.setLayout(layoutRef.current!);
-      if (skippedEarly.current) {
-        checked = true;
-        offset = T_CARD;
-      }
+    const begin = () => {
+      if (disposed) return;
       if (manualClock) {
-        window.__intro = { set: (t: number) => step(t) };
+        window.__intro = {
+          set: async (t: number) => {
+            await layersLoad;
+            step(t);
+          },
+        };
         step(offset);
       } else {
         raf = requestAnimationFrame(tick);
       }
       document.addEventListener('visibilitychange', onVisibility);
-    });
+    };
+
+    /* Часы стартуют, когда слои скачаны и раскодированы: иначе кадры
+       первых долей секунды пропали бы. Скачивание — сразу после того,
+       как страница стала интерактивной (чанк заставки грузится тогда же). */
+    void layersLoad.then(begin);
 
     return () => {
       disposed = true;
@@ -261,10 +283,8 @@ export function IntroSplash(props: IntroSplashProps) {
       skipRequest.current = () => {};
       redraw.current = () => {};
       if (window.__intro !== undefined) delete window.__intro;
-      scene.current?.dispose();
-      scene.current = null;
     };
-    /* Сцена создаётся один раз на показ; размер меняется через setLayout. */
+    /* Анимация запускается один раз на показ; размер — через stagesRef. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animated, ready]);
 
@@ -319,8 +339,8 @@ export function IntroSplash(props: IntroSplashProps) {
     }
   };
 
-  const still = !animated && anchor !== null ? stillBox(anchor) : null;
-  const small = view !== null && view.w < 640;
+  const frameCss = stages === null ? 600 : Math.max(stages.intro.k, stages.final.k) * FRAME;
+  const layersShown: readonly LayerId[] = animated ? FLOWER : ['A'];
 
   return (
     <div
@@ -342,17 +362,53 @@ export function IntroSplash(props: IntroSplashProps) {
         aria-hidden="true"
         onMouseDown={() => (cardShown ? onClose() : skip())}
       />
-      {animated ? <canvas ref={canvas} className="intro__canvas" aria-hidden="true" /> : null}
-      {still !== null ? (
-        // Готовый кадр той же сцены: в статичном режиме вместо холста.
-        <img
-          className="intro__still"
-          src={assetUrl(small ? STILL.srcSmall : STILL.src)}
-          alt=""
-          aria-hidden="true"
-          style={{ left: still.left, top: still.top, width: still.width, height: still.height }}
-        />
-      ) : null}
+      {/* Цветок из слоёв: рамка A, положение и масштаб — из stage.ts. */}
+      <div
+        ref={stageEl}
+        className="intro__stage"
+        aria-hidden="true"
+        style={{ width: FRAME, height: FRAME }}
+      >
+        {/* Световое пятно на «полу» под нижней вершиной — под слоями. */}
+        <span className="intro__floor" data-floor="" style={floorStyle()} />
+        {stages !== null
+          ? layersShown.map((id) => (
+              <picture key={id}>
+                <source type="image/webp" srcSet={layerSrc(id, frameCss, 'webp')} />
+                {/* Слой цветка: рамка в системе слоя A. */}
+                <img
+                  className="intro__layer"
+                  data-layer={id}
+                  src={layerSrc(id, frameCss, 'png')}
+                  alt=""
+                  decoding="async"
+                  draggable={false}
+                  style={{ ...layerStyle(id), opacity: 0, visibility: 'hidden' }}
+                />
+              </picture>
+            ))
+          : null}
+        {animated && stages !== null ? (
+          <>
+            {(['F', 'C', 'D'] as const).map((id) => (
+              <span
+                key={`g${id}`}
+                className="intro__glint"
+                data-glint={id}
+                style={{
+                  ...layerStyle(id),
+                  WebkitMaskImage: `url(${layerSrc(id, frameCss, 'webp')})`,
+                  maskImage: `url(${layerSrc(id, frameCss, 'webp')})`,
+                }}
+              />
+            ))}
+            <span className="intro__core" data-core="" style={coreStyle()} />
+          </>
+        ) : null}
+      </div>
+      {animated ? <span className="intro__halo" data-halo="" aria-hidden="true" /> : null}
+      {animated ? <canvas ref={canvasFx} className="intro__canvas" aria-hidden="true" /> : null}
+      {animated ? <span className="intro__flash" data-flash="" aria-hidden="true" /> : null}
       <WelcomeCard
         ref={card}
         titleId={titleId}
@@ -376,4 +432,23 @@ export function IntroSplash(props: IntroSplashProps) {
       ) : null}
     </div>
   );
+}
+
+/** Пятно света под основанием: широкий эллипс и тонкая полоса. */
+function floorStyle(): Record<string, string | number> {
+  const w = 1150;
+  const h = 190;
+  return { left: BASE.x - w / 2, top: BASE.y - h / 2, width: w, height: h, opacity: 0 };
+}
+
+/** Свет сердцевины — в центре свечения тычинок. */
+function coreStyle(): Record<string, string | number> {
+  const r = LAYERS.E.w * 0.62;
+  return {
+    left: CORE.x - r,
+    top: CORE.y - r,
+    width: r * 2,
+    height: r * 2,
+    opacity: 0,
+  };
 }

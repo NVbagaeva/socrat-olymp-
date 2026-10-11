@@ -1,11 +1,13 @@
 /**
  * Анимировать ли заставку и насколько подробно. Статичный кадр вместо
- * анимации: просят меньше движения, нет WebGL2, мало памяти, включена
- * экономия трафика. Ещё одна причина — меньше 30 кадров/с в первую
- * секунду — выясняется на ходу, в IntroSplash.
+ * анимации: просят меньше движения, мало памяти, включена экономия
+ * трафика. Ещё одна причина — меньше 30 кадров/с в первую секунду —
+ * выясняется на ходу, в IntroSplash. WebGL заставке не нужен; причина
+ * 'no-webgl' осталась для режима прототипа «без WebGL».
  */
 
-import type { Tier } from './scene';
+/** high — компьютер, low — телефон: меньше частиц. */
+export type Tier = 'high' | 'low';
 
 export type StaticReason = 'reduced-motion' | 'no-webgl' | 'device-memory' | 'save-data' | 'slow';
 
@@ -31,7 +33,6 @@ export function decideIntro(): IntroDecision {
   const nav = navigator as Navigator & NavigatorHints;
   const still = (reason: StaticReason): IntroDecision => ({ animated: false, reason, tier });
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return still('reduced-motion');
-  if (typeof window.WebGL2RenderingContext !== 'function') return still('no-webgl');
   if (typeof nav.deviceMemory === 'number' && nav.deviceMemory < 4) return still('device-memory');
   if (nav.connection?.saveData === true) return still('save-data');
   return { animated: true, reason: null, tier };
