@@ -5,6 +5,7 @@ import { spravochnikHtml } from '@/lib/planimetriya/spravochnik';
 import 'katex/dist/katex.min.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../pechat1.css';
+import '../spravochnik1.css';
 
 export const metadata: Metadata = {
   title: zadanie1Title('Справочник по планиметрии'),

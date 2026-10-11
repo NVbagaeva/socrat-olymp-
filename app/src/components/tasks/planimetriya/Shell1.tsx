@@ -3,6 +3,9 @@ import { tasksPage } from '@/content/tasks';
 import { RAZDELY_TEORII_1 } from '@/content/teoriya1';
 import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
+import { BLOKI } from '@/lib/planimetriya/prep/bloki';
+import { PROTOTIPY } from '@/lib/planimetriya/stseny';
+import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Progress1 } from './Progress1';
@@ -27,7 +30,13 @@ export function Shell1({ children }: { children: React.ReactNode }) {
           title={ZADANIE1.title}
           badge={ZADANIE1.badge}
           lead={ZADANIE1.lead}
-          media={<Progress1 razdely={RAZDELY_TEORII_1.map((r) => r.id)} />}
+          media={
+            <Progress1
+              razdely={RAZDELY_TEORII_1.map((r) => r.id)}
+              bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
+              podtipy={PROTOTIPY.map((p) => klyuchProto(p.id))}
+            />
+          }
         />
         <RazdelTabs base={base} tabs={ZADANIE1.tabs} />
         <div className="section-panel">{children}</div>

@@ -160,7 +160,11 @@ function trapeciya(r: Rnd, ravnobedrennaya = false): [P, P, P, P] {
   const x = ravnobedrennaya ? (a - b) / 2 : ot(r, -2, a - b + 2);
   const t = ot(r, 0, 360);
   const o: P = [ot(r, -3, 3), ot(r, -3, 3)];
-  const v = (p: P): P => add(o, [p[0] * Math.cos(t * RAD) - p[1] * Math.sin(t * RAD), p[0] * Math.sin(t * RAD) + p[1] * Math.cos(t * RAD)]);
+  const v = (p: P): P =>
+    add(o, [
+      p[0] * Math.cos(t * RAD) - p[1] * Math.sin(t * RAD),
+      p[0] * Math.sin(t * RAD) + p[1] * Math.cos(t * RAD),
+    ]);
   return [v([0, 0]), v([x, h]), v([x + b, h]), v([a, 0])];
 }
 
@@ -982,7 +986,11 @@ export function proveritFormuly(n = 200, eps = 1e-9): ItogFormul {
       itog.figur += 1;
       for (const [x, y] of f(rng)) {
         const d = Math.abs(x - y);
-        if (!Number.isFinite(x) || !Number.isFinite(y) || d > eps * Math.max(1, Math.abs(x), Math.abs(y))) {
+        if (
+          !Number.isFinite(x) ||
+          !Number.isFinite(y) ||
+          d > eps * Math.max(1, Math.abs(x), Math.abs(y))
+        ) {
           itog.problems.push(`${z.metka}: на фигуре ${i} ${x} ≠ ${y}`);
           break;
         }
