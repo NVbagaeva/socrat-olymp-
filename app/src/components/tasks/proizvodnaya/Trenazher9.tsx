@@ -52,26 +52,13 @@ function Itog9({ data }: { data: SummaryData }) {
   const right = data.items.filter((item) => item.mark === 'right').length;
   const solved = right + data.items.filter((item) => item.mark === 'hinted').length;
   const percent = solved === 0 ? 0 : Math.round((right / solved) * 100);
+  /* Строкой, а не ещё одним списком tdone__rows: строки итогов общие,
+     и по ним их читают проверки. */
   return (
-    <>
-      {solved < total ? (
-        <p className="tdone__lead">
-          Тренировка завершена досрочно: закрыто {solved} из {total}.
-        </p>
-      ) : null}
-      <dl className="tdone__rows">
-        <div className="tdone__row">
-          <dt>Решено (закрыто)</dt>
-          <dd>
-            {solved} из {total}
-          </dd>
-        </div>
-        <div className="tdone__row">
-          <dt>Верно среди решённых</dt>
-          <dd>{percent}%</dd>
-        </div>
-      </dl>
-    </>
+    <p className="tdone__lead">
+      {solved < total ? 'Тренировка завершена досрочно. ' : ''}
+      Решено (закрыто): {solved} из {total}; верно среди решённых — {percent}%.
+    </p>
   );
 }
 

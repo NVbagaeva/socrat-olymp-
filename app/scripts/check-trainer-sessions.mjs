@@ -49,6 +49,7 @@
                 задача по id: answer (у задач с вариантами — номер варианта);
      №8, №2   — generate(прототип, seed[, уровень]).otvet
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
+     №9       — generate(прототип, seed).otvet (lib/proizvodnaya/generate.ts);
      №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
                 номер верного варианта (lib/zadanie11/trenazher/zadacha.ts);
      №4, №5   — otvetUchenika(прототип, параметры варианта) из банка
@@ -147,6 +148,14 @@ function answer2(payload, at) {
   const { generate } = requireSrc('lib/vektory/generate');
   const [prototype, seed] = payload.tasks[at][0].split('|');
   return { text: numberText(generate(prototype, seed).otvet) };
+}
+
+/** №9: ids[номер] = «прототип|seed» (запись packTrenazher9) → generate(…).otvet. */
+function answer9(payload, at) {
+  const { generate } = requireSrc('lib/proizvodnaya/generate');
+  const id = payload.ids[at];
+  const split = id.indexOf('|');
+  return { text: numberText(generate(id.slice(0, split), id.slice(split + 1)).otvet) };
 }
 
 /** №11: [вид, подтип, номер в банке или seed, подпись] → reshitPlan. */
@@ -262,6 +271,14 @@ const TRAINERS = [
     rep: true,
   },
   { name: '№2', url: '/zadaniya/2/trenazher/', scope: '2', answer: answer2, all: chooseAll },
+  {
+    name: '№9',
+    url: '/zadaniya/9/trenazher/',
+    scope: '9',
+    answer: answer9,
+    all: chooseAll,
+    rep: true,
+  },
   {
     name: '№11',
     url: '/zadaniya/11/trenazher/',
