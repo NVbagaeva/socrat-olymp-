@@ -1,3 +1,4 @@
+import { clsx } from 'clsx';
 import { illyustraciya } from '@/lib/zadanie10/illyustracii';
 
 /**
@@ -21,7 +22,7 @@ export function Illyustraciya10({
     return null;
   }
   const picture = (
-    <picture className={`z10-ill${className ? ` ${className}` : ''}`}>
+    <picture className={clsx('z10-ill', className)}>
       <source type="image/webp" srcSet={il.webp} />
       <img
         src={il.png}

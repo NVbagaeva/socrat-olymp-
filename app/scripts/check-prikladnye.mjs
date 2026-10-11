@@ -47,7 +47,9 @@ for (const { where, item } of solved.filter((x) => x.item.prototypeId === 'P01')
   for (const rezhim of ['uchenik', 'uchitel']) {
     const { svg, report } = chertezhMosta(item.params, rezhim);
     mostov += 1;
-    report.nalozheniya.forEach((n) => problems.push({ where: `${where} мост (${rezhim})`, what: n }));
+    report.nalozheniya.forEach((n) =>
+      problems.push({ where: `${where} мост (${rezhim})`, what: n }),
+    );
     for (const slovo of ['цепь', 'ванта', 'пилон', 'полотно моста']) {
       if (!svg.includes(`>${slovo}<`)) {
         problems.push({ where: `${where} мост (${rezhim})`, what: `нет подписи «${slovo}»` });
@@ -56,10 +58,16 @@ for (const { where, item } of solved.filter((x) => x.item.prototypeId === 'P01')
     const vydelena = svg.includes('z10-most__vanta-iskomaya');
     const podpisana = svg.includes(`>${dlina}<`);
     if (rezhim === 'uchenik' && (vydelena || podpisana)) {
-      problems.push({ where: `${where} мост (ученик)`, what: 'ванта из условия выделена или подписана' });
+      problems.push({
+        where: `${where} мост (ученик)`,
+        what: 'ванта из условия выделена или подписана',
+      });
     }
     if (rezhim === 'uchitel' && !(vydelena && podpisana)) {
-      problems.push({ where: `${where} мост (учитель)`, what: 'ванта из условия не выделена или длина не подписана' });
+      problems.push({
+        where: `${where} мост (учитель)`,
+        what: 'ванта из условия не выделена или длина не подписана',
+      });
     }
   }
 }
@@ -79,7 +87,9 @@ const display = (tex, where) => {
   } catch (e) {
     problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)}` });
   }
-  gigienaFormuly(tex).forEach((b) => problems.push({ where, what: `формула: ${b} в «${tex.slice(0, 60)}»` }));
+  gigienaFormuly(tex).forEach((b) =>
+    problems.push({ where, what: `формула: ${b} в «${tex.slice(0, 60)}»` }),
+  );
 };
 if (RAZDELY_TEORII_10.length !== 9) {
   problems.push({ where: 'теория', what: `разделов ${RAZDELY_TEORII_10.length}, нужно 9` });
@@ -87,7 +97,9 @@ if (RAZDELY_TEORII_10.length !== 9) {
 for (const r of RAZDELY_TEORII_10) {
   const where = `теория ${r.id}`;
   strokiTeorii.push([where, r.lead]);
-  r.prototipy.forEach((id) => idsProto.has(id) || problems.push({ where, what: `нет прототипа ${id}` }));
+  r.prototipy.forEach(
+    (id) => idsProto.has(id) || problems.push({ where, what: `нет прототипа ${id}` }),
+  );
   for (const b of r.bloki) {
     for (const k of ['paras', 'spisok']) {
       (b[k] ?? []).forEach((t) => strokiTeorii.push([where, t]));
@@ -97,7 +109,10 @@ for (const r of RAZDELY_TEORII_10) {
     }
     if (b.formula) display(b.formula, where);
     /* Плашки рамок (Определение, Важно!, Вывод) — обычный текст без KaTeX. */
-    if (['opredelenie', 'vazhno', 'vyvod', 'tablica', 'lovushka'].includes(b.vid) && /\$/.test(b.title ?? '')) {
+    if (
+      ['opredelenie', 'vazhno', 'vyvod', 'tablica', 'lovushka'].includes(b.vid) &&
+      /\$/.test(b.title ?? '')
+    ) {
       problems.push({ where, what: `формула в плашке рамки: «${b.title}»` });
     }
     if (b.rows) [b.head, ...b.rows].flat().forEach((t) => strokiTeorii.push([where, t]));
@@ -107,7 +122,8 @@ for (const r of RAZDELY_TEORII_10) {
   }
 }
 for (const p of PROTOTYPES) {
-  if (!FIZIKA_10[p.id]) problems.push({ where: `теория fizika ${p.id}`, what: 'нет карточки «Физика в двух словах»' });
+  if (!FIZIKA_10[p.id])
+    problems.push({ where: `теория fizika ${p.id}`, what: 'нет карточки «Физика в двух словах»' });
   else strokiTeorii.push([`теория fizika ${p.id}`, FIZIKA_10[p.id]]);
 }
 const vUrokah = UROKI_10.flatMap((u) => u.prototipy);
@@ -123,14 +139,78 @@ for (const [where, t] of strokiTeorii) {
     } catch (e) {
       problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)} в «${f.slice(0, 60)}»` });
     }
-    gigienaFormuly(f).forEach((b) => problems.push({ where, what: `формула: ${b} в «${f.slice(0, 60)}»` }));
+    gigienaFormuly(f).forEach((b) =>
+      problems.push({ where, what: `формула: ${b} в «${f.slice(0, 60)}»` }),
+    );
   }
   const plain = stripDollarMath(t).replace(/\*\*/g, '');
   for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
     problems.push({ where, what: `вне KaTeX (${f.rule}): «${f.match}» в «${t.slice(0, 60)}»` });
   }
 }
-console.log(`Теория: разделов ${RAZDELY_TEORII_10.length}, строк проверено ${strokiTeorii.length}.`);
+console.log(
+  `Теория: разделов ${RAZDELY_TEORII_10.length}, строк проверено ${strokiTeorii.length}.`,
+);
+
+/* Данные для браузера (public/data/zadanie10): совпадают с банком и без ответов. */
+{
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { APP } = await import('./lib/load-ts.mjs');
+  const { dannyeDlyaBrauzera } = requireSrc('lib/zadanie10/dannye-server');
+  const { FIPI, ANALOGI_PO_PROTOTIPAM } = requireSrc('lib/zadanie10/bank/index');
+  for (const [fail, nado] of Object.entries(dannyeDlyaBrauzera(FIPI, ANALOGI_PO_PROTOTIPAM))) {
+    const f = path.join(APP, 'public/data/zadanie10', `${fail}.json`);
+    const est = fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null;
+    if (est !== nado) {
+      problems.push({
+        where: `public/data/zadanie10/${fail}.json`,
+        what: 'файл устарел — запустите pnpm build:bank-10',
+      });
+    }
+    if (/"answer"/.test(nado)) {
+      problems.push({
+        where: `public/data/zadanie10/${fail}.json`,
+        what: 'в данных для браузера есть ответ',
+      });
+    }
+  }
+  /* Опорные задачи: 7 блоков по 10, ответы — для бланка ЕГЭ, формулы чистые. */
+  const { BLOKI_OPORNYH } = requireSrc('lib/zadanie10/opornye');
+  if (BLOKI_OPORNYH.length !== 7) {
+    problems.push({ where: 'опорные', what: `блоков ${BLOKI_OPORNYH.length}, нужно 7` });
+  }
+  for (const b of BLOKI_OPORNYH) {
+    if (b.zadachi.length !== 10) {
+      problems.push({ where: `опорные ${b.id}`, what: `задач ${b.zadachi.length}, нужно 10` });
+    }
+    if (/\$/.test(b.opisanie) || /\$/.test(b.nazvanie)) {
+      problems.push({ where: `опорные ${b.id}`, what: 'формула на карточке блока' });
+    }
+    for (const z of b.zadachi) {
+      if (
+        !Number.isFinite(z.answer) ||
+        Math.abs(z.answer * 1000 - Math.round(z.answer * 1000)) > 1e-7
+      ) {
+        problems.push({ where: z.id, what: `ответ не для бланка: ${z.answer}` });
+      }
+      strokiTeorii.push([z.id, z.uslovie], [z.id, z.podskazka], ...z.razbor.map((r) => [z.id, r]));
+    }
+    strokiTeorii.push([`опорные ${b.id}`, b.zapomni]);
+  }
+  for (const [where, t] of strokiTeorii.slice(-200)) {
+    for (const f of formuly(t)) {
+      try {
+        typeset(f);
+      } catch (e) {
+        problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)}` });
+      }
+      gigienaFormuly(f).forEach((x) =>
+        problems.push({ where, what: `формула: ${x} в «${f.slice(0, 60)}»` }),
+      );
+    }
+  }
+}
 
 const fipi = solved.filter((x) => x.item.source === 'fipi').length;
 const analogi = solved.filter((x) => x.item.source === 'analog').length;

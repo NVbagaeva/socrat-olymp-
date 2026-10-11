@@ -184,13 +184,15 @@ export const tasks = [
     part: 1,
     status: 'soon',
   },
+  /* Раздел открыт: 34 прототипа (банк ФИПИ + 20 аналогов на каждый),
+     теория, опорные задачи, тренажёр, генератор и уроки — lib/zadanie10. */
   {
     no: '10',
     name: 'Задачи с физическим смыслом',
     shortTitle: 'Физический смысл',
     slug: '10',
     part: 1,
-    status: 'soon',
+    status: 'ready',
   },
   { no: '11', name: 'Текстовые задачи', slug: '11', part: 1, status: 'ready' },
   { no: '12', name: 'Графики функций', slug: '12', part: 1, status: 'ready' },
