@@ -132,6 +132,13 @@ jobs:
         working-directory: app
         run: pnpm test:zadanie15
 
+      # Заставка первого визита: октаэдр раскрывается по развёртке от
+      # нижней вершины — 8 правильных граней, ни в какой момент грани не
+      # проходят друг сквозь друга, в начале складываются ровно в октаэдр.
+      - name: Проверить развёртку октаэдра в заставке
+        working-directory: app
+        run: pnpm test:intro-unfold
+
       # Относительные импорты: проверка типов на CSS не смотрит,
       # и неверный путь к стилям находился только на сборке.
       - name: Проверить относительные импорты
@@ -298,6 +305,13 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q apache2 poppler-utils
           pnpm exec playwright install --with-deps chromium webkit
+
+      # Прототипы (page.dev.tsx, например /dev/intro — заставка первого
+      # визита) есть только в next dev. В собранном сайте их нет: ни папки,
+      # ни ссылок, ни кода, а Apache отдаёт на их адрес 404.
+      - name: Проверить, что прототипов нет в сборке
+        working-directory: app
+        run: pnpm test:dev-pages
 
       - name: Проверить, что сырой RSC-текст не показывается
         working-directory: app
