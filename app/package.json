@@ -62,6 +62,7 @@
     "test:math-markup": "node scripts/check-math-markup.mjs",
     "test:rsc-serving": "node scripts/check-rsc-serving.mjs",
     "test:asset-versions": "node scripts/check-asset-versions.mjs",
+    "test:illustrations": "node scripts/check-illustrations.mjs",
     "test:print-pages": "node scripts/check-print-pages.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
