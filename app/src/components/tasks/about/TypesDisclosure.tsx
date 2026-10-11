@@ -12,8 +12,10 @@ export interface TypeItem {
   card: ReactNode;
   /** Страница разбора: из неё под плашку вставляется блок примеров. */
   href: string;
-  /** «Потренироваться»: тренажёр этого типа. */
+  /** «Потренироваться»: набор опорных задач или тренажёр этого типа. */
   practiceHref: string;
+  /** «В тренажёре»: вторая ссылка, когда первая ведёт в опорные задачи. */
+  trainerHref: string | null;
 }
 
 export interface TypesDisclosureProps {
@@ -25,6 +27,7 @@ export interface TypesDisclosureProps {
   words: {
     back: string;
     practice: string;
+    trainer: string;
     open: string;
     close: string;
     loading: string;
@@ -173,6 +176,11 @@ export function TypesDisclosure({ items, headingId, attr, words }: TypesDisclosu
               <a className="btn btn--primary" href={item.practiceHref}>
                 {words.practice}
               </a>
+              {item.trainerHref === null ? null : (
+                <a className="btn btn--secondary" href={item.trainerHref}>
+                  {words.trainer}
+                </a>
+              )}
             </div>
           </li>,
         ];

@@ -39,7 +39,13 @@ export type TrainerShortcutId =
   | 'abscissa-line'
   | 'abscissa-parabola'
   | 'ordinate-line'
-  | 'ordinate-parabola';
+  | 'ordinate-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'value-at'
+  | 'argument-for';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -92,6 +98,14 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
     mode: 'mixed',
   },
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+  /* Ярлыки по одному набору: «В тренажёре» из разборов основных типов
+     задач на вкладке «О задании» (content/quadraticBasics.ts). */
+  { id: 'sign-a', title: 'Знак старшего коэффициента', skills: ['12Q.A'], mode: 'practice' },
+  { id: 'value-a', title: 'Значение старшего коэффициента', skills: ['12Q.B'], mode: 'practice' },
+  { id: 'value-c', title: 'Свободный член', skills: ['12Q.C'], mode: 'practice' },
+  { id: 'value-b', title: 'Средний коэффициент', skills: ['12Q.D'], mode: 'practice' },
+  { id: 'value-at', title: 'Значение функции', skills: ['12Q.E'], mode: 'practice' },
+  { id: 'argument-for', title: 'Аргумент по значению', skills: ['12Q.F'], mode: 'practice' },
   /* Ссылки «Потренироваться» из разборов на вкладке «О задании»
      (content/quadraticTypes.ts): тот же набор, но только задачи
      того же типа — абсцисса или ордината второй точки. */
