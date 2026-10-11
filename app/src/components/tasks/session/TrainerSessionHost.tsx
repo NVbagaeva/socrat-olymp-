@@ -181,6 +181,37 @@ type Notice = 'version' | 'broken' | 'restore';
 
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
+/* ── Адрес, с которого вкладка уже вошла в тренировку ───────────
+   Вопрос «продолжить или начать новую» нужен, когда ученик пришёл по
+   ссылке на набор, а не когда он перезагружает страницу этой же ссылки
+   посреди начатой с неё тренировки. Поэтому вкладка помнит (в
+   sessionStorage) адрес, с которого начата тренировка, и на нём не
+   спрашивает. Повторный приход по другой ссылке спросит снова. */
+
+function hereAddress(): string {
+  return `${window.location.pathname}${window.location.search}`;
+}
+
+function entryKey(scope: string): string {
+  return `budetege:trainer:${scope}:entry`;
+}
+
+function rememberEntry(scope: string): void {
+  try {
+    window.sessionStorage.setItem(entryKey(scope), hereAddress());
+  } catch {
+    /* Не запомнили — в худшем случае вопрос повторится. */
+  }
+}
+
+function enteredHere(scope: string): boolean {
+  try {
+    return window.sessionStorage.getItem(entryKey(scope)) === hereAddress();
+  } catch {
+    return false;
+  }
+}
+
 /* Вызов функции-«слота» внутри собственной отрисовки: так конфигуратор
    и экран, которым оболочка отдаёт колбэки, отрисовываются как обычные
    дочерние компоненты. */
@@ -404,12 +435,13 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         epoch: 0,
       };
       enter(run, 0, false, 0);
+      rememberEntry(scope);
       /* Запись появляется сразу, до первого действия: метка в меню
          загорается, а возврат на экран заданий возможен с первой секунды. */
       flush();
       notifySessionsChanged();
     },
-    [enter, flush, pack, count],
+    [enter, flush, pack, count, scope],
   );
 
   const toConfig = useCallback(() => {
@@ -500,7 +532,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     if (ok) {
       /* Записи прежних версий и старые ключи тренажёров — прочь. */
       sweepStaleSessions(scope);
-      const read = entryIntent ? readSession(scope) : null;
+      const read = entryIntent && !enteredHere(scope) ? readSession(scope) : null;
       if (read !== null && read.status === 'ok') {
         /* По ссылке на набор — не уводить молча в старую тренировку. */
         const ui = isBaseUi(read.session.ui) ? read.session.ui : null;
