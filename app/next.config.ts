@@ -17,7 +17,6 @@ const devPages =
   process.env.GALEREYA_10 === '1';
 
 const nextConfig: NextConfig = {
-  pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
   pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
