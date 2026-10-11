@@ -24,6 +24,15 @@
 
 import type { Formulation } from './sections';
 import type { RichExample } from './theoryRich';
+import {
+  ARGUMENT_EXAMPLES,
+  FORMULA_EXAMPLES,
+  SIGN_A_EXAMPLES,
+  VALUE_A_EXAMPLES,
+  VALUE_AT_EXAMPLES,
+  VALUE_B_EXAMPLES,
+  VALUE_C_EXAMPLES,
+} from './quadraticBasics';
 
 const CHECK = 'Проверка на адекватность';
 const TG = '\\operatorname{tg}';
@@ -334,14 +343,83 @@ const ordinateParabola: RichExample[] = [
 ];
 
 /**
- * Плашки типов задач. Порядок — как в задании автора: абсцисса и
- * ордината, с прямой и с параболой. Якорь плашки — id: по нему
- * разбор открывается ссылкой (#abscissa-line). «Потренироваться» —
- * ярлык тренажёра с фильтром по правилу ответа (content/trainerModes.ts).
+ * Плашки типов задач. Порядок: коэффициенты (знак a, значение a, c, b),
+ * формула по графику, значение функции, аргумент по значению, затем
+ * пересечения — абсцисса и ордината, с прямой и с параболой. Якорь
+ * плашки — id: по нему разбор открывается ссылкой (#abscissa-line).
+ * «Потренироваться»: у основных типов — свой набор опорных задач P12Q-n
+ * (analysis.prep), вторая ссылка — тренажёр по 12Q.x; у пересечений —
+ * тренажёр с фильтром по правилу ответа (content/trainerModes.ts).
  */
 export const QUADRATIC_TYPES: Formulation[] = [
   {
     no: '01',
+    title: 'Знак коэффициента $a$',
+    hint: 'Куда направлены ветви параболы — таков и знак $a$.',
+    icon: 'value',
+    typeScene: 'sign-a',
+    analysis: { id: 'sign-a', examples: SIGN_A_EXAMPLES, trainer: 'sign-a', prep: 'sign-a' },
+  },
+  {
+    no: '02',
+    title: 'Значение коэффициента $a$',
+    hint: 'Шаг от вершины: изменение на шаге, делённое на квадрат шага.',
+    icon: 'value',
+    typeScene: 'value-a',
+    analysis: { id: 'value-a', examples: VALUE_A_EXAMPLES, trainer: 'value-a', prep: 'value-a' },
+  },
+  {
+    no: '03',
+    title: 'Свободный член $c$',
+    hint: '$c$ — ордината точки на оси $Oy$; не видно её — подстановка $x = 0$.',
+    icon: 'value',
+    typeScene: 'value-c',
+    analysis: { id: 'value-c', examples: VALUE_C_EXAMPLES, trainer: 'value-c', prep: 'value-c' },
+  },
+  {
+    no: '04',
+    title: 'Коэффициент $b$',
+    hint: 'Знаете $a$ и вершину — $b$ находится по формуле вершины.',
+    icon: 'value',
+    typeScene: 'value-b',
+    analysis: { id: 'value-b', examples: VALUE_B_EXAMPLES, trainer: 'value-b', prep: 'value-b' },
+  },
+  {
+    no: '05',
+    title: 'Формула по графику',
+    hint: 'Знак $a$, вершина, свободный член — и вариант остаётся один.',
+    icon: 'value',
+    typeScene: 'formula',
+    analysis: { id: 'formula', examples: FORMULA_EXAMPLES, trainer: 'formula', prep: 'formula' },
+  },
+  {
+    no: '06',
+    title: 'Значение функции в точке',
+    hint: 'Формула через вершину и подстановка: точка может лежать за краем рисунка.',
+    icon: 'value',
+    typeScene: 'value-at',
+    analysis: {
+      id: 'value-at',
+      examples: VALUE_AT_EXAMPLES,
+      trainer: 'value-at',
+      prep: 'value-at',
+    },
+  },
+  {
+    no: '07',
+    title: 'Аргумент по значению функции',
+    hint: 'Уравнение $f(x) = y_0$ даёт два корня — нужный называет условие.',
+    icon: 'argument',
+    typeScene: 'argument-for',
+    analysis: {
+      id: 'argument-for',
+      examples: ARGUMENT_EXAMPLES,
+      trainer: 'argument-for',
+      prep: 'argument-for',
+    },
+  },
+  {
+    no: '08',
     title: 'Абсцисса точки пересечения параболы и прямой',
     hint: 'Найти $x$ второй точки пересечения: формулы по рисунку, уравнение, второй корень по Виету.',
     icon: 'abscissa',
@@ -353,7 +431,7 @@ export const QUADRATIC_TYPES: Formulation[] = [
     },
   },
   {
-    no: '02',
+    no: '09',
     title: 'Абсцисса точки пересечения двух парабол',
     hint: 'Приравнять две квадратичные функции: уравнение остаётся квадратным, второй корень — по Виету.',
     icon: 'abscissa',
@@ -365,7 +443,7 @@ export const QUADRATIC_TYPES: Formulation[] = [
     },
   },
   {
-    no: '03',
+    no: '10',
     title: 'Ордината точки пересечения параболы и прямой',
     hint: 'Найти $x$ второй точки, затем $y$ — подстановкой в формулу прямой.',
     icon: 'ordinate',
@@ -377,7 +455,7 @@ export const QUADRATIC_TYPES: Formulation[] = [
     },
   },
   {
-    no: '04',
+    no: '11',
     title: 'Ордината точки пересечения двух парабол',
     hint: 'Найти $x$ второй точки, затем $y$ — подстановкой в более простую формулу.',
     icon: 'ordinate',
