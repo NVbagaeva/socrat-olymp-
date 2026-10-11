@@ -9,6 +9,7 @@ import { RichExampleBlock } from './RichExample';
 import { KatexFigure } from './KatexFigure';
 import { ExpPlaygroundLazy } from '../live/ExpPlaygroundLazy';
 import { LogPlaygroundLazy } from '../live/LogPlaygroundLazy';
+import { TrigPlaygroundLazy } from '../live/TrigPlaygroundLazy';
 
 /* Блок — обычная функция разметки, а не компонент: вложенные блоки
    (врезка, подраздел) зовут её же, ключ стоит на Fragment вокруг. */
@@ -171,6 +172,9 @@ function renderBlock(block: RichBlock): ReactNode {
       );
 
     case 'live':
+      if (block.id === 'trig-play') {
+        return <TrigPlaygroundLazy />;
+      }
       if (block.id === 'log-play') {
         return <LogPlaygroundLazy />;
       }

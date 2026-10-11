@@ -21,6 +21,7 @@ import '@/lib/graph/families/sqrt.js';
 import '@/lib/graph/families/quadratic.js';
 import '@/lib/graph/families/expo.js';
 import '@/lib/graph/families/loga.js';
+import '@/lib/graph/families/trig.js';
 import { exampleOfFigure, secondPoint, type CrossExample, type Quad } from '@/lib/quadraticCross';
 import { basicOfFigure, type BasicExample } from '@/lib/quadraticBasics';
 
@@ -1478,6 +1479,108 @@ function logExShiftXArgument(): TheoryFigure {
   };
 }
 
+/* ── Тригонометрические функции ──────────────────────────────────
+   Как в открытом банке: клетка по оси x — π/4 (подписано π), по оси
+   y — 1 или 0,5 (подписана единица). Координаты рисунка — в клетках.
+   Числа — те же, что в content/theoryTrigonometric.ts и
+   content/trigonometric.ts. */
+
+function trig(fn: string, a: number, b: number, yu: number, color = 'lineA') {
+  return { type: 'trig', fn, a, b, yu, color, label: null };
+}
+
+function trigLabels(w: Win, yu: number): FigureLabel[] {
+  return [
+    ...axisLabels(w, false),
+    { at: [4, 0], text: '$\\pi$', dy: 16, size: 14, tone: 'muted' },
+    { at: [0, 1 / yu], text: '$1$', dx: -12, size: 14, tone: 'muted' },
+  ];
+}
+
+function tgAsym(w: Win) {
+  return [-6, -2, 2, 6, 10].filter((X) => X > w.xmin && X < w.xmax).map((X) => vasym(w, X));
+}
+
+/** y = cos x: (0; 1), (π/2; 0), (π; −1); клетка по y — 0,5. */
+function trigCos(): TheoryFigure {
+  const w = win(-5, 9, -3, 3);
+  return {
+    scene: { ...base(w), curves: [trig('cos', 1, 0, 0.5)], points: [dot(0, 2), dot(2, 0), dot(4, -2)] },
+    labels: trigLabels(w, 0.5),
+  };
+}
+
+/** y = sin x: (0; 0), (π/2; 1), (−π/2; −1). */
+function trigSin(): TheoryFigure {
+  const w = win(-5, 9, -3, 3);
+  return {
+    scene: { ...base(w), curves: [trig('sin', 1, 0, 0.5)], points: [dot(0, 0), dot(2, 2), dot(-2, -2)] },
+    labels: trigLabels(w, 0.5),
+  };
+}
+
+/** y = tg x: (0; 0), (π/4; 1), (−π/4; −1); асимптоты x = ±π/2. */
+function trigTg(): TheoryFigure {
+  const w = win(-3, 7, -4, 4);
+  return {
+    scene: { ...base(w), curves: [trig('tg', 1, 0, 1)], points: [dot(0, 0), dot(1, 1), dot(-1, -1)], shapes: tgAsym(w) },
+    labels: trigLabels(w, 1),
+  };
+}
+
+/** y = sin x (бледно) и y = 2 sin x + 1: a растягивает, b поднимает. */
+function trigStretch(): TheoryFigure {
+  const w = win(-5, 9, -2, 4);
+  return {
+    scene: {
+      ...base(w),
+      curves: [trig('sin', 1, 0, 1, 'muted'), trig('sin', 2, 1, 1)],
+      points: [dot(2, 3), dot(-2, -1)],
+      shapes: [seg([w.xmin, 1], [w.xmax, 1], 'muted')],
+    },
+    labels: [
+      ...trigLabels(w, 1),
+      { at: [8, 1], text: '$y = b$', dy: -12, size: 14, tone: 'muted' },
+    ],
+  };
+}
+
+/** f(x) = 2 cos x + 1 по точкам A(0; 3), B(π/2; 1): метод раздела. */
+function trigTwoPoints(): TheoryFigure {
+  const w = win(-5, 6, -2, 4);
+  return {
+    scene: {
+      ...base(w),
+      curves: [trig('cos', 2, 1, 1)],
+      points: [dot(0, 3), dot(2, 1)],
+      shapes: [seg([2, 0], [2, 1]), seg([0, 1], [2, 1])],
+    },
+    labels: [
+      ...trigLabels(w, 1),
+      { at: [0, 3], text: '$A$', size: 14, auto: true },
+      { at: [2, 1], text: '$B$', size: 14, auto: true },
+    ],
+  };
+}
+
+function trigExample(fn: string, a: number, b: number, yu: number, w: Win, pts: [number, number][]): TheoryFigure {
+  return {
+    scene: { ...base(w), curves: [trig(fn, a, b, yu)], points: pts.map(([x, y]) => dot(x, y)),
+             shapes: fn === 'tg' ? tgAsym(w) : [] },
+    labels: trigLabels(w, yu),
+  };
+}
+
+/** Разборы: косинус — a: (0; 2), (π/2; −1); b: (0; 3), (π; −1). */
+const trigExCosA = () => trigExample('cos', 3, -1, 1, win(-5, 6, -5, 3), [[0, 2], [2, -1]]);
+const trigExCosB = () => trigExample('cos', 2, 1, 1, win(-5, 6, -2, 4), [[0, 3], [4, -1]]);
+/** Тангенс — a: (0; −1), (π/4; 2); b: (π/4; 3), (−π/4; −1). */
+const trigExTgA = () => trigExample('tg', 3, -1, 1, win(-3, 7, -7, 6), [[0, -1], [1, 2]]);
+const trigExTgB = () => trigExample('tg', 2, 1, 1, win(-3, 7, -6, 7), [[1, 3], [-1, -1]]);
+/** Синус, клетка 0,5 — a: (0; 0,5), (π/2; 2); b: (π/2; 2,5), (−π/2; −0,5). */
+const trigExSinA = () => trigExample('sin', 1.5, 0.5, 0.5, win(-5, 6, -4, 6), [[0, 1], [2, 4]]);
+const trigExSinB = () => trigExample('sin', 1.5, 1, 0.5, win(-5, 6, -3, 7), [[2, 5], [-2, -1]]);
+
 const FIGURES = {
   'lin-rise-mini': riseMini,
   'lin-fall-mini': fallMini,
@@ -1537,6 +1640,17 @@ const FIGURES = {
   'log-ex-shift-argument': logExShiftArgument,
   'log-ex-shiftx-value': logExShiftXValue,
   'log-ex-shiftx-argument': logExShiftXArgument,
+  'trig-cos': trigCos,
+  'trig-sin': trigSin,
+  'trig-tg': trigTg,
+  'trig-stretch': trigStretch,
+  'trig-two-points': trigTwoPoints,
+  'trig-ex-cos-a': trigExCosA,
+  'trig-ex-cos-b': trigExCosB,
+  'trig-ex-tg-a': trigExTgA,
+  'trig-ex-tg-b': trigExTgB,
+  'trig-ex-sin-a': trigExSinA,
+  'trig-ex-sin-b': trigExSinB,
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;

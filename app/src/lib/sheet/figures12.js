@@ -21,6 +21,7 @@ import QuadraticAux from '../graph/quadratic-aux.js';
 import Sqrt from '../graph/generate-sqrt.js';
 import Exponential from '../graph/generate-exponential.js';
 import Logarithmic from '../graph/generate-logarithmic.js';
+import Trigonometric from '../graph/generate-trigonometric.js';
 import Line from '../graph/families/line.js';
 import Triangle from '../graph/triangle.js';
 
@@ -69,6 +70,9 @@ export function solutionScene(task, generator) {
   }
   if (meta.family === 'logarithmic') {
     return Logarithmic.sceneWith(meta, Logarithmic.guideShapes(meta));
+  }
+  if (meta.family === 'trigonometric') {
+    return Trigonometric.sceneWith(meta, Trigonometric.guideShapes(meta));
   }
   if (meta.family === 'sqrt') {
     var A = (meta.points || []).filter(function (p) { return p.role === 'cross'; })[0];

@@ -21,6 +21,8 @@ import sqrt from './sqrt.js';
 import './expo.js';
 /* Логарифмическая со сдвигами: k · logₐ(x + c) + d. Только регистрация. */
 import './loga.js';
+/* Тригонометрические в клетках сетки: a · cos x + b, a · sin x + b, a · tg x + b. */
+import './trig.js';
 
 export { quadratic, rational, exponential, logarithmic, trigonometric, sqrt };
 

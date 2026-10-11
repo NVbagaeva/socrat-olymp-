@@ -33,6 +33,7 @@
     "test:galereya-12": "node scripts/check-galereya-12.mjs",
     "test:graph-exponential": "node scripts/check-graph-exponential.mjs",
     "test:graph-logarithmic": "node scripts/check-graph-logarithmic.mjs",
+    "test:graph-trigonometric": "node scripts/check-graph-trigonometric.mjs",
     "test:graph-sqrt": "node scripts/check-graph-sqrt.mjs",
     "test:point-labels": "node scripts/check-point-labels.mjs",
     "test:komplekty": "node scripts/check-komplekty.mjs",

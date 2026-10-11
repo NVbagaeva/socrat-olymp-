@@ -20,6 +20,8 @@ import { EXPONENTIAL } from '@/content/exponential';
 import { EXPONENTIAL_THEORY } from '@/content/theoryExponential';
 import { LOGARITHMIC } from '@/content/logarithmic';
 import { LOGARITHMIC_THEORY } from '@/content/theoryLogarithmic';
+import { TRIGONOMETRIC } from '@/content/trigonometric';
+import { TRIGONOMETRIC_THEORY } from '@/content/theoryTrigonometric';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -152,9 +154,6 @@ const LINEAR_THEORY: TheoryBlock[] = LINEAR_RICH_THEORY;
 
 /** Все четыре типа заданий: вопрос не зависит от вида функции. */
 const ALL_TASK_TYPES: TaskTypeId[] = taskTypes.map((type) => type.id);
-
-/** Пустой банк: заданий этого типа в движке пока нет. */
-const EMPTY_BANK: FunctionBank = { prep: [], prototypes: [] };
 
 export const functionTypes: FunctionType[] = [
   {
@@ -331,6 +330,9 @@ export const functionTypes: FunctionType[] = [
     bezStarogoAdresa: true,
     tutors: LOGARITHMIC.tutors,
   },
+  /* Подтема «Тригонометрические функции»: a cos x + b, a sin x + b и
+     a tg x + b — шесть задач открытого банка ФИПИ (найти a или b) и по
+     20 аналогов. Тексты — content/trigonometric.ts. */
   {
     id: 'trigonometric',
     no: '07',
@@ -339,11 +341,18 @@ export const functionTypes: FunctionType[] = [
     icon: 'trig',
     formula: 'y = \\sin x',
     description: '',
-    theory: [],
+    theory: TRIGONOMETRIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12T-1', 'P12T-2', 'P12T-3', 'P12T-4', 'P12T-5'],
+      prototypes: ['12T.A', '12T.B', '12T.C', '12T.D', '12T.E', '12T.F'],
+    },
+    status: 'active',
+    head: TRIGONOMETRIC.head,
+    about: TRIGONOMETRIC.about,
+    bezStarogoAdresa: true,
+    tutors: TRIGONOMETRIC.tutors,
   },
 ];
 

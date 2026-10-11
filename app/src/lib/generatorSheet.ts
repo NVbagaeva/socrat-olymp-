@@ -17,6 +17,7 @@ import rationalSolution from '@/lib/graph/solution-rational.js';
 import sqrtSolution from '@/lib/graph/solution-sqrt.js';
 import exponentialSolution from '@/lib/graph/solution-exponential.js';
 import logarithmicSolution from '@/lib/graph/solution-logarithmic.js';
+import trigonometricSolution from '@/lib/graph/solution-trigonometric.js';
 import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -348,6 +349,9 @@ const rationalBuilder = {
     }
     if (task.meta.family === 'logarithmic') {
       return logarithmicSolution.fromTask(task);
+    }
+    if (task.meta.family === 'trigonometric') {
+      return trigonometricSolution.fromTask(task);
     }
     return task.meta.family === 'sqrt'
       ? sqrtSolution.fromTask(task)

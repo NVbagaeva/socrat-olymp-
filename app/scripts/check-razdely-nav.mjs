@@ -294,11 +294,14 @@ for (const size of SIZES) {
     where(`подписи в меню ${JSON.stringify(dialog.captions)}`),
   );
 
-  /* «Скоро» не нажимается: меню на месте, адрес тот же. */
-  const urlBefore = page.url();
-  await page.locator(`${MENU} .razdel-karta.is-soon`).first().click({ force: true });
-  await page.waitForTimeout(300);
-  check((await menuOpen(page)) && page.url() === urlBefore, where('карточка «Скоро» нажимается'));
+  /* «Скоро» не нажимается: меню на месте, адрес тот же. Когда открыты
+     все разделы, проверять нечего. */
+  if (SOON > 0) {
+    const urlBefore = page.url();
+    await page.locator(`${MENU} .razdel-karta.is-soon`).first().click({ force: true });
+    await page.waitForTimeout(300);
+    check((await menuOpen(page)) && page.url() === urlBefore, where('карточка «Скоро» нажимается'));
+  }
 
   /* Переход без перезагрузки: метка в окне переживает навигацию. */
   await page.evaluate(() => {
@@ -623,11 +626,14 @@ for (const size of SIZES) {
   await page.evaluate(() => localStorage.removeItem('budetege:trainer:v1'));
 
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
-  await page.goto(BASE + '/zadaniya/12/trigonometric/', { waitUntil: 'networkidle' });
-  check(
-    (await page.locator('.razdely-plashka', { hasText: 'Тригонометрические функции' }).count()) === 1,
-    where('на странице закрытого раздела нет плашки'),
-  );
+  const closed = RAZDELY.find((r) => !r.open);
+  if (closed) {
+    await page.goto(BASE + '/zadaniya/12/' + closed.id + '/', { waitUntil: 'networkidle' });
+    check(
+      (await page.locator('.razdely-plashka').count()) === 1,
+      where('на странице закрытого раздела нет плашки'),
+    );
+  }
 
   check(errors.length === 0, where(`ошибки на странице: ${errors.slice(0, 3).join('; ')}`));
   await context.close();

@@ -58,7 +58,13 @@ export type PrepSkillId =
   | 'log-znachenie'
   | 'log-sdvig-vverh'
   | 'log-sdvig-vbok'
-  | 'log-argument';
+  | 'log-argument'
+  /* Тригонометрические функции: пять навыков, P12T-1 … P12T-5. */
+  | 'trig-cos'
+  | 'trig-sin'
+  | 'trig-tg'
+  | 'trig-sistema'
+  | 'trig-polovina';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */
@@ -478,6 +484,54 @@ export const logarithmicSkills: PrepSkill[] = [
 ];
 
 /**
+ * Навыки подтемы «Тригонометрические функции»: по десять задач в блоке.
+ * Метод: клетка по оси x — π/4; две отмеченные точки в узлах сетки,
+ * значения функции в них (−1, 0, 1) и система.
+ */
+export const trigonometricSkills: PrepSkill[] = [
+  {
+    id: 'trig-cos',
+    no: '01',
+    title: 'Косинус: $a\\cos x + b$',
+    lead: 'Точки в узлах, где косинус равен $1$, $0$ или $-1$',
+    tip: 'Клетка по оси $x$ — $\\dfrac{\\pi}{4}$. Нужные значения: $\\cos 0 = 1$, $\\cos \\dfrac{\\pi}{2} = 0$, $\\cos \\pi = -1$. Точка, где косинус равен нулю, сразу даёт $b$; вторая точка — $a$.',
+    setId: 'P12T-1',
+  },
+  {
+    id: 'trig-sin',
+    no: '02',
+    title: 'Синус: $a\\sin x + b$',
+    lead: 'Точки, где синус равен $1$, $0$ или $-1$',
+    tip: 'Нужные значения: $\\sin 0 = 0$, $\\sin \\dfrac{\\pi}{2} = 1$, $\\sin\\left(-\\dfrac{\\pi}{2}\\right) = -1$. В точке $x = 0$ синус равен нулю — там $f(0) = b$.',
+    setId: 'P12T-2',
+  },
+  {
+    id: 'trig-tg',
+    no: '03',
+    title: 'Тангенс: $a\\operatorname{tg} x + b$',
+    lead: 'Асимптоты пунктиром, точки при $0$ и $\\dfrac{\\pi}{4}$',
+    tip: 'Нужные значения: $\\operatorname{tg} 0 = 0$, $\\operatorname{tg} \\dfrac{\\pi}{4} = 1$, $\\operatorname{tg}\\left(-\\dfrac{\\pi}{4}\\right) = -1$. В точке $x = 0$ тангенс равен нулю — там $f(0) = b$.',
+    setId: 'P12T-3',
+  },
+  {
+    id: 'trig-sistema',
+    no: '04',
+    title: 'Система сложением',
+    lead: 'Значения $1$ и $-1$: складываем и вычитаем',
+    tip: 'Если в точках функция равна $1$ и $-1$, получаем $a + b = y_1$ и $-a + b = y_2$. Сложите уравнения — $2b = y_1 + y_2$; вычтите — $2a = y_1 - y_2$.',
+    setId: 'P12T-4',
+  },
+  {
+    id: 'trig-polovina',
+    no: '05',
+    title: 'Клетка — половина единицы',
+    lead: 'Сначала посмотрите, сколько клеток в единице',
+    tip: 'Если единица на оси $y$ — две клетки, одна клетка равна $0{,}5$. Ординату точки считаем в клетках и делим на два: $3$ клетки — это $1{,}5$.',
+    setId: 'P12T-5',
+  },
+];
+
+/**
  * Навыки подтемы по её идентификатору (data/functionTypes.ts).
  *
  * У каждой подтемы свой список: новая не дописывается в чужой.
@@ -499,6 +553,9 @@ export function prepSkillsFor(type: string): PrepSkill[] {
   if (type === 'logarithmic') {
     return logarithmicSkills;
   }
+  if (type === 'trigonometric') {
+    return trigonometricSkills;
+  }
   return type === 'rational' ? rationalSkills : [];
 }
 
@@ -510,6 +567,7 @@ export const allPrepSkills: PrepSkill[] = [
   ...irrationalSkills,
   ...exponentialSkills,
   ...logarithmicSkills,
+  ...trigonometricSkills,
 ];
 
 /** Заголовок и подписи экрана списка навыков. */

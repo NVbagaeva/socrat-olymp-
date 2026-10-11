@@ -174,7 +174,33 @@ export function logarithmicScene() {
   };
 }
 
+/** Тригонометрическая f(x) = 1,5 cos x − 1 в клетках π/4 и 0,5: две точки в узлах. */
+export function trigonometricScene() {
+  const win = { xmin: -5, xmax: 6, ymin: -7, ymax: 4 };
+  const ticks = {
+    x: [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6].map((at) => (at === 4 ? { at, label: 'π' } : { at })),
+    y: [-7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4].map((at) => (at === 2 ? { at, label: '1' } : { at })),
+  };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0', ticks },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'trig', fn: 'cos', a: 1.5, b: -1, yu: 0.5, color: 'lineA', label: null }],
+    points: [
+      { x: 0, y: 1, style: 'solid', color: 'lineA', label: null },
+      { x: -2, y: -2, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [],
+    alt: 'График функции a cos x + b с двумя отмеченными точками',
+  };
+}
+
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'trigonometric') {
+    return trigonometricScene();
+  }
   if (type === 'logarithmic') {
     return logarithmicScene();
   }
@@ -235,7 +261,7 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 export function generatorSkillScene(setId: string) {
   const quadratic =
     QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId] ??
-    EXPONENTIAL_SKILL_SCENE[setId] ?? LOGARITHMIC_SKILL_SCENE[setId];
+    EXPONENTIAL_SKILL_SCENE[setId] ?? LOGARITHMIC_SKILL_SCENE[setId] ?? TRIGONOMETRIC_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -571,6 +597,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return logarithmic;
   }
 
+  const trigonometric = trigonometricPrepScene(id, base);
+  if (trigonometric !== null) {
+    return trigonometric;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -726,7 +757,11 @@ export type TypeSceneId =
   /* Логарифмическая функция. */
   | 'log-value'
   | 'log-shift'
-  | 'log-shift-x';
+  | 'log-shift-x'
+  /* Тригонометрические функции. */
+  | 'trig-cos'
+  | 'trig-sin'
+  | 'trig-tg';
 
 /* Миниатюры основных типов: одна парабола, чуть разная у каждого типа —
    ветви вниз, шире и уже, выше и ниже, вершина левее и правее. Только
@@ -785,6 +820,16 @@ export function typeScene(id: TypeSceneId) {
   if (id === 'log-shift-x') {
     return { ...base, curves: [{ type: 'loga', a: 2, c: 1.3, d: 0, color: 'lineA', label: null, steps: MINI_STEPS }],
       shapes: [{ type: 'segment', from: [-1.3, -2], to: [-1.3, 2], style: 'dashed', color: 'asymptote' }] };
+  }
+  /* Тригонометрические: волна в клетках π/2, у тангенса — асимптоты. */
+  if (id === 'trig-cos' || id === 'trig-sin' || id === 'trig-tg') {
+    const fn = id.slice(5);
+    return {
+      ...base,
+      curves: [{ type: 'trig', fn, a: fn === 'tg' ? 0.6 : 1.3, b: fn === 'tg' ? 0 : 0.2, xu: Math.PI / 2, yu: 1,
+                 color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: fn === 'tg' ? [miniVAsymptote(-1), miniVAsymptote(1)] : [],
+    };
   }
   /* Второй график — зелёный, как g в разборах под плашкой. */
   if (id === 'cross-line') {
@@ -1078,6 +1123,48 @@ function logarithmicPrepScene(
   }
   return null;
 }
+
+/* ── Миниатюры навыков тригонометрических функций ─────────────────
+   Окно ±2 клетки, клетка по x — π/2: волна видна целиком. */
+
+function miniTrig(fn: string, a: number, b: number) {
+  return { type: 'trig', fn, a, b, xu: Math.PI / 2, yu: 1, color: 'lineA', label: null };
+}
+
+function trigonometricPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'trig-cos') {
+    return { ...base, curves: [miniTrig('cos', 1, 0.5)], points: [miniDot(0, 1.5), miniDot(1, 0.5)], shapes: [] };
+  }
+  if (id === 'trig-sin') {
+    return { ...base, curves: [miniTrig('sin', 1, 0.5)], points: [miniDot(0, 0.5), miniDot(1, 1.5)], shapes: [] };
+  }
+  if (id === 'trig-tg') {
+    return { ...base, curves: [miniTrig('tg', 0.5, 0)], points: [miniDot(0, 0), miniDot(0.5, 0.5)],
+             shapes: [miniVAsymptote(-1), miniVAsymptote(1)] };
+  }
+  if (id === 'trig-sistema') {
+    return { ...base, curves: [miniTrig('sin', 1.2, 0.3)], points: [miniDot(1, 1.5), miniDot(-1, -0.9)],
+             shapes: [dashed([0, 0.3], [2, 0.3]), prepLabel('b', 1.6, 0.3, 0, -14, 'accent')] };
+  }
+  if (id === 'trig-polovina') {
+    return { ...base, curves: [miniTrig('cos', 0.75, -0.25)], points: [miniDot(0, 0.5), miniDot(2, -1)], shapes: [] };
+  }
+  return null;
+}
+
+/* Набор прототипов тригонометрических функций → навык подтемы. */
+const TRIGONOMETRIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12T.A': 'trig-cos',
+  '12T.B': 'trig-cos',
+  '12T.C': 'trig-tg',
+  '12T.D': 'trig-tg',
+  '12T.E': 'trig-sin',
+  '12T.F': 'trig-sin',
+};
 
 /* Набор прототипов логарифмической функции → навык подтемы. */
 const LOGARITHMIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
