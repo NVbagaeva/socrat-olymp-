@@ -22,23 +22,39 @@ const problems = [];
 
 if (!site) {
   const { PROTOTYPES, kodNaSayte } = requireSrc('lib/zadanie10/prototypes');
+  const { faylSlota, altSlota } = requireSrc('lib/zadanie10/illyustracii');
   const dir = path.join(APP, 'public/illustrations/zadanie-10');
   const pustye = [];
   for (const p of PROTOTYPES) {
-    const webp = fs.existsSync(path.join(dir, `${p.id}.webp`));
-    const png = fs.existsSync(path.join(dir, `${p.id}.png`));
+    const f = faylSlota(p.id);
+    const webp = fs.existsSync(path.join(dir, `${f}.webp`));
+    const png = fs.existsSync(path.join(dir, `${f}.png`));
     if (!webp && !png) {
-      pustye.push(`${kodNaSayte(p.id)} ${p.title} → ${p.id}.webp + ${p.id}.png`);
+      pustye.push(`${kodNaSayte(p.id)} ${p.title} → ${f}.webp + ${f}.png`);
     } else if (!webp || !png) {
       problems.push(`${p.id}: есть только ${webp ? 'webp' : 'png'} — нужны оба файла`);
     } else {
-      const buf = fs.readFileSync(path.join(dir, `${p.id}.png`));
+      const buf = fs.readFileSync(path.join(dir, `${f}.png`));
       if (buf.toString('ascii', 1, 4) !== 'PNG') {
-        problems.push(`${p.id}.png — не PNG`);
+        problems.push(`${f}.png — не PNG`);
+      }
+      const razmer = fs.statSync(path.join(dir, `${f}.webp`)).size;
+      if (razmer > 300 * 1024) {
+        problems.push(`${f}.webp — ${Math.round(razmer / 1024)} КБ, больше 300 КБ`);
       }
     }
-    if (!p.alt || p.alt.length < 10) {
+    const alt = altSlota(p.id, p.alt);
+    if (!alt || alt.length < 10) {
       problems.push(`${p.id}: нет alt-текста`);
+    }
+  }
+  /* Лишние файлы: всё в папке должно принадлежать какому-то слоту. */
+  const nuzhnye = new Set(
+    PROTOTYPES.flatMap((p) => [`${faylSlota(p.id)}.webp`, `${faylSlota(p.id)}.png`]),
+  );
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+    if (!nuzhnye.has(f)) {
+      problems.push(`${f}: файл не относится ни к одному слоту`);
     }
   }
   console.log(

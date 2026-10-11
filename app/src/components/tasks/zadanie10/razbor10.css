@@ -118,11 +118,22 @@
   height: auto;
 }
 
+/* Картинки сюжетов — PNG/WebP с прозрачным фоном: без рамки и тени,
+   ширина ограничена, чтобы не заслонять условие. */
+.z10-ill {
+  display: block;
+}
+
 .z10-ill img {
   display: block;
-  max-width: 100%;
+  width: auto;
+  max-width: min(100%, 440px);
   height: auto;
-  border-radius: var(--radius-lg);
+  max-height: 320px;
+}
+
+.z10-ill__svernuto summary {
+  margin-bottom: var(--space-2, 8px);
 }
 
 .z10-ill__svernuto summary {
