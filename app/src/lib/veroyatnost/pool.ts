@@ -32,6 +32,7 @@ import {
   type Method,
 } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -407,13 +408,11 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
   const kartinka = kartinkaOpornoy(zadacha);
-  /* Подсказка — от прототипа, на числах того варианта, из которого
-     взята задача (вариант 1 — сама задача конспекта). */
-  const params = zadacha.prototip?.varianty.find((v) => v.n === (zadacha.variant ?? 1))?.params;
+  /* Подсказка — от прототипа на числах варианта задачи или, у задач №5
+     без прототипа, своя (podgotovka5-podskazki.ts). */
+  const shagiPodskazki = podskazkaOpornoy(zadacha);
   const podskazka =
-    zadacha.prototip?.podskazka === undefined || params === undefined
-      ? undefined
-      : zapechatatPodskazku(zadacha.prototip.podskazka(params), seal);
+    shagiPodskazki === undefined ? undefined : zapechatatPodskazku(shagiPodskazki, seal);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
   const illustration = model === null ? kartinka : undefined;

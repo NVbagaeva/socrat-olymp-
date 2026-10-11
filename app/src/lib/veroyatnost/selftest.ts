@@ -33,6 +33,7 @@ import {
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import { zapisOtveta } from './podskazka';
 import { klyuchZadachi, sealAnswer } from './secret';
 import {
@@ -420,6 +421,8 @@ export interface PrepReport {
    * задачу, которой нет, или превью блока без задачи по картинке.
    */
   kartinki: string[];
+  /** Опорные задачи без подсказки-вопросов. */
+  bezPodskazki: string[];
   bad: BadVariant[];
 }
 
@@ -435,6 +438,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
   const duplicates: string[] = [];
   const vidennye = new Set<string>();
   const nomera = new Set<number>();
+  const bezPodskazkiOpornye: string[] = [];
 
   let zadachi = 0;
   let mismatch = 0;
@@ -471,6 +475,15 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
       }
       if (zadacha.okruglenie === undefined && !konechnaya(otvet)) {
         problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+      }
+      /* Подсказка — та же, что уйдёт ученику (podskazkaOpornoy). */
+      const podskazka = podskazkaOpornoy(zadacha);
+      if (podskazka === undefined) {
+        bezPodskazkiOpornye.push(zadacha.id);
+      } else {
+        problems.push(
+          ...problemyPodskazki(podskazka, otvet, 'десятичная', zadacha.okruglenie ?? null),
+        );
       }
 
       const posledniy = zadacha.shagi[zadacha.shagi.length - 1];
@@ -528,6 +541,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     vykladki,
     duplicates,
     kartinki,
+    bezPodskazki: bezPodskazkiOpornye,
     bad,
   };
 }
