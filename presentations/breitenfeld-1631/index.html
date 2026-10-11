@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Битва при Брейтенфельде, 1631</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div id="viewport">
+<div id="stage" aria-live="polite">
+  <div class="paper-bg"></div>
+
+  <!-- 1. ТИТУЛ -->
+  <section class="slide" id="s1" data-guide="none" data-dark="1">
+    <canvas id="scene" aria-label="3D-диорама поля битвы: шведские линии против терций Тилли"></canvas>
+    <div class="fallback"></div>
+    <div class="watercolor"></div>
+    <div class="wash"></div>
+    <div class="title-block">
+      <span class="kicker a-kicker">Тридцатилетняя война</span>
+      <h1 class="a-title"><span class="line">Битва при Брейтенфельде</span><span class="year">1631</span></h1>
+      <p class="sub a-sub">Как «военная революция» выиграла сражение</p>
+    </div>
+    <div class="credits a-credits">
+      <span>Выполнила: ученица 7 класса <b>Васильева Алёна</b></span>
+      <span>Учитель: <b>Васильев В.Г.</b></span>
+    </div>
+    <div class="hint a-hint"><kbd>→</kbd> далее <kbd>F</kbd> весь экран <kbd>S</kbd> заметки</div>
+    <aside class="notes">Здравствуйте! Моя презентация посвящена битве при Брейтенфельде, которая произошла в 1631 году. На этой битве хорошо видно, что такое «военная революция»: новое оружие и новая тактика победили старую. Перед вами поле боя: внизу синие линии шведов, вверху красные квадраты армии Тилли.</aside>
+  </section>
+
+  <!-- 2. ГДЕ И КОГДА -->
+  <section class="slide" id="s2" data-guide="wonder" data-say="Король приплыл через Балтийское море!" data-pos="tr">
+    <div class="s-map">
+      <div class="map-wrap a-img">
+        <svg id="euroMap" viewBox="0 0 1000 760" aria-label="Карта Европы"></svg>
+      </div>
+      <div class="when">
+        <span class="kicker a-in">Где и когда</span>
+        <div class="bigyear a-in"><span class="count" data-to="1631" data-from="1600" data-plain="1">1631</span></div>
+        <div class="date a-in">17 сентября</div>
+        <p class="place a-in">Деревня Брейтенфельд под Лейпцигом, Саксония (Германия)</p>
+        <div class="timeline a-in">
+          <div class="bar"></div>
+          <span class="tick" style="left:0">1618</span>
+          <span class="tick" style="right:0">1648</span>
+          <div class="mark" style="left:43.3%"><span>1631</span><i></i></div>
+          <span class="cap" style="top:104px;left:110px">Тридцатилетняя война</span>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Битва произошла 17 сентября 1631 года у деревни Брейтенфельд, рядом с городом Лейпцигом в Саксонии. Это время Тридцатилетней войны, которая шла с 1618 по 1648 год. За год до битвы шведский король Густав Адольф высадился со своей армией на побережье Германии.</aside>
+  </section>
+
+  <!-- 3. КТО ПРОТИВ КОГО -->
+  <section class="slide" id="s3" data-guide="cheer" data-say="Синие против красных! Кто победит?" data-pos="tr">
+    <h2 class="title a-title">Кто против кого</h2>
+    <div class="armies">
+      <article class="army sw a-card">
+        <div class="flagbar"></div>
+        <h3>Шведы и саксонцы</h3>
+        <p class="who">Протестанты</p>
+        <dl>
+          <dt>Командир</dt><dd>король <b>Густав II Адольф</b></dd>
+          <dt>Союзники</dt><dd>саксонцы курфюрста Иоганна Георга</dd>
+          <dt>Воинов</dt><dd><span class="num"><small>около</small><span class="count" data-to="40000">40 000</span></span></dd>
+          <dt>Пушек</dt><dd>более 60, много лёгких</dd>
+          <dt>Построение</dt><dd><b>длинные линии</b></dd>
+        </dl>
+      </article>
+      <div class="vs a-vs"><span>vs</span></div>
+      <article class="army im a-card">
+        <div class="flagbar"></div>
+        <h3>Армия Тилли</h3>
+        <p class="who">Католическая лига и император</p>
+        <dl>
+          <dt>Командир</dt><dd>граф <b>Иоганн Тилли</b></dd>
+          <dt>Союзники</dt><dd>войска императора Фердинанда II</dd>
+          <dt>Воинов</dt><dd><span class="num"><small>около</small><span class="count" data-to="31000">31 000</span></span></dd>
+          <dt>Пушек</dt><dd>около 30, тяжёлые</dd>
+          <dt>Построение</dt><dd><b>глубокие квадраты (терции)</b></dd>
+        </dl>
+      </article>
+    </div>
+    <aside class="notes">С одной стороны воевали шведы короля Густава Адольфа и их союзники саксонцы. Вместе их было около 40 тысяч. С другой стороны была армия Католической лиги и императора под командованием графа Тилли, около 31 тысячи человек. Главное отличие было в построении: у Тилли глубокие квадраты, у шведов длинные линии.</aside>
+  </section>
+
+  <!-- 4. КОРОЛЬ-НОВАТОР -->
+  <section class="slide" id="s4" data-guide="none">
+    <div class="s-king">
+      <figure class="frame bare contain blend king-frame a-img"><img src="assets/img/king.png" alt="Густав II Адольф на белом коне"><div class="ph">Нет файла<b>king.png</b></div></figure>
+      <div>
+        <p class="years a-in">король Швеции в 1611-1632 годах</p>
+        <h2 class="title a-title">Густав II&nbsp;Адольф, <em>король-новатор</em></h2>
+        <div class="rule a-rule"></div>
+        <ul class="points">
+          <li class="a-li">Стал королём в <b>17 лет</b></li>
+          <li class="a-li">Создал <b>постоянную армию</b> из обученных солдат</li>
+          <li class="a-li">Ввёл <b>лёгкие пушки</b>, линии и залповый огонь</li>
+          <li class="a-li">Прозвище: <b>«Северный лев»</b></li>
+        </ul>
+      </div>
+    </div>
+    <aside class="notes">Шведскую армию вёл король Густав Второй Адольф. Он стал королём в 17 лет и правил с 1611 по 1632 год. Он создал постоянную обученную армию, ввёл лёгкие пушки и новое построение. За смелость его прозвали «Северным львом».</aside>
+  </section>
+
+  <!-- 5. СТАРОЕ ПРОТИВ НОВОГО -->
+  <section class="slide" id="s5" data-guide="wonder" data-say="Потяни шторку и сравни!" data-pos="tr">
+    <h2 class="title a-title">Старое против нового</h2>
+    <div class="compare a-img" id="compare" style="--cut:50%" tabindex="0" role="slider" aria-label="Шторка: терция и линия" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <div class="side old"><img src="assets/img/tercio.png" alt="Испанская терция: квадрат пикинёров и мушкетёров" draggable="false"><div class="ph">Нет файла<b>tercio.png</b></div><span class="tag">Терция</span></div>
+      <div class="side new"><img src="assets/img/swedish_line.png" alt="Шведская линия: залп мушкетёров и лёгкая пушка" draggable="false"><div class="ph">Нет файла<b>swedish_line.png</b></div><span class="tag">Линия</span></div>
+      <div class="handle"><span>‹ ›</span></div>
+    </div>
+    <div class="pros">
+      <div class="o a-in"><h4>Терция: глубокий квадрат</h4><span class="plus">Плюс:</span> прочная стена пик против конницы.<br><span class="minus">Минус:</span> стреляют только крайние ряды, медленная.</div>
+      <div class="n a-in"><h4>Линия: всего 6 шеренг</h4><span class="plus">Плюс:</span> залп тысяч ружей сразу.<br><span class="minus">Минус:</span> тонкую линию легко обойти, перестроить её трудно.</div>
+    </div>
+    <aside class="notes">Слева терция: огромный квадрат из пикинёров, а мушкетёры стоят по углам. Он крепкий, но стреляют только крайние ряды, и двигается он медленно. Справа шведская линия: в ней всего шесть шеренг, поэтому стреляют почти все солдаты сразу. Но тонкую линию легко обойти с фланга, и перестраивать её трудно, для этого нужна выучка.</aside>
+  </section>
+
+  <!-- 6. ОРУЖИЕ ЭПОХИ -->
+  <section class="slide" id="s6" data-guide="cheer" data-say="Бах! Мушкет стреляет громко и дымно!" data-pos="br">
+    <h2 class="title a-title">Оружие эпохи</h2>
+    <div class="weapons">
+      <div class="weapon m">
+        <figure class="frame contain a-img"><img src="assets/img/musk.jpg" alt="Мушкетёр"><div class="ph">Нет файла<b>musk.jpg</b></div></figure>
+        <div>
+          <h3 class="a-in">Мушкетёр</h3>
+          <ul class="points compact">
+            <li class="a-li">Фитильный <b>мушкет</b></li>
+            <li class="a-li">Бумажные <b>патроны</b>: заряжать быстрее</li>
+            <li class="a-li">Шеренги стреляют <b>залпом</b></li>
+          </ul>
+        </div>
+      </div>
+      <div class="weapon p">
+        <figure class="frame contain a-img"><img src="assets/img/pikeman.png" alt="Пикинёр"><div class="ph">Нет файла<b>pikeman.png</b></div></figure>
+        <div>
+          <h3 class="a-in">Пикинёр</h3>
+          <ul class="points compact">
+            <li class="a-li">Шлем и <b>кираса</b></li>
+            <li class="a-li">Защищает стрелков <b>от конницы</b></li>
+          </ul>
+          <div class="stat a-in"><b>~<span class="count" data-to="5">5</span>&nbsp;м</b>длина пики</div>
+        </div>
+      </div>
+    </div>
+    <aside class="notes">Главные пехотинцы того времени: мушкетёр и пикинёр. Мушкетёр стрелял из фитильного мушкета. Шведы заряжали быстрее, потому что использовали бумажные патроны с порохом и пулей. Пикинёр держал пику длиной около пяти метров и защищал стрелков от вражеской конницы.</aside>
+  </section>
+
+  <!-- 7. РАССТАНОВКА -->
+  <section class="slide" id="s7" data-guide="none">
+    <div class="head"><h2 class="title a-title" style="font-size:64px">Расстановка перед боем</h2></div>
+    <figure class="frame a-kb" style="inset:auto;left:134px;top:150px;width:1652px;height:930px"><img src="assets/img/map_start.png" alt="Схема расстановки войск перед битвой"><div class="ph">Нет файла<b>map_start.png</b></div>
+      <div class="callout r a-call" style="left:812px;top:296px"><span class="dotp"></span><span class="txt">Терции Тилли</span></div>
+      <div class="callout r a-call" style="left:150px;top:300px"><span class="dotp"></span><span class="txt">Конница Лиги</span></div>
+      <div class="callout r flip a-call" style="right:150px;top:316px"><span class="dotp"></span><span class="txt">Конница Паппенгейма</span></div>
+      <div class="callout r a-call" style="left:1000px;top:352px"><span class="dotp"></span><span class="txt">Тяжёлые пушки</span></div>
+      <div class="callout b a-call" style="left:826px;top:540px"><span class="dotp"></span><span class="txt">Шведские линии</span></div>
+      <div class="callout b a-call" style="left:840px;top:772px"><span class="dotp"></span><span class="txt">Лёгкие полковые пушки</span></div>
+      <div class="callout b a-call" style="left:226px;top:730px"><span class="dotp"></span><span class="txt">Конница союзников</span></div>
+      <div class="callout b flip a-call" style="right:180px;top:728px"><span class="dotp"></span><span class="txt">Конница и стрелки вперемешку</span></div>
+    </figure>
+    <aside class="notes">Вот так армии стояли перед боем. Наверху армия Тилли: в центре огромные квадраты-терции, по бокам конница, впереди тяжёлые пушки. Внизу союзники: шведы стоят длинными линиями, между ними лёгкие пушки, а среди конницы стоят группы мушкетёров.</aside>
+  </section>
+
+  <!-- 8. ХОД БИТВЫ 1 -->
+  <section class="slide" id="s8" data-guide="none">
+    <div class="s-battle">
+      <div class="board a-img"><svg id="board1" viewBox="0 0 1120 820" aria-label="Схема: атака Тилли и бегство саксонцев"></svg></div>
+      <div>
+        <h2 class="title a-title" style="font-size:72px">Ход битвы, <em>часть 1</em></h2>
+        <ol class="steps" id="steps1">
+          <li><span class="t">1</span>Два часа гремят пушки</li>
+          <li><span class="t">2</span>Паппенгейм <b>7 раз</b> атакует шведов, и всё зря</li>
+          <li><span class="t">3</span>Конница и терции Тилли бьют саксонцев</li>
+          <li><span class="t">4</span>Саксонцы <b>бегут</b>, левый фланг шведов открыт</li>
+        </ol>
+        <div class="legend"><span><i style="background:var(--imp-red)"></i>Тилли</span><span><i style="background:var(--navy-2)"></i>шведы</span><span><i style="background:#7da0c9"></i>саксонцы</span></div>
+      </div>
+    </div>
+    <aside class="notes">Бой начался с пушечной перестрелки, которая длилась около двух часов. Конница Паппенгейма семь раз атаковала правое крыло шведов, но каждый раз её отбивали залпами. Тогда Тилли ударил по саксонцам. Саксонцы не выдержали и бежали, и левый фланг шведов оказался открыт.</aside>
+  </section>
+
+  <!-- 9. ХОД БИТВЫ 2 -->
+  <section class="slide" id="s9" data-guide="none">
+    <div class="s-battle">
+      <div class="board a-img"><svg id="board2" viewBox="0 0 1120 820" aria-label="Схема: перестроение шведов и захват пушек"></svg></div>
+      <div>
+        <h2 class="title a-title" style="font-size:72px">Ход битвы, <em>часть 2</em></h2>
+        <ol class="steps" id="steps2">
+          <li><span class="t">1</span>Терции идут в обход шведов</li>
+          <li><span class="t">2</span>Шведы <b>за 15 минут</b> строят новый фронт</li>
+          <li><span class="t">3</span>Король с конницей захватывает пушки Тилли</li>
+          <li><span class="t">4</span>Пушки разворачивают <b>против терций</b></li>
+        </ol>
+        <figure class="frame mini-frame a-in"><img src="assets/img/turn_cannons.png" alt="Шведы разворачивают захваченные пушки"><div class="ph">Нет файла<b>turn_cannons.png</b></div></figure>
+      </div>
+    </div>
+    <aside class="notes">Терции Тилли пошли в обход, на открытый фланг шведов. Но шведы были хорошо обучены: генерал Горн повернул войска и примерно за 15 минут построил новый фронт. В это время король с конницей ударил по холму, где стояли пушки Тилли, и захватил их. Шведы развернули эти пушки и стали стрелять по терциям.</aside>
+  </section>
+
+  <!-- 10. ПОЧЕМУ ПОБЕДИЛИ -->
+  <section class="slide" id="s10" data-guide="none">
+    <h2 class="title a-title">Почему победили шведы</h2>
+    <div class="reasons">
+      <article class="reason a-card"><span class="n">1</span><h4>Залповый огонь</h4><p>На один залп противника шведы отвечали тремя.</p><div class="big-n"><span class="count" data-to="3">3</span>:1</div><span class="rev">Огнестрельное оружие вместо рыцарской конницы</span></article>
+      <article class="reason a-card"><span class="n">2</span><h4>Лёгкие пушки</h4><p>Полковую пушку быстро перевозили по полю.</p><span class="rev">Мобильная артиллерия</span></article>
+      <article class="reason a-card"><span class="n">3</span><h4>Линии</h4><p>Стреляют почти все солдаты, а не крайние ряды.</p><span class="rev">Отказ от «квадратов»</span></article>
+      <article class="reason a-card"><span class="n">4</span><h4>Выучка</h4><p>Постоянная армия перестроилась прямо в бою.</p><span class="rev">Постоянная обученная армия</span></article>
+      <article class="reason a-card"><span class="n">5</span><h4>Шведское железо</h4><p>Свои руда и заводы давали пушки и ядра.</p><span class="rev">Железная руда Швеции</span></article>
+    </div>
+    <aside class="notes">Шведы победили по нескольким причинам, и все они связаны с военной революцией. Их мушкетёры стреляли залпами и примерно в три раза чаще противника. Лёгкие пушки быстро перевозили по полю, а линии позволяли стрелять почти всем солдатам. Постоянная обученная армия смогла перестроиться прямо во время боя, а железная руда Швеции давала металл для пушек.</aside>
+  </section>
+
+  <!-- 11. ИТОГИ -->
+  <section class="slide" id="s11" data-guide="wonder" data-say="Первая большая победа протестантов!" data-pos="br">
+    <figure class="frame a-kb"><img src="assets/img/hero.png" alt="Поле битвы при Брейтенфельде"><div class="ph">Нет файла<b>hero.png</b></div></figure>
+    <div class="scrim"></div>
+    <div class="content">
+      <h2 class="title a-title">Итоги и значение</h2>
+      <div class="rule a-rule"></div>
+      <div class="tallies">
+        <div class="tally a-in"><div class="v">~<span class="count" data-to="7">7</span> тыс.</div><div class="l">воинов Тилли погибли</div></div>
+        <div class="tally a-in"><div class="v">~<span class="count" data-to="6">6</span> тыс.</div><div class="l">попали в плен</div></div>
+      </div>
+      <ul class="points compact">
+        <li class="a-li">Первая крупная победа <b>протестантов</b> в войне</li>
+        <li class="a-li">Шведам достались <b>все тяжёлые пушки</b> Тилли</li>
+        <li class="a-li">Густав Адольф прославился как <b>полководец-новатор</b></li>
+      </ul>
+    </div>
+    <aside class="notes">Армия Тилли была разгромлена: около семи тысяч человек погибли и около шести тысяч попали в плен. Шведам достались все тяжёлые пушки противника. Это была первая крупная победа протестантов в Тридцатилетней войне, и Густав Адольф прославился на всю Европу как полководец-новатор.</aside>
+  </section>
+
+  <!-- 12. ВОТ ЭТО ДА -->
+  <section class="slide" id="s12" data-guide="wonder" data-say="Вот это да!" data-pos="tr">
+    <h2 class="title a-title">Вот это да!</h2>
+    <div class="facts">
+      <article class="fact a-card"><div class="big"><span class="count" data-to="72">72</span><small>года</small></div><h4>Непобедимый Тилли</h4><p>Столько было графу Тилли. До Брейтенфельда он не проиграл ни одной большой битвы.</p></article>
+      <article class="fact a-card"><div class="big">~<span class="count" data-to="120">120</span></div><h4>Трофейных знамён</h4><p>Их отправили в Стокгольм, в церковь Риддархольмен.</p></article>
+      <article class="fact a-card"><div class="big"><span class="count" data-to="1" data-from="0">1</span><small>год</small></div><h4>Короткая слава</h4><p>Через год, в 1632 году, Густав Адольф погиб в битве при Лютцене.</p></article>
+    </div>
+    <aside class="notes">Несколько интересных фактов. Графу Тилли было 72 года, и до этой битвы он не проиграл ни одного крупного сражения. Около 120 захваченных знамён шведы отправили в Стокгольм. А сам Густав Адольф погиб уже через год, в битве при Лютцене.</aside>
+  </section>
+
+  <!-- 13. ВИКТОРИНА -->
+  <section class="slide" id="s13" data-guide="cheer" data-say="Нажми на вопрос, чтобы узнать ответ!" data-pos="br">
+    <h2 class="title a-title">Мини-викторина</h2>
+    <div class="quiz">
+      <div class="q a-card" tabindex="0" role="button" aria-expanded="false"><span class="qn">1</span><span class="open-hint">ответ</span>
+        <div class="qt">Как называлось глубокое построение армии Тилли?</div>
+        <div class="qa"><p><b>Терция:</b> большой квадрат из пикинёров и мушкетёров.</p></div></div>
+      <div class="q a-card" tabindex="0" role="button" aria-expanded="false"><span class="qn">2</span><span class="open-hint">ответ</span>
+        <div class="qt">Что шведы сделали с пушками Тилли?</div>
+        <div class="qa"><p><b>Захватили</b> и развернули их против армии Тилли.</p></div></div>
+      <div class="q a-card" tabindex="0" role="button" aria-expanded="false"><span class="qn">3</span><span class="open-hint">ответ</span>
+        <div class="qt">Почему шведские пушки называли «полковыми»?</div>
+        <div class="qa"><p>Они были <b>лёгкими</b>: их придавали каждому полку и быстро перевозили по полю.</p></div></div>
+    </div>
+    <aside class="notes">А теперь проверим, что вы запомнили. Я задам три вопроса, а ответ откроется по щелчку. Попробуйте ответить раньше, чем я его покажу.</aside>
+  </section>
+
+  <!-- 14. ФИНАЛ -->
+  <section class="slide" id="s14" data-guide="cheer" data-say="Ура! Спасибо!" data-pos="tl">
+    <canvas id="confetti"></canvas>
+    <div class="s-final">
+      <div>
+        <h2 class="title a-title">Спасибо <em>за внимание!</em></h2>
+        <div class="rule a-rule"></div>
+        <p class="lead a-in">Брейтенфельд показал: побеждает не самая большая армия, а самая обученная и современная.</p>
+        <div class="sources a-in">
+          <h4>Источники</h4>
+          <ol>
+            <li>Учебник «История Нового времени», 7 класс, § 14-15 «Военная революция».</li>
+            <li>Encyclopaedia Britannica: статьи «Gustav II Adolf», «Johann Tserclaes, Graf von Tilly».</li>
+            <li>Википедия: «Битва при Брейтенфельде (1631)», «Battle of Breitenfeld (1631)».</li>
+            <li>Warfare History Network: «King Gustavus Adolphus, Breitenfeld and the Birthplace of Modern War».</li>
+          </ol>
+        </div>
+      </div>
+      <figure class="frame contain blend victory-frame a-img"><img src="assets/img/victory.png" alt="Победа шведов"><div class="ph">Нет файла<b>victory.png</b></div></figure>
+    </div>
+    <aside class="notes">Битва при Брейтенфельде показала, что побеждает не самая большая армия, а самая обученная и современная. Новую тактику Густава Адольфа потом изучали полководцы многих стран. Спасибо за внимание! Буду рада ответить на ваши вопросы.</aside>
+  </section>
+
+  <div id="guide"><img alt="Эстрелла"></div>
+  <div id="bubble"></div>
+  <div id="veil"></div>
+  <div class="paper-grain"></div>
+  <div class="paper-edge"></div>
+  <div id="chrome"><div id="progress"><i></i></div><div id="pageno"><b>01</b> / 14</div></div>
+</div>
+</div>
+<div id="notesPanel"><h5>Заметки докладчика</h5><div class="body"></div></div>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/data/europe.js"></script>
+<script src="assets/js/scene3d.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
