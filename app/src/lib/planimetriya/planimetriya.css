@@ -1,0 +1,130 @@
+/* planimetriya/planimetriya.css — чертёж задания №1 на странице.
+   Цвета внутри SVG — токены (--graph-axis, --color-primary,
+   --graph-accent, --color-surface): в ч/б теме печати они чернеют
+   сами. Здесь только размещение и появление шагов подсказки. */
+
+.pl-wrap {
+  display: block;
+  max-width: 100%;
+}
+
+.pl-wrap .pl {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Новый слой подсказки проявляется, а не выскакивает. */
+.pl-anim .pl-novoe {
+  animation: pl-poyavlenie 0.5s ease-out both;
+}
+
+@keyframes pl-poyavlenie {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-anim .pl-novoe {
+    animation: none;
+  }
+}
+
+/* Пошаговый чертёж: рисунок и кнопки шагов под ним. */
+.pl-shagi {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.pl-shagi__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pl-shagi__status {
+  color: var(--color-text-secondary);
+}
+
+/* Увеличенный рисунок в просмотрщике FigureZoom. */
+.figzoom__big .pl-wrap .pl {
+  width: 100%;
+  max-height: min(70vh, 720px);
+}
+
+/* Живой чертёж: рисунок, поверх — ручки подвижных вершин в той же
+   системе координат; под рисунком — пересчитанные величины. */
+.pl-zhivoy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.pl-zhivoy__holst {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+}
+.pl-zhivoy__holst .pl-wrap,
+.pl-zhivoy__holst .pl-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pl-zhivoy__ruchki {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Палец тянет вершину, а не прокручивает страницу. */
+  touch-action: none;
+}
+.pl-zhivoy__ruchka {
+  fill: var(--color-primary);
+  fill-opacity: 0.12;
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+  cursor: grab;
+}
+.pl-zhivoy__ruchka:hover,
+.pl-zhivoy__ruchka.is-active {
+  fill-opacity: 0.25;
+}
+.pl-zhivoy__ruchka.is-active {
+  cursor: grabbing;
+}
+.pl-zhivoy__ruchka:focus-visible {
+  outline: none;
+  stroke-width: 3;
+}
+.pl-zhivoy__znacheniya {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.pl-zhivoy__stroka {
+  overflow-x: auto;
+}
+.pl-zhivoy__sbros {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+
+@media print {
+  .pl-shagi__knopki,
+  .pl-zhivoy__ruchki,
+  .pl-zhivoy__sbros {
+    display: none;
+  }
+}
