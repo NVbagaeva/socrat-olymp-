@@ -23,8 +23,15 @@
    встречается больше двух раз (исключения — с причиной, в отчёт);
    файл аналогов совпадает с подбором заново.
 
+   Теория (справочник): рисунки карточек и фактов чисты, «Пример» —
+   задача открытого банка своего прототипа, у каждого прототипа есть
+   карточка, формулы и тексты набираются KaTeX строго; каждая формула
+   проверена численно на 200 случайных фигурах с точностью 1e-9.
+
    Источники: в файлах №1 нет имён авторов и названий сторонних
-   источников (список слов — только локально, в _sources/zadanie-1/).
+   источников (список слов — только локально, в _sources/zadanie-1/);
+   тексты теории не совпадают с текстами источников больше чем на
+   восемь слов подряд (тексты источников — тоже только локально).
 
    Запуск: pnpm test:planimetria [N]
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
@@ -32,7 +39,7 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { requireSrc } from './lib/load-ts.mjs';
-import { proveritZapret } from './lib/istochniki-1.mjs';
+import { proveritPereskaz, proveritZapret } from './lib/istochniki-1.mjs';
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
@@ -55,6 +62,24 @@ console.log(
 );
 for (const i of bank.isklucheniya) console.log(`  исключение: прототип ${i.proto} — ${i.prichina}`);
 
+const { checkTeoriya, tekstyTeorii } = requireSrc('lib/planimetriya/teoriya-selftest');
+const { proveritFormuly } = requireSrc('lib/planimetriya/teoriya-proverka');
+const teor = checkTeoriya(typeset);
+console.log(
+  `теория: ${teor.kartochek} карточек, ${teor.faktov} фактов, проблем ${teor.problems.length}`,
+);
+const form = proveritFormuly(200, 1e-9);
+console.log(
+  `формулы: ${form.formul} формул на ${form.figur} случайных фигурах, расхождений ${form.problems.length}`,
+);
+for (const b of form.bezProverki) console.log(`  определение, без проверки: ${b}`);
+const pereskaz = proveritPereskaz(tekstyTeorii(), 8);
+if (pereskaz === null) {
+  console.log('пересказ: текстов источников нет на этой машине — сверка пропущена');
+} else {
+  console.log(`пересказ: совпадений с источниками длиннее 8 слов — ${pereskaz.length}`);
+}
+
 const zapret = proveritZapret();
 if (zapret === null) {
   console.log('источники: _sources/zadanie-1 нет на этой машине — проверка слов пропущена');
@@ -76,6 +101,9 @@ const vse = [
   ...st.problems,
   ...zh.problems,
   ...bank.problems,
+  ...teor.problems,
+  ...form.problems,
+  ...(pereskaz ?? []).map((x) => `совпадение с источником: ${x}`),
   ...(zapret ?? []).map((z) => `упоминание источника: ${z}`),
 ];
 if (vse.length > 0) {
