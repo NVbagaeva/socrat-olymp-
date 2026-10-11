@@ -39,7 +39,13 @@ export function vopros(
   sloy?: number,
   verno = 0,
 ): VoprosPodskazki {
-  return { vopros: tekst, varianty, verno, poyasnenie, ...(sloy === undefined ? {} : { sloy }) };
+  return {
+    vopros: tekst,
+    knopki: varianty,
+    verno,
+    poyasnenie,
+    ...(sloy === undefined ? {} : { sloy }),
+  };
 }
 
 /** Какой угол по виду: острый, прямой, тупой. */

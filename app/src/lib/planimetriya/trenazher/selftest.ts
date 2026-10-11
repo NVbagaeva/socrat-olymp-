@@ -151,6 +151,9 @@ export function checkTrenazher(seedov = 3): ItogTrenazhera {
           .join(',');
       if (ids(uchenik) !== ids(uchitel))
         problems.push(`лист ${q}: у ученика и учителя разные задачи`);
+      /* Сырой TeX на листе: всё, что в $…$, должно быть набрано KaTeX. */
+      const syroy = JSON.stringify([uchenik, uchitel]).match(/\$[^$"]*\\[a-z]+[^$"]*\$/);
+      if (syroy !== null) problems.push(`лист ${q}: сырой TeX ${syroy[0].slice(0, 40)}`);
       listov += 1;
     } catch (e) {
       problems.push(`лист ${q}: ${(e as Error).message}`);

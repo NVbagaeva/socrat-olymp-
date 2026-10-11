@@ -556,7 +556,7 @@ function RamkaPreview({ ramka }: { ramka: Ramka }) {
         <div className="z1-a4__primer" key={i}>
           <div>
             <p className="z1-a4__primer-title">
-              {SHEET_1.primer}. <Tex text={p.title} />
+              {SHEET_1.primer}. <span dangerouslySetInnerHTML={{ __html: p.title }} />
             </p>
             <div dangerouslySetInnerHTML={{ __html: p.conditionHtml }} />
             <div

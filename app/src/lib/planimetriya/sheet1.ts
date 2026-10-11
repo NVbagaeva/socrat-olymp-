@@ -343,6 +343,7 @@ export interface Ramka {
   /** Пункты «Повторяем» — HTML с формулами KaTeX. */
   items: string[];
   primery: {
+    /** Название типа, набранное KaTeX. */
     title: string;
     conditionHtml: string;
     solutionHtml: string;
@@ -378,7 +379,7 @@ export function ramkaDlya(
       fipi: svobodnaya?.n ?? null,
     });
     primery.push({
-      title: s.title,
+      title: typeset(s.title),
       conditionHtml: typeset(s.uslovie),
       solutionHtml: `${s.reshenieLista}<p class="sheet-task-answer">${SHEET_1.otvet}: <b>${s.razbor.otvetHtml}</b></p>`,
       figureSvg: s.razbor.risunokSvg,
@@ -447,6 +448,7 @@ interface SheetTask {
   options: null;
   figureSvg: string | null;
   figureWidth: number;
+  figureBelow?: boolean;
   solutionHtml: string | null;
 }
 
@@ -566,12 +568,15 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
     options: null,
     figureSvg: z.figureSvg,
     figureWidth: shirinaRisunka(z.figureSvg),
+    /* Рисунок условия — под текстом: колонке решения нужна вся ширина,
+       выкладки в строке не переносятся. */
+    figureBelow: true,
     solutionHtml:
-      `<div class="z1-sheet-reshenie"><div>${z.solutionHtml}<p class="sheet-task-answer">${SHEET_1.otvet}: <b>${z.answerHtml}</b></p></div>` +
+      '<div class="z1-sheet-reshenie">' +
       (z.figureUchitelSvg === null
         ? ''
-        : `<figure class="sheet-figure z1-sheet-reshenie__pic" style="width:${shirinaRisunka(z.figureUchitelSvg, 44)}mm">${z.figureUchitelSvg}</figure>`) +
-      '</div>',
+        : `<figure class="sheet-figure z1-sheet-reshenie__pic" style="width:${shirinaRisunka(z.figureUchitelSvg, 34)}mm">${z.figureUchitelSvg}</figure>`) +
+      `${z.solutionHtml}<p class="sheet-task-answer">${SHEET_1.otvet}: <b>${z.answerHtml}</b></p></div>`,
   });
   const nV = list.poVariantam.length;
   const variantTitle = (i: number) => (nV > 1 ? `Вариант ${i + 1}` : undefined);

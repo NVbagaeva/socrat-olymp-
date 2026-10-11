@@ -45,7 +45,7 @@ function teksty(proto: number, p: Params): { stroki: string[]; formuly: string[]
       if (k.tex !== '') formuly.push(k.tex);
     }
   }
-  for (const v of r.voprosy) stroki.push(v.vopros, v.poyasnenie, ...v.varianty);
+  for (const v of r.voprosy) stroki.push(v.vopros, v.poyasnenie, ...v.knopki);
   return { stroki, formuly };
 }
 
@@ -75,9 +75,9 @@ function proveritZadachu(proto: number, p: Params, metka: string, katex: Typeset
   for (const v of r.voprosy) {
     if (v.sloy !== undefined && v.sloy > shagov)
       out.push(`${metka}: вопрос «${v.vopros}» ссылается на слой ${v.sloy}`);
-    if (v.verno < 0 || v.verno >= v.varianty.length)
+    if (v.verno < 0 || v.verno >= v.knopki.length)
       out.push(`${metka}: у вопроса «${v.vopros}» нет верного варианта`);
-    if (new Set(v.varianty).size !== v.varianty.length)
+    if (new Set(v.knopki).size !== v.knopki.length)
       out.push(`${metka}: у вопроса «${v.vopros}» повторяются варианты`);
   }
   if (r.shagi.length === 0) out.push(`${metka}: решение без шагов`);

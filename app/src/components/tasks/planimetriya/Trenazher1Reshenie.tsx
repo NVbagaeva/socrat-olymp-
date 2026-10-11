@@ -268,7 +268,7 @@ export function Trenazher1Reshenie({
             <div className="z11-resh__shag">
               <p className="z11-resh__q" dangerouslySetInnerHTML={{ __html: tekVopros.vopros }} />
               <div className="z11-resh__opts">
-                {tekVopros.varianty.map((o, k) => (
+                {tekVopros.knopki.map((o, k) => (
                   <button
                     key={k}
                     type="button"
@@ -398,7 +398,7 @@ function PredShag({
     <div className="z11-resh__pred">
       <p className="z11-resh__pred-otvet">
         <span dangerouslySetInnerHTML={{ __html: vopros.vopros }} />{' '}
-        <b dangerouslySetInnerHTML={{ __html: vopros.varianty[vopros.verno] ?? '' }} />
+        <b dangerouslySetInnerHTML={{ __html: vopros.knopki[vopros.verno] ?? '' }} />
       </p>
       {vopros.poyasnenie === '' ? null : (
         <p

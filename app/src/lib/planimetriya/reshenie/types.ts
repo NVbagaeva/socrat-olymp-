@@ -32,8 +32,8 @@ export interface ShagResheniya {
 
 export interface VoprosPodskazki {
   vopros: string;
-  /** Варианты ответа, формулы в $…$. Верный — под номером verno. */
-  varianty: string[];
+  /** Кнопки-ответы, формулы в $…$. Верная — под номером verno. */
+  knopki: string[];
   verno: number;
   /** Пояснение после верного ответа. */
   poyasnenie: string;

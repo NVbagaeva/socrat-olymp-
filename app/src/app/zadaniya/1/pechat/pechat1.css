@@ -63,16 +63,12 @@
   width: 100%;
   height: auto;
 }
-/* Решение на листе учителя: шаги и чертёж со всеми построениями. */
+/* Решение на листе учителя: чертёж со всеми построениями справа,
+   шаги его обтекают — колонка условия не шире, чем у ученика. */
 .z1-sheet-reshenie {
-  display: flex;
-  gap: calc(var(--sheet-step) * 3);
-  align-items: flex-start;
-}
-.z1-sheet-reshenie > div {
-  flex: 1 1 auto;
-  min-width: 0;
+  display: flow-root;
 }
 .z1-sheet-reshenie__pic {
-  flex: none;
+  float: right;
+  margin: 0 0 var(--sheet-step) calc(var(--sheet-step) * 3);
 }

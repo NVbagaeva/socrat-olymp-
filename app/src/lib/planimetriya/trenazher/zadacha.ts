@@ -150,7 +150,7 @@ export function razreshit(plan: ZadachaPlan, bank: readonly UslovieBanka[]): Raz
 
 export interface VoprosHtml {
   vopros: string;
-  varianty: string[];
+  knopki: string[];
   verno: number;
   poyasnenie: string;
   /** Чертёж шага подсказки: нужный элемент подсвечен. */
@@ -233,7 +233,7 @@ export function sostavZadachi(z: RazreshennayaZadacha) {
   const podskazki: Podskazki1 = {
     voprosy: r.voprosy.map((v) => ({
       vopros: typeset(ren(v.vopros)),
-      varianty: v.varianty.map((x) => typeset(ren(x))),
+      knopki: v.knopki.map((x) => typeset(ren(x))),
       verno: v.verno,
       poyasnenie: typeset(ren(v.poyasnenie)),
       risunokSvg:
