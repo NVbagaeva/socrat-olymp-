@@ -129,9 +129,7 @@ const summaUglov: ZhivayaStsena = {
   },
   znacheniya: (t) => {
     const [a, b, c] = ugly(t);
-    return [
-      `\\angle A + \\angle B + \\angle C = ${a}^\\circ + ${b}^\\circ + ${c}^\\circ = 180^\\circ`,
-    ];
+    return [`${a}^\\circ + ${b}^\\circ + ${c}^\\circ = 180^\\circ`];
   },
 };
 
@@ -214,7 +212,9 @@ const odnaDuga: ZhivayaStsena = {
   },
   znacheniya: (t) => {
     const u = ugolGr(pt(t, 'A'), pt(t, 'C'), pt(t, 'B'));
-    return [`\\angle ACB = \\angle ADB = ${Math.round(u)}^\\circ = \\tfrac12 \\smile AB`];
+    return [
+      `\\angle ACB = \\angle ADB = ${Math.round(u)}^\\circ = \\tfrac12 \\overset{\\smile}{AB}`,
+    ];
   },
 };
 
@@ -447,9 +447,7 @@ const srednyayaLiniya: ZhivayaStsena = {
   },
   znacheniya: (t) => {
     const ab = dlina(pt(t, 'A'), pt(t, 'B'));
-    return [
-      `MN \\parallel AB, \\quad MN = \\tfrac12 AB = \\tfrac12 \\cdot ${dl(ab)} = ${dl(ab / 2)}`,
-    ];
+    return [`MN \\parallel AB`, `MN = \\tfrac12 AB = \\tfrac12 \\cdot ${dl(ab)} = ${dl(ab / 2)}`];
   },
 };
 

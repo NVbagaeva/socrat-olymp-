@@ -69,6 +69,9 @@
   position: relative;
   width: 100%;
   max-width: 420px;
+  /* Перетаскивание вершины не выделяет подписи рисунка. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .pl-zhivoy__holst .pl-wrap,
 .pl-zhivoy__holst .pl-wrap svg {
@@ -98,6 +101,9 @@
 .pl-zhivoy__ruchka.is-active {
   cursor: grabbing;
 }
+.pl-zhivoy__ruchka:focus:not(:focus-visible) {
+  outline: none;
+}
 .pl-zhivoy__ruchka:focus-visible {
   outline: none;
   stroke-width: 3;
@@ -110,6 +116,13 @@
 }
 .pl-zhivoy__stroka {
   overflow-x: auto;
+}
+/* Формула на сайте не рвётся переносом (styles/base.css), поэтому на
+   телефоне строка величин мельче — помещается в карточку целиком. */
+@media (max-width: 767.98px) {
+  .pl-zhivoy__znacheniya {
+    font-size: var(--fs-caption);
+  }
 }
 .pl-zhivoy__sbros {
   justify-self: start;

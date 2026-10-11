@@ -72,3 +72,53 @@ export function proveritZapret() {
   }
   return out;
 }
+
+/* ── Пересказ: не больше восьми слов подряд ─────────────────────── */
+
+/** Слова строки: без формул TeX и разметки, в нижнем регистре, «ё» → «е». */
+function slova(t) {
+  return (
+    t
+      .replace(/\$[^$]*\$/g, ' ')
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .match(/[а-яa-z0-9]+/g) ?? []
+  );
+}
+
+/** Тексты сторонних источников, извлечённые pdftotext (только локально). */
+const TEKSTY_ISTOCHNIKOV = [
+  'spravochnik.txt',
+  'kurs-tom1-part3.txt',
+  'kurs-tom1-part7.txt',
+  'kurs-tom2-part3.txt',
+];
+
+/**
+ * Совпадения наших текстов с текстами источников длиннее `max` слов
+ * подряд. null — источников на машине нет (CI): проверка пропущена.
+ */
+export function proveritPereskaz(teksty, max = 8) {
+  const fajly = TEKSTY_ISTOCHNIKOV.map((f) => path.join(SOURCES, 'tekst', f)).filter((f) =>
+    fs.existsSync(f),
+  );
+  if (fajly.length === 0) return null;
+  const n = max + 1;
+  const grammy = new Map();
+  for (const f of fajly) {
+    const w = slova(fs.readFileSync(f, 'utf8'));
+    for (let i = 0; i + n <= w.length; i += 1) grammy.set(w.slice(i, i + n).join(' '), path.basename(f));
+  }
+  const out = [];
+  for (const t of teksty) {
+    const w = slova(t);
+    for (let i = 0; i + n <= w.length; i += 1) {
+      const g = w.slice(i, i + n).join(' ');
+      if (grammy.has(g)) {
+        out.push(`«${g}» (${grammy.get(g)})`);
+        break;
+      }
+    }
+  }
+  return out;
+}
