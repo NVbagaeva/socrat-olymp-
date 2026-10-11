@@ -31,11 +31,18 @@ import {
 } from '../../content/spravochnik1';
 import { KARTOCHKI_1 } from '../../content/teoriya1';
 import { typeset } from '../tex';
-import { analogi } from './bank/analogi';
-import { BANK_FIPI } from './bank/fipi';
 import { gigienaFormuly } from './bank/selftest';
 import { PROTOTIPY } from './stseny';
-import type { Params } from './stseny/dsl';
+import { chisloOtveta, zadachaPrimera } from './spravochnik-zadachi';
+import {
+  KARTOCHKI_S_CHERTEZHOM,
+  SVOI_PRIMERY_S_CHERTEZHOM,
+  chertezhPrimera,
+  chertezhTemy,
+  type RisunokSpravochnika,
+} from './spravochnik-chertezhi';
+import { pustoyOtchet, renderPlan } from './render';
+import { proveritPodpisi } from './selftest';
 
 type Typeset = (tex: string) => string;
 
@@ -106,53 +113,6 @@ function formulySpravochnika(): string[] {
     }
   }
   return out;
-}
-
-/** Условие и ответ задачи, которую разбирает пример. */
-export function zadachaPrimera(p: Primer): {
-  uslovie: string;
-  otvet: number | null;
-  proto: number | null;
-  metka: string;
-} {
-  const ist = p.istochnik;
-  if ('svoy' in ist)
-    return { uslovie: ist.svoy.uslovie, otvet: null, proto: null, metka: 'свой пример' };
-  if ('fipi' in ist) {
-    const z = BANK_FIPI.find((x) => x.n === ist.fipi);
-    if (z === undefined) throw new Error(`нет задачи ${ist.fipi} в банке`);
-    const pr = PROTOTIPY.find((x) => x.id === z.proto);
-    if (pr === undefined) throw new Error(`нет прототипа ${z.proto}`);
-    const params = { ...pr.primer, ...z.params } as Params;
-    return {
-      uslovie: pr.uslovie(params),
-      otvet: pr.otvet(params),
-      proto: z.proto,
-      metka: `открытый банк, задача ${z.n}`,
-    };
-  }
-  const { proto, no } = ist.analog;
-  const pr = PROTOTIPY.find((x) => x.id === proto);
-  if (pr === undefined) throw new Error(`нет прототипа ${proto}`);
-  const a = analogi(proto).find((x) => x.no === no);
-  if (a === undefined) throw new Error(`нет аналога ${no} прототипа ${proto}`);
-  const params = { ...pr.primer, ...a.params } as Params;
-  return {
-    uslovie: pr.uslovie(params),
-    otvet: pr.otvet(params),
-    proto,
-    metka: `аналог ${no} прототипа ${proto}, не из открытого банка`,
-  };
-}
-
-/** Число из ответа в TeX: «118^\circ» → 118, «1{,}5» → 1.5; null — не число. */
-export function chisloOtveta(tex: string): number | null {
-  const s = tex
-    .replace(/\^\\circ/g, '')
-    .replace(/\{,\}/g, '.')
-    .trim();
-  if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
-  return Number(s);
 }
 
 /**
@@ -255,6 +215,76 @@ function proveritObyazatelnoe(problems: string[]): void {
   );
 }
 
+/**
+ * Карточки, где градусы на чертеже — часть самой формулировки:
+ * таблица значений, катет против 30°, тупой угол 180° − α.
+ */
+const GRADUSY_V_FORMULIROVKE = new Set(['znacheniya', 'ugol-30', 'trig-tupogo-ugla']);
+
+/** Рисунок рисуется движком без нарушений и наложений подписей. */
+function risunokChist(r: RisunokSpravochnika): string | null {
+  try {
+    const o = pustoyOtchet();
+    const svg = renderPlan(r.scena, { ...r.optsii, vysota: 220 }, o);
+    const p = [...o.problems, ...proveritPodpisi(o)];
+    if (/NaN|Infinity/.test(svg)) p.push('NaN в SVG');
+    return p.length === 0 ? null : p.join('; ');
+  } catch (e) {
+    return (e as Error).message;
+  }
+}
+
+/**
+ * Чертежи справочника: у каждой карточки и каждого своего примера есть
+ * чертёж; движок рисует его чисто; в теории нет чисел (номер угла 1–8
+ * — можно); у теории выделен ключевой элемент.
+ */
+export function checkChertezhi(): { risunkov: number; problems: string[] } {
+  const problems: string[] = [];
+  let risunkov = 0;
+  const ids = new Set(TEMY_SPRAVOCHNIKA_1.map((t) => t.id));
+  for (const k of KARTOCHKI_S_CHERTEZHOM)
+    if (!ids.has(k)) problems.push(`чертёж «${k}»: нет такой карточки`);
+  const svoi = new Set<string>();
+  for (const t of TEMY_SPRAVOCHNIKA_1) {
+    let ch: ReturnType<typeof chertezhTemy>;
+    try {
+      ch = chertezhTemy(t.id);
+    } catch (e) {
+      problems.push(`карточка «${t.id}»: ${(e as Error).message}`);
+      continue;
+    }
+    const risunki = Array.isArray(ch) ? ch : [ch];
+    let klyuch = false;
+    for (const [i, r] of risunki.entries()) {
+      risunkov += 1;
+      const p = risunokChist(r);
+      if (p !== null) problems.push(`чертёж «${t.id}» [${i}]: ${p}`);
+      for (const e of r.scena.elementy) {
+        if (e.vydelit === 'iskomoe') klyuch = true;
+        const z = e.znachenie;
+        if (z === undefined || GRADUSY_V_FORMULIROVKE.has(t.id)) continue;
+        if (/\d/.test(z) && !/^[1-8]$/.test(z))
+          problems.push(`чертёж «${t.id}»: число «${z}» на чертеже теории`);
+      }
+    }
+    if (!klyuch) problems.push(`чертёж «${t.id}»: не выделен ключевой элемент`);
+    for (const [i, p] of (t.primery ?? []).entries()) {
+      if ('svoy' in p.istochnik) svoi.add(`${t.id}:${i}`);
+      try {
+        risunkov += 1;
+        const pr = risunokChist(chertezhPrimera(t.id, i, p));
+        if (pr !== null) problems.push(`чертёж примера «${t.id}:${i}»: ${pr}`);
+      } catch (e) {
+        problems.push(`чертёж примера «${t.id}:${i}»: ${(e as Error).message}`);
+      }
+    }
+  }
+  for (const k of SVOI_PRIMERY_S_CHERTEZHOM)
+    if (!svoi.has(k)) problems.push(`чертёж своего примера «${k}»: нет такого примера`);
+  return { risunkov, problems };
+}
+
 export interface ItogSpravochnika {
   razdelov: number;
   kartochek: number;
@@ -344,3 +374,5 @@ export function checkSpravochnik(katex: Typeset): ItogSpravochnika {
     problems,
   };
 }
+
+export { chisloOtveta, zadachaPrimera };
