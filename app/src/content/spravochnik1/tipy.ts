@@ -17,6 +17,12 @@ export interface Utverzhdenie {
   tekst: string;
   /** Формула отдельной строкой (TeX без $). */
   formula?: string;
+  /**
+   * Школьная формулировка из учебника (теорема, признак). Такие фразы
+   * неизбежно совпадают с учебными текстами: сверка пересказа печатает
+   * их совпадения отдельным списком и не считает ошибкой.
+   */
+  shkolnaya?: true;
 }
 
 /** Теорема или формула: название, формулировка словами, формула. */
@@ -24,6 +30,10 @@ export interface Teorema {
   nazvanie?: string;
   slovami: string;
   formula: string;
+  /** Вторая формула той же теоремы с подписью: «косинус угла по трём сторонам». */
+  dop?: { podpis: string; formula: string };
+  /** Школьная формулировка — см. Utverzhdenie.shkolnaya. */
+  shkolnaya?: true;
 }
 
 /**
@@ -31,8 +41,8 @@ export interface Teorema {
  * - `fipi` — задача открытого банка (номер в Блоке 1): условие и ответ
  *   собирает прототип, ответ разбора сверяется с ним автоматически;
  * - `analog` — наш аналог прототипа (прототип, номер аналога);
- * - `svoy` — свой пример для темы без прототипа: условие пишется здесь,
- *   ответ сверяется с `znachenie`.
+ * - `svoy` — свой пример: условие пишется здесь, ответ пересчитывается
+ *   программно (`raschet`) из чисел условия и сверяется с `otvet`.
  */
 export type IstochnikPrimera =
   { fipi: number } | { analog: { proto: number; no: number } } | { svoy: { uslovie: string } };
@@ -53,8 +63,19 @@ export interface Primer {
   shagi: ShagPrimera[];
   /** Ответ в TeX: «118^\circ», «1{,}5», «10\sqrt2». */
   otvet: string;
-  /** Числовое значение ответа, если его не прочитать из `otvet` (корни). */
-  znachenie?: number;
+  /**
+   * Числовое значение ответа, если его не прочитать из `otvet`: корни,
+   * два числа («$0{,}8$ и $-0{,}6$»).
+   */
+  znachenie?: number | readonly number[];
+  /**
+   * Свой пример: независимый пересчёт ответа по числам условия.
+   * Нет — ответ не число («да», «$\angle B$»), тогда `bezChisla`.
+   */
+  raschet?: () => number | readonly number[];
+  bezChisla?: true;
+  /** Свой пример: что на чертеже (с числами условия). */
+  chertezh?: string;
 }
 
 /**
@@ -80,6 +101,8 @@ export interface Tema1 {
   svoystva?: Utverzhdenie[];
   priznaki?: Utverzhdenie[];
   teoremy?: Teorema[];
+  /** Таблица под блоками: заголовки столбцов и строки (тексты с $…$). */
+  tablica?: { head: string[]; rows: string[][] };
   /** «Как применять»: 2–4 типичных хода в задании №1. */
   primenenie?: string[];
   /** «Важно»: ловушка или частая ошибка. */
@@ -103,6 +126,13 @@ export interface Razdel1 {
   temy: Tema1[];
 }
 
+/** Блок «Как пользоваться» в начале справочника. */
+export interface KakPolzovatsya {
+  title: string;
+  legenda: { blok: keyof typeof BLOKI_SPRAVOCHNIKA; tekst: string }[];
+  oboznacheniya: { title: string; tekst: string };
+}
+
 /** Подписи блоков — одни на веб, PDF и файл вычитки. */
 export const BLOKI_SPRAVOCHNIKA = {
   opredeleniya: 'Определение',
@@ -119,3 +149,20 @@ export const SPRAVOCHNIK_1 = {
   title: 'Справочник по планиметрии',
   lead: 'Всё для задания №1 первой части ЕГЭ профильного уровня',
 } as const;
+
+export const KAK_POLZOVATSYA_1: KakPolzovatsya = {
+  title: 'Как пользоваться',
+  legenda: [
+    { blok: 'opredeleniya', tekst: 'что это такое' },
+    { blok: 'svoystva', tekst: 'что верно, когда уже известно, что объект такой' },
+    { blok: 'priznaki', tekst: 'по чему узнать, что объект такой' },
+    { blok: 'teoremy', tekst: 'утверждение словами и формулой' },
+    { blok: 'vazhno', tekst: 'ловушка или частая ошибка' },
+    { blok: 'primery', tekst: 'разбор задачи по шагам' },
+  ],
+  oboznacheniya: {
+    title: 'Обозначения',
+    tekst:
+      '$a$, $b$, $c$ — стороны против углов $A$, $B$, $C$ ($a = BC$, $b = AC$, $c = AB$); $\\alpha$, $\\beta$, $\\gamma$ — углы при вершинах $A$, $B$, $C$; $h_a$ — высота к стороне $a$; $p$ — полупериметр; $S$ — площадь; $R$ и $r$ — радиусы описанной и вписанной окружностей; $\\smile AB$ — дуга $AB$.',
+  },
+};

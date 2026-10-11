@@ -22,6 +22,7 @@
  */
 
 import {
+  KAK_POLZOVATSYA_1,
   RAZDELY_SPRAVOCHNIKA_1,
   TEMY_SPRAVOCHNIKA_1,
   novayaTema1,
@@ -38,26 +39,55 @@ import type { Params } from './stseny/dsl';
 
 type Typeset = (tex: string) => string;
 
-/** Все тексты справочника, которые видит ученик (без формул отдельной строкой). */
-export function tekstySpravochnika(): string[] {
-  const out: string[] = [];
+/** Школьная ли формулировка: такие сверяются с источниками отдельно. */
+type Fraza = { tekst: string; shkolnaya: boolean };
+
+function vseFrazy(): Fraza[] {
+  const out: Fraza[] = [];
+  const f = (tekst: string, shkolnaya = false) => out.push({ tekst, shkolnaya });
+  f(KAK_POLZOVATSYA_1.title);
+  for (const l of KAK_POLZOVATSYA_1.legenda) f(l.tekst);
+  f(KAK_POLZOVATSYA_1.oboznacheniya.tekst);
   for (const r of RAZDELY_SPRAVOCHNIKA_1) {
-    out.push(r.title, r.lead);
+    f(r.title);
+    f(r.lead);
     for (const t of r.temy) {
-      out.push(t.title);
+      f(t.title);
       for (const u of [...(t.opredeleniya ?? []), ...(t.svoystva ?? []), ...(t.priznaki ?? [])])
-        out.push(u.tekst);
-      for (const th of t.teoremy ?? [])
-        out.push(...(th.nazvanie === undefined ? [] : [th.nazvanie]), th.slovami);
-      out.push(...(t.primenenie ?? []), ...(t.vazhno ?? []));
+        f(u.tekst, u.shkolnaya === true);
+      for (const th of t.teoremy ?? []) {
+        if (th.nazvanie !== undefined) f(th.nazvanie);
+        f(th.slovami, th.shkolnaya === true);
+        if (th.dop !== undefined) f(th.dop.podpis);
+      }
+      for (const cell of [...(t.tablica?.head ?? []), ...(t.tablica?.rows.flat() ?? [])]) f(cell);
+      for (const x of [...(t.primenenie ?? []), ...(t.vazhno ?? [])]) f(x);
       for (const p of t.primery ?? []) {
-        out.push(p.title);
-        if ('svoy' in p.istochnik) out.push(p.istochnik.svoy.uslovie);
-        for (const s of p.shagi) out.push(s.etap, ...(s.tekst === undefined ? [] : [s.tekst]));
+        f(p.title);
+        if ('svoy' in p.istochnik) f(p.istochnik.svoy.uslovie);
+        if (p.chertezh !== undefined) f(p.chertezh);
+        for (const s of p.shagi) {
+          f(s.etap);
+          if (s.tekst !== undefined) f(s.tekst);
+        }
       }
     }
   }
-  return out;
+  return out.filter((x) => x.tekst !== '');
+}
+
+/** Все тексты справочника, кроме школьных формулировок теорем и признаков. */
+export function tekstySpravochnika(): string[] {
+  return vseFrazy()
+    .filter((x) => !x.shkolnaya)
+    .map((x) => x.tekst);
+}
+
+/** Школьные формулировки (как в учебнике) — сверяются с источниками отдельно. */
+export function shkolnyeFormulirovki(): string[] {
+  return vseFrazy()
+    .filter((x) => x.shkolnaya)
+    .map((x) => x.tekst);
 }
 
 /** Формулы отдельной строкой: утверждения, теоремы, выкладки, ответы. */
@@ -66,7 +96,10 @@ function formulySpravochnika(): string[] {
   for (const t of TEMY_SPRAVOCHNIKA_1) {
     for (const u of [...(t.opredeleniya ?? []), ...(t.svoystva ?? []), ...(t.priznaki ?? [])])
       if (u.formula !== undefined) out.push(u.formula);
-    for (const th of t.teoremy ?? []) out.push(th.formula);
+    for (const th of t.teoremy ?? []) {
+      out.push(th.formula);
+      if (th.dop !== undefined) out.push(th.dop.formula);
+    }
     for (const p of t.primery ?? []) {
       for (const s of p.shagi) out.push(...(s.tex ?? []));
       out.push(p.otvet);
@@ -122,6 +155,23 @@ export function chisloOtveta(tex: string): number | null {
   return Number(s);
 }
 
+/**
+ * Свой пример: ответ пересчитан программно по числам условия и совпадает
+ * с ответом разбора. null — всё сходится.
+ */
+function proveritRaschet(p: Primer): string | null {
+  if (p.bezChisla === true) return p.raschet === undefined ? null : 'и bezChisla, и raschet';
+  if (p.raschet === undefined) return 'нет пересчёта ответа (raschet)';
+  const r = p.raschet();
+  const nado = p.znachenie ?? chisloOtveta(p.otvet);
+  if (nado === null) return `ответ «${p.otvet}» не число — укажите znachenie`;
+  const a = typeof r === 'number' ? [r] : [...r];
+  const b = typeof nado === 'number' ? [nado] : [...nado];
+  if (a.length !== b.length || a.some((x, i) => Math.abs(x - (b[i] ?? NaN)) > 1e-9))
+    return `пересчёт даёт ${a.join('; ')}, а в ответе ${b.join('; ')}`;
+  return null;
+}
+
 function blokov(t: Tema1): number {
   return (
     (t.opredeleniya?.length ?? 0) +
@@ -171,7 +221,7 @@ function proveritObyazatelnoe(problems: string[]): void {
     'parallelnye',
     'нужны три свойства и три признака',
     (x) =>
-      (x.svoystva?.length ?? 0) === 3 && (x.priznaki?.length ?? 0) === 3 && x.shirokaya === true,
+      (x.svoystva?.length ?? 0) === 3 && (x.priznaki?.length ?? 0) >= 3 && x.shirokaya === true,
   );
   nuzhno(
     'svoystvo-ili-priznak',
@@ -228,6 +278,7 @@ export function checkSpravochnik(katex: Typeset): ItogSpravochnika {
     if (n !== undefined && (n < 2 || n > 4))
       problems.push(`карточка «${t.id}»: «Как применять» — ${n} ходов, нужно 2–4`);
     if ((t.primery?.length ?? 0) > 2) problems.push(`карточка «${t.id}»: больше двух примеров`);
+    if ((t.primery?.length ?? 0) === 0) problems.push(`карточка «${t.id}»: нет ни одного примера`);
     for (const p of t.prototipy)
       if (!PROTOTIPY.some((x) => x.id === p))
         problems.push(`карточка «${t.id}»: нет прототипа ${p}`);
@@ -243,7 +294,12 @@ export function checkSpravochnik(katex: Typeset): ItogSpravochnika {
         continue;
       }
       if (p.shagi.length === 0) problems.push(`${metka}: нет шагов`);
-      const chislo = p.znachenie ?? chisloOtveta(p.otvet);
+      if ('svoy' in p.istochnik) {
+        if (p.chertezh === undefined) problems.push(`${metka}: свой пример без описания чертежа`);
+        const ok = proveritRaschet(p);
+        if (ok !== null) problems.push(`${metka}: ${ok}`);
+      }
+      const chislo = typeof p.znachenie === 'number' ? p.znachenie : chisloOtveta(p.otvet);
       if (z.otvet !== null) {
         if (chislo === null) problems.push(`${metka}: ответ «${p.otvet}» не число`);
         else if (Math.abs(chislo - z.otvet) > 1e-6)

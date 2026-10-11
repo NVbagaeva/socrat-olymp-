@@ -9,6 +9,9 @@
    2. Пересказ: ни одна фраза не совпадает с текстами сторонних
       источников больше чем на восемь слов подряд (тексты источников
       есть только локально, в _sources/; в CI шаг пропускается).
+      Исключение — школьные формулировки теорем и признаков, которые
+      автор задала дословно (shkolnaya в данных): их совпадения
+      печатаются отдельным списком и ошибкой не считаются.
    3. Файл вычитки docs/spravochnik-1/soderzhanie.md совпадает с данными
       (иначе: pnpm build:spravochnik-1).
 
@@ -25,7 +28,7 @@ const require = createRequire(import.meta.url);
 const katex = require('katex');
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
-const { checkSpravochnik, tekstySpravochnika } = requireSrc(
+const { checkSpravochnik, tekstySpravochnika, shkolnyeFormulirovki } = requireSrc(
   'lib/planimetriya/spravochnik-selftest.ts',
 );
 
@@ -38,6 +41,16 @@ const pereskaz = proveritPereskaz(tekstySpravochnika(), 8);
 if (pereskaz === null)
   console.log('пересказ: текстов источников нет на этой машине — сверка пропущена');
 else console.log(`пересказ: совпадений с источниками длиннее 8 слов — ${pereskaz.length}`);
+
+/* Школьные формулировки: только для сведения. */
+const shkolnye = shkolnyeFormulirovki();
+const shkolnyeSovpadeniya = proveritPereskaz(shkolnye, 8);
+if (shkolnyeSovpadeniya !== null) {
+  console.log(
+    `школьные формулировки: ${shkolnye.length}, совпадают с учебными текстами — ${shkolnyeSovpadeniya.length} (не ошибка)`,
+  );
+  for (const x of shkolnyeSovpadeniya) console.log(`  · ${x}`);
+}
 
 const FILE = path.join(APP, '..', 'docs', 'spravochnik-1', 'soderzhanie.md');
 const fajl = fs.existsSync(FILE) ? fs.readFileSync(FILE, 'utf8') : '';

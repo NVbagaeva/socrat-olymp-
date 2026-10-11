@@ -206,6 +206,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
           istochnik: {
             svoy: { uslovie: 'Диагональ квадрата равна $6$. Найдите его площадь.' },
           },
+          chertezh: 'Квадрат с проведённой диагональю, подписано $d = 6$.',
           shagi: [
             {
               etap: 'Формула через диагональ',
@@ -213,6 +214,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
             },
           ],
           otvet: '18',
+          raschet: () => 6 ** 2 / 2,
         },
       ],
       prototipy: [],
@@ -252,6 +254,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
           istochnik: {
             svoy: { uslovie: 'Диагонали ромба равны $10$ и $24$. Найдите его площадь.' },
           },
+          chertezh: 'Ромб с диагоналями $10$ и $24$, значок прямого угла в точке их пересечения.',
           shagi: [
             {
               etap: 'Формула',
@@ -259,6 +262,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
             },
           ],
           otvet: '120',
+          raschet: () => (10 * 24) / 2,
         },
       ],
       prototipy: [72],
@@ -294,6 +298,8 @@ export const R06_PLOSHCHADI: Razdel1 = {
                 'Основания трапеции равны $4$ и $10$, высота равна $6$. Найдите площадь трапеции.',
             },
           },
+          chertezh:
+            'Трапеция с основаниями $4$ (сверху) и $10$ (снизу), высота $6$ со значком прямого угла.',
           shagi: [
             {
               etap: 'Полусумма оснований',
@@ -305,6 +311,7 @@ export const R06_PLOSHCHADI: Razdel1 = {
             },
           ],
           otvet: '42',
+          raschet: () => ((4 + 10) / 2) * 6,
         },
       ],
       prototipy: [15, 20],

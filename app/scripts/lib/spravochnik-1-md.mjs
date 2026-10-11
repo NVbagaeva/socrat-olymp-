@@ -48,10 +48,22 @@ function tema(t) {
         `  $$${th.formula}$$`,
         '',
       );
+      if (th.dop !== undefined)
+        out.push(
+          `  ${th.dop.podpis[0].toUpperCase()}${th.dop.podpis.slice(1)}:`,
+          '',
+          `  $$${th.dop.formula}$$`,
+          '',
+        );
     }
   }
   out.push(...utverzhdeniya(B.svoystva, t.svoystva));
   out.push(...utverzhdeniya(B.priznaki, t.priznaki));
+  if (t.tablica !== undefined) {
+    out.push(`| ${t.tablica.head.join(' | ')} |`, `|${t.tablica.head.map(() => '---').join('|')}|`);
+    for (const r of t.tablica.rows) out.push(`| ${r.join(' | ')} |`);
+    out.push('');
+  }
   if (t.primenenie !== undefined) {
     out.push(`**${B.primenenie}**`, '', ...t.primenenie.map((x, i) => `${i + 1}. ${x}`), '');
   }
@@ -61,6 +73,7 @@ function tema(t) {
   for (const [i, p] of (t.primery ?? []).entries()) {
     const z = zadachaPrimera(p);
     out.push(`**${B.primery} ${i + 1}. ${p.title}** _(${z.metka})_`, '', `> ${z.uslovie}`, '');
+    if (p.chertezh !== undefined) out.push(`*Чертёж:* ${p.chertezh}`, '');
     for (const s of p.shagi) {
       out.push(`- *${s.etap}.*${s.tekst === undefined ? '' : ` ${s.tekst}`}`);
       for (const f of s.tex ?? []) out.push('', `  $$${f}$$`);
@@ -85,6 +98,12 @@ export function soderzhanieMd() {
     '> Файл собран из данных справочника (`app/src/content/spravochnik1`) командой',
     '> `pnpm build:spravochnik-1`. Править тексты — в данных, не здесь: проверка',
     '> `pnpm test:spravochnik-1` сверяет файл с данными.',
+    '',
+    `## ${S.KAK_POLZOVATSYA_1.title}`,
+    '',
+    ...S.KAK_POLZOVATSYA_1.legenda.map((l) => `- **${B[l.blok]}** — ${l.tekst}.`),
+    '',
+    `**${S.KAK_POLZOVATSYA_1.oboznacheniya.title}.** ${S.KAK_POLZOVATSYA_1.oboznacheniya.tekst}`,
     '',
     '## Содержание',
     '',

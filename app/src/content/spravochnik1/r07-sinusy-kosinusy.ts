@@ -19,8 +19,13 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
         {
           nazvanie: 'Теорема косинусов',
           slovami:
-            'Квадрат стороны треугольника равен сумме квадратов двух других сторон, из которой вычли их удвоенное произведение, умноженное на косинус угла между ними.',
+            'Квадрат стороны треугольника равен сумме квадратов двух других сторон минус удвоенное произведение этих сторон на косинус угла между ними.',
           formula: 'a^2 = b^2 + c^2 - 2bc \\cos\\alpha',
+          dop: {
+            podpis: 'косинус угла по трём сторонам',
+            formula: '\\cos\\alpha = \\dfrac{b^2 + c^2 - a^2}{2bc}',
+          },
+          shkolnaya: true,
         },
       ],
       svoystva: [
@@ -68,6 +73,8 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
                 'Стороны треугольника равны $3$, $5$ и $7$. Найдите наибольший угол треугольника.',
             },
           },
+          chertezh:
+            'Треугольник со сторонами $3$, $5$ и $7$ в масштабе; угол против стороны $7$ выделен и подписан $\\alpha$.',
           shagi: [
             {
               etap: 'Какой угол',
@@ -86,10 +93,11 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
             },
           ],
           otvet: '120^\\circ',
+          raschet: () => (Math.acos((3 ** 2 + 5 ** 2 - 7 ** 2) / (2 * 3 * 5)) * 180) / Math.PI,
         },
       ],
       prototipy: [57],
-      zamenyaet: ['kosinusov', 'tupoy-ugol'],
+      zamenyaet: ['kosinusov'],
     },
     {
       id: 'teorema-sinusov',
@@ -115,6 +123,7 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
       vazhno: [
         'Синусы смежных углов равны: $\\sin\\alpha = \\sin(180^\\circ - \\alpha)$. Поэтому $\\sin 135^\\circ = \\sin 45^\\circ$, а по синусу угол восстанавливается неоднозначно — острый или тупой, решает условие.',
         'Отношение равно **диаметру** $2R$, а не радиусу.',
+        'Если по синусу ищем угол, проверьте, может ли он быть тупым: сумма углов треугольника не больше $180^\\circ$.',
       ],
       primery: [
         {
@@ -140,6 +149,8 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
                 'В треугольнике $ABC$ $BC = 10$, $\\angle A = 30^\\circ$, $\\angle B = 45^\\circ$. Найдите сторону $AC$.',
             },
           },
+          chertezh:
+            'Треугольник $ABC$; подписаны $BC = 10$, $\\angle A = 30^\\circ$, $\\angle B = 45^\\circ$; сторона $AC$ выделена.',
           shagi: [
             {
               etap: 'Пары «сторона — угол»',
@@ -153,6 +164,7 @@ export const R07_SINUSY_KOSINUSY: Razdel1 = {
           ],
           otvet: '10\\sqrt2',
           znachenie: 14.142135623730951,
+          raschet: () => (10 * Math.sin(Math.PI / 4)) / Math.sin(Math.PI / 6),
         },
       ],
       prototipy: [49],
