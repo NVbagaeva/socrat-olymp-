@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { AlertIcon, EmptyState, GlassBadge, HandNote } from '@/components/ui';
 import { vkladka } from '@/content/veroyatnost';
 import { FOTO_4, O_ZADANII_4, STATISTIKA_4, V_ZADANII_5 } from '@/content/veroyatnost-o-zadanii';
+import { bezVersii } from '@/lib/assetUrl';
 import { HintIcon } from '../prep/PrepIcons';
 import { Roscherk, ShapochkaIcon } from './Ikonki4';
 
@@ -32,7 +33,7 @@ export interface OZadanii4Props {
  */
 function fotoEst(): boolean {
   try {
-    return fs.statSync(path.join(process.cwd(), 'public', FOTO_4.src)).isFile();
+    return fs.statSync(path.join(process.cwd(), 'public', bezVersii(FOTO_4.src))).isFile();
   } catch {
     return false;
   }

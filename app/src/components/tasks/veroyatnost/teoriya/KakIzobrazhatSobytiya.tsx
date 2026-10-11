@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 import { CoordinateLine, type Promezhutok, type Tochka } from '@/components/probability';
 import { Details, EmptyState, HandNote } from '@/components/ui';
 import { IZOBRAZHENIE, type IzobrazhenieStroka } from '@/content/veroyatnost-teoriya';
+import { bezVersii } from '@/lib/assetUrl';
 import { plain } from '@/lib/tex';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
@@ -30,7 +31,9 @@ type Vid = IzobrazhenieStroka['id'];
 /** Портрет лежит в public: нет файла — пустое место, а не чужая картинка. */
 function portretEst(): boolean {
   try {
-    return fs.statSync(path.join(process.cwd(), 'public', IZOBRAZHENIE.eyler.portret.src)).isFile();
+    return fs
+      .statSync(path.join(process.cwd(), 'public', bezVersii(IZOBRAZHENIE.eyler.portret.src)))
+      .isFile();
   } catch {
     return false;
   }
