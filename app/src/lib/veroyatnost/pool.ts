@@ -32,11 +32,12 @@ import {
   type Method,
 } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import type { Razbor, RazborShag } from './razbor';
+import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
 import { klyuchZadachi, sealAnswer, sealMetod, sealText } from './secret';
 import {
+  type HintStep,
   type Metodika,
   type PrepBlok,
   type PrepZadacha,
@@ -143,6 +144,11 @@ export interface PoolVariant {
    * рисунка и запись ответа.
    */
   steps: string;
+  /**
+   * Подсказка-вопросы: JSON PodskazkaShag[], закрытый тем же отпечатком.
+   * Нет поля — у прототипа подсказки пока нет.
+   */
+  podskazka?: string;
   model?: PoolModel;
 }
 
@@ -260,6 +266,20 @@ function zakrytyRazbor(
       };
 }
 
+/**
+ * Набрать и закрыть подсказку отпечатком ответа: вопросы, кнопки и
+ * комментарии набираются KaTeX здесь, на сборке.
+ */
+function zapechatatPodskazku(shagi: readonly HintStep[], seal: string): string {
+  const nabrannye: PodskazkaShag[] = shagi.map((h) => ({
+    question: typesetText(h.question),
+    options: h.options.map((o) => typesetText(o)),
+    correct: h.correct,
+    comment: h.comment === undefined ? null : typesetText(h.comment),
+  }));
+  return sealText(JSON.stringify(nabrannye), seal);
+}
+
 /** Закрыть разбор отпечатком ответа: вызывается на сборке. */
 function zapechatatRazbor(razbor: Razbor, seal: string): string {
   return sealText(JSON.stringify(razbor), seal);
@@ -295,6 +315,9 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
     steps: zapechatatRazbor(razbor, seal),
+    ...(prototype.podskazka === undefined
+      ? {}
+      : { podskazka: zapechatatPodskazku(prototype.podskazka(variant.params), seal) }),
     ...(model === null ? {} : { model: otkrytayaModel(model, prototype.id, variant.n) }),
   };
 }

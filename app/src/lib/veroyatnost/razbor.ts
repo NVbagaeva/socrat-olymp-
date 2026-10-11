@@ -45,3 +45,20 @@ export interface Razbor {
 export function otkrytRazbor(steps: string, seal: string): Razbor {
   return JSON.parse(openText(steps, seal)) as Razbor;
 }
+
+/**
+ * Шаг подсказки в браузере: вопрос, кнопки и комментарий уже набраны
+ * KaTeX на сборке. Подсказка закрыта тем же отпечатком, что и разбор:
+ * номер верной кнопки до нажатия «Подсказка» в разметке не виден.
+ */
+export interface PodskazkaShag {
+  question: string;
+  options: string[];
+  correct: number;
+  comment: string | null;
+}
+
+/** Открыть закрытую подсказку по отпечатку верного ответа. */
+export function otkrytPodskazku(podskazka: string, seal: string): PodskazkaShag[] {
+  return JSON.parse(openText(podskazka, seal)) as PodskazkaShag[];
+}

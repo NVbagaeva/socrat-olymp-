@@ -341,6 +341,7 @@ export function Sessiya({
           klyuch: klyuchZadachi(kind.id, variant.n),
           seal: variant.seal,
           steps: variant.steps,
+          ...(variant.podskazka === undefined ? {} : { podskazka: variant.podskazka }),
           ...(variant.model === undefined ? {} : { model: variant.model }),
         }}
         /* Метод в шапке — только в отработке: в смешанном режиме и
@@ -352,6 +353,11 @@ export function Sessiya({
         podskazki={plan.podskazki}
         onResult={(right) => otvet(right, seychas())}
         onReveal={() => zapisat(false, false, seychas())}
+        /* Ответ после подсказки засчитывается как верный, но не чистый —
+           так же, как верный ответ после ошибки. */
+        onHint={() => {
+          oshibsya.current = true;
+        }}
         onNext={dalshe}
         nextLabel={last ? slova.zavershit : slova.dalshe}
       />

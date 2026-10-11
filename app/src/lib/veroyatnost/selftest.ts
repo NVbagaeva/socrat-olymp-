@@ -34,7 +34,7 @@ import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import { klyuchZadachi, sealAnswer } from './secret';
-import { konechnaya, round, type PrepBlok, type Prototype, type Step, type Variant } from './types';
+import { konechnaya, round, type HintStep, type PrepBlok, type Prototype, type Step, type Variant } from './types';
 
 export interface BadVariant {
   id: string;
@@ -92,6 +92,65 @@ export function problemyShagov(shagi: readonly Step[]): string[] {
   return problems;
 }
 
+/** Строка подсказки без разметки: «$0{,}25$» → «0,25». */
+function bezRazmetki(stroka: string): string {
+  return stroka
+    .replace(/\$/g, '')
+    .replace(/\{,\}/g, ',')
+    .replace(/\\[,;! ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Подсказка-вопросы к варианту:
+ *  - от двух до шести шагов, в каждом вопрос и 2–4 разные кнопки;
+ *  - номер верной кнопки — в пределах списка;
+ *  - знаки `$` в каждой строке парные — формула набирается целиком;
+ *  - последний шаг спрашивает ответ: его верная кнопка — ответ
+ *    задачи, как его записывают в бланк. Так подсказка не может
+ *    разойтись с ответом: ошибка в её числах ловится здесь.
+ */
+export function problemyPodskazki(shagi: readonly HintStep[], otvet: number): string[] {
+  const problems: string[] = [];
+  if (shagi.length < 2 || shagi.length > 6) {
+    problems.push(`в подсказке ${shagi.length} шагов, нужно от 2 до 6`);
+  }
+  shagi.forEach((shag, i) => {
+    const gde = `подсказка, шаг ${i + 1}`;
+    if (shag.question.trim() === '') {
+      problems.push(`${gde}: пустой вопрос`);
+    }
+    if (shag.options.length < 2 || shag.options.length > 4) {
+      problems.push(`${gde}: кнопок ${shag.options.length}, нужно 2–4`);
+    }
+    if (!Number.isInteger(shag.correct) || shag.correct < 0 || shag.correct >= shag.options.length) {
+      problems.push(`${gde}: верная кнопка ${shag.correct} вне списка`);
+    }
+    const vidno = shag.options.map(bezRazmetki);
+    if (new Set(vidno).size !== vidno.length) {
+      problems.push(`${gde}: кнопки повторяются (${vidno.join(' | ')})`);
+    }
+    if (vidno.some((o) => o === '')) {
+      problems.push(`${gde}: пустая кнопка`);
+    }
+    for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+      if ((stroka.match(/\$/g) ?? []).length % 2 !== 0) {
+        problems.push(`${gde}: непарный знак $ в «${stroka}»`);
+      }
+    }
+  });
+  const posledniy = shagi[shagi.length - 1];
+  const vBlank = String(otvet).replace('.', ',');
+  if (posledniy !== undefined && bezRazmetki(posledniy.options[posledniy.correct] ?? '') !== vBlank) {
+    problems.push(
+      `подсказка: последний шаг должен спрашивать ответ ${vBlank}, ` +
+        `а верная кнопка — «${bezRazmetki(posledniy.options[posledniy.correct] ?? '')}»`,
+    );
+  }
+  return problems;
+}
+
 function problemsOf(prototype: Prototype, variant: Variant): string[] {
   const problems: string[] = [];
   const p = variant.params;
@@ -128,6 +187,10 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   const znakov = prototype.okruglenie(p);
   if (znakov === null && !konechnaya(otvet)) {
     problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+  }
+
+  if (prototype.podskazka !== undefined) {
+    problems.push(...problemyPodskazki(prototype.podskazka(p), otvet));
   }
 
   const shagi = prototype.shagi(p);
@@ -768,4 +831,9 @@ export function checkRaskladku(
     vneZadachnika,
     problems,
   };
+}
+
+/** Прототипы банка без подсказки-вопросов. */
+export function bezPodskazki(bank: readonly Prototype[]): string[] {
+  return bank.filter((p) => p.podskazka === undefined).map((p) => p.id);
 }

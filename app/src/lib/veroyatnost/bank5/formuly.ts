@@ -10,6 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, text, type Params, type Prototype } from '../types';
+import { chislo, otvetShag, vopros } from '../podskazka';
 import { bezRisunka } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -70,6 +71,33 @@ const P01: Prototype = prototip({
         formula: `P = p_1 + p_2 = ${tex(p1)} + ${tex(p2)} = ${tex(tochnee(p1 + p2))}`,
         value: tochnee(p1 + p2),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    return [
+      vopros(
+        'Какое событие нужно найти?',
+        'Вопрос по одной из двух тем — или по первой, или по второй',
+        ['Вопрос сразу по обеим темам', 'Вопрос ни по одной из этих тем'],
+      ),
+      vopros(
+        'Может ли вопрос относиться к обеим темам сразу?',
+        'Нет — таких вопросов нет, события несовместны',
+        ['Да, такие вопросы бывают'],
+        'Несовместные события не происходят вместе.',
+      ),
+      vopros(
+        'Что делать с вероятностями несовместных событий, если нужно «одно или другое»?',
+        'Сложить: $p_1 + p_2$',
+        ['Перемножить: $p_1 \\cdot p_2$', 'Вычесть из единицы: $1 - p_1 - p_2$'],
+      ),
+      otvetShag(`Чему равна вероятность? $${tex(p1)} + ${tex(p2)} = \\ ?$`, tochnee(p1 + p2), [
+        tochnee(p1 * p2),
+        tochnee(1 - p1 - p2),
+        tochnee(Math.abs(p1 - p2)),
+      ]),
     ];
   },
   varianty: [
@@ -146,6 +174,28 @@ const P02: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const t = text(p, 't');
+    return [
+      vopros(
+        `Как связаны события «ниже ${t} °C» и «${t} °C или выше»?`,
+        'Противоположны: всегда случается ровно одно из них',
+        ['Независимы: одно не влияет на другое', 'Могут случиться одновременно'],
+        'Вместе они дают все возможные случаи.',
+      ),
+      vopros(
+        'Как найти вероятность противоположного события?',
+        'Из единицы вычесть данную: $1 - p$',
+        ['Взять ту же вероятность: $p$', 'Умножить на себя: $p \\cdot p$'],
+      ),
+      otvetShag(`Чему равна вероятность? $1 - ${tex(q)} = \\ ?$`, tochnee(1 - q), [
+        q,
+        tochnee(q * q),
+        tochnee(1.1 - q),
+      ]),
+    ];
+  },
   varianty: [
     { n: 1, source: 'sbornik', sourceNote: '№ 5', params: { p: 0.87, t: '36,8' } },
     { n: 2, source: 'sbornik', sourceNote: '№ 6', params: { p: 0.94, t: '36,8' } },
@@ -206,6 +256,35 @@ const P04: Prototype = prototip({
         formula: `P = 1 - ${tex(hotyaBy)} = ${tex(tochnee(1 - hotyaBy))}`,
         value: tochnee(1 - hotyaBy),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const q12 = veroyatnost(p, 'p12');
+    const hotyaBy = tochnee(2 * q - q12);
+    return [
+      vopros(
+        '«Кофе останется в обоих автоматах» — противоположное какому событию?',
+        'Кофе закончится хотя бы в одном автомате',
+        ['Кофе закончится в обоих автоматах', 'Кофе закончится в первом автомате'],
+        'Значит, сначала найдём вероятность «хотя бы в одном».',
+      ),
+      vopros(
+        'События «закончится в первом» и «закончится во втором» могут случиться вместе. Как найти вероятность «хотя бы в одном»?',
+        'Сложить и вычесть общую часть: $P(A) + P(B) - P(AB)$',
+        ['Просто сложить: $P(A) + P(B)$', 'Перемножить: $P(A) \\cdot P(B)$'],
+        'Иначе случаи «в обоих» посчитаются дважды.',
+      ),
+      vopros(
+        `Чему равна вероятность «хотя бы в одном»? $${tex(q)} + ${tex(q)} - ${tex(q12)} = \\ ?$`,
+        chislo(hotyaBy),
+        [chislo(tochnee(2 * q)), chislo(tochnee(q * q)), chislo(tochnee(2 * q + q12))],
+      ),
+      otvetShag(
+        `Чему равна вероятность, что кофе останется в обоих? $1 - ${tex(hotyaBy)} = \\ ?$`,
+        tochnee(1 - hotyaBy),
+        [hotyaBy, tochnee(1 - 2 * q), tochnee(1 - q12)],
+      ),
     ];
   },
   varianty: [
@@ -300,6 +379,33 @@ const P12: Prototype = prototip({
         formula: stroki.join(';\\quad '),
       },
       { text: 'Наименьшее число патронов:', formula: `k = ${k}`, value: k },
+    ];
+  },
+  podskazka: (p) => {
+    const pp = veroyatnost(p, 'p');
+    const q = veroyatnost(p, 'q');
+    const k = naimensheeK(pp, q);
+    const promah = tochnee(1 - pp);
+    const pred = tochnee(1 - promah ** (k - 1));
+    return [
+      vopros(
+        'Когда стрелок не поразит цель за $k$ выстрелов?',
+        'Если промахнётся все $k$ раз',
+        ['Если промахнётся хотя бы один раз', 'Если попадёт ровно один раз'],
+        `Вероятность промаха при одном выстреле — $1 - ${tex(pp)} = ${tex(promah)}$.`,
+      ),
+      vopros(
+        'Какова вероятность поразить цель, если патронов $k$?',
+        `$1 - ${tex(promah)}^{k}$`,
+        [`$${tex(pp)}^{k}$`, `$k \\cdot ${tex(pp)}$`],
+        'Поразить цель — противоположное событие к «промахнуться все $k$ раз».',
+      ),
+      vopros(
+        `Хватит ли ${k - 1} ${k - 1 === 1 ? 'патрона' : 'патронов'}? $1 - ${tex(promah)}^{${k - 1}} = ${tex(pred)}$`,
+        `Нет: $${tex(pred)} < ${tex(q)}$`,
+        [`Да: $${tex(pred)} \\ge ${tex(q)}$`],
+      ),
+      otvetShag('Какое наименьшее число патронов нужно дать стрелку?', k, [k - 1, k + 1]),
     ];
   },
   varianty: [

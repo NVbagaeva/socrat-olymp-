@@ -5,10 +5,11 @@ import { clsx } from 'clsx';
 import { Badge, Button, Input } from '@/components/ui';
 import type { Parametry } from '@/lib/veroyatnost/model';
 import type { PoolModel } from '@/lib/veroyatnost/pool';
-import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
+import { otkrytPodskazku, otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
 import { answerMatches } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { VykladkaKlient } from '../veroyatnost/VykladkaKlient';
+import { HintFlow } from './HintFlow';
 import { Vizualizatsiya, podpisRisunka } from './Vizualizatsiya';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -46,6 +47,11 @@ export interface ProblemCardZadacha {
   seal: string;
   /** Закрытый разбор (JSON формы Razbor, зашифрованный отпечатком). */
   steps: string;
+  /**
+   * Закрытая подсказка-вопросы (JSON PodskazkaShag[], тем же
+   * отпечатком). Нет поля — кнопки «Подсказка» нет.
+   */
+  podskazka?: string;
   /** Метод и картинка — открытая часть модели. */
   model?: PoolModel;
   /**
@@ -79,6 +85,8 @@ export interface ProblemCardProps {
   nextLabel?: string;
   /** Раскрыто решение — задача не засчитывается; сообщается один раз. */
   onReveal?: () => void;
+  /** Открыта подсказка по шагам: верный ответ после неё — не чистый. */
+  onHint?: () => void;
   disabled?: boolean;
   /**
    * Подсказки включены (по умолчанию). Выключены — кнопки «Показать
@@ -113,6 +121,7 @@ export function ProblemCard({
   onNext,
   nextLabel = 'Следующая',
   onReveal,
+  onHint,
   disabled = false,
   podskazki = true,
   className,
@@ -126,6 +135,16 @@ export function ProblemCard({
   const [shagov, setShagov] = useState(initial?.shagov ?? 0);
   const [otkryt, setOtkryt] = useState(
     initial?.state === 'revealed' || initial?.state === 'correct',
+  );
+
+  const [podskazkaOtkryta, setPodskazkaOtkryta] = useState(false);
+  /* Подсказка открывается так же лениво, как разбор. */
+  const podskazka = useMemo(
+    () =>
+      podskazkaOtkryta && zadacha.podskazka !== undefined
+        ? otkrytPodskazku(zadacha.podskazka, zadacha.seal)
+        : null,
+    [podskazkaOtkryta, zadacha.podskazka, zadacha.seal],
   );
 
   /* Разбор открывается лениво и один раз: до этого в памяти его нет. */
@@ -153,6 +172,11 @@ export function ProblemCard({
     setShagov(1);
     onReveal?.();
   }, [onReveal]);
+
+  const otkrytPodskazkuKnopkoy = useCallback((): void => {
+    setPodskazkaOtkryta(true);
+    onHint?.();
+  }, [onHint]);
 
   const skryt = useCallback((): void => {
     setState(itog ?? 'before');
@@ -331,6 +355,11 @@ export function ProblemCard({
                 <Button onClick={proverit} disabled={disabled || value.trim() === ''}>
                   Проверить
                 </Button>
+                {podskazki && zadacha.podskazka !== undefined && !podskazkaOtkryta ? (
+                  <Button variant="ghost" onClick={otkrytPodskazkuKnopkoy} disabled={disabled}>
+                    Подсказка
+                  </Button>
+                ) : null}
                 {podskazki || state === 'incorrect' ? (
                   <Button variant="ghost" onClick={raskryt} disabled={disabled}>
                     {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
@@ -348,6 +377,10 @@ export function ProblemCard({
               </Button>
             )}
           </footer>
+
+          {podskazka !== null && !resheniyeVidno && state !== 'correct' ? (
+            <HintFlow shagi={podskazka} />
+          ) : null}
         </div>
 
         {risunokVnizu === null ? null : (

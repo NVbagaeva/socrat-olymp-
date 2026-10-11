@@ -14,6 +14,7 @@
 import { prototip, type Rng } from '../generator';
 import { shagP } from '../bank4/vizual';
 import { dec, konechnaya, num, text, type Params, type Prototype, type Step } from '../types';
+import { otvetShag, vopros } from '../podskazka';
 import { setka } from './vizual5';
 import { shtuk, tex, texInt, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -192,6 +193,46 @@ const P03: Prototype = prototip({
       default:
         return [];
     }
+  },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const a = shtuk(p1, 100);
+    const b = shtuk(p2, 100);
+    /* Какое событие шире и какое уже — словами сюжета. */
+    const [shire, uzhe] = ((): [string, string] => {
+      switch (syuzhet(p)) {
+        case 'test':
+          return [`«больше ${num(p, 'k') - 1} задач»`, `«больше ${num(p, 'k')} задач»`];
+        case 'pribor':
+          return ['«больше года»', '«больше двух лет»'];
+        default:
+          return [`«меньше ${num(p, 'b')} пассажиров»`, `«меньше ${num(p, 'a')} пассажиров»`];
+      }
+    })();
+    return [
+      vopros(
+        `Как связаны события ${shire} и ${uzhe}?`,
+        `Второе — часть первого: всё, что ${uzhe.slice(1, -1)}, входит в ${shire}`,
+        ['Они несовместны — вместе не бывают', 'Они противоположны — одно из них обязательно'],
+        'Искомое событие — разница между ними: входит в первое, но не во второе.',
+      ),
+      vopros(
+        `Возьмём 100 случаев. В скольких из них ${shire.slice(1, -1)} и ${uzhe.slice(1, -1)}?`,
+        `$${a}$ и $${b}$`,
+        [`$${100 - a}$ и $${100 - b}$`, `$${b}$ и $${a}$`],
+        `$100 \\cdot ${tex(p1)} = ${a}$, $100 \\cdot ${tex(p2)} = ${b}$.`,
+      ),
+      vopros('Как получить число случаев, которые нужны?', `Вычесть: $${a} - ${b}$`, [
+        `Сложить: $${a} + ${b}$`,
+        `Вычесть из ста: $100 - ${a}$`,
+      ]),
+      otvetShag(`Чему равна вероятность? $\\dfrac{${a - b}}{100} = \\ ?$`, otvet03(p), [
+        tochnee(1 - p1),
+        tochnee(1 - p2),
+        tochnee(p1 * p2),
+      ]),
+    ];
   },
   varianty: [
     {
@@ -373,6 +414,39 @@ const P13: Prototype = prototip({
       shagP(m, 100),
     ];
   },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const a = shtuk(p1, 100);
+    const b = shtuk(p2, 100);
+    const aa = num(p, 'a');
+    const bb = num(p, 'b');
+    return [
+      vopros(
+        `Могут ли события «легче ${bb} г» и «тяжелее ${aa} г» случиться одновременно?`,
+        `Да — когда масса между ${aa} и ${bb} г, это и есть искомое`,
+        ['Нет — они несовместны', 'Нет — они противоположны'],
+        'События совместны: их общая часть и нужна.',
+      ),
+      vopros(
+        `Возьмём 100 буханок. Сколько из них тяжелее ${bb} г?`,
+        `$100 - ${a} = ${100 - a}$`,
+        [`$${a}$`, `$${b}$`],
+        `Легче ${bb} г — $${a}$ буханок, остальные тяжелее.`,
+      ),
+      vopros(
+        `А сколько легче ${aa} г?`,
+        `$100 - ${b} = ${100 - b}$`,
+        [`$${b}$`, `$${100 - a}$`],
+        `Тяжелее ${aa} г — $${b}$ буханок, остальные легче.`,
+      ),
+      otvetShag(
+        `Чему равна вероятность? $\\dfrac{100 - ${100 - a} - ${100 - b}}{100} = \\ ?$`,
+        otvet04(p),
+        [tochnee(p1 * p2), tochnee(1 - p1), tochnee(Math.abs(p1 - p2))],
+      ),
+    ];
+  },
   varianty: [
     {
       n: 1,
@@ -484,6 +558,36 @@ const P11: Prototype = prototip({
         formula: `P = \\dfrac{m}{n} = \\dfrac{${texInt(z1 + z2)}}{${texInt(BAZA)}} = ${tex((z1 + z2) / BAZA)}`,
         value: (z1 + z2) / BAZA,
       },
+    ];
+  },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const q1 = veroyatnost(p, 'q1');
+    const q2 = veroyatnost(p, 'q2');
+    const { neispr, ispr, z1, z2 } = zabrakovano(p);
+    return [
+      vopros(
+        `Возьмём ${texInt(BAZA).replace('\\,', ' ')} батареек. Сколько из них неисправных?`,
+        `$${texInt(neispr)}$`,
+        [`$${texInt(ispr)}$`, `$${texInt(z1)}$`],
+        `$${texInt(BAZA)} \\cdot ${tex(q)} = ${texInt(neispr)}$, исправных — $${texInt(ispr)}$.`,
+      ),
+      vopros(
+        'Какие батарейки система забракует?',
+        'Неисправные, которые она поймала, и исправные, забракованные по ошибке',
+        ['Только неисправные', 'Только исправные'],
+      ),
+      vopros(
+        'Сколько батареек будет забраковано?',
+        `$${texInt(z1)} + ${texInt(z2)} = ${texInt(z1 + z2)}$`,
+        [`$${texInt(z1)}$`, `$${texInt(neispr)}$`],
+        `$${texInt(neispr)} \\cdot ${tex(q1)} = ${texInt(z1)}$, $${texInt(ispr)} \\cdot ${tex(q2)} = ${texInt(z2)}$.`,
+      ),
+      otvetShag(
+        `Чему равна вероятность? $\\dfrac{${texInt(z1 + z2)}}{${texInt(BAZA)}} = \\ ?$`,
+        (z1 + z2) / BAZA,
+        [z1 / BAZA, q, z2 / BAZA],
+      ),
     ];
   },
   varianty: [
