@@ -96,6 +96,20 @@ async function ring(page) {
   }));
 }
 
+/* После перезагрузки кольцо считает прогресс уже в браузере: пока
+   страница не ожила, в нём «0%». Под нагрузкой это дольше полусекунды,
+   поэтому кольцо опрашивается до пяти секунд (по настоящим часам Node,
+   часы страницы подменены), пока не покажет ожидаемое значение. Если не
+   покажет — вернётся последнее, и проверка честно упадёт. */
+async function ringSettled(page, percent) {
+  let r = await ring(page);
+  for (let i = 0; i < 50 && r.percent !== percent; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    r = await ring(page);
+  }
+  return r;
+}
+
 async function fresh(sub) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
@@ -205,7 +219,7 @@ for (const { sub, items } of SUBTOPICS) {
     expect(name('теория — подпись'), r.text, 'Вы изучили 1 из ' + items + ' разделов');
     await page.reload({ waitUntil: 'load' });
     await wait(page, 500);
-    r = await ring(page);
+    r = await ringSettled(page, step);
     expect(name('после перезагрузки'), r.percent, step);
     await shot(page, sub + '-chast');
 
@@ -255,12 +269,13 @@ for (const { sub, items } of SUBTOPICS) {
       [id, Array.from({ length: round(total * share) }, (_, i) => i + 1)]));
     await page.evaluate(([value]) => localStorage.setItem('budetege:prep:v1', JSON.stringify(value)), [prep(0.7, Math.floor)]);
     await page.reload({ waitUntil: 'load' }); await wait(page, 500);
-    expect(name('опорные 70% — не пройдено'), (await ring(page)).percent, Math.round((done / items) * 100) + '%');
+    const partial = Math.round((done / items) * 100) + '%';
+    expect(name('опорные 70% — не пройдено'), (await ringSettled(page, partial)).percent, partial);
     await page.evaluate(([value]) => localStorage.setItem('budetege:prep:v1', JSON.stringify(value)), [prep(0.8, Math.ceil)]);
     const trainer = { kinds: Object.fromEntries(kinds.map((id) => [id, { done: 3, right: 2, seconds: 60 }])), mistakes: [] };
     await page.evaluate(([value]) => localStorage.setItem('budetege:trainer:v1', JSON.stringify(value)), [trainer]);
     await page.reload({ waitUntil: 'load' }); await wait(page, 500);
-    const r = await ring(page);
+    const r = await ringSettled(page, '100%');
     expect(name('всё пройдено — процент'), r.percent, '100%');
     expect(name('всё пройдено — подпись'), r.text, 'Вы изучили все разделы подтемы');
     await page.locator('.topic-progress__toggle').click();
