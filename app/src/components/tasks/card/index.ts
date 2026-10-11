@@ -8,6 +8,7 @@
 export {
   ProblemCard,
   type ProblemCardProps,
+  type ProblemCardSnapshot,
   type ProblemCardZadacha,
   type CardState,
 } from './ProblemCard';

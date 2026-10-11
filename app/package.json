@@ -89,7 +89,9 @@
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",
     "test:soglasiya-sql": "node scripts/check-soglasiya-sql.mjs",
-    "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs"
+    "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs",
+    "test:trainer-session": "node scripts/check-trainer-session.mjs",
+    "test:trainer-sessions": "node scripts/check-trainer-sessions.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

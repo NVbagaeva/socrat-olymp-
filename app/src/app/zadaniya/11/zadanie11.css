@@ -1842,29 +1842,9 @@
   align-items: center;
   gap: var(--space-3);
 }
-.z11-resh__nazad {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  border: 0;
-  background: none;
-  color: var(--color-text-secondary);
-  font: inherit;
-  cursor: pointer;
-}
-.z11-resh__nazad .z11-pic {
-  width: 18px;
-  height: 18px;
-  color: var(--color-primary);
-}
 .z11-resh__bar {
   flex: 1;
   min-width: 100px;
-}
-.z11-resh__count {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  white-space: nowrap;
 }
 .z11-resh__badge {
   padding: 2px var(--space-3);
@@ -2110,95 +2090,7 @@
   grid-column: 1 / -1;
 }
 
-/* ── Итог тренировки ──────────────────────────────────────────── */
-
-.z11-itog {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 820px;
-  margin: var(--space-5) auto 0;
-}
-.z11-itog__sum {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z11-itog__sum li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
-.z11-itog__sum .is-right {
-  color: var(--color-success);
-}
-.z11-itog__sum .is-wrong {
-  color: var(--color-error);
-}
-.z11-itog__list {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z11-itog__item {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-left-width: 4px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: var(--fs-caption);
-}
-.z11-itog__item.is-right {
-  border-left-color: var(--color-success);
-}
-.z11-itog__item.is-hinted {
-  border-left-color: var(--color-warning);
-}
-.z11-itog__item.is-wrong {
-  border-left-color: var(--color-error);
-}
-.z11-itog__ikonka {
-  width: 32px;
-  height: 32px;
-}
-.z11-itog__ikonka .z11-pic {
-  width: 18px;
-  height: 18px;
-}
-.z11-itog__kod,
-.z11-itog__badge {
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-.z11-itog__mark {
-  font-weight: 600;
-  white-space: nowrap;
-}
-.z11-itog__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
 @media (max-width: 640px) {
-  .z11-itog__item {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-  .z11-itog__kod,
-  .z11-itog__badge {
-    display: none;
-  }
   .z11-istochnik {
     grid-template-columns: 1fr;
   }
