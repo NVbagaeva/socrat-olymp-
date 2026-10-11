@@ -25,7 +25,7 @@ import Line from './families/line.js';
 import hidden from './hidden.js';
 import S from './generate-sqrt.js';
 
-var frac = Line.frac, add = Line.add, sub = Line.sub, mul = Line.mul,
+var frac = Line.frac, add = Line.add, sub = Line.sub, mul = Line.mul, div = Line.div,
     num = Line.num, isInt = Line.isInt, isZero = Line.isZero;
 
 /* ══════════════════════════════════════════════════════════
@@ -136,51 +136,186 @@ function mainMark(points) {
   return marks.reduce(function (best, p) { return best === null || p.n > best.n ? p : best; }, null);
 }
 
-function stepStart(c, form) {
-  if (form !== 'shift') {
-    return step('start', 'Начало графика', [
-      text('График корня начинается в точке, где подкоренное выражение равно нулю. Здесь это ' +
-        'начало координат ' + m('(0;\\, 0)') + ' — график не сдвинут:'),
-      formula(formTex(form))
-    ]);
+/* ── Слова и вычисления для подробного разбора ─────────────── */
+
+/** Число знаков после запятой у десятичной дроби (0 у целого). */
+function decimals(f) {
+  var text = String(Math.round(num(f) * 1e8) / 1e8);
+  var dot = text.indexOf('.');
+  return dot < 0 ? 0 : text.length - dot - 1;
+}
+
+/** Целое число из десятичной записи: 2,6 → 26 (знаков d). */
+function scaled(f, d) { return Math.round(Math.abs(num(f)) * Math.pow(10, d)); }
+
+function digitsWord(d) { return d === 1 ? 'один знак' : d === 2 ? 'два знака' : d + ' знака'; }
+
+/** Квадрат целого устным способом: 26·26 = 26·20 + 26·6 = 520 + 156 = 676. */
+function squareByParts(n) {
+  if (n < 10) { return n + ' \\cdot ' + n + ' = ' + n * n; }
+  var tens = Math.floor(n / 10) * 10, ones = n % 10;
+  if (ones === 0) { return n + ' \\cdot ' + n + ' = ' + n * n; }
+  return n + ' \\cdot ' + n + ' = ' + n + ' \\cdot ' + tens + ' + ' + n + ' \\cdot ' + ones + ' = ' +
+    n * tens + ' + ' + n * ones + ' = ' + n * n;
+}
+
+/** Корень из квадрата рационального числа: что написать и как объяснить. */
+function sqrtExplain(under, s) {
+  var d = decimals(s);
+  if (isInt(s)) {
+    return {
+      tex: '\\sqrt{' + tex(under) + '} = ' + tex(s),
+      words: 'Ищем число, которое при умножении само на себя даёт ' + m(tex(under)) + '. Это ' +
+        m(tex(s)) + ': ' + m(tex(s) + ' \\cdot ' + tex(s) + ' = ' + tex(under)) + '. Значит, корень извлекается нацело.',
+      proof: null
+    };
   }
-  return step('start', 'Начало графика', [
-    text('График начинается в отмеченной точке ' + m(pointTex('', frac(c.x0), frac(c.y0))) +
-      ' — левее неё функции нет: под корнем было бы отрицательное число. Начало графика — это ' +
-      m('(x_0;\\, y_0)') + ':'),
+  if (decimalFriendly(s)) {
+    var n = scaled(s, d), den = Math.pow(10, d);
+    return {
+      tex: '\\sqrt{' + tex(under) + '} = \\sqrt{\\dfrac{' + n * n + '}{' + den * den + '}} = \\dfrac{' + n + '}{' + den +
+        '} = ' + tex(s),
+      words: 'Чтобы взять корень из десятичной дроби, запишем её обычной дробью: ' + m(tex(under)) + ' — это ' +
+        m(String(n * n)) + ' ' + (d === 1 ? 'сотых' : d === 2 ? 'десятитысячных' : 'миллионных') + ', то есть ' +
+        m('\\dfrac{' + n * n + '}{' + den * den + '}') + '. Знаменатель — полный квадрат: ' + m(den * den + ' = ' + den + '^2') +
+        '. Числитель тоже: ' + m(n * n + ' = ' + n + '^2') + ' (проверим умножением: ' + m(squareByParts(n)) +
+        '). Корень из дроби равен корню из числителя, делённому на корень из знаменателя.',
+      proof: null
+    };
+  }
+  return {
+    tex: '\\sqrt{' + tex(under) + '} = \\sqrt{\\dfrac{' + s.p * s.p + '}{' + s.q * s.q + '}} = \\dfrac{' +
+      Math.abs(s.p) + '}{' + s.q + '}',
+    words: 'Запишем подкоренное число дробью ' + m('\\dfrac{' + s.p * s.p + '}{' + s.q * s.q + '}') +
+      ' = ' + m('\\dfrac{' + Math.abs(s.p) + '^2}{' + s.q + '^2}') + ' — корень из дроби равен корню из ' +
+      'числителя, делённому на корень из знаменателя.',
+    proof: null
+  };
+}
+
+/** Произведение k · s: «умный» способ, названный словами. */
+function multiplyBy(k, s) {
+  var result = mul(k, s);
+  var sign = k.p < 0 ? '-' : '';
+  var kp = Math.abs(k.p), kq = k.q;
+  if (isInt(k) && kp === 1) {
+    return { words: 'Множитель ' + m(tex(k)) + (k.p < 0 ? ' только меняет знак' : ' ничего не меняет') + ':',
+      tex: tex(k) + ' \\cdot ' + tb(s) + ' = ' + tex(result), result: result };
+  }
+  if (isInt(s)) {
+    return { words: 'Умножаем коэффициент на корень:',
+      tex: tb(k) + ' \\cdot ' + tex(s) + ' = ' + tex(result), result: result };
+  }
+  if (!isInt(k)) {
+    /* k = p/q: сначала делим s на q, потом умножаем на p. */
+    var part = div(s, frac(kq));
+    if (decimalFriendly(part)) {
+      var tail = kp === 1 ? '' : sign + kp + ' \\cdot ' + tex(part) + ' = ';
+      return {
+        words: 'Число ' + m(tex(k)) + ' — это ' + m(sign + '\\dfrac{' + kp + '}{' + kq + '}') +
+          '. Умножать на дробь удобно так: сначала делим на знаменатель ' + m(String(kq)) +
+          (kp === 1 ? '.' : ', потом умножаем на числитель ' + m(String(kp)) + '.'),
+        tex: tb(k) + ' \\cdot ' + tex(s) + ' = ' + sign + '\\dfrac{' + kp + '}{' + kq + '} \\cdot ' + tex(s) + ' = ' +
+          tail + tex(result), result: result };
+    }
+  }
+  /* k — целое, s — десятичная дробь: разбиваем s на целую и дробную части. */
+  var whole = Math.floor(Math.abs(num(s))), rest = sub(frac(Math.abs(s.p), s.q), frac(whole));
+  if (isInt(k) && whole > 0 && decimalFriendly(s)) {
+    var a = mul(frac(Math.abs(k.p)), frac(whole)), b = mul(frac(Math.abs(k.p)), rest);
+    var open = sign ? '-(' : '', close = sign ? ')' : '';
+    return {
+      words: 'Умножаем по частям: отдельно на целую часть ' + m(String(whole)) + ' и на дробную ' + m(tex(rest)) +
+        ', потом складываем.',
+      tex: tb(k) + ' \\cdot ' + tex(s) + ' = ' + open + Math.abs(k.p) + ' \\cdot ' + whole + ' + ' + Math.abs(k.p) +
+        ' \\cdot ' + tex(rest) + close + ' = ' + open + tex(a) + ' + ' + tex(b) + close + ' = ' + tex(result),
+      result: result };
+  }
+  return { words: 'Умножаем коэффициент на корень:', tex: tb(k) + ' \\cdot ' + tb(s) + ' = ' + tex(result), result: result };
+}
+
+/** Деление right : k — «умный» способ для дробного k. */
+function divideBy(right, k, s) {
+  if (!isInt(k) && k.p > 0) {
+    var part = div(right, frac(k.p));
+    if (decimalFriendly(part)) {
+      return {
+        words: 'Делить на ' + m(tex(k)) + ' = ' + m('\\dfrac{' + k.p + '}{' + k.q + '}') +
+          ' — то же, что умножать на перевёрнутую дробь ' + m('\\dfrac{' + k.q + '}{' + k.p + '}') + ': сначала делим ' +
+          'на ' + m(String(k.p)) + (k.q === 1 ? '' : ', потом умножаем на ' + m(String(k.q))) + '.',
+        tex: '\\dfrac{' + tex(right) + '}{' + tex(k) + '} = ' + tex(right) + ' \\cdot \\dfrac{' + k.q + '}{' + k.p + '} = ' +
+          tex(part) + ' \\cdot ' + k.q + ' = ' + tex(s) };
+    }
+  }
+  return { words: 'Делим обе части на ' + m(tex(k)) + ':', tex: '\\dfrac{' + tex(right) + '}{' + tex(k) + '} = ' + tex(s) };
+}
+
+function pointCoords(P) { return m(pointTex('', f0(P.x), f0(P.y))); }
+
+function stepStart(c, form) {
+  /* Без сдвига отдельного шага нет: график начинается в (0; 0). */
+  if (form !== 'shift') { return null; }
+  return step('start', 'Находим начало графика $(x_0;\\, y_0)$', [
+    text('График корня начинается в самой левой своей точке — левее неё функции нет, потому что под ' +
+      'корнем было бы отрицательное число. Эта точка отмечена на рисунке: ' + m(pointTex('', frac(c.x0), frac(c.y0))) +
+      '. Её координаты и есть числа ' + m('x_0') + ' и ' + m('y_0') + ':'),
     formula('x_0 = ' + tex(frac(c.x0)) + ', \\quad y_0 = ' + tex(frac(c.y0))),
-    formula(letterTex(c))
+    text('Сдвинутый график записывается формулой ' + m(formTex('shift')) + '. Подставим в неё найденные ' +
+      m('x_0') + ' и ' + m('y_0') + ' — формула теперь выглядит так:'),
+    formula(letterTex(c, 'y'))
   ]);
 }
 
-function stepPoint(c, P) {
+function stepPoint(c, P, form) {
   var dx = P.x - c.x0;
-  var dy = sub(f0(P.y), frac(c.y0));
-  return step('point', 'Целая точка графика', [
-    text('Ищем на графике точку в узле сетки — она отмечена: ' + m(pointTex('', f0(P.x), f0(P.y))) +
-      '. От начала графика она сдвинута на ' + m(String(dx)) + ' вправо — это точный квадрат, ' +
-      m(dx + ' = ' + P.n + '^2') + ', поэтому корень из него извлекается нацело:'),
-    formula((c.x0 === 0 ? '' : '\\sqrt{' + tex(f0(P.x)) + term(frac(-c.x0)) + '} = ') +
-      '\\sqrt{' + dx + '} = ' + P.n),
-    text('По вертикали точка отстоит от начала на ' + m(tex(frac(Math.abs(dy.p), dy.q))) + ' ' +
-      (num(dy) > 0 ? 'вверх' : 'вниз') + '.')
-  ]);
+  var shifted = form === 'shift';
+  var blocks = [
+    text('Найдём на графике точку, которая лежит ровно в узле клетчатой сетки, то есть обе её координаты — ' +
+      'целые числа. Берём точку ' + pointCoords(P) + '.')
+  ];
+  if (shifted && c.x0 !== 0) {
+    blocks.push(text('Под корнем стоит ' + m(radicand(c.x0)) + ' — расстояние от точки до начала графика по горизонтали. ' +
+      'Для нашей точки оно равно ' + m(P.x + term(frac(-c.x0)) + ' = ' + dx) + ' — это точный квадрат, ' +
+      m(dx + ' = ' + P.n + '^2') + ', поэтому корень извлекается нацело:'));
+    blocks.push(formula('\\sqrt{' + P.x + term(frac(-c.x0)) + '} = \\sqrt{' + dx + '} = ' + P.n));
+  } else {
+    blocks.push(text('Её абсцисса ' + m(String(P.x)) + ' — точный квадрат, ' + m(P.x + ' = ' + P.n + '^2') +
+      ', поэтому корень из неё извлекается нацело (так специально выбирают точку: считать будет легко):'));
+    blocks.push(formula('\\sqrt{' + P.x + '} = ' + P.n));
+  }
+  return step('point', 'Берём точку в узле сетки', blocks);
 }
 
-function stepK(c, P) {
-  var y = f0(P.y);
+function stepK(c, P, form) {
+  var y = f0(P.y), x = f0(P.x);
   var dy = sub(y, frac(c.y0));
+  var shifted = form === 'shift';
+  var sq = shifted ? '\\sqrt{' + tex(x) + term(frac(-c.x0)) + '}' : '\\sqrt{' + tex(x) + '}';
   var blocks = [
-    text('Подставляем координаты точки в формулу ' + m(letterTex(c, 'y')) + ':'),
-    formula(tex(y) + ' = k\\sqrt{' + tex(f0(P.x)) + term(frac(-c.x0)) + '}' + term(frac(c.y0)) +
-      ' \\;\\Rightarrow\\; ' + tex(dy) + ' = ' + (P.n === 1 ? '' : P.n) + 'k' +
-      (P.n === 1 ? ' \\;\\Rightarrow\\; k = ' + tex(c.k)
-        : ' \\;\\Rightarrow\\; k = \\dfrac{' + tex(dy) + '}{' + P.n + '} = ' + tex(c.k))),
-    text('Знак ' + m('k') + ' видно и по рисунку: график идёт ' +
-      (num(c.k) > 0 ? 'вверх — ' + m('k > 0') : 'вниз — ' + m('k < 0')) + '. Формула функции:'),
-    formula(equationTex(c))
+    text('Чтобы найти ' + m('k') + ', подставим координаты этой точки в формулу ' + m(letterTex(c, 'y')) +
+      ': вместо ' + m('x') + ' ставим ' + m(tex(x)) + ', вместо ' + m('y') + ' ставим ' + m(tex(y)) + '.'),
+    formula(tex(y) + ' = k \\cdot ' + sq + term(frac(c.y0)) + ' = ' + (P.n === 1 ? '' : P.n) + 'k' + term(frac(c.y0)))
   ];
-  return step('k', 'Находим $k$ по целой точке', blocks);
+  if (c.y0 !== 0) {
+    blocks.push(text('Число ' + m(tex(frac(c.y0))) + ' переносим в левую часть, поменяв знак — так слагаемое ' +
+      'с ' + m('k') + ' остаётся одно:'));
+    blocks.push(formula(tex(y) + term(frac(-c.y0)) + ' = ' + (P.n === 1 ? '' : P.n) + 'k \\;\\Rightarrow\\; ' +
+      tex(dy) + ' = ' + (P.n === 1 ? '' : P.n) + 'k'));
+  }
+  if (P.n !== 1) {
+    blocks.push(text('Теперь ' + m('k') + ' умножено на ' + m(String(P.n)) + '. Чтобы найти ' + m('k') +
+      ', делим обе части уравнения на ' + m(String(P.n)) + ':'));
+    blocks.push(formula('k = \\dfrac{' + tex(dy) + '}{' + P.n + '} = ' + tex(c.k)));
+  } else {
+    blocks.push(text('Корень из единицы равен единице, поэтому ' + m('k') + ' получается сразу:'));
+    blocks.push(formula('k = ' + tex(c.k)));
+  }
+  blocks.push(text('Знак ' + m('k') + ' видно и по рисунку: график идёт ' +
+    (num(c.k) > 0 ? 'вверх — ' + m('k > 0') : 'вниз — ' + m('k < 0')) + '.'));
+  blocks.push(text('Мы нашли ' + m('k') + '. Каждый раз, когда находим очередной коэффициент, записываем, ' +
+    'какой вид теперь принимает формула — формула теперь выглядит так:'));
+  blocks.push(formula(equationTex(c, 'y')));
+  return step('k', 'Находим $k$ по точке', blocks);
 }
 
 /* Проверка на адекватность: где по картинке должен оказаться ответ. */
@@ -203,8 +338,8 @@ function sanityValue(c, s, x, y) {
 
 function stepAsked(c, rule, query, answer) {
   if (rule === 'coef-k') {
-    return step('asked', 'Что спрашивают', [
-      text('Спрашивают коэффициент ' + m('k') + ' — он уже найден:'),
+    return step('asked', 'Что нужно найти', [
+      text('В задании нужно найти коэффициент ' + m('k') + '. Мы уже нашли его во втором шаге — просто записываем:'),
       formula('k = ' + tex(c.k))
     ]);
   }
@@ -212,33 +347,64 @@ function stepAsked(c, rule, query, answer) {
   if (rule === 'value-at') {
     var x = exact(query.x0);
     var under = sub(x, frac(c.x0));
-    return step('asked', 'Считаем значение функции', [
-      text('Подставляем ' + m('x = ' + tex(x)) + ' в формулу ' + m(equationTex(c)) + '. ' +
-        'Корень извлекается нацело: ' + m(tex(under) + ' = ' + tex(s) + '^2') + '.'),
+    var root = sqrtExplain(under, s);
+    var prod = multiplyBy(c.k, s);
+    var blocks = [
+      text('В задании нужно найти значение функции в точке ' + m('x = ' + tex(x)) + ', то есть ' + m('f(' + tex(x) + ')') +
+        '. Мы знаем формулу, поэтому подставляем в неё ' + m('x = ' + tex(x)) + ' вместо ' + m('x') + ':'),
       formula('f(' + tex(x) + ') = ' + coef(c.k) + (coef(c.k) === '' || coef(c.k) === '-' ? '' : ' \\cdot ') +
-        '\\sqrt{' + tex(under) + '}' + term(frac(c.y0)) + ' = ' +
-        (coef(c.k) === '' ? '' : coef(c.k) === '-' ? '-' : tex(c.k) + ' \\cdot ') + tex(s) +
-        term(frac(c.y0)) + ' = ' + tex(answer))
-    ]);
+        '\\sqrt{' + tex(x) + term(frac(-c.x0)) + '}' + term(frac(c.y0)) +
+        (c.x0 === 0 ? '' : ' = ' + coef(c.k) + (coef(c.k) === '' || coef(c.k) === '-' ? '' : ' \\cdot ') +
+          '\\sqrt{' + tex(under) + '}' + term(frac(c.y0)))),
+      text('Сначала найдём корень. ' + root.words),
+      formula(root.tex)
+    ];
+    if (!(isInt(c.k) && Math.abs(c.k.p) === 1)) {
+      blocks.push(text(prod.words));
+      blocks.push(formula(prod.tex));
+    }
+    var value = prod.result;
+    if (c.y0 !== 0) {
+      blocks.push(text('Остаётся прибавить ' + m('y_0 = ' + tex(frac(c.y0))) + ' — график сдвинут по вертикали:'));
+      blocks.push(formula('f(' + tex(x) + ') = ' + tex(value) + term(frac(c.y0)) + ' = ' + tex(answer)));
+    } else {
+      blocks.push(text(isInt(c.k) && c.k.p === -1 ? 'Минус перед корнем остаётся — значение функции:' : 'Значение функции:'));
+      blocks.push(formula('f(' + tex(x) + ') = ' + tex(answer)));
+    }
+    return step('asked', 'Что нужно найти', blocks);
   }
   var y = exact(query.y0);
   var right = sub(y, frac(c.y0));
-  var blocks = [
-    text('Решаем уравнение ' + m('f(x) = ' + tex(y)) + ':'),
+  var blocks2 = [
+    text('В задании известно значение функции ' + m('y = ' + tex(y)) + ', нужно найти ' + m('x') + '. Мы знаем формулу, ' +
+      'поэтому подставляем известное ' + m('y') + ' и решаем уравнение относительно ' + m('x') + ':'),
     formula(coef(c.k) + '\\sqrt{' + radicand(c.x0) + '}' + term(frac(c.y0)) + ' = ' + tex(y))
   ];
   if (c.y0 !== 0) {
-    blocks.push(formula(coef(c.k) + '\\sqrt{' + radicand(c.x0) + '} = ' + tex(y) + term(frac(-c.y0)) +
-      ' = ' + tex(right)));
+    blocks2.push(text('Число ' + m(tex(frac(c.y0))) + ' переносим в правую часть, поменяв знак:'));
+    blocks2.push(formula(coef(c.k) + '\\sqrt{' + radicand(c.x0) + '} = ' + tex(y) + term(frac(-c.y0)) + ' = ' + tex(right)));
   }
-  blocks.push(formula('\\sqrt{' + radicand(c.x0) + '} = \\dfrac{' + tex(right) + '}{' + tex(c.k) +
-    '} = ' + tex(s)));
-  blocks.push(text('Корень не бывает отрицательным, поэтому решение есть только при ' +
-    m('\\dfrac{y - y_0}{k} \\ge 0') + '. Здесь ' + m(tex(s) + ' \\ge 0') +
-    ' — решение есть. Возводим обе части в квадрат:'));
-  blocks.push(formula(radicand(c.x0) + ' = ' + tex(s) + '^2 = ' + tex(mul(s, s)) +
-    (c.x0 === 0 ? '' : ' \\;\\Rightarrow\\; x = ' + tex(mul(s, s)) + term(frac(c.x0)) + ' = ' + tex(answer))));
-  return step('asked', 'Решаем уравнение', blocks);
+  var dv = divideBy(right, c.k, s);
+  var unit = isInt(c.k) && Math.abs(c.k.p) === 1;
+  if (unit && c.k.p < 0) {
+    blocks2.push(text('Перед корнем стоит минус. Умножим обе части уравнения на ' + m('-1') + ' — знаки поменяются:'));
+    blocks2.push(formula('\\sqrt{' + radicand(c.x0) + '} = ' + tex(s)));
+  } else if (!unit) {
+    blocks2.push(text(dv.words));
+    blocks2.push(formula('\\sqrt{' + radicand(c.x0) + '} = ' + dv.tex));
+  }
+  blocks2.push(text('Квадратный корень не бывает отрицательным, поэтому решение есть, только если справа не ' +
+    'отрицательное число. Здесь ' + m(tex(s) + ' \\ge 0') + ' — решение есть. Чтобы избавиться от корня, ' +
+    'возводим обе части уравнения в квадрат' + (decimalFriendly(s) && !isInt(s)
+      ? ' (у числа ' + m(tex(s)) + ' ' + digitsWord(decimals(s)) + ' после запятой, у его квадрата — вдвое больше)' : '') + ':'));
+  if (c.x0 !== 0) {
+    blocks2.push(formula(radicand(c.x0) + ' = ' + tex(s) + '^2 = ' + tex(mul(s, s))));
+    blocks2.push(text('Число ' + m(tex(frac(-c.x0))) + ' переносим в правую часть, поменяв знак:'));
+    blocks2.push(formula('x = ' + tex(mul(s, s)) + term(frac(c.x0)) + ' = ' + tex(answer)));
+  } else {
+    blocks2.push(formula('x = ' + tex(s) + '^2 = ' + tex(answer)));
+  }
+  return step('asked', 'Что нужно найти', blocks2);
 }
 
 function stepAnswerSingle(c, rule, query, answer) {
@@ -263,7 +429,7 @@ function stepAnswerSingle(c, rule, query, answer) {
       ', знак ' + m('k') + ' ' + (num(c.k) > 0 ? 'плюс' : 'минус') + ' — сходится.'));
   }
   blocks.push(answerBlock(answer));
-  return step('answer', 'Ответ и проверка', blocks);
+  return step('answer', 'Проверка на адекватность и ответ', blocks);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -310,6 +476,7 @@ function lineStep(task) {
     blocks.push(formula(tex(yA) + ' = ' + (coef(line.k) === '' ? '' : coef(line.k) === '-' ? '-' : tb(line.k) + ' \\cdot ') +
       tb(xA) + ' + b \\;\\Rightarrow\\; b = ' + tex(line.b)));
   }
+  blocks.push(text('Мы нашли ' + m('a') + ' и ' + m('b') + ' — формула прямой теперь выглядит так:'));
   blocks.push(formula(lineTex(line)));
   return step('line', 'Прямая: $a$ и $b$ по двум точкам', blocks);
 }
@@ -340,11 +507,15 @@ function lineSteps(c, task) {
   }
 
   steps.push(step('k', 'Корень: находим $k$ по точке $A$', [
-    text('Точка ' + m(pointTex('A', xA, yA)) + ' лежит на графике ' + m('f(x) = k\\sqrt{x}') +
-      '. Подставляем её координаты:'),
-    formula(tex(yA) + ' = k\\sqrt{' + tex(xA) + '}' + (A.n === 1 ? ' \\;\\Rightarrow\\; k'
-      : ' = ' + A.n + 'k \\;\\Rightarrow\\; k = \\dfrac{' + tex(yA) + '}{' + A.n + '}') + ' = ' + tex(c.k)),
-    formula(equationTex(c))
+    text('Точка ' + m(pointTex('A', xA, yA)) + ' лежит в узле сетки и на графике ' + m('f(x) = k\\sqrt{x}') +
+      ', поэтому её координаты подходят к формуле. Подставляем: вместо ' + m('x') + ' ставим ' + m(tex(xA)) +
+      ', вместо ' + m('f(x)') + ' — ' + m(tex(yA)) + ':'),
+    formula(tex(yA) + ' = k\\sqrt{' + tex(xA) + '}' + (A.n === 1 ? '' : ' = ' + A.n + 'k')),
+    text(A.n === 1 ? 'Корень из единицы равен единице, поэтому ' + m('k') + ' получается сразу:'
+      : 'Число ' + m(String(A.n)) + ' стоит множителем при ' + m('k') + '. Делим обе части на ' + m(String(A.n)) + ':'),
+    formula('k = ' + (A.n === 1 ? '' : '\\dfrac{' + tex(yA) + '}{' + A.n + '} = ') + tex(c.k)),
+    text('Мы нашли ' + m('k') + ' — формула корня теперь выглядит так:'),
+    formula(equationTex(c, 'f(x)'))
   ]));
 
   steps.push(lineStep(task));
@@ -434,9 +605,9 @@ function fromTask(task) {
   } else {
     var P = mainMark(meta.points);
     var answer = exact(meta.answer);
-    steps = [stepStart(c, meta.form), stepPoint(c, P), stepK(c, P),
+    steps = [stepStart(c, meta.form), stepPoint(c, P, meta.form), stepK(c, P, meta.form),
       stepAsked(c, meta.rule, meta.query, answer),
-      stepAnswerSingle(c, meta.rule, meta.query, answer)];
+      stepAnswerSingle(c, meta.rule, meta.query, answer)].filter(Boolean);
   }
   return steps.map(function (item, index) {
     return { number: index + 1, id: item.id, title: item.title, arrow: null, blocks: item.blocks };

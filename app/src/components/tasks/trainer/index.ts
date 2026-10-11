@@ -9,10 +9,4 @@ export {
   type TrainerWords,
 } from './TrainerConfigurator';
 export { TrainerScreen, type TrainerScreenProps } from './TrainerScreen';
-export {
-  TrainerResult,
-  type TrainerResultProps,
-  type TrainerMark,
-  type ResultTask,
-} from './TrainerResult';
 export { TrainerStats, type TrainerStatsProps } from './TrainerStats';
