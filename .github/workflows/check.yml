@@ -18,6 +18,13 @@ concurrency:
   group: check-${{ github.ref }}
   cancel-in-progress: true
 
+# Эта сборка не публикуется, поэтому правовые документы можно собрать
+# черновиком, с незаполненными [ФИО], [ПОЧТА], [ДАТА]. deploy.yml
+# переменную не ставит: там сборка падает, пока не заполнен
+# app/src/content/legal/operator.json (scripts/lib/legal-config.mjs).
+env:
+  LEGAL_DRAFT: '1'
+
 jobs:
   build:
     name: Сборка
@@ -261,6 +268,19 @@ jobs:
       - name: Проверить, что математика набрана KaTeX (исходники)
         working-directory: app
         run: pnpm test:math-markup --src
+
+      # Политика, согласие и соглашение — слово в слово из утверждённого
+      # файла; правила регистрации (галочки, родитель, повтор письма).
+      - name: Правовые документы и правила согласий
+        working-directory: app
+        run: pnpm test:legal
+
+      # Таблица согласий на настоящем PostgreSQL (он есть на раннере):
+      # без галочек пользователь не создаётся, подтверждение родителя,
+      # выгрузка, удаление аккаунта без журнала согласий.
+      - name: Согласия в базе
+        working-directory: app
+        run: pnpm test:soglasiya-sql
 
       # next.config.ts собран с output: 'export' — результат в app/out.
       # Здесь же отрабатывает ESLint: именно этот шаг ловит ошибки кода.
