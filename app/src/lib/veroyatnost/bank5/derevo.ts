@@ -10,6 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
+import { chislo, vopros, zapisShag } from '../podskazka';
 import { derevo, type Vetv } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -49,6 +50,27 @@ const P06: Prototype = prototip({
         formula: `P = p_1 \\cdot p_2 = ${tex(pb)} \\cdot ${tex(pc)} = ${tex(tochnee(pb * pc))}`,
         value: tochnee(pb * pc),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const pb = veroyatnost(p, 'pb');
+    const pc = veroyatnost(p, 'pc');
+    return [
+      vopros('Влияет ли исход первой партии на вторую?', 'Нет — партии независимы', [
+        'Да — после выигрыша шансы выше',
+        'Да — после проигрыша шансы выше',
+      ]),
+      vopros(
+        'Нужно, чтобы А. выиграл и первую, и вторую партию. Что делать с вероятностями?',
+        'Перемножить: $p_1 \\cdot p_2$',
+        ['Сложить: $p_1 + p_2$', 'Взять бо́льшую из двух'],
+        'Это один путь по дереву: вдоль пути вероятности перемножаются.',
+      ),
+      vopros('Какое выражение даёт ответ?', `$${tex(pb)} \\cdot ${tex(pc)}$`, [
+        `$${tex(pb)} + ${tex(pc)}$`,
+        `$${tex(pb)} \\cdot ${tex(tochnee(1 - pc))}$`,
+      ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -152,6 +174,38 @@ const P07: Prototype = prototip({
         formula: `P = ${mnozhiteli} = ${tex(P07otvet(p))}`,
         value: P07otvet(p),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const s = shema(p);
+    return [
+      vopros(
+        'Какова вероятность промаха при одном выстреле?',
+        chislo(tochnee(1 - q)),
+        [chislo(q), chislo(tochnee(q / 2))],
+        `Промах — противоположное попаданию: $1 - ${tex(q)}$.`,
+      ),
+      vopros(
+        'Сколько путей по дереву подходит?',
+        'Один — для каждого выстрела сказано, попал или нет',
+        ['Несколько — важно только, сколько было попаданий'],
+      ),
+      vopros(
+        'Что делать с вероятностями вдоль этого пути?',
+        'Перемножить все четыре',
+        ['Сложить все четыре', 'Перемножить только вероятности попаданий'],
+        'Выстрелы независимы.',
+      ),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' \\cdot ')}$`,
+        [
+          `$${[...s].map((c) => tex(c === 'p' ? tochnee(1 - q) : q)).join(' \\cdot ')}$`,
+          `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' + ')}$`,
+        ],
+      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -272,6 +326,27 @@ const P08: Prototype = prototip({
         formula: `P = 1 - ${tex(vse)} = ${tex(tochnee(1 - vse))}`,
         value: tochnee(1 - vse),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const n = lamp(p);
+    const vse = tochnee(q ** n);
+    const slovami = SLOVAMI[n] ?? String(n);
+    return [
+      vopros(
+        'Какое событие противоположно «хотя бы одна лампа не перегорит»?',
+        `Перегорят все ${slovami} лампы`,
+        ['Ни одна лампа не перегорит', 'Перегорит ровно одна лампа'],
+        'Его вероятность найти проще: это один путь по дереву.',
+      ),
+      vopros(
+        `Какова вероятность, что перегорят все ${slovami}?`,
+        `$${tex(q)}^{${n}} = ${tex(vse)}$`,
+        [`$${n} \\cdot ${tex(q)}$`, `$${tex(tochnee(1 - q))}^{${n}}$`],
+        'Лампы перегорают независимо: вероятности перемножаются.',
+      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -409,6 +484,35 @@ const P09: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const n = n09(p);
+    return [
+      vopros(
+        'Сколько фломастеров в коробке всего?',
+        `$${n}$`,
+        [`$${n - 1}$`, `$${a + b}$`],
+        `$${a} + ${b} + ${c} = ${n}$.`,
+      ),
+      vopros(
+        'Сколько путей по дереву дают «один синий и один красный»?',
+        'Два: синий, потом красный — и красный, потом синий',
+        ['Один: синий, потом красный', 'Три: по пути на каждый цвет'],
+      ),
+      vopros(
+        'Какова вероятность пути «синий, потом красный»?',
+        `$\\dfrac{${a}}{${n}} \\cdot \\dfrac{${b}}{${n - 1}}$`,
+        [
+          `$\\dfrac{${a}}{${n}} \\cdot \\dfrac{${b}}{${n}}$`,
+          `$\\dfrac{${a}}{${n}} + \\dfrac{${b}}{${n - 1}}$`,
+        ],
+        'Второй фломастер берут из оставшихся — их на один меньше. Второй путь даёт столько же.',
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
     { n: 1, source: 'sbornik', sourceNote: '№ 41', params: { a: 11, b: 6, c: 8 } },
     { n: 2, source: 'sbornik', sourceNote: '№ 42', params: { a: 12, b: 6, c: 7 } },
@@ -520,6 +624,38 @@ const P10: Prototype = prototip({
         formula: `P = ${tex(q)} \\cdot ${tex(q)} + ${tex(q)} \\cdot ${tex(nich)} + ${tex(nich)} \\cdot ${tex(q)} = ${tex(vv)} + ${tex(vn)} + ${tex(vn)} = ${tex(tochnee(vv + 2 * vn))}`,
         value: tochnee(vv + 2 * vn),
       },
+    ];
+  },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const nich = tochnee(1 - 2 * q);
+    const vv = tochnee(q * q);
+    const vn = tochnee(q * nich);
+    return [
+      vopros(
+        'Какова вероятность ничьей в одной игре?',
+        `$1 - ${tex(q)} - ${tex(q)} = ${tex(nich)}$`,
+        [`$${tex(q)}$`, `$1 - ${tex(q)} = ${tex(tochnee(1 - q))}$`],
+        'Ничья — всё, что не выигрыш и не проигрыш.',
+      ),
+      vopros(
+        'Какие исходы двух игр дают хотя бы 4 очка?',
+        'Выигрыш-выигрыш, выигрыш-ничья, ничья-выигрыш',
+        ['Только выигрыш-выигрыш', 'Выигрыш-выигрыш и выигрыш-ничья'],
+        'Выигрыш даёт 3 очка, ничья — 1: подходят $3 + 3$, $3 + 1$ и $1 + 3$.',
+      ),
+      vopros(
+        'Что делать с вероятностями этих трёх путей?',
+        'Перемножить вдоль каждого пути и сложить пути',
+        ['Сложить вероятности всех исходов подряд', 'Взять самый вероятный путь'],
+      ),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${tex(vv)} + ${tex(vn)} + ${tex(vn)}$`,
+        [`$${tex(vv)}$`, `$${tex(vv)} + ${tex(vn)}$`],
+        'Вдоль пути — произведение, пути — складываем.',
+      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [

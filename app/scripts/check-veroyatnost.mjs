@@ -90,8 +90,15 @@ for (const file of [
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkGeneratory, checkPrep, checkLabirint, checkModel, checkRaskladku } =
-  require0(path.join(out, 'veroyatnost', 'selftest.js'));
+const {
+  bezPodskazki,
+  checkBank,
+  checkGeneratory,
+  checkPrep,
+  checkLabirint,
+  checkModel,
+  checkRaskladku,
+} = require0(path.join(out, 'veroyatnost', 'selftest.js'));
 const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
   path.join(out, 'veroyatnost', 'index.js'),
 );
@@ -382,7 +389,22 @@ generatory.bezPravila.forEach((id) => console.log(`   ${id}`));
 console.log(`  нарушений: ${generatory.problems.length}`);
 generatory.problems.slice(0, 40).forEach((item) => console.log(`   ${item}`));
 
+/* Подсказки-вопросы: их шаги проверены выше вместе с вариантом (и на
+   зёрнах генератора). Здесь — у каких прототипов подсказки ещё нет.
+   У задания №5 она обязательна у всех. */
+const bez4 = bezPodskazki(BANK_4);
+const bez5 = bezPodskazki(BANK_5);
+console.log(
+  `\nподсказки-вопросы: №4 — ${BANK_4.length - bez4.length} из ${BANK_4.length}, ` +
+    `№5 — ${BANK_5.length - bez5.length} из ${BANK_5.length}`,
+);
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (bez5.length > 0) {
+  console.error(`\nУ прототипов №5 нет подсказки-вопросов: ${bez5.join(', ')}.`);
+  process.exit(1);
+}
 
 if (generatory.problems.length > 0) {
   console.error('\nПравила генерации дают недопустимые варианты.');

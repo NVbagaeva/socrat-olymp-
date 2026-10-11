@@ -7,6 +7,7 @@
 import { prototip, type Rng } from '../generator';
 import { shagP } from '../bank4/vizual';
 import { konechnaya, num, type Params, type Prototype } from '../types';
+import { vopros, zapisShag } from '../podskazka';
 import { tablitsaBezGrani } from './vizual5';
 import { tochno } from './obshchee';
 
@@ -85,6 +86,45 @@ const P05: Prototype = prototip({
       },
       { text: `Благоприятные — клетки с суммой ${s}:`, formula: `m = ${ok}`, value: ok },
       shagP(ok, vsego),
+    ];
+  },
+  podskazka: (p) => {
+    const zapret = num(p, 'zapret');
+    const s = num(p, 's');
+    const { ok, vsego } = paryBezGrani(zapret, s);
+    const gran = zapret === 6 ? 'шестёрки' : 'единицы';
+    /* Сколько пар с той же суммой среди всех 36 — типичная ошибка:
+       условие забыли. */
+    let vse36 = 0;
+    for (let a = 1; a <= 6; a += 1) {
+      for (let b = 1; b <= 6; b += 1) {
+        vse36 += a + b === s ? 1 : 0;
+      }
+    }
+    return [
+      vopros(
+        'Какие броски остаются после условия?',
+        `Только те, где ни на одной кости нет ${gran}`,
+        ['Все 36 пар бросков', `Только те, где выпала ${zapret === 6 ? 'шестёрка' : 'единица'}`],
+        'Условие сужает пространство исходов: остальные броски просто не случились.',
+      ),
+      vopros(
+        'Сколько равновозможных пар осталось?',
+        `$5 \\cdot 5 = ${vsego}$`,
+        ['$6 \\cdot 6 = 36$', '$5 + 5 = 10$'],
+        'У каждой кости пять граней, пары — клетки таблицы $5 \\times 5$.',
+      ),
+      vopros(
+        `Сколько из этих пар дают сумму ${s}?`,
+        `$${ok}$`,
+        [
+          `$${ok + 1}$`,
+          ...(vse36 !== ok ? [`$${vse36}$`] : []),
+          ...(ok > 1 ? [`$${ok - 1}$`] : []),
+        ],
+        'Перечислите пары по первой кости: вторая определяется суммой.',
+      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
