@@ -9,31 +9,21 @@ import { katex } from '@/lib/graph/katex';
  * конус, рассечённый плоскостью. Оба портрета повёрнуты к центру —
  * поэтому местами их менять нельзя, зеркалить тоже.
  *
- * Кривой сечения на картинке нет намеренно: её рисует SVG поверх
- * картинки, чтобы геометрия была верной. Подписи от руки — текст
- * рукописным шрифтом, а не картинка.
+ * Конус с секущей плоскостью и параболой сечения — картинка: кривая
+ * нарисована на ней самой, поверх неё ничего не рисуется. Подписи от
+ * руки — текст рукописным шрифтом, а не картинка.
  */
 
-/* Сечение конуса плоскостью, параллельной образующей, — парабола.
-   Координаты в системе самой картинки (1254 × 1254): плоскость взята
-   та же, что нарисована, и подогнана по двум её приметам — точке, где
-   она режет правую образующую у вершины, и точке, где выходит через
-   основание. Проекция параболы — снова парабола, поэтому каждый кусок
-   дуги точно ложится на квадратичную кривую Безье; расхождение
-   с настоящим сечением меньше двух единиц из 1254, то есть доли
-   пикселя на экране.
-
-   Первый кусок идёт по передней половине конуса и виден, второй
-   уходит за конус — он штриховой. */
-const SECHENIE = {
-  vidno: 'M 560.4 1142.4 Q 743.8 344.3 699 210.1',
-  skryto: 'M 699 210.1 Q 640.2 34 188 1002.2',
-};
 
 /** Стрелка от подписи к тому, что она подписывает. */
-function Strelka({ d, ostriyo }: { d: string; ostriyo: string }) {
+function Strelka({ d, ostriyo, className }: { d: string; ostriyo: string; className?: string }) {
   return (
-    <svg className="istor__strelka" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+    <svg
+      className={className === undefined ? 'istor__strelka' : `istor__strelka ${className}`}
+      viewBox="0 0 120 120"
+      aria-hidden="true"
+      focusable="false"
+    >
       <path d={d} />
       <path d={ostriyo} />
     </svg>
@@ -68,19 +58,14 @@ export function IstoriyaBanner() {
             width={istoriya.konus.width}
             height={istoriya.konus.height}
           />
-          {/* Сечение: система координат — сама картинка, поэтому кривая
-              держится на конусе при любой ширине. Толщина линии не
-              тянется вместе с картинкой: она задана в пикселях экрана,
-              как у линий чертежей движка. */}
-          <svg
-            className="istor__sechenie"
-            viewBox="0 0 1254 1254"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path className="istor__krivaya" d={SECHENIE.vidno} />
-            <path className="istor__krivaya istor__krivaya--za" d={SECHENIE.skryto} />
-          </svg>
+          {/* Стрелка подписи живёт внутри картинки и меряется в её
+              долях: остриё должно упираться в саму кривую сечения,
+              а кривая нарисована на картинке и едет вместе с ней. */}
+          <Strelka
+            className="istor__strelka--konus"
+            d="M 8 24 C 44 36 72 56 92 84"
+            ostriyo="M 80 80 L 94 88 L 88 74"
+          />
         </div>
 
         <figure className="istor__lico istor__lico--sovremennyy">
@@ -104,10 +89,7 @@ export function IstoriyaBanner() {
         <Strelka d="M 10 20 C 45 35 70 60 86 88" ostriyo="M 74 84 L 88 92 L 82 78" />
       </span>
 
-      <span className="istor__zametka istor__zametka--konus">
-        {istoriya.zametki.konus}
-        <Strelka d="M 8 24 C 44 36 72 56 92 84" ostriyo="M 80 80 L 94 88 L 88 74" />
-      </span>
+      <span className="istor__zametka istor__zametka--konus">{istoriya.zametki.konus}</span>
 
       <span className="istor__zametka istor__zametka--sprava">
         {istoriya.zametki.sprava}
