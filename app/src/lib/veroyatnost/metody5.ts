@@ -63,7 +63,9 @@ export const METODY_5: readonly Metod5[] = [
     id: 'koordinatnaya',
     nomer: 3,
     nazvanie: 'Промежутки на числовой прямой',
-    opisanie: 'Один промежуток лежит внутри другого — рисуем прямую и вычитаем',
+    opisanie:
+      'Разбиваем прямую на непересекающиеся промежутки: их вероятности складываются, а вместе дают 1',
+    formula: 'P(a \\le X < b) = P(X < b) - P(X < a)',
     zadachnik: [[9, 16]],
     podtipy: [
       { zadachi: [9, 12], nazvanie: 'тестирование' },
