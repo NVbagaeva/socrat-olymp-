@@ -145,6 +145,7 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
             klyuch: klyuchZadachi(zadacha.id),
             seal: zadacha.seal,
             steps: zadacha.steps,
+            ...(zadacha.podskazka === undefined ? {} : { podskazka: zadacha.podskazka }),
             ...(zadacha.model === undefined ? {} : { model: zadacha.model }),
             ...(zadacha.illustration === undefined ? {} : { illustration: zadacha.illustration }),
             ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
@@ -152,6 +153,8 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
           {...(metod === undefined ? {} : { metodLabel: metod.nazvanie })}
           onResult={otvet}
           onReveal={razbor}
+          /* Подсказка учитывается так же, как открытое решение. */
+          onHint={razbor}
           {...(dalshe === null
             ? {}
             : {
