@@ -27,7 +27,13 @@ export function bezBanneraCookie(browser) {
   browser.newPage = async (options) => {
     const context = await browser.newContext(options);
     const page = await context.newPage();
-    page.on('close', () => void context.close());
+    /* Закрытие не ждут: если следом закрывается весь браузер, обещание
+       отклоняется с TargetClosedError — без catch это необработанный
+       отказ, и процесс падает (так падали «Снимки страниц»). Контекст
+       в этом случае и так уходит вместе с браузером. */
+    page.on('close', () => {
+      context.close().catch(() => {});
+    });
     return page;
   };
   return browser;
