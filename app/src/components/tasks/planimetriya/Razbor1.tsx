@@ -47,10 +47,7 @@ export function Razbor1({ proto, params, title, wide = false, id }: Razbor1Props
         </p>
       </div>
       <div className="rich-example__grid">
-        <FigureZoom
-          className="rich-example__figure z1-razbor__pic"
-          label={RAZBOR_1.risunok}
-        >
+        <FigureZoom className="rich-example__figure z1-razbor__pic" label={RAZBOR_1.risunok}>
           <span className="pl-wrap" dangerouslySetInnerHTML={{ __html: svg }} />
         </FigureZoom>
         <ol className="rich-example__steps">

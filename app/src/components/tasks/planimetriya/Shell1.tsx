@@ -3,6 +3,10 @@ import { tasksPage } from '@/content/tasks';
 import { RAZDELY_TEORII_1 } from '@/content/teoriya1';
 import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
+import { BLOKI } from '@/lib/planimetriya/prep/bloki';
+import { PROTOTIPY } from '@/lib/planimetriya/stseny';
+import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
+import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Progress1 } from './Progress1';
@@ -11,6 +15,11 @@ import { Progress1 } from './Progress1';
  * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента
  * вкладок — устройство то же, что у №2 и №11. Вызывается из layout
  * маршрута: при переходе между вкладками остаётся на месте.
+ *
+ * Справа в шапке — иллюстрация, как у №4 (общая метка
+ * section-head--art), поэтому кольцо прогресса стоит в текстовой
+ * колонке под подзаголовком — в слоте, где у №12 кнопка «Продолжить
+ * подготовку».
  */
 export function Shell1({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE1.slug}`;
@@ -18,7 +27,7 @@ export function Shell1({ children }: { children: React.ReactNode }) {
     <AppShell active="tasks">
       <main className="app-main">
         <ShapkaRazdela
-          className="z1-head"
+          className="z1-head section-head--art"
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
@@ -27,7 +36,14 @@ export function Shell1({ children }: { children: React.ReactNode }) {
           title={ZADANIE1.title}
           badge={ZADANIE1.badge}
           lead={ZADANIE1.lead}
-          media={<Progress1 razdely={RAZDELY_TEORII_1.map((r) => r.id)} />}
+          media={<IllyustratsiyaShapki art={ZADANIE1.art} />}
+          actions={
+            <Progress1
+              razdely={RAZDELY_TEORII_1.map((r) => r.id)}
+              bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
+              podtipy={PROTOTIPY.map((p) => klyuchProto(p.id))}
+            />
+          }
         />
         <RazdelTabs base={base} tabs={ZADANIE1.tabs} />
         <div className="section-panel">{children}</div>

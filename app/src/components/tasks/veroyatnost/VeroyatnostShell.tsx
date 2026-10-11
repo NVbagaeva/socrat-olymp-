@@ -1,7 +1,7 @@
-import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
+import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { RazdelTabs } from '../RazdelTabs';
 import { ZADANIYA } from '@/lib/paths';
@@ -42,19 +42,8 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           {...(section.art === undefined
             ? {}
             : {
-                media: (
-                  /* Картинка — декор: alt пустой, ничего сверх заголовка
-                     она не сообщает. Размеры стоят настоящие, чтобы место
-                     под неё держалось до загрузки и шапка не прыгала. */
-                  <Image
-                    className="veroyatnost-art"
-                    src={section.art.src}
-                    alt=""
-                    width={section.art.width}
-                    height={section.art.height}
-                    priority
-                  />
-                ),
+                className: 'veroyatnost-head section-head--art',
+                media: <IllyustratsiyaShapki art={section.art} />,
               })}
         />
 

@@ -34,6 +34,7 @@ export const GENERATOR_SOURCES = {
   5: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
   8: ['lib/vychisleniya', 'content/sheet8.js'],
   11: ['lib/zadanie11'],
+  1: ['lib/planimetriya', 'lib/sheet/sheet.js', 'content/repetitory1.ts', 'content/teoriya1.ts'],
 };
 
 /* Crockford base32: без I, L, O, U — код читают с бумаги. */

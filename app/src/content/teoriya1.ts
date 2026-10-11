@@ -17,6 +17,7 @@
  * Разметка строк: $…$ — формула TeX, **…** — выделение.
  */
 
+import { BANK_FIPI } from '../lib/planimetriya/bank/fipi';
 import type { TeoriyaRazdel } from './veroyatnost-teoriya';
 
 export interface Kartochka1 {
@@ -123,7 +124,8 @@ const ugly: Razdel1 = {
       tekst: [
         'Секущая пересекает две параллельные прямые под одинаковым наклоном. Поэтому **накрест лежащие** и **соответственные** углы равны, а **односторонние** дополняют друг друга до $180^\\circ$.',
       ],
-      formula: '\\begin{gathered}\\angle 1 = \\angle 2 \\\\ \\angle 1 + \\angle 3 = 180^\\circ\\end{gathered}',
+      formula:
+        '\\begin{gathered}\\angle 1 = \\angle 2 \\\\ \\angle 1 + \\angle 3 = 180^\\circ\\end{gathered}',
       risunok: 'parallelnye',
       prototipy: [12, 13],
     },
@@ -349,7 +351,8 @@ const pryamougolnyy: Razdel1 = {
       tekst: [
         'Высота из прямого угла делит треугольник на два, подобных исходному. Её квадрат равен произведению отрезков гипотенузы, а сама она — произведению катетов, делённому на гипотенузу.',
       ],
-      formula: '\\begin{gathered}CH^2 = AH \\cdot HB \\\\ CH = \\dfrac{AC \\cdot BC}{AB}\\end{gathered}',
+      formula:
+        '\\begin{gathered}CH^2 = AH \\cdot HB \\\\ CH = \\dfrac{AC \\cdot BC}{AB}\\end{gathered}',
       risunok: 'vysota-gipotenuza',
       prototipy: [55, 56],
     },
@@ -370,7 +373,8 @@ const pryamougolnyy: Razdel1 = {
       tekst: [
         'Тупой угол и смежный с ним острый имеют **одинаковый синус**, а косинусы у них отличаются знаком: косинус тупого угла отрицателен.',
       ],
-      formula: '\\begin{gathered}\\sin(180^\\circ - \\alpha) = \\sin\\alpha \\\\ \\cos(180^\\circ - \\alpha) = -\\cos\\alpha\\end{gathered}',
+      formula:
+        '\\begin{gathered}\\sin(180^\\circ - \\alpha) = \\sin\\alpha \\\\ \\cos(180^\\circ - \\alpha) = -\\cos\\alpha\\end{gathered}',
       risunok: 'tupoy-ugol',
       prototipy: [32, 49],
     },
@@ -395,7 +399,8 @@ const osobennye: Razdel1 = {
         'Против равных сторон лежат равные углы — углы при основании. Высота, проведённая к основанию, одновременно и медиана, и биссектриса.',
         'Читайте условие: запись «$AC = BC$» означает, что основание — $AB$, а вершина — $C$.',
       ],
-      formula: '\\begin{gathered}\\angle A = \\angle B \\\\ \\angle C = 180^\\circ - 2\\angle A\\end{gathered}',
+      formula:
+        '\\begin{gathered}\\angle A = \\angle B \\\\ \\angle C = 180^\\circ - 2\\angle A\\end{gathered}',
       risunok: 'ravnobedrennyy',
       prototipy: [1, 2, 3],
       primer: 5,
@@ -406,7 +411,8 @@ const osobennye: Razdel1 = {
       tekst: [
         'Все стороны равны, все углы по $60^\\circ$. Высота — она же медиана и биссектриса — выражается через сторону.',
       ],
-      formula: '\\begin{gathered}h = \\dfrac{a\\sqrt3}{2} \\\\ S = \\dfrac{a^2\\sqrt3}{4}\\end{gathered}',
+      formula:
+        '\\begin{gathered}h = \\dfrac{a\\sqrt3}{2} \\\\ S = \\dfrac{a^2\\sqrt3}{4}\\end{gathered}',
       risunok: 'pravilnyy-treugolnik',
       prototipy: [18, 64],
       primer: 69,
@@ -471,7 +477,8 @@ const podobie: Razdel1 = {
       tekst: [
         'Отрезок между серединами двух сторон параллелен третьей стороне и вдвое её короче. Он отрезает треугольник, подобный исходному с $k = \\tfrac12$, — его площадь в четыре раза меньше.',
       ],
-      formula: '\\begin{gathered}MN = \\tfrac12\\, AB \\\\ S_{MCN} = \\tfrac14\\, S_{ABC}\\end{gathered}',
+      formula:
+        '\\begin{gathered}MN = \\tfrac12\\, AB \\\\ S_{MCN} = \\tfrac14\\, S_{ABC}\\end{gathered}',
       zhivoy: 'srednyaya-liniya',
       prototipy: [19, 20, 21],
       primer: 77,
@@ -724,7 +731,8 @@ const parallelogramm: Razdel1 = {
       tekst: [
         'Противоположные стороны параллельны и равны, противоположные углы равны, соседние в сумме дают $180^\\circ$. Диагонали делят друг друга пополам.',
       ],
-      formula: '\\begin{gathered}\\angle A + \\angle B = 180^\\circ \\\\ AO = OC, \\quad BO = OD\\end{gathered}',
+      formula:
+        '\\begin{gathered}\\angle A + \\angle B = 180^\\circ \\\\ AO = OC, \\quad BO = OD\\end{gathered}',
       risunok: 'parallelogramm',
       prototipy: [12],
       primer: 45,
@@ -801,7 +809,8 @@ const okruzhnost: Razdel1 = {
       tekst: [
         'Дуга в $\\alpha$ градусов — это $\\tfrac{\\alpha}{360}$ всей окружности, сектор — та же доля круга.',
       ],
-      formula: '\\begin{gathered}l = \\dfrac{\\pi R\\alpha}{180^\\circ} \\\\ S = \\dfrac{\\pi R^2\\alpha}{360^\\circ}\\end{gathered}',
+      formula:
+        '\\begin{gathered}l = \\dfrac{\\pi R\\alpha}{180^\\circ} \\\\ S = \\dfrac{\\pi R^2\\alpha}{360^\\circ}\\end{gathered}',
       risunok: 'sektor',
       prototipy: [35],
     },
@@ -832,7 +841,8 @@ const okruzhnost: Razdel1 = {
       tekst: [
         'Отрезки двух касательных от общей точки до точек касания **равны**, а прямая через центр делит угол между касательными пополам.',
       ],
-      formula: '\\begin{gathered}CA = CB \\\\ \\angle ACB + \\angle AOB = 180^\\circ\\end{gathered}',
+      formula:
+        '\\begin{gathered}CA = CB \\\\ \\angle ACB + \\angle AOB = 180^\\circ\\end{gathered}',
       risunok: 'dve-kasatelnye',
       prototipy: [39],
       primer: 163,
@@ -1005,7 +1015,8 @@ const vpisannye: Razdel1 = {
       tekst: [
         'Четырёхугольник вписан в окружность ровно тогда, когда суммы его противоположных углов равны $180^\\circ$: такие углы опираются на дуги, дающие вместе всю окружность.',
       ],
-      formula: '\\begin{gathered}\\angle A + \\angle C = 180^\\circ \\\\ \\angle B + \\angle D = 180^\\circ\\end{gathered}',
+      formula:
+        '\\begin{gathered}\\angle A + \\angle C = 180^\\circ \\\\ \\angle B + \\angle D = 180^\\circ\\end{gathered}',
       zhivoy: 'vpisannyy-chetyrehugolnik',
       prototipy: [47, 48, 68, 74],
       primer: 199,
@@ -1060,7 +1071,8 @@ const vpisannye: Razdel1 = {
       tekst: [
         'Все стороны и углы равны, около правильного многоугольника описывается окружность. Сторона правильного шестиугольника равна радиусу описанной окружности: он складывается из шести равносторонних треугольников.',
       ],
-      formula: '\\begin{gathered}a_6 = R \\\\ \\angle_n = \\dfrac{180^\\circ (n - 2)}{n}\\end{gathered}',
+      formula:
+        '\\begin{gathered}a_6 = R \\\\ \\angle_n = \\dfrac{180^\\circ (n - 2)}{n}\\end{gathered}',
       risunok: 'pravilnyy-shestiugolnik',
       prototipy: [62, 63],
     },
@@ -1085,7 +1097,8 @@ const layfhaki: Razdel1 = {
     {
       no: 1,
       title: 'Биссектрисы смежных углов',
-      tekst: 'Половинки двух смежных углов вместе дают половину от $180^\\circ$, поэтому биссектрисы смежных углов перпендикулярны.',
+      tekst:
+        'Половинки двух смежных углов вместе дают половину от $180^\\circ$, поэтому биссектрисы смежных углов перпендикулярны.',
       formula: '\\tfrac12\\alpha + \\tfrac12\\beta = 90^\\circ',
       risunok: 'bissektrisy-smezhnyh',
       prototipy: [53],
@@ -1101,7 +1114,8 @@ const layfhaki: Razdel1 = {
     {
       no: 3,
       title: 'Точка пересечения медиан',
-      tekst: 'Медианы пересекаются в одной точке, которая отсекает от каждой треть у стороны и две трети у вершины.',
+      tekst:
+        'Медианы пересекаются в одной точке, которая отсекает от каждой треть у стороны и две трети у вершины.',
       formula: 'AM = \\tfrac23\\, AK',
       risunok: 'mediany',
       prototipy: [64],
@@ -1109,7 +1123,8 @@ const layfhaki: Razdel1 = {
     {
       no: 4,
       title: 'Диагонали параллелограмма',
-      tekst: 'Сложите квадраты обеих диагоналей — получится столько же, сколько дают квадраты всех четырёх сторон.',
+      tekst:
+        'Сложите квадраты обеих диагоналей — получится столько же, сколько дают квадраты всех четырёх сторон.',
       formula: 'd_1^2 + d_2^2 = 2(a^2 + b^2)',
       risunok: 'parallelogramm',
       prototipy: [12],
@@ -1117,7 +1132,8 @@ const layfhaki: Razdel1 = {
     {
       no: 5,
       title: 'Площадь по диагоналям',
-      tekst: 'Для любого выпуклого четырёхугольника: половина произведения диагоналей на синус угла между ними.',
+      tekst:
+        'Для любого выпуклого четырёхугольника: половина произведения диагоналей на синус угла между ними.',
       formula: 'S = \\tfrac12\\, d_1 d_2 \\sin\\varphi',
       risunok: 'ploshchad-diagonali',
       prototipy: [72],
@@ -1133,7 +1149,8 @@ const layfhaki: Razdel1 = {
     {
       no: 7,
       title: 'Проекции в равнобедренной трапеции',
-      tekst: 'Боковая сторона проектируется на основание в полуразность оснований, диагональ — в полусумму.',
+      tekst:
+        'Боковая сторона проектируется на основание в полуразность оснований, диагональ — в полусумму.',
       formula: '\\begin{gathered}AH = \\dfrac{a - b}{2} \\\\ HD = \\dfrac{a + b}{2}\\end{gathered}',
       risunok: 'proekciya-trapecii',
       prototipy: [70],
@@ -1141,7 +1158,8 @@ const layfhaki: Razdel1 = {
     {
       no: 8,
       title: 'Четыре точки трапеции на одной прямой',
-      tekst: 'Пересечение диагоналей, пересечение продолжений боковых сторон и середины обоих оснований — на одной прямой.',
+      tekst:
+        'Пересечение диагоналей, пересечение продолжений боковых сторон и середины обоих оснований — на одной прямой.',
       risunok: 'zamechatelnoe',
       prototipy: [22],
     },
@@ -1156,7 +1174,8 @@ const layfhaki: Razdel1 = {
     {
       no: 10,
       title: 'Пересекающиеся хорды',
-      tekst: 'Если две хорды пересекаются, произведение кусков одной равно произведению кусков другой.',
+      tekst:
+        'Если две хорды пересекаются, произведение кусков одной равно произведению кусков другой.',
       formula: 'AE \\cdot EB = CE \\cdot ED',
       risunok: 'khordy-peresechenie',
       prototipy: [],
@@ -1164,7 +1183,8 @@ const layfhaki: Razdel1 = {
     {
       no: 11,
       title: 'Серединный перпендикуляр к хорде',
-      tekst: 'Прямая, перпендикулярная хорде и проходящая через её середину, всегда проходит через центр.',
+      tekst:
+        'Прямая, перпендикулярная хорде и проходящая через её середину, всегда проходит через центр.',
       risunok: 'diametr-khorda',
       prototipy: [73],
     },
@@ -1187,7 +1207,8 @@ const layfhaki: Razdel1 = {
     {
       no: 14,
       title: 'Касательная и секущая',
-      tekst: 'Квадрат отрезка касательной $AK$ из внешней точки равен произведению всей секущей из той же точки на её внешний кусок.',
+      tekst:
+        'Квадрат отрезка касательной $AK$ из внешней точки равен произведению всей секущей из той же точки на её внешний кусок.',
       formula: 'AK^2 = AB \\cdot AC',
       risunok: 'kasatelnaya-sekushchaya',
       prototipy: [58],
@@ -1227,7 +1248,8 @@ const layfhaki: Razdel1 = {
     {
       no: 22,
       title: 'Когда четырёхугольник вписан',
-      tekst: 'Окружность через все четыре вершины проходит тогда и только тогда, когда противоположные углы дают вместе $180^\\circ$.',
+      tekst:
+        'Окружность через все четыре вершины проходит тогда и только тогда, когда противоположные углы дают вместе $180^\\circ$.',
       formula: '\\angle A + \\angle C = 180^\\circ',
       risunok: 'vpisannyy-chetyrehugolnik',
       prototipy: [47, 48],
@@ -1235,7 +1257,8 @@ const layfhaki: Razdel1 = {
     {
       no: 23,
       title: 'Когда четырёхугольник описан',
-      tekst: 'Окружность касается всех четырёх сторон тогда и только тогда, когда суммы противоположных сторон совпадают.',
+      tekst:
+        'Окружность касается всех четырёх сторон тогда и только тогда, когда суммы противоположных сторон совпадают.',
       formula: 'AB + CD = BC + AD',
       risunok: 'opisannyy-chetyrehugolnik',
       prototipy: [41, 42],
@@ -1243,7 +1266,8 @@ const layfhaki: Razdel1 = {
     {
       no: 24,
       title: 'Равнобедренная описанная трапеция',
-      tekst: 'Если в равнобедренную трапецию вписана окружность, её боковая сторона совпадает по длине со средней линией.',
+      tekst:
+        'Если в равнобедренную трапецию вписана окружность, её боковая сторона совпадает по длине со средней линией.',
       formula: 'c = m = \\dfrac{a + b}{2}',
       risunok: 'opisannaya-trapeciya',
       prototipy: [44],
@@ -1256,48 +1280,59 @@ const layfhaki: Razdel1 = {
     },
     {
       no: 20,
-      tekst: 'Общая хорда двух пересекающихся окружностей, продолженная до общей касательной, делит отрезок этой касательной между точками касания пополам.',
+      tekst:
+        'Общая хорда двух пересекающихся окружностей, продолженная до общей касательной, делит отрезок этой касательной между точками касания пополам.',
     },
     {
       no: 21,
-      tekst: 'Окружности с радиусами $R$ и $r$, расстояние между центрами $a > R + r$. Отрезки общих касательных между точками касания: внешней — $\\sqrt{a^2 - (R-r)^2}$, внутренней — $\\sqrt{a^2 - (R+r)^2}$.',
-      formula: '\\begin{gathered}t_{\\text{внеш}}^2 = a^2 - (R - r)^2 \\\\ t_{\\text{внутр}}^2 = a^2 - (R + r)^2\\end{gathered}',
+      tekst:
+        'Окружности с радиусами $R$ и $r$, расстояние между центрами $a > R + r$. Отрезки общих касательных между точками касания: внешней — $\\sqrt{a^2 - (R-r)^2}$, внутренней — $\\sqrt{a^2 - (R+r)^2}$.',
+      formula:
+        '\\begin{gathered}t_{\\text{внеш}}^2 = a^2 - (R - r)^2 \\\\ t_{\\text{внутр}}^2 = a^2 - (R + r)^2\\end{gathered}',
     },
     {
       no: 25,
-      tekst: 'Все точки, из которых отрезок $AB$ виден под прямым углом, лежат на окружности с диаметром $AB$ (кроме самих $A$ и $B$).',
+      tekst:
+        'Все точки, из которых отрезок $AB$ виден под прямым углом, лежат на окружности с диаметром $AB$ (кроме самих $A$ и $B$).',
     },
     {
       no: 26,
-      tekst: 'Все точки, из которых отрезок $AB$ виден под одним и тем же углом, лежат на двух дугах равных окружностей, проходящих через $A$ и $B$.',
+      tekst:
+        'Все точки, из которых отрезок $AB$ виден под одним и тем же углом, лежат на двух дугах равных окружностей, проходящих через $A$ и $B$.',
     },
     {
       no: 27,
-      tekst: 'Вписанная окружность касается стороны $AC$ в точке $M$. Отрезок от вершины до точки касания равен полупериметру без противоположной стороны.',
+      tekst:
+        'Вписанная окружность касается стороны $AC$ в точке $M$. Отрезок от вершины до точки касания равен полупериметру без противоположной стороны.',
       formula: 'AM = p - BC',
     },
     {
       no: 28,
-      tekst: 'Вневписанная окружность касается стороны $BC$ и продолжений $AB$ и $AC$. Касательная из вершины $A$ до неё равна полупериметру.',
+      tekst:
+        'Вневписанная окружность касается стороны $BC$ и продолжений $AB$ и $AC$. Касательная из вершины $A$ до неё равна полупериметру.',
       formula: 'AK = p',
     },
     {
       no: 29,
-      tekst: 'Вписанная окружность касается сторон $AB$, $BC$, $AC$ в точках $K$, $L$, $M$, угол $A$ равен $\\varphi$. Тогда угол $KLM$ выражается через $\\varphi$.',
+      tekst:
+        'Вписанная окружность касается сторон $AB$, $BC$, $AC$ в точках $K$, $L$, $M$, угол $A$ равен $\\varphi$. Тогда угол $KLM$ выражается через $\\varphi$.',
       formula: '\\angle KLM = 90^\\circ - \\tfrac12\\varphi',
     },
     {
       no: 30,
-      tekst: 'Из точки $A$ к окружности $S$ проведены касательные $AB$ и $AC$. Центр вписанной окружности треугольника $ABC$ лежит на $S$.',
+      tekst:
+        'Из точки $A$ к окружности $S$ проведены касательные $AB$ и $AC$. Центр вписанной окружности треугольника $ABC$ лежит на $S$.',
     },
     {
       no: 31,
-      tekst: 'Если $AM$ и $CK$ — высоты треугольника $ABC$, то треугольник $MBK$ подобен $ABC$ с коэффициентом $|\\cos B|$.',
+      tekst:
+        'Если $AM$ и $CK$ — высоты треугольника $ABC$, то треугольник $MBK$ подобен $ABC$ с коэффициентом $|\\cos B|$.',
       formula: 'MK = AC\\,|\\cos B|',
     },
     {
       no: 32,
-      tekst: 'Треугольник, стороны которого равны медианам данного, имеет площадь $\\tfrac34$ площади данного.',
+      tekst:
+        'Треугольник, стороны которого равны медианам данного, имеет площадь $\\tfrac34$ площади данного.',
       formula: 'S_m = \\tfrac34\\, S',
     },
   ],
@@ -1336,17 +1371,42 @@ export function razdelKartochki(id: string): Razdel1 {
 }
 
 /**
+ * Где порядок справочника ведёт не туда: главный факт прототипа стоит
+ * в другой карточке, чем первая с его номером.
+ */
+const GLAVNAYA_KARTOCHKA: Readonly<Record<number, string>> = {
+  27: 'trig',
+  34: 'centralnyy-vpisannyy',
+  56: 'vysota-gipotenuza',
+  64: 'r-pravilnogo',
+  68: 'vpisannyy-chetyrehugolnik',
+  74: 'vpisannyy-chetyrehugolnik',
+};
+
+/** Задача открытого банка → её прототип. */
+const PRIMERY_PROTOTIPA = new Map(BANK_FIPI.map((z) => [z.n, z.proto]));
+
+/**
  * Главная карточка прототипа — ею открывается «Повторить теорию» в
- * тренажёре: первая по порядку справочника карточка, где прототип
- * стоит в «Где на ЕГЭ».
+ * тренажёре и рамка «Повторяем» генератора. Порядок выбора: карточка,
+ * чей «Пример» — задача этого прототипа; карточка, где прототип стоит
+ * в «Где на ЕГЭ» первым; первая по порядку справочника.
  */
 export function kartochkaPrototipa(proto: number): Kartochka1 | null {
-  return KARTOCHKI_1.find((k) => k.prototipy.includes(proto)) ?? null;
+  const yavno = GLAVNAYA_KARTOCHKA[proto];
+  if (yavno !== undefined) return kartochka1(yavno);
+  const s = KARTOCHKI_1.filter((k) => k.prototipy.includes(proto));
+  return (
+    s.find((k) => k.primer !== undefined && PRIMERY_PROTOTIPA.get(k.primer) === proto) ??
+    s.find((k) => k.prototipy[0] === proto) ??
+    s[0] ??
+    null
+  );
 }
 
 /**
  * Шпаргалки к урокам «Для репетиторов»: карточки, которые печатаются
- * в начале листа ученика. Урок 12 — итоговый, без шпаргалки.
+ * в начале листа ученика. Итоговый урок — без шпаргалки.
  */
 export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
   1: ['summa-uglov', 'smezhnye', 'vneshniy', 'ravnobedrennyy', 'bissektrisa-ugla'],
@@ -1358,28 +1418,27 @@ export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
     'romb',
     'bissektrisa-parallelogramma',
   ],
-  4: [
-    'ploshchad-parallelogramma',
-    'ploshchad-treugolnika',
-    'ploshchad-sinus',
-    'pravilnyy-treugolnik',
-    '30-60-90',
-  ],
-  5: ['podobnye', 'srednyaya-liniya', 'srednyaya-liniya-trapecii', 'serediny-diagonaley'],
-  6: ['trig', 'tablica', 'osnovnoe-tozhdestvo', 'pifagor', 'vysota-gipotenuza'],
-  7: ['cos-ravnobedrennyy', 'tupoy-ugol', 'kosinusov'],
-  8: ['centralnyy-vpisannyy', 'odna-duga', 'duga-dolya'],
-  9: ['kasatelnaya-radius', 'dve-kasatelnye', 'sekushchie', 'khorda-kasatelnaya'],
-  10: [
+  4: ['ploshchad-parallelogramma', 'ploshchad-treugolnika', 'ploshchad-trapecii', 'pryamougolnik'],
+  5: ['ploshchad-sinus', '30-60-90', 'pravilnyy-treugolnik', 'romb'],
+  6: ['podobnye', 'srednyaya-liniya', 'srednyaya-liniya-trapecii', 'serediny-diagonaley'],
+  7: ['trig', 'tablica', 'pifagor', 'vysota-gipotenuza'],
+  8: ['trig', 'osnovnoe-tozhdestvo', 'pifagor', 'vysota-gipotenuza'],
+  9: ['cos-ravnobedrennyy', 'tupoy-ugol', 'kosinusov'],
+  10: ['centralnyy-vpisannyy', 'odna-duga', 'duga-dolya'],
+  11: ['kasatelnaya-radius', 'diametr-khorda'],
+  12: ['dve-kasatelnye', 'sekushchie', 'kasatelnaya-sekushchaya', 'khorda-kasatelnaya'],
+  13: [
     'opisannyy-chetyrehugolnik',
     'opisannaya-trapeciya',
     'pryamougolnaya-trapeciya',
     'vpisannaya-treugolnik',
   ],
-  11: [
+  14: ['vpisannyy-chetyrehugolnik', 'odna-duga-chetyrehugolnik', 'odna-duga'],
+  15: [
     'vpisannyy-chetyrehugolnik',
-    'odna-duga-chetyrehugolnik',
     'teorema-sinusov',
+    'tupoy-ugol',
     'pravilnyy-shestiugolnik',
+    'r-pryamougolnogo',
   ],
 };
