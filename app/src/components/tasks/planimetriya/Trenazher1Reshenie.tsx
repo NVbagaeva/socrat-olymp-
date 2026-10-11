@@ -13,6 +13,7 @@ import type { Level, RazdelInfo } from '@/lib/planimetriya/trenazher/sessiya';
 import type { Podskazki1, Razbor1, Zadacha1 } from '@/lib/planimetriya/trenazher/zadacha';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import { HintIcon } from '../prep/PrepIcons';
+import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import { Piktogramma, Zvezdy } from '../zadanie11/Piktogrammy';
 import { IkonkaBloka1 } from './IkonkaBloka1';
@@ -30,6 +31,8 @@ export interface Trenazher1ResheniePropsy {
   report: (ui: Trenazher1Ui) => void;
   /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
   elapsed: () => number;
+  /** Регистрация обработчика «перед досрочным завершением» (оболочка). */
+  setBeforeFinish?: (handler: (() => void) | null) => void;
   /** Последняя задача закрыта: показать итоги. */
   onKonets: () => void;
 }
@@ -69,6 +72,7 @@ export function Trenazher1Reshenie({
   restored,
   report,
   elapsed,
+  setBeforeFinish,
   onKonets,
 }: Trenazher1ResheniePropsy) {
   /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
@@ -129,6 +133,18 @@ export function Trenazher1Reshenie({
     misses,
   };
   useSessionReport<Trenazher1Ui>(report, ui);
+
+  /* Завершение кнопкой панели — как прежняя кнопка «Завершить»: начатая,
+     но не закрытая задача (была проверка или подсказка) уходит в ошибки
+     и в итогах числится «неверно»; нетронутые — «пропущено», в историю
+     не пишутся. */
+  useBeforeFinish(setBeforeFinish, () => {
+    if (otmetki[index] !== undefined || razborOtkryt || (checked === null && !podskazkaByla)) {
+      return;
+    }
+    zapisat('wrong', false);
+    report({ ...ui, tried: { ...tried, [index]: true } });
+  });
 
   if (zadacha === undefined) {
     return null;

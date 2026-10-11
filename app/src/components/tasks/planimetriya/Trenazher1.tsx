@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Modal } from '@/components/ui';
 import { TRENAZHER_1 } from '@/content/zadanie1';
 import { progress1 } from '@/lib/planimetriya/progress';
 import type { DannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
@@ -17,11 +16,8 @@ import {
   vTrenirovke,
   type Nastroyki,
 } from '@/lib/planimetriya/trenazher/sessiya';
-import { isBaseUi } from '@/lib/trainerSession/restore';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
-import { clearSession, readSession } from '@/lib/trainerSession/store';
 import { TrainerSessionHost, type ConfiguratorApi } from '../session';
-import { sessionText } from '../session/text';
 import { IkonkaBloka1 } from './IkonkaBloka1';
 import { Trenazher1Reshenie, Trenazher1Review } from './Trenazher1Reshenie';
 import { Trenazher1Vybor } from './Trenazher1Vybor';
@@ -42,12 +38,6 @@ function novyySeed(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Незавершённая тренировка, о которой спрашиваем после ссылки на прототип. */
-interface Vopros {
-  solved: number;
-  total: number;
-}
-
 /**
  * Вкладка «Тренажёр» №1 — тренажёр №11: выбор задач → решение →
  * итог.
@@ -63,19 +53,18 @@ interface Vopros {
  * Выбор хранится на время вкладки браузера (sessionStorage). Ссылка
  * из «Где на ЕГЭ» теории (?tipy=p05) и маршрут урока «Для
  * репетиторов» (?tipy=p01,p05) отмечают свои типы; если при этом
- * есть незавершённая тренировка, спрашиваем, продолжить её или начать
- * новую — тем же диалогом, что у оболочки.
+ * есть незавершённая тренировка, оболочка спрашивает, продолжить её
+ * или начать новую (entryIntent).
  */
 export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: string }) {
   const scope = scopeOfPath(base) ?? '1';
   const n = useNastroyki();
   const [zagruzka, setZagruzka] = useState(false);
   const [oshibka, setOshibka] = useState<string | null>(null);
-  const [vopros, setVopros] = useState<Vopros | null>(null);
-  /* Оболочка снята на время смены тренировки; pokolenie — ключ
-     новой оболочки. */
-  const [smena, setSmena] = useState(false);
-  const [pokolenie, setPokolenie] = useState(0);
+  /* Пришли по ссылке на типы: читается один раз, в браузере. */
+  const [poSsylke] = useState(
+    () => typeof window !== 'undefined' && /[?&]tipy=/.test(window.location.search),
+  );
   const progress = progress1.useProgress();
   const vse = useMemo(() => dannye.razdely.flatMap((r) => r.podtipy), [dannye]);
   const bloki = useMemo(
@@ -101,8 +90,13 @@ export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: 
       uroven: 0,
       istochnik: bezBanka && s.istochnik === 'bank' ? 'mix' : s.istochnik,
     });
-    /* Ссылка отработала: после перезагрузки вопрос не повторяется,
-       выбор типов остаётся в настройках вкладки. */
+  }, [vse]);
+
+  /* Ученик ответил на вопрос оболочки: ссылка своё сделала, после
+     перезагрузки вопрос не повторяется, выбор типов остаётся в
+     настройках вкладки. */
+  function ubratSsylku() {
+    const q = new URLSearchParams(window.location.search);
     q.delete('tipy');
     const rest = q.toString();
     window.history.replaceState(
@@ -110,34 +104,6 @@ export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: 
       '',
       `${window.location.pathname}${rest === '' ? '' : `?${rest}`}${window.location.hash}`,
     );
-    /* Оболочка уже вернула незавершённую тренировку (или возвращает:
-       задачи собираются): спросить, остаться в ней или начать новую
-       по ссылке. Запись читается без распаковки — как у оболочки. */
-    const timer = window.setTimeout(() => {
-      const read = readSession(scope);
-      if (read.status === 'ok') {
-        const ui = isBaseUi(read.session.ui) ? read.session.ui : null;
-        setVopros({
-          solved: ui === null ? 0 : Object.keys(ui.marks).length,
-          total: ui?.order?.length ?? read.session.total,
-        });
-      }
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [vse, scope]);
-
-  /* «Начать новую» по ссылке. Оболочка с незавершённой тренировкой
-     убирается и, уходя, записывает её в последний раз; уже после
-     этого (следующая задача цикла) запись стирается, и новая оболочка
-     открывает выбор с типами из ссылки. */
-  function nachatNovuyu() {
-    setVopros(null);
-    setSmena(true);
-    window.setTimeout(() => {
-      clearSession(scope);
-      setPokolenie((k) => k + 1);
-      setSmena(false);
-    }, 0);
   }
 
   function izmenit(patch: Partial<Nastroyki>) {
@@ -180,33 +146,12 @@ export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: 
     n.istochnik,
   ).length;
 
-  const dialog = (
-    <Modal
-      open={vopros !== null}
-      onClose={() => setVopros(null)}
-      title={sessionText.unfinishedTitle}
-      description={vopros === null ? null : sessionText.unfinishedText(vopros.solved, vopros.total)}
-      footer={
-        <>
-          <Button variant="secondary" onClick={() => setVopros(null)}>
-            {sessionText.keepOld}
-          </Button>
-          <Button variant="danger" onClick={nachatNovuyu}>
-            {sessionText.startNew}
-          </Button>
-        </>
-      }
-    />
-  );
-
-  if (smena) {
-    return null;
-  }
   return (
     <>
       <TrainerSessionHost<Trenazher1Payload, Trenazher1Ui>
-        key={pokolenie}
         scope={scope}
+        entryIntent={poSsylke}
+        onEntryResolved={ubratSsylku}
         what="тренажёр"
         backHref={base}
         isPayload={isTrenazher1Payload}
@@ -263,7 +208,7 @@ export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: 
             )}
           </>
         )}
-        screen={({ payload, restored, report, elapsed, finish }) => (
+        screen={({ payload, restored, report, elapsed, finish, setBeforeFinish }) => (
           <Trenazher1Reshenie
             zadachi={payload.zadachi}
             podskazki={payload.podskazki}
@@ -273,11 +218,11 @@ export function Trenazher1({ dannye, base }: { dannye: DannyeTrenazhera1; base: 
             restored={restored === null ? null : readTrenazher1Ui(restored)}
             report={report}
             elapsed={elapsed}
+            setBeforeFinish={setBeforeFinish}
             onKonets={finish}
           />
         )}
       />
-      {dialog}
     </>
   );
 }

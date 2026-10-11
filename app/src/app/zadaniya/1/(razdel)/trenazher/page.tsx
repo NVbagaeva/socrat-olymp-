@@ -8,9 +8,6 @@ import { dannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
 import '../../../11/zadanie11.css';
 import '../../../komplekt.css';
 import '../../trenazher1.css';
-/* Общий экран итогов оболочки сессии (tdone, tkind) — оформление
-   итога тренажёров №12, как у №2, №4, №5 и №8. */
-import '../../../[task]/[type]/trainer.css';
 
 export const metadata: Metadata = {
   title: zadanie1Title(TRENAZHER_1.title),
