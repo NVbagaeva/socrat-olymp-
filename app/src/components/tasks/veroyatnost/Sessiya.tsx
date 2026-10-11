@@ -341,6 +341,7 @@ export function Sessiya({
           klyuch: klyuchZadachi(kind.id, variant.n),
           seal: variant.seal,
           steps: variant.steps,
+          ...(variant.podskazka === undefined ? {} : { podskazka: variant.podskazka }),
           ...(variant.model === undefined ? {} : { model: variant.model }),
         }}
         /* Метод в шапке — только в отработке: в смешанном режиме и
@@ -352,6 +353,9 @@ export function Sessiya({
         podskazki={plan.podskazki}
         onResult={(right) => otvet(right, seychas())}
         onReveal={() => zapisat(false, false, seychas())}
+        /* Подсказка учитывается так же, как открытое решение: задача
+           закрыта и не засчитана, следующий ответ счётчиков не меняет. */
+        onHint={() => zapisat(false, false, seychas())}
         onNext={dalshe}
         nextLabel={last ? slova.zavershit : slova.dalshe}
       />

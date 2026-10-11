@@ -10,6 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
+import { chislo, vopros, zapisShag } from '../podskazka';
 import { derevo, type Vetv } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -19,8 +20,8 @@ const P06: Prototype = prototip({
   id: 'p5-06',
   blok: 'nezavisimye',
   nazvanie: 'Шахматист: выиграет обе партии',
-  tip: 'Умножение независимых событий',
-  zadachnik: [29, 32],
+  tip: 'Независимые события: перемножаем',
+  sourceRange: [29, 32],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -51,11 +52,32 @@ const P06: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const pb = veroyatnost(p, 'pb');
+    const pc = veroyatnost(p, 'pc');
+    return [
+      vopros('Влияет ли исход первой партии на вторую?', 'Нет — партии независимы', [
+        'Да — после выигрыша шансы выше',
+        'Да — после проигрыша шансы выше',
+      ]),
+      vopros(
+        'Нужно, чтобы А. выиграл и первую, и вторую партию. Что делать с вероятностями?',
+        'Перемножить: $p_1 \\cdot p_2$',
+        ['Сложить: $p_1 + p_2$', 'Взять бо́льшую из двух'],
+        'Это один путь по дереву: вдоль пути вероятности перемножаются.',
+      ),
+      vopros('Какое выражение даёт ответ?', `$${tex(pb)} \\cdot ${tex(pc)}$`, [
+        `$${tex(pb)} + ${tex(pc)}$`,
+        `$${tex(pb)} \\cdot ${tex(tochnee(1 - pc))}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 29', params: { pb: 0.5, pc: 0.32 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 30', params: { pb: 0.6, pc: 0.45 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 31', params: { pb: 0.5, pc: 0.3 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 32', params: { pb: 0.6, pc: 0.4 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 29', params: { pb: 0.5, pc: 0.32 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 30', params: { pb: 0.6, pc: 0.45 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 31', params: { pb: 0.5, pc: 0.3 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 32', params: { pb: 0.6, pc: 0.4 } },
   ],
   generator: (r: Rng): Params => ({ pb: r.dec(0.3, 0.7, 2), pc: r.dec(0.25, 0.6, 2) }),
   metodika: {
@@ -105,8 +127,8 @@ const P07: Prototype = prototip({
   id: 'p5-07',
   blok: 'nezavisimye',
   nazvanie: 'Стрелок: четыре мишени по одному выстрелу',
-  tip: 'Умножение независимых событий',
-  zadachnik: [33, 36],
+  tip: 'Независимые события: перемножаем',
+  sourceRange: [33, 36],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -154,11 +176,43 @@ const P07: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const s = shema(p);
+    return [
+      vopros(
+        'Какова вероятность промаха при одном выстреле?',
+        chislo(tochnee(1 - q)),
+        [chislo(q), chislo(tochnee(q / 2))],
+        `Промах — противоположное попаданию: $1 - ${tex(q)}$.`,
+      ),
+      vopros(
+        'Сколько путей по дереву подходит?',
+        'Один — для каждого выстрела сказано, попал или нет',
+        ['Несколько — важно только, сколько было попаданий'],
+      ),
+      vopros(
+        'Что делать с вероятностями вдоль этого пути?',
+        'Перемножить все четыре',
+        ['Сложить все четыре', 'Перемножить только вероятности попаданий'],
+        'Выстрелы независимы.',
+      ),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' \\cdot ')}$`,
+        [
+          `$${[...s].map((c) => tex(c === 'p' ? tochnee(1 - q) : q)).join(' \\cdot ')}$`,
+          `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' + ')}$`,
+        ],
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 33', params: { p: 0.9, shema: 'pmmm' } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 34', params: { p: 0.8, shema: 'pmmm' } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 35', params: { p: 0.6, shema: 'pppm' } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 36', params: { p: 0.7, shema: 'ppmm' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 33', params: { p: 0.9, shema: 'pmmm' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 34', params: { p: 0.8, shema: 'pmmm' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 35', params: { p: 0.6, shema: 'pppm' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 36', params: { p: 0.7, shema: 'ppmm' } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.5, 0.9, 1), shema: r.pick(Object.keys(SHEMY)) }),
   metodika: {
@@ -226,8 +280,8 @@ const P08: Prototype = prototip({
   id: 'p5-08',
   blok: 'hotya-by',
   nazvanie: 'Лампы: хотя бы одна не перегорит',
-  tip: 'Задачи со словами «хотя бы»',
-  zadachnik: [37, 40],
+  tip: '«Хотя бы один»: через «ни одного»',
+  sourceRange: [37, 40],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -274,11 +328,32 @@ const P08: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const n = lamp(p);
+    const vse = tochnee(q ** n);
+    const slovami = SLOVAMI[n] ?? String(n);
+    return [
+      vopros(
+        'Какое событие противоположно «хотя бы одна лампа не перегорит»?',
+        `Перегорят все ${slovami} лампы`,
+        ['Ни одна лампа не перегорит', 'Перегорит ровно одна лампа'],
+        'Его вероятность найти проще: это один путь по дереву.',
+      ),
+      vopros(
+        `Какова вероятность, что перегорят все ${slovami}?`,
+        `$${tex(q)}^{${n}} = ${tex(vse)}$`,
+        [`$${n} \\cdot ${tex(q)}$`, `$${tex(tochnee(1 - q))}^{${n}}$`],
+        'Лампы перегорают независимо: вероятности перемножаются.',
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 37', params: { n: 3, p: 0.8 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 38', params: { n: 3, p: 0.9 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 39', params: { n: 3, p: 0.7 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 40', params: { n: 3, p: 0.6 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 37', params: { n: 3, p: 0.8 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 38', params: { n: 3, p: 0.9 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 39', params: { n: 3, p: 0.7 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 40', params: { n: 3, p: 0.6 } },
   ],
   /* Две лампы — вероятность с двумя знаками (ответ до четырёх),
      три и четыре — с одним. */
@@ -333,8 +408,8 @@ const P09: Prototype = prototip({
   id: 'p5-09',
   blok: 'dva-predmeta',
   nazvanie: 'Фломастеры: один синий и один красный',
-  tip: 'Два предмета из коробки',
-  zadachnik: [41, 44],
+  tip: 'Два предмета без возвращения',
+  sourceRange: [41, 44],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -409,11 +484,40 @@ const P09: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const n = n09(p);
+    return [
+      vopros(
+        'Сколько фломастеров в коробке всего?',
+        `$${n}$`,
+        [`$${n - 1}$`, `$${a + b}$`],
+        `$${a} + ${b} + ${c} = ${n}$.`,
+      ),
+      vopros(
+        'Сколько путей по дереву дают «один синий и один красный»?',
+        'Два: синий, потом красный — и красный, потом синий',
+        ['Один: синий, потом красный', 'Три: по пути на каждый цвет'],
+      ),
+      vopros(
+        'Какова вероятность пути «синий, потом красный»?',
+        `$\\dfrac{${a}}{${n}} \\cdot \\dfrac{${b}}{${n - 1}}$`,
+        [
+          `$\\dfrac{${a}}{${n}} \\cdot \\dfrac{${b}}{${n}}$`,
+          `$\\dfrac{${a}}{${n}} + \\dfrac{${b}}{${n - 1}}$`,
+        ],
+        'Второй фломастер берут из оставшихся — их на один меньше. Второй путь даёт столько же.',
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 41', params: { a: 11, b: 6, c: 8 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 42', params: { a: 12, b: 6, c: 7 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 43', params: { a: 10, b: 3, c: 12 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 44', params: { a: 12, b: 4, c: 9 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 41', params: { a: 11, b: 6, c: 8 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 42', params: { a: 12, b: 6, c: 7 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 43', params: { a: 10, b: 3, c: 12 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 44', params: { a: 12, b: 4, c: 9 } },
   ],
   generator: (r: Rng): Params => {
     const n = r.int(15, 30);
@@ -472,8 +576,8 @@ const P10: Prototype = prototip({
   id: 'p5-10',
   blok: 'nezavisimye',
   nazvanie: 'Футбол: хотя бы 4 очка в двух играх',
-  tip: 'Умножение независимых событий',
-  zadachnik: [45, 48],
+  tip: 'Независимые события: перемножаем',
+  sourceRange: [45, 48],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -522,11 +626,43 @@ const P10: Prototype = prototip({
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const nich = tochnee(1 - 2 * q);
+    const vv = tochnee(q * q);
+    const vn = tochnee(q * nich);
+    return [
+      vopros(
+        'Какова вероятность ничьей в одной игре?',
+        `$1 - ${tex(q)} - ${tex(q)} = ${tex(nich)}$`,
+        [`$${tex(q)}$`, `$1 - ${tex(q)} = ${tex(tochnee(1 - q))}$`],
+        'Ничья — всё, что не выигрыш и не проигрыш.',
+      ),
+      vopros(
+        'Какие исходы двух игр дают хотя бы 4 очка?',
+        'Выигрыш-выигрыш, выигрыш-ничья, ничья-выигрыш',
+        ['Только выигрыш-выигрыш', 'Выигрыш-выигрыш и выигрыш-ничья'],
+        'Выигрыш даёт 3 очка, ничья — 1: подходят $3 + 3$, $3 + 1$ и $1 + 3$.',
+      ),
+      vopros(
+        'Что делать с вероятностями этих трёх путей?',
+        'Перемножить вдоль каждого пути и сложить пути',
+        ['Сложить вероятности всех исходов подряд', 'Взять самый вероятный путь'],
+      ),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${tex(vv)} + ${tex(vn)} + ${tex(vn)}$`,
+        [`$${tex(vv)}$`, `$${tex(vv)} + ${tex(vn)}$`],
+        'Вдоль пути — произведение, пути — складываем.',
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 45', params: { p: 0.3 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 46', params: { p: 0.4 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 47', params: { p: 0.2 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 48', params: { p: 0.1 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 45', params: { p: 0.3 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 46', params: { p: 0.4 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 47', params: { p: 0.2 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 48', params: { p: 0.1 } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.1, 0.45, 2) }),
   metodika: {

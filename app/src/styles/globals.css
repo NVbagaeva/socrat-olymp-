@@ -10,5 +10,6 @@
 @import './base.css' layer(base);
 @import './components.css' layer(components);
 @import './site.css' layer(components);
+@import './ramki.css' layer(components);
 
 @source '../**/*.{ts,tsx}';

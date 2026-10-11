@@ -70,6 +70,12 @@ const PAGES = [
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
   '/zadaniya/12/quadratic/opornye-zadachi/',
+  '/zadaniya/10/',
+  '/zadaniya/10/teoriya/',
+  '/zadaniya/10/opornye-zadachi/',
+  '/zadaniya/10/trenazher/',
+  '/zadaniya/10/generator/',
+  '/zadaniya/10/dlya-repetitorov/',
 ];
 const SIZES = [
   { name: 'компьютер', width: 1280, height: 800, isMobile: false },

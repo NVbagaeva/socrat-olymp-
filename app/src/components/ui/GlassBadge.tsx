@@ -1,8 +1,43 @@
 import { clsx } from 'clsx';
 import { useId } from 'react';
 
+/** Что нарисовано внутри шара: столбики статистики или книга. */
+export type GlassBadgeGlif = 'stolbiki' | 'kniga';
+
 export interface GlassBadgeProps {
   className?: string;
+  /**
+   * Глиф внутри шара. По умолчанию столбики — значок «О задании»
+   * №4 от появления книги не меняется ни на пиксель.
+   */
+  glif?: GlassBadgeGlif;
+}
+
+/**
+ * Фигура внутри шара без заливки: цвет задаёт группа снаружи —
+ * так один и тот же контур рисует и глиф, и его тень.
+ *
+ * Столбики стоят на подложке-черте, она рисуется отдельно: у тени
+ * черты нет. Книга раскрыта корешком к середине шара; страницы
+ * чуть провисают по нижнему краю, как у настоящей.
+ */
+function Glif({ glif }: { glif: GlassBadgeGlif }) {
+  if (glif === 'kniga') {
+    return (
+      <>
+        <path d="M80,68 C72,61 62,59 54,61 L54,93 C62,91 72,93 80,99 Z" />
+        <path d="M80,68 C88,61 98,59 106,61 L106,93 C98,91 88,93 80,99 Z" />
+      </>
+    );
+  }
+  return (
+    <>
+      <rect x="60" y="80" width="5.5" height="18" rx="2.75" />
+      <rect x="72" y="58" width="5.5" height="40" rx="2.75" />
+      <rect x="84" y="70" width="5.5" height="28" rx="2.75" />
+      <rect x="96" y="84" width="5.5" height="14" rx="2.75" />
+    </>
+  );
 }
 
 /**
@@ -27,9 +62,15 @@ export interface GlassBadgeProps {
  * Шар занимает 104 единицы холста из 160, остальное — свечение
  * вокруг него, поэтому холст выступает за рамку значка.
  *
+ * Внутри шара может стоять другой глиф: столбики статистики или
+ * раскрытая книга исторической врезки №12. Шар, свечение, блик и
+ * ободок у обоих одни и те же — меняется только фигура под клипом
+ * и её тень. Образец книги: design-reference/mockups/zadanie-12/
+ * glass-badge-kniga.svg.
+ *
  * Декор: alt у значка нет, смысл несёт текст рядом.
  */
-export function GlassBadge({ className }: GlassBadgeProps) {
+export function GlassBadge({ className, glif = 'stolbiki' }: GlassBadgeProps) {
   const id = useId();
   const body = `body-${id}`;
   const refract = `refract-${id}`;
@@ -114,19 +155,15 @@ export function GlassBadge({ className }: GlassBadgeProps) {
 
           {/* лёгкая тень под глифом */}
           <g fill="#1B4DB8" opacity="0.25" filter={`url(#${blurs})`} transform="translate(1,2)">
-            <rect x="60" y="80" width="5.5" height="18" rx="2.75" />
-            <rect x="72" y="58" width="5.5" height="40" rx="2.75" />
-            <rect x="84" y="70" width="5.5" height="28" rx="2.75" />
-            <rect x="96" y="84" width="5.5" height="14" rx="2.75" />
+            <Glif glif={glif} />
           </g>
-          {/* глиф: тонкие полупрозрачные столбики */}
+          {/* глиф: тонкие полупрозрачные фигуры */}
           <g fill={`url(#${bar})`}>
-            <rect x="60" y="80" width="5.5" height="18" rx="2.75" />
-            <rect x="72" y="58" width="5.5" height="40" rx="2.75" />
-            <rect x="84" y="70" width="5.5" height="28" rx="2.75" />
-            <rect x="96" y="84" width="5.5" height="14" rx="2.75" />
+            <Glif glif={glif} />
           </g>
-          <rect x="52" y="100" width="58" height="4" rx="2" fill="#FFFFFF" opacity="0.65" />
+          {glif === 'stolbiki' ? (
+            <rect x="52" y="100" width="58" height="4" rx="2" fill="#FFFFFF" opacity="0.65" />
+          ) : null}
         </g>
         <path
           d="M42,62 A52,52 0 0 1 100,32"
