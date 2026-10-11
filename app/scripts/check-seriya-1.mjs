@@ -2,15 +2,15 @@
 /* scripts/check-seriya-1.mjs — серия уроков «Для репетиторов» №1 по коду.
 
    1. Код восстанавливает всю серию: для нескольких кодов (в том числе с
-      перегенерированными уроками) листы ученика и учителя всех 12
+      перегенерированными уроками) листы ученика и учителя всех 13
       уроков собираются в двух отдельных процессах — с чистого
       состояния, без браузера и хранилищ — и совпадают байт в байт
       (HTML листа из lib/sheet).
    2. Внутри комплекта задачи не повторяются: ни между уроками, ни
       внутри урока, ни с итоговой работой; то же с настройками учителя
       (другое число задач в блоках).
-   3. Итоговая работа — два варианта по 11 задач, по одной на урок
-      1–11, только открытый банк.
+   3. Итоговая работа — два варианта по 12 задач, по одной на урок
+      1–12, только открытый банк.
    4. Перегенерация урока N берёт неиспользованные задачи (пересечение
       с прежним поколением — только когда банк прототипа кончился) и не
       трогает другие уроки, кроме мини-проверки и разминки урока N + 1.
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { requireSrc } from './lib/load-ts.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
-const KODY = ['K7Q2AB', 'Z9X1C0-3.1', '4MPT7V-1.2-12.1'];
+const KODY = ['K7Q2AB', 'Z9X1C0-3.1', '4MPT7V-1.2-13.1'];
 
 const S1 = requireSrc('lib/planimetriya/sheet1.ts');
 const U = requireSrc('lib/planimetriya/uroki.ts');
@@ -33,11 +33,14 @@ const sheet = requireSrc('lib/sheet/sheet.js');
 const buildDocument = sheet.buildDocument ?? sheet.default?.buildDocument;
 
 const bank = dannyeTrenazhera1().bank;
+const { UROKI_1, ITOG_1 } = requireSrc('content/repetitory1.ts');
+const UROKOV = UROKI_1.length;
+const ITOG = ITOG_1.uroki + 1;
 
 /** Хэши листов всех уроков серии: урок → [ученик, учитель]. */
 function hashiSerii(kod) {
   const out = {};
-  for (let urok = 1; urok <= 12; urok += 1) {
+  for (let urok = 1; urok <= UROKOV; urok += 1) {
     const q = new URLSearchParams(`m=u&i=m&u=${urok}&k=${encodeURIComponent(kod)}&seed=${kod}`);
     const p = S1.parseSheetQuery1(q);
     const list = S1.sobratList(p, bank);
@@ -69,14 +72,14 @@ for (const kod of KODY) {
   );
   if (a !== b) problems.push(`код ${kod}: листы двух чистых сборок различаются`);
   const h = JSON.parse(a);
-  if (Object.keys(h).length !== 12)
+  if (Object.keys(h).length !== UROKOV)
     problems.push(`код ${kod}: собрано ${Object.keys(h).length} уроков`);
 }
 
 /* 2–3. Повторы и итоговая. */
 function vseZadachi(s, nastroyki = {}) {
   const out = [];
-  for (let n = 1; n <= 12; n += 1) {
+  for (let n = 1; n <= UROKOV; n += 1) {
     const p = U.planUroka(s, n, nastroyki[n]);
     for (const b of p.bloki)
       for (const z of b.pozicii) out.push({ urok: n, blok: b.id, key: klyuch(z), z });
@@ -99,16 +102,17 @@ for (const kod of KODY) {
       );
     else seen.set(x.key, x);
   }
-  const itog = U.planUroka(s, 12).bloki.filter((b) => b.id === 'v1' || b.id === 'v2');
-  if (itog.length !== 2 || itog.some((v) => v.pozicii.length !== 11))
-    problems.push(`код ${kod}: итоговая не 2 × 11`);
+  const itog = U.planUroka(s, ITOG).bloki.filter((b) => b.id === 'v1' || b.id === 'v2');
+  if (itog.length !== 2 || itog.some((v) => v.pozicii.length !== ITOG_1.uroki))
+    problems.push(`код ${kod}: итоговая не 2 × ${ITOG_1.uroki}`);
   for (const v of itog) {
     if (v.pozicii.some((z) => z.vid !== 'bank'))
       problems.push(`код ${kod}: в итоговой задача не из банка`);
   }
   /* С настройками учителя: больше задач в блоках — всё равно без повторов. */
   const nast = {};
-  for (let n = 1; n <= 11; n += 1) nast[n] = { vykl: [], n: { razbor: 2, sam: 3, dz: 4 } };
+  for (let n = 1; n <= ITOG_1.uroki; n += 1)
+    nast[n] = { vykl: [], n: { razbor: 2, sam: 3, dz: 4 } };
   const svoi = vseZadachi(s, nast);
   const keys = svoi.map((x) => x.key);
   const dup = keys.filter((x, i) => keys.indexOf(x) !== i);
@@ -116,17 +120,17 @@ for (const kod of KODY) {
     problems.push(`код ${kod}, свои настройки: повторы ${dup.slice(0, 3).join(', ')}`);
 }
 
-/* 3а. Резерв итоговой: задачи итоговой не встречаются в уроках 1–11
+/* 3а. Резерв итоговой: задачи итоговой не встречаются в уроках 1–12
    той же серии (и с настройками учителя), две перегенерации итоговой
    подряд не пересекаются. */
 for (const kod of KODY) {
   const osn = U.parseKodSerii(kod).osnova;
   for (let g = 0; g <= 3; g += 1) {
-    const k = U.parseKodSerii(g === 0 ? osn : `${osn}-12.${g}`);
+    const k = U.parseKodSerii(g === 0 ? osn : `${osn}-${ITOG}.${g}`);
     const s = U.seriya(k, bank);
     const itog = new Set(s.itog.flat().map(klyuch));
     for (const nast of [{}, { vykl: [], n: { razbor: 3, sam: 4, dz: 6 } }]) {
-      for (let n = 1; n <= 11; n += 1) {
+      for (let n = 1; n <= ITOG_1.uroki; n += 1) {
         for (const b of U.planUroka(s, n, nast.n === undefined ? undefined : nast).bloki)
           for (const z of b.pozicii)
             if (itog.has(klyuch(z)))
@@ -136,7 +140,7 @@ for (const kod of KODY) {
       }
     }
     if (g > 0) {
-      const pred = U.seriya(U.parseKodSerii(g === 1 ? osn : `${osn}-12.${g - 1}`), bank);
+      const pred = U.seriya(U.parseKodSerii(g === 1 ? osn : `${osn}-${ITOG}.${g - 1}`), bank);
       const bylo = new Set(pred.itog.flat().map(klyuch));
       const obshchie = [...itog].filter((x) => bylo.has(x));
       if (obshchie.length > 0)
@@ -153,13 +157,46 @@ for (const kod of KODY) {
   );
 }
 
+/* 3б. Перегенерация урока снова на ФИПИ там, где задач банка 6 и
+   больше: у таких прототипов «Разбор» перегенерированного урока — из
+   открытого банка. Остальные (2–5 задач ФИПИ) после перегенерации
+   получают аналоги — печатаем список. */
+{
+  const pul = U.pulIz(bank);
+  const mnogo = new Set();
+  const malo = [];
+  for (const u of UROKI_1.slice(0, ITOG_1.uroki))
+    for (const proto of u.bank) {
+      const n = (pul.fipi.get(`p${String(proto).padStart(2, '0')}`) ?? []).length;
+      if (n >= 6) mnogo.add(proto);
+      else malo.push(proto);
+    }
+  for (const kod of KODY) {
+    const osn = U.parseKodSerii(kod).osnova;
+    for (const u of UROKI_1.slice(0, ITOG_1.uroki)) {
+      const s1 = U.seriya(U.parseKodSerii(`${osn}-${u.no}.1`), bank);
+      const razbor = U.planUroka(s1, u.no).bloki.find((b) => b.id === 'razbor')?.pozicii ?? [];
+      for (const z of razbor) {
+        const proto = Number(z.id.slice(1));
+        if (mnogo.has(proto) && z.vid !== 'bank')
+          problems.push(
+            `код ${osn}-${u.no}.1: «Разбор» прототипа ${proto} после перегенерации не из ФИПИ`,
+          );
+      }
+    }
+  }
+  console.log(
+    `перегенерация урока на ФИПИ: прототипы ${[...mnogo].join(', ')}; после перегенерации аналоги: ${malo.join(', ')}`,
+  );
+}
+
 /* 4. Перегенерация. */
 {
   const osnova = 'K7Q2AB';
   const s0 = U.seriya(U.parseKodSerii(osnova), bank);
-  for (const n of [3, 7, 11, 12]) {
+  for (const n of [3, 7, 11, ITOG]) {
     const s1 = U.seriya(U.parseKodSerii(`${osnova}-${n}.1`), bank);
-    for (let m = 1; m <= 12; m += 1) {
+    for (let m = 1; m <= UROKOV; m += 1) {
       const a = U.planUroka(s0, m).bloki;
       const b = U.planUroka(s1, m).bloki;
       const sravnit = (bl) =>
@@ -184,7 +221,7 @@ for (const kod of KODY) {
 }
 
 console.log(
-  `серии: ${KODY.length} кода × 12 уроков, задач в сериях ${zadach}, проблем ${problems.length}`,
+  `серии: ${KODY.length} кода × ${UROKOV} уроков, задач в сериях ${zadach}, проблем ${problems.length}`,
 );
 if (problems.length > 0) {
   for (const p of problems.slice(0, 100)) console.log(`  ✗ ${p}`);

@@ -1,5 +1,5 @@
 /**
- * Серия уроков «Для репетиторов» задания №1: 12 уроков по коду
+ * Серия уроков «Для репетиторов» задания №1: 13 уроков по коду
  * комплекта.
  *
  * Код комплекта — шесть знаков (четыре знака комплекта и версия
@@ -13,7 +13,7 @@
  *   — внутри комплекта задачи не повторяются: уроки собираются по
  *     порядку 1 → 11, каждая взятая задача (банка, аналог, новая)
  *     отмечается занятой для всех следующих;
- *   — итоговая работа (урок 12) — два варианта по 11 задач, по одной
+ *   — итоговая работа (урок 13) — два варианта по 12 задач, по одной
  *     на урок, только открытый банк. Её задачи откладываются до
  *     раздачи уроков, поэтому перегенерация итоговой не меняет уроки;
  *   — «Перегенерировать урок» берёт задачи, которых не было ни в
@@ -248,7 +248,7 @@ function razlozhit(
 export interface Seriya {
   kod: KodSerii;
   uroki: Map<number, RaskladkaUroka>;
-  /** Итоговая работа: варианты по 11 задач. */
+  /** Итоговая работа: варианты по 12 задач. */
   itog: ZadachaPlan[][];
   /** Всё, что занято серией (уроки, запас, итоговая). */
   zanyato: Set<string>;
@@ -264,8 +264,20 @@ export interface Seriya {
 /** ФИПИ на прототип для уроков по умолчанию: «Разбор» 1 + «ДЗ» 1. */
 const FIPI_V_UROKAH = KOLICHESTVO_1.razbor + Math.ceil(KOLICHESTVO_1.dz / 2);
 
+/**
+ * Сколько ФИПИ прототипа отдать урокам. Где задач банка много (6 и
+ * больше), уроки получают запас на одну перегенерацию — ещё
+ * FIPI_V_UROKAH задач, а резерв итоговой сохраняет не меньше двух.
+ * Где задач 3–5 — ровно норма урока, с одной задачей — 0, с двумя —
+ * одна: итоговой всегда остаётся хотя бы одна.
+ */
+export function fipiDlyaUrokov(n: number): number {
+  if (n >= 6) return Math.min(2 * FIPI_V_UROKAH, n - 2);
+  return Math.max(0, Math.min(FIPI_V_UROKAH, n - 1));
+}
+
 export interface Rezerv {
-  /** ФИПИ прототипа, которые могут взять уроки 1–11. */
+  /** ФИПИ прототипа, которые могут взять уроки 1–12. */
   uroki: Map<string, number[]>;
   /** ФИПИ прототипа, отложенные для итоговой: в уроки не идут никогда. */
   itog: Map<string, number[]>;
@@ -273,9 +285,9 @@ export interface Rezerv {
 
 /**
  * Резерв итоговой — до сборки серии. ФИПИ каждого прототипа банка
- * перемешиваются по коду: урокам — не больше FIPI_V_UROKAH, но так,
- * чтобы для итоговой осталась хотя бы одна задача; всё остальное —
- * резерв итоговой. Если ФИПИ не хватает и на уроки, и на резерв, урок
+ * перемешиваются по коду: урокам — fipiDlyaUrokov (норма урока, а где
+ * задач 6 и больше — с запасом на перегенерацию), итоговой — всё
+ * остальное, хотя бы одна задача. Если ФИПИ не хватает и на уроки, и на резерв, урок
  * получает аналог, а задача банка остаётся итоговой.
  */
 export function rezervItoga(osnova: string, pul: Pul): Rezerv {
@@ -285,7 +297,7 @@ export function rezervItoga(osnova: string, pul: Pul): Rezerv {
     for (const id of u.bank.map(klyuchProto)) {
       const vse = pul.fipi.get(id) ?? [];
       const smes = rngOf(`z1-rezerv|${osnova}|${id}`).sample(vse, vse.length);
-      const vUroki = Math.max(0, Math.min(FIPI_V_UROKAH, smes.length - 1));
+      const vUroki = fipiDlyaUrokov(smes.length);
       uroki.set(id, smes.slice(0, vUroki));
       itog.set(id, smes.slice(vUroki));
     }
@@ -302,7 +314,7 @@ export function nehvatkaFipi(pul: Pul): { proto: number; fipi: number }[] {
 }
 
 /**
- * Итоговая поколения g: по задаче на урок 1–11 в каждом варианте,
+ * Итоговая поколения g: по задаче на урок 1–12 в каждом варианте,
  * только из резерва. Каждое поколение берёт задачи, которых не было в
  * прежних поколениях; когда резерв урока кончается — хотя бы не из
  * предыдущего поколения, так что две перегенерации подряд не
@@ -364,8 +376,9 @@ export function seriya(kod: KodSerii, bank: readonly UslovieBanka[]): Seriya {
     uroki.set(u.no, r!);
     for (const key of [...r!.zanyatoBlokami, ...r!.zanyatoZapasom]) zanyato.add(key);
   }
-  doUroka.set(12, new Set(zanyato));
-  const g12 = kod.regen[12] ?? 0;
+  const urokItoga = ITOG_1.uroki + 1;
+  doUroka.set(urokItoga, new Set(zanyato));
+  const g12 = kod.regen[urokItoga] ?? 0;
   let itog: ZadachaPlan[][] = [];
   const prezhnie = new Set<string>();
   let predydushchee = new Set<string>();

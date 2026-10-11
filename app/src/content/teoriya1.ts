@@ -1406,7 +1406,7 @@ export function kartochkaPrototipa(proto: number): Kartochka1 | null {
 
 /**
  * Шпаргалки к урокам «Для репетиторов»: карточки, которые печатаются
- * в начале листа ученика. Урок 12 — итоговый, без шпаргалки.
+ * в начале листа ученика. Урок 13 — итоговый, без шпаргалки.
  */
 export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
   1: ['summa-uglov', 'smezhnye', 'vneshniy', 'ravnobedrennyy', 'bissektrisa-ugla'],
@@ -1436,10 +1436,12 @@ export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
     'pryamougolnaya-trapeciya',
     'vpisannaya-treugolnik',
   ],
-  11: [
+  11: ['vpisannyy-chetyrehugolnik', 'odna-duga-chetyrehugolnik', 'odna-duga'],
+  12: [
     'vpisannyy-chetyrehugolnik',
-    'odna-duga-chetyrehugolnik',
     'teorema-sinusov',
+    'tupoy-ugol',
     'pravilnyy-shestiugolnik',
+    'r-pryamougolnogo',
   ],
 };

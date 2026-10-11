@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Button, Checkbox } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
-import { BLOKI_UROKA_1, REPETITORY_1, UROKI_1, ZAMETKI_1 } from '@/content/repetitory1';
+import { BLOKI_UROKA_1, ITOG_1, REPETITORY_1, UROKI_1, ZAMETKI_1 } from '@/content/repetitory1';
 import { generatorVersion, newKitId } from '@/lib/komplekt';
 import { sheetQuery1 } from '@/lib/planimetriya/sheet1';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
@@ -56,7 +56,7 @@ function novyyKod(): KodSerii {
 }
 
 /**
- * Вкладка «Для репетиторов» задания №1: серия из 12 уроков по коду
+ * Вкладка «Для репетиторов» задания №1: серия из 13 уроков по коду
  * комплекта (lib/planimetriya/uroki.ts), методические заметки по
  * блокам I–X.
  *
@@ -211,7 +211,7 @@ export function Repetitory1({
               const bloki = BLOKI_UROKA_1.filter((b) =>
                 u.no === 1
                   ? b.id !== 'proverka' && b.id !== 'razminka'
-                  : u.no === 12
+                  : u.no > ITOG_1.uroki
                     ? b.id === 'proverka'
                     : true,
               );
