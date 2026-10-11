@@ -5,6 +5,7 @@ import { clsx } from 'clsx';
 import { kitTexts as T } from '@/content/generator';
 import { counted } from '@/lib/plural';
 import {
+  bezUroka,
   bothHref,
   currentKit,
   findKit,
@@ -19,6 +20,7 @@ import {
   setCurrentKit,
   settingsOf,
   subscribeKits,
+  urokKomplekta,
   type Kit,
   type KitScope,
   type SheetWhich,
@@ -43,6 +45,12 @@ export interface KitBarProps {
   seed?: string;
   /** Seed текущего комплекта сменился: экрану с превью — пересобрать. */
   onSeed?: (seed: string) => void;
+  /**
+   * Серия уроков (№9): один код — много уроков, номер урока — параметр u
+   * адреса. Смена урока у скачанного комплекта не замораживает его, а
+   * даёт черновик того же кода для другого урока.
+   */
+  seriya?: boolean;
 }
 
 function fill(text: string, values: Record<string, string>): string {
@@ -86,6 +94,7 @@ export function KitBar({
   summary,
   seed: firstSeed,
   onSeed,
+  seriya = false,
 }: KitBarProps) {
   const history = useSyncExternalStore(subscribeKits, loadKits, () => NO_KITS);
   const stored = useSyncExternalStore(
@@ -126,9 +135,17 @@ export function KitBar({
       );
     } else if (kit !== null && !isDownloaded(stored) && !sameKit(stored, kit)) {
       setCurrentKit(kit);
+    } else if (
+      seriya &&
+      isDownloaded(stored) &&
+      stored.settings !== settings &&
+      bezUroka(stored.settings) === bezUroka(settings)
+    ) {
+      /* Другой урок той же серии: тот же код, новый черновик. */
+      setCurrentKit(build(stored.id));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, stored, kitKey]);
+  }, [ready, stored, kitKey, settings]);
 
   const seed = kit?.id ?? null;
   useEffect(() => {
@@ -206,6 +223,9 @@ export function KitBar({
           <b className="kit-code" data-kit-code={kit?.code ?? ''}>
             {kit?.code ?? '····-··'}
           </b>
+          {kit !== null && urokKomplekta(kit) !== null ? (
+            <span className="kit-bar__urok"> · урок {urokKomplekta(kit)}</span>
+          ) : null}
           {kit === null ? null : (
             <span className={clsx('kit-bar__status', isDownloaded(kit) && 'is-done')}>
               {statusOf(kit)}
@@ -316,11 +336,12 @@ export function KitBar({
         ) : (
           <ul className="kit-history__list">
             {history.map((item) => (
-              <li className="kit-history__row" key={item.code}>
+              <li className="kit-history__row" key={`${item.code}|${item.settings}`}>
                 <span className="kit-history__section">{item.section}</span>
                 <span className="kit-history__date">{dateText(item.createdAt)}</span>
                 <span className="kit-history__code">
                   <b className="kit-code">{item.code}</b>
+                  {urokKomplekta(item) === null ? null : ` · урок ${urokKomplekta(item)}`}
                   {item.version === generatorVersion(item.scope) ? null : (
                     <span className="kit-history__changed" title={T.historyChangedTitle}>
                       {T.historyChanged}
