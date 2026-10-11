@@ -606,10 +606,14 @@ export const IZMERENIYA: Record<number, Izmerenie> = {
     return angleAt(naOkr(90 + mal / 2), naOkr(90), naOkr(90 - mal / 2));
   },
   62: (p) => {
-    /* Число вершин: правильный n-угольник с измеренным углом, равным данному. */
+    /* Число вершин: правильный n-угольник, у которого измеренный угол
+       (между сторонами или при центре) равен данному. */
     for (let n = 3; n <= 100; n += 1) {
-      const u = angleAt(naOkr(360 / n), naOkr(0), naOkr(-360 / n));
-      if (Math.abs(u - (180 - 360 / p.n)) < 1e-9) return n;
+      const u = p.v
+        ? angleAt(naOkr(0), [0, 0], naOkr(360 / n))
+        : angleAt(naOkr(360 / n), naOkr(0), naOkr(-360 / n));
+      const dano = p.v ? 360 / p.n : 180 - 360 / p.n;
+      if (Math.abs(u - dano) < 1e-9) return n;
     }
     return NaN;
   },
