@@ -33,8 +33,13 @@ import {
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
+import { zapisOtveta } from './podskazka';
 import { klyuchZadachi, sealAnswer } from './secret';
-import { konechnaya, round, type HintStep, type PrepBlok, type Prototype, type Step, type Variant } from './types';
+import {
+  konechnaya,
+  round,
+  type AnswerFormat,
+  type HintStep, type PrepBlok, type Prototype, type Step, type Variant } from './types';
 
 export interface BadVariant {
   id: string;
@@ -107,11 +112,18 @@ function bezRazmetki(stroka: string): string {
  *  - от двух до шести шагов, в каждом вопрос и 2–4 разные кнопки;
  *  - номер верной кнопки — в пределах списка;
  *  - знаки `$` в каждой строке парные — формула набирается целиком;
- *  - последний шаг спрашивает ответ: его верная кнопка — ответ
- *    задачи, как его записывают в бланк. Так подсказка не может
- *    разойтись с ответом: ошибка в её числах ловится здесь.
+ *  - последний шаг спрашивает, как записать ответ, и его верная кнопка
+ *    совпадает с форматом ответа прототипа (podskazka.ts, zapisOtveta);
+ *  - числа ответа нет ни в одной строке подсказки: она ведёт к ответу,
+ *    но не называет его. У целого ответа это не проверяется — малые
+ *    целые встречаются в подсказке по делу (номер шага, число игр).
  */
-export function problemyPodskazki(shagi: readonly HintStep[], otvet: number): string[] {
+export function problemyPodskazki(
+  shagi: readonly HintStep[],
+  otvet: number,
+  format: AnswerFormat,
+  znakov: 2 | 3 | null,
+): string[] {
   const problems: string[] = [];
   if (shagi.length < 2 || shagi.length > 6) {
     problems.push(`в подсказке ${shagi.length} шагов, нужно от 2 до 6`);
@@ -141,12 +153,23 @@ export function problemyPodskazki(shagi: readonly HintStep[], otvet: number): st
     }
   });
   const posledniy = shagi[shagi.length - 1];
-  const vBlank = String(otvet).replace('.', ',');
-  if (posledniy !== undefined && bezRazmetki(posledniy.options[posledniy.correct] ?? '') !== vBlank) {
+  const zapis = zapisOtveta(format, znakov);
+  if (posledniy !== undefined && posledniy.options[posledniy.correct] !== zapis) {
     problems.push(
-      `подсказка: последний шаг должен спрашивать ответ ${vBlank}, ` +
-        `а верная кнопка — «${bezRazmetki(posledniy.options[posledniy.correct] ?? '')}»`,
+      `подсказка: последний шаг должен спрашивать запись ответа «${zapis}», ` +
+        `а верная кнопка — «${posledniy.options[posledniy.correct] ?? ''}»`,
     );
+  }
+  if (format === 'десятичная') {
+    const vBlank = String(otvet).replace('.', ',');
+    shagi.forEach((shag, i) => {
+      for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+        const chisla: string[] = bezRazmetki(stroka).match(/\d+(?:,\d+)?/g) ?? [];
+        if (chisla.includes(vBlank)) {
+          problems.push(`подсказка, шаг ${i + 1}: называет ответ ${vBlank} — «${bezRazmetki(stroka)}»`);
+        }
+      }
+    });
   }
   return problems;
 }
@@ -190,7 +213,9 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   }
 
   if (prototype.podskazka !== undefined) {
-    problems.push(...problemyPodskazki(prototype.podskazka(p), otvet));
+    problems.push(
+      ...problemyPodskazki(prototype.podskazka(p), otvet, prototype.format, znakov),
+    );
   }
 
   const shagi = prototype.shagi(p);

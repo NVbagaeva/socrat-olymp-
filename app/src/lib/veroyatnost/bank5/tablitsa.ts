@@ -7,7 +7,7 @@
 import { prototip, type Rng } from '../generator';
 import { shagP } from '../bank4/vizual';
 import { konechnaya, num, type Params, type Prototype } from '../types';
-import { otvetShag, vopros } from '../podskazka';
+import { vopros, zapisShag } from '../podskazka';
 import { tablitsaBezGrani } from './vizual5';
 import { tochno } from './obshchee';
 
@@ -124,11 +124,7 @@ const P05: Prototype = prototip({
         ],
         'Перечислите пары по первой кости: вторая определяется суммой.',
       ),
-      otvetShag(`Чему равна вероятность? $\\dfrac{${ok}}{${vsego}} = \\ ?$`, ok / vsego, [
-        (ok + 1) / vsego,
-        ok > 1 ? (ok - 1) / vsego : 0,
-        ok / 50,
-      ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [

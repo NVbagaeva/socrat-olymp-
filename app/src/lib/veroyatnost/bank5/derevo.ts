@@ -10,7 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
-import { chislo, otvetShag, vopros } from '../podskazka';
+import { chislo, vopros, zapisShag } from '../podskazka';
 import { derevo, type Vetv } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -66,11 +66,11 @@ const P06: Prototype = prototip({
         ['Сложить: $p_1 + p_2$', 'Взять бо́льшую из двух'],
         'Это один путь по дереву: вдоль пути вероятности перемножаются.',
       ),
-      otvetShag(`Чему равна вероятность? $${tex(pb)} \\cdot ${tex(pc)} = \\ ?$`, tochnee(pb * pc), [
-        tochnee(pb + pc) < 1 ? tochnee(pb + pc) : 0,
-        tochnee(pb * (1 - pc)),
-        tochnee((1 - pb) * pc),
+      vopros('Какое выражение даёт ответ?', `$${tex(pb)} \\cdot ${tex(pc)}$`, [
+        `$${tex(pb)} + ${tex(pc)}$`,
+        `$${tex(pb)} \\cdot ${tex(tochnee(1 - pc))}$`,
       ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -179,8 +179,6 @@ const P07: Prototype = prototip({
   podskazka: (p) => {
     const q = veroyatnost(p, 'p');
     const s = shema(p);
-    const popadaniy = [...s].filter((c) => c === 'p').length;
-    const naoborot = tochnee(q ** (4 - popadaniy) * (1 - q) ** popadaniy);
     return [
       vopros(
         'Какова вероятность промаха при одном выстреле?',
@@ -199,11 +197,15 @@ const P07: Prototype = prototip({
         ['Сложить все четыре', 'Перемножить только вероятности попаданий'],
         'Выстрелы независимы.',
       ),
-      otvetShag('Чему равна вероятность?', P07otvet(p), [
-        naoborot,
-        tochnee(q ** 4),
-        tochnee(q ** popadaniy),
-      ]),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' \\cdot ')}$`,
+        [
+          `$${[...s].map((c) => tex(c === 'p' ? tochnee(1 - q) : q)).join(' \\cdot ')}$`,
+          `$${[...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' + ')}$`,
+        ],
+      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -344,11 +346,7 @@ const P08: Prototype = prototip({
         [`$${n} \\cdot ${tex(q)}$`, `$${tex(tochnee(1 - q))}^{${n}}$`],
         'Лампы перегорают независимо: вероятности перемножаются.',
       ),
-      otvetShag(
-        `Чему равна вероятность, что хотя бы одна не перегорит? $1 - ${tex(vse)} = \\ ?$`,
-        tochnee(1 - vse),
-        [vse, tochnee(1 - q), tochnee(1 - (1 - q) ** n)],
-      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -512,11 +510,7 @@ const P09: Prototype = prototip({
         ],
         'Второй фломастер берут из оставшихся — их на один меньше. Второй путь даёт столько же.',
       ),
-      otvetShag(
-        'Чему равна вероятность «один синий и один красный»?',
-        tochnee((2 * a * b) / (n * (n - 1))),
-        [(a * b) / (n * (n - 1)), (2 * a * b) / (n * n), (a * b) / (n * n)],
-      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -655,11 +649,13 @@ const P10: Prototype = prototip({
         'Перемножить вдоль каждого пути и сложить пути',
         ['Сложить вероятности всех исходов подряд', 'Взять самый вероятный путь'],
       ),
-      otvetShag(
-        `Чему равна вероятность? $${tex(vv)} + ${tex(vn)} + ${tex(vn)} = \\ ?$`,
-        tochnee(vv + 2 * vn),
-        [vv, tochnee(vv + vn), tochnee(2 * q)],
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${tex(vv)} + ${tex(vn)} + ${tex(vn)}$`,
+        [`$${tex(vv)}$`, `$${tex(vv)} + ${tex(vn)}$`],
+        'Вдоль пути — произведение, пути — складываем.',
       ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [

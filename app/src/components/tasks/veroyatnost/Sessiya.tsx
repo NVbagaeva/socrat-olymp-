@@ -353,11 +353,9 @@ export function Sessiya({
         podskazki={plan.podskazki}
         onResult={(right) => otvet(right, seychas())}
         onReveal={() => zapisat(false, false, seychas())}
-        /* Ответ после подсказки засчитывается как верный, но не чистый —
-           так же, как верный ответ после ошибки. */
-        onHint={() => {
-          oshibsya.current = true;
-        }}
+        /* Подсказка учитывается так же, как открытое решение: задача
+           закрыта и не засчитана, следующий ответ счётчиков не меняет. */
+        onHint={() => zapisat(false, false, seychas())}
         onNext={dalshe}
         nextLabel={last ? slova.zavershit : slova.dalshe}
       />

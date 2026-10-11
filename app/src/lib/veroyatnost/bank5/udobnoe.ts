@@ -14,7 +14,7 @@
 import { prototip, type Rng } from '../generator';
 import { shagP } from '../bank4/vizual';
 import { dec, konechnaya, num, text, type Params, type Prototype, type Step } from '../types';
-import { otvetShag, vopros } from '../podskazka';
+import { vopros, zapisShag } from '../podskazka';
 import { setka } from './vizual5';
 import { shtuk, tex, texInt, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -227,11 +227,7 @@ const P03: Prototype = prototip({
         `Сложить: $${a} + ${b}$`,
         `Вычесть из ста: $100 - ${a}$`,
       ]),
-      otvetShag(`Чему равна вероятность? $\\dfrac{${a - b}}{100} = \\ ?$`, otvet03(p), [
-        tochnee(1 - p1),
-        tochnee(1 - p2),
-        tochnee(p1 * p2),
-      ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -440,11 +436,7 @@ const P13: Prototype = prototip({
         [`$${b}$`, `$${100 - a}$`],
         `Тяжелее ${aa} г — $${b}$ буханок, остальные легче.`,
       ),
-      otvetShag(
-        `Чему равна вероятность? $\\dfrac{100 - ${100 - a} - ${100 - b}}{100} = \\ ?$`,
-        otvet04(p),
-        [tochnee(p1 * p2), tochnee(1 - p1), tochnee(Math.abs(p1 - p2))],
-      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -583,11 +575,7 @@ const P11: Prototype = prototip({
         [`$${texInt(z1)}$`, `$${texInt(neispr)}$`],
         `$${texInt(neispr)} \\cdot ${tex(q1)} = ${texInt(z1)}$, $${texInt(ispr)} \\cdot ${tex(q2)} = ${texInt(z2)}$.`,
       ),
-      otvetShag(
-        `Чему равна вероятность? $\\dfrac{${texInt(z1 + z2)}}{${texInt(BAZA)}} = \\ ?$`,
-        (z1 + z2) / BAZA,
-        [z1 / BAZA, q, z2 / BAZA],
-      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [

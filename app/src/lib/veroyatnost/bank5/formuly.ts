@@ -10,7 +10,7 @@
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, text, type Params, type Prototype } from '../types';
-import { chislo, otvetShag, vopros } from '../podskazka';
+import { chislo, vopros, zapisShag } from '../podskazka';
 import { bezRisunka } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -93,11 +93,11 @@ const P01: Prototype = prototip({
         'Сложить: $p_1 + p_2$',
         ['Перемножить: $p_1 \\cdot p_2$', 'Вычесть из единицы: $1 - p_1 - p_2$'],
       ),
-      otvetShag(`Чему равна вероятность? $${tex(p1)} + ${tex(p2)} = \\ ?$`, tochnee(p1 + p2), [
-        tochnee(p1 * p2),
-        tochnee(1 - p1 - p2),
-        tochnee(Math.abs(p1 - p2)),
+      vopros('Какое выражение даёт ответ?', `$${tex(p1)} + ${tex(p2)}$`, [
+        `$${tex(p1)} \\cdot ${tex(p2)}$`,
+        `$1 - ${tex(p1)} - ${tex(p2)}$`,
       ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -189,11 +189,11 @@ const P02: Prototype = prototip({
         'Из единицы вычесть данную: $1 - p$',
         ['Взять ту же вероятность: $p$', 'Умножить на себя: $p \\cdot p$'],
       ),
-      otvetShag(`Чему равна вероятность? $1 - ${tex(q)} = \\ ?$`, tochnee(1 - q), [
-        q,
-        tochnee(q * q),
-        tochnee(1.1 - q),
+      vopros('Какое выражение даёт ответ?', `$1 - ${tex(q)}$`, [
+        `$${tex(q)}$`,
+        `$${tex(q)} \\cdot ${tex(q)}$`,
       ]),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -278,13 +278,12 @@ const P04: Prototype = prototip({
       vopros(
         `Чему равна вероятность «хотя бы в одном»? $${tex(q)} + ${tex(q)} - ${tex(q12)} = \\ ?$`,
         chislo(hotyaBy),
-        [chislo(tochnee(2 * q)), chislo(tochnee(q * q)), chislo(tochnee(2 * q + q12))],
+        /* Неверное число, совпавшее с ответом задачи, назвало бы ответ. */
+        [tochnee(2 * q), tochnee(q * q), tochnee(2 * q + q12)]
+          .filter((x) => x !== tochnee(1 - hotyaBy))
+          .map(chislo),
       ),
-      otvetShag(
-        `Чему равна вероятность, что кофе останется в обоих? $1 - ${tex(hotyaBy)} = \\ ?$`,
-        tochnee(1 - hotyaBy),
-        [hotyaBy, tochnee(1 - 2 * q), tochnee(1 - q12)],
-      ),
+      zapisShag('десятичная', null),
     ];
   },
   varianty: [
@@ -384,9 +383,7 @@ const P12: Prototype = prototip({
   podskazka: (p) => {
     const pp = veroyatnost(p, 'p');
     const q = veroyatnost(p, 'q');
-    const k = naimensheeK(pp, q);
     const promah = tochnee(1 - pp);
-    const pred = tochnee(1 - promah ** (k - 1));
     return [
       vopros(
         'Когда стрелок не поразит цель за $k$ выстрелов?',
@@ -401,11 +398,15 @@ const P12: Prototype = prototip({
         'Поразить цель — противоположное событие к «промахнуться все $k$ раз».',
       ),
       vopros(
-        `Хватит ли ${k - 1} ${k - 1 === 1 ? 'патрона' : 'патронов'}? $1 - ${tex(promah)}^{${k - 1}} = ${tex(pred)}$`,
-        `Нет: $${tex(pred)} < ${tex(q)}$`,
-        [`Да: $${tex(pred)} \\ge ${tex(q)}$`],
+        `Как найти наименьшее $k$, при котором вероятность не меньше $${tex(q)}$?`,
+        'Перебирать $k = 1, 2, 3, \\ldots$, пока вероятность не дотянет до порога',
+        [
+          `Решить $1 - ${tex(promah)}^{k} = ${tex(q)}$ и округлить вниз`,
+          `Разделить: $k = ${tex(q)} : ${tex(pp)}$`,
+        ],
+        'С каждым патроном вероятность растёт; нужен первый $k$, где она не меньше порога.',
       ),
-      otvetShag('Какое наименьшее число патронов нужно дать стрелку?', k, [k - 1, k + 1]),
+      zapisShag('целое', null),
     ];
   },
   varianty: [
