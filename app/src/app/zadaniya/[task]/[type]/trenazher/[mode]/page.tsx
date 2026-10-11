@@ -61,7 +61,13 @@ export default async function Page({ params }: { params: Params }) {
           <TrainerShell
             subtopic={subtopic}
             base={`${base}/trenazher/`}
-            preset={{ skill: found.skills[0] ?? null, skills: found.skills, mode: found.mode }}
+            preset={{
+              skill: found.skills[0] ?? null,
+              skills: found.skills,
+              mode: found.mode,
+              ...(found.rules === undefined ? {} : { rules: found.rules }),
+              ...(found.filter === undefined ? {} : { filter: found.filter }),
+            }}
           />
         }
       />

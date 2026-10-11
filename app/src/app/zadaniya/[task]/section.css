@@ -67,6 +67,46 @@
 .section-head__media {
   position: relative;
 }
+/* ── Верхний блок с иллюстрацией задания ─────────────────────────
+   Только у заданий с полем hero в конфиге (№12); остальные — прежний
+   график справа. Компьютер: колонка до 460px, картинка по центру,
+   без рамки и подложки (фон у неё прозрачный). */
+.section-head--hero {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  gap: var(--space-8);
+}
+.section-head--hero .section-head__media {
+  display: grid;
+  justify-items: center;
+}
+.zadanie-hero {
+  display: block;
+  width: 100%;
+}
+.zadanie-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Очень медленное «парение»: transform, без нагрузки на раскладку. */
+  animation: zadanie-hero-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes zadanie-hero-float {
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zadanie-hero img {
+    animation: none;
+    will-change: auto;
+  }
+}
+.section-head--hero .section-head__note {
+  text-align: center;
+  margin-top: var(--space-1);
+}
+
 /* Надпись стоит под чертежом и смещена вправо: положение задаёт
    страница, сам компонент себя не позиционирует. */
 .section-head__note {
@@ -245,6 +285,25 @@ a.subtopic:hover {
   .section-head__media {
     max-width: 320px;
   }
+  /* Планшет и телефон: компактная картинка под заголовком, чтобы
+     список разделов не уезжал вниз. */
+  .section-head--hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+  .section-head--hero .section-head__media {
+    max-width: none;
+  }
+  .section-head--hero .zadanie-hero {
+    width: auto;
+    max-width: 100%;
+    height: 200px;
+  }
+  .section-head--hero .zadanie-hero img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
   .subtopics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -253,6 +312,17 @@ a.subtopic:hover {
 @media (max-width: 767.98px) {
   .subtopics-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Телефон: картинка ниже, подпись скрыта, анимации нет (батарея). */
+  .section-head--hero .zadanie-hero {
+    height: 170px;
+  }
+  .section-head--hero .zadanie-hero img {
+    animation: none;
+    will-change: auto;
+  }
+  .section-head--hero .section-head__note {
+    display: none;
   }
   .section-head__note {
     text-align: left;

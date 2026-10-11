@@ -35,7 +35,17 @@ export type TrainerShortcutId =
   | 'koefficienty'
   | 'znachenie'
   | 'formula'
-  | 'peresechenie';
+  | 'peresechenie'
+  | 'abscissa-line'
+  | 'abscissa-parabola'
+  | 'ordinate-line'
+  | 'ordinate-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'value-at'
+  | 'argument-for';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -49,6 +59,14 @@ export interface TrainerShortcut {
    */
   skills: string[];
   mode: TrainerModeId;
+  /**
+   * Правила ответа (answerRule движка), которыми ярлык сужает наборы:
+   * например, в 12Q.H только задачи на абсциссу второй точки. Не
+   * задано — все задачи наборов.
+   */
+  rules?: string[];
+  /** Что оставил фильтр: строка над конфигуратором. */
+  filter?: string;
 }
 
 const LINEAR_SHORTCUTS: TrainerShortcut[] = [
@@ -80,6 +98,49 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
     mode: 'mixed',
   },
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+  /* Ярлыки по одному набору: «В тренажёре» из разборов основных типов
+     задач на вкладке «О задании» (content/quadraticBasics.ts). */
+  { id: 'sign-a', title: 'Знак старшего коэффициента', skills: ['12Q.A'], mode: 'practice' },
+  { id: 'value-a', title: 'Значение старшего коэффициента', skills: ['12Q.B'], mode: 'practice' },
+  { id: 'value-c', title: 'Свободный член', skills: ['12Q.C'], mode: 'practice' },
+  { id: 'value-b', title: 'Средний коэффициент', skills: ['12Q.D'], mode: 'practice' },
+  { id: 'value-at', title: 'Значение функции', skills: ['12Q.E'], mode: 'practice' },
+  { id: 'argument-for', title: 'Аргумент по значению', skills: ['12Q.F'], mode: 'practice' },
+  /* Ссылки «Потренироваться» из разборов на вкладке «О задании»
+     (content/quadraticTypes.ts): тот же набор, но только задачи
+     того же типа — абсцисса или ордината второй точки. */
+  {
+    id: 'abscissa-line',
+    title: 'Парабола и прямая: абсцисса',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'abscissa-parabola',
+    title: 'Две параболы: абсцисса',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-line',
+    title: 'Парабола и прямая: ордината',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-parabola',
+    title: 'Две параболы: ордината',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
 ];
 
 /* Гипербола: те же связки действий — значение и аргумент, коэффициенты

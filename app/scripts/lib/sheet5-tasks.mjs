@@ -43,6 +43,7 @@ function lib() {
       bank: requireSrc('lib/veroyatnost/index'),
       modeli: requireSrc('lib/veroyatnost/model-zadachi'),
       model: requireSrc('lib/veroyatnost/model'),
+      metody: requireSrc('lib/veroyatnost/metody5'),
       types: requireSrc('lib/veroyatnost/types'),
       list: requireSrc('content/veroyatnost'),
     };
@@ -170,13 +171,23 @@ function mathSpan(tex) {
 }
 
 export function recap() {
-  const { model } = lib();
+  const { metody } = lib();
   return {
     title: content.recap.title,
     items: content.recap.methods.map((item) => {
-      const opisanie = model.metodPoId(item.id);
+      /* Название — с сайта, из того же списка методов, что и вкладка
+         «Ключевые методы решения»: в PDF и на сайте оно одно. Формула —
+         метода, а если у метода её нет, — записанная в пункте. */
+      const metod = metody.METODY_5.find((m) => m.id === item.metod);
+      if (!metod) {
+        throw new Error('в «Повторяем» метод ' + item.metod + ' не найден среди методов сайта');
+      }
+      const tex = item.formula ?? metod.formula;
+      if (!tex) {
+        throw new Error('в «Повторяем» у метода ' + item.metod + ' нет формулы');
+      }
       /* В одну строку пункта — дробь текстового кегля, а не выключная. */
-      return typo.escape(item.name) + ' — ' + mathSpan(opisanie.formula.replace(/\\dfrac/g, '\\frac'));
+      return typo.escape(metod.nazvanie) + ' — ' + mathSpan(tex.replace(/\\dfrac/g, '\\frac'));
     }),
     phrase: content.recap.phrase,
   };
