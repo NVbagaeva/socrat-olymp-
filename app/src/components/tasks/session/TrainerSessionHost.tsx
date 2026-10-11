@@ -471,7 +471,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     setAvailable(ok);
     if (ok) {
       /* Записи прежних версий и старые ключи тренажёров — прочь. */
-      sweepStaleSessions();
+      sweepStaleSessions(scope);
       void resume();
     }
     return () => {
