@@ -1108,7 +1108,7 @@ const P927 = proto({
     const mm = m > 0 ? `+${m}` : String(m);
     const pryamaya = `y=${kk}x${mm}`;
     const aa = a === 1 ? '' : a === -1 ? '-' : String(a);
-    const bb = b > 0 ? `+${b}` : String(b);
+    const bb = b === 1 ? '+' : b === -1 ? '-' : b > 0 ? `+${b}` : String(b);
     const parabola = `y=${aa}x^{2}${bb}x+c`;
     const f0 = a * x0 * x0 + b * x0;
     const uslovie = `Прямая $${pryamaya}$ является касательной к графику функции $${parabola}$. Найдите $c$.`;

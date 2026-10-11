@@ -336,6 +336,26 @@ export const razneOtvety = new Map<string, number>();
 /** Частоты ответов прототипа в последнем прогоне генераторов: «возможные» ответы для проверки банка. */
 export const chastotyOtvetov = new Map<string, Map<number, number>>();
 
+/**
+ * Формулы условия и разбора, где перед переменной стоит единица:
+ * «2x^2+1x», «-1t». Единицу перед буквой не пишут. Смотрим только
+ * внутри $…$: «1» перед латинской буквой, без цифры, точки, запятой
+ * или обратной косой черты перед ней.
+ */
+function edinichnyeKoefficienty(t: Generated): string[] {
+  const texts = [t.uslovie, ...t.shagi.flatMap((s) => [s.zagolovok, ...s.stroki])];
+  const out: string[] = [];
+  for (const text of texts) {
+    for (const [, formula] of text.matchAll(/\$([^$]+)\$/g)) {
+      const m = /(?<![\d.,\\}])1(?=[a-z])/.exec(formula ?? '');
+      if (m !== null) {
+        out.push(formula as string);
+      }
+    }
+  }
+  return out;
+}
+
 /** Генераторы: ответ из данных узлов совпадает с заложенным, рисунок и тексты чисты. */
 export function checkGenerators(
   seeds: number,
@@ -377,6 +397,9 @@ export function checkGenerators(
       }
       if (Math.abs(t.proverka - t.otvet) > 1e-6) {
         problems.push({ where, what: `независимый счёт ${t.proverka} ≠ ${t.otvet}` });
+      }
+      for (const bad of edinichnyeKoefficienty(t)) {
+        problems.push({ where, what: `коэффициент 1 перед переменной: «${bad}»` });
       }
       answers.set(t.otvet, (answers.get(t.otvet) ?? 0) + 1);
       signatures.add(t.signature);
