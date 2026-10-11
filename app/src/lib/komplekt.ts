@@ -193,9 +193,12 @@ export function sheetFingerprint(spec: SpecLike): string {
   return fnv(
     specTasks(spec)
       .map((task) =>
-        [task.questionHtml ?? '', task.figureSvg ?? '', JSON.stringify(task.options ?? null), task.answer ?? ''].join(
-          '\u0001',
-        ),
+        [
+          task.questionHtml ?? '',
+          task.figureSvg ?? '',
+          JSON.stringify(task.options ?? null),
+          task.answer ?? '',
+        ].join('\u0001'),
       )
       .join('\u0002'),
   );
@@ -295,10 +298,24 @@ export function sameKit(a: Kit | null, b: Kit | null): boolean {
   );
 }
 
+/* Кто хочет знать о скачанных комплектах, кроме «Моих комплектов»:
+   аккаунт репетитора (lib/auth/kits.ts) пишет код в базу. Здесь только
+   список слушателей — модуль не знает ни о React, ни о сервисе входа. */
+const rememberListeners = new Set<(kit: Kit) => void>();
+
+/** Подписка на rememberKit. Возвращает отписку. */
+export function onKitRemembered(listener: (kit: Kit) => void): () => void {
+  rememberListeners.add(listener);
+  return () => {
+    rememberListeners.delete(listener);
+  };
+}
+
 /** Комплект в историю: тот же код — запись обновляется и поднимается. */
 export function rememberKit(kit: Kit): Kit {
   const stamped: Kit = { ...kit, createdAt: kit.createdAt ?? new Date().toISOString() };
   saveKits([stamped, ...loadKits().filter((item) => item.code !== kit.code)]);
+  rememberListeners.forEach((listener) => listener(stamped));
   return stamped;
 }
 

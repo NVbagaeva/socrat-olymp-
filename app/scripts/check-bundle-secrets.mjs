@@ -25,6 +25,11 @@
    analogov/ — исключения: они служебные,
    помечена noindex и показывает ответы намеренно.
 
+   Отдельно, во всех файлах сборки, ищутся ключи сервиса входа: JWT с
+   ролью service_role, ключи sb_secret_…, значение
+   SUPABASE_SERVICE_ROLE_KEY и адреса из ALLOWED_EMAILS, если список
+   передан в окружение проверки (lib/auth/config.ts).
+
    Ненулевой код возврата — в сборке лежит то, чего там быть не должно.
 */
 
@@ -427,12 +432,57 @@ function okna(text, id) {
   return out;
 }
 
+/* ── Ключи сервиса входа ────────────────────────────────────────
+   В сборку может уходить только публичный ключ проекта Supabase (anon /
+   publishable): он для того и сделан. Секретный ключ service_role
+   открывает базу в обход правил доступа, и его в браузере быть не
+   должно никогда. Ищем: токены с ролью service_role (JWT с «role»:
+   «service_role» в полезной нагрузке), новые секретные ключи
+   «sb_secret_…», а также пароли и адреса из списка разрешённых —
+   если ALLOWED_EMAILS передан в окружение проверки. */
+function klyuchiServisa(text) {
+  const found = [];
+  if (/sb_secret_[A-Za-z0-9_-]{10,}/.test(text)) {
+    found.push('секретный ключ sb_secret_…');
+  }
+  for (const m of text.matchAll(
+    /eyJ[A-Za-z0-9_-]{10,}\.(eyJ[A-Za-z0-9_-]{10,})\.[A-Za-z0-9_-]{10,}/g,
+  )) {
+    try {
+      const payload = JSON.parse(Buffer.from(m[1], 'base64url').toString('utf8'));
+      if (payload.role === 'service_role') {
+        found.push('JWT с ролью service_role');
+      }
+    } catch {
+      /* не JWT — не ключ */
+    }
+  }
+  if (/SUPABASE_SERVICE_ROLE_KEY\s*[:=]\s*["'][^"']{8,}/.test(text)) {
+    found.push('значение SUPABASE_SERVICE_ROLE_KEY');
+  }
+  const adresa = (process.env.ALLOWED_EMAILS ?? '')
+    .split(',')
+    .map((a) => a.trim().toLowerCase())
+    .filter((a) => a.includes('@'));
+  for (const adres of adresa) {
+    if (text.toLowerCase().includes(adres)) {
+      found.push('адрес из ALLOWED_EMAILS');
+    }
+  }
+  return found;
+}
+
 const bad = [];
 let oknaVsego = 0;
 for (const file of files) {
   const rel = path.relative(outDir, file);
   const text = raskryt(fs.readFileSync(file, 'utf8'));
   const problemy = [];
+
+  /* Ключи сервиса входа — во всех файлах сборки. */
+  for (const k of klyuchiServisa(text)) {
+    problemy.push(`ключ сервиса входа: ${k}`);
+  }
 
   /* След целого банка. */
   const fields = FIELDS.filter((f) => text.includes(f));

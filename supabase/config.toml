@@ -1,0 +1,74 @@
+# Локальный запуск Supabase (`supabase start`) для ручной проверки писем:
+# письма ловит встроенный почтовый ящик Mailpit на http://127.0.0.1:54324.
+# Настройки повторяют то, что выставляется в панели облачного проекта
+# (docs/AUTH.md). Секретов здесь нет.
+
+project_id = "budetege-auth-trial"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 100
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:4181"
+additional_redirect_urls = [
+  "http://127.0.0.1:4181/voyti/podtverzhdenie/",
+  "http://127.0.0.1:4181/voyti/novyy-parol/",
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# Регистрация открыта в службе, но хук before_user_created пускает
+# только адреса из allowed_emails (supabase/migrations).
+enable_signup = true
+enable_anonymous_sign_ins = false
+minimum_password_length = 8
+password_requirements = ""
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+secure_password_change = false
+# Письмо на один адрес — не чаще раза в минуту.
+max_frequency = "1m"
+otp_length = 6
+otp_expiry = 86400
+
+[auth.email.template.confirmation]
+subject = "Подтвердите почту — Будет на ЕГЭ"
+content_path = "./supabase/templates/confirm-signup.html"
+
+[auth.email.template.recovery]
+subject = "Сброс пароля — Будет на ЕГЭ"
+content_path = "./supabase/templates/reset-password.html"
+
+[auth.email.template.email_change]
+subject = "Подтвердите новую почту — Будет на ЕГЭ"
+content_path = "./supabase/templates/change-email.html"
+
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/auth_hooks/before_user_created"
+
+[auth.rate_limit]
+email_sent = 2
+sign_in_sign_ups = 30
+token_refresh = 150
+token_verifications = 30

@@ -23,8 +23,11 @@ export const site = {
     { label: 'Тарифы', href: '#' },
   ] satisfies SiteLink[],
 
+  /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
+     появляется только при включённом флаге (lib/auth/config.ts). Раздела
+     с тарифами пока нет — «Начать бесплатно» без входа ведёт в никуда,
+     со входом — на регистрацию. */
   headerActions: {
-    login: { label: 'Войти', href: '#' } satisfies SiteLink,
     signup: { label: 'Начать бесплатно', href: '#' } satisfies SiteLink,
   },
 
