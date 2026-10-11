@@ -20,6 +20,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import generator from '../src/lib/graph/generate.js';
+import { requireSrc } from './lib/load-ts.mjs';
 import { HIDDEN_VARIANTS, INTERSECTION_CHECKS, checkLabels, checkQuadraticComposition,
          checkQuadraticSolution, checkQuadraticTask, hiddenVariantCounts, intersectionAudit,
          rescuedLabels, solutionShape } from './lib/graph-quadratic-checks.mjs';
@@ -160,6 +161,33 @@ for (const set of QUADRATIC_SETS) {
     });
   }
 }
+
+/* ── Чертёж разбора в теории ─────────────────────────────────────
+   Пример «находим c по точке» стоит не в наборах, а в сцене теории,
+   и его числа нигде больше не проверяются. Здесь — подстановкой:
+   отмеченная точка обязана лежать на параболе, а её пересечение
+   с осью Oy — быть за рамкой, иначе пример не про то. */
+const { quadraticTheoryScene } = requireSrc('lib/scenes');
+const razbor = quadraticTheoryScene('c-by-point');
+const krivaya = razbor.curves[0];
+const tochka = razbor.points[0];
+const vOkne = (y) => y >= razbor.window.ymin && y <= razbor.window.ymax;
+const znachenie = (x) => krivaya.a * x * x + krivaya.b * x + krivaya.c;
+
+if (znachenie(tochka.x) !== tochka.y) {
+  errors.push(`теория, сцена c-by-point: точка (${tochka.x}; ${tochka.y}) не лежит на параболе ` +
+    `y = ${krivaya.a}x² + ${krivaya.b}x + ${krivaya.c}: подстановка даёт ${znachenie(tochka.x)}`);
+}
+if (vOkne(krivaya.c)) {
+  errors.push(`теория, сцена c-by-point: пересечение с Oy (0; ${krivaya.c}) попало в окно — ` +
+    'пример перестал быть про случай, когда его не видно');
+}
+if (!Number.isInteger(krivaya.c) || !Number.isInteger(tochka.x) || !Number.isInteger(tochka.y)) {
+  errors.push('теория, сцена c-by-point: c и координаты точки должны быть целыми');
+}
+report.push(`  теория, сцена c-by-point: y = ${krivaya.a}x² + ${krivaya.b}x + ${krivaya.c}, ` +
+  `точка ${tochka.label}(${tochka.x}; ${tochka.y}) на параболе, c = ${krivaya.c} за рамкой ` +
+  `(окно ${razbor.window.ymin}…${razbor.window.ymax})`);
 
 console.log('graph/check-graph-quadratic');
 report.forEach((line) => console.log(line));

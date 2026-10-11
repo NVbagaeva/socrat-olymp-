@@ -155,8 +155,6 @@ export interface PoolKind {
   /** Блок задачника: по нему фильтруют чипы. */
   blok: string;
   blokTitle: string;
-  /** Диапазон номеров задачника, откуда собран прототип. */
-  zadachnik: readonly [number, number];
   /** Строка об источнике в шапке карточки. */
   istochnik: string;
   variants: PoolVariant[];
@@ -306,18 +304,15 @@ function kindOf(prototype: Prototype, zadanie: string): PoolKind {
   if (blok === undefined) {
     throw new Error(`У прототипа ${prototype.id} неизвестный блок ${prototype.blok}`);
   }
-  /* Нулевой диапазон — прототип составлен не по задачнику. */
-  const izZadachnika = prototype.zadachnik[0] > 0;
   return {
     id: prototype.id,
     title: prototype.nazvanie,
     tip: prototype.tip,
     blok: blok.id,
     blokTitle: blok.nazvanie,
-    zadachnik: prototype.zadachnik,
-    istochnik: izZadachnika
-      ? `Прототип задания ${zadanie} · задачи ${prototype.zadachnik[0]}–${prototype.zadachnik[1]}`
-      : `Прототип задания ${zadanie} · составлено по схеме автора`,
+    /* Номера сборника, по которому собран прототип, — служебные
+       (sourceRange) и на экран не выводятся. */
+    istochnik: `Прототип задания ${zadanie}`,
     variants: prototype.varianty.map((variant) => variantPool(prototype, variant)),
   };
 }
@@ -454,10 +449,10 @@ export interface UznayVariant {
 }
 
 export interface UznayKind {
-  /** Идентификатор прототипа или задачи конспекта. */
+  /** Идентификатор прототипа или опорной задачи. */
   id: string;
   /** Откуда задача: подпись в шапке карточки. */
-  istochnik: 'prototip' | 'konspekt';
+  istochnik: 'prototip' | 'opornaya';
   variants: UznayVariant[];
 }
 
@@ -529,7 +524,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
       return [
         {
           id: zadacha.id,
-          istochnik: 'konspekt',
+          istochnik: 'opornaya',
           variants: [
             uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok),
           ],
