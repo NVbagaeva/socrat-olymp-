@@ -946,6 +946,7 @@ export type QuadraticTheorySceneId =
   | 'a-step'
   | 'c-read'
   | 'c-offscreen'
+  | 'c-by-point'
   | 'vertex-formula'
   | 'b-sign'
   | 'path-vertex'
@@ -990,6 +991,11 @@ function pointLabel(x: number, y: number) {
 
 function mark(x: number, y: number, labelled = false, color = 'lineA') {
   return { x, y, style: 'solid', color, label: labelled ? pointLabel(x, y) : null };
+}
+
+/** Точка с именем вместо координат: «A». */
+function namedPoint(x: number, y: number, name: string, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: name };
 }
 
 function dashedSegment(from: [number, number], to: [number, number], color = 'accent') {
@@ -1124,6 +1130,16 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
           ...arrow([2.0, 3.4], [1.5, 5.8]),
           note('(0; c) за кадром', [0.6, 4.6], [-40, 0]),
         ],
+      };
+
+    /* 3а. Тот же чертёж, что и выше, с отмеченной точкой A(3; 2):
+       по ней в разборе находят c = 23. Кроме A на чертеже не отмечено
+       ничего — вершину (5; −2) ученик читает по сетке. */
+    case 'c-by-point':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, 5, -2)],
+        points: [namedPoint(3, 2, 'A')],
       };
 
     /* 4. Формула вершины: y = x² − 6x + 5, вершина (3; −4). */

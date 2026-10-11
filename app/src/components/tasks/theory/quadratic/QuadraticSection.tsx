@@ -42,6 +42,7 @@ function Card({
         'qth-card',
         (card.scene !== undefined || card.illustration !== undefined) && 'qth-card--chart',
         card.forward === true && 'qth-card--forward',
+        card.steps !== undefined && 'qth-card--razbor',
       )}
     >
       <h4 className="qth-card__title">
@@ -105,6 +106,40 @@ function Card({
             </tbody>
           </table>
         ) : null}
+
+        {card.steps !== undefined ? (
+          /* Разбор по шагам: нумерация своя, счётчиком — так номер
+             остаётся и когда шаг начинается с выкладки. */
+          <ol className="qth-steps">
+            {card.steps.map((step) => (
+              <li className="qth-step" key={step.title}>
+                <p className="qth-step__title">
+                  <Phrases parts={phrases(step.title)} />
+                </p>
+                <p className="qth-card__p">
+                  <Phrases parts={phrases(step.text)} />
+                </p>
+                {step.lines !== undefined ? (
+                  <div className="qth-card__lines">
+                    {step.lines.map((line) => (
+                      <span
+                        className="qth-card__line"
+                        key={line}
+                        dangerouslySetInnerHTML={formula(line)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        ) : null}
+
+        {card.after !== undefined ? (
+          <p className="qth-card__p qth-card__after">
+            <Phrases parts={phrases(card.after)} />
+          </p>
+        ) : null}
       </div>
 
       {card.scene !== undefined ? (
@@ -133,7 +168,10 @@ function Card({
               decoding="async"
             />
           )}
-          <figcaption className="qth-illustration__caption">{card.illustration.caption}</figcaption>
+          {/* Подпись с формулами $…$ — тем же набором, что и текст карточки. */}
+          <figcaption className="qth-illustration__caption">
+            <Phrases parts={phrases(card.illustration.caption)} />
+          </figcaption>
         </figure>
       ) : null}
     </li>
