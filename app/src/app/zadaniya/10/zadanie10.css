@@ -630,6 +630,74 @@
   align-self: flex-start;
 }
 
+/* Опорные: картинка сюжета рядом с условием, «Где пригодится». */
+.z10-op__uslovie.is-s-kartinkoy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.z10-op__syuzhet {
+  margin: 0;
+}
+
+.z10-op__syuzhet img {
+  max-height: 180px;
+}
+
+.z10-op__syuzhet figcaption {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm, 0.875rem);
+}
+
+@media (max-width: 640px) {
+  .z10-op__uslovie.is-s-kartinkoy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.z10-op__gde {
+  margin-top: var(--space-6);
+}
+
+.z10-op__gde-spisok {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.z10-op__gde-karta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font-size: var(--text-sm, 0.875rem);
+  text-decoration: none;
+}
+
+.z10-op__gde-karta:hover {
+  border-color: var(--color-primary);
+}
+
+.z10-op__gde-karta img {
+  max-height: 100px;
+  margin-inline: auto;
+}
+
+.z10-op-karta__ill img {
+  max-height: 120px;
+  margin-inline: auto;
+}
+
 /* ── Генератор и репетиторы ── */
 .z10-gen,
 .z10-rep {

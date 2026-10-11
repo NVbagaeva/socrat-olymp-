@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { useState, useSyncExternalStore } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import type { MikroDlyaBrauzera } from '@/lib/zadanie10/opornye';
+import type { IllInfo } from './Zadacha10';
 import { answerMatches } from '@/lib/zadanie10/secret';
 
 const KLYUCH = 'budetege:zadanie-10:opornye:v1';
@@ -72,7 +73,23 @@ export function ReshenoVBloke({ ids }: { ids: string[] }) {
  * короткий разбор после ответа. Сверху — плашка «Запомни» с правилом
  * блока (формулы — здесь, а не на карточке блока).
  */
-export function Opornye10({ zapomni, zadachi }: { zapomni: string; zadachi: MikroDlyaBrauzera[] }) {
+/**
+ * Блок опорных задач. У задачи с сюжетом (SYUZHET_OPORNOY) рядом с
+ * условием — картинка сюжета и ссылка на разбор прототипа, где эта
+ * формула встречается.
+ */
+export function Opornye10({
+  zapomni,
+  zadachi,
+  kartinki,
+  syuzhety,
+}: {
+  zapomni: string;
+  zadachi: MikroDlyaBrauzera[];
+  kartinki: Record<string, IllInfo>;
+  /** Прототип → название и адрес разбора. */
+  syuzhety: Record<string, { title: string; href: string }>;
+}) {
   const [i, setI] = useState(0);
   const itogi = useItogi();
   const [vvod, setVvod] = useState('');
@@ -82,6 +99,8 @@ export function Opornye10({ zapomni, zadachi }: { zapomni: string; zadachi: Mikr
   if (z === undefined) {
     return null;
   }
+  const ill = z.syuzhet ? kartinki[z.syuzhet] : undefined;
+  const syuzhet = z.syuzhet ? syuzhety[z.syuzhet] : undefined;
   const pereyti = (k: number) => {
     setI(k);
     setVvod('');
@@ -112,9 +131,29 @@ export function Opornye10({ zapomni, zadachi }: { zapomni: string; zadachi: Mikr
         ))}
       </ol>
       <article className="z10-zadacha">
-        <p className="z10-uslovie__text">
-          <Tex text={z.uslovie} />
-        </p>
+        <div className={clsx('z10-op__uslovie', ill ? 'is-s-kartinkoy' : '')}>
+          <p className="z10-uslovie__text">
+            <Tex text={z.uslovie} />
+          </p>
+          {ill && syuzhet ? (
+            <figure className="z10-op__syuzhet">
+              <picture className="z10-ill">
+                <source type="image/webp" srcSet={ill.webp} />
+                <img
+                  src={ill.png}
+                  alt={ill.alt}
+                  width={ill.width}
+                  height={ill.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <figcaption>
+                Где встречается: <a href={syuzhet.href}>{syuzhet.title}</a>
+              </figcaption>
+            </figure>
+          ) : null}
+        </div>
         <form
           className="z10-otvet"
           onSubmit={(e) => {

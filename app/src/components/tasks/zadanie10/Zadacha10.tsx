@@ -47,7 +47,7 @@ export interface Itog10 {
  * Состояние поля и подсказок сбрасывается сменой задачи: родитель
  * передаёт key={z.id}.
  *
- * Задача тренажёра: картинка сюжета (свёрнута) над условием, чертёж
+ * Задача тренажёра: картинка сюжета справа от условия (её можно свернуть), чертёж
  * моста у П-01, поле ответа, подсказки-вопросы, разбор после ответа.
  * Ответ сверяется с отпечатком — числа ответа в странице нет.
  */
@@ -75,18 +75,26 @@ export function Zadacha10({
         {z.source === 'fipi' ? `Задача ФИПИ №${z.no ?? ''}` : 'Не из открытого банка'}
         {z.modern ? ' · современный сюжет' : ''}
       </p>
-      {ill ? (
-        <details className="z10-ill__svernuto">
-          <summary>Картинка к задаче</summary>
-          <picture className="z10-ill">
-            <source type="image/webp" srcSet={ill.webp} />
-            <img src={ill.png} alt={ill.alt} width={ill.width} height={ill.height} loading="lazy" />
-          </picture>
-        </details>
-      ) : null}
-      <p className="z10-uslovie__text">
-        <Tex text={z.text} />
-      </p>
+      <div className={clsx('z10-op__uslovie', ill ? 'is-s-kartinkoy' : '')}>
+        <p className="z10-uslovie__text">
+          <Tex text={z.text} />
+        </p>
+        {ill ? (
+          <details className="z10-ill__svernuto z10-op__syuzhet" open>
+            <summary>Картинка к задаче</summary>
+            <picture className="z10-ill">
+              <source type="image/webp" srcSet={ill.webp} />
+              <img
+                src={ill.png}
+                alt={ill.alt}
+                width={ill.width}
+                height={ill.height}
+                loading="lazy"
+              />
+            </picture>
+          </details>
+        ) : null}
+      </div>
       {z.prototypeId === 'P01' ? (
         <Most10 params={z.params} rezhim={otkryt ? 'uchitel' : 'uchenik'} />
       ) : null}

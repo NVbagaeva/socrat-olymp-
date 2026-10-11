@@ -509,11 +509,58 @@ export function blokPoSlugu(slug: string): BlokOpornyh | undefined {
   return BLOKI_OPORNYH.find((b) => b.slug === slug);
 }
 
+/**
+ * Сюжет опорной задачи: прототип, в котором встречается именно эта
+ * формула или ситуация. Рядом с задачей показываем картинку сюжета и
+ * ссылку на разбор прототипа. Чисто вычислительные задачи без сюжета
+ * (перевод единиц, табличные углы) картинки не получают.
+ */
+export const SYUZHET_OPORNOY: Record<string, string> = {
+  'pod-1': 'P01',
+  'pod-2': 'P01',
+  'pod-3': 'P01',
+  'pod-4': 'P01',
+  'pod-5': 'P04',
+  'pod-6': 'P05',
+  'pod-7': 'P06',
+  'pod-8': 'P11',
+  'pod-9': 'P27',
+  'pod-10': 'P02',
+  'kor-1': 'P11',
+  'kor-3': 'P16',
+  'kor-4': 'P17',
+  'kor-5': 'P14',
+  'kor-6': 'P12',
+  'kor-7': 'P13',
+  'kor-8': 'P21',
+  'kor-9': 'P14',
+  'kor-10': 'P11',
+  'ner-1': 'P14',
+  'ner-2': 'P17',
+  'ner-5': 'P17',
+  'ner-6': 'P14',
+  'ner-10': 'P14',
+  'st-1': 'P19',
+  'st-3': 'P20',
+  'st-4': 'P21',
+  'st-5': 'P21',
+  'st-6': 'P18',
+  'st-10': 'P19',
+  'log-1': 'P22',
+  'log-5': 'P22',
+  'log-6': 'P22',
+  'tr-9': 'P26',
+};
+
 /** Задача для браузера: ответ — отпечатком. */
 export interface MikroDlyaBrauzera extends Omit<MikroZadacha, 'answer'> {
   seal: string;
+  syuzhet?: string;
 }
 
 export function opornyeDlyaBrauzera(b: BlokOpornyh): MikroDlyaBrauzera[] {
-  return b.zadachi.map(({ answer, ...rest }) => ({ ...rest, seal: sealAnswer(answer) }));
+  return b.zadachi.map(({ answer, ...rest }) => {
+    const syuzhet = SYUZHET_OPORNOY[rest.id];
+    return { ...rest, seal: sealAnswer(answer), ...(syuzhet ? { syuzhet } : {}) };
+  });
 }
