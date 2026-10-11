@@ -4,7 +4,8 @@
  * Цвета — только из палитры сайта (styles/tokens.css), в шейдер они
  * вписаны числами:
  *   голубое стекло  --blue-300 #9bc0f2, --blue-200 #d7e5fa, --blue-100 #e8f0fc,
- *                   --blue-400 #5d8ce8, --ice #f5f9ff;
+ *                   --blue-400 #5d8ce8, --ice #f5f9ff; толща кристалла —
+ *                   --blue-600 #1f5fd0 (основной синий сайта);
  *   контур          --navy-900 #0b1f45;
  *   тёплый акцент   --terracotta #e07a2f — рёбра, тычинки, сердцевина;
  *                   в самых ярких местах он выгорает до белого.
@@ -17,6 +18,7 @@
 const PALETTE = /* glsl */ `
 const vec3 GOLD = vec3(0.878, 0.478, 0.184);
 const vec3 HOT = vec3(1.0, 0.86, 0.66);
+const vec3 BLUE600 = vec3(0.122, 0.373, 0.816);
 const vec3 BLUE400 = vec3(0.365, 0.549, 0.910);
 const vec3 BLUE300 = vec3(0.608, 0.753, 0.949);
 const vec3 BLUE200 = vec3(0.843, 0.898, 0.980);
@@ -82,6 +84,19 @@ uniform vec3 uCore;
 uniform float uCoreI;
 uniform float uAlpha;
 uniform float uTime;
+#ifdef PLATE
+uniform mat4 uModel;
+uniform vec2 uTriA;
+uniform vec2 uTriB;
+uniform vec2 uTriC;
+/* Тонкая линия вдоль отрезка a–b в координатах пластины. */
+float seg(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return smoothstep(0.012, 0.0, length(pa - ba * h));
+}
+#endif
 #ifdef REFRACT
 uniform sampler2D uBack;
 uniform vec2 uRes;
@@ -106,30 +121,45 @@ void main() {
   float key = 0.6 + 0.4 * max(dot(N, normalize(vec3(-0.35, 0.85, 0.45))), 0.0);
 
 #ifdef PLATE
-  /* Кристалл: прозрачное голубое стекло, внутренние отражения — блики
-     по возмущённой нормали и тонкие линии граней внутри пластины. */
+  /* Кристалл, огранённый как камень (слои 0 и 2b): грань разбита
+     лучами из центра к вершинам и серединам сторон на шесть сколов.
+     Нормаль каждого скола наклонена по-своему — сколы бликуют
+     по-разному; сами лучи — тонкие светлые линии внутри стекла. */
   vec2 q = vExtra.xy;
-  float side = vExtra.z;
-  vec3 N2 = normalize(N + 0.45 * vec3(sin(q.x * 9.0 + side), sin(q.y * 11.0 - side), cos((q.x - q.y) * 7.0)));
-  vec3 inner = env(reflect(-V, N2));
+  vec2 c = (uTriA + uTriB + uTriC) / 3.0;
+  vec2 d = q - c;
+  float a0 = atan(uTriA.y - c.y, uTriA.x - c.x);
+  float rel = mod(atan(d.y, d.x) - a0, 6.28319);
+  float sector = floor(rel / 1.0472);
+  float sa = a0 + (sector + 0.5) * 1.0472;
+  vec3 ax = normalize(mat3(uModel)[0]);
+  vec3 ay = normalize(mat3(uModel)[1]);
+  float lean = mod(sector, 2.0) < 0.5 ? 0.42 : 0.22;
+  vec3 N2 = normalize(N + lean * (cos(sa) * ax + sin(sa) * ay));
+  vec3 gem = env(reflect(-V, N2));
   float lines = 0.0;
-  for (int i = 0; i < 3; i++) {
-    float a = float(i) * 2.0944 + 0.35;
-    float d = dot(q, vec2(cos(a), sin(a))) * 4.4 + side * 0.31 + float(i) * 0.17;
-    lines += smoothstep(0.035, 0.0, abs(fract(d) - 0.5));
-  }
-  float shimmer = 0.55 + 0.45 * sin(dot(V, vec3(13.0, 7.0, 11.0)) + uTime * 0.6);
-  float a = clamp(0.38 + 0.45 * F, 0.0, 1.0);
-  /* Глубокий синий в толще, светлый — на гранях к зрителю: «кристалл». */
-  float facet = 0.5 + 0.5 * sin(dot(N2, vec3(5.0, 3.0, 4.0)) + side);
-  vec3 body = mix(BLUE400 * 0.8, BLUE200, (0.15 + 0.5 * ndv) * (0.6 + 0.4 * facet));
-  /* Длинный блик-полоса по грани: «стеклянная» диагональ кадра 1. */
-  float streak = smoothstep(0.8, 1.0, sin(dot(q, vec2(2.3, 1.4)) * 2.2 + side * 1.3 + dot(V, vec3(2.0, 1.0, 0.0))));
-  vec3 col = body * a * key * 0.75
-    + spec * F * 0.55
-    + inner * a * 0.12
-    + ICE * streak * a * 0.35
-    + ICE * lines * 0.16 * shimmer
+  vec2 mAB = (uTriA + uTriB) * 0.5;
+  vec2 mBC = (uTriB + uTriC) * 0.5;
+  vec2 mCA = (uTriC + uTriA) * 0.5;
+  lines = max(lines, seg(q, c, uTriA));
+  lines = max(lines, seg(q, c, uTriB));
+  lines = max(lines, seg(q, c, uTriC));
+  lines = max(lines, seg(q, c, mAB) * 0.7);
+  lines = max(lines, seg(q, c, mBC) * 0.7);
+  lines = max(lines, seg(q, c, mCA) * 0.7);
+  lines = max(lines, seg(q, mAB, mBC) * 0.5);
+  lines = max(lines, seg(q, mBC, mCA) * 0.5);
+  lines = max(lines, seg(q, mCA, mAB) * 0.5);
+  float a = clamp(0.68 + 0.27 * F, 0.0, 1.0);
+  /* Насыщенный синий в толще, светлее на сколах, обращённых к зрителю. */
+  float ndv2 = clamp(dot(N2, V) * sign(dot(N, V)), 0.0, 1.0);
+  vec3 body = mix(BLUE600, BLUE300, 0.1 + 0.65 * ndv2 * ndv2);
+  float glint = smoothstep(0.9, 1.35, max(gem.r, max(gem.g, gem.b)));
+  vec3 col = body * a * key * 0.8
+    + spec * F * 0.45
+    + gem * a * 0.22
+    + vec3(1.0) * glint * a * 0.7
+    + ICE * lines * (gl_FrontFacing ? 0.28 : 0.08)
     + HOT * warm * 0.45 * (0.5 + 0.5 * abs(dot(N, L)));
   /* Тонкий тёмно-синий контур у самого края силуэта. */
   col = mix(col, NAVY * a, smoothstep(0.93, 1.0, 1.0 - ndv) * 0.25);
@@ -200,7 +230,7 @@ void main() {
   /* По ребру бегут мягкие волны яркости — «живой» свет. */
   float run = 0.85 + 0.15 * sin(vExtra.x * 6.0 - uTime * 2.2 + vExtra.y * 2.0);
   /* Сердцевина линии почти белая с золотом, ореол — терракотовый. */
-  vec3 col = GOLD * 1.15 + HOT * 0.45 + vec3(0.25) * pow(ndv, 3.0);
+  vec3 col = GOLD * 1.55 + HOT * 0.2 + vec3(0.2) * pow(ndv, 3.0);
   /* Немного кроющей альфы: на светлой странице золото не бледнеет. */
   o = vec4(col * uI * dim * run, 0.45 * uI * dim);
 }

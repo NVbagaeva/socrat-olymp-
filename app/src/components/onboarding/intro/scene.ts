@@ -310,9 +310,9 @@ class Scene implements IntroScene {
     const upperTri = UPPER_TRI;
     this.lowerPlate = g.mesh(plateGeometry(lowerTri, 0.045, 0.07), gl.TRIANGLES);
     this.upperPlate = g.mesh(plateGeometry(upperTri, 0.045, 0.07), gl.TRIANGLES);
-    this.lowerEdges = g.mesh(edgeGeometry(lowerTri, 0.017), gl.TRIANGLES);
+    this.lowerEdges = g.mesh(edgeGeometry(lowerTri, 0.021), gl.TRIANGLES);
     /* Ребро сгиба у верхней грани общее с нижней — его рисует нижняя. */
-    this.upperEdges = g.mesh(edgeGeometry(upperTri, 0.017, [0]), gl.TRIANGLES);
+    this.upperEdges = g.mesh(edgeGeometry(upperTri, 0.021, [0]), gl.TRIANGLES);
 
     this.petals = PETALS.map((spec) => {
       const geo = petalGeometry(spec.shape, d.petalU, d.petalV);
@@ -443,7 +443,7 @@ class Scene implements IntroScene {
     const cameraWorld = eye;
 
     /* Пластины граней. */
-    const plates: { m: Mat4; mesh: Mesh; edges: Mesh; center: Vec3 }[] = [];
+    const plates: { m: Mat4; mesh: Mesh; edges: Mesh; center: Vec3; tri: typeof LOWER_TRI }[] = [];
     let sp = 0;
     const spark = (p: Vec3, i: number) => {
       this.sparkData.set(p, sp * 3);
@@ -459,12 +459,14 @@ class Scene implements IntroScene {
         m: mL,
         mesh: this.lowerPlate,
         edges: this.lowerEdges,
+        tri: LOWER_TRI,
         center: transformPoint(mL, [0, (OCTA_FACE_H * 2) / 3, 0]),
       });
       plates.push({
         m: mU,
         mesh: this.upperPlate,
         edges: this.upperEdges,
+        tri: UPPER_TRI,
         center: transformPoint(mU, [0, OCTA_FACE_H / 3, 0]),
       });
       /* В собранном октаэдре углы соседних ромбов совпадают: второй угол
@@ -502,7 +504,7 @@ class Scene implements IntroScene {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     this.uploadSparkExtra();
 
-    const halo = Math.exp(-((t - 0.2) ** 2) * 14) * (1 - span(t, 0.5, 1.0));
+    const halo = Math.exp(-((t - 0.12) ** 2) * 30) * (1 - span(t, 0.2, 0.45)) * 0.7;
     const flare = smooth(span(t, 0.2, 0.8)) * (0.85 + 0.25 * coreI);
 
     const common = { uViewProj: viewProj, uCam: cameraWorld, uTime: t };
@@ -578,7 +580,14 @@ class Scene implements IntroScene {
       glassItems.push({
         depth: project(viewProj, p.center)[2],
         draw: () => {
-          g.use(this.plateGlass, { ...glassCommon, uModel: p.m, uAlpha: reveal });
+          g.use(this.plateGlass, {
+            ...glassCommon,
+            uModel: p.m,
+            uAlpha: reveal,
+            uTriA: p.tri[0],
+            uTriB: p.tri[1],
+            uTriC: p.tri[2],
+          });
           this.twoSided(p.mesh);
         },
       });
@@ -618,7 +627,8 @@ class Scene implements IntroScene {
 
     /* Золотые рёбра поверх стекла. */
     const edgeI = smooth(span(t, 0.15, 0.75)) * (1 + 0.2 * coreI);
-    const backDim = 0.3 + 0.7 * smooth(span(t, 0.8, 1.6));
+    /* Задние рёбра собранного октаэдра почти не видны (слой 0). */
+    const backDim = 0.1 + 0.9 * smooth(span(t, 0.8, 1.6));
     gl.enable(gl.CULL_FACE);
     for (const p of plates) {
       g.use(this.edge, { ...common, uModel: p.m, uI: edgeI, uBackDim: backDim });
