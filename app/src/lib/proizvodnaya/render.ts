@@ -328,6 +328,15 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     for (const u of fig.uzly) {
       polyline.push({ x: u.x, y: u.y });
     }
+  } else if (fig.analitika !== undefined && first !== undefined && last !== undefined) {
+    /* Кривая по формуле (теория): частая выборка, ломаная неотличима от кривой. */
+    const y = fig.analitika;
+    const n = Math.max(2, Math.round((hi - lo) * 40));
+    for (let i = 0; i <= n; i += 1) {
+      const x = lo + ((hi - lo) * i) / n;
+      polyline.push({ x, y: y(x) });
+    }
+    pathD = polyline.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(sx(p.x))} ${px(sy(p.y))}`).join('');
   } else if (fig.uzly.length >= 2) {
     const spl = postroit(fig.uzly);
     pathD = `M${px(sx(lo))} ${px(sy((first as { y: number }).y))}`;
@@ -336,7 +345,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       const b = fig.uzly[i + 1] as { x: number; y: number };
       const h = b.x - a.x;
       const m0 = spl.m[i] as number;
-      const m1 = spl.m[i + 1] as number;
+      /* Излом: отрезок приходит в узел со своим наклоном слева (mL). */
+      const m1 = (b as { mL?: number }).mL ?? (spl.m[i + 1] as number);
       pathD += `C${px(sx(a.x + h / 3))} ${px(sy(a.y + (h / 3) * m0))} ${px(sx(b.x - h / 3))} ${px(sy(b.y - (h / 3) * m1))} ${px(sx(b.x))} ${px(sy(b.y))}`;
     }
     for (let x = lo; x <= hi + 1e-9; x += 0.1) {
@@ -472,6 +482,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     pref: Napr;
     /** Точка на дуге, от которой к подписи идёт выноска. */
     vynoska?: [number, number];
+    /** Отступы от точки привязки; по умолчанию 0, 6 и 12 px. */
+    offs?: number[];
   }[] = [];
   for (const item of aux) {
     switch (item.t) {
@@ -502,6 +514,224 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       case 'tochka':
         auxDots.push({ x: item.x, y: item.y, fill: V.aux });
         break;
+      case 'liniya': {
+        /* Прямая через две точки, продлённая до рамки окна. */
+        const [ax, ay] = item.a;
+        const [bx, by] = item.b;
+        const blednaya = item.vid === 'blednaya';
+        const stroke = blednaya ? V.aux : V.curve;
+        const w = blednaya ? V.dashWidth : V.tangentWidth;
+        let p1: [number, number];
+        let p2: [number, number];
+        if (Math.abs(bx - ax) < 1e-9) {
+          p1 = [ax, win.ymin];
+          p2 = [ax, win.ymax];
+        } else {
+          const k = (by - ay) / (bx - ax);
+          const yAt = (x: number) => ay + k * (x - ax);
+          const xs = [win.xmin, win.xmax];
+          if (Math.abs(k) > 1e-9) {
+            xs.push(ax + (win.ymin - ay) / k, ax + (win.ymax - ay) / k);
+          }
+          const inside = xs
+            .filter((x) => x >= win.xmin - 1e-9 && x <= win.xmax + 1e-9)
+            .filter((x) => yAt(x) >= win.ymin - 1e-9 && yAt(x) <= win.ymax + 1e-9)
+            .sort((p, q) => p - q);
+          const xa = inside[0] ?? win.xmin;
+          const xb = inside[inside.length - 1] ?? win.xmax;
+          p1 = [xa, yAt(xa)];
+          p2 = [xb, yAt(xb)];
+        }
+        layers.aux.push(
+          `<path class="pr-liniya${blednaya ? ' pr-liniya--bled' : ''}" d="M${px(sx(p1[0]))} ${px(sy(p1[1]))}L${px(sx(p2[0]))} ${px(sy(p2[1]))}" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round"${blednaya ? ` stroke-opacity="0.55"` : ''}/>`,
+        );
+        for (let i = 0; i < 30; i += 1) {
+          const q1 = [p1[0] + ((p2[0] - p1[0]) * i) / 30, p1[1] + ((p2[1] - p1[1]) * i) / 30];
+          const q2 = [
+            p1[0] + ((p2[0] - p1[0]) * (i + 1)) / 30,
+            p1[1] + ((p2[1] - p1[1]) * (i + 1)) / 30,
+          ];
+          obstacles.push({
+            seg: {
+              x1: sx(q1[0] as number),
+              y1: sy(q1[1] as number),
+              x2: sx(q2[0] as number),
+              y2: sy(q2[1] as number),
+            },
+            r: w / 2,
+            what: 'прямая',
+          });
+        }
+        if (item.podpis !== undefined && item.podpis !== '') {
+          /* Подпись у верхнего (правого) конца прямой, чуть внутри рамки. */
+          const verhniy = p2[1] >= p1[1] ? p2 : p1;
+          const end = item.podpisU === 'niz' ? (verhniy === p2 ? p1 : p2) : verhniy;
+          const other = end === p2 ? p1 : p2;
+          const t = 0.88;
+          /* Сбоку от прямой, а не на ней: у возрастающей — справа снизу,
+             у убывающей — слева снизу, у вертикальной — справа. */
+          const vert = Math.abs(end[0] - other[0]) < 1e-9;
+          const rastyot = !vert && (end[1] - other[1]) / (end[0] - other[0]) > 0;
+          auxLabels.push({
+            text: item.podpis,
+            x: sx(other[0] + (end[0] - other[0]) * t),
+            y: sy(other[1] + (end[1] - other[1]) * t),
+            kind: 'liniya',
+            id: `прямая ${item.podpis}`,
+            fill: stroke,
+            offs: [8, 16, 26, 36],
+            /* Поперёк прямой: у возрастающей вправо-вниз, у убывающей влево-вниз. */
+            pref: vert ? 'right' : rastyot ? 'below-right' : 'below-left',
+          });
+        }
+        if (item.ugol !== undefined && Math.abs(by - ay) > 1e-9) {
+          /* Угол с положительным направлением Ox — там, где прямая пересекает ось. */
+          const x0 = Math.abs(bx - ax) < 1e-9 ? ax : ax - (ay * (bx - ax)) / (by - ay);
+          if (x0 > win.xmin && x0 < win.xmax) {
+            let deg = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+            if (deg < 0) {
+              deg += 180;
+            }
+            const r = 30;
+            const cx = sx(x0);
+            layers.aux.push(
+              `<path class="pr-ugol" d="${duga(cx, axisX, r, 0, deg)}" fill="none" stroke="${stroke}" stroke-width="2.4" stroke-linecap="round"/>`,
+            );
+            const mid = ((deg / 2) * Math.PI) / 180;
+            auxLabels.push({
+              text: item.ugol,
+              x: cx + (r + 13) * Math.cos(mid),
+              y: axisX - (r + 13) * Math.sin(mid),
+              kind: 'alpha',
+              id: `угол ${item.ugol}`,
+              fill: stroke,
+              pref: 'above-right',
+            });
+          }
+        }
+        break;
+      }
+      case 'prirashchenie': {
+        /* Приращения: катеты от точки (x1; f(x1)) к точке (x2; f(x2)). */
+        const y1 = f.y(item.x1);
+        const y2 = f.y(item.x2);
+        const P = [sx(item.x1), sy(y1)];
+        const Q = [sx(item.x2), sy(y2)];
+        const A = [sx(item.x2), sy(y1)];
+        const pun = (d: string, what: string, seg: Seg) => {
+          layers.aux.push(
+            `<path class="pr-aux" d="${d}" fill="none" stroke="${V.aux}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
+          );
+          obstacles.push({ seg, r: 1, what });
+        };
+        /* Пунктиры к осям. */
+        pun(`M${px(P[0] as number)} ${px(P[1] as number)}V${px(axisX)}`, 'пунктир', {
+          x1: P[0] as number,
+          y1: P[1] as number,
+          x2: P[0] as number,
+          y2: axisX,
+        });
+        pun(`M${px(Q[0] as number)} ${px(A[1] as number)}V${px(axisX)}`, 'пунктир', {
+          x1: Q[0] as number,
+          y1: A[1] as number,
+          x2: Q[0] as number,
+          y2: axisX,
+        });
+        pun(`M${px(P[0] as number)} ${px(P[1] as number)}H${px(axisY)}`, 'пунктир', {
+          x1: P[0] as number,
+          y1: P[1] as number,
+          x2: axisY,
+          y2: P[1] as number,
+        });
+        pun(`M${px(Q[0] as number)} ${px(Q[1] as number)}H${px(axisY)}`, 'пунктир', {
+          x1: Q[0] as number,
+          y1: Q[1] as number,
+          x2: axisY,
+          y2: Q[1] as number,
+        });
+        /* Катеты сплошные, треугольник подкрашен. */
+        layers.aux.push(
+          `<path class="pr-tri" d="M${px(P[0] as number)} ${px(P[1] as number)}L${px(Q[0] as number)} ${px(Q[1] as number)}L${px(A[0] as number)} ${px(A[1] as number)}Z" fill="${V.aux}" fill-opacity="0.1" stroke="none"/>`,
+          `<path class="pr-tri-legs" d="M${px(P[0] as number)} ${px(P[1] as number)}H${px(A[0] as number)}V${px(Q[1] as number)}" fill="none" stroke="${V.aux}" stroke-width="2.2"/>`,
+        );
+        obstacles.push(
+          {
+            seg: { x1: P[0] as number, y1: P[1] as number, x2: A[0] as number, y2: A[1] as number },
+            r: 1.1,
+            what: 'катет Δx',
+          },
+          {
+            seg: { x1: A[0] as number, y1: A[1] as number, x2: Q[0] as number, y2: Q[1] as number },
+            r: 1.1,
+            what: 'катет Δf',
+          },
+        );
+        const vverh = y2 > y1;
+        auxLabels.push(
+          {
+            text: item.dx ?? 'Δx',
+            x: ((P[0] as number) + (A[0] as number)) / 2,
+            y: (A[1] as number) + (vverh ? 14 : -14),
+            kind: 'leg',
+            id: 'катет Δx',
+            fill: V.aux,
+            pref: vverh ? 'below' : 'above',
+          },
+          {
+            text: item.dy ?? 'Δf',
+            x: (A[0] as number) + 18,
+            y: ((A[1] as number) + (Q[1] as number)) / 2,
+            kind: 'leg',
+            id: 'катет Δf',
+            fill: V.aux,
+            pref: 'right',
+          },
+        );
+        if (item.vershina !== undefined) {
+          auxLabels.push({
+            text: item.vershina,
+            x: (A[0] as number) + 12,
+            y: (A[1] as number) + (vverh ? 12 : -12),
+            kind: 'tochka',
+            id: `вершина ${item.vershina}`,
+            fill: V.aux,
+            pref: vverh ? 'below-right' : 'above-right',
+          });
+        }
+        /* Подписи на осях. */
+        const osi = item.osi ?? {};
+        const naOsiX = (text: string | undefined, x: number) => {
+          if (text !== undefined && text !== '') {
+            auxLabels.push({
+              text,
+              x,
+              y: axisX + 16,
+              kind: 'os',
+              id: `ось ${text}`,
+              fill: THEME.colors.axis,
+              pref: 'below',
+            });
+          }
+        };
+        const naOsiY = (text: string | undefined, y: number) => {
+          if (text !== undefined && text !== '') {
+            auxLabels.push({
+              text,
+              x: axisY - textWidth(text, V.helper.size) / 2 - 10,
+              y,
+              kind: 'os',
+              id: `ось ${text}`,
+              fill: THEME.colors.axis,
+              pref: 'left',
+            });
+          }
+        };
+        naOsiX(osi.x1, P[0] as number);
+        naOsiX(osi.x2, Q[0] as number);
+        naOsiY(osi.y1, P[1] as number);
+        naOsiY(osi.y2, Q[1] as number);
+        break;
+      }
       case 'otrezok': {
         layers.aux.push(
           `<path class="pr-aux-seg" d="M${px(sx(item.p))} ${px(axisX)}H${px(sx(item.q))}" fill="none" stroke="${V.aux}" stroke-opacity="0.55" stroke-width="9" stroke-linecap="butt"/>`,
@@ -750,6 +980,14 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       [axisY + V.tick.origin, axisX + V.tick.gapX, 'start'],
       [axisY - V.tick.origin, axisX - 8, 'end'],
       [axisY + V.tick.origin, axisX - 8, 'start'],
+      /* Рисунок теории: запас, когда у начала координат сходятся линии
+         (излом, прямые через начало) — ниже оси по центру и дальше влево. */
+      ...(fig.teoriya === true
+        ? ([
+            [axisY + zeroW / 2, axisX + V.tick.gapX + 8, 'end'],
+            [axisY - V.tick.origin - 12, axisX + V.tick.gapX, 'end'],
+          ] as [number, number, 'end' | 'start'][])
+        : []),
     ];
     let best: { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number } | null =
       null;
@@ -847,7 +1085,8 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       continue;
     }
     const forced = obyaz.has(x);
-    const wantIt = forced || chislaX === 'vse' || x === 1 || auxZasechki.has(x);
+    const wantIt =
+      forced || chislaX === 'vse' || (chislaX === 'minimum' && x === 1) || auxZasechki.has(x);
     if (!wantIt) {
       continue;
     }
@@ -879,7 +1118,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     if (y === 0) {
       continue;
     }
-    if (!(chislaY === 'vse' || y === 1)) {
+    if (!(chislaY === 'vse' || (chislaY === 'minimum' && y === 1))) {
       continue;
     }
     const text = (y < 0 ? THEME.minus : '') + String(Math.abs(y));
@@ -1041,7 +1280,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         9,
         { x: sx(item.x), y: sy(item.y) },
         ['above-right', 'below-right', 'above-left'],
-        [10, 18],
+        fig.teoriya === true ? [10, 18, 26] : [10, 18],
       );
       layers.labels.push(
         svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }),
@@ -1071,7 +1310,15 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   for (const al of auxLabels) {
     const halfW = textWidth(al.text, V.helper.size) / 2 + 3;
     const halfH = V.helper.size * 0.55;
-    const b = place(al.id, al.kind, halfW, halfH, { x: al.x, y: al.y }, [al.pref], [0, 6, 12]);
+    const b = place(
+      al.id,
+      al.kind,
+      halfW,
+      halfH,
+      { x: al.x, y: al.y },
+      [al.pref],
+      al.offs ?? (fig.teoriya === true ? [0, 6, 12, 20] : [0, 6, 12]),
+    );
     if (al.vynoska !== undefined) {
       /* Выноска: от середины дуги к краю подписи. */
       const [vx, vy] = al.vynoska;

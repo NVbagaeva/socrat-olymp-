@@ -33,6 +33,10 @@ import {
   pravilaOtvetov,
 } from './bankPravila';
 import { klassFormy, otpechatokZadachi } from './otpechatokRisunka';
+import { PONYATIE_9 } from '@/content/theoryPonyatie9';
+import { renderLuchDvizheniya, type OtchetLucha } from './osDvizheniya';
+import { sceny9Problemy } from './stseny';
+import { MODUL, SEK, SKOROST, galochkaFig, sekushchayaFig } from './stsenyPonyatiya';
 import type { Figura, Generated } from './types';
 import { pointSegDist, rectGap, segRectDist, type Rect, type Seg } from '../vektory/geometry';
 
@@ -721,4 +725,118 @@ export function checkPrep(
     });
   }
   return { prototypes: blocks.length, generated, problems };
+}
+
+/* ── Блок теории «Понятие производной» ──────────────────────────── */
+
+/**
+ * Рисунки, числа и тексты блока «Понятие производной»:
+ *   рисунки сцен теории (все, не только этого блока) и живых рисунков на
+ *   каждом значении слайдера — подписи не пересекаются;
+ *   числа панелей и разобранных примеров совпадают с численным расчётом
+ *   (разностное отношение, производная симметричной разностью);
+ *   каждая формула текстов набирается KaTeX в строгом режиме, вне формул
+ *   нет плоской математики, нет «1x» и «+ −».
+ */
+export function checkPonyatie(
+  typeset: (tex: string) => string,
+  textCheck: TextCheck,
+): { checked: number; problems: Problem[] } {
+  const problems: Problem[] = [];
+  let checked = 0;
+  const p = (where: string, what: string) => problems.push({ where, what });
+
+  /* Рисунки. */
+  for (const what of sceny9Problemy()) {
+    p('сцены теории', what);
+  }
+  const risunok = (where: string, fig: Figura) => {
+    const rep = pustoyOtchet();
+    renderFigura(fig, { rezhim: 'teacher' }, rep);
+    checked += 1;
+    for (const what of rep.problems) p(where, what);
+  };
+  for (const dx of SEK.shkala) {
+    risunok(`секущая Δx=${dx}`, sekushchayaFig(dx, false));
+  }
+  for (const dx of MODUL.shkala) {
+    risunok(`модуль Δx=${dx}`, galochkaFig(dx));
+  }
+  for (const dt of SKOROST.shkala) {
+    const rep: OtchetLucha = { width: 0, height: 0, problems: [] };
+    const s0 = SKOROST.s(SKOROST.t0);
+    renderLuchDvizheniya({ s: s0, ds: SKOROST.s(SKOROST.t0 + dt) - s0 }, rep);
+    checked += 1;
+    for (const what of rep.problems) p(`луч Δt=${dt}`, what);
+  }
+
+  /* Числа. */
+  const blizko = (a: number, b: number, eps = 1e-9) => Math.abs(a - b) <= eps;
+  const proizv = (f: (x: number) => number, x: number) => (f(x + 1e-6) - f(x - 1e-6)) / 2e-6;
+  for (const dx of SEK.shkala) {
+    const otn = (SEK.f(SEK.x0 + dx) - SEK.f(SEK.x0)) / dx;
+    if (!blizko(otn, SEK.tgBeta(dx))) p('секущая', `tg β при Δx=${dx}: ${SEK.tgBeta(dx)} ≠ ${otn}`);
+  }
+  if (!blizko(proizv(SEK.f, SEK.x0), SEK.tgAlpha, 1e-6)) p('касательная', 'tg α ≠ f′(x₀)');
+  for (const dt of SKOROST.shkala) {
+    const otn = (SKOROST.s(SKOROST.t0 + dt) - SKOROST.s(SKOROST.t0)) / dt;
+    if (!blizko(otn, SKOROST.vSr(dt)))
+      p('скорость', `v_ср при Δt=${dt}: ${SKOROST.vSr(dt)} ≠ ${otn}`);
+  }
+  if (!blizko(proizv(SKOROST.s, SKOROST.t0), SKOROST.v, 1e-6)) p('скорость', 'v ≠ s′(t₀)');
+  /* Пример: f(x) = x² в точке 3 — отношение 6 + Δx, предел 6. */
+  const kv = (x: number) => x * x;
+  for (const dx of [1, 0.5, 0.1, 0.001]) {
+    if (!blizko((kv(3 + dx) - kv(3)) / dx, 6 + dx, 1e-9))
+      p('пример x²', `отношение при Δx=${dx} ≠ 6 + Δx`);
+  }
+  if (!blizko(proizv(kv, 3), 6, 1e-6)) p('пример x²', 'f′(3) ≠ 6');
+  /* Модуль: справа 1, слева −1. */
+  for (const dx of MODUL.shkala) {
+    const otn = Math.abs(dx) / dx;
+    if (otn !== (dx > 0 ? 1 : -1)) p('модуль', `Δy/Δx при Δx=${dx}`);
+  }
+
+  /* Тексты: строки с $…$ — текст и формулы; ключи formula/formuly — чистый TeX. */
+  const PLOHO = [
+    { re: /(?<![\d.,\\}])1(?=[a-z])/, what: 'коэффициент 1 перед буквой' },
+    { re: /\+\s*[-−]/, what: '«+ −»' },
+  ];
+  const proverkaTeX = (where: string, tex: string) => {
+    checked += 1;
+    try {
+      typeset(tex);
+    } catch (e) {
+      p(where, `KaTeX: ${(e as Error).message.slice(0, 90)}`);
+    }
+    for (const { re, what } of PLOHO) {
+      if (re.test(tex)) p(where, `${what}: ${tex.slice(0, 60)}`);
+    }
+  };
+  const obhod = (node: unknown, path: string, chistyyTeX: boolean): void => {
+    if (typeof node === 'string') {
+      if (chistyyTeX) {
+        proverkaTeX(path, node);
+        return;
+      }
+      for (const [, f] of node.matchAll(/\$([^$]+)\$/g)) {
+        proverkaTeX(path, f as string);
+      }
+      const plain = node.replace(/\$[^$]+\$/g, ' ').replace(/\*\*/g, '');
+      for (const msg of textCheck(plain)) p(path, msg);
+      return;
+    }
+    if (Array.isArray(node)) {
+      node.forEach((x, i) => obhod(x, `${path}[${i}]`, chistyyTeX));
+      return;
+    }
+    if (node !== null && typeof node === 'object') {
+      for (const [k, v] of Object.entries(node)) {
+        if (k === 'id' || k === 'anchor' || k === 'gruppa' || k === 'fiz' || k === 'geom') continue;
+        obhod(v, `${path}.${k}`, k === 'formula' || k === 'formuly');
+      }
+    }
+  };
+  obhod(PONYATIE_9, 'тексты', false);
+  return { checked, problems };
 }

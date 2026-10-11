@@ -86,6 +86,11 @@ export function funkciya(fig: Figura): { y: (x: number) => number; dy: (x: numbe
     const k = (last.y - first.y) / (last.x - first.x);
     return { y: (x) => first.y + k * (x - first.x), dy: () => k };
   }
+  if (fig.analitika !== undefined) {
+    const y = fig.analitika;
+    const h = 1e-6;
+    return { y, dy: (x) => (y(x + h) - y(x - h)) / (2 * h) };
+  }
   const s = postroit(fig.uzly);
   return { y: (x) => s.y(x), dy: (x) => s.dy(x) };
 }

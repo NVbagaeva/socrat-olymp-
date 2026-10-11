@@ -50,7 +50,17 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
   const active = useActiveSession();
   const [istochnik, setIstochnik] = useIstochnik();
   const first = groups[0];
-  const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
+  /* Ссылка из теории «Где на ЕГЭ»: ?g=II — сразу выбрана нужная группа.
+     На сборке адреса нет — берётся первая группа; экран выбора всё равно
+     появляется только в браузере, когда готова сессия (useActiveSession). */
+  const [selected, setSelected] = useState<string[]>(() => {
+    const g =
+      typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('g');
+    if (g !== null && groups.some((group) => group.id === g)) {
+      return [g];
+    }
+    return first === undefined ? [] : [first.id];
+  });
   const [mode, setMode] = useState<TrainerModeId>('practice');
   const [count, setCount] = useState<number | null>(10);
   const [loading, setLoading] = useState(false);

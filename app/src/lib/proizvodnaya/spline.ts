@@ -113,7 +113,7 @@ export function postroit(uzly: readonly Uzel[]): Splayn {
         (2 * t3 - 3 * t2 + 1) * a.y +
         (t3 - 2 * t2 + t) * h * (m[i] as number) +
         (-2 * t3 + 3 * t2) * b.y +
-        (t3 - t2) * h * (m[i + 1] as number)
+        (t3 - t2) * h * (b.mL ?? (m[i + 1] as number))
       );
     },
     dy(x) {
@@ -127,7 +127,7 @@ export function postroit(uzly: readonly Uzel[]): Splayn {
         ((6 * t2 - 6 * t) * a.y) / h +
         (3 * t2 - 4 * t + 1) * (m[i] as number) +
         ((-6 * t2 + 6 * t) * b.y) / h +
-        (3 * t2 - 2 * t) * (m[i + 1] as number)
+        (3 * t2 - 2 * t) * (b.mL ?? (m[i + 1] as number))
       );
     },
   };

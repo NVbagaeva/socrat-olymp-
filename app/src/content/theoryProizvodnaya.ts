@@ -1,5 +1,5 @@
 /**
- * Теория задания №9 «Производная и первообразная»: шесть разделов.
+ * Теория задания №9 «Производная и первообразная»: семь разделов (первый — «Понятие производной», его тексты в theoryPonyatie9.ts).
  *
  * Здесь только слова и ключи рисунков. Разметка — components/tasks/
  * proizvodnaya/Teoriya9.tsx (те же рамки, шаги, примеры и плашки
@@ -15,6 +15,7 @@
  */
 
 import type { StsenaId } from '@/lib/proizvodnaya/stseny';
+import { PONYATIE_9 } from './theoryPonyatie9';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
 
 const TG = '\\operatorname{tg}';
@@ -108,6 +109,14 @@ export interface PFigure {
   caption?: string;
 }
 
+/** Ссылка на другой раздел теории: текст и якорь (#…). */
+export interface PSsylka {
+  type: 'ssylka';
+  text: string;
+  link: string;
+  anchor: string;
+}
+
 /** Таблица «вопрос — где смотреть». Заголовки и ячейки — со строками $…$. */
 export interface PTable {
   type: 'table';
@@ -126,7 +135,8 @@ export type PBlock =
   | PProto
   | PPair
   | PFigure
-  | PTable;
+  | PTable
+  | PSsylka;
 
 export interface RazdelTeorii9 {
   /** Идентификатор: он же якорь прокрутки. */
@@ -148,6 +158,12 @@ const geometricheskiy: RazdelTeorii9 = {
       paras: [
         'Производная в точке — это **угловой коэффициент касательной**, проведённой к графику в этой точке. Поэтому в задании по рисунку производную не надо вычислять по формулам: достаточно измерить наклон прямой.',
       ],
+    },
+    {
+      type: 'ssylka',
+      text: 'Откуда берётся эта формула — секущая, приращения и предел, — в разделе',
+      link: '«Понятие производной»',
+      anchor: 'z9-0-1',
     },
     {
       type: 'main-formula',
@@ -599,6 +615,12 @@ const fizicheskiy: RazdelTeorii9 = {
       ],
     },
     {
+      type: 'ssylka',
+      text: 'Почему мгновенная скорость — это предел средней скорости, — в разделе',
+      link: '«Понятие производной»',
+      anchor: 'z9-0-1',
+    },
+    {
       type: 'main-formula',
       chip: 'Скорость и ускорение',
       formula: "\\begin{aligned} v(t)&=x'(t)\\\\ a(t)&=v'(t)=x''(t) \\end{aligned}",
@@ -971,7 +993,18 @@ const pervoobraznaya: RazdelTeorii9 = {
   ],
 };
 
+/* ── 0. Понятие производной ───────────────────────────────────────
+   Тело раздела — свой компонент с рамками и живыми рисунками
+   (PonyatieProizvodnoy9.tsx, тексты — theoryPonyatie9.ts); здесь —
+   только место в списке и подпункты «Содержания». */
+const ponyatie: RazdelTeorii9 = {
+  id: PONYATIE_9.razdel.id,
+  title: PONYATIE_9.razdel.title,
+  blocks: [],
+};
+
 export const RAZDELY_TEORII_9: readonly RazdelTeorii9[] = [
+  ponyatie,
   geometricheskiy,
   znakIMonotonnost,
   ekstremumy,
@@ -982,6 +1015,15 @@ export const RAZDELY_TEORII_9: readonly RazdelTeorii9[] = [
 
 /** Подпункты «Содержания»: подразделы с якорями. */
 export function podpunkty9(razdel: RazdelTeorii9): { id: string; title: string }[] {
+  if (razdel.id === PONYATIE_9.razdel.id) {
+    const r = PONYATIE_9.razdely;
+    return [
+      { id: r.zadachi.id, title: `I. ${r.zadachi.title}` },
+      { id: r.proizvodnaya.id, title: `II. ${r.proizvodnaya.title}` },
+      { id: r.net.id, title: `III. ${r.net.title}` },
+      { id: r.ege.id, title: `IV. ${r.ege.title}` },
+    ];
+  }
   const out: { id: string; title: string }[] = [];
   for (const block of razdel.blocks) {
     if (block.type === 'sub') {

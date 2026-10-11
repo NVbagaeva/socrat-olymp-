@@ -14,7 +14,9 @@ import { renderFigura } from '@/lib/proizvodnaya/render';
 import { stsena, type StsenaId } from '@/lib/proizvodnaya/stseny';
 import type { Generated } from '@/lib/proizvodnaya/types';
 import { WarnIcon } from '../theory/VerdictIcons';
+import { PONYATIE_9 } from '@/content/theoryPonyatie9';
 import { FiguraSvg9 } from './FiguraSvg9';
+import { PonyatieProizvodnoy9 } from './PonyatieProizvodnoy9';
 import { Display9, Primer9, PrimerIzZadachi } from './Primer9';
 
 /** Рисунок сцены теории: движок рисует в режиме, заданном сценой. */
@@ -199,6 +201,13 @@ function renderBlock(block: PBlock): ReactNode {
         </figure>
       );
 
+    case 'ssylka':
+      return (
+        <p className="rich-p z9-ssylka">
+          <Tex text={block.text} /> <a href={`#${block.anchor}`}>{block.link}</a>.
+        </p>
+      );
+
     case 'table':
       return (
         <div className="z9-tabl">
@@ -239,7 +248,7 @@ function renderBlock(block: PBlock): ReactNode {
 }
 
 /**
- * Вкладка «Теория» задания №9: шесть разделов подряд и «Содержание»
+ * Вкладка «Теория» задания №9: семь разделов подряд (первый — «Понятие производной») и «Содержание»
  * рядом — та же оболочка, что у теории №2 и №4 (липкая полоса ниже
  * 1024 px, правая колонка на широком экране). Разметка разделов —
  * блоки теории линейной функции: рамка с формулой, шаги, разобранные
@@ -250,11 +259,15 @@ export function Teoriya9({ vkladka }: { vkladka: string }) {
   const tela = Object.fromEntries(
     RAZDELY_TEORII_9.map((razdel) => [
       razdel.id,
-      <div className="rich z9-teoriya" key={razdel.id}>
-        {razdel.blocks.map((block, index) => (
-          <Fragment key={index}>{renderBlock(block)}</Fragment>
-        ))}
-      </div>,
+      razdel.id === PONYATIE_9.razdel.id ? (
+        <PonyatieProizvodnoy9 key={razdel.id} />
+      ) : (
+        <div className="rich z9-teoriya" key={razdel.id}>
+          {razdel.blocks.map((block, index) => (
+            <Fragment key={index}>{renderBlock(block)}</Fragment>
+          ))}
+        </div>
+      ),
     ]),
   );
   const razdely = RAZDELY_TEORII_9.map((razdel) => ({

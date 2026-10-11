@@ -36,3 +36,6 @@ content-source/**/*.pdf
 # app/scripts/check-repo-files.mjs
 _refs/
 *.zip
+
+# Справочные материалы (фото конспектов и т. п.): источник содержания, в git не идут.
+_sources/

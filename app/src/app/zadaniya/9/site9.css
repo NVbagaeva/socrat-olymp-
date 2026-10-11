@@ -597,3 +597,116 @@
 .z9-teoriya > * {
   min-width: 0;
 }
+
+/* ── Понятие производной (PonyatieProizvodnoy9.tsx) ─────────────── */
+
+/* Длинная формула прокручивается внутри своей рамки, а не раздвигает страницу. */
+.z9-ponyatie,
+.z9-ponyatie .rich-sub,
+.z9-ponyatie .ramka__telo,
+.z9-ponyatie .ramka__shag {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Живой рисунок: рисунок над слайдером и числами; на широком экране — рядом. */
+.z9-zhivoy {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-6) 0 0;
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+@media (min-width: 900px) {
+  .z9-zhivoy {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+.z9-zhivoy__ruchki {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.z9-zhivoy__slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.z9-zhivoy__label {
+  font-weight: 700;
+}
+.z9-zhivoy__slider input[type='range'] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--color-primary);
+}
+.z9-zhivoy__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.z9-zhivoy__panel dd {
+  margin: 0;
+}
+.z9-zhivoy__zakon {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Алгоритм в рамке определения — нумерованный список. */
+.ramka__algoritm {
+  margin: 0;
+  padding-left: var(--space-6);
+}
+.ramka__algoritm li + li {
+  margin-top: var(--space-2);
+}
+
+/* Ссылки на другие разделы и «Где это на ЕГЭ». */
+.z9-ssylka a,
+.z9-ponyatie .ramka a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.z9-ege-ssylki {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z9-ege-ssylki li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z9-ege-ssylki a {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.z9-ege-ssylki__note {
+  color: var(--color-text-secondary);
+}
+
+@media print {
+  /* Печать — статичный кадр: слайдер не нужен, рисунок и числа остаются. */
+  .z9-zhivoy__slider input[type='range'] {
+    display: none;
+  }
+  .z9-zhivoy {
+    break-inside: avoid;
+  }
+}

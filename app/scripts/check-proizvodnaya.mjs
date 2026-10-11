@@ -38,7 +38,7 @@ const textCheck = (text) => [
 ];
 
 const seeds = Number(process.argv[2] ?? 200);
-const { checkEngine, checkGenerators, checkBank, checkPrep } = requireSrc(
+const { checkEngine, checkGenerators, checkBank, checkPrep, checkPonyatie } = requireSrc(
   'lib/proizvodnaya/selftest',
 );
 
@@ -82,7 +82,18 @@ console.log(
   `опорные задачи: ${prep.prototypes} блоков, ${prep.generated} задач, проблем ${prep.problems.length}`,
 );
 
-const problems = [...engine.problems, ...gen.problems, ...bankProblems, ...prep.problems];
+const ponyatie = checkPonyatie(typeset, textCheck);
+console.log(
+  `теория «Понятие производной» и сцены: ${ponyatie.checked} рисунков и формул, проблем ${ponyatie.problems.length}`,
+);
+
+const problems = [
+  ...engine.problems,
+  ...gen.problems,
+  ...bankProblems,
+  ...prep.problems,
+  ...ponyatie.problems,
+];
 const shown = new Map();
 for (const p of problems) {
   const key = `${p.where.replace(/#\d+/g, '#N')} — ${p.what.slice(0, 110)}`;

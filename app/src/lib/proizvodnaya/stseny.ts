@@ -11,6 +11,13 @@
 
 import { figura } from './krivye';
 import { pustoyOtchet, renderFigura, type RezhimRisunka } from './render';
+import {
+  galochkaFig,
+  ostrieFig,
+  sekushchayaFig,
+  sekushchieFig,
+  vertikalnayaFig,
+} from './stsenyPonyatiya';
 import type { Figura, Uzel } from './types';
 
 export type StsenaId =
@@ -25,7 +32,12 @@ export type StsenaId =
   | 'F-znak-f'
   | 'F-ekstremumy'
   | 'ploschad-lomanaya'
-  | 'ploschad-parabola';
+  | 'ploschad-parabola'
+  | 'ponyatie-sekushchie'
+  | 'ponyatie-prirashcheniya'
+  | 'ponyatie-vertikalnaya'
+  | 'ponyatie-ostrie'
+  | 'ponyatie-galochka';
 
 export interface Stsena {
   fig: Figura;
@@ -269,12 +281,20 @@ const STSENY: Record<StsenaId, () => Stsena> = {
   'F-ekstremumy': bigFEkstremumy,
   'ploschad-lomanaya': ploschadLomanaya,
   'ploschad-parabola': ploschadParabola,
+  /* Понятие производной (stsenyPonyatiya.ts). */
+  'ponyatie-sekushchie': () => ({ fig: sekushchieFig(), rezhim: 'teacher' }),
+  'ponyatie-prirashcheniya': () => ({ fig: sekushchayaFig(3, true), rezhim: 'teacher' }),
+  'ponyatie-vertikalnaya': () => ({ fig: vertikalnayaFig(), rezhim: 'teacher' }),
+  'ponyatie-ostrie': () => ({ fig: ostrieFig(), rezhim: 'teacher' }),
+  'ponyatie-galochka': () => ({ fig: galochkaFig(), rezhim: 'teacher' }),
 };
 
 export const STSENA_IDS = Object.keys(STSENY) as StsenaId[];
 
 export function stsena(id: StsenaId): Stsena {
-  return STSENY[id]();
+  const s = STSENY[id]();
+  /* Все сцены — рисунки теории: подписям больше мест (render.ts). */
+  return { ...s, fig: { ...s.fig, teoriya: true } };
 }
 
 /** SVG сцены: строка разметки движка. */
