@@ -266,20 +266,21 @@ export function stamenGeometry(
   const idx: number[] = [];
   const golden = Math.PI * (3 - Math.sqrt(5));
   for (let k = 0; k < count; k += 1) {
-    /* Направления — по спирали Ферма внутри конуса: ровно и без кучек. */
+    /* Направления — по спирали Ферма внутри широкого конуса: пучок
+       веером, в середине выше, по краям почти лёжа (слой 5). */
     const f = (k + 0.5) / count;
-    const tilt = Math.sqrt(f) * 1.1;
+    const tilt = Math.sqrt(f) * 1.38;
     const az = k * golden;
-    const len = 0.42 + 0.34 * (1 - f) + rand() * 0.12;
+    const len = 0.5 + 0.32 * (1 - f) + rand() * 0.12;
     const dir: Vec3 = [
       Math.sin(tilt) * Math.sin(az),
       Math.cos(tilt),
       Math.sin(tilt) * Math.cos(az),
     ];
-    const start = madd(root, dir, 0.04);
+    const start = madd(root, dir, 0.05);
     const end = madd(root, dir, len);
     const delay = f * 0.35 + rand() * 0.1;
-    const r = 0.009;
+    const r = 0.012;
     /* Нить. */
     const u = normalize(cross(dir, Math.abs(dir[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0]));
     const v = cross(dir, u);
@@ -306,7 +307,7 @@ export function stamenGeometry(
       );
     }
     /* Шарик. */
-    const br = 0.034 + rand() * 0.01;
+    const br = 0.045 + rand() * 0.018;
     const ballBase = pos.length / 3;
     const lat = detail.ball;
     const lon = detail.ball * 2;
@@ -350,11 +351,13 @@ export function filamentGeometry(count: number, seed: number, points = 72): Geom
   const pos: number[] = [];
   const ext: number[] = [];
   for (let k = 0; k < count; k += 1) {
-    const r = 0.14 + rand() * 0.16;
-    const tiltA = rand() * Math.PI;
+    /* Почти большие круги со слабой волной: вместе — сеточка-шар вокруг
+       ядра (слой 5). */
+    const r = 0.2 + rand() * 0.1;
+    const tiltA = Math.acos(1 - 2 * rand());
     const tiltB = rand() * Math.PI * 2;
-    const wob = 1 + Math.floor(rand() * 3);
-    const wobA = 0.15 + rand() * 0.2;
+    const wob = 2 + Math.floor(rand() * 3);
+    const wobA = 0.06 + rand() * 0.08;
     const n: Vec3 = normalize([
       Math.sin(tiltA) * Math.cos(tiltB),
       Math.cos(tiltA),

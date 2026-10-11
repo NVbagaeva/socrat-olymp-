@@ -124,55 +124,49 @@ const shape = (
   tip,
 });
 
+/** Лепестки одного яруса: [азимут, наклон, длина, ширина, изгиб, кончик]. */
+function tier(
+  start: number,
+  y: number,
+  rows: readonly (readonly [number, number, number, number, number, number])[],
+): PetalSpec[] {
+  return rows.flatMap(([az, tilt, length, width, bend, tip], i) =>
+    (az === 0 || az === 180 ? [az] : [-az, az]).map((a, j) => ({
+      az: a,
+      tilt,
+      start: start + i * 0.07 + j * 0.03,
+      base: [0, y, 0] as Vec3,
+      shape: shape(length, width, bend, 0.24, tip),
+    })),
+  );
+}
+
 /**
- * Три яруса гладких лепестков (кадр 3) и два передних, лежащих чашечкой.
- * Ярусы раскрываются по очереди: внешний, средний, внутренний.
+ * Два яруса гладких лепестков (слои 3 и 4 в docs/mockups/intro/).
+ * Внешний: высокий задний, две пары по бокам — выше и почти лёжа, и
+ * пара передних, лежащих чашечкой. Внутренний — бутон: высокий
+ * центральный, боковые и две пары передних пониже. Ярусы и лепестки
+ * в них раскрываются по очереди.
  */
 const PETALS: readonly PetalSpec[] = [
-  /* Внешний ярус. */
-  ...[-150, -108, -66, 66, 108, 150].map((az, i) => ({
-    az,
-    tilt: 54,
-    start: 2.0 + i * 0.03,
-    base: [0, 0.98, 0] as Vec3,
-    shape: shape(1.52, 1.03, 0.55, 0.22),
-  })),
-  /* Средний ярус. */
-  ...[-140, -95, 95, 140, 180].map((az, i) => ({
-    az,
-    tilt: 32,
-    start: 2.22 + i * 0.03,
-    base: [0, 1.0, 0] as Vec3,
-    shape: shape(1.55, 0.9, 0.35, 0.2),
-  })),
-  /* Передние — лежат вперёд, кончики скруглены. */
-  ...[-30, 30].map((az, i) => ({
-    az,
-    tilt: 64,
-    start: 2.32 + i * 0.04,
-    base: [0, 1.03, 0] as Vec3,
-    shape: shape(1.1, 0.94, 0.8, 0.3, 0.38),
-  })),
-  /* Внутренний ярус: высокий задний и боковые. */
-  { az: 180, tilt: 7, start: 2.5, base: [0, 1.03, 0], shape: shape(1.75, 0.78, 0.08, 0.26) },
-  ...[-122, 122].map((az, i) => ({
-    az,
-    tilt: 16,
-    start: 2.55 + i * 0.03,
-    base: [0, 1.03, 0] as Vec3,
-    shape: shape(1.55, 0.73, 0.12, 0.26),
-  })),
-  ...[-74, 74].map((az, i) => ({
-    az,
-    tilt: 34,
-    start: 2.62 + i * 0.03,
-    base: [0, 1.05, 0] as Vec3,
-    shape: shape(1.05, 0.66, 0.3, 0.26),
-  })),
+  ...tier(2.0, 0.98, [
+    [180, 12, 1.62, 0.95, 0.1, 0.6],
+    [150, 36, 1.52, 0.9, 0.18, 0.6],
+    [112, 66, 1.48, 0.84, 0.22, 0.62],
+    [42, 76, 1.25, 0.84, 0.3, 0.4],
+  ]),
+  ...tier(2.4, 1.04, [
+    [180, 4, 1.5, 0.86, 0.04, 0.6],
+    [140, 16, 1.32, 0.76, 0.1, 0.58],
+    [100, 32, 1.12, 0.72, 0.2, 0.5],
+    /* Передние лежат низко: тычинки видны над ними (слой 1). */
+    [30, 80, 0.85, 0.7, 0.25, 0.38],
+  ]),
 ];
 
-const CORE: Vec3 = [0, 1.36, 0];
-const STAMEN_ROOT: Vec3 = [0, 1.2, 0];
+const PLATE_YAW = 45 * DEG;
+const CORE: Vec3 = [0, 1.4, 0];
+const STAMEN_ROOT: Vec3 = [0, 1.22, 0];
 const OCTA_CENTER: Vec3 = [0, 1, 0];
 const UP: Vec3 = [0, 1, 0];
 
@@ -316,9 +310,9 @@ class Scene implements IntroScene {
     const upperTri = UPPER_TRI;
     this.lowerPlate = g.mesh(plateGeometry(lowerTri, 0.045, 0.07), gl.TRIANGLES);
     this.upperPlate = g.mesh(plateGeometry(upperTri, 0.045, 0.07), gl.TRIANGLES);
-    this.lowerEdges = g.mesh(edgeGeometry(lowerTri, 0.013), gl.TRIANGLES);
+    this.lowerEdges = g.mesh(edgeGeometry(lowerTri, 0.017), gl.TRIANGLES);
     /* Ребро сгиба у верхней грани общее с нижней — его рисует нижняя. */
-    this.upperEdges = g.mesh(edgeGeometry(upperTri, 0.013, [0]), gl.TRIANGLES);
+    this.upperEdges = g.mesh(edgeGeometry(upperTri, 0.017, [0]), gl.TRIANGLES);
 
     this.petals = PETALS.map((spec) => {
       const geo = petalGeometry(spec.shape, d.petalU, d.petalV);
@@ -330,10 +324,10 @@ class Scene implements IntroScene {
       };
     });
     this.stamens = g.mesh(
-      stamenGeometry(STAMEN_ROOT, 38, 7, { seg: 5, ball: d.refract ? 6 : 4 }),
+      stamenGeometry(STAMEN_ROOT, 58, 7, { seg: 6, ball: d.refract ? 8 : 5 }),
       gl.TRIANGLES,
     );
-    this.filaments = g.mesh(filamentGeometry(9, 11), gl.LINES);
+    this.filaments = g.mesh(filamentGeometry(d.refract ? 22 : 14, 11), gl.LINES);
     this.particleMesh = g.mesh(particleGeometry(d.particles, 23), gl.POINTS);
 
     /* Искры: 4 ромба × (нижний угол + 2 угла сгиба + вершина) + кончики лепестков. */
@@ -419,7 +413,7 @@ class Scene implements IntroScene {
     const idle =
       smooth(span(t, T_CARD, T_CARD + 1.2)) * (1 - smooth(span(t, IDLE_STOP_S - 2, IDLE_STOP_S)));
     const yaw =
-      53 * DEG * (1 - easeInOutCubic(span(t, 0, 2.4))) +
+      -16 * DEG * (1 - easeInOutCubic(span(t, 0, 2.4))) +
       0.14 * Math.sin(((t - T_CARD) / 16) * Math.PI * 2) * idle;
     const breath = 1 + 0.014 * Math.sin(((t - T_CARD) / 4.5) * Math.PI * 2) * idle;
     const group = multiply(rotationY(yaw), uniformScale(breath));
@@ -427,8 +421,11 @@ class Scene implements IntroScene {
     /* Проявление октаэдра. */
     const reveal = smooth(span(t, 0.05, 0.7));
     const octaK = 0.9 + 0.1 * easeOutCubic(span(t, 0, 0.8));
+    /* Ромбы — по диагоналям (±45°, ±135°): спереди зигзаг нижних граней,
+       по бокам — шипы верхних (слой 2). В собранном виде к зрителю
+       смотрит вершина экватора, как на кадре 1. */
     const octaM = multiply(
-      group,
+      multiply(group, rotationY(PLATE_YAW)),
       multiply(
         translation(OCTA_CENTER),
         multiply(uniformScale(octaK), translation(scale(OCTA_CENTER, -1))),
@@ -526,7 +523,8 @@ class Scene implements IntroScene {
       gl.enable(gl.BLEND);
       gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       gl.depthMask(false);
-      const filI = smooth(span(t, 1.0, 1.6)) * (1 - 0.6 * smooth(span(t, 2.6, 3.4)));
+      /* Нити разгораются при раскрытии и остаются «сеточкой» вокруг ядра. */
+      const filI = smooth(span(t, 1.0, 1.6)) * (1 - 0.35 * smooth(span(t, 2.6, 3.4)));
       if (filI > 0) {
         g.use(this.line, { ...common, uModel: group, uCore: CORE, uI: filI });
         g.draw(this.filaments);
@@ -602,6 +600,12 @@ class Scene implements IntroScene {
     for (const item of glassItems) item.draw();
     gl.disable(gl.CULL_FACE);
 
+    /* Свет ядра пробивается сквозь лепестки — ещё раз поверх стекла,
+       но под тычинками: иначе он белит золото. */
+    gl.disable(gl.DEPTH_TEST);
+    this.drawSprite(viewProj, right, upv, core, [0.6, 0.6], 0, coreI);
+    gl.enable(gl.DEPTH_TEST);
+
     /* Тычинки — после стекла: лепестки впереди закрывают их по глубине,
        а стекло сзади не белит золото. */
     if (stamenT > 0) {
@@ -621,9 +625,7 @@ class Scene implements IntroScene {
       g.draw(p.edges);
     }
     gl.disable(gl.CULL_FACE);
-    /* Свет ядра пробивается сквозь лепестки — ещё раз поверх стекла. */
     gl.disable(gl.DEPTH_TEST);
-    this.drawSprite(viewProj, right, upv, core, [0.85, 0.85], 0, coreI * 1.1);
 
     /* Частицы и искры. */
     gl.disable(gl.DEPTH_TEST);

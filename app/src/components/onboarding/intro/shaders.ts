@@ -102,7 +102,7 @@ void main() {
   float dc = length(toCore);
   vec3 L = toCore / max(dc, 1e-4);
   /* Тёплый свет ядра просвечивает стекло вблизи сердцевины. */
-  float warm = uCoreI * exp(-dc * 1.9);
+  float warm = uCoreI * exp(-dc * 2.6);
   float key = 0.6 + 0.4 * max(dot(N, normalize(vec3(-0.35, 0.85, 0.45))), 0.0);
 
 #ifdef PLATE
@@ -115,19 +115,21 @@ void main() {
   float lines = 0.0;
   for (int i = 0; i < 3; i++) {
     float a = float(i) * 2.0944 + 0.35;
-    float d = dot(q, vec2(cos(a), sin(a))) * 3.2 + side * 0.31 + float(i) * 0.17;
+    float d = dot(q, vec2(cos(a), sin(a))) * 4.4 + side * 0.31 + float(i) * 0.17;
     lines += smoothstep(0.035, 0.0, abs(fract(d) - 0.5));
   }
   float shimmer = 0.55 + 0.45 * sin(dot(V, vec3(13.0, 7.0, 11.0)) + uTime * 0.6);
   float a = clamp(0.38 + 0.45 * F, 0.0, 1.0);
-  vec3 body = mix(BLUE400 * 0.85, BLUE300, 0.15 + 0.55 * ndv);
+  /* Глубокий синий в толще, светлый — на гранях к зрителю: «кристалл». */
+  float facet = 0.5 + 0.5 * sin(dot(N2, vec3(5.0, 3.0, 4.0)) + side);
+  vec3 body = mix(BLUE400 * 0.8, BLUE200, (0.15 + 0.5 * ndv) * (0.6 + 0.4 * facet));
   /* Длинный блик-полоса по грани: «стеклянная» диагональ кадра 1. */
   float streak = smoothstep(0.8, 1.0, sin(dot(q, vec2(2.3, 1.4)) * 2.2 + side * 1.3 + dot(V, vec3(2.0, 1.0, 0.0))));
   vec3 col = body * a * key * 0.75
     + spec * F * 0.55
     + inner * a * 0.12
     + ICE * streak * a * 0.35
-    + ICE * lines * 0.1 * shimmer
+    + ICE * lines * 0.16 * shimmer
     + HOT * warm * 0.45 * (0.5 + 0.5 * abs(dot(N, L)));
   /* Тонкий тёмно-синий контур у самого края силуэта. */
   col = mix(col, NAVY * a, smoothstep(0.93, 1.0, 1.0 - ndv) * 0.25);
@@ -135,14 +137,28 @@ void main() {
   /* Лепесток: жемчужно-белое стекло с голубым оттенком к кончику и краям. */
   float u = vExtra.x;
   float across = abs(vExtra.y);
-  vec3 body = mix(ICE, BLUE200, clamp(smoothstep(0.3, 1.0, u) * 0.55 + across * across * 0.35, 0.0, 1.0));
-  body = mix(body, BLUE300, F * 0.35);
-  float a = clamp(0.5 + 0.4 * F, 0.0, 1.0);
+  /* Прозрачная голубая линза: середина светлее, к краям и кончику — синее. */
+  vec3 body = mix(BLUE100, BLUE300, clamp(smoothstep(0.25, 1.0, u) * 0.5 + across * across * 0.5, 0.0, 1.0));
+  body = mix(body, BLUE400, F * 0.3);
+  float a = clamp(0.3 + 0.45 * F, 0.0, 1.0);
   float glowIn = warm * (0.55 + 0.45 * abs(dot(N, L))) * (1.0 - 0.6 * u);
-  vec3 col = body * a * mix(0.55, 1.0, key)
-    + spec * F * 0.55
-    + ICE * pow(1.0 - ndv, 2.5) * a * 0.45
-    + mix(HOT, ICE, 0.2) * glowIn * 0.9;
+  /* Огранка внутри лепестка: тонкие диагонали от основания к кончику,
+     как у резного кристалла (слои 3 и 4). */
+  float x = vExtra.y;
+  float cut = 0.0;
+  cut += smoothstep(0.045, 0.0, abs(fract((x * 1.6 + u * 2.4) * 2.0) - 0.5) - 0.44);
+  cut += smoothstep(0.045, 0.0, abs(fract((-x * 1.6 + u * 2.4) * 2.0) - 0.5) - 0.44);
+  cut *= smoothstep(0.02, 0.2, u) * (1.0 - smoothstep(0.85, 1.0, u));
+  /* Золотой ободок по краю лепестка. */
+  /* Край линзы — там, где сечение сходится (sin β → 0): узкая полоса. */
+  float rim = smoothstep(0.9, 1.0, 1.0 - abs(vExtra.z)) * (0.35 + 0.65 * smoothstep(0.1, 0.6, u));
+  vec3 col = body * a * mix(0.5, 1.0, key)
+    + spec * F * 0.6
+    + ICE * pow(1.0 - ndv, 2.5) * a * 0.4
+    + ICE * cut * a * 0.35 * (0.5 + 0.5 * F)
+    + mix(GOLD, HOT, 0.45) * glowIn * 0.55
+    + mix(GOLD, HOT, 0.5) * rim * 1.3;
+  a = max(a, rim * 0.5);
   col = mix(col, NAVY * a, smoothstep(0.96, 1.0, 1.0 - ndv) * 0.18);
 #endif
 
@@ -206,9 +222,13 @@ void main() {
   vec3 V = normalize(uCam - vPos);
   vec3 L = normalize(vec3(-0.4, 0.8, 0.6));
   float diff = max(dot(N, L), 0.0);
-  float spec = pow(max(dot(reflect(-L, N), V), 0.0), 28.0);
+  float spec = pow(max(dot(reflect(-L, N), V), 0.0), 36.0);
+  float ndv = max(dot(N, V), 0.0);
   float nearCore = exp(-length(uCore - vPos) * 3.0);
-  vec3 col = GOLD * (0.7 + 0.9 * diff) + HOT * spec * 1.6 + HOT * nearCore * 1.2;
+  /* Металл: тёмный край, насыщенная середина, белёсый блик (слой 5). */
+  vec3 col = GOLD * (0.3 + 0.95 * diff) * (0.5 + 0.5 * ndv)
+    + mix(GOLD, HOT, 0.6) * spec * 1.8
+    + GOLD * nearCore * 0.5;
   o = vec4(col * uI, uI);
 }
 `;
@@ -241,7 +261,7 @@ uniform float uTime;
 out vec4 o;
 void main() {
   float pulse = 0.55 + 0.45 * sin(vExtra.x * 25.0 - uTime * 3.0 + vExtra.y);
-  o = vec4(mix(GOLD, HOT, 0.5) * 1.6 * uI * pulse, 0.0);
+  o = vec4(mix(GOLD, HOT, 0.3) * 1.8 * uI * pulse, 0.2 * uI);
 }
 `;
 
@@ -330,7 +350,7 @@ void main() {
   vec3 c;
   if (uKind == 0) {
     /* Ядро: белая точка, тёплый ореол. */
-    c = vec3(1.0) * exp(-r2 * 40.0) * 2.0 + HOT * exp(-r2 * 12.0) * 0.8 + GOLD * exp(-r * 3.6) * 1.0;
+    c = vec3(1.0) * exp(-r2 * 50.0) * 2.0 + HOT * exp(-r2 * 16.0) * 0.6 + GOLD * exp(-r * 3.4) * 1.2;
   } else if (uKind == 1) {
     /* Отблеск на полу под нижней вершиной: вспышка и лучи. */
     float streak = exp(-abs(p.y) * 55.0) * exp(-p.x * p.x * 3.0);

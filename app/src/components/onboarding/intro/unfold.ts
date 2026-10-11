@@ -32,8 +32,8 @@ export const UPPER_TRI: [[number, number], [number, number], [number, number]] =
 const FOLD_L = OCTA_FACE_TILT;
 const FOLD_U = -OCTA_FACE_TILT;
 /* Не меньше FOLD_L: иначе нижние грани заваливаются внутрь, друг в друга. */
-const OPEN_L = 38 * DEG;
-const OPEN_U = 50 * DEG;
+const OPEN_L = 50 * DEG;
+const OPEN_U = 70 * DEG;
 
 /** Наклоны нижней и верхней граней в момент t. */
 export function unfoldAngles(t: number): { aL: number; aU: number } {
