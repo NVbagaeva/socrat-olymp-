@@ -161,6 +161,9 @@ export function TrainerBuilder({
   return (
     <TrainerSessionHost<TrainerPayload, TrainerUi>
       scope={scope}
+      /* Ярлык режима (/trenazher/<режим>/) — вход по ссылке на набор:
+         при незавершённой тренировке оболочка спросит, что делать. */
+      entryIntent={preset !== null}
       what="тренажёр"
       backHref={base}
       isPayload={isTrainerPayload}

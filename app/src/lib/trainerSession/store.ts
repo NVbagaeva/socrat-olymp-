@@ -50,8 +50,11 @@ export function storageAvailable(): boolean {
     target.setItem(probe, '1');
     target.removeItem(probe);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    /* Хранилище есть, но полное: тренировка всё равно попробует
+       записаться — уберёт старые тренировки других разделов, а не
+       выйдет, скажет ученику про место, а не про приватный режим. */
+    return isQuotaError(error);
   }
 }
 
