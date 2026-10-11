@@ -23,6 +23,13 @@
    встречается больше двух раз (исключения — с причиной, в отчёт);
    файл аналогов совпадает с подбором заново.
 
+   Опорные задачи: микрозадачи всех блоков — ответ, набор KaTeX.
+   Тренажёр, генератор и уроки: задачи всех прототипов из банка,
+   аналогов и новые — ответ ЕГЭ, ответ не подписан на чертеже условия
+   и вопросов подсказки, буквы согласованы, отпечаток открывает
+   подсказку и решение; сессии всех источников; листы всех уроков и
+   режимов.
+
    Теория (справочник): рисунки карточек и фактов чисты, «Пример» —
    задача открытого банка своего прототипа, у каждого прототипа есть
    карточка, формулы и тексты набираются KaTeX строго; каждая формула
@@ -61,6 +68,15 @@ console.log(
   `банк: ${bank.zadach} задач (214 ФИПИ, образцы и аналоги), проблем ${bank.problems.length}`,
 );
 for (const i of bank.isklucheniya) console.log(`  исключение: прототип ${i.proto} — ${i.prichina}`);
+
+const { checkPrep } = requireSrc('lib/planimetriya/prep/selftest');
+const { checkTrenazher } = requireSrc('lib/planimetriya/trenazher/selftest');
+const prep = checkPrep(30, typeset);
+console.log(`опорные задачи: ${prep.zadach} вариантов микрозадач, проблем ${prep.problems.length}`);
+const tr = checkTrenazher(3);
+console.log(
+  `тренажёр, генератор и уроки: ${tr.zadach} задач, ${tr.listov} листов, проблем ${tr.problems.length}`,
+);
 
 const { checkTeoriya, tekstyTeorii } = requireSrc('lib/planimetriya/teoriya-selftest');
 const { proveritFormuly } = requireSrc('lib/planimetriya/teoriya-proverka');
@@ -101,6 +117,8 @@ const vse = [
   ...st.problems,
   ...zh.problems,
   ...bank.problems,
+  ...prep.problems,
+  ...tr.problems,
   ...teor.problems,
   ...form.problems,
   ...(pereskaz ?? []).map((x) => `совпадение с источником: ${x}`),

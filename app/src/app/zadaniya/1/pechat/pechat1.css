@@ -1,12 +1,117 @@
-/* Печатные страницы задания №1: справочник по планиметрии и
-   шпаргалки к урокам. Только лист, без оболочки сайта. A4 книжный,
-   плитки в три колонки; чертежи — движок (planimetriya.css), в печати
-   чёрно-белые. Значения — токены; размеры листа — в миллиметрах. */
+/* Печатные страницы задания №1: листы генератора и уроков (основа
+   pechat11.css: пометки «банк» / «новая» на листе учителя, шаги
+   решения), справочник по планиметрии и шпаргалки к урокам. Только
+   лист, без оболочки сайта. Чертежи красит движок токенами темы
+   листа: в ч/б всё чернеет (lib/planimetriya/planimetriya.css). */
 
-@page {
-  size: A4 portrait;
-  margin: 10mm 10mm 12mm;
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
 }
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Шаги решения и пометка задачи на листе учителя. */
+.z1-sheet-steps {
+  margin-top: var(--sheet-step);
+}
+.z1-sheet-badge {
+  display: inline-block;
+  margin-right: calc(var(--sheet-step) * 1);
+  padding: 0 calc(var(--sheet-step) * 1.5);
+  border: 0.3mm solid currentColor;
+  border-radius: 1mm;
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  opacity: 0.75;
+}
+/* Рамка «Повторяем» перед блоком: просвет до примеров и задач. */
+.sheet-block-recap .sheet-recap {
+  margin-bottom: calc(var(--sheet-step) * 3);
+}
+.sheet-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Решение на листе учителя: чертёж со всеми построениями справа,
+   шаги его обтекают — колонка условия не шире, чем у ученика. */
+.z1-sheet-reshenie {
+  display: flow-root;
+}
+.z1-sheet-reshenie__pic {
+  float: right;
+  margin: 0 0 var(--sheet-step) calc(var(--sheet-step) * 3);
+}
+/* Продолжение разобранного примера: следующий шаг — свой кусок
+   потока, рамка та же, без ярлыка; стык с предыдущим куском не виден. */
+.sheet-example:has(+ .sheet-example--dalee) {
+  border-bottom-width: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-bottom: 0;
+}
+.sheet-example--dalee {
+  margin-top: 0 !important;
+  border-top-width: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding-top: 0;
+  padding-left: calc(var(--sheet-step) * 16);
+}
+.sheet-example--dalee .sheet-task-solution {
+  margin-top: 0;
+}
+
+/* Широкий чертёж решения — под условием, перед шагами. */
+.z1-sheet-reshenie__pic--pod {
+  float: none;
+  margin: 0 0 var(--sheet-step);
+}
+/* Лист учителя: рисунок условия (тот же, что у ученика) заменён
+   чертежом решения — второй копии чертежа на листе нет. */
+.sheet-task:has(.z1-sheet-reshenie__pic) > .sheet-task-body > .sheet-figure {
+  display: none;
+}
+
+/* Таблица ответов листа учителя урока: номер, ответ, ключевой шаг. */
+.z1-otvety__tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-small);
+}
+.z1-otvety__tab th,
+.z1-otvety__tab td {
+  padding: calc(var(--sheet-step) * 0.8) calc(var(--sheet-step) * 2);
+  border: var(--sheet-rule-width) solid var(--sheet-recap-line);
+  text-align: left;
+  vertical-align: middle;
+}
+.z1-otvety__tab th {
+  background: var(--sheet-recap-bg);
+  font-weight: 700;
+}
+.z1-otvety__no {
+  width: 8mm;
+  text-align: center;
+}
+.z1-otvety__otvet {
+  width: 22mm;
+  font-weight: 600;
+}
+
+/* ── Справочник и шпаргалки ─────────────────────────────────────── */
 
 .spr {
   max-width: 190mm;

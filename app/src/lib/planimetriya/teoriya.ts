@@ -9,7 +9,20 @@
 import { POROG, poUglam, pryamougolnyy, trapeciya } from './figury';
 import { polar } from './geom';
 import { prototip } from './stseny';
-import { duga, gr, mn, oblast, okr, otr, pryam, pryamaya, shtrih, tochka, tri, ug } from './stseny/dsl';
+import {
+  duga,
+  gr,
+  mn,
+  oblast,
+  okr,
+  otr,
+  pryam,
+  pryamaya,
+  shtrih,
+  tochka,
+  tri,
+  ug,
+} from './stseny/dsl';
 import type { Nabor, Params } from './stseny/dsl';
 import type { EOtrezok, Optsii, Rezhim, Scena, T2 } from './types';
 
@@ -43,7 +56,6 @@ const zn = (a: string, b: string, znachenie: string, o: Partial<EOtrezok> = {}):
 
 const RAD = Math.PI / 180;
 const kr = (gradus: number) => ({ naDuge: { okr: 'w', gradus } });
-
 
 const SVOI: Record<string, () => RisunokTeorii> = {
   smezhnye: () =>
@@ -429,7 +441,12 @@ const SVOI: Record<string, () => RisunokTeorii> = {
         K: { seredina: ['B', 'C'] },
         L: { seredina: ['A', 'C'] },
         N: { seredina: ['A', 'B'] },
-        M: { peresechenie: [['A', 'K'], ['B', 'L']] },
+        M: {
+          peresechenie: [
+            ['A', 'K'],
+            ['B', 'L'],
+          ],
+        },
       },
       elementy: [
         tri('A', 'B', 'C'),
@@ -551,7 +568,12 @@ const SVOI: Record<string, () => RisunokTeorii> = {
         B: [2, 5.5],
         C: [9, 6.5],
         D: [10, 0],
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -611,8 +633,18 @@ const SVOI: Record<string, () => RisunokTeorii> = {
     sCh({
       tochki: {
         ...trapeciya(12, 5, 5, 4),
-        K: { peresechenie: [['A', 'B'], ['D', 'C']] },
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        K: {
+          peresechenie: [
+            ['A', 'B'],
+            ['D', 'C'],
+          ],
+        },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
         E: { seredina: ['B', 'C'] },
         F: { seredina: ['A', 'D'] },
       },
@@ -635,7 +667,12 @@ const SVOI: Record<string, () => RisunokTeorii> = {
         B: [3, 4],
         C: [8, 4],
         D: [5, 0],
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -692,7 +729,12 @@ const SVOI: Record<string, () => RisunokTeorii> = {
         B: kr(345),
         C: kr(60),
         D: kr(240),
-        E: { peresechenie: [['A', 'B'], ['C', 'D']] },
+        E: {
+          peresechenie: [
+            ['A', 'B'],
+            ['C', 'D'],
+          ],
+        },
       },
       okruzhnosti: { w: { centr: 'O', radius: 5 } },
       elementy: [okr('w'), otr('A', 'B'), otr('C', 'D', { vydelit: 'iskomoe' }), tochka('E')],
@@ -743,7 +785,12 @@ const SVOI: Record<string, () => RisunokTeorii> = {
         B: kr(330),
         C: kr(60),
         D: kr(250),
-        E: { peresechenie: [['A', 'B'], ['C', 'D']] },
+        E: {
+          peresechenie: [
+            ['A', 'B'],
+            ['C', 'D'],
+          ],
+        },
       },
       okruzhnosti: { w: { centr: 'O', radius: 5 } },
       elementy: [

@@ -9,12 +9,7 @@
  * Живой чертёж печатается кадром в начальном положении.
  */
 
-import {
-  RAZDELY_TEORII_1,
-  kartochka1,
-  type Fakt1,
-  type Kartochka1,
-} from '../../content/teoriya1';
+import { RAZDELY_TEORII_1, kartochka1, type Fakt1, type Kartochka1 } from '../../content/teoriya1';
 import { katex } from '../graph/katex';
 import { typeset } from '../tex';
 import { renderPlan } from './render';
@@ -70,6 +65,13 @@ export function spravochnikHtml(): string {
       r.title,
     )}</h2><div class="spr-r__grid">${plitki}</div></section>`;
   }).join('');
+}
+
+/** Плитка карточек справочника без заголовка — шпаргалка на листе урока. */
+export function plitkiHtml(kartochki: readonly string[]): string {
+  return `<div class="spr-r spr-r--shp"><div class="spr-r__grid">${kartochki
+    .map((id) => plitka(kartochka1(id)))
+    .join('')}</div></div>`;
 }
 
 /** Шпаргалка к уроку: карточки урока плиткой справочника. */
