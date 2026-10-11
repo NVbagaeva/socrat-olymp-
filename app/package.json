@@ -82,7 +82,8 @@
     "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:navigation": "node scripts/check-navigation.mjs",
-    "test:trainer-session": "node scripts/check-trainer-session.mjs"
+    "test:trainer-session": "node scripts/check-trainer-session.mjs",
+    "test:trainer-sessions": "node scripts/check-trainer-sessions.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

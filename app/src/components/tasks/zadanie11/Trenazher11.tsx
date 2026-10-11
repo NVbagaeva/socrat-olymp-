@@ -67,6 +67,15 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [dannye],
   );
 
+  /* Пришли по ссылке на подтипы (?tip= / ?tipy=): при незавершённой
+     тренировке оболочка спросит, продолжить её или начать новую по
+     ссылке. Адрес читается один раз, в браузере; разметку это не меняет. */
+  const [poSsylke] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      /[?&]tipy?=/.test(window.location.search),
+  );
+
   /* Подтипы из ссылки: «Решать» в теории (?tip=DP-07) или маршрут
      урока у репетиторов (?tipy=PR-01,PR-04) — отмечаем только их. */
   useEffect(() => {
@@ -168,6 +177,14 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
   return (
     <TrainerSessionHost<Trenazher11Payload, Trenazher11Ui>
       scope={scopeOfPath(base) ?? '11'}
+      entryIntent={poSsylke}
+      onEntryResolved={() => {
+        /* Ответ дан — ссылка своё сделала, вопрос после перезагрузки не нужен. */
+        const url = new URL(window.location.href);
+        url.searchParams.delete('tip');
+        url.searchParams.delete('tipy');
+        window.history.replaceState(window.history.state, '', url);
+      }}
       what="тренажёр"
       backHref={base}
       isPayload={isTrenazher11Payload}

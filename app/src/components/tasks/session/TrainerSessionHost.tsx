@@ -44,6 +44,12 @@ export interface ScreenContext<P, U extends BaseUi> {
   elapsed: () => number;
   /** Ученик решил последнее задание и жмёт «Смотреть результат». */
   finish: () => void;
+  /**
+   * Что сделать перед досрочным завершением кнопкой панели: например,
+   * записать в историю начатую, но не закрытую задачу. Регистрируется
+   * хуком useBeforeFinish; null — снять.
+   */
+  setBeforeFinish: (handler: (() => void) | null) => void;
 }
 
 /** Как тренажёр описывает задание на экране итогов. */
@@ -121,6 +127,20 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
   unpack?: (packed: unknown) => P | null | Promise<P | null>;
   /** Дополнения к экрану итогов. */
   summary?: SummaryOptions;
+  /**
+   * Вход по ссылке на конкретный набор (ярлык режима, «Потренироваться»
+   * с прототипа, ?tip=). Если в тренажёре есть незавершённая тренировка,
+   * оболочка не возвращает в неё молча, а спрашивает: продолжить её или
+   * начать новую — тогда открывается выбор тренировки, уже настроенный
+   * ссылкой. Без ссылки (false) — сразу в незавершённую.
+   */
+  entryIntent?: boolean;
+  /**
+   * Ученик ответил на вопрос при входе по ссылке. Тренажёр может убрать
+   * параметры ссылки из адреса, чтобы вопрос не повторялся после
+   * перезагрузки.
+   */
+  onEntryResolved?: () => void;
   /** Куда ведёт ссылка с экрана итогов. */
   backHref?: string;
   /** Экран выбора тренировки. */
@@ -160,6 +180,37 @@ type Blocked = 'taken' | 'replaced' | 'gone';
 type Notice = 'version' | 'broken' | 'restore';
 
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/* ── Адрес, с которого вкладка уже вошла в тренировку ───────────
+   Вопрос «продолжить или начать новую» нужен, когда ученик пришёл по
+   ссылке на набор, а не когда он перезагружает страницу этой же ссылки
+   посреди начатой с неё тренировки. Поэтому вкладка помнит (в
+   sessionStorage) адрес, с которого начата тренировка, и на нём не
+   спрашивает. Повторный приход по другой ссылке спросит снова. */
+
+function hereAddress(): string {
+  return `${window.location.pathname}${window.location.search}`;
+}
+
+function entryKey(scope: string): string {
+  return `budetege:trainer:${scope}:entry`;
+}
+
+function rememberEntry(scope: string): void {
+  try {
+    window.sessionStorage.setItem(entryKey(scope), hereAddress());
+  } catch {
+    /* Не запомнили — в худшем случае вопрос повторится. */
+  }
+}
+
+function enteredHere(scope: string): boolean {
+  try {
+    return window.sessionStorage.getItem(entryKey(scope)) === hereAddress();
+  } catch {
+    return false;
+  }
+}
 
 /* Вызов функции-«слота» внутри собственной отрисовки: так конфигуратор
    и экран, которым оболочка отдаёт колбэки, отрисовываются как обычные
@@ -217,6 +268,8 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   pack,
   unpack,
   summary,
+  entryIntent = false,
+  onEntryResolved,
   backHref,
   configurator,
   screen,
@@ -233,7 +286,13 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
   /* Новая тренировка при незавершённой: ждёт ответа ученика. */
-  const [pending, setPending] = useState<{ payload: P; solved: number; total: number } | null>(
+  /* payload null — вопрос задан при входе по ссылке: «Начать новую»
+     открывает выбор тренировки, настроенный ссылкой. */
+  const [pending, setPending] = useState<{
+    payload: P | null;
+    solved: number;
+    total: number;
+  } | null>(
     null,
   );
   /* Прогресс для панели: перерисовывается только панель, не экран. */
@@ -376,12 +435,13 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         epoch: 0,
       };
       enter(run, 0, false, 0);
+      rememberEntry(scope);
       /* Запись появляется сразу, до первого действия: метка в меню
          загорается, а возврат на экран заданий возможен с первой секунды. */
       flush();
       notifySessionsChanged();
     },
-    [enter, flush, pack, count],
+    [enter, flush, pack, count, scope],
   );
 
   const toConfig = useCallback(() => {
@@ -472,7 +532,18 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     if (ok) {
       /* Записи прежних версий и старые ключи тренажёров — прочь. */
       sweepStaleSessions(scope);
-      void resume();
+      const read = entryIntent && !enteredHere(scope) ? readSession(scope) : null;
+      if (read !== null && read.status === 'ok') {
+        /* По ссылке на набор — не уводить молча в старую тренировку. */
+        const ui = isBaseUi(read.session.ui) ? read.session.ui : null;
+        setPending({
+          payload: null,
+          solved: ui === null ? 0 : Object.keys(ui.marks).length,
+          total: ui?.order?.length ?? read.session.total,
+        });
+      } else {
+        void resume();
+      }
     }
     return () => {
       aliveRef.current = false;
@@ -519,11 +590,23 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     [count, describe, elapsed],
   );
 
+  /* Обработчик экрана «перед досрочным завершением». */
+  const beforeFinishRef = useRef<(() => void) | null>(null);
+  const setBeforeFinish = useCallback((handler: (() => void) | null) => {
+    beforeFinishRef.current = handler;
+  }, []);
+
   const finish = useCallback(() => {
     const current = viewRef.current;
     if (current.kind !== 'run') {
       return;
     }
+    try {
+      beforeFinishRef.current?.();
+    } catch {
+      /* Запись истории не должна мешать показать итоги. */
+    }
+    beforeFinishRef.current = null;
     stopClock();
     const data = summarize(current.run);
     if (timerRef.current !== null) {
@@ -644,7 +727,11 @@ export function TrainerSessionHost<P, U extends BaseUi>({
           reason = 'taken';
         }
       }
-      if (reason !== null && blockedRef.current === null) {
+      /* Уже остановлена другой вкладкой, а тренировку тем временем
+         заменили или завершили — сказать об этом: «Продолжить здесь»
+         открыло бы уже другую тренировку. */
+      const was = blockedRef.current;
+      if (reason !== null && (was === null || (reason !== 'taken' && reason !== was))) {
         stopClock();
         blockedRef.current = reason;
         setBlocked(reason);
@@ -769,6 +856,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
           <Button
             variant="secondary"
             onClick={() => {
+              if (pending?.payload === null) {
+                onEntryResolved?.();
+              }
               setPending(null);
               void resume();
             }}
@@ -779,12 +869,17 @@ export function TrainerSessionHost<P, U extends BaseUi>({
             variant="danger"
             onClick={() => {
               const next = pending?.payload;
+              setPending(null);
+              if (next === null || next === undefined) {
+                /* Вход по ссылке: старая стирается, остаётся выбор,
+                   настроенный ссылкой. */
+                clearSession(scope);
+                onEntryResolved?.();
+                return;
+              }
               /* Запись не удаляется, а перезаписывается новой: соседняя
                  вкладка увидит «заменена», а не «завершена». */
-              setPending(null);
-              if (next !== undefined) {
-                begin(next);
-              }
+              begin(next);
             }}
           >
             {sessionText.startNew}
@@ -889,6 +984,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
               report,
               elapsed,
               finish,
+              setBeforeFinish,
             }}
           />
         </RunBoundary>

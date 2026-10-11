@@ -178,6 +178,8 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
 
   return (
     <TrainerSessionHost<SessiyaPayload, SessiyaUi>
+      /* Ярлык режима — вход по ссылке: при незавершённой тренировке вопрос. */
+      entryIntent={preset !== null}
       /* Раздел вкладок считает тот же scopeOfPath от адреса вкладки. */
       scope={scopeOfPath(base) ?? String(zadanie)}
       what="тренажёр"
