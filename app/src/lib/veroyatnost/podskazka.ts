@@ -15,7 +15,14 @@
  * число ответа во всех шагах.
  */
 
-import { dec, type AnswerFormat, type HintStep } from './types';
+import {
+  dec,
+  type AnswerFormat,
+  type HintStep,
+  type Params,
+  type Prototype,
+  type Step,
+} from './types';
 
 /** Видимый текст кнопки: формула без разметки и пробелов. */
 function vid(stroka: string): string {
@@ -101,4 +108,107 @@ export function zapisShag(format: AnswerFormat, znakov: 2 | 3 | null): HintStep 
     nevernye,
     'В бланке ЕГЭ — только цифры, запятая и минус.',
   );
+}
+
+/* ── Подсказка «m из n» для задания №4 ───────────────────────────── */
+
+/**
+ * Что прототип говорит о своей подсказке словами сюжета. Числа берутся
+ * из шагов разбора, поэтому подсказка не может с ним разойтись.
+ */
+export interface MnOpisanie {
+  /** Что здесь все равновозможные исходы (или вся мера) — верная кнопка. */
+  vse: string;
+  /** Неверные ответы на тот же вопрос. */
+  vseNe: readonly string[];
+  /** Какие исходы благоприятные — словами, для вопроса шага 3. */
+  blago: string;
+  /** Геометрическая вероятность: мера L и часть l вместо n и m. */
+  geom?: boolean;
+  /** Типичные ошибки в числе всех исходов (n вместо n − 1 и т. п.). */
+  nOshibki?: readonly number[];
+  /** Типичные ошибки в числе благоприятных. */
+  mOshibki?: readonly number[];
+}
+
+/**
+ * Вычисление из шага разбора — комментарий к верной кнопке. Если в
+ * разборе просто «n = 50», комментарий повторил бы кнопку: его нет.
+ */
+function vychislenie(shag: Step | undefined): string | undefined {
+  const formula = shag?.formula ?? '';
+  return (formula.match(/=/g) ?? []).length > 1 ? `$${formula}$` : undefined;
+}
+
+/** Число шага разбора: у «m из n» оно есть у первых двух шагов. */
+function znachenie(shag: Step | undefined, kto: string): number {
+  if (shag?.value === undefined || shag.formula === undefined) {
+    throw new Error(`подсказка «m из n»: у шага «${kto}» нет числа или формулы`);
+  }
+  return shag.value;
+}
+
+/**
+ * Подсказка «m из n» по шагам разбора: что считать всеми исходами,
+ * сколько их, сколько благоприятных, какое выражение даёт ответ, как
+ * его записать. Неверные числа — ошибки сюжета и соседние числа. На
+ * кнопках только числа: вычисление из разбора («76 − 1 = 75») стоит в
+ * комментарии, иначе верная кнопка выдавала бы себя видом.
+ */
+export function mnPodskazka(
+  shagi: readonly Step[],
+  opisanie: MnOpisanie,
+  format: AnswerFormat,
+  znakov: 2 | 3 | null,
+): HintStep[] {
+  const n = znachenie(shagi[0], 'все исходы');
+  const m = znachenie(shagi[1], 'благоприятные');
+  const [N, M] = opisanie.geom === true ? ['L', 'l'] : ['n', 'm'];
+  const bukva = (b: string, x: number): string => `$${b} = ${x}$`;
+  const nNe = [...(opisanie.nOshibki ?? []), n - 1, n + 1].filter((x) => x > 0 && x !== n);
+  const mNe = [...(opisanie.mOshibki ?? []), n - m, m + 1, m - 1].filter((x) => x > 0 && x !== m);
+  return [
+    vopros(
+      opisanie.geom === true
+        ? 'С чем сравниваем — что здесь вся мера?'
+        : 'Что здесь все равновозможные исходы?',
+      opisanie.vse,
+      opisanie.vseNe,
+    ),
+    vopros(
+      opisanie.geom === true ? `Чему равна вся мера $${N}$?` : `Сколько всего исходов $${N}$?`,
+      bukva(N, n),
+      nNe.map((x) => bukva(N, x)),
+      vychislenie(shagi[0]),
+    ),
+    vopros(
+      opisanie.geom === true
+        ? `Чему равна благоприятная часть $${M}$ — ${opisanie.blago}?`
+        : `Сколько благоприятных исходов $${M}$ — ${opisanie.blago}?`,
+      bukva(M, m),
+      mNe.map((x) => bukva(M, x)),
+      vychislenie(shagi[1]),
+    ),
+    vopros(
+      'Какое выражение даёт ответ?',
+      `$\\dfrac{${m}}{${n}}$`,
+      /* Дробь, равная единице (при m = n − m), — не ошибка, а опечатка:
+         такую кнопку не показываем. */
+      [
+        ...(n - m !== m ? [`$\\dfrac{${n - m}}{${n}}$`, `$\\dfrac{${m}}{${n - m}}$`] : []),
+        `$\\dfrac{${n}}{${m}}$`,
+      ],
+      `Вероятность — доля благоприятных: $P = \\dfrac{${M}}{${N}}$.`,
+    ),
+    zapisShag(format, znakov),
+  ];
+}
+
+/** Прототип №4 с подсказкой «m из n»: числа — из его же шагов разбора. */
+export function sPodskazkoy(prototype: Prototype, opisanie: (p: Params) => MnOpisanie): Prototype {
+  return {
+    ...prototype,
+    podskazka: (p) =>
+      mnPodskazka(prototype.shagi(p), opisanie(p), prototype.format, prototype.okruglenie(p)),
+  };
 }

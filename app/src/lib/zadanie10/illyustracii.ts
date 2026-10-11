@@ -125,3 +125,21 @@ export function slotyIllyustraciy(): { id: string; title: string; alt: string; e
     est: illyustraciya(p.id) !== null,
   }));
 }
+
+/** Картинки всех прототипов для клиентских компонентов (только найденные). */
+export function kartinkiPrototipov(): Record<
+  string,
+  { webp: string; png: string; alt: string; width: number; height: number }
+> {
+  const ill: Record<
+    string,
+    { webp: string; png: string; alt: string; width: number; height: number }
+  > = {};
+  for (const p of PROTOTYPES) {
+    const i = illyustraciya(p.id);
+    if (i) {
+      ill[p.id] = { webp: i.webp, png: i.png, alt: i.alt, width: i.width, height: i.height };
+    }
+  }
+  return ill;
+}
