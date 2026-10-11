@@ -12,7 +12,15 @@
  * Адрес: g=I,II — группы; p=9.2.1,… — конкретные прототипы (пусто —
  * все прототипы групп); n — число задач; seed; t=color|print;
  * c=1|2 — колонки; k — вид работы; d — дата; r=0|1|2 — число
- * разобранных примеров на группу (по умолчанию 2).
+ * разобранных примеров на группу (по умолчанию 2); s — серия уроков,
+ * u — номер урока в серии (0, 1, …).
+ *
+ * Задачи берутся из банка (bank.ts, двадцать вариантов на прототип).
+ * Порядок вариантов прототипа задаёт серия; урок u продолжает поток
+ * с того места, где закончился урок u − 1. Поэтому повторная
+ * генерация урока с теми же настройками не повторяет задачи, пока в
+ * банке есть неиспользованные; когда банк прототипа исчерпан, поток
+ * идёт по нему заново в том же порядке.
  *
  * Рисунки. У ученика — режим 'student': только то, что даёт условие.
  * У учителя на том же месте — режим 'teacher' со вспомогательными
@@ -33,6 +41,8 @@ import { generate as generateRaw, opornayaSeed } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
 import { pustoyOtchet, renderFigura } from './render';
 import { GRUPPY, gruppaById } from './skills';
+import { BANK } from './bank';
+import { rngOf } from './rng';
 import { ru } from './tex';
 import type { Generated, Gruppa } from './types';
 
@@ -70,6 +80,10 @@ export interface SheetParams9 {
   date: string;
   /** Разобранных примеров на тип (группу): 0, 1 или 2. */
   ramki: 0 | 1 | 2;
+  /** Серия уроков: задаёт порядок вариантов банка. Пусто — серия по seed. */
+  seriya: string;
+  /** Номер урока в серии: 0, 1, … — сдвиг по потоку вариантов банка. */
+  urok: number;
 }
 
 /** По умолчанию — полный набор: два разобранных примера на группу. */
@@ -86,6 +100,8 @@ export function defaultSheetParams9(): SheetParams9 {
     kind: '',
     date: '',
     ramki: RAMKI_DEFAULT,
+    seriya: '',
+    urok: 0,
   };
 }
 
@@ -107,6 +123,12 @@ export function sheetQuery9(params: SheetParams9): string {
     query.set('d', params.date);
   }
   query.set('r', String(params.ramki));
+  if (params.seriya !== '') {
+    query.set('s', params.seriya);
+  }
+  if (params.urok > 0) {
+    query.set('u', String(params.urok));
+  }
   return query.toString();
 }
 
@@ -131,6 +153,7 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
   }
   const count = Number(query.get('n'));
   const ramki = query.get('r');
+  const urok = Number(query.get('u'));
   return {
     groups,
     prototypes,
@@ -141,6 +164,8 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
     kind: query.get('k') ?? '',
     date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
     ramki: ramki === '0' ? 0 : ramki === '1' ? 1 : RAMKI_DEFAULT,
+    seriya: query.get('s') ?? '',
+    urok: Number.isFinite(urok) && urok > 0 ? Math.floor(urok) : 0,
   };
 }
 
@@ -261,7 +286,19 @@ function poolOf(group: Gruppa, params: SheetParams9): string[] {
   return chosen.length > 0 ? chosen : all;
 }
 
-/** Задачи одной группы: `want` штук, прототипы по кругу, воспроизводимо по адресу. */
+/** Варианты банка прототипа в порядке серии: перестановка по seed серии. */
+function bankOrder(proto: string, seriya: string): string[] {
+  const seeds = (BANK.find((e) => e.prototype === proto)?.variants ?? []).map((v) => v.seed);
+  return rngOf(`${seriya}|${proto}`).sample(seeds, seeds.length);
+}
+
+/**
+ * Задачи одной группы: `want` штук, прототипы по кругу, воспроизводимо
+ * по адресу. Урок u занимает в потоке группы места u·want … u·want +
+ * want − 1; место i — прототип pool[i mod L] и его вариант номер
+ * ⌊i / L⌋ в порядке серии. Соседние уроки поэтому не пересекаются, пока
+ * у прототипа хватает вариантов банка.
+ */
 function tasksForGroup(
   pool: string[],
   want: number,
@@ -273,20 +310,27 @@ function tasksForGroup(
   if (pool.length === 0) {
     return out;
   }
-  const attempts = new Map<string, number>();
+  const seriya = params.seriya !== '' ? params.seriya : params.seed;
+  const orders = new Map(pool.map((proto) => [proto, bankOrder(proto, seriya)]));
   const seen = new Set<string>();
-  let cursor = 0;
-  let guard = 0;
-  while (out.length < want && guard < want * ATTEMPTS_PER_TASK + ATTEMPTS_PER_TASK) {
-    guard += 1;
-    const proto = pool[cursor % pool.length] as string;
-    cursor += 1;
-    const attempt = attempts.get(proto) ?? 0;
-    attempts.set(proto, attempt + 1);
-    const seed = `${params.seed}:${proto}:${attempt}`;
+  const start = params.urok * want;
+  let i = start;
+  while (out.length < want && i < start + want * ATTEMPTS_PER_TASK + ATTEMPTS_PER_TASK) {
+    const proto = pool[i % pool.length] as string;
+    const occurrence = Math.floor(i / pool.length);
+    i += 1;
+    const order = orders.get(proto) ?? [];
+    const fromBank = order[occurrence % Math.max(order.length, 1)];
+    /* Прототипа нет в банке или его варианты уже стоят на этом листе
+       (на один прототип просят больше задач, чем в банке) — задача по
+       seed адреса, как раньше: лист не повторяет задачу внутри себя. */
+    const seed =
+      fromBank !== undefined && !seen.has(`${proto}|${fromBank}`)
+        ? fromBank
+        : `${params.seed}:${proto}:${occurrence}`;
     try {
       const task = generate(proto, seed);
-      const key = `${proto}|${task.uslovie}|${task.signature}|${task.otvet}`;
+      const key = `${proto}|${task.seed}`;
       if (seen.has(key)) {
         continue;
       }

@@ -24,10 +24,15 @@ function zapis(fig: Figura, zapros: Zapros | null, sx: 1 | -1, sy: 1 | -1): stri
   const y0 = first === undefined ? 0 : first.y * sy;
   const t: T = (x, y) => [x * sx - x0, y * sy - y0];
   const tx = (x: number) => x * sx - x0;
+  /* Заданный наклон в узле (парабола, касательная) — часть формы: при
+     отражении по одной оси он меняет знак, по обеим — нет. */
   const uzly = fig.uzly
-    .map((u) => t(u.x, u.y))
-    .sort((a, b) => a[0] - b[0])
-    .map(([x, y]) => `${x}:${y}`)
+    .map((u) => {
+      const [x, y] = t(u.x, u.y);
+      return { x, y, m: u.m === undefined ? '' : `:${Math.round(u.m * sx * sy * 1000) / 1000}` };
+    })
+    .sort((a, b) => a.x - b.x)
+    .map((u) => `${u.x}:${u.y}${u.m}`)
     .join(',');
   const metki = (fig.metki ?? [])
     .map(tx)

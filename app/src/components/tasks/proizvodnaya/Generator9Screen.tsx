@@ -13,6 +13,7 @@ import {
 } from '@/content/generator';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ekran } from '@/content/sheet9.js';
+import { loadKits, settingsOf } from '@/lib/komplekt';
 import { counted } from '@/lib/plural';
 import { sheetQuery9, subtitleOf9, RAMKI_DEFAULT } from '@/lib/proizvodnaya/sheet9';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
@@ -53,7 +54,7 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
 
   /* Адреса листов по seed комплекта: его выдаёт KitBar. */
   const sheetHrefs = (seed: string) => {
-    const query = sheetQuery9({
+    const params = {
       groups: chosen.map((item) => item.id as Gruppa),
       prototypes: [],
       count,
@@ -63,7 +64,28 @@ export function Generator9Screen({ base, skills }: Generator9ScreenProps) {
       kind: kindTitle,
       date,
       ramki,
-    });
+      seriya: '',
+      urok: 0,
+    };
+    /* Следующий урок продолжает серию последнего скачанного комплекта с
+       теми же настройками: задачи банка идут дальше по потоку и не
+       повторяются, пока есть неиспользованные. Первый урок серии целиком
+       задаётся seed комплекта. */
+    const settings = settingsOf(`${base}/pechat/?${sheetQuery9(params)}`);
+    const prev = loadKits().find(
+      (kit) =>
+        kit.scope === '9' &&
+        kit.slot === base &&
+        kit.createdAt !== null &&
+        kit.id !== seed &&
+        kit.settings === settings,
+    );
+    if (prev !== undefined) {
+      const query = new URLSearchParams(prev.studentHref.split('?')[1] ?? '');
+      params.seriya = query.get('s') ?? prev.id;
+      params.urok = (Number(query.get('u')) || 0) + 1;
+    }
+    const query = sheetQuery9(params);
     return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
   };
 

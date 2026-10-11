@@ -12,6 +12,7 @@
 import type { TrainerModeId } from '@/content/trainerModes';
 import { typeset } from '../tex';
 import { generate } from './generate';
+import { BANK } from './bank';
 import { OPEN_BANK, type OpenBankTask } from './otkrytyj-bank';
 import { prototypeById } from './prototypes';
 import { openText, sealAnswer, sealText } from './secret';
@@ -70,6 +71,8 @@ export interface Session9Request {
   istochnik: Istochnik;
   /** История ошибок: идентификаторы задач. */
   mistakes: string[];
+  /** Задачи, которые ученик уже решал (любой исход): банк отдаёт их в последнюю очередь. */
+  uzhe?: string[];
 }
 
 const OPEN_PREFIX = 'ob:';
@@ -250,25 +253,35 @@ export function buildSession9(request: Session9Request): Task9[] {
       .map((item) => makeOpenTask(item));
   }
 
+  /* Сгенерированные задачи берутся из банка (по 20 аналогов на прототип):
+     сначала те, что ученик ещё не решал, в случайном порядке; когда
+     нерешённых нет — уже решённые. В одной сессии задача не повторяется. */
   const prototypes = shuffled(prototypesFor(groups, request.prototypes));
   if (prototypes.length === 0) {
     return [];
   }
+  const uzhe = new Set(request.uzhe ?? []);
+  const ocheredi = new Map<string, string[]>();
+  for (const prototype of prototypes) {
+    const seeds = (BANK.find((e) => e.prototype === prototype)?.variants ?? []).map((v) => v.seed);
+    const fresh = shuffled(seeds.filter((seed) => !uzhe.has(taskId(prototype, seed))));
+    const old = shuffled(seeds.filter((seed) => uzhe.has(taskId(prototype, seed))));
+    ocheredi.set(prototype, [...fresh, ...old]);
+  }
   const tasks: Task9[] = [];
-  const seen = new Set<string>();
-  let failures = 0;
-  for (let i = 0; tasks.length < request.count && failures < request.count * 3 + 6; i += 1) {
+  let pusto = 0;
+  for (let i = 0; tasks.length < request.count && pusto < prototypes.length; i += 1) {
     const prototype = prototypes[i % prototypes.length] as string;
-    const seed = randomSeed();
+    const seed = ocheredi.get(prototype)?.shift();
+    if (seed === undefined) {
+      pusto += 1;
+      continue;
+    }
+    pusto = 0;
     try {
-      const task = makeTask(prototype, seed);
-      if (!seen.has(task.questionHtml)) {
-        seen.add(task.questionHtml);
-        tasks.push(task);
-      }
+      tasks.push(makeTask(prototype, seed));
     } catch {
-      /* Генератор не подобрал параметры на этом seed — берём следующий. */
-      failures += 1;
+      /* Задача банка не собралась (не должно случаться — банк проверен автотестом). */
     }
   }
   return tasks;

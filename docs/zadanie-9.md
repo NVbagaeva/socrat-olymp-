@@ -14,7 +14,9 @@
 | `app/src/lib/proizvodnaya/reshit.ts` | независимый пересчёт ответа по узлам рисунка и запросу + проверка читаемости |
 | `app/src/lib/proizvodnaya/prototypes/` | 31 прототип: 9.1.1 … 9.5.6 (реестр — `index.ts`) |
 | `app/src/lib/proizvodnaya/prep/` | опорные задачи: 6 блоков по 10 микрозадач |
-| `app/src/lib/proizvodnaya/bank.ts` | банк: 10 вариантов (seed) на прототип; пишет только `pnpm build:bank-9` |
+| `app/src/lib/proizvodnaya/bank.ts` | банк: 20 вариантов (seed) на прототип (у 9.4.5 и 9.4.6 — 16); пишет только `pnpm build:bank-9`, правила — `bankPravila.ts` |
+| `app/src/lib/proizvodnaya/otpechatokRisunka.ts` | отпечаток рисунка (сдвиг и отражение — повтор) и класс формы кривой |
+| `app/src/app/styleguide/zadanie-9/` | служебная галерея банка: все варианты прототипа с ответами; в меню сайта её нет, `noindex` |
 | `content-source/proizvodnaya/` | исходник открытого банка ФИПИ (пока пустой) и инструкция, как его пополнять |
 
 ## Источник задачи

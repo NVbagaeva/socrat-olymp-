@@ -92,7 +92,7 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
   const source = open ? ISTOCHNIK_OTKRYTYJ : ISTOCHNIK_SVOI;
 
   const countOf = (id: string): number =>
-    open ? (openOf[id] ?? 0) : Math.min((prototypesOf[id] ?? 0) * 10, 1000);
+    open ? (openOf[id] ?? 0) : Math.min((prototypesOf[id] ?? 0) * 20, 1000);
   const sourceMistakes = progress.mistakes.filter((id) => isOpenId(id) === open);
   const hasMistakes = sourceMistakes.length > 0;
 
@@ -120,6 +120,7 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
         mode: modeId,
         istochnik: sourceId,
         mistakes: progress.mistakes,
+        uzhe: Object.keys(progress.outcomes ?? {}),
       });
       setLoading(false);
       if (tasks.length === 0) {

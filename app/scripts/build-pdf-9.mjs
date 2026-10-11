@@ -16,7 +16,7 @@
    рамки «Запомни», разобранные примеры, карточки задач с рисунками
    режима 'student', у учителя — разбор по этапам и рисунок построений.
    Отличие одно: задачи не по seed адреса, а фиксированные — банк
-   тренажёра lib/proizvodnaya/bank.ts (десять вариантов на прототип),
+   тренажёра lib/proizvodnaya/bank.ts (двадцать вариантов на прототип),
    а пока банка нет — десять seed «<прототип>#1 … #10». В этом файле
    ни одного условия и ни одного ответа нет: считает движок.
 
@@ -38,11 +38,13 @@ const SECTION = 'zadanie-9';
 const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
 const { GRUPPY, prototypesOfGroup } = requireSrc('lib/proizvodnaya/skills.ts');
 
-/** Печатная CSS страницы листа: рисунки графиков в ч/б теме. */
-export const EXTRA_CSS = fs.readFileSync(
-  path.join(APP, 'src', 'app', 'zadaniya', '9', 'pechat', 'pechat9.css'),
-  'utf8',
-);
+/** Печатная CSS страницы листа: рисунки графиков в ч/б теме.
+    Блок :root из неё убирается: там шрифты листа ссылаются на
+    переменные сайта (--font-sans), которых в сборке PDF нет, и текст
+    уходил в системную антикву. Шрифты сборке задаёт sheet-render. */
+export const EXTRA_CSS = fs
+  .readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '9', 'pechat', 'pechat9.css'), 'utf8')
+  .replace(/^:root\s*\{[^}]*\}\s*/m, '');
 
 /** Варианты прототипа: банк тренажёра, а без него — десять seed подряд. */
 export function variantsOf(prototypeId) {

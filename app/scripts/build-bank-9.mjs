@@ -1,20 +1,30 @@
 #!/usr/bin/env node
-/* scripts/build-bank-9.mjs — подбор банка задания №9.
+/* scripts/build-bank-9.mjs — подбор банка задания №9: 20 аналогов на прототип.
 
-   Запуск: pnpm build:bank-9
+   Запуск: pnpm build:bank-9            (BANK9_KANDIDATOV — сколько seed
+                                         перебирать на прототип, по умолчанию 700)
 
-   Для каждого прототипа перебирает seed «9.X.Y#1», «9.X.Y#2», … и
-   оставляет первые десять вариантов, у которых:
-   — разные signature (и разная подпись узлов рисунка);
-   — разные условия;
-   — не больше четырёх с одним `vid`;
-   — ответы все разные; если у прототипа меньше десяти возможных
-     ответов — один ответ не чаще двух (в крайнем случае трёх) раз;
+   Главный критерий — непохожесть рисунков и условий
+   (lib/proizvodnaya/bankPravila.ts, otpechatokRisunka.ts):
+   — среди двадцати нет двух с одинаковым отпечатком рисунка: узлы
+     кривой, метки, отрезок, касательная, закраска с точностью до сдвига
+     и отражения (у задач без рисунка — подпись параметров);
+   — форма кривой разная: один класс формы — не больше MAX_V_KLASSE задач;
    — рисунок чист во всех режимах: ученик, подсказка, учитель.
+   Ответы:
+   — задачи на подсчёт: встречаются все возможные значения (ответы,
+     которые генератор даёт хотя бы в 1,5% случаев), ни одно не чаще
+     четырёх раз;
+   — остальные: не меньше двенадцати различных, ни один не чаще двух раз.
 
-   Результат пишется в src/lib/proizvodnaya/bank.ts: только seed,
-   ответов в файле нет. Скрипт — единственный, кто пишет этот файл.
-   Краткий отчёт печатается в консоль. */
+   Подбор идёт в три прохода по кандидатам в порядке seed «9.X.Y#1», …:
+   по одной задаче на каждый возможный ответ (покрытие, редкие первыми),
+   затем новые ответы, затем добор до двадцати с ограничением повторов.
+   Прототип, который правилам не отвечает, попадает в отчёт — решение за
+   автором (ISKLYUCHENIYA_BANKA).
+
+   Результат — src/lib/proizvodnaya/bank.ts: только seed, ответов в
+   файле нет. Скрипт — единственный, кто пишет этот файл. */
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,15 +33,19 @@ import { APP, requireSrc } from './lib/load-ts.mjs';
 const { PROTOTYPES } = requireSrc('lib/proizvodnaya/prototypes/index');
 const { generate } = requireSrc('lib/proizvodnaya/generate');
 const { renderFigura, pustoyOtchet } = requireSrc('lib/proizvodnaya/render');
-const { podpisUzlov } = requireSrc('lib/proizvodnaya/prototypes/common');
+const { otpechatokZadachi, klassFormy } = requireSrc('lib/proizvodnaya/otpechatokRisunka');
+const { V_BANKE, MAX_V_KLASSE, SCHETNYE, pravilaOtvetov, ISKLYUCHENIYA_BANKA } = requireSrc(
+  'lib/proizvodnaya/bankPravila',
+);
 const { chislaOtvet } = requireSrc('lib/proizvodnaya/otvet');
 
-/* Генератор рисунка считает до 0,4 с на задачу: перебор ограничен. Не набралось
-   десять за столько попыток — прототип мало разнообразен, он попадёт в отчёт. */
-const MAX_ATTEMPTS = Number(process.env.BANK9_ATTEMPTS ?? 300);
-const PER_PROTOTYPE = 10;
-const MAX_SAME_VID = 4;
-const MAX_SAME_ANSWER = 4;
+const KANDIDATOV = Number(process.env.BANK9_KANDIDATOV ?? 700);
+const MAX_SAME_VID = 6;
+/* Классы формы считаются у гладких кривых (графики f, F и f′). У задач без
+   рисунка, у ломаной и у параболы непохожесть даёт отпечаток. */
+const KLASSY_RISUNKA = /^(?:f|F|fprime)\|/;
+/** Ответ «возможен», если генератор даёт его хотя бы в такой доле случаев. */
+const DOLYA_VOZMOZHNOGO = 0.015;
 
 /** Проблемы рисунка во всех трёх режимах. */
 function risunokProblems(fig) {
@@ -39,121 +53,148 @@ function risunokProblems(fig) {
   for (const rezhim of ['student', 'hint', 'teacher']) {
     const rep = pustoyOtchet();
     renderFigura(fig, { rezhim }, rep);
-    out.push(...rep.problems.map((p) => `${rezhim}: ${p}`));
+    out.push(...rep.problems);
   }
   return out;
 }
 
-const entries = [];
-const refusals = new Map();
-const short = [];
-const stubs = [];
-
-function refuse(reason) {
-  refusals.set(reason, (refusals.get(reason) ?? 0) + 1);
-}
-
-const started = Date.now();
-
-/** Подбор десяти вариантов при ограничении «ответ повторяется не чаще maxSame раз». */
-function podobrat(prototype, maxSame) {
-  const variants = [];
-  const statements = new Set();
-  const signatures = new Set();
-  const drawings = new Set();
-  const vids = new Map();
-  const answers = new Map();
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS && variants.length < PER_PROTOTYPE; attempt += 1) {
-    const seed = `${prototype.id}#${attempt}`;
+/** Кандидаты прототипа: seed подряд, с ответом, отпечатком, классом формы. */
+function kandidaty(prototype) {
+  const out = [];
+  for (let i = 1; i <= KANDIDATOV; i += 1) {
+    const seed = `${prototype.id}#${i}`;
     let task;
     try {
       task = generate(prototype.id, seed);
     } catch {
-      refuse('генератор не подобрал параметры');
       continue;
     }
-    /* У задач с рисунком условие одно и то же, различает их рисунок (signature и узлы). */
-    if (task.risunok === null && statements.has(task.uslovie)) {
-      refuse('то же условие');
-      continue;
-    }
-    if (signatures.has(task.signature)) {
-      refuse('та же signature');
-      continue;
-    }
-    const vid = task.vid ?? '';
-    if (vid !== '' && (vids.get(vid) ?? 0) >= MAX_SAME_VID) {
-      refuse('больше четырёх одного вида');
-      continue;
-    }
-    const answer = chislaOtvet(task.otvet);
-    if ((answers.get(answer) ?? 0) >= maxSame) {
-      refuse('ответ уже есть в банке');
-      continue;
-    }
-    if (task.risunok !== null) {
-      const key = podpisUzlov(task.risunok);
-      if (drawings.has(key)) {
-        refuse('тот же рисунок');
-        continue;
-      }
-      if (risunokProblems(task.risunok).length > 0) {
-        refuse('рисунок нечист в одном из режимов');
-        continue;
-      }
-      drawings.add(key);
-    }
-    statements.add(task.uslovie);
-    signatures.add(task.signature);
-    if (vid !== '') {
-      vids.set(vid, (vids.get(vid) ?? 0) + 1);
-    }
-    answers.set(answer, (answers.get(answer) ?? 0) + 1);
-    variants.push({ n: variants.length + 1, seed });
+    out.push({
+      seed,
+      otvet: chislaOtvet(task.otvet),
+      otp: otpechatokZadachi(task),
+      klass: klassFormy(task.risunok),
+      vid: task.vid ?? '',
+      uslovie: task.uslovie,
+      risunok: task.risunok,
+    });
   }
-  return variants;
+  return out;
 }
 
-const povtory = [];
-for (const prototype of PROTOTYPES) {
-  if (prototype.zaglushka) {
-    stubs.push(prototype.id);
+/** Подбор двадцати по правилам; возвращает выбранные и описание нарушений. */
+function podobrat(prototype, list) {
+  const pravila = pravilaOtvetov(prototype.id);
+  const chastota = new Map();
+  for (const k of list) {
+    chastota.set(k.otvet, (chastota.get(k.otvet) ?? 0) + 1);
   }
-  /* Сначала — десять разных ответов. Если у прототипа возможных ответов
-     меньше десяти (счёт точек на читаемом рисунке), разрешается повтор:
-     не больше двух, потом трёх одинаковых. */
-  let variants = [];
-  let maxSame = 1;
-  for (; maxSame <= MAX_SAME_ANSWER; maxSame += 1) {
-    variants = podobrat(prototype, maxSame);
-    if (variants.length >= PER_PROTOTYPE) {
-      break;
+  const vozmozhnye = [...chastota.entries()]
+    .filter(([, n]) => n / list.length >= DOLYA_VOZMOZHNOGO)
+    .sort((a, b) => a[1] - b[1])
+    .map(([o]) => o);
+
+  const chosen = [];
+  const otp = new Set();
+  const usloviya = new Set();
+  const klassy = new Map();
+  const vidy = new Map();
+  const otvety = new Map();
+  const chistye = new Map();
+
+  const goden = (k, maxPovtor) => {
+    if (otp.has(k.otp)) return false;
+    if (k.risunok === null && usloviya.has(k.uslovie)) return false;
+    if (KLASSY_RISUNKA.test(k.klass) && (klassy.get(k.klass) ?? 0) >= MAX_V_KLASSE) return false;
+    if (k.vid !== '' && (vidy.get(k.vid) ?? 0) >= MAX_SAME_VID) return false;
+    if ((otvety.get(k.otvet) ?? 0) >= maxPovtor) return false;
+    if (k.risunok !== null) {
+      if (!chistye.has(k.seed)) chistye.set(k.seed, risunokProblems(k.risunok).length === 0);
+      if (!chistye.get(k.seed)) return false;
     }
+    return true;
+  };
+  const vzyat = (k) => {
+    chosen.push(k);
+    otp.add(k.otp);
+    usloviya.add(k.uslovie);
+    klassy.set(k.klass, (klassy.get(k.klass) ?? 0) + 1);
+    if (k.vid !== '') vidy.set(k.vid, (vidy.get(k.vid) ?? 0) + 1);
+    otvety.set(k.otvet, (otvety.get(k.otvet) ?? 0) + 1);
+  };
+
+  /* Проход 1: покрытие — по одной задаче на каждый возможный ответ, редкие первыми. */
+  for (const o of vozmozhnye) {
+    if (chosen.length >= V_BANKE) break;
+    const k = list.find((c) => c.otvet === o && goden(c, 1));
+    if (k !== undefined) vzyat(k);
   }
-  if (maxSame > 1) {
-    povtory.push(`${prototype.id}: ответ повторяется до ${maxSame} раз`);
+  /* Проход 2: новые ответы, пока есть. */
+  for (const k of list) {
+    if (chosen.length >= V_BANKE) break;
+    if (!otvety.has(k.otvet) && goden(k, 1)) vzyat(k);
   }
-  if (variants.length < PER_PROTOTYPE) {
-    short.push(`${prototype.id}: ${variants.length}`);
-    process.exitCode = 1;
+  /* Проход 3: добор до двадцати с ограничением повторов. */
+  for (const k of list) {
+    if (chosen.length >= V_BANKE) break;
+    if (!chosen.includes(k) && goden(k, pravila.maxPovtor)) vzyat(k);
   }
-  entries.push({ prototype: prototype.id, variants });
-  console.error(
-    `  ${prototype.id}: ${variants.length} вариантов, ${((Date.now() - started) / 1000).toFixed(1)} с`,
-  );
+
+  const narusheniya = [];
+  if (chosen.length < V_BANKE) narusheniya.push(`набрано ${chosen.length} из ${V_BANKE}`);
+  const raznyh = otvety.size;
+  if (SCHETNYE.has(prototype.id)) {
+    const net = vozmozhnye.filter((o) => !otvety.has(o));
+    if (net.length > 0) narusheniya.push(`не покрыты ответы ${net.join(', ')}`);
+    if (vozmozhnye.length < 6)
+      narusheniya.push(`возможных ответов всего ${vozmozhnye.length} (нужно 6–8)`);
+  } else if (raznyh < pravila.minRaznyh) {
+    narusheniya.push(`различных ответов ${raznyh} (нужно ≥ ${pravila.minRaznyh})`);
+  }
+  const maxPovtor = Math.max(0, ...otvety.values());
+  if (maxPovtor > pravila.maxPovtor) narusheniya.push(`ответ повторяется ${maxPovtor} раз`);
+  return {
+    chosen,
+    narusheniya,
+    svodka: `ответов ${raznyh} (возможных ${vozmozhnye.length}), повтор ≤ ${maxPovtor}, классов формы ${klassy.size}`,
+  };
+}
+
+const started = Date.now();
+const entries = [];
+const otchet = [];
+let bad = 0;
+for (const prototype of PROTOTYPES) {
+  const list = kandidaty(prototype);
+  const { chosen, narusheniya, svodka } = podobrat(prototype, list);
+  entries.push({
+    prototype: prototype.id,
+    variants: chosen.map((k, i) => ({ n: i + 1, seed: k.seed })),
+  });
+  const isk = ISKLYUCHENIYA_BANKA[prototype.id];
+  const status =
+    narusheniya.length === 0
+      ? 'ок'
+      : isk
+        ? `исключение: ${isk.prichina}`
+        : `НАРУШЕНО: ${narusheniya.join('; ')}`;
+  if (narusheniya.length > 0 && !isk) bad += 1;
+  otchet.push(`  ${prototype.id}: ${chosen.length} · ${svodka} · ${status}`);
+  console.error(`  ${prototype.id}: ${((Date.now() - started) / 1000).toFixed(0)} с`);
 }
 
 const lines = [
   '/**',
-  ' * Банк задания №9: десять зафиксированных вариантов на прототип.',
+  ` * Банк задания №9: ${V_BANKE} зафиксированных вариантов на прототип.`,
   ' *',
   ' * Файл собирается скриптом scripts/build-bank-9.mjs (pnpm build:bank-9)',
   ' * и правится только им. Здесь только seed: ответов нет, задача',
-  ' * воспроизводится как generate(prototype, seed).',
+  ' * воспроизводится как generate(prototype, seed). Правила подбора —',
+  ' * lib/proizvodnaya/bankPravila.ts.',
   ' */',
   '',
   'export interface BankVariant {',
-  '  /** Номер варианта: 1…10. */',
+  `  /** Номер варианта: 1…${V_BANKE}. */`,
   '  n: number;',
   '  seed: string;',
   '}',
@@ -181,18 +222,8 @@ const total = entries.reduce((sum, e) => sum + e.variants.length, 0);
 console.log(
   `банк №9: ${entries.length} прототипов, ${total} вариантов → ${path.relative(APP, bankPath)}`,
 );
-if (stubs.length > 0) {
-  console.log(`заглушки: ${stubs.join(', ')}`);
-}
-if (refusals.size > 0) {
-  console.log('отказы при подборе:');
-  for (const [reason, count] of [...refusals].sort((a, b) => b[1] - a[1])) {
-    console.log(`  ${reason}: ${count}`);
-  }
-}
-if (povtory.length > 0) {
-  console.log(`ответы не все разные (возможных ответов меньше десяти): ${povtory.join('; ')}`);
-}
-if (short.length > 0) {
-  console.error(`! не набрано десять вариантов: ${short.join('; ')}`);
+console.log(otchet.join('\n'));
+if (bad > 0) {
+  console.error(`! правилам банка не отвечают ${bad} прототипов (см. выше)`);
+  process.exitCode = 1;
 }

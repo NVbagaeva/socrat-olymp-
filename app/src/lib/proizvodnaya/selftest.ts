@@ -21,6 +21,14 @@ import { renderFigura, pustoyOtchet, type Otchet } from './render';
 import { SHAG, postroit } from './spline';
 import { ekstremumy, granitsy, nuli, problemy, reshit } from './reshit';
 import { ru } from './tex';
+import {
+  ISKLYUCHENIYA_BANKA,
+  MAX_V_KLASSE,
+  SCHETNYE,
+  V_BANKE,
+  pravilaOtvetov,
+} from './bankPravila';
+import { klassFormy, otpechatokZadachi } from './otpechatokRisunka';
 import type { Figura, Generated } from './types';
 import { pointSegDist, rectGap, segRectDist, type Rect, type Seg } from '../vektory/geometry';
 
@@ -58,6 +66,8 @@ export interface Report {
   generated: number;
   problems: Problem[];
   ms?: Record<string, number>;
+  /** Нарушения у прототипов из списка исключений: печатаются, но не валят проверку. */
+  warnings?: Problem[];
 }
 
 /** Проверка текста: возвращает список замечаний. Подставляется скриптом. */
@@ -323,6 +333,8 @@ export function proveritStroki(
 
 /** Число различных ответов прототипа в последнем прогоне генераторов: им пользуется проверка банка. */
 export const razneOtvety = new Map<string, number>();
+/** Частоты ответов прототипа в последнем прогоне генераторов: «возможные» ответы для проверки банка. */
+export const chastotyOtvetov = new Map<string, Map<number, number>>();
 
 /** Генераторы: ответ из данных узлов совпадает с заложенным, рисунок и тексты чисты. */
 export function checkGenerators(
@@ -459,6 +471,7 @@ export function checkGenerators(
       });
     }
     razneOtvety.set(proto.id, answers.size);
+    chastotyOtvetov.set(proto.id, answers);
     if (seeds >= 50 && signatures.size < count * 0.8) {
       problems.push({ where: proto.id, what: `различных задач ${signatures.size} из ${count}` });
     }
@@ -473,6 +486,7 @@ export function checkBank(
   textCheck: TextCheck,
 ): Report {
   const problems: Problem[] = [];
+  const warnings: Problem[] = [];
   let generated = 0;
   for (const proto of PROTOTYPES) {
     const entry = bank.find((e) => e.prototype === proto.id);
@@ -480,13 +494,16 @@ export function checkBank(
       problems.push({ where: proto.id, what: 'нет в банке' });
       continue;
     }
-    if (entry.variants.length !== 10) {
-      problems.push({
-        where: proto.id,
-        what: `в банке ${entry.variants.length} вариантов вместо 10`,
-      });
+    /* Нарушения правил банка у прототипа из списка исключений — не ошибка,
+       а предупреждение: решение за автором раздела. */
+    const isk = ISKLYUCHENIYA_BANKA[proto.id];
+    const narushenie = (what: string) =>
+      (isk === undefined ? problems : warnings).push({ where: proto.id, what });
+    if (entry.variants.length !== V_BANKE) {
+      narushenie(`в банке ${entry.variants.length} вариантов вместо ${V_BANKE}`);
     }
-    const sig = new Set<string>();
+    const otp = new Map<string, string>();
+    const klassy = new Map<string, number>();
     const vids = new Map<string, number>();
     const otvety = new Map<number, number>();
     for (const v of entry.variants) {
@@ -494,10 +511,17 @@ export function checkBank(
       try {
         const t = generate(proto.id, v.seed);
         generated += 1;
-        if (sig.has(t.signature)) {
-          problems.push({ where, what: 'повтор варианта в банке' });
+        const o = otpechatokZadachi(t);
+        const prev = otp.get(o);
+        if (prev !== undefined) {
+          problems.push({
+            where,
+            what: `тот же рисунок, что у ${prev} (с точностью до сдвига и отражения)`,
+          });
         }
-        sig.add(t.signature);
+        otp.set(o, v.seed);
+        const k = klassFormy(t.risunok);
+        klassy.set(k, (klassy.get(k) ?? 0) + 1);
         otvety.set(t.otvet, (otvety.get(t.otvet) ?? 0) + 1);
         const vid = t.vid ?? '';
         vids.set(vid, (vids.get(vid) ?? 0) + 1);
@@ -506,25 +530,44 @@ export function checkBank(
         problems.push({ where, what: `не сгенерировался: ${(e as Error).message}` });
       }
     }
-    /* Ответы в банке разные; если у прототипа возможных ответов меньше
-       десяти — не больше двух раз (при четырёх возможных — трёх). */
-    const vozmozhno = razneOtvety.get(proto.id) ?? 10;
-    const dopusk = vozmozhno >= 10 ? 1 : Math.max(2, Math.ceil(10 / vozmozhno));
-    for (const [otvet, k] of otvety) {
-      if (k > dopusk) {
-        problems.push({
-          where: proto.id,
-          what: `в банке ответ ${otvet} встречается ${k} раз (допустимо ${dopusk})`,
-        });
+    /* Форма кривой разная: один класс — не больше MAX_V_KLASSE задач (у гладких кривых). */
+    for (const [k, n] of klassy) {
+      if (/^(?:f|F|fprime)\|/.test(k) && n > MAX_V_KLASSE) {
+        narushenie(`класс формы «${k}» у ${n} задач из ${entry.variants.length}`);
       }
     }
-    for (const [vid, k] of vids) {
-      if (k > 4 && vid !== '') {
-        problems.push({ where: proto.id, what: `вид «${vid}» встречается ${k} раз из 10` });
+    /* Ответы: счётные — все возможные значения и не чаще 4 раз; остальные — ≥ 12 различных, не чаще 2 раз. */
+    const pravila = pravilaOtvetov(proto.id);
+    for (const [otvet, n] of otvety) {
+      if (n > pravila.maxPovtor) {
+        narushenie(`ответ ${otvet} встречается ${n} раз (допустимо ${pravila.maxPovtor})`);
+      }
+    }
+    if (SCHETNYE.has(proto.id)) {
+      const chast = chastotyOtvetov.get(proto.id);
+      if (chast !== undefined) {
+        const vsego = [...chast.values()].reduce((x, y) => x + y, 0);
+        const vozmozhnye = [...chast.entries()]
+          .filter(([, n]) => n / vsego >= 0.015)
+          .map(([o]) => o);
+        const net = vozmozhnye.filter((o) => !otvety.has(o));
+        if (net.length > 0) {
+          narushenie(`в банке нет возможных ответов ${net.join(', ')}`);
+        }
+        if (vozmozhnye.length < 6) {
+          narushenie(`возможных ответов ${vozmozhnye.length} — меньше 6`);
+        }
+      }
+    } else if (otvety.size < pravila.minRaznyh) {
+      narushenie(`различных ответов в банке ${otvety.size} — нужно не меньше ${pravila.minRaznyh}`);
+    }
+    for (const [vid, n] of vids) {
+      if (n > 6 && vid !== '') {
+        narushenie(`вид «${vid}» встречается ${n} раз из ${entry.variants.length}`);
       }
     }
   }
-  return { prototypes: bank.length, generated, problems };
+  return { prototypes: bank.length, generated, problems, warnings };
 }
 
 /** Опорные задачи: шесть блоков по десять микрозадач, у каждой ответ, разбор, подсказка и рисунок без построений. */
