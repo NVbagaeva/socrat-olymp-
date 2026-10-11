@@ -107,7 +107,8 @@ export function proveritPereskaz(teksty, max = 8) {
   const grammy = new Map();
   for (const f of fajly) {
     const w = slova(fs.readFileSync(f, 'utf8'));
-    for (let i = 0; i + n <= w.length; i += 1) grammy.set(w.slice(i, i + n).join(' '), path.basename(f));
+    for (let i = 0; i + n <= w.length; i += 1)
+      grammy.set(w.slice(i, i + n).join(' '), path.basename(f));
   }
   const out = [];
   for (const t of teksty) {
