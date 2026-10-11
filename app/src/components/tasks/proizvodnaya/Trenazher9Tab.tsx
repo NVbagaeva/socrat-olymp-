@@ -1,11 +1,13 @@
 import type { SkillItem } from '../configurator';
 import { TabScrollOnMount } from '../TabScroll';
+import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { tasksPage } from '@/content/tasks';
 import { trainerPage } from '@/content/trainerModes';
 import { OPEN_BANK } from '@/lib/proizvodnaya/otkrytyj-bank';
 import { generate } from '@/lib/proizvodnaya/generate';
 import { renderFigura } from '@/lib/proizvodnaya/render';
 import { GRUPPY, gruppaOfPrototype, prototypesOfGroup } from '@/lib/proizvodnaya/skills';
+import { ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import { Trenazher9 } from './Trenazher9';
 
@@ -65,6 +67,7 @@ export function Trenazher9Tab() {
       </header>
       <TabScrollOnMount />
       <Trenazher9
+        base={`${ZADANIYA}/${PROIZVODNAYA.slug}`}
         backHref={tasksPage.href}
         groups={groups}
         prototypesOf={prototypesOf}

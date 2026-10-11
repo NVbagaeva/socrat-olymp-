@@ -1,27 +1,31 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Badge, Button } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { counted } from '@/lib/plural';
 import { progress9 } from '@/lib/proizvodnaya/progress';
-import { allGroupIds, buildSession9, isOpenId } from '@/lib/proizvodnaya/session';
-import {
-  dismissResult,
-  ISTOCHNIK_OTKRYTYJ,
-  ISTOCHNIK_SVOI,
-  start,
-  useActiveSession,
-  useIstochnik,
-} from '@/lib/proizvodnaya/sessionStore';
-import { Trenazher9Result } from './Trenazher9Result';
-import { Trenazher9Screen } from './Trenazher9Screen';
+import { allGroupIds, buildSession9, isOpenId, kindTitle } from '@/lib/proizvodnaya/session';
+import { ISTOCHNIK_OTKRYTYJ, ISTOCHNIK_SVOI, useIstochnik } from '@/lib/proizvodnaya/istochnik';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
+import { TrainerSessionHost, type ConfiguratorApi, type SummaryData } from '../session';
+import { Risunok9 } from './Risunok9';
+import { Razbor9, Trenazher9Screen, razborOf } from './Trenazher9Screen';
 import { Trenazher9Stats } from './Trenazher9Stats';
+import {
+  isTrenazher9Payload,
+  packTrenazher9,
+  similarTrenazher9,
+  unpackTrenazher9,
+  type Trenazher9Payload,
+} from './trenazher9Payload';
+import { readTrenazher9Ui, type Trenazher9Ui } from './trenazher9Ui';
 
 export interface Trenazher9Props {
+  /** Адрес раздела: по нему оболочка сессии и лента вкладок находят тренировку. */
+  base: string;
   /** Куда ведёт «Вернуться к заданиям» с итогового экрана. */
   backHref: string;
   /** Карточки групп: собраны на сервере, рисунки и формулы готовы. */
@@ -39,15 +43,111 @@ const COUNTS: (number | null)[] = [5, 10, 20, null];
 const MAX_ALL = 40;
 
 /**
- * Конфигуратор тренировки №9: группы → режим → количество → источник.
- *
- * Если уже идёт сессия, вместо конфигуратора показывается она: так
- * тренировка продолжается с того же задания после перехода на другую
- * вкладку раздела или перезагрузки страницы. Завершённая тренировка
- * показывает итог, пока его не закроют.
+ * То, что прежний итог №9 показывал сверх общих строк: сколько заданий
+ * закрыто (решено, с подсказкой или с решением) и какая доля из них
+ * решена верно, и пометка о досрочном завершении.
  */
-export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher9Props) {
-  const active = useActiveSession();
+function Itog9({ data }: { data: SummaryData }) {
+  const total = data.items.length;
+  const right = data.items.filter((item) => item.mark === 'right').length;
+  const solved = right + data.items.filter((item) => item.mark === 'hinted').length;
+  const percent = solved === 0 ? 0 : Math.round((right / solved) * 100);
+  /* Строкой, а не ещё одним списком tdone__rows: строки итогов общие,
+     и по ним их читают проверки. */
+  return (
+    <p className="tdone__lead">
+      {solved < total ? 'Тренировка завершена досрочно. ' : ''}
+      Решено (закрыто): {solved} из {total}; верно среди решённых — {percent}%.
+    </p>
+  );
+}
+
+/**
+ * Тренажёр задания №9: оболочка сессии вокруг конфигуратора и экрана.
+ *
+ * Задачи собираются в браузере генератором по seed. В хранилище идут
+ * только их идентификаторы с подписями (packTrenazher9): целиком, с
+ * набранными подсказками, тренировка весит мегабайты. При входе задачи
+ * собираются заново и сверяются с подписью.
+ */
+export function Trenazher9({ base, backHref, groups, prototypesOf, openOf }: Trenazher9Props) {
+  return (
+    <TrainerSessionHost<Trenazher9Payload, Trenazher9Ui>
+      scope={scopeOfPath(base) ?? '9'}
+      what="тренажёр"
+      backHref={backHref}
+      isPayload={isTrenazher9Payload}
+      count={(payload) => payload.tasks.length}
+      pack={packTrenazher9}
+      unpack={unpackTrenazher9}
+      describe={(payload, at) => {
+        const task = payload.tasks[at];
+        if (task === undefined) {
+          throw new Error('Нет задания');
+        }
+        return {
+          kind: kindTitle(task.prototype),
+          html: task.questionHtml,
+          ...(isOpenId(task.id) ? { badge: 'Открытый банк' } : {}),
+          /* Разбор открывается только здесь, на итогах: он закрыт
+             отпечатком. Рисунок — со всеми построениями. */
+          review: () => (
+            <div className="z9-razbor">
+              {task.risunok === null ? null : (
+                <div className="chart ptask__chart z9-ptask__pic">
+                  <Risunok9 figura={task.risunok} rezhim="teacher" />
+                </div>
+              )}
+              <Razbor9 shagi={razborOf(task)} />
+            </div>
+          ),
+        };
+      }}
+      subset={(payload, indexes) => ({
+        ...payload,
+        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
+      })}
+      similar={similarTrenazher9}
+      summary={{ extra: (data) => <Itog9 data={data} /> }}
+      configurator={(api) => (
+        <Trenazher9Configurator
+          groups={groups}
+          prototypesOf={prototypesOf}
+          openOf={openOf}
+          api={api}
+        />
+      )}
+      screen={({ payload, restored, report, elapsed, finish }) => (
+        <Trenazher9Screen
+          tasks={payload.tasks}
+          control={payload.control}
+          restored={restored === null ? null : readTrenazher9Ui(restored)}
+          report={report}
+          elapsed={elapsed}
+          onFinish={finish}
+        />
+      )}
+    />
+  );
+}
+
+/**
+ * Конфигуратор тренировки №9: группы → режим → количество → источник.
+ * «Начать тренировку» собирает задачи в браузере и отдаёт их оболочке
+ * сессии: она сохранит тренировку и вернёт в неё после перехода на
+ * другую вкладку или перезагрузки.
+ */
+function Trenazher9Configurator({
+  groups,
+  prototypesOf,
+  openOf,
+  api,
+}: {
+  groups: SkillItem[];
+  prototypesOf: Record<string, number>;
+  openOf: Record<string, number>;
+  api: ConfiguratorApi<Trenazher9Payload>;
+}) {
   const [istochnik, setIstochnik] = useIstochnik();
   const first = groups[0];
   const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
@@ -67,24 +167,6 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
   );
 
   const progress = progress9.useProgress();
-
-  if (!active.ready) {
-    return <div className="z9-wait" aria-busy="true" />;
-  }
-
-  if (active.session !== null) {
-    return (
-      <ErrorBoundary what="тренажёр" resetKey={active.session.id}>
-        <Trenazher9Screen session={active.session} />
-      </ErrorBoundary>
-    );
-  }
-
-  const result = active.result;
-
-  function again(settingsOf: NonNullable<typeof result>['settings']) {
-    launch(settingsOf.groups, settingsOf.mode, settingsOf.count, settingsOf.istochnik);
-  }
 
   const openTotal = Object.values(openOf).reduce((sum, n) => sum + n, 0);
   const open = istochnik === ISTOCHNIK_OTKRYTYJ && openTotal > 0;
@@ -127,7 +209,7 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
         setFailed(true);
         return;
       }
-      start({ groups: groupIds, mode: modeId, count: tasks.length, istochnik: sourceId }, tasks);
+      api.start({ tasks, control: modeId === 'control' });
     }, 40);
   }
 
@@ -168,17 +250,6 @@ export function Trenazher9({ backHref, groups, prototypesOf, openOf }: Trenazher
   }));
 
   const countText = counted(Math.max(chosenCount, 0), 'задание', 'задания', 'заданий');
-
-  if (result !== null) {
-    return (
-      <Trenazher9Result
-        result={result}
-        backHref={backHref}
-        onAgain={() => again(result.settings)}
-        onNew={dismissResult}
-      />
-    );
-  }
 
   return (
     <div className="cfg">

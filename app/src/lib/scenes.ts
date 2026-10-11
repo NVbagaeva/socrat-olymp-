@@ -10,10 +10,14 @@
  */
 
 import '@/lib/graph/families/index.js';
-import { registerCurve } from '@/lib/graph/renderer.js';
+import { THEME, registerCurve } from '@/lib/graph/renderer.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { playground as PLAY } from '@/content/theoryQuadratic';
+
+/* Зелёный второй график миниатюр плашек «О задании» — тот же цвет, что у g
+   в разборах (lib/theoryFigures.ts): ключ добавляется в THEME, как там. */
+(THEME.colors as unknown as Record<string, string>).alt ??= 'var(--graph-alt, var(--color-success))';
 
 /** Квадратное симметричное окно — иного renderGraph не принимает. */
 function squareWindow(half: number) {
@@ -681,6 +685,72 @@ function quadraticPrepScene(
   return null;
 }
 
+
+/* ── Миниатюры плашек типов задач ───────────────────────────────
+   Вкладка «О задании», блок «Типы задач в этом разделе». Миниатюра
+   чистая: только графики — без искомой точки, «?» и пунктиров. Что
+   найти, говорит название плашки, как решать — разбор под ней. */
+
+export type TypeSceneId =
+  | 'cross-line'
+  | 'cross-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'formula'
+  | 'value-at'
+  | 'argument-for';
+
+/* Миниатюры основных типов: одна парабола, чуть разная у каждого типа —
+   ветви вниз, шире и уже, выше и ниже, вершина левее и правее. Только
+   график: без отметок, подписей и пунктиров. */
+/* Миниатюре хватает редкой ломаной: на 4 клетках в 136 px — шаг около
+   двух пикселей. Плотная выборка движка весила бы по 7 КБ на плашку, а
+   плашек на странице одиннадцать и в разметке каждая дважды. */
+const MINI_STEPS = 80;
+function thin<T extends object>(curve: T): T & { steps: number } {
+  return { ...curve, steps: MINI_STEPS };
+}
+
+const BASIC_MINI: Record<string, ReturnType<typeof miniParabola> & { steps: number }> = {
+  'sign-a': thin(miniParabola(0.7, 0.3, -1.2)),
+  'value-a': thin(miniParabola(-0.45, -0.6, 1)),
+  'value-c': thin(miniParabola(0.6, 1.2, -1.3)),
+  'value-b': thin(miniParabola(0.8, -0.8, -1.1)),
+  formula: thin(miniParabola(-0.6, 0.4, 1.2)),
+  'value-at': thin(miniParabola(0.5, -0.4, -1)),
+  'argument-for': thin(miniParabola(0.9, 0.2, -1.3)),
+};
+
+export function typeScene(id: TypeSceneId) {
+  const base = {
+    window: squareWindow(2),
+    grid: { step: 1, show: true },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  const basic = BASIC_MINI[id];
+  if (basic !== undefined) {
+    return { ...base, curves: [basic] };
+  }
+  /* Второй график — зелёный, как g в разборах под плашкой. */
+  if (id === 'cross-line') {
+    return {
+      ...base,
+      curves: [
+        thin(miniParabola(1, 0, -1.5)),
+        { type: 'line', k: 1, b: -0.5, color: 'alt', label: null },
+      ],
+    };
+  }
+  return {
+    ...base,
+    curves: [thin(miniParabola(1, -0.5, -1.5)), thin(miniParabola(0.5, 0.9, -1.2, 'alt'))],
+  };
+}
 
 /* ── Миниатюры навыков гиперболы ──────────────────────────────────
    Окно то же тесное, ±2. Гипербола задаётся сдвигами: k/(x + a) + b.

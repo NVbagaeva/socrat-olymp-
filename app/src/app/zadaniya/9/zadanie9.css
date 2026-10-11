@@ -7,12 +7,9 @@
 }
 
 /* ── Тренажёр ─────────────────────────────────────────────────────
-   Конфигуратор, экран задания, пауза, подсказка с кнопками, разбор.
+   Конфигуратор, экран задания, подсказка с кнопками, разбор. Пауза,
+   завершение и итоги — общие (components/tasks/session).
    Ленту вкладок и общие панели не трогаем: правил position здесь нет. */
-
-.z9-wait {
-  min-height: 240px;
-}
 
 /* Миниатюры групп: рисунок движка или формула. */
 .z9-chart {
@@ -57,28 +54,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Строка над заданием: номер, время, пауза и завершение. */
-.z9-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-4);
-}
-.z9-bar .ttask__count {
-  flex: 1 1 200px;
-}
-.z9-bar__time {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  font-variant-numeric: tabular-nums;
-}
-.z9-bar__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 /* Рисунок условия. */
 .z9-ptask__pic {
   width: 100%;
@@ -106,44 +81,6 @@
   .z9-ptask__pic {
     max-width: none;
   }
-}
-
-/* Пауза и подтверждение завершения. */
-.z9-pause {
-  max-width: 560px;
-  padding: var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.z9-pause__title {
-  margin: 0;
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-}
-.z9-pause__text {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-.z9-pause__time {
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-}
-.z9-confirm {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
-}
-.z9-confirm__title {
-  margin: 0;
-  font-weight: 600;
-}
-.z9-confirm__text {
-  margin: 0;
-  color: var(--color-text-secondary);
 }
 
 /* Подсказка: вопросы с кнопками ответов. */

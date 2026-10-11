@@ -17,6 +17,7 @@ import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
+import type { TheoryFigureId } from '@/lib/theoryFigures';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
@@ -24,6 +25,15 @@ import { TopicTabs } from './TopicTabs';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { href, ZADANIYA } from '@/lib/paths';
+
+/* Рисунок «Что нужно уметь» с подписями у своих графиков (KaTeX): у
+   линейной и квадратичной на рисунке две подписи формул. У гиперболы
+   и корня графики не подписаны — там сцена движка как есть. */
+const ABOUT_FIGURE: Partial<Record<string, TheoryFigureId>> = {
+  linear: 'about-linear',
+  quadratic: 'about-quadratic',
+};
+
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
@@ -169,7 +179,13 @@ export function FunctionTopicPage({
       <TopicTabs
         initial={initialTab}
         about={
-          <TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} base={base} />
+          <TopicAbout
+            section={section}
+            about={about}
+            scene={aboutScene(subtopic.id)}
+            base={base}
+            {...(ABOUT_FIGURE[subtopic.id] === undefined ? {} : { figure: ABOUT_FIGURE[subtopic.id] })}
+          />
         }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
         bodies={ownBodies}
