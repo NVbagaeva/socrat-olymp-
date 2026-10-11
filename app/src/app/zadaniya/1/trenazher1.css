@@ -1,0 +1,179 @@
+/* Задание №1: добавки к экранам тренажёра, генератора и «Для
+   репетиторов». Сами экраны — слой №11 (zadanie11.css, классы z11-*),
+   здесь только то, чего у №11 нет: значок блока римской цифрой,
+   чертёж рядом с условием, тренировка на паузе, рамки теории в
+   генераторе. Значения — только токены. */
+
+/* Значок блока: кружок значка раздела №11, внутри — номер блока. */
+.z1-ikonka {
+  font-family: var(--font-serif);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1;
+}
+.z11-akk__ikonka.z1-ikonka,
+.z11-vybrannaya__ikonka.z1-ikonka,
+.z11-itog__ikonka.z1-ikonka {
+  font-size: var(--fs-caption);
+}
+
+/* ── Тренажёр: тренировка на паузе ─────────────────────────────── */
+
+.z1-pauza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  border-color: var(--color-border-warm);
+  background: var(--color-surface-warm);
+}
+.z1-pauza__ikonka {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-star);
+}
+.z1-pauza__ikonka .z11-pic {
+  width: 24px;
+  height: 24px;
+}
+.z1-pauza__text {
+  flex: 1 1 240px;
+  min-width: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z1-pauza__title {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.z1-pauza__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ── Тренажёр: экран задачи ────────────────────────────────────── */
+
+.z1-resh {
+  max-width: 960px;
+}
+.z1-resh__stop {
+  margin-left: auto;
+}
+.z1-resh__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+  gap: var(--space-5);
+  align-items: start;
+}
+.z1-resh__pic {
+  width: 100%;
+}
+.z1-resh__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.z1-resh__razbor .rich-example__grid {
+  margin-top: var(--space-3);
+}
+.z11-resh__podtip .katex,
+.z11-akk__podtip .katex,
+.z11-vybrannaya__name .katex {
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  .z1-resh__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z1-resh__pic {
+    max-width: 360px;
+  }
+  .z1-resh__stop {
+    margin-left: 0;
+  }
+}
+
+/* ── Генератор: превью листа ───────────────────────────────────── */
+
+.z1-a4__blok {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-info);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z1-a4__blok-no {
+  font-family: var(--font-serif);
+  color: var(--color-text-brand);
+}
+.z1-a4__uslovie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+}
+.z1-a4__pic {
+  display: block;
+  width: 150px;
+}
+.z1-a4__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.z1-a4__ramka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-info);
+}
+.z1-a4__ramka-title,
+.z1-a4__primer-title {
+  font-weight: 700;
+}
+.z1-a4__ramka-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.z1-a4__primer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-border-info);
+}
+.z1-a4__primer-reshenie .sheet-steps {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+}
+
+@media (max-width: 767.98px) {
+  .z1-a4__uslovie,
+  .z1-a4__primer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z1-a4__pic {
+    width: 100%;
+    max-width: 240px;
+  }
+}

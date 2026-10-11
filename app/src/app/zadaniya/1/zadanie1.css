@@ -1,0 +1,664 @@
+/* Задание №1 «Планиметрия».
+
+   Оболочка, вкладки, карточки теории и разобранные примеры описаны в
+   общих слоях (qth-*, rich-example, vteor): здесь только то, чего в
+   них нет. Значения — только токены. Чертежи движка красятся его
+   собственными токенами (lib/planimetriya/planimetriya.css). */
+
+.z1-head {
+  margin-bottom: var(--space-6);
+}
+/* Справа в шапке — иллюстрация (общая метка section-head--art), а
+   кольцо прогресса — в текстовой колонке под подзаголовком: кольцо
+   слева, подпись справа от него строкой. */
+.z1-head .topic-progress {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: var(--space-4);
+}
+.z1-head .topic-progress__text {
+  text-align: left;
+}
+/* Текстовая колонка с кольцом выше картинки: подставка стоит на
+   нижней границе шапки, как у №4, где картинка и есть высота шапки,
+   а не висит посередине колонки. */
+.z1-head .section-head__media {
+  align-self: end;
+}
+
+/* ── Вкладка «О задании» ──────────────────────────────────────── */
+
+.z1-about {
+  display: grid;
+  gap: var(--space-8);
+}
+.z1-about__lead {
+  max-width: 64ch;
+}
+.z1-about__text {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z1-about__sub {
+  margin-bottom: var(--space-4);
+}
+.z1-format__text {
+  max-width: 64ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+
+/* Миниатюра чертежа на плашке типа задач: движок вписывает фигуру
+   в 150 × 96, рисунок идёт в своём размере — подписи у всех плашек
+   одного кегля, как бы ни была вытянута фигура. */
+.z1-mini {
+  display: block;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.z1-mini svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Типичные ошибки: карточки в две колонки. */
+.z1-oshibki__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+.z1-oshibka {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-soft);
+}
+.z1-oshibka__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z1-oshibka__text {
+  margin-top: var(--space-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+
+/* ── Разбор задачи («Пример» карточки теории) ─────────────────── */
+
+.z1-razbor {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z1-razbor__pic {
+  width: 100%;
+}
+.z1-razbor__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Метка «не из открытого банка» у заголовка разбора. */
+.z1-metka {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  vertical-align: middle;
+}
+/* Признаки делимости под сокращением дроби. */
+.z1-sokr {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.z1-sokr__summary {
+  cursor: pointer;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z1-sokr__list {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding-left: var(--space-5);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+
+/* ── Вкладка «Теория» ─────────────────────────────────────────── */
+
+.z1-skachat {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+/* Карточка: четвёртая строка — «Пример». Открытый пример занимает
+   обе колонки сетки карточек: разбору нужна ширина. */
+.z1-k {
+  grid-template-rows: auto 1fr auto auto;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z1-k:has(> .z1-primer[open]) {
+  grid-column: 1 / -1;
+}
+.z1-k__pic {
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.z1-dekor svg,
+.z1-fakt__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Статичный чертёж — в своём размере (движок вписывает фигуру в
+   рамку): подписи у всех карточек одного кегля, узкая фигура не
+   раздувается на ширину карточки. */
+.z1-k__pic svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+.z1-k__pic--zhivoy {
+  max-width: none;
+}
+.z1-k__pic--zhivoy svg {
+  width: 100%;
+}
+.z1-k__podpis {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: center;
+}
+.z1-dekor {
+  display: block;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+/* «Где на ЕГЭ»: номера прототипов плашками. */
+.z1-gde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z1-gde__label {
+  margin-right: var(--space-1);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+.z1-gde__chip {
+  display: inline-block;
+  min-width: 2em;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none;
+}
+a.z1-gde__chip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-brand);
+}
+
+/* «Пример»: раскрывающаяся задача открытого банка. */
+.z1-primer {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+.z1-primer__summary {
+  cursor: pointer;
+  color: var(--color-text-brand);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z1-primer[open] > .z1-primer__summary {
+  margin-bottom: var(--space-3);
+}
+
+/* Лайфхаки: мини-карточки в две колонки. */
+.z1-fakty {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container (min-width: 640px) {
+  .z1-fakty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z1-fakt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 150px);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.z1-fakt__text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+.z1-fakt__no {
+  color: var(--color-star);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+}
+.z1-fakt__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z1-fakt__pic {
+  display: block;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* Свёрнутая панель «Для задачи №17». */
+.z1-dlya17 {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z1-dlya17__summary {
+  cursor: pointer;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.z1-dlya17__lead {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.z1-dlya17__list {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-left: var(--space-6);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+
+/* ── Вкладка «Опорные задачи» ─────────────────────────────────── */
+
+.z1-prep__sub {
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-2);
+}
+.z1-prep__sub:first-of-type {
+  margin-top: var(--space-6);
+}
+.z1-prep__lead {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* Разобранные задачи: группа на блок I–X, раскрывается по клику. */
+.z1-op-group {
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z1-op-group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.z1-op-group__code {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+.z1-op-group[open] > .z1-op-group__title {
+  margin-bottom: var(--space-4);
+}
+
+/* Рисунок условия микрозадачи. */
+.z1-ptask__pic {
+  width: 100%;
+  max-width: 360px;
+}
+.z1-ptask__pic svg,
+.z1-mrazbor__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Разбор микрозадачи: строки и чертёж с построениями рядом. */
+.z1-mrazbor {
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z1-mrazbor__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z1-mrazbor__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 320px);
+  gap: var(--space-4);
+  align-items: start;
+}
+.z1-mrazbor__body:has(> .z1-mrazbor__lines:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z1-mrazbor__lines {
+  display: grid;
+  gap: var(--space-2);
+}
+.z1-mrazbor__line {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+.z1-mrazbor__pic {
+  width: 100%;
+}
+
+/* Плашка «Запомни»: формулы блока. */
+.z1-memo {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z1-memo__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z1-memo__list {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+.z1-memo__list .katex {
+  white-space: nowrap;
+}
+
+/* ── Вкладка «Для репетиторов»: код комплекта и уроки серии ───── */
+
+/* Сетка №11 рассчитана на боковую колонку «Быстрый лист»; у №1 её нет —
+   уроки на всю ширину. */
+.z11-rep.z1-rep {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.z1-kod {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.z1-kod__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z1-kod__title {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+}
+.z1-kod__value {
+  padding: var(--space-1) var(--space-3);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  letter-spacing: 0.08em;
+}
+.z1-kod__vvod {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z1-kod__vvod .input {
+  width: 14rem;
+  max-width: 100%;
+  text-transform: uppercase;
+}
+.z1-kod__oshibka {
+  flex-basis: 100%;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.z1-uroki {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-8);
+  padding: 0;
+  list-style: none;
+}
+.z1-urok {
+  display: grid;
+  gap: var(--space-2);
+}
+.z1-urok__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z1-urok__title {
+  flex: 1 1 18rem;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z1-urok__count {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+}
+.z1-urok__protos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z1-urok__label {
+  margin-right: var(--space-1);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+/* Прототип 50+ — «не из открытого банка»: плашка пунктиром. */
+.z1-gde__chip--dop {
+  border-style: dashed;
+  background: var(--color-surface);
+}
+.z1-urok__body {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.z1-urok__h {
+  font-weight: 600;
+}
+.z1-urok__bloki {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z1-urok__blok {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z1-urok__blok.is-off .z1-urok__note {
+  opacity: 0.55;
+}
+.z1-urok__note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z1-urok__n {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z1-urok__ed {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+}
+.z1-urok__polnye {
+  display: grid;
+  gap: var(--space-1);
+}
+.z1-urok__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ── Телефон ──────────────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+  .z1-urok__blok {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+  .z1-fakt {
+    grid-template-columns: minmax(0, 1fr) 110px;
+    padding: var(--space-3);
+  }
+  .z1-skachat {
+    justify-content: stretch;
+  }
+  .z1-skachat .btn {
+    width: 100%;
+  }
+}
+
+/* ── Печать: ч/б, плашки без заливки ──────────────────────────── */
+
+@media print {
+  .z1-fakt,
+  .z1-sokr,
+  .z1-dlya17 {
+    background: none;
+    border-color: currentColor;
+  }
+  .z1-skachat,
+  .z1-primer:not([open]),
+  .z1-k__podpis {
+    display: none;
+  }
+}
+
+/* Телефон и печать: «О задании» и «Опорные задачи». */
+
+@media (max-width: 767.98px) {
+  .z1-mrazbor__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z1-ptask__pic,
+  .z1-mrazbor__pic {
+    max-width: 360px;
+  }
+  .z1-op-group {
+    padding: var(--space-3) var(--space-4);
+  }
+  .z1-memo__list,
+  .z1-mrazbor__line {
+    font-size: var(--fs-caption);
+  }
+}
+
+@media print {
+  .z1-memo,
+  .z1-oshibka,
+  .z1-sokr {
+    background: none;
+    border-color: currentColor;
+  }
+}
