@@ -51,6 +51,8 @@
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
      №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
                 номер верного варианта (lib/zadanie11/trenazher/zadacha.ts);
+     №1       — sostavZadachi(razreshit(план, банк dannyeTrenazhera1())).otvet
+                (lib/planimetriya/trenazher/zadacha.ts);
      №4, №5   — otvetUchenika(прототип, параметры варианта) из банка
                 lib/veroyatnost; «Узнай метод» — метод, чей отпечаток
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
@@ -164,6 +166,20 @@ function answer11(payload, at) {
     : { option: String(solved.vybor.correct + 1) };
 }
 
+/** №1: план {vid, id, no | seed} → ответ движка планиметрии (тем же кодом, что собирает задачу). */
+let bank1 = null;
+function answer1(payload, at) {
+  const { razreshit, sostavZadachi } = requireSrc('lib/planimetriya/trenazher/zadacha');
+  if (bank1 === null) {
+    bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
+  }
+  const plan = payload.plan[at];
+  if (plan === undefined) {
+    throw new Error(`№1: нет задачи ${at} в плане`);
+  }
+  return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
+}
+
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
 const uznay = new Map();
 function answer45(payload, at) {
@@ -270,6 +286,18 @@ const TRAINERS = [
     /* Типы задач по умолчанию не отмечены: быстрая настройка на всё задание. */
     start: async (page) => {
       await page.getByRole('button', { name: 'Всё задание 11' }).click();
+      await pressStart(page);
+    },
+    rep: true,
+  },
+  {
+    name: '№1',
+    url: '/zadaniya/1/trenazher/',
+    scope: '1',
+    answer: answer1,
+    /* Типы задач по умолчанию не отмечены: быстрая настройка на всё задание. */
+    start: async (page) => {
+      await page.getByRole('button', { name: 'Всё задание 1' }).click();
       await pressStart(page);
     },
     rep: true,
@@ -1025,6 +1053,7 @@ console.log('\n10. Вход по ссылке на набор');
 for (const [name, link, tag] of [
   ['№12 linear', '/zadaniya/12/linear/trenazher/value/', '№12 linear, ярлык «Найти значение функции»'],
   ['№11', '/zadaniya/11/trenazher/?tip=RZ-17', '№11, ссылка ?tip=RZ-17'],
+  ['№1', '/zadaniya/1/trenazher/?tipy=p05', '№1, ссылка «Где на ЕГЭ» ?tipy=p05'],
 ]) {
   const trainer = chosen.find((item) => item.name === name);
   if (trainer !== undefined) {

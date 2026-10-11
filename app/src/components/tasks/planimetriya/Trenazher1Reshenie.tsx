@@ -139,7 +139,12 @@ export function Trenazher1Reshenie({
      и в итогах числится «неверно»; нетронутые — «пропущено», в историю
      не пишутся. */
   useBeforeFinish(setBeforeFinish, () => {
-    if (otmetki[index] !== undefined || razborOtkryt || (checked === null && !podskazkaByla)) {
+    if (
+      zadacha === undefined ||
+      otmetki[index] !== undefined ||
+      razborOtkryt ||
+      (checked === null && shag === 0 && mimo.length === 0)
+    ) {
       return;
     }
     zapisat('wrong', false);
