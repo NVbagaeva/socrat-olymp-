@@ -7,9 +7,13 @@ import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainer
 import { O_ZADANII, TRENAZHER_2, VEKTORY } from '@/content/vektory';
 import { counted } from '@/lib/plural';
 import { progress2 } from '@/lib/vektory/progress';
-import { buildSession2, type Task2 } from '@/lib/vektory/session';
-import { Trenazher2Screen } from './Trenazher2Screen';
+import { buildSession2, kindTitle, type Task2 } from '@/lib/vektory/session';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
+import { TrainerSessionHost, type ConfiguratorApi } from '../session';
+import { Trenazher2Screen, razborOf } from './Trenazher2Screen';
 import { Trenazher2Stats } from './Trenazher2Stats';
+import { isTrenazher2Payload, type Trenazher2Payload } from './trenazher2Payload';
+import { readTrenazher2Ui, type Trenazher2Ui } from './trenazher2Ui';
 
 export interface Trenazher2Props {
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
@@ -20,13 +24,74 @@ export interface Trenazher2Props {
   total: number;
 }
 
-interface Started {
-  key: string;
-  tasks: Task2[];
-  control: boolean;
+const COUNTS: (number | null)[] = [5, 10, 20, null];
+
+/**
+ * Тренажёр задания №2: оболочка сессии вокруг конфигуратора и экрана.
+ * Задания собираются в браузере и сохраняются целиком вместе с
+ * закрытыми ответами: открытые числа в хранилище не попадают.
+ */
+export function Trenazher2({ base, skills, total }: Trenazher2Props) {
+  return (
+    <TrainerSessionHost<Trenazher2Payload, Trenazher2Ui>
+      scope={scopeOfPath(base) ?? VEKTORY.slug}
+      what="тренажёр"
+      backHref={base}
+      isPayload={isTrenazher2Payload}
+      count={(payload) => payload.tasks.length}
+      describe={(payload, at) => {
+        const task = payload.tasks[at];
+        if (task === undefined) {
+          throw new Error('Нет задания');
+        }
+        return {
+          kind: kindTitle(task.prototype),
+          html: task.questionHtml,
+          /* Разбор открывается только здесь, на итогах: он закрыт отпечатком. */
+          review: () => <Trenazher2Review task={task} />,
+        };
+      }}
+      subset={(payload, indexes) => ({
+        ...payload,
+        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
+      })}
+      configurator={(api) => <Trenazher2Configurator skills={skills} total={total} api={api} />}
+      screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
+        <Trenazher2Screen
+          pool={payload.tasks}
+          roundKey={sessionId}
+          restored={restored === null ? null : readTrenazher2Ui(restored)}
+          report={report}
+          elapsed={elapsed}
+          onFinish={finish}
+          control={payload.control}
+        />
+      )}
+    />
+  );
 }
 
-const COUNTS: (number | null)[] = [5, 10, 20, null];
+/** Разбор задания на итогах: все шаги и рисунок с катетами. */
+function Trenazher2Review({ task }: { task: Task2 }) {
+  const razbor = razborOf(task);
+  return (
+    <div className="z2-razbor">
+      {razbor.risunokSvg === null ? null : (
+        <span className="vp-wrap" dangerouslySetInnerHTML={{ __html: razbor.risunokSvg }} />
+      )}
+      <ol className="z2-shagi">
+        {razbor.shagi.map((shag, i) => (
+          <li className="z2-shag" key={i}>
+            <p className="z2-shag__title" dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }} />
+            {shag.strokiHtml.map((line, j) => (
+              <p className="z2-shag__line" key={j} dangerouslySetInnerHTML={{ __html: line }} />
+            ))}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 /**
  * Конфигуратор тренировки №2: прототип → режим → количество.
@@ -37,12 +102,19 @@ const COUNTS: (number | null)[] = [5, 10, 20, null];
  * браузере: генератор считает свежие числа, ответы сразу закрываются
  * отпечатком.
  */
-export function Trenazher2({ base, skills, total }: Trenazher2Props) {
+function Trenazher2Configurator({
+  skills,
+  total,
+  api,
+}: {
+  skills: SkillItem[];
+  total: number;
+  api: ConfiguratorApi<Trenazher2Payload>;
+}) {
   const first = skills[0];
   const [skillId, setSkillId] = useState(first?.id ?? '');
   const [mode, setMode] = useState<TrainerModeId>('practice');
   const [count, setCount] = useState<number | null>(10);
-  const [started, setStarted] = useState<Started | null>(null);
 
   const progress = progress2.useProgress();
   const hasMistakes = progress.mistakes.length > 0;
@@ -72,18 +144,8 @@ export function Trenazher2({ base, skills, total }: Trenazher2Props) {
     if (tasks.length === 0) {
       return;
     }
-    setStarted({ key: `session2:${Date.now()}`, tasks, control: mode === 'control' });
-  }
-
-  if (started !== null) {
-    return (
-      <Trenazher2Screen
-        pool={started.tasks}
-        roundKey={started.key}
-        backHref={base}
-        control={started.control}
-      />
-    );
+    /* Оболочка сессии сохранит задания целиком и вернёт ученика в них. */
+    api.start({ tasks, control: mode === 'control' });
   }
 
   return (

@@ -1,26 +1,35 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import { TRENAZHER_2 } from '@/content/vektory';
-import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
+import { pickRound, useRound } from '@/lib/trainerRound';
 import { progress2 } from '@/lib/vektory/progress';
 import { answerMatches, openText } from '@/lib/vektory/secret';
 import { kindTitle, type RazborTrenazhera, type Task2 } from '@/lib/vektory/session';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
-import { Trenazher2Result, type Mark2 } from './Trenazher2Result';
+import { useSessionReport } from '../session/useSessionReport';
+import type { TaskMark } from '@/lib/trainerSession/types';
+import type { Trenazher2Ui } from './trenazher2Ui';
 
 export interface Trenazher2ScreenProps {
   pool: Task2[];
   roundKey: string;
-  backHref: string;
+  /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
+  restored: Trenazher2Ui | null;
+  /** Сообщить оболочке сессии о новом состоянии (она его сохранит). */
+  report: (ui: Trenazher2Ui) => void;
+  /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
+  elapsed: () => number;
+  /** Последнее задание решено: показать итоги. */
+  onFinish: () => void;
   /** Контроль: без подсказок и решения до конца сессии. */
   control?: boolean;
 }
 
 /** Разбор: закрыт тем же отпечатком, что и ответ; раскрывается по нажатию. */
-function razborOf(task: Task2): RazborTrenazhera {
+export function razborOf(task: Task2): RazborTrenazhera {
   try {
     const value: unknown = JSON.parse(openText(task.razbor, task.seal));
     if (typeof value === 'object' && value !== null && 'shagi' in value) {
@@ -45,12 +54,15 @@ function razborOf(task: Task2): RazborTrenazhera {
 export function Trenazher2Screen({
   pool,
   roundKey,
-  backHref,
+  restored,
+  report,
+  elapsed,
+  onFinish,
   control = false,
 }: Trenazher2ScreenProps) {
   const kinds = useMemo(() => pool.map((item) => kindTitle(item.prototype)), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  const order = useRound(roundKey, build);
+  const order = useRound(roundKey, build, restored?.order);
   const tasks = useMemo(
     () =>
       order.length === 0
@@ -59,30 +71,33 @@ export function Trenazher2Screen({
     [order, pool],
   );
 
-  const [index, setIndex] = useState(0);
-  const [value, setValue] = useState('');
-  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
-  const [marks, setMarks] = useState<Record<number, Mark2>>({});
-  const [razbor, setRazbor] = useState<RazborTrenazhera | null>(null);
+  /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
+     вернувшись в тренажёр, он продолжает с того же места. */
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  const [value, setValue] = useState(restored?.value ?? '');
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
+  const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
+  /* Задания, в которых была ошибка: на итогах они отличаются от пропущенных. */
+  const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
+  /* Разбор хранится флагом: он закрыт отпечатком и раскрывается заново. */
+  const [razborOpen, setRazborOpen] = useState(restored?.razborOpen ?? false);
   /** Сколько шагов разбора открыто подсказками; все — полное решение. */
-  const [shagov, setShagov] = useState(0);
-  const [polnoe, setPolnoe] = useState(false);
-  const [misses, setMisses] = useState(0);
-  const [result, setResult] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const startedAt = useRef<number | null>(null);
-  const taskStartedAt = useRef<number | null>(null);
-  const failed = useRef(false);
+  const [shagov, setShagov] = useState(restored?.shagov ?? 0);
+  const [polnoe, setPolnoe] = useState(restored?.polnoe ?? false);
+  const [misses, setMisses] = useState(restored?.misses ?? 0);
+  /* Время тренировки считает оболочка сессии; здесь — время на одно
+     задание, от первой проверки. */
+  const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
+  const [failed, setFailed] = useState(restored?.failed ?? false);
 
   function startClock() {
-    const now = Date.now();
-    startedAt.current ??= now;
-    taskStartedAt.current ??= now;
+    if (taskFrom === null) {
+      setTaskFrom(elapsed());
+    }
   }
 
   function taskSeconds(): number {
-    const from = taskStartedAt.current;
-    return from === null ? 0 : (Date.now() - from) / 1000;
+    return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
 
   function remember(item: Task2, right: boolean, clean: boolean) {
@@ -95,10 +110,22 @@ export function Trenazher2Screen({
     });
   }
 
-  function stopClock() {
-    const from = startedAt.current;
-    setSeconds(from === null ? 0 : (Date.now() - from) / 1000);
-  }
+  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
+     каждом изменении, а при возвращении отдаёт обратно (restored). */
+  useSessionReport<Trenazher2Ui>(report, {
+    index,
+    marks,
+    tried,
+    order: order.length === 0 ? null : order,
+    value,
+    checked,
+    razborOpen,
+    shagov,
+    polnoe,
+    misses,
+    failed,
+    taskFrom,
+  });
 
   const found = tasks[index];
   if (found === undefined) {
@@ -110,6 +137,7 @@ export function Trenazher2Screen({
   const ready = value.trim() !== '';
   /* Полное решение до верного ответа — задача не засчитана. */
   const revealed = polnoe && checked !== 'right';
+  const razbor = razborOpen ? razborOf(task) : null;
   const hinted = shagov > 0;
   const shagi = razbor === null ? [] : razbor.shagi;
   const otkryto = polnoe ? shagi.length : Math.min(shagov, shagi.length);
@@ -122,96 +150,58 @@ export function Trenazher2Screen({
     const right = answerMatches(value, task.seal);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
-      const clean = failed.current === false && !hinted && !polnoe;
+      const clean = !failed && !hinted && !polnoe;
       setMarks({
         ...marks,
         [index]: polnoe ? 'hinted' : clean ? 'right' : hinted ? 'hinted' : 'right',
       });
       remember(task, !polnoe, clean);
-      if (last) {
-        stopClock();
-      }
     } else {
-      failed.current = true;
+      setFailed(true);
       setMisses(misses + 1);
+      setTried({ ...tried, [index]: true });
     }
   }
 
   function podskazka() {
     startClock();
     const opened = razbor ?? razborOf(task);
-    setRazbor(opened);
+    setRazborOpen(true);
     setShagov(Math.min(shagov + 1, opened.shagi.length));
   }
 
   function polnoeReshenie() {
     startClock();
-    const opened = razbor ?? razborOf(task);
-    setRazbor(opened);
+    setRazborOpen(true);
     setPolnoe(true);
     if (checked !== 'right') {
       setMarks({ ...marks, [index]: 'hinted' });
       remember(task, false, false);
-      if (last) {
-        stopClock();
-      }
     }
   }
 
   function next() {
-    taskStartedAt.current = null;
-    failed.current = false;
+    setTaskFrom(null);
+    setFailed(false);
     setIndex(index + 1);
     setValue('');
     setChecked(null);
-    setRazbor(null);
+    setRazborOpen(false);
     setShagov(0);
     setPolnoe(false);
-  }
-
-  function again() {
-    restartRound(roundKey);
-    setResult(false);
-    setIndex(0);
-    setValue('');
-    setChecked(null);
-    setMarks({});
-    setMisses(0);
-    setSeconds(0);
-    setRazbor(null);
-    setShagov(0);
-    setPolnoe(false);
-    startedAt.current = null;
-    taskStartedAt.current = null;
-    failed.current = false;
   }
 
   const nextButton = last ? (
-    <Button onClick={() => setResult(true)}>{TRENAZHER_2.rezultat}</Button>
+    <Button onClick={onFinish}>{TRENAZHER_2.rezultat}</Button>
   ) : (
     <Button onClick={next}>{TRENAZHER_2.sleduyushchaya}</Button>
   );
-
-  if (result) {
-    return (
-      <Trenazher2Result
-        tasks={tasks}
-        marks={marks}
-        misses={misses}
-        seconds={seconds}
-        backHref={backHref}
-        onAgain={again}
-      />
-    );
-  }
 
   const done = checked === 'right' || revealed;
 
   return (
     <section className="ttask z2-ttask">
-      <p className="ttask__count">
-        Задание <b>{index + 1}</b> из {total} · {task.prototype}
-      </p>
+      <p className="ttask__count">{task.prototype}</p>
 
       <ol className="ttask__dots" aria-hidden="true">
         {tasks.map((item, i) => (

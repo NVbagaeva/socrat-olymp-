@@ -1,18 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Badge, Button } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { counted } from '@/lib/plural';
 import { progress8 } from '@/lib/vychisleniya/progress';
-import { buildSession8, type Task8 } from '@/lib/vychisleniya/session';
+import { buildSession8, kindTitle } from '@/lib/vychisleniya/session';
 import { LEVELS } from '@/lib/vychisleniya/skills';
 import type { Level } from '@/lib/vychisleniya/types';
-import { Trenazher8Screen } from './Trenazher8Screen';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
+import { TrainerSessionHost, type ConfiguratorApi } from '../session';
+import { Trenazher8Screen, razborOf } from './Trenazher8Screen';
 import { Trenazher8Stats } from './Trenazher8Stats';
+import { isTrenazher8Payload, type Trenazher8Payload } from './trenazher8Payload';
+import { readTrenazher8Ui, type Trenazher8Ui } from './trenazher8Ui';
 
 export interface Trenazher8Props {
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
@@ -23,21 +26,57 @@ export interface Trenazher8Props {
   total: number;
 }
 
-interface Started {
-  key: string;
-  tasks: Task8[];
-  control: boolean;
-}
-
 const COUNTS: (number | null)[] = [5, 10, 20, null];
 
-/* Ключ подхода новый на каждый запуск: раскладки подходов живут в
-   модуле (lib/trainerRound.ts) всю жизнь страницы, и ключ не должен
-   повториться и после повторного захода во вкладку. */
-let rounds = 0;
-function nextRoundKey(): string {
-  rounds += 1;
-  return `session8:${rounds}`;
+/**
+ * Тренажёр задания №8: оболочка сессии вокруг конфигуратора и экрана.
+ * Задания собираются в браузере и сохраняются целиком вместе с
+ * закрытыми ответами: открытые числа в хранилище не попадают.
+ */
+export function Trenazher8({ base, skills, total }: Trenazher8Props) {
+  return (
+    <TrainerSessionHost<Trenazher8Payload, Trenazher8Ui>
+      scope={scopeOfPath(base) ?? '8'}
+      what="тренажёр"
+      backHref={base}
+      isPayload={isTrenazher8Payload}
+      count={(payload) => payload.tasks.length}
+      describe={(payload, at) => {
+        const task = payload.tasks[at];
+        if (task === undefined) {
+          throw new Error('Нет задания');
+        }
+        return {
+          kind: kindTitle(task.prototype),
+          html: task.questionHtml,
+          /* Разбор открывается только здесь, на итогах: он закрыт отпечатком. */
+          review: () => (
+            <ol className="z8-razbor__steps">
+              {razborOf(task).map((line, i) => (
+                <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
+              ))}
+            </ol>
+          ),
+        };
+      }}
+      subset={(payload, indexes) => ({
+        ...payload,
+        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
+      })}
+      configurator={(api) => <Trenazher8Configurator skills={skills} total={total} api={api} />}
+      screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
+        <Trenazher8Screen
+          pool={payload.tasks}
+          roundKey={sessionId}
+          restored={restored === null ? null : readTrenazher8Ui(restored)}
+          report={report}
+          elapsed={elapsed}
+          onFinish={finish}
+          control={payload.control}
+        />
+      )}
+    />
+  );
 }
 
 /**
@@ -49,14 +88,21 @@ function nextRoundKey(): string {
  * тренировку» собирает задачи в браузере: генератор считает свежие
  * числа, ответы сразу закрываются отпечатком.
  */
-export function Trenazher8({ base, skills, total }: Trenazher8Props) {
+function Trenazher8Configurator({
+  skills,
+  total,
+  api,
+}: {
+  skills: SkillItem[];
+  total: number;
+  api: ConfiguratorApi<Trenazher8Payload>;
+}) {
   const first = skills[0];
   /* Навыков можно выбрать несколько; последний снять нельзя. */
   const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
   const [mode, setMode] = useState<TrainerModeId>('practice');
   const [count, setCount] = useState<number | null>(10);
   const [level, setLevel] = useState<Level>('base');
-  const [started, setStarted] = useState<Started | null>(null);
 
   /* История ошибок только читается: «Повтор ошибок» доступен, когда
      есть что повторять. */
@@ -109,20 +155,8 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
     if (tasks.length === 0) {
       return;
     }
-    setStarted({ key: nextRoundKey(), tasks, control: mode === 'control' });
-  }
-
-  if (started !== null) {
-    return (
-      <ErrorBoundary what="тренажёр" resetKey={started.key}>
-        <Trenazher8Screen
-          pool={started.tasks}
-          roundKey={started.key}
-          backHref={base}
-          control={started.control}
-        />
-      </ErrorBoundary>
-    );
+    /* Оболочка сессии сохранит задания целиком и вернёт ученика в них. */
+    api.start({ tasks, control: mode === 'control' });
   }
 
   return (

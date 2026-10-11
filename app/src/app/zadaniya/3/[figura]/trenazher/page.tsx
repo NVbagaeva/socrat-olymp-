@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
 import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
 import { razdelPool } from '@/lib/zadanie3/pool';
+import { stereometria } from '@/content/stereometria';
+import { href, ZADANIYA } from '@/lib/paths';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
 import '../trenazher.css';
 
 export function generateStaticParams() {
@@ -31,5 +34,13 @@ export default async function TrenazherTab({ params }: { params: Params }) {
   if (razdel === undefined) {
     notFound();
   }
-  return <Solid3Trainer pool={razdelPool(razdel)} roundKey={`z3:${razdel.slug}`} />;
+  /* Адрес раздела: по нему же лента вкладок узнаёт о незавершённой тренировке. */
+  const base = href(ZADANIYA, stereometria.slug, razdel.slug);
+  return (
+    <Solid3Trainer
+      pool={razdelPool(razdel)}
+      scope={scopeOfPath(base) ?? razdel.slug}
+      backHref={base}
+    />
+  );
 }
