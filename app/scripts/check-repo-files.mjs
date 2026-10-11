@@ -56,7 +56,11 @@ const SELF = 'app/scripts/check-repo-files.mjs';
 
 /* Явные исключения: путь → причина. */
 const ALLOWED = new Map([
-  // Пока пусто. Формат: ['путь/к/файлу.pdf', 'почему ему можно здесь лежать'].
+  // Формат: ['путь/к/файлу', 'почему ему можно здесь лежать'].
+  [
+    'app/scripts/check-istochniki-skryty.mjs',
+    'проверка сайта: список запрещённых слов, которых не должно быть на страницах №4 и №5',
+  ],
 ]);
 
 const files = execFileSync('git', ['-c', 'core.quotepath=off', 'ls-files', '-z'], {
