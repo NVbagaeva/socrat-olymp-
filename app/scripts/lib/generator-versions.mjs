@@ -33,6 +33,7 @@ export const GENERATOR_SOURCES = {
   4: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
   5: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
   8: ['lib/vychisleniya', 'content/sheet8.js'],
+  9: ['lib/proizvodnaya', 'content/sheet9.js', 'lib/sheet/answers9.js'],
   11: ['lib/zadanie11'],
 };
 

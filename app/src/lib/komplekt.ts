@@ -29,7 +29,7 @@
 import { storage } from '@/lib/storage';
 
 /** Область комплекта — задание, чей генератор его собрал. */
-export type KitScope = '12' | '2' | '4' | '5' | '8' | '11';
+export type KitScope = '12' | '2' | '4' | '5' | '8' | '9' | '11';
 
 export type SheetWhich = 'student' | 'teacher';
 
@@ -135,6 +135,9 @@ export function settingsOf(href: string): string {
   params.delete('seed');
   params.delete('kit');
   params.delete('oba');
+  /* Серия и номер урока (№9) — не настройки экрана, а место в потоке банка. */
+  params.delete('s');
+  params.delete('u');
   return `${path}?${params.toString()}`;
 }
 

@@ -1,0 +1,70 @@
+/* Страница печати задания №9: только лист, без оболочки сайта.
+   Копия pechat8.css плюс рисунки графиков (.pr) на чёрно-белом листе. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Рисунки графиков: в ч/б теме кривая — чёрная и толстая, касательная
+   и построения — серые и тоньше. Различие — тоном и толщиной, штриха
+   на рисунке ученика нет. */
+[data-sheet-theme='print'] svg.pr {
+  --graph-accent: #6b6b6b;
+}
+[data-sheet-theme='print'] svg.pr .pr-tangent {
+  stroke-width: 2px;
+}
+[data-sheet-theme='print'] svg.pr .pr-fill {
+  fill: #000000;
+  fill-opacity: 0.14;
+}
+
+/* Рамки теории: рисунок к примеру не сжимается, текст не наезжает.
+   Пример №9 — с рисунком под текстом на всю ширину рамки. */
+.sheet-example:not(.sheet-example--stack) .sheet-figure {
+  flex: none;
+}
+.sheet-example--stack .sheet-example-text {
+  flex: 1 1 100%;
+}
+.sheet-example--stack .sheet-figure {
+  flex: 0 0 auto;
+  margin: calc(var(--sheet-step) * 2) auto 0;
+}
+.sheet-example--stack .sheet-figure svg {
+  width: 100%;
+}
+.sheet-zapomni .sheet-recap {
+  margin-bottom: 0;
+}
+
+/* Лист учителя: разбор основным кеглем и чернилами, а не мелким серым,
+   формулы KaTeX на ступень крупнее — всё читается на A4 без лупы. */
+.z9-razbor {
+  font-size: var(--sheet-fs-body);
+  color: var(--sheet-ink);
+}
+.z9-razbor .katex,
+.sheet-task-answer .katex {
+  font-size: 1.12em;
+}
+.sheet-example-text .sheet-task-question {
+  font-size: var(--sheet-fs-body);
+}
+/* Рисунок учителя под условием — по центру колонки. */
+.sheet-task--stack .sheet-figure {
+  align-self: center;
+}

@@ -50,6 +50,8 @@ const SKIP_FILES = [
   { re: /^lib\/solid\/catalog\.ts$/, why: 'подписи каталога тел — только для /styleguide/' },
   { re: /^lib\/scenes\.ts$/, why: 'подписи внутри SVG-чертежей: KaTeX в <text> не встраивается' },
   { re: /^lib\/vektory\/(?:render|obraztsy)\.ts$/, why: 'движок рисунков №2: подписи внутри SVG и образцы витрины' },
+  { re: /^lib\/proizvodnaya\/(?:render|reshit)\.ts$/,
+    why: 'движок рисунков №9: подписи внутри SVG и сообщения о нарушениях для разработчика' },
   { re: /^lib\/veroyatnost\/illyustratsii\.ts$/, why: 'alt картинок: атрибут, только обычный текст' },
 ];
 
