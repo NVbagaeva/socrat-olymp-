@@ -512,18 +512,40 @@ export const BLOK_X: PrototipChertezha[] = [
   {
     id: 62,
     blok: 'X',
-    nazvanie: 'Правильный многоугольник: угол между сторонами → число вершин',
+    nazvanie: 'Правильный многоугольник: угол между сторонами или центральный угол → число вершин',
     fipi: [],
+    /* Две формулировки: v = 0 — угол между соседними сторонами,
+       v = 1 — угол, под которым сторона видна из центра. */
     uslovie: (p) =>
-      `Угол между двумя соседними сторонами правильного многоугольника, вписанного в окружность, равен $${grTex(180 - 360 / p.n)}$. Найдите число вершин многоугольника.`,
+      p.v
+        ? `Сторона правильного многоугольника видна из центра описанной окружности под углом $${grTex(360 / p.n)}$. Найдите число вершин многоугольника.`
+        : `Угол между двумя соседними сторонами правильного многоугольника, вписанного в окружность, равен $${grTex(180 - 360 / p.n)}$. Найдите число вершин многоугольника.`,
     otvet: (p) => p.n,
-    primer: { n: 5 },
-    sluchaynye: (r) => ({ n: r.int(3, 18) }),
+    primer: { n: 5, v: 0 },
+    sluchaynye: (r) => ({ n: r.int(3, 18), v: r.int(0, 1) }),
     stsena: (p) => {
       const v = pravilnyy(p.n);
       const imena = v.map((_, i) => `P${i + 1}`);
+      const tochki = { O: O0, ...Object.fromEntries(imena.map((n, i) => [n, v[i]!])) };
+      if (p.v) {
+        return {
+          tochki,
+          okruzhnosti: OKR,
+          elementy: [
+            okr('w'),
+            mn(imena, { vydelit: 'iskomoe' }),
+            tochka('O'),
+            otr('O', imena[0]!),
+            otr('O', imena[1]!),
+            ug(imena[0]!, 'O', imena[1]!, { vydelit: 'dano', znachenie: gr(360 / p.n) }),
+            otr('O', imena[2 % p.n]!, { sloy: 1, stil: 'punktir' }),
+            ug(imena[1]!, 'O', imena[2 % p.n]!, { sloy: 1, dugi: 2 }),
+          ],
+          podpisi: false,
+        };
+      }
       return {
-        tochki: { O: O0, ...Object.fromEntries(imena.map((n, i) => [n, v[i]!])) },
+        tochki,
         okruzhnosti: OKR,
         elementy: [
           okr('w'),
