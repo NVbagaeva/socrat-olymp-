@@ -69,6 +69,8 @@ export interface OpcVolny {
   shag?: number;
   /** Первый экстремум: 'max', 'min' или случайно. */
   pervyy?: 'max' | 'min';
+  /** Длина интервала b − a: от и до (по умолчанию 8…17). */
+  shirina?: [number, number];
 }
 
 /** Волна для графика f: чередующиеся максимумы и минимумы. */
@@ -77,7 +79,8 @@ export function volna(r: Rng, o: OpcVolny): Volna | null {
   const [bLo, bHi] = o.b ?? [3, 9];
   const a = r.int(aLo, aHi);
   const b = r.int(bLo, bHi);
-  if (b - a < 8 || b - a > 17) {
+  const [wLo, wHi] = o.shirina ?? [8, 17];
+  if (b - a < wLo || b - a > wHi) {
     return null;
   }
   const n = r.int(o.n[0], o.n[1]);
@@ -161,6 +164,8 @@ export interface OpcVolnyP {
   shag?: number;
   /** Знак первой доли (до первого нуля): +1, −1 или случайно. */
   pervyy?: 1 | -1;
+  /** Длина интервала b − a: от и до (по умолчанию 8…17). */
+  shirina?: [number, number];
 }
 
 /** Волна для графика f′: узлы-нули на оси, между ними горбы. */
@@ -169,7 +174,8 @@ export function volnaP(r: Rng, o: OpcVolnyP): VolnaP | null {
   const [bLo, bHi] = o.b ?? [3, 9];
   const a = r.int(aLo, aHi);
   const b = r.int(bLo, bHi);
-  if (b - a < 8 || b - a > 17) {
+  const [wLo, wHi] = o.shirina ?? [8, 17];
+  if (b - a < wLo || b - a > wHi) {
     return null;
   }
   const n = r.int(o.n[0], o.n[1]);
