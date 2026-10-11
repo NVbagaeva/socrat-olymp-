@@ -7,7 +7,6 @@ import { Tex } from '@/components/ui/Tex';
 import { TRENAZHER_1 } from '@/content/zadanie1';
 import { plural } from '@/lib/plural';
 import { progress1 } from '@/lib/planimetriya/progress';
-import { zakryto, type Pauza } from '@/lib/planimetriya/trenazher/pauza';
 import {
   primernoeVremya,
   vTrenirovke,
@@ -36,10 +35,6 @@ export interface Trenazher1VyborProps {
   progress: StoreProgress;
   zagruzka: boolean;
   onStart: () => void;
-  /** Тренировка на паузе и что с ней сделать. */
-  pauza: Pauza | null;
-  onProdolzhit: () => void;
-  onZavershit: () => void;
 }
 
 /** Текст для поиска: название без TeX. */
@@ -57,8 +52,9 @@ function podkhodit(p: PodtipInfo, needle: string): boolean {
 /**
  * Экран выбора тренировки №1 — экран выбора №11 (Trenazher11Vybor):
  * источник задач, быстрые настройки, поиск, аккордеон блоков I–X с
- * прототипами и правая карточка «Выбранная тренировка». Сверху —
- * тренировка на паузе, если она есть.
+ * прототипами и правая карточка «Выбранная тренировка».
+ * Незавершённую тренировку возвращает оболочка сессии: с ней этот
+ * экран не показывается.
  */
 export function Trenazher1Vybor({
   razdely,
@@ -70,9 +66,6 @@ export function Trenazher1Vybor({
   progress,
   zagruzka,
   onStart,
-  pauza,
-  onProdolzhit,
-  onZavershit,
 }: Trenazher1VyborProps) {
   const [poisk, setPoisk] = useState('');
   const [otkryty, setOtkryty] = useState<Set<Blok>>(new Set());
@@ -145,29 +138,6 @@ export function Trenazher1Vybor({
   return (
     <div className="z11-tr">
       <div className="z11-tr__main">
-        {pauza === null ? null : (
-          <section className="z11-card z1-pauza" aria-labelledby="z1-pauza-title">
-            <span className="z1-pauza__ikonka" aria-hidden="true">
-              <Piktogramma name="clock" />
-            </span>
-            <div className="z1-pauza__text">
-              <h2 className="z1-pauza__title" id="z1-pauza-title">
-                {TRENAZHER_1.naPauze}
-              </h2>
-              <p>{TRENAZHER_1.naPauzeText(pauza.index + 1, pauza.plan.length, zakryto(pauza))}</p>
-            </div>
-            <div className="z1-pauza__btns">
-              <Button onClick={onProdolzhit} disabled={zagruzka}>
-                <Piktogramma name="play" />
-                {TRENAZHER_1.prodolzhit}
-              </Button>
-              <Button variant="ghost" onClick={onZavershit} disabled={zagruzka}>
-                {TRENAZHER_1.zavershit}
-              </Button>
-            </div>
-          </section>
-        )}
-
         <section className="z11-tr__blok">
           <h2 className="z11-blok-title">{TRENAZHER_1.otkuda}</h2>
           <div className="z11-istochnik" role="radiogroup" aria-label={TRENAZHER_1.otkuda}>

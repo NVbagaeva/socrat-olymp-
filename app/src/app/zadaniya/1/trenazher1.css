@@ -1,7 +1,7 @@
 /* Задание №1: добавки к экранам тренажёра, генератора и «Для
    репетиторов». Сами экраны — слой №11 (zadanie11.css, классы z11-*),
    здесь только то, чего у №11 нет: значок блока римской цифрой,
-   чертёж рядом с условием, тренировка на паузе, рамки теории в
+   чертёж рядом с условием и в итогах тренировки, рамки теории в
    генераторе. Значения — только токены. */
 
 /* Значок блока: кружок значка раздела №11, внутри — номер блока. */
@@ -12,60 +12,20 @@
   line-height: 1;
 }
 .z11-akk__ikonka.z1-ikonka,
-.z11-vybrannaya__ikonka.z1-ikonka,
-.z11-itog__ikonka.z1-ikonka {
+.z11-vybrannaya__ikonka.z1-ikonka {
   font-size: var(--fs-caption);
 }
-
-/* ── Тренажёр: тренировка на паузе ─────────────────────────────── */
-
-.z1-pauza {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-5);
-  border-color: var(--color-border-warm);
-  background: var(--color-surface-warm);
-}
-.z1-pauza__ikonka {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--color-surface);
-  color: var(--color-star);
-}
-.z1-pauza__ikonka .z11-pic {
-  width: 24px;
-  height: 24px;
-}
-.z1-pauza__text {
-  flex: 1 1 240px;
-  min-width: 0;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-}
-.z1-pauza__title {
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
-  font-weight: 600;
-}
-.z1-pauza__btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/* В строке итогов значок — кружок высотой со строку. */
+.tsum__icon .z1-ikonka {
+  width: 100%;
+  height: 100%;
+  font-size: var(--fs-caption);
 }
 
 /* ── Тренажёр: экран задачи ────────────────────────────────────── */
 
 .z1-resh {
   max-width: 960px;
-}
-.z1-resh__stop {
-  margin-left: auto;
 }
 .z1-resh__grid {
   display: grid;
@@ -97,9 +57,21 @@
   .z1-resh__pic {
     max-width: 360px;
   }
-  .z1-resh__stop {
-    margin-left: 0;
-  }
+}
+
+/* ── Тренажёр: итоги ───────────────────────────────────────────── */
+
+/* Чертёж ученика под условием задачи в списке итогов (общий экран
+   итогов оболочки сессии, разметка условия — из describe). */
+.z1-sum__pic {
+  display: block;
+  max-width: 240px;
+  margin-top: var(--space-3);
+}
+.z1-sum__pic svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ── Генератор: превью листа ───────────────────────────────────── */

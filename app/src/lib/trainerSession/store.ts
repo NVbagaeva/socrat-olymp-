@@ -370,7 +370,10 @@ export function useActiveTrainerScopes(): readonly string[] {
  * прежние ключи: у учеников они больше не читаются и только занимают
  * место. Ключи прогресса (счётчики, ошибки) сюда не попадают — они живы.
  */
-export const LEGACY_SESSION_KEYS: readonly string[] = [];
+export const LEGACY_SESSION_KEYS: readonly string[] = [
+  /* №1: тренировка на паузе (план, номер задачи, отметки). */
+  'budetege:planimetriya-1:trenazher-pauza:v1',
+];
 
 let swept = false;
 
