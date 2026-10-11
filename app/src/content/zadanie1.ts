@@ -8,6 +8,7 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 
 export const ZADANIE1 = {
   no: '01',
@@ -15,6 +16,18 @@ export const ZADANIE1 = {
   title: taskName('1'),
   lead: 'Углы, площади, тригонометрия острого угла и окружности — задачи по готовому чертежу. Справочник с чертежами, все 214 задач открытого банка и по двадцать аналогов на каждый тип.',
   badge: 'Профильный уровень',
+  /**
+   * Иллюстрация справа в шапке: стеклянная подставка с чертежами.
+   * Файлы собирает scripts/build-shapka.mjs из
+   * assets/zadanie-01/shapka-planimetriya.png; размеры — обрезанного
+   * кадра, их печатает тот же скрипт.
+   */
+  art: {
+    src: '/images/zadanie-01/shapka-planimetriya',
+    width: 1567,
+    height: 1004,
+    shiriny: [480, 768, 1200, 1536],
+  } as ShapkaArt,
   tabs: [
     { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
