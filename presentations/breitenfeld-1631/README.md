@@ -9,8 +9,8 @@
 - `breitenfeld-1631.pdf` статичная версия для печати.
 
 Картинки лежат в `assets/img`. Если файла нет, на слайде показывается заглушка с его именем.
-Гравюры на слайде 6 (`musk.jpg`, `pikeman.jpg`): Якоб де Гейн II, «Wapenhandelinghe» (1607),
-Рейксмюсеум RP-P-OB-52.713 и RP-P-OB-52.666, общественное достояние, Wikimedia Commons.
+Мушкетёр на слайде 6 (`musk.jpg`): гравюра Якоба де Гейна II, «Wapenhandelinghe» (1607),
+Рейксмюсеум RP-P-OB-52.713, общественное достояние, Wikimedia Commons. Пикинёр (`pikeman.jpg`): цветная иллюстрация.
 Эстрелла в углах слайдов: `estrella-wonder.png` и `estrella-cheer.png`; их можно заменить стикерами с теми же именами.
 
 Библиотеки (GSAP 3.12.5, Three.js r160) и шрифты (Cormorant Garamond, Manrope) лежат локально в `assets/vendor` и `assets/fonts`.

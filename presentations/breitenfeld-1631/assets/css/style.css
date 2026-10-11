@@ -228,6 +228,7 @@ ul.points.compact li{font-size:30px}
 .weapon.has-engr{grid-template-columns:400px 1fr}
 .weapon .frame.engr{height:auto;aspect-ratio:73/100;background:#efe3c6}
 .frame.engr img{object-fit:cover}
+.weapon .frame.engr.pike-color{aspect-ratio:944/1456;width:360px}
 .credit{position:absolute;left:120px;bottom:96px;max-width:1300px;font-size:19px;line-height:1.4;color:var(--ink-soft)}
 .weapon h3{font-size:56px;margin-bottom:16px}
 .weapon.m h3{color:var(--navy)}

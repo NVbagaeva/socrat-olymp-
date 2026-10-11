@@ -30,7 +30,7 @@
 ## Картинки
 
 - Стоят на местах: `hero.png`, `map_start.png`, `king.png`, `tercio.png`, `swedish_line.png`, `turn_cannons.png`, `victory.png`. Белый фон убран.
-- Слайд 6: гравюры Якоба де Гейна II из «Wapenhandelinghe» (1607): `musk.jpg` (RP-P-OB-52.713) и `pikeman.jpg` (RP-P-OB-52.666), Рейксмюсеум, общественное достояние, Wikimedia Commons.
+- Слайд 6: мушкетёр — гравюра Якоба де Гейна II из «Wapenhandelinghe» (1607), `musk.jpg` (Рейксмюсеум, RP-P-OB-52.713, общественное достояние, Wikimedia Commons); пикинёр — цветная иллюстрация, `pikeman.jpg`.
 - `king.png`, `map_start.png`, `victory.png` заменены новыми версиями со шведскими флагами.
 - Лилии остались на `tercio.png` (слайд 5), `hero.png` (слайд 11) и маленький фрагмент на `swedish_line.png`: их лучше перегенерировать.
 - Эстрелла в углу слайдов пока вырезана из больших картинок, края неидеальные. Отдельные стикеры (`chars*.png`, `st*.png`) можно поставить вместо вырезок.
