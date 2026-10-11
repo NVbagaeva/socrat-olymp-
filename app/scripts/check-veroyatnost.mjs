@@ -390,8 +390,8 @@ console.log(`  нарушений: ${generatory.problems.length}`);
 generatory.problems.slice(0, 40).forEach((item) => console.log(`   ${item}`));
 
 /* Подсказки-вопросы: их шаги проверены выше вместе с вариантом (и на
-   зёрнах генератора). Здесь — у каких прототипов подсказки ещё нет.
-   У задания №5 она обязательна у всех. */
+   зёрнах генератора). Здесь — у каких прототипов подсказки ещё нет:
+   у банков №4 и №5 она обязательна у всех. */
 const bez4 = bezPodskazki(BANK_4);
 const bez5 = bezPodskazki(BANK_5);
 console.log(
@@ -401,8 +401,8 @@ console.log(
 
 fs.rmSync(out, { recursive: true, force: true });
 
-if (bez5.length > 0) {
-  console.error(`\nУ прототипов №5 нет подсказки-вопросов: ${bez5.join(', ')}.`);
+if (bez4.length > 0 || bez5.length > 0) {
+  console.error(`\nУ прототипов нет подсказки-вопросов: ${[...bez4, ...bez5].join(', ')}.`);
   process.exit(1);
 }
 

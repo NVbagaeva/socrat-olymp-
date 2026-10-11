@@ -13,6 +13,7 @@
 
 import { skl } from '../morfologia';
 import { prototip } from '../generator';
+import { sPodskazkoy } from '../podskazka';
 import { konechnaya, num, type Prototype } from '../types';
 import { gen } from './generatory';
 import { plitkiDvuh, shagP } from './vizual';
@@ -261,4 +262,25 @@ const P21: Prototype = prototip({
   ],
 });
 
-export const STATISTICHESKOE: readonly Prototype[] = [P19, P20, P21];
+/* Подсказки-вопросы «m из n» (podskazka.ts): числа — из шагов разбора. */
+export const STATISTICHESKOE: readonly Prototype[] = [
+  sPodskazkoy(P19, (p) => ({
+    vse: 'Насосы партии: на контроль попадёт любой',
+    vseNe: ['Подтекающие насосы', 'Исправные насосы'],
+    blago: 'исправные насосы',
+    mOshibki: [num(p, 'k')],
+  })),
+  sPodskazkoy(P20, (p) => ({
+    vse: 'Сумки партии: покупателю достанется любая',
+    vseNe: ['Сумки с дефектом', 'Сумки без дефекта'],
+    blago: 'сумки без дефекта',
+    mOshibki: [num(p, 'k')],
+  })),
+  sPodskazkoy(P21, (p) => ({
+    vse: 'Все сумки: качественные вместе с дефектными',
+    vseNe: ['Только качественные сумки', 'Только сумки с дефектом'],
+    blago: 'качественные сумки',
+    nOshibki: [num(p, 'q')],
+    mOshibki: [num(p, 'd')],
+  })),
+];
