@@ -134,3 +134,32 @@ export function finishTour(id: TourId): void {
     tours: { ...s.tours, [id]: { step: 0, done: true } },
   });
 }
+
+/* ── Повторный показ заставки ──────────────────────────────────── */
+
+const INTRO_EVENT = 'budetege:intro';
+let introRequests = 0;
+
+/**
+ * «Посмотреть приветствие» из меню «?» и со страницы «Как пользоваться»:
+ * заставка показывается снова, хотя окно уже видели. Счётчик не
+ * хранится — это просьба на один раз.
+ */
+export function requestIntro(): void {
+  introRequests += 1;
+  window.dispatchEvent(new Event(INTRO_EVENT));
+}
+
+function subscribeIntro(onChange: () => void): () => void {
+  window.addEventListener(INTRO_EVENT, onChange);
+  return () => window.removeEventListener(INTRO_EVENT, onChange);
+}
+
+/** Сколько раз просили показать заставку снова (0 — не просили). */
+export function useIntroRequest(): number {
+  return useSyncExternalStore(
+    subscribeIntro,
+    () => introRequests,
+    () => 0,
+  );
+}

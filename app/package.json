@@ -75,7 +75,8 @@
     "test:repo-files": "node scripts/check-repo-files.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:navigation": "node scripts/check-navigation.mjs",
-    "test:dev-pages": "node scripts/check-dev-pages.mjs"
+    "test:dev-pages": "node scripts/check-dev-pages.mjs",
+    "test:intro": "node scripts/check-intro.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
