@@ -139,7 +139,7 @@ function stepB(meta, cv, A, B) {
   } else {
     blocks.push(text('Значения ' + m('1') + ' и ' + m('-1') + ' — противоположные. Сложим уравнения: ' + m('a') +
       ' и ' + m('-a') + ' сократятся.'));
-    blocks.push(formula(chain(['(a + b) + (-a + b) = ' + tex(A.y) + term(B.y) + ' = ' + tex(add(A.y, B.y)),
+    blocks.push(formula(chain(['a + b - a + b = ' + tex(A.y) + term(B.y) + ' = ' + tex(add(A.y, B.y)),
       '2b = ' + tex(add(A.y, B.y)) + ' \\;\\Rightarrow\\; b = ' + tex(cv.b)])));
   }
   blocks.push(text('Мы нашли ' + m('b') + '. Записываем, как теперь выглядит формула:'));
@@ -158,7 +158,7 @@ function stepA(meta, cv, A, B) {
         (other.v === 1 ? '' : ' \\;\\Rightarrow\\; a = ' + tex(cv.a))])));
   } else {
     blocks.push(text('Теперь вычтем из первого уравнения второе — ' + m('b') + ' сократится:'));
-    blocks.push(formula(chain(['(a + b) - (-a + b) = ' + tex(A.y) + ' - ' + tb(B.y) + ' = ' + tex(sub(A.y, B.y)),
+    blocks.push(formula(chain(['(a + b) - (b - a) = ' + tex(A.y) + ' - ' + tb(B.y) + ' = ' + tex(sub(A.y, B.y)),
       '2a = ' + tex(sub(A.y, B.y)) + ' \\;\\Rightarrow\\; a = ' + tex(cv.a)])));
   }
   blocks.push(text('Мы нашли ' + m('a') + '. Формула теперь полностью известна:'));

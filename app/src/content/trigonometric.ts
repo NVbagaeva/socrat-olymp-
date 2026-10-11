@@ -69,7 +69,7 @@ const cosB: RichExample = {
     {
       label: 'Шаг 3. Находим $b$',
       paras: ['Складываем уравнения — $a$ уходит:'],
-      lines: ['2b = 3 + (-1) = 2 \\;\\Rightarrow\\; b = 1'],
+      lines: ['2b = 3 - 1 = 2 \\;\\Rightarrow\\; b = 1'],
       more: [{ paras: ['Формула теперь выглядит так:'], lines: ['f(x) = a\\cos x + 1'] }],
     },
     {
@@ -134,7 +134,7 @@ const tgB: RichExample = {
     {
       label: 'Шаг 3. Находим $b$',
       paras: ['Складываем уравнения — $a$ уходит:'],
-      lines: ['2b = 3 + (-1) = 2 \\;\\Rightarrow\\; b = 1'],
+      lines: ['2b = 3 - 1 = 2 \\;\\Rightarrow\\; b = 1'],
       more: [{ paras: ['Формула теперь выглядит так:'], lines: ['f(x) = a\\operatorname{tg} x + 1'] }],
     },
     {
@@ -199,7 +199,7 @@ const sinB: RichExample = {
     {
       label: 'Шаг 3. Находим $b$',
       paras: ['Складываем уравнения — $a$ уходит:'],
-      lines: ['2b = 2{,}5 + (-0{,}5) = 2 \\;\\Rightarrow\\; b = 1'],
+      lines: ['2b = 2{,}5 - 0{,}5 = 2 \\;\\Rightarrow\\; b = 1'],
       more: [{ paras: ['Формула теперь выглядит так:'], lines: ['f(x) = a\\sin x + 1'] }],
     },
     {
