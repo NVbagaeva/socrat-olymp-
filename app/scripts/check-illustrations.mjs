@@ -78,13 +78,13 @@ for (const file of pages) {
 const URL_RE = /(\/[A-Za-z0-9_\-./%@~+]+?\.(?:png|jpe?g|webp|avif|gif|svg|ico))(?=[?#"'\\)\s,;<>]|$)/gi;
 /* Откуда ссылка: нужна для сообщения об ошибке. */
 const found = new Map(); // url → первая страница
-/* Данные роутера в HTML Next.js режет на куски: <script>self.__next_f.push([1,"…"])</script>
-   подряд, и граница куска может прийтись на середину адреса
-   ("/image" | "s/mountains-network.webp"). Обрывок выглядел бы как
-   отдельная битая ссылка, поэтому соседние куски сперва склеиваются. */
-const RSC_STYK = /"\]\)<\/script><script>self\.__next_f\.push\(\[1,"/g;
+/* Данные роутера в HTML режутся на куски self.__next_f.push(…) где
+   придётся, бывает и посреди адреса: «"/images"])</script><script>
+   self.__next_f.push([1,"/mountains-network.webp"». Куски склеиваем,
+   иначе хвост адреса читается как отдельная (несуществующая) картинка. */
+const STYK = /"\]\)<\/script><script>self\.__next_f\.push\(\[1,"/g;
 for (const file of texts) {
-  const text = fs.readFileSync(file, 'utf8').replace(RSC_STYK, '');
+  const text = fs.readFileSync(file, 'utf8').replace(STYK, '');
   let m;
   while ((m = URL_RE.exec(text)) !== null) {
     const url = m[1];
