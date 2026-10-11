@@ -654,6 +654,18 @@
 }
 .z9-zhivoy__panel dd {
   margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+@media (max-width: 640px) {
+  .z9-zhivoy {
+    padding: var(--space-3);
+  }
+  .z9-zhivoy__panel {
+    padding: var(--space-3);
+    font-size: var(--fs-caption);
+  }
 }
 .z9-zhivoy__zakon {
   margin: 0;

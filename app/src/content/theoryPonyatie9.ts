@@ -173,13 +173,14 @@ export const PONYATIE_9 = {
         {
           label: 'Отношение приращений',
           formuly: [
-            '\\dfrac{\\Delta y}{\\Delta x} = \\dfrac{|\\Delta x|}{\\Delta x} = \\begin{cases} 1, & \\Delta x > 0,\\\\ -1, & \\Delta x < 0. \\end{cases}',
+            '\\begin{aligned} \\dfrac{\\Delta y}{\\Delta x} &= \\dfrac{|\\Delta x|}{\\Delta x} \\\\ &= \\begin{cases} 1, & \\Delta x > 0,\\\\ -1, & \\Delta x < 0. \\end{cases} \\end{aligned}',
           ],
         },
         {
           label: 'Пределы справа и слева',
           formuly: [
-            `${LIM('\\Delta x\\to 0+0')}\\dfrac{\\Delta y}{\\Delta x} = 1, \\qquad ${LIM('\\Delta x\\to 0-0')}\\dfrac{\\Delta y}{\\Delta x} = -1`,
+            `${LIM('\\Delta x\\to 0+0')}\\dfrac{\\Delta y}{\\Delta x} = 1`,
+            `${LIM('\\Delta x\\to 0-0')}\\dfrac{\\Delta y}{\\Delta x} = -1`,
           ],
           paras: [
             'Пределы справа и слева разные, значит, общего предела $\\displaystyle\\lim_{\\Delta x\\to 0}\\dfrac{\\Delta y}{\\Delta x}$ нет.',
