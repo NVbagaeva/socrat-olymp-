@@ -36,10 +36,18 @@ const SKILL_BY_SET: Record<string, PrepSkillId> = {
   '12R.A': 'znachenie', '12R.B': 'argument', '12R.C': 'znachenie', '12R.D': 'argument',
   '12R.E': 'celaya-chast', '12R.F': 'celaya-chast', '12R.G': 'abscissa-b',
   '12R.H': 'ordinata-b', '12R.I': 'koef-k', '12R.J': 'celaya-chast',
+  /* График корня. */
+  'P12S-1': 'koren-k', 'P12S-2': 'koren-znachenie', 'P12S-3': 'koren-argument',
+  'P12S-4': 'koren-pryamaya', 'P12S-5': 'koren-peresechenie',
+  '12S.A': 'koren-znachenie', '12S.B': 'koren-argument', '12S.C': 'koren-peresechenie',
+  '12S.D': 'koren-peresechenie',
 };
 
 /* Подтема набора: по префиксу идентификатора. */
 function typeOf(setId: string): string {
+  if (/^(P12S-|12S\.)/.test(setId)) {
+    return 'irrational';
+  }
   return /^(P12R-|12R\.)/.test(setId) ? 'rational' : 'quadratic';
 }
 

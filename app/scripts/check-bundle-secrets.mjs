@@ -216,15 +216,22 @@ const readSets = (dir) =>
     .filter((name) => name.endsWith('.json'))
     .sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(graphData, dir, name), 'utf8')));
-/* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы из prep/12r.
+/* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы из prep/12r,
+   графика корня из prep/12s.
    Наборы прототипов — оттуда задачи берут тренажёр, генератор и лист
    для печати, и их ответы тоже не должны попадать в разметку. */
 GraphGenerate.setSets({
-  prep: [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')],
+  prep: [
+    ...readSets('prep/12'),
+    ...readSets('prep/12q'),
+    ...readSets('prep/12r'),
+    ...readSets('prep/12s'),
+  ],
   prototypes: [
     ...readSets('prototypes/12'),
     ...readSets('prototypes/12q'),
     ...readSets('prototypes/12r'),
+    ...readSets('prototypes/12s'),
   ],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
@@ -234,7 +241,8 @@ const POLYA_12 = ['answer', 'error', 'steps'];
 const NABORY_12 = allPrepSkills
   .map((skill) => skill.setId)
   .concat(readSets('prototypes/12q').map((set) => set.id))
-  .concat(readSets('prototypes/12r').map((set) => set.id));
+  .concat(readSets('prototypes/12r').map((set) => set.id))
+  .concat(readSets('prototypes/12s').map((set) => set.id));
 for (const setId of NABORY_12) {
   for (const task of GraphGenerate.generateSet(setId)) {
     zadachi.push({

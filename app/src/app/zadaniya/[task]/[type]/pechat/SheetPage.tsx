@@ -6,6 +6,7 @@ import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { parseSheetQuery, sheetSpec } from '@/lib/generatorSheet';
+import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 
 declare global {
   interface Window {
@@ -40,13 +41,17 @@ function specJson(html: string): string {
  *
  * Готовый лист сразу отправляется в печать браузера: «Сохранить как
  * PDF» — и файл на диске. Адрес страницы можно открыть повторно —
- * лист будет тем же.
+ * лист будет тем же. Код комплекта из адреса (kit) печатается в
+ * колонтитуле; по «Скачать оба» (oba=1) после печати открывается лист
+ * учителя того же комплекта.
  */
 export function SheetPage({ withAnswers, subtopic }: SheetPageProps) {
   const query = useSearchParams();
   const params = parseSheetQuery(query);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
+  const [warning, setWarning] = useState<string | null>(null);
 
   /* Тема и раскладка — атрибуты на <html>: так их читает theme.css. */
   useEffect(() => {
@@ -68,9 +73,13 @@ export function SheetPage({ withAnswers, subtopic }: SheetPageProps) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const html = buildDocument(sheetSpec(params, withAnswers, subtopic), {});
+    const built = sheetSpec(params, withAnswers, subtopic);
+    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+    const kit = checkKitSheet(query, '12', withAnswers ? 'teacher' : 'student', built);
+    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
+        setWarning(kit.warning);
         setSpec(specJson(html));
       }
     });
@@ -93,12 +102,12 @@ export function SheetPage({ withAnswers, subtopic }: SheetPageProps) {
         window.clearInterval(timer);
         setDone(true);
         if (window.sheetPagination.error === undefined) {
-          window.print();
+          printKitSheet(warning);
         }
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done]);
+  }, [spec, done, warning]);
 
   return (
     <>

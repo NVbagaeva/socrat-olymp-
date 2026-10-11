@@ -8,6 +8,7 @@ import '../../[task]/section.css';
    слой задания №4 (vteor, vtab). */
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
+import '../../komplekt.css';
 import '../../[task]/[type]/trainer.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';

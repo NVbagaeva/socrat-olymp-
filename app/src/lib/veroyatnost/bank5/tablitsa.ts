@@ -32,8 +32,8 @@ const P05: Prototype = prototip({
   id: 'p5-05',
   blok: 'uslovnaya',
   nazvanie: 'Две кости: сумма при известном условии',
-  tip: 'Условная вероятность',
-  zadachnik: [25, 28],
+  tip: 'Вероятность при условии',
+  sourceRange: [25, 28],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -88,10 +88,10 @@ const P05: Prototype = prototip({
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 25', params: { zapret: 6, s: 8 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 26', params: { zapret: 6, s: 9 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 27', params: { zapret: 6, s: 7 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 28', params: { zapret: 6, s: 10 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 25', params: { zapret: 6, s: 8 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 26', params: { zapret: 6, s: 9 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 27', params: { zapret: 6, s: 7 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 28', params: { zapret: 6, s: 10 } },
   ],
   generator: (r: Rng): Params => {
     const zapret = r.pick([6, 1]);

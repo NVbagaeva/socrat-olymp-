@@ -1,15 +1,14 @@
 /**
  * Задание №4, блок I: классическое определение вероятности.
  *
- * Восемнадцать прототипов, собранных из задачника Е. А. Ширяевой
- * «ЕГЭпроф 2025», задачи 1–88. У каждого прототипа десять вариантов:
- * сколько взято из задачника и сколько создано заново — записано в
- * самом варианте.
+ * Восемнадцать прототипов, исходные задачи 1–88 внутренней нумерации
+ * банка. У каждого прототипа исходные варианты и сгенерированные;
+ * откуда вариант — записано в нём самом.
  *
  * Числа в вариантах не случайные. Ответ ЕГЭ пишется в клетки,
  * поэтому дробь обязана быть конечной: `dopustimo` это и проверяет,
  * а автотест не пропустит вариант, где 1/3 вылезло бы ученику.
- * Там, где задачник сам просит округление («результат округлите до
+ * Там, где условие само просит округление («результат округлите до
  * сотых»), округление объявлено в `okruglenie` и бесконечная дробь
  * допустима.
  */
@@ -114,7 +113,7 @@ const P01: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Вертолёт: первый рейс',
   tip: 'Вероятность попасть в первую группу',
-  zadachnik: [1, 4],
+  sourceRange: [1, 4],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -151,16 +150,16 @@ const P01: Prototype = prototip({
       ),
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 04, № 1', params: { N: 20, k: 4, kto: 'В.' } },
-    { n: 2, source: 'задачник', ref: 'задачник 04, № 2', params: { N: 30, k: 6, kto: 'В.' } },
-    { n: 3, source: 'задачник', ref: 'задачник 04, № 3', params: { N: 300, k: 15, kto: 'В.' } },
-    { n: 4, source: 'задачник', ref: 'задачник 04, № 4', params: { N: 200, k: 12, kto: 'В.' } },
-    { n: 5, source: 'новый', ref: 'создан заново', params: { N: 75, k: 3, kto: 'П.' } },
-    { n: 6, source: 'новый', ref: 'создан заново', params: { N: 25, k: 5, kto: 'Д.' } },
-    { n: 7, source: 'новый', ref: 'создан заново', params: { N: 50, k: 4, kto: 'С.' } },
-    { n: 8, source: 'новый', ref: 'создан заново', params: { N: 40, k: 5, kto: 'К.' } },
-    { n: 9, source: 'новый', ref: 'создан заново', params: { N: 60, k: 3, kto: 'М.' } },
-    { n: 10, source: 'новый', ref: 'создан заново', params: { N: 250, k: 20, kto: 'Н.' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 1', params: { N: 20, k: 4, kto: 'В.' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 2', params: { N: 30, k: 6, kto: 'В.' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 3', params: { N: 300, k: 15, kto: 'В.' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 4', params: { N: 200, k: 12, kto: 'В.' } },
+    { n: 5, source: 'novyj', sourceNote: 'новый', params: { N: 75, k: 3, kto: 'П.' } },
+    { n: 6, source: 'novyj', sourceNote: 'новый', params: { N: 25, k: 5, kto: 'Д.' } },
+    { n: 7, source: 'novyj', sourceNote: 'новый', params: { N: 50, k: 4, kto: 'С.' } },
+    { n: 8, source: 'novyj', sourceNote: 'новый', params: { N: 40, k: 5, kto: 'К.' } },
+    { n: 9, source: 'novyj', sourceNote: 'новый', params: { N: 60, k: 3, kto: 'М.' } },
+    { n: 10, source: 'novyj', sourceNote: 'новый', params: { N: 250, k: 20, kto: 'Н.' } },
   ],
 });
 
@@ -172,7 +171,7 @@ const P02: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Жребий: кого выберут',
   tip: 'Вероятность быть выбранным жребием',
-  zadachnik: [5, 8],
+  sourceRange: [5, 8],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -208,16 +207,16 @@ const P02: Prototype = prototip({
       ),
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 04, № 5', params: { N: 5, k: 3, kto: 'Д.' } },
-    { n: 2, source: 'задачник', ref: 'задачник 04, № 6', params: { N: 8, k: 6, kto: 'Д.' } },
-    { n: 3, source: 'задачник', ref: 'задачник 04, № 7', params: { N: 12, k: 3, kto: 'Д.' } },
-    { n: 4, source: 'задачник', ref: 'задачник 04, № 8', params: { N: 10, k: 5, kto: 'Д.' } },
-    { n: 5, source: 'новый', ref: 'создан заново', params: { N: 20, k: 4, kto: 'А.' } },
-    { n: 6, source: 'новый', ref: 'создан заново', params: { N: 25, k: 10, kto: 'Б.' } },
-    { n: 7, source: 'новый', ref: 'создан заново', params: { N: 16, k: 2, kto: 'В.' } },
-    { n: 8, source: 'новый', ref: 'создан заново', params: { N: 40, k: 10, kto: 'Г.' } },
-    { n: 9, source: 'новый', ref: 'создан заново', params: { N: 4, k: 3, kto: 'Е.' } },
-    { n: 10, source: 'новый', ref: 'создан заново', params: { N: 50, k: 10, kto: 'Ж.' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 5', params: { N: 5, k: 3, kto: 'Д.' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 6', params: { N: 8, k: 6, kto: 'Д.' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 7', params: { N: 12, k: 3, kto: 'Д.' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 8', params: { N: 10, k: 5, kto: 'Д.' } },
+    { n: 5, source: 'novyj', sourceNote: 'новый', params: { N: 20, k: 4, kto: 'А.' } },
+    { n: 6, source: 'novyj', sourceNote: 'новый', params: { N: 25, k: 10, kto: 'Б.' } },
+    { n: 7, source: 'novyj', sourceNote: 'новый', params: { N: 16, k: 2, kto: 'В.' } },
+    { n: 8, source: 'novyj', sourceNote: 'новый', params: { N: 40, k: 10, kto: 'Г.' } },
+    { n: 9, source: 'novyj', sourceNote: 'новый', params: { N: 4, k: 3, kto: 'Е.' } },
+    { n: 10, source: 'novyj', sourceNote: 'новый', params: { N: 50, k: 10, kto: 'Ж.' } },
   ],
 });
 
@@ -229,7 +228,7 @@ const P03: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Прыжки в воду: кто выступит по счёту',
   tip: 'Вероятность выбрать спортсмена из страны',
-  zadachnik: [9, 14],
+  sourceRange: [9, 14],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -289,62 +288,62 @@ const P03: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 9',
+      source: 'sbornik',
+      sourceNote: '№ 9',
       params: { N: 20, a: 7, strA: 'Германии', b: 9, strB: 'США', m: 12, ischem: 'a' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 10',
+      source: 'sbornik',
+      sourceNote: '№ 10',
       params: { N: 25, a: 4, strA: 'Франции', b: 9, strB: 'Колумбии', m: 12, ischem: 'b' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 11',
+      source: 'sbornik',
+      sourceNote: '№ 11',
       params: { N: 40, a: 10, strA: 'Италии', b: 2, strB: 'Мексики', m: 21, ischem: 'a' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 12',
+      source: 'sbornik',
+      sourceNote: '№ 12',
       params: { N: 45, a: 4, strA: 'Испании', b: 9, strB: 'США', m: 24, ischem: 'b' },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 04, № 13',
+      source: 'sbornik',
+      sourceNote: '№ 13',
       params: { N: 50, a: 11, strA: 'Голландии', b: 8, strB: 'Колумбии', m: 10, ischem: 'a' },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 04, № 14',
+      source: 'sbornik',
+      sourceNote: '№ 14',
       params: { N: 75, a: 15, strA: 'Италии', b: 13, strB: 'Канады', m: 4, ischem: 'a' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 80, a: 12, strA: 'Японии', b: 20, strB: 'Кореи', m: 9, ischem: 'a' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 60, a: 21, strA: 'Сербии', b: 6, strB: 'Хорватии', m: 30, ischem: 'a' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 25, a: 6, strA: 'Дании', b: 4, strB: 'Швеции', m: 7, ischem: 'b' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 40, a: 14, strA: 'Польши', b: 6, strB: 'Чехии', m: 9, ischem: 'a' },
     },
   ],
@@ -366,7 +365,7 @@ function zhrebiyPrototip(opisanie: {
   blok: string;
   nazvanie: string;
   tip: string;
-  zadachnik: readonly [number, number];
+  sourceRange: readonly [number, number];
   methodHints: readonly string[];
   varianty: Variant[];
 }): Prototype {
@@ -376,7 +375,7 @@ function zhrebiyPrototip(opisanie: {
     blok: opisanie.blok,
     nazvanie: opisanie.nazvanie,
     tip: opisanie.tip,
-    zadachnik: opisanie.zadachnik,
+    sourceRange: opisanie.sourceRange,
     format: 'десятичная',
     okruglenie: tochno,
     uslovie: (p) =>
@@ -442,7 +441,7 @@ const P04: Prototype = zhrebiyPrototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Жребий: кому начинать игру',
   tip: 'Вероятность по списку имён',
-  zadachnik: [15, 16],
+  sourceRange: [15, 16],
   methodHints: [
     'один случайный выбор из перечисленных людей',
     'благоприятные — просто пересчитать: мальчики',
@@ -450,8 +449,8 @@ const P04: Prototype = zhrebiyPrototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 15',
+      source: 'sbornik',
+      sourceNote: '№ 15',
       params: {
         imena: 'Дима, Марат, Петя, Надя, Света',
         blag: 'Дима, Марат, Петя',
@@ -460,8 +459,8 @@ const P04: Prototype = zhrebiyPrototip({
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 16',
+      source: 'sbornik',
+      sourceNote: '№ 16',
       params: {
         imena: 'Тоня, Арина, Маша, Денис, Лёня, Максим',
         blag: 'Тоня, Арина, Маша',
@@ -470,8 +469,8 @@ const P04: Prototype = zhrebiyPrototip({
     },
     {
       n: 3,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Аня, Боря, Вика, Гена, Даша',
         blag: 'Боря, Гена',
@@ -480,8 +479,8 @@ const P04: Prototype = zhrebiyPrototip({
     },
     {
       n: 4,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Никита, Егор, Соня, Лиза, Юля, Рома, Тимур, Влад, Артём, Максим',
         blag: 'Соня, Лиза, Юля',
@@ -490,8 +489,8 @@ const P04: Prototype = zhrebiyPrototip({
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Лена, Марина, Тимур, Вера',
         blag: 'Тимур',
@@ -500,8 +499,8 @@ const P04: Prototype = zhrebiyPrototip({
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Гриша, Захар, Илья, Катя, Пётр',
         blag: 'Катя',
@@ -517,7 +516,7 @@ const P24: Prototype = zhrebiyPrototip({
   blok: PROTIVOPOLOZHNYE,
   nazvanie: 'Жребий: начинать будет не он',
   tip: 'Вероятность противоположного события',
-  zadachnik: [17, 18],
+  sourceRange: [17, 18],
   methodHints: [
     'один случайный выбор из перечисленных людей',
     'спрашивают, что жребий выпадет НЕ названному человеку',
@@ -526,8 +525,8 @@ const P24: Prototype = zhrebiyPrototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 17',
+      source: 'sbornik',
+      sourceNote: '№ 17',
       params: {
         imena: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Ксюша, Федя',
         blag: 'Серёжа, Саша, Ира, Соня, Женя, Толя, Федя',
@@ -536,8 +535,8 @@ const P24: Prototype = zhrebiyPrototip({
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 18',
+      source: 'sbornik',
+      sourceNote: '№ 18',
       params: {
         imena: 'Миша, Олег, Настя, Галя',
         blag: 'Миша, Олег, Настя',
@@ -546,8 +545,8 @@ const P24: Prototype = zhrebiyPrototip({
     },
     {
       n: 3,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Ваня, Коля, Оля, Зина, Слава',
         blag: 'Ваня, Коля, Оля, Слава',
@@ -556,8 +555,8 @@ const P24: Prototype = zhrebiyPrototip({
     },
     {
       n: 4,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         imena: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа, Дина',
         blag: 'Тася, Вова, Ким, Юра, Ася, Рита, Лёва, Ника, Стёпа',
@@ -580,7 +579,7 @@ const P05: Prototype = prototip({
   blok: GEOMETRICHESKOE,
   nazvanie: 'Механические часы: где встала стрелка',
   tip: 'Геометрическая вероятность на циферблате',
-  zadachnik: [19, 22],
+  sourceRange: [19, 22],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -644,16 +643,16 @@ const P05: Prototype = prototip({
     vizual: (p) => tsiferblat(num(p, 'a'), num(p, 'b')),
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 04, № 19', params: { a: 7, b: 1 } },
-    { n: 2, source: 'задачник', ref: 'задачник 04, № 20', params: { a: 5, b: 11 } },
-    { n: 3, source: 'задачник', ref: 'задачник 04, № 21', params: { a: 3, b: 6 } },
-    { n: 4, source: 'задачник', ref: 'задачник 04, № 22', params: { a: 11, b: 2 } },
-    { n: 5, source: 'конспект', ref: 'конспект, № 16', params: { a: 10, b: 1 } },
-    { n: 6, source: 'новый', ref: 'создан заново', params: { a: 1, b: 10 } },
-    { n: 7, source: 'новый', ref: 'создан заново', params: { a: 12, b: 3 } },
-    { n: 8, source: 'новый', ref: 'создан заново', params: { a: 4, b: 1 } },
-    { n: 9, source: 'новый', ref: 'создан заново', params: { a: 2, b: 8 } },
-    { n: 10, source: 'новый', ref: 'создан заново', params: { a: 6, b: 3 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 19', params: { a: 7, b: 1 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 20', params: { a: 5, b: 11 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 21', params: { a: 3, b: 6 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 22', params: { a: 11, b: 2 } },
+    { n: 5, source: 'urok', sourceNote: 'урок, № 16', params: { a: 10, b: 1 } },
+    { n: 6, source: 'novyj', sourceNote: 'новый', params: { a: 1, b: 10 } },
+    { n: 7, source: 'novyj', sourceNote: 'новый', params: { a: 12, b: 3 } },
+    { n: 8, source: 'novyj', sourceNote: 'новый', params: { a: 4, b: 1 } },
+    { n: 9, source: 'novyj', sourceNote: 'новый', params: { a: 2, b: 8 } },
+    { n: 10, source: 'novyj', sourceNote: 'новый', params: { a: 6, b: 3 } },
   ],
 });
 
@@ -670,7 +669,7 @@ const P06: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Толкание ядра: четыре страны',
   tip: 'Вероятность выбрать спортсмена из страны',
-  zadachnik: [23, 26],
+  sourceRange: [23, 26],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -732,8 +731,8 @@ const P06: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 23',
+      source: 'sbornik',
+      sourceNote: '№ 23',
       params: {
         k1: 6,
         s1: 'Эстонии',
@@ -749,8 +748,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 24',
+      source: 'sbornik',
+      sourceNote: '№ 24',
       params: {
         k1: 6,
         s1: 'Великобритании',
@@ -766,8 +765,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 25',
+      source: 'sbornik',
+      sourceNote: '№ 25',
       params: {
         k1: 4,
         s1: 'Аргентины',
@@ -783,8 +782,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 26',
+      source: 'sbornik',
+      sourceNote: '№ 26',
       params: {
         k1: 8,
         s1: 'Греции',
@@ -800,8 +799,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 5,
         s1: 'Кении',
@@ -817,8 +816,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 3,
         s1: 'Норвегии',
@@ -834,8 +833,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 9,
         s1: 'Мексики',
@@ -851,8 +850,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 4,
         s1: 'Египта',
@@ -868,8 +867,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 11,
         s1: 'Индии',
@@ -885,8 +884,8 @@ const P06: Prototype = prototip({
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 7,
         s1: 'Латвии',
@@ -911,7 +910,7 @@ const P07: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Конференция: чей доклад по счёту',
   tip: 'Вероятность выбрать учёного из страны',
-  zadachnik: [27, 30],
+  sourceRange: [27, 30],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -976,8 +975,8 @@ const P07: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 27',
+      source: 'sbornik',
+      sourceNote: '№ 27',
       params: {
         k1: 2,
         s1: 'Румынии',
@@ -991,14 +990,14 @@ const P07: Prototype = prototip({
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 28',
+      source: 'sbornik',
+      sourceNote: '№ 28',
       params: { k1: 7, s1: 'Сербии', k2: 3, s2: 'России', k3: 2, s3: 'Дании', ischem: 2, m: 10 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 29',
+      source: 'sbornik',
+      sourceNote: '№ 29',
       params: {
         k1: 3,
         s1: 'Швейцарии',
@@ -1012,44 +1011,44 @@ const P07: Prototype = prototip({
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 30',
+      source: 'sbornik',
+      sourceNote: '№ 30',
       params: { k1: 5, s1: 'Австрии', k2: 2, s2: 'Венгрии', k3: 7, s3: 'Дании', ischem: 3, m: 6 },
     },
     {
       n: 5,
-      source: 'конспект',
-      ref: 'конспект, № 9',
+      source: 'urok',
+      sourceNote: 'урок, № 9',
       params: { k1: 3, s1: 'Норвегии', k2: 3, s2: 'России', k3: 4, s3: 'Испании', ischem: 2, m: 8 },
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { k1: 6, s1: 'Индии', k2: 9, s2: 'Китая', k3: 5, s3: 'Японии', ischem: 2, m: 12 },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { k1: 4, s1: 'Чехии', k2: 7, s2: 'Польши', k3: 9, s3: 'Венгрии', ischem: 1, m: 15 },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { k1: 5, s1: 'Египта', k2: 8, s2: 'Кении', k3: 12, s3: 'Ганы', ischem: 2, m: 20 },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { k1: 2, s1: 'Перу', k2: 6, s2: 'Чили', k3: 17, s3: 'Бразилии', ischem: 3, m: 11 },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         k1: 9,
         s1: 'Кореи',
@@ -1079,7 +1078,7 @@ function biletyPrototip(opisanie: {
   blok: string;
   nazvanie: string;
   tip: string;
-  zadachnik: readonly [number, number];
+  sourceRange: readonly [number, number];
   /** 0 — вопрос по теме, 1 — не по теме. Фиксирован у прототипа. */
   ne: 0 | 1;
   methodHints: readonly string[];
@@ -1092,7 +1091,7 @@ function biletyPrototip(opisanie: {
     blok: opisanie.blok,
     nazvanie: opisanie.nazvanie,
     tip: opisanie.tip,
-    zadachnik: opisanie.zadachnik,
+    sourceRange: opisanie.sourceRange,
     format: 'десятичная',
     okruglenie: tochno,
     uslovie: (p) => {
@@ -1155,7 +1154,7 @@ const P08: Prototype = biletyPrototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Сборник билетов: вопрос по теме',
   tip: 'Вероятность события',
-  zadachnik: [31, 34],
+  sourceRange: [31, 34],
   ne: 0,
   methodHints: [
     'один случайный выбор билета',
@@ -1165,32 +1164,32 @@ const P08: Prototype = biletyPrototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 31',
+      source: 'sbornik',
+      sourceNote: '№ 31',
       params: { N: 25, k: 10, predmet: 'математике', tema: 'Логарифмы', ne: 0 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 32',
+      source: 'sbornik',
+      sourceNote: '№ 32',
       params: { N: 20, k: 18, predmet: 'истории', tema: 'Смутное время', ne: 0 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 33',
+      source: 'sbornik',
+      sourceNote: '№ 33',
       params: { N: 15, k: 6, predmet: 'химии', tema: 'Кислоты', ne: 0 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 34',
+      source: 'sbornik',
+      sourceNote: '№ 34',
       params: { N: 45, k: 9, predmet: 'математике', tema: 'Неравенства', ne: 0 },
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 80, k: 28, predmet: 'обществознанию', tema: 'Право', ne: 0 },
     },
   ],
@@ -1202,7 +1201,7 @@ const P25: Prototype = biletyPrototip({
   blok: PROTIVOPOLOZHNYE,
   nazvanie: 'Сборник билетов: вопрос не по теме',
   tip: 'Вероятность противоположного события',
-  zadachnik: [35, 38],
+  sourceRange: [35, 38],
   ne: 1,
   methodHints: [
     'один случайный выбор билета',
@@ -1212,32 +1211,32 @@ const P25: Prototype = biletyPrototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 35',
+      source: 'sbornik',
+      sourceNote: '№ 35',
       params: { N: 40, k: 14, predmet: 'географии', tema: 'Страны Африки', ne: 1 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 36',
+      source: 'sbornik',
+      sourceNote: '№ 36',
       params: { N: 48, k: 12, predmet: 'математике', tema: 'Логарифмы', ne: 1 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 37',
+      source: 'sbornik',
+      sourceNote: '№ 37',
       params: { N: 50, k: 5, predmet: 'истории', tema: 'Великая Отечественная война', ne: 1 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 38',
+      source: 'sbornik',
+      sourceNote: '№ 38',
       params: { N: 60, k: 9, predmet: 'географии', tema: 'Ресурсообеспеченность', ne: 1 },
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 25, k: 4, predmet: 'физике', tema: 'Оптика', ne: 1 },
     },
   ],
@@ -1251,7 +1250,7 @@ const P09: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Фирма такси: цвет машины',
   tip: 'Вероятность противоположного события',
-  zadachnik: [39, 42],
+  sourceRange: [39, 42],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1293,16 +1292,16 @@ const P09: Prototype = prototip({
       ),
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 04, № 39', params: { N: 45, k: 18 } },
-    { n: 2, source: 'задачник', ref: 'задачник 04, № 40', params: { N: 55, k: 11 } },
-    { n: 3, source: 'задачник', ref: 'задачник 04, № 41', params: { N: 50, k: 27 } },
-    { n: 4, source: 'задачник', ref: 'задачник 04, № 42', params: { N: 60, k: 27 } },
-    { n: 5, source: 'новый', ref: 'создан заново', params: { N: 40, k: 14 } },
-    { n: 6, source: 'новый', ref: 'создан заново', params: { N: 25, k: 7 } },
-    { n: 7, source: 'новый', ref: 'создан заново', params: { N: 120, k: 18 } },
-    { n: 8, source: 'новый', ref: 'создан заново', params: { N: 200, k: 34 } },
-    { n: 9, source: 'новый', ref: 'создан заново', params: { N: 50, k: 13 } },
-    { n: 10, source: 'новый', ref: 'создан заново', params: { N: 80, k: 52 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 39', params: { N: 45, k: 18 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 40', params: { N: 55, k: 11 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 41', params: { N: 50, k: 27 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 42', params: { N: 60, k: 27 } },
+    { n: 5, source: 'novyj', sourceNote: 'новый', params: { N: 40, k: 14 } },
+    { n: 6, source: 'novyj', sourceNote: 'новый', params: { N: 25, k: 7 } },
+    { n: 7, source: 'novyj', sourceNote: 'новый', params: { N: 120, k: 18 } },
+    { n: 8, source: 'novyj', sourceNote: 'новый', params: { N: 200, k: 34 } },
+    { n: 9, source: 'novyj', sourceNote: 'новый', params: { N: 50, k: 13 } },
+    { n: 10, source: 'novyj', sourceNote: 'новый', params: { N: 80, k: 52 } },
   ],
 });
 
@@ -1314,7 +1313,7 @@ const P10: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Гимнастика: остальные спортсменки',
   tip: 'Вероятность, когда группа задана остатком',
-  zadachnik: [43, 48],
+  sourceRange: [43, 48],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1370,62 +1369,62 @@ const P10: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 43',
+      source: 'sbornik',
+      sourceNote: '№ 43',
       params: { N: 25, a: 6, sA: 'Венгрии', b: 7, sB: 'Румынии', sC: 'Болгарии' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 44',
+      source: 'sbornik',
+      sourceNote: '№ 44',
       params: { N: 25, a: 6, sA: 'Венгрии', b: 9, sB: 'Румынии', sC: 'Болгарии' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 45',
+      source: 'sbornik',
+      sourceNote: '№ 45',
       params: { N: 50, a: 13, sA: 'Великобритании', b: 7, sB: 'Франции', sC: 'Германии' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 46',
+      source: 'sbornik',
+      sourceNote: '№ 46',
       params: { N: 56, a: 27, sA: 'Норвегии', b: 15, sB: 'Дании', sC: 'Швеции' },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 04, № 47',
+      source: 'sbornik',
+      sourceNote: '№ 47',
       params: { N: 70, a: 29, sA: 'Сербии', b: 27, sB: 'Хорватии', sC: 'Словении' },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 04, № 48',
+      source: 'sbornik',
+      sourceNote: '№ 48',
       params: { N: 60, a: 27, sA: 'Японии', b: 27, sB: 'Китая', sC: 'Кореи' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 40, a: 11, sA: 'Польши', b: 9, sB: 'Чехии', sC: 'Словакии' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 20, a: 4, sA: 'Италии', b: 3, sB: 'Испании', sC: 'Португалии' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 80, a: 26, sA: 'Бразилии', b: 30, sB: 'Аргентины', sC: 'Чили' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 50, a: 11, sA: 'Кореи', b: 4, sB: 'Китая', sC: 'Японии' },
     },
   ],
@@ -1444,7 +1443,7 @@ const P11: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Научная конференция: последний день',
   tip: 'Вероятность попасть в день конференции',
-  zadachnik: [49, 54],
+  sourceRange: [49, 54],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1530,62 +1529,62 @@ const P11: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 49',
+      source: 'sbornik',
+      sourceNote: '№ 49',
       params: { d: 3, N: 40, m: 1, k: 8, prof: 'М.' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 50',
+      source: 'sbornik',
+      sourceNote: '№ 50',
       params: { d: 3, N: 70, m: 1, k: 28, prof: 'М.' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 51',
+      source: 'sbornik',
+      sourceNote: '№ 51',
       params: { d: 4, N: 80, m: 2, k: 12, prof: 'М.' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 52',
+      source: 'sbornik',
+      sourceNote: '№ 52',
       params: { d: 4, N: 40, m: 2, k: 14, prof: 'К.' },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 04, № 53',
+      source: 'sbornik',
+      sourceNote: '№ 53',
       params: { d: 5, N: 75, m: 3, k: 15, prof: 'М.' },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 04, № 54',
+      source: 'sbornik',
+      sourceNote: '№ 54',
       params: { d: 5, N: 55, m: 0, k: 0, prof: 'М.' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 3, N: 40, m: 1, k: 4, prof: 'Н.' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 4, N: 120, m: 2, k: 15, prof: 'Р.' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 4, N: 80, m: 0, k: 0, prof: 'С.' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 3, N: 100, m: 1, k: 20, prof: 'Т.' },
     },
   ],
@@ -1599,7 +1598,7 @@ const P12: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Олимпиада: запасная аудитория',
   tip: 'Вероятность попасть в остаток',
-  zadachnik: [55, 58],
+  sourceRange: [55, 58],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1660,62 +1659,62 @@ const P12: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 55',
+      source: 'sbornik',
+      sourceNote: '№ 55',
       params: { N: 550, m: 4, k: 110, predmet: 'математике' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 56',
+      source: 'sbornik',
+      sourceNote: '№ 56',
       params: { N: 400, m: 3, k: 110, predmet: 'обществознанию' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 57',
+      source: 'sbornik',
+      sourceNote: '№ 57',
       params: { N: 350, m: 3, k: 140, predmet: 'русскому языку' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 58',
+      source: 'sbornik',
+      sourceNote: '№ 58',
       params: { N: 400, m: 3, k: 150, predmet: 'химии' },
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 500, m: 3, k: 180, predmet: 'физике' },
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 600, m: 4, k: 140, predmet: 'биологии' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 480, m: 4, k: 120, predmet: 'информатике' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 200, m: 3, k: 60, predmet: 'литературе' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 1000, m: 5, k: 200, predmet: 'английскому языку' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 320, m: 3, k: 100, predmet: 'истории' },
     },
   ],
@@ -1729,7 +1728,7 @@ const P13: Prototype = prototip({
   blok: KLASSICHESKAYA,
   nazvanie: 'Конкурс исполнителей: день выступления',
   tip: 'Вероятность попасть в день конкурса',
-  zadachnik: [59, 62],
+  sourceRange: [59, 62],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1800,62 +1799,62 @@ const P13: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 59',
+      source: 'sbornik',
+      sourceNote: '№ 59',
       params: { d: 3, N: 40, k: 12, den: 2, strana: 'России' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 60',
+      source: 'sbornik',
+      sourceNote: '№ 60',
       params: { d: 3, N: 80, k: 16, den: 3, strana: 'России' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 61',
+      source: 'sbornik',
+      sourceNote: '№ 61',
       params: { d: 3, N: 70, k: 28, den: 3, strana: 'России' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 62',
+      source: 'sbornik',
+      sourceNote: '№ 62',
       params: { d: 5, N: 75, k: 27, den: 3, strana: 'России' },
     },
     {
       n: 5,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 4, N: 100, k: 25, den: 4, strana: 'Италии' },
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 5, N: 100, k: 20, den: 5, strana: 'Японии' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 3, N: 50, k: 20, den: 2, strana: 'Бразилии' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 4, N: 200, k: 50, den: 2, strana: 'Франции' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 3, N: 100, k: 20, den: 2, strana: 'Испании' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { d: 5, N: 80, k: 20, den: 4, strana: 'Германии' },
     },
   ],
@@ -1869,7 +1868,7 @@ const P14: Prototype = prototip({
   blok: KRUGLYY_STOL,
   nazvanie: 'Игровые пары: соперник из России',
   tip: 'Вероятность при выборе соперника',
-  zadachnik: [63, 66],
+  sourceRange: [63, 66],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -1881,7 +1880,8 @@ const P14: Prototype = prototip({
   dopustimo: (p) => {
     const N = num(p, 'N');
     const r = num(p, 'r');
-    return N % 2 === 0 && r >= 2 && r <= N && konechnaya((r - 1) / (N - 1));
+    /* r < N: если из России все участники, ответ ровно 1 — это не задача. */
+    return N % 2 === 0 && r >= 2 && r < N && konechnaya((r - 1) / (N - 1));
   },
   otvet: (p) => (num(p, 'r') - 1) / (num(p, 'N') - 1),
   perebor: (p) => dolyaPerebor(num(p, 'N') - 1, (i) => i <= num(p, 'r') - 1),
@@ -1920,62 +1920,62 @@ const P14: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 63',
+      source: 'sbornik',
+      sourceNote: '№ 63',
       params: { N: 76, r: 22, vid: 'бадминтону', imya: 'Игорь Чаев' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 64',
+      source: 'sbornik',
+      sourceNote: '№ 64',
       params: { N: 26, r: 17, vid: 'настольному теннису', imya: 'Денис Полянкин' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 65',
+      source: 'sbornik',
+      sourceNote: '№ 65',
       params: { N: 46, r: 28, vid: 'шахматам', imya: 'Дмитрий Тоснин' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 66',
+      source: 'sbornik',
+      sourceNote: '№ 66',
       params: { N: 76, r: 13, vid: 'шашкам', imya: 'Андрей Фомин' },
     },
     {
       n: 5,
-      source: 'конспект',
-      ref: 'конспект, № 7',
+      source: 'urok',
+      sourceNote: 'урок, № 7',
       params: { N: 46, r: 19, vid: 'теннису', imya: 'Ярослав Исаков' },
     },
     {
       n: 6,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 126, r: 26, vid: 'шахматам', imya: 'Павел Гринёв' },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 46, r: 37, vid: 'шашкам', imya: 'Олег Ким' },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 26, r: 14, vid: 'настольному теннису', imya: 'Артём Волков' },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 76, r: 37, vid: 'бадминтону', imya: 'Марк Ильин' },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { N: 46, r: 10, vid: 'теннису', imya: 'Роман Гущин' },
     },
   ],
@@ -1989,7 +1989,7 @@ const P15: Prototype = prototip({
   blok: KRUGLYY_STOL,
   nazvanie: 'Деление на группы: вместе или врозь',
   tip: 'Вероятность оказаться в одной группе',
-  zadachnik: [67, 70],
+  sourceRange: [67, 70],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -2070,8 +2070,8 @@ const P15: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 67',
+      source: 'sbornik',
+      sourceNote: '№ 67',
       params: {
         gde: 'В классе',
         kogo1: 'учащийся',
@@ -2086,8 +2086,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 68',
+      source: 'sbornik',
+      sourceNote: '№ 68',
       params: {
         gde: 'В классе',
         kogo1: 'учащийся',
@@ -2102,8 +2102,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 69',
+      source: 'sbornik',
+      sourceNote: '№ 69',
       params: {
         gde: 'В классе',
         kogo1: 'семиклассник',
@@ -2118,8 +2118,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 70',
+      source: 'sbornik',
+      sourceNote: '№ 70',
       params: {
         gde: 'В школе',
         kogo1: 'пятиклассник',
@@ -2134,8 +2134,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 5,
-      source: 'конспект',
-      ref: 'конспект, № 12',
+      source: 'urok',
+      sourceNote: 'урок, № 12',
       params: {
         gde: 'На соревнование едут',
         kogo1: 'спортсмен',
@@ -2150,8 +2150,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 6,
-      source: 'конспект',
-      ref: 'конспект, № 13',
+      source: 'urok',
+      sourceNote: 'урок, № 13',
       params: {
         gde: 'В классе',
         kogo1: 'учащийся',
@@ -2166,8 +2166,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         gde: 'В классе',
         kogo1: 'учащийся',
@@ -2182,8 +2182,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         gde: 'В классе',
         kogo1: 'учащийся',
@@ -2198,8 +2198,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         gde: 'В школе',
         kogo1: 'шестиклассник',
@@ -2214,8 +2214,8 @@ const P15: Prototype = prototip({
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: {
         gde: 'В школе',
         kogo1: 'семиклассник',
@@ -2259,7 +2259,7 @@ const P16: Prototype = prototip({
   blok: MONETY,
   nazvanie: 'Симметричная монета',
   tip: 'Вероятность числа выпадений',
-  zadachnik: [71, 78],
+  sourceRange: [71, 78],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -2372,62 +2372,62 @@ const P16: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 71',
+      source: 'sbornik',
+      sourceNote: '№ 71',
       params: { n: 2, storona: 'орёл', rezhim: 'ni-razu', k: 0 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 72',
+      source: 'sbornik',
+      sourceNote: '№ 72',
       params: { n: 2, storona: 'решка', rezhim: 'rovno', k: 1 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 73',
+      source: 'sbornik',
+      sourceNote: '№ 73',
       params: { n: 2, storona: 'орёл', rezhim: 'vse', k: 0 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 74',
+      source: 'sbornik',
+      sourceNote: '№ 74',
       params: { n: 2, storona: 'решка', rezhim: 'bolshe', k: 0 },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 04, № 75',
+      source: 'sbornik',
+      sourceNote: '№ 75',
       params: { n: 3, storona: 'решка', rezhim: 'vse', k: 0 },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 04, № 76',
+      source: 'sbornik',
+      sourceNote: '№ 76',
       params: { n: 3, storona: 'орёл', rezhim: 'rovno', k: 1 },
     },
     {
       n: 7,
-      source: 'задачник',
-      ref: 'задачник 04, № 77',
+      source: 'sbornik',
+      sourceNote: '№ 77',
       params: { n: 4, storona: 'орёл', rezhim: 'rovno', k: 2 },
     },
     {
       n: 8,
-      source: 'задачник',
-      ref: 'задачник 04, № 78',
+      source: 'sbornik',
+      sourceNote: '№ 78',
       params: { n: 4, storona: 'орёл', rezhim: 'rovno', k: 3 },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 3, storona: 'орёл', rezhim: 'ni-razu', k: 0 },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 4, storona: 'решка', rezhim: 'bolshe', k: 0 },
     },
   ],
@@ -2441,7 +2441,7 @@ const P17: Prototype = prototip({
   blok: MONETY,
   nazvanie: 'Монетка судьи: кто начнёт с мячом',
   tip: 'Вероятность числа удачных жребиев',
-  zadachnik: [79, 84],
+  sourceRange: [79, 84],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) => {
@@ -2469,7 +2469,9 @@ const P17: Prototype = prototip({
     if (rezhim === 'vse') {
       return true;
     }
-    return ['rovno', 'ne-bolee'].includes(rezhim) && k >= 1 && k <= n;
+    /* «Не больше n раз из n» — достоверное событие, ответ 1: такой вопрос не задаём. */
+    const verkh = rezhim === 'ne-bolee' ? n - 1 : n;
+    return ['rovno', 'ne-bolee'].includes(rezhim) && k >= 1 && k <= verkh;
   },
   otvet: (p) => {
     const n = num(p, 'n');
@@ -2539,62 +2541,62 @@ const P17: Prototype = prototip({
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 04, № 79',
+      source: 'sbornik',
+      sourceNote: '№ 79',
       params: { n: 2, komanda: 'Изумруд', rezhim: 'ne-bolee', k: 1 },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 04, № 80',
+      source: 'sbornik',
+      sourceNote: '№ 80',
       params: { n: 2, komanda: 'Геолог', rezhim: 'rovno', k: 1 },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 04, № 81',
+      source: 'sbornik',
+      sourceNote: '№ 81',
       params: { n: 3, komanda: 'Биолог', rezhim: 'vse', k: 3 },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 04, № 82',
+      source: 'sbornik',
+      sourceNote: '№ 82',
       params: { n: 3, komanda: 'Физик', rezhim: 'rovno', k: 2 },
     },
     {
       n: 5,
-      source: 'задачник',
-      ref: 'задачник 04, № 83',
+      source: 'sbornik',
+      sourceNote: '№ 83',
       params: { n: 3, komanda: 'Сапфир', rezhim: 'ne-bolee', k: 1 },
     },
     {
       n: 6,
-      source: 'задачник',
-      ref: 'задачник 04, № 84',
+      source: 'sbornik',
+      sourceNote: '№ 84',
       params: { n: 3, komanda: 'Труд', rezhim: 'rovno', k: 1 },
     },
     {
       n: 7,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 2, komanda: 'Ротор', rezhim: 'vse', k: 2 },
     },
     {
       n: 8,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 3, komanda: 'Химик', rezhim: 'ne-bolee', k: 2 },
     },
     {
       n: 9,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 2, komanda: 'Старт', rezhim: 'rovno', k: 2 },
     },
     {
       n: 10,
-      source: 'новый',
-      ref: 'создан заново',
+      source: 'novyj',
+      sourceNote: 'новый',
       params: { n: 3, komanda: 'Метеор', rezhim: 'ne-bolee', k: 2 },
     },
   ],
@@ -2608,7 +2610,7 @@ const P18: Prototype = prototip({
   blok: KUBIKI,
   nazvanie: 'Две игральные кости: сумма очков',
   tip: 'Вероятность суммы на двух кубиках',
-  zadachnik: [85, 88],
+  sourceRange: [85, 88],
   format: 'десятичная',
   okruglenie: (p) => (num(p, 'znakov') === 3 ? 3 : 2),
   uslovie: (p) => {
@@ -2682,16 +2684,16 @@ const P18: Prototype = prototip({
       ),
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 04, № 85', params: { s: 4, znakov: 2 } },
-    { n: 2, source: 'задачник', ref: 'задачник 04, № 86', params: { s: 11, znakov: 2 } },
-    { n: 3, source: 'задачник', ref: 'задачник 04, № 87', params: { s: 9, znakov: 2 } },
-    { n: 4, source: 'задачник', ref: 'задачник 04, № 88', params: { s: 7, znakov: 3 } },
-    { n: 5, source: 'новый', ref: 'создан заново', params: { s: 6, znakov: 2 } },
-    { n: 6, source: 'новый', ref: 'создан заново', params: { s: 8, znakov: 3 } },
-    { n: 7, source: 'новый', ref: 'создан заново', params: { s: 3, znakov: 3 } },
-    { n: 8, source: 'новый', ref: 'создан заново', params: { s: 12, znakov: 3 } },
-    { n: 9, source: 'новый', ref: 'создан заново', params: { s: 2, znakov: 2 } },
-    { n: 10, source: 'новый', ref: 'создан заново', params: { s: 5, znakov: 3 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 85', params: { s: 4, znakov: 2 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 86', params: { s: 11, znakov: 2 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 87', params: { s: 9, znakov: 2 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 88', params: { s: 7, znakov: 3 } },
+    { n: 5, source: 'novyj', sourceNote: 'новый', params: { s: 6, znakov: 2 } },
+    { n: 6, source: 'novyj', sourceNote: 'новый', params: { s: 8, znakov: 3 } },
+    { n: 7, source: 'novyj', sourceNote: 'новый', params: { s: 3, znakov: 3 } },
+    { n: 8, source: 'novyj', sourceNote: 'новый', params: { s: 12, znakov: 3 } },
+    { n: 9, source: 'novyj', sourceNote: 'новый', params: { s: 2, znakov: 2 } },
+    { n: 10, source: 'novyj', sourceNote: 'новый', params: { s: 5, znakov: 3 } },
   ],
 });
 

@@ -439,26 +439,6 @@
   white-space: nowrap;
 }
 
-/* Seed варианта: поле и кнопка «Новый seed» в строку. */
-.z2-seed {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-}
-.z2-seed .cfg-input {
-  flex: 1 1 220px;
-}
-.z2-seed__lead {
-  margin-top: var(--space-2);
-  color: var(--color-text-secondary);
-}
-.z2-seed__now {
-  font-family: var(--font-mono, monospace);
-  font-size: var(--fs-caption);
-  color: var(--color-text);
-}
-
 /* Экран задания тренажёра: рисунок условия, подсказка под ответом. */
 .z2-ttask .ptask__chart {
   width: 100%;

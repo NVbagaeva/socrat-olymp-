@@ -40,7 +40,13 @@ export type PrepSkillId =
   | 'argument'
   | 'pryamaya'
   | 'abscissa-b'
-  | 'ordinata-b';
+  | 'ordinata-b'
+  /* График корня: пять навыков, P12S-1 … P12S-5. */
+  | 'koren-k'
+  | 'koren-znachenie'
+  | 'koren-argument'
+  | 'koren-pryamaya'
+  | 'koren-peresechenie';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */
@@ -316,6 +322,54 @@ export const rationalSkills: PrepSkill[] = [
 ];
 
 /**
+ * Навыки подтемы «Иррациональная функция»: по десять задач в блоке.
+ * Формул на карточках нет — только название, строка о том, что
+ * делаем, и миниатюра; приём для плашки «Запомни!» — в поле tip.
+ */
+export const irrationalSkills: PrepSkill[] = [
+  {
+    id: 'koren-k',
+    no: '01',
+    title: 'Найти $k$ по графику',
+    lead: 'Начало графика и одна целая точка дают $k$',
+    tip: 'Найдите начало графика и целую точку правее него на $1$, $4$ или $9$ клеток. Подставьте её в $f(x) = k\\sqrt{x - x_0} + y_0$: $k = \\dfrac{y - y_0}{\\sqrt{x - x_0}}$. Знак $k$ — по направлению графика.',
+    setId: 'P12S-1',
+  },
+  {
+    id: 'koren-znachenie',
+    no: '02',
+    title: 'Найти значение функции',
+    lead: 'Значение, которое не читается с рисунка',
+    tip: 'Сначала восстановите формулу: начало и $k$. Потом подставьте $x$ — под корнем окажется точный квадрат: $\\sqrt{6{,}76} = 2{,}6$. Проверьте по рисунку, между какими целыми точками лежит ответ.',
+    setId: 'P12S-2',
+  },
+  {
+    id: 'koren-argument',
+    no: '03',
+    title: 'Найти $x$ по известному значению',
+    lead: 'При каком $x$ функция принимает данное значение',
+    tip: 'Перенесите $y_0$ и разделите на $k$: $\\sqrt{x - x_0} = \\dfrac{y - y_0}{k}$. Решение есть только при $\\dfrac{y - y_0}{k} \\ge 0$. Затем возведите в квадрат и прибавьте $x_0$.',
+    setId: 'P12S-3',
+  },
+  {
+    id: 'koren-pryamaya',
+    no: '04',
+    title: 'Формула прямой по графику',
+    lead: 'Коэффициенты $a$ и $b$ прямой рядом с графиком корня',
+    tip: 'Угловой коэффициент прямой — через треугольник под прямой: $a = \\operatorname{tg} \\alpha$, у убывающей — со знаком минус. $b$ — по оси $Oy$, если пересечение в узле, иначе подстановкой целой точки.',
+    setId: 'P12S-4',
+  },
+  {
+    id: 'koren-peresechenie',
+    no: '05',
+    title: 'Пересечение графика корня и прямой',
+    lead: 'Координата второй точки пересечения $B$',
+    tip: '$k$ — по точке $A$, прямая — по двум точкам. Приравняйте функции и сделайте замену $t = \\sqrt{x}$, $t \\ge 0$: получится квадратное уравнение. Один корень — у точки $A$, второй даёт $B$: $x_B = t_B^2$. Ординату считайте по более простой формуле.',
+    setId: 'P12S-5',
+  },
+];
+
+/**
  * Навыки подтемы по её идентификатору (data/functionTypes.ts).
  *
  * У каждой подтемы свой список: новая не дописывается в чужой.
@@ -328,11 +382,19 @@ export function prepSkillsFor(type: string): PrepSkill[] {
   if (type === 'quadratic') {
     return quadraticSkills;
   }
+  if (type === 'irrational') {
+    return irrationalSkills;
+  }
   return type === 'rational' ? rationalSkills : [];
 }
 
 /** Все навыки всех подтем: по ним проверка ищет ответы в сборке. */
-export const allPrepSkills: PrepSkill[] = [...prepSkills, ...quadraticSkills, ...rationalSkills];
+export const allPrepSkills: PrepSkill[] = [
+  ...prepSkills,
+  ...quadraticSkills,
+  ...rationalSkills,
+  ...irrationalSkills,
+];
 
 /** Заголовок и подписи экрана списка навыков. */
 export const prepPage = {

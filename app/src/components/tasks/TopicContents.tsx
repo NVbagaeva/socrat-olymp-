@@ -9,7 +9,7 @@ export interface ContentsItem {
   /** Заголовок, набранный KaTeX на сервере. Нет — выводится title. */
   titleHtml?: string;
   /** Подпункты: видны под открытым разделом (теория №11). */
-  podpunkty?: { id: string; title: string }[];
+  podpunkty?: { id: string; title: string; titleHtml?: string }[];
 }
 
 export interface TopicContentsProps {
@@ -19,6 +19,8 @@ export interface TopicContentsProps {
   onSelect: (id: string) => void;
   /** Переход к подпункту открытого раздела: id элемента на странице. */
   onSelectPodpunkt?: (id: string) => void;
+  /** Подпункты видны всегда, а не только у открытого раздела. */
+  podpunktyVsegda?: boolean;
   className?: string;
 }
 
@@ -33,6 +35,7 @@ export function TopicContents({
   active,
   onSelect,
   onSelectPodpunkt,
+  podpunktyVsegda = false,
   className,
 }: TopicContentsProps) {
   return (
@@ -54,7 +57,9 @@ export function TopicContents({
               <TitleText title={item.title} html={item.titleHtml} />
             </span>
           </button>
-          {item.id === active && item.podpunkty !== undefined && onSelectPodpunkt !== undefined ? (
+          {(podpunktyVsegda || item.id === active) &&
+          item.podpunkty !== undefined &&
+          onSelectPodpunkt !== undefined ? (
             <ul className="contents-sub">
               {item.podpunkty.map((sub) => (
                 <li key={sub.id}>
@@ -63,7 +68,7 @@ export function TopicContents({
                     className="contents-sub__item"
                     onClick={() => onSelectPodpunkt(sub.id)}
                   >
-                    {sub.title}
+                    <TitleText title={sub.title} html={sub.titleHtml} />
                   </button>
                 </li>
               ))}

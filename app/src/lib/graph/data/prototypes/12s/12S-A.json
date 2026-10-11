@@ -1,0 +1,177 @@
+{
+  "kind": "prototype",
+  "id": "12S.A",
+  "block": 1,
+  "title": "Значение функции",
+  "subtitle": "Найти значение функции по графику корня",
+  "seed": 12601,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "12S.A-01",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.A-02",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.A-03",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.A-04",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика, изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.A-05",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "lucky",
+      "levelReason": "корень извлекается из целого числа",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12S.A-06",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x}$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.A-07",
+      "question": "График функции $f(x) = k\\sqrt{x}$ изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.A-08",
+      "question": "На рисунке изображён график функции вида $f(x) = k\\sqrt{x}$. Чему равно значение функции в точке $x = {x0}$?",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "basic",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.A-09",
+      "question": "На рисунке изображён график функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "shift",
+      "constraints": {
+        "kSign": "negative",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    },
+    {
+      "id": "12S.A-10",
+      "question": "График функции $f(x) = k\\sqrt{x - x_0} + y_0$, где $(x_0;\\ y_0)$ — начало графика, изображён на рисунке. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "level": "unlucky",
+      "levelReason": "под корнем десятичная дробь",
+      "form": "shift",
+      "constraints": {
+        "kSign": "positive",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      }
+    }
+  ]
+}
