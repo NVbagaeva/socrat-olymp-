@@ -1406,7 +1406,7 @@ export function kartochkaPrototipa(proto: number): Kartochka1 | null {
 
 /**
  * Шпаргалки к урокам «Для репетиторов»: карточки, которые печатаются
- * в начале листа ученика. Урок 13 — итоговый, без шпаргалки.
+ * в начале листа ученика. Итоговый урок — без шпаргалки.
  */
 export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
   1: ['summa-uglov', 'smezhnye', 'vneshniy', 'ravnobedrennyy', 'bissektrisa-ugla'],
@@ -1418,26 +1418,23 @@ export const SHPARGALKI_1: Readonly<Record<number, readonly string[]>> = {
     'romb',
     'bissektrisa-parallelogramma',
   ],
-  4: [
-    'ploshchad-parallelogramma',
-    'ploshchad-treugolnika',
-    'ploshchad-sinus',
-    'pravilnyy-treugolnik',
-    '30-60-90',
-  ],
-  5: ['podobnye', 'srednyaya-liniya', 'srednyaya-liniya-trapecii', 'serediny-diagonaley'],
-  6: ['trig', 'tablica', 'osnovnoe-tozhdestvo', 'pifagor', 'vysota-gipotenuza'],
-  7: ['cos-ravnobedrennyy', 'tupoy-ugol', 'kosinusov'],
-  8: ['centralnyy-vpisannyy', 'odna-duga', 'duga-dolya'],
-  9: ['kasatelnaya-radius', 'dve-kasatelnye', 'sekushchie', 'khorda-kasatelnaya'],
-  10: [
+  4: ['ploshchad-parallelogramma', 'ploshchad-treugolnika', 'ploshchad-trapecii', 'pryamougolnik'],
+  5: ['ploshchad-sinus', '30-60-90', 'pravilnyy-treugolnik', 'romb'],
+  6: ['podobnye', 'srednyaya-liniya', 'srednyaya-liniya-trapecii', 'serediny-diagonaley'],
+  7: ['trig', 'tablica', 'pifagor', 'vysota-gipotenuza'],
+  8: ['trig', 'osnovnoe-tozhdestvo', 'pifagor', 'vysota-gipotenuza'],
+  9: ['cos-ravnobedrennyy', 'tupoy-ugol', 'kosinusov'],
+  10: ['centralnyy-vpisannyy', 'odna-duga', 'duga-dolya'],
+  11: ['kasatelnaya-radius', 'diametr-khorda'],
+  12: ['dve-kasatelnye', 'sekushchie', 'kasatelnaya-sekushchaya', 'khorda-kasatelnaya'],
+  13: [
     'opisannyy-chetyrehugolnik',
     'opisannaya-trapeciya',
     'pryamougolnaya-trapeciya',
     'vpisannaya-treugolnik',
   ],
-  11: ['vpisannyy-chetyrehugolnik', 'odna-duga-chetyrehugolnik', 'odna-duga'],
-  12: [
+  14: ['vpisannyy-chetyrehugolnik', 'odna-duga-chetyrehugolnik', 'odna-duga'],
+  15: [
     'vpisannyy-chetyrehugolnik',
     'teorema-sinusov',
     'tupoy-ugol',

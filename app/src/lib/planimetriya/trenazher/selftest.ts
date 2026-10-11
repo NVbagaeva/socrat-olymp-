@@ -8,7 +8,7 @@
  * чертежа, отпечаток открывает закрытые блоки, а движок не записал
  * нарушений во всех режимах.
  *
- * Листы: все 13 уроков серии (по умолчанию и с настройками учителя) и режимы генератора (отработка с рамкой
+ * Листы: все 16 уроков серии (по умолчанию и с настройками учителя) и режимы генератора (отработка с рамкой
  * и примерами, варианты) собираются, номера задач идут подряд, на
  * листе нет повторов задач, листы ученика и учителя — из одного
  * набора.
@@ -18,7 +18,8 @@ import { otvetEge } from '../bank/analogi';
 import { UROKI_1 } from '../../../content/repetitory1';
 import { answerMatches, openText } from '../secret';
 import { parseSheetQuery1, sheetSpec1, sobratList } from '../sheet1';
-import { chislo } from '../stseny/dsl';
+import { PROTOTIPY } from '../stseny';
+import { chislo, type Params } from '../stseny/dsl';
 import { dannyeTrenazhera1 } from './dannye';
 import { nomerAnaloga, planSessii, type ZadachaPlan } from './sessiya';
 import { razreshit, sobratZadachu, sostavZadachi, type Podskazki1, type Razbor1 } from './zadacha';
@@ -98,6 +99,23 @@ export function checkTrenazher(seedov = 3): ItogTrenazhera {
       } catch (e) {
         problems.push(`${metka}: ${(e as Error).message}`);
       }
+    }
+  }
+
+  /* 20 аналогов на прототип с другими числами (отпечатки сверяет
+     самотест банка) и с другими буквами: вариант тренажёра и генератора
+     переименовывает точки. Без новых букв — только прототипы, в
+     условии которых букв нет (правильный многоугольник). */
+  for (const pr of PROTOTIPY) {
+    const id = `p${String(pr.id).padStart(2, '0')}`;
+    const an = d.bank.filter((b) => b.id === id && b.analog);
+    if (an.length !== 20) problems.push(`прототип ${pr.id}: аналогов ${an.length}, нужно 20`);
+    const sBukvami = /\$[^$]*[A-Z]/.test(pr.uslovie(pr.primer as Params));
+    for (const a of an) {
+      const r = razreshit({ vid: 'analog', id, no: a.no }, d.bank);
+      const novye = Object.entries(r.variant.bukvy).some(([k, v]) => k !== v);
+      if (sBukvami && !novye)
+        problems.push(`прототип ${pr.id}, аналог ${a.no}: буквы как в образце`);
     }
   }
 
