@@ -414,20 +414,7 @@ export function chistaya(s: string): string {
   return s.replace(/\$([^$]+)\$/g, (_m, f: string) => `$${chistoTex(f)}$`);
 }
 
-/* ── Углы через π ───────────────────────────────────────────────── */
-
-/** Угол t·π в TeX: 1/6 → «\dfrac{\pi}{6}», −5/6 → «-\dfrac{5\pi}{6}», 2 → «2\pi». */
-export function piTex(tq: Q): string {
-  if (tq.n === 0) {
-    return '0';
-  }
-  const sign = tq.n < 0 ? '-' : '';
-  const n = Math.abs(tq.n);
-  if (tq.m === 1) {
-    return `${sign}${n === 1 ? '' : d(n)}\\pi`;
-  }
-  return `${sign}\\dfrac{${n === 1 ? '' : d(n)}\\pi}{${d(tq.m)}}`;
-}
+export { piTex } from './trig';
 
 /* ── Линейное уравнение с x в обеих частях ─────────────────────── */
 
