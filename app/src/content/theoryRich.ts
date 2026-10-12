@@ -133,6 +133,12 @@ export interface RichRemember {
   paras: string[];
 }
 
+/** Живой график со слайдерами: ключ компонента (components/tasks/theory/live). */
+export interface RichLive {
+  type: 'live';
+  id: 'exp-play' | 'log-play' | 'trig-play';
+}
+
 /** Памятка-итог: нумерованные пункты. */
 export interface RichMemo {
   type: 'memo';
@@ -149,7 +155,8 @@ export type RichBlock =
   | RichSub
   | RichFigure
   | RichRemember
-  | RichMemo;
+  | RichMemo
+  | RichLive;
 
 export interface RichSection {
   /** Ключ раздела: на него ссылается поле body блока теории. */

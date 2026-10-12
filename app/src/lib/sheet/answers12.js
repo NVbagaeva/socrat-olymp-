@@ -67,7 +67,9 @@ function fullSolutionRational(task, rationalBuilder) {
    краткое. Возвращает готовый кусок листа или null. */
 /* Семейства с полным решением по шагам: у каждого этапа подпись. */
 function stepwise(task) {
-  return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt');
+  return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt' ||
+    task.meta.family === 'exponential' || task.meta.family === 'logarithmic' ||
+    task.meta.family === 'trigonometric');
 }
 
 /* task.solutionFigure — рисунок к разбору ({ svg, width }), его

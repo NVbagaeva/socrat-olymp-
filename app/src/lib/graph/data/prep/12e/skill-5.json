@@ -1,0 +1,179 @@
+{
+  "kind": "prep",
+  "id": "P12E-5",
+  "task": 12,
+  "title": "Аргумент по значению",
+  "subtitle": "Найти $x$, при котором функция принимает данное значение",
+  "seed": 12715,
+  "family": "exponential",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12E-5-01",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-02",
+      "form": "shiftY",
+      "question": "На рисунке изображён график функции $f(x) = a^x + b$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-03",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = a^{x+b}$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-04",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-05",
+      "form": "shiftY",
+      "question": "На рисунке изображён график функции $f(x) = a^x + b$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-06",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = a^{x+b}$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-07",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-08",
+      "form": "shiftY",
+      "question": "На рисунке изображён график функции $f(x) = a^x + b$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-09",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = a^{x+b}$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "P12E-5-10",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    }
+  ]
+}

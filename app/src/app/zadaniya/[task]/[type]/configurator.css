@@ -262,6 +262,15 @@
   font-weight: 700;
   color: var(--color-text-brand);
 }
+.cfg-summary__family {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.cfg-summary__ico {
+  width: 56px;
+}
 .cfg-summary__skill {
   font-size: var(--fs-h4);
   line-height: var(--lh-h4);

@@ -41,12 +41,36 @@ const SKILL_BY_SET: Record<string, PrepSkillId> = {
   'P12S-4': 'koren-pryamaya', 'P12S-5': 'koren-peresechenie',
   '12S.A': 'koren-znachenie', '12S.B': 'koren-argument', '12S.C': 'koren-peresechenie',
   '12S.D': 'koren-peresechenie',
+  /* Показательная функция. */
+  'P12E-1': 'pokaz-osnovanie', 'P12E-2': 'pokaz-znachenie', 'P12E-3': 'pokaz-sdvig-vverh',
+  'P12E-4': 'pokaz-sdvig-vbok', 'P12E-5': 'pokaz-argument',
+  '12E.A': 'pokaz-znachenie', '12E.B': 'pokaz-sdvig-vverh', '12E.C': 'pokaz-argument',
+  '12E.D': 'pokaz-sdvig-vbok',
+  /* Логарифмическая функция. */
+  'P12L-1': 'log-osnovanie', 'P12L-2': 'log-znachenie', 'P12L-3': 'log-sdvig-vverh',
+  'P12L-4': 'log-sdvig-vbok', 'P12L-5': 'log-argument',
+  '12L.A': 'log-znachenie', '12L.B': 'log-sdvig-vverh', '12L.C': 'log-argument',
+  '12L.D': 'log-sdvig-vbok', '12L.E': 'log-argument',
+  /* Тригонометрические функции. */
+  'P12T-1': 'trig-cos', 'P12T-2': 'trig-sin', 'P12T-3': 'trig-tg', 'P12T-4': 'trig-sistema',
+  'P12T-5': 'trig-polovina',
+  '12T.A': 'trig-cos', '12T.B': 'trig-cos', '12T.C': 'trig-tg', '12T.D': 'trig-tg',
+  '12T.E': 'trig-sin', '12T.F': 'trig-sin',
 };
 
 /* Подтема набора: по префиксу идентификатора. */
 function typeOf(setId: string): string {
   if (/^(P12S-|12S\.)/.test(setId)) {
     return 'irrational';
+  }
+  if (/^(P12E-|12E\.)/.test(setId)) {
+    return 'exponential';
+  }
+  if (/^(P12L-|12L\.)/.test(setId)) {
+    return 'logarithmic';
+  }
+  if (/^(P12T-|12T\.)/.test(setId)) {
+    return 'trigonometric';
   }
   return /^(P12R-|12R\.)/.test(setId) ? 'rational' : 'quadratic';
 }

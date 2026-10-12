@@ -1,0 +1,169 @@
+{
+  "kind": "prep",
+  "id": "P12T-2",
+  "task": 12,
+  "title": "Синус: $a\\sin x + b$",
+  "subtitle": "Найти $a$ и $b$: $\\sin \\dfrac{\\pi}{2} = 1$, $\\sin 0 = 0$",
+  "seed": 12912,
+  "family": "trigonometric",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12T-2-01",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-02",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-03",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-04",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-05",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-06",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-07",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-08",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-09",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-2-10",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    }
+  ]
+}

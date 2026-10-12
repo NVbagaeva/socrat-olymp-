@@ -23,6 +23,11 @@ export interface TutorMenuProps {
   children: ReactNode;
   /** Узел ленты нужен и снаружи — по нему подводят активную вкладку. */
   stripRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Над лентой, в той же липкой строке: плашка разделов задания
+   * (components/tasks/razdely). Прилипает вместе с вкладками.
+   */
+  before?: ReactNode;
 }
 
 /** Ширина меню на широком экране: примерно две колонки содержимого. */
@@ -123,6 +128,7 @@ export function TutorMenu({
   onOpenChange,
   children,
   stripRef,
+  before,
 }: TutorMenuProps) {
   const id = useId();
   const button = useRef<HTMLButtonElement>(null);
@@ -172,6 +178,7 @@ export function TutorMenu({
 
   return (
     <div className="topic-tabs-row">
+      {before}
       <div className="topic-tabs" ref={stripRef}>
         {children}
         <button

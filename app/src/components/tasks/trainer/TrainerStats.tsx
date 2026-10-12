@@ -3,7 +3,11 @@
 import { Button } from '@/components/ui';
 import { trainerKindTitle, trainerStats } from '@/content/trainerModes';
 import { KindName } from './KindName';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import {
+  progressOf,
+  resetSets,
   resetTrainer,
   summarize,
   useTrainerProgress,
@@ -13,6 +17,13 @@ import {
 export interface TrainerStatsProps {
   /** Сколько заданий всего есть в наборах: знаменатель счётчика. */
   total: number;
+  /**
+   * Наборы раздела. Заданы — сводка считает только их, и «Сбросить»
+   * чистит только их: счётчики всех разделов лежат в одной записи.
+   */
+  sets?: readonly string[] | undefined;
+  /** Раздел: иконка и название в шапке сводки. */
+  razdel?: { title: string; icon?: IkonkaRazdela | undefined } | undefined;
 }
 
 interface KindRow {
@@ -82,14 +93,21 @@ function mistakeText(id: string): string {
  * проверки: экран задания и эта сводка смотрят в одно и то же место.
  * До монтирования здесь нули — хранилище читается только в браузере.
  */
-export function TrainerStats({ total }: TrainerStatsProps) {
-  const progress = useTrainerProgress();
+export function TrainerStats({ total, sets, razdel }: TrainerStatsProps) {
+  const all = useTrainerProgress();
+  const progress = sets === undefined ? all : progressOf(all, sets);
   const sum = summarize(progress);
   const rows = kindRows(progress);
   const weak = weakest(rows);
 
   return (
     <section className="tstats">
+      {razdel === undefined ? null : (
+        <p className="tstats__razdel">
+          <RazdelIkonka icon={razdel.icon} sizes="40px" className="tstats__ico" />
+          <span>{razdel.title}</span>
+        </p>
+      )}
       <p className="tstats__counter">
         <b>{sum.done}</b> из {total} заданий
       </p>
@@ -165,7 +183,10 @@ export function TrainerStats({ total }: TrainerStatsProps) {
             </section>
           )}
 
-          <Button variant="ghost" onClick={resetTrainer}>
+          <Button
+            variant="ghost"
+            onClick={() => (sets === undefined ? resetTrainer() : resetSets(sets))}
+          >
             {trainerStats.reset}
           </Button>
         </>
