@@ -1,0 +1,8242 @@
+{
+ "P01": [
+  {
+   "id": "P01-a01",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{8x-14}=\\dfrac{1}{2}$.",
+   "params": {
+    "k": 8,
+    "b": -14,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": 2
+  },
+  {
+   "id": "P01-a02",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x+16}=\\dfrac{1}{4}$.",
+   "params": {
+    "k": 4,
+    "b": 16,
+    "cn": 1,
+    "cm": 4
+   },
+   "answer": -3
+  },
+  {
+   "id": "P01-a03",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-15}=-\\dfrac{1}{3}$.",
+   "params": {
+    "k": 4,
+    "b": -15,
+    "cn": -1,
+    "cm": 3
+   },
+   "answer": 3
+  },
+  {
+   "id": "P01-a04",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x-22}=\\dfrac{1}{3}$.",
+   "params": {
+    "k": 5,
+    "b": -22,
+    "cn": 1,
+    "cm": 3
+   },
+   "answer": 5
+  },
+  {
+   "id": "P01-a05",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{7x-10}=-5$.",
+   "params": {
+    "k": 7,
+    "b": -10,
+    "cn": -5,
+    "cm": 1
+   },
+   "answer": 1.4
+  },
+  {
+   "id": "P01-a06",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{10x+12}=\\dfrac{1}{2}$.",
+   "params": {
+    "k": 10,
+    "b": 12,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": -1
+  },
+  {
+   "id": "P01-a07",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{12x+15}=\\dfrac{1}{3}$.",
+   "params": {
+    "k": 12,
+    "b": 15,
+    "cn": 1,
+    "cm": 3
+   },
+   "answer": -1
+  },
+  {
+   "id": "P01-a08",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x+8}=-\\dfrac{1}{2}$.",
+   "params": {
+    "k": 2,
+    "b": 8,
+    "cn": -1,
+    "cm": 2
+   },
+   "answer": -5
+  },
+  {
+   "id": "P01-a09",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{3x+4}=\\dfrac{1}{4}$.",
+   "params": {
+    "k": 3,
+    "b": 4,
+    "cn": 1,
+    "cm": 4
+   },
+   "answer": 0
+  },
+  {
+   "id": "P01-a10",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-19}=\\dfrac{1}{5}$.",
+   "params": {
+    "k": 4,
+    "b": -19,
+    "cn": 1,
+    "cm": 5
+   },
+   "answer": 6
+  },
+  {
+   "id": "P01-a11",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{11x-5}=\\dfrac{1}{6}$.",
+   "params": {
+    "k": 11,
+    "b": -5,
+    "cn": 1,
+    "cm": 6
+   },
+   "answer": 1
+  },
+  {
+   "id": "P01-a12",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x-3}=-\\dfrac{1}{2}$.",
+   "params": {
+    "k": 2,
+    "b": -3,
+    "cn": -1,
+    "cm": 2
+   },
+   "answer": 0.5
+  },
+  {
+   "id": "P01-a13",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x+25}=-\\dfrac{1}{3}$.",
+   "params": {
+    "k": 4,
+    "b": 25,
+    "cn": -1,
+    "cm": 3
+   },
+   "answer": -7
+  },
+  {
+   "id": "P01-a14",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-6}=\\dfrac{1}{2}$.",
+   "params": {
+    "k": 4,
+    "b": -6,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": 2
+  },
+  {
+   "id": "P01-a15",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{3x+13}=-\\dfrac{1}{2}$.",
+   "params": {
+    "k": 3,
+    "b": 13,
+    "cn": -1,
+    "cm": 2
+   },
+   "answer": -5
+  },
+  {
+   "id": "P01-a16",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x+3}=\\dfrac{1}{5}$.",
+   "params": {
+    "k": 2,
+    "b": 3,
+    "cn": 1,
+    "cm": 5
+   },
+   "answer": 1
+  },
+  {
+   "id": "P01-a17",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{8x+4}=\\dfrac{1}{4}$.",
+   "params": {
+    "k": 8,
+    "b": 4,
+    "cn": 1,
+    "cm": 4
+   },
+   "answer": 0
+  },
+  {
+   "id": "P01-a18",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{9x-23}=\\dfrac{1}{4}$.",
+   "params": {
+    "k": 9,
+    "b": -23,
+    "cn": 1,
+    "cm": 4
+   },
+   "answer": 3
+  },
+  {
+   "id": "P01-a19",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x+17}=-\\dfrac{1}{3}$.",
+   "params": {
+    "k": 5,
+    "b": 17,
+    "cn": -1,
+    "cm": 3
+   },
+   "answer": -4
+  },
+  {
+   "id": "P01-a20",
+   "prototypeId": "P01",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-18}=\\dfrac{1}{2}$.",
+   "params": {
+    "k": 4,
+    "b": -18,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": 5
+  }
+ ],
+ "P02": [
+  {
+   "id": "P02-a01",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+5)^3=1$.",
+   "params": {
+    "a": 5,
+    "n": 3,
+    "b": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P02-a02",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-12)^7=-128$.",
+   "params": {
+    "a": -12,
+    "n": 7,
+    "b": -128
+   },
+   "answer": 10
+  },
+  {
+   "id": "P02-a03",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+2)^5=-32$.",
+   "params": {
+    "a": 2,
+    "n": 5,
+    "b": -32
+   },
+   "answer": -4
+  },
+  {
+   "id": "P02-a04",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+2)^5=-1$.",
+   "params": {
+    "a": 2,
+    "n": 5,
+    "b": -1
+   },
+   "answer": -3
+  },
+  {
+   "id": "P02-a05",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+3)^3=1000$.",
+   "params": {
+    "a": 3,
+    "n": 3,
+    "b": 1000
+   },
+   "answer": 7
+  },
+  {
+   "id": "P02-a06",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-9)^9=1$.",
+   "params": {
+    "a": -9,
+    "n": 9,
+    "b": 1
+   },
+   "answer": 10
+  },
+  {
+   "id": "P02-a07",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+6)^9=1$.",
+   "params": {
+    "a": 6,
+    "n": 9,
+    "b": 1
+   },
+   "answer": -5
+  },
+  {
+   "id": "P02-a08",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-5)^3=1000$.",
+   "params": {
+    "a": -5,
+    "n": 3,
+    "b": 1000
+   },
+   "answer": 15
+  },
+  {
+   "id": "P02-a09",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-13)^9=-1$.",
+   "params": {
+    "a": -13,
+    "n": 9,
+    "b": -1
+   },
+   "answer": 12
+  },
+  {
+   "id": "P02-a10",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+12)^3=-1$.",
+   "params": {
+    "a": 12,
+    "n": 3,
+    "b": -1
+   },
+   "answer": -13
+  },
+  {
+   "id": "P02-a11",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-4)^3=1000$.",
+   "params": {
+    "a": -4,
+    "n": 3,
+    "b": 1000
+   },
+   "answer": 14
+  },
+  {
+   "id": "P02-a12",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+7)^9=512$.",
+   "params": {
+    "a": 7,
+    "n": 9,
+    "b": 512
+   },
+   "answer": -5
+  },
+  {
+   "id": "P02-a13",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+11)^9=1$.",
+   "params": {
+    "a": 11,
+    "n": 9,
+    "b": 1
+   },
+   "answer": -10
+  },
+  {
+   "id": "P02-a14",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+10)^3=27$.",
+   "params": {
+    "a": 10,
+    "n": 3,
+    "b": 27
+   },
+   "answer": -7
+  },
+  {
+   "id": "P02-a15",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-12)^3=-1000$.",
+   "params": {
+    "a": -12,
+    "n": 3,
+    "b": -1000
+   },
+   "answer": 2
+  },
+  {
+   "id": "P02-a16",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-6)^9=1$.",
+   "params": {
+    "a": -6,
+    "n": 9,
+    "b": 1
+   },
+   "answer": 7
+  },
+  {
+   "id": "P02-a17",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-4)^3=343$.",
+   "params": {
+    "a": -4,
+    "n": 3,
+    "b": 343
+   },
+   "answer": 11
+  },
+  {
+   "id": "P02-a18",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+3)^5=1$.",
+   "params": {
+    "a": 3,
+    "n": 5,
+    "b": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P02-a19",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-10)^3=-8$.",
+   "params": {
+    "a": -10,
+    "n": 3,
+    "b": -8
+   },
+   "answer": 8
+  },
+  {
+   "id": "P02-a20",
+   "prototypeId": "P02",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-6)^3=27$.",
+   "params": {
+    "a": -6,
+    "n": 3,
+    "b": 27
+   },
+   "answer": 9
+  }
+ ],
+ "P03": [
+  {
+   "id": "P03-a01",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{5}{11}x=-2\\dfrac{3}{11}$.",
+   "params": {
+    "kn": 5,
+    "km": 11,
+    "z": -1,
+    "w": 2,
+    "rn": 3,
+    "rm": 11
+   },
+   "answer": -5
+  },
+  {
+   "id": "P03-a02",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{3}{7}x=-10\\dfrac{2}{7}$.",
+   "params": {
+    "kn": 3,
+    "km": 7,
+    "z": -1,
+    "w": 10,
+    "rn": 2,
+    "rm": 7
+   },
+   "answer": -24
+  },
+  {
+   "id": "P03-a03",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{12}x=3\\dfrac{1}{12}$.",
+   "params": {
+    "kn": 1,
+    "km": 12,
+    "z": 1,
+    "w": 3,
+    "rn": 1,
+    "rm": 12
+   },
+   "answer": 37
+  },
+  {
+   "id": "P03-a04",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{7}{9}x=28\\dfrac{7}{9}$.",
+   "params": {
+    "kn": -7,
+    "km": 9,
+    "z": 1,
+    "w": 28,
+    "rn": 7,
+    "rm": 9
+   },
+   "answer": -37
+  },
+  {
+   "id": "P03-a05",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{12}x=-3\\dfrac{1}{6}$.",
+   "params": {
+    "kn": 1,
+    "km": 12,
+    "z": -1,
+    "w": 3,
+    "rn": 1,
+    "rm": 6
+   },
+   "answer": -38
+  },
+  {
+   "id": "P03-a06",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{7}{9}x=-26\\dfrac{4}{9}$.",
+   "params": {
+    "kn": -7,
+    "km": 9,
+    "z": -1,
+    "w": 26,
+    "rn": 4,
+    "rm": 9
+   },
+   "answer": 34
+  },
+  {
+   "id": "P03-a07",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{2}{9}x=-5\\dfrac{1}{9}$.",
+   "params": {
+    "kn": 2,
+    "km": 9,
+    "z": -1,
+    "w": 5,
+    "rn": 1,
+    "rm": 9
+   },
+   "answer": -23
+  },
+  {
+   "id": "P03-a08",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{8}x=-1\\dfrac{5}{8}$.",
+   "params": {
+    "kn": 1,
+    "km": 8,
+    "z": -1,
+    "w": 1,
+    "rn": 5,
+    "rm": 8
+   },
+   "answer": -13
+  },
+  {
+   "id": "P03-a09",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{4}{7}x=4\\dfrac{2}{7}$.",
+   "params": {
+    "kn": 4,
+    "km": 7,
+    "z": 1,
+    "w": 4,
+    "rn": 2,
+    "rm": 7
+   },
+   "answer": 7.5
+  },
+  {
+   "id": "P03-a10",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{7}{6}x=-15\\dfrac{3}{4}$.",
+   "params": {
+    "kn": 7,
+    "km": 6,
+    "z": -1,
+    "w": 15,
+    "rn": 3,
+    "rm": 4
+   },
+   "answer": -13.5
+  },
+  {
+   "id": "P03-a11",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{8}{9}x=27\\dfrac{1}{9}$.",
+   "params": {
+    "kn": -8,
+    "km": 9,
+    "z": 1,
+    "w": 27,
+    "rn": 1,
+    "rm": 9
+   },
+   "answer": -30.5
+  },
+  {
+   "id": "P03-a12",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{11}{10}x=3\\dfrac{3}{10}$.",
+   "params": {
+    "kn": -11,
+    "km": 10,
+    "z": 1,
+    "w": 3,
+    "rn": 3,
+    "rm": 10
+   },
+   "answer": -3
+  },
+  {
+   "id": "P03-a13",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{2}{11}x=4\\dfrac{8}{11}$.",
+   "params": {
+    "kn": 2,
+    "km": 11,
+    "z": 1,
+    "w": 4,
+    "rn": 8,
+    "rm": 11
+   },
+   "answer": 26
+  },
+  {
+   "id": "P03-a14",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{6}{11}x=15\\dfrac{3}{11}$.",
+   "params": {
+    "kn": -6,
+    "km": 11,
+    "z": 1,
+    "w": 15,
+    "rn": 3,
+    "rm": 11
+   },
+   "answer": -28
+  },
+  {
+   "id": "P03-a15",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{5}{11}x=10\\dfrac{5}{22}$.",
+   "params": {
+    "kn": 5,
+    "km": 11,
+    "z": 1,
+    "w": 10,
+    "rn": 5,
+    "rm": 22
+   },
+   "answer": 22.5
+  },
+  {
+   "id": "P03-a16",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{10}{9}x=-28\\dfrac{8}{9}$.",
+   "params": {
+    "kn": 10,
+    "km": 9,
+    "z": -1,
+    "w": 28,
+    "rn": 8,
+    "rm": 9
+   },
+   "answer": -26
+  },
+  {
+   "id": "P03-a17",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{3}{10}x=10\\dfrac{13}{20}$.",
+   "params": {
+    "kn": -3,
+    "km": 10,
+    "z": 1,
+    "w": 10,
+    "rn": 13,
+    "rm": 20
+   },
+   "answer": -35.5
+  },
+  {
+   "id": "P03-a18",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{5}{11}x=13\\dfrac{9}{22}$.",
+   "params": {
+    "kn": -5,
+    "km": 11,
+    "z": 1,
+    "w": 13,
+    "rn": 9,
+    "rm": 22
+   },
+   "answer": -29.5
+  },
+  {
+   "id": "P03-a19",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $-\\dfrac{4}{9}x=10\\dfrac{2}{9}$.",
+   "params": {
+    "kn": -4,
+    "km": 9,
+    "z": 1,
+    "w": 10,
+    "rn": 2,
+    "rm": 9
+   },
+   "answer": -23
+  },
+  {
+   "id": "P03-a20",
+   "prototypeId": "P03",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{8}{3}x=30\\dfrac{2}{3}$.",
+   "params": {
+    "kn": 8,
+    "km": 3,
+    "z": 1,
+    "w": 30,
+    "rn": 2,
+    "rm": 3
+   },
+   "answer": 11.5
+  }
+ ],
+ "P04": [
+  {
+   "id": "P04-a01",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x+15}=\\dfrac{1}{3x+14}$.",
+   "params": {
+    "a": 4,
+    "b": 15,
+    "c": 3,
+    "dd": 14
+   },
+   "answer": -1
+  },
+  {
+   "id": "P04-a02",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x-11}=\\dfrac{1}{x-12}$.",
+   "params": {
+    "a": 2,
+    "b": -11,
+    "c": 1,
+    "dd": -12
+   },
+   "answer": -1
+  },
+  {
+   "id": "P04-a03",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x-16}=\\dfrac{1}{4x-2}$.",
+   "params": {
+    "a": 2,
+    "b": -16,
+    "c": 4,
+    "dd": -2
+   },
+   "answer": -7
+  },
+  {
+   "id": "P04-a04",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{7x-10}=\\dfrac{1}{3x-27}$.",
+   "params": {
+    "a": 7,
+    "b": -10,
+    "c": 3,
+    "dd": -27
+   },
+   "answer": -4.25
+  },
+  {
+   "id": "P04-a05",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{3x+13}=\\dfrac{1}{x+7}$.",
+   "params": {
+    "a": 3,
+    "b": 13,
+    "c": 1,
+    "dd": 7
+   },
+   "answer": -3
+  },
+  {
+   "id": "P04-a06",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{7x-9}=\\dfrac{1}{5x+11}$.",
+   "params": {
+    "a": 7,
+    "b": -9,
+    "c": 5,
+    "dd": 11
+   },
+   "answer": 10
+  },
+  {
+   "id": "P04-a07",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x-14}=\\dfrac{1}{7x+28}$.",
+   "params": {
+    "a": 5,
+    "b": -14,
+    "c": 7,
+    "dd": 28
+   },
+   "answer": -21
+  },
+  {
+   "id": "P04-a08",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x+19}=\\dfrac{1}{9x+11}$.",
+   "params": {
+    "a": 5,
+    "b": 19,
+    "c": 9,
+    "dd": 11
+   },
+   "answer": 2
+  },
+  {
+   "id": "P04-a09",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x+15}=\\dfrac{1}{2x+25}$.",
+   "params": {
+    "a": 4,
+    "b": 15,
+    "c": 2,
+    "dd": 25
+   },
+   "answer": 5
+  },
+  {
+   "id": "P04-a10",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{3x-5}=\\dfrac{1}{8x-2}$.",
+   "params": {
+    "a": 3,
+    "b": -5,
+    "c": 8,
+    "dd": -2
+   },
+   "answer": -0.6
+  },
+  {
+   "id": "P04-a11",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{x+5}=\\dfrac{1}{3x-5}$.",
+   "params": {
+    "a": 1,
+    "b": 5,
+    "c": 3,
+    "dd": -5
+   },
+   "answer": 5
+  },
+  {
+   "id": "P04-a12",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x+6}=\\dfrac{1}{x-11}$.",
+   "params": {
+    "a": 2,
+    "b": 6,
+    "c": 1,
+    "dd": -11
+   },
+   "answer": -17
+  },
+  {
+   "id": "P04-a13",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-6}=\\dfrac{1}{2x+18}$.",
+   "params": {
+    "a": 4,
+    "b": -6,
+    "c": 2,
+    "dd": 18
+   },
+   "answer": 12
+  },
+  {
+   "id": "P04-a14",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x+19}=\\dfrac{1}{2x+7}$.",
+   "params": {
+    "a": 5,
+    "b": 19,
+    "c": 2,
+    "dd": 7
+   },
+   "answer": -4
+  },
+  {
+   "id": "P04-a15",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-18}=\\dfrac{1}{6x-30}$.",
+   "params": {
+    "a": 4,
+    "b": -18,
+    "c": 6,
+    "dd": -30
+   },
+   "answer": 6
+  },
+  {
+   "id": "P04-a16",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-8}=\\dfrac{1}{6x-22}$.",
+   "params": {
+    "a": 4,
+    "b": -8,
+    "c": 6,
+    "dd": -22
+   },
+   "answer": 7
+  },
+  {
+   "id": "P04-a17",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{5x+15}=\\dfrac{1}{3x+23}$.",
+   "params": {
+    "a": 5,
+    "b": 15,
+    "c": 3,
+    "dd": 23
+   },
+   "answer": 4
+  },
+  {
+   "id": "P04-a18",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{3x+10}=\\dfrac{1}{9x-8}$.",
+   "params": {
+    "a": 3,
+    "b": 10,
+    "c": 9,
+    "dd": -8
+   },
+   "answer": 3
+  },
+  {
+   "id": "P04-a19",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{2x+1}=\\dfrac{1}{6x-21}$.",
+   "params": {
+    "a": 2,
+    "b": 1,
+    "c": 6,
+    "dd": -21
+   },
+   "answer": 5.5
+  },
+  {
+   "id": "P04-a20",
+   "prototypeId": "P04",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{1}{4x-17}=\\dfrac{1}{6x-5}$.",
+   "params": {
+    "a": 4,
+    "b": -17,
+    "c": 6,
+    "dd": -5
+   },
+   "answer": -6
+  }
+ ],
+ "P05": [
+  {
+   "id": "P05-a01",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(5x+1)^2=(5x+19)^2$.",
+   "params": {
+    "a": 5,
+    "b": 1,
+    "c": 19
+   },
+   "answer": -2
+  },
+  {
+   "id": "P05-a02",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(6x-14)^2=(6x+14)^2$.",
+   "params": {
+    "a": 6,
+    "b": -14,
+    "c": 14
+   },
+   "answer": 0
+  },
+  {
+   "id": "P05-a03",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+6)^2=(x-25)^2$.",
+   "params": {
+    "a": 1,
+    "b": 6,
+    "c": -25
+   },
+   "answer": 9.5
+  },
+  {
+   "id": "P05-a04",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(2x+1)^2=(2x-21)^2$.",
+   "params": {
+    "a": 2,
+    "b": 1,
+    "c": -21
+   },
+   "answer": 5
+  },
+  {
+   "id": "P05-a05",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(6x-3)^2=(6x-21)^2$.",
+   "params": {
+    "a": 6,
+    "b": -3,
+    "c": -21
+   },
+   "answer": 2
+  },
+  {
+   "id": "P05-a06",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-1)^2=(x+11)^2$.",
+   "params": {
+    "a": 1,
+    "b": -1,
+    "c": 11
+   },
+   "answer": -5
+  },
+  {
+   "id": "P05-a07",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(8x+8)^2=(8x-24)^2$.",
+   "params": {
+    "a": 8,
+    "b": 8,
+    "c": -24
+   },
+   "answer": 1
+  },
+  {
+   "id": "P05-a08",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(6x-13)^2=(6x-17)^2$.",
+   "params": {
+    "a": 6,
+    "b": -13,
+    "c": -17
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P05-a09",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(6x+8)^2=(6x-8)^2$.",
+   "params": {
+    "a": 6,
+    "b": 8,
+    "c": -8
+   },
+   "answer": 0
+  },
+  {
+   "id": "P05-a10",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(2x+15)^2=(2x+1)^2$.",
+   "params": {
+    "a": 2,
+    "b": 15,
+    "c": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P05-a11",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+1)^2=(x+3)^2$.",
+   "params": {
+    "a": 1,
+    "b": 1,
+    "c": 3
+   },
+   "answer": -2
+  },
+  {
+   "id": "P05-a12",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-3)^2=(x-15)^2$.",
+   "params": {
+    "a": 1,
+    "b": -3,
+    "c": -15
+   },
+   "answer": 9
+  },
+  {
+   "id": "P05-a13",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(4x-14)^2=(4x+6)^2$.",
+   "params": {
+    "a": 4,
+    "b": -14,
+    "c": 6
+   },
+   "answer": 1
+  },
+  {
+   "id": "P05-a14",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+4)^2=(x-12)^2$.",
+   "params": {
+    "a": 1,
+    "b": 4,
+    "c": -12
+   },
+   "answer": 4
+  },
+  {
+   "id": "P05-a15",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(4x-1)^2=(4x-19)^2$.",
+   "params": {
+    "a": 4,
+    "b": -1,
+    "c": -19
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P05-a16",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(2x+8)^2=(2x+12)^2$.",
+   "params": {
+    "a": 2,
+    "b": 8,
+    "c": 12
+   },
+   "answer": -5
+  },
+  {
+   "id": "P05-a17",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(4x+9)^2=(4x+3)^2$.",
+   "params": {
+    "a": 4,
+    "b": 9,
+    "c": 3
+   },
+   "answer": -1.5
+  },
+  {
+   "id": "P05-a18",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(5x-4)^2=(5x+14)^2$.",
+   "params": {
+    "a": 5,
+    "b": -4,
+    "c": 14
+   },
+   "answer": -1
+  },
+  {
+   "id": "P05-a19",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(5x-13)^2=(5x+19)^2$.",
+   "params": {
+    "a": 5,
+    "b": -13,
+    "c": 19
+   },
+   "answer": -0.6
+  },
+  {
+   "id": "P05-a20",
+   "prototypeId": "P05",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(2x-15)^2=(2x-10)^2$.",
+   "params": {
+    "a": 2,
+    "b": -15,
+    "c": -10
+   },
+   "answer": 6.25
+  }
+ ],
+ "P06": [
+  {
+   "id": "P06-a01",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+4)^2=16x$.",
+   "params": {
+    "a": 4
+   },
+   "answer": 4
+  },
+  {
+   "id": "P06-a02",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-2)^2=-8x$.",
+   "params": {
+    "a": -2
+   },
+   "answer": -2
+  },
+  {
+   "id": "P06-a03",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-8)^2=-32x$.",
+   "params": {
+    "a": -8
+   },
+   "answer": -8
+  },
+  {
+   "id": "P06-a04",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-6)^2=-24x$.",
+   "params": {
+    "a": -6
+   },
+   "answer": -6
+  },
+  {
+   "id": "P06-a05",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-17)^2=-68x$.",
+   "params": {
+    "a": -17
+   },
+   "answer": -17
+  },
+  {
+   "id": "P06-a06",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+3)^2=12x$.",
+   "params": {
+    "a": 3
+   },
+   "answer": 3
+  },
+  {
+   "id": "P06-a07",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-4)^2=-16x$.",
+   "params": {
+    "a": -4
+   },
+   "answer": -4
+  },
+  {
+   "id": "P06-a08",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-3)^2=-12x$.",
+   "params": {
+    "a": -3
+   },
+   "answer": -3
+  },
+  {
+   "id": "P06-a09",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-18)^2=-72x$.",
+   "params": {
+    "a": -18
+   },
+   "answer": -18
+  },
+  {
+   "id": "P06-a10",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-13)^2=-52x$.",
+   "params": {
+    "a": -13
+   },
+   "answer": -13
+  },
+  {
+   "id": "P06-a11",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+5)^2=20x$.",
+   "params": {
+    "a": 5
+   },
+   "answer": 5
+  },
+  {
+   "id": "P06-a12",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+16)^2=64x$.",
+   "params": {
+    "a": 16
+   },
+   "answer": 16
+  },
+  {
+   "id": "P06-a13",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-1)^2=-4x$.",
+   "params": {
+    "a": -1
+   },
+   "answer": -1
+  },
+  {
+   "id": "P06-a14",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-7)^2=-28x$.",
+   "params": {
+    "a": -7
+   },
+   "answer": -7
+  },
+  {
+   "id": "P06-a15",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-10)^2=-40x$.",
+   "params": {
+    "a": -10
+   },
+   "answer": -10
+  },
+  {
+   "id": "P06-a16",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+18)^2=72x$.",
+   "params": {
+    "a": 18
+   },
+   "answer": 18
+  },
+  {
+   "id": "P06-a17",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-15)^2=-60x$.",
+   "params": {
+    "a": -15
+   },
+   "answer": -15
+  },
+  {
+   "id": "P06-a18",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x-5)^2=-20x$.",
+   "params": {
+    "a": -5
+   },
+   "answer": -5
+  },
+  {
+   "id": "P06-a19",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+17)^2=68x$.",
+   "params": {
+    "a": 17
+   },
+   "answer": 17
+  },
+  {
+   "id": "P06-a20",
+   "prototypeId": "P06",
+   "source": "analog",
+   "text": "Найдите корень уравнения $(x+10)^2=40x$.",
+   "params": {
+    "a": 10
+   },
+   "answer": 10
+  }
+ ],
+ "P07": [
+  {
+   "id": "P07-a01",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{4}{13}x^2=1\\dfrac{3}{13}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 4,
+    "km": 13,
+    "cw": 1,
+    "cn": 3,
+    "cm": 13,
+    "v": "menshiy"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P07-a02",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{9}{8}x^2=10\\dfrac{1}{8}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 9,
+    "km": 8,
+    "cw": 10,
+    "cn": 1,
+    "cm": 8,
+    "v": "menshiy"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P07-a03",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{6}{11}x^2=19\\dfrac{7}{11}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 6,
+    "km": 11,
+    "cw": 19,
+    "cn": 7,
+    "cm": 11,
+    "v": "bolshiy"
+   },
+   "answer": 6
+  },
+  {
+   "id": "P07-a04",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{12}{7}x^2=27\\dfrac{3}{7}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 12,
+    "km": 7,
+    "cw": 27,
+    "cn": 3,
+    "cm": 7,
+    "v": "menshiy"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P07-a05",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{3}{8}x^2=1\\dfrac{1}{2}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 3,
+    "km": 8,
+    "cw": 1,
+    "cn": 1,
+    "cm": 2,
+    "v": "menshiy"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P07-a06",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{6}{5}x^2=7\\dfrac{1}{2}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 6,
+    "km": 5,
+    "cw": 7,
+    "cn": 1,
+    "cm": 2,
+    "v": "bolshiy"
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P07-a07",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{5}{6}x^2=1\\dfrac{7}{8}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 5,
+    "km": 6,
+    "cw": 1,
+    "cn": 7,
+    "cm": 8,
+    "v": "menshiy"
+   },
+   "answer": -1.5
+  },
+  {
+   "id": "P07-a08",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{8}{13}x^2=12\\dfrac{6}{13}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 8,
+    "km": 13,
+    "cw": 12,
+    "cn": 6,
+    "cm": 13,
+    "v": "menshiy"
+   },
+   "answer": -4.5
+  },
+  {
+   "id": "P07-a09",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{9}{5}x^2=11\\dfrac{1}{4}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 9,
+    "km": 5,
+    "cw": 11,
+    "cn": 1,
+    "cm": 4,
+    "v": "bolshiy"
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P07-a10",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{1}{15}x^2=2\\dfrac{2}{5}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 1,
+    "km": 15,
+    "cw": 2,
+    "cn": 2,
+    "cm": 5,
+    "v": "menshiy"
+   },
+   "answer": -6
+  },
+  {
+   "id": "P07-a11",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{5}{6}x^2=40\\dfrac{5}{6}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 5,
+    "km": 6,
+    "cw": 40,
+    "cn": 5,
+    "cm": 6,
+    "v": "menshiy"
+   },
+   "answer": -7
+  },
+  {
+   "id": "P07-a12",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{9}{4}x^2=110\\dfrac{1}{4}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 9,
+    "km": 4,
+    "cw": 110,
+    "cn": 1,
+    "cm": 4,
+    "v": "bolshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P07-a13",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{11}{10}x^2=17\\dfrac{3}{5}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 11,
+    "km": 10,
+    "cw": 17,
+    "cn": 3,
+    "cm": 5,
+    "v": "menshiy"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P07-a14",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{9}{11}x^2=29\\dfrac{5}{11}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 9,
+    "km": 11,
+    "cw": 29,
+    "cn": 5,
+    "cm": 11,
+    "v": "menshiy"
+   },
+   "answer": -6
+  },
+  {
+   "id": "P07-a15",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{11}{9}x^2=19\\dfrac{5}{9}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 11,
+    "km": 9,
+    "cw": 19,
+    "cn": 5,
+    "cm": 9,
+    "v": "bolshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P07-a16",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{9}{2}x^2=28\\dfrac{1}{8}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 9,
+    "km": 2,
+    "cw": 28,
+    "cn": 1,
+    "cm": 8,
+    "v": "menshiy"
+   },
+   "answer": -2.5
+  },
+  {
+   "id": "P07-a17",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{6}{7}x^2=1\\dfrac{13}{14}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 6,
+    "km": 7,
+    "cw": 1,
+    "cn": 13,
+    "cm": 14,
+    "v": "menshiy"
+   },
+   "answer": -1.5
+  },
+  {
+   "id": "P07-a18",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{12}{13}x^2=2\\dfrac{1}{13}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "kn": 12,
+    "km": 13,
+    "cw": 2,
+    "cn": 1,
+    "cm": 13,
+    "v": "bolshiy"
+   },
+   "answer": 1.5
+  },
+  {
+   "id": "P07-a19",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{4}{11}x^2=17\\dfrac{9}{11}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 4,
+    "km": 11,
+    "cw": 17,
+    "cn": 9,
+    "cm": 11,
+    "v": "menshiy"
+   },
+   "answer": -7
+  },
+  {
+   "id": "P07-a20",
+   "prototypeId": "P07",
+   "source": "analog",
+   "text": "Решите уравнение $\\dfrac{4}{11}x^2=2\\dfrac{3}{11}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "kn": 4,
+    "km": 11,
+    "cw": 2,
+    "cn": 3,
+    "cm": 11,
+    "v": "menshiy"
+   },
+   "answer": -2.5
+  }
+ ],
+ "P08": [
+  {
+   "id": "P08-a01",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{3x-1}{8x-11}=1$.",
+   "params": {
+    "p": 3,
+    "qq": -1,
+    "r": 8,
+    "s": -11,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": 2
+  },
+  {
+   "id": "P08-a02",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{8x-30}{-7x-9}=1$.",
+   "params": {
+    "p": 8,
+    "qq": -30,
+    "r": -7,
+    "s": -9,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": 1.4
+  },
+  {
+   "id": "P08-a03",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-4x+19}{8x-11}=-1$.",
+   "params": {
+    "p": -4,
+    "qq": 19,
+    "r": 8,
+    "s": -11,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P08-a04",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-4x+25}{8x-9}=-1$.",
+   "params": {
+    "p": -4,
+    "qq": 25,
+    "r": 8,
+    "s": -9,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P08-a05",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-3x-28}{-2x-2}=4$.",
+   "params": {
+    "p": -3,
+    "qq": -28,
+    "r": -2,
+    "s": -2,
+    "cn": 4,
+    "cm": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P08-a06",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{9x-12}{-8x+12}=-1$.",
+   "params": {
+    "p": 9,
+    "qq": -12,
+    "r": -8,
+    "s": 12,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": 0
+  },
+  {
+   "id": "P08-a07",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{2x-5}{3x-10}=1$.",
+   "params": {
+    "p": 2,
+    "qq": -5,
+    "r": 3,
+    "s": -10,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": 5
+  },
+  {
+   "id": "P08-a08",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{4x+17}{7x-9}=2$.",
+   "params": {
+    "p": 4,
+    "qq": 17,
+    "r": 7,
+    "s": -9,
+    "cn": 2,
+    "cm": 1
+   },
+   "answer": 3.5
+  },
+  {
+   "id": "P08-a09",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-x-13}{2x-2}=0{,}5$.",
+   "params": {
+    "p": -1,
+    "qq": -13,
+    "r": 2,
+    "s": -2,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": -6
+  },
+  {
+   "id": "P08-a10",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-x-24}{4x+11}=4$.",
+   "params": {
+    "p": -1,
+    "qq": -24,
+    "r": 4,
+    "s": 11,
+    "cn": 4,
+    "cm": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P08-a11",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{2x-24}{-7x+3}=1$.",
+   "params": {
+    "p": 2,
+    "qq": -24,
+    "r": -7,
+    "s": 3,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": 3
+  },
+  {
+   "id": "P08-a12",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{9x-10}{-4x+10}=-2$.",
+   "params": {
+    "p": 9,
+    "qq": -10,
+    "r": -4,
+    "s": 10,
+    "cn": -2,
+    "cm": 1
+   },
+   "answer": -10
+  },
+  {
+   "id": "P08-a13",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{3x+2}{4x+9}=0{,}5$.",
+   "params": {
+    "p": 3,
+    "qq": 2,
+    "r": 4,
+    "s": 9,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P08-a14",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-9x+27}{4x-3}=-1$.",
+   "params": {
+    "p": -9,
+    "qq": 27,
+    "r": 4,
+    "s": -3,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": 4.8
+  },
+  {
+   "id": "P08-a15",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{3x-6}{-5x-12}=-1$.",
+   "params": {
+    "p": 3,
+    "qq": -6,
+    "r": -5,
+    "s": -12,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": -9
+  },
+  {
+   "id": "P08-a16",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-8x-19}{-2x+4}=0{,}5$.",
+   "params": {
+    "p": -8,
+    "qq": -19,
+    "r": -2,
+    "s": 4,
+    "cn": 1,
+    "cm": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P08-a17",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-6x-8}{-5x-9}=1$.",
+   "params": {
+    "p": -6,
+    "qq": -8,
+    "r": -5,
+    "s": -9,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": 1
+  },
+  {
+   "id": "P08-a18",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{x+17}{x+2}=-2$.",
+   "params": {
+    "p": 1,
+    "qq": 17,
+    "r": 1,
+    "s": 2,
+    "cn": -2,
+    "cm": 1
+   },
+   "answer": -7
+  },
+  {
+   "id": "P08-a19",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{-8x+3}{-6x+10}=1$.",
+   "params": {
+    "p": -8,
+    "qq": 3,
+    "r": -6,
+    "s": 10,
+    "cn": 1,
+    "cm": 1
+   },
+   "answer": -3.5
+  },
+  {
+   "id": "P08-a20",
+   "prototypeId": "P08",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\dfrac{5x-2}{5x+2}=-1$.",
+   "params": {
+    "p": 5,
+    "qq": -2,
+    "r": 5,
+    "s": 2,
+    "cn": -1,
+    "cm": 1
+   },
+   "answer": 0
+  }
+ ],
+ "P09": [
+  {
+   "id": "P09-a01",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{8x-48}{x-6}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 8,
+    "b": -48,
+    "c": -6,
+    "v": "menshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P09-a02",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-4x-8}{x+5}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -4,
+    "b": -8,
+    "c": 5,
+    "v": "bolshiy"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P09-a03",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-6x-18}{x+5}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -6,
+    "b": -18,
+    "c": 5,
+    "v": "menshiy"
+   },
+   "answer": -9
+  },
+  {
+   "id": "P09-a04",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{9x-63}{x-7}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 9,
+    "b": -63,
+    "c": -7,
+    "v": "bolshiy"
+   },
+   "answer": 9
+  },
+  {
+   "id": "P09-a05",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-19x-42}{x-6}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -19,
+    "b": -42,
+    "c": -6,
+    "v": "menshiy"
+   },
+   "answer": -7
+  },
+  {
+   "id": "P09-a06",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-10x-36}{x+3}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -10,
+    "b": -36,
+    "c": 3,
+    "v": "bolshiy"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P09-a07",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{x+1}{x+1}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 1,
+    "b": 1,
+    "c": 1,
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P09-a08",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{5x-16}{x-5}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 5,
+    "b": -16,
+    "c": -5,
+    "v": "menshiy"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P09-a09",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-2x-7}{x+6}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -2,
+    "b": -7,
+    "c": 6,
+    "v": "bolshiy"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P09-a10",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{6x-18}{x-3}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 6,
+    "b": -18,
+    "c": -3,
+    "v": "menshiy"
+   },
+   "answer": 6
+  },
+  {
+   "id": "P09-a11",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-5x+27}{x+1}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -5,
+    "b": 27,
+    "c": 1,
+    "v": "menshiy"
+   },
+   "answer": -9
+  },
+  {
+   "id": "P09-a12",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{3x+16}{x+9}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 3,
+    "b": 16,
+    "c": 9,
+    "v": "menshiy"
+   },
+   "answer": -8
+  },
+  {
+   "id": "P09-a13",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{4x+8}{x+2}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 4,
+    "b": 8,
+    "c": 2,
+    "v": "bolshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P09-a14",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{2x-4}{x+7}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 2,
+    "b": -4,
+    "c": 7,
+    "v": "menshiy"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P09-a15",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-4x+24}{x-2}$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -4,
+    "b": 24,
+    "c": -2,
+    "v": "menshiy"
+   },
+   "answer": -6
+  },
+  {
+   "id": "P09-a16",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{x+6}{x+6}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 1,
+    "b": 6,
+    "c": 6,
+    "v": "bolshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P09-a17",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{11x-5}{x+5}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 11,
+    "b": -5,
+    "c": 5,
+    "v": "bolshiy"
+   },
+   "answer": 5
+  },
+  {
+   "id": "P09-a18",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-2x+49}{x-2}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -2,
+    "b": 49,
+    "c": -2,
+    "v": "bolshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P09-a19",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-2x+12}{x-6}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -2,
+    "b": 12,
+    "c": -6,
+    "v": "bolshiy"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P09-a20",
+   "prototypeId": "P09",
+   "source": "analog",
+   "text": "Решите уравнение $x=\\dfrac{-15x-45}{x-1}$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -15,
+    "b": -45,
+    "c": -1,
+    "v": "bolshiy"
+   },
+   "answer": -5
+  }
+ ],
+ "P10": [
+  {
+   "id": "P10-a01",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-7x+12=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -7,
+    "qq": 12,
+    "v": "bolshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P10-a02",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+11x+10=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": 11,
+    "qq": 10,
+    "v": "bolshiy"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P10-a03",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+5x-84=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": 5,
+    "qq": -84,
+    "v": "menshiy"
+   },
+   "answer": -12
+  },
+  {
+   "id": "P10-a04",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+2x-24=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": 2,
+    "qq": -24,
+    "v": "bolshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P10-a05",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-2x-35=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -2,
+    "qq": -35,
+    "v": "bolshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P10-a06",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-6x-7=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": -6,
+    "qq": -7,
+    "v": "menshiy"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P10-a07",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-3x+2=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -3,
+    "qq": 2,
+    "v": "bolshiy"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P10-a08",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+20x+99=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": 20,
+    "qq": 99,
+    "v": "bolshiy"
+   },
+   "answer": -9
+  },
+  {
+   "id": "P10-a09",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-11x+24=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -11,
+    "qq": 24,
+    "v": "bolshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P10-a10",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+3x-88=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": 3,
+    "qq": -88,
+    "v": "bolshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P10-a11",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-11x+18=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -11,
+    "qq": 18,
+    "v": "bolshiy"
+   },
+   "answer": 9
+  },
+  {
+   "id": "P10-a12",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+7x-18=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": 7,
+    "qq": -18,
+    "v": "menshiy"
+   },
+   "answer": -9
+  },
+  {
+   "id": "P10-a13",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-7x-30=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -7,
+    "qq": -30,
+    "v": "bolshiy"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P10-a14",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-14x+40=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -14,
+    "qq": 40,
+    "v": "bolshiy"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P10-a15",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+3x-70=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": 3,
+    "qq": -70,
+    "v": "menshiy"
+   },
+   "answer": -10
+  },
+  {
+   "id": "P10-a16",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-19x+84=0$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "p": -19,
+    "qq": 84,
+    "v": "bolshiy"
+   },
+   "answer": 12
+  },
+  {
+   "id": "P10-a17",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+22x+120=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": 22,
+    "qq": 120,
+    "v": "menshiy"
+   },
+   "answer": -12
+  },
+  {
+   "id": "P10-a18",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-6x+5=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": -6,
+    "qq": 5,
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P10-a19",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2-13x+30=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": -13,
+    "qq": 30,
+    "v": "menshiy"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P10-a20",
+   "prototypeId": "P10",
+   "source": "analog",
+   "text": "Решите уравнение $x^2+5x-24=0$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "p": 5,
+    "qq": -24,
+    "v": "menshiy"
+   },
+   "answer": -8
+  }
+ ],
+ "P11": [
+  {
+   "id": "P11-a01",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-2x-12}=6$.",
+   "params": {
+    "k": -2,
+    "b": -12,
+    "por": "xb",
+    "c": 6
+   },
+   "answer": -24
+  },
+  {
+   "id": "P11-a02",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-15-4x}=1$.",
+   "params": {
+    "k": -4,
+    "b": -15,
+    "por": "bx",
+    "c": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P11-a03",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-3x+58}=11$.",
+   "params": {
+    "k": -3,
+    "b": 58,
+    "por": "xb",
+    "c": 11
+   },
+   "answer": -21
+  },
+  {
+   "id": "P11-a04",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{8x+129}=3$.",
+   "params": {
+    "k": 8,
+    "b": 129,
+    "por": "xb",
+    "c": 3
+   },
+   "answer": -15
+  },
+  {
+   "id": "P11-a05",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{131-5x}=9$.",
+   "params": {
+    "k": -5,
+    "b": 131,
+    "por": "bx",
+    "c": 9
+   },
+   "answer": 10
+  },
+  {
+   "id": "P11-a06",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{3x-26}=8$.",
+   "params": {
+    "k": 3,
+    "b": -26,
+    "por": "xb",
+    "c": 8
+   },
+   "answer": 30
+  },
+  {
+   "id": "P11-a07",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{3x-89}=5$.",
+   "params": {
+    "k": 3,
+    "b": -89,
+    "por": "xb",
+    "c": 5
+   },
+   "answer": 38
+  },
+  {
+   "id": "P11-a08",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{x-22}=1$.",
+   "params": {
+    "k": 1,
+    "b": -22,
+    "por": "xb",
+    "c": 1
+   },
+   "answer": 23
+  },
+  {
+   "id": "P11-a09",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{5x-129}=4$.",
+   "params": {
+    "k": 5,
+    "b": -129,
+    "por": "xb",
+    "c": 4
+   },
+   "answer": 29
+  },
+  {
+   "id": "P11-a10",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-x+113}=9$.",
+   "params": {
+    "k": -1,
+    "b": 113,
+    "por": "xb",
+    "c": 9
+   },
+   "answer": 32
+  },
+  {
+   "id": "P11-a11",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-16-5x}=8$.",
+   "params": {
+    "k": -5,
+    "b": -16,
+    "por": "bx",
+    "c": 8
+   },
+   "answer": -16
+  },
+  {
+   "id": "P11-a12",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-7-4x}=3$.",
+   "params": {
+    "k": -4,
+    "b": -7,
+    "por": "bx",
+    "c": 3
+   },
+   "answer": -4
+  },
+  {
+   "id": "P11-a13",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{-7x-140}=7$.",
+   "params": {
+    "k": -7,
+    "b": -140,
+    "por": "xb",
+    "c": 7
+   },
+   "answer": -27
+  },
+  {
+   "id": "P11-a14",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{61-3x}=8$.",
+   "params": {
+    "k": -3,
+    "b": 61,
+    "por": "bx",
+    "c": 8
+   },
+   "answer": -1
+  },
+  {
+   "id": "P11-a15",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{2x-34}=6$.",
+   "params": {
+    "k": 2,
+    "b": -34,
+    "por": "xb",
+    "c": 6
+   },
+   "answer": 35
+  },
+  {
+   "id": "P11-a16",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{18-x}=1$.",
+   "params": {
+    "k": -1,
+    "b": 18,
+    "por": "bx",
+    "c": 1
+   },
+   "answer": 17
+  },
+  {
+   "id": "P11-a17",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{5x+130}=5$.",
+   "params": {
+    "k": 5,
+    "b": 130,
+    "por": "xb",
+    "c": 5
+   },
+   "answer": -21
+  },
+  {
+   "id": "P11-a18",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{9x+90}=6$.",
+   "params": {
+    "k": 9,
+    "b": 90,
+    "por": "xb",
+    "c": 6
+   },
+   "answer": -6
+  },
+  {
+   "id": "P11-a19",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{5x-59}=6$.",
+   "params": {
+    "k": 5,
+    "b": -59,
+    "por": "xb",
+    "c": 6
+   },
+   "answer": 19
+  },
+  {
+   "id": "P11-a20",
+   "prototypeId": "P11",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{38-x}=7$.",
+   "params": {
+    "k": -1,
+    "b": 38,
+    "por": "bx",
+    "c": 7
+   },
+   "answer": -11
+  }
+ ],
+ "P12": [
+  {
+   "id": "P12-a01",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-1}=1$.",
+   "params": {
+    "a": -1,
+    "c": 1
+   },
+   "answer": 2
+  },
+  {
+   "id": "P12-a02",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+30}=-2$.",
+   "params": {
+    "a": 30,
+    "c": -2
+   },
+   "answer": -38
+  },
+  {
+   "id": "P12-a03",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-37}=-3$.",
+   "params": {
+    "a": -37,
+    "c": -3
+   },
+   "answer": 10
+  },
+  {
+   "id": "P12-a04",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+22}=-1$.",
+   "params": {
+    "a": 22,
+    "c": -1
+   },
+   "answer": -23
+  },
+  {
+   "id": "P12-a05",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+5}=5$.",
+   "params": {
+    "a": 5,
+    "c": 5
+   },
+   "answer": 120
+  },
+  {
+   "id": "P12-a06",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-38}=3$.",
+   "params": {
+    "a": -38,
+    "c": 3
+   },
+   "answer": 65
+  },
+  {
+   "id": "P12-a07",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-28}=1$.",
+   "params": {
+    "a": -28,
+    "c": 1
+   },
+   "answer": 29
+  },
+  {
+   "id": "P12-a08",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+3}=-1$.",
+   "params": {
+    "a": 3,
+    "c": -1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P12-a09",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+13}=2$.",
+   "params": {
+    "a": 13,
+    "c": 2
+   },
+   "answer": -5
+  },
+  {
+   "id": "P12-a10",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+32}=3$.",
+   "params": {
+    "a": 32,
+    "c": 3
+   },
+   "answer": -5
+  },
+  {
+   "id": "P12-a11",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-37}=1$.",
+   "params": {
+    "a": -37,
+    "c": 1
+   },
+   "answer": 38
+  },
+  {
+   "id": "P12-a12",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+5}=1$.",
+   "params": {
+    "a": 5,
+    "c": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P12-a13",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-16}=4$.",
+   "params": {
+    "a": -16,
+    "c": 4
+   },
+   "answer": 80
+  },
+  {
+   "id": "P12-a14",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+36}=5$.",
+   "params": {
+    "a": 36,
+    "c": 5
+   },
+   "answer": 89
+  },
+  {
+   "id": "P12-a15",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+29}=-2$.",
+   "params": {
+    "a": 29,
+    "c": -2
+   },
+   "answer": -37
+  },
+  {
+   "id": "P12-a16",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-24}=-2$.",
+   "params": {
+    "a": -24,
+    "c": -2
+   },
+   "answer": 16
+  },
+  {
+   "id": "P12-a17",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-31}=4$.",
+   "params": {
+    "a": -31,
+    "c": 4
+   },
+   "answer": 95
+  },
+  {
+   "id": "P12-a18",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-27}=-4$.",
+   "params": {
+    "a": -27,
+    "c": -4
+   },
+   "answer": -37
+  },
+  {
+   "id": "P12-a19",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x-27}=-2$.",
+   "params": {
+    "a": -27,
+    "c": -2
+   },
+   "answer": 19
+  },
+  {
+   "id": "P12-a20",
+   "prototypeId": "P12",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt[3]{x+2}=1$.",
+   "params": {
+    "a": 2,
+    "c": 1
+   },
+   "answer": -1
+  }
+ ],
+ "P13": [
+  {
+   "id": "P13-a01",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{12+11x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 11,
+    "b": 12,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 12
+  },
+  {
+   "id": "P13-a02",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-50+15x}=x$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "k": 15,
+    "b": -50,
+    "por": "bx",
+    "v": "bolshiy"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P13-a03",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{24+5x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 5,
+    "b": 24,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P13-a04",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-33+14x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 14,
+    "b": -33,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P13-a05",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{45-4x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -4,
+    "b": 45,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 5
+  },
+  {
+   "id": "P13-a06",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-36+15x}=x$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "k": 15,
+    "b": -36,
+    "por": "bx",
+    "v": "bolshiy"
+   },
+   "answer": 12
+  },
+  {
+   "id": "P13-a07",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{32-4x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -4,
+    "b": 32,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P13-a08",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-84+19x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 19,
+    "b": -84,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P13-a09",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{20+8x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 8,
+    "b": 20,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P13-a10",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-15+8x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 8,
+    "b": -15,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P13-a11",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{24-2x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -2,
+    "b": 24,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P13-a12",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{13x-42}=x$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "k": 13,
+    "b": -42,
+    "por": "xb",
+    "v": "bolshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P13-a13",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{60-7x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -7,
+    "b": 60,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 5
+  },
+  {
+   "id": "P13-a14",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-24+14x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 14,
+    "b": -24,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P13-a15",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-x+6}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -1,
+    "b": 6,
+    "por": "xb",
+    "v": "menshiy"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P13-a16",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{4x-3}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 4,
+    "b": -3,
+    "por": "xb",
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P13-a17",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{11+10x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 10,
+    "b": 11,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 11
+  },
+  {
+   "id": "P13-a18",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-60+16x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 16,
+    "b": -60,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 6
+  },
+  {
+   "id": "P13-a19",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{3-2x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": -2,
+    "b": 3,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P13-a20",
+   "prototypeId": "P13",
+   "source": "analog",
+   "text": "Решите уравнение $\\sqrt{-90+19x}=x$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "k": 19,
+    "b": -90,
+    "por": "bx",
+    "v": "menshiy"
+   },
+   "answer": 9
+  }
+ ],
+ "P14": [
+  {
+   "id": "P14-a01",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{16}{148+4x}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 16,
+    "k": 4,
+    "b": 148,
+    "por": "bx",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": -21
+  },
+  {
+   "id": "P14-a02",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{13}{21-6x}}=\\dfrac{1}{3}$.",
+   "params": {
+    "c": 13,
+    "k": -6,
+    "b": 21,
+    "por": "bx",
+    "dn": 1,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": -16
+  },
+  {
+   "id": "P14-a03",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{17}{2x+48}}=0{,}5$.",
+   "params": {
+    "c": 17,
+    "k": 2,
+    "b": 48,
+    "por": "xb",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "dec"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P14-a04",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{18}{154-2x}}=0{,}3$.",
+   "params": {
+    "c": 18,
+    "k": -2,
+    "b": 154,
+    "por": "bx",
+    "dn": 3,
+    "dm": 10,
+    "dvid": "dec"
+   },
+   "answer": -23
+  },
+  {
+   "id": "P14-a05",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{8}{90-8x}}=\\dfrac{2}{3}$.",
+   "params": {
+    "c": 8,
+    "k": -8,
+    "b": 90,
+    "por": "bx",
+    "dn": 2,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": 9
+  },
+  {
+   "id": "P14-a06",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{10}{-88-8x}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 10,
+    "k": -8,
+    "b": -88,
+    "por": "bx",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": -16
+  },
+  {
+   "id": "P14-a07",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{2}{-3x-9}}=\\dfrac{1}{3}$.",
+   "params": {
+    "c": 2,
+    "k": -3,
+    "b": -9,
+    "por": "xb",
+    "dn": 1,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": -9
+  },
+  {
+   "id": "P14-a08",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{2}{-7x-153}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 2,
+    "k": -7,
+    "b": -153,
+    "por": "xb",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": -23
+  },
+  {
+   "id": "P14-a09",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{5}{3x-34}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 5,
+    "k": 3,
+    "b": -34,
+    "por": "xb",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": 18
+  },
+  {
+   "id": "P14-a10",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{12}{129-2x}}=0{,}4$.",
+   "params": {
+    "c": 12,
+    "k": -2,
+    "b": 129,
+    "por": "bx",
+    "dn": 2,
+    "dm": 5,
+    "dvid": "dec"
+   },
+   "answer": 27
+  },
+  {
+   "id": "P14-a11",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{23}{3x+122}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 23,
+    "k": 3,
+    "b": 122,
+    "por": "xb",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": -10
+  },
+  {
+   "id": "P14-a12",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{11}{166-5x}}=\\dfrac{1}{4}$.",
+   "params": {
+    "c": 11,
+    "k": -5,
+    "b": 166,
+    "por": "bx",
+    "dn": 1,
+    "dm": 4,
+    "dvid": "frac"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P14-a13",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{2}{3x+29}}=0{,}2$.",
+   "params": {
+    "c": 2,
+    "k": 3,
+    "b": 29,
+    "por": "xb",
+    "dn": 1,
+    "dm": 5,
+    "dvid": "dec"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P14-a14",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{12}{5x+147}}=\\dfrac{2}{3}$.",
+   "params": {
+    "c": 12,
+    "k": 5,
+    "b": 147,
+    "por": "xb",
+    "dn": 2,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": -24
+  },
+  {
+   "id": "P14-a15",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{1}{-104-6x}}=0{,}5$.",
+   "params": {
+    "c": 1,
+    "k": -6,
+    "b": -104,
+    "por": "bx",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "dec"
+   },
+   "answer": -18
+  },
+  {
+   "id": "P14-a16",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{11}{6x+131}}=0{,}2$.",
+   "params": {
+    "c": 11,
+    "k": 6,
+    "b": 131,
+    "por": "xb",
+    "dn": 1,
+    "dm": 5,
+    "dvid": "dec"
+   },
+   "answer": 24
+  },
+  {
+   "id": "P14-a17",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{8}{-5x+57}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 8,
+    "k": -5,
+    "b": 57,
+    "por": "xb",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": 5
+  },
+  {
+   "id": "P14-a18",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{10}{181-7x}}=\\dfrac{1}{3}$.",
+   "params": {
+    "c": 10,
+    "k": -7,
+    "b": 181,
+    "por": "bx",
+    "dn": 1,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": 13
+  },
+  {
+   "id": "P14-a19",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{19}{-84-8x}}=\\dfrac{1}{2}$.",
+   "params": {
+    "c": 19,
+    "k": -8,
+    "b": -84,
+    "por": "bx",
+    "dn": 1,
+    "dm": 2,
+    "dvid": "frac"
+   },
+   "answer": -20
+  },
+  {
+   "id": "P14-a20",
+   "prototypeId": "P14",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\sqrt{\\dfrac{6}{8x-98}}=\\dfrac{1}{3}$.",
+   "params": {
+    "c": 6,
+    "k": 8,
+    "b": -98,
+    "por": "xb",
+    "dn": 1,
+    "dm": 3,
+    "dvid": "frac"
+   },
+   "answer": 19
+  }
+ ],
+ "P15": [
+  {
+   "id": "P15-a01",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x+10}=9$.",
+   "params": {
+    "a": 3,
+    "b": 10,
+    "k": 2
+   },
+   "answer": -8
+  },
+  {
+   "id": "P15-a02",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $7^{x+7}=7$.",
+   "params": {
+    "a": 7,
+    "b": 7,
+    "k": 1
+   },
+   "answer": -6
+  },
+  {
+   "id": "P15-a03",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{x+6}=8$.",
+   "params": {
+    "a": 2,
+    "b": 6,
+    "k": 3
+   },
+   "answer": -3
+  },
+  {
+   "id": "P15-a04",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{x-9}=216$.",
+   "params": {
+    "a": 6,
+    "b": -9,
+    "k": 3
+   },
+   "answer": 12
+  },
+  {
+   "id": "P15-a05",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{x+5}=4$.",
+   "params": {
+    "a": 4,
+    "b": 5,
+    "k": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P15-a06",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{x+12}=9$.",
+   "params": {
+    "a": 9,
+    "b": 12,
+    "k": 1
+   },
+   "answer": -11
+  },
+  {
+   "id": "P15-a07",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x-5}=81$.",
+   "params": {
+    "a": 3,
+    "b": -5,
+    "k": 4
+   },
+   "answer": 9
+  },
+  {
+   "id": "P15-a08",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x-3}=125$.",
+   "params": {
+    "a": 5,
+    "b": -3,
+    "k": 3
+   },
+   "answer": 6
+  },
+  {
+   "id": "P15-a09",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{x-10}=81$.",
+   "params": {
+    "a": 9,
+    "b": -10,
+    "k": 2
+   },
+   "answer": 12
+  },
+  {
+   "id": "P15-a10",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{x-3}=6$.",
+   "params": {
+    "a": 6,
+    "b": -3,
+    "k": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P15-a11",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{x-4}=64$.",
+   "params": {
+    "a": 8,
+    "b": -4,
+    "k": 2
+   },
+   "answer": 6
+  },
+  {
+   "id": "P15-a12",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x-2}=125$.",
+   "params": {
+    "a": 5,
+    "b": -2,
+    "k": 3
+   },
+   "answer": 5
+  },
+  {
+   "id": "P15-a13",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{x-2}=512$.",
+   "params": {
+    "a": 8,
+    "b": -2,
+    "k": 3
+   },
+   "answer": 5
+  },
+  {
+   "id": "P15-a14",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{x+12}=8$.",
+   "params": {
+    "a": 8,
+    "b": 12,
+    "k": 1
+   },
+   "answer": -11
+  },
+  {
+   "id": "P15-a15",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{x+3}=8$.",
+   "params": {
+    "a": 8,
+    "b": 3,
+    "k": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P15-a16",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x+12}=25$.",
+   "params": {
+    "a": 5,
+    "b": 12,
+    "k": 2
+   },
+   "answer": -10
+  },
+  {
+   "id": "P15-a17",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x-3}=5$.",
+   "params": {
+    "a": 5,
+    "b": -3,
+    "k": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P15-a18",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x-6}=9$.",
+   "params": {
+    "a": 3,
+    "b": -6,
+    "k": 2
+   },
+   "answer": 8
+  },
+  {
+   "id": "P15-a19",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{x-7}=64$.",
+   "params": {
+    "a": 8,
+    "b": -7,
+    "k": 2
+   },
+   "answer": 9
+  },
+  {
+   "id": "P15-a20",
+   "prototypeId": "P15",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x+4}=25$.",
+   "params": {
+    "a": 5,
+    "b": 4,
+    "k": 2
+   },
+   "answer": -2
+  }
+ ],
+ "P16": [
+  {
+   "id": "P16-a01",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{11-x}=729$.",
+   "params": {
+    "a": 9,
+    "k": -1,
+    "b": 11,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 8
+  },
+  {
+   "id": "P16-a02",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $7^{-2x+15}=343$.",
+   "params": {
+    "a": 7,
+    "k": -2,
+    "b": 15,
+    "por": "xb",
+    "m": 3
+   },
+   "answer": 6
+  },
+  {
+   "id": "P16-a03",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{-1+3x}=4$.",
+   "params": {
+    "a": 2,
+    "k": 3,
+    "b": -1,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P16-a04",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{-5-x}=64$.",
+   "params": {
+    "a": 8,
+    "k": -1,
+    "b": -5,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": -7
+  },
+  {
+   "id": "P16-a05",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-2x+10}=81$.",
+   "params": {
+    "a": 3,
+    "k": -2,
+    "b": 10,
+    "por": "xb",
+    "m": 4
+   },
+   "answer": 3
+  },
+  {
+   "id": "P16-a06",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{1+x}=9$.",
+   "params": {
+    "a": 3,
+    "k": 1,
+    "b": 1,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P16-a07",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{5+2x}=512$.",
+   "params": {
+    "a": 8,
+    "k": 2,
+    "b": 5,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": -1
+  },
+  {
+   "id": "P16-a08",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{3+3x}=729$.",
+   "params": {
+    "a": 9,
+    "k": 3,
+    "b": 3,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 0
+  },
+  {
+   "id": "P16-a09",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{12+x}=36$.",
+   "params": {
+    "a": 6,
+    "k": 1,
+    "b": 12,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": -10
+  },
+  {
+   "id": "P16-a10",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-5-x}=27$.",
+   "params": {
+    "a": 3,
+    "k": -1,
+    "b": -5,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": -8
+  },
+  {
+   "id": "P16-a11",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{-x-1}=81$.",
+   "params": {
+    "a": 9,
+    "k": -1,
+    "b": -1,
+    "por": "xb",
+    "m": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P16-a12",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{3+x}=36$.",
+   "params": {
+    "a": 6,
+    "k": 1,
+    "b": 3,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": -1
+  },
+  {
+   "id": "P16-a13",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{-6-x}=625$.",
+   "params": {
+    "a": 5,
+    "k": -1,
+    "b": -6,
+    "por": "bx",
+    "m": 4
+   },
+   "answer": -10
+  },
+  {
+   "id": "P16-a14",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{11+2x}=216$.",
+   "params": {
+    "a": 6,
+    "k": 2,
+    "b": 11,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": -4
+  },
+  {
+   "id": "P16-a15",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{-4+x}=16$.",
+   "params": {
+    "a": 2,
+    "k": 1,
+    "b": -4,
+    "por": "bx",
+    "m": 4
+   },
+   "answer": 8
+  },
+  {
+   "id": "P16-a16",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $8^{-3+2x}=512$.",
+   "params": {
+    "a": 8,
+    "k": 2,
+    "b": -3,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 3
+  },
+  {
+   "id": "P16-a17",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-4x+12}=81$.",
+   "params": {
+    "a": 3,
+    "k": -4,
+    "b": 12,
+    "por": "xb",
+    "m": 4
+   },
+   "answer": 2
+  },
+  {
+   "id": "P16-a18",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{12-x}=729$.",
+   "params": {
+    "a": 9,
+    "k": -1,
+    "b": 12,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 9
+  },
+  {
+   "id": "P16-a19",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{-12+3x}=729$.",
+   "params": {
+    "a": 9,
+    "k": 3,
+    "b": -12,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 5
+  },
+  {
+   "id": "P16-a20",
+   "prototypeId": "P16",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{4-x}=16$.",
+   "params": {
+    "a": 4,
+    "k": -1,
+    "b": 4,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": 2
+  }
+ ],
+ "P17": [
+  {
+   "id": "P17-a01",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{4x+4}=216^x$.",
+   "params": {
+    "a": 6,
+    "k": 4,
+    "b": 4,
+    "por": "xb",
+    "j": 3,
+    "m": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P17-a02",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-12+2x}=27^{2x}$.",
+   "params": {
+    "a": 3,
+    "k": 2,
+    "b": -12,
+    "por": "bx",
+    "j": 3,
+    "m": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P17-a03",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{-10+4x}=216^{3x}$.",
+   "params": {
+    "a": 6,
+    "k": 4,
+    "b": -10,
+    "por": "bx",
+    "j": 3,
+    "m": 3
+   },
+   "answer": -2
+  },
+  {
+   "id": "P17-a04",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{-6+5x}=25^{2x}$.",
+   "params": {
+    "a": 5,
+    "k": 5,
+    "b": -6,
+    "por": "bx",
+    "j": 2,
+    "m": 2
+   },
+   "answer": 6
+  },
+  {
+   "id": "P17-a05",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{x-5}=25^x$.",
+   "params": {
+    "a": 5,
+    "k": 1,
+    "b": -5,
+    "por": "xb",
+    "j": 2,
+    "m": 1
+   },
+   "answer": -5
+  },
+  {
+   "id": "P17-a06",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{-7+2x}=216^{2x}$.",
+   "params": {
+    "a": 6,
+    "k": 2,
+    "b": -7,
+    "por": "bx",
+    "j": 3,
+    "m": 2
+   },
+   "answer": -1.75
+  },
+  {
+   "id": "P17-a07",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{5x-9}=4^x$.",
+   "params": {
+    "a": 2,
+    "k": 5,
+    "b": -9,
+    "por": "xb",
+    "j": 2,
+    "m": 1
+   },
+   "answer": 3
+  },
+  {
+   "id": "P17-a08",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{10+4x}=9^x$.",
+   "params": {
+    "a": 3,
+    "k": 4,
+    "b": 10,
+    "por": "bx",
+    "j": 2,
+    "m": 1
+   },
+   "answer": -5
+  },
+  {
+   "id": "P17-a09",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{3x+3}=16^{2x}$.",
+   "params": {
+    "a": 4,
+    "k": 3,
+    "b": 3,
+    "por": "xb",
+    "j": 2,
+    "m": 2
+   },
+   "answer": 3
+  },
+  {
+   "id": "P17-a10",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-6+2x}=27^x$.",
+   "params": {
+    "a": 3,
+    "k": 2,
+    "b": -6,
+    "por": "bx",
+    "j": 3,
+    "m": 1
+   },
+   "answer": -6
+  },
+  {
+   "id": "P17-a11",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $7^{6+3x}=49^{2x}$.",
+   "params": {
+    "a": 7,
+    "k": 3,
+    "b": 6,
+    "por": "bx",
+    "j": 2,
+    "m": 2
+   },
+   "answer": 6
+  },
+  {
+   "id": "P17-a12",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{-5+3x}=9^x$.",
+   "params": {
+    "a": 3,
+    "k": 3,
+    "b": -5,
+    "por": "bx",
+    "j": 2,
+    "m": 1
+   },
+   "answer": 5
+  },
+  {
+   "id": "P17-a13",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $7^{x+10}=49^{3x}$.",
+   "params": {
+    "a": 7,
+    "k": 1,
+    "b": 10,
+    "por": "xb",
+    "j": 2,
+    "m": 3
+   },
+   "answer": 2
+  },
+  {
+   "id": "P17-a14",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{7+2x}=9^{2x}$.",
+   "params": {
+    "a": 3,
+    "k": 2,
+    "b": 7,
+    "por": "bx",
+    "j": 2,
+    "m": 2
+   },
+   "answer": 3.5
+  },
+  {
+   "id": "P17-a15",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{-2+x}=16^x$.",
+   "params": {
+    "a": 4,
+    "k": 1,
+    "b": -2,
+    "por": "bx",
+    "j": 2,
+    "m": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P17-a16",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{4x+4}=4^{3x}$.",
+   "params": {
+    "a": 2,
+    "k": 4,
+    "b": 4,
+    "por": "xb",
+    "j": 2,
+    "m": 3
+   },
+   "answer": 2
+  },
+  {
+   "id": "P17-a17",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{2x+2}=4^{2x}$.",
+   "params": {
+    "a": 2,
+    "k": 2,
+    "b": 2,
+    "por": "xb",
+    "j": 2,
+    "m": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P17-a18",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{2x+4}=8^x$.",
+   "params": {
+    "a": 2,
+    "k": 2,
+    "b": 4,
+    "por": "xb",
+    "j": 3,
+    "m": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P17-a19",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $6^{-9+3x}=216^{2x}$.",
+   "params": {
+    "a": 6,
+    "k": 3,
+    "b": -9,
+    "por": "bx",
+    "j": 3,
+    "m": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P17-a20",
+   "prototypeId": "P17",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{6+5x}=25^{2x}$.",
+   "params": {
+    "a": 5,
+    "k": 5,
+    "b": 6,
+    "por": "bx",
+    "j": 2,
+    "m": 2
+   },
+   "answer": -6
+  }
+ ],
+ "P18": [
+  {
+   "id": "P18-a01",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x-3}=\\dfrac{1}{81}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 0,
+    "k": 1,
+    "b": -3,
+    "por": "xb",
+    "tt": -4
+   },
+   "answer": -1
+  },
+  {
+   "id": "P18-a02",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{1-x}=\\dfrac{1}{81}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 1,
+    "k": -1,
+    "b": 1,
+    "por": "bx",
+    "tt": -4
+   },
+   "answer": -3
+  },
+  {
+   "id": "P18-a03",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $7^{8+3x}=\\dfrac{1}{7}$.",
+   "params": {
+    "a": 7,
+    "s": 1,
+    "inv": 0,
+    "k": 3,
+    "b": 8,
+    "por": "bx",
+    "tt": -1
+   },
+   "answer": -3
+  },
+  {
+   "id": "P18-a04",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{-10-x}=\\dfrac{1}{64}$.",
+   "params": {
+    "a": 8,
+    "s": 1,
+    "inv": 1,
+    "k": -1,
+    "b": -10,
+    "por": "bx",
+    "tt": -2
+   },
+   "answer": -12
+  },
+  {
+   "id": "P18-a05",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{2x-4}=16$.",
+   "params": {
+    "a": 4,
+    "s": 1,
+    "inv": 1,
+    "k": 2,
+    "b": -4,
+    "por": "xb",
+    "tt": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P18-a06",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{2x+6}=\\dfrac{1}{81}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 1,
+    "k": 2,
+    "b": 6,
+    "por": "xb",
+    "tt": -4
+   },
+   "answer": -1
+  },
+  {
+   "id": "P18-a07",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{9}\\right)^{-6+x}=729$.",
+   "params": {
+    "a": 3,
+    "s": 2,
+    "inv": 1,
+    "k": 1,
+    "b": -6,
+    "por": "bx",
+    "tt": 6
+   },
+   "answer": 3
+  },
+  {
+   "id": "P18-a08",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{9}\\right)^{-4+x}=\\dfrac{1}{243}$.",
+   "params": {
+    "a": 3,
+    "s": 2,
+    "inv": 1,
+    "k": 1,
+    "b": -4,
+    "por": "bx",
+    "tt": -5
+   },
+   "answer": 6.5
+  },
+  {
+   "id": "P18-a09",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $9^{3+x}=\\dfrac{1}{729}$.",
+   "params": {
+    "a": 9,
+    "s": 1,
+    "inv": 0,
+    "k": 1,
+    "b": 3,
+    "por": "bx",
+    "tt": -3
+   },
+   "answer": -6
+  },
+  {
+   "id": "P18-a10",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{5}\\right)^{2x+7}=\\dfrac{1}{25}$.",
+   "params": {
+    "a": 5,
+    "s": 1,
+    "inv": 1,
+    "k": 2,
+    "b": 7,
+    "por": "xb",
+    "tt": -2
+   },
+   "answer": -2.5
+  },
+  {
+   "id": "P18-a11",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{x-9}=\\dfrac{1}{27}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 1,
+    "k": 1,
+    "b": -9,
+    "por": "xb",
+    "tt": -3
+   },
+   "answer": 12
+  },
+  {
+   "id": "P18-a12",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x-7}=\\dfrac{1}{27}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 0,
+    "k": 1,
+    "b": -7,
+    "por": "xb",
+    "tt": -3
+   },
+   "answer": 4
+  },
+  {
+   "id": "P18-a13",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{9}\\right)^{-3-x}=9$.",
+   "params": {
+    "a": 9,
+    "s": 1,
+    "inv": 1,
+    "k": -1,
+    "b": -3,
+    "por": "bx",
+    "tt": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P18-a14",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{6}\\right)^{-10-x}=6$.",
+   "params": {
+    "a": 6,
+    "s": 1,
+    "inv": 1,
+    "k": -1,
+    "b": -10,
+    "por": "bx",
+    "tt": 1
+   },
+   "answer": -9
+  },
+  {
+   "id": "P18-a15",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{x-15}=\\dfrac{1}{256}$.",
+   "params": {
+    "a": 4,
+    "s": 1,
+    "inv": 0,
+    "k": 1,
+    "b": -15,
+    "por": "xb",
+    "tt": -4
+   },
+   "answer": 11
+  },
+  {
+   "id": "P18-a16",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x+11}=2$.",
+   "params": {
+    "a": 2,
+    "s": 1,
+    "inv": 1,
+    "k": 1,
+    "b": 11,
+    "por": "xb",
+    "tt": 1
+   },
+   "answer": -12
+  },
+  {
+   "id": "P18-a17",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{x-8}=\\dfrac{1}{729}$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 0,
+    "k": 1,
+    "b": -8,
+    "por": "xb",
+    "tt": -6
+   },
+   "answer": 2
+  },
+  {
+   "id": "P18-a18",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{2x+2}=729$.",
+   "params": {
+    "a": 3,
+    "s": 1,
+    "inv": 1,
+    "k": 2,
+    "b": 2,
+    "por": "xb",
+    "tt": 6
+   },
+   "answer": -4
+  },
+  {
+   "id": "P18-a19",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{-2+2x}=\\dfrac{1}{4}$.",
+   "params": {
+    "a": 2,
+    "s": 1,
+    "inv": 0,
+    "k": 2,
+    "b": -2,
+    "por": "bx",
+    "tt": -2
+   },
+   "answer": 0
+  },
+  {
+   "id": "P18-a20",
+   "prototypeId": "P18",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x-3}=\\dfrac{1}{8}$.",
+   "params": {
+    "a": 2,
+    "s": 1,
+    "inv": 1,
+    "k": 1,
+    "b": -3,
+    "por": "xb",
+    "tt": -3
+   },
+   "answer": 6
+  }
+ ],
+ "P19": [
+  {
+   "id": "P19-a01",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x-8}=64^x$.",
+   "params": {
+    "a": 4,
+    "b": -8,
+    "k": 3
+   },
+   "answer": 2
+  },
+  {
+   "id": "P19-a02",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x+8}=2^x$.",
+   "params": {
+    "a": 2,
+    "b": 8,
+    "k": 1
+   },
+   "answer": -4
+  },
+  {
+   "id": "P19-a03",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{7}\\right)^{x-6}=7^x$.",
+   "params": {
+    "a": 7,
+    "b": -6,
+    "k": 1
+   },
+   "answer": 3
+  },
+  {
+   "id": "P19-a04",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x-4}=2^x$.",
+   "params": {
+    "a": 2,
+    "b": -4,
+    "k": 1
+   },
+   "answer": 2
+  },
+  {
+   "id": "P19-a05",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{9}\\right)^{x-14}=9^x$.",
+   "params": {
+    "a": 9,
+    "b": -14,
+    "k": 1
+   },
+   "answer": 7
+  },
+  {
+   "id": "P19-a06",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{x+10}=8^x$.",
+   "params": {
+    "a": 8,
+    "b": 10,
+    "k": 1
+   },
+   "answer": -5
+  },
+  {
+   "id": "P19-a07",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{x+9}=9^x$.",
+   "params": {
+    "a": 3,
+    "b": 9,
+    "k": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P19-a08",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{7}\\right)^{x+9}=49^x$.",
+   "params": {
+    "a": 7,
+    "b": 9,
+    "k": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P19-a09",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x-14}=2^x$.",
+   "params": {
+    "a": 2,
+    "b": -14,
+    "k": 1
+   },
+   "answer": 7
+  },
+  {
+   "id": "P19-a10",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{x+15}=64^x$.",
+   "params": {
+    "a": 8,
+    "b": 15,
+    "k": 2
+   },
+   "answer": -5
+  },
+  {
+   "id": "P19-a11",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{x-8}=8^x$.",
+   "params": {
+    "a": 8,
+    "b": -8,
+    "k": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P19-a12",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x-3}=16^x$.",
+   "params": {
+    "a": 4,
+    "b": -3,
+    "k": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P19-a13",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x-8}=4^x$.",
+   "params": {
+    "a": 4,
+    "b": -8,
+    "k": 1
+   },
+   "answer": 4
+  },
+  {
+   "id": "P19-a14",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{2}\\right)^{x+4}=2^x$.",
+   "params": {
+    "a": 2,
+    "b": 4,
+    "k": 1
+   },
+   "answer": -2
+  },
+  {
+   "id": "P19-a15",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x+12}=4^x$.",
+   "params": {
+    "a": 4,
+    "b": 12,
+    "k": 1
+   },
+   "answer": -6
+  },
+  {
+   "id": "P19-a16",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{x+8}=27^x$.",
+   "params": {
+    "a": 3,
+    "b": 8,
+    "k": 3
+   },
+   "answer": -2
+  },
+  {
+   "id": "P19-a17",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{5}\\right)^{x-4}=125^x$.",
+   "params": {
+    "a": 5,
+    "b": -4,
+    "k": 3
+   },
+   "answer": 1
+  },
+  {
+   "id": "P19-a18",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{3}\\right)^{x-6}=3^x$.",
+   "params": {
+    "a": 3,
+    "b": -6,
+    "k": 1
+   },
+   "answer": 3
+  },
+  {
+   "id": "P19-a19",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x-10}=4^x$.",
+   "params": {
+    "a": 4,
+    "b": -10,
+    "k": 1
+   },
+   "answer": 5
+  },
+  {
+   "id": "P19-a20",
+   "prototypeId": "P19",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{5}\\right)^{x-3}=5^x$.",
+   "params": {
+    "a": 5,
+    "b": -3,
+    "k": 1
+   },
+   "answer": 1.5
+  }
+ ],
+ "P20": [
+  {
+   "id": "P20-a01",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(2x-20)=\\log_4 16$.",
+   "params": {
+    "a": 4,
+    "k": 2,
+    "b": -20,
+    "por": "xb",
+    "c": 16
+   },
+   "answer": 18
+  },
+  {
+   "id": "P20-a02",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_9(3x-27)=\\log_9 33$.",
+   "params": {
+    "a": 9,
+    "k": 3,
+    "b": -27,
+    "por": "xb",
+    "c": 33
+   },
+   "answer": 20
+  },
+  {
+   "id": "P20-a03",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(11-x)=\\log_8 12$.",
+   "params": {
+    "a": 8,
+    "k": -1,
+    "b": 11,
+    "por": "bx",
+    "c": 12
+   },
+   "answer": -1
+  },
+  {
+   "id": "P20-a04",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(3x+7)=\\log_8 13$.",
+   "params": {
+    "a": 8,
+    "k": 3,
+    "b": 7,
+    "por": "xb",
+    "c": 13
+   },
+   "answer": 2
+  },
+  {
+   "id": "P20-a05",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(-2x-25)=\\log_8 3$.",
+   "params": {
+    "a": 8,
+    "k": -2,
+    "b": -25,
+    "por": "xb",
+    "c": 3
+   },
+   "answer": -14
+  },
+  {
+   "id": "P20-a06",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(2x-17)=\\log_7 21$.",
+   "params": {
+    "a": 7,
+    "k": 2,
+    "b": -17,
+    "por": "xb",
+    "c": 21
+   },
+   "answer": 19
+  },
+  {
+   "id": "P20-a07",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(30-x)=\\log_5 22$.",
+   "params": {
+    "a": 5,
+    "k": -1,
+    "b": 30,
+    "por": "bx",
+    "c": 22
+   },
+   "answer": 8
+  },
+  {
+   "id": "P20-a08",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(x+40)=\\log_8 30$.",
+   "params": {
+    "a": 8,
+    "k": 1,
+    "b": 40,
+    "por": "xb",
+    "c": 30
+   },
+   "answer": -10
+  },
+  {
+   "id": "P20-a09",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_9(x-7)=\\log_9 10$.",
+   "params": {
+    "a": 9,
+    "k": 1,
+    "b": -7,
+    "por": "xb",
+    "c": 10
+   },
+   "answer": 17
+  },
+  {
+   "id": "P20-a10",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_9(x+11)=\\log_9 4$.",
+   "params": {
+    "a": 9,
+    "k": 1,
+    "b": 11,
+    "por": "xb",
+    "c": 4
+   },
+   "answer": -7
+  },
+  {
+   "id": "P20-a11",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(x+30)=\\log_4 5$.",
+   "params": {
+    "a": 4,
+    "k": 1,
+    "b": 30,
+    "por": "xb",
+    "c": 5
+   },
+   "answer": -25
+  },
+  {
+   "id": "P20-a12",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(21+x)=\\log_7 18$.",
+   "params": {
+    "a": 7,
+    "k": 1,
+    "b": 21,
+    "por": "bx",
+    "c": 18
+   },
+   "answer": -3
+  },
+  {
+   "id": "P20-a13",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(x+31)=\\log_7 27$.",
+   "params": {
+    "a": 7,
+    "k": 1,
+    "b": 31,
+    "por": "xb",
+    "c": 27
+   },
+   "answer": -4
+  },
+  {
+   "id": "P20-a14",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{12}(x-13)=\\log_{12} 9$.",
+   "params": {
+    "a": 12,
+    "k": 1,
+    "b": -13,
+    "por": "xb",
+    "c": 9
+   },
+   "answer": 22
+  },
+  {
+   "id": "P20-a15",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_2(x+4)=\\log_2 3$.",
+   "params": {
+    "a": 2,
+    "k": 1,
+    "b": 4,
+    "por": "xb",
+    "c": 3
+   },
+   "answer": -1
+  },
+  {
+   "id": "P20-a16",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(x-11)=\\log_4 2$.",
+   "params": {
+    "a": 4,
+    "k": 1,
+    "b": -11,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": 13
+  },
+  {
+   "id": "P20-a17",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(3x+11)=\\log_5 23$.",
+   "params": {
+    "a": 5,
+    "k": 3,
+    "b": 11,
+    "por": "xb",
+    "c": 23
+   },
+   "answer": 4
+  },
+  {
+   "id": "P20-a18",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(-17-x)=\\log_7 5$.",
+   "params": {
+    "a": 7,
+    "k": -1,
+    "b": -17,
+    "por": "bx",
+    "c": 5
+   },
+   "answer": -22
+  },
+  {
+   "id": "P20-a19",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{11}(20-x)=\\log_{11} 19$.",
+   "params": {
+    "a": 11,
+    "k": -1,
+    "b": 20,
+    "por": "bx",
+    "c": 19
+   },
+   "answer": 1
+  },
+  {
+   "id": "P20-a20",
+   "prototypeId": "P20",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{12}(-x+22)=\\log_{12} 30$.",
+   "params": {
+    "a": 12,
+    "k": -1,
+    "b": 22,
+    "por": "xb",
+    "c": 30
+   },
+   "answer": -8
+  }
+ ],
+ "P21": [
+  {
+   "id": "P21-a01",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(4x+57)=2$.",
+   "params": {
+    "a": 3,
+    "k": 4,
+    "b": 57,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": -12
+  },
+  {
+   "id": "P21-a02",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(4x+48)=2$.",
+   "params": {
+    "a": 6,
+    "k": 4,
+    "b": 48,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P21-a03",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(-11-3x)=3$.",
+   "params": {
+    "a": 4,
+    "k": -3,
+    "b": -11,
+    "por": "bx",
+    "c": 3
+   },
+   "answer": -25
+  },
+  {
+   "id": "P21-a04",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(-3x+12)=3$.",
+   "params": {
+    "a": 3,
+    "k": -3,
+    "b": 12,
+    "por": "xb",
+    "c": 3
+   },
+   "answer": -5
+  },
+  {
+   "id": "P21-a05",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(x-19)=1$.",
+   "params": {
+    "a": 8,
+    "k": 1,
+    "b": -19,
+    "por": "xb",
+    "c": 1
+   },
+   "answer": 27
+  },
+  {
+   "id": "P21-a06",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(-32-4x)=1$.",
+   "params": {
+    "a": 4,
+    "k": -4,
+    "b": -32,
+    "por": "bx",
+    "c": 1
+   },
+   "answer": -9
+  },
+  {
+   "id": "P21-a07",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(10x-60)=2$.",
+   "params": {
+    "a": 6,
+    "k": 10,
+    "b": -60,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": 9.6
+  },
+  {
+   "id": "P21-a08",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(3x+20)=3$.",
+   "params": {
+    "a": 5,
+    "k": 3,
+    "b": 20,
+    "por": "xb",
+    "c": 3
+   },
+   "answer": 35
+  },
+  {
+   "id": "P21-a09",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(5x+45)=1$.",
+   "params": {
+    "a": 5,
+    "k": 5,
+    "b": 45,
+    "por": "xb",
+    "c": 1
+   },
+   "answer": -8
+  },
+  {
+   "id": "P21-a10",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(-3x-30)=2$.",
+   "params": {
+    "a": 3,
+    "k": -3,
+    "b": -30,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": -13
+  },
+  {
+   "id": "P21-a11",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(-4x+3)=1$.",
+   "params": {
+    "a": 3,
+    "k": -4,
+    "b": 3,
+    "por": "xb",
+    "c": 1
+   },
+   "answer": 0
+  },
+  {
+   "id": "P21-a12",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(10x+16)=2$.",
+   "params": {
+    "a": 6,
+    "k": 10,
+    "b": 16,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": 2
+  },
+  {
+   "id": "P21-a13",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_4(58-9x)=4$.",
+   "params": {
+    "a": 4,
+    "k": -9,
+    "b": 58,
+    "por": "bx",
+    "c": 4
+   },
+   "answer": -22
+  },
+  {
+   "id": "P21-a14",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(3x-8)=0$.",
+   "params": {
+    "a": 7,
+    "k": 3,
+    "b": -8,
+    "por": "xb",
+    "c": 0
+   },
+   "answer": 3
+  },
+  {
+   "id": "P21-a15",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8(10x-59)=0$.",
+   "params": {
+    "a": 8,
+    "k": 10,
+    "b": -59,
+    "por": "xb",
+    "c": 0
+   },
+   "answer": 6
+  },
+  {
+   "id": "P21-a16",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(2x+20)=0$.",
+   "params": {
+    "a": 7,
+    "k": 2,
+    "b": 20,
+    "por": "xb",
+    "c": 0
+   },
+   "answer": -9.5
+  },
+  {
+   "id": "P21-a17",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_2(3x-26)=0$.",
+   "params": {
+    "a": 2,
+    "k": 3,
+    "b": -26,
+    "por": "xb",
+    "c": 0
+   },
+   "answer": 9
+  },
+  {
+   "id": "P21-a18",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(-3x+46)=2$.",
+   "params": {
+    "a": 5,
+    "k": -3,
+    "b": 46,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": 7
+  },
+  {
+   "id": "P21-a19",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(6x+25)=2$.",
+   "params": {
+    "a": 7,
+    "k": 6,
+    "b": 25,
+    "por": "xb",
+    "c": 2
+   },
+   "answer": 4
+  },
+  {
+   "id": "P21-a20",
+   "prototypeId": "P21",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_2(-2x-18)=1$.",
+   "params": {
+    "a": 2,
+    "k": -2,
+    "b": -18,
+    "por": "xb",
+    "c": 1
+   },
+   "answer": -10
+  }
+ ],
+ "P22": [
+  {
+   "id": "P22-a01",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(-10-2x)=-1$.",
+   "params": {
+    "a": 4,
+    "k": -2,
+    "b": -10,
+    "por": "bx",
+    "c": -1
+   },
+   "answer": -7
+  },
+  {
+   "id": "P22-a02",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{2}}(-34-7x)=-3$.",
+   "params": {
+    "a": 2,
+    "k": -7,
+    "b": -34,
+    "por": "bx",
+    "c": -3
+   },
+   "answer": -6
+  },
+  {
+   "id": "P22-a03",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{5}}(-3x-28)=-1$.",
+   "params": {
+    "a": 5,
+    "k": -3,
+    "b": -28,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": -11
+  },
+  {
+   "id": "P22-a04",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(x+15)=-2$.",
+   "params": {
+    "a": 4,
+    "k": 1,
+    "b": 15,
+    "por": "xb",
+    "c": -2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P22-a05",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{3}}(5x+2)=-2$.",
+   "params": {
+    "a": 3,
+    "k": 5,
+    "b": 2,
+    "por": "xb",
+    "c": -2
+   },
+   "answer": 1.4
+  },
+  {
+   "id": "P22-a06",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{8}}(2x+52)=-1$.",
+   "params": {
+    "a": 8,
+    "k": 2,
+    "b": 52,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": -22
+  },
+  {
+   "id": "P22-a07",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{2}}(-31-3x)=-3$.",
+   "params": {
+    "a": 2,
+    "k": -3,
+    "b": -31,
+    "por": "bx",
+    "c": -3
+   },
+   "answer": -13
+  },
+  {
+   "id": "P22-a08",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{6}}(60+6x)=-2$.",
+   "params": {
+    "a": 6,
+    "k": 6,
+    "b": 60,
+    "por": "bx",
+    "c": -2
+   },
+   "answer": -4
+  },
+  {
+   "id": "P22-a09",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{8}}(6x+50)=-1$.",
+   "params": {
+    "a": 8,
+    "k": 6,
+    "b": 50,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": -7
+  },
+  {
+   "id": "P22-a10",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{7}}(48-5x)=-2$.",
+   "params": {
+    "a": 7,
+    "k": -5,
+    "b": 48,
+    "por": "bx",
+    "c": -2
+   },
+   "answer": -0.2
+  },
+  {
+   "id": "P22-a11",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(60-2x)=-2$.",
+   "params": {
+    "a": 4,
+    "k": -2,
+    "b": 60,
+    "por": "bx",
+    "c": -2
+   },
+   "answer": 22
+  },
+  {
+   "id": "P22-a12",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(4x-44)=-3$.",
+   "params": {
+    "a": 4,
+    "k": 4,
+    "b": -44,
+    "por": "xb",
+    "c": -3
+   },
+   "answer": 27
+  },
+  {
+   "id": "P22-a13",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(2x+8)=-3$.",
+   "params": {
+    "a": 4,
+    "k": 2,
+    "b": 8,
+    "por": "xb",
+    "c": -3
+   },
+   "answer": 28
+  },
+  {
+   "id": "P22-a14",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{2}}(-6-x)=-3$.",
+   "params": {
+    "a": 2,
+    "k": -1,
+    "b": -6,
+    "por": "bx",
+    "c": -3
+   },
+   "answer": -14
+  },
+  {
+   "id": "P22-a15",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{3}}(-6x+27)=-2$.",
+   "params": {
+    "a": 3,
+    "k": -6,
+    "b": 27,
+    "por": "xb",
+    "c": -2
+   },
+   "answer": 3
+  },
+  {
+   "id": "P22-a16",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{2}}(x+22)=-2$.",
+   "params": {
+    "a": 2,
+    "k": 1,
+    "b": 22,
+    "por": "xb",
+    "c": -2
+   },
+   "answer": -18
+  },
+  {
+   "id": "P22-a17",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{3}}(-2x+35)=-1$.",
+   "params": {
+    "a": 3,
+    "k": -2,
+    "b": 35,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": 16
+  },
+  {
+   "id": "P22-a18",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{2}}(-44+8x)=-4$.",
+   "params": {
+    "a": 2,
+    "k": 8,
+    "b": -44,
+    "por": "bx",
+    "c": -4
+   },
+   "answer": 7.5
+  },
+  {
+   "id": "P22-a19",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{4}}(-3x-47)=-1$.",
+   "params": {
+    "a": 4,
+    "k": -3,
+    "b": -47,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": -17
+  },
+  {
+   "id": "P22-a20",
+   "prototypeId": "P22",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{\\frac{1}{7}}(5x-3)=-1$.",
+   "params": {
+    "a": 7,
+    "k": 5,
+    "b": -3,
+    "por": "xb",
+    "c": -1
+   },
+   "answer": 2
+  }
+ ],
+ "P23": [
+  {
+   "id": "P23-a01",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(x+17)=2\\log_3 5$.",
+   "params": {
+    "a": 3,
+    "k": 1,
+    "b": 17,
+    "por": "xb",
+    "m": 2,
+    "c": 5
+   },
+   "answer": 8
+  },
+  {
+   "id": "P23-a02",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_2(2x+57)=2\\log_2 5$.",
+   "params": {
+    "a": 2,
+    "k": 2,
+    "b": 57,
+    "por": "xb",
+    "m": 2,
+    "c": 5
+   },
+   "answer": -16
+  },
+  {
+   "id": "P23-a03",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(2x+26)=2\\log_7 6$.",
+   "params": {
+    "a": 7,
+    "k": 2,
+    "b": 26,
+    "por": "xb",
+    "m": 2,
+    "c": 6
+   },
+   "answer": 5
+  },
+  {
+   "id": "P23-a04",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(22+x)=2\\log_7 6$.",
+   "params": {
+    "a": 7,
+    "k": 1,
+    "b": 22,
+    "por": "bx",
+    "m": 2,
+    "c": 6
+   },
+   "answer": 14
+  },
+  {
+   "id": "P23-a05",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(16-3x)=2\\log_6 4$.",
+   "params": {
+    "a": 6,
+    "k": -3,
+    "b": 16,
+    "por": "bx",
+    "m": 2,
+    "c": 4
+   },
+   "answer": 0
+  },
+  {
+   "id": "P23-a06",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\lg(25-3x)=2\\lg 2$.",
+   "params": {
+    "a": 10,
+    "k": -3,
+    "b": 25,
+    "por": "bx",
+    "m": 2,
+    "c": 2
+   },
+   "answer": 7
+  },
+  {
+   "id": "P23-a07",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(-3x+22)=2\\log_3 2$.",
+   "params": {
+    "a": 3,
+    "k": -3,
+    "b": 22,
+    "por": "xb",
+    "m": 2,
+    "c": 2
+   },
+   "answer": 6
+  },
+  {
+   "id": "P23-a08",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(13-x)=2\\log_3 2$.",
+   "params": {
+    "a": 3,
+    "k": -1,
+    "b": 13,
+    "por": "bx",
+    "m": 2,
+    "c": 2
+   },
+   "answer": 9
+  },
+  {
+   "id": "P23-a09",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_5(x-4)=2\\log_5 3$.",
+   "params": {
+    "a": 5,
+    "k": 1,
+    "b": -4,
+    "por": "xb",
+    "m": 2,
+    "c": 3
+   },
+   "answer": 13
+  },
+  {
+   "id": "P23-a10",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\lg(59-x)=2\\lg 6$.",
+   "params": {
+    "a": 10,
+    "k": -1,
+    "b": 59,
+    "por": "bx",
+    "m": 2,
+    "c": 6
+   },
+   "answer": 23
+  },
+  {
+   "id": "P23-a11",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(26-x)=2\\log_7 2$.",
+   "params": {
+    "a": 7,
+    "k": -1,
+    "b": 26,
+    "por": "bx",
+    "m": 2,
+    "c": 2
+   },
+   "answer": 22
+  },
+  {
+   "id": "P23-a12",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(-17+x)=2\\log_7 2$.",
+   "params": {
+    "a": 7,
+    "k": 1,
+    "b": -17,
+    "por": "bx",
+    "m": 2,
+    "c": 2
+   },
+   "answer": 21
+  },
+  {
+   "id": "P23-a13",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_2(60+x)=2\\log_2 8$.",
+   "params": {
+    "a": 2,
+    "k": 1,
+    "b": 60,
+    "por": "bx",
+    "m": 2,
+    "c": 8
+   },
+   "answer": 4
+  },
+  {
+   "id": "P23-a14",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_7(-39-3x)=2\\log_7 6$.",
+   "params": {
+    "a": 7,
+    "k": -3,
+    "b": -39,
+    "por": "bx",
+    "m": 2,
+    "c": 6
+   },
+   "answer": -25
+  },
+  {
+   "id": "P23-a15",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(53-x)=2\\log_6 9$.",
+   "params": {
+    "a": 6,
+    "k": -1,
+    "b": 53,
+    "por": "bx",
+    "m": 2,
+    "c": 9
+   },
+   "answer": -28
+  },
+  {
+   "id": "P23-a16",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\lg(50-x)=2\\lg 5$.",
+   "params": {
+    "a": 10,
+    "k": -1,
+    "b": 50,
+    "por": "bx",
+    "m": 2,
+    "c": 5
+   },
+   "answer": 25
+  },
+  {
+   "id": "P23-a17",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(-x+46)=2\\log_6 4$.",
+   "params": {
+    "a": 6,
+    "k": -1,
+    "b": 46,
+    "por": "xb",
+    "m": 2,
+    "c": 4
+   },
+   "answer": 30
+  },
+  {
+   "id": "P23-a18",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_6(2x+14)=2\\log_6 2$.",
+   "params": {
+    "a": 6,
+    "k": 2,
+    "b": 14,
+    "por": "xb",
+    "m": 2,
+    "c": 2
+   },
+   "answer": -5
+  },
+  {
+   "id": "P23-a19",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\lg(6-3x)=3\\lg 3$.",
+   "params": {
+    "a": 10,
+    "k": -3,
+    "b": 6,
+    "por": "bx",
+    "m": 3,
+    "c": 3
+   },
+   "answer": -7
+  },
+  {
+   "id": "P23-a20",
+   "prototypeId": "P23",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_3(-3x-32)=2\\log_3 4$.",
+   "params": {
+    "a": 3,
+    "k": -3,
+    "b": -32,
+    "por": "xb",
+    "m": 2,
+    "c": 4
+   },
+   "answer": -16
+  }
+ ],
+ "P24": [
+  {
+   "id": "P24-a01",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{\\log_{16}(57+x)}=6$.",
+   "params": {
+    "a": 4,
+    "j": 2,
+    "k": 1,
+    "b": 57,
+    "por": "bx",
+    "m": 6
+   },
+   "answer": -21
+  },
+  {
+   "id": "P24-a02",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{\\log_{25}(59+x)}=8$.",
+   "params": {
+    "a": 5,
+    "j": 2,
+    "k": 1,
+    "b": 59,
+    "por": "bx",
+    "m": 8
+   },
+   "answer": 5
+  },
+  {
+   "id": "P24-a03",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(7x+32)}=12$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 7,
+    "b": 32,
+    "por": "xb",
+    "m": 12
+   },
+   "answer": 16
+  },
+  {
+   "id": "P24-a04",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(2x+33)}=9$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 2,
+    "b": 33,
+    "por": "xb",
+    "m": 9
+   },
+   "answer": 24
+  },
+  {
+   "id": "P24-a05",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(8x-31)}=7$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 8,
+    "b": -31,
+    "por": "xb",
+    "m": 7
+   },
+   "answer": 10
+  },
+  {
+   "id": "P24-a06",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{\\log_{25}(3x-5)}=8$.",
+   "params": {
+    "a": 5,
+    "j": 2,
+    "k": 3,
+    "b": -5,
+    "por": "xb",
+    "m": 8
+   },
+   "answer": 23
+  },
+  {
+   "id": "P24-a07",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{\\log_{16}(-10+2x)}=4$.",
+   "params": {
+    "a": 4,
+    "j": 2,
+    "k": 2,
+    "b": -10,
+    "por": "bx",
+    "m": 4
+   },
+   "answer": 13
+  },
+  {
+   "id": "P24-a08",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{\\log_{16}(3x-30)}=3$.",
+   "params": {
+    "a": 4,
+    "j": 2,
+    "k": 3,
+    "b": -30,
+    "por": "xb",
+    "m": 3
+   },
+   "answer": 13
+  },
+  {
+   "id": "P24-a09",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(47+2x)}=5$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 2,
+    "b": 47,
+    "por": "bx",
+    "m": 5
+   },
+   "answer": -11
+  },
+  {
+   "id": "P24-a10",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{\\log_{25}(5x+2)}=11$.",
+   "params": {
+    "a": 5,
+    "j": 2,
+    "k": 5,
+    "b": 2,
+    "por": "xb",
+    "m": 11
+   },
+   "answer": 23.8
+  },
+  {
+   "id": "P24-a11",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(6x+16)}=14$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 6,
+    "b": 16,
+    "por": "xb",
+    "m": 14
+   },
+   "answer": 30
+  },
+  {
+   "id": "P24-a12",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{\\log_{16}(x-10)}=2$.",
+   "params": {
+    "a": 4,
+    "j": 2,
+    "k": 1,
+    "b": -10,
+    "por": "xb",
+    "m": 2
+   },
+   "answer": 14
+  },
+  {
+   "id": "P24-a13",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{\\log_{25}(9x+54)}=3$.",
+   "params": {
+    "a": 5,
+    "j": 2,
+    "k": 9,
+    "b": 54,
+    "por": "xb",
+    "m": 3
+   },
+   "answer": -5
+  },
+  {
+   "id": "P24-a14",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $5^{\\log_{25}(2x+58)}=8$.",
+   "params": {
+    "a": 5,
+    "j": 2,
+    "k": 2,
+    "b": 58,
+    "por": "xb",
+    "m": 8
+   },
+   "answer": 3
+  },
+  {
+   "id": "P24-a15",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_{27}(2x+32)}=2$.",
+   "params": {
+    "a": 3,
+    "j": 3,
+    "k": 2,
+    "b": 32,
+    "por": "xb",
+    "m": 2
+   },
+   "answer": -12
+  },
+  {
+   "id": "P24-a16",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $3^{\\log_9(50+8x)}=2$.",
+   "params": {
+    "a": 3,
+    "j": 2,
+    "k": 8,
+    "b": 50,
+    "por": "bx",
+    "m": 2
+   },
+   "answer": -5.75
+  },
+  {
+   "id": "P24-a17",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{\\log_4(-19+7x)}=3$.",
+   "params": {
+    "a": 2,
+    "j": 2,
+    "k": 7,
+    "b": -19,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": 4
+  },
+  {
+   "id": "P24-a18",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{\\log_4(8x-31)}=11$.",
+   "params": {
+    "a": 2,
+    "j": 2,
+    "k": 8,
+    "b": -31,
+    "por": "xb",
+    "m": 11
+   },
+   "answer": 19
+  },
+  {
+   "id": "P24-a19",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $4^{\\log_{16}(2x+60)}=6$.",
+   "params": {
+    "a": 4,
+    "j": 2,
+    "k": 2,
+    "b": 60,
+    "por": "xb",
+    "m": 6
+   },
+   "answer": -12
+  },
+  {
+   "id": "P24-a20",
+   "prototypeId": "P24",
+   "source": "analog",
+   "text": "Найдите корень уравнения $2^{\\log_8(52+5x)}=3$.",
+   "params": {
+    "a": 2,
+    "j": 3,
+    "k": 5,
+    "b": 52,
+    "por": "bx",
+    "m": 3
+   },
+   "answer": -5
+  }
+ ],
+ "P25": [
+  {
+   "id": "P25-a01",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{256} 4^{x+26}=5$.",
+   "params": {
+    "a": 4,
+    "j": 4,
+    "k": 1,
+    "b": 26,
+    "por": "xb",
+    "m": 5
+   },
+   "answer": -6
+  },
+  {
+   "id": "P25-a02",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{3x+6}=5$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": 3,
+    "b": 6,
+    "por": "xb",
+    "m": 5
+   },
+   "answer": 3
+  },
+  {
+   "id": "P25-a03",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{-5-4x}=-3$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": -4,
+    "b": -5,
+    "por": "bx",
+    "m": -3
+   },
+   "answer": 1
+  },
+  {
+   "id": "P25-a04",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8 2^{-20-7x}=5$.",
+   "params": {
+    "a": 2,
+    "j": 3,
+    "k": -7,
+    "b": -20,
+    "por": "bx",
+    "m": 5
+   },
+   "answer": -5
+  },
+  {
+   "id": "P25-a05",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{16} 2^{2-2x}=-2$.",
+   "params": {
+    "a": 2,
+    "j": 4,
+    "k": -2,
+    "b": 2,
+    "por": "bx",
+    "m": -2
+   },
+   "answer": 5
+  },
+  {
+   "id": "P25-a06",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_8 2^{6x+21}=5$.",
+   "params": {
+    "a": 2,
+    "j": 3,
+    "k": 6,
+    "b": 21,
+    "por": "xb",
+    "m": 5
+   },
+   "answer": -1
+  },
+  {
+   "id": "P25-a07",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{27} 3^{-21+x}=-4$.",
+   "params": {
+    "a": 3,
+    "j": 3,
+    "k": 1,
+    "b": -21,
+    "por": "bx",
+    "m": -4
+   },
+   "answer": 9
+  },
+  {
+   "id": "P25-a08",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{16} 2^{-x+1}=-1$.",
+   "params": {
+    "a": 2,
+    "j": 4,
+    "k": -1,
+    "b": 1,
+    "por": "xb",
+    "m": -1
+   },
+   "answer": 5
+  },
+  {
+   "id": "P25-a09",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{64} 4^{9-6x}=-2$.",
+   "params": {
+    "a": 4,
+    "j": 3,
+    "k": -6,
+    "b": 9,
+    "por": "bx",
+    "m": -2
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P25-a10",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{x+23}=5$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": 1,
+    "b": 23,
+    "por": "xb",
+    "m": 5
+   },
+   "answer": -8
+  },
+  {
+   "id": "P25-a11",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{64} 4^{-5x+5}=5$.",
+   "params": {
+    "a": 4,
+    "j": 3,
+    "k": -5,
+    "b": 5,
+    "por": "xb",
+    "m": 5
+   },
+   "answer": -2
+  },
+  {
+   "id": "P25-a12",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{-x+7}=2$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": -1,
+    "b": 7,
+    "por": "xb",
+    "m": 2
+   },
+   "answer": 1
+  },
+  {
+   "id": "P25-a13",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{-6-3x}=6$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": -3,
+    "b": -6,
+    "por": "bx",
+    "m": 6
+   },
+   "answer": -8
+  },
+  {
+   "id": "P25-a14",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{16} 2^{-16-8x}=6$.",
+   "params": {
+    "a": 2,
+    "j": 4,
+    "k": -8,
+    "b": -16,
+    "por": "bx",
+    "m": 6
+   },
+   "answer": -5
+  },
+  {
+   "id": "P25-a15",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{16} 2^{12-3x}=-3$.",
+   "params": {
+    "a": 2,
+    "j": 4,
+    "k": -3,
+    "b": 12,
+    "por": "bx",
+    "m": -3
+   },
+   "answer": 8
+  },
+  {
+   "id": "P25-a16",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{81} 3^{12-8x}=5$.",
+   "params": {
+    "a": 3,
+    "j": 4,
+    "k": -8,
+    "b": 12,
+    "por": "bx",
+    "m": 5
+   },
+   "answer": -1
+  },
+  {
+   "id": "P25-a17",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{125} 5^{5x+21}=2$.",
+   "params": {
+    "a": 5,
+    "j": 3,
+    "k": 5,
+    "b": 21,
+    "por": "xb",
+    "m": 2
+   },
+   "answer": -3
+  },
+  {
+   "id": "P25-a18",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{81} 3^{2x+6}=6$.",
+   "params": {
+    "a": 3,
+    "j": 4,
+    "k": 2,
+    "b": 6,
+    "por": "xb",
+    "m": 6
+   },
+   "answer": 9
+  },
+  {
+   "id": "P25-a19",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{81} 3^{9x+16}=4$.",
+   "params": {
+    "a": 3,
+    "j": 4,
+    "k": 9,
+    "b": 16,
+    "por": "xb",
+    "m": 4
+   },
+   "answer": 0
+  },
+  {
+   "id": "P25-a20",
+   "prototypeId": "P25",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\log_{81} 3^{4-2x}=1$.",
+   "params": {
+    "a": 3,
+    "j": 4,
+    "k": -2,
+    "b": 4,
+    "por": "bx",
+    "m": 1
+   },
+   "answer": 0
+  }
+ ],
+ "P26": [
+  {
+   "id": "P26-a01",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{2}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 2,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P26-a02",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(x+6)}{6}=-0{,}5$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 6,
+    "a": 6,
+    "z": "-1/2",
+    "dec": 1,
+    "v": "maxOtr"
+   },
+   "answer": -7
+  },
+  {
+   "id": "P26-a03",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(x+4)}{4}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 4,
+    "a": 4,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P26-a04",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{3}=\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 3,
+    "z": "r3/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P26-a05",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{6}=-0{,}5$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 6,
+    "z": "-1/2",
+    "dec": 1,
+    "v": "minPol"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P26-a06",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(x+9)}{4}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 9,
+    "a": 4,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P26-a07",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(2x-4)}{4}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": -4,
+    "a": 4,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P26-a08",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(2x-5)}{6}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": -5,
+    "a": 6,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -4.25
+  },
+  {
+   "id": "P26-a09",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{2\\pi x}{3}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": 0,
+    "a": 3,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 0.75
+  },
+  {
+   "id": "P26-a10",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(2x-8)}{4}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": -8,
+    "a": 4,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -2.5
+  },
+  {
+   "id": "P26-a11",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{4\\pi x}{3}=\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 0,
+    "a": 3,
+    "z": "r3/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 0.25
+  },
+  {
+   "id": "P26-a12",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(x-8)}{3}=-1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -8,
+    "a": 3,
+    "z": "-1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -5.5
+  },
+  {
+   "id": "P26-a13",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{2}=-1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 2,
+    "z": "-1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P26-a14",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{2}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 2,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P26-a15",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi x}{8}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 8,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P26-a16",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(4x+6)}{2}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 4,
+    "b": 6,
+    "a": 2,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -0.25
+  },
+  {
+   "id": "P26-a17",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(4x+6)}{6}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 6,
+    "a": 6,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2.25
+  },
+  {
+   "id": "P26-a18",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(x-1)}{4}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -1,
+    "a": 4,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P26-a19",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{2\\pi x}{3}=-\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": 0,
+    "a": 3,
+    "z": "-r3/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P26-a20",
+   "prototypeId": "P26",
+   "source": "analog",
+   "text": "Решите уравнение $\\sin\\dfrac{\\pi(4x-8)}{12}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 4,
+    "b": -8,
+    "a": 12,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1.75
+  }
+ ],
+ "P27": [
+  {
+   "id": "P27-a01",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi x}{2}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 2,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P27-a02",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+5)}{6}=-\\dfrac{1}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 5,
+    "a": 6,
+    "z": "-1/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P27-a03",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-8)}{12}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -8,
+    "a": 12,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 17
+  },
+  {
+   "id": "P27-a04",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi x}{2}=-1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 2,
+    "z": "-1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P27-a05",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+6)}{12}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 6,
+    "a": 12,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 15
+  },
+  {
+   "id": "P27-a06",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-8)}{2}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -8,
+    "a": 2,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P27-a07",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-7)}{6}=-\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -7,
+    "a": 6,
+    "z": "-r3/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P27-a08",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{2\\pi x}{3}=-\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": 0,
+    "a": 3,
+    "z": "-r3/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1.25
+  },
+  {
+   "id": "P27-a09",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(4x+5)}{12}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 5,
+    "a": 12,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 4.75
+  },
+  {
+   "id": "P27-a10",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+7)}{12}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 7,
+    "a": 12,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -16
+  },
+  {
+   "id": "P27-a11",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(4x+9)}{12}=-\\dfrac{1}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 9,
+    "a": 12,
+    "z": "-1/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1.75
+  },
+  {
+   "id": "P27-a12",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+5)}{12}=0$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 5,
+    "a": 12,
+    "z": "0",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -11
+  },
+  {
+   "id": "P27-a13",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-4)}{12}=-\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -4,
+    "a": 12,
+    "z": "-r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 13
+  },
+  {
+   "id": "P27-a14",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{3\\pi x}{3}=-1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 3,
+    "b": 0,
+    "a": 3,
+    "z": "-1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P27-a15",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+7)}{12}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 7,
+    "a": 12,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 11
+  },
+  {
+   "id": "P27-a16",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x+5)}{12}=\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 5,
+    "a": 12,
+    "z": "r3/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P27-a17",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(2x-4)}{6}=\\dfrac{\\sqrt{2}}{2}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": -4,
+    "a": 6,
+    "z": "r2/2",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1.25
+  },
+  {
+   "id": "P27-a18",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi x}{6}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 6,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -12
+  },
+  {
+   "id": "P27-a19",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-7)}{2}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -7,
+    "a": 2,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P27-a20",
+   "prototypeId": "P27",
+   "source": "analog",
+   "text": "Решите уравнение $\\cos\\dfrac{\\pi(x-1)}{6}=\\dfrac{\\sqrt{3}}{2}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -1,
+    "a": 6,
+    "z": "r3/2",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -10
+  }
+ ],
+ "P28": [
+  {
+   "id": "P28-a01",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{3\\pi x}{6}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 3,
+    "b": 0,
+    "a": 6,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P28-a02",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x+1)}{3}=\\sqrt{3}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 1,
+    "a": 3,
+    "z": "r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P28-a03",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{2\\pi x}{4}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": 0,
+    "a": 4,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 0.5
+  },
+  {
+   "id": "P28-a04",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x-6)}{6}=0$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -6,
+    "a": 6,
+    "z": "0",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -6
+  },
+  {
+   "id": "P28-a05",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{4\\pi x}{6}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 0,
+    "a": 6,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1.5
+  },
+  {
+   "id": "P28-a06",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(2x+2)}{3}=\\dfrac{1}{\\sqrt{3}}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": 2,
+    "a": 3,
+    "z": "1/r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -0.75
+  },
+  {
+   "id": "P28-a07",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(2x+4)}{6}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": 4,
+    "a": 6,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P28-a08",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(2x-7)}{6}=-\\dfrac{1}{\\sqrt{3}}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": -7,
+    "a": 6,
+    "z": "-1/r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P28-a09",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x-1)}{4}=-1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -1,
+    "a": 4,
+    "z": "-1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P28-a10",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x-3)}{2}=0$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": -3,
+    "a": 2,
+    "z": "0",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P28-a11",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x+8)}{12}=-\\dfrac{1}{\\sqrt{3}}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": 8,
+    "a": 12,
+    "z": "-1/r3",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2
+  },
+  {
+   "id": "P28-a12",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x+4)}{3}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 4,
+    "a": 3,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -0.25
+  },
+  {
+   "id": "P28-a13",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x-4)}{4}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 1,
+    "b": -4,
+    "a": 4,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 4
+  },
+  {
+   "id": "P28-a14",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(4x-6)}{6}=\\sqrt{3}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 4,
+    "b": -6,
+    "a": 6,
+    "z": "r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1
+  },
+  {
+   "id": "P28-a15",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(4x+4)}{12}=1$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 4,
+    "a": 12,
+    "z": "1",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2.75
+  },
+  {
+   "id": "P28-a16",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(2x-1)}{6}=\\sqrt{3}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 2,
+    "b": -1,
+    "a": 6,
+    "z": "r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -1.5
+  },
+  {
+   "id": "P28-a17",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{2\\pi x}{6}=-\\dfrac{1}{\\sqrt{3}}$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 2,
+    "b": 0,
+    "a": 6,
+    "z": "-1/r3",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 2.5
+  },
+  {
+   "id": "P28-a18",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi x}{6}=-\\sqrt{3}$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 0,
+    "a": 6,
+    "z": "-r3",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -2
+  },
+  {
+   "id": "P28-a19",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{4\\pi x}{2}=0$. В ответе запишите наименьший положительный корень.",
+   "params": {
+    "k": 4,
+    "b": 0,
+    "a": 2,
+    "z": "0",
+    "dec": 0,
+    "v": "minPol"
+   },
+   "answer": 0.5
+  },
+  {
+   "id": "P28-a20",
+   "prototypeId": "P28",
+   "source": "analog",
+   "text": "Решите уравнение $\\tg\\dfrac{\\pi(x+5)}{12}=1$. В ответе запишите наибольший отрицательный корень.",
+   "params": {
+    "k": 1,
+    "b": 5,
+    "a": 12,
+    "z": "1",
+    "dec": 0,
+    "v": "maxOtr"
+   },
+   "answer": -2
+  }
+ ],
+ "P29": [
+  {
+   "id": "P29-a01",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{343}\\right)^{x-8}=7^{x+16}$.",
+   "params": {
+    "a": 7,
+    "m": 3,
+    "b": -8,
+    "c": 16
+   },
+   "answer": 2
+  },
+  {
+   "id": "P29-a02",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{27}\\right)^{x-4}=3^{x+4}$.",
+   "params": {
+    "a": 3,
+    "m": 3,
+    "b": -4,
+    "c": 4
+   },
+   "answer": 2
+  },
+  {
+   "id": "P29-a03",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{25}\\right)^{x+5}=5^{x-7}$.",
+   "params": {
+    "a": 5,
+    "m": 2,
+    "b": 5,
+    "c": -7
+   },
+   "answer": -1
+  },
+  {
+   "id": "P29-a04",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{125}\\right)^{x+2}=5^{x+12}$.",
+   "params": {
+    "a": 5,
+    "m": 3,
+    "b": 2,
+    "c": 12
+   },
+   "answer": -4.5
+  },
+  {
+   "id": "P29-a05",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{125}\\right)^{x+7}=5^{x+3}$.",
+   "params": {
+    "a": 5,
+    "m": 3,
+    "b": 7,
+    "c": 3
+   },
+   "answer": -6
+  },
+  {
+   "id": "P29-a06",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{16}\\right)^{x+4}=4^{x-20}$.",
+   "params": {
+    "a": 4,
+    "m": 2,
+    "b": 4,
+    "c": -20
+   },
+   "answer": 4
+  },
+  {
+   "id": "P29-a07",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{216}\\right)^{x+1}=6^{x-17}$.",
+   "params": {
+    "a": 6,
+    "m": 3,
+    "b": 1,
+    "c": -17
+   },
+   "answer": 3.5
+  },
+  {
+   "id": "P29-a08",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x+1}=2^{x+19}$.",
+   "params": {
+    "a": 2,
+    "m": 2,
+    "b": 1,
+    "c": 19
+   },
+   "answer": -7
+  },
+  {
+   "id": "P29-a09",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{x+2}=2^{x-17}$.",
+   "params": {
+    "a": 2,
+    "m": 3,
+    "b": 2,
+    "c": -17
+   },
+   "answer": 2.75
+  },
+  {
+   "id": "P29-a10",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{9}\\right)^{x-4}=3^{x+8}$.",
+   "params": {
+    "a": 3,
+    "m": 2,
+    "b": -4,
+    "c": 8
+   },
+   "answer": 0
+  },
+  {
+   "id": "P29-a11",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{4}\\right)^{x+1}=2^{x+4}$.",
+   "params": {
+    "a": 2,
+    "m": 2,
+    "b": 1,
+    "c": 4
+   },
+   "answer": -2
+  },
+  {
+   "id": "P29-a12",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{216}\\right)^{x-4}=6^{x-8}$.",
+   "params": {
+    "a": 6,
+    "m": 3,
+    "b": -4,
+    "c": -8
+   },
+   "answer": 5
+  },
+  {
+   "id": "P29-a13",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{36}\\right)^{x+8}=6^{x-10}$.",
+   "params": {
+    "a": 6,
+    "m": 2,
+    "b": 8,
+    "c": -10
+   },
+   "answer": -2
+  },
+  {
+   "id": "P29-a14",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{343}\\right)^{x-4}=7^{x+8}$.",
+   "params": {
+    "a": 7,
+    "m": 3,
+    "b": -4,
+    "c": 8
+   },
+   "answer": 1
+  },
+  {
+   "id": "P29-a15",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{16}\\right)^{x-6}=4^{x+12}$.",
+   "params": {
+    "a": 4,
+    "m": 2,
+    "b": -6,
+    "c": 12
+   },
+   "answer": 0
+  },
+  {
+   "id": "P29-a16",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{64}\\right)^{x+6}=4^{x+14}$.",
+   "params": {
+    "a": 4,
+    "m": 3,
+    "b": 6,
+    "c": 14
+   },
+   "answer": -8
+  },
+  {
+   "id": "P29-a17",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{25}\\right)^{x+6}=5^{x+12}$.",
+   "params": {
+    "a": 5,
+    "m": 2,
+    "b": 6,
+    "c": 12
+   },
+   "answer": -8
+  },
+  {
+   "id": "P29-a18",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{25}\\right)^{x+6}=5^{x-9}$.",
+   "params": {
+    "a": 5,
+    "m": 2,
+    "b": 6,
+    "c": -9
+   },
+   "answer": -1
+  },
+  {
+   "id": "P29-a19",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{49}\\right)^{x+7}=7^{x+1}$.",
+   "params": {
+    "a": 7,
+    "m": 2,
+    "b": 7,
+    "c": 1
+   },
+   "answer": -5
+  },
+  {
+   "id": "P29-a20",
+   "prototypeId": "P29",
+   "source": "analog",
+   "text": "Найдите корень уравнения $\\left(\\dfrac{1}{8}\\right)^{x-8}=2^{x+8}$.",
+   "params": {
+    "a": 2,
+    "m": 3,
+    "b": -8,
+    "c": 8
+   },
+   "answer": 4
+  }
+ ],
+ "P30": [
+  {
+   "id": "P30-a01",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+12}169=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 12,
+    "N": 169,
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P30-a02",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-2}36=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -2,
+    "N": 36,
+    "v": "menshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P30-a03",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+2}25=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 2,
+    "N": 25,
+    "v": "menshiy"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P30-a04",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-14}100=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -14,
+    "N": 100,
+    "v": "bolshiy"
+   },
+   "answer": 24
+  },
+  {
+   "id": "P30-a05",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-4}4=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -4,
+    "N": 4,
+    "v": "menshiy"
+   },
+   "answer": 6
+  },
+  {
+   "id": "P30-a06",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-13}16=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -13,
+    "N": 16,
+    "v": "menshiy"
+   },
+   "answer": 17
+  },
+  {
+   "id": "P30-a07",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+13}81=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 13,
+    "N": 81,
+    "v": "bolshiy"
+   },
+   "answer": -4
+  },
+  {
+   "id": "P30-a08",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-10}81=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -10,
+    "N": 81,
+    "v": "bolshiy"
+   },
+   "answer": 19
+  },
+  {
+   "id": "P30-a09",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-13}100=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -13,
+    "N": 100,
+    "v": "menshiy"
+   },
+   "answer": 23
+  },
+  {
+   "id": "P30-a10",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+3}100=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 3,
+    "N": 100,
+    "v": "menshiy"
+   },
+   "answer": 7
+  },
+  {
+   "id": "P30-a11",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-15}169=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -15,
+    "N": 169,
+    "v": "menshiy"
+   },
+   "answer": 28
+  },
+  {
+   "id": "P30-a12",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+8}4=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 8,
+    "N": 4,
+    "v": "bolshiy"
+   },
+   "answer": -6
+  },
+  {
+   "id": "P30-a13",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-2}64=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -2,
+    "N": 64,
+    "v": "menshiy"
+   },
+   "answer": 10
+  },
+  {
+   "id": "P30-a14",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-5}9=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -5,
+    "N": 9,
+    "v": "menshiy"
+   },
+   "answer": 8
+  },
+  {
+   "id": "P30-a15",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+7}16=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": 7,
+    "N": 16,
+    "v": "bolshiy"
+   },
+   "answer": -3
+  },
+  {
+   "id": "P30-a16",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-10}100=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -10,
+    "N": 100,
+    "v": "menshiy"
+   },
+   "answer": 20
+  },
+  {
+   "id": "P30-a17",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-6}169=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": -6,
+    "N": 169,
+    "v": "menshiy"
+   },
+   "answer": 19
+  },
+  {
+   "id": "P30-a18",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+10}169=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 10,
+    "N": 169,
+    "v": "menshiy"
+   },
+   "answer": 3
+  },
+  {
+   "id": "P30-a19",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x+10}121=2$. Если уравнение имеет более одного корня, в ответе запишите меньший из них.",
+   "params": {
+    "a": 10,
+    "N": 121,
+    "v": "menshiy"
+   },
+   "answer": 1
+  },
+  {
+   "id": "P30-a20",
+   "prototypeId": "P30",
+   "source": "analog",
+   "text": "Решите уравнение $\\log_{x-1}16=2$. Если уравнение имеет более одного корня, в ответе запишите больший из них.",
+   "params": {
+    "a": -1,
+    "N": 16,
+    "v": "bolshiy"
+   },
+   "answer": 5
+  }
+ ]
+}

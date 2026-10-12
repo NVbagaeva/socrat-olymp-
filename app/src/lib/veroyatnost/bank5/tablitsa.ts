@@ -80,11 +80,17 @@ const P05: Prototype = prototip({
     const { ok, vsego } = paryBezGrani(zapret, s);
     return [
       {
+        etap: 'Все исходы',
         text: `Условие отбрасывает броски с ${zapret === 6 ? 'шестёркой' : 'единицей'}: у каждой кости остаётся 5 граней, а пары — клетки таблицы $5\\times 5$, все равновозможны:`,
         formula: `n = 5 \\cdot 5 = ${vsego}`,
         value: vsego,
       },
-      { text: `Благоприятные — клетки с суммой ${s}:`, formula: `m = ${ok}`, value: ok },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Клетки с суммой ${s}:`,
+        formula: `m = ${ok}`,
+        value: ok,
+      },
       shagP(ok, vsego),
     ];
   },

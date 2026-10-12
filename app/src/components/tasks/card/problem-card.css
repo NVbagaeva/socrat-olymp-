@@ -287,6 +287,15 @@
   display: grid;
   gap: var(--space-1);
 }
+/* Этап решения — подпись над шагом: одни и те же слова во всех
+   задачах №4 и №5 (lib/veroyatnost/types.ts, ETAPY). */
+.pc-step__etap {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 28px;
+}
 .pc-step__text {
   margin: 0;
   line-height: var(--lh-body);
