@@ -124,12 +124,14 @@ const P22: Prototype = {
     const l = d - c;
     return [
       {
-        text: 'Вся мера — длина отрезка распределения:',
+        etap: 'Вся мера',
+        text: 'Длина отрезка распределения:',
         formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
         value: L,
       },
       {
-        text: `Благоприятный промежуток — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
+        etap: 'Благоприятная часть',
+        text: `Промежуток — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
         formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
         value: l,
       },
@@ -374,15 +376,17 @@ const P23: Prototype = {
     const kray = storona(p) === 'nizhnyaya' ? 'до конца отрезка' : 'от начала отрезка';
     return [
       {
-        text: 'Вся мера — длина отрезка распределения:',
+        etap: 'Вся мера',
+        text: 'Длина отрезка распределения:',
         formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
         value: L,
       },
       {
+        etap: 'Благоприятная часть',
         text:
           storona(p) === 'nizhnyaya'
-            ? `Благоприятный промежуток — от ${dec(c)} ${text(p, 'ed')} ${kray}:`
-            : `Благоприятный промежуток — ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
+            ? `Промежуток от ${dec(c)} ${text(p, 'ed')} ${kray}:`
+            : `Промежуток ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
         formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
         value: l,
       },

@@ -824,6 +824,17 @@ body {
   gap: calc(var(--sheet-step) * 0.75);
 }
 
+/* Подсказка по шагам в конце файла учителя: вопрос, кнопки через
+   точку (верная — жирным, чернилами), комментарий — мельче. */
+.sheet-hint { font-size: var(--sheet-fs-small); color: var(--sheet-ink-2); }
+.sheet-hint-q { color: var(--sheet-ink); }
+.sheet-hint-right { color: var(--sheet-ink); font-weight: 700; }
+.sheet-hint-sep { color: var(--sheet-ink-3); }
+.sheet-hint-comment { display: block; color: var(--sheet-ink-3); font-style: italic; }
+
+/* Этап решения перед текстом шага — те же слова, что над шагом на сайте. */
+.sheet-step-etap { color: var(--sheet-ink); font-weight: 600; }
+
 .sheet-step .math { margin-left: calc(var(--sheet-step) * 1); white-space: nowrap; }
 
 /* Строка ответа под решением — жирная, чернилами. */

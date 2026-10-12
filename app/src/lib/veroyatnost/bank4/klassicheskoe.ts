@@ -130,8 +130,13 @@ const P01: Prototype = prototip({
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: 'Все исходы — места туриста в очереди на вертолёт:', formula: `n = ${N}`, value: N },
-      { text: 'Благоприятные — места первого рейса:', formula: `m = ${k}`, value: k },
+      {
+        etap: 'Все исходы',
+        text: 'Места туриста в очереди на вертолёт:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      { etap: 'Благоприятные исходы', text: 'Места первого рейса:', formula: `m = ${k}`, value: k },
       shagP(k, N),
     ];
   },
@@ -188,8 +193,8 @@ const P02: Prototype = prototip({
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: 'Все исходы — участники жребия:', formula: `n = ${N}`, value: N },
-      { text: 'Благоприятные — те, кого выберут:', formula: `m = ${k}`, value: k },
+      { etap: 'Все исходы', text: 'Участники жребия:', formula: `n = ${N}`, value: N },
+      { etap: 'Благоприятные исходы', text: 'Те, кого выберут:', formula: `m = ${k}`, value: k },
       shagP(k, N),
     ];
   },
@@ -257,11 +262,17 @@ const P03: Prototype = prototip({
     const ischem = text(p, 'ischem') === 'a' ? text(p, 'strA') : text(p, 'strB');
     return [
       {
-        text: 'Все исходы — кто окажется под нужным номером, любой из спортсменов:',
+        etap: 'Все исходы',
+        text: 'Кто окажется под нужным номером, любой из спортсменов:',
         formula: `n = ${N}`,
         value: N,
       },
-      { text: `Благоприятные — спортсмены из ${ischem}:`, formula: `m = ${nado}`, value: nado },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Спортсмены из ${ischem}:`,
+        formula: `m = ${nado}`,
+        value: nado,
+      },
       shagP(nado, N),
     ];
   },
@@ -403,12 +414,14 @@ function zhrebiyPrototip(opisanie: {
       const blag = spisok(p, 'blag');
       return [
         {
-          text: 'Все исходы — кому выпадет жребий, любой из играющих:',
+          etap: 'Все исходы',
+          text: 'Кому выпадет жребий, любой из играющих:',
           formula: `n = ${vse.length}`,
           value: vse.length,
         },
         {
-          text: `Благоприятные — ${perechislenie(blag)}:`,
+          etap: 'Благоприятные исходы',
+          text: `${perechislenie(blag)}:`,
           formula: `m = ${blag.length}`,
           value: blag.length,
         },
@@ -620,12 +633,14 @@ const P05: Prototype = prototip({
     const d = duga(a, b);
     return [
       {
-        text: 'Вся мера — полный круг циферблата, двенадцать часовых делений:',
+        etap: 'Вся мера',
+        text: 'Полный круг циферблата, двенадцать часовых делений:',
         formula: 'L = 12',
         value: 12,
       },
       {
-        text: `Благоприятная дуга — от отметки ${a} до отметки ${b}:`,
+        etap: 'Благоприятная часть',
+        text: `Дуга — от отметки ${a} до отметки ${b}:`,
         formula: `l = ${d}`,
         value: d,
       },
@@ -703,11 +718,17 @@ const P06: Prototype = prototip({
     const { kol, strana } = stranaKol(p, num(p, 'ischem'));
     return [
       {
-        text: 'Все исходы — кто выступит под нужным номером, любой из спортсменов:',
+        etap: 'Все исходы',
+        text: 'Кто выступит под нужным номером, любой из спортсменов:',
         formula: `n = ${[1, 2, 3, 4].map((i) => num(p, `k${i}`)).join(' + ')} = ${summa}`,
         value: summa,
       },
-      { text: `Благоприятные — спортсмены из ${strana}:`, formula: `m = ${kol}`, value: kol },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Спортсмены из ${strana}:`,
+        formula: `m = ${kol}`,
+        value: kol,
+      },
       shagP(kol, summa),
     ];
   },
@@ -947,11 +968,17 @@ const P07: Prototype = prototip({
     const strana = text(p, `s${num(p, 'ischem')}`);
     return [
       {
-        text: 'Все исходы — чей доклад окажется под нужным номером, любой из докладов:',
+        etap: 'Все исходы',
+        text: 'Чей доклад окажется под нужным номером, любой из докладов:',
         formula: `n = ${[1, 2, 3].map((i) => num(p, `k${i}`)).join(' + ')} = ${summa}`,
         value: summa,
       },
-      { text: `Благоприятные — учёные из ${strana}:`, formula: `m = ${nado}`, value: nado },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Учёные из ${strana}:`,
+        formula: `m = ${nado}`,
+        value: nado,
+      },
       shagP(nado, summa),
     ];
   },
@@ -1121,14 +1148,20 @@ function biletyPrototip(opisanie: {
       const k = num(p, 'k');
       const blag = ne === 1 ? N - k : k;
       return [
-        { text: 'Все исходы — билеты сборника:', formula: `n = ${N}`, value: N },
+        { etap: 'Все исходы', text: 'Билеты сборника:', formula: `n = ${N}`, value: N },
         ne === 1
           ? {
-              text: 'Благоприятные — билеты без этой темы:',
+              etap: 'Благоприятные исходы',
+              text: 'Билеты без этой темы:',
               formula: `m = ${N} - ${k} = ${blag}`,
               value: blag,
             }
-          : { text: 'Благоприятные — билеты с этой темой:', formula: `m = ${k}`, value: blag },
+          : {
+              etap: 'Благоприятные исходы',
+              text: 'Билеты с этой темой:',
+              formula: `m = ${k}`,
+              value: blag,
+            },
         shagP(blag, N),
       ];
     },
@@ -1269,9 +1302,15 @@ const P09: Prototype = prototip({
     const N = num(p, 'N');
     const k = num(p, 'k');
     return [
-      { text: 'Все исходы — машины фирмы, на вызов приедет любая:', formula: `n = ${N}`, value: N },
       {
-        text: 'Благоприятные — жёлтые машины:',
+        etap: 'Все исходы',
+        text: 'Машины фирмы, на вызов приедет любая:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        etap: 'Благоприятные исходы',
+        text: 'Жёлтые машины:',
         formula: `m = ${N} - ${k} = ${N - k}`,
         value: N - k,
       },
@@ -1336,12 +1375,14 @@ const P10: Prototype = prototip({
     const c = N - a - b;
     return [
       {
-        text: 'Все исходы — кто выступит под нужным номером, любая из гимнасток:',
+        etap: 'Все исходы',
+        text: 'Кто выступит под нужным номером, любая из гимнасток:',
         formula: `n = ${N}`,
         value: N,
       },
       {
-        text: `Благоприятные — гимнастки из ${text(p, 'sC')}:`,
+        etap: 'Благоприятные исходы',
+        text: `Гимнастки из ${text(p, 'sC')}:`,
         formula: `m = ${N} - ${a} - ${b} = ${c}`,
         value: c,
       },
@@ -1491,18 +1532,21 @@ const P11: Prototype = prototip({
     const last = vPoslednijDen(d, N, m, k);
     return [
       {
-        text: 'Все исходы — места доклада в расписании, все равновозможны:',
+        etap: 'Все исходы',
+        text: 'Места доклада в расписании, все равновозможны:',
         formula: `n = ${N}`,
         value: N,
       },
       m === 0
         ? {
-            text: `Благоприятные — доклады последнего дня; дней ${d}, докладов поровну:`,
+            etap: 'Благоприятные исходы',
+            text: `Доклады последнего дня; дней ${d}, докладов поровну:`,
             formula: `m = ${drob(N, d)} = ${last}`,
             value: last,
           }
         : {
-            text: `Благоприятные — доклады последнего дня: на первые дни ушло ${m * k}, остальные поделены поровну:`,
+            etap: 'Благоприятные исходы',
+            text: `Доклады последнего дня: на первые дни ушло ${m * k}, остальные поделены поровну:`,
             formula: `m = ${drob(`${N} - ${m * k}`, d - m)} = ${last}`,
             value: last,
           },
@@ -1627,12 +1671,14 @@ const P12: Prototype = prototip({
     const ostalos = N - (m - 1) * k;
     return [
       {
-        text: 'Все исходы — участники олимпиады, посадить могут любого:',
+        etap: 'Все исходы',
+        text: 'Участники олимпиады, посадить могут любого:',
         formula: `n = ${N}`,
         value: N,
       },
       {
-        text: 'Благоприятные — те, кто попал в запасную аудиторию:',
+        etap: 'Благоприятные исходы',
+        text: 'Те, кто попал в запасную аудиторию:',
         formula: `m = ${N} - ${m - 1} \\cdot ${k} = ${ostalos}`,
         value: ostalos,
       },
@@ -1770,9 +1816,15 @@ const P13: Prototype = prototip({
     const k = num(p, 'k');
     const vDenN = (N - k) / (d - 1);
     return [
-      { text: 'Все исходы — места выступления в расписании:', formula: `n = ${N}`, value: N },
       {
-        text: `Благоприятные — выступления нужного дня; после первого дня осталось ${N - k}, они поделены на ${d - 1} дня поровну:`,
+        etap: 'Все исходы',
+        text: 'Места выступления в расписании:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Выступления нужного дня; после первого дня осталось ${N - k}, они поделены на ${d - 1} дня поровну:`,
         formula: `m = ${drob(N - k, d - 1)} = ${vDenN}`,
         value: vDenN,
       },
@@ -1891,12 +1943,14 @@ const P14: Prototype = prototip({
     const r = num(p, 'r');
     return [
       {
-        text: 'Все исходы — возможные соперники, любой из остальных участников:',
+        etap: 'Все исходы',
+        text: 'Возможные соперники, любой из остальных участников:',
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: 'Благоприятные — соперники из России, без него самого:',
+        etap: 'Благоприятные исходы',
+        text: 'Соперники из России, без него самого:',
         formula: `m = ${r} - 1 = ${r - 1}`,
         value: r - 1,
       },
@@ -2031,18 +2085,21 @@ const P15: Prototype = prototip({
     const m = vmeste ? razmer - 1 : N - razmer;
     return [
       {
-        text: 'Одного из двоих фиксируем. Все исходы — места второго среди оставшихся:',
+        etap: 'Все исходы',
+        text: 'Одного из двоих фиксируем. Считаем места второго среди оставшихся:',
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       vmeste
         ? {
-            text: 'Благоприятные — свободные места в группе первого:',
+            etap: 'Благоприятные исходы',
+            text: 'Свободные места в группе первого:',
             formula: `m = ${razmer} - 1 = ${m}`,
             value: m,
           }
         : {
-            text: 'Благоприятные — места в других группах:',
+            etap: 'Благоприятные исходы',
+            text: 'Места в других группах:',
             formula: `m = ${N} - ${razmer} = ${m}`,
             value: m,
           },
@@ -2337,11 +2394,17 @@ const P16: Prototype = prototip({
     const m = Math.round(otvet * vsego);
     return [
       {
-        text: `Все исходы — последовательности ${n} бросков, в таблице каждая — своя клетка:`,
+        etap: 'Все исходы',
+        text: `Последовательности ${n} бросков, в таблице каждая — своя клетка:`,
         formula: `n = 2^{${n}} = ${vsego}`,
         value: vsego,
       },
-      { text: 'Благоприятные — клетки, где выпало то, что нужно:', formula: `m = ${m}`, value: m },
+      {
+        etap: 'Благоприятные исходы',
+        text: 'Клетки, где выпало то, что нужно:',
+        formula: `m = ${m}`,
+        value: m,
+      },
       shagP(m, vsego),
     ];
   },
@@ -2509,12 +2572,14 @@ const P17: Prototype = prototip({
     const m = Math.round(otvet * vsego);
     return [
       {
-        text: `Все исходы — как лягут ${n} жребия подряд, в таблице каждый — своя клетка:`,
+        etap: 'Все исходы',
+        text: `Как лягут ${n} жребия подряд, в таблице каждый — своя клетка:`,
         formula: `n = 2^{${n}} = ${vsego}`,
         value: vsego,
       },
       {
-        text: 'Благоприятные — клетки, где команда выиграла жребий столько раз, сколько нужно:',
+        etap: 'Благоприятные исходы',
+        text: 'Клетки, где команда выиграла жребий столько раз, сколько нужно:',
         formula: `m = ${m}`,
         value: m,
       },
@@ -2661,11 +2726,17 @@ const P18: Prototype = prototip({
     }
     return [
       {
-        text: 'Все исходы — пары значений двух костей, каждая — клетка таблицы:',
+        etap: 'Все исходы',
+        text: 'Пары значений двух костей, каждая — клетка таблицы:',
         formula: 'n = 6 \\cdot 6 = 36',
         value: 36,
       },
-      { text: `Благоприятные — клетки с суммой ${s}:`, formula: `m = ${ok}`, value: ok },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Клетки с суммой ${s}:`,
+        formula: `m = ${ok}`,
+        value: ok,
+      },
       shagP(ok, 36, znakov),
     ];
   },
