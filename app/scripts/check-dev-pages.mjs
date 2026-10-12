@@ -16,6 +16,7 @@ import { APP } from './lib/load-ts.mjs';
 
 const OUT = path.join(APP, 'out');
 const DEV_ROUTES = [
+  'styleguide/zadanie-6',
   'styleguide/zadanie-7',
   'styleguide/zadanie-9',
   'styleguide/zadanie-10',
@@ -23,6 +24,8 @@ const DEV_ROUTES = [
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [
+  '/styleguide/zadanie-6',
+  'g6__stat',
   '/styleguide/zadanie-7',
   'g7__stat',
   '/styleguide/zadanie-9',
