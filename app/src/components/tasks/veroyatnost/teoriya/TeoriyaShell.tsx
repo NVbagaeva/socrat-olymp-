@@ -40,6 +40,14 @@ export interface TeoriyaShellProps {
    * поиск (справочник №1). Не задано — ничего.
    */
   podZagolovkom?: ReactNode;
+  /** Что стоит над заголовком вкладки: «← Назад» и крошки (справочник №1). */
+  nadZagolovkom?: ReactNode;
+  /**
+   * Маленькое действие в липкой полосе «Содержание» (телефон) и рядом
+   * с заголовком колонки содержания (компьютер) — «Скачать» справочника
+   * №1. Не задано — ничего.
+   */
+  vSoderzhanii?: ReactNode;
 }
 
 /** Якорь раздела на странице. */
@@ -66,6 +74,8 @@ export function TeoriyaShell({
   dekor = TEORIYA_DEKOR,
   trackKey,
   podZagolovkom,
+  nadZagolovkom,
+  vSoderzhanii,
 }: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
@@ -159,6 +169,7 @@ export function TeoriyaShell({
       {/* Название вкладки — H2 панели: заголовок задания (H1) один на
           все вкладки и живёт в шапке раздела. Разделы теории — на
           уровень ниже. */}
+      {nadZagolovkom}
       <h2 className="t-h2 vtab__title">{vkladka}</h2>
       {podZagolovkom}
 
@@ -179,6 +190,7 @@ export function TeoriyaShell({
           {SODERZHANIE.title}
         </button>
         {otkryto === undefined ? null : <span className="topic-open__now">{otkryto.title}</span>}
+        {vSoderzhanii}
       </div>
 
       <div className="topic-body topic-body--theory vteor">
@@ -207,7 +219,14 @@ export function TeoriyaShell({
         </div>
 
         <aside className="topic-side" aria-label={SODERZHANIE.title}>
-          <h3 className="topic-side__title">{SODERZHANIE.title}</h3>
+          {vSoderzhanii === undefined ? (
+            <h3 className="topic-side__title">{SODERZHANIE.title}</h3>
+          ) : (
+            <div className="vteor-side__head">
+              <h3 className="topic-side__title">{SODERZHANIE.title}</h3>
+              {vSoderzhanii}
+            </div>
+          )}
           <p className="vteor-side__lead">{SODERZHANIE.lead}</p>
           {spisok}
 

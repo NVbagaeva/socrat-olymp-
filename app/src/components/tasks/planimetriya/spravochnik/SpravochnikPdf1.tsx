@@ -103,7 +103,7 @@ export function SpravochnikPdf1({
 
   return (
     <>
-      <Nazad1 teoriya={teoriya} zadanie={zadanie} />
+      <Nazad1 kuda={teoriya} teoriya={teoriya} zadanie={zadanie} lipkiy />
       <div className="z1-print-bar spr1p-bar" data-print-bar>
         <span className="spr1p-bar__vybor" role="group" aria-label={PDF.vybor}>
           <a className="spr1p-bar__var" href="./" aria-current={sPrimerami ? 'true' : undefined}>

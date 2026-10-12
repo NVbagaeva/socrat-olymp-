@@ -9,80 +9,7 @@
 
 /* ── Над листом: «Назад», хлебные крошки, скачать и печать ───── */
 
-/* «← Назад» — липкая в левом верхнем углу, зона нажатия не меньше
-   44×44 px; под ней хлебные крошки. На бумагу и в PDF не попадает. */
-.spr1p-verh {
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-4);
-  padding: var(--space-2) var(--space-4);
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid var(--color-border);
-  font-family: var(--font-sans);
-}
-.spr1p-nazad {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 var(--space-4) 0 var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--color-primary);
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: inset 0 0 0 1px var(--color-border-strong);
-  background: var(--color-surface);
-}
-.spr1p-nazad:hover {
-  background: var(--color-surface-2);
-}
-.spr1p-nazad:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 2px;
-}
-.spr1p-nazad__strelka {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.spr1p-kroshki ol {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
-}
-.spr1p-kroshki li + li::before {
-  content: '›';
-  margin: 0 var(--space-2);
-  color: var(--color-text-tertiary);
-}
-.spr1p-kroshki a {
-  color: var(--color-text-secondary);
-}
-.spr1p-kroshki [aria-current='page'] {
-  color: var(--color-text);
-  font-weight: 600;
-}
-/* На телефоне крошки — строкой под кнопкой. */
-@media (max-width: 599px) {
-  .spr1p-kroshki {
-    flex-basis: 100%;
-  }
-}
+/* «← Назад» и крошки — Nazad1.css (здесь блок липкий). */
 
 @media screen {
   .spr1p-bar {
@@ -118,7 +45,6 @@
   }
 }
 @media print {
-  .spr1p-verh,
   .spr1p-bar {
     display: none;
   }

@@ -247,7 +247,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
   /* «Назад» и крошки на бумагу не попадают. */
   await page.emulateMedia({ media: 'print' });
   const vidnoVPechati = await page.evaluate(() =>
-    ['.spr1p-verh', '.spr1-pdf', '.spr1p-bar'].filter((sel) => {
+    ['.spr1-nazad', '.spr1-pdf', '.spr1p-bar'].filter((sel) => {
       const el = document.querySelector(sel);
       return el !== null && getComputedStyle(el).display !== 'none';
     }),
@@ -307,10 +307,35 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     `веб: без примеров кнопка ведёт на ${await adres()}`,
   );
 
+  /* Панель ушла за верх экрана — в колонке «Содержание» появилась
+     маленькая «Скачать», и она отдаёт тот же файл, что выбран. */
+  const mini = page.locator('.topic-side .spr1-pdf-mini');
+  proverka(!(await mini.isVisible()), 'веб: маленькая «Скачать» видна, пока видна панель');
+  await page.evaluate(() =>
+    document.getElementById('teoriya-treugolnik')?.scrollIntoView({ block: 'start' }),
+  );
+  await page.waitForTimeout(400);
+  proverka(await mini.isVisible(), 'веб: после прокрутки маленькой «Скачать» нет');
+  proverka(
+    ((await mini.getAttribute('href')) ?? '').split('?')[0] === MANIFEST.bezPrimerov.fayl,
+    'веб: маленькая «Скачать» отдаёт не тот файл, что выбран переключателем',
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
+
+  /* Печать веб-страницы: без панели, поиска, «Назад» и маленькой кнопки. */
+  await page.emulateMedia({ media: 'print' });
+  const vidnoNaTeorii = await page.evaluate(() =>
+    ['.spr1-nazad', '.spr1-pdf', '.spr1-poisk', '.spr1-pdf-mini'].filter((sel) =>
+      [...document.querySelectorAll(sel)].some((el) => getComputedStyle(el).display !== 'none'),
+    ),
+  );
+  proverka(vidnoNaTeorii.length === 0, `веб: при печати теории видно: ${vidnoNaTeorii.join(', ')}`);
+  await page.emulateMedia({ media: 'screen' });
+
   /* «Теория → печать → Назад» возвращает на теорию. */
   await page.locator('.spr1-pdf__pechat').click();
   await page.waitForURL(/\/pechat\/spravochnik\//);
-  await page.locator('.spr1p-nazad').click();
+  await page.locator('.spr1-nazad__knopka').click();
   await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
   proverka(
     page.url().endsWith('/zadaniya/1/teoriya/'),
@@ -326,7 +351,7 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     window.print = () => {};
   });
   await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/`, { waitUntil: 'networkidle' });
-  const nazad = page.locator('.spr1p-nazad');
+  const nazad = page.locator('.spr1-nazad__knopka');
   const box = await nazad.boundingBox();
   proverka(
     box !== null && box.width >= 44 && box.height >= 44,

@@ -20,20 +20,7 @@
   line-height: var(--lh-lg);
 }
 
-.spr1-shapka__ryad {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3) var(--space-6);
-  margin-top: calc(-1 * var(--space-3));
-}
-.spr1-shapka__ryad .spr1-shapka__lead {
-  flex: 1 1 320px;
-  margin: 0;
-}
-
-/* «Скачать справочник» и переключатель «С примерами» — SkachatPdf1.css. */
+/* Панель «Скачать справочник» — SkachatPdf1.css, «← Назад» — Nazad1.css. */
 
 .spr1-poisk {
   position: relative;
@@ -571,6 +558,14 @@ a.spr1-ege__chip:hover {
 /* Подсказка клавиш — только там, где есть клавиатура. */
 @media (max-width: 767.98px), (hover: none) {
   .spr1-poisk__kbd {
+    display: none;
+  }
+}
+
+/* Печать веб-страницы: без поиска (панель скачивания и «Назад»
+   прячут свои файлы стилей). */
+@media print {
+  .spr1-poisk {
     display: none;
   }
 }
