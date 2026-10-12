@@ -9,6 +9,7 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/components/tasks/zadanie7/razbor7.css';
 import '../zadanie7.css';
+import '../irracionalnye7.css';
 
 /**
  * Оболочка задания №7: крошки, заголовок и лента вкладок. Группа

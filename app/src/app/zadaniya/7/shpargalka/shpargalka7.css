@@ -151,3 +151,14 @@
     font-size: 12.5px;
   }
 }
+
+/* Иррациональные: три компактные схемы и итоговая таблица. */
+.z7-shp__irr {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.z7-shp__irr .z7-sx {
+  break-inside: avoid;
+}
