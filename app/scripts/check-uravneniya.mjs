@@ -141,6 +141,190 @@ for (const { where, item, s } of solved) {
   );
 }
 
+/* Вкладки раздела (PR3): данные для браузера совпадают с банком и без
+   ответов; опорные задачи — 8 блоков по 10, ответ пересчитан своей
+   проверкой; группы генератора — те же, что у прототипов; сборка листа
+   и план тренировки детерминированы и без повторов; ответ ученика
+   принимается в любом верном виде. */
+{
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { APP } = await import('./lib/load-ts.mjs');
+  const { FIPI, ANALOGI_PO_PROTOTIPAM, BANK } = requireSrc('lib/zadanie7/bank/index');
+  const { dannyeDlyaBrauzera } = requireSrc('lib/zadanie7/dannye-server');
+  const { BLOKI_OPORNYH, opornyeDlyaBrauzera } = requireSrc('lib/zadanie7/opornye');
+  const { GRUPPY_PROTOTIPOV, sobratList, parseZapros, zaprosQuery } =
+    requireSrc('lib/zadanie7/sborka');
+  const { planTrenirovki } = requireSrc('lib/zadanie7/trenazher');
+  const { answerMatches7 } = requireSrc('lib/zadanie7/otvet');
+  const { sealAnswer, openText } = requireSrc('lib/zadanie7/secret');
+  const { PROTOTYPES } = requireSrc('lib/zadanie7/prototypes');
+  const { rngOf } = requireSrc('lib/vychisleniya/rng');
+
+  /* public/data/zadanie7 — свежие и без ответов. */
+  const dir = path.join(APP, 'public/data/zadanie7');
+  const nado = dannyeDlyaBrauzera(FIPI, ANALOGI_PO_PROTOTIPAM);
+  for (const [fail, tekst] of Object.entries(nado)) {
+    const full = path.join(dir, `${fail}.json`);
+    if (!fs.existsSync(full) || fs.readFileSync(full, 'utf8') !== tekst) {
+      problems.push({
+        where: `public/data/zadanie7/${fail}.json`,
+        what: 'устарел: pnpm build:bank-7',
+      });
+    }
+  }
+  for (const name of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+    const t = fs.readFileSync(path.join(dir, name), 'utf8');
+    if (/"answer"|"korni"|"etapy"/.test(t)) {
+      problems.push({
+        where: `public/data/zadanie7/${name}`,
+        what: 'в данных для браузера есть ответ или разбор',
+      });
+    }
+  }
+
+  /* Опорные задачи. */
+  if (BLOKI_OPORNYH.length !== 8) {
+    problems.push({ where: 'опорные', what: `блоков ${BLOKI_OPORNYH.length}, нужно 8` });
+  }
+  for (const b of BLOKI_OPORNYH) {
+    if (b.zadachi.length !== 10) {
+      problems.push({ where: `опорные ${b.slug}`, what: `задач ${b.zadachi.length}, нужно 10` });
+    }
+    if (/\$|\\/.test(b.opisanie) || /\$|\\/.test(b.nazvanie)) {
+      problems.push({ where: `опорные ${b.slug}`, what: 'формула на карточке блока' });
+    }
+    for (const z of b.zadachi) {
+      const v = z.proverka();
+      if (Math.abs(v - z.answer) > 1e-9) {
+        problems.push({ where: `опорные ${z.id}`, what: `ответ ${z.answer}, пересчёт ${v}` });
+      }
+      if (
+        !Number.isFinite(z.answer) ||
+        Math.abs(z.answer * 1e6 - Math.round(z.answer * 1e6)) > 1e-6
+      ) {
+        problems.push({ where: `опорные ${z.id}`, what: `ответ не конечная дробь: ${z.answer}` });
+      }
+      for (const t of [z.uslovie, z.podskazka, ...z.razbor]) {
+        for (const f of t.match(/\$[^$]+\$/g) ?? []) {
+          try {
+            typeset(f.slice(1, -1));
+          } catch (e) {
+            problems.push({ where: `опорные ${z.id}`, what: `KaTeX: ${e.message.slice(0, 80)}` });
+          }
+        }
+      }
+    }
+    for (const m of opornyeDlyaBrauzera(b)) {
+      const z = b.zadachi.find((x) => x.id === m.id);
+      if (JSON.stringify(JSON.parse(openText(m.razbor, m.id))) !== JSON.stringify(z.razbor)) {
+        problems.push({ where: `опорные ${m.id}`, what: 'закрытый разбор не открывается' });
+      }
+    }
+    if (/"answer"|Ответ:/.test(JSON.stringify(opornyeDlyaBrauzera(b)))) {
+      problems.push({ where: `опорные ${b.slug}`, what: 'ответ уходит в браузер' });
+    }
+  }
+
+  /* Группы генератора и тренажёра = группы прототипов. */
+  for (const p of PROTOTYPES) {
+    if (!(GRUPPY_PROTOTIPOV[p.group] ?? []).includes(p.id)) {
+      problems.push({ where: 'sborka.ts', what: `${p.id} нет в группе ${p.group}` });
+    }
+  }
+  const vGruppah = Object.values(GRUPPY_PROTOTIPOV).flat();
+  if (vGruppah.length !== PROTOTYPES.length) {
+    problems.push({
+      where: 'sborka.ts',
+      what: `в группах ${vGruppah.length}, прототипов ${PROTOTYPES.length}`,
+    });
+  }
+
+  /* Лист генератора: адрес → тот же лист; без повторов; ученик и учитель одинаковы. */
+  const indeks = BANK.map((b) => ({
+    id: b.id,
+    p: b.prototypeId,
+    s: b.source === 'fipi' ? 'f' : 'a',
+  }));
+  const zapros = {
+    tipy: PROTOTYPES.map((p) => ({ id: p.id, n: 2 })),
+    istochnik: 'mix',
+    variantov: 3,
+    primery: 2,
+    seed: 'AB12',
+  };
+  const q = new URLSearchParams(zaprosQuery(zapros));
+  const z2 = parseZapros(q);
+  const a = JSON.stringify(sobratList(zapros, indeks));
+  if (z2 === null || JSON.stringify(sobratList(z2, indeks)) !== a) {
+    problems.push({ where: 'sborka.ts', what: 'лист по адресу не совпал с листом по запросу' });
+  }
+  const m = sobratList(zapros, indeks);
+  const ids = m.bloki.flatMap((b) => [...b.spiski.flat(), ...(b.primery ?? [])]);
+  if (new Set(ids).size !== ids.length) {
+    problems.push({ where: 'sborka.ts', what: 'на листе генератора повторяются задачи' });
+  }
+  const fipiOnly = sobratList({ ...zapros, istochnik: 'fipi', seed: 'CD34', primery: 0 }, indeks);
+  for (const id of fipiOnly.bloki.flatMap((b) => b.spiski.flat())) {
+    const it = BANK.find((b) => b.id === id);
+    if (
+      it &&
+      it.source !== 'fipi' &&
+      FIPI.some(
+        (f) =>
+          f.prototypeId === it.prototypeId &&
+          !fipiOnly.bloki.some((b) => b.spiski.flat().includes(f.id)),
+      )
+    ) {
+      problems.push({
+        where: 'sborka.ts',
+        what: `«только ФИПИ» взял аналог ${id}, хотя ФИПИ остались`,
+      });
+    }
+  }
+
+  /* План тренировки: детерминирован при одном random, без повторов, нужное число. */
+  const r1 = rngOf('z7-plan');
+  const r2 = rngOf('z7-plan');
+  const n = { istochnik: 'mix', tipy: ['P01', 'P13', 'P26'], skolko: 20 };
+  const p1 = planTrenirovki(indeks, n, () => r1.next());
+  const p2 = planTrenirovki(indeks, n, () => r2.next());
+  if (
+    JSON.stringify(p1) !== JSON.stringify(p2) ||
+    new Set(p1).size !== p1.length ||
+    p1.length !== 20
+  ) {
+    problems.push({
+      where: 'trenazher.ts',
+      what: `план тренировки: ${p1.length} задач, повторы или не детерминирован`,
+    });
+  }
+  const bezFipi = planTrenirovki(
+    indeks,
+    { istochnik: 'fipi', tipy: ['P10'], skolko: 5 },
+    Math.random,
+  );
+  if (bezFipi.length !== 5) {
+    problems.push({ where: 'trenazher.ts', what: 'П-10 в режиме «только ФИПИ» не дал аналогов' });
+  }
+
+  /* Ответ ученика в любом верном виде. */
+  const pecat = sealAnswer(1.4);
+  for (const v of ['1,4', '1.4', '7/5', '−(−1,4)', ' 1,40 ', '14/10']) {
+    if (!answerMatches7(v, pecat)) {
+      problems.push({ where: 'otvet.ts', what: `«${v}» не принят как 1,4` });
+    }
+  }
+  for (const v of ['1,41', '-1,4', '7/4', 'abc', '']) {
+    if (answerMatches7(v, pecat)) {
+      problems.push({ where: 'otvet.ts', what: `«${v}» принят как 1,4` });
+    }
+  }
+  console.log(
+    `Вкладки: опорных ${BLOKI_OPORNYH.length}×10, лист генератора ${ids.length} задач, план ${p1.length}.`,
+  );
+}
+
 /* Блок «Иррациональные уравнения»: примеры пересчитаны — корни исходного
    уравнения численно, посторонние решают уравнение после возведения в
    степень, но не исходное; ответ совпадает с текстом примера и с банком;

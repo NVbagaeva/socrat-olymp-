@@ -29,3 +29,12 @@ for (const { id } of PROTOTYPES) {
 const file = path.join(APP, 'src/data/zadanie7/analogi.json');
 fs.writeFileSync(file, JSON.stringify(out, null, 1) + '\n');
 console.log(`Записано: ${path.relative(APP, file)}`);
+
+/* Данные для браузера: без ответов, с отпечатком (lib/zadanie7/dannye.ts). */
+const { dannyeDlyaBrauzera } = requireSrc('lib/zadanie7/dannye-server');
+const dir = path.join(APP, 'public/data/zadanie7');
+fs.mkdirSync(dir, { recursive: true });
+for (const [fail, soderzhimoe] of Object.entries(dannyeDlyaBrauzera(FIPI, out))) {
+  fs.writeFileSync(path.join(dir, `${fail}.json`), soderzhimoe);
+}
+console.log(`Записано: ${path.relative(APP, dir)}/ (индекс и файлы прототипов)`);
