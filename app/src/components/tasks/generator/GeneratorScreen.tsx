@@ -28,6 +28,7 @@ import {
 import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
+import type { KitScope } from '@/lib/komplekt';
 import { planCounts } from '@/lib/sheetPlan';
 import { sheetQuery, subtitleOf } from '@/lib/generatorQuery';
 import { TitleText } from '../TitleText';
@@ -45,6 +46,10 @@ export interface GeneratorScreenProps {
   levels?: readonly SkillLevel[];
   /** Плашка под сводкой: откуда взяты задания. Не задана — общая. */
   note?: string;
+  /** Чей генератор: версия в коде комплекта. По умолчанию №12. */
+  scope?: KitScope;
+  /** Раздел в «Моих комплектах». По умолчанию «№12 · семейство». */
+  section?: string;
 }
 
 /** «2 варианта» для сводки. */
@@ -70,6 +75,8 @@ export function GeneratorScreen({
   skills,
   levels = skillLevels,
   note = generatorPage.summary.note,
+  scope = '12',
+  section,
 }: GeneratorScreenProps) {
   const customId = useId();
   const [kind, setKind] = useState(workKinds[0] ?? CUSTOM);
@@ -329,9 +336,9 @@ export function GeneratorScreen({
       </div>
 
       <KitBar
-        scope="12"
+        scope={scope}
         slot={base}
-        section={`№12 · ${family}`}
+        section={section ?? `№12 · ${family}`}
         count={(chosenCount ?? 0) * variants}
         ready={ready}
         hrefs={sheetHrefs}

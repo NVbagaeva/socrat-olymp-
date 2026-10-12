@@ -57,6 +57,19 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №5, генератор шаблонов (как у №12): лист ученика и лист учителя. */
+  [
+    '№5 шаблоны',
+    '/zadaniya/5/shablony/pechat/',
+    's=z5-garant,z5-bayes-3,z5-kost,z5-eyler&n=10&seed=print-check',
+  ],
+  /* №5, «Домашняя работа»: три отдельных листа одного ДЗ. */
+  ...['uchenik', 'otvety', 'resheniya'].map((r) => [
+    `№5 ДЗ ${r}`,
+    '/zadaniya/5/dz/pechat/',
+    `src=nabor&nabor=dz9-novoe&z=1,2,3,4,5,6,7,8,9,10,11,12,13&d=2026-10-12&r=${r}`,
+    [[r, '']],
+  ]),
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],

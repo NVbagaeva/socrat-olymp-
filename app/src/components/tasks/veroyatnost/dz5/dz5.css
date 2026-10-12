@@ -1,0 +1,323 @@
+/* Вкладка «Домашняя работа» задания №5.
+
+   Экран выбора стоит на классах конфигуратора генератора (cfg-*,
+   configurator.css): шаги, варианты, сводка справа. Здесь — только
+   то, чего у генератора нет: стартовая карточка, список задач с
+   галочками, строки типов со счётчиком, шапка выданного ДЗ и задачи.
+   Только семантические токены. */
+
+.dz5 {
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* ── Старт ─────────────────────────────────────────────────────── */
+.dz5-start {
+  justify-items: start;
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.dz5-start__lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* ── Выбор задач набора ───────────────────────────────────────── */
+.dz5-ssylki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-tertiary);
+}
+.dz5-galochki {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dz5-galochka {
+  display: grid;
+  grid-template-columns: 24px auto auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2) var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dz5-galochka:hover {
+  border-color: var(--color-border-hover);
+}
+.dz5-galochka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.dz5-galochka.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.dz5-galochka__box {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.dz5-galochka.is-checked .dz5-galochka__box {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 3px var(--color-surface);
+}
+.dz5-galochka__no {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dz5-galochka__tip,
+.dz5-tip {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.dz5-galochka__text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+@media (max-width: 767px) {
+  .dz5-galochka {
+    grid-template-columns: 24px auto minmax(0, 1fr);
+  }
+  .dz5-galochka__text {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Типы генератора ──────────────────────────────────────────── */
+.dz5-tipy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dz5-tip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.dz5-tip-row.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.dz5-tip-row__name {
+  display: grid;
+  gap: 2px;
+  font-weight: 600;
+}
+.dz5-tip-row__lead {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+}
+.dz5-stepper {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dz5-stepper__btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+.dz5-stepper__btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.dz5-stepper__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.dz5-stepper__n {
+  min-width: 2ch;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dz5-summary__btn {
+  width: 100%;
+}
+
+/* ── Выданное ДЗ ──────────────────────────────────────────────── */
+.dz5-shapka {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+}
+.dz5-shapka__chip {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.dz5-shapka__title {
+  margin: 0;
+  color: var(--color-text-brand);
+}
+.dz5-shapka__meta {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.dz5-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dz5-spisok {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dz5-zadacha {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.dz5-spisok--compact .dz5-zadacha {
+  padding: var(--space-4);
+}
+.dz5-zadacha__no {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}
+.dz5-zadacha__body {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.dz5-zadacha__tip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+.dz5-zadacha__kod {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-label);
+}
+.dz5-zadacha__text {
+  margin: 0;
+  line-height: 1.6;
+}
+.dz5-zadacha__risunok {
+  max-width: 340px;
+}
+.dz5-zadacha__risunok svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Пометка типа — только учителю на экране: при печати страницы её нет. */
+@media print {
+  .dz5-tip,
+  .dz5-zadacha__kod,
+  .dz5-knopki,
+  .dz5 .cfg-note {
+    display: none !important;
+  }
+}
+
+/* ── Миниатюры шаблонов на карточках генератора ───────────────── */
+.dz5-mini {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.dz5-mini--eyler svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.dz5-mini__a {
+  fill: var(--color-primary);
+  fill-opacity: 0.18;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.dz5-mini__b {
+  fill: var(--color-accent);
+  fill-opacity: 0.18;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+.dz5-mini__line {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 2;
+}
+.dz5-mini__hl {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.dz5-mini__dot {
+  fill: var(--color-primary);
+}
+
+/* ── Переключатель вкладки «Генератор»: шаблоны или прототипы ── */
+.dz5-gen-rezhim {
+  margin-bottom: var(--space-5);
+}

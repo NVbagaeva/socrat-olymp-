@@ -75,7 +75,16 @@ const TABS: readonly VeroyatnostTab[] = [
   { id: 'repetitory', label: 'Для репетиторов', tail: TUTORS_TAIL, icon: 'materials' },
 ];
 const TABS_4 = TABS;
-const TABS_5 = TABS;
+/**
+ * У №5 перед «Для репетиторов» — «Домашняя работа»: учитель выдаёт
+ * готовое ДЗ или собирает его из генератора (lib/veroyatnost/dz5).
+ */
+export const DZ_TAIL = 'domashnyaya-rabota/';
+const TABS_5: readonly VeroyatnostTab[] = [
+  ...TABS.filter((tab) => tab.id !== 'repetitory'),
+  { id: 'dz', label: 'Домашняя работа', tail: DZ_TAIL, icon: 'tasks' },
+  ...TABS.filter((tab) => tab.id === 'repetitory'),
+];
 
 /**
  * Короткое имя темы №4 — для тренажёра и генератора: там страница уже
