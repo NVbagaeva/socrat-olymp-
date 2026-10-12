@@ -53,6 +53,8 @@ export interface TrainerSummaryProps {
   hintedLabel?: string | undefined;
   /** Свой блок тренажёра под строками итогов. */
   extra?: ReactNode;
+  /** Свои подписи итогов: у зачётной работы — «Работа завершена». */
+  texts?: Partial<typeof sessionText.summary> | undefined;
 }
 
 interface KindRow {
@@ -135,8 +137,9 @@ export function TrainerSummary({
   buildingSimilar = false,
   hintedLabel,
   extra,
+  texts,
 }: TrainerSummaryProps) {
-  const t = sessionText.summary;
+  const t = { ...sessionText.summary, ...texts };
   const { items } = data;
   const total = items.length;
   const count = (mark: SummaryMark) => items.filter((item) => item.mark === mark).length;

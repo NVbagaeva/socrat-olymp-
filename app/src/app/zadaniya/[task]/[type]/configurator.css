@@ -92,9 +92,18 @@
     border-color var(--dur-hover) var(--ease),
     box-shadow var(--dur-hover) var(--ease);
 }
-.cfg-skill:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-sm);
+/* Здесь карточку действительно выбирают, поэтому наведение и выбор
+   различаются: под мышью — мягкая рамка и тень без заливки и галочки;
+   выбранная — галочка, синяя рамка и заливка постоянно. Наведение —
+   только при мыши: на телефоне оно залипало бы и путалось с выбором. */
+@media (hover: hover) {
+  .cfg-skill:hover {
+    border-color: var(--color-accent-soft);
+    box-shadow: var(--shadow-sm);
+  }
+  .cfg-skill.is-checked:hover {
+    border-color: var(--color-primary-hover);
+  }
 }
 .cfg-skill:focus-visible {
   outline: 2px solid var(--color-primary);
