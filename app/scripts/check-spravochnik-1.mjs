@@ -12,7 +12,13 @@
       Исключение — школьные формулировки теорем и признаков, которые
       автор задала дословно (shkolnaya в данных): их совпадения
       печатаются отдельным списком и ошибкой не считаются.
-   3. Файл вычитки docs/spravochnik-1/soderzhanie.md совпадает с данными
+   3. Чертежи (этап 2): у каждой карточки и своего примера есть
+      чертёж, движок рисует его без нарушений и наложений подписей,
+      в теории нет чисел, ключевой элемент выделен.
+   4. Контраст цветов блоков (styles/tokens.css): белый текст на
+      ярлыках и основной текст на заливках — не меньше 4,5 : 1 (WCAG
+      AA), золотая линия ключевого элемента на белом — не меньше 3 : 1.
+   5. Файл вычитки docs/spravochnik-1/soderzhanie.md совпадает с данными
       (иначе: pnpm build:spravochnik-1).
 
    Запуск: pnpm test:spravochnik-1 */
@@ -28,7 +34,7 @@ const require = createRequire(import.meta.url);
 const katex = require('katex');
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
-const { checkSpravochnik, tekstySpravochnika, shkolnyeFormulirovki } = requireSrc(
+const { checkSpravochnik, checkChertezhi, tekstySpravochnika, shkolnyeFormulirovki } = requireSrc(
   'lib/planimetriya/spravochnik-selftest.ts',
 );
 
@@ -52,6 +58,45 @@ if (shkolnyeSovpadeniya !== null) {
   for (const x of shkolnyeSovpadeniya) console.log(`  · ${x}`);
 }
 
+const chertezhi = checkChertezhi();
+console.log(`чертежи: ${chertezhi.risunkov} рисунков, проблем ${chertezhi.problems.length}`);
+
+/* Контраст: значения токенов из styles/tokens.css. */
+const TOKENS = fs.readFileSync(path.join(APP, 'src', 'styles', 'tokens.css'), 'utf8');
+function cvet(imya) {
+  const m = TOKENS.match(new RegExp(`${imya}:\\s*([^;]+);`));
+  if (m === null) throw new Error(`нет токена ${imya}`);
+  const v = m[1].trim();
+  const ssylka = v.match(/^var\((--[a-z0-9-]+)\)$/);
+  return ssylka === null ? v : cvet(ssylka[1]);
+}
+function yarkost(hex) {
+  const n = hex.replace('#', '');
+  const c = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16) / 255);
+  const l = c.map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+}
+function kontrast(a, b) {
+  const [x, y] = [yarkost(cvet(a)), yarkost(cvet(b))].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+const PARY = [
+  ...['def', 'svo', 'pri', 'teo', 'vaz', 'primer', 'primenenie'].flatMap((b) => [
+    [`ярлык «${b}»: белый на цвете`, '--white', `--color-spr-${b}`, 4.5],
+    [`текст на заливке «${b}»`, '--grey-900', `--color-spr-${b}-soft`, 4.5],
+  ]),
+  ['ответ: подпись на заливке', '--color-spr-vaz', '--color-spr-vaz-soft', 4.5],
+  ['этап разбора на белом', '--color-spr-def', '--white', 4.5],
+  ['ключевой элемент чертежа на белом', '--color-spr-klyuch', '--white', 3],
+];
+const kontrastProblemy = [];
+for (const [chto, a, b, nado] of PARY) {
+  const k = kontrast(a, b);
+  if (k < nado) kontrastProblemy.push(`контраст: ${chto} — ${k.toFixed(2)} при норме ${nado}`);
+}
+const minK = Math.min(...PARY.filter((x) => x[3] === 4.5).map(([, a, b]) => kontrast(a, b)));
+console.log(`контраст: ${PARY.length} пар, наименьший для текста ${minK.toFixed(2)} : 1, проблем ${kontrastProblemy.length}`);
+
 const FILE = path.join(APP, '..', 'docs', 'spravochnik-1', 'soderzhanie.md');
 const fajl = fs.existsSync(FILE) ? fs.readFileSync(FILE, 'utf8') : '';
 const svezhiy = fajl === soderzhanieMd();
@@ -59,6 +104,8 @@ console.log(`файл вычитки: ${svezhiy ? 'совпадает с дан�
 
 const vse = [
   ...itog.problems,
+  ...chertezhi.problems,
+  ...kontrastProblemy,
   ...(pereskaz ?? []).map((x) => `совпадение с источником: ${x}`),
   ...(svezhiy ? [] : ['docs/spravochnik-1/soderzhanie.md устарел: pnpm build:spravochnik-1']),
 ];

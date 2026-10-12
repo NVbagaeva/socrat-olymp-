@@ -11,6 +11,7 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../zadanie1.css';
+import '../spravochnik1-web.css';
 
 /**
  * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента

@@ -35,6 +35,11 @@ export interface TeoriyaShellProps {
   dekor?: TeoriyaDekor | TeoriyaDekorUzel;
   /** Разделы, до конца которых долистал ученик, запоминаются под этим ключом (lib/theoryRead). */
   trackKey?: string;
+  /**
+   * Что стоит сразу под заголовком вкладки: подзаголовок, легенда,
+   * поиск (справочник №1). Не задано — ничего.
+   */
+  podZagolovkom?: ReactNode;
 }
 
 /** Якорь раздела на странице. */
@@ -60,6 +65,7 @@ export function TeoriyaShell({
   tela,
   dekor = TEORIYA_DEKOR,
   trackKey,
+  podZagolovkom,
 }: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
@@ -154,6 +160,7 @@ export function TeoriyaShell({
           все вкладки и живёт в шапке раздела. Разделы теории — на
           уровень ниже. */}
       <h2 className="t-h2 vtab__title">{vkladka}</h2>
+      {podZagolovkom}
 
       {/* Кнопка содержания — только на узком экране, вместо колонки.
           Стоит над сеткой, а не первой ячейкой в ней: в сетке её

@@ -153,7 +153,7 @@ export const R02_TREUGOLNIK: Razdel1 = {
       id: 'neravenstvo',
       title: 'Неравенство треугольника',
       chertezh: {
-        chto: 'Треугольник со сторонами $a$, $b$, $c$; рядом ломаная из сторон $a$ и $b$ и отрезок $c$ между теми же концами.',
+        chto: 'Треугольник $ABC$ со сторонами $a$, $b$, $c$.',
         vydelit: 'сторона $c$',
       },
       teoremy: [
