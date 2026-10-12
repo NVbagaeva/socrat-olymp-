@@ -61,6 +61,13 @@ import log3 from './prep/12l/skill-3.json';
 import log4 from './prep/12l/skill-4.json';
 import log5 from './prep/12l/skill-5.json';
 
+/* Подтема «Тригонометрические функции»: пять опорных навыков, P12T-1 … P12T-5. */
+import trig1 from './prep/12t/skill-1.json';
+import trig2 from './prep/12t/skill-2.json';
+import trig3 from './prep/12t/skill-3.json';
+import trig4 from './prep/12t/skill-4.json';
+import trig5 from './prep/12t/skill-5.json';
+
 import protoA from './prototypes/12/12-A.json';
 import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
@@ -114,6 +121,15 @@ import logC from './prototypes/12l/12L-C.json';
 import logD from './prototypes/12l/12L-D.json';
 import logE from './prototypes/12l/12L-E.json';
 
+/* Прототипы тригонометрических функций: шесть задач открытого банка ФИПИ
+   (a cos x + b, a tg x + b, a sin x + b; найти a или b) и по 20 аналогов. */
+import trigA from './prototypes/12t/12T-A.json';
+import trigB from './prototypes/12t/12T-B.json';
+import trigC from './prototypes/12t/12T-C.json';
+import trigD from './prototypes/12t/12T-D.json';
+import trigE from './prototypes/12t/12T-E.json';
+import trigF from './prototypes/12t/12T-F.json';
+
 /** Подготовка: собственный материал платформы, в покрытие банка не входит.
     Сначала наборы линейной подтемы, потом квадратичной, потом гиперболы: порядок в этом
     списке задаёт порядок записей в answers.json, и линейные записи от
@@ -125,6 +141,7 @@ export const prep = [
   sqrt1, sqrt2, sqrt3, sqrt4, sqrt5,
   exp1, exp2, exp3, exp4, exp5,
   log1, log2, log3, log4, log5,
+  trig1, trig2, trig3, trig4, trig5,
 ];
 
 /** Прототипы: у линейной — банк ФИПИ, у квадратичной — свой материал.
@@ -138,5 +155,6 @@ export const prototypes = [
   sqrtA, sqrtB, sqrtC, sqrtD,
   expA, expB, expC, expD,
   logA, logB, logC, logD, logE,
+  trigA, trigB, trigC, trigD, trigE, trigF,
 ];
 

@@ -33,6 +33,8 @@ export type TrainerShortcutId =
   | 'intersection'
   | 'mixed'
   | 'koefficienty'
+  | 'koef-a'
+  | 'koef-b'
   | 'znachenie'
   | 'formula'
   | 'peresechenie'
@@ -189,6 +191,13 @@ const LOGARITHMIC_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Тригонометрические функции: найти a и найти b — по три типа банка. */
+const TRIGONOMETRIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'koef-a', title: 'Найти множитель при функции', skills: ['12T.A', '12T.C', '12T.E'], mode: 'mixed' },
+  { id: 'koef-b', title: 'Найти свободное слагаемое', skills: ['12T.B', '12T.D', '12T.F'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -215,6 +224,9 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'logarithmic') {
     return LOGARITHMIC_SHORTCUTS;
+  }
+  if (type === 'trigonometric') {
+    return TRIGONOMETRIC_SHORTCUTS;
   }
   return [];
 }
@@ -327,6 +339,13 @@ export const trainerKindTitle: Record<string, string> = {
   '12L.C': 'Аргумент: $b + \\log_a x$',
   '12L.D': 'Значение $\\log_a(x + b)$',
   '12L.E': 'Аргумент: $\\log_a(x + b)$',
+  /* Тригонометрические функции: шесть типов открытого банка. */
+  '12T.A': 'Косинус: найти $a$',
+  '12T.B': 'Косинус: найти $b$',
+  '12T.C': 'Тангенс: найти $a$',
+  '12T.D': 'Тангенс: найти $b$',
+  '12T.E': 'Синус: найти $a$',
+  '12T.F': 'Синус: найти $b$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

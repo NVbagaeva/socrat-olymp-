@@ -74,6 +74,7 @@ const PAGES = [
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
   '/zadaniya/12/logarithmic/',
+  '/zadaniya/12/trigonometric/',
   '/zadaniya/12/quadratic/opornye-zadachi/',
   '/zadaniya/10/',
   '/zadaniya/10/teoriya/',

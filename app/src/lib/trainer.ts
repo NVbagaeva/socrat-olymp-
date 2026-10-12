@@ -19,6 +19,8 @@ import ExponentialHints from '@/lib/graph/hints-exponential.js';
 import { exponentialGuideSvg } from '@/lib/exponentialGuides';
 import LogarithmicHints from '@/lib/graph/hints-logarithmic.js';
 import { logarithmicGuideSvg } from '@/lib/logarithmicGuides';
+import TrigonometricHints from '@/lib/graph/hints-trigonometric.js';
+import { trigonometricGuideSvg } from '@/lib/trigonometricGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
@@ -29,6 +31,7 @@ import {
   sqrtSteps as sqrtSolution,
   exponentialSteps as exponentialSolution,
   logarithmicSteps as logarithmicSolution,
+  trigonometricSteps as trigonometricSolution,
   type PrepStep,
 } from '@/lib/prep';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
@@ -1160,6 +1163,15 @@ function logarithmicSteps(task: EngineTask): TrainerStep[] {
   );
 }
 
+/* Тригонометрические функции — та же лестница, шаги строит
+   graph/hints-trigonometric.js. */
+function trigonometricSteps(task: EngineTask): TrainerStep[] {
+  return pointHintSteps(
+    TrigonometricHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    trigonometricGuideSvg(task.meta),
+  );
+}
+
 function pointHintSteps(hints: (SqrtHint & { id?: string })[], guides: string): TrainerStep[] {
   const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
   return hints.map((hint) => {
@@ -1202,6 +1214,25 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  if (task.meta.family === 'trigonometric') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: клетка по оси $x$ — $\\dfrac{\\pi}{4}$, две отмеченные точки, значения функции ' +
+          'в них, система; точка со значением $0$ сразу даёт $b$.',
+      ),
+      rightHint: hintHtml('Параметры найдены из системы по двум точкам.'),
+      steps: trigonometricSteps(task),
+      options: null,
+      oshibki: {},
+      solution: trigonometricSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   if (task.meta.family === 'logarithmic') {
     return {
       id: task.id,

@@ -49,7 +49,7 @@ if (SHOTS) { fs.mkdirSync(SHOTS, { recursive: true }); }
    тренажёра — наборы прототипов подтемы в данных движка. Лишний
    набор в записи не мешает: кольцо считает только свои. */
 const { prepSkillsFor } = requireSrc('content/prepSkills.ts');
-const PROTOTYPES = { linear: '12', quadratic: '12q', rational: '12r', irrational: '12s', exponential: '12e', logarithmic: '12l' };
+const PROTOTYPES = { linear: '12', quadratic: '12q', rational: '12r', irrational: '12s', exponential: '12e', logarithmic: '12l', trigonometric: '12t' };
 /** Сколько задач в наборе опорных задач навыка. */
 function prepTotal(type, setId) {
   const dir = path.join(APP, 'src', 'lib', 'graph', 'data', 'prep', PROTOTYPES[type]);
@@ -172,6 +172,7 @@ const SUBTOPICS = [
   { sub: 'irrational', items: 3 },
   { sub: 'exponential', items: 3 },
   { sub: 'logarithmic', items: 3 },
+  { sub: 'trigonometric', items: 3 },
 ];
 
 for (const { sub, items } of SUBTOPICS) {

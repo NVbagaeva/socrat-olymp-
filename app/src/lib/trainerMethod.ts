@@ -51,6 +51,11 @@ const SKILL_BY_SET: Record<string, PrepSkillId> = {
   'P12L-4': 'log-sdvig-vbok', 'P12L-5': 'log-argument',
   '12L.A': 'log-znachenie', '12L.B': 'log-sdvig-vverh', '12L.C': 'log-argument',
   '12L.D': 'log-sdvig-vbok', '12L.E': 'log-argument',
+  /* Тригонометрические функции. */
+  'P12T-1': 'trig-cos', 'P12T-2': 'trig-sin', 'P12T-3': 'trig-tg', 'P12T-4': 'trig-sistema',
+  'P12T-5': 'trig-polovina',
+  '12T.A': 'trig-cos', '12T.B': 'trig-cos', '12T.C': 'trig-tg', '12T.D': 'trig-tg',
+  '12T.E': 'trig-sin', '12T.F': 'trig-sin',
 };
 
 /* Подтема набора: по префиксу идентификатора. */
@@ -63,6 +68,9 @@ function typeOf(setId: string): string {
   }
   if (/^(P12L-|12L\.)/.test(setId)) {
     return 'logarithmic';
+  }
+  if (/^(P12T-|12T\.)/.test(setId)) {
+    return 'trigonometric';
   }
   return /^(P12R-|12R\.)/.test(setId) ? 'rational' : 'quadratic';
 }

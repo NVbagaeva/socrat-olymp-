@@ -68,7 +68,8 @@ function fullSolutionRational(task, rationalBuilder) {
 /* Семейства с полным решением по шагам: у каждого этапа подпись. */
 function stepwise(task) {
   return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt' ||
-    task.meta.family === 'exponential' || task.meta.family === 'logarithmic');
+    task.meta.family === 'exponential' || task.meta.family === 'logarithmic' ||
+    task.meta.family === 'trigonometric');
 }
 
 /* task.solutionFigure — рисунок к разбору ({ svg, width }), его

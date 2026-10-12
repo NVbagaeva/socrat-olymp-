@@ -16,6 +16,8 @@ import GraphSolutionExponential from '@/lib/graph/solution-exponential.js';
 import { exponentialGuideSvg } from '@/lib/exponentialGuides';
 import GraphSolutionLogarithmic from '@/lib/graph/solution-logarithmic.js';
 import { logarithmicGuideSvg } from '@/lib/logarithmicGuides';
+import GraphSolutionTrigonometric from '@/lib/graph/solution-trigonometric.js';
+import { trigonometricGuideSvg } from '@/lib/trigonometricGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
@@ -804,6 +806,30 @@ export function logarithmicSteps(task: { answer: string; meta: unknown }): PrepS
   })));
 }
 
+/**
+ * Разбор задачи о тригонометрической функции: solution-trigonometric.js —
+ * клетки осей, две отмеченные точки, значения функции в них, система,
+ * b, a, проверка по графику. Шаг с точками показывает чертёж с
+ * пунктирами от точек к осям.
+ */
+export function trigonometricSteps(task: { answer: string; meta: unknown }): PrepStep[] {
+  const steps = GraphSolutionTrigonometric.fromTask(task) as {
+    id: string;
+    number: number;
+    title: string;
+    blocks: EngineBlock[];
+  }[];
+  const guides = trigonometricGuideSvg(task.meta);
+  return withTitles(steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: null,
+    blocks: step.id === 'points'
+      ? [{ type: 'chart', svg: guides } as PrepBlock, ...viewBlocks(step.blocks)]
+      : viewBlocks(step.blocks),
+  })));
+}
+
 /** Заголовок шага с формулами ($…$) → вёрстка KaTeX. */
 export function titleHtml(title: string): string {
   return typeset(GraphGenerate.typeset(title) as string);
@@ -833,6 +859,9 @@ function buildStepsRaw(task: EngineTask): PrepStep[] | null {
   }
   if (task.meta.family === 'logarithmic') {
     return logarithmicSteps(task);
+  }
+  if (task.meta.family === 'trigonometric') {
+    return trigonometricSteps(task);
   }
 
   const found = GraphGenerate.analysis(task.id) as Analysis | null;

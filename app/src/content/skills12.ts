@@ -46,6 +46,12 @@ export const skillTitle: Record<string, string> = {
   '12L.C': '$b + \\log_a x$: аргумент по значению',
   '12L.D': '$\\log_a(x + b)$: значение функции',
   '12L.E': '$\\log_a(x + b)$: аргумент по значению',
+  '12T.A': '$a\\cos x + b$: найти $a$',
+  '12T.B': '$a\\cos x + b$: найти $b$',
+  '12T.C': '$a\\operatorname{tg} x + b$: найти $a$',
+  '12T.D': '$a\\operatorname{tg} x + b$: найти $b$',
+  '12T.E': '$a\\sin x + b$: найти $a$',
+  '12T.F': '$a\\sin x + b$: найти $b$',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -102,8 +108,18 @@ const LOGARITHMIC_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'дробный ответ, дальние точки' },
 ];
 
+/* У тригонометрических: целый ответ и клетка, равная единице, — против
+   клетки 0,5 и системы сложением. */
+const TRIGONOMETRIC_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'клетка — единица, целый ответ' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'клетка 0,5, система сложением' },
+];
+
 /** Уровни подтемы: у квадратичной, гиперболы, корня, показательной и логарифмической свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'trigonometric') {
+    return TRIGONOMETRIC_LEVELS;
+  }
   if (type === 'logarithmic') {
     return LOGARITHMIC_LEVELS;
   }
