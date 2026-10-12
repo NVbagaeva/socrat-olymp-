@@ -85,8 +85,13 @@ if (!site) {
       }
     }
   };
+  /* Данные роутера в HTML режутся на куски self.__next_f.push(…), и граница
+     куска может прийтись на середину адреса («/image» | «s/…webp»). Как в
+     check-illustrations.mjs: куски склеиваем, иначе обрывок адреса виден
+     как отдельная битая картинка. */
+  const STYK = /"\]\)<\/script><script>self\.__next_f\.push\(\[1,"/g;
   for (const f of walk(OUT)) {
-    const s = fs.readFileSync(f, 'utf8');
+    const s = fs.readFileSync(f, 'utf8').replace(STYK, '');
     const razdel = path.relative(OUT, f).startsWith(`zadaniya${path.sep}10${path.sep}`);
     for (const z of razdel ? ZAGLUSHKI : []) {
       if (z.test(s)) {
