@@ -12,7 +12,6 @@ import { ProverSebya } from '@/components/teoriya/ProverSebya';
 import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import {
-  BLOKI_KARTOCHKI_6,
   RAZDELY_TEORII_6,
   TEORIYA_6_TEKSTY,
   type BlokTeorii6,
@@ -25,6 +24,7 @@ import { BANK } from '@/lib/zadanie6/bank/index';
 import { NABORY_PROVERKI_6 } from '@/lib/zadanie6/proverka';
 import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
 import type { BankItem } from '@/lib/zadanie6/types';
+import { KartochkaTelo6 } from './KartochkaTelo6';
 import { Razbor6 } from './Razbor6';
 import { Ris6 } from './Ris6';
 import { Uslovie6 } from './Uslovie6';
@@ -99,39 +99,6 @@ export function GdeNaEge6({ prototipy, trenazher }: { prototipy: string[]; trena
         </Link>
       ))}
     </p>
-  );
-}
-
-/**
- * Тело карточки теории №6: заголовок и цветные блоки «Определение /
- * Свойство / Формула / Важно». Без банка — его берут и вкладка
- * «Теория», и листы генератора (рамки теории), и шпаргалка.
- */
-export function KartochkaTelo6({ k, children }: { k: Kartochka6; children?: ReactNode }) {
-  return (
-    <article className="z6-k" id={`k-${k.id}`}>
-      <h4 className="z6-k__title">
-        <Tex text={k.title} />
-      </h4>
-      <div className="z6-k__bloki">
-        {k.bloki.map((b, i) => (
-          <section className={`z6-blok z6-blok--${b.vid}`} key={`${k.id}-${i}`}>
-            <span className="z6-blok__plashka">{BLOKI_KARTOCHKI_6[b.vid]}</span>
-            {b.tekst.map((t) => (
-              <p className="z6-blok__p" key={t}>
-                <Tex text={t} />
-              </p>
-            ))}
-            {b.formula ? (
-              <p className="z6-blok__formula">
-                <Tex text={`$\\displaystyle ${b.formula}$`} />
-              </p>
-            ) : null}
-          </section>
-        ))}
-      </div>
-      {children}
-    </article>
   );
 }
 
