@@ -8,12 +8,21 @@ import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { sostavText } from '@/content/ves12';
 import { TitleText } from '../TitleText';
 import { TemplateIcon, type TemplateIconName } from './icons';
+import './zachyot-setup.css';
 
 /** Строка списка: тип функции (или прототип у генератора раздела). */
 export interface SostavRow {
   id: string;
   title: string;
   icon?: IkonkaRazdela | undefined;
+  /** Миниатюра вместо иконки: у генератора раздела строка — прототип. */
+  media?: ReactNode;
+  /** Свой предел счётчика: у прототипа — сколько задач в наборе. */
+  max?: number;
+  /** Подпись под названием: код набора. */
+  code?: string;
+  /** Название, набранное KaTeX. */
+  titleHtml?: string;
   /** Прототипы строки. Пусто — «Настроить» нет (строка и есть прототип). */
   sets: { id: string; title: string; titleHtml: string; bank: number | null }[];
 }
@@ -76,10 +85,11 @@ export function SostavPicker({
   const listId = useId();
   const [open, setOpen] = useState<string | null>(null);
   const count = (id: string) => value.counts[id] ?? 0;
+  const limit = (id: string) => Math.min(max, rows.find((row) => row.id === id)?.max ?? max);
   const setCount = (id: string, n: number) =>
-    onChange({ ...value, counts: { ...value.counts, [id]: Math.max(0, Math.min(max, n)) } });
+    onChange({ ...value, counts: { ...value.counts, [id]: Math.max(0, Math.min(limit(id), n)) } });
   const all = (n: number) =>
-    onChange({ ...value, counts: Object.fromEntries(rows.map((row) => [row.id, n])) });
+    onChange({ ...value, counts: Object.fromEntries(rows.map((row) => [row.id, Math.min(n, limit(row.id))])) });
   const total = rows.reduce((sum, row) => sum + count(row.id), 0);
 
   function onCounterKey(event: KeyboardEvent<HTMLDivElement>, id: string) {
@@ -94,7 +104,7 @@ export function SostavPicker({
       setCount(id, count(id) + step);
     } else if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      setCount(id, event.key === 'Home' ? 0 : max);
+      setCount(id, event.key === 'Home' ? 0 : limit(id));
     }
   }
 
@@ -199,17 +209,24 @@ export function SostavPicker({
             return (
               <li key={row.id} className={clsx('sostav-row', n === 0 && 'is-off', expanded && 'is-open')}>
                 <div className="sostav-row__main">
-                  {row.icon === undefined ? null : (
+                  {row.media !== undefined ? (
+                    <span className="sostav-row__media" aria-hidden="true">
+                      {row.media}
+                    </span>
+                  ) : row.icon === undefined ? null : (
                     <RazdelIkonka icon={row.icon} sizes="44px" dim={n === 0} className="sostav-row__ico" />
                   )}
-                  <span className="sostav-row__title">{row.title}</span>
+                  <span className="sostav-row__title">
+                    <TitleText title={row.title} html={row.titleHtml} />
+                    {row.code === undefined ? null : <span className="sostav-row__code">{row.code}</span>}
+                  </span>
                   <div
                     className="sostav-counter"
                     role="spinbutton"
                     tabIndex={0}
                     aria-label={`${row.title}: задач`}
                     aria-valuemin={0}
-                    aria-valuemax={max}
+                    aria-valuemax={limit(row.id)}
                     aria-valuenow={n}
                     aria-valuetext={n === 0 ? sostavText.offValue : `${n}`}
                     onKeyDown={(event) => onCounterKey(event, row.id)}
@@ -229,7 +246,7 @@ export function SostavPicker({
                       type="button"
                       tabIndex={-1}
                       aria-label={sostavText.more}
-                      disabled={n === max}
+                      disabled={n >= limit(row.id)}
                       onClick={() => setCount(row.id, n + 1)}
                     >
                       +

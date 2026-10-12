@@ -261,13 +261,28 @@
 }
 .sostav-row__main {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto minmax(0, 150px) auto;
+  grid-template-columns: minmax(44px, auto) minmax(0, 1fr) auto minmax(0, 150px) auto;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
 }
 .sostav-row__ico {
   width: 44px;
+}
+.sostav-row__media {
+  display: block;
+  width: 56px;
+}
+.sostav-row__media svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sostav-row__code {
+  display: block;
+  font-size: var(--fs-label);
+  font-weight: 400;
+  color: var(--color-text-tertiary);
 }
 .sostav-row__title {
   font-weight: 600;
@@ -806,7 +821,8 @@
       'ico more sets';
     row-gap: 0;
   }
-  .sostav-row__ico {
+  .sostav-row__ico,
+  .sostav-row__media {
     grid-area: ico;
     width: 40px;
   }

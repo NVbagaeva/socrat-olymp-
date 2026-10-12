@@ -85,6 +85,17 @@ interface SheetBlock {
   leadItems?: string[];
 }
 
+/** Уровни задач набора — из манифеста. */
+function levelsOf(setId: string): string[] {
+  for (const family of manifest.families) {
+    const skill = family.skills.find((item) => item.id === setId);
+    if (skill !== undefined) {
+      return skill.levels;
+    }
+  }
+  return [];
+}
+
 /** Тип функции набора: по манифесту генератора. */
 function typeOfSet(setId: string) {
   const family = manifest.families.find((item) => item.skills.some((skill) => skill.id === setId));
@@ -196,7 +207,9 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
         : pickTasks(
             {
               skills: [id],
-              level: params.level,
+              /* Уровня нет у набора — задачи любого уровня: иначе
+                 прототип молча выпал бы с листа. */
+              level: levelsOf(id).includes(params.level ?? '') ? params.level : null,
               count,
               mode: 'practice',
               mistakes: [],
