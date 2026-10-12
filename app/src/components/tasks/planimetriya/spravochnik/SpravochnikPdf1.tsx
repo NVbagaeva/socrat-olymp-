@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
 import type { PdfSpravochnika } from '@/content/spravochnik1/pdf';
+import { naIos, useIos } from './ios';
 import { Nazad1 } from './Nazad1';
 import { SkachatPdf1 } from './SkachatPdf1';
 
@@ -51,6 +52,7 @@ export function SpravochnikPdf1({
 }) {
   const query = useSearchParams();
   const sPrimerami = query.get('primery') !== '0';
+  const ios = useIos();
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -88,7 +90,9 @@ export function SpravochnikPdf1({
           if (window.sheetPagination !== undefined) {
             window.clearInterval(timer);
             setDone(true);
-            if (window.sheetPagination.error === undefined) window.print();
+            /* На iPhone/iPad окно печати само не открываем: там печатается
+               готовый PDF (ios.ts). */
+            if (window.sheetPagination.error === undefined && !naIos()) window.print();
           }
         }, 100);
       })
@@ -119,15 +123,27 @@ export function SpravochnikPdf1({
         </span>
         <SkachatPdf1 fayly={fayly} sPrimerami={sPrimerami} />
         <span className="spr1p-bar__pechat">
-          <button
-            type="button"
-            className="btn btn--secondary"
-            onClick={() => window.print()}
-            disabled={!done}
-          >
-            {done ? PDF.knopka : PDF.gotovim}
-          </button>
-          <span className="z1-print-bar__lead">{PDF.lead}</span>
+          {ios ? (
+            <a
+              className="btn btn--secondary"
+              href={(sPrimerami ? fayly.sPrimerami : fayly.bezPrimerov).href}
+              target="_blank"
+              rel="noopener"
+              type="application/pdf"
+            >
+              {PDF.knopka}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="btn btn--secondary"
+              onClick={() => window.print()}
+              disabled={!done}
+            >
+              {done ? PDF.knopka : PDF.gotovim}
+            </button>
+          )}
+          <span className="z1-print-bar__lead">{ios ? PDF.leadIos : PDF.lead}</span>
         </span>
       </div>
       <div id="sheet-measure" />

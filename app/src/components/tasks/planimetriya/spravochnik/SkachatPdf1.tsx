@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from 'react';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
 import type { PdfSpravochnika } from '@/content/spravochnik1/pdf';
+import { useIos } from './ios';
 import { useVyborPdf1 } from './vyborPdf1';
 import './SkachatPdf1.css';
 
@@ -53,6 +54,7 @@ export function SkachatPdf1({
 }) {
   const [vybor, setVybor] = useVyborPdf1();
   const sPrimerami = izvne ?? vybor;
+  const ios = useIos();
   const id = useId();
   const fayl = sPrimerami ? fayly.sPrimerami : fayly.bezPrimerov;
   return (
@@ -93,7 +95,10 @@ export function SkachatPdf1({
         <a
           className="btn btn--secondary spr1-pdf__pechat"
           aria-label={PDF.pechat}
-          href={sPrimerami ? pechat : `${pechat}?primery=0`}
+          /* iPhone/iPad: печать HTML-листа там даёт пустые страницы (ios.ts) —
+             печатаем готовый PDF, он откроется в новой вкладке. */
+          href={ios ? fayl.href : sPrimerami ? pechat : `${pechat}?primery=0`}
+          {...(ios ? { target: '_blank', rel: 'noopener', type: 'application/pdf' } : {})}
         >
           <svg
             viewBox="0 0 24 24"

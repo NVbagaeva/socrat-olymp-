@@ -27,12 +27,15 @@
    Назад» и прямой заход на печать → «Назад» приводят на вкладку
    «Теория» №1; кнопка «Назад» не меньше 44×44 px и липкая.
    «Скачать справочник» на вкладке «Теория»: aria-label, download,
-   отдаёт PDF, подпись «PDF, A4, N страниц», переключатель меняет файл. */
+   отдаёт PDF, подпись «PDF, A4, N страниц», переключатель меняет файл.
+   iPhone (по userAgent): «Печать» ведёт на готовый PDF, окно печати
+   само не открывается — HTML-лист Safari на iOS печатает с лишними
+   страницами. */
 
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 import { APP, requireSrc } from './lib/load-ts.mjs';
 import { bezBanneraCookie } from './lib/cookie-notice.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
@@ -371,6 +374,48 @@ for (const [imya, zapros, sPrimerami, klyuch] of [
     `назад: с прямого захода попали на ${page.url()}`,
   );
   await page.close();
+}
+
+/* iPhone/iPad: печать HTML-листа там переезжает на лишние страницы
+   (Safari не слушает @page и печатает на свою бумагу), поэтому «Печать»
+   ведёт на готовый PDF, а окно печати само не открывается. Движок
+   здесь Chromium, iPhone — по userAgent и размеру экрана. */
+{
+  const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    window.print = () => {
+      window.__pechat = (window.__pechat ?? 0) + 1;
+    };
+  });
+  await page.goto(`${BASE}/zadaniya/1/teoriya/`, { waitUntil: 'networkidle' });
+  const vPaneli = (await page.locator('.spr1-pdf__pechat').getAttribute('href')) ?? '';
+  proverka(
+    vPaneli.split('?')[0] === MANIFEST.sPrimerami.fayl,
+    `iPhone: «Печать» в панели ведёт на ${vPaneli}, а не на готовый PDF`,
+  );
+  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/?primery=0`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
+    timeout: 120000,
+  });
+  await page.waitForTimeout(500);
+  proverka(
+    (await page.evaluate(() => window.__pechat ?? 0)) === 0,
+    'iPhone: окно печати открылось само',
+  );
+  const pechat = page.locator('.spr1p-bar__pechat a');
+  const adres = (await pechat.getAttribute('href')) ?? '';
+  proverka(
+    adres.split('?')[0] === MANIFEST.bezPrimerov.fayl,
+    `iPhone: «Печать» на печатной странице ведёт на ${adres}`,
+  );
+  proverka(
+    (await page.locator('.spr1p-bar__pechat').textContent())?.includes(
+      SPRAVOCHNIK_1.pdf.leadIos,
+    ) === true,
+    'iPhone: нет подсказки про «Поделиться» → «Напечатать»',
+  );
+  await ctx.close();
 }
 
 await browser.close();
