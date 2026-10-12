@@ -172,7 +172,9 @@ function checkCards(name, withAnswers) {
 
   /* Плашек прототипов столько же, сколько прототипов, и у каждой
      идентификатор. */
-  const plaques = spec.items.filter((item) => /sheet-block--sub/.test(item));
+  /* Плашка — подзаголовок с идентификатором прототипа; подзаголовки
+     раздела подсказок в конце файла учителя без него и не считаются. */
+  const plaques = spec.items.filter((item) => /sheet-block--sub/.test(item) && /sheet-block-id/.test(item));
   if (plaques.length !== prototypes.length) {
     fail(name + ': плашек прототипов ' + plaques.length + ', прототипов ' + prototypes.length);
   }
@@ -196,6 +198,31 @@ function checkCards(name, withAnswers) {
     } else if (!hasSolution || !card.includes('Ответ: <b>' + task.answer + '</b>')) {
       fail(name + ': в карточке ' + task.no + ' для учителя нет решения с ответом «' + task.answer + '»');
     }
+  });
+
+  /* Раздел «Подсказки по шагам» в конце файла учителя: по карточке на
+     вариант, в каждом вопросе ровно один верный ответ и хотя бы два
+     варианта. В файле ученика подсказок нет. */
+  const hints = spec.items.filter((item) => /class="[^"]*\bsheet-hint"/.test(item));
+  if (!withAnswers) {
+    if (hints.length) { fail(name + ': в файле для ученика есть подсказки — ' + hints.length); }
+    return;
+  }
+  if (hints.length !== expected.length) {
+    fail(name + ': подсказок в конце файла ' + hints.length + ', задач ' + expected.length);
+  }
+  hints.forEach((card, index) => {
+    const no = expected[index] ? expected[index].no : index + 1;
+    const shagi = card.match(/<li class="sheet-step sheet-hint-step">[\s\S]*?<\/li>/g) || [];
+    if (shagi.length < 2) { fail(name + ': в подсказке к задаче ' + no + ' меньше двух вопросов'); }
+    shagi.forEach((shag, i) => {
+      const right = (shag.match(/class="sheet-hint-right"/g) || []).length;
+      const options = right + (shag.match(/class="sheet-hint-option"/g) || []).length;
+      if (right !== 1 || options < 2) {
+        fail(name + ': подсказка к задаче ' + no + ', вопрос ' + (i + 1) +
+          ': верных ' + right + ', вариантов ' + options);
+      }
+    });
   });
 }
 

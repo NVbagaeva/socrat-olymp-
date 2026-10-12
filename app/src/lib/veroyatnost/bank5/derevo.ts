@@ -43,9 +43,11 @@ const P06: Prototype = prototip({
     const pc = veroyatnost(p, 'pc');
     return [
       {
+        etap: 'Связь событий',
         text: `Первую партию А. играет белыми и выигрывает с вероятностью ${dec(pb)}, вторую — чёрными, с вероятностью ${dec(pc)}. Партии независимы.`,
       },
       {
+        etap: 'Ответ',
         text: 'Нужен один путь по дереву — выигрыш и там, и там; вдоль пути вероятности перемножаются:',
         formula: `P = p_1 \\cdot p_2 = ${tex(pb)} \\cdot ${tex(pc)} = ${tex(tochnee(pb * pc))}`,
         value: tochnee(pb * pc),
@@ -166,10 +168,12 @@ const P07: Prototype = prototip({
     const mnozhiteli = [...s].map((c) => tex(c === 'p' ? q : tochnee(1 - q))).join(' \\cdot ');
     return [
       {
+        etap: 'Противоположное событие',
         text: `Выстрелы независимы. Попадание — ${dec(q)}, промах — всё остальное:`,
         formula: `1 - ${tex(q)} = ${tex(tochnee(1 - q))}`,
       },
       {
+        etap: 'Ответ',
         text: `Нужная последовательность: ${slova}. Это один путь по дереву; вдоль пути вероятности перемножаются:`,
         formula: `P = ${mnozhiteli} = ${tex(P07otvet(p))}`,
         value: P07otvet(p),
@@ -317,11 +321,13 @@ const P08: Prototype = prototip({
     const vse = tochnee(q ** n);
     return [
       {
+        etap: 'Противоположное событие',
         text: `Противоположное событие — все ${SLOVAMI[n] ?? n} лампы перегорели. Лампы независимы, вдоль этого пути вероятности перемножаются:`,
         formula: `P(\\bar A) = ${tex(q)}^${n} = ${tex(vse)}`,
         value: vse,
       },
       {
+        etap: 'Ответ',
         text: '«Хотя бы одна не перегорит» — всё остальное:',
         formula: `P = 1 - ${tex(vse)} = ${tex(tochnee(1 - vse))}`,
         value: tochnee(1 - vse),
@@ -463,21 +469,25 @@ const P09: Prototype = prototip({
     const znam = n * (n - 1);
     return [
       {
+        etap: 'Все исходы',
         text: 'Фломастеров всего:',
         formula: `n = ${a} + ${b} + ${c} = ${n}`,
         value: n,
       },
       {
+        etap: 'Путь по дереву',
         text: 'Путь «сначала синий, потом красный»: второй берём из оставшихся, их на один меньше:',
         formula: `\\dfrac{${a}}{${n}} \\cdot \\dfrac{${b}}{${n - 1}} = \\dfrac{${odin}}{${znam}}`,
         value: odin / znam,
       },
       {
+        etap: 'Путь по дереву',
         text: 'Путь «сначала красный, потом синий» — столько же:',
         formula: `\\dfrac{${b}}{${n}} \\cdot \\dfrac{${a}}{${n - 1}} = \\dfrac{${odin}}{${znam}}`,
         value: odin / znam,
       },
       {
+        etap: 'Ответ',
         text: 'Пути несовместны — складываем:',
         formula: `P = \\dfrac{${odin}}{${znam}} + \\dfrac{${odin}}{${znam}} = \\dfrac{${2 * odin}}{${znam}} = ${tex(tochnee((2 * odin) / znam))}`,
         value: tochnee((2 * odin) / znam),
@@ -616,10 +626,12 @@ const P10: Prototype = prototip({
     const vn = tochnee(q * nich);
     return [
       {
+        etap: 'Противоположное событие',
         text: 'Ничья — всё, что не выигрыш и не проигрыш:',
         formula: `1 - ${tex(q)} - ${tex(q)} = ${tex(nich)}`,
       },
       {
+        etap: 'Ответ',
         text: 'Хотя бы 4 очка дают три исхода двух игр: выигрыш-выигрыш (6 очков), выигрыш-ничья и ничья-выигрыш (по 4 очка). Вдоль каждого пути вероятности перемножаются, пути складываются:',
         formula: `P = ${tex(q)} \\cdot ${tex(q)} + ${tex(q)} \\cdot ${tex(nich)} + ${tex(nich)} \\cdot ${tex(q)} = ${tex(vv)} + ${tex(vn)} + ${tex(vn)} = ${tex(tochnee(vv + 2 * vn))}`,
         value: tochnee(vv + 2 * vn),

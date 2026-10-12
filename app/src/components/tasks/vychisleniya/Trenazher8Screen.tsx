@@ -1,21 +1,30 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
-import { pickRound, restartRound, useRound } from '@/lib/trainerRound';
+import { pickRound, useRound } from '@/lib/trainerRound';
 import { progress8 } from '@/lib/vychisleniya/progress';
 import { answerMatches, openText } from '@/lib/vychisleniya/secret';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
 import { SKILL_FORMULA } from '@/content/vychisleniya';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { Formula } from './Formula';
-import { Trenazher8Result, type Mark8 } from './Trenazher8Result';
+import { useSessionReport } from '../session/useSessionReport';
+import type { TaskMark } from '@/lib/trainerSession/types';
+import type { Trenazher8Ui } from './trenazher8Ui';
 
 export interface Trenazher8ScreenProps {
   pool: Task8[];
   roundKey: string;
-  backHref: string;
+  /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
+  restored: Trenazher8Ui | null;
+  /** Сообщить оболочке сессии о новом состоянии (она его сохранит). */
+  report: (ui: Trenazher8Ui) => void;
+  /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
+  elapsed: () => number;
+  /** Последнее задание решено: показать итоги. */
+  onFinish: () => void;
   /** Контроль: без решения до конца сессии. */
   control?: boolean;
 }
@@ -26,7 +35,7 @@ const VERDICT = {
 };
 
 /** Разбор: закрыт тем же отпечатком, что и ответ; раскрывается по нажатию. */
-function razborOf(task: Task8): string[] {
+export function razborOf(task: Task8): string[] {
   try {
     const value: unknown = JSON.parse(openText(task.razbor, task.seal));
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -42,46 +51,67 @@ function razborOf(task: Task8): string[] {
  * числа в разметке нет. Разбор закрыт и открывается только по
  * просьбе ученика; открытое решение не засчитывается.
  */
-export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: Trenazher8ScreenProps) {
+export function Trenazher8Screen({
+  pool,
+  roundKey,
+  restored,
+  report,
+  elapsed,
+  onFinish,
+  control = false,
+}: Trenazher8ScreenProps) {
   const kinds = useMemo(() => pool.map((item) => kindTitle(item.prototype)), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  const order = useRound(roundKey, build);
+  const order = useRound(roundKey, build, restored?.order);
   const tasks = useMemo(
     () => (order.length === 0 ? pool : order.map((at) => pool[at]).filter((item): item is Task8 => item !== undefined)),
     [order, pool],
   );
 
-  const [index, setIndex] = useState(0);
-  const [value, setValue] = useState('');
-  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
-  const [marks, setMarks] = useState<Record<number, Mark8>>({});
-  const [solution, setSolution] = useState<string[] | null>(null);
-  const [misses, setMisses] = useState(0);
-  const [result, setResult] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const startedAt = useRef<number | null>(null);
-  const taskStartedAt = useRef<number | null>(null);
-  const failed = useRef(false);
+  /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
+     вернувшись в тренажёр, он продолжает с того же места. */
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  const [value, setValue] = useState(restored?.value ?? '');
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
+  const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
+  /* Задания, в которых была ошибка: на итогах они отличаются от пропущенных. */
+  const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
+  /* Решение хранится флагом: текст закрыт отпечатком и раскрывается заново. */
+  const [solutionOpen, setSolutionOpen] = useState(restored?.solutionOpen ?? false);
+  const [misses, setMisses] = useState(restored?.misses ?? 0);
+  /* Время тренировки считает оболочка сессии; здесь — время на одно
+     задание, от первой проверки. */
+  const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
+  const [failed, setFailed] = useState(restored?.failed ?? false);
 
   function startClock() {
-    const now = Date.now();
-    startedAt.current ??= now;
-    taskStartedAt.current ??= now;
+    if (taskFrom === null) {
+      setTaskFrom(elapsed());
+    }
   }
 
   function taskSeconds(): number {
-    const from = taskStartedAt.current;
-    return from === null ? 0 : (Date.now() - from) / 1000;
+    return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
 
   function remember(item: Task8, right: boolean, clean: boolean) {
     progress8.recordAttempt({ kind: item.prototype, taskId: item.id, right, clean, seconds: taskSeconds() });
   }
 
-  function stopClock() {
-    const from = startedAt.current;
-    setSeconds(from === null ? 0 : (Date.now() - from) / 1000);
-  }
+  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
+     каждом изменении, а при возвращении отдаёт обратно (restored). */
+  useSessionReport<Trenazher8Ui>(report, {
+    index,
+    marks,
+    tried,
+    order: order.length === 0 ? null : order,
+    value,
+    checked,
+    solutionOpen,
+    misses,
+    failed,
+    taskFrom,
+  });
 
   const found = tasks[index];
   if (found === undefined) {
@@ -92,6 +122,7 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
   const last = index === total - 1;
   const ready = value.trim() !== '';
   /* Открытое решение до верного ответа — задача не засчитана. */
+  const solution = solutionOpen ? razborOf(task) : null;
   const revealed = solution !== null && checked !== 'right';
 
   function check() {
@@ -99,74 +130,47 @@ export function Trenazher8Screen({ pool, roundKey, backHref, control = false }: 
     const right = answerMatches(value, task.seal);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
-      const clean = failed.current === false && solution === null;
+      const clean = !failed && solution === null;
       setMarks({ ...marks, [index]: clean || solution === null ? 'right' : 'hinted' });
       remember(task, solution === null, clean);
-      if (last) {
-        stopClock();
-      }
     } else {
-      failed.current = true;
+      setFailed(true);
       setMisses(misses + 1);
+      setTried({ ...tried, [index]: true });
     }
   }
 
   function reveal() {
     startClock();
-    const lines = razborOf(task);
-    setSolution(lines);
+    setSolutionOpen(true);
     if (checked !== 'right') {
       /* Решение открыто до ответа: задача пройдена с подсказкой. */
       setMarks({ ...marks, [index]: 'hinted' });
       remember(task, false, false);
-      if (last) {
-        stopClock();
-      }
     }
   }
 
   function next() {
-    taskStartedAt.current = null;
-    failed.current = false;
+    setTaskFrom(null);
+    setFailed(false);
     setIndex(index + 1);
     setValue('');
     setChecked(null);
-    setSolution(null);
-  }
-
-  function again() {
-    restartRound(roundKey);
-    setResult(false);
-    setIndex(0);
-    setValue('');
-    setChecked(null);
-    setMarks({});
-    setMisses(0);
-    setSeconds(0);
-    setSolution(null);
-    startedAt.current = null;
-    taskStartedAt.current = null;
-    failed.current = false;
+    setSolutionOpen(false);
   }
 
   const nextButton = last ? (
-    <Button onClick={() => setResult(true)}>Смотреть результат →</Button>
+    <Button onClick={onFinish}>Смотреть результат →</Button>
   ) : (
     <Button onClick={next}>Следующее задание →</Button>
   );
-
-  if (result) {
-    return <Trenazher8Result tasks={tasks} marks={marks} misses={misses} seconds={seconds} backHref={backHref} onAgain={again} />;
-  }
 
   const done = checked === 'right' || revealed;
 
   return (
     <section className="ttask">
-      <p className="ttask__count">
-        Задание <b>{index + 1}</b> из {total}
-      </p>
-
+      {/* Номер задания, решённое и время показывает панель тренировки
+          над экраном (components/tasks/session). */}
       <ol className="ttask__dots" aria-hidden="true">
         {tasks.map((item, i) => (
           <li

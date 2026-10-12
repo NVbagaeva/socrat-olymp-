@@ -29,7 +29,9 @@ import { otvetUchenika, prepOtvet } from './index';
 
 function shagiModeli(shagi: readonly Step[]): ModelShag[] {
   return shagi.map((s) =>
-    s.formula === undefined ? { text: s.text } : { text: s.text, formula: s.formula },
+    s.formula === undefined
+      ? { etap: s.etap, text: s.text }
+      : { etap: s.etap, text: s.text, formula: s.formula },
   );
 }
 
