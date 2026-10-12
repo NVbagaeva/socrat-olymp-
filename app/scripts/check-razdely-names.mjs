@@ -145,6 +145,9 @@ function checkSource() {
     'app/styleguide/',
     'lib/zadanie15/',
   ];
+  /* Код других заданий (№7, №11, №15…) о разделах №12 не говорит: там
+     «График квадратного корня» — подпись к своему рисунку. */
+  const otherTask = /^(?:components\/tasks|lib|content)\/zadanie(?!12(?:\/|\.|$))\d+/;
   const stringLiteral = /(['"`])((?:\\.|(?!\1)[^\\\n])*)\1/g;
   const walk = (dir) =>
     fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -156,7 +159,7 @@ function checkSource() {
     });
   for (const file of walk(SRC)) {
     const rel = path.relative(SRC, file).split(path.sep).join('/');
-    if (allowed.has(rel) || skipDirs.some((dir) => rel.startsWith(dir))) {
+    if (allowed.has(rel) || skipDirs.some((dir) => rel.startsWith(dir)) || otherTask.test(rel)) {
       continue;
     }
     /* Комментарии убираются: в них названия упоминаются свободно. */
