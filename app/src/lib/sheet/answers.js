@@ -191,12 +191,15 @@ function fullSolution(no, items, answer, figure) {
  * Решение по шагам внутри карточки задачи: текст шага и его формула,
  * затем строка ответа. Печатается в файле для учителя.
  *
- * steps — [{ text, tex, plain }]: tex — формула шага, plain — она же
- * словами для запасного набора без KaTeX. Ничего не досочиняется.
+ * steps — [{ etap, text, tex, plain }]: etap — этап решения («Все
+ * исходы», «Ответ»), печатается жирным перед текстом шага; tex —
+ * формула шага, plain — она же словами для запасного набора без KaTeX.
+ * Ничего не досочиняется.
  */
 function steps(items, answer) {
   var list = items.map(function (step) {
     return '<li class="sheet-step">' +
+      (step.etap ? '<b class="sheet-step-etap">' + typo.text(step.etap) + '.</b> ' : '') +
       (step.text ? '<span class="sheet-step-text">' + typo.text(step.text) + '</span>' : '') +
       (step.tex
         ? ' <span class="math" data-tex="' + typo.attr(step.tex) + '">' +
