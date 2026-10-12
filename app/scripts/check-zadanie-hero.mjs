@@ -19,6 +19,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium);
@@ -140,6 +141,7 @@ async function measure(page) {
     hasTouch: true,
     deviceScaleFactor: 2,
   });
+  await welcomeSeen(ctx);
   const page = await ctx.newPage();
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
   const m = await measure(page);
@@ -166,6 +168,7 @@ async function measure(page) {
     hasTouch: true,
     deviceScaleFactor: 1,
   });
+  await welcomeSeen(ctx);
   const page = await ctx.newPage();
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
   const m = await measure(page);
@@ -178,6 +181,7 @@ for (const reduced of [false, true]) {
     viewport: { width: 1440, height: 900 },
     reducedMotion: reduced ? 'reduce' : 'no-preference',
   });
+  await welcomeSeen(ctx);
   const page = await ctx.newPage();
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
   const m = await measure(page);

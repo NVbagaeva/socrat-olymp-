@@ -67,6 +67,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const args = process.argv.slice(2);
 const argOf = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
@@ -599,6 +600,7 @@ async function finishRun(page) {
 /** Каждый сценарий — в своём контексте: чистое хранилище и своя вкладка. */
 async function inContext(what, run) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(context);
   try {
     await run(context);
   } catch (error) {

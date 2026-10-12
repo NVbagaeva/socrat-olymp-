@@ -29,6 +29,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(OUT)) {
@@ -150,6 +151,7 @@ for (const size of SIZES) {
     isMobile: size.isMobile,
     hasTouch: size.isMobile,
   });
+  await welcomeSeen(context);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
