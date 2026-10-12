@@ -41,7 +41,7 @@ export function CopyLink({ label, path, testId }: CopyLinkProps) {
         {full}
       </a>
       <Button size="sm" variant="secondary" onClick={copy}>
-        {copied ? zachyotText.copied : zachyotText.copy}
+        {copied ? zachyotText.copied : zachyotText.copyLink}
       </Button>
     </div>
   );

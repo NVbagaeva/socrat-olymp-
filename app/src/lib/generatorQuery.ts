@@ -34,6 +34,11 @@ export interface SheetParams {
   theory?: boolean;
   /** Разобранных примеров на тип: 0…2. Не задано — 0. */
   examples?: number;
+  /**
+   * Задач у каждого набора — у генератора по всем типам №12 (по
+   * счётчикам типов). Не задано — поровну по плану.
+   */
+  per?: Record<string, number>;
 }
 
 /** Сколько вариантов можно заказать в генераторе. */
@@ -77,6 +82,14 @@ export function sheetQuery(params: SheetParams): string {
   if ((params.examples ?? 0) > 0) {
     query.set('pr', String(params.examples));
   }
+  if (params.per !== undefined) {
+    query.set(
+      'pp',
+      Object.entries(params.per)
+        .map(([id, n]) => `${id}:${n}`)
+        .join(','),
+    );
+  }
   return query.toString();
 }
 
@@ -101,7 +114,24 @@ export function parseSheetQuery(query: URLSearchParams): SheetParams {
     order: query.get('o') === 'types' ? 'types' : 'mix',
     theory: query.get('th') === '1',
     examples: ['1', '2'].includes(query.get('pr') ?? '') ? Number(query.get('pr')) : 0,
+    ...perFrom(query.get('pp')),
   };
+}
+
+/** Задачи наборов из адреса: «12.A:2,12Q.B:1». Нет поля — нет и per. */
+function perFrom(raw: string | null): { per?: Record<string, number> } {
+  if (raw === null || raw === '') {
+    return {};
+  }
+  const per: Record<string, number> = {};
+  raw.split(',').forEach((pair) => {
+    const [id, n] = pair.split(':');
+    const count = Number(n);
+    if (id !== undefined && id !== '' && Number.isInteger(count) && count > 0 && count <= 20) {
+      per[id] = count;
+    }
+  });
+  return { per };
 }
 
 /** «18.09.2026» из записи ГГГГ-ММ-ДД. */

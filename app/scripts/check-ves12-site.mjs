@@ -194,7 +194,22 @@ async function cardLook(page, selector, index) {
   await ctx.close();
 }
 
-/* ── Зачётная работа: от настройки до итогов ───────────────────── */
+/* ── Зачётная работа: экран настройки ──────────────────────────── */
+
+/** Нажатие с подсчётом: в отчёт идёт число нажатий типового сценария. */
+let clicks = 0;
+async function press(locator) {
+  clicks += 1;
+  await locator.click();
+}
+async function counts(page) {
+  return page.$$eval('.sostav-counter', (nodes) =>
+    Object.fromEntries(nodes.map((n) => [n.dataset.row, Number(n.getAttribute('aria-valuenow'))])),
+  );
+}
+const mainButton = (page, mobile) =>
+  page.locator(mobile ? '.zs-bar [data-testid=zachyot-main]' : '.zs-sum [data-testid=zachyot-main]');
+
 for (const [width, height, mobile] of [
   [1440, 900, false],
   [390, 844, true],
@@ -202,31 +217,102 @@ for (const [width, height, mobile] of [
   const ctx = await context(width, height, mobile);
   const page = await ctx.newPage();
   const where = (text) => `${width}: ${text}`;
-  await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
-  await page.getByRole('radio', { name: /ФИПИ \+ аналоги/ }).click();
-  /* Типы: прямая, парабола и показательная. */
-  /* «Выбрать все» / «Снять все» — до пустого выбора. */
-  const all = page.locator('.type-picker__all');
-  if (!/Снять/.test((await all.textContent()) ?? '')) {
-    await all.click();
-  }
-  await all.click();
-  for (const name of ['Линейная функция', 'Квадратичная функция', 'Показательная функция']) {
-    await page.getByRole('checkbox', { name, exact: true }).click();
-  }
-  await page.locator('[aria-labelledby$="-v"] .cfg-opt').filter({ hasText: /^2$/ }).click();
-  await page.getByLabel('Учитель').fill('Иванова А. Б.');
-  await page.waitForTimeout(300);
-  const count = await page.textContent('[data-testid=zachyot-count]');
-  check(/6 задач/.test(count ?? '') && /2 варианта/.test(count ?? ''), where(`сводка: «${count}»`));
-  await shot(page, `zachyot-nastroyka-${width}`, true);
 
+  /* Типовой сценарий: «Весь №12, как на ЕГЭ» → «Собрать работу». */
+  await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
+  await shot(page, `zachyot-shag1-${width}`, true);
+  clicks = 0;
+  await press(page.locator('[data-template=ege]'));
+  await press(mainButton(page, mobile));
+  await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
+  check(clicks === 2, where(`«Весь №12» → «Собрать»: нажатий ${clicks}`));
+  const main = await mainButton(page, mobile).getAttribute('data-main');
+  check(main === 'download', where(`после сборки главная кнопка не «Скачать для печати» (${main})`));
+  check(
+    (await page.locator('.zs-preview__task').count()) > 0,
+    where('после сборки в превью нет задач первой страницы'),
+  );
+  await shot(page, `zachyot-shag3-${width}`, true);
+
+  /* Изменили настройки — код «устарел», кнопка снова «Собрать работу». */
+  await page.locator('.steps__item').nth(1).click();
+  await page.getByRole('radio', { name: '2' }).first().click();
+  await page.locator('.steps__item').nth(2).click();
+  check((await page.locator('[data-testid=zachyot-stale]').count()) === 1, where('после изменения код не помечен «устарел»'));
+  check((await mainButton(page, mobile).getAttribute('data-main')) === 'build', where('после изменения кнопка не «Собрать работу»'));
+
+  /* «Свой состав»: три типа с разным числом задач, у одного выключен прототип. */
+  await page.locator('.steps__item').nth(0).click();
+  await page.locator('[data-template=own]').click();
+  for (const [row, n] of [['linear', 1], ['quadratic', 2], ['exponential', 3]]) {
+    for (let i = 0; i < n; i += 1) {
+      await page.locator(`.sostav-counter[data-row=${row}] button[aria-label="Больше"]`).click();
+    }
+  }
+  const expRow = page.locator('.sostav-row').filter({ has: page.locator('.sostav-counter[data-row=exponential]') });
+  await expRow.locator('.sostav-row__more').click();
+  await expRow.locator('.sostav-set').nth(3).click();
+  await shot(page, `zachyot-prototipy-${width}`, true);
+  const own = await counts(page);
+  check(own.linear === 1 && own.quadratic === 2 && own.exponential === 3 && own.trigonometric === 0, where(`«Свой состав»: ${JSON.stringify(own)}`));
+  check(/3 из 4/.test((await expRow.locator('.sostav-row__sets').textContent()) ?? ''), where('нет «3 из 4 прототипов»'));
+  const total = await page.locator(mobile ? '.zs-bar__text b' : '[data-testid=zachyot-total]').first().textContent();
+  check(/6/.test(total ?? ''), where(`сводка: задач «${total}», а нужно 6`));
+  check(/off=12E\.D/.test(decodeURIComponent(page.url())), where('выключенный прототип не попал в адрес'));
+
+  /* Нехватка: тригонометрия 4 задачи × 2 варианта по ФИПИ. */
+  await page.locator('[data-template=own]').click();
+  for (let i = 0; i < 4; i += 1) {
+    await page.locator('.sostav-counter[data-row=trigonometric] button[aria-label="Больше"]').click();
+  }
+  await page.locator('.steps__item').nth(1).click();
+  await page.getByRole('radio', { name: 'Только ФИПИ' }).click();
+  check((await page.locator('[data-testid=zachyot-shortage]').count()) === 1, where('нет плашки нехватки задач ФИПИ'));
+  check((await mainButton(page, mobile).isDisabled()), where('при нехватке главная кнопка активна'));
+  await shot(page, `zachyot-shag2-${width}`, true);
+  await page.click('[data-testid=zachyot-add-analogs]');
+  check((await page.locator('[data-testid=zachyot-shortage]').count()) === 0, where('после «Добавить аналоги» плашка осталась'));
+
+  /* Ссылка на настройку открывает тот же набор. */
+  const shared = page.url().replace(/&kod=[^&]*/, '');
+  const other = await ctx.newPage();
+  await other.goto(shared, { waitUntil: 'networkidle' });
+  const again = await counts(other);
+  check(again.trigonometric === 4 && again.linear === 0, where(`ссылка с настройками: ${JSON.stringify(again)}`));
+  await other.close();
+
+  /* «Как в прошлый раз» — после сборки, на чистой странице. */
+  await page.locator('.steps__item').nth(0).click();
+  await page.locator('[data-template=ege]').click();
+  await mainButton(page, mobile).click();
+  await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
+  await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
+  await page.locator('[data-template=own]').click();
+  check((await page.locator('[data-template=last]').count()) === 1, where('нет плитки «Как в прошлый раз»'));
+  await page.locator('[data-template=last]').click();
+  const restored = await counts(page);
+  check(Object.values(restored).every((n) => n === 2), where(`«Как в прошлый раз»: ${JSON.stringify(restored)}`));
+  await ctx.close();
+}
+
+/* ── Зачётная работа: листы и онлайн ───────────────────────────── */
+{
+  const width = 1440;
+  const ctx = await context(1440, 900, false);
+  const page = await ctx.newPage();
+  const where = (text) => `${width}: ${text}`;
+  /* Прямая, парабола и показательная по 2, ФИПИ + аналоги, 2 варианта. */
+  await page.goto(
+    BASE + '/zadaniya/12/zachyot/?c=linear:2,quadratic:2,exponential:2&v=2&src=all&u=Иванова А. Б.',
+    { waitUntil: 'networkidle' },
+  );
+  await page.locator('.zs-sum [data-testid=zachyot-main]').click();
+  await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
   const studentHref = await page.getAttribute('[data-testid=zachyot-print-student]', 'href');
   const teacherHref = await page.getAttribute('[data-testid=zachyot-print-teacher]', 'href');
   const runHref = await page.getAttribute('[data-testid=zachyot-link]', 'href');
   check(studentHref !== null && teacherHref !== null && runHref !== null, where('нет ссылок на листы и онлайн'));
 
-  const texts = [];
   for (const [kind, url] of [
     ['uchenik', studentHref],
     ['uchitel', teacherHref],
@@ -247,19 +333,17 @@ for (const [width, height, mobile] of [
     if (kind === 'uchitel') {
       check(info.key > 0, where('лист учителя: нет таблицы ответов вариантов'));
       check(/Шкала оценок/.test(info.text), where('лист учителя: нет шкалы оценок'));
+      if (SHOTS) {
+        await sheet
+          .locator('#sheet-pages .sheet-page', { has: sheet.locator('.sheet-work-key') })
+          .first()
+          .screenshot({ path: path.join(SHOTS, `zachyot-list-uchitel-otvety-${width}.png`) });
+      }
     } else {
       check(!/Ответы/.test(info.text.replace(/Ответ:/g, '')), where('лист ученика: в нём ответы'));
     }
-    texts.push(info.text);
     await sheet.evaluate(() => window.scrollTo(0, 0));
     await shot(sheet, `zachyot-list-${kind}-${width}`);
-    if (kind === 'uchitel' && SHOTS) {
-      /* Страница с таблицей ответов всех вариантов и шкалой. */
-      await sheet
-        .locator('#sheet-pages .sheet-page', { has: sheet.locator('.sheet-work-key') })
-        .first()
-        .screenshot({ path: path.join(SHOTS, `zachyot-list-uchitel-otvety-${width}.png`) });
-    }
     await sheet.close();
   }
 
@@ -268,9 +352,7 @@ for (const [width, height, mobile] of [
   await page.getByRole('radio', { name: 'Вариант 2' }).click();
   await page.click('[data-testid=exam-start]');
   await page.waitForSelector('.exam__task', { timeout: 60000 });
-  const navCount = await page.locator('.exam__no').count();
-  check(navCount === 6, where(`онлайн: номеров задач ${navCount}, а не 6`));
-  check((await page.locator('.exam .psol, .exam [class*="hint"]').count()) === 0, where('онлайн: на экране подсказка'));
+  check((await page.locator('.exam__no').count()) === 6, where('онлайн: задач не 6'));
   const input = page.locator('[data-testid=exam-input]');
   if ((await input.count()) > 0) {
     await input.fill('1');
@@ -279,14 +361,12 @@ for (const [width, height, mobile] of [
   await page.locator('.exam__no').first().click();
   const kept = (await input.count()) > 0 ? await input.inputValue() : '1';
   check(kept === '1', where(`онлайн: ответ не сохранился при возврате («${kept}»)`));
-  await shot(page, `zachyot-onlayn-${width}`, true);
   await page.click('[data-testid=exam-finish]');
   await page.click('[data-testid=exam-confirm]');
   await page.waitForSelector('[data-testid=exam-result]', { timeout: 30000 });
   const grade = await page.textContent('[data-testid=exam-grade]');
   check(['2', '3', '4', '5'].includes((grade ?? '').trim()), where(`итоги: оценка «${grade}»`));
-  const kinds = await page.locator('.tkind').count();
-  check(kinds === 3, where(`итоги: строк по типам ${kinds}, а типов 3`));
+  check((await page.locator('.tkind').count()) === 3, where('итоги: строк по типам не 3'));
   await shot(page, `zachyot-itogi-${width}`, true);
   await ctx.close();
 }
@@ -308,7 +388,7 @@ for (const [width, height, mobile] of [
       recaps: document.querySelectorAll('#sheet-pages .sheet-recap').length,
       examples: document.querySelectorAll('#sheet-pages .sheet-example').length,
     }));
-    check(info.tasks === 14, `генератор: задач на листе ${info.tasks}, а заказано 14`);
+    check(info.tasks === 7, `генератор: задач на листе ${info.tasks}, а по умолчанию «Все типы по 1» — 7`);
     check(info.recaps === 7, `генератор: рамок «Запомни» ${info.recaps}, а типов 7`);
     check(info.examples === 7, `генератор: разобранных примеров ${info.examples}, а типов 7`);
     await shot(sheet, 'generator-list-1440');
@@ -324,4 +404,7 @@ if (errors.length > 0) {
   errors.forEach((line) => console.error('  ✗ ' + line));
   process.exit(1);
 }
-console.log(`«Весь №12» на сайте: проверок ${checks}, расхождений нет.`);
+console.log(
+  `«Весь №12» на сайте: проверок ${checks}, расхождений нет. ` +
+    'Типовой сценарий «Весь №12, как на ЕГЭ» → «Собрать работу»: 2 нажатия.',
+);

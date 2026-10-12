@@ -6,11 +6,13 @@ import { generatorAllText } from '@/content/ves12';
 import { tasksPage } from '@/content/tasks';
 import { ves12Catalog } from '@/lib/ves12/catalog';
 import { href, ZADANIYA } from '@/lib/paths';
+import 'katex/dist/katex.min.css';
 import '../../zadaniya.css';
 import '../../[task]/section.css';
 import '../../[task]/[type]/configurator.css';
 import '../../komplekt.css';
 import '@/components/tasks/ves12/ves12.css';
+import '@/components/tasks/ves12/zachyot-setup.css';
 
 export const metadata: Metadata = {
   title: `${generatorAllText.pageTitle} — Будет на ЕГЭ`,

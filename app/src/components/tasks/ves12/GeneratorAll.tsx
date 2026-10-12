@@ -1,9 +1,9 @@
 'use client';
 
-import { useId, useState } from 'react';
-import { generatorAllText, zachyotText } from '@/content/ves12';
+import { useState } from 'react';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import { generatorAllText, sostavText, zachyotText } from '@/content/ves12';
 import {
-  generatorPage,
   sheetLayouts,
   sheetThemes,
   variantCounts,
@@ -12,35 +12,57 @@ import {
   type SheetThemeId,
 } from '@/content/generator';
 import { sheetQuery } from '@/lib/generatorQuery';
-import { firstSets, planWork, tasksLabel } from '@/lib/ves12/work';
+import {
+  DEFAULT_GRADES,
+  matchTemplate,
+  openTypes,
+  planWork,
+  tasksLabel,
+  templates as workTemplates,
+  variantsLabel,
+  type WorkOrder,
+} from '@/lib/ves12/work';
 import type { Ves12Catalog } from '@/lib/ves12/types';
-import { counted } from '@/lib/plural';
-import { Note, Option, OptionGroup, StepHead } from '../configurator';
+import { Note } from '../configurator';
 import { KitBar } from '../generator/KitBar';
-import { TypePicker } from './TypePicker';
+import { SostavPicker, type SostavRow, type SostavTemplate, type SostavValue } from './SostavPicker';
+import { Segmented } from './Segmented';
+import { TemplateIcon, type TemplateIconName } from './icons';
 import { GENERATOR_ALL_HREF } from './paths';
 
 export interface GeneratorAllProps {
   catalog: Ves12Catalog;
 }
 
-const PER_SET = [1, 2, 3, 4, 5];
-const EXAMPLES = [0, 1, 2];
+const ICONS: Record<string, TemplateIconName> = {
+  ege: 'sheet',
+  short: 'shield',
+  'lin-quad': 'parabola',
+  'exp-log': 'exp',
+  'rat-sqrt': 'hyperbola',
+  trig: 'wave',
+};
 
 /**
- * Генератор по всем типам №12: лист для отработки из любых типов и
- * прототипов, с рамками теории и разобранными примерами каждого типа.
+ * Генератор по всем типам №12: лист для отработки из любых типов, с
+ * рамками теории и разобранными примерами каждого типа.
  *
- * Лист собирает тот же генератор, что у разделов (lib/generatorSheet.ts):
- * лист ученика и лист учителя одного комплекта — из одних задач, код
- * комплекта в адресе. Отличие от зачётной работы — здесь есть теория и
- * разборы, а источник — все задачи прототипов (банк и аналоги).
+ * Выбор состава — тот же компонент, что у зачётной: шаблон → счётчики по
+ * типам → прототипы по желанию. Лист собирает генератор разделов
+ * (lib/generatorSheet.ts): задачи каждого прототипа — по счётчикам, лист
+ * ученика и лист учителя одного комплекта — из одних задач.
  */
 export function GeneratorAll({ catalog }: GeneratorAllProps) {
-  const ids = { types: useId(), params: useId() };
-  const [selected, setSelected] = useState<string[]>(() => firstSets(catalog));
-  const [perSet, setPerSet] = useState(2);
-  const [order, setOrder] = useState<'types' | 'mix'>('types');
+  const base = workTemplates(catalog).map(
+    (item): SostavTemplate => ({
+      ...item,
+      title:
+        item.id === 'ege' ? generatorAllText.tplAll2 : item.id === 'short' ? generatorAllText.tplAll1 : item.title,
+      icon: ICONS[item.id] ?? 'sheet',
+    }),
+  );
+  const [value, setValue] = useState<SostavValue>(() => ({ counts: { ...(base[1]?.counts ?? {}) }, off: [] }));
+  const [order, setOrder] = useState<WorkOrder>('types');
   const [theory, setTheory] = useState(true);
   const [examples, setExamples] = useState(1);
   const [kind, setKind] = useState(generatorAllText.kind);
@@ -48,28 +70,38 @@ export function GeneratorAll({ catalog }: GeneratorAllProps) {
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
 
-  /* Типы выбранных прототипов — по каталогу, тем же планом, что у зачётной. */
+  /* Задачи каждого прототипа — тем же планом, что у зачётной (один вариант). */
   const plan = planWork(
     {
-      sets: selected,
-      perType: 1,
+      ...value,
+      analogs: [],
       variants: 1,
       source: 'all',
       minutes: 0,
-      grades: { five: 90, four: 70, three: 50 },
+      grades: DEFAULT_GRADES,
+      order,
       title: '',
       teacher: '',
-      code: 'plan',
     },
     catalog,
   );
-  const count = selected.length * perSet;
-  const ready = count > 0;
-  const kinds = [generatorAllText.kind, ...workKinds];
+  const per: Record<string, number> = {};
+  (plan.variants[0] ?? []).forEach((slot) => {
+    per[slot.setId] = (per[slot.setId] ?? 0) + 1;
+  });
+  const skills = Object.keys(per);
+  const count = plan.perVariant;
+
+  const rows: SostavRow[] = openTypes(catalog).map((type) => ({
+    id: type.id,
+    title: type.title,
+    icon: type.icon,
+    sets: type.sets.map((set) => ({ id: set.id, title: set.title, titleHtml: set.titleHtml, bank: set.count })),
+  }));
 
   const sheetHrefs = (seed: string) => {
     const query = sheetQuery({
-      skills: selected,
+      skills,
       count,
       level: null,
       seed,
@@ -81,6 +113,7 @@ export function GeneratorAll({ catalog }: GeneratorAllProps) {
       order,
       theory,
       examples,
+      per,
     });
     return {
       student: `${GENERATOR_ALL_HREF}pechat/?${query}`,
@@ -89,94 +122,102 @@ export function GeneratorAll({ catalog }: GeneratorAllProps) {
   };
 
   return (
-    <section className="cfg ves-setup">
-      <div className="cfg__layout">
-        <div className="cfg__steps">
-          <section className="cfg-step" aria-labelledby={ids.types}>
-            <StepHead id={ids.types} {...generatorAllText.steps.types} />
-            <TypePicker
-              catalog={catalog}
-              source="all"
-              selected={selected}
-              onChange={setSelected}
-              labelledBy={ids.types}
+    <section className="zs">
+      <div className="zs__layout">
+        <div className="zs__steps">
+          <div className="zs-panel">
+            <SostavPicker
+              rows={rows}
+              soon={catalog.types.filter((type) => type.soon).map((type) => type.title)}
+              templates={base}
+              activeTemplate={matchTemplate(base, value.counts)}
+              value={value}
+              onChange={setValue}
+              listTitle={sostavText.types}
             />
-          </section>
-
-          <section className="cfg-step" aria-labelledby={ids.params}>
-            <StepHead id={ids.params} {...generatorAllText.steps.params} />
-            <div className="cfg-params">
-              <OptionGroup id={`${ids.params}-k`} label={generatorPage.kind.title}>
-                {kinds.map((item) => (
-                  <Option key={item} checked={kind === item} onSelect={() => setKind(item)} title={item} />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-n`} label={generatorAllText.perSet} compact>
-                {PER_SET.map((n) => (
-                  <Option key={n} checked={perSet === n} onSelect={() => setPerSet(n)} title={n} />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-o`} label={generatorAllText.order}>
-                {(['types', 'mix'] as const).map((item) => (
-                  <Option
-                    key={item}
-                    checked={order === item}
-                    onSelect={() => setOrder(item)}
-                    title={generatorAllText.orders[item].title}
-                    lead={generatorAllText.orders[item].lead}
-                  />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-t`} label={generatorAllText.theory}>
-                <Option checked={theory} onSelect={() => setTheory(true)} title={generatorAllText.theoryOn} />
-                <Option checked={!theory} onSelect={() => setTheory(false)} title={generatorAllText.theoryOff} />
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-e`} label={generatorAllText.examples} compact>
-                {EXAMPLES.map((n) => (
-                  <Option key={n} checked={examples === n} onSelect={() => setExamples(n)} title={n} />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-v`} label={generatorPage.params.variants} compact>
-                {variantCounts.map((n) => (
-                  <Option key={n} checked={variants === n} onSelect={() => setVariants(n)} title={n} />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-l`} label={generatorPage.params.layout}>
-                {sheetLayouts.map((item) => (
-                  <Option key={item.id} checked={layout === item.id} onSelect={() => setLayout(item.id)} title={item.title} />
-                ))}
-              </OptionGroup>
-              <OptionGroup id={`${ids.params}-th`} label={generatorPage.params.theme}>
-                {sheetThemes.map((item) => (
-                  <Option key={item.id} checked={theme === item.id} onSelect={() => setTheme(item.id)} title={item.title} />
-                ))}
-              </OptionGroup>
+          </div>
+          <div className="zs-panel">
+            <h3 className="zs-panel__title">{generatorAllText.steps.params.title}</h3>
+            <div className="zs-format zs-format--wrap">
+              <Segmented
+                label={generatorAllText.theory}
+                value={theory ? 'on' : 'off'}
+                onChange={(next) => setTheory(next === 'on')}
+                options={[
+                  { value: 'on', title: generatorAllText.theoryOnShort },
+                  { value: 'off', title: generatorAllText.theoryOff },
+                ]}
+              />
+              <Segmented
+                label={generatorAllText.examples}
+                value={examples}
+                onChange={setExamples}
+                options={[0, 1, 2].map((n) => ({ value: n, title: n }))}
+              />
+              <Segmented
+                label={generatorAllText.order}
+                value={order}
+                onChange={setOrder}
+                options={[
+                  { value: 'types', title: generatorAllText.orders.types.title },
+                  { value: 'mix', title: generatorAllText.orders.mix.title },
+                ]}
+              />
+              <Segmented
+                label={zachyotText.variants}
+                value={variants}
+                onChange={setVariants}
+                options={variantCounts.map((n) => ({ value: n, title: n }))}
+              />
+              <Segmented
+                label={generatorAllText.layout}
+                value={layout}
+                onChange={setLayout}
+                options={sheetLayouts.map((item) => ({ value: item.id, title: item.title }))}
+              />
+              <Segmented
+                label={generatorAllText.theme}
+                value={theme}
+                onChange={setTheme}
+                options={sheetThemes.map((item) => ({ value: item.id, title: item.title }))}
+              />
+              <Segmented
+                label={generatorAllText.kindLabel}
+                value={kind}
+                onChange={setKind}
+                options={[generatorAllText.kind, ...workKinds.slice(0, 3)].map((item) => ({ value: item, title: item }))}
+              />
             </div>
-          </section>
+          </div>
         </div>
 
-        <aside className="cfg-summary ves-summary" aria-label={generatorAllText.summaryTitle}>
-          <h3 className="cfg-summary__title">{generatorAllText.summaryTitle}</h3>
-          <p className="cfg-summary__skill">{kind}</p>
+        <aside className="zs-sum" aria-label={generatorAllText.summaryTitle}>
+          <h3 className="zs-sum__title">{generatorAllText.summaryTitle}</h3>
+          <div className="zs-stats">
+            <span className="zs-stat">
+              <TemplateIcon name="sheet" />
+              <b data-testid="generator-all-count">{count}</b> {tasksLabel(count).split(' ')[1]}
+            </span>
+            <span className="zs-stat">
+              <TemplateIcon name="sliders" />
+              <b>{variants}</b> {variantsLabel(variants).split(' ')[1]}
+            </span>
+          </div>
+          <h4 className="zs-sum__sub">{zachyotText.included}</h4>
           {plan.types.length === 0 ? (
-            <Note tone="warning">{zachyotText.empty}</Note>
+            <p className="zs-hint">{zachyotText.emptyHint}</p>
           ) : (
-            <ul className="cfg-summary__list">
-              {plan.types.map((item) => {
-                const own = selected.filter((id) => item.type.sets.some((set) => set.id === id)).length;
-                return (
-                  <li key={item.type.id}>
-                    {item.type.title}{' '}
-                    <span className="cfg-summary__code">· {tasksLabel(own * perSet)}</span>
-                  </li>
-                );
-              })}
+            <ul className="zs-sum__types">
+              {plan.types.map((item) => (
+                <li key={item.type.id}>
+                  <RazdelIkonka icon={item.type.icon} sizes="32px" className="zs-sum__ico" />
+                  <span className="zs-sum__name">{item.type.title}</span>
+                  <span className="zs-sum__n">{item.count}</span>
+                </li>
+              ))}
             </ul>
           )}
-          <p className="cfg-summary__count" data-testid="generator-all-count">
-            {tasksLabel(count)}
-            {variants > 1 ? ` · ${counted(variants, 'вариант', 'варианта', 'вариантов')}` : ''}
-            <br />
+          <p className="zs-hint">
             {theory ? generatorAllText.theoryOn : generatorAllText.theoryOff}
             {examples > 0 ? ` · примеров на тип: ${examples}` : ''}
           </p>
@@ -189,12 +230,12 @@ export function GeneratorAll({ catalog }: GeneratorAllProps) {
         slot={GENERATOR_ALL_HREF}
         section="№12 · Все типы функций"
         count={count * variants}
-        ready={ready}
+        ready={count > 0}
         hrefs={sheetHrefs}
         summary={
           <>
             {kind} · {plan.types.map((item) => item.type.title).join(', ')} · {tasksLabel(count)}
-            {variants > 1 ? ` · ${counted(variants, 'вариант', 'варианта', 'вариантов')}` : ''}
+            {variants > 1 ? ` · ${variantsLabel(variants)}` : ''}
           </>
         }
       />

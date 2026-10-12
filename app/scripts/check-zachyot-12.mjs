@@ -36,20 +36,25 @@ const catalog = ves12Catalog();
 const errors = [];
 const bad = (text) => errors.push(text);
 
-function params(code, source, variants, perType = 2, types = null) {
-  const sets = work
-    .defaultSets(catalog, source)
-    .filter((id) => types === null || types.some((type) => catalog.types.find((t) => t.id === type).sets.some((set) => set.id === id)));
+/** Параметры работы: counts — по шаблону или явно; types — только эти типы. */
+function params(code, source, variants, perType = 2, types = null, extra = {}) {
+  const counts = {};
+  work.openTypes(catalog).forEach((type) => {
+    counts[type.id] = types === null || types.includes(type.id) ? perType : 0;
+  });
   return {
-    sets,
-    perType,
+    counts,
+    off: [],
+    analogs: [],
     variants,
     source,
     minutes: 24,
     grades: work.DEFAULT_GRADES,
+    order: 'types',
     title: work.DEFAULT_TITLE,
     teacher: 'Иванова А. Б.',
     code,
+    ...extra,
   };
 }
 
@@ -75,9 +80,9 @@ function checkWork(p) {
   if (built.missing > 0 || plan.shortages.length > 0) {
     bad(`${label}: банк не дал ${built.missing} задач, нехваток в плане ${plan.shortages.length}`);
   }
-  const slots = plan.types.flatMap((item) => item.slots);
   const seen = new Set();
   built.variants.forEach((variant) => {
+    const slots = plan.variants[variant.no - 1].map((slot) => slot.setId);
     if (variant.tasks.length !== plan.perVariant) {
       bad(`${label}: в варианте ${variant.no} задач ${variant.tasks.length}, а в плане ${plan.perVariant}`);
     }
@@ -90,7 +95,7 @@ function checkWork(p) {
         bad(`${label}: задача ${item.task.id} повторяется (вариант ${variant.no})`);
       }
       seen.add(key);
-      if (p.source === 'fipi') {
+      if (work.typeSource(p, item.type.id) === 'fipi') {
         const raw = prototypes.find((set) => set.id === item.setId);
         if (!isFipiTask(raw, item.task.id)) {
           bad(`${label}: ${item.task.id} — не из открытого банка`);
@@ -105,11 +110,57 @@ function checkWork(p) {
   return built;
 }
 
-/* Состав по умолчанию: ФИПИ, все типы, 2 задачи на тип, 1 вариант. */
+/* У каждого готового типа есть задачи ФИПИ; у типов, где набор целиком —
+   прототипы банка, их столько же, сколько задач в тренажёре раздела. */
+const { manifest } = requireSrc('lib/generator/manifest.ts');
+work.openTypes(catalog).forEach((type) => {
+  const fipi = type.sets.reduce((sum, set) => sum + (set.fipi === null ? set.count : set.fipi), 0);
+  const trainer = manifest.families.find((family) => family.id === type.id).prototypes.tasks;
+  if (fipi <= 0) {
+    bad(`«${type.title}»: задач ФИПИ 0`);
+  }
+  if (type.sets.every((set) => set.fipi === null) && fipi !== trainer) {
+    bad(`«${type.title}»: задач ФИПИ ${fipi}, а в тренажёре раздела ${trainer}`);
+  }
+});
+
+/* Шаблон «Весь №12, как на ЕГЭ»: все готовые типы по 2, по банку ФИПИ. */
+const ege = work.templates(catalog).find((item) => item.id === 'ege');
+if (ege === undefined || Object.values(ege.counts).some((n) => n !== 2)) {
+  bad('шаблон «Весь №12, как на ЕГЭ» — не все типы по 2');
+}
 checkWork(params('7K3F-00', 'fipi', 1));
-/* Два варианта по банку ФИПИ: прямая и показательная (у логарифмической
-   и тригонометрических задач банка на два варианта по 2 не хватает). */
+/* Два варианта по банку ФИПИ: прямая и показательная. */
 const base = checkWork(params('7K3F-00', 'fipi', 2, 2, ['linear', 'exponential']));
+/* Задач меньше, чем прототипов: прототипы идут по кругу между вариантами. */
+{
+  const p = params('R0T4-00', 'all', 2, 1, ['quadratic']);
+  const plan = work.planWork(p, catalog);
+  if (plan.variants[0][0].setId === plan.variants[1][0].setId) {
+    bad('1 задача параболы, 2 варианта: прототип в вариантах один и тот же');
+  }
+}
+/* Выключенный прототип в работу не попадает. */
+{
+  const p = params('0FF0-00', 'all', 2, 3, ['exponential'], { off: ['12E.D'] });
+  const built = checkWork(p);
+  if (built.variants.some((v) => v.tasks.some((t) => t.setId === '12E.D'))) {
+    bad('выключенный прототип 12E.D попал в работу');
+  }
+}
+/* «Добавить аналоги для этого типа» снимает нехватку. */
+{
+  const p = params('A7A7-00', 'fipi', 2, 4, ['trigonometric']);
+  const sh = work.planWork(p, catalog).shortages;
+  if (sh.length !== 1 || sh[0].enough !== 1) {
+    bad(`тригонометрия, 4 задачи × 2 варианта по ФИПИ: ждали «хватает на 1 вариант», план: ${JSON.stringify(sh.map((x) => x.enough))}`);
+  }
+  const fixed = { ...p, analogs: ['trigonometric'] };
+  if (work.planWork(fixed, catalog).shortages.length > 0) {
+    bad('тригонометрия с аналогами: нехватка осталась');
+  }
+  checkWork(fixed);
+}
 checkWork(params('AB12-00', 'all', 4));
 checkWork(params('ZZ99-00', 'all', 3, 3));
 checkWork(params('Q0Q0-00', 'fipi', 1, 1));
@@ -122,15 +173,25 @@ if (fingerprint(other) === fingerprint(first)) {
 }
 
 /* Нехватка банка ФИПИ видна в плане до сборки. */
-const many = work.planWork(params('7K3F-00', 'fipi', 2), catalog);
-if (!many.shortages.some((item) => item.type.id === 'trigonometric')) {
-  bad('2 варианта по 2 задачи при «Только ФИПИ»: план не сообщил о нехватке у тригонометрических');
+/* «Весь №12» по ФИПИ на 2 варианта: прототипы идут по кругу, банка хватает. */
+checkWork(params('E6E2-00', 'fipi', 2));
+
+/* Адрес настроек (без кода) туда и обратно. */
+{
+  const p = params('7K3F-00', 'fipi', 3, 2, null, { off: ['12E.D'], analogs: ['trigonometric'], order: 'mix' });
+  const { code: _code, ...settings } = p;
+  const back = work.parseSettings(new URLSearchParams(work.settingsQuery(settings)));
+  const strip = (x) => ({ ...x, counts: Object.fromEntries(Object.entries(x.counts).filter(([, n]) => n > 0)) });
+  if (JSON.stringify(strip(back)) !== JSON.stringify(strip(settings))) {
+    bad(`адрес настроек не восстанавливает их: ${JSON.stringify(back)}`);
+  }
 }
 
 /* Адрес работы туда и обратно. */
 const p0 = params('7K3F-00', 'fipi', 2, 2, ['linear', 'exponential']);
 const parsed = work.parseWorkQuery(new URLSearchParams(work.workQuery(p0)));
-if (JSON.stringify(parsed) !== JSON.stringify(p0)) {
+const stripZero = (x) => ({ ...x, counts: Object.fromEntries(Object.entries(x.counts).filter(([, n]) => n > 0)) });
+if (JSON.stringify(stripZero(parsed)) !== JSON.stringify(stripZero(p0))) {
   bad(`адрес работы не восстанавливает параметры: ${JSON.stringify(parsed)}`);
 }
 
@@ -168,7 +229,7 @@ for (const withAnswers of [false, true]) {
 }
 
 /* Генератор по всем типам. */
-const sets = work.defaultSets(catalog, 'all');
+const sets = work.openTypes(catalog).flatMap((type) => type.sets.map((set) => set.id));
 const genParams = {
   skills: sets,
   count: sets.length * 2,
@@ -205,7 +266,7 @@ buildDocument(gen, {});
 /* По первому прототипу каждого типа (выбор генератора по умолчанию), два
    примера на тип: пример находится и там, где у выбранного прототипа
    разбора нет (знак коэффициента параболы). */
-const firstOnly = work.firstSets(catalog);
+const firstOnly = work.openTypes(catalog).map((type) => type.sets[0].id);
 const gen2 = sheetSpec({ ...genParams, skills: firstOnly, count: firstOnly.length * 2, examples: 2 }, false, 'Графики функций');
 gen2.blocks.forEach((block) => {
   if ((block.leadItems ?? []).length !== 2) {

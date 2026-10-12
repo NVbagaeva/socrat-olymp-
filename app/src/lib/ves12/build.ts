@@ -42,6 +42,7 @@ import {
   planWork,
   rngFrom,
   shuffledBy,
+  typeSource,
   type WorkParams,
   type WorkPlan,
 } from './work';
@@ -176,41 +177,36 @@ class SetQueue {
 export function buildWork(params: WorkParams, catalog: Ves12Catalog): BuiltWork {
   const plan = planWork(params, catalog);
   const queues = new Map<string, SetQueue>();
-  const queue = (setId: string) => {
+  const queue = (setId: string, typeId: string) => {
     let found = queues.get(setId);
     if (found === undefined) {
-      found = new SetQueue(setId, params.code, params.source === 'fipi');
+      found = new SetQueue(setId, params.code, typeSource(params, typeId) === 'fipi');
       queues.set(setId, found);
     }
     return found;
   };
   const shown = new Set<string>();
-  /* Уровень задачи на каждом месте — по первому варианту. */
-  const levels: (string | null)[] = [];
+  /* Уровень задачи на месте — по первому варианту, если прототип тот же. */
+  const first: { setId: string; level: string | null }[] = [];
   let missing = 0;
-  const variants: WorkVariant[] = [];
-
-  for (let v = 1; v <= params.variants; v += 1) {
+  const variants: WorkVariant[] = plan.variants.map((slots, v) => {
     const tasks: WorkTask[] = [];
-    let slot = 0;
-    plan.types.forEach(({ type, slots }) => {
-      slots.forEach((setId) => {
-        const level = v === 1 ? null : (levels[slot] ?? null);
-        const task = queue(setId).take(shown, level);
-        if (task === null) {
-          missing += 1;
-        } else {
-          shown.add(shownKey(task));
-          if (v === 1) {
-            levels[slot] = task.meta.level ?? null;
-          }
-          tasks.push({ no: tasks.length + 1, type, setId, task });
-        }
-        slot += 1;
-      });
+    slots.forEach((slot, i) => {
+      const sample = first[i];
+      const level = v > 0 && sample !== undefined && sample.setId === slot.setId ? sample.level : null;
+      const task = queue(slot.setId, slot.type.id).take(shown, level);
+      if (v === 0) {
+        first[i] = { setId: slot.setId, level: task?.meta.level ?? null };
+      }
+      if (task === null) {
+        missing += 1;
+        return;
+      }
+      shown.add(shownKey(task));
+      tasks.push({ no: tasks.length + 1, type: slot.type, setId: slot.setId, task });
     });
-    variants.push({ no: v, tasks });
-  }
+    return { no: v + 1, tasks };
+  });
   return { plan, variants, missing };
 }
 
@@ -292,10 +288,28 @@ function sheetTask(item: Omit<WorkTask, 'type'> & { type: TypeRef }, rules: Reco
     : base;
 }
 
-/** Блоки варианта: по типам функций, с полосой-названием типа. */
-function variantBlocks(variant: WorkVariant, rules: Record<string, string>, withFigure: boolean) {
-  const blocks: { title: string; note: string; set: string; tasks: ReturnType<typeof sheetTask>[] }[] =
-    [];
+/**
+ * Блоки варианта: по типам функций, с полосой-названием типа. Вперемешку
+ * — один блок без полосы: тип по соседним задачам не угадать.
+ */
+function variantBlocks(
+  variant: WorkVariant,
+  rules: Record<string, string>,
+  withFigure: boolean,
+  order: WorkParams['order'],
+) {
+  const blocks: {
+    title: string;
+    note: string;
+    set: string;
+    head?: boolean;
+    tasks: ReturnType<typeof sheetTask>[];
+  }[] = [];
+  if (order === 'mix') {
+    return [
+      { title: '', note: '', set: 'mix', head: false, tasks: variant.tasks.map((item) => sheetTask(item, rules, withFigure)) },
+    ];
+  }
   variant.tasks.forEach((item) => {
     const last = blocks[blocks.length - 1];
     const task = sheetTask(item, rules, withFigure);
@@ -341,7 +355,7 @@ function answerCell(task: ReturnType<typeof sheetTask>): string {
  * потока неделим.
  */
 function keyTableAll(variants: ReturnType<typeof variantBlocks>[]): string[] {
-  const rows = (variants[0] ?? []).flatMap((block) => block.tasks.map((task) => ({ no: task.no, type: block.title })));
+  const rows = (variants[0] ?? []).flatMap((block) => block.tasks.map((task) => ({ no: task.no, type: task.method })));
   const cells = variants.map((blocks) => {
     const byNo = new Map<number, string>();
     blocks.forEach((block) => block.tasks.forEach((task) => byNo.set(task.no, answerCell(task))));
@@ -393,7 +407,7 @@ function gradesItem(params: WorkParams, total: number): string {
  */
 export function workSheetSpec(params: WorkParams, built: BuiltWork, withAnswers: boolean) {
   const rules = answerRules();
-  const variants = built.variants.map((variant) => variantBlocks(variant, rules, withAnswers));
+  const variants = built.variants.map((variant) => variantBlocks(variant, rules, withAnswers, params.order));
   const sub = subtitle(params);
   const title = (variant: number) => ({
     chip: content.title.chip,
@@ -504,4 +518,37 @@ export function exampleItems(type: TypeRef, sets: string[], count: number, seed:
     );
   }
   return out;
+}
+
+/* ── Предпросмотр на экране настройки ──────────────────────────── */
+
+export interface PreviewTask {
+  no: number;
+  typeTitle: string;
+  /** Условие, набранное KaTeX. */
+  html: string;
+  /** Рисунок условия — как на листе ученика, без построений. */
+  svg: string | null;
+}
+
+export interface WorkPreview {
+  /** Задачи начала первого варианта. */
+  tasks: PreviewTask[];
+  /** Мест, на которые банк не дал задачи. */
+  missing: number;
+}
+
+/** Начало первого варианта — для мини-листа в сводке. */
+export function previewOf(params: WorkParams, catalog: Ves12Catalog, count = 2): WorkPreview {
+  const built = buildWork(params, catalog);
+  const first = built.variants[0]?.tasks ?? [];
+  return {
+    missing: built.missing,
+    tasks: first.slice(0, count).map((item) => ({
+      no: item.no,
+      typeTitle: item.type.title,
+      html: trainerTaskFrom(item.task).questionHtml,
+      svg: item.task.svg === null ? null : (conditionSvg(item.task as EngineExtra) as string | null),
+    })),
+  };
 }

@@ -175,7 +175,12 @@ function answerRules(): Record<string, string> {
  * нельзя было угадать метод.
  */
 export function sheetBlocks(params: SheetParams): SheetBlock[] {
-  const plan = planCounts(sheetMethods(params.skills), params.count);
+  /* Генератор по всем типам задаёт задачи каждого прототипа сам (по
+     счётчикам типов); у генератора раздела — поровну по плану. */
+  const plan =
+    params.per === undefined
+      ? planCounts(sheetMethods(params.skills), params.count)
+      : { counts: params.skills.map((id) => ({ id, count: params.per?.[id] ?? 0 })) };
   const rules = answerRules();
   /* choice: задачи с выбором варианта листу годятся — варианты
      печатаются списком под условием, а на листе с ответами стоит
