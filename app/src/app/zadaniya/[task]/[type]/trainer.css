@@ -468,6 +468,23 @@
   background: var(--color-surface);
 }
 
+.tstats__razdel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tstats__ico {
+  flex: none;
+  width: 40px;
+}
+.tstats__ico img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .tstats__counter {
   margin: 0;
   font-size: var(--fs-body);
