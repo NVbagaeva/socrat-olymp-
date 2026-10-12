@@ -246,15 +246,18 @@ export function chertezhRazryada(p: ParamsKondensatora): string {
     `<circle cx="${px(X(p.t))}" cy="${px(Y(Ub))}" r="4.5" fill="${C.accent}" stroke="#fff" stroke-width="1.5"/>`,
   );
 
-  /* Подписи: точка, её координаты на осях, имена осей. */
+  /* Подписи: точка, её координаты на осях, имена осей. Имена осей —
+     в полях labelX/labelY, как у движка графиков: это подпись SVG, а не
+     формула KaTeX. */
   const f = THEME.font.axisName;
+  const osi = { labelX: 't, с', labelY: 'U, кВ' };
   const podpisTochki = `(${d(p.t).replace('{,}', ',')}; ${ch(r.U).replace('{,}', ',')})`;
   parts.push(
     svgText(podpisTochki, X(p.t) + 8, Y(Ub) - 10, 'start', { size: 16, weight: 600 }),
     svgText(d(p.t).replace('{,}', ','), X(p.t), Y(0) + 22, 'middle', { size: 15 }),
     svgText(ch(r.U).replace('{,}', ','), X(0) - 8, Y(Ub) + 5, 'end', { size: 15 }),
-    svgText('t, с', xKon, Y(0) + 22, 'end', { size: f, style: 'italic' }),
-    svgText('U, кВ', X(0) + 10, yKon + 10, 'start', { size: f, style: 'italic' }),
+    svgText(osi.labelX, xKon, Y(0) + 22, 'end', { size: f, style: 'italic' }),
+    svgText(osi.labelY, X(0) + 10, yKon + 10, 'start', { size: f, style: 'italic' }),
   );
   /* Ширина подписи точки не должна выходить за холст. */
   if (X(p.t) + 8 + textWidth(podpisTochki, 16) > W) {
