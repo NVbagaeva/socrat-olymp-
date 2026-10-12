@@ -1,0 +1,127 @@
+# Вход в облегчённый набор. Повторяет то, что у Supabase делает шлюз
+# (Kong, теперь Envoy), ровно в том объёме, который нужен supabase-js:
+#
+#   /auth/v1/*  → GoTrue,    /rest/v1/* → PostgREST;
+#   заголовок apikey обязателен и должен быть ключом anon или
+#   service_role, иначе 401 — как у Supabase;
+#   без apikey открыты только адреса из писем (/auth/v1/verify),
+#   по ним человек переходит из почты обычной ссылкой;
+#   CORS — только для адресов сайта.
+#
+# Ключи и адреса берутся из окружения контейнера ({$…}).
+
+{
+	admin off
+	# В пробе HTTPS нет: всё на localhost. На сервере имя api.budetege.ru
+	# и сертификат Let's Encrypt (infra/lite/).
+	auto_https off
+}
+
+(cors) {
+	@site {
+		header Origin {$SITE_ORIGIN}
+		header Origin {$SITE_ORIGIN_2}
+	}
+	header @site {
+		Access-Control-Allow-Origin "{http.request.header.Origin}"
+		Access-Control-Allow-Credentials "true"
+		Access-Control-Expose-Headers "Content-Range, Content-Location, X-Supabase-Api-Version"
+		Vary Origin
+	}
+	# Предварительный запрос браузера (OPTIONS) не несёт apikey,
+	# поэтому отвечаем на него до проверки ключа.
+	@preflight {
+		method OPTIONS
+		header Origin {$SITE_ORIGIN}
+		header Origin {$SITE_ORIGIN_2}
+	}
+	handle @preflight {
+		header {
+			Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+			Access-Control-Allow-Headers "Authorization, Apikey, Content-Type, Accept, Accept-Profile, Content-Profile, Prefer, Range, X-Client-Info, X-Supabase-Api-Version, X-Retry-Count"
+			Access-Control-Max-Age "3600"
+		}
+		respond 204
+	}
+	@foreign method OPTIONS
+	handle @foreign {
+		respond 403
+	}
+}
+
+(no_key) {
+	header Content-Type application/json
+	respond `{"message":"Invalid API key","hint":"Double check your Supabase anon or service_role API key."}` 401
+}
+
+{$API_ADDRESS} {
+	request_body {
+		max_size 1MB
+	}
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+	}
+
+	import cors
+
+	# Для «Проверить здоровье»: сам Caddy жив.
+	handle /health {
+		respond "ok" 200
+	}
+
+	# Ссылки из писем: подтверждение почты и сброс пароля. Ключа в них
+	# нет, токен одноразовый и проверяется самим GoTrue.
+	handle_path /auth/v1/verify* {
+		rewrite * /verify{path}
+		reverse_proxy auth:9999 {
+			# Адреса в письмах GoTrue строит из API_EXTERNAL_URL, а не из
+			# заголовков запроса.
+			header_up -X-Forwarded-Host
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
+	handle_path /auth/v1/* {
+		@bad_key not {
+			header apikey {$ANON_KEY}
+			header apikey {$SERVICE_ROLE_KEY}
+		}
+		handle @bad_key {
+			import no_key
+		}
+		reverse_proxy auth:9999 {
+			header_up -X-Forwarded-Host
+			header_down -Access-Control-Allow-Origin
+			header_down -Access-Control-Allow-Credentials
+			header_down -Access-Control-Expose-Headers
+		}
+	}
+
+	handle_path /rest/v1/* {
+		@bad_key not {
+			header apikey {$ANON_KEY}
+			header apikey {$SERVICE_ROLE_KEY}
+		}
+		handle @bad_key {
+			import no_key
+		}
+		reverse_proxy rest:3000 {
+			header_down -Access-Control-Allow-Origin
+			header_down -Access-Control-Allow-Credentials
+			header_down -Access-Control-Expose-Headers
+		}
+	}
+
+	handle {
+		respond 404
+	}
+}
+
+# Шаблоны писем для GoTrue. Порт не опубликован: виден только внутри
+# сети контейнеров.
+:8081 {
+	root * /srv/templates
+	file_server
+}

@@ -22,6 +22,11 @@ export interface TopbarProps {
   /** Адрес страницы уведомлений. Не задан — колокольчик кнопкой. */
   notificationsHref?: string;
   user?: { initials: string; name: string; role?: string };
+  /**
+   * Блок аккаунта справа: кнопка входа или кружок с меню. Задан —
+   * показывается вместо user; это живой компонент, а не данные.
+   */
+  userSlot?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }
@@ -35,6 +40,7 @@ export function Topbar({
   unread = true,
   notificationsHref,
   user,
+  userSlot,
   actions,
   className,
 }: TopbarProps) {
@@ -83,6 +89,7 @@ export function Topbar({
         </button>
       )}
 
+      {userSlot}
       {user !== undefined ? (
         <span className="topbar__user">
           <span className="avatar avatar--sm" aria-hidden="true">
@@ -92,9 +99,7 @@ export function Topbar({
               подписью к аватару. */}
           <span className="topbar__who">
             <span className="topbar__name">{user.name}</span>
-            {user.role !== undefined ? (
-              <span className="topbar__role">{user.role}</span>
-            ) : null}
+            {user.role !== undefined ? <span className="topbar__role">{user.role}</span> : null}
           </span>
         </span>
       ) : null}
