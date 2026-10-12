@@ -59,6 +59,7 @@ function lib() {
 function stepsHtml(shagi, answer) {
   const { model } = lib();
   const items = shagi.map((step) => ({
+    etap: step.etap,
     text: step.text,
     tex: step.formula,
     plain: step.formula ? model.texPlain(step.formula) : '',

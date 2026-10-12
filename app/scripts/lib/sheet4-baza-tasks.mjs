@@ -134,6 +134,7 @@ export function prototypesBySection() {
 function stepsHtml(model) {
   const { model: m } = lib();
   const items = model.solution.steps.map((step) => ({
+    etap: step.etap,
     text: step.text,
     tex: step.formula,
     plain: step.formula ? m.texPlain(step.formula) : '',
