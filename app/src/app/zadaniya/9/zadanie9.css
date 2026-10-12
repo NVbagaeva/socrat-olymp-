@@ -1,0 +1,251 @@
+/* Задание №9 «Производная и первообразная»: тренажёр, генератор, листы.
+   Оболочка, вкладки, карточки опорных задач — в общих слоях: здесь только
+   то, чего в них нет. Значения — только токены. */
+
+.z9-head {
+  margin-bottom: var(--space-6);
+}
+
+/* ── Тренажёр ─────────────────────────────────────────────────────
+   Конфигуратор, экран задания, пауза, подсказка с кнопками, разбор.
+   Ленту вкладок и общие панели не трогаем: правил position здесь нет. */
+
+.z9-wait {
+  min-height: 240px;
+}
+
+/* Миниатюры групп: рисунок движка или формула. */
+.z9-chart {
+  display: block;
+  width: 100%;
+}
+.z9-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.z9-formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.z9-formula .katex {
+  white-space: nowrap;
+}
+.z9-chart--big {
+  max-width: 220px;
+}
+.z9-skills .cfg-skill__chart {
+  max-width: 140px;
+}
+@media (max-width: 767.98px) {
+  .z9-skills .cfg-skill {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+  .z9-skills .cfg-skill__chart {
+    width: 100%;
+    max-width: none;
+  }
+}
+.z9-source-note {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+/* Строка над заданием: номер, время, пауза и завершение. */
+.z9-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+.z9-bar .ttask__count {
+  flex: 1 1 200px;
+}
+.z9-bar__time {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+.z9-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Рисунок условия. */
+.z9-ptask__pic {
+  width: 100%;
+  max-width: 420px;
+}
+.z9-risunok {
+  display: block;
+}
+.z9-risunok svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.z9-kartinka {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+}
+.z9-ttask__hint {
+  margin-top: var(--space-1);
+  color: var(--color-text-tertiary);
+}
+@media (max-width: 767.98px) {
+  .z9-ptask__pic {
+    max-width: none;
+  }
+}
+
+/* Пауза и подтверждение завершения. */
+.z9-pause {
+  max-width: 560px;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z9-pause__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+}
+.z9-pause__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z9-pause__time {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.z9-confirm {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z9-confirm__title {
+  margin: 0;
+  font-weight: 600;
+}
+.z9-confirm__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Подсказка: вопросы с кнопками ответов. */
+.z9-hint__list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.z9-hint__step.is-passed .z9-hint__q {
+  color: var(--color-text-secondary);
+}
+.z9-hint__no {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z9-hint__q {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-serif);
+  line-height: var(--lh-lg);
+}
+.z9-hint__opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z9-hint__opt {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z9-hint__opt:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.z9-hint__opt:disabled {
+  cursor: default;
+}
+.z9-hint__opt.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z9-hint__opt.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  opacity: 0.6;
+}
+.z9-hint__opt .katex {
+  white-space: nowrap;
+}
+.z9-hint__itog {
+  margin-top: var(--space-1);
+  color: var(--color-success);
+}
+.z9-hint__oops {
+  margin-top: var(--space-1);
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.z9-hint__done {
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+
+/* Решение. */
+.z9-razbor {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z9-razbor__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z9-razbor__steps {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.z9-razbor__head {
+  font-weight: 600;
+}
+.z9-razbor__line {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z9-razbor .katex {
+  white-space: nowrap;
+}

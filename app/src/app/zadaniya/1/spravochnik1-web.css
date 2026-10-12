@@ -1,0 +1,644 @@
+/* Справочник по планиметрии (задание №1), веб-страница.
+
+   Оболочка — теория №4 (TeoriyaShell, .vteor): содержание, шторка и
+   номера разделов описаны там. Здесь — шапка, поиск, сетка карточек,
+   цветные блоки и разбор внутри карточки. Цвета блоков — токены
+   --color-spr-* (styles/tokens.css): насыщенный цвет только у рамки и
+   ярлыка, заливка пастельная. Значения — только токены. */
+
+/* ── Шапка: подзаголовок, поиск, «Как пользоваться» ───────────── */
+
+.spr1-shapka {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.spr1-shapka__lead {
+  margin: calc(-1 * var(--space-3)) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+
+.spr1-shapka__ryad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  margin-top: calc(-1 * var(--space-3));
+}
+.spr1-shapka__ryad .spr1-shapka__lead {
+  flex: 1 1 320px;
+  margin: 0;
+}
+
+/* «Скачать PDF» и переключатель «С примерами». */
+.spr1-pdf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+.spr1-pdf__knopka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.spr1-pdf__ikonka {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.spr1-pdf__vybor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.spr1-pdf__switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 24px;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease-out;
+}
+.spr1-pdf__switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: transform 0.15s ease-out;
+}
+.spr1-pdf__switch:checked {
+  background: var(--color-primary);
+}
+.spr1-pdf__switch:checked::after {
+  transform: translateX(16px);
+}
+.spr1-pdf__switch:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spr1-pdf__switch,
+  .spr1-pdf__switch::after {
+    transition: none;
+  }
+}
+
+.spr1-poisk {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.spr1-poisk__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.spr1-poisk__ikonka {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--color-text-tertiary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.spr1-poisk__pole {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-12) var(--space-3) var(--space-12);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.spr1-poisk__pole:hover {
+  border-color: var(--color-border-hover);
+}
+.spr1-poisk__pole:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.spr1-poisk__kbd {
+  position: absolute;
+  right: var(--space-3);
+  top: 24px;
+  transform: translateY(-50%);
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-family: inherit;
+}
+.spr1-poisk__pusto {
+  flex-basis: 100%;
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+}
+
+.spr1-kak {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: var(--space-3) var(--space-4);
+}
+.spr1-kak__title {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.spr1-kak__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.spr1-kak__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.spr1-kak__oboznacheniya {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* ── Раздел и сетка карточек: 3 / 2 / 1 колонки по ширине ─────── */
+
+.spr1-razdel__lead {
+  margin: 0 0 var(--space-5);
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+.spr1-grid {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spr1-razdel {
+  container-type: inline-size;
+}
+@container (min-width: 720px) {
+  .spr1-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (min-width: 1140px) {
+  .spr1-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ── Карточка ─────────────────────────────────────────────────── */
+
+.spr1-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  scroll-margin-top: var(--space-16);
+}
+.spr1-card[hidden] {
+  display: none;
+}
+.spr1-card--wide {
+  grid-column: 1 / -1;
+}
+.spr1-card__yakor {
+  position: absolute;
+  top: 0;
+  scroll-margin-top: var(--space-16);
+}
+.spr1-card__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.spr1-card__glavnoe {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-4);
+}
+.spr1-card__bloki {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.spr1-card__niz {
+  display: grid;
+  gap: var(--space-3);
+}
+/* Широкая карточка: блоки слева, чертёж справа; «Как применять» и
+   «Важно» — рядом. */
+@container (min-width: 720px) {
+  .spr1-card--wide .spr1-card__glavnoe {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .spr1-card--wide .spr1-card__bloki {
+    flex: 1 1 0;
+  }
+  .spr1-card--wide .spr1-card__ris {
+    flex: 0 1 46%;
+  }
+  .spr1-card--wide .spr1-card__niz {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Чертёж: не ниже 220 px на компьютере, на узком экране ужимается
+   по ширине колонки. Ключевой элемент — золотисто-оранжевый. */
+.spr1-chertezh {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+.spr1-chertezh__ris {
+  max-width: 100%;
+}
+.spr1-chertezh__ris svg {
+  max-width: 100%;
+  height: auto;
+}
+.spr1-chertezh--neskolko .spr1-chertezh__ris {
+  flex: 1 1 140px;
+  display: flex;
+  justify-content: center;
+}
+.spr1-chertezh .pl-iskomoe,
+.spr1-chertezh .pl-iskomoe.pl-duga {
+  stroke: var(--color-spr-klyuch);
+}
+
+/* ── Блоки: определение, свойство, признак, теорема, важно ───── */
+
+.spr1-blok {
+  --spr-cvet: var(--color-spr-def);
+  --spr-fon: var(--color-spr-def-soft);
+  position: relative;
+  padding: var(--space-6) var(--space-4) var(--space-3);
+  margin-top: var(--space-2);
+  border: 1px solid var(--spr-cvet);
+  border-radius: var(--radius-lg);
+  background: var(--spr-fon);
+  color: var(--color-text);
+}
+.spr1-blok--svo {
+  --spr-cvet: var(--color-spr-svo);
+  --spr-fon: var(--color-spr-svo-soft);
+}
+.spr1-blok--pri {
+  --spr-cvet: var(--color-spr-pri);
+  --spr-fon: var(--color-spr-pri-soft);
+}
+.spr1-blok--teo {
+  --spr-cvet: var(--color-spr-teo);
+  --spr-fon: var(--color-spr-teo-soft);
+}
+.spr1-blok--vaz {
+  --spr-cvet: var(--color-spr-vaz);
+  --spr-fon: var(--color-spr-vaz-soft);
+}
+.spr1-blok--pri-men {
+  --spr-cvet: var(--color-spr-primenenie);
+  --spr-fon: var(--color-spr-primenenie-soft);
+}
+.spr1-blok__label {
+  display: inline-block;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--spr-cvet, var(--color-spr-def));
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.spr1-blok > .spr1-blok__label {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: var(--space-3);
+}
+.spr1-blok__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.spr1-blok__list--nomera {
+  counter-reset: spr1;
+}
+.spr1-blok__list--nomera > .spr1-blok__item {
+  counter-increment: spr1;
+  position: relative;
+  padding-left: var(--space-8);
+}
+.spr1-blok__list--nomera > .spr1-blok__item::before {
+  content: counter(spr1);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--spr-cvet);
+  color: var(--spr-cvet);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-align: center;
+  line-height: 22px;
+}
+.spr1-blok__formula {
+  display: block;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: center;
+  overflow-x: auto;
+}
+.spr1-blok__dop {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.spr1-blok__nazvanie {
+  color: var(--color-text);
+}
+
+/* Легенда «Как пользоваться» — те же ярлыки. */
+.spr1-kak__label--def {
+  --spr-cvet: var(--color-spr-def);
+}
+.spr1-kak__label--svo {
+  --spr-cvet: var(--color-spr-svo);
+}
+.spr1-kak__label--pri {
+  --spr-cvet: var(--color-spr-pri);
+}
+.spr1-kak__label--teo {
+  --spr-cvet: var(--color-spr-teo);
+}
+.spr1-kak__label--vaz {
+  --spr-cvet: var(--color-spr-vaz);
+}
+.spr1-kak__label--primer {
+  --spr-cvet: var(--color-spr-primer);
+}
+
+/* ── Таблица «признак → свойство» ─────────────────────────────── */
+
+.spr1-tablica-wrap {
+  overflow-x: auto;
+}
+.spr1-tablica {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+}
+.spr1-tablica th,
+.spr1-tablica td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.spr1-tablica thead th:nth-child(2) {
+  color: var(--color-spr-pri);
+}
+.spr1-tablica thead th:nth-child(3) {
+  color: var(--color-spr-svo);
+}
+
+/* ── Пример: раскрывается внутри карточки ─────────────────────── */
+
+.spr1-primer {
+  border: 1.5px dashed var(--color-spr-primer);
+  border-radius: var(--radius-lg);
+  background: var(--color-spr-primer-soft);
+}
+.spr1-primer__knopka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.spr1-primer__knopka::-webkit-details-marker {
+  display: none;
+}
+.spr1-primer__knopka:hover {
+  background: var(--color-border-info);
+}
+.spr1-primer__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.spr1-primer__zakryt,
+.spr1-primer[open] .spr1-primer__otkryt {
+  display: none;
+}
+.spr1-primer[open] .spr1-primer__zakryt {
+  display: inline;
+}
+.spr1-primer__telo {
+  display: grid;
+  gap: var(--space-5);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.spr1-razbor {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border-strong);
+}
+.spr1-razbor:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.spr1-razbor__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.spr1-razbor__no {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  font-weight: 700;
+}
+.spr1-razbor__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-brand);
+}
+.spr1-razbor__ist {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.spr1-razbor__ist--ne {
+  border-color: var(--color-border-accent);
+  color: var(--color-accent-text);
+}
+.spr1-razbor__body {
+  display: grid;
+  gap: var(--space-3);
+}
+.spr1-razbor__uslovie {
+  display: grid;
+  gap: var(--space-3);
+}
+.spr1-razbor__tekst {
+  margin: 0;
+}
+.spr1-razbor__shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spr1-razbor__shag {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.spr1-razbor__etap {
+  color: var(--color-spr-def);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.spr1-razbor__vykladka {
+  display: block;
+  overflow-x: auto;
+}
+.spr1-razbor__otvet {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-spr-vaz);
+  background: var(--color-spr-vaz-soft);
+}
+.spr1-razbor__otvet-label {
+  color: var(--color-spr-vaz);
+  font-weight: 700;
+}
+@container (min-width: 720px) {
+  .spr1-card--wide .spr1-razbor__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .spr1-card--wide .spr1-razbor__otvet {
+    grid-column: 2;
+  }
+}
+
+/* ── «Где на ЕГЭ» ─────────────────────────────────────────────── */
+
+.spr1-ege {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+}
+.spr1-ege__label {
+  color: var(--color-text-secondary);
+}
+.spr1-ege__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+a.spr1-ege__chip:hover {
+  background: var(--color-border-info);
+}
+
+/* Подсказка клавиш — только там, где есть клавиатура. */
+@media (max-width: 767.98px), (hover: none) {
+  .spr1-poisk__kbd {
+    display: none;
+  }
+}

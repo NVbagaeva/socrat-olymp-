@@ -1,0 +1,166 @@
+/* Страницы правовых документов: /politika/, /soglasie/, /soglashenie/.
+   Текст читается колонкой до 72 знаков; оглавление на широком экране —
+   липкой колонкой слева, на узком — раскрывающимся списком сверху. */
+
+.legal {
+  padding: var(--space-12) 0 var(--space-16);
+}
+
+.legal__draft {
+  margin-bottom: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.legal__head {
+  max-width: 760px;
+  margin-bottom: var(--space-10);
+}
+.legal__title {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text-brand);
+  overflow-wrap: break-word;
+}
+.legal__edition {
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+}
+
+.legal__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+.legal__body {
+  max-width: 72ch;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+}
+.legal__body p,
+.legal__body ul {
+  margin-top: var(--space-4);
+}
+.legal__body ul {
+  padding-left: var(--space-6);
+  list-style: disc;
+}
+.legal__body li + li {
+  margin-top: var(--space-2);
+}
+.legal__body strong {
+  font-weight: 600;
+}
+.legal__body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.legal__h {
+  margin-top: var(--space-10);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+  /* Заголовок по якорю не прячется под липкой шапкой. */
+  scroll-margin-top: calc(var(--h-site-head) + var(--space-4));
+}
+.legal__h:first-child {
+  margin-top: 0;
+}
+
+.legal-toc__t {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.legal-toc__list {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.legal-toc__list a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.legal-toc__list a:hover {
+  color: var(--color-primary);
+}
+
+.legal-toc__fold {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: var(--space-3) var(--space-4);
+}
+.legal-toc__fold summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.legal-toc__fold[open] summary {
+  margin-bottom: var(--space-3);
+}
+.legal-toc__side {
+  display: none;
+}
+
+.legal__others {
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+.legal__others ul {
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+@media (min-width: 1024px) {
+  .legal__grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+  .legal-toc__fold {
+    display: none;
+  }
+  .legal-toc__side {
+    display: block;
+    position: sticky;
+    top: calc(var(--h-site-head) + var(--space-6));
+    max-height: calc(100vh - var(--h-site-head) - var(--space-12));
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .legal {
+    padding-top: var(--space-8);
+  }
+  .legal__title {
+    font-size: var(--fs-h3);
+    line-height: var(--lh-h3);
+  }
+}
+
+@media print {
+  .legal-toc,
+  .legal__draft {
+    display: none;
+  }
+}

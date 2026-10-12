@@ -23,6 +23,10 @@ import path from 'node:path';
 import { chromium, webkit } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium, webkit);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(OUT)) {
@@ -66,6 +70,18 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  '/zadaniya/10/',
+  '/zadaniya/10/teoriya/',
+  '/zadaniya/10/opornye-zadachi/',
+  '/zadaniya/10/trenazher/',
+  '/zadaniya/10/generator/',
+  '/zadaniya/10/dlya-repetitorov/',
+  '/zadaniya/7/',
+  '/zadaniya/7/teoriya/',
+  '/zadaniya/7/opornye-zadachi/',
+  '/zadaniya/7/trenazher/',
+  '/zadaniya/7/generator/',
+  '/zadaniya/7/dlya-repetitorov/',
 ];
 const SIZES = [
   { name: 'компьютер', width: 1280, height: 800, isMobile: false },

@@ -1,0 +1,79 @@
+/* ── Переход между вкладками раздела ───────────────────────────────
+   Лента вкладок (RazdelTabs) запускает document.startViewTransition при
+   переходе на соседнюю вкладку (см. useVkladkaPerehod). Браузер делает
+   снимки «до» и «после» и анимирует только то, что названо здесь:
+
+   - razdel-vkladka — активная «таблетка» ленты: переезжает к новой
+     вкладке, а не перескакивает;
+   - razdel-panel — содержимое вкладки (.section-panel): старое быстро
+     гаснет, новое проявляется с небольшим подъёмом.
+
+   Остальная страница (шапка, боковое меню, заголовок раздела) в
+   переходе не участвует: у корня анимации нет, он меняется сразу.
+
+   Вкладки — соседние разделы одного уровня, поэтому сдвига «вперёд /
+   назад» нет: только перекрёстное проявление.
+
+   При «уменьшить движение» имён нет и скрипт перехода не запускает —
+   вкладки переключаются мгновенно, как раньше. Браузеры без View
+   Transitions тоже переключают мгновенно. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .tabs--lenta a[role='tab'][aria-selected='true'] {
+    view-transition-name: razdel-vkladka;
+  }
+
+  .section-panel {
+    view-transition-name: razdel-panel;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(razdel-vkladka) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease);
+}
+
+::view-transition-old(razdel-vkladka),
+::view-transition-new(razdel-vkladka) {
+  animation-duration: var(--dur-state);
+  animation-timing-function: var(--ease);
+}
+
+/* Панель меняет высоту вместе с содержимым: растягивать снимок
+   некрасиво, поэтому рамка сразу встаёт по новой странице, а меняются
+   только снимки внутри неё. */
+::view-transition-group(razdel-panel) {
+  animation: none;
+}
+
+::view-transition-image-pair(razdel-panel) {
+  isolation: auto;
+}
+
+/* Старое гаснет быстро, новое начинает проявляться, когда старого уже
+   почти не видно: текст двух вкладок не двоится. */
+::view-transition-old(razdel-panel) {
+  animation: razdel-gasnet 90ms linear both;
+}
+
+::view-transition-new(razdel-panel) {
+  animation: razdel-poyavlyaetsya var(--dur-switch) var(--ease) 70ms both;
+}
+
+@keyframes razdel-gasnet {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes razdel-poyavlyaetsya {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}

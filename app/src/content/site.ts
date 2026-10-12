@@ -5,6 +5,7 @@
  */
 
 import { HOWTO_HREF } from '@/content/onboarding';
+import { legalDocs } from '@/content/legal/documents';
 import { tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
@@ -48,7 +49,12 @@ export const site = {
        Связь — через Telegram-канал платформы, тот же, что на печатных
        листах. */
     links: [
-      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
-    ] satisfies ExternalLink[],
+      { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
+      { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
+      { label: 'Оферта', href: '#' },
+      { label: 'Контакты', href: '#' },
+    ] satisfies SiteLink[],
+    /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
+    operatorLabel: 'Оператор персональных данных:',
   },
 } as const;

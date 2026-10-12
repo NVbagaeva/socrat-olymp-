@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
+import { CookieNotice } from '@/components/CookieNotice';
 import { NavigationGuard } from '@/components/NavigationGuard';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <NavigationGuard />
         {children}
         <Onboarding />
+        <CookieNotice />
       </body>
     </html>
   );

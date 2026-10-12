@@ -15,6 +15,7 @@
  * `pryamaya`: по ней карточка рисует чертёж из тех же чисел.
  */
 
+import { sPodskazkoy } from '../podskazka';
 import type { Pryamaya } from '../pryamaya';
 import { dec, konechnaya, num, text, type Params, type Prototype } from '../types';
 import { otrezok as otrezokVizual, shagLL } from './vizual';
@@ -123,12 +124,14 @@ const P22: Prototype = {
     const l = d - c;
     return [
       {
-        text: 'Вся мера — длина отрезка распределения:',
+        etap: 'Вся мера',
+        text: 'Длина отрезка распределения:',
         formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
         value: L,
       },
       {
-        text: `Благоприятный промежуток — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
+        etap: 'Благоприятная часть',
+        text: `Промежуток — ${text(p, 'chego')} от ${dec(c)} до ${dec(d)} ${text(p, 'ed')}:`,
         formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
         value: l,
       },
@@ -373,15 +376,17 @@ const P23: Prototype = {
     const kray = storona(p) === 'nizhnyaya' ? 'до конца отрезка' : 'от начала отрезка';
     return [
       {
-        text: 'Вся мера — длина отрезка распределения:',
+        etap: 'Вся мера',
+        text: 'Длина отрезка распределения:',
         formula: `L = ${tex(b)} - ${tex(a)} = ${tex(L)}`,
         value: L,
       },
       {
+        etap: 'Благоприятная часть',
         text:
           storona(p) === 'nizhnyaya'
-            ? `Благоприятный промежуток — от ${dec(c)} ${text(p, 'ed')} ${kray}:`
-            : `Благоприятный промежуток — ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
+            ? `Промежуток от ${dec(c)} ${text(p, 'ed')} ${kray}:`
+            : `Промежуток ${kray} до ${dec(d)} ${text(p, 'ed')}:`,
         formula: `l = ${tex(d)} - ${tex(c)} = ${tex(l)}`,
         value: l,
       },
@@ -569,4 +574,22 @@ const P23: Prototype = {
   ],
 };
 
-export const PRYAMAYA: readonly Prototype[] = [P22, P23];
+/* Подсказки-вопросы (podskazka.ts): длины берутся из шагов разбора. */
+export const PRYAMAYA: readonly Prototype[] = [
+  sPodskazkoy(P22, (p) => ({
+    vse: 'Весь отрезок, на котором распределена величина',
+    vseNe: ['Нужный промежуток', 'Отрезок от нуля до правого конца'],
+    blago: 'длина нужного промежутка',
+    geom: true,
+    nOshibki: [num(p, 'b')],
+    mOshibki: [num(p, 'd')],
+  })),
+  sPodskazkoy(P23, (p) => ({
+    vse: 'Весь отрезок, на котором распределена величина',
+    vseNe: ['Нужный промежуток', 'Отрезок от нуля до правого конца'],
+    blago: 'длина промежутка от границы до конца отрезка',
+    geom: true,
+    nOshibki: [num(p, 'b')],
+    mOshibki: [num(p, 'g')],
+  })),
+];

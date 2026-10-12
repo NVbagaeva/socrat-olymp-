@@ -1,0 +1,109 @@
+/* Регистрация, плашка родителя и блок «Документы и данные». */
+
+.reg-form {
+  display: grid;
+  gap: var(--space-5);
+}
+.reg-form .field {
+  margin: 0;
+}
+.reg-form__roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.reg-form__roles legend {
+  width: 100%;
+  margin-bottom: var(--space-2);
+}
+.reg-form__hint {
+  margin-top: calc(var(--space-3) * -1);
+  text-align: center;
+}
+
+.consent-checks {
+  display: grid;
+  gap: var(--space-3);
+}
+.consent-checks a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.modal .consent-checks {
+  margin-top: var(--space-4);
+}
+
+.parent-pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-soft);
+}
+.parent-pending__t {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.parent-pending__b,
+.parent-pending__w {
+  margin-top: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.parent-pending > div {
+  flex: 1 1 280px;
+}
+.parent-pending .btn {
+  flex: none;
+}
+
+.account-docs {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.account-docs__t {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.account-docs__links {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.account-docs__links a {
+  color: var(--color-primary);
+}
+.account-docs__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+.account-docs__hint {
+  margin-top: var(--space-2);
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 559.98px) {
+  .parent-pending {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .account-docs__actions .btn {
+    flex: 1 1 100%;
+  }
+}

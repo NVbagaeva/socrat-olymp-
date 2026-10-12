@@ -33,7 +33,10 @@ export const GENERATOR_SOURCES = {
   4: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
   5: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
   8: ['lib/vychisleniya', 'content/sheet8.js'],
+  9: ['lib/proizvodnaya', 'content/sheet9.js', 'lib/sheet/answers9.js'],
   11: ['lib/zadanie11'],
+  7: ['lib/zadanie7', 'content/teoriya7.ts', 'content/zadanie7.ts'],
+  1: ['lib/planimetriya', 'lib/sheet/sheet.js', 'content/repetitory1.ts', 'content/teoriya1.ts'],
 };
 
 /* Crockford base32: без I, L, O, U — код читают с бумаги. */
@@ -46,7 +49,10 @@ function files(full) {
   if (!fs.statSync(full).isDirectory()) {
     return [full];
   }
-  return fs.readdirSync(full).sort().flatMap((name) => files(path.join(full, name)));
+  return fs
+    .readdirSync(full)
+    .sort()
+    .flatMap((name) => files(path.join(full, name)));
 }
 
 /** Версия одной области: два знака Crockford base32 из sha256 исходников. */
