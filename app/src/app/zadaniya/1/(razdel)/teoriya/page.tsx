@@ -23,5 +23,5 @@ function trenazher(proto: number): string {
  * планиметрии на сборке.
  */
 export default function Teoriya1Tab() {
-  return <Spravochnik1 trenazher={trenazher} />;
+  return <Spravochnik1 trenazher={trenazher} pdf={`${BASE}/pechat/spravochnik/`} />;
 }

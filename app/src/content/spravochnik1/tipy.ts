@@ -162,6 +162,21 @@ export const SPRAVOCHNIK_1 = {
   neIzBanka: 'Не из открытого банка',
   /** Подпись к «Где на ЕГЭ»: номер ведёт в тренажёр на этот прототип. */
   gdeNaEgeTitle: (n: number, nazvanie: string) => `Прототип ${n}: ${nazvanie}`,
+  /** PDF: кнопка на странице, переключатель примеров, лист. */
+  pdf: {
+    knopka: 'Скачать PDF',
+    sPrimerami: 'С примерами',
+    bezPrimerov: 'Без примеров',
+    vybor: 'Что войдёт в PDF',
+    lead: 'Откроется окно печати браузера: выберите «Сохранить как PDF». A4, книжная.',
+    gotovim: 'Раскладываем страницы…',
+    shapka: 'Справочник по планиметрии · Задание №1 ЕГЭ',
+    zadanie: 'Задание №1 ЕГЭ',
+    soderzhanie: 'Содержание',
+    /** Разбор ушёл в следующую колонку: к какой теме он. */
+    kTeme: 'К теме:',
+    str: 'стр.',
+  },
 } as const;
 
 export const KAK_POLZOVATSYA_1: KakPolzovatsya = {

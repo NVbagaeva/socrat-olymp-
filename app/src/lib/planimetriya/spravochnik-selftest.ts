@@ -43,6 +43,7 @@ import {
 } from './spravochnik-chertezhi';
 import { pustoyOtchet, renderPlan } from './render';
 import { proveritPodpisi } from './selftest';
+import { risunkiPechati1 } from './spravochnik-pdf';
 
 type Typeset = (tex: string) => string;
 
@@ -222,10 +223,10 @@ function proveritObyazatelnoe(problems: string[]): void {
 const GRADUSY_V_FORMULIROVKE = new Set(['znacheniya', 'ugol-30', 'trig-tupogo-ugla']);
 
 /** Рисунок рисуется движком без нарушений и наложений подписей. */
-function risunokChist(r: RisunokSpravochnika): string | null {
+function risunokChist(r: RisunokSpravochnika, kakEst = false): string | null {
   try {
     const o = pustoyOtchet();
-    const svg = renderPlan(r.scena, { ...r.optsii, vysota: 220 }, o);
+    const svg = renderPlan(r.scena, kakEst ? r.optsii : { ...r.optsii, vysota: 220 }, o);
     const p = [...o.problems, ...proveritPodpisi(o)];
     if (/NaN|Infinity/.test(svg)) p.push('NaN в SVG');
     return p.length === 0 ? null : p.join('; ');
@@ -236,8 +237,9 @@ function risunokChist(r: RisunokSpravochnika): string | null {
 
 /**
  * Чертежи справочника: у каждой карточки и каждого своего примера есть
- * чертёж; движок рисует его чисто; в теории нет чисел (номер угла 1–8
- * — можно); у теории выделен ключевой элемент.
+ * чертёж; движок рисует его чисто — на веб-холсте и на холсте PDF; в
+ * теории нет чисел (номер угла 1–8 — можно); у теории выделен
+ * ключевой элемент.
  */
 export function checkChertezhi(): { risunkov: number; problems: string[] } {
   const problems: string[] = [];
@@ -282,6 +284,12 @@ export function checkChertezhi(): { risunkov: number; problems: string[] } {
   }
   for (const k of SVOI_PRIMERY_S_CHERTEZHOM)
     if (!svoi.has(k)) problems.push(`чертёж своего примера «${k}»: нет такого примера`);
+  /* PDF рисует те же сцены на своём холсте — подписи проверяются и там. */
+  for (const { imya, risunok } of risunkiPechati1()) {
+    risunkov += 1;
+    const p = risunokChist(risunok, true);
+    if (p !== null) problems.push(`чертёж PDF «${imya}»: ${p}`);
+  }
   return { risunkov, problems };
 }
 

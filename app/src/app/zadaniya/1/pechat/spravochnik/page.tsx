@@ -1,36 +1,39 @@
 import type { Metadata } from 'next';
-import { PechatKnopka1 } from '@/components/tasks/planimetriya/PechatKnopka1';
+import { Suspense } from 'react';
+import { SpravochnikPdf1 } from '@/components/tasks/planimetriya/spravochnik/SpravochnikPdf1';
+import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
 import { zadanie1Title } from '@/content/zadanie1';
-import { spravochnikHtml } from '@/lib/planimetriya/spravochnik';
+import { specSpravochnika1 } from '@/lib/planimetriya/spravochnik-pdf';
 import 'katex/dist/katex.min.css';
+import '@/lib/sheet/theme.css';
+import '@/lib/sheet/sheet.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../pechat1.css';
-import '../spravochnik1.css';
+import './spravochnik1-pdf.css';
 
 export const metadata: Metadata = {
-  title: zadanie1Title('Справочник по планиметрии'),
+  title: zadanie1Title(SPRAVOCHNIK_1.title),
   robots: { index: false },
 };
 
 /**
- * Печатный справочник по планиметрии: все карточки вкладки «Теория»
- * плиткой — заголовок, формула, маленький чертёж; без пояснений и
- * примеров. Свой файл A4 на 2–4 листа, оболочки сайта нет.
+ * «Скачать PDF» справочника по планиметрии: лист A4 книжный в две
+ * колонки через конвейер листов генератора. Описание листа (карточки
+ * с формулами KaTeX и чертежами движка) собирается на сборке; с
+ * примерами или без — по адресу (?primery=0), раскладка и окно печати
+ * — в браузере. Оболочки сайта нет.
  */
-export default function Spravochnik1Page() {
+export default function Spravochnik1PdfPage() {
   return (
     <>
-      <PechatKnopka1
-        label="Скачать PDF / Печать"
-        lead="В окне печати выберите «Сохранить как PDF». Лист A4, книжная ориентация."
+      <script
+        id="spr1-spec"
+        type="application/json"
+        dangerouslySetInnerHTML={{ __html: specSpravochnika1() }}
       />
-      <main className="spr">
-        <header className="spr__head">
-          <h1 className="spr__title">Справочник по планиметрии</h1>
-          <p className="spr__lead">Задание №1 ЕГЭ профильного уровня · Будет на ЕГЭ</p>
-        </header>
-        <div dangerouslySetInnerHTML={{ __html: spravochnikHtml() }} />
-      </main>
+      <Suspense fallback={null}>
+        <SpravochnikPdf1 />
+      </Suspense>
     </>
   );
 }

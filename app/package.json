@@ -81,6 +81,7 @@
     "test:istochniki": "node scripts/check-istochniki-skryty.mjs",
     "test:illustrations": "node scripts/check-illustrations.mjs",
     "test:print-pages": "node scripts/check-print-pages.mjs",
+    "test:pdf-spravochnik-1": "node scripts/check-pdf-spravochnik-1.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
     "test:zadanie-hero": "node scripts/check-zadanie-hero.mjs",
