@@ -33,13 +33,20 @@ import {
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import { zapisOtveta } from './podskazka';
 import { klyuchZadachi, sealAnswer } from './secret';
 import {
+  ETAPY,
   konechnaya,
   round,
   type AnswerFormat,
-  type HintStep, type PrepBlok, type Prototype, type Step, type Variant } from './types';
+  type HintStep,
+  type PrepBlok,
+  type Prototype,
+  type Step,
+  type Variant,
+} from './types';
 
 export interface BadVariant {
   id: string;
@@ -81,12 +88,24 @@ const PLOHOY_TEX = /\d\.\d|\d\s*\/\s*\d|\d\s*:\s*\d/;
 
 /**
  * Шаги разбора по соглашению: выкладки только в формуле, формула в
- * TeX с запятой `0{,}25` и настоящими дробями. Возвращает список
- * нарушений — пустой, если всё по правилам.
+ * TeX с запятой `0{,}25` и настоящими дробями. Этап у каждого шага —
+ * из словаря ETAPY, «Ответ» — ровно у последнего шага с формулой: его
+ * число и есть ответ. Возвращает список нарушений — пустой, если всё
+ * по правилам.
  */
 export function problemyShagov(shagi: readonly Step[]): string[] {
   const problems: string[] = [];
+  const posledniy = shagi.reduce((k, s, i) => (s.formula === undefined ? k : i), -1);
   shagi.forEach((shag, i) => {
+    if (!(ETAPY as readonly string[]).includes(shag.etap)) {
+      problems.push(`шаг ${i + 1}: этап не из словаря — «${String(shag.etap)}»`);
+    } else if ((shag.etap === 'Ответ') !== (i === posledniy)) {
+      problems.push(
+        i === posledniy
+          ? `шаг ${i + 1}: этап последнего шага с формулой — «${shag.etap}», а не «Ответ»`
+          : `шаг ${i + 1}: этап «Ответ» не у последнего шага с формулой`,
+      );
+    }
     if (VYKLADKA_V_TEKSTE.test(shag.text)) {
       problems.push(`шаг ${i + 1}: выкладка в тексте — «${shag.text.slice(0, 50)}»`);
     }
@@ -138,7 +157,11 @@ export function problemyPodskazki(
     if (shag.options.length < 2 || shag.options.length > 4) {
       problems.push(`${gde}: кнопок ${shag.options.length}, нужно 2–4`);
     }
-    if (!Number.isInteger(shag.correct) || shag.correct < 0 || shag.correct >= shag.options.length) {
+    if (
+      !Number.isInteger(shag.correct) ||
+      shag.correct < 0 ||
+      shag.correct >= shag.options.length
+    ) {
       problems.push(`${gde}: верная кнопка ${shag.correct} вне списка`);
     }
     const vidno = shag.options.map(bezRazmetki);
@@ -153,7 +176,9 @@ export function problemyPodskazki(
     const ravno = shag.options.map((o) => (o.match(/=/g) ?? []).length);
     const uVernoy = ravno[shag.correct] ?? 0;
     if (uVernoy > 0 && ravno.every((k, i) => i === shag.correct || k < uVernoy)) {
-      problems.push(`${gde}: на верной кнопке больше «=», чем на остальных — она выдаёт себя видом`);
+      problems.push(
+        `${gde}: на верной кнопке больше «=», чем на остальных — она выдаёт себя видом`,
+      );
     }
     for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
       if ((stroka.match(/\$/g) ?? []).length % 2 !== 0) {
@@ -175,7 +200,9 @@ export function problemyPodskazki(
       for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
         const chisla: string[] = bezRazmetki(stroka).match(/\d+(?:,\d+)?/g) ?? [];
         if (chisla.includes(vBlank)) {
-          problems.push(`подсказка, шаг ${i + 1}: называет ответ ${vBlank} — «${bezRazmetki(stroka)}»`);
+          problems.push(
+            `подсказка, шаг ${i + 1}: называет ответ ${vBlank} — «${bezRazmetki(stroka)}»`,
+          );
         }
       }
     });
@@ -222,9 +249,7 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   }
 
   if (prototype.podskazka !== undefined) {
-    problems.push(
-      ...problemyPodskazki(prototype.podskazka(p), otvet, prototype.format, znakov),
-    );
+    problems.push(...problemyPodskazki(prototype.podskazka(p), otvet, prototype.format, znakov));
   }
 
   const shagi = prototype.shagi(p);
@@ -305,7 +330,12 @@ export function checkGeneratory(bank: readonly Prototype[], zeren = 500): Genera
         continue;
       }
       vsego += 1;
-      const oshibki = problemsOf(prototype, { n: 0, source: 'novyj', sourceNote: 'генератор', params });
+      const oshibki = problemsOf(prototype, {
+        n: 0,
+        source: 'novyj',
+        sourceNote: 'генератор',
+        params,
+      });
       if (oshibki.length > 0) {
         problems.push(
           `${prototype.id}, зерно ${zerno}, ${JSON.stringify(params)}: ${oshibki.join('; ')}`,
@@ -420,6 +450,8 @@ export interface PrepReport {
    * задачу, которой нет, или превью блока без задачи по картинке.
    */
   kartinki: string[];
+  /** Опорные задачи без подсказки-вопросов. */
+  bezPodskazki: string[];
   bad: BadVariant[];
 }
 
@@ -435,6 +467,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
   const duplicates: string[] = [];
   const vidennye = new Set<string>();
   const nomera = new Set<number>();
+  const bezPodskazkiOpornye: string[] = [];
 
   let zadachi = 0;
   let mismatch = 0;
@@ -471,6 +504,15 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
       }
       if (zadacha.okruglenie === undefined && !konechnaya(otvet)) {
         problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+      }
+      /* Подсказка — та же, что уйдёт ученику (podskazkaOpornoy). */
+      const podskazka = podskazkaOpornoy(zadacha);
+      if (podskazka === undefined) {
+        bezPodskazkiOpornye.push(zadacha.id);
+      } else {
+        problems.push(
+          ...problemyPodskazki(podskazka, otvet, 'десятичная', zadacha.okruglenie ?? null),
+        );
       }
 
       const posledniy = zadacha.shagi[zadacha.shagi.length - 1];
@@ -528,6 +570,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     vykladki,
     duplicates,
     kartinki,
+    bezPodskazki: bezPodskazkiOpornye,
     bad,
   };
 }

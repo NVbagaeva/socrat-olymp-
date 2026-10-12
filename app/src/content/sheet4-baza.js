@@ -83,12 +83,18 @@ export const metodLabel = (nomer, nazvanie) => 'Метод ' + nomer + ' · ' + 
 /** Раздел «Ответы» файла для учителя. */
 export const otvety = { title: 'Ответы', note: 'по разделам, сквозная нумерация' };
 
+/** Раздел подсказок в конце файла для учителя. */
+export const podskazki = {
+  title: 'Подсказки по шагам',
+  note: 'вопросы кнопки «Подсказка» на сайте; верный ответ — жирным',
+};
+
 /** Названия файлов базы. */
 export const files = {
   uchenik: 'Zadanie_4_baza_uchenik',
   uchitel: 'Zadanie_4_baza_uchitel',
 };
 
-const content = { head, foot, subtitle, variants, dvoyniki, sections, metodLabel, otvety, files };
+const content = { head, foot, subtitle, variants, dvoyniki, sections, metodLabel, otvety, podskazki, files };
 
 export default content;

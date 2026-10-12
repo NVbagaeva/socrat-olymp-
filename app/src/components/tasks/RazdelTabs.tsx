@@ -8,6 +8,9 @@ import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
 import { useStickyTabs } from './useStickyTabs';
 import { useVkladkaPerehod } from './useVkladkaPerehod';
+import { sessionText } from './session/text';
+import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
+import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { VkladkaIkonka } from './VkladkaIkonka';
 
 export interface RazdelTabsProps {
@@ -76,6 +79,10 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
     }
   }, [active?.id]);
 
+  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  const sessions = useActiveTrainerScopes();
+  const trainerActive = hasActiveScope(sessions, scopeOfPath(base));
+
   const lenta = (
     <Tabs
       className="tabs--lenta"
@@ -87,6 +94,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
         label: tab.label,
         icon: tab.icon === undefined ? undefined : <VkladkaIkonka name={tab.icon} />,
         href: `${base}/${tab.tail}`,
+        ...(tab.id === 'trenazher' && trainerActive ? { badge: sessionText.menuDot } : {}),
       }))}
     />
   );
