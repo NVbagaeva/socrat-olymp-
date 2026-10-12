@@ -72,6 +72,12 @@ export const prototypeSections = [
 /** Раздел «Ответы» файла для учителя. */
 export const otvety = { title: 'Ответы', note: 'по разделам, сквозная нумерация' };
 
+/** Раздел подсказок в конце файла для учителя. */
+export const podskazki = {
+  title: 'Подсказки по шагам',
+  note: 'вопросы кнопки «Подсказка» на сайте; верный ответ — жирным',
+};
+
 /** Названия файлов сборника. */
 export const files = {
   uchenik: 'zadanie-5-veroyatnosti-sobytiy-uchenik',
@@ -80,6 +86,6 @@ export const files = {
   uchitelChb: 'zadanie-5-veroyatnosti-sobytiy-uchitel-chb',
 };
 
-const content = { head, foot, subtitle, recap, prototypeSections, otvety, files };
+const content = { head, foot, subtitle, recap, prototypeSections, otvety, podskazki, files };
 
 export default content;

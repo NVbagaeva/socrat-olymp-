@@ -203,6 +203,27 @@ function checkTeacherItems(name) {
       fail(name + ': задача ' + no + ': у последнего шага с формулой этап не «Ответ»');
     }
   });
+
+  /* Раздел «Подсказки по шагам» в конце: по карточке на задачу, в
+     каждом вопросе ровно один верный ответ (жирным) и хотя бы два
+     варианта. */
+  const hints = loaded.spec.items.filter((item) => /class="[^"]*\bsheet-hint"/.test(item));
+  if (hints.length !== expected.length) {
+    fail(name + ': подсказок в конце файла ' + hints.length + ', задач ' + expected.length);
+  }
+  hints.forEach((card, index) => {
+    const no = expected[index] ? expected[index].no : index + 1;
+    const shagi = card.match(/<li class="sheet-step sheet-hint-step">[\s\S]*?<\/li>/g) || [];
+    if (shagi.length < 2) { fail(name + ': в подсказке к задаче ' + no + ' меньше двух вопросов'); }
+    shagi.forEach((shag, i) => {
+      const right = (shag.match(/class="sheet-hint-right"/g) || []).length;
+      const options = right + (shag.match(/class="sheet-hint-option"/g) || []).length;
+      if (right !== 1 || options < 2) {
+        fail(name + ': подсказка к задаче ' + no + ', вопрос ' + (i + 1) +
+          ': верных ' + right + ', вариантов ' + options);
+      }
+    });
+  });
 }
 
 /* ══════════════════════════════════════════════════════════
