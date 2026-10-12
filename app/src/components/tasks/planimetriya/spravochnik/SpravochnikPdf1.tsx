@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
+import type { PdfSpravochnika } from '@/content/spravochnik1/pdf';
+import { Nazad1 } from './Nazad1';
+import { SkachatPdf1 } from './SkachatPdf1';
 
 const PDF = SPRAVOCHNIK_1.pdf;
 
@@ -36,7 +39,16 @@ async function shriftyGotovy(items: string[]): Promise<void> {
  * здесь из него по адресу (?primery=0) снимаются разборы, раскладку
  * делает paginate.js, затем открывается окно печати: «Сохранить как PDF».
  */
-export function SpravochnikPdf1() {
+export function SpravochnikPdf1({
+  fayly,
+  teoriya,
+  zadanie,
+}: {
+  fayly: { sPrimerami: PdfSpravochnika; bezPrimerov: PdfSpravochnika };
+  /** Вкладка «Теория» и раздел задания №1: «Назад» и хлебные крошки. */
+  teoriya: string;
+  zadanie: string;
+}) {
   const query = useSearchParams();
   const sPrimerami = query.get('primery') !== '0';
   const [done, setDone] = useState(false);
@@ -91,6 +103,7 @@ export function SpravochnikPdf1() {
 
   return (
     <>
+      <Nazad1 teoriya={teoriya} zadanie={zadanie} />
       <div className="z1-print-bar spr1p-bar" data-print-bar>
         <span className="spr1p-bar__vybor" role="group" aria-label={PDF.vybor}>
           <a className="spr1p-bar__var" href="./" aria-current={sPrimerami ? 'true' : undefined}>
@@ -104,15 +117,18 @@ export function SpravochnikPdf1() {
             {PDF.bezPrimerov}
           </a>
         </span>
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => window.print()}
-          disabled={!done}
-        >
-          {done ? PDF.knopka : PDF.gotovim}
-        </button>
-        <span className="z1-print-bar__lead">{PDF.lead}</span>
+        <SkachatPdf1 fayly={fayly} sPrimerami={sPrimerami} />
+        <span className="spr1p-bar__pechat">
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() => window.print()}
+            disabled={!done}
+          >
+            {done ? PDF.knopka : PDF.gotovim}
+          </button>
+          <span className="z1-print-bar__lead">{PDF.lead}</span>
+        </span>
       </div>
       <div id="sheet-measure" />
       <div id="sheet-pages" />

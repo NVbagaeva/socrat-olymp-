@@ -7,6 +7,7 @@ import {
   SPRAVOCHNIK_1,
   type Razdel1,
 } from '@/content/spravochnik1';
+import { PDF_SPRAVOCHNIKA_1 } from '@/content/spravochnik1/pdf';
 import { PROGRESS_1 } from '@/content/zadanie1';
 import { chertezhTemy } from '@/lib/planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '@/lib/planimetriya/render';
@@ -77,7 +78,7 @@ function Razdel({ r, trenazher }: { r: Razdel1; trenazher?: (proto: number) => s
  * Оболочка — теория №4 и №2 (TeoriyaShell): содержание стоит липкой
  * колонкой, на узком экране его открывает кнопка «Содержание»; у
  * открытого раздела в содержании видны его темы. Под заголовком —
- * подзаголовок, «Скачать PDF» (с примерами или без), «Как
+ * подзаголовок, «Скачать справочник» (готовый PDF, с примерами или без), «Как
  * пользоваться» и поиск по темам. Страница
  * серверная: формулы набирает KaTeX, чертежи рисует движок на сборке.
  */
@@ -86,7 +87,7 @@ export function Spravochnik1({
   pdf,
 }: {
   trenazher?: (proto: number) => string;
-  /** Адрес печатной страницы: «Скачать PDF». */
+  /** Адрес печатной страницы: «Открыть для печати» под кнопкой «Скачать справочник». */
   pdf?: string;
 }) {
   const razdely = RAZDELY_SPRAVOCHNIKA_1.map((r) => ({
@@ -106,7 +107,7 @@ export function Spravochnik1({
         <div className="spr1-shapka">
           <div className="spr1-shapka__ryad">
             <p className="spr1-shapka__lead">{SPRAVOCHNIK_1.lead}</p>
-            {pdf === undefined ? null : <SkachatPdf1 adres={pdf} />}
+            {pdf === undefined ? null : <SkachatPdf1 fayly={PDF_SPRAVOCHNIKA_1} pechat={pdf} />}
           </div>
           <Poisk1 />
           <KakPolzovatsya />

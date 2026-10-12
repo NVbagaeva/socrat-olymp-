@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { SpravochnikPdf1 } from '@/components/tasks/planimetriya/spravochnik/SpravochnikPdf1';
+import { PDF_SPRAVOCHNIKA_1 } from '@/content/spravochnik1/pdf';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
-import { zadanie1Title } from '@/content/zadanie1';
+import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
+import { ZADANIYA } from '@/lib/paths';
 import { specSpravochnika1 } from '@/lib/planimetriya/spravochnik-pdf';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
@@ -10,6 +12,8 @@ import '@/lib/sheet/sheet.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../pechat1.css';
 import './spravochnik1-pdf.css';
+
+const BASE = `${ZADANIYA}/${ZADANIE1.slug}`;
 
 export const metadata: Metadata = {
   title: zadanie1Title(SPRAVOCHNIK_1.title),
@@ -32,7 +36,11 @@ export default function Spravochnik1PdfPage() {
         dangerouslySetInnerHTML={{ __html: specSpravochnika1() }}
       />
       <Suspense fallback={null}>
-        <SpravochnikPdf1 />
+        <SpravochnikPdf1
+          fayly={PDF_SPRAVOCHNIKA_1}
+          teoriya={`${BASE}/teoriya/`}
+          zadanie={`${BASE}/`}
+        />
       </Suspense>
     </>
   );
