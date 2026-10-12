@@ -168,6 +168,8 @@ for (const c of CHASTI_EDINIC) {
         });
         break;
       case 'izBanka':
+      case 'proverka':
+        /* «Проверь себя» проверяет pnpm test:proverka-edinic. */
         break;
       default:
         add(w, 'неизвестный блок');

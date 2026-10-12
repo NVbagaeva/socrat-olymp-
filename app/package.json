@@ -104,6 +104,8 @@
     "test:uravneniya": "node scripts/check-uravneniya.mjs",
     "test:prikladnye": "node scripts/check-prikladnye.mjs",
     "test:edinicy": "node scripts/check-edinicy.mjs",
+    "test:proverka-edinic": "node scripts/check-proverka-edinic.mjs",
+    "test:proverka-edinic-site": "node scripts/check-proverka-edinic-site.mjs",
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",

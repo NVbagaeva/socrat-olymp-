@@ -98,6 +98,11 @@ export type BlokEdinic =
     }
   /** Место для примера из банка: его подставляет задание (№10). */
   | { vid: 'izBanka' }
+  /**
+   * «Проверь себя»: задачи с выбором ответа и автопроверкой
+   * (lib/teoriya/proverka-edinic.ts, components/teoriya/ProverSebya.tsx).
+   */
+  | { vid: 'proverka'; nabor: 'kak-perevodit' | 'sostavnye' | 'stepeni' }
   /** «Где пригодится»: пункты со ссылками. */
   | { vid: 'gde'; title: string; punkty: { tekst: string; href?: string; ssylka?: string }[] };
 
@@ -211,6 +216,7 @@ const KAK_PEREVODIT: ChastEdinic = {
         },
       ],
     },
+    { vid: 'proverka', nabor: 'kak-perevodit' },
   ],
 };
 
@@ -308,6 +314,7 @@ const SOSTAVNYE: ChastEdinic = {
         },
       ],
     },
+    { vid: 'proverka', nabor: 'sostavnye' },
     {
       vid: 'ramka',
       tip: 'vaz',
@@ -544,6 +551,7 @@ const STEPENI: ChastEdinic = {
       ],
     },
     { vid: 'izBanka' },
+    { vid: 'proverka', nabor: 'stepeni' },
     {
       vid: 'gde',
       title: 'Где пригодится',

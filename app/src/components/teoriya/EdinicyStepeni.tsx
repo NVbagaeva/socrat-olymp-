@@ -16,6 +16,8 @@ import {
   type TipRamki,
 } from '@/content/teoriya-edinicy';
 import { kartinkaStepeni } from '@/lib/teoriya/illyustracii-stepeni';
+import { zadachiProverki } from '@/lib/teoriya/proverka-server';
+import { ProverSebya } from './ProverSebya';
 
 /**
  * Общая теория «Единицы измерения» и «Степени десяти» (№10 и №11).
@@ -255,12 +257,19 @@ function Blok({ b, izBanka }: { b: BlokEdinic; izBanka?: ReactNode }): ReactNode
             {b.gruppy.map((g) => (
               <section className="ed-fakty__gruppa" key={g.title}>
                 <h6 className="ed-fakty__title">{g.title}</h6>
+                {/* Сетка в три колонки: левая часть, «=», правая — знаки
+                    равенства у всех фактов группы стоят в одну линию. */}
                 <ul className="ed-fakty__spisok">
-                  {g.fakty.map((f) => (
-                    <li key={f}>
-                      <Tex text={`$${f}$`} />
-                    </li>
-                  ))}
+                  {g.fakty.map((f) => {
+                    const i = f.indexOf('=');
+                    return (
+                      <li className="ed-fakt" key={f}>
+                        <Tex className="ed-fakt__l" text={`$${f.slice(0, i)}$`} />
+                        <Tex className="ed-fakt__eq" text="$=$" />
+                        <Tex className="ed-fakt__r" text={`$${f.slice(i + 1)}$`} />
+                      </li>
+                    );
+                  })}
                 </ul>
               </section>
             ))}
@@ -349,6 +358,8 @@ function Blok({ b, izBanka }: { b: BlokEdinic; izBanka?: ReactNode }): ReactNode
     }
     case 'izBanka':
       return izBanka ?? null;
+    case 'proverka':
+      return <ProverSebya klyuch={`edinicy:${b.nabor}`} zadachi={zadachiProverki(b.nabor)} />;
     case 'gde':
       return (
         <Ramka tip="gde" metka={b.title}>
