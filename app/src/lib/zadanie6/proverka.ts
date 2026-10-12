@@ -39,12 +39,19 @@ interface Lozhnyy {
  */
 function varianty(r: Rng, verno: number, lozhnye: Lozhnyy[]): VariantZadachi[] {
   const okr = (x: number) => Math.round(x * 1e9) / 1e9;
-  const konechnoe = (x: number) => Number.isFinite(x) && Math.abs(x * 1e4 - Math.round(x * 1e4)) < 1e-6;
+  const konechnoe = (x: number) =>
+    Number.isFinite(x) && Math.abs(x * 1e4 - Math.round(x * 1e4)) < 1e-6;
   const byli = new Set([m(okr(verno))]);
   const out: VariantZadachi[] = [{ tekst: m(okr(verno)), verno: true }];
   const zapas: Lozhnyy[] = [
-    { x: verno * 2, podskazka: 'Ответ вдвое больше верного: проверьте, не сложено ли что-то дважды.' },
-    { x: verno + 0.1, podskazka: 'Пересчитайте по формуле раздела: одно из слагаемых посчитано неверно.' },
+    {
+      x: verno * 2,
+      podskazka: 'Ответ вдвое больше верного: проверьте, не сложено ли что-то дважды.',
+    },
+    {
+      x: verno + 0.1,
+      podskazka: 'Пересчитайте по формуле раздела: одно из слагаемых посчитано неверно.',
+    },
     { x: verno / 2, podskazka: 'Ответ вдвое меньше верного: проверьте, на что вы делили.' },
   ];
   for (const l of [...lozhnye, ...zapas]) {
