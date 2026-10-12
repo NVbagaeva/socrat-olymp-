@@ -230,6 +230,33 @@ export function answersItems(blocks) {
   return items;
 }
 
+/**
+ * Подсказки всех вариантов в конце файла для учителя: по прототипам
+ * банка и конспекта, та же подсказка, что на сайте, на числах каждого варианта.
+ */
+export function hintsItems(blocks) {
+  const { bank, modeli } = lib();
+  const map = new Map();
+  [...bank.BANK_4, ...bank.KONSPEKT_4].forEach((prototype) => {
+    prototype.varianty.forEach((variant) => {
+      map.set(modeli.modelVarianta(prototype, variant).id,
+        prototype.podskazka ? prototype.podskazka(variant.params) : undefined);
+    });
+  });
+  const items = [answers.sectionHead(content.podskazki.title, content.podskazki.note)];
+  blocks
+    .filter((block) => block.tasks.length)
+    .forEach((block) => {
+      items.push(answers.subHead(block.id + ' · ' + block.title));
+      block.tasks.forEach((task) => {
+        const shagi = map.get(task.id);
+        if (!shagi) { throw new Error('у задачи ' + task.id + ' нет подсказки'); }
+        items.push(answers.hint(task.no, shagi));
+      });
+    });
+  return items;
+}
+
 /** Название задания и строка компактной шапки — те же, что на сайте. */
 export function naming() {
   const { LIST_4 } = lib().list;
@@ -254,7 +281,7 @@ export function sheetSpec(blocks, options) {
     recap: null,
     blocks,
     withAnswerLine: !options.withAnswers,
-    extraItems: options.withAnswers ? answersItems(blocks) : [],
+    extraItems: options.withAnswers ? [...answersItems(blocks), ...hintsItems(blocks)] : [],
     foot: content.foot,
   };
 }
