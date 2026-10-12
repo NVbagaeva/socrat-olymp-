@@ -150,12 +150,14 @@ const K01: Prototype = prototip({
     const N = num(p, 'm') + num(p, 'k') + num(p, 'v');
     return [
       {
-        text: 'Все исходы — любой из пирожков:',
+        etap: 'Все исходы',
+        text: 'Любой из пирожков:',
         formula: `n = ${num(p, 'm')} + ${num(p, 'k')} + ${num(p, 'v')} = ${N}`,
         value: N,
       },
       {
-        text: `Благоприятные — пирожки с ${nachinka(p).tv}:`,
+        etap: 'Благоприятные исходы',
+        text: `Пирожки с ${nachinka(p).tv}:`,
         formula: `m = ${kol01(p)}`,
         value: kol01(p),
       },
@@ -243,9 +245,10 @@ const K02: Prototype = prototip({
       .filter((z) => z.key !== zhanr(p).key)
       .map((z) => num(p, z.key));
     return [
-      { text: 'Все исходы — любой из фильмов:', formula: `n = ${N}`, value: N },
+      { etap: 'Все исходы', text: 'Любой из фильмов:', formula: `n = ${N}`, value: N },
       {
-        text: `Благоприятные — все, кроме ${zhanr(p).tv.replace(/ой$|ом$|ей$/, (m) => ({ ой: 'ы', ом: 'ов', ей: 'й' })[m] ?? m)}, то есть остальные два жанра:`,
+        etap: 'Благоприятные исходы',
+        text: `Все, кроме ${zhanr(p).tv.replace(/ой$|ом$|ей$/, (m) => ({ ой: 'ы', ом: 'ов', ей: 'й' })[m] ?? m)}, то есть остальные два жанра:`,
         formula: `m = ${ostalnye.join(' + ')} = ${N - ne}`,
         value: N - ne,
       },
@@ -319,8 +322,18 @@ const K03: Prototype = prototip({
   otvet: (p) => num(p, 'k') / num(p, 'N'),
   perebor: (p) => 1 - (num(p, 'N') - num(p, 'k')) / num(p, 'N'),
   shagi: (p) => [
-    { text: 'Все исходы — любая из карт:', formula: `n = ${num(p, 'N')}`, value: num(p, 'N') },
-    { text: 'Благоприятные — карты мафии:', formula: `m = ${num(p, 'k')}`, value: num(p, 'k') },
+    {
+      etap: 'Все исходы',
+      text: 'Любая из карт:',
+      formula: `n = ${num(p, 'N')}`,
+      value: num(p, 'N'),
+    },
+    {
+      etap: 'Благоприятные исходы',
+      text: 'Карты мафии:',
+      formula: `m = ${num(p, 'k')}`,
+      value: num(p, 'k'),
+    },
     shagP(num(p, 'k'), num(p, 'N')),
   ],
   varianty: [
@@ -363,12 +376,15 @@ const K04: Prototype = prototip({
   otvet: (p) => num(p, 'k') / num(p, 'N'),
   perebor: (p) => dolya(num(p, 'N'), (i) => i <= num(p, 'k')),
   shagi: (p) => [
-    { text: 'Все исходы — любой из подъездов:', formula: `n = ${num(p, 'N')}`, value: num(p, 'N') },
     {
-      text:
-        num(p, 'k') === 2
-          ? 'Благоприятные — первый и второй подъезды:'
-          : 'Благоприятные — первые три подъезда:',
+      etap: 'Все исходы',
+      text: 'Любой из подъездов:',
+      formula: `n = ${num(p, 'N')}`,
+      value: num(p, 'N'),
+    },
+    {
+      etap: 'Благоприятные исходы',
+      text: num(p, 'k') === 2 ? 'Первый и второй подъезды:' : 'Первые три подъезда:',
       formula: `m = ${num(p, 'k')}`,
       value: num(p, 'k'),
     },
@@ -450,12 +466,14 @@ const K05: Prototype = prototip({
     const m = n / vse.length;
     return [
       {
-        text: `Все исходы — порядки ${vse.length === 3 ? 'троих' : 'четверых'}: ${perechislenie(vse.map((s) => `${s} (${s[0]})`))}:`,
+        etap: 'Все исходы',
+        text: `Порядки ${vse.length === 3 ? 'троих' : 'четверых'}: ${perechislenie(vse.map((s) => `${s} (${s[0]})`))}:`,
         formula: `n = ${n}`,
         value: n,
       },
       {
-        text: `Благоприятные — порядки, где ${text(p, 'reper')} последний:`,
+        etap: 'Благоприятные исходы',
+        text: `Порядки, где ${text(p, 'reper')} последний:`,
         formula: `m = ${m}`,
         value: m,
       },
@@ -529,12 +547,14 @@ const K06: Prototype = prototip({
   perebor: (p) => 1 - (n06(p) - num(p, derevo06(p).key)) / n06(p),
   shagi: (p) => [
     {
-      text: 'Отношение задаёт доли: возьмём одну порцию деревьев в этом отношении. Все исходы — любое дерево в ней:',
+      etap: 'Все исходы',
+      text: 'Отношение задаёт доли: возьмём одну порцию деревьев в этом отношении; исход — любое дерево в ней:',
       formula: `n = ${num(p, 'a')} + ${num(p, 'b')} + ${num(p, 'c')} = ${n06(p)}`,
       value: n06(p),
     },
     {
-      text: `Благоприятные — ${derevo06(p).label === 'яблоня' ? 'яблони' : derevo06(p).label === 'груша' ? 'груши' : 'вишни'}:`,
+      etap: 'Благоприятные исходы',
+      text: `${derevo06(p).label === 'яблоня' ? 'яблони' : derevo06(p).label === 'груша' ? 'груши' : 'вишни'}:`,
       formula: `m = ${num(p, derevo06(p).key)}`,
       value: num(p, derevo06(p).key),
     },
@@ -634,12 +654,14 @@ const K07: Prototype = prototip({
     const familiya = text(p, 'imya').split(' ')[1] ?? text(p, 'imya');
     return [
       {
-        text: `Все исходы — возможные соперники ${familiya.replace(/в$/, 'ва').replace(/н$/, 'на')}, любой из остальных:`,
+        etap: 'Все исходы',
+        text: `Возможные соперники ${familiya.replace(/в$/, 'ва').replace(/н$/, 'на')}, любой из остальных:`,
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: 'Благоприятные — россияне без него самого:',
+        etap: 'Благоприятные исходы',
+        text: 'Россияне без него самого:',
         formula: `m = ${r} - 1 = ${r - 1}`,
         value: r - 1,
       },
@@ -694,20 +716,20 @@ const K08: Prototype = prototip({
   perebor: (p) => dolya(num(p, 'N'), (i) => i <= num(p, 'k')),
   shagi: (p) => [
     {
-      text: 'Все исходы — места туриста в очереди:',
+      etap: 'Все исходы',
+      text: 'Места туриста в очереди:',
       formula: `n = ${num(p, 'N')}`,
       value: num(p, 'N'),
     },
     {
-      text: 'Благоприятные — места первого рейса:',
+      etap: 'Благоприятные исходы',
+      text: 'Места первого рейса:',
       formula: `m = ${num(p, 'k')}`,
       value: num(p, 'k'),
     },
     shagP(num(p, 'k'), num(p, 'N')),
   ],
-  varianty: [
-    { n: 1, source: 'urok', sourceNote: 'урок, № 8', params: { N: 30, k: 6, kto: 'П.' } },
-  ],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 8', params: { N: 30, k: 6, kto: 'П.' } }],
   generator: (r: Rng): Params => {
     const k = r.int(2, 20);
     return { N: k * r.int(2, 12), k, kto: r.pick(INITSIALY) };
@@ -762,12 +784,14 @@ const K09: Prototype = prototip({
     const m = num(p, `k${num(p, 'ischem')}`);
     return [
       {
-        text: `Все исходы — чей доклад окажется ${poryadkovoe(num(p, 'm'))}, любой из докладов:`,
+        etap: 'Все исходы',
+        text: `Чей доклад окажется ${poryadkovoe(num(p, 'm'))}, любой из докладов:`,
         formula: `n = ${num(p, 'k1')} + ${num(p, 'k2')} + ${num(p, 'k3')} = ${n09(p)}`,
         value: n09(p),
       },
       {
-        text: `Благоприятные — учёные из ${text(p, `s${num(p, 'ischem')}`)}:`,
+        etap: 'Благоприятные исходы',
+        text: `Учёные из ${text(p, `s${num(p, 'ischem')}`)}:`,
         formula: `m = ${m}`,
         value: m,
       },
@@ -921,17 +945,16 @@ const K10: Prototype = prototip({
     const m = Math.round(pary(kost(p).podhodit) * 36);
     return [
       {
-        text: 'Все исходы — пары значений двух бросков, каждая — клетка таблицы:',
+        etap: 'Все исходы',
+        text: 'Пары значений двух бросков, каждая — клетка таблицы:',
         formula: 'n = 6 \\cdot 6 = 36',
         value: 36,
       },
-      { text: `Благоприятные — ${kost(p).blago}:`, formula: `m = ${m}`, value: m },
+      { etap: 'Благоприятные исходы', text: `${kost(p).blago}:`, formula: `m = ${m}`, value: m },
       shagP(m, 36, 2),
     ];
   },
-  varianty: [
-    { n: 1, source: 'urok', sourceNote: 'урок, № 10', params: { rezhim: 'sovpadayut' } },
-  ],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 10', params: { rezhim: 'sovpadayut' } }],
   generator: (r: Rng): Params => ({ rezhim: r.pick(Object.keys(KOST)) }),
   metodika: {
     metod: 'outcome-table',
@@ -992,12 +1015,14 @@ const K11: Prototype = prototip({
     const n = num(p, 'a') + num(p, 'b');
     return [
       {
-        text: 'Все исходы — претенденты, любой из них равноправен:',
+        etap: 'Все исходы',
+        text: 'Претенденты, любой из них равноправен:',
         formula: `n = ${num(p, 'a')} + ${num(p, 'b')} = ${n}`,
         value: n,
       },
       {
-        text: `Благоприятные для ${text(p, 'kto')} — места на Марс:`,
+        etap: 'Благоприятные исходы',
+        text: `Для ${text(p, 'kto')} благоприятны места на Марс:`,
         formula: `m = ${num(p, 'k')}`,
         value: num(p, 'k'),
       },
@@ -1074,12 +1099,14 @@ const K12: Prototype = prototip({
     const k = num(p, 'k');
     return [
       {
-        text: `Посадим ${text(p, 'aR')}. Все исходы — места ${text(p, 'bR')} среди оставшихся:`,
+        etap: 'Все исходы',
+        text: `Посадим ${text(p, 'aR')}. Считаем места ${text(p, 'bR')} среди оставшихся:`,
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: `Благоприятные — свободные места в автобусе ${text(p, 'aR')}:`,
+        etap: 'Благоприятные исходы',
+        text: `Свободные места в автобусе ${text(p, 'aR')}:`,
         formula: `m = ${k} - 1 = ${k - 1}`,
         value: k - 1,
       },
@@ -1146,12 +1173,14 @@ const K13: Prototype = prototip({
     const razmer = N / g;
     return [
       {
-        text: `${N} человек делятся на ${g} ${g === 2 ? 'группы' : 'групп'} по ${razmer}. Посадим ${text(p, 'aR')}. Все исходы — места ${text(p, 'bR')} среди оставшихся:`,
+        etap: 'Все исходы',
+        text: `${N} человек делятся на ${g} ${g === 2 ? 'группы' : 'групп'} по ${razmer}. Посадим ${text(p, 'aR')}. Считаем места ${text(p, 'bR')} среди оставшихся:`,
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: `Благоприятные — свободные места в группе ${text(p, 'aR')}:`,
+        etap: 'Благоприятные исходы',
+        text: `Свободные места в группе ${text(p, 'aR')}:`,
         formula: `m = ${razmer} - 1 = ${razmer - 1}`,
         value: razmer - 1,
       },
@@ -1218,12 +1247,14 @@ const K14: Prototype = prototip({
     const N = num(p, 'N');
     return [
       {
-        text: `Поставим ${text(p, 'aR')}. Все исходы — места ${text(p, 'bR')} среди оставшихся:`,
+        etap: 'Все исходы',
+        text: `Поставим ${text(p, 'aR')}. Считаем места ${text(p, 'bR')} среди оставшихся:`,
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: `Благоприятные — соседние с ${text(p, 'aT')} места, справа и слева:`,
+        etap: 'Благоприятные исходы',
+        text: `Соседние с ${text(p, 'aT')} места, справа и слева:`,
         formula: 'm = 2',
         value: 2,
       },
@@ -1284,12 +1315,14 @@ const K15: Prototype = prototip({
     const N = num(p, 'N');
     return [
       {
-        text: 'Посадим первую девочку. Все исходы — стулья второй среди оставшихся:',
+        etap: 'Все исходы',
+        text: 'Посадим первую девочку. Считаем стулья второй среди оставшихся:',
         formula: `n = ${N} - 1 = ${N - 1}`,
         value: N - 1,
       },
       {
-        text: 'Благоприятные — стулья через одного мальчика от первой, справа и слева:',
+        etap: 'Благоприятные исходы',
+        text: 'Стулья через одного мальчика от первой, справа и слева:',
         formula: 'm = 2',
         value: 2,
       },
@@ -1350,12 +1383,14 @@ const K16: Prototype = prototip({
     const l = duga(num(p, 'a'), num(p, 'b'));
     return [
       {
-        text: 'Вся мера — полный круг циферблата, двенадцать часовых делений:',
+        etap: 'Вся мера',
+        text: 'Полный круг циферблата, двенадцать часовых делений:',
         formula: 'L = 12',
         value: 12,
       },
       {
-        text: `Благоприятная дуга — от отметки ${num(p, 'a')} до отметки ${num(p, 'b')}:`,
+        etap: 'Благоприятная часть',
+        text: `Дуга — от отметки ${num(p, 'a')} до отметки ${num(p, 'b')}:`,
         formula: `l = ${l}`,
         value: l,
       },
@@ -1404,12 +1439,14 @@ const K17: Prototype = prototip({
     const rTex = String(r).replace('.', '{,}');
     return [
       {
-        text: 'Вся мера — площадь озера:',
+        etap: 'Вся мера',
+        text: 'Площадь озера:',
         formula: `L = \\pi \\cdot ${R}^2 = ${R * R}\\pi`,
         value: R * R,
       },
       {
-        text: 'Благоприятная — площадь домика; его радиус — половина диаметра:',
+        etap: 'Благоприятная часть',
+        text: 'Площадь домика; его радиус — половина диаметра:',
         formula: `r = \\dfrac{${num(p, 'd')}}{2} = ${rTex},\\quad l = \\pi \\cdot ${rTex}^2 = ${String(r * r).replace('.', '{,}')}\\pi`,
         value: r * r,
       },
@@ -1457,21 +1494,21 @@ const K18: Prototype = prototip({
     const l = num(p, 'T') / num(p, 't');
     return [
       {
-        text: 'Вся мера — площадь сада, колечко равновероятно в любой его точке:',
+        etap: 'Вся мера',
+        text: 'Площадь сада, колечко равновероятно в любой его точке:',
         formula: `L = ${S}`,
         value: S,
       },
       {
-        text: `Благоприятная — то, что Маша успеет осмотреть за ${num(p, 'T')} ${skl(num(p, 'T'), 'минуту', 'минуты', 'минут')}:`,
+        etap: 'Благоприятная часть',
+        text: `То, что Маша успеет осмотреть за ${num(p, 'T')} ${skl(num(p, 'T'), 'минуту', 'минуты', 'минут')}:`,
         formula: `l = ${drob(num(p, 'T'), num(p, 't'))} = ${l}`,
         value: l,
       },
       shagLL(l, S, l / S),
     ];
   },
-  varianty: [
-    { n: 1, source: 'urok', sourceNote: 'урок, № 18', params: { S: 800, t: 5, T: 40 } },
-  ],
+  varianty: [{ n: 1, source: 'urok', sourceNote: 'урок, № 18', params: { S: 800, t: 5, T: 40 } }],
   generator: (r: Rng): Params => {
     const t = r.pick([2, 4, 5, 10]);
     return { S: r.int(4, 20) * 50, t, T: t * r.int(2, 24) };
@@ -1548,11 +1585,7 @@ const K17sPodskazkoy: Prototype = {
         ['Длина берега озера', 'Площадь домика'],
         'Парашютист попадает в любую точку озера с равными шансами.',
       ),
-      vopros(
-        'Как найти площадь круга радиусом $R$?',
-        '$\\pi R^2$',
-        ['$2\\pi R$', '$\\pi d^2$'],
-      ),
+      vopros('Как найти площадь круга радиусом $R$?', '$\\pi R^2$', ['$2\\pi R$', '$\\pi d^2$']),
       vopros(
         'Какой радиус у домика?',
         `$r = ${t(r)}$ м`,
@@ -1562,10 +1595,7 @@ const K17sPodskazkoy: Prototype = {
       vopros(
         'Какое выражение даёт ответ?',
         `$\\dfrac{\\pi \\cdot ${t(r)}^2}{\\pi \\cdot ${t(R)}^2}$`,
-        [
-          `$\\dfrac{${t(r)}}{${t(R)}}$`,
-          `$\\dfrac{\\pi \\cdot ${t(d)}^2}{\\pi \\cdot ${t(R)}^2}$`,
-        ],
+        [`$\\dfrac{${t(r)}}{${t(R)}}$`, `$\\dfrac{\\pi \\cdot ${t(d)}^2}{\\pi \\cdot ${t(R)}^2}$`],
         'Вероятность — доля площади: $P = \\dfrac{S_{\\text{домика}}}{S_{\\text{озера}}}$, $\\pi$ сокращается.',
       ),
       zapisShag(K17.format, K17.okruglenie(p)),

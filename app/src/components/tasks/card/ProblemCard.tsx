@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Badge, Button, Input } from '@/components/ui';
 import type { Parametry } from '@/lib/veroyatnost/model';
@@ -36,6 +36,15 @@ import { assetUrl } from '@/lib/assetUrl';
  */
 
 export type CardState = 'before' | 'correct' | 'incorrect' | 'revealed';
+
+/** Что внутри карточки меняется по действиям ученика: для сохранения тренировки. */
+export interface ProblemCardSnapshot {
+  value: string;
+  state: CardState;
+  /** Чем кончилась проверка: туда возвращает «Скрыть решение». */
+  itog: 'correct' | 'incorrect' | null;
+  shagov: number;
+}
 
 export interface ProblemCardZadacha {
   id: string;
@@ -76,9 +85,18 @@ export interface ProblemCardProps {
   istochnik?: string;
   /**
    * Начальное состояние. Нужно витрине, чтобы показать раскрытое
-   * решение без кликов; в тренажёре карточка всегда начинается с before.
+   * решение без кликов; в тренажёре карточка начинается с before, а при
+   * возвращении в сохранённую тренировку — с того, что отдал onChange:
+   * введённый ответ (value) и чем кончилась проверка (itog).
    */
-  initial?: { state: CardState; shagov?: number };
+  initial?: {
+    state: CardState;
+    shagov?: number;
+    value?: string;
+    itog?: 'correct' | 'incorrect' | null;
+  };
+  /** Сообщает состояние карточки при каждом его изменении. */
+  onChange?: (snapshot: ProblemCardSnapshot) => void;
   /** Ответ проверен: верно или нет. Открытие решения — не результат. */
   onResult?: (right: boolean) => void;
   onNext?: () => void;
@@ -117,6 +135,7 @@ export function ProblemCard({
   metodLabel,
   istochnik,
   initial,
+  onChange,
   onResult,
   onNext,
   nextLabel = 'Следующая',
@@ -126,11 +145,15 @@ export function ProblemCard({
   podskazki = true,
   className,
 }: ProblemCardProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(initial?.value ?? '');
   const [state, setState] = useState<CardState>(initial?.state ?? 'before');
   /* Чем кончилась проверка — чтобы «Скрыть решение» вернуло туда же. */
   const [itog, setItog] = useState<'correct' | 'incorrect' | null>(
-    initial?.state === 'correct' || initial?.state === 'incorrect' ? initial.state : null,
+    initial?.itog !== undefined
+      ? initial.itog
+      : initial?.state === 'correct' || initial?.state === 'incorrect'
+        ? initial.state
+        : null,
   );
   const [shagov, setShagov] = useState(initial?.shagov ?? 0);
   const [otkryt, setOtkryt] = useState(
@@ -146,6 +169,16 @@ export function ProblemCard({
         : null,
     [podskazkaOtkryta, zadacha.podskazka, zadacha.seal],
   );
+
+  /* Отчёт наружу: последняя функция в ref, чтобы новая ссылка на
+     onChange не вызывала повторных сообщений. */
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+  useEffect(() => {
+    onChangeRef.current?.({ value, state, itog, shagov });
+  }, [value, state, itog, shagov]);
 
   /* Разбор открывается лениво и один раз: до этого в памяти его нет. */
   const razbor = useMemo<Razbor | null>(
@@ -399,6 +432,7 @@ export function ProblemCard({
                     {i + 1}
                   </span>
                   <div className="pc-step__body">
+                    <p className="pc-step__etap">{shag.etap}</p>
                     <p className="pc-step__text">{shag.text}</p>
                     {shag.vykladka === undefined ? null : (
                       <VykladkaKlient className="pc-step__formula" vykladka={shag.vykladka} />

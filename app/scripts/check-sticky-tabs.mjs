@@ -75,6 +75,12 @@ const PAGES = [
   '/zadaniya/10/trenazher/',
   '/zadaniya/10/generator/',
   '/zadaniya/10/dlya-repetitorov/',
+  '/zadaniya/7/',
+  '/zadaniya/7/teoriya/',
+  '/zadaniya/7/opornye-zadachi/',
+  '/zadaniya/7/trenazher/',
+  '/zadaniya/7/generator/',
+  '/zadaniya/7/dlya-repetitorov/',
 ];
 const SIZES = [
   { name: 'компьютер', width: 1280, height: 800, isMobile: false },

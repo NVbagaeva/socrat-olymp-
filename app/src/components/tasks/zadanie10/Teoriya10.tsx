@@ -19,6 +19,12 @@ import {
 } from '@/content/teoriya10';
 import { PROGRESS_10 } from '@/content/zadanie10';
 import { BANK } from '@/lib/zadanie10/bank/index';
+import {
+  chertezhRazryada,
+  paramsKondensatora,
+  pochemuKondensatora,
+  primerKondensatora,
+} from '@/lib/zadanie10/teoriya-kondensator';
 import { GROUPS, kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { Illyustraciya10 } from './Illyustraciya10';
 import { Most10 } from './Most10';
@@ -56,7 +62,17 @@ export function PrimerIzBanka({ title, zadacha }: { title: string; zadacha: stri
   );
 }
 
-function Tablica({ head, rows, title }: { head: string[]; rows: string[][]; title?: string }) {
+function Tablica({
+  head,
+  rows,
+  title,
+  podpis,
+}: {
+  head: string[];
+  rows: string[][];
+  title?: string;
+  podpis?: string;
+}) {
   return (
     <div className="z10-tablica">
       {title ? <p className="z10-tablica__title">{title}</p> : null}
@@ -82,7 +98,49 @@ function Tablica({ head, rows, title }: { head: string[]; rows: string[][]; titl
           ))}
         </tbody>
       </table>
+      {podpis ? (
+        <p className="z10-tablica__podpis">
+          <Tex text={podpis} />
+        </p>
+      ) : null}
     </div>
+  );
+}
+
+/** Пример про конденсатор: шаги считает сервер из задачи банка. */
+function PrimerKondensator({
+  title,
+  zadacha,
+  zametka,
+}: {
+  title: string;
+  zadacha: string;
+  zametka?: boolean;
+}) {
+  const z = zadachaBanka(zadacha);
+  const pr = primerKondensatora(paramsKondensatora(z.params), zametka ?? false);
+  return (
+    <RamkaPrimer
+      title={title}
+      uslovie={`${z.source === 'fipi' ? '**Задача ФИПИ.** ' : '**Не из открытого банка.** '}${z.text}`}
+      shagi={pr.shagi}
+      otvet={pr.otvet}
+    />
+  );
+}
+
+/** «Почему так»: «не менее t» → «не более U», таблица и график разряда. */
+function PochemuKondensator({ zadacha }: { zadacha: string }) {
+  const p = paramsKondensatora(zadachaBanka(zadacha).params);
+  const pq = pochemuKondensatora(p);
+  return (
+    <RamkaOpredelenie title="Почему так">
+      <Abzacy paras={pq.paras} />
+      <Tablica head={pq.head} rows={pq.rows} podpis={pq.podpis} />
+      <figure className="z10-razryad-wrap">
+        <div dangerouslySetInnerHTML={{ __html: chertezhRazryada(p) }} />
+      </figure>
+    </RamkaOpredelenie>
   );
 }
 
@@ -175,7 +233,14 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
         </RamkaVyvod>
       );
     case 'tablica':
-      return <Tablica head={b.head} rows={b.rows} {...(b.title ? { title: b.title } : {})} />;
+      return (
+        <Tablica
+          head={b.head}
+          rows={b.rows}
+          {...(b.title ? { title: b.title } : {})}
+          {...(b.podpis ? { podpis: b.podpis } : {})}
+        />
+      );
     case 'zhivoy':
       return b.chto === 'myach' ? <ZhivoyMyach /> : <ZhivoyRaspad />;
     case 'most': {
@@ -195,6 +260,24 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
           </p>
         </RamkaVazhno>
       );
+    case 'razvorot':
+      /* Кнопка «Пример ▸»: без JavaScript, открытый пример виден сразу. */
+      return (
+        <details className="z10-razvorot" {...(b.otkryt ? { open: true } : {})}>
+          <summary className="z10-razvorot__knopka">{b.knopka}</summary>
+          <Blok10 b={b.blok} />
+        </details>
+      );
+    case 'primerKondensator':
+      return (
+        <PrimerKondensator
+          title={b.title}
+          zadacha={b.zadacha}
+          {...(b.zametka ? { zametka: true } : {})}
+        />
+      );
+    case 'pochemuKondensator':
+      return <PochemuKondensator zadacha={b.zadacha} />;
     default:
       return null;
   }
