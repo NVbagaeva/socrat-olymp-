@@ -7,6 +7,8 @@ import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon } from '@/components/ui';
 import { MetkaTrenirovki, RazdelKartochka, StrelkaVpravo } from './RazdelKartochka';
+import { VesRazdelCards } from '../ves12/VesRazdelCards';
+import { vesRazdel } from '@/content/ves12';
 import { RazdelIkonka } from './RazdelIkonka';
 import { useNezavershennye } from './trenirovki';
 import { RAZDELY_OPEN_EVENT, type RazdelKarta, type RazdelyData } from './types';
@@ -411,6 +413,15 @@ export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
                   </button>
                 </div>
                 <ul className="razdely-menu__list" ref={list}>
+                  {/* Первый пункт — весь раздел: зачётная работа и
+                      генератор по всем типам. В прокрутке вместе со
+                      списком: на телефоне панель невысокая. */}
+                  {String(no) === '12' ? (
+                    <li className="razdely-menu__ves">
+                      <VesRazdelCards place="menu" />
+                      <h3 className="razdely-menu__sub">{vesRazdel.orType}</h3>
+                    </li>
+                  ) : null}
                   {razdely.map((razdel) => (
                     <li key={razdel.id}>{karta(razdel)}</li>
                   ))}

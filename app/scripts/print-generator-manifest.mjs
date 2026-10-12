@@ -8,67 +8,15 @@
    это способ посмотреть на числа глазами до того, как они попадут
    на экран.
 
-   Список семейств лежит в TypeScript (data/functionTypes.ts), поэтому
-   читается через transpileModule — так же, как в check-bundle-secrets.
+   Манифест берётся из src/lib/generator/manifest.ts — того же модуля,
+   что читают страницы, — через общий загрузчик TypeScript
+   (scripts/lib/load-ts.mjs): наборы всех семейств и список семейств
+   со всеми их импортами по алиасу «@/».
 */
 
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { requireSrc } from './lib/load-ts.mjs';
 
-import { buildManifest } from '../src/lib/generator/build-manifest.js';
-
-const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DATA = path.join(APP, 'src', 'lib', 'graph', 'data');
-const require0 = createRequire(import.meta.url);
-
-function loadTypeScript() {
-  try {
-    return require0('typescript');
-  } catch {
-    return createRequire('/opt/node22/lib/node_modules/typescript/package.json')('typescript');
-  }
-}
-
-/* Наборы — с диска, как в остальных служебных скриптах. */
-function readSets(dir) {
-  const full = path.join(DATA, dir);
-  return fs
-    .readdirSync(full)
-    .filter((f) => f.endsWith('.json'))
-    .sort()
-    .map((f) => JSON.parse(fs.readFileSync(path.join(full, f), 'utf8')));
-}
-
-/* data/functionTypes.ts тянет за собой taskTypes.ts и materials.ts
-   по алиасу «@/»: все три переписываются в CommonJS во временную
-   папку, алиас заменяется относительным путём. */
-function loadFamilies() {
-  const ts = loadTypeScript();
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'manifest-'));
-  const src = path.join(APP, 'src');
-  for (const name of ['data/functionTypes.ts', 'data/taskTypes.ts', 'data/materials.ts']) {
-    const file = path.join(src, name);
-    const source = fs.readFileSync(file, 'utf8').replace(/from '@\/data\//g, "from './");
-    const js = ts.transpileModule(source, {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-      fileName: file,
-    }).outputText;
-    const target = path.join(tmp, name.replace(/\.ts$/, '.js'));
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, js);
-  }
-  const { functionTypes } = require0(path.join(tmp, 'data', 'functionTypes.js'));
-  fs.rmSync(tmp, { recursive: true, force: true });
-  return functionTypes;
-}
-
-const manifest = buildManifest(
-  { prep: readSets('prep/12'), prototypes: readSets('prototypes/12') },
-  loadFamilies(),
-);
+const { manifest } = requireSrc('lib/generator/manifest');
 
 function levels(skill) {
   return skill.levels.length === 0

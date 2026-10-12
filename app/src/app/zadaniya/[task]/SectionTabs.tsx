@@ -5,6 +5,8 @@ import { useRef } from 'react';
 import { useStickyTabs } from '@/components/tasks/useStickyTabs';
 import { EmptyState, Tabs } from '@/components/ui';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
+import { VesRazdelCards } from '@/components/tasks/ves12/VesRazdelCards';
+import { vesRazdel as vesRazdelText } from '@/content/ves12';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
 import { TitleText } from '@/components/tasks/TitleText';
@@ -39,6 +41,8 @@ export interface SectionTabsProps {
   description: string;
   subtopics: SubtopicView[];
   prototypes: PrototypeView[];
+  /** Блок «Весь раздел» над карточками подтем: зачётная и генератор (№12). */
+  vesRazdel?: boolean;
 }
 
 /* Список лежит в конфиге, как у остальных разделов. Состав у этой
@@ -57,7 +61,7 @@ const IDS = new Set(TABS.map((tab) => tab.id));
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
  * идёт без перезагрузки: адрес меняется через replace.
  */
-export function SectionTabs({ description, subtopics, prototypes }: SectionTabsProps) {
+export function SectionTabs({ description, subtopics, prototypes, vesRazdel = false }: SectionTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -91,6 +95,12 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
       </div>
 
       <div className="section-panel">
+        {active === 'subtopics' && vesRazdel ? (
+          <>
+            <VesRazdelCards place="page" />
+            <h3 className="ves-or ves-or--page">{vesRazdelText.orType}</h3>
+          </>
+        ) : null}
         {active === 'subtopics' ? (
           <ul className="subtopics-grid">
             {subtopics.map((item) => (

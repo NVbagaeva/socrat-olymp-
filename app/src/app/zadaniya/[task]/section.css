@@ -178,12 +178,10 @@
   text-decoration: none;
   color: inherit;
   transition:
-    border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease);
-}
-a.subtopic:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-sm);
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease),
+    box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
 }
 /* Подтема ещё не открыта: та же приглушённая поверхность, что
    у неоткрытой карточки задания. */
@@ -229,6 +227,8 @@ a.subtopic:hover {
   display: block;
   margin-top: var(--space-4);
 }
+/* Стрелка «→». На компьютере в покое её нет — выезжает при наведении
+   и фокусе; на устройствах без мыши видна всегда, приглушённой. */
 .subtopic__go {
   position: absolute;
   right: var(--space-6);
@@ -236,31 +236,92 @@ a.subtopic:hover {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  /* В покое стрелка серая: синеет только у нажатой карточки. */
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
+  color: var(--color-primary);
+  opacity: 0;
+  transform: translateX(-6px);
   transition:
-    background-color var(--dur-hover) var(--ease),
-    border-color var(--dur-hover) var(--ease);
-}
-.subtopic.is-picked .subtopic__go {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-.subtopic.is-picked .subtopic__go svg {
-  stroke: var(--color-text-inverse);
+    opacity 180ms var(--ease),
+    transform 180ms var(--ease),
+    color 180ms var(--ease);
 }
 .subtopic__go svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   fill: none;
-  stroke: var(--color-text-tertiary);
+  stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke var(--dur-hover) var(--ease);
+}
+
+/* Подсветка — только у карточки под мышью или в фокусе: синяя рамка,
+   светло-голубая заливка, подъём и мягкая тень, стрелка выезжает,
+   иконка чуть крупнее. В покое ни одна карточка не выглядит выбранной. */
+@media (hover: hover) {
+  a.subtopic:hover {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  a.subtopic:hover .subtopic__go {
+    opacity: 1;
+    transform: none;
+  }
+  a.subtopic--ikonka:hover .subtopic__ico {
+    transform: scale(1.05);
+  }
+}
+a.subtopic:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  transform: translateY(-2px);
+}
+a.subtopic:focus-visible .subtopic__go {
+  opacity: 1;
+  transform: none;
+}
+a.subtopic--ikonka:focus-visible .subtopic__ico {
+  transform: scale(1.05);
+}
+@media (hover: none) {
+  a.subtopic .subtopic__go {
+    opacity: 1;
+    transform: none;
+    color: var(--color-text-tertiary);
+  }
+  a.subtopic:active {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  a.subtopic:active .subtopic__go {
+    color: var(--color-primary);
+  }
+  a.subtopic--ikonka:active .subtopic__ico {
+    transform: scale(1.05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .subtopic,
+  .subtopic__go,
+  .subtopic--ikonka .subtopic__ico {
+    transition: none;
+  }
+  a.subtopic:hover,
+  a.subtopic:focus-visible,
+  a.subtopic:active,
+  a.subtopic .subtopic__go,
+  a.subtopic--ikonka:hover .subtopic__ico,
+  a.subtopic--ikonka:focus-visible .subtopic__ico,
+  a.subtopic--ikonka:active .subtopic__ico {
+    transform: none;
+  }
 }
 
 /* ── Карточка подтемы с иконкой раздела ─────────────────────────
@@ -307,19 +368,6 @@ a.subtopic:hover {
   /* Формула целиком, без прокрутки: колонка текста ей достаточна. */
   overflow-x: visible;
 }
-@media (hover: hover) {
-  a.subtopic--ikonka:hover .subtopic__ico {
-    transform: translateY(-4px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .subtopic--ikonka .subtopic__ico {
-    transition: none;
-  }
-  a.subtopic--ikonka:hover .subtopic__ico {
-    transform: none;
-  }
-}
 @media (max-width: 767.98px) {
   .subtopic--ikonka {
     grid-template-columns: 88px minmax(0, 1fr);
@@ -352,7 +400,9 @@ a.subtopic:hover {
     right: var(--space-4);
     bottom: auto;
     top: 50%;
-    transform: translateY(-50%);
+    /* Центр по вертикали — полем, а не transform: transform занят
+       выездом стрелки. */
+    margin-top: -16px;
   }
 }
 

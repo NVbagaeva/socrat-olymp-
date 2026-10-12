@@ -93,6 +93,8 @@
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
     "test:zadanie-hero": "node scripts/check-zadanie-hero.mjs",
     "test:razdely-nav": "node scripts/check-razdely-nav.mjs",
+    "test:ves12-site": "node scripts/check-ves12-site.mjs",
+    "test:zachyot-12": "node scripts/check-zachyot-12.mjs",
     "test:razdely-names": "node scripts/check-razdely-names.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",

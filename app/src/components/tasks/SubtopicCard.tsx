@@ -6,7 +6,6 @@ import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui';
 import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
 import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
-import { pickSubtopic, useSubtopicPicked } from '@/lib/subtopicPick';
 
 export interface SubtopicCardProps {
   /** Название подтемы или раздела. */
@@ -52,9 +51,10 @@ export interface SubtopicCardProps {
  * формула, у №3 чертёж и число прототипов, и то и другое приходит
  * сюда готовым.
  *
- * Стрелка в покое серая: синей она становится только у карточки, на
- * которую нажали последней (lib/subtopicPick.ts). Иначе на странице
- * все стрелки синие сразу, и выделение ничего не выделяет.
+ * В покое карточки одинаковые и ни одна не выглядит выбранной: это
+ * переход, а не выбор. Подсветка и стрелка «→» — при наведении мышью и
+ * в фокусе с клавиатуры; на устройствах без мыши стрелка видна всегда,
+ * приглушённой, а подсветка держится только на время касания.
  */
 export function SubtopicCard({
   name,
@@ -66,7 +66,6 @@ export function SubtopicCard({
   media,
   meta,
 }: SubtopicCardProps) {
-  const picked = useSubtopicPicked(href);
   const body = (
     <>
       {icon === undefined ? null : (
@@ -130,9 +129,8 @@ export function SubtopicCard({
   }
   return (
     <Link
-      className={clsx('subtopic', picked && 'is-picked', icon !== undefined && 'subtopic--ikonka')}
+      className={clsx('subtopic', icon !== undefined && 'subtopic--ikonka')}
       href={href}
-      onClick={() => pickSubtopic(href)}
     >
       {body}
     </Link>
