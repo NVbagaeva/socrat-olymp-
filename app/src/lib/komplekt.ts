@@ -29,7 +29,7 @@
 import { storage } from '@/lib/storage';
 
 /** Область комплекта — задание, чей генератор его собрал. */
-export type KitScope = '12' | '2' | '4' | '5' | '8' | '11';
+export type KitScope = '12' | '1' | '2' | '4' | '5' | '7' | '8' | '9' | '11';
 
 export type SheetWhich = 'student' | 'teacher';
 
@@ -138,6 +138,32 @@ export function settingsOf(href: string): string {
   return `${path}?${params.toString()}`;
 }
 
+/** Настройки листа по его адресу — то же, что settingsOf, но без пути. */
+export function nastroykiZaprosa(query: URLSearchParams): string {
+  const params = new URLSearchParams(query);
+  params.delete('seed');
+  params.delete('kit');
+  params.delete('oba');
+  return params.toString();
+}
+
+/**
+ * Серия уроков (№9): у уроков одной серии общий код, а различаются они
+ * номером урока u в адресе. Номер — с единицы; null — лист не из серии.
+ */
+export function urokKomplekta(kit: Pick<Kit, 'studentHref'>): number | null {
+  const u = new URLSearchParams(kit.studentHref.split('?')[1] ?? '').get('u');
+  return u === null ? null : Number(u) + 1;
+}
+
+/** Настройки без номера урока: уроки одной серии совпадают по ним. */
+export function bezUroka(settings: string): string {
+  const [path, query = ''] = settings.split('?');
+  const params = new URLSearchParams(query);
+  params.delete('u');
+  return `${path}?${params.toString()}`;
+}
+
 /** Адрес «Скачать оба»: лист ученика, после печати — лист учителя. */
 export function bothHref(kit: Kit): string {
   return `${kit.studentHref}&oba=1`;
@@ -193,9 +219,12 @@ export function sheetFingerprint(spec: SpecLike): string {
   return fnv(
     specTasks(spec)
       .map((task) =>
-        [task.questionHtml ?? '', task.figureSvg ?? '', JSON.stringify(task.options ?? null), task.answer ?? ''].join(
-          '\u0001',
-        ),
+        [
+          task.questionHtml ?? '',
+          task.figureSvg ?? '',
+          JSON.stringify(task.options ?? null),
+          task.answer ?? '',
+        ].join('\u0001'),
       )
       .join('\u0002'),
   );
@@ -260,11 +289,21 @@ function saveKits(list: Kit[]): void {
 }
 
 /** Комплект по коду из истории; null — не скачивали на этом устройстве. */
-export function findKit(code: string, scope?: KitScope): Kit | null {
-  return (
-    loadKits().find((kit) => kit.code === code && (scope === undefined || kit.scope === scope)) ??
-    null
+export function findKit(code: string, scope?: KitScope, nastroyki?: string): Kit | null {
+  const list = loadKits().filter(
+    (kit) => kit.code === code && (scope === undefined || kit.scope === scope),
   );
+  /* У серии уроков код общий: лист ищет свой урок по настройкам. */
+  if (nastroyki !== undefined) {
+    const own = list.find((kit) => (kit.settings.split('?')[1] ?? '') === nastroyki);
+    if (own !== undefined) {
+      return own;
+    }
+    if (list.some((kit) => urokKomplekta(kit) !== null)) {
+      return null;
+    }
+  }
+  return list[0] ?? null;
 }
 
 /** Текущий комплект экрана генератора: черновик или скачанный. */
@@ -295,10 +334,17 @@ export function sameKit(a: Kit | null, b: Kit | null): boolean {
   );
 }
 
-/** Комплект в историю: тот же код — запись обновляется и поднимается. */
+/**
+ * Комплект в историю: тот же код с теми же настройками — запись
+ * обновляется и поднимается. Уроки одной серии (№9) — общий код, разные
+ * настройки (номер урока): каждый урок — своя запись.
+ */
 export function rememberKit(kit: Kit): Kit {
   const stamped: Kit = { ...kit, createdAt: kit.createdAt ?? new Date().toISOString() };
-  saveKits([stamped, ...loadKits().filter((item) => item.code !== kit.code)]);
+  saveKits([
+    stamped,
+    ...loadKits().filter((item) => item.code !== kit.code || item.settings !== kit.settings),
+  ]);
   return stamped;
 }
 
@@ -309,7 +355,7 @@ export function rememberKit(kit: Kit): Kit {
 export function markDownloaded(kit: Kit, which: SheetWhich): Kit {
   const next = rememberKit({ ...kit, downloaded: { ...kit.downloaded, [which]: true } });
   const current = currentKit(kit.slot);
-  if (current !== null && current.code === kit.code) {
+  if (current !== null && current.code === kit.code && current.settings === kit.settings) {
     setCurrentKit(next);
   }
   return next;
@@ -384,7 +430,7 @@ export function checkKitSheet(
   const code = kitCode(parsed.id, parsed.version);
   const fingerprint = sheetFingerprint(spec);
   const changed = parsed.version !== generatorVersion(scope);
-  const saved = findKit(code, scope);
+  const saved = findKit(code, scope, nastroykiZaprosa(query));
   const before = saved?.fingerprints?.[which] ?? null;
   let warning: string | null = null;
   if (before !== null && before !== fingerprint) {

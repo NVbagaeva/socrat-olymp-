@@ -1,0 +1,147 @@
+/* Страница печати задания №9: только лист, без оболочки сайта.
+   Копия pechat8.css плюс рисунки графиков (.pr) на чёрно-белом листе. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Рисунки графиков: в ч/б теме кривая — чёрная и толстая, касательная
+   и построения — серые и тоньше. Различие — тоном и толщиной, штриха
+   на рисунке ученика нет. */
+[data-sheet-theme='print'] svg.pr {
+  --graph-accent: #6b6b6b;
+}
+[data-sheet-theme='print'] svg.pr .pr-tangent {
+  stroke-width: 2px;
+}
+[data-sheet-theme='print'] svg.pr .pr-fill {
+  fill: #000000;
+  fill-opacity: 0.14;
+}
+
+/* Рамки теории: рисунок к примеру не сжимается, текст не наезжает.
+   Пример №9 — с рисунком под текстом на всю ширину рамки. */
+.sheet-example:not(.sheet-example--stack) .sheet-figure {
+  flex: none;
+}
+.sheet-example--stack .sheet-example-text {
+  flex: 1 1 100%;
+}
+.sheet-example--stack .sheet-figure {
+  flex: 0 0 auto;
+  margin: calc(var(--sheet-step) * 2) auto 0;
+}
+.sheet-example--stack .sheet-figure svg {
+  width: 100%;
+}
+.sheet-zapomni .sheet-recap {
+  margin-bottom: 0;
+}
+
+/* Лист учителя: разбор основным кеглем и чернилами, а не мелким серым,
+   формулы KaTeX на ступень крупнее — всё читается на A4 без лупы. */
+.z9-razbor {
+  font-size: var(--sheet-fs-body);
+  color: var(--sheet-ink);
+}
+.z9-razbor .katex,
+.sheet-task-answer .katex {
+  font-size: 1.12em;
+}
+.sheet-example-text .sheet-task-question {
+  font-size: var(--sheet-fs-body);
+}
+/* Рисунок учителя под условием — по центру колонки. */
+.sheet-task--stack .sheet-figure {
+  align-self: center;
+}
+
+/* Лист учителя: задача и разобранный пример кусками (sheet9.ts,
+   kuskiRazbora). Первый кусок — условие, рисунок и первый этап, дальше
+   этапы по одному: на одной странице куски сливаются в одну карточку,
+   при переносе продолжение начинается на следующей странице. */
+.sheet-item.z9-kusok--cont {
+  margin-top: 0;
+}
+.sheet-task--single.z9-zadacha .z9-telo {
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(var(--sheet-step) * 1.5);
+}
+.z9-kusok--first:not(.z9-kusok--last) .z9-zadacha {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-bottom: calc(var(--sheet-step) * 0.75);
+}
+.z9-prodolzhenie {
+  padding: calc(var(--sheet-step) * 0.75) calc(var(--sheet-step) * 3.5)
+    calc(var(--sheet-step) * 2.5) calc(var(--sheet-step) * 13.5);
+  background: var(--sheet-card-bg);
+  border: var(--sheet-card-width) solid var(--sheet-card-line);
+  border-top: 0;
+  border-radius: 0 0 var(--sheet-radius-lg) var(--sheet-radius-lg);
+}
+.z9-kusok--cont:not(.z9-kusok--last) .z9-prodolzhenie {
+  border-bottom: 0;
+  border-radius: 0;
+  padding-bottom: calc(var(--sheet-step) * 0.75);
+}
+.z9-primer.z9-kusok--first:not(.z9-kusok--last) {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-bottom: calc(var(--sheet-step) * 0.75);
+}
+.z9-primer.z9-kusok--cont {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding-top: calc(var(--sheet-step) * 0.75);
+}
+.z9-primer.z9-kusok--cont:not(.z9-kusok--last) {
+  border-bottom: 0;
+  border-radius: 0;
+  padding-bottom: calc(var(--sheet-step) * 0.75);
+}
+.z9-primer .sheet-task-question {
+  font-size: var(--sheet-fs-body);
+}
+.z9-nevidim {
+  visibility: hidden;
+}
+/* Узкий рисунок — справа от первых этапов разбора. */
+.z9-ryad {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--sheet-step) * 4);
+}
+.z9-ryad-tekst {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.z9-ryad .sheet-figure {
+  flex: none;
+}
+/* Широкий рисунок — под условием, по центру. */
+.z9-pod-usloviem {
+  display: flex;
+  justify-content: center;
+}
+.z9-ryad .sheet-figure svg,
+.z9-pod-usloviem .sheet-figure svg {
+  width: 100%;
+}

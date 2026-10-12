@@ -19,6 +19,10 @@ import zlib from 'node:zlib';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {

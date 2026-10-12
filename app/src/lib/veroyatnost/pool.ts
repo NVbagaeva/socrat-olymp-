@@ -24,19 +24,20 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { altIllyustratsii, KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import {
-  imyaIllyustratsii,
-  texPlain,
-  zadanieIllyustratsii,
-  type Method,
-} from './model';
+  altIllyustratsii,
+  KARTINKA_NE_PO_USLOVIYU,
+  KARTINKA_OSNOVY_PODHODIT,
+} from './illyustratsii';
+import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import type { Razbor, RazborShag } from './razbor';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
+import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
 import { klyuchZadachi, sealAnswer, sealMetod, sealText } from './secret';
 import {
+  type HintStep,
   type Metodika,
   type PrepBlok,
   type PrepZadacha,
@@ -143,6 +144,11 @@ export interface PoolVariant {
    * рисунка и запись ответа.
    */
   steps: string;
+  /**
+   * Подсказка-вопросы: JSON PodskazkaShag[], закрытый тем же отпечатком.
+   * Нет поля — у прототипа подсказки пока нет.
+   */
+  podskazka?: string;
   model?: PoolModel;
 }
 
@@ -216,10 +222,11 @@ export function vydelitOtvet(formula: string): string {
  */
 export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   if (shag.formula === undefined) {
-    return { text: shag.text };
+    return { etap: shag.etap, text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
   return {
+    etap: shag.etap,
     text: shag.text,
     tex,
     vykladka: nabratVykladku(tex, true),
@@ -260,6 +267,20 @@ function zakrytyRazbor(
       };
 }
 
+/**
+ * Набрать и закрыть подсказку отпечатком ответа: вопросы, кнопки и
+ * комментарии набираются KaTeX здесь, на сборке.
+ */
+function zapechatatPodskazku(shagi: readonly HintStep[], seal: string): string {
+  const nabrannye: PodskazkaShag[] = shagi.map((h) => ({
+    question: typesetText(h.question),
+    options: h.options.map((o) => typesetText(o)),
+    correct: h.correct,
+    comment: h.comment === undefined ? null : typesetText(h.comment),
+  }));
+  return sealText(JSON.stringify(nabrannye), seal);
+}
+
 /** Закрыть разбор отпечатком ответа: вызывается на сборке. */
 function zapechatatRazbor(razbor: Razbor, seal: string): string {
   return sealText(JSON.stringify(razbor), seal);
@@ -295,6 +316,9 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
     steps: zapechatatRazbor(razbor, seal),
+    ...(prototype.podskazka === undefined
+      ? {}
+      : { podskazka: zapechatatPodskazku(prototype.podskazka(variant.params), seal) }),
     ...(model === null ? {} : { model: otkrytayaModel(model, prototype.id, variant.n) }),
   };
 }
@@ -336,6 +360,8 @@ export interface PrepPoolZadacha {
   seal: string;
   /** Закрытый разбор: JSON формы `Razbor`, зашифрованный отпечатком. */
   steps: string;
+  /** Подсказка-вопросы тем же отпечатком; есть у задач с прототипом. */
+  podskazka?: string;
   /**
    * Картинка к условию у задачи без модели (подготовка №5): у задач
    * с моделью она идёт через модель. Только если файл есть.
@@ -382,6 +408,11 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
   const kartinka = kartinkaOpornoy(zadacha);
+  /* Подсказка — от прототипа на числах варианта задачи или, у задач №5
+     без прототипа, своя (podgotovka5-podskazki.ts). */
+  const shagiPodskazki = podskazkaOpornoy(zadacha);
+  const podskazka =
+    shagiPodskazki === undefined ? undefined : zapechatatPodskazku(shagiPodskazki, seal);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
   const illustration = model === null ? kartinka : undefined;
@@ -391,11 +422,17 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     uslovie: typesetText(zadacha.uslovie),
     seal,
     steps: zapechatatRazbor(razbor, seal),
+    ...(podskazka === undefined ? {} : { podskazka }),
     ...(illustration === undefined ? {} : { illustration }),
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
     ...(model === null
       ? {}
-      : { model: { method: model.method, ...(kartinka === undefined ? {} : { illustration: kartinka }) } }),
+      : {
+          model: {
+            method: model.method,
+            ...(kartinka === undefined ? {} : { illustration: kartinka }),
+          },
+        }),
   };
 }
 
@@ -525,9 +562,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
         {
           id: zadacha.id,
           istochnik: 'opornaya',
-          variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok),
-          ],
+          variants: [uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok)],
         },
       ];
     });

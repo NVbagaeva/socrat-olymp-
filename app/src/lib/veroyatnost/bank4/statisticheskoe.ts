@@ -13,6 +13,7 @@
 
 import { skl } from '../morfologia';
 import { prototip } from '../generator';
+import { sPodskazkoy } from '../podskazka';
 import { konechnaya, num, type Prototype } from '../types';
 import { gen } from './generatory';
 import { plitkiDvuh, shagP } from './vizual';
@@ -64,12 +65,14 @@ const P19: Prototype = prototip({
     const k = num(p, 'k');
     return [
       {
-        text: 'Все исходы — насосы партии, на контроль равновероятно попадёт любой:',
+        etap: 'Все исходы',
+        text: 'Насосы партии, на контроль равновероятно попадёт любой:',
         formula: `n = ${N}`,
         value: N,
       },
       {
-        text: 'Благоприятные — исправные насосы:',
+        etap: 'Благоприятные исходы',
+        text: 'Исправные насосы:',
         formula: `m = ${N} - ${k} = ${N - k}`,
         value: N - k,
       },
@@ -149,12 +152,14 @@ const P20: Prototype = prototip({
     const znakov = num(p, 'znakov') === 2 ? 2 : null;
     return [
       {
-        text: 'Все исходы — сумки партии, покупателю равновероятно достанется любая:',
+        etap: 'Все исходы',
+        text: 'Сумки партии, покупателю равновероятно достанется любая:',
         formula: `n = ${N}`,
         value: N,
       },
       {
-        text: 'Благоприятные — сумки без дефекта:',
+        etap: 'Благоприятные исходы',
+        text: 'Сумки без дефекта:',
         formula: `m = ${N} - ${k} = ${N - k}`,
         value: N - k,
       },
@@ -224,11 +229,12 @@ const P21: Prototype = prototip({
     const d = num(p, 'd');
     return [
       {
-        text: 'Все исходы — сумки партии, качественные вместе с дефектными:',
+        etap: 'Все исходы',
+        text: 'Сумки партии, качественные вместе с дефектными:',
         formula: `n = ${q} + ${d} = ${q + d}`,
         value: q + d,
       },
-      { text: 'Благоприятные — качественные сумки:', formula: `m = ${q}`, value: q },
+      { etap: 'Благоприятные исходы', text: 'Качественные сумки:', formula: `m = ${q}`, value: q },
       shagP(q, q + d, 2),
     ];
   },
@@ -261,4 +267,25 @@ const P21: Prototype = prototip({
   ],
 });
 
-export const STATISTICHESKOE: readonly Prototype[] = [P19, P20, P21];
+/* Подсказки-вопросы «m из n» (podskazka.ts): числа — из шагов разбора. */
+export const STATISTICHESKOE: readonly Prototype[] = [
+  sPodskazkoy(P19, (p) => ({
+    vse: 'Насосы партии: на контроль попадёт любой',
+    vseNe: ['Подтекающие насосы', 'Исправные насосы'],
+    blago: 'исправные насосы',
+    mOshibki: [num(p, 'k')],
+  })),
+  sPodskazkoy(P20, (p) => ({
+    vse: 'Сумки партии: покупателю достанется любая',
+    vseNe: ['Сумки с дефектом', 'Сумки без дефекта'],
+    blago: 'сумки без дефекта',
+    mOshibki: [num(p, 'k')],
+  })),
+  sPodskazkoy(P21, (p) => ({
+    vse: 'Все сумки: качественные вместе с дефектными',
+    vseNe: ['Только качественные сумки', 'Только сумки с дефектом'],
+    blago: 'качественные сумки',
+    nOshibki: [num(p, 'q')],
+    mOshibki: [num(p, 'd')],
+  })),
+];
