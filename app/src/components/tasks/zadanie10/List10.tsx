@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAdres } from '@/lib/zadanie10/adres';
 import { RamkaFormula, RamkaPrimer, RamkaVazhno, Abzacy } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
-import { RAZDELY_TEORII_10 } from '@/content/teoriya10';
+import { bezSsylok, RAZDELY_TEORII_10 } from '@/content/teoriya10';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie10/dannye';
 import {
   modelUroka,
@@ -151,7 +151,9 @@ function RamkiTeorii({
         <RamkaFormula key={id} formula={proto(id).formula} podpis={`${proto(id).title}`} />
       ))}
       {razdely.map((r) => {
-        const v = r.bloki.find((b) => b.vid === 'vazhno');
+        /* Примеров на листе нет — отсылки «(см. пример …)» убираем. */
+        const najden = r.bloki.find((b) => b.vid === 'vazhno');
+        const v = najden ? bezSsylok(najden) : undefined;
         return v && v.vid === 'vazhno' ? (
           <RamkaVazhno key={r.id} title={`Важно! ${r.title}`}>
             <Abzacy paras={v.paras} />
