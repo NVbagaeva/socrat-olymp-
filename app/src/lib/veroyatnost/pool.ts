@@ -24,13 +24,12 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { altIllyustratsii, KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import {
-  imyaIllyustratsii,
-  texPlain,
-  zadanieIllyustratsii,
-  type Method,
-} from './model';
+  altIllyustratsii,
+  KARTINKA_NE_PO_USLOVIYU,
+  KARTINKA_OSNOVY_PODHODIT,
+} from './illyustratsii';
+import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
 import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
@@ -223,10 +222,11 @@ export function vydelitOtvet(formula: string): string {
  */
 export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   if (shag.formula === undefined) {
-    return { text: shag.text };
+    return { etap: shag.etap, text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
   return {
+    etap: shag.etap,
     text: shag.text,
     tex,
     vykladka: nabratVykladku(tex, true),
@@ -427,7 +427,12 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
     ...(model === null
       ? {}
-      : { model: { method: model.method, ...(kartinka === undefined ? {} : { illustration: kartinka }) } }),
+      : {
+          model: {
+            method: model.method,
+            ...(kartinka === undefined ? {} : { illustration: kartinka }),
+          },
+        }),
   };
 }
 
@@ -557,9 +562,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
         {
           id: zadacha.id,
           istochnik: 'opornaya',
-          variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok),
-          ],
+          variants: [uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok)],
         },
       ];
     });
