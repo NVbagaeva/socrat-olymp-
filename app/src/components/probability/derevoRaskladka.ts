@@ -37,7 +37,7 @@ export const PAD_X = 20;
    иначе подпись уровня наезжает на крайнюю ветку. */
 export const PAD_LEVELS = 104;
 /* Овал события вокруг листьев и подпись под ним. */
-export const OVAL = { dx: 24, dy: 12, ry: 21, podpis: 18 };
+export const OVAL = { dx: 24, dy: 10, ry: 18, podpis: 18 };
 /** Кегль подписи вероятности ветки (как в probability.css). */
 export const KEGL_P = 14;
 
