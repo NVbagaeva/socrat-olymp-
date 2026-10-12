@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Details } from '@/components/ui';
+import { EdinicyStepeni } from '@/components/teoriya/EdinicyStepeni';
+import { chastEdinic, YAKOR_EDINIC } from '@/content/teoriya-edinicy';
 import { Tex } from '@/components/ui/Tex';
 import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
 import { LAYFHAKI, LOVUSHKI, RAZDELY_TEORII_11, type RazdelTeorii11 } from '@/content/teoriya11';
@@ -100,6 +102,7 @@ function KartaLovushka({ id }: { id: string }) {
 /** Подпункты раздела в содержании: что есть в теле раздела, по порядку. */
 export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
   const out: { id: string; title: string }[] = [];
+  for (const c of r.obshchaya ?? []) out.push({ id: YAKOR_EDINIC(c), title: chastEdinic(c).title });
   if (r.vvedenie) out.push({ id: `${r.id}-opredelenie`, title: 'Определение' });
   if (r.formula) out.push({ id: `${r.id}-formula`, title: 'Главная формула' });
   if (r.tablitsa || r.paraTablits) out.push({ id: `${r.id}-tablitsa`, title: 'Таблица' });
@@ -216,6 +219,8 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
           <Tex text={r.lead} />
         </p>
       </div>
+
+      {r.obshchaya ? <EdinicyStepeni chasti={r.obshchaya} /> : null}
 
       {r.vvedenie ? (
         <section className="z11-card z11-vved" id={`${r.id}-opredelenie`}>

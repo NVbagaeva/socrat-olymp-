@@ -104,6 +104,7 @@
     "build:bank-7": "node scripts/build-bank-7.mjs",
     "test:uravneniya": "node scripts/check-uravneniya.mjs",
     "test:prikladnye": "node scripts/check-prikladnye.mjs",
+    "test:edinicy": "node scripts/check-edinicy.mjs",
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",

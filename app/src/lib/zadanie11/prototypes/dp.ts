@@ -22,6 +22,7 @@ import {
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
+import { minutyVChasy, MS_V_KMCH_POYASNENIE, msVKmch } from '../../teoriya/perevod';
 import type { Subtype } from '../types';
 import { GEROI, klyuch } from './syuzhety';
 import { otvet } from './common';
@@ -48,23 +49,20 @@ const DP01: Subtype = {
       answer: kmh,
       etapy: etapy(
         ['Скорость в м/с', [`$v=\\dfrac{S}{t}=${frac(S, t)}=${ms}$ м/с.`]],
-        [
-          'Перевод',
-          [
-            '$1$ м/с $=\\dfrac{3600}{1000}$ км/ч $=3{,}6$ км/ч. Удобно помнить: $10$ м/с $=36$ км/ч.',
-          ],
-        ],
-        ['Ответ на вопрос задачи', [`$${ms}\\cdot3{,}6=${d(kmh)}$ км/ч.`, otvet(kmh)]],
+        ['Перевод', [MS_V_KMCH_POYASNENIE, msVKmch(ms, d(kmh))]],
+        ['Ответ на вопрос задачи', [otvet(kmh)]],
       ),
       hints: [
         vopros('Какая скорость в метрах в секунду?', `$${ms}$`, [
           `$${fq(q(t, S), true)}$`,
           `$${d(S * t)}$`,
         ]),
-        vopros('На что умножить скорость в м/с, чтобы получить км/ч?', '$3{,}6$', [
-          '$60$',
-          '$1000$',
-        ]),
+        vopros(
+          'Как перевести м/с в км/ч?',
+          'перевести отдельно метры в километры и секунды в часы',
+          ['умножить на $60$', 'умножить на $1000$'],
+          'Скорость — дробь «метры на секунды»: $1$ м $=\\dfrac{1}{1000}$ км, $1$ с $=\\dfrac{1}{3600}$ ч.',
+        ),
         chtoSprashivayut('скорость в км/ч', ['скорость в м/с', 'время в часах']),
       ],
       lifehacks: ['fast-count'],
@@ -720,7 +718,8 @@ const DP09: Subtype = {
         [
           'Обозначаем',
           [
-            `Скорость ${medlRod} — $x$ км/ч, ${kogo} — $x+${d(dv)}$ км/ч. Разница во времени: ${vremya(dt)} $=${chasyTex(dt)}$ ч.`,
+            `Скорость ${medlRod} — $x$ км/ч, ${kogo} — $x+${d(dv)}$ км/ч. Разница во времени: ${vremya(dt)}.`,
+            minutyVChasy(dt, true),
           ],
         ],
         [
@@ -897,7 +896,8 @@ const DP11: Subtype = {
         [
           'Обозначаем',
           [
-            `Расстояние АВ примем за $1$. ${zaglavnaya(medl)} в пути $x$ ч, ${bys} — $x-${d(Dl)}$ ч. Встреча через ${vremya(tm, true)} $=${tTex}$ ч.`,
+            `Расстояние АВ примем за $1$. ${zaglavnaya(medl)} в пути $x$ ч, ${bys} — $x-${d(Dl)}$ ч. Встреча через ${vremya(tm, true)}.`,
+            minutyVChasy(tm, true),
           ],
         ],
         [
