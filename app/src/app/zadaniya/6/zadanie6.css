@@ -1,0 +1,267 @@
+/* Задание №6 «Случайные величины»: теория и вкладки раздела (по образцу №7).
+   Цвета — токены сайта (палитра №1, №9, №10); карточки — как в
+   справочнике №1: цветные блоки «Определение / Свойство / Теорема /
+   Важно» и кнопка «Пример». Печать — ч/б, роль блока видна по плашке. */
+
+.z6-teoriya__lead {
+  max-width: 72ch;
+  font-size: var(--fs-lg);
+  color: var(--color-text-secondary);
+}
+
+.z6-spisok {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+  line-height: 1.7;
+}
+
+.z6-spisok li + li {
+  margin-top: var(--space-1);
+}
+
+.z6-lovushka__oshibka {
+  color: var(--color-text-secondary);
+}
+
+.z6-dekor {
+  display: block;
+  padding: var(--space-4);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* ── Таблица ── */
+.z6-tablica-teorii {
+  margin: var(--space-6) 0;
+  overflow-x: auto;
+  break-inside: avoid;
+}
+
+.z6-tablica-teorii__title {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+}
+
+.z6-tablica-teorii table {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+.z6-tablica-teorii th,
+.z6-tablica-teorii td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.z6-tablica-teorii th {
+  background: var(--color-surface-info);
+}
+
+/* ── Карточки теории ── */
+.z6-kartochki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+}
+
+.z6-k {
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-primary) 8%, transparent);
+  break-inside: avoid;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+
+/* Раскрытый пример — карточка на всю ширину, как в справочнике №1. */
+.z6-k:has(> .z6-primer[open]) {
+  grid-column: 1 / -1;
+}
+
+.z6-k:target {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.z6-k__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: 1.3;
+}
+
+.z6-k__bloki {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.z6-blok {
+  --blok: var(--color-primary);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--blok) 28%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--blok) 7%, var(--color-surface));
+}
+
+.z6-blok--svoystvo {
+  --blok: var(--color-success);
+}
+
+.z6-blok--teorema {
+  --blok: var(--color-accent);
+}
+
+.z6-blok--vazhno {
+  --blok: var(--color-error);
+}
+
+.z6-blok__plashka {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  background: var(--blok);
+  color: var(--color-on-brand, #fff);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.z6-blok__p {
+  margin: var(--space-1) 0 0;
+  line-height: 1.65;
+}
+
+.z6-blok__formula {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+/* ── Где на ЕГЭ ── */
+.z6-gde {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin: var(--space-3) 0 0;
+}
+
+.z6-gde__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.z6-gde__chip {
+  display: inline-block;
+  padding: 2px var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: 999px;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.z6-gde__chip:hover {
+  background: var(--color-surface-soft);
+}
+
+/* ── Кнопка «Пример» ── */
+.z6-primer {
+  margin-top: var(--space-3);
+}
+
+.z6-primer__summary {
+  display: inline-block;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 999px;
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.z6-primer__summary::-webkit-details-marker {
+  display: none;
+}
+
+.z6-primer__zakryt,
+.z6-primer[open] .z6-primer__otkryt {
+  display: none;
+}
+
+.z6-primer[open] .z6-primer__zakryt {
+  display: inline;
+}
+
+.z6-primer[open] > .z6-primer__summary {
+  margin-bottom: var(--space-3);
+}
+
+.z6-primer__uslovie {
+  margin: 0 0 var(--space-3);
+  line-height: 1.7;
+}
+
+.z6-primer__metka {
+  margin: 0 0 var(--space-1);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.z6-primer__uslovie {
+  margin: 0 0 var(--space-3);
+}
+
+.z6-ris-teorii {
+  margin: var(--space-4) 0;
+  break-inside: avoid;
+}
+
+.z6-ris-teorii__podpis {
+  margin-top: var(--space-2);
+  max-width: 72ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.z6-shpargalka-ssylka {
+  margin: var(--space-2) 0 0;
+  font-size: 15px;
+}
+
+/* «Проверь себя» после раздела — с отступом от карточек. */
+.z6-teoriya > .prv {
+  margin-top: var(--space-8);
+}
+
+@media print {
+  .z6-gde,
+  .z6-primer,
+  .z6-teoriya > .prv {
+    display: none;
+  }
+
+  .z6-tablica-teorii th,
+  .z6-blok,
+  .z6-blok__formula {
+    background: none;
+  }
+
+  .z6-blok {
+    border-color: #000;
+  }
+}

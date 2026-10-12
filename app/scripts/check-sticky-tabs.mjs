@@ -82,6 +82,7 @@ const PAGES = [
   '/zadaniya/10/trenazher/',
   '/zadaniya/10/generator/',
   '/zadaniya/10/dlya-repetitorov/',
+  '/zadaniya/6/teoriya/',
   '/zadaniya/7/',
   '/zadaniya/7/teoriya/',
   '/zadaniya/7/opornye-zadachi/',
