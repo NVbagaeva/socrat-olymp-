@@ -9,7 +9,6 @@
  */
 
 .tour,
-.welcome,
 .help-fab {
   --onb-veil: color-mix(in srgb, var(--color-text) 48%, transparent);
 }
@@ -86,8 +85,7 @@
   background: var(--color-surface-2);
   color: var(--color-text);
 }
-.tour-card__close svg,
-.welcome__close svg {
+.tour-card__close svg {
   width: 20px;
   height: 20px;
   fill: none;
@@ -291,170 +289,6 @@
   line-height: 1.4;
 }
 
-/* ── Окно «Впервые здесь?» ─────────────────────────────────────── */
-
-.welcome {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  display: grid;
-  place-items: center;
-  padding: var(--space-5);
-  background: var(--onb-veil);
-}
-.welcome__panel {
-  position: relative;
-  width: min(680px, 100%);
-  padding: var(--space-8);
-  background: var(--color-surface);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  outline: none;
-}
-.welcome__grip {
-  display: none;
-}
-.welcome__close {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-md);
-  color: var(--color-text-tertiary);
-}
-.welcome__close:hover {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-.welcome__eyebrow {
-  color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.welcome__title {
-  margin-top: var(--space-2);
-  font-size: 36px;
-  line-height: 1.15;
-  font-weight: 700;
-}
-.welcome__lead {
-  margin-top: var(--space-3);
-  color: var(--color-text-secondary);
-  font-size: 17px;
-  line-height: 1.5;
-}
-.welcome__choices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-}
-.welcome__choice {
-  position: relative;
-  display: grid;
-  gap: var(--space-1);
-  align-content: start;
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  text-align: left;
-  transition:
-    border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease);
-}
-.welcome__choice:hover,
-.welcome__choice:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-}
-.welcome__icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: var(--space-2);
-  border-radius: 50%;
-  background: var(--color-surface-info);
-  color: var(--color-primary);
-}
-.welcome__icon svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.welcome__choice-title {
-  color: var(--color-text-brand);
-  font-size: 18px;
-  font-weight: 700;
-}
-.welcome__choice-text {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.45;
-}
-.welcome__arrow {
-  position: absolute;
-  top: var(--space-5);
-  right: var(--space-5);
-  color: var(--color-primary);
-  font-size: 20px;
-}
-.welcome__later {
-  display: block;
-  margin: var(--space-5) auto 0;
-  padding: var(--space-2) var(--space-3);
-  color: var(--color-primary);
-  font-size: 15px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-@media (max-width: 767.98px) {
-  .welcome {
-    align-items: end;
-    padding: 0;
-  }
-  .welcome__panel {
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: var(--space-6) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  }
-  .welcome__grip {
-    display: block;
-    width: 40px;
-    height: 4px;
-    margin: calc(-1 * var(--space-3)) auto var(--space-4);
-    border-radius: var(--radius-pill);
-    background: var(--color-border-strong);
-  }
-  .welcome__close {
-    top: var(--space-3);
-    right: var(--space-3);
-  }
-  .welcome__title {
-    font-size: 28px;
-  }
-  .welcome__choices {
-    grid-template-columns: 1fr;
-    gap: var(--space-3);
-  }
-  .welcome__choice {
-    padding: var(--space-4);
-  }
-}
-
 /* ── Кнопка «?» ────────────────────────────────────────────────── */
 
 .help-fab {
@@ -539,7 +373,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tour__hole,
   .tour-card,
-  .welcome__choice,
   .help-fab__button {
     transition: none;
   }

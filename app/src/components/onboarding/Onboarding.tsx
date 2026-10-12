@@ -4,19 +4,19 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useSyncExternalStore } from 'react';
 import { HOWTO_HREF } from '@/content/onboarding';
-import { useOnboarding, useWelcomeAtLoad } from '@/lib/onboarding';
+import { useIntroRequest, useOnboarding, useWelcomeAtLoad } from '@/lib/onboarding';
 import { HelpFab } from './HelpFab';
+import { IntroWelcome } from './IntroWelcome';
 import './onboarding.css';
 
-/* Тур и окно приветствия грузятся, только когда нужны: онбординг стоит
-   на каждой странице, а тур идёт редко, окно — один раз. */
+/* Тур грузится, только когда идёт: онбординг стоит на каждой странице. */
 const Tour = dynamic(() => import('./Tour').then((m) => m.Tour), { ssr: false });
-const Welcome = dynamic(() => import('./Welcome').then((m) => m.Welcome), { ssr: false });
 
-/** Страницы без онбординга: печатные листы, служебные витрины и прототипы. */
+/** Страницы без онбординга: печатные листы, PDF, служебные витрины и прототипы. */
 function quiet(path: string): boolean {
   return (
     path.includes('/pechat') ||
+    path.includes('/pdf') ||
     path.startsWith('/styleguide') ||
     path.includes('/vitrina') ||
     path.startsWith('/dev/')
@@ -35,22 +35,47 @@ function useFramed(): boolean {
 }
 
 /**
- * Онбординг на всех страницах сайта: окно «Впервые здесь?», кнопка «?»
- * и тур. Стоит в корневом layout, поэтому тур переживает переходы
- * между страницами.
+ * Где заставку первого визита не показывать, хотя человек здесь впервые:
+ * пришёл по ссылке с кодом комплекта или на конкретную тренировку —
+ * ему нужна она, а не приветствие; поисковый робот — ему нужна страница.
+ * Считается один раз при загрузке: адрес на тот момент и есть «как пришёл».
+ */
+function useIntroBlocked(): boolean {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => {
+      const { pathname, search } = window.location;
+      const params = new URLSearchParams(search);
+      if (params.has('kit') || params.has('seed')) return true;
+      if (pathname.includes('/trenazher')) return true;
+      return /bot|crawl|spider|slurp|yandex|google|bing|baidu|duckduck|lighthouse/i.test(
+        navigator.userAgent,
+      );
+    },
+    () => true,
+  );
+}
+
+/**
+ * Онбординг на всех страницах сайта: заставка первого визита с окном
+ * «Добро пожаловать», кнопка «?» и тур. Стоит в корневом layout, поэтому
+ * тур переживает переходы между страницами.
  */
 export function Onboarding() {
   const path = usePathname();
   const state = useOnboarding();
   const welcomeNeeded = useWelcomeAtLoad();
+  const blocked = useIntroBlocked();
+  const replay = useIntroRequest();
   const framed = useFramed();
   if (quiet(path) || framed) return null;
+  /* На странице инструкции заставка лишняя: человек уже читает, как
+     пользоваться сайтом. Повторный показ по просьбе — и там тоже. */
   const onHowto = path.startsWith(HOWTO_HREF.replace(/\/$/, ''));
+  const first = welcomeNeeded && !blocked && !onHowto && state.active === null;
   return (
     <>
-      {/* На странице инструкции окно «Впервые здесь?» лишнее: человек
-          уже читает, как пользоваться сайтом. */}
-      {welcomeNeeded ? <Welcome allowed={!onHowto} /> : null}
+      {first || replay > 0 ? <IntroWelcome first={first} replay={replay} /> : null}
       <HelpFab />
       {state.active !== null ? <Tour /> : null}
     </>
