@@ -5,7 +5,7 @@ import { Illyustraciya10 } from '@/components/tasks/zadanie10/Illyustraciya10';
 import { Most10 } from '@/components/tasks/zadanie10/Most10';
 import { Razbor10 } from '@/components/tasks/zadanie10/Razbor10';
 import { Tex } from '@/components/ui/Tex';
-import { TEORIYA_10_DLYA_PROTOTIPA } from '@/content/teoriya10';
+import { YAKOR_TEORII_10 } from '@/content/teoriya10';
 import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
 import { zadachiPrototipa } from '@/lib/zadanie10/bank/index';
 import { kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
@@ -39,7 +39,7 @@ export default async function Razbor10Page({ params }: { params: Promise<{ proto
   }
   const s = prototype(p.id).solve(z.params);
   const base = `${ZADANIYA}/${ZADANIE10.slug}`;
-  const teoriya = TEORIYA_10_DLYA_PROTOTIPA(p.id);
+  const teoriya = YAKOR_TEORII_10(p.id);
   return (
     <article className="z10-razbor-str">
       <p className="z10-razbor-str__nazad">
@@ -65,7 +65,7 @@ export default async function Razbor10Page({ params }: { params: Promise<{ proto
           Решать такие задачи
         </Link>
         {teoriya ? (
-          <Link className="btn btn--secondary" href={`${base}/teoriya/#teoriya-${teoriya}`}>
+          <Link className="btn btn--secondary" href={`${base}/teoriya/#${teoriya}`}>
             Теория
           </Link>
         ) : null}

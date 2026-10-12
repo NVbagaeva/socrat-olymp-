@@ -23,15 +23,32 @@ function formulaHtml(kusok: Kusok, strogo: boolean, displayFrac = false): string
   });
 }
 
+/* Единицы в обычном тексте не рвутся на телефоне. Составная единица
+   («км/ч», «м/с», «км/ч²») — браузер переносит после «/», поэтому она
+   идёт неразрывным куском; пробел между формулой-числом и единицей
+   («$72$ км/ч») — неразрывный. */
+const ED = '(?:км|м|см|мм|мин|ч|с|сут|г|кг|т|л|Вт|кВт|руб\\.|град\\.|К)';
+const SOSTAVNAYA = new RegExp(`(?<![\\p{L}])(${ED}\\/${ED}[²³]?)(?![\\p{L}])`, 'gu');
+const POSLE_CHISLA = new RegExp(`^ (?=(?:${ED}|кВ|В|МГц|Гц|мкФ|Ф|Ом)(?![\\p{L}]))`, 'u');
+
+function edinicyNeRvutsya(body: string, posleFormuly: boolean): string {
+  const s = posleFormuly ? body.replace(POSLE_CHISLA, '\u00A0') : body;
+  return s.replace(SOSTAVNAYA, '<span class="nowrap">$1</span>');
+}
+
 function kuskiHtml(text: string, strogo: boolean, escape: boolean, displayFrac = false): string {
-  return razmetka(text)
-    .map((kusok) => {
+  const kuski = razmetka(text);
+  return kuski
+    .map((kusok, i) => {
       if (kusok.math === true) {
         return formulaHtml(kusok, strogo, displayFrac);
       }
-      const body = escape
-        ? kusok.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        : kusok.text;
+      const body = edinicyNeRvutsya(
+        escape
+          ? kusok.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          : kusok.text,
+        kuski[i - 1]?.math === true,
+      );
       return kusok.strong === true ? `<strong>${body}</strong>` : body;
     })
     .join('');

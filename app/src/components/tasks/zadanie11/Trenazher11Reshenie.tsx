@@ -156,6 +156,7 @@ export function Trenazher11Reshenie({
   const podskazkaByla = shag > 0 || otkrytye.size > 0 || mimo.length > 0;
   const zakrytaZadacha = checked === 'right' || razborOtkryt;
   const ssylka = ssylki[z.section];
+  const teoriya = ssylka.podtipy[z.id] ?? ssylka.teoriya;
   const layfhak = z.lifehacks[0];
 
   function sekund(): number {
@@ -344,8 +345,8 @@ export function Trenazher11Reshenie({
             {TRENAZHER_11.layfhak}
           </Link>
         )}
-        {ssylka.teoriya === '' ? null : (
-          <Link className="z11-resh__link" href={`${base}/teoriya/#teoriya-${ssylka.teoriya}`}>
+        {teoriya === '' ? null : (
+          <Link className="z11-resh__link" href={`${base}/teoriya/#${teoriya}`}>
             <Piktogramma name="book" />
             {TRENAZHER_11.teoriya}
           </Link>

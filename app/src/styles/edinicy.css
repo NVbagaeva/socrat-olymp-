@@ -1,0 +1,509 @@
+/* Общая теория «Единицы измерения» и «Степени десяти»
+   (components/teoriya/EdinicyStepeni.tsx) — №10 и №11.
+
+   Палитра — та же, что у справочника по планиметрии (токены
+   --color-spr-*): «Определение» — синий, «Правило» — бирюзовый,
+   «Формула» — золотисто-оранжевый, «Важно» — терракотовый, «Пример» —
+   серо-голубой пунктир. Ярлык рамки стоит на её верхней границе.
+
+   Телефон: всё в одну колонку, таблицы без горизонтальной прокрутки.
+   Единицы — внутри формул KaTeX, поэтому «км/ч» не рвётся. */
+
+.ed-teoriya {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.ed-chast {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open, 0px) + var(--space-4));
+}
+.ed-chast__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text-brand);
+}
+
+.ed-p {
+  margin: var(--space-2) 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.ed-formula {
+  display: block;
+  max-width: 100%;
+  margin: var(--space-2) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.ed-formula .katex-display {
+  margin: 0;
+}
+.ed-vykladka {
+  display: block;
+}
+.ed-vykladka > .ed-formula + .ed-formula {
+  margin-top: 0;
+}
+
+/* ── Рамки ─────────────────────────────────────────────────────── */
+
+.ed-ramka {
+  --ed-cvet: var(--color-spr-def);
+  --ed-fon: var(--color-spr-def-soft);
+  position: relative;
+  min-width: 0;
+  margin-top: var(--space-3);
+  padding: var(--space-6) var(--space-5) var(--space-4);
+  border: 1px solid var(--ed-cvet);
+  border-radius: var(--radius-lg);
+  background: var(--ed-fon);
+  color: var(--color-text);
+  break-inside: avoid;
+}
+.ed-ramka--svo {
+  --ed-cvet: var(--color-spr-svo);
+  --ed-fon: var(--color-spr-svo-soft);
+}
+.ed-ramka--teo {
+  --ed-cvet: var(--color-spr-teo);
+  --ed-fon: var(--color-spr-teo-soft);
+}
+.ed-ramka--vaz {
+  --ed-cvet: var(--color-spr-vaz);
+  --ed-fon: var(--color-spr-vaz-soft);
+}
+.ed-ramka--vopros,
+.ed-ramka--gde {
+  --ed-cvet: var(--color-spr-primenenie);
+  --ed-fon: var(--color-spr-primenenie-soft);
+}
+.ed-ramka--vopros {
+  border-width: 2px;
+  text-align: center;
+}
+.ed-ramka--vopros .ed-p {
+  font-size: var(--fs-h4);
+  line-height: 1.4;
+  font-weight: 600;
+}
+.ed-ramka > .ed-p:first-of-type {
+  margin-top: 0;
+}
+.ed-ramka > :last-child {
+  margin-bottom: 0;
+}
+.ed-ramka__metka {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: var(--space-3);
+  max-width: calc(100% - var(--space-6));
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--ed-cvet);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.ed-ramka__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ed-cvet);
+}
+/* Выносная формула в рамке — на белой подложке, как в справочнике. */
+.ed-ramka .ed-formula {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* ── Две стрелки ──────────────────────────────────────────────── */
+
+.ed-strelki {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.ed-strelka {
+  --ed-cvet: var(--color-spr-svo);
+  --ed-fon: var(--color-spr-svo-soft);
+  padding: var(--space-4);
+  border: 2px solid var(--ed-cvet);
+  border-radius: var(--radius-lg);
+  background: var(--ed-fon);
+  text-align: center;
+}
+.ed-strelka--vverh {
+  --ed-cvet: var(--color-spr-teo);
+  --ed-fon: var(--color-spr-teo-soft);
+}
+.ed-strelka p {
+  margin: 0;
+}
+.ed-strelka__put {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+.ed-strelka__ikonka {
+  width: 40px;
+  height: 16px;
+  flex: none;
+  color: var(--ed-cvet);
+}
+.ed-strelka__deystvie {
+  margin-top: var(--space-2) !important;
+  font-size: var(--fs-h4);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ed-cvet);
+}
+.ed-strelka__pochemu {
+  margin-top: var(--space-1) !important;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Опорные факты ────────────────────────────────────────────── */
+
+.ed-fakty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.ed-fakty__gruppa {
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.ed-fakty__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ed-cvet);
+}
+.ed-fakty__spisok {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-lg);
+}
+
+/* ── Пример: кнопка «Пример ▸» ───────────────────────────────── */
+
+.ed-primer {
+  position: relative;
+  min-width: 0;
+  border: 1.5px dashed var(--color-spr-primer);
+  border-radius: var(--radius-lg);
+  background: var(--color-spr-primer-soft);
+}
+.ed-primer__knopka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-text-brand);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.ed-primer__knopka::-webkit-details-marker {
+  display: none;
+}
+.ed-primer__knopka:hover {
+  background: var(--color-border-info);
+}
+.ed-primer__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.ed-primer__zakryt,
+.ed-primer[open] .ed-primer__otkryt {
+  display: none;
+}
+.ed-primer[open] .ed-primer__zakryt {
+  display: inline;
+}
+.ed-primer__telo {
+  padding: 0 var(--space-4) var(--space-4);
+}
+.ed-primer--otkryt {
+  margin-top: var(--space-3);
+  padding-top: var(--space-6);
+}
+.ed-primer__metka {
+  position: absolute;
+  top: calc(-1 * var(--space-3));
+  left: var(--space-3);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-spr-primer);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+}
+
+.ed-primery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ed-primery__item {
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.ed-primery__podpis {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* ── Разбор по шагам ──────────────────────────────────────────── */
+
+.ed-razbor {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.ed-razbor + .ed-razbor {
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--color-border-strong);
+}
+.ed-razbor__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.ed-razbor__ist {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.ed-razbor__shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ed-shag;
+}
+.ed-razbor__shag {
+  position: relative;
+  min-width: 0;
+  padding: var(--space-3) var(--space-3) var(--space-2) calc(var(--space-3) + 32px);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  counter-increment: ed-shag;
+}
+.ed-razbor__shag::before {
+  content: counter(ed-shag);
+  position: absolute;
+  left: var(--space-3);
+  top: var(--space-3);
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-spr-primer);
+  border-radius: var(--radius-pill);
+  color: var(--color-spr-primer);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+}
+.ed-razbor__podpis {
+  display: block;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.ed-razbor__vyvod,
+.ed-razbor__otvet {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-spr-svo);
+  background: var(--color-surface);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.ed-razbor__otvet {
+  border-left-color: var(--color-spr-teo);
+  font-weight: 600;
+}
+
+/* ── Две колонки «Почему так» ─────────────────────────────────── */
+
+.ed-kolonki {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.ed-kolonka {
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.ed-kolonka .ed-formula {
+  padding: 0;
+}
+.ed-kolonka__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--ed-cvet);
+}
+.ed-kolonki__vyvod {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--ed-cvet);
+  font-weight: 600;
+}
+
+/* ── Приставки ────────────────────────────────────────────────── */
+
+.ed-pristavki {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+}
+.ed-pristavki:not(:has(.ed-pristavki__kartinki)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ed-pristavki__kartinki {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+}
+.ed-tablica {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.ed-tablica th,
+.ed-tablica td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+.ed-tablica thead th {
+  font-size: var(--fs-caption);
+  color: var(--ed-cvet);
+}
+.ed-tablica tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ed-tablica__oboz {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+/* ── Вступление, картинки, «Где пригодится» ───────────────────── */
+
+.ed-tekst {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+}
+.ed-tekst--s-kartinkoy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: var(--space-5);
+  align-items: center;
+}
+.ed-kartinka {
+  display: block;
+  max-width: 240px;
+}
+.ed-kartinka img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ed-pristavki__kartinki .ed-kartinka {
+  max-width: 160px;
+}
+.ed-gde {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.ed-gde__ssylka {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Телефон: одна колонка ────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+  .ed-strelki,
+  .ed-fakty,
+  .ed-primery,
+  .ed-kolonki,
+  .ed-pristavki,
+  .ed-tekst--s-kartinkoy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ed-ramka {
+    padding: var(--space-6) var(--space-4) var(--space-3);
+  }
+  .ed-primer__telo {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+  .ed-tablica {
+    font-size: var(--fs-caption);
+  }
+  .ed-tablica th,
+  .ed-tablica td {
+    padding: var(--space-2) var(--space-1);
+  }
+  .ed-tablica tbody th {
+    white-space: normal;
+  }
+  .ed-kartinka {
+    margin: 0 auto;
+    max-width: 200px;
+  }
+  .ed-gde__ssylka {
+    white-space: normal;
+  }
+}

@@ -30,6 +30,7 @@ const KRATKIE: ReadonlySet<BlokTeorii10['vid']> = new Set([
   'vazhno',
   'vyvod',
   'lovushka',
+  'edinicy',
 ]);
 
 /**
@@ -78,7 +79,10 @@ export default async function Shpargalka10({ params }: { params: Promise<{ urok:
           {r.bloki
             .filter((b) => KRATKIE.has(b.vid) || (r.id === 'algoritm' && b.vid === 'opredelenie'))
             .map((b, i) => (
-              <Blok10 b={bezSsylok(b)} key={`${r.id}-${i}`} />
+              <Blok10
+                b={b.vid === 'edinicy' ? { ...b, kratko: true } : bezSsylok(b)}
+                key={`${r.id}-${i}`}
+              />
             ))}
         </section>
       ))}
