@@ -119,6 +119,12 @@ export const sections = [
 /** Раздел «Ответы» файла для учителя. */
 export const otvety = { title: 'Ответы', note: 'по разделам, сквозная нумерация' };
 
+/** Раздел подсказок в конце файла для учителя. */
+export const podskazki = {
+  title: 'Подсказки по шагам',
+  note: 'вопросы кнопки «Подсказка» на сайте; верный ответ — жирным',
+};
+
 /** Названия файлов сборника. */
 export const files = {
   uchenik: 'zadanie-4-teoriya-veroyatnostey-uchenik',
@@ -127,6 +133,6 @@ export const files = {
   uchitelChb: 'zadanie-4-teoriya-veroyatnostey-uchitel-chb',
 };
 
-const content = { head, foot, subtitle, recap, examples, sections, otvety, files };
+const content = { head, foot, subtitle, recap, examples, sections, otvety, podskazki, files };
 
 export default content;

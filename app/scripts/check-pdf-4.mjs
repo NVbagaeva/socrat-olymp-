@@ -178,6 +178,55 @@ function checkStudentItems(name) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Учитель: у каждого шага решения — этап
+   ══════════════════════════════════════════════════════════ */
+/* Этап («Все исходы», «Ответ») печатается жирным перед текстом шага —
+   те же слова, что над шагом на сайте. Шаги №4 начинаются сразу с
+   сюжета («Места туриста…»): без этапа учитель не увидит, что это
+   все исходы. Последний шаг с формулой — «Ответ». */
+function checkTeacherItems(name) {
+  const loaded = specItems(name);
+  if (!loaded) { return; }
+  const cards = loaded.spec.items.filter((item) => /class="sheet-task /.test(item));
+  cards.forEach((card, index) => {
+    const no = expected[index] ? expected[index].no : index + 1;
+    const steps = card.match(/<li class="sheet-step">[\s\S]*?<\/li>/g) || [];
+    if (!steps.length) { fail(name + ': в карточке ' + no + ' для учителя нет решения по шагам'); return; }
+    steps.forEach((step, i) => {
+      if (!/class="sheet-step-etap"/.test(step)) {
+        fail(name + ': задача ' + no + ', шаг ' + (i + 1) + ' без этапа');
+      }
+    });
+    const withMath = steps.filter((step) => /class="math"/.test(step));
+    const last = withMath[withMath.length - 1];
+    if (last && !/class="sheet-step-etap">Ответ\.</.test(last)) {
+      fail(name + ': задача ' + no + ': у последнего шага с формулой этап не «Ответ»');
+    }
+  });
+
+  /* Раздел «Подсказки по шагам» в конце: по карточке на задачу, в
+     каждом вопросе ровно один верный ответ (жирным) и хотя бы два
+     варианта. */
+  const hints = loaded.spec.items.filter((item) => /class="[^"]*\bsheet-hint"/.test(item));
+  if (hints.length !== expected.length) {
+    fail(name + ': подсказок в конце файла ' + hints.length + ', задач ' + expected.length);
+  }
+  hints.forEach((card, index) => {
+    const no = expected[index] ? expected[index].no : index + 1;
+    const shagi = card.match(/<li class="sheet-step sheet-hint-step">[\s\S]*?<\/li>/g) || [];
+    if (shagi.length < 2) { fail(name + ': в подсказке к задаче ' + no + ' меньше двух вопросов'); }
+    shagi.forEach((shag, i) => {
+      const right = (shag.match(/class="sheet-hint-right"/g) || []).length;
+      const options = right + (shag.match(/class="sheet-hint-option"/g) || []).length;
+      if (right !== 1 || options < 2) {
+        fail(name + ': подсказка к задаче ' + no + ', вопрос ' + (i + 1) +
+          ': верных ' + right + ', вариантов ' + options);
+      }
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
    PDF: шрифты, ссылки, цвет, заголовок
    ══════════════════════════════════════════════════════════ */
 function checkPdf(name, mono, strictFonts, withAnswers) {
@@ -221,7 +270,7 @@ files.forEach((file) => {
 
   checkPdf(file.name, file.mono, withKatex, file.answers);
   checkReport(file.name, file.answers);
-  if (!file.answers) { checkStudentItems(file.name); }
+  if (!file.answers) { checkStudentItems(file.name); } else { checkTeacherItems(file.name); }
   console.log('  проверен ' + file.name + (withKatex ? '' : ' (черновик, без KaTeX)'));
 });
 

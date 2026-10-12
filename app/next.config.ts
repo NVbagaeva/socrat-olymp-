@@ -11,15 +11,16 @@ import {
 
 /* Служебные страницы-галереи банков (файлы page.dev.tsx) становятся
    маршрутами только в `next dev` или со флагом GALEREYA=1
-   (GALEREYA_1=1, GALEREYA_9=1 и GALEREYA_10=1 — то же для заданий №1,
-   №9 и №10, SOGLASIYA=1 — для витрины согласий /styleguide/soglasiya/).
-   Галереи показывают ответы; в обычной сборке их нет — адрес отдаёт
-   404, это проверяют scripts/check-dev-pages.mjs и
-   scripts/check-galereya-1.mjs. */
+   (GALEREYA_1=1, GALEREYA_7=1, GALEREYA_9=1 и GALEREYA_10=1 — то же для
+   заданий №1, №7, №9 и №10, SOGLASIYA=1 — для витрины согласий
+   /styleguide/soglasiya/). Галереи показывают ответы; в обычной сборке
+   их нет — адрес отдаёт 404, это проверяют scripts/check-dev-pages.mjs
+   и scripts/check-galereya-1.mjs. */
 const devPages =
   process.env.NODE_ENV === 'development' ||
   process.env.GALEREYA === '1' ||
   process.env.GALEREYA_1 === '1' ||
+  process.env.GALEREYA_7 === '1' ||
   process.env.GALEREYA_9 === '1' ||
   process.env.GALEREYA_10 === '1' ||
   process.env.SOGLASIYA === '1';

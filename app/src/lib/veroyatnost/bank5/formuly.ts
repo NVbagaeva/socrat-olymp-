@@ -64,9 +64,11 @@ const P01: Prototype = prototip({
     const p2 = veroyatnost(p, 'p2');
     return [
       {
+        etap: 'Связь событий',
         text: `События «вопрос по теме «${text(p, 't1')}»» и «вопрос по теме «${text(p, 't2')}»» несовместны: общих вопросов нет.`,
       },
       {
+        etap: 'Ответ',
         text: 'Вероятность суммы несовместных событий — сумма их вероятностей:',
         formula: `P = p_1 + p_2 = ${tex(p1)} + ${tex(p2)} = ${tex(tochnee(p1 + p2))}`,
         value: tochnee(p1 + p2),
@@ -165,9 +167,11 @@ const P02: Prototype = prototip({
     const q = veroyatnost(p, 'p');
     return [
       {
+        etap: 'Связь событий',
         text: `События «ниже ${text(p, 't')} °C» и «${text(p, 't')} °C или выше» противоположны: одно из них происходит обязательно, вместе — никогда.`,
       },
       {
+        etap: 'Ответ',
         text: 'Вероятность противоположного события — единица минус вероятность данного:',
         formula: `P = 1 - p = 1 - ${tex(q)} = ${tex(tochnee(1 - q))}`,
         value: tochnee(1 - q),
@@ -247,11 +251,13 @@ const P04: Prototype = prototip({
     const hotyaBy = tochnee(2 * q - q12);
     return [
       {
+        etap: 'Связь событий',
         text: 'Событие «кофе закончится хотя бы в одном автомате» — сумма совместных событий $A$ и $B$; их общую часть вычитаем, чтобы не посчитать дважды:',
         formula: `P(A + B) = P(A) + P(B) - P(AB) = ${tex(q)} + ${tex(q)} - ${tex(q12)} = ${tex(hotyaBy)}`,
         value: hotyaBy,
       },
       {
+        etap: 'Ответ',
         text: '«Кофе останется в обоих» — противоположное событие:',
         formula: `P = 1 - ${tex(hotyaBy)} = ${tex(tochnee(1 - hotyaBy))}`,
         value: tochnee(1 - hotyaBy),
@@ -370,14 +376,16 @@ const P12: Prototype = prototip({
     }
     return [
       {
+        etap: 'Противоположное событие',
         text: `Промах при одном выстреле — ${dec(promah)}. Стрелок не поразит цель за $k$ выстрелов, если промахнётся все $k$ раз; поразит — в противоположном случае:`,
         formula: `P_k = 1 - ${tex(promah)}^{k}`,
       },
       {
+        etap: 'Вычисление',
         text: 'Перебираем $k$, пока вероятность не дотянет до порога:',
         formula: stroki.join(';\\quad '),
       },
-      { text: 'Наименьшее число патронов:', formula: `k = ${k}`, value: k },
+      { etap: 'Ответ', text: 'Наименьшее число патронов:', formula: `k = ${k}`, value: k },
     ];
   },
   podskazka: (p) => {

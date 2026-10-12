@@ -24,14 +24,14 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { altIllyustratsii, KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
 import {
-  imyaIllyustratsii,
-  texPlain,
-  zadanieIllyustratsii,
-  type Method,
-} from './model';
+  altIllyustratsii,
+  KARTINKA_NE_PO_USLOVIYU,
+  KARTINKA_OSNOVY_PODHODIT,
+} from './illyustratsii';
+import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -222,10 +222,11 @@ export function vydelitOtvet(formula: string): string {
  */
 export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   if (shag.formula === undefined) {
-    return { text: shag.text };
+    return { etap: shag.etap, text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
   return {
+    etap: shag.etap,
     text: shag.text,
     tex,
     vykladka: nabratVykladku(tex, true),
@@ -407,13 +408,11 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
   const kartinka = kartinkaOpornoy(zadacha);
-  /* Подсказка — от прототипа, на числах того варианта, из которого
-     взята задача (вариант 1 — сама задача конспекта). */
-  const params = zadacha.prototip?.varianty.find((v) => v.n === (zadacha.variant ?? 1))?.params;
+  /* Подсказка — от прототипа на числах варианта задачи или, у задач №5
+     без прототипа, своя (podgotovka5-podskazki.ts). */
+  const shagiPodskazki = podskazkaOpornoy(zadacha);
   const podskazka =
-    zadacha.prototip?.podskazka === undefined || params === undefined
-      ? undefined
-      : zapechatatPodskazku(zadacha.prototip.podskazka(params), seal);
+    shagiPodskazki === undefined ? undefined : zapechatatPodskazku(shagiPodskazki, seal);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
   const illustration = model === null ? kartinka : undefined;
@@ -428,7 +427,12 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
     ...(model === null
       ? {}
-      : { model: { method: model.method, ...(kartinka === undefined ? {} : { illustration: kartinka }) } }),
+      : {
+          model: {
+            method: model.method,
+            ...(kartinka === undefined ? {} : { illustration: kartinka }),
+          },
+        }),
   };
 }
 
@@ -558,9 +562,7 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
         {
           id: zadacha.id,
           istochnik: 'opornaya',
-          variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok),
-          ],
+          variants: [uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok)],
         },
       ];
     });

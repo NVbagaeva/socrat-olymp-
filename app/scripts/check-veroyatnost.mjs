@@ -394,23 +394,20 @@ generatory.problems.slice(0, 40).forEach((item) => console.log(`   ${item}`));
    у банков №4 и №5 она обязательна у всех. */
 const bez4 = bezPodskazki(BANK_4);
 const bez5 = bezPodskazki(BANK_5);
-/* Опорные задачи №4 берут подсказку у своего прототипа (KONSPEKT_4):
-   на числах того варианта, из которого задача взята. */
-const opornyeBez4 = PODGOTOVKA_4.flatMap((b) => b.zadachi)
-  .filter((z) => z.prototip?.podskazka === undefined)
-  .map((z) => z.id);
+/* Опорные задачи: подсказка проверена в checkPrep (та же, что уйдёт
+   ученику); здесь — у каких её нет. */
+const opornyeBez = prep.bezPodskazki;
 console.log(
   `\nподсказки-вопросы: №4 — ${BANK_4.length - bez4.length} из ${BANK_4.length}, ` +
     `№5 — ${BANK_5.length - bez5.length} из ${BANK_5.length}`,
 );
-const opornyh4 = PODGOTOVKA_4.reduce((sum, b) => sum + b.zadachi.length, 0);
-console.log(`  опорные №4 — ${opornyh4 - opornyeBez4.length} из ${opornyh4}`);
+console.log(`  опорные №4 и №5 — ${prep.zadachi - opornyeBez.length} из ${prep.zadachi}`);
 
 fs.rmSync(out, { recursive: true, force: true });
 
-if (bez4.length > 0 || bez5.length > 0 || opornyeBez4.length > 0) {
+if (bez4.length > 0 || bez5.length > 0 || opornyeBez.length > 0) {
   console.error(
-    `\nНет подсказки-вопросов: ${[...bez4, ...bez5, ...opornyeBez4].join(', ')}.`,
+    `\nНет подсказки-вопросов: ${[...bez4, ...bez5, ...opornyeBez].join(', ')}.`,
   );
   process.exit(1);
 }

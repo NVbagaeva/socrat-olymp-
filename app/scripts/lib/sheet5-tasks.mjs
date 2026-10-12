@@ -45,6 +45,7 @@ function lib() {
       model: requireSrc('lib/veroyatnost/model'),
       metody: requireSrc('lib/veroyatnost/metody5'),
       types: requireSrc('lib/veroyatnost/types'),
+      podskazki: requireSrc('lib/veroyatnost/podgotovka5-podskazki'),
       list: requireSrc('content/veroyatnost'),
     };
   }
@@ -59,6 +60,7 @@ function lib() {
 function stepsHtml(shagi, answer) {
   const { model } = lib();
   const items = shagi.map((step) => ({
+    etap: step.etap,
     text: step.text,
     tex: step.formula,
     plain: step.formula ? model.texPlain(step.formula) : '',
@@ -205,6 +207,40 @@ export function answersItems(sections) {
   return items;
 }
 
+/**
+ * Подсказки задач сборника по идентификатору задачи: у опорной — та
+ * же, что на сайте (podskazkaOpornoy), у прототипа — на числах
+ * первого варианта, как и сама задача сборника.
+ */
+function podskazkiPoId() {
+  const { bank, modeli, podskazki } = lib();
+  const map = new Map();
+  bank.PODGOTOVKA_5.forEach((blok) => blok.zadachi.forEach((zadacha) => {
+    map.set(zadacha.id, podskazki.podskazkaOpornoy(zadacha));
+  }));
+  bank.BANK_5.forEach((prototype) => {
+    const first = prototype.varianty[0];
+    map.set(modeli.modelVarianta(prototype, first).id,
+      prototype.podskazka ? prototype.podskazka(first.params) : undefined);
+  });
+  return map;
+}
+
+/** Подсказки всех задач в конце файла для учителя — по разделам. */
+export function hintsItems(sections) {
+  const map = podskazkiPoId();
+  const items = [answers.sectionHead(content.podskazki.title, content.podskazki.note)];
+  sections.forEach((section) => {
+    items.push(answers.subHead(section.title));
+    section.tasks.forEach((task) => {
+      const shagi = map.get(task.id);
+      if (!shagi) { throw new Error('у задачи ' + task.id + ' нет подсказки'); }
+      items.push(answers.hint(task.no, shagi));
+    });
+  });
+  return items;
+}
+
 /** Название задания и строка компактной шапки — те же, что на сайте. */
 export function naming() {
   const { LIST_5 } = lib().list;
@@ -229,7 +265,7 @@ export function sheetSpec(sections, options) {
     recap: recap(),
     blocks: sections,
     withAnswerLine: !options.withAnswers,
-    extraItems: options.withAnswers ? answersItems(sections) : [],
+    extraItems: options.withAnswers ? [...answersItems(sections), ...hintsItems(sections)] : [],
     foot: content.foot,
     defs: marks.hatchDefs(),
   };

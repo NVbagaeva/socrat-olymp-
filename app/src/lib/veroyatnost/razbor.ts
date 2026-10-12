@@ -7,9 +7,12 @@
 
 import type { AtomVykladki } from '../tex';
 import type { Parametry, Podsvetka } from './model';
+import type { Etap } from './types';
 import { openText } from './secret';
 
 export interface RazborShag {
+  /** Этап решения — подпись над шагом (types.ts, ETAPY). */
+  etap: Etap;
   /** Пояснение шага словами. Дробей и выкладок в нём нет — они в формуле. */
   text: string;
   /** Формула шага в TeX — из неё набираются печатные листы. */

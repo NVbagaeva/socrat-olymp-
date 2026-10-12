@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { trainerPage, trainerWordsFor } from '@/content/trainerModes';
 import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
 import { typeset } from '@/lib/tex';
+import { scopeOfPath } from '@/lib/trainerSession/scope';
 import type { Subtopic } from '@/content/sections';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { prototypes } from '@/lib/graph/data/index.js';
@@ -70,6 +71,7 @@ export function TrainerShell({ subtopic, base, preset = null, children }: Traine
       {children ?? (
         <TrainerBuilder
           base={base}
+          scope={scopeOfPath(base) ?? subtopic.id}
           family={subtopic.title}
           familyTotal={total}
           skills={skills}
