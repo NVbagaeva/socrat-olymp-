@@ -8,7 +8,7 @@
  *     углов 1–8 там, где они нужны), засечки равенства, значок
  *     прямого угла, буквы сторон a, b, c, h, R;
  *   — ключевой элемент карточки — `vydelit: 'iskomoe'`: на странице
- *     справочника он золотисто-оранжевый (spravochnik1.css);
+ *     справочника он золотисто-оранжевый (spravochnik1-web.css, spravochnik1-pdf.css);
  *   — карточка из двух картинок («было/стало», «внутри/снаружи») —
  *     массив рисунков, они стоят рядом.
  *
@@ -231,12 +231,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   neravenstvo: () =>
     r({
       tochki: poStoronam(6, 7, 10),
-      elementy: [
-        tri('A', 'B', 'C'),
-        bk('B', 'C', 'a'),
-        bk('A', 'C', 'b'),
-        bk('A', 'B', 'c', ISK),
-      ],
+      elementy: [tri('A', 'B', 'C'), bk('B', 'C', 'a'), bk('A', 'C', 'b'), bk('A', 'B', 'c', ISK)],
     }),
   'storony-i-ugly': () =>
     r({
@@ -289,7 +284,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         M: { seredina: ['A', 'C'] },
         N: { seredina: ['B', 'C'] },
         K: { seredina: ['A', 'B'] },
-        O: { peresechenie: [['B', 'M'], ['A', 'N']] },
+        O: {
+          peresechenie: [
+            ['B', 'M'],
+            ['A', 'N'],
+          ],
+        },
       },
       elementy: [
         tri('A', 'B', 'C'),
@@ -354,7 +354,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         ...poUglam(62, 56),
         D: { osnovanie: ['B', 'A', 'C'] },
         E: { osnovanie: ['C', 'A', 'B'] },
-        O: { peresechenie: [['B', 'D'], ['C', 'E']] },
+        O: {
+          peresechenie: [
+            ['B', 'D'],
+            ['C', 'E'],
+          ],
+        },
       },
       elementy: [
         tri('A', 'B', 'C'),
@@ -573,11 +578,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         D: { naPryamoy: ['C', 'A', 0.5] },
         E: { naPryamoy: ['C', 'B', 0.5] },
       },
-      elementy: [
-        tri('A', 'B', 'C'),
-        otr('D', 'E'),
-        oblast(['C', 'D', 'E'], ISK),
-      ],
+      elementy: [tri('A', 'B', 'C'), otr('D', 'E'), oblast(['C', 'D', 'E'], ISK)],
     }),
 
   /* 6. Площади */
@@ -616,7 +617,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   'ploshchad-pryamougolnika': () => [
     r({
       tochki: { A: [0, 0], B: [0, 5], C: [8, 5], D: [8, 0] },
-      elementy: [mn(['A', 'B', 'C', 'D']), pryam('B', 'A', 'D'), bk('A', 'D', 'a'), bk('A', 'B', 'b')],
+      elementy: [
+        mn(['A', 'B', 'C', 'D']),
+        pryam('B', 'A', 'D'),
+        bk('A', 'D', 'a'),
+        bk('A', 'B', 'b'),
+      ],
       podpisi: false,
     }),
     r({
@@ -633,7 +639,15 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   ],
   'ploshchad-romba': () => [
     r({
-      tochki: { ...romb(56, 6), O: { peresechenie: [['A', 'C'], ['B', 'D']] } },
+      tochki: {
+        ...romb(56, 6),
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
+      },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
         otr('A', 'C', ISK),
@@ -650,7 +664,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: [2, 5],
         C: [9, 4],
         D: [8, 0],
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -727,7 +746,15 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
     }),
   parallelogramm: () =>
     r({
-      tochki: { ...parallelogramm(64), O: { peresechenie: [['A', 'C'], ['B', 'D']] } },
+      tochki: {
+        ...parallelogramm(64),
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
+      },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
         otr('A', 'C'),
@@ -748,7 +775,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: [0, 5],
         C: [9, 5],
         D: [9, 0],
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -763,7 +795,15 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
     }),
   romb: () =>
     r({
-      tochki: { ...romb(58, 6), O: { peresechenie: [['A', 'C'], ['B', 'D']] } },
+      tochki: {
+        ...romb(58, 6),
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
+      },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
         shtrih('A', 'B', 1),
@@ -784,7 +824,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: [0, 6],
         C: [6, 6],
         D: [6, 0],
-        O: { peresechenie: [['A', 'C'], ['B', 'D']] },
+        O: {
+          peresechenie: [
+            ['A', 'C'],
+            ['B', 'D'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -805,7 +850,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         ...trapeciya(10, 4.5, 4.5, 2.4),
         M: { seredina: ['A', 'B'] },
         N: { seredina: ['C', 'D'] },
-        K: { peresechenie: [['A', 'C'], ['M', 'N']] },
+        K: {
+          peresechenie: [
+            ['A', 'C'],
+            ['M', 'N'],
+          ],
+        },
       },
       elementy: [
         mn(['A', 'B', 'C', 'D']),
@@ -850,7 +900,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: { naDuge: { okr: 'w', gradus: 325 } },
         C: { naDuge: { okr: 'w', gradus: 90 } },
         D: { naDuge: { okr: 'w', gradus: 270 } },
-        M: { peresechenie: [['A', 'B'], ['C', 'D']] },
+        M: {
+          peresechenie: [
+            ['A', 'B'],
+            ['C', 'D'],
+          ],
+        },
       },
       okruzhnosti: { w: { centr: 'O', radius: 5 } },
       elementy: [
@@ -1010,7 +1065,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: { naDuge: { okr: 'w', gradus: 330 } },
         C: { naDuge: { okr: 'w', gradus: 25 } },
         D: { naDuge: { okr: 'w', gradus: 225 } },
-        M: { peresechenie: [['A', 'B'], ['C', 'D']] },
+        M: {
+          peresechenie: [
+            ['A', 'B'],
+            ['C', 'D'],
+          ],
+        },
       },
       okruzhnosti: { w: { centr: 'O', radius: 4.5 } },
       elementy: [okr('w'), otr('A', 'B'), otr('C', 'D'), tochka('M', ISK)],
@@ -1027,7 +1087,14 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         E: { pryamayaOkruzhnost: { pryamaya: ['A', 'P2'], okr: 'w', vybor: 'dalnyaya' } },
       },
       okruzhnosti: { w: { centr: 'O', radius: 3.4 } },
-      elementy: [okr('w'), otr('A', 'C'), otr('A', 'E'), tochka('B'), tochka('D'), tochka('A', ISK)],
+      elementy: [
+        okr('w'),
+        otr('A', 'C'),
+        otr('A', 'E'),
+        tochka('B'),
+        tochka('D'),
+        tochka('A', ISK),
+      ],
       bezPodpisi: ['P1', 'P2', 'O'],
     }),
   ],
@@ -1039,7 +1106,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         B: { naDuge: { okr: 'w', gradus: 305 } },
         C: { naDuge: { okr: 'w', gradus: 45 } },
         D: { naDuge: { okr: 'w', gradus: 235 } },
-        M: { peresechenie: [['A', 'B'], ['C', 'D']] },
+        M: {
+          peresechenie: [
+            ['A', 'B'],
+            ['C', 'D'],
+          ],
+        },
       },
       okruzhnosti: { w: { centr: 'O', radius: 4.5 } },
       elementy: [
@@ -1194,7 +1266,12 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         ...poUglam(64, 52),
         D: { bissektrisa: ['A', 'B', 'C'] },
         E: { bissektrisa: ['B', 'A', 'C'] },
-        O: { peresechenie: [['A', 'D'], ['B', 'E']] },
+        O: {
+          peresechenie: [
+            ['A', 'D'],
+            ['B', 'E'],
+          ],
+        },
       },
       elementy: [
         tri('A', 'B', 'C'),
@@ -1278,11 +1355,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         E: { seredina: ['B', 'C'] },
         F: { seredina: ['A', 'B'] },
       },
-      elementy: [
-        oblast(['D', 'E', 'F'], ISK),
-        tri('A', 'B', 'C'),
-        tri('D', 'E', 'F'),
-      ],
+      elementy: [oblast(['D', 'E', 'F'], ISK), tri('A', 'B', 'C'), tri('D', 'E', 'F')],
       podpisi: false,
     }),
   ],
@@ -1326,10 +1399,7 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
   'svoystvo-ili-priznak:0': () =>
     r({
       tochki: parallelnye(68),
-      elementy: [
-        ...PARALLELNYE_LINII,
-        ...uglyParallelnyh({ 4: '68°', 5: '112°' }, [4, 5]),
-      ],
+      elementy: [...PARALLELNYE_LINII, ...uglyParallelnyh({ 4: '68°', 5: '112°' }, [4, 5])],
       podpisi: false,
     }),
   'svoystvo-ili-priznak:1': () =>
@@ -1373,7 +1443,12 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
         M: { seredina: ['A', 'C'] },
         N: { seredina: ['B', 'C'] },
         K: { seredina: ['A', 'B'] },
-        O: { peresechenie: [['B', 'M'], ['A', 'N']] },
+        O: {
+          peresechenie: [
+            ['B', 'M'],
+            ['A', 'N'],
+          ],
+        },
       },
       elementy: [
         tri('A', 'B', 'C'),
@@ -1451,7 +1526,12 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
   'ploshchad-pryamougolnika:0': () =>
     r({
       tochki: { A: [0, 0], B: [0, 5], C: [5, 5], D: [5, 0] },
-      elementy: [mn(['A', 'B', 'C', 'D']), oblast(['A', 'B', 'C', 'D'], ISK), otr('A', 'C'), bk('A', 'C', '6')],
+      elementy: [
+        mn(['A', 'B', 'C', 'D']),
+        oblast(['A', 'B', 'C', 'D'], ISK),
+        otr('A', 'C'),
+        bk('A', 'C', '6'),
+      ],
       podpisi: false,
     }),
   'ploshchad-romba:0': () =>
@@ -1595,7 +1675,12 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
         M: { seredina: ['A', 'C'] },
         N: { seredina: ['B', 'C'] },
         K: { seredina: ['A', 'B'] },
-        O: { peresechenie: [['B', 'M'], ['A', 'N']] },
+        O: {
+          peresechenie: [
+            ['B', 'M'],
+            ['A', 'N'],
+          ],
+        },
       },
       elementy: [
         oblast(['A', 'O', 'B'], ISK),
@@ -1635,7 +1720,8 @@ export function chertezhPrimera(temaId: string, nomer: number, p: Primer): Risun
     nabor = z.params;
   } else {
     const a = analogi(ist.analog.proto).find((x) => x.no === ist.analog.no);
-    if (a === undefined) throw new Error(`нет аналога ${ist.analog.no} прототипа ${ist.analog.proto}`);
+    if (a === undefined)
+      throw new Error(`нет аналога ${ist.analog.no} прототипа ${ist.analog.proto}`);
     proto = ist.analog.proto;
     nabor = a.params;
   }

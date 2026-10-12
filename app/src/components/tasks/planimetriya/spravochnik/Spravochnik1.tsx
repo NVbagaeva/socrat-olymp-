@@ -11,11 +11,14 @@ import { PROGRESS_1 } from '@/content/zadanie1';
 import { chertezhTemy } from '@/lib/planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '@/lib/planimetriya/render';
 import { Poisk1 } from './Poisk1';
+import { SkachatPdf1 } from './SkachatPdf1';
 import { TemaKartochka1 } from './TemaKartochka1';
 
 /** Заголовок темы для содержания: без TeX, «$30^\\circ$» → «30°». */
 function bezTex(s: string): string {
-  return s.replace(/\$([^$]*)\$/g, (_, f: string) => f.replace(/\^\\circ/g, '°').replace(/\\/g, ''));
+  return s.replace(/\$([^$]*)\$/g, (_, f: string) =>
+    f.replace(/\^\\circ/g, '°').replace(/\\/g, ''),
+  );
 }
 
 /** Вид блока легенды → класс цвета (spravochnik1-web.css). */
@@ -74,10 +77,18 @@ function Razdel({ r, trenazher }: { r: Razdel1; trenazher?: (proto: number) => s
  * Оболочка — теория №4 и №2 (TeoriyaShell): содержание стоит липкой
  * колонкой, на узком экране его открывает кнопка «Содержание»; у
  * открытого раздела в содержании видны его темы. Под заголовком —
- * подзаголовок, «Как пользоваться» и поиск по темам. Страница
+ * подзаголовок, «Скачать PDF» (с примерами или без), «Как
+ * пользоваться» и поиск по темам. Страница
  * серверная: формулы набирает KaTeX, чертежи рисует движок на сборке.
  */
-export function Spravochnik1({ trenazher }: { trenazher?: (proto: number) => string }) {
+export function Spravochnik1({
+  trenazher,
+  pdf,
+}: {
+  trenazher?: (proto: number) => string;
+  /** Адрес печатной страницы: «Скачать PDF». */
+  pdf?: string;
+}) {
   const razdely = RAZDELY_SPRAVOCHNIKA_1.map((r) => ({
     id: r.id,
     title: r.title,
@@ -93,7 +104,10 @@ export function Spravochnik1({ trenazher }: { trenazher?: (proto: number) => str
       vkladka={SPRAVOCHNIK_1.title}
       podZagolovkom={
         <div className="spr1-shapka">
-          <p className="spr1-shapka__lead">{SPRAVOCHNIK_1.lead}</p>
+          <div className="spr1-shapka__ryad">
+            <p className="spr1-shapka__lead">{SPRAVOCHNIK_1.lead}</p>
+            {pdf === undefined ? null : <SkachatPdf1 adres={pdf} />}
+          </div>
           <Poisk1 />
           <KakPolzovatsya />
         </div>

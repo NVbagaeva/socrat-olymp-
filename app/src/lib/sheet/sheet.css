@@ -71,6 +71,31 @@ body {
   min-height: 0;
 }
 
+/* Две колонки (paginate.js, spec.columns === 2): заголовки на всю
+   ширину сверху, под ними две колонки на всю оставшуюся высоту. */
+.sheet-flow--cols {
+  display: flex;
+  flex-direction: column;
+}
+.sheet-cols {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: calc(var(--sheet-step) * 4);
+}
+.sheet-col {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+/* Полоса колонок над куском на всю ширину: высота — по содержимому. */
+.sheet-cols--zakryta {
+  flex: none;
+  grid-template-rows: auto;
+}
+
 /* ── Декоративные дуги в углах ──────────────────────────────
    Очень светлые и под содержимым: текст они не задевают.
    В ч/б теме --sheet-arc-show снимает их полностью. */

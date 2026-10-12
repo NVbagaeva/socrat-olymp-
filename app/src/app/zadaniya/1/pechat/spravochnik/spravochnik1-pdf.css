@@ -1,0 +1,426 @@
+/* Справочник по планиметрии (задание №1) для печати и PDF.
+
+   Лист — конвейер генератора (lib/sheet: шапка, подвал, номера
+   страниц), раскладка в две колонки — paginate.js. Здесь карточка
+   и её блоки в миллиметрах и пунктах. Цвета — токены --color-spr-*
+   (styles/tokens.css), те же, что на веб-странице: насыщенный цвет у
+   рамки и ярлыка, заливка пастельная. В ч/б печати блоки различаются
+   ярлыком со словом, рамка разбора — пунктиром. */
+
+/* ── Строка над листом: с примерами / без, печать ─────────────── */
+
+@media screen {
+  .spr1p-bar__vybor {
+    display: inline-flex;
+    padding: 2px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+  }
+  .spr1p-bar__var {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .spr1p-bar__var[aria-current='true'] {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+  }
+  .spr1p-bar__var:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+@media print {
+  .spr1p-bar {
+    display: none;
+  }
+}
+
+/* ── Цвет блока: рамка и ярлык, заливка ───────────────────────── */
+
+.spr1p-blok,
+.spr1p-kak__label {
+  --spr-cvet: var(--color-spr-def);
+  --spr-fon: var(--color-spr-def-soft);
+}
+.spr1p-blok--svo,
+.spr1p-kak__label--svo {
+  --spr-cvet: var(--color-spr-svo);
+  --spr-fon: var(--color-spr-svo-soft);
+}
+.spr1p-blok--pri,
+.spr1p-kak__label--pri {
+  --spr-cvet: var(--color-spr-pri);
+  --spr-fon: var(--color-spr-pri-soft);
+}
+.spr1p-blok--teo,
+.spr1p-kak__label--teo {
+  --spr-cvet: var(--color-spr-teo);
+  --spr-fon: var(--color-spr-teo-soft);
+}
+.spr1p-blok--vaz,
+.spr1p-kak__label--vaz {
+  --spr-cvet: var(--color-spr-vaz);
+  --spr-fon: var(--color-spr-vaz-soft);
+}
+.spr1p-blok--pri-men {
+  --spr-cvet: var(--color-spr-primenenie);
+  --spr-fon: var(--color-spr-primenenie-soft);
+}
+.spr1p-kak__label--primer {
+  --spr-cvet: var(--color-spr-primer);
+}
+
+/* ── Карточка ─────────────────────────────────────────────────── */
+
+.spr1p-card {
+  margin-bottom: 2.6mm;
+  padding: 2.2mm 2.6mm 2mm;
+  border: 0.3mm solid var(--color-border-strong);
+  border-radius: 2.4mm;
+  background: var(--sheet-paper);
+  font-size: 8.2pt;
+  line-height: 1.3;
+}
+.spr1p-card__title {
+  margin: 0 0 1mm;
+  font-family: var(--font-serif);
+  font-size: 12.5pt;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+
+.spr1p-blok {
+  position: relative;
+  margin-top: 3.2mm;
+  padding: 2.5mm 2mm 1.1mm;
+  border: 0.3mm solid var(--spr-cvet);
+  border-radius: 1.8mm;
+  background: var(--spr-fon);
+}
+.spr1p-blok__label {
+  display: inline-block;
+  padding: 0.35mm 1.8mm;
+  border-radius: 99mm;
+  background: var(--spr-cvet);
+  color: var(--color-text-inverse);
+  font-size: 7pt;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.spr1p-blok > .spr1p-blok__label {
+  position: absolute;
+  top: -2.1mm;
+  left: 2mm;
+}
+
+.spr1p-list {
+  margin: 0;
+  padding-left: 3.6mm;
+}
+.spr1p-list > li + li {
+  margin-top: 0.5mm;
+}
+.spr1p-list--nomera {
+  padding-left: 4mm;
+}
+.spr1p-list--nomera > li::marker {
+  font-weight: 700;
+  color: var(--spr-cvet);
+}
+.spr1p-formula {
+  display: block;
+  margin: 0.5mm 0 0.2mm;
+  text-align: center;
+}
+.spr1p-formula .katex {
+  font-size: 1.08em;
+}
+/* Колонка узкая: выкладка отдельной строкой переносится после знака,
+   как в книге, а не вылезает за рамку. Формулы в тексте не рвутся —
+   правило сайта (styles/base.css). */
+.spr1p-formula .katex .katex-html {
+  white-space: normal;
+}
+.spr1p-dop {
+  display: block;
+  margin-top: 0.6mm;
+}
+
+/* Чертёж: под блоками, по центру; ширину в мм ставит сборка
+   (spravochnik-pdf.ts) по высоте рисунка. Ключевой элемент —
+   золотисто-оранжевый, как на сайте. */
+.spr1p-ris {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1mm 2mm;
+  margin: 1.6mm 0 0.2mm;
+}
+.spr1p-ris__odin svg {
+  display: block;
+}
+.spr1p-ris--neskolko .spr1p-ris__odin {
+  flex: 1 1 38%;
+  display: flex;
+  justify-content: center;
+}
+.spr1p-ris .pl-iskomoe,
+.spr1p-ris .pl-iskomoe.pl-duga {
+  stroke: var(--color-spr-klyuch);
+}
+
+.spr1p-tablica {
+  width: 100%;
+  margin-top: 2mm;
+  border-collapse: collapse;
+  font-size: 8pt;
+}
+.spr1p-tablica th,
+.spr1p-tablica td {
+  padding: 0.6mm 1mm;
+  border: 0.25mm solid var(--color-border-strong);
+  text-align: center;
+}
+.spr1p-tablica thead th,
+.spr1p-tablica tbody th {
+  background: var(--color-spr-def-soft);
+}
+
+.spr1p-ege {
+  margin: 1.4mm 0 0;
+  font-size: 7.5pt;
+  color: var(--color-text-secondary);
+}
+
+/* Карточка выше колонки (и широкая на сайте) встаёт на всю ширину
+   листа (paginate.js, data-span-active), блоки — в две колонки внутри. */
+.spr1p-card[data-span='all'],
+.spr1p-card[data-span-active] {
+  column-count: 2;
+  column-gap: 5mm;
+}
+.spr1p-card[data-span='all'] > *,
+.spr1p-card[data-span-active] > * {
+  break-inside: avoid;
+}
+.spr1p-card[data-span='all'] > .spr1p-card__title,
+.spr1p-card[data-span-active] > .spr1p-card__title {
+  column-span: all;
+}
+
+/* ── Разбор: компактная рамка пунктиром ───────────────────────── */
+
+/* Разбор — свой кусок потока сразу за карточкой. В той же колонке он
+   продолжает рамку карточки вниз; первым в колонке — открывает свою
+   рамку со строкой «К теме: …».
+
+   Высота куска не зависит от соседа: колонку меряет paginate.js, и
+   если следующий кусок уйдёт в другую колонку, этот не должен вырасти
+   и вылезти за край. Поэтому стык — прозрачная нижняя граница и
+   отрицательный отступ следующего куска, а не нулевые поля. */
+.spr1p-card:has(+ .spr1p-pr),
+.spr1p-pr:has(+ .spr1p-pr) {
+  border-bottom-color: transparent;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.spr1p-pr {
+  margin-bottom: 2.6mm;
+  padding: 0 2.6mm 2mm;
+  border: 0.3mm solid var(--color-border-strong);
+  border-top-width: 0;
+  border-radius: 0 0 2.4mm 2.4mm;
+  background: var(--sheet-paper);
+}
+.spr1p-card + .spr1p-pr,
+.spr1p-pr + .spr1p-pr {
+  margin-top: -2.9mm;
+}
+.spr1p-pr:first-child {
+  padding-top: 0.4mm;
+  border-top-width: 0.3mm;
+  border-top-left-radius: 2.4mm;
+  border-top-right-radius: 2.4mm;
+}
+.spr1p-primer__tema {
+  display: none;
+  margin: 0 0 1mm;
+  font-size: 7.5pt;
+  color: var(--color-text-secondary);
+}
+.spr1p-pr:first-child .spr1p-primer__tema {
+  display: block;
+}
+
+.spr1p-primer {
+  margin-top: 1.6mm;
+  padding: 1.6mm 2mm;
+  border: 0.3mm dashed var(--color-spr-primer);
+  border-radius: 1.8mm;
+  background: var(--color-spr-primer-soft);
+  font-size: 8pt;
+}
+.spr1p-primer__head {
+  margin: 0;
+}
+.spr1p-primer__label {
+  display: inline-block;
+  padding: 0.3mm 1.6mm;
+  border-radius: 99mm;
+  background: var(--color-spr-primer);
+  color: var(--color-text-inverse);
+  font-size: 7pt;
+  font-weight: 700;
+}
+.spr1p-primer__ist {
+  font-size: 7pt;
+  color: var(--color-text-secondary);
+}
+.spr1p-primer__uslovie {
+  margin: 1mm 0 0;
+}
+.spr1p-primer__telo {
+  display: grid;
+  grid-template-columns: 30mm minmax(0, 1fr);
+  gap: 2mm;
+  align-items: start;
+  margin-top: 1mm;
+}
+.spr1p-primer__ris {
+  margin: 0;
+}
+/* Длинная выкладка: чертёж над шагами, шаги во всю ширину рамки. */
+.spr1p-primer__telo--stolbik {
+  grid-template-columns: minmax(0, 1fr);
+}
+.spr1p-primer__shagi {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spr1p-primer__shagi > li + li {
+  margin-top: 0.5mm;
+}
+.spr1p-primer__etap {
+  font-weight: 700;
+  color: var(--color-spr-def);
+}
+.spr1p-primer .spr1p-formula {
+  text-align: left;
+}
+.spr1p-primer .spr1p-formula .katex {
+  font-size: 1em;
+}
+.spr1p-primer__otvet {
+  margin: 1.2mm 0 0;
+  padding: 0.8mm 1.6mm;
+  border: 0.3mm solid var(--color-spr-vaz);
+  border-radius: 1.4mm;
+  background: var(--sheet-paper);
+}
+.spr1p-primer__otvet > span:first-child {
+  font-weight: 700;
+  color: var(--color-spr-vaz);
+}
+.spr1p-primer__otvet .spr1p-formula {
+  display: inline;
+}
+
+/* ── Заголовок раздела: на всю ширину над колонками ───────────── */
+
+.spr1p-razdel {
+  margin-bottom: 3mm;
+}
+.spr1p-razdel__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20pt;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+.spr1p-razdel__no {
+  color: var(--color-spr-def);
+}
+.spr1p-razdel__lead {
+  margin: 1mm 0 0;
+  font-size: 9pt;
+  color: var(--color-text-secondary);
+}
+
+/* ── Первая страница: содержание и «Как пользоваться» ─────────── */
+
+.spr1p-toc {
+  margin-top: 2mm;
+}
+.spr1p-toc__head,
+.spr1p-kak__head {
+  margin: 0 0 2mm;
+  font-family: var(--font-serif);
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--sheet-ink);
+}
+.spr1p-toc__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.spr1p-toc__razdel + .spr1p-toc__razdel {
+  margin-top: 2mm;
+}
+.spr1p-toc__stroka {
+  display: flex;
+  align-items: baseline;
+  gap: 2mm;
+  color: var(--sheet-ink);
+  text-decoration: none;
+  font-size: 11pt;
+  font-weight: 600;
+}
+.spr1p-toc__no {
+  flex: none;
+  width: 6mm;
+  color: var(--color-spr-def);
+  font-weight: 700;
+}
+.spr1p-toc__tochki {
+  flex: 1 1 auto;
+  border-bottom: 0.3mm dotted var(--color-border-strong);
+}
+.spr1p-toc__str {
+  flex: none;
+  min-width: 6mm;
+  text-align: right;
+}
+.spr1p-toc__temy {
+  display: block;
+  margin-left: 8mm;
+  font-size: 8pt;
+  color: var(--color-text-secondary);
+}
+
+.spr1p-kak {
+  margin-top: 5mm;
+  padding: 3mm 3.5mm;
+  border: 0.3mm solid var(--color-border-strong);
+  border-radius: 2.4mm;
+}
+.spr1p-kak__legenda {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6mm 4mm;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 8.6pt;
+}
+.spr1p-kak__oboznacheniya {
+  margin: 2.4mm 0 0;
+  font-size: 8.4pt;
+}
