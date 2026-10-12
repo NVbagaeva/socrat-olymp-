@@ -6,7 +6,8 @@
 
    Собранный сайт открывается в Chromium и (если установлен) в WebKit —
    движке Safari — на ширине компьютера и телефона. Каждая вкладка
-   задания №11 (и для сравнения теория №2) прокручивается шагами до
+   задания №11 (и для сравнения теория №2, и два экрана №12 с плашкой
+   разделов над лентой) прокручивается шагами до
    конца, и на каждом шаге:
      — пока лента в своём месте, её верх совпадает с местом под шапкой
        раздела;
@@ -70,6 +71,12 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  /* №12: над лентой в той же липкой строке — плашка разделов. */
+  '/zadaniya/12/irrational/',
+  '/zadaniya/12/exponential/',
+  '/zadaniya/12/logarithmic/',
+  '/zadaniya/12/trigonometric/',
+  '/zadaniya/12/quadratic/opornye-zadachi/',
   '/zadaniya/10/',
   '/zadaniya/10/teoriya/',
   '/zadaniya/10/opornye-zadachi/',

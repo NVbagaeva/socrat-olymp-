@@ -10,8 +10,7 @@
 
 import type { SectionAbout, TutorMaterial } from './sections';
 
-export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint'> = {
-  title: 'Иррациональная функция (график корня)',
+export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
   description:
     'Разбираем графики функций вида $f(x) = k\\sqrt{x}$ и их сдвигов $f(x) = k\\sqrt{x - x_0} + y_0$: читаем значения по графику, находим $k$ по целой точке и точки пересечения с прямыми — и решаем типовые задачи.',
   formsTitle: 'Типы задач в этом разделе',
@@ -58,8 +57,8 @@ export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint'> = {
 };
 
 export const IRRATIONAL = {
-  /** Шапка: H1 общий на задание, название подтемы — подзаголовком. */
-  head: { subtitle: 'Иррациональная функция (график корня)' },
+  /** Шапка: H1 общий на задание; название подтемы — из data/functionTypes.ts. */
+  head: true,
   about: IRRATIONAL_ABOUT,
   /* Материалов для репетиторов у подтемы ещё нет: листы — в генераторе. */
   tutors: [] as TutorMaterial[],

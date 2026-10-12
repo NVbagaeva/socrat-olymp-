@@ -3,6 +3,7 @@ import { findManifestFamily } from '@/lib/generator/manifest';
 import { findSection } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { BankScreen } from './BankScreen';
 import type { SubtopicView } from './SubtopicDialog';
 import './zadaniya.css';
@@ -30,6 +31,8 @@ const dialog = {
       id: item.id,
       no: String(index + 1).padStart(2, '0'),
       title: item.title,
+      graphName: item.graphName,
+      icon: ikonkaRazdela(section?.slug ?? '12', item.icon),
       status: item.status,
       prototypes: family?.prototypes.sets ?? 0,
       tasks: family?.prototypes.tasks ?? 0,

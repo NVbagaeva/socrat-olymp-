@@ -33,6 +33,8 @@ export type TrainerShortcutId =
   | 'intersection'
   | 'mixed'
   | 'koefficienty'
+  | 'koef-a'
+  | 'koef-b'
   | 'znachenie'
   | 'formula'
   | 'peresechenie'
@@ -175,6 +177,27 @@ const IRRATIONAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Показательная функция: значение и аргумент — по два типа банка ФИПИ. */
+const EXPONENTIAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12E.A', '12E.B'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12E.C', '12E.D'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+/* Логарифмическая функция: значение — три типа банка, аргумент — два. */
+const LOGARITHMIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12L.A', '12L.B', '12L.D'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12L.C', '12L.E'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+/* Тригонометрические функции: найти a и найти b — по три типа банка. */
+const TRIGONOMETRIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'koef-a', title: 'Найти множитель при функции', skills: ['12T.A', '12T.C', '12T.E'], mode: 'mixed' },
+  { id: 'koef-b', title: 'Найти свободное слагаемое', skills: ['12T.B', '12T.D', '12T.F'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -195,6 +218,15 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'irrational') {
     return IRRATIONAL_SHORTCUTS;
+  }
+  if (type === 'exponential') {
+    return EXPONENTIAL_SHORTCUTS;
+  }
+  if (type === 'logarithmic') {
+    return LOGARITHMIC_SHORTCUTS;
+  }
+  if (type === 'trigonometric') {
+    return TRIGONOMETRIC_SHORTCUTS;
   }
   return [];
 }
@@ -296,6 +328,24 @@ export const trainerKindTitle: Record<string, string> = {
   '12S.B': 'Аргумент по значению',
   '12S.C': 'Корень и прямая',
   '12S.D': 'Корень и прямая',
+  /* Показательная функция: четыре типа открытого банка. */
+  '12E.A': 'Значение $a^x$',
+  '12E.B': 'Значение $a^x + b$',
+  '12E.C': 'Аргумент: $a^x + b$',
+  '12E.D': 'Аргумент: $a^{x+b}$',
+  /* Логарифмическая функция: пять типов открытого банка. */
+  '12L.A': 'Значение $\\log_a x$',
+  '12L.B': 'Значение $b + \\log_a x$',
+  '12L.C': 'Аргумент: $b + \\log_a x$',
+  '12L.D': 'Значение $\\log_a(x + b)$',
+  '12L.E': 'Аргумент: $\\log_a(x + b)$',
+  /* Тригонометрические функции: шесть типов открытого банка. */
+  '12T.A': 'Косинус: найти $a$',
+  '12T.B': 'Косинус: найти $b$',
+  '12T.C': 'Тангенс: найти $a$',
+  '12T.D': 'Тангенс: найти $b$',
+  '12T.E': 'Синус: найти $a$',
+  '12T.F': 'Синус: найти $b$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

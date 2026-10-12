@@ -1,0 +1,139 @@
+{
+  "kind": "prep",
+  "id": "P12L-4",
+  "task": 12,
+  "title": "Сдвиг влево-вправо: $\\log_a(x + b)$",
+  "subtitle": "Найти $a$ и $b$: переходим к степени",
+  "seed": 12814,
+  "family": "logarithmic",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12L-4-01",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-02",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-03",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-04",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-05",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-06",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-07",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-08",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12L-4-09",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "far"
+      }
+    },
+    {
+      "id": "P12L-4-10",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "far"
+      }
+    }
+  ]
+}
