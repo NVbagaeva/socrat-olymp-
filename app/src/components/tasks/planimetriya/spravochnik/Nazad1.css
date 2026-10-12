@@ -1,0 +1,93 @@
+/* «← Назад» и хлебные крошки справочника №1 (Nazad1.tsx).
+   Над заголовком справочника — в потоке страницы; на печатной
+   странице (--lipkiy) — липкая полоса в левом верхнем углу. Зона
+   нажатия кнопки — не меньше 44×44 px. На бумагу и в PDF не попадает. */
+
+.spr1-nazad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-family: var(--font-sans);
+}
+.spr1-nazad--lipkiy {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-bottom: 0;
+  padding: var(--space-2) var(--space-4);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.spr1-nazad__knopka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.spr1-nazad__knopka:hover {
+  background: var(--color-surface-2);
+}
+.spr1-nazad__knopka:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.spr1-nazad__strelka {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spr1-nazad__kroshki ol {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.spr1-nazad__kroshki li + li::before {
+  content: '›';
+  margin: 0 var(--space-2);
+  color: var(--color-text-tertiary);
+}
+.spr1-nazad__kroshki a {
+  color: var(--color-text-secondary);
+}
+.spr1-nazad__kroshki a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.spr1-nazad__kroshki [aria-current='page'] {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .spr1-nazad__kroshki {
+    flex-basis: 100%;
+  }
+}
+
+@media print {
+  .spr1-nazad {
+    display: none;
+  }
+}
