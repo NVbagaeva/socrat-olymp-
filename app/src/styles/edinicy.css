@@ -44,6 +44,15 @@
 .ed-formula .katex-display {
   margin: 0;
 }
+/* Формула внутри предложения — как обычный текст: строчный режим, без
+   боковых отступов; пробелы вокруг — обычные пробелы строки. */
+.ed-p .katex,
+.ed-tekst .katex,
+.ed-primery__podpis .katex,
+.ed-razbor__podpis .katex {
+  margin: 0;
+  padding: 0;
+}
 .ed-vykladka {
   display: block;
 }
@@ -201,11 +210,21 @@
 }
 .ed-fakty__spisok {
   display: grid;
-  gap: var(--space-1);
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  column-gap: var(--space-2);
+  row-gap: var(--space-2);
+  align-items: baseline;
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: var(--fs-lg);
+  line-height: 1.5;
+}
+.ed-fakt {
+  display: contents;
+}
+.ed-fakt__l {
+  justify-self: start;
 }
 
 /* ── Пример: кнопка «Пример ▸» ───────────────────────────────── */
@@ -281,11 +300,22 @@
   border-radius: var(--radius-md);
   background: var(--color-surface);
 }
+/* Формула примера — по левому краю, как подпись под ней. KaTeX
+   центрирует .katex-display > .katex своими стилями без слоя, а этот
+   файл лежит в слое components: перебить его можно только !important. */
+.ed-primery__item .katex-display,
+.ed-primery__item .katex-display > .katex {
+  text-align: left !important;
+}
 .ed-primery__podpis {
-  margin: var(--space-1) 0 0;
+  margin: var(--space-2) 0 0;
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
   color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+.ed-primery__podpis .katex {
+  font-size: 1.05em;
 }
 
 /* ── Разбор по шагам ──────────────────────────────────────────── */
