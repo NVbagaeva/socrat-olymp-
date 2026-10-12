@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SkhemaIrr7, TablicaIrr7 } from '@/components/tasks/zadanie7/Irracionalnye7';
 import { Blok7 } from '@/components/tasks/zadanie7/Teoriya7';
 import { PechatKnopka7 } from '@/components/tasks/zadanie7/PechatKnopka7';
 import { Tex } from '@/components/ui/Tex';
@@ -8,10 +9,12 @@ import {
   type BlokTeorii7,
   type Kartochka7,
 } from '@/content/teoriya7';
+import { IRRACIONALNYE_7 } from '@/content/teoriya7-irr';
 import { zadanie7Title } from '@/content/zadanie7';
 import 'katex/dist/katex.min.css';
 import '@/components/tasks/zadanie7/razbor7.css';
 import '../zadanie7.css';
+import '../irracionalnye7.css';
 import './shpargalka7.css';
 
 export const metadata: Metadata = {
@@ -79,13 +82,24 @@ export default function Shpargalka7() {
               .map((b, i) => (
                 <Blok7 b={b} bezPrimerov key={`${r.id}-${i}`} />
               ))}
-            <ul className="z7-shp__kartochki">
-              {r.bloki
-                .flatMap((b) => (b.vid === 'kartochki' ? b.kartochki : []))
-                .map((k) => (
-                  <KratkayaKartochka k={k} key={k.id} />
-                ))}
-            </ul>
+            {r.bloki.some((b) => b.vid === 'irracionalnye') ? (
+              <div className="z7-shp__irr">
+                {IRRACIONALNYE_7.vidy
+                  .filter((v) => v.ton !== 'seryy')
+                  .map((v) => (
+                    <SkhemaIrr7 skhema={v.skhema} kompakt key={v.kartochka.id} />
+                  ))}
+                <TablicaIrr7 kompakt />
+              </div>
+            ) : (
+              <ul className="z7-shp__kartochki">
+                {r.bloki
+                  .flatMap((b) => (b.vid === 'kartochki' ? b.kartochki : []))
+                  .map((k) => (
+                    <KratkayaKartochka k={k} key={k.id} />
+                  ))}
+              </ul>
+            )}
           </section>
         ))}
       </div>

@@ -325,6 +325,132 @@ for (const { where, item, s } of solved) {
   );
 }
 
+/* Блок «Иррациональные уравнения»: примеры пересчитаны — корни исходного
+   уравнения численно, посторонние решают уравнение после возведения в
+   степень, но не исходное; ответ совпадает с текстом примера и с банком;
+   формулы схем, пояснений и таблицы — KaTeX строго и «чисто». */
+{
+  const { IRRACIONALNYE_7 } = requireSrc('content/teoriya7-irr');
+  const { PROVERKA_IRR_7 } = requireSrc('lib/zadanie7/irrProverka');
+  const { korniChislenno } = requireSrc('lib/zadanie7/proverka');
+  const { gigienaFormuly, formuly } = requireSrc('lib/zadanie7/selftest');
+  const { FIPI } = requireSrc('lib/zadanie7/bank/index');
+  const blizko = (a, b) => Math.abs(a - b) < 1e-6;
+  const teksty = [
+    ...IRRACIONALNYE_7.vstuplenie,
+    IRRACIONALNYE_7.grafik.podpis,
+    ...IRRACIONALNYE_7.podstanovka.paras,
+  ];
+  const tex = [];
+  let primerov = 0;
+  const proverit = (id, where, otvetTekst) => {
+    const p = PROVERKA_IRR_7[id];
+    if (p === undefined) {
+      problems.push({ where, what: `нет пересчёта ${id}` });
+      return;
+    }
+    const k = korniChislenno(p.chisla);
+    if (k.length !== p.korni.length || !p.korni.every((x) => k.some((y) => blizko(x, y)))) {
+      problems.push({
+        where,
+        what: `корни ${JSON.stringify(k)}, в примере ${JSON.stringify(p.korni)}`,
+      });
+    }
+    for (const x of p.postoronnie) {
+      const isx = p.chisla.odz(x) && blizko(p.chisla.lhs(x), p.chisla.rhs(x));
+      if (Math.abs(p.posle(x)) > 1e-9 || isx) {
+        problems.push({
+          where,
+          what: `${x} не посторонний: после возведения ${p.posle(x)}, в исходном ${isx}`,
+        });
+      }
+    }
+    for (const x of p.korni) {
+      if (Math.abs(p.posle(x)) > 1e-9)
+        problems.push({ where, what: `корень ${x} потерян при возведении` });
+    }
+    if (otvetTekst !== undefined) {
+      const ozhid =
+        p.otvet === null
+          ? 'Ответ: корней нет.'
+          : `Ответ: $${String(p.otvet).replace('.', '{,}')}$.`;
+      if (otvetTekst !== ozhid)
+        problems.push({ where, what: `ответ «${otvetTekst}», пересчёт «${ozhid}»` });
+    }
+  };
+  for (const v of IRRACIONALNYE_7.vidy) {
+    const where = `иррациональные ${v.kartochka.id}`;
+    tex.push([where, v.skhema.iskhodnoe]);
+    for (const vt of v.skhema.vetki) {
+      if (vt.esli) tex.push([where, vt.esli]);
+      for (const st of [...vt.sistema, ...(vt.samo ?? [])]) {
+        if (st.tex) tex.push([where, st.tex]);
+        if (st.prichina) teksty.push(st.prichina);
+      }
+    }
+    v.poyasneniya.forEach((p) => teksty.push(p.tekst));
+    for (const r of v.ramki) {
+      if (/\$/.test(r.title))
+        problems.push({ where, what: `формула в плашке рамки: «${r.title}»` });
+      [...(r.shagi ?? []), ...(r.paras ?? [])].forEach((t) => teksty.push(t));
+    }
+    if (v.zametka) teksty.push(v.zametka);
+    for (const p of v.primery) {
+      primerov += 1;
+      teksty.push(p.uslovie, p.otvet, ...p.shagi.flatMap((s) => [s.label, ...s.paras]));
+      proverit(p.id, `${where} ${p.id}`, p.otvet);
+      if (p.bank) {
+        const f = FIPI.find((z) => z.id === p.bank);
+        const pr = PROVERKA_IRR_7[p.id];
+        if (!f) problems.push({ where, what: `${p.bank} нет в банке` });
+        else {
+          if (f.text !== p.uslovie)
+            problems.push({ where, what: `условие ${p.bank} не совпало с банком` });
+          if (pr && pr.otvet !== f.answer)
+            problems.push({ where, what: `ответ ${p.bank} в банке ${f.answer}` });
+          if (!v.kartochka.prototipy.includes(f.prototypeId))
+            problems.push({ where, what: `${p.bank} — прототип ${f.prototypeId}, не из карточки` });
+        }
+      }
+    }
+  }
+  proverit('grafik', 'иррациональные: живой рисунок');
+  IRRACIONALNYE_7.tablica.rows.forEach((r) => r.cells.forEach((c) => teksty.push(c)));
+  for (const [where, t] of tex) {
+    try {
+      katex.renderToString(t, { throwOnError: true, strict: 'error', displayMode: true });
+    } catch (e) {
+      problems.push({ where, what: `KaTeX: ${e.message.slice(0, 100)}` });
+    }
+    gigienaFormuly(t).forEach((b) => problems.push({ where, what: `формула: ${b} в «${t}»` }));
+  }
+  for (const t of teksty) {
+    for (const f of formuly(t)) {
+      try {
+        typeset(f);
+      } catch (e) {
+        problems.push({
+          where: 'иррациональные',
+          what: `KaTeX: ${e.message.slice(0, 100)} в «${f.slice(0, 60)}»`,
+        });
+      }
+      gigienaFormuly(f).forEach((b) =>
+        problems.push({ where: 'иррациональные', what: `формула: ${b} в «${f.slice(0, 60)}»` }),
+      );
+    }
+    const plain = stripDollarMath(t).replace(/\*\*/g, '');
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) {
+      problems.push({
+        where: 'иррациональные',
+        what: `вне KaTeX (${f.rule}): «${f.match}» в «${t.slice(0, 60)}»`,
+      });
+    }
+  }
+  console.log(
+    `Иррациональные: видов ${IRRACIONALNYE_7.vidy.length}, примеров ${primerov} пересчитано, строк ${teksty.length}.`,
+  );
+}
+
 statistika.forEach((s) => console.log(s));
 console.log(`Задач проверено: ${solved.length}.`);
 

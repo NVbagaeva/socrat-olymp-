@@ -11,9 +11,14 @@
  * Каждый прототип привязан ровно к одной карточке: на неё ведут
  * «Повторить теорию» в тренажёре и рамки теории на листах генератора.
  *
+ * Раздел «Иррациональные уравнения» — отдельный большой блок со схемами
+ * (content/teoriya7-irr.ts); его виды — тоже карточки (kartochkiBloka7).
+ *
  * Тексты — свои; идеи — из стороннего курса (том 1, ч. 6–7; том 2, ч. 1).
  * Вся математика — в $…$, формулы рамок — TeX без $.
  */
+
+import { IRRACIONALNYE_7 } from './teoriya7-irr';
 
 export type BlokTeorii7 =
   | { vid: 'opredelenie'; title?: string; paras: string[]; formula?: string; spisok?: string[] }
@@ -31,7 +36,9 @@ export type BlokTeorii7 =
   | { vid: 'tablica'; title?: string; head: string[]; rows: string[][] }
   | { vid: 'lovushka'; title: string; oshibka: string; pravilno: string }
   | { vid: 'krug' }
-  | { vid: 'kartochki'; kartochki: Kartochka7[] };
+  | { vid: 'kartochki'; kartochki: Kartochka7[] }
+  /** Большой блок «Иррациональные уравнения»: данные — content/teoriya7-irr.ts. */
+  | { vid: 'irracionalnye' };
 
 /** Цветной блок карточки: как в справочнике №1. */
 export interface BlokKartochki7 {
@@ -470,90 +477,8 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     id: 'irracionalnye',
     no: 5,
     title: 'Иррациональные уравнения',
-    lead: 'Корень снимаем возведением в степень. У квадратного корня обязательно проверяем знак правой части.',
-    bloki: [
-      {
-        vid: 'opredelenie',
-        title: 'Арифметический квадратный корень',
-        paras: [
-          '$\\sqrt{A}$ — неотрицательное число, квадрат которого равен $A$. Поэтому $\\sqrt{A}\\ge0$ всегда, а под корнем $A\\ge0$.',
-        ],
-      },
-      {
-        vid: 'kartochki',
-        kartochki: [
-          {
-            id: 'koren-chislo',
-            title: 'Корень равен числу',
-            bloki: [
-              {
-                vid: 'teorema',
-                tekst: ['Если $c\\ge0$:'],
-                formula: '\\sqrt{A}=c\\iff A=c^2',
-              },
-              {
-                vid: 'vazhno',
-                tekst: ['$\\sqrt{A}=-3$ корней не имеет: корень не бывает отрицательным.'],
-              },
-            ],
-            primer: 'F017',
-            prototipy: ['P11'],
-          },
-          {
-            id: 'koren-x',
-            title: 'Корень равен выражению с $x$',
-            bloki: [
-              {
-                vid: 'teorema',
-                tekst: ['Возводим в квадрат и запоминаем условие на правую часть:'],
-                formula: '\\sqrt{A}=B\\iff \\begin{cases}A=B^2\\\\ B\\ge0\\end{cases}',
-              },
-              {
-                vid: 'vazhno',
-                tekst: [
-                  'Корень с $B<0$ — посторонний: он решает уравнение $\\sqrt{A}=-B$, а не наше. Проверять $A\\ge0$ отдельно не нужно — $A=B^2\\ge0$.',
-                ],
-              },
-            ],
-            primer: 'F112',
-            prototipy: ['P13'],
-          },
-          {
-            id: 'kub-koren',
-            title: 'Кубический корень',
-            bloki: [
-              {
-                vid: 'svoystvo',
-                tekst: [
-                  'Кубический корень есть у любого числа, ограничений нет. Возводим обе части в куб:',
-                ],
-                formula: '\\sqrt[3]{A}=c\\iff A=c^3',
-              },
-            ],
-            primer: 'F029',
-            prototipy: ['P12'],
-          },
-          {
-            id: 'koren-drob',
-            title: 'Корень из дроби',
-            bloki: [
-              {
-                vid: 'svoystvo',
-                tekst: [
-                  '$\\sqrt{\\dfrac{c}{A}}=d$ при $d>0$: возводим в квадрат, $\\dfrac{c}{A}=d^2$, по пропорции $A=\\dfrac{c}{d^2}$.',
-                ],
-              },
-              {
-                vid: 'vazhno',
-                tekst: ['$0{,}4^2=0{,}16$, а не $0{,}8$ и не $1{,}6$.'],
-              },
-            ],
-            primer: 'F166',
-            prototipy: ['P14'],
-          },
-        ],
-      },
-    ],
+    lead: 'Корень снимаем возведением в степень — равносильным переходом. Для каждого из трёх видов квадратного корня он свой; у кубического корня условий нет.',
+    bloki: [{ vid: 'irracionalnye' }],
   },
   /* ── 6. Показательные ── */
   {
@@ -1013,11 +938,20 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
   },
 ];
 
+/** Карточки блока: обычные карточки или виды блока «Иррациональные». */
+export function kartochkiBloka7(b: BlokTeorii7): Kartochka7[] {
+  if (b.vid === 'kartochki') {
+    return b.kartochki;
+  }
+  if (b.vid === 'irracionalnye') {
+    return IRRACIONALNYE_7.vidy.map((v) => v.kartochka);
+  }
+  return [];
+}
+
 /** Все карточки теории подряд. */
 export function vseKartochki7(): Kartochka7[] {
-  return RAZDELY_TEORII_7.flatMap((r) =>
-    r.bloki.flatMap((b) => (b.vid === 'kartochki' ? b.kartochki : [])),
-  );
+  return RAZDELY_TEORII_7.flatMap((r) => r.bloki.flatMap(kartochkiBloka7));
 }
 
 /** Карточка и раздел прототипа: «Повторить теорию» и рамки на листах. */
@@ -1026,10 +960,7 @@ export function TEORIYA_7_DLYA_PROTOTIPA(
 ): { razdel: string; kartochka: string; title: string } | null {
   for (const r of RAZDELY_TEORII_7) {
     for (const b of r.bloki) {
-      if (b.vid !== 'kartochki') {
-        continue;
-      }
-      const k = b.kartochki.find((x) => x.prototipy.includes(id));
+      const k = kartochkiBloka7(b).find((x) => x.prototipy.includes(id));
       if (k) {
         return { razdel: r.id, kartochka: k.id, title: k.title };
       }

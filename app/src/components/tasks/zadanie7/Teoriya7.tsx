@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import {
   Abzacy,
@@ -20,11 +19,15 @@ import {
 } from '@/content/teoriya7';
 import { PROGRESS_7 } from '@/content/zadanie7';
 import { BANK } from '@/lib/zadanie7/bank/index';
-import { kodNaSayte, prototype } from '@/lib/zadanie7/prototypes';
+import { prototype } from '@/lib/zadanie7/prototypes';
 import type { BankItem } from '@/lib/zadanie7/types';
 import { KartochkaTelo7 } from './KartochkaTelo7';
+import { GdeNaEge7 } from './GdeNaEge7';
+import { Irracionalnye7 } from './Irracionalnye7';
 import { Razbor7 } from './Razbor7';
 import { ZhivoyKrug7 } from './ZhivoyKrug7';
+
+export { GdeNaEge7 };
 
 const T = TEORIYA_7_TEKSTY;
 
@@ -87,23 +90,6 @@ function Tablica({ head, rows, title }: { head: string[]; rows: string[][]; titl
         </tbody>
       </table>
     </div>
-  );
-}
-
-/** «Где на ЕГЭ»: прототипы карточки, по нажатию — тренажёр с ними. */
-export function GdeNaEge7({ prototipy, trenazher }: { prototipy: string[]; trenazher: string }) {
-  if (prototipy.length === 0) {
-    return null;
-  }
-  return (
-    <p className="z7-gde">
-      <span className="z7-gde__label">{T.gdeNaEge}:</span>
-      {prototipy.map((id) => (
-        <Link className="z7-gde__chip" href={`${trenazher}?tipy=${id}`} key={id}>
-          {kodNaSayte(id)} <Tex text={prototype(id).title} />
-        </Link>
-      ))}
-    </p>
   );
 }
 
@@ -213,6 +199,8 @@ export function Blok7({
           </p>
         </RamkaVazhno>
       );
+    case 'irracionalnye':
+      return <Irracionalnye7 {...(trenazher ? { trenazher } : {})} />;
     case 'krug':
       return bezPrimerov ? null : <ZhivoyKrug7 />;
     case 'kartochki':
