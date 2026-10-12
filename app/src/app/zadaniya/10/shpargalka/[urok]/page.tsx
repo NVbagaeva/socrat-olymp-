@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Blok10 } from '@/components/tasks/zadanie10/Teoriya10';
 import { PechatKnopka10 } from '@/components/tasks/zadanie10/PechatKnopka10';
 import { Tex } from '@/components/ui/Tex';
-import { RAZDELY_TEORII_10, type BlokTeorii10 } from '@/content/teoriya10';
+import { bezSsylok, RAZDELY_TEORII_10, type BlokTeorii10 } from '@/content/teoriya10';
 import { UROKI_10 } from '@/content/uroki10';
 import { zadanie10Title } from '@/content/zadanie10';
 import { kodNaSayte, prototype } from '@/lib/zadanie10/prototypes';
@@ -78,7 +78,7 @@ export default async function Shpargalka10({ params }: { params: Promise<{ urok:
           {r.bloki
             .filter((b) => KRATKIE.has(b.vid) || (r.id === 'algoritm' && b.vid === 'opredelenie'))
             .map((b, i) => (
-              <Blok10 b={b} key={`${r.id}-${i}`} />
+              <Blok10 b={bezSsylok(b)} key={`${r.id}-${i}`} />
             ))}
         </section>
       ))}

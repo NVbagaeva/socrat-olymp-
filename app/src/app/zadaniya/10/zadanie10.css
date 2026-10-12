@@ -48,6 +48,68 @@
   background: var(--color-surface-info);
 }
 
+.z10-tablica__podpis {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+/* ── Пример под кнопкой «Пример ▸» ──
+   <details>: работает без скрипта; стрелка поворачивается, когда
+   пример раскрыт. Рамка примера внутри — общая (ramki.css). */
+.z10-razvorot {
+  margin: var(--space-6) 0;
+}
+
+.z10-razvorot__knopka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.z10-razvorot__knopka::-webkit-details-marker {
+  display: none;
+}
+
+.z10-razvorot__knopka::after {
+  content: '▸';
+  transition: transform var(--dur-switch) var(--ease);
+}
+
+.z10-razvorot[open] > .z10-razvorot__knopka::after {
+  transform: rotate(90deg);
+}
+
+.z10-razvorot__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.z10-razvorot > .ramka {
+  margin-top: var(--space-3);
+}
+
+/* ── График разряда конденсатора («Почему так») ── */
+.z10-razryad-wrap {
+  max-width: 560px;
+  margin: var(--space-4) 0 0;
+}
+
+.z10-razryad-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* ── Живые графики ── */
 .z10-zhivoy {
   max-width: 560px;
