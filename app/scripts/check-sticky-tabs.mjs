@@ -73,6 +73,7 @@ const PAGES = [
   /* №12: над лентой в той же липкой строке — плашка разделов. */
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
+  '/zadaniya/12/logarithmic/',
   '/zadaniya/12/quadratic/opornye-zadachi/',
   '/zadaniya/10/',
   '/zadaniya/10/teoriya/',

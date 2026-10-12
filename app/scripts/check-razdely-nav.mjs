@@ -623,9 +623,9 @@ for (const size of SIZES) {
   await page.evaluate(() => localStorage.removeItem('budetege:trainer:v1'));
 
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
-  await page.goto(BASE + '/zadaniya/12/logarithmic/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/zadaniya/12/trigonometric/', { waitUntil: 'networkidle' });
   check(
-    (await page.locator('.razdely-plashka', { hasText: 'Логарифмическая функция' }).count()) === 1,
+    (await page.locator('.razdely-plashka', { hasText: 'Тригонометрические функции' }).count()) === 1,
     where('на странице закрытого раздела нет плашки'),
   );
 

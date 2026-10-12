@@ -19,6 +19,8 @@ import trigonometric from './trigonometric.js';
 import sqrt from './sqrt.js';
 /* Показательная со сдвигом в показателе: a^(x + c) + d. Только регистрация. */
 import './expo.js';
+/* Логарифмическая со сдвигами: k · logₐ(x + c) + d. Только регистрация. */
+import './loga.js';
 
 export { quadratic, rational, exponential, logarithmic, trigonometric, sqrt };
 

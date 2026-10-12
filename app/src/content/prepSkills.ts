@@ -52,7 +52,13 @@ export type PrepSkillId =
   | 'pokaz-znachenie'
   | 'pokaz-sdvig-vverh'
   | 'pokaz-sdvig-vbok'
-  | 'pokaz-argument';
+  | 'pokaz-argument'
+  /* Логарифмическая функция: пять навыков, P12L-1 … P12L-5. */
+  | 'log-osnovanie'
+  | 'log-znachenie'
+  | 'log-sdvig-vverh'
+  | 'log-sdvig-vbok'
+  | 'log-argument';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */
@@ -424,6 +430,54 @@ export const exponentialSkills: PrepSkill[] = [
 ];
 
 /**
+ * Навыки подтемы «Логарифмическая функция»: по десять задач в блоке.
+ * Метод тот же, что у показательной: две отмеченные точки в узлах
+ * сетки, система, переход к показательной записи logₐ t = s ⇔ aˢ = t.
+ */
+export const logarithmicSkills: PrepSkill[] = [
+  {
+    id: 'log-osnovanie',
+    no: '01',
+    title: 'Найти основание $a$ по графику',
+    lead: 'Точка в узле сетки даёт основание',
+    tip: 'Точка $(1;\\, 0)$ есть у любого $\\log_a x$ и об основании ничего не говорит. Берите вторую отмеченную точку $(x_1;\\, y_1)$ и переходите к степени: $\\log_a x_1 = y_1 \\iff a^{y_1} = x_1$. При $y_1 = 1$ сразу $a = x_1$, при $y_1 = -1$ — $a = \\dfrac{1}{x_1}$.',
+    setId: 'P12L-1',
+  },
+  {
+    id: 'log-znachenie',
+    no: '02',
+    title: 'Найти значение $\\log_a x$',
+    lead: 'Значение, которое не читается с рисунка',
+    tip: 'Сначала основание — по отмеченной точке. Потом подставьте $x$ и запишите его степенью основания: $\\log_2 32 = 5$, потому что $2^5 = 32$. Логарифм — это показатель.',
+    setId: 'P12L-2',
+  },
+  {
+    id: 'log-sdvig-vverh',
+    no: '03',
+    title: 'Сдвиг вверх-вниз: $b + \\log_a x$',
+    lead: 'Две точки — система; вычитаем уравнения',
+    tip: 'Подставьте две отмеченные точки и вычтите уравнения — $b$ уйдёт, а разность логарифмов станет логарифмом частного: $\\log_a x_2 - \\log_a x_1 = \\log_a \\dfrac{x_2}{x_1}$. Найдите $a$, потом $b$.',
+    setId: 'P12L-3',
+  },
+  {
+    id: 'log-sdvig-vbok',
+    no: '04',
+    title: 'Сдвиг влево-вправо: $\\log_a(x + b)$',
+    lead: 'Две точки — система; переходим к степени',
+    tip: 'Асимптоту на глаз не берите. Запишите оба уравнения в показательной форме: $x_1 + b = a^{y_1}$, $x_2 + b = a^{y_2}$, и вычтите — $b$ уйдёт. Асимптота — прямая $x = -b$.',
+    setId: 'P12L-4',
+  },
+  {
+    id: 'log-argument',
+    no: '05',
+    title: 'Найти $x$ по известному значению',
+    lead: 'При каком $x$ функция принимает данное значение',
+    tip: 'Восстановите формулу по двум точкам. Перенесите $b$ и перейдите к степени: $\\log_2(x + 5) = 4 \\iff x + 5 = 2^4$. Проверьте, что ответ входит в область определения.',
+    setId: 'P12L-5',
+  },
+];
+
+/**
  * Навыки подтемы по её идентификатору (data/functionTypes.ts).
  *
  * У каждой подтемы свой список: новая не дописывается в чужой.
@@ -442,6 +496,9 @@ export function prepSkillsFor(type: string): PrepSkill[] {
   if (type === 'exponential') {
     return exponentialSkills;
   }
+  if (type === 'logarithmic') {
+    return logarithmicSkills;
+  }
   return type === 'rational' ? rationalSkills : [];
 }
 
@@ -452,6 +509,7 @@ export const allPrepSkills: PrepSkill[] = [
   ...rationalSkills,
   ...irrationalSkills,
   ...exponentialSkills,
+  ...logarithmicSkills,
 ];
 
 /** Заголовок и подписи экрана списка навыков. */

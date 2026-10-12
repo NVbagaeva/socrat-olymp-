@@ -46,6 +46,11 @@ const SKILL_BY_SET: Record<string, PrepSkillId> = {
   'P12E-4': 'pokaz-sdvig-vbok', 'P12E-5': 'pokaz-argument',
   '12E.A': 'pokaz-znachenie', '12E.B': 'pokaz-sdvig-vverh', '12E.C': 'pokaz-argument',
   '12E.D': 'pokaz-sdvig-vbok',
+  /* Логарифмическая функция. */
+  'P12L-1': 'log-osnovanie', 'P12L-2': 'log-znachenie', 'P12L-3': 'log-sdvig-vverh',
+  'P12L-4': 'log-sdvig-vbok', 'P12L-5': 'log-argument',
+  '12L.A': 'log-znachenie', '12L.B': 'log-sdvig-vverh', '12L.C': 'log-argument',
+  '12L.D': 'log-sdvig-vbok', '12L.E': 'log-argument',
 };
 
 /* Подтема набора: по префиксу идентификатора. */
@@ -55,6 +60,9 @@ function typeOf(setId: string): string {
   }
   if (/^(P12E-|12E\.)/.test(setId)) {
     return 'exponential';
+  }
+  if (/^(P12L-|12L\.)/.test(setId)) {
+    return 'logarithmic';
   }
   return /^(P12R-|12R\.)/.test(setId) ? 'rational' : 'quadratic';
 }

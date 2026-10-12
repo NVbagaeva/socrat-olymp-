@@ -17,6 +17,8 @@ import RationalHints from '@/lib/graph/hints-rational.js';
 import SqrtHints from '@/lib/graph/hints-sqrt.js';
 import ExponentialHints from '@/lib/graph/hints-exponential.js';
 import { exponentialGuideSvg } from '@/lib/exponentialGuides';
+import LogarithmicHints from '@/lib/graph/hints-logarithmic.js';
+import { logarithmicGuideSvg } from '@/lib/logarithmicGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
@@ -26,6 +28,7 @@ import {
   rationalSteps as rationalSolution,
   sqrtSteps as sqrtSolution,
   exponentialSteps as exponentialSolution,
+  logarithmicSteps as logarithmicSolution,
   type PrepStep,
 } from '@/lib/prep';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
@@ -1142,9 +1145,23 @@ function sqrtSteps(task: EngineTask): TrainerStep[] {
    чертёж с пунктирами от точек к осям: построения — только в подсказке. */
 
 function exponentialSteps(task: EngineTask): TrainerStep[] {
-  const hints = ExponentialHints.fromTask(task) as (SqrtHint & { id?: string })[];
+  return pointHintSteps(
+    ExponentialHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    exponentialGuideSvg(task.meta),
+  );
+}
+
+/* Логарифмическая функция — та же лестница, шаги строит
+   graph/hints-logarithmic.js. */
+function logarithmicSteps(task: EngineTask): TrainerStep[] {
+  return pointHintSteps(
+    LogarithmicHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    logarithmicGuideSvg(task.meta),
+  );
+}
+
+function pointHintSteps(hints: (SqrtHint & { id?: string })[], guides: string): TrainerStep[] {
   const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
-  const guides = exponentialGuideSvg(task.meta);
   return hints.map((hint) => {
     const step: TrainerStep = {
       titleHtml: hintHtml(hint.title),
@@ -1185,6 +1202,25 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  if (task.meta.family === 'logarithmic') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: две отмеченные точки в узлах сетки, система уравнений, ' +
+          'переход к показательной записи $\\log_a t = s \\iff a^s = t$; затем вычисление.',
+      ),
+      rightHint: hintHtml('Формула восстановлена по двум точкам, дальше вычисление.'),
+      steps: logarithmicSteps(task),
+      options: null,
+      oshibki: {},
+      solution: logarithmicSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   if (task.meta.family === 'exponential') {
     return {
       id: task.id,

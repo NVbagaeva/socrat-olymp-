@@ -78,7 +78,13 @@ export function lacksSlash(href) {
    внутри self.__next_f.push в HTML, где кавычки экранированы). */
 const PATTERNS = [/\bhref=(["'])(.*?)\1/g, /\\?"href\\?":\\?"(.*?)\\?"/g];
 
-function hrefsIn(text) {
+/* Поток данных роутера приходит кусками self.__next_f.push([1,"…"]), и
+   длинная строка может разорваться посреди ссылки: "href":"/za | daniya/…".
+   Перед поиском куски склеиваются обратно. */
+const CHUNK_SEAM = /"\]\)<\/script><script>self\.__next_f\.push\(\[1,"/g;
+
+function hrefsIn(raw) {
+  const text = raw.replace(CHUNK_SEAM, '');
   const found = [];
   for (const m of text.matchAll(PATTERNS[0])) {
     found.push(m[2]);

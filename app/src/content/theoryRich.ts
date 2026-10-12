@@ -136,7 +136,7 @@ export interface RichRemember {
 /** Живой график со слайдерами: ключ компонента (components/tasks/theory/live). */
 export interface RichLive {
   type: 'live';
-  id: 'exp-play';
+  id: 'exp-play' | 'log-play';
 }
 
 /** Памятка-итог: нумерованные пункты. */

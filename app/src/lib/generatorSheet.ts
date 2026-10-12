@@ -16,6 +16,7 @@ import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import rationalSolution from '@/lib/graph/solution-rational.js';
 import sqrtSolution from '@/lib/graph/solution-sqrt.js';
 import exponentialSolution from '@/lib/graph/solution-exponential.js';
+import logarithmicSolution from '@/lib/graph/solution-logarithmic.js';
 import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -344,6 +345,9 @@ const rationalBuilder = {
   fromTask(task: { meta: { family?: string } }) {
     if (task.meta.family === 'exponential') {
       return exponentialSolution.fromTask(task);
+    }
+    if (task.meta.family === 'logarithmic') {
+      return logarithmicSolution.fromTask(task);
     }
     return task.meta.family === 'sqrt'
       ? sqrtSolution.fromTask(task)

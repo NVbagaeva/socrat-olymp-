@@ -41,6 +41,11 @@ export const skillTitle: Record<string, string> = {
   '12E.B': '$a^x + b$: значение функции',
   '12E.C': '$a^x + b$: аргумент по значению',
   '12E.D': '$a^{x+b}$: аргумент по значению',
+  '12L.A': '$\\log_a x$: значение функции',
+  '12L.B': '$b + \\log_a x$: значение функции',
+  '12L.C': '$b + \\log_a x$: аргумент по значению',
+  '12L.D': '$\\log_a(x + b)$: значение функции',
+  '12L.E': '$\\log_a(x + b)$: аргумент по значению',
 };
 
 export type SkillLevelId = 'lucky' | 'unlucky';
@@ -90,8 +95,18 @@ const EXPONENTIAL_LEVELS: SkillLevel[] = [
   { id: 'unlucky', title: 'Повышенная', lead: 'дробный ответ, корень в основании' },
 ];
 
-/** Уровни подтемы: у квадратичной, гиперболы, корня и показательной свои подписи. */
+/* У логарифмической: соседние точки и целый ответ — против дробного
+   ответа и «дальних» точек. */
+const LOGARITHMIC_LEVELS: SkillLevel[] = [
+  { id: 'lucky', title: 'Базовая', lead: 'соседние точки, целый ответ' },
+  { id: 'unlucky', title: 'Повышенная', lead: 'дробный ответ, дальние точки' },
+];
+
+/** Уровни подтемы: у квадратичной, гиперболы, корня, показательной и логарифмической свои подписи. */
 export function skillLevelsFor(type: string): SkillLevel[] {
+  if (type === 'logarithmic') {
+    return LOGARITHMIC_LEVELS;
+  }
   if (type === 'exponential') {
     return EXPONENTIAL_LEVELS;
   }
