@@ -134,7 +134,30 @@ export function sqrtAndLineScene() {
  * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
  * у квадратичной — парабола и прямая, у гиперболы — гипербола и прямая.
  */
+/** Показательная f(x) = 2ˣ − 1: асимптота y = −1 пунктиром, две точки в узлах. */
+export function exponentialScene() {
+  /* Левый край — там, где хвост ещё на 0,25 клетки выше асимптоты. */
+  const win = { xmin: -2, xmax: 4, ymin: -3, ymax: 5 };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'expo', a: 2, c: 0, d: -1, color: 'lineA', label: null }],
+    points: [
+      { x: 1, y: 1, style: 'solid', color: 'lineA', label: null },
+      { x: 2, y: 3, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [{ type: 'segment', from: [win.xmin, -1], to: [win.xmax, -1], style: 'dashed', color: 'asymptote' }],
+    alt: 'График показательной функции и её асимптота',
+  };
+}
+
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'exponential') {
+    return exponentialScene();
+  }
   if (type === 'irrational') {
     return sqrtAndLineScene();
   }
@@ -188,7 +211,8 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 
 export function generatorSkillScene(setId: string) {
   const quadratic =
-    QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId];
+    QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId] ??
+    EXPONENTIAL_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -514,6 +538,11 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return irrational;
   }
 
+  const exponential = exponentialPrepScene(id, base);
+  if (exponential !== null) {
+    return exponential;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -661,7 +690,11 @@ export type TypeSceneId =
   | 'value-b'
   | 'formula'
   | 'value-at'
-  | 'argument-for';
+  | 'argument-for'
+  /* Показательная функция. */
+  | 'exp-value'
+  | 'exp-shift'
+  | 'exp-shift-x';
 
 /* Миниатюры основных типов: одна парабола, чуть разная у каждого типа —
    ветви вниз, шире и уже, выше и ниже, вершина левее и правее. Только
@@ -696,6 +729,19 @@ export function typeScene(id: TypeSceneId) {
   const basic = BASIC_MINI[id];
   if (basic !== undefined) {
     return { ...base, curves: [basic] };
+  }
+  /* Показательная: кривая и асимптота, без отметок. */
+  if (id === 'exp-value') {
+    return { ...base, curves: [{ type: 'expo', a: 2, c: 0, d: -1.2, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -1.2], to: [2, -1.2], style: 'dashed', color: 'asymptote' }] };
+  }
+  if (id === 'exp-shift') {
+    return { ...base, curves: [{ type: 'expo', a: 0.5, c: 0, d: -0.8, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -0.8], to: [2, -0.8], style: 'dashed', color: 'asymptote' }] };
+  }
+  if (id === 'exp-shift-x') {
+    return { ...base, curves: [{ type: 'expo', a: 2, c: 1, d: -1.5, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -1.5], to: [2, -1.5], style: 'dashed', color: 'asymptote' }] };
   }
   /* Второй график — зелёный, как g в разборах под плашкой. */
   if (id === 'cross-line') {
@@ -863,6 +909,77 @@ function irrationalPrepScene(
   }
   return null;
 }
+
+/* ── Миниатюры навыков показательной функции ──────────────────────
+   Окно то же тесное, ±2. Кривая y = a^(x + c) + d; асимптота —
+   пунктир цветом асимптоты, искомое — пунктир цветом подсказки. */
+
+function miniExpo(a: number, c: number, d: number, color = 'lineA') {
+  return { type: 'expo', a, c, d, color, label: null };
+}
+
+function miniAsymptote(y: number) {
+  return { type: 'segment', from: [-2, y], to: [2, y], style: 'dashed', color: 'asymptote' };
+}
+
+function exponentialPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'pokaz-osnovanie') {
+    /* (0; 1) и (1; a): по второй точке видно основание. */
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, 0)],
+      points: [miniDot(0, 1), miniDot(1, 2)],
+      shapes: [dashed([1, 0], [1, 2]), prepLabel('a', 1, 2, 16, 4, 'accent')],
+    };
+  }
+  if (id === 'pokaz-znachenie') {
+    return {
+      ...base,
+      curves: [miniExpo(0.5, 0, 0)],
+      points: [miniDot(0, 1), miniDot(-1.4, Math.pow(2, 1.4), 'lineB')],
+      shapes: [dashed([-1.4, 0], [-1.4, Math.pow(2, 1.4)]),
+        prepLabel('?', -1.4, Math.pow(2, 1.4), 16, 4, 'accent')],
+    };
+  }
+  if (id === 'pokaz-sdvig-vverh') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, -1.2)],
+      points: [miniDot(0, -0.2), miniDot(1, 0.8)],
+      shapes: [miniAsymptote(-1.2)],
+    };
+  }
+  if (id === 'pokaz-sdvig-vbok') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 1, 0)],
+      points: [miniDot(-1, 1), miniDot(0, 2)],
+      shapes: [dashed([-1, 0], [-1, 1])],
+    };
+  }
+  if (id === 'pokaz-argument') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, -1)],
+      points: [miniDot(1.3, Math.pow(2, 1.3) - 1, 'lineB')],
+      shapes: [miniAsymptote(-1), dashed([0, Math.pow(2, 1.3) - 1], [1.3, Math.pow(2, 1.3) - 1]),
+        prepLabel('?', 1.3, Math.pow(2, 1.3) - 1, 16, 4, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* Набор прототипов показательной функции → навык подтемы. */
+const EXPONENTIAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12E.A': 'pokaz-znachenie',
+  '12E.B': 'pokaz-sdvig-vverh',
+  '12E.C': 'pokaz-argument',
+  '12E.D': 'pokaz-sdvig-vbok',
+};
 
 /* Набор прототипов корня → навык подтемы. */
 const IRRATIONAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {

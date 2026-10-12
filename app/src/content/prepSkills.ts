@@ -46,7 +46,13 @@ export type PrepSkillId =
   | 'koren-znachenie'
   | 'koren-argument'
   | 'koren-pryamaya'
-  | 'koren-peresechenie';
+  | 'koren-peresechenie'
+  /* Показательная функция: пять навыков, P12E-1 … P12E-5. */
+  | 'pokaz-osnovanie'
+  | 'pokaz-znachenie'
+  | 'pokaz-sdvig-vverh'
+  | 'pokaz-sdvig-vbok'
+  | 'pokaz-argument';
 
 export interface PrepSkill {
   /** Часть адреса: /opornye-zadachi/{id}. */
@@ -370,6 +376,54 @@ export const irrationalSkills: PrepSkill[] = [
 ];
 
 /**
+ * Навыки подтемы «Показательная функция»: по десять задач в блоке.
+ * Метод один: параметры не угадываются по рисунку — берём две
+ * отмеченные точки в узлах сетки и решаем систему.
+ */
+export const exponentialSkills: PrepSkill[] = [
+  {
+    id: 'pokaz-osnovanie',
+    no: '01',
+    title: 'Найти основание $a$ по графику',
+    lead: 'Точка в узле сетки даёт основание',
+    tip: 'Точка $(0;\\, 1)$ есть у любой $a^x$ и об основании ничего не говорит. Берите вторую отмеченную точку $(x_1;\\, y_1)$: $a^{x_1} = y_1$. При $x_1 = 1$ сразу $a = y_1$, при $x_1 = -1$ — $a = \\dfrac{1}{y_1}$.',
+    setId: 'P12E-1',
+  },
+  {
+    id: 'pokaz-znachenie',
+    no: '02',
+    title: 'Найти значение $a^x$',
+    lead: 'Значение, которое не читается с рисунка',
+    tip: 'Сначала основание — по отмеченной точке. Потом подставьте $x$ и считайте степень устно по шагам: $2^8 = (2^4)^2 = 16^2 = 256$. Отрицательная степень — перевёрнутая дробь: $\\left(\\dfrac{1}{2}\\right)^{-5} = 2^5$.',
+    setId: 'P12E-2',
+  },
+  {
+    id: 'pokaz-sdvig-vverh',
+    no: '03',
+    title: 'Сдвиг вверх-вниз: $a^x + b$',
+    lead: 'Две точки — система; вычитаем уравнения',
+    tip: 'Асимптоту на глаз не берите. Подставьте две отмеченные точки: $a^{x_1} + b = y_1$, $a^{x_2} + b = y_2$. Вычтите — $b$ уйдёт. Найдите $a$, потом $b$ из любого уравнения. Асимптота — прямая $y = b$.',
+    setId: 'P12E-3',
+  },
+  {
+    id: 'pokaz-sdvig-vbok',
+    no: '04',
+    title: 'Сдвиг влево-вправо: $a^{x+b}$',
+    lead: 'Две точки — система; делим уравнения',
+    tip: 'Подставьте две отмеченные точки: $a^{x_1 + b} = y_1$, $a^{x_2 + b} = y_2$. Разделите второе на первое: $a^{x_2 - x_1} = \\dfrac{y_2}{y_1}$ — $b$ уйдёт. Точка с $y = 1$ даёт $b$ сразу: показатель там равен нулю.',
+    setId: 'P12E-4',
+  },
+  {
+    id: 'pokaz-argument',
+    no: '05',
+    title: 'Найти $x$ по известному значению',
+    lead: 'При каком $x$ функция принимает данное значение',
+    tip: 'Восстановите формулу по двум точкам. Перенесите $b$, запишите число справа степенью основания: $32 = 2^5$. Степени с одним основанием равны, только когда равны показатели.',
+    setId: 'P12E-5',
+  },
+];
+
+/**
  * Навыки подтемы по её идентификатору (data/functionTypes.ts).
  *
  * У каждой подтемы свой список: новая не дописывается в чужой.
@@ -385,6 +439,9 @@ export function prepSkillsFor(type: string): PrepSkill[] {
   if (type === 'irrational') {
     return irrationalSkills;
   }
+  if (type === 'exponential') {
+    return exponentialSkills;
+  }
   return type === 'rational' ? rationalSkills : [];
 }
 
@@ -394,6 +451,7 @@ export const allPrepSkills: PrepSkill[] = [
   ...quadraticSkills,
   ...rationalSkills,
   ...irrationalSkills,
+  ...exponentialSkills,
 ];
 
 /** Заголовок и подписи экрана списка навыков. */

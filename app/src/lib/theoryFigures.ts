@@ -19,6 +19,7 @@
 import { THEME } from '@/lib/graph/renderer.js';
 import '@/lib/graph/families/sqrt.js';
 import '@/lib/graph/families/quadratic.js';
+import '@/lib/graph/families/expo.js';
 import { exampleOfFigure, secondPoint, type CrossExample, type Quad } from '@/lib/quadraticCross';
 import { basicOfFigure, type BasicExample } from '@/lib/quadraticBasics';
 
@@ -1119,6 +1120,181 @@ function aboutLinear(): TheoryFigure {
 
 /* ── Реестр ───────────────────────────────────────────────────── */
 
+/* ── Показательная функция ────────────────────────────────────────
+   Кривая y = k · a^(x + c) + d. Окна подобраны так, чтобы у края со
+   стороны хвоста кривая отстояла от асимптоты не меньше чем на 0,2
+   клетки: на рисунке она не касается асимптоты. Сдвиги показаны
+   переездом точки (0; 1) со стрелкой, а не второй кривой — у второй
+   кривой хвост лёг бы на ось. Числа — те же, что в
+   content/theoryExponential.ts и content/exponential.ts. */
+
+function expo(a: number, c = 0, d = 0, color = 'lineA', k = 1) {
+  return { type: 'expo', a, c, d, k, color, label: null };
+}
+
+function asym(w: Win, y: number) {
+  return { type: 'segment', from: [w.xmin, y], to: [w.xmax, y], style: 'dashed', color: 'asymptote' };
+}
+
+function move(from: [number, number], to: [number, number]) {
+  return { type: 'segment', from, to, color: 'accent', arrow: true };
+}
+
+/** y = 2ˣ: точки (0; 1), (1; 2), (2; 4), (3; 8). */
+function expUp(): TheoryFigure {
+  const w = win(-2, 4, -1, 9);
+  return {
+    scene: { ...base(w), curves: [expo(2)], points: [dot(0, 1), dot(1, 2), dot(2, 4), dot(3, 8)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, 1], text: '$(0;\\, 1)$', size: 14, auto: true },
+      { at: [1, 2], text: '$(1;\\, 2)$', size: 14, auto: true },
+      { at: [2, 4], text: '$(2;\\, 4)$', size: 14, auto: true },
+      { at: [3, 8], text: '$(3;\\, 8)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = (1/2)ˣ: зеркально, точки (0; 1), (−1; 2), (−2; 4), (−3; 8). */
+function expDown(): TheoryFigure {
+  const w = win(-4, 2, -1, 9);
+  return {
+    scene: { ...base(w), curves: [expo(0.5)], points: [dot(0, 1), dot(-1, 2), dot(-2, 4), dot(-3, 8)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, 1], text: '$(0;\\, 1)$', size: 14, auto: true },
+      { at: [-1, 2], text: '$(-1;\\, 2)$', size: 14, auto: true },
+      { at: [-2, 4], text: '$(-2;\\, 4)$', size: 14, auto: true },
+      { at: [-3, 8], text: '$(-3;\\, 8)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = 2ˣ − 3: точка (0; 1) уехала вниз на 3, асимптота y = −3. */
+function expShiftY(): TheoryFigure {
+  const w = win(-2, 4, -4, 6);
+  return {
+    scene: {
+      ...base(w),
+      curves: [expo(2, 0, -3)],
+      points: [dot(0, 1, 'muted'), dot(0, -2), dot(2, 1)],
+      shapes: [asym(w, -3), move([0, 0.75], [0, -1.7])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, -2], text: '$(0;\\, -2)$', size: 14, auto: true },
+      { at: [2, 1], text: '$(2;\\, 1)$', size: 14, auto: true },
+      { at: [3, -3], text: '$y = -3$', dy: -12, size: 14, tone: 'muted' },
+    ],
+  };
+}
+
+/** y = 2^(x + 2): точка (0; 1) уехала влево на 2. */
+function expShiftX(): TheoryFigure {
+  const w = win(-4, 2, -1, 9);
+  return {
+    scene: {
+      ...base(w),
+      curves: [expo(2, 2)],
+      points: [dot(0, 1, 'muted'), dot(-2, 1), dot(-1, 2), dot(0, 4)],
+      shapes: [move([-0.3, 1], [-1.7, 1])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [-2, 1], text: '$(-2;\\, 1)$', size: 14, auto: true },
+      { at: [0, 4], text: '$(0;\\, 4)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = 3 · 2ˣ: точка (0; 1) поднялась в (0; 3), асимптота та же. */
+function expStretch(): TheoryFigure {
+  const w = win(-1, 3, -1, 9);
+  return {
+    scene: {
+      ...base(w),
+      curves: [expo(2, 0, 0, 'lineA', 3)],
+      points: [dot(0, 1, 'muted'), dot(0, 3), dot(1, 6)],
+      shapes: [move([0, 1.3], [0, 2.7])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, 3], text: '$(0;\\, 3)$', size: 14, auto: true },
+      { at: [1, 6], text: '$(1;\\, 6)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** y = 2ˣ − 3 по двум точкам A(1; −1), B(2; 1): метод раздела. */
+function expTwoPoints(): TheoryFigure {
+  const w = win(-2, 4, -4, 6);
+  return {
+    scene: {
+      ...base(w),
+      curves: [expo(2, 0, -3)],
+      points: [dot(1, -1), dot(2, 1)],
+      shapes: [asym(w, -3), seg([1, 0], [1, -1]), seg([0, -1], [1, -1]), seg([2, 0], [2, 1]), seg([0, 1], [2, 1])],
+    },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, -1], text: '$A(1;\\, -1)$', size: 14, auto: true },
+      { at: [2, 1], text: '$B(2;\\, 1)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 1: f(x) = 3ˣ, точки (0; 1) и (1; 3). */
+function expExValue(): TheoryFigure {
+  const w = win(-1, 3, -1, 9);
+  return {
+    scene: { ...base(w), curves: [expo(3)], points: [dot(0, 1), dot(1, 3)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, 1], text: '$(0;\\, 1)$', size: 14, auto: true },
+      { at: [1, 3], text: '$(1;\\, 3)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 2: f(x) = 2ˣ − 3, точки (0; −2) и (2; 1). */
+function expExShiftValue(): TheoryFigure {
+  const w = win(-2, 4, -4, 6);
+  return {
+    scene: { ...base(w), curves: [expo(2, 0, -3)], points: [dot(0, -2), dot(2, 1)], shapes: [asym(w, -3)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, -2], text: '$(0;\\, -2)$', size: 14, auto: true },
+      { at: [2, 1], text: '$(2;\\, 1)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 3: f(x) = (1/2)ˣ + 1, точки (0; 2) и (−1; 3). */
+function expExShiftArgument(): TheoryFigure {
+  const w = win(-4, 2, -1, 9);
+  return {
+    scene: { ...base(w), curves: [expo(0.5, 0, 1)], points: [dot(0, 2), dot(-1, 3)], shapes: [asym(w, 1)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [0, 2], text: '$(0;\\, 2)$', size: 14, auto: true },
+      { at: [-1, 3], text: '$(-1;\\, 3)$', size: 14, auto: true },
+    ],
+  };
+}
+
+/** Разбор типа 4: f(x) = 2^(x − 1), точки (1; 1) и (3; 4). */
+function expExShiftXArgument(): TheoryFigure {
+  const w = win(-1, 5, -1, 8);
+  return {
+    scene: { ...base(w), curves: [expo(2, -1)], points: [dot(1, 1), dot(3, 4)] },
+    labels: [
+      ...axisLabels(w, false),
+      { at: [1, 1], text: '$(1;\\, 1)$', size: 14, auto: true },
+      { at: [3, 4], text: '$(3;\\, 4)$', size: 14, auto: true },
+    ],
+  };
+}
+
 const FIGURES = {
   'lin-rise-mini': riseMini,
   'lin-fall-mini': fallMini,
@@ -1157,6 +1333,16 @@ const FIGURES = {
   'qb-at-outside': qbAtOutside,
   'qb-arg-visible': qbArgVisible,
   'qb-arg-outside': qbArgOutside,
+  'exp-up': expUp,
+  'exp-down': expDown,
+  'exp-shift-y': expShiftY,
+  'exp-shift-x': expShiftX,
+  'exp-stretch': expStretch,
+  'exp-two-points': expTwoPoints,
+  'exp-ex-value': expExValue,
+  'exp-ex-shift-value': expExShiftValue,
+  'exp-ex-shift-argument': expExShiftArgument,
+  'exp-ex-shiftx-argument': expExShiftXArgument,
 } satisfies Record<string, () => TheoryFigure>;
 
 export type TheoryFigureId = keyof typeof FIGURES;

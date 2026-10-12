@@ -29,6 +29,7 @@ import solutionBuilder from '../src/lib/graph/solution.js';
 import quadraticBuilder from '../src/lib/graph/solution-quadratic.js';
 import rationalSolution from '../src/lib/graph/solution-rational.js';
 import sqrtBuilder from '../src/lib/graph/solution-sqrt.js';
+import exponentialBuilder from '../src/lib/graph/solution-exponential.js';
 import { variantAnswersItems } from '../src/lib/sheet/answers12.js';
 
 const args = process.argv.slice(2);
@@ -79,13 +80,15 @@ const SUBTOPICS = [
   ['парабола', '12q'],
   ['гипербола', '12r'],
   ['корень', '12s'],
+  ['показательная', '12e'],
 ];
 
 /* Разбор по шагам на листе учителя: гипербола и график корня — как
    в lib/generatorSheet.ts, модуль по семейству задачи. */
 const rationalBuilder = {
   fromTask: (task) =>
-    task.meta.family === 'sqrt' ? sqrtBuilder.fromTask(task) : rationalSolution.fromTask(task),
+    task.meta.family === 'exponential' ? exponentialBuilder.fromTask(task)
+      : task.meta.family === 'sqrt' ? sqrtBuilder.fromTask(task) : rationalSolution.fromTask(task),
 };
 
 function stepsOf(task) {
@@ -93,7 +96,7 @@ function stepsOf(task) {
   if (family === 'quadratic') {
     return quadraticBuilder.fromTask(task);
   }
-  if (family === 'rational' || family === 'sqrt') {
+  if (family === 'rational' || family === 'sqrt' || family === 'exponential') {
     return rationalBuilder.fromTask(task);
   }
   const lines = task.meta && task.meta.lines;

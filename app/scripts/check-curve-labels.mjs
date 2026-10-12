@@ -74,7 +74,7 @@ for (const set of [...sets.prep, ...sets.prototypes]) {
   }
 }
 
-for (const type of ['linear', 'quadratic', 'rational', 'irrational']) {
+for (const type of ['linear', 'quadratic', 'rational', 'irrational', 'exponential']) {
   const scene = scenes.aboutScene(type);
   const before = checked;
   inspect(`«О задании», ${type}`, scene);

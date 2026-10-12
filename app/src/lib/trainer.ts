@@ -15,6 +15,8 @@ import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import RationalHints from '@/lib/graph/hints-rational.js';
 import SqrtHints from '@/lib/graph/hints-sqrt.js';
+import ExponentialHints from '@/lib/graph/hints-exponential.js';
+import { exponentialGuideSvg } from '@/lib/exponentialGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
@@ -23,6 +25,7 @@ import {
   quadraticSteps as quadraticSolution,
   rationalSteps as rationalSolution,
   sqrtSteps as sqrtSolution,
+  exponentialSteps as exponentialSolution,
   type PrepStep,
 } from '@/lib/prep';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
@@ -1131,6 +1134,46 @@ function sqrtSteps(task: EngineTask): TrainerStep[] {
   });
 }
 
+/* ── Цепочка для показательной функции ───────────────────────────
+
+   Шаги строит graph/hints-exponential.js: лестница вопросов с
+   кнопками — какие точки берём, какая система, a, b, что спрашивают,
+   ответ с проверкой по графику. Шагам о точках и системе достаётся
+   чертёж с пунктирами от точек к осям: построения — только в подсказке. */
+
+function exponentialSteps(task: EngineTask): TrainerStep[] {
+  const hints = ExponentialHints.fromTask(task) as (SqrtHint & { id?: string })[];
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const guides = exponentialGuideSvg(task.meta);
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      focus: null,
+      questions: hint.questions.map((question) => ({
+        promptHtml: big(question.prompt),
+        options: question.options.map((option) => ({
+          html: big(option.text),
+          right: option.right,
+          whyHtml: option.why === null ? '' : big(option.why),
+        })),
+        rightHtml: big(question.right),
+      })),
+    };
+    if (hint.after && hint.after.length > 0) {
+      step.afterHtml = afterHtml(hint.after);
+    }
+    if (hint.id === 'points' || hint.id === 'system') {
+      step.chartSvg = guides;
+      step.chartFrom = 0;
+    }
+    return step;
+  });
+}
+
 /* ── Задание тренажёра из задачи движка ──────────────────────────
    Условие набирается KaTeX, подсказки и цепочка шагов собираются
    вместе с заданием. Откуда пришла задача — с сборки или из браузера
@@ -1142,6 +1185,25 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  if (task.meta.family === 'exponential') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: две отмеченные точки в узлах сетки, система уравнений, ' +
+          'у $a^x + b$ — вычитаем, у $a^{x+b}$ — делим; затем вычисление.',
+      ),
+      rightHint: hintHtml('Формула восстановлена по двум точкам, дальше вычисление.'),
+      steps: exponentialSteps(task),
+      options: null,
+      oshibki: {},
+      solution: exponentialSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   if (task.meta.family === 'sqrt') {
     return {
       id: task.id,

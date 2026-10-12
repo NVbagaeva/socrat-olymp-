@@ -17,6 +17,8 @@ import exponential from './exponential.js';
 import logarithmic from './logarithmic.js';
 import trigonometric from './trigonometric.js';
 import sqrt from './sqrt.js';
+/* Показательная со сдвигом в показателе: a^(x + c) + d. Только регистрация. */
+import './expo.js';
 
 export { quadratic, rational, exponential, logarithmic, trigonometric, sqrt };
 

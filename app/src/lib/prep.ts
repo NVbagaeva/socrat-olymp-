@@ -12,6 +12,8 @@ import GraphSolution from '@/lib/graph/solution.js';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import GraphSolutionRational from '@/lib/graph/solution-rational.js';
 import GraphSolutionSqrt from '@/lib/graph/solution-sqrt.js';
+import GraphSolutionExponential from '@/lib/graph/solution-exponential.js';
+import { exponentialGuideSvg } from '@/lib/exponentialGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import Quadratic from '@/lib/graph/families/quadratic.js';
 import { renderGraph } from '@/lib/graph/renderer.js';
@@ -754,6 +756,29 @@ export function sqrtSteps(task: { answer: string; meta: unknown }): PrepStep[] {
   })));
 }
 
+/**
+ * Разбор задачи о показательной функции: solution-exponential.js строит
+ * его по meta задачи — две отмеченные точки, система, a, b, запрос.
+ * Шаг с точками показывает чертёж с пунктирами от точек к осям.
+ */
+export function exponentialSteps(task: { answer: string; meta: unknown }): PrepStep[] {
+  const steps = GraphSolutionExponential.fromTask(task) as {
+    id: string;
+    number: number;
+    title: string;
+    blocks: EngineBlock[];
+  }[];
+  const guides = exponentialGuideSvg(task.meta);
+  return withTitles(steps.map((step) => ({
+    number: step.number,
+    title: step.title,
+    arrow: null,
+    blocks: step.id === 'points'
+      ? [{ type: 'chart', svg: guides } as PrepBlock, ...viewBlocks(step.blocks)]
+      : viewBlocks(step.blocks),
+  })));
+}
+
 /** Заголовок шага с формулами ($…$) → вёрстка KaTeX. */
 export function titleHtml(title: string): string {
   return typeset(GraphGenerate.typeset(title) as string);
@@ -777,6 +802,9 @@ function buildStepsRaw(task: EngineTask): PrepStep[] | null {
   }
   if (task.meta.family === 'sqrt') {
     return sqrtSteps(task);
+  }
+  if (task.meta.family === 'exponential') {
+    return exponentialSteps(task);
   }
 
   const found = GraphGenerate.analysis(task.id) as Analysis | null;

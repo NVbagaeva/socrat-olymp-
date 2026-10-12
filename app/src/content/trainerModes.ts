@@ -175,6 +175,13 @@ const IRRATIONAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* Показательная функция: значение и аргумент — по два типа банка ФИПИ. */
+const EXPONENTIAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12E.A', '12E.B'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12E.C', '12E.D'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -195,6 +202,9 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'irrational') {
     return IRRATIONAL_SHORTCUTS;
+  }
+  if (type === 'exponential') {
+    return EXPONENTIAL_SHORTCUTS;
   }
   return [];
 }
@@ -296,6 +306,11 @@ export const trainerKindTitle: Record<string, string> = {
   '12S.B': 'Аргумент по значению',
   '12S.C': 'Корень и прямая',
   '12S.D': 'Корень и прямая',
+  /* Показательная функция: четыре типа открытого банка. */
+  '12E.A': 'Значение $a^x$',
+  '12E.B': 'Значение $a^x + b$',
+  '12E.C': 'Аргумент: $a^x + b$',
+  '12E.D': 'Аргумент: $a^{x+b}$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */

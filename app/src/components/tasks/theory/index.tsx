@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { QUADRATIC_SECTIONS } from '@/content/theoryQuadratic';
 import { RATIONAL_SECTIONS } from '@/content/theoryRational';
 import { IRRATIONAL_SECTIONS } from '@/content/theoryIrrational';
+import { EXPONENTIAL_SECTIONS } from '@/content/theoryExponential';
 import { LINEAR_SECTIONS } from '@/content/theoryLinearRich';
 import { rationalTheoryScene } from '@/lib/scenes';
 import { WhatIsFunction } from './WhatIsFunction';
@@ -39,7 +40,7 @@ export const theoryBodies: Record<string, ReactNode> = {
   /* Разделы, свёрстанные блоками: теория линейной функции и графика
      корня. Разметка одна, подписи на рисунках — KaTeX. */
   ...Object.fromEntries(
-    [...LINEAR_SECTIONS, ...IRRATIONAL_SECTIONS].map((section) => [
+    [...LINEAR_SECTIONS, ...IRRATIONAL_SECTIONS, ...EXPONENTIAL_SECTIONS].map((section) => [
       section.id,
       <RichSection section={section} key={section.id} />,
     ]),
