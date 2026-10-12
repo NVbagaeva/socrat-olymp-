@@ -1,0 +1,92 @@
+/* Разбор уравнения №7: подписанные этапы, выделенные «ОДЗ» и «Отбор
+   корней», панель «Считаем с умом». Общий для тренажёра, галереи,
+   листа учителя и разобранных примеров теории. */
+
+.z7-razbor {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.z7-razbor__etap {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  break-inside: avoid;
+}
+
+/* ОДЗ и отбор корней — то, что чаще всего забывают: другим цветом. */
+.z7-razbor__etap--odz,
+.z7-razbor__etap--otbor {
+  border-left-color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+}
+
+.z7-razbor__title {
+  margin: 0 0 var(--space-2);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.z7-razbor__line {
+  margin: var(--space-1) 0 0;
+  line-height: 1.7;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.z7-razbor__calc {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.z7-razbor__calc summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.z7-razbor__calc ul,
+.z7-razbor__calc ol {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  line-height: 1.8;
+}
+
+.z7-razbor__calc-tex {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.z7-hint {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.z7-hint--ok {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.z7-hint__comment {
+  color: var(--color-text-secondary);
+}
+
+@media print {
+  .z7-razbor__etap {
+    border-left-color: #000;
+    background: none;
+  }
+
+  .z7-razbor__etap--odz,
+  .z7-razbor__etap--otbor {
+    border-left-width: 5px;
+  }
+}

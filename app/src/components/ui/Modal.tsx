@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface ModalProps {
   open: boolean;
@@ -172,7 +173,7 @@ export function Modal({
 
   if (preview) return panelNode;
 
-  return (
+  const backdrop = (
     <div
       className={clsx('modal-backdrop', anchored && 'modal-backdrop--anchored')}
       onMouseDown={onClose}
@@ -188,4 +189,10 @@ export function Modal({
       </div>
     </div>
   );
+
+  /* Окно — в конце body, а не на месте вызова: предок со своим контекстом
+     наложения (у .section-panel это view-transition-name перехода между
+     вкладками) запер бы z-index окна внутри себя, и липкая лента вкладок
+     легла бы поверх затемнения и кнопок окна. */
+  return typeof document === 'undefined' ? backdrop : createPortal(backdrop, document.body);
 }

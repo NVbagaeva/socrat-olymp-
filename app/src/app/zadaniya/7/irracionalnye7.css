@@ -1,0 +1,706 @@
+/* Теория №7: большой блок «Иррациональные уравнения» (Irracionalnye7.tsx).
+   Цвета карточек — из палитры сайта, мягкие заливки: вид 1 — синий,
+   вид 2 — фиолетовый, вид 3 — бирюзовый, кубический корень —
+   серо-голубой. Роли в схемах одни во всех карточках: уравнение —
+   тёмно-синий, обязательное условие — золотисто-оранжевый, условие
+   «выполняется само» — серый с галочкой. Роль подписана словом, поэтому
+   в ч/б печати схема читается без цвета. */
+
+.z7-irr {
+  --irr-ur: var(--navy-800);
+  --irr-ur-bg: var(--blue-50);
+  --irr-us: var(--amber-600);
+  --irr-us-text: var(--terracotta-700);
+  --irr-us-bg: var(--sun-50);
+  --irr-samo: var(--grey-700);
+  --irr-samo-bg: var(--grey-50);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* Раздел теории — элемент сетки: без этого он растягивается до ширины
+   итоговой таблицы и на телефоне выходит за экран. */
+.z7-teoriya:has(> .z7-irr) {
+  min-width: 0;
+}
+
+/* Широкие дети (таблица, схема) прокручиваются внутри себя, а не
+   растягивают блок шире экрана. */
+.z7-irr > *,
+.z7-irr__vidy > *,
+.z7-irr__vid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.z7-irr__vstuplenie {
+  max-width: 80ch;
+}
+
+.z7-irr__vstuplenie p {
+  margin: 0 0 var(--space-2);
+  line-height: 1.65;
+}
+
+/* ── Легенда ролей ── */
+.z7-irr__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font-size: 14px;
+}
+
+.z7-irr__rol {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.z7-irr__rol-slovo {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.z7-irr__rol--uravnenie .z7-irr__rol-slovo {
+  color: var(--irr-ur);
+  background: var(--irr-ur-bg);
+}
+
+.z7-irr__rol--uslovie .z7-irr__rol-slovo {
+  color: var(--irr-us-text);
+  border-color: var(--irr-us);
+  background: var(--irr-us-bg);
+}
+
+.z7-irr__rol--samo .z7-irr__rol-slovo {
+  color: var(--irr-samo);
+  border-style: dashed;
+  background: var(--irr-samo-bg);
+}
+
+.z7-irr__rol-opisanie {
+  color: var(--color-text-secondary);
+}
+
+/* ── Карточки видов ── */
+.z7-irr__vidy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.z7-irr__vid {
+  --ton: var(--blue-600);
+  --ton-bg: var(--blue-50);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1.5px solid color-mix(in srgb, var(--ton) 45%, transparent);
+  border-left: 6px solid var(--ton);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(170deg, var(--ton-bg), var(--color-surface) 70%);
+  scroll-margin-top: 140px;
+}
+
+.z7-irr__vid--fiolet {
+  --ton: var(--violet-600);
+  --ton-bg: var(--violet-50);
+}
+
+.z7-irr__vid--biryuza {
+  --ton: var(--teal-600);
+  --ton-bg: var(--teal-50);
+}
+
+.z7-irr__vid--seryy {
+  --ton: var(--grey-700);
+  --ton-bg: var(--grey-100);
+}
+
+.z7-irr__vid-shapka {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.z7-irr__metka {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--ton);
+  color: var(--color-text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.z7-irr__vid-title {
+  margin: 0;
+  font-size: var(--fs-h4, 20px);
+}
+
+/* ── Схема перехода ── */
+.z7-sx {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.z7-sx__iskh {
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--ton, var(--irr-ur));
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 1.15em;
+  white-space: nowrap;
+  justify-self: start;
+}
+
+.z7-sx__vetki {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.z7-sx__vetka {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.z7-sx__vetka:not(:has(.z7-sx__esli)) {
+  grid-template-columns: auto 1fr;
+}
+
+.z7-sx__esli {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.z7-sx__strelka {
+  font-size: 1.4em;
+  color: var(--ton, var(--irr-ur));
+}
+
+.z7-sx__itog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.z7-sx__sistema {
+  position: relative;
+  padding-left: 20px;
+}
+
+/* Скобка тянется ровно на высоту строк системы. */
+.z7-sx__skobka {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 100%;
+  color: var(--irr-ur);
+}
+
+.z7-sx__stroki {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.z7-sx__stroka {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid currentColor;
+}
+
+.z7-sx__rol {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.z7-sx__stroka--uravnenie {
+  color: var(--irr-ur);
+  background: var(--irr-ur-bg);
+}
+
+.z7-sx__stroka--uslovie {
+  color: var(--irr-us-text);
+  border-color: var(--irr-us);
+  border-width: 2px;
+  background: var(--irr-us-bg);
+}
+
+.z7-sx__stroka--uslovie .z7-sx__formula {
+  color: var(--color-text);
+}
+
+.z7-sx__stroka--samo {
+  color: var(--irr-samo);
+  border-style: dashed;
+  background: var(--irr-samo-bg);
+}
+
+.z7-sx__stroka--samo .z7-sx__formula {
+  opacity: 0.75;
+}
+
+.z7-sx__formula {
+  font-size: 1.05em;
+}
+
+.z7-sx__prichina {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Компактная схема — для шпаргалки: в колонку A4, без причин. */
+.z7-sx--kompakt {
+  gap: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.z7-sx--kompakt .z7-sx__iskh {
+  padding: 2px 6px;
+  font-size: 1em;
+  border-width: 1.5px;
+}
+
+.z7-sx--kompakt .z7-sx__vetki,
+.z7-sx--kompakt .z7-sx__stroki,
+.z7-sx--kompakt .z7-sx__itog {
+  gap: 3px;
+}
+
+.z7-sx--kompakt .z7-sx__vetka {
+  gap: 4px;
+}
+
+.z7-sx--kompakt .z7-sx__strelka {
+  font-size: 1.1em;
+}
+
+.z7-sx--kompakt .z7-sx__esli {
+  font-size: 10px;
+}
+
+.z7-sx--kompakt .z7-sx__sistema {
+  padding-left: 12px;
+}
+
+.z7-sx--kompakt .z7-sx__skobka {
+  width: 9px;
+}
+
+.z7-sx--kompakt .z7-sx__stroka {
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 1px 5px;
+  border-width: 1px;
+}
+
+.z7-sx--kompakt .z7-sx__rol {
+  font-size: 7.5px;
+  letter-spacing: 0;
+}
+
+.z7-sx--kompakt .z7-sx__prichina {
+  display: none;
+}
+
+.z7-sx--kompakt {
+  grid-template-columns: auto minmax(0, 1fr);
+  overflow: visible;
+}
+
+.z7-sx--kompakt .z7-sx__stroka {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.z7-sx--kompakt .z7-sx__stroka--samo {
+  flex-wrap: wrap;
+}
+
+/* ── Пояснения под схемой ── */
+.z7-irr__poyasneniya {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-3);
+}
+
+.z7-irr__poyasnenie {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  line-height: 1.6;
+}
+
+.z7-irr__poyasnenie--uslovie {
+  border: 2px solid var(--irr-us);
+  background: var(--irr-us-bg);
+}
+
+.z7-irr__poyasnenie--samo {
+  border: 1.5px dashed var(--grey-500);
+  background: var(--irr-samo-bg);
+}
+
+.z7-irr__poyasnenie-rol {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.z7-irr__poyasnenie--uslovie .z7-irr__poyasnenie-rol {
+  color: var(--irr-us-text);
+}
+
+.z7-irr__poyasnenie--samo .z7-irr__poyasnenie-rol {
+  color: var(--irr-samo);
+}
+
+.z7-irr__vid .ramka {
+  margin: 0;
+}
+
+.z7-irr__pochemu {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  line-height: 1.65;
+  list-style: decimal;
+}
+
+.z7-irr__pochemu li + li {
+  margin-top: var(--space-2);
+}
+
+.z7-irr__zametka {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.z7-irr__vid .z7-gde {
+  margin: 0;
+}
+
+/* ── Примеры ── */
+.z7-irr__primery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.z7-irr__primer {
+  margin: 0;
+}
+
+.z7-irr__primer > summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.z7-irr__primer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.z7-irr__primer-knopka {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ton);
+  color: var(--ton);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.z7-irr__primer[open] .z7-irr__primer-knopka {
+  background: var(--ton);
+  color: var(--color-text-inverse);
+}
+
+.z7-irr__primer-title {
+  font-weight: 600;
+}
+
+.z7-irr__lovushka {
+  margin-left: var(--space-2);
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--irr-us-bg);
+  border: 1px solid var(--irr-us);
+  color: var(--irr-us-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.z7-irr__primer .ramka {
+  margin-top: var(--space-3);
+}
+
+/* ── Живой рисунок ── */
+.z7-irr-graf {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.z7-irr-graf__title {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+
+.z7-irr-graf__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.z7-irr-graf__l {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.z7-irr-graf__liniya {
+  width: 28px;
+  height: 0;
+  border-top: 3px solid var(--blue-600);
+}
+
+.z7-irr-graf__l--nash .z7-irr-graf__liniya {
+  border-top-color: var(--violet-600);
+}
+
+.z7-irr-graf__l--chuzhoy .z7-irr-graf__liniya {
+  border-top: 3px dashed var(--violet-600);
+}
+
+.z7-irr-graf__svg {
+  display: block;
+  max-width: 460px;
+}
+
+.z7-irr-graf__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.z7-irr-graf__knopka {
+  margin-top: var(--space-2);
+}
+
+.z7-irr-graf__podpis {
+  margin: var(--space-2) 0 0;
+  line-height: 1.6;
+}
+
+/* ── Итоговая таблица ── */
+.z7-irr__tablica {
+  overflow-x: auto;
+}
+
+.z7-irr__tablica table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  min-width: 620px;
+}
+
+.z7-irr__tablica th,
+.z7-irr__tablica td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.z7-irr__tablica thead th {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
+.z7-irr__tr {
+  --ton: var(--blue-600);
+  --ton-bg: var(--blue-50);
+}
+
+.z7-irr__tr--fiolet {
+  --ton: var(--violet-600);
+  --ton-bg: var(--violet-50);
+}
+
+.z7-irr__tr--biryuza {
+  --ton: var(--teal-600);
+  --ton-bg: var(--teal-50);
+}
+
+.z7-irr__tr--seryy {
+  --ton: var(--grey-700);
+  --ton-bg: var(--grey-100);
+}
+
+.z7-irr__tr > * {
+  background: var(--ton-bg);
+}
+
+.z7-irr__tr > :first-child {
+  border-left: 5px solid var(--ton);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  white-space: nowrap;
+}
+
+.z7-irr__tr > :last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.z7-irr__tablica--kompakt table {
+  min-width: 0;
+  border-spacing: 0 2px;
+  font-size: 11px;
+}
+
+.z7-irr__tablica--kompakt th,
+.z7-irr__tablica--kompakt td {
+  padding: 1px 6px;
+}
+
+/* В шпаргалке «что не проверяем» уже видно по серым строкам схем. */
+.z7-irr__tablica--kompakt th:nth-child(4),
+.z7-irr__tablica--kompakt td:nth-child(4) {
+  display: none;
+}
+
+.z7-irr__tablica--kompakt .z7-irr__tr > :nth-child(3) {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ── Телефон: схема в столбик, стрелка вниз ── */
+@media (max-width: 640px) {
+  .z7-irr__vid {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .z7-sx {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .z7-sx__vetka,
+  .z7-sx__vetka:not(:has(.z7-sx__esli)) {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .z7-sx__strelka {
+    display: inline-block;
+    justify-self: start;
+    transform: rotate(90deg);
+    margin: 10px 0 10px var(--space-5);
+    line-height: 1;
+  }
+
+  .z7-irr__rol {
+    flex-wrap: wrap;
+    gap: 2px var(--space-2);
+  }
+
+  .z7-sx__vetki {
+    width: 100%;
+  }
+
+  .z7-sx__stroka {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Печать: ч/б, роли подписаны словами ── */
+@media print {
+  /* Не рвём только мелкие части: схему, рисунок, строку таблицы.
+     Запрет разрыва на целой карточке или таблице Chrome при печати
+     выполняет с наложением на следующий раздел. */
+  .z7-irr__vid {
+    background: none;
+    border-color: #000;
+  }
+
+  .z7-sx,
+  .z7-irr-graf,
+  .z7-irr__poyasnenie,
+  .z7-irr__tr {
+    break-inside: avoid;
+  }
+
+  .z7-irr__vid-shapka {
+    break-after: avoid;
+  }
+
+  /* На бумаге прокрутки нет: таблица и схема — по ширине листа. */
+  .z7-sx,
+  .z7-irr__tablica {
+    overflow: visible;
+  }
+
+  .z7-irr__tablica table {
+    min-width: 0;
+  }
+
+  .z7-irr__primer:not([open]) {
+    display: none;
+  }
+
+  .z7-irr-graf__knopka {
+    display: none;
+  }
+}

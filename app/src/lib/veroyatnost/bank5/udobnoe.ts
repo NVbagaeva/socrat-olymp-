@@ -150,10 +150,12 @@ const P03: Prototype = prototip({
         const k = num(p, 'k');
         return [
           {
+            etap: 'Количества',
             text: `Возьмём 100 попыток. Больше ${k - 1} задач решается в ${a} из них, больше ${k} — в ${b}:`,
             formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
           },
           {
+            etap: 'Благоприятные исходы',
             text: `Ровно ${k} задач — это «больше ${k - 1}», но не «больше ${k}»:`,
             formula: `m = ${a} - ${b} = ${m}`,
             value: m,
@@ -164,10 +166,12 @@ const P03: Prototype = prototip({
       case 'pribor':
         return [
           {
+            etap: 'Количества',
             text: `Возьмём 100 приборов. Больше года служат ${a} из них, больше двух лет — ${b}:`,
             formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
           },
           {
+            etap: 'Благоприятные исходы',
             text: 'От года до двух — это «больше года», но не «больше двух лет»:',
             formula: `m = ${a} - ${b} = ${m}`,
             value: m,
@@ -179,10 +183,12 @@ const P03: Prototype = prototip({
         const bb = num(p, 'b');
         return [
           {
+            etap: 'Количества',
             text: `Возьмём 100 понедельников. Меньше ${bb} пассажиров бывает в ${a} из них, меньше ${aa} — в ${b}:`,
             formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
           },
           {
+            etap: 'Благоприятные исходы',
             text: `От ${aa} до ${bb - 1} — это «меньше ${bb}», но не «меньше ${aa}»:`,
             formula: `m = ${a} - ${b} = ${m}`,
             value: m,
@@ -399,10 +405,12 @@ const P13: Prototype = prototip({
     const bb = num(p, 'b');
     return [
       {
+        etap: 'Количества',
         text: `Возьмём 100 буханок. Легче ${bb} г — ${a} из них, тяжелее ${aa} г — ${b}:`,
         formula: `100 \\cdot ${tex(p1)} = ${a},\\quad 100 \\cdot ${tex(p2)} = ${b}`,
       },
       {
+        etap: 'Благоприятные исходы',
         text: `Тяжелее ${bb} г — остальные, легче ${aa} г — тоже остальные; между ${aa} и ${bb} г — всё, что не попало ни туда, ни туда:`,
         formula: `100 - ${a} = ${100 - a},\\quad 100 - ${b} = ${100 - b},\\quad m = 100 - ${100 - a} - ${100 - b} = ${m}`,
         value: m,
@@ -537,16 +545,19 @@ const P11: Prototype = prototip({
     const { neispr, ispr, z1, z2 } = zabrakovano(p);
     return [
       {
+        etap: 'Количества',
         text: `Возьмём ${texInt(BAZA).replace('\\,', ' ')} батареек. Неисправных ${dec(q * 100)} %, исправных — остальные:`,
         formula: `${texInt(BAZA)} \\cdot ${tex(q)} = ${texInt(neispr)},\\quad ${texInt(BAZA)} - ${texInt(neispr)} = ${texInt(ispr)}`,
       },
       {
+        etap: 'Благоприятные исходы',
         text: 'Забракованы две группы: неисправные, которых система поймала, и исправные, которые она забраковала по ошибке:',
         formula: `${texInt(neispr)} \\cdot ${tex(q1)} + ${texInt(ispr)} \\cdot ${tex(q2)} = ${texInt(z1)} + ${texInt(z2)} = ${texInt(z1 + z2)}`,
         value: z1 + z2,
       },
       {
-        text: 'Вероятность',
+        etap: 'Ответ',
+        text: 'Вероятность — доля благоприятных:',
         formula: `P = \\dfrac{m}{n} = \\dfrac{${texInt(z1 + z2)}}{${texInt(BAZA)}} = ${tex((z1 + z2) / BAZA)}`,
         value: (z1 + z2) / BAZA,
       },

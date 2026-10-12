@@ -92,12 +92,16 @@
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:navigation": "node scripts/check-navigation.mjs",
     "build:bank-10": "node scripts/build-bank-10.mjs",
+    "build:bank-7": "node scripts/build-bank-7.mjs",
+    "test:uravneniya": "node scripts/check-uravneniya.mjs",
     "test:prikladnye": "node scripts/check-prikladnye.mjs",
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",
     "test:soglasiya-sql": "node scripts/check-soglasiya-sql.mjs",
-    "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs"
+    "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs",
+    "test:trainer-session": "node scripts/check-trainer-session.mjs",
+    "test:trainer-sessions": "node scripts/check-trainer-sessions.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

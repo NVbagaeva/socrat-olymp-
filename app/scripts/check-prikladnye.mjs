@@ -75,7 +75,8 @@ console.log(`Чертежей моста проверено: ${mostov}.`);
 
 /* Теория: формулы рамок и строки с $…$ — KaTeX строго и «чисто»;
    примеры — задачи банка; «Где на ЕГЭ» — существующие прототипы. */
-const { RAZDELY_TEORII_10, FIZIKA_10 } = requireSrc('content/teoriya10');
+const { RAZDELY_TEORII_10, FIZIKA_10, bezSsylok } = requireSrc('content/teoriya10');
+const kond = requireSrc('lib/zadanie10/teoriya-kondensator');
 const { UROKI_10 } = requireSrc('content/uroki10');
 const { gigienaFormuly, formuly } = requireSrc('lib/zadanie10/selftest');
 const idsBanka = new Set(solved.map((x) => x.item.id));
@@ -94,13 +95,104 @@ const display = (tex, where) => {
 if (RAZDELY_TEORII_10.length !== 9) {
   problems.push({ where: 'теория', what: `разделов ${RAZDELY_TEORII_10.length}, нужно 9` });
 }
+/* Блоки раздела вместе с вложенными (пример под кнопкой «Пример ▸»). */
+const vseBloki = (bloki) =>
+  bloki.flatMap((b) => (b.vid === 'razvorot' ? [b, ...vseBloki([b.blok])] : [b]));
+const primeryRazdela = (r) =>
+  vseBloki(r.bloki)
+    .filter((b) => ['primer', 'primerRuchnoy', 'primerKondensator'].includes(b.vid))
+    .map((b) => b.title);
 for (const r of RAZDELY_TEORII_10) {
   const where = `теория ${r.id}`;
   strokiTeorii.push([where, r.lead]);
+  /* Пример про конденсатор: шаги и «Почему так» считает сервер — сверяем
+     ответ с решателем банка и таблицу с формулой. */
+  for (const b of vseBloki(r.bloki)) {
+    if (b.vid !== 'primerKondensator' && b.vid !== 'pochemuKondensator') continue;
+    const item = solved.find((x) => x.item.id === b.zadacha);
+    if (!item) {
+      problems.push({ where, what: `пример ${b.zadacha} не из банка` });
+      continue;
+    }
+    const p = kond.paramsKondensatora(item.item.params);
+    if (b.vid === 'primerKondensator') {
+      const pr = kond.primerKondensatora(p, b.zametka ?? false);
+      if (
+        Math.abs(pr.answer - item.s.answer) > 1e-9 ||
+        Math.abs(pr.answer - item.item.answer) > 1e-9
+      ) {
+        problems.push({
+          where,
+          what: `${b.zadacha}: ответ примера ${pr.answer}, банк ${item.item.answer}, решатель ${item.s.answer}`,
+        });
+      }
+      if (pr.shagi.length !== 7)
+        problems.push({ where, what: `${b.zadacha}: шагов ${pr.shagi.length}, нужно 7` });
+      for (const sh of pr.shagi) {
+        strokiTeorii.push([where, sh.label], ...(sh.paras ?? []).map((t) => [where, t]));
+        (sh.formuly ?? []).forEach((f) => display(f, `${where} ${b.zadacha}`));
+      }
+      strokiTeorii.push([where, pr.otvet]);
+    } else {
+      const pq = kond.pochemuKondensatora(p);
+      const r0 = kond.raschet(p);
+      for (const t of pq.tochki) {
+        const nado = p.alpha * p.Cm * p.Rm * Math.log2(p.U0 / t.U);
+        if (Math.abs(nado - t.t) > 1e-9)
+          problems.push({ where, what: `«Почему так»: при U=${t.U} t=${t.t}, по формуле ${nado}` });
+      }
+      const gran = pq.tochki.find((t) => Math.abs(t.t - p.t) < 1e-9);
+      if (!gran || Math.abs(gran.U - item.s.answer) > 1e-9) {
+        problems.push({
+          where,
+          what: `«Почему так»: в таблице нет точки (${p.t}; ${item.s.answer})`,
+        });
+      }
+      if (r0.k !== Math.log2(p.U0 / item.s.answer))
+        problems.push({ where, what: '«Почему так»: k не совпадает с ответом' });
+      [...pq.paras, pq.podpis, ...pq.head, ...pq.rows.flat()].forEach((t) =>
+        strokiTeorii.push([where, t]),
+      );
+      kond.chertezhRazryada(p);
+    }
+  }
+  /* Отсылки «(см. пример «…»)» ведут на пример этой карточки
+     или указанного раздела; на печати (bezSsylok) их не остаётся. */
+  for (const b of vseBloki(r.bloki)) {
+    const teksty = [...(b.paras ?? []), b.oshibka, b.pravilno].filter(Boolean);
+    for (const t of teksty) {
+      for (const m of t.matchAll(/\(см\. ([^)]*)\)/g)) {
+        const nRazdela = /в разделе (\d+)/.exec(m[1])?.[1];
+        const gde = nRazdela ? RAZDELY_TEORII_10.find((x) => x.no === Number(nRazdela)) : r;
+        const imena = [...m[1].matchAll(/«([^»]+)»/g)].map((x) => x[1]);
+        for (const imya of imena) {
+          if (imya === 'Почему так' || imya === 'Важно!') continue;
+          if (!gde || !primeryRazdela(gde).some((title) => title.startsWith(imya))) {
+            problems.push({
+              where,
+              what: `отсылка «${imya}» не ведёт на пример ${nRazdela ? `раздела ${nRazdela}` : 'этой карточки'}`,
+            });
+          }
+        }
+        if (
+          /шаг (\d+)/.test(m[1]) &&
+          !vseBloki(r.bloki).some((x) => x.vid === 'primerKondensator')
+        ) {
+          problems.push({ where, what: `отсылка к шагу без примера: «${m[0]}»` });
+        }
+      }
+    }
+    const pechat = bezSsylok(b);
+    const ostalos = [...(pechat.paras ?? []), pechat.oshibka, pechat.pravilno]
+      .filter(Boolean)
+      .filter((t) => /\(см\./.test(t));
+    if (ostalos.length > 0)
+      problems.push({ where, what: `на печати осталась отсылка: «${ostalos[0].slice(0, 60)}»` });
+  }
   r.prototipy.forEach(
     (id) => idsProto.has(id) || problems.push({ where, what: `нет прототипа ${id}` }),
   );
-  for (const b of r.bloki) {
+  for (const b of vseBloki(r.bloki)) {
     for (const k of ['paras', 'spisok']) {
       (b[k] ?? []).forEach((t) => strokiTeorii.push([where, t]));
     }
@@ -116,6 +208,8 @@ for (const r of RAZDELY_TEORII_10) {
       problems.push({ where, what: `формула в плашке рамки: «${b.title}»` });
     }
     if (b.rows) [b.head, ...b.rows].flat().forEach((t) => strokiTeorii.push([where, t]));
+    if (b.vid === 'razvorot' && /\$/.test(b.knopka))
+      problems.push({ where, what: `формула на кнопке: «${b.knopka}»` });
     if ((b.vid === 'primer' || b.vid === 'most') && !idsBanka.has(b.zadacha)) {
       problems.push({ where, what: `пример ${b.zadacha} не из банка` });
     }
@@ -148,8 +242,22 @@ for (const [where, t] of strokiTeorii) {
     problems.push({ where, what: `вне KaTeX (${f.rule}): «${f.match}» в «${t.slice(0, 60)}»` });
   }
 }
+/* «Вывод» раздела 6: в задачах про конденсатор RC — целое и после
+   деления на αRC получается целое k. Проверяем на всём банке П-24. */
+const kondensatory = solved.filter((x) => x.item.prototypeId === 'P24');
+for (const x of kondensatory) {
+  try {
+    const p = kond.paramsKondensatora(x.item.params);
+    const r0 = kond.raschet(p);
+    if (r0.RC.m !== 1) problems.push({ where: `П-24 ${x.item.id}`, what: `RC нецелое` });
+    if (Math.abs(r0.U.n / r0.U.m - x.s.answer) > 1e-9)
+      problems.push({ where: `П-24 ${x.item.id}`, what: 'U₀:2ᵏ не равно ответу' });
+  } catch (e) {
+    problems.push({ where: `П-24 ${x.item.id}`, what: e.message });
+  }
+}
 console.log(
-  `Теория: разделов ${RAZDELY_TEORII_10.length}, строк проверено ${strokiTeorii.length}.`,
+  `Теория: разделов ${RAZDELY_TEORII_10.length}, строк проверено ${strokiTeorii.length}; задач про конденсатор с целым k: ${kondensatory.length}.`,
 );
 
 /* Данные для браузера (public/data/zadanie10): совпадают с банком и без ответов. */
