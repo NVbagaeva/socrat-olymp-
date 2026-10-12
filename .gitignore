@@ -2,6 +2,8 @@
 node_modules/
 app/.next/
 app/out/
+# Сборка с прототипами (INTRO_DEV_PAGES=1): запись видео заставки.
+app/.next-dev/
 app/next-env.d.ts
 app/tsconfig.tsbuildinfo
 

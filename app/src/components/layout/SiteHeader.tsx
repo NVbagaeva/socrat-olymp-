@@ -32,9 +32,11 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
         </nav>
 
         <div className="site-head__cta">
-          <a className="btn btn--ghost btn--sm" href={site.headerActions.login.href}>
-            {site.headerActions.login.label}
-          </a>
+          {site.headerActions.login !== null ? (
+            <a className="btn btn--ghost btn--sm" href={site.headerActions.login.href}>
+              {site.headerActions.login.label}
+            </a>
+          ) : null}
           <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
             {site.headerActions.signup.label}
           </a>

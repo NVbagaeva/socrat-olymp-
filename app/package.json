@@ -17,6 +17,8 @@
     "format:check": "prettier --check .",
     "build:hero": "node scripts/build-hero-images.mjs",
     "build:zadanie-hero": "node scripts/build-zadanie-hero.mjs",
+    "build:intro-layers": "node scripts/build-intro-layers.mjs",
+    "record:intro": "node scripts/record-intro.mjs",
     "build:razdely": "node scripts/build-razdely-icons.mjs",
     "build:shapka": "node scripts/build-shapka.mjs",
     "validate:graph": "node scripts/validate-graph.mjs",

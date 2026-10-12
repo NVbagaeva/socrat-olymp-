@@ -5,7 +5,10 @@
    обычной сборке (`pnpm build`, без GALEREYA=1) маршрута нет, и
    хостинг отдаёт на адрес 404. Проверка смотрит на готовый экспорт
    out/: папки маршрута нет и ни один файл не содержит его адреса или
-   служебного класса галереи.
+   служебного класса галереи. То же для прототипа заставки первого
+   визита /dev/intro (флаг INTRO_DEV_PAGES=1); его 404 проверяется ещё и
+   настоящим Apache с нашим .htaccess, если apache2 установлен (в CI —
+   да; локально без него этот пункт пропускается с предупреждением).
 
    Запуск после pnpm build: node scripts/check-dev-pages.mjs */
 
@@ -13,6 +16,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { APP } from './lib/load-ts.mjs';
+import { startApache } from './lib/apache.mjs';
 
 const OUT = path.join(APP, 'out');
 const DEV_ROUTES = [
@@ -20,6 +24,7 @@ const DEV_ROUTES = [
   'styleguide/zadanie-9',
   'styleguide/zadanie-10',
   'styleguide/soglasiya',
+  'dev/intro',
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [
@@ -31,6 +36,9 @@ const MARKERS = [
   'g10__stat',
   '/styleguide/soglasiya',
   'sgl__grid',
+  '/dev/intro',
+  'Прототип заставки',
+  'dev-intro__panel',
 ];
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
@@ -94,9 +102,27 @@ for (const r of DEV_ROUTES) {
 }
 server.close();
 
+let apacheChecked = false;
+try {
+  const apache = await startApache(OUT, 18000 + Math.floor(Math.random() * 1000));
+  try {
+    const res = await fetch(apache.url + '/dev/intro/', { redirect: 'manual' });
+    if (res.status !== 404) problems.push(`Apache: /dev/intro/ отдаёт ${res.status}, а не 404`);
+    apacheChecked = true;
+  } finally {
+    apache.stop();
+  }
+} catch (err) {
+  if (process.env.CI) problems.push('Apache не запустился: ' + err.message);
+  else console.warn('Пропущено: ответ Apache (' + err.message + ')');
+}
+
 if (problems.length > 0) {
   console.error('Служебные страницы в продакшене:');
   problems.forEach((p) => console.error('  ' + p));
   process.exit(1);
 }
-console.log(`Галереи (${DEV_ROUTES.join(', ')}) в продакшен не попали: маршрут отдаёт 404.`);
+console.log(
+  `Служебные страницы (${DEV_ROUTES.join(', ')}) в продакшен не попали: маршрут отдаёт 404` +
+    (apacheChecked ? ' (и в Apache).' : '.'),
+);

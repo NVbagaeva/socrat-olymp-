@@ -16,13 +16,16 @@ import {
   topNav,
 } from '@/content/appNav';
 import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
-import { demoUser } from '@/data/demo';
 
 import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
-  /** Поиск в шапке. false — у страницы свой, второго поля не нужно. */
+  /**
+   * Поле поиска в шапке. По умолчанию выключено: поиск по сайту ещё не
+   * подключён, а поле, которое ничего не ищет, — обещание в никуда.
+   * Поиск по заданиям есть на странице банка.
+   */
   search?: boolean;
   children: React.ReactNode;
 }
@@ -68,7 +71,7 @@ function taskGroups(): NavGroup[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-export function AppShell({ active, search = true, children }: AppShellProps) {
+export function AppShell({ active, search = false, children }: AppShellProps) {
   const bottomItems = withActive([...appNavPrimary, appNavMorePage], bottomNavActive(active));
 
   return (
@@ -102,7 +105,8 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
-          user={demoUser}
+          /* Входа на сайте нет, поэтому и «вошедшего» пользователя в шапке
+             нет. Демо-имя лежит в data/demo.ts до появления аккаунтов. */
         />
         {children}
       </div>

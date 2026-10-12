@@ -24,9 +24,11 @@ const devPages =
   process.env.GALEREYA_7 === '1' ||
   process.env.GALEREYA_9 === '1' ||
   process.env.GALEREYA_10 === '1' ||
-  process.env.SOGLASIYA === '1';
+  process.env.SOGLASIYA === '1' ||
+  process.env.INTRO_DEV_PAGES === '1';
 
 const nextConfig: NextConfig = {
+  ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
   pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],

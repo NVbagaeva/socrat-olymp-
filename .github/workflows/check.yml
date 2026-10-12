@@ -361,12 +361,6 @@ jobs:
         working-directory: app
         run: pnpm test:galereya-1
 
-      # Галереи банков (page.dev.tsx, №9 и №10 — с ответами) — только в
-      # разработке: в экспорте маршрута нет, адрес отдаёт 404.
-      - name: Галереи банков не попали в продакшен
-        working-directory: app
-        run: pnpm test:dev-pages
-
       # №10: слоты иллюстраций сюжетов (список пустых — в журнале), на
       # страницах раздела нет заглушек, все изображения отдаются с 200.
       - name: Иллюстрации задания №10
@@ -450,6 +444,15 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y -q apache2 poppler-utils
           pnpm exec playwright install --with-deps chromium webkit
+
+      # Служебные страницы (page.dev.tsx: галереи банков с ответами и
+      # /dev/intro — прототип заставки первого визита) есть только в
+      # разработке. В экспорте их нет: ни папки, ни кода, адрес отдаёт
+      # 404 — и у статического сервера, и у Apache (поэтому шаг — после
+      # его установки).
+      - name: Служебные страницы не попали в продакшен
+        working-directory: app
+        run: pnpm test:dev-pages
 
       - name: Проверить, что сырой RSC-текст не показывается
         working-directory: app
