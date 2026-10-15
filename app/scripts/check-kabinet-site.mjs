@@ -4,6 +4,8 @@
    Запуск:
      KABINET=1 LEGAL_DRAFT=1 pnpm build && pnpm test:kabinet-site
      или против запущенного next dev: pnpm test:kabinet-site --base http://localhost:3000
+     --shots <папка> — ещё снимки экранов ученика, репетитора, выдачи ДЗ
+     и администратора на 390 и 1440.
 
    Сценарий (docs/kabinet-roli-dz.md):
      1. первый запуск — аккаунт администратора, второго не будет;
@@ -326,6 +328,27 @@ try {
   await go('/kabinet/vydat-dz/');
   await page.getByText('Раздел не для вашей роли').waitFor();
   ok(true, 'ученику экран выдачи ДЗ закрыт');
+
+  const SHOTS = argOf('--shots');
+  if (SHOTS !== null) {
+    fs.mkdirSync(SHOTS, { recursive: true });
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const shot = async (name) =>
+        page.screenshot({ path: path.join(SHOTS, `${name}-${width}.png`), fullPage: true });
+      await signInAs('Ученик Пётр');
+      await shot('uchenik');
+      await signInAs('Репетитор Анна');
+      await shot('repetitor');
+      await go('/kabinet/vydat-dz/');
+      await page.getByLabel('Название').waitFor();
+      await shot('vydat-dz');
+      await signInAs('Наталья');
+      await shot('admin');
+    }
+    await page.setViewportSize({ width: 1280, height: 900 });
+    console.log(`  снимки: ${SHOTS}`);
+  }
 
   console.log('8. Гость');
   /* Свой контекст: чистый браузер без кабинета. */

@@ -241,6 +241,16 @@
 }
 
 /* Выдача ДЗ. */
+.kab-fields {
+  display: grid;
+  gap: var(--space-4);
+}
+.kab-fields .field {
+  margin: 0;
+}
+.kab-fields .kab-sub {
+  margin: 0;
+}
 .kab-checks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));

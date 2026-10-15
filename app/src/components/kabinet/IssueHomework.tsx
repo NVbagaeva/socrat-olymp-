@@ -185,67 +185,71 @@ export function IssueHomework() {
       <h1 className="t-h1">{t.title}</h1>
 
       <Card title={t.whom}>
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-class`}>{t.wholeClass}</FieldLabel>
-          <Select
-            id={`${id}-class`}
-            value={cls ?? ''}
-            onChange={(e) => setClassId(e.target.value === '' ? null : e.target.value)}
-          >
-            <option value="">{t.noClass}</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.students.length})
-              </option>
-            ))}
-          </Select>
-        </div>
-        <p className="field__label kab-sub">{t.students}</p>
-        <div className="kab-checks">
-          {students.map((s) => (
-            <Checkbox
-              key={s.id}
-              checked={inClass.has(s.id) || studentIds.includes(s.id)}
-              disabled={inClass.has(s.id)}
-              onChange={(e) =>
-                setStudentIds((ids) =>
-                  e.target.checked ? [...ids, s.id] : ids.filter((x) => x !== s.id),
-                )
-              }
+        <div className="kab-fields">
+          <div className="field">
+            <FieldLabel htmlFor={`${id}-class`}>{t.wholeClass}</FieldLabel>
+            <Select
+              id={`${id}-class`}
+              value={cls ?? ''}
+              onChange={(e) => setClassId(e.target.value === '' ? null : e.target.value)}
             >
-              {s.name}
-            </Checkbox>
-          ))}
+              <option value="">{t.noClass}</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.students.length})
+                </option>
+              ))}
+            </Select>
+          </div>
+          <p className="field__label kab-sub">{t.students}</p>
+          <div className="kab-checks">
+            {students.map((s) => (
+              <Checkbox
+                key={s.id}
+                checked={inClass.has(s.id) || studentIds.includes(s.id)}
+                disabled={inClass.has(s.id)}
+                onChange={(e) =>
+                  setStudentIds((ids) =>
+                    e.target.checked ? [...ids, s.id] : ids.filter((x) => x !== s.id),
+                  )
+                }
+              >
+                {s.name}
+              </Checkbox>
+            ))}
+          </div>
         </div>
       </Card>
 
       <Card>
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-title`}>{t.name}</FieldLabel>
-          <Input
-            id={`${id}-title`}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={120}
-          />
-        </div>
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-note`}>{t.note}</FieldLabel>
-          <Input
-            id={`${id}-note`}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            maxLength={2000}
-          />
-        </div>
-        <div className="field">
-          <FieldLabel htmlFor={`${id}-due`}>{t.due}</FieldLabel>
-          <Input
-            id={`${id}-due`}
-            type="datetime-local"
-            value={due}
-            onChange={(e) => setDue(e.target.value)}
-          />
+        <div className="kab-fields">
+          <div className="field">
+            <FieldLabel htmlFor={`${id}-title`}>{t.name}</FieldLabel>
+            <Input
+              id={`${id}-title`}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+            />
+          </div>
+          <div className="field">
+            <FieldLabel htmlFor={`${id}-note`}>{t.note}</FieldLabel>
+            <Input
+              id={`${id}-note`}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={2000}
+            />
+          </div>
+          <div className="field">
+            <FieldLabel htmlFor={`${id}-due`}>{t.due}</FieldLabel>
+            <Input
+              id={`${id}-due`}
+              type="datetime-local"
+              value={due}
+              onChange={(e) => setDue(e.target.value)}
+            />
+          </div>
         </div>
       </Card>
 
