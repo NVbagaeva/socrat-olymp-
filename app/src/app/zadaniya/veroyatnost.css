@@ -1520,6 +1520,7 @@
 }
 .vteor__main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-8);
   min-width: 0;
 }
@@ -1531,6 +1532,8 @@
 }
 .vteor-razdel {
   display: grid;
+  /* Колонка не шире блока: формула в рамке не раздвигает раздел. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   /* Заголовок не прячется под липкую шапку при переходе по содержанию. */
   scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-6));

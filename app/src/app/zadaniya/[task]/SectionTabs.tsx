@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useRef } from 'react';
 import { useStickyTabs } from '@/components/tasks/useStickyTabs';
 import { EmptyState, Tabs } from '@/components/ui';
+import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VesRazdelCards } from '@/components/tasks/ves12/VesRazdelCards';
 import { vesRazdel as vesRazdelText } from '@/content/ves12';
@@ -69,6 +70,8 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
 
+  const sizes = bentoAll(subtopics.length);
+
   const requested = params.get('tab');
   const active = requested !== null && IDS.has(requested) ? requested : 'subtopics';
 
@@ -102,9 +105,10 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
           </>
         ) : null}
         {active === 'subtopics' ? (
-          <ul className="subtopics-grid">
-            {subtopics.map((item) => (
-              <li key={item.slug}>
+          /* Bento: карточки разного размера, ряды без дыр (lib/bento.ts). */
+          <ul className="subtopics-grid subtopics-grid--bento">
+            {subtopics.map((item, i) => (
+              <li key={item.slug} {...bentoAttrs(sizes, i)}>
                 <SubtopicCard
                   name={item.name}
                   {...(item.caption === undefined ? {} : { caption: item.caption })}
