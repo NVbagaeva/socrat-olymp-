@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-/* scripts/check-soglasiya-sql.mjs — таблица согласий и удаление аккаунта.
+/* scripts/check-soglasiya-sql.mjs — согласия и кабинет в базе.
 
-   Запуск: pnpm test:soglasiya-sql
+   Запуск: pnpm test:soglasiya-sql (или pnpm test:kabinet-sql — то же)
+
+   Два набора, каждый в своей базе. Кабинет (роли, приглашения, классы,
+   ДЗ, попытки, сессии тренажёра) — supabase/tests/kabinet.test.sql,
+   план — docs/kabinet-roli-dz.md. Согласия:
 
    Поднимает временный PostgreSQL (initdb в папке ОС для временных
    файлов, свой порт и сокет), применяет заглушку Supabase
@@ -97,7 +101,7 @@ must(
   'запуск PostgreSQL',
 );
 
-const psql = (file) =>
+const psql = (file, db) =>
   run('psql', [
     '-h',
     dir,
@@ -106,7 +110,7 @@ const psql = (file) =>
     '-U',
     'postgres',
     '-d',
-    'postgres',
+    db,
     '-v',
     'ON_ERROR_STOP=1',
     '-q',
@@ -114,40 +118,67 @@ const psql = (file) =>
     file,
   ]);
 
-// Файлы читает пользователь postgres — копируем во временную папку.
-const files = [
-  ['supabase-stub.sql', path.join(SUPA, 'tests', 'supabase-stub.sql')],
-  ...fs
-    .readdirSync(path.join(SUPA, 'migrations'))
-    .filter((f) => f.endsWith('.sql'))
-    .sort()
-    .map((f) => [f, path.join(SUPA, 'migrations', f)]),
-  ['soglasiya.test.sql', path.join(SUPA, 'tests', 'soglasiya.test.sql')],
+const migrations = fs
+  .readdirSync(path.join(SUPA, 'migrations'))
+  .filter((f) => f.endsWith('.sql'))
+  .sort();
+const migration = (f) => [f, path.join(SUPA, 'migrations', f)];
+const stub = ['supabase-stub.sql', path.join(SUPA, 'tests', 'supabase-stub.sql')];
+
+/* Каждый набор проверок — в своей базе: тест согласий создаёт
+   пользователей без приглашения, и на полной схеме (с регистрацией
+   только по приглашению) его не прогнать. */
+const SUITES = [
+  {
+    name: 'Согласия',
+    db: 'soglasiya',
+    files: [
+      stub,
+      ...migrations.filter((f) => f <= '20261011120000_soglasiya.sql').map(migration),
+      ['soglasiya.test.sql', path.join(SUPA, 'tests', 'soglasiya.test.sql')],
+    ],
+  },
+  {
+    name: 'Кабинет',
+    db: 'kabinet',
+    files: [
+      stub,
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['kabinet.test.sql', path.join(SUPA, 'tests', 'kabinet.test.sql')],
+    ],
+  },
 ];
 
 let failed = false;
-for (const [name, src] of files) {
-  const copy = path.join(dir, name);
-  fs.copyFileSync(src, copy);
-  if (asRoot) execFileSync('chown', ['postgres', copy]);
-  const res = psql(copy);
-  const notices = `${res.stderr}`
-    .split('\n')
-    .filter((l) => l.includes('NOTICE:'))
-    .map((l) => l.replace(/^.*NOTICE:\s*/, '  '));
-  if (notices.length) console.log(notices.join('\n'));
-  if (res.status !== 0) {
-    console.error(
-      `\n${name}:\n${res.stderr
-        .split('\n')
-        .filter((l) => !l.includes('NOTICE:'))
-        .join('\n')}`,
-    );
-    failed = true;
-    break;
+for (const suite of SUITES) {
+  console.log(`\n${suite.name}:`);
+  must(run('createdb', ['-h', dir, '-p', port, '-U', 'postgres', suite.db]), `база ${suite.db}`);
+  for (const [name, src] of suite.files) {
+    // Файлы читает пользователь postgres — копируем во временную папку.
+    const copy = path.join(dir, name);
+    fs.copyFileSync(src, copy);
+    if (asRoot) execFileSync('chown', ['postgres', copy]);
+    const res = psql(copy, suite.db);
+    const notices = `${res.stderr}`
+      .split('\n')
+      .filter((l) => l.includes('NOTICE:'))
+      .map((l) => l.replace(/^.*NOTICE:\s*/, '  '));
+    if (notices.length) console.log(notices.join('\n'));
+    if (res.status !== 0) {
+      console.error(
+        `\n${name}:\n${res.stderr
+          .split('\n')
+          .filter((l) => !l.includes('NOTICE:'))
+          .join('\n')}`,
+      );
+      failed = true;
+      break;
+    }
   }
+  if (failed) break;
 }
 
 stop();
 if (failed) process.exit(1);
-console.log('\nСогласия в базе: все проверки прошли.');
+console.log('\nСогласия и кабинет в базе: все проверки прошли.');
