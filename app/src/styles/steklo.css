@@ -1,0 +1,264 @@
+/* ── Навигация «голубое стекло» ───────────────────────────────────
+   Матовые плавающие панели поверх страницы: лента вкладок раздела,
+   плашка-пилюля разделов №12 и её шторка, полоса и колонка
+   «Содержание», шторка содержания на телефоне.
+
+   Пока это показ на одной подтеме (№12, линейная функция): правила
+   действуют, только если на странице есть main[data-steklo]. Шторки
+   выносятся порталом в body, поэтому условие стоит на корне
+   документа (:root:has), а не на main.
+
+   Файл подключён без слоя (globals.css): стили разделов (razdely.css,
+   topic.css) тоже без слоя и иначе перекрыли бы стекло.
+
+   Читаемость. Под панелью проезжают формулы, графики и таблицы,
+   поэтому прозрачность выбрана по худшему случаю — чёрное под
+   панелью: фон 80% непрозрачности даёт тёмному тексту панели
+   контраст около 10:1, вторичному — около 6:1, синим значкам — 3,4:1
+   (норма для значков — 3:1). Подписи в панели поэтому тёмные, а не
+   серые: серый --color-text-secondary на стекле норму не держит.
+   Без backdrop-filter фон почти сплошной (97%). */
+
+:root:has(.app-main[data-steklo]) {
+  --steklo-gap: var(--space-2);
+  --steklo-radius: 24px;
+  --steklo-bg: rgb(245 249 255 / 0.8);
+  --steklo-bg-plotnyy: rgb(245 249 255 / 0.9);
+  --steklo-bg-sploshnoy: rgb(245 249 255 / 0.97);
+  --steklo-plitka: rgb(255 255 255 / 0.6);
+  --steklo-plitka-hover: rgb(255 255 255 / 0.9);
+  --steklo-kant: rgb(255 255 255 / 0.75);
+  --steklo-ten:
+    0 0 0 1px rgb(31 95 208 / 0.1), 0 12px 32px -12px rgb(16 40 90 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --steklo-tekst: var(--grey-900);
+  --steklo-tekst-2: #33415c;
+  --steklo-znachok: var(--color-primary);
+  --steklo-blur: blur(24px) saturate(160%);
+}
+/* Телефон: размытие слабее — на слабых телефонах сильное размытие
+   под прокручиваемой страницей тормозит. */
+@media (max-width: 767.98px) {
+  :root:has(.app-main[data-steklo]) {
+    --steklo-blur: blur(12px) saturate(140%);
+  }
+}
+/* Тёмная тема: стекло тёмное. Своей тёмной темы у сайта пока нет —
+   включается атрибутом data-theme="dark" на <html>. Худший случай —
+   белое под панелью: светлый текст держит около 9:1, вторичный 6:1. */
+:root[data-theme='dark']:has(.app-main[data-steklo]) {
+  --steklo-bg: rgb(12 20 38 / 0.8);
+  --steklo-bg-plotnyy: rgb(12 20 38 / 0.9);
+  --steklo-bg-sploshnoy: rgb(12 20 38 / 0.97);
+  --steklo-plitka: rgb(255 255 255 / 0.06);
+  --steklo-plitka-hover: rgb(255 255 255 / 0.14);
+  --steklo-kant: rgb(255 255 255 / 0.14);
+  --steklo-ten:
+    0 0 0 1px rgb(255 255 255 / 0.06), 0 12px 32px -12px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --steklo-tekst: #eef3fb;
+  --steklo-tekst-2: #c4cfdf;
+  --steklo-znachok: #8fb4ff;
+}
+/* Браузер без backdrop-filter и «меньше прозрачности» в системе:
+   фон почти сплошной, текст под панелью не просвечивает. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root:has(.app-main[data-steklo]) {
+    --steklo-bg: var(--steklo-bg-sploshnoy);
+    --steklo-bg-plotnyy: var(--steklo-bg-sploshnoy);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root:has(.app-main[data-steklo]) {
+    --steklo-bg: var(--steklo-bg-sploshnoy);
+    --steklo-bg-plotnyy: var(--steklo-bg-sploshnoy);
+    --steklo-blur: none;
+  }
+}
+
+/* Общий вид стеклянной панели. */
+:root:has(.app-main[data-steklo])
+  :is(.topic-tabs, .razdely-plashka, .topic-open, .topic-side, .razdely-menu, .contents-sheet) {
+  border: 1px solid var(--steklo-kant);
+  background: var(--steklo-bg);
+  -webkit-backdrop-filter: var(--steklo-blur);
+  backdrop-filter: var(--steklo-blur);
+  box-shadow: var(--steklo-ten);
+  color: var(--steklo-tekst);
+}
+
+/* ── Лента вкладок ──────────────────────────────────────────────
+   Прилипшая лента — плавающая пилюля с отступом от верха экрана;
+   сплошной подложки во всю ширину больше нет, страница видна под
+   стеклом. Отступ входит в --topic-sticky-top (хук useStickyTabs
+   берёт низ ленты), поэтому полоса «Содержание» и якоря встают
+   под панелью, а не прячутся за ней. */
+:root:has(.app-main[data-steklo]) .topic-tabs-row {
+  top: calc(env(safe-area-inset-top, 0px) + var(--steklo-gap));
+}
+:root:has(.app-main[data-steklo]) .topic-tabs-row::before {
+  display: none;
+}
+:root:has(.app-main[data-steklo]) .topic-tabs-row.is-stuck {
+  padding-block: 0;
+}
+/* Лента на месте (плитки) — широкая панель; прилипшая — пилюля. */
+:root:has(.app-main[data-steklo]) .topic-tabs-row:not(.is-stuck) .topic-tabs {
+  border-radius: var(--steklo-radius);
+}
+:root:has(.app-main[data-steklo]) .topic-tabs-row.is-stuck .topic-tabs {
+  border-radius: var(--radius-pill);
+}
+@media (max-width: 767.98px) {
+  :root:has(.app-main[data-steklo]) .topic-tabs-row.is-stuck .topic-tabs {
+    padding: 3px;
+    box-shadow: var(--steklo-ten);
+  }
+}
+/* Подписи и значки вкладок — тёмные и синие поверх стекла. */
+:root:has(.app-main[data-steklo]) :is(.tabs--lenta, .topic-tabs__more) .tabs__text {
+  color: var(--steklo-tekst-2);
+}
+:root:has(.app-main[data-steklo])
+  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+  color: var(--steklo-znachok);
+}
+:root:has(.app-main[data-steklo]) .tabs--lenta :is(button, a[role='tab'])[aria-selected='true'],
+:root:has(.app-main[data-steklo])
+  .tabs--lenta
+  :is(button, a[role='tab'])[aria-selected='true']
+  .tabs__text {
+  color: var(--color-text-inverse);
+}
+:root:has(.app-main[data-steklo])
+  .tabs--lenta
+  :is(button, a[role='tab']):not([aria-selected='true']):hover,
+:root:has(.app-main[data-steklo]) .topic-tabs__more:hover {
+  background: var(--steklo-plitka-hover);
+}
+/* Плитки меню, пока лента на месте: светлое стекло внутри панели. */
+:root:has(.app-main[data-steklo])
+  .topic-tabs-row:not(.is-stuck)
+  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):not(
+    [aria-selected='true']
+  ) {
+  border-color: var(--steklo-kant);
+  background: var(--steklo-plitka);
+}
+:root:has(.app-main[data-steklo])
+  .topic-tabs-row:not(.is-stuck)
+  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):not(
+    [aria-selected='true']
+  ):hover {
+  background: var(--steklo-plitka-hover);
+}
+
+/* ── Плашка-пилюля разделов №12 ─────────────────────────────── */
+:root:has(.app-main[data-steklo]) .razdely-plashka {
+  border-radius: var(--radius-pill);
+  color: var(--steklo-tekst);
+}
+:root:has(.app-main[data-steklo]) .razdely-plashka:hover {
+  background: var(--steklo-plitka-hover);
+}
+:root:has(.app-main[data-steklo]) .razdely-plashka__arrow {
+  stroke: var(--steklo-znachok);
+}
+/* Телефон, прилипшая строка №12: плашка разделов и лента — одна
+   панель, а не две пилюли с щелью, в которую мелькает страница. */
+@media (max-width: 767.98px) {
+  :root:has(.app-main[data-steklo]) .topic-tabs-row.is-stuck:has(.razdely-plashka) {
+    padding: 3px;
+    border: 1px solid var(--steklo-kant);
+    border-radius: var(--steklo-radius);
+    background: var(--steklo-bg);
+    -webkit-backdrop-filter: var(--steklo-blur);
+    backdrop-filter: var(--steklo-blur);
+    box-shadow: var(--steklo-ten);
+  }
+  :root:has(.app-main[data-steklo])
+    .topic-tabs-row.is-stuck:has(.razdely-plashka)
+    :is(.razdely-plashka, .topic-tabs) {
+    border-color: transparent;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  :root:has(.app-main[data-steklo]) .topic-tabs-row.is-stuck .razdely-plashka {
+    margin-bottom: 0;
+  }
+}
+
+/* ── Шторки: разделы №12 и содержание теории ────────────────────
+   Шторка не прилипает к краям экрана, а парит с отступом и
+   скруглена со всех сторон. Под ней затемнение, поэтому стекло
+   плотнее: в шторке длинный список, его читают подолгу. */
+:root:has(.app-main[data-steklo]) :is(.razdely-menu, .contents-sheet) {
+  background: var(--steklo-bg-plotnyy);
+  border-radius: var(--steklo-radius);
+}
+@media (max-width: 767.98px) {
+  :root:has(.app-main[data-steklo]) .razdely-menu {
+    width: calc(100% - 2 * var(--steklo-gap));
+    margin: 0 var(--steklo-gap) var(--steklo-gap);
+  }
+}
+@media (max-width: 1023.98px) {
+  :root:has(.app-main[data-steklo]) .modal-backdrop:has(.contents-sheet) {
+    padding: var(--steklo-gap);
+    padding-bottom: calc(var(--steklo-gap) + env(safe-area-inset-bottom, 0px));
+  }
+  :root:has(.app-main[data-steklo]) .contents-sheet {
+    border-radius: var(--steklo-radius);
+  }
+}
+
+/* ── «Содержание» теории ─────────────────────────────────────────
+   Телефон и планшет: полоса — пилюля под лентой, с тем же отступом.
+   Якорь раздела встаёт ниже неё: в отступ заголовка входят оба
+   промежутка. */
+@media (max-width: 1023.98px) {
+  :root:has(.app-main[data-steklo]) .topic-open {
+    top: calc(var(--topic-sticky-top, 0px) + var(--steklo-gap) / 2);
+    margin-inline: 0;
+    padding: var(--space-1) var(--space-4) var(--space-1) var(--space-1);
+    border-radius: var(--radius-pill);
+  }
+  :root:has(.app-main[data-steklo]) .app-main:has(.topic-tabs-row.is-stuck) .topic-open {
+    box-shadow: var(--steklo-ten);
+  }
+  :root:has(.app-main[data-steklo]) .topic-open__btn {
+    border-radius: var(--radius-pill);
+    border-color: var(--steklo-kant);
+    background: var(--steklo-plitka);
+    color: var(--steklo-tekst);
+  }
+  :root:has(.app-main[data-steklo]) .topic-open__now {
+    color: var(--steklo-tekst-2);
+  }
+  :root:has(.app-main[data-steklo]) .topic-panel .theory-block {
+    scroll-margin-top: calc(
+      var(--topic-sticky-top, 0px) + var(--steklo-gap) + var(--h-topic-open) + var(--space-4)
+    );
+  }
+}
+/* Компьютер: колонка содержания — широкая стеклянная панель. */
+:root:has(.app-main[data-steklo]) .topic-side {
+  padding: var(--space-5);
+  border-radius: var(--steklo-radius);
+}
+:root:has(.app-main[data-steklo]) .topic-side .contents-item:not(.is-active) {
+  color: var(--steklo-tekst);
+}
+:root:has(.app-main[data-steklo]) .theory-block {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--steklo-gap) + var(--space-5));
+}
+
+/* Печать: навигация — не часть листа. */
+@media print {
+  :root:has(.app-main[data-steklo])
+    :is(.topic-tabs-row, .topic-open, .topic-side, .razdely-layer, .contents-sheet) {
+    display: none !important;
+  }
+}

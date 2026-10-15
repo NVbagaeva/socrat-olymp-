@@ -71,6 +71,9 @@ const PAGES = [
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
   /* №12: над лентой в той же липкой строке — плашка разделов. */
+  /* Линейная — стеклянная навигация (styles/steklo.css): лента
+     парит с отступом от верха экрана. */
+  '/zadaniya/12/linear/',
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
   '/zadaniya/12/logarithmic/',
@@ -114,6 +117,9 @@ async function zamer(page) {
       top: box.top,
       bottom: box.bottom,
       stuck: row.classList.contains('is-stuck'),
+      /* Отступ прилипшей ленты от верха экрана: у стеклянной панели
+         он не нулевой — она парит над страницей. */
+      gap: parseFloat(getComputedStyle(row).top) || 0,
       sy: window.scrollY,
       vh: window.innerHeight,
       max: document.documentElement.scrollHeight - window.innerHeight,
@@ -123,7 +129,7 @@ async function zamer(page) {
 
 /* Что не так с лентой после прокрутки; null — всё верно. */
 function oshibka(z, home) {
-  const expected = Math.max(0, home - z.sy);
+  const expected = Math.max(z.gap, home - z.sy);
   if (Math.abs(z.top - expected) > 1.5) {
     return `прокрутка ${Math.round(z.sy)}: верх ленты ${Math.round(z.top)} вместо ${Math.round(expected)}`;
   }

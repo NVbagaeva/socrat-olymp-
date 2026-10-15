@@ -131,7 +131,12 @@ export function FunctionTopicPage({
   );
 
   return (
-    <main className="app-main">
+    /* data-steklo — показ навигации «голубое стекло» (styles/steklo.css)
+       на одной подтеме до решения, включать ли её на всём сайте. */
+    <main
+      className="app-main"
+      {...(section.slug === '12' && subtopic.id === 'linear' ? { 'data-steklo': '' } : {})}
+    >
       <ShapkaRazdela
         className="topic-head"
         back={<VseRazdelyKnopka no={section.no} href={href(ZADANIYA, section.slug)} />}

@@ -13,5 +13,8 @@
 @import './ramki.css' layer(components);
 @import './perehody.css' layer(components);
 @import './edinicy.css' layer(components);
+/* Навигация «голубое стекло». Без слоя: стили разделов, которые она
+   перекрашивает (razdely.css, topic.css), подключаются тоже без слоя. */
+@import './steklo.css';
 
 @source '../**/*.{ts,tsx}';
