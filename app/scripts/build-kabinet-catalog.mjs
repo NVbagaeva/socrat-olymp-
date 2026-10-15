@@ -10,7 +10,8 @@
    и пишет два файла:
 
      src/content/kabinet/katalog.json        — для экранов кабинета:
-       номер, название, открыто ли задание, прототипы {code, title};
+       номер, название, открыто ли задание, прототипы {code, title},
+       подписи разделов тренажёров («12:linear» → «Линейная функция»);
      ../supabase/seed/kabinet_katalog.sql    — те же строки для таблиц
        ege_tasks и bank_prototypes (миграция 20261015120000_kabinet.sql).
 
@@ -88,6 +89,17 @@ for (const task of tasks) {
   catalog.tasks.push({ no, name: task.name, ready, prototypes });
 }
 
+/* Подписи разделов тренажёров со своей сессией («12:linear», «3:<фигура>»)
+   — для списка тренировок в кабинете. */
+const sections = {};
+for (const family of requireSrc('lib/generator/manifest').manifest.families) {
+  sections[`12:${family.id}`] = family.title;
+}
+for (const razdel of requireSrc('lib/zadanie3/index').RAZDELY) {
+  sections[`3:${razdel.slug}`] = razdel.nazvanie;
+}
+catalog.sections = sections;
+
 const json = `${JSON.stringify(catalog, null, 1)}\n`;
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
@@ -138,5 +150,7 @@ if (CHECK) {
   for (const t of catalog.tasks) {
     if (t.ready) console.log(`№${t.no} ${t.name}: ${t.prototypes.length}`);
   }
-  console.log(`Записано ${total} прототипов: ${path.relative(APP, JSON_FILE)}, ${path.relative(APP, SQL_FILE)}`);
+  console.log(
+    `Записано ${total} прототипов: ${path.relative(APP, JSON_FILE)}, ${path.relative(APP, SQL_FILE)}`,
+  );
 }

@@ -20,6 +20,7 @@ const DEV_ROUTES = [
   'styleguide/zadanie-9',
   'styleguide/zadanie-10',
   'styleguide/soglasiya',
+  'kabinet',
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [
@@ -31,6 +32,8 @@ const MARKERS = [
   'g10__stat',
   '/styleguide/soglasiya',
   'sgl__grid',
+  '/kabinet/',
+  'kab-trial',
 ];
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {

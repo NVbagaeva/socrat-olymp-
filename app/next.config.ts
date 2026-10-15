@@ -24,7 +24,8 @@ const devPages =
   process.env.GALEREYA_7 === '1' ||
   process.env.GALEREYA_9 === '1' ||
   process.env.GALEREYA_10 === '1' ||
-  process.env.SOGLASIYA === '1';
+  process.env.SOGLASIYA === '1' ||
+  process.env.KABINET === '1';
 
 const nextConfig: NextConfig = {
   // Статический экспорт: деплой на обычный хостинг, не Vercel.

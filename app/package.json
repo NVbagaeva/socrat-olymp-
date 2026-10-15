@@ -116,6 +116,7 @@
     "test:kabinet-sql": "node scripts/check-soglasiya-sql.mjs",
     "build:kabinet-catalog": "node scripts/build-kabinet-catalog.mjs",
     "test:kabinet-catalog": "node scripts/build-kabinet-catalog.mjs --check",
+    "test:kabinet-site": "node scripts/check-kabinet-site.mjs",
     "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs",
     "test:trainer-session": "node scripts/check-trainer-session.mjs",
     "test:trainer-sessions": "node scripts/check-trainer-sessions.mjs"
