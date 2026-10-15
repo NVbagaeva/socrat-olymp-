@@ -526,6 +526,9 @@ a.razdel-karta:focus-visible .razdel-karta__go {
 }
 .drugie-razdely__list {
   display: grid;
+  /* Одна колонка не шире блока: иначе карточка раздвигала её
+     по своему содержимому, и на 360px страница ехала вбок. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   margin: 0;
   padding: 0;
