@@ -62,7 +62,12 @@ const IDS = new Set(TABS.map((tab) => tab.id));
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
  * идёт без перезагрузки: адрес меняется через replace.
  */
-export function SectionTabs({ description, subtopics, prototypes, vesRazdel = false }: SectionTabsProps) {
+export function SectionTabs({
+  description,
+  subtopics,
+  prototypes,
+  vesRazdel = false,
+}: SectionTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -85,15 +90,18 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
 
   return (
     <>
-      <div className="topic-tabs-row">
-        <div className="topic-tabs" ref={strip}>
-          <Tabs
-            className="tabs--lenta"
-            items={TABS}
-            value={active}
-            onValueChange={select}
-            label="Разделы задания"
-          />
+      {/* Место ленты в потоке страницы (useStickyTabs). */}
+      <div className="topic-tabs-slot">
+        <div className="topic-tabs-row">
+          <div className="topic-tabs" ref={strip}>
+            <Tabs
+              className="tabs--lenta"
+              items={TABS}
+              value={active}
+              onValueChange={select}
+              label="Разделы задания"
+            />
+          </div>
         </div>
       </div>
 
