@@ -8,12 +8,14 @@
    движке Safari — на ширине компьютера и телефона. Каждая вкладка
    задания №11 (и для сравнения теория №2, и два экрана №12 с плашкой
    разделов над лентой) прокручивается шагами до
-   конца, и на каждом шаге:
-     — пока лента в своём месте, её верх совпадает с местом под шапкой
-       раздела;
-     — как только она ушла бы за верх окна, она прилипает: верх ленты
-       у верхнего края окна (с точностью до пикселя), класс is-stuck;
-     — лента не закрывает собой середину экрана: её низ выше трети
+   конца и обратно, и на каждом шаге:
+     — пока меню вкладок в кадре, оно едет вместе со страницей;
+     — когда оно целиком ушло за верх окна, сверху стоит компактная
+       строка (класс is-stuck), её верх у верхнего края окна;
+     — под строкой нет пустоты: место меню в этот момент выше экрана;
+     — текст под меню не сдвигается ни при появлении строки, ни при
+       её уходе;
+     — строка не закрывает собой середину экрана: её низ выше трети
        высоты окна.
    Отдельно — переход по подпункту «Содержания» теории №11: блок
    встаёт под лентой, а не под ней прячется. */
@@ -106,13 +108,24 @@ function check(ok, what) {
 async function zamer(page) {
   return page.evaluate(() => {
     const row = document.querySelector('.topic-tabs-row');
-    if (row === null) {
+    const slot = row?.closest('.topic-tabs-slot') ?? null;
+    if (row === null || slot === null) {
       return null;
     }
     const box = row.getBoundingClientRect();
+    const place = slot.getBoundingClientRect();
+    /* Первый видимый блок под меню: по нему видно, не сдвинулась ли
+       страница, когда меню сменилось строкой. */
+    let next = slot.nextElementSibling;
+    while (next !== null && next.getBoundingClientRect().height === 0) {
+      next = next.nextElementSibling;
+    }
     return {
       top: box.top,
       bottom: box.bottom,
+      placeTop: place.top,
+      placeBottom: place.bottom,
+      nextTop: next === null ? null : next.getBoundingClientRect().top + window.scrollY,
       stuck: row.classList.contains('is-stuck'),
       sy: window.scrollY,
       vh: window.innerHeight,
@@ -121,17 +134,35 @@ async function zamer(page) {
   });
 }
 
-/* Что не так с лентой после прокрутки; null — всё верно. */
-function oshibka(z, home) {
-  const expected = Math.max(0, home - z.sy);
-  if (Math.abs(z.top - expected) > 1.5) {
-    return `прокрутка ${Math.round(z.sy)}: верх ленты ${Math.round(z.top)} вместо ${Math.round(expected)}`;
+/* Что не так с лентой после прокрутки; null — всё верно.
+
+   Пока меню в кадре, оно прокручивается вместе со страницей. Когда
+   оно целиком ушло за верх экрана, сверху стоит компактная строка
+   (is-stuck), а место меню держит высоту — пустоты под строкой нет,
+   и текст под меню не сдвигается. */
+function oshibka(z, start) {
+  const y = Math.round(z.sy);
+  if (start.nextTop !== null && Math.abs(z.nextTop - start.nextTop) > 1.5) {
+    return `прокрутка ${y}: текст под меню сдвинулся на ${Math.round(z.nextTop - start.nextTop)}px`;
   }
-  if (z.sy > home + 2 && !z.stuck) {
-    return `прокрутка ${Math.round(z.sy)}: лента у верха, но без is-stuck`;
+  if (!z.stuck) {
+    const expected = start.top + start.sy - z.sy;
+    if (Math.abs(z.top - expected) > 1.5) {
+      return `прокрутка ${y}: меню не едет со страницей (${Math.round(z.top)} вместо ${Math.round(expected)})`;
+    }
+    if (z.placeBottom < 0) {
+      return `прокрутка ${y}: меню ушло за верх экрана, а строки нет`;
+    }
+    return null;
   }
-  if (z.sy > home + 2 && z.bottom > z.vh / 3) {
-    return `прокрутка ${Math.round(z.sy)}: лента закрывает середину экрана`;
+  if (Math.abs(z.top) > 1.5) {
+    return `прокрутка ${y}: строка не у верха экрана (${Math.round(z.top)})`;
+  }
+  if (z.placeBottom > z.bottom + 1) {
+    return `прокрутка ${y}: под строкой пустота ${Math.round(z.placeBottom - z.bottom)}px`;
+  }
+  if (z.bottom > z.vh / 3) {
+    return `прокрутка ${y}: строка закрывает середину экрана`;
   }
   return null;
 }
@@ -164,10 +195,13 @@ async function proverit(engine, browserType) {
         await page.close();
         continue;
       }
-      /* Место ленты в странице до прокрутки. */
-      const home = start.top + start.sy;
       const bad = [];
-      for (let y = 0; y <= start.max + 400; y += Math.round(size.height * 0.6)) {
+      /* Вниз и обратно вверх: строка уходит, когда меню вернулось. */
+      const shagi = [];
+      for (let y = 0; y <= start.max + 400; y += Math.round(size.height * 0.37)) {
+        shagi.push(y);
+      }
+      for (const y of [...shagi, ...shagi.slice().reverse()]) {
         await page.evaluate((to) => window.scrollTo(0, to), y);
         /* Хук обновляет ленту в requestAnimationFrame; на тяжёлой
            странице в WebKit кадр приходит позже. Ждём, пока замер
@@ -175,7 +209,7 @@ async function proverit(engine, browserType) {
         let problem = null;
         for (let attempt = 0; attempt < 25; attempt += 1) {
           await page.waitForTimeout(60);
-          problem = oshibka(await zamer(page), home);
+          problem = oshibka(await zamer(page), start);
           if (problem === null) {
             break;
           }

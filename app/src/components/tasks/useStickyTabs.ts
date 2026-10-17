@@ -3,26 +3,24 @@
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
 
-/* Ширина, ниже которой закреплённая лента становится компактной —
-   ярус телефона, как в styles/components.css. */
-const PHONE = '(max-width: 767.98px)';
+/** Безопасная зона сверху (чёлка iPhone) в пикселях. */
+function safeTop(): number {
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  const value = probe.getBoundingClientRect().height;
+  probe.remove();
+  return value;
+}
 
-function attach(strip: HTMLElement, row: HTMLElement, page: HTMLElement): () => void {
-  const phone = window.matchMedia(PHONE);
+function attach(strip: HTMLElement, row: HTMLElement, slot: HTMLElement, page: HTMLElement) {
   let stuck = false;
+  /* Высота компактной строки: от неё считается, когда её показывать
+     и сколько места она закрывает сверху. */
+  let compact = 0;
+  let observer: IntersectionObserver | null = null;
   let frame = 0;
-
-  /* Где лента стояла бы без липкости: под предыдущим соседом или у
-     верхнего поля страницы. Её собственный прямоугольник не годится —
-     у прилипшей ленты он всегда у верха экрана. */
-  function naturalTop(): number {
-    const before = row.previousElementSibling;
-    const margin = parseFloat(getComputedStyle(row).marginTop) || 0;
-    if (before !== null) {
-      return before.getBoundingClientRect().bottom + margin;
-    }
-    return page.getBoundingClientRect().top + (parseFloat(getComputedStyle(page).paddingTop) || 0);
-  }
 
   function revealActive(): void {
     const active = strip.querySelector<HTMLElement>('[aria-selected="true"]');
@@ -38,90 +36,151 @@ function attach(strip: HTMLElement, row: HTMLElement, page: HTMLElement): () => 
     }
   }
 
-  /* Высота ленты в обычном виде: её помнят, пока лента не прилипла,
-     и по ней считают отступ компактной. */
-  let full = row.getBoundingClientRect().height;
+  /* Закреплённая строка — position: fixed: встаёт ровно над колонкой
+     страницы, где лежит её место (с сайдбаром и без). */
+  function place(): void {
+    const box = slot.getBoundingClientRect();
+    row.style.left = `${box.left}px`;
+    row.style.width = `${box.width}px`;
+  }
 
-  function update(): void {
-    frame = 0;
-    const next = naturalTop() < 0;
-    if (!next && !stuck) {
-      full = row.getBoundingClientRect().height;
+  function unplace(): void {
+    row.style.removeProperty('left');
+    row.style.removeProperty('width');
+  }
+
+  /* Высота компактной строки. Пока лента стоит плитками, строку не
+     видно — её примеряют на миг, в одной задаче, без отрисовки.
+     Место ленты на это время держит свою высоту. */
+  function measure(): void {
+    if (stuck) {
+      compact = row.getBoundingClientRect().height;
+      return;
     }
-    if (next !== stuck) {
-      stuck = next;
-      row.classList.toggle('is-stuck', stuck);
-      revealActive();
-    }
-    const box = row.getBoundingClientRect();
-    /* Отступ бывает и отрицательным: на широком экране прилипшая
-       лента получает поля сверху и снизу и становится выше. */
-    const gap = stuck ? full - box.height : 0;
-    /* Нижний отступ ленты схлопывается с верхним отступом следующего
-       блока: из двух положительных остаётся больший. Чтобы страница
-       не теряла этот отступ (из-за потери лента отлипала и снова
-       прилипала по кругу), положительная разница кладётся сверх него. */
-    const sosed = row.nextElementSibling;
-    const nextTop = sosed === null ? 0 : parseFloat(getComputedStyle(sosed).marginTop) || 0;
-    const margin = gap > 0 ? gap + Math.max(nextTop, 0) : gap;
-    row.style.marginBottom = Math.abs(gap) > 0.5 ? `${margin}px` : '';
-    /* У прилипшей ленты низ — с учётом выреза экрана сверху. */
-    const bottom = stuck ? Math.max(box.bottom, box.height) : box.height;
+    slot.style.minHeight = `${slot.getBoundingClientRect().height}px`;
+    row.classList.add('is-stuck', 'is-measuring');
+    place();
+    compact = row.getBoundingClientRect().height;
+    row.classList.remove('is-stuck', 'is-measuring');
+    unplace();
+    slot.style.removeProperty('min-height');
+  }
+
+  /* Высота, которую закрывает строка сверху: от неё отсчитываются
+     полоса «Содержание», колонка содержания и отступ заголовка при
+     переходе по якорю. Пока строки нет, пишем её будущую высоту:
+     после перехода по якорю строка появится и закроет ровно её. */
+  function publish(): void {
+    const bottom = stuck ? row.getBoundingClientRect().bottom : safeTop() + compact;
     page.style.setProperty('--topic-sticky-top', `${Math.round(bottom)}px`);
+  }
+
+  function setStuck(next: boolean): void {
+    if (next === stuck) {
+      return;
+    }
+    if (next) {
+      /* Место ленты не схлопывается: страница под ней не сдвигается.
+         Оно в эту минуту целиком выше экрана — пустоты не видно. */
+      slot.style.minHeight = `${slot.getBoundingClientRect().height}px`;
+      place();
+      row.classList.add('is-stuck');
+    } else {
+      row.classList.remove('is-stuck');
+      unplace();
+      slot.style.removeProperty('min-height');
+    }
+    stuck = next;
+    revealActive();
+    publish();
+  }
+
+  /* Строка появляется, когда плитки целиком ушли под её будущую
+     высоту — за верх видимой области. Обратно — как только место
+     ленты снова показалось из-под строки. */
+  function observe(): void {
+    observer?.disconnect();
+    const top = Math.max(0, Math.round(safeTop() + compact));
+    observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[entries.length - 1];
+        if (entry === undefined) {
+          return;
+        }
+        const above = !entry.isIntersecting && entry.boundingClientRect.bottom <= top + 1;
+        setStuck(above);
+      },
+      { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 },
+    );
+    observer.observe(slot);
+  }
+
+  function relayout(): void {
+    frame = 0;
+    measure();
+    if (stuck) {
+      place();
+    }
+    observe();
+    publish();
   }
 
   function schedule(): void {
     if (frame === 0) {
-      frame = window.requestAnimationFrame(update);
+      frame = window.requestAnimationFrame(relayout);
     }
   }
 
-  update();
-  window.addEventListener('scroll', schedule, { passive: true });
+  relayout();
   window.addEventListener('resize', schedule);
-  phone.addEventListener('change', schedule);
+  /* Шрифты меняют высоту плиток и строки. */
+  void document.fonts?.ready.then(schedule);
   return () => {
-    window.removeEventListener('scroll', schedule);
+    observer?.disconnect();
     window.removeEventListener('resize', schedule);
-    phone.removeEventListener('change', schedule);
     if (frame !== 0) {
       window.cancelAnimationFrame(frame);
     }
     row.classList.remove('is-stuck');
-    row.style.marginBottom = '';
+    unplace();
+    slot.style.removeProperty('min-height');
     page.style.removeProperty('--topic-sticky-top');
   };
 }
 
 /**
- * Липкая лента вкладок раздела (.topic-tabs-row): общая для всех
- * разделов — №12, №2, №3, №4, №5, №8. Сама липкость — в CSS
- * (styles/components.css); хук делает то, чего CSS не умеет.
+ * Лента вкладок раздела (.topic-tabs-row) — общая для всех разделов.
  *
- * 1. Отмечает ленту классом is-stuck, когда она прилипла к верху
- *    экрана. По нему на телефоне лента становится компактной
- *    (подписи в одну строку, поля меньше), а снизу появляется тень.
- * 2. Прилипшая лента другой высоты, чем обычная (на телефоне ниже,
- *    на широком экране чуть выше — с полями), и всё под ней сдвинулось
- *    бы. Разница уходит в нижний отступ ленты: страница под ней не
- *    дёргается.
- * 3. Высоту закреплённой ленты пишет в --topic-sticky-top на
- *    содержимом страницы: от неё отсчитываются полоса «Содержание»,
- *    колонка содержания и отступ заголовка при переходе по якорю —
- *    заголовок не прячется под лентой.
- * 4. Подводит активную вкладку в видимую часть ленты, когда лента
- *    меняет ширину подписей.
+ * Пока лента в кадре, она — большое меню плитками и прокручивается
+ * вместе со страницей, как обычный текст. Когда меню целиком ушло за
+ * верх экрана, сверху плавно появляется компактная закреплённая
+ * строка тех же вкладок (класс is-stuck, position: fixed). При
+ * прокрутке назад строка уходит, как только место меню показалось.
  *
- * stripRef — сама лента (.topic-tabs); строка — её родитель.
+ * Место меню в потоке (.topic-tabs-slot) держит свою высоту, пока
+ * строка закреплена: страница не прыгает. А видно его никогда не
+ * бывает — строка появляется только когда оно уже выше экрана.
+ *
+ * Раньше лента прилипала, едва верх меню доходил до верха экрана,
+ * и сворачивалась в строку; место плиток держал пустой отступ — под
+ * строкой оставалась пустая полоса в 500–700px.
+ *
+ * Ещё хук пишет в --topic-sticky-top высоту, которую закрывает
+ * строка (полоса «Содержание», якоря), и подводит активную вкладку
+ * в видимую часть строки.
+ *
+ * stripRef — сама лента (.topic-tabs); строка — её родитель, место —
+ * родитель строки.
  */
 export function useStickyTabs(stripRef: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const strip = stripRef.current;
     const row = strip?.parentElement ?? null;
-    const page = row?.parentElement ?? null;
-    if (strip === null || row === null || page === null) {
+    const slot = row?.parentElement ?? null;
+    const page = slot?.parentElement ?? null;
+    if (strip === null || row === null || slot === null || page === null) {
       return undefined;
     }
-    return attach(strip, row, page);
+    return attach(strip, row, slot, page);
   }, [stripRef]);
 }

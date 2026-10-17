@@ -104,9 +104,12 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
      пришлось бы описывать дважды. */
   if (tutors === undefined) {
     return (
-      <div className="topic-tabs-row">
-        <div className="topic-tabs" ref={strip}>
-          {lenta}
+      /* Место ленты в потоке страницы (useStickyTabs). */
+      <div className="topic-tabs-slot">
+        <div className="topic-tabs-row">
+          <div className="topic-tabs" ref={strip}>
+            {lenta}
+          </div>
         </div>
       </div>
     );
