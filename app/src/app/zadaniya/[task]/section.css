@@ -571,14 +571,15 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
   }
 }
 
-/* Широкая плитка: текст слева, иконка справа, стрелка внизу справа. */
+/* Широкая плитка: текст слева, иконка справа, стрелка внизу справа —
+   в своей полосе под иконкой (нижнее поле плитки), а не поверх неё. */
 .subtopics-grid--bento .subtopic--ikonka {
   grid-template-columns: minmax(0, 1fr) 112px;
   grid-template-rows: auto 1fr;
   column-gap: var(--space-3);
   align-items: normal;
   min-height: 160px;
-  padding: var(--space-5);
+  padding: var(--space-5) var(--space-5) calc(var(--space-5) + 32px + var(--space-2));
 }
 .subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
   grid-column: 2;
@@ -608,7 +609,7 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
 @container (min-width: 440px) {
   .subtopics-grid--bento .subtopic--ikonka {
     grid-template-columns: minmax(0, 1fr) 176px;
-    padding: var(--space-6);
+    padding: var(--space-6) var(--space-6) calc(var(--space-6) + 32px + var(--space-2));
   }
   .subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
     width: 176px;
@@ -639,6 +640,8 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
     grid-template-rows: auto auto 1fr;
     row-gap: var(--space-2);
     min-height: 0;
+    /* Стрелка здесь в правом верхнем углу; иконка слева сверху — справа
+       от неё место под стрелку. */
     padding: var(--space-4);
   }
   .subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
