@@ -8,6 +8,8 @@ export interface ContentsItem {
   title: string;
   /** Заголовок, набранный KaTeX на сервере. Нет — выводится title. */
   titleHtml?: string;
+  /** Раздел ещё не открыт (теория №16): вместо номера — замок, строка приглушена. */
+  skoro?: boolean;
   /** Подпункты: видны под открытым разделом (теория №11). */
   podpunkty?: { id: string; title: string; titleHtml?: string }[];
 }
@@ -22,6 +24,16 @@ export interface TopicContentsProps {
   /** Подпункты видны всегда, а не только у открытого раздела. */
   podpunktyVsegda?: boolean;
   className?: string;
+}
+
+/** Замок раздела «Скоро»: рисуется вместо номера. */
+export function ZamokIkonka() {
+  return (
+    <svg className="contents-item__zamok" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
 }
 
 /**
@@ -44,17 +56,22 @@ export function TopicContents({
         <li key={item.id}>
           <button
             type="button"
-            className={clsx('contents-item', item.id === active && 'is-active')}
+            className={clsx(
+              'contents-item',
+              item.id === active && 'is-active',
+              item.skoro && 'is-skoro',
+            )}
             aria-current={item.id === active ? 'true' : undefined}
             onClick={() => onSelect(item.id)}
           >
             {/* Номер считается по месту в списке: руками он нигде
                 не записан и не разъедется при правке содержания. */}
             <span className="contents-item__no" aria-hidden="true">
-              {index + 1}
+              {item.skoro ? <ZamokIkonka /> : index + 1}
             </span>
             <span className="contents-item__title">
               <TitleText title={item.title} html={item.titleHtml} />
+              {item.skoro ? <span className="sr-only"> (скоро)</span> : null}
             </span>
           </button>
           {(podpunktyVsegda || item.id === active) &&

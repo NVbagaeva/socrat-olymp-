@@ -585,6 +585,9 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
   grid-row: 1 / span 2;
   align-self: start;
   width: 112px;
+  /* Под иконкой — место для стрелки в правом нижнем углу: иначе на
+     невысокой широкой плитке стрелка ложится на иконку. */
+  margin-bottom: calc(32px + var(--space-2));
 }
 .subtopics-grid--bento .subtopic--ikonka .subtopic__head {
   grid-column: 1;
@@ -645,6 +648,8 @@ a.subtopic--ikonka:focus-visible .subtopic__ico {
     grid-column: 1;
     grid-row: 1;
     width: 72px;
+    /* Стрелка здесь вверху справа, рядом с иконкой, а не под ней. */
+    margin-bottom: 0;
   }
   .subtopics-grid--bento .subtopic--ikonka .subtopic__head {
     grid-row: 2;

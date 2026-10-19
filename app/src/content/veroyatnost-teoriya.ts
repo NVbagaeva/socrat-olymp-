@@ -20,6 +20,8 @@ export interface TeoriyaRazdel {
   /** Идентификатор: он же якорь прокрутки и ключ тела. */
   id: string;
   title: string;
+  /** Раздел ещё не открыт: замок вместо номера (теория №16). */
+  skoro?: boolean;
   /** Подпункты открытого раздела в содержании: id элемента на странице. */
   podpunkty?: { id: string; title: string }[];
 }

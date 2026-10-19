@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { EmptyState, HandNote, Modal } from '@/components/ui';
-import { TopicContents } from '@/components/tasks/TopicContents';
+import { TopicContents, ZamokIkonka } from '@/components/tasks/TopicContents';
 import { scrollToSection, useActiveSection } from '@/components/tasks/useActiveSection';
 import { markSectionRead } from '@/lib/theoryRead';
 import { SODERZHANIE, TEORIYA_DEKOR, type TeoriyaRazdel } from '@/content/veroyatnost-teoriya';
@@ -201,10 +201,14 @@ export function TeoriyaShell({
               Ненаписанный раздел не пропадает — он есть в плане темы
               и говорит о себе строкой. */}
           {razdely.map((razdel, i) => (
-            <article className="vteor-razdel" id={razdelId(razdel.id)} key={razdel.id}>
+            <article
+              className={razdel.skoro ? 'vteor-razdel is-skoro' : 'vteor-razdel'}
+              id={razdelId(razdel.id)}
+              key={razdel.id}
+            >
               <h3 className="vteor-razdel__title">
                 <span className="vteor-razdel__no" aria-hidden="true">
-                  {i + 1}
+                  {razdel.skoro ? <ZamokIkonka /> : i + 1}
                 </span>
                 {razdel.title}
               </h3>

@@ -101,6 +101,10 @@ async function openDialog(page) {
     .first()
     .click();
   await page.waitForSelector('.subtopic-modal');
+  /* Курсор остаётся там, где кликнули по плитке банка, — а там теперь
+     может оказаться карточка окна, и «покой» был бы наведением. Мышь
+     уводится в угол, за окно. */
+  await page.mouse.move(1, 1);
   await page.waitForTimeout(500);
 }
 
