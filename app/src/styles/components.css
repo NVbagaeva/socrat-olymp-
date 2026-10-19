@@ -2770,18 +2770,23 @@ html[data-tabs-pending] .topic-panel,
    Когда лента прилипает к верху экрана (is-stuck), она снова
    становится компактной строкой — прежняя лента со своими правилами
    выше и ниже. Разницу высот хук useStickyTabs отдаёт в нижний
-   отступ, страница под лентой не прыгает. */
-.topic-tabs-row:not(.is-stuck) .topic-tabs {
+   отступ, страница под лентой не прыгает.
+
+   Лента с модификатором --stroka — всегда строкой, без плиток: так
+   на странице выбора типа функции №12, где под крупной картинкой
+   первая карточка подтем должна остаться на первом экране
+   (scripts/check-zadanie-hero.mjs). */
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
   flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-2);
   border-radius: var(--radius-xl);
   overflow: visible;
 }
-.topic-tabs-row:not(.is-stuck) .tabs--lenta {
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
   display: contents;
 }
-.topic-tabs-row:not(.is-stuck)
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
   :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
   flex: 1 1 calc(50% - var(--space-2));
   flex-direction: column;
@@ -2798,25 +2803,29 @@ html[data-tabs-pending] .topic-panel,
   font-size: var(--fs-label);
   line-height: var(--lh-label);
 }
-.topic-tabs-row:not(.is-stuck)
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
   :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):hover {
   background: var(--color-surface-info);
 }
-.topic-tabs-row:not(.is-stuck) .tabs--lenta :is(button, a[role='tab'])[aria-selected='true'] {
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .tabs--lenta
+  :is(button, a[role='tab'])[aria-selected='true'] {
   border-color: transparent;
   background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
 }
-.topic-tabs-row:not(.is-stuck) .tabs--lenta .tabs__text,
-.topic-tabs-row:not(.is-stuck) .topic-tabs__more .tabs__text {
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta .tabs__text,
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more .tabs__text {
   max-width: none;
 }
 /* Кнопка материалов — такая же плитка, черта-разделитель не нужна. */
-.topic-tabs-row:not(.is-stuck) .topic-tabs__more::before {
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
   display: none;
 }
 /* Первая плитка крупнее: во всю ширину на телефоне, значок и подпись
    в строку. */
-.topic-tabs-row:not(.is-stuck) .tabs--lenta > :is(button, a[role='tab']):first-child {
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .tabs--lenta
+  > :is(button, a[role='tab']):first-child {
   flex-basis: 100%;
   flex-direction: row;
   align-items: center;
@@ -2826,21 +2835,25 @@ html[data-tabs-pending] .topic-panel,
   line-height: var(--lh-body);
 }
 @media (min-width: 768px) {
-  .topic-tabs-row:not(.is-stuck)
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
     :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
     flex-basis: calc(33.333% - var(--space-2));
   }
-  .topic-tabs-row:not(.is-stuck) .tabs--lenta > :is(button, a[role='tab']):first-child {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
     flex-basis: calc(66.666% - var(--space-2));
     min-height: 72px;
   }
 }
 @media (min-width: 1280px) {
-  .topic-tabs-row:not(.is-stuck)
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
     :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
     flex-basis: calc(25% - var(--space-2));
   }
-  .topic-tabs-row:not(.is-stuck) .tabs--lenta > :is(button, a[role='tab']):first-child {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
     flex-basis: calc(50% - var(--space-2));
   }
 }

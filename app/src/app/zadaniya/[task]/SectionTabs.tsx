@@ -85,7 +85,9 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
 
   return (
     <>
-      <div className="topic-tabs-row">
+      {/* Строкой, а не плитками Bento: под крупной картинкой шапки
+          первая карточка подтем должна быть на первом экране. */}
+      <div className="topic-tabs-row topic-tabs-row--stroka">
         <div className="topic-tabs" ref={strip}>
           <Tabs
             className="tabs--lenta"
