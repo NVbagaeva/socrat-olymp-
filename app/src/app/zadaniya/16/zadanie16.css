@@ -1,0 +1,381 @@
+/* Задание №16 «Неравенства».
+
+   Оболочка, лента вкладок и оболочка теории — общие слои; здесь
+   только своё: блоки главы (теория, опорная задача, тренировочная
+   работа), карточки, чертежи и поле ответа. Значения — только токены.
+   Свои блоки-якоря отступают под липкую ленту (docs/razdel-pravila.md). */
+
+.z16-head {
+  margin-bottom: var(--space-6);
+}
+
+/* ── «О задании» ──────────────────────────────────────────────── */
+
+.z16-about {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 760px;
+}
+.z16-about__lead {
+  display: grid;
+  gap: var(--space-3);
+}
+.z16-about__answer {
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z16-about__text {
+  color: var(--color-text-secondary);
+}
+.z16-plan {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+.z16-plan__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.z16-plan__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.z16-plan__title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+/* ── Глава теории ─────────────────────────────────────────────── */
+
+.z16-glava {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.z16-glava__lead {
+  color: var(--color-text-secondary);
+}
+.z16-blok {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z16-blok__vid {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.z16-punkt {
+  display: grid;
+  gap: var(--space-3);
+}
+.z16-blok__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z16-blok__no {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.z16-blok__title--opornye .z16-blok__no {
+  color: var(--color-accent-text);
+}
+.z16-blok__title--raboty .z16-blok__no {
+  color: var(--color-success);
+}
+.z16-pusto {
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+/* Глава «Скоро». */
+.z16-skoro {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z16-skoro__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z16-skoro__title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Карточки ─────────────────────────────────────────────────── */
+
+.z16-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .z16-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z16-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z16-card--pravilo {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+.z16-card--lovushka {
+  border-color: var(--color-error-soft);
+  background: var(--color-error-soft);
+}
+.z16-card--primer,
+.z16-card--opornaya {
+  border-color: var(--color-border-warm);
+  background: var(--color-surface-warm);
+}
+.z16-card__title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+.z16-card__podtitle {
+  font-weight: 700;
+}
+.z16-card__formula {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.z16-card__shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z16-card__otvet {
+  font-weight: 600;
+}
+
+/* ── Чертёж: SVG и подписи KaTeX поверх ───────────────────────── */
+
+.z16-ch {
+  position: relative;
+  margin: 0;
+  max-width: 600px;
+  width: 100%;
+}
+.z16-ch__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.z16-ch__os,
+.z16-ch__strelka {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z16-ch__krivaya {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+}
+.z16-ch__tochka {
+  fill: var(--color-text);
+  stroke: var(--color-text);
+  stroke-width: 2;
+}
+.z16-ch__tochka--vykolota {
+  fill: var(--color-surface);
+}
+.z16-ch__hatch {
+  stroke: var(--color-primary);
+  stroke-width: 1.6;
+}
+.z16-ch__hatch--2 {
+  stroke: var(--color-accent);
+}
+.z16-ch__podpis,
+.z16-ch__znak,
+.z16-ch__peremennaya {
+  position: absolute;
+  white-space: nowrap;
+  line-height: 1;
+  pointer-events: none;
+}
+.z16-ch__podpis {
+  transform: translateX(-50%);
+}
+.z16-ch__peremennaya {
+  transform: translateX(-100%);
+  font-style: italic;
+}
+.z16-ch__znak {
+  transform: translate(-50%, -50%);
+  font-size: 1.25em;
+  font-weight: 700;
+}
+.z16-ch__znak--plus {
+  color: var(--color-success);
+}
+.z16-ch__znak--minus {
+  color: var(--color-error);
+}
+.z16-dekor {
+  max-width: 240px;
+}
+
+/* ── Тренировочная работа ─────────────────────────────────────── */
+
+.z16-rabota-blok {
+  display: grid;
+  gap: var(--space-3);
+}
+.z16-rabota {
+  display: grid;
+  gap: var(--space-3);
+}
+.z16-rabota__schet {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z16-rabota__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z16-zad {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z16-zad__no {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.z16-zad__forma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z16-zad__label {
+  font-weight: 600;
+}
+.z16-zad__pole {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.z16-zad__pole[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+.z16-zad__znaki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.z16-zad__znak {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.z16-zad__znak:hover {
+  border-color: var(--color-border-hover);
+}
+.z16-zad__itog:empty {
+  display: none;
+}
+.z16-zad__verno {
+  font-weight: 600;
+  color: var(--color-success);
+}
+.z16-zad__neverno {
+  color: var(--color-error);
+}
+.z16-zad__otvet {
+  font-weight: 600;
+}
+.z16-zad .btn--secondary {
+  justify-self: start;
+}
+
+/* ── Витрина ──────────────────────────────────────────────────── */
+
+.z16-vit {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+.z16-vit__title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+}
+.z16-vit__grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .z16-vit__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

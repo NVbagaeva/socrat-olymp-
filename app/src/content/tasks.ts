@@ -215,7 +215,10 @@ export const tasks = [
      Иконки — векторные чертежи public/images/task-{no}.svg. */
   { no: '14', name: 'Уравнение', slug: '14', part: 2, status: 'soon', stub: true, icon: 'svg' },
   { no: '15', name: 'Стереометрия', slug: '15', part: 2, status: 'soon', stub: true, icon: 'svg' },
-  { no: '16', name: 'Неравенство', slug: '16', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  /* Раздел открыт каркасом: вкладки «О задании» и «Теория», главы
+     с заголовками и движок чертежей (lib/zadanie16). Содержание глав
+     наполняется отдельно. */
+  { no: '16', name: 'Неравенство', slug: '16', part: 2, status: 'ready', icon: 'svg' },
   {
     no: '17',
     name: 'Задача на оптимизацию',

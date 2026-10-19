@@ -70,6 +70,8 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  '/zadaniya/16/',
+  '/zadaniya/16/teoriya/',
   /* №12: над лентой в той же липкой строке — плашка разделов. */
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
