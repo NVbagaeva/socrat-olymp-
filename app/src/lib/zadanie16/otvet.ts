@@ -143,7 +143,7 @@ export function razobrat16(zapis: string): Razbor16 {
       }
       return {
         ok: false,
-        oshibka: 'Запишите ответ промежутками, например: (−∞; 2] ∪ (3; +∞).',
+        oshibka: 'Запишите ответ промежутками: концы — через «;», объединение — знаком «∪».',
       };
     }
     const koncy = chasti(m[2] ?? '');

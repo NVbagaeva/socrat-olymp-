@@ -17,7 +17,7 @@ const ZNAKI = ['(', ')', '[', ']', ';', '−∞', '+∞', '∪', '√', '{', '}'
 
 const TEKST = {
   pole: 'Ответ',
-  primer: 'Например: (−∞; −2] ∪ (3; +∞)',
+  pole_podskazka: 'Ответ промежутками',
   proverit: 'Проверить',
   verno: 'Верно!',
   neverno: 'Пока неверно — проверьте концы и скобки.',
@@ -75,7 +75,7 @@ function Zadanie({ z, no, onVerno }: { z: Zadanie16View; no: number; onVerno: ()
           id={idPolya}
           className="z16-zad__pole"
           value={vvod}
-          placeholder={TEKST.primer}
+          placeholder={TEKST.pole_podskazka}
           autoComplete="off"
           spellCheck={false}
           inputMode="text"
@@ -127,10 +127,18 @@ function Zadanie({ z, no, onVerno }: { z: Zadanie16View; no: number; onVerno: ()
  * ответа с проверкой (lib/zadanie16/otvet.ts) и кнопка «Показать
  * ответ». Счёт верных — только на этой странице, без сохранения.
  */
-export function Rabota16({ zadaniya }: { zadaniya: readonly Zadanie16View[] }) {
+export function Rabota16({
+  zadaniya,
+  primerHtml,
+}: {
+  zadaniya: readonly Zadanie16View[];
+  /** Как записывать ответ — строка с формулой, набранная на сервере. */
+  primerHtml: string;
+}) {
   const [verno, setVerno] = useState(0);
   return (
     <div className="z16-rabota">
+      <p className="z16-rabota__primer" dangerouslySetInnerHTML={{ __html: primerHtml }} />
       <p className="z16-rabota__schet">{TEKST.resheno(verno, zadaniya.length)}</p>
       <ol className="z16-rabota__list">
         {zadaniya.map((z, i) => (

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Chertezh16 } from '@/components/zadanie16/Chertezh16';
 import { Rabota16 } from '@/components/zadanie16/Rabota16';
 import { Tex } from '@/components/ui/Tex';
+import { PRIMER_OTVETA_16 } from '@/content/teoriya16';
 import { katex } from '@/lib/graph/katex';
 import { typeset } from '@/lib/tex';
 import { PRIMERY_CHERTEZHEY_16, PROBNAYA_RABOTA_16 } from '@/lib/zadanie16/primery';
@@ -34,6 +35,7 @@ export default function Vitrina16Page() {
       </ul>
       <h2 className="z16-vit__title">Пробная работа</h2>
       <Rabota16
+        primerHtml={typeset(PRIMER_OTVETA_16)}
         zadaniya={PROBNAYA_RABOTA_16.map((z) => ({
           id: z.id,
           uslovieHtml: typeset(z.uslovie),

@@ -108,6 +108,10 @@ export interface Glava16 {
   raboty: Rabota16[];
 }
 
+/** Как записывать ответ: строка над заданиями работы. */
+export const PRIMER_OTVETA_16 =
+  'Ответ записывайте промежутками через «;», например: $(-\\infty;\\,-2]\\cup(3;\\,+\\infty)$.';
+
 /** Заданий в тренировочной работе. */
 export const ZADANIY_V_RABOTE = 10;
 

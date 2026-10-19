@@ -470,6 +470,9 @@
   display: grid;
   gap: var(--space-3);
 }
+.z16-rabota__primer {
+  color: var(--color-text-secondary);
+}
 .z16-rabota__schet {
   font-weight: 600;
   color: var(--color-text-secondary);

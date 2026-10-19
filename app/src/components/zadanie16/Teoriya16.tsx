@@ -5,6 +5,7 @@ import { PROGRESS_16 } from '@/content/zadanie16';
 import {
   BLOKI_16,
   GLAVY_16,
+  PRIMER_OTVETA_16,
   punktyGlavy16,
   ZADANIY_V_RABOTE,
   type Glava16,
@@ -177,6 +178,7 @@ function Rabota({ r, odna }: { r: RabotaData; odna: boolean }) {
         <Gotovitsya text={BLOKI_16.gotovitsyaRabota(ZADANIY_V_RABOTE)} />
       ) : (
         <Rabota16
+          primerHtml={typeset(PRIMER_OTVETA_16)}
           zadaniya={r.zadaniya.map((z) => ({
             id: z.id,
             uslovieHtml: typeset(z.uslovie),
