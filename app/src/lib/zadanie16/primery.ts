@@ -45,6 +45,80 @@ export const PRIMERY_CHERTEZHEY_16: PrimerChertezha16[] = [
     otvet: '(-5;\\,2]',
   },
   {
+    id: 'zmeyka',
+    title: '$(x-1)(x-4)>0$',
+    spec: metodIntervalov16({
+      korni: [
+        { x: 1, tex: '1' },
+        { x: 4, tex: '4' },
+      ],
+      sprava: '+',
+      znak: '>',
+      dugi: true,
+    }),
+    otvet: '(-\\infty;\\,1)\\cup(4;\\,+\\infty)',
+  },
+  {
+    id: 'tesno',
+    title: 'Тесно: $\\prod(x-a_i)\\le0$, семь нулей с длинными подписями',
+    spec: metodIntervalov16({
+      korni: [
+        { x: -2 * Math.sqrt(3), tex: '-2\\sqrt{3}' },
+        { x: -3, tex: '-3' },
+        { x: -7 / 3, tex: '-\\tfrac{7}{3}' },
+        { x: -Math.sqrt(5), tex: '-\\sqrt{5}' },
+        { x: 0.25, tex: '0{,}25' },
+        { x: Math.SQRT2, tex: '\\sqrt{2}' },
+        { x: 3 * Math.sqrt(2), tex: '3\\sqrt{2}' },
+      ],
+      sprava: '+',
+      znak: '<=',
+    }),
+  },
+  {
+    id: 'sistema-tri',
+    title: '$\\begin{cases}x>-3,\\\\x\\le2,\\\\x\\ne0\\end{cases}$',
+    spec: {
+      vid: 'sistema',
+      tochki: [
+        { x: -3, tex: '-3' },
+        { x: 0, tex: '0' },
+        { x: 2, tex: '2' },
+      ],
+      ryady: [
+        { tex: 'x>-3', mnozhestvo: '(-3;\\,+\\infty)' },
+        { tex: 'x\\le2', mnozhestvo: '(-\\infty;\\,2]' },
+        { tex: 'x\\ne0', mnozhestvo: '(-\\infty;\\,0)\\cup(0;\\,+\\infty)' },
+      ],
+    },
+    otvet: '(-3;\\,0)\\cup(0;\\,2]',
+  },
+  {
+    id: 'parabola-oy',
+    title: '$(x-5)^2>0$, ось $Oy$',
+    spec: {
+      vid: 'parabola',
+      vetvi: 'vverh',
+      oy: true,
+      korni: [{ x: 5, tex: '5', zakrashena: false }],
+      shtrikh: 'nad',
+    },
+  },
+  {
+    id: 'parabola-oy-ryadom',
+    title: '$x^2-4x<0$, ось $Oy$: нуль в начале координат',
+    spec: {
+      vid: 'parabola',
+      vetvi: 'vverh',
+      oy: true,
+      korni: [
+        { x: 0, tex: '0', zakrashena: false },
+        { x: 4, tex: '4', zakrashena: false },
+      ],
+      shtrikh: 'pod',
+    },
+  },
+  {
     id: 'sistema',
     title: '$\\begin{cases}x>-1,\\\\x\\le3\\end{cases}$',
     spec: {

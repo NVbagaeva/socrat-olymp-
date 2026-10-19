@@ -214,6 +214,23 @@ export function ravny16(a: Mnozhestvo16, b: Mnozhestvo16): boolean {
   );
 }
 
+/** Пересечение двух множеств — решение системы из двух условий. */
+export function peresechenie16(a: Mnozhestvo16, b: Mnozhestvo16): Mnozhestvo16 {
+  const out: Promezhutok16[] = [];
+  for (const p of a) {
+    for (const q of b) {
+      const ot = Math.max(p.ot, q.ot);
+      const do_ = Math.min(p.do, q.do);
+      const otVkl = blizko(p.ot, q.ot) ? p.otVkl && q.otVkl : p.ot > q.ot ? p.otVkl : q.otVkl;
+      const doVkl = blizko(p.do, q.do) ? p.doVkl && q.doVkl : p.do < q.do ? p.doVkl : q.doVkl;
+      if (ot < do_ - DOPUSK || (blizko(ot, do_) && otVkl && doVkl)) {
+        out.push({ ot, do: do_, otVkl, doVkl });
+      }
+    }
+  }
+  return normalizovat16(out);
+}
+
 export type Proverka16 = 'verno' | 'neverno' | { oshibka: string };
 
 /** Проверка ответа ученика по ответу из данных (TeX). */

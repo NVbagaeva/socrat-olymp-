@@ -64,29 +64,33 @@
 
 .z16-glava {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
   min-width: 0;
 }
 .z16-glava__lead {
   color: var(--color-text-secondary);
 }
-.z16-blok {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
+.z16-glava--skoro {
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
 }
-.z16-blok__vid {
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.vteor-razdel.is-skoro .vteor-razdel__title {
   color: var(--color-text-tertiary);
+}
+.z16-punkty {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
 }
 .z16-punkt {
   display: grid;
   gap: var(--space-3);
+  min-width: 0;
 }
-.z16-blok__title {
+.z16-punkt__title {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
@@ -94,16 +98,10 @@
   font-weight: 700;
   scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
 }
-.z16-blok__no {
+.z16-punkt__no {
   flex: none;
   font-variant-numeric: tabular-nums;
   color: var(--color-primary);
-}
-.z16-blok__title--opornye .z16-blok__no {
-  color: var(--color-accent-text);
-}
-.z16-blok__title--raboty .z16-blok__no {
-  color: var(--color-success);
 }
 .z16-pusto {
   padding: var(--space-4);
@@ -111,68 +109,126 @@
   border-radius: var(--radius-lg);
 }
 
-/* Глава «Скоро». */
-.z16-skoro {
+/* Вкладки главы: «Теория» · «Разбор» · «Тренировочная работа».
+   Лента прокручивается вбок сама, страница — нет. */
+.z16-vkl {
   display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z16-skoro__item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
-}
-.z16-skoro__title {
-  flex: 1;
+  gap: var(--space-4);
   min-width: 0;
+}
+.z16-vkl__lenta {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.z16-vkl__knopka {
+  flex: none;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.z16-vkl__knopka:hover {
+  border-color: var(--color-border-hover);
+}
+.z16-vkl__knopka.is-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+.z16-vkl__knopka:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.z16-vkl__panel[hidden] {
+  display: none;
 }
 
 /* ── Карточки ─────────────────────────────────────────────────── */
 
+/* Сетка в шесть колонок: карточка занимает 2, 3, 4 или все 6. До
+   1024 карточки идут столбиком. */
 .z16-grid {
   display: grid;
   gap: var(--space-4);
 }
 @media (min-width: 1024px) {
   .z16-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: start;
+  }
+  .z16-shir--2 {
+    grid-column: span 2;
+  }
+  .z16-shir--3 {
+    grid-column: span 3;
+  }
+  .z16-shir--4 {
+    grid-column: span 4;
+  }
+  .z16-shir--6 {
+    grid-column: 1 / -1;
   }
 }
 .z16-card {
+  --z16-c: var(--color-primary);
+  --z16-c-soft: var(--color-surface-info);
   display: grid;
   gap: var(--space-3);
+  align-content: start;
   min-width: 0;
   padding: var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
-.z16-card--pravilo {
-  border-color: var(--color-border-info);
-  background: var(--color-surface-info);
-}
-.z16-card--lovushka {
-  border-color: var(--color-error-soft);
-  background: var(--color-error-soft);
-}
-.z16-card--primer,
-.z16-card--opornaya {
+.z16-card--vazhno {
+  --z16-c: var(--color-accent-text);
+  --z16-c-soft: var(--color-surface-warm);
   border-color: var(--color-border-warm);
   background: var(--color-surface-warm);
+}
+.z16-card--oshibka {
+  --z16-c: var(--color-error);
+  --z16-c-soft: var(--color-error-soft);
+}
+.z16-metka {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--z16-c-soft);
+  color: var(--z16-c);
+  font-weight: 600;
+}
+.z16-metka__ikonka {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .z16-card__title {
   font-size: var(--fs-lg);
   font-weight: 700;
 }
-.z16-card__podtitle {
-  font-weight: 700;
+.z16-card__text,
+.z16-card__podpis {
+  color: var(--color-text-secondary);
+}
+.z16-card__podpis {
+  font-size: var(--fs-caption);
 }
 .z16-card__formula {
   overflow-x: auto;
@@ -180,23 +236,146 @@
   border-radius: var(--radius-md);
   background: var(--color-surface-soft);
 }
-.z16-card__shagi {
+.z16-shagi {
   display: grid;
   gap: var(--space-2);
   margin: 0;
-  padding-left: var(--space-5);
+  padding: 0;
+  list-style: none;
+  counter-reset: z16-shag;
 }
-.z16-card__otvet {
+.z16-shagi > li {
+  position: relative;
+  padding-left: 32px;
+  counter-increment: z16-shag;
+}
+.z16-shagi > li::before {
+  content: counter(z16-shag);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z16-otvet {
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.z16-otvet__label {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.z16-otvet--neverno {
+  border-color: var(--color-error-soft);
+  background: var(--color-error-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-error);
+}
+.z16-otvet--neverno .z16-otvet__label {
+  color: var(--color-error);
+}
+
+/* «Неверно» рядом с «Верно»: на широкой карточке — две колонки. */
+.z16-sravnenie {
+  display: grid;
+  gap: var(--space-3);
+  container-type: inline-size;
+}
+@container (min-width: 560px) {
+  .z16-sravnenie {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z16-variant {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.z16-variant--neverno {
+  border-color: var(--color-error-soft);
+}
+.z16-variant--verno {
+  border-color: var(--color-success-soft);
+  background: var(--color-success-soft);
+}
+.z16-variant__metka {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.z16-variant--neverno .z16-variant__metka {
+  color: var(--color-error);
+}
+.z16-variant--verno .z16-variant__metka {
+  color: var(--color-success);
+}
+.z16-variant__title {
+  font-weight: 600;
+}
+
+/* Плитки ограничений: выражение → условие. */
+.z16-plitki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z16-plitka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.z16-plitka__tex {
+  flex: none;
+  color: var(--color-primary);
+}
+.z16-plitka__text {
+  min-width: 0;
+  font-size: var(--fs-caption);
+}
+.z16-card__itog {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 /* ── Чертёж: SVG и подписи KaTeX поверх ───────────────────────── */
 
+/* Подписи — в долях ширины чертежа (cqw), но не мельче 12px: движок
+   считает рамки подписей с этим запасом. */
 .z16-ch {
   position: relative;
-  margin: 0;
-  max-width: 600px;
+  container-type: inline-size;
   width: 100%;
+  max-width: 600px;
+  margin: 0;
 }
 .z16-ch__svg {
   display: block;
@@ -205,17 +384,34 @@
   overflow: visible;
 }
 .z16-ch__os,
-.z16-ch__strelka {
+.z16-ch__strelka,
+.z16-ch__vniz {
   fill: none;
   stroke: var(--color-text);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.z16-ch__vniz {
+  stroke: var(--color-text-tertiary);
+}
+.z16-ch__ryad--itog .z16-ch__os {
+  stroke-width: 2.5;
+}
+.z16-ch__punktir {
+  stroke: var(--color-border-strong);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
 .z16-ch__krivaya {
   fill: none;
   stroke: var(--color-primary);
   stroke-width: 2.5;
+}
+.z16-ch__duga {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.2;
 }
 .z16-ch__tochka {
   fill: var(--color-text);
@@ -232,30 +428,32 @@
 .z16-ch__hatch--2 {
   stroke: var(--color-accent);
 }
-.z16-ch__podpis,
-.z16-ch__znak,
-.z16-ch__peremennaya {
+.z16-ch__hatch--3 {
+  stroke: var(--color-success);
+}
+.z16-ch__hatch--itog {
+  stroke: var(--color-primary);
+  stroke-width: 2.6;
+}
+.z16-ch__podpis {
   position: absolute;
+  font-size: clamp(12px, 2.8cqw, 16px);
   white-space: nowrap;
   line-height: 1;
   pointer-events: none;
 }
-.z16-ch__podpis {
-  transform: translateX(-50%);
+.z16-ch__podpis--uslovie {
+  color: var(--color-text-secondary);
 }
-.z16-ch__peremennaya {
-  transform: translateX(-100%);
-  font-style: italic;
-}
-.z16-ch__znak {
-  transform: translate(-50%, -50%);
-  font-size: 1.25em;
+.z16-ch__podpis--plus,
+.z16-ch__podpis--minus {
+  font-size: clamp(14px, 3.4cqw, 20px);
   font-weight: 700;
 }
-.z16-ch__znak--plus {
+.z16-ch__podpis--plus {
   color: var(--color-success);
 }
-.z16-ch__znak--minus {
+.z16-ch__podpis--minus {
   color: var(--color-error);
 }
 .z16-dekor {

@@ -2486,6 +2486,19 @@ html[data-tabs-pending] .topic-panel,
 .contents-item.is-active .contents-item__no {
   color: var(--color-primary);
 }
+/* Раздел «Скоро» (теория №16): замок вместо номера, строка приглушена. */
+.contents-item.is-skoro {
+  color: var(--color-text-tertiary);
+}
+.contents-item__zamok {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vertical-align: -2px;
+}
 /* Подпункты открытого раздела (теория №11): отступ под номер. */
 .contents-sub {
   display: grid;

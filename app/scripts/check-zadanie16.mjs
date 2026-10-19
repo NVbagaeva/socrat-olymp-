@@ -103,7 +103,27 @@ ok(
 );
 ok(drob.tochki[1].zakrashena, 'нуль числителя в нестрогом неравенстве закрашен');
 
+/* ── Пересечение ────────────────────────────────────────── */
+
+const mn = (t) => {
+  const r = O.razobrat16(t);
+  if (!r.ok) throw new Error(`${t}: ${r.oshibka}`);
+  return r.mnozhestvo;
+};
+const per = [
+  ['(-3;+∞)', '(-∞;2]', '(-3;2]'],
+  ['[1;5]', '[5;7)', '{5}'],
+  ['(1;5)', '[5;7)', '∅'],
+  ['(-∞;0)∪(0;+∞)', '(-3;2]', '(-3;0)∪(0;2]'],
+  ['[-1;4]', '(-∞;-1]∪[3;+∞)', '{-1}∪[3;4]'],
+];
+for (const [a, b, c] of per) {
+  ok(O.ravny16(O.peresechenie16(mn(a), mn(b)), mn(c)), `пересечение ${a} и ${b} должно быть ${c}`);
+}
+
 /* ── Геометрия ──────────────────────────────────────────── */
+
+const svgChisla = (d) => d.match(/-?\d+(?:\.\d+)?/g).map(Number);
 
 for (const p of P.PRIMERY_CHERTEZHEY_16) {
   let g;
@@ -113,44 +133,90 @@ for (const p of P.PRIMERY_CHERTEZHEY_16) {
     problems.push(`${p.id}: ${e.message}`);
     continue;
   }
-  const xs = g.tochki.map((t) => t.cx);
-  ok(
-    xs.every((x, i) => i === 0 || x > xs[i - 1]),
-    `${p.id}: точки не по порядку`,
-  );
-  ok(
-    xs.every((x) => x > 0 && x < g.w),
-    `${p.id}: точка за краем рисунка`,
-  );
-  ok(
-    g.shtrikh.every((s) => s.x1 < s.x2),
-    `${p.id}: пустая штриховка`,
-  );
-  if (g.krivaya !== undefined) {
-    const nums = g.krivaya.match(/-?\d+(?:\.\d+)?/g).map(Number);
-    const ys = nums.filter((_, i) => i % 2 === 1);
+  for (const r of g.ryady) {
+    const xs = r.tochki.map((t) => t.cx);
     ok(
-      ys
-        .slice(0, 1)
-        .concat(ys.slice(-1))
-        .every((y) => y >= 0 && y <= g.h),
+      xs.every((x, i) => i === 0 || x > xs[i - 1]),
+      `${p.id}: точки не по порядку`,
+    );
+    ok(
+      xs.every((x) => x > 0 && x < g.w),
+      `${p.id}: точка за краем рисунка`,
+    );
+    ok(
+      r.shtrikh.every((s) => s.x1 < s.x2),
+      `${p.id}: пустая штриховка`,
+    );
+  }
+  /* Подписи: внутри рисунка и не налезают друг на друга. */
+  g.podpisi.forEach((a, i) => {
+    ok(
+      a.ramka.x1 >= 0 && a.ramka.x2 <= g.w && a.ramka.y1 >= 0 && a.ramka.y2 <= g.h,
+      `${p.id}: подпись ${a.tex} за краем`,
+    );
+    g.podpisi.slice(i + 1).forEach((b) => {
+      ok(!C.peresekayutsya16(a.ramka, b.ramka), `${p.id}: подписи ${a.tex} и ${b.tex} налезают`);
+    });
+    try {
+      katex.renderToString(a.tex, { throwOnError: true, strict: 'error' });
+    } catch (e) {
+      problems.push(`${p.id}: подпись ${a.tex} — ${e.message}`);
+    }
+  });
+  /* Подписи чисел не залезают на кружки точек своей прямой. */
+  for (const r of g.ryady) {
+    for (const t of r.tochki) {
+      const kr = { x1: t.cx - 7, x2: t.cx + 7, y1: r.osY - 7, y2: r.osY + 7 };
+      ok(!g.podpisi.some((q) => C.peresekayutsya16(q.ramka, kr)), `${p.id}: подпись на точке`);
+    }
+  }
+  if (g.krivaya !== undefined) {
+    const ys = svgChisla(g.krivaya).filter((_, i) => i % 2 === 1);
+    ok(
+      [ys[0], ys[ys.length - 1]].every((y) => y >= 0 && y <= g.h),
       `${p.id}: концы ветвей за краем`,
     );
   }
-  for (const t of g.tochki) {
-    try {
-      katex.renderToString(t.tex, { throwOnError: true, strict: 'error' });
-    } catch (e) {
-      problems.push(`${p.id}: подпись ${t.tex} — ${e.message}`);
-    }
-  }
   if (p.otvet !== undefined && p.spec.vid === 'pryamaya') {
-    const e = O.razobrat16(p.otvet);
     ok(
-      e.ok && O.ravny16(C.otvetPryamoy16(p.spec), e.mnozhestvo),
+      O.ravny16(C.otvetPryamoy16(p.spec), mn(p.otvet)),
       `${p.id}: чертёж не совпадает с ответом ${p.otvet}`,
     );
   }
+  if (p.otvet !== undefined && p.spec.vid === 'sistema') {
+    ok(
+      O.ravny16(C.reshenieSistemy16(p.spec), mn(p.otvet)),
+      `${p.id}: пересечение не совпадает с ответом ${p.otvet}`,
+    );
+    ok(
+      g.ryady.length === p.spec.ryady.length + 1 && g.ryady.at(-1).itog,
+      `${p.id}: нет прямой пересечения`,
+    );
+  }
+}
+
+/* Парабола (x−5)²>0 с осью Oy: ось при x = 0 левее вершины, вершина на Ox. */
+{
+  const spec = P.PRIMERY_CHERTEZHEY_16.find((x) => x.id === 'parabola-oy').spec;
+  const g = C.geom16(spec);
+  const [, y0, qx, , , y2] = svgChisla(g.krivaya);
+  const vershinaX = qx;
+  ok(g.oy !== undefined && g.oy.x < vershinaX - 40, 'Oy должна стоять левее вершины в точке 5');
+  ok(Math.abs(g.ryady[0].tochki[0].cx - vershinaX) < 1e-6, 'вершина параболы — в точке 5 на оси');
+  ok(!g.ryady[0].tochki[0].zakrashena, 'точка 5 выколота');
+  ok(y0 < g.ryady[0].osY && y2 < g.ryady[0].osY, 'ветви вверх: концы ветвей над осью Ox');
+  ok(
+    g.podpisi.some((q) => q.tex === '0') && g.podpisi.some((q) => q.tex === 'y'),
+    'подписи 0 и y у оси Oy',
+  );
+}
+{
+  const g = C.geom16(P.PRIMERY_CHERTEZHEY_16.find((x) => x.id === 'tesno').spec);
+  const chisla = g.podpisi.filter((q) => q.vid === 'chislo');
+  ok(new Set(chisla.map((q) => q.ramka.y1)).size > 1, 'тесные подписи уходят строкой ниже');
+  const n = C.geom16(P.PRIMERY_CHERTEZHEY_16.find((x) => x.id === 'parabola-oy-ryadom').spec);
+  const nol = n.podpisi.find((q) => q.tex === '0');
+  ok(nol && nol.ramka.x2 < n.oy.x, 'нуль в начале координат подписан левее оси Oy');
 }
 
 let bylaOshibka = false;
@@ -169,7 +235,7 @@ const id = (v, gde) => {
   ids.add(v);
 };
 const strogo = (text, gde) => {
-  for (const [, f] of String(text).matchAll(/\$([^$]+)\$/g)) {
+  for (const [, f] of String(text ?? '').matchAll(/\$([^$]+)\$/g)) {
     try {
       katex.renderToString(f, { throwOnError: true, strict: 'error' });
     } catch (e) {
@@ -177,36 +243,91 @@ const strogo = (text, gde) => {
     }
   }
 };
+const chertezh = (ch, gde) => {
+  try {
+    const g = C.geom16(ch);
+    g.podpisi.forEach((a, i) =>
+      g.podpisi.slice(i + 1).forEach((b) => {
+        ok(!C.peresekayutsya16(a.ramka, b.ramka), `${gde}: подписи ${a.tex} и ${b.tex} налезают`);
+      }),
+    );
+  } catch (e) {
+    problems.push(`${gde}: ${e.message}`);
+  }
+};
+const otvet = (t, gde) => {
+  ok(O.razobrat16(t).ok, `${gde}: ответ ${t} не разбирается`);
+  ok(!/\d,\d/.test(t.replace(/\{,\}/g, '')), `${gde}: в ответе разделитель — запятая, нужна «;»`);
+  ok(/\\infty|;|\\varnothing|\\\{/.test(t), `${gde}: концы промежутка через «;»`);
+  katex.renderToString(`x\\in${t}`, { throwOnError: true, strict: 'error' });
+};
 
-ok(T.GLAVY_16.length === 7, `глав ${T.GLAVY_16.length} вместо 7`);
+ok(T.GLAVY_16.length === 11, `глав ${T.GLAVY_16.length} вместо 11 (6 открытых и 5 «Скоро»)`);
+ok(T.GLAVY_16.filter((g) => g.skoro).length === 5, 'глав «Скоро» должно быть пять');
+ok(
+  T.BLOKI_16.razbor === 'Разбор' && T.BLOKI_16.rabota === 'Тренировочная работа (10 заданий)',
+  'подписи вкладок главы',
+);
 T.GLAVY_16.forEach((g, i) => {
   id(g.id, 'глава');
   const punkty = T.punktyGlavy16(g, i + 1);
-  punkty.forEach((p) => id(p.id, `пункт ${p.no}`));
-  ok(
-    punkty.every((p, k) => p.no === `${i + 1}.${k + 1}`),
-    `${g.id}: номера пунктов не по порядку`,
-  );
+  punkty.forEach((p, k) => {
+    id(p.id, `пункт ${p.no}`);
+    ok(p.no === `${i + 1}.${k + 1}`, `${g.id}: номера пунктов не по порядку`);
+  });
   if (g.skoro) {
-    ok((g.temy ?? []).length > 0, `${g.id}: у главы «Скоро» нет тем`);
+    ok(g.teoriya.length === 0 && g.raboty.length === 0, `${g.id}: у главы «Скоро» нет содержания`);
     return;
   }
-  ok(
-    punkty.some((p) => p.vid === 'opornye') && punkty.some((p) => p.vid === 'raboty'),
-    `${g.id}: нет блока опорных задач или работы`,
-  );
+  ok(g.teoriya.length > 0 && g.raboty.length > 0, `${g.id}: нет пунктов теории или работы`);
   for (const t of g.teoriya) {
     for (const k of t.kartochki) {
-      strogo(k.title, `${t.id}`);
-      strogo(k.text ?? '', `${t.id}`);
-      if (k.chertezh) C.geom16(k.chertezh);
+      const gde = `${t.id} / ${k.metka ?? k.ton}`;
+      [k.title, k.text, k.podpis, k.itog, ...(k.shagi ?? [])].forEach((x) => strogo(x, gde));
+      for (const pl of k.plitki ?? []) {
+        katex.renderToString(pl.tex, { throwOnError: true, strict: 'error' });
+        strogo(pl.text, gde);
+      }
+      if (k.tex)
+        katex.renderToString(k.tex, { throwOnError: true, strict: 'error', displayMode: true });
+      if (k.chertezh) chertezh(k.chertezh, gde);
+      if (k.otvet) otvet(k.otvet, gde);
+      for (const v of k.sravnenie ? [k.sravnenie.neverno, k.sravnenie.verno] : []) {
+        strogo(v.title, gde);
+        strogo(v.text, gde);
+        if (v.chertezh) chertezh(v.chertezh, gde);
+        if (v.otvet) otvet(v.otvet, gde);
+      }
+      /* Ответ примера совпадает с тем, что показывает его чертёж. */
+      if (k.otvet && k.chertezh?.vid === 'pryamaya') {
+        ok(
+          O.ravny16(C.otvetPryamoy16(k.chertezh), mn(k.otvet)),
+          `${gde}: чертёж не сходится с ответом`,
+        );
+      }
+      if (k.otvet && k.chertezh?.vid === 'sistema') {
+        ok(
+          O.ravny16(C.reshenieSistemy16(k.chertezh), mn(k.otvet)),
+          `${gde}: пересечение не сходится с ответом`,
+        );
+      }
+      if (k.sravnenie?.verno.chertezh?.vid === 'pryamaya' && k.sravnenie.verno.otvet) {
+        ok(
+          O.ravny16(C.otvetPryamoy16(k.sravnenie.verno.chertezh), mn(k.sravnenie.verno.otvet)),
+          `${gde}: верный вариант не сходится с чертежом`,
+        );
+        ok(
+          !O.ravny16(mn(k.sravnenie.neverno.otvet), mn(k.sravnenie.verno.otvet)),
+          `${gde}: неверный и верный ответы совпадают`,
+        );
+      }
     }
   }
   for (const o of g.opornye) {
-    id(o.id, 'опорная');
+    id(o.id, 'разбор');
     strogo(o.uslovie, o.id);
     o.shagi.forEach((s) => strogo(s, o.id));
-    ok(O.razobrat16(o.otvet).ok, `${o.id}: ответ ${o.otvet} не разбирается`);
+    otvet(o.otvet, o.id);
   }
   for (const r of g.raboty) {
     id(r.id, 'работа');
@@ -217,14 +338,47 @@ T.GLAVY_16.forEach((g, i) => {
     for (const zd of r.zadaniya) {
       id(zd.id, r.id);
       strogo(zd.uslovie, zd.id);
-      ok(O.razobrat16(zd.otvet).ok, `${zd.id}: ответ ${zd.otvet} не разбирается`);
-      katex.renderToString(zd.otvet, { throwOnError: true, strict: 'error' });
+      otvet(zd.otvet, zd.id);
     }
   }
 });
+
+/* Исправления макета: кратность нуля и ограничения tg/ctg. */
+{
+  const kartochki = T.GLAVY_16.flatMap((g) => g.teoriya.flatMap((t) => t.kartochki));
+  const kr = kartochki.find((k) => k.title === 'Кратность нуля');
+  ok(
+    kr && /\(x-3\)\(2x-6\)>0/.test(kr.tex) && /2\(x-3\)\^2>0/.test(kr.tex),
+    'кратность нуля: (x−3)(2x−6)>0 → 2(x−3)²>0',
+  );
+  ok(
+    kr && kr.chertezh.znaki.join('') === '++' && !kr.chertezh.tochki[0].zakrashena,
+    'кратность нуля: «+» с обеих сторон, точка 3 выколота',
+  );
+  const odz = kartochki.find((k) => k.ton === 'ogranicheniya');
+  const tg = odz?.plitki.find((p) => p.tex.includes('tg'));
+  ok(
+    tg &&
+      tg.text.includes('\\dfrac{\\pi}{2}+\\pi n') &&
+      tg.text.includes('x\\ne\\pi n') &&
+      tg.text.includes('\\mathbb{Z}'),
+    'tg и ctg: x ≠ π/2 + πn и x ≠ πn, n ∈ ℤ',
+  );
+  const vyvod = kartochki.find((k) => k.ton === 'vyvod');
+  ok(
+    vyvod && /стандартному виду/.test(vyvod.shagi[0]) && /до конца/.test(vyvod.shagi[0]),
+    'вывод: первый шаг — стандартный вид',
+  );
+  const osh = kartochki.find((k) => k.ton === 'oshibka');
+  ok(
+    osh?.sravnenie?.neverno.chertezh.znaki.join('') === '+-+',
+    'частая ошибка: неверное чередование + − +',
+  );
+}
+
 for (const zd of P.PROBNAYA_RABOTA_16) {
   strogo(zd.uslovie, zd.id);
-  ok(O.razobrat16(zd.otvet).ok, `витрина ${zd.id}: ответ не разбирается`);
+  otvet(zd.otvet, `витрина ${zd.id}`);
 }
 
 if (problems.length > 0) {
