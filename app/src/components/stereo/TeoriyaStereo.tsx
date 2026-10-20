@@ -9,8 +9,19 @@ import { DEKOR_STEREO, STEREO, type StereoNo } from '@/content/stereo/zadaniya';
 import { THUMBS } from '@/lib/solid/drawings/thumbs';
 import { prototypeById, RAZDELY } from '@/lib/zadanie3';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
+import { diagonalKuba, sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
+import { Chertezh3d } from './Chertezh3d';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
+
+/**
+ * Живые чертежи, которые уже стоят в главах: по одному на задание,
+ * пока главы пишутся (этап 3 плана). Ключ — «задание:глава».
+ */
+const ZHIVYE: Readonly<Record<string, () => PrimerChertezha>> = {
+  '3:chertezh': diagonalKuba,
+  '15:secheniya': sechenieKuba,
+};
 
 /** «6» → «P03-06». */
 function protoId(n: number): string {
@@ -66,8 +77,12 @@ function Shpargalki() {
 
 /** Глава, пока не написана: её план и прототипы, которые она разберёт. */
 function PlanGlavy({ glava, no }: { glava: GlavaStereo; no: StereoNo }) {
+  const zhivoy = ZHIVYE[`${no}:${glava.id}`]?.();
   return (
     <div className="stereo-plan">
+      {zhivoy === undefined ? null : (
+        <Chertezh3d model={zhivoy.model} uslovie={zhivoy.uslovie} shagi={zhivoy.shagi} />
+      )}
       <p className="stereo-plan__label">{GLAVA_PLAN.vGlave}</p>
       <ul className="stereo-plan__list">
         {glava.podglavy.map((title) => (

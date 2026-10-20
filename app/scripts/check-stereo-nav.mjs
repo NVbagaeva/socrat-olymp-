@@ -20,6 +20,9 @@
      — теория: все главы на странице, номера №3 — с нуля; на телефоне
        «Содержание» открывается шторкой, на компьютере — колонка;
      — прежние адреса фигур №3 уводят на новые места;
+     — живой чертёж в теории: движок грузится по касанию, чертёж
+       поворачивается (мышью и пальцем вбок), при замедлении процессора
+       ×4 кадры идут, шаги выделяют свои элементы, кнопки ≥ 44 px;
      — страница целиком не уезжает вбок, ошибок в консоли нет. */
 
 import fs from 'node:fs';
@@ -292,6 +295,97 @@ for (const size of SIZES) {
   }
 
   check(errors.length === 0, `${size.name}: ошибки на странице: ${errors.join('; ')}`);
+  await context.close();
+}
+
+/* Живой чертёж в теории: движок приезжает по касанию, чертёж
+   поворачивается, шаги выделяют свои элементы; при замедлении
+   процессора в 4 раза кадры продолжают идти. */
+for (const size of SIZES) {
+  const context = await browser.newContext({
+    viewport: { width: size.width, height: size.height },
+    isMobile: size.isMobile,
+    hasTouch: size.isMobile,
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const js = [];
+  page.on('response', (r) => {
+    if (r.url().endsWith('.js')) {
+      js.push(r.url());
+    }
+  });
+  const where = (what) => `${size.name}, живой чертёж: ${what}`;
+  await page.goto(BASE + '/zadaniya/3/teoriya/', { waitUntil: 'networkidle' });
+  const vid = page.locator('.z3d__vid').first();
+  check((await vid.count()) === 1, where('нет на странице'));
+  await vid.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  const svg0 = await page.locator('.z3d__kholst').first().innerHTML();
+  check(svg0.includes('<svg'), where('нет первого кадра со сборки'));
+  const jsDo = js.length;
+
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.evaluate(() => {
+    const node = document.querySelector('.z3d__kholst');
+    window.__kadrov = 0;
+    new MutationObserver(() => {
+      window.__kadrov += 1;
+    }).observe(node, { childList: true });
+  });
+  const box = await vid.boundingBox();
+  const x0 = box.x + box.width / 2;
+  const y0 = box.y + box.height / 2;
+  if (size.isMobile) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: x0, y: y0 }],
+    });
+    for (let i = 1; i <= 30; i += 1) {
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: x0 - i * 5, y: y0 }],
+      });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } else {
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    for (let i = 1; i <= 30; i += 1) {
+      await page.mouse.move(x0 + i * 6, y0 + i * 2);
+    }
+    await page.mouse.up();
+  }
+  await page.waitForTimeout(800);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  check(js.length > jsDo, where('движок не догрузился по касанию'));
+  const kadrov = await page.evaluate(() => window.__kadrov);
+  check(kadrov >= 5, where(`при замедлении ×4 за поворот всего ${kadrov} кадров`));
+  const svg1 = await page.locator('.z3d__kholst').first().innerHTML();
+  check(svg1 !== svg0, where('не повернулся'));
+
+  for (let k = 1; k <= 3; k += 1) {
+    await page.locator('.z3d').first().getByRole('button', { name: 'Далее' }).click();
+    await page.waitForTimeout(250);
+    const shag = await page.locator('.z3d__shag').first().innerText();
+    check(shag.trim() === `Шаг ${k} из 3`, where(`после «Далее» ${k} раз: «${shag}»`));
+    const svg = await page.locator('.z3d__kholst').first().innerHTML();
+    /* Выделенная линия видна — 3.4, скрыта (внутри куба) — пунктир 2.4. */
+    check(
+      svg.includes('stroke-width="3.4"') || svg.includes('stroke-width="2.4"'),
+      where(`шаг ${k} не выделен`),
+    );
+  }
+  const knopki = await page
+    .locator('.z3d button')
+    .evaluateAll((list) => list.map((b) => b.getBoundingClientRect().height));
+  check(
+    knopki.every((h) => h >= 44),
+    where(`кнопки ниже 44px: ${knopki.join(', ')}`),
+  );
+  check(errors.length === 0, where(`ошибки: ${errors.join('; ')}`));
   await context.close();
 }
 
