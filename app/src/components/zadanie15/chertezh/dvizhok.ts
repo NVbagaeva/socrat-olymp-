@@ -21,6 +21,11 @@
  *
  * Кадр рисуется только когда что-то меняется (вращение, инерция,
  * анимация): в покое движок ничего не считает.
+ *
+ * Инструмент «Сечение по трём точкам» (lib/zadanie15/render/instrument):
+ * короткое нажатие без сдвига (щелчок, тап) — выбор точки: имеющейся
+ * (вершина, поставленная точка), новой на ребре или на лицевой грани.
+ * Вращение пальцем или мышью выбором не считается.
  */
 
 import katex from 'katex';
@@ -37,19 +42,23 @@ import {
   scale,
   sub,
 } from '@/lib/zadanie15/render/geom';
+import { type Polyhedron, box, cube, toArray } from '@/lib/zadanie15/core';
 import { chertezhSvg, naturalnayaSvg } from '@/lib/zadanie15/render/eksport';
+import { type Soobshchenie, SechenieTryokhTochek } from '@/lib/zadanie15/render/instrument';
 import { razlozhit } from '@/lib/zadanie15/render/metki';
 import { type Naturalnaya, naturalnaya } from '@/lib/zadanie15/render/naturalnaya';
 import { PRIMERY, primer } from '@/lib/zadanie15/render/primery';
 import { type Chasti, razrezat } from '@/lib/zadanie15/render/razrez';
 import {
+  type Gran,
   type Otrezok,
   type Scena,
   type Telo,
   shkolnyyRakurs,
+  teloIzMnogogrannika,
   vTele,
 } from '@/lib/zadanie15/render/scena';
-import { type Kamera, type Liniya, linii } from '@/lib/zadanie15/render/vidimost';
+import { type Kamera, type Liniya, licom, linii } from '@/lib/zadanie15/render/vidimost';
 
 export { PRIMERY };
 
@@ -91,7 +100,35 @@ export interface Tsveta {
   liniya3d: string;
   sechenie: string;
   vspom: string;
+  ploskost: string;
   gran: string;
+}
+
+/** Фигуры инструмента «Сечение по трём точкам». */
+export type Figura = 'kub' | 'parallelepiped';
+const FIGURY: Record<Figura, () => Polyhedron> = {
+  kub: () => cube(6),
+  parallelepiped: () => box(4, 6, 3),
+};
+
+/** Состояние инструмента для панели (тексты уже набраны KaTeX). */
+export interface SostoyanieInstrumenta {
+  schyot: number;
+  podskazkaHtml: string;
+  soobshchenie: { vid: Soobshchenie['vid']; html: string } | null;
+  gotovo: boolean;
+}
+
+/** Текст с формулами в $…$ → HTML (KaTeX). */
+export function texHtml(s: string): string {
+  return s
+    .split(/(\$[^$]+\$)/)
+    .map((part) =>
+      part.startsWith('$') && part.endsWith('$') && part.length > 1
+        ? katex.renderToString(part.slice(1, -1), { throwOnError: false })
+        : part.replace(/&/g, '&amp;').replace(/</g, '&lt;'),
+    )
+    .join('');
 }
 
 function tsvetaIzCss(el: HTMLElement): Tsveta {
@@ -102,6 +139,7 @@ function tsvetaIzCss(el: HTMLElement): Tsveta {
     liniya3d: v('--z15-liniya-3d', '#24324a'),
     sechenie: v('--color-accent', '#e07a2f'),
     vspom: v('--color-primary', '#1f5fd0'),
+    ploskost: v('--color-primary', '#1f5fd0'),
     gran: v('--z15-gran', '#9dbcf0'),
   };
 }
@@ -148,6 +186,14 @@ export class Dvizhok {
   private prosh = 0;
   onFps: ((fps: number) => void) | null = null;
 
+  /** Инструмент «Сечение по трём точкам» (null — выключен). */
+  private instr: SechenieTryokhTochek | null = null;
+  private pokazPloskosti = true;
+  /** Нажатие на холсте: где и когда началось (для отличия тапа от поворота). */
+  private nazhatie: { x: number; y: number; t: number; id: number; tip: string } | null = null;
+  private pal = 0;
+  onInstrument: ((s: SostoyanieInstrumenta) => void) | null = null;
+
   constructor(host: HTMLElement) {
     this.host = host;
     this.tsveta = tsvetaIzCss(host);
@@ -185,6 +231,9 @@ export class Dvizhok {
     this.controls.screenSpacePanning = true;
     this.controls.addEventListener('change', () => this.zapustit());
     this.controls.addEventListener('start', () => this.zapustit());
+    canvas.addEventListener('pointerdown', this.naNazhatie);
+    canvas.addEventListener('pointerup', this.naOtpuskanie);
+    canvas.addEventListener('pointercancel', this.naOtmenuNazhatiya);
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0xdbe4f2, 1.1));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -248,6 +297,70 @@ export class Dvizhok {
   naturalnayaSvg(): string {
     const nv = this.naturalnaya();
     return nv ? naturalnayaSvg(nv) : '';
+  }
+
+  /* ── Сечение по трём точкам ───────────────────────────── */
+
+  /** Включить инструмент на фигуре: выбор начинается заново. */
+  vklyuchitSechenie(figura: Figura): void {
+    this.instr = new SechenieTryokhTochek(FIGURY[figura]());
+    this.razdvig = 0;
+    this.primenitInstrument(true);
+  }
+
+  /** Выключить инструмент (сцену затем задаёт страница). */
+  vyklyuchitSechenie(): void {
+    this.instr = null;
+  }
+
+  get instrument(): SechenieTryokhTochek | null {
+    return this.instr;
+  }
+
+  otmenitTochku(): void {
+    if (!this.instr) return;
+    this.instr.otmenit();
+    this.primenitInstrument(false);
+  }
+
+  sbrositTochki(): void {
+    if (!this.instr) return;
+    this.instr.sbrosit();
+    this.primenitInstrument(false);
+  }
+
+  /** Показать или скрыть секущую плоскость; сечение остаётся. */
+  pokazatPloskost(on: boolean): void {
+    this.pokazPloskosti = on;
+    this.zapustit();
+  }
+
+  /**
+   * Выбор точки в точке экрана (px от левого верхнего угла окна).
+   * Порядок: имеющаяся точка рядом → ребро рядом → лицевая грань.
+   * true — что-то изменилось.
+   */
+  vybratVTochke(x: number, y: number, palec = false): boolean {
+    const ins = this.instr;
+    if (!ins) return false;
+    const R = palec ? 22 : 12;
+    const was = ins.schyot;
+    const hadItog = ins.itog !== null;
+    // 1. Имеющиеся точки.
+    let best: { id: string; d: number } | null = null;
+    for (const t of ins.tochki()) {
+      const q = this.ekran(t.p);
+      const d = Math.hypot(q[0] - x, q[1] - y);
+      if (d < R && (best === null || d < best.d)) best = { id: t.id, d };
+    }
+    if (best) {
+      ins.vzyat(best.id);
+    } else if (!this.vybratNaRebre(ins, x, y, R * 0.8)) {
+      this.vybratNaGrani(ins, x, y);
+    }
+    const changed = ins.schyot !== was || (ins.itog !== null) !== hadItog;
+    this.primenitInstrument(false, !hadItog && ins.itog !== null);
+    return changed;
   }
 
   /* ── Режимы и виды ────────────────────────────────────── */
@@ -386,6 +499,10 @@ export class Dvizhok {
 
   dispose(): void {
     cancelAnimationFrame(this.raf);
+    const canvas = this.renderer.domElement;
+    canvas.removeEventListener('pointerdown', this.naNazhatie);
+    canvas.removeEventListener('pointerup', this.naOtpuskanie);
+    canvas.removeEventListener('pointercancel', this.naOtmenuNazhatiya);
     this.ro.disconnect();
     this.controls.dispose();
     for (const m of this.meshes) {
@@ -397,6 +514,146 @@ export class Dvizhok {
   }
 
   /* ── Внутреннее ───────────────────────────────────────── */
+
+  /** Сцена из инструмента: без сброса вида (кроме первого раза). */
+  private primenitInstrument(novyy: boolean, poyavilos = false): void {
+    const ins = this.instr;
+    if (!ins) return;
+    const sc = ins.scena();
+    this.sc = sc;
+    this.chasti = sc.sechenie ? razrezat(sc.tela[0] as Telo, sc.sechenie, sc.razmer) : null;
+    this.razdvig = 0;
+    this.sobratPodpisi();
+    this.sobratMeshi();
+    if (novyy) {
+      this.razmerOkna();
+      this.sbros(false);
+    }
+    if (poyavilos) {
+      this.pokazatSechenie();
+      // Сечение смотрит на зрителя почти ребром — повернуть к школьному
+      // ракурсу, где его видно шире всего.
+      const k = arr(this.cam.position.clone().sub(this.controls.target).normalize());
+      if (sc.sechenie && Math.abs(dot(k, sc.sechenie.n)) < 0.3) this.vid('shkola');
+    } else {
+      this.poyavlenie = 1;
+    }
+    this.zapustit();
+    this.onInstrument?.({
+      schyot: ins.schyot,
+      podskazkaHtml: texHtml(ins.podskazka),
+      soobshchenie: ins.soobshchenie
+        ? { vid: ins.soobshchenie.vid, html: texHtml(ins.soobshchenie.text) }
+        : null,
+      gotovo: ins.itog !== null,
+    });
+  }
+
+  private naNazhatie = (e: PointerEvent): void => {
+    this.pal += 1;
+    this.nazhatie =
+      this.pal === 1
+        ? { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, tip: e.pointerType }
+        : null; // второй палец — щипок, не выбор
+  };
+
+  private naOtpuskanie = (e: PointerEvent): void => {
+    this.pal = Math.max(0, this.pal - 1);
+    const n = this.nazhatie;
+    if (!n || n.id !== e.pointerId) return;
+    this.nazhatie = null;
+    if (!this.instr || e.button > 0) return;
+    const sdvig = Math.hypot(e.clientX - n.x, e.clientY - n.y);
+    if (sdvig > 6 || performance.now() - n.t > 600) return;
+    const r = this.host.getBoundingClientRect();
+    this.vybratVTochke(e.clientX - r.left, e.clientY - r.top, n.tip !== 'mouse');
+  };
+
+  private naOtmenuNazhatiya = (): void => {
+    this.pal = Math.max(0, this.pal - 1);
+    this.nazhatie = null;
+  };
+
+  /** Луч камеры через точку экрана. */
+  private luch(x: number, y: number): { o: V; d: V } {
+    const rc = new THREE.Raycaster();
+    rc.setFromCamera(new THREE.Vector2((x / this.W) * 2 - 1, 1 - (y / this.H) * 2), this.cam);
+    return { o: arr(rc.ray.origin), d: arr(rc.ray.direction) };
+  }
+
+  /** Новая точка на ребре рядом с нажатием (видимые рёбра — в приоритете). */
+  private vybratNaRebre(ins: SechenieTryokhTochek, x: number, y: number, R: number): boolean {
+    const poly = ins.poly;
+    const telo = teloIzMnogogrannika(poly);
+    const kam = this.kamera();
+    const lic = telo.grani.map((g) => licom(g, kam));
+    const pts = poly.vertices.map((v) => toArray(v.p) as V);
+    let best: { e: number; d: number } | null = null;
+    poly.edges.forEach((e, ei) => {
+      const a = this.ekran(pts[e.a] as V);
+      const b = this.ekran(pts[e.b] as V);
+      const ab: P2 = [b[0] - a[0], b[1] - a[1]];
+      const l2 = ab[0] ** 2 + ab[1] ** 2 || 1;
+      const t = Math.min(1, Math.max(0, ((x - a[0]) * ab[0] + (y - a[1]) * ab[1]) / l2));
+      const d = Math.hypot(a[0] + t * ab[0] - x, a[1] + t * ab[1] - y);
+      const vidno = lic[e.faces[0]] || lic[e.faces[1]];
+      const cost = d + (vidno ? 0 : 4);
+      if (d < R && (best === null || cost < best.d)) best = { e: ei, d: cost };
+    });
+    if (best === null) return false;
+    const ei = (best as { e: number }).e;
+    const e = poly.edges[ei];
+    if (!e) return false;
+    // Параметр на ребре — ближайшая к лучу точка ребра (и для центральной проекции).
+    const A = pts[e.a] as V;
+    const d1 = sub(pts[e.b] as V, A);
+    const { o, d: d2 } = this.luch(x, y);
+    const w = sub(A, o);
+    const a = dot(d1, d1);
+    const b = dot(d1, d2);
+    const c = dot(d2, d2);
+    const den = a * c - b * b;
+    const t = den < 1e-12 ? 0.5 : (b * dot(d2, w) - c * dot(d1, w)) / den;
+    ins.naRebre(ei, Math.min(1, Math.max(0, t)));
+    return true;
+  }
+
+  /** Новая точка на лицевой грани под нажатием. */
+  private vybratNaGrani(ins: SechenieTryokhTochek, x: number, y: number): boolean {
+    const poly = ins.poly;
+    const telo = teloIzMnogogrannika(poly);
+    const kam = this.kamera();
+    const { o, d } = this.luch(x, y);
+    let best: { f: number; s: number; p: V } | null = null;
+    telo.grani.forEach((g, fi) => {
+      if (!licom(g, kam)) return;
+      const den = dot(g.n, d);
+      if (Math.abs(den) < 1e-12) return;
+      const s = (g.c - dot(g.n, o)) / den;
+      const p = add(o, scale(d, s));
+      const inside = g.pts.every((q, i) => {
+        const r = g.pts[(i + 1) % g.pts.length] as V;
+        const e = sub(r, q);
+        const v = sub(p, q);
+        const cr: V = [
+          e[1] * v[2] - e[2] * v[1],
+          e[2] * v[0] - e[0] * v[2],
+          e[0] * v[1] - e[1] * v[0],
+        ];
+        return dot(cr, g.n) >= -1e-9;
+      });
+      if (inside && (best === null || s < best.s)) best = { f: fi, s, p };
+    });
+    if (best === null) return false;
+    const { f, p } = best as { f: number; p: V };
+    const g = telo.grani[f] as Gran;
+    // Координаты в грани-параллелограмме: вдоль первой и последней стороны.
+    const V0 = g.pts[0] as V;
+    const u = sub(g.pts[1] as V, V0);
+    const w = sub(g.pts[g.pts.length - 1] as V, V0);
+    ins.naGrani(f, dot(sub(p, V0), u) / dot(u, u), dot(sub(p, V0), w) / dot(w, w));
+    return true;
+  }
 
   private ustanovitKameru(c: THREE.OrthographicCamera | THREE.PerspectiveCamera): void {
     if (c === this.cam) return;
@@ -437,8 +694,9 @@ export class Dvizhok {
     this.labels.replaceChildren();
     this.podpisi = (this.sc?.metki ?? []).map((m) => {
       const el = document.createElement('span');
-      el.className = m.vid === 'tochka' ? 'z15-ch__label z15-ch__label--tochka' : 'z15-ch__label';
+      el.className = clsxLabel(m.vid === 'tochka', m.vybrana === true);
       el.innerHTML = katex.renderToString(m.name, { throwOnError: false });
+      el.dataset.name = m.name;
       this.labels.appendChild(el);
       const r = el.getBoundingClientRect();
       return { el, w: Math.max(r.width, 8), h: Math.max(r.height, 12) };
@@ -565,15 +823,15 @@ export class Dvizhok {
   }
 
   /** Линии кадра: при разрезе — части, иначе тело, сечение и построение. */
-  private liniiKadra(): { ls: Liniya[]; fill: V[][] } {
+  private liniiKadra(): { ls: Liniya[]; fill: V[][]; ploskost: V[] | null } {
     const sc = this.sc as Scena;
     const kam = this.kamera();
     const s = sc.sechenie;
     const sdv = this.sdvigi();
     if (sdv && this.chasti && s) {
       const tela = [this.chasti.plyus, this.chasti.minus];
-      const ls = linii({ ...sc, tela, otrezki: [] }, kam, sdv);
-      return { ls, fill: sdv.map((d) => s.pts.map((p) => add(p, d))) };
+      const ls = linii({ ...sc, tela, otrezki: [], ploskost: null }, kam, sdv);
+      return { ls, fill: sdv.map((d) => s.pts.map((p) => add(p, d))), ploskost: null };
     }
     // Появление: стороны сечения — на долю периметра.
     const otrezki: Otrezok[] = [];
@@ -587,32 +845,42 @@ export class Dvizhok {
       ostatok -= l;
     }
     otrezki.push(...sc.otrezki.filter((o) => o.vid !== 'sechenie'));
-    const ls = linii({ ...sc, otrezki }, kam);
-    return { ls, fill: s && this.poyavlenie > 0.6 ? [s.pts] : [] };
+    const ploskost = this.pokazPloskosti && this.poyavlenie > 0.6 ? (sc.ploskost ?? null) : null;
+    const ls = linii({ ...sc, otrezki, ploskost }, kam);
+    return { ls, fill: s && this.poyavlenie > 0.6 ? [s.pts] : [], ploskost };
   }
 
   private narisovat(): void {
     if (!this.sc) return;
     const sc = this.sc;
-    const { ls, fill } = this.liniiKadra();
+    const { ls, fill, ploskost } = this.liniiKadra();
     const tri = this.smes;
     const tsv = this.tsveta;
 
-    // Заливка сечения.
-    const fillOp = (0.2 + 0.08 * tri) * Math.max(0, (this.poyavlenie - 0.6) / 0.4);
-    pool(this.gFill, 'polygon', fill.length, (el, i) => {
-      const pts = (fill[i] as V[]).map((p) =>
+    // Заливки: секущая плоскость, затем сечение; линии — поверх них.
+    const vyh = Math.max(0, (this.poyavlenie - 0.6) / 0.4);
+    const zalivki = [
+      ...(ploskost ? [{ pts: ploskost, color: tsv.ploskost, op: 0.09 * vyh }] : []),
+      ...fill.map((pts) => ({ pts, color: tsv.sechenie, op: (0.24 + 0.08 * tri) * vyh })),
+    ];
+    pool(this.gFill, 'polygon', zalivki.length, (el, i) => {
+      const z = zalivki[i] as { pts: V[]; color: string; op: number };
+      const pts = z.pts.map((p) =>
         this.ekran(p)
           .map((x) => x.toFixed(1))
           .join(','),
       );
       el.setAttribute('points', pts.join(' '));
-      el.setAttribute('fill', tsv.sechenie);
-      el.setAttribute('fill-opacity', fillOp.toFixed(3));
+      el.setAttribute('fill', z.color);
+      el.setAttribute('fill-opacity', z.op.toFixed(3));
     });
 
-    // Линии: сначала невидимые, потом видимые — видимые поверх.
-    const order = [...ls].sort((a, b) => Number(a.vidno) - Number(b.vidno));
+    // Линии: сначала невидимые, потом видимые — видимые поверх;
+    // внутри — плоскость, построение, рёбра, сечение.
+    const RANG = { ploskost: 0, vspom: 1, rebro: 2, sechenie: 3 } as const;
+    const order = [...ls].sort(
+      (a, b) => Number(a.vidno) - Number(b.vidno) || RANG[a.vid] - RANG[b.vid],
+    );
     const ekr: (readonly [P2, P2])[] = [];
     pool(this.gLines, 'line', order.length, (el, i) => {
       const l = order[i] as Liniya;
@@ -628,17 +896,30 @@ export class Dvizhok {
           ? tsv.sechenie
           : l.vid === 'vspom'
             ? tsv.vspom
-            : tri > 0.5
-              ? tsv.liniya3d
-              : tsv.liniya;
+            : l.vid === 'ploskost'
+              ? tsv.ploskost
+              : tri > 0.5
+                ? tsv.liniya3d
+                : tsv.liniya;
       el.setAttribute('stroke', color);
       el.setAttribute(
         'stroke-width',
-        l.vid === 'sechenie' ? '2.2' : l.vid === 'vspom' ? '1.2' : '1.4',
+        l.vid === 'sechenie' ? '2.8' : l.vid === 'rebro' ? '1.4' : l.vid === 'vspom' ? '1.2' : '1',
       );
       el.setAttribute('stroke-linecap', 'round');
-      el.setAttribute('stroke-dasharray', l.vidno ? '' : '5 4');
-      el.setAttribute('stroke-opacity', l.vidno ? '1' : (0.85 - 0.3 * tri).toFixed(2));
+      el.setAttribute('stroke-dasharray', l.vidno ? '' : l.vid === 'sechenie' ? '7 5' : '5 4');
+      el.setAttribute(
+        'stroke-opacity',
+        l.vid === 'ploskost'
+          ? l.vidno
+            ? '0.75'
+            : '0.5'
+          : l.vidno
+            ? '1'
+            : (0.85 - 0.3 * tri).toFixed(2),
+      );
+      el.setAttribute('data-vid', l.vid);
+      el.setAttribute('data-vidno', l.vidno ? '1' : '0');
     });
 
     // При разрезе подписи едут вместе со своей частью; точки построения
@@ -656,16 +937,30 @@ export class Dvizhok {
     });
     const tochkaP = (i: number): V => add(sc.metki[i]?.p as V, gde[i] ?? [0, 0, 0]);
 
-    // Точки построения.
+    // Точки построения; выбранные инструментом — крупнее, цветом сечения.
     const dots = sc.metki
       .map((_, i) => i)
-      .filter((i) => sc.metki[i]?.vid === 'tochka' && gde[i] !== null);
+      .filter((i) => (sc.metki[i]?.vid === 'tochka' || sc.metki[i]?.vybrana) && gde[i] !== null)
+      .sort(
+        (a, b) => Number(sc.metki[a]?.vybrana ?? false) - Number(sc.metki[b]?.vybrana ?? false),
+      );
     pool(this.gDots, 'circle', dots.length, (el, i) => {
+      const m = sc.metki[dots[i] as number];
       const p = this.ekran(tochkaP(dots[i] as number));
       el.setAttribute('cx', p[0].toFixed(1));
       el.setAttribute('cy', p[1].toFixed(1));
-      el.setAttribute('r', '3');
-      el.setAttribute('fill', tsv.liniya);
+      if (m?.vybrana) {
+        el.setAttribute('r', '5.5');
+        el.setAttribute('fill', tsv.sechenie);
+        el.setAttribute('stroke', '#fff');
+        el.setAttribute('stroke-width', '2');
+        el.setAttribute('data-vybrana', '1');
+      } else {
+        el.setAttribute('r', '3');
+        el.setAttribute('fill', tsv.liniya);
+        el.setAttribute('stroke', 'none');
+        el.removeAttribute('data-vybrana');
+      }
     });
 
     // Подписи.
@@ -676,17 +971,26 @@ export class Dvizhok {
       ekr,
       c,
       this.podpisi.map((p) => p.dir),
-      5,
+      sc.metki.some((m) => m.vybrana) ? 7 : 5,
     );
     this.podpisi.forEach((p, i) => {
       const q = pos[i];
       p.el.style.visibility = gde[i] === null ? 'hidden' : '';
       if (!q) return;
+      // Якорь подписи — точка на экране (для проверок на сайте).
+      const a = anchors[i] as P2;
+      p.el.dataset.x = a[0].toFixed(1);
+      p.el.dataset.y = a[1].toFixed(1);
       p.dir = q.dir;
       p.el.style.transform = `translate(${q.x.toFixed(1)}px, ${q.y.toFixed(1)}px)`;
     });
   }
 }
+
+const clsxLabel = (tochka: boolean, vybrana: boolean): string =>
+  ['z15-ch__label', tochka ? 'z15-ch__label--tochka' : '', vybrana ? 'z15-ch__label--vybrana' : '']
+    .filter(Boolean)
+    .join(' ');
 
 /** Переиспользовать элементы SVG: столько, сколько нужно в кадре. */
 function pool<K extends 'line' | 'polygon' | 'circle'>(

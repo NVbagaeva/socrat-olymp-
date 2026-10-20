@@ -23,6 +23,7 @@ import {
   isZero,
   lt,
   rat,
+  sign as rsign,
   sub as rsub,
 } from './rational';
 import {
@@ -30,6 +31,7 @@ import {
   type Plane,
   type V3,
   coplanarLines,
+  cross,
   dot,
   intersectLines,
   lerp,
@@ -39,6 +41,7 @@ import {
   parallelPlanes,
   planeThrough,
   sameLine,
+  sub as vsub,
   veq,
 } from './vec';
 
@@ -52,6 +55,8 @@ export type Origin =
   | { op: 'vertex'; vertex: number }
   /** Точка условия на ребре: A + t(B − A); t вне (0; 1) — на продолжении. */
   | { op: 'onEdge'; edge: number; t: Rat }
+  /** Точка условия внутри грани (задана координатами в грани). */
+  | { op: 'onFace'; face: number }
   /** Поставлена «на глаз» — без построения; обоснования нет. */
   | { op: 'free' }
   /** Прямая ребра. */
@@ -112,6 +117,7 @@ export interface Refusal {
     | 'point-on-line'
     | 'name-taken'
     | 'name-invalid'
+    | 'off-face'
     | 'unknown';
   message: string;
 }
@@ -297,6 +303,26 @@ export class Construction {
   /** Отношение AM : MB = m : n → параметр t. Снаружи (M за B или за A) — t = m/(m − n). */
   static ratio(m: number, n: number, outside = false): Rat {
     return outside ? rat(m, m - n) : rat(m, m + n);
+  }
+
+  /**
+   * Точка условия внутри грани (или на её границе). Если точка легла
+   * на ребро или в вершину, лучше брать pointOnEdge и vertex — здесь
+   * это не запрещено, но происхождение будет «в грани».
+   */
+  pointOnFace(face: number, p: V3, name?: string): Result<ObjId> {
+    const f = this.poly.faces[face];
+    if (f === undefined) return refuse('unknown', 'Нет такой грани.');
+    if (!inFace(this.poly, face, p)) {
+      return refuse('off-face', `Точка не лежит в грани $${f.name}$.`);
+    }
+    const nm = name ?? this.freeName();
+    const ren = this.checkName(nm);
+    if (ren !== null) return ren;
+    return {
+      ok: true,
+      value: this.put({ id: '', kind: 'point', name: nm, p, origin: { op: 'onFace', face } }),
+    };
   }
 
   /** Точка «на глаз»: без построения. Обоснования у неё нет. */
@@ -596,6 +622,26 @@ export class Construction {
     }
     return null;
   }
+}
+
+/**
+ * Лежит ли точка в грани (в её плоскости и внутри многоугольника,
+ * граница включена) — точно. Грань выпуклая: точка с одной стороны
+ * от всех её сторон.
+ */
+export function inFace(poly: Polyhedron, face: number, p: V3): boolean {
+  const f = at(poly.faces, face);
+  if (!onPlane(f.plane, p)) return false;
+  let sgn = 0;
+  for (let i = 0; i < f.idx.length; i++) {
+    const a = at(poly.vertices, at(f.idx, i)).p;
+    const b = at(poly.vertices, at(f.idx, (i + 1) % f.idx.length)).p;
+    const s = rsign(dot(cross(vsub(b, a), vsub(p, a)), f.plane.n));
+    if (s === 0) continue;
+    if (sgn !== 0 && s !== sgn) return false;
+    sgn = s;
+  }
+  return true;
 }
 
 /** Параметр t точки P на прямой AB, если P на ней лежит. */
