@@ -19,6 +19,7 @@ export const TSVETA = {
   sechenie: '#e07a2f',
   zalivka: '#e07a2f',
   vspom: '#1f5fd0',
+  ploskost: '#1f5fd0',
 };
 
 /** Базис экрана для параллельной проекции: вправо, вверх, к зрителю. */
@@ -83,6 +84,9 @@ export function chertezhSvg(sc: Scena, k: V, up: V, o: OpciiSvg = {}): string {
   for (const l of ls) {
     vse.push(proj(b, l.a), proj(b, l.b));
   }
+  for (const v of sc.ploskost ?? []) {
+    vse.push(proj(b, v));
+  }
   for (const m of sc.metki) {
     vse.push(proj(b, m.p));
   }
@@ -97,19 +101,32 @@ export function chertezhSvg(sc: Scena, k: V, up: V, o: OpciiSvg = {}): string {
   const f = (x: number) => x.toFixed(1);
 
   const parts: string[] = [];
+  // Порядок заливок: плоскость, затем сечение, затем все линии.
+  if (sc.ploskost) {
+    const pts = sc.ploskost.map((v) => P(v).map(f).join(',')).join(' ');
+    parts.push(
+      `<polygon points="${pts}" fill="${TSVETA.ploskost}" fill-opacity="0.08" stroke="none"/>`,
+    );
+  }
   if (sc.sechenie && !o.bezSecheniya) {
     const pts = sc.sechenie.pts.map((v) => P(v).map(f).join(',')).join(' ');
     parts.push(
       `<polygon points="${pts}" fill="${TSVETA.zalivka}" fill-opacity="0.22" stroke="none"/>`,
     );
   }
-  // Порядок: построение, рёбра, сечение — сечение поверх.
-  const RANG = { vspom: 0, rebro: 1, sechenie: 2 } as const;
+  // Порядок: плоскость, построение, рёбра, сечение — сечение поверх.
+  const RANG = { ploskost: 0, vspom: 1, rebro: 2, sechenie: 3 } as const;
   for (const l of [...ls].sort((x, y) => RANG[x.vid] - RANG[y.vid])) {
     const [a, c] = [P(l.a), P(l.b)];
     const color =
-      l.vid === 'sechenie' ? TSVETA.sechenie : l.vid === 'vspom' ? TSVETA.vspom : TSVETA.liniya;
-    const w = l.vid === 'sechenie' ? 2.2 : l.vid === 'vspom' ? 1.2 : 1.5;
+      l.vid === 'sechenie'
+        ? TSVETA.sechenie
+        : l.vid === 'vspom'
+          ? TSVETA.vspom
+          : l.vid === 'ploskost'
+            ? TSVETA.ploskost
+            : TSVETA.liniya;
+    const w = l.vid === 'sechenie' ? 2.6 : l.vid === 'rebro' ? 1.5 : 1.1;
     const dash = l.vidno ? '' : ' stroke-dasharray="6 4"';
     parts.push(
       `<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(c[0])}" y2="${f(c[1])}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"${dash}/>`,
