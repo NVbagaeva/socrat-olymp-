@@ -1,5 +1,5 @@
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import {
   BLOKI_SPRAVOCHNIKA,
   KAK_POLZOVATSYA_1,

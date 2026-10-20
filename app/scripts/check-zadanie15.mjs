@@ -20,7 +20,12 @@
      — рисунок (src/lib/zadanie15/render): видимость рёбер, сторон
        сечения и вспомогательных прямых для параллельной и центральной
        проекции, разрез тела на две части, натуральная величина,
-       раскладка подписей, SVG для экспорта, сцены витрины.
+       раскладка подписей, SVG для экспорта, сцены витрины;
+     — сечение по трём точкам: треугольник … шестиугольник на кубе и
+       параллелепипеде, через вершину и через ребро, совпадение с
+       гранью, касание, точки на одной прямой и не на поверхности;
+       инструмент выбора (счётчик, отмена, сброс, имена новых вершин),
+       аналитическая видимость сторон сечения и контура плоскости.
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
@@ -498,6 +503,256 @@ for (const p of R.PRIMERY) {
     'имя A_1 в SVG',
   );
   ok(R.imyaSvg("K'").includes('′'), "имя K' в SVG — со штрихом");
+}
+
+/* ── Сечение по трём точкам ─────────────────────────────── */
+
+{
+  const T = K;
+  // Точка на ребре a→b с параметром t (точно).
+  const na = (poly, a, b, t = [1, 2]) => {
+    const A = poly.vertices[T.vertexIndex(poly, a)].p;
+    const B = poly.vertices[T.vertexIndex(poly, b)].p;
+    const tt = rat(t[0], t[1]);
+    const f = (k) => T.add(A[k], T.mul(T.sub(B[k], A[k]), tt));
+    return { x: f('x'), y: f('y'), z: f('z') };
+  };
+  const ve = (poly, n) => poly.vertices[T.vertexIndex(poly, n)].p;
+  const sec3 = (poly, pts) => T.sectionByThreePoints(poly, pts);
+  const vida = (r) => (r.ok ? T.polygonKind(r.section.vertices.map((v) => v.p)) : r.code);
+
+  for (const [poly, nm] of [
+    [cube(6), 'куб'],
+    [box(4, 6, 3), 'параллелепипед'],
+  ]) {
+    const tri = sec3(poly, [ve(poly, 'A_1'), ve(poly, 'B'), ve(poly, 'D')]);
+    ok(
+      tri.ok && tri.kind === 'polygon' && tri.section.vertices.length === 3,
+      `${nm}: A_1BD — треугольник`,
+    );
+    const quad = sec3(poly, [na(poly, 'A_1', 'B_1'), na(poly, 'A_1', 'D_1'), ve(poly, 'B')]);
+    ok(quad.ok && quad.section.vertices.length === 4, `${nm}: M, N, B — четырёхугольник (через D)`);
+    ok(quad.ok && /трапеция/.test(vida(quad)), `${nm}: MNB — трапеция (${vida(quad)})`);
+    const pent = sec3(poly, [na(poly, 'A_1', 'B_1'), na(poly, 'A_1', 'D_1'), ve(poly, 'C')]);
+    ok(pent.ok && pent.section.vertices.length === 5, `${nm}: M, N, C — пятиугольник`);
+    const hex = sec3(poly, [na(poly, 'A', 'B'), na(poly, 'B', 'C'), na(poly, 'C', 'C_1')]);
+    ok(hex.ok && hex.section.vertices.length === 6, `${nm}: середины AB, BC, CC_1 — шестиугольник`);
+    // Плоскость через вершины A и C_1 (и середины BB_1, DD_1).
+    const vert = sec3(poly, [ve(poly, 'A'), na(poly, 'B', 'B_1'), na(poly, 'D', 'D_1')]);
+    ok(
+      vert.ok &&
+        vert.section.vertices.length === 4 &&
+        vert.section.vertices.filter((v) => v.vertex !== undefined).length === 2,
+      `${nm}: через вершину A — четырёхугольник с вершинами A и C_1`,
+    );
+    // Плоскость через ребро AB и C_1: прямоугольник ABC_1D_1.
+    const edge = sec3(poly, [ve(poly, 'A'), ve(poly, 'B'), ve(poly, 'C_1')]);
+    ok(
+      edge.ok &&
+        edge.section.vertices.length === 4 &&
+        edge.section.vertices.every((v) => v.vertex !== undefined) &&
+        vida(edge) === 'прямоугольник',
+      `${nm}: через ребро AB — прямоугольник ABC_1D_1 (${vida(edge)})`,
+    );
+    // Вершины сечения без дублей и упорядочены обходом: соседние
+    // вершины лежат в общей грани.
+    for (const r of [tri, quad, pent, hex, vert, edge]) {
+      const vs = r.section.vertices;
+      const keys = new Set(vs.map((v) => T.toArray(v.p).join(',')));
+      ok(keys.size === vs.length, `${nm}: вершины сечения без дублей`);
+      ok(
+        vs.every((v, i) => v.faces.some((f) => vs[(i + 1) % vs.length].faces.includes(f))),
+        `${nm}: соседние вершины сечения — в одной грани (обход)`,
+      );
+    }
+    // Совпадает с гранью.
+    const face = sec3(poly, [ve(poly, 'A'), ve(poly, 'B'), na(poly, 'C', 'D')]);
+    ok(
+      face.ok && face.kind === 'face' && /ABCD/.test(face.note),
+      `${nm}: три точки в грани — сечение-грань`,
+    );
+    // На одной прямой.
+    const col = sec3(poly, [ve(poly, 'A'), na(poly, 'A', 'B', [1, 3]), ve(poly, 'B')]);
+    ok(
+      !col.ok && col.code === 'collinear' && /одной прямой/.test(col.message),
+      `${nm}: три точки на прямой — отказ`,
+    );
+    const diag = sec3(poly, [ve(poly, 'A'), na(poly, 'A_1', 'B_1'), ve(poly, 'A')]);
+    ok(!diag.ok && diag.code === 'same-point', `${nm}: совпадающие точки — отказ`);
+    // Не на поверхности: центр тела, точка снаружи.
+    const c0 = na(poly, 'A', 'C_1'); // центр тела — середина диагонали
+    const off = sec3(poly, [ve(poly, 'A'), c0, ve(poly, 'B')]);
+    ok(
+      !off.ok && off.code === 'off-surface' && off.point === 1,
+      `${nm}: точка внутри тела — отказ`,
+    );
+    const out = T.sectionByThreePoints(
+      poly,
+      [ve(poly, 'A'), K.v3n(-1, 0, 0), ve(poly, 'B')],
+      ['A', 'X', 'B'],
+    );
+    ok(
+      !out.ok && out.code === 'off-surface' && /\$X\$/.test(out.message),
+      `${nm}: точка снаружи — отказ с именем`,
+    );
+  }
+
+  // Вырожденные плоскости: касание в вершине, по ребру, мимо.
+  const cb = cube(6);
+  const tv = T.sectionByPlane(cb, { n: K.v3n(1, 1, 1), c: rat(0) });
+  ok(!tv.ok && tv.code === 'touch-vertex' && /\$A\$/.test(tv.message), 'касание в вершине A');
+  const te = T.sectionByPlane(cb, { n: K.v3n(0, 1, 1), c: rat(0) });
+  ok(!te.ok && te.code === 'touch-edge' && /\$AB\$/.test(te.message), 'касание по ребру AB');
+  const tn = T.sectionByPlane(cb, { n: K.v3n(1, 0, 0), c: rat(10) });
+  ok(!tn.ok && tn.code === 'none', 'плоскость мимо фигуры');
+
+  // Где точка на поверхности.
+  eqStr(T.placeOnSurface(cb, K.v3n(0, 0, 0))?.kind, 'vertex', 'A — вершина');
+  const pe = T.placeOnSurface(cb, K.v3n(2, 0, 0));
+  ok(pe?.kind === 'edge' && K.ratStr(pe.t) === '1/3', 'точка AB, t = 1/3');
+  eqStr(T.placeOnSurface(cb, K.v3n(2, 3, 0))?.kind, 'face', 'точка в грани ABCD');
+  ok(T.placeOnSurface(cb, K.v3n(2, 3, 1)) === null, 'точка внутри — не на поверхности');
+  ok(T.placeOnSurface(cb, K.v3n(2, 3, -1)) === null, 'точка снаружи — не на поверхности');
+  const sf = T.snapOnFace(cb, T.faceIndex(cb, 'ABCD'), 0.49, 0.26);
+  ok(
+    sf.kind === 'face' && K.toArray(sf.p).join(',') === '1.5,3,0',
+    `округление в грани до 1/12: ${K.toArray(sf.p)}`,
+  );
+  const se = T.snapOnEdge(cb, 0, 0.98);
+  ok(se.kind === 'vertex', 'у конца ребра — вершина');
+}
+
+/* ── Инструмент: выбор точек ────────────────────────────── */
+
+{
+  const I = requireSrc('lib/zadanie15/render/instrument.ts');
+  const poly = cube(6);
+  const ei = (a, b) => K.edgeIndex(poly, a, b);
+  const fwd = (a, b, t) => (poly.vertices[poly.edges[ei(a, b)].a].name === a ? t : 1 - t);
+  const s = new I.SechenieTryokhTochek(poly);
+  eqStr(s.podskazka, 'Выберите три точки на рёбрах или гранях (1/3)', 'подсказка 1/3');
+  ok(s.naRebre(ei('A', 'B'), fwd('A', 'B', 0.52)), 'точка на AB взята');
+  eqStr(s.podskazka, 'Выберите три точки на рёбрах или гранях (2/3)', 'подсказка 2/3');
+  ok(!s.naRebre(ei('A', 'B'), fwd('A', 'B', 0.49)), 'та же точка второй раз не берётся');
+  ok(/уже выбрана/.test(s.soobshchenie?.text ?? ''), 'сообщение «уже выбрана»');
+  ok(s.vzyat(s.c.vertex('B')), 'вершина B взята');
+  eqStr(s.podskazka, 'Выберите три точки на рёбрах или гранях (3/3)', 'подсказка 3/3');
+  // Третья на прямой AB — отказ, остаёмся на 2/3.
+  ok(!s.vzyat(s.c.vertex('A')), 'A на прямой MB — не берётся');
+  ok(/одной прямой/.test(s.soobshchenie?.text ?? ''), 'сообщение «на одной прямой»');
+  eqStr(s.schyot, 2, 'после отказа выбрано две точки');
+  ok(s.naRebre(ei('C', 'C_1'), fwd('C', 'C_1', 0.5)), 'точка на CC_1 взята');
+  ok(s.itog !== null, 'сечение построено');
+  const sc = s.scena();
+  // M и B на ребре AB: плоскость через ребро, сечение ABNK.
+  eqStr(sc.sechenie?.pts.length, 4, 'сечение M, B, N — четырёхугольник');
+  eqStr(
+    sc.metki
+      .filter((m) => m.vybrana)
+      .map((m) => m.name)
+      .sort()
+      .join(','),
+    'B,M,N',
+    'выбранные точки подсвечены',
+  );
+  eqStr(
+    sc.sechenie.names.join(','),
+    sc.sechenie.names.filter((x) => typeof x === 'string' && x.length > 0).join(','),
+    'у всех вершин сечения есть имена',
+  );
+  eqStr(sc.sechenie.names.join(','), 'A,B,N,K', 'новая вершина — следующая свободная буква K');
+  ok(sc.ploskost?.length === 4, 'секущая плоскость — параллелограмм');
+  ok(!s.vzyat(s.c.vertex('D')), 'четвёртая точка не берётся');
+  // Отмена убирает сечение и новые вершины.
+  s.otmenit();
+  ok(s.itog === null && s.schyot === 2, 'отмена: две точки, сечения нет');
+  ok(s.c.byName('N') === undefined && s.c.byName('K') === undefined, 'отмена: N и K удалены');
+  ok(s.naGrani(K.faceIndex(poly, 'CC_1D_1D'), 0.5, 0.5), 'точка в грани взята');
+  ok(s.itog !== null, 'сечение через точку грани');
+  s.sbrosit();
+  ok(s.schyot === 0 && s.itog === null && s.c.byName('M') === undefined, 'сброс выбора');
+  // Три точки одной грани — сечение-грань с пояснением.
+  s.vzyat(s.c.vertex('A'));
+  s.vzyat(s.c.vertex('B'));
+  s.naGrani(K.faceIndex(poly, 'ABCD'), 0.5, 0.5);
+  ok(
+    s.itog?.kind === 'face' && s.soobshchenie?.vid === 'info',
+    'три точки в грани — сечение-грань',
+  );
+  eqStr(s.scena().sechenie?.pts.length, 4, 'сечение-грань нарисовано');
+}
+
+/* ── Видимость: аналитически ────────────────────────────── */
+
+{
+  const I = requireSrc('lib/zadanie15/render/instrument.ts');
+  const poly = cube(6);
+  const ei = (a, b) => K.edgeIndex(poly, a, b);
+  const s = new I.SechenieTryokhTochek(poly);
+  // Правильный шестиугольник: середины AB, BC, CC_1.
+  s.naRebre(ei('A', 'B'), 0.5);
+  s.naRebre(ei('B', 'C'), 0.5);
+  s.naRebre(ei('C', 'C_1'), 0.5);
+  const sc = s.scena();
+  eqStr(sc.sechenie.pts.length, 6, 'шестиугольник инструментом');
+  // Сторона на грани, повёрнутой от зрителя, — штрихом; на лицевой — сплошная.
+  const tela = sc.tela;
+  for (const k of [K0, unit([-0.5, -1, 0.4]), unit([0.6, 0.8, -0.5]), unit([0.2, 0.3, 1])]) {
+    const kam = { vid: 'orto', k };
+    const ls = R.linii(sc, kam).filter((l) => l.vid === 'sechenie');
+    eqStr(ls.length, 6, 'стороны сечения не дробятся');
+    for (const l of ls) {
+      const o = sc.otrezki.find((x) => ptEq(x.a, l.a) && ptEq(x.b, l.b));
+      const lic = o.grani.some((f) => R.licom(tela[0].grani[f], kam));
+      ok(
+        l.vidno === lic,
+        `сторона сечения: видимость по грани (k = ${k.map((x) => x.toFixed(2))})`,
+      );
+    }
+    // Контур плоскости: куски без дыр, есть видимые; закрытая часть —
+    // ровно та, что проецируется на лицевые грани позади них.
+    const pl = R.linii(sc, kam).filter((l) => l.vid === 'ploskost');
+    ok(
+      pl.some((l) => l.vidno),
+      'контур плоскости частично виден',
+    );
+    for (const l of pl) {
+      const m = [0, 1, 2].map((i) => (l.a[i] + l.b[i]) / 2);
+      ok(
+        R.zakrytaKemTo(m, tela, kam, 1e-9) === !l.vidno,
+        'кусок контура: середина согласна с лучом',
+      );
+    }
+  }
+  // Отрезок, протыкающий куб насквозь спереди назад: виден до передней
+  // грани (t = 1/4 точно), дальше закрыт.
+  const kam = { vid: 'orto', k: unit([0.3, -1, 0.2]) };
+  const k = R.kuskiOtrezka([3, -3, 3], [3, 9, 3], tela, kam, 1e-9);
+  ok(k[0].vidno && Math.abs(k[0].t1 - 0.25) < 1e-12, `прокол передней грани: t = ${k[0].t1}`);
+  ok(k.length >= 2 && !k[1].vidno, 'внутри куба — штрихом');
+  // Взгляд ровно спереди: верхняя грань смотрит ребром. Рёбра по краю
+  // видны, стороны сечения на ней — тоже (без мигания штриха).
+  const front = { vid: 'orto', k: [0, -1, 0] };
+  const rebra = R.linii(sc, front).filter((l) => l.vid === 'rebro');
+  const A1B1 = rebra.find(
+    (l) =>
+      (ptEq(l.a, [0, 0, 6]) && ptEq(l.b, [6, 0, 6])) ||
+      (ptEq(l.b, [0, 0, 6]) && ptEq(l.a, [6, 0, 6])),
+  );
+  ok(A1B1?.vidno === true, 'ребро A_1B_1 по краю — сплошное');
+  const persp2 = { vid: 'persp', glaz: [3 + 40, 3 - 100, 3 + 50] };
+  const ps = R.linii(sc, persp2);
+  ok(
+    ps.some((l) => !l.vidno) && ps.some((l) => l.vidno),
+    'центральная проекция: есть сплошные и штрихи',
+  );
+  // SVG экспорта с плоскостью: плоскость, сечение, линии.
+  const svg = R.chertezhSvg(sc, K0, [0, 0, 1]);
+  ok((svg.match(/<polygon/g) ?? []).length === 2, 'SVG: заливки плоскости и сечения');
+  ok(
+    svg.indexOf('fill-opacity="0.08"') < svg.indexOf('fill-opacity="0.22"'),
+    'SVG: плоскость под сечением',
+  );
 }
 
 /* ── Итог ───────────────────────────────────────────────── */

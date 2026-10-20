@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
 import type { TutorMaterial } from '@/content/sections';
@@ -25,6 +26,11 @@ export interface RazdelTabsProps {
    * с раскрытым меню.
    */
   tutorsTail?: string;
+  /**
+   * Слева в строке ленты, прилипает вместе с ней: плашка «раздел ▾»
+   * с меню разделов (RazdelyNav), как у №12.
+   */
+  before?: ReactNode;
 }
 
 /**
@@ -44,7 +50,7 @@ export interface RazdelTabsProps {
  * по вхождению строки: иначе «trenazher» нашёлся бы и внутри
  * «trenazher/uznay-metod».
  */
-export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) {
+export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTabsProps) {
   const pathname = usePathname();
   const strip = useRef<HTMLDivElement>(null);
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
@@ -105,6 +111,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
   if (tutors === undefined) {
     return (
       <div className="topic-tabs-row">
+        {before}
         <div className="topic-tabs" ref={strip}>
           {lenta}
         </div>
@@ -119,6 +126,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
       open={menu}
       onOpenChange={setMenu}
       stripRef={strip}
+      before={before}
     >
       {lenta}
     </TutorMenu>

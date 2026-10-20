@@ -70,6 +70,9 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  '/zadaniya/16/',
+  '/zadaniya/16/teoriya/',
+  '/zadaniya/16/opornye-zadachi/',
   /* №12: над лентой в той же липкой строке — плашка разделов. */
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
@@ -196,17 +199,34 @@ async function proverit(engine, browserType) {
     /* Подпункт содержания теории №11: блок встаёт под лентой. */
     const page = await context.newPage();
     await page.goto(BASE + '/zadaniya/11/teoriya/', { waitUntil: 'networkidle' });
-    if (size.isMobile) {
-      await page.locator('.topic-open__btn').click();
-    }
+    /* Обработчики вешает React при гидратации. Тяжёлая страница в
+       WebKit гидратируется позже networkidle, и ранний клик теряется:
+       шторка не открывается, раздел не становится активным. Поэтому
+       жмём, пока не наступит ожидаемое, — не больше пяти раз. */
+    const nazhat = async (target, done, state = 'visible') => {
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        await target.click();
+        try {
+          await done.waitFor({ state, timeout: 2000 });
+          return;
+        } catch {
+          /* следующая попытка */
+        }
+      }
+    };
     const where = `${engine}, ${size.name}, содержание теории №11`;
     const smesi = page.locator('.contents-item', { hasText: 'Смеси и сплавы' }).last();
-    await smesi.click();
-    await page.waitForTimeout(900);
-    if (size.isMobile) {
-      await page.locator('.topic-open__btn').click();
-    }
     const sub = page.locator('.contents-sub__item', { hasText: 'Таблица' }).last();
+    if (size.isMobile) {
+      await nazhat(page.locator('.topic-open__btn'), smesi);
+    }
+    /* На телефоне выбор раздела закрывает шторку: подпункты есть в
+       разметке, но скрыты до следующего открытия. */
+    await nazhat(smesi, sub, 'attached');
+    await page.waitForTimeout(900);
+    if (size.isMobile && !(await sub.isVisible())) {
+      await nazhat(page.locator('.topic-open__btn'), sub);
+    }
     check((await sub.count()) > 0, `${where}: у открытого раздела нет подпунктов`);
     if ((await sub.count()) > 0) {
       await sub.click();

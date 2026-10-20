@@ -4,18 +4,8 @@ import { useId, useState } from 'react';
 import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
 import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { Badge, Input } from '@/components/ui';
-import {
-  CountPicker,
-  Note,
-  Option,
-  OptionGroup,
-  SkillCards,
-  StepHead,
-  countLabel,
-  countOf,
-  useCountChoice,
-  type SkillItem,
-} from '../configurator';
+import { Note, Option, OptionGroup, StepHead, countLabel, type SkillItem } from '../configurator';
+import { SostavPicker, type SostavValue } from '../ves12/SostavPicker';
 import {
   generatorPage,
   sheetLayouts,
@@ -28,7 +18,6 @@ import {
 import { firstLevel, skillLevels, type SkillLevel, type SkillLevelId }
   from '@/content/skills12';
 import { counted } from '@/lib/plural';
-import { planCounts } from '@/lib/sheetPlan';
 import { sheetQuery, subtitleOf } from '@/lib/generatorQuery';
 import { TitleText } from '../TitleText';
 import { KitBar } from './KitBar';
@@ -76,20 +65,28 @@ export function GeneratorScreen({
   const [customKind, setCustomKind] = useState('');
   const [date, setDate] = useState('');
   const dateId = useId();
-  const [selected, setSelected] = useState<string[]>(skills[0] === undefined ? [] : [skills[0].id]);
-  const [count, setCount] = useCountChoice();
-  const [level, setLevel] = useState<SkillLevelId | null>(firstLevel(skills[0]?.levels ?? []));
+  /* Задачи по прототипам — счётчиками общего выбора состава (тот же, что у
+     зачётной и генератора по всем типам №12). По умолчанию — по 2. */
+  const [sostav, setSostav] = useState<SostavValue>(() => ({
+    counts: Object.fromEntries(skills.map((item) => [item.id, Math.min(2, item.count)])),
+    off: [],
+  }));
+  const selected = skills.filter((item) => (sostav.counts[item.id] ?? 0) > 0).map((item) => item.id);
+  const [levelChoice, setLevel] = useState<SkillLevelId | null>(firstLevel(skills[0]?.levels ?? []));
   const [layout, setLayout] = useState<SheetLayoutId>('single');
   const [theme, setTheme] = useState<SheetThemeId>('color');
   const [variants, setVariants] = useState(1);
 
   const chosen = skills.filter((item) => selected.includes(item.id));
-  /* «Все» — сколько задач в выбранных наборах на самом деле. */
-  const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
-  /* null — в поле «Своё» пусто: лист не собирается. */
-  const chosenCount = countOf(count, allCount);
+  const per = Object.fromEntries(chosen.map((item) => [item.id, sostav.counts[item.id] ?? 0]));
+  const total = chosen.reduce((sum, item) => sum + (sostav.counts[item.id] ?? 0), 0);
+  /* null — задач нет: лист не собирается. */
+  const chosenCount = total > 0 ? total : null;
   const levelsOfChosen = chosen.flatMap((item) => item.levels);
   const shownLevels = levels.filter((item) => levelsOfChosen.includes(item.id));
+  /* Уровень, которого у выбранных прототипов нет, не держится. */
+  const level =
+    levelChoice !== null && levelsOfChosen.includes(levelChoice) ? levelChoice : firstLevel(levelsOfChosen);
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
@@ -106,52 +103,17 @@ export function GeneratorScreen({
       kind: kindTitle,
       date,
       variants,
+      per,
     });
     return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
   };
-  /* Доли навыков на листе — тот же план, что у страницы печати:
-     нехватку у навыка учитель видит до печати. */
-  const plan = planCounts(
-    chosen.map((item) => ({ id: item.id, capacity: item.count })),
-    chosenCount ?? 0,
+  /* Шаблон «Каждый по N», которому соответствуют счётчики. */
+  const activeEach = [2, 3, 5].find((n) =>
+    skills.every((item) => (sostav.counts[item.id] ?? 0) === Math.min(n, item.count)),
   );
-  /* Банк кончился у всех навыков — отдавать некому, и про отдачу
-     говорить нечего: одна фраза о том, сколько всего есть. */
-  const warnings = [
-    ...(plan.overflow > 0 ? [] : plan.shortages).map((item) => {
-      const title = chosen.find((skill) => skill.id === item.id)?.title ?? item.id;
-      return generatorPage.params.shortage
-        .replace('{title}', title)
-        .replace('{have}', counted(item.have, 'задача', 'задачи', 'задач'))
-        .replace('{give}', String(item.want - item.have));
-    }),
-    ...(plan.overflow > 0
-      ? [
-          generatorPage.params.overflow
-            .replace('{have}', counted(allCount, 'задача', 'задачи', 'задач'))
-            .replace('{want}', String(chosenCount ?? 0)),
-        ]
-      : []),
-  ];
-  /* Пустое поле «Своё» — листа нет, ссылки выключены. */
+  /* Задач нет — листа нет, ссылки выключены. */
   const ready = chosenCount !== null;
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
-
-  function toggleSkill(id: string) {
-    /* Последний выбранный навык снять нельзя: пустой вариант не
-       собирается, и кнопка без выбора обещала бы то, чего нет. */
-    const next = selected.includes(id)
-      ? selected.filter((item) => item !== id)
-      : [...selected, id];
-    if (next.length === 0) {
-      return;
-    }
-    setSelected(next);
-    const levels = skills.filter((item) => next.includes(item.id)).flatMap((item) => item.levels);
-    if (level === null || !levels.includes(level)) {
-      setLevel(firstLevel(levels));
-    }
-  }
 
   return (
     <section className="cfg">
@@ -222,12 +184,29 @@ export function GeneratorScreen({
               title={generatorPage.skills.title}
               lead={generatorPage.skills.lead.replace('{family}', family)}
             />
-            <SkillCards
-              items={skills}
-              selected={selected}
-              onToggle={toggleSkill}
-              multiple
-              labelledBy="gen-step-skills"
+            <SostavPicker
+              rows={skills.map((item) => ({
+                id: item.id,
+                title: item.title,
+                ...(item.titleHtml === undefined ? {} : { titleHtml: item.titleHtml }),
+                code: item.code ?? item.id,
+                media: item.chart,
+                max: item.count,
+                sets: [],
+              }))}
+              soon={[]}
+              templates={[2, 3, 5].map((n) => ({
+                id: `po-${n}`,
+                title: generatorPage.skills.each(n),
+                lead: generatorPage.skills.eachLead(n * skills.length),
+                icon: 'sheet',
+                counts: Object.fromEntries(skills.map((item) => [item.id, Math.min(n, item.count)])),
+              }))}
+              activeTemplate={activeEach === undefined ? null : `po-${activeEach}`}
+              value={sostav}
+              onChange={setSostav}
+              listTitle={generatorPage.skills.list}
+              max={10}
             />
           </section>
 
@@ -239,20 +218,6 @@ export function GeneratorScreen({
               lead={generatorPage.params.lead}
             />
             <div className="cfg-params">
-              <CountPicker
-                id="gen-param-count"
-                label={generatorPage.params.count}
-                max={allCount}
-                value={count}
-                onChange={setCount}
-                allWord={generatorPage.params.all}
-              />
-              {warnings.map((text) => (
-                <Note key={text} tone="warning">
-                  {text}
-                </Note>
-              ))}
-
               {shownLevels.length === 0 ? null : (
                 <OptionGroup id="gen-param-level" label={generatorPage.params.level}>
                   {shownLevels.map((item) => (

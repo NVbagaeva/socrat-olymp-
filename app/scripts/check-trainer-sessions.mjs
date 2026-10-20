@@ -333,28 +333,9 @@ const TRAINERS = [
     scope: '4',
     answer: answer45,
   },
-  ...solid3Urls().map((url) => ({
-    name: `№3 ${url.split('/')[3] === 'trenazher' ? 'общий' : url.split('/')[3]}`,
-    url,
-    scope: url.split('/')[3] === 'trenazher' ? '3' : `3:${url.split('/')[3]}`,
-    answer: answer3,
-    rep: url === '/zadaniya/3/trenazher/',
-    /* У общего тренажёра №3 своей ленты вкладок нет: метке негде гореть. */
-    tabs: url !== '/zadaniya/3/trenazher/',
-  })),
+  /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
+  { name: '№3', url: '/zadaniya/3/trenazher/', scope: '3', answer: answer3, rep: true },
 ];
-
-/** Тренажёры №3: общий и по фигурам — по папкам сборки. */
-function solid3Urls() {
-  const dir = path.join(OUT, 'zadaniya', '3');
-  const figures = fs.existsSync(dir)
-    ? fs
-        .readdirSync(dir)
-        .filter((name) => fs.existsSync(path.join(dir, name, 'trenazher', 'index.html')))
-        .sort()
-    : [];
-  return ['/zadaniya/3/trenazher/', ...figures.map((name) => `/zadaniya/3/${name}/trenazher/`)];
-}
 
 /* ── Статический сервер над out/ ────────────────────────────── */
 

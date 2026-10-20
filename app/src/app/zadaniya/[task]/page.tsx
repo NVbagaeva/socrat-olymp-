@@ -159,6 +159,7 @@ export default async function SectionPage({ params }: { params: Params }) {
             description={section.description}
             subtopics={subtopics}
             prototypes={prototypes}
+            vesRazdel={section.slug === '12'}
           />
         </Suspense>
       </main>

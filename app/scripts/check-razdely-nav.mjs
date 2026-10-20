@@ -516,7 +516,8 @@ for (const size of SIZES) {
   check(podtemy.overlap === 0, where('«Подтемы»: стрелка налезает на иконку'));
 
   /* Окно выбора типа функции: иконки на месте, старых схем нет, названия
-     не рвутся по слову (на телефоне), отметки: галочка у открытых. */
+     не рвутся по слову (на телефоне). Галочек нет совсем: это переход,
+     а не выбор; у открытых разделов — стрелка «→». */
   await page.goto(BASE + '/zadaniya/', { waitUntil: 'networkidle' });
   await page
     .locator('.tasks-grid button, .tasks-grid [role=button]')
@@ -536,8 +537,9 @@ for (const size of SIZES) {
       cards: cards.length,
       icons: document.querySelectorAll('.subtopic-card picture.razdel-ico img').length,
       oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
-      checks: document.querySelectorAll('.subtopic-card__check:not(.subtopic-card__check--empty)')
-        .length,
+      checks: document.querySelectorAll('.subtopic-card__check').length,
+      arrows: document.querySelectorAll('a.subtopic-card .subtopic-card__go').length,
+      links: document.querySelectorAll('a.subtopic-card').length,
       soonDim: document.querySelectorAll('.subtopic-card--soon picture.razdel-ico--soon').length,
       quadLines:
         quad === undefined
@@ -554,9 +556,10 @@ for (const size of SIZES) {
     where(`окно выбора: иконок ${okno.icons} из ${okno.cards}`),
   );
   check(okno.oldCharts === 0, where('в окне выбора остались старые схематичные значки'));
+  check(okno.checks === 0, where(`окно выбора: галочек ${okno.checks}, а их быть не должно`));
   check(
-    okno.checks === OPEN,
-    where(`окно выбора: галочек ${okno.checks}, нужно ${OPEN} (открытые разделы)`),
+    okno.arrows === okno.links && okno.links >= OPEN,
+    where(`окно выбора: стрелок ${okno.arrows} у ${okno.links} карточек-ссылок`),
   );
   check(okno.soonDim === SOON, where('окно выбора: иконки «Скоро» не бледные'));
   if (size.isMobile) {

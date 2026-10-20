@@ -1,0 +1,518 @@
+/* «Весь №12»: карточки входа, выбор типов и прототипов, экраны
+   зачётной работы и генератора по всем типам, онлайн-режим ученика. */
+
+/* ── Карточки «Весь раздел» ─────────────────────────────────────── */
+
+.ves-razdel {
+  margin: 0;
+}
+.ves-razdel__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.ves-razdel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.ves-razdel__list > li {
+  display: flex;
+}
+.ves-razdel--page {
+  margin-bottom: var(--space-8);
+}
+.ves-razdel--menu .ves-razdel__list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+/* Карточка — переход, как у типов функций: в покое светлая с тонкой
+   рамкой, подсветка — при наведении мышью и фокусе с клавиатуры. */
+.ves-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease),
+    box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
+}
+.ves-card__ico {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  transition: transform 180ms var(--ease);
+}
+.ves-card__ico svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ves-card__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.ves-card__name {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.ves-card__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.ves-card__go {
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 180ms var(--ease),
+    transform 180ms var(--ease),
+    color 180ms var(--ease);
+}
+.ves-card__go svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (hover: hover) {
+  .ves-card:hover {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .ves-card:hover .ves-card__go {
+    opacity: 1;
+    transform: none;
+  }
+  .ves-card:hover .ves-card__ico {
+    transform: scale(1.05);
+  }
+}
+.ves-card:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  transform: translateY(-2px);
+}
+.ves-card:focus-visible .ves-card__go {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: none) {
+  .ves-card .ves-card__go {
+    opacity: 1;
+    transform: none;
+    color: var(--color-text-tertiary);
+  }
+  .ves-card:active {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .ves-card:active .ves-card__go {
+    color: var(--color-primary);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ves-card,
+  .ves-card__go,
+  .ves-card__ico {
+    transition: none;
+  }
+  .ves-card:hover,
+  .ves-card:focus-visible,
+  .ves-card:active,
+  .ves-card .ves-card__go,
+  .ves-card:hover .ves-card__ico {
+    transform: none;
+  }
+}
+/* Заголовок «Или выберите тип функции» в окне. */
+.ves-or {
+  margin: var(--space-5) 0 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.ves-or--page {
+  margin: 0 0 var(--space-4);
+}
+.ves-razdel--dialog {
+  margin-top: var(--space-4);
+}
+@media (max-width: 767.98px) {
+  .ves-razdel__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Ссылки для учеников ───────────────────────────────────────── */
+
+.ves-links {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.ves-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.ves-link__label {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ves-link__url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--color-primary);
+}
+@media (max-width: 767.98px) {
+  .ves-link {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .ves-link__url {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+/* ── Онлайн-режим ученика ───────────────────────────────────────── */
+
+.exam-bad,
+.exam-start {
+  max-width: 720px;
+}
+.exam-start {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.exam-start__title {
+  margin: 0;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  color: var(--color-text-brand);
+}
+.exam-start__meta,
+.exam-start__hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.exam-start__warn {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.exam-start__label,
+.exam-start__variant {
+  margin: 0;
+  font-weight: 600;
+}
+.exam-start__variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.exam-variant {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+.exam-variant.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.exam-start__rules {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--color-text-secondary);
+}
+.exam-head {
+  margin: 0 0 var(--space-3);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+
+.exam {
+  display: grid;
+  gap: var(--space-4);
+}
+.exam__timer {
+  justify-self: start;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.exam__timer.is-low {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.exam__nav ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.exam__no {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.exam__no.is-answered {
+  background: var(--color-surface-soft);
+  border-color: var(--color-accent-soft);
+}
+.exam__no.is-current {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+.exam__no:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.exam__task {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.exam__kind {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.exam__question {
+  font-size: 17px;
+  line-height: 26px;
+}
+.exam__chart {
+  max-width: 520px;
+}
+.exam__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.exam__answer {
+  display: grid;
+  gap: var(--space-2);
+}
+.exam__label {
+  font-weight: 600;
+}
+.exam__field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.exam__field .input {
+  max-width: 14rem;
+}
+.exam__options {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.exam__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.exam__option.is-checked {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.exam__option-no {
+  font-weight: 600;
+}
+.exam__saved {
+  min-height: 20px;
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-success);
+}
+.exam__moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.exam__moves .btn--danger {
+  margin-left: auto;
+}
+
+/* Итоги: оценка и шкала над общей статистикой. */
+.exam-result {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.exam-result__grade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+.exam-result__label {
+  font-weight: 600;
+}
+.exam-result__mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 30px;
+  font-weight: 700;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+.exam-result__mark--2 {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+.exam-result__score {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.exam-result__scale {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.exam-result__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+}
+.exam-review .is-right {
+  color: var(--color-success);
+}
+.exam-review .is-wrong {
+  color: var(--color-error);
+}
+@media (max-width: 767.98px) {
+  .exam__task,
+  .exam-start {
+    padding: var(--space-4);
+  }
+  .exam__moves .btn--danger {
+    margin-left: 0;
+  }
+}
+
+/* Страница №12 на телефоне: первая карточка раздела должна быть видна на
+   первом экране (test:zadanie-hero), поэтому «Весь раздел» здесь — строка
+   из двух компактных кнопок, без заголовков и подписей. */
+@media (max-width: 767.98px) {
+  .ves-razdel--page {
+    margin-bottom: var(--space-3);
+  }
+  .ves-razdel--page .ves-razdel__title,
+  .ves-or--page {
+    display: none;
+  }
+  .ves-razdel--page .ves-razdel__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .ves-razdel--page .ves-card {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: var(--space-2);
+    min-height: 52px;
+    padding: var(--space-2);
+  }
+  .ves-razdel--page .ves-card__ico {
+    width: 32px;
+    height: 32px;
+  }
+  .ves-razdel--page .ves-card__ico svg {
+    width: 20px;
+    height: 20px;
+  }
+  .ves-razdel--page .ves-card__name {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .ves-razdel--page .ves-card__lead,
+  .ves-razdel--page .ves-card__go {
+    display: none;
+  }
+}

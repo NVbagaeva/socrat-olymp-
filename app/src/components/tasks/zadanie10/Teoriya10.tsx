@@ -11,7 +11,7 @@ import {
 } from '@/components/teoriya/Ramki';
 import { EdinicyStepeni, KartinkaStepeni, ShagiRazbora } from '@/components/teoriya/EdinicyStepeni';
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import {
   FIZIKA_10,
   RAZDELY_TEORII_10,

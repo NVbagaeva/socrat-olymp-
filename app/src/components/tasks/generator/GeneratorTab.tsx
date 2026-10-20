@@ -24,9 +24,9 @@ export interface GeneratorTabProps {
  */
 export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
   const family = findManifestFamily(subtopic.id);
-  /* Подписи уровней и плашка «откуда задания» — подтемы: у
-     квадратичной наборы собственные, и обещать прототипы ФИПИ
-     нельзя, а уровень у неё не про коэффициент b. */
+  /* Подписи уровней — подтемы: у квадратичной уровень не про
+     коэффициент b. Плашка «откуда задания» у всех подтем одна: наборы —
+     прототипы открытого банка ФИПИ. */
   return (
     <GeneratorScreen
       base={base}
@@ -34,11 +34,7 @@ export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
       familyIcon={icon}
       skills={skillItems(family)}
       levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-      note={
-        subtopic.id === 'quadratic' || subtopic.id === 'rational' || subtopic.id === 'irrational'
-          ? generatorPage.summary.noteOwn
-          : generatorPage.summary.note
-      }
+      note={generatorPage.summary.note}
     />
   );
 }
