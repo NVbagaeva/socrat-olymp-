@@ -1,0 +1,203 @@
+/* Стереометрия (№3 и №15): то, чего нет в общих слоях раздела.
+   Лента, плашка, меню, «Содержание» и карточки разделов — общие
+   (components.css, razdely.css, topic.css); здесь только своё. */
+
+/* ── Меню разделов: ссылки к спискам заданий части 1 и части 2 ── */
+.stereo-chasti {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+.stereo-chasti__link {
+  justify-content: center;
+  min-height: 44px;
+  text-align: center;
+}
+
+/* ── «О задании» ── */
+.stereo-about {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 72ch;
+  margin-bottom: var(--space-8);
+}
+.stereo-about__p {
+  margin: 0;
+}
+.stereo-tipy {
+  display: grid;
+  gap: var(--space-3);
+}
+.stereo-tipy__lead {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+.stereo-tipy__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-3);
+}
+.stereo-tip {
+  display: grid;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.stereo-tip:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+.stereo-tip__title {
+  font-weight: 600;
+}
+.stereo-tip__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Теория: план главы, пока она пишется ── */
+.stereo-plan {
+  display: grid;
+  gap: var(--space-3);
+}
+.stereo-plan__label {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.stereo-plan__list {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1);
+}
+.stereo-plan__note {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* «Прототипы банка»: номера плашками, название — во всплывающей подсказке. */
+.stereo-gde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.stereo-gde__label {
+  margin-right: var(--space-1);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+.stereo-gde__chip {
+  display: inline-block;
+  min-width: 2em;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Справочник формул: шпаргалки групп банка, по одной в свёртке. */
+.stereo-shpargalki {
+  display: grid;
+  gap: var(--space-3);
+}
+.stereo-shpargalka {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.stereo-shpargalka__title {
+  padding: var(--space-3) var(--space-4);
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.stereo-shpargalka[open] > .stereo-shpargalka__title {
+  border-bottom: 1px solid var(--color-border);
+}
+.stereo-shpargalka > .sheet {
+  padding: var(--space-4);
+}
+
+/* Пункты шпаргалки (components/tasks/SheetBlock): чертёж слева, текст
+   справа; без чертежа текст во всю ширину. */
+.sheet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+.sheet__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.sheet__item:has(.sheet__fig) {
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+.sheet__fig {
+  display: block;
+}
+.sheet__fig .solid-wrap .solid {
+  width: 100%;
+  height: auto;
+  max-width: 220px;
+}
+.sheet__text {
+  display: block;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+.sheet__formula {
+  display: inline;
+}
+/* Длинная формула отдельной строкой уезжает вбок внутри себя. */
+.sheet__formula--block {
+  display: block;
+  overflow-x: auto;
+}
+
+@media (max-width: 767.98px) {
+  .sheet__item,
+  .sheet__item:has(.sheet__fig) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet__fig .solid-wrap .solid {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+  .stereo-chasti {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

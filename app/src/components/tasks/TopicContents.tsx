@@ -4,6 +4,8 @@ import { clsx } from 'clsx';
 import { TitleText } from './TitleText';
 
 export interface ContentsItem {
+  /** Номер на экране. Не задан — место в списке, с единицы. */
+  nomer?: number;
   id: string;
   title: string;
   /** Заголовок, набранный KaTeX на сервере. Нет — выводится title. */
@@ -67,7 +69,7 @@ export function TopicContents({
             {/* Номер считается по месту в списке: руками он нигде
                 не записан и не разъедется при правке содержания. */}
             <span className="contents-item__no" aria-hidden="true">
-              {item.skoro ? <ZamokIkonka /> : index + 1}
+              {item.skoro ? <ZamokIkonka /> : (item.nomer ?? index + 1)}
             </span>
             <span className="contents-item__title">
               <TitleText title={item.title} html={item.titleHtml} />

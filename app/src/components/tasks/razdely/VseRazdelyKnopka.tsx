@@ -10,6 +10,8 @@ export interface VseRazdelyKnopkaProps {
    * страницы не загрузился, и при открытии в новой вкладке браузера.
    */
   href: string;
+  /** Подпись кнопки. Не задана — «Все разделы №<no>». */
+  podpis?: string;
 }
 
 /**
@@ -17,7 +19,7 @@ export interface VseRazdelyKnopkaProps {
  * плашка над вкладками. Само меню живёт при плашке (RazdelyNav),
  * кнопка только зовёт его событием.
  */
-export function VseRazdelyKnopka({ no, href }: VseRazdelyKnopkaProps) {
+export function VseRazdelyKnopka({ no, href, podpis }: VseRazdelyKnopkaProps) {
   return (
     <Link
       className="razdely-vse"
@@ -42,7 +44,7 @@ export function VseRazdelyKnopka({ no, href }: VseRazdelyKnopkaProps) {
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="m15 6-6 6 6 6" />
       </svg>
-      Все разделы №{no}
+      {podpis ?? `Все разделы №${no}`}
     </Link>
   );
 }

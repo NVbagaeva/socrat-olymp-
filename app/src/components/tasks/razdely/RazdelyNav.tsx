@@ -3,12 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
+import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon } from '@/components/ui';
 import { MetkaTrenirovki, RazdelKartochka, StrelkaVpravo } from './RazdelKartochka';
-import { VesRazdelCards } from '../ves12/VesRazdelCards';
-import { vesRazdel } from '@/content/ves12';
 import { RazdelIkonka } from './RazdelIkonka';
 import { useNezavershennye } from './trenirovki';
 import { RAZDELY_OPEN_EVENT, type RazdelKarta, type RazdelyData } from './types';
@@ -51,6 +49,10 @@ function prostoyShchelchok(event: ReactMouseEvent): boolean {
 export interface RazdelyNavProps extends RazdelyData {
   /** Вкладка, открытая сейчас: в другом разделе откроется она же. */
   vkladka: string;
+  /** Первый пункт меню над карточками: у №12 — весь раздел целиком. */
+  dop?: ReactNode;
+  /** Последний пункт меню под карточками: у стереометрии — «Все задания части 1 и 2». */
+  niz?: ReactNode;
 }
 
 type Faza = 'closed' | 'open' | 'closing';
@@ -70,7 +72,8 @@ type Faza = 'closed' | 'open' | 'closing';
  * «Назад» из нового раздела ведёт прямо в прежний, на ту вкладку,
  * с которой ушли.
  */
-export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
+export function RazdelyNav({ no, chi, razdely, current, vkladka, dop, niz }: RazdelyNavProps) {
+  const chego = chi ?? `задания №${no}`;
   const router = useRouter();
   const [faza, setFaza] = useState<Faza>('closed');
   /* Панель потянули вниз: на сколько пикселей. */
@@ -365,7 +368,7 @@ export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
           />
         )}
         <span className="razdely-plashka__text">
-          <span className="sr-only">Раздел задания №{no}: </span>
+          <span className="sr-only">Раздел {chego}: </span>
           {tekushchiy?.title}
         </span>
         <svg
@@ -399,7 +402,7 @@ export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
                 <div className="razdely-menu__head">
                   <span className="razdely-menu__grip" aria-hidden="true" />
                   <h2 className="razdely-menu__title" id={titleId}>
-                    Все разделы задания №{no}
+                    Все разделы {chego}
                   </h2>
                   <button
                     type="button"
@@ -413,18 +416,11 @@ export function RazdelyNav({ no, razdely, current, vkladka }: RazdelyNavProps) {
                   </button>
                 </div>
                 <ul className="razdely-menu__list" ref={list}>
-                  {/* Первый пункт — весь раздел: зачётная работа и
-                      генератор по всем типам. В прокрутке вместе со
-                      списком: на телефоне панель невысокая. */}
-                  {String(no) === '12' ? (
-                    <li className="razdely-menu__ves">
-                      <VesRazdelCards place="menu" />
-                      <h3 className="razdely-menu__sub">{vesRazdel.orType}</h3>
-                    </li>
-                  ) : null}
+                  {dop === undefined ? null : <li className="razdely-menu__ves">{dop}</li>}
                   {razdely.map((razdel) => (
                     <li key={razdel.id}>{karta(razdel)}</li>
                   ))}
+                  {niz === undefined ? null : <li className="razdely-menu__niz">{niz}</li>}
                 </ul>
               </div>
             </div>,

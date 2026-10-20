@@ -9,17 +9,24 @@ function novyySeed(): number {
   return (Date.now() ^ Math.floor(Math.random() * 0x7fffffff)) >>> 0 || 1;
 }
 
+export interface RazdelPechati {
+  /** Адрес листа ученика раздела, со слешем на конце. */
+  base: string;
+  nazvanie: string;
+}
+
 /**
- * Лист для печати раздела: число задач и набор. Обе ссылки ведут на
+ * Лист для печати: раздел, число задач и набор. Обе ссылки ведут на
  * один и тот же набор (seed в адресе) — лист ученика и лист учителя
  * всегда про одни и те же задачи.
  */
-/** base — адрес листа ученика раздела, со слешем на конце. */
-export function Pechat3Panel({ base }: { base: string }) {
+export function Pechat3Panel({ razdely }: { razdely: readonly RazdelPechati[] }) {
   const [n, setN] = useState(6);
   const [seed, setSeed] = useState(1);
+  const [vybor, setVybor] = useState(0);
   const q = adresLista({ n, seed, theme: 'color' });
   const g = SHEET_3.generator;
+  const base = razdely[vybor]?.base ?? razdely[0]?.base ?? '';
   return (
     <section className="z3t-print" aria-labelledby="z3t-print-h">
       <h2 id="z3t-print-h" className="z3t-print__title">
@@ -27,6 +34,16 @@ export function Pechat3Panel({ base }: { base: string }) {
       </h2>
       <p className="z3t-print__lead">{g.lead}</p>
       <div className="z3t-print__row">
+        <label className="z3t-print__field">
+          {g.razdel}
+          <select value={vybor} onChange={(e) => setVybor(Number(e.target.value))}>
+            {razdely.map((r, i) => (
+              <option key={r.base} value={i}>
+                {r.nazvanie}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="z3t-print__field">
           {g.skolko}
           <select value={n} onChange={(e) => setN(Number(e.target.value))}>

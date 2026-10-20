@@ -4,7 +4,7 @@ import { Details } from '@/components/ui';
 import { EdinicyStepeni } from '@/components/teoriya/EdinicyStepeni';
 import { chastEdinic, YAKOR_EDINIC } from '@/content/teoriya-edinicy';
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { LAYFHAKI, LOVUSHKI, RAZDELY_TEORII_11, type RazdelTeorii11 } from '@/content/teoriya11';
 import { PROGRESS_11 } from '@/content/zadanie11';
 import { katex } from '@/lib/graph/katex';

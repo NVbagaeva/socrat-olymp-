@@ -96,6 +96,7 @@
     "test:mobile-overflow": "node scripts/check-mobile-overflow.mjs",
     "test:zadanie-hero": "node scripts/check-zadanie-hero.mjs",
     "test:razdely-nav": "node scripts/check-razdely-nav.mjs",
+    "test:stereo-nav": "node scripts/check-stereo-nav.mjs",
     "test:ves12-site": "node scripts/check-ves12-site.mjs",
     "test:zachyot-12": "node scripts/check-zachyot-12.mjs",
     "test:razdely-names": "node scripts/check-razdely-names.mjs",

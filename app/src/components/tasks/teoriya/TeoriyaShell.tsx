@@ -208,7 +208,7 @@ export function TeoriyaShell({
             >
               <h3 className="vteor-razdel__title">
                 <span className="vteor-razdel__no" aria-hidden="true">
-                  {razdel.skoro ? <ZamokIkonka /> : i + 1}
+                  {razdel.skoro ? <ZamokIkonka /> : (razdel.nomer ?? i + 1)}
                 </span>
                 {razdel.title}
               </h3>
