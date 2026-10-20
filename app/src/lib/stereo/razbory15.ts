@@ -59,7 +59,7 @@ function cilindrTochki(ab: number, bc: number, h: number) {
   return { r, A, B, C, B1: add(B, up), C1: add(C, up), h };
 }
 
-function cilindrModel(ab: number, bc: number, h: number, alt: string): Model {
+function cilindrModel(ab: number, bc: number, h: number, { alt }: { alt: string }): Model {
   const { r, A, B, C, B1, C1 } = cilindrTochki(ab, bc, h);
   return {
     alt,
@@ -630,7 +630,7 @@ export const RAZBORY_15: readonly RazborStereo[] = [
     uslovie:
       'В цилиндре образующая перпендикулярна плоскости основания. На окружности одного из оснований цилиндра выбраны точки $A$ и $B$, а на окружности другого основания — точки $B_1$ и $C_1$, причём $BB_1$ — образующая цилиндра, а отрезок $AC_1$ пересекает ось цилиндра. а) Докажите, что угол $ABC_1$ прямой. б) Найдите расстояние от точки $B$ до прямой $AC_1$, если $AB = 21$, $BB_1 = 12$, $B_1C_1 = 16$.',
     model: () => {
-      const m = cilindrModel(21, 16, 12, 'Цилиндр с точками A, B, B₁, C₁ и прямой AC₁');
+      const m = cilindrModel(21, 16, 12, { alt: 'Цилиндр с точками A, B, B₁, C₁ и прямой AC₁' });
       const { B, A, C1 } = cilindrTochki(21, 16, 12);
       const t = dot(sub(B, A), sub(C1, A)) / dot(sub(C1, A), sub(C1, A));
       const F = add(A, scale(sub(C1, A), t));
@@ -759,7 +759,7 @@ export const RAZBORY_15: readonly RazborStereo[] = [
     fipi: '13D60B',
     uslovie:
       'В цилиндре образующая перпендикулярна плоскости основания. На окружности одного из оснований цилиндра выбраны точки $A$ и $B$, а на окружности другого основания — точки $B_1$ и $C_1$, причём $BB_1$ — образующая цилиндра, а отрезок $AC_1$ пересекает ось цилиндра. а) Докажите, что угол $ABC_1$ прямой. б) Найдите объём цилиндра, если $AB = 7$, $BB_1 = 24$, $B_1C_1 = 10$.',
-    model: () => cilindrModel(7, 10, 24, 'Цилиндр с точками A, B, B₁, C₁'),
+    model: () => cilindrModel(7, 10, 24, { alt: 'Цилиндр с точками A, B, B₁, C₁' }),
     shagi: [
       ...CILINDR_A,
       {
@@ -789,7 +789,7 @@ export const RAZBORY_15: readonly RazborStereo[] = [
     uslovie:
       'В цилиндре образующая перпендикулярна плоскости основания. На окружности одного из оснований цилиндра выбраны точки $A$ и $B$, а на окружности другого основания — точки $B_1$ и $C_1$, причём $BB_1$ — образующая цилиндра, а отрезок $AC_1$ пересекает ось цилиндра. а) Докажите, что угол $ABC_1$ прямой. б) Найдите угол между прямыми $BB_1$ и $AC_1$, если $AB = 6$, $BB_1 = 15$, $B_1C_1 = 8$.',
     model: () => {
-      const m = cilindrModel(6, 8, 15, 'Цилиндр с прямыми BB₁ и AC₁');
+      const m = cilindrModel(6, 8, 15, { alt: 'Цилиндр с прямыми BB₁ и AC₁' });
       const { A, C, C1 } = cilindrTochki(6, 8, 15);
       return {
         ...m,
