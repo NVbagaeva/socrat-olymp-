@@ -8,10 +8,14 @@
  * нижним, штрихи — знаком ′), без KaTeX и внешних шрифтов.
  */
 
-import { type P2, type V, centroid, cross, dot, norm } from './geom';
+import { type P2, type V, centroid } from './geom';
+import { bazis, imyaSvg, proj, shirinaImeni } from '@/lib/stereo/proekciya';
 import { razlozhit } from './metki';
 import type { Scena } from './scena';
 import { type Kamera, linii } from './vidimost';
+
+/* Проекция и подписи текстом SVG — общее ядро (lib/stereo/proekciya). */
+export { type Bazis, bazis, imyaSvg, shirinaImeni } from '@/lib/stereo/proekciya';
 
 /** Цвета чертежа: из палитры сайта (tokens.css). */
 export const TSVETA = {
@@ -20,49 +24,6 @@ export const TSVETA = {
   zalivka: '#e07a2f',
   vspom: '#1f5fd0',
 };
-
-/** Базис экрана для параллельной проекции: вправо, вверх, к зрителю. */
-export interface Bazis {
-  r: V;
-  u: V;
-  k: V;
-}
-
-export function bazis(k: V, up: V = [0, 0, 1]): Bazis {
-  const kk = norm(k);
-  let r = cross(up, kk);
-  if (Math.hypot(r[0], r[1], r[2]) < 1e-9) {
-    r = cross([0, 1, 0], kk);
-  }
-  r = norm(r);
-  return { r, u: cross(kk, r), k: kk };
-}
-
-const proj = (b: Bazis, p: V): P2 => [dot(p, b.r), -dot(p, b.u)];
-
-/** Имя «A_1», «K'» → разметка SVG: курсив, индекс нижний, штрихи ′. */
-export function imyaSvg(name: string): string {
-  const m = /^([A-ZА-Я])(?:_\{?(\d+)\}?)?('*)$/.exec(name);
-  if (m === null) {
-    return esc(name);
-  }
-  const [, base, idx, primes] = m;
-  return (
-    `<tspan font-style="italic">${base}</tspan>` +
-    (primes ? `<tspan>${'′'.repeat(primes.length)}</tspan>` : '') +
-    (idx ? `<tspan baseline-shift="sub" font-size="70%">${idx}</tspan>` : '')
-  );
-}
-
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-/** Ширина подписи на глаз: буква ≈ 0,62 кегля, индекс ≈ 0,45. */
-export function shirinaImeni(name: string, size: number): number {
-  const m = /^(.)(?:_\{?(\d+)\}?)?('*)$/.exec(name);
-  const idx = m?.[2]?.length ?? 0;
-  const primes = m?.[3]?.length ?? 0;
-  return size * (0.62 + 0.45 * idx + 0.25 * primes);
-}
 
 export interface OpciiSvg {
   shirina?: number;
