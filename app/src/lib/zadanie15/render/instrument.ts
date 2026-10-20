@@ -83,7 +83,7 @@ export class SechenieTryokhTochek {
 
   /** Подсказка-счётчик. */
   get podskazka(): string {
-    if (this.rezultat !== null) return 'Сечение построено (3/3)';
+    if (this.rezultat !== null) return `Сечение построено (${NUZHNO_TOCHEK}/${NUZHNO_TOCHEK})`;
     const n = Math.min(this.vybrany.length + 1, NUZHNO_TOCHEK);
     return `Выберите три точки на рёбрах или гранях (${n}/${NUZHNO_TOCHEK})`;
   }
