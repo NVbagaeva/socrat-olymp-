@@ -3,18 +3,26 @@
  *
  * Камера — параллельная проекция (направление взгляда) или
  * центральная (точка глаза). Пересчитывается на каждом повороте.
+ * Всё считается аналитически (удаление невидимых линий), а не
+ * буфером глубины WebGL.
  *
  * Рёбра тела: ребро невидимо, если обе его грани повёрнуты от
- * зрителя, — точное правило для выпуклого тела.
+ * зрителя, — точное правило для выпуклого тела. Так же — отрезки,
+ * лежащие на поверхности (стороны сечения): на лицевой грани —
+ * сплошные, на невидимой — штрихом. Ребро «ровно по краю» (одна
+ * грань лицевая, другая смотрит ребром) — видно.
  *
- * Любой другой отрезок (сторона сечения, след, продолжение ребра,
- * прямая построения): точка закрыта, если луч от неё к зрителю
- * входит внутрь тела. Для выпуклого тела закрытые точки отрезка
- * образуют один промежуток, поэтому достаточно найти его границы:
- * грубый шаг по отрезку и уточнение делением пополам.
+ * Любой другой отрезок (след, продолжение ребра, прямая построения,
+ * контур секущей плоскости) разбивается на куски точками, где в
+ * проекции он пересекает контуры лицевых граней (рёбра, у которых
+ * хотя бы одна грань лицевая) и дополнительные контуры (контур
+ * плоскости), а также точками, где он протыкает грань. Между такими
+ * точками видимость не меняется, поэтому каждый кусок проверяется
+ * по одной точке — середине: закрыта ли она лицевой гранью (луч от
+ * неё к зрителю входит внутрь тела).
  */
 
-import { type V, add, dot, lerp, sub } from './geom';
+import { type V, add, cross, dist, dot, lerp, sub } from './geom';
 import type { Gran, Otrezok, Rebro, Scena, Telo } from './scena';
 
 export type Kamera =
@@ -77,41 +85,94 @@ export interface Kusok {
   vidno: boolean;
 }
 
-const SHAGOV = 48;
-const UTOCHNENIY = 22;
+/** Направление «к зрителю» в точке: для центральной проекции — к глазу. */
+const kZritelyu = (kam: Kamera, p: V): V => (kam.vid === 'orto' ? kam.k : sub(kam.glaz, p));
 
-/** Разбить отрезок на видимые и закрытые куски. */
-export function kuskiOtrezka(a: V, b: V, tela: readonly Telo[], kam: Kamera, eps: number): Kusok[] {
-  const skryto = (t: number) => zakrytaKemTo(lerp(a, b, t), tela, kam, eps);
-  const flags: boolean[] = [];
-  for (let i = 0; i <= SHAGOV; i += 1) {
-    flags.push(skryto(i / SHAGOV));
+/**
+ * Параметр t, где отрезок ab в проекции пересекает отрезок ef
+ * (контур). Точка ищется в пространстве: пересечение ab с
+ * «лучевой» плоскостью через ef и направление взгляда; затем
+ * проверяется, что она проецируется внутрь ef.
+ */
+function peresechenieVProektsii(a: V, b: V, e: V, f: V, kam: Kamera): number | null {
+  const ef = sub(f, e);
+  const m = cross(ef, kZritelyu(kam, e));
+  const sa = dot(m, sub(a, e));
+  const sb = dot(m, sub(b, e));
+  if ((sa > 0 && sb > 0) || (sa < 0 && sb < 0) || sa === sb) return null;
+  const t = sa / (sa - sb);
+  if (t <= 0 || t >= 1) return null;
+  const x = lerp(a, b, t);
+  // Положение проекции x на ef: x и прямая ef лежат в одной лучевой
+  // плоскости, параметр — по проекции на ef вдоль луча.
+  const d = kZritelyu(kam, x);
+  const w = cross(d, m); // направление в лучевой плоскости, поперёк луча
+  const den = dot(w, ef);
+  if (Math.abs(den) < 1e-14) return null;
+  const s = dot(w, sub(x, e)) / den;
+  return s >= -1e-9 && s <= 1 + 1e-9 ? t : null;
+}
+
+/** Параметр t, где отрезок ab протыкает грань (внутри неё). */
+function prokolGrani(a: V, b: V, g: Gran, eps: number): number | null {
+  const da = dot(g.n, a) - g.c;
+  const db = dot(g.n, b) - g.c;
+  if ((da > eps && db > eps) || (da < -eps && db < -eps) || Math.abs(da - db) < 1e-14) {
+    return null;
   }
+  const t = da / (da - db);
+  if (t <= 0 || t >= 1) return null;
+  const x = lerp(a, b, t);
+  const n = g.pts.length;
+  for (let i = 0; i < n; i += 1) {
+    const p = g.pts[i] as V;
+    const q = g.pts[(i + 1) % n] as V;
+    if (dot(cross(sub(q, p), sub(x, p)), g.n) < -eps * dist(p, q)) return null;
+  }
+  return t;
+}
+
+/**
+ * Разбить отрезок на видимые и закрытые куски — аналитически.
+ * kontury — дополнительные отрезки, на которых отрезок тоже
+ * разбивается (контур секущей плоскости).
+ */
+export function kuskiOtrezka(
+  a: V,
+  b: V,
+  tela: readonly Telo[],
+  kam: Kamera,
+  eps: number,
+  kontury: readonly (readonly [V, V])[] = [],
+): Kusok[] {
+  const ts: number[] = [0, 1];
+  for (const t of tela) {
+    const lic = t.grani.map((g) => licom(g, kam));
+    for (const r of t.rebra) {
+      if (!lic[r.f[0]] && !lic[r.f[1]]) continue;
+      const x = peresechenieVProektsii(a, b, r.a, r.b, kam);
+      if (x !== null) ts.push(x);
+    }
+    for (const g of t.grani) {
+      const x = prokolGrani(a, b, g, eps);
+      if (x !== null) ts.push(x);
+    }
+  }
+  for (const [e, f] of kontury) {
+    const x = peresechenieVProektsii(a, b, e, f, kam);
+    if (x !== null) ts.push(x);
+  }
+  ts.sort((x, y) => x - y);
   const kuski: Kusok[] = [];
-  let start = 0;
-  let cur = flags[0] as boolean;
-  for (let i = 1; i <= SHAGOV; i += 1) {
-    const f = flags[i] as boolean;
-    if (f === cur) {
-      continue;
-    }
-    // Граница между (i−1)/N и i/N — делением пополам.
-    let lo = (i - 1) / SHAGOV;
-    let hi = i / SHAGOV;
-    for (let k = 0; k < UTOCHNENIY; k += 1) {
-      const m = (lo + hi) / 2;
-      if (skryto(m) === cur) {
-        lo = m;
-      } else {
-        hi = m;
-      }
-    }
-    const t = (lo + hi) / 2;
-    kuski.push({ t0: start, t1: t, vidno: !cur });
-    start = t;
-    cur = f;
+  for (let i = 0; i + 1 < ts.length; i += 1) {
+    const t0 = ts[i] as number;
+    const t1 = ts[i + 1] as number;
+    if (t1 - t0 < 1e-12) continue;
+    const vidno = !zakrytaKemTo(lerp(a, b, (t0 + t1) / 2), tela, kam, eps);
+    const last = kuski.at(-1);
+    if (last && last.vidno === vidno) last.t1 = t1;
+    else kuski.push({ t0: last ? last.t1 : 0, t1, vidno });
   }
-  kuski.push({ t0: start, t1: 1, vidno: !cur });
   return skleit(kuski);
 }
 
@@ -146,6 +207,17 @@ export interface Liniya {
   vid: 'rebro' | Otrezok['vid'];
 }
 
+/** Грань к зрителю или смотрит ребром (для отрезков на поверхности). */
+function neOtvernuta(g: Gran, kam: Kamera): boolean {
+  const l = kam.vid === 'orto' ? dot(g.n, kam.k) : dot(g.n, kam.glaz) - g.c;
+  return l > -1e-9;
+}
+
+/** Контур секущей плоскости отрезками. */
+export function konturPloskosti(pts: readonly V[]): [V, V][] {
+  return pts.map((p, i) => [p, pts[(i + 1) % pts.length] as V]);
+}
+
 /** Все линии сцены с видимостью для данной камеры. */
 export function linii(sc: Scena, kam: Kamera, sdvigi?: readonly V[]): Liniya[] {
   const eps = sc.razmer * 1e-7;
@@ -156,8 +228,22 @@ export function linii(sc: Scena, kam: Kamera, sdvigi?: readonly V[]): Liniya[] {
       out.push({ a: r.a, b: r.b, vidno: rebroVidno(t, r, kam), vid: 'rebro' });
     }
   });
-  for (const o of sc.otrezki) {
-    for (const k of kuskiOtrezka(o.a, o.b, tela, kam, eps)) {
+  const kontur = sc.ploskost ? konturPloskosti(sc.ploskost) : [];
+  const otrezki: Otrezok[] = [
+    ...sc.otrezki,
+    ...kontur.map(([a, b]): Otrezok => ({ a, b, vid: 'ploskost' })),
+  ];
+  const telo = tela[0];
+  for (const o of otrezki) {
+    if (o.grani && telo && !sdvigi) {
+      const vidno = o.grani.some((f) => {
+        const g = telo.grani[f];
+        return g !== undefined && neOtvernuta(g, kam);
+      });
+      out.push({ a: o.a, b: o.b, vidno, vid: o.vid });
+      continue;
+    }
+    for (const k of kuskiOtrezka(o.a, o.b, tela, kam, eps, kontur)) {
       out.push({ a: lerp(o.a, o.b, k.t0), b: lerp(o.a, o.b, k.t1), vidno: k.vidno, vid: o.vid });
     }
   }

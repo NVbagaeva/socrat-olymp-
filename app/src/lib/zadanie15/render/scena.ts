@@ -41,12 +41,18 @@ export interface Telo {
 }
 
 /** Вид отрезка: от него зависит цвет и толщина. */
-export type VidOtrezka = 'sechenie' | 'vspom';
+export type VidOtrezka = 'sechenie' | 'vspom' | 'ploskost';
 
 export interface Otrezok {
   a: V;
   b: V;
   vid: VidOtrezka;
+  /**
+   * Грани первого тела, в которых лежит отрезок (сторона сечения).
+   * Тогда видимость — по граням: на лицевой грани — сплошная, на
+   * невидимой — штрихом, без расчёта по лучам.
+   */
+  grani?: number[];
 }
 
 export interface Metka {
@@ -55,6 +61,8 @@ export interface Metka {
   name: string;
   /** Вершина тела или точка построения (точку рисуем кружком). */
   vid: 'vershina' | 'tochka';
+  /** Точка выбрана инструментом (подсвечивается). */
+  vybrana?: boolean;
 }
 
 export interface Sechenie {
@@ -63,6 +71,8 @@ export interface Sechenie {
   n: V;
   /** Имена вершин сечения, если они есть (для натуральной величины). */
   names: (string | null)[];
+  /** Для стороны i (от вершины i к i+1) — грани тела, в которых она лежит. */
+  grani?: number[][];
 }
 
 export interface Scena {
@@ -70,6 +80,8 @@ export interface Scena {
   sechenie: Sechenie | null;
   otrezki: Otrezok[];
   metki: Metka[];
+  /** Секущая плоскость — параллелограмм вокруг сечения (если показана). */
+  ploskost?: V[] | null;
   /** Характерный размер — для допусков и масштаба. */
   razmer: number;
   centr: V;
@@ -137,7 +149,12 @@ export function sechenieIzYadra(poly: Polyhedron, s: Section, pl: Plane): Sechen
   const names = s.vertices.map((v) =>
     v.vertex === undefined ? null : (poly.vertices[v.vertex]?.name ?? null),
   );
-  return { pts, n: norm(n0), names };
+  // Сторона лежит в гранях, общих для её концов.
+  const grani = s.vertices.map((v, i) => {
+    const w = s.vertices[(i + 1) % s.vertices.length];
+    return v.faces.filter((f) => w?.faces.includes(f));
+  });
+  return { pts, n: norm(n0), names, grani };
 }
 
 /** Сцена: тело, сечение плоскостью (если есть) и подписи вершин. */
@@ -165,7 +182,15 @@ export function scena(
 
 /** Стороны сечения отрезками (рисуются цветом сечения). */
 export function storonySecheniya(s: Sechenie): Otrezok[] {
-  return s.pts.map((a, i) => ({ a, b: s.pts[(i + 1) % s.pts.length] as V, vid: 'sechenie' }));
+  return s.pts.map((a, i) => {
+    const grani = s.grani?.[i];
+    return {
+      a,
+      b: s.pts[(i + 1) % s.pts.length] as V,
+      vid: 'sechenie',
+      ...(grani && grani.length > 0 ? { grani } : {}),
+    };
+  });
 }
 
 /** Нормаль грани наружу относительно внутренней точки (для проверки). */
