@@ -191,3 +191,14 @@
     text-decoration: underline;
   }
 }
+
+@media print {
+  /* На листе рисунки компактнее: дерево и диаграмма не занимают полстраницы. */
+  .z6-ris--derevo .pr-tree {
+    max-width: 340px;
+  }
+
+  .z6-ris--eiler .pr-eiler {
+    width: 230px;
+  }
+}
