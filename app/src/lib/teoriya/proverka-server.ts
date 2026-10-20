@@ -9,7 +9,12 @@
 
 import { typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
-import { NABORY_PROVERKI, type NaborProverki, type ZadachaProverki } from './proverka-edinic';
+import {
+  NABORY_PROVERKI,
+  type NaborProverki,
+  type ShablonProverki,
+  type ZadachaProverki,
+} from './proverka-edinic';
 import { sealVarianta, zakryt, type EkzemplyarKlient, type ZadachaKlient } from './proverka-seal';
 
 export const EKZEMPLYAROV = 10;
@@ -42,7 +47,12 @@ function ekzemplyar(klyuch: string, z: ZadachaProverki): EkzemplyarKlient {
  * числа в «Ещё такое же» нельзя.
  */
 export function zadachiProverki(nabor: NaborProverki): ZadachaKlient[] {
-  return NABORY_PROVERKI[nabor].map((sh) => {
+  return zadachiIzShablonov(NABORY_PROVERKI[nabor]);
+}
+
+/** То же для любого набора шаблонов (теория №6 и другие разделы). */
+export function zadachiIzShablonov(shablony: readonly ShablonProverki[]): ZadachaKlient[] {
+  return shablony.map((sh) => {
     const byli = new Set<string>();
     const ekzemplyary: EkzemplyarKlient[] = [];
     for (let n = 0, t = 0; ekzemplyary.length < EKZEMPLYAROV && t < 400; t += 1) {
