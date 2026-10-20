@@ -389,6 +389,7 @@ const ANSWER_INPUT = [
   'input.pc__input',
   'input.z3t__input',
   'input.z7-otvet__input',
+  'input.z6-otvet__input',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -399,6 +400,7 @@ const QUESTION = [
   '.pc__text',
   '.z3t__question',
   '.z7-uslovie__text',
+  '.z6-uslovie__text',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
