@@ -55,7 +55,7 @@ const THEME = {
     dotStroke: 1.6,
     halo: 3.2,
     /* Элемент текущего шага решения: толще остальных. */
-    hl: 3.2,
+    hl: 3.4,
     hlHidden: 2.4,
     hlMarker: 2.2,
   },

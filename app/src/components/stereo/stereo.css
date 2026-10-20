@@ -201,3 +201,77 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ── Живой чертёж (Chertezh3d) ──
+   Поворот пальцем — только вбок: вертикальный жест остаётся странице
+   (touch-action: pan-y), иначе чертёж «съедал» бы прокрутку. */
+.z3d {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 480px;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z3d__vid {
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  border-radius: var(--radius-md);
+}
+.z3d__vid:active {
+  cursor: grabbing;
+}
+.z3d__kholst.solid-wrap .solid {
+  max-width: none;
+  margin: 0 auto;
+}
+/* Подсказка стоит в строке кнопок, а не поверх рисунка: поверх она
+   закрывала подписи вершин. */
+.z3d__namek {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  pointer-events: none;
+}
+.z3d__namek svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z3d__knopki,
+.z3d__shagi-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z3d__knopki .btn,
+.z3d__shagi-nav .btn {
+  min-height: 44px;
+}
+.z3d__shagi {
+  display: grid;
+  gap: var(--space-2);
+}
+.z3d__shag {
+  flex: 1 1 auto;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+.z3d__podpis {
+  margin: 0;
+  min-height: 3lh;
+}
