@@ -12,18 +12,18 @@ const T = TRENAZHER_6;
 /** Переключатель из кнопок (радиогруппа): источник, формулировка. */
 export function Pereklyuchatel<V extends string>({
   label,
-  varianty,
+  punkty,
   znachenie,
   izmenit,
 }: {
   label: string;
-  varianty: readonly { id: string; label: string }[];
+  punkty: readonly { id: string; label: string }[];
   znachenie: V;
   izmenit: (v: V) => void;
 }) {
   return (
     <div className="z6-tr__istochnik" role="radiogroup" aria-label={label}>
-      {varianty.map((i) => (
+      {punkty.map((i) => (
         <button
           type="button"
           role="radio"
@@ -86,7 +86,7 @@ export function Vybor6({
       <h3 className="z6-tr__podzag">{T.istochnik}</h3>
       <Pereklyuchatel<IstochnikVybora>
         label={T.istochnik}
-        varianty={T.istochniki}
+        punkty={T.istochniki}
         znachenie={n.istochnik}
         izmenit={(istochnik) => izmenit({ istochnik })}
       />
@@ -94,7 +94,7 @@ export function Vybor6({
       <h3 className="z6-tr__podzag">{T.stil}</h3>
       <Pereklyuchatel<Stil>
         label={T.stil}
-        varianty={T.stili}
+        punkty={T.stili}
         znachenie={n.stil}
         izmenit={(stil) => izmenit({ stil })}
       />

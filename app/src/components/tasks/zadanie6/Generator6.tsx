@@ -65,7 +65,7 @@ export function Generator6({
         <h2 className="t-h3">{T.istochnik}</h2>
         <Pereklyuchatel<Istochnik>
           label={T.istochnik}
-          varianty={TRENAZHER_6.istochniki}
+          punkty={TRENAZHER_6.istochniki}
           znachenie={istochnik}
           izmenit={setIstochnik}
         />
@@ -73,7 +73,7 @@ export function Generator6({
         <h3 className="z6-tr__podzag">{TRENAZHER_6.stil}</h3>
         <Pereklyuchatel<Stil>
           label={TRENAZHER_6.stil}
-          varianty={TRENAZHER_6.stili}
+          punkty={TRENAZHER_6.stili}
           znachenie={stil}
           izmenit={setStil}
         />
