@@ -183,7 +183,7 @@ function imena(
   const niz = bukvy.slice(0, n);
   const verh = bukvy.slice(n);
   if (!verh.every((v, i) => v === `${niz[i]}1`)) {
-    return { imena: null, somnenie: `верхнее основание «${run}» названо не по правилу A → A₁` };
+    return { imena: null, somnenie: `верхнее основание «${run}» названо не по правилу: к букве нижней вершины дописывается индекс 1` };
   }
   return { imena: bukvy };
 }
