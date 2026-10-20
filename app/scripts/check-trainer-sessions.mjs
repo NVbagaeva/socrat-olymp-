@@ -56,6 +56,7 @@
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
+     №6       — то же из lib/zadanie6
                 (в записи — условие и параметры задачи, без ответа).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
@@ -219,6 +220,13 @@ function answer7(payload, at) {
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
+/** №6: задача записи {prototypeId, params} → решатель прототипа. */
+function answer6(payload, at) {
+  const { prototype } = requireSrc('lib/zadanie6/prototypes/index');
+  const z = payload.zadachi[at];
+  return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
 /* ── Тренажёры ──────────────────────────────────────────────────
 
    Один объект — один адрес тренажёра:
@@ -294,6 +302,23 @@ const TRAINERS = [
         .getByRole('checkbox', { name: /^Группа I\./ })
         .first()
         .check();
+      await page
+        .getByRole('button', { name: /^Начать/ })
+        .first()
+        .click();
+    },
+  },
+  {
+    name: '№6',
+    url: '/zadaniya/6/trenazher/',
+    scope: '6',
+    answer: answer6,
+    /* Прототипы по умолчанию не отмечены: шаблон «Диаграммы и деревья». */
+    start: async (page) => {
+      await page
+        .getByRole('button', { name: /^Диаграммы и деревья/ })
+        .first()
+        .click();
       await page
         .getByRole('button', { name: /^Начать/ })
         .first()
