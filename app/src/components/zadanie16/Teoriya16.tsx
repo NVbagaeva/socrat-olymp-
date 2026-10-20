@@ -1,6 +1,6 @@
 import { Badge, EmptyState } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { PROGRESS_16 } from '@/content/zadanie16';
 import {
   BLOKI_16,

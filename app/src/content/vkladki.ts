@@ -43,18 +43,6 @@ export interface RazdelTab {
 }
 
 /**
- * Вкладки страницы фигуры задания №3: теория живёт на самом адресе
- * раздела, остальные — в подпапках. Раньше список лежал внутри
- * компонента ленты; перенесён сюда, чтобы все разделы описывались
- * одинаково.
- */
-export const VKLADKI_FIGURY: readonly RazdelTab[] = [
-  { id: 'teoriya', label: 'Теория', tail: '', icon: 'book' },
-  { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
-  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
-];
-
-/**
  * Вкладки подтемы задания №12. Раньше список лежал внутри TopicTabs.
  *
  * Хвостов у них нет: лента подтемы переключает содержимое на месте,
