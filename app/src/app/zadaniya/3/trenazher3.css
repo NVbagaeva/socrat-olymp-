@@ -81,6 +81,15 @@
   height: auto;
   max-width: 260px;
 }
+/* Интерактивный чертёж многогранника шире статичного. */
+@media (min-width: 768px) {
+  .z3t__card:has(.z3t__fig--3d) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  }
+}
+.z3t__fig--3d {
+  justify-self: center;
+}
 
 .z3t__answer {
   display: grid;
@@ -140,6 +149,75 @@
   line-height: var(--lh-body);
   color: var(--color-text-secondary);
   max-width: 68ch;
+}
+
+/* Шаги разбора у интерактивного чертежа: шаг — кнопка, открытый
+   шаг подсвечивает свои элементы на чертеже. */
+.z3t__steps--live > li.is-active {
+  color: var(--color-text);
+}
+.z3t__step {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  margin-left: calc(-1 * var(--space-3));
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z3t__step:hover {
+  background: var(--color-surface-soft);
+}
+.z3t__steps--live > li.is-active .z3t__step {
+  border-color: var(--color-accent);
+  background: var(--color-surface-soft);
+}
+.z3t__step-hint {
+  font-size: var(--fs-caption);
+  color: var(--color-accent);
+}
+
+/* ── Лист для печати ─────────────────────────────────────────── */
+
+.z3t-print {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: var(--space-3);
+}
+.z3t-print__title {
+  font-size: var(--fs-h4);
+  font-weight: 600;
+}
+.z3t-print__lead {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  max-width: 68ch;
+}
+.z3t-print__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z3t-print__field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z3t-print__field select {
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
 }
 
 /* ── Статистика ─────────────────────────────────────────────── */

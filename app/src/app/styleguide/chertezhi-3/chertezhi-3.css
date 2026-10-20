@@ -1,0 +1,75 @@
+.ch3p {
+  padding: var(--space-6) var(--space-4);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.ch3p__title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+}
+.ch3p__lead {
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0 var(--space-6);
+}
+.ch3p h2 {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  margin: var(--space-8) 0 var(--space-3);
+}
+.ch3p h3 {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  margin: var(--space-4) 0 var(--space-2);
+}
+.ch3p__review {
+  font-size: var(--fs-caption);
+}
+.ch3p__review ul ul {
+  color: var(--color-text-secondary);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+.ch3p__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: var(--space-2);
+}
+.ch3p__cell {
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+  font-size: 11px;
+}
+.ch3p__cell.is-bad {
+  border-color: var(--color-error);
+}
+.ch3p__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ch3p__pair svg {
+  width: 100%;
+  height: auto;
+}
+.ch3p__err {
+  display: block;
+  color: var(--color-error);
+}
+.ch3p__demo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+}
+.ch3p__steps button {
+  text-align: left;
+  border: 1px solid transparent;
+  background: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font: inherit;
+}
+.ch3p__steps button.is-active {
+  border-color: var(--color-accent);
+}
