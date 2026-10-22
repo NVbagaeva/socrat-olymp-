@@ -1,0 +1,5 @@
+// Только обновления безопасности (так в Ubuntu по умолчанию), без
+// перезагрузки: перезагрузку делает кнопка «Обновить», когда удобно.
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";

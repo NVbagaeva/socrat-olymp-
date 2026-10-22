@@ -1,18 +1,20 @@
-# Облегчённый набор «Supabase-lite»: только то, чем пользуется сайт.
+# Облегчённый набор «Supabase-lite» на сервере api.budetege.ru.
 #
-#   db     — PostgreSQL 17, настройки под сервер на 1 ГБ;
+#   db     — PostgreSQL 17;
 #   auth   — GoTrue, служба входа Supabase (регистрация, письма, JWT);
 #   rest   — PostgREST, доступ к таблицам по правилам RLS;
-#   caddy  — вход снаружи: /auth/v1 и /rest/v1, проверка apikey, CORS.
+#   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS.
 #
-# Адреса и ключи те же, что у облачного Supabase, поэтому supabase-js
-# на сайте работает без изменений. Нет Kong/Envoy, Studio, Storage,
-# Realtime, Analytics, Edge Functions, Supavisor: сайту они не нужны.
+# Адреса и ключи те же, что у облачного Supabase, поэтому supabase-js на
+# сайте работает без изменений. Почему без Kong, Studio, Storage и
+# остального — docs/hosting-lite.md; как этим пользоваться —
+# docs/SERVER.md.
 #
-# Это ПРОБНЫЙ набор (этап 0, docs/hosting-lite.md): адреса localhost,
-# письма уходят в Mailpit. Боевой набор будет в infra/lite/.
+# Запускается через bin/dc: он подставляет .env.generated (секреты,
+# созданные на сервере, bin/gen-env.sh) и .env.github (то, что пришло
+# из GitHub Secrets кнопкой «Развернуть»). Своих значений здесь нет.
 
-name: lite
+name: budetege-api
 
 x-logging: &logging
   driver: json-file
@@ -22,21 +24,22 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
-    mem_limit: ${DB_MEM:-256m}
+    mem_limit: ${DB_MEM:-320m}
     shm_size: 64m
     logging: *logging
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?нет .env, запустите gen-env.mjs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?нет .env.generated — запустите bin/gen-env.sh}
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
       AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD}
-    # Память: shared_buffers 128 МБ, не больше 30 подключений, без
-    # параллельных запросов. Подключений берут GoTrue (5) и PostgREST (5).
+    # shared_buffers 128 МБ, не больше 30 подключений, без параллельных
+    # запросов. Подключений берут GoTrue (5) и PostgREST (5). Замеры —
+    # docs/hosting-lite.md, раздел 4.
     command:
       - postgres
       - -c
       - shared_buffers=128MB
       - -c
-      - effective_cache_size=384MB
+      - effective_cache_size=512MB
       - -c
       - work_mem=2MB
       - -c
@@ -62,10 +65,10 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d:ro
-    # Порт базы — только на 127.0.0.1 сервера: снаружи его нет, зайти
-    # можно SSH-туннелем.
+    # Порт базы — только на 127.0.0.1 сервера. Снаружи его нет, зайти
+    # можно SSH-туннелем (docs/SERVER.md, «Доступ к базе»).
     ports:
-      - 127.0.0.1:${DB_LOCAL_PORT:-5432}:5432
+      - 127.0.0.1:5432:5432
     healthcheck:
       test: [CMD, pg_isready, -U, postgres, -d, postgres]
       interval: 5s
@@ -82,22 +85,23 @@ services:
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: '9999'
-      API_EXTERNAL_URL: ${API_EXTERNAL_URL:-http://127.0.0.1:8000}
+      API_EXTERNAL_URL: https://${API_DOMAIN:?нет API_DOMAIN}
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${AUTH_ADMIN_PASSWORD}@db:5432/postgres
       GOTRUE_DB_MAX_POOL_SIZE: '5'
 
-      GOTRUE_SITE_URL: ${SITE_URL:-http://127.0.0.1:4173}
-      GOTRUE_URI_ALLOW_LIST: ${REDIRECT_URLS:-http://127.0.0.1:4173/**}
+      GOTRUE_SITE_URL: ${SITE_ORIGIN:?нет SITE_ORIGIN}
+      GOTRUE_URI_ALLOW_LIST: ${SITE_ORIGIN}/**,${SITE_ORIGIN_2:-${SITE_ORIGIN}}/**
 
       GOTRUE_JWT_SECRET: ${JWT_SECRET}
       GOTRUE_JWT_EXP: '3600'
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_JWT_ADMIN_ROLES: service_role
-      GOTRUE_JWT_ISSUER: ${API_EXTERNAL_URL:-http://127.0.0.1:8000}/auth/v1
+      GOTRUE_JWT_ISSUER: https://${API_DOMAIN}/auth/v1
 
-      # Только почта и пароль; регистрацию пропускает хук по списку.
+      # Только почта и пароль; регистрацию пропускает хук по списку
+      # приглашённых (supabase/trial/auth_trial.sql, bin/migrate.sh).
       GOTRUE_DISABLE_SIGNUP: 'false'
       GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'
       GOTRUE_EXTERNAL_PHONE_ENABLED: 'false'
@@ -109,22 +113,25 @@ services:
       GOTRUE_HOOK_BEFORE_USER_CREATED_ENABLED: 'true'
       GOTRUE_HOOK_BEFORE_USER_CREATED_URI: pg-functions://postgres/auth_hooks/before_user_created
 
-      # Письма. В пробе — Mailpit, на сервере — SMTP Яндекс 360.
-      GOTRUE_SMTP_HOST: ${SMTP_HOST:-mailpit}
-      GOTRUE_SMTP_PORT: ${SMTP_PORT:-1025}
-      # Mailpit принимает письма без входа; GoTrue и не станет отдавать
-      # пароль по соединению без шифрования.
+      # Письма — SMTP Яндекс 360 (smtp.yandex.ru:465, SSL), ящик
+      # noreply@budetege.ru, пароль приложения из GitHub Secrets.
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-smtp.yandex.ru}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-465}
       GOTRUE_SMTP_USER: ${SMTP_USER:-}
       GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
       GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_FROM:-noreply@budetege.ru}
       GOTRUE_SMTP_SENDER_NAME: Будет на ЕГЭ
-      # Одно письмо человеку не чаще раза в минуту (на сайте та же
-      # минута до «Отправить ещё раз»), всего не больше 30 в час.
+
+      # Ограничения частоты. Одно письмо человеку не чаще раза в минуту
+      # (на сайте та же минута до «Отправить ещё раз»), всего не больше
+      # 30 писем в час. Входы с одного адреса: 450 за 5 минут — класс за
+      # одним школьным IP входит разом, а подбор пароля всё равно
+      # упирается в предел. Адрес человека Caddy кладёт в X-Forwarded-For
+      # сам, подделанный клиентом заголовок заменяется.
       GOTRUE_SMTP_MAX_FREQUENCY: 60s
-      GOTRUE_RATE_LIMIT_EMAIL_SENT: '30'
-      # Ограничения частоты считаются по адресу человека, который Caddy
-      # кладёт в X-Forwarded-For (подделанный клиентом заголовок Caddy
-      # заменяет).
+      GOTRUE_RATE_LIMIT_EMAIL_SENT: ${RATE_LIMIT_EMAIL_SENT:-30}
+      GOTRUE_RATE_LIMIT_TOKEN_REFRESH: ${RATE_LIMIT_TOKEN_REFRESH:-450}
+      GOTRUE_RATE_LIMIT_VERIFY: '60'
       GOTRUE_RATE_LIMIT_HEADER: X-Forwarded-For
 
       GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
@@ -141,7 +148,7 @@ services:
       GOTRUE_LOG_LEVEL: info
     healthcheck:
       test: [CMD, wget, -q, --spider, http://localhost:9999/health]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
 
@@ -169,14 +176,14 @@ services:
       PGRST_ADMIN_SERVER_HOST: localhost
     healthcheck:
       test: [CMD, postgrest, --ready]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
 
   caddy:
     image: caddy:2.11.7-alpine
     restart: unless-stopped
-    mem_limit: ${CADDY_MEM:-64m}
+    mem_limit: ${CADDY_MEM:-96m}
     logging: *logging
     depends_on:
       auth: { condition: service_healthy }
@@ -184,28 +191,29 @@ services:
     environment:
       ANON_KEY: ${ANON_KEY}
       SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      # Сайт и его второй адрес (www); в пробе оба — локальный сервер.
-      SITE_ORIGIN: ${SITE_ORIGIN:-http://127.0.0.1:4173}
-      SITE_ORIGIN_2: ${SITE_ORIGIN_2:-http://localhost:4173}
-      API_ADDRESS: ${API_ADDRESS:-:8000}
+      API_DOMAIN: ${API_DOMAIN}
+      SITE_ORIGIN: ${SITE_ORIGIN}
+      SITE_ORIGIN_2: ${SITE_ORIGIN_2:-${SITE_ORIGIN}}
+      # Почта для Let's Encrypt: о сертификате, который не продлился.
+      ACME_EMAIL: ${ACME_EMAIL:?нет ACME_EMAIL}
+      # Только для проверки в CI: local_certs — сертификат от своего
+      # центра Caddy вместо Let's Encrypt.
+      CADDY_EXTRA_GLOBAL: ${CADDY_EXTRA_GLOBAL:-}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ../../supabase/templates:/srv/templates:ro
+      - ./templates:/srv/templates:ro
       - caddy-data:/data
+      - caddy-config:/config
     ports:
-      - ${API_BIND:-127.0.0.1:8000}:8000
-
-  # Только для пробы: ловит письма вместо настоящей почты.
-  mailpit:
-    image: axllent/mailpit:v1.31.5
-    profiles: [probe]
-    mem_limit: 64m
-    environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: '1'
-      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
-    ports:
-      - 127.0.0.1:8025:8025
+      - 80:80
+      - 443:443
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://localhost:8082/health]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   db-data:
   caddy-data:
+  caddy-config:
