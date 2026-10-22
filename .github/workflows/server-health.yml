@@ -1,0 +1,46 @@
+name: 'Сервер: проверить здоровье'
+
+# Снаружи: отвечает ли https://api.budetege.ru с настоящим сертификатом.
+# Изнутри (bin/health.sh): контейнеры, API, срок сертификата, диск,
+# память, свежесть ночной копии. Каждые 30 минут по расписанию и
+# кнопкой. Сбой — письмо на ALERT_EMAIL (и уведомление GitHub).
+#
+# Сам сервер раз в 15 минут проверяет то же и пишет о проблемах сам;
+# эта проверка нужна на случай, когда сервер не может написать —
+# выключен или недоступен.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,37 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: Проверить здоровье
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Расписание — только когда сервер уже подготовлен.
+    if: github.event_name == 'workflow_dispatch' || vars.SERVER_READY == '1'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Проверить
+        id: health
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          API_DOMAIN: ${{ vars.API_DOMAIN || 'api.budetege.ru' }}
+        run: infra/lite/actions/health.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh 'Сервер нездоров' "$RUNNER_TEMP/budetege-lite/health.txt"
