@@ -12,7 +12,7 @@
  * сверяет их с банком.
  */
 
-import { assetUrl } from '../assetUrl';
+import { dataUrl } from '../dataUrl';
 import type { Istochnik, Params, Tema } from './types';
 
 export const PAPKA_DANNYH = '/data/zadanie6';
@@ -44,7 +44,7 @@ export interface IndeksZadachi {
 }
 
 export function urlDannyh(fail: string): string {
-  return assetUrl(`${PAPKA_DANNYH}/${fail}.json`);
+  return dataUrl(`${PAPKA_DANNYH}/${fail}.json`);
 }
 
 const kesh = new Map<string, Promise<unknown>>();

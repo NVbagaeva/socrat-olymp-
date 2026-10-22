@@ -59,11 +59,20 @@ const nextConfig: NextConfig = {
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
     // а он грузится отдельно (components/onboarding/intro/IntroSplash.tsx).
+    // Так же — файлы данных тренажёров 6, 7, 10 (public/data/, 82 файла):
+    // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts.
     ASSET_VERSIONS: JSON.stringify(
-      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => !file.startsWith('/intro/'))),
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(
+          ([file]) => !file.startsWith('/intro/') && !file.startsWith('/data/'),
+        ),
+      ),
     ),
     INTRO_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/intro/'))),
+    ),
+    DATA_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/data/'))),
     ),
     // Версии генераторов листов: вторая половина кода комплекта
     // (lib/komplekt.ts). Хеш исходников движка — считается на сборке.
