@@ -39,8 +39,17 @@ export function bezVersii(path: string): string {
 }
 
 export function assetUrl(path: string): string {
+  return withVersion(path, versions());
+}
+
+/**
+ * То же по своей таблице версий. Нужна коду, который грузится отдельно
+ * и держит версии своих файлов при себе, чтобы общая таблица в первой
+ * загрузке не росла (данные тренажёров: lib/dataUrl.ts).
+ */
+export function withVersion(path: string, table: Record<string, string>): string {
   const [bare] = path.split(/[?#]/);
-  const version = bare === undefined ? undefined : versions()[bare];
+  const version = bare === undefined ? undefined : table[bare];
   if (version === undefined) {
     return path;
   }

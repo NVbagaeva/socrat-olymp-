@@ -27,6 +27,9 @@ const devPages =
   process.env.GALEREYA_10 === '1' ||
   process.env.SOGLASIYA === '1';
 
+/** Версии файлов из public/ (lib/assetUrl.ts). */
+const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
+
 const nextConfig: NextConfig = {
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
@@ -50,7 +53,15 @@ const nextConfig: NextConfig = {
       (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
         ? '1'
         : '0',
-    ASSET_VERSIONS: JSON.stringify(assetVersions(path.join(process.cwd(), 'public'))),
+    // Таблица версий попадает в первую загрузку каждой страницы, поэтому
+    // файлов данных тренажёров 6, 7, 10 (public/data/, 82 файла) в ней
+    // нет: их версии — в DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts.
+    ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => !file.startsWith('/data/'))),
+    ),
+    DATA_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/data/'))),
+    ),
     // Версии генераторов листов: вторая половина кода комплекта
     // (lib/komplekt.ts). Хеш исходников движка — считается на сборке.
     GENERATOR_VERSIONS: JSON.stringify(generatorVersions(path.join(process.cwd(), 'src'))),
