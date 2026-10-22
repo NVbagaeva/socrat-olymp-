@@ -127,6 +127,13 @@ jobs:
         run: |
           infra/lite/actions/prepare.sh
           # Созданные ключи — в окружение следующих шагов (как GitHub Secrets).
+          # Ключи одноразовые, но в журнал не попадают: каждая строка
+          # закрытых ключей маскируется, как маскирует GitHub настоящие секреты.
+          for name in SERVER_SSH_KEY BACKUP_AGE_IDENTITY; do
+            while IFS= read -r line; do
+              [ -n "$line" ] && echo "::add-mask::$line"
+            done < "$PREPARE_OUT/$name"
+          done
           for name in SERVER_SSH_KEY SERVER_KNOWN_HOSTS BACKUP_AGE_IDENTITY BACKUP_AGE_RECIPIENT; do
             {
               echo "$name<<KEY_END"
@@ -209,7 +216,7 @@ jobs:
           systemctl show -p Result --value budetege-backup.service | grep -qx success
           # Проблема видна: остановленный PostgREST — сбой и письмо.
           sudo -u deploy /opt/budetege-api/bin/dc stop rest
-          ! infra/lite/actions/health.sh
+          ! EXTERNAL_CACERT="$RUNNER_TEMP/caddy-root.crt" infra/lite/actions/health.sh
           sudo -u deploy /opt/budetege-api/bin/health.sh --mail || true
           curl -s --get --data-urlencode 'query=subject:"Проблема на сервере"' http://127.0.0.1:8025/api/v1/search | jq -e '.messages | length >= 1'
           sudo -u deploy /opt/budetege-api/bin/dc start rest
