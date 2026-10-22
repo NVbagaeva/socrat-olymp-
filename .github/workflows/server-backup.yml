@@ -1,0 +1,39 @@
+name: 'Сервер: копия сейчас'
+
+# Внеочередная копия базы — та же, что каждую ночь в 03:30 по Москве:
+# pg_dump, шифрование, Yandex Object Storage (daily/, и weekly/, если
+# за неделю ещё не было).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Копия базы
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Копия
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: infra/lite/actions/backup.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Копия сейчас» не прошла'

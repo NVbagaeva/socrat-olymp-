@@ -1,0 +1,250 @@
+name: Lite server
+
+# Весь путь сервера api.budetege.ru — на машине GitHub, которая играет
+# роль чистого сервера Ubuntu 24.04. Те же скрипты, что у кнопок
+# «Сервер: …», только адрес сервера — 127.0.0.1:
+#
+#   подготовка: вход root по паролю → пользователи, ufw, fail2ban,
+#     автообновления, swap → вход deploy по ключу → root и пароли выключены;
+#   развёртывание с HTTPS (свой центр Caddy вместо Let's Encrypt);
+#   миграции и список приглашённых;
+#   сценарий пробного кабинета supabase-js из браузера + замер памяти;
+#   копия в S3 (rclone вместо Yandex Object Storage) и письмо о её сбое;
+#   проверка восстановления в пустую базу и восстановление на «сервер»;
+#   проверка здоровья снаружи и изнутри, таймеры systemd;
+#   SSH-туннель к базе: только порт 5432, без оболочки;
+#   shellcheck всех скриптов.
+#
+# Секреты создаются на машине CI и живут до конца запуска.
+
+on:
+  pull_request:
+    branches: [main, claude/trial-account-auth-yqmaxx]
+    paths:
+      - infra/lite/**
+      - supabase/trial/**
+      - supabase/templates/**
+      - .github/workflows/lite-server.yml
+      - .github/workflows/server-*.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lite-server-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: shellcheck и секреты
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ключей и паролей в репозитории нет
+        run: |
+          node app/scripts/check-infra-secrets.mjs --self-test
+          node app/scripts/check-infra-secrets.mjs
+
+      - name: Проверить скрипты
+        run: |
+          command -v shellcheck >/dev/null || sudo apt-get install -y -q shellcheck
+          shellcheck --version | head -2
+          LC_ALL=C.UTF-8 shellcheck -x -S warning infra/lite/actions/*.sh infra/lite/bin/*.sh infra/lite/bin/dc \
+            infra/lite/server/prepare.sh infra/lite/db/*.sh
+
+  server:
+    name: Сервер целиком на машине CI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SERVER_HOST: 127.0.0.1
+      API_DOMAIN: api.lite.test
+      SITE_ORIGIN: http://127.0.0.1:4173
+      SITE_ORIGIN_2: http://localhost:4173
+      ALERT_EMAIL: owner@budetege.test
+      SMTP_HOST: mailpit
+      SMTP_PORT: '1025'
+      SMTP_FROM: noreply@budetege.ru
+      MAIL_SMTP_HOST: 127.0.0.1
+      MAIL_SMTP_PORT: '1025'
+      MAIL_NO_AUTH: '1'
+      S3_ENDPOINT: http://127.0.0.1:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: budetege-backups
+      COMPOSE_EXTRA: compose.ci.yml
+      CADDY_EXTRA_GLOBAL: local_certs
+      CERT_MIN_DAYS: '0'
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      # supabase-js (тот же, что в сборке сайта) и Playwright для сценария.
+      - name: Поставить зависимости
+        working-directory: app
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec playwright install --with-deps chromium
+
+      - name: Машина CI — «чистый сервер»
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q openssh-server sshpass rclone age postgresql-client
+          # Как у провайдера: вход root по паролю открыт.
+          printf 'PermitRootLogin yes\nPasswordAuthentication yes\n' | sudo tee /etc/ssh/sshd_config.d/60-ci-root.conf >/dev/null
+          sudo systemctl restart ssh || sudo systemctl restart sshd
+          root_password=$(openssl rand -hex 16)
+          echo "::add-mask::$root_password"
+          echo "root:$root_password" | sudo chpasswd
+          echo "SERVER_ROOT_PASSWORD=$root_password" >> "$GITHUB_ENV"
+          echo '127.0.0.1 api.lite.test' | sudo tee -a /etc/hosts >/dev/null
+          # Ваш ключ для туннеля к базе.
+          ssh-keygen -q -t ed25519 -N '' -f "$RUNNER_TEMP/admin_key"
+          echo "ADMIN_SSH_PUBLIC_KEY=$(cat "$RUNNER_TEMP/admin_key.pub")" >> "$GITHUB_ENV"
+          # Ключи хранилища и пароль роли туннеля — только для этого запуска.
+          for name in S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY DB_ADMIN_PASSWORD; do
+            value=$(openssl rand -hex 12)
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+
+      - name: Подготовить сервер
+        env:
+          PREPARE_OUT: ${{ runner.temp }}/prepared
+        run: |
+          infra/lite/actions/prepare.sh
+          # Созданные ключи — в окружение следующих шагов (как GitHub Secrets).
+          for name in SERVER_SSH_KEY SERVER_KNOWN_HOSTS BACKUP_AGE_IDENTITY BACKUP_AGE_RECIPIENT; do
+            {
+              echo "$name<<KEY_END"
+              cat "$PREPARE_OUT/$name"
+              echo "KEY_END"
+            } >> "$GITHUB_ENV"
+          done
+
+      - name: Сервер защищён
+        run: |
+          sudo ufw status | grep -q 'Status: active'
+          sudo ufw status | grep -E '^(22|80|443)/tcp +ALLOW' | wc -l | grep -qx 3
+          systemctl is-active fail2ban
+          systemctl is-enabled unattended-upgrades
+          grep -q 'Unattended-Upgrade "1"' /etc/apt/apt.conf.d/20auto-upgrades
+          test "$(swapon --noheadings | wc -l)" -ge 1
+          sudo sshd -T | grep -x 'permitrootlogin no' >/dev/null
+          sudo sshd -T | grep -x 'passwordauthentication no' >/dev/null
+          # root по паролю не входит, deploy по паролю — тоже.
+          ! SSHPASS=$SERVER_ROOT_PASSWORD sshpass -e ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no root@127.0.0.1 true
+          ! SSHPASS=x sshpass -e ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=no deploy@127.0.0.1 true
+          # Повторная подготовка безопасна: входит deploy по ключу, ключи не меняются.
+          infra/lite/actions/prepare.sh 2>&1 | tee "$RUNNER_TEMP/prepare-again.log"
+          grep -q 'повторная подготовка' "$RUNNER_TEMP/prepare-again.log"
+        env:
+          PREPARE_OUT: ${{ runner.temp }}/prepared-again
+
+      - name: Развернуть
+        run: infra/lite/actions/deploy.sh
+
+      - name: Миграции и список приглашённых
+        env:
+          ALLOWED_EMAILS: anna@example.test, Boris@Example.test
+        run: |
+          infra/lite/actions/migrate.sh
+          # Повтор ничего не применяет.
+          infra/lite/actions/migrate.sh | grep 'Новых миграций: 0' >/dev/null
+
+      - name: Сценарий кабинета и замер памяти
+        run: |
+          sudo cat /opt/budetege-api/.env.generated > "$RUNNER_TEMP/lite.env"
+          chmod 600 "$RUNNER_TEMP/lite.env"
+          NODE_TLS_REJECT_UNAUTHORIZED=0 \
+          LITE_API=https://api.lite.test LITE_ENV="$RUNNER_TEMP/lite.env" \
+          LITE_OUT="$RUNNER_TEMP/out" LITE_DC="sudo -u deploy /opt/budetege-api/bin/dc" \
+            node infra/lite/test/scenario.mjs
+          rm -f "$RUNNER_TEMP/lite.env"
+
+      - name: Копия базы и письмо о её сбое
+        run: |
+          RCLONE_S3_PROVIDER=Other RCLONE_S3_ENDPOINT=$S3_ENDPOINT RCLONE_S3_ENV_AUTH=false \
+          RCLONE_S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID RCLONE_S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY \
+            rclone mkdir ":s3:$S3_BUCKET"
+          infra/lite/actions/backup.sh
+          # Хранилище недоступно — копия не сделана, письмо ушло.
+          sudo -u deploy /opt/budetege-api/bin/dc stop s3
+          ! sudo -u deploy /opt/budetege-api/bin/backup.sh
+          sudo -u deploy /opt/budetege-api/bin/dc start s3
+          sleep 2
+          curl -s --get --data-urlencode 'query=subject:"Копия не сделана"' http://127.0.0.1:8025/api/v1/search | jq -e '.messages | length >= 1'
+
+      - name: Проверить восстановление
+        run: |
+          MODE=test infra/lite/actions/restore-check.sh
+          # На «сервер»: без подтверждения — отказ; с ним — база из копии.
+          ! MODE=server CONFIRM=да infra/lite/actions/restore-check.sh
+          sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -c 'delete from public.kits'
+          MODE=server CONFIRM=ВОССТАНОВИТЬ infra/lite/actions/restore-check.sh
+          test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc 'select count(*) from public.kits')" -ge 1
+
+      - name: Проверить здоровье
+        run: |
+          sudo docker cp budetege-api-caddy-1:/data/caddy/pki/authorities/local/root.crt "$RUNNER_TEMP/caddy-root.crt"
+          sudo chmod 644 "$RUNNER_TEMP/caddy-root.crt"
+          EXTERNAL_CACERT="$RUNNER_TEMP/caddy-root.crt" infra/lite/actions/health.sh
+          # Таймеры ночной копии и проверки здоровья включены и работают.
+          systemctl list-timers --all | grep -E 'budetege-(backup|health)\.timer' | wc -l | grep -qx 2
+          sudo systemctl start budetege-health.service
+          sudo systemctl start budetege-backup.service
+          systemctl show -p Result --value budetege-backup.service | grep -qx success
+          # Проблема видна: остановленный PostgREST — сбой и письмо.
+          sudo -u deploy /opt/budetege-api/bin/dc stop rest
+          ! infra/lite/actions/health.sh
+          sudo -u deploy /opt/budetege-api/bin/health.sh --mail || true
+          curl -s --get --data-urlencode 'query=subject:"Проблема на сервере"' http://127.0.0.1:8025/api/v1/search | jq -e '.messages | length >= 1'
+          sudo -u deploy /opt/budetege-api/bin/dc start rest
+
+      - name: SSH-туннель к базе
+        run: |
+          key="$RUNNER_TEMP/admin_key"
+          opts=(-i "$key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o BatchMode=yes)
+          ssh "${opts[@]}" -f -N -L 15432:127.0.0.1:5432 tunnel@127.0.0.1
+          sleep 2
+          PGPASSWORD=$DB_ADMIN_PASSWORD psql -h 127.0.0.1 -p 15432 -U budetege_admin -d postgres -tAc 'select count(*) from auth.users' | grep -qx '[0-9]*'
+          # Оболочки у tunnel нет, и пробросить можно только 5432.
+          ! ssh "${opts[@]}" tunnel@127.0.0.1 id
+          ssh "${opts[@]}" -f -N -L 15422:127.0.0.1:22 tunnel@127.0.0.1
+          sleep 2
+          ! timeout 5 ssh -p 15422 -o StrictHostKeyChecking=no -o BatchMode=yes deploy@127.0.0.1 true
+          pkill -f 'ssh .*tunnel@127.0.0.1' || true
+
+      - name: Сводка
+        if: always()
+        run: |
+          cat "$RUNNER_TEMP/out/probe-summary.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo 'Сценарий не дошёл до отчёта.' >> "$GITHUB_STEP_SUMMARY"
+          { echo; echo '<details><summary>Машина CI</summary>'; echo; echo '```'; free -m; sudo docker system df; echo '```'; echo '</details>'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Журналы контейнеров
+        if: failure()
+        run: |
+          mkdir -p "$RUNNER_TEMP/out"
+          sudo -u deploy /opt/budetege-api/bin/dc logs --no-color --tail 200 > "$RUNNER_TEMP/out/compose.log" 2>&1 || true
+          sudo journalctl -u 'budetege-*' --no-pager -n 200 > "$RUNNER_TEMP/out/timers.log" 2>&1 || true
+
+      - name: Сохранить замеры
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lite-server
+          path: ${{ runner.temp }}/out/
+          retention-days: 14
