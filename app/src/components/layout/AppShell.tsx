@@ -16,6 +16,7 @@ import {
   topNav,
 } from '@/content/appNav';
 import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
+import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
@@ -105,8 +106,9 @@ export function AppShell({ active, search = false, children }: AppShellProps) {
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
-          /* Входа на сайте нет, поэтому и «вошедшего» пользователя в шапке
-             нет. Демо-имя лежит в data/demo.ts до появления аккаунтов. */
+          /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
+             Выдуманного пользователя в шапке больше нет. */
+          userSlot={<AuthWidget variant="app" />}
         />
         {children}
       </div>

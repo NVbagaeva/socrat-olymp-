@@ -8,7 +8,7 @@
  */
 
 import type { NavItem } from '@/components/ui';
-import { HOWTO_HREF } from '@/content/onboarding';
+import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
