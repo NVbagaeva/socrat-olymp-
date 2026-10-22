@@ -178,12 +178,10 @@
   text-decoration: none;
   color: inherit;
   transition:
-    border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease);
-}
-a.subtopic:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-sm);
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease),
+    box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
 }
 /* Подтема ещё не открыта: та же приглушённая поверхность, что
    у неоткрытой карточки задания. */
@@ -229,6 +227,8 @@ a.subtopic:hover {
   display: block;
   margin-top: var(--space-4);
 }
+/* Стрелка «→». На компьютере в покое её нет — выезжает при наведении
+   и фокусе; на устройствах без мыши видна всегда, приглушённой. */
 .subtopic__go {
   position: absolute;
   right: var(--space-6);
@@ -236,31 +236,92 @@ a.subtopic:hover {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  /* В покое стрелка серая: синеет только у нажатой карточки. */
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
+  color: var(--color-primary);
+  opacity: 0;
+  transform: translateX(-6px);
   transition:
-    background-color var(--dur-hover) var(--ease),
-    border-color var(--dur-hover) var(--ease);
-}
-.subtopic.is-picked .subtopic__go {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-}
-.subtopic.is-picked .subtopic__go svg {
-  stroke: var(--color-text-inverse);
+    opacity 180ms var(--ease),
+    transform 180ms var(--ease),
+    color 180ms var(--ease);
 }
 .subtopic__go svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   fill: none;
-  stroke: var(--color-text-tertiary);
+  stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: stroke var(--dur-hover) var(--ease);
+}
+
+/* Подсветка — только у карточки под мышью или в фокусе: синяя рамка,
+   светло-голубая заливка, подъём и мягкая тень, стрелка выезжает,
+   иконка чуть крупнее. В покое ни одна карточка не выглядит выбранной. */
+@media (hover: hover) {
+  a.subtopic:hover {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  a.subtopic:hover .subtopic__go {
+    opacity: 1;
+    transform: none;
+  }
+  a.subtopic--ikonka:hover .subtopic__ico {
+    transform: scale(1.05);
+  }
+}
+a.subtopic:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  transform: translateY(-2px);
+}
+a.subtopic:focus-visible .subtopic__go {
+  opacity: 1;
+  transform: none;
+}
+a.subtopic--ikonka:focus-visible .subtopic__ico {
+  transform: scale(1.05);
+}
+@media (hover: none) {
+  a.subtopic .subtopic__go {
+    opacity: 1;
+    transform: none;
+    color: var(--color-text-tertiary);
+  }
+  a.subtopic:active {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  a.subtopic:active .subtopic__go {
+    color: var(--color-primary);
+  }
+  a.subtopic--ikonka:active .subtopic__ico {
+    transform: scale(1.05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .subtopic,
+  .subtopic__go,
+  .subtopic--ikonka .subtopic__ico {
+    transition: none;
+  }
+  a.subtopic:hover,
+  a.subtopic:focus-visible,
+  a.subtopic:active,
+  a.subtopic .subtopic__go,
+  a.subtopic--ikonka:hover .subtopic__ico,
+  a.subtopic--ikonka:focus-visible .subtopic__ico,
+  a.subtopic--ikonka:active .subtopic__ico {
+    transform: none;
+  }
 }
 
 /* ── Карточка подтемы с иконкой раздела ─────────────────────────
@@ -307,19 +368,6 @@ a.subtopic:hover {
   /* Формула целиком, без прокрутки: колонка текста ей достаточна. */
   overflow-x: visible;
 }
-@media (hover: hover) {
-  a.subtopic--ikonka:hover .subtopic__ico {
-    transform: translateY(-4px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .subtopic--ikonka .subtopic__ico {
-    transition: none;
-  }
-  a.subtopic--ikonka:hover .subtopic__ico {
-    transform: none;
-  }
-}
 @media (max-width: 767.98px) {
   .subtopic--ikonka {
     grid-template-columns: 88px minmax(0, 1fr);
@@ -352,7 +400,9 @@ a.subtopic:hover {
     right: var(--space-4);
     bottom: auto;
     top: 50%;
-    transform: translateY(-50%);
+    /* Центр по вертикали — полем, а не transform: transform занят
+       выездом стрелки. */
+    margin-top: -16px;
   }
 }
 
@@ -458,6 +508,167 @@ a.subtopic:hover {
   }
   .section-head__note {
     text-align: left;
+  }
+}
+
+/* ── Выбор типа функции (№12): раскладка Bento ──────────────────
+   Карточки разного размера (lib/bento.ts, data-b2/-b3/-b4): на
+   телефоне 2 колонки — первая во всю ширину, дальше парами; на
+   планшете 3, на широком компьютере 4, первая — крупная 2×2.
+   Вид карточки выбирается по ширине самой плитки, а не окна:
+   узкая — иконка сверху, текст под ней; широкая — текст слева,
+   иконка справа; крупная — иконка больше. Правила стоят после
+   медиазапросов выше и перекрывают их специфичностью. */
+.subtopics-grid--bento {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.subtopics-grid--bento > li {
+  container-type: inline-size;
+}
+.subtopics-grid--bento > [data-b2='2'] {
+  grid-column: span 2;
+}
+@media (min-width: 768px) {
+  .subtopics-grid--bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .subtopics-grid--bento > [data-b2='2'] {
+    grid-column: auto;
+  }
+  .subtopics-grid--bento > [data-b3='2'] {
+    grid-column: span 2;
+  }
+  .subtopics-grid--bento > [data-b3='3'] {
+    grid-column: span 3;
+  }
+  .subtopics-grid--bento > [data-b3='big'] {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+@media (min-width: 1280px) {
+  .subtopics-grid--bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .subtopics-grid--bento > :is([data-b3='2'], [data-b3='3'], [data-b3='big']) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .subtopics-grid--bento > [data-b4='2'] {
+    grid-column: span 2;
+  }
+  .subtopics-grid--bento > [data-b4='3'] {
+    grid-column: span 3;
+  }
+  .subtopics-grid--bento > [data-b4='4'] {
+    grid-column: span 4;
+  }
+  .subtopics-grid--bento > [data-b4='big'] {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+/* Широкая плитка: текст слева, иконка справа, стрелка внизу справа. */
+.subtopics-grid--bento .subtopic--ikonka {
+  grid-template-columns: minmax(0, 1fr) 112px;
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-3);
+  align-items: normal;
+  min-height: 160px;
+  padding: var(--space-5);
+}
+.subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  width: 112px;
+  /* Под иконкой — место для стрелки в правом нижнем углу: иначе на
+     невысокой широкой плитке стрелка ложится на иконку. */
+  margin-bottom: calc(32px + var(--space-2));
+}
+.subtopics-grid--bento .subtopic--ikonka .subtopic__head {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  padding-right: 0;
+}
+.subtopics-grid--bento .subtopic--ikonka :is(.subtopic__note, .subtopic__meta) {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  margin-top: var(--space-4);
+}
+.subtopics-grid--bento .subtopic--ikonka .subtopic__go {
+  top: auto;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  margin-top: 0;
+}
+/* Крупная плитка 2×2: иконка и название крупнее. */
+@container (min-width: 440px) {
+  .subtopics-grid--bento .subtopic--ikonka {
+    grid-template-columns: minmax(0, 1fr) 176px;
+    padding: var(--space-6);
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
+    width: 176px;
+  }
+  /* Плитка 2×2 выше соседних: иконка крупнее и стоит внизу справа,
+     над стрелкой, а не висит у верхнего края над пустотой. */
+  .subtopics-grid--bento > [data-b3='big'] .subtopic--ikonka,
+  .subtopics-grid--bento > [data-b4='big'] .subtopic--ikonka {
+    grid-template-columns: minmax(0, 1fr) minmax(176px, 45%);
+  }
+  .subtopics-grid--bento > [data-b3='big'] .subtopic--ikonka .subtopic__ico,
+  .subtopics-grid--bento > [data-b4='big'] .subtopic--ikonka .subtopic__ico {
+    width: 100%;
+    max-width: 280px;
+    align-self: center;
+    justify-self: end;
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__name {
+    font-size: var(--fs-h4);
+    line-height: var(--lh-h4);
+  }
+}
+/* Узкая плитка (пара на телефоне, четверть компьютера): иконка
+   сверху, текст под ней во всю ширину плитки, стрелка в углу. */
+@container (max-width: 299.98px) {
+  .subtopics-grid--bento .subtopic--ikonka {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    row-gap: var(--space-2);
+    min-height: 0;
+    padding: var(--space-4);
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__ico {
+    grid-column: 1;
+    grid-row: 1;
+    width: 72px;
+    /* Стрелка здесь вверху справа, рядом с иконкой, а не под ней. */
+    margin-bottom: 0;
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__head {
+    grid-row: 2;
+  }
+  .subtopics-grid--bento .subtopic--ikonka :is(.subtopic__note, .subtopic__meta) {
+    grid-row: 3;
+    margin-top: var(--space-2);
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__name {
+    font-size: 15px;
+    line-height: 20px;
+    /* «Логарифмическая», «Тригонометрические» шире узкой плитки:
+       перенос по слогам, а не посреди слова где придётся. */
+    hyphens: auto;
+  }
+  .subtopics-grid--bento .subtopic--ikonka .subtopic__go {
+    top: var(--space-3);
+    right: var(--space-3);
+    bottom: auto;
   }
 }
 

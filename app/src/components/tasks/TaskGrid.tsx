@@ -1,6 +1,7 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
 import { taskHasPage, taskHref } from '@/content/tasks';
+import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { TaskImage } from './TaskImage';
 
 export interface TaskGridProps {
@@ -16,6 +17,12 @@ export interface TaskGridProps {
     /** Второй аргумент — сама карточка: от неё считается место окна. */
     onOpen: (task: ExamTask, card: HTMLElement) => void;
   };
+  /**
+   * Раскладка Bento: карточки разного размера, 2 колонки на телефоне,
+   * 3 на планшете, 4 на компьютере (lib/bento.ts). Не задано — ровная
+   * сетка, как на главной.
+   */
+  bento?: boolean;
 }
 
 /**
@@ -29,15 +36,16 @@ export interface TaskGridProps {
  * ширины, поэтому в разделе с сайдбаром колонок меньше, чем на главной,
  * без единого условия в коде.
  */
-export function TaskGrid({ tasks, openInDialog }: TaskGridProps) {
+export function TaskGrid({ tasks, openInDialog, bento = false }: TaskGridProps) {
+  const sizes = bento ? bentoAll(tasks.length) : null;
   return (
-    <ul className="tasks-grid">
-      {tasks.map((task) => {
+    <ul className={sizes === null ? 'tasks-grid' : 'tasks-grid tasks-grid--bento'}>
+      {tasks.map((task, i) => {
         /* Ссылка есть у открытого раздела и у неоткрытого с заглушкой. */
         const open = taskHasPage(task);
         const byHandler = task.status === 'ready' && openInDialog?.slug === task.slug;
         return (
-        <li key={task.no}>
+        <li key={task.no} {...(sizes === null ? {} : bentoAttrs(sizes, i))}>
           <TaskCard
             className="task-card--bank"
             number={task.no}

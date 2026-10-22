@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
+import type { PdfSpravochnika } from '@/content/spravochnik1/pdf';
+import { naIos, useIos } from './ios';
+import { Nazad1 } from './Nazad1';
+import { SkachatPdf1 } from './SkachatPdf1';
 
 const PDF = SPRAVOCHNIK_1.pdf;
 
@@ -36,9 +40,19 @@ async function shriftyGotovy(items: string[]): Promise<void> {
  * здесь из него по адресу (?primery=0) снимаются разборы, раскладку
  * делает paginate.js, затем открывается окно печати: «Сохранить как PDF».
  */
-export function SpravochnikPdf1() {
+export function SpravochnikPdf1({
+  fayly,
+  teoriya,
+  zadanie,
+}: {
+  fayly: { sPrimerami: PdfSpravochnika; bezPrimerov: PdfSpravochnika };
+  /** Вкладка «Теория» и раздел задания №1: «Назад» и хлебные крошки. */
+  teoriya: string;
+  zadanie: string;
+}) {
   const query = useSearchParams();
   const sPrimerami = query.get('primery') !== '0';
+  const ios = useIos();
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -76,7 +90,9 @@ export function SpravochnikPdf1() {
           if (window.sheetPagination !== undefined) {
             window.clearInterval(timer);
             setDone(true);
-            if (window.sheetPagination.error === undefined) window.print();
+            /* На iPhone/iPad окно печати само не открываем: там печатается
+               готовый PDF (ios.ts). */
+            if (window.sheetPagination.error === undefined && !naIos()) window.print();
           }
         }, 100);
       })
@@ -91,6 +107,7 @@ export function SpravochnikPdf1() {
 
   return (
     <>
+      <Nazad1 kuda={teoriya} teoriya={teoriya} zadanie={zadanie} lipkiy />
       <div className="z1-print-bar spr1p-bar" data-print-bar>
         <span className="spr1p-bar__vybor" role="group" aria-label={PDF.vybor}>
           <a className="spr1p-bar__var" href="./" aria-current={sPrimerami ? 'true' : undefined}>
@@ -104,15 +121,30 @@ export function SpravochnikPdf1() {
             {PDF.bezPrimerov}
           </a>
         </span>
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => window.print()}
-          disabled={!done}
-        >
-          {done ? PDF.knopka : PDF.gotovim}
-        </button>
-        <span className="z1-print-bar__lead">{PDF.lead}</span>
+        <SkachatPdf1 fayly={fayly} sPrimerami={sPrimerami} />
+        <span className="spr1p-bar__pechat">
+          {ios ? (
+            <a
+              className="btn btn--secondary"
+              href={(sPrimerami ? fayly.sPrimerami : fayly.bezPrimerov).href}
+              target="_blank"
+              rel="noopener"
+              type="application/pdf"
+            >
+              {PDF.knopka}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="btn btn--secondary"
+              onClick={() => window.print()}
+              disabled={!done}
+            >
+              {done ? PDF.knopka : PDF.gotovim}
+            </button>
+          )}
+          <span className="z1-print-bar__lead">{ios ? PDF.leadIos : PDF.lead}</span>
+        </span>
       </div>
       <div id="sheet-measure" />
       <div id="sheet-pages" />

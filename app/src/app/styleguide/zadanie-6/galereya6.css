@@ -1,0 +1,158 @@
+/* Галерея банка №6 — служебная страница, только в разработке. */
+
+.g6 {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+
+.g6__lead {
+  max-width: 82ch;
+  color: var(--color-text-secondary);
+}
+
+.g6__toc p {
+  margin: var(--space-1) 0;
+}
+
+.g6__toc a {
+  margin-right: var(--space-2);
+}
+
+.g6__section {
+  margin-top: var(--space-10);
+  scroll-margin-top: var(--space-4);
+}
+
+.g6__group {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+
+.g6__formula,
+.g6__stat {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+}
+
+.g6__iskl {
+  color: var(--color-warning);
+}
+
+.g6__sub {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 16px;
+}
+
+.g6__list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.g6__item {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.g6__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.g6__id {
+  font-weight: 600;
+}
+
+.g6__badge {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+
+.g6__badge--modern {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+}
+
+.g6__otvet {
+  margin-left: auto;
+}
+
+.g6__text {
+  margin: var(--space-2) 0;
+  line-height: 1.7;
+}
+
+.g6__razbor summary {
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+.g6__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.g6__table th,
+.g6__table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.g6__row--iskl td:nth-last-child(-n + 3) {
+  color: var(--color-warning);
+}
+
+.g6__badge--post {
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+  color: var(--color-warning);
+}
+
+.g6__gde {
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 720px) {
+  .g6__table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .g6__otvet {
+    margin-left: 0;
+  }
+}
+
+.g6__badge--syuzhet {
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface));
+}
+
+.g6__badge--istochnik {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+}
+
+.g6__uslovie {
+  margin-top: var(--space-2);
+}
+
+.g6__filtr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}

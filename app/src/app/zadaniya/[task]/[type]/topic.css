@@ -2856,6 +2856,24 @@ a.tutor-card:hover {
     padding-left: var(--space-8);
   }
 }
+/* Формула и пояснение рядом — только когда рамке хватает ширины.
+   На планшете рамка около 650px: крупная формула забирала почти всё
+   место, пояснение сжималось до слова в строке и уходило за экран. */
+.rich-main__frame {
+  container: rich-main / inline-size;
+}
+@container rich-main (max-width: 760px) {
+  .rich-main__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .rich-main__formula {
+    padding-right: 0;
+    padding-bottom: var(--space-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-warm);
+  }
+}
 .rich-figure {
   max-width: 560px;
 }

@@ -9,8 +9,9 @@ import {
   RamkaVyvod,
   type ShagPrimera,
 } from '@/components/teoriya/Ramki';
+import { EdinicyStepeni, KartinkaStepeni, ShagiRazbora } from '@/components/teoriya/EdinicyStepeni';
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import {
   FIZIKA_10,
   RAZDELY_TEORII_10,
@@ -25,6 +26,7 @@ import {
   pochemuKondensatora,
   primerKondensatora,
 } from '@/lib/zadanie10/teoriya-kondensator';
+import { primerStefana } from '@/lib/zadanie10/teoriya-stepeni';
 import { GROUPS, kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { Illyustraciya10 } from './Illyustraciya10';
 import { Most10 } from './Most10';
@@ -141,6 +143,31 @@ function PochemuKondensator({ zadacha }: { zadacha: string }) {
         <div dangerouslySetInnerHTML={{ __html: chertezhRazryada(p) }} />
       </figure>
     </RamkaOpredelenie>
+  );
+}
+
+/**
+ * Пример из банка в блоке «Степени десяти»: звезда по закону Стефана —
+ * Больцмана, степени считаются по шагам (lib/zadanie10/teoriya-stepeni).
+ */
+function PrimerStepeni({ zadacha }: { zadacha: string }) {
+  const z = zadachaBanka(zadacha);
+  const pr = primerStefana(z.params);
+  return (
+    <div className="ed-primer ed-primer--otkryt">
+      <span className="ed-primer__metka">Пример из банка</span>
+      <div className="ed-primer__telo">
+        <ShagiRazbora
+          title="Звезда: считаем степени по шагам"
+          istochnik={z.source === 'fipi' ? 'Задача ФИПИ' : 'Не из открытого банка'}
+          uslovie={z.text}
+          shagi={pr.shagi}
+          otvet={pr.otvet}
+        >
+          <KartinkaStepeni slot="kosmos" className="ed-razbor__kartinka" />
+        </ShagiRazbora>
+      </div>
+    </div>
   );
 }
 
@@ -278,6 +305,14 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
       );
     case 'pochemuKondensator':
       return <PochemuKondensator zadacha={b.zadacha} />;
+    case 'edinicy':
+      return (
+        <EdinicyStepeni
+          chasti={b.chasti}
+          {...(b.kratko ? { kratko: true } : {})}
+          {...(b.izBanka ? { izBanka: <PrimerStepeni zadacha={b.izBanka} /> } : {})}
+        />
+      );
     default:
       return null;
   }

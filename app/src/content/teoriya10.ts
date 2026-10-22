@@ -18,6 +18,8 @@
  * генератора в браузере, а примеры считает сервер.
  */
 
+import type { ChastEdinic } from './teoriya-edinicy';
+
 export type BlokTeorii10 =
   | { vid: 'opredelenie'; title?: string; paras: string[]; formula?: string; spisok?: string[] }
   | { vid: 'formula'; formula: string; podpis?: string }
@@ -44,7 +46,19 @@ export type BlokTeorii10 =
    */
   | { vid: 'primerKondensator'; title: string; zadacha: string; zametka?: boolean }
   /** Рамка «Почему так»: «не менее t» → «не более U», таблица и график. */
-  | { vid: 'pochemuKondensator'; zadacha: string };
+  | { vid: 'pochemuKondensator'; zadacha: string }
+  /**
+   * Общая теория «Единицы измерения» / «Степени десяти»
+   * (content/teoriya-edinicy.ts, та же в №11). izBanka — задача банка
+   * для примера «Стефан — Больцман» в блоке степеней; kratko — только
+   * правила и факты (шпаргалка).
+   */
+  | {
+      vid: 'edinicy';
+      chasti: ChastEdinic['id'][];
+      izBanka?: string;
+      kratko?: boolean;
+    };
 
 export interface RazdelTeorii10 {
   id: string;
@@ -110,27 +124,8 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
           'Переводить нужно в двух случаях: величины в условии даны в разных единицах или ответ просят в других единицах.',
         ],
       },
-      {
-        vid: 'tablica',
-        title: 'Шпаргалка по переводу',
-        head: ['Было', 'Стало', 'Как'],
-        rows: [
-          ['$t$ ч', '$t\\cdot60$ мин', 'часы в минуты — умножить на $60$'],
-          ['$t$ мин', '$\\dfrac{t}{60}$ ч', 'минуты в часы — разделить на $60$'],
-          ['$v$ км/ч', '$\\dfrac{v}{3{,}6}$ м/с', '$1$ км/ч $=\\dfrac{1000}{3600}$ м/с'],
-          ['$v$ м/с', '$v\\cdot3{,}6$ км/ч', 'и обратно — умножить на $3{,}6$'],
-          ['$h$ км', '$h\\cdot1000$ м', '$1$ км $=1000$ м'],
-          ['$1$ кВ', '$10^3$ В', 'кило — тысяча'],
-          ['$1$ МГц', '$10^6$ Гц', 'мега — миллион'],
-          ['$1$ мкФ', '$10^{-6}$ Ф', 'микро — миллионная доля'],
-        ],
-      },
-      {
-        vid: 'formula',
-        formula:
-          '\\begin{gathered}10^m\\cdot10^n=10^{m+n},\\qquad \\dfrac{10^m}{10^n}=10^{m-n},\\\\ 10^6\\cdot10^{-6}=1\\end{gathered}',
-        podpis: 'Степени десяти: при умножении показатели складываются, при делении — вычитаются',
-      },
+      /* Общая теория единиц (№10 и №11): как переводить, км/ч ↔ м/с. */
+      { vid: 'edinicy', chasti: ['kak-perevodit', 'sostavnye'] },
       { vid: 'primer', title: 'Мотоциклист: ответ в минутах', zadacha: 'F009' },
       { vid: 'primer', title: 'Горизонт: высота сразу в метрах', zadacha: 'F091', kratko: true },
       {
@@ -144,6 +139,8 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
         vid: 'vyvod',
         paras: ['Смотрим на единицы дважды: когда подставляем и когда записываем ответ.'],
       },
+      /* Степени десяти и приставки; пример из банка — звезда F103. */
+      { vid: 'edinicy', chasti: ['stepeni'], izBanka: 'F103' },
     ],
     prototipy: ['P12', 'P19', 'P18', 'P24'],
   },
@@ -484,7 +481,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
         title: 'Не перевели единицы',
         oshibka: 'Нашли $t=\\dfrac{1}{3}$ и записали в бланк $0{,}33$ — а спрашивали минуты.',
         pravilno:
-          'Перечитываем последнюю фразу условия: «Ответ дайте в минутах» → $\\dfrac{1}{3}\\cdot60=20$ (см. пример «Мотоциклист» в разделе 2).',
+          'Перечитываем последнюю фразу условия: «Ответ дайте в минутах». $1\\text{ ч}=60\\text{ мин}$; часы → минуты: большая → меньшая, умножаем: $\\dfrac{1}{3}\\cdot60=20\\text{ мин}$ (см. пример «Мотоциклист» в разделе 2).',
       },
       {
         vid: 'lovushka',
@@ -588,3 +585,23 @@ export function bezSsylok(b: BlokTeorii10): BlokTeorii10 {
 /** Ловушки для подсказок тренажёра и листов: ссылка на раздел. */
 export const TEORIYA_10_DLYA_PROTOTIPA = (id: string): string | undefined =>
   RAZDELY_TEORII_10.find((r) => r.prototipy.includes(id))?.id;
+
+/**
+ * Якорь «Повторить теорию» для прототипа: блок общей теории единиц,
+ * если трудность сюжета — перевод единиц или степени десяти, иначе
+ * первый раздел с этим прототипом.
+ */
+const YAKORYA_10: Record<string, string> = {
+  /* Мотоциклист: часы → минуты. */
+  P12: 'ed-kak-perevodit',
+  /* Звезда: степени десяти — пример из банка в блоке степеней. */
+  P20: 'ed-stepeni',
+  P30: 'ed-stepeni',
+  /* Конденсатор: карточка с разбором и «Почему так». */
+  P24: 'teoriya-pokazatelnye',
+};
+
+export const YAKOR_TEORII_10 = (id: string): string | undefined => {
+  const r = TEORIYA_10_DLYA_PROTOTIPA(id);
+  return YAKORYA_10[id] ?? (r === undefined ? undefined : `teoriya-${r}`);
+};

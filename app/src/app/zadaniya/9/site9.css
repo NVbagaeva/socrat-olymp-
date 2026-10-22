@@ -117,6 +117,19 @@
 .z9-tabl__table tbody th {
   font-weight: 600;
 }
+/* Первый столбец закреплён: таблица на телефоне прокручивается вбок
+   внутри себя, подписи строк остаются на месте. */
+.z9-tabl__table thead th:first-child,
+.z9-tabl__table tbody th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--color-surface);
+  box-shadow: inset -1px 0 0 var(--color-border);
+}
+.z9-tabl__table thead th:first-child {
+  background-color: var(--color-surface-soft);
+}
 .z9-tabl__table tbody tr:last-child th,
 .z9-tabl__table tbody tr:last-child td {
   border-bottom: 0;

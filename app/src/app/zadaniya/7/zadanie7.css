@@ -452,6 +452,8 @@
 }
 
 .z7-tr__pereklyuchatel {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-2) var(--space-4);
   border: 0;
   border-radius: 999px;
@@ -529,6 +531,13 @@
   font-size: 13px;
   cursor: pointer;
 }
+/* На сенсорном экране номер задачи — палец, а не курсор: 44px. */
+@media (pointer: coarse) {
+  .z7-tochka {
+    width: 44px;
+    height: 44px;
+  }
+}
 
 .z7-tochka[aria-current='true'] {
   border-color: var(--color-primary);
@@ -605,8 +614,21 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+/* Узкий экран: варианты ответа в столбик во всю ширину — кнопки
+   не мельчат и не налезают друг на друга. */
+@media (max-width: 479.98px) {
+  .z7-podskazki__knopki {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .z7-podskazki__knopka {
+    text-align: left;
+  }
+}
 
 .z7-podskazki__knopka {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);

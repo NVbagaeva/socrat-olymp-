@@ -375,6 +375,50 @@ export function useActiveTrainerScopes(): readonly string[] {
  */
 export const LEGACY_SESSION_KEYS: readonly string[] = [];
 
+/**
+ * Разделы, которые слились в другой: старый раздел → новый. Тренировка
+ * старого раздела переезжает под ключ нового, если там своей ещё нет,
+ * иначе — убирается. Задания в записи — ссылки на банк, поэтому в
+ * новом разделе с тем же банком она открывается как была.
+ *
+ * №3 раньше делился по фигурам (3:konus …), теперь тренажёр один на
+ * всё задание (docs/stereometry-plan.md, п. 5.5).
+ */
+export const PERENOS_RAZDELOV: Readonly<Record<string, string>> = Object.fromEntries(
+  [
+    'parallelepiped',
+    'prizma',
+    'piramida',
+    'konus',
+    'cilindr',
+    'shar',
+    'vpisannyy-cilindr',
+    'vpisannaya-sfera',
+  ].map((figura) => [`3:${figura}`, '3']),
+);
+
+/**
+ * Перенести тренировку слитого раздела под ключ нового. Раздел записан
+ * и внутри записи (поле scope в её начале) — он меняется вместе с ключом,
+ * иначе чтение отбросило бы запись как чужую.
+ */
+function perenesti(target: Storage): boolean {
+  let changed = false;
+  for (const [from, to] of Object.entries(PERENOS_RAZDELOV)) {
+    const raw = target.getItem(sessionKey(from));
+    if (raw === null) {
+      continue;
+    }
+    const head = `"scope":${JSON.stringify(from)}`;
+    if (target.getItem(sessionKey(to)) === null && raw.includes(head)) {
+      target.setItem(sessionKey(to), raw.replace(head, `"scope":${JSON.stringify(to)}`));
+    }
+    target.removeItem(sessionKey(from));
+    changed = true;
+  }
+  return changed;
+}
+
 let swept = false;
 
 /**
@@ -398,7 +442,9 @@ export function sweepStaleSessions(keep: string | null = null): void {
     return;
   }
   const doomed: string[] = [];
+  let moved = false;
   try {
+    moved = perenesti(target);
     for (let i = 0; i < target.length; i += 1) {
       const key = target.key(i);
       if (key === null) {
@@ -421,7 +467,7 @@ export function sweepStaleSessions(keep: string | null = null): void {
   } catch {
     return;
   }
-  if (doomed.length > 0) {
+  if (doomed.length > 0 || moved) {
     notifySessionsChanged();
   }
 }

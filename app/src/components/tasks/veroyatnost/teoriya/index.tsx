@@ -23,7 +23,7 @@ export const telaRazdelov5: Record<string, ReactNode> = {
   'koordinatnaya-pryamaya': <KoordinatnayaPryamaya />,
 };
 
-export { TeoriyaShell, type TeoriyaShellProps } from './TeoriyaShell';
+export { TeoriyaShell, type TeoriyaShellProps } from '@/components/tasks/teoriya/TeoriyaShell';
 export { ProverSebya, type ProverSebyaProps } from './ProverSebya';
 export { ProverPonimanie, type ProverPonimaniyaProps } from './ProverPonimanie';
 export { VariantyOtveta, type VariantyOtvetaProps, type VariantSostoyanie } from './VariantyOtveta';

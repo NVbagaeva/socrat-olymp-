@@ -88,6 +88,8 @@ const PARY = [
   ['ответ: подпись на заливке', '--color-spr-vaz', '--color-spr-vaz-soft', 4.5],
   ['этап разбора на белом', '--color-spr-def', '--white', 4.5],
   ['ключевой элемент чертежа на белом', '--color-spr-klyuch', '--white', 3],
+  ['«Скачать справочник»: белый на синем', '--white', '--color-primary', 4.5],
+  ['«Скачать справочник» при наведении', '--white', '--color-primary-hover', 4.5],
 ];
 const kontrastProblemy = [];
 for (const [chto, a, b, nado] of PARY) {

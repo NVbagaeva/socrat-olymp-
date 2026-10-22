@@ -1,5 +1,5 @@
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import {
   BLOKI_SPRAVOCHNIKA,
   KAK_POLZOVATSYA_1,
@@ -7,11 +7,13 @@ import {
   SPRAVOCHNIK_1,
   type Razdel1,
 } from '@/content/spravochnik1';
+import { PDF_SPRAVOCHNIKA_1 } from '@/content/spravochnik1/pdf';
 import { PROGRESS_1 } from '@/content/zadanie1';
 import { chertezhTemy } from '@/lib/planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '@/lib/planimetriya/render';
 import { Poisk1 } from './Poisk1';
-import { SkachatPdf1 } from './SkachatPdf1';
+import { Nazad1 } from './Nazad1';
+import { SkachatIkonka1, SkachatPdf1 } from './SkachatPdf1';
 import { TemaKartochka1 } from './TemaKartochka1';
 
 /** Заголовок темы для содержания: без TeX, «$30^\\circ$» → «30°». */
@@ -77,16 +79,21 @@ function Razdel({ r, trenazher }: { r: Razdel1; trenazher?: (proto: number) => s
  * Оболочка — теория №4 и №2 (TeoriyaShell): содержание стоит липкой
  * колонкой, на узком экране его открывает кнопка «Содержание»; у
  * открытого раздела в содержании видны его темы. Под заголовком —
- * подзаголовок, «Скачать PDF» (с примерами или без), «Как
+ * «← Назад» с крошками над заголовком, под ним подзаголовок, панель
+ * «Скачать справочник» (готовый PDF, с примерами или без; при
+ * прокрутке — маленькая кнопка в строке «Содержание»), «Как
  * пользоваться» и поиск по темам. Страница
  * серверная: формулы набирает KaTeX, чертежи рисует движок на сборке.
  */
 export function Spravochnik1({
   trenazher,
   pdf,
+  adresa,
 }: {
   trenazher?: (proto: number) => string;
-  /** Адрес печатной страницы: «Скачать PDF». */
+  /** Раздел задания №1 и вкладка «Теория»: «← Назад» и крошки над заголовком. */
+  adresa?: { zadanie: string; teoriya: string };
+  /** Адрес печатной страницы: «Открыть для печати» под кнопкой «Скачать справочник». */
   pdf?: string;
 }) {
   const razdely = RAZDELY_SPRAVOCHNIKA_1.map((r) => ({
@@ -104,14 +111,18 @@ export function Spravochnik1({
       vkladka={SPRAVOCHNIK_1.title}
       podZagolovkom={
         <div className="spr1-shapka">
-          <div className="spr1-shapka__ryad">
-            <p className="spr1-shapka__lead">{SPRAVOCHNIK_1.lead}</p>
-            {pdf === undefined ? null : <SkachatPdf1 adres={pdf} />}
-          </div>
+          <p className="spr1-shapka__lead">{SPRAVOCHNIK_1.lead}</p>
+          {pdf === undefined ? null : <SkachatPdf1 fayly={PDF_SPRAVOCHNIKA_1} pechat={pdf} />}
           <Poisk1 />
           <KakPolzovatsya />
         </div>
       }
+      nadZagolovkom={
+        adresa === undefined ? undefined : (
+          <Nazad1 kuda={adresa.zadanie} teoriya={adresa.teoriya} zadanie={adresa.zadanie} />
+        )
+      }
+      vSoderzhanii={pdf === undefined ? undefined : <SkachatIkonka1 fayly={PDF_SPRAVOCHNIKA_1} />}
       razdely={razdely}
       tela={tela}
       dekor={{

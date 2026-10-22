@@ -188,7 +188,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
+        <TaskGrid bento tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
       )}
 
       <section className="bank-start">

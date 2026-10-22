@@ -7,9 +7,14 @@
    рамки и ярлыка, заливка пастельная. В ч/б печати блоки различаются
    ярлыком со словом, рамка разбора — пунктиром. */
 
-/* ── Строка над листом: с примерами / без, печать ─────────────── */
+/* ── Над листом: «Назад», хлебные крошки, скачать и печать ───── */
+
+/* «← Назад» и крошки — Nazad1.css (здесь блок липкий). */
 
 @media screen {
+  .spr1p-bar {
+    align-items: flex-start;
+  }
   .spr1p-bar__vybor {
     display: inline-flex;
     padding: 2px;
@@ -30,6 +35,13 @@
   .spr1p-bar__var:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+  }
+  /* Печать — вторая кнопка: подсказка про окно печати только у неё. */
+  .spr1p-bar__pechat {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    max-width: 320px;
   }
 }
 @media print {

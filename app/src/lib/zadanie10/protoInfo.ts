@@ -4,12 +4,12 @@
  */
 
 import type { ProtoInfo10 } from '../../components/tasks/zadanie10/Trenazher10';
-import { TEORIYA_10_DLYA_PROTOTIPA } from '../../content/teoriya10';
+import { YAKOR_TEORII_10 } from '../../content/teoriya10';
 import { GROUPS, kodNaSayte, PROTOTYPES } from './prototypes';
 
 export function protoInfo10(): ProtoInfo10[] {
   return PROTOTYPES.map((p) => {
-    const t = TEORIYA_10_DLYA_PROTOTIPA(p.id);
+    const t = YAKOR_TEORII_10(p.id);
     return {
       id: p.id,
       kod: kodNaSayte(p.id),

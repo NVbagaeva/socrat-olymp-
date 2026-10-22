@@ -5,6 +5,7 @@
  * течения; на озере течения нет.
  */
 
+import { minutyVChasy } from '../../teoriya/perevod';
 import {
   chtoSprashivayut,
   drobnoe,
@@ -468,7 +469,9 @@ const VD05: Subtype = {
         : `Определите (в км/ч) скорость течения реки, если известно, что собственная скорость ${kogo} равна ${txt(num(p, 'v'))} км/ч.`;
     const uslovie = `${s.kto} в ${chasy(t0, lead)} ${s.vyshel}${s.potech ? ' по течению реки' : ''} из пункта А в пункт В, расположенный в ${txt(S)} км от А. Пробыв в пункте В ${vremya(st, true)}, ${s.probyv} назад и ${s.vernulsya} в пункт А в ${chasy(t1, lead)} того же дня. ${vopr}`;
     const timeLines = [
-      `С ${chasy(t0, lead)} до ${chasy(t1, lead)} прошло $${d(t1 - t0)}$ ч, из них ${vremya(st)} — стоянка. В движении: $${d(t1 - t0)}-${fq(q(st, 60))}=${fq(T)}$ ч.`,
+      `С ${chasy(t0, lead)} до ${chasy(t1, lead)} прошло $${d(t1 - t0)}$ ч, из них ${vremya(st)} — стоянка.`,
+      `Стоянку — в часы: ${minutyVChasy(st, true)}`,
+      `В движении: $${d(t1 - t0)}-${fq(q(st, 60))}=${fq(T)}$ ч.`,
     ];
     if (s.ask === 'v') {
       const c = num(p, 'c');
