@@ -1,0 +1,51 @@
+name: 'Сервер: развернуть'
+
+# Набор infra/lite на сервер: файлы, окружение из Secrets и Variables,
+# docker compose pull и up. Запускать после «Подготовить сервер» и
+# после каждого изменения infra/lite/ или supabase/templates/.
+# Данные базы не трогаются.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Развернуть набор
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Развернуть
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          API_DOMAIN: ${{ vars.API_DOMAIN || 'api.budetege.ru' }}
+          SITE_ORIGIN: ${{ vars.SITE_ORIGIN || 'https://budetege.ru' }}
+          SITE_ORIGIN_2: ${{ vars.SITE_ORIGIN_2 || 'https://www.budetege.ru' }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          S3_PREFIX: ${{ vars.S3_PREFIX }}
+          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          BACKUP_AGE_RECIPIENT: ${{ secrets.BACKUP_AGE_RECIPIENT }}
+        run: infra/lite/actions/deploy.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Развернуть» не прошло'

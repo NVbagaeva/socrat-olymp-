@@ -3,9 +3,10 @@
 Этап 0, проверка до покупки. Отчёт от 12.10.2026. Ничего не куплено и не
 настроено. Сервер, DNS, Timeweb и облачный Supabase я не трогал.
 
-Проба лежит в `infra/lite-probe/` и запускается в GitHub Actions
-(`.github/workflows/lite-probe.yml`). Боевого кода инфраструктуры здесь
-ещё нет: он появится на этапе 1 в `infra/lite/`, после вашего «да».
+Проба этапа 0 жила в `infra/lite-probe/`. На этапе 1 она стала боевым
+набором `infra/lite/`, а её сценарий — проверкой
+`infra/lite/test/scenario.mjs` в workflow `lite-server.yml`. Как
+пользоваться сервером — [docs/SERVER.md](SERVER.md).
 
 ## 1. Короткий итог
 
@@ -76,7 +77,7 @@ Supabase Vault. В чистом PostgreSQL расширения Vault нет, п
 
 | Компонент Supabase | Что делал | Что вместо него |
 |---|---|---|
-| Studio | веб-панель: таблицы, пользователи, SQL | DBeaver или `psql` через SSH-туннель; список аккаунтов — SQL-запросом (инструкция будет в `docs/SERVER.md`) |
+| Studio | веб-панель: таблицы, пользователи, SQL | DBeaver или `psql` через SSH-туннель; список аккаунтов — SQL-запросом ([docs/SERVER.md](SERVER.md), «Доступ к базе») |
 | Kong / Envoy | шлюз | Caddy. Не поддерживается `?apikey=` в адресе: он нужен только Realtime, а сайт им не пользуется |
 | Storage | загрузка файлов | пока ничего: сайт файлы не принимает |
 | Realtime | живые обновления по WebSocket | не нужен: в коде нет ни одного `channel()` |
@@ -110,7 +111,7 @@ Supabase Vault. В чистом PostgreSQL расширения Vault нет, п
 
 ## 3. Что проверено в пробе
 
-Сценарий `infra/lite-probe/scenario.mjs` запускает Chromium, открывает
+Сценарий `infra/lite/test/scenario.mjs` (на этапе 0 — `infra/lite-probe/`) запускает Chromium, открывает
 страницу с другого адреса (`127.0.0.1:4173`, API на `:8000`), загружает
 в неё `supabase-js` из `app/node_modules` и выполняет те же вызовы с теми
 же настройками клиента, что `app/src/lib/auth`. Письма ловит Mailpit,
@@ -328,19 +329,14 @@ Timeweb Cloud не советую: за 2 ГБ в Москве 2140 ₽, втр�
 
 - **Этап 1:** почтовый ящик `noreply@budetege.ru` в Яндекс 360 с паролем
   приложения для SMTP и бакет в Yandex Object Storage для копий. Что
-  куда положить, будет в `docs/SERVER.md`.
+  куда положить — [docs/SERVER.md](SERVER.md).
 - **Этап 2:** A-запись `api` → IP сервера в DNS budetege.ru.
 
 ## 9. Как повторить пробу
 
-```sh
-cd infra/lite-probe
-node gen-env.mjs                                   # секреты в .env (не в git)
-ALLOWED_EMAILS="anna@example.test, boris@example.test" ./up.sh
-node scenario.mjs                                  # итог в out/probe-summary.md
-docker compose --profile probe down -v
-```
-
-В GitHub Actions проба запускается сама на pull request, который меняет
-`infra/lite-probe/`, `supabase/trial/` или `supabase/templates/`, и
-вручную через вкладку Actions → Lite probe.
+Проба стала проверкой боевого набора: workflow `lite-server.yml` на
+машине GitHub проходит весь путь сервера — подготовку, развёртывание по
+HTTPS, этот же сценарий с замером памяти, копию и восстановление
+([docs/SERVER.md](SERVER.md), «Как это проверяется»). Он запускается сам на
+pull request, который меняет `infra/lite/`, `supabase/trial/` или
+`supabase/templates/`, и вручную: Actions → Lite server.

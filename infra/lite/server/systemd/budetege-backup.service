@@ -1,0 +1,12 @@
+[Unit]
+Description=Копия базы budetege-api в Yandex Object Storage
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+ExecStart=/opt/budetege-api/bin/backup.sh
+TimeoutStartSec=1h
+Nice=10
+IOSchedulingClass=idle
