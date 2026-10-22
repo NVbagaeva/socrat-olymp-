@@ -2,6 +2,8 @@
 node_modules/
 app/.next/
 app/out/
+# Сборка с прототипами (INTRO_DEV_PAGES=1): запись видео заставки.
+app/.next-dev/
 # снимки проверки входа (scripts/check-auth.mjs в CI); в docs/screenshots/auth/ — отобранные вручную
 app/snimki-auth/
 app/next-env.d.ts

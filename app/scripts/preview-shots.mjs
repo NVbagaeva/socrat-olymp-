@@ -15,8 +15,8 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium);

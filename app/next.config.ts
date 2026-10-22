@@ -25,12 +25,14 @@ const devPages =
   process.env.GALEREYA_7 === '1' ||
   process.env.GALEREYA_9 === '1' ||
   process.env.GALEREYA_10 === '1' ||
-  process.env.SOGLASIYA === '1';
+  process.env.SOGLASIYA === '1' ||
+  process.env.INTRO_DEV_PAGES === '1';
 
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 
 const nextConfig: NextConfig = {
+  ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
   output: 'export',
   pageExtensions: devPages ? ['dev.tsx', 'tsx', 'ts', 'jsx', 'js'] : ['tsx', 'ts', 'jsx', 'js'],
@@ -54,10 +56,20 @@ const nextConfig: NextConfig = {
         ? '1'
         : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
-    // файлов данных тренажёров 6, 7, 10 (public/data/, 82 файла) в ней
-    // нет: их версии — в DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts.
+    // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
+    // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
+    // а он грузится отдельно (components/onboarding/intro/IntroSplash.tsx).
+    // Так же — файлы данных тренажёров 6, 7, 10 (public/data/, 82 файла):
+    // DATA_ASSET_VERSIONS, её подставляет lib/dataUrl.ts.
     ASSET_VERSIONS: JSON.stringify(
-      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => !file.startsWith('/data/'))),
+      Object.fromEntries(
+        Object.entries(ASSETS).filter(
+          ([file]) => !file.startsWith('/intro/') && !file.startsWith('/data/'),
+        ),
+      ),
+    ),
+    INTRO_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/intro/'))),
     ),
     DATA_ASSET_VERSIONS: JSON.stringify(
       Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/data/'))),

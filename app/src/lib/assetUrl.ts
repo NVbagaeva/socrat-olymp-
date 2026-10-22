@@ -45,7 +45,8 @@ export function assetUrl(path: string): string {
 /**
  * То же по своей таблице версий. Нужна коду, который грузится отдельно
  * и держит версии своих файлов при себе, чтобы общая таблица в первой
- * загрузке не росла (данные тренажёров: lib/dataUrl.ts).
+ * загрузке не росла (заставка: process.env.INTRO_ASSET_VERSIONS;
+ * данные тренажёров: lib/dataUrl.ts).
  */
 export function withVersion(path: string, table: Record<string, string>): string {
   const [bare] = path.split(/[?#]/);

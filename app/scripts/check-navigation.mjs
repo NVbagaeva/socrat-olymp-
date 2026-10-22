@@ -34,8 +34,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
-import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);

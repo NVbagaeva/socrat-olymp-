@@ -68,6 +68,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
@@ -612,6 +613,7 @@ async function finishRun(page) {
 /** Каждый сценарий — в своём контексте: чистое хранилище и своя вкладка. */
 async function inContext(what, run) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(context);
   try {
     await run(context);
   } catch (error) {
