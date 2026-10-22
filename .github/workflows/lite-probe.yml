@@ -1,0 +1,132 @@
+name: Lite probe
+
+# Этап 0 (docs/hosting-lite.md): облегчённый набор «Supabase-lite» —
+# PostgreSQL, GoTrue, PostgREST, Caddy — поднимается в docker compose
+# с настройками под маленький сервер, и supabase-js сайта проходит
+# против него сценарий пробного кабинета: регистрация по списку,
+# письмо, вход, кабинет, смена роли, правила RLS, сброс пароля,
+# удаление аккаунта, нагрузка. Пока идёт сценарий, пишется память
+# контейнеров; итог — в сводке запуска и в архиве lite-probe.
+#
+# Два прогона: с обычными лимитами памяти и с урезанными — сумма
+# лимитов 368 МБ, как на сервере 1 ГБ с запасом.
+#
+# Секреты создаются на машине CI (gen-env.mjs) и живут до конца
+# запуска; письма ловит Mailpit, наружу ничего не уходит.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - infra/lite-probe/**
+      - supabase/trial/**
+      - supabase/templates/**
+      - .github/workflows/lite-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lite-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Набор lite (${{ matrix.limits }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - limits: обычные лимиты
+            db: 256m
+            auth: 128m
+            rest: 96m
+            caddy: 64m
+          - limits: лимиты 1 ГБ
+            db: 192m
+            auth: 64m
+            rest: 64m
+            caddy: 48m
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      # Нужны два пакета сайта: supabase-js (тот же, что в сборке) и
+      # Playwright. Сам сайт не собирается.
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Создать секреты набора
+        working-directory: infra/lite-probe
+        run: node gen-env.mjs
+
+      - name: Поднять набор
+        working-directory: infra/lite-probe
+        env:
+          ALLOWED_EMAILS: anna@example.test, Boris@Example.test
+          DB_MEM: ${{ matrix.db }}
+          AUTH_MEM: ${{ matrix.auth }}
+          REST_MEM: ${{ matrix.rest }}
+          CADDY_MEM: ${{ matrix.caddy }}
+        run: ./up.sh
+
+      - name: Пройти сценарий и замерить память
+        working-directory: infra/lite-probe
+        run: node scenario.mjs
+
+      - name: Сводка
+        if: always()
+        working-directory: infra/lite-probe
+        run: |
+          {
+            echo "### ${{ matrix.limits }}"
+            cat out/probe-summary.md 2>/dev/null || echo 'Сценарий не дошёл до отчёта.'
+            echo
+            echo '<details><summary>Машина CI</summary>'
+            echo
+            echo '```'
+            free -m
+            docker compose images
+            docker system df
+            echo '```'
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Журналы контейнеров
+        if: failure()
+        working-directory: infra/lite-probe
+        run: docker compose --profile probe logs --no-color --tail 200 > out/compose.log 2>&1 || true
+
+      - name: Сохранить замеры
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lite-probe-${{ strategy.job-index }}
+          path: infra/lite-probe/out/
+          retention-days: 14
+
+      - name: Убрать набор
+        if: always()
+        working-directory: infra/lite-probe
+        run: docker compose --profile probe down -v

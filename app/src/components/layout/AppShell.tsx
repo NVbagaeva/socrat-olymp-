@@ -16,7 +16,7 @@ import {
   topNav,
 } from '@/content/appNav';
 import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
-import { demoUser } from '@/data/demo';
+import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 export interface AppShellProps {
@@ -102,7 +102,9 @@ export function AppShell({ active, search = true, children }: AppShellProps) {
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
-          user={demoUser}
+          /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
+             Выдуманного пользователя в шапке больше нет. */
+          userSlot={<AuthWidget variant="app" />}
         />
         {children}
       </div>
