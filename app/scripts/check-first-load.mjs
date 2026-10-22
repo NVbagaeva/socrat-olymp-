@@ -19,6 +19,7 @@ import zlib from 'node:zlib';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium);
@@ -129,6 +130,7 @@ const context = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+await welcomeSeen(context);
 const page = await context.newPage();
 /* Код страницы «едет по сети»: каждый скрипт задержан на 2,5 с. */
 await page.route('**/_next/static/chunks/**', async (route) => {
@@ -173,6 +175,7 @@ const context2 = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+await welcomeSeen(context2);
 const page2 = await context2.newPage();
 await page2.route('**/_next/static/chunks/**', async (route) => {
   await new Promise((resolve) => setTimeout(resolve, 2500));

@@ -24,6 +24,7 @@ import path from 'node:path';
 import { chromium, webkit } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -162,6 +163,7 @@ async function proverit(engine, browserType) {
       isMobile: size.isMobile && engine === 'Chromium',
       hasTouch: size.isMobile,
     });
+    await welcomeSeen(context);
     for (const url of PAGES) {
       const page = await context.newPage();
       await page.goto(BASE + url, { waitUntil: 'networkidle' });

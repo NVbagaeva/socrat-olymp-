@@ -1,14 +1,6 @@
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
-import {
-  BankSection,
-  CtaSection,
-  DiagnosticsSection,
-  HeroSection,
-  HowSection,
-  PathSection,
-  TeachersSection,
-} from '@/components/landing';
+import { BankSection, HeroSection, HowSection } from '@/components/landing';
 import { landing } from '@/content/landing';
 import './landing.css';
 
@@ -24,11 +16,13 @@ export default function HomePage() {
       <main>
         <HeroSection />
         <HowSection />
-        <DiagnosticsSection />
-        <PathSection />
+        {/* Сняты до появления самих функций — на главной только то, что
+            работает. Компоненты и тексты на месте, вернуть — одна строка:
+            DiagnosticsSection — диагностики нет («Пройти диагностику»);
+            PathSection — персонального плана нет;
+            TeachersSection — классов и назначения домашних нет;
+            CtaSection — «Узнай свой балл за 25 минут», та же диагностика. */}
         <BankSection />
-        <TeachersSection />
-        <CtaSection />
       </main>
       <SiteFooter />
     </>

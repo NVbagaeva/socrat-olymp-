@@ -29,6 +29,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
+   закрывает страницу целиком. */
+bezBanneraCookieVsyudu(chromium);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(OUT)) {

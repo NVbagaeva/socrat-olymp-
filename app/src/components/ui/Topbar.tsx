@@ -37,7 +37,8 @@ export function Topbar({
   search = true,
   searchPlaceholder = 'Поиск по заданиям, темам и номерам',
   searchLabel = 'Поиск',
-  unread = true,
+  /* Уведомлений пока нет — точку «есть новые» по умолчанию не рисуем. */
+  unread = false,
   notificationsHref,
   user,
   userSlot,
@@ -80,11 +81,19 @@ export function Topbar({
       {/* Колокольчик: ссылка, когда страница уведомлений есть, и кнопка,
           когда её нет, — чтобы не обещать переход в никуда. */}
       {notificationsHref !== undefined ? (
-        <a className="bell" href={notificationsHref} aria-label={bellLabel}>
+        <a
+          className={clsx('bell', unread && 'bell--unread')}
+          href={notificationsHref}
+          aria-label={bellLabel}
+        >
           <NavIcon name="notifications" />
         </a>
       ) : (
-        <button type="button" className="bell" aria-label={bellLabel}>
+        <button
+          type="button"
+          className={clsx('bell', unread && 'bell--unread')}
+          aria-label={bellLabel}
+        >
           <span className="bell__ico" aria-hidden="true" />
         </button>
       )}

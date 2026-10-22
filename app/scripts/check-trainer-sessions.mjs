@@ -68,6 +68,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
+   закрывает страницу целиком. */
+bezBanneraCookieVsyudu(chromium);
 
 const args = process.argv.slice(2);
 const argOf = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);

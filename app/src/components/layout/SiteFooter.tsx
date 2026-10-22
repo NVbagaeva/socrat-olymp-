@@ -6,7 +6,7 @@ export interface SiteFooterProps {
   className?: string;
 }
 
-/** Подвал публичных страниц: копирайт, оператор персональных данных и правовые ссылки. */
+/** Подвал публичных страниц: копирайт, оператор персональных данных, правовые ссылки и связь. */
 export function SiteFooter({ className }: SiteFooterProps) {
   return (
     <footer className={clsx('site-foot', className)}>
@@ -17,12 +17,18 @@ export function SiteFooter({ className }: SiteFooterProps) {
             {site.footer.operatorLabel} {operator.fio}
           </span>
         </div>
-        <nav className="site-foot__links" aria-label="Правовая информация">
-          {site.footer.links.map((link) => (
-            <a key={link.label} href={link.href}>
-              {link.label}
-            </a>
-          ))}
+        <nav className="site-foot__links" aria-label="Правовая информация и связь">
+          {site.footer.links.map((link) =>
+            'external' in link ? (
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.label}
+              </a>
+            ) : (
+              <a key={link.label} href={link.href}>
+                {link.label}
+              </a>
+            ),
+          )}
         </nav>
       </div>
     </footer>
