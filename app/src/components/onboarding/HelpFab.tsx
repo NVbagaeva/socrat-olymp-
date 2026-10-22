@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback, useId, useRef, useState } from 'react';
 import { HELP, HOWTO_HREF, TOUR_REPETITOR } from '@/content/onboarding';
 import { useDismiss } from '@/lib/dismiss';
-import { startTour, useOnboarding } from '@/lib/onboarding';
+import { requestIntro, startTour, useOnboarding } from '@/lib/onboarding';
 
 /**
  * Кнопка «?» в правом нижнем углу: туры и инструкция. Пока идёт тур,
@@ -67,6 +67,17 @@ export function HelpFab() {
             {HELP.studentTour}
             <span className="badge">{HELP.soon}</span>
           </span>
+          <button
+            type="button"
+            role="menuitem"
+            className="help-fab__item"
+            onClick={() => {
+              setOpen(false);
+              requestIntro();
+            }}
+          >
+            {HELP.intro}
+          </button>
           <Link
             role="menuitem"
             className="help-fab__item"

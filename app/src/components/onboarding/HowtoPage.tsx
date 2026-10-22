@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Details } from '@/components/ui';
 import { HOWTO, type HowtoTabContent } from '@/content/kakPolzovatsya';
 import { howtoHref, type HowtoTab } from '@/content/onboarding';
-import { startTour } from '@/lib/onboarding';
+import { requestIntro, startTour } from '@/lib/onboarding';
 import './howto.css';
 
 /** Вкладка по умолчанию, когда в адресе её нет. */
@@ -65,15 +65,22 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
             {content.video.title}
           </h2>
           <p className="howto__video-text">{content.video.text}</p>
-          {content.cta.tour !== undefined ? (
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={() => startTour('repetitor', 0)}
-            >
-              {content.cta.tour}
+          <div className="howto__video-actions">
+            {content.cta.tour !== undefined ? (
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => startTour('repetitor', 0)}
+              >
+                {content.cta.tour}
+              </button>
+            ) : null}
+            {/* Заставка первого визита ещё раз: показывается один раз
+                сама, отсюда — сколько угодно. */}
+            <button type="button" className="btn btn--secondary" onClick={requestIntro}>
+              {HOWTO.intro}
             </button>
-          ) : null}
+          </div>
         </section>
 
         <section className="howto__steps" aria-labelledby="howto-steps">

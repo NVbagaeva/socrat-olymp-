@@ -126,6 +126,7 @@
     "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs",
     "test:trainer-session": "node scripts/check-trainer-session.mjs",
     "test:trainer-sessions": "node scripts/check-trainer-sessions.mjs",
+    "test:intro": "node scripts/check-intro.mjs",
     "test:auth": "node scripts/check-auth.mjs",
     "test:auth-disabled": "node scripts/check-auth.mjs --disabled"
   },
