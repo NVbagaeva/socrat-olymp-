@@ -1,0 +1,68 @@
+name: 'Сервер: проверить восстановление'
+
+# Режим «проверка» (и каждый понедельник по расписанию): последняя копия
+# скачивается из хранилища, расшифровывается здесь, на машине GitHub, и
+# восстанавливается в пустой PostgreSQL. Сервер не трогается. Сбой —
+# если копия не восстановилась, не сошлась по числу строк или старше
+# суток.
+#
+# Режим «на сервер» — настоящее восстановление базы из копии. Нужен
+# только при беде или переезде (docs/SERVER.md, «Если что-то
+# сломалось»). Перед ним делается свежая копия текущей базы.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Что сделать'
+        type: choice
+        options: [проверка, на сервер]
+        default: проверка
+      backup_name:
+        description: 'Какую копию (пусто — последнюю), например db-20261101T003012Z'
+        required: false
+      confirm:
+        description: 'Для «на сервер» впишите ВОССТАНОВИТЬ'
+        required: false
+  schedule:
+    - cron: '23 4 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    name: Восстановление из копии
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    if: github.event_name == 'workflow_dispatch' || vars.SERVER_READY == '1'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Восстановить
+        env:
+          MODE: ${{ inputs.mode == 'на сервер' && 'server' || 'test' }}
+          BACKUP_NAME: ${{ inputs.backup_name }}
+          CONFIRM: ${{ inputs.confirm }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          S3_PREFIX: ${{ vars.S3_PREFIX }}
+          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+          BACKUP_AGE_IDENTITY: ${{ secrets.BACKUP_AGE_IDENTITY }}
+        run: infra/lite/actions/restore-check.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh 'Восстановление из копии не прошло'

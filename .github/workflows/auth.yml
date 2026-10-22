@@ -60,7 +60,7 @@ jobs:
         env:
           NEXT_PUBLIC_AUTH_ENABLED: '1'
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
         run: pnpm build
 
       - name: Поставить Chromium

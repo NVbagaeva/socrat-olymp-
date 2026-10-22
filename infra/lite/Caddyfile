@@ -1,5 +1,6 @@
-# Вход в облегчённый набор. Повторяет то, что у Supabase делает шлюз
-# (Kong, теперь Envoy), ровно в том объёме, который нужен supabase-js:
+# Вход в облегчённый набор на сервере. Повторяет то, что у Supabase
+# делает шлюз (Kong, теперь Envoy), ровно в том объёме, который нужен
+# supabase-js:
 #
 #   /auth/v1/*  → GoTrue,    /rest/v1/* → PostgREST;
 #   заголовок apikey обязателен и должен быть ключом anon или
@@ -8,13 +9,17 @@
 #   по ним человек переходит из почты обычной ссылкой;
 #   CORS — только для адресов сайта.
 #
-# Ключи и адреса берутся из окружения контейнера ({$…}).
+# Сертификат Caddy получает и продлевает сам (Let's Encrypt), как только
+# A-запись api.budetege.ru смотрит на сервер. Ключи и адреса берутся из
+# окружения контейнера ({$…}), см. compose.yml.
 
 {
 	admin off
-	# В пробе HTTPS нет: всё на localhost. На сервере имя api.budetege.ru
-	# и сертификат Let's Encrypt (infra/lite/).
-	auto_https off
+	email {$ACME_EMAIL}
+	servers {
+		protocols h1 h2
+	}
+	{$CADDY_EXTRA_GLOBAL}
 }
 
 (cors) {
@@ -54,7 +59,7 @@
 	respond `{"message":"Invalid API key","hint":"Double check your Supabase anon or service_role API key."}` 401
 }
 
-{$API_ADDRESS} {
+{$API_DOMAIN} {
 	request_body {
 		max_size 1MB
 	}
@@ -62,6 +67,11 @@
 		-Server
 		X-Content-Type-Options nosniff
 		Referrer-Policy no-referrer
+		Strict-Transport-Security "max-age=31536000"
+	}
+	log {
+		output stdout
+		format json
 	}
 
 	import cors
@@ -124,4 +134,9 @@
 :8081 {
 	root * /srv/templates
 	file_server
+}
+
+# Проверка контейнера (healthcheck в compose.yml), тоже только внутри.
+:8082 {
+	respond /health "ok" 200
 }
