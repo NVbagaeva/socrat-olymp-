@@ -1,0 +1,169 @@
+{
+  "kind": "prep",
+  "id": "P12T-5",
+  "task": 12,
+  "title": "Клетка — половина единицы",
+  "subtitle": "По оси $y$ клетка равна $0{,}5$: ответ — десятичная дробь",
+  "seed": 12915,
+  "family": "trigonometric",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12T-5-01",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-02",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-03",
+      "fn": "tg",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-04",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-05",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-06",
+      "fn": "tg",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-07",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-08",
+      "fn": "sin",
+      "question": "На рисунке изображён график функции $f(x) = a\\sin x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-09",
+      "fn": "tg",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "P12T-5-10",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "unlucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      }
+    }
+  ]
+}

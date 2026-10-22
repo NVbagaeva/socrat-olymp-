@@ -1,0 +1,18 @@
+/* Лист учителя зачётной работы: ответы всех вариантов одной таблицей —
+   строка на задачу, столбец на вариант. Ячейки — как у ключа ответов. */
+.sheet-work-key thead th {
+  font-size: var(--sheet-fs-small);
+  font-weight: 600;
+  color: var(--sheet-num-ink);
+  background: var(--sheet-num-bg);
+}
+.sheet-work-key thead th:first-child {
+  width: calc(var(--sheet-step) * 7);
+  text-align: center;
+}
+.sheet-work-key .sheet-work-type {
+  font-size: var(--sheet-fs-small);
+}
+.sheet-work-key .sheet-work-answer {
+  font-variant-numeric: tabular-nums;
+}

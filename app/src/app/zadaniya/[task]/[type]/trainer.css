@@ -341,6 +341,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
+/* Узкий экран: варианты ответа в столбик во всю ширину. */
+@media (max-width: 479.98px) {
+  .tquest__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (min-width: 640px) {
   .tquest__options {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -468,6 +474,23 @@
   background: var(--color-surface);
 }
 
+.tstats__razdel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tstats__ico {
+  flex: none;
+  width: 40px;
+}
+.tstats__ico img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .tstats__counter {
   margin: 0;
   font-size: var(--fs-body);

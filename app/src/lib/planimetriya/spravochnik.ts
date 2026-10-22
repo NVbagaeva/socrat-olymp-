@@ -1,15 +1,13 @@
 /**
- * Печатный справочник по планиметрии и шпаргалки к урокам — HTML
- * строкой из тех же карточек теории (content/teoriya1.ts): один
- * источник содержания для вкладки «Теория», PDF-справочника и
- * шпаргалки на листе ученика.
- *
- * Плитка справочника — заголовок, формула и маленький чертёж; без
- * пояснений и примеров: справочник помещается на 2–4 листа A4.
- * Живой чертёж печатается кадром в начальном положении.
+ * Шпаргалки к урокам задания №1 — плитка карточек прежней теории
+ * (content/teoriya1.ts) HTML строкой: на отдельной странице
+ * шпаргалки и на листе ученика. Плитка — заголовок, формула и
+ * маленький чертёж. Живой чертёж печатается кадром в начальном
+ * положении. Справочник по планиметрии для печати собирается
+ * из своих данных — lib/planimetriya/spravochnik-pdf.ts.
  */
 
-import { RAZDELY_TEORII_1, kartochka1, type Fakt1, type Kartochka1 } from '../../content/teoriya1';
+import { kartochka1, type Kartochka1 } from '../../content/teoriya1';
 import { katex } from '../graph/katex';
 import { typeset } from '../tex';
 import { renderPlan } from './render';
@@ -45,26 +43,6 @@ function plitka(k: Kartochka1): string {
   }<p class="spr-k__t">${typeset(k.title)}</p>${
     k.formula === undefined ? '' : `<p class="spr-k__f">${formula(k.formula)}</p>`
   }${tablica}</div>`;
-}
-
-function plitkaFakta(f: Fakt1): string {
-  return `<div class="spr-k spr-k--fakt"><span class="spr-k__pic pl-wrap">${risunok(
-    f,
-  )}</span><p class="spr-k__t">${f.no}. ${typeset(f.title)}</p>${
-    f.formula === undefined
-      ? `<p class="spr-k__s">${typeset(f.tekst)}</p>`
-      : `<p class="spr-k__f">${formula(f.formula)}</p>`
-  }</div>`;
-}
-
-/** Весь справочник: разделы по порядку вкладки «Теория», без примеров. */
-export function spravochnikHtml(): string {
-  return RAZDELY_TEORII_1.map((r, i) => {
-    const plitki = [...r.kartochki.map(plitka), ...(r.fakty ?? []).map(plitkaFakta)].join('');
-    return `<section class="spr-r"><h2 class="spr-r__t">${i + 1}. ${typeset(
-      r.title,
-    )}</h2><div class="spr-r__grid">${plitki}</div></section>`;
-  }).join('');
 }
 
 /** Плитка карточек справочника без заголовка — шпаргалка на листе урока. */

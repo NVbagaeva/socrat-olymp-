@@ -22,6 +22,9 @@ import Triangle from './triangle.js';
 import Quadratic from './generate-quadratic.js';
 import Rational from './generate-rational.js';
 import Sqrt from './generate-sqrt.js';
+import Exponential from './generate-exponential.js';
+import Logarithmic from './generate-logarithmic.js';
+import Trigonometric from './generate-trigonometric.js';
 import { rng, shuffled, answerPlaces, resetPlaces } from './random.js';
 import { MINUS, typesetText, plainText, fillTemplate, numberText, pointText,
          answerText } from './text.js';
@@ -528,6 +531,9 @@ function taskCandidates(task, set, seed) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.candidates(task, set, seed); }
   if (familyOf(task, set) === 'rational') { return Rational.candidates(task, set, seed); }
   if (familyOf(task, set) === 'sqrt') { return Sqrt.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'exponential') { return Exponential.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'logarithmic') { return Logarithmic.candidates(task, set, seed); }
+  if (familyOf(task, set) === 'trigonometric') { return Trigonometric.candidates(task, set, seed); }
   var constraints = task.constraints || {};
   if (constraints.lines) { return pairCandidates(task, set, seed); }
   var random = rng(set.id + ':' + task.id + ':' + seed);
@@ -691,8 +697,20 @@ function assemble(set, seed) {
     if (set.maxSlopeRepeat && count(candidate.slopeKey) >= set.maxSlopeRepeat) { return true; }
     if (set.maxInterceptRepeat && count(candidate.interceptKey) >= set.maxInterceptRepeat) { return true; }
     if (set.uniqueAnswers && candidate.answerKey && count(candidate.answerKey)) { return true; }
+    /* Мягче, чем uniqueAnswers: ответ повторяется не чаще, чем разрешено.
+       Нужно там, где различных целых ответов меньше, чем задач. */
+    if (set.maxAnswerRepeat && candidate.answerKey &&
+        count(candidate.answerKey) >= set.maxAnswerRepeat) { return true; }
+    /* Повторов ответа в наборе всего не больше maxAnswerDuplicates: при
+       20 задачах и 8 повторах различных ответов не меньше 12. */
+    if (set.maxAnswerDuplicates !== undefined && candidate.answerKey &&
+        count(candidate.answerKey) && count('dup:answers') >= set.maxAnswerDuplicates) { return true; }
     /* Парабола: вершина не повторяется в наборе, если набор так просит. */
     if (set.uniqueVertices && candidate.vertexKey && count(candidate.vertexKey)) { return true; }
+    /* Показательная функция: рисунок (кривая и опорные точки) повторяется
+       не чаще, чем разрешено, — у f(x) = aˣ различных рисунков мало. */
+    if (set.maxVertexRepeat && candidate.vertexKey &&
+        count(candidate.vertexKey) >= set.maxVertexRepeat) { return true; }
     /* Парабола: симметричных пар отмеченных точек в наборе не больше,
        чем разрешено. */
     if (set.maxSymmetricPairs !== undefined && candidate.symmetricPair &&
@@ -704,7 +722,12 @@ function assemble(set, seed) {
     used[candidate.pairKey] = count(candidate.pairKey) + delta;
     used[candidate.slopeKey] = count(candidate.slopeKey) + delta;
     used[candidate.interceptKey] = count(candidate.interceptKey) + delta;
-    if (candidate.answerKey) { used[candidate.answerKey] = count(candidate.answerKey) + delta; }
+    if (candidate.answerKey) {
+      /* Повтор ответа считается в момент выбора: был ли этот ответ уже. */
+      if (delta > 0 && count(candidate.answerKey)) { used['dup:answers'] = count('dup:answers') + 1; }
+      used[candidate.answerKey] = count(candidate.answerKey) + delta;
+      if (delta < 0 && count(candidate.answerKey)) { used['dup:answers'] = count('dup:answers') - 1; }
+    }
     if (candidate.vertexKey) { used[candidate.vertexKey] = count(candidate.vertexKey) + delta; }
     if (candidate.symmetricPair) { used['sym:pair'] = count('sym:pair') + delta; }
   }
@@ -726,10 +749,21 @@ function assemble(set, seed) {
     return true;
   }
 
+  /* С лимитом повторов ответа сначала пробуются варианты с ответом,
+     которого ещё не было: иначе лимит тратится на первых задачах и
+     перебор упирается в него в конце. У остальных наборов порядок
+     прежний — их задачи не меняются. */
+  function ordered(pool) {
+    if (set.maxAnswerDuplicates === undefined) { return pool; }
+    var fresh = [], seen = [];
+    pool.forEach(function (cand) { (cand.answerKey && count(cand.answerKey) ? seen : fresh).push(cand); });
+    return fresh.concat(seen);
+  }
+
   function step(depth) {
     if (depth === order.length) { return true; }
     var i = order[depth];
-    var pool = pools[i];
+    var pool = ordered(pools[i]);
     for (var c = 0; c < pool.length; c++) {
       if (--budget < 0) {
         throw new Error('generate: набор ' + set.id + ' (seed ' + seed +
@@ -794,6 +828,9 @@ function taskResult(set, task, built, seed, index) {
   if (familyOf(task, set) === 'quadratic') { return Quadratic.result(set, task, built, seed, index); }
   if (familyOf(task, set) === 'rational') { return Rational.result(set, task, built, seed, index); }
   if (familyOf(task, set) === 'sqrt') { return Sqrt.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'exponential') { return Exponential.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'logarithmic') { return Logarithmic.result(set, task, built, seed, index); }
+  if (familyOf(task, set) === 'trigonometric') { return Trigonometric.result(set, task, built, seed, index); }
   var rule = ANSWER_RULES[task.answerRule];
   if (!rule) { throw new Error('generate: неизвестное правило ответа «' + task.answerRule + '»'); }
 
@@ -894,7 +931,8 @@ function analysis(id, seed) {
   if (!task.svg || !task.meta.window) { return null; }
   /* Разбор с треугольником наклона — только у прямой. */
   if (task.meta.family === 'quadratic' || task.meta.family === 'rational' ||
-      task.meta.family === 'sqrt') { return null; }
+      task.meta.family === 'sqrt' || task.meta.family === 'exponential' ||
+      task.meta.family === 'logarithmic' || task.meta.family === 'trigonometric') { return null; }
 
   var line = Line.create(task.meta.kFraction, task.meta.bFraction);
   var triangle = Triangle.build(line, task.meta.window, task.meta.points);

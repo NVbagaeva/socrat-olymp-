@@ -11,13 +11,35 @@
 
 import { clsx } from 'clsx';
 import { useEffect, useRef, useState } from 'react';
-import type { Dvizhok, Rezhim, StandartnyyVid } from './chertezh/dvizhok';
+import type {
+  Dvizhok,
+  Figura,
+  Rezhim,
+  SostoyanieInstrumenta,
+  StandartnyyVid,
+} from './chertezh/dvizhok';
+import type { SechenieTryokhTochek } from '@/lib/zadanie15/render/instrument';
 
 export interface PrimerVitriny {
   id: string;
   /** Подпись кнопки, уже набранная KaTeX на сборке. */
   titleHtml: string;
 }
+
+/**
+ * Точка расширения: пошаговое построение с обоснованием. Механизма
+ * пока нет; когда он появится, страница передаёт сюда функцию —
+ * и в режиме «Сечение» появится кнопка «Пошаговое построение».
+ * Инструмент отдаёт построение ядра (instr.c — Construction с
+ * происхождением точек, instr.itog — плоскость plane3 и вершины
+ * сечения по обходу), этого хватает для шагов и подсветки.
+ */
+export type PoshagovoePostroenie = (instr: SechenieTryokhTochek) => void;
+
+const FIGURY: { id: Figura; title: string }[] = [
+  { id: 'kub', title: 'Куб' },
+  { id: 'parallelepiped', title: 'Параллелепипед' },
+];
 
 const VIDY: { id: StandartnyyVid; title: string }[] = [
   { id: 'speredi', title: 'Спереди' },
@@ -34,7 +56,13 @@ function skachat(blob: Blob, name: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function Vitrina15({ primery }: { primery: PrimerVitriny[] }) {
+export function Vitrina15({
+  primery,
+  poshagovo,
+}: {
+  primery: PrimerVitriny[];
+  poshagovo?: PoshagovoePostroenie;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const dv = useRef<Dvizhok | null>(null);
   const [gotov, setGotov] = useState(false);
@@ -44,6 +72,10 @@ export function Vitrina15({ primery }: { primery: PrimerVitriny[] }) {
   const [razrez, setRazrez] = useState(false);
   const [natural, setNatural] = useState('');
   const [fps, setFps] = useState<number | null>(null);
+  /** Инструмент «Сечение по трём точкам»: фигура или null — выключен. */
+  const [figura, setFigura] = useState<Figura | null>(null);
+  const [instr, setInstr] = useState<SostoyanieInstrumenta | null>(null);
+  const [ploskost, setPloskost] = useState(true);
 
   useEffect(() => {
     let otmena = false;
@@ -52,6 +84,7 @@ export function Vitrina15({ primery }: { primery: PrimerVitriny[] }) {
         if (otmena || !host.current) return;
         const d = m.sozdat(host.current);
         d.onFps = setFps;
+        d.onInstrument = setInstr;
         d.zadatPrimer(primerId);
         dv.current = d;
         setGotov(true);
@@ -66,7 +99,28 @@ export function Vitrina15({ primery }: { primery: PrimerVitriny[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const vybratFiguru = (f: Figura | null) => {
+    setFigura(f);
+    setRazrez(false);
+    setNatural('');
+    const d = dv.current;
+    if (!d) return;
+    if (f === null) {
+      d.vyklyuchitSechenie();
+      setInstr(null);
+      d.zadatPrimer(primerId);
+      return;
+    }
+    d.pokazatPloskost(ploskost);
+    d.vklyuchitSechenie(f);
+  };
+
   const vybratPrimer = (id: string) => {
+    if (figura !== null) {
+      setFigura(null);
+      setInstr(null);
+      dv.current?.vyklyuchitSechenie();
+    }
     setPrimerId(id);
     setRazrez(false);
     dv.current?.zadatPrimer(id);
@@ -82,15 +136,106 @@ export function Vitrina15({ primery }: { primery: PrimerVitriny[] }) {
             type="button"
             className={clsx(
               'btn btn--secondary btn--sm z15-vit__btn',
-              primerId === p.id && 'is-on',
+              figura === null && primerId === p.id && 'is-on',
             )}
-            aria-pressed={primerId === p.id}
+            aria-pressed={figura === null && primerId === p.id}
             disabled={!gotov}
             onClick={() => vybratPrimer(p.id)}
             dangerouslySetInnerHTML={{ __html: p.titleHtml }}
           />
         ))}
+        <button
+          type="button"
+          className={clsx(
+            'btn btn--secondary btn--sm z15-vit__btn z15-vit__tool',
+            figura !== null && 'is-on',
+          )}
+          aria-pressed={figura !== null}
+          disabled={!gotov}
+          onClick={() => vybratFiguru(figura === null ? 'kub' : null)}
+        >
+          Сечение
+        </button>
       </div>
+
+      {figura !== null ? (
+        <div className="z15-sech" role="region" aria-label="Сечение по трём точкам">
+          <div className="z15-vit__bar">
+            <div className="z15-vit__group" role="group" aria-label="Фигура">
+              {FIGURY.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={clsx(
+                    'btn btn--secondary btn--sm z15-vit__btn',
+                    figura === f.id && 'is-on',
+                  )}
+                  aria-pressed={figura === f.id}
+                  onClick={() => vybratFiguru(f.id)}
+                >
+                  {f.title}
+                </button>
+              ))}
+            </div>
+            <div className="z15-vit__group" role="group" aria-label="Выбор точек">
+              <button
+                type="button"
+                className="btn btn--secondary btn--sm z15-vit__btn"
+                disabled={!instr || instr.schyot === 0}
+                onClick={() => dv.current?.otmenitTochku()}
+              >
+                Отменить точку
+              </button>
+              <button
+                type="button"
+                className="btn btn--secondary btn--sm z15-vit__btn"
+                disabled={!instr || instr.schyot === 0}
+                onClick={() => dv.current?.sbrositTochki()}
+              >
+                Сбросить выбор
+              </button>
+              <button
+                type="button"
+                className={clsx('btn btn--secondary btn--sm z15-vit__btn', ploskost && 'is-on')}
+                aria-pressed={ploskost}
+                onClick={() => {
+                  setPloskost(!ploskost);
+                  dv.current?.pokazatPloskost(!ploskost);
+                }}
+              >
+                Секущая плоскость
+              </button>
+              {poshagovo && instr?.gotovo ? (
+                <button
+                  type="button"
+                  className="btn btn--primary btn--sm z15-vit__btn"
+                  onClick={() => {
+                    const i = dv.current?.instrument;
+                    if (i) poshagovo(i);
+                  }}
+                >
+                  Пошаговое построение
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <p
+            className="z15-sech__hint"
+            aria-live="polite"
+            dangerouslySetInnerHTML={{ __html: instr?.podskazkaHtml ?? '' }}
+          />
+          {instr?.soobshchenie ? (
+            <p
+              className={clsx(
+                'z15-sech__msg',
+                instr.soobshchenie.vid === 'oshibka' && 'z15-sech__msg--oshibka',
+              )}
+              role={instr.soobshchenie.vid === 'oshibka' ? 'alert' : 'status'}
+              dangerouslySetInnerHTML={{ __html: instr.soobshchenie.html }}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="z15-vit__bar">
         <div className="z15-vit__group" role="group" aria-label="Режим">

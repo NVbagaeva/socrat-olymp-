@@ -5,7 +5,7 @@
  * поле answer из bank.json сюда не переносится.
  */
 
-import { RAZDELY_TEORII_11 } from '../../../content/teoriya11';
+import { RAZDELY_TEORII_11, TEORIYA_PODTIPA_11 } from '../../../content/teoriya11';
 import { O_ZADANII_11 } from '../../../content/zadanie11';
 import { ANALOGI } from '../analogi';
 import { BANK, RAZMINKA } from '../bank';
@@ -16,8 +16,10 @@ import type { SectionId } from '../types';
 import type { RazdelInfo, UslovieBanka } from './sessiya';
 
 export interface SsylkiRazdela {
-  /** Якорь раздела теории. */
+  /** Якорь раздела теории без «#»: «teoriya-pryamaya»; пусто — нет. */
   teoriya: string;
+  /** Подтипы, у которых своя теория: перевод единиц → «ed-sostavnye». */
+  podtipy: Record<string, string>;
   /** Опорный блок навыка для раздела: адрес и название. */
   opornyy: { slug: string; nazvanie: string } | null;
 }
@@ -61,7 +63,11 @@ export function dannyeTrenazhera(): DannyeTrenazhera {
   }));
   const ssylki = Object.fromEntries(
     SECTIONS.map((s) => {
-      const teoriya = RAZDELY_TEORII_11.find((r) => r.section === s.id)?.id ?? '';
+      const razdel = RAZDELY_TEORII_11.find((r) => r.section === s.id)?.id;
+      const teoriya = razdel === undefined ? '' : `teoriya-${razdel}`;
+      const podtipy = Object.fromEntries(
+        Object.entries(TEORIYA_PODTIPA_11).filter(([id]) => id.startsWith(`${s.id}-`)),
+      );
       const svoi = BLOKI.find((b) => b.razdel === s.id);
       const pered = O_ZADANII_11.pered[s.id] ?? [];
       const blok = svoi ?? BLOKI.find((b) => pered.includes(b.nazvanie));
@@ -69,6 +75,7 @@ export function dannyeTrenazhera(): DannyeTrenazhera {
         s.id,
         {
           teoriya,
+          podtipy,
           opornyy: blok === undefined ? null : { slug: blok.slug, nazvanie: blok.nazvanie },
         },
       ];

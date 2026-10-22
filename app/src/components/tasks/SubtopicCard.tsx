@@ -1,9 +1,11 @@
 'use client';
 
+import { clsx } from 'clsx';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui';
-import { pickSubtopic, useSubtopicPicked } from '@/lib/subtopicPick';
+import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 
 export interface SubtopicCardProps {
   /** Название подтемы или раздела. */
@@ -15,6 +17,14 @@ export interface SubtopicCardProps {
    * это предпросмотр — карточка ведёт на страницы, но бейдж остаётся.
    */
   soon?: boolean;
+  /** Подпись под названием: у №12 — название графика, «График — парабола». */
+  caption?: string;
+  /**
+   * Иконка раздела (у №12). Не задана — раскладка прежняя: текст и
+   * стрелка без картинки. С иконкой: на компьютере текст слева, иконка
+   * справа сверху, стрелка внизу справа; на телефоне иконка слева.
+   */
+  icon?: IkonkaRazdela | undefined;
   /**
    * Формула, свёрстанная KaTeX на сборке. Есть у типов функций
    * задания №12; у разделов стереометрии формулы нет.
@@ -41,21 +51,31 @@ export interface SubtopicCardProps {
  * формула, у №3 чертёж и число прототипов, и то и другое приходит
  * сюда готовым.
  *
- * Стрелка в покое серая: синей она становится только у карточки, на
- * которую нажали последней (lib/subtopicPick.ts). Иначе на странице
- * все стрелки синие сразу, и выделение ничего не выделяет.
+ * В покое карточки одинаковые и ни одна не выглядит выбранной: это
+ * переход, а не выбор. Подсветка и стрелка «→» — при наведении мышью и
+ * в фокусе с клавиатуры; на устройствах без мыши стрелка видна всегда,
+ * приглушённой, а подсветка держится только на время касания.
  */
 export function SubtopicCard({
   name,
   href,
   soon = href === null,
+  caption,
+  icon,
   formulaHtml,
   media,
   meta,
 }: SubtopicCardProps) {
-  const picked = useSubtopicPicked(href);
   const body = (
     <>
+      {icon === undefined ? null : (
+        <RazdelIkonka
+          icon={icon}
+          sizes="(min-width: 768px) 112px, 88px"
+          soon={soon}
+          className="subtopic__ico"
+        />
+      )}
       {media !== undefined ? (
         <span className="subtopic__media" aria-hidden="true">
           {media}
@@ -64,6 +84,7 @@ export function SubtopicCard({
 
       <span className="subtopic__head">
         <span className="subtopic__name">{name}</span>
+        {caption === undefined ? null : <span className="subtopic__caption">{caption}</span>}
         {/* Формула свёрстана на сборке: обычным текстом она не выводится. */}
         {formulaHtml !== undefined ? (
           <span
@@ -94,16 +115,22 @@ export function SubtopicCard({
 
   if (href === null) {
     return (
-      <span className="subtopic subtopic--soon" aria-disabled="true">
+      <span
+        className={
+          icon === undefined
+            ? 'subtopic subtopic--soon'
+            : 'subtopic subtopic--soon subtopic--ikonka'
+        }
+        aria-disabled="true"
+      >
         {body}
       </span>
     );
   }
   return (
     <Link
-      className={picked ? 'subtopic is-picked' : 'subtopic'}
+      className={clsx('subtopic', icon !== undefined && 'subtopic--ikonka')}
       href={href}
-      onClick={() => pickSubtopic(href)}
     >
       {body}
     </Link>

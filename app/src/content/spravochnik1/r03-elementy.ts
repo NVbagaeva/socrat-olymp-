@@ -125,7 +125,7 @@ export const R03_ELEMENTY: Razdel1 = {
       id: 'srednyaya-liniya-treugolnika',
       title: 'Средняя линия треугольника',
       chertezh: {
-        chto: 'Треугольник $ABC$ с основанием $AB$ внизу; $D$ — середина $AC$, $E$ — середина $BC$ (засечки); отрезок $DE$ параллелен $AB$ (стрелки параллельности).',
+        chto: 'Треугольник $ABC$ с основанием $AB$ внизу; $D$ — середина $AC$, $E$ — середина $BC$ (засечки); отрезок $DE$.',
         vydelit: 'средняя линия $DE$',
       },
       opredeleniya: [

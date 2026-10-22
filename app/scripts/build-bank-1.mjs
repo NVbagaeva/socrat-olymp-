@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* scripts/build-bank-1.mjs — аналоги задания №1: по десять на прототип.
+/* scripts/build-bank-1.mjs — аналоги задания №1: по двадцать на прототип.
 
    Подбор детерминированный (lib/planimetriya/bank/analogi.ts,
    podobratAnalogi): ответ — целое или конечная десятичная дробь,
@@ -32,7 +32,7 @@ for (const p of PROTOTIPY) {
   console.log(`прототип ${p.id}: ${a.length}`);
 }
 const text = `/**
- * Аналоги задач открытого банка, по десять на прототип: числа
+ * Аналоги задач открытого банка, по двадцать на прототип: числа
  * условия. Файл пишет scripts/build-bank-1.mjs (pnpm build:bank-1),
  * руками не правится. Правила подбора — bank/analogi.ts.
  */

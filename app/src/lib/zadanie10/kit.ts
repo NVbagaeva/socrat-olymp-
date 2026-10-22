@@ -53,9 +53,20 @@ export function dano(oboz: string, znach: number | string, ed: string, smysl: st
   return { oboz, znach: typeof znach === 'number' ? d(znach) : znach, ed, smysl };
 }
 
+/**
+ * Знак между буквой и значением: «=», а у условия-неравенства
+ * («не менее 16,2 с» → значение `\ge16{,}2`) — сам знак неравенства,
+ * без лишнего «=»: $t\ge16{,}2$, а не $t=\ge16{,}2$.
+ */
+export function oboznachenie(r: DanoRow): string {
+  return /^(\\(ge|le|geq|leq|geqslant|leqslant)(?![a-zA-Z])|[<>])/.test(r.znach)
+    ? `${r.oboz}${r.znach}`
+    : `${r.oboz}=${r.znach}`;
+}
+
 /** Строка «Дано» для этапа 1: «$v_0=24$ м/с — начальная скорость». */
 export function danoLine(r: DanoRow): string {
-  return `$${r.oboz}=${r.znach}$${r.ed ? ` ${r.ed}` : ''} — ${r.smysl}`;
+  return `$${oboznachenie(r)}$${r.ed ? ` ${r.ed}` : ''} — ${r.smysl}`;
 }
 
 /* ── Этапы ──────────────────────────────────────────────────────── */

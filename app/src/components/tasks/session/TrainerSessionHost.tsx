@@ -143,12 +143,37 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
   onEntryResolved?: () => void;
   /** Куда ведёт ссылка с экрана итогов. */
   backHref?: string;
+  /**
+   * Свои подписи оболочки: зачётная работа говорит «работа», а не
+   * «тренировка», и спрашивает о завершении по-своему. Не заданы — общие.
+   */
+  labels?: HostLabels<U>;
   /** Экран выбора тренировки. */
   configurator: (api: ConfiguratorApi<P>) => ReactNode;
   /** Экран заданий. */
   screen: (context: ScreenContext<P, U>) => ReactNode;
   /** Что внутри, для сообщения об ошибке. */
   what?: string;
+}
+
+/** Подписи и поведение оболочки, которые тренажёр может переопределить. */
+export interface HostLabels<U extends BaseUi> {
+  /** Подпись счётчика на панели вместо «решено». */
+  solved?: string;
+  /** Сколько показывать в счётчике. Не задано — число закрытых заданий. */
+  progress?: (ui: U) => number;
+  finish?: string;
+  finishLong?: string;
+  finishTitle?: string;
+  /** Текст вопроса о завершении: считается в момент вопроса. */
+  finishText?: () => string;
+  finishCancel?: string;
+  /** Пауза на панели. По умолчанию есть. */
+  pausable?: boolean;
+  /** Часы на панели. По умолчанию есть. */
+  clock?: boolean;
+  /** Подписи экрана итогов. */
+  summary?: Partial<typeof sessionText.summary>;
 }
 
 /** Идущая тренировка. */
@@ -271,6 +296,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   entryIntent = false,
   onEntryResolved,
   backHref,
+  labels,
   configurator,
   screen,
   what = 'тренажёр',
@@ -285,6 +311,12 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const [building, setBuilding] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
+  /* Свой счётчик панели читается при каждом сообщении экрана: подписи
+     держатся в ссылке, чтобы report не пересоздавался на каждый рендер. */
+  const labelsRef = useRef(labels);
+  useEffect(() => {
+    labelsRef.current = labels;
+  });
   /* Новая тренировка при незавершённой: ждёт ответа ученика. */
   /* payload null — вопрос задан при входе по ссылке: «Начать новую»
      открывает выбор тренировки, настроенный ссылкой. */
@@ -650,7 +682,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         return;
       }
       const total = ui.order?.length ?? count(current.run.payload);
-      const solved = Object.keys(ui.marks).length;
+      const solved = labelsRef.current?.progress?.(ui) ?? Object.keys(ui.marks).length;
       setBar((prev) =>
         prev.index === ui.index && prev.total === total && prev.solved === solved
           ? prev
@@ -895,6 +927,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         data={view.data}
         backHref={backHref}
         hintedLabel={summary?.hintedLabel}
+        texts={labels?.summary}
         extra={summary?.extra === undefined ? undefined : summary.extra(view.data)}
         onNew={toConfig}
         onRetrySame={subset === undefined ? undefined : () => retrySame(view.data)}
@@ -935,6 +968,11 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         onPause={pause}
         onResume={unpause}
         onFinish={() => setConfirmFinish(true)}
+        {...(labels?.solved === undefined ? {} : { solvedLabel: labels.solved })}
+        {...(labels?.finishLong === undefined ? {} : { finishLabel: labels.finishLong })}
+        {...(labels?.finish === undefined ? {} : { finishShortLabel: labels.finish })}
+        pausable={labels?.pausable !== false}
+        clock={labels?.clock !== false}
       />
       {available && saveProblem === null ? null : (
         <p className="tsess__nosave" role="status">
@@ -993,15 +1031,15 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       <Modal
         open={confirmFinish}
         onClose={() => setConfirmFinish(false)}
-        title={sessionText.finishTitle}
-        description={sessionText.finishText}
+        title={labels?.finishTitle ?? sessionText.finishTitle}
+        description={confirmFinish && labels?.finishText !== undefined ? labels.finishText() : sessionText.finishText}
         footer={
           <>
             <Button variant="secondary" onClick={() => setConfirmFinish(false)}>
-              {sessionText.cancel}
+              {labels?.finishCancel ?? sessionText.cancel}
             </Button>
             <Button variant="danger" onClick={finish}>
-              {sessionText.finish}
+              {labels?.finish ?? sessionText.finish}
             </Button>
           </>
         }

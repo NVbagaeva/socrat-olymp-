@@ -1,0 +1,112 @@
+name: PDF 1 справочник
+
+# Пересобирает готовые PDF справочника по планиметрии №1 (с примерами и
+# без) — по образцу pdf-4.yml. Файлы лежат в app/public/materials/zadanie-1,
+# их отдаёт кнопка «Скачать справочник»; число страниц —
+# в app/src/content/spravochnik1/pdf.json. Ответов в справочнике нет,
+# поэтому оба файла публичные и коммитятся в ветку.
+#
+# test:pdf-spravochnik-1 в check.yml падает, если число страниц файла
+# разошлось с тем, что раскладывает лист сейчас: тогда достаточно
+# запустить этот workflow (кнопка «Run workflow» или push в ветку
+# справочника с правкой данных) — он пересоберёт файлы и вернёт их
+# в ветку.
+
+on:
+  push:
+    branches: ['claude/planimetry-**']
+    paths:
+      - 'app/src/content/spravochnik1/**'
+      - 'app/src/lib/planimetriya/spravochnik-pdf.ts'
+      - 'app/src/lib/planimetriya/spravochnik-chertezhi.ts'
+      - 'app/src/lib/sheet/**'
+      - 'app/src/app/zadaniya/1/pechat/spravochnik/**'
+      - 'app/src/components/tasks/planimetriya/spravochnik/SpravochnikPdf1.tsx'
+      - 'app/scripts/build-pdf-spravochnik-1.mjs'
+      - '.github/workflows/pdf-1-spravochnik.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf-1-spravochnik-${{ github.ref }}
+  cancel-in-progress: true
+
+# Сборка не публикуется: правовые документы — черновиком (как в pdf-4.yml).
+env:
+  LEGAL_DRAFT: '1'
+
+jobs:
+  build:
+    name: Сборка PDF справочника
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      - name: Поставить Chromium и poppler (pdfinfo)
+        working-directory: app
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          sudo apt-get install -y poppler-utils
+
+      - name: Собрать сайт
+        working-directory: app
+        run: pnpm build
+
+      - name: Собрать PDF
+        working-directory: app
+        run: pnpm build:pdf-spravochnik-1
+
+      # Число страниц в pdf.json попадает в подпись кнопки только при
+      # сборке сайта — пересобираем и проверяем лист вместе с файлами.
+      - name: Проверить справочник
+        working-directory: app
+        run: |
+          pnpm build
+          pnpm test:pdf-spravochnik-1
+
+      - name: Отдать файлы архивом
+        uses: actions/upload-artifact@v7
+        with:
+          name: zadanie-1-spravochnik-pdf
+          path: app/public/materials/zadanie-1/*.pdf
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Вернуть готовые PDF в ветку
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/public/materials/zadanie-1 app/src/content/spravochnik1/pdf.json
+          if git diff --cached --quiet -- app/public/materials/zadanie-1 app/src/content/spravochnik1/pdf.json; then
+            echo "файлы не менялись"
+            exit 0
+          fi
+          echo "сравнение с файлами ветки:"
+          if git diff --cached --quiet -- app/src/content/spravochnik1/pdf.json && \
+             [ "$(node app/scripts/pdf-changed.mjs app/public/materials/zadanie-1)" = same ]; then
+            echo "содержимое то же — коммит не нужен"
+            exit 0
+          fi
+          git commit -m "Справочник №1: пересобранные PDF [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin HEAD:"${GITHUB_REF_NAME}"

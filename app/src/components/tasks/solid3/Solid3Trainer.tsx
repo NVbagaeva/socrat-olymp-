@@ -19,6 +19,8 @@ import { TrainerSessionHost, useSessionReport, type ConfiguratorApi } from '../s
 import { Solid3Stats } from './Solid3Stats';
 import { readSolid3Ui, type Solid3Ui } from './solid3Ui';
 import { TitleText } from '@/components/tasks/TitleText';
+import { Chertezh3 } from '@/components/chertezh3/Chertezh3';
+import type { Scenariy } from '@/lib/chertezh3/scenariy';
 
 export interface Solid3TrainerProps {
   pool: Pool;
@@ -179,7 +181,11 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
      в тренажёре раздела. */
   const filters = useMemo(() => {
     if (pool.razdel !== 'all') {
-      return pool.kinds.map((kind) => ({ id: kind.id, title: kind.title, titleHtml: kind.titleHtml }));
+      return pool.kinds.map((kind) => ({
+        id: kind.id,
+        title: kind.title,
+        titleHtml: kind.titleHtml,
+      }));
     }
     const seen = new Map<string, string>();
     pool.kinds.forEach((kind) => seen.set(kind.group, kind.groupTitle));
@@ -345,11 +351,24 @@ function Solid3Screen({
     return openText(variant.steps, variant.seal).split('\n');
   }, [variant, solution]);
 
+  /* Сценарий интерактивного чертежа (многогранники) и ссылки шагов
+     разбора на его элементы: шаг открыт — его элементы подсвечены. */
+  const scena = useMemo(() => {
+    if (variant === undefined || variant.scena === null) return null;
+    return JSON.parse(openText(variant.scena, variant.seal)) as Scenariy;
+  }, [variant]);
+  const stepRefs = useMemo(() => {
+    if (variant === undefined || variant.stepRefs === null || !solution) return [];
+    return JSON.parse(openText(variant.stepRefs, variant.seal)) as string[][];
+  }, [variant, solution]);
+  const [step, setStep] = useState<number | null>(null);
+
   if (item === undefined || kind === undefined || variant === undefined) {
     return <p className="z3t__wait">Собираем подход…</p>;
   }
 
   function reset() {
+    setStep(null);
     setValue('');
     setChecked(null);
     setSolution(false);
@@ -431,9 +450,18 @@ function Solid3Screen({
 
       <article className="z3t__card">
         <div className="z3t__question" dangerouslySetInnerHTML={{ __html: variant.uslovieHtml }} />
-        <FigureZoom className="z3t__fig" label={`Чертёж к заданию: ${kind.titlePlain}`}>
-          <span dangerouslySetInnerHTML={{ __html: variant.svg ?? kind.svg }} />
-        </FigureZoom>
+        {scena !== null && kind.podpisiHtml !== null ? (
+          <Chertezh3
+            className="z3t__fig z3t__fig--3d"
+            scenariy={scena}
+            podpisiHtml={kind.podpisiHtml}
+            podsvetka={step === null ? null : (stepRefs[step] ?? null)}
+          />
+        ) : (
+          <FigureZoom className="z3t__fig" label={`Чертёж к заданию: ${kind.titlePlain}`}>
+            <span dangerouslySetInnerHTML={{ __html: variant.svg ?? kind.svg }} />
+          </FigureZoom>
+        )}
       </article>
 
       <div className="z3t__answer">
@@ -476,7 +504,14 @@ function Solid3Screen({
               Проверить
             </Button>
           )}
-          <Button variant="ghost" onClick={() => setSolution(true)} disabled={solution}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setSolution(true);
+              setStep(0);
+            }}
+            disabled={solution}
+          >
             {checked === 'right' ? 'Показать решение' : 'Посмотреть решение'}
           </Button>
           <Button variant="ghost" onClick={anotherVariant}>
@@ -485,12 +520,12 @@ function Solid3Screen({
         </div>
 
         {solution ? (
-          <ol className="z3t__steps">
-            {steps.map((step, i) => (
-              /* Шаг набран KaTeX на сборке (lib/zadanie3/pool.ts). */
-              <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
-            ))}
-          </ol>
+          <SolutionSteps
+            steps={steps}
+            refs={scena === null ? null : stepRefs}
+            active={step}
+            onSelect={setStep}
+          />
         ) : null}
       </div>
 
@@ -503,5 +538,54 @@ function Solid3Screen({
         </Button>
       </div>
     </section>
+  );
+}
+
+interface SolutionStepsProps {
+  steps: string[];
+  /** Ссылки шагов на элементы чертежа. null — чертёж не интерактивный. */
+  refs: string[][] | null;
+  active: number | null;
+  onSelect: (i: number | null) => void;
+}
+
+/**
+ * Разбор по шагам. У интерактивного чертежа шаг — кнопка: открытый
+ * шаг подсвечивает на чертеже свои элементы, остальное приглушается.
+ */
+function SolutionSteps({ steps, refs, active, onSelect }: SolutionStepsProps) {
+  if (refs === null) {
+    return (
+      <ol className="z3t__steps">
+        {steps.map((text, i) => (
+          /* Шаг набран KaTeX на сборке (lib/zadanie3/pool.ts). */
+          <li key={i} dangerouslySetInnerHTML={{ __html: text }} />
+        ))}
+      </ol>
+    );
+  }
+  return (
+    <ol className="z3t__steps z3t__steps--live">
+      {steps.map((text, i) => {
+        const est = (refs[i]?.length ?? 0) > 0;
+        return (
+          <li key={i} className={clsx(active === i && 'is-active')}>
+            <button
+              type="button"
+              className="z3t__step"
+              aria-pressed={active === i}
+              onClick={() => onSelect(active === i ? null : i)}
+            >
+              <span dangerouslySetInnerHTML={{ __html: text }} />
+              {est ? (
+                <span className="z3t__step-hint">
+                  {active === i ? 'на чертеже' : 'показать на чертеже'}
+                </span>
+              ) : null}
+            </button>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

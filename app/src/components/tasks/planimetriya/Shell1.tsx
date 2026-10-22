@@ -1,6 +1,6 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
-import { RAZDELY_TEORII_1 } from '@/content/teoriya1';
+import { RAZDELY_SPRAVOCHNIKA_1 } from '@/content/spravochnik1';
 import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
 import { BLOKI } from '@/lib/planimetriya/prep/bloki';
@@ -39,7 +39,7 @@ export function Shell1({ children }: { children: React.ReactNode }) {
           media={<IllyustratsiyaShapki art={ZADANIE1.art} />}
           actions={
             <Progress1
-              razdely={RAZDELY_TEORII_1.map((r) => r.id)}
+              razdely={RAZDELY_SPRAVOCHNIKA_1.map((r) => r.id)}
               bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
               podtipy={PROTOTIPY.map((p) => klyuchProto(p.id))}
             />
