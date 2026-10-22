@@ -5,7 +5,7 @@
  */
 
 import { legalDocs } from '@/content/legal/documents';
-import { HOWTO_HREF } from '@/content/onboarding';
+import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
