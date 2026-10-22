@@ -191,8 +191,38 @@
     return pages;
   }
 
+  /* Экранный предпросмотр на узком экране: страница A4 шире телефона,
+     и вся страница ехала вбок. Лист целиком уменьшается под ширину
+     окна (zoom из переменной — только на экране, см. sheet.css);
+     печать и обмер при наборе идут в настоящем размере. */
+  var PREVIEW_GAP = 16;
+
+  function fitPreview() {
+    var host = document.getElementById('sheet-pages');
+    var page = host && host.querySelector('.sheet-page');
+    if (!page) {
+      return;
+    }
+    host.style.removeProperty('--sheet-preview-zoom');
+    var room = document.documentElement.clientWidth - PREVIEW_GAP;
+    var width = page.offsetWidth;
+    if (width > 0 && room < width) {
+      host.style.setProperty('--sheet-preview-zoom', String(Math.max(room / width, 0.3)));
+    }
+  }
+
+  var fitBound = false;
+  function bindFit() {
+    fitPreview();
+    if (!fitBound) {
+      fitBound = true;
+      window.addEventListener('resize', fitPreview);
+    }
+  }
+
   function run(spec) {
     var host = document.getElementById('sheet-pages');
+    host.style.removeProperty('--sheet-preview-zoom');
     host.textContent = '';
 
     var pages = [];
@@ -449,6 +479,7 @@
         window.sheetPagination.formulasFailed =
           host.querySelectorAll('.math[data-katex="error"]').length;
       }
+      bindFit();
     }).catch(function (error) {
       window.sheetPagination = { error: String(error && error.message || error) };
     });

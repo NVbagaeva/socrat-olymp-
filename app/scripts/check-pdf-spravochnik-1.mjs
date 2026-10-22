@@ -21,13 +21,21 @@
        формулы, чертежи и таблицы не вылезают за рамку;
      — окно печати открылось один раз.
    Число страниц в PDF и пустые страницы проверяет test:print-pages.
-   Отдельно — веб-страница справочника: кнопка «Скачать PDF» ведёт на
-   печатную страницу, переключатель «С примерами» меняет адрес. */
+   Готовые PDF (build:pdf-spravochnik-1) лежат на месте, и страниц в них
+   столько же, сколько раскладывает лист сейчас.
+   «Назад» и хлебные крошки на бумагу не попадают; «Теория → печать →
+   Назад» и прямой заход на печать → «Назад» приводят на вкладку
+   «Теория» №1; кнопка «Назад» не меньше 44×44 px и липкая.
+   «Скачать справочник» на вкладке «Теория»: aria-label, download,
+   отдаёт PDF, подпись «PDF, A4, N страниц», переключатель меняет файл.
+   iPhone (по userAgent): «Печать» ведёт на готовый PDF, окно печати
+   само не открывается — HTML-лист Safari на iOS печатает с лишними
+   страницами. */
 
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 import { APP, requireSrc } from './lib/load-ts.mjs';
 import { bezBanneraCookie } from './lib/cookie-notice.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
@@ -139,10 +147,15 @@ async function snyatList(page) {
   });
 }
 
+/* Готовые файлы (build:pdf-spravochnik-1) и число их страниц. */
+const MANIFEST = JSON.parse(
+  fs.readFileSync(path.join(APP, 'src', 'content', 'spravochnik1', 'pdf.json'), 'utf8'),
+);
+
 const stroki = [];
-for (const [imya, zapros, sPrimerami] of [
-  ['с примерами', '', true],
-  ['без примеров', '?primery=0', false],
+for (const [imya, zapros, sPrimerami, klyuch] of [
+  ['с примерами', '', true, 'sPrimerami'],
+  ['без примеров', '?primery=0', false, 'bezPrimerov'],
 ]) {
   const page = await browser.newPage({ viewport: { width: 1000, height: 1200 } });
   await page.addInitScript(() => {
@@ -222,28 +235,187 @@ for (const [imya, zapros, sPrimerami] of [
   proverka(l.shire.length === 0, `${pre} шире своей рамки: ${[...new Set(l.shire)].join(', ')}`);
   proverka(l.pechat === 1, `${pre} окно печати открывалось ${l.pechat} раз`);
 
+  /* Готовый PDF не отстал от данных: страниц столько же, сколько
+     раскладывает лист сейчас. Отстал — pnpm build:pdf-spravochnik-1. */
+  const fayl = MANIFEST[klyuch];
+  proverka(
+    fs.existsSync(path.join(APP, 'public', fayl.fayl)),
+    `${pre} нет готового файла ${fayl.fayl}`,
+  );
+  proverka(
+    fayl.stranic === l.stranic,
+    `${pre} в готовом PDF ${fayl.stranic} стр., а лист сейчас — ${l.stranic}: пересоберите pnpm build:pdf-spravochnik-1`,
+  );
+
+  /* «Назад» и крошки на бумагу не попадают. */
+  await page.emulateMedia({ media: 'print' });
+  const vidnoVPechati = await page.evaluate(() =>
+    ['.spr1-nazad', '.spr1-pdf', '.spr1p-bar'].filter((sel) => {
+      const el = document.querySelector(sel);
+      return el !== null && getComputedStyle(el).display !== 'none';
+    }),
+  );
+  proverka(vidnoVPechati.length === 0, `${pre} при печати видно: ${vidnoVPechati.join(', ')}`);
+
   stroki.push(
     `${imya.padEnd(13)} страниц ${String(l.stranic).padStart(2)}, карточек ${KARTOCHKI.length}, разборов ${primery.length}`,
   );
   await page.close();
 }
 
-/* Веб-страница: «Скачать PDF» и переключатель «С примерами». */
+/* Вкладка «Теория»: «Скачать справочник» отдаёт готовый PDF,
+   переключатель меняет файл. */
 {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.addInitScript(() => {
+    window.print = () => {};
+  });
   await page.goto(`${BASE}/zadaniya/1/teoriya/`, { waitUntil: 'networkidle' });
   const knopka = page.locator('.spr1-pdf__knopka');
   const adres = async () => (await knopka.getAttribute('href')) ?? '';
   proverka(
-    (await adres()).endsWith('/zadaniya/1/pechat/spravochnik/'),
-    `веб: «Скачать PDF» ведёт на ${await adres()}`,
+    (await knopka.getAttribute('aria-label')) === SPRAVOCHNIK_1.pdf.skachatAria,
+    'веб: у кнопки нет aria-label «Скачать справочник по планиметрии в PDF»',
+  );
+  proverka((await knopka.getAttribute('download')) !== null, 'веб: у кнопки нет атрибута download');
+  const sPrimerami = await adres();
+  proverka(
+    sPrimerami.split('?')[0] === MANIFEST.sPrimerami.fayl,
+    `веб: «Скачать справочник» ведёт на ${sPrimerami}`,
+  );
+  const otvet = await page.request.get(`${BASE}${sPrimerami}`);
+  const telo = await otvet.body();
+  proverka(
+    otvet.ok() && telo.subarray(0, 5).toString() === '%PDF-',
+    `веб: по ${sPrimerami} не PDF (${otvet.status()})`,
+  );
+  const podpis = await page.locator('.spr1-pdf__podpis').textContent();
+  proverka(
+    podpis === SPRAVOCHNIK_1.pdf.podpis(MANIFEST.sPrimerami.stranic),
+    `веб: подпись под кнопкой «${podpis}»`,
+  );
+  /* Нажатие — загрузка файла (вкладка сайта остаётся на месте). */
+  const [zagruzka] = await Promise.all([page.waitForEvent('download'), knopka.click()]);
+  proverka(
+    zagruzka.suggestedFilename().endsWith('.pdf'),
+    `веб: скачался файл «${zagruzka.suggestedFilename()}»`,
+  );
+  proverka(
+    page.url().endsWith('/zadaniya/1/teoriya/'),
+    `веб: после скачивания вкладка на ${page.url()}`,
   );
   await page.locator('.spr1-pdf__switch').click();
   proverka(
-    (await adres()).endsWith('/zadaniya/1/pechat/spravochnik/?primery=0'),
-    `веб: без примеров «Скачать PDF» ведёт на ${await adres()}`,
+    (await adres()).split('?')[0] === MANIFEST.bezPrimerov.fayl,
+    `веб: без примеров кнопка ведёт на ${await adres()}`,
+  );
+
+  /* Панель ушла за верх экрана — в колонке «Содержание» появилась
+     маленькая «Скачать», и она отдаёт тот же файл, что выбран. */
+  const mini = page.locator('.topic-side .spr1-pdf-mini');
+  proverka(!(await mini.isVisible()), 'веб: маленькая «Скачать» видна, пока видна панель');
+  await page.evaluate(() =>
+    document.getElementById('teoriya-treugolnik')?.scrollIntoView({ block: 'start' }),
+  );
+  await page.waitForTimeout(400);
+  proverka(await mini.isVisible(), 'веб: после прокрутки маленькой «Скачать» нет');
+  proverka(
+    ((await mini.getAttribute('href')) ?? '').split('?')[0] === MANIFEST.bezPrimerov.fayl,
+    'веб: маленькая «Скачать» отдаёт не тот файл, что выбран переключателем',
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
+
+  /* Печать веб-страницы: без панели, поиска, «Назад» и маленькой кнопки. */
+  await page.emulateMedia({ media: 'print' });
+  const vidnoNaTeorii = await page.evaluate(() =>
+    ['.spr1-nazad', '.spr1-pdf', '.spr1-poisk', '.spr1-pdf-mini'].filter((sel) =>
+      [...document.querySelectorAll(sel)].some((el) => getComputedStyle(el).display !== 'none'),
+    ),
+  );
+  proverka(vidnoNaTeorii.length === 0, `веб: при печати теории видно: ${vidnoNaTeorii.join(', ')}`);
+  await page.emulateMedia({ media: 'screen' });
+
+  /* «Теория → печать → Назад» возвращает на теорию. */
+  await page.locator('.spr1-pdf__pechat').click();
+  await page.waitForURL(/\/pechat\/spravochnik\//);
+  await page.locator('.spr1-nazad__knopka').click();
+  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  proverka(
+    page.url().endsWith('/zadaniya/1/teoriya/'),
+    `назад: с печати после теории попали на ${page.url()}`,
   );
   await page.close();
+}
+
+/* Прямой заход на печатную страницу: «Назад» ведёт на теорию №1. */
+{
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.addInitScript(() => {
+    window.print = () => {};
+  });
+  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/`, { waitUntil: 'networkidle' });
+  const nazad = page.locator('.spr1-nazad__knopka');
+  const box = await nazad.boundingBox();
+  proverka(
+    box !== null && box.width >= 44 && box.height >= 44,
+    `назад: кнопка ${box?.width}×${box?.height} px, нужно не меньше 44×44`,
+  );
+  await page.mouse.wheel(0, 3000);
+  await page.waitForTimeout(200);
+  const posle = await nazad.boundingBox();
+  proverka(
+    posle !== null && posle.y >= -1 && posle.y < 60,
+    'назад: кнопка не липкая при прокрутке',
+  );
+  await nazad.click();
+  await page.waitForURL(/\/zadaniya\/1\/teoriya\/$/, { timeout: 15000 }).catch(() => {});
+  proverka(
+    page.url().endsWith('/zadaniya/1/teoriya/'),
+    `назад: с прямого захода попали на ${page.url()}`,
+  );
+  await page.close();
+}
+
+/* iPhone/iPad: печать HTML-листа там переезжает на лишние страницы
+   (Safari не слушает @page и печатает на свою бумагу), поэтому «Печать»
+   ведёт на готовый PDF, а окно печати само не открывается. Движок
+   здесь Chromium, iPhone — по userAgent и размеру экрана. */
+{
+  const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  const page = await ctx.newPage();
+  await page.addInitScript(() => {
+    window.print = () => {
+      window.__pechat = (window.__pechat ?? 0) + 1;
+    };
+  });
+  await page.goto(`${BASE}/zadaniya/1/teoriya/`, { waitUntil: 'networkidle' });
+  const vPaneli = (await page.locator('.spr1-pdf__pechat').getAttribute('href')) ?? '';
+  proverka(
+    vPaneli.split('?')[0] === MANIFEST.sPrimerami.fayl,
+    `iPhone: «Печать» в панели ведёт на ${vPaneli}, а не на готовый PDF`,
+  );
+  await page.goto(`${BASE}/zadaniya/1/pechat/spravochnik/?primery=0`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
+    timeout: 120000,
+  });
+  await page.waitForTimeout(500);
+  proverka(
+    (await page.evaluate(() => window.__pechat ?? 0)) === 0,
+    'iPhone: окно печати открылось само',
+  );
+  const pechat = page.locator('.spr1p-bar__pechat a');
+  const adres = (await pechat.getAttribute('href')) ?? '';
+  proverka(
+    adres.split('?')[0] === MANIFEST.bezPrimerov.fayl,
+    `iPhone: «Печать» на печатной странице ведёт на ${adres}`,
+  );
+  proverka(
+    (await page.locator('.spr1p-bar__pechat').textContent())?.includes(
+      SPRAVOCHNIK_1.pdf.leadIos,
+    ) === true,
+    'iPhone: нет подсказки про «Поделиться» → «Напечатать»',
+  );
+  await ctx.close();
 }
 
 await browser.close();

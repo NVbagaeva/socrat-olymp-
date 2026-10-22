@@ -1,11 +1,13 @@
-import { Redirect, REDIRECT_METADATA } from '@/components/layout';
+import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
-import { RAZDELY } from '@/lib/zadanie3';
+import { FIGURA_GLAVA } from '@/content/stereo/glavy';
 import { ZADANIYA } from '@/lib/paths';
 
-/* Те же адреса, что были: по разделу на фигуру. */
+/* Прежние адреса №3 — по разделу на фигуру. Раздел собран заново
+   (docs/stereometry-plan.md, п. 5.4): фигуры стали главами теории,
+   а тренажёр и опорные задачи — общими вкладками задания. */
 export function generateStaticParams() {
-  return RAZDELY.map((razdel) => ({ figura: razdel.slug }));
+  return Object.keys(FIGURA_GLAVA).map((figura) => ({ figura }));
 }
 export const dynamicParams = false;
 
@@ -13,12 +15,8 @@ export const metadata = REDIRECT_METADATA;
 
 type Params = Promise<{ figura: string }>;
 
-/**
- * Прежний адрес вкладки раздела №3: до переименования в «Опорные
- * задачи». Оболочка раздела приходит из layout, поэтому здесь только
- * сам перенос.
- */
+/** Прежнее имя вкладки «Опорные задачи» → опорные задачи задания. */
 export default async function Page({ params }: { params: Params }) {
-  const { figura } = await params;
-  return <Redirect href={`${ZADANIYA}/3/${figura}/${OPORNYE.tail}`} title={OPORNYE.title} />;
+  await params;
+  return <RedirectPage href={`${ZADANIYA}/3/${OPORNYE.tail}`} title={OPORNYE.title} />;
 }

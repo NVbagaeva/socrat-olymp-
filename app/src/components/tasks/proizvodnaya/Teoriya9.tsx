@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { Fragment, type ReactNode } from 'react';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import {
   RAZDELY_TEORII_9,

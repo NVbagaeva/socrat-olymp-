@@ -695,7 +695,9 @@ a.task-card--soon:hover {
 
 .heat {
   display: grid;
-  grid-template-columns: 104px repeat(10, 1fr);
+  /* Подписи строк сжимаются на телефоне, клетки не шире своей доли:
+     на 360px карта выходила за экран. */
+  grid-template-columns: minmax(56px, 104px) repeat(10, minmax(0, 1fr));
   gap: 3px;
   align-items: center;
 }
@@ -1981,6 +1983,115 @@ html[data-tabs-pending] .topic-panel,
   }
 }
 
+/* ── Банк заданий: раскладка Bento ─────────────────────────────
+   Карточки разного размера: размер каждой посчитан заранее
+   (lib/bento.ts) под 2, 3 и 4 колонки и лежит в data-b2/-b3/-b4,
+   поэтому ряды заполнены ровно и порядок номеров не меняется.
+   Телефон — 2 колонки, планшет и узкий компьютер — 3, широкий — 4.
+   Ряды одной высоты (grid-auto-rows от .tasks-grid): крупная
+   карточка 2×2 ровно в два ряда. */
+.tasks-grid--bento {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* На телефоне ряд по своему содержимому: равные ряды по самой
+     высокой карточке (13 — с двумя бейджами) оставляли в остальных
+     пустую половину. */
+  grid-auto-rows: auto;
+  gap: var(--space-3);
+}
+.tasks-grid--bento > [data-b2='2'] {
+  grid-column: span 2;
+}
+@media (min-width: 768px) {
+  .tasks-grid--bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: var(--space-4);
+  }
+  .tasks-grid--bento > [data-b2='2'] {
+    grid-column: auto;
+  }
+  .tasks-grid--bento > [data-b3='2'] {
+    grid-column: span 2;
+  }
+  .tasks-grid--bento > [data-b3='3'] {
+    grid-column: span 3;
+  }
+  .tasks-grid--bento > [data-b3='big'] {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+@media (min-width: 1280px) {
+  .tasks-grid--bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .tasks-grid--bento > :is([data-b3='2'], [data-b3='3'], [data-b3='big']) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .tasks-grid--bento > [data-b4='2'] {
+    grid-column: span 2;
+  }
+  .tasks-grid--bento > [data-b4='3'] {
+    grid-column: span 3;
+  }
+  .tasks-grid--bento > [data-b4='4'] {
+    grid-column: span 4;
+  }
+  .tasks-grid--bento > [data-b4='big'] {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+/* Крупная карточка: иллюстрация растёт вместе с плиткой. */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+  .tasks-grid--bento > [data-b3='big'] .task-card--bank {
+    --card-ill: clamp(96px, 34cqw, 180px);
+    --card-no: 40px;
+    --card-no-lh: 46px;
+  }
+}
+@media (min-width: 1280px) {
+  .tasks-grid--bento > [data-b4='big'] .task-card--bank {
+    --card-ill: clamp(96px, 34cqw, 200px);
+    --card-no: 44px;
+    --card-no-lh: 50px;
+  }
+}
+/* Узкая плитка (половина телефона, треть планшета): иллюстрации
+   рядом с названием места нет. Номер и миниатюра — верхней строкой,
+   название под ними во всю ширину плитки; стрелка наведения не нужна
+   — на таких экранах наведения нет. */
+@container (max-width: 239.98px) {
+  .tasks-grid--bento .task-card--bank {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    column-gap: var(--space-2);
+    row-gap: var(--space-2);
+    min-height: 0;
+    --card-pad: var(--space-4);
+    --card-ill: 56px;
+    --card-no: 24px;
+    --card-no-lh: 30px;
+    --card-title: 15px;
+    --card-title-lh: 20px;
+    --card-title-lines: 4;
+  }
+  .tasks-grid--bento .task-card--bank .task-card__no {
+    grid-area: 1 / 1;
+    align-self: center;
+  }
+  .tasks-grid--bento .task-card--bank .task-card__ill {
+    grid-area: 1 / 2;
+  }
+  .tasks-grid--bento .task-card--bank .task-card__body {
+    grid-area: 2 / 1 / 3 / 3;
+  }
+  .tasks-grid--bento .task-card--bank .task-card__go {
+    display: none;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════
    10. КОМПОНЕНТЫ · хлебные крошки
    ══════════════════════════════════════════════════════════ */
@@ -2375,6 +2486,19 @@ html[data-tabs-pending] .topic-panel,
 .contents-item.is-active .contents-item__no {
   color: var(--color-primary);
 }
+/* Раздел «Скоро» (теория №16): замок вместо номера, строка приглушена. */
+.contents-item.is-skoro {
+  color: var(--color-text-tertiary);
+}
+.contents-item__zamok {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vertical-align: -2px;
+}
 /* Подпункты открытого раздела (теория №11): отступ под номер. */
 .contents-sub {
   display: grid;
@@ -2461,6 +2585,11 @@ html[data-tabs-pending] .topic-panel,
   /* Под чёлкой iPhone лента не прячется: отступ — безопасная зона. */
   top: env(safe-area-inset-top, 0px);
   z-index: 6;
+  /* Лента не якорь прокрутки. Прилипая, она сворачивается из плиток
+     в строку; если браузер держал за якорь плитку, он сдвигал
+     прокрутку на разницу — лента отлипала, снова разворачивалась, и
+     так по кругу. Якорем браузер берёт текст под лентой. */
+  overflow-anchor: none;
 }
 .topic-tabs-row::before {
   content: '';
@@ -2627,6 +2756,105 @@ html[data-tabs-pending] .topic-panel,
   .topic-tabs__more .tabs__ico svg {
     width: 18px;
     height: 18px;
+  }
+}
+
+/* ── Меню раздела плитками (Bento) ─────────────────────────────
+   Пока лента стоит на месте, вкладки раздела — плитки разного
+   размера: первая («О задании», «Подтемы») крупнее, остальные
+   делят ряды поровну, ряды заполнены без дыр (flex-wrap с ростом).
+   Телефон — по 2 в ряд (первая во всю ширину), планшет — по 3,
+   широкий экран — по 4. Ничего не прокручивается вбок, подписи
+   не обрезаются.
+
+   Когда лента прилипает к верху экрана (is-stuck), она снова
+   становится компактной строкой — прежняя лента со своими правилами
+   выше и ниже. Разницу высот хук useStickyTabs отдаёт в нижний
+   отступ, страница под лентой не прыгает.
+
+   Лента с модификатором --stroka — всегда строкой, без плиток: так
+   на странице выбора типа функции №12, где под крупной картинкой
+   первая карточка подтем должна остаться на первом экране
+   (scripts/check-zadanie-hero.mjs). */
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  overflow: visible;
+}
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
+  display: contents;
+}
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+  flex: 1 1 calc(50% - var(--space-2));
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 72px;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+}
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):hover {
+  background: var(--color-surface-info);
+}
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .tabs--lenta
+  :is(button, a[role='tab'])[aria-selected='true'] {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+}
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta .tabs__text,
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more .tabs__text {
+  max-width: none;
+}
+/* Кнопка материалов — такая же плитка, черта-разделитель не нужна. */
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
+  display: none;
+}
+/* Первая плитка крупнее: во всю ширину на телефоне, значок и подпись
+   в строку. */
+.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .tabs--lenta
+  > :is(button, a[role='tab']):first-child {
+  flex-basis: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 56px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+@media (min-width: 768px) {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+    flex-basis: calc(33.333% - var(--space-2));
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: calc(66.666% - var(--space-2));
+    min-height: 72px;
+  }
+}
+@media (min-width: 1280px) {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+    flex-basis: calc(25% - var(--space-2));
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: calc(50% - var(--space-2));
   }
 }
 

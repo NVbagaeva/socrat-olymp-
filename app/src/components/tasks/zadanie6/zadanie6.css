@@ -1,0 +1,204 @@
+/* Задание №6: условие, рисунки, таблицы распределений и разбор.
+   Общий для галереи, тренажёра, листов и примеров теории. */
+
+.z6-uslovie {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.z6-uslovie__text {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.z6-ris {
+  margin: 0;
+  max-width: 100%;
+}
+
+.z6-ris--eiler .pr-eiler {
+  width: 280px;
+}
+
+.z6-ris--derevo .pr-tree {
+  max-width: min(100%, 520px);
+}
+
+.z6-zapis {
+  padding: var(--space-1) 0;
+}
+
+/* На телефоне запись из шести-семи столбцов чуть мельче, остальное — прокрутка с тенью. */
+@media (max-width: 480px) {
+  .z6-zapis {
+    font-size: 0.92em;
+  }
+}
+
+/* ── Таблица распределения ──────────────────────────────────────────
+   Прокрутка внутри рамки; тень у края, за которым есть продолжение:
+   белые «шторки» прокручиваются вместе с таблицей (local), тени стоят на
+   месте (scroll) — когда таблица у края, шторка закрывает тень. */
+
+.z6-tablica,
+.z6-zapis {
+  --z6-fon: var(--color-surface);
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background:
+    linear-gradient(to right, var(--z6-fon) 30%, transparent),
+    linear-gradient(to left, var(--z6-fon) 30%, transparent) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.28), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.28), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size:
+    28px 100%,
+    28px 100%,
+    14px 100%,
+    14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.z6-tablica:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.z6-tablica table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.z6-tablica th,
+.z6-tablica td {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  white-space: nowrap;
+}
+
+.z6-tablica th {
+  font-weight: 700;
+  text-align: left;
+}
+
+.z6-tablica td {
+  min-width: 3em;
+  text-align: center;
+}
+
+.z6-tablica td.is-vydelen,
+.z6-tablica tr.is-vydelena td {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  font-weight: 600;
+}
+
+/* ── Разбор ─────────────────────────────────────────────────────── */
+
+.z6-razbor {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.z6-razbor__etap {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  break-inside: avoid;
+}
+
+.z6-razbor__etap .z6-tablica {
+  --z6-fon: var(--color-surface-info);
+}
+
+.z6-razbor__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.z6-razbor__line {
+  margin: 0;
+  line-height: 1.7;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.z6-razbor__calc {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.z6-razbor__calc summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.z6-razbor__calc ul,
+.z6-razbor__calc ol {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  line-height: 1.8;
+}
+
+.z6-razbor__calc-tex {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.z6-hint {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.z6-hint--ok {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.z6-hint__comment {
+  color: var(--color-text-secondary);
+}
+
+@media print {
+  .z6-tablica,
+  .z6-zapis {
+    overflow: visible;
+    background: none;
+  }
+
+  .z6-razbor__etap {
+    border-left-color: #000;
+    background: none;
+  }
+
+  .z6-tablica td.is-vydelen,
+  .z6-tablica tr.is-vydelena td {
+    background: none;
+    text-decoration: underline;
+  }
+}
+
+@media print {
+  /* На листе рисунки компактнее: дерево и диаграмма не занимают полстраницы. */
+  .z6-ris--derevo .pr-tree {
+    max-width: 340px;
+  }
+
+  .z6-ris--eiler .pr-eiler {
+    width: 230px;
+  }
+}

@@ -236,6 +236,23 @@
   overscroll-behavior: contain;
 }
 
+/* «Весь раздел» первым пунктом меню и подзаголовок над разделами. */
+.razdely-menu__ves {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+.razdely-menu__ves .ves-razdel__title,
+.razdely-menu__sub {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
 /* На широком экране — окно по центру: панель от нижнего края
    экрана компьютера читается хуже. */
 @media (min-width: 1024px) {
@@ -325,8 +342,10 @@
   text-decoration: none;
   cursor: pointer;
   transition:
-    border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease);
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease),
+    box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
 }
 .razdel-karta__ico {
   width: 88px;
@@ -367,6 +386,57 @@
   border-radius: var(--radius-pill);
   background: var(--color-surface-info);
   color: var(--color-primary);
+}
+/* Стрелка «перейти» — без кружка: синий кружок в покое выглядел бы
+   отметкой выбора. На компьютере она выезжает при наведении, на
+   устройствах без мыши видна всегда, приглушённой. */
+.razdel-karta__go {
+  background: none;
+  color: var(--color-primary);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 180ms var(--ease),
+    transform 180ms var(--ease),
+    color 180ms var(--ease);
+}
+.razdel-karta__ico {
+  transition: transform 180ms var(--ease);
+}
+a.razdel-karta:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+a.razdel-karta:focus-visible .razdel-karta__go {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: none) {
+  a.razdel-karta .razdel-karta__go {
+    opacity: 1;
+    transform: none;
+    color: var(--color-text-tertiary);
+  }
+  a.razdel-karta:active {
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+  }
+  a.razdel-karta:active .razdel-karta__go {
+    color: var(--color-primary);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .razdel-karta,
+  .razdel-karta__go,
+  .razdel-karta__ico {
+    transition: none;
+  }
+  a.razdel-karta:hover,
+  a.razdel-karta .razdel-karta__go,
+  a.razdel-karta:hover .razdel-karta__ico {
+    transform: none;
+  }
 }
 .razdel-karta__go svg {
   width: 20px;
@@ -456,6 +526,9 @@
 }
 .drugie-razdely__list {
   display: grid;
+  /* Одна колонка не шире блока: иначе карточка раздвигала её
+     по своему содержимому, и на 360px страница ехала вбок. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   margin: 0;
   padding: 0;
@@ -508,7 +581,16 @@
     background: var(--color-surface-2);
   }
   a.razdel-karta:hover {
-    border-color: var(--color-accent-soft);
-    box-shadow: var(--shadow-sm);
+    border-color: var(--color-primary);
+    background: var(--color-surface-info);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  a.razdel-karta:hover .razdel-karta__go {
+    opacity: 1;
+    transform: none;
+  }
+  a.razdel-karta:hover .razdel-karta__ico {
+    transform: scale(1.05);
   }
 }

@@ -57,7 +57,14 @@ function attach(strip: HTMLElement, row: HTMLElement, page: HTMLElement): () => 
     /* Отступ бывает и отрицательным: на широком экране прилипшая
        лента получает поля сверху и снизу и становится выше. */
     const gap = stuck ? full - box.height : 0;
-    row.style.marginBottom = Math.abs(gap) > 0.5 ? `${gap}px` : '';
+    /* Нижний отступ ленты схлопывается с верхним отступом следующего
+       блока: из двух положительных остаётся больший. Чтобы страница
+       не теряла этот отступ (из-за потери лента отлипала и снова
+       прилипала по кругу), положительная разница кладётся сверх него. */
+    const sosed = row.nextElementSibling;
+    const nextTop = sosed === null ? 0 : parseFloat(getComputedStyle(sosed).marginTop) || 0;
+    const margin = gap > 0 ? gap + Math.max(nextTop, 0) : gap;
+    row.style.marginBottom = Math.abs(gap) > 0.5 ? `${margin}px` : '';
     /* У прилипшей ленты низ — с учётом выреза экрана сверху. */
     const bottom = stuck ? Math.max(box.bottom, box.height) : box.height;
     page.style.setProperty('--topic-sticky-top', `${Math.round(bottom)}px`);

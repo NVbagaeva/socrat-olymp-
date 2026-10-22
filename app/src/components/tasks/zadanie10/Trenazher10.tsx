@@ -18,7 +18,7 @@ export interface ProtoInfo10 {
   kod: string;
   title: string;
   group: string;
-  /** Якорь раздела теории для «Повторить теорию». */
+  /** Якорь теории для «Повторить теорию»: «teoriya-edinicy», «ed-stepeni». */
   teoriya?: string;
   izKursa: boolean;
 }
@@ -290,7 +290,7 @@ export function Trenazher10({
           ill={ill[z.prototypeId]}
           itog={s.otvety[z.id]}
           onOtvet={(it) => obnovit({ otvety: { ...s.otvety, [z.id]: it } })}
-          teoriyaHref={proto?.teoriya ? `${base}/teoriya/#teoriya-${proto.teoriya}` : undefined}
+          teoriyaHref={proto?.teoriya ? `${base}/teoriya/#${proto.teoriya}` : undefined}
         />
       ) : (
         <p>Загружаем задачу…</p>

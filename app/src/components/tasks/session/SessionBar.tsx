@@ -17,6 +17,15 @@ export interface SessionBarProps {
   onPause: () => void;
   onResume: () => void;
   onFinish: () => void;
+  /** Подпись счётчика: «решено», у зачётной работы — «с ответом». */
+  solvedLabel?: string;
+  /** Подписи кнопки завершения: полная и короткая. */
+  finishLabel?: string;
+  finishShortLabel?: string;
+  /** Есть ли пауза. У зачётной работы её нет. */
+  pausable?: boolean;
+  /** Часы на панели. У зачётной работы свой обратный отсчёт. */
+  clock?: boolean;
 }
 
 /**
@@ -63,6 +72,11 @@ export function SessionBar({
   onPause,
   onResume,
   onFinish,
+  solvedLabel = sessionText.solved,
+  finishLabel = sessionText.finishShort,
+  finishShortLabel = sessionText.finish,
+  pausable = true,
+  clock = true,
 }: SessionBarProps) {
   const shown = total === 0 ? 0 : Math.min(index + 1, total);
   return (
@@ -70,12 +84,12 @@ export function SessionBar({
       <p className="tsess__progress">
         {sessionText.task} <b>{shown}</b> {sessionText.of} {total}
         <span className="tsess__solved">
-          {sessionText.solved} <b>{solved}</b>
+          {solvedLabel} <b>{solved}</b>
         </span>
       </p>
-      <SessionClock elapsed={elapsed} />
+      {clock ? <SessionClock elapsed={elapsed} /> : null}
       <div className="tsess__actions">
-        {paused ? (
+        {!pausable ? null : paused ? (
           <Button size="sm" onClick={onResume} disabled={blocked}>
             {sessionText.resume}
           </Button>
@@ -85,8 +99,8 @@ export function SessionBar({
           </Button>
         )}
         <Button size="sm" variant="ghost" onClick={onFinish} disabled={blocked}>
-          <span className="tsess__finish-long">{sessionText.finishShort}</span>
-          <span className="tsess__finish-short">{sessionText.finish}</span>
+          <span className="tsess__finish-long">{finishLabel}</span>
+          <span className="tsess__finish-short">{finishShortLabel}</span>
         </Button>
       </div>
     </div>

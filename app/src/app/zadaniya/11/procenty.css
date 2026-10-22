@@ -16,7 +16,9 @@
 
 .prc-zapis {
   display: grid;
-  grid-template-columns: max-content max-content max-content;
+  /* Третий столбец (запись) может сжаться и перенестись: при трёх
+     max-content строка на телефоне выходила за экран. */
+  grid-template-columns: max-content max-content minmax(0, max-content);
   align-items: baseline;
   column-gap: 0.6em;
   row-gap: 0.35em;
@@ -329,6 +331,22 @@
   background: var(--color-surface, #fff);
   box-shadow: 0 8px 24px rgb(16 23 40 / 12%);
   font-size: 0.92em;
+}
+
+/* Телефон и планшет: справка раскрывается в потоке под ссылкой, а не
+   всплывающим окном — окно от ссылки в середине строки уходило за
+   правый край экрана. */
+@media screen and (max-width: 1023.98px) {
+  .prc-spravka {
+    display: block;
+  }
+  .prc-spravka__telo {
+    position: static;
+    display: block;
+    width: auto;
+    max-width: 100%;
+    margin-top: 0.4em;
+  }
 }
 
 /* ── Печать и лист учителя: без фона, всё видно в ч/б ─────────── */
