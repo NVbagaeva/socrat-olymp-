@@ -69,54 +69,73 @@ function sphereOn(toward: Vec3) {
 }
 
 /* ── Ортогональная проекция ──────────────────────────────────────
-   Поворот вокруг вертикали и подъём взгляда над горизонтом. Углы
-   подобраны так, чтобы ни одно ребро основания не легло вдоль луча
-   зрения и ни одна вершина не встала на ось чертежа. */
+   Поворот вокруг вертикали (азимут) и подъём взгляда над горизонтом.
+   Углы по умолчанию подобраны так, чтобы ни одно ребро основания не
+   легло вдоль луча зрения и ни одна вершина не встала на ось чертежа.
+   Живой чертёж (components/stereo/Chertezh3d) берёт тот же вид с
+   другими углами — его вращает ученик. */
 
-const AZIMUTH = (28 * Math.PI) / 180;
-const ELEVATION = (25 * Math.PI) / 180;
+/** Ракурс по умолчанию, градусы. */
+export const ORTHO_AZIMUTH = 28;
+export const ORTHO_ELEVATION = 25;
 
-const cosA = Math.cos(AZIMUTH);
-const sinA = Math.sin(AZIMUTH);
-const cosE = Math.cos(ELEVATION);
-const sinE = Math.sin(ELEVATION);
+/** С какого угла обходится правильное основание: подобрано под ракурс по умолчанию. */
+function orthoPolygonStart(n: number): number {
+  switch (n) {
+    case 3:
+      return 162.5;
+    case 4:
+      return 225;
+    case 5:
+      return 200;
+    case 6:
+      return 217.5;
+    default:
+      return 270 - 360 / n / 2 - 360 / n;
+  }
+}
 
-const ORTHO_RIGHT: Vec3 = [cosA, sinA, 0];
-const ORTHO_UP: Vec3 = [-sinA * sinE, cosA * sinE, cosE];
-const ORTHO_TOWARD: Vec3 = [sinA * cosE, -cosA * cosE, sinE];
+/**
+ * Ортогональный вид под заданным ракурсом: азимут — поворот вокруг
+ * вертикали, подъём — угол взгляда над горизонтом (градусы; подъём
+ * от −89 до 89).
+ */
+export function orthoAt(azimuth: number, elevation: number): View {
+  const a = (azimuth * Math.PI) / 180;
+  const e = (elevation * Math.PI) / 180;
+  const cosA = Math.cos(a);
+  const sinA = Math.sin(a);
+  const cosE = Math.cos(e);
+  const sinE = Math.sin(e);
+  const right: Vec3 = [cosA, sinA, 0];
+  const up: Vec3 = [-sinA * sinE, cosA * sinE, cosE];
+  const toward: Vec3 = [sinA * cosE, -cosA * cosE, sinE];
+  return {
+    id: 'ortho',
+    project: (p) => [dot(p, right), -dot(p, up)],
+    depth: (p) => dot(p, toward),
+    toward,
+    rayPoint: (q) => add(scale(right, q[0]), scale(up, -q[1])),
+    /* Угол отсчитывается от направления взгляда: тогда контурные
+       образующие цилиндра стоят на 0 и π. */
+    circlePoint: (center, r, u) => [
+      center[0] + r * (Math.cos(u) * cosA - Math.sin(u) * sinA),
+      center[1] + r * (Math.cos(u) * sinA + Math.sin(u) * cosA),
+      center[2],
+    ],
+    silhouette: 0,
+    /* Ближняя половина — та, что к зрителю; при взгляде снизу ближней
+       остаётся та же сторона окружности, видимость основания решает
+       нормаль. */
+    nearSide: (u) => Math.sin(u) < 1e-9,
+    coneTangent: (r, apexHeight) =>
+      Math.asin(Math.min(1, ((r / apexHeight) * Math.abs(sinE)) / cosE)),
+    spherePoint: sphereOn(toward),
+    polygonStart: orthoPolygonStart,
+  };
+}
 
-export const ortho: View = {
-  id: 'ortho',
-  project: (p) => [dot(p, ORTHO_RIGHT), -dot(p, ORTHO_UP)],
-  depth: (p) => dot(p, ORTHO_TOWARD),
-  toward: ORTHO_TOWARD,
-  rayPoint: (q) => add(scale(ORTHO_RIGHT, q[0]), scale(ORTHO_UP, -q[1])),
-  /* Угол отсчитывается от направления взгляда: тогда контурные
-     образующие цилиндра стоят на 0 и π. */
-  circlePoint: (center, r, u) => [
-    center[0] + r * (Math.cos(u) * cosA - Math.sin(u) * sinA),
-    center[1] + r * (Math.cos(u) * sinA + Math.sin(u) * cosA),
-    center[2],
-  ],
-  silhouette: 0,
-  nearSide: (u) => Math.sin(u) < 1e-9,
-  coneTangent: (r, apexHeight) => Math.asin(Math.min(1, ((r / apexHeight) * sinE) / cosE)),
-  spherePoint: sphereOn(ORTHO_TOWARD),
-  polygonStart: (n) => {
-    switch (n) {
-      case 3:
-        return 162.5;
-      case 4:
-        return 225;
-      case 5:
-        return 200;
-      case 6:
-        return 217.5;
-      default:
-        return 270 - 360 / n / 2 - 360 / n;
-    }
-  },
-};
+export const ortho: View = orthoAt(ORTHO_AZIMUTH, ORTHO_ELEVATION);
 
 /* ── Косоугольная проекция ───────────────────────────────────────
    Ось глубины под 60° с сокращением 0,4 — как в старых чертежах. */

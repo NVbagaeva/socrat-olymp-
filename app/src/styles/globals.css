@@ -12,5 +12,6 @@
 @import './site.css' layer(components);
 @import './ramki.css' layer(components);
 @import './perehody.css' layer(components);
+@import './edinicy.css' layer(components);
 
 @source '../**/*.{ts,tsx}';

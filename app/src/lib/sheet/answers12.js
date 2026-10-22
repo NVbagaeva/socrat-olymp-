@@ -11,6 +11,7 @@
 */
 
 import answers from './answers.js';
+import typo from './typography.js';
 
 /* Ответ для таблицы. У задач с выбором ответ — номер варианта,
    и один номер на бумаге ничего не говорит, поэтому рядом идёт
@@ -67,7 +68,9 @@ function fullSolutionRational(task, rationalBuilder) {
    краткое. Возвращает готовый кусок листа или null. */
 /* Семейства с полным решением по шагам: у каждого этапа подпись. */
 function stepwise(task) {
-  return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt');
+  return !!task.meta && (task.meta.family === 'rational' || task.meta.family === 'sqrt' ||
+    task.meta.family === 'exponential' || task.meta.family === 'logarithmic' ||
+    task.meta.family === 'trigonometric');
 }
 
 /* task.solutionFigure — рисунок к разбору ({ svg, width }), его
@@ -236,6 +239,43 @@ export function variantAnswersItems(variants, generator, solutionBuilder, quadra
   return items;
 }
 
-const api = { answersItems: answersItems, variantAnswersItems: variantAnswersItems };
+/**
+ * Решение одной задачи отдельным куском потока: номер, шаги, ответ и
+ * рисунок к разбору. Зачётная работа №12 раскладывает решения сама —
+ * по вариантам, после общей таблицы ответов.
+ */
+export function taskSolutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder) {
+  return solutionItem(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder);
+}
+
+/**
+ * Решение задачи разметкой внутри карточки «Разобранный пример» листа
+ * генератора по всем типам: шаги разбора движка и строка ответа. Тот же
+ * разбор, что в листе учителя, — ничего не досочиняется. null — разбора
+ * у задачи нет: пример с ней не печатается.
+ */
+export function exampleSolutionHtml(task, generator, solutionBuilder, quadraticBuilder,
+                                    rationalBuilder) {
+  const math = (tex) => '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+    typo.escape(tex) + '</span>';
+  const answer = '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answerHtml(task) || task.answer) +
+    '</b></p>';
+  if (stepwise(task)) {
+    const full = fullSolutionRational(task, rationalBuilder);
+    if (!full) { return null; }
+    return '<ol class="sheet-steps">' + full.map((step) =>
+      '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
+        (step.formulas.length ? ':' : '') + '</span> ' +
+        step.formulas.map(math).join('<span class="sheet-solution-sep">;</span> ') + '</li>'
+    ).join('') + '</ol>' + answer;
+  }
+  const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
+  if (!formulas) { return null; }
+  return '<ol class="sheet-steps">' + formulas.map((tex) =>
+    '<li class="sheet-step">' + math(tex) + '</li>').join('') + '</ol>' + answer;
+}
+
+const api = { answersItems: answersItems, variantAnswersItems: variantAnswersItems,
+              taskSolutionItem: taskSolutionItem, exampleSolutionHtml: exampleSolutionHtml };
 
 export default api;

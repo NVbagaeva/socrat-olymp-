@@ -25,6 +25,12 @@ export interface ShapkaRazdelaProps {
   media?: ReactNode;
   /** Под подзаголовком: кнопка «Продолжить подготовку» у №12. */
   actions?: ReactNode;
+  /**
+   * Над заголовком: кнопка «‹ Все разделы №12» у подтем. Задана —
+   * на телефоне и планшете она стоит вместо крошек: обе ведут на
+   * уровень выше, и двух строк навигации над заголовком не нужно.
+   */
+  back?: ReactNode;
   className?: string;
 }
 
@@ -49,11 +55,13 @@ export function ShapkaRazdela({
   lead,
   media,
   actions,
+  back,
   className,
 }: ShapkaRazdelaProps) {
   return (
     <>
-      <Breadcrumbs items={crumbs} />
+      <Breadcrumbs items={crumbs} className={back === undefined ? undefined : 'crumbs--wide'} />
+      {back}
       <header
         className={clsx('section-head', media === undefined && 'section-head--text', className)}
       >

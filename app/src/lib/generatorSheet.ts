@@ -15,6 +15,9 @@ import solutionBuilder from '@/lib/graph/solution.js';
 import quadraticBuilder from '@/lib/graph/solution-quadratic.js';
 import rationalSolution from '@/lib/graph/solution-rational.js';
 import sqrtSolution from '@/lib/graph/solution-sqrt.js';
+import exponentialSolution from '@/lib/graph/solution-exponential.js';
+import logarithmicSolution from '@/lib/graph/solution-logarithmic.js';
+import trigonometricSolution from '@/lib/graph/solution-trigonometric.js';
 import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { variantAnswersItems } from '@/lib/sheet/answers12.js';
 import { parseAnswer } from '@/lib/answer';
@@ -25,6 +28,8 @@ import { pickTasks, seedFrom } from '@/lib/trainerSession';
 import { manifest } from '@/lib/generator/manifest';
 import { planCounts, planOrder, type PlanMethod } from '@/lib/sheetPlan';
 import type { EngineTask } from '@/lib/trainer';
+import { functionTypes } from '@/data/functionTypes';
+import { exampleItems, recapOf } from '@/lib/ves12/build';
 
 /* Адрес листа (параметры ↔ строка запроса) лежит в лёгком модуле: экран
    генератора берёт его, не загружая движок. Здесь он для прежних импортов. */
@@ -74,6 +79,77 @@ interface SheetBlock {
   /** false — блок без полосы-заголовка: навык на листе не подписан. */
   head?: boolean;
   tasks: SheetTask[];
+  /** Рамка «Запомни» типа (генератор по всем типам №12). */
+  recap?: { title: string; items: string[]; phrase: string | null } | null;
+  /** Разобранные примеры перед задачами блока. */
+  leadItems?: string[];
+}
+
+/** Уровни задач набора — из манифеста. */
+function levelsOf(setId: string): string[] {
+  for (const family of manifest.families) {
+    const skill = family.skills.find((item) => item.id === setId);
+    if (skill !== undefined) {
+      return skill.levels;
+    }
+  }
+  return [];
+}
+
+/** Тип функции набора: по манифесту генератора. */
+function typeOfSet(setId: string) {
+  const family = manifest.families.find((item) => item.skills.some((skill) => skill.id === setId));
+  return functionTypes.find((type) => type.id === family?.id);
+}
+
+/**
+ * Генератор по всем типам №12: задачи по блокам типов (или одним
+ * блоком вперемешку), рамка «Запомни» и разобранные примеры каждого
+ * типа. У генератора раздела этих полей в адресе нет — лист прежний.
+ */
+function groupedBlocks(params: SheetParams, tasks: SheetTask[]): SheetBlock[] {
+  const theory = params.theory === true;
+  const examples = params.examples ?? 0;
+  const types = functionTypes.filter((type) =>
+    params.skills.some((setId) => typeOfSet(setId)?.id === type.id),
+  );
+  /* Примеры — по выбранным прототипам типа; не у всякого прототипа
+     движок строит разбор (знак коэффициента параболы — выбор варианта),
+     и тогда пример берётся из других прототипов того же типа. */
+  const exampleSets = (typeId: string) => {
+    const chosen = params.skills.filter((setId) => typeOfSet(setId)?.id === typeId);
+    const others = (manifest.families.find((family) => family.id === typeId)?.skills ?? [])
+      .filter((skill) => skill.kind === 'prototype' && !chosen.includes(skill.id))
+      .map((skill) => skill.id);
+    return [...chosen, ...others];
+  };
+  const extras = (type: (typeof types)[number]) => ({
+    recap: theory ? recapOf(type) : null,
+    leadItems:
+      examples > 0
+        ? exampleItems(type, exampleSets(type.id), examples, params.seed)
+        : [],
+  });
+  if (params.order === 'types') {
+    let number = 0;
+    return types
+      .map((type) => {
+        const own = tasks
+          .filter((task) => typeOfSet(task.meta.set)?.id === type.id)
+          .map((task) => {
+            number += 1;
+            return { ...task, no: number };
+          });
+        return { title: type.title, note: type.graphName, set: type.id, tasks: own, ...extras(type) };
+      })
+      .filter((block) => block.tasks.length > 0);
+  }
+  /* Вперемешку: сначала теория всех типов, затем задачи одним блоком. */
+  const lead: SheetBlock[] =
+    theory || examples > 0
+      ? types.map((type) => ({ title: type.title, note: type.graphName, set: `teoriya:${type.id}`, tasks: [], ...extras(type) }))
+      : [];
+  return [...lead, { title: '', note: '', set: '', head: false, tasks }];
 }
 
 /**
@@ -110,7 +186,12 @@ function answerRules(): Record<string, string> {
  * нельзя было угадать метод.
  */
 export function sheetBlocks(params: SheetParams): SheetBlock[] {
-  const plan = planCounts(sheetMethods(params.skills), params.count);
+  /* Генератор по всем типам задаёт задачи каждого прототипа сам (по
+     счётчикам типов); у генератора раздела — поровну по плану. */
+  const plan =
+    params.per === undefined
+      ? planCounts(sheetMethods(params.skills), params.count)
+      : { counts: params.skills.map((id) => ({ id, count: params.per?.[id] ?? 0 })) };
   const rules = answerRules();
   /* choice: задачи с выбором варианта листу годятся — варианты
      печатаются списком под условием, а на листе с ответами стоит
@@ -126,7 +207,9 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
         : pickTasks(
             {
               skills: [id],
-              level: params.level,
+              /* Уровня нет у набора — задачи любого уровня: иначе
+                 прототип молча выпал бы с листа. */
+              level: levelsOf(id).includes(params.level ?? '') ? params.level : null,
               count,
               mode: 'practice',
               mistakes: [],
@@ -146,7 +229,13 @@ export function sheetBlocks(params: SheetParams): SheetBlock[] {
       tasks.push(sheetTaskFrom(task, number, rules));
     }
   });
-  return tasks.length === 0 ? [] : [{ title: '', note: '', set: '', head: false, tasks }];
+  if (tasks.length === 0) {
+    return [];
+  }
+  if (params.order === 'types' || params.theory === true || (params.examples ?? 0) > 0) {
+    return groupedBlocks(params, tasks);
+  }
+  return [{ title: '', note: '', set: '', head: false, tasks }];
 }
 
 /* Сколько seed перебирать на набор, подбирая задачи следующего
@@ -341,6 +430,15 @@ function withSolutionFigures(variants: SheetBlock[][], cell: number): SheetBlock
    каждого свой модуль, выбор по семейству задачи. */
 const rationalBuilder = {
   fromTask(task: { meta: { family?: string } }) {
+    if (task.meta.family === 'exponential') {
+      return exponentialSolution.fromTask(task);
+    }
+    if (task.meta.family === 'logarithmic') {
+      return logarithmicSolution.fromTask(task);
+    }
+    if (task.meta.family === 'trigonometric') {
+      return trigonometricSolution.fromTask(task);
+    }
     return task.meta.family === 'sqrt'
       ? sqrtSolution.fromTask(task)
       : rationalSolution.fromTask(task);

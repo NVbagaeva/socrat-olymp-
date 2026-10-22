@@ -27,3 +27,4 @@ export * from './polyhedron';
 export * from './section';
 export * from './measure';
 export * from './construction';
+export * from './threePoints';

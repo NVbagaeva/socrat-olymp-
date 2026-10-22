@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import type { SkillItem } from '../configurator';
 import { trainerKindTitle, trainerModes, type TrainerModeId } from '@/content/trainerModes';
 import type { SkillLevel } from '@/content/skills12';
@@ -35,6 +36,9 @@ export interface TrainerBuilderProps {
   scope: string;
   /** Название семейства: в подзаголовке, бейдже и сводке. */
   family: string;
+  familyIcon?: IkonkaRazdela | undefined;
+  /** Все наборы прототипов раздела: по ним сводка отбирает свои счётчики. */
+  familySets?: readonly string[] | undefined;
   /** Сколько задач во всех наборах прототипов семейства. */
   familyTotal: number;
   skills: SkillItem[];
@@ -62,6 +66,8 @@ export function TrainerBuilder({
   base,
   scope,
   family,
+  familyIcon,
+  familySets,
   familyTotal,
   skills,
   levels,
@@ -190,6 +196,7 @@ export function TrainerBuilder({
       configurator={(api) => (
         <TrainerConfigurator
           family={family}
+          familyIcon={familyIcon}
           skills={skills}
           modes={modes}
           preset={preset}
@@ -198,7 +205,13 @@ export function TrainerBuilder({
           onStart={(request) => start(request, api.start)}
           starting={starting}
           /* Что уже сделано: знаменатель — все задания прототипов семейства. */
-          stats={<TrainerStats total={familyTotal} />}
+          stats={
+            <TrainerStats
+              total={familyTotal}
+              sets={familySets}
+              razdel={{ title: family, icon: familyIcon }}
+            />
+          }
         />
       )}
       screen={({ payload, sessionId, restored, report, elapsed, finish }) => (

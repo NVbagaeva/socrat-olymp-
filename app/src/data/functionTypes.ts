@@ -16,6 +16,12 @@ import { RATIONAL_THEORY } from '@/content/theoryRational';
 import { IRRATIONAL } from '@/content/irrational';
 import { IRRATIONAL_THEORY } from '@/content/theoryIrrational';
 import { LINEAR_RICH_THEORY } from '@/content/theoryLinearRich';
+import { EXPONENTIAL } from '@/content/exponential';
+import { EXPONENTIAL_THEORY } from '@/content/theoryExponential';
+import { LOGARITHMIC } from '@/content/logarithmic';
+import { LOGARITHMIC_THEORY } from '@/content/theoryLogarithmic';
+import { TRIGONOMETRIC } from '@/content/trigonometric';
+import { TRIGONOMETRIC_THEORY } from '@/content/theoryTrigonometric';
 import type { SectionAbout, TutorMaterial } from '@/content/sections';
 import type { MaterialId } from '@/data/materials';
 import type { TaskTypeId } from '@/data/taskTypes';
@@ -74,10 +80,19 @@ export interface FunctionType {
   id: FunctionTypeId;
   /** Номер на карточке выбора: 01 … 06. */
   no: string;
-  /** Полное название: «Линейные функции». Так оно стоит в макете. */
+  /**
+   * Название раздела — название ФУНКЦИИ: «Квадратичная функция». Единственное
+   * место, откуда его берут плашка, меню, карточки, заголовки страниц и
+   * листов, title страниц и крошки: строк с названием в компонентах нет.
+   */
   title: string;
-  /** Короткое название для вкладок и фильтров: «Линейные». */
-  shortTitle: string;
+  /**
+   * Название ГРАФИКА, подпись под названием: «График — парабола». Так же
+   * единственное место; проверяет scripts/check-razdely-names.mjs.
+   */
+  graphName: string;
+  /** Иконка раздела: имя файлов в public/images/razdely/12. */
+  icon: string;
   /** Формула в записи TeX: набирается KaTeX, текстом не выводится. */
   formula: string;
   /** Описание типа. Пустая строка — текста ещё нет. */
@@ -99,13 +114,13 @@ export interface FunctionType {
    * Графики функций», а название подтемы стоит подзаголовком.
    * Не задана — H1 равен названию подтемы, как у линейной.
    */
-  head?: { subtitle: string };
+  head?: boolean;
   /**
    * Своя вкладка «О задании». Не задана — вкладка раздела, одна на
    * все его подтемы. Плашка-подсказка у подтемы не своя: она одна
    * на раздел и стоит ещё в окне выбора типа функции.
    */
-  about?: Omit<SectionAbout, 'hint'>;
+  about?: Omit<SectionAbout, 'hint' | 'title'>;
   /** Вкладка «Ключевые методы решения». Не задана — вкладки нет. */
   methods?: boolean;
   /**
@@ -124,13 +139,6 @@ export interface FunctionType {
    */
   choiceAnswers?: boolean;
   /**
-   * Название подтемы в шапке листа для печати. Не задано — лист
-   * берёт название из своего конфига (content/sheet12.js): там оно
-   * написано в единственном числе, «Линейная функция», и менять его
-   * ради множественного числа с карточки незачем.
-   */
-  sheetTitle?: string;
-  /**
    * Материалы «Для репетиторов» подтемы. Не заданы — материалы
    * раздела. Пустой список — меню открывается на пустое состояние.
    */
@@ -147,15 +155,13 @@ const LINEAR_THEORY: TheoryBlock[] = LINEAR_RICH_THEORY;
 /** Все четыре типа заданий: вопрос не зависит от вида функции. */
 const ALL_TASK_TYPES: TaskTypeId[] = taskTypes.map((type) => type.id);
 
-/** Пустой банк: заданий этого типа в движке пока нет. */
-const EMPTY_BANK: FunctionBank = { prep: [], prototypes: [] };
-
 export const functionTypes: FunctionType[] = [
   {
     id: 'linear',
     no: '01',
-    title: 'Линейные функции',
-    shortTitle: 'Линейные',
+    title: 'Линейная функция',
+    graphName: 'График — прямая',
+    icon: 'linear',
     formula: 'y = kx + b',
     description: '',
     theory: LINEAR_THEORY,
@@ -172,18 +178,27 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'quadratic',
     no: '02',
-    title: 'Квадратичные функции',
-    shortTitle: 'Квадратичные',
+    title: 'Квадратичная функция',
+    graphName: 'График — парабола',
+    icon: 'quadratic',
     formula: 'y = ax^2 + bx + c',
     description: '',
     theory: QUADRATIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
     bank: {
-      prep: ['P12Q-1', 'P12Q-2', 'P12Q-3', 'P12Q-4', 'P12Q-5',
-             'P12Q-6', 'P12Q-7', 'P12Q-8', 'P12Q-9'],
-      prototypes: ['12Q.A', '12Q.B', '12Q.C', '12Q.D', '12Q.E',
-                   '12Q.F', '12Q.G', '12Q.H', '12Q.I'],
+      prep: [
+        'P12Q-1',
+        'P12Q-2',
+        'P12Q-3',
+        'P12Q-4',
+        'P12Q-5',
+        'P12Q-6',
+        'P12Q-7',
+        'P12Q-8',
+        'P12Q-9',
+      ],
+      prototypes: ['12Q.A', '12Q.B', '12Q.C', '12Q.D', '12Q.E', '12Q.F', '12Q.G', '12Q.H', '12Q.I'],
     },
     status: 'active',
     head: QUADRATIC.head,
@@ -191,7 +206,6 @@ export const functionTypes: FunctionType[] = [
     methods: true,
     bezStarogoAdresa: true,
     choiceAnswers: true,
-    sheetTitle: 'Квадратичная функция',
     tutors: QUADRATIC.tutors,
   },
   /* Подтема «Гипербола» открыта на месте дробно-рациональных функций:
@@ -200,28 +214,49 @@ export const functionTypes: FunctionType[] = [
   {
     id: 'rational',
     no: '03',
-    title: 'Гипербола',
-    shortTitle: 'Гипербола',
+    title: 'Дробно-линейная функция',
+    graphName: 'График — гипербола',
+    icon: 'rational',
     formula: 'y = \\dfrac{k}{x + a} + b',
     description: '',
     theory: RATIONAL_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
     bank: {
-      prep: ['P12R-1', 'P12R-2', 'P12R-3', 'P12R-4', 'P12R-5', 'P12R-6',
-             'P12R-7', 'P12R-8', 'P12R-9', 'P12R-10', 'P12R-11'],
-      prototypes: ['12R.A', '12R.B', '12R.C', '12R.D', '12R.E',
-                   '12R.F', '12R.G', '12R.H', '12R.I', '12R.J'],
+      prep: [
+        'P12R-1',
+        'P12R-2',
+        'P12R-3',
+        'P12R-4',
+        'P12R-5',
+        'P12R-6',
+        'P12R-7',
+        'P12R-8',
+        'P12R-9',
+        'P12R-10',
+        'P12R-11',
+      ],
+      prototypes: [
+        '12R.A',
+        '12R.B',
+        '12R.C',
+        '12R.D',
+        '12R.E',
+        '12R.F',
+        '12R.G',
+        '12R.H',
+        '12R.I',
+        '12R.J',
+      ],
     },
     status: 'active',
     head: RATIONAL.head,
     about: RATIONAL.about,
     methods: true,
     bezStarogoAdresa: true,
-    sheetTitle: 'Гипербола',
     tutors: RATIONAL.tutors,
   },
-  /* Подтема «Иррациональная функция (график корня)»: f(x) = k√x и
+  /* Подтема «Иррациональная функция» (график — ветвь параболы): f(x) = k√x и
      f(x) = k√(x − x₀) + y₀, иногда вместе с прямой. Признаки — как у
      гиперболы, тексты в content/irrational.ts; вкладки «Ключевые
      методы решения» у подтемы нет. */
@@ -229,7 +264,8 @@ export const functionTypes: FunctionType[] = [
     id: 'irrational',
     no: '04',
     title: 'Иррациональная функция',
-    shortTitle: 'Иррациональная',
+    graphName: 'График — ветвь параболы',
+    icon: 'irrational',
     formula: 'y = k\\sqrt{x}',
     description: '',
     theory: IRRATIONAL_THEORY,
@@ -243,47 +279,80 @@ export const functionTypes: FunctionType[] = [
     head: IRRATIONAL.head,
     about: IRRATIONAL.about,
     bezStarogoAdresa: true,
-    sheetTitle: 'График корня',
     tutors: IRRATIONAL.tutors,
   },
-  {
-    id: 'logarithmic',
-    no: '05',
-    title: 'Логарифмические функции',
-    shortTitle: 'Логарифмические',
-    formula: 'y = \\log_a x',
-    description: '',
-    theory: [],
-    taskTypes: ALL_TASK_TYPES,
-    materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
-  },
+  /* Подтема «Показательная функция»: f(x) = aˣ, aˣ + b и a^(x + b) —
+     четыре типа открытого банка ФИПИ, задачи банка и по 20 аналогов.
+     Признаки — как у иррациональной, тексты в content/exponential.ts. */
   {
     id: 'exponential',
-    no: '06',
-    title: 'Показательные функции',
-    shortTitle: 'Показательные',
+    no: '05',
+    title: 'Показательная функция',
+    graphName: 'График — экспонента',
+    icon: 'exponential',
     formula: 'y = a^x',
     description: '',
-    theory: [],
+    theory: EXPONENTIAL_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12E-1', 'P12E-2', 'P12E-3', 'P12E-4', 'P12E-5'],
+      prototypes: ['12E.A', '12E.B', '12E.C', '12E.D'],
+    },
+    status: 'active',
+    head: EXPONENTIAL.head,
+    about: EXPONENTIAL.about,
+    bezStarogoAdresa: true,
+    tutors: EXPONENTIAL.tutors,
   },
+  /* Подтема «Логарифмическая функция»: f(x) = logₐ x, b + logₐ x и
+     logₐ(x + b) — пять типов открытого банка ФИПИ, задачи банка и по
+     20 аналогов. Признаки — как у показательной, тексты в
+     content/logarithmic.ts. */
+  {
+    id: 'logarithmic',
+    no: '06',
+    title: 'Логарифмическая функция',
+    graphName: 'График — логарифмическая кривая',
+    icon: 'logarithmic',
+    formula: 'y = \\log_a x',
+    description: '',
+    theory: LOGARITHMIC_THEORY,
+    taskTypes: ALL_TASK_TYPES,
+    materials: [],
+    bank: {
+      prep: ['P12L-1', 'P12L-2', 'P12L-3', 'P12L-4', 'P12L-5'],
+      prototypes: ['12L.A', '12L.B', '12L.C', '12L.D', '12L.E'],
+    },
+    status: 'active',
+    head: LOGARITHMIC.head,
+    about: LOGARITHMIC.about,
+    bezStarogoAdresa: true,
+    tutors: LOGARITHMIC.tutors,
+  },
+  /* Подтема «Тригонометрические функции»: a cos x + b, a sin x + b и
+     a tg x + b — шесть задач открытого банка ФИПИ (найти a или b) и по
+     20 аналогов. Тексты — content/trigonometric.ts. */
   {
     id: 'trigonometric',
     no: '07',
     title: 'Тригонометрические функции',
-    shortTitle: 'Тригонометрические',
+    graphName: 'Графики — синусоида, косинусоида, тангенсоида',
+    icon: 'trig',
     formula: 'y = \\sin x',
     description: '',
-    theory: [],
+    theory: TRIGONOMETRIC_THEORY,
     taskTypes: ALL_TASK_TYPES,
     materials: [],
-    bank: EMPTY_BANK,
-    status: 'soon',
+    bank: {
+      prep: ['P12T-1', 'P12T-2', 'P12T-3', 'P12T-4', 'P12T-5'],
+      prototypes: ['12T.A', '12T.B', '12T.C', '12T.D', '12T.E', '12T.F'],
+    },
+    status: 'active',
+    head: TRIGONOMETRIC.head,
+    about: TRIGONOMETRIC.about,
+    bezStarogoAdresa: true,
+    tutors: TRIGONOMETRIC.tutors,
   },
 ];
 

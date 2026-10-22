@@ -601,6 +601,11 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       if (Math.abs(th - 90) > 0.5 && !scena.skhematichno) {
         problems.push(`значок прямого угла при ${e.v}, а угол ${th.toFixed(1)}°`);
       }
+      if (e.znachenie !== undefined) {
+        /* Подпись прямого угла (словом) — за внешним углом квадратика. */
+        const bis = unit(add(u, w));
+        zadaniyaZnach.push({ e, yakor: p2, napr: bis, vdol: null });
+      }
       continue;
     }
     if (th < POROG - 0.01) {

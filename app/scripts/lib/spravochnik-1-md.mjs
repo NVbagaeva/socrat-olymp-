@@ -8,7 +8,7 @@
 import { requireSrc } from './load-ts.mjs';
 
 const S = requireSrc('content/spravochnik1/index.ts');
-const { zadachaPrimera } = requireSrc('lib/planimetriya/spravochnik-selftest.ts');
+const { zadachaPrimera } = requireSrc('lib/planimetriya/spravochnik-zadachi.ts');
 
 const B = S.BLOKI_SPRAVOCHNIKA;
 

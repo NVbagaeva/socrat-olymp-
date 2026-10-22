@@ -18,35 +18,33 @@ import {
   section as coreSection,
   toArray,
 } from '../core';
-import { type V, centroid, dist, dot, key, norm, sub } from './geom';
+import { type V, centroid, dot, norm, sub } from './geom';
+import { type Gran, type Telo, gran, razmerTochek, teloIzGraney } from '@/lib/stereo/telo';
 
-export interface Gran {
-  pts: V[];
-  /** Внешняя единичная нормаль. */
-  n: V;
-  /** Плоскость n·X = c. */
-  c: number;
-}
-
-export interface Rebro {
-  a: V;
-  b: V;
-  /** Индексы двух граней тела, которым принадлежит ребро. */
-  f: [number, number];
-}
-
-export interface Telo {
-  grani: Gran[];
-  rebra: Rebro[];
-}
+/* Тело, грань и ребро — общее ядро чертежей №3 и №15 (lib/stereo). */
+export {
+  type Gran,
+  type Rebro,
+  type Telo,
+  gran,
+  teloIzGraney,
+  razmerTochek,
+  vTele,
+} from '@/lib/stereo/telo';
 
 /** Вид отрезка: от него зависит цвет и толщина. */
-export type VidOtrezka = 'sechenie' | 'vspom';
+export type VidOtrezka = 'sechenie' | 'vspom' | 'ploskost';
 
 export interface Otrezok {
   a: V;
   b: V;
   vid: VidOtrezka;
+  /**
+   * Грани первого тела, в которых лежит отрезок (сторона сечения).
+   * Тогда видимость — по граням: на лицевой грани — сплошная, на
+   * невидимой — штрихом, без расчёта по лучам.
+   */
+  grani?: number[];
 }
 
 export interface Metka {
@@ -55,6 +53,8 @@ export interface Metka {
   name: string;
   /** Вершина тела или точка построения (точку рисуем кружком). */
   vid: 'vershina' | 'tochka';
+  /** Точка выбрана инструментом (подсвечивается). */
+  vybrana?: boolean;
 }
 
 export interface Sechenie {
@@ -63,6 +63,8 @@ export interface Sechenie {
   n: V;
   /** Имена вершин сечения, если они есть (для натуральной величины). */
   names: (string | null)[];
+  /** Для стороны i (от вершины i к i+1) — грани тела, в которых она лежит. */
+  grani?: number[][];
 }
 
 export interface Scena {
@@ -70,61 +72,17 @@ export interface Scena {
   sechenie: Sechenie | null;
   otrezki: Otrezok[];
   metki: Metka[];
+  /** Секущая плоскость — параллелограмм вокруг сечения (если показана). */
+  ploskost?: V[] | null;
   /** Характерный размер — для допусков и масштаба. */
   razmer: number;
   centr: V;
-}
-
-/** Грань по вершинам: нормаль считается по обходу. */
-export function gran(pts: V[]): Gran {
-  let n: V = [0, 0, 0];
-  for (let i = 0; i < pts.length; i += 1) {
-    const a = pts[i] as V;
-    const b = pts[(i + 1) % pts.length] as V;
-    // Формула Ньюэлла: устойчива и для почти вырожденных граней.
-    n = [
-      n[0] + (a[1] - b[1]) * (a[2] + b[2]),
-      n[1] + (a[2] - b[2]) * (a[0] + b[0]),
-      n[2] + (a[0] - b[0]) * (a[1] + b[1]),
-    ];
-  }
-  const u = norm(n);
-  return { pts, n: u, c: dot(u, pts[0] as V) };
-}
-
-/** Тело по граням: рёбра — общие стороны двух граней. */
-export function teloIzGraney(grani: Gran[], unit: number): Telo {
-  const seen = new Map<string, { a: V; b: V; f: number[] }>();
-  grani.forEach((g, fi) => {
-    g.pts.forEach((a, i) => {
-      const b = g.pts[(i + 1) % g.pts.length] as V;
-      if (dist(a, b) < unit * 1e-9) {
-        return;
-      }
-      const ka = key(a, unit);
-      const kb = key(b, unit);
-      const k = ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
-      const e = seen.get(k) ?? { a, b, f: [] };
-      e.f.push(fi);
-      seen.set(k, e);
-    });
-  });
-  const rebra: Rebro[] = [];
-  for (const e of seen.values()) {
-    rebra.push({ a: e.a, b: e.b, f: [e.f[0] as number, (e.f[1] ?? e.f[0]) as number] });
-  }
-  return { grani, rebra };
 }
 
 export function teloIzMnogogrannika(poly: Polyhedron): Telo {
   const pts = poly.vertices.map((v) => toArray(v.p) as V);
   const grani = poly.faces.map((f) => gran(f.idx.map((i) => pts[i] as V)));
   return teloIzGraney(grani, razmerTochek(pts));
-}
-
-export function razmerTochek(pts: readonly V[]): number {
-  const c = centroid(pts);
-  return Math.max(...pts.map((p) => dist(p, c)), 1e-9) * 2;
 }
 
 /** Сечение ядра → многоугольник для рисования (с именами вершин тела). */
@@ -137,7 +95,12 @@ export function sechenieIzYadra(poly: Polyhedron, s: Section, pl: Plane): Sechen
   const names = s.vertices.map((v) =>
     v.vertex === undefined ? null : (poly.vertices[v.vertex]?.name ?? null),
   );
-  return { pts, n: norm(n0), names };
+  // Сторона лежит в гранях, общих для её концов.
+  const grani = s.vertices.map((v, i) => {
+    const w = s.vertices[(i + 1) % s.vertices.length];
+    return v.faces.filter((f) => w?.faces.includes(f));
+  });
+  return { pts, n: norm(n0), names, grani };
 }
 
 /** Сцена: тело, сечение плоскостью (если есть) и подписи вершин. */
@@ -165,7 +128,15 @@ export function scena(
 
 /** Стороны сечения отрезками (рисуются цветом сечения). */
 export function storonySecheniya(s: Sechenie): Otrezok[] {
-  return s.pts.map((a, i) => ({ a, b: s.pts[(i + 1) % s.pts.length] as V, vid: 'sechenie' }));
+  return s.pts.map((a, i) => {
+    const grani = s.grani?.[i];
+    return {
+      a,
+      b: s.pts[(i + 1) % s.pts.length] as V,
+      vid: 'sechenie',
+      ...(grani && grani.length > 0 ? { grani } : {}),
+    };
+  });
 }
 
 /** Нормаль грани наружу относительно внутренней точки (для проверки). */
@@ -201,9 +172,4 @@ export function shkolnyyRakurs(sc: Scena): V {
     }
   }
   return best;
-}
-
-/** Лежит ли точка в теле или на его границе. */
-export function vTele(t: Telo, p: V, eps: number): boolean {
-  return t.grani.every((g) => dot(g.n, p) <= g.c + eps);
 }

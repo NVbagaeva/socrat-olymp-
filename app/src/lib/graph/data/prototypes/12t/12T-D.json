@@ -1,0 +1,342 @@
+{
+  "kind": "prototype",
+  "id": "12T.D",
+  "task": 12,
+  "title": "12T.D · $a\\operatorname{tg} x + b$: найти $b$",
+  "subtitle": "По графику $f(x) = a\\operatorname{tg} x + b$ найти $b$ по двум отмеченным точкам",
+  "seed": 12904,
+  "family": "trigonometric",
+  "fn": "tg",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "maxAnswerRepeat": 2,
+  "maxAnswerDuplicates": 8,
+  "maxVertexRepeat": 1,
+  "maxSlopeRepeat": 6,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка. Задачи с пометкой source: fipi — из банка дословно, остальные — аналоги, не из открытого банка.",
+  "composition": {
+    "count": 21,
+    "fipi": 1,
+    "analogs": 20,
+    "levels": {
+      "lucky": 14,
+      "unlucky": 6
+    },
+    "minDistinctAnswers": 12
+  },
+  "tasks": [
+    {
+      "id": "12T.D-F1",
+      "source": "fipi",
+      "fipiNo": 4,
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "fn": "tg",
+          "a": 4,
+          "b": -3,
+          "yu": 1,
+          "marks": [
+            0,
+            1
+          ],
+          "window": {
+            "xmin": -4,
+            "xmax": 8,
+            "ymin": -11,
+            "ymax": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "12T.D-01",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-02",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-03",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-04",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-05",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-06",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-07",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-08",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-09",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-10",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-11",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-12",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-13",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-14",
+      "level": "lucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "12T.D-15",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    },
+    {
+      "id": "12T.D-16",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    },
+    {
+      "id": "12T.D-17",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    },
+    {
+      "id": "12T.D-18",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    },
+    {
+      "id": "12T.D-19",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    },
+    {
+      "id": "12T.D-20",
+      "level": "unlucky",
+      "question": "На рисунке изображён график функции $f(x) = a\\operatorname{tg} x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "decimal",
+        "yUnits": [
+          0.5
+        ]
+      },
+      "levelReason": "half-cell"
+    }
+  ]
+}

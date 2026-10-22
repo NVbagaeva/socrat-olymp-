@@ -28,6 +28,7 @@ import {
   pravila,
   SOVREMENNYH,
 } from './bank/analogi';
+import { oboznachenie } from './kit';
 import { PROTOTYPES, prototype } from './prototypes';
 import type { BankItem, Solved } from './types';
 
@@ -72,6 +73,9 @@ export function gigienaFormuly(f: string): string[] {
   if (/\(\s*\(/.test(f)) {
     bad.push('двойные скобки');
   }
+  if (/=\s*\\(?:ge|le|geq|leq|geqslant|leqslant)(?![a-zA-Z])/.test(f)) {
+    bad.push('«=» перед знаком неравенства');
+  }
   if (/\\cdot\s*1(?![\d{,])/.test(f) || /(?<![\d}])1\s*\\cdot/.test(f)) {
     bad.push('умножение на 1');
   }
@@ -82,7 +86,7 @@ export function gigienaFormuly(f: string): string[] {
 export function vseTeksty(s: Solved): string[] {
   const out: string[] = [];
   for (const r of s.dano) {
-    out.push(`$${r.oboz}=${r.znach}$`, r.smysl);
+    out.push(`$${oboznachenie(r)}$`, r.smysl);
   }
   for (const e of s.etapy) {
     out.push(e.title, ...e.lines);

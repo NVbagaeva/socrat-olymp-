@@ -881,6 +881,8 @@
   background: var(--color-surface);
 }
 .vtr-switch__btn {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-1) var(--space-4);
   border: 0;
   border-radius: var(--radius-pill);

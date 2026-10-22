@@ -29,6 +29,16 @@
   margin: 0 0 var(--space-3);
   color: var(--color-text);
 }
+/* Название графика под ним: «График — парабола». */
+.topic-head__subtitle--wide {
+  margin-bottom: var(--space-1);
+}
+.topic-head__graph {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-secondary);
+}
 
 /* ── Баннер с цитатой ───────────────────────────────────────── */
 
@@ -2227,7 +2237,9 @@ a.tutor-card:hover {
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   color: var(--color-primary);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 .form-card__go:hover {
   background: var(--color-surface-soft);
@@ -2842,6 +2854,24 @@ a.tutor-card:hover {
   }
   .rich-memo {
     padding-left: var(--space-8);
+  }
+}
+/* Формула и пояснение рядом — только когда рамке хватает ширины.
+   На планшете рамка около 650px: крупная формула забирала почти всё
+   место, пояснение сжималось до слова в строке и уходило за экран. */
+.rich-main__frame {
+  container: rich-main / inline-size;
+}
+@container rich-main (max-width: 760px) {
+  .rich-main__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .rich-main__formula {
+    padding-right: 0;
+    padding-bottom: var(--space-3);
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-warm);
   }
 }
 .rich-figure {

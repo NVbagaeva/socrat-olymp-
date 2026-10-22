@@ -1,36 +1,22 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { EmptyState } from '@/components/ui';
+import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
-import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
+import { FIGURA_GLAVA } from '@/content/stereo/glavy';
+import { ZADANIYA } from '@/lib/paths';
 
+/* Прежние адреса №3 — по разделу на фигуру. Раздел собран заново
+   (docs/stereometry-plan.md, п. 5.4): фигуры стали главами теории,
+   а тренажёр и опорные задачи — общими вкладками задания. */
 export function generateStaticParams() {
-  return RAZDELY.map((razdel) => ({ figura: razdel.slug }));
+  return Object.keys(FIGURA_GLAVA).map((figura) => ({ figura }));
 }
 export const dynamicParams = false;
 
+export const metadata = REDIRECT_METADATA;
+
 type Params = Promise<{ figura: string }>;
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const razdel = razdelBySlug((await params).figura);
-  return razdel === undefined
-    ? {}
-    : { title: `${razdel.nazvanie}. ${OPORNYE.title} — задание №3 — Будет на ЕГЭ` };
-}
-
-/**
- * Вкладка «Опорные задачи». Навыки раздела придумывать
- * нельзя: их список утверждает автор. Пока списка нет — вкладка
- * честно об этом говорит.
- */
-export default async function OpornyeTab({ params }: { params: Params }) {
-  if (razdelBySlug((await params).figura) === undefined) {
-    notFound();
-  }
-  return (
-    <EmptyState
-      title="Материал готовится"
-      description="Здесь появятся карточки навыков раздела с задачами на отработку."
-    />
-  );
+/** Опорные задачи фигуры → опорные задачи задания. */
+export default async function Page({ params }: { params: Params }) {
+  await params;
+  return <RedirectPage href={`${ZADANIYA}/3/${OPORNYE.tail}`} title={OPORNYE.title} />;
 }

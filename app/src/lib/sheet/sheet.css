@@ -56,6 +56,15 @@ body {
   page-break-after: auto;
 }
 
+/* Экранный предпросмотр на узком экране: paginate.js ставит
+   --sheet-preview-zoom, когда страница шире окна. Только на экране —
+   на бумаге и в PDF лист всегда настоящего размера. */
+@media screen {
+  #sheet-pages {
+    zoom: var(--sheet-preview-zoom, 1);
+  }
+}
+
 /* Печать. Поля задаёт сама страница листа (@page без полей — это же
    убирает колонтитулы браузера с адресом и датой там, где браузер это
    умеет). Фон вокруг страниц на экране светлый; на бумаге он попал бы
@@ -69,6 +78,31 @@ body {
 .sheet-flow {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* Две колонки (paginate.js, spec.columns === 2): заголовки на всю
+   ширину сверху, под ними две колонки на всю оставшуюся высоту. */
+.sheet-flow--cols {
+  display: flex;
+  flex-direction: column;
+}
+.sheet-cols {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: calc(var(--sheet-step) * 4);
+}
+.sheet-col {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+/* Полоса колонок над куском на всю ширину: высота — по содержимому. */
+.sheet-cols--zakryta {
+  flex: none;
+  grid-template-rows: auto;
 }
 
 /* ── Декоративные дуги в углах ──────────────────────────────

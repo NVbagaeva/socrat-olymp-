@@ -1,0 +1,169 @@
+{
+  "kind": "prep",
+  "id": "P12T-1",
+  "task": 12,
+  "title": "Косинус: $a\\cos x + b$",
+  "subtitle": "Найти $a$ и $b$ по точкам в узлах: $\\cos 0 = 1$, $\\cos \\pi = -1$",
+  "seed": 12911,
+  "family": "trigonometric",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12T-1-01",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-02",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-03",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-04",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-05",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-06",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-07",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-08",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-09",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "zero",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "P12T-1-10",
+      "fn": "cos",
+      "question": "На рисунке изображён график функции $f(x) = a\\cos x + b$. Найдите $b$.",
+      "answerRule": "coef-b",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "marks": "sym",
+        "answerKind": "integer",
+        "yUnits": [
+          1
+        ]
+      }
+    }
+  ]
+}
