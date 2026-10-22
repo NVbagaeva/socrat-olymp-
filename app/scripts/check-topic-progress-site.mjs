@@ -30,7 +30,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
@@ -46,7 +50,7 @@ if (SHOTS) { fs.mkdirSync(SHOTS, { recursive: true }); }
    тренажёра — наборы прототипов подтемы в данных движка. Лишний
    набор в записи не мешает: кольцо считает только свои. */
 const { prepSkillsFor } = requireSrc('content/prepSkills.ts');
-const PROTOTYPES = { linear: '12', quadratic: '12q', rational: '12r' };
+const PROTOTYPES = { linear: '12', quadratic: '12q', rational: '12r', irrational: '12s', exponential: '12e', logarithmic: '12l', trigonometric: '12t' };
 /** Сколько задач в наборе опорных задач навыка. */
 function prepTotal(type, setId) {
   const dir = path.join(APP, 'src', 'lib', 'graph', 'data', 'prep', PROTOTYPES[type]);
@@ -95,6 +99,20 @@ async function ring(page) {
     percent: document.querySelector('.topic-progress .progress-ring__c .t-data-lg')?.textContent ?? '',
     text: document.querySelector('.topic-progress__text')?.firstChild?.textContent ?? '',
   }));
+}
+
+/* После перезагрузки кольцо считает прогресс уже в браузере: пока
+   страница не ожила, в нём «0%». Под нагрузкой это дольше полусекунды,
+   поэтому кольцо опрашивается до пяти секунд (по настоящим часам Node,
+   часы страницы подменены), пока не покажет ожидаемое значение. Если не
+   покажет — вернётся последнее, и проверка честно упадёт. */
+async function ringSettled(page, percent) {
+  let r = await ring(page);
+  for (let i = 0; i < 50 && r.percent !== percent; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    r = await ring(page);
+  }
+  return r;
 }
 
 async function fresh(sub) {
@@ -153,6 +171,10 @@ const SUBTOPICS = [
   { sub: 'linear', items: 3 },
   { sub: 'quadratic', items: 4 },
   { sub: 'rational', items: 4 },
+  { sub: 'irrational', items: 3 },
+  { sub: 'exponential', items: 3 },
+  { sub: 'logarithmic', items: 3 },
+  { sub: 'trigonometric', items: 3 },
 ];
 
 for (const { sub, items } of SUBTOPICS) {
@@ -203,7 +225,7 @@ for (const { sub, items } of SUBTOPICS) {
     expect(name('теория — подпись'), r.text, 'Вы изучили 1 из ' + items + ' разделов');
     await page.reload({ waitUntil: 'load' });
     await wait(page, 500);
-    r = await ring(page);
+    r = await ringSettled(page, step);
     expect(name('после перезагрузки'), r.percent, step);
     await shot(page, sub + '-chast');
 
@@ -253,12 +275,13 @@ for (const { sub, items } of SUBTOPICS) {
       [id, Array.from({ length: round(total * share) }, (_, i) => i + 1)]));
     await page.evaluate(([value]) => localStorage.setItem('budetege:prep:v1', JSON.stringify(value)), [prep(0.7, Math.floor)]);
     await page.reload({ waitUntil: 'load' }); await wait(page, 500);
-    expect(name('опорные 70% — не пройдено'), (await ring(page)).percent, Math.round((done / items) * 100) + '%');
+    const partial = Math.round((done / items) * 100) + '%';
+    expect(name('опорные 70% — не пройдено'), (await ringSettled(page, partial)).percent, partial);
     await page.evaluate(([value]) => localStorage.setItem('budetege:prep:v1', JSON.stringify(value)), [prep(0.8, Math.ceil)]);
     const trainer = { kinds: Object.fromEntries(kinds.map((id) => [id, { done: 3, right: 2, seconds: 60 }])), mistakes: [] };
     await page.evaluate(([value]) => localStorage.setItem('budetege:trainer:v1', JSON.stringify(value)), [trainer]);
     await page.reload({ waitUntil: 'load' }); await wait(page, 500);
-    const r = await ring(page);
+    const r = await ringSettled(page, '100%');
     expect(name('всё пройдено — процент'), r.percent, '100%');
     expect(name('всё пройдено — подпись'), r.text, 'Вы изучили все разделы подтемы');
     await page.locator('.topic-progress__toggle').click();

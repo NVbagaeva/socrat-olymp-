@@ -33,9 +33,21 @@ export type TrainerShortcutId =
   | 'intersection'
   | 'mixed'
   | 'koefficienty'
+  | 'koef-a'
+  | 'koef-b'
   | 'znachenie'
   | 'formula'
-  | 'peresechenie';
+  | 'peresechenie'
+  | 'abscissa-line'
+  | 'abscissa-parabola'
+  | 'ordinate-line'
+  | 'ordinate-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'value-at'
+  | 'argument-for';
 
 export interface TrainerShortcut {
   /** Часть адреса: /trenazher/{id}. */
@@ -49,6 +61,14 @@ export interface TrainerShortcut {
    */
   skills: string[];
   mode: TrainerModeId;
+  /**
+   * Правила ответа (answerRule движка), которыми ярлык сужает наборы:
+   * например, в 12Q.H только задачи на абсциссу второй точки. Не
+   * задано — все задачи наборов.
+   */
+  rules?: string[];
+  /** Что оставил фильтр: строка над конфигуратором. */
+  filter?: string;
 }
 
 const LINEAR_SHORTCUTS: TrainerShortcut[] = [
@@ -80,6 +100,49 @@ const QUADRATIC_SHORTCUTS: TrainerShortcut[] = [
     mode: 'mixed',
   },
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+  /* Ярлыки по одному набору: «В тренажёре» из разборов основных типов
+     задач на вкладке «О задании» (content/quadraticBasics.ts). */
+  { id: 'sign-a', title: 'Знак старшего коэффициента', skills: ['12Q.A'], mode: 'practice' },
+  { id: 'value-a', title: 'Значение старшего коэффициента', skills: ['12Q.B'], mode: 'practice' },
+  { id: 'value-c', title: 'Свободный член', skills: ['12Q.C'], mode: 'practice' },
+  { id: 'value-b', title: 'Средний коэффициент', skills: ['12Q.D'], mode: 'practice' },
+  { id: 'value-at', title: 'Значение функции', skills: ['12Q.E'], mode: 'practice' },
+  { id: 'argument-for', title: 'Аргумент по значению', skills: ['12Q.F'], mode: 'practice' },
+  /* Ссылки «Потренироваться» из разборов на вкладке «О задании»
+     (content/quadraticTypes.ts): тот же набор, но только задачи
+     того же типа — абсцисса или ордината второй точки. */
+  {
+    id: 'abscissa-line',
+    title: 'Парабола и прямая: абсцисса',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'abscissa-parabola',
+    title: 'Две параболы: абсцисса',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-x'],
+    filter: 'Только задачи «найдите абсциссу второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-line',
+    title: 'Парабола и прямая: ордината',
+    skills: ['12Q.H'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
+  {
+    id: 'ordinate-parabola',
+    title: 'Две параболы: ордината',
+    skills: ['12Q.I'],
+    mode: 'practice',
+    rules: ['intersection-y'],
+    filter: 'Только задачи «найдите ординату второй точки пересечения»',
+  },
 ];
 
 /* Гипербола: те же связки действий — значение и аргумент, коэффициенты
@@ -101,6 +164,40 @@ const RATIONAL_SHORTCUTS: TrainerShortcut[] = [
   { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
 ];
 
+/* График корня: значение, аргумент и корень с прямой. */
+const IRRATIONAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12S.A'], mode: 'practice' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12S.B'], mode: 'practice' },
+  {
+    id: 'peresechenie',
+    title: 'Корень и прямая',
+    skills: ['12S.C', '12S.D'],
+    mode: 'mixed',
+  },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+/* Показательная функция: значение и аргумент — по два типа банка ФИПИ. */
+const EXPONENTIAL_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12E.A', '12E.B'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12E.C', '12E.D'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+/* Логарифмическая функция: значение — три типа банка, аргумент — два. */
+const LOGARITHMIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'znachenie', title: 'Найти значение функции', skills: ['12L.A', '12L.B', '12L.D'], mode: 'mixed' },
+  { id: 'argument', title: 'Найти аргумент по значению', skills: ['12L.C', '12L.E'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
+/* Тригонометрические функции: найти a и найти b — по три типа банка. */
+const TRIGONOMETRIC_SHORTCUTS: TrainerShortcut[] = [
+  { id: 'koef-a', title: 'Найти множитель при функции', skills: ['12T.A', '12T.C', '12T.E'], mode: 'mixed' },
+  { id: 'koef-b', title: 'Найти свободное слагаемое', skills: ['12T.B', '12T.D', '12T.F'], mode: 'mixed' },
+  { id: 'mixed', title: 'Смешанный тренажёр', skills: [], mode: 'mixed' },
+];
+
 export const trainerShortcuts = LINEAR_SHORTCUTS;
 
 /**
@@ -118,6 +215,18 @@ export function trainerShortcutsFor(type: string): TrainerShortcut[] {
   }
   if (type === 'rational') {
     return RATIONAL_SHORTCUTS;
+  }
+  if (type === 'irrational') {
+    return IRRATIONAL_SHORTCUTS;
+  }
+  if (type === 'exponential') {
+    return EXPONENTIAL_SHORTCUTS;
+  }
+  if (type === 'logarithmic') {
+    return LOGARITHMIC_SHORTCUTS;
+  }
+  if (type === 'trigonometric') {
+    return TRIGONOMETRIC_SHORTCUTS;
   }
   return [];
 }
@@ -162,23 +271,12 @@ export const trainerPage = {
 };
 
 /**
- * Подписи конфигуратора подтемы.
- *
- * У квадратичной и гиперболы наборы — собственный материал платформы, в открытый
- * банк ФИПИ они не входят, и обещать обратное нельзя: так и сказано
- * в поле note самих наборов.
+ * Подписи конфигуратора подтемы. Наборы всех подтем №12 — прототипы
+ * открытого банка ФИПИ (поле note наборов); у параболы, гиперболы и корня
+ * числа в задачах новые, как у прямой. Подпись у всех одна.
  */
-export function trainerWordsFor(type: string) {
-  if (type !== 'quadratic' && type !== 'rational') {
-    return trainerPage;
-  }
-  return {
-    ...trainerPage,
-    summary: {
-      ...trainerPage.summary,
-      note: 'Задания составлены платформой по разборам прототипов ЕГЭ.',
-    },
-  };
+export function trainerWordsFor(_type: string) {
+  return trainerPage;
 }
 
 /** Название типа задания по набору движка: для статистики подхода. */
@@ -214,9 +312,34 @@ export const trainerKindTitle: Record<string, string> = {
   '12R.H': 'Гипербола и прямая',
   '12R.I': 'Гипербола $y = \\frac{k}{x}$',
   '12R.J': 'Коэффициент $b$ и значение $\\frac{kx + a}{x + b}$',
+  /* График корня: точки B — одним типом, как у гиперболы. */
+  '12S.A': 'Значение функции',
+  '12S.B': 'Аргумент по значению',
+  '12S.C': 'Корень и прямая',
+  '12S.D': 'Корень и прямая',
+  /* Показательная функция: четыре типа открытого банка. */
+  '12E.A': 'Значение $a^x$',
+  '12E.B': 'Значение $a^x + b$',
+  '12E.C': 'Аргумент: $a^x + b$',
+  '12E.D': 'Аргумент: $a^{x+b}$',
+  /* Логарифмическая функция: пять типов открытого банка. */
+  '12L.A': 'Значение $\\log_a x$',
+  '12L.B': 'Значение $b + \\log_a x$',
+  '12L.C': 'Аргумент: $b + \\log_a x$',
+  '12L.D': 'Значение $\\log_a(x + b)$',
+  '12L.E': 'Аргумент: $\\log_a(x + b)$',
+  /* Тригонометрические функции: шесть типов открытого банка. */
+  '12T.A': 'Косинус: найти $a$',
+  '12T.B': 'Косинус: найти $b$',
+  '12T.C': 'Тангенс: найти $a$',
+  '12T.D': 'Тангенс: найти $b$',
+  '12T.E': 'Синус: найти $a$',
+  '12T.F': 'Синус: найти $b$',
 };
 
 /** Итоговый экран подхода. Тексты заданы заказчиком дословно. */
+/** Итоговый экран подхода (№9 — свой экран итогов; остальные тренажёры —
+    общий итог сессии). Тексты заданы заказчиком дословно. */
 export const trainerResult = {
   title: 'Тренировка завершена!',
   lead: 'Отличная работа!',

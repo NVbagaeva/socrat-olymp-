@@ -9,8 +9,8 @@
  * Имена — в записи TeX: «A», «A_1». Координаты — точные дроби.
  */
 
-import { type Rat, rat, ratDec } from './rational';
-import { type Plane, type V3, collinear, planeThrough, sub, v3 } from './vec';
+import { type Rat, div, rat, ratDec, sign } from './rational';
+import { type Plane, type V3, add, collinear, cross, dot, planeThrough, sub, v3 } from './vec';
 
 export interface Vertex {
   name: string;
@@ -155,3 +155,91 @@ export const parallelEdges = (poly: Polyhedron, e: Edge, f: Edge): boolean =>
   collinear(edgeDir(poly, e), edgeDir(poly, f));
 
 export { at };
+
+/* ── Призма, пирамида, тетраэдр ─────────────────────────────────
+   Вершины задаются точными координатами. Ядро считает в дробях,
+   поэтому основание с иррациональными координатами (правильный
+   треугольник, шестиугольник) так не задать: для сечений и метода
+   следов это не помеха — они аффинные, — а точная метрика правильных
+   оснований — этап 5б плана (docs/stereometry-plan.md). */
+
+/** Точка с именем: вершина основания. */
+export interface Tochka {
+  name: string;
+  p: V3;
+}
+
+/** Центр масс вершин: точка внутри выпуклого тела. */
+function centr(points: readonly V3[]): V3 {
+  const n = rat(points.length);
+  const s = points.reduce((acc, p) => add(acc, p));
+  return v3(div(s.x, n), div(s.y, n), div(s.z, n));
+}
+
+/** Развернуть обход грани так, чтобы нормаль смотрела наружу. */
+function naruzhu(vertices: readonly Vertex[], idx: number[], inner: V3): number[] {
+  const [i, j, k] = idx;
+  if (i === undefined || j === undefined || k === undefined) {
+    throw new Error('грань: меньше трёх вершин');
+  }
+  const a = at(vertices, i).p;
+  const n = cross(sub(at(vertices, j).p, a), sub(at(vertices, k).p, a));
+  return sign(dot(n, sub(a, inner))) < 0 ? idx.slice().reverse() : idx;
+}
+
+/** «A_1» → «A_1», «A» + «_1» → «A_1»: имя вершины верхнего основания. */
+const verkh = (name: string): string => `${name}_1`;
+
+/**
+ * Призма с основанием base (выпуклый многоугольник по порядку обхода)
+ * и боковым ребром shift: верхние вершины — A_1, B_1, … Прямая призма —
+ * shift перпендикулярен основанию; наклонная — любой.
+ */
+export function prism(base: readonly Tochka[], shift: V3, kind = 'prism'): Polyhedron {
+  const n = base.length;
+  if (n < 3) throw new Error('призма: в основании меньше трёх вершин');
+  const vertices: Vertex[] = [
+    ...base.map((t) => ({ name: t.name, p: t.p })),
+    ...base.map((t) => ({ name: verkh(t.name), p: add(t.p, shift) })),
+  ];
+  const inner = centr(vertices.map((v) => v.p));
+  const names = (idx: number[]) => idx.map((i) => at(vertices, i).name).join('');
+  const raw: number[][] = [
+    Array.from({ length: n }, (_, k) => k),
+    Array.from({ length: n }, (_, k) => n + k),
+  ];
+  for (let k = 0; k < n; k += 1) {
+    const m = (k + 1) % n;
+    raw.push([k, m, n + m, n + k]);
+  }
+  return polyhedron(
+    kind,
+    vertices,
+    raw.map((idx) => {
+      const out = naruzhu(vertices, idx, inner);
+      return { name: names(idx), idx: out };
+    }),
+  );
+}
+
+/** Пирамида с вершиной apex над основанием base: SABCD, DABC … */
+export function pyramid(base: readonly Tochka[], apex: Tochka, kind = 'pyramid'): Polyhedron {
+  const n = base.length;
+  if (n < 3) throw new Error('пирамида: в основании меньше трёх вершин');
+  const vertices: Vertex[] = [...base.map((t) => ({ name: t.name, p: t.p })), apex];
+  const inner = centr(vertices.map((v) => v.p));
+  const names = (idx: number[]) => idx.map((i) => at(vertices, i).name).join('');
+  const raw: number[][] = [Array.from({ length: n }, (_, k) => k)];
+  for (let k = 0; k < n; k += 1) {
+    raw.push([n, k, (k + 1) % n]);
+  }
+  return polyhedron(
+    kind,
+    vertices,
+    raw.map((idx) => ({ name: names(idx), idx: naruzhu(vertices, idx, inner) })),
+  );
+}
+
+/** Тетраэдр ABCD: пирамида с треугольным основанием ABC и вершиной D. */
+export const tetrahedron = (a: Tochka, b: Tochka, c: Tochka, d: Tochka): Polyhedron =>
+  pyramid([a, b, c], d, 'tetrahedron');

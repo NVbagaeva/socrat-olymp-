@@ -4,6 +4,7 @@
  * Меняется здесь, в разметке текста нет.
  */
 
+import { legalDocs } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/onboarding';
 import { tasksPage } from '@/content/tasks';
 
@@ -44,11 +45,17 @@ export const site = {
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
-    /* Страниц оферты и обработки данных пока нет — ссылки на них сняты.
-       Связь — через Telegram-канал платформы, тот же, что на печатных
-       листах. */
+    /* Правовые документы — свои страницы сайта; связь — через
+       Telegram-канал платформы, тот же, что на печатных листах, он
+       открывается в новой вкладке. */
     links: [
+      { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
+      { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
+      { label: 'Оферта', href: '#' },
+      { label: 'Контакты', href: '#' },
       { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
-    ] satisfies ExternalLink[],
+    ] satisfies (SiteLink | ExternalLink)[],
+    /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
+    operatorLabel: 'Оператор персональных данных:',
   },
 } as const;

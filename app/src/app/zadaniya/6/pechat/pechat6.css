@@ -1,0 +1,146 @@
+/* Печатные листы №6: A4, ч/б. Лист учителя: кусок «условие + ответ»
+   не рвётся, разбор переносится только между шагами. */
+.z6-list {
+  max-width: 190mm;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.z6-list__panel {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.z6-list__eyebrow {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.z6-list h1 {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: 22px;
+}
+
+.z6-list h2 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: 18px;
+  break-after: avoid;
+}
+
+.z6-list h3 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: 16px;
+  break-after: avoid;
+}
+
+.z6-list__note,
+.z6-list__klyuch {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.z6-list__zadacha {
+  margin: var(--space-3) 0;
+  break-inside: avoid;
+}
+
+.z6-list__zadacha--mesto {
+  min-height: 70mm;
+}
+
+.z6-list__metka {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.z6-list__otvet {
+  margin: var(--space-2) 0 0;
+}
+
+/* ── Лист учителя ── */
+
+.z6-list__zadacha--uchitel {
+  break-inside: auto;
+  margin: var(--space-4) 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.z6-list__kusok-pervyy {
+  break-inside: avoid;
+}
+
+.z6-list__shag {
+  break-inside: avoid;
+  margin: var(--space-2) 0;
+}
+
+.z6-list__shag-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.z6-list__shag-line {
+  margin: 0;
+}
+
+.z6-list__otvet-uchitel {
+  margin: var(--space-1) 0;
+}
+
+.z6-list__podval {
+  margin-top: var(--space-8);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.z6-list .ramka {
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: 15px;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 15mm;
+  }
+
+  .z6-list {
+    max-width: none;
+    padding: 0;
+  }
+
+  .z6-list__panel {
+    display: none;
+  }
+}
+
+.z6-list__teoriya {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 82mm), 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.z6-list__teoriya .z6-k {
+  break-inside: avoid;
+  margin: 0;
+}
+
+.z6-list .z6-razbor__etap {
+  break-inside: avoid;
+}
+
+@media print {
+  .z6-list .z6-razbor__calc {
+    display: none;
+  }
+}

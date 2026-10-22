@@ -11,8 +11,9 @@
    3. Телефон 390 px, касания (Chromium): чертёж появляется, есть
       сплошные и штриховые линии и подписи; поворот пальцем меняет
       картинку и пересчитывает штрихи; щипок меняет масштаб; режимы
-      «3D» и «Школьный чертёж» переключаются без ошибок; ошибок в
-      консоли нет.
+      «3D» и «Школьный чертёж» переключаются без ошибок; инструмент
+      «Сечение»: три тапа строят сечение A_1BD (две стороны штрихом),
+      плоскость выключается, отмена точки работает; ошибок в консоли нет.
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
@@ -21,6 +22,10 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
@@ -231,6 +236,47 @@ if (ok) {
   await page.waitForTimeout(1200);
   const e = await zamer();
   check(e.lines >= 12, 'после смены режимов чертёж пропал');
+
+  // Инструмент «Сечение по трём точкам»: выбор тапом A_1, B, D.
+  await page.getByRole('button', { name: 'Сечение', exact: true }).click();
+  await page.waitForTimeout(900);
+  const hint = () => page.locator('.z15-sech__hint').textContent();
+  check(/\(1\/3\)/.test((await hint()) ?? ''), 'сечение: нет подсказки (1/3)');
+  for (const name of ['A_1', 'B', 'D']) {
+    await page.locator('.z15-ch').scrollIntoViewIfNeeded();
+    const p = await page.evaluate((n) => {
+      const host = document.querySelector('.z15-ch').getBoundingClientRect();
+      const l = document.querySelector(`.z15-ch__label[data-name="${n}"]`);
+      return l ? [host.x + Number(l.dataset.x), host.y + Number(l.dataset.y)] : null;
+    }, name);
+    check(p !== null, `сечение: нет подписи ${name}`);
+    if (p) await page.touchscreen.tap(p[0], p[1]);
+    await page.waitForTimeout(450);
+  }
+  await page.waitForTimeout(1500);
+  const sech = await page.evaluate(() => ({
+    vybrano: document.querySelectorAll('.z15-ch circle[data-vybrana]').length,
+    zalivok: document.querySelectorAll('.z15-ch svg polygon').length,
+    storony: [...document.querySelectorAll('.z15-ch svg line[data-vid="sechenie"]')].map(
+      (l) => l.dataset.vidno,
+    ),
+    kontur: document.querySelectorAll('.z15-ch svg line[data-vid="ploskost"]').length,
+  }));
+  check(/построено/.test((await hint()) ?? ''), 'сечение: после трёх тапов не построено');
+  check(sech.vybrano === 3, `сечение: подсвечено точек ${sech.vybrano}`);
+  check(sech.zalivok === 2, `сечение: заливок ${sech.zalivok} (нужны плоскость и сечение)`);
+  check(
+    sech.storony.length === 3 && sech.storony.filter((v) => v === '0').length === 2,
+    `сечение A_1BD: стороны ${sech.storony.join('')} (две — штрихом)`,
+  );
+  check(sech.kontur >= 4, 'сечение: нет контура секущей плоскости');
+  await page.getByRole('button', { name: 'Секущая плоскость' }).click();
+  await page.waitForTimeout(300);
+  const bez = await page.evaluate(() => document.querySelectorAll('.z15-ch svg polygon').length);
+  check(bez === 1, 'сечение: плоскость не выключается (или пропало сечение)');
+  await page.getByRole('button', { name: 'Отменить точку' }).click();
+  await page.waitForTimeout(300);
+  check(/\(3\/3\)/.test((await hint()) ?? ''), 'сечение: отмена точки не вернула (3/3)');
 }
 check(errors.length === 0, `ошибки в консоли витрины: ${errors.slice(0, 3).join('; ')}`);
 

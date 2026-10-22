@@ -1158,6 +1158,9 @@ function result(set, task, built, seed, index) {
     id: task.id,
     kind: set.kind,
     svg: scene === null ? null : renderer.renderGraph(scene, layout),
+    /* Сцена — для листов: их рисунки рисуются в своём режиме
+       (renderer.renderFigure), без построений сайта. */
+    scene: scene,
     layout: layout,
     question: plainText(fillTemplate(task.question, values)),
     questionHtml: typesetText(fillTemplate(task.question, values)),

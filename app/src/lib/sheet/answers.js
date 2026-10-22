@@ -127,22 +127,34 @@ function keyTable(title, rows) {
   return out;
 }
 
+/* Рисунок к разбору: построения (треугольник наклона, асимптоты,
+   вспомогательные оси) — отдельным рисунком рядом с решением, а не
+   на рисунке условия. Ширина — как у рисунка задачи на листе. */
+function solutionFigure(figure) {
+  if (!figure || !figure.svg) { return ''; }
+  var width = figure.width ? ' style="width:' + (Math.round(figure.width * 100) / 100) + 'mm"' : '';
+  return '<figure class="sheet-figure sheet-solution-figure"' + width + '>' + figure.svg + '</figure>';
+}
+
 /**
  * Краткое решение одной задачи.
  *
  * steps — уже отобранные куски: [{ tex }] для формул и строка
  * ответа. Ничего не досочиняется: что пришло, то и печатается.
+ * figure — необязательный рисунок к разбору: { svg, width (мм) }.
  */
-function solution(no, formulas, answer) {
+function solution(no, formulas, answer, figure) {
   var body = formulas.map(function (tex) {
     return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
       typo.escape(tex) + '</span>';
   }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
-  return '<div class="sheet-item sheet-solution">' +
+  var drawn = solutionFigure(figure);
+  return '<div class="sheet-item sheet-solution' + (drawn ? ' sheet-solution--figure' : '') + '">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body">' + body + '</span>' +
     '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
+    drawn +
     '</div>';
 }
 
@@ -153,9 +165,10 @@ function solution(no, formulas, answer) {
  * k → формула; у задач с прямой — обе функции, уравнение, корни),
  * а не только итог каждого шага.
  *
- * items — [{ title, formulas: [tex] }]
+ * items  — [{ title, formulas: [tex] }]
+ * figure — необязательный рисунок к разбору, как у solution.
  */
-function fullSolution(no, items, answer) {
+function fullSolution(no, items, answer, figure) {
   var list = items.map(function (step) {
     var body = step.formulas.map(function (tex) {
       return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
@@ -164,10 +177,13 @@ function fullSolution(no, items, answer) {
     return '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
       (body ? ':' : '') + '</span> ' + body + '</li>';
   }).join('');
-  return '<div class="sheet-item sheet-solution sheet-solution--full">' +
+  var drawn = solutionFigure(figure);
+  return '<div class="sheet-item sheet-solution sheet-solution--full' +
+    (drawn ? ' sheet-solution--figure' : '') + '">' +
     '<span class="sheet-solution-no">' + no + '</span>' +
     '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
     '<span class="sheet-solution-answer">' + answerMath(answer) + '</span>' +
+    drawn +
     '</div>';
 }
 
@@ -175,12 +191,15 @@ function fullSolution(no, items, answer) {
  * Решение по шагам внутри карточки задачи: текст шага и его формула,
  * затем строка ответа. Печатается в файле для учителя.
  *
- * steps — [{ text, tex, plain }]: tex — формула шага, plain — она же
- * словами для запасного набора без KaTeX. Ничего не досочиняется.
+ * steps — [{ etap, text, tex, plain }]: etap — этап решения («Все
+ * исходы», «Ответ»), печатается жирным перед текстом шага; tex —
+ * формула шага, plain — она же словами для запасного набора без KaTeX.
+ * Ничего не досочиняется.
  */
 function steps(items, answer) {
   var list = items.map(function (step) {
     return '<li class="sheet-step">' +
+      (step.etap ? '<b class="sheet-step-etap">' + typo.text(step.etap) + '.</b> ' : '') +
       (step.text ? '<span class="sheet-step-text">' + typo.text(step.text) + '</span>' : '') +
       (step.tex
         ? ' <span class="math" data-tex="' + typo.attr(step.tex) + '">' +
@@ -192,8 +211,35 @@ function steps(items, answer) {
     '<p class="sheet-task-answer">Ответ: <b>' + typo.text(answer) + '</b></p>';
 }
 
+/**
+ * Подсказка по шагам для учителя: номер задачи, затем вопросы той же
+ * подсказки, что открывает кнопка «Подсказка» на сайте. У вопроса —
+ * все кнопки через точку, верная жирным, и комментарий после верного
+ * ответа. Формулы в $…$ набираются KaTeX, как условия.
+ *
+ * shagi — [{ question, options, correct, comment }]
+ */
+function hint(no, shagi) {
+  var list = shagi.map(function (shag) {
+    var options = shag.options.map(function (option, index) {
+      return index === shag.correct
+        ? '<b class="sheet-hint-right">' + typo.mathText(option) + '</b>'
+        : '<span class="sheet-hint-option">' + typo.mathText(option) + '</span>';
+    }).join('<span class="sheet-hint-sep"> · </span>');
+    return '<li class="sheet-step sheet-hint-step">' +
+      '<span class="sheet-hint-q">' + typo.mathText(shag.question) + '</span> ' +
+      '<span class="sheet-hint-options">' + options + '</span>' +
+      (shag.comment ? ' <span class="sheet-hint-comment">' + typo.mathText(shag.comment) + '</span>' : '') +
+      '</li>';
+  }).join('');
+  return '<div class="sheet-item sheet-solution sheet-solution--full sheet-hint">' +
+    '<span class="sheet-solution-no">' + no + '</span>' +
+    '<span class="sheet-solution-body"><ol class="sheet-steps">' + list + '</ol></span>' +
+    '</div>';
+}
+
 const api = { sectionHead: sectionHead, subHead: subHead, table: table, keyTable: keyTable,
-              solution: solution, fullSolution: fullSolution, steps: steps };
+              solution: solution, fullSolution: fullSolution, steps: steps, hint: hint };
 
 export default api;
-export { sectionHead, subHead, table, keyTable, solution, fullSolution, steps };
+export { sectionHead, subHead, table, keyTable, solution, fullSolution, steps, hint };

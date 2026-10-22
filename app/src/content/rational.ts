@@ -10,8 +10,7 @@
 
 import type { SectionAbout, TutorMaterial } from './sections';
 
-export const RATIONAL_ABOUT: Omit<SectionAbout, 'hint'> = {
-  title: 'Гипербола',
+export const RATIONAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
   description:
     'В задании №12 с гиперболой дан её график: $y = \\frac{k}{x}$, сдвинутая гипербола или дробь $\\frac{kx + a}{x + b}$, иногда вместе с прямой. По чертежу нужно восстановить формулу — асимптоты дают сдвиги, отмеченная точка даёт $k$, — а потом найти значение функции, аргумент, коэффициент или вторую точку пересечения с прямой.',
   formsTitle: 'Возможные формулировки',
@@ -62,8 +61,8 @@ export const RATIONAL_ABOUT: Omit<SectionAbout, 'hint'> = {
 };
 
 export const RATIONAL = {
-  /** Шапка: H1 общий на задание, название подтемы — подзаголовком. */
-  head: { subtitle: 'Гипербола' },
+  /** Шапка: H1 общий на задание; название подтемы — из data/functionTypes.ts. */
+  head: true,
   about: RATIONAL_ABOUT,
   /* Материалов для репетиторов у подтемы ещё нет. */
   tutors: [] as TutorMaterial[],

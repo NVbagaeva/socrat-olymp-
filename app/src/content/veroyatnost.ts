@@ -5,9 +5,8 @@
  * рекламных фраз нет намеренно: их пишет автор, а пустое место
  * честнее придуманного текста.
  *
- * Названия разделов взяты из кодификатора ФИПИ и из задачников
- * Е. А. Ширяевой, по которым собираются банки: «Основные понятия
- * теории вероятностей» и «Вероятности событий».
+ * Названия разделов — «Вероятность: простая» и «Вероятность:
+ * сложная» — по позициям заданий №4 и №5 в кодификаторе ФИПИ.
  */
 
 import { OPORNYE } from './opornye';
@@ -17,6 +16,7 @@ import { counted } from '@/lib/plural';
 import { taskName } from './tasks';
 
 import { assetUrl } from '@/lib/assetUrl';
+import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
 /* Вкладка раздела описывается общим типом: лента у всех заданий одна
@@ -55,7 +55,7 @@ export interface VeroyatnostSection {
    * одноколоночная, и текст занимает всю ширину. У №5 своей картинки
    * пока нет, поэтому поле необязательное.
    */
-  art?: { src: string; width: number; height: number };
+  art?: ShapkaArt;
 }
 
 /**
@@ -175,7 +175,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
         {
           id: 'workbook',
           title: 'Рабочая тетрадь для репетиторов',
-          lead: 'Задачи конспекта и прототипы с заготовками рисунков и строкой для ответа',
+          lead: 'Опорные задачи и прототипы с заготовками рисунков и строкой для ответа',
           icon: 'doc',
           file: assetUrl('/materials/zadanie-5/zadanie-5-veroyatnosti-sobytiy-uchenik.pdf'),
         },
@@ -353,7 +353,7 @@ export function uznaySlova(zadanie: Zadanie) {
     pravilnyy: 'Правильный метод:',
     priznaki: 'Признаки в условии:',
     kakVidno: 'Как это было видно:',
-    istochnik: { prototip: `Прототип задания ${zadanie}`, konspekt: 'Задача конспекта' },
+    istochnik: { prototip: `Прототип задания ${zadanie}`, opornaya: 'Опорная задача' },
     progress: {
       title: 'Прогресс «Узнай метод»',
       lead: 'Считается отдельно от решённых задач: узнано верно из показанных, по каждому методу.',
@@ -374,8 +374,8 @@ export function uznaySlova(zadanie: Zadanie) {
  */
 export const PODGOTOVKA_SLOVA = {
   title: OPORNYE.title,
-  lead: 'Задачи авторского конспекта. Блоки идут в порядке конспекта: это последовательность, а не каталог.',
-  /** Подзаголовок №5: там блоки — методы, а не заголовки конспекта. */
+  lead: 'Блоки идут по порядку: каждый следующий опирается на предыдущий.',
+  /** Подзаголовок №5: там блоки — методы. */
   leadPoMetodam:
     'Блоки идут по методам из «Ключевых методов решения»: в каждом десять задач, от простой к сложной.',
   allLabel: 'Все блоки',
@@ -400,7 +400,7 @@ export const PODGOTOVKA_SLOVA = {
  * и превью с примером задачи, внизу подсказка про тренажёр.
  */
 export const DOROZHKA_SLOVA = {
-  lead: 'Идём по шагам конспекта: каждый блок — 10 задач на один приём.',
+  lead: 'Идём шаг за шагом: каждый блок — 10 задач на один приём.',
   tyZdes: 'Ты здесь',
   proydeno: (vsego: number): string => `Пройдено ${vsego}/${vsego}`,
   schet: (resheno: number, vsego: number): string => `${resheno}/${vsego}`,

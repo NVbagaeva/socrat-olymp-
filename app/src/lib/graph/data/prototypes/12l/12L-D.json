@@ -1,0 +1,384 @@
+{
+  "kind": "prototype",
+  "id": "12L.D",
+  "task": 12,
+  "title": "12L.D · $\\log_a(x + b)$: значение функции",
+  "subtitle": "По графику $f(x) = \\log_a(x + b)$ найти значение в точке",
+  "seed": 12804,
+  "family": "logarithmic",
+  "form": "shiftX",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "maxAnswerRepeat": 2,
+  "maxAnswerDuplicates": 8,
+  "maxVertexRepeat": 2,
+  "maxSlopeRepeat": 6,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка. Задачи с пометкой source: fipi — из банка дословно, остальные — аналоги, не из открытого банка.",
+  "composition": {
+    "count": 21,
+    "fipi": 1,
+    "analogs": 20,
+    "levels": {
+      "lucky": 14,
+      "unlucky": 6
+    },
+    "minDistinctAnswers": 12
+  },
+  "tasks": [
+    {
+      "id": "12L.D-F1",
+      "source": "fipi",
+      "fipiNo": 7,
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "base": {
+            "r": 2
+          },
+          "c": 5,
+          "marks": [
+            1,
+            2
+          ],
+          "x0": 11,
+          "window": {
+            "xmin": -7,
+            "xmax": 4,
+            "ymin": -2,
+            "ymax": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "12L.D-01",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-02",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-03",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-04",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-05",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-06",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-07",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-08",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-09",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-10",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-11",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-12",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-13",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-14",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.D-15",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "any",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.D-16",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "any",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.D-17",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.D-18",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.D-19",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.D-20",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    }
+  ]
+}

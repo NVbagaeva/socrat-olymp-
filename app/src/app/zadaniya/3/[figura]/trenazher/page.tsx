@@ -1,35 +1,21 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
-import { RAZDELY, razdelBySlug } from '@/lib/zadanie3';
-import { razdelPool } from '@/lib/zadanie3/pool';
-import '../trenazher.css';
+import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
+import { FIGURA_GLAVA } from '@/content/stereo/glavy';
+import { ZADANIYA } from '@/lib/paths';
 
+/* Прежние адреса №3 — по разделу на фигуру. Раздел собран заново
+   (docs/stereometry-plan.md, п. 5.4): фигуры стали главами теории,
+   а тренажёр и опорные задачи — общими вкладками задания. */
 export function generateStaticParams() {
-  return RAZDELY.map((razdel) => ({ figura: razdel.slug }));
+  return Object.keys(FIGURA_GLAVA).map((figura) => ({ figura }));
 }
 export const dynamicParams = false;
 
+export const metadata = REDIRECT_METADATA;
+
 type Params = Promise<{ figura: string }>;
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const razdel = razdelBySlug((await params).figura);
-  return razdel === undefined
-    ? {}
-    : { title: `${razdel.nazvanie}. Тренажёр — задание №3 — Будет на ЕГЭ` };
-}
-
-/**
- * Вкладка «Тренажёр» раздела.
- *
- * Банк раздела собирается на сборке: условия набраны KaTeX, чертежи
- * нарисованы движком. Ответы уходят вниз только отпечатками, разборы
- * закрытыми — открытым текстом в разметке их нет.
- */
-export default async function TrenazherTab({ params }: { params: Params }) {
-  const razdel = razdelBySlug((await params).figura);
-  if (razdel === undefined) {
-    notFound();
-  }
-  return <Solid3Trainer pool={razdelPool(razdel)} roundKey={`z3:${razdel.slug}`} />;
+/** Тренажёр фигуры → тренажёр задания (группа выбирается в нём). */
+export default async function Page({ params }: { params: Params }) {
+  await params;
+  return <RedirectPage href={`${ZADANIYA}/3/trenazher/`} title="Тренажёр" />;
 }

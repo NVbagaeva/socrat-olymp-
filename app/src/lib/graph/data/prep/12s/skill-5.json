@@ -1,0 +1,157 @@
+{
+  "kind": "prep",
+  "id": "P12S-5",
+  "block": 5,
+  "title": "Пересечение корня и прямой",
+  "subtitle": "Найти координату второй точки пересечения",
+  "seed": 12505,
+  "family": "sqrt",
+  "axisLabels": "minimal",
+  "uniqueAnswers": true,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12S-5-01",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-02",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-03",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-04",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-05",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-06",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.",
+      "answerRule": "cross-x",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "x"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-07",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-08",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-09",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "negative",
+        "intersection": {
+          "axis": "y"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    },
+    {
+      "id": "P12S-5-10",
+      "question": "На рисунке изображены графики функций $f(x) = k\\sqrt{x}$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "form": "line",
+      "constraints": {
+        "kSign": "positive",
+        "intersection": {
+          "axis": "y"
+        }
+      },
+      "hint": "Найди $k$ по точке $A$ и прямую по двум точкам, приравняй функции и сделай замену $t = \\sqrt{x}$, $t \\ge 0$."
+    }
+  ]
+}

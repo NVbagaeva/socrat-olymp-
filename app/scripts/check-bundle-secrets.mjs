@@ -205,6 +205,23 @@ const otvety2 = BANK_2.flatMap((entry) =>
   entry.variants.flatMap((v) => formy(generate2(entry.prototype, v.seed).otvet)),
 );
 
+/* №9: банк тренажёра — зафиксированные варианты на прототип
+   (lib/proizvodnaya/bank.ts, его собирает scripts/build-bank-9.mjs).
+   В страницы он не идёт: задачи считаются в браузере, а листы
+   генератора собираются на клиенте по адресу. Ответы банка ищутся
+   по страницам раздела целиком, кроме теории и опорных задач:
+   разобранные образцы с ответами там стоят намеренно. Пока банка
+   нет (раздел собирается), проверка этого пункта пропускается. */
+let BANK_9 = [];
+let generate9 = null;
+if (fs.existsSync(path.join(root, 'src', 'lib', 'proizvodnaya', 'bank.ts'))) {
+  BANK_9 = requireSrc('lib/proizvodnaya/bank').BANK;
+  generate9 = requireSrc('lib/proizvodnaya/generate').generate;
+}
+const otvety9 = BANK_9.flatMap((entry) =>
+  entry.variants.flatMap((v) => formy(generate9(entry.prototype, v.seed).otvet)),
+);
+
 /* №12: наборы движка graph/ по навыкам опорных задач. Ответ — число
    или номер верного варианта; в окне не должно быть ни поля
    «answer», ни открытого разбора, ни пометок вариантов «error». */
@@ -216,15 +233,28 @@ const readSets = (dir) =>
     .filter((name) => name.endsWith('.json'))
     .sort()
     .map((name) => JSON.parse(fs.readFileSync(path.join(graphData, dir, name), 'utf8')));
-/* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы из prep/12r.
+/* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы из prep/12r,
+   графика корня из prep/12s.
    Наборы прототипов — оттуда задачи берут тренажёр, генератор и лист
    для печати, и их ответы тоже не должны попадать в разметку. */
 GraphGenerate.setSets({
-  prep: [...readSets('prep/12'), ...readSets('prep/12q'), ...readSets('prep/12r')],
+  prep: [
+    ...readSets('prep/12'),
+    ...readSets('prep/12q'),
+    ...readSets('prep/12r'),
+    ...readSets('prep/12s'),
+    ...readSets('prep/12e'),
+    ...readSets('prep/12l'),
+    ...readSets('prep/12t'),
+  ],
   prototypes: [
     ...readSets('prototypes/12'),
     ...readSets('prototypes/12q'),
     ...readSets('prototypes/12r'),
+    ...readSets('prototypes/12s'),
+    ...readSets('prototypes/12e'),
+    ...readSets('prototypes/12l'),
+    ...readSets('prototypes/12t'),
   ],
 });
 const POLYA_12 = ['answer', 'error', 'steps'];
@@ -234,7 +264,11 @@ const POLYA_12 = ['answer', 'error', 'steps'];
 const NABORY_12 = allPrepSkills
   .map((skill) => skill.setId)
   .concat(readSets('prototypes/12q').map((set) => set.id))
-  .concat(readSets('prototypes/12r').map((set) => set.id));
+  .concat(readSets('prototypes/12r').map((set) => set.id))
+  .concat(readSets('prototypes/12s').map((set) => set.id))
+  .concat(readSets('prototypes/12e').map((set) => set.id))
+  .concat(readSets('prototypes/12l').map((set) => set.id))
+  .concat(readSets('prototypes/12t').map((set) => set.id));
 for (const setId of NABORY_12) {
   for (const task of GraphGenerate.generateSet(setId)) {
     zadachi.push({
@@ -504,6 +538,23 @@ for (const file of files) {
     }
   }
 
+  /* Банк тренажёра №9: по страницам раздела, кроме теории и опорных
+     задач (образцы с ответами) и листов печати (они пусты до сборки
+     на клиенте). */
+  if (
+    put2.slice(0, 2).join('/') === 'zadaniya/9' &&
+    !['opornye-zadachi', 'teoriya'].includes(put2[2])
+  ) {
+    for (const otvet of otvety9) {
+      for (const [chto, re] of shablony(otvet)) {
+        const m = re.exec(text);
+        if (m !== null) {
+          problemy.push(`№9 банк тренажёра: ${chto} «${otvet}» — …${m[0].slice(-70)}`);
+        }
+      }
+    }
+  }
+
   if (problemy.length > 0) {
     bad.push({ file: rel, problemy });
   }
@@ -520,6 +571,10 @@ for (const z of zadachi) {
 }
 poRazdelam['№8'].variantov += BANK_8.reduce((s, e) => s + e.variants.length, 0);
 poRazdelam['№2'].variantov += BANK_2.reduce((s, e) => s + e.variants.length, 0);
+if (BANK_9.length > 0) {
+  poRazdelam['№9'] = poRazdelam['№9'] ?? { zapisey: 0, variantov: 0 };
+  poRazdelam['№9'].variantov += BANK_9.reduce((s, e) => s + e.variants.length, 0);
+}
 console.log(
   `Просмотрено файлов сборки: ${files.length}; окон задач в страницах: ${oknaVsego}.\n` +
     `Проверено записей банков: ${zadachi.length}, вариантов с ответами: ` +

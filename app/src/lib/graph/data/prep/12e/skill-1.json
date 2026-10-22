@@ -1,0 +1,139 @@
+{
+  "kind": "prep",
+  "id": "P12E-1",
+  "task": 12,
+  "title": "Основание $a$ по графику",
+  "subtitle": "Найти основание показательной функции по отмеченной точке",
+  "seed": 12711,
+  "family": "exponential",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "uniqueVertices": true,
+  "maxSlopeRepeat": 3,
+  "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
+  "composition": {
+    "count": 10
+  },
+  "tasks": [
+    {
+      "id": "P12E-1-01",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-02",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-03",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-04",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-05",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-06",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit"
+      }
+    },
+    {
+      "id": "P12E-1-07",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "far"
+      }
+    },
+    {
+      "id": "P12E-1-08",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "far"
+      }
+    },
+    {
+      "id": "P12E-1-09",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "up",
+        "marks": "far"
+      }
+    },
+    {
+      "id": "P12E-1-10",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = a^x$. Найдите $a$.",
+      "answerRule": "coef-a",
+      "answerType": "number",
+      "level": "lucky",
+      "constraints": {
+        "direction": "down",
+        "marks": "far"
+      }
+    }
+  ]
+}

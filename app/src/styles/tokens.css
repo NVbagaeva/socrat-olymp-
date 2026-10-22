@@ -55,6 +55,10 @@
      смыслом «предупреждение», и для спокойного акцента не годится. */
   --terracotta-50: #fdf1ea;
   --terracotta-200: #f3cdb5;
+  /* Терракота для мелкого текста: сам акцент на белом даёт 3,0:1 —
+     подписи кеглем меньше основного этого мало. Тон темнее, тот же
+     оттенок: 5,5:1 на белом и 5,0:1 на терракотовой заливке. */
+  --terracotta-700: #a8500f;
   --heat-1: #eef4fd;
   --heat-2: #d5e4fa;
   --heat-3: #a9c8f3;
@@ -72,6 +76,16 @@
   --brown-50: #f5ebe1;
   --violet-600: #7c4ddb;
   --violet-50: #efe9fc;
+  /* Справочник по планиметрии (№1): тёмные пары для ярлыков блоков —
+     белый текст на них проходит WCAG AA (≥ 4,5 : 1), и золото линий
+     чертежа (≥ 3 : 1 на белом). Проверка — pnpm test:spravochnik-1. */
+  --teal-700: #0b6f64;
+  --violet-700: #6337c2;
+  --gold-700: #8f5900;
+  --gold-500: #b87300;
+  --rust-700: #b23a1b;
+  --rust-50: #fcece6;
+  --slate-600: #4a5d79;
   --pink-600: #d63384;
   --pink-50: #fce8f2;
 }
@@ -142,6 +156,8 @@
      Сам акцент остаётся цветом значка, маркеров и заголовка. */
   --color-accent-soft-surface: var(--terracotta-50);
   --color-border-accent: var(--terracotta-200);
+  /* Акцент в роли текста: подпись, набранная в тон акцентной плашке. */
+  --color-accent-text: var(--terracotta-700);
   /* Тёплая поверхность теории и рамка к ней. */
   --color-surface-warm: var(--cream-50);
   --color-border-warm: var(--cream-200);
@@ -199,6 +215,24 @@
      синий, что у прямых в №12; невидимые рёбра движок делает светлее
      прозрачностью, отдельного цвета им не нужно. Грани и жидкость —
      светлые синие из палитры; вспомогательные построения — --graph-accent. */
+  /* Справочник по планиметрии (№1): блоки карточки. Насыщенный цвет —
+     у рамки и ярлыка, заливка пастельная; ключевой элемент чертежа —
+     золотисто-оранжевый. */
+  --color-spr-def: var(--blue-700);
+  --color-spr-def-soft: var(--blue-50);
+  --color-spr-svo: var(--teal-700);
+  --color-spr-svo-soft: var(--teal-50);
+  --color-spr-pri: var(--violet-700);
+  --color-spr-pri-soft: var(--violet-50);
+  --color-spr-teo: var(--gold-700);
+  --color-spr-teo-soft: var(--sun-50);
+  --color-spr-vaz: var(--rust-700);
+  --color-spr-vaz-soft: var(--rust-50);
+  --color-spr-primer: var(--slate-600);
+  --color-spr-primer-soft: var(--grey-50);
+  --color-spr-primenenie: var(--navy-700);
+  --color-spr-primenenie-soft: var(--grey-50);
+  --color-spr-klyuch: var(--gold-500);
   /* Разделы задания №11: значок раздела и заливка кружка. */
   --color-z11-rz: var(--sun-500);
   --color-z11-rz-soft: var(--sun-50);
@@ -236,6 +270,15 @@
   --solid-liquid: var(--blue-300);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* Текст, в котором встречаются греческие буквы. Греческое
+     подмножество Inter стоит первым, основной стек — за ним: в файле
+     только греческие буквы, всё остальное браузер берёт следующим
+     семейством, подставляя шрифт по буквам, а не по строке целиком.
+     Наоборот не работает: стек --font-sans кончается родовым
+     sans-serif, и греческие буквы забирал бы он. Стек стоит только
+     там, где греческие слова есть: остальным страницам лишний файл
+     незачем. */
+  --font-grech: var(--font-inter-greek), var(--font-sans);
   /* Рукописная подпись на полях. Caveat — только обычное начертание,
      подмножество cyrillic: латиницу и цифры отрисует запасной cursive. */
   --font-hand: var(--font-caveat), cursive;

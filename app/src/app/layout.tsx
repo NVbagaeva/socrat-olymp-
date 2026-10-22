@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
+import { CookieNotice } from '@/components/CookieNotice';
+import { FormulyPoShirine } from '@/components/FormulyPoShirine';
 import { NavigationGuard } from '@/components/NavigationGuard';
 import { Onboarding } from '@/components/onboarding/Onboarding';
-import { caveat, inter, ptSerif } from '@/lib/fonts';
+import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
+import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -21,11 +24,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${caveat.variable} ${ptSerif.variable}`}>
+    <html
+      lang="ru"
+      className={`${inter.variable} ${interGreek.variable} ${caveat.variable} ${ptSerif.variable}`}
+    >
       <body>
         <ChunkReloadGuard />
         <NavigationGuard />
+        <FormulyPoShirine />
+        <PodpisiChertezhey />
         {children}
+        <CookieNotice />
         <Onboarding />
       </body>
     </html>

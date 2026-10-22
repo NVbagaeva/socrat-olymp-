@@ -186,6 +186,37 @@ export function resetTrainer(): void {
   listeners.forEach((fn) => fn());
 }
 
+/** Набор, к которому относится задание: «12Q.C-04» → «12Q.C». */
+function setOfTask(id: string): string {
+  return id.split('-')[0] ?? id;
+}
+
+/**
+ * Прогресс одного раздела. Счётчики всех разделов №12 лежат в одной
+ * записи, а сводка на странице раздела должна считать только его
+ * наборы: иначе на «Квадратичной функции» в «решено» шли бы задачи
+ * линейной, а знаменатель — задачи одной квадратичной.
+ */
+export function progressOf(progress: TrainerProgress, sets: readonly string[]): TrainerProgress {
+  return {
+    kinds: Object.fromEntries(
+      Object.entries(progress.kinds).filter(([kind]) => sets.includes(kind)),
+    ),
+    mistakes: progress.mistakes.filter((id) => sets.includes(setOfTask(id))),
+  };
+}
+
+/** Сбросить счётчики и ошибки одного раздела: другие разделы не трогаются. */
+export function resetSets(sets: readonly string[]): void {
+  const current = snapshot();
+  save({
+    kinds: Object.fromEntries(
+      Object.entries(current.kinds).filter(([kind]) => !sets.includes(kind)),
+    ),
+    mistakes: current.mistakes.filter((id) => !sets.includes(setOfTask(id))),
+  });
+}
+
 export interface TrainerSummary {
   done: number;
   right: number;

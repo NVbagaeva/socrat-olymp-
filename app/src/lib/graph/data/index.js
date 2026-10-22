@@ -40,6 +40,34 @@ import rat9 from './prep/12r/skill-9.json';
 import rat10 from './prep/12r/skill-10.json';
 import rat11 from './prep/12r/skill-11.json';
 
+/* Подтема «Иррациональная функция»: пять опорных навыков, P12S-1 … P12S-5. */
+import sqrt1 from './prep/12s/skill-1.json';
+import sqrt2 from './prep/12s/skill-2.json';
+import sqrt3 from './prep/12s/skill-3.json';
+import sqrt4 from './prep/12s/skill-4.json';
+import sqrt5 from './prep/12s/skill-5.json';
+
+/* Подтема «Показательная функция»: пять опорных навыков, P12E-1 … P12E-5. */
+import exp1 from './prep/12e/skill-1.json';
+import exp2 from './prep/12e/skill-2.json';
+import exp3 from './prep/12e/skill-3.json';
+import exp4 from './prep/12e/skill-4.json';
+import exp5 from './prep/12e/skill-5.json';
+
+/* Подтема «Логарифмическая функция»: пять опорных навыков, P12L-1 … P12L-5. */
+import log1 from './prep/12l/skill-1.json';
+import log2 from './prep/12l/skill-2.json';
+import log3 from './prep/12l/skill-3.json';
+import log4 from './prep/12l/skill-4.json';
+import log5 from './prep/12l/skill-5.json';
+
+/* Подтема «Тригонометрические функции»: пять опорных навыков, P12T-1 … P12T-5. */
+import trig1 from './prep/12t/skill-1.json';
+import trig2 from './prep/12t/skill-2.json';
+import trig3 from './prep/12t/skill-3.json';
+import trig4 from './prep/12t/skill-4.json';
+import trig5 from './prep/12t/skill-5.json';
+
 import protoA from './prototypes/12/12-A.json';
 import protoB from './prototypes/12/12-B.json';
 import protoC from './prototypes/12/12-C.json';
@@ -71,6 +99,37 @@ import ratH from './prototypes/12r/12R-H.json';
 import ratI from './prototypes/12r/12R-I.json';
 import ratJ from './prototypes/12r/12R-J.json';
 
+/* Прототипы графика корня: значение, аргумент и две координаты точки
+   пересечения с прямой. Собственный материал платформы. */
+import sqrtA from './prototypes/12s/12S-A.json';
+import sqrtB from './prototypes/12s/12S-B.json';
+import sqrtC from './prototypes/12s/12S-C.json';
+import sqrtD from './prototypes/12s/12S-D.json';
+
+/* Прототипы показательной функции: четыре типа открытого банка ФИПИ —
+   задачи банка дословно и по 20 аналогов на тип. */
+import expA from './prototypes/12e/12E-A.json';
+import expB from './prototypes/12e/12E-B.json';
+import expC from './prototypes/12e/12E-C.json';
+import expD from './prototypes/12e/12E-D.json';
+
+/* Прототипы логарифмической функции: пять типов открытого банка ФИПИ —
+   задачи банка дословно и по 20 аналогов на тип. */
+import logA from './prototypes/12l/12L-A.json';
+import logB from './prototypes/12l/12L-B.json';
+import logC from './prototypes/12l/12L-C.json';
+import logD from './prototypes/12l/12L-D.json';
+import logE from './prototypes/12l/12L-E.json';
+
+/* Прототипы тригонометрических функций: шесть задач открытого банка ФИПИ
+   (a cos x + b, a tg x + b, a sin x + b; найти a или b) и по 20 аналогов. */
+import trigA from './prototypes/12t/12T-A.json';
+import trigB from './prototypes/12t/12T-B.json';
+import trigC from './prototypes/12t/12T-C.json';
+import trigD from './prototypes/12t/12T-D.json';
+import trigE from './prototypes/12t/12T-E.json';
+import trigF from './prototypes/12t/12T-F.json';
+
 /** Подготовка: собственный материал платформы, в покрытие банка не входит.
     Сначала наборы линейной подтемы, потом квадратичной, потом гиперболы: порядок в этом
     списке задаёт порядок записей в answers.json, и линейные записи от
@@ -79,6 +138,10 @@ export const prep = [
   block1, block2, block3, block4, block5, block6,
   quad1, quad2, quad3, quad4, quad5, quad6, quad7, quad8, quad9,
   rat1, rat2, rat3, rat4, rat5, rat6, rat7, rat8, rat9, rat10, rat11,
+  sqrt1, sqrt2, sqrt3, sqrt4, sqrt5,
+  exp1, exp2, exp3, exp4, exp5,
+  log1, log2, log3, log4, log5,
+  trig1, trig2, trig3, trig4, trig5,
 ];
 
 /** Прототипы: у линейной — банк ФИПИ, у квадратичной — свой материал.
@@ -89,5 +152,9 @@ export const prototypes = [
   protoA, protoB, protoC, protoD,
   quadA, quadB, quadC, quadD, quadE, quadF, quadG, quadH, quadI,
   ratA, ratB, ratC, ratD, ratE, ratF, ratG, ratH, ratI, ratJ,
+  sqrtA, sqrtB, sqrtC, sqrtD,
+  expA, expB, expC, expD,
+  logA, logB, logC, logD, logE,
+  trigA, trigB, trigC, trigD, trigE, trigF,
 ];
 

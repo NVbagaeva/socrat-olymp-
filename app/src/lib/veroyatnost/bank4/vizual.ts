@@ -36,7 +36,8 @@ export function shagP(m: number, n: number, znakov: 2 | 3 | null = null): Step {
   const otvet = znakov === null ? tochno : round(tochno, znakov);
   const znak = znakov === null ? '=' : '\\approx';
   return {
-    text: 'Вероятность',
+    etap: 'Ответ',
+    text: 'Вероятность — доля благоприятных:',
     formula: `P = ${drob('m', 'n')} = ${drob(m, n)} ${znak} ${texDec(otvet)}`,
     value: otvet,
   };
@@ -45,7 +46,8 @@ export function shagP(m: number, n: number, znakov: 2 | 3 | null = null): Step {
 /** Последний шаг для отношения мер: «P = l/L = 200/400 = 0,5». */
 export function shagLL(l: number | string, L: number | string, otvet: number): Step {
   return {
-    text: 'Вероятность',
+    etap: 'Ответ',
+    text: 'Вероятность — доля всей меры:',
     formula: `P = ${drob('l', 'L')} = ${drob(l, L)} = ${texDec(otvet)}`,
     value: otvet,
   };

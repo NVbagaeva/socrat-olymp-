@@ -1,8 +1,9 @@
-/* families/sqrt.js — корень y = a·√(x − c).
+/* families/sqrt.js — корень y = a·√(x − c) + d.
 
    Область определения x ≥ c: левее границы НИЧЕГО не рисуется.
-   В самой точке (c, 0) кривая начинается — это не разрыв, а край,
-   поэтому она в выборку входит.
+   В самой точке (c, d) кривая начинается — это не разрыв, а край,
+   поэтому она в выборку входит. Без поля d это прежняя y = a·√(x − c):
+   старые сцены (миниатюры, превью) рисуются как раньше.
 
    Асимптот у семейства нет. В точке c касательная вертикальна,
    поэтому выборка сгущается к левому краю: равномерный шаг дал бы
@@ -20,13 +21,15 @@ import { fitWindow, sampleDense, asymptotes as pack, HALF, EPS } from './shared.
 var MAX = 12;
 var STEPS = 400;
 
-function create(a, c) {
+function create(a, c, d) {
   if (Math.abs(a) < EPS) { throw new Error('sqrt: множитель a не может быть нулём'); }
-  return { a: a, c: c === undefined ? 0 : c };
+  return { a: a, c: c === undefined ? 0 : c, d: d === undefined ? 0 : d };
 }
 
+function liftOf(p) { return p.d === undefined ? 0 : p.d; }
+
 function valueAt(p, x) {
-  return x - p.c < 0 ? null : p.a * Math.sqrt(x - p.c);
+  return x - p.c < 0 ? null : p.a * Math.sqrt(x - p.c) + liftOf(p);
 }
 
 /**
@@ -35,17 +38,18 @@ function valueAt(p, x) {
  * точка (c + 1, a) иначе не попадут в кадр.
  */
 function windowFor(p) {
-  return fitWindow([{ x: p.c, y: 0 }, { x: 1 + p.c, y: p.a }], HALF, MAX);
+  return fitWindow([{ x: p.c, y: liftOf(p) }, { x: 1 + p.c, y: p.a + liftOf(p) }], HALF, MAX);
 }
 
 registerCurve('sqrt', function (curve, win) {
   var a = curve.a === undefined ? 1 : curve.a;
   var c = curve.c === undefined ? 0 : curve.c;
+  var d = liftOf(curve);
   /* Выборка идёт от края области определения вправо: точек с x < c
      в ломаной нет вовсе, поэтому нарисовать их нечем. Сгущение к
      левому концу отрабатывает вертикальную касательную. */
   return sampleDense(function (x) {
-    return x - c < 0 ? null : a * Math.sqrt(x - c);
+    return x - c < 0 ? null : a * Math.sqrt(x - c) + d;
   }, c, win.xmax, STEPS, 3);
 });
 
