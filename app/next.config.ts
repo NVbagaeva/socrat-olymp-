@@ -40,6 +40,16 @@ const nextConfig: NextConfig = {
   // на каждой сборке. lib/assetUrl.ts добавляет его к ссылке как ?v=…,
   // чтобы перезалитый под тем же именем файл не залипал в годовом кеше.
   env: {
+    // Вход в кабинет: «1» или «0» всегда, а не undefined. Так условие
+    // `process.env.AUTH_ON === '1'` вычисляется на сборке, и без флага
+    // webpack не кладёт в сборку ни ветку входа, ни кусок SDK
+    // (lib/auth/config.ts, lib/auth/client.ts).
+    AUTH_ON:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
+        ? '1'
+        : '0',
     ASSET_VERSIONS: JSON.stringify(assetVersions(path.join(process.cwd(), 'public'))),
     // Версии генераторов листов: вторая половина кода комплекта
     // (lib/komplekt.ts). Хеш исходников движка — считается на сборке.

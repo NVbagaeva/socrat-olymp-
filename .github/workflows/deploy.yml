@@ -54,8 +54,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # next.config.ts собран с output: 'export' — результат складывается в app/out.
+      #
+      # Вход в кабинет включается переменными репозитория (Settings →
+      # Secrets and variables → Actions → вкладка Variables, не Secrets):
+      # NEXT_PUBLIC_AUTH_ENABLED=1, адрес проекта и его публичный ключ.
+      # Переменных нет — сайт собирается без входа, как раньше. Секретный
+      # ключ сервиса сюда не передаётся никогда (docs/AUTH.md).
       - name: Собрать статический экспорт
         working-directory: app
+        env:
+          NEXT_PUBLIC_AUTH_ENABLED: ${{ vars.NEXT_PUBLIC_AUTH_ENABLED }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой
@@ -66,6 +76,11 @@ jobs:
       - name: Проверить, что ссылки кончаются на «/»
         working-directory: app
         run: pnpm test:trailing-slash
+
+      # Ключи сервиса входа в сборку не попадают: только публичный ключ.
+      - name: Проверить, что в сборке нет секретов
+        working-directory: app
+        run: pnpm test:secrets
 
       # .htaccess (косая черта сразу с https, служебные index.txt)
       # обязан доехать до хостинга вместе со страницами.

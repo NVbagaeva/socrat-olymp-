@@ -34,12 +34,11 @@ export const site = {
     { label: 'Учителям', href: '/#how' },
   ] satisfies SiteLink[],
 
-  /**
-   * Кнопки справа в шапке. Входа на сайте нет, поэтому «Войти» не
-   * показывается; вернуть — добавить login с адресом страницы входа.
-   */
+  /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
+     появляется только при включённом флаге (lib/auth/config.ts).
+     «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
+     нет; со входом — на регистрацию. */
   headerActions: {
-    login: null as SiteLink | null,
     signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
   },
 
