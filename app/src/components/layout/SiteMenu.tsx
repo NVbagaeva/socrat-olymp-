@@ -8,7 +8,7 @@ import { AUTH_UI } from '@/content/auth-ui';
 import { site } from '@/content/site';
 import { AUTH_ENABLED, AUTH_HREF } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
-import { LogoutItem } from '@/components/auth/AuthWidget';
+import { LogoutItem } from '@/components/auth/AuthLive';
 
 type MenuState = 'open' | 'closing';
 
