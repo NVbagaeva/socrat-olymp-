@@ -28,6 +28,9 @@ const devPages =
   process.env.SOGLASIYA === '1' ||
   process.env.INTRO_DEV_PAGES === '1';
 
+/** Версии файлов из public/ (lib/assetUrl.ts). */
+const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
+
 const nextConfig: NextConfig = {
   ...(process.env.INTRO_DEV_PAGES === '1' ? { distDir: '.next-dev' } : {}),
   // Статический экспорт: деплой на обычный хостинг, не Vercel.
@@ -52,7 +55,16 @@ const nextConfig: NextConfig = {
       (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
         ? '1'
         : '0',
-    ASSET_VERSIONS: JSON.stringify(assetVersions(path.join(process.cwd(), 'public'))),
+    // Таблица версий попадает в первую загрузку каждой страницы, поэтому
+    // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
+    // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,
+    // а он грузится отдельно (components/onboarding/intro/IntroSplash.tsx).
+    ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => !file.startsWith('/intro/'))),
+    ),
+    INTRO_ASSET_VERSIONS: JSON.stringify(
+      Object.fromEntries(Object.entries(ASSETS).filter(([file]) => file.startsWith('/intro/'))),
+    ),
     // Версии генераторов листов: вторая половина кода комплекта
     // (lib/komplekt.ts). Хеш исходников движка — считается на сборке.
     GENERATOR_VERSIONS: JSON.stringify(generatorVersions(path.join(process.cwd(), 'src'))),

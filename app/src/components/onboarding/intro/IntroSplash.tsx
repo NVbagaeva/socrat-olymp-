@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { WELCOME_INTRO } from '@/content/onboarding';
-import { assetUrl } from '@/lib/assetUrl';
+import { withVersion } from '@/lib/assetUrl';
 import { decideIntro, MIN_FPS, type IntroDecision, type StaticReason, type Tier } from './detect';
 import { FlowerDom, layerStyle } from './flower';
 import { Fx2D } from './fx2d';
@@ -46,11 +46,28 @@ declare global {
 /** Слои анимации: октаэдр, корона, затем цветок снизу вверх. A — статичный режим. */
 const FLOWER: readonly LayerId[] = ['F', 'G', ...ORDER];
 
+/* Версии слоёв — своя таблица, не общая (next.config.ts): общая идёт в
+   первую загрузку каждой страницы, а этот код — только с заставкой. */
+let introVersions: Record<string, string> | null = null;
+function layerVersions(): Record<string, string> {
+  if (introVersions === null) {
+    try {
+      introVersions = JSON.parse(process.env.INTRO_ASSET_VERSIONS ?? '{}') as Record<
+        string,
+        string
+      >;
+    } catch {
+      introVersions = {};
+    }
+  }
+  return introVersions;
+}
+
 /** Файл слоя для этой ширины рамки на экране (CSS px). */
 function layerSrc(id: LayerId, frameCssPx: number, ext: 'webp' | 'png'): string {
   const dpr = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   const width = frameCssPx * dpr > 900 ? 1536 : 768;
-  return assetUrl(`/intro/${LAYERS[id].file}-${width}.${ext}`);
+  return withVersion(`/intro/${LAYERS[id].file}-${width}.${ext}`, layerVersions());
 }
 
 function preload(srcs: string[]): Promise<void> {
