@@ -9,15 +9,10 @@
 
 import { tasksPage } from '@/content/tasks';
 
-/** Адрес страницы «Как пользоваться сайтом». */
-export const HOWTO_HREF = '/kak-polzovatsya/';
-
-/** Вкладки страницы: адрес вкладки — ?dlya=… */
-export type HowtoTab = 'uchenik' | 'repetitor';
-
-export function howtoHref(tab: HowtoTab): string {
-  return `${HOWTO_HREF}?dlya=${tab}`;
-}
+/* Адрес страницы «Как пользоваться сайтом» — в отдельном маленьком модуле:
+   его берут шапка и меню на каждой странице, а тексты туров ниже нужны
+   только самому онбордингу. */
+export { HOWTO_HREF, howtoHref, type HowtoTab } from '@/content/howto';
 
 /** Генератор, который открывают кнопки «Создать вариант» и «Открыть генератор». */
 export const GENERATOR_HREF = '/zadaniya/11/generator/';

@@ -4,7 +4,11 @@ import { clsx } from 'clsx';
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { AUTH_UI } from '@/content/auth-ui';
 import { site } from '@/content/site';
+import { AUTH_ENABLED, AUTH_HREF } from '@/lib/auth/config';
+import { useSessionUser } from '@/lib/auth/session';
+import { LogoutItem } from '@/components/auth/AuthLive';
 
 type MenuState = 'open' | 'closing';
 
@@ -14,8 +18,9 @@ const FOCUSABLE = 'a[href], button:not([disabled])';
 const NARROW = '(max-width: 939.98px)';
 
 /**
- * Бургер-меню узкой шапки: пункты навигации (и «Войти», когда вход есть) уезжают сюда,
- * логотип и кнопка «Начать бесплатно» остаются в шапке.
+ * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,
+ * логотип и кнопка «Начать бесплатно» остаются в шапке. После входа
+ * вместо «Войти» — «Мой кабинет» и «Выйти».
  */
 export function SiteMenu() {
   const [state, setState] = useState<MenuState | null>(null);
@@ -85,11 +90,19 @@ export function SiteMenu() {
     button.current?.focus();
   };
 
-  const login = site.headerActions.login;
+  /* Вход — только при включённом флаге: без него пункта нет вообще.
+     Вошедшему вместо «Войти» — «Мой кабинет» и «Выйти». */
+  const user = useSessionUser();
   const items = [
     ...site.nav.map((link) => ({ ...link, separated: false })),
-    ...(login !== null ? [{ ...login, separated: true }] : []),
+    ...(AUTH_ENABLED && user === null
+      ? [{ label: AUTH_UI.login, href: AUTH_HREF.voyti, separated: true }]
+      : []),
+    ...(AUTH_ENABLED && user !== null
+      ? [{ label: AUTH_UI.kabinet, href: AUTH_HREF.kabinet, separated: true }]
+      : []),
   ];
+  const withLogout = AUTH_ENABLED && user !== null;
 
   return (
     <>
@@ -140,6 +153,9 @@ export function SiteMenu() {
                       {item.label}
                     </a>
                   ))}
+                  {withLogout ? (
+                    <LogoutItem className="t-h3 site-menu__item" onDone={close} />
+                  ) : null}
                 </nav>
               </div>
             </div>,

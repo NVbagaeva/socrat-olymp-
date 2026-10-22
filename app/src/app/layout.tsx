@@ -3,7 +3,7 @@ import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
 import { CookieNotice } from '@/components/CookieNotice';
 import { FormulyPoShirine } from '@/components/FormulyPoShirine';
 import { NavigationGuard } from '@/components/NavigationGuard';
-import { Onboarding } from '@/components/onboarding/Onboarding';
+import { OnboardingLazy } from '@/components/onboarding/OnboardingLazy';
 import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import '@/styles/globals.css';
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PodpisiChertezhey />
         {children}
         <CookieNotice />
-        <Onboarding />
+        <OnboardingLazy />
       </body>
     </html>
   );
