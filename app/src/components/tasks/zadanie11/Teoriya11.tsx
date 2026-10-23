@@ -305,9 +305,14 @@ function Svod({ vid }: { vid: 'layfhaki' | 'lovushki' }) {
         <li key={it.id} className="z11-svod__item">
           <Piktogramma name={vid === 'layfhaki' ? 'bulb' : 'alert'} className="z11-svod__ikonka" />
           <span className="z11-svod__body">
-            <a className="z11-svod__title" href={it.razdel === undefined ? undefined : it.href}>
-              {it.title}
-            </a>
+            {/* Без раздела ссылаться некуда — заголовок без ссылки. */}
+            {it.razdel === undefined ? (
+              <span className="z11-svod__title">{it.title}</span>
+            ) : (
+              <a className="z11-svod__title" href={it.href}>
+                {it.title}
+              </a>
+            )}
             <span className="z11-svod__text">
               <Tex text={it.text} />
             </span>

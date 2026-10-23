@@ -9,6 +9,7 @@ import { prepPool11 } from '@/lib/zadanie11/prep/pool';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { SECTIONS } from '@/lib/zadanie11/taxonomy';
 import { ZADANIYA } from '@/lib/paths';
+import { typeset } from '@/lib/tex';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -55,7 +56,7 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
         blockId={found.id}
         razdel={found.razdel}
         title={found.nazvanie}
-        zachem={found.zachem}
+        zachem={typeset(found.zachem)}
         teoriyaHtml={found.teoriyaHtml}
         tasks={found.zadachi}
         zapomniHtml={found.zapomniHtml}

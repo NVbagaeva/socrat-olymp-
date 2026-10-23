@@ -291,10 +291,13 @@ function sceneProblems(task) {
 }
 
 /* Плашка «откуда задача» у №11 стоит перед условием только на листе
-   учителя («новая · аналог ПР-04»): это пометка для учителя, не
-   условие. При сравнении условий она снимается. */
+   учителя («новая», рядом код типа «тип ПР-04»): это пометки для
+   учителя, не условие. При сравнении условий они снимаются. */
 const teacherOnly = (html) =>
-  String(html ?? '').replace(/^<span class="z(?:1|11)-sheet-badge">[^<]*<\/span>\s*/, '');
+  String(html ?? '').replace(
+    /^<span class="z(?:1|11)-sheet-badge">[^<]*<\/span>(?:<span class="z11-sheet-kod">[^<]*<\/span>)?\s*/,
+    '',
+  );
 
 const tasksOf = (spec) => K.specTasks(spec);
 const problems = [];
