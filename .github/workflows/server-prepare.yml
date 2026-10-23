@@ -1,0 +1,45 @@
+name: 'Сервер: подготовить'
+
+# Один раз на чистом сервере Ubuntu 24.04 (docs/SERVER.md, шаг 4).
+# Входит root по паролю из письма провайдера, ставит защиту и Docker,
+# заводит вход deploy по ключу, проверяет его и выключает root и пароли.
+# Созданные ключи (вход на сервер, шифрование копий) сохраняет в
+# GitHub Secrets через токен GH_SECRETS_TOKEN — показать их некому.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Подготовить сервер
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Подготовить
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_ROOT_PASSWORD: ${{ secrets.SERVER_ROOT_PASSWORD }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          BACKUP_AGE_IDENTITY: ${{ secrets.BACKUP_AGE_IDENTITY }}
+          ADMIN_SSH_PUBLIC_KEY: ${{ vars.ADMIN_SSH_PUBLIC_KEY }}
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: infra/lite/actions/prepare.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Подготовить сервер» не прошло'

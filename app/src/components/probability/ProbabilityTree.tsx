@@ -1,6 +1,13 @@
 import { clsx } from 'clsx';
 import type { RisunokState } from './OutcomeTiles';
 import { Znaki } from './Znaki';
+import {
+  chisloVetvi as chislo,
+  LEVEL_H,
+  PAD_X,
+  raskladkaDereva,
+  type SobytieRaskladki,
+} from './derevoRaskladka';
 
 /**
  * Дерево вероятностей — метод 4.
@@ -49,26 +56,18 @@ export interface ProbabilityTreeProps {
   direction?: 'top-to-bottom';
   /** Заготовка: ветви без вероятностей — ученик подписывает их сам. */
   blank?: boolean;
+  /** Подпись корня — случайный опыт: «S» (задание №6). */
+  rootLabel?: string;
+  /** Подписи листьев — имена исходов курсивом: a, b, c (задание №6). */
+  leafLabelsMath?: boolean;
+  /**
+   * События — овалы вокруг подряд стоящих листьев с подписью под
+   * овалом: «Событию A благоприятствуют исходы a, b, c» (задание №6).
+   */
+  events?: readonly SobytieRaskladki[];
   state?: RisunokState;
   alt?: string;
   className?: string;
-}
-
-/* Шаг между листьями подстраивается под самую длинную подпись ветки:
-   «не выиграл» просит больше места, чем «попал». */
-const LEAF_GAP_MIN = 88;
-const LEAF_GAP_MAX = 122;
-const ZNAK = 7.5;
-const LEVEL_H = 96;
-const TOP = 42;
-const PAD_X = 20;
-/* Когда уровни подписаны, слева нужно место под их названия:
-   иначе подпись уровня наезжает на крайнюю ветку. */
-const PAD_LEVELS = 104;
-
-function chislo(value: number): string {
-  /* Хвосты вида 0,6400000000000001 — от двоичной дроби, а не от задачи. */
-  return String(Math.round(value * 1e9) / 1e9).replace('.', ',');
 }
 
 /**
@@ -91,65 +90,18 @@ export function ProbabilityTree({
   showSum = false,
   direction = 'top-to-bottom',
   blank = false,
+  rootLabel,
+  leafLabelsMath = false,
+  events,
   state = 'default',
   alt,
   className,
 }: ProbabilityTreeProps) {
   void direction;
 
-  const dlinnaya = branches.reduce((m, b) => Math.max(m, b.label.length), 0);
-  const LEAF_GAP = Math.max(LEAF_GAP_MIN, Math.min(LEAF_GAP_MAX, Math.round(dlinnaya * ZNAK) + 28));
-
-  const deti = new Map<string | null, TreeBranch[]>();
-  for (const b of branches) {
-    const spisok = deti.get(b.parent) ?? [];
-    spisok.push(b);
-    deti.set(b.parent, spisok);
-  }
-  const detiU = (id: string | null): TreeBranch[] => deti.get(id) ?? [];
-
-  /* Листья в порядке обхода — они и задают горизонтальную раскладку. */
-  const listya: TreeBranch[] = [];
-  const glubina = new Map<string, number>();
-  const proizvedenie = new Map<string, number>();
-  const obhod = (b: TreeBranch, d: number, p: number): void => {
-    glubina.set(b.id, d);
-    const pp = p * b.p;
-    proizvedenie.set(b.id, pp);
-    const sled = detiU(b.id);
-    if (sled.length === 0) {
-      listya.push(b);
-      return;
-    }
-    for (const c of sled) {
-      obhod(c, d + 1, pp);
-    }
-  };
-  for (const b of detiU(null)) {
-    obhod(b, 0, 1);
-  }
-
-  /* x узла: у листа — свой столбец, у ветки — середина её поддерева. */
-  const x = new Map<string, number>();
-  const sleva = levels === undefined ? PAD_X : PAD_LEVELS;
-  listya.forEach((b, i) => x.set(b.id, sleva + LEAF_GAP / 2 + i * LEAF_GAP));
-  const postavit = (b: TreeBranch): number => {
-    const est = x.get(b.id);
-    if (est !== undefined) {
-      return est;
-    }
-    const sled = detiU(b.id).map(postavit);
-    const seredina = (Math.min(...sled) + Math.max(...sled)) / 2;
-    x.set(b.id, seredina);
-    return seredina;
-  };
-  for (const b of detiU(null)) {
-    postavit(b);
-  }
-
-  const urovney = Math.max(...[...glubina.values()], 0) + 1;
-  const y = (d: number): number => TOP + (d + 1) * LEVEL_H;
-  const koren = { x: sleva + (listya.length * LEAF_GAP) / 2, y: TOP };
+  const r = raskladkaDereva({ branches, levels, showProducts, showSum, events });
+  const { listya, glubina, proizvedenie, x, y, koren, urovney, width, height } = r;
+  const detiEst = new Set(branches.map((b) => b.parent));
 
   const podhodit = new Set(highlightedPaths ?? []);
   /* Путь усилен, если он ведёт к подходящему листу. */
@@ -164,9 +116,6 @@ export function ProbabilityTree({
       }
     }
   }
-
-  const width = sleva + listya.length * LEAF_GAP + PAD_X;
-  const height = y(urovney - 1) + (showProducts ? 46 : 20) + (showSum ? 38 : 0);
 
   const summa = [...podhodit].reduce((s, id) => s + (proizvedenie.get(id) ?? 0), 0);
   const slagaemye = [...podhodit].map((id) => chislo(proizvedenie.get(id) ?? 0));
@@ -194,13 +143,11 @@ export function ProbabilityTree({
           ))}
 
       {/* Ветки. Рисуются до узлов, чтобы точки легли поверх линий. */}
-      {branches.map((b) => {
-        const d = glubina.get(b.id) ?? 0;
-        const bx = x.get(b.id) ?? 0;
-        const roditel = branches.find((p) => p.id === b.parent);
-        const px = roditel === undefined ? koren.x : (x.get(roditel.id) ?? 0);
-        const py = roditel === undefined ? koren.y : y(glubina.get(roditel.id) ?? 0);
-        const list = detiU(b.id).length === 0;
+      {branches.map((b, i) => {
+        const otr = r.otrezki[i] as (typeof r.otrezki)[number];
+        const metka = r.metki[i] as (typeof r.metki)[number];
+        const { x1: px, y1: py, x2: bx, y2: by } = otr;
+        const list = !detiEst.has(b.id);
         const vlevo = bx < px;
         const usilen = naPuti.has(b.id);
         const priglushen = highlightedPaths !== undefined && !usilen;
@@ -213,26 +160,26 @@ export function ProbabilityTree({
               priglushen && 'pr-branch--dimmed',
             )}
           >
-            <line x1={px} y1={py} x2={bx} y2={y(d)} />
+            <line x1={px} y1={py} x2={bx} y2={by} />
             {/* Вероятность стоит сбоку от ветки, со стороны её наклона:
                 поверх линии она читалась бы хуже. В заготовке её нет. */}
             {blank ? null : (
               <text
                 className="pr-math pr-branch-p"
-                x={(px + bx) / 2 + (vlevo ? -10 : 10)}
-                y={(py + y(d)) / 2}
-                textAnchor={vlevo ? 'end' : 'start'}
+                x={metka.x}
+                y={metka.y}
+                textAnchor={metka.anchor}
               >
-                {b.pLabel ?? chislo(b.p)}
+                {metka.text}
               </text>
             )}
-            <circle className="pr-node" cx={bx} cy={y(d)} r="5" />
+            <circle className="pr-node" cx={bx} cy={by} r="5" />
             {/* У листа подпись снизу — под ним ничего нет. У развилки
                 снизу расходятся ветки, поэтому подпись уходит вбок. */}
             <text
-              className="pr-branch-label"
+              className={clsx('pr-branch-label', list && leafLabelsMath && 'pr-math pr-leaf-name')}
               x={list ? bx : bx + (vlevo ? -12 : 12)}
-              y={list ? y(d) + 22 : y(d) + 4}
+              y={list ? by + 22 : by + 4}
               textAnchor={list ? 'middle' : vlevo ? 'end' : 'start'}
             >
               {b.label}
@@ -242,6 +189,21 @@ export function ProbabilityTree({
       })}
 
       <circle className="pr-node pr-node--root" cx={koren.x} cy={koren.y} r="6" />
+      {rootLabel === undefined ? null : (
+        <text className="pr-math pr-root-label" x={koren.x} y={koren.y - 13} textAnchor="middle">
+          {rootLabel}
+        </text>
+      )}
+
+      {/* События — овалы вокруг своих листьев, имя под овалом. */}
+      {r.ovaly.map((ov) => (
+        <g key={`ov${ov.name}`} className="pr-event">
+          <ellipse cx={ov.cx} cy={ov.cy} rx={ov.rx} ry={ov.ry} />
+          <text className="pr-math pr-event-name" x={ov.lx} y={ov.ly} textAnchor="middle">
+            {ov.name}
+          </text>
+        </g>
+      ))}
 
       {/* Произведения под листьями */}
       {showProducts

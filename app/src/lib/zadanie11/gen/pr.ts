@@ -22,7 +22,10 @@ export const GEN_PR: Record<string, Gen> = {
     if (ch < 0.5 || !des(ch, 2)) {
       return null;
     }
-    return { params: { a, b }, answer: Math.round(ch * 100) / 100 };
+    /* Порядок изменений: как в банке (подорожал, потом подешевел) или
+       наоборот — ответ тот же, а ход решения другой. */
+    const poryadok = r.next() < 0.5 ? 'vverh' : 'vniz';
+    return { params: { a, b, poryadok }, answer: Math.round(ch * 100) / 100 };
   },
 
   /* p² / 100 — конечная дробь при p, кратном 5. */

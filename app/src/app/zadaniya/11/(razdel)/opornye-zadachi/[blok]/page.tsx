@@ -3,12 +3,12 @@ import { notFound } from 'next/navigation';
 import { Opornye11Screen } from '@/components/tasks/zadanie11/Opornye11Screen';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
-import { tasksPage } from '@/content/tasks';
 import { O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { BLOKI, blokBySlug } from '@/lib/zadanie11/prep/bloki';
 import { prepPool11 } from '@/lib/zadanie11/prep/pool';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { SECTIONS } from '@/lib/zadanie11/taxonomy';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -35,7 +35,7 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
   if (found === undefined) {
     notFound();
   }
-  const base = `${tasksPage.href}/${ZADANIE11.slug}`;
+  const base = `${ZADANIYA}/${ZADANIE11.slug}`;
   const listHref = `${base}/${OPORNYE.tail}`;
   /* Куда дальше после 10/10: теория раздела, следующий блок, задачи
      ЕГЭ раздела — своего или первого, перед которым этот блок нужен. */

@@ -97,13 +97,18 @@
   gap: var(--space-5);
 }
 .sg-root .g2 {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .sg-root .g3 {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .sg-root .g4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+/* Вкладки в карточке витрины на телефоне прокручиваются внутри неё. */
+.sg-root .card .tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 .sg-root .stack {
   display: grid;
@@ -380,11 +385,11 @@
 
 @media (max-width: 900px) {
   .sg-root .g4 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .sg-root .g3,
   .sg-root .g2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .sg-root .page {
     padding: 0 var(--space-5);

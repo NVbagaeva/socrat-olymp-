@@ -1,0 +1,162 @@
+/* Разбор задачи №10: «Дано», подписанные этапы, панель «Считаем с умом».
+   Общий для тренажёра, галереи и разобранных примеров теории. */
+
+.z10-razbor {
+  display: grid;
+  /* Колонка не шире блока: длинная выкладка не раздвигает разбор. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.z10-razbor__etap {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  break-inside: avoid;
+}
+
+.z10-razbor__title {
+  margin: 0 0 var(--space-2);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.z10-razbor__line {
+  margin: var(--space-1) 0 0;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.z10-dano {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.z10-dano th,
+.z10-dano td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.z10-dano th {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.z10-dano__ed {
+  color: var(--color-text-secondary);
+}
+
+.z10-razbor__calc {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.z10-razbor__calc summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.z10-razbor__calc ul,
+.z10-razbor__calc ol {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  line-height: 1.8;
+}
+
+.z10-razbor__calc-tex {
+  display: block;
+  overflow-x: auto;
+}
+
+.z10-hint {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.z10-hint--ok {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+@media print {
+  .z10-razbor__etap {
+    border-left-color: #000;
+    background: none;
+  }
+}
+
+/* ── Чертёж моста и иллюстрации сюжетов ── */
+
+.z10-most-wrap {
+  max-width: 640px;
+  margin: var(--space-3) 0;
+  padding: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface-soft) 60%, var(--color-surface)),
+    var(--color-surface)
+  );
+  break-inside: avoid;
+}
+
+.z10-most-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Картинки сюжетов — PNG/WebP с прозрачным фоном: без рамки и тени,
+   ширина ограничена, чтобы не заслонять условие. */
+.z10-ill {
+  display: block;
+}
+
+.z10-ill img {
+  display: block;
+  width: auto;
+  max-width: min(100%, 440px);
+  height: auto;
+  max-height: 320px;
+}
+
+.z10-ill__svernuto summary {
+  margin-bottom: var(--space-2, 8px);
+}
+
+.z10-ill__svernuto summary {
+  cursor: pointer;
+  color: var(--color-primary);
+}
+
+@media print {
+  /* Ч/б печать: вода — без заливки, выделенная ванта — чёрная и толстая,
+     голубое стекло рамки не печатается. */
+  .z10-most-wrap {
+    border: none;
+    background: none;
+    padding: 0;
+  }
+
+  .z10-most .z10-most__voda {
+    fill: none;
+  }
+
+  .z10-most .z10-most__vanta-iskomaya {
+    stroke: #000;
+  }
+}

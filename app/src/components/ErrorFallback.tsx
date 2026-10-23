@@ -40,11 +40,11 @@ export function ErrorFallback({ error, variant = 'page', what }: ErrorFallbackPr
   return (
     <div className={clsx('errfb', block && 'errfb--block')}>
       <ErrorState
-        title={block ? `Не удалось показать ${what ?? 'этот блок'}` : 'Что-то пошло не так'}
+        title={block ? `Не удалось показать ${what ?? 'этот блок'}` : 'Не удалось открыть страницу'}
         description={
           block
             ? 'Остальная страница работает. Обновите страницу: обычно этого хватает.'
-            : 'Страница не открылась. Обновите её: обычно этого хватает. Если не помогло, вернитесь на главную.'
+            : 'Обновите её: обычно этого хватает. Если не помогло, вернитесь на главную.'
         }
         action={
           <div className="errfb__actions">

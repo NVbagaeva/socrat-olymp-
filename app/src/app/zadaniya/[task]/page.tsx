@@ -7,11 +7,14 @@ import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
 import { Chart } from '@/components/graph/Chart';
+import { ZadanieHero } from '@/components/tasks/ZadanieHero';
 import { HandNote } from '@/components/ui';
 import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
 import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { lineScene } from '@/lib/scenes';
+import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import type { PrototypeView, SubtopicView } from './SectionTabs';
 import { SectionTabs } from './SectionTabs';
@@ -63,10 +66,12 @@ function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
   return {
     slug: subtopic.id,
     name: subtopic.title,
+    caption: subtopic.graphName,
+    icon: ikonkaRazdela(sectionSlug, subtopic.icon),
     formulaHtml: formulaHtml(subtopic.formula),
     status: subtopic.status,
     /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
-    href: subtopicBuilt(subtopic) ? `/zadaniya/${sectionSlug}/${subtopic.id}` : null,
+    href: subtopicBuilt(subtopic) ? href(ZADANIYA, sectionSlug, subtopic.id) : null,
   };
 }
 
@@ -116,13 +121,14 @@ export default async function SectionPage({ params }: { params: Params }) {
             { label: `№${section.no}` },
           ]}
           title={section.title}
+          {...(section.hero === undefined ? {} : { className: 'section-head--hero' })}
           {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.description}
           actions={
             entry === undefined ? null : (
               <Link
                 className="btn btn--primary section-head__cta"
-                href={`/zadaniya/${section.slug}/${entry.id}`}
+                href={href(ZADANIYA, section.slug, entry.id)}
               >
                 Продолжить подготовку
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -133,10 +139,14 @@ export default async function SectionPage({ params }: { params: Params }) {
           }
           media={
             <>
-              <Chart
-                className="section-head__chart"
-                scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
-              />
+              {section.hero === undefined ? (
+                <Chart
+                  className="section-head__chart"
+                  scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
+                />
+              ) : (
+                <ZadanieHero task={section.hero} />
+              )}
               <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
             </>
           }
@@ -149,6 +159,7 @@ export default async function SectionPage({ params }: { params: Params }) {
             description={section.description}
             subtopics={subtopics}
             prototypes={prototypes}
+            vesRazdel={section.slug === '12'}
           />
         </Suspense>
       </main>

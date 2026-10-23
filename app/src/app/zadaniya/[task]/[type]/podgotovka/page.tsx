@@ -1,7 +1,7 @@
 import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
 import { prepRedirectParams } from '@/content/sections';
-import { tasksPage } from '@/content/tasks';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Те же адреса, что были: подтемы, жившие до переименования. */
 export function generateStaticParams() {
@@ -17,9 +17,6 @@ type Params = Promise<{ task: string; type: string }>;
 export default async function Page({ params }: { params: Params }) {
   const { task, type } = await params;
   return (
-    <RedirectPage
-      href={`${tasksPage.href}/${task}/${type}/${OPORNYE.tail}`}
-      title={OPORNYE.title}
-    />
+    <RedirectPage href={`${ZADANIYA}/${task}/${type}/${OPORNYE.tail}`} title={OPORNYE.title} />
   );
 }

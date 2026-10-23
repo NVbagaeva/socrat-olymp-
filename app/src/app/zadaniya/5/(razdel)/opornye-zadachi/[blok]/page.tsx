@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { PodgotovkaBlok } from '@/components/tasks/veroyatnost/PodgotovkaBlok';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
 import { OPORNYE } from '@/content/opornye';
-import { veroyatnostTitle } from '@/content/veroyatnost';
+import { PODGOTOVKA_SLOVA, veroyatnostTitle } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
@@ -31,7 +31,13 @@ export default async function Podgotovka5BlokPage({ params }: { params: Params }
     notFound();
   }
   return (
-    <PodgotovkaShell zadanie={5} base="/zadaniya/5" active={found.id} bloki={bloki}>
+    <PodgotovkaShell
+      zadanie={5}
+      base="/zadaniya/5"
+      lead={PODGOTOVKA_SLOVA.leadPoMetodam}
+      active={found.id}
+      bloki={bloki}
+    >
       <PodgotovkaBlok zadanie={5} blok={found} listHref="/zadaniya/5/podgotovka/" />
     </PodgotovkaShell>
   );

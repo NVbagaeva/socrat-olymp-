@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
+import { AuthWidget } from '@/components/auth/AuthWidget';
 import { site } from '@/content/site';
 import { SiteMenu } from './SiteMenu';
 
@@ -32,12 +33,9 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
         </nav>
 
         <div className="site-head__cta">
-          <a className="btn btn--ghost btn--sm" href={site.headerActions.login.href}>
-            {site.headerActions.login.label}
-          </a>
-          <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
-            {site.headerActions.signup.label}
-          </a>
+          {/* «Войти» или кружок аккаунта и «Начать бесплатно». Вход
+              выключен — остаётся одна прежняя кнопка. */}
+          <AuthWidget variant="site" />
           <SiteMenu />
         </div>
       </div>

@@ -19,6 +19,16 @@
         первая: так начинается каждый вариант листа.
      4. Кусок с data-section-start открывает свою нумерацию страниц
         «N / M»: у каждого варианта она своя.
+
+   Две колонки (spec.columns === 2, справочник №1): поток страницы
+   делится на две колонки, куски встают сверху вниз сначала в левую,
+   потом в правую, потом на новую страницу. Кусок с data-span="all"
+   (заголовок раздела) встаёт на всю ширину; data-span="auto" — в
+   колонку, а если выше колонки, то на всю ширину. Правила 1, 3 и 4
+   действуют и здесь.
+
+   Оглавление: элемент с data-toc-ref="X" получает номер страницы,
+   на которой стоит элемент с data-toc-id="X".
 */
 
 (function () {
@@ -30,8 +40,189 @@
     return box.firstElementChild;
   }
 
+  /* Набор в две колонки (spec.columns === 2). Поток страницы — полосы:
+     полоса двух колонок или кусок на всю ширину. Открытая (последняя)
+     полоса колонок занимает всю оставшуюся высоту, и влезло ли —
+     сравнение scrollHeight с clientHeight колонки, как у потока
+     страницы. Кусок на всю ширину закрывает полосу над собой: её высота
+     становится высотой содержимого, под куском открывается новая.
+     Кусок с data-span="auto" встаёт в колонку, а если он выше целой
+     колонки — на всю ширину (data-span-active, оформление — у листа). */
+  function naborVKolonki(items, addPage, pages, overflowing, fits) {
+    var cur = null;
+
+    function polosa(posle) {
+      var band = document.createElement('div');
+      band.className = 'sheet-cols';
+      band.innerHTML = '<div class="sheet-col"></div><div class="sheet-col"></div>';
+      cur.flow.insertBefore(band, posle ? posle.nextSibling : null);
+      var cols = band.querySelectorAll('.sheet-col');
+      cur.band = band;
+      cur.cols = [cols[0], cols[1]];
+      cur.ci = 0;
+    }
+
+    function stranica(full) {
+      var flow = addPage(full);
+      flow.className += ' sheet-flow--cols';
+      cur = { flow: flow };
+      polosa(null);
+    }
+
+    function pustaya() {
+      return cur.flow.querySelector('.sheet-item') === null;
+    }
+
+    function polosaPusta() {
+      return cur.band.querySelector('.sheet-item') === null;
+    }
+
+    /* Новая страница для куска, который не встал. Если над пустой
+       полосой стоит заголовок с data-keep-with-next, он уходит вместе
+       с куском: заголовок без своей первой карточки внизу не остаётся. */
+    function stranicaSZagolovkom() {
+      var z = polosaPusta() ? cur.band.previousElementSibling : null;
+      if (z && (z.getAttribute('data-keep-with-next') !== '1' ||
+                cur.flow.querySelectorAll('.sheet-item').length === 1)) { z = null; }
+      if (z) { cur.flow.removeChild(z); }
+      stranica(false);
+      if (z) { cur.flow.insertBefore(z, cur.band); }
+    }
+
+    /* Кусок — единственный на странице, кроме заголовков над ним:
+       дальше переносить некуда (заголовок пошёл бы следом). */
+    function podZagolovkom(node) {
+      return Array.prototype.every.call(cur.flow.querySelectorAll('.sheet-item'), function (x) {
+        return x === node || x.getAttribute('data-keep-with-next') === '1';
+      });
+    }
+
+    function imya(node, i) {
+      return node.getAttribute('data-item-id') || node.getAttribute('data-task') ||
+        node.getAttribute('data-block') || String(i);
+    }
+
+    /* Кусок на всю ширину: над пустой полосой — перед ней; иначе
+       полоса закрывается, кусок встаёт под ней, под ним — новая. */
+    /* Влезет ли следующий кусок в открытую полосу — для заголовка с
+       data-keep-with-next: заголовок раздела не остаётся внизу
+       страницы без первой карточки под ним. */
+    function vlezetSleduyushiy(html) {
+      if (!html) { return true; }
+      var proba = el(html);
+      cur.cols[0].appendChild(proba);
+      var ok = fits(cur.cols[0]);
+      cur.cols[0].removeChild(proba);
+      return ok;
+    }
+
+    function naVsyuShirinu(node, i, sleduyushiy) {
+      var sVnizu = node.getAttribute('data-keep-with-next') === '1' ? sleduyushiy : null;
+      if (polosaPusta()) {
+        cur.flow.insertBefore(node, cur.band);
+        if (fits(cur.flow) && vlezetSleduyushiy(sVnizu)) { return; }
+        if (cur.flow.querySelectorAll('.sheet-item').length > 1) {
+          cur.flow.removeChild(node);
+          stranicaSZagolovkom();
+          cur.flow.insertBefore(node, cur.band);
+        }
+      } else {
+        var staraya = cur.band;
+        staraya.className += ' sheet-cols--zakryta';
+        cur.flow.insertBefore(node, staraya.nextSibling);
+        polosa(node);
+        if (fits(cur.flow) && vlezetSleduyushiy(sVnizu)) { return; }
+        cur.flow.removeChild(cur.band);
+        cur.flow.removeChild(node);
+        stranica(false);
+        cur.flow.insertBefore(node, cur.band);
+      }
+      if (!fits(cur.flow)) { overflowing.push(imya(node, i)); }
+    }
+
+    stranica(false);
+
+    for (var i = 0; i < items.length; i += 1) {
+      var node = el(items[i]);
+      if (node.getAttribute('data-page-break') === '1' && !pustaya()) {
+        stranica(node.getAttribute('data-full-head') === '1');
+      }
+
+      if (node.getAttribute('data-span') === 'all') {
+        naVsyuShirinu(node, i, items[i + 1]);
+        continue;
+      }
+
+      var col = cur.cols[cur.ci];
+      col.appendChild(node);
+      /* Выше колонки целой страницы: в колонку не встанет нигде. */
+      var vysokiy = node.offsetHeight > cur.flow.clientHeight;
+      while (!fits(col) && !vysokiy && !podZagolovkom(node)) {
+        col.removeChild(node);
+        if (cur.ci === 0 && cur.cols[0].childElementCount > 0) {
+          cur.ci = 1;
+        } else {
+          stranicaSZagolovkom();
+        }
+        col = cur.cols[cur.ci];
+        col.appendChild(node);
+      }
+      if (fits(col)) { continue; }
+      /* Выше колонки. Можно на всю ширину — встаёт так; нельзя —
+         разрывать всё равно не будем, сообщаем наверх. */
+      if (node.getAttribute('data-span') === 'auto') {
+        col.removeChild(node);
+        node.setAttribute('data-span-active', '1');
+        naVsyuShirinu(node, i);
+        continue;
+      }
+      overflowing.push(imya(node, i));
+    }
+
+    /* Сверка готового набора: оформление может зависеть от соседей
+       (стык карточки с разбором), и колонка, которая влезала при
+       обмере, обязана влезать и в конце. */
+    Array.prototype.forEach.call(document.querySelectorAll('#sheet-pages .sheet-col'),
+      function (col) {
+        if (!fits(col) && col.lastElementChild) {
+          overflowing.push(imya(col.lastElementChild, -1));
+        }
+      });
+    return pages;
+  }
+
+  /* Экранный предпросмотр на узком экране: страница A4 шире телефона,
+     и вся страница ехала вбок. Лист целиком уменьшается под ширину
+     окна (zoom из переменной — только на экране, см. sheet.css);
+     печать и обмер при наборе идут в настоящем размере. */
+  var PREVIEW_GAP = 16;
+
+  function fitPreview() {
+    var host = document.getElementById('sheet-pages');
+    var page = host && host.querySelector('.sheet-page');
+    if (!page) {
+      return;
+    }
+    host.style.removeProperty('--sheet-preview-zoom');
+    var room = document.documentElement.clientWidth - PREVIEW_GAP;
+    var width = page.offsetWidth;
+    if (width > 0 && room < width) {
+      host.style.setProperty('--sheet-preview-zoom', String(Math.max(room / width, 0.3)));
+    }
+  }
+
+  var fitBound = false;
+  function bindFit() {
+    fitPreview();
+    if (!fitBound) {
+      fitBound = true;
+      window.addEventListener('resize', fitPreview);
+    }
+  }
+
   function run(spec) {
     var host = document.getElementById('sheet-pages');
+    host.style.removeProperty('--sheet-preview-zoom');
     host.textContent = '';
 
     var pages = [];
@@ -74,9 +265,15 @@
       return flow.scrollHeight <= flow.clientHeight + 0.5;
     }
 
-    var flow = addPage();
     var items = spec.items || [];
     var i = 0;
+
+    if (spec.columns === 2) {
+      naborVKolonki(items, addPage, pages, overflowing, fits);
+      i = items.length;
+    }
+
+    var flow = spec.columns === 2 ? null : addPage();
 
     while (i < items.length) {
       var node = el(items[i]);
@@ -107,8 +304,9 @@
     }
 
     /* Правило 2: заголовок блока не остаётся один внизу страницы.
-       Проверяется после набора — тогда видно, кто у кого последний. */
-    for (var p = 0; p < pages.length - 1; p += 1) {
+       Проверяется после набора — тогда видно, кто у кого последний.
+       В две колонки заголовок раздела и так стоит в начале страницы. */
+    for (var p = 0; spec.columns !== 2 && p < pages.length - 1; p += 1) {
       var last = pages[p].flow.lastElementChild;
       while (last && last.getAttribute('data-keep-with-next') === '1' &&
              !startsFresh(pages[p + 1])) {
@@ -130,7 +328,7 @@
        на ней стало на кусок больше. Догоняем переносом вниз, пока
        всё не встанет — и пока страница не кончается заголовком:
        сдвинутая вниз задача могла оставить его последним. */
-    for (var q = 0; q < pages.length; q += 1) {
+    for (var q = 0; spec.columns !== 2 && q < pages.length; q += 1) {
       while ((!fits(pages[q].flow) || endsWithHead(pages[q].flow)) &&
              pages[q].flow.childElementCount > 1) {
         var moved = pages[q].flow.lastElementChild;
@@ -144,7 +342,9 @@
     }
 
     /* Пустая последняя страница ни к чему. */
-    while (pages.length > 1 && pages[pages.length - 1].flow.childElementCount === 0) {
+    while (pages.length > 1 && (spec.columns === 2
+      ? pages[pages.length - 1].flow.querySelector('.sheet-item') === null
+      : pages[pages.length - 1].flow.childElementCount === 0)) {
       host.removeChild(pages[pages.length - 1].page);
       pages.pop();
     }
@@ -165,6 +365,15 @@
         var slot = item.page.querySelector('[data-page-number]');
         if (slot) { slot.textContent = (index + 1) + ' / ' + list.length; }
       });
+    });
+
+    /* Оглавление: номер страницы, на которой стоит раздел. */
+    Array.prototype.forEach.call(host.querySelectorAll('[data-toc-ref]'), function (slot) {
+      var target = host.querySelector('[data-toc-id="' + slot.getAttribute('data-toc-ref') + '"]');
+      var page = target && target.closest('.sheet-page');
+      for (var n = 0; page && n < pages.length; n += 1) {
+        if (pages[n].page === page) { slot.textContent = String(n + 1); }
+      }
     });
 
     /* Отчёт о ГОТОВОМ документе, а не о спецификации: проверять надо
@@ -211,6 +420,12 @@
       answerLines: host.querySelectorAll('.sheet-answer-line').length,
       links: Array.prototype.map.call(host.querySelectorAll('.sheet-social-item a'),
         function (node) { return node.getAttribute('href'); }),
+      /* Куски с data-item-id по страницам и колонкам — проверка
+         справочника №1: каждая карточка встала, и ровно один раз. */
+      itemIds: Array.prototype.map.call(host.querySelectorAll('[data-item-id]'),
+        function (node) { return node.getAttribute('data-item-id'); }),
+      tocPages: Array.prototype.map.call(host.querySelectorAll('[data-toc-ref]'),
+        function (node) { return textOf(node); }),
       pageNumbers: Array.prototype.map.call(host.querySelectorAll('[data-page-number]'),
         function (node) { return textOf(node); }),
       text: textOf(host)
@@ -264,6 +479,7 @@
         window.sheetPagination.formulasFailed =
           host.querySelectorAll('.math[data-katex="error"]').length;
       }
+      bindFit();
     }).catch(function (error) {
       window.sheetPagination = { error: String(error && error.message || error) };
     });

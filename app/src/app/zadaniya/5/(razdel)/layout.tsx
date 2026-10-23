@@ -9,6 +9,7 @@ import '../../[task]/section.css';
    подключаются без правок. */
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
+import '../../komplekt.css';
 import '../../[task]/[type]/trainer.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
@@ -18,6 +19,9 @@ import '@/components/tasks/veroyatnost/vykladka.css';
 /* Стили «Узнай метод», кнопок методов, прогресса по методам и
    миниатюр генератора общие с заданием №4 и живут в его файле. */
 import '../../4/zadanie4.css';
+/* Вкладки по макетам: значки методов, дорожка опорных задач, тренажёр,
+   генератор по методам и страница «Для репетиторов». */
+import '../../veroyatnost-vkladki.css';
 
 /**
  * Оболочка задания №5: крошки, заголовок и лента вкладок.

@@ -6,7 +6,8 @@
 
    Собранный сайт открывается в Chromium и (если установлен) в WebKit —
    движке Safari — на ширине компьютера и телефона. Каждая вкладка
-   задания №11 (и для сравнения теория №2) прокручивается шагами до
+   задания №11 (и для сравнения теория №2, и два экрана №12 с плашкой
+   разделов над лентой) прокручивается шагами до
    конца, и на каждом шаге:
      — пока лента в своём месте, её верх совпадает с местом под шапкой
        раздела;
@@ -22,6 +23,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium, webkit } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium, webkit);
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(OUT)) {
@@ -65,6 +71,32 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  '/zadaniya/16/',
+  '/zadaniya/16/teoriya/',
+  '/zadaniya/16/opornye-zadachi/',
+  /* №12: над лентой в той же липкой строке — плашка разделов. */
+  '/zadaniya/12/irrational/',
+  '/zadaniya/12/exponential/',
+  '/zadaniya/12/logarithmic/',
+  '/zadaniya/12/trigonometric/',
+  '/zadaniya/12/quadratic/opornye-zadachi/',
+  '/zadaniya/10/',
+  '/zadaniya/10/teoriya/',
+  '/zadaniya/10/opornye-zadachi/',
+  '/zadaniya/10/trenazher/',
+  '/zadaniya/10/generator/',
+  '/zadaniya/10/dlya-repetitorov/',
+  '/zadaniya/6/',
+  '/zadaniya/6/teoriya/',
+  '/zadaniya/6/opornye-zadachi/',
+  '/zadaniya/6/trenazher/',
+  '/zadaniya/6/generator/',
+  '/zadaniya/7/',
+  '/zadaniya/7/teoriya/',
+  '/zadaniya/7/opornye-zadachi/',
+  '/zadaniya/7/trenazher/',
+  '/zadaniya/7/generator/',
+  '/zadaniya/7/dlya-repetitorov/',
 ];
 const SIZES = [
   { name: 'компьютер', width: 1280, height: 800, isMobile: false },
@@ -131,6 +163,7 @@ async function proverit(engine, browserType) {
       isMobile: size.isMobile && engine === 'Chromium',
       hasTouch: size.isMobile,
     });
+    await welcomeSeen(context);
     for (const url of PAGES) {
       const page = await context.newPage();
       await page.goto(BASE + url, { waitUntil: 'networkidle' });
@@ -168,17 +201,34 @@ async function proverit(engine, browserType) {
     /* Подпункт содержания теории №11: блок встаёт под лентой. */
     const page = await context.newPage();
     await page.goto(BASE + '/zadaniya/11/teoriya/', { waitUntil: 'networkidle' });
-    if (size.isMobile) {
-      await page.locator('.topic-open__btn').click();
-    }
+    /* Обработчики вешает React при гидратации. Тяжёлая страница в
+       WebKit гидратируется позже networkidle, и ранний клик теряется:
+       шторка не открывается, раздел не становится активным. Поэтому
+       жмём, пока не наступит ожидаемое, — не больше пяти раз. */
+    const nazhat = async (target, done, state = 'visible') => {
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        await target.click();
+        try {
+          await done.waitFor({ state, timeout: 2000 });
+          return;
+        } catch {
+          /* следующая попытка */
+        }
+      }
+    };
     const where = `${engine}, ${size.name}, содержание теории №11`;
     const smesi = page.locator('.contents-item', { hasText: 'Смеси и сплавы' }).last();
-    await smesi.click();
-    await page.waitForTimeout(900);
-    if (size.isMobile) {
-      await page.locator('.topic-open__btn').click();
-    }
     const sub = page.locator('.contents-sub__item', { hasText: 'Таблица' }).last();
+    if (size.isMobile) {
+      await nazhat(page.locator('.topic-open__btn'), smesi);
+    }
+    /* На телефоне выбор раздела закрывает шторку: подпункты есть в
+       разметке, но скрыты до следующего открытия. */
+    await nazhat(smesi, sub, 'attached');
+    await page.waitForTimeout(900);
+    if (size.isMobile && !(await sub.isVisible())) {
+      await nazhat(page.locator('.topic-open__btn'), sub);
+    }
     check((await sub.count()) > 0, `${where}: у открытого раздела нет подпунктов`);
     if ((await sub.count()) > 0) {
       await sub.click();

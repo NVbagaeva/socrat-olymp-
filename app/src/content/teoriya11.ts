@@ -11,6 +11,7 @@
 import { assetUrl } from '@/lib/assetUrl';
 import { dvizhenie, koncentraciya, rabota, tablitsa } from '@/lib/zadanie11/kit';
 import type { LifehackId, SectionId, Tablitsa } from '@/lib/zadanie11/types';
+import type { ChastEdinic } from './teoriya-edinicy';
 
 export interface Kartochka {
   title: string;
@@ -68,7 +69,12 @@ export interface RazdelTeorii11 {
     tables: Tablitsa[];
     note?: string;
   };
-  /** Короткие пункты «как решать» с формулами. */
+  /**
+   * Общая теория (content/teoriya-edinicy.ts, та же в №10): части
+   * «Как переводить единицы», «Составные единицы».
+   */
+  obshchaya?: ChastEdinic['id'][];
+  /** Главное в разделе: короткие пункты с формулами. */
   idei: string[];
   /** Заголовок карточки с пунктами idei; нет — «Как решать». */
   ideiTitle?: string;
@@ -270,7 +276,7 @@ export const LAYFHAKI: Record<LifehackId, Layfhak> = {
     dolgo: { podpis: 'Через 20 минут опередил на круг', tex: 'v_1t-v_2t=L' },
     bystro: { podpis: 'Разность скоростей', tex: 'v_1-v_2=L:\\dfrac{1}{3}=3L' },
     shagi: [
-      '$20$ минут — это $\\dfrac13$ часа.',
+      '$1$ ч $=60$ мин; минуты → часы: меньшая → большая, делим: $20:60=\\dfrac13$ ч.',
       'Разность путей за это время равна длине круга $L$, поэтому разность скоростей $L:\\dfrac13=3L$.',
       'Обгон $n$-й раз — разница путей $n$ кругов.',
     ],
@@ -283,8 +289,8 @@ export const LOVUSHKI: Record<string, Lovushka> = {
   minuty: {
     id: 'minuty',
     title: 'Минуты — в часы дробью',
-    text: '1 час 20 минут — это $\\dfrac43$ часа, а не $1{,}2$!',
-    tex: '1\\text{ ч }20\\text{ мин}=\\dfrac{60+20}{60}=\\dfrac43\\text{ ч}',
+    text: '1 час 20 минут — это $\\dfrac43$ часа, а не $1{,}2$! $1$ ч $=60$ мин; минуты → часы: меньшая → большая, делим: $20$ мин $=\\dfrac{20}{60}=\\dfrac13$ ч.',
+    tex: '1\\text{ ч }20\\text{ мин}=1+\\dfrac{20}{60}=\\dfrac43\\text{ ч}',
   },
   uchastnik: {
     id: 'uchastnik',
@@ -356,6 +362,19 @@ export const LOVUSHKI: Record<string, Lovushka> = {
   },
 };
 
+/**
+ * Подтипы, у которых главная трудность — перевод единиц: «Повторить
+ * теорию» в тренажёре ведёт в общий блок единиц, а не в раздел.
+ */
+export const TEORIYA_PODTIPA_11: Record<string, string> = {
+  'RZ-01': 'ed-kak-perevodit',
+  'RZ-02': 'ed-sostavnye',
+  'RZ-05': 'ed-kak-perevodit',
+  'RZ-07': 'ed-kak-perevodit',
+  'RZ-18': 'ed-kak-perevodit',
+  'DP-01': 'ed-sostavnye',
+};
+
 /* ── Разделы ────────────────────────────────────────────────────── */
 
 export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
@@ -366,7 +385,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
     ideiTitle: 'Семь шагов решения',
     paraTablits: [
       {
-        title: 'Движение: S | v | t',
+        title: 'Движение: $S \\mid v \\mid t$',
         primer:
           'Велосипедист проехал $50$ км со скоростью $x$ км/ч, автомобилист — на $30$ км/ч быстрее.',
         table: dvizhenie([
@@ -376,7 +395,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
         note: 'Строки — участники, время всегда $t=\\dfrac{S}{v}$.',
       },
       {
-        title: 'Работа: A | p | t',
+        title: 'Работа: $A \\mid p \\mid t$',
         primer:
           'Первый мастер делает заказ за $30$ ч, второй — за $15$ ч. **Примем всю работу за $1$.**',
         table: rabota(
@@ -535,6 +554,15 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
     ],
     layfhaki: [],
     lovushki: ['okruglenie', 'sto'],
+  },
+  {
+    id: 'edinicy',
+    title: 'Единицы измерения',
+    lead: 'Минуты и часы, метры и километры, м/с и км/ч. Правило одно: из большей единицы в меньшую — умножаем, из меньшей в большую — делим.',
+    obshchaya: ['kak-perevodit', 'sostavnye'],
+    idei: [],
+    layfhaki: [],
+    lovushki: ['minuty'],
   },
   {
     id: 'procenty',
@@ -712,7 +740,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
       note: 'Правило уравнения: **из большего вычитаем меньшее — получаем разницу**: $\\dfrac{50}{x}-\\dfrac{50}{x+30}=\\dfrac32$.',
     },
     idei: [
-      'Минуты переводим в часы дробью: $1$ ч $20$ мин $=\\dfrac43$ ч. Метры в секунду — в км/ч умножением на $3{,}6$: $10$ м/с $=36$ км/ч.',
+      'Минуты → часы: из меньшей единицы в большую — делим: $1$ ч $20$ мин $=1+\\dfrac{20}{60}=\\dfrac43$ ч. Скорость — дробь: м/с в км/ч переводим числитель и знаменатель отдельно, $10$ м/с $=\\dfrac{10\\cdot3600}{1000}$ км/ч $=36$ км/ч (см. «Единицы измерения»).',
       'Средняя скорость — весь путь, делённый на всё время. Равные промежутки времени — среднее арифметическое; равные половины пути — $\\dfrac{2v_1v_2}{v_1+v_2}$.',
       'Встречное движение — скорости складываются, движение вдогонку — вычитаются.',
     ],
@@ -735,7 +763,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
           ['', '$S$, м', '$v$, м/с', '$t$, с'],
         ),
       ],
-      note: 'Навстречу скорости складываются: $85+35=120$ км/ч $=\\dfrac{100}{3}$ м/с. $x+250=1000$, $x=750$.',
+      note: 'Навстречу скорости складываются: $85+35=120$ км/ч. Скорость — дробь, числитель и знаменатель переводим отдельно: $120\\text{ км/ч}=\\dfrac{120\\cdot1000\\text{ м}}{3600\\text{ с}}=\\dfrac{100}{3}\\text{ м/с}$. $x+250=\\dfrac{100}{3}\\cdot30=1000$, $x=750$.',
     },
     idei: [
       'Навстречу — скорости складываются, в одном направлении — вычитаются.',
@@ -786,7 +814,7 @@ export const RAZDELY_TEORII_11: RazdelTeorii11[] = [
           ['Второй', '\\dfrac12x', 'x', '\\dfrac12'],
         ]),
       ],
-      note: '$\\dfrac{113}{2}-\\dfrac{x}{2}=22$, $x=69$.',
+      note: 'Минуты → часы: делим, $30:60=\\dfrac12$ ч. $\\dfrac{113}{2}-\\dfrac{x}{2}=22$, $x=69$.',
     },
     idei: ['Опередил на круг за $t$ часов — разность скоростей равна $L:t$.'],
     layfhaki: ['closing-speed'],

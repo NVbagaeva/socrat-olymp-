@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
-import { taskHref, taskParts, tasksPage, type ExamTask } from '@/content/tasks';
+import { taskBase, taskParts, tasksPage, type ExamTask } from '@/content/tasks';
 import { VKLADKI_ZAGLUSHKI } from '@/content/vkladki';
 import { assetUrl } from '@/lib/assetUrl';
 import { RazdelTabs } from './RazdelTabs';
 import { ShapkaRazdela } from './ShapkaRazdela';
+import { href } from '@/lib/paths';
 
 /** «Задание №15. Стереометрия» — заголовок заглушки. */
 export function stubTitle(task: ExamTask): string {
@@ -22,7 +23,7 @@ export function stubTitle(task: ExamTask): string {
  */
 export function TaskStub({ task }: { task: ExamTask }) {
   const part = taskParts.find((item) => item.part === task.part) ?? taskParts[0];
-  const partHref = task.part === 1 ? `${tasksPage.href}/` : `${tasksPage.href}/?part=${task.part}`;
+  const partHref = task.part === 1 ? tasksPage.href : href(tasksPage.href, `?part=${task.part}`);
   const { stub } = tasksPage;
 
   return (
@@ -31,7 +32,7 @@ export function TaskStub({ task }: { task: ExamTask }) {
         <ShapkaRazdela
           className="task-stub-head"
           crumbs={[
-            { label: stub.crumb, href: `${tasksPage.href}/` },
+            { label: stub.crumb, href: tasksPage.href },
             { label: part.title, href: partHref },
             { label: `Задание №${Number(task.no)}` },
           ]}
@@ -40,7 +41,7 @@ export function TaskStub({ task }: { task: ExamTask }) {
           badgeTone="neutral"
         />
 
-        <RazdelTabs base={taskHref(task)} tabs={VKLADKI_ZAGLUSHKI} />
+        <RazdelTabs base={taskBase(task)} tabs={VKLADKI_ZAGLUSHKI} />
 
         <div className="section-panel">
           <section className="task-stub" aria-labelledby="task-stub-title">

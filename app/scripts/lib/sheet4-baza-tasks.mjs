@@ -87,10 +87,16 @@ export function prototypesBySection() {
     const section = sections.find((s) => s.id === blok.id);
     if (!section) { throw new Error('блок конспекта ' + blok.id + ' не описан в content'); }
     blok.zadachi.forEach((zadacha) => {
-      if (content.dvoyniki[zadacha.id]) { return; }
-      const prototype = bank.KONSPEKT_4.find((p) => p.id === zadacha.id);
-      if (!prototype) { throw new Error('у задачи конспекта ' + zadacha.id + ' нет прототипа'); }
-      section.prototypes.push(prototype);
+      /* Блок добран до десяти задач вариантами тех же прототипов
+         (k4-11-2 — это k4-11, вариант 2): прототип берётся из самой
+         задачи, и в базу каждый прототип идёт один раз. */
+      const id = zadacha.prototip?.id ?? zadacha.id;
+      if (content.dvoyniki[id]) { return; }
+      const prototype = bank.KONSPEKT_4.find((p) => p.id === id);
+      if (!prototype) { throw new Error('у опорной задачи ' + zadacha.id + ' нет прототипа'); }
+      if (!section.prototypes.includes(prototype)) {
+        section.prototypes.push(prototype);
+      }
     });
   });
 
@@ -128,6 +134,7 @@ export function prototypesBySection() {
 function stepsHtml(model) {
   const { model: m } = lib();
   const items = model.solution.steps.map((step) => ({
+    etap: step.etap,
     text: step.text,
     tex: step.formula,
     plain: step.formula ? m.texPlain(step.formula) : '',
@@ -223,6 +230,33 @@ export function answersItems(blocks) {
   return items;
 }
 
+/**
+ * Подсказки всех вариантов в конце файла для учителя: по прототипам
+ * банка и конспекта, та же подсказка, что на сайте, на числах каждого варианта.
+ */
+export function hintsItems(blocks) {
+  const { bank, modeli } = lib();
+  const map = new Map();
+  [...bank.BANK_4, ...bank.KONSPEKT_4].forEach((prototype) => {
+    prototype.varianty.forEach((variant) => {
+      map.set(modeli.modelVarianta(prototype, variant).id,
+        prototype.podskazka ? prototype.podskazka(variant.params) : undefined);
+    });
+  });
+  const items = [answers.sectionHead(content.podskazki.title, content.podskazki.note)];
+  blocks
+    .filter((block) => block.tasks.length)
+    .forEach((block) => {
+      items.push(answers.subHead(block.id + ' · ' + block.title));
+      block.tasks.forEach((task) => {
+        const shagi = map.get(task.id);
+        if (!shagi) { throw new Error('у задачи ' + task.id + ' нет подсказки'); }
+        items.push(answers.hint(task.no, shagi));
+      });
+    });
+  return items;
+}
+
 /** Название задания и строка компактной шапки — те же, что на сайте. */
 export function naming() {
   const { LIST_4 } = lib().list;
@@ -247,7 +281,7 @@ export function sheetSpec(blocks, options) {
     recap: null,
     blocks,
     withAnswerLine: !options.withAnswers,
-    extraItems: options.withAnswers ? answersItems(blocks) : [],
+    extraItems: options.withAnswers ? [...answersItems(blocks), ...hintsItems(blocks)] : [],
     foot: content.foot,
   };
 }

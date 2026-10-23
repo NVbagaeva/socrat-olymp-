@@ -1,0 +1,445 @@
+{
+  "kind": "prototype",
+  "id": "12L.A",
+  "task": 12,
+  "title": "12L.A · $\\log_a x$: значение функции",
+  "subtitle": "По графику $f(x) = \\log_a x$ найти значение в точке",
+  "seed": 12801,
+  "family": "logarithmic",
+  "form": "basic",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "maxAnswerRepeat": 2,
+  "maxAnswerDuplicates": 8,
+  "maxVertexRepeat": 2,
+  "maxSlopeRepeat": 6,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка. Задачи с пометкой source: fipi — из банка дословно, остальные — аналоги, не из открытого банка.",
+  "composition": {
+    "count": 23,
+    "fipi": 3,
+    "analogs": 20,
+    "levels": {
+      "lucky": 14,
+      "unlucky": 6
+    },
+    "minDistinctAnswers": 12
+  },
+  "tasks": [
+    {
+      "id": "12L.A-F1",
+      "source": "fipi",
+      "fipiNo": 1,
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "base": {
+            "r": [
+              1,
+              2
+            ]
+          },
+          "marks": [
+            0,
+            -1
+          ],
+          "x0": 8,
+          "window": {
+            "xmin": -1,
+            "xmax": 10,
+            "ymin": -4,
+            "ymax": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "12L.A-F2",
+      "source": "fipi",
+      "fipiNo": 2,
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "base": {
+            "r": [
+              1,
+              5
+            ]
+          },
+          "marks": [
+            0,
+            -1
+          ],
+          "x0": 25,
+          "window": {
+            "xmin": -1,
+            "xmax": 10,
+            "ymin": -4,
+            "ymax": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "12L.A-F3",
+      "source": "fipi",
+      "fipiNo": 3,
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "base": {
+            "r": 2
+          },
+          "marks": [
+            0,
+            1
+          ],
+          "x0": 8,
+          "window": {
+            "xmin": -1,
+            "xmax": 10,
+            "ymin": -6,
+            "ymax": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "12L.A-01",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-02",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-03",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-04",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-05",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-06",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-07",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-08",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-09",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-10",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-11",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-12",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-13",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-14",
+      "level": "lucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.A-15",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "any",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.A-16",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "any",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.A-17",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.A-18",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.A-19",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.A-20",
+      "level": "unlucky",
+      "form": "basic",
+      "question": "На рисунке изображён график функции вида $f(x) = \\log_a x$. Найдите значение $f({x0})$.",
+      "answerRule": "value-at",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "value-at",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    }
+  ]
+}

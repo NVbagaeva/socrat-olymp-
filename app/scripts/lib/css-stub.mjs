@@ -8,9 +8,18 @@
    module.register и отдаёт вместо любого .css пустой модуль — на
    сервере стили ничего не значат. */
 
+import { readFile } from 'node:fs/promises';
+
 export async function load(url, context, nextLoad) {
   if (url.endsWith('.css')) {
     return { format: 'module', source: 'export default {};', shortCircuit: true };
+  }
+  /* Наборы движка (data/index.js) импортируются как JSON без атрибута
+     — так их собирает Next.js. Node требует атрибут, поэтому здесь
+     JSON отдаётся модулем с экспортом по умолчанию. */
+  if (url.endsWith('.json') && context.importAttributes?.type !== 'json') {
+    const source = await readFile(new URL(url), 'utf8');
+    return { format: 'module', source: 'export default ' + source + ';', shortCircuit: true };
   }
   return nextLoad(url, context);
 }

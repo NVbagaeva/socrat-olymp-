@@ -1,8 +1,8 @@
 import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
 import { OPORNYE } from '@/content/opornye';
 import { prepRedirectParams } from '@/content/sections';
-import { tasksPage } from '@/content/tasks';
 import { prepSkillIds } from '@/lib/prep';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Те же адреса, что были: прежние подтемы × их навыки. */
 export function generateStaticParams() {
@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: Params }) {
   const { task, type, skill } = await params;
   return (
     <RedirectPage
-      href={`${tasksPage.href}/${task}/${type}/${OPORNYE.tail}${skill}/`}
+      href={`${ZADANIYA}/${task}/${type}/${OPORNYE.tail}${skill}/`}
       title={OPORNYE.title}
     />
   );

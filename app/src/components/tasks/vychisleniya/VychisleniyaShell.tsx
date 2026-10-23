@@ -3,6 +3,7 @@ import { tasksPage } from '@/content/tasks';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
+import { ZADANIYA } from '@/lib/paths';
 
 /**
  * Оболочка задания №8: крошки, заголовок и лента вкладок.
@@ -12,7 +13,7 @@ import { ShapkaRazdela } from '../ShapkaRazdela';
  * компонент свой: общие компоненты других заданий не правятся.
  */
 export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
-  const base = `${tasksPage.href}/${VYCHISLENIYA.slug}`;
+  const base = `${ZADANIYA}/${VYCHISLENIYA.slug}`;
 
   return (
     <AppShell active="tasks">

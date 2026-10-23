@@ -4,14 +4,23 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useRef } from 'react';
 import { useStickyTabs } from '@/components/tasks/useStickyTabs';
 import { EmptyState, Tabs } from '@/components/ui';
+import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
+import { VesRazdelCards } from '@/components/tasks/ves12/VesRazdelCards';
+import { vesRazdel as vesRazdelText } from '@/content/ves12';
 import { VKLADKI_OGLAVLENIYA } from '@/content/vkladki';
 import { VkladkaIkonka } from '@/components/tasks/VkladkaIkonka';
 import { TitleText } from '@/components/tasks/TitleText';
+import { href } from '@/lib/paths';
+import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 
 export interface SubtopicView {
   slug: string;
   name: string;
+  /** Название графика: «График — парабола». */
+  caption?: string;
+  /** Иконка раздела. Нет — карточка без иконки, как раньше. */
+  icon?: IkonkaRazdela;
   /** Формула, уже свёрстанная KaTeX на сборке. */
   formulaHtml: string;
   status: 'active' | 'soon';
@@ -33,6 +42,8 @@ export interface SectionTabsProps {
   description: string;
   subtopics: SubtopicView[];
   prototypes: PrototypeView[];
+  /** Блок «Весь раздел» над карточками подтем: зачётная и генератор (№12). */
+  vesRazdel?: boolean;
 }
 
 /* Список лежит в конфиге, как у остальных разделов. Состав у этой
@@ -51,7 +62,7 @@ const IDS = new Set(TABS.map((tab) => tab.id));
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
  * идёт без перезагрузки: адрес меняется через replace.
  */
-export function SectionTabs({ description, subtopics, prototypes }: SectionTabsProps) {
+export function SectionTabs({ description, subtopics, prototypes, vesRazdel = false }: SectionTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -59,17 +70,24 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
 
+  const sizes = bentoAll(subtopics.length);
+
   const requested = params.get('tab');
   const active = requested !== null && IDS.has(requested) ? requested : 'subtopics';
 
   function select(id: string) {
     /* scroll: false — вкладка меняет содержимое, а не место на странице. */
-    router.replace(id === 'subtopics' ? pathname : `${pathname}?tab=${id}`, { scroll: false });
+    /* href(): адрес всегда с «/» на конце, как у страниц экспорта. */
+    router.replace(id === 'subtopics' ? href(pathname) : href(pathname, `?tab=${id}`), {
+      scroll: false,
+    });
   }
 
   return (
     <>
-      <div className="topic-tabs-row">
+      {/* Строкой, а не плитками Bento: под крупной картинкой шапки
+          первая карточка подтем должна быть на первом экране. */}
+      <div className="topic-tabs-row topic-tabs-row--stroka">
         <div className="topic-tabs" ref={strip}>
           <Tabs
             className="tabs--lenta"
@@ -82,12 +100,21 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
       </div>
 
       <div className="section-panel">
+        {active === 'subtopics' && vesRazdel ? (
+          <>
+            <VesRazdelCards place="page" />
+            <h3 className="ves-or ves-or--page">{vesRazdelText.orType}</h3>
+          </>
+        ) : null}
         {active === 'subtopics' ? (
-          <ul className="subtopics-grid">
-            {subtopics.map((item) => (
-              <li key={item.slug}>
+          /* Bento: карточки разного размера, ряды без дыр (lib/bento.ts). */
+          <ul className="subtopics-grid subtopics-grid--bento">
+            {subtopics.map((item, i) => (
+              <li key={item.slug} {...bentoAttrs(sizes, i)}>
                 <SubtopicCard
                   name={item.name}
+                  {...(item.caption === undefined ? {} : { caption: item.caption })}
+                  icon={item.icon}
                   href={item.href}
                   soon={item.status === 'soon'}
                   formulaHtml={item.formulaHtml}
@@ -127,10 +154,7 @@ export function SectionTabs({ description, subtopics, prototypes }: SectionTabsP
         ) : null}
 
         {active === 'stats' ? (
-          <EmptyState
-            title="Статистика появится вместе с личным кабинетом"
-            description="Хранилища результатов в проекте пока нет, поэтому показывать нечего."
-          />
+          <EmptyState title="Раздел в разработке" description="Статистики по заданию пока нет." />
         ) : null}
 
         {active === 'materials' ? (

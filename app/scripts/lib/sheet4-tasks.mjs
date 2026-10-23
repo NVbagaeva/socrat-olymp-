@@ -49,8 +49,10 @@ function lib() {
       bank: requireSrc('lib/veroyatnost/index'),
       modeli: requireSrc('lib/veroyatnost/model-zadachi'),
       model: requireSrc('lib/veroyatnost/model'),
+      metody: requireSrc('lib/veroyatnost/metody4'),
       primery: requireSrc('lib/veroyatnost/primery'),
       list: requireSrc('content/veroyatnost'),
+      podskazki: requireSrc('lib/veroyatnost/podgotovka5-podskazki'),
       viz: requireSrc('components/tasks/card/Vizualizatsiya'),
       React: require('react'),
       server: require('react-dom/server'),
@@ -100,6 +102,7 @@ export function models() {
 function stepsHtml(model) {
   const { model: m } = lib();
   const items = model.solution.steps.map((step) => ({
+    etap: step.etap,
     text: step.text,
     tex: step.formula,
     plain: step.formula ? m.texPlain(step.formula) : '',
@@ -198,14 +201,23 @@ export function examples() {
 }
 
 export function recap() {
-  const { model } = lib();
+  const { metody } = lib();
   return {
     title: content.recap.title,
     items: content.recap.methods.map((item) => {
-      const opisanie = model.metodPoId(item.id);
-      /* В одну строку пункта — дробь текстового кегля, а не выключная:
-         с выключной пять пунктов не помещаются в рамку. */
-      return typo.escape(item.name) + ' — ' + mathSpan(opisanie.formula.replace(/\\dfrac/g, '\\frac'));
+      /* Название — с сайта, из того же списка методов, что и вкладка
+         «Ключевые методы решения»: в PDF и на сайте оно одно. Формула —
+         метода, а если у метода её нет, — записанная в пункте. */
+      const metod = metody.OPORNYE_4.find((m) => m.id === item.metod);
+      if (!metod) {
+        throw new Error('в «Повторяем» метод ' + item.metod + ' не найден среди методов сайта');
+      }
+      const tex = item.formula ?? metod.formula;
+      if (!tex) {
+        throw new Error('в «Повторяем» у метода ' + item.metod + ' нет формулы');
+      }
+      /* В одну строку пункта — дробь текстового кегля, а не выключная. */
+      return typo.escape(metod.nazvanie) + ' — ' + mathSpan(tex.replace(/\\dfrac/g, '\\frac'));
     }),
     phrase: content.recap.phrase,
   };
@@ -219,6 +231,40 @@ export function answersItems(sections) {
       section.title,
       section.tasks.map((task) => ({ no: task.no, answer: task.answer, html: null })),
       5));
+  });
+  return items;
+}
+
+/**
+ * Подсказки задач сборника по идентификатору задачи: у опорной — та
+ * же, что на сайте (podskazkaOpornoy), у прототипа — на числах
+ * первого варианта, как и сама задача сборника.
+ */
+function podskazkiPoId() {
+  const { bank, modeli, podskazki } = lib();
+  const map = new Map();
+  bank.PODGOTOVKA_4.forEach((blok) => blok.zadachi.forEach((zadacha) => {
+    map.set(modeli.modelPrep(zadacha).id, podskazki.podskazkaOpornoy(zadacha));
+  }));
+  bank.BANK_4.forEach((prototype) => {
+    const first = prototype.varianty[0];
+    map.set(modeli.modelVarianta(prototype, first).id,
+      prototype.podskazka ? prototype.podskazka(first.params) : undefined);
+  });
+  return map;
+}
+
+/** Подсказки всех задач в конце файла для учителя — по разделам. */
+export function hintsItems(sections) {
+  const map = podskazkiPoId();
+  const items = [answers.sectionHead(content.podskazki.title, content.podskazki.note)];
+  sections.forEach((section) => {
+    items.push(answers.subHead(section.title));
+    section.tasks.forEach((task) => {
+      const shagi = map.get(task.id);
+      if (!shagi) { throw new Error('у задачи ' + task.id + ' нет подсказки'); }
+      items.push(answers.hint(task.no, shagi));
+    });
   });
   return items;
 }
@@ -249,7 +295,7 @@ export function sheetSpec(sections, options) {
     leadItems: examples().map((example) => sheet.exampleItem(example)),
     blocks: sections,
     withAnswerLine: !options.withAnswers,
-    extraItems: options.withAnswers ? answersItems(sections) : [],
+    extraItems: options.withAnswers ? [...answersItems(sections), ...hintsItems(sections)] : [],
     foot: content.foot,
     defs: marks.hatchDefs(),
   };

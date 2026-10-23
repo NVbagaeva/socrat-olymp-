@@ -56,6 +56,15 @@ body {
   page-break-after: auto;
 }
 
+/* Экранный предпросмотр на узком экране: paginate.js ставит
+   --sheet-preview-zoom, когда страница шире окна. Только на экране —
+   на бумаге и в PDF лист всегда настоящего размера. */
+@media screen {
+  #sheet-pages {
+    zoom: var(--sheet-preview-zoom, 1);
+  }
+}
+
 /* Печать. Поля задаёт сама страница листа (@page без полей — это же
    убирает колонтитулы браузера с адресом и датой там, где браузер это
    умеет). Фон вокруг страниц на экране светлый; на бумаге он попал бы
@@ -69,6 +78,31 @@ body {
 .sheet-flow {
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* Две колонки (paginate.js, spec.columns === 2): заголовки на всю
+   ширину сверху, под ними две колонки на всю оставшуюся высоту. */
+.sheet-flow--cols {
+  display: flex;
+  flex-direction: column;
+}
+.sheet-cols {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: calc(var(--sheet-step) * 4);
+}
+.sheet-col {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+/* Полоса колонок над куском на всю ширину: высота — по содержимому. */
+.sheet-cols--zakryta {
+  flex: none;
+  grid-template-rows: auto;
 }
 
 /* ── Декоративные дуги в углах ──────────────────────────────
@@ -618,6 +652,17 @@ body {
   line-height: 1.35;
 }
 
+/* Код комплекта: мелко, у номера страницы. */
+.sheet-kit-code {
+  flex: none;
+  align-self: flex-end;
+  font-size: 6.5pt;
+  letter-spacing: 0.04em;
+  color: var(--sheet-ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .sheet-page-no {
   flex: none;
   align-self: center;
@@ -783,6 +828,19 @@ body {
   color: var(--sheet-ink);
 }
 
+/* Рисунок к разбору — справа от решения, на листе учителя. */
+.sheet-solution--figure { align-items: flex-start; }
+.sheet-solution--figure .sheet-solution-no { align-self: flex-start; }
+.sheet-solution-figure {
+  flex: none;
+  margin: 0;
+  max-width: min(34%, 44mm);
+}
+.sheet-solution-figure svg { display: block; width: 100%; height: auto; }
+/* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */
+.sheet-solution-figure--float { float: right; margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3); }
+.sheet-task-solution::after { content: ''; display: block; clear: both; }
+
 /* ══════════════════════════════════════════════════════════
    Решение по шагам в карточке — файл «Для учителя»
    ══════════════════════════════════════════════════════════ */
@@ -799,6 +857,17 @@ body {
   flex-direction: column;
   gap: calc(var(--sheet-step) * 0.75);
 }
+
+/* Подсказка по шагам в конце файла учителя: вопрос, кнопки через
+   точку (верная — жирным, чернилами), комментарий — мельче. */
+.sheet-hint { font-size: var(--sheet-fs-small); color: var(--sheet-ink-2); }
+.sheet-hint-q { color: var(--sheet-ink); }
+.sheet-hint-right { color: var(--sheet-ink); font-weight: 700; }
+.sheet-hint-sep { color: var(--sheet-ink-3); }
+.sheet-hint-comment { display: block; color: var(--sheet-ink-3); font-style: italic; }
+
+/* Этап решения перед текстом шага — те же слова, что над шагом на сайте. */
+.sheet-step-etap { color: var(--sheet-ink); font-weight: 600; }
 
 .sheet-step .math { margin-left: calc(var(--sheet-step) * 1); white-space: nowrap; }
 

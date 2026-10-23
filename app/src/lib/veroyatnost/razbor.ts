@@ -7,9 +7,12 @@
 
 import type { AtomVykladki } from '../tex';
 import type { Parametry, Podsvetka } from './model';
+import type { Etap } from './types';
 import { openText } from './secret';
 
 export interface RazborShag {
+  /** Этап решения — подпись над шагом (types.ts, ETAPY). */
+  etap: Etap;
   /** Пояснение шага словами. Дробей и выкладок в нём нет — они в формуле. */
   text: string;
   /** Формула шага в TeX — из неё набираются печатные листы. */
@@ -44,4 +47,21 @@ export interface Razbor {
 /** Открыть закрытый разбор по отпечатку верного ответа. */
 export function otkrytRazbor(steps: string, seal: string): Razbor {
   return JSON.parse(openText(steps, seal)) as Razbor;
+}
+
+/**
+ * Шаг подсказки в браузере: вопрос, кнопки и комментарий уже набраны
+ * KaTeX на сборке. Подсказка закрыта тем же отпечатком, что и разбор:
+ * номер верной кнопки до нажатия «Подсказка» в разметке не виден.
+ */
+export interface PodskazkaShag {
+  question: string;
+  options: string[];
+  correct: number;
+  comment: string | null;
+}
+
+/** Открыть закрытую подсказку по отпечатку верного ответа. */
+export function otkrytPodskazku(podskazka: string, seal: string): PodskazkaShag[] {
+  return JSON.parse(openText(podskazka, seal)) as PodskazkaShag[];
 }

@@ -1,67 +1,65 @@
-import type { SkillItem } from '@/components/tasks/configurator';
-import { Vizualizatsiya } from '@/components/tasks/card';
 import { YARLYKI_REZHIMOV, type Rezhim, type Zadanie } from '@/content/veroyatnost';
-import { parametryMiniatyury, type Pool } from '@/lib/veroyatnost/pool';
+import type { Pool } from '@/lib/veroyatnost/pool';
 import { navykKind, navykiZadaniya } from './metody';
 
 /**
- * Миниатюра прототипа: заготовка рисунка первого варианта, без
- * количеств и подсветки. Параметры берутся на сборке из банка, а не
- * из пула: в пул они не едут, и рисунок уходит вниз уже готовой
- * разметкой. У метода «Формула» рисунка нет.
+ * Карточка метода в тренажёре: что показывает шаг «Выбери методы».
+ * Значок метода рисует MetodIkonka по идентификатору, поэтому здесь
+ * только название, номер и число задач в банке.
  */
-function miniatyura(kindId: string) {
-  const parametry = parametryMiniatyury(kindId);
-  return parametry === undefined || parametry.method === 'formula' ? null : (
-    <span className="z4-skill-chart">
-      <Vizualizatsiya parametry={parametry} />
-    </span>
-  );
+export interface MetodKarta {
+  id: string;
+  nomer: number;
+  title: string;
+  /** Сколько задач этого метода в банке — все варианты всех прототипов. */
+  count: number;
 }
 
 /**
- * Навыки тренажёра и генератора — методы, под которые в банке есть
- * задачи: у №4 семь разделов списка Б, у №5 десять методов автора.
- * Карточка навыка собирается на сервере: название и номер метода из
- * каталога, число задач из банка, миниатюра — рисунок первого
- * варианта первого прототипа этого метода по его модели. У задачи
- * без рисунка карточка идёт без миниатюры.
+ * Методы тренажёра — те, под которые в банке есть задачи: у №4 семь
+ * разделов списка Б, у №5 десять методов автора. Карточка собирается
+ * на сервере: название и номер из каталога, число задач из банка.
  *
  * Метод без задач в банке карточки не получает: тренировать по нему
  * нечего.
  */
-export function navykiMetodov(pool: Pool, zadanie: Zadanie): SkillItem[] {
-  return navykiZadaniya(zadanie).flatMap((m): SkillItem[] => {
+export function navykiMetodov(pool: Pool, zadanie: Zadanie): MetodKarta[] {
+  return navykiZadaniya(zadanie).flatMap((m): MetodKarta[] => {
     const kinds = pool.kinds.filter((kind) => navykKind(kind) === m.id);
-    const pervy = kinds[0];
-    if (pervy === undefined) {
+    if (kinds.length === 0) {
       return [];
     }
     return [
       {
         id: m.id,
+        nomer: m.nomer,
         title: m.nazvanie,
-        code: `Метод ${m.nomer}`,
         count: kinds.reduce((sum, kind) => sum + kind.variants.length, 0),
-        levels: [],
-        chart: miniatyura(pervy.id),
       },
     ];
   });
 }
 
 /**
- * Навыки генератора — прототипы банка: название, число вариантов и
- * миниатюра по модели первого варианта. У прототипа без рисунка
- * (метод «Формула») карточка идёт без миниатюры.
+ * Сюжет генератора — прототип банка: название, код, метод и число
+ * вариантов. Картинку сюжета подбирает экран по коду
+ * (content/veroyatnost-syuzhety.ts); нет картинки — стоит значок метода.
  */
-export function navykiPrototipov(pool: Pool): SkillItem[] {
-  return pool.kinds.map((kind): SkillItem => ({
+export interface Syuzhet {
+  id: string;
+  title: string;
+  /** Метод (блок банка): по нему сюжеты сгруппированы в генераторе. */
+  metod: string;
+  count: number;
+}
+
+/** Сюжеты генератора — прототипы банка в порядке банка. */
+export function syuzhetyPrototipov(pool: Pool): Syuzhet[] {
+  return pool.kinds.map((kind): Syuzhet => ({
     id: kind.id,
     title: kind.title,
+    metod: navykKind(kind),
     count: kind.variants.length,
-    levels: [],
-    chart: miniatyura(kind.id),
   }));
 }
 
@@ -74,8 +72,8 @@ export interface Yarlyk {
 }
 
 /**
- * Ярлыки тренажёра задания: по одному на метод с задачами, смешанная
- * тренировка и «Узнай метод». Из них собираются адреса страниц.
+ * Ярлыки тренажёра задания: по одному на метод с задачами, тренировка
+ * вперемешку и «Узнай метод». Из них собираются адреса страниц.
  */
 export function yarlyki(pool: Pool, zadanie: Zadanie): Yarlyk[] {
   const poMetodam = navykiMetodov(pool, zadanie).map((skill): Yarlyk => ({

@@ -10,10 +10,14 @@
  */
 
 import '@/lib/graph/families/index.js';
-import { registerCurve } from '@/lib/graph/renderer.js';
+import { THEME, registerCurve } from '@/lib/graph/renderer.js';
 import type { FunctionTypeId } from '@/data/functionTypes';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { playground as PLAY } from '@/content/theoryQuadratic';
+
+/* Зелёный второй график миниатюр плашек «О задании» — тот же цвет, что у g
+   в разборах (lib/theoryFigures.ts): ключ добавляется в THEME, как там. */
+(THEME.colors as unknown as Record<string, string>).alt ??= 'var(--graph-alt, var(--color-success))';
 
 /** Квадратное симметричное окно — иного renderGraph не принимает. */
 function squareWindow(half: number) {
@@ -115,59 +119,107 @@ export function hyperbolaAndLineScene() {
   };
 }
 
+/** Корень f(x) = 2√x и прямая через A(1; 2): чертёж вкладки «О задании». */
+export function sqrtAndLineScene() {
+  return {
+    window: squareWindow(6),
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'sqrt', a: 2, c: 0, d: 0, color: 'lineA', label: null },
+      { type: 'line', k: 0.5, b: 1.5, color: 'lineB', label: null },
+    ],
+    points: [{ x: 1, y: 2, style: 'solid', color: 'cross', label: 'A' }],
+    alt: 'График корня и прямая',
+  };
+}
+
 /**
  * Чертёж вкладки «О задании» по подтеме: у линейной — две прямые,
  * у квадратичной — парабола и прямая, у гиперболы — гипербола и прямая.
  */
+/** Показательная f(x) = 2ˣ − 1: асимптота y = −1 пунктиром, две точки в узлах. */
+export function exponentialScene() {
+  /* Левый край — там, где хвост ещё на 0,25 клетки выше асимптоты. */
+  const win = { xmin: -2, xmax: 4, ymin: -3, ymax: 5 };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'expo', a: 2, c: 0, d: -1, color: 'lineA', label: null }],
+    points: [
+      { x: 1, y: 1, style: 'solid', color: 'lineA', label: null },
+      { x: 2, y: 3, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [{ type: 'segment', from: [win.xmin, -1], to: [win.xmax, -1], style: 'dashed', color: 'asymptote' }],
+    alt: 'График показательной функции и её асимптота',
+  };
+}
+
+/** Логарифмическая f(x) = log₂(x + 2) − 1: асимптота x = −2 пунктиром, две точки в узлах. */
+export function logarithmicScene() {
+  /* Нижний край — там, где хвост ещё на 0,25 клетки правее асимптоты. */
+  const win = { xmin: -3, xmax: 5, ymin: -3, ymax: 3 };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'loga', a: 2, c: 2, d: -1, color: 'lineA', label: null }],
+    points: [
+      { x: -1, y: -1, style: 'solid', color: 'lineA', label: null },
+      { x: 2, y: 1, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [{ type: 'segment', from: [-2, win.ymin], to: [-2, win.ymax], style: 'dashed', color: 'asymptote' }],
+    alt: 'График логарифмической функции и её асимптота',
+  };
+}
+
+/** Тригонометрическая f(x) = 1,5 cos x − 1 в клетках π/4 и 0,5: две точки в узлах. */
+export function trigonometricScene() {
+  const win = { xmin: -5, xmax: 6, ymin: -7, ymax: 4 };
+  const ticks = {
+    x: [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6].map((at) => (at === 4 ? { at, label: 'π' } : { at })),
+    y: [-7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4].map((at) => (at === 2 ? { at, label: '1' } : { at })),
+  };
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0', ticks },
+    axisLabels: 'minimal',
+    labelRules: 'strict',
+    curves: [{ type: 'trig', fn: 'cos', a: 1.5, b: -1, yu: 0.5, color: 'lineA', label: null }],
+    points: [
+      { x: 0, y: 1, style: 'solid', color: 'lineA', label: null },
+      { x: -2, y: -2, style: 'solid', color: 'lineA', label: null },
+    ],
+    shapes: [],
+    alt: 'График функции a cos x + b с двумя отмеченными точками',
+  };
+}
+
 export function aboutScene(type: FunctionTypeId) {
+  if (type === 'trigonometric') {
+    return trigonometricScene();
+  }
+  if (type === 'logarithmic') {
+    return logarithmicScene();
+  }
+  if (type === 'exponential') {
+    return exponentialScene();
+  }
+  if (type === 'irrational') {
+    return sqrtAndLineScene();
+  }
   if (type === 'rational') {
     return hyperbolaAndLineScene();
   }
   return type === 'quadratic' ? parabolaAndLineScene() : compareLinesScene();
 }
-
-/* ── Миниатюры типов функций ──────────────────────────────────────
-   По одному представителю на семейство: коэффициенты подобраны так,
-   чтобы кривая в окне читалась характерной формой, а не куском.
-   Числа здесь — параметры чертежа, а не содержание задания. */
-
-interface Curve {
-  type: string;
-  [key: string]: unknown;
-}
-
-const PREVIEW: Record<FunctionTypeId, { curve: Curve; half: number }> = {
-  linear: { curve: { type: 'line', k: 1, b: 0.5 }, half: 3 },
-  quadratic: { curve: { type: 'quadratic', a: 1, b: 0, c: -1.5 }, half: 3 },
-  rational: { curve: { type: 'rational', k: 1.5, b: 0 }, half: 3 },
-  logarithmic: { curve: { type: 'logarithmic', a: 2, c: 0 }, half: 3 },
-  exponential: { curve: { type: 'exponential', a: 2, d: 0 }, half: 3 },
-  trigonometric: { curve: { type: 'trigonometric', a: 2, b: 1.4, c: 0, d: 0 }, half: 3 },
-};
-
-/**
- * Миниатюра типа функции: одна кривая, только оси.
- *
- * Сетка выключена, окно тесное: в кадре 56px клетки сливаются в серое
- * пятно, а форма кривой — единственное, что должно читаться. Чертёж
- * декоративный — рядом стоят название и формула, поэтому alt не
- * задаётся и чертёж не читается вслух дважды.
- */
-export function previewScene(id: FunctionTypeId) {
-  const preset = PREVIEW[id];
-  return {
-    window: squareWindow(preset.half),
-    grid: { step: 1, show: false },
-    axes: { labelX: '', labelY: '', origin: '' },
-    /* Оси с засечками, но без чисел: в карточке шириной сто пикселей
-       цифры всё равно нечитаемы, а обрезанными они выглядят грязью. */
-    axisLabels: 'none',
-    curves: [{ ...preset.curve, color: 'lineA', label: null }],
-    points: [],
-    shapes: [],
-  };
-}
-
 
 /* ── Миниатюры навыков ────────────────────────────────────────────
    Навык — набор прототипов; по одной картинке на набор: что дано
@@ -213,7 +265,9 @@ const QUADRATIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
 };
 
 export function generatorSkillScene(setId: string) {
-  const quadratic = QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId];
+  const quadratic =
+    QUADRATIC_SKILL_SCENE[setId] ?? RATIONAL_SKILL_SCENE[setId] ?? IRRATIONAL_SKILL_SCENE[setId] ??
+    EXPONENTIAL_SKILL_SCENE[setId] ?? LOGARITHMIC_SKILL_SCENE[setId] ?? TRIGONOMETRIC_SKILL_SCENE[setId];
   if (quadratic !== undefined) {
     return prepSkillScene(quadratic);
   }
@@ -275,6 +329,11 @@ export function generatorSkillScene(setId: string) {
    не задаётся и график не читается вслух дважды. */
 
 export type KindId = 'linear' | 'quadratic' | 'rational' | 'sqrt';
+
+interface Curve {
+  type: string;
+  [key: string]: unknown;
+}
 
 /* Коэффициенты подобраны так, чтобы в окне читалась характерная
    форма: прямая идёт через оба края, у параболы видны обе ветви и
@@ -522,6 +581,26 @@ export function prepSkillScene(id: PrepSkillSceneId) {
     return rational;
   }
 
+  const irrational = irrationalPrepScene(id, base);
+  if (irrational !== null) {
+    return irrational;
+  }
+
+  const exponential = exponentialPrepScene(id, base);
+  if (exponential !== null) {
+    return exponential;
+  }
+
+  const logarithmic = logarithmicPrepScene(id, base);
+  if (logarithmic !== null) {
+    return logarithmic;
+  }
+
+  const trigonometric = trigonometricPrepScene(id, base);
+  if (trigonometric !== null) {
+    return trigonometric;
+  }
+
   return {
     ...base,
     curves: [{ type: 'line', k: 0.7, b: -0.7, color: 'lineA', label: null }],
@@ -657,6 +736,118 @@ function quadraticPrepScene(
 }
 
 
+/* ── Миниатюры плашек типов задач ───────────────────────────────
+   Вкладка «О задании», блок «Типы задач в этом разделе». Миниатюра
+   чистая: только графики — без искомой точки, «?» и пунктиров. Что
+   найти, говорит название плашки, как решать — разбор под ней. */
+
+export type TypeSceneId =
+  | 'cross-line'
+  | 'cross-parabola'
+  | 'sign-a'
+  | 'value-a'
+  | 'value-c'
+  | 'value-b'
+  | 'formula'
+  | 'value-at'
+  | 'argument-for'
+  /* Показательная функция. */
+  | 'exp-value'
+  | 'exp-shift'
+  | 'exp-shift-x'
+  /* Логарифмическая функция. */
+  | 'log-value'
+  | 'log-shift'
+  | 'log-shift-x'
+  /* Тригонометрические функции. */
+  | 'trig-cos'
+  | 'trig-sin'
+  | 'trig-tg';
+
+/* Миниатюры основных типов: одна парабола, чуть разная у каждого типа —
+   ветви вниз, шире и уже, выше и ниже, вершина левее и правее. Только
+   график: без отметок, подписей и пунктиров. */
+/* Миниатюре хватает редкой ломаной: на 4 клетках в 136 px — шаг около
+   двух пикселей. Плотная выборка движка весила бы по 7 КБ на плашку, а
+   плашек на странице одиннадцать и в разметке каждая дважды. */
+const MINI_STEPS = 80;
+function thin<T extends object>(curve: T): T & { steps: number } {
+  return { ...curve, steps: MINI_STEPS };
+}
+
+const BASIC_MINI: Record<string, ReturnType<typeof miniParabola> & { steps: number }> = {
+  'sign-a': thin(miniParabola(0.7, 0.3, -1.2)),
+  'value-a': thin(miniParabola(-0.45, -0.6, 1)),
+  'value-c': thin(miniParabola(0.6, 1.2, -1.3)),
+  'value-b': thin(miniParabola(0.8, -0.8, -1.1)),
+  formula: thin(miniParabola(-0.6, 0.4, 1.2)),
+  'value-at': thin(miniParabola(0.5, -0.4, -1)),
+  'argument-for': thin(miniParabola(0.9, 0.2, -1.3)),
+};
+
+export function typeScene(id: TypeSceneId) {
+  const base = {
+    window: squareWindow(2),
+    grid: { step: 1, show: true },
+    axes: { labelX: '', labelY: '', origin: '' },
+    axisLabels: 'none',
+    points: [] as unknown[],
+    shapes: [] as unknown[],
+  };
+  const basic = BASIC_MINI[id];
+  if (basic !== undefined) {
+    return { ...base, curves: [basic] };
+  }
+  /* Показательная: кривая и асимптота, без отметок. */
+  if (id === 'exp-value') {
+    return { ...base, curves: [{ type: 'expo', a: 2, c: 0, d: -1.2, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -1.2], to: [2, -1.2], style: 'dashed', color: 'asymptote' }] };
+  }
+  if (id === 'exp-shift') {
+    return { ...base, curves: [{ type: 'expo', a: 0.5, c: 0, d: -0.8, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -0.8], to: [2, -0.8], style: 'dashed', color: 'asymptote' }] };
+  }
+  if (id === 'exp-shift-x') {
+    return { ...base, curves: [{ type: 'expo', a: 2, c: 1, d: -1.5, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-2, -1.5], to: [2, -1.5], style: 'dashed', color: 'asymptote' }] };
+  }
+  /* Логарифмическая: кривая и асимптота (если она не ось), без отметок. */
+  if (id === 'log-value') {
+    return { ...base, curves: [{ type: 'loga', a: 2, c: 0, d: 0, color: 'lineA', label: null, steps: MINI_STEPS }] };
+  }
+  if (id === 'log-shift') {
+    return { ...base, curves: [{ type: 'loga', a: 0.5, c: 0, d: 0.5, color: 'lineA', label: null, steps: MINI_STEPS }] };
+  }
+  if (id === 'log-shift-x') {
+    return { ...base, curves: [{ type: 'loga', a: 2, c: 1.3, d: 0, color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: [{ type: 'segment', from: [-1.3, -2], to: [-1.3, 2], style: 'dashed', color: 'asymptote' }] };
+  }
+  /* Тригонометрические: волна в клетках π/2, у тангенса — асимптоты. */
+  if (id === 'trig-cos' || id === 'trig-sin' || id === 'trig-tg') {
+    const fn = id.slice(5);
+    return {
+      ...base,
+      curves: [{ type: 'trig', fn, a: fn === 'tg' ? 0.6 : 1.3, b: fn === 'tg' ? 0 : 0.2, xu: Math.PI / 2, yu: 1,
+                 color: 'lineA', label: null, steps: MINI_STEPS }],
+      shapes: fn === 'tg' ? [miniVAsymptote(-1), miniVAsymptote(1)] : [],
+    };
+  }
+  /* Второй график — зелёный, как g в разборах под плашкой. */
+  if (id === 'cross-line') {
+    return {
+      ...base,
+      curves: [
+        thin(miniParabola(1, 0, -1.5)),
+        { type: 'line', k: 1, b: -0.5, color: 'alt', label: null },
+      ],
+    };
+  }
+  return {
+    ...base,
+    curves: [thin(miniParabola(1, -0.5, -1.5)), thin(miniParabola(0.5, 0.9, -1.2, 'alt'))],
+  };
+}
+
 /* ── Миниатюры навыков гиперболы ──────────────────────────────────
    Окно то же тесное, ±2. Гипербола задаётся сдвигами: k/(x + a) + b.
    Асимптоты пунктиром — тем же цветом подсказки, что пунктиры
@@ -751,6 +942,258 @@ function rationalPrepScene(
   return null;
 }
 
+/* ── Миниатюры навыков графика корня ──────────────────────────────
+   Окно то же тесное, ±2. Корень задаётся началом и множителем:
+   k√(x − x₀) + y₀. Пунктиры — тем же цветом подсказки. Числа —
+   параметры чертежа. */
+
+function miniSqrt(k: number, x0: number, y0: number, color = 'lineA') {
+  return { type: 'sqrt', a: k, c: x0, d: y0, color, label: null };
+}
+
+function irrationalPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'koren-k') {
+    /* От начала вправо на 1 и вверх на k: катеты пунктиром. */
+    return {
+      ...base,
+      curves: [miniSqrt(1.4, -1.5, -1.2)],
+      points: [miniDot(-1.5, -1.2), miniDot(-0.5, 0.2)],
+      shapes: [dashed([-1.5, -1.2], [-0.5, -1.2]), dashed([-0.5, -1.2], [-0.5, 0.2])],
+    };
+  }
+  if (id === 'koren-znachenie') {
+    return {
+      ...base,
+      curves: [miniSqrt(1, -1.8, -1)],
+      points: [miniDot(1.2, -1 + Math.sqrt(3), 'lineB')],
+      shapes: [dashed([1.2, 0], [1.2, -1 + Math.sqrt(3)]),
+        prepLabel('?', 1.2, -1 + Math.sqrt(3), 14, -14, 'accent')],
+    };
+  }
+  if (id === 'koren-argument') {
+    return {
+      ...base,
+      curves: [miniSqrt(1.2, -1.8, -1)],
+      points: [miniDot(0.45, 0.8, 'lineB')],
+      shapes: [dashed([0, 0.8], [0.45, 0.8]), prepLabel('?', 0.45, 0.8, 16, -12, 'accent')],
+    };
+  }
+  if (id === 'koren-pryamaya') {
+    return {
+      ...base,
+      curves: [miniSqrt(1, -1.8, -1.2), { type: 'line', k: 0.5, b: 0.5, color: 'lineB', label: null }],
+      points: [miniDot(-1, 0, 'lineB'), miniDot(1, 1, 'lineB')],
+      shapes: [dashed([-1, 0], [1, 0]), dashed([1, 0], [1, 1])],
+    };
+  }
+  if (id === 'koren-peresechenie') {
+    return {
+      ...base,
+      curves: [miniSqrt(1.5, -1.6, -1.2), { type: 'line', k: 0.45, b: 0.048, color: 'lineB', label: null }],
+      points: [miniDot(-1.6 + 0.16, -1.2 + 1.5 * 0.4, 'cross')],
+      shapes: [prepLabel('A', -1.44, -0.6, -4, -16, 'label'), prepLabel('B ?', 1.3, 1.4, 0, 0, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* ── Миниатюры навыков показательной функции ──────────────────────
+   Окно то же тесное, ±2. Кривая y = a^(x + c) + d; асимптота —
+   пунктир цветом асимптоты, искомое — пунктир цветом подсказки. */
+
+function miniExpo(a: number, c: number, d: number, color = 'lineA') {
+  return { type: 'expo', a, c, d, color, label: null };
+}
+
+function miniAsymptote(y: number) {
+  return { type: 'segment', from: [-2, y], to: [2, y], style: 'dashed', color: 'asymptote' };
+}
+
+function exponentialPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'pokaz-osnovanie') {
+    /* (0; 1) и (1; a): по второй точке видно основание. */
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, 0)],
+      points: [miniDot(0, 1), miniDot(1, 2)],
+      shapes: [dashed([1, 0], [1, 2]), prepLabel('a', 1, 2, 16, 4, 'accent')],
+    };
+  }
+  if (id === 'pokaz-znachenie') {
+    return {
+      ...base,
+      curves: [miniExpo(0.5, 0, 0)],
+      points: [miniDot(0, 1), miniDot(-1.4, Math.pow(2, 1.4), 'lineB')],
+      shapes: [dashed([-1.4, 0], [-1.4, Math.pow(2, 1.4)]),
+        prepLabel('?', -1.4, Math.pow(2, 1.4), 16, 4, 'accent')],
+    };
+  }
+  if (id === 'pokaz-sdvig-vverh') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, -1.2)],
+      points: [miniDot(0, -0.2), miniDot(1, 0.8)],
+      shapes: [miniAsymptote(-1.2)],
+    };
+  }
+  if (id === 'pokaz-sdvig-vbok') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 1, 0)],
+      points: [miniDot(-1, 1), miniDot(0, 2)],
+      shapes: [dashed([-1, 0], [-1, 1])],
+    };
+  }
+  if (id === 'pokaz-argument') {
+    return {
+      ...base,
+      curves: [miniExpo(2, 0, -1)],
+      points: [miniDot(1.3, Math.pow(2, 1.3) - 1, 'lineB')],
+      shapes: [miniAsymptote(-1), dashed([0, Math.pow(2, 1.3) - 1], [1.3, Math.pow(2, 1.3) - 1]),
+        prepLabel('?', 1.3, Math.pow(2, 1.3) - 1, 16, 4, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* ── Миниатюры навыков логарифмической функции ────────────────────
+   Окно ±2, кривая y = logₐ(x + c) + d; асимптота x = −c — пунктир
+   цветом асимптоты, если она не ось; искомое — пунктир цветом подсказки. */
+
+function miniLoga(a: number, c: number, d: number, color = 'lineA') {
+  return { type: 'loga', a, c, d, color, label: null };
+}
+
+function miniVAsymptote(x: number) {
+  return { type: 'segment', from: [x, -2], to: [x, 2], style: 'dashed', color: 'asymptote' };
+}
+
+function logarithmicPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'log-osnovanie') {
+    /* (1; 0) и (a; 1): по второй точке видно основание. */
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, 0)],
+      points: [miniDot(1, 0), miniDot(2, 1)],
+      shapes: [dashed([2, 0], [2, 1]), prepLabel('a', 2, 0, -16, -10, 'accent')],
+    };
+  }
+  if (id === 'log-znachenie') {
+    const y = Math.log(1.6) / Math.log(0.5);
+    return {
+      ...base,
+      curves: [miniLoga(0.5, 0, 0)],
+      points: [miniDot(1, 0), miniDot(1.6, y, 'lineB')],
+      shapes: [dashed([1.6, 0], [1.6, y]), prepLabel('?', 1.6, y, 16, 4, 'accent')],
+    };
+  }
+  if (id === 'log-sdvig-vverh') {
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, -1)],
+      points: [miniDot(1, -1), miniDot(2, 0)],
+      shapes: [],
+    };
+  }
+  if (id === 'log-sdvig-vbok') {
+    return {
+      ...base,
+      curves: [miniLoga(2, 1.5, 0)],
+      points: [miniDot(-0.5, 0), miniDot(0.5, 1)],
+      shapes: [miniVAsymptote(-1.5)],
+    };
+  }
+  if (id === 'log-argument') {
+    const x = Math.pow(2, 0.7);
+    return {
+      ...base,
+      curves: [miniLoga(2, 0, 0.5)],
+      points: [miniDot(x, 1.2, 'lineB')],
+      shapes: [dashed([0, 1.2], [x, 1.2]), prepLabel('?', x, 1.2, 16, 4, 'accent')],
+    };
+  }
+  return null;
+}
+
+/* ── Миниатюры навыков тригонометрических функций ─────────────────
+   Окно ±2 клетки, клетка по x — π/2: волна видна целиком. */
+
+function miniTrig(fn: string, a: number, b: number) {
+  return { type: 'trig', fn, a, b, xu: Math.PI / 2, yu: 1, color: 'lineA', label: null };
+}
+
+function trigonometricPrepScene(
+  id: PrepSkillSceneId,
+  base: { window: unknown; grid: unknown; axes: unknown; axisLabels: string;
+          curves: unknown[]; points: unknown[]; shapes: unknown[] },
+) {
+  if (id === 'trig-cos') {
+    return { ...base, curves: [miniTrig('cos', 1, 0.5)], points: [miniDot(0, 1.5), miniDot(1, 0.5)], shapes: [] };
+  }
+  if (id === 'trig-sin') {
+    return { ...base, curves: [miniTrig('sin', 1, 0.5)], points: [miniDot(0, 0.5), miniDot(1, 1.5)], shapes: [] };
+  }
+  if (id === 'trig-tg') {
+    return { ...base, curves: [miniTrig('tg', 0.5, 0)], points: [miniDot(0, 0), miniDot(0.5, 0.5)],
+             shapes: [miniVAsymptote(-1), miniVAsymptote(1)] };
+  }
+  if (id === 'trig-sistema') {
+    return { ...base, curves: [miniTrig('sin', 1.2, 0.3)], points: [miniDot(1, 1.5), miniDot(-1, -0.9)],
+             shapes: [dashed([0, 0.3], [2, 0.3]), prepLabel('b', 1.6, 0.3, 0, -14, 'accent')] };
+  }
+  if (id === 'trig-polovina') {
+    return { ...base, curves: [miniTrig('cos', 0.75, -0.25)], points: [miniDot(0, 0.5), miniDot(2, -1)], shapes: [] };
+  }
+  return null;
+}
+
+/* Набор прототипов тригонометрических функций → навык подтемы. */
+const TRIGONOMETRIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12T.A': 'trig-cos',
+  '12T.B': 'trig-cos',
+  '12T.C': 'trig-tg',
+  '12T.D': 'trig-tg',
+  '12T.E': 'trig-sin',
+  '12T.F': 'trig-sin',
+};
+
+/* Набор прототипов логарифмической функции → навык подтемы. */
+const LOGARITHMIC_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12L.A': 'log-znachenie',
+  '12L.B': 'log-sdvig-vverh',
+  '12L.C': 'log-argument',
+  '12L.D': 'log-sdvig-vbok',
+  '12L.E': 'log-argument',
+};
+
+/* Набор прототипов показательной функции → навык подтемы. */
+const EXPONENTIAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12E.A': 'pokaz-znachenie',
+  '12E.B': 'pokaz-sdvig-vverh',
+  '12E.C': 'pokaz-argument',
+  '12E.D': 'pokaz-sdvig-vbok',
+};
+
+/* Набор прототипов корня → навык подтемы. */
+const IRRATIONAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
+  '12S.A': 'koren-znachenie',
+  '12S.B': 'koren-argument',
+  '12S.C': 'koren-peresechenie',
+  '12S.D': 'koren-peresechenie',
+};
+
 /* Набор прототипов гиперболы → навык подтемы: у карточки
    конфигуратора та же миниатюра, что у карточки навыка. */
 const RATIONAL_SKILL_SCENE: Record<string, PrepSkillSceneId> = {
@@ -786,6 +1229,7 @@ export type QuadraticTheorySceneId =
   | 'a-step'
   | 'c-read'
   | 'c-offscreen'
+  | 'c-by-point'
   | 'vertex-formula'
   | 'b-sign'
   | 'path-vertex'
@@ -830,6 +1274,11 @@ function pointLabel(x: number, y: number) {
 
 function mark(x: number, y: number, labelled = false, color = 'lineA') {
   return { x, y, style: 'solid', color, label: labelled ? pointLabel(x, y) : null };
+}
+
+/** Точка с именем вместо координат: «A». */
+function namedPoint(x: number, y: number, name: string, color = 'lineA') {
+  return { x, y, style: 'solid', color, label: name };
 }
 
 function dashedSegment(from: [number, number], to: [number, number], color = 'accent') {
@@ -964,6 +1413,16 @@ export function quadraticTheoryScene(id: QuadraticTheorySceneId) {
           ...arrow([2.0, 3.4], [1.5, 5.8]),
           note('(0; c) за кадром', [0.6, 4.6], [-40, 0]),
         ],
+      };
+
+    /* 3а. Тот же чертёж, что и выше, с отмеченной точкой A(3; 2):
+       по ней в разборе находят c = 23. Кроме A на чертеже не отмечено
+       ничего — вершину (5; −2) ученик читает по сетке. */
+    case 'c-by-point':
+      return {
+        ...theoryBase(squareWindow(6)),
+        curves: [fromVertex(1, 5, -2)],
+        points: [namedPoint(3, 2, 'A')],
       };
 
     /* 4. Формула вершины: y = x² − 6x + 5, вершина (3; −4). */

@@ -32,6 +32,11 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startApache } from './lib/apache.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium);
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
@@ -168,6 +173,7 @@ async function asNginx(page) {
 
 async function scenario(server, name, act) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await welcomeSeen(context);
   const page = await context.newPage();
   const documents = [];
   page.on('request', (r) => {
@@ -191,7 +197,8 @@ async function scenario(server, name, act) {
   await context.close();
 }
 
-const link = (page) => page.locator(`a[href="${PAGE}"]`).first();
+/* Видимая: та же ссылка есть и в сайдбаре, скрытом на ширине телефона. */
+const link = (page) => page.locator(`a[href="${PAGE}"]:visible`).first();
 
 for (const server of ['apache', 'nginx']) {
   console.log(

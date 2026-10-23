@@ -3,9 +3,11 @@ import { findManifestFamily } from '@/lib/generator/manifest';
 import { findSection } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { subtopicBuilt } from '@/data/functionTypes';
+import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { BankScreen } from './BankScreen';
 import type { SubtopicView } from './SubtopicDialog';
 import './zadaniya.css';
+import { href, ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: `${tasksPage.title} — Будет на ЕГЭ`,
@@ -29,11 +31,13 @@ const dialog = {
       id: item.id,
       no: String(index + 1).padStart(2, '0'),
       title: item.title,
+      graphName: item.graphName,
+      icon: ikonkaRazdela(section?.slug ?? '12', item.icon),
       status: item.status,
       prototypes: family?.prototypes.sets ?? 0,
       tasks: family?.prototypes.tasks ?? 0,
       /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
-      href: subtopicBuilt(item) ? `${tasksPage.href}/12/${item.id}` : null,
+      href: subtopicBuilt(item) ? href(ZADANIYA, 12, item.id) : null,
     };
   }),
 };

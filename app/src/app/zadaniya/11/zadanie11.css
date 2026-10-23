@@ -871,6 +871,24 @@
 .z11-tab tr.is-uravnenie > td:not(.z11-tab__vyn) {
   background: var(--color-success-soft);
 }
+/* Первый столбец (участник: «1-й автомобиль», «раствор», «рабочий»)
+   закреплён: на телефоне таблица прокручивается вбок внутри себя,
+   и подписи строк остаются на месте. Фон непрозрачный — числа
+   уезжают под него; тень справа отделяет столбец. */
+.z11-tab thead th:first-child,
+.z11-tab tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--color-surface);
+  box-shadow: inset -1px 0 0 var(--color-border-strong);
+}
+.z11-tab thead th:first-child {
+  background-color: var(--color-surface-2);
+}
+.z11-tab tr.is-uravnenie > th {
+  background-color: var(--color-success-soft);
+}
 /* Столбец выноски: без рамок и фона, только подпись у своей строки. */
 .z11-tab .z11-tab__vyn {
   width: 1%;
@@ -1505,7 +1523,20 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+/* Узкий экран: варианты ответа в столбик во всю ширину — кнопки
+   не мельчат и не налезают друг на друга. */
+@media (max-width: 479.98px) {
+  .z11-hint__opts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .z11-hint__opt {
+    text-align: left;
+  }
+}
 .z11-hint__opt {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
@@ -1621,6 +1652,7 @@
 
 .z11-tr {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   margin-top: var(--space-5);
 }
@@ -1636,11 +1668,13 @@
 }
 .z11-tr__main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   min-width: 0;
 }
 .z11-tr__blok {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 .z11-tr__blok .z11-blok-title {
@@ -1708,6 +1742,8 @@
   gap: var(--space-2);
 }
 .z11-preset {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -1778,6 +1814,7 @@
 
 .z11-akk {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -1793,13 +1830,16 @@
 }
 .z11-akk__head {
   display: flex;
+  /* На 360px кнопка «весь блок» не помещается рядом с названием и
+     счётчиком — уходит на свою строку, а не за край экрана. */
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: 0 var(--space-3);
   padding-right: var(--space-3);
 }
 .z11-akk__toggle {
   display: flex;
-  flex: 1;
+  flex: 1 1 15rem;
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
@@ -2098,29 +2138,9 @@
   align-items: center;
   gap: var(--space-3);
 }
-.z11-resh__nazad {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  border: 0;
-  background: none;
-  color: var(--color-text-secondary);
-  font: inherit;
-  cursor: pointer;
-}
-.z11-resh__nazad .z11-pic {
-  width: 18px;
-  height: 18px;
-  color: var(--color-primary);
-}
 .z11-resh__bar {
   flex: 1;
   min-width: 100px;
-}
-.z11-resh__count {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  white-space: nowrap;
 }
 .z11-resh__badge {
   padding: 2px var(--space-3);
@@ -2366,95 +2386,7 @@
   grid-column: 1 / -1;
 }
 
-/* ── Итог тренировки ──────────────────────────────────────────── */
-
-.z11-itog {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 820px;
-  margin: var(--space-5) auto 0;
-}
-.z11-itog__sum {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z11-itog__sum li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
-.z11-itog__sum .is-right {
-  color: var(--color-success);
-}
-.z11-itog__sum .is-wrong {
-  color: var(--color-error);
-}
-.z11-itog__list {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z11-itog__item {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-left-width: 4px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: var(--fs-caption);
-}
-.z11-itog__item.is-right {
-  border-left-color: var(--color-success);
-}
-.z11-itog__item.is-hinted {
-  border-left-color: var(--color-warning);
-}
-.z11-itog__item.is-wrong {
-  border-left-color: var(--color-error);
-}
-.z11-itog__ikonka {
-  width: 32px;
-  height: 32px;
-}
-.z11-itog__ikonka .z11-pic {
-  width: 18px;
-  height: 18px;
-}
-.z11-itog__kod,
-.z11-itog__badge {
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-.z11-itog__mark {
-  font-weight: 600;
-  white-space: nowrap;
-}
-.z11-itog__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
 @media (max-width: 640px) {
-  .z11-itog__item {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-  .z11-itog__kod,
-  .z11-itog__badge {
-    display: none;
-  }
   .z11-istochnik {
     grid-template-columns: 1fr;
   }

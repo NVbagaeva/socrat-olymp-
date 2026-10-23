@@ -122,10 +122,13 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
 
       <p className="ptask__counter">{PODGOTOVKA_SLOVA.schet(index + 1, zadachi.length)}</p>
 
+      {/* В кружках — место задачи в блоке, а не номер конспекта: блок
+          добран вариантами прототипов, и номера конспекта шли бы с
+          разрывом (11–15, потом 19–23). */}
       <PrepDots
         items={zadachi.map((item, i) => ({
           id: item.id,
-          no: item.nomer,
+          no: i + 1,
           state: sostoyaniya[i] ?? null,
         }))}
         current={index}
@@ -142,6 +145,7 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
             klyuch: klyuchZadachi(zadacha.id),
             seal: zadacha.seal,
             steps: zadacha.steps,
+            ...(zadacha.podskazka === undefined ? {} : { podskazka: zadacha.podskazka }),
             ...(zadacha.model === undefined ? {} : { model: zadacha.model }),
             ...(zadacha.illustration === undefined ? {} : { illustration: zadacha.illustration }),
             ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
@@ -149,6 +153,8 @@ export function PodgotovkaBlok({ zadanie, blok, listHref }: PodgotovkaBlokProps)
           {...(metod === undefined ? {} : { metodLabel: metod.nazvanie })}
           onResult={otvet}
           onReveal={razbor}
+          /* Подсказка учитывается так же, как открытое решение. */
+          onHint={razbor}
           {...(dalshe === null
             ? {}
             : {

@@ -2,11 +2,16 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
 import { useStickyTabs } from './useStickyTabs';
+import { useVkladkaPerehod } from './useVkladkaPerehod';
+import { sessionText } from './session/text';
+import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
+import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { VkladkaIkonka } from './VkladkaIkonka';
 
 export interface RazdelTabsProps {
@@ -21,6 +26,11 @@ export interface RazdelTabsProps {
    * с раскрытым меню.
    */
   tutorsTail?: string;
+  /**
+   * Слева в строке ленты, прилипает вместе с ней: плашка «раздел ▾»
+   * с меню разделов (RazdelyNav), как у №12.
+   */
+  before?: ReactNode;
 }
 
 /**
@@ -40,11 +50,13 @@ export interface RazdelTabsProps {
  * по вхождению строки: иначе «trenazher» нашёлся бы и внутри
  * «trenazher/uznay-metod».
  */
-export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) {
+export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTabsProps) {
   const pathname = usePathname();
   const strip = useRef<HTMLDivElement>(null);
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
+  /* Плавный переход между вкладками (styles/perehody.css). */
+  const perehod = useVkladkaPerehod();
   const tail = pathname.replace(base, '').replace(/^\/+/, '');
   /* Адрес известен и на сборке, поэтому разметка сервера и первая
      отрисовка совпадают. */
@@ -73,16 +85,22 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
     }
   }, [active?.id]);
 
+  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  const sessions = useActiveTrainerScopes();
+  const trainerActive = hasActiveScope(sessions, scopeOfPath(base));
+
   const lenta = (
     <Tabs
       className="tabs--lenta"
       label="Разделы темы"
       value={active?.id ?? ''}
+      onLinkClick={perehod}
       items={tabs.map((tab) => ({
         id: tab.id,
         label: tab.label,
         icon: tab.icon === undefined ? undefined : <VkladkaIkonka name={tab.icon} />,
         href: `${base}/${tab.tail}`,
+        ...(tab.id === 'trenazher' && trainerActive ? { badge: sessionText.menuDot } : {}),
       }))}
     />
   );
@@ -93,6 +111,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
   if (tutors === undefined) {
     return (
       <div className="topic-tabs-row">
+        {before}
         <div className="topic-tabs" ref={strip}>
           {lenta}
         </div>
@@ -107,6 +126,7 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail }: RazdelTabsProps) 
       open={menu}
       onOpenChange={setMenu}
       stripRef={strip}
+      before={before}
     >
       {lenta}
     </TutorMenu>

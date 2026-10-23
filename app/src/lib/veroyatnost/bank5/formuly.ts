@@ -4,12 +4,13 @@
  * автоматы), 5.10 испытания до первого успеха. Рисунка у них нет —
  * только шаги с формулами.
  *
- * Исходные варианты — из задачника Е. А. Ширяевой «ЕГЭпроф 2025»,
- * остальные собирает генератор; ответ везде считается формулой типа.
+ * У каждого прототипа исходные варианты и варианты, которые собирает
+ * генератор; ответ везде считается формулой типа.
  */
 
 import { prototip, type Rng } from '../generator';
 import { dec, konechnaya, text, type Params, type Prototype } from '../types';
+import { chislo, vopros, zapisShag } from '../podskazka';
 import { bezRisunka } from './vizual5';
 import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 
@@ -34,8 +35,8 @@ const P01: Prototype = prototip({
   id: 'p5-01',
   blok: 'nesovmestnye',
   nazvanie: 'Экзамен: вопрос по одной из двух тем',
-  tip: 'Сложение несовместных событий',
-  zadachnik: [1, 4],
+  tip: 'Несовместные события: складываем',
+  sourceRange: [1, 4],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -63,38 +64,67 @@ const P01: Prototype = prototip({
     const p2 = veroyatnost(p, 'p2');
     return [
       {
+        etap: 'Связь событий',
         text: `События «вопрос по теме «${text(p, 't1')}»» и «вопрос по теме «${text(p, 't2')}»» несовместны: общих вопросов нет.`,
       },
       {
+        etap: 'Ответ',
         text: 'Вероятность суммы несовместных событий — сумма их вероятностей:',
         formula: `P = p_1 + p_2 = ${tex(p1)} + ${tex(p2)} = ${tex(tochnee(p1 + p2))}`,
         value: tochnee(p1 + p2),
       },
     ];
   },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    return [
+      vopros(
+        'Какое событие нужно найти?',
+        'Вопрос по одной из двух тем — или по первой, или по второй',
+        ['Вопрос сразу по обеим темам', 'Вопрос ни по одной из этих тем'],
+      ),
+      vopros(
+        'Может ли вопрос относиться к обеим темам сразу?',
+        'Нет — таких вопросов нет, события несовместны',
+        ['Да, такие вопросы бывают'],
+        'Несовместные события не происходят вместе.',
+      ),
+      vopros(
+        'Что делать с вероятностями несовместных событий, если нужно «одно или другое»?',
+        'Сложить: $p_1 + p_2$',
+        ['Перемножить: $p_1 \\cdot p_2$', 'Вычесть из единицы: $1 - p_1 - p_2$'],
+      ),
+      vopros('Какое выражение даёт ответ?', `$${tex(p1)} + ${tex(p2)}$`, [
+        `$${tex(p1)} \\cdot ${tex(p2)}$`,
+        `$1 - ${tex(p1)} - ${tex(p2)}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
     {
       n: 1,
-      source: 'задачник',
-      ref: 'задачник 05, № 1',
+      source: 'sbornik',
+      sourceNote: '№ 1',
       params: { p1: 0.2, p2: 0.35, t1: 'Вписанная окружность', t2: 'Внешние углы' },
     },
     {
       n: 2,
-      source: 'задачник',
-      ref: 'задачник 05, № 2',
+      source: 'sbornik',
+      sourceNote: '№ 2',
       params: { p1: 0.25, p2: 0.35, t1: 'Тригонометрия', t2: 'Параллелограмм' },
     },
     {
       n: 3,
-      source: 'задачник',
-      ref: 'задачник 05, № 3',
+      source: 'sbornik',
+      sourceNote: '№ 3',
       params: { p1: 0.25, p2: 0.1, t1: 'Треугольник', t2: 'Трапеция' },
     },
     {
       n: 4,
-      source: 'задачник',
-      ref: 'задачник 05, № 4',
+      source: 'sbornik',
+      sourceNote: '№ 4',
       params: { p1: 0.45, p2: 0.45, t1: 'Площадь', t2: 'Углы' },
     },
   ],
@@ -120,8 +150,8 @@ const P02: Prototype = prototip({
   id: 'p5-02',
   blok: 'protivopolozhnoe',
   nazvanie: 'Температура тела: «или выше»',
-  tip: 'Противоположное событие',
-  zadachnik: [5, 8],
+  tip: 'Через противоположное событие',
+  sourceRange: [5, 8],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -137,20 +167,44 @@ const P02: Prototype = prototip({
     const q = veroyatnost(p, 'p');
     return [
       {
+        etap: 'Связь событий',
         text: `События «ниже ${text(p, 't')} °C» и «${text(p, 't')} °C или выше» противоположны: одно из них происходит обязательно, вместе — никогда.`,
       },
       {
+        etap: 'Ответ',
         text: 'Вероятность противоположного события — единица минус вероятность данного:',
         formula: `P = 1 - p = 1 - ${tex(q)} = ${tex(tochnee(1 - q))}`,
         value: tochnee(1 - q),
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const t = text(p, 't');
+    return [
+      vopros(
+        `Как связаны события «ниже ${t} °C» и «${t} °C или выше»?`,
+        'Противоположны: всегда случается ровно одно из них',
+        ['Независимы: одно не влияет на другое', 'Могут случиться одновременно'],
+        'Вместе они дают все возможные случаи.',
+      ),
+      vopros(
+        'Как найти вероятность противоположного события?',
+        'Из единицы вычесть данную: $1 - p$',
+        ['Взять ту же вероятность: $p$', 'Умножить на себя: $p \\cdot p$'],
+      ),
+      vopros('Какое выражение даёт ответ?', `$1 - ${tex(q)}$`, [
+        `$${tex(q)}$`,
+        `$${tex(q)} \\cdot ${tex(q)}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 5', params: { p: 0.87, t: '36,8' } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 6', params: { p: 0.94, t: '36,8' } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 7', params: { p: 0.89, t: '36,8' } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 8', params: { p: 0.91, t: '36,8' } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 5', params: { p: 0.87, t: '36,8' } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 6', params: { p: 0.94, t: '36,8' } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 7', params: { p: 0.89, t: '36,8' } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 8', params: { p: 0.91, t: '36,8' } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.75, 0.98, 2), t: r.pick(['36,8', '36,6', '36,9']) }),
   metodika: {
@@ -171,8 +225,8 @@ const P04: Prototype = prototip({
   id: 'p5-04',
   blok: 'sovmestnye',
   nazvanie: 'Два автомата: кофе останется в обоих',
-  tip: 'Совместные события',
-  zadachnik: [21, 24],
+  tip: 'Совместные события: общая часть',
+  sourceRange: [21, 24],
   format: 'десятичная',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -197,22 +251,52 @@ const P04: Prototype = prototip({
     const hotyaBy = tochnee(2 * q - q12);
     return [
       {
+        etap: 'Связь событий',
         text: 'Событие «кофе закончится хотя бы в одном автомате» — сумма совместных событий $A$ и $B$; их общую часть вычитаем, чтобы не посчитать дважды:',
         formula: `P(A + B) = P(A) + P(B) - P(AB) = ${tex(q)} + ${tex(q)} - ${tex(q12)} = ${tex(hotyaBy)}`,
         value: hotyaBy,
       },
       {
+        etap: 'Ответ',
         text: '«Кофе останется в обоих» — противоположное событие:',
         formula: `P = 1 - ${tex(hotyaBy)} = ${tex(tochnee(1 - hotyaBy))}`,
         value: tochnee(1 - hotyaBy),
       },
     ];
   },
+  podskazka: (p) => {
+    const q = veroyatnost(p, 'p');
+    const q12 = veroyatnost(p, 'p12');
+    const hotyaBy = tochnee(2 * q - q12);
+    return [
+      vopros(
+        '«Кофе останется в обоих автоматах» — противоположное какому событию?',
+        'Кофе закончится хотя бы в одном автомате',
+        ['Кофе закончится в обоих автоматах', 'Кофе закончится в первом автомате'],
+        'Значит, сначала найдём вероятность «хотя бы в одном».',
+      ),
+      vopros(
+        'События «закончится в первом» и «закончится во втором» могут случиться вместе. Как найти вероятность «хотя бы в одном»?',
+        'Сложить и вычесть общую часть: $P(A) + P(B) - P(AB)$',
+        ['Просто сложить: $P(A) + P(B)$', 'Перемножить: $P(A) \\cdot P(B)$'],
+        'Иначе случаи «в обоих» посчитаются дважды.',
+      ),
+      vopros(
+        `Чему равна вероятность «хотя бы в одном»? $${tex(q)} + ${tex(q)} - ${tex(q12)} = \\ ?$`,
+        chislo(hotyaBy),
+        /* Неверное число, совпавшее с ответом задачи, назвало бы ответ. */
+        [tochnee(2 * q), tochnee(q * q), tochnee(2 * q + q12)]
+          .filter((x) => x !== tochnee(1 - hotyaBy))
+          .map(chislo),
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 21', params: { p: 0.1, p12: 0.03 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 22', params: { p: 0.1, p12: 0.05 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 23', params: { p: 0.2, p12: 0.05 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 24', params: { p: 0.2, p12: 0.06 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 21', params: { p: 0.1, p12: 0.03 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 22', params: { p: 0.1, p12: 0.05 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 23', params: { p: 0.2, p12: 0.05 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 24', params: { p: 0.2, p12: 0.06 } },
   ],
   generator: (r: Rng): Params => {
     const q = r.int(1, 6) * 0.05;
@@ -249,8 +333,8 @@ const P12: Prototype = prototip({
   id: 'p5-12',
   blok: 'do-uspeha',
   nazvanie: 'Стрелок стреляет, пока не попадёт',
-  tip: 'Испытания до первого успеха',
-  zadachnik: [55, 58],
+  tip: 'Пробуем до первой удачи',
+  sourceRange: [55, 58],
   format: 'целое',
   okruglenie: tochno,
   uslovie: (p) =>
@@ -292,21 +376,52 @@ const P12: Prototype = prototip({
     }
     return [
       {
+        etap: 'Противоположное событие',
         text: `Промах при одном выстреле — ${dec(promah)}. Стрелок не поразит цель за $k$ выстрелов, если промахнётся все $k$ раз; поразит — в противоположном случае:`,
         formula: `P_k = 1 - ${tex(promah)}^{k}`,
       },
       {
+        etap: 'Вычисление',
         text: 'Перебираем $k$, пока вероятность не дотянет до порога:',
         formula: stroki.join(';\\quad '),
       },
-      { text: 'Наименьшее число патронов:', formula: `k = ${k}`, value: k },
+      { etap: 'Ответ', text: 'Наименьшее число патронов:', formula: `k = ${k}`, value: k },
+    ];
+  },
+  podskazka: (p) => {
+    const pp = veroyatnost(p, 'p');
+    const q = veroyatnost(p, 'q');
+    const promah = tochnee(1 - pp);
+    return [
+      vopros(
+        'Когда стрелок не поразит цель за $k$ выстрелов?',
+        'Если промахнётся все $k$ раз',
+        ['Если промахнётся хотя бы один раз', 'Если попадёт ровно один раз'],
+        `Вероятность промаха при одном выстреле — $1 - ${tex(pp)} = ${tex(promah)}$.`,
+      ),
+      vopros(
+        'Какова вероятность поразить цель, если патронов $k$?',
+        `$1 - ${tex(promah)}^{k}$`,
+        [`$${tex(pp)}^{k}$`, `$k \\cdot ${tex(pp)}$`],
+        'Поразить цель — противоположное событие к «промахнуться все $k$ раз».',
+      ),
+      vopros(
+        `Как найти наименьшее $k$, при котором вероятность не меньше $${tex(q)}$?`,
+        'Перебирать $k = 1, 2, 3, \\ldots$, пока вероятность не дотянет до порога',
+        [
+          `Решить $1 - ${tex(promah)}^{k} = ${tex(q)}$ и округлить вниз`,
+          `Разделить: $k = ${tex(q)} : ${tex(pp)}$`,
+        ],
+        'С каждым патроном вероятность растёт; нужен первый $k$, где она не меньше порога.',
+      ),
+      zapisShag('целое', null),
     ];
   },
   varianty: [
-    { n: 1, source: 'задачник', ref: 'задачник 05, № 55', params: { p: 0.5, q: 0.7 } },
-    { n: 2, source: 'задачник', ref: 'задачник 05, № 56', params: { p: 0.5, q: 0.8 } },
-    { n: 3, source: 'задачник', ref: 'задачник 05, № 57', params: { p: 0.4, q: 0.7 } },
-    { n: 4, source: 'задачник', ref: 'задачник 05, № 58', params: { p: 0.6, q: 0.8 } },
+    { n: 1, source: 'sbornik', sourceNote: '№ 55', params: { p: 0.5, q: 0.7 } },
+    { n: 2, source: 'sbornik', sourceNote: '№ 56', params: { p: 0.5, q: 0.8 } },
+    { n: 3, source: 'sbornik', sourceNote: '№ 57', params: { p: 0.4, q: 0.7 } },
+    { n: 4, source: 'sbornik', sourceNote: '№ 58', params: { p: 0.6, q: 0.8 } },
   ],
   generator: (r: Rng): Params => ({ p: r.dec(0.3, 0.7, 1), q: r.dec(0.7, 0.95, 2) }),
   metodika: {

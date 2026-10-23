@@ -29,6 +29,8 @@ export const METODY_KARTOCHKI = {
     gotovitsya: 'Материал готовится',
     /** Счётчик задач банка по этому методу. */
     vBanke: (n: number): string => `задач в банке: ${n}`,
+    /** Счётчик задач блока опорных задач, если кнопка ведёт туда. */
+    vOpornyh: (n: number): string => `опорных задач: ${n}`,
     trenirovka: 'Потренироваться',
     zakryt: 'Закрыть',
   },

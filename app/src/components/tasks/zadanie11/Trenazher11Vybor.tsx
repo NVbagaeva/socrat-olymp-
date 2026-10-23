@@ -243,7 +243,7 @@ export function Trenazher11Vybor({
                   {ssylki[r.id]?.teoriya ? (
                     <Link
                       className="z11-akk__teoriya"
-                      href={`${base}/teoriya/#teoriya-${ssylki[r.id].teoriya}`}
+                      href={`${base}/teoriya/#${ssylki[r.id].teoriya}`}
                       title={`${TRENAZHER_11.teoriyaRazdela}: ${r.nazvanie}`}
                     >
                       <Piktogramma name="book" />

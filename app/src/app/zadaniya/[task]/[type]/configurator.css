@@ -92,9 +92,18 @@
     border-color var(--dur-hover) var(--ease),
     box-shadow var(--dur-hover) var(--ease);
 }
-.cfg-skill:hover {
-  border-color: var(--color-accent-soft);
-  box-shadow: var(--shadow-sm);
+/* Здесь карточку действительно выбирают, поэтому наведение и выбор
+   различаются: под мышью — мягкая рамка и тень без заливки и галочки;
+   выбранная — галочка, синяя рамка и заливка постоянно. Наведение —
+   только при мыши: на телефоне оно залипало бы и путалось с выбором. */
+@media (hover: hover) {
+  .cfg-skill:hover {
+    border-color: var(--color-accent-soft);
+    box-shadow: var(--shadow-sm);
+  }
+  .cfg-skill.is-checked:hover {
+    border-color: var(--color-primary-hover);
+  }
 }
 .cfg-skill:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -189,6 +198,8 @@
 /* Вариант в группе: та же плашка, что карточка, только меньше.
    Выключенный вариант приглушён, как закрытая карточка семейства. */
 .cfg-opt {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   display: grid;
   gap: 2px;
   min-width: 0;
@@ -261,6 +272,15 @@
   line-height: var(--lh-h4);
   font-weight: 700;
   color: var(--color-text-brand);
+}
+.cfg-summary__family {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.cfg-summary__ico {
+  width: 56px;
 }
 .cfg-summary__skill {
   font-size: var(--fs-h4);

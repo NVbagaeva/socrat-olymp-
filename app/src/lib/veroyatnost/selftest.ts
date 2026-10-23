@@ -14,8 +14,13 @@
  *  5. в условии не осталось «undefined» и «NaN»;
  *  6. вариантов не меньше десяти и они не повторяются;
  *  7. отпечатки ответов не сталкиваются.
+ *
+ * Отдельно checkGeneratory гоняет правило генерации каждого прототипа
+ * на сотнях зёрен — шире, чем десять вариантов, которые уходят на
+ * сайт, — и проверяет каждый принятый вариант теми же правилами.
  */
 
+import { GENERATORY_PROTOTIPOV, rng } from './generator';
 import { otvetUchenika, prepOtvet } from './index';
 import {
   LABIRINT,
@@ -27,8 +32,21 @@ import {
 } from './labirint';
 import { METODY, otvetPoRisunku, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
+import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustratsii';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
+import { zapisOtveta } from './podskazka';
 import { klyuchZadachi, sealAnswer } from './secret';
-import { konechnaya, round, type PrepBlok, type Prototype, type Step, type Variant } from './types';
+import {
+  ETAPY,
+  konechnaya,
+  round,
+  type AnswerFormat,
+  type HintStep,
+  type PrepBlok,
+  type Prototype,
+  type Step,
+  type Variant,
+} from './types';
 
 export interface BadVariant {
   id: string;
@@ -49,7 +67,7 @@ export interface Report {
   /** Выкладка в тексте шага или формула не в TeX. */
   vykladki: number;
   /** Варианты, взятые из источника, с проблемами. */
-  sourceProblems: { ref: string; why: string }[];
+  sourceProblems: { sourceNote: string; why: string }[];
   /** Совпадающие варианты внутри прототипа. */
   duplicates: { a: string; b: string }[];
   /** Прототипы, где вариантов меньше десяти. */
@@ -70,12 +88,24 @@ const PLOHOY_TEX = /\d\.\d|\d\s*\/\s*\d|\d\s*:\s*\d/;
 
 /**
  * Шаги разбора по соглашению: выкладки только в формуле, формула в
- * TeX с запятой `0{,}25` и настоящими дробями. Возвращает список
- * нарушений — пустой, если всё по правилам.
+ * TeX с запятой `0{,}25` и настоящими дробями. Этап у каждого шага —
+ * из словаря ETAPY, «Ответ» — ровно у последнего шага с формулой: его
+ * число и есть ответ. Возвращает список нарушений — пустой, если всё
+ * по правилам.
  */
 export function problemyShagov(shagi: readonly Step[]): string[] {
   const problems: string[] = [];
+  const posledniy = shagi.reduce((k, s, i) => (s.formula === undefined ? k : i), -1);
   shagi.forEach((shag, i) => {
+    if (!(ETAPY as readonly string[]).includes(shag.etap)) {
+      problems.push(`шаг ${i + 1}: этап не из словаря — «${String(shag.etap)}»`);
+    } else if ((shag.etap === 'Ответ') !== (i === posledniy)) {
+      problems.push(
+        i === posledniy
+          ? `шаг ${i + 1}: этап последнего шага с формулой — «${shag.etap}», а не «Ответ»`
+          : `шаг ${i + 1}: этап «Ответ» не у последнего шага с формулой`,
+      );
+    }
     if (VYKLADKA_V_TEKSTE.test(shag.text)) {
       problems.push(`шаг ${i + 1}: выкладка в тексте — «${shag.text.slice(0, 50)}»`);
     }
@@ -83,6 +113,100 @@ export function problemyShagov(shagi: readonly Step[]): string[] {
       problems.push(`шаг ${i + 1}: формула не в TeX — «${shag.formula.slice(0, 50)}»`);
     }
   });
+  return problems;
+}
+
+/** Строка подсказки без разметки: «$0{,}25$» → «0,25». */
+function bezRazmetki(stroka: string): string {
+  return stroka
+    .replace(/\$/g, '')
+    .replace(/\{,\}/g, ',')
+    .replace(/\\[,;! ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Подсказка-вопросы к варианту:
+ *  - от двух до шести шагов, в каждом вопрос и 2–4 разные кнопки;
+ *  - номер верной кнопки — в пределах списка;
+ *  - знаки `$` в каждой строке парные — формула набирается целиком;
+ *  - на верной кнопке знаков «=» не больше, чем на остальных: иначе
+ *    вычисление («76 − 1 = 75» рядом с «76») выдаёт её видом;
+ *  - последний шаг спрашивает, как записать ответ, и его верная кнопка
+ *    совпадает с форматом ответа прототипа (podskazka.ts, zapisOtveta);
+ *  - числа ответа нет ни в одной строке подсказки: она ведёт к ответу,
+ *    но не называет его. У целого ответа это не проверяется — малые
+ *    целые встречаются в подсказке по делу (номер шага, число игр).
+ */
+export function problemyPodskazki(
+  shagi: readonly HintStep[],
+  otvet: number,
+  format: AnswerFormat,
+  znakov: 2 | 3 | null,
+): string[] {
+  const problems: string[] = [];
+  if (shagi.length < 2 || shagi.length > 6) {
+    problems.push(`в подсказке ${shagi.length} шагов, нужно от 2 до 6`);
+  }
+  shagi.forEach((shag, i) => {
+    const gde = `подсказка, шаг ${i + 1}`;
+    if (shag.question.trim() === '') {
+      problems.push(`${gde}: пустой вопрос`);
+    }
+    if (shag.options.length < 2 || shag.options.length > 4) {
+      problems.push(`${gde}: кнопок ${shag.options.length}, нужно 2–4`);
+    }
+    if (
+      !Number.isInteger(shag.correct) ||
+      shag.correct < 0 ||
+      shag.correct >= shag.options.length
+    ) {
+      problems.push(`${gde}: верная кнопка ${shag.correct} вне списка`);
+    }
+    const vidno = shag.options.map(bezRazmetki);
+    if (new Set(vidno).size !== vidno.length) {
+      problems.push(`${gde}: кнопки повторяются (${vidno.join(' | ')})`);
+    }
+    if (vidno.some((o) => o === '')) {
+      problems.push(`${gde}: пустая кнопка`);
+    }
+    /* Верная кнопка не должна выдавать себя видом: если вычисление
+       «… = …» длиннее только на ней, ответ виден без размышлений. */
+    const ravno = shag.options.map((o) => (o.match(/=/g) ?? []).length);
+    const uVernoy = ravno[shag.correct] ?? 0;
+    if (uVernoy > 0 && ravno.every((k, i) => i === shag.correct || k < uVernoy)) {
+      problems.push(
+        `${gde}: на верной кнопке больше «=», чем на остальных — она выдаёт себя видом`,
+      );
+    }
+    for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+      if ((stroka.match(/\$/g) ?? []).length % 2 !== 0) {
+        problems.push(`${gde}: непарный знак $ в «${stroka}»`);
+      }
+    }
+  });
+  const posledniy = shagi[shagi.length - 1];
+  const zapis = zapisOtveta(format, znakov);
+  if (posledniy !== undefined && posledniy.options[posledniy.correct] !== zapis) {
+    problems.push(
+      `подсказка: последний шаг должен спрашивать запись ответа «${zapis}», ` +
+        `а верная кнопка — «${posledniy.options[posledniy.correct] ?? ''}»`,
+    );
+  }
+  if (format === 'десятичная') {
+    const vBlank = String(otvet).replace('.', ',');
+    shagi.forEach((shag, i) => {
+      for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+        const chisla: string[] = bezRazmetki(stroka).match(/\d+(?:,\d+)?/g) ?? [];
+        if (chisla.includes(vBlank)) {
+          problems.push(
+            `подсказка, шаг ${i + 1}: называет ответ ${vBlank} — «${bezRazmetki(stroka)}»`,
+          );
+        }
+      }
+    });
+  }
   return problems;
 }
 
@@ -107,11 +231,13 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   }
 
   const otvet = otvetUchenika(prototype, p);
-  /* Вероятность обязана лежать в (0; 1]. У прототипов с целым ответом
-     («сколько патронов дать стрелку») ответ — не вероятность, и это
-     правило к нему не относится. */
-  if (prototype.format === 'десятичная' && (otvet <= 0 || otvet > 1)) {
-    problems.push(`вероятность вне (0; 1]: ${otvet}`);
+  /* Вероятность обязана лежать строго в (0; 1): ответ 0 или 1 — это
+     невозможное или достоверное событие, а не задача. Проверяется
+     ответ ученика, то есть уже после округления. У прототипов с целым
+     ответом («сколько патронов дать стрелку») ответ — не вероятность,
+     и это правило к нему не относится. */
+  if (prototype.format === 'десятичная' && (otvet <= 0 || otvet >= 1)) {
+    problems.push(`вероятность вне (0; 1): ${otvet}`);
   }
   if (prototype.format === 'целое' && !Number.isInteger(otvet)) {
     problems.push(`ответ должен быть целым: ${otvet}`);
@@ -120,6 +246,10 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   const znakov = prototype.okruglenie(p);
   if (znakov === null && !konechnaya(otvet)) {
     problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+  }
+
+  if (prototype.podskazka !== undefined) {
+    problems.push(...problemyPodskazki(prototype.podskazka(p), otvet, prototype.format, znakov));
   }
 
   const shagi = prototype.shagi(p);
@@ -145,10 +275,81 @@ function problemsOf(prototype: Prototype, variant: Variant): string[] {
   return problems;
 }
 
+/** Итог прогона правил генерации на многих зёрнах. */
+export interface GeneratorReport {
+  /** Прототипов с правилом генерации. */
+  prototypes: number;
+  /** Зёрен на прототип. */
+  zeren: number;
+  /** Принятых вариантов всего. */
+  vsego: number;
+  /** Прототипы без правила генерации в реестре. */
+  bezPravila: string[];
+  /** Нарушения: прототип, зерно, параметры и что не так. */
+  problems: string[];
+}
+
+/** Сколько кандидатов правило может отбросить подряд на одном зерне. */
+const POPYTOK_NA_ZERNO = 2000;
+
+/**
+ * Прогон правил генерации: на каждом зерне берётся первый кандидат,
+ * прошедший допустимость прототипа (в неё уже входит правило «ответ
+ * строго в (0; 1)»), и проверяется так же, как вариант банка: формула
+ * против перебора, ответ в (0; 1) после округления, запись в клетки,
+ * последний шаг разбора, подстановки в тексте. Зерно, на котором за
+ * POPYTOK_NA_ZERNO попыток не нашлось ни одного кандидата, — тоже
+ * нарушение: генератор и ограничения разошлись.
+ */
+export function checkGeneratory(bank: readonly Prototype[], zeren = 500): GeneratorReport {
+  const problems: string[] = [];
+  const bezPravila: string[] = [];
+  let vsego = 0;
+  let prototypes = 0;
+  for (const prototype of bank) {
+    const pravilo = GENERATORY_PROTOTIPOV.get(prototype.id);
+    if (pravilo === undefined) {
+      bezPravila.push(prototype.id);
+      continue;
+    }
+    prototypes += 1;
+    for (let zerno = 1; zerno <= zeren; zerno += 1) {
+      /* Зёрна разнесены умножением: соседние числа дают похожие ряды. */
+      const r = rng(Math.imul(zerno, 0x9e3779b1) >>> 0);
+      let params: Variant['params'] | null = null;
+      for (let i = 0; i < POPYTOK_NA_ZERNO && params === null; i += 1) {
+        const kandidat = pravilo(r);
+        if (prototype.dopustimo(kandidat)) {
+          params = kandidat;
+        }
+      }
+      if (params === null) {
+        problems.push(
+          `${prototype.id}, зерно ${zerno}: за ${POPYTOK_NA_ZERNO} попыток нет допустимого варианта`,
+        );
+        continue;
+      }
+      vsego += 1;
+      const oshibki = problemsOf(prototype, {
+        n: 0,
+        source: 'novyj',
+        sourceNote: 'генератор',
+        params,
+      });
+      if (oshibki.length > 0) {
+        problems.push(
+          `${prototype.id}, зерно ${zerno}, ${JSON.stringify(params)}: ${oshibki.join('; ')}`,
+        );
+      }
+    }
+  }
+  return { prototypes, zeren, vsego, bezPravila, problems };
+}
+
 export function checkBank(bank: readonly Prototype[]): Report {
-  const bySource: Record<string, number> = { задачник: 0, конспект: 0, новый: 0 };
+  const bySource: Record<string, number> = { sbornik: 0, urok: 0, novyj: 0 };
   const bad: BadVariant[] = [];
-  const sourceProblems: { ref: string; why: string }[] = [];
+  const sourceProblems: { sourceNote: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
   const malo: string[] = [];
   const collisions: { a: string; b: string }[] = [];
@@ -190,8 +391,8 @@ export function checkBank(bank: readonly Prototype[]): Report {
       const problems = problemsOf(prototype, variant);
       if (problems.length > 0) {
         bad.push({ id: prototype.id, n: variant.n, problems });
-        if (variant.source !== 'новый') {
-          sourceProblems.push({ ref: variant.ref, why: problems.join('; ') });
+        if (variant.source !== 'novyj') {
+          sourceProblems.push({ sourceNote: variant.sourceNote, why: problems.join('; ') });
         }
         mismatchPerebor += problems.some((x) => x.includes('перебор')) ? 1 : 0;
         mismatchSteps += problems.some((x) => x.includes('последний шаг')) ? 1 : 0;
@@ -244,6 +445,13 @@ export interface PrepReport {
   vykladki: number;
   /** Повторяющиеся идентификаторы или номера конспекта. */
   duplicates: string[];
+  /**
+   * Списки картинок опорных задач (illyustratsii.ts) ссылаются на
+   * задачу, которой нет, или превью блока без задачи по картинке.
+   */
+  kartinki: string[];
+  /** Опорные задачи без подсказки-вопросов. */
+  bezPodskazki: string[];
   bad: BadVariant[];
 }
 
@@ -259,6 +467,7 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
   const duplicates: string[] = [];
   const vidennye = new Set<string>();
   const nomera = new Set<number>();
+  const bezPodskazkiOpornye: string[] = [];
 
   let zadachi = 0;
   let mismatch = 0;
@@ -275,10 +484,15 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
         duplicates.push(`повторяется идентификатор ${zadacha.id}`);
       }
       vidennye.add(zadacha.id);
-      if (nomera.has(zadacha.nomer)) {
-        duplicates.push(`повторяется номер конспекта ${zadacha.nomer}`);
+      /* Номер конспекта свой у каждой задачи автора; задача-вариант
+         того же прототипа (variant > 1) носит номер своей основы —
+         это не повтор, а тот же сюжет с другими числами. */
+      if (zadacha.variant === undefined) {
+        if (nomera.has(zadacha.nomer)) {
+          duplicates.push(`повторяется номер конспекта ${zadacha.nomer}`);
+        }
+        nomera.add(zadacha.nomer);
       }
-      nomera.add(zadacha.nomer);
 
       if (Math.abs(zadacha.otvet - zadacha.proverka) > TOCHNOST) {
         problems.push(`ответ ${zadacha.otvet} ≠ проверка ${zadacha.proverka}`);
@@ -290,6 +504,15 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
       }
       if (zadacha.okruglenie === undefined && !konechnaya(otvet)) {
         problems.push(`ответ ${otvet} не записывается в клетки, а округления в условии нет`);
+      }
+      /* Подсказка — та же, что уйдёт ученику (podskazkaOpornoy). */
+      const podskazka = podskazkaOpornoy(zadacha);
+      if (podskazka === undefined) {
+        bezPodskazkiOpornye.push(zadacha.id);
+      } else {
+        problems.push(
+          ...problemyPodskazki(podskazka, otvet, 'десятичная', zadacha.okruglenie ?? null),
+        );
       }
 
       const posledniy = zadacha.shagi[zadacha.shagi.length - 1];
@@ -317,6 +540,27 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     }
   }
 
+  /* Списки картинок сверены вручную по id задачи: id без задачи —
+     опечатка или задачу убрали, и картинка снова показывается. */
+  const kartinki: string[] = [];
+  const poId = new Map(bloki.flatMap((blok) => blok.zadachi).map((z) => [z.id, z]));
+  for (const id of Object.keys(KARTINKA_NE_PO_USLOVIYU)) {
+    if (!poId.has(id)) {
+      kartinki.push(`KARTINKA_NE_PO_USLOVIYU: нет опорной задачи ${id}`);
+    }
+  }
+  for (const id of Object.keys(KARTINKA_OSNOVY_PODHODIT)) {
+    if (poId.get(id)?.variant === undefined) {
+      kartinki.push(`KARTINKA_OSNOVY_PODHODIT: ${id} — не вариант опорной задачи`);
+    }
+  }
+  for (const blok of bloki) {
+    const primer = blok.kartinka?.primer;
+    if (primer !== undefined && (primer.trim() === '' || /undefined|NaN/.test(primer))) {
+      kartinki.push(`блок ${blok.id}: пустая задача превью`);
+    }
+  }
+
   return {
     bloki: bloki.length,
     zadachi,
@@ -325,6 +569,8 @@ export function checkPrep(bloki: readonly PrepBlok[]): PrepReport {
     badFormat,
     vykladki,
     duplicates,
+    kartinki,
+    bezPodskazki: bezPodskazkiOpornye,
     bad,
   };
 }
@@ -541,7 +787,7 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
 export interface RazdelDiapazonov {
   id: string;
   nazvanie: string;
-  zadachnik: readonly (readonly [number, number])[];
+  sourceRanges: readonly (readonly [number, number])[];
 }
 
 export interface RaskladkaRazdel {
@@ -572,7 +818,7 @@ export interface RaskladkaReport {
  *     иначе прототип собран из задач двух разных методов;
  *  4. каждый номер от 1 до N встречается ровно один раз.
  *
- * Прототип с нулевым диапазоном (`zadachnik: [0, 0]`) в задачнике не
+ * Прототип с нулевым диапазоном (`sourceRange: [0, 0]`) в сборнике не
  * значится — он составлен по схеме автора и в счёт номеров не идёт.
  */
 export function checkRaskladku(
@@ -585,7 +831,7 @@ export function checkRaskladku(
   /* 1. Диапазоны: без пересечений и без дыр. */
   const hozyain = new Map<number, string>();
   for (const razdel of razdely) {
-    for (const [ot, do_] of razdel.zadachnik) {
+    for (const [ot, do_] of razdel.sourceRanges) {
       for (let n = ot; n <= do_; n += 1) {
         const bylo = hozyain.get(n);
         if (bylo !== undefined) {
@@ -616,18 +862,18 @@ export function checkRaskladku(
       problems.push(`у прототипа ${prototype.id} блок «${prototype.blok}» не назван в типологии`);
       continue;
     }
-    if (prototype.zadachnik[0] === 0) {
+    if (prototype.sourceRange[0] === 0) {
       vneZadachnika.push(prototype.id);
       continue;
     }
     for (const variant of prototype.varianty) {
-      if (variant.source !== 'задачник') {
+      if (variant.source !== 'sbornik') {
         continue;
       }
-      const nomer = Number(variant.ref.split('№')[1]);
+      const nomer = Number(variant.sourceNote.split('№')[1]);
       if (!Number.isInteger(nomer)) {
         problems.push(
-          `у варианта ${prototype.id}-${variant.n} не читается номер: «${variant.ref}»`,
+          `у варианта ${prototype.id}-${variant.n} не читается номер: «${variant.sourceNote}»`,
         );
         continue;
       }
@@ -637,7 +883,7 @@ export function checkRaskladku(
       }
       vstrecheno.set(nomer, prototype.id);
       poRazdelam.set(razdel.id, (poRazdelam.get(razdel.id) ?? 0) + 1);
-      if (!razdel.zadachnik.some(([ot, do_]) => nomer >= ot && nomer <= do_)) {
+      if (!razdel.sourceRanges.some(([ot, do_]) => nomer >= ot && nomer <= do_)) {
         problems.push(
           `задача ${nomer} лежит в прототипе ${prototype.id} раздела «${razdel.nazvanie}», ` +
             `а по типологии она в «${hozyain.get(nomer) ?? 'ниоткуда'}»`,
@@ -656,10 +902,15 @@ export function checkRaskladku(
     razdely: razdely.map((r) => ({
       id: r.id,
       nazvanie: r.nazvanie,
-      nomerov: r.zadachnik.reduce((sum, [ot, do_]) => sum + (do_ - ot + 1), 0),
+      nomerov: r.sourceRanges.reduce((sum, [ot, do_]) => sum + (do_ - ot + 1), 0),
       zadach: poRazdelam.get(r.id) ?? 0,
     })),
     vneZadachnika,
     problems,
   };
+}
+
+/** Прототипы банка без подсказки-вопросов. */
+export function bezPodskazki(bank: readonly Prototype[]): string[] {
+  return bank.filter((p) => p.podskazka === undefined).map((p) => p.id);
 }

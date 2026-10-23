@@ -81,7 +81,7 @@ function windowFor(p) {
 registerCurve('quadratic', function (curve, win) {
   return sample(function (x) {
     return curve.a * x * x + curve.b * x + curve.c;
-  }, win.xmin, win.xmax, STEPS);
+  }, win.xmin, win.xmax, curve.steps || STEPS);
 });
 
 /** Асимптот у параболы нет. */

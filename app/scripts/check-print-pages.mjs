@@ -9,7 +9,8 @@
    на 2 мм ниже A4 (lib/sheet/theme.css), фон при печати белый.
 
    Проверяются листы ученика и учителя всех разделов с генератором,
-   с постоянным зерном:
+   с постоянным зерном, и справочник по планиметрии №1 (с примерами
+   и без):
 
      Chromium — печать в PDF на трёх высотах бумаги: ровно A4 (с
        правилом @page листа) и 841 pt, 840 pt без @page — так печатает
@@ -38,6 +39,10 @@ import { fileURLToPath } from 'node:url';
 import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
+bezBanneraCookieVsyudu(chromium, webkit);
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
@@ -50,7 +55,17 @@ const SHEETS = [
   ['№4', '/zadaniya/4/pechat/', 's=p4-01&n=10&seed=print-check'],
   ['№5', '/zadaniya/5/pechat/', 's=p5-01&n=10&seed=print-check'],
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
+  ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* Справочник №1: один лист, с примерами и без; в две колонки. */
+  ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
+  ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],
+];
+
+/* Листы генератора — ученика и учителя; у справочника свои варианты. */
+const OBA = [
+  ['ученик', ''],
+  ['учитель', 'otvety/'],
 ];
 
 /* Высоты бумаги для Chromium: A4 и печатные области, округлённые до
@@ -148,11 +163,8 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'print-'));
 const chrome = await chromium.launch(
   fs.existsSync('/opt/pw-browsers/chromium') ? { executablePath: '/opt/pw-browsers/chromium' } : {},
 );
-for (const [name, route, query] of SHEETS) {
-  for (const [who, sub] of [
-    ['ученик', ''],
-    ['учитель', 'otvety/'],
-  ]) {
+for (const [name, route, query, vidy] of SHEETS) {
+  for (const [who, sub] of vidy ?? OBA) {
     const url = `${apache.url}${route}${sub}?${query}${TAIL}`;
     const { page, declared } = await openSheet(chrome, url);
     check(
@@ -246,11 +258,8 @@ try {
 }
 
 if (safari !== null) {
-  for (const [name, route, query] of SHEETS) {
-    for (const [who, sub] of [
-      ['ученик', ''],
-      ['учитель', 'otvety/'],
-    ]) {
+  for (const [name, route, query, vidy] of SHEETS) {
+    for (const [who, sub] of vidy ?? OBA) {
       const url = `${apache.url}${route}${sub}?${query}${TAIL}`;
       const { page, declared } = await openSheet(safari, url);
       await page.emulateMedia({ media: 'print' });

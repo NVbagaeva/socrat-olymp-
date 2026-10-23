@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
-import { tasksPage } from '@/content/tasks';
-import { veroyatnostFamily, veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
+import { ZADANIYA } from '@/lib/paths';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
 export function generateStaticParams() {
@@ -39,9 +39,8 @@ export default async function Page({ params }: { params: Params }) {
         pool={pool}
         uznay={uznayMetodPool(5)}
         zadanie={5}
-        base={`${tasksPage.href}/5/trenazher/`}
-        family={veroyatnostFamily('5')}
-        skills={navykiMetodov(pool, 5)}
+        base={`${ZADANIYA}/5/trenazher/`}
+        metody={navykiMetodov(pool, 5)}
         preset={{ skill: found.skill, mode: found.mode }}
       />
     </>

@@ -1,0 +1,54 @@
+name: 'Сервер: обновить'
+
+# Все пакеты Ubuntu (обновления безопасности ставятся и сами, каждую
+# ночь) и образы набора по версиям из infra/lite/compose.yml.
+# Перезагрузка — только если её просит система и стоит отметка.
+
+on:
+  workflow_dispatch:
+    inputs:
+      reboot:
+        description: 'Перезагрузить, если система просит (сайт без входа на 1–2 минуты)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Обновить сервер
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Обновить
+        env:
+          REBOOT: ${{ inputs.reboot && '1' || '' }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: infra/lite/actions/update.sh
+
+      - name: Здоровье после обновления
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          API_DOMAIN: ${{ vars.API_DOMAIN || 'api.budetege.ru' }}
+        run: infra/lite/actions/health.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Обновить» не прошло'

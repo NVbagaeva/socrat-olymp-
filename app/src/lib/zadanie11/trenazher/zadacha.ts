@@ -13,6 +13,7 @@
 
 import { typesetKrupno as typeset } from '../../tex';
 import { generateBez, pohozhaNa, type Pohozha } from '../gen/core';
+import { strokaHtml } from '../proporciya/html';
 import { subtype } from '../prototypes';
 import { sealAnswer, sealChoice, sealText } from '../secret';
 import type { Level, LifehackId, SectionId, Solved, Tablitsa } from '../types';
@@ -94,7 +95,7 @@ export function sobratZadachu(plan: ZadachaPlan, bank: readonly UslovieBanka[]):
   const razbor: Razbor11 = {
     etapy: s.etapy.map((e) => ({
       title: typeset(e.title),
-      stroki: e.lines.map((line) => typeset(line)),
+      stroki: e.lines.map((line) => strokaHtml(line, { typeset })),
     })),
     tables: s.tables ?? [],
   };

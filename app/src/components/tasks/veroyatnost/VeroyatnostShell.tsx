@@ -1,10 +1,10 @@
-import Image from 'next/image';
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
-import { TUTORS_TAIL } from '@/content/vkladki';
+import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { RazdelTabs } from '../RazdelTabs';
+import { ZADANIYA } from '@/lib/paths';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -21,7 +21,7 @@ export interface VeroyatnostShellProps {
  * не мигает и не исчезает.
  */
 export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
-  const base = `${tasksPage.href}/${section.slug}`;
+  const base = `${ZADANIYA}/${section.slug}`;
 
   return (
     <AppShell active="tasks">
@@ -37,33 +37,19 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
             { label: `№${Number(section.no)}` },
           ]}
           title={section.title}
-          badge={section.badge}
+          {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.lead}
           {...(section.art === undefined
             ? {}
             : {
-                media: (
-                  /* Картинка — декор: alt пустой, ничего сверх заголовка
-                     она не сообщает. Размеры стоят настоящие, чтобы место
-                     под неё держалось до загрузки и шапка не прыгала. */
-                  <Image
-                    className="veroyatnost-art"
-                    src={section.art.src}
-                    alt=""
-                    width={section.art.width}
-                    height={section.art.height}
-                    priority
-                  />
-                ),
+                className: 'veroyatnost-head section-head--art',
+                media: <IllyustratsiyaShapki art={section.art} />,
               })}
         />
 
-        <RazdelTabs
-          base={base}
-          tabs={section.tabs}
-          tutorsTail={TUTORS_TAIL}
-          {...(section.tutors === undefined ? {} : { tutors: section.tutors })}
-        />
+        {/* «Для репетиторов» — обычная вкладка ленты со своей страницей,
+            меню материалов в ленте больше нет. */}
+        <RazdelTabs base={base} tabs={section.tabs} />
 
         <div className="section-panel veroyatnost-panel">{children}</div>
       </main>

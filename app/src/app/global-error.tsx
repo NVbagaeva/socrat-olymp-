@@ -41,10 +41,9 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
         <main
           style={{ maxWidth: 420, margin: '0 auto', padding: '96px 24px', textAlign: 'center' }}
         >
-          <h1 style={{ fontSize: 22, margin: '0 0 12px' }}>Что-то пошло не так</h1>
+          <h1 style={{ fontSize: 22, margin: '0 0 12px' }}>Не удалось открыть страницу</h1>
           <p style={{ margin: '0 0 24px', lineHeight: 1.5 }}>
-            Сайт не открылся. Обновите страницу: обычно этого хватает. Если не помогло, зайдите на
-            главную чуть позже.
+            Обновите страницу: обычно этого хватает. Если не помогло, зайдите на главную чуть позже.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button

@@ -22,6 +22,10 @@ import Triangle from '../src/lib/graph/triangle.js';
 import Solution from '../src/lib/graph/solution.js';
 import { checkQuadraticComposition, checkQuadraticTask } from './lib/graph-quadratic-checks.mjs';
 import { checkRationalComposition, checkRationalTask } from './lib/graph-rational-checks.mjs';
+import { checkSqrtComposition, checkSqrtTask } from './lib/graph-sqrt-checks.mjs';
+import { checkExponentialComposition, checkExponentialTask } from './lib/graph-exponential-checks.mjs';
+import { checkLogarithmicComposition, checkLogarithmicTask } from './lib/graph-logarithmic-checks.mjs';
+import { checkTrigonometricComposition, checkTrigonometricTask } from './lib/graph-trigonometric-checks.mjs';
 
 const THEME = renderer.THEME;
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'graph', 'data');
@@ -849,10 +853,14 @@ function readSets(dir) {
 /* Скрипту наборы нужно передать движку до первой генерации. */
 function loadAll() {
   /* Наборы подтем: прямой из prep/12, параболы из prep/12q, гиперболы
-     из prep/12r и prototypes/12r.
-     Проверки каждая выбирает по семейству набора. */
-  var prep = readSets('prep/12').concat(readSets('prep/12q')).concat(readSets('prep/12r'));
-  var prototypes = readSets('prototypes/12').concat(readSets('prototypes/12r'));
+     из prep/12r и prototypes/12r, графика корня из prep/12s и
+     prototypes/12s. Проверки каждая выбирает по семейству набора. */
+  var prep = readSets('prep/12').concat(readSets('prep/12q')).concat(readSets('prep/12r'))
+    .concat(readSets('prep/12s')).concat(readSets('prep/12e')).concat(readSets('prep/12l'))
+    .concat(readSets('prep/12t'));
+  var prototypes = readSets('prototypes/12').concat(readSets('prototypes/12r'))
+    .concat(readSets('prototypes/12s')).concat(readSets('prototypes/12e'))
+    .concat(readSets('prototypes/12l')).concat(readSets('prototypes/12t'));
   generator.setSets({
     prep: prep.map(function (item) { return item.data; }),
     prototypes: prototypes.map(function (item) { return item.data; })
@@ -894,6 +902,26 @@ function run() {
         errors = errors.concat(checkRationalTask(set, task));
       });
       errors = errors.concat(checkRationalComposition(set, tasks));
+    } else if (set.family === 'trigonometric') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkTrigonometricTask(set, task));
+      });
+      errors = errors.concat(checkTrigonometricComposition(set, tasks));
+    } else if (set.family === 'logarithmic') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkLogarithmicTask(set, task));
+      });
+      errors = errors.concat(checkLogarithmicComposition(set, tasks));
+    } else if (set.family === 'exponential') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkExponentialTask(set, task));
+      });
+      errors = errors.concat(checkExponentialComposition(set, tasks));
+    } else if (set.family === 'sqrt') {
+      tasks.forEach(function (task) {
+        errors = errors.concat(checkSqrtTask(set, task));
+      });
+      errors = errors.concat(checkSqrtComposition(set, tasks));
     } else if (set.family === 'quadratic') {
       tasks.forEach(function (task) {
         errors = errors.concat(checkQuadraticTask(set, task));

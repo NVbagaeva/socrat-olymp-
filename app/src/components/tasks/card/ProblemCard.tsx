@@ -1,14 +1,15 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Badge, Button, Input } from '@/components/ui';
 import type { Parametry } from '@/lib/veroyatnost/model';
 import type { PoolModel } from '@/lib/veroyatnost/pool';
-import { otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
+import { otkrytPodskazku, otkrytRazbor, type Razbor } from '@/lib/veroyatnost/razbor';
 import { answerMatches } from '@/lib/veroyatnost/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { VykladkaKlient } from '../veroyatnost/VykladkaKlient';
+import { HintFlow } from './HintFlow';
 import { Vizualizatsiya, podpisRisunka } from './Vizualizatsiya';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -36,6 +37,15 @@ import { assetUrl } from '@/lib/assetUrl';
 
 export type CardState = 'before' | 'correct' | 'incorrect' | 'revealed';
 
+/** Что внутри карточки меняется по действиям ученика: для сохранения тренировки. */
+export interface ProblemCardSnapshot {
+  value: string;
+  state: CardState;
+  /** Чем кончилась проверка: туда возвращает «Скрыть решение». */
+  itog: 'correct' | 'incorrect' | null;
+  shagov: number;
+}
+
 export interface ProblemCardZadacha {
   id: string;
   /** Условие — готовая вёрстка: формулы набраны KaTeX на сборке. */
@@ -46,6 +56,11 @@ export interface ProblemCardZadacha {
   seal: string;
   /** Закрытый разбор (JSON формы Razbor, зашифрованный отпечатком). */
   steps: string;
+  /**
+   * Закрытая подсказка-вопросы (JSON PodskazkaShag[], тем же
+   * отпечатком). Нет поля — кнопки «Подсказка» нет.
+   */
+  podskazka?: string;
   /** Метод и картинка — открытая часть модели. */
   model?: PoolModel;
   /**
@@ -70,16 +85,33 @@ export interface ProblemCardProps {
   istochnik?: string;
   /**
    * Начальное состояние. Нужно витрине, чтобы показать раскрытое
-   * решение без кликов; в тренажёре карточка всегда начинается с before.
+   * решение без кликов; в тренажёре карточка начинается с before, а при
+   * возвращении в сохранённую тренировку — с того, что отдал onChange:
+   * введённый ответ (value) и чем кончилась проверка (itog).
    */
-  initial?: { state: CardState; shagov?: number };
+  initial?: {
+    state: CardState;
+    shagov?: number;
+    value?: string;
+    itog?: 'correct' | 'incorrect' | null;
+  };
+  /** Сообщает состояние карточки при каждом его изменении. */
+  onChange?: (snapshot: ProblemCardSnapshot) => void;
   /** Ответ проверен: верно или нет. Открытие решения — не результат. */
   onResult?: (right: boolean) => void;
   onNext?: () => void;
   nextLabel?: string;
   /** Раскрыто решение — задача не засчитывается; сообщается один раз. */
   onReveal?: () => void;
+  /** Открыта подсказка по шагам — учитывается как раскрытое решение; сообщается один раз. */
+  onHint?: () => void;
   disabled?: boolean;
+  /**
+   * Подсказки включены (по умолчанию). Выключены — кнопки «Показать
+   * решение» до первой проверки нет: ученик сначала отвечает сам, а
+   * решение открывается после верного или неверного ответа.
+   */
+  podskazki?: boolean;
   className?: string;
 }
 
@@ -103,23 +135,50 @@ export function ProblemCard({
   metodLabel,
   istochnik,
   initial,
+  onChange,
   onResult,
   onNext,
   nextLabel = 'Следующая',
   onReveal,
+  onHint,
   disabled = false,
+  podskazki = true,
   className,
 }: ProblemCardProps) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(initial?.value ?? '');
   const [state, setState] = useState<CardState>(initial?.state ?? 'before');
   /* Чем кончилась проверка — чтобы «Скрыть решение» вернуло туда же. */
   const [itog, setItog] = useState<'correct' | 'incorrect' | null>(
-    initial?.state === 'correct' || initial?.state === 'incorrect' ? initial.state : null,
+    initial?.itog !== undefined
+      ? initial.itog
+      : initial?.state === 'correct' || initial?.state === 'incorrect'
+        ? initial.state
+        : null,
   );
   const [shagov, setShagov] = useState(initial?.shagov ?? 0);
   const [otkryt, setOtkryt] = useState(
     initial?.state === 'revealed' || initial?.state === 'correct',
   );
+
+  const [podskazkaOtkryta, setPodskazkaOtkryta] = useState(false);
+  /* Подсказка открывается так же лениво, как разбор. */
+  const podskazka = useMemo(
+    () =>
+      podskazkaOtkryta && zadacha.podskazka !== undefined
+        ? otkrytPodskazku(zadacha.podskazka, zadacha.seal)
+        : null,
+    [podskazkaOtkryta, zadacha.podskazka, zadacha.seal],
+  );
+
+  /* Отчёт наружу: последняя функция в ref, чтобы новая ссылка на
+     onChange не вызывала повторных сообщений. */
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+  useEffect(() => {
+    onChangeRef.current?.({ value, state, itog, shagov });
+  }, [value, state, itog, shagov]);
 
   /* Разбор открывается лениво и один раз: до этого в памяти его нет. */
   const razbor = useMemo<Razbor | null>(
@@ -146,6 +205,11 @@ export function ProblemCard({
     setShagov(1);
     onReveal?.();
   }, [onReveal]);
+
+  const otkrytPodskazkuKnopkoy = useCallback((): void => {
+    setPodskazkaOtkryta(true);
+    onHint?.();
+  }, [onHint]);
 
   const skryt = useCallback((): void => {
     setState(itog ?? 'before');
@@ -324,9 +388,16 @@ export function ProblemCard({
                 <Button onClick={proverit} disabled={disabled || value.trim() === ''}>
                   Проверить
                 </Button>
-                <Button variant="ghost" onClick={raskryt} disabled={disabled}>
-                  {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
-                </Button>
+                {podskazki && zadacha.podskazka !== undefined && !podskazkaOtkryta ? (
+                  <Button variant="ghost" onClick={otkrytPodskazkuKnopkoy} disabled={disabled}>
+                    Подсказка
+                  </Button>
+                ) : null}
+                {podskazki || state === 'incorrect' ? (
+                  <Button variant="ghost" onClick={raskryt} disabled={disabled}>
+                    {state === 'incorrect' ? 'Открыть решение' : 'Показать решение'}
+                  </Button>
+                ) : null}
               </>
             )}
             {onNext === undefined ? null : (
@@ -339,6 +410,10 @@ export function ProblemCard({
               </Button>
             )}
           </footer>
+
+          {podskazka !== null && !resheniyeVidno && state !== 'correct' ? (
+            <HintFlow shagi={podskazka} />
+          ) : null}
         </div>
 
         {risunokVnizu === null ? null : (
@@ -357,6 +432,7 @@ export function ProblemCard({
                     {i + 1}
                   </span>
                   <div className="pc-step__body">
+                    <p className="pc-step__etap">{shag.etap}</p>
                     <p className="pc-step__text">{shag.text}</p>
                     {shag.vykladka === undefined ? null : (
                       <VykladkaKlient className="pc-step__formula" vykladka={shag.vykladka} />

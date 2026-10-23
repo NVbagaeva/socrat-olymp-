@@ -3,6 +3,7 @@ import { ProverkaAnalogov } from '@/components/tasks/zadanie11/ProverkaAnalogov'
 import { dannyeProverki } from '@/lib/zadanie11/proverka';
 import 'katex/dist/katex.min.css';
 import './proverka.css';
+import '../procenty.css';
 
 export const metadata: Metadata = {
   title: 'Проверка аналогов · Задание 11 — Будет на ЕГЭ',

@@ -1,24 +1,16 @@
 import type { Metadata } from 'next';
-import { TeoriyaShell, telaRazdelov5 } from '@/components/tasks/veroyatnost/teoriya';
+import { OZadanii5 } from '@/components/tasks/veroyatnost/OZadanii5';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { RAZDELY_5 } from '@/content/veroyatnost-teoriya';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'teoriya')),
+  title: veroyatnostTitle('5', vkladka('5', 'o-zadanii')),
 };
 
 /**
- * Вкладка «Теория» задания №5 — она же адрес раздела.
- *
- * Написан один раздел, «Координатная прямая»: он переехал из теории
- * №4, потому что разбирает два события-промежутка и их вложенность —
- * метод 3 задания №5. Остальные разделы автор ещё не писал, и
- * придуманного здесь не будет.
- *
- * Страница серверная: формулы набираются KaTeX на сборке.
+ * Вкладка «О задании» задания №5 — живёт на адресе самого раздела,
+ * как у задания №4. Теория — на /teoriya/.
  */
-export default function Teoriya5Tab() {
-  return (
-    <TeoriyaShell vkladka={vkladka('5', 'teoriya')} razdely={RAZDELY_5} tela={telaRazdelov5} />
-  );
+export default function OZadanii5Tab() {
+  return <OZadanii5 base={`${ZADANIYA}/5`} />;
 }

@@ -14,10 +14,26 @@ import { prep, prototypes } from '@/lib/graph/data/index.js';
 import GraphGenerate from '@/lib/graph/generate.js';
 import { interceptVisible } from '@/lib/graph/solution.js';
 import RationalHints from '@/lib/graph/hints-rational.js';
+import SqrtHints from '@/lib/graph/hints-sqrt.js';
+import ExponentialHints from '@/lib/graph/hints-exponential.js';
+import { exponentialGuideSvg } from '@/lib/exponentialGuides';
+import LogarithmicHints from '@/lib/graph/hints-logarithmic.js';
+import { logarithmicGuideSvg } from '@/lib/logarithmicGuides';
+import TrigonometricHints from '@/lib/graph/hints-trigonometric.js';
+import { trigonometricGuideSvg } from '@/lib/trigonometricGuides';
+import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { katex } from '@/lib/graph/katex';
-import { quadraticSteps as quadraticSolution, rationalSteps as rationalSolution, type PrepStep } from '@/lib/prep';
+import {
+  quadraticSteps as quadraticSolution,
+  rationalSteps as rationalSolution,
+  sqrtSteps as sqrtSolution,
+  exponentialSteps as exponentialSolution,
+  logarithmicSteps as logarithmicSolution,
+  trigonometricSteps as trigonometricSolution,
+  type PrepStep,
+} from '@/lib/prep';
 import GraphSolutionQuadratic from '@/lib/graph/solution-quadratic.js';
 import { methodFor } from '@/lib/trainerMethod';
 
@@ -59,6 +75,19 @@ export interface TrainerTask {
   solution: PrepStep[] | null;
   /** Рисунок метода: чем эта задача решается. null — рисунка нет. */
   method: TrainerMethod | null;
+  /**
+   * Откуда задание: seed набора движка и контрольная подпись условия
+   * и ответа. По ним сессия тренажёра хранит задание рецептом и
+   * собирает заново (lib/trainerSession.ts). Нет — задание собрано
+   * не сессией тренажёра.
+   */
+  origin?: TrainerOrigin;
+}
+
+/** Seed набора и подпись задачи: рецепт, по которому задание собирается заново. */
+export interface TrainerOrigin {
+  seed: string;
+  sig: string;
 }
 
 /** Вариант ответа: номер и готовая разметка. */
@@ -221,8 +250,10 @@ export interface EngineTask {
     lines: EngineLine[];
     /** Уровень задачи: lucky или unlucky у прототипов, null у подготовки. */
     level?: string | null;
-    /** Семейство кривой: 'line', 'quadratic' или 'rational'. */
+    /** Семейство кривой: 'line', 'quadratic', 'rational' или 'sqrt'. */
     family?: string;
+    /** Правило ответа задачи (answerRule набора): например, intersection-x. */
+    rule?: string;
   };
   answerType?: string;
   /**
@@ -1056,6 +1087,122 @@ function rationalRightHint(task: EngineTask): string {
   return hintHtml('По чертежу $' + (meta.equation ?? '') + '$, дальше вычисление.');
 }
 
+/* ── Цепочка для графика корня ───────────────────────────────────
+
+   Шаги строит graph/hints-sqrt.js: лестница вопросов с кнопками —
+   где начало графика, через какую целую точку он проходит, чему
+   равно k, что спрашивают, ответ с проверкой по картинке; у задач с
+   прямой — ещё прямая через треугольник, уравнение, замена t = √x и
+   отбор корня. Здесь шаги набираются KaTeX, а шагу о прямой
+   достаётся свой чертёж — с треугольником наклона. */
+
+interface SqrtHint {
+  title: string;
+  chart?: 'triangle';
+  questions: {
+    prompt: string;
+    options: { text: string; right: boolean; why: string | null }[];
+    right: string;
+  }[];
+  after?: string[];
+}
+
+function sqrtSteps(task: EngineTask): TrainerStep[] {
+  const hints = SqrtHints.fromTask(task) as SqrtHint[];
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const triangle = sqrtTriangleSvg(task.meta);
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      focus: null,
+      questions: hint.questions.map((question) => ({
+        promptHtml: big(question.prompt),
+        options: question.options.map((option) => ({
+          html: big(option.text),
+          right: option.right,
+          whyHtml: option.why === null ? '' : big(option.why),
+        })),
+        rightHtml: big(question.right),
+      })),
+    };
+    if (hint.after && hint.after.length > 0) {
+      step.afterHtml = afterHtml(hint.after);
+    }
+    if (hint.chart === 'triangle' && triangle !== null) {
+      step.chartSvg = triangle;
+      step.chartFrom = 0;
+    }
+    return step;
+  });
+}
+
+/* ── Цепочка для показательной функции ───────────────────────────
+
+   Шаги строит graph/hints-exponential.js: лестница вопросов с
+   кнопками — какие точки берём, какая система, a, b, что спрашивают,
+   ответ с проверкой по графику. Шагам о точках и системе достаётся
+   чертёж с пунктирами от точек к осям: построения — только в подсказке. */
+
+function exponentialSteps(task: EngineTask): TrainerStep[] {
+  return pointHintSteps(
+    ExponentialHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    exponentialGuideSvg(task.meta),
+  );
+}
+
+/* Логарифмическая функция — та же лестница, шаги строит
+   graph/hints-logarithmic.js. */
+function logarithmicSteps(task: EngineTask): TrainerStep[] {
+  return pointHintSteps(
+    LogarithmicHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    logarithmicGuideSvg(task.meta),
+  );
+}
+
+/* Тригонометрические функции — та же лестница, шаги строит
+   graph/hints-trigonometric.js. */
+function trigonometricSteps(task: EngineTask): TrainerStep[] {
+  return pointHintSteps(
+    TrigonometricHints.fromTask(task) as (SqrtHint & { id?: string })[],
+    trigonometricGuideSvg(task.meta),
+  );
+}
+
+function pointHintSteps(hints: (SqrtHint & { id?: string })[], guides: string): TrainerStep[] {
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  return hints.map((hint) => {
+    const step: TrainerStep = {
+      titleHtml: hintHtml(hint.title),
+      textHtml: '',
+      shape: 'plain',
+      fields: [],
+      wrongHint: '',
+      focus: null,
+      questions: hint.questions.map((question) => ({
+        promptHtml: big(question.prompt),
+        options: question.options.map((option) => ({
+          html: big(option.text),
+          right: option.right,
+          whyHtml: option.why === null ? '' : big(option.why),
+        })),
+        rightHtml: big(question.right),
+      })),
+    };
+    if (hint.after && hint.after.length > 0) {
+      step.afterHtml = afterHtml(hint.after);
+    }
+    if (hint.id === 'points' || hint.id === 'system') {
+      step.chartSvg = guides;
+      step.chartFrom = 0;
+    }
+    return step;
+  });
+}
+
 /* ── Задание тренажёра из задачи движка ──────────────────────────
    Условие набирается KaTeX, подсказки и цепочка шагов собираются
    вместе с заданием. Откуда пришла задача — с сборки или из браузера
@@ -1067,6 +1214,82 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
      рисунок метода. */
   const quadratic = task.meta.family === 'quadratic';
   const rational = task.meta.family === 'rational';
+  if (task.meta.family === 'trigonometric') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: клетка по оси $x$ — $\\dfrac{\\pi}{4}$, две отмеченные точки, значения функции ' +
+          'в них, система; точка со значением $0$ сразу даёт $b$.',
+      ),
+      rightHint: hintHtml('Параметры найдены из системы по двум точкам.'),
+      steps: trigonometricSteps(task),
+      options: null,
+      oshibki: {},
+      solution: trigonometricSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
+  if (task.meta.family === 'logarithmic') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: две отмеченные точки в узлах сетки, система уравнений, ' +
+          'переход к показательной записи $\\log_a t = s \\iff a^s = t$; затем вычисление.',
+      ),
+      rightHint: hintHtml('Формула восстановлена по двум точкам, дальше вычисление.'),
+      steps: logarithmicSteps(task),
+      options: null,
+      oshibki: {},
+      solution: logarithmicSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
+  if (task.meta.family === 'exponential') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: две отмеченные точки в узлах сетки, система уравнений, ' +
+          'у $a^x + b$ — вычитаем, у $a^{x+b}$ — делим; затем вычисление.',
+      ),
+      rightHint: hintHtml('Формула восстановлена по двум точкам, дальше вычисление.'),
+      steps: exponentialSteps(task),
+      options: null,
+      oshibki: {},
+      solution: exponentialSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
+  if (task.meta.family === 'sqrt') {
+    return {
+      id: task.id,
+      kind: task.meta.set,
+      questionHtml: typeset(task.questionHtml),
+      chartSvg: task.svg,
+      answer: task.answer,
+      wrongHint: hintHtml(
+        'Проверь по шагам: начало графика, целая точка правее начала на $1$, $4$ или $9$ клеток, ' +
+          '$k$ — подъём делить на $\\sqrt{\\text{сдвига}}$, затем вычисление.',
+      ),
+      rightHint: hintHtml('По рисунку восстановлена формула, дальше вычисление.'),
+      steps: sqrtSteps(task),
+      options: null,
+      oshibki: {},
+      solution: sqrtSolution(task),
+      method: methodFor(task.meta.set),
+    };
+  }
   if (rational) {
     return {
       id: task.id,

@@ -287,6 +287,15 @@
   display: grid;
   gap: var(--space-1);
 }
+/* Этап решения — подпись над шагом: одни и те же слова во всех
+   задачах №4 и №5 (lib/veroyatnost/types.ts, ETAPY). */
+.pc-step__etap {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 28px;
+}
 .pc-step__text {
   margin: 0;
   line-height: var(--lh-body);
@@ -350,4 +359,119 @@
 /* Урезанный вариант: только условие, без сетки. */
 .pc--condition .pc__uslovie {
   max-width: 720px;
+}
+
+/* ── Подсказка по шагам ────────────────────────────────────────── */
+
+/* Стоит в колонке ответа, под кнопками: ученик проходит вопросы и
+   тут же вводит ответ, не прокручивая карточку. */
+.pc-hint {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.pc-hint__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.pc-hint__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pc-hint__step {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.pc-hint__no {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.pc-hint__q {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.pc-hint__step.is-passed .pc-hint__q {
+  color: var(--color-text-secondary);
+}
+.pc-hint__opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* Узкий экран: варианты ответа в столбик во всю ширину — кнопки
+   не мельчат и не налезают друг на друга. */
+@media (max-width: 479.98px) {
+  .pc-hint__opts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pc-hint__opt {
+    text-align: left;
+  }
+}
+/* Кнопка-ответ: высота под палец на телефоне, формула внутри не
+   выталкивает кнопку за край — переносится или прокручивается. */
+.pc-hint__opt {
+  min-height: 44px;
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  line-height: var(--lh-body);
+  text-align: left;
+  overflow-x: auto;
+  cursor: pointer;
+}
+.pc-hint__opt:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.pc-hint__opt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.pc-hint__opt:disabled {
+  cursor: default;
+}
+.pc-hint__opt.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.pc-hint__opt.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  opacity: 0.6;
+}
+/* Пройденный шаг: остаётся только верная кнопка — ход решения
+   читается сверху вниз без лишнего. */
+.pc-hint__step.is-passed .pc-hint__opt:not(.is-right) {
+  display: none;
+}
+.pc-hint__comment {
+  margin: 0;
+  color: var(--color-success);
+  line-height: var(--lh-body);
+}
+.pc-hint__oops {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.pc-hint__done {
+  margin: 0;
+  font-weight: 600;
 }

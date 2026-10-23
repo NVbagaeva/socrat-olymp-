@@ -20,7 +20,7 @@ import { round, type Params, type PrepZadacha, type Prototype } from './types';
 export { BLOKI_4, BLOKI_5, type Blok } from './blocks';
 export { BANK_5 } from './bank5';
 
-/** Банк задания №4: два блока задачника и блок координатной прямой, 23 прототипа. */
+/** Банк задания №4: два блока задачника и блок координатной прямой, 25 прототипов. */
 export const BANK_4: readonly Prototype[] = [...KLASSICHESKOE, ...STATISTICHESKOE, ...PRYAMAYA];
 
 /** Прототипы задач конспекта №4: вариант 1 — задача автора, дальше генератор. */

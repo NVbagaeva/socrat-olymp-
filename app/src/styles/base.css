@@ -173,3 +173,9 @@ svg {
 .katex .katex-html {
   white-space: nowrap;
 }
+
+/* Составная единица в тексте («км/ч», «м/с²»): без переноса после «/»
+   (lib/tex.ts оборачивает её сам). */
+.nowrap {
+  white-space: nowrap;
+}

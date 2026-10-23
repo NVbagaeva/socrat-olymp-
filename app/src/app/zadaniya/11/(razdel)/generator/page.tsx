@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Generator11 } from '@/components/tasks/zadanie11/Generator11';
-import { tasksPage } from '@/content/tasks';
 import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
+import { ZADANIYA } from '@/lib/paths';
 
 const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
 
@@ -17,7 +17,5 @@ export const metadata: Metadata = {
  */
 export default function Generator11Tab() {
   const d = dannyeTrenazhera();
-  return (
-    <Generator11 razdely={d.razdely} bank={d.bank} base={`${tasksPage.href}/${ZADANIE11.slug}`} />
-  );
+  return <Generator11 razdely={d.razdely} bank={d.bank} base={`${ZADANIYA}/${ZADANIE11.slug}`} />;
 }

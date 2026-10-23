@@ -7,6 +7,7 @@ import { PROTOTYPES } from '@/lib/vektory/prototypes';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Progress2 } from './Progress2';
+import { ZADANIYA } from '@/lib/paths';
 
 /**
  * Оболочка задания №2: крошки, заголовок, кольцо прогресса и лента
@@ -20,7 +21,7 @@ import { Progress2 } from './Progress2';
  * содержание теории и лента блоков: отдельного числа нигде нет.
  */
 export function VektoryShell({ children }: { children: React.ReactNode }) {
-  const base = `${tasksPage.href}/${VEKTORY.slug}`;
+  const base = `${ZADANIYA}/${VEKTORY.slug}`;
 
   return (
     <AppShell active="tasks">

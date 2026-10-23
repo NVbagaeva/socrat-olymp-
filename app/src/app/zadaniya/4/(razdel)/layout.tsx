@@ -9,6 +9,7 @@ import '../../[task]/section.css';
    №12, со своими стилями маршрута: подключаются без правок. */
 import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/configurator.css';
+import '../../komplekt.css';
 import '../../[task]/[type]/trainer.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
@@ -16,6 +17,9 @@ import '@/components/probability/probability.css';
 import '@/components/tasks/card/problem-card.css';
 import '@/components/tasks/veroyatnost/vykladka.css';
 import '../zadanie4.css';
+/* Вкладки по макетам: значки методов, дорожка опорных задач, тренажёр,
+   генератор по методам и страница «Для репетиторов». */
+import '../../veroyatnost-vkladki.css';
 
 /**
  * Оболочка задания №4: крошки, заголовок и лента вкладок.

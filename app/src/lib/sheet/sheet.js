@@ -269,7 +269,10 @@ function socialList(social, size) {
   }).join('');
 }
 
-function footer(foot) {
+/* kit — «Комплект 7K3F-2B» (lib/komplekt.ts): мелко у номера
+   страницы, на обоих листах комплекта. По нему учитель находит
+   комплект в «Моих комплектах» и печатает его снова. */
+function footer(foot, kit) {
   return '<footer class="sheet-foot">' +
     '<span class="sheet-foot-brand">' +
       '<span class="sheet-logo">' + marks.logoMark(7) +
@@ -280,6 +283,7 @@ function footer(foot) {
       '<span class="sheet-social">' + socialList(foot.social, 3.6) + '</span>' +
       '<p class="sheet-rights">' + typo.text(foot.rights) + '</p>' +
     '</span>' +
+    (kit ? '<span class="sheet-kit-code" data-kit-code>' + typo.escape(kit) + '</span>' : '') +
     '<span class="sheet-page-no" data-page-number>—</span>' +
     '</footer>';
 }
@@ -311,6 +315,12 @@ function flowItems(spec) {
       out.push('<div class="sheet-item sheet-block' + sub + '" data-keep-with-next="1" data-block="' + bi + '">' +
         blockHead(block) + '</div>');
     }
+    /* Рамка «Повторяем» и разобранные примеры перед задачами блока:
+       генератор №1 ставит их к каждому типу задач. */
+    if (block.recap) {
+      out.push('<div class="sheet-item sheet-block-recap">' + recapBlock(block.recap) + '</div>');
+    }
+    (block.leadItems || []).forEach(function (item) { out.push(item); });
 
     /* items — готовые куски потока вместо задач: рамка «что нужно
        знать», разобранный пример. Каждый — уже обёрнутый sheet-item,
@@ -363,6 +373,8 @@ function flowItems(spec) {
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
  *            даёт одну полосу заголовка; head: false — блок без полосы;
+ *            recap — рамка «Повторяем» блока, leadItems — куски потока
+ *            перед его задачами (разобранные примеры, exampleItem)
  *            items[] — готовые куски потока (sheet-item) перед задачами
  *            блока: рамка «что нужно знать», разобранный пример
  *   defs     разметка, которая кладётся в документ один раз перед
@@ -378,6 +390,7 @@ function flowItems(spec) {
  *               Первый из них помечается data-page-break, чтобы
  *               раздел начинался с новой страницы
  *   foot     { course, social[], rights }
+ *   kit      «Комплект 7K3F-2B» — код комплекта в колонтитуле; нет — нет
  *
  * assets: { css, fontCss, extraCss, script }
  */
@@ -419,7 +432,7 @@ function buildDocument(spec, assets) {
         compactHead: compactHead(spec.head, spec.runner || spec.title.text),
         opening: variants ? '' : titleBlock(spec.title) + recapBlock(spec.recap) + fieldsLine(spec.fields),
         items: items.concat(spec.extraItems || []),
-        footer: footer(spec.foot)
+        footer: footer(spec.foot, spec.kit)
       }).replace(/<\//g, '<\\/') +
     '</script>\n' +
     '<script>\n' + (assets.script || '') + '\n</script>\n' +

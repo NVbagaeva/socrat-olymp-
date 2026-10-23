@@ -9,6 +9,7 @@
  */
 
 import { typesetKrupno as typeset } from '../../tex';
+import { strokaHtml } from '../proporciya/html';
 import { sealAnswer, sealChoice, sealText } from '../secret';
 import type { Tablitsa } from '../types';
 import { generateMikro } from './generate';
@@ -52,7 +53,7 @@ export function sealMikro11(m: Mikro, seed: string): MikroSealed11 {
     comment: h.comment === undefined ? null : typeset(h.comment),
   }));
   const razbor: MikroRazbor11 = {
-    stroki: task.razbor.map((line) => typeset(line)),
+    stroki: task.razbor.map((line) => strokaHtml(line, { typeset })),
     tablitsa: task.razborTablitsa ?? null,
   };
   return {

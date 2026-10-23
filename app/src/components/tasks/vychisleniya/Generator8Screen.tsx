@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { useId, useState } from 'react';
 import { Badge, Input } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import {
@@ -13,10 +13,10 @@ import {
 } from '@/content/generator';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { counted } from '@/lib/plural';
-import { randomSeed } from '@/lib/vychisleniya/session';
 import { sheetQuery8, subtitleOf8 } from '@/lib/vychisleniya/sheet8';
 import { LEVELS } from '@/lib/vychisleniya/skills';
 import type { Level } from '@/lib/vychisleniya/types';
+import { KitBar } from '../generator/KitBar';
 
 export interface Generator8ScreenProps {
   /** Адрес раздела: страницы печати лежат под ним. */
@@ -45,29 +45,25 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
   const [theme, setTheme] = useState<SheetThemeId>('color');
 
   const chosen = skills.filter((item) => selected.includes(item.id));
-  const selectedKey = selected.join(',');
-  const seed = useMemo(
-    () => randomSeed(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedKey, count, level],
-  );
   const allCount = chosen.reduce((sum, item) => sum + item.count, 0);
   const chosenCount = count ?? allCount;
   const kindTitle = kind === CUSTOM ? customKind.trim() : kind;
   const subtitle = subtitleOf8({ kind: kindTitle, date });
   const layoutTitle = sheetLayouts.find((item) => item.id === layout)?.title ?? '';
-  const query = sheetQuery8({
-    skills: chosen.map((item) => item.id),
-    count: chosenCount,
-    level,
-    seed,
-    theme,
-    layout,
-    kind: kindTitle,
-    date,
-  });
-  const studentHref = `${base}/pechat/?${query}`;
-  const teacherHref = `${base}/pechat/otvety/?${query}`;
+  /* Адреса листов по seed комплекта: его выдаёт KitBar. */
+  const sheetHrefs = (seed: string) => {
+    const query = sheetQuery8({
+      skills: chosen.map((item) => item.id),
+      count: chosenCount,
+      level,
+      seed,
+      theme,
+      layout,
+      kind: kindTitle,
+      date,
+    });
+    return { student: `${base}/pechat/?${query}`, teacher: `${base}/pechat/otvety/?${query}` };
+  };
   const themeTitle = sheetThemes.find((item) => item.id === theme)?.title ?? '';
 
   function toggleSkill(id: string) {
@@ -188,18 +184,22 @@ export function Generator8Screen({ base, skills }: Generator8ScreenProps) {
         </aside>
       </div>
 
-      <div className="cfg-bar cfg-bar--two">
-        <a className="btn btn--primary btn--lg cfg-bar__start" href={studentHref} target="_blank" rel="noopener">
-          {generatorPage.student}
-        </a>
-        <a className="btn btn--secondary btn--lg cfg-bar__start" href={teacherHref} target="_blank" rel="noopener">
-          {generatorPage.teacher}
-        </a>
-        <p className="cfg-bar__summary">
-          {VYCHISLENIYA.title}
-          {subtitle === '' ? '' : ` · ${subtitle}`} · {chosen.map((item) => item.title).join(', ')} · {counted(chosenCount, 'задание', 'задания', 'заданий')}
-        </p>
-      </div>
+      <KitBar
+        scope="8"
+        slot={base}
+        section={`№8 · ${VYCHISLENIYA.title}`}
+        count={chosenCount}
+        ready
+        hrefs={sheetHrefs}
+        summary={
+          <>
+            {VYCHISLENIYA.title}
+            {subtitle === '' ? '' : ` · ${subtitle}`} ·{' '}
+            {chosen.map((item) => item.title).join(', ')} ·{' '}
+            {counted(chosenCount, 'задание', 'задания', 'заданий')}
+          </>
+        }
+      />
     </section>
   );
 }

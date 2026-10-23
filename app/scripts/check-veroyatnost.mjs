@@ -65,7 +65,8 @@ const src = path.join(root, 'src', 'lib');
    генератора из lib/zadanie3/podhod.ts, набор формул из lib/tex.ts (с
    разбором строки lib/razmetka.ts) и
    склонение из lib/plural.ts (его просят слова вкладки подготовки) и
-   план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts) —
+   план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts),
+   адреса страниц из lib/paths.ts (их просит content/tasks.ts) —
    переводим их вместе с папкой раздела. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
@@ -78,6 +79,7 @@ for (const file of [
   path.join(src, 'assetUrl.ts'),
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
+  path.join(src, 'paths.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
@@ -88,9 +90,15 @@ for (const file of [
   fs.writeFileSync(target, js);
 }
 
-const { checkBank, checkPrep, checkLabirint, checkModel, checkRaskladku } = require0(
-  path.join(out, 'veroyatnost', 'selftest.js'),
-);
+const {
+  bezPodskazki,
+  checkBank,
+  checkGeneratory,
+  checkPrep,
+  checkLabirint,
+  checkModel,
+  checkRaskladku,
+} = require0(path.join(out, 'veroyatnost', 'selftest.js'));
 const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
   path.join(out, 'veroyatnost', 'index.js'),
 );
@@ -100,10 +108,10 @@ const { BANK_4, BANK_5, KONSPEKT_4, PODGOTOVKA_4, PODGOTOVKA_5 } = require0(
 const report = checkBank([...BANK_4, ...BANK_5, ...KONSPEKT_4]);
 
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
-console.log(`   сгенерировано ${report.bySource.новый} (пометка «генератор» у каждого прототипа)`);
+console.log(`   сгенерировано ${report.bySource.novyj} (пометка «генератор» у каждого прототипа)`);
 console.log(
-  `2. из задачника ${report.bySource.задачник}, из конспекта ${report.bySource.конспект}, ` +
-    `создано заново ${report.bySource.новый}`,
+  `2. из сборника ${report.bySource.sbornik}, из урока ${report.bySource.urok}, ` +
+    `создано заново ${report.bySource.novyj}`,
 );
 console.log(`3. ответ по формуле разошёлся с ответом перебором: ${report.mismatchPerebor}`);
 console.log(`4. последний шаг разбора не равен ответу: ${report.mismatchSteps}`);
@@ -118,7 +126,7 @@ report.bad
   .slice(0, 20)
   .forEach((item) => console.log(`   ${item}`));
 console.log(`6. варианты из источников с проблемами: ${report.sourceProblems.length}`);
-report.sourceProblems.slice(0, 20).forEach((item) => console.log(`   ${item.ref}: ${item.why}`));
+report.sourceProblems.slice(0, 20).forEach((item) => console.log(`   ${item.sourceNote}: ${item.why}`));
 console.log(`7. совпадающих вариантов: ${report.duplicates.length}`);
 report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`столкновений отпечатков ответа: ${report.collisions.length}`);
@@ -140,6 +148,8 @@ prep.bad
   .forEach((item) => console.log(`   ${item}`));
 console.log(`  повторов: ${prep.duplicates.length}`);
 prep.duplicates.forEach((item) => console.log(`   ${item}`));
+console.log(`  ошибок в списках картинок: ${prep.kartinki.length}`);
+prep.kartinki.forEach((item) => console.log(`   ${item}`));
 
 /* Модель задачи (раздел 04 референса): метод у каждой задачи №4,
    рисунок собирается из параметров и показывает тот же ответ. */
@@ -252,7 +262,7 @@ if (katexPut !== undefined) {
     try {
       const razbor = shagiRazbora(shagi);
       tex.shagov += razbor.length;
-      tex.formul += razbor.filter((shag) => shag.html !== undefined).length;
+      tex.formul += razbor.filter((shag) => shag.vykladka !== undefined).length;
     } catch (error) {
       tex.oshibki.push(`${imya}: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -363,7 +373,49 @@ console.log(`\nлист генератора: собрано ${listy.sobrano}, �
 console.log(`  нарушений: ${listy.oshibki.length}`);
 listy.oshibki.forEach((item) => console.log(`   ${item}`));
 
+/* Правила генерации на многих зёрнах: шире, чем варианты на сайте.
+   Каждый принятый вариант проверяется как вариант банка, в том числе
+   правилом «ответ строго между 0 и 1 после округления». */
+const ZEREN = 500;
+const generatory = checkGeneratory([...BANK_4, ...BANK_5, ...KONSPEKT_4], ZEREN);
+console.log(
+  `\nгенераторы: прототипов ${generatory.prototypes}, зёрен на прототип ${generatory.zeren}, ` +
+    `вариантов проверено ${generatory.vsego}`,
+);
+/* Прототипы без правила генерации — с вариантами, заданными списком
+   (p4-22, p4-23): их варианты проверены выше вместе с банком. */
+console.log(`  вариантов списком, без правила генерации: ${generatory.bezPravila.length}`);
+generatory.bezPravila.forEach((id) => console.log(`   ${id}`));
+console.log(`  нарушений: ${generatory.problems.length}`);
+generatory.problems.slice(0, 40).forEach((item) => console.log(`   ${item}`));
+
+/* Подсказки-вопросы: их шаги проверены выше вместе с вариантом (и на
+   зёрнах генератора). Здесь — у каких прототипов подсказки ещё нет:
+   у банков №4 и №5 она обязательна у всех. */
+const bez4 = bezPodskazki(BANK_4);
+const bez5 = bezPodskazki(BANK_5);
+/* Опорные задачи: подсказка проверена в checkPrep (та же, что уйдёт
+   ученику); здесь — у каких её нет. */
+const opornyeBez = prep.bezPodskazki;
+console.log(
+  `\nподсказки-вопросы: №4 — ${BANK_4.length - bez4.length} из ${BANK_4.length}, ` +
+    `№5 — ${BANK_5.length - bez5.length} из ${BANK_5.length}`,
+);
+console.log(`  опорные №4 и №5 — ${prep.zadachi - opornyeBez.length} из ${prep.zadachi}`);
+
 fs.rmSync(out, { recursive: true, force: true });
+
+if (bez4.length > 0 || bez5.length > 0 || opornyeBez.length > 0) {
+  console.error(
+    `\nНет подсказки-вопросов: ${[...bez4, ...bez5, ...opornyeBez].join(', ')}.`,
+  );
+  process.exit(1);
+}
+
+if (generatory.problems.length > 0) {
+  console.error('\nПравила генерации дают недопустимые варианты.');
+  process.exit(1);
+}
 
 if (listy.oshibki.length > 0) {
   console.error('\nНа листе генератора есть картинки задач.');
@@ -391,7 +443,7 @@ if (raskladka.problems.length > 0) {
   process.exit(1);
 }
 
-if (prep.bad.length > 0 || prep.duplicates.length > 0) {
+if (prep.bad.length > 0 || prep.duplicates.length > 0 || prep.kartinki.length > 0) {
   console.error(`\nПодготовительные задачи не сходятся: ${prep.bad.length} задач с проблемами.`);
   prep.bad.forEach((row) =>
     console.error(`  ${row.id} (конспект № ${row.n}): ${row.problems.join('; ')}`),

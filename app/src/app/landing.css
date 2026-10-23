@@ -123,6 +123,58 @@
   flex-wrap: wrap;
 }
 
+/* Пилюля «Как пользоваться сайтом · 2 минуты» рядом с главной кнопкой. */
+.hero__howto {
+  display: inline-flex;
+  text-decoration: none;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-5) var(--space-2) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.hero__howto:hover,
+.hero__howto:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+.hero__howto-ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.hero__howto-ico svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.hero__howto-text {
+  display: grid;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+}
+.hero__howto-meta {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
 .hero__note {
   font-size: 14px;
   color: var(--color-text-secondary);

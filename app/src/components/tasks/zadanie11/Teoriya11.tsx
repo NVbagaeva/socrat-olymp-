@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Details } from '@/components/ui';
+import { EdinicyStepeni } from '@/components/teoriya/EdinicyStepeni';
+import { chastEdinic, YAKOR_EDINIC } from '@/content/teoriya-edinicy';
 import { Tex } from '@/components/ui/Tex';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import {
   LAYFHAKI,
   LOVUSHKI,
@@ -140,8 +142,9 @@ function KartaLovushka({ id, yakor }: { id: string; yakor: boolean }) {
  */
 export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
   const out: { id: string; title: string }[] = [];
+  for (const c of r.obshchaya ?? []) out.push({ id: YAKOR_EDINIC(c), title: chastEdinic(c).title });
   if (r.priemy) {
-    return r.priemy.map((p) => ({ id: `${r.id}-${p.id}`, title: p.kratko }));
+    return [...out, ...r.priemy.map((p) => ({ id: `${r.id}-${p.id}`, title: p.kratko }))];
   }
   if (r.section) out.push({ id: `${r.id}-vstup`, title: TEORIYA_11.vstup.title });
   if (r.idei.length > 0 && !r.section) {
@@ -434,6 +437,7 @@ function Telo({ r, base }: { r: RazdelTeorii11; base: string }) {
       </div>
 
       {sSektsiey ? <Vstup r={sSektsiey} /> : null}
+      {r.obshchaya ? <EdinicyStepeni chasti={r.obshchaya} /> : null}
 
       {r.vvedenie ? (
         <section className="z11-card z11-vved">

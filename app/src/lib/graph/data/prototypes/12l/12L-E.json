@@ -1,0 +1,384 @@
+{
+  "kind": "prototype",
+  "id": "12L.E",
+  "task": 12,
+  "title": "12L.E · $\\log_a(x + b)$: аргумент по значению",
+  "subtitle": "По графику $f(x) = \\log_a(x + b)$ найти $x$, при котором $f(x)$ равно данному числу",
+  "seed": 12805,
+  "family": "logarithmic",
+  "form": "shiftX",
+  "axisLabels": "minimal",
+  "uniqueAnswers": false,
+  "maxAnswerRepeat": 2,
+  "maxAnswerDuplicates": 8,
+  "maxVertexRepeat": 2,
+  "maxSlopeRepeat": 6,
+  "note": "Соответствует открытому банку ФИПИ. Считается в покрытии банка. Задачи с пометкой source: fipi — из банка дословно, остальные — аналоги, не из открытого банка.",
+  "composition": {
+    "count": 21,
+    "fipi": 1,
+    "analogs": 20,
+    "levels": {
+      "lucky": 14,
+      "unlucky": 6
+    },
+    "minDistinctAnswers": 12
+  },
+  "tasks": [
+    {
+      "id": "12L.E-F1",
+      "source": "fipi",
+      "fipiNo": 8,
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "fixed": {
+          "base": {
+            "r": 2
+          },
+          "c": 5,
+          "marks": [
+            1,
+            2
+          ],
+          "y0": 4,
+          "window": {
+            "xmin": -7,
+            "xmax": 4,
+            "ymin": -2,
+            "ymax": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "12L.E-01",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-02",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-03",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-04",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-05",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-06",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-07",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-08",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-09",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-10",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-11",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-12",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-13",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-14",
+      "level": "lucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "unit",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      }
+    },
+    {
+      "id": "12L.E-15",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "any",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.E-16",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "any",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "fraction-argument"
+    },
+    {
+      "id": "12L.E-17",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.E-18",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "argument-for",
+          "kind": "integer"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.E-19",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "up",
+        "marks": "far",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    },
+    {
+      "id": "12L.E-20",
+      "level": "unlucky",
+      "form": "shiftX",
+      "question": "На рисунке изображён график функции $f(x) = \\log_a(x + b)$. Найдите значение $x$, при котором $f(x) = {y0}$.",
+      "answerRule": "argument-for",
+      "answerType": "number",
+      "constraints": {
+        "direction": "down",
+        "marks": "far",
+        "query": {
+          "type": "argument-for",
+          "kind": "decimal"
+        }
+      },
+      "levelReason": "far-points"
+    }
+  ]
+}

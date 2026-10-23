@@ -28,9 +28,29 @@ function versions(): Record<string, string> {
   return table;
 }
 
+/**
+ * Путь к файлу без версии и якоря: '/images/x.jpg?v=3f9a' → '/images/x.jpg'.
+ * Нужен там, где по ссылке ищут сам файл в public/ — например, проверка
+ * на сборке «лежит ли фотография на месте»: с хвостом ?v=… такого файла
+ * на диске нет.
+ */
+export function bezVersii(path: string): string {
+  return path.split(/[?#]/)[0] ?? path;
+}
+
 export function assetUrl(path: string): string {
+  return withVersion(path, versions());
+}
+
+/**
+ * То же по своей таблице версий. Нужна коду, который грузится отдельно
+ * и держит версии своих файлов при себе, чтобы общая таблица в первой
+ * загрузке не росла (заставка: process.env.INTRO_ASSET_VERSIONS;
+ * данные тренажёров: lib/dataUrl.ts).
+ */
+export function withVersion(path: string, table: Record<string, string>): string {
   const [bare] = path.split(/[?#]/);
-  const version = bare === undefined ? undefined : versions()[bare];
+  const version = bare === undefined ? undefined : table[bare];
   if (version === undefined) {
     return path;
   }

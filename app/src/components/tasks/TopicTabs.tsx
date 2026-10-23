@@ -1,7 +1,16 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { flushSync } from 'react-dom';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import type { ReactNode } from 'react';
 import { VKLADKI_PODTEMY } from '@/content/vkladki';
 import { VkladkaIkonka } from './VkladkaIkonka';
@@ -14,8 +23,15 @@ import { TitleText } from './TitleText';
 import { TopicContents } from './TopicContents';
 import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
+import { DrugieRazdely, RazdelyNav, type RazdelyData } from './razdely';
+import { VesRazdelCards } from './ves12/VesRazdelCards';
+import { vesRazdel } from '@/content/ves12';
+import { sbrositVkladku, vkladkaIzAdresa } from './razdely/vkladka';
 import { useStickyTabs } from './useStickyTabs';
 import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
+import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
+import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
+import { sessionText } from './session/text';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -68,9 +84,20 @@ export interface TopicTabsProps {
    * месте, как «О задании» и «Теория».
    */
   prepHref: string | null;
+  /**
+   * Разделы задания: плашка над вкладками, меню всех разделов и блок
+   * «Другие разделы» в конце вкладки. Не заданы — ничего этого нет.
+   */
+  razdely?: RazdelyData;
 }
 
 /** Идентификатор блока теории в разметке: по нему работают якоря. */
+interface Podpunkt {
+  id: string;
+  title: string;
+  titleHtml: string;
+}
+
 function blockId(id: string): string {
   return `theory-${id}`;
 }
@@ -121,6 +148,7 @@ export function TopicTabs({
   trackKey,
   initial = 'about',
   prepHref,
+  razdely,
 }: TopicTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -139,6 +167,12 @@ export function TopicTabs({
       (item.id !== 'generator' || generator !== undefined) &&
       (item.id !== 'methods' || methods !== undefined),
   );
+  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  const active = useActiveTrainerScopes();
+  const trainerActive = trainerHref !== null && hasActiveScope(active, scopeOfPath(trainerHref));
+  const marked = tabs.map((item) =>
+    item.id === 'trainer' && trainerActive ? { ...item, badge: sessionText.menuDot } : item,
+  );
 
   /* У подготовительных задач и тренажёра свои адреса. Поэтому такая
      вкладка не переключает состояние, а ведёт туда: иначе изнутри
@@ -148,6 +182,8 @@ export function TopicTabs({
   function choose(id: string) {
     /* Переход на любую вкладку закрывает меню материалов. */
     setMenu(false);
+    /* Пришли по ?vkladka= — адрес больше не про открытую вкладку. */
+    sbrositVkladku(id);
     const href = id === 'prep' ? prepHref : id === 'trainer' ? trainerHref : null;
     if (href !== null && pathname !== href) {
       /* Переход в переходе (transition): пока страница-назначение едет по
@@ -173,6 +209,24 @@ export function TopicTabs({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
   }, []);
 
+  /* Пришли из другого раздела с вкладки без своего адреса («Теория»,
+     «Методы», «Генератор»): она в параметре ?vkladka=, открываем её.
+     До первой отрисовки на экране — без мелькания «О задании». Такой
+     вкладки у раздела нет — параметр убирается, остаётся «О задании». */
+  useLayoutEffect(() => {
+    const wanted = vkladkaIzAdresa();
+    if (wanted === null) {
+      return;
+    }
+    if (tabs.some((item) => item.id === wanted)) {
+      /* Синхронно и до отрисовки кадра: «О задании» не мелькает. */
+      queueMicrotask(() => flushSync(() => setTab(wanted)));
+    } else {
+      sbrositVkladku(tab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при загрузке
+  }, []);
+
   /* Раздел, на котором стоит страница: сначала первый, дальше тот,
      что виден на экране. */
   const [block, setBlock] = useState(theory[0]?.id ?? '');
@@ -183,11 +237,40 @@ export function TopicTabs({
   /* Лента прилипает к верху экрана (общий хук всех разделов). */
   useStickyTabs(strip);
 
+  /* Подпункты «Содержания» — подразделы с якорями внутри раздела
+     (.rich-sub: «8.1 Найти f(3)»). Берутся из самой разметки раздела
+     после отрисовки: второго списка заголовков нет, и разойтись
+     содержанию с текстом нечем. */
+  const [podpunkty, setPodpunkty] = useState<Record<string, Podpunkt[]>>({});
+  useEffect(() => {
+    if (tab !== 'theory') {
+      return undefined;
+    }
+    /* Читается следующим кадром: разделы к этому времени уже в DOM. */
+    const frame = requestAnimationFrame(() => {
+      const found: Record<string, Podpunkt[]> = {};
+      theory.forEach((item) => {
+        const node = document.getElementById(blockId(item.id));
+        const subs =
+          node === null ? [] : Array.from(node.querySelectorAll<HTMLElement>('.rich-sub[id]'));
+        if (subs.length > 0) {
+          found[item.id] = subs.map((sub) => {
+            const head = sub.querySelector('.rich-sub__title');
+            return { id: sub.id, title: head?.textContent ?? '', titleHtml: head?.innerHTML ?? '' };
+          });
+        }
+      });
+      setPodpunkty(found);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [tab, theory]);
+
   const current = theory.find((item) => item.id === block) ?? theory[0];
   const items = theory.map((item) => ({
     id: item.id,
     title: item.title,
     titleHtml: item.titleHtml,
+    ...(podpunkty[item.id] === undefined ? {} : { podpunkty: podpunkty[item.id] }),
   }));
 
   /* Переход к разделу. Узла может не быть — тогда просто ничего не
@@ -199,6 +282,22 @@ export function TopicTabs({
     }
     scrollToSection(node);
   }, []);
+
+  /* Подпункт раздела: якорь внутри него. Раздел подсвечивается свой. */
+  function pickPodpunkt(id: string) {
+    const owner = theory.find((item) => podpunkty[item.id]?.some((sub) => sub.id === id));
+    if (owner !== undefined) {
+      setBlock(owner.id);
+      pinBlock();
+    }
+    setSheet(false);
+    requestAnimationFrame(() => {
+      const node = document.getElementById(id);
+      if (node !== null) {
+        scrollToSection(node);
+      }
+    });
+  }
 
   function pick(id: string) {
     setBlock(id);
@@ -326,10 +425,29 @@ export function TopicTabs({
         open={menu}
         onOpenChange={setMenu}
         stripRef={strip}
+        before={
+          razdely === undefined ? undefined : (
+            <RazdelyNav
+              {...razdely}
+              vkladka={tab}
+              /* Первый пункт меню №12 — весь раздел: зачётная работа и
+                 генератор по всем типам. В прокрутке вместе со списком:
+                 на телефоне панель невысокая. */
+              dop={
+                String(razdely.no) === '12' ? (
+                  <>
+                    <VesRazdelCards place="menu" />
+                    <h3 className="razdely-menu__sub">{vesRazdel.orType}</h3>
+                  </>
+                ) : undefined
+              }
+            />
+          )
+        }
       >
         <Tabs
           className="tabs--lenta"
-          items={tabs}
+          items={marked}
           value={navigating && target !== null ? target : tab}
           {...(navigating && target !== null ? { busyId: target } : {})}
           onValueChange={choose}
@@ -429,11 +547,21 @@ export function TopicTabs({
         {tab === 'theory' ? (
           <aside className="topic-side" aria-label="Содержание темы">
             <h3 className="topic-side__title">Содержание</h3>
-            <TopicContents items={items} active={block} onSelect={pick} />
+            <TopicContents
+              items={items}
+              active={block}
+              onSelect={pick}
+              onSelectPodpunkt={pickPodpunkt}
+              podpunktyVsegda
+            />
             {contentsDecor}
           </aside>
         ) : null}
       </div>
+
+      {/* Другие разделы задания — в конце любой вкладки, под колонкой
+          содержания, во всю ширину. */}
+      {razdely === undefined ? null : <DrugieRazdely {...razdely} vkladka={tab} />}
 
       {/* Шторка: то же окно, что и на выборе типа функции. Своего
           компонента для неё в проекте нет и не заводится. */}
@@ -445,7 +573,13 @@ export function TopicTabs({
         title="Содержание"
         description="Выберите раздел темы"
       >
-        <TopicContents items={items} active={block} onSelect={pick} />
+        <TopicContents
+          items={items}
+          active={block}
+          onSelect={pick}
+          onSelectPodpunkt={pickPodpunkt}
+          podpunktyVsegda
+        />
       </Modal>
     </>
   );

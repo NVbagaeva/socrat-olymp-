@@ -1,11 +1,10 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
-import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { prepSkillsFor } from '@/content/prepSkills';
+import { EmptyState, HandNote, type Crumb } from '@/components/ui';
 import { tasksPage } from '@/content/tasks';
 import { PODTEMA_SKORO, type ExamSection, type Subtopic } from '@/content/sections';
-import { subtopicBuilt } from '@/data/functionTypes';
 import { findManifestFamily } from '@/lib/generator/manifest';
 import { prepSkillTotal } from '@/lib/prep';
 import { aboutScene } from '@/lib/scenes';
@@ -17,12 +16,25 @@ import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
 import { TrainerShell } from './trainer';
 import { TopicAbout } from './TopicAbout';
+import type { TheoryFigureId } from '@/lib/theoryFigures';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
 import { ShapkaRazdela } from './ShapkaRazdela';
+import { VseRazdelyKnopka } from './razdely';
+import { podtemaVkladki, razdelyZadaniya } from './razdely/razdely12';
 import { TopicTabs } from './TopicTabs';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { href, ZADANIYA } from '@/lib/paths';
+
+/* Рисунок «Что нужно уметь» с подписями у своих графиков (KaTeX): у
+   линейной и квадратичной на рисунке две подписи формул. У гиперболы
+   и корня графики не подписаны — там сцена движка как есть. */
+const ABOUT_FIGURE: Partial<Record<string, TheoryFigureId>> = {
+  linear: 'about-linear',
+  quadratic: 'about-quadratic',
+};
+
 export interface FunctionTopicPageProps {
   section: ExamSection;
   subtopic: Subtopic;
@@ -63,7 +75,7 @@ export function FunctionTopicPage({
   trail = [],
 }: FunctionTopicPageProps) {
   const { topic } = section;
-  const base = `${tasksPage.href}/${section.slug}/${subtopic.id}`;
+  const base = `${ZADANIYA}/${section.slug}/${subtopic.id}`;
   /* Вкладка ведёт по адресу только тогда, когда за ней есть материал
      этой подтемы: у опорных задач — список навыков, у тренажёра
      и генератора — наборы прототипов в данных движка. Иначе вкладка
@@ -71,14 +83,20 @@ export function FunctionTopicPage({
      уводит на 404, а до нажатия не показываются навыки чужой подтемы.
      Адреса под вкладки собираются по тем же условиям (lib/prep.ts,
      content/sections.ts). У закрытой подтемы страниц нет вовсе. */
-  const built = subtopicBuilt(subtopic);
-  const hasPrep = built && prepSkillsFor(subtopic.id).length > 0;
-  const hasTrainer = built && prototypeSkills(findManifestFamily(subtopic.id)).length > 0;
+  const { prep: hasPrep, trainer: hasTrainer } = podtemaVkladki(subtopic);
+  /* Навигация по разделам задания: плашка над вкладками, меню и блок
+     «Другие разделы» внизу. Данные — из того же списка подтем. */
+  const razdely = razdelyZadaniya(section, subtopic.id);
+  const icon = razdely.razdely.find((item) => item.id === subtopic.id)?.icon;
   /* Чем подтема отличается от линейной — признаками в её конфиге;
      не задано — берётся общее для раздела. Плашка-подсказка вкладки
      «О задании» у раздела одна, подтема её не переопределяет. */
-  const about =
-    subtopic.about === undefined ? section.about : { ...subtopic.about, hint: section.about.hint };
+  const about = {
+    ...(subtopic.about === undefined ? section.about : subtopic.about),
+    hint: section.about.hint,
+    /* Заголовок вкладки — название раздела из общего списка. */
+    title: subtopic.title,
+  };
   const tutors =
     subtopic.tutors === undefined ? section.tutors : { ...section.tutors, items: subtopic.tutors };
 
@@ -97,7 +115,9 @@ export function FunctionTopicPage({
           total: prepSkillTotal(subtopic.id, skill.id),
         }))
       : [],
-    trainer: hasTrainer ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id) : [],
+    trainer: hasTrainer
+      ? prototypeSkills(findManifestFamily(subtopic.id)).map((skill) => skill.id)
+      : [],
   };
 
   /* Разметка теории — только разделов этой подтемы. Словарь theoryBodies
@@ -114,26 +134,33 @@ export function FunctionTopicPage({
     <main className="app-main">
       <ShapkaRazdela
         className="topic-head"
+        back={<VseRazdelyKnopka no={section.no} href={href(ZADANIYA, section.slug)} />}
         crumbs={[
           { label: 'Задания', href: tasksPage.href },
           {
             label: `№${section.no}. ${section.subtitle}`,
-            href: `${tasksPage.href}/${section.slug}`,
+            href: href(ZADANIYA, section.slug),
           },
           { label: subtopic.title, href: trail.length === 0 ? undefined : base + '/' },
           ...trail,
         ]}
-        /* Шапка по признаку подтемы: H1 общий на задание, название
-           подтемы — подзаголовком. Без признака H1 — сама подтема. */
+        /* Шапка по признаку подтемы: H1 общий на задание, название раздела
+           — подзаголовком, под ним название графика. Без признака H1 —
+           сам раздел. Названия — из data/functionTypes.ts. */
         title={
           subtopic.head === undefined
             ? subtopic.title
             : `Задание №${section.no}. ${section.subtitle}`
         }
         subtitle={
-          subtopic.head === undefined ? undefined : (
-            <p className="t-h3 topic-head__subtitle">{subtopic.head.subtitle}</p>
-          )
+          <>
+            {subtopic.head === undefined ? null : (
+              <p className="t-h3 topic-head__subtitle topic-head__subtitle--wide">
+                {subtopic.title}
+              </p>
+            )}
+            <p className="topic-head__graph">{subtopic.graphName}</p>
+          </>
         }
         badge={topic.badge}
         lead={topic.lead}
@@ -167,7 +194,15 @@ export function FunctionTopicPage({
 
       <TopicTabs
         initial={initialTab}
-        about={<TopicAbout section={section} about={about} scene={aboutScene(subtopic.id)} />}
+        about={
+          <TopicAbout
+            section={section}
+            about={about}
+            scene={aboutScene(subtopic.id)}
+            base={base}
+            {...(ABOUT_FIGURE[subtopic.id] === undefined ? {} : { figure: ABOUT_FIGURE[subtopic.id] })}
+          />
+        }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
         bodies={ownBodies}
         trackKey={theoryKey}
@@ -191,7 +226,7 @@ export function FunctionTopicPage({
         trainer={
           trainer ??
           (hasTrainer ? (
-            <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} />
+            <TrainerShell subtopic={subtopic} base={`${base}/trenazher/`} icon={icon} />
           ) : (
             <EmptyState
               title={PODTEMA_SKORO.trainer.title}
@@ -200,11 +235,15 @@ export function FunctionTopicPage({
           ))
         }
         trainerHref={hasTrainer ? `${base}/trenazher/` : null}
-        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} /> : undefined}
+        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined}
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
+        razdely={razdely}
         contentsDecor={
-          <div className="topic-side__decor" aria-hidden="true">
+          /* Ключ — от ложного предупреждения React о списке: серверный
+             элемент в пропсе клиентской ленты при большой теории
+             приходит отдельным куском и проверяется как элемент списка. */
+          <div className="topic-side__decor" aria-hidden="true" key="decor">
             <Image
               className="topic-side__pyramid"
               src={assetUrl('/images/pyramid-network.webp')}

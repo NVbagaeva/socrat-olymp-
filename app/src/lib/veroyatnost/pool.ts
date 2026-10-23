@@ -24,20 +24,20 @@ import {
   prepOtvet,
 } from './index';
 import { BLOKI_4, BLOKI_5, type Blok } from './blocks';
-import { altIllyustratsii } from './illyustratsii';
 import {
-  imyaIllyustratsii,
-  texPlain,
-  zadanieIllyustratsii,
-  type Method,
-  type Parametry,
-} from './model';
+  altIllyustratsii,
+  KARTINKA_NE_PO_USLOVIYU,
+  KARTINKA_OSNOVY_PODHODIT,
+} from './illyustratsii';
+import { imyaIllyustratsii, texPlain, zadanieIllyustratsii, type Method } from './model';
 import { modelPrep, modelVarianta } from './model-zadachi';
-import type { Razbor, RazborShag } from './razbor';
+import { podskazkaOpornoy } from './podgotovka5-podskazki';
+import type { PodskazkaShag, Razbor, RazborShag } from './razbor';
 import fs from 'node:fs';
 import path from 'node:path';
 import { klyuchZadachi, sealAnswer, sealMetod, sealText } from './secret';
 import {
+  type HintStep,
   type Metodika,
   type PrepBlok,
   type PrepZadacha,
@@ -144,6 +144,11 @@ export interface PoolVariant {
    * рисунка и запись ответа.
    */
   steps: string;
+  /**
+   * Подсказка-вопросы: JSON PodskazkaShag[], закрытый тем же отпечатком.
+   * Нет поля — у прототипа подсказки пока нет.
+   */
+  podskazka?: string;
   model?: PoolModel;
 }
 
@@ -156,8 +161,6 @@ export interface PoolKind {
   /** Блок задачника: по нему фильтруют чипы. */
   blok: string;
   blokTitle: string;
-  /** Диапазон номеров задачника, откуда собран прототип. */
-  zadachnik: readonly [number, number];
   /** Строка об источнике в шапке карточки. */
   istochnik: string;
   variants: PoolVariant[];
@@ -219,10 +222,11 @@ export function vydelitOtvet(formula: string): string {
  */
 export function shagRazbora(shag: Step, posledniy: boolean): RazborShag {
   if (shag.formula === undefined) {
-    return { text: shag.text };
+    return { etap: shag.etap, text: shag.text };
   }
   const tex = posledniy ? vydelitOtvet(shag.formula) : shag.formula;
   return {
+    etap: shag.etap,
     text: shag.text,
     tex,
     vykladka: nabratVykladku(tex, true),
@@ -263,6 +267,20 @@ function zakrytyRazbor(
       };
 }
 
+/**
+ * Набрать и закрыть подсказку отпечатком ответа: вопросы, кнопки и
+ * комментарии набираются KaTeX здесь, на сборке.
+ */
+function zapechatatPodskazku(shagi: readonly HintStep[], seal: string): string {
+  const nabrannye: PodskazkaShag[] = shagi.map((h) => ({
+    question: typesetText(h.question),
+    options: h.options.map((o) => typesetText(o)),
+    correct: h.correct,
+    comment: h.comment === undefined ? null : typesetText(h.comment),
+  }));
+  return sealText(JSON.stringify(nabrannye), seal);
+}
+
 /** Закрыть разбор отпечатком ответа: вызывается на сборке. */
 function zapechatatRazbor(razbor: Razbor, seal: string): string {
   return sealText(JSON.stringify(razbor), seal);
@@ -277,20 +295,6 @@ function otkrytayaModel(model: ReturnType<typeof modelVarianta>, id: string, n: 
     method: model.method,
     ...(illustration === undefined ? {} : { illustration }),
   };
-}
-
-/**
- * Параметры рисунка для миниатюры навыка: первый вариант прототипа.
- * Считается на сборке прямо по банку — в пуле параметров нет, и
- * карточка навыка получает готовый рисунок, а не числа.
- */
-export function parametryMiniatyury(kindId: string): Parametry | undefined {
-  const prototype = [...BANK_4, ...BANK_5].find((p) => p.id === kindId);
-  const variant = prototype?.varianty[0];
-  if (prototype === undefined || variant === undefined || prototype.metodika === undefined) {
-    return undefined;
-  }
-  return modelVarianta(prototype, variant).parameters;
 }
 
 function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
@@ -312,6 +316,9 @@ function variantPool(prototype: Prototype, variant: Variant): PoolVariant {
     /* Разбор шифруется отпечатком ответа: в бандле он лежит набором
        символов, а раскрывается только по просьбе. */
     steps: zapechatatRazbor(razbor, seal),
+    ...(prototype.podskazka === undefined
+      ? {}
+      : { podskazka: zapechatatPodskazku(prototype.podskazka(variant.params), seal) }),
     ...(model === null ? {} : { model: otkrytayaModel(model, prototype.id, variant.n) }),
   };
 }
@@ -321,18 +328,15 @@ function kindOf(prototype: Prototype, zadanie: string): PoolKind {
   if (blok === undefined) {
     throw new Error(`У прототипа ${prototype.id} неизвестный блок ${prototype.blok}`);
   }
-  /* Нулевой диапазон — прототип составлен не по задачнику. */
-  const izZadachnika = prototype.zadachnik[0] > 0;
   return {
     id: prototype.id,
     title: prototype.nazvanie,
     tip: prototype.tip,
     blok: blok.id,
     blokTitle: blok.nazvanie,
-    zadachnik: prototype.zadachnik,
-    istochnik: izZadachnika
-      ? `Прототип задания ${zadanie} · задачи ${prototype.zadachnik[0]}–${prototype.zadachnik[1]}`
-      : `Прототип задания ${zadanie} · составлено по схеме автора`,
+    /* Номера сборника, по которому собран прототип, — служебные
+       (sourceRange) и на экран не выводятся. */
+    istochnik: `Прототип задания ${zadanie}`,
     variants: prototype.varianty.map((variant) => variantPool(prototype, variant)),
   };
 }
@@ -356,6 +360,8 @@ export interface PrepPoolZadacha {
   seal: string;
   /** Закрытый разбор: JSON формы `Razbor`, зашифрованный отпечатком. */
   steps: string;
+  /** Подсказка-вопросы тем же отпечатком; есть у задач с прототипом. */
+  podskazka?: string;
   /**
    * Картинка к условию у задачи без модели (подготовка №5): у задач
    * с моделью она идёт через модель. Только если файл есть.
@@ -371,6 +377,29 @@ export interface PrepPoolBlok {
   nazvanie: string;
   tip: string;
   zadachi: PrepPoolZadacha[];
+  /** Метод блока — значок на карточке (есть у блоков №4). */
+  metod?: string;
+  /** Картинка превью и задача по ней, условие набрано (есть у блоков №4). */
+  kartinka?: { src: string; alt: string; primer: string };
+}
+
+/**
+ * Картинка опорной задачи — по прототипу задачи и её варианту. Своего
+ * файла у варианта нет — картинка варианта 1, но только если она
+ * подходит и к его числам (KARTINKA_OSNOVY_PODHODIT). Картинка,
+ * которая расходится с условием (KARTINKA_NE_PO_USLOVIYU), не
+ * показывается вовсе.
+ */
+function kartinkaOpornoy(zadacha: PrepZadacha): { path: string; alt: string } | undefined {
+  if (zadacha.id in KARTINKA_NE_PO_USLOVIYU) {
+    return undefined;
+  }
+  const kartinkaId = zadacha.prototip?.id ?? zadacha.id;
+  const svoya = illyustratsiyaVarianta(kartinkaId, zadacha.variant ?? 1);
+  if (svoya !== undefined || zadacha.variant === undefined) {
+    return svoya;
+  }
+  return zadacha.id in KARTINKA_OSNOVY_PODHODIT ? illyustratsiyaVarianta(kartinkaId, 1) : undefined;
 }
 
 function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
@@ -378,18 +407,32 @@ function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
   const seal = sealAnswer(otvet, klyuchZadachi(zadacha.id));
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);
   const razbor = zakrytyRazbor(model, zadacha.shagi, String(otvet).replace('.', ','));
+  const kartinka = kartinkaOpornoy(zadacha);
+  /* Подсказка — от прототипа на числах варианта задачи или, у задач №5
+     без прототипа, своя (podgotovka5-podskazki.ts). */
+  const shagiPodskazki = podskazkaOpornoy(zadacha);
+  const podskazka =
+    shagiPodskazki === undefined ? undefined : zapechatatPodskazku(shagiPodskazki, seal);
   /* Картинка к условию задачи без модели: у задачи с моделью она
      приходит вместе с моделью. */
-  const illustration = model === null ? illyustratsiyaVarianta(zadacha.id, 1) : undefined;
+  const illustration = model === null ? kartinka : undefined;
   return {
     id: zadacha.id,
     nomer: zadacha.nomer,
     uslovie: typesetText(zadacha.uslovie),
     seal,
     steps: zapechatatRazbor(razbor, seal),
+    ...(podskazka === undefined ? {} : { podskazka }),
     ...(illustration === undefined ? {} : { illustration }),
     ...(zadacha.risunok === undefined ? {} : { risunok: zadacha.risunok }),
-    ...(model === null ? {} : { model: otkrytayaModel(model, zadacha.id, 1) }),
+    ...(model === null
+      ? {}
+      : {
+          model: {
+            method: model.method,
+            ...(kartinka === undefined ? {} : { illustration: kartinka }),
+          },
+        }),
   };
 }
 
@@ -404,6 +447,10 @@ function prepPool(bloki: readonly PrepBlok[]): PrepPoolBlok[] {
     nazvanie: blok.nazvanie,
     tip: blok.tip,
     zadachi: blok.zadachi.map((zadacha) => prepZadachaPool(zadacha)),
+    ...(blok.metod === undefined ? {} : { metod: blok.metod }),
+    ...(blok.kartinka === undefined
+      ? {}
+      : { kartinka: { ...blok.kartinka, primer: typesetText(blok.kartinka.primer) } }),
   }));
 }
 
@@ -439,10 +486,10 @@ export interface UznayVariant {
 }
 
 export interface UznayKind {
-  /** Идентификатор прототипа или задачи конспекта. */
+  /** Идентификатор прототипа или опорной задачи. */
   id: string;
   /** Откуда задача: подпись в шапке карточки. */
-  istochnik: 'prototip' | 'konspekt';
+  istochnik: 'prototip' | 'opornaya';
   variants: UznayVariant[];
 }
 
@@ -514,10 +561,8 @@ export function uznayMetodPool(zadanie: 4 | 5 = 4): UznayPool {
       return [
         {
           id: zadacha.id,
-          istochnik: 'konspekt',
-          variants: [
-            uznayVariant(1, zadacha.uslovie, metodika, illyustratsiyaVarianta(zadacha.id, 1), blok),
-          ],
+          istochnik: 'opornaya',
+          variants: [uznayVariant(1, zadacha.uslovie, metodika, kartinkaOpornoy(zadacha), blok)],
         },
       ];
     });
