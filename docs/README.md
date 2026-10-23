@@ -6,6 +6,9 @@
 - [Сервер api.budetege.ru: инструкция владельца](SERVER.md) — кнопки
   GitHub Actions, что вписать в Secrets и Variables, туннель к базе,
   что делать при сбое и при переезде.
+- [Сервер по шагам](SERVER-po-shagam.md) — простая версия для первого
+  запуска: что купить в FirstVDS, Яндекс 360 и Yandex Cloud и куда что
+  вписать в GitHub.
 - [Свой сервер за 350–700 ₽: облегчённый набор](hosting-lite.md) —
   проба PostgreSQL + GoTrue + PostgREST + Caddy вместо полного
   Supabase, замер памяти, цены провайдеров в Москве, чек-лист заказа.
