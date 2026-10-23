@@ -16,7 +16,10 @@
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
+import { createRequire } from 'node:module';
 import { requireSrc } from './lib/load-ts.mjs';
+
+const require = createRequire(import.meta.url);
 
 const { D, kOf } = requireSrc('lib/zadanie13/drob');
 const S_ = requireSrc('lib/zadanie13/solver');
@@ -641,6 +644,60 @@ for (const [n, extra, want] of tables) {
   checks += 1;
   if (JSON.stringify(evenEnds(1000, 4).map(String)) !== '["750","500","250","0"]')
     problems.push('evenEnds');
+}
+
+/* ── Генерация: все прототипы ──────────────────────────────────── */
+{
+  const katex = require('katex');
+  const { findPlainMath, findRawTex, stripDollarMath } = await import('./lib/math-markup.mjs');
+  const typeset = (t, where) => {
+    try {
+      katex.renderToString(t, { throwOnError: true, strict: 'error' });
+    } catch (e) {
+      problems.push(`${where}: KaTeX «${t.slice(0, 60)}»: ${e.message.slice(0, 120)}`);
+    }
+  };
+  const inline = (text, where) => {
+    for (const m of text.matchAll(/\$([^$]+)\$/g)) typeset(m[1], where);
+    const plain = stripDollarMath(text).replace(/\*\*/g, '');
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) problems.push(`${where}: вне KaTeX (${f.rule}): «${f.match}»`);
+  };
+  const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
+  const perProto = Number(process.env.Z13_SEEDS ?? 60);
+  const only = process.env.Z13_ONLY;
+  const counts = {};
+  for (const info of prototypes()) {
+    if (only && !info.id.startsWith(only)) continue;
+    const seen = new Set();
+    for (let i = 0; i < perProto; i++) {
+      const where = `${info.id} seed s${i}`;
+      let t;
+      try {
+        t = generate(info.id, `s${i}`);
+      } catch (e) {
+        problems.push(`${where}: ${e.message}`);
+        break;
+      }
+      checks += 1;
+      counts[info.type] = (counts[info.type] ?? 0) + 1;
+      seen.add(t.condition);
+      inline(t.condition, where + ' условие');
+      for (const st of t.solution) {
+        inline(st.title + ' ' + st.text, where + ' решение');
+        if (st.formula) typeset(st.formula, where + ' формула');
+      }
+      for (const h of t.hints) {
+        inline(h.question, where + ' подсказка');
+        h.options.forEach((o) => inline(o, where + ' вариант'));
+        if (h.comment) inline(h.comment, where + ' комментарий');
+        if (!(h.correct >= 0 && h.correct < h.options.length) || new Set(h.options).size !== h.options.length) problems.push(`${where}: подсказка без верного варианта или с повтором`);
+      }
+      const again = generate(info.id, `s${i}`);
+      if (again.condition !== t.condition || again.answer !== t.answer) problems.push(`${where}: не воспроизводится по seed`);
+    }
+    if (seen.size < Math.min(perProto, 10)) problems.push(`${info.id}: из ${perProto} задач разных условий только ${seen.size}`);
+  }
+  console.log('сгенерировано по типам:', JSON.stringify(counts));
 }
 
 if (problems.length) {

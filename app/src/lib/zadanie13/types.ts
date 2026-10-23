@@ -102,6 +102,8 @@ export interface Task13 {
   seed: string;
   /** Условие: текст, формулы в $…$. */
   condition: string;
+  /** Таблица в условии (график долга): подписи и строки. */
+  conditionTable?: ConditionTable;
   /** Ответ в единицах условия. В браузер уходит только отпечаток. */
   answer: number;
   units: Units;
@@ -110,6 +112,12 @@ export interface Task13 {
   tableModel: TableModel;
   plot: Plot;
   params: Record<string, number>;
+}
+
+/** Таблица условия: «Дата | 15.01 | 15.02 …», «Долг | 100 % | 90 % …». */
+export interface ConditionTable {
+  head: string[];
+  rows: string[][];
 }
 
 /** Запись реестра прототипов: для генератора, тренажёра и «Собрать вариант». */
