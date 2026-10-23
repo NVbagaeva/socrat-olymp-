@@ -3,6 +3,7 @@
 
    Запуск: pnpm build && node scripts/probe-sticky-tabs.mjs <папка> [адрес] [phone|desktop] [шаг] [до] [от]
    Переменные: ENGINE=webkit — движок Safari (нужен `npx playwright install webkit`);
+               OUT_DIR=<папка> — другая сборка (по умолчанию app/out);
                EXTRA_CSS='html{overflow-anchor:none}' — вставить CSS для проверки гипотез.
 
    Собранный сайт открывается на профиле iPhone 13 (390×844, DPR 3) или
@@ -19,7 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium, webkit, devices } from 'playwright';
 
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(APP, 'out');
+/* OUT_DIR — другая сборка, например сохранённая до правки. */
+const OUT = process.env.OUT_DIR ?? path.join(APP, 'out');
 const DIR = process.argv[2];
 if (!DIR) {
   console.error('Укажите папку для кадров: node scripts/probe-sticky-tabs.mjs <папка>');
@@ -111,9 +113,14 @@ await page.waitForTimeout(800);
 
 const measure = () =>
   page.evaluate(() => {
+    /* Плитки — первая строка; панель (после этапа 2) — .topic-tabs-row--panel. */
     const row = document.querySelector('.topic-tabs-row');
-    const strip = document.querySelector('.topic-tabs');
-    const body = row.nextElementSibling;
+    const panel = document.querySelector('.topic-tabs-row--panel');
+    const strip = row.querySelector('.topic-tabs');
+    let body = row.nextElementSibling;
+    while (body !== null && (body === panel || body.getClientRects().length === 0)) {
+      body = body.nextElementSibling;
+    }
     const r = row.getBoundingClientRect();
     const b = body?.getBoundingClientRect();
     const tops = Array.from(strip.querySelectorAll('[role=tab], .topic-tabs__more')).map((t) =>
@@ -121,7 +128,9 @@ const measure = () =>
     );
     return {
       sy: Math.round(window.scrollY),
-      stuck: row.classList.contains('is-stuck'),
+      stuck:
+        panel === null ? row.classList.contains('is-stuck') : panel.classList.contains('is-shown'),
+      panelBottom: panel === null ? null : Math.round(panel.getBoundingClientRect().bottom),
       rowTop: Math.round(r.top),
       rowH: Math.round(r.height),
       rowMarginBottom: row.style.marginBottom,
@@ -147,11 +156,12 @@ for (let y = FROM; y <= MAX; y += STEP) {
   await page.evaluate((to) => window.scrollTo(0, to), y);
   await page.waitForTimeout(120);
   const m = await measure();
+  m.want = y;
   log.push(m);
   await page.screenshot({ path: path.join(DIR, `f-${String(y).padStart(4, '0')}.png`) });
   const mark = m.stuck !== before.stuck ? ' <-- переключение' : '';
   console.log(
-    `scrollTo=${String(y).padStart(4)} sy=${String(m.sy).padStart(4)} stuck=${m.stuck ? 1 : 0} rowTop=${m.rowTop} rowH=${m.rowH} mb=${m.rowMarginBottom || '-'} bodyTopDoc=${m.bodyTopDoc} bodyTopVp=${m.bodyTopVp} gap=${m.gapBelowRow} cls=${m.cls.toFixed(4)}${mark}`,
+    `scrollTo=${String(y).padStart(4)} sy=${String(m.sy).padStart(4)} stuck=${m.stuck ? 1 : 0} panelBottom=${m.panelBottom ?? '-'} rowTop=${m.rowTop} rowH=${m.rowH} mb=${m.rowMarginBottom || '-'} bodyTopDoc=${m.bodyTopDoc} bodyTopVp=${m.bodyTopVp} gap=${m.gapBelowRow} cls=${m.cls.toFixed(4)}${mark}`,
   );
   before = m;
 }
