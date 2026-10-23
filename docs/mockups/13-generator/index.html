@@ -367,9 +367,7 @@ details.more[open] summary::before { content: "−"; }
           <span class="flabel" id="l-help">Подсказка на листе</span>
           <div class="seg" role="radiogroup" aria-labelledby="l-help" data-group="help">
             <button type="button" class="is-on" data-v="0">Нет</button>
-            <button type="button" data-v="rule">Рамка с правилом</button>
-            <button type="button" data-v="ex1">+ 1 пример</button>
-            <button type="button" data-v="ex2">+ 2 примера</button>
+            <button type="button" data-v="ex1">Рамка с правилом и примером</button>
           </div>
           <span class="fnote">Рамка ставится перед первой задачей каждого типа: правило и разобранный пример.</span>
         </div>
@@ -486,7 +484,7 @@ details.more[open] summary::before { content: "−"; }
     test:   { counts: { dif: 3, brk: 2, ann: 3, dep: 2, kind: 0, hand: 0 }, level: 'all', help: '0', fmt: 'compact', variants: '2', title: 'Самостоятельная работа', label: 'Самостоятельная' },
     one:    { counts: { dif: 0, brk: 0, ann: 10, dep: 0, kind: 0, hand: 0 }, level: 'all', help: 'ex1', fmt: 'compact', variants: '1', title: 'Отработка: аннуитет', label: 'Один тип' },
     zachet: { counts: { dif: 5, brk: 5, ann: 5, dep: 5, kind: 10, hand: 0 }, level: 'all', help: '0', fmt: 'full', variants: '1', title: 'Зачётная работа', label: 'Зачёт Н.В.' },
-    warm:   { counts: { dif: 0, brk: 0, ann: 0, dep: 0, kind: 0, hand: 6 }, level: 'base', help: 'rule', fmt: 'full', variants: '1', title: 'Разминка: таблица руками', label: 'Разминка' }
+    warm:   { counts: { dif: 0, brk: 0, ann: 0, dep: 0, kind: 0, hand: 6 }, level: 'base', help: 'ex1', fmt: 'full', variants: '1', title: 'Разминка: таблица руками', label: 'Разминка' }
   };
   const MIN = { dif: 7, brk: 8, ann: 6, dep: 6, kind: 1, hand: 5 };
 
