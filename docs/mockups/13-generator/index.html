@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Генератор задания 13</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=PT+Serif:ital@0;1&display=swap">
+<style>
+/* Макет повторяет дизайн-систему сайта «Будет на ЕГЭ» (app/src/styles/tokens.css).
+   Сайт светлый, поэтому и макет намеренно в одной светлой теме.
+   Раскладка: слева три шага настройки, справа липкий предпросмотр листа A4;
+   на телефоне одна колонка и нижняя панель с главной кнопкой. */
+:root {
+  --bg: #f5f9ff;
+  --surface: #ffffff;
+  --surface-2: #f7f9fc;
+  --soft: #e8f0fc;
+  --soft-2: #f2f7fe;
+  --primary: #1f5fd0;
+  --primary-hover: #1a4fb0;
+  --tab-top: #3d79e0;
+  --tab-bottom: #163f8c;
+  --text: #101728;
+  --text-2: #667389;
+  --text-3: #97a1b0;
+  --border: #e4ebf3;
+  --border-strong: #cfdae8;
+  --border-info: #d7e5fa;
+  --brand: #0b1f45;
+  --success: #16a34a;
+  --success-soft: #e7f6ec;
+  --accent: #e07a2f;
+  --accent-soft: #fdf1ea;
+  --accent-border: #f3cdb5;
+  --accent-text: #a8500f;
+  --warm: #fdf6ea;
+  --warm-border: #f0e2c8;
+  --brown: #a3622c;
+  --brown-soft: #f5ebe1;
+  --teal: #0e9384;
+  --teal-soft: #dff5f1;
+  --violet: #7c4ddb;
+  --violet-soft: #efe9fc;
+  --paper: #ffffff;
+  --ink: #101728;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sheet: 'PT Serif', Georgia, 'Times New Roman', serif;
+  --font-math: 'Latin Modern Math', 'Cambria Math', 'STIX Two Math', serif;
+  --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
+  --sh-sm: 0 2px 6px rgba(16, 23, 40, 0.05);
+  --sh-md: 0 8px 24px rgba(16, 23, 40, 0.06);
+  --sh-lg: 0 16px 40px rgba(16, 23, 40, 0.10);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg);
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--border-info); outline-offset: 2px; border-radius: var(--r-sm); }
+math { font-family: var(--font-math); font-size: 1.08em; }
+
+.wrap {
+  max-width: 1320px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 120px;
+}
+
+/* ── Шапка раздела ── */
+.mock-note {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  font-size: 13px; color: var(--accent-text);
+  background: var(--accent-soft); border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg); padding: 8px 12px; margin-bottom: 16px;
+}
+.mock-note b { font-weight: 600; }
+.crumbs { font-size: 14px; color: var(--text-2); }
+.crumbs b { color: var(--text); font-weight: 600; }
+.head { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-top: 8px; }
+.head h1 { margin: 0; font-size: clamp(30px, 5vw, 48px); line-height: 1.05; letter-spacing: -0.02em; font-weight: 800; text-wrap: balance; }
+.head p { margin: 6px 0 0; color: var(--text-2); font-size: clamp(15px, 2vw, 18px); }
+.pill-info { display: inline-block; vertical-align: middle; font-size: 13px; font-weight: 600; color: var(--primary); background: var(--soft); border-radius: var(--r-pill); padding: 4px 12px; margin-left: 8px; letter-spacing: 0; }
+
+.tabs-row {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  margin: 16px -4px 20px; padding: 6px 4px;
+  background: rgba(245, 249, 255, 0.92); backdrop-filter: blur(8px);
+}
+.tabs {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-pill); padding: 6px; box-shadow: var(--sh-sm);
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--r-pill); border: 0; background: transparent;
+  color: var(--text-2); font-weight: 500; white-space: nowrap;
+}
+.tab svg { width: 18px; height: 18px; }
+.tab.is-on { color: #fff; background: linear-gradient(180deg, var(--tab-top), var(--tab-bottom)); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); font-weight: 600; }
+
+/* ── Сетка экрана ── */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1024px) { .grid { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); } }
+.col { display: grid; gap: 16px; min-width: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 18px; box-shadow: var(--sh-sm); min-width: 0; }
+.card h2 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.step-no { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--primary); font-size: 14px; font-weight: 700; }
+.card .lead { margin: 4px 0 14px 38px; color: var(--text-2); font-size: 14px; }
+
+/* Пресеты */
+.presets { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.presets::-webkit-scrollbar { display: none; }
+@media (min-width: 560px) { .presets { flex-wrap: wrap; overflow: visible; } }
+.preset {
+  flex: none; text-align: left; min-width: 132px;
+  border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--r-lg);
+  padding: 10px 12px; display: grid; gap: 2px; transition: border-color 120ms var(--ease), background 120ms var(--ease);
+}
+.preset b { font-weight: 600; font-size: 14px; }
+.preset span { font-size: 12px; color: var(--text-2); }
+.preset:hover { border-color: var(--border-strong); }
+.preset.is-on { background: var(--soft-2); border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; }
+.preset.is-zachet b::after { content: " ★"; color: var(--accent); }
+
+/* Строки типов */
+.types { display: grid; gap: 8px; }
+.trow {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface);
+}
+.trow.is-zero { background: var(--surface-2); }
+.trow.is-zero .tname { color: var(--text-2); }
+.ticon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; }
+.ticon svg { width: 20px; height: 20px; }
+.tname { font-weight: 600; font-size: 15px; line-height: 1.25; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: anywhere; }
+.thint { font-size: 12px; color: var(--text-2); line-height: 1.35; }
+.stepper { display: flex; align-items: center; gap: 2px; }
+.stepper button {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); color: var(--primary); font-size: 18px; line-height: 1; display: grid; place-items: center;
+}
+.stepper button:disabled { color: var(--text-3); cursor: default; }
+.stepper output { width: 28px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.total { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 14px; color: var(--text-2); flex-wrap: wrap; }
+.total b { color: var(--text); }
+.quick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.quick button { border: 0; background: var(--soft-2); color: var(--primary); border-radius: var(--r-pill); padding: 6px 12px; font-size: 13px; font-weight: 500; }
+
+/* Сегменты */
+.field { display: grid; gap: 6px; margin-top: 14px; }
+.field:first-of-type { margin-top: 0; }
+.flabel { font-size: 13px; font-weight: 600; color: var(--text-2); letter-spacing: 0.01em; }
+.seg { display: flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { flex: 1 1 auto; border: 0; background: transparent; border-radius: var(--r-md); padding: 8px 10px; font-size: 14px; color: var(--text-2); min-height: 40px; }
+.seg button.is-on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--sh-sm); }
+.fnote { font-size: 12px; color: var(--text-2); }
+
+details.more { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 12px; }
+details.more summary { cursor: pointer; font-weight: 600; color: var(--primary); list-style: none; display: flex; align-items: center; gap: 6px; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::before { content: "+"; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); font-size: 14px; }
+details.more[open] summary::before { content: "−"; }
+.inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+.inputs label { display: grid; gap: 4px; font-size: 13px; color: var(--text-2); font-weight: 600; }
+.inputs input { border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: 9px 10px; background: var(--surface); font-weight: 400; color: var(--text); min-width: 0; }
+
+.go {
+  width: 100%; border: 0; border-radius: var(--r-xl); padding: 16px; font-size: 18px; font-weight: 700;
+  color: #fff; background: linear-gradient(180deg, var(--tab-top), var(--tab-bottom)); box-shadow: var(--sh-md);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.go:hover { filter: brightness(1.05); }
+.go small { font-weight: 500; opacity: .85; font-size: 14px; }
+
+/* Комплект */
+.kit { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.qr { width: 96px; height: 96px; border: 1px solid var(--border); border-radius: var(--r-md); padding: 6px; background: #fff; }
+.qr svg, .qr img { width: 100%; height: 100%; display: block; }
+.kit-code { font-size: 22px; font-weight: 800; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.kit-sub { font-size: 13px; color: var(--text-2); }
+.kit-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.btn { border: 1px solid var(--border-strong); background: var(--surface); border-radius: var(--r-lg); padding: 10px 12px; font-weight: 600; font-size: 14px; display: flex; gap: 8px; align-items: center; justify-content: center; min-height: 44px; text-align: center; }
+.btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn.ghost { border-color: transparent; background: var(--soft-2); color: var(--primary); }
+.copied { font-size: 13px; color: var(--success); min-height: 18px; margin-top: 6px; }
+
+/* ── Предпросмотр ── */
+.preview { position: sticky; top: 92px; }
+@media (max-width: 1023px) { .preview { position: static; } }
+.pv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.pv-tabs { display: flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 3px; }
+.pv-tabs button { border: 0; background: transparent; border-radius: var(--r-pill); padding: 7px 14px; font-size: 14px; color: var(--text-2); }
+.pv-tabs button.is-on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--sh-sm); }
+.pv-state { font-size: 13px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
+.dot.ok { background: var(--success); }
+.variants { display: flex; gap: 4px; }
+.variants button { width: 32px; height: 32px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface); font-weight: 600; font-size: 13px; }
+.variants button.is-on { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.sheet-scroll { overflow-x: auto; border-radius: var(--r-lg); }
+.sheet {
+  background: var(--paper); color: var(--ink); font-family: var(--font-sheet);
+  border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--sh-lg);
+  padding: 28px 30px 22px; min-width: 0; font-size: 14px; line-height: 1.5;
+}
+@media (max-width: 520px) { .sheet { padding: 18px 16px; font-size: 13.5px; } }
+.sh-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; border-bottom: 2px solid var(--brand); padding-bottom: 10px; font-family: var(--font); }
+.tw { overflow-x: auto; margin: 6px 0 10px; }
+.tw > table { margin: 0; }
+.sh-brand b { display: block; white-space: nowrap; font-size: 17px; font-weight: 800; color: var(--brand); letter-spacing: -0.01em; }
+.sh-brand span { font-size: 9.5px; letter-spacing: 0.28em; color: var(--text-2); font-weight: 600; }
+.sh-meta { text-align: right; font-size: 11.5px; color: var(--text-2); line-height: 1.45; }
+.sh-meta b { color: var(--text); font-size: 12.5px; }
+@media (max-width: 560px) { .sh-head { grid-template-columns: minmax(0, 1fr); } .sh-meta { text-align: left; } }
+.sh-title { text-align: center; margin: 16px 0 4px; font-family: var(--font); }
+.sh-title h3 { margin: 0; font-size: 19px; font-weight: 800; color: var(--brand); text-wrap: balance; }
+.sh-title p { margin: 2px 0 0; font-size: 13px; color: var(--text-2); }
+.sh-fields { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; font-family: var(--font); font-size: 13px; margin: 12px 0 14px; }
+.sh-fields span { border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+.sh-task { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; padding: 9px 0; border-top: 1px dashed var(--border-strong); }
+.sh-task:first-of-type { border-top: 0; }
+.sh-n { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--brand); display: grid; place-items: center; font: 700 12px/1 var(--font); color: var(--brand); margin-top: 1px; }
+.sh-tag { font: 600 10.5px/1 var(--font); border-radius: var(--r-pill); padding: 4px 8px; white-space: nowrap; align-self: start; }
+.sh-tag.fipi { background: var(--soft); color: var(--primary); }
+.sh-tag.own { background: var(--success-soft); color: var(--success); }
+.sh-type { font: 600 11px/1.3 var(--font); color: var(--text-2); letter-spacing: 0.02em; display: block; margin-bottom: 2px; }
+.sh-swap { border: 0; background: transparent; color: var(--primary); font-size: 15px; width: 28px; height: 28px; border-radius: 50%; }
+.sh-swap:hover { background: var(--soft-2); }
+.sh-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.sh-ans { margin-top: 4px; font: 600 12.5px/1.4 var(--font); color: var(--success); }
+.sh-sol { margin-top: 6px; background: var(--surface-2); border-left: 3px solid var(--border-info); padding: 6px 10px; border-radius: 0 var(--r-sm) var(--r-sm) 0; font-size: 13px; }
+.sh-sol div + div { margin-top: 3px; }
+.sh-frame { border: 1.5px solid var(--warm-border); background: var(--warm); border-radius: var(--r-md); padding: 8px 12px; margin: 4px 0 10px; font-size: 13px; }
+.sh-frame b { font-family: var(--font); font-size: 12px; color: var(--brown); letter-spacing: 0.04em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.sh-frame .ex { margin-top: 4px; color: var(--text-2); font-style: italic; }
+.sh-table { width: 100%; min-width: 360px; border-collapse: collapse; font-family: var(--font); font-size: 11.5px; margin: 6px 0 2px; }
+.sh-table th, .sh-table td { border: 1px solid var(--border-strong); padding: 4px 6px; text-align: center; }
+.sh-table th { background: var(--surface-2); font-weight: 600; color: var(--text-2); }
+.sh-table td { height: 22px; font-variant-numeric: tabular-nums; }
+.sh-keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; font-family: var(--font); font-size: 12.5px; margin: 8px 0 12px; }
+.sh-keys div { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 6px 8px; }
+.sh-keys b { color: var(--brand); }
+.sh-score { width: 100%; min-width: 300px; border-collapse: collapse; font-family: var(--font); font-size: 12px; margin: 6px 0 10px; }
+.sh-score th, .sh-score td { border: 1px solid var(--border-strong); padding: 5px 7px; text-align: left; }
+.sh-score th { background: var(--surface-2); color: var(--text-2); font-weight: 600; }
+.sh-score td.c, .sh-score th.c { text-align: center; font-variant-numeric: tabular-nums; }
+.sh-scale { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-family: var(--font); font-size: 12px; text-align: center; }
+.sh-scale div { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 6px 4px; }
+.sh-scale b { display: block; font-size: 15px; color: var(--brand); }
+.sh-sec { font: 700 13px/1.3 var(--font); color: var(--brand); margin: 14px 0 4px; letter-spacing: 0.01em; }
+.sh-dn { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin: 6px 0; font-family: var(--font); font-size: 11px; color: var(--text-2); font-weight: 600; letter-spacing: 0.06em; }
+.sh-dn div { border: 1px solid var(--border-strong); border-radius: var(--r-sm); height: 46px; padding: 4px 6px; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 10px 10px; }
+.sh-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; font: 10.5px/1.4 var(--font); color: var(--text-2); }
+.sh-foot .qr { width: 54px; height: 54px; padding: 3px; }
+.skeleton-note { font: 500 12px/1.4 var(--font); color: var(--accent-text); background: var(--accent-soft); border-radius: var(--r-md); padding: 6px 10px; margin-bottom: 10px; }
+
+/* ── Нижняя панель на телефоне ── */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 8;
+  background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-top: 1px solid var(--border);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; gap: 12px; align-items: center; box-shadow: 0 -8px 24px rgba(16, 23, 40, 0.06);
+}
+.dock .sum { flex: 1; min-width: 0; font-size: 13px; color: var(--text-2); line-height: 1.3; }
+.dock .sum b { display: block; color: var(--text); font-size: 15px; }
+.dock .go { width: auto; padding: 12px 20px; font-size: 16px; border-radius: var(--r-lg); }
+@media (min-width: 1024px) { .dock { display: none; } .wrap { padding-block-end: 40px; } }
+
+.legend { margin-top: 28px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.legend div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; font-size: 13px; color: var(--text-2); }
+.legend b { color: var(--text); display: block; margin-bottom: 2px; font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap" lang="ru">
+  <div class="mock-note"><b>Макет без логики.</b> Кнопки переключают заранее подготовленные состояния. Числа в задачах настоящие и проверены, но новых задач макет не генерирует.</div>
+
+  <div class="crumbs">Главная / Банк заданий / <b>№13</b></div>
+  <div class="head">
+    <div>
+      <h1>Экономические задачи <span class="pill-info">Часть 1 · 1 балл</span></h1>
+      <p>Кредиты и вклады: дифференцированный платёж, аннуитет, вклады.</p>
+    </div>
+  </div>
+
+  <div class="tabs-row">
+    <nav class="tabs" aria-label="Вкладки раздела">
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>О задании</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1z"/><path d="M12 6v14"/></svg>Теория</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>Опорные задачи</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg>Тренажёр</button>
+      <button class="tab is-on" type="button" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Генератор</button>
+      <button class="tab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h10v18H7z"/><path d="M10 8h4M10 12h4M10 16h2"/></svg>Для репетиторов</button>
+    </nav>
+  </div>
+
+  <div class="grid">
+    <!-- ════ Левая колонка: настройка ════ -->
+    <div class="col">
+      <section class="card" aria-labelledby="h-presets">
+        <h2 id="h-presets"><span class="step-no" aria-hidden="true">⚡</span>Быстрый старт</h2>
+        <p class="lead">Одно касание заполняет все шаги. Дальше можно ничего не трогать.</p>
+        <div class="presets" id="presets">
+          <button class="preset is-on" type="button" data-preset="home"><b>Домашка</b><span>6 задач · все типы</span></button>
+          <button class="preset" type="button" data-preset="test"><b>Самостоятельная</b><span>10 задач · 2 варианта</span></button>
+          <button class="preset" type="button" data-preset="one"><b>Один тип</b><span>10 задач одного типа</span></button>
+          <button class="preset is-zachet" type="button" data-preset="zachet"><b>Зачёт Н.В.</b><span>30 задач · 50 баллов</span></button>
+          <button class="preset" type="button" data-preset="warm"><b>Разминка</b><span>6 таблиц руками</span></button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-what">
+        <h2 id="h-what"><span class="step-no">1</span>Что</h2>
+        <p class="lead">Какие типы и сколько задач каждого.</p>
+        <div class="types" id="types"></div>
+        <div class="quick" id="quick">
+          <button type="button" data-all="1">Всем по 1</button>
+          <button type="button" data-all="2">Всем по 2</button>
+          <button type="button" data-all="0">Очистить</button>
+        </div>
+        <div class="total"><span>В листе: <b id="tot">6 задач</b></span><span id="time">≈ 35 минут</span></div>
+      </section>
+
+      <section class="card" aria-labelledby="h-how">
+        <h2 id="h-how"><span class="step-no">2</span>Как</h2>
+        <p class="lead">Уровень, откуда задачи и чем помочь ученику на листе.</p>
+
+        <div class="field">
+          <span class="flabel" id="l-level">Уровень</span>
+          <div class="seg" role="radiogroup" aria-labelledby="l-level" data-group="level">
+            <button type="button" class="is-on" data-v="base">Базовый</button>
+            <button type="button" data-v="all">Все</button>
+            <button type="button" data-v="hard">Повышенный</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="flabel" id="l-src">Откуда задачи</span>
+          <div class="seg" role="radiogroup" aria-labelledby="l-src" data-group="src">
+            <button type="button" data-v="fipi">Открытый банк</button>
+            <button type="button" class="is-on" data-v="mix">Банк + новые</button>
+            <button type="button" data-v="new">Только новые</button>
+          </div>
+          <span class="fnote">Открытый банк — задачи по прототипам ФИПИ. Новые помечены «не из открытого банка».</span>
+        </div>
+        <div class="field">
+          <span class="flabel" id="l-help">Подсказка на листе</span>
+          <div class="seg" role="radiogroup" aria-labelledby="l-help" data-group="help">
+            <button type="button" class="is-on" data-v="0">Нет</button>
+            <button type="button" data-v="rule">Рамка с правилом</button>
+            <button type="button" data-v="ex1">+ 1 пример</button>
+            <button type="button" data-v="ex2">+ 2 примера</button>
+          </div>
+          <span class="fnote">Рамка ставится перед первой задачей каждого типа: правило и разобранный пример.</span>
+        </div>
+        <div class="field">
+          <span class="flabel" id="l-fmt">Вид листа</span>
+          <div class="seg" role="radiogroup" aria-labelledby="l-fmt" data-group="fmt">
+            <button type="button" class="is-on" data-v="compact">Компактный</button>
+            <button type="button" data-v="full">С полями для оформления</button>
+          </div>
+          <span class="fnote">«С полями» — Дано, Найти и пустая таблица по периодам у каждой задачи, как в зачёте.</span>
+        </div>
+
+        <details class="more" id="more">
+          <summary>Дополнительно</summary>
+          <div class="inputs">
+            <label for="f-title">Заголовок листа<input id="f-title" value="Домашняя работа"></label>
+            <label for="f-date">Дата<input id="f-date" value="24.10.2026"></label>
+            <label for="f-teacher">Учитель<input id="f-teacher" value="Багаева Н.В."></label>
+          </div>
+          <div class="field">
+            <span class="flabel" id="l-var">Вариантов</span>
+            <div class="seg" role="radiogroup" aria-labelledby="l-var" data-group="var">
+              <button type="button" class="is-on" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="flabel" id="l-key">Лист учителя</span>
+            <div class="seg" role="radiogroup" aria-labelledby="l-key" data-group="key">
+              <button type="button" data-v="ans">Только ответы</button>
+              <button type="button" class="is-on" data-v="short">Ответы и краткие решения</button>
+              <button type="button" data-v="fullsol">Полные решения</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="flabel" id="l-print">Печать</span>
+            <div class="seg" role="radiogroup" aria-labelledby="l-print" data-group="print">
+              <button type="button" class="is-on" data-v="color">Цветная</button>
+              <button type="button" data-v="bw">Чёрно-белая</button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card" aria-labelledby="h-go">
+        <h2 id="h-go" style="margin-bottom:12px"><span class="step-no">3</span>Сгенерировать</h2>
+        <button class="go" type="button" id="go">Сгенерировать <small id="go-sub">6 задач</small></button>
+        <div id="kit" hidden style="margin-top:16px">
+          <div class="kit">
+            <div class="qr" id="qr" aria-label="QR-код комплекта"></div>
+            <div>
+              <div class="kit-sub">Комплект</div>
+              <div class="kit-code" id="kit-code">7K3F-2B</div>
+              <div class="kit-sub">Лист ученика и лист учителя собраны из одного набора. По коду или QR комплект откроется снова.</div>
+            </div>
+          </div>
+          <div class="kit-actions">
+            <button class="btn primary" type="button">Лист ученика</button>
+            <button class="btn" type="button">Лист учителя</button>
+            <button class="btn" type="button">Скачать оба PDF</button>
+            <button class="btn ghost" type="button" id="regen">↻ Перегенерировать</button>
+          </div>
+          <button class="btn ghost" type="button" id="copy" style="width:100%;margin-top:8px">Скопировать ссылку для ученика</button>
+          <div class="copied" id="copied" aria-live="polite"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ════ Правая колонка: предпросмотр ════ -->
+    <div class="col preview">
+      <div class="pv-bar">
+        <div class="pv-tabs" role="tablist" aria-label="Какой лист показать">
+          <button type="button" role="tab" class="is-on" data-sheet="student" aria-selected="true">Лист ученика</button>
+          <button type="button" role="tab" data-sheet="teacher" aria-selected="false">Лист учителя</button>
+        </div>
+        <div class="variants" id="variants" hidden></div>
+        <div class="pv-state"><span class="dot" id="dot"></span><span id="pv-state">Пример первых задач</span></div>
+      </div>
+      <div class="sheet-scroll"><article class="sheet" id="sheet" aria-live="polite"></article></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div><b>Три шага на одном экране</b>Что → Как → Сгенерировать. Вид работы, дата и печать спрятаны в «Дополнительно».</div>
+    <div><b>Предпросмотр до генерации</b>Справа сразу видны первые задачи по выбранному составу. После генерации у каждой задачи появляется ↻ «заменить».</div>
+    <div><b>Один набор — два листа</b>Код комплекта и QR ведут на тот же набор. «Перегенерировать» — новый набор того же состава.</div>
+    <div><b>Телефон</b>Пресеты листаются вбок, главная кнопка — в нижней панели под большим пальцем.</div>
+  </div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="sum"><b id="dock-tot">6 задач</b><span id="dock-sub">Домашка · базовый · ≈ 35 минут</span></div>
+  <button class="go" type="button" id="dock-go">Сгенерировать</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function () {
+  const TYPES = [
+    { id: 'dif', name: 'Дифференцированный платёж', hint: 'долг уменьшается на одну и ту же величину', color: 'var(--primary)', soft: 'var(--soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5v14h16"/><path d="M7 8h2v11M11 10h2v9M15 12h2v7"/></svg>' },
+    { id: 'brk', name: '«Поломанный» дифференцированный', hint: 'две ставки, остаток одним платежом, льготный', color: 'var(--accent)', soft: 'var(--accent-soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5v14h16"/><path d="M7 8l4 3 2-2 5 6"/></svg>' },
+    { id: 'ann', name: 'Аннуитет', hint: 'известны платежи, долг неизвестен', color: 'var(--teal)', soft: 'var(--teal-soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5v14h16"/><path d="M7 12h3v7H7zM11 12h3v7h-3zM15 12h3v7h-3z"/></svg>' },
+    { id: 'dep', name: 'Вклады', hint: 'деньги копятся, пополнения и снятия', color: 'var(--brown)', soft: 'var(--brown-soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l8-5 8 5M5 10v8M19 10v8M9 12v5M15 12v5M3 20h18"/></svg>' },
+    { id: 'kind', name: 'Определи тип', hint: 'решать не нужно: назвать схему и признак', color: 'var(--violet)', soft: 'var(--violet-soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>' },
+    { id: 'hand', name: 'Таблица руками', hint: 'разминка: 1000 рублей под 10 %, считаем по строкам', color: 'var(--success)', soft: 'var(--success-soft)',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16"/></svg>' }
+  ];
+  const PRESETS = {
+    home:   { counts: { dif: 2, brk: 1, ann: 2, dep: 1, kind: 0, hand: 0 }, level: 'base', help: '0', fmt: 'compact', variants: '1', title: 'Домашняя работа', label: 'Домашка' },
+    test:   { counts: { dif: 3, brk: 2, ann: 3, dep: 2, kind: 0, hand: 0 }, level: 'all', help: '0', fmt: 'compact', variants: '2', title: 'Самостоятельная работа', label: 'Самостоятельная' },
+    one:    { counts: { dif: 0, brk: 0, ann: 10, dep: 0, kind: 0, hand: 0 }, level: 'all', help: 'ex1', fmt: 'compact', variants: '1', title: 'Отработка: аннуитет', label: 'Один тип' },
+    zachet: { counts: { dif: 5, brk: 5, ann: 5, dep: 5, kind: 10, hand: 0 }, level: 'all', help: '0', fmt: 'full', variants: '1', title: 'Зачётная работа', label: 'Зачёт Н.В.' },
+    warm:   { counts: { dif: 0, brk: 0, ann: 0, dep: 0, kind: 0, hand: 6 }, level: 'base', help: 'rule', fmt: 'full', variants: '1', title: 'Разминка: таблица руками', label: 'Разминка' }
+  };
+  const MIN = { dif: 7, brk: 8, ann: 6, dep: 6, kind: 1, hand: 5 };
+
+  const state = { preset: 'home', counts: { ...PRESETS.home.counts }, level: 'base', src: 'mix', help: '0', fmt: 'compact', variants: '1', key: 'short', sheet: 'student', generated: false, variant: 1, kit: 0 };
+  const KITS = ['7K3F-2B', 'Q4N8-7H', 'M2XC-5T', 'D9PR-3K'];
+
+  const M = {
+    p: '<math><mi>П</mi><mo>=</mo><mi>S</mi><mo>·</mo><mfrac><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></mfrac><mo>·</mo><mfrac><mi>r</mi><mn>100</mn></mfrac></math>',
+    k: '<math><mi>k</mi><mo>=</mo><mn>1</mn><mo>+</mo><mfrac><mi>r</mi><mn>100</mn></mfrac></math>',
+    x2: '<math><mi>X</mi><mo>=</mo><mfrac><mrow><mi>S</mi><msup><mi>k</mi><mn>2</mn></msup></mrow><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></mfrac></math>',
+    sn: '<math><mfrac><mi>S</mi><mi>n</mi></mfrac></math>',
+    sr: '<math><mfrac><mrow><mi>S</mi><mo>·</mo><mi>r</mi></mrow><mn>100</mn></mfrac></math>'
+  };
+
+  const TASKS = {
+    dif: [
+      { tag: 'fipi', text: 'Кира хочет пройти онлайн-курс веб-дизайна и 15 января берёт кредит в банке на некоторое количество месяцев. 1-го числа каждого месяца долг возрастает на 3 % по сравнению с концом предыдущего месяца; со 2-го по 14-е число нужно выплатить часть долга; 15-го числа долг должен быть на одну и ту же величину меньше долга на 15-е число предыдущего месяца. На сколько месяцев Кира взяла кредит, если общая сумма выплат на 27 % больше суммы кредита?',
+        ans: '17', sol: [M.p, '<math><mn>0,27</mn><mi>S</mi><mo>=</mo><mi>S</mi><mo>·</mo><mfrac><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></mfrac><mo>·</mo><mn>0,03</mn></math> ⇒ n + 1 = 18, n = 17'] },
+      { tag: 'fipi', text: '15 января Тимофей берёт кредит на ноутбук для монтажа видео на 14 месяцев. Условия те же: 1-го числа долг возрастает на 2 %, 15-го числа долг на одну и ту же величину меньше, чем месяцем раньше. Общая сумма выплат составила 690 тыс. рублей. Какую сумму Тимофей взял в кредит? Ответ выразите в рублях.',
+        ans: '600 000', sol: ['S<sub>общ</sub> = S + S · <math><mfrac><mn>15</mn><mn>2</mn></mfrac></math> · 0,02 = 1,15S', '1,15S = 690 ⇒ S = 600 тыс. рублей'] }
+    ],
+    brk: [
+      { tag: 'fipi', text: '15 декабря студия подкастов «Пиксель» берёт кредит на 15 месяцев. 1-го числа каждого месяца долг возрастает на 2 %; с 1-го по 14-й месяц 15-го числа долг должен быть на 40 тыс. рублей меньше, чем месяцем раньше; к 15-му числу 15-го месяца кредит погашается полностью. Общая сумма выплат — 956 тыс. рублей. Какой долг будет 15-го числа 14-го месяца? Ответ выразите в тысячах рублей.',
+        ans: '240 тыс.', sol: ['Сумма изменения долга: 14 раз по 40, затем остаток; вместе S', 'S<sub>перепл</sub> = 0,02 · (15S − 40 · (1 + 2 + … + 14)) = 0,3S − 84', '1,3S − 84 = 956 ⇒ S = 800; долг 14-го месяца: 800 − 14 · 40 = 240'] }
+    ],
+    ann: [
+      { tag: 'fipi', text: 'В июле 2027 года семья Морозовых берёт кредит 275 000 рублей на оборудование для домашней студии. Каждый январь долг увеличивается на 20 % по сравнению с концом предыдущего года; с февраля по июнь нужно выплатить одним платежом часть долга. Сколько рублей составит общая сумма платежей, если кредит погашен двумя равными платежами?',
+        ans: '360 000', sol: [M.k + ' = 1,2;  ' + M.x2, 'X = 275 000 · 1,44 : 2,2 = 180 000; два платежа — 360 000'] },
+      { tag: 'own', text: 'Марк взял кредит 500 000 рублей на электровелосипед под r % годовых и погасил его за два года: в первый год заплатил 360 000 рублей, во второй — 288 000 рублей. Каждый платёж вносился после начисления процентов. Найдите r.',
+        ans: '20', sol: ['(500k − 360) · k − 288 = 0', '500k² − 360k − 288 = 0 ⇒ k = 1,2 (второй корень отрицательный) ⇒ r = 20'] }
+    ],
+    dep: [
+      { tag: 'fipi', text: 'Вклад на учёбу в магистратуре открывают на четыре года, первоначальный вклад — целое число миллионов рублей. В конце каждого года вклад увеличивается на 10 % по сравнению с началом года, а в начале третьего и четвёртого годов пополняется на 3 млн рублей. Найдите наибольший первоначальный вклад, при котором через четыре года на счёте будет меньше 20 млн рублей.',
+        ans: '8 млн', sol: ['((S · 1,1² + 3) · 1,1 + 3) · 1,1 < 20', '1,4641S + 6,93 < 20 ⇒ S < 8,93 ⇒ S = 8 млн'] }
+    ],
+    kind: [
+      { tag: 'own', text: 'Кредит погашается тремя ежегодными платежами, каждый следующий на 20 % больше предыдущего. Найдите первый платёж. <i>Решать не нужно: назови схему кредита и признак.</i>', ans: 'Аннуитет', sol: ['Признак: известно соотношение платежей, а не путь долга'] }
+    ],
+    hand: [
+      { tag: 'own', text: 'Петя взял в кредит 1000 рублей на 4 месяца. Каждый месяц долг уменьшается на одну и ту же сумму, банк начисляет 10 % на долг на начало месяца. Заполни таблицу и найди переплату.', ans: '250 рублей', table: true,
+        sol: ['Сумма изменения долга: 1000 : 4 = 250 каждый месяц', 'Переплата: 100 + 75 + 50 + 25 = 250'] }
+    ]
+  };
+
+  const FRAMES = {
+    dif: { rule: 'Сумма изменения долга ' + M.sn + ' — каждый месяц одна и та же, в сумме даёт S. Переплата за месяц ' + M.sr + ' от долга на начало. Долг на конец = долг на начало − сумма изменения долга.', ex: 'Пример: 1000 рублей на 4 месяца под 10 %: изменение 250, переплаты 100, 75, 50, 25, всего 250.' },
+    brk: { rule: 'Та же таблица: сумма изменений долга всё равно равна S, переплату считаем по кускам, где долг меняется по-разному.', ex: 'Пример: 15 месяцев, 14 раз по 40 тыс., остаток одним платежом.' },
+    ann: { rule: M.k + ' — увеличивающий коэффициент. Долг с процентами = долг на начало · k, долг на конец = долг с процентами − платёж.', ex: 'Пример: 2100 рублей под 10 % двумя платежами: 2100 → 2310 → 1100 → 1210 → 0, платёж 1210.' },
+    dep: { rule: 'Вклад после начисления = вклад на начало · k, затем прибавляем пополнение или вычитаем снятие.', ex: 'Пример: 1 млн под 10 % и пополнение 0,5 млн: 1,1 + 0,5 = 1,6 млн.' },
+    kind: { rule: 'Долг уменьшается на одну и ту же величину — дифференцированный. Известны платежи — аннуитет. Деньги копятся — вклад.', ex: '' },
+    hand: { rule: 'Три столбца — три правила: сумма изменения долга, переплата, долг на конец.', ex: '' }
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const total = () => Object.values(state.counts).reduce((a, b) => a + b, 0);
+  const minutes = () => Math.round(Object.entries(state.counts).reduce((a, [k, v]) => a + v * MIN[k], 0) / 5) * 5;
+  const plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return (m === 1 && h !== 11) ? a : (m >= 2 && m <= 4 && (h < 12 || h > 14)) ? b : c; };
+  const tasksWord = (n) => n + ' ' + plural(n, 'задача', 'задачи', 'задач');
+
+  function renderTypes() {
+    $('#types').innerHTML = TYPES.map((t) => {
+      const n = state.counts[t.id];
+      return '<div class="trow' + (n ? '' : ' is-zero') + '">' +
+        '<span class="ticon" style="color:' + t.color + ';background:' + t.soft + '" aria-hidden="true">' + t.icon + '</span>' +
+        '<div><div class="tname">' + t.name + '</div><div class="thint">' + t.hint + '</div></div>' +
+        '<div class="stepper" role="group" aria-label="' + t.name + ': количество">' +
+          '<button type="button" data-t="' + t.id + '" data-d="-1" aria-label="Меньше"' + (n ? '' : ' disabled') + '>−</button>' +
+          '<output aria-live="polite">' + n + '</output>' +
+          '<button type="button" data-t="' + t.id + '" data-d="1" aria-label="Больше">+</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function setSeg(group, v) {
+    document.querySelectorAll('.seg[data-group="' + group + '"] button').forEach((b) => b.classList.toggle('is-on', b.dataset.v === v));
+  }
+
+  function renderSummary() {
+    const n = total();
+    $('#tot').textContent = tasksWord(n);
+    $('#time').textContent = n ? '≈ ' + minutes() + ' минут' : 'выберите хотя бы один тип';
+    $('#go-sub').textContent = tasksWord(n) + (state.variants !== '1' ? ' × ' + state.variants + ' вар.' : '');
+    $('#dock-tot').textContent = tasksWord(n);
+    const lvl = { base: 'базовый', all: 'все уровни', hard: 'повышенный' }[state.level];
+    const pname = state.preset ? PRESETS[state.preset].label : 'Свой состав';
+    $('#dock-sub').textContent = pname + ' · ' + lvl + (n ? ' · ≈ ' + minutes() + ' минут' : '');
+    document.querySelectorAll('.preset').forEach((b) => b.classList.toggle('is-on', b.dataset.preset === state.preset));
+  }
+
+  function pickTasks() {
+    const out = [];
+    TYPES.forEach((t) => {
+      const pool = TASKS[t.id];
+      for (let i = 0; i < state.counts[t.id]; i++) out.push({ type: t, task: pool[(i + state.kit) % pool.length], first: i === 0 });
+    });
+    return out;
+  }
+
+  function sheetHead(title) {
+    const teacher = $('#f-teacher').value || 'Багаева Н.В.';
+    const date = $('#f-date').value || '24.10.2026';
+    return '<header class="sh-head"><div class="sh-brand"><b>Будет на ЕГЭ</b><span>БОЛЬШЕ, ЧЕМ ПОДГОТОВКА</span></div>' +
+      '<div class="sh-meta"><b>' + title + ' · Экономические задачи</b><br>Профильная математика · задание 13<br>' + date + ' · Учитель: ' + teacher + '</div></header>';
+  }
+
+  function qrSvg(text, cell) {
+    try {
+      const q = qrcode(0, 'M'); q.addData(text); q.make();
+      return q.createSvgTag({ cellSize: cell, margin: 0, scalable: true });
+    } catch (e) {
+      return '<svg viewBox="0 0 10 10"><rect width="10" height="10" fill="#fff"/><path d="M0 0h3v3H0zM7 0h3v3H7zM0 7h3v3H0zM4 4h2v2H4z" fill="#101728"/></svg>';
+    }
+  }
+
+  function renderSheet() {
+    const teacher = state.sheet === 'teacher';
+    const zachet = state.preset === 'zachet';
+    const title = $('#f-title').value || 'Домашняя работа';
+    const list = pickTasks();
+    let h = '';
+    if (!state.generated) h += '<div class="skeleton-note">Так будет выглядеть лист. Числа и сюжеты поменяются при генерации.</div>';
+    h += sheetHead(teacher ? 'Ответы и решения' : title);
+    h += '<div class="sh-title"><h3>' + (teacher ? title + ' · файл для учителя' : title) + '</h3><p>' +
+      (zachet ? 'Кредиты и вклады · 30 задач · 50 баллов' : 'Кредиты и вклады' + (state.variants !== '1' ? ' · вариант ' + state.variant : '')) + '</p></div>';
+
+    if (!teacher) h += '<div class="sh-fields"><span>Фамилия, имя:</span><span>Дата: ' + ($('#f-date').value || '') + '</span></div>';
+
+    if (zachet && !teacher) {
+      h += '<div class="sh-sec">Таблица баллов</div><div class="tw"><table class="sh-score"><thead><tr><th>Блок</th><th class="c">Задачи</th><th class="c">Макс.</th><th class="c">Балл</th></tr></thead><tbody>' +
+        '<tr><td>Дифференцированный платёж</td><td class="c">1–5</td><td class="c">10</td><td></td></tr>' +
+        '<tr><td>«Поломанный» дифференцированный платёж</td><td class="c">6–10</td><td class="c">10</td><td></td></tr>' +
+        '<tr><td>Аннуитет</td><td class="c">11–15</td><td class="c">10</td><td></td></tr>' +
+        '<tr><td>Вклады</td><td class="c">16–20</td><td class="c">10</td><td></td></tr>' +
+        '<tr><td>Определи тип задачи</td><td class="c">21–30</td><td class="c">10</td><td></td></tr>' +
+        '<tr><td><b>Итого</b></td><td></td><td class="c"><b>50</b></td><td></td></tr></tbody></table></div>' +
+        '<div class="sh-scale"><div><b>«5»</b>43–50</div><div><b>«4»</b>34–42</div><div><b>«3»</b>25–33</div><div><b>«2»</b>0–24</div></div>' +
+        '<p style="font:12px/1.45 var(--font);color:var(--text-2);margin:8px 0 0">Блоки 1–4: 2 балла — верная модель и верный ответ; 1 балл — верная модель, но ошибка в счёте или в единицах; 0 — модели нет. Определи тип: 1 балл за верно названную схему.</p>';
+    }
+
+    if (teacher) {
+      h += '<div class="sh-sec">Сводка ответов</div><div class="sh-keys">' +
+        list.slice(0, zachet ? 8 : 12).map((x, i) => '<div><b>' + (i + 1) + '.</b> ' + x.task.ans + '</div>').join('') +
+        (zachet ? '<div>… ещё 22</div>' : '') + '</div>';
+      if (state.key !== 'ans') h += '<div class="sh-sec">' + (state.key === 'fullsol' ? 'Решения по шагам' : 'Краткие решения') + '</div>';
+    }
+
+    const shown = list.slice(0, zachet ? 2 : 6);
+    let prevType = null;
+    shown.forEach((x, i) => {
+      if (!teacher && x.type.id !== prevType && state.help !== '0') {
+        const f = FRAMES[x.type.id];
+        h += '<div class="sh-frame"><b>' + x.type.name + '</b>' + f.rule + (state.help !== 'rule' && f.ex ? '<div class="ex">' + f.ex + '</div>' : '') + '</div>';
+      }
+      prevType = x.type.id;
+      if (teacher && state.key === 'ans') return;
+      h += '<div class="sh-task"><span class="sh-n">' + (i + 1) + '</span><div><span class="sh-type">' + x.type.name + '</span>' +
+        (teacher ? '' : x.task.text);
+      if (teacher) {
+        h += '<div class="sh-sol">' + x.task.sol.map((s) => '<div>' + s + '</div>').join('') + '</div><div class="sh-ans">Ответ: ' + x.task.ans + '</div>';
+      } else if (state.fmt === 'full' && x.type.id !== 'kind') {
+        h += '<div class="sh-dn"><div>ДАНО</div><div>НАЙТИ</div></div>' + tableFor(x.type.id, x.task);
+      }
+      h += '</div><div class="sh-side"><span class="sh-tag ' + x.task.tag + '">' + (x.task.tag === 'fipi' ? 'ФИПИ' : 'не из банка') + '</span>' +
+        (state.generated && !teacher ? '<button class="sh-swap" type="button" title="Заменить задачу" aria-label="Заменить задачу ' + (i + 1) + '">↻</button>' : '') + '</div></div>';
+    });
+    const rest = list.length - shown.length;
+    if (rest > 0 && !(teacher && state.key === 'ans')) h += '<p style="font:12px var(--font);color:var(--text-2);text-align:center;margin:10px 0 0">… и ещё ' + tasksWord(rest) + ' на следующих страницах</p>';
+    if (!list.length) h += '<p style="font:14px var(--font);color:var(--text-2);text-align:center;margin:30px 0">Выберите хотя бы один тип в шаге 1.</p>';
+
+    const link = 'budetege.ru/zadaniya/13/k/' + KITS[state.kit];
+    h += '<footer class="sh-foot"><div>Будет на ЕГЭ · Профильная математика · Багаева Н.В. · t.me/budet_na_ege_math' +
+      (state.generated ? '<br>Комплект ' + KITS[state.kit] + ' · ' + link : '') + '</div>' +
+      (state.generated && !teacher ? '<div class="qr">' + qrSvg('https://' + link, 2) + '</div>' : '') + '</footer>';
+    $('#sheet').innerHTML = h;
+  }
+
+  function tableFor(type, task) {
+    const ann = type === 'ann' || type === 'dep';
+    const head = type === 'dep'
+      ? ['Год', 'Вклад на начало', 'После начисления %', 'Пополнение / снятие', 'Вклад на конец']
+      : ann ? ['Год', 'Долг на начало', 'Долг с процентами', 'Платёж', 'Долг на конец']
+            : ['Месяц', 'Долг на начало', 'Сумма изменения долга', 'Переплата', 'Долг на конец'];
+    const rows = task.table ? ['1', '2', '3', '4', 'Итого'] : ['1', '2', '3', '…', 'n'];
+    return '<div class="tw"><table class="sh-table"><thead><tr>' + head.map((x) => '<th>' + x + '</th>').join('') + '</tr></thead><tbody>' +
+      rows.map((r) => '<tr><td><b>' + r + '</b></td><td></td><td></td><td></td><td></td></tr>').join('') + '</tbody></table></div>';
+  }
+
+  function renderVariants() {
+    const v = Number(state.variants);
+    const box = $('#variants');
+    box.hidden = !(state.generated && v > 1);
+    box.innerHTML = Array.from({ length: v }, (_, i) => '<button type="button" class="' + (state.variant === i + 1 ? 'is-on' : '') + '" data-var="' + (i + 1) + '" aria-label="Вариант ' + (i + 1) + '">' + (i + 1) + '</button>').join('');
+  }
+
+  function renderKit() {
+    $('#kit').hidden = !state.generated;
+    $('#dot').classList.toggle('ok', state.generated);
+    $('#pv-state').textContent = state.generated ? 'Комплект ' + KITS[state.kit] : 'Пример первых задач';
+    if (state.generated) {
+      $('#kit-code').textContent = KITS[state.kit];
+      $('#qr').innerHTML = qrSvg('https://budetege.ru/zadaniya/13/k/' + KITS[state.kit], 3);
+    }
+    $('#dock-go').textContent = state.generated ? 'Листы готовы ↓' : 'Сгенерировать';
+  }
+
+  function render() { renderTypes(); renderSummary(); renderSheet(); renderVariants(); renderKit(); }
+
+  function applyPreset(id) {
+    const p = PRESETS[id];
+    state.preset = id; state.counts = { ...p.counts }; state.level = p.level; state.help = p.help; state.fmt = p.fmt; state.variants = p.variants; state.variant = 1;
+    state.generated = false;
+    $('#f-title').value = p.title;
+    ['level', 'help', 'fmt'].forEach((g) => setSeg(g, state[g]));
+    setSeg('var', p.variants);
+    render();
+  }
+
+  function dirty() { state.preset = null; state.generated = false; }
+
+  document.addEventListener('click', (e) => {
+    const pr = e.target.closest('[data-preset]');
+    if (pr) { applyPreset(pr.dataset.preset); return; }
+    const st = e.target.closest('[data-t]');
+    if (st) { const t = st.dataset.t; state.counts[t] = Math.max(0, Math.min(10, state.counts[t] + Number(st.dataset.d))); dirty(); render(); return; }
+    const all = e.target.closest('[data-all]');
+    if (all) { const v = Number(all.dataset.all); Object.keys(state.counts).forEach((k) => { state.counts[k] = (k === 'kind' || k === 'hand') ? 0 : v; }); dirty(); render(); return; }
+    const seg = e.target.closest('.seg button');
+    if (seg) {
+      const g = seg.parentElement.dataset.group; setSeg(g, seg.dataset.v);
+      if (g === 'var') { state.variants = seg.dataset.v; state.variant = 1; } else state[g] = seg.dataset.v;
+      if (g !== 'key' && g !== 'print') dirty();
+      render(); return;
+    }
+    const tab = e.target.closest('[data-sheet]');
+    if (tab) { state.sheet = tab.dataset.sheet; document.querySelectorAll('[data-sheet]').forEach((b) => { b.classList.toggle('is-on', b === tab); b.setAttribute('aria-selected', String(b === tab)); }); renderSheet(); return; }
+    const vb = e.target.closest('[data-var]');
+    if (vb) { state.variant = Number(vb.dataset.var); state.kit = (state.variant - 1) % KITS.length; renderVariants(); renderSheet(); return; }
+    if (e.target.closest('#go')) { if (!total()) return; state.generated = true; render(); return; }
+    if (e.target.closest('#dock-go')) {
+      if (total() && !state.generated) { state.generated = true; render(); }
+      $('#h-go').scrollIntoView({ behavior: 'smooth', block: 'start' }); return;
+    }
+    if (e.target.closest('#regen')) { state.kit = (state.kit + 1) % KITS.length; state.variant = 1; render(); return; }
+    if (e.target.closest('.sh-swap')) { state.kit = (state.kit + 1) % KITS.length; renderSheet(); return; }
+    if (e.target.closest('#copy')) {
+      const text = 'https://budetege.ru/zadaniya/13/k/' + KITS[state.kit];
+      const done = () => { $('#copied').textContent = 'Ссылка скопирована: ' + text; };
+      try { navigator.clipboard.writeText(text).then(done, () => { $('#copied').textContent = text; }); } catch (err) { $('#copied').textContent = text; }
+    }
+  });
+  ['#f-title', '#f-date', '#f-teacher'].forEach((s) => $(s).addEventListener('input', renderSheet));
+
+  render();
+})();
+</script>
+</body>
+</html>
