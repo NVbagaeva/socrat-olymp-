@@ -209,6 +209,7 @@ generators.push({
     const q = S11.sheetQuery11({
       rezhim: 'komplekt', istochnik: 'mix', sostav: s.sostav, variants: s.variants, seed,
       zameny: {}, marshrut: 1, theme: 'color',
+      bloki: [...S11.BLOKI_PO_UMOLCHANIYU], dz: S11.DZ_PO_UMOLCHANIYU, mesto: false,
     });
     return { student: `/zadaniya/11/pechat/?${q}`, teacher: `/zadaniya/11/pechat/otvety/?${q}` };
   },
