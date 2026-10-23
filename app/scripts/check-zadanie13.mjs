@@ -1,0 +1,651 @@
+#!/usr/bin/env node
+/* scripts/check-zadanie13.mjs — автотест задания №13 «Экономические задачи».
+
+   Запуск: pnpm test:zadanie13
+
+   Сейчас (этап 3, PR 1, ядро) проверяется:
+     — точные дроби lib/zadanie13/drob.ts;
+     — независимый солвер lib/zadanie13/solver.ts: прямым пересчётом
+       таблицы по периодам он воспроизводит ответы задач из материалов
+       автора (зачёт, рабочая тетрадь, лист «Дифференцируемый платёж»,
+       конспекты), задач ЕГЭ и демоверсий ФИПИ 2026 и 2027;
+     — проверка «число верное, единицы нет» (edinicy.ts);
+     — сокращённые таблицы 1, 2, 3, …, n−1, n (tablica.ts).
+   Когда появятся прототипы, сюда добавится генерация: каждая задача
+   банка решается солвером, 1000 задач на тип без ошибок.
+
+   Ненулевой код возврата — есть проблемы, они печатаются списком. */
+
+import { requireSrc } from './lib/load-ts.mjs';
+
+const { D, kOf } = requireSrc('lib/zadanie13/drob');
+const S_ = requireSrc('lib/zadanie13/solver');
+const { checkValue, wrongUnitValues } = requireSrc('lib/zadanie13/edinicy');
+const { shownRows, toTableModel } = requireSrc('lib/zadanie13/tablica');
+
+const problems = [];
+let checks = 0;
+const expect = (where, got, want) => {
+  checks += 1;
+  const ok =
+    typeof want === 'object' && want !== null && 'eq' in want
+      ? D(got).eq(want)
+      : D(got).eq(D(want));
+  if (!ok) problems.push(`${where}: получилось ${got}, ждали ${want}`);
+};
+const findInt = (from, to, pred) => {
+  const out = [];
+  for (let x = from; x <= to; x++) if (pred(x)) out.push(x);
+  return out;
+};
+const one = (where, list) => {
+  checks += 1;
+  if (list.length !== 1)
+    problems.push(`${where}: ждали ровно одно значение, нашлось ${JSON.stringify(list)}`);
+  return list[0];
+};
+
+const {
+  differentiated: dif,
+  byDebts,
+  byPayments,
+  deposit,
+  totalPaid,
+  overpay,
+  equalPayment,
+  loanProblems,
+  evenEnds,
+} = S_;
+const paid = (rows) => totalPaid(rows);
+const pct = (rows, S) => overpay(rows).div(S).mul(100);
+
+/* ── Дроби ─────────────────────────────────────────────────────── */
+expect('drob: 1,1³', kOf(10).pow(3), D('1.331'));
+expect('drob: 0,1 + 0,2', D('0.1').add('0.2'), D('0.3'));
+checks += 4;
+if (D(1n, 3n).isFiniteDecimal()) problems.push('drob: 1/3 — не конечная дробь');
+if (!D('813.5195').isFiniteDecimal()) problems.push('drob: 813,5195 — конечная дробь');
+if (D('813.5195').toRu() !== '813,5195') problems.push('drob: запись 813,5195');
+if (D(1200000n).toRu() !== '1 200 000') problems.push('drob: запись 1 200 000');
+
+/* ── Зачёт автора (ответы из файла учителя) ───────────────────── */
+expect(
+  'зачёт 1',
+  one(
+    'зачёт 1',
+    findInt(1, 80, (n) => pct(dif(100, n, 2), 100).eq(25)),
+  ),
+  24,
+);
+expect('зачёт 2', pct(byDebts(100, [80, 70, 50, 30, 20, 0], 4), 100), 14);
+expect(
+  'зачёт 3',
+  D(1404)
+    .div(paid(dif(1, 16, 2)))
+    .mul(1000),
+  1200000,
+);
+expect(
+  'зачёт 4',
+  paid(dif(900, 18, 4))
+    .sub(paid(dif(900, 12, 4)))
+    .mul(1000),
+  108000,
+);
+{
+  const n = one(
+    'зачёт 5: срок',
+    findInt(1, 40, (k) => paid(dif(12, k, 10)).eq('18.6')),
+  );
+  const p = dif(12, n, 10);
+  expect('зачёт 5', p[4].payment.sub(p[7].payment).mul(1e6), 360000);
+}
+{
+  const broken = (S) =>
+    byDebts(S, [...Array.from({ length: 12 }, (_, i) => S - 30 * (i + 1)), 0], 2);
+  const S = one(
+    'зачёт 6',
+    findInt(361, 3000, (s) => paid(broken(s)).eq('709.2')),
+  );
+  expect('зачёт 6', S - 360, 240);
+}
+expect(
+  'зачёт 7',
+  one(
+    'зачёт 7',
+    findInt(1, 60, (r) => paid(dif('1.2', 6, [10, 10, 10, r, r, r])).eq('1.68')),
+  ),
+  15,
+);
+expect('зачёт 8', paid(dif(800, 8, [10, 10, 10, 10, 15, 15, 15, 15])), 1210);
+{
+  const rows = byDebts(1, [D('0.75'), D('0.4'), 0], 15);
+  const s = Math.min(...findInt(1, 2000, (S) => rows.every((r) => r.payment.mul(S).isInteger())));
+  expect('зачёт 9', s, 400);
+}
+{
+  const S = 180;
+  const D2 = D(S).mul('0.6');
+  const x = equalPayment(D2, 2, 25);
+  const rows = byPayments(D2, [x, x], 25);
+  checks += 1;
+  if (!rows[1].end.eq(0)) problems.push('зачёт 10: два равных платежа не гасят остаток');
+  expect('зачёт 10', paid(byDebts(S, [D(S).mul('0.8'), D2], 25)).add(x.mul(2)), 303);
+}
+expect('зачёт 11', equalPayment(910, 3, 20).mul(3).sub(910), 386);
+expect('зачёт 12', equalPayment(4300000, 2, 15), 2645000);
+expect(
+  'зачёт 13',
+  one(
+    'зачёт 13',
+    findInt(1, 60, (r) =>
+      D(1464100)
+        .div(equalPayment(1, 4, r))
+        .eq(D(2674100).div(equalPayment(1, 2, r))),
+    ),
+  ),
+  10,
+);
+expect(
+  'зачёт 14',
+  D(400)
+    .mul(kOf(10).pow(2).add(kOf(10)))
+    .add(407)
+    .div(kOf(10).pow(3))
+    .mul(1000),
+  1000000,
+);
+{
+  const k = kOf(10);
+  const x = D(741000)
+    .mul(k.pow(3))
+    .div(k.pow(2).add(k.mul(2)).add(4));
+  const rows = byPayments(741000, [x, x.mul(2), x.mul(4)], 10);
+  checks += 1;
+  if (!rows[2].end.eq(0)) problems.push('зачёт 15: долг не погашен');
+  expect('зачёт 15', x, 133100);
+}
+{
+  const r = one(
+    'зачёт 16',
+    findInt(1, 60, (rr) => {
+      const k = kOf(rr);
+      const S = D(42).div(k.pow(2).sub(1));
+      return S.mul(k.pow(2)).mul(k.sub(1)).eq('24.2');
+    }),
+  );
+  expect('зачёт 16', D(42).div(kOf(r).pow(2).sub(1)), 200);
+}
+expect(
+  'зачёт 17',
+  Math.max(...findInt(1, 20, (S) => deposit(S, 4, 10, { before: [0, 1, 1, 1] })[3].end.lt(10))),
+  4,
+);
+expect(
+  'зачёт 18',
+  Math.min(
+    ...findInt(1, 200, (S) => {
+      const r = deposit(S, 4, 20, { after: [10, 10, 5, 5] });
+      return r[1].end.gt(70) && r[3].end.gt(120);
+    }),
+  ),
+  38,
+);
+expect('зачёт 19', D('2.8').mul(150).sub(D(2).mul(150).mul('1.2')).mul(1000), 60000);
+{
+  const S = D(133100)
+    .mul(kOf(10).pow(2).add(kOf(10)).add(1))
+    .div(kOf(10).pow(3));
+  const rows = deposit(S, 3, 10, { after: [-133100, -133100, -133100] });
+  checks += 1;
+  if (!rows[2].end.eq(0)) problems.push('зачёт 20: вклад не обнулился');
+  expect('зачёт 20', S, 331000);
+}
+
+/* ── Рабочая тетрадь «Дифференцированный платёж» ──────────────── */
+expect('тетрадь 1', overpay(dif(60000, 4, 10)), 15000);
+expect('тетрадь 2', pct(dif(1, 8, 12), 1).sub(pct(dif(1, 20, 5), 1)), '1.5');
+{
+  const S = D(24).div(dif(1, 21, 4)[10].payment);
+  expect('тетрадь 3', paid(dif(S, 21, 4)), 504);
+}
+expect(
+  'тетрадь 4',
+  one(
+    'тетрадь 4',
+    findInt(1, 50, (r) => pct(dif(1, 8, r), 1).eq(45)),
+  ),
+  10,
+);
+expect(
+  'тетрадь 5',
+  one(
+    'тетрадь 5',
+    findInt(1, 80, (n) => pct(dif(1, n, 4), 1).eq(26)),
+  ),
+  12,
+);
+{
+  const p = dif(1, 20, 2);
+  const S = D(1310).div(p.slice(0, 10).reduce((a, x) => a.add(x.payment), D(0)));
+  expect('тетрадь 6', paid(dif(S, 20, 2).slice(10)), 1110);
+}
+expect(
+  'тетрадь 7',
+  D(
+    one(
+      'тетрадь 7',
+      findInt(1, 100, (x) => dif(1, 40, D(x, 10))[0].payment.eq(D(1, 25))),
+    ),
+  ).div(10),
+  '1.5',
+);
+expect('тетрадь 8', pct(dif(1, 15, 3), 1), 24);
+expect('тетрадь 9', pct(byDebts(100, [85, 70, 55, 40, 20, 0], 4), 100), '14.8');
+{
+  const rows = byDebts(1, [D('0.8'), D('0.5'), 0], 25);
+  const min = rows.reduce((m, r) => (r.payment.lt(m) ? r.payment : m), rows[0].payment);
+  expect('тетрадь 10', Math.min(...findInt(1, 100, (S) => min.mul(S).gt(4))), 9);
+}
+expect(
+  'тетрадь 11',
+  Math.max(
+    ...findInt(1, 60, (r) =>
+      paid(byDebts(1, [D('0.8'), D('0.6'), D('0.4'), D('0.2'), D('0.1'), 0], r)).lt('1.25'),
+    ),
+  ),
+  8,
+);
+expect('тетрадь 12а', dif(900000, 5, 2)[2].payment, 190800);
+expect('тетрадь 12б', paid(dif(900000, 5, 2)), 954000);
+expect('тетрадь 13', D(78000).div(dif(1, 10, 3)[0].payment), 600000);
+{
+  const r = one(
+    'тетрадь 14',
+    findInt(1, 500, (x) => {
+      const p = dif(1, 7, D(x, 10));
+      return p[0].payment.div(p[6].payment).eq(D(5, 3));
+    }),
+  );
+  expect('тетрадь 14', pct(dif(1, 7, D(r, 10)), 1), 50);
+}
+expect(
+  'тетрадь 15',
+  one(
+    'тетрадь 15',
+    findInt(1, 40, (t) => pct(dif(1, 19, t), 1).eq(40)),
+  ),
+  4,
+);
+
+/* ── Лист «Дифференцируемый платёж», конспекты, ДЗ, повторение ── */
+expect(
+  'лист 3',
+  D(29.6)
+    .div(dif(1, 31, 3)[15].payment)
+    .mul(paid(dif(1, 31, 3))),
+  '917.6',
+);
+expect(
+  'лист 10',
+  Math.min(
+    ...findInt(1, 100, (S) =>
+      byDebts(1, [D('0.7'), D('0.3'), 0], 30).every((r) => r.payment.mul(S).gt(3)),
+    ),
+  ),
+  8,
+);
+{
+  const rows = byDebts(1, [D('0.7'), D('0.4'), 0], 25);
+  const ps = rows.map((r) => r.payment);
+  const spread = ps.reduce((m, x) => (x.gt(m) ? x : m)).sub(ps.reduce((m, x) => (x.lt(m) ? x : m)));
+  expect('лист 12', Math.max(...findInt(1, 100, (S) => spread.mul(S).lt(1))), 13);
+}
+expect(
+  'конспект 21.12 №7 (r)',
+  one(
+    '21.12 №7',
+    findInt(1, 60, (r) => paid(dif('2.5', 10, [12, 12, 12, 12, 12, r, r, r, r, r])).eq(4)),
+  ),
+  8,
+);
+{
+  const broken = (S, X, m, r) =>
+    byDebts(S, [...Array.from({ length: m }, (_, i) => D(S).sub(D(X).mul(i + 1))), 0], r);
+  expect(
+    'конспект 21.12 №5',
+    one(
+      '21.12 №5',
+      findInt(501, 3000, (S) => paid(broken(S, 20, 25, 3)).eq(1407)),
+    ) - 500,
+    400,
+  );
+  expect(
+    'конспект 21.12 №8',
+    one(
+      '21.12 №8',
+      findInt(601, 3000, (S) => paid(broken(S, 30, 20, 3)).eq(1604)),
+    ),
+    1100,
+  );
+  expect(
+    'IMG_0952',
+    one(
+      'IMG_0952',
+      findInt(801, 3000, (S) => paid(broken(S, 80, 10, 3)).eq(1198)),
+    ) - 800,
+    200,
+  );
+  expect(
+    'IMG_0945 №20',
+    one(
+      'IMG_0945',
+      findInt(901, 3000, (S) => paid(broken(S, 50, 18, 2)).eq(1209)),
+    ) - 900,
+    100,
+  );
+  expect(
+    'IMG_0951 №5 (r)',
+    one(
+      'IMG_0951 №5',
+      findInt(1, 40, (r) => paid(broken(900, 20, 30, r)).eq(1272)),
+    ),
+    2,
+  );
+  expect(
+    'IMG_0951 №6 (n)',
+    one(
+      'IMG_0951 №6',
+      findInt(1, 100, (n) => paid(broken(700, D(400, n), n, 1)).eq(755)),
+    ),
+    10,
+  );
+  expect(
+    'IMG_0951 №7 (n)',
+    one(
+      'IMG_0951 №7',
+      findInt(1, 100, (n) => paid(broken(600, D(400, n), n, 3)).eq(852)),
+    ),
+    20,
+  );
+  expect('ЕГЭ-2018 (300 тыс., 21 мес.)', paid(broken(300, 10, 20, 2)), 384);
+}
+{
+  const ends = [
+    ...Array.from({ length: 5 }, (_, i) => 1500 - 160 * (i + 1)),
+    ...Array.from({ length: 5 }, (_, i) => 700 - 140 * (i + 1)),
+  ];
+  expect('повторение №4 (долг 2030)', paid(byDebts(1500, ends, 10)), 2300);
+  const x = equalPayment(1, 1, 10);
+  checks += 1;
+  if (!x.eq('1.1')) problems.push('повторение: один платёж = 1,1S');
+}
+expect(
+  'повторение №1',
+  (() => {
+    const k = kOf(10);
+    const d = D('634.5').mul(k).sub(100).mul(k).sub(100);
+    return d.mul(k).add(200);
+  })(),
+  '813.5195',
+);
+expect(
+  'повторение №3',
+  dif(1800, 24, 1)
+    .slice(0, 12)
+    .reduce((a, r) => a.add(r.payment), D(0)),
+  '1066.5',
+);
+expect('ДЗ-21 №1', pct(byDebts(100, [90, 80, 70, 60, 50, 0], 5), 100), '22.5');
+
+/* ── Аннуитет, льготный, вклады: фото ЕГЭ и Ларина ─────────────── */
+expect('IMG_2487 №1', equalPayment(550000, 2, 20).mul(2), 720000);
+expect('IMG_2487 №2', equalPayment(8052000, 4, 20), 3110400);
+expect(
+  'IMG_2487 №3',
+  equalPayment(4026000, 4, 20)
+    .mul(4)
+    .sub(equalPayment(4026000, 2, 20).mul(2)),
+  950400,
+);
+expect('IMG_0946 №4', D('2.16').div(equalPayment(1, 3, 20)), '4.55');
+expect(
+  'IMG_0946 №5',
+  D(48250)
+    .div(equalPayment(1, 3, 20).mul(3).sub(1))
+    .add(48250),
+  162000,
+);
+expect(
+  'IMG_0946 №7',
+  Math.min(...findInt(1, 30, (n) => !equalPayment(1300000, n, 10).gt(350000))),
+  5,
+);
+expect(
+  'IMG_0946 №8',
+  one(
+    'IMG_0946 №8',
+    findInt(1, 80, (r) => byPayments(300000, [260000, 169000], r)[1].end.eq(0)),
+  ),
+  30,
+);
+expect('IMG_2488 №6', D(78030).div(equalPayment(1, 3, 30).mul(3).sub(1)), 119700);
+expect(
+  'IMG_2488 №7',
+  one(
+    'IMG_2488 №7',
+    findInt(1, 80, (r) => byPayments(400000, [330000, 121000], r)[1].end.eq(0)),
+  ),
+  10,
+);
+expect('IMG_2488 №9', equalPayment(419375, 4, 20).mul(4), 648000);
+{
+  const x = one(
+    'IMG_2488 №8',
+    findInt(1, 800, (xx) => {
+      const rows = byPayments(800, [xx, xx], 20);
+      const y = rows[1].end.mul(kOf(20));
+      return D(2 * xx)
+        .add(y)
+        .eq('1254.4');
+    }),
+  );
+  expect('IMG_2488 №8 (ЕГЭ-2022)', x, 200);
+}
+const lgot = (S, m, n, r) => {
+  const x = equalPayment(S, n - m, r);
+  return D(S)
+    .mul(kOf(r).sub(1))
+    .mul(m)
+    .add(x.mul(n - m));
+};
+expect(
+  'IMG_5099 №10',
+  one(
+    'IMG_5099 №10',
+    findInt(1, 80, (r) => lgot(220, 3, 5, r).eq(420)),
+  ),
+  20,
+);
+expect('IMG_5099 №11', Math.max(...findInt(1, 100, (S) => lgot(S, 3, 5, 20).lt(7))), 3);
+expect('IMG_5099 №12', Math.min(...findInt(1, 100, (S) => lgot(S, 3, 5, 20).gt(10))), 6);
+expect(
+  'IMG_5099 №13',
+  one(
+    'IMG_5099 №13',
+    findInt(1, 80, (r) => lgot('4.2', 3, 5, r).eq('6.1')),
+  ),
+  10,
+);
+expect(
+  'IMG_5099 №14',
+  one(
+    'IMG_5099 №14',
+    findInt(1, 80, (r) =>
+      D(38016)
+        .div(equalPayment(1, 3, r))
+        .eq(D(52416).div(equalPayment(1, 2, r))),
+    ),
+  ),
+  20,
+);
+expect(
+  'IMG_5099 №15',
+  one(
+    'IMG_5099 №15',
+    findInt(1, 80, (r) =>
+      D(58564)
+        .div(equalPayment(1, 4, r))
+        .eq(D(106964).div(equalPayment(1, 2, r))),
+    ),
+  ),
+  10,
+);
+{
+  const k = kOf(10);
+  expect(
+    'IMG_0946 №6',
+    D(270200)
+      .mul(k.pow(3))
+      .div(k.pow(2).add(k.mul(3)).add(9)),
+    26620,
+  );
+}
+expect(
+  'IMG_0945 №19',
+  Math.min(
+    ...findInt(1, 1000, (S) => {
+      const r = deposit(S, 4, 40, { after: [40, 40, 20, 20] });
+      return r[1].end.gt(270) && r[3].end.gt(490);
+    }),
+  ),
+  89,
+);
+expect(
+  'IMG_0955 №1',
+  deposit(10000, 3, 10)
+    .at(-1)
+    .end.sub(deposit(10000, 3, 10, { after: [-2000, 2000, 0] }).at(-1).end),
+  220,
+);
+{
+  const k = kOf(50);
+  const x = D(3900)
+    .mul('8.25')
+    .sub(D(3900).mul(k.pow(5)))
+    .div(k.pow(4).add(k.pow(3)).add(k.pow(2)).add(k));
+  const r = deposit(3900, 5, 50, { after: [x, x, x, x, 0] });
+  checks += 1;
+  if (!r[4].end.eq(D(3900).mul('8.25'))) problems.push('IMG_0955 №3: итог не 8,25S');
+  expect('IMG_0955 №3', x, 210);
+}
+expect(
+  'IMG_0955 №4',
+  one(
+    'IMG_0955 №4',
+    findInt(1, 200, (a) =>
+      kOf(a)
+        .mul(D(3, 4))
+        .mul(kOf(a + 40))
+        .eq('1.44'),
+    ),
+  ) + 40,
+  60,
+);
+{
+  // Ларин №82: a = S·kA/6, b = S·kB/6 из двух линейных уравнений, затем S/6 из второго года.
+  const a = D(3350 - 710, 24),
+    b = D(670).sub(a.mul(5));
+  const s = a.mul(a).mul(5).add(b.mul(b)).div(749);
+  expect('IMG_0955 №2', a.mul(a.div(s)).add(b.mul(5).mul(b.div(s))), 841);
+}
+expect(
+  '738d827e №2',
+  Math.min(...findInt(1, 40, (n) => kOf(8).mul(kOf(n).pow(2)).gt(kOf(10).pow(3)))),
+  12,
+);
+
+/* ── Демоверсии ФИПИ ───────────────────────────────────────────── */
+expect('демо-2027 №13 (182 000, 3 платежа)', equalPayment(182000, 3, 20).mul(3), 259200);
+{
+  const ends = [
+    ...Array.from({ length: 5 }, (_, i) => 800 - 120 * (i + 1)),
+    ...Array.from({ length: 5 }, (_, i) => 200 - 40 * (i + 1)),
+  ];
+  expect(
+    'демо-2026 №16 (r)',
+    one(
+      'демо-2026',
+      findInt(1, 60, (r) => paid(byDebts(800, ends, r)).eq(1480)),
+    ),
+    20,
+  );
+}
+
+/* ── Решения автора: «известные платежи» таблицей диф. платежа ─── */
+{
+  // ЕГЭ-2022: долг после двух равных платежей x, сумма = S + переплата.
+  const x = 200,
+    k = kOf(20);
+  const d1 = D(800).mul(k).sub(x),
+    d2 = d1.mul(k).sub(x);
+  expect('Б7 через переплату', D(800).add(D('0.2').mul(D(800).add(d1).add(d2))), '1254.4');
+}
+
+/* ── Корректность кредита ──────────────────────────────────────── */
+checks += 2;
+if (loanProblems(dif(1000, 4, 10)).length)
+  problems.push('loanProblems: дифференцированный кредит помечен ошибочным');
+if (!loanProblems(byPayments(1000, [100, 100], 10)).length)
+  problems.push('loanProblems: непогашенный кредит не замечен');
+
+/* ── Единицы ответа ────────────────────────────────────────────── */
+const units = [
+  [1200, 1200000, 'rub', 'units'],
+  [1.2, 1200000, 'rub', 'units'],
+  [1200000, 1200000, 'rub', 'right'],
+  [240000, 240, 'thous', 'units'],
+  [240, 240, 'thous', 'right'],
+  [241, 240, 'thous', 'wrong'],
+  [20, 20, 'percent', 'right'],
+  [0.2, 20, 'percent', 'wrong'],
+];
+for (const [input, answer, u, want] of units) {
+  checks += 1;
+  const got = checkValue(input, answer, u);
+  if (got !== want)
+    problems.push(`единицы: ${input} при ответе ${answer} ${u} → ${got}, ждали ${want}`);
+}
+checks += 1;
+if (wrongUnitValues(20, 'percent').length)
+  problems.push('единицы: у процентов не бывает «чужих единиц»');
+
+/* ── Таблицы ───────────────────────────────────────────────────── */
+const sr = (n, extra) => JSON.stringify(shownRows(n, extra));
+const tables = [
+  [4, [], '[1,2,3,4]'],
+  [21, [], '[1,2,3,0,20,21]'],
+  [21, [11], '[1,2,3,0,11,0,20,21]'],
+  [20, [10, 11], '[1,2,3,0,10,11,0,19,20]'],
+];
+for (const [n, extra, want] of tables) {
+  checks += 1;
+  if (sr(n, extra) !== want)
+    problems.push(`таблица ${n} строк ${JSON.stringify(extra)}: ${sr(n, extra)}, ждали ${want}`);
+}
+{
+  const tm = toTableModel(dif(1000, 4, 10), 'dif', 'month');
+  checks += 1;
+  if (tm.totals.change !== 1000 || tm.totals.interest !== 250 || tm.totals.payment !== 1250)
+    problems.push('таблица Пети: итоги не 1000 / 250 / 1250');
+  checks += 1;
+  if (JSON.stringify(evenEnds(1000, 4).map(String)) !== '["750","500","250","0"]')
+    problems.push('evenEnds');
+}
+
+if (problems.length) {
+  console.error(`check-zadanie13: проблем ${problems.length} из ${checks} проверок`);
+  for (const p of problems) console.error('  — ' + p);
+  process.exit(1);
+}
+console.log(`check-zadanie13: ${checks} проверок, все прошли.`);
