@@ -199,7 +199,7 @@ const A03: Prototype = {
   source: 'fipi',
   difficulty: 'base',
   units: 'thous',
-  title: 'По платежу m-го месяца найти общую сумму выплат',
+  title: 'По платежу $m$-го месяца найти общую сумму выплат',
   forbid: [
     { n: 31, r: 3, m: 16 },
     { n: 21, r: 4, m: 11 },
@@ -463,7 +463,7 @@ const A07: Prototype = {
   sourceNote: 'авторская (лист «Дифференцируемый платёж», по сборнику)',
   difficulty: 'hard',
   units: 'percent',
-  title: 'Наибольший платёж в q раз меньше кредита — найти ставку',
+  title: 'Наибольший платёж в $q$ раз меньше кредита — найти ставку',
   forbid: [
     { n: 50, q: 20 },
     { n: 40, q: 25 },
@@ -807,7 +807,7 @@ const A12: Prototype = {
   sourceNote: 'по задаче ЕГЭ-2019',
   difficulty: 'base',
   units: 'percent',
-  title: 'По переплате в процентах найти месячную ставку t',
+  title: 'По переплате в процентах найти месячную ставку $t$',
   forbid: [
     { n: 23, p: 36 },
     { n: 19, p: 40 },
@@ -1116,7 +1116,7 @@ const A18: Prototype = {
   sourceNote: 'авторская (рабочая тетрадь)',
   difficulty: 'base',
   units: 'rub',
-  title: 'Платёж k-го месяца',
+  title: 'Платёж $k$-го месяца',
   forbid: [{ S: 900000, n: 5, r: 2, k: 3 }],
   make({ rng, plot }) {
     const n = rng.int(4, 12);

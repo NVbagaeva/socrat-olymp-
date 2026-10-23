@@ -7,7 +7,8 @@
    seed «b1», «b2», … и оставляет первые десять вариантов, у которых:
      — числа разные (подпись параметров не повторяется);
      — сюжет другой: не повторяются ни имя (или организация), ни цель;
-     — один ответ встречается не больше двух раз.
+     — один ответ встречается не больше двух раз (у прототипов с малым
+       числом возможных ответов — не больше, чем необходимо).
    Каждый вариант уже проверен генератором: ответ формулы совпал с
    независимым солвером, числа источников исключены.
 
@@ -24,11 +25,24 @@ const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
 const PER = 10;
 const entries = [];
 const report = [];
-const UNIT = { rub: 'руб.', thous: 'тыс. руб.', mln: 'млн руб.', percent: '%', months: 'мес.', years: 'лет', none: '' };
-const TYPE = { A: 'Дифференцированный платёж', B: '«Поломанный» дифференцированный платёж', C: 'Аннуитет', D: 'Вклады' };
+const UNIT = {
+  rub: 'руб.',
+  thous: 'тыс. руб.',
+  mln: 'млн руб.',
+  percent: '%',
+  months: 'мес.',
+  years: 'лет',
+  none: '',
+};
+const TYPE = {
+  A: 'Дифференцированный платёж',
+  B: '«Поломанный» дифференцированный платёж',
+  C: 'Аннуитет',
+  D: 'Вклады',
+};
 
 let lastType = '';
-for (const info of prototypes()) {
+function pick(info, answerLimit) {
   const chosen = [];
   const sigs = new Set();
   const who = new Set();
@@ -44,13 +58,21 @@ for (const info of prototypes()) {
     }
     const sig = JSON.stringify(t.params);
     if (sigs.has(sig) || who.has(t.plot.who) || goals.has(t.plot.goal)) continue;
-    if ((answers.get(t.answer) ?? 0) >= 2) continue;
+    if ((answers.get(t.answer) ?? 0) >= answerLimit) continue;
     sigs.add(sig);
     who.add(t.plot.who);
     goals.add(t.plot.goal);
     answers.set(t.answer, (answers.get(t.answer) ?? 0) + 1);
     chosen.push(t);
   }
+  return chosen;
+}
+
+for (const info of prototypes()) {
+  /* Один ответ — не больше двух раз; если у прототипа мало «хороших» ответов
+     (ставка из четырёх возможных), предел поднимается ровно до нужного. */
+  let chosen = [];
+  for (let limit = 2; limit <= 5 && chosen.length < PER; limit++) chosen = pick(info, limit);
   if (chosen.length < PER) {
     console.error(`${info.id}: набралось только ${chosen.length} вариантов`);
     process.exit(1);
@@ -63,11 +85,17 @@ for (const info of prototypes()) {
     lastType = typeTitle;
   }
   report.push(`### ${info.id} · ${info.subtype} · ${info.title}\n`);
-  report.push(`Источник: ${info.sourceNote ?? (info.source === 'fipi' ? 'ФИПИ' : 'авторская')} · уровень: ${info.difficulty === 'hard' ? 'повышенный' : 'базовый'} · ответ в: ${UNIT[info.units] || '—'}\n`);
+  report.push(
+    `Источник: ${info.sourceNote ?? (info.source === 'fipi' ? 'ФИПИ' : 'авторская')} · уровень: ${info.difficulty === 'hard' ? 'повышенный' : 'базовый'} · ответ в: ${UNIT[info.units] || '—'}\n`,
+  );
   chosen.forEach((t, k) => {
     const cond = t.condition.replace(/\n/g, '<br>');
-    const table = t.conditionTable ? `<br>${t.conditionTable.head.join(' · ')}<br>${t.conditionTable.rows.map((r) => r.join(' · ')).join('<br>')}` : '';
-    report.push(`${k + 1}. ${cond}${table}<br>**Ответ: ${String(t.answer).replace('.', ',')}** · seed \`${t.seed}\` · ${t.plot.deck}\n`);
+    const table = t.conditionTable
+      ? `<br>${t.conditionTable.head.join(' · ')}<br>${t.conditionTable.rows.map((r) => r.join(' · ')).join('<br>')}`
+      : '';
+    report.push(
+      `${k + 1}. ${cond}${table}<br>**Ответ: ${String(t.answer).replace('.', ',')}** · seed \`${t.seed}\` · ${t.plot.deck}\n`,
+    );
   });
 }
 
@@ -93,5 +121,10 @@ const head = `# Задание №13. Банк задач для проверк�
 
 Файл с ответами — для учителя; в клиентский код сайта ответы не попадают (там только seed).
 `;
-fs.writeFileSync(path.join(APP, '..', 'docs/13-economics/04-bank.md'), head + report.join('\n') + '\n');
-console.log(`build-bank-13: ${entries.length} задач → src/lib/zadanie13/bank.ts, docs/13-economics/04-bank.md`);
+fs.writeFileSync(
+  path.join(APP, '..', 'docs/13-economics/04-bank.md'),
+  head + report.join('\n') + '\n',
+);
+console.log(
+  `build-bank-13: ${entries.length} задач → src/lib/zadanie13/bank.ts, docs/13-economics/04-bank.md`,
+);

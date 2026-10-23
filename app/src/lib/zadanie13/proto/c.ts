@@ -503,7 +503,7 @@ const C06: Prototype = {
   source: 'fipi',
   difficulty: 'base',
   units: 'rub',
-  title: 'Каждый следующий платёж в q раз больше — найти первый',
+  title: 'Каждый следующий платёж в $q$ раз больше — найти первый',
   forbid: [
     { S: 270200, r: 10, q: 3 },
     { S: 741000, r: 10, q: 2 },
@@ -745,7 +745,7 @@ const C11: Prototype = {
   sourceNote: 'по задаче ЕГЭ-2017',
   difficulty: 'hard',
   units: 'percent',
-  title: 'По X за 4 (3) года или по Y за 2 — найти ставку',
+  title: 'По $X$ за 4 (3) года или по $Y$ за 2 — найти ставку',
   forbid: [
     { X: 58564, Y: 106964 },
     { X: 38016, Y: 52416 },
@@ -1129,6 +1129,8 @@ const C16: Prototype = {
   },
 };
 
+/** Число для KaTeX: конечная дробь — десятичной записью, иначе обыкновенной. */
+const fr = (x: Drob): string => (x.isFiniteDecimal() ? tex(x) : `\\frac{${x.n}}{${x.d}}`);
 const C17: Prototype = {
   id: 'C-17',
   type: 'C',
@@ -1137,31 +1139,39 @@ const C17: Prototype = {
   sourceNote: 'авторская (по А. Малковой)',
   difficulty: 'hard',
   units: 'percent',
+  maxDecimals: 3,
   title: 'Смена ставки по ходу кредита — последний платёж в процентах от суммы',
-  forbid: [{ r1: 25, r2: 20 }],
+  forbid: [{ r1: 25, r2: 20, h: 50 }],
   make({ rng, plot }) {
-    const r1 = rng.pick([20, 25, 30, 40]);
-    const r2 = rng.pick([10, 15, 20, 25].filter((x) => x < r1));
+    const share = rng.pick([
+      { h: D(1, 2), word: 'половину' },
+      { h: D(2, 5), word: 'две пятых' },
+      { h: D(1, 3), word: 'треть' },
+      { h: D(3, 10), word: 'три десятых' },
+    ]);
+    const h = share.h;
+    const r1 = rng.pick([10, 15, 20, 25, 30, 40, 50]);
+    const r2 = rng.pick([5, 10, 15, 20, 25, 30, 40].filter((x) => x < r1));
     const k1 = kOf(r1);
     const k2 = kOf(r2);
-    const h = D(1, 2);
-    // формула: долг после трёх платежей d3 = k2(k1(k1 − ½) − ½) − ½, четвёртый платёж k2·d3 (в долях S)
+    // формула: долг после трёх платежей d3 = k2(k1(k1 − h) − h) − h, четвёртый платёж k2·d3 (в долях S), h — доля платежа
     const d3 = k2.mul(k1.mul(k1.sub(h)).sub(h)).sub(h);
     const p4 = k2.mul(d3);
     if (!d3.isPositive() || !p4.lt(h)) return null;
     const answer = p4.mul(100);
-    if (!isNice(answer, 2)) return null;
+    if (!isNice(answer, 3)) return null;
     const rows3 = byPayments(1, [h, h, h], [r1, r1, r2]);
     const last = rows3[2]!.end.mul(k2);
-    const rows = byPayments(100, [50, 50, 50, last.mul(100)], [r1, r1, r2, r2]);
+    const hp = h.mul(100);
+    const rows = byPayments(100, [hp, hp, hp, last.mul(100)], [r1, r1, r2, r2]);
     return {
       condition:
-        `${plot.subject} ${v(plot, 'взял', 'взяла')} кредит ${plot.goal}, рассчитывая погасить долг ежегодными платежами, каждый из которых (кроме, возможно, последнего) составляет половину суммы $S$, взятой в кредит. ` +
+        `${plot.subject} ${v(plot, 'взял', 'взяла')} кредит ${plot.goal}, рассчитывая погасить долг ежегодными платежами, каждый из которых (кроме, возможно, последнего) составляет ${share.word} суммы $S$, взятой в кредит. ` +
         `В конце каждого года банк увеличивает оставшуюся сумму долга на ${pct(r1)}, а затем ${plot.firm ? 'компания переводит' : `${plot.subject} переводит`} в банк очередной платёж. После двух лет выплат банк снизил процентную ставку до ${pct(r2)} годовых, и был внесён третий платёж. Четвёртым платежом долг был погашен полностью. ` +
         `Сколько процентов от суммы $S$ составил четвёртый платёж?`,
       answer,
       verify: last.mul(100),
-      params: { r1, r2 },
+      params: { r1, r2, h: h.mul(100).toNumber() },
       rows,
       scheme: 'ann',
       period: 'year',
@@ -1171,21 +1181,21 @@ const C17: Prototype = {
           'До снижения ставки долг каждый год растёт в $k_1$ раз, после — в $k_2$ раз.',
           `k_1 = 1 + \\frac{${r1}}{100} = ${tex(k1)}, \\qquad k_2 = 1 + \\frac{${r2}}{100} = ${tex(k2)}`,
         ),
-        stTable('Считаем в процентах от кредита: $S = 100$, первые три платежа по 50.'),
+        stTable(`Считаем в долях кредита $S$: первые три платежа по $${fr(h)}\\,S$.`),
         step(
           'Два года по старой ставке',
-          'Долг умножаем на $k_1$, вычитаем половину кредита.',
-          `(${tex(k1)}S - 0{,}5S)\\cdot ${tex(k1)} - 0{,}5S = ${tex(k1.mul(k1.sub(h)).sub(h))}\\,S`,
+          `Долг умножаем на $k_1$, вычитаем платёж — ${share.word} кредита.`,
+          `(${tex(k1)}S - ${fr(h)}S)\\cdot ${tex(k1)} - ${fr(h)}S = ${fr(k1.mul(k1.sub(h)).sub(h))}\\,S`,
         ),
         step(
           'Третий год по новой ставке',
           'Теперь умножаем на $k_2$.',
-          `${tex(k1.mul(k1.sub(h)).sub(h))}\\,S\\cdot ${tex(k2)} - 0{,}5S = ${tex(d3)}\\,S`,
+          `${fr(k1.mul(k1.sub(h)).sub(h))}\\,S\\cdot ${tex(k2)} - ${fr(h)}S = ${fr(d3)}\\,S`,
         ),
         step(
           'Четвёртый платёж',
           'Последний платёж гасит долг с процентами целиком.',
-          `${tex(d3)}\\,S\\cdot ${tex(k2)} = ${tex(p4)}\\,S`,
+          `${fr(d3)}\\,S\\cdot ${tex(k2)} = ${fr(p4)}\\,S`,
         ),
         stAnswer(`Четвёртый платёж — ${pct(answer)} от $S$.`),
       ],

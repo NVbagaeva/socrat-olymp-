@@ -666,9 +666,11 @@ for (const [n, extra, want] of tables) {
     const sig = new Set(list.map((t) => JSON.stringify(t.params)));
     const who = new Set(list.map((t) => t.plot.who));
     const cond = new Set(list.map((t) => t.condition));
-    if (sig.size !== list.length || who.size !== list.length || cond.size !== list.length) problems.push(`банк ${id}: повторяются числа, имя или условие`);
+    if (sig.size !== list.length || who.size !== list.length || cond.size !== list.length)
+      problems.push(`банк ${id}: повторяются числа, имя или условие`);
   }
-  for (const id of byProto.keys()) if (!ids.includes(id)) problems.push(`банк: прототипа ${id} нет в реестре`);
+  for (const id of byProto.keys())
+    if (!ids.includes(id)) problems.push(`банк: прототипа ${id} нет в реестре`);
 }
 
 /* ── Генерация: все прототипы ──────────────────────────────────── */
@@ -685,7 +687,8 @@ for (const [n, extra, want] of tables) {
   const inline = (text, where) => {
     for (const m of text.matchAll(/\$([^$]+)\$/g)) typeset(m[1], where);
     const plain = stripDollarMath(text).replace(/\*\*/g, '');
-    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) problems.push(`${where}: вне KaTeX (${f.rule}): «${f.match}»`);
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)])
+      problems.push(`${where}: вне KaTeX (${f.rule}): «${f.match}»`);
   };
   const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
   /* Не меньше 1000 задач на тип: число seed на прототип зависит от того, сколько прототипов в типе. */
@@ -719,12 +722,18 @@ for (const [n, extra, want] of tables) {
         inline(h.question, where + ' подсказка');
         h.options.forEach((o) => inline(o, where + ' вариант'));
         if (h.comment) inline(h.comment, where + ' комментарий');
-        if (!(h.correct >= 0 && h.correct < h.options.length) || new Set(h.options).size !== h.options.length) problems.push(`${where}: подсказка без верного варианта или с повтором`);
+        if (
+          !(h.correct >= 0 && h.correct < h.options.length) ||
+          new Set(h.options).size !== h.options.length
+        )
+          problems.push(`${where}: подсказка без верного варианта или с повтором`);
       }
       const again = generate(info.id, `s${i}`);
-      if (again.condition !== t.condition || again.answer !== t.answer) problems.push(`${where}: не воспроизводится по seed`);
+      if (again.condition !== t.condition || again.answer !== t.answer)
+        problems.push(`${where}: не воспроизводится по seed`);
     }
-    if (seen.size < Math.min(perProto, 10)) problems.push(`${info.id}: из ${perProto} задач разных условий только ${seen.size}`);
+    if (seen.size < Math.min(perProto, 10))
+      problems.push(`${info.id}: из ${perProto} задач разных условий только ${seen.size}`);
   }
   console.log('сгенерировано по типам:', JSON.stringify(counts));
 }
