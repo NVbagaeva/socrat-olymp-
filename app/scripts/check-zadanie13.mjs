@@ -16,6 +16,7 @@
 
    Ненулевой код возврата — есть проблемы, они печатаются списком. */
 
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { requireSrc } from './lib/load-ts.mjs';
 
@@ -646,6 +647,30 @@ for (const [n, extra, want] of tables) {
     problems.push('evenEnds');
 }
 
+/* ── Банк: 10 вариантов на прототип ────────────────────────────── */
+{
+  const bankFile = new URL('../src/lib/zadanie13/bank.ts', import.meta.url);
+  const { BANK_13 } = fs.existsSync(bankFile) ? requireSrc('lib/zadanie13/bank') : { BANK_13: [] };
+  if (!BANK_13.length) problems.push('банк не собран: pnpm build:bank-13');
+  const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
+  const ids = prototypes().map((p) => p.id);
+  const byProto = new Map();
+  for (const [id, seed] of BANK_13) {
+    if (!byProto.has(id)) byProto.set(id, []);
+    byProto.get(id).push(generate(id, seed));
+  }
+  for (const id of ids) {
+    const list = byProto.get(id) ?? [];
+    checks += 1;
+    if (list.length !== 10) problems.push(`банк ${id}: ${list.length} вариантов вместо 10`);
+    const sig = new Set(list.map((t) => JSON.stringify(t.params)));
+    const who = new Set(list.map((t) => t.plot.who));
+    const cond = new Set(list.map((t) => t.condition));
+    if (sig.size !== list.length || who.size !== list.length || cond.size !== list.length) problems.push(`банк ${id}: повторяются числа, имя или условие`);
+  }
+  for (const id of byProto.keys()) if (!ids.includes(id)) problems.push(`банк: прототипа ${id} нет в реестре`);
+}
+
 /* ── Генерация: все прототипы ──────────────────────────────────── */
 {
   const katex = require('katex');
@@ -663,12 +688,16 @@ for (const [n, extra, want] of tables) {
     for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) problems.push(`${where}: вне KaTeX (${f.rule}): «${f.match}»`);
   };
   const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
-  const perProto = Number(process.env.Z13_SEEDS ?? 60);
+  /* Не меньше 1000 задач на тип: число seed на прототип зависит от того, сколько прототипов в типе. */
+  const byType = {};
+  for (const p of prototypes()) byType[p.type] = (byType[p.type] ?? 0) + 1;
+  const seedsFor = (type) => Number(process.env.Z13_SEEDS ?? Math.ceil(1000 / byType[type]));
   const only = process.env.Z13_ONLY;
   const counts = {};
   for (const info of prototypes()) {
     if (only && !info.id.startsWith(only)) continue;
     const seen = new Set();
+    const perProto = seedsFor(info.type);
     for (let i = 0; i < perProto; i++) {
       const where = `${info.id} seed s${i}`;
       let t;
