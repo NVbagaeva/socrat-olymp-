@@ -23,6 +23,27 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Часть 2: ключи вариантов для автопроверки — из тех же шаблонов,
+      # что и задания сайта. Файл с ответами в репозиторий не попадает.
+      - name: Установить pnpm
+        if: vars.CHAST2_ENABLED == '1'
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        if: vars.CHAST2_ENABLED == '1'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Ключи вариантов
+        if: vars.CHAST2_ENABLED == '1'
+        working-directory: app
+        run: |
+          pnpm install --frozen-lockfile
+          node scripts/build-variant-keys.mjs
+
       - name: Миграции
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
