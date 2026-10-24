@@ -38,6 +38,9 @@ export const NASTROYKI_13: Nastroyki13 = {
 
 export const KOLICHESTVO_13 = [5, 10, 20] as const;
 
+/** Выбор тренажёра в sessionStorage: его пишет и «Решать в тренажёре» у репетиторов. */
+export const KLYUCH_VYBORA_13 = 'budetege:zadanie-13:trenazher-vybor:v1';
+
 /** Прототип для плана: без движка. */
 export interface ProtoPlan {
   id: string;
