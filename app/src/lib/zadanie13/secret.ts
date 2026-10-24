@@ -7,4 +7,13 @@ import { createOtpechatok } from '../otpechatok';
 
 const sekret = createOtpechatok('z13:v1:');
 
-export const { canonical, fingerprint, sealAnswer, answerMatches, sealText, openText } = sekret;
+export const {
+  canonical,
+  fingerprint,
+  sealAnswer,
+  sealChoice,
+  answerMatches,
+  choiceMatches,
+  sealText,
+  openText,
+} = sekret;
