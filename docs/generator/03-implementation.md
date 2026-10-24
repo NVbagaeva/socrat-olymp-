@@ -93,7 +93,7 @@
 | `pnpm lint`, `pnpm typecheck` | чисто |
 | `pnpm test:generator` (№11, №1, №2, №8) | 3323 из 3323 |
 | Прежние адреса №8 до и после правки листа | 146 адресов, листы совпадают |
-| `test:vychisleniya`, `check-mobile-overflow /zadaniya/8/` | чисто; см. ниже |
+| `test:vychisleniya`, `check-mobile-overflow /zadaniya/8/` | чисто; 14 страниц × 4 ширины, прокрутки 0 (5 старых адресов `/podgotovka/` уводят на новые — их скрипт замера не дожидается) |
 | `pnpm test:komplekty` (200 комплектов на генератор) | 3000 комплектов, расхождений 0 |
 | Прежние адреса №2 и банк до и после правки листа | 67 адресов, листы совпадают |
 | `test:vektory`, `check-mobile-overflow /zadaniya/2/` | чисто; 15 страниц × 4 ширины, прокрутки 0 |
