@@ -38,10 +38,29 @@ html:root {
   align-self: flex-start;
 }
 .sheet-figure svg {
-  max-height: 46mm;
+  max-height: 36mm;
+}
+.sheet-task-question {
+  line-height: 1.4;
 }
 .sheet-item + .sheet-item {
-  margin-top: calc(var(--sheet-step) * 2);
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+
+/* Плотный режим: лист ученика не уложился в две страницы на вариант —
+   VariantPrint набирает его ещё раз с этим признаком. */
+html[data-sheet-dense] {
+  --sheet-fs-body: 9.3pt;
+}
+html[data-sheet-dense] .sheet-task .sheet-figure {
+  max-width: 42mm;
+}
+html[data-sheet-dense] .sheet-figure svg {
+  max-height: 30mm;
+}
+html[data-sheet-dense] .var-instruction {
+  margin-bottom: calc(var(--sheet-step) * 2);
+  padding-block: var(--sheet-step);
 }
 
 /* ── Поля шапки: вторая строка (время, учитель) ─────────────── */
@@ -75,8 +94,8 @@ html:root {
   break-inside: avoid;
 }
 .var-blank__title {
-  margin: 0 0 calc(var(--sheet-step) * 2);
-  font-size: var(--sheet-fs-block);
+  margin: 0 0 var(--sheet-step);
+  font-size: var(--sheet-fs-body);
   font-weight: 700;
   color: var(--sheet-brand);
 }
@@ -84,7 +103,7 @@ html:root {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 4);
+  gap: var(--sheet-step) calc(var(--sheet-step) * 4);
 }
 .var-blank__row {
   display: flex;
@@ -103,7 +122,7 @@ html:root {
 }
 .var-blank__cells i {
   width: 4.6mm;
-  height: 6mm;
+  height: 5.2mm;
   border: 1px solid var(--sheet-ink-2);
   margin-left: -1px;
 }

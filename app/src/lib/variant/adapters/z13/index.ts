@@ -34,7 +34,8 @@ function stars(d: 'base' | 'hard'): Stars {
 
 function candidate(prototypeId: string, seed: string): C13 | null {
   const p = PROTOTYPE_BY_ID[prototypeId];
-  if (p === undefined || !TYPES.includes(p.type)) return null;
+  /* «Таблица руками» (P-…) — тренировка оформления, в ЕГЭ такой задачи нет. */
+  if (p === undefined || prototypeId.startsWith('P-') || !TYPES.includes(p.type)) return null;
   return {
     taskId: `${prototypeId}:${seed}`,
     prototypeId,

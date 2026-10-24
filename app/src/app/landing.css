@@ -507,14 +507,25 @@ section.band--soft {
   }
 }
 
-/* Плашка «Собрать вариант» — главное действие первого экрана. */
+/* Плашка «Собрать вариант» — главное действие первого экрана: на
+   широком экране — среди кнопок, уже — над кадром (он идёт первым и
+   занимает экран). */
 .hero__variant {
   flex: 1 1 320px;
   max-width: 440px;
 }
-@media (max-width: 767.98px) {
-  .hero__variant {
-    flex-basis: 100%;
+.hero .hero__variant--top {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .hero .hero__variant--top {
+    display: flex;
+    position: relative;
+    z-index: 1;
     max-width: none;
+    margin: var(--space-4) var(--space-5) 0;
+  }
+  .hero .hero__variant--actions {
+    display: none;
   }
 }
