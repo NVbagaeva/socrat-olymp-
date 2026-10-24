@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import { useRef, useState } from 'react';
 import { GEN_UI } from '@/content/generatorUi';
-import type { GenConfig, GenTask } from '@/lib/generator/obshchiy/types';
+import type { GenConfig, GenExtras, GenTask } from '@/lib/generator/obshchiy/types';
 import { GenIcon } from './GenIcons';
 
 export type TaskAction = 'swap' | 'level' | 'remove' | 'menu' | 'up' | 'down';
@@ -18,6 +18,12 @@ export type TaskAction = 'swap' | 'level' | 'remove' | 'menu' | 'up' | 'down';
  * и ручка перетаскивания слева по наведению (ручка понимает и ↑ ↓), на
  * телефоне — кнопка «⋯» и долгое нажатие, там же «Выше» и «Ниже».
  */
+/** «2026-10-24» → «24.10.2026»; пусто — пустая линия. */
+function dataText(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m === null ? '' : `${m[3]}.${m[2]}.${m[1]}`;
+}
+
 export function GenSheetView({
   config,
   tasks,
@@ -25,6 +31,8 @@ export function GenSheetView({
   teacher,
   demo,
   live,
+  extras,
+  qr,
   onAction,
   onMove,
 }: {
@@ -34,6 +42,10 @@ export function GenSheetView({
   teacher: boolean;
   demo: boolean;
   live: boolean;
+  /** «Дополнительно»: учитель и дата в шапке. null — пример листа. */
+  extras: GenExtras | null;
+  /** QR-код на лист ученика, SVG. */
+  qr: string | null;
   onAction: (pos: string, action: TaskAction) => void;
   /** Перетаскивание: задача pos встаёт на место to (номер в листе с нуля). */
   onMove: (pos: string, to: number) => void;
@@ -70,13 +82,23 @@ export function GenSheetView({
         <span className="gen-paper__course">
           <b>{config.sheet.course}</b>
           <br />
-          {GEN_UI.uchitelPodpis(config.sheet.teacher)}
+          {(extras?.teacher ?? config.sheet.teacher) === ''
+            ? null
+            : GEN_UI.uchitelPodpis(extras?.teacher ?? config.sheet.teacher)}
         </span>
         <span className="gen-paper__motto">{GEN_UI.motto}</span>
       </header>
       <div className="gen-paper__title">
         <span className="gen-paper__chip">{config.sheet.chip}</span>
         <h3>{config.sheet.title}</h3>
+        {qr === null ? null : (
+          <span
+            className="gen-paper__qr"
+            role="img"
+            aria-label={GEN_UI.dop.qr}
+            dangerouslySetInnerHTML={{ __html: qr }}
+          />
+        )}
       </div>
       <p className="gen-paper__sub">
         {demo ? GEN_UI.primerLista : subtitle}
@@ -86,10 +108,17 @@ export function GenSheetView({
         <b>{GEN_UI.familiya}</b>
         <span />
         <b>{GEN_UI.data}</b>
-        <span className="gen-paper__date" />
+        <span className="gen-paper__date">{dataText(extras?.date ?? '')}</span>
       </div>
       <ol className="gen-paper__list">
-        {tasks.map((t, i) => (
+        {tasks.map((t, i) => [
+          t.lead === undefined ? null : (
+            <li
+              key={`lead-${t.pos}`}
+              className="gen-lead"
+              dangerouslySetInnerHTML={{ __html: t.lead }}
+            />
+          ),
           <li
             key={t.pos}
             className={clsx(
@@ -214,8 +243,8 @@ export function GenSheetView({
                 </button>
               </>
             ) : null}
-          </li>
-        ))}
+          </li>,
+        ])}
       </ol>
       {teacher && !demo ? (
         <p className="gen-paper__src">{GEN_UI.istochnikStroka(bankNos, tasks.length)}</p>

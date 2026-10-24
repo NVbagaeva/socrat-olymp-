@@ -16,9 +16,11 @@ import {
   GENERATOR11_SOURCES,
   GENERATOR11_TEXTS,
 } from '@/content/generator11';
+import { defaultExtras } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
+  GenExtras,
   GenSheet,
   GenSlot,
   GenState,
@@ -30,7 +32,12 @@ import {
   sheetQuery11,
   slotySostava,
   sostavIzSlotov,
+  subtitleOf,
+  type Dop11,
+  type Primer11,
+  type Ramka11,
   type SheetParams11,
+  type VidRaboty11,
 } from './sheet11';
 import type { RazdelInfo, UslovieBanka } from './trenazher/sessiya';
 
@@ -60,7 +67,53 @@ export function config11(razdely: readonly RazdelInfo[], slot: string): GenConfi
     sources: GENERATOR11_SOURCES,
     presets: GENERATOR11_PRESETS,
     limits: { maxPerTopic: 6, maxTasks: 20, variantsMax: 8 },
+    extras: {
+      kinds: Object.entries(SHEET_11.vidy).map(([id, title]) => ({ id, title })),
+    },
   };
+}
+
+/** «Дополнительно» → параметры листа; всё по умолчанию — без них. */
+function dopIzExtras(e: GenExtras, config: GenConfig): Dop11 | undefined {
+  const d = defaultExtras(config);
+  if (JSON.stringify(e) === JSON.stringify(d)) return undefined;
+  return {
+    teoriya: e.theory,
+    primery: e.examples,
+    qr: e.qr,
+    vid: e.kind !== null && e.kind in SHEET_11.vidy ? (e.kind as VidRaboty11) : null,
+    data: e.date,
+    uchitel: e.teacher,
+  };
+}
+
+function extrasIzDop(dop: Dop11 | undefined, config: GenConfig): GenExtras {
+  if (dop === undefined) return defaultExtras(config);
+  return {
+    theory: dop.teoriya,
+    examples: dop.primery,
+    qr: dop.qr,
+    kind: dop.vid,
+    date: dop.data,
+    teacher: dop.uchitel,
+  };
+}
+
+/** Рамка и примеры перед задачей — в предпросмотре, своей разметкой. */
+function leadHtml(x: { ramka: Ramka11 | null; primery: Primer11[] }): string {
+  const ramka =
+    x.ramka === null
+      ? ''
+      : `<div class="gen-recap"><b>${x.ramka.title}</b><ol>${x.ramka.items
+          .map((i) => `<li>${i}</li>`)
+          .join('')}</ol></div>`;
+  const primery = x.primery
+    .map(
+      (y) =>
+        `<div class="gen-example"><span class="gen-example__label">${SHEET_11.primer}</span><p class="gen-example__title">${y.title}</p><div class="gen-example__q">${y.questionHtml}</div><div class="gen-example__sol">${y.solutionHtml}<p>${SHEET_11.otvet}: <b>${y.answerHtml}</b></p></div></div>`,
+    )
+    .join('');
+  return ramka + primery;
 }
 
 /** План прежней схемы → состав: подряд идущие одинаковые подтипы склеиваются. */
@@ -84,6 +137,7 @@ export function paramsIzSostoyaniya(
     state.plan.map(({ id }) => config.topics.find((t) => t.subtypes.some((s) => s.id === id))?.id),
   );
   const legacy = state.legacy === true;
+  const dop = dopIzExtras(state.extras, config);
   return {
     rezhim: topics.size === 1 ? 'otrabotka' : 'komplekt',
     istochnik: state.source,
@@ -94,6 +148,7 @@ export function paramsIzSostoyaniya(
     marshrut: 1,
     theme: 'color',
     ...(legacy ? {} : { poKlyucham: true }),
+    ...(dop === undefined ? {} : { dop }),
   };
 }
 
@@ -114,19 +169,25 @@ export function engine11(
     sheetQuery11(paramsIzSostoyaniya(state, config));
   return {
     async build(state) {
-      const { sobratList } = await import('./sheet11');
-      const list = sobratList(paramsIzSostoyaniya(state, config), bank);
+      const { sobratList, peredZadachami } = await import('./sheet11');
+      const p = paramsIzSostoyaniya(state, config);
+      const list = sobratList(p, bank);
       const sheet: GenSheet = {
-        variants: list.poVariantam.map((zs) =>
-          zs.map((z) => ({
-            pos: z.pos,
-            no: z.no,
-            questionHtml: z.questionHtml,
-            answerHtml: z.answerHtml,
-            solutionHtml: z.solutionHtml,
-            fromBank: z.poz.vid === 'bank',
-          })),
-        ),
+        variants: list.poVariantam.map((zs) => {
+          const pered = peredZadachami(p, list, zs);
+          return zs.map((z, i) => {
+            const x = pered.get(i);
+            return {
+              pos: z.pos,
+              no: z.no,
+              questionHtml: z.questionHtml,
+              answerHtml: z.answerHtml,
+              solutionHtml: z.solutionHtml,
+              fromBank: z.poz.vid === 'bank',
+              ...(x === undefined ? {} : { lead: leadHtml(x) }),
+            };
+          });
+        }),
         note: list.nehvatka > 0 ? GENERATOR11_TEXTS.nehvatka(list.nehvatka) : null,
       };
       return sheet;
@@ -141,11 +202,7 @@ export function engine11(
       };
     },
     subtitle(state) {
-      return SHEET_11.subtitle[
-        paramsIzSostoyaniya({ ...state, seed: '' }, config).rezhim === 'otrabotka'
-          ? 'otrabotka'
-          : 'komplekt'
-      ];
+      return subtitleOf(paramsIzSostoyaniya({ ...state, seed: '' }, config));
     },
     parse(q) {
       if (!q.has('s') || q.get('m') === 'r') return null;
@@ -163,6 +220,7 @@ export function engine11(
         plan,
         seed: p.seed,
         zameny: p.zameny,
+        extras: extrasIzDop(p.dop, config),
         ...(p.poKlyucham === true ? {} : { legacy: true }),
       };
     },

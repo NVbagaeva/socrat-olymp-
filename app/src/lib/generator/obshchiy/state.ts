@@ -13,6 +13,7 @@
 import { plural } from '@/lib/plural';
 import type {
   GenConfig,
+  GenExtras,
   GenPreset,
   GenSlot,
   GenState,
@@ -310,7 +311,25 @@ export function planFromPreset(config: GenConfig, preset: GenPreset, source: Sou
   return filterBySource(config, slotsOf(assemble(config, by)), source);
 }
 
-export function stateFromPreset(config: GenConfig, preset: GenPreset, source: SourceId): GenState {
+/** «Дополнительно» по умолчанию: лист без рамок, примеров и QR. */
+export function defaultExtras(config: GenConfig): GenExtras {
+  return {
+    theory: false,
+    examples: 0,
+    qr: false,
+    kind: null,
+    date: '',
+    teacher: config.sheet.teacher,
+  };
+}
+
+/** Пресет заполняет состав, уровни, варианты и вид работы; остальное «Дополнительно» — как было. */
+export function stateFromPreset(
+  config: GenConfig,
+  preset: GenPreset,
+  source: SourceId,
+  extras: GenExtras = defaultExtras(config),
+): GenState {
   return {
     source,
     levels: preset.levels.slice(),
@@ -318,6 +337,7 @@ export function stateFromPreset(config: GenConfig, preset: GenPreset, source: So
     plan: planFromPreset(config, preset, source),
     seed: null,
     zameny: {},
+    extras: { ...extras, kind: preset.kind ?? null },
   };
 }
 
@@ -325,8 +345,21 @@ export function defaultState(config: GenConfig): GenState {
   const preset = config.presets[0];
   const source = config.sources[0]?.id ?? 'mix';
   if (preset === undefined)
-    return { source, levels: [1, 2, 3], variants: 1, plan: [], seed: null, zameny: {} };
+    return {
+      source,
+      levels: [1, 2, 3],
+      variants: 1,
+      plan: [],
+      seed: null,
+      zameny: {},
+      extras: defaultExtras(config),
+    };
   return stateFromPreset(config, preset, source);
+}
+
+/** Сколько пунктов «Дополнительно» включено: для подписи кнопки. */
+export function extrasOn(extras: GenExtras): number {
+  return [extras.theory, extras.examples > 0, extras.qr].filter(Boolean).length;
 }
 
 /** Какой пресет совпадает с экраном: число вариантов, уровни и темы. */

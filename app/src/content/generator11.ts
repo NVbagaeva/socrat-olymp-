@@ -76,6 +76,7 @@ export const GENERATOR11_PRESETS: GenPreset[] = [
     variants: 1,
     levels: [1, 2],
     sostav: { PR: 1, SM: 1, DP: 1, VD: 1, RB: 1, PG: 1 },
+    kind: 'dz',
   },
   {
     id: 'sr',
@@ -84,6 +85,7 @@ export const GENERATOR11_PRESETS: GenPreset[] = [
     variants: 2,
     levels: [1, 2],
     sostav: { PR: 2, SM: 2, DP: 2, VD: 2, RB: 2 },
+    kind: 'sr',
   },
   {
     id: 'one',

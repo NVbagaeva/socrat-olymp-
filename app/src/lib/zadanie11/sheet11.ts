@@ -23,7 +23,9 @@
  */
 
 import { MARSHRUTY_11, SHEET_11 } from '@/content/repetitory11';
+import { RAZDELY_TEORII_11 } from '@/content/teoriya11';
 import answers from '@/lib/sheet/answers.js';
+import { exampleItem } from '@/lib/sheet/sheet.js';
 import { typesetKrupno as typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
@@ -58,7 +60,37 @@ export interface SheetParams11 {
   /** Номер маршрута урока (режим «marshrut»). */
   marshrut: number;
   theme: 'color' | 'print';
+  /** «Дополнительно» генератора. Нет — лист как прежде. */
+  dop?: Dop11;
 }
+
+export type VidRaboty11 = keyof typeof SHEET_11.vidy;
+
+/**
+ * «Дополнительно» генератора (docs/generator/02-design.md, макет А):
+ * рамка теории перед типом задач, разобранные примеры, QR-код на лист
+ * ученика, вид работы, дата и учитель в шапке. Всё — в адресе листа.
+ */
+export interface Dop11 {
+  teoriya: boolean;
+  /** Разобранных примеров на тип: 0–2. */
+  primery: 0 | 1 | 2;
+  qr: boolean;
+  /** Вид работы в шапке; null — подпись по составу. */
+  vid: VidRaboty11 | null;
+  /** Дата на листе: «2026-10-24»; пусто — пустая линия. */
+  data: string;
+  uchitel: string;
+}
+
+export const DOP_11: Dop11 = {
+  teoriya: false,
+  primery: 0,
+  qr: false,
+  vid: null,
+  data: '',
+  uchitel: SHEET_11.head.author,
+};
 
 export const VARIANTS_MAX_11 = 8;
 
@@ -84,7 +116,37 @@ export function sheetQuery11(p: SheetParams11): string {
   const z = Object.entries(p.zameny).filter(([, k]) => k > 0);
   if (z.length > 0) q.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
   if (p.theme === 'print') q.set('t', 'print');
+  const dop = p.rezhim === 'marshrut' ? undefined : p.dop;
+  if (dop !== undefined) {
+    if (dop.teoriya) q.set('tr', '1');
+    if (dop.primery > 0) q.set('pr', String(dop.primery));
+    if (dop.qr) q.set('qr', '1');
+    if (dop.vid !== null) q.set('vr', dop.vid);
+    if (dop.data !== '') q.set('d', dop.data);
+    if (dop.uchitel !== DOP_11.uchitel) q.set('uch', dop.uchitel);
+  }
   return q.toString();
+}
+
+/** «Дополнительно» из адреса; нет ни одного ключа — undefined. */
+function dopIzZaprosa(q: URLSearchParams): Dop11 | undefined {
+  if (!['tr', 'pr', 'qr', 'vr', 'd', 'uch'].some((k) => q.has(k))) return undefined;
+  const pr = Number(q.get('pr'));
+  const vr = q.get('vr') ?? '';
+  const data = q.get('d') ?? '';
+  return {
+    teoriya: q.get('tr') === '1',
+    primery: pr === 1 || pr === 2 ? pr : 0,
+    qr: q.get('qr') === '1',
+    vid: vr in SHEET_11.vidy ? (vr as VidRaboty11) : null,
+    data: /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : '',
+    uchitel: q.has('uch')
+      ? (q.get('uch') ?? '')
+          .replace(/[\u0000-\u001f<>]/g, '')
+          .trim()
+          .slice(0, 40)
+      : DOP_11.uchitel,
+  };
 }
 
 export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
@@ -94,6 +156,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     (Object.keys(ISTOCHNIK_KOD) as Istochnik[]).find((k) => ISTOCHNIK_KOD[k] === q.get('i')) ??
     'bank';
   const poKlyucham = rezhim !== 'marshrut' && q.get('ps') === '2';
+  const dop = rezhim === 'marshrut' ? undefined : dopIzZaprosa(q);
   const sostav = (q.get('s') ?? '')
     .split(',')
     .map((x) => x.split(':'))
@@ -124,6 +187,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     marshrut: MARSHRUTY_11.some((m) => m.no === r) ? r : 1,
     theme: q.get('t') === 'print' ? 'print' : 'color',
     ...(poKlyucham ? { poKlyucham } : {}),
+    ...(dop === undefined ? {} : { dop }),
   };
 }
 
@@ -578,6 +642,66 @@ export interface SobrannyyList {
   poVariantam: ListZadacha[][];
   bloki: string[];
   nehvatka: number;
+  /** Разобранные примеры: подтип → примеры («*» — на весь вариант). */
+  primery?: Record<string, Primer11[]>;
+}
+
+/** Разобранный пример: новая задача того же типа, которой нет на листе. */
+export interface Primer11 {
+  title: string;
+  questionHtml: string;
+  solutionHtml: string;
+  answerHtml: string;
+}
+
+/**
+ * Примеры листа. Отработка — k примеров к каждому подтипу, вариант
+ * ЕГЭ — k на весь вариант, из первых подтипов. Одни и те же во всех
+ * вариантах и у ученика, и у учителя; условие не повторяет задачи листа.
+ */
+function primeryLista(
+  p: SheetParams11,
+  poVariantam: ListZadacha[][],
+  pohozha: Pohozha,
+): Record<string, Primer11[]> {
+  const k = p.dop?.primery ?? 0;
+  if (k === 0 || p.rezhim === 'marshrut') return {};
+  const zanyato = new Set(poVariantam.flat().map((z) => z.questionHtml));
+  const ids = [...new Set((poVariantam[0] ?? []).map((z) => z.poz.id))];
+  const primer = (id: string, a: number): Primer11 | null => {
+    try {
+      const g = generateBez(id, `${p.seed}|primer|${id}|${a}`, pohozha);
+      const questionHtml = typeset(g.solved.uslovie);
+      if (zanyato.has(questionHtml)) return null;
+      zanyato.add(questionHtml);
+      const kontekst: Kontekst = {
+        typeset,
+        pechat: true,
+        pokazano: { pravilo: false, priznaki: false },
+      };
+      return {
+        title: subtype(id).title,
+        questionHtml,
+        solutionHtml: reshenieHtml(g.solved.etapy, g.solved.tables ?? [], kontekst),
+        answerHtml: typeset(`$${d(g.solved.answer)}$`),
+      };
+    } catch {
+      return null;
+    }
+  };
+  const nabrat = (id: string, n: number): Primer11[] => {
+    const out: Primer11[] = [];
+    for (let a = 0; out.length < n && a < 25; a += 1) {
+      const x = primer(id, a);
+      if (x !== null) out.push(x);
+    }
+    return out;
+  };
+  if (p.rezhim === 'otrabotka') {
+    return Object.fromEntries(ids.map((id) => [id, nabrat(id, k)]));
+  }
+  const iz = ids.length >= k ? ids.slice(0, k) : ids;
+  return { '*': iz.flatMap((id) => nabrat(id, ids.length >= k ? 1 : k)) };
 }
 
 /** Задачи листа по вариантам: условия, ответы, решения. */
@@ -653,19 +777,32 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       };
     });
   });
-  return { poVariantam, bloki: plan.bloki, nehvatka: plan.nehvatka };
+  const primery = primeryLista(p, poVariantam, pohozha);
+  return {
+    poVariantam,
+    bloki: plan.bloki,
+    nehvatka: plan.nehvatka,
+    ...(Object.keys(primery).length > 0 ? { primery } : {}),
+  };
 }
 
 /* ── Описание листа для шаблона lib/sheet ───────────────────────── */
 
 export type VidLista = 'uchenik' | 'uchitel' | 'vse';
 
-function subtitleOf(p: SheetParams11): string {
+export function subtitleOf(p: SheetParams11): string {
   if (p.rezhim === 'marshrut') {
     const m = MARSHRUTY_11.find((x) => x.no === p.marshrut);
     return m === undefined ? '' : SHEET_11.subtitle.marshrut(m.no, m.title);
   }
-  return SHEET_11.subtitle[p.rezhim];
+  const vid = p.dop?.vid ?? null;
+  return vid === null ? SHEET_11.subtitle[p.rezhim] : SHEET_11.vidy[vid];
+}
+
+/** «2026-10-24» → «24.10.2026». */
+export function dataNaListe(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m === null ? '' : `${m[3]}.${m[2]}.${m[1]}`;
 }
 
 const BLOK_ROUTE: Record<string, string> = {
@@ -684,10 +821,9 @@ interface SheetTask {
 }
 
 /** Блоки листа: по типам (отработка), по этапам урока или один без полосы. */
-function blokiLista(p: SheetParams11, zadachi: ListZadacha[], task: (z: ListZadacha) => SheetTask) {
-  if (p.rezhim === 'komplekt') {
-    return [{ head: false, title: '', note: '', tasks: zadachi.map(task) }];
-  }
+/** Задачи по блокам листа: по типам (отработка), по этапам урока или один блок. */
+function gruppyLista(p: SheetParams11, zadachi: ListZadacha[]): ListZadacha[][] {
+  if (p.rezhim === 'komplekt') return [zadachi];
   /* В схеме ps=2 порядок задач задаёт учитель: блок — подряд идущие
      задачи одного типа, номера на листе идут по порядку. */
   const gruppy: ListZadacha[][] = [];
@@ -702,12 +838,125 @@ function blokiLista(p: SheetParams11, zadachi: ListZadacha[], task: (z: ListZada
     for (const z of zadachi) if (!order.includes(z.blok)) order.push(z.blok);
     for (const b of order) gruppy.push(zadachi.filter((z) => z.blok === b));
   }
-  return gruppy.map((tasks) => {
+  return gruppy;
+}
+
+/** Рамка «Повторяем»: пункты из вкладки «Теория». */
+export interface Ramka11 {
+  title: string;
+  items: string[];
+}
+
+/** Пункты рамки раздела: определение, главная формула и следствия. */
+function punktyTeorii(razdel: string, kratko: boolean): string[] {
+  const r = RAZDELY_TEORII_11.find((x) => x.section === razdel);
+  if (r?.formula === undefined) return [];
+  const formula = (tex: string, podpis: string) => `${typeset(`$${tex}$`)} — ${typeset(podpis)}`;
+  if (kratko) return [`<b>${typeset(r.title)}.</b> ${formula(r.formula.tex, r.formula.podpis)}`];
+  return [
+    typeset(r.lead),
+    formula(r.formula.tex, r.formula.podpis),
+    ...(r.formula.sledstviya ?? []).slice(0, 2).map((x) => formula(x.tex, x.podpis)),
+  ];
+}
+
+/**
+ * Что стоит перед блоком листа: рамка теории и разобранные примеры.
+ * Отработка — перед первым блоком каждого раздела (рамка) и подтипа
+ * (примеры); вариант ЕГЭ — одна рамка и примеры перед всеми задачами.
+ * Ключ — номер блока.
+ */
+export function peredBlokami(
+  p: SheetParams11,
+  list: SobrannyyList,
+  zadachi: ListZadacha[],
+): Map<number, { ramka: Ramka11 | null; primery: Primer11[] }> {
+  const out = new Map<number, { ramka: Ramka11 | null; primery: Primer11[] }>();
+  const dop = p.dop;
+  if (dop === undefined || p.rezhim === 'marshrut') return out;
+  const razdelOf = (z: ListZadacha | undefined) =>
+    z === undefined || z.poz.vid === 'mikro' ? '' : subtype(z.poz.id).section;
+  if (p.rezhim === 'komplekt') {
+    const razdely = [...new Set(zadachi.map((z) => razdelOf(z)))];
+    const items = dop.teoriya ? razdely.flatMap((r) => punktyTeorii(r, true)) : [];
+    const primery = list.primery?.['*'] ?? [];
+    if (items.length > 0 || primery.length > 0)
+      out.set(0, {
+        ramka: items.length === 0 ? null : { title: SHEET_11.povtoryaem, items },
+        primery,
+      });
+    return out;
+  }
+  const bylRazdel = new Set<string>();
+  const bylPodtip = new Set<string>();
+  gruppyLista(p, zadachi).forEach((g, i) => {
+    const first = g[0];
+    const razdel = razdelOf(first);
+    const id = first?.poz.id ?? '';
+    let ramka: Ramka11 | null = null;
+    if (dop.teoriya && !bylRazdel.has(razdel)) {
+      const items = punktyTeorii(razdel, false);
+      const nazvanie = RAZDELY_TEORII_11.find((x) => x.section === razdel)?.title ?? '';
+      if (items.length > 0) ramka = { title: `${SHEET_11.povtoryaem} ${nazvanie}`, items };
+    }
+    bylRazdel.add(razdel);
+    const primery = bylPodtip.has(id) ? [] : (list.primery?.[id] ?? []);
+    bylPodtip.add(id);
+    if (ramka !== null || primery.length > 0) out.set(i, { ramka, primery });
+  });
+  return out;
+}
+
+/** То же, что peredBlokami, но ключ — номер задачи в варианте: для предпросмотра. */
+export function peredZadachami(
+  p: SheetParams11,
+  list: SobrannyyList,
+  zadachi: ListZadacha[],
+): Map<number, { ramka: Ramka11 | null; primery: Primer11[] }> {
+  const pered = peredBlokami(p, list, zadachi);
+  const out = new Map<number, { ramka: Ramka11 | null; primery: Primer11[] }>();
+  gruppyLista(p, zadachi).forEach((g, i) => {
+    const x = pered.get(i);
+    const first = g[0];
+    if (x !== undefined && first !== undefined) out.set(zadachi.indexOf(first), x);
+  });
+  return out;
+}
+
+function primerItem(x: Primer11): string {
+  return exampleItem({
+    label: SHEET_11.primer,
+    title: x.title,
+    conditionHtml: x.questionHtml,
+    /* Пример разобран и у ученика: рамка — опора, а не задача. */
+    solutionHtml: `${x.solutionHtml}<p class="sheet-task-answer">${SHEET_11.otvet}: <b>${x.answerHtml}</b></p>`,
+    figureSvg: null,
+  });
+}
+
+function blokiLista(
+  p: SheetParams11,
+  zadachi: ListZadacha[],
+  task: (z: ListZadacha) => SheetTask,
+  pered: Map<number, { ramka: Ramka11 | null; primery: Primer11[] }> = new Map(),
+) {
+  return gruppyLista(p, zadachi).map((tasks, i) => {
     const b = tasks[0]?.blok ?? '';
     const first = tasks[0];
+    const x = pered.get(i);
+    const dop =
+      x === undefined
+        ? {}
+        : {
+            recap: x.ramka === null ? null : { ...x.ramka, stack: true },
+            leadItems: x.primery.map((y) => primerItem(y)),
+          };
+    if (p.rezhim === 'komplekt') {
+      return { head: false, title: '', note: '', ...dop, tasks: tasks.map(task) };
+    }
     return p.rezhim === 'marshrut'
       ? { title: BLOK_ROUTE[b] ?? b, note: '', tasks: tasks.map(task) }
-      : { id: first?.kod ?? b, title: first?.title ?? b, note: '', tasks: tasks.map(task) };
+      : { id: first?.kod ?? b, title: first?.title ?? b, note: '', ...dop, tasks: tasks.map(task) };
   });
 }
 
@@ -726,12 +975,20 @@ function bejdzh(z: ListZadacha): string {
  * пометкой «банк» / «новая», в конце — таблица ответов. «Всё одним
  * файлом» — листы учеников всех вариантов, затем листы учителя.
  */
-export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista) {
+export function sheetSpec11(
+  p: SheetParams11,
+  list: SobrannyyList,
+  vid: VidLista,
+  /** QR-код на лист ученика, SVG: считает страница печати по своему адресу. */
+  qrSvg?: string,
+) {
+  const dop = p.rezhim === 'marshrut' ? undefined : p.dop;
   const title = (variant?: string, uchitel = false) => ({
     chip: SHEET_11.title.chip,
     text: SHEET_11.title.text,
     subtitle: subtitleOf(p) + (uchitel ? ` · ${SHEET_11.resheniya}` : ''),
     ...(variant === undefined ? {} : { variant }),
+    ...(dop?.qr === true && qrSvg !== undefined ? { qr: qrSvg } : {}),
   });
   const uchenikTask =
     (sStrokoy: boolean) =>
@@ -761,21 +1018,21 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
     vid === 'uchenik'
       ? list.poVariantam.map((zs, i) => ({
           title: title(variantTitle(i)),
-          blocks: blokiLista(p, zs, uchenikTask(false)),
+          blocks: blokiLista(p, zs, uchenikTask(false), peredBlokami(p, list, zs)),
         }))
       : vid === 'uchitel'
         ? list.poVariantam.map((zs, i) => ({
             title: title(variantTitle(i), true),
-            blocks: blokiLista(p, zs, uchitelTask),
+            blocks: blokiLista(p, zs, uchitelTask, peredBlokami(p, list, zs)),
           }))
         : [
             ...list.poVariantam.map((zs, i) => ({
               title: title(variantTitle(i)),
-              blocks: blokiLista(p, zs, uchenikTask(true)),
+              blocks: blokiLista(p, zs, uchenikTask(true), peredBlokami(p, list, zs)),
             })),
             ...list.poVariantam.map((zs, i) => ({
               title: title(variantTitle(i), true),
-              blocks: blokiLista(p, zs, uchitelTask),
+              blocks: blokiLista(p, zs, uchitelTask, peredBlokami(p, list, zs)),
             })),
           ];
   /* Источник задач — одной строкой в разделе ответов, у каждого варианта. */
@@ -808,12 +1065,12 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
     theme: p.theme,
     layout: 'single' as const,
     documentTitle: `${SHEET_11.title.chip}. ${SHEET_11.title.text} — ${subtitleOf(p)}`,
-    head: SHEET_11.head,
+    head: dop === undefined ? SHEET_11.head : { ...SHEET_11.head, author: dop.uchitel },
     runner: SHEET_11.runner,
     title: one?.title ?? title(),
     recap: null,
     blocks: one?.blocks ?? [],
-    fields: { date: '' },
+    fields: { date: dataNaListe(dop?.data ?? '') },
     ...(one === undefined ? { variants: poVariantam } : {}),
     withAnswerLine: vid === 'uchenik',
     extraItems: otvety,

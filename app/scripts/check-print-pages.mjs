@@ -57,6 +57,13 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №11 с «Дополнительно» общего генератора: рамка теории, примеры,
+     QR-код, вид работы и дата в шапке. */
+  [
+    '№11 с «Дополнительно»',
+    '/zadaniya/11/pechat/',
+    'm=o&i=n&ps=2&s=VD-01:1,VD-02:2,VD-05:1&seed=print-check&tr=1&pr=2&qr=1&vr=dz&d=2026-10-24',
+  ],
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],

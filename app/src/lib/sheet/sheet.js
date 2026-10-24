@@ -72,6 +72,8 @@ function titleBlock(title) {
         (title.subtitle ? '<p class="sheet-subtitle">' + typo.text(title.subtitle) + '</p>' : '') +
       '</div>' +
       (title.variant ? '<span class="sheet-variant">' + typo.text(title.variant) + '</span>' : '') +
+      /* QR-код на лист ученика (генератор, «Дополнительно»): SVG готов. */
+      (title.qr ? '<span class="sheet-qr">' + title.qr + '</span>' : '') +
     '</div>' +
     '</div>';
 }
@@ -122,7 +124,8 @@ function recapBlock(recap) {
   return '<section class="sheet-recap">' +
     '<div class="sheet-recap-main">' +
       '<h2 class="sheet-recap-title">' + typo.text(recap.title) + '</h2>' +
-      '<ul class="sheet-recap-list">' + items + '</ul>' +
+      '<ul class="sheet-recap-list' + (recap.stack ? ' sheet-recap-list--stack' : '') + '">' +
+        items + '</ul>' +
     '</div>' + aside +
     '</section>';
 }
@@ -358,8 +361,10 @@ function flowItems(spec) {
  *            задаётся вместо cell, не вместе с ним
  *   head     { course, author, motto }
  *   runner   строка компактной шапки следующих страниц
- *   title    { chip, text, subtitle }
- *   recap    { title, items[], phrase } либо null
+ *   title    { chip, text, subtitle, variant?, qr? } — qr: SVG QR-кода
+ *            справа в строке названия
+ *   recap    { title, items[], phrase, stack? } либо null; stack —
+ *            пункты в один столбик (длинные пункты с формулами)
  *   leadItems  куски потока перед блоками задач: например,
  *            разобранные примеры (exampleItem)
  *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия

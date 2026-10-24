@@ -53,6 +53,8 @@ export interface GenPreset {
   sostav: Record<string, number>;
   /** «Один тип»: учитель выбирает тему, в ней столько задач. */
   pickTopic?: number;
+  /** Вид работы в шапке листа (GenConfig.extras.kinds); нет — по составу. */
+  kind?: string;
 }
 
 export interface GenConfig {
@@ -71,6 +73,26 @@ export interface GenConfig {
   /** Первый — по умолчанию. */
   presets: GenPreset[];
   limits: { maxPerTopic: number; maxTasks: number; variantsMax: number };
+  /** «Дополнительно» к листу; нет поля — раздел его не поддерживает. */
+  extras?: { kinds: { id: string; title: string }[] };
+}
+
+/**
+ * «Дополнительно» (docs/generator/02-design.md, макет А): что лист
+ * получает сверх задач. Всё — в ссылке на набор.
+ */
+export interface GenExtras {
+  /** Рамка «Повторяем» с теорией перед типом задач. */
+  theory: boolean;
+  /** Разобранных примеров на тип. */
+  examples: 0 | 1 | 2;
+  /** QR-код на лист ученика. */
+  qr: boolean;
+  /** Вид работы в шапке; null — по составу. */
+  kind: string | null;
+  /** Дата на листе, «2026-10-24»; пусто — пустая линия. */
+  date: string;
+  teacher: string;
 }
 
 /**
@@ -96,6 +118,7 @@ export interface GenState {
   seed: string | null;
   /** Замены: «вариант.ключ позиции» («2.PR-04_0») → сколько раз заменяли. */
   zameny: Record<string, number>;
+  extras: GenExtras;
   /**
    * Набор открыт по адресу прежнего генератора: лист собирается по
    * старой схеме, как был напечатан. Первая правка состава переводит
@@ -114,6 +137,8 @@ export interface GenTask {
   solutionHtml: string;
   /** Задача из открытого банка ФИПИ: для строки источника в листе учителя. */
   fromBank: boolean;
+  /** Перед задачей на листе: рамка теории и разобранные примеры, HTML. */
+  lead?: string;
 }
 
 export interface GenSheet {

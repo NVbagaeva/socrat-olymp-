@@ -7,6 +7,7 @@ import {
   changeLevelAt,
   countsByTopic,
   defaultState,
+  extrasOn,
   filterBySource,
   indexOfPos,
   levelsText,
@@ -28,6 +29,7 @@ import {
 import type {
   GenConfig,
   GenEngine,
+  GenExtras,
   GenSheet,
   GenSlot,
   GenState,
@@ -44,6 +46,7 @@ import {
   type Kit,
   type SheetWhich,
 } from '@/lib/komplekt';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { GenIcon } from './GenIcons';
 import { GenKits } from './GenKits';
 import { GenPopover, GenToast, GenSheet as GenWindow } from './GenOverlay';
@@ -140,6 +143,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [srcPop, setSrcPop] = useState(false);
   const [pick, setPick] = useState(false);
+  const [dopOpen, setDopOpen] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
   const pvRef = useRef<HTMLDivElement>(null);
   const buildNo = useRef(0);
   const scrollAfterBuild = useRef(false);
@@ -232,6 +237,21 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     [hrefs, st.seed, st.plan.length, st.variants, config],
   );
 
+  /* QR-код («Дополнительно») — на лист ученика этого набора. */
+  const studentHref = hrefs?.student ?? null;
+  useEffect(() => {
+    if (!st.extras.qr || studentHref === null) return undefined;
+    let alive = true;
+    qrSvg(adresListaUchenika(new URL(studentHref, window.location.origin).toString()))
+      .then((svg) => {
+        if (alive) setQr(svg);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [st.extras.qr, studentHref]);
+
   /* Ссылка на набор — в адресе страницы; текущий комплект — в браузере. */
   useEffect(() => {
     if (hrefs === null || kit === null) return;
@@ -268,7 +288,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   function applyPreset(id: string) {
     const p = config.presets.find((x) => x.id === id);
     if (p === undefined) return;
-    setSt({ ...stateFromPreset(config, p, st.source), seed: st.seed });
+    setSt({ ...stateFromPreset(config, p, st.source, st.extras), seed: st.seed });
     setPick(p.pickTopic !== undefined);
     setVariant(0);
     say(GEN_UI.toast.preset);
@@ -304,6 +324,11 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     const variants = Math.max(1, Math.min(config.limits.variantsMax, n));
     commit({ ...st, variants });
     if (variant >= variants) setVariant(0);
+  }
+
+  function setExtras(patch: Partial<GenExtras>, quiet = false) {
+    commit({ ...st, extras: { ...st.extras, ...patch } });
+    if (generated && !quiet) say(GEN_UI.toast.obnovlen);
   }
 
   function generate() {
@@ -476,6 +501,94 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       ))}
     </div>
   );
+
+  const extras = config.extras;
+  const dopCount = extrasOn(st.extras);
+  const dopControls =
+    extras === undefined ? null : (
+      <div className="gen-dop__list">
+        <div className="gen-opt">
+          <span>
+            {GEN_UI.dop.teoriya}
+            <small>{GEN_UI.dop.teoriyaNote}</small>
+          </span>
+          <button
+            type="button"
+            role="switch"
+            className="gen-switch"
+            aria-checked={st.extras.theory}
+            aria-label={GEN_UI.dop.teoriya}
+            onClick={() => setExtras({ theory: !st.extras.theory })}
+          />
+        </div>
+        <div className="gen-opt">
+          <span>
+            {GEN_UI.dop.primery}
+            <small>{GEN_UI.dop.primeryNote}</small>
+          </span>
+          <div className="gen-segm" role="group" aria-label={GEN_UI.dop.primery}>
+            {([0, 1, 2] as const).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={st.extras.examples === k}
+                onClick={() => setExtras({ examples: k })}
+              >
+                {k}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="gen-opt">
+          <span>
+            {GEN_UI.dop.qr}
+            <small>{GEN_UI.dop.qrNote}</small>
+          </span>
+          <button
+            type="button"
+            role="switch"
+            className="gen-switch"
+            aria-checked={st.extras.qr}
+            aria-label={GEN_UI.dop.qr}
+            onClick={() => setExtras({ qr: !st.extras.qr })}
+          />
+        </div>
+        <label className="gen-opt">
+          <span>{GEN_UI.dop.vid}</span>
+          <select
+            className="gen-input"
+            value={st.extras.kind ?? ''}
+            onChange={(e) => setExtras({ kind: e.target.value === '' ? null : e.target.value })}
+          >
+            <option value="">{GEN_UI.dop.vidAuto}</option>
+            {extras.kinds.map((k) => (
+              <option key={k.id} value={k.id}>
+                {k.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="gen-opt">
+          <span>{GEN_UI.dop.data}</span>
+          <input
+            type="date"
+            className="gen-input"
+            value={st.extras.date}
+            onChange={(e) => setExtras({ date: e.target.value }, true)}
+          />
+        </label>
+        <label className="gen-opt">
+          <span>{GEN_UI.dop.uchitel}</span>
+          <input
+            type="text"
+            className="gen-input"
+            maxLength={40}
+            value={st.extras.teacher}
+            onChange={(e) => setExtras({ teacher: e.target.value }, true)}
+          />
+        </label>
+      </div>
+    );
 
   return (
     <section className="gen" aria-label="Генератор">
@@ -672,6 +785,24 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             })}
             <p className="gen-hint gen-sostav__limit">{GEN_UI.limit(config.limits.maxPerTopic)}</p>
           </section>
+          {dopControls === null ? null : (
+            <section className="gen-card gen-dop" aria-label={GEN_UI.dopolnitelno}>
+              <button
+                type="button"
+                className="gen-dop__head"
+                aria-expanded={dopOpen}
+                onClick={() => setDopOpen((v) => !v)}
+              >
+                <span>
+                  <b>{GEN_UI.dopolnitelno}</b>
+                  <small>{GEN_UI.dop.chto}</small>
+                </span>
+                {dopCount > 0 ? <span className="gen-dop__n">{dopCount}</span> : null}
+                <GenIcon name="chevron" />
+              </button>
+              {dopOpen ? dopControls : null}
+            </section>
+          )}
         </div>
 
         <div className="gen-pv" ref={pvRef}>
@@ -775,6 +906,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 teacher={generated && teacher}
                 demo={!generated}
                 live={live}
+                extras={generated ? st.extras : null}
+                qr={generated && st.extras.qr ? qr : null}
                 onAction={onTask}
                 onMove={move}
               />
@@ -835,6 +968,12 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               onChange={setVariants}
             />
           </section>
+          {dopControls === null ? null : (
+            <section className="gen-sec">
+              <h3>{GEN_UI.dopolnitelno}</h3>
+              {dopControls}
+            </section>
+          )}
         </GenWindow>
       ) : null}
 

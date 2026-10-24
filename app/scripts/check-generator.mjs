@@ -19,6 +19,9 @@
         остаются у своих позиций; лист печати — тот же, что на экране.
      7. Старые адреса листов (прежний генератор) открываются тем же
         листом, что был напечатан.
+     8. «Дополнительно»: рамка теории, примеры, QR-код, вид работы,
+        дата и учитель попадают в ссылку и на оба листа; задачи от них
+        не меняются, примеры не повторяют задачи листа.
 
    Ненулевой код возврата — проверка не прошла. */
 
@@ -353,6 +356,92 @@ console.log('Прежние адреса листов');
     engine.parse(new URLSearchParams('m=r&r=2')) === null,
     'маршрут урока генератор не перехватывает',
   );
+}
+
+/* ── 8. «Дополнительно» ─────────────────────────────────────────── */
+console.log('«Дополнительно»');
+{
+  const blocksOf = (spec) => (spec.variants ? spec.variants.flatMap((v) => v.blocks) : spec.blocks);
+  for (const preset of config.presets) {
+    for (const seed of SEEDS.slice(0, 2)) {
+      const label = `${preset.id}/${seed}`;
+      const base = { ...G.stateFromPreset(config, preset, 'mix'), seed };
+      const extras = {
+        theory: true,
+        examples: 2,
+        qr: true,
+        kind: 'kr',
+        date: '2026-10-24',
+        teacher: 'Иванова А.А.',
+      };
+      const st = { ...base, extras };
+      const back = engine.parse(new URLSearchParams(engine.hrefs(st).link.split('?')[1]));
+      ok(
+        back !== null && JSON.stringify(back.extras) === JSON.stringify(extras),
+        `${label}: «Дополнительно» в ссылке на набор`,
+      );
+      /* Пресет может задать вид работы; без «Дополнительно» вовсе — прежний адрес. */
+      const plain = { ...base, extras: G.defaultExtras(config) };
+      const plainLink = engine.hrefs(plain).link;
+      ok(
+        engine.parse(new URLSearchParams(plainLink.split('?')[1]))?.extras.theory === false &&
+          !/[?&](tr|pr|qr|vr|d|uch)=/.test(plainLink),
+        `${label}: без «Дополнительно» адрес прежний`,
+      );
+      const a = await engine.build(base);
+      const b = await engine.build(st);
+      ok(diffTasks(a, b).length === 0, `${label}: задачи от «Дополнительно» не меняются`);
+      ok(
+        b.variants.every(
+          (v) => v[0]?.lead?.includes('gen-recap') && v[0].lead.includes('gen-example'),
+        ),
+        `${label}: в предпросмотре рамка и примеры перед задачами`,
+      );
+      const p = A.paramsIzSostoyaniya(st, config);
+      const list = S11.sobratList(p, bank);
+      for (const vid of ['uchenik', 'uchitel']) {
+        const spec = S11.sheetSpec11(p, list, vid, '<svg></svg>');
+        const blocks = blocksOf(spec);
+        const titles = spec.variants ? spec.variants.map((v) => v.title) : [spec.title];
+        ok(
+          blocks.some((x) => x.recap?.items.length > 0) &&
+            blocks.some((x) => (x.leadItems ?? []).length > 0),
+          `${label}/${vid}: рамка и примеры на листе`,
+        );
+        ok(
+          titles.every(
+            (t) => t.qr === '<svg></svg>' && t.subtitle.startsWith('Контрольная работа'),
+          ),
+          `${label}/${vid}: QR-код и вид работы в шапке`,
+        );
+        ok(
+          spec.fields.date === '24.10.2026' && spec.head.author === 'Иванова А.А.',
+          `${label}/${vid}: дата и учитель`,
+        );
+        if (vid === 'uchenik')
+          ok(
+            blocks.flatMap((x) => x.tasks).every((t) => t.solutionHtml === null),
+            `${label}: у задач ученика по-прежнему нет решений`,
+          );
+      }
+      const primery = Object.values(list.primery ?? {}).flat();
+      const zadachi = new Set(list.poVariantam.flat().map((z) => z.questionHtml));
+      ok(
+        primery.length > 0 && primery.every((x) => !zadachi.has(x.questionHtml)),
+        `${label}: примеры не повторяют задачи листа (${primery.length})`,
+      );
+      const noQr = S11.sheetSpec11(
+        A.paramsIzSostoyaniya({ ...st, extras: { ...extras, qr: false } }, config),
+        list,
+        'uchenik',
+        '<svg></svg>',
+      );
+      ok(
+        (noQr.variants ?? [noQr]).every((v) => (v.title ?? noQr.title).qr === undefined),
+        `${label}: без галочки QR-кода нет`,
+      );
+    }
+  }
 }
 
 console.log(`\n${checks - failed}/${checks} проверок прошли.`);
