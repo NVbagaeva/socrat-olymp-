@@ -837,6 +837,82 @@ for (const [n, extra, want] of tables) {
     if (!covered.has(p.id)) problems.push(`опорные: прототип ${p.id} не попал ни в один блок`);
 }
 
+/* ── Тренажёр: план и оформление ───────────────────────────────── */
+{
+  const { planTrenirovki13, NASTROYKI_13 } = requireSrc('lib/zadanie13/trenazher/plan');
+  const { sobratZadachu13 } = requireSrc('lib/zadanie13/trenazher/zadacha');
+  const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
+  const { BANK_13 } = requireSrc('lib/zadanie13/bank');
+  const { TABLE_FIELDS } = requireSrc('lib/zadanie13/tablica');
+  const secret = requireSrc('lib/zadanie13/secret');
+  const { TYPE_NAMES } = requireSrc('lib/zadanie13/types');
+  const protos = prototypes().map((p) => ({ id: p.id, type: p.type, difficulty: p.difficulty }));
+  for (const chto of ['A', 'B', 'C', 'D', 'all', 'tip'])
+    for (const istochnik of ['bank', 'mix', 'new'])
+      for (const uroven of ['base', 'all']) {
+        checks += 1;
+        const n = { ...NASTROYKI_13, chto, istochnik, uroven, count: 20 };
+        const plan = planTrenirovki13(n, protos, BANK_13, [], `t-${chto}-${istochnik}`);
+        const w = `тренажёр ${chto}/${istochnik}/${uroven}`;
+        if (plan.length !== 20) problems.push(`${w}: в плане ${plan.length} задач вместо 20`);
+        const keys = new Set(plan.map((z) => `${z.prototypeId}|${z.seed}`));
+        if (keys.size !== plan.length) problems.push(`${w}: задачи повторяются`);
+        for (const z of plan) {
+          const p = protos.find((x) => x.id === z.prototypeId);
+          if (!p || p.id.startsWith('P-'))
+            problems.push(`${w}: прототип ${z.prototypeId} не для тренажёра`);
+          else if (chto.length === 1 && p.type !== chto) problems.push(`${w}: чужая схема ${p.id}`);
+          else if (uroven === 'base' && p.difficulty !== 'base')
+            problems.push(`${w}: повышенная ${p.id}`);
+          if (istochnik === 'bank' && z.istochnik !== 'bank')
+            problems.push(`${w}: новая задача в режиме «банк»`);
+          if ((z.vid === 'tip') !== (chto === 'tip')) problems.push(`${w}: не тот вид задачи`);
+        }
+      }
+  const mistakesPlan = planTrenirovki13(
+    { ...NASTROYKI_13, chto: 'all', oshibki: true },
+    protos,
+    BANK_13,
+    ['C-02'],
+    'm',
+  );
+  if (!mistakesPlan.length || mistakesPlan.some((z) => z.prototypeId !== 'C-02'))
+    problems.push('тренажёр: «Повтор ошибок» берёт не только прототипы с ошибками');
+  /* Оформление: схема — верная, клетки первой строки сходятся с таблицей движка. */
+  const seeds =
+    (Number(process.env.Z13_SEEDS) || 3) > 3 ? ['b1', 'b2', 'b3', 'n-x1', 'n-x2'] : ['b1', 'n-x1'];
+  for (const p of protos)
+    for (const seed of seeds) {
+      checks += 1;
+      const w = `тренажёр ${p.id}:${seed}`;
+      const z = sobratZadachu13({ prototypeId: p.id, seed, istochnik: 'bank', vid: 'zadachi' }, 1);
+      let of;
+      try {
+        of = JSON.parse(secret.openText(z.oformlenie, z.seal));
+      } catch {
+        problems.push(`${w}: оформление не открывается`);
+        continue;
+      }
+      if (of.shema.options[of.shema.correct] !== TYPE_NAMES[p.type])
+        problems.push(`${w}: в шаге «схема» верный вариант — не схема задачи`);
+      if (!of.shagi.every((s) => s.correct >= 0 && s.correct < s.options.length))
+        problems.push(`${w}: шаг решения без верного варианта`);
+      if (of.stroka) {
+        const t = generate(p.id, seed);
+        const row = t.tableModel.rows[0];
+        const fields = TABLE_FIELDS[t.tableModel.scheme];
+        of.stroka.kletki.forEach((k, i) => {
+          if (k.seal === null) return;
+          const v = String(row[fields[i]]).replace('.', ',');
+          if (!secret.answerMatches(v, k.seal))
+            problems.push(`${w}: клетка «${k.title}» не сходится с таблицей`);
+        });
+        if (Math.abs(row.start - t.answer) < 1e-9 || Math.abs(row.rate - t.answer) < 1e-9)
+          problems.push(`${w}: первая строка выдаёт ответ (ищут сумму или ставку)`);
+      }
+    }
+}
+
 /* ── Генерация: все прототипы ──────────────────────────────────── */
 {
   const katex = require('katex');
