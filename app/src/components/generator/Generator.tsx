@@ -198,15 +198,19 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
           if (no !== buildNo.current) return;
           setSheet(s);
           setBusy(false);
-          if (scrollAfterBuild.current) {
-            scrollAfterBuild.current = false;
-            pvRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
         })
         .catch(() => setBusy(false));
     }, 60);
     return () => window.clearTimeout(t);
   }, [generated, st, engine]);
+
+  /* Телефон, первая генерация: к листу — когда он уже на странице,
+     иначе прокрутка упирается в конец короткой заглушки «Собираем…». */
+  useEffect(() => {
+    if (sheet === null || !scrollAfterBuild.current) return;
+    scrollAfterBuild.current = false;
+    pvRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [sheet]);
 
   const ready = generated && st.seed !== null && st.plan.length > 0;
   const hrefs = useMemo(

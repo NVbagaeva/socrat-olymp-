@@ -11,6 +11,29 @@
   gap: var(--space-4);
   margin-top: var(--space-5);
 }
+/* Вкладка генератора — рабочий экран учителя: шапка раздела в одну
+   строку (заголовок и уровень), без вводного текста и кольца прогресса
+   ученика. Так фильтры и лист видны сразу, а не после экрана шапки.
+   Остальные вкладки раздела шапку не меняют. */
+.app-main:has(.gen) .section-head {
+  grid-template-columns: minmax(0, 1fr);
+  margin: var(--space-3) 0 var(--space-5);
+}
+.app-main:has(.gen) .section-head__title {
+  gap: var(--space-3);
+  margin-bottom: 0;
+}
+.app-main:has(.gen) .section-head .t-h1 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+}
+.app-main:has(.gen) .section-head__lead,
+.app-main:has(.gen) .section-head__media {
+  display: none;
+}
+.app-main:has(.gen) .section-panel {
+  margin-top: 0;
+}
 .gen-ico {
   width: 18px;
   height: 18px;
