@@ -128,7 +128,7 @@ function TablitsaRuchnayaBlok({ t }: { t: TablitsaRuchnaya }) {
 }
 
 /** Разобранная задача из движка: условие, таблица, решение по шагам. */
-function Razbor({
+export function Razbor({
   title,
   prototypeId,
   seed,
