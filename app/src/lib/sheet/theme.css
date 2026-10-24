@@ -1,8 +1,14 @@
-/* sheet/theme.css — две темы печатного листа.
+/* sheet/theme.css — три темы печатного листа.
 
-   Тема выбирается атрибутом на <html>: data-sheet-theme="color"
-   или data-sheet-theme="print". Ни один компонент листа своих
-   цветов не знает — все берут отсюда.
+   Тема выбирается атрибутом на <html>: data-sheet-theme="color",
+   "print" или "strict". Ни один компонент листа своих цветов не
+   знает — все берут отсюда.
+
+   «Строгая» (strict) — ч/б тема с одним акцентным цветом для
+   заголовков, номеров и таблицы ответов: чёрный текст, без заливок,
+   рисунки — как в ч/б (те же правила штриховки и толщины). Ею
+   печатается «Собрать вариант»; генератор раздела включает её
+   полем spec.theme = 'strict'.
 
    Значения цветной темы — токены сайта из styles/tokens.css:
    лист не заводит новой палитры. Ч/б тема — не серая копия
@@ -237,6 +243,85 @@
   --color-focus-ring: transparent;
 }
 
+/* ══════════════════════════════════════════════════════════
+   СТРОГАЯ ТЕМА — чистый лист: чёрный текст, белый фон, без
+   заливок и декора; один акцентный цвет — заголовки, номера
+   заданий, плашки и таблица ответов. Рисунки — как в ч/б теме:
+   лист читается и на чёрно-белом принтере.
+   ══════════════════════════════════════════════════════════ */
+:root[data-sheet-theme='strict'] {
+  --sheet-ink: #000000;
+  --sheet-ink-2: #333333;
+  --sheet-ink-3: #666666;
+  --sheet-brand: #1a4fae;
+  --sheet-brand-deep: #0b1f45;
+  --sheet-accent: #1a4fae;
+  --sheet-paper: #ffffff;
+  --sheet-page: #ffffff;
+
+  /* Карточка задачи: без рамки и заливки — задачи разделяет воздух. */
+  --sheet-card-bg: transparent;
+  --sheet-card-line: #b8b8b8;
+  --sheet-card-width: 0;
+
+  --sheet-recap-bg: transparent;
+  --sheet-recap-line: #1a4fae;
+  --sheet-recap-bar: #1a4fae;
+
+  --sheet-block-bg: transparent;
+  --sheet-block-line: #1a4fae;
+  --sheet-block-bar: #1a4fae;
+
+  --sheet-chip-bg: transparent;
+  --sheet-chip-ink: #1a4fae;
+  --sheet-chip-line: #1a4fae;
+  --sheet-chip-width: 1.5px;
+  --sheet-num-bg: transparent;
+  --sheet-num-ink: #1a4fae;
+  --sheet-num-line: #1a4fae;
+
+  --sheet-rule: #1a4fae;
+  --sheet-rule-strong: #000000;
+  --sheet-rule-width: 1px;
+
+  --sheet-blank: #666666;
+
+  --sheet-arc: transparent;
+  --sheet-arc-show: none;
+
+  /* Чертежи — как в ч/б теме. */
+  --color-surface: #ffffff;
+  --color-primary: #000000;
+  --color-text: #000000;
+  --color-text-tertiary: #3d3d3d;
+  --graph-axis: #000000;
+  --graph-grid: #b9b9b9;
+  --graph-accent: #000000;
+  --graph-aux-axis: #8a8a8a;
+  --graph-asymptote: #6b6b6b;
+  --solid-edge: #000000;
+  --solid-face: transparent;
+  --solid-liquid: transparent;
+  --graph-curve-a-width: 2;
+  --graph-curve-b-width: 3.6;
+  --graph-curve-b-dash: 11 7;
+
+  --color-accent: #000000;
+  --color-surface-soft: transparent;
+  --color-border: #6b6b6b;
+  --color-border-strong: #6b6b6b;
+  --color-border-info: #6b6b6b;
+  --color-text-secondary: #3d3d3d;
+  --color-text-brand: #000000;
+  --color-text-inverse: #000000;
+  --color-track: #e6e6e6;
+  --color-heat-2: #e6e6e6;
+  --color-heat-3: #c8c8c8;
+  --color-heat-4: #a3a3a3;
+  --color-success: #000000;
+  --color-error: #000000;
+  --color-focus-ring: transparent;
+}
 
 /* Две кривые на чёрно-белом листе: вторая идёт штрихом. Правило
    действует только на чертежи со строгими правилами подписей —
@@ -245,6 +330,7 @@
 
    Штрих задаётся только в печатной теме: на экране кривые различает
    цвет, и рвать линию там незачем. */
-[data-sheet-theme='print'] .graph-strict .graph-curve--lineB {
+[data-sheet-theme='print'] .graph-strict .graph-curve--lineB,
+[data-sheet-theme='strict'] .graph-strict .graph-curve--lineB {
   stroke-dasharray: var(--graph-curve-b-dash, 11 7);
 }

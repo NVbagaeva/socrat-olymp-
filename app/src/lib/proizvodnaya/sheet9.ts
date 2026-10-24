@@ -168,15 +168,15 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
 /* ── Лист ─────────────────────────────────────────────────────────── */
 
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
-const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
+export const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
 /** Клетка рисунка в разобранном примере, мм. */
 const EXAMPLE_CELL_MM = 5.6;
 /* Лист учителя читают с рисунком построений и разбором: рисунок
    стоит под условием на всю ширину колонки, клетка крупнее, чем у
    ученика, но не шире колонки. */
 /* 6 мм на клетку: числа осей печатаются кеглем около 6,5 pt, подпись графика — около 10 pt. */
-const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 6.0, double: 3.6 };
-const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 };
+export const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 6.0, double: 3.6 };
+export const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 };
 const EXAMPLE_MAX_MM = 150;
 
 export interface SheetTask9 {
@@ -211,7 +211,7 @@ export interface SheetBlock9 {
   primery: string[];
 }
 
-interface Drawn {
+export interface Drawn {
   svg: string;
   /** Ширина в миллиметрах при заданной клетке. */
   width: (cellMm: number) => number;
@@ -220,7 +220,7 @@ interface Drawn {
   kletokY: number;
 }
 
-function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
+export function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
   if (task.risunok === null) {
     return null;
   }
@@ -254,6 +254,14 @@ function etapHtml(s: Generated['shagi'][number]): string {
 function etapyHtml(list: Generated['shagi'], start: number): string {
   const from = start > 1 ? ` start="${start}"` : '';
   return `<ol class="sheet-steps z9-razbor"${from}>${list.map(etapHtml).join('')}</ol>`;
+}
+
+/**
+ * Этапы разбора без строки ответа — те же, что на листе учителя. Нужны
+ * генератору вариантов (lib/variant/adapters/z09): там ответ стоит своей строкой.
+ */
+export function razborEtapyHtml(task: Generated): string {
+  return etapyHtml(etapy(task), 1);
 }
 
 /** Разбор ЭТАПАМИ: «Заголовок этапа.» и строки; шаг «Ответ» — строкой под списком. */

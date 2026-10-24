@@ -31,6 +31,7 @@ import { zadachiPrototipa } from './bank/fipi';
 import { BLOKI } from './prep/bloki';
 import { generateMikro, sOtvetom } from './prep/generate';
 import { renderPlan } from './render';
+import { shirinaRisunka } from './shirina';
 import { plitkiHtml } from './spravochnik';
 import { parseKodSerii, planUroka, seriya, type NastroykiUroka } from './uroki';
 import { PROTOTIPY, prototip } from './stseny';
@@ -299,14 +300,7 @@ function chisloOtveta(x: number): string {
 const RESHENIE_MAX_MM = 44;
 const POLKOLONKI_MM = 85;
 
-/** Ширина чертежа на листе, мм: по ширине SVG, не шире колонки и не выше maxVysota. */
-export function shirinaRisunka(svg: string | null, max = 52, maxVysota = 42): number {
-  const w = Number(/width="([0-9.]+)"/.exec(svg ?? '')?.[1] ?? 0);
-  const h = Number(/height="([0-9.]+)"/.exec(svg ?? '')?.[1] ?? 0);
-  /* Высокий узкий чертёж не растягивает задачу: по высоте не больше maxVysota мм. */
-  const poVysote = h > 0 ? (maxVysota * w) / h : Infinity;
-  return Math.max(12, Math.min(poVysote, Math.max(22, Math.min(max, Math.round(w * 0.18)))));
-}
+export { shirinaRisunka };
 
 export interface SobrannyyList {
   poVariantam: ListZadacha[][];

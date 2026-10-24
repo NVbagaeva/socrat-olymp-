@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { HeroImage } from './HeroImage';
 import { HeroLines } from './HeroLines';
 import { Metric, MetricRow } from '@/components/ui';
+import { VariantEntry } from '@/components/variant/VariantEntry';
 import { landing } from '@/content/landing';
 import { HOWTO_HREF, HOWTO_PILL } from '@/content/onboarding';
 
@@ -32,9 +33,9 @@ export function HeroSection() {
         <p className="hero__lead">{hero.lead}</p>
 
         <div className="hero__actions">
-          <a className="btn btn--primary btn--lg" href={hero.primaryAction.href}>
-            {hero.primaryAction.label}
-          </a>
+          {/* Главное действие — плашка «Собрать вариант»: на телефоне она
+              на первом экране, без прокрутки. */}
+          <VariantEntry className="hero__variant" />
           {/* Рядом с главной кнопкой — вход в инструкцию и тур. */}
           <Link className="hero__howto" href={HOWTO_HREF}>
             <span className="hero__howto-ico" aria-hidden="true">

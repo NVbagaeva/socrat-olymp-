@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useId, useMemo, useState, useSyncExternalStore } from 'react';
 import { TaskGrid } from '@/components/tasks';
+import { VariantEntry } from '@/components/variant/VariantEntry';
 import { HandNote } from '@/components/ui';
 import type { ExamTask, TaskPart } from '@/content/tasks';
 import { partRange, taskParts, tasks, tasksPage } from '@/content/tasks';
@@ -146,6 +147,9 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           />
         </div>
       </div>
+
+      {/* Вход в «Собрать вариант» — рядом с выбором заданий. */}
+      <VariantEntry className="bank-variant" />
 
       {/* Переключатель частей. Сегменты — ссылки: часть можно открыть
           в новой вкладке, а без скрипта они просто перезагрузят страницу

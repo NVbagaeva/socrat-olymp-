@@ -100,10 +100,18 @@ interface SheetBlock8 {
   tasks: SheetTask8[];
 }
 
+/**
+ * Шаги разбора без строки ответа. Нужны и генератору вариантов
+ * (lib/variant/adapters/z08): там ответ стоит своей строкой.
+ */
+export function razborStepsHtml(lines: string[]): string {
+  const items = lines.map((line) => `<li class="sheet-step">${typeset(line)}</li>`).join('');
+  return `<ol class="sheet-steps">${items}</ol>`;
+}
+
 /** Разбор: список шагов и строка ответа, свёрстано под ту же CSS, что у №12. */
 function razborHtml(lines: string[], answerText: string): string {
-  const items = lines.map((line) => `<li class="sheet-step">${typeset(line)}</li>`).join('');
-  return `<ol class="sheet-steps">${items}</ol><p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
+  return `${razborStepsHtml(lines)}<p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
 }
 
 /** Прототипы навыка, подходящие уровню; нет ни одного — берутся все навыка. */

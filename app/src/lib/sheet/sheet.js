@@ -11,13 +11,13 @@
    делает paginate.js уже в браузере — до обмера настоящими
    шрифтами высоту карточки не знает никто.
 
-   Тема выбирается одним полем: theme: 'color' | 'print'.
+   Тема выбирается одним полем: theme: 'color' | 'print' | 'strict'.
 */
 
 import marks from './marks.js';
 import typo from './typography.js';
 
-var THEMES = ['color', 'print'];
+var THEMES = ['color', 'print', 'strict'];
 var LAYOUTS = ['single', 'double'];
 
 /* ══════════════════════════════════════════════════════════
@@ -76,18 +76,31 @@ function titleBlock(title) {
     '</div>';
 }
 
-/* Строка полей ученика под названием: фамилия, класс, дата. Дату,
-   выбранную в генераторе, лист ставит сам — иначе пустая линия. */
+/* Значение поля или пустая линия для заполнения от руки. */
+function fieldValue(value) {
+  return value
+    ? '<span class="sheet-field-value">' + typo.escape(value) + '</span>'
+    : '<span class="sheet-field-blank"></span>';
+}
+
+/* Строка полей ученика под названием: фамилия, класс, дата. Дату
+   (и класс), выбранные в генераторе, лист ставит сам — иначе пустая
+   линия. extra — дополнительные подписи строкой ниже: «Учитель: …»,
+   «Время выполнения: …»; пустые не печатаются. */
 function fieldsLine(fields) {
   if (!fields) { return ''; }
-  var date = fields.date
-    ? '<span class="sheet-field-value">' + typo.escape(fields.date) + '</span>'
-    : '<span class="sheet-field-blank"></span>';
+  var extra = (fields.extra || []).filter(function (item) { return item.value; });
   return '<div class="sheet-fields">' +
     '<span class="sheet-field sheet-field--wide">Фамилия, имя<span class="sheet-field-blank"></span></span>' +
-    '<span class="sheet-field">Класс<span class="sheet-field-blank"></span></span>' +
-    '<span class="sheet-field">Дата' + date + '</span>' +
-    '</div>';
+    '<span class="sheet-field">Класс' + fieldValue(fields.group) + '</span>' +
+    '<span class="sheet-field">Дата' + fieldValue(fields.date) + '</span>' +
+    '</div>' +
+    (extra.length
+      ? '<div class="sheet-fields sheet-fields--extra">' + extra.map(function (item) {
+          return '<span class="sheet-field">' + typo.escape(item.label) +
+            '<span class="sheet-field-value">' + typo.escape(item.value) + '</span></span>';
+        }).join('') + '</div>'
+      : '');
 }
 
 /* Начало варианта в потоке: с новой страницы, с полной шапкой,
@@ -352,7 +365,7 @@ function flowItems(spec) {
  * Документ целиком.
  *
  * spec:
- *   theme    'color' | 'print'
+ *   theme    'color' | 'print' | 'strict' (ч/б с одним акцентом)
  *   layout   'single' | 'double'
  *   cell     размер клетки чертежа в мм (одна клетка на все задачи)
  *   frame    размер рамки чертежа в мм (одна рамка на все задачи);
@@ -373,11 +386,14 @@ function flowItems(spec) {
  *            перед его задачами (разобранные примеры, exampleItem)
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
- *   fields   { date } — строка «Фамилия, имя / Класс / Дата» под
- *            названием; не задано — строки нет (сборники)
+ *   fields   { date, group, extra } — строка «Фамилия, имя / Класс /
+ *            Дата» под названием (group и date — готовые значения, иначе
+ *            линия), extra — [{ label, value }] строкой ниже; не задано —
+ *            строки нет (сборники)
  *   variants [ { title: { chip, text, subtitle, variant }, blocks[] } ]
  *            — несколько вариантов: каждый с новой страницы, с полной
- *            шапкой и своей нумерацией страниц. Задано — blocks,
+ *            шапкой и своей нумерацией страниц; у варианта могут быть
+ *            свои fields (null — без строки полей). Задано — blocks,
  *            leadItems и recap не используются
  *   withAnswerLine  ставить ли строку «Ответ: ____»
  *   extraItems  куски потока после задач: раздел «Ответы».
@@ -404,7 +420,10 @@ function buildDocument(spec, assets) {
   var variants = spec.variants || null;
   var items = variants
     ? variants.reduce(function (out, variant) {
-        return out.concat([variantOpening(variant.title, spec.fields)],
+        /* У варианта могут быть свои поля (null — без строки полей):
+           лист учителя в общем файле с листом ученика. */
+        var fields = variant.fields !== undefined ? variant.fields : spec.fields;
+        return out.concat([variantOpening(variant.title, fields)],
           flowItems({ blocks: variant.blocks, cell: spec.cell, frame: spec.frame,
                       layout: spec.layout, withAnswerLine: spec.withAnswerLine }));
       }, [])

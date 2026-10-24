@@ -138,7 +138,7 @@ function tipHtml(t: Task13): string {
   return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}:</b> ${typeset(v.text)}</p></div>`;
 }
 
-function sobrat(poz: Poziciya13): ListZadacha13 {
+export function sobrat(poz: Poziciya13): ListZadacha13 {
   const t = generate(poz.prototypeId, poz.seed);
   if (poz.vid === 'T') {
     const reshenie = `<p>${typeset(`Признак: ${SIGN[t.type]}.`)}</p>`;

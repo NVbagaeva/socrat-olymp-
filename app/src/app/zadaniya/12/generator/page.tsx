@@ -14,6 +14,7 @@ import '../../komplekt.css';
 import '@/components/tasks/ves12/ves12.css';
 import '@/components/tasks/ves12/zachyot-setup.css';
 
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 export const metadata: Metadata = {
   title: `${generatorAllText.pageTitle} — Будет на ЕГЭ`,
   description: generatorAllText.lead,
@@ -34,6 +35,7 @@ export default function GeneratorAllPage() {
           title={generatorAllText.pageTitle}
           lead={generatorAllText.lead}
         />
+        <VariantFromSection />
         <GeneratorAll catalog={ves12Catalog()} />
       </main>
     </AppShell>
