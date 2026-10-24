@@ -35,14 +35,22 @@ const REPORT = args.includes('--report');
 const { povSetIz } = requireSrc('lib/povyshennye/set');
 const { SHABLONY } = requireSrc('lib/povyshennye/shablony');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
-const { PV4_NE_MENEE, PV5_DVE_PARTII } = requireSrc('lib/veroyatnost/povyshennye');
-const { P03_86 } = requireSrc('lib/zadanie3/razdel8/cilindr');
+const VER = requireSrc('lib/veroyatnost/povyshennye');
+const { PV4_NE_MENEE, PV5_DVE_PARTII } = VER;
+const { P03_85, P03_86 } = requireSrc('lib/zadanie3/razdel8/cilindr');
+const { P03_90, P03_91 } = requireSrc('lib/zadanie3/razdel8/sfera-konus');
+const { P03_74S } = requireSrc('lib/zadanie3/razdel7/povyshennye');
 const { prototype: prototype6 } = requireSrc('lib/zadanie6/prototypes');
-const { PV7_KOREN } = requireSrc('lib/zadanie7/prototypes/povyshennye');
-const { logObratnyy } = requireSrc('lib/vychisleniya/povyshennye');
-const { maxNaOtrezke } = requireSrc('lib/proizvodnaya/povyshennye');
-const { kLog } = requireSrc('lib/graph/povyshennye');
-const { skalyarnoeKombinatsiy } = requireSrc('lib/vektory/povyshennye');
+const Z7 = requireSrc('lib/zadanie7/prototypes/povyshennye');
+const { PV7_KOREN } = Z7;
+const VY = requireSrc('lib/vychisleniya/povyshennye');
+const { logObratnyy } = VY;
+const PR9 = requireSrc('lib/proizvodnaya/povyshennye');
+const { maxNaOtrezke } = PR9;
+const GR = requireSrc('lib/graph/povyshennye');
+const { kLog } = GR;
+const VK = requireSrc('lib/vektory/povyshennye');
+const { skalyarnoeKombinatsiy } = VK;
 
 let failures = 0;
 function fail(where, message) {
@@ -106,6 +114,136 @@ const VTOROY = {
   },
 };
 
+/** Корень уравнения №7 подстановкой в исходное уравнение (с ОДЗ). */
+const podstanovka7 = (proto) => (p) => {
+  const x = proto.solve(p).answer;
+  const c = proto.chisla(p);
+  return close(c.lhs(x), c.rhs(x)) && c.odz(x) ? x : NaN;
+};
+
+/** Бисекция возрастающей функции f на [lo; hi]: f(x) = 0. */
+function bisekciya(f, lo, hi) {
+  for (let i = 0; i < 200; i += 1) {
+    const m = (lo + hi) / 2;
+    if (f(m) < 0) lo = m;
+    else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+
+/** Угол при вершине по координатам, в градусах. */
+function ugol(P, Q, R) {
+  const a = Math.atan2(P[1] - Q[1], P[0] - Q[0]);
+  const b = Math.atan2(R[1] - Q[1], R[0] - Q[0]);
+  let d = Math.abs(a - b) * (180 / Math.PI);
+  if (d > 180) d = 360 - d;
+  return d;
+}
+
+Object.assign(VTOROY, {
+  'z01.ravnobedr-150': (p) => {
+    /* Площадь по координатам вершин: стороны √a, угол 150°. */
+    const s = Math.sqrt(p.a);
+    const C = [s * Math.cos((5 * Math.PI) / 6), s * Math.sin((5 * Math.PI) / 6)];
+    return Math.abs(s * C[1]) / 2;
+  },
+  'z01.trapeciya-menshiy': (p) => {
+    /* Трапеция по координатам: точка пересечения средней линии с диагональю AC. */
+    const h = 3;
+    const A = [0, 0];
+    const B = [1.3, h];
+    const C = [1.3 + Math.min(p.a, p.b), h];
+    const D = [Math.max(p.a, p.b), 0];
+    const M = [(A[0] + B[0]) / 2, h / 2];
+    const N = [(C[0] + D[0]) / 2, h / 2];
+    const K = [(A[0] + C[0]) / 2, h / 2];
+    return Math.min(K[0] - M[0], N[0] - K[0]);
+  },
+  'z01.trapeciya-diagonali': (p) => {
+    const h = 3;
+    const A = [0, 0];
+    const B = [1.3, h];
+    const C = [1.3 + Math.min(p.a, p.b), h];
+    const D = [Math.max(p.a, p.b), 0];
+    return Math.hypot((A[0] + C[0] - B[0] - D[0]) / 2, (A[1] + C[1] - B[1] - D[1]) / 2);
+  },
+  'z01.vneshnie-ugly': (p) => {
+    /* Строим треугольник по внутренним углам A и C, угол B меряем. */
+    const A = (180 - p.a) * (Math.PI / 180);
+    const C = (180 - p.c) * (Math.PI / 180);
+    const b = 10;
+    const c = (b * Math.sin(C)) / Math.sin(Math.PI - A - C);
+    const PA = [0, 0];
+    const PC = [b, 0];
+    const PB = [c * Math.cos(A), c * Math.sin(A)];
+    return Math.round(ugol(PA, PB, PC) * 1e6) / 1e6;
+  },
+  'z02.dlina-po-risunku': (p) => VK.dlinaKombinatsiiPoRisunku(p).proverka,
+  'z02.perpendikulyar': (p) => VK.perpendikulyarNeizvestnaya(p).proverka,
+  'z03.cilindr-okolo-shara': (p) => P03_85.poModeli(p),
+  'z03.prizma-okolo-cilindra': (p) => P03_74S.poModeli(p),
+  'z03.konus-v-share': (p) => P03_91.poModeli(p),
+  'z03.shar-okolo-konusa': (p) => P03_90.poModeli(p),
+  'z04.bolshe': (p) => VER.PV4_BOLSHE.perebor(p),
+  'z04.delitsya': (p) => VER.PV4_DELITSYA.perebor(p),
+  'z04.protivopolozhnoe': (p) => VER.PV4_PROTIVOPOLOZHNOE.perebor(p),
+  'z05.mezhdu': (p) => VER.PV5_MEZHDU.perebor(p),
+  'z05.kost-uslovie': (p) => VER.PV5_KOST_USLOVIE.perebor(p),
+  'z06.dispersiya': (p) => prototype6('P14').pereschet(p),
+  'z06.otklonenie': (p) => prototype6('P15').pereschet(p),
+  'z07.log-stepeni': podstanovka7(Z7.PV7_LOG_STEPENI),
+  'z07.log-postoronniy': podstanovka7(Z7.PV7_LOG_KVADRAT),
+  'z08.log-pryamoy': (p) => VY.logPryamoy(p).proverka,
+  'z08.sin-dvoynoy': (p) => VY.sinDvoynogoPrivedenie(p).proverka,
+  'z08.stepeni-chastnoe': (p) => VY.stepeniChastnoe(p).proverka,
+  'z09.min-na-otrezke': (p) => PR9.minNaOtrezke(p)?.proverka ?? NaN,
+  'z09.chislo-na-otrezke': (p) => PR9.chisloNaOtrezke(p)?.proverka ?? NaN,
+  'z09.skorost': (p) => PR9.skorostVMoment(p).proverka,
+  'z10.adiabata': (p) => Math.round(p.V1 * (p.p1 / p.p2) ** (1 / 1.4) * 1e9) / 1e9,
+  'z10.motocikl': (p) => {
+    /* Время в часах бисекцией S(t) = S, затем минуты. */
+    const tt = bisekciya((t) => p.v0 * t + (p.a * t * t) / 2 - p.S, 0, 50);
+    return Math.round(tt * 60 * 1e6) / 1e6;
+  },
+  'z11.sobstvennaya': (p) => {
+    /* Время в пути убывает по x: бисекция на (c; 1000). */
+    const x = bisekciya(
+      (u) => -(p.S / (u + p.c) + p.S / (u - p.c) - (p.T - p.st)),
+      p.c + 1e-9,
+      1000,
+    );
+    return Math.round(x * 1e6) / 1e6;
+  },
+  'z11.ocheredno': (p) => {
+    /* Сделанная к моменту T доля работы — бисекция по T. */
+    const dolya = (T) =>
+      (Math.max(0, T) + Math.max(0, T - p.d1) + Math.max(0, T - p.d1 - p.d2)) / p.t - 1;
+    return Math.round(bisekciya(dolya, 0, 1000) * 1e6) / 1e6;
+  },
+  'z12.giperbola-pryamaya': (p) => GR.giperbolaPryamaya(p).proverka,
+  'z12.koren-koren': (p) => GR.korenKoren(p).proverka,
+  'z13.stavka-vklada': (p) => {
+    /* Перебор ставки с шагом 0,01 % прямым пересчётом по годам. */
+    for (let r = 1; r <= 10000; r += 1) {
+      const k = 1 + r / 10000;
+      if (Math.abs((p.S * k + p.x) * k - p.Z) < 1e-6) return r / 100;
+    }
+    return NaN;
+  },
+  'z13.posledniy-platezh': (p) => {
+    /* Годы по очереди: начисление, затем долг на июль. */
+    let dolg = p.S * 1e6;
+    let plat = 0;
+    for (let i = 1; i <= p.n; i += 1) {
+      const posle = dolg * (1 + p.r / 100);
+      const novyy = i === p.n ? 0 : dolg * (1 - p.q / 100);
+      plat = posle - novyy;
+      dolg = novyy;
+    }
+    return Math.round(plat * 100) / 100;
+  },
+});
+
 /* ── Варианты ───────────────────────────────────────────────────── */
 
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
@@ -165,6 +303,9 @@ for (const k of nomera) {
       if ([4, 5].includes(ege) && !(x > 0 && x < 1)) fail(kv, `вероятность ${x} вне (0; 1)`);
       if (ege === 13 && !Number.isInteger(x)) fail(kv, `сумма не целая: ${x}`);
       if (x === 0) fail(kv, 'ответ 0');
+      /* Хвосты двоичной арифметики: в ответе ЕГЭ не больше 4 знаков после запятой. */
+      if ((String(t.answer).split(/[,.]/)[1] ?? '').length > 4)
+        fail(kv, `ответ «${t.answer}» с хвостом`);
       if (!t.statement || !t.solutionTeacher || !t.solutionStudent) {
         fail(kv, 'нет условия или решения');
         ok = false;
@@ -175,6 +316,8 @@ for (const k of nomera) {
         ['разбор', t.solutionStudent],
       ]) {
         for (const text of visibleTexts(html ?? '')) {
+          const hvost = /\d[,.]\d{6,}/.exec(text.replace(/\{,\}/g, ','));
+          if (hvost !== null) fail(kv, `число с хвостом в «${chto}»: ${hvost[0]}`);
           const raw = findRawTex(text);
           if (raw.length > 0) {
             fail(
@@ -188,7 +331,8 @@ for (const k of nomera) {
           }
         }
       }
-      if ([1, 3, 9, 12].includes(ege) && t.figure === null) fail(kv, 'нет рисунка');
+      if ([1, 3, 9, 12].includes(ege) && t.figure === null && z.s !== 'z09.skorost')
+        fail(kv, 'нет рисунка');
       const vtoroy = VTOROY[z.s]?.(z.p);
       if (vtoroy === undefined || !close(vtoroy, x)) {
         fail(kv, `второй счёт ${vtoroy} ≠ ответу ${x}`);

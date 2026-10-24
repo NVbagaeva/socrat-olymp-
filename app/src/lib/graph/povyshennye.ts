@@ -208,7 +208,10 @@ export function giperbolaPryamaya(p: GiperbolaPryamaya): GrafikTask {
   const m = round9((py - ay) / (px - ax));
   const b = round9(ay - m * ax);
   if (k === 0 || m === 0) throw new Error('giperbolaPryamaya: вырожденные графики');
-  const xB = round9(-k / m / ax);
+  /* Коэффициенты прямой пишутся десятичными — дробь должна быть конечной. */
+  if (!celoe(m * 1e4)) throw new Error(`giperbolaPryamaya: наклон ${m} — бесконечная дробь`);
+  /* x_B из целых: x_A·x_B = −k/a, a = (y_P − y_A)/(x_P − x_A). */
+  const xB = round9((-ay * (px - ax)) / (py - ay));
   if (Math.abs(xB - ax) < 1e-9) throw new Error('giperbolaPryamaya: касание, B = A');
   /* Второй счёт: бисекция разности k/x − (mx + b) на ветви, где лежит B. */
   const h = (x: number) => k / x - (m * x + b);

@@ -464,7 +464,9 @@ interface Syuzhet13 {
 }
 
 function z13(proto: Proto13, p: Syuzhet13, klyuch: string): Gotovaya {
-  const person = PEOPLE.find((x) => x.name === p.imya) ?? { name: p.imya, g: 'm' as const };
+  /* Род глаголов условия берётся из списка имён раздела: чужое имя — ошибка данных. */
+  const person = PEOPLE.find((x) => x.name === p.imya);
+  if (person === undefined) throw new Error(`№13: имени «${p.imya}» нет в PEOPLE`);
   const plot: PlotFull = {
     deck: 'варианты',
     who: person.name,

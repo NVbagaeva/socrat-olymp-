@@ -8,6 +8,11 @@ import type { VariantPV } from '../types';
 
 const ZAGRUZKA: Record<number, () => Promise<{ VARIANT: VariantPV }>> = {
   1: () => import('./v01'),
+  2: () => import('./v02'),
+  3: () => import('./v03'),
+  4: () => import('./v04'),
+  5: () => import('./v05'),
+  6: () => import('./v06'),
 };
 
 /** Номера вариантов, у которых есть версии (остальные — «скоро»). */
