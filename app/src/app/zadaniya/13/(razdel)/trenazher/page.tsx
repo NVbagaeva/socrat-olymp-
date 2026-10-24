@@ -1,15 +1,26 @@
 import type { Metadata } from 'next';
-import { Zaglushka13 } from '@/components/tasks/zadanie13/Zaglushka13';
-import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
-
-const VKLADKA = ZADANIE13.tabs.find((tab) => tab.id === 'trenazher')?.label ?? '';
+import { Trenazher13 } from '@/components/tasks/zadanie13/Trenazher13';
+import { TRENAZHER_13, ZADANIE13, zadanie13Title } from '@/content/zadanie13';
+import { BANK_13 } from '@/lib/zadanie13/bank';
+import { prototypes } from '@/lib/zadanie13/generate';
+import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
-  title: zadanie13Title(VKLADKA),
-  robots: { index: false },
+  title: zadanie13Title(TRENAZHER_13.title),
 };
 
-/** Вкладка задания №13, которая ещё готовится: что в ней будет. */
+/**
+ * Вкладка «Тренажёр» задания №13. Реестр прототипов и банк seed
+ * собираются на сборке; задачи тренировки — в браузере, ответ
+ * закрывается отпечатком сразу после сборки задачи движком.
+ */
 export default function Trenazher13Tab() {
-  return <Zaglushka13 vkladka="trenazher" />;
+  const protos = prototypes().map((p) => ({ id: p.id, type: p.type, difficulty: p.difficulty }));
+  return (
+    <Trenazher13
+      protos={protos}
+      bank={BANK_13.map(([id, seed]) => [id, seed] as const)}
+      base={`${ZADANIYA}/${ZADANIE13.slug}`}
+    />
+  );
 }

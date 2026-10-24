@@ -64,7 +64,7 @@ function nazvanieMalenkoe(type: TypeCode): string {
   return name.charAt(0).toLowerCase() + name.slice(1);
 }
 
-function shagiHtml(hints: HintStep[]): ShagHtml[] {
+export function shagiHtml(hints: HintStep[]): ShagHtml[] {
   return hints.map((h) => ({
     question: typeset(h.question),
     options: h.options.map((o) => typeset(o)),
@@ -162,12 +162,16 @@ function zadachaTip(t: Task13, no: number): Zadacha13Sealed {
   };
 }
 
+/** Готовая задача движка в закрытом виде: для опорных задач и тренажёра. */
+export function sealTask13(t: Task13, vid: 'zadachi' | 'tip', no: number): Zadacha13Sealed {
+  return vid === 'tip' ? zadachaTip(t, no) : zadachaChislom(t);
+}
+
 export function sealZadacha13(
   prototypeId: string,
   seed: string,
   vid: 'zadachi' | 'tip',
   no: number,
 ): Zadacha13Sealed {
-  const t = generate(prototypeId, seed);
-  return vid === 'tip' ? zadachaTip(t, no) : zadachaChislom(t);
+  return sealTask13(generate(prototypeId, seed), vid, no);
 }
