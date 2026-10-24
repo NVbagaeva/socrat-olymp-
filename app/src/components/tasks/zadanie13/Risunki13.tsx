@@ -105,8 +105,9 @@ function Lesenka({
   tochki: number[];
   podpisi: string[];
 }) {
-  const left = 16;
-  const right = 16;
+  /* Поля по краям — под подписи крайних точек: «1000» не должна обрезаться. */
+  const left = 30;
+  const right = 22;
   const top = 26;
   const bottom = H - 24;
   const max = Math.max(...tochki) * 1.08;
