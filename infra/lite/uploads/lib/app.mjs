@@ -87,7 +87,9 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-export function createApp({ pool, storage, jwtSecret, now = () => Date.now(), maxPerHour = MAX_PER_HOUR }) {
+// keepDays — срок хранения фото в днях (PHOTO_KEEP_DAYS); не задан — до
+// конца учебного года (31 августа), и в любом случае не дольше него.
+export function createApp({ pool, storage, jwtSecret, now = () => Date.now(), maxPerHour = MAX_PER_HOUR, keepDays = null }) {
   /** Права на задание: работа своя, задание можно менять, в работе — фото учителю. */
   async function editableSubmission(sub, work, task) {
     return asUser(pool, sub, async (c) => {
@@ -129,8 +131,10 @@ export function createApp({ pool, storage, jwtSecret, now = () => Date.now(), ma
         [submission, task, pos])).rows;
       await c.query(
         `insert into public.photos (id, submission_id, task_no, position, object_key, bytes, width, height, expires_at)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, public.konets_uchebnogo_goda(now()))`,
-        [id, submission, task, pos, key, img.bytes, img.width, img.height]);
+         values ($1, $2, $3, $4, $5, $6, $7, $8,
+                 case when $9::int is null then public.konets_uchebnogo_goda(now())
+                      else least(public.konets_uchebnogo_goda(now()), now() + make_interval(days => $9::int)) end)`,
+        [id, submission, task, pos, key, img.bytes, img.width, img.height, keepDays]);
       return prev;
     }).catch(async (e) => {
       await storage.remove(key).catch(() => {});

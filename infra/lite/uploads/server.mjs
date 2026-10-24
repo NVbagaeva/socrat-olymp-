@@ -24,5 +24,8 @@ const storage = s3Storage({
   accessKeyId: need('S3_ACCESS_KEY_ID'),
   secretAccessKey: need('S3_SECRET_ACCESS_KEY'),
 });
-const handle = createApp({ pool, storage, jwtSecret: need('JWT_SECRET') });
+// PHOTO_KEEP_DAYS — сколько дней хранить фото (не дольше конца учебного года).
+const keep = Number(process.env.PHOTO_KEEP_DAYS ?? '');
+const keepDays = Number.isInteger(keep) && keep > 0 ? keep : null;
+const handle = createApp({ pool, storage, jwtSecret: need('JWT_SECRET'), keepDays });
 http.createServer(handle).listen(8080, () => console.log('uploads: 8080'));

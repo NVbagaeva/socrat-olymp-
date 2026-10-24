@@ -142,6 +142,41 @@ try {
   ok(meta.exif === undefined && meta.orientation === undefined, 'EXIF (и геометка) удалён');
   ok(stored.length <= 1_100_000, `размер около 1 МБ (${stored.length})`);
 
+  ok(
+    db
+      .sql(
+        'raboty',
+        `select to_char(expires_at at time zone 'Europe/Moscow', 'MM-DD') from public.photos where id = '${p1.id}'`,
+      )
+      .stdout.trim() === '08-31',
+    'срок хранения по умолчанию — 31 августа',
+  );
+  {
+    /* PHOTO_KEEP_DAYS: свой срок, но не дольше конца учебного года. */
+    const app7 = createApp({ pool, storage: fsStorage(store), jwtSecret: SECRET, keepDays: 7 });
+    const s7 = http.createServer(app7);
+    await new Promise((res) => s7.listen(0, '127.0.0.1', res));
+    const r7 = await fetch(
+      `http://127.0.0.1:${s7.address().port}/photo?work=${WORK}&task=15&pos=1`,
+      {
+        method: 'POST',
+        headers: { authorization: `Bearer ${tok(S1)}`, 'content-type': 'image/jpeg' },
+        body: raw,
+      },
+    );
+    const p7 = await r7.json();
+    s7.close();
+    const days = Number(
+      db
+        .sql(
+          'raboty',
+          `select round(extract(epoch from expires_at - now()) / 86400) from public.photos where id = '${p7.id}'`,
+        )
+        .stdout.trim(),
+    );
+    ok(r7.status === 200 && days === 7, `PHOTO_KEEP_DAYS=7 — срок ${days} дн.`);
+    await call('DELETE', `/photo/${p7.id}`, tok(S1));
+  }
   console.log('3. Не изображение, HEIC, размер, лимит');
   r = await call(
     'POST',

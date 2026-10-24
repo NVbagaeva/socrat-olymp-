@@ -198,6 +198,7 @@ services:
     environment:
       DATABASE_URL: postgres://uploads:${UPLOADS_DB_PASSWORD:-}@db:5432/postgres
       JWT_SECRET: ${JWT_SECRET}
+      PHOTO_KEEP_DAYS: ${PHOTO_KEEP_DAYS:-}
       S3_ENDPOINT: ${PHOTOS_S3_ENDPOINT:-https://storage.yandexcloud.net}
       S3_BUCKET: ${PHOTOS_S3_BUCKET:-}
       S3_REGION: ru-central1
