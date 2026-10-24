@@ -23,6 +23,8 @@ import { FotoProverka } from './FotoProverka';
 import { RABOTY_HREF } from './RabotyPage';
 import { proverkaText as T, STATUS_TEXT } from './text';
 import { kogda, useRaboty } from './useRaboty';
+import '@/components/variant/online/online.css';
+import '@/components/chast2/chast2.css';
 import './raboty.css';
 
 type Tab = 'part1' | Part2No;

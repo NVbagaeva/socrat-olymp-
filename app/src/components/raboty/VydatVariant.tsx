@@ -13,6 +13,8 @@ import { rabotyApi } from '@/lib/raboty/client';
 import type { Part2Mode } from '@/lib/raboty/types';
 import { RABOTY_HREF } from './RabotyPage';
 import { vydatText as T } from './text';
+import '@/components/variant/online/online.css';
+import '@/components/chast2/chast2.css';
 import './raboty.css';
 
 const loadTutor = (api: KabinetApi) => api.tutorHome();

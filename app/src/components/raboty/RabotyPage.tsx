@@ -14,6 +14,8 @@ import { XLSX_MIME, xlsx } from '@/lib/raboty/xlsx';
 import { rabotaHref } from '@/lib/variant/online/link';
 import { rabotyText as T, STATUS_TEXT } from './text';
 import { kogda, skachat, useRaboty } from './useRaboty';
+import '@/components/variant/online/online.css';
+import '@/components/chast2/chast2.css';
 import './raboty.css';
 
 export const RABOTY_HREF = '/kabinet/raboty/';
@@ -81,7 +83,7 @@ function RabotyUchitelya() {
             <button
               key={f}
               type="button"
-              className={`c2-chip${filter === f ? 'is-on' : ''}`}
+              className={`rab-chip${filter === f ? ' is-on' : ''}`}
               aria-pressed={filter === f}
               onClick={() => setFilter(f)}
               data-testid={`rab-filter-${f}`}
@@ -144,7 +146,9 @@ function RabotyUchitelya() {
                       <span className={`c2-status is-${r.status}`}>{STATUS_TEXT[r.status]}</span>
                     </td>
                     <td>
-                      {r.score.part1} + {r.status === 'checked' ? r.score.part2 : '…'}
+                      {r.status === 'checked'
+                        ? `${r.score.total} / 33`
+                        : `${r.score.part1} / 13 + часть 2`}
                       {r.score.test === null ? null : (
                         <span className="vo-mini">{r.score.test}</span>
                       )}
