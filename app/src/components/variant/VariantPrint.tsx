@@ -116,7 +116,9 @@ export function VariantPrint() {
         const built = variantSheetSpec(payload.set, payload.meta, choice, {
           workTitle: payload.workTitle,
           showCode: true,
-          ...(got.variantLabel === undefined ? {} : { variantLabel: got.variantLabel }),
+          ...(got.variantLabel === undefined
+            ? {}
+            : { variantLabel: got.variantLabel, istochnik: false }),
         });
         const html = buildDocument(built, {});
         await import('@/lib/sheet/paginate.js');

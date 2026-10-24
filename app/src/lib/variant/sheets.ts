@@ -218,14 +218,22 @@ function blankItem(numbers: number[]): string {
 }
 
 /** Таблица ответов учителя: номер, ответ, источник, сложность. */
-function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: string | null): string {
+function keyItem(
+  tasks: readonly VariantTask[],
+  numbering: Numbering,
+  code: string | null,
+  istochnik: boolean,
+): string {
   const rows = tasks
     .map(
       (t, i) =>
         `<tr><th scope="row">${sheetNo(t, i, numbering)}</th>` +
         `<td class="var-key__answer" data-answer="${typo.attr(t.answer)}">${t.answerHtml}</td>` +
-        `<td class="var-key__source">${typo.escape(t.source.label)}</td>` +
-        `<td class="var-key__level">${typo.escape(starsText(t.difficulty))}</td></tr>`,
+        (istochnik
+          ? `<td class="var-key__source">${typo.escape(t.source.label)}</td>` +
+            `<td class="var-key__level">${typo.escape(starsText(t.difficulty))}</td>`
+          : '') +
+        '</tr>',
     )
     .join('');
   return item(
@@ -233,7 +241,9 @@ function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: stri
     `<table class="var-key__table"><caption>${typo.escape(T.keyTitle)}` +
       (code === null ? '' : `<span class="var-key__code">${typo.escape(T.code(code))}</span>`) +
       `</caption>` +
-      `<thead><tr><th>${T.blankNo}</th><th>${T.answer}</th><th>${T.keySource}</th><th>${T.keyLevel}</th></tr></thead>` +
+      `<thead><tr><th>${T.blankNo}</th><th>${T.answer}</th>` +
+      (istochnik ? `<th>${T.keySource}</th><th>${T.keyLevel}</th>` : '') +
+      `</tr></thead>` +
       `<tbody>${rows}</tbody></table>`,
   );
 }
@@ -281,13 +291,14 @@ function blocksUchitel(
   tasks: readonly VariantTask[],
   meta: VariantMeta,
   code: string | null,
+  istochnik: boolean,
 ): unknown[] {
   const out: unknown[] = [
     {
       head: false,
       title: '',
       note: '',
-      leadItems: [keyItem(tasks, meta.numbering, code)],
+      leadItems: [keyItem(tasks, meta.numbering, code, istochnik)],
       tasks: [],
     },
     {
@@ -312,7 +323,7 @@ function blocksUchitel(
       leadItems: [
         item(
           'var-sol var-sol--first',
-          solutionHead(t, no, true) + teacherNotes(t),
+          solutionHead(t, no, istochnik) + teacherNotes(t),
           ' data-keep-with-next="1"',
         ),
       ],
@@ -367,6 +378,11 @@ export interface VariantSheetOptions {
   showCode: boolean;
   /** Подпись варианта на листе; не задана — «Вариант n» по номеру в партии. */
   variantLabel?: (index: number) => string;
+  /**
+   * Колонки «Источник» и «Сложность» у учителя. Нет у вариантов раздела
+   * повышенной сложности: источник у всех задач один — сам вариант.
+   */
+  istochnik?: boolean;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -395,7 +411,7 @@ export function variantSheetSpec(
         kind === 'uchenik'
           ? blocksUchenik(v.tasks, meta)
           : kind === 'uchitel'
-            ? blocksUchitel(v.tasks, meta, opts.showCode ? set.code : null)
+            ? blocksUchitel(v.tasks, meta, opts.showCode ? set.code : null, opts.istochnik ?? true)
             : blocksRazbor(v.tasks, meta);
       return {
         title: {
