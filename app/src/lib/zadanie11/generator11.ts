@@ -96,6 +96,7 @@ function extrasIzDop(dop: Dop11 | undefined, config: GenConfig): GenExtras {
     kind: dop.vid,
     date: dop.data,
     teacher: dop.uchitel,
+    urok: 0,
   };
 }
 

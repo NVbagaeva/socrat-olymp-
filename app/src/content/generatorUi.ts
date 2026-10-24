@@ -86,6 +86,8 @@ export const GEN_UI = {
     vidAuto: 'По составу',
     data: 'Дата',
     uchitel: 'Учитель',
+    urok: 'Урок серии',
+    urokNote: 'урок 2, 3, … — следующие задачи банка',
   },
 
   toast: {

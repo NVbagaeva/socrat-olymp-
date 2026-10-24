@@ -111,6 +111,7 @@ function extrasIzParams(p: SheetParams1, config: GenConfig): GenExtras {
       kind: p.dop.vid,
       date: p.dop.data,
       teacher: p.dop.uchitel,
+      urok: 0,
     };
   }
   if (p.ramka < 0) return d;
