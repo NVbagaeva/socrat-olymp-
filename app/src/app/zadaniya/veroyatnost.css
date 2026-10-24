@@ -58,8 +58,8 @@
 .veroyatnost-main {
   overflow-x: clip;
 }
-/* Сама лента липнет во всех разделах одинаково — styles/components.css
-   и хук components/tasks/useStickyTabs.ts. */
+/* Липкая панель вкладок во всех разделах одна — styles/components.css
+   и components/tasks/TabsRow.tsx. */
 
 /* ── Тренажёр ───────────────────────────────────────────────────── */
 
