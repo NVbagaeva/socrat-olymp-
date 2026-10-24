@@ -139,7 +139,7 @@ export function stavkaVklada(par: StavkaVklada): Prototype {
       const y = plot.year;
       return {
         condition:
-          `В январе ${y} года ${plot.subject} ${v(plot, 'открыл', 'открыла')} вклад ${plot.goal} и ${v(plot, 'положил', 'положила')} на него ${money(S, 'thous')}. ` +
+          `В январе ${y} года ${plot.subject} ${v(plot, 'открыл', 'открыла')} вклад${plot.goal.startsWith('чтобы') ? `, ${plot.goal},` : ` ${plot.goal}`} и ${v(plot, 'положил', 'положила')} на него ${money(S, 'thous')}. ` +
           'Каждый год в декабре банк увеличивает сумму на вкладе на одно и то же число процентов (начисляет $r$ % годовых). ' +
           `В январе ${y + 1} года ${plot.subject} ${v(plot, 'пополнил', 'пополнила')} вклад на ${money(x, 'thous')}, а в январе ${y + 2} года на счёте было ${money(Z, 'thous')}. Найдите $r$.`,
         answer: r,
