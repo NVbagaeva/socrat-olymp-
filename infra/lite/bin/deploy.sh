@@ -20,6 +20,9 @@ if [ "${SKIP_TIMERS:-}" != "1" ]; then
   sudo install -m 644 "$LITE_DIR"/server/systemd/budetege-*.service "$LITE_DIR"/server/systemd/budetege-*.timer /etc/systemd/system/
   sudo systemctl daemon-reload
   sudo systemctl enable --now budetege-backup.timer budetege-health.timer
+  if [ "${CHAST2_ENABLED:-0}" = 1 ]; then
+    sudo systemctl enable --now budetege-photos.timer
+  fi
 fi
 
 # Docker Hub ограничивает число скачиваний с одного адреса; зеркало
@@ -46,6 +49,11 @@ until dc pull --quiet; do
 done
 
 log "Контейнеры"
+# Часть 2: роль базы для сервиса загрузки — до запуска контейнера.
+if [ "${CHAST2_ENABLED:-0}" = 1 ]; then
+  dc up -d --wait db
+  "$LITE_DIR/bin/uploads-role.sh"
+fi
 dc up -d --wait --wait-timeout 180 --remove-orphans
 dc ps --format 'table {{.Service}}\t{{.Status}}'
 docker image prune -f >/dev/null

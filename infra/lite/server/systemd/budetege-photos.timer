@@ -1,0 +1,11 @@
+[Unit]
+Description=Ночная очистка фото решений budetege-api
+
+[Timer]
+# 04:15 по Москве — после копии базы
+OnCalendar=*-*-* 01:15:00 UTC
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

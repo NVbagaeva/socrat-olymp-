@@ -754,6 +754,7 @@ revoke execute on function public.check_grade_max() from authenticated;
 revoke execute on function public.log_grade() from authenticated;
 -- Право на файл фото проверяет только сервис загрузки.
 revoke execute on function public.can_read_photo(uuid, uuid) from authenticated;
-grant execute on function public.can_read_photo(uuid, uuid) to service_role;
+grant execute on function public.can_read_photo(uuid, uuid), public.konets_uchebnogo_goda(timestamptz)
+  to service_role;
 grant select, insert, update, delete on public.photos, public.variant_keys, public.submission_answers
   to service_role;

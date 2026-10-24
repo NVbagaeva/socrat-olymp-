@@ -124,6 +124,24 @@
 		}
 	}
 
+	# Фото решений части 2 (контейнер uploads, профиль chast2). Ключ
+	# обязателен, как у /rest/v1; пользователя сервис берёт из JWT сам.
+	# Тело — до 5 МБ (фото уже сжато на устройстве до ~1 МБ).
+	handle_path /uploads/v1/* {
+		request_body {
+			max_size 5MB
+		}
+		@bad_key not {
+			header apikey {$ANON_KEY}
+		}
+		handle @bad_key {
+			import no_key
+		}
+		reverse_proxy uploads:8080 {
+			header_down -Access-Control-Allow-Origin
+		}
+	}
+
 	handle {
 		respond 404
 	}
