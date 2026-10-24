@@ -28,6 +28,7 @@ import {
   pickCandidate,
   razborAnswer,
   sourceOk,
+  hintSteps,
   studentFromHints,
   subtypeOk,
   type Candidate,
@@ -127,6 +128,7 @@ function build(c: C9, isNew: boolean): VariantTask | null {
     answer: answerText(t.otvet),
     answerHtml: otvet,
     solutionTeacher: katexHtml(razborEtapyHtml(t)) + razborAnswer(otvet),
+    hints: hintSteps(hints(t)),
     solutionStudent: studentFromHints(hints(t), steps) + razborAnswer(otvet),
     fallbacks: [
       FALLBACK.noDifficulty,

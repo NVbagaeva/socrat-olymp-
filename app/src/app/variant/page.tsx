@@ -4,6 +4,7 @@ import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { VariantScreen } from '@/components/variant/VariantScreen';
 import '@/components/variant/sectionStyles';
 import '@/components/variant/variant.css';
+import '@/components/variant/online/online.css';
 import { VARIANT_SCREEN as T } from '@/content/variant';
 import { tasksPage } from '@/content/tasks';
 

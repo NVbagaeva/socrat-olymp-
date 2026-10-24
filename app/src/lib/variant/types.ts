@@ -109,6 +109,16 @@ export interface TaskSource {
   label: string;
 }
 
+/** Подсказка-вопрос онлайн-тренировки: HTML, формулы набраны KaTeX. */
+export interface HintStep {
+  question: string;
+  options: string[];
+  /** Номер верного варианта. */
+  correct: number;
+  /** Пояснение после верного выбора. */
+  comment: string | null;
+}
+
 export interface VariantTask {
   egeNumber: EgeNo;
   /** Задача в разделе: по нему исключаются повторы в партии. */
@@ -133,6 +143,11 @@ export interface VariantTask {
   solutionTeacher: string | null;
   /** Разбор для ученика: шаги словами и формулы (HTML). */
   solutionStudent: string | null;
+  /**
+   * Подсказки-вопросы для онлайн-тренировки (как в тренажёре раздела).
+   * Нет — после ошибки разбор открывается по шагам.
+   */
+  hints?: HintStep[];
   /** Поля, взятые из запасного варианта. Пусто — всё своё. */
   fallbacks: Fallback[];
   /** Как восстановить задачу без сохранения разметки (кабинет). */
