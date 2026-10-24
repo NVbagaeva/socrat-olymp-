@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /* scripts/check-mobile-overflow.mjs — горизонтальная прокрутка на телефоне.
 
-   Обходит все страницы собранного экспорта на ширинах 360, 390, 430
-   и 768 и ищет то, что выходит за экран: страница целиком не должна
+   Обходит все страницы собранного экспорта на ширинах 320, 360, 375,
+   390, 430 и 768 и ищет то, что выходит за экран: страница целиком не должна
    ехать вбок. Широкое содержимое (формулы, таблицы) прокручивается
    внутри своего блока — такой блок обрезает потомков и сюда не попадает.
 
    Запуск: node scripts/check-mobile-overflow.mjs [--json файл] [префикс…]
+   Ширины можно сузить: SHIRINY=375 node scripts/check-mobile-overflow.mjs.
    Префиксы сужают обход: `node scripts/check-mobile-overflow.mjs /zadaniya/4/`. */
 
 import fs from 'node:fs';
@@ -21,7 +22,9 @@ bezBanneraCookieVsyudu(chromium);
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(root, 'out');
 const PORT = 4183;
-const SHIRINY = [360, 390, 430, 768];
+const SHIRINY = process.env.SHIRINY
+  ? process.env.SHIRINY.split(',').map(Number)
+  : [320, 360, 375, 390, 430, 768];
 const POTOKI = 6;
 
 const TIPY = {

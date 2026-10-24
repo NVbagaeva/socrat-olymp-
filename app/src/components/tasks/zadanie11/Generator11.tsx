@@ -12,6 +12,7 @@ import type { Level, SectionId } from '@/lib/zadanie11/types';
 import { newKitId } from '@/lib/komplekt';
 import { KitBar } from '../generator/KitBar';
 import { IkonkaRazdela, Piktogramma, Zvezdy } from './Piktogrammy';
+import { A4Preview } from '../generator/A4Preview';
 
 const IKONKA_ISTOCHNIKA: Record<Istochnik, string> = { bank: 'doc', mix: 'layers', new: 'sparkle' };
 
@@ -408,7 +409,7 @@ export function Generator11({
           </p>
         ) : null}
 
-        <div className="z11-a4">
+        <A4Preview className="z11-a4">
           {list === null ? (
             <p className="z11-a4__pusto">{GENERATOR_11.pusto}</p>
           ) : (
@@ -455,7 +456,7 @@ export function Generator11({
               <p className="z11-a4__podpis">{SHEET_11.podpis}</p>
             </>
           )}
-        </div>
+        </A4Preview>
       </section>
     </div>
   );

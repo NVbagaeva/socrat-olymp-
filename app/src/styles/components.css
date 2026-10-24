@@ -2152,15 +2152,22 @@ html[data-tabs-pending] .topic-panel,
   cursor: pointer;
   border-bottom: 1px dashed currentColor;
 }
+/* Раскрытие — через строку сетки 0fr → 1fr: тело любой длины
+   раскрывается целиком (у max-height был потолок, и длинное решение
+   обрезалось), анимация остаётся. */
 .solution-details-body {
+  display: grid;
+  grid-template-rows: 0fr;
   overflow: hidden;
-  max-height: 0;
-  transition: max-height var(--dur-reveal, 320ms) var(--ease);
+  transition: grid-template-rows var(--dur-reveal, 320ms) var(--ease);
 }
 .solution-details.open .solution-details-body {
-  max-height: 720px;
+  grid-template-rows: 1fr;
 }
 .solution-details-body > div {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   padding-top: var(--space-3);
 }
 .solution-details svg {
