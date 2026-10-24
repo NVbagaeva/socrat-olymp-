@@ -8,13 +8,15 @@ import {
   countsByTopic,
   defaultState,
   filterBySource,
+  indexOfPos,
   levelsText,
   matchPreset,
+  moveSlot,
+  pruneZameny,
   relayout,
   removeAt,
   setSubtypeCount,
   setTopicCount,
-  shiftZameny,
   stateFromPreset,
   subtypeById,
   summary,
@@ -27,6 +29,7 @@ import type {
   GenConfig,
   GenEngine,
   GenSheet,
+  GenSlot,
   GenState,
   GenTopic,
   Level,
@@ -117,6 +120,8 @@ function stars(l: number): string {
  * слева пресеты и состав, справа лист. До первой генерации в рамке
  * демонстрационный лист; после — лист обновляется при любой смене
  * настроек, seed сохраняется. «Перегенерировать всё» — новый seed.
+ * Задача привязана к своей позиции в составе: правка состава, порядок
+ * и «Убрать» не меняют остальные задачи, замены остаются.
  *
  * Состояние набора живёт в адресе (ссылка на набор) и в текущем
  * комплекте раздела (lib/komplekt.ts): после перезагрузки или
@@ -237,11 +242,23 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const counts = countsByTopic(config, st.plan);
   const presetId = matchPreset(config, st);
 
-  function changePlan(plan: string[], patch: Partial<GenState> = {}) {
-    const reset = plan.length !== st.plan.length || patch.levels !== undefined;
-    const hadZameny = Object.keys(st.zameny).length > 0;
-    setSt({ ...st, ...patch, plan, zameny: reset ? {} : st.zameny });
-    if (generated) say(reset && hadZameny ? GEN_UI.toast.zamenySbrosheny : GEN_UI.toast.obnovlen);
+  /**
+   * Правка набора. Замены остаются у своих позиций; ушедшая позиция или
+   * вариант забирают свои. Набор с адреса прежнего генератора первая
+   * правка переводит на ключи позиций — лист собирается заново.
+   */
+  function commit(next: GenState) {
+    const { legacy, ...rest } = next;
+    setSt(
+      legacy === true
+        ? { ...rest, zameny: {} }
+        : { ...rest, zameny: pruneZameny(rest.zameny, rest.plan, rest.variants) },
+    );
+  }
+
+  function changePlan(plan: GenSlot[], patch: Partial<GenState> = {}) {
+    commit({ ...st, ...patch, plan });
+    if (generated) say(GEN_UI.toast.obnovlen);
   }
 
   function applyPreset(id: string) {
@@ -281,7 +298,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
 
   function setVariants(n: number) {
     const variants = Math.max(1, Math.min(config.limits.variantsMax, n));
-    setSt({ ...st, variants });
+    commit({ ...st, variants });
     if (variant >= variants) setVariant(0);
   }
 
@@ -293,13 +310,23 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     const again = generated;
     setBusy(true);
     setVariant(0);
-    setSt({ ...st, seed: newKitId(), zameny: {} });
+    const { legacy: _legacy, ...rest } = st;
+    setSt({ ...rest, seed: newKitId(), zameny: {} });
     setGenerated(true);
     scrollAfterBuild.current = !again && isPhone();
     if (again) say(GEN_UI.toast.novye);
   }
 
-  const indexOf = (pos: string) => Number(pos.split('.')[1] ?? 0) - 1;
+  /* Номер задачи в плане по её ключу; у листа прежней схемы ключ — номер. */
+  const indexOf = (pos: string) =>
+    st.legacy === true ? Number(pos.split('.')[1] ?? 0) - 1 : indexOfPos(st.plan, pos);
+
+  function move(pos: string, to: number) {
+    const from = indexOf(pos);
+    if (from < 0 || to < 0 || to >= st.plan.length || to === from) return;
+    commit({ ...st, plan: moveSlot(st.plan, from, to) });
+    say(GEN_UI.toast.peremeshchena);
+  }
 
   function onTask(pos: string, action: TaskAction) {
     if (action === 'menu') {
@@ -316,14 +343,17 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       setOverlay(null);
       return;
     }
-    const i = indexOf(pos);
-    setSt({ ...st, plan: removeAt(st.plan, i), zameny: shiftZameny(st.zameny, i) });
+    if (action === 'up' || action === 'down') {
+      move(pos, indexOf(pos) + (action === 'up' ? -1 : 1));
+      return;
+    }
+    commit({ ...st, plan: removeAt(st.plan, indexOf(pos)) });
     say(GEN_UI.toast.ubrana);
     setOverlay(null);
   }
 
   function chooseLevel(pos: string, level: Level) {
-    setSt({ ...st, plan: changeLevelAt(config, st.plan, indexOf(pos), level) });
+    commit({ ...st, plan: changeLevelAt(config, st.plan, indexOf(pos), level) });
     say(GEN_UI.toast.uroven(stars(level)));
     setOverlay(null);
   }
@@ -425,7 +455,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const overlayLevel =
     overlayTask === null
       ? null
-      : (subtypeById(config, st.plan[indexOf(overlayTask)] ?? '')?.level ?? null);
+      : (subtypeById(config, st.plan[indexOf(overlayTask)]?.id ?? '')?.level ?? null);
   const levelCards = (pos: string) => (
     <div className="gen-lvcards" role="group" aria-label={GEN_UI.drugoyUroven}>
       {config.levels.map(({ level, words }) => (
@@ -607,7 +637,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                   {isOpen ? (
                     <div className="gen-subs">
                       {t.subtypes.map((s) => {
-                        const k = st.plan.filter((id) => id === s.id).length;
+                        const k = st.plan.filter((x) => x.id === s.id).length;
                         return (
                           <div key={s.id} className="gen-sub">
                             <span className="gen-sub__name">
@@ -742,6 +772,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 demo={!generated}
                 live={live}
                 onAction={onTask}
+                onMove={move}
               />
             ) : (
               <p className="gen-pv__empty">
@@ -813,6 +844,28 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             <GenIcon name="swap" />
             {GEN_UI.zamenit}
           </button>
+          {st.plan.length > 1 ? (
+            <div className="gen-menu-row">
+              <button
+                type="button"
+                className="gen-menu-item"
+                disabled={indexOf(overlay.pos) <= 0}
+                onClick={() => onTask(overlay.pos, 'up')}
+              >
+                <GenIcon name="up" />
+                {GEN_UI.vyshe}
+              </button>
+              <button
+                type="button"
+                className="gen-menu-item"
+                disabled={indexOf(overlay.pos) >= st.plan.length - 1}
+                onClick={() => onTask(overlay.pos, 'down')}
+              >
+                <GenIcon name="down" />
+                {GEN_UI.nizhe}
+              </button>
+            </div>
+          ) : null}
           <div className="gen-menu-item is-static">
             <GenIcon name="star" />
             {GEN_UI.drugoyUroven}

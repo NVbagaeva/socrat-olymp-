@@ -788,13 +788,71 @@
   width: 20px;
   height: 20px;
 }
+/* Перестановка: ручка на поле слева, линия — куда встанет задача. */
+.gen-task__grip {
+  position: absolute;
+  top: 6px;
+  left: -26px;
+  display: none;
+  place-items: center;
+  width: 24px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text-tertiary);
+  cursor: grab;
+}
+.gen-task__grip:hover,
+.gen-task__grip:focus-visible {
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.gen-task__grip .gen-ico {
+  width: 18px;
+  height: 18px;
+}
+.gen-task.is-dragging {
+  opacity: 0.45;
+}
+.gen-task.is-drop-before::before,
+.gen-task.is-drop-after::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+.gen-task.is-drop-before::before {
+  top: -2px;
+}
+.gen-task.is-drop-after::after {
+  bottom: -2px;
+}
+/* Значки и ручка невидимы, пока на задачу не навели или не пришли
+   клавишей Tab: так они доступны и с клавиатуры. */
 @media (hover: hover) and (min-width: 760px) {
   .gen-paper.is-live .gen-task:hover {
     background: var(--color-surface-info);
   }
-  .gen-paper.is-live .gen-task:hover .gen-task__tools,
-  .gen-paper.is-live .gen-task:focus-within .gen-task__tools {
+  .gen-paper.is-live .gen-task__tools,
+  .gen-paper.is-live .gen-task__grip {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .gen-paper.is-live .gen-task__tools {
     display: flex;
+  }
+  .gen-paper.is-live .gen-task__grip {
+    display: grid;
+  }
+  .gen-paper.is-live .gen-task:hover :is(.gen-task__tools, .gen-task__grip),
+  .gen-paper.is-live .gen-task:focus-within :is(.gen-task__tools, .gen-task__grip) {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 @media (hover: none), (max-width: 759.98px) {
@@ -975,6 +1033,23 @@
 .gen-menu-item.is-danger,
 .gen-menu-item.is-danger .gen-ico {
   color: var(--color-error);
+}
+.gen-menu-item:disabled {
+  color: var(--color-text-tertiary);
+  cursor: default;
+}
+.gen-menu-item:disabled .gen-ico {
+  color: inherit;
+}
+/* «Выше» и «Ниже» — в одну строку. */
+.gen-menu-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-surface-2);
+}
+.gen-menu-row .gen-menu-item {
+  border-top: 0;
 }
 .gen-toast {
   position: fixed;

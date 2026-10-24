@@ -2,16 +2,19 @@
  * Состояние общего генератора: чистые функции, без React и браузера.
  * Их же проверяет автотест (scripts/check-generator.mjs).
  *
- * План — подтип на каждой позиции варианта. Позиции идут блоками по
- * темам в порядке конфига, внутри темы — в порядке добавления. Число
- * задач темы меняется степпером: к теме добавляется следующий подходящий
- * подтип по кругу, убирается — последний.
+ * План — позиции варианта: подтип и номер внутри подтипа (GenSlot).
+ * Пресет раскладывает темы блоками в порядке конфига; дальше порядок
+ * задаёт учитель. Число задач темы меняется степпером: к теме добавляется
+ * следующий подходящий подтип по кругу — после задач того же подтипа или
+ * в конец темы, — убирается последняя. Новой позиции достаётся
+ * наименьший свободный номер: «−» и «+» возвращают ту же задачу.
  */
 
 import { plural } from '@/lib/plural';
 import type {
   GenConfig,
   GenPreset,
+  GenSlot,
   GenState,
   GenSubtype,
   GenTopic,
@@ -37,10 +40,26 @@ export function topicAllowed(topic: GenTopic, source: SourceId): boolean {
   return topic.sources === undefined || topic.sources.includes(source);
 }
 
+/** Ключ позиции: «PR-04_0». */
+export function slotKey(s: GenSlot): string {
+  return `${s.id}_${s.k}`;
+}
+
+/** Ключ замены: «2.PR-04_0». */
+export function posKey(variant: number, s: GenSlot): string {
+  return `${variant}.${slotKey(s)}`;
+}
+
+/** Номер позиции в плане по ключу замены; -1 — такой позиции нет. */
+export function indexOfPos(plan: readonly GenSlot[], pos: string): number {
+  const key = pos.slice(pos.indexOf('.') + 1);
+  return plan.findIndex((s) => slotKey(s) === key);
+}
+
 /** Задач по темам: { PR: 1, SM: 2 }. */
-export function countsByTopic(config: GenConfig, plan: readonly string[]): Record<string, number> {
+export function countsByTopic(config: GenConfig, plan: readonly GenSlot[]): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const id of plan) {
+  for (const { id } of plan) {
     const t = topicOfSubtype(config, id);
     if (t !== undefined) out[t.id] = (out[t.id] ?? 0) + 1;
   }
@@ -69,18 +88,66 @@ export function topicHasLevels(topic: GenTopic, levels: readonly Level[]): boole
   return topic.subtypes.some((s) => levels.includes(s.level));
 }
 
-/** n подтипов темы по кругу, продолжая после уже выбранных. */
-function extend(topic: GenTopic, levels: readonly Level[], have: string[], n: number): string[] {
+/** add подтипов темы по кругу, продолжая после уже выбранных. */
+function nextIds(
+  topic: GenTopic,
+  levels: readonly Level[],
+  have: readonly string[],
+  add: number,
+): string[] {
   const c = candidates(topic, levels);
-  if (c.length === 0) return have.slice(0, n);
-  const out = have.slice(0, n);
-  const last = out[out.length - 1];
+  if (c.length === 0) return [];
+  const last = have[have.length - 1];
   let k = last === undefined ? 0 : (c.findIndex((s) => s.id === last) + 1) % c.length;
-  while (out.length < n) {
+  const out: string[] = [];
+  while (out.length < add) {
     const s = c[k % c.length];
     if (s !== undefined) out.push(s.id);
     k += 1;
   }
+  return out;
+}
+
+/** Наименьший номер подтипа, которого нет в плане. */
+function freeK(plan: readonly GenSlot[], id: string): number {
+  const used = new Set(plan.filter((s) => s.id === id).map((s) => s.k));
+  let k = 0;
+  while (used.has(k)) k += 1;
+  return k;
+}
+
+/** Позиции по списку подтипов: номера по порядку, без повторов. */
+export function slotsOf(ids: readonly string[]): GenSlot[] {
+  const out: GenSlot[] = [];
+  for (const id of ids) out.push({ id, k: freeK(out, id) });
+  return out;
+}
+
+/**
+ * Новая позиция подтипа: после задач того же подтипа, иначе после задач
+ * темы, иначе там, где тема стоит в конфиге.
+ */
+function insertSlot(config: GenConfig, plan: readonly GenSlot[], id: string): GenSlot[] {
+  const topic = topicOfSubtype(config, id);
+  const out = plan.slice();
+  const slot = { id, k: freeK(plan, id) };
+  const lastOf = (pred: (s: GenSlot) => boolean) => {
+    for (let i = out.length - 1; i >= 0; i -= 1) {
+      const s = out[i];
+      if (s !== undefined && pred(s)) return i;
+    }
+    return -1;
+  };
+  let at = lastOf((s) => s.id === id);
+  if (at < 0) at = lastOf((s) => topicOfSubtype(config, s.id) === topic);
+  if (at >= 0) {
+    out.splice(at + 1, 0, slot);
+    return out;
+  }
+  const order = (s: GenSlot) => config.topics.findIndex((t) => t === topicOfSubtype(config, s.id));
+  const mine = config.topics.findIndex((t) => t === topic);
+  const before = out.findIndex((s) => order(s) > mine);
+  out.splice(before < 0 ? out.length : before, 0, slot);
   return out;
 }
 
@@ -89,91 +156,89 @@ function assemble(config: GenConfig, byTopic: Record<string, string[]>): string[
   return config.topics.flatMap((t) => byTopic[t.id] ?? []);
 }
 
-function groupByTopic(config: GenConfig, plan: readonly string[]): Record<string, string[]> {
-  const out: Record<string, string[]> = {};
-  for (const id of plan) {
-    const t = topicOfSubtype(config, id);
-    if (t === undefined) continue;
-    (out[t.id] ??= []).push(id);
-  }
-  return out;
-}
-
 /* ── Изменения плана ────────────────────────────────────────────── */
 
 export function setTopicCount(
   config: GenConfig,
-  plan: readonly string[],
+  plan: readonly GenSlot[],
   topicId: string,
   n: number,
   levels: readonly Level[],
-): string[] {
+): GenSlot[] {
   const topic = config.topics.find((t) => t.id === topicId);
   if (topic === undefined) return plan.slice();
-  const room = config.limits.maxTasks - (plan.length - (countsByTopic(config, plan)[topicId] ?? 0));
+  const own = plan.filter((s) => topicOfSubtype(config, s.id) === topic);
+  const room = config.limits.maxTasks - (plan.length - own.length);
   const want = Math.max(0, Math.min(n, config.limits.maxPerTopic, room));
-  const by = groupByTopic(config, plan);
-  by[topicId] = extend(topic, levels, by[topicId] ?? [], want);
-  return assemble(config, by);
+  if (want <= own.length) {
+    const drop = new Set(own.slice(want));
+    return plan.filter((s) => !drop.has(s));
+  }
+  const ids = nextIds(
+    topic,
+    levels,
+    own.map((s) => s.id),
+    want - own.length,
+  );
+  return ids.reduce((acc, id) => insertSlot(config, acc, id), plan.slice());
 }
 
 export function setSubtypeCount(
   config: GenConfig,
-  plan: readonly string[],
+  plan: readonly GenSlot[],
   subtypeId: string,
   n: number,
-): string[] {
+): GenSlot[] {
   const topic = topicOfSubtype(config, subtypeId);
   if (topic === undefined) return plan.slice();
-  const by = groupByTopic(config, plan);
-  const own = by[topic.id] ?? [];
-  const others = own.filter((id) => id !== subtypeId);
+  const ofTopic = plan.filter((s) => topicOfSubtype(config, s.id) === topic);
+  const own = plan.filter((s) => s.id === subtypeId);
   const room = Math.min(
-    config.limits.maxPerTopic - others.length,
-    config.limits.maxTasks - (plan.length - own.filter((id) => id === subtypeId).length),
+    config.limits.maxPerTopic - (ofTopic.length - own.length),
+    config.limits.maxTasks - (plan.length - own.length),
   );
   const want = Math.max(0, Math.min(n, room));
-  /* Подтип остаётся на своих местах в блоке темы; новые — в конец блока. */
-  const kept: string[] = [];
-  let left = want;
-  for (const id of own) {
-    if (id !== subtypeId) kept.push(id);
-    else if (left > 0) {
-      kept.push(id);
-      left -= 1;
-    }
+  if (want <= own.length) {
+    const drop = new Set(own.slice(want));
+    return plan.filter((s) => !drop.has(s));
   }
-  while (left > 0) {
-    kept.push(subtypeId);
-    left -= 1;
-  }
-  by[topic.id] = kept;
-  return assemble(config, by);
+  let out = plan.slice();
+  for (let i = own.length; i < want; i += 1) out = insertSlot(config, out, subtypeId);
+  return out;
 }
 
-/** Уровни сменились: темы сохраняют число задач, подтипы подбираются заново. */
+/**
+ * Уровни сменились: темы сохраняют число задач и места на листе, подтипы
+ * подбираются заново. Позиция, чей подтип остался, сохраняет задачу.
+ */
 export function relayout(
   config: GenConfig,
-  plan: readonly string[],
+  plan: readonly GenSlot[],
   levels: readonly Level[],
-): string[] {
-  const counts = countsByTopic(config, plan);
-  const by: Record<string, string[]> = {};
+): GenSlot[] {
+  const fresh = new Map<GenTopic, string[]>();
   for (const t of config.topics) {
-    const n = counts[t.id] ?? 0;
-    if (n > 0) by[t.id] = extend(t, levels, [], n);
+    const n = plan.filter((s) => topicOfSubtype(config, s.id) === t).length;
+    if (n > 0) fresh.set(t, nextIds(t, levels, [], n));
   }
-  return assemble(config, by);
+  const out = plan.slice();
+  out.forEach((s, i) => {
+    const t = topicOfSubtype(config, s.id);
+    const id = t === undefined ? undefined : fresh.get(t)?.shift();
+    if (id === undefined || id === s.id) return;
+    out[i] = { id, k: freeK(out, id) };
+  });
+  return out;
 }
 
 /** Источник сменился: темы, которых нет в этом источнике, уходят из плана. */
 export function filterBySource(
   config: GenConfig,
-  plan: readonly string[],
+  plan: readonly GenSlot[],
   source: SourceId,
-): string[] {
-  return plan.filter((id) => {
-    const t = topicOfSubtype(config, id);
+): GenSlot[] {
+  return plan.filter((s) => {
+    const t = topicOfSubtype(config, s.id);
     return t !== undefined && topicAllowed(t, source);
   });
 }
@@ -181,43 +246,54 @@ export function filterBySource(
 /** «Другой уровень» у одной позиции: другой подтип той же темы. */
 export function changeLevelAt(
   config: GenConfig,
-  plan: readonly string[],
+  plan: readonly GenSlot[],
   index: number,
   level: Level,
-): string[] {
-  const id = plan[index];
-  if (id === undefined) return plan.slice();
-  const topic = topicOfSubtype(config, id);
+): GenSlot[] {
+  const cur = plan[index];
+  if (cur === undefined) return plan.slice();
+  const topic = topicOfSubtype(config, cur.id);
   if (topic === undefined) return plan.slice();
   const pool = candidates(topic, [level]);
-  const next = pool.find((s) => s.id !== id) ?? pool[0];
+  const next = pool.find((s) => s.id !== cur.id) ?? pool[0];
+  if (next === undefined) return plan.slice();
+  const rest = plan.filter((_, i) => i !== index);
   const out = plan.slice();
-  if (next !== undefined) out[index] = next.id;
+  out[index] = next.id === cur.id ? cur : { id: next.id, k: freeK(rest, next.id) };
   return out;
 }
 
-export function removeAt(plan: readonly string[], index: number): string[] {
+export function removeAt(plan: readonly GenSlot[], index: number): GenSlot[] {
   return plan.filter((_, i) => i !== index);
 }
 
-/** Замены после удаления позиции: дальше по листу номера сдвигаются. */
-export function shiftZameny(
+/** Перестановка: позиция from встаёт на место to, задачи едут с ней. */
+export function moveSlot(plan: readonly GenSlot[], from: number, to: number): GenSlot[] {
+  const out = plan.slice();
+  const [s] = out.splice(from, 1);
+  if (s === undefined || to < 0 || to > out.length) return plan.slice();
+  out.splice(to, 0, s);
+  return out;
+}
+
+/** Замены только для позиций и вариантов, которые есть в наборе. */
+export function pruneZameny(
   zameny: Record<string, number>,
-  removed: number,
+  plan: readonly GenSlot[],
+  variants: number,
 ): Record<string, number> {
+  const keys = new Set(plan.map(slotKey));
   const out: Record<string, number> = {};
   for (const [pos, k] of Object.entries(zameny)) {
-    const [v, i] = pos.split('.').map(Number);
-    if (v === undefined || i === undefined || !Number.isFinite(i)) continue;
-    if (i - 1 === removed) continue;
-    out[`${v}.${i - 1 > removed ? i - 1 : i}`] = k;
+    const v = Number(pos.slice(0, pos.indexOf('.')));
+    if (v >= 1 && v <= variants && keys.has(pos.slice(pos.indexOf('.') + 1))) out[pos] = k;
   }
   return out;
 }
 
 /* ── Пресеты ────────────────────────────────────────────────────── */
 
-export function planFromPreset(config: GenConfig, preset: GenPreset, source: SourceId): string[] {
+export function planFromPreset(config: GenConfig, preset: GenPreset, source: SourceId): GenSlot[] {
   const by: Record<string, string[]> = {};
   for (const [key, n] of Object.entries(preset.sostav)) {
     if (key.includes('-')) {
@@ -225,11 +301,13 @@ export function planFromPreset(config: GenConfig, preset: GenPreset, source: Sou
       if (t !== undefined) (by[t.id] ??= []).push(...Array.from({ length: n }, () => key));
     } else {
       const t = config.topics.find((x) => x.id === key);
-      if (t !== undefined)
-        by[t.id] = extend(t, preset.levels, by[t.id] ?? [], (by[t.id]?.length ?? 0) + n);
+      if (t !== undefined) {
+        const have = by[t.id] ?? [];
+        by[t.id] = [...have, ...nextIds(t, preset.levels, have, n)];
+      }
     }
   }
-  return filterBySource(config, assemble(config, by), source);
+  return filterBySource(config, slotsOf(assemble(config, by)), source);
 }
 
 export function stateFromPreset(config: GenConfig, preset: GenPreset, source: SourceId): GenState {
@@ -311,7 +389,8 @@ export function problems(config: GenConfig, state: GenState): string[] {
   }
   if (state.variants < 1 || state.variants > config.limits.variantsMax) out.push('число вариантов');
   if (state.levels.length === 0) out.push('нет уровней');
-  for (const id of state.plan) {
+  if (new Set(state.plan.map(slotKey)).size !== state.plan.length) out.push('повтор позиции');
+  for (const { id } of state.plan) {
     const t = topicOfSubtype(config, id);
     if (t === undefined) out.push(`неизвестный подтип ${id}`);
     else if (!topicAllowed(t, state.source)) out.push(`${t.id} нет в источнике ${state.source}`);

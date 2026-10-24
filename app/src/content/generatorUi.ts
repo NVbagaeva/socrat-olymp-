@@ -61,6 +61,7 @@ export const GEN_UI = {
   drugoyUroven: 'Другой уровень',
   vyshe: 'Выше',
   nizhe: 'Ниже',
+  peretashchit: 'Переставить: перетащите или нажмите ↑ ↓',
   ubrat: 'Убрать из листа',
 
   toast: {
@@ -68,7 +69,7 @@ export const GEN_UI = {
     ubrana: 'Задача убрана из листа',
     uroven: (stars: string) => `Уровень ${stars}`,
     obnovlen: 'Лист обновлён',
-    zamenySbrosheny: 'Лист обновлён. Замены сброшены: изменился состав',
+    peremeshchena: 'Задача переставлена',
     novye: 'Новые задачи, состав тот же',
     ssylka: 'Ссылка на набор скопирована',
     preset: 'Пресет применён',

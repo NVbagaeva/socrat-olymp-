@@ -1,12 +1,12 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { GEN_UI } from '@/content/generatorUi';
 import type { GenConfig, GenTask } from '@/lib/generator/obshchiy/types';
 import { GenIcon } from './GenIcons';
 
-export type TaskAction = 'swap' | 'level' | 'remove' | 'menu';
+export type TaskAction = 'swap' | 'level' | 'remove' | 'menu' | 'up' | 'down';
 
 /**
  * Лист в предпросмотре — так, как его получит ученик: шапка «Будет на
@@ -15,7 +15,8 @@ export type TaskAction = 'swap' | 'level' | 'remove' | 'menu';
  * ответом, источник — одной строкой внизу.
  *
  * Действия над задачей: на компьютере — колонка значков на поле справа
- * по наведению, на телефоне — кнопка «⋯» и долгое нажатие.
+ * и ручка перетаскивания слева по наведению (ручка понимает и ↑ ↓), на
+ * телефоне — кнопка «⋯» и долгое нажатие, там же «Выше» и «Ниже».
  */
 export function GenSheetView({
   config,
@@ -25,6 +26,7 @@ export function GenSheetView({
   demo,
   live,
   onAction,
+  onMove,
 }: {
   config: GenConfig;
   tasks: GenTask[];
@@ -33,8 +35,16 @@ export function GenSheetView({
   demo: boolean;
   live: boolean;
   onAction: (pos: string, action: TaskAction) => void;
+  /** Перетаскивание: задача pos встаёт на место to (номер в листе с нуля). */
+  onMove: (pos: string, to: number) => void;
 }) {
   const timer = useRef<number | null>(null);
+  const [drag, setDrag] = useState<string | null>(null);
+  const [drop, setDrop] = useState<{ i: number; after: boolean } | null>(null);
+  const endDrag = () => {
+    setDrag(null);
+    setDrop(null);
+  };
   const bankNos = tasks.filter((t) => t.fromBank).map((t) => t.no);
   const cancel = () => {
     if (timer.current !== null) {
@@ -79,10 +89,30 @@ export function GenSheetView({
         <span className="gen-paper__date" />
       </div>
       <ol className="gen-paper__list">
-        {tasks.map((t) => (
+        {tasks.map((t, i) => (
           <li
             key={t.pos}
-            className="gen-task"
+            className={clsx(
+              'gen-task',
+              drag === t.pos && 'is-dragging',
+              drop?.i === i && (drop.after ? 'is-drop-after' : 'is-drop-before'),
+            )}
+            onDragOver={(e) => {
+              if (drag === null) return;
+              e.preventDefault();
+              const r = e.currentTarget.getBoundingClientRect();
+              const after = e.clientY > r.top + r.height / 2;
+              if (drop?.i !== i || drop.after !== after) setDrop({ i, after });
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (drag === null || drop === null) return;
+              const from = tasks.findIndex((x) => x.pos === drag);
+              let to = drop.i + (drop.after ? 1 : 0);
+              if (from < to) to -= 1;
+              if (from >= 0 && to !== from) onMove(drag, to);
+              endDrag();
+            }}
             onPointerDown={(e) => {
               if (!live || e.pointerType !== 'touch' || (e.target as HTMLElement).closest('button'))
                 return;
@@ -123,6 +153,31 @@ export function GenSheetView({
             </div>
             {live ? (
               <>
+                {tasks.length > 1 ? (
+                  <button
+                    type="button"
+                    className="gen-task__grip"
+                    draggable
+                    title={GEN_UI.peretashchit}
+                    aria-label={`${GEN_UI.peretashchit}: ${t.no}`}
+                    onDragStart={(e) => {
+                      const li = e.currentTarget.closest('li');
+                      if (li !== null) e.dataTransfer.setDragImage(li, 24, 20);
+                      e.dataTransfer.effectAllowed = 'move';
+                      e.dataTransfer.setData('text/plain', t.pos);
+                      setDrag(t.pos);
+                    }}
+                    onDragEnd={endDrag}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        onAction(t.pos, e.key === 'ArrowUp' ? 'up' : 'down');
+                      }
+                    }}
+                  >
+                    <GenIcon name="grip" />
+                  </button>
+                ) : null}
                 <div className="gen-task__tools" role="toolbar" aria-label={GEN_UI.zadacha(t.no)}>
                   <button
                     type="button"

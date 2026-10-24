@@ -1,11 +1,13 @@
 /**
  * Подключение №11 к общему генератору: конфиг из разделов движка и
- * адаптер к листу (sheet11.ts). Движок не меняется: адаптер переводит
- * состояние генератора в SheetParams11 и обратно.
+ * адаптер к листу (sheet11.ts): состояние генератора → SheetParams11 и
+ * обратно.
  *
- * Адрес набора — тот же, что у листа печати (m, i, s, v, seed, z),
- * плюс уровни lv. Поэтому ссылки и комплекты, собранные прежним
- * генератором, открываются в новом.
+ * Адрес набора — тот же, что у листа печати (m, i, s, v, seed, z, ps),
+ * плюс уровни lv. Набор привязывает задачи к ключам позиций (ps=2):
+ * правка состава не меняет остальные задачи. Адрес прежнего генератора
+ * (без ps) открывается тем же листом, что был напечатан, — по старой
+ * схеме, до первой правки состава.
  */
 
 import {
@@ -18,11 +20,18 @@ import type {
   GenConfig,
   GenEngine,
   GenSheet,
+  GenSlot,
   GenState,
   Level,
 } from '@/lib/generator/obshchiy/types';
 import { SHEET_11 } from '@/content/repetitory11';
-import { parseSheetQuery11, sheetQuery11, type SheetParams11 } from './sheet11';
+import {
+  parseSheetQuery11,
+  sheetQuery11,
+  slotySostava,
+  sostavIzSlotov,
+  type SheetParams11,
+} from './sheet11';
 import type { RazdelInfo, UslovieBanka } from './trenazher/sessiya';
 
 export function config11(razdely: readonly RazdelInfo[], slot: string): GenConfig {
@@ -54,10 +63,10 @@ export function config11(razdely: readonly RazdelInfo[], slot: string): GenConfi
   };
 }
 
-/** План → состав движка: подряд идущие одинаковые подтипы склеиваются. */
-export function sostavIzPlana(plan: readonly string[]): { id: string; n: number }[] {
+/** План прежней схемы → состав: подряд идущие одинаковые подтипы склеиваются. */
+function sostavPoNomeram(plan: readonly GenSlot[]): { id: string; n: number }[] {
   const out: { id: string; n: number }[] = [];
-  for (const id of plan) {
+  for (const { id } of plan) {
     const last = out[out.length - 1];
     if (last !== undefined && last.id === id) last.n += 1;
     else out.push({ id, n: 1 });
@@ -72,23 +81,26 @@ export function paramsIzSostoyaniya(
   /* Одна тема — «Задания для отработки»: блоки по подтипам с заголовками.
      Несколько тем — лист в формате варианта ЕГЭ. */
   const topics = new Set(
-    state.plan.map((id) => config.topics.find((t) => t.subtypes.some((s) => s.id === id))?.id),
+    state.plan.map(({ id }) => config.topics.find((t) => t.subtypes.some((s) => s.id === id))?.id),
   );
+  const legacy = state.legacy === true;
   return {
     rezhim: topics.size === 1 ? 'otrabotka' : 'komplekt',
     istochnik: state.source,
-    sostav: sostavIzPlana(state.plan),
+    sostav: legacy ? sostavPoNomeram(state.plan) : sostavIzSlotov(state.plan),
     variants: state.variants,
     seed: state.seed,
     zameny: state.zameny,
     marshrut: 1,
     theme: 'color',
+    ...(legacy ? {} : { poKlyucham: true }),
   };
 }
 
-function levelsOfPlan(plan: readonly string[], razdely: readonly RazdelInfo[]): Level[] {
+function levelsOfPlan(plan: readonly GenSlot[], razdely: readonly RazdelInfo[]): Level[] {
+  const ids = new Set(plan.map((s) => s.id));
   const set = new Set<Level>();
-  for (const r of razdely) for (const p of r.podtipy) if (plan.includes(p.id)) set.add(p.level);
+  for (const r of razdely) for (const p of r.podtipy) if (ids.has(p.id)) set.add(p.level);
   return set.size === 0 ? [1, 2, 3] : [...set].sort();
 }
 
@@ -138,7 +150,7 @@ export function engine11(
     parse(q) {
       if (!q.has('s') || q.get('m') === 'r') return null;
       const p = parseSheetQuery11(q);
-      const plan = p.sostav.flatMap((x) => Array.from({ length: x.n }, () => x.id));
+      const plan = slotySostava(p.sostav);
       if (plan.length === 0) return null;
       const lv = (q.get('lv') ?? '')
         .split('')
@@ -151,6 +163,7 @@ export function engine11(
         plan,
         seed: p.seed,
         zameny: p.zameny,
+        ...(p.poKlyucham === true ? {} : { legacy: true }),
       };
     },
   };
