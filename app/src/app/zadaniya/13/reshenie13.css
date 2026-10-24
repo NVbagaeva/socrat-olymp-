@@ -1,0 +1,173 @@
+/* Решение задачи №13 (lib/zadanie13/reshenieHtml.ts): шаги, рамки,
+   плашки, пропорции, таблица в переменных со стрелкой. Один файл для
+   страниц раздела, страниц печати и сборки PDF в CI — поэтому у
+   токенов сайта есть запасные значения: в сборке PDF токенов нет. */
+
+.z13-r-shag {
+  --z13r-accent: var(--color-accent, #e8590c);
+  --z13r-rule: var(--color-border, #d0d7e2);
+  --z13r-info: var(--color-surface-info, #eef4ff);
+  --z13r-warm: var(--color-surface-warm, #fff6e8);
+  --z13r-ink: var(--color-text, #111827);
+  --z13r-ink-soft: var(--color-text-secondary, #5b6475);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  min-width: 0;
+}
+.z13-r-shag + .z13-r-shag {
+  margin-top: 10px;
+}
+.z13-r-shag__head {
+  margin: 0;
+}
+.z13-r-shag__head b {
+  color: var(--color-text-brand, #1f3a8a);
+}
+.z13-r-shag p {
+  margin: 0;
+}
+.z13-r-formula {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.z13-r-formula .katex-display {
+  margin: 4px 0;
+}
+
+/* Рамка «Вспоминаем …» и рамка «Внимание на формулировку». */
+.z13-r-shag--ramka,
+.z13-r-shag--vnimanie {
+  padding: 10px 14px;
+  border: 1px solid var(--z13r-rule);
+  border-left: 4px solid var(--color-primary, #2563eb);
+  border-radius: 8px;
+  background: var(--z13r-info);
+}
+.z13-r-shag--vnimanie {
+  border-left-color: var(--z13r-accent);
+  background: var(--z13r-warm);
+}
+.z13-r-plashka {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--z13r-warm);
+  font-size: 0.92em;
+}
+.z13-r-melko {
+  color: var(--z13r-ink-soft);
+  font-size: 0.85em;
+}
+.z13-r-proporciya {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+}
+
+/* Таблица в переменных. Столбцы 2–4 одной ширины: стрелка над шапкой
+   попадает в центры «Долга на начало» и «Переплаты» при любой ширине. */
+.z13-r-tab {
+  margin: 4px 0;
+  min-width: 0;
+}
+.z13-r-tab figcaption {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.z13-r-tab__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.z13-r-table {
+  width: 100%;
+  min-width: 520px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.z13-r-table__c0 {
+  width: 12%;
+}
+.z13-r-table th,
+.z13-r-table td {
+  padding: 4px 6px;
+  border: 1px solid var(--z13r-rule);
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+}
+.z13-r-table thead tr:not(.z13-r-strelka) th {
+  font-weight: 600;
+  color: var(--z13r-ink-soft);
+}
+.z13-r-table__itog th,
+.z13-r-table__itog td {
+  font-weight: 700;
+}
+.z13-r-table__dots td {
+  border-top-style: dashed;
+  border-bottom-style: dashed;
+}
+
+.z13-r-table .z13-r-strelka td {
+  padding: 0;
+  border: 0;
+}
+.z13-r-strelka__box {
+  position: relative;
+  height: 46px;
+  color: var(--z13r-accent);
+}
+.z13-r-strelka__duga {
+  position: absolute;
+  left: 0;
+  top: 16px;
+  width: 100%;
+  height: 30px;
+  overflow: visible;
+}
+.z13-r-strelka__duga path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.z13-r-strelka__ostrie {
+  position: absolute;
+  bottom: 0;
+  left: calc(100% / 6);
+  width: 10px;
+  height: 8px;
+  transform: translateX(-50%);
+  fill: currentColor;
+}
+.z13-r-strelka__text {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 6px;
+  background: var(--color-surface, #fff);
+  color: var(--z13r-accent);
+  font-size: 0.82em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Печать: ч/б тема листа — стрелка и рамки без цвета. */
+[data-sheet-theme='print'] .z13-r-shag {
+  --z13r-accent: #000;
+  --z13r-info: #fff;
+  --z13r-warm: #fff;
+}
+@media print {
+  .z13-r-tab__scroll {
+    overflow: visible;
+  }
+  .z13-r-table {
+    min-width: 0;
+  }
+}

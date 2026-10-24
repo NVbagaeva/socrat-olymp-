@@ -107,24 +107,37 @@ function uchenikTask(p: GenParams13) {
   };
 }
 
+function stroOtveta(z: ListZadacha13): string {
+  return `<p class="sheet-task-answer">${SHEET_13.otvet}: <b>${escape(z.answer)}</b>${metka(z)}</p>`;
+}
+
 function uchitelTask(p: GenParams13) {
-  return (z: ListZadacha13): SheetTask => {
-    const reshenie = p.uchitel === 'polno' ? z.polnoHtml : z.kratkoHtml;
-    return {
-      no: z.no,
-      id: z.pos,
-      /* Условие — как у ученика: автотест комплектов сверяет их. Тип
-         называется в решении (шаг «Определяем тип»), пометка «не из
-         открытого банка» — у ответа. */
-      questionHtml: z.questionHtml,
-      options: null,
-      figureSvg: null,
-      solutionHtml:
-        tablitsaUsloviya13(z) +
-        (p.uchitel === 'otvety' ? '' : reshenie) +
-        `<p class="sheet-task-answer">${SHEET_13.otvet}: <b>${escape(z.answer)}</b>${metka(z)}</p>`,
-    };
-  };
+  return (z: ListZadacha13): SheetTask => ({
+    no: z.no,
+    id: z.pos,
+    /* Условие — как у ученика: автотест комплектов сверяет их. Тип
+       называется в решении (шаг «Определяем тип»), пометка «не из
+       открытого банка» — у ответа. Решение идёт после карточки
+       отдельными кусками (posleZadachi): длинное решение переносится
+       по шагам, а не обрезается. «Только ответы» — ответ в карточке. */
+    questionHtml: z.questionHtml,
+    options: null,
+    figureSvg: null,
+    solutionHtml: tablitsaUsloviya13(z) + (p.uchitel === 'otvety' ? stroOtveta(z) : ''),
+  });
+}
+
+/** Решение учителя после карточки задачи: по куску потока на шаг и строка ответа. */
+function posleZadachi(p: GenParams13) {
+  return (z: ListZadacha13): string[] =>
+    p.uchitel === 'otvety'
+      ? []
+      : [
+          ...(p.uchitel === 'polno' ? z.polno : z.kratko).map(
+            (html) => `<div class="sheet-item z13-sheet-reshenie-shag">${html}</div>`,
+          ),
+          `<div class="sheet-item z13-sheet-reshenie-shag">${stroOtveta(z)}</div>`,
+        ];
 }
 
 /** Схемы в рамке «Повторяем»: все четыре всегда — по составу рамки схему не угадать. */
@@ -188,10 +201,24 @@ function bloki(
   zs: ListZadacha13[],
   task: (z: ListZadacha13) => SheetTask,
   uchenik: boolean,
+  posle?: (z: ListZadacha13) => string[],
 ): SheetBlock[] {
   const lead = uchenik && p.pomoshch === 'ramka' ? [povtor(zs)] : [];
+  /* Куски после задачи — отдельный блок без задач и без заголовка. */
+  const hvost = (z: ListZadacha13): SheetBlock[] => {
+    const items = posle?.(z) ?? [];
+    return items.length === 0
+      ? []
+      : [{ title: '', note: '', head: false, leadItems: items, tasks: [] }];
+  };
   if (!p.zachet) {
-    return [{ title: '', note: '', head: false, leadItems: lead, tasks: zs.map(task) }];
+    if (posle === undefined) {
+      return [{ title: '', note: '', head: false, leadItems: lead, tasks: zs.map(task) }];
+    }
+    return zs.flatMap((z, i) => [
+      { title: '', note: '', head: false, leadItems: i === 0 ? lead : [], tasks: [task(z)] },
+      ...hvost(z),
+    ]);
   }
   const vidy = [...new Set(zs.map((z) => z.vid))];
   const out: SheetBlock[] = [];
@@ -215,6 +242,7 @@ function bloki(
               : [],
         tasks: [task(z)],
       });
+      out.push(...hvost(z));
     });
   });
   return out;
@@ -280,7 +308,7 @@ export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
     return { title: title(i, false), blocks: b };
   };
   const uchitelVariant = (zs: ListZadacha13[], i: number) => {
-    const b = bloki(p, zs, uchitelTask(p), false);
+    const b = bloki(p, zs, uchitelTask(p), false, posleZadachi(p));
     if (b[0] !== undefined) {
       b[0] = { ...b[0], leadItems: [svodka(zs, i), ...(b[0].leadItems ?? [])] };
     }

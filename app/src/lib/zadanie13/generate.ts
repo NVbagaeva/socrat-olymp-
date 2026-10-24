@@ -73,7 +73,8 @@ export function generate(prototypeId: string, seed: string): Task13 {
       condition: draft.condition,
       ...(draft.conditionTable ? { conditionTable: draft.conditionTable } : {}),
       answer: draft.answer.toNumber(),
-      units: p.units,
+      units: draft.units ?? p.units,
+      ...(draft.vopros ? { vopros: draft.vopros } : {}),
       solution: draft.solution,
       hints: draft.hints,
       tableModel: toTableModel(draft.rows, draft.scheme, draft.period, {

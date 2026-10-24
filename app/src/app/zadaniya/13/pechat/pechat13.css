@@ -58,6 +58,16 @@
   margin-top: var(--sheet-step);
 }
 
+/* Решение учителя после карточки задачи: шаг за шагом, с отступом
+   под текст задачи — пагинатор переносит шаги, а не режет решение. */
+.z13-sheet-reshenie-shag {
+  padding: 0 0 0 9mm;
+  font-size: var(--sheet-fs-small);
+}
+.z13-sheet-reshenie-shag + .z13-sheet-reshenie-shag {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+
 /* Рамка «Повторяем»: правила всех схем подряд. */
 .z13-sheet-povtor__item + .z13-sheet-povtor__item {
   margin-top: calc(var(--sheet-step) * 2);
