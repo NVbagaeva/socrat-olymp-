@@ -217,7 +217,11 @@ function optionList(options) {
 function taskCard(task, options) {
   var layout = options.layout;
 
-  var answer = options.withAnswerLine
+  /* Строка ответа: у задачи своя (task.answerLine) — так в одном файле
+     лист ученика со строками и лист учителя без них; не задана — как
+     у листа (withAnswerLine). */
+  var withLine = task.answerLine !== undefined ? task.answerLine : options.withAnswerLine;
+  var answer = withLine
     ? '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>'
     : '';
 
@@ -378,7 +382,9 @@ function flowItems(spec) {
  *            разобранные примеры (exampleItem)
  *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия
  *            и чертежа могут быть figureWidth (мм), figureBelow
- *            (рисунок под условием) и solutionHtml (для учителя).
+ *            (рисунок под условием), solutionHtml (для учителя) и
+ *            answerLine — строка «Ответ: ____» у этой задачи (поверх
+ *            withAnswerLine листа).
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
  *            даёт одну полосу заголовка; head: false — блок без полосы;

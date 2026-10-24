@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select } from '@/components/ui';
-import { EGE_INSTRUCTION, VARIANT_SCREEN as T, WORK_KINDS } from '@/content/variant';
+import { VARIANT_SCREEN as T, WORK_KINDS, standardInstruction } from '@/content/variant';
 import { useSessionUser } from '@/lib/auth/session';
 import { newSeed } from '@/lib/variant/code';
 import { loadConfig, loadMeta, openSheet, saveConfig, saveMeta } from '@/lib/variant/handoff';
@@ -17,7 +17,7 @@ import {
   sanitizeConfig,
   sanitizeMeta,
 } from '@/lib/variant/session';
-import { workTitle, type SheetChoice } from '@/lib/variant/sheets';
+import { instructionFor, workTitle, type SheetChoice } from '@/lib/variant/sheets';
 import { zamenaKey } from '@/lib/variant/build';
 import {
   EGE_NUMBERS,
@@ -28,6 +28,7 @@ import {
   type VariantMeta,
   type VariantSet,
 } from '@/lib/variant/types';
+import { BlankiEge } from '@/components/blanki/BlankiEge';
 import { VariantPreview } from './VariantPreview';
 
 function Segment<I extends string>({
@@ -465,21 +466,30 @@ export function VariantScreen() {
               <span className="var-switch__track" aria-hidden="true" />
               <span className="var-switch__label">{T.instruction}</span>
             </label>
+            <p className="var-field__note">{T.instructionNote}</p>
             {meta.instruction ? (
               <>
                 <textarea
                   className="var-textarea"
                   rows={3}
-                  value={meta.instructionText}
+                  value={instructionFor(meta)}
                   maxLength={600}
                   aria-label={T.instruction}
-                  onChange={(e) => setMeta((m) => ({ ...m, instructionText: e.target.value }))}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    /* Совпала со стандартной — хранится пустой: тогда она
+                       следует за типом работы (с бланком № 1 или без). */
+                    setMeta((m) => ({
+                      ...m,
+                      instructionText: v.trim() === standardInstruction(m.kind) ? '' : v,
+                    }));
+                  }}
                 />
-                {meta.instructionText !== EGE_INSTRUCTION ? (
+                {meta.instructionText !== '' ? (
                   <button
                     type="button"
                     className="var-link"
-                    onClick={() => setMeta((m) => ({ ...m, instructionText: EGE_INSTRUCTION }))}
+                    onClick={() => setMeta((m) => ({ ...m, instructionText: '' }))}
                   >
                     {T.instructionReset}
                   </button>
@@ -532,35 +542,39 @@ export function VariantScreen() {
         {stale ? <p className="var-status var-status--warn">{T.stale}</p> : null}
       </section>
 
-      {/* ── Набор: код и листы ─────────────────────────────── */}
-      {set === null ? null : (
-        <section className="var-panel var-kit" aria-label={T.downloads}>
-          <div className="var-kit__code">
-            <span className="var-field__label">{T.code}</span>
-            <code className="var-kit__value">{set.code}</code>
-            <button type="button" className="var-link" onClick={copyCode}>
-              {copied ? T.codeCopied : T.codeCopy}
-            </button>
-            <span className="var-field__note">{T.codeNote}</span>
-          </div>
-          <div className="var-kit__buttons">
-            <Button onClick={() => pechat('uchenik')}>{T.pdf.uchenik}</Button>
-            <Button variant="secondary" onClick={() => pechat('uchitel')}>
-              {T.pdf.uchitel}
-            </Button>
-            <Button variant="secondary" onClick={() => pechat('razbor')}>
-              {T.pdf.razbor}
-            </Button>
-            <Button variant="secondary" onClick={() => pechat('vse')}>
-              {T.pdf.vse}
-            </Button>
-            <Button variant="ghost" onClick={() => pechat('uchenik')}>
-              {T.print}
-            </Button>
-          </div>
-          <p className="var-field__note">{T.downloadsNote}</p>
-        </section>
-      )}
+      {/* ── Набор: код и листы; рядом — бланки ЕГЭ (на телефоне — под
+          кнопками вариантов). Бланки в листы не входят никогда. */}
+      <div className={clsx('var-out', set !== null && 'var-out--two')}>
+        {set === null ? null : (
+          <section className="var-panel var-kit" aria-label={T.downloads}>
+            <div className="var-kit__code">
+              <span className="var-field__label">{T.code}</span>
+              <code className="var-kit__value">{set.code}</code>
+              <button type="button" className="var-link" onClick={copyCode}>
+                {copied ? T.codeCopied : T.codeCopy}
+              </button>
+              <span className="var-field__note">{T.codeNote}</span>
+            </div>
+            <div className="var-kit__buttons">
+              <Button onClick={() => pechat('uchenik')}>{T.pdf.uchenik}</Button>
+              <Button variant="secondary" onClick={() => pechat('uchitel')}>
+                {T.pdf.uchitel}
+              </Button>
+              <Button variant="secondary" onClick={() => pechat('razbor')}>
+                {T.pdf.razbor}
+              </Button>
+              <Button variant="secondary" onClick={() => pechat('vse')}>
+                {T.pdf.vse}
+              </Button>
+              <Button variant="ghost" onClick={() => pechat('uchenik')}>
+                {T.print}
+              </Button>
+            </div>
+            <p className="var-field__note">{T.downloadsNote}</p>
+          </section>
+        )}
+        <BlankiEge defaultCopies={set?.variants.length ?? config.count} />
+      </div>
 
       {/* ── Предпросмотр ──────────────────────────────────── */}
       <VariantPreview

@@ -17,7 +17,7 @@
  * следующую страницу, а не теряет решение, которое выше страницы.
  */
 
-import { VARIANT_SHEET as T } from '@/content/variant';
+import { VARIANT_SCREEN, VARIANT_SHEET as T, standardInstruction } from '@/content/variant';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
 import type { Figure, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
@@ -47,10 +47,6 @@ export function sheetFigure(f: Figure): { width: number | undefined; below: bool
   return { width: Math.round(Math.min(w, below ? FIG_BELOW_MAX : FIG_SIDE_MAX) * 10) / 10, below };
 }
 
-/** Бланк ответов: клеток в строке и колонок строк. */
-const BLANK_CELLS = 10;
-const BLANK_COLUMNS = 3;
-
 /* ── Номера и подписи ───────────────────────────────────────────── */
 
 /** Номер задачи на листе: как в ЕГЭ или сквозной. */
@@ -58,8 +54,18 @@ export function sheetNo(task: VariantTask, index: number, numbering: Numbering):
   return numbering === 'ege' ? task.egeNumber : index + 1;
 }
 
+/**
+ * Звёзды для экрана (фильтры, предпросмотр вне листа). На листы
+ * сложность не печатается никогда.
+ */
 export function starsText(stars: number | null): string {
-  return stars === null ? T.noLevel : '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  return stars === null ? VARIANT_SCREEN.noLevel : '★'.repeat(stars) + '☆'.repeat(3 - stars);
+}
+
+/** Инструкция листа: своя или стандартная для типа работы. */
+export function instructionFor(meta: VariantMeta): string {
+  const own = meta.instructionText.trim();
+  return own !== '' ? own : standardInstruction(meta.kind);
 }
 
 /** Название работы из шапки. */
@@ -189,17 +195,23 @@ function figureItem(f: Figure | null, cls: string): string {
   );
 }
 
-function card(task: VariantTask, no: number, prefix = '') {
+/**
+ * Карточка задачи. answerLine — строка «Ответ: ____» после задания, как
+ * в КИМ: у листа ученика. Будущее «место для решения» встаёт между
+ * условием и этой строкой.
+ */
+function card(task: VariantTask, no: number, answerLine = false) {
   const size = task.figure === null ? null : sheetFigure(task.figure);
   return {
     no,
     id: task.taskId,
-    questionHtml: prefix + task.statement,
+    questionHtml: task.statement,
     options: null,
     figureSvg: task.figure?.svg ?? null,
     figureWidth: size?.width,
     figureBelow: size?.below === true,
     solutionHtml: null,
+    answerLine,
   };
 }
 
@@ -211,33 +223,17 @@ function instructionItem(text: string): string {
   );
 }
 
-/** Бланк ответов в стиле ЕГЭ: номер задания и клеточки. */
-function blankItem(numbers: number[]): string {
-  const cells = Array.from({ length: BLANK_CELLS }, () => '<i></i>').join('');
-  const rows = numbers
-    .map(
-      (n) =>
-        `<div class="var-blank__row"><span class="var-blank__no">${n}</span>` +
-        `<span class="var-blank__cells">${cells}</span></div>`,
-    )
-    .join('');
-  return item(
-    'var-blank',
-    `<p class="var-blank__title">${typo.escape(T.blankTitle)}</p>` +
-      `<div class="var-blank__grid" style="grid-template-rows:repeat(${Math.ceil(numbers.length / BLANK_COLUMNS)},auto)">${rows}</div>`,
-    ' data-keep-together="1"',
-  );
-}
-
-/** Таблица ответов учителя: номер, ответ, источник, сложность. */
+/**
+ * Таблица ответов учителя: номер, ответ, источник. Сложность на листах
+ * не печатается — её видно только на экране.
+ */
 function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: string | null): string {
   const rows = tasks
     .map(
       (t, i) =>
         `<tr><th scope="row">${sheetNo(t, i, numbering)}</th>` +
         `<td class="var-key__answer" data-answer="${typo.attr(t.answer)}">${t.answerHtml}</td>` +
-        `<td class="var-key__source">${typo.escape(t.source.label)}</td>` +
-        `<td class="var-key__level">${typo.escape(starsText(t.difficulty))}</td></tr>`,
+        `<td class="var-key__source">${typo.escape(t.source.label)}</td></tr>`,
     )
     .join('');
   return item(
@@ -245,14 +241,14 @@ function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: stri
     `<table class="var-key__table"><caption>${typo.escape(T.keyTitle)}` +
       (code === null ? '' : `<span class="var-key__code">${typo.escape(T.code(code))}</span>`) +
       `</caption>` +
-      `<thead><tr><th>${T.blankNo}</th><th>${T.answer}</th><th>${T.keySource}</th><th>${T.keyLevel}</th></tr></thead>` +
+      `<thead><tr><th>${T.keyNo}</th><th>${T.answer}</th><th>${T.keySource}</th></tr></thead>` +
       `<tbody>${rows}</tbody></table>`,
   );
 }
 
 function solutionHead(task: VariantTask, no: number, withMeta: boolean): string {
   const meta = withMeta
-    ? `<span class="var-sol__meta">${typo.escape(task.source.label)} · ${typo.escape(starsText(task.difficulty))}</span>`
+    ? `<span class="var-sol__meta">${typo.escape(task.source.label)}</span>`
     : '';
   return `<p class="var-sol__head"><b>${typo.escape(T.task(no))}</b>${meta}</p>`;
 }
@@ -273,19 +269,15 @@ interface SheetVariant {
 }
 
 function blocksUchenik(tasks: readonly VariantTask[], meta: VariantMeta): unknown[] {
-  const numbers = tasks.map((t, i) => sheetNo(t, i, meta.numbering));
+  const text = instructionFor(meta);
   return [
     {
       head: false,
       title: '',
       note: '',
-      leadItems:
-        meta.instruction && meta.instructionText.trim() !== ''
-          ? [instructionItem(meta.instructionText)]
-          : [],
-      tasks: tasks.map((t, i) => card(t, numbers[i] ?? i + 1)),
+      leadItems: meta.instruction && text !== '' ? [instructionItem(text)] : [],
+      tasks: tasks.map((t, i) => card(t, sheetNo(t, i, meta.numbering), true)),
     },
-    { head: false, title: '', note: '', leadItems: [blankItem(numbers)], tasks: [] },
   ];
 }
 

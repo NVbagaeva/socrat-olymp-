@@ -37,6 +37,8 @@ const only = args.filter((a, i) => /^\d+$/.test(a) && args[i - 1] !== '--sets').
 const { buildVariantSet } = requireSrc('lib/variant/build');
 const { encodeCode, decodeCode } = requireSrc('lib/variant/code');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
+const { variantSheetSpec, instructionFor } = requireSrc('lib/variant/sheets');
+const { defaultMeta } = requireSrc('lib/variant/session');
 
 let failures = 0;
 function fail(where, message) {
@@ -74,6 +76,10 @@ for (let n = 1; n <= 13; n += 1) {
 
 /* ── Проверки задачи ────────────────────────────────────────────── */
 
+/* Пометки уровня сложности: на листах их быть не должно. */
+const LEVEL =
+  /[★☆]|\b(?:un)?lucky\b|сложност[ьи]|(?:базов|повышенн|сложн)\S* уров|уровень сложности|\bбаза\b|\(база\)/i;
+
 /* Сырой TeX вне формул: формулы набраны KaTeX (class="katex") или
    стоят заглушкой (class="math" data-tex="…"); в остальном тексте
    долларов и команд быть не должно. */
@@ -103,6 +109,18 @@ function checkTask(where, t, n) {
     if (raw !== null) fail(where, `сырой TeX в ${field}: «${raw}»`);
   }
   if (/Ответ:/.test(t.statement)) fail(where, 'в условии строка «Ответ:»');
+  /* Сложность на листы не печатается: ни звёзд, ни «база/сложная»,
+     ни lucky/unlucky — ни в условии, ни в решениях, ни в источнике. */
+  for (const [field, html] of [
+    ['statement', t.statement],
+    ['solutionTeacher', t.solutionTeacher ?? ''],
+    ['solutionStudent', t.solutionStudent ?? ''],
+    ['source', t.source.label],
+  ]) {
+    const text = html.replace(/<[^>]+>/g, ' ');
+    const m = LEVEL.exec(text);
+    if (m !== null) fail(where, `пометка сложности в ${field}: «${m[0]}»`);
+  }
   if (t.figure !== null && !/^<svg[\s>]/.test(t.figure.svg.trim()) && !/<img /.test(t.figure.svg))
     fail(where, 'рисунок не SVG');
   for (const f of t.fallbacks) {
@@ -185,6 +203,28 @@ for (const [n, adapter] of adapters) {
       )
         fail(w, `звёзды ${t.difficulty} не из ${config.stars}`);
     });
+
+    /* Листы: «всё одним файлом» — три части. Бланков ЕГЭ в листах нет
+       (только блок «Бланки» на экране), пометок сложности тоже; у листа
+       ученика строка ответа после каждого задания. */
+    for (const kind of ['ege', 'dz']) {
+      const meta = { ...defaultMeta(), kind };
+      const spec = variantSheetSpec(set, meta, 'vse', { workTitle: 'Проверка', showCode: true });
+      const json = JSON.stringify(spec);
+      if (/[★☆]/.test(json)) fail(where, 'звёзды сложности на листе');
+      if (/var-blank|blanki\//.test(json)) fail(where, 'бланк ЕГЭ в листе');
+      const uchenik = spec.variants.slice(0, set.variants.length);
+      const lines = uchenik.flatMap((v) => v.blocks.flatMap((b) => b.tasks ?? []));
+      if (lines.some((t) => t.answerLine !== true))
+        fail(where, 'у задачи листа ученика нет строки ответа');
+      const teacher = spec.variants
+        .slice(set.variants.length)
+        .flatMap((v) => v.blocks.flatMap((b) => b.tasks ?? []));
+      if (teacher.some((t) => t.answerLine === true)) fail(where, 'строка ответа на листе учителя');
+      const blank = /бланк/i.test(instructionFor(meta));
+      if (blank !== (kind === 'ege'))
+        fail(where, `инструкция «${kind}»: бланк ${blank ? 'есть' : 'нет'}`);
+    }
 
     /* 6. Код и замены. */
     const decoded = decodeCode(
