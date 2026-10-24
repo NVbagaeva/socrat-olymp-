@@ -341,6 +341,13 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: { a: number }) => z01({ proto: 101, a: p.a }),
   },
+  'z01.ravnobedr-150': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок III: площадь равнобедренного с тупым углом 150° при вершине (как прототип 17), боковая сторона — корень; подвох — sin 150° = sin 30°',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number }) => z01({ proto: 102, a: p.a }),
+  },
   'z02.skalyar-km': {
     ege: 2,
     prototip:
