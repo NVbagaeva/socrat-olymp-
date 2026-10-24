@@ -11,6 +11,7 @@
 
    Ненулевой код возврата — проверка не прошла. */
 
+import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
 
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL } = requireSrc('content/variantOnline/bally');
@@ -36,6 +37,26 @@ ok(
   `части 13 + 20 = 33 (${MAX_PART1} + ${MAX_PART2} = ${MAX_TOTAL})`,
 );
 ok(Object.values(MAX_BALL).reduce((s, x) => s + x, 0) === 33, 'сумма максимумов 33');
+
+/* Критерии: верхняя строка — максимум задания, нижняя — 0, баллы по убыванию без пропусков. */
+const { KRITERII, kriteriiZadaniya } = requireSrc('content/variantOnline/kriterii');
+for (let n = 14; n <= 20; n += 1) {
+  const k = KRITERII[n];
+  ok(k[0].ball === MAX_BALL[n], `№${n}: верхний критерий = максимум ${MAX_BALL[n]}`);
+  ok(k[k.length - 1].ball === 0, `№${n}: нижний критерий 0`);
+  ok(
+    k.every((r, i) => i === 0 || r.ball === k[i - 1].ball - 1),
+    `№${n}: баллы ${k.map((r) => r.ball).join(',')} подряд`,
+  );
+  ok(
+    kriteriiZadaniya(n).every((r) => r.ili.every((t) => !/[{}]/.test(t))),
+    `№${n}: в критериях нет незаполненных мест`,
+  );
+}
+ok(
+  kriteriiZadaniya(16, { u: 'точки 1' })[1].ili[0].endsWith('исключением точки 1'),
+  '№16: уточнение варианта подставляется',
+);
 
 /* ── 2. Шкала ───────────────────────────────────────────────────── */
 ok(TESTOVYJ.length === 34, `шкала: 34 значения (0…33), а не ${TESTOVYJ.length}`);
@@ -204,6 +225,38 @@ for (const [pole, sluchai] of TABLICA) {
     );
   }
 }
+
+/* ── 4. Часть 2 вариантов: верный ответ проходит свою автопроверку ── */
+const { CHAST2_V01 } = requireSrc('lib/povyshennye/chast2/v01');
+const { chislo } = requireSrc('lib/chast2/vyrazhenie');
+const vygruzka = {};
+for (const [v, zadachi] of Object.entries(CHAST2_V01)) {
+  const kv = `1.${v}`;
+  ok(
+    zadachi.map((z) => z.no).join(',') === '14,15,16,17,18,19,20',
+    `${kv}: задания 14–20 по порядку`,
+  );
+  vygruzka[kv] = zadachi.map((z) => {
+    for (const p of z.punkty) {
+      if (p.pole === null) continue;
+      const vvod = p.pole.vid === 'danet' ? (p.pole.verno ? 'da' : 'net') : p.pole.verno;
+      ok(
+        proverit(p.pole, vvod) === S,
+        `${kv} №${z.no}${p.bukva ?? ''}: верный ответ проходит автопроверку`,
+      );
+    }
+    const pole = z.punkty.find((p) => p.pole?.vid === 'chislo' || p.pole?.vid === 'korni')?.pole;
+    return {
+      no: z.no,
+      tekst: z.otvet,
+      chislo: pole?.vid === 'chislo' ? pole.verno : null,
+      znach: pole?.vid === 'chislo' ? chislo(pole.verno) : null,
+      korni: pole?.vid === 'korni' ? pole.verno : null,
+    };
+  });
+}
+const jsonAt = process.argv.indexOf('--json');
+if (jsonAt > 0) fs.writeFileSync(process.argv[jsonAt + 1], JSON.stringify(vygruzka, null, 1));
 
 if (failures > 0) {
   console.error(`\nЧасть 2: ошибок ${failures} из ${checks}`);
