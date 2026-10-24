@@ -114,6 +114,9 @@ function planPrezhnego(p: SheetParams2): GenSlot[] {
   );
 }
 
+/** Строка «Ответ: …» в конце разбора листа. */
+const BEZ_OTVETA = /<p class="sheet-task-answer">.*?<\/p>$/;
+
 export function engine2(config: GenConfig, base: string): GenEngine {
   const query = (state: GenState & { seed: string }) =>
     sheetQuery2(paramsIzSostoyaniya(state, config));
@@ -132,7 +135,8 @@ export function engine2(config: GenConfig, base: string): GenEngine {
               no: t.no,
               questionHtml: t.questionHtml,
               answerHtml: t.answer,
-              solutionHtml: t.solutionHtml ?? '',
+              /* Строка ответа — у предпросмотра своя, из листа её не берём. */
+              solutionHtml: (t.solutionHtml ?? '').replace(BEZ_OTVETA, ''),
               fromBank: false,
               figureSvg: t.figureSvg,
             })),

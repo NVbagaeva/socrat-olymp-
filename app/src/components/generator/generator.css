@@ -398,7 +398,12 @@
   background: var(--color-surface-info);
 }
 .gen-trow.is-off .gen-trow__icon,
-.gen-trow.is-disabled .gen-trow__letter {
+.gen-trow.is-disabled .gen-trow__icon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+/* Буква темы в кружке — у тем без своего значка (группы A–C №2, навыки №8). */
+.gen-trow__letter {
   display: grid;
   place-items: center;
   width: 36px;
@@ -406,11 +411,8 @@
   border-radius: 50%;
   background: var(--color-surface-info);
   color: var(--color-primary);
+  font-size: var(--fs-label);
   font-weight: 700;
-}
-.gen-trow__icon {
-  filter: grayscale(1);
-  opacity: 0.45;
 }
 .gen-trow.is-off .gen-trow__name b,
 .gen-trow.is-disabled .gen-trow__name b {

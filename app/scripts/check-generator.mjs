@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №8) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -36,6 +36,8 @@ const A1 = requireSrc('lib/planimetriya/generator1.ts');
 const S1 = requireSrc('lib/planimetriya/sheet1.ts');
 const A2 = requireSrc('lib/vektory/generator2.ts');
 const S2 = requireSrc('lib/vektory/sheet2.ts');
+const A8 = requireSrc('lib/vychisleniya/generator8.ts');
+const S8 = requireSrc('lib/vychisleniya/sheet8.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
 
 let failed = 0;
@@ -117,6 +119,33 @@ const RAZDELY = [
       old: 's=A1,B3&n=5&v=3&seed=K7Q2&t=color&c=1&k=%D0%94%D0%BE%D0%BC%D0%B0%D1%88%D0%BD%D1%8F%D1%8F+%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0',
       oldIds: 'A1,A1,A1,B3,B3',
       urok: 's=A1,B2&bank=1&t=color&c=1',
+    };
+  })(),
+  (() => {
+    const config8 = A8.config8('/zadaniya/8');
+    const sobrat = (p) => ({
+      poVariantam: S8.sheetVariants8(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
+    });
+    return {
+      name: '№8',
+      config: config8,
+      engine: A8.engine8(config8, '/zadaniya/8'),
+      params: (st) => A8.paramsIzSostoyaniya(st, config8),
+      parse: (q) => S8.parseSheetQuery8(q),
+      query: (p) => S8.sheetQuery8(p),
+      sobrat,
+      spec: (p, list, vid, qr) => S8.sheetSpec8(p, vid !== 'uchenik', qr),
+      primery: () => [],
+      badge: 'z8-sheet-badge',
+      ist: null,
+      ramka: false,
+      /* Уровень — параметр генерации на весь лист: его смена меняет задачи. */
+      urovenNaList: true,
+      /* У прежнего листа №8 вариантов не было. */
+      old: 's=S1,S5&n=5&l=base&seed=K7Q2&t=color&c=1',
+      oldIds: '8.A,8.C,8.D,8.M,8.N',
+      oldVariants: 1,
+      urok: null,
     };
   })(),
 ];
@@ -279,10 +308,16 @@ async function proverit(R) {
           `${label}: задача едет вместе с позицией`,
         );
         const lv = G.relayout(config, base.plan, [1]);
-        const kept = new Set(
-          lv.filter((s, i) => G.slotKey(s) === G.slotKey(base.plan[i])).map(G.slotKey),
-        );
-        const c = await engine.build({ ...base, plan: lv });
+        /* У №8 уровень задаёт генерацию всего листа: прежние задачи — только при том же уровне. */
+        const kept =
+          R.urovenNaList === true && base.levels.join() !== '1'
+            ? new Set()
+            : new Set(lv.filter((s, i) => G.slotKey(s) === G.slotKey(base.plan[i])).map(G.slotKey));
+        const c = await engine.build({
+          ...base,
+          plan: lv,
+          levels: R.urovenNaList ? [1] : base.levels,
+        });
         const d = diffTasks(a, c).filter((pos) => kept.has(pos.slice(pos.indexOf('.') + 1)));
         ok(d.length === 0, `${label}: смена уровней не трогает позиции с прежним подтипом`);
 
@@ -328,7 +363,7 @@ async function proverit(R) {
       st !== null &&
         st.legacy !== undefined &&
         st.plan.map((s) => s.id).join() === R.oldIds &&
-        st.variants === 3 &&
+        st.variants === (R.oldVariants ?? 3) &&
         st.seed === 'K7Q2',
       'адрес листа прежнего генератора открывается',
     );
@@ -360,7 +395,11 @@ async function proverit(R) {
       st !== null && engine.hrefs(st).student.split('?')[1] === q,
       'прежний адрес до правки остаётся прежним',
     );
-    ok(engine.parse(new URLSearchParams(R.urok)) === null, 'урок серии генератор не перехватывает');
+    if (R.urok !== null)
+      ok(
+        engine.parse(new URLSearchParams(R.urok)) === null,
+        'урок серии генератор не перехватывает',
+      );
   }
 
   /* ── 8. «Дополнительно» ─────────────────────────────────────────── */
@@ -456,6 +495,50 @@ async function proverit(R) {
 }
 
 for (const R of RAZDELY) await proverit(R);
+
+/* ── №8: уровень листа и повторы ────────────────────────────────── */
+console.log('№8: уровень и повторы');
+{
+  const config8 = A8.config8('/zadaniya/8');
+  const G8 = requireSrc('lib/vychisleniya/generate.ts');
+  const P8 = requireSrc('lib/vychisleniya/prototypes/index.ts');
+  const { typeset } = requireSrc('lib/tex.ts');
+  const one = config8.presets.find((p) => p.id === 'one');
+  for (const [levels, want] of [
+    [[1], 'base'],
+    [[2], 'advanced'],
+    [[1, 2], null],
+  ]) {
+    const st = { ...G.stateFromPreset(config8, one, 'new'), levels, seed: 'K7Q2' };
+    const p = A8.paramsIzSostoyaniya(st, config8);
+    okTop(p.level === want, `№8 уровни ${levels.join()} → лист «${want ?? 'любой'}»`);
+    const back = A8.engine8(config8, '/zadaniya/8').parse(new URLSearchParams(S8.sheetQuery8(p)));
+    okTop(back?.levels.join() === levels.join(), `№8 уровни ${levels.join()} в ссылке на набор`);
+  }
+  /* Шесть задач одного прототипа в варианте — без одинаковых условий. */
+  let dup = 0;
+  for (const proto of P8.PROTOTYPES) {
+    for (const l of ['base', 'advanced']) {
+      for (const seed of SEEDS) {
+        const p = S8.parseSheetQuery8(
+          new URLSearchParams(`ps=2&s=${proto.id}:6&v=2&l=${l}&seed=${seed}`),
+        );
+        for (const blocks of S8.sheetVariants8(p, false)) {
+          const q = blocks.flatMap((b) => b.tasks).map((t) => t.questionHtml);
+          dup += q.length - new Set(q).size;
+        }
+        /* Уровень доходит до движка: задача позиции — та, что движок даёт на этом уровне. */
+        const t = S8.sheetVariants8(p, false)[0][0].tasks[0];
+        const g = G8.generate(proto.id, t.id.split('|').slice(1).join('|'), l);
+        okTop(
+          t.questionHtml === typeset(g.uslovie) && (!G8.hasLevel(proto, l) || g.level === l),
+          `№8 ${proto.id}/${l}/${seed}: задача нужного уровня`,
+        );
+      }
+    }
+  }
+  okTop(dup === 0, `№8: условия одного прототипа в варианте не повторяются (повторов ${dup})`);
+}
 
 /* ── 5. Изменения состава ───────────────────────────────────────── */
 console.log('Изменения состава');

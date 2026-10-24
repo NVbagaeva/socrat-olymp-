@@ -77,16 +77,27 @@ export function countsByTopic(config: GenConfig, plan: readonly GenSlot[]): Reco
 export function candidates(topic: GenTopic, levels: readonly Level[]): GenSubtype[] {
   const order = (a: GenSubtype, b: GenSubtype) =>
     a.level - b.level || b.bank - a.bank || a.id.localeCompare(b.id);
-  const exact = topic.subtypes.filter((s) => levels.includes(s.level)).sort(order);
+  const exact = topic.subtypes.filter((s) => umeet(s, levels)).sort(order);
   if (exact.length > 0) return exact;
-  const dist = (s: GenSubtype) => Math.min(...levels.map((l) => Math.abs(l - s.level)));
+  const dist = (s: GenSubtype) =>
+    Math.min(...levels.flatMap((l) => urovniPodtipa(s).map((u) => Math.abs(l - u))));
   const best = Math.min(...topic.subtypes.map(dist));
   return topic.subtypes.filter((s) => dist(s) === best).sort(order);
 }
 
+/** Уровни подтипа: несколько (levels) или один (level). */
+export function urovniPodtipa(s: GenSubtype): Level[] {
+  return s.levels ?? [s.level];
+}
+
+/** Умеет ли подтип хотя бы один из уровней. */
+function umeet(s: GenSubtype, levels: readonly Level[]): boolean {
+  return urovniPodtipa(s).some((l) => levels.includes(l));
+}
+
 /** Есть ли у темы задачи точно выбранных уровней. */
 export function topicHasLevels(topic: GenTopic, levels: readonly Level[]): boolean {
-  return topic.subtypes.some((s) => levels.includes(s.level));
+  return topic.subtypes.some((s) => umeet(s, levels));
 }
 
 /** add подтипов темы по кругу, продолжая после уже выбранных. */

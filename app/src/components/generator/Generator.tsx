@@ -25,6 +25,7 @@ import {
   tasksText,
   topicAllowed,
   topicHasLevels,
+  urovniPodtipa,
   variantsText,
 } from '@/lib/generator/obshchiy/state';
 import type {
@@ -266,6 +267,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
 
   const counts = countsByTopic(config, st.plan);
   const hasLevels = config.levels.length > 0;
+  /* Уровень на весь лист (№8): у задачи «Другого уровня» нет. */
+  const taskLevel = hasLevels && config.taskLevel !== false;
   const presetId = matchPreset(config, st);
 
   /**
@@ -738,7 +741,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                     <span className="gen-trow__icon">
                       {/* Без своего значка — буква темы в кружке (группы A–C №2). */}
                       {icons?.[t.id] ?? (
-                        <span className="gen-trow__letter" aria-hidden="true">
+                        <span className="gen-trow__letter no-math-check" aria-hidden="true">
                           {t.id}
                         </span>
                       )}
@@ -797,9 +800,9 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                               {hasLevels ? (
                                 <span
                                   className="gen-sub__lv"
-                                  aria-label={`Сложность ${s.level} из 3`}
+                                  aria-label={`Сложность ${urovniPodtipa(s).join('–')} из ${config.levels.length}`}
                                 >
-                                  {stars(s.level)}
+                                  {levelsText(urovniPodtipa(s))}
                                 </span>
                               ) : null}
                             </span>
@@ -832,7 +835,11 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               >
                 <span>
                   <b>{GEN_UI.dopolnitelno}</b>
-                  <small>{GEN_UI.dop.chto}</small>
+                  <small>
+                    {extras?.theory === false && extras.examples === false
+                      ? GEN_UI.dop.chtoBezRamok
+                      : GEN_UI.dop.chto}
+                  </small>
                 </span>
                 {dopCount > 0 ? <span className="gen-dop__n">{dopCount}</span> : null}
                 <GenIcon name="chevron" />
@@ -943,7 +950,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 teacher={generated && teacher}
                 demo={!generated}
                 live={live}
-                levels={hasLevels}
+                levels={taskLevel}
                 extras={generated ? st.extras : null}
                 qr={generated && st.extras.qr ? qr : null}
                 onAction={onTask}
@@ -1050,7 +1057,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </button>
             </div>
           ) : null}
-          {hasLevels ? (
+          {taskLevel ? (
             <>
               <div className="gen-menu-item is-static">
                 <GenIcon name="star" />

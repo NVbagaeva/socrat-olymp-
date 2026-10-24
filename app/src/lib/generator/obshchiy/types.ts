@@ -26,6 +26,11 @@ export interface GenSubtype {
   /** Название с формулами, набранное KaTeX; нет — title текстом. */
   titleHtml?: string;
   level: Level;
+  /**
+   * Уровни, которые подтип умеет, если их несколько (№8: почти каждый
+   * прототип даёт и базовую задачу, и повышенную). Нет — только level.
+   */
+  levels?: Level[];
   /** Задач в открытом банке; 0 — только генерируются. */
   bank: number;
 }
@@ -74,6 +79,11 @@ export interface GenConfig {
   topics: GenTopic[];
   /** Уровни сложности; пусто — у раздела их нет: фильтра и «Другого уровня» нет. */
   levels: { level: Level; words: string }[];
+  /**
+   * false — уровень задаётся на весь лист (№8: движок получает его вместе
+   * с прототипом), у отдельной задачи «Другого уровня» нет.
+   */
+  taskLevel?: false;
   sources: { id: SourceId; title: string; short: string; note: string }[];
   /** Первый — по умолчанию. */
   presets: GenPreset[];
