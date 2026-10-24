@@ -913,6 +913,46 @@ for (const [n, extra, want] of tables) {
     }
 }
 
+/* ── «Заполни таблицу»: таблица у задач «таблица руками» ─────────── */
+{
+  const { tablitsaZapolni13 } = requireSrc('lib/zadanie13/zapolni');
+  const { generate } = requireSrc('lib/zadanie13/generate');
+  const secret = requireSrc('lib/zadanie13/secret');
+  const { BANK_13 } = requireSrc('lib/zadanie13/bank');
+  const POLYA = {
+    dif: ['start', 'interest', 'change', 'payment', 'end'],
+    ann: ['start', 'interest', 'afterInterest', 'payment', 'end'],
+    dep: ['start', 'interest', 'afterInterest', 'payment', 'end'],
+  };
+  for (const [id, seed] of BANK_13) {
+    const t = generate(id, seed);
+    const z = tablitsaZapolni13(t, (x) => x);
+    checks += 1;
+    const w = `заполни таблицу ${id}|${seed}`;
+    if (!id.startsWith('P-')) {
+      if (z !== null) problems.push(`${w}: таблица у задачи не из «таблицы руками»`);
+      continue;
+    }
+    if (z === null) {
+      problems.push(`${w}: нет таблицы, а условие просит её заполнить`);
+      continue;
+    }
+    if (z.periody.length !== t.tableModel.rows.length) problems.push(`${w}: не все периоды`);
+    z.stroki.forEach((s, r) =>
+      s.kletki.forEach((k, c) => {
+        const v = t.tableModel.rows[c][POLYA[t.tableModel.scheme][r]];
+        if (k.seal !== null && !secret.answerMatches(String(v).replace('.', ','), k.seal))
+          problems.push(`${w}: клетка «${s.title}», ${c + 1} — отпечаток не того числа`);
+        if (k.seal !== null && JSON.stringify(k).includes(String(v)) && String(v).length > 2)
+          problems.push(`${w}: число клетки видно в разметке`);
+      }),
+    );
+    if (!z.stroki.some((s) => s.kletki.some((k) => k.seal !== null)))
+      problems.push(`${w}: нечего заполнять`);
+    if (z.stroki[0].kletki[0].dano === null) problems.push(`${w}: начальная сумма не дана`);
+  }
+}
+
 /* ── Генератор: план, замены, пресеты, адрес ────────────────────── */
 {
   const P13 = requireSrc('lib/zadanie13/gen/params');

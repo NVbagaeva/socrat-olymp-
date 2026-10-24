@@ -95,7 +95,10 @@ function uchenikTask(p: GenParams13) {
         ? STROKI_TIPA
         : p.vid === 'full' || p.zachet
           ? polyaOformleniya(z) + STROKA_OTVETA
-          : STROKA_OTVETA;
+          : /* «Заполни таблицу» без таблицы не решить: пустая таблица и на компактном листе. */
+            z.prototypeId.startsWith('P-')
+            ? pustayaTablitsa(z) + STROKA_OTVETA
+            : STROKA_OTVETA;
     return {
       no: z.no,
       id: z.pos,
