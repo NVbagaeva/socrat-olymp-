@@ -8,6 +8,10 @@
  */
 
 import { VIDY_13, type Vid13 } from '@/content/generator13';
+import { UROKI_13, type Urok13 } from '@/content/repetitory13';
+
+/** Опорные блоки «таблица руками» (прототипы P-…): вид «С таблицей». */
+const TABLITSA_RUKAMI: readonly string[] = ['o13-01', 'o13-02', 'o13-03'];
 
 export type Uroven13 = 'base' | 'all' | 'hard';
 export type IstochnikGen13 = 'bank' | 'mix' | 'new';
@@ -32,6 +36,8 @@ export interface GenParams13 {
   seed: string;
   /** Замены задач: «вариант.номер» → сколько раз заменяли. */
   zameny: Record<string, number>;
+  /** Урок вкладки «Для репетиторов» (1–6): состав задаёт урок, а не «Что»; 0 — не урок. */
+  urok: number;
 }
 
 export const VIDY_ID: readonly Vid13[] = VIDY_13.map((v) => v.id);
@@ -51,14 +57,40 @@ export const GEN_PARAMS_13: GenParams13 = {
   theme: 'color',
   seed: '',
   zameny: {},
+  urok: 0,
 };
 
-export function vsegoZadach13(p: Pick<GenParams13, 'sostav'>): number {
-  return VIDY_ID.reduce((s, id) => s + (p.sostav[id] ?? 0), 0);
+export function urokPo13(no: number): Urok13 | undefined {
+  return UROKI_13.find((u) => u.no === no);
 }
 
-export function minut13(p: Pick<GenParams13, 'sostav'>): number {
-  return VIDY_13.reduce((s, v) => s + (p.sostav[v.id] ?? 0) * v.minut, 0);
+/** Состав урока по видам: опорные блоки 1–3 — «таблица руками», остальное — тип урока. */
+export function sostavUroka13(u: Urok13): Partial<Record<Vid13, number>> {
+  const out: Partial<Record<Vid13, number>> = {};
+  const plus = (vid: Vid13, n: number) => {
+    if (n > 0) out[vid] = (out[vid] ?? 0) + n;
+  };
+  for (const id of u.opornye) plus(TABLITSA_RUKAMI.includes(id) ? 'P' : u.chto, 1);
+  plus(u.chto, u.bank.length + u.novye.length);
+  plus('T', u.tip);
+  return out;
+}
+
+function sostavOf(
+  p: Pick<GenParams13, 'sostav'> & { urok?: number },
+): Partial<Record<Vid13, number>> {
+  const u = p.urok ? urokPo13(p.urok) : undefined;
+  return u === undefined ? p.sostav : sostavUroka13(u);
+}
+
+export function vsegoZadach13(p: Pick<GenParams13, 'sostav'> & { urok?: number }): number {
+  const sostav = sostavOf(p);
+  return VIDY_ID.reduce((s, id) => s + (sostav[id] ?? 0), 0);
+}
+
+export function minut13(p: Pick<GenParams13, 'sostav'> & { urok?: number }): number {
+  const sostav = sostavOf(p);
+  return VIDY_13.reduce((s, v) => s + (sostav[v.id] ?? 0) * v.minut, 0);
 }
 
 function oneOf<T extends string>(value: string | null, allowed: readonly T[], fallback: T): T {
@@ -87,6 +119,8 @@ export function genQuery13(p: GenParams13): string {
   q.set('a', p.uchitel);
   q.set('t', p.theme);
   q.set('seed', p.seed);
+  /* Урок серии — как у №9: номер с нуля под «u», общий код у всех уроков. */
+  if (p.urok > 0) q.set('u', String(p.urok - 1));
   const z = Object.entries(p.zameny)
     .filter(([, k]) => k > 0)
     .map(([pos, k]) => `${pos}:${k}`)
@@ -113,6 +147,7 @@ export function parseGenQuery13(
     if (pos && /^\d+\.\d+$/.test(pos) && Number.isInteger(n) && n > 0) zameny[pos] = n;
   }
   const v = Number(q.get('v'));
+  const u = q.get('u') === null ? NaN : Number(q.get('u')) + 1;
   return {
     sostav,
     uroven: oneOf(q.get('l'), ['base', 'all', 'hard'] as const, 'all'),
@@ -128,6 +163,7 @@ export function parseGenQuery13(
     theme: oneOf(q.get('t'), ['color', 'print'] as const, 'color'),
     seed: (q.get('seed') ?? '').slice(0, 40),
     zameny,
+    urok: urokPo13(u) === undefined ? 0 : u,
   };
 }
 

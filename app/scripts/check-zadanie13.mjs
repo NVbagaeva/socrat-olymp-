@@ -1009,6 +1009,98 @@ for (const [n, extra, want] of tables) {
     problems.push('зачёт: шкала оценок с дырой');
 }
 
+/* ── Для репетиторов: листы уроков и карточки «Определи тип» ─────── */
+{
+  const P13 = requireSrc('lib/zadanie13/gen/params');
+  const L13 = requireSrc('lib/zadanie13/gen/list');
+  const S13 = requireSrc('lib/zadanie13/gen/sheet');
+  const K13 = requireSrc('lib/zadanie13/gen/kartochki');
+  const { UROKI_13 } = requireSrc('content/repetitory13');
+  const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki');
+  const { PROTOTYPE_BY_ID } = requireSrc('lib/zadanie13/proto');
+  const { BANK_13 } = requireSrc('lib/zadanie13/bank');
+  const PORYADOK = ['opornye', 'bank', 'novye', 'tip'];
+  for (const u of UROKI_13) {
+    const w = `урок ${u.no}`;
+    for (const id of [...u.bank, ...u.novye]) {
+      checks += 1;
+      if (PROTOTYPE_BY_ID[id] === undefined) problems.push(`${w}: нет прототипа ${id}`);
+      else if (PROTOTYPE_BY_ID[id].type !== u.chto) problems.push(`${w}: ${id} не типа урока`);
+    }
+    for (const id of u.opornye) {
+      checks += 1;
+      if (!BLOKI_13.some((b) => b.id === id)) problems.push(`${w}: нет опорного блока ${id}`);
+    }
+    for (const variants of [1, 3]) {
+      checks += 1;
+      const p = { ...P13.GEN_PARAMS_13, title: '', urok: u.no, seed: 'TEST', variants };
+      const back = P13.parseGenQuery13(new URLSearchParams(P13.genQuery13(p)));
+      if (JSON.stringify(back) !== JSON.stringify(p)) problems.push(`${w}: адрес теряет урок`);
+      const plan = L13.planLista13(p);
+      const n = u.opornye.length + u.bank.length + u.novye.length + u.tip;
+      if (P13.vsegoZadach13(p) !== n || plan.some((v) => v.length !== n))
+        problems.push(`${w}: в плане не столько задач, сколько в уроке`);
+      if (JSON.stringify(L13.planLista13(p)) !== JSON.stringify(plan))
+        problems.push(`${w}: план не воспроизводится`);
+      const keys = plan.flat().map((z) => `${z.prototypeId}|${z.seed}`);
+      if (new Set(keys).size !== keys.length) problems.push(`${w}: задачи серии повторяются`);
+      for (const v of plan) {
+        const chasti = v.map((z) => PORYADOK.indexOf(z.chast));
+        if (chasti.some((c, i) => c < 0 || (i > 0 && c < chasti[i - 1])))
+          problems.push(`${w}: части листа не по порядку`);
+      }
+      /* Опорные — задачи экрана опорных задач: тот же прототип и seed. */
+      const opornye = plan[0].filter((z) => z.chast === 'opornye');
+      opornye.forEach((z, i) => {
+        const blok = BLOKI_13.find((b) => b.id === u.opornye[i]);
+        if (!zadachiBloka(blok).some((x) => x.prototypeId === z.prototypeId && x.seed === z.seed))
+          problems.push(`${w}: опорная задача ${z.prototypeId}|${z.seed} не из блока ${blok.id}`);
+      });
+      for (const z of plan.flat().filter((x) => x.chast === 'bank' || x.chast === 'tip'))
+        if (!BANK_13.some(([id, sd]) => id === z.prototypeId && sd === z.seed))
+          problems.push(`${w}: задача «банка» ${z.prototypeId}|${z.seed} не из банка`);
+      /* Тип и тема урока не утекают на лист ученика. */
+      const list = L13.sobratList13(p);
+      let bezUsloviy = JSON.stringify(S13.sheetSpec13(p, list, 'uchenik'));
+      for (const z of list.poVariantam.flat())
+        bezUsloviy = bezUsloviy.split(JSON.stringify(z.questionHtml).slice(1, -1)).join('');
+      const utechka = bezUsloviy.match(
+        /дифференцированн|аннуитет|поломанн|не из открытого банка|вклад|платёж|переплат/i,
+      );
+      if (utechka) problems.push(`${w}: на листе ученика тип или тема («${utechka[0]}»)`);
+      const uchitel = JSON.stringify(S13.sheetSpec13(p, list, 'uchitel'));
+      if (!uchitel.includes(JSON.stringify(u.title).slice(1, -1)))
+        problems.push(`${w}: на листе учителя нет темы урока`);
+    }
+    /* Замена в уроке меняет одну задачу. */
+    checks += 1;
+    const p = { ...P13.GEN_PARAMS_13, title: '', urok: u.no, seed: 'TEST', variants: 1 };
+    const plan = L13.planLista13(p).flat();
+    const zam = L13.planLista13({ ...p, zameny: { 1.4: 1 } }).flat();
+    const diff = zam.filter((z, i) => JSON.stringify(z) !== JSON.stringify(plan[i]));
+    if (diff.length !== 1 || diff[0].pos !== '1.4')
+      problems.push(`${w}: замена задела другие задачи`);
+  }
+  /* Карточки: 20 разных задач банка, по 5 на схему, воспроизводятся по seed. */
+  for (const seed of ['TEST', '7K3F', 'Q9ZZ']) {
+    checks += 1;
+    const k = K13.kartochki13(seed);
+    const keys = k.map((x) => `${x.prototypeId}|${x.seed}`);
+    if (k.length !== 20 || new Set(keys).size !== 20)
+      problems.push(`карточки ${seed}: не 20 разных`);
+    for (const t of ['A', 'B', 'C', 'D'])
+      if (k.filter((x) => x.type === t).length !== 5)
+        problems.push(`карточки ${seed}: схема ${t} не 5 раз`);
+    if (k.some((x) => PROTOTYPE_BY_ID[x.prototypeId]?.type !== x.type))
+      problems.push(`карточки ${seed}: схема на обороте не та`);
+    if (JSON.stringify(K13.kartochki13(seed)) !== JSON.stringify(k))
+      problems.push(`карточки ${seed}: не воспроизводятся`);
+    const spec = JSON.stringify(K13.kartochkiSpec13(seed, 'color', ''));
+    if ((spec.match(/z13-kartochka__oborot/g) ?? []).length !== 20)
+      problems.push(`карточки ${seed}: не у всех карточек оборот`);
+  }
+}
+
 /* ── Шаблон решения дифференцированного платежа (решение автора 24.10) ── */
 {
   const A = requireSrc('lib/zadanie13/proto/a');
