@@ -374,6 +374,20 @@ function z09(g: Generated9 | null, p: unknown): Gotovaya {
   return bezPoley(build09({ ...kand, seed: 'pv' }, g, false));
 }
 
+/* ── №10 ────────────────────────────────────────────────────────── */
+
+/** Задача №10 прототипа раздела со своим текстом сюжета. */
+function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
+  const { tekst, ...params } = p;
+  return bezPoley(
+    build10({
+      ...kand,
+      prototypeId: proto,
+      z: { id: klyuch, prototypeId: proto, source: 'analog', text: tekst, params },
+    }),
+  );
+}
+
 /* ── №12 ────────────────────────────────────────────────────────── */
 
 /** Ширина рисунка №12 на листе, мм: клетка 3,4 мм, у движка — 34 единицы. */
@@ -737,16 +751,19 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Прикладные, группа II: сколько секунд тело выше отметки (P17), коэффициент при t² — параметр',
     otkuda: 'razdel',
-    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => {
-      const { tekst, ...params } = p;
-      return bezPoley(
-        build10({
-          ...kand,
-          prototypeId: 'P17',
-          z: { id: klyuch, prototypeId: 'P17', source: 'analog', text: tekst, params },
-        }),
-      );
-    },
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P17', p, klyuch),
+  },
+  'z10.adiabata': {
+    ege: 10,
+    prototip: 'Прикладные, группа III: адиабатическое сжатие, объём после сжатия (P21)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P21', p, klyuch),
+  },
+  'z10.motocikl': {
+    ege: 10,
+    prototip: 'Прикладные, группа II: разгон S = v₀t + at²/2, наибольшее время в минутах (P12)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P12', p, klyuch),
   },
   'z11.bystryy': {
     ege: 11,
