@@ -334,6 +334,9 @@
   flex-wrap: wrap;
 }
 .ptask__title {
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
   margin: 0;
   font-size: var(--fs-h3);
   line-height: var(--lh-h3);

@@ -2103,6 +2103,7 @@
   min-width: 0;
 }
 .z11-gen__blok {
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   padding: var(--space-4);
 }
@@ -2198,6 +2199,16 @@
 .z11-gen__summa {
   color: var(--color-text-secondary);
   white-space: nowrap;
+}
+.z11-gen__razdel-toggle .z11-akk__name {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+/* На 320 значок раздела отнимал место у названия. */
+@media (max-width: 359.98px) {
+  .z11-gen__razdel-toggle .z11-akk__ikonka {
+    display: none;
+  }
 }
 .z11-akk__chevron.is-open {
   transform: rotate(180deg);
