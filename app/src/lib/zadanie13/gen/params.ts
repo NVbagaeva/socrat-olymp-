@@ -22,7 +22,7 @@ export interface GenParams13 {
   pomoshch: Pomoshch13;
   vid: VidLista13;
   variants: number;
-  /** Пресет «Зачёт Н.В.»: страница с баллами, задачи по одной на страницу. */
+  /** Пресет «Зачёт»: страница с баллами, задачи по одной на страницу. */
   zachet: boolean;
   title: string;
   date: string;

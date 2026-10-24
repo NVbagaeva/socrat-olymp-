@@ -107,7 +107,7 @@ export const PRESETY_13: readonly Preset13[] = [
   },
   {
     id: 'zachet',
-    label: 'Зачёт Н.В.',
+    label: 'Зачёт',
     note: '30 задач · 50 баллов',
     sostav: { A: 5, B: 5, C: 5, D: 5, T: 10 },
     uroven: 'all',
@@ -158,9 +158,10 @@ export const GENERATOR_13 = {
   pomoshch: 'Подсказка на листе',
   pomoshchi: [
     { id: 'net', label: 'Нет' },
-    { id: 'ramka', label: 'Рамка с правилом и примером' },
+    { id: 'ramka', label: 'Рамка «Повторяем»' },
   ] as const,
-  pomoshchNote: 'Рамка ставится перед первой задачей каждого типа: правило и разобранный пример.',
+  pomoshchNote:
+    'Одна рамка в начале листа: правила всех схем с разобранными примерами. Над задачами тип не пишется — ученик определяет его сам.',
   vid: 'Вид листа',
   vidy: [
     { id: 'compact', label: 'Компактный' },
@@ -222,7 +223,7 @@ export const SHEET_13 = {
   reshenie: 'Решение',
   tipSkhema: 'Схема:',
   tipPriznak: 'Признак:',
-  ramka: 'Правило и пример',
+  ramka: 'Повторяем',
   onlayn: 'Решать онлайн:',
   foot: {
     course: 'Профильная математика',
@@ -240,7 +241,7 @@ export const SHEET_13 = {
   },
 } as const;
 
-/** Зачёт Н.В.: первая страница — как выполнять, баллы и шкала. */
+/** Зачёт: первая страница — как выполнять, баллы и шкала. */
 export const ZACHET_13 = {
   kak: 'Как выполнять работу',
   pravila: [
@@ -260,13 +261,14 @@ export const ZACHET_13 = {
   ],
   zachet: 'Зачёт — от 25 баллов.',
   blok: 'Блок',
+  zadachiMal: 'задачи',
   zadachi: 'Задачи',
   ballov: 'Баллов',
   itogo: 'Итого',
   nabrano: 'Набрано',
 } as const;
 
-/** Рамка «Правило и пример» перед первой задачей каждого типа. */
+/** Рамка «Повторяем» в начале листа: правило и пример каждой схемы. */
 export const RAMKA_13: Record<Vid13, { pravilo: string; primer: string; reshenie: string }> = {
   A: {
     pravilo:

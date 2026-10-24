@@ -3,7 +3,7 @@
    «Экономические задачи».
 
    Запуск:
-     node scripts/build-pdf-13.mjs           образцы: «Домашка» и «Зачёт Н.В.»,
+     node scripts/build-pdf-13.mjs           образцы: «Домашка» и «Зачёт»,
                                              лист ученика и лист учителя
      node scripts/build-pdf-13.mjs --draft   то же без требования KaTeX
 

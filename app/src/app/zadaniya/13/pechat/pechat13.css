@@ -58,6 +58,13 @@
   margin-top: var(--sheet-step);
 }
 
+/* Рамка «Повторяем»: правила всех схем подряд. */
+.z13-sheet-povtor__item + .z13-sheet-povtor__item {
+  margin-top: calc(var(--sheet-step) * 2);
+  padding-top: calc(var(--sheet-step) * 2);
+  border-top: 0.5pt dashed var(--sheet-rule, #999);
+}
+
 /* Таблица по периодам — в условии и в решении. */
 .z13-tablitsa {
   margin: calc(var(--sheet-step) * 2) 0;
@@ -114,10 +121,15 @@
 }
 .z13-sheet-pusto {
   width: 100%;
+  table-layout: fixed;
   margin-top: calc(var(--sheet-step) * 2);
 }
-.z13-sheet-pusto td {
+.z13-sheet-pusto td,
+.z13-sheet-pusto thead th {
   height: 7mm;
+}
+.z13-sheet-pusto thead th:first-child {
+  width: 14%;
 }
 
 /* Зачёт: первая страница. */

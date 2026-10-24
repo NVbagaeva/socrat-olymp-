@@ -966,6 +966,26 @@ for (const [n, extra, want] of tables) {
           problems.push(`${w}: ответ «Определи тип» — не схема`);
       }
       const uchenik = JSON.stringify(S13.sheetSpec13(p, list, 'uchenik'));
+      /* Тип не утекает на лист ученика: ни над условием, ни в заголовках
+         блоков, ни в подписях. Само условие (оно может назвать схему, как
+         у ФИПИ) из проверки вынимается; рамку «Повторяем» учитель
+         включает сам — проверяем лист без неё. */
+      let bezUsloviy = JSON.stringify(S13.sheetSpec13({ ...p, pomoshch: 'net' }, list, 'uchenik'));
+      for (const z of list.poVariantam.flat()) {
+        bezUsloviy = bezUsloviy.split(JSON.stringify(z.questionHtml).slice(1, -1)).join('');
+      }
+      const utechka = bezUsloviy.match(
+        /дифференцированн|аннуитет|поломанн|не из открытого банка|вклад/i,
+      );
+      if (utechka) problems.push(`${w}: на листе ученика тип задачи («${utechka[0]}»)`);
+      if (!p.zachet) {
+        const vidy = list.poVariantam[0].map((z) => z.vid).join('');
+        const podryad = [...new Set(vidy)]
+          .map((v) => v.repeat([...vidy].filter((x) => x === v).length))
+          .join('');
+        if (new Set(vidy).size > 1 && vidy === podryad && n > 4)
+          problems.push(`${w}: задачи стоят группами по типам — порядок не перемешан`);
+      }
       if (/sheet-task-answer|Сводка ответов/.test(uchenik))
         problems.push(`${w}: ответы на листе ученика`);
       const uchitel = JSON.stringify(S13.sheetSpec13(p, list, 'uchitel'));
@@ -973,7 +993,7 @@ for (const [n, extra, want] of tables) {
         problems.push(`${w}: на листе учителя нет сводки ответов`);
     }
   }
-  /* Зачёт Н.В.: 50 баллов, шкала без дыр и до 50. */
+  /* Зачёт: 50 баллов, шкала без дыр и до 50. */
   const zachet = PRESETY_13.find((x) => x.id === 'zachet');
   const ballov = Object.entries(zachet.sostav).reduce(
     (s, [vid, n]) => s + n * (vid === 'T' ? ZACHET_13.bally.tip : ZACHET_13.bally.zadacha),

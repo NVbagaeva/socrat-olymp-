@@ -15,7 +15,7 @@ import { rngOf } from '../../vychisleniya/rng';
 import { BANK_13 } from '../bank';
 import { generate } from '../generate';
 import { kletkiModeli, kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
-import { SIGN } from '../proto/common';
+import { SIGN, TIP_VYVOD } from '../proto/common';
 import { PROTOTYPES } from '../proto';
 import { TYPE_NAMES, type Task13 } from '../types';
 import { VIDY_ID, type GenParams13 } from './params';
@@ -54,11 +54,21 @@ function kandidaty(vid: Vid13, uroven: GenParams13['uroven']): string[] {
   return (poUrovnyu.length > 0 ? poUrovnyu : vse).map((p) => p.id);
 }
 
+/** Место задачи в варианте до раскладки: строка «Что» и номер в ней. */
+interface Slot {
+  vid: Vid13;
+  i: number;
+  prototypeId: string;
+}
+
 /**
- * План листа: по вариантам, по строкам «Что» в порядке A, B, C, D,
- * T, P. Прототипы строки — по кругу в перемешанном порядке, seed банка
- * у каждого прототипа свой и не повторяется в комплекте; «Банк + новые»
- * чередует. Замена — новая задача того же прототипа на своём seed.
+ * План листа: по вариантам. Прототипы строки «Что» — по кругу в
+ * перемешанном порядке. Задачи варианта перемешиваются (seed
+ * комплекта): по соседству задач нельзя угадать схему. У зачёта
+ * порядок блоков, так и задуман. Seed банка у прототипа свой и не
+ * повторяется в комплекте, «Банк + новые» чередует. Замена — новая
+ * задача того же прототипа на своём seed; остальные задачи она не
+ * трогает: место в очереди банка задача занимает и после замены.
  */
 export function planLista13(p: GenParams13): Poziciya13[][] {
   const bankSeeds = new Map<string, string[]>();
@@ -74,42 +84,38 @@ export function planLista13(p: GenParams13): Poziciya13[][] {
   };
   const out: Poziciya13[][] = [];
   for (let v = 0; v < p.variants; v += 1) {
-    const variant: Poziciya13[] = [];
+    const sloty: Slot[] = [];
     for (const vid of VIDY_ID) {
       const n = p.sostav[vid] ?? 0;
       if (n === 0) continue;
       const kand = kandidaty(vid, p.uroven);
       const poryadok = rngOf(`z13-gen|${p.seed}|${v}|${vid}`).sample(kand, kand.length);
       for (let i = 0; i < n; i += 1) {
-        const no = variant.length + 1;
-        const pos = `${v + 1}.${no}`;
-        const prototypeId = poryadok[i % poryadok.length] ?? kand[0] ?? 'A-01';
-        const zamena = p.zameny[pos] ?? 0;
-        const izBanka =
-          zamena === 0 &&
-          vid !== 'P' &&
-          (p.istochnik === 'bank' || (p.istochnik === 'mix' && i % 2 === 0));
-        let seed: string | undefined;
-        if (izBanka) {
-          const k = vzyato.get(prototypeId) ?? 0;
-          seed = seedsOf(prototypeId)[k];
-          vzyato.set(prototypeId, k + 1);
-        }
-        variant.push(
-          seed === undefined
-            ? {
-                pos,
-                no,
-                vid,
-                prototypeId,
-                seed: `g${p.seed}-${pos}-${zamena}`,
-                istochnik: 'new',
-              }
-            : { pos, no, vid, prototypeId, seed, istochnik: 'bank' },
-        );
+        sloty.push({ vid, i, prototypeId: poryadok[i % poryadok.length] ?? kand[0] ?? 'A-01' });
       }
     }
-    out.push(variant);
+    const rasklad = p.zachet
+      ? sloty
+      : rngOf(`z13-gen|${p.seed}|${v}|poryadok`).sample(sloty, sloty.length);
+    out.push(
+      rasklad.map((slot, k): Poziciya13 => {
+        const no = k + 1;
+        const pos = `${v + 1}.${no}`;
+        const { vid, prototypeId } = slot;
+        const izBanka =
+          vid !== 'P' && (p.istochnik === 'bank' || (p.istochnik === 'mix' && slot.i % 2 === 0));
+        let seed: string | undefined;
+        if (izBanka) {
+          const j = vzyato.get(prototypeId) ?? 0;
+          seed = seedsOf(prototypeId)[j];
+          vzyato.set(prototypeId, j + 1);
+        }
+        const zamena = p.zameny[pos] ?? 0;
+        return seed === undefined || zamena > 0
+          ? { pos, no, vid, prototypeId, seed: `g${p.seed}-${pos}-${zamena}`, istochnik: 'new' }
+          : { pos, no, vid, prototypeId, seed, istochnik: 'bank' };
+      }),
+    );
   }
   return out;
 }
@@ -127,6 +133,12 @@ function formula(tex: string): string {
   return `<div class="z13-sheet-formula">${katex.renderToString(tex, { throwOnError: true, displayMode: true })}</div>`;
 }
 
+/** Первая строка решения учителя: тип называется здесь, а не над условием. */
+function tipHtml(t: Task13): string {
+  const v = TIP_VYVOD[t.type];
+  return `<div class="z13-sheet-shag"><p><b>${v.title}.</b> ${typeset(v.text)}</p></div>`;
+}
+
 function sobrat(poz: Poziciya13): ListZadacha13 {
   const t = generate(poz.prototypeId, poz.seed);
   if (poz.vid === 'T') {
@@ -142,21 +154,25 @@ function sobrat(poz: Poziciya13): ListZadacha13 {
   }
   const shagi = t.solution.filter((s) => s.title !== 'Ответ');
   /* Кратко — шаги с формулами: подпись шага и формула, без пояснений. */
-  const kratko = shagi
-    .filter((s) => s.formula !== undefined)
-    .map(
-      (s) =>
-        `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b></p>${formula(s.formula as string)}</div>`,
-    )
-    .join('');
-  const polno = shagi
-    .map(
-      (s) =>
-        `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b> ${typeset(s.text)}</p>${
-          s.formula === undefined ? '' : formula(s.formula)
-        }${s.table ? tablitsaHtml(kletkiModeli(t.tableModel)) : ''}</div>`,
-    )
-    .join('');
+  const kratko =
+    tipHtml(t) +
+    shagi
+      .filter((s) => s.formula !== undefined)
+      .map(
+        (s) =>
+          `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b></p>${formula(s.formula as string)}</div>`,
+      )
+      .join('');
+  const polno =
+    tipHtml(t) +
+    shagi
+      .map(
+        (s) =>
+          `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b> ${typeset(s.text)}</p>${
+            s.formula === undefined ? '' : formula(s.formula)
+          }${s.table ? tablitsaHtml(kletkiModeli(t.tableModel)) : ''}</div>`,
+      )
+      .join('');
   return {
     ...poz,
     task: t,

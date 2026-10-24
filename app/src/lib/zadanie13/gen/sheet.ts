@@ -1,18 +1,17 @@
 /**
  * Описание листа генератора №13 для lib/sheet (02-design.md, § 5.5).
  *
- * Ученику — условия; на компактном листе под условием строка
- * «Ответ: ____», на листе «С полями» — «Дано», «Найти», пустая таблица
- * по периодам в нужном формате, поле «Решение» и строка ответа. В
- * «Определи тип» — строки «Схема» и «Признак». С подсказкой перед
- * первой задачей каждого типа — рамка «Правило и пример». Учителю —
- * сводка ответов, затем краткие или полные решения. Зачёт: первая
- * страница — как выполнять, баллы и шкала, дальше задачи блоков 1–4
- * по одной на страницу.
+ * Ученику — условия без подписи типа: схему ученик определяет сам. На
+ * компактном листе под условием строка «Ответ: ____», на листе «С
+ * полями» — «Дано», «Найти», пустая таблица по периодам, поле «Решение»
+ * и строка ответа. В «Определи тип» — строки «Схема» и «Признак». С
+ * подсказкой — одна рамка «Повторяем» в начале листа. Учителю — сводка
+ * ответов, затем решения; тип называется первым шагом решения. Зачёт:
+ * первая страница — как выполнять, баллы и шкала, дальше задачи блоков
+ * 1–4 по одной на страницу; у ученика блоки без названий схем.
  */
 
 import answers from '../../sheet/answers.js';
-import { exampleItem } from '../../sheet/sheet.js';
 import { BLOK_13, RAMKA_13, SHEET_13, ZACHET_13, type Vid13 } from '@/content/generator13';
 import { typeset } from '../../tex';
 import { TABLE_HEAD } from '../tablica';
@@ -48,13 +47,17 @@ function escape(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** Пустая таблица по периодам: сокращённые строки 1, 2, 3, …, n. */
+/**
+ * Пустая таблица по периодам: сокращённые строки 1, 2, 3, …, n.
+ * Подписи столбцов пустые — по ним угадывалась бы схема («Вклад на
+ * начало», «Долг с процентами»): столбцы ученик подписывает сам.
+ */
 function pustayaTablitsa(z: ListZadacha13): string {
   const m = z.task.tableModel;
   const h = TABLE_HEAD[m.scheme];
-  const head = [h.period[m.period], ...h.cols]
-    .map((c) => `<th scope="col">${escape(c)}</th>`)
-    .join('');
+  const head =
+    `<th scope="col">${escape(h.period[m.period])}</th>` +
+    h.cols.map(() => '<th scope="col"></th>').join('');
   const rows = m.show
     .map((i) => {
       const label = i === 0 ? '…' : escape(m.labels[i - 1] ?? String(i));
@@ -83,12 +86,6 @@ function metka(z: ListZadacha13): string {
     : '';
 }
 
-function podpisTipa(z: ListZadacha13, p: GenParams13): string {
-  /* В «Определи тип» схему не подписываем — её и надо назвать. */
-  if (z.vid === 'T' || p.zachet) return '';
-  return `<span class="z13-sheet-tip">${escape(BLOK_13[z.vid])}</span><br>`;
-}
-
 function uchenikTask(p: GenParams13) {
   return (z: ListZadacha13): SheetTask => {
     const tablitsa = tablitsaUsloviya13(z);
@@ -101,7 +98,8 @@ function uchenikTask(p: GenParams13) {
     return {
       no: z.no,
       id: z.pos,
-      questionHtml: podpisTipa(z, p) + z.questionHtml,
+      /* Над условием ничего: схему ученик определяет сам. */
+      questionHtml: z.questionHtml,
       options: null,
       figureSvg: null,
       solutionHtml: tablitsa + niz,
@@ -111,76 +109,112 @@ function uchenikTask(p: GenParams13) {
 
 function uchitelTask(p: GenParams13) {
   return (z: ListZadacha13): SheetTask => {
-    const reshenie =
-      p.uchitel === 'otvety' ? '' : p.uchitel === 'polno' ? z.polnoHtml : z.kratkoHtml;
+    const reshenie = p.uchitel === 'polno' ? z.polnoHtml : z.kratkoHtml;
     return {
       no: z.no,
       id: z.pos,
-      /* Условие — как у ученика: автотест комплектов сверяет их. Схема и
-         пометка «не из открытого банка» — в решении, только учителю. */
-      questionHtml: podpisTipa(z, p) + z.questionHtml,
+      /* Условие — как у ученика: автотест комплектов сверяет их. Тип
+         называется в решении (шаг «Определяем тип»), пометка «не из
+         открытого банка» — у ответа. */
+      questionHtml: z.questionHtml,
       options: null,
       figureSvg: null,
       solutionHtml:
         tablitsaUsloviya13(z) +
-        `<p class="z13-sheet-tip">${escape(BLOK_13[z.vid])}${metka(z)}</p>` +
-        reshenie +
-        `<p class="sheet-task-answer">${SHEET_13.otvet}: <b>${escape(z.answer)}</b></p>`,
+        (p.uchitel === 'otvety' ? '' : reshenie) +
+        `<p class="sheet-task-answer">${SHEET_13.otvet}: <b>${escape(z.answer)}</b>${metka(z)}</p>`,
     };
   };
 }
 
-function ramka(vid: Vid13): string {
-  const r = RAMKA_13[vid];
-  return exampleItem({
-    label: SHEET_13.ramka,
-    title: typeset(r.pravilo),
-    conditionHtml: typeset(r.primer),
-    solutionHtml: `<p>${typeset(r.reshenie)}</p>`,
-  });
-}
+/** Схемы в рамке «Повторяем»: все четыре всегда — по составу рамки схему не угадать. */
+const SKHEMY_POVTORA: readonly Vid13[] = ['A', 'B', 'C', 'D'];
 
-function zagolovokBloka(no: number, vid: Vid13, razryv: boolean): string {
+/**
+ * Рамка «Повторяем» — одна, в начале листа: правила всех схем с
+ * разобранными примерами. Перед задачами своего типа она не стоит,
+ * иначе подсказала бы метод.
+ */
+function povtor(zs: ListZadacha13[]): string {
+  const vidy = [
+    ...SKHEMY_POVTORA,
+    ...(['T', 'P'] as const).filter((v) => zs.some((z) => z.vid === v)),
+  ];
+  const pravila = vidy
+    .map((vid) => {
+      const r = RAMKA_13[vid];
+      return (
+        `<div class="z13-sheet-povtor__item"><p class="sheet-example-title">${typeset(r.pravilo)}</p>` +
+        `<p class="sheet-task-question">${typeset(r.primer)}</p>` +
+        `<div class="sheet-task-solution"><p>${typeset(r.reshenie)}</p></div></div>`
+      );
+    })
+    .join('');
   return (
-    `<div class="sheet-item sheet-block"${razryv ? ' data-page-break="1"' : ''} data-keep-with-next="1">` +
-    `<header class="sheet-block-head"><h2 class="sheet-block-title">${ZACHET_13.blok} ${no}. ${escape(BLOK_13[vid])}</h2></header></div>`
+    `<div class="sheet-item sheet-example z13-sheet-povtor">` +
+    `<span class="sheet-example-label">${SHEET_13.ramka}</span>` +
+    `<div class="sheet-example-text">${pravila}</div></div>`
   );
 }
 
-/** Блоки листа одного варианта: по строкам «Что», в порядке листа. */
+/** «Блок 2 · задачи 6–10»; учителю — с названием схемы. «Определи тип» — всегда с названием. */
+function nazvanieBloka(
+  no: number,
+  vid: Vid13,
+  ot: number,
+  kolvo: number,
+  uchenik: boolean,
+): string {
+  const zadachi = `${ZACHET_13.zadachiMal} ${ot}–${ot + kolvo - 1}`;
+  return uchenik && vid !== 'T'
+    ? `${ZACHET_13.blok} ${no} · ${zadachi}`
+    : `${ZACHET_13.blok} ${no}. ${escape(BLOK_13[vid])} · ${zadachi}`;
+}
+
+function zagolovokBloka(title: string): string {
+  return (
+    `<div class="sheet-item sheet-block" data-page-break="1" data-keep-with-next="1">` +
+    `<header class="sheet-block-head"><h2 class="sheet-block-title">${title}</h2></header></div>`
+  );
+}
+
+/**
+ * Блоки листа одного варианта. Обычный лист — один блок без заголовка:
+ * задачи в порядке плана (он уже перемешан). Зачёт — блоки по схемам,
+ * у ученика без названий схем, в блоках 1–4 — по задаче на страницу.
+ */
 function bloki(
   p: GenParams13,
   zs: ListZadacha13[],
   task: (z: ListZadacha13) => SheetTask,
   uchenik: boolean,
 ): SheetBlock[] {
+  const lead = uchenik && p.pomoshch === 'ramka' ? [povtor(zs)] : [];
+  if (!p.zachet) {
+    return [{ title: '', note: '', head: false, leadItems: lead, tasks: zs.map(task) }];
+  }
   const vidy = [...new Set(zs.map((z) => z.vid))];
   const out: SheetBlock[] = [];
   vidy.forEach((vid, bi) => {
     const svoi = zs.filter((z) => z.vid === vid);
-    const lead = uchenik && p.pomoshch === 'ramka' ? [ramka(vid)] : [];
-    if (p.zachet) {
-      /* Зачёт: заголовок блока с новой страницы; в блоках 1–4 — по
-         задаче на страницу, «Определи тип» — подряд. */
-      const poOdnoy = uchenik && vid !== 'T';
-      svoi.forEach((z, i) => {
-        out.push({
-          title: '',
-          note: '',
-          head: false,
-          leadItems:
-            i === 0 ? [zagolovokBloka(bi + 1, vid, true), ...lead] : poOdnoy ? [RAZRYV] : [],
-          tasks: [task(z)],
-        });
+    const ot = svoi[0]?.no ?? 1;
+    const poOdnoy = uchenik && vid !== 'T';
+    svoi.forEach((z, i) => {
+      out.push({
+        title: '',
+        note: '',
+        head: false,
+        leadItems:
+          i === 0
+            ? [
+                zagolovokBloka(nazvanieBloka(bi + 1, vid, ot, svoi.length, uchenik)),
+                ...(bi === 0 ? lead : []),
+              ]
+            : poOdnoy
+              ? [RAZRYV]
+              : [],
+        tasks: [task(z)],
       });
-      return;
-    }
-    out.push({
-      title: BLOK_13[vid],
-      note: '',
-      head: false,
-      leadItems: lead,
-      tasks: svoi.map(task),
     });
   });
   return out;
@@ -196,7 +230,9 @@ function stranicaZacheta(zs: ListZadacha13[]): string {
       const n = zs.filter((z) => z.vid === vid).length;
       const ball = vid === 'T' ? ZACHET_13.bally.tip : ZACHET_13.bally.zadacha;
       vsego += n * ball;
-      const row = `<tr><td>${i + 1}. ${escape(BLOK_13[vid])}</td><td>${ot}–${ot + n - 1}</td><td>${n * ball}</td><td></td></tr>`;
+      /* Схему блока на листе ученика не называем: только «Определи тип». */
+      const imya = vid === 'T' ? `. ${escape(BLOK_13[vid])}` : '';
+      const row = `<tr><td>${ZACHET_13.blok} ${i + 1}${imya}</td><td>${ot}–${ot + n - 1}</td><td>${n * ball}</td><td></td></tr>`;
       ot += n;
       return row;
     })

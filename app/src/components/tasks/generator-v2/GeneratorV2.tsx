@@ -386,7 +386,10 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
                 <li key={z.pos} className="gv2-a4__task">
                   <span className="gv2-a4__no">{z.no}</span>
                   <div className="gv2-a4__body">
-                    <span className="gv2-a4__kind">{z.kindLabel}</span>
+                    {/* Тип — только учителю: на листе ученика его нет. */}
+                    {vkladka === 'uchitel' ? (
+                      <span className="gv2-a4__kind">{z.kindLabel}</span>
+                    ) : null}
                     <div dangerouslySetInnerHTML={{ __html: z.html }} />
                     {vkladka === 'uchitel' ? (
                       <div
