@@ -93,7 +93,16 @@ export interface GenConfig {
    * theory, examples: false — рамки теории или разобранных примеров у
    * раздела нет, переключателя тоже.
    */
-  extras?: { kinds: { id: string; title: string }[]; theory?: boolean; examples?: boolean };
+  extras?: {
+    kinds: { id: string; title: string }[];
+    theory?: boolean;
+    examples?: boolean;
+    /**
+     * Уроков в серии (№9): один код комплекта — серия листов, урок 2, 3, …
+     * берёт следующие задачи банка. Нет поля — серии у раздела нет.
+     */
+    seriya?: number;
+  };
 }
 
 /**
@@ -112,6 +121,8 @@ export interface GenExtras {
   /** Дата на листе, «2026-10-24»; пусто — пустая линия. */
   date: string;
   teacher: string;
+  /** Урок серии с нуля (GenConfig.extras.seriya); 0 — первый урок. */
+  urok: number;
 }
 
 /**

@@ -980,7 +980,8 @@
 .gen-opt:first-child {
   border-top: 0;
 }
-.gen-opt > span {
+/* Подпись строки; степпер (тоже span) остаётся строкой кнопок. */
+.gen-opt > span:not(.gen-step) {
   display: grid;
   font-size: var(--fs-caption);
 }

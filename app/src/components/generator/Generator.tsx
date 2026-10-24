@@ -557,6 +557,21 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             </div>
           </div>
         )}
+        {extras.seriya === undefined ? null : (
+          <div className="gen-opt">
+            <span>
+              {GEN_UI.dop.urok}
+              <small>{GEN_UI.dop.urokNote}</small>
+            </span>
+            <Stepper
+              value={st.extras.urok + 1}
+              min={1}
+              max={extras.seriya}
+              label={GEN_UI.dop.urok}
+              onChange={(v) => setExtras({ urok: v - 1 })}
+            />
+          </div>
+        )}
         <div className="gen-opt">
           <span>
             {GEN_UI.dop.qr}

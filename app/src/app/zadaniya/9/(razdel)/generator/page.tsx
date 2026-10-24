@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Generator9Tab } from '@/components/tasks/proizvodnaya/Generator9Tab';
+import { Generator9 } from '@/components/tasks/proizvodnaya/Generator9';
 import { proizvodnayaTitle } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: proizvodnayaTitle('Генератор'),
 };
 
-/** Вкладка «Генератор» задания №9: вариант для печати. */
+/** Вкладка «Генератор» задания №9: общий генератор листов. */
 export default function Generator9Page() {
-  return <Generator9Tab base={`${ZADANIYA}/9`} />;
+  return <Generator9 base={`${ZADANIYA}/9`} />;
 }

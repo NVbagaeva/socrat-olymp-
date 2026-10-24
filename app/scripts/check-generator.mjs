@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №8) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -38,6 +38,9 @@ const A2 = requireSrc('lib/vektory/generator2.ts');
 const S2 = requireSrc('lib/vektory/sheet2.ts');
 const A8 = requireSrc('lib/vychisleniya/generator8.ts');
 const S8 = requireSrc('lib/vychisleniya/sheet8.ts');
+const A9 = requireSrc('lib/proizvodnaya/generator9.ts');
+const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
+const typo = requireSrc('lib/sheet/typography.js');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
 
 let failed = 0;
@@ -148,7 +151,47 @@ const RAZDELY = [
       urok: null,
     };
   })(),
+  (() => {
+    const config9 = A9.config9('/zadaniya/9');
+    const sobrat = (p) => ({
+      poVariantam: S9.sheetVariants9(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
+    });
+    return {
+      name: '№9',
+      config: config9,
+      engine: A9.engine9(config9, '/zadaniya/9'),
+      params: (st) => A9.paramsIzSostoyaniya(st, config9),
+      parse: (q) => S9.parseSheetQuery9(q),
+      query: (p) => S9.sheetQuery9(p),
+      sobrat,
+      spec: (p, list, vid, qr) => S9.sheetSpec9(p, vid !== 'uchenik', qr),
+      /* Примеры — в записи листа (заглушки формул), как и задачи листа. */
+      primery: (p) =>
+        p.groups.flatMap((g) =>
+          S9.ramkiGruppy9(g, p).primery.map((x) => typo.mathText(x.uslovie) + (x.figureSvg ?? '')),
+        ),
+      /* Задачи «по рисунку» с одним текстом различаются рисунком (учителя — как у примера). */
+      primerKey: (z) => z.questionHtml + (z.figureSvg ?? ''),
+      badge: 'z9-sheet-badge',
+      ist: null,
+      /* Рамка «Запомни» и примеры — куски потока блока, а не recap. */
+      ramkaNaListe: (blocks) =>
+        blocks.some((x) => (x.leadItems ?? []).some((i) => i.includes('sheet-zapomni'))) &&
+        blocks.some((x) => (x.leadItems ?? []).some((i) => i.includes('sheet-example'))),
+      /* Формулы листа — заглушки; на экране они набраны KaTeX, рисунок — ученика. */
+      vopros: (t) => A9.nabrat(t.questionHtml),
+      figura: (t) => t.figureCondition ?? '',
+      old: 'g=I,IV&n=4&seed=K7Q2&t=color&c=1&r=2',
+      oldIds: '9.1.1,9.1.2,9.4.1,9.4.2',
+      oldVariants: 1,
+      urok: null,
+    };
+  })(),
 ];
+
+/** Условие и рисунок задачи листа печати — в записи экрана генератора. */
+const voprosOf = (R, t) => (R.vopros ? R.vopros(t) : t.questionHtml);
+const figuraOf = (R, t) => (R.figura ? R.figura(t) : (t.figureSvg ?? ''));
 
 function specOf(R, state, vid) {
   const p = R.params(state);
@@ -343,7 +386,7 @@ async function proverit(R) {
         const link = engine.hrefs(z1).link.split('?')[1];
         const p = R.parse(new URLSearchParams(link));
         const printed = R.sobrat(p).poVariantam.flatMap((v) =>
-          v.map((t) => t.questionHtml + (t.figureSvg ?? '')),
+          v.map((t) => voprosOf(R, t) + figuraOf(R, t)),
         );
         const shown = Object.values(r1);
         ok(
@@ -372,7 +415,7 @@ async function proverit(R) {
       'уровни выводятся из подтипов, если в адресе их нет',
     );
     const was = R.sobrat(R.parse(new URLSearchParams(q))).poVariantam.flatMap((v) =>
-      v.map((t) => t.questionHtml),
+      v.map((t) => voprosOf(R, t)),
     );
     const now =
       st === null
@@ -419,6 +462,7 @@ async function proverit(R) {
           kind: 'kr',
           date: '2026-10-24',
           teacher: 'Иванова А.А.',
+          urok: 0,
         };
         const st = { ...base, extras };
         const back = engine.parse(new URLSearchParams(engine.hrefs(st).link.split('?')[1]));
@@ -452,8 +496,10 @@ async function proverit(R) {
           const titles = spec.variants ? spec.variants.map((v) => v.title) : [spec.title];
           if (R.ramka !== false)
             ok(
-              blocks.some((x) => x.recap?.items.length > 0) &&
-                blocks.some((x) => (x.leadItems ?? []).length > 0),
+              R.ramkaNaListe
+                ? R.ramkaNaListe(blocks)
+                : blocks.some((x) => x.recap?.items.length > 0) &&
+                    blocks.some((x) => (x.leadItems ?? []).length > 0),
               `${label}/${vid}: рамка и примеры на листе`,
             );
           ok(
@@ -473,7 +519,9 @@ async function proverit(R) {
             );
         }
         const primery = R.primery(p, list);
-        const zadachi = new Set(list.poVariantam.flat().map((z) => z.questionHtml));
+        const zadachi = new Set(
+          list.poVariantam.flat().map((z) => (R.primerKey ? R.primerKey(z) : z.questionHtml)),
+        );
         if (R.ramka !== false)
           ok(
             primery.length > 0 && primery.every((x) => !zadachi.has(x)),
@@ -538,6 +586,31 @@ console.log('№8: уровень и повторы');
     }
   }
   okTop(dup === 0, `№8: условия одного прототипа в варианте не повторяются (повторов ${dup})`);
+}
+
+/* ── №9: серия уроков по одному коду ───────────────────────────── */
+console.log('№9: серия уроков');
+{
+  const config9 = A9.config9('/zadaniya/9');
+  const engine9 = A9.engine9(config9, '/zadaniya/9');
+  for (const preset of config9.presets) {
+    for (const seed of SEEDS.slice(0, 2)) {
+      const base = { ...G.stateFromPreset(config9, preset, 'new'), seed };
+      const uroki = [];
+      for (let u = 0; u < 3; u += 1) {
+        const st = { ...base, extras: { ...base.extras, urok: u } };
+        const back = engine9.parse(new URLSearchParams(engine9.hrefs(st).link.split('?')[1]));
+        okTop(back?.extras.urok === u, `№9 ${preset.id}/${seed}: урок ${u + 1} в ссылке на набор`);
+        uroki.push(Object.values(byPos(await engine9.build(st))));
+      }
+      /* Банка (20 вариантов на прототип) хватает на три урока пресета. */
+      const vse = uroki.flat();
+      okTop(
+        new Set(vse).size === vse.length,
+        `№9 ${preset.id}/${seed}: уроки 1–3 серии не повторяют задачи`,
+      );
+    }
+  }
 }
 
 /* ── 5. Изменения состава ───────────────────────────────────────── */
