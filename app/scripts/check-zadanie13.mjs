@@ -913,6 +913,82 @@ for (const [n, extra, want] of tables) {
     }
 }
 
+/* ── Генератор: план, замены, пресеты, адрес ────────────────────── */
+{
+  const P13 = requireSrc('lib/zadanie13/gen/params');
+  const L13 = requireSrc('lib/zadanie13/gen/list');
+  const S13 = requireSrc('lib/zadanie13/gen/sheet');
+  const { PRESETY_13, ZACHET_13 } = requireSrc('content/generator13');
+  const { TYPE_NAMES } = requireSrc('lib/zadanie13/types');
+  for (const preset of PRESETY_13) {
+    for (const istochnik of ['bank', 'mix', 'new']) {
+      checks += 1;
+      const w = `генератор ${preset.id}/${istochnik}`;
+      const p = {
+        ...P13.GEN_PARAMS_13,
+        sostav: { ...preset.sostav },
+        uroven: preset.uroven,
+        pomoshch: preset.pomoshch,
+        vid: preset.vid,
+        variants: preset.variants,
+        zachet: preset.zachet === true,
+        istochnik,
+        seed: 'TEST',
+      };
+      /* Адрес туда и обратно — те же параметры. */
+      const back = P13.parseGenQuery13(new URLSearchParams(P13.genQuery13(p)));
+      if (JSON.stringify(back) !== JSON.stringify(p)) problems.push(`${w}: адрес теряет параметры`);
+      const plan = L13.planLista13(p);
+      const n = P13.vsegoZadach13(p);
+      if (plan.length !== p.variants || plan.some((v) => v.length !== n))
+        problems.push(`${w}: в плане не столько задач, сколько в составе`);
+      if (JSON.stringify(L13.planLista13(p)) !== JSON.stringify(plan))
+        problems.push(`${w}: план не воспроизводится`);
+      const keys = plan.flat().map((z) => `${z.prototypeId}|${z.seed}`);
+      if (new Set(keys).size !== keys.length) problems.push(`${w}: задачи комплекта повторяются`);
+      if (istochnik === 'bank' && plan.flat().some((z) => z.istochnik !== 'bank' && z.vid !== 'P'))
+        problems.push(`${w}: в режиме «банк» есть новые задачи`);
+      /* Замена меняет одну задачу и не трогает остальные. */
+      const pos = plan[0][0].pos;
+      const zam = L13.planLista13({ ...p, zameny: { [pos]: 1 } });
+      const diff = zam
+        .flat()
+        .filter((z, i) => JSON.stringify(z) !== JSON.stringify(plan.flat()[i]));
+      if (diff.length !== 1 || diff[0].pos !== pos)
+        problems.push(`${w}: замена задела другие задачи`);
+      /* Ответов в адресе нет; на листе ученика — ни ответа, ни схемы у «Определи тип». */
+      const list = L13.sobratList13(p);
+      const q = P13.genQuery13(p);
+      for (const z of list.poVariantam.flat()) {
+        if (z.vid !== 'T' && q.includes(String(z.task.answer)) && String(z.task.answer).length > 3)
+          problems.push(`${w}: ответ ${z.task.answer} в адресе`);
+        if (z.vid === 'T' && z.answer !== TYPE_NAMES[z.task.type])
+          problems.push(`${w}: ответ «Определи тип» — не схема`);
+      }
+      const uchenik = JSON.stringify(S13.sheetSpec13(p, list, 'uchenik'));
+      if (/sheet-task-answer|Сводка ответов/.test(uchenik))
+        problems.push(`${w}: ответы на листе ученика`);
+      const uchitel = JSON.stringify(S13.sheetSpec13(p, list, 'uchitel'));
+      if (!uchitel.includes('Сводка ответов'))
+        problems.push(`${w}: на листе учителя нет сводки ответов`);
+    }
+  }
+  /* Зачёт Н.В.: 50 баллов, шкала без дыр и до 50. */
+  const zachet = PRESETY_13.find((x) => x.id === 'zachet');
+  const ballov = Object.entries(zachet.sostav).reduce(
+    (s, [vid, n]) => s + n * (vid === 'T' ? ZACHET_13.bally.tip : ZACHET_13.bally.zadacha),
+    0,
+  );
+  if (ballov !== 50) problems.push(`зачёт: ${ballov} баллов вместо 50`);
+  const shk = [...ZACHET_13.shkala].sort((a, b) => a.ot - b.ot);
+  if (
+    shk[0].ot !== 0 ||
+    shk.at(-1).do !== 50 ||
+    shk.some((x, i) => i > 0 && x.ot !== shk[i - 1].do + 1)
+  )
+    problems.push('зачёт: шкала оценок с дырой');
+}
+
 /* ── Генерация: все прототипы ──────────────────────────────────── */
 {
   const katex = require('katex');

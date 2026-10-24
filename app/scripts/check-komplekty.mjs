@@ -89,6 +89,9 @@ const S11 = requireSrc('lib/zadanie11/sheet11.ts');
 const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye.ts');
 const S1 = requireSrc('lib/planimetriya/sheet1.ts');
 const { dannyeTrenazhera1 } = requireSrc('lib/planimetriya/trenazher/dannye.ts');
+const P13 = requireSrc('lib/zadanie13/gen/params.ts');
+const L13 = requireSrc('lib/zadanie13/gen/list.ts');
+const S13 = requireSrc('lib/zadanie13/gen/sheet.ts');
 
 const query = (href) => new URLSearchParams(href.split('?')[1] ?? '');
 
@@ -237,6 +240,28 @@ generators.push({
   spec: (href, teacher) => {
     const p = S1.parseSheetQuery1(query(href));
     return S1.sheetSpec1(p, S1.sobratList(p, bank1), teacher ? 'uchitel' : 'uchenik');
+  },
+});
+
+const VIDY_13 = ['A', 'B', 'C', 'D', 'T', 'P'];
+generators.push({
+  name: '№13',
+  scope: '13',
+  settings: (random) => ({
+    sostav: Object.fromEntries(
+      sample(VIDY_13, 1 + Math.floor(random() * 3), random).map((id) => [id, 1 + Math.floor(random() * 2)]),
+    ),
+    variants: random() < 0.05 ? 2 : 1,
+    vid: random() < 0.3 ? 'full' : 'compact',
+    zachet: random() < 0.05,
+  }),
+  hrefs: (s, seed) => {
+    const p = { ...P13.GEN_PARAMS_13, sostav: s.sostav, variants: s.variants, vid: s.vid, zachet: s.zachet, seed };
+    return { student: P13.listHref13(p, 'uchenik'), teacher: P13.listHref13(p, 'uchitel') };
+  },
+  spec: (href, teacher) => {
+    const p = P13.parseGenQuery13(query(href));
+    return S13.sheetSpec13(p, L13.sobratList13(p), teacher ? 'uchitel' : 'uchenik');
   },
 });
 

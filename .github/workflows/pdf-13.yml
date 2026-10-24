@@ -1,0 +1,80 @@
+name: PDF 13
+
+# Собирает образцы PDF генератора задания №13 «Экономические задачи»:
+# «Домашка» и «Зачёт Н.В.», лист ученика и лист учителя. Листы те же,
+# что генератор отдаёт в браузере (lib/zadanie13/gen/sheet.ts), но на
+# постоянном seed. Файлы с ответами в репозиторий не попадают — только
+# в архив запуска (lib/sheet/outputs.js, папка pdf-private).
+#
+# Триггер — push в ветки задания №13 и кнопка «Run workflow» (она
+# появится, когда файл будет в main).
+
+on:
+  push:
+    branches: ['claude/economics-task-13-**', 'claude/pdf-task-13-**']
+    paths:
+      - 'app/src/lib/sheet/**'
+      - 'app/src/lib/zadanie13/**'
+      - 'app/src/content/generator13.ts'
+      - 'app/src/app/zadaniya/13/pechat/pechat13.css'
+      - 'app/scripts/build-pdf-13.mjs'
+      - 'app/scripts/lib/sheet-render.mjs'
+      - '.github/workflows/pdf-13.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pdf-13-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Сборка PDF
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Проверить движок и банк задания №13
+        working-directory: app
+        run: pnpm test:zadanie13
+
+      # Сборка печатает каждый лист и сверяет отчёт пагинатора: число
+      # задач, куски выше страницы, формулы KaTeX. Любое расхождение —
+      # ошибка, файл не выпускается.
+      - name: Собрать PDF
+        working-directory: app
+        run: pnpm build:pdf-13
+
+      - name: Отдать файлы архивом
+        uses: actions/upload-artifact@v7
+        with:
+          name: zadanie-13-pdf
+          path: |
+            app/public/materials/zadanie-13/*.pdf
+            app/pdf-private/*.pdf
+          if-no-files-found: error
+          retention-days: 90
