@@ -178,6 +178,7 @@ export type ZaprosT =
   | 'extr-na-otrezke'
   /* точка максимума на отрезке, где есть и минимум (варианты повышенной сложности) */
   | 'max-na-otrezke'
+  | 'min-na-otrezke'
   | 'naib-na-otrezke'
   | 'naim-na-otrezke'
   | 'kasat-abscissa'

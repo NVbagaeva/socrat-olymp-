@@ -15,7 +15,16 @@ import { shirinaRisunka } from '@/lib/planimetriya/shirina';
 import { BEZ_VARIANTA } from '@/lib/planimetriya/variant';
 import { sostavZadachi } from '@/lib/planimetriya/trenazher/zadacha';
 import { kLog, type KLog } from '@/lib/graph/povyshennye';
-import { maxNaOtrezke, type MaxNaOtrezke } from '@/lib/proizvodnaya/povyshennye';
+import {
+  chisloNaOtrezke,
+  maxNaOtrezke,
+  minNaOtrezke,
+  skorostVMoment,
+  type ChisloNaOtrezke,
+  type MaxNaOtrezke,
+  type SkorostVMoment,
+} from '@/lib/proizvodnaya/povyshennye';
+import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
 import { renderSolid } from '@/lib/solid';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import { skalyarnoeKombinatsiy, type SkalyarnoeKombinatsiy } from '@/lib/vektory/povyshennye';
@@ -282,6 +291,13 @@ function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
   };
 }
 
+/* ── №9 ──────────────────────────────────────────────────────────── */
+
+function z09(g: Generated9 | null, p: unknown): Gotovaya {
+  if (g === null) throw new Error(`№9: рисунок не прошёл проверки ${JSON.stringify(p)}`);
+  return bezPoley(build09({ ...kand, seed: 'pv' }, g, false));
+}
+
 /* ── №12 ────────────────────────────────────────────────────────── */
 
 /** Ширина рисунка №12 на листе, мм: клетка 3,4 мм, у движка — 34 единицы. */
@@ -522,11 +538,28 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Производная, группа IV: точка максимума на отрезке по графику f′ (как 9.4.8, на отрезке есть и минимум)',
     otkuda: 'novyy',
-    zadacha: (p: MaxNaOtrezke) => {
-      const g = maxNaOtrezke(p);
-      if (g === null) throw new Error(`№9: рисунок не прошёл проверки ${JSON.stringify(p)}`);
-      return bezPoley(build09({ ...kand, seed: 'pv' }, g, false));
-    },
+    zadacha: (p: MaxNaOtrezke) => z09(maxNaOtrezke(p), p),
+  },
+  'z09.min-na-otrezke': {
+    ege: 9,
+    prototip:
+      'Производная, группа IV: точка минимума на отрезке по графику f′ (как 9.4.8, на отрезке есть и максимум)',
+    otkuda: 'novyy',
+    zadacha: (p: MaxNaOtrezke) => z09(minNaOtrezke(p), p),
+  },
+  'z09.chislo-na-otrezke': {
+    ege: 9,
+    prototip:
+      'Производная, группа IV: число точек максимума или экстремума на отрезке по графику f′ (как 9.4.4), часть нулей вне отрезка',
+    otkuda: 'novyy',
+    zadacha: (p: ChisloNaOtrezke) => z09(chisloNaOtrezke(p), p),
+  },
+  'z09.skorost': {
+    ege: 9,
+    prototip:
+      'Производная, группа I: скорость в момент t₀ по закону движения (9.1.1), десятичные коэффициенты',
+    otkuda: 'novyy',
+    zadacha: (p: SkorostVMoment) => z09(skorostVMoment(p), p),
   },
   'z10.vysota': {
     ege: 10,
