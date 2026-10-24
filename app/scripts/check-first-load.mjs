@@ -42,10 +42,13 @@ const kb = (n) => Math.round(n / 1024);
 
 /* ── 1. Бюджет ─────────────────────────────────────────────── */
 /* Порог — текущее значение с запасом ≈ 20%: выросло сильнее — разбираться. */
+/* Скрипты — 205 КБ: в первую загрузку любой страницы входит карта ленивых
+   чанков webpack, она растёт с каждым новым разделом сайта (№13: +66 байт
+   при запасе ~270 байт). Код самих страниц №12 при этом не менялся. */
 const BUDGET = [
-  { page: 'zadaniya/12/rational', htmlGz: 200 * 1024, scriptsGz: 200 * 1024 },
-  { page: 'zadaniya/12/quadratic', htmlGz: 260 * 1024, scriptsGz: 200 * 1024 },
-  { page: 'zadaniya/12/linear', htmlGz: 60 * 1024, scriptsGz: 200 * 1024 },
+  { page: 'zadaniya/12/rational', htmlGz: 200 * 1024, scriptsGz: 205 * 1024 },
+  { page: 'zadaniya/12/quadratic', htmlGz: 260 * 1024, scriptsGz: 205 * 1024 },
+  { page: 'zadaniya/12/linear', htmlGz: 60 * 1024, scriptsGz: 205 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [
