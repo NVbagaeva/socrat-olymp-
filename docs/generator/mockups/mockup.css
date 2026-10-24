@@ -143,6 +143,8 @@ body.view-phone .side, body.view-phone .tabs { top: 0; }
 .sum { font-size: 13px; color: var(--grey-700); text-align: right; max-width: 300px; min-width: 0; }
 @container dev (max-width: 1180px) { .strip { flex-wrap: wrap; } }
 .sum b { color: var(--grey-900); font-weight: 600; }
+.strip .sum { font-size: 14px; }
+.strip .sum small { display: block; font-size: 12px; color: var(--grey-500); }
 .strip__chips { display: none; }
 body.view-phone .strip { top: 52px; }
 
@@ -198,7 +200,7 @@ body.view-phone .strip { top: 52px; }
 .vtabs span { font-size: 13px; color: var(--grey-700); margin-right: 2px; }
 .vtabs button { width: 40px; height: 40px; border-radius: var(--r-md); border: 1px solid var(--grey-300); background: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
 .vtabs button[aria-pressed="true"] { background: var(--blue-600); border-color: var(--blue-600); color: #fff; }
-.pv__scroll { background: var(--grey-100); padding: 20px; max-height: calc(100vh - 260px); overflow: auto; }
+.pv__scroll { background: var(--grey-100); padding: 20px 64px 20px 20px; max-height: calc(100vh - 260px); overflow: auto; }
 body.view-phone .pv__scroll { max-height: none; }
 .toast { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--navy-900); color: #fff; font-size: 13px; padding: 10px 14px; border-radius: var(--r-md); box-shadow: var(--sh-lg); z-index: 70; pointer-events: none; }
 .right .toast { position: absolute; }
@@ -243,10 +245,10 @@ body.view-phone .pv__scroll { max-height: none; }
 .sh-empty { padding: 28px 0 8px; text-align: center; color: var(--grey-700); }
 
 /* Действия над задачей: десктоп — по наведению, тач — кнопка «⋯» и долгое нажатие. */
-.task__tools { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; opacity: 0; transition: opacity .12s; background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 3px; box-shadow: var(--sh-md); }
-.task__tools button { border: 0; background: none; min-height: 32px; padding: 0 10px; border-radius: 7px; font-size: 13px; color: var(--grey-900); display: inline-flex; align-items: center; gap: 6px; }
+.task__tools { position: absolute; top: 4px; right: -66px; display: flex; flex-direction: column; gap: 2px; opacity: 0; transition: opacity .12s; background: #fff; border: 1px solid var(--grey-200); border-radius: 10px; padding: 3px; box-shadow: var(--sh-md); z-index: 2; }
+.task__tools button { border: 0; background: none; width: 34px; height: 34px; border-radius: 7px; color: var(--grey-700); display: grid; place-items: center; }
 .task__tools button:hover { background: var(--blue-50); color: var(--blue-700); }
-.task__tools svg { width: 15px; height: 15px; }
+.task__tools svg { width: 17px; height: 17px; }
 .task__grip { position: absolute; left: -18px; top: 14px; width: 14px; height: 22px; opacity: 0; cursor: grab; color: var(--grey-500); }
 .sheet.is-live .task:hover { background: var(--blue-50); }
 .sheet.is-live .task:hover .task__tools, .sheet.is-live .task:focus-within .task__tools { opacity: 1; }
@@ -273,6 +275,13 @@ body.view-phone .pv__scroll { max-height: none; }
 .bsheet section { padding: 12px 0; border-top: 1px solid var(--grey-100); }
 .bsheet section:first-child { border-top: 0; }
 .bsheet section > .lbl { display: block; margin-bottom: 8px; font-size: 13px; }
+.sec-h { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
+.lvcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lvcards button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 76px; padding: 10px; text-align: left; border: 1px solid var(--grey-200); background: #fff; border-radius: var(--r-lg); }
+.lvcards button b { color: var(--grey-500); font-size: 15px; letter-spacing: -.05em; }
+.lvcards button small { font-size: 12px; color: var(--grey-700); line-height: 1.3; }
+.lvcards button[aria-pressed="true"] { border-color: #f2c27a; background: var(--amber-50); }
+.lvcards button[aria-pressed="true"] b { color: var(--amber-600); }
 .radio { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; border: 1px solid var(--grey-200); background: #fff; border-radius: var(--r-lg); padding: 12px; min-height: 56px; }
 .radio + .radio { margin-top: 8px; }
 .radio i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--grey-300); flex: none; margin-top: 1px; }

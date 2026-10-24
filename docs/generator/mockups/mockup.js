@@ -69,6 +69,11 @@
     if (s[1] - s[0] === 1) return '★'.repeat(s[0]) + '–' + '★'.repeat(s[1]);
     return '★ и ★★★';
   }
+  function summaryShort() {
+    const n = total(), v = S.variants;
+    return `<b>${n} ${plural(n, 'задача', 'задачи', 'задач')}</b> · ${v} ${plural(v, 'вариант', 'варианта', 'вариантов')}`;
+  }
+  function summaryPlain() { return summary().replace(/<[^>]+>/g, ''); }
   function summary() {
     const n = total(), v = S.variants;
     const src = MK.sources.find((x) => x.id === S.src).short;
@@ -147,7 +152,7 @@
           ${teacher ? `<div class="task__sol"><b>Ответ: ${t.a}.</b> ${tex(t.s)}</div>` : '<div class="task__ans">Ответ: <span></span></div>'}
         </div>
         ${demo ? '' : `<div class="task__tools" role="toolbar" aria-label="Действия с задачей ${ord}">
-          <button data-act="swap">${ico('swap')}Заменить</button><button data-act="lvl">${ico('star')}Другой уровень</button><button data-act="del">${ico('x')}Убрать</button></div>
+          <button data-act="swap" title="Заменить на похожую" aria-label="Заменить на похожую">${ico('swap')}</button><button data-act="lvl" title="Другой уровень" aria-label="Другой уровень">${ico('star')}</button><button data-act="del" title="Убрать из листа" aria-label="Убрать из листа">${ico('x')}</button></div>
           <button class="task__more" data-act="menu" aria-label="Действия с задачей ${ord}">${ico('dots')}</button>`}
       </li>`;
     });
@@ -230,7 +235,7 @@
         <div class="fld"><span class="lbl">Вариантов</span><span class="step"><button data-vdec aria-label="Вариантов меньше" ${S.variants <= 1 ? 'disabled' : ''}>−</button><output>${S.variants}</output><button data-vinc aria-label="Вариантов больше" ${S.variants >= 8 ? 'disabled' : ''}>+</button></span></div>
         <button class="btn btn--ghost" data-more aria-expanded="${S.moreOpen}">${ico('filter')}Дополнительно</button>
       </div>
-      <div class="strip__go"><span class="sum">${summary()}</span><button class="btn btn--primary go" data-go>${S.generated ? ico('refresh') + 'Перегенерировать всё' : ico('play') + 'Сгенерировать'}</button></div>
+      <div class="strip__go"><span class="sum" title="${summaryPlain()}">${summaryShort()}<small>${lvText(S.lv)} · ${MK.sources.find((x) => x.id === S.src).short}</small></span><button class="btn btn--primary go" data-go>${S.generated ? ico('refresh') + 'Перегенерировать всё' : ico('play') + 'Сгенерировать'}</button></div>
       <div class="strip__chips">
         <button class="is-filters" data-sheet="filters">${ico('filter')}Фильтры</button>
         <button data-sheet="filters">${src.title}</button>
@@ -246,9 +251,9 @@
     overlay().innerHTML = `<div class="scrim" data-close></div><div class="bsheet" role="dialog" aria-modal="true" aria-label="${title}"><div class="bsheet__grip"></div><div class="bsheet__h"><h2>${title}</h2><button class="btn btn--sm btn--ghost" data-close aria-label="Закрыть">${ico('x')}</button></div><div class="bsheet__body">${body}</div>${foot ? `<div class="bsheet__foot">${foot}</div>` : ''}</div>`;
   }
   function filtersBody() {
-    return `<section><span class="lbl">Откуда брать задачи</span>${MK.sources.map((s) => `<button class="radio" role="radio" aria-checked="${S.src === s.id}" data-src="${s.id}"><i></i><span><b>${s.title}</b><small>${s.note}</small></span></button>`).join('')}</section>
-      <section><span class="lbl">Сложность</span><div class="stars" role="group">${[1, 2, 3].map((l) => `<button data-lv="${l}" aria-pressed="${S.lv.includes(l)}">${'★'.repeat(l)}</button>`).join('')}</div><p class="hint" style="margin:8px 0 0">★ — ${MK.levelWords[1]}, ★★ — ${MK.levelWords[2]}, ★★★ — ${MK.levelWords[3]}.</p></section>
-      <section><span class="lbl">Вариантов</span><span class="step"><button data-vdec ${S.variants <= 1 ? 'disabled' : ''}>−</button><output>${S.variants}</output><button data-vinc ${S.variants >= 8 ? 'disabled' : ''}>+</button></span></section>
+    return `<section><h3 class="sec-h">Откуда брать задачи</h3>${MK.sources.map((s) => `<button class="radio" role="radio" aria-checked="${S.src === s.id}" data-src="${s.id}"><i></i><span><b>${s.title}</b><small>${s.note}</small></span></button>`).join('')}</section>
+      <section><h3 class="sec-h">Сложность</h3><div class="lvcards" role="group" aria-label="Сложность">${[1, 2, 3].map((l) => `<button data-lv="${l}" aria-pressed="${S.lv.includes(l)}"><b>${'★'.repeat(l)}</b><small>${MK.levelWords[l]}</small></button>`).join('')}</div><p class="hint" style="margin:8px 0 0">Можно выбрать несколько. Темы из состава не пропадают.</p></section>
+      <section><h3 class="sec-h">Вариантов</h3><span class="step"><button data-vdec ${S.variants <= 1 ? 'disabled' : ''}>−</button><output>${S.variants}</output><button data-vinc ${S.variants >= 8 ? 'disabled' : ''}>+</button></span></section>
       <section class="more-in-sheet">${moreHtml()}</section>`;
   }
   function openFilters() {
