@@ -26,6 +26,15 @@ import { MARSHRUTY_11, SHEET_11 } from '@/content/repetitory11';
 import { RAZDELY_TEORII_11 } from '@/content/teoriya11';
 import answers from '@/lib/sheet/answers.js';
 import { exampleItem } from '@/lib/sheet/sheet.js';
+import {
+  klyuchSlota,
+  planPoKlyucham as planPoKlyuchamObshchiy,
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+  type Slot,
+} from '@/lib/generator/obshchiy/klyuchi';
 import { typesetKrupno as typeset } from '../tex';
 import { rngOf } from '../vychisleniya/rng';
 import { generateBez, paramsKey, pohozhaNa, type Pohozha } from './gen/core';
@@ -157,17 +166,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
     'bank';
   const poKlyucham = rezhim !== 'marshrut' && q.get('ps') === '2';
   const dop = rezhim === 'marshrut' ? undefined : dopIzZaprosa(q);
-  const sostav = (q.get('s') ?? '')
-    .split(',')
-    .map((x) => x.split(':'))
-    .map(([tok = '', n = '1']) => {
-      const m = /^([A-Z]{2}-\d{2})(?:\.(\d{1,2}))?$/.exec(tok);
-      /* Ключ в составе понимает только схема ps=2. */
-      const id = m === null || (!poKlyucham && m[2] !== undefined) ? '' : (m[1] ?? '');
-      const k = m?.[2] !== undefined && id !== '' ? { k: Number(m[2]) } : {};
-      return { id, n: Math.max(1, Math.min(20, Number(n) || 1)), ...k };
-    })
-    .filter((x) => x.id !== '' && subtypeEst(x.id));
+  const sostav = razobratSostav(q.get('s') ?? '', poKlyucham, /[A-Z]{2}-\d{2}/, subtypeEst);
   const v = Number(q.get('v'));
   const r = Number(q.get('r'));
   const zameny: Record<string, number> = {};
@@ -191,59 +190,10 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
   };
 }
 
-/* ── Ключи позиций (схема ps=2) ─────────────────────────────────── */
+/* ── Ключи позиций (схема ps=2): lib/generator/obshchiy/klyuchi.ts ── */
 
-/** Позиция состава: подтип и номер внутри подтипа. */
-export interface Slot11 {
-  id: string;
-  k: number;
-}
-
-export function klyuchSlota(s: Slot11): string {
-  return `${s.id}_${s.k}`;
-}
-
-/** Позиции состава по порядку; без k — следующий ключ после прежних. */
-export function slotySostava(sostav: readonly { id: string; n: number; k?: number }[]): Slot11[] {
-  const next = new Map<string, number>();
-  const seen = new Set<string>();
-  const out: Slot11[] = [];
-  for (const x of sostav) {
-    let k = x.k ?? next.get(x.id) ?? 0;
-    for (let j = 0; j < x.n; j += 1, k += 1) {
-      const key = `${x.id}_${k}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({ id: x.id, k });
-    }
-    next.set(x.id, k);
-  }
-  return out;
-}
-
-/** Позиции → состав: подряд идущие ключи одного подтипа склеиваются. */
-export function sostavIzSlotov(sloty: readonly Slot11[]): { id: string; n: number; k: number }[] {
-  const out: { id: string; n: number; k: number }[] = [];
-  for (const s of sloty) {
-    const last = out[out.length - 1];
-    if (last !== undefined && last.id === s.id && last.k + last.n === s.k) last.n += 1;
-    else out.push({ id: s.id, n: 1, k: s.k });
-  }
-  return out;
-}
-
-/** «PR-04:2,SM-04.3:1»: ключ пишется, только если он не следующий. */
-function sostavStroka(sostav: readonly { id: string; n: number; k?: number }[]): string {
-  const next = new Map<string, number>();
-  return sostav
-    .map((x) => {
-      const k = x.k ?? next.get(x.id) ?? 0;
-      const tok = k === (next.get(x.id) ?? 0) ? x.id : `${x.id}.${k}`;
-      next.set(x.id, k + x.n);
-      return `${tok}:${x.n}`;
-    })
-    .join(',');
-}
+export type Slot11 = Slot;
+export { klyuchSlota, slotySostava, sostavIzSlotov };
 
 function subtypeEst(id: string): boolean {
   try {
@@ -350,151 +300,28 @@ export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): Plan
     : planPoNomeram(p, bank);
 }
 
-/**
- * Пул задач подтипа без повторов. У каждой позиции своё место в пуле —
- * «номер × число вариантов + вариант», — его она берёт первой: задачи не
- * зависят от соседей. Места плотные, чтобы маленького банка хватало на
- * весь лист; цена — при смене числа вариантов вторые и дальше задачи
- * одного подтипа берут другие места. Место занято или его нет — берётся
- * задача с конца пула: новые позиции занимают места с начала, так их
- * появление реже задевает остальные.
- */
-class Pul<T> {
-  private zanyato: boolean[];
-  constructor(private items: readonly T[]) {
-    this.zanyato = items.map(() => false);
-  }
-  svoyo(i: number): T | undefined {
-    if (i >= this.items.length || this.zanyato[i] === true) return undefined;
-    this.zanyato[i] = true;
-    return this.items[i];
-  }
-  sKontsa(): T | undefined {
-    for (let i = this.items.length - 1; i >= 0; i -= 1) {
-      if (this.zanyato[i] !== true) return this.svoyo(i);
-    }
-    return undefined;
-  }
-}
-
 /** Схема ps=2: задача — функция ключа позиции, варианта и seed листа. */
 function planPoKlyucham(p: SheetParams11, bank: readonly UslovieBanka[]): PlanLista {
   const sh = shablony(p);
   const pohozha = pohozhaNa(bank);
-  const banki = new Map<string, Pul<UslovieBanka>>();
-  const analogi = new Map<string, Pul<UslovieBanka>>();
-  const bankDlya = (id: string) => {
-    let o = banki.get(id);
-    if (o === undefined) banki.set(id, (o = new Pul(bankPodtipa(p, bank, id))));
-    return o;
-  };
-  const analogDlya = (id: string) => {
-    let o = analogi.get(id);
-    if (o === undefined) analogi.set(id, (o = new Pul(analogiPodtipa(p, bank, id))));
-    return o;
-  };
-  /* Ячейки листа в порядке «подтип → ключ → вариант»: от него зависят
-     только задачи одного подтипа, порядок на листе не важен. */
-  const yacheyki = sh
-    .flatMap((s, i) =>
-      Array.from({ length: p.variants }, (_, vi) => ({
-        s,
-        i,
-        v: vi + 1,
-        mesto: s.k * p.variants + vi,
-        seed: `${p.seed}|${vi + 1}|${klyuchSlota(s)}`,
-      })),
-    )
-    .sort((a, b) => a.s.id.localeCompare(b.s.id) || a.s.k - b.s.k || a.v - b.v);
-  type Yacheyka = (typeof yacheyki)[number];
-  const izBanka = (c: Yacheyka) =>
-    c.s.istochnik === 'bank' ||
-    (c.s.istochnik === 'mix' && rngOf(`z11-mix|${c.seed}`).next() < 0.5);
-  const izBankaPoz = (b: UslovieBanka): Pozitsiya => ({
-    vid: b.razminka ? 'razminka' : 'bank',
-    id: b.id,
-    no: b.no,
+  const { poVariantam, nehvatka } = planPoKlyuchamObshchiy<Shablon, UslovieBanka, Pozitsiya>({
+    sh,
+    variants: p.variants,
+    seed: p.seed,
+    zameny: p.zameny,
+    mixSol: 'z11-mix',
+    bank: (id) => bankPodtipa(p, bank, id),
+    analogi: (id) => analogiPodtipa(p, bank, id),
+    bankPoz: (b) => ({ vid: b.razminka ? 'razminka' : 'bank', id: b.id, no: b.no }),
+    analogPoz: (a) => ({ vid: 'analog', id: a.id, no: a.no }),
+    novaya: (c, seed, zanyato) => ({
+      vid: 'new',
+      id: c.s.id,
+      ...novayaZadacha(c.s.id, seed, pohozha, zanyato),
+    }),
+    seedNovoy: (x) => (x.vid === 'new' ? x.seed : undefined),
   });
-
-  const poVariantam: (Pozitsiya | undefined)[][] = Array.from({ length: p.variants }, () =>
-    sh.map(() => undefined),
-  );
-  const postavit = (c: Yacheyka, poz: Pozitsiya) => {
-    const row = poVariantam[c.v - 1];
-    if (row !== undefined) row[c.i] = poz;
-  };
-  let nehvatka = 0;
-
-  /* Банк: сначала свои места, потом остаток с конца. */
-  const bankovye = yacheyki.filter(izBanka);
-  const bezBanka = bankovye.filter((c) => {
-    const b = bankDlya(c.s.id).svoyo(c.mesto);
-    if (b !== undefined) postavit(c, izBankaPoz(b));
-    return b === undefined;
-  });
-  const nuzhenAnalog = yacheyki.filter((c) => !izBanka(c));
-  for (const c of bezBanka) {
-    const b = bankDlya(c.s.id).sKontsa();
-    if (b !== undefined) postavit(c, izBankaPoz(b));
-    else {
-      if (c.s.istochnik === 'bank') nehvatka += 1;
-      nuzhenAnalog.push(c);
-    }
-  }
-  /* Аналоги — так же; не хватило — новая задача по своему seed. */
-  nuzhenAnalog.sort((a, b) => yacheyki.indexOf(a) - yacheyki.indexOf(b));
-  const bezAnaloga = nuzhenAnalog.filter((c) => {
-    const a = analogDlya(c.s.id).svoyo(c.mesto);
-    if (a !== undefined) postavit(c, { vid: 'analog', id: a.id, no: a.no });
-    return a === undefined;
-  });
-  const zanyatoNovye = new Set<string>();
-  for (const c of bezAnaloga) {
-    const a = analogDlya(c.s.id).sKontsa();
-    if (a !== undefined) postavit(c, { vid: 'analog', id: a.id, no: a.no });
-    else
-      postavit(c, {
-        vid: 'new',
-        id: c.s.id,
-        ...novayaZadacha(c.s.id, c.seed, pohozha, zanyatoNovye),
-      });
-  }
-
-  /* Замены: k-я замена берёт k-ю ещё не занятую задачу пула с конца;
-     пул кончился — следующий источник, затем новая задача. */
-  for (const c of yacheyki) {
-    const n = p.zameny[`${c.v}.${klyuchSlota(c.s)}`] ?? 0;
-    if (n <= 0) continue;
-    const old = poVariantam[c.v - 1]?.[c.i];
-    let left = n;
-    let next: Pozitsiya | undefined;
-    if (izBanka(c)) {
-      while (left > 0) {
-        const b = bankDlya(c.s.id).sKontsa();
-        if (b === undefined) break;
-        next = izBankaPoz(b);
-        left -= 1;
-      }
-    }
-    while (left > 0) {
-      const a = analogDlya(c.s.id).sKontsa();
-      if (a === undefined) break;
-      next = { vid: 'analog', id: a.id, no: a.no };
-      left -= 1;
-    }
-    if (left > 0) {
-      let seed = `${c.seed}|z${n}`;
-      /* Замена должна отличаться от прежней задачи. */
-      if (old?.vid === 'new' && old.seed === seed) seed = `${c.seed}|z${n + 100}`;
-      next = { vid: 'new', id: c.s.id, ...novayaZadacha(c.s.id, seed, pohozha, zanyatoNovye) };
-    }
-    if (next !== undefined) postavit(c, next);
-  }
-  return {
-    poVariantam: poVariantam.map((row) => row.filter((x): x is Pozitsiya => x !== undefined)),
-    bloki: sh.map((s) => s.blok),
-    nehvatka,
-  };
+  return { poVariantam, bloki: sh.map((s) => s.blok), nehvatka };
 }
 
 /** Прежняя схема: задача привязана к номеру позиции на листе. */

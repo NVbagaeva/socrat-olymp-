@@ -136,10 +136,17 @@ export function paramsIzSostoyaniya(
   const topics = new Set(
     state.plan.map(({ id }) => config.topics.find((t) => t.subtypes.some((s) => s.id === id))?.id),
   );
-  const legacy = state.legacy === true;
+  const legacy = state.legacy !== undefined;
   const dop = dopIzExtras(state.extras, config);
   return {
-    rezhim: topics.size === 1 ? 'otrabotka' : 'komplekt',
+    /* У прежнего адреса — его режим, чтобы лист совпал с напечатанным. */
+    rezhim: legacy
+      ? state.legacy === 'o'
+        ? 'otrabotka'
+        : 'komplekt'
+      : topics.size === 1
+        ? 'otrabotka'
+        : 'komplekt',
     istochnik: state.source,
     sostav: legacy ? sostavPoNomeram(state.plan) : sostavIzSlotov(state.plan),
     variants: state.variants,
@@ -221,7 +228,7 @@ export function engine11(
         seed: p.seed,
         zameny: p.zameny,
         extras: extrasIzDop(p.dop, config),
-        ...(p.poKlyucham === true ? {} : { legacy: true }),
+        ...(p.poKlyucham === true ? {} : { legacy: q.get('m') === 'o' ? 'o' : 'v' }),
       };
     },
   };

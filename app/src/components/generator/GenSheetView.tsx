@@ -166,6 +166,14 @@ export function GenSheetView({
           >
             <span className="gen-task__no">{t.no}</span>
             <div className="gen-task__body">
+              {(teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ? (
+                <figure
+                  className="gen-task__fig"
+                  dangerouslySetInnerHTML={{
+                    __html: (teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ?? '',
+                  }}
+                />
+              ) : null}
               <div className="gen-task__q" dangerouslySetInnerHTML={{ __html: t.questionHtml }} />
               {teacher ? (
                 <div className="gen-task__sol">

@@ -297,15 +297,13 @@ export function pruneZameny(
 export function planFromPreset(config: GenConfig, preset: GenPreset, source: SourceId): GenSlot[] {
   const by: Record<string, string[]> = {};
   for (const [key, n] of Object.entries(preset.sostav)) {
-    if (key.includes('-')) {
+    const topic = config.topics.find((x) => x.id === key);
+    if (topic === undefined) {
       const t = topicOfSubtype(config, key);
       if (t !== undefined) (by[t.id] ??= []).push(...Array.from({ length: n }, () => key));
     } else {
-      const t = config.topics.find((x) => x.id === key);
-      if (t !== undefined) {
-        const have = by[t.id] ?? [];
-        by[t.id] = [...have, ...nextIds(t, preset.levels, have, n)];
-      }
+      const have = by[topic.id] ?? [];
+      by[topic.id] = [...have, ...nextIds(topic, preset.levels, have, n)];
     }
   }
   return filterBySource(config, slotsOf(assemble(config, by)), source);

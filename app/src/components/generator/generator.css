@@ -27,7 +27,9 @@
   font-size: var(--fs-h3);
   line-height: var(--lh-h3);
 }
-.app-main:has(.gen) .section-head__lead,
+/* Всё, кроме строки заголовка: вводный текст, кольцо прогресса (у №1 —
+   в слоте действий под текстом), иллюстрация. */
+.app-main:has(.gen) .section-head__text > :not(.section-head__title),
 .app-main:has(.gen) .section-head__media {
   display: none;
 }
@@ -711,7 +713,19 @@
   min-width: 0;
   overflow-x: auto;
 }
+/* Чертёж задачи (№1): справа от условия, на узком листе — над ним. */
+.gen-task__fig {
+  float: right;
+  width: min(42%, 220px);
+  margin: 0 0 var(--space-2) var(--space-3);
+}
+.gen-task__fig svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .gen-task__ans {
+  clear: right;
   display: flex;
   justify-content: flex-end;
   gap: 6px;
@@ -1321,6 +1335,11 @@
 /* ═══ Телефон ═══════════════════════════════════════════════════ */
 
 @media (max-width: 759.98px) {
+  .gen-task__fig {
+    float: none;
+    width: min(100%, 260px);
+    margin: 0 auto var(--space-2);
+  }
   /* «Дополнительно» на телефоне — в окне «Фильтры». */
   .gen-dop {
     display: none;

@@ -124,8 +124,9 @@ function recapBlock(recap) {
   return '<section class="sheet-recap">' +
     '<div class="sheet-recap-main">' +
       '<h2 class="sheet-recap-title">' + typo.text(recap.title) + '</h2>' +
-      '<ul class="sheet-recap-list' + (recap.stack ? ' sheet-recap-list--stack' : '') + '">' +
-        items + '</ul>' +
+      '<ul class="sheet-recap-list' + (recap.stack ? ' sheet-recap-list--stack' : '') + '"' +
+        (recap.rows ? ' style="grid-template-rows: repeat(' + Number(recap.rows) + ', auto)"' : '') +
+        '>' + items + '</ul>' +
     '</div>' + aside +
     '</section>';
 }
@@ -363,8 +364,9 @@ function flowItems(spec) {
  *   runner   строка компактной шапки следующих страниц
  *   title    { chip, text, subtitle, variant?, qr? } — qr: SVG QR-кода
  *            справа в строке названия
- *   recap    { title, items[], phrase, stack? } либо null; stack —
- *            пункты в один столбик (длинные пункты с формулами)
+ *   recap    { title, items[], phrase, stack?, rows? } либо null;
+ *            stack — пункты в один столбик (длинные пункты с формулами),
+ *            rows — сколько пунктов в колонке (по умолчанию три)
  *   leadItems  куски потока перед блоками задач: например,
  *            разобранные примеры (exampleItem)
  *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия

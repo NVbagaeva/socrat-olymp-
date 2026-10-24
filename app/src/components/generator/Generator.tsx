@@ -274,7 +274,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   function commit(next: GenState) {
     const { legacy, ...rest } = next;
     setSt(
-      legacy === true
+      legacy !== undefined
         ? { ...rest, zameny: {} }
         : { ...rest, zameny: pruneZameny(rest.zameny, rest.plan, rest.variants) },
     );
@@ -348,7 +348,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
 
   /* Номер задачи в плане по её ключу; у листа прежней схемы ключ — номер. */
   const indexOf = (pos: string) =>
-    st.legacy === true ? Number(pos.split('.')[1] ?? 0) - 1 : indexOfPos(st.plan, pos);
+    st.legacy !== undefined ? Number(pos.split('.')[1] ?? 0) - 1 : indexOfPos(st.plan, pos);
 
   function move(pos: string, to: number) {
     const from = indexOf(pos);
