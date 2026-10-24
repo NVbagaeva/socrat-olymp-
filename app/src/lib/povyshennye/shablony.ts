@@ -35,7 +35,15 @@ import {
   type PerpendikulyarNeizvestnaya,
   type SkalyarnoeKombinatsiy,
 } from '@/lib/vektory/povyshennye';
-import { PV4_NE_MENEE, PV5_DVE_PARTII } from '@/lib/veroyatnost/povyshennye';
+import {
+  PV4_BOLSHE,
+  PV4_DELITSYA,
+  PV4_NE_MENEE,
+  PV4_PROTIVOPOLOZHNOE,
+  PV5_DVE_PARTII,
+  PV5_KOST_USLOVIE,
+  PV5_MEZHDU,
+} from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
   logObratnyy,
@@ -503,6 +511,40 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Вероятность: вложенные события «не менее a / не менее b» (как p5-03, сюжет лучника)',
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(4, PV4_NE_MENEE, p),
+  },
+  'z04.bolshe': {
+    ege: 4,
+    prototip:
+      'Вероятность: вложенные события «больше a / больше b», строгие границы (как p5-03, сюжет с пассажирами, посетителями…)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_BOLSHE, p),
+  },
+  'z04.delitsya': {
+    ege: 4,
+    prototip:
+      'Вероятность, классическое определение: число из отрезка натурального ряда делится на d (концы входят)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_DELITSYA, p),
+  },
+  'z04.protivopolozhnoe': {
+    ege: 4,
+    prototip: 'Вероятность: противоположное событие — выход размера за допуск или «не ниже порога»',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_PROTIVOPOLOZHNOE, p),
+  },
+  'z05.mezhdu': {
+    ege: 5,
+    prototip:
+      'Вероятность: значение между двумя порогами по P(выше t₁) и P(ниже t₂), p₁ + p₂ − 1 (как p5-13)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_MEZHDU, p),
+  },
+  'z05.kost-uslovie': {
+    ege: 5,
+    prototip:
+      'Условная вероятность на двух костях: «хотя бы раз g» при «сумма не s», до сотых (как p5-05)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_KOST_USLOVIE, p),
   },
   'z05.dve-partii': {
     ege: 5,
