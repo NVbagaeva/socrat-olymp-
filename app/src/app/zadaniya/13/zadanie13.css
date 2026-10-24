@@ -920,3 +920,71 @@
     padding: var(--space-4);
   }
 }
+
+/* ── Для репетиторов ───────────────────────────────────────────── */
+/* Вёрстка — общие слои вкладки репетиторов №11 (z11-rep); здесь код
+   серии, признак типа и карточки. */
+
+.z13-rep__kod,
+.z13-rep__kartochki {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.z13-rep__kod-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.z13-rep__kod-head .z11-card__title {
+  margin: 0;
+}
+.z13-rep__kod-text {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-text-brand);
+}
+.z13-rep__kod-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z13-rep__kod-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-rep__kod-form .input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  max-width: 14rem;
+  text-transform: uppercase;
+}
+.z13-rep__oshibka {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.z13-rep__priznak {
+  margin: 0;
+}
+.z13-rep__kartochki .z11-card__title {
+  margin: 0;
+}
+.z13-rep__kartochki .btn {
+  justify-self: start;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-rep .z11-urok-plan a {
+  color: var(--color-text-brand);
+}
+/* Четвёртая часть урока — «Определи тип». */
+.z13-rep .z11-urok__polosa .is-t {
+  background: var(--color-accent-text);
+}

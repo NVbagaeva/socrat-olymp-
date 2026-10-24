@@ -13,11 +13,12 @@
 
 import answers from '../../sheet/answers.js';
 import { BLOK_13, RAMKA_13, SHEET_13, ZACHET_13, type Vid13 } from '@/content/generator13';
+import { LIST_UROKA_13 } from '@/content/repetitory13';
 import { typeset } from '../../tex';
 import { TABLE_HEAD } from '../tablica';
 import type { List13, ListZadacha13 } from './list';
 import { tablitsaUsloviya13 } from './list';
-import type { GenParams13 } from './params';
+import { urokPo13, type GenParams13 } from './params';
 
 export type VidPechati13 = 'uchenik' | 'uchitel' | 'vse';
 
@@ -211,6 +212,9 @@ function bloki(
       ? []
       : [{ title: '', note: '', head: false, leadItems: items, tasks: [] }];
   };
+  if (p.urok > 0) {
+    return blokiUroka(zs, task, lead, hvost);
+  }
   if (!p.zachet) {
     if (posle === undefined) {
       return [{ title: '', note: '', head: false, leadItems: lead, tasks: zs.map(task) }];
@@ -246,6 +250,37 @@ function bloki(
     });
   });
   return out;
+}
+
+/** Заголовок части листа урока: без разрыва страницы, держится со следующей задачей. */
+function zagolovokChasti(title: string): string {
+  return (
+    `<div class="sheet-item sheet-block" data-keep-with-next="1">` +
+    `<header class="sheet-block-head"><h2 class="sheet-block-title">${title}</h2></header></div>`
+  );
+}
+
+/**
+ * Лист урока: части «Опорные задачи», «Задачи открытого банка»,
+ * «Новые задачи», «Определи тип» — по порядку плана, у каждой свой
+ * заголовок. Схему части не называют: в уроке она одна, а тему урока
+ * ученику не пишем.
+ */
+function blokiUroka(
+  zs: ListZadacha13[],
+  task: (z: ListZadacha13) => SheetTask,
+  lead: string[],
+  hvost: (z: ListZadacha13) => SheetBlock[],
+): SheetBlock[] {
+  return zs.flatMap((z, i) => {
+    const prev = zs[i - 1];
+    const novayaChast = z.chast !== undefined && z.chast !== prev?.chast;
+    const leadItems = [
+      ...(i === 0 ? lead : []),
+      ...(novayaChast && z.chast ? [zagolovokChasti(LIST_UROKA_13.chasti[z.chast])] : []),
+    ];
+    return [{ title: '', note: '', head: false, leadItems, tasks: [task(z)] }, ...hvost(z)];
+  });
 }
 
 /** Первая страница зачёта: как выполнять, таблица баллов, шкала. */
@@ -287,10 +322,17 @@ function stranicaZacheta(zs: ListZadacha13[]): string {
 
 export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
   const nV = list.poVariantam.length;
-  const zagolovok = p.title || SHEET_13.text;
+  const urok = p.urok > 0 ? urokPo13(p.urok) : undefined;
+  const zagolovokDlya = (uchitel: boolean) =>
+    urok === undefined
+      ? p.title || SHEET_13.text
+      : uchitel
+        ? LIST_UROKA_13.uchitel(urok.no, urok.title)
+        : LIST_UROKA_13.uchenik(urok.no);
+  const zagolovok = zagolovokDlya(vid === 'uchitel');
   const title = (variant: number | null, uchitel: boolean) => ({
     chip: SHEET_13.chip,
-    text: uchitel ? `${zagolovok} · ${SHEET_13.resheniya}` : zagolovok,
+    text: uchitel ? `${zagolovokDlya(true)} · ${SHEET_13.resheniya}` : zagolovokDlya(false),
     subtitle: SHEET_13.text,
     ...(variant === null || nV === 1 ? {} : { variant: `Вариант ${variant + 1}` }),
   });
