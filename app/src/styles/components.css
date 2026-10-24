@@ -2806,9 +2806,10 @@ html[data-tabs-pending] .topic-panel,
    Пока лента стоит на месте, вкладки раздела — плитки разного
    размера: первая («О задании», «Подтемы») крупнее, остальные
    делят ряды поровну, ряды заполнены без дыр (flex-wrap с ростом).
-   Телефон — по 2 в ряд (первая во всю ширину), планшет — по 3,
-   широкий экран — по 4. Ничего не прокручивается вбок, подписи
-   не обрезаются.
+   Телефон — по 3 в ряд, все плитки одного размера (первая во всю
+   ширину, только если иначе последняя осталась бы в ряду одна),
+   планшет — по 3, широкий экран — по 4. Ничего не прокручивается
+   вбок, подписи не обрезаются.
 
    Липкая панель (is-stuck, components/tasks/TabsRow.tsx) — та же
    лента компактной строкой со своими правилами выше и ниже. Плитки
@@ -2876,6 +2877,48 @@ html[data-tabs-pending] .topic-panel,
   min-height: 56px;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
+}
+/* Телефон: по 3 в ряд, значок над подписью, поля меньше. Обычные
+   шесть плиток — два ровных ряда, меню вдвое ниже. Первая плитка —
+   такая же, как остальные; во всю ширину, со значком и подписью в
+   строку, она становится, только когда иначе в последнем ряду
+   осталась бы одна плитка: 4, 7 плиток (вкладки + кнопка материалов).
+   Без :has (старые браузеры) — просто по 3 в ряд. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+    flex-basis: calc(33.333% - var(--space-2));
+    gap: var(--space-1);
+    min-height: 64px;
+    padding: var(--space-2);
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: calc(33.333% - var(--space-2));
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-height: 64px;
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .topic-tabs:not(:has(.topic-tabs__more)):has(.tabs--lenta > :nth-child(3n + 1):last-child)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child,
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .topic-tabs:has(.topic-tabs__more):has(.tabs--lenta > :nth-child(3n):last-child)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 56px;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
 }
 @media (min-width: 768px) {
   .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
