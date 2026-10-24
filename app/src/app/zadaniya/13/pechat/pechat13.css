@@ -1,0 +1,203 @@
+/* Страницы печати задания №13: только лист, без оболочки сайта. Та же
+   основа, что у pechat11.css; плюс поля для оформления, таблица
+   условия, рамка зачёта и QR в подвале. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+  .z13-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .z13-print-bar__lead {
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--color-text-secondary);
+  }
+}
+
+@media print {
+  .z13-print-bar {
+    display: none;
+  }
+}
+
+.z13-sheet-tip {
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sheet-ink-soft, #555);
+}
+.z13-sheet-metka {
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 600;
+  color: var(--sheet-accent, #2a7a3b);
+}
+.z13-sheet-formula {
+  margin: var(--sheet-step) 0;
+  overflow: hidden;
+}
+.z13-sheet-shag + .z13-sheet-shag {
+  margin-top: var(--sheet-step);
+}
+
+/* Решение учителя после карточки задачи: шаг за шагом, с отступом
+   под текст задачи — пагинатор переносит шаги, а не режет решение. */
+.z13-sheet-reshenie-shag {
+  padding: 0 0 0 9mm;
+  font-size: var(--sheet-fs-small);
+}
+.z13-sheet-reshenie-shag + .z13-sheet-reshenie-shag {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+
+/* Рамка «Повторяем»: правила всех схем подряд. */
+.z13-sheet-povtor__item + .z13-sheet-povtor__item {
+  margin-top: calc(var(--sheet-step) * 2);
+  padding-top: calc(var(--sheet-step) * 2);
+  border-top: 0.5pt dashed var(--sheet-rule, #999);
+}
+
+/* Таблица по периодам — в условии и в решении. */
+.z13-tablitsa {
+  margin: calc(var(--sheet-step) * 2) 0;
+}
+.z13-tablitsa table,
+.z13-sheet-pusto {
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-small);
+}
+.z13-tablitsa th,
+.z13-tablitsa td,
+.z13-sheet-pusto th,
+.z13-sheet-pusto td {
+  padding: 2px 6px;
+  border: 0.5pt solid var(--sheet-rule, #999);
+  text-align: center;
+}
+.z13-tablitsa thead th,
+.z13-sheet-pusto thead th {
+  font-weight: 600;
+}
+
+/* Поля для оформления: Дано, Найти, пустая таблица, Решение. */
+.z13-sheet-dano {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(var(--sheet-step) * 2);
+  margin: calc(var(--sheet-step) * 2) 0;
+}
+.z13-sheet-kletka,
+.z13-sheet-reshenie {
+  position: relative;
+  min-height: 22mm;
+  border: 0.5pt solid var(--sheet-rule, #999);
+  border-radius: 2mm;
+  background-image:
+    linear-gradient(var(--sheet-grid, #e3e3e3) 0.3pt, transparent 0.3pt),
+    linear-gradient(90deg, var(--sheet-grid, #e3e3e3) 0.3pt, transparent 0.3pt);
+  background-size: 5mm 5mm;
+}
+.z13-sheet-reshenie {
+  min-height: 45mm;
+  margin-top: calc(var(--sheet-step) * 2);
+}
+.z13-sheet-kletka span,
+.z13-sheet-reshenie span {
+  position: absolute;
+  top: 1mm;
+  left: 2mm;
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.z13-sheet-pusto {
+  width: 100%;
+  table-layout: fixed;
+  margin-top: calc(var(--sheet-step) * 2);
+}
+.z13-sheet-pusto td,
+.z13-sheet-pusto thead th {
+  height: 7mm;
+}
+.z13-sheet-pusto thead th:first-child {
+  width: 14%;
+}
+
+/* Зачёт: первая страница. */
+.z13-sheet-zachet {
+  display: grid;
+  gap: calc(var(--sheet-step) * 3);
+}
+.z13-sheet-pravila {
+  margin: 0;
+  padding-left: 5mm;
+  list-style: decimal;
+  font-size: var(--sheet-fs-body);
+}
+.z13-sheet-bally {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-body);
+}
+.z13-sheet-bally caption {
+  margin-bottom: var(--sheet-step);
+  font-weight: 700;
+  text-align: left;
+}
+.z13-sheet-bally th,
+.z13-sheet-bally td {
+  padding: 3px 6px;
+  border: 0.5pt solid var(--sheet-rule, #999);
+}
+.z13-sheet-bally td:nth-child(n + 2) {
+  text-align: center;
+}
+.z13-sheet-bally__itog td {
+  font-weight: 700;
+}
+.z13-sheet-shkala {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: calc(var(--sheet-step) * 2);
+}
+.z13-sheet-shkala__item {
+  display: grid;
+  justify-items: center;
+  padding: 2mm;
+  border: 0.5pt solid var(--sheet-rule, #999);
+  border-radius: 2mm;
+  font-size: var(--sheet-fs-body);
+}
+.z13-sheet-note {
+  font-size: var(--sheet-fs-small);
+}
+
+/* QR в подвале: онлайн-версия набора. */
+.sheet-foot-qr {
+  display: inline-flex;
+  width: 14mm;
+  height: 14mm;
+}
+.sheet-foot-qr .qr {
+  width: 100%;
+  height: 100%;
+}

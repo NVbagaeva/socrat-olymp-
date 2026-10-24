@@ -810,7 +810,7 @@ for (const [n, extra, want] of tables) {
       try {
         const shagi = JSON.parse(secret.openText(sealed.podskazki, sealed.seal));
         const razbor = JSON.parse(secret.openText(sealed.razbor, sealed.seal));
-        if (!shagi.length || !razbor.shagi.length || !razbor.otvet)
+        if (!shagi.length || !razbor.html || !razbor.otvet)
           problems.push(`опорные ${zw}: пустые подсказка или решение`);
       } catch {
         problems.push(`опорные ${zw}: подсказка или решение не открываются`);
@@ -913,6 +913,239 @@ for (const [n, extra, want] of tables) {
     }
 }
 
+/* ── Генератор: план, замены, пресеты, адрес ────────────────────── */
+{
+  const P13 = requireSrc('lib/zadanie13/gen/params');
+  const L13 = requireSrc('lib/zadanie13/gen/list');
+  const S13 = requireSrc('lib/zadanie13/gen/sheet');
+  const { PRESETY_13, ZACHET_13 } = requireSrc('content/generator13');
+  const { TYPE_NAMES } = requireSrc('lib/zadanie13/types');
+  for (const preset of PRESETY_13) {
+    for (const istochnik of ['bank', 'mix', 'new']) {
+      checks += 1;
+      const w = `генератор ${preset.id}/${istochnik}`;
+      const p = {
+        ...P13.GEN_PARAMS_13,
+        sostav: { ...preset.sostav },
+        uroven: preset.uroven,
+        pomoshch: preset.pomoshch,
+        vid: preset.vid,
+        variants: preset.variants,
+        zachet: preset.zachet === true,
+        istochnik,
+        seed: 'TEST',
+      };
+      /* Адрес туда и обратно — те же параметры. */
+      const back = P13.parseGenQuery13(new URLSearchParams(P13.genQuery13(p)));
+      if (JSON.stringify(back) !== JSON.stringify(p)) problems.push(`${w}: адрес теряет параметры`);
+      const plan = L13.planLista13(p);
+      const n = P13.vsegoZadach13(p);
+      if (plan.length !== p.variants || plan.some((v) => v.length !== n))
+        problems.push(`${w}: в плане не столько задач, сколько в составе`);
+      if (JSON.stringify(L13.planLista13(p)) !== JSON.stringify(plan))
+        problems.push(`${w}: план не воспроизводится`);
+      const keys = plan.flat().map((z) => `${z.prototypeId}|${z.seed}`);
+      if (new Set(keys).size !== keys.length) problems.push(`${w}: задачи комплекта повторяются`);
+      if (istochnik === 'bank' && plan.flat().some((z) => z.istochnik !== 'bank' && z.vid !== 'P'))
+        problems.push(`${w}: в режиме «банк» есть новые задачи`);
+      /* Замена меняет одну задачу и не трогает остальные. */
+      const pos = plan[0][0].pos;
+      const zam = L13.planLista13({ ...p, zameny: { [pos]: 1 } });
+      const diff = zam
+        .flat()
+        .filter((z, i) => JSON.stringify(z) !== JSON.stringify(plan.flat()[i]));
+      if (diff.length !== 1 || diff[0].pos !== pos)
+        problems.push(`${w}: замена задела другие задачи`);
+      /* Ответов в адресе нет; на листе ученика — ни ответа, ни схемы у «Определи тип». */
+      const list = L13.sobratList13(p);
+      const q = P13.genQuery13(p);
+      for (const z of list.poVariantam.flat()) {
+        if (z.vid !== 'T' && q.includes(String(z.task.answer)) && String(z.task.answer).length > 3)
+          problems.push(`${w}: ответ ${z.task.answer} в адресе`);
+        if (z.vid === 'T' && z.answer !== TYPE_NAMES[z.task.type])
+          problems.push(`${w}: ответ «Определи тип» — не схема`);
+      }
+      const uchenik = JSON.stringify(S13.sheetSpec13(p, list, 'uchenik'));
+      /* Тип не утекает на лист ученика: ни над условием, ни в заголовках
+         блоков, ни в подписях. Само условие (оно может назвать схему, как
+         у ФИПИ) из проверки вынимается; рамку «Повторяем» учитель
+         включает сам — проверяем лист без неё. */
+      let bezUsloviy = JSON.stringify(S13.sheetSpec13({ ...p, pomoshch: 'net' }, list, 'uchenik'));
+      for (const z of list.poVariantam.flat()) {
+        bezUsloviy = bezUsloviy.split(JSON.stringify(z.questionHtml).slice(1, -1)).join('');
+      }
+      const utechka = bezUsloviy.match(
+        /дифференцированн|аннуитет|поломанн|не из открытого банка|вклад/i,
+      );
+      if (utechka) problems.push(`${w}: на листе ученика тип задачи («${utechka[0]}»)`);
+      if (!p.zachet) {
+        const vidy = list.poVariantam[0].map((z) => z.vid).join('');
+        const podryad = [...new Set(vidy)]
+          .map((v) => v.repeat([...vidy].filter((x) => x === v).length))
+          .join('');
+        if (new Set(vidy).size > 1 && vidy === podryad && n > 4)
+          problems.push(`${w}: задачи стоят группами по типам — порядок не перемешан`);
+      }
+      if (/sheet-task-answer|Сводка ответов/.test(uchenik))
+        problems.push(`${w}: ответы на листе ученика`);
+      const uchitel = JSON.stringify(S13.sheetSpec13(p, list, 'uchitel'));
+      if (!uchitel.includes('Сводка ответов'))
+        problems.push(`${w}: на листе учителя нет сводки ответов`);
+    }
+  }
+  /* Зачёт: 50 баллов, шкала без дыр и до 50. */
+  const zachet = PRESETY_13.find((x) => x.id === 'zachet');
+  const ballov = Object.entries(zachet.sostav).reduce(
+    (s, [vid, n]) => s + n * (vid === 'T' ? ZACHET_13.bally.tip : ZACHET_13.bally.zadacha),
+    0,
+  );
+  if (ballov !== 50) problems.push(`зачёт: ${ballov} баллов вместо 50`);
+  const shk = [...ZACHET_13.shkala].sort((a, b) => a.ot - b.ot);
+  if (
+    shk[0].ot !== 0 ||
+    shk.at(-1).do !== 50 ||
+    shk.some((x, i) => i > 0 && x.ot !== shk[i - 1].do + 1)
+  )
+    problems.push('зачёт: шкала оценок с дырой');
+}
+
+/* ── Шаблон решения дифференцированного платежа (решение автора 24.10) ── */
+{
+  const A = requireSrc('lib/zadanie13/proto/a');
+  const { generate } = requireSrc('lib/zadanie13/generate');
+  const { reshenieHtml } = requireSrc('lib/zadanie13/reshenieHtml');
+  const { tex } = requireSrc('lib/zadanie13/proto/common');
+  const { differentiated, overpay } = S_;
+  const json = (x) => JSON.stringify(x);
+  /* Приёмка: Лука, 11 лет под 7 % и 4 года под 16 %, «от суммы кредита». */
+  {
+    checks += 1;
+    const r = A.reshenieA02(11, D(7), 4, D(16), 'ot-summy');
+    const sol = json(r.shagi);
+    const est = (frag, what) => {
+      if (!sol.includes(JSON.stringify(frag).slice(1, -1)))
+        problems.push(`приёмка A-02: нет «${what}»: ${frag}`);
+    };
+    if (!r.answer.eq(2)) problems.push(`приёмка A-02: ответ ${r.answer} вместо 2`);
+    est('S = \\dfrac{11S}{11}', 'первая строка S = 11S/11');
+    est('\\dfrac{10S}{11}\\cdot \\dfrac{7}{100}', 'переплата второй строки');
+    est('11 + 10 + \\dots + 1 = \\dfrac{11 + 1}{2}\\cdot 11 = 66', 'сумма прогрессии 66');
+    est('= \\dfrac{42S}{100} = 0{,}42S', 'P₁ = 0,42S');
+    est('\\dfrac{S}{4}\\cdot \\dfrac{16}{100}\\cdot 10', 'P₂ = S/4 · 16/100 · 10');
+    est('0{,}4S', 'P₂ = 0,4S');
+    est('x_{1} = \\dfrac{0{,}42S\\cdot 100}{S} = 42\\,\\%', 'x₁ = 42 %');
+    est('x_{2} = \\dfrac{0{,}4S\\cdot 100}{S} = 40\\,\\%', 'x₂ = 40 %');
+    est('42\\,\\% - 40\\,\\% = 2\\,\\%', '42 % − 40 % = 2 %');
+    const t1 = r.shagi.find((st) => st.title === 'Составляем таблицу: первый банк').bloki[0].t;
+    if (t1.rows.map((x) => (x ? x.label : '…')).join(',') !== '1,2,3,…,10,11')
+      problems.push('приёмка A-02: в таблице первого банка не строки 1–3, «…», 10–11');
+    const t2 = r.shagi.find((st) => st.title === 'Составляем таблицу: второй банк').bloki[0].t;
+    if (t2.rows.length !== 4 || t2.rows.includes(null))
+      problems.push('приёмка A-02: таблица второго банка — не 4 строки');
+    if (!r.shagi.some((st) => st.vid === 'vnimanie'))
+      problems.push('приёмка A-02: нет рамки «Внимание на формулировку»');
+    const html = reshenieHtml(r.shagi, null);
+    if (
+      !/z13-r-strelka__duga/.test(html) ||
+      (html.match(/z13-r-strelka__duga/g) ?? []).length !== 2
+    )
+      problems.push('приёмка A-02: над таблицами нет стрелки «Переплата → Долг на начало»');
+    if (!/r\\,\\% = 7\\,\\%/.test(json(t1.strelka)) && !t1.strelka.includes('= 7'))
+      problems.push('приёмка A-02: подпись стрелки без r % = 7 %');
+  }
+  /* Выкладки шаблона сходятся с солвером на сотнях задач: сумма
+     прогрессии, коэффициент k в P = kS, процент от кредита, ответ. */
+  const seeds = Array.from(
+    { length: Number(process.env.Z13_SEEDS) || 3 > 3 ? 120 : 60 },
+    (_, i) => `ts${i}`,
+  );
+  const kredity = (t) => {
+    const q = t.params;
+    switch (t.prototypeId) {
+      case 'A-01':
+      case 'A-08':
+      case 'A-15':
+        return [{ n: q.n, r: q.r }];
+      case 'A-02':
+        return [
+          { n: q.n1, r: q.r1 },
+          { n: q.n2, r: q.r2 },
+        ];
+      case 'A-13':
+        return [
+          { n: q.n1, r: q.r },
+          { n: q.n2, r: q.r },
+        ];
+      default:
+        return [];
+    }
+  };
+  const voprosy = new Set();
+  for (const id of ['A-01', 'A-02', 'A-04', 'A-05', 'A-08', 'A-12', 'A-13', 'A-15']) {
+    for (const seed of seeds) {
+      checks += 1;
+      const t = generate(id, seed);
+      const w = `шаблон ${id}:${seed}`;
+      if (!t.vopros) problems.push(`${w}: нет типа вопроса`);
+      voprosy.add(`${id}:${t.vopros}`);
+      const sol = json(t.solution);
+      if (t.solution[0]?.title !== 'Определяем тип платежа')
+        problems.push(`${w}: первый шаг — не «Определяем тип платежа»`);
+      if (!t.solution.some((st) => st.vid === 'ramka'))
+        problems.push(`${w}: нет рамки «Вспоминаем»`);
+      if (!t.solution.some((st) => (st.bloki ?? []).some((b) => b.vid === 'tablitsa')))
+        problems.push(`${w}: нет таблицы в переменных`);
+      for (const k of kredity(t)) {
+        const koef = overpay(differentiated(1, k.n, D(k.r)));
+        const summa = (k.n * (k.n + 1)) / 2;
+        if (!sol.includes(`= ${summa}`)) problems.push(`${w}: нет суммы прогрессии ${summa}`);
+        if (!sol.includes(`= ${tex(koef)}S`)) problems.push(`${w}: P ≠ ${tex(koef)}S (солвер)`);
+        if (
+          !['A-01', 'A-13', 'A-15'].includes(id) &&
+          !sol.includes(`= ${tex(koef.mul(100))}\\\\,\\\\%`)
+        )
+          problems.push(`${w}: процент от кредита ≠ ${tex(koef.mul(100))} %`);
+      }
+      /* Неизвестная ставка или срок: уравнение шаблона даёт ответ задачи. */
+      if (id === 'A-04' || id === 'A-12') {
+        const ok = D(t.params.n + 1)
+          .div(2)
+          .mul(D(t.answer))
+          .eq(D(t.params.p));
+        if (!ok) problems.push(`${w}: (n+1)/2 · r ≠ переплате в процентах`);
+      }
+      if (id === 'A-05') {
+        const ok = D(t.answer + 1)
+          .div(2)
+          .mul(D(t.params.r))
+          .eq(D(t.params.p));
+        if (!ok) problems.push(`${w}: (n+1)/2 · r ≠ переплате в процентах`);
+      }
+    }
+  }
+  for (const v of ['A-02:ot-summy', 'A-02:ot-pereplaty', 'A-02:vo-skolko'])
+    if (!voprosy.has(v)) problems.push(`шаблон: у A-02 не встретилась формулировка ${v}`);
+  /* Остальные прототипы дифференцированного платежа начинаются с типа. */
+  for (const id of [
+    'A-03',
+    'A-06',
+    'A-07',
+    'A-09',
+    'A-10',
+    'A-11',
+    'A-14',
+    'A-16',
+    'A-17',
+    'A-18',
+    'A-19',
+  ]) {
+    checks += 1;
+    const t = generate(id, 'ts0');
+    if (t.solution[0]?.title !== 'Определяем тип платежа')
+      problems.push(`шаблон ${id}: первый шаг — не «Определяем тип платежа»`);
+  }
+}
+
 /* ── Генерация: все прототипы ──────────────────────────────────── */
 {
   const katex = require('katex');
@@ -957,6 +1190,19 @@ for (const [n, extra, want] of tables) {
       for (const st of t.solution) {
         inline(st.title + ' ' + st.text, where + ' решение');
         if (st.formula) typeset(st.formula, where + ' формула');
+        for (const b of st.bloki ?? []) {
+          if (b.vid === 'formula') typeset(b.tex, where + ' формула шага');
+          else if (b.vid === 'proporciya') {
+            b.rows.flat().forEach((c) => typeset(c, where + ' пропорция'));
+            typeset(b.vyvod, where + ' пропорция');
+          } else if (b.vid === 'tablitsa') {
+            inline(b.t.podpis + ' ' + b.t.strelka, where + ' таблица');
+            b.t.rows.forEach(
+              (r) => r && [r.label, ...r.cells].forEach((c) => typeset(c, where + ' таблица')),
+            );
+            b.t.itog.forEach((c) => typeset(c, where + ' таблица'));
+          } else inline(b.text, where + ' ' + b.vid);
+        }
       }
       for (const h of t.hints) {
         inline(h.question, where + ' подсказка');

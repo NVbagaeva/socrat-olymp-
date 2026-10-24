@@ -76,6 +76,9 @@ const SHEETS = [
     '/zadaniya/1/pechat/',
     'm=v&i=m&ps=2&s=p01:1,p13:1,p24:1,p41:1&seed=print-check&tr=1&pr=1&qr=1',
   ],
+  /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
+  ['№13', '/zadaniya/13/pechat/', 's=A:2,B:1,C:2,D:1&l=base&i=mix&h=ramka&f=compact&v=1&seed=print-check'],
+  ['№13 зачёт', '/zadaniya/13/pechat/', 's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check'],
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],

@@ -8,6 +8,8 @@ import '../../[task]/[type]/topic.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../zadanie13.css';
+import '../reshenie13.css';
+import '../../komplekt.css';
 
 /**
  * Оболочка задания №13: крошки, заголовок и лента вкладок. Группа

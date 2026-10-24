@@ -32,8 +32,11 @@ import {
   largestInt,
   step,
   tex,
+  TIP_VYVOD,
 } from './common';
 import type { Prototype } from './types';
+import { difPereplata, type DifItog } from '../reshenie';
+import type { SolutionStep } from '../types';
 
 /* ── Общие шаги ───────────────────────────────────────────────── */
 
@@ -55,6 +58,9 @@ const stTotal = () =>
   );
 
 const stAnswer = (text: string) => step('Ответ', text);
+
+/** Шаг 1 любого решения: тип по признаку из условия. */
+const stTip = () => step(TIP_VYVOD.A.title, TIP_VYVOD.A.text);
 
 const hintsA = (shift: number, last: ReturnType<typeof choice>[] = []) => [
   hintType('A', shift),
@@ -105,22 +111,127 @@ const A01: Prototype = {
       rows,
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable(
-          `Каждый месяц долг уменьшается на $\\dfrac{S}{n} = ${tex(S.div(n))}$ рублей. Переплата за месяц — ${num(r)} % от долга на начало месяца.`,
-        ),
-        stDerive(),
-        step(
-          'Считаем',
-          'Подставляем числа и сокращаем.',
-          `S_{\\text{перепл}} = ${tex(S)}\\cdot\\frac{${n + 1}}{2}\\cdot\\frac{${tex(r)}}{100} = ${tex(answer)}`,
-        ),
-        stAnswer(`Переплата составит ${money(answer, 'rub')}.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n, r }], 'month', { bezProcentov: true });
+        const k = (itogi[0] as DifItog).koef as Drob;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Спрашивают переплату в рублях — подставляем $S = ${tex(S)}$:`,
+            formula: `P = ${tex(k)}S = ${tex(k)}\\cdot ${tex(S)} = ${tex(answer)}`,
+          },
+          stAnswer(`Переплата составит ${money(answer, 'rub')}.`),
+        ];
+      })(),
+      vopros: 'rubli',
       hints: hintsA(rng.int(0, 2)),
     };
   },
 };
+
+/* ── A-02: два банка, три формулировки вопроса ───────────────── */
+
+export type VoprosA02 = 'ot-summy' | 'ot-pereplaty-menshe' | 'ot-pereplaty-bolshe' | 'vo-skolko';
+
+const VOPROS_A02: Record<VoprosA02, string> = {
+  'ot-summy':
+    'На сколько процентов от суммы кредита переплата в более выгодном банке меньше, чем в другом?',
+  'ot-pereplaty-menshe':
+    'На сколько процентов переплата в более выгодном банке меньше, чем в другом?',
+  'ot-pereplaty-bolshe':
+    'На сколько процентов переплата в менее выгодном банке больше, чем в более выгодном?',
+  'vo-skolko': 'Во сколько раз переплата в менее выгодном банке больше, чем в более выгодном?',
+};
+
+/**
+ * Решение и ответ A-02 по параметрам и формулировке вопроса: шаблон
+ * переплаты для двух банков и ответ на вопрос. null — у этой
+ * формулировки ответ не конечная десятичная дробь.
+ */
+export function reshenieA02(n1: number, r1: Drob, n2: number, r2: Drob, vopros: VoprosA02) {
+  const { shagi, itogi } = difPereplata(
+    [
+      { n: n1, r: r1, imya: 'первый банк', kogo: 'первого банка' },
+      { n: n2, r: r2, imya: 'второй банк', kogo: 'второго банка' },
+    ],
+    'year',
+  );
+  const [i1, i2] = itogi as [DifItog, DifItog];
+  const k1 = i1.koef as Drob;
+  const k2 = i2.koef as Drob;
+  if (k1.eq(k2)) return null;
+  const [big, small] = k1.gt(k2) ? [i1, i2] : [i2, i1];
+  const kb = big.koef as Drob;
+  const ks = small.koef as Drob;
+  const pb = big.procent as Drob;
+  const ps = small.procent as Drob;
+  let answer: Drob;
+  let otvet: SolutionStep;
+  let vnimanie: string;
+  if (vopros === 'ot-summy') {
+    answer = pb.sub(ps);
+    otvet = {
+      title: 'Отвечаем на вопрос задачи',
+      text: 'Спрашивают «на сколько процентов от суммы кредита» — за 100 % взята сумма кредита $S$, проценты в шаге выше посчитаны именно от неё. Вопрос «на сколько» — из большего вычитаем меньшее:',
+      formula: `${big.x} - ${small.x} = ${tex(pb)}\\,\\% - ${tex(ps)}\\,\\% = ${tex(answer)}\\,\\%`,
+    };
+    vnimanie =
+      'В вопросе сказано «от суммы кредита» — поэтому за 100 % берём сумму кредита $S$, и ответ — разность процентов. Без этих слов («на сколько процентов переплата в одном банке меньше, чем в другом») за 100 % взяли бы переплату банка, с которым сравнивают.';
+  } else if (vopros === 'vo-skolko') {
+    answer = kb.div(ks);
+    otvet = {
+      title: 'Отвечаем на вопрос задачи',
+      text: 'Вопрос «во сколько раз» — делим большую переплату на меньшую, проценты не нужны:',
+      formula: `\\dfrac{${big.P}}{${small.P}} = \\dfrac{${tex(kb)}S}{${tex(ks)}S} = ${tex(answer)}`,
+    };
+    vnimanie =
+      '«Во сколько раз» — это отношение, ответ без процентов. «На сколько» — это разность.';
+  } else {
+    /* За 100 % — переплата того банка, с которым сравнивают (после «чем»). */
+    const menshe = vopros === 'ot-pereplaty-menshe';
+    const [baza, drug] = menshe ? [big, small] : [small, big];
+    const kBaza = baza.koef as Drob;
+    const kDrug = drug.koef as Drob;
+    const z = kDrug.mul(100).div(kBaza);
+    answer = menshe ? D(100).sub(z) : z.sub(100);
+    otvet = {
+      title: 'Отвечаем на вопрос задачи',
+      text: `Сравниваем с переплатой ${menshe ? 'менее выгодного' : 'более выгодного'} банка — она стоит после «чем», её и берём за 100 %:`,
+      bloki: [
+        {
+          vid: 'proporciya',
+          rows: [
+            ['100\\,\\%', baza.P],
+            ['z\\,\\%', drug.P],
+          ],
+          vyvod: `z = \\dfrac{${drug.P}\\cdot 100}{${baza.P}} = \\dfrac{${tex(kDrug)}S\\cdot 100}{${tex(kBaza)}S} = ${tex(z)}\\,\\%`,
+        },
+        { vid: 'text', text: 'Вопрос «на сколько» — вычитаем:' },
+        {
+          vid: 'formula',
+          tex: menshe
+            ? `100\\,\\% - ${tex(z)}\\,\\% = ${tex(answer)}\\,\\%`
+            : `${tex(z)}\\,\\% - 100\\,\\% = ${tex(answer)}\\,\\%`,
+        },
+      ],
+    };
+    vnimanie =
+      'В вопросе нет слов «от суммы кредита»: переплату одного банка сравнивают с переплатой другого. За 100 % берём переплату банка, с которым сравнивают, — она стоит после «чем».';
+  }
+  if (!answer.isPositive() || !answer.isFiniteDecimal() || answer.decimals() > 2) return null;
+  const better = k1.lt(k2) ? 'первый' : 'второй';
+  const ed = vopros === 'vo-skolko' ? '' : ' %';
+  return {
+    answer,
+    shagi: [
+      ...shagi,
+      otvet,
+      { title: 'Внимание на формулировку', text: vnimanie, vid: 'vnimanie' as const },
+      stAnswer(`${tex(answer).replace('{,}', ',')}${ed}. Выгоднее ${better} банк.`),
+    ],
+  };
+}
 
 const A02: Prototype = {
   id: 'A-02',
@@ -142,49 +253,59 @@ const A02: Prototype = {
     const r2 = D(rng.int(r1.toNumber() + 3, 18));
     const p1 = overpayPct(n1, r1);
     const p2 = overpayPct(n2, r2);
-    const answer = p1.sub(p2).cmp(0) > 0 ? p1.sub(p2) : p2.sub(p1);
-    if (answer.eq(0) || answer.gt(12) || !isNice(answer, 1)) return null;
-    const better = p1.lt(p2) ? 'первый' : 'второй';
+    const raznost = p1.sub(p2).cmp(0) > 0 ? p1.sub(p2) : p2.sub(p1);
+    if (raznost.eq(0) || raznost.gt(12) || !isNice(raznost, 1)) return null;
+    /* Формулировка — последней: у «от суммы кредита» числа те же, что
+       были до появления других формулировок. Не получилась конечная
+       дробь — остаётся «от суммы кредита». */
+    const hochu = rng.pick<VoprosA02>([
+      'ot-summy',
+      'ot-summy',
+      'ot-pereplaty-menshe',
+      'ot-pereplaty-bolshe',
+      'vo-skolko',
+    ]);
+    const vopros: VoprosA02 = reshenieA02(n1, r1, n2, r2, hochu) === null ? 'ot-summy' : hochu;
+    const r = reshenieA02(n1, r1, n2, r2, vopros);
+    if (r === null) return null;
     const verify = (() => {
-      const a = overpay(differentiated(1, n1, r1)).mul(100);
-      const b = overpay(differentiated(1, n2, r2)).mul(100);
-      return a.gt(b) ? a.sub(b) : b.sub(a);
+      const a = overpay(differentiated(1, n1, r1));
+      const b = overpay(differentiated(1, n2, r2));
+      const [big, small] = a.gt(b) ? [a, b] : [b, a];
+      if (vopros === 'ot-summy') return big.sub(small).mul(100);
+      if (vopros === 'vo-skolko') return big.div(small);
+      return vopros === 'ot-pereplaty-menshe'
+        ? D(100).sub(small.mul(100).div(big))
+        : big.mul(100).div(small).sub(100);
     })();
     return {
       condition:
         `${plot.subject} выбирает банк для кредита ${plot.goal}. Первый банк предлагает кредит на ${years(n1)} под ${pct(r1)} годовых, второй — на ${years(n2)} под ${pct(r2)} годовых. ` +
         `В обоих банках платежи дифференцированные: долг каждый год уменьшается на одну и ту же величину, проценты начисляются раз в год на остаток долга. ` +
-        `На сколько процентов от суммы кредита переплата в более выгодном банке меньше, чем в другом?`,
-      answer,
+        VOPROS_A02[vopros],
+      answer: r.answer,
       verify,
       params: { n1, r1: r1.toNumber(), n2, r2: r2.toNumber() },
       rows: differentiated(100, n2, r2),
       scheme: 'dif',
       period: 'year',
-      solution: [
-        stTable(
-          'Сумма кредита одна и та же, поэтому сравниваем переплату в процентах от кредита. Таблица для второго банка — при кредите 100 %.',
-        ),
-        stDerive('year'),
-        step(
-          'Первый банк',
-          'Переплата в процентах от кредита.',
-          `\\frac{${n1}+1}{2}\\cdot ${tex(r1)}\\,\\% = ${tex(p1)}\\,\\%`,
-        ),
-        step(
-          'Второй банк',
-          'Так же для второго банка.',
-          `\\frac{${n2}+1}{2}\\cdot ${tex(r2)}\\,\\% = ${tex(p2)}\\,\\%`,
-        ),
-        stAnswer(
-          `Выгоднее ${better} банк, переплата меньше на ${tex(answer).replace('{,}', ',')} % от суммы кредита.`,
-        ),
-      ],
+      solution: r.shagi,
+      ...(vopros === 'vo-skolko' ? { units: 'none' as const } : {}),
+      vopros:
+        vopros === 'vo-skolko' ? 'vo-skolko' : vopros === 'ot-summy' ? 'ot-summy' : 'ot-pereplaty',
       hints: hintsA(rng.int(0, 2), [
         choice(
-          'С чем сравниваем переплату?',
-          'С суммой кредита: она в обоих банках одна',
-          ['С годовой ставкой', 'Со сроком кредита'],
+          'Что берём за 100 %?',
+          vopros === 'ot-summy'
+            ? 'Сумму кредита: так сказано в вопросе'
+            : vopros === 'vo-skolko'
+              ? 'Ничего: «во сколько раз» — это отношение'
+              : 'Переплату банка, с которым сравнивают',
+          vopros === 'ot-summy'
+            ? ['Переплату первого банка', 'Годовую ставку']
+            : vopros === 'vo-skolko'
+              ? ['Сумму кредита', 'Переплату первого банка']
+              : ['Сумму кредита', 'Годовую ставку'],
           rng.int(0, 2),
         ),
       ]),
@@ -290,23 +411,25 @@ const A04: Prototype = {
       rows,
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable(
-          'Сумма кредита неизвестна и не нужна: примем её за 100 % и будем считать всё в процентах от кредита.',
-        ),
-        stDerive(),
-        step(
-          'Составляем уравнение',
-          `Переплата — это ${num(p)} % от $S$.`,
-          `S\\cdot\\frac{${n}+1}{2}\\cdot\\frac{r}{100} = \\frac{${tex(p)}}{100}\\,S \\;\\Rightarrow\\; \\frac{${n + 1}}{2}\\,r = ${tex(p)}`,
-        ),
-        step(
-          'Находим ставку',
-          'Делим обе части на коэффициент при $r$.',
-          `r = \\frac{${tex(p)}\\cdot 2}{${n + 1}} = ${tex(r)}`,
-        ),
-        stAnswer(`Месячная ставка — ${pct(r)}.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n, r: null }], 'month');
+        const x = (itogi[0] as DifItog).procentTex;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Общая сумма выплат больше кредита на переплату, а переплата — ${num(p)} % от суммы кредита. Составляем уравнение:`,
+            formula: `${x} = ${tex(p)} \\;\\Rightarrow\\; r = ${tex(r)}`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: '«Общая сумма выплат превысила сумму кредита на … %» — за 100 % берём сумму кредита $S$: проценты переплаты посчитаны от неё.',
+            vid: 'vnimanie',
+          },
+          stAnswer(`Месячная ставка — ${pct(r)}.`),
+        ];
+      })(),
+      vopros: 'stavka',
       hints: hintsA(rng.int(0, 2), [
         choice(
           'Какое уравнение получается?',
@@ -350,23 +473,25 @@ const A05: Prototype = {
       rows,
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable(
-          'Срок обозначим $n$. Сумма изменения долга каждый месяц $\\dfrac{S}{n}$, переплата за месяц — от долга на начало.',
-        ),
-        stDerive(),
-        step(
-          'Составляем уравнение',
-          `Переплата — это ${num(p)} % от $S$; «на ${num(p)} % больше суммы кредита» — 100 % здесь сумма кредита.`,
-          `S\\cdot\\frac{n+1}{2}\\cdot\\frac{${tex(r)}}{100} = \\frac{${tex(p)}}{100}\\,S`,
-        ),
-        step(
-          'Находим срок',
-          'Сокращаем на $S$ и на сотню.',
-          `n + 1 = \\frac{2\\cdot ${tex(p)}}{${tex(r)}} = ${n + 1} \\;\\Rightarrow\\; n = ${n}`,
-        ),
-        stAnswer(`Кредит взят на ${months(n)}.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n: null, r }], 'month');
+        const x = (itogi[0] as DifItog).procentTex;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Сумма выплат на ${num(p)} % больше кредита, значит переплата — ${num(p)} % от $S$. Составляем уравнение:`,
+            formula: `${x} = ${tex(p)} \\;\\Rightarrow\\; n + 1 = \\dfrac{2\\cdot ${tex(p)}}{${tex(r)}} = ${n + 1} \\;\\Rightarrow\\; n = ${n}`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: '«На … % больше суммы, взятой в кредит» — за 100 % берём сумму кредита $S$ (она стоит после «чем» / «суммы»).',
+            vid: 'vnimanie',
+          },
+          stAnswer(`Кредит взят на ${months(n)}.`),
+        ];
+      })(),
+      vopros: 'srok',
       hints: hintsA(rng.int(0, 2), [
         choice(
           'Что принимаем за 100 %?',
@@ -540,16 +665,25 @@ const A08: Prototype = {
       rows,
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable('Примем сумму кредита за 100 %: тогда переплата сразу получится в процентах.'),
-        stDerive(),
-        step(
-          'Считаем',
-          'Подставляем срок и ставку.',
-          `\\frac{${n}+1}{2}\\cdot ${tex(r)}\\,\\% = ${tex(p)}\\,\\%`,
-        ),
-        stAnswer(`На ${pct(p)} больше.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n, r }], 'month');
+        const x = (itogi[0] as DifItog).procentTex;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: 'Заплатить придётся сумму кредита и переплату — больше кредита ровно на переплату:',
+            formula: `x = ${x}\\,\\%`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: '«По отношению к сумме кредита» — за 100 % берём сумму кредита $S$, поэтому ответ — переплата в процентах от $S$.',
+            vid: 'vnimanie',
+          },
+          stAnswer(`На ${pct(p)} больше.`),
+        ];
+      })(),
+      vopros: 'procent',
       hints: hintsA(rng.int(0, 2)),
     };
   },
@@ -834,21 +968,25 @@ const A12: Prototype = {
       rows: differentiated(100, n, t),
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable('Сумму кредита примем за 100 %.'),
-        stDerive(),
-        step(
-          'Составляем уравнение',
-          `Переплата — ${num(p)} % от $S$.`,
-          `\\frac{${n}+1}{2}\\cdot t = ${tex(p)}`,
-        ),
-        step(
-          'Находим $t$',
-          'Делим на коэффициент при $t$.',
-          `t = \\frac{2\\cdot ${tex(p)}}{${n + 1}} = ${tex(t)}`,
-        ),
-        stAnswer(`$t = ${tex(t)}$.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n, r: null, bukva: 't' }], 'month');
+        const x = (itogi[0] as DifItog).procentTex;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Сумма выплат на ${num(p)} % больше кредита, значит переплата — ${num(p)} % от $S$. Составляем уравнение:`,
+            formula: `${x} = ${tex(p)} \\;\\Rightarrow\\; t = ${tex(t)}`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: '«На … % больше, чем сумма, взятая в кредит» — за 100 % берём сумму кредита $S$.',
+            vid: 'vnimanie',
+          },
+          stAnswer(`$t = ${tex(t)}$.`),
+        ];
+      })(),
+      vopros: 'stavka',
       hints: hintsA(rng.int(0, 2)),
     };
   },
@@ -888,21 +1026,34 @@ const A13: Prototype = {
       rows: differentiated(S, n1, r),
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable(`Таблица для срока ${n1} месяцев; для ${n2} месяцев она устроена так же.`),
-        stDerive(),
-        step(
-          'Разность переплат',
-          'Сумма кредита одна и та же, поэтому разница сумм выплат — это разница переплат.',
-          `${tex(S)}\\cdot\\frac{${tex(r)}}{100}\\cdot\\Big(\\frac{${n2 + 1}}{2} - \\frac{${n1 + 1}}{2}\\Big) = ${tex(S)}\\cdot\\frac{${tex(r)}}{100}\\cdot\\frac{${n2 - n1}}{2} = ${tex(diff)}`,
-        ),
-        step(
-          'Переводим в рубли',
-          'Считали в тысячах, ответ нужен в рублях.',
-          `${tex(diff)}\\ \\text{тыс.} = ${tex(answer)}\\ \\text{руб.}`,
-        ),
-        stAnswer(`На ${money(answer, 'rub')} больше.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata(
+          [
+            { n: n1, r, imya: `срок ${months(n1)}`, kogo: `срока ${months(n1)}` },
+            { n: n2, r, imya: `срок ${months(n2)}`, kogo: `срока ${months(n2)}` },
+          ],
+          'month',
+          { bezProcentov: true },
+        );
+        const [i1, i2] = itogi as [DifItog, DifItog];
+        const k1 = i1.koef as Drob;
+        const k2 = i2.koef as Drob;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Сумма кредита одна и та же, поэтому разница сумм выплат — это разница переплат. Подставляем $S = ${tex(S)}$ тыс. рублей:`,
+            formula: `P_{2} - P_{1} = ${tex(k2)}S - ${tex(k1)}S = ${tex(k2.sub(k1))}\\cdot ${tex(S)} = ${tex(diff)}\\ \\text{тыс.} = ${tex(answer)}\\ \\text{руб.}`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: '«На сколько рублей больше» — это разность, и ответ нужен в рублях: тысячи переводим в рубли.',
+            vid: 'vnimanie',
+          },
+          stAnswer(`На ${money(answer, 'rub')} больше.`),
+        ];
+      })(),
+      vopros: 'rubli',
       hints: hintsA(rng.int(0, 2), [
         choice(
           'В каких единицах ответ?',
@@ -949,22 +1100,25 @@ const A15: Prototype = {
       rows: differentiated(S, n, r),
       scheme: 'dif',
       period: 'month',
-      solution: [
-        stTable('Сумму кредита обозначим $S$ и будем считать в тысячах рублей.'),
-        stDerive(),
-        stTotal(),
-        step(
-          'Составляем уравнение',
-          'Подставляем срок, ставку и общую сумму.',
-          `S\\Big(1 + \\frac{${n + 1}}{2}\\cdot\\frac{${tex(r)}}{100}\\Big) = ${tex(Z)} \\;\\Rightarrow\\; ${tex(coef)}\\,S = ${tex(Z)}`,
-        ),
-        step(
-          'Находим $S$ и переводим в рубли',
-          'Делим и переводим тысячи в рубли.',
-          `S = ${tex(S)}\\ \\text{тыс.} = ${tex(S.mul(1000))}\\ \\text{руб.}`,
-        ),
-        stAnswer(`В кредит взято ${money(S.mul(1000), 'rub')}.`),
-      ],
+      solution: (() => {
+        const { shagi, itogi } = difPereplata([{ n, r }], 'month', { bezProcentov: true });
+        const k = (itogi[0] as DifItog).koef as Drob;
+        return [
+          ...shagi,
+          {
+            title: 'Отвечаем на вопрос задачи',
+            text: `Общая сумма выплат — кредит и переплата: $S + P = S + ${tex(k)}S = ${tex(coef)}S$. Составляем уравнение (в тысячах рублей):`,
+            formula: `${tex(coef)}S = ${tex(Z)} \\;\\Rightarrow\\; S = ${tex(S)}\\ \\text{тыс.} = ${tex(S.mul(1000))}\\ \\text{руб.}`,
+          },
+          {
+            title: 'Внимание на формулировку',
+            text: 'Ответ нужен в рублях, а суммы в условии — в тысячах: переводим.',
+            vid: 'vnimanie',
+          },
+          stAnswer(`В кредит взято ${money(S.mul(1000), 'rub')}.`),
+        ];
+      })(),
+      vopros: 'summa',
       hints: hintsA(rng.int(0, 2), [
         choice(
           'В каких единицах ответ?',
@@ -1235,6 +1389,21 @@ const A19: Prototype = {
   },
 };
 
+/**
+ * У каждой задачи решение начинается с шага «Определяем тип платежа»:
+ * у прототипов шаблона он уже есть, остальным добавляется здесь.
+ */
+function sTipom(p: Prototype): Prototype {
+  return {
+    ...p,
+    make(ctx) {
+      const d = p.make(ctx);
+      if (d !== null && d.solution[0]?.title !== TIP_VYVOD.A.title) d.solution.unshift(stTip());
+      return d;
+    },
+  };
+}
+
 export const PROTO_A: Prototype[] = [
   A01,
   A02,
@@ -1255,4 +1424,4 @@ export const PROTO_A: Prototype[] = [
   A17,
   A18,
   A19,
-];
+].map(sTipom);
