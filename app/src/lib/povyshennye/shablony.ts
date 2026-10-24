@@ -68,7 +68,8 @@ import type { Params as Params7 } from '@/lib/zadanie7/types';
 import type { Params as Params6 } from '@/lib/zadanie6/types';
 import type { Params as ParamsVer } from '@/lib/veroyatnost/types';
 import type { Params as Params10 } from '@/lib/zadanie10/types';
-import type { Params as Params11 } from '@/lib/zadanie11/types';
+import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
+import { ocheredno } from '@/lib/zadanie11/prototypes/povyshennye';
 import { razborUchenika } from '@/lib/variant/adapters/z01';
 import { build as build02 } from '@/lib/variant/adapters/z02';
 import { studentHtml, teacherHtml, type Razbor45 } from '@/lib/variant/adapters/z04/veroyatnost';
@@ -386,6 +387,23 @@ function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Go
       z: { id: klyuch, prototypeId: proto, source: 'analog', text: tekst, params },
     }),
   );
+}
+
+/* ── №11 ────────────────────────────────────────────────────────── */
+
+/** Задача №11 по решателю подтипа, условие — свой текст сюжета. */
+function z11(
+  id: string,
+  p: Params11 & { tekst: string },
+  klyuch: string,
+  solve: (x: Params11) => Solved11,
+): Gotovaya {
+  const { tekst, ...params } = p;
+  const t = build11(
+    { ...kand, prototypeId: id, iz: { vid: 'new', seed: klyuch, params } },
+    solve(params),
+  );
+  return bezPoley({ ...t, statement: typesetKrupno(tekst) });
 }
 
 /* ── №12 ────────────────────────────────────────────────────────── */
@@ -770,14 +788,24 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Текстовые, движение: «за час на … км больше, прибыл раньше» (DP-09), спрашивают скорость быстрого',
     otkuda: 'razdel',
-    zadacha: (p: Params11 & { tekst: string }, klyuch: string) => {
-      const { tekst, ...params } = p;
-      const t = build11(
-        { ...kand, prototypeId: 'DP-09', iz: { vid: 'new', seed: klyuch, params } },
-        subtype11('DP-09').solve({ ...params, ask: 'bys' }),
-      );
-      return bezPoley({ ...t, statement: typesetKrupno(tekst) });
-    },
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('DP-09', p, klyuch, (x) => subtype11('DP-09').solve({ ...x, ask: 'bys' })),
+  },
+  'z11.sobstvennaya': {
+    ege: 11,
+    prototip:
+      'Текстовые, движение по воде: туда и обратно со стоянкой, собственная скорость (ВД-02)',
+    otkuda: 'razdel',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('VD-02', p, klyuch, (x) => subtype11('VD-02').solve(x)),
+  },
+  'z11.ocheredno': {
+    ege: 11,
+    prototip:
+      'Текстовые, работа: три одинаковых рабочих подключаются по очереди — сколько длилась работа (как РБ, таблица A | p | t)',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PV11-OCHEREDNO', p, klyuch, ocheredno),
   },
   'z12.k-log': {
     ege: 12,

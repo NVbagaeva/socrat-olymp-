@@ -55,8 +55,13 @@ export interface C11 extends Candidate {
   iz: Iz;
 }
 
-function stars(id: string): Stars {
-  return subtype(id).level;
+function stars(id: string): Stars | null {
+  /* Своих подтипов раздела вариантов в SUBTYPES нет — у них звёзд нет. */
+  try {
+    return subtype(id).level;
+  } catch {
+    return null;
+  }
 }
 
 function fromBank(b: UslovieBanka): C11 | null {
