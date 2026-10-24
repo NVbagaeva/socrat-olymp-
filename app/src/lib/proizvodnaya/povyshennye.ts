@@ -21,6 +21,9 @@ import { grafikP } from './uslovie';
 
 const MINUS_PLUS = 'с $-$ на $+$';
 const PLUS_MINUS = 'с $+$ на $-$';
+/* В вопросах подсказки знаки — в кавычках. */
+const MINUS_PLUS_K = 'с «$-$» на «$+$»';
+const PLUS_MINUS_K = 'с «$+$» на «$-$»';
 
 export interface MaxNaOtrezke {
   /** Узлы волны f′: [x, y], x по возрастанию, концы — границы интервала. */
@@ -143,7 +146,7 @@ function ekstremumNaOtrezke(par: MaxNaOtrezke, tip: Tip): Generated | null {
       vopros(
         r,
         `Как на графике $f'$ узнать точку ${w.imyaR} функции $f$?`,
-        `$f'$ пересекает ось $Ox$, меняя знак ${w.znak}`,
+        `$f'$ пересекает ось $Ox$, меняя знак ${tip === 'max' ? PLUS_MINUS_K : MINUS_PLUS_K}`,
         [
           {
             tekst:
@@ -153,7 +156,7 @@ function ekstremumNaOtrezke(par: MaxNaOtrezke, tip: Tip): Generated | null {
             pochemu: "Вершина графика $f'$ — экстремум производной, а не функции $f$.",
           },
           {
-            tekst: `$f'$ пересекает ось $Ox$, меняя знак ${w.drugoyZnak}`,
+            tekst: `$f'$ пересекает ось $Ox$, меняя знак ${tip === 'max' ? MINUS_PLUS_K : PLUS_MINUS_K}`,
             pochemu:
               tip === 'max'
                 ? 'Так выглядит точка минимума: функция сначала убывает, потом возрастает.'
@@ -284,7 +287,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
           ? "Как на графике $f'$ узнать точку максимума функции $f$?"
           : "Как на графике $f'$ узнать точку экстремума функции $f$?",
         tip === 'max'
-          ? `$f'$ пересекает ось $Ox$, меняя знак ${PLUS_MINUS}`
+          ? `$f'$ пересекает ось $Ox$, меняя знак ${PLUS_MINUS_K}`
           : "$f'$ пересекает ось $Ox$ (меняет знак)",
         [
           {
@@ -293,7 +296,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
           },
           tip === 'max'
             ? {
-                tekst: `$f'$ пересекает ось $Ox$, меняя знак ${MINUS_PLUS}`,
+                tekst: `$f'$ пересекает ось $Ox$, меняя знак ${MINUS_PLUS_K}`,
                 pochemu: 'Так выглядит точка минимума.',
               }
             : {

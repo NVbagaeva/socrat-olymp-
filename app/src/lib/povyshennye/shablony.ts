@@ -45,7 +45,10 @@ import {
 } from '@/lib/vychisleniya/povyshennye';
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
-import { P03_86 } from '@/lib/zadanie3/razdel8/cilindr';
+import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
+import { P03_85, P03_86 } from '@/lib/zadanie3/razdel8/cilindr';
+import { P03_90, P03_91 } from '@/lib/zadanie3/razdel8/sfera-konus';
+import type { Params as Params3, Prototype as Proto3 } from '@/lib/zadanie3/types';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
 import { PV7_KOREN, PV7_LOG_KVADRAT, PV7_LOG_STEPENI } from '@/lib/zadanie7/prototypes/povyshennye';
 import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
@@ -148,29 +151,66 @@ function z01(proto: number, params: Record<string, number>): Gotovaya {
 
 /* ── №3 ─────────────────────────────────────────────────────────── */
 
-function z03(p: { V: number }): Gotovaya {
-  const proto = P03_86;
+/** Подсказки к шару, вписанному в цилиндр (P03-86, P03-85). */
+const HINTS_SHAR_CILINDR: HintLike[] = [
+  {
+    question: 'Как связаны размеры цилиндра и вписанного в него шара?',
+    options: [
+      'Радиус основания равен радиусу шара, высота — диаметру',
+      'Высота цилиндра равна радиусу шара',
+      'Радиус основания вдвое больше радиуса шара',
+    ],
+    correct: 0,
+  },
+  {
+    question: 'Какую часть объёма цилиндра занимает шар?',
+    options: ['$\\dfrac23$', '$\\dfrac12$', '$\\dfrac34$'],
+    correct: 0,
+    comment: '$V_{\\text{шара}}=\\dfrac43\\pi R^3$, $V_{\\text{цил}}=\\pi R^2\\cdot 2R=2\\pi R^3$.',
+  },
+];
+
+/** Подсказки к конусу, вписанному в шар (P03-90, P03-91). */
+const HINTS_KONUS_SHAR: HintLike[] = [
+  {
+    question: 'Чему равна высота конуса, если радиус его основания равен радиусу шара?',
+    options: ['Радиусу шара', 'Диаметру шара', 'Половине радиуса шара'],
+    correct: 0,
+    comment: 'Основание — большой круг шара, центр шара — центр основания, вершина лежит на шаре.',
+  },
+  {
+    question: 'Во сколько раз объём шара больше объёма конуса?',
+    options: ['В 4 раза', 'В 3 раза', 'В 2 раза'],
+    correct: 0,
+    comment:
+      '$V_{\\text{шара}}=\\dfrac43\\pi R^3$, $V_{\\text{кон}}=\\dfrac13\\pi R^2\\cdot R=\\dfrac13\\pi R^3$.',
+  },
+];
+
+/** Подсказки к призме, описанной около цилиндра (P03-74S). */
+const HINTS_PRIZMA_CILINDR: HintLike[] = [
+  {
+    question: 'Чему равна сторона основания призмы?',
+    options: ['Диаметру цилиндра', 'Радиусу цилиндра', 'Высоте цилиндра'],
+    correct: 0,
+    comment: 'Круг основания цилиндра вписан в квадрат основания призмы.',
+  },
+  {
+    question: 'Из чего складывается полная поверхность призмы?',
+    options: [
+      'Два квадрата-основания и четыре прямоугольные боковые грани',
+      'Только четыре боковые грани',
+      'Одно основание и четыре боковые грани',
+    ],
+    correct: 0,
+  },
+];
+
+function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Gotovaya {
   const otvetChislo = proto.otvet(p);
   const otvet = answerHtml(otvetChislo);
   const shagi = proto.shagi(p).map((s) => s.text.replace(/\n/g, ' '));
-  const hints: HintLike[] = [
-    {
-      question: 'Как связаны размеры цилиндра и вписанного в него шара?',
-      options: [
-        'Радиус основания равен радиусу шара, высота — диаметру',
-        'Высота цилиндра равна радиусу шара',
-        'Радиус основания вдвое больше радиуса шара',
-      ],
-      correct: 0,
-    },
-    {
-      question: 'Какую часть объёма цилиндра занимает шар?',
-      options: ['$\\dfrac23$', '$\\dfrac12$', '$\\dfrac34$'],
-      correct: 0,
-      comment:
-        '$V_{\\text{шара}}=\\dfrac43\\pi R^3$, $V_{\\text{цил}}=\\pi R^2\\cdot 2R=2\\pi R^3$.',
-    },
-  ];
+  const h = peremeshat(hints, klyuch);
   return {
     egeNumber: 3,
     difficulty: null,
@@ -182,10 +222,10 @@ function z03(p: { V: number }): Gotovaya {
     solutionTeacher:
       `<ol class="sheet-steps">${shagi.map((t) => `<li class="sheet-step">${typeset(t)}</li>`).join('')}</ol>` +
       razborAnswer(otvet),
-    hints: hintSteps(peremeshat(hints, `z03|${p.V}`)),
+    hints: hintSteps(h),
     solutionStudent:
       studentFromHints(
-        peremeshat(hints, `z03|${p.V}`),
+        h,
         shagi.map((t) => ({ title: t, lines: [] })),
       ) + razborAnswer(otvet),
     fallbacks: [],
@@ -430,7 +470,33 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 3,
     prototip: 'Стереометрия, раздел VIII: объём шара, вписанного в цилиндр (P03-86)',
     otkuda: 'razdel',
-    zadacha: (p: { V: number }) => z03(p),
+    zadacha: (p: { V: number }) => z03(P03_86, p, HINTS_SHAR_CILINDR, `z03|${p.V}`),
+  },
+  'z03.cilindr-okolo-shara': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел VIII: объём цилиндра, описанного около шара (P03-85)',
+    otkuda: 'razdel',
+    zadacha: (p: { V: number }) => z03(P03_85, p, HINTS_SHAR_CILINDR, `z03c|${p.V}`),
+  },
+  'z03.prizma-okolo-cilindra': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел VII: полная поверхность правильной четырёхугольной призмы около цилиндра (как P03-74, где спрашивают объём)',
+    otkuda: 'novyy',
+    zadacha: (p: { r: number; h: number }) =>
+      z03(P03_74S, p, HINTS_PRIZMA_CILINDR, `z03p|${p.r}|${p.h}`),
+  },
+  'z03.konus-v-share': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел VIII: конус в шаре, r конуса = R шара — объём конуса (P03-91)',
+    otkuda: 'razdel',
+    zadacha: (p: { V: number }) => z03(P03_91, p, HINTS_KONUS_SHAR, `z03k|${p.V}`),
+  },
+  'z03.shar-okolo-konusa': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел VIII: конус в шаре, r конуса = R шара — объём шара (P03-90)',
+    otkuda: 'razdel',
+    zadacha: (p: { V: number }) => z03(P03_90, p, HINTS_KONUS_SHAR, `z03s|${p.V}`),
   },
   'z04.ne-menee': {
     ege: 4,

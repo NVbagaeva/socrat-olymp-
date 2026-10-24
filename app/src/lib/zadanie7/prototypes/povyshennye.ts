@@ -46,6 +46,14 @@ function pokazatel(p: Params): { k: number; b: number; por: Poryadok } {
   return { k, b: num(p, 'b'), por };
 }
 
+/** kx + b с подставленным x: «2-1{,}25», «3\\cdot(-2)+5». */
+function linPodst(k: number, b: number, x: ReturnType<typeof q>, por: Poryadok): string {
+  const xs = val(x) < 0 ? `(${t(x)})` : t(x);
+  const kx = k === 1 ? xs : k === -1 ? `-${xs}` : `${d(k)}\\cdot ${xs}`;
+  if (por === 'bx') return kx.startsWith('-') ? `${d(b)}${kx}` : `${d(b)}+${kx}`;
+  return b < 0 ? `${kx}-${d(-b)}` : `${kx}+${d(b)}`;
+}
+
 function uravnenie(p: Params): string {
   const c = num(p, 'c');
   const a = num(p, 'a');
@@ -114,7 +122,7 @@ export const PV7_KOREN: Prototype = {
         ],
         korni: [`$x=${t(x)}$ — единственный корень (показательная функция монотонна).`],
         proverka: [
-          `При $x=${t(x)}$ показатель слева $${E}=${t(Ex)}$, левая часть $${pw(d(a), `${d(s)}\\cdot${t(Ex)}`)}=${pw(d(a), t(mul(q(s), Ex)))}$; правая часть $${pw(d(a), t(pravyy))}$ — равны.`,
+          `При $x=${t(x)}$ показатель слева $${linPodst(k, b, x, por)}=${t(Ex)}$, левая часть $${pw(d(a), `${d(s)}\\cdot${t(Ex)}`)}=${pw(d(a), t(mul(q(s), Ex)))}$; правая часть $${pw(d(a), t(pravyy))}$ — равны.`,
         ],
         answer: ans,
       }),
