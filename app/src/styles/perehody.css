@@ -19,7 +19,9 @@
    Transitions тоже переключают мгновенно. */
 
 @media (prefers-reduced-motion: no-preference) {
-  .tabs--lenta a[role='tab'][aria-selected='true'] {
+  /* Имя перехода должно быть одно на страницу, а лента вкладок стоит
+     в двух копиях (плитки и липкая панель): имя — у видимой. */
+  .topic-tabs-row:not([inert]) .tabs--lenta a[role='tab'][aria-selected='true'] {
     view-transition-name: razdel-vkladka;
   }
 
