@@ -5,6 +5,7 @@ import { generatorPage } from '@/content/generator';
 import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
 import { typeset } from '@/lib/tex';
 import { skillItems } from '../configurator/skillItems';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { GeneratorScreen } from './GeneratorScreen';
 
 export interface GeneratorTabProps {
@@ -28,13 +29,16 @@ export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
      коэффициент b. Плашка «откуда задания» у всех подтем одна: наборы —
      прототипы открытого банка ФИПИ. */
   return (
-    <GeneratorScreen
-      base={base}
-      family={subtopic.title}
-      familyIcon={icon}
-      skills={skillItems(family)}
-      levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-      note={generatorPage.summary.note}
-    />
+    <>
+      <VariantFromSection />
+      <GeneratorScreen
+        base={base}
+        family={subtopic.title}
+        familyIcon={icon}
+        skills={skillItems(family)}
+        levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
+        note={generatorPage.summary.note}
+      />
+    </>
   );
 }

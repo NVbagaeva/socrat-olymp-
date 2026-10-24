@@ -29,7 +29,20 @@
 import { storage } from '@/lib/storage';
 
 /** Область комплекта — задание, чей генератор его собрал. */
-export type KitScope = '12' | '1' | '2' | '4' | '5' | '6' | '7' | '8' | '9' | '11' | '13';
+export type KitScope =
+  | '12'
+  | '1'
+  | '2'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '11'
+  | '13'
+  /** «Собрать вариант» (lib/variant): все задания первой части. */
+  | 'variant';
 
 export type SheetWhich = 'student' | 'teacher';
 

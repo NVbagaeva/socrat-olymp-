@@ -30,18 +30,18 @@
 
 /* ── Ч/б: штриховка вместо заливки ─────────────────────────────── */
 
-:root[data-sheet-theme='print'] .pr-tile--favorable rect,
-:root[data-sheet-theme='print'] .pr-cell--favorable rect,
-:root[data-sheet-theme='print'] .pr-unit--highlighted,
-:root[data-sheet-theme='print'] .pr-part {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable rect,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable rect,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-unit--highlighted,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-part {
   fill: url(#sheet-hatch);
   fill-opacity: 1;
   stroke: var(--sheet-ink);
 }
 
 /* Подпись на штриховке: чёрная с белой обводкой, чтобы читалась. */
-:root[data-sheet-theme='print'] .pr-tile--favorable text,
-:root[data-sheet-theme='print'] .pr-cell--favorable text {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable text,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable text {
   fill: var(--sheet-ink);
   stroke: var(--sheet-paper);
   stroke-width: 3px;
@@ -50,60 +50,62 @@
 }
 
 /* Плитки и клетки без заливки: только контур. */
-:root[data-sheet-theme='print'] .pr-tile rect,
-:root[data-sheet-theme='print'] .pr-cell rect,
-:root[data-sheet-theme='print'] .pr-whole {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile rect,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell rect,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-whole {
   fill: var(--sheet-paper);
 }
-:root[data-sheet-theme='print'] .pr-tile--favorable rect,
-:root[data-sheet-theme='print'] .pr-cell--favorable rect {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable rect,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable rect {
   fill: url(#sheet-hatch);
 }
 
 /* Координатная прямая: области условий — редкой штриховкой в разные
    стороны, пересечение выходит клеткой; сам благоприятный отрезок
    на оси — толстая чёрная линия. */
-:root[data-sheet-theme='print'] .pr-band {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band {
   fill: url(#sheet-hatch-light);
   fill-opacity: 1;
 }
-:root[data-sheet-theme='print'] .pr-band ~ .pr-band {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band ~ .pr-band {
   fill: url(#sheet-hatch-back);
 }
-:root[data-sheet-theme='print'] .pr-favorable {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-favorable {
   stroke-width: 7;
 }
-:root[data-sheet-theme='print'] .pr-bound {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-bound {
   fill: var(--sheet-paper);
 }
-:root[data-sheet-theme='print'] .pr-bound--inclusive {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-bound--inclusive {
   fill: var(--sheet-ink);
 }
 
 /* Дерево: смысл несёт толщина. Выделенный путь толстый, остальные
    тонкие; полупрозрачного приглушения нет. */
-:root[data-sheet-theme='print'] .pr-branch line {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch line {
   stroke: var(--sheet-ink);
   stroke-width: 1.2;
 }
-:root[data-sheet-theme='print'] .pr-branch--highlighted line {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--highlighted line {
   stroke-width: 4.5;
 }
-:root[data-sheet-theme='print'] .pr-branch--dimmed,
-:root[data-sheet-theme='print'] .pr-leaf--dimmed,
-:root[data-sheet-theme='print'] .pr-unit--dimmed,
-:root[data-sheet-theme='print'] .pr-legend--dimmed {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--dimmed,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-leaf--dimmed,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-unit--dimmed,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-legend--dimmed {
   opacity: 1;
 }
-:root[data-sheet-theme='print'] .pr-branch--dimmed .pr-branch-p,
-:root[data-sheet-theme='print'] .pr-branch--dimmed .pr-branch-label,
-:root[data-sheet-theme='print'] .pr-leaf--dimmed {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--dimmed .pr-branch-p,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+  .pr-branch--dimmed
+  .pr-branch-label,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-leaf--dimmed {
   fill: var(--sheet-ink-3);
 }
 
 /* Подпись условия над штрихованной областью — с белой обводкой,
    иначе на штрихах она не читается. */
-:root[data-sheet-theme='print'] .pr-band-label {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band-label {
   stroke: var(--sheet-paper);
   stroke-width: 4px;
   paint-order: stroke;
@@ -126,18 +128,22 @@
    ксероксе от них остаётся грязь. Остаются стены сплошными чернилами
    и подписи. Классов в файле нет, поэтому селекторы по атрибутам:
    тело стен — заливка градиентом, декор — обводки, кружки и вставки. */
-:root[data-sheet-theme='print'] .sheet-labirint * {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint * {
   filter: none;
 }
-:root[data-sheet-theme='print'] .sheet-labirint path[fill='url(#glass)'] {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+  .sheet-labirint
+  path[fill='url(#glass)'] {
   fill: var(--sheet-ink);
 }
-:root[data-sheet-theme='print'] .sheet-labirint g[clip-path],
-:root[data-sheet-theme='print'] .sheet-labirint path[stroke]:not([stroke='none']),
-:root[data-sheet-theme='print'] .sheet-labirint circle,
-:root[data-sheet-theme='print'] .sheet-labirint use {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint g[clip-path],
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+  .sheet-labirint
+  path[stroke]:not([stroke='none']),
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint circle,
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint use {
   display: none;
 }
-:root[data-sheet-theme='print'] .sheet-labirint text {
+:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint text {
   fill: var(--sheet-ink);
 }

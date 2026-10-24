@@ -6,6 +6,7 @@ import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { KARTINKI_SYUZHETOV } from '@/content/veroyatnost-syuzhety';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', vkladka('4', 'generator')),
@@ -25,6 +26,7 @@ export default function Generator4Tab() {
     <>
       {/* Название вкладки — H2 панели; у экрана генератора свой заголовок ниже. */}
       <h2 className="t-h2 vtab__title">{vkladka('4', 'generator')}</h2>
+      <VariantFromSection />
       <GeneratorSyuzhety
         zadanie={4}
         base={`${ZADANIYA}/4`}
