@@ -201,3 +201,55 @@
   width: 100%;
   height: 100%;
 }
+
+/* Карточки «Определи тип»: вырезать по сплошной, согнуть по пунктиру.
+   Оборот повёрнут на 180°: после сгиба карточку переворачивают вбок. */
+.z13-kartochka {
+  display: grid;
+  grid-template-rows: auto auto;
+  margin-bottom: calc(var(--sheet-step) * 2);
+  border: 0.75pt solid var(--sheet-ink);
+  break-inside: avoid;
+}
+.z13-kartochka__lico {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: calc(var(--sheet-step) * 2);
+  padding: 3mm;
+  font-size: var(--sheet-fs-body);
+}
+.z13-kartochka__no {
+  display: inline-grid;
+  place-items: center;
+  width: calc(var(--sheet-step) * 7);
+  height: calc(var(--sheet-step) * 7);
+  border-radius: var(--sheet-radius-md);
+  background: var(--sheet-chip-bg);
+  border: var(--sheet-chip-width) solid var(--sheet-chip-line);
+  color: var(--sheet-chip-ink);
+  font-weight: 700;
+}
+.z13-kartochka__uslovie p {
+  margin: 0;
+}
+.z13-kartochka__oborot {
+  display: grid;
+  gap: 1mm;
+  padding: 3mm;
+  border-top: 0.75pt dashed var(--sheet-ink);
+  font-size: var(--sheet-fs-body);
+  transform: rotate(180deg);
+}
+.z13-kartochka__oborot p {
+  margin: 0;
+}
+.z13-kartochka__skhema {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2mm;
+  align-items: baseline;
+}
+.z13-kartochka__skhema span {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}

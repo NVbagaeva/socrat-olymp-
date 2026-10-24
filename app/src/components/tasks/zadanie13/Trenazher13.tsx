@@ -5,6 +5,7 @@ import { TRENAZHER_13 } from '@/content/zadanie13';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { trenazher13 } from '@/lib/zadanie13/progress';
 import {
+  KLYUCH_VYBORA_13,
   NASTROYKI_13,
   planTrenirovki13,
   prototipKlyucha13,
@@ -25,7 +26,7 @@ import {
   type Trenazher13Ui,
 } from './trenazher13Sessiya';
 
-const KLYUCH_NASTROEK = 'budetege:zadanie-13:trenazher-vybor:v1';
+const KLYUCH_NASTROEK = KLYUCH_VYBORA_13;
 
 /* Выбор живёт в sessionStorage; компоненты подписаны на него, как на
    внешнее хранилище: на сервере и при первой отрисовке — выбор по умолчанию. */

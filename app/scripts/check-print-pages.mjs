@@ -74,6 +74,9 @@ const SHEETS = [
   ['Вариант', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00', [['ученик', '']]],
   ['Вариант', '/variant/pechat/', 'list=uchitel&kod=PR7T-407ZZ-00', [['учитель', '']]],
   ['Вариант', '/variant/pechat/', 'list=razbor&kod=PR7T-407ZZ-00', [['разбор', '']]],
+  /* №13, «Для репетиторов»: лист урока 6 (опорные, банк, новые, «Определи тип») и карточки. */
+  ['№13 урок', '/zadaniya/13/pechat/', 's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check'],
+  ['№13 карточки', '/zadaniya/13/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],
