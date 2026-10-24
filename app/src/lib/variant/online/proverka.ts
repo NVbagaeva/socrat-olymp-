@@ -106,3 +106,19 @@ export function scoreWork(numbers: readonly EgeNo[], right: readonly boolean[]):
     test: fullPartOne(numbers) ? testScore(primary) : null,
   };
 }
+
+/**
+ * Балл работы с частью 2: к части 1 прибавляются баллы 14–20 (оценка
+ * учителя или самопроверка). Тестовый балл — по той же шкале 0…33.
+ */
+export function withPart2(score: Score, part2: { ball: number; max: number } | null): Score {
+  if (part2 === null) return score;
+  const primary = score.primary + part2.ball;
+  const max = score.max + part2.max;
+  return {
+    primary,
+    max,
+    percent: max === 0 ? 0 : Math.round((primary / max) * 100),
+    test: score.test === null ? null : testScore(primary),
+  };
+}

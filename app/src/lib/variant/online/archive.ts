@@ -41,6 +41,8 @@ export interface ArchivedWork {
   test: number | null;
   seconds: number;
   tasks: ArchivedTask[];
+  /** Часть 2: балл по заданию (самопроверка или учитель); null — не оценено. */
+  part2?: { no: number; ball: number | null }[];
 }
 
 /** Хранилище архива: в браузере — IndexedDB, в проверках — память. */

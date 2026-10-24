@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { parseReshat } from '@/lib/variant/online/link';
 import { tasksSignature, loadSet } from '@/lib/variant/online/work';
-import type { WorkPayload } from '@/lib/variant/online/sessionUi';
+import { part2For, type WorkPayload } from '@/lib/variant/online/sessionUi';
 import { WorkRun } from './WorkRun';
 
 type State =
@@ -26,8 +26,8 @@ export function ReshatPage() {
   useEffect(() => {
     if (link === null) return undefined;
     let alive = true;
-    void loadSet(link.code)
-      .then((loaded) => {
+    void Promise.all([loadSet(link.code), part2For(link)])
+      .then(([loaded, part2]) => {
         if (!alive) return;
         const tasks = loaded?.set.variants[link.variant - 1]?.tasks;
         if (loaded === null || tasks === undefined) {
@@ -47,6 +47,7 @@ export function ReshatPage() {
               title: link.title,
               tasks,
               oshibki: null,
+              part2,
               sig: tasksSignature(tasks),
             },
           });

@@ -97,6 +97,7 @@ export const ONLINE_TEXT = {
       later: 'вернусь позже',
       right: 'верно',
       wrong: 'неверно',
+      scored: 'оценено',
     },
     task: (no: number) => `Задание ${no}`,
     figure: (no: number) => `Рисунок к заданию ${no}`,

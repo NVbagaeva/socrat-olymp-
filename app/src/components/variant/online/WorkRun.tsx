@@ -17,9 +17,13 @@ import {
   type WorkLink,
 } from '@/lib/variant/online/link';
 import { normalizeAnswer, sameAnswer } from '@/lib/variant/online/normalize';
+import { Chast2Itog } from '@/components/chast2/Chast2Itog';
+import { ballyChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import {
+  fullPartOne,
   localProverka,
   scoreWork,
+  withPart2,
   type Proverka,
   type WorkCheck,
 } from '@/lib/variant/online/proverka';
@@ -28,6 +32,7 @@ import {
   buildWork,
   isWorkPayload,
   packWork,
+  part2Of,
   readWorkUi,
   unpackWork,
   type WorkPayload,
@@ -107,11 +112,13 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
           scope={workScope(link.code, link.variant, link.mode)}
           what="вариант"
           isPayload={isWorkPayload}
-          count={(p) => p.tasks.length}
-          describe={(p, i) => ({
-            kind: `№${p.tasks[i]?.egeNumber ?? ''}`,
-            html: p.tasks[i]?.statement ?? '',
-          })}
+          count={(p) => p.tasks.length + part2Of(p).length}
+          describe={(p, i) => {
+            const z = part2Of(p)[i - p.tasks.length];
+            return z === undefined
+              ? { kind: `№${p.tasks[i]?.egeNumber ?? ''}`, html: p.tasks[i]?.statement ?? '' }
+              : { kind: `№${z.no}`, html: '' };
+          }}
           pack={packWork}
           unpack={unpackWork}
           labels={{
@@ -153,7 +160,7 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
             <StartScreen
               link={link}
               title={title}
-              count={initial.tasks.length}
+              count={initial.tasks.length + part2Of(initial).length}
               outdated={outdated}
               onStart={() => start({ ...initial })}
             />
@@ -244,6 +251,10 @@ function Finished({
 }) {
   const proverka: Proverka = useMemo(() => localProverka(payload.tasks), [payload]);
   const [check, setCheck] = useState<WorkCheck | null>(null);
+  const part2 = useMemo(() => part2Of(payload), [payload]);
+  /* Самопроверка части 2 продолжается на экране результатов. */
+  const [chast2, setChast2] = useState<Chast2Ui>(ui.chast2);
+  const [finishedAtMs] = useState(() => Date.now());
   const [volatile, setVolatile] = useState(false);
   const answers = useMemo(() => firstAttempts(payload, ui), [payload, ui]);
   const result: ResultData = useMemo(
@@ -264,44 +275,62 @@ function Finished({
     [payload, ui, answers, seconds],
   );
   const code = useMemo(() => encodeResult(result), [result]);
-  const saved = useRef(false);
 
   useEffect(() => {
     let alive = true;
     void proverka.finish(answers).then((c) => {
-      if (!alive) return;
-      setCheck(c);
-      if (saved.current) return;
-      saved.current = true;
-      const numbers = payload.tasks.map((t) => t.egeNumber);
-      const score = scoreWork(numbers, c.right);
-      const finishedAt = Date.now();
-      void saveWork({
-        id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
-        code: payload.code,
-        variant: payload.variant,
-        mode: payload.mode,
-        title,
-        finishedAt,
-        resultCode: code,
-        primary: score.primary,
-        max: score.max,
-        test: score.test,
-        seconds,
-        tasks: payload.tasks.map((t, i) => ({
-          egeNumber: t.egeNumber,
-          right: c.right[i] === true,
-          empty: (answers[i] ?? '') === '',
-          seconds: result.tasks[i]?.seconds ?? 0,
-        })),
-      }).then(() => {
-        if (alive) setVolatile(archiveVolatile());
-      });
+      if (alive) setCheck(c);
     });
     return () => {
       alive = false;
     };
-  }, [proverka, answers, payload, title, code, seconds, result]);
+  }, [proverka, answers]);
+
+  /* В архив — после проверки и при каждой смене самооценки части 2
+     (та же запись: ключ по времени завершения). */
+  useEffect(() => {
+    if (check === null) return;
+    const numbers = payload.tasks.map((t) => t.egeNumber);
+    const p2 =
+      part2.length === 0
+        ? null
+        : ballyChast2(
+            part2.map((z) => z.no),
+            chast2.ball,
+          );
+    const score = withPart2(
+      scoreWork(numbers, check.right),
+      p2 === null ? null : { ball: p2.summa, max: p2.max },
+    );
+    let alive = true;
+    void saveWork({
+      id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAtMs}`,
+      code: payload.code,
+      variant: payload.variant,
+      mode: payload.mode,
+      title,
+      finishedAt: finishedAtMs,
+      resultCode: code,
+      primary: score.primary,
+      max: score.max,
+      test: score.test,
+      seconds,
+      tasks: payload.tasks.map((t, i) => ({
+        egeNumber: t.egeNumber,
+        right: check.right[i] === true,
+        empty: (answers[i] ?? '') === '',
+        seconds: result.tasks[i]?.seconds ?? 0,
+      })),
+      ...(part2.length === 0
+        ? {}
+        : { part2: part2.map((z) => ({ no: z.no, ball: chast2.ball[z.no] ?? null })) }),
+    }).then(() => {
+      if (alive) setVolatile(archiveVolatile());
+    });
+    return () => {
+      alive = false;
+    };
+  }, [check, chast2, part2, answers, payload, title, code, seconds, result, finishedAtMs]);
 
   if (check === null) return <p className="vo-status">{T.start.loading}</p>;
   const wrong = payload.tasks.map((_, i) => i).filter((i) => check.right[i] !== true);
@@ -317,6 +346,36 @@ function Finished({
       resultCode={code}
       outdated={outdated}
       notice={volatile ? T.result.volatile : null}
+      part2={
+        part2.length === 0
+          ? null
+          : {
+              ball: ballyChast2(
+                part2.map((z) => z.no),
+                chast2.ball,
+              ).summa,
+              max: ballyChast2(
+                part2.map((z) => z.no),
+                {},
+              ).max,
+            }
+      }
+      part2Block={
+        part2.length === 0 ? null : (
+          <Chast2Itog
+            part2={part2}
+            st={chast2}
+            update={setChast2}
+            part1={
+              scoreWork(
+                payload.tasks.map((t) => t.egeNumber),
+                check.right,
+              ).primary
+            }
+            fullPart1={fullPartOne(payload.tasks.map((t) => t.egeNumber))}
+          />
+        )
+      }
       actions={
         <>
           {wrong.length > 0 ? (

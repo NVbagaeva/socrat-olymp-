@@ -1,0 +1,374 @@
+/* Часть 2 онлайн-варианта: поля ответа, самопроверка, критерии, фото.
+   Только семантические токены. Префикс c2-. */
+
+.vo-strip__no.is-part2 {
+  border-style: dashed;
+}
+.vo-strip__no.is-part2.is-answered,
+.vo-strip__no.is-part2.is-scored {
+  border-style: solid;
+}
+.vo-strip__no.is-scored {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.c2-card {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.c2-uslovie p {
+  margin: 0 0 var(--space-2);
+  line-height: 1.6;
+}
+.c2-uslovie p:last-child {
+  margin-bottom: 0;
+}
+.c2-punkty {
+  display: grid;
+  gap: var(--space-4);
+}
+.c2-punkt {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.c2-punkt__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.c2-punkt__podpis,
+.c2-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-h {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+/* ── Поле формулы ───────────────────────────────────────────── */
+.c2-math-host {
+  display: block;
+  min-width: 0;
+  flex: 1 1 10rem;
+}
+.c2-math-host[data-mode='loading'] {
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+math-field.c2-math {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.15rem;
+  --caret-color: var(--color-primary);
+  --selection-background-color: var(--color-surface-info);
+  --contains-highlight-background-color: transparent;
+}
+math-field.c2-math:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+math-field.c2-math[read-only] {
+  background: var(--color-surface-2);
+}
+math-field.c2-math::part(menu-toggle) {
+  display: none;
+}
+
+/* ── Списки корней и серий ──────────────────────────────────── */
+.c2-spisok {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.c2-spisok__row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  max-width: 32rem;
+}
+.c2-spisok__pre,
+.c2-spisok__post {
+  flex: none;
+  font-style: italic;
+}
+.c2-x {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-lg);
+  cursor: pointer;
+}
+
+/* ── Промежутки ─────────────────────────────────────────────── */
+.c2-prom {
+  display: grid;
+  gap: var(--space-2);
+}
+.c2-prom__list {
+  display: grid;
+  gap: var(--space-2);
+}
+.c2-prom__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.c2-prom__union {
+  font-size: var(--fs-lg);
+  color: var(--color-text-secondary);
+}
+.c2-prom__kusok {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  flex: 1 1 18rem;
+  min-width: 0;
+  max-width: 30rem;
+}
+.c2-prom__kusok .c2-math-host {
+  flex: 1 1 6rem;
+}
+.c2-prom__sep,
+.c2-prom__br {
+  font-size: var(--fs-lg);
+}
+.c2-skobka {
+  flex: none;
+  min-width: 36px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.c2-skobka.is-zakr {
+  border-color: var(--color-primary);
+}
+.c2-skobka:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.c2-prom__tools,
+.c2-prom__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.c2-chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ── Да / нет ───────────────────────────────────────────────── */
+.c2-danet {
+  display: flex;
+  gap: var(--space-2);
+}
+.c2-danet__btn {
+  min-width: 88px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.c2-danet__btn.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+}
+
+/* ── Сверка и самопроверка ──────────────────────────────────── */
+.c2-sverka {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.c2-sverka.is-sovpadaet {
+  color: var(--color-success);
+}
+.c2-sverka.is-ne-sovpadaet {
+  color: var(--color-error);
+}
+.c2-sverka.is-uchitel {
+  color: var(--color-text-secondary);
+}
+.c2-samo {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-samo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.c2-banner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  min-width: 0;
+  overflow-x: auto;
+}
+.c2-reshenie__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: 1.6;
+}
+.c2-reshenie__line {
+  display: block;
+}
+.c2-reshenie__otvet {
+  margin: 0;
+}
+
+/* ── Критерии ───────────────────────────────────────────────── */
+.c2-krit {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.c2-krit__bally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.c2-krit__ball {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.c2-krit__ball.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.c2-krit__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-krit__table th,
+.c2-krit__table td {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.c2-krit__table tr.is-ball td {
+  background: var(--color-surface-info);
+}
+.c2-krit__num {
+  width: 3.5rem;
+  text-align: center !important;
+  font-weight: 700;
+}
+.c2-krit__ili {
+  display: block;
+}
+.c2-krit__or {
+  display: block;
+  margin: var(--space-1) 0;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.c2-krit__row {
+  display: block;
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.c2-krit__row:hover:not(:disabled) {
+  border-color: var(--color-border-accent);
+}
+.c2-krit__row.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+.c2-krit__row:disabled {
+  cursor: default;
+}
+.c2-krit__itog {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ── Итоги части 2 ──────────────────────────────────────────── */
+.c2-itog {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-counter {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.c2-table__punkt {
+  display: block;
+}

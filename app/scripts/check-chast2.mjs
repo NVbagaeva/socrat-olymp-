@@ -71,10 +71,19 @@ ok(
 );
 
 /* Миграция базы: те же максимумы и та же шкала, что в конфиге сайта. */
-const MIG = fs.readFileSync(new URL('../../supabase/migrations/20261024120000_raboty_chast2.sql', import.meta.url), 'utf8');
-const maxSql = Object.fromEntries([...MIG.matchAll(/\((\d+), (\d)\)/g)].map((m) => [Number(m[1]), Number(m[2])]));
-for (let n = 1; n <= 20; n += 1) ok(maxSql[n] === MAX_BALL[n], `база: максимум №${n} = ${MAX_BALL[n]}`);
-const shkSql = /unnest\(array\[([\d,\s]+)\]\)/.exec(MIG)?.[1].split(',').map((x) => Number(x.trim()));
+const MIG = fs.readFileSync(
+  new URL('../../supabase/migrations/20261024120000_raboty_chast2.sql', import.meta.url),
+  'utf8',
+);
+const maxSql = Object.fromEntries(
+  [...MIG.matchAll(/\((\d+), (\d)\)/g)].map((m) => [Number(m[1]), Number(m[2])]),
+);
+for (let n = 1; n <= 20; n += 1)
+  ok(maxSql[n] === MAX_BALL[n], `база: максимум №${n} = ${MAX_BALL[n]}`);
+const shkSql = /unnest\(array\[([\d,\s]+)\]\)/
+  .exec(MIG)?.[1]
+  .split(',')
+  .map((x) => Number(x.trim()));
 ok(JSON.stringify(shkSql) === JSON.stringify([...TESTOVYJ]), 'база: шкала та же, что shkala.ts');
 
 /* ── 3. Автопроверка ────────────────────────────────────────────── */
@@ -262,6 +271,76 @@ for (const [v, zadachi] of Object.entries(CHAST2_V01)) {
     };
   });
 }
+
+/* ── Состояние части 2 в сессии и баллы с частью 2 ─────────────── */
+{
+  const { readChast2, vvodTex, ballyChast2, itogZadaniya } = requireSrc('lib/chast2/sostoyanie');
+  const { withPart2, scoreWork } = requireSrc('lib/variant/online/proverka');
+  const st = readChast2({
+    vvod: {
+      '14.0': ['2\\pi n'],
+      '16.0': { kuski: [{ t: 'interval', lo: '1', hi: '\\infty', loZakr: true, hiZakr: true }] },
+      '99.0': 'x',
+      '20.0': 'da',
+    },
+    sverka: { '14.0': 'sovpadaet', 14.1: 'vzlom' },
+    reshenie: [14, 21, '15'],
+    ball: { 14: 2, 15: 9, 19: -1, 20: 4 },
+    stroka: { 14: '2:0', 15: 'drop table' },
+  });
+  ok(
+    Object.keys(st.vvod).sort().join() === '14.0,16.0,20.0',
+    'чтение: чужие ключи ответов отброшены',
+  );
+  ok(st.sverka['14.1'] === undefined, 'чтение: неизвестный итог сверки отброшен');
+  ok(st.reshenie.join() === '14', 'чтение: номера решений только 14–20');
+  ok(
+    st.ball[14] === 2 &&
+      st.ball[15] === undefined &&
+      st.ball[19] === undefined &&
+      st.ball[20] === 4,
+    'чтение: балл выше максимума или отрицательный отброшен',
+  );
+  ok(st.stroka[15] === undefined, 'чтение: строка критериев только «балл:номер»');
+  ok(readChast2('мусор').reshenie.length === 0, 'чтение: мусор → пустое состояние');
+  ok(
+    vvodTex({ vid: 'promezhutki', verno: { kuski: [] } }, st.vvod['16.0']) === '[1;\\ \\infty)',
+    'показ: у бесконечности скобка круглая',
+  );
+  ok(
+    vvodTex({ vid: 'serii', verno: [] }, ['\\pi', '']) === 'x=\\pi',
+    'показ: пустые серии не выводятся',
+  );
+  const b = ballyChast2([14, 15, 16, 17, 18, 19, 20], { 14: 2, 20: 4 });
+  ok(
+    b.summa === 6 && b.oceneno === 2 && b.max === 20,
+    'баллы части 2: сумма, оценено, максимум 20',
+  );
+  ok(
+    itogZadaniya(['sovpadaet', 'uchitel']) === 'uchitel' &&
+      itogZadaniya(['uchitel', 'ne-sovpadaet']) === 'ne-sovpadaet',
+    'итог задания по пунктам',
+  );
+  const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const s1 = scoreWork(
+    nums,
+    nums.map(() => true),
+  );
+  const s = withPart2(s1, { ball: 20, max: 20 });
+  ok(s.primary === 33 && s.max === 33 && s.test === 100, 'полный вариант: 33 из 33 → 100');
+  ok(
+    withPart2(
+      scoreWork(
+        nums,
+        nums.map((_, i) => i < 5),
+      ),
+      { ball: 0, max: 20 },
+    ).test === TESTOVYJ[5],
+    'часть 1 + 0 за часть 2 → тестовый по той же шкале',
+  );
+  ok(withPart2(s1, null) === s1, 'без части 2 балл не меняется');
+}
+
 const jsonAt = process.argv.indexOf('--json');
 if (jsonAt > 0) fs.writeFileSync(process.argv[jsonAt + 1], JSON.stringify(vygruzka, null, 1));
 
