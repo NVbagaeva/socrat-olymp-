@@ -12,9 +12,9 @@ import {
 } from '@/content/teoriya13';
 import { katex } from '@/lib/graph/katex';
 import { generate } from '@/lib/zadanie13/generate';
-import { kletkiModeli, kletkiUsloviya, otvetText } from '@/lib/zadanie13/html';
+import { kletkiUsloviya, otvetText } from '@/lib/zadanie13/html';
+import { reshenieHtml } from '@/lib/zadanie13/reshenieHtml';
 import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
-import type { TableModel } from '@/lib/zadanie13/types';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
 
 /** Формула крупно (display), набранная на сервере. */
@@ -127,11 +127,6 @@ function TablitsaRuchnayaBlok({ t }: { t: TablitsaRuchnaya }) {
   );
 }
 
-/** Таблица из модели движка: сокращённые строки 1, 2, 3, …, n. */
-function TablitsaModeli({ m }: { m: TableModel }) {
-  return <Tablitsa {...kletkiModeli(m)} />;
-}
-
 /** Разобранная задача из движка: условие, таблица, решение по шагам. */
 function Razbor({
   title,
@@ -158,21 +153,11 @@ function Razbor({
         {t.source === 'own' ? <p className="z13-razbor__metka">не из открытого банка</p> : null}
       </div>
       <Details title="Решение по шагам" className="z13-primer">
-        <ol className="z13-shagi">
-          {/* Последний шаг движка — «Ответ»: его показывает строка ответа ниже. */}
-          {t.solution
-            .filter((s) => s.title !== 'Ответ')
-            .map((s, i) => (
-              <li key={i}>
-                <b className="z13-shagi__title">
-                  <Tex text={`${s.title}.`} />
-                </b>{' '}
-                <Tex text={s.text} />
-                {s.formula ? <Krupno tex={s.formula} /> : null}
-                {s.table ? <TablitsaModeli m={t.tableModel} /> : null}
-              </li>
-            ))}
-        </ol>
+        {/* Решение — общей разметкой, той же, что в опорных задачах и на листе учителя. */}
+        <div
+          className="z13-reshenie"
+          dangerouslySetInnerHTML={{ __html: reshenieHtml(t.solution, t.tableModel) }}
+        />
         <p className="z13-otvet">Ответ: {otvetText(t.answer, t.units)}</p>
       </Details>
     </section>

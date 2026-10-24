@@ -38,6 +38,42 @@ export interface SolutionStep {
   formula?: string;
   /** На этом шаге показывается таблица задачи. */
   table?: boolean;
+  /**
+   * Оформление шага: рамка «Вспоминаем …» или рамка «Внимание на
+   * формулировку». Нет — обычный шаг.
+   */
+  vid?: 'ramka' | 'vnimanie';
+  /** Куски шага по порядку после текста: формулы, плашки, пропорции, таблицы. */
+  bloki?: ShagBlok[];
+}
+
+/** Кусок шага решения. Текст — с формулами в $…$, формула — KaTeX без $…$. */
+export type ShagBlok =
+  | { vid: 'formula'; tex: string }
+  | { vid: 'text'; text: string }
+  /** Плашка-пояснение: почему сделали именно так. */
+  | { vid: 'plashka'; text: string }
+  /** Мелкий текст под формулами. */
+  | { vid: 'melko'; text: string }
+  /** Пропорция «100 % — S, r % — ?» и вывод из неё. */
+  | { vid: 'proporciya'; rows: [string, string][]; vyvod: string }
+  | { vid: 'tablitsa'; t: TablitsaPeremennye };
+
+/**
+ * Таблица дифференцированного платежа в переменных: клетки — TeX без
+ * $…$, сокращённые строки 1, 2, 3, …, n − 1, n. Над шапкой — стрелка от
+ * «Переплаты» к «Долгу на начало» с подписью.
+ */
+export interface TablitsaPeremennye {
+  /** Подпись над таблицей: «Первый банк: $n = 11$, $r = 7$». */
+  podpis: string;
+  period: 'month' | 'year';
+  /** Строки: подпись периода и четыре клетки; null — строка «…». */
+  rows: ({ label: string; cells: [string, string, string, string] } | null)[];
+  /** Итого: сумма изменения долга и переплата. */
+  itog: [string, string];
+  /** Подпись стрелки, текст с формулами в $…$. */
+  strelka: string;
 }
 
 /**
@@ -87,6 +123,22 @@ export interface Plot {
   year: number;
 }
 
+/**
+ * Тип вопроса задачи — от него зависит последний шаг решения: что
+ * берём за 100 % и что вычитаем (ответ на вопрос задачи).
+ *  ot-summy     «на сколько процентов от суммы кредита» — разность процентов
+ *  ot-pereplaty «на сколько процентов переплата … чем в другом» — за 100 %
+ *               переплата того банка, с которым сравнивают
+ *  vo-skolko    «во сколько раз» — отношение, без процентов
+ *  procent      «на сколько процентов больше кредита заплатить» — переплата в %
+ *  rubli        переплата или разница в рублях
+ *  summa        найти сумму кредита
+ *  stavka       найти ставку
+ *  srok         найти срок
+ */
+export type Vopros13 =
+  'ot-summy' | 'ot-pereplaty' | 'vo-skolko' | 'procent' | 'rubli' | 'summa' | 'stavka' | 'srok';
+
 export interface Task13 {
   /** «13.C-08:9f2k» — прототип и seed. */
   id: string;
@@ -107,6 +159,8 @@ export interface Task13 {
   /** Ответ в единицах условия. В браузер уходит только отпечаток. */
   answer: number;
   units: Units;
+  /** Тип вопроса: от него зависит последний шаг решения. */
+  vopros?: Vopros13;
   solution: SolutionStep[];
   hints: HintStep[];
   tableModel: TableModel;

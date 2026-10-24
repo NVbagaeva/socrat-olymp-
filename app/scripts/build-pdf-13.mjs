@@ -33,9 +33,12 @@ const { PRESETY_13 } = requireSrc('content/generator13.ts');
 const { qrSvg } = requireSrc('lib/qr.ts');
 
 /** Печатная CSS листа без блока :root: шрифты сборке задаёт sheet-render. */
-const EXTRA_CSS = fs
-  .readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '13', 'pechat', 'pechat13.css'), 'utf8')
-  .replace(/^:root\s*\{[^}]*\}\s*/m, '');
+const EXTRA_CSS =
+  fs
+    .readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '13', 'pechat', 'pechat13.css'), 'utf8')
+    .replace(/^:root\s*\{[^}]*\}\s*/m, '') +
+  /* Решения учителя — та же разметка и те же стили, что на экране. */
+  fs.readFileSync(path.join(APP, 'src', 'app', 'zadaniya', '13', 'reshenie13.css'), 'utf8');
 
 function paramsOf(presetId) {
   const p = PRESETY_13.find((x) => x.id === presetId);
@@ -49,7 +52,9 @@ function paramsOf(presetId) {
     variants: p.variants,
     zachet: p.zachet === true,
     title: p.title,
-    seed: 'OBRAZEC',
+    /* На этом seed первая задача «Домашки» — приёмочная задача шаблона решения
+       (A-02: 11 лет под 7 % и 4 года под 16 %, «от суммы кредита»). */
+    seed: '7K3F',
   };
 }
 
@@ -80,7 +85,8 @@ async function main() {
   for (const preset of ['domashka', 'zachet']) {
     const params = paramsOf(preset);
     await build(`${preset}-uchenik`, params, false, requireKatex);
-    await build(`${preset}-uchitel`, params, true, requireKatex);
+    /* Лист учителя — с полными решениями: таблица в переменных, стрелка, рамки. */
+    await build(`${preset}-uchitel`, { ...params, uchitel: 'polno' }, true, requireKatex);
   }
 }
 

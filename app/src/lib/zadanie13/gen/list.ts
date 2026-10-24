@@ -9,12 +9,12 @@
  */
 
 import type { Vid13 } from '@/content/generator13';
-import { katex } from '../../graph/katex';
 import { typeset } from '../../tex';
 import { rngOf } from '../../vychisleniya/rng';
 import { BANK_13 } from '../bank';
 import { generate } from '../generate';
-import { kletkiModeli, kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
+import { kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
+import { reshenieChasti } from '../reshenieHtml';
 import { SIGN, TIP_VYVOD } from '../proto/common';
 import { PROTOTYPES } from '../proto';
 import { TYPE_NAMES, type Task13 } from '../types';
@@ -35,6 +35,9 @@ export interface ListZadacha13 extends Poziciya13 {
   questionHtml: string;
   /** Ответ строкой: «600 000 рублей», «Аннуитет». */
   answer: string;
+  /** Решение по шагам — по куску на шаг (лист учителя переносит шаги). */
+  kratko: string[];
+  polno: string[];
   kratkoHtml: string;
   polnoHtml: string;
 }
@@ -129,14 +132,10 @@ function uslovieHtml(t: Task13): string {
   return text;
 }
 
-function formula(tex: string): string {
-  return `<div class="z13-sheet-formula">${katex.renderToString(tex, { throwOnError: true, displayMode: true })}</div>`;
-}
-
 /** Первая строка решения учителя: тип называется здесь, а не над условием. */
 function tipHtml(t: Task13): string {
   const v = TIP_VYVOD[t.type];
-  return `<div class="z13-sheet-shag"><p><b>${v.title}.</b> ${typeset(v.text)}</p></div>`;
+  return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}.</b> ${typeset(v.text)}</p></div>`;
 }
 
 function sobrat(poz: Poziciya13): ListZadacha13 {
@@ -148,38 +147,26 @@ function sobrat(poz: Poziciya13): ListZadacha13 {
       task: t,
       questionHtml: uslovieHtml(t),
       answer: TYPE_NAMES[t.type],
+      kratko: [reshenie],
+      polno: [reshenie],
       kratkoHtml: reshenie,
       polnoHtml: reshenie,
     };
   }
-  const shagi = t.solution.filter((s) => s.title !== 'Ответ');
-  /* Кратко — шаги с формулами: подпись шага и формула, без пояснений. */
-  const kratko =
-    tipHtml(t) +
-    shagi
-      .filter((s) => s.formula !== undefined)
-      .map(
-        (s) =>
-          `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b></p>${formula(s.formula as string)}</div>`,
-      )
-      .join('');
-  const polno =
-    tipHtml(t) +
-    shagi
-      .map(
-        (s) =>
-          `<div class="z13-sheet-shag"><p><b>${typeset(s.title)}.</b> ${typeset(s.text)}</p>${
-            s.formula === undefined ? '' : formula(s.formula)
-          }${s.table ? tablitsaHtml(kletkiModeli(t.tableModel)) : ''}</div>`,
-      )
-      .join('');
+  /* Решение — общей разметкой (lib/zadanie13/reshenieHtml.ts). Тип
+     называется первым шагом; у старых решений его нет — добавляем. */
+  const tip = t.solution[0]?.title.startsWith('Определяем тип') ? [] : [tipHtml(t)];
+  const kratko = [...tip, ...reshenieChasti(t.solution, t.tableModel, { kratko: true })];
+  const polno = [...tip, ...reshenieChasti(t.solution, t.tableModel)];
   return {
     ...poz,
     task: t,
     questionHtml: uslovieHtml(t),
     answer: otvetText(t.answer, t.units),
-    kratkoHtml: kratko,
-    polnoHtml: polno,
+    kratko,
+    polno,
+    kratkoHtml: kratko.join(''),
+    polnoHtml: polno.join(''),
   };
 }
 

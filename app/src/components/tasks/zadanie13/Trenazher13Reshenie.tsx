@@ -105,18 +105,7 @@ export function Razbor13Blok({ razbor }: { razbor: Razbor13 }) {
   return (
     <section className="z13-oreshenie" aria-label={TRENAZHER_13.reshenie}>
       <p className="z13-oreshenie__title">{TRENAZHER_13.reshenie}</p>
-      <ol className="z13-shagi">
-        {razbor.shagi.map((s, i) => (
-          <li key={i}>
-            <b className="z13-shagi__title" dangerouslySetInnerHTML={{ __html: `${s.title}.` }} />{' '}
-            <span dangerouslySetInnerHTML={{ __html: s.text }} />
-            {s.formula === null ? null : (
-              <div className="z13-formula" dangerouslySetInnerHTML={{ __html: s.formula }} />
-            )}
-            {s.tablitsa === null ? null : <div dangerouslySetInnerHTML={{ __html: s.tablitsa }} />}
-          </li>
-        ))}
-      </ol>
+      <div className="z13-reshenie" dangerouslySetInnerHTML={{ __html: razbor.html }} />
       <p className="z13-otvet">
         {TRENAZHER_13.otvet}: {razbor.otvet}
       </p>

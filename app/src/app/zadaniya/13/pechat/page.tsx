@@ -6,6 +6,7 @@ import { zadanie13Title } from '@/content/zadanie13';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
+import '../reshenie13.css';
 import './pechat13.css';
 
 export const metadata: Metadata = {

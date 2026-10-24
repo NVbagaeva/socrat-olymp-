@@ -8,12 +8,12 @@
  * отпечатком и открываются по кнопке.
  */
 
-import { katex } from '../../graph/katex';
 import { typeset } from '../../tex';
 import type { ShagHtml } from '../../zadanie11/prep/seal';
 import { wrongUnitValues } from '../edinicy';
 import { generate } from '../generate';
-import { kletkiModeli, kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
+import { kletkiUsloviya, otvetText, tablitsaHtml } from '../html';
+import { reshenieHtml } from '../reshenieHtml';
 import { choice, SIGN } from '../proto/common';
 import { sealAnswer, sealChoice, sealText } from '../secret';
 import { TYPE_NAMES, type HintStep, type Task13, type TypeCode } from '../types';
@@ -45,15 +45,9 @@ export interface Zadacha13Sealed {
   razbor: string;
 }
 
-export interface ShagRazbora13 {
-  title: string;
-  text: string;
-  formula: string | null;
-  tablitsa: string | null;
-}
-
+/** Разбор: решение по шагам общей разметкой и строка ответа. */
 export interface Razbor13 {
-  shagi: ShagRazbora13[];
+  html: string;
   otvet: string;
 }
 
@@ -92,20 +86,10 @@ function metki(t: Task13): string[] {
 function zadachaChislom(t: Task13): Zadacha13Sealed {
   const seal = sealAnswer(t.answer);
   const razbor: Razbor13 = {
-    /* Последний шаг движка — «Ответ»: его показывает строка ответа под шагами. */
-    shagi: t.solution
-      .filter((s) => s.title !== 'Ответ')
-      .map((s) => ({
-        title: typeset(s.title),
-        text: typeset(s.text),
-        formula:
-          s.formula === undefined
-            ? null
-            : katex.renderToString(s.formula, { throwOnError: true, displayMode: true }),
-        tablitsa: s.table ? tablitsaHtml(kletkiModeli(t.tableModel)) : null,
-      })),
+    html: reshenieHtml(t.solution, t.tableModel),
     otvet: otvetText(t.answer, t.units),
   };
+
   return {
     prototypeId: t.prototypeId,
     seed: t.seed,
@@ -132,20 +116,13 @@ function zadachaTip(t: Task13, no: number): Zadacha13Sealed {
     `Это ${nazvanieMalenkoe(t.type)}.`,
   );
   const razbor: Razbor13 = {
-    shagi: [
-      {
-        title: typeset('Ищем признак'),
-        text: typeset(`В условии: ${SIGN[t.type]}.`),
-        formula: null,
-        tablitsa: null,
-      },
-      {
-        title: typeset('Называем схему'),
-        text: typeset(`Это ${nazvanieMalenkoe(t.type)}.`),
-        formula: null,
-        tablitsa: null,
-      },
-    ],
+    html: reshenieHtml(
+      [
+        { title: 'Ищем признак', text: `В условии: ${SIGN[t.type]}.` },
+        { title: 'Называем схему', text: `Это ${nazvanieMalenkoe(t.type)}.` },
+      ],
+      null,
+    ),
     otvet: TYPE_NAMES[t.type],
   };
   return {

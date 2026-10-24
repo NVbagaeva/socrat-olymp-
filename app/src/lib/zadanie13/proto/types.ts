@@ -19,6 +19,7 @@ import type {
   SolutionStep,
   TableScheme,
   Units,
+  Vopros13,
 } from '../types';
 
 export interface Ctx {
@@ -43,6 +44,10 @@ export interface Draft {
   extra?: number[];
   solution: SolutionStep[];
   hints: HintStep[];
+  /** Единицы ответа, если у этой формулировки они свои («во сколько раз» — без единиц). */
+  units?: Units;
+  /** Тип вопроса задачи. */
+  vopros?: Vopros13;
   /** Найденные нарушения: непустой список — задача отбрасывается. */
   problems?: string[];
 }
