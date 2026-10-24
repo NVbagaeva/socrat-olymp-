@@ -284,6 +284,9 @@ export function checkMetodika(where: string, id: string, s: Solved): Problem[] {
     }
   }
   const text = s.etapy.flatMap((e) => e.lines).join(' ');
+  if (/Делим на \$1\$|=1x\(/.test(text)) {
+    add('артефакт «Делим на 1» или множитель 1x');
+  }
   if (
     tables.some((t) => t.vid === 'rabota' && t.rows.some((r) => r[1] === '$1$')) &&
     !text.includes('Примем всю работу за $1$') &&

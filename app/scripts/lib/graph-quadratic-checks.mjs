@@ -11,6 +11,7 @@
 import renderer from '../../src/lib/graph/renderer.js';
 import Q from '../../src/lib/graph/families/quadratic.js';
 import Line from '../../src/lib/graph/families/line.js';
+import { HIDDEN_MARGIN, isPointHidden } from '../../src/lib/graph/hidden.js';
 import { buildSolution, stepText } from './quadratic-solution-text.mjs';
 
 const EPS = 1e-9;
@@ -54,24 +55,24 @@ function partOf(curve) {
 
 /* ══════════════════════════════════════════════════════════
    Пересечение двух графиков: одна очевидная точка — в узле сетки,
-   отмечена; вторая не читается с чертежа: либо за рамкой с запасом
-   (hidden: 'offscreen'), либо в окне, но не в узле и с нецелой
-   спрошенной координатой (hidden: 'fraction', только с прямой).
+   отмечена; вторая на рисунке не видна никогда — за рамкой с запасом
+   (hidden.js): целая (hidden: 'offscreen') или с нецелой спрошенной
+   координатой (hidden: 'fraction', только с прямой).
    Каждая проверка отдельно: по ним отчёт считает, сколько задач
    прошло каждую.
    ══════════════════════════════════════════════════════════ */
 export const INTERSECTION_CHECKS = [
   ['oneShown', 'ровно одна очевидная точка пересечения: в узле сетки внутри окна'],
   ['shownMargin', 'очевидная точка не ближе двух клеток к рамке'],
-  ['hiddenAway', 'вторая точка за рамкой с запасом или в окне, но не в узле и с нецелой координатой'],
+  ['hiddenAway', 'вторая точка за рамкой с запасом: на рисунке её нет (hidden.js)'],
   ['answerHidden', 'вопрос — о второй точке, ответ не читается с чертежа'],
   ['angle', 'угол в очевидной точке не меньше порога'],
-  ['noGuess', 'вторая точка не угадывается: за рамкой кривые не сходятся снова, в окне — не у рамки и не сливается с первой'],
+  ['noGuess', 'вторая точка не угадывается: на видимой части кривые не сходятся снова'],
   ['ownMark', 'очевидная точка не совпадает с отмеченными точками кривых'],
 ];
 
 /* Названия вариантов скрытой точки для отчёта. */
-export const HIDDEN_VARIANTS = { offscreen: 'за рамкой', fraction: 'нецелая в окне' };
+export const HIDDEN_VARIANTS = { offscreen: 'целая за рамкой', fraction: 'нецелая за рамкой' };
 
 function onNode(point) {
   return Number.isInteger(point.x) && Number.isInteger(point.y);
@@ -93,8 +94,6 @@ export function intersectionAudit(set, task) {
   const margin = spec.margin ?? Q.RULES.crossMargin;
   const least = spec.offscreenMin ?? Q.RULES.crossOffscreenMin;
   const angleMin = spec.angleMin ?? Q.RULES.crossAngleMin;
-  const insideMargin = spec.insideMargin ?? Q.RULES.crossInsideMargin;
-  const apart = spec.separation ?? Q.RULES.crossSeparation;
   const variant = spec.hidden ?? 'offscreen';
   const answer = answerNumber(task.answer);
   const rule = source.answerRule;
@@ -120,21 +119,21 @@ export function intersectionAudit(set, task) {
   if (variant === 'fraction' && meta.curves[1].kind !== 'line') {
     out.errors.push('нецелая точка пересечения допускается только с прямой');
   }
-  if (variant === 'offscreen') {
-    out.ok.hiddenAway = hidden.length === 1 && hidden.every((pt) => Q.offscreenBy(pt, win) >= least - EPS);
-    if (!out.ok.hiddenAway) {
-      out.errors.push(hidden.length === 0 ? 'нет скрытой точки пересечения'
-        : `скрытая точка вынесена за рамку меньше чем на ${least} клетки`);
-    }
-  } else {
-    /* Координаты — с двумя знаками после запятой, не больше. */
-    const twoDecimals = (value) => Number.isInteger(value * 100);
-    out.ok.hiddenAway = hidden.length === 1 && hidden.every((pt) =>
-      inside(pt, win) && !onNode(pt) && !Number.isInteger(askedValue(pt)) &&
-      twoDecimals(pt.x) && twoDecimals(pt.y));
-    if (!out.ok.hiddenAway) {
-      out.errors.push(hidden.length === 0 ? 'нет скрытой точки пересечения'
-        : 'нецелая точка должна быть в окне, не в узле сетки, со спрошенной нецелой координатой и не длиннее двух знаков после запятой');
+  /* Скрытая точка на рисунке не видна при любом варианте: за рамкой
+     не ближе least клеток (hidden.js). */
+  out.ok.hiddenAway = hidden.length === 1 &&
+    hidden.every((pt) => isPointHidden(pt, win, Math.max(HIDDEN_MARGIN, least)));
+  if (!out.ok.hiddenAway) {
+    out.errors.push(hidden.length === 0 ? 'нет скрытой точки пересечения'
+      : `скрытая точка видна на рисунке или вынесена за рамку меньше чем на ${least} клетки`);
+  }
+  if (variant === 'fraction') {
+    /* Координаты — с двумя знаками после запятой, не больше; спрошенная — нецелая. */
+    const twoDecimals = (value) => Number.isInteger(Math.round(value * 1e6) / 1e4);
+    out.ok.fraction = hidden.every((pt) =>
+      !Number.isInteger(askedValue(pt)) && twoDecimals(pt.x) && twoDecimals(pt.y));
+    if (!out.ok.fraction) {
+      out.errors.push('у нецелой точки спрошенная координата должна быть нецелой и не длиннее двух знаков после запятой');
     }
   }
 
@@ -147,16 +146,9 @@ export function intersectionAudit(set, task) {
   out.ok.angle = angles.every((angle) => angle >= angleMin - EPS);
   if (!out.ok.angle) { out.errors.push(`угол в очевидной точке ${angles.map((a) => a.toFixed(1)).join(', ')}°, нужно не меньше ${angleMin}°`); }
 
-  if (variant === 'offscreen') {
-    out.ok.noGuess = shown.length === 1 && hidden.length === 1 &&
-      Q.gapGrows(first, second, win, shown[0], hidden[0]);
-    if (!out.ok.noGuess) { out.errors.push('на видимой части кривые снова сходятся — вторая точка читается на глаз'); }
-  } else {
-    out.ok.noGuess = shown.length === 1 && hidden.length === 1 &&
-      inside(hidden[0], win, insideMargin) &&
-      Math.hypot(hidden[0].x - shown[0].x, hidden[0].y - shown[0].y) >= apart - EPS;
-    if (!out.ok.noGuess) { out.errors.push(`нецелая точка ближе ${insideMargin} клетки к рамке или ближе ${apart} клеток к очевидной`); }
-  }
+  out.ok.noGuess = shown.length === 1 && hidden.length === 1 &&
+    Q.gapGrows(first, second, win, shown[0], hidden[0]);
+  if (!out.ok.noGuess) { out.errors.push('на видимой части кривые снова сходятся — вторая точка читается на глаз'); }
 
   const marked = (meta.points || []).filter((pt) => pt.role !== 'cross');
   out.ok.ownMark = shown.every((v) => !marked.some((pt) => pt.x === v.x && pt.y === v.y));
@@ -413,7 +405,7 @@ export function checkQuadraticTask(set, task) {
     } else {
       cross.points.forEach((point) => {
         /* Целые — очевидные точки; нецелая допускается только второй
-           точкой варианта «нецелая в окне», и её проверяет аудит. */
+           точкой варианта «нецелая за рамкой», и её проверяет аудит. */
         if (point.shown && (!Number.isInteger(point.x) || !Number.isInteger(point.y))) {
           fail(`очевидная точка пересечения (${point.x}; ${point.y}) не целая`);
         }

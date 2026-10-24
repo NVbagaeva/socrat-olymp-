@@ -19,6 +19,7 @@ import {
   str,
   vopros,
   xxd,
+  kKvadratnomu,
 } from '../kit';
 import { add, d, div, fq, q, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -54,10 +55,7 @@ const RB01: Subtype = {
       lo: 0,
       pochemu: 'производительность положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(N)}(x+${d(dd)})-${d(N)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(N, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -111,7 +109,7 @@ const RB01: Subtype = {
           `$\\dfrac{${d(N)}}{x}+\\dfrac{${d(N)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(N)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(N)}$ — подбор`, [
           'среднее арифметическое',
           'перевести часы в минуты',
         ]),
@@ -157,7 +155,7 @@ const RB02: Subtype = {
       pochemu: 'производительность положительна',
       znamenatel: `x(x+${d(dd)})`,
       posle: [
-        `$${d(N2)}(x+${d(dd)})-${d(N1)}x=${d(Dl)}x(x+${d(dd)})$.`,
+        `$${d(N2)}(x+${d(dd)})-${d(N1)}x=${Dl === 1 ? '' : d(Dl)}x(x+${d(dd)})$.`,
         `$${sol.ishodnoe}$.`,
         ...sol.lines,
       ],
@@ -252,10 +250,7 @@ const RB03: Subtype = {
       lo: 0,
       pochemu: 'пропускная способность трубы положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(V)}(x+${d(dd)})-${d(V)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(V, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -297,7 +292,7 @@ const RB03: Subtype = {
           `$\\dfrac{${d(V)}}{x}+\\dfrac{${d(V)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(V)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(V)}$ — подбор`, [
           'среднее арифметическое',
           'сложить производительности',
         ]),

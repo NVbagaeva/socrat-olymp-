@@ -97,8 +97,8 @@ export function checkPrep(seeds: number, typeset: (tex: string) => string) {
   const problems: Problem[] = [];
   const texts: { where: string; text: string }[] = [];
   let generated = 0;
-  if (BLOKI.length !== 12 || BLOKI[0]?.razdel !== 'RZ') {
-    problems.push({ where: 'опорные', what: 'блоков не 12 или разминка не первая' });
+  if (BLOKI.length !== 16 || BLOKI[0]?.razdel !== 'RZ') {
+    problems.push({ where: 'опорные', what: 'блоков не 16 или разминка не первая' });
   }
   const ids = new Set<string>();
   for (const b of BLOKI) {
@@ -108,7 +108,7 @@ export function checkPrep(seeds: number, typeset: (tex: string) => string) {
     if (/\$|\\/.test(b.nazvanie)) {
       problems.push({ where: b.id, what: 'формула в названии блока' });
     }
-    for (const line of [b.lead, ...b.zapomni]) {
+    for (const line of [b.lead, b.zachem, ...b.teoriya, ...b.zapomni]) {
       texts.push({ where: `${b.id} запомни`, text: line });
       for (const tex of texPieces(line) ?? []) {
         try {

@@ -212,6 +212,7 @@ generators.push({
     const q = S11.sheetQuery11({
       rezhim: 'komplekt', istochnik: 'mix', sostav: s.sostav, variants: s.variants, seed,
       zameny: {}, marshrut: 1, theme: 'color',
+      bloki: [...S11.BLOKI_PO_UMOLCHANIYU], dz: S11.DZ_PO_UMOLCHANIYU, mesto: false,
     });
     return { student: `/zadaniya/11/pechat/?${q}`, teacher: `/zadaniya/11/pechat/otvety/?${q}` };
   },
@@ -317,10 +318,13 @@ function sceneProblems(task) {
 }
 
 /* Плашка «откуда задача» у №11 стоит перед условием только на листе
-   учителя («новая · аналог ПР-04»): это пометка для учителя, не
-   условие. При сравнении условий она снимается. */
+   учителя («новая», рядом код типа «тип ПР-04»): это пометки для
+   учителя, не условие. При сравнении условий они снимаются. */
 const teacherOnly = (html) =>
-  String(html ?? '').replace(/^<span class="z(?:1|11)-sheet-badge">[^<]*<\/span>\s*/, '');
+  String(html ?? '').replace(
+    /^<span class="z(?:1|11)-sheet-badge">[^<]*<\/span>(?:<span class="z11-sheet-kod">[^<]*<\/span>)?\s*/,
+    '',
+  );
 
 const tasksOf = (spec) => K.specTasks(spec);
 const problems = [];

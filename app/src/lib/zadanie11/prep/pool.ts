@@ -19,6 +19,10 @@ export interface PoolBlok11 {
   razdel: RazdelBloka;
   nazvanie: string;
   lead: string;
+  zachem: string;
+  /** «Теория к этому блоку», свёрстана. */
+  teoriyaHtml: string[];
+  teoriyaRazdel: string;
   zapomniHtml: string[];
   zadachi: (MikroSealed11 & { no: number })[];
 }
@@ -34,6 +38,9 @@ export function prepPool11(): PoolBlok11[] {
     razdel: b.razdel,
     nazvanie: b.nazvanie,
     lead: b.lead,
+    zachem: b.zachem,
+    teoriyaHtml: b.teoriya.map((z) => typeset(z)),
+    teoriyaRazdel: b.teoriyaRazdel,
     zapomniHtml: b.zapomni.map((z) => typeset(z)),
     zadachi: b.zadachi.map((m, i) => ({ ...sealMikro11(m, fixedSeed(m)), no: i + 1 })),
   }));

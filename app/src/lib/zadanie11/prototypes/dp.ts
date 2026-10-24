@@ -19,6 +19,7 @@ import {
   str,
   vopros,
   xxd,
+  kKvadratnomu,
 } from '../kit';
 import { add, d, div, fq, frac, mul, q, round9, sub, txt, val } from '../num';
 import { sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
@@ -497,12 +498,7 @@ const DP07: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        st === dd
-          ? `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`
-          : `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(st)}x(x+${d(dd)})$, то есть $${d(S * dd)}=${d(st)}x(x+${d(dd)})$. Делим на $${d(st)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, st), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -563,7 +559,7 @@ const DP07: Subtype = {
           `$\\dfrac{${d(S)}}{x}+\\dfrac{${d(S)}}{x+${d(dd)}}=${d(st)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(P)}$ — подбор множителей`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(P)}$ — подбор множителей`, [
           'сразу считать дискриминант без сокращения',
           'взять среднее арифметическое',
         ]),
@@ -601,10 +597,7 @@ const DP08: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(dd)})`,
-      posle: [
-        `$${d(S)}(x+${d(dd)})-${d(S)}x=${d(dd)}x(x+${d(dd)})$. Делим на $${d(dd)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, dd, dd), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -655,7 +648,7 @@ const DP08: Subtype = {
           `$\\dfrac{${d(S)}}{x}+\\dfrac{${d(S)}}{x+${d(dd)}}=${d(dd)}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(dd)})=${d(S)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(dd)})=${d(S)}$ — подбор`, [
           'среднее арифметическое',
           'перевести минуты в часы',
         ]),
@@ -1050,10 +1043,7 @@ const DP13: Subtype = {
       lo: 0,
       pochemu: 'скорость положительна',
       znamenatel: `x(x+${d(h)})`,
-      posle: [
-        `$${d(S)}(x+${d(h)})-${d(S)}x=${d(h)}x(x+${d(h)})$. Делим на $${d(h)}$:`,
-        ...res.lines,
-      ],
+      posle: [kKvadratnomu(S, h, h), ...res.lines],
       roots: res.roots,
     });
     return {
@@ -1088,7 +1078,7 @@ const DP13: Subtype = {
           `$\\dfrac{${d(S)}}{x}=\\dfrac{${d(S)}}{x+${d(h)}}$`,
         ]),
         t.hintOdz,
-        vopros('Какой лайфхак применим?', `$x(x+${d(h)})=${d(S)}$ — подбор`, [
+        vopros('Как решить быстрее?', `$x(x+${d(h)})=${d(S)}$ — подбор`, [
           'среднее арифметическое',
           'разложение на множители дискриминанта не нужно',
         ]),

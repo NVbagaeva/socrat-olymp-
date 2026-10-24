@@ -46,6 +46,7 @@ import math from './math.js';
 import Line from './families/line.js';
 import Rational from './families/rational.js';
 import { rng, shuffled } from './random.js';
+import { HIDDEN_MARGIN, isPointHidden } from './hidden.js';
 import { plainText, typesetText, fillTemplate, answerText, decimalFriendly } from './text.js';
 
 var frac = Line.frac, add = Line.add, sub = Line.sub, mul = Line.mul, div = Line.div,
@@ -394,10 +395,6 @@ function singleCandidates(task, set, seed) {
    Вторая точка B: из ax² + bx − k = 0 по Виету x_A·x_B = −k/a,
    значит x_B = −k/(a·x_A), а y_B = k/x_B = −a·x_A.
    ══════════════════════════════════════════════════════════ */
-function offscreen(B, win, min) {
-  return Math.abs(num(B.x)) >= win.xmax + min - 1e-9 || Math.abs(num(B.y)) >= win.ymax + min - 1e-9;
-}
-
 function crossOf(k, line, xA) {
   var xB = div(mul(frac(-1), k), mul(line.k, xA));
   var yB = div(k, xB);
@@ -450,8 +447,9 @@ function lineCandidates(task, set, seed) {
           if (places(line.k) > 2 || places(line.b) > 2) { continue; }
           /* B на рисунке не видна никогда: её координаты не должны
              читаться с чертежа. Она заметно за рамкой — не ближе
-             offscreenMin клеток за границей по x или по y. */
-          if (!offscreen(B, win, offscreenMin)) { continue; }
+             offscreenMin клеток за границей по x или по y (общая
+             проверка hidden.js). Не прошла — прямая бракуется. */
+          if (!isPointHidden(B, win, Math.max(HIDDEN_MARGIN, offscreenMin))) { continue; }
           /* P не должна случайно совпасть с B или лежать на продолжении
              через начало: на чертеже это путает. */
           if (key(B.x) === String(px)) { continue; }

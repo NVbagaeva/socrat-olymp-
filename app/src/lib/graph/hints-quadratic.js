@@ -33,6 +33,7 @@
 import Line from './families/line.js';
 import Q from './families/quadratic.js';
 import Solution from './solution-quadratic.js';
+import { whyHidden } from './hidden.js';
 
 var frac = Line.frac, sub = Line.sub, mul = Line.mul,
     num = Line.num, isInt = Line.isInt, isZero = Line.isZero;
@@ -398,7 +399,8 @@ function answerStep(p, task, sol, key) {
     var xs = exact(shown.xFraction || shown.x);
     var xa = exact(cross.asked.xFraction || cross.asked.x);
     var list = [
-      fields('Приравняй формулы и перенеси всё в одну часть: $Ax^2 + Bx + C = 0$.',
+      fields(whyHidden(cross.hidden === 'fraction') + ' Находи её не по рисунку, а из уравнения ' +
+        '$f(x) = g(x)$: приравняй формулы и перенеси всё в одну часть, $Ax^2 + Bx + C = 0$.',
         [field('A =', A), field('B =', B), field('C =', C)], {
           variants: [[plain(A), plain(B), plain(C)],
             [plain(mul(frac(-1), A)), plain(mul(frac(-1), B)), plain(mul(frac(-1), C))]],
