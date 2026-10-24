@@ -69,6 +69,8 @@
     "test:galereya-1": "node scripts/check-galereya-1.mjs",
     "build:bank-1": "node scripts/build-bank-1.mjs",
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
+    "test:zadanie13": "node scripts/check-zadanie13.mjs",
+    "build:bank-13": "node scripts/build-bank-13.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:chertezh3": "node scripts/check-chertezh3.mjs",
     "test:zadanie16": "node scripts/check-zadanie16.mjs",
