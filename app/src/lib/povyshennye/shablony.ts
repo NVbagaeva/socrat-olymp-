@@ -21,7 +21,13 @@ import { typeset, typesetKrupno } from '@/lib/tex';
 import { skalyarnoeKombinatsiy, type SkalyarnoeKombinatsiy } from '@/lib/vektory/povyshennye';
 import { PV4_NE_MENEE, PV5_DVE_PARTII } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
-import { logObratnyy } from '@/lib/vychisleniya/povyshennye';
+import {
+  logObratnyy,
+  logPryamoy,
+  sinDvoynogoPrivedenie,
+  stepeniChastnoe,
+} from '@/lib/vychisleniya/povyshennye';
+import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { P03_86 } from '@/lib/zadanie3/razdel8/cilindr';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
@@ -229,10 +235,9 @@ function z07(p: Params7, proto: Proto7 = PV7_KOREN): Gotovaya {
 
 /* ── №8 ─────────────────────────────────────────────────────────── */
 
-function z08(p: { m: number; t: number }): Gotovaya {
-  const t = logObratnyy(p);
-  const otvet = answerHtml(t.otvet);
-  const hints: HintLike[] = [
+/** Подсказки к log_a(bᵐ√a) при данном log_b a (вариант 1). */
+function hints08Obratnyy(p: { m: number; t: number }): HintLike[] {
+  return [
     {
       question: `Как найти $\\log_a b$, если $\\log_b a=${p.t}$?`,
       options: [`$\\dfrac{1}{${p.t}}$`, `$${-p.t}$`, `$${p.t}$`],
@@ -254,7 +259,12 @@ function z08(p: { m: number; t: number }): Gotovaya {
       correct: 0,
     },
   ];
-  const h = peremeshat(hints, `z08|${p.m}|${p.t}`);
+}
+
+/** Задача №8 из черновика раздела и своих подсказок. */
+function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
+  const otvet = answerHtml(t.otvet);
+  const h = peremeshat(hints, klyuch);
   return {
     egeNumber: 8,
     difficulty: null,
@@ -418,7 +428,94 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 8,
     prototip: 'Вычисления, логарифмы с буквами (как 8.Z «given»): дан log_b a, найти log_a(bᵐ√a)',
     otkuda: 'novyy',
-    zadacha: (p: { m: number; t: number }) => z08(p),
+    zadacha: (p: { m: number; t: number }) =>
+      z08(logObratnyy(p), hints08Obratnyy(p), `z08|${p.m}|${p.t}`),
+  },
+  'z08.log-pryamoy': {
+    ege: 8,
+    prototip:
+      'Вычисления, логарифмы с буквами (как 8.Z «given»): дан log_b a, найти log_a(aᵐ√b) — корень из b, а не из a',
+    otkuda: 'novyy',
+    zadacha: (p: { m: number; t: number }) =>
+      z08(
+        logPryamoy(p),
+        [
+          {
+            question: `Чему равен $\\log_a a^{${p.m}}$?`,
+            options: [`$${p.m}$`, `$${p.m}\\log_a b$`, '$1$'],
+            correct: 0,
+          },
+          {
+            question: `Как найти $\\log_a b$, если $\\log_b a=${p.t}$?`,
+            options: [`$\\dfrac{1}{${p.t}}$`, `$${-p.t}$`, `$${p.t}$`],
+            correct: 0,
+            comment: '$\\log_a b\\cdot\\log_b a=1$.',
+          },
+          {
+            question: 'Чему равен $\\log_a\\sqrt b$?',
+            options: ['$\\dfrac12\\log_a b$', '$\\dfrac12$', '$2\\log_a b$'],
+            correct: 0,
+            comment: '$\\sqrt b=b^{\\frac12}$, показатель выносим множителем.',
+          },
+        ],
+        `z08p|${p.m}|${p.t}`,
+      ),
+  },
+  'z08.sin-dvoynoy': {
+    ege: 8,
+    prototip:
+      'Вычисления, тригонометрия (как 8.R «cancel»): синус двойного угла в числителе, формула приведения и знак в знаменателе',
+    otkuda: 'novyy',
+    zadacha: (p: { x: number; c: number }) =>
+      z08(
+        sinDvoynogoPrivedenie(p),
+        [
+          {
+            question: `Чему равно $2\\sin ${p.x}^\\circ\\cos ${p.x}^\\circ$?`,
+            options: [
+              `$\\sin ${2 * p.x}^\\circ$`,
+              `$\\cos ${2 * p.x}^\\circ$`,
+              `$\\sin ${p.x}^\\circ$`,
+            ],
+            correct: 0,
+            comment: 'Формула синуса двойного угла.',
+          },
+          {
+            question: `Как связаны $\\sin ${360 - 2 * p.x}^\\circ$ и $\\sin ${2 * p.x}^\\circ$?`,
+            options: [
+              `$\\sin ${360 - 2 * p.x}^\\circ=-\\sin ${2 * p.x}^\\circ$`,
+              `$\\sin ${360 - 2 * p.x}^\\circ=\\sin ${2 * p.x}^\\circ$`,
+              `$\\sin ${360 - 2 * p.x}^\\circ=\\cos ${2 * p.x}^\\circ$`,
+            ],
+            correct: 0,
+            comment: '$\\sin(360^\\circ-\\alpha)=-\\sin\\alpha$.',
+          },
+        ],
+        `z08s|${p.x}|${p.c}`,
+      ),
+  },
+  'z08.stepeni-chastnoe': {
+    ege: 8,
+    prototip:
+      'Вычисления, степени (как 8.C «quot»): частное степеней с разными основаниями — степенями одного числа, дробные показатели',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number; s1: number; s2: number; x: number; y: number }) =>
+      z08(
+        stepeniChastnoe(p),
+        [
+          {
+            question: `Степенью какого числа являются $${p.b ** p.s1}$ и $${p.b ** p.s2}$?`,
+            options: [`$${p.b}$`, `$${p.b ** p.s2}$`, '$10$'],
+            correct: 0,
+          },
+          {
+            question: 'Как делить степени с одинаковым основанием?',
+            options: ['Показатели вычесть', 'Показатели разделить', 'Основания разделить'],
+            correct: 0,
+          },
+        ],
+        `z08c|${p.b}|${p.x}|${p.y}`,
+      ),
   },
   'z09.max-na-otrezke': {
     ege: 9,

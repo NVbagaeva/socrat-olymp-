@@ -42,3 +42,91 @@ export function logObratnyy(p: { m: number; t: number }): Draft {
     signature: `inv:${m}:${t}`,
   };
 }
+
+/**
+ * log_a(aᵐ·√b), если log_b a = t: степень основания даёт m, а корень из
+ * b — половину log_a b = 1/t. Подвох — «перевернуть» логарифм.
+ */
+export function logPryamoy(p: { m: number; t: number }): Draft {
+  const { m, t } = p;
+  const obr = round9(1 / t);
+  const pol = round9(obr / 2);
+  const otvet = round9(m + pol);
+  const arg = `a^{${m}}\\cdot\\sqrt{b}`;
+  return {
+    uslovie: `Найдите $${log('a', `\\left(${arg}\\right)`)}$, если $${log('b', 'a')} = ${d(t)}$.`,
+    otvet,
+    razbor: [
+      `Логарифм произведения — сумма логарифмов: $${log('a', `\\left(${arg}\\right)`)} = ${log('a', `a^{${m}}`)} + ${log('a', '\\sqrt{b}')}$.`,
+      `$${log('a', `a^{${m}}`)} = ${m}$ — показатель степени основания.`,
+      `Дано $${log('b', 'a')}$, а нужен $${log('a', 'b')}$: они взаимно обратны, $${log('a', 'b')} = \\dfrac{1}{${d(t)}} = ${d(obr)}$.`,
+      `Корень — степень $\\dfrac12$: $${log('a', '\\sqrt{b}')} = \\dfrac12\\cdot${log('a', 'b')} = \\dfrac12\\cdot(${d(obr)}) = ${d(pol)}$.`,
+      `Складываем: $${m} + (${d(pol)}) = ${d(otvet)}$.`,
+    ],
+    params: { m, t },
+    proverka: (() => {
+      const b = 3;
+      const a = b ** t;
+      return Math.log(a ** m * Math.sqrt(b)) / Math.log(a);
+    })(),
+    signature: `pryam:${m}:${t}`,
+  };
+}
+
+/**
+ * 2c·sin x·cos x / sin(360° − 2x): числитель — c·sin 2x, знаменатель
+ * по формуле приведения −sin 2x. Подвох — знак: ответ −c.
+ */
+export function sinDvoynogoPrivedenie(p: { x: number; c: number }): Draft {
+  const { x, c } = p;
+  const y = 360 - 2 * x;
+  const vnizu = `\\sin ${y}^\\circ`;
+  const svyaz = `$\\sin ${y}^\\circ = \\sin(360^\\circ - ${2 * x}^\\circ) = -\\sin ${2 * x}^\\circ$ — синус меняет знак при вычитании из $360^\\circ$.`;
+  return {
+    uslovie: `Найдите значение выражения $\\dfrac{${2 * c}\\sin ${x}^\\circ\\cdot\\cos ${x}^\\circ}{${vnizu}}$.`,
+    otvet: -c,
+    razbor: [
+      `Числитель — синус двойного угла: $${2 * c}\\sin ${x}^\\circ\\cos ${x}^\\circ = ${c}\\cdot 2\\sin ${x}^\\circ\\cos ${x}^\\circ = ${c}\\sin ${2 * x}^\\circ$.`,
+      svyaz,
+      `Делим: $\\dfrac{${c}\\sin ${2 * x}^\\circ}{-\\sin ${2 * x}^\\circ} = ${d(-c)}$.`,
+    ],
+    params: { x, c },
+    proverka: (() => {
+      const r = Math.PI / 180;
+      return (2 * c * Math.sin(x * r) * Math.cos(x * r)) / Math.sin(y * r);
+    })(),
+    signature: `sin2:${x}:${c}`,
+  };
+}
+
+/**
+ * (b^s1)^x / (b^s2)^y: оба основания — степени b, показатели дробные,
+ * разность целая. Ответ b^(s1·x − s2·y).
+ */
+export function stepeniChastnoe(p: {
+  b: number;
+  s1: number;
+  s2: number;
+  x: number;
+  y: number;
+}): Draft {
+  const { b, s1, s2, x, y } = p;
+  const B1 = b ** s1;
+  const B2 = b ** s2;
+  const e1 = round9(s1 * x);
+  const e2 = round9(s2 * y);
+  const e = round9(e1 - e2);
+  const otvet = round9(b ** e);
+  return {
+    uslovie: `Найдите значение выражения $\\dfrac{${B1}^{${d(x)}}}{${B2}^{${d(y)}}}$.`,
+    otvet,
+    razbor: [
+      `Оба основания — степени числа $${b}$: $${B1} = ${b}^{${s1}}$, $${B2} = ${b}^{${s2}}$.`,
+      `Степень в степени — показатели перемножаются: $${B1}^{${d(x)}} = ${b}^{${s1}\\cdot${d(x)}} = ${b}^{${d(e1)}}$, $${B2}^{${d(y)}} = ${b}^{${s2}\\cdot${d(y)}} = ${b}^{${d(e2)}}$.`,
+      `При делении степеней показатели вычитаются: $${b}^{${d(e1)}-${d(e2)}} = ${b}^{${d(e)}} = ${d(otvet)}$.`,
+    ],
+    params: { b, s1, s2, x, y },
+    proverka: B1 ** x / B2 ** y,
+    signature: `stch:${b}:${s1}:${s2}:${x}:${y}`,
+  };
+}
