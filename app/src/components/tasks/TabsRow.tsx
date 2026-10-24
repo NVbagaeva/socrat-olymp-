@@ -49,48 +49,32 @@ export function TabsRow({ className, children }: TabsRowProps) {
      лент; новая вкладка, открытая из панели, — к началу её содержимого. */
   const last = useRef(-2);
   useEffect(() => {
-    const row = panel.current;
-    const index = activeIndex(row);
-    if (tiles.current !== null && row !== null) {
-      settlePanelTab(pathname, index, tiles.current, row);
+    const index = activeIndex(panel.current!);
+    settlePanelTab(pathname, index, tiles.current!, panel.current!);
+    if (index !== last.current) {
+      last.current = index;
+      revealActive(tiles.current!);
+      revealActive(panel.current!);
     }
-    if (index === last.current) {
-      return;
-    }
-    last.current = index;
-    revealActive(tiles.current);
-    revealActive(row);
   });
-
-  useEffect(() => {
-    const again = () => {
-      revealActive(tiles.current);
-      revealActive(panel.current);
-    };
-    window.addEventListener('resize', again);
-    return () => window.removeEventListener('resize', again);
-  }, []);
 
   /* Нажатие на вкладку в панели: содержимое новой вкладки начнётся
      под панелью. Подводим сразу и ещё раз, когда вкладка отрисуется. */
   function onPanelClick(event: MouseEvent<HTMLDivElement>) {
     const tab = (event.target as Element).closest('[role="tab"]');
     if (
-      tab === null ||
+      !tab ||
       tab.getAttribute('aria-selected') === 'true' ||
-      tab.hasAttribute('disabled') ||
-      event.button !== 0 ||
+      event.button ||
       event.metaKey ||
       event.ctrlKey ||
       event.shiftKey ||
-      event.altKey ||
-      tiles.current === null ||
-      panel.current === null
+      event.altKey
     ) {
       return;
     }
-    rememberPanelTab(pathname, activeIndex(panel.current));
-    scrollToContent(tiles.current, panel.current);
+    rememberPanelTab(pathname, activeIndex(panel.current!));
+    scrollToContent(tiles.current!, panel.current!);
   }
 
   return (
@@ -99,7 +83,7 @@ export function TabsRow({ className, children }: TabsRowProps) {
         ref={tiles}
         className={clsx('topic-tabs-row', className)}
         inert={shown}
-        aria-hidden={shown ? true : undefined}
+        aria-hidden={shown || undefined}
       >
         {children('tiles', !shown)}
       </div>
@@ -109,7 +93,7 @@ export function TabsRow({ className, children }: TabsRowProps) {
           'is-shown': shown,
         })}
         inert={!shown}
-        aria-hidden={shown ? undefined : true}
+        aria-hidden={!shown || undefined}
         onClickCapture={onPanelClick}
       >
         {children('panel', shown)}

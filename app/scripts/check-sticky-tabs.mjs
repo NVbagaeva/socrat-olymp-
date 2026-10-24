@@ -441,6 +441,12 @@ async function vid(browser, engine, size) {
         v.props.includes('opacity') && v.durations.some((d) => d >= 0.15 && d <= 0.2),
         `${where}: переход не 150–200 мс (${v.durations.join(', ')})`,
       );
+      /* С анимацией панель доходит до полной видимости. */
+      const base = await zamer(page);
+      const deep = Math.round(base.tilesBottomDoc + 200);
+      await page.evaluate((to) => window.scrollTo(0, to), deep);
+      const { problem } = await dozhdatsya(page, deep, base);
+      check(problem === null, `${where}: ${problem}`);
     }
     await context.close();
   }
@@ -587,7 +593,10 @@ async function proverit(engine, browserType) {
     return;
   }
   for (const size of SIZES) {
-    const context = await newContext(browser, size, engine);
+    /* Состояния проверяются без анимации: проявление панели в
+       безголовом WebKit изредка замирает на кадр-другой дольше
+       ожидания. Сам переход проверяет vid(). */
+    const context = await newContext(browser, size, engine, { reducedMotion: 'reduce' });
     for (const url of PAGES) {
       await prokrutka(context, engine, size, url);
     }
