@@ -1,0 +1,727 @@
+/* Часть 2 онлайн-варианта: поля ответа, самопроверка, критерии, фото.
+   Только семантические токены. Префикс c2-. */
+
+.vo-strip__no.is-part2 {
+  border-style: dashed;
+}
+.vo-strip__no.is-part2.is-answered,
+.vo-strip__no.is-part2.is-scored {
+  border-style: solid;
+}
+.vo-strip__no.is-scored {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.c2-card {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.c2-uslovie {
+  min-width: 0;
+}
+/* Длинная формула не раздвигает страницу: прокрутка внутри абзаца. */
+.c2-uslovie p,
+.c2-reshenie__line,
+.c2-reshenie__otvet {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.c2-uslovie p {
+  margin: 0 0 var(--space-2);
+  line-height: 1.6;
+}
+.c2-uslovie p:last-child {
+  margin-bottom: 0;
+}
+.c2-punkty {
+  display: grid;
+  gap: var(--space-4);
+}
+.c2-punkt {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.c2-punkt__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.c2-punkt__podpis,
+.c2-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-h {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+/* ── Поле формулы ───────────────────────────────────────────── */
+.c2-math-host {
+  display: block;
+  min-width: 0;
+  flex: 1 1 10rem;
+}
+.c2-math-host[data-mode='loading'] {
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+math-field.c2-math {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.15rem;
+  --caret-color: var(--color-primary);
+  --selection-background-color: var(--color-surface-info);
+  --contains-highlight-background-color: transparent;
+}
+math-field.c2-math:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+math-field.c2-math[read-only] {
+  background: var(--color-surface-2);
+}
+math-field.c2-math::part(menu-toggle) {
+  display: none;
+}
+
+/* ── Списки корней и серий ──────────────────────────────────── */
+.c2-spisok {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.c2-spisok__row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  max-width: 32rem;
+}
+.c2-spisok__pre,
+.c2-spisok__post {
+  flex: none;
+  font-style: italic;
+}
+.c2-x {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-lg);
+  cursor: pointer;
+}
+
+/* ── Промежутки ─────────────────────────────────────────────── */
+.c2-prom {
+  display: grid;
+  gap: var(--space-2);
+}
+.c2-prom__list {
+  display: grid;
+  gap: var(--space-2);
+}
+.c2-prom__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.c2-prom__union {
+  font-size: var(--fs-lg);
+  color: var(--color-text-secondary);
+}
+.c2-prom__kusok {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  flex: 1 1 18rem;
+  min-width: 0;
+  max-width: 30rem;
+}
+.c2-prom__kusok .c2-math-host {
+  flex: 1 1 6rem;
+}
+.c2-prom__sep,
+.c2-prom__br {
+  font-size: var(--fs-lg);
+}
+.c2-skobka {
+  flex: none;
+  min-width: 36px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.c2-skobka.is-zakr {
+  border-color: var(--color-primary);
+}
+.c2-skobka:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.c2-prom__tools,
+.c2-prom__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.c2-chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ── Да / нет ───────────────────────────────────────────────── */
+.c2-danet {
+  display: flex;
+  gap: var(--space-2);
+}
+.c2-danet__btn {
+  min-width: 88px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.c2-danet__btn.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+}
+
+/* ── Сверка и самопроверка ──────────────────────────────────── */
+.c2-sverka {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.c2-sverka.is-sovpadaet {
+  color: var(--color-success);
+}
+.c2-sverka.is-ne-sovpadaet {
+  color: var(--color-error);
+}
+.c2-sverka.is-uchitel {
+  color: var(--color-text-secondary);
+}
+.c2-samo {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-samo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.c2-banner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-reshenie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  min-width: 0;
+  overflow-x: auto;
+}
+.c2-reshenie__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: 1.6;
+}
+.c2-reshenie__line {
+  display: block;
+}
+.c2-reshenie__otvet {
+  margin: 0;
+}
+
+/* ── Критерии ───────────────────────────────────────────────── */
+.c2-krit {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.c2-krit__bally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.c2-krit__ball {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.c2-krit__ball.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.c2-krit__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-krit__table th,
+.c2-krit__table td {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.c2-krit__table tr.is-ball td {
+  background: var(--color-surface-info);
+}
+.c2-krit__num {
+  width: 3.5rem;
+  text-align: center !important;
+  font-weight: 700;
+}
+.c2-krit__ili {
+  display: block;
+}
+.c2-krit__or {
+  display: block;
+  margin: var(--space-1) 0;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.c2-krit__row {
+  display: block;
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.c2-krit__row:hover:not(:disabled) {
+  border-color: var(--color-border-accent);
+}
+.c2-krit__row.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+.c2-krit__row:disabled {
+  cursor: default;
+}
+.c2-krit__itog {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ── Итоги части 2 ──────────────────────────────────────────── */
+.c2-itog {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-counter {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.c2-table__punkt {
+  display: block;
+}
+
+/* ── Фото решения ───────────────────────────────────────────── */
+.c2-foto {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+.c2-foto__warn {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-warning-soft);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.c2-foto__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.c2-foto__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.c2-foto__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.c2-thumb {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.c2-thumb.is-dragging {
+  opacity: 0.6;
+}
+.c2-thumb__img {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.c2-thumb.is-err .c2-thumb__img {
+  border-color: var(--color-error);
+}
+.c2-thumb__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.c2-thumb__n {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  min-width: 24px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-align: center;
+}
+.c2-thumb__handle {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 1.2rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.c2-thumb__progress {
+  width: 100%;
+  height: 6px;
+}
+.c2-thumb__status {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+.c2-thumb__status.is-err {
+  color: var(--color-error);
+}
+.c2-thumb__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.c2-thumb__tools .c2-mini {
+  min-width: 28px;
+  padding: 0 6px;
+}
+.c2-mini {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.c2-mini:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Редактор фото ──────────────────────────────────────────── */
+.c2-red {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.c2-red__head {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+.c2-red__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.c2-red__stage {
+  display: grid;
+  grid-template-columns: minmax(0, auto);
+  justify-content: center;
+  place-items: center;
+  min-height: 0;
+  padding: var(--space-3);
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+.c2-red__box {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
+}
+.c2-red__canvas {
+  display: block;
+  max-width: calc(100vw - 2 * var(--space-3));
+  max-height: calc(100dvh - 200px);
+  width: auto;
+  height: auto;
+}
+.c2-red__crop {
+  position: absolute;
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.45);
+  outline: 2px solid #fff;
+  cursor: move;
+}
+.c2-red__crop:focus-visible {
+  outline: 3px solid var(--color-primary);
+}
+.c2-red__h {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #fff;
+  background: rgb(0 0 0 / 0.2);
+}
+.c2-red__h--nw {
+  top: -6px;
+  left: -6px;
+  border-right: 0;
+  border-bottom: 0;
+  cursor: nwse-resize;
+}
+.c2-red__h--ne {
+  top: -6px;
+  right: -6px;
+  border-left: 0;
+  border-bottom: 0;
+  cursor: nesw-resize;
+}
+.c2-red__h--sw {
+  bottom: -6px;
+  left: -6px;
+  border-right: 0;
+  border-top: 0;
+  cursor: nesw-resize;
+}
+.c2-red__h--se {
+  bottom: -6px;
+  right: -6px;
+  border-left: 0;
+  border-top: 0;
+  cursor: nwse-resize;
+}
+.c2-red__tools {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+}
+.c2-red__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.c2-red__reset {
+  margin-left: auto;
+}
+.c2-red__angle {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--fs-caption);
+}
+.c2-red__angle input {
+  flex: 1;
+  min-height: 44px;
+}
+.c2-red__angle output {
+  min-width: 3.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.c2-red__scan {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--fs-caption);
+}
+
+/* ── Работа из кабинета ─────────────────────────────────────── */
+.vo-note.is-problem {
+  color: var(--color-error);
+}
+.c2-review {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-review__cap {
+  padding-bottom: var(--space-2);
+  font-weight: 700;
+  text-align: left;
+}
+.c2-review__warn {
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.c2-status {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  vertical-align: middle;
+}
+.c2-status.is-checked {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.c2-status.is-returned {
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+.c2-plaque {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  font-weight: 600;
+}
+.c2-comment {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.c2-table__krit {
+  max-width: 22rem;
+  font-size: var(--fs-caption);
+}
+.c2-itogr__task {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.c2-fm-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.c2-fm {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+.c2-fm__box {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.c2-fm__box img,
+.c2-metki {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.c2-fm__box img {
+  object-fit: fill;
+}
+.c2-metki {
+  pointer-events: none;
+}

@@ -1,9 +1,11 @@
-import { typeset } from '@/lib/tex';
+import { typeset, typesetKrupno } from '@/lib/tex';
 
 export interface TexProps {
   /** Текст, в котором формулы помечены знаками доллара: «Найдите $k$». */
   text: string;
   className?: string;
+  /** \dfrac в строке — крупной дробью (условия и решения части 2). */
+  krupno?: boolean;
 }
 
 /**
@@ -18,11 +20,11 @@ export interface TexProps {
  * В общий индекс components/ui не входит намеренно: он тянет KaTeX,
  * а индекс берут и лёгкие клиентские экраны. Импорт — по пути.
  */
-export function Tex({ text, className }: TexProps) {
+export function Tex({ text, className, krupno = false }: TexProps) {
   return (
     <span
       {...(className === undefined ? {} : { className })}
-      dangerouslySetInnerHTML={{ __html: typeset(text) }}
+      dangerouslySetInnerHTML={{ __html: krupno ? typesetKrupno(text) : typeset(text) }}
     />
   );
 }

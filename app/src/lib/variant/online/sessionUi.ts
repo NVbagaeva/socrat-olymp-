@@ -11,6 +11,9 @@
 
 import { asNumber, asNumberList, asStringRecord, isRecord } from '@/lib/trainerSession/restore';
 import type { BaseUi } from '@/lib/trainerSession/types';
+import { pustoyChast2, readChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
+import { povNomer } from '@/lib/povyshennye/kod';
+import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import type { VariantTask } from '../types';
 import type { Mode, Timer } from './link';
 import { loadSet, oshibkiTasks, tasksSignature } from './work';
@@ -28,7 +31,17 @@ export interface WorkPayload {
    * для каждой задачи — из какого задания она и аналог ли. null — вариант.
    */
   oshibki: { wrong: number[]; from: number[]; analog: boolean[] } | null;
+  /**
+   * Часть 2 (задания 14–20) — идёт на ленте после части 1. null — в
+   * работе только часть 1 (или в «Работе над ошибками»).
+   */
+  part2: Chast2Zadacha[] | null;
   sig: string;
+}
+
+/** Часть 2 работы: в старых сессиях поля нет. */
+export function part2Of(p: WorkPayload): Chast2Zadacha[] {
+  return p.part2 ?? [];
 }
 
 interface PackedWork {
@@ -78,7 +91,7 @@ function readTimer(v: unknown): Timer {
 
 /** Задания варианта или «Работы над ошибками» по коду партии. */
 export async function buildWork(
-  base: Omit<WorkPayload, 'tasks' | 'oshibki' | 'sig'>,
+  base: Omit<WorkPayload, 'tasks' | 'oshibki' | 'part2' | 'sig'>,
   wrong: number[] | null,
 ): Promise<WorkPayload | null> {
   const loaded = await loadSet(base.code);
@@ -86,7 +99,13 @@ export async function buildWork(
   const tasks = loaded.set.variants[base.variant - 1]?.tasks;
   if (tasks === undefined || tasks.length === 0) return null;
   if (wrong === null) {
-    return { ...base, tasks, oshibki: null, sig: tasksSignature(tasks) };
+    return {
+      ...base,
+      tasks,
+      oshibki: null,
+      part2: await part2For(base),
+      sig: tasksSignature(tasks),
+    };
   }
   const items = await oshibkiTasks(loaded.set, base.variant, wrong);
   if (items.length === 0) return null;
@@ -96,8 +115,20 @@ export async function buildWork(
     mode: 'trening',
     tasks: list,
     oshibki: { wrong, from: items.map((i) => i.from), analog: items.map((i) => i.analog) },
+    part2: null,
     sig: tasksSignature(list),
   };
+}
+
+/** Часть 2 по коду: пока она есть только у вариантов раздела повышенной сложности. */
+export async function part2For(base: {
+  code: string;
+  variant: number;
+}): Promise<Chast2Zadacha[] | null> {
+  const pv = povNomer(base.code);
+  if (pv === null) return null;
+  const { chast2Versii } = await import('@/lib/povyshennye/chast2');
+  return chast2Versii(pv, base.variant);
 }
 
 export async function unpackWork(packed: unknown): Promise<WorkPayload | null> {
@@ -139,6 +170,8 @@ export interface WorkUi extends BaseUi {
   times: Record<number, number>;
   /** Начало работы, мс по часам: для таймера контрольной. */
   startedAt: number;
+  /** Часть 2: ответы, сверка, решение, самооценка. */
+  chast2: Chast2Ui;
 }
 
 function checks(v: unknown): Record<number, Check> {
@@ -184,5 +217,6 @@ export function readWorkUi(base: BaseUi): WorkUi {
     steps: numbers(raw['steps']),
     times: numbers(raw['times']),
     startedAt: asNumber(raw['startedAt'], Date.now()),
+    chast2: raw['chast2'] === undefined ? pustoyChast2() : readChast2(raw['chast2']),
   };
 }

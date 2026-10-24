@@ -9,7 +9,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { qrSvg } from '@/lib/qr';
 import { proverkaHref, sectionLinks } from '@/lib/variant/online/link';
 import { displayAnswer } from '@/lib/variant/online/normalize';
-import { scoreWork } from '@/lib/variant/online/proverka';
+import { scoreWork, withPart2 } from '@/lib/variant/online/proverka';
 import type { ResultData } from '@/lib/variant/online/resultCode';
 import type { VariantTask } from '@/lib/variant/types';
 import { dateText, secondsText } from './format';
@@ -34,6 +34,10 @@ export interface WorkResultProps {
   actions?: ReactNode;
   /** Предупреждение над результатом. */
   notice?: string | null;
+  /** Баллы части 2 (14–20): прибавляются к первичному. null — части 2 нет. */
+  part2?: { ball: number; max: number } | null;
+  /** Блок части 2 под таблицей части 1. */
+  part2Block?: ReactNode;
 }
 
 /**
@@ -55,13 +59,18 @@ export function WorkResult({
   outdated = false,
   actions,
   notice,
+  part2 = null,
+  part2Block,
 }: WorkResultProps) {
   const [open, setOpen] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const score = scoreWork(
-    tasks.map((t) => t.egeNumber),
-    rights,
+  const score = withPart2(
+    scoreWork(
+      tasks.map((t) => t.egeNumber),
+      rights,
+    ),
+    part2,
   );
   useEffect(() => {
     if (root.current !== null) upgrade(root.current, katex);
@@ -196,6 +205,8 @@ export function WorkResult({
           </tbody>
         </table>
       </div>
+
+      {part2Block}
 
       {links.length > 0 ? (
         <section className="vo-links" aria-label={T.result.links}>

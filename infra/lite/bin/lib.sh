@@ -22,6 +22,8 @@ load_env() {
 # docker compose с обоими файлами окружения. В CI к набору добавляется
 # compose.ci.yml (COMPOSE_EXTRA в .env.github).
 dc() {
+  # Часть 2 (контейнер uploads) включается переменной CHAST2_ENABLED=1.
+  if [ "${CHAST2_ENABLED:-0}" = 1 ]; then export COMPOSE_PROFILES=chast2; fi
   set -- -f "$LITE_DIR/compose.yml" ${COMPOSE_EXTRA:+-f "$LITE_DIR/$COMPOSE_EXTRA"} "$@"
   docker compose --project-directory "$LITE_DIR" \
     --env-file "$LITE_DIR/.env.generated" --env-file "$LITE_DIR/.env.github" "$@"

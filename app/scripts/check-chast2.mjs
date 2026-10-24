@@ -1,0 +1,351 @@
+#!/usr/bin/env node
+/* scripts/check-chast2.mjs — часть 2 онлайн: баллы, шкала, автопроверка.
+
+   Запуск: pnpm test:chast2
+
+     1. Баллы: максимумы 1–20 из одного конфига, сумма 13 + 20 = 33.
+     2. Шкала: значения для 0…33, не убывает, 0 → 0, 33 → 100.
+     3. Автопроверка: для каждого типа поля — таблица эквивалентных
+        записей (должны совпасть), неэквивалентных (не совпасть) и
+        неразборчивых («проверит учитель», не «неверно»).
+
+   Ненулевой код возврата — проверка не прошла. */
+
+import fs from 'node:fs';
+import { requireSrc } from './lib/load-ts.mjs';
+
+const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL } = requireSrc('content/variantOnline/bally');
+const { TESTOVYJ } = requireSrc('content/variantOnline/shkala');
+const { proverit } = requireSrc('lib/chast2/sravnenie');
+
+let failures = 0;
+let checks = 0;
+function ok(cond, where) {
+  checks += 1;
+  if (!cond) {
+    failures += 1;
+    console.error(`  ✗ ${where}`);
+  }
+}
+
+/* ── 1. Баллы ───────────────────────────────────────────────────── */
+const ozhid = { 14: 2, 15: 3, 16: 2, 17: 2, 18: 3, 19: 4, 20: 4 };
+for (let n = 1; n <= 13; n += 1) ok(MAX_BALL[n] === 1, `№${n}: 1 балл`);
+for (const [n, b] of Object.entries(ozhid)) ok(MAX_BALL[n] === b, `№${n}: ${b} балла`);
+ok(
+  MAX_PART1 === 13 && MAX_PART2 === 20 && MAX_TOTAL === 33,
+  `части 13 + 20 = 33 (${MAX_PART1} + ${MAX_PART2} = ${MAX_TOTAL})`,
+);
+ok(Object.values(MAX_BALL).reduce((s, x) => s + x, 0) === 33, 'сумма максимумов 33');
+
+/* Критерии: верхняя строка — максимум задания, нижняя — 0, баллы по убыванию без пропусков. */
+const { KRITERII, kriteriiZadaniya } = requireSrc('content/variantOnline/kriterii');
+for (let n = 14; n <= 20; n += 1) {
+  const k = KRITERII[n];
+  ok(k[0].ball === MAX_BALL[n], `№${n}: верхний критерий = максимум ${MAX_BALL[n]}`);
+  ok(k[k.length - 1].ball === 0, `№${n}: нижний критерий 0`);
+  ok(
+    k.every((r, i) => i === 0 || r.ball === k[i - 1].ball - 1),
+    `№${n}: баллы ${k.map((r) => r.ball).join(',')} подряд`,
+  );
+  ok(
+    kriteriiZadaniya(n).every((r) => r.ili.every((t) => !/[{}]/.test(t))),
+    `№${n}: в критериях нет незаполненных мест`,
+  );
+}
+ok(
+  kriteriiZadaniya(16, { u: 'точки 1' })[1].ili[0].endsWith('исключением точки 1'),
+  '№16: уточнение варианта подставляется',
+);
+
+/* ── 2. Шкала ───────────────────────────────────────────────────── */
+ok(TESTOVYJ.length === 34, `шкала: 34 значения (0…33), а не ${TESTOVYJ.length}`);
+ok(TESTOVYJ[0] === 0 && TESTOVYJ[33] === 100, 'шкала: 0 → 0, 33 → 100');
+ok(
+  TESTOVYJ.every((v, i) => i === 0 || v >= TESTOVYJ[i - 1]),
+  'шкала не убывает',
+);
+ok(
+  TESTOVYJ.every((v) => Number.isInteger(v) && v >= 0 && v <= 100),
+  'шкала: целые 0…100',
+);
+
+/* Миграция базы: те же максимумы и та же шкала, что в конфиге сайта. */
+const MIG = fs.readFileSync(
+  new URL('../../supabase/migrations/20261024120000_raboty_chast2.sql', import.meta.url),
+  'utf8',
+);
+const maxSql = Object.fromEntries(
+  [...MIG.matchAll(/\((\d+), (\d)\)/g)].map((m) => [Number(m[1]), Number(m[2])]),
+);
+for (let n = 1; n <= 20; n += 1)
+  ok(maxSql[n] === MAX_BALL[n], `база: максимум №${n} = ${MAX_BALL[n]}`);
+const shkSql = /unnest\(array\[([\d,\s]+)\]\)/
+  .exec(MIG)?.[1]
+  .split(',')
+  .map((x) => Number(x.trim()));
+ok(JSON.stringify(shkSql) === JSON.stringify([...TESTOVYJ]), 'база: шкала та же, что shkala.ts');
+
+/* ── 3. Автопроверка ────────────────────────────────────────────── */
+const S = 'sovpadaet';
+const N = 'ne-sovpadaet';
+const U = 'uchitel';
+const I = (lo, loZakr, hi, hiZakr) => ({ t: 'interval', lo, loZakr, hi, hiZakr });
+const T = (x) => ({ t: 'tochka', x });
+const M = (...kuski) => ({ kuski });
+
+const TABLICA = [
+  /* число */
+  [
+    { vid: 'chislo', verno: '\\frac{2\\sqrt{21}}{\\sqrt{103}}' },
+    [
+      ['\\frac{\\sqrt{84}}{\\sqrt{103}}', S],
+      ['2√21/√103', S],
+      ['\\sqrt{\\frac{84}{103}}', S],
+      ['0,9031', N],
+      ['\\frac{2\\sqrt{21}}{103}', N],
+      ['2*sqrt(21)/sqrt(103)', S],
+      ['\\sqrt{84/103', U],
+      ['ответ два', U],
+    ],
+  ],
+  [
+    { vid: 'chislo', verno: '1,5' },
+    [
+      ['1.5', S],
+      ['\\frac32', S],
+      ['3/2', S],
+      ['1{,}5', S],
+      ['1\\frac{1}{2}', S],
+      ['15', N],
+      ['-1,5', N],
+    ],
+  ],
+  [
+    { vid: 'chislo', verno: '420' },
+    [
+      ['420', S],
+      ['4,2\\cdot10^2', S],
+      ['420,0', S],
+      ['421', N],
+    ],
+  ],
+  [
+    { vid: 'chislo', verno: '-\\frac{11\\pi}{2}' },
+    [
+      ['-5,5\\pi', S],
+      ['-\\frac{11}{2}\\pi', S],
+      ['-11π/2', S],
+      ['11π/2', N],
+    ],
+  ],
+  /* выражение с параметром */
+  [
+    { vid: 'vyrazhenie', verno: '14{,}4\\sqrt{\\frac{2}{2-n}}', oblast: { n: [0, 0.5] } },
+    [
+      ['14,4\\sqrt{\\frac{2}{2-n}}', S],
+      ['\\frac{14{,}4\\sqrt2}{\\sqrt{2-n}}', S],
+      ['\\sqrt{\\frac{414{,}72}{2-n}}', S],
+      ['72√2/(5√(2-n))', S],
+      ['14,4\\sqrt{\\frac{2}{2+n}}', N],
+      ['14,4', N],
+      ['14,4\\sqrt{\\frac{2}{2-m}}', U],
+    ],
+  ],
+  /* набор корней */
+  [
+    { vid: 'korni', verno: ['-\\frac{11\\pi}{2}', '-5\\pi'] },
+    [
+      [['-5\\pi', '-\\frac{11\\pi}{2}'], S],
+      [['-5π', '-5,5π'], S],
+      [['-5\\pi', '-5\\pi', '-\\frac{11\\pi}{2}'], S],
+      [['-5\\pi'], N],
+      [['-5\\pi', '-\\frac{9\\pi}{2}'], N],
+      [['-5\\pi', '-\\frac{11\\pi}{2}', '-6\\pi'], N],
+      [['-5\\pi', 'минус пять пи'], U],
+      [[], N],
+    ],
+  ],
+  /* промежутки */
+  [
+    { vid: 'promezhutki', verno: M(I('1', true, '1,5', false), I('16', true, 'inf', false)) },
+    [
+      [M(I('1', true, '\\frac32', false), I('16', true, '+\\infty', false)), S],
+      [M(I('16', true, '\\infty', true), I('1', true, '1.5', false)), S],
+      [
+        M(I('1', true, '1,25', true), I('1,25', false, '1,5', false), I('16', true, 'inf', false)),
+        S,
+      ],
+      [M(I('1', false, '1,5', false), I('16', true, 'inf', false)), N],
+      [M(I('1', true, '1,5', true), I('16', true, 'inf', false)), N],
+      [M(I('1', true, '1,5', false), I('16', false, 'inf', false), T('16')), S],
+      [M(I('1', true, '1,5', false)), N],
+      [M(I('1', true, 'полтора', false), I('16', true, 'inf', false)), U],
+    ],
+  ],
+  [
+    { vid: 'promezhutki', verno: M(I('-4,5', true, '-2\\sqrt2', false), T('-4\\frac{17}{18}')) },
+    [
+      [M(T('-\\frac{89}{18}'), I('-\\frac92', true, '-\\sqrt8', false)), S],
+      [M(I('-4,5', true, '-2√2', false), T('-89/18')), S],
+      [M(I('-4,5', true, '-2\\sqrt2', true), T('-\\frac{89}{18}')), N],
+      [M(I('-4,5', true, '-2\\sqrt2', false)), N],
+      [M(I('-4,5', true, '-2,83', false), T('-\\frac{89}{18}')), N],
+    ],
+  ],
+  /* серии */
+  [
+    { vid: 'serii', verno: ['\\pi+2\\pi n', '\\frac{\\pi}{2}+2\\pi l'] },
+    [
+      [['x=\\pi+2\\pi n, n\\in\\mathbb{Z}', 'x=\\frac{\\pi}{2}+2\\pi k, k\\in\\mathbb{Z}'], S],
+      [['-\\pi+2\\pi k', '\\frac{5\\pi}{2}+2\\pi m'], S],
+      [['\\pi(2n+1)', '\\frac{\\pi}{2}(4k+1)'], S],
+      [['\\frac{\\pi}{2}+\\frac{\\pi}{2}\\cdot n'], N],
+      [['\\pi+2\\pi n'], N],
+      [['\\pi+\\pi n', '\\frac{\\pi}{2}+2\\pi n'], N],
+      [['x = π + 2πn', 'x = π/2 + 2πn'], S],
+      [['\\pi + 2\\pi n + y'], U],
+    ],
+  ],
+  [
+    { vid: 'serii', verno: ['(-1)^n\\frac{\\pi}{6}+\\pi n'] },
+    [
+      [['\\frac{\\pi}{6}+2\\pi n', '\\frac{5\\pi}{6}+2\\pi n'], S],
+      [['\\frac{\\pi}{6}+\\pi n'], N],
+    ],
+  ],
+  /* да / нет */
+  [
+    { vid: 'danet', verno: true },
+    [
+      ['da', S],
+      ['net', N],
+      [null, N],
+    ],
+  ],
+  [
+    { vid: 'danet', verno: false },
+    [
+      ['net', S],
+      ['da', N],
+    ],
+  ],
+];
+
+for (const [pole, sluchai] of TABLICA) {
+  for (const [vvod, nado] of sluchai) {
+    const est = proverit(pole, vvod);
+    ok(
+      est === nado,
+      `${pole.vid} ${JSON.stringify(pole.verno)} ← ${JSON.stringify(vvod)}: ждали ${nado}, получили ${est}`,
+    );
+  }
+}
+
+/* ── 4. Часть 2 вариантов: верный ответ проходит свою автопроверку ── */
+const { CHAST2_V01 } = requireSrc('lib/povyshennye/chast2/v01');
+const { chislo } = requireSrc('lib/chast2/vyrazhenie');
+const vygruzka = {};
+for (const [v, zadachi] of Object.entries(CHAST2_V01)) {
+  const kv = `1.${v}`;
+  ok(
+    zadachi.map((z) => z.no).join(',') === '14,15,16,17,18,19,20',
+    `${kv}: задания 14–20 по порядку`,
+  );
+  vygruzka[kv] = zadachi.map((z) => {
+    for (const p of z.punkty) {
+      if (p.pole === null) continue;
+      const vvod = p.pole.vid === 'danet' ? (p.pole.verno ? 'da' : 'net') : p.pole.verno;
+      ok(
+        proverit(p.pole, vvod) === S,
+        `${kv} №${z.no}${p.bukva ?? ''}: верный ответ проходит автопроверку`,
+      );
+    }
+    const pole = z.punkty.find((p) => p.pole?.vid === 'chislo' || p.pole?.vid === 'korni')?.pole;
+    return {
+      no: z.no,
+      tekst: z.otvet,
+      chislo: pole?.vid === 'chislo' ? pole.verno : null,
+      znach: pole?.vid === 'chislo' ? chislo(pole.verno) : null,
+      korni: pole?.vid === 'korni' ? pole.verno : null,
+    };
+  });
+}
+
+/* ── Состояние части 2 в сессии и баллы с частью 2 ─────────────── */
+{
+  const { readChast2, vvodTex, ballyChast2, itogZadaniya } = requireSrc('lib/chast2/sostoyanie');
+  const { withPart2, scoreWork } = requireSrc('lib/variant/online/proverka');
+  const st = readChast2({
+    vvod: {
+      '14.0': ['2\\pi n'],
+      '16.0': { kuski: [{ t: 'interval', lo: '1', hi: '\\infty', loZakr: true, hiZakr: true }] },
+      '99.0': 'x',
+      '20.0': 'da',
+    },
+    sverka: { '14.0': 'sovpadaet', 14.1: 'vzlom' },
+    reshenie: [14, 21, '15'],
+    ball: { 14: 2, 15: 9, 19: -1, 20: 4 },
+    stroka: { 14: '2:0', 15: 'drop table' },
+  });
+  ok(
+    Object.keys(st.vvod).sort().join() === '14.0,16.0,20.0',
+    'чтение: чужие ключи ответов отброшены',
+  );
+  ok(st.sverka['14.1'] === undefined, 'чтение: неизвестный итог сверки отброшен');
+  ok(st.reshenie.join() === '14', 'чтение: номера решений только 14–20');
+  ok(
+    st.ball[14] === 2 &&
+      st.ball[15] === undefined &&
+      st.ball[19] === undefined &&
+      st.ball[20] === 4,
+    'чтение: балл выше максимума или отрицательный отброшен',
+  );
+  ok(st.stroka[15] === undefined, 'чтение: строка критериев только «балл:номер»');
+  ok(readChast2('мусор').reshenie.length === 0, 'чтение: мусор → пустое состояние');
+  ok(
+    vvodTex({ vid: 'promezhutki', verno: { kuski: [] } }, st.vvod['16.0']) === '[1;\\ \\infty)',
+    'показ: у бесконечности скобка круглая',
+  );
+  ok(
+    vvodTex({ vid: 'serii', verno: [] }, ['\\pi', '']) === 'x=\\pi',
+    'показ: пустые серии не выводятся',
+  );
+  const b = ballyChast2([14, 15, 16, 17, 18, 19, 20], { 14: 2, 20: 4 });
+  ok(
+    b.summa === 6 && b.oceneno === 2 && b.max === 20,
+    'баллы части 2: сумма, оценено, максимум 20',
+  );
+  ok(
+    itogZadaniya(['sovpadaet', 'uchitel']) === 'uchitel' &&
+      itogZadaniya(['uchitel', 'ne-sovpadaet']) === 'ne-sovpadaet',
+    'итог задания по пунктам',
+  );
+  const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const s1 = scoreWork(
+    nums,
+    nums.map(() => true),
+  );
+  const s = withPart2(s1, { ball: 20, max: 20 });
+  ok(s.primary === 33 && s.max === 33 && s.test === 100, 'полный вариант: 33 из 33 → 100');
+  ok(
+    withPart2(
+      scoreWork(
+        nums,
+        nums.map((_, i) => i < 5),
+      ),
+      { ball: 0, max: 20 },
+    ).test === TESTOVYJ[5],
+    'часть 1 + 0 за часть 2 → тестовый по той же шкале',
+  );
+  ok(withPart2(s1, null) === s1, 'без части 2 балл не меняется');
+}
+
+const jsonAt = process.argv.indexOf('--json');
+if (jsonAt > 0) fs.writeFileSync(process.argv[jsonAt + 1], JSON.stringify(vygruzka, null, 1));
+
+if (failures > 0) {
+  console.error(`\nЧасть 2: ошибок ${failures} из ${checks}`);
+  process.exit(1);
+}
+console.log(`Часть 2: ${checks} проверок — всё сходится`);

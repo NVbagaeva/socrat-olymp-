@@ -1,0 +1,16 @@
+{
+  "name": "budetege-uploads",
+  "private": true,
+  "type": "module",
+  "description": "Загрузка фото решений части 2: проверка, перекодирование, бакет, подписанные ссылки, автопроверка",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "retention": "node retention.mjs"
+  },
+  "dependencies": {
+    "aws4fetch": "1.0.20",
+    "pg": "8.16.3",
+    "sharp": "0.34.4"
+  }
+}

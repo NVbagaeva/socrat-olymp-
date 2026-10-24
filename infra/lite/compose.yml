@@ -3,7 +3,9 @@
 #   db     — PostgreSQL 17;
 #   auth   — GoTrue, служба входа Supabase (регистрация, письма, JWT);
 #   rest   — PostgREST, доступ к таблицам по правилам RLS;
-#   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS.
+#   caddy  — HTTPS (Let's Encrypt), /auth/v1 и /rest/v1, apikey, CORS;
+#   uploads — фото решений части 2 (профиль chast2, включается вместе
+#             с серверным кабинетом; docs/chast2-onlayn.md).
 #
 # Адреса и ключи те же, что у облачного Supabase, поэтому supabase-js на
 # сайте работает без изменений. Почему без Kong, Studio, Storage и
@@ -179,6 +181,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  # Фото решений части 2: проверка JWT и прав в базе, перекодирование
+  # (EXIF удаляется), приватный бакет Yandex Object Storage в России,
+  # подписанные ссылки на 10 минут, автопроверка ответов. Включается
+  # профилем chast2 (COMPOSE_PROFILES=chast2), когда на сервере есть
+  # миграции кабинета и работ.
+  uploads:
+    profiles: [chast2]
+    build: ./uploads
+    restart: unless-stopped
+    mem_limit: ${UPLOADS_MEM:-192m}
+    logging: *logging
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://uploads:${UPLOADS_DB_PASSWORD:-}@db:5432/postgres
+      JWT_SECRET: ${JWT_SECRET}
+      PHOTO_KEEP_DAYS: ${PHOTO_KEEP_DAYS:-}
+      S3_ENDPOINT: ${PHOTOS_S3_ENDPOINT:-https://storage.yandexcloud.net}
+      S3_BUCKET: ${PHOTOS_S3_BUCKET:-}
+      S3_REGION: ru-central1
+      S3_ACCESS_KEY_ID: ${PHOTOS_S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${PHOTOS_S3_SECRET_ACCESS_KEY:-}
 
   caddy:
     image: caddy:2.11.7-alpine

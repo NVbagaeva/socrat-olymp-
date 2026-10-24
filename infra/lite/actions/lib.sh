@@ -84,6 +84,12 @@ sync_files() {
     n=$((n + 1))
     cp "$REPO_ROOT/$path" "$stage/migrations/$(printf '%03d' "$n")-$(basename "$path")"
   done < "$LITE_SRC/migrations.txt"
+  # Ключи вариантов (часть 2): собираются в CI scripts/build-variant-keys.mjs,
+  # в репозитории их нет.
+  if [ -f "$REPO_ROOT/app/pdf-private/variant_keys.sql" ]; then
+    mkdir -p "$stage/keys"
+    cp "$REPO_ROOT/app/pdf-private/variant_keys.sql" "$stage/keys/"
+  fi
   log "На сервер: набор, $(ls "$stage/templates" | wc -l) шаблона писем, миграций $n"
   # Файлы без секретов: читать их можно всем, и postgres в контейнере
   # (uid 70) должен видеть db/. Секреты — в .env.*, они здесь не трогаются.

@@ -52,6 +52,15 @@ SQL
 done
 log "Новых миграций: $applied"
 
+# Ключи вариантов (часть 2): файл приходит из CI, только если таблица уже есть.
+if [ -f keys/variant_keys.sql ]; then
+  has=$(psql_db -tA -c "select to_regclass('public.variant_keys') is not null")
+  if [ "$has" = t ]; then
+    psql_db < keys/variant_keys.sql
+    log "Ключи вариантов обновлены"
+  fi
+fi
+
 # Список приглашённых: витрина vault.decrypted_secrets (db/10-vault-shim.sql),
 # её читает хук регистрации. Пустой список — регистрация закрыта для всех.
 psql_db -v emails="$ALLOWED_EMAILS" <<'SQL'

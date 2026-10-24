@@ -11,15 +11,23 @@ import { archiveVolatile, saveWork } from '@/lib/variant/online/archive';
 import {
   ONLINE_PATHS,
   oshibkiScope,
+  rabotaScope,
   reshatHref,
   seriyaHref,
   workScope,
   type WorkLink,
 } from '@/lib/variant/online/link';
 import { normalizeAnswer, sameAnswer } from '@/lib/variant/online/normalize';
+import { Chast2Itog } from '@/components/chast2/Chast2Itog';
+import { RabotaOtpravka } from '@/components/chast2/RabotaOtpravka';
+import type { RabotaCtx } from '@/components/chast2/rabotaCtx';
+import { CHAST2_TEXT as C2 } from '@/content/variantOnline/chast2Text';
+import { ballyChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import {
+  fullPartOne,
   localProverka,
   scoreWork,
+  withPart2,
   type Proverka,
   type WorkCheck,
 } from '@/lib/variant/online/proverka';
@@ -28,6 +36,7 @@ import {
   buildWork,
   isWorkPayload,
   packWork,
+  part2Of,
   readWorkUi,
   unpackWork,
   type WorkPayload,
@@ -44,6 +53,8 @@ export interface WorkRunProps {
   outdated: boolean;
   /** Ссылка открыта со страницы серии: в итогах — «К серии». */
   series: boolean;
+  /** Работа, выданная в кабинете: ответы — в неё, итог — отправка учителю. */
+  rabota?: RabotaCtx;
 }
 
 /** Название работы по типу из шапки: «Домашняя работа», своё. */
@@ -71,7 +82,7 @@ function firstAttempts(payload: WorkPayload, ui: WorkUi): string[] {
  * Проверка — через `Proverka` (lib/variant/online/proverka.ts): на этапе
  * 1 в браузере, на этапе 2 — на сервере, экран тот же.
  */
-export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
+export function WorkRun({ link, initial, outdated, series, rabota }: WorkRunProps) {
   const [mode, setMode] = useState<'work' | 'oshibki'>('work');
   const snapshot = useRef<WorkUi | null>(null);
   const emptyRef = useRef('');
@@ -86,9 +97,11 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
   /* Версия варианта повышенной сложности называется по разделу: «Вариант 7.3». */
   const pv = povNomer(link.code);
   const title =
-    pv === null
-      ? `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`
-      : `${POV_TITLE} · ${POV_VERSION_LABEL(versiyaText(pv, link.variant))}`;
+    rabota !== undefined
+      ? `${rabota.sw.work.title} · ${pv === null ? T.start.variant(link.variant) : POV_VERSION_LABEL(versiyaText(pv, link.variant))}`
+      : pv === null
+        ? `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`
+        : `${POV_TITLE} · ${POV_VERSION_LABEL(versiyaText(pv, link.variant))}`;
 
   /* Итоги варианта остаются на месте, пока идёт работа над ошибками:
      «К результатам варианта» возвращает к ним, а не к началу. */
@@ -104,14 +117,20 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
       ) : null}
       <div hidden={mode === 'oshibki'}>
         <TrainerSessionHost<WorkPayload, WorkUi>
-          scope={workScope(link.code, link.variant, link.mode)}
+          scope={
+            rabota === undefined
+              ? workScope(link.code, link.variant, link.mode)
+              : rabotaScope(rabota.id)
+          }
           what="вариант"
           isPayload={isWorkPayload}
-          count={(p) => p.tasks.length}
-          describe={(p, i) => ({
-            kind: `№${p.tasks[i]?.egeNumber ?? ''}`,
-            html: p.tasks[i]?.statement ?? '',
-          })}
+          count={(p) => p.tasks.length + part2Of(p).length}
+          describe={(p, i) => {
+            const z = part2Of(p)[i - p.tasks.length];
+            return z === undefined
+              ? { kind: `№${p.tasks[i]?.egeNumber ?? ''}`, html: p.tasks[i]?.statement ?? '' }
+              : { kind: `№${z.no}`, html: '' };
+          }}
           pack={packWork}
           unpack={unpackWork}
           labels={{
@@ -120,8 +139,8 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               link.mode === 'kontrol'
                 ? (ui) => Object.values(ui.answers).filter((v) => normalizeAnswer(v).ok).length
                 : undefined,
-            finish: T.run.finish,
-            finishLong: T.run.finish,
+            finish: rabota === undefined ? T.run.finish : C2.rabota.finish,
+            finishLong: rabota === undefined ? T.run.finish : C2.rabota.finish,
             finishTitle: T.run.finishTitle,
             finishText: () =>
               emptyRef.current === '' ? T.run.finishAll : T.run.finishEmpty(emptyRef.current),
@@ -129,10 +148,24 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
             pausable: link.mode === 'trening',
             clock: link.mode === 'trening' && link.timer.kind === 'up',
           }}
-          summaryView={(data) => {
+          summaryView={(data, actions) => {
             const payload = data.payload as WorkPayload;
             const ui = snapshot.current;
             if (ui === null) return null;
+            if (rabota !== undefined) {
+              return (
+                <RabotaOtpravka
+                  payload={payload}
+                  ui={ui}
+                  rabota={rabota}
+                  onBack={() => {
+                    rabota.reload();
+                    actions.onNew();
+                  }}
+                  onSent={rabota.reload}
+                />
+              );
+            }
             return (
               <Finished
                 payload={payload}
@@ -149,15 +182,19 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               />
             );
           }}
-          configurator={({ start }) => (
-            <StartScreen
-              link={link}
-              title={title}
-              count={initial.tasks.length}
-              outdated={outdated}
-              onStart={() => start({ ...initial })}
-            />
-          )}
+          configurator={({ start }) =>
+            rabota === undefined ? (
+              <StartScreen
+                link={link}
+                title={title}
+                count={initial.tasks.length + part2Of(initial).length}
+                outdated={outdated}
+                onStart={() => start({ ...initial })}
+              />
+            ) : (
+              <RabotaStart rabota={rabota} title={title} onStart={() => start({ ...initial })} />
+            )
+          }
           screen={(ctx) => (
             <WorkScreen
               payload={ctx.payload}
@@ -169,6 +206,7 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               proverka={localProverka(ctx.payload.tasks)}
               onSnapshot={onSnapshot}
               onEmpty={onEmpty}
+              {...(rabota === undefined ? {} : { rabota })}
             />
           )}
         />
@@ -221,6 +259,65 @@ function StartScreen({
   );
 }
 
+/* ── Старт работы из кабинета ───────────────────────────────────── */
+
+function RabotaStart({
+  rabota,
+  title,
+  onStart,
+}: {
+  rabota: RabotaCtx;
+  title: string;
+  onStart: () => void;
+}) {
+  const { sw } = rabota;
+  const returned = sw.submission?.status === 'returned';
+  const late = sw.editable.length === 0;
+  return (
+    <section className="vo-start" data-testid="vo-start">
+      <h2 className="vo-start__title">{title}</h2>
+      <p className="vo-start__meta">
+        {C2.rabota.tutor(sw.tutor.name)} ·{' '}
+        {sw.deadline === null
+          ? C2.rabota.noDeadline
+          : C2.rabota.deadline(
+              new Date(sw.deadline).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            )}
+      </p>
+      {sw.work.note === null ? null : <p>{sw.work.note}</p>}
+      <ul className="vo-start__rules">
+        <li>{C2.rabota.mode[sw.work.part2Mode]}</li>
+        <li>{C2.rabota.saved}.</li>
+        <li>{T.start.answerFormat}</li>
+      </ul>
+      {returned ? (
+        <div className="vo-warn">
+          <p>{C2.rabota.returned}</p>
+          <ul>
+            {sw.grades
+              .filter((g) => g.naDorabotke)
+              .map((g) => (
+                <li key={g.taskNo}>
+                  {C2.rabota.returnedTask(g.taskNo)}
+                  {g.comment === null ? '' : `: ${g.comment}`}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
+      {late ? <p className="vo-warn">{C2.rabota.late}</p> : null}
+      <Button size="lg" onClick={onStart} disabled={late} data-testid="vo-begin">
+        {T.start.begin}
+      </Button>
+    </section>
+  );
+}
+
 /* ── Итоги ──────────────────────────────────────────────────────── */
 
 function Finished({
@@ -244,6 +341,10 @@ function Finished({
 }) {
   const proverka: Proverka = useMemo(() => localProverka(payload.tasks), [payload]);
   const [check, setCheck] = useState<WorkCheck | null>(null);
+  const part2 = useMemo(() => part2Of(payload), [payload]);
+  /* Самопроверка части 2 продолжается на экране результатов. */
+  const [chast2, setChast2] = useState<Chast2Ui>(ui.chast2);
+  const [finishedAtMs] = useState(() => Date.now());
   const [volatile, setVolatile] = useState(false);
   const answers = useMemo(() => firstAttempts(payload, ui), [payload, ui]);
   const result: ResultData = useMemo(
@@ -264,44 +365,62 @@ function Finished({
     [payload, ui, answers, seconds],
   );
   const code = useMemo(() => encodeResult(result), [result]);
-  const saved = useRef(false);
 
   useEffect(() => {
     let alive = true;
     void proverka.finish(answers).then((c) => {
-      if (!alive) return;
-      setCheck(c);
-      if (saved.current) return;
-      saved.current = true;
-      const numbers = payload.tasks.map((t) => t.egeNumber);
-      const score = scoreWork(numbers, c.right);
-      const finishedAt = Date.now();
-      void saveWork({
-        id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
-        code: payload.code,
-        variant: payload.variant,
-        mode: payload.mode,
-        title,
-        finishedAt,
-        resultCode: code,
-        primary: score.primary,
-        max: score.max,
-        test: score.test,
-        seconds,
-        tasks: payload.tasks.map((t, i) => ({
-          egeNumber: t.egeNumber,
-          right: c.right[i] === true,
-          empty: (answers[i] ?? '') === '',
-          seconds: result.tasks[i]?.seconds ?? 0,
-        })),
-      }).then(() => {
-        if (alive) setVolatile(archiveVolatile());
-      });
+      if (alive) setCheck(c);
     });
     return () => {
       alive = false;
     };
-  }, [proverka, answers, payload, title, code, seconds, result]);
+  }, [proverka, answers]);
+
+  /* В архив — после проверки и при каждой смене самооценки части 2
+     (та же запись: ключ по времени завершения). */
+  useEffect(() => {
+    if (check === null) return;
+    const numbers = payload.tasks.map((t) => t.egeNumber);
+    const p2 =
+      part2.length === 0
+        ? null
+        : ballyChast2(
+            part2.map((z) => z.no),
+            chast2.ball,
+          );
+    const score = withPart2(
+      scoreWork(numbers, check.right),
+      p2 === null ? null : { ball: p2.summa, max: p2.max },
+    );
+    let alive = true;
+    void saveWork({
+      id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAtMs}`,
+      code: payload.code,
+      variant: payload.variant,
+      mode: payload.mode,
+      title,
+      finishedAt: finishedAtMs,
+      resultCode: code,
+      primary: score.primary,
+      max: score.max,
+      test: score.test,
+      seconds,
+      tasks: payload.tasks.map((t, i) => ({
+        egeNumber: t.egeNumber,
+        right: check.right[i] === true,
+        empty: (answers[i] ?? '') === '',
+        seconds: result.tasks[i]?.seconds ?? 0,
+      })),
+      ...(part2.length === 0
+        ? {}
+        : { part2: part2.map((z) => ({ no: z.no, ball: chast2.ball[z.no] ?? null })) }),
+    }).then(() => {
+      if (alive) setVolatile(archiveVolatile());
+    });
+    return () => {
+      alive = false;
+    };
+  }, [check, chast2, part2, answers, payload, title, code, seconds, result, finishedAtMs]);
 
   if (check === null) return <p className="vo-status">{T.start.loading}</p>;
   const wrong = payload.tasks.map((_, i) => i).filter((i) => check.right[i] !== true);
@@ -317,6 +436,36 @@ function Finished({
       resultCode={code}
       outdated={outdated}
       notice={volatile ? T.result.volatile : null}
+      part2={
+        part2.length === 0
+          ? null
+          : {
+              ball: ballyChast2(
+                part2.map((z) => z.no),
+                chast2.ball,
+              ).summa,
+              max: ballyChast2(
+                part2.map((z) => z.no),
+                {},
+              ).max,
+            }
+      }
+      part2Block={
+        part2.length === 0 ? null : (
+          <Chast2Itog
+            part2={part2}
+            st={chast2}
+            update={setChast2}
+            part1={
+              scoreWork(
+                payload.tasks.map((t) => t.egeNumber),
+                check.right,
+              ).primary
+            }
+            fullPart1={fullPartOne(payload.tasks.map((t) => t.egeNumber))}
+          />
+        )
+      }
       actions={
         <>
           {wrong.length > 0 ? (
@@ -353,7 +502,7 @@ function Finished({
 
 /* ── Работа над ошибками ────────────────────────────────────────── */
 
-function OshibkiRun({
+export function OshibkiRun({
   link,
   wrong,
   title,
