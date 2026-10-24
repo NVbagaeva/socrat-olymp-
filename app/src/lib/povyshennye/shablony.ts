@@ -25,7 +25,8 @@ import { logObratnyy } from '@/lib/vychisleniya/povyshennye';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { P03_86 } from '@/lib/zadanie3/razdel8/cilindr';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
-import { PV7_KOREN } from '@/lib/zadanie7/prototypes/povyshennye';
+import { PV7_KOREN, PV7_LOG_KVADRAT, PV7_LOG_STEPENI } from '@/lib/zadanie7/prototypes/povyshennye';
+import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
 import { subtype as subtype11 } from '@/lib/zadanie11/prototypes';
 import { generateFixed } from '@/lib/zadanie13/generate';
 import { PEOPLE, type PlotFull } from '@/lib/zadanie13/plots';
@@ -204,14 +205,14 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
 
 /* ── №7 ─────────────────────────────────────────────────────────── */
 
-function z07(p: Params7): Gotovaya {
-  const s = PV7_KOREN.solve(p);
+function z07(p: Params7, proto: Proto7 = PV7_KOREN): Gotovaya {
+  const s = proto.solve(p);
   const otvet = answerHtml(s.answer);
   const razbor = razbor7Html(s);
   return {
     egeNumber: 7,
     difficulty: null,
-    statement: `<p>${typeset(PV7_KOREN.uslovie(p))}</p>`,
+    statement: `<p>${typeset(proto.uslovie(p))}</p>`,
     figure: null,
     figureTeacher: null,
     answer: answerText(s.answer),
@@ -398,6 +399,20 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Простейшие уравнения, группа III: показательное, справа корень (как П-16)',
     otkuda: 'novyy',
     zadacha: (p: Params7) => z07(p),
+  },
+  'z07.log-stepeni': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа IV: логарифм степени, основание и число — разные степени одного числа (как П-25)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_LOG_STEPENI),
+  },
+  'z07.log-postoronniy': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа IV: равные логарифмы → x² = c, посторонний корень, «больший корень» (как П-30)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_LOG_KVADRAT),
   },
   'z08.log-obratnyy': {
     ege: 8,
