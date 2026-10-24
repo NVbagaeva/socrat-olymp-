@@ -1104,7 +1104,6 @@ for (const [n, extra, want] of tables) {
 /* ── Шаблон решения дифференцированного платежа (решение автора 24.10) ── */
 {
   const A = requireSrc('lib/zadanie13/proto/a');
-  const { difPereplata } = requireSrc('lib/zadanie13/reshenie');
   const { generate } = requireSrc('lib/zadanie13/generate');
   const { reshenieHtml } = requireSrc('lib/zadanie13/reshenieHtml');
   const { tex } = requireSrc('lib/zadanie13/proto/common');

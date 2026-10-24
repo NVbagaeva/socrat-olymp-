@@ -620,6 +620,24 @@
 .topic-tabs__more[aria-expanded='true'] svg {
   transform: rotate(180deg);
 }
+/* Плитка «Для репетиторов» на телефоне (по 3 в ряд, styles/components.css)
+   — как остальные плитки: значок над подписью. Стрелка меню — в правом
+   верхнем углу плитки: в строку с подписью она в узкой плитке не
+   помещается. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more-in {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    align-self: stretch;
+    gap: var(--space-1);
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more-in > svg {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+}
 
 /* Меню. Ширину и сдвиг ставит компонент: место кнопки в прокрученной
    ленте из стиля не вычислить. --nose — центр носика, он же держит
