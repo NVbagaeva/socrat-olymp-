@@ -27,6 +27,7 @@ const DEV_ROUTES = [
   'styleguide/soglasiya',
   'dev/intro',
   'styleguide/chertezhi-3',
+  'kabinet',
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [
@@ -45,6 +46,8 @@ const MARKERS = [
   'dev-intro__panel',
   '/styleguide/chertezhi-3',
   'ch3p__grid',
+  '/kabinet/',
+  'kab-trial',
 ];
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
