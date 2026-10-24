@@ -30,6 +30,7 @@ import path from 'node:path';
 import { chromium, devices } from 'playwright';
 import { requireSrc, SRC, APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { generatorVersions } from './lib/generator-versions.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 bezBanneraCookieVsyudu(chromium);
@@ -75,10 +76,17 @@ for (let n = 1; n <= 13; n += 1) subtypeIds[n] = adapters.get(n).info.subtypes.m
 const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 const config = { tasks: ALL, subtypes: {}, source: 'mix', stars: [], count: 10, parallel: false };
 const SEED = 'K7M2';
-const CODE = encodeCode({ seed: SEED, config, zameny: {}, version: '00' }, subtypeIds);
-const SET = buildVariantSet({ config, seed: SEED, zameny: {}, version: '00', code: CODE }, adapters);
+/* Версия генератора — как у сборки: иначе страница предупредит, что
+   вариант собран другой версией. */
+const VERSION = generatorVersions(SRC).variant ?? '00';
+const CODE = encodeCode({ seed: SEED, config, zameny: {}, version: VERSION }, subtypeIds);
+const SET = buildVariantSet(
+  { config, seed: SEED, zameny: {}, version: VERSION, code: CODE },
+  adapters,
+);
 /** Верный ответ задания i варианта v — как вводит ученик: «-2,25». */
-const answerOf = (v, i) => normalizeAnswer(SET.variants[v - 1].tasks[i].answer).value.replace('.', ',');
+const answerOf = (v, i) =>
+  normalizeAnswer(SET.variants[v - 1].tasks[i].answer).value.replace('.', ',');
 console.log(`Серия ${CODE}`);
 
 /* ── Сервер над out/ ────────────────────────────────────────────── */
@@ -119,7 +127,8 @@ const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
 const reshat = (v, mode, tm = '0') =>
   `${BASE}/variant/reshat/?kod=${encodeURIComponent(CODE)}&v=${v}&r=${mode}&tm=${tm}&w=probnik`;
-const seriya = (mode) => `${BASE}/variant/seriya/?kod=${encodeURIComponent(CODE)}&r=${mode}&tm=0&w=probnik`;
+const seriya = (mode) =>
+  `${BASE}/variant/seriya/?kod=${encodeURIComponent(CODE)}&r=${mode}&tm=0&w=probnik`;
 
 async function shot(page, name) {
   if (!SHOTS) return;
@@ -156,41 +165,103 @@ const page = await desk.newPage();
 page.on('pageerror', (e) => errors.push(String(e)));
 await begin(page, reshat(2, 'k', '90'));
 await type(page, 0, answerOf(2, 0));
+/* Время на задание: 2,5 с на первом — в таблице результатов 2–3 с. */
+await page.waitForTimeout(2500);
 await type(page, 1, '12345');
 await type(page, 2, '1/2');
 ok(
-  (await page.locator('.vo-answer__hint.is-problem').textContent())?.includes('десятичной') === true,
+  (await page.locator('.vo-answer__hint.is-problem').textContent())?.includes('десятичной') ===
+    true,
   'подсказка о формате на «1/2»',
   'нет подсказки',
 );
 await go(page, 3);
 await page.locator('.vo-later input').check();
 await go(page, 4);
-ok((await page.locator('.vo-strip__no').nth(0).getAttribute('data-status')) === 'answered', 'статус «ответ введён»', 'нет');
-ok((await page.locator('.vo-strip__no').nth(2).getAttribute('data-status')) === 'empty', '«1/2» не сохранён как ответ', 'сохранён');
-ok((await page.locator('.vo-strip__no').nth(3).getAttribute('data-status')) === 'later', 'статус «вернусь позже»', 'нет');
+ok(
+  (await page.locator('.vo-strip__no').nth(0).getAttribute('data-status')) === 'answered',
+  'статус «ответ введён»',
+  'нет',
+);
+ok(
+  (await page.locator('.vo-strip__no').nth(2).getAttribute('data-status')) === 'empty',
+  '«1/2» не сохранён как ответ',
+  'сохранён',
+);
+ok(
+  (await page.locator('.vo-strip__no').nth(3).getAttribute('data-status')) === 'later',
+  'статус «вернусь позже»',
+  'нет',
+);
 await shot(page, 'reshenie-kompyuter');
 await page.waitForTimeout(400);
 await page.reload();
 await page.getByTestId('vo-card').waitFor({ timeout: 60_000 });
-ok((await page.locator('.vo-strip__no.is-current').textContent())?.trim() === '5', 'после перезагрузки — то же задание', 'другое');
-ok((await page.locator('.vo-strip__no').nth(3).getAttribute('data-status')) === 'later', 'после перезагрузки — «вернусь позже»', 'потерян');
+ok(
+  (await page.locator('.vo-strip__no.is-current').textContent())?.trim() === '5',
+  'после перезагрузки — то же задание',
+  'другое',
+);
+ok(
+  (await page.locator('.vo-strip__no').nth(3).getAttribute('data-status')) === 'later',
+  'после перезагрузки — «вернусь позже»',
+  'потерян',
+);
 await go(page, 0);
-ok((await page.getByTestId('vo-input').inputValue()) === answerOf(2, 0), 'после перезагрузки — ответ на месте', 'потерян');
+ok(
+  (await page.getByTestId('vo-input').inputValue()) === answerOf(2, 0),
+  'после перезагрузки — ответ на месте',
+  'потерян',
+);
 await go(page, 1);
-ok((await page.getByTestId('vo-input').inputValue()) === '12345', 'после перезагрузки — второй ответ', 'потерян');
+ok(
+  (await page.getByTestId('vo-input').inputValue()) === '12345',
+  'после перезагрузки — второй ответ',
+  'потерян',
+);
 await page.getByTestId('vo-finish').click();
 const question = await page.locator('.modal').textContent();
-ok(question?.includes('№3') === true && question.includes('№13') === true, 'в вопросе — пустые номера', question ?? '');
+ok(
+  question?.includes('№3') === true && question.includes('№13') === true,
+  'в вопросе — пустые номера',
+  question ?? '',
+);
 await page.getByTestId('vo-confirm').click();
 await page.getByTestId('vo-result').waitFor({ timeout: 60_000 });
-ok((await page.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true, 'первичный балл 1 из 13', (await page.getByTestId('vo-primary').textContent()) ?? '');
-ok((await page.getByTestId('vo-test').textContent())?.includes(String(testScore(1))) === true, 'тестовый балл по шкале', (await page.getByTestId('vo-test').textContent()) ?? '');
-ok((await page.locator('.vo-table tbody tr.is-right').count()) === 1, 'в таблице одно верное', 'не так');
+ok(
+  (await page.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
+  'первичный балл 1 из 13',
+  (await page.getByTestId('vo-primary').textContent()) ?? '',
+);
+ok(
+  (await page.getByTestId('vo-test').textContent())?.includes(String(testScore(1))) === true,
+  'тестовый балл по шкале',
+  (await page.getByTestId('vo-test').textContent()) ?? '',
+);
+ok(
+  (await page.locator('.vo-table tbody tr.is-right').count()) === 1,
+  'в таблице одно верное',
+  'не так',
+);
+const t1 =
+  (await page.locator('.vo-table tbody tr').first().locator('td').nth(3).textContent()) ?? '';
+ok(/^[23] с$/.test(t1.trim()), 'время на задание записано', t1);
+ok(
+  page.url().includes('/variant/reshat/') && (await page.locator('.vo-warn').count()) === 0,
+  'нет предупреждения о версии',
+  'есть',
+);
 await shot(page, 'rezultat-kompyuter');
 const code = (await page.getByTestId('vo-result-code').textContent())?.trim() ?? '';
 ok(code.startsWith(CODE + '_'), 'код результата', code);
-ok((await page.evaluate((k) => localStorage.getItem(k), `budetege:trainer:variant:${CODE}:2:k:session`)) === null, 'сессия удалена после завершения', 'осталась');
+ok(
+  (await page.evaluate(
+    (k) => localStorage.getItem(k),
+    `budetege:trainer:variant:${CODE}:2:k:session`,
+  )) === null,
+  'сессия удалена после завершения',
+  'осталась',
+);
 
 console.log('2. Проверка результата учителем');
 const teacher = await desk.newPage();
@@ -198,8 +269,18 @@ await teacher.goto(`${BASE}/variant/proverka/`);
 await teacher.getByTestId('vo-proverka-input').fill(code);
 await teacher.getByTestId('vo-proverka-open').click();
 await teacher.getByTestId('vo-result').waitFor({ timeout: 60_000 });
-ok((await teacher.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true, 'у учителя тот же балл', 'другой');
-ok((await teacher.locator('.vo-table tbody tr').first().textContent())?.includes(answerOf(2, 0).replace('-', '−')) === true, 'у учителя ответ ученика', 'нет');
+ok(
+  (await teacher.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
+  'у учителя тот же балл',
+  'другой',
+);
+ok(
+  (await teacher.locator('.vo-table tbody tr').first().textContent())?.includes(
+    answerOf(2, 0).replace('-', '−'),
+  ) === true,
+  'у учителя ответ ученика',
+  'нет',
+);
 await teacher.locator('.vo-table .vo-link').first().click();
 ok((await teacher.locator('.vo-table__razbor').count()) === 1, 'разбор открывается', 'нет');
 await shot(teacher, 'proverka-kompyuter');
@@ -214,7 +295,11 @@ const mob = await phone.newPage();
 mob.on('pageerror', (e) => errors.push(String(e)));
 await begin(mob, reshat(1, 't'));
 ok((await mob.locator('.keypad').count()) === 1, 'своя клавиатура на телефоне', 'нет');
-ok((await mob.getByTestId('vo-input').getAttribute('inputmode')) === 'none', 'системная клавиатура не открывается', 'inputmode не none');
+ok(
+  (await mob.getByTestId('vo-input').getAttribute('inputmode')) === 'none',
+  'системная клавиатура не открывается',
+  'inputmode не none',
+);
 /* Задание с подсказками-вопросами: №6, 7, 9, 10, 11, 13 — берём №7. */
 const i7 = 6;
 await mob.locator('.vo-strip__no').nth(i7).click();
@@ -222,7 +307,11 @@ await mob.locator('.keypad__key[data-key="-"]').click();
 await mob.locator('.keypad__key[data-key="9"]').click();
 await mob.locator('.keypad__key[data-key=","]').click();
 await mob.locator('.keypad__key[data-key="5"]').click();
-ok((await mob.getByTestId('vo-input').inputValue()) === '-9,5', 'минус и запятая с клавиатуры', await mob.getByTestId('vo-input').inputValue());
+ok(
+  (await mob.getByTestId('vo-input').inputValue()) === '-9,5',
+  'минус и запятая с клавиатуры',
+  await mob.getByTestId('vo-input').inputValue(),
+);
 await shot(mob, 'klaviatura-telefon');
 await mob.getByTestId('vo-check').click();
 await mob.locator('.vo-verdict.is-wrong').first().waitFor();
@@ -232,7 +321,11 @@ for (let k = 0; k < 6; k += 1) await mob.locator('.keypad__key[data-key="erase"]
 for (const ch of answerOf(1, i7)) await mob.locator(`.keypad__key[data-key="${ch}"]`).click();
 await mob.getByTestId('vo-check').click();
 await mob.locator('.vo-verdict.is-right').waitFor();
-ok((await mob.locator('.vo-strip__no').nth(i7).getAttribute('data-status')) === 'wrong', 'в ленте — первая попытка (неверно)', 'нет');
+ok(
+  (await mob.locator('.vo-strip__no').nth(i7).getAttribute('data-status')) === 'wrong',
+  'в ленте — первая попытка (неверно)',
+  'нет',
+);
 /* Задание 1 — верно с первой попытки. */
 await mob.locator('.vo-strip__no').nth(0).click();
 for (const ch of answerOf(1, 0)) await mob.locator(`.keypad__key[data-key="${ch}"]`).click();
@@ -242,7 +335,11 @@ await shot(mob, 'reshenie-telefon');
 await mob.getByTestId('vo-finish').click();
 await mob.getByTestId('vo-confirm').click();
 await mob.getByTestId('vo-result').waitFor({ timeout: 60_000 });
-ok((await mob.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true, 'в баллы — только первая попытка', (await mob.getByTestId('vo-primary').textContent()) ?? '');
+ok(
+  (await mob.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
+  'в баллы — только первая попытка',
+  (await mob.getByTestId('vo-primary').textContent()) ?? '',
+);
 await shot(mob, 'rezultat-telefon');
 
 /* ── 4. Серия ───────────────────────────────────────────────────── */
@@ -267,9 +364,17 @@ await page.getByTestId('vo-series').waitFor({ timeout: 60_000 });
 const cards = page.locator('.vo-vcard');
 ok((await cards.count()) === 10, '10 карточек', String(await cards.count()));
 const st = await cards.evaluateAll((els) => els.map((e) => e.getAttribute('data-status')));
-ok(st[0] === 'done' && st[1] === 'done' && st[2] === 'done' && st[3] === 'run' && st[4] === 'none', 'статусы карточек', st.join(','));
+ok(
+  st[0] === 'done' && st[1] === 'done' && st[2] === 'done' && st[3] === 'run' && st[4] === 'none',
+  'статусы карточек',
+  st.join(','),
+);
 ok((await page.getByTestId('vo-stats').count()) === 1, 'статистика серии', 'нет');
-ok((await page.locator('.vo-heat__cell').count()) === 13, 'тепловая карта 1–13', String(await page.locator('.vo-heat__cell').count()));
+ok(
+  (await page.locator('.vo-heat__cell').count()) === 13,
+  'тепловая карта 1–13',
+  String(await page.locator('.vo-heat__cell').count()),
+);
 await shot(page, 'seriya-kompyuter');
 await page.locator('.vo-series__stats').scrollIntoViewIfNeeded();
 await shot(page, 'statistika-serii-kompyuter');

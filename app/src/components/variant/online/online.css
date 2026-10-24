@@ -351,6 +351,12 @@
 .vo-verdict.is-wrong {
   color: var(--color-error);
 }
+/* Лампочка подсказки (HintFlow): размер — как в тренажёрах (prep.css). */
+.vo .ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
 .vo-steps {
   display: grid;
   gap: var(--space-2);
@@ -495,11 +501,33 @@
 .vo-table__razbor td {
   background: var(--color-surface-soft);
 }
+.vo-table__no {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vo-table__no::after {
+  content: ' ▾';
+  color: var(--color-text-tertiary);
+  font-size: 0.75em;
+}
+/* На телефоне разбор открывается по номеру: столбца «Разбор» нет. */
 @media (max-width: 599px) {
   .vo-table th,
   .vo-table td {
-    padding: var(--space-2);
+    padding: var(--space-2) var(--space-1);
     font-size: var(--fs-caption);
+  }
+  .vo-table__act {
+    display: none;
+  }
+  .vo-table .vo-mini {
+    font-size: 0.6875rem;
+    line-height: 1.2;
   }
 }
 .vo-links ul {
