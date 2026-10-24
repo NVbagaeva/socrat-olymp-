@@ -768,7 +768,7 @@ function makeSchedule(id: string, equal: boolean): Prototype {
                   cells: [
                     pred,
                     `${pred} - ${kon}`.replace(' - 0', ''),
-                    `${pred}\\cdot \\dfrac{r}{100}`,
+                    `\\dfrac{r}{100}\\cdot ${pred}`,
                     kon,
                   ] as [string, string, string, string],
                 };
@@ -1323,14 +1323,14 @@ const A18: Prototype = {
             rows: [
               {
                 label: '1',
-                cells: ['S', '\\dfrac{S}{n}', 'S\\cdot \\dfrac{r}{100}', '\\dfrac{(n-1)S}{n}'],
+                cells: ['S', '\\dfrac{S}{n}', '\\dfrac{r}{100}\\cdot S', '\\dfrac{(n-1)S}{n}'],
               },
               {
                 label: '2',
                 cells: [
                   '\\dfrac{(n-1)S}{n}',
                   '\\dfrac{S}{n}',
-                  '\\dfrac{(n-1)S}{n}\\cdot \\dfrac{r}{100}',
+                  '\\dfrac{r}{100}\\cdot \\dfrac{(n-1)S}{n}',
                   '\\dfrac{(n-2)S}{n}',
                 ],
               },
@@ -1340,7 +1340,7 @@ const A18: Prototype = {
                 cells: [
                   '\\dfrac{(n-m+1)S}{n}',
                   '\\dfrac{S}{n}',
-                  '\\dfrac{(n-m+1)S}{n}\\cdot \\dfrac{r}{100}',
+                  '\\dfrac{r}{100}\\cdot \\dfrac{(n-m+1)S}{n}',
                   '\\dfrac{(n-m)S}{n}',
                 ],
               },
@@ -1350,7 +1350,7 @@ const A18: Prototype = {
                 cells: [
                   '\\dfrac{S}{n}',
                   '\\dfrac{S}{n}',
-                  '\\dfrac{S}{n}\\cdot \\dfrac{r}{100}',
+                  '\\dfrac{r}{100}\\cdot \\dfrac{S}{n}',
                   '0',
                 ],
               },

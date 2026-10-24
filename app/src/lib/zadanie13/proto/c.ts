@@ -2,7 +2,7 @@
  * Прототипы задания №13: аннуитет и «известны платежи» (C-01 … C-17).
  * Список и источники — docs/13-economics/03-prototypes.md.
  *
- * Таблица — формат «Долг на начало · Долг с процентами · Платёж · Долг
+ * Таблица — формат «Долг на начало · Долг после начисления · Платёж · Долг
  * на конец». k = 1 + r/100 — увеличивающий коэффициент. Решение — через
  * цепочку (Sk − X)k − X = 0, раскрытие скобок и геометрическую
  * прогрессию; для четырёх платежей — разложение k³ + k² + k + 1 =
@@ -18,15 +18,7 @@ import { byPayments, equalPayment, totalPaid } from '../solver';
 import { frameEnd, frameJan, money, num, pct, plural, years } from '../text';
 import { choice, hintK, hintType, isNice, step, tex } from './common';
 import { annBukvy } from '../bukvy';
-import {
-  perenos,
-  raskryto,
-  stChisla,
-  stFormula,
-  stRaskryvaem,
-  stTablitsaBukvy,
-  stUravnenie,
-} from './razbor';
+import { perenos, stChisla, stFormula, stTablitsaBukvy, stUravnenie } from './razbor';
 import type { Prototype } from './types';
 
 /* ── Ставки: k обыкновенной дробью a/b ───────────────────────────── */
@@ -97,7 +89,7 @@ const FORMULA_X: Record<number, string> = {
 };
 
 const TEXT_ANN =
-  'Каждый год долг на начало умножаем на $k = 1 + \\dfrac{r}{100}$ — получаем долг с процентами, вычитаем платёж — получаем долг на конец. После последнего платежа долг равен нулю.';
+  'Каждый год долг на начало умножаем на $k = 1 + \\dfrac{r}{100}$ — получаем долг после начисления, вычитаем платёж — получаем долг на конец. После последнего платежа долг равен нулю.';
 
 /* ── Общие шаги ─────────────────────────────────────────────────── */
 
@@ -192,7 +184,6 @@ const C01: Prototype = {
       solution: [
         stTablitsaBukvy(`${TEXT_ANN} Все платежи равны $x$.`),
         stUravnenie(ops),
-        stRaskryvaem(ops),
         step(
           'Переносим платежи вправо и выносим $x$',
           'В скобках — сумма геометрической прогрессии.',
@@ -257,7 +248,7 @@ function makeEqualFour(id: 'C-02' | 'C-10'): Prototype {
         solution: [
           stK(rate),
           stTable(
-            'Каждый год: долг на начало $\\cdot\\, k$ — долг с процентами, минус платёж $x$ — долг на конец.',
+            'Каждый год: долг на начало $\\cdot\\, k$ — долг после начисления, минус платёж $x$ — долг на конец.',
           ),
           stChain(4),
           stOpen(4),
@@ -562,7 +553,6 @@ const C06: Prototype = {
           annBukvy({ n: 3, period: 'year', platezh: (i) => pl[i === 'n' ? 2 : i - 1] ?? 'x' }),
         ),
         stUravnenie(ops),
-        stRaskryvaem(ops),
         step(
           'Переносим платежи вправо и выносим $x$',
           'Все платежи — в правую часть, $x$ — общий множитель.',
@@ -734,7 +724,6 @@ const C08: Prototype = {
           `${TEXT_ANN} Платежи известны: $x_{1}$ в первый год и $x_{2}$ во второй; ищем $k$, а с ним и $r$.`,
         ),
         stUravnenie(ops),
-        stRaskryvaem(ops),
         {
           title: 'Решаем квадратное уравнение относительно $k$',
           text: 'Неизвестное — $k$, остальные буквы — известные числа.',
@@ -831,7 +820,7 @@ const C11: Prototype = {
     const solution = [
       {
         title: 'Составляем таблицы',
-        text: `${TEXT_ANN} Сумма кредита $S$ одна и та же, схем две: ${n === 4 ? 'четыре' : 'три'} платежа по $x$ и два по $y$. Долг на конец во второй схеме — $D'$.`,
+        text: `${TEXT_ANN} Сумма кредита $S$ одна и та же, схем две: ${n === 4 ? 'четыре' : 'три'} платежа по $x$ и два по $y$.`,
         bloki: [
           {
             vid: 'tablitsa' as const,
@@ -845,18 +834,12 @@ const C11: Prototype = {
               podpis: 'Платежи по $y$',
               label: pl2,
               platezh: () => 'y',
-              bukva: "D'",
             }),
           },
         ],
       },
       { ...stUravnenie(plX), title: 'Составляем уравнение: платежи по $x$' },
       { ...stUravnenie(plY, { D: "D'" }), title: 'Составляем уравнение: платежи по $y$' },
-      step(
-        'Раскрываем скобки',
-        'В обоих уравнениях — изнутри наружу.',
-        `${raskryto(plX)} = 0, \\qquad ${raskryto(plY)} = 0`,
-      ),
       step(
         'Переносим платежи вправо и выносим $x$ и $y$',
         n === 4
@@ -1249,7 +1232,7 @@ const C17: Prototype = {
         ),
         step(
           'Четвёртый платёж',
-          'Последний платёж гасит долг с процентами целиком.',
+          'Последний платёж гасит долг после начисления целиком.',
           `${fr(d3)}\\,S\\cdot ${tex(k2)} = ${fr(p4)}\\,S`,
         ),
         stAnswer(`Четвёртый платёж — ${pct(answer)} от $S$.`),

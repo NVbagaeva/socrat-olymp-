@@ -84,7 +84,7 @@ function tablitsa(k: Kredit13, period: 'month' | 'year', P: string): TablitsaPer
     /* Первая строка — просто S: как S записывается дробью, видно под
        таблицей (переход к долгу на конец) и в сумме переплат. */
     const nachalo = pervaya ? 'S' : dolya(start, n);
-    return [nachalo, dolya(1, n), `${nachalo}\\cdot ${rT}`, dolya(end, n)] as [
+    return [nachalo, dolya(1, n), `${rT}\\cdot ${nachalo}`, dolya(end, n)] as [
       string,
       string,
       string,
@@ -153,11 +153,11 @@ function slagaemye(k: Kredit13): string {
   const rT = stavka(k);
   if (k.n === null) {
     return [fr('nS', 'n'), fr('(n-1)S', 'n'), '\\dots', fr('S', 'n')]
-      .map((t) => (t === '\\dots' ? t : `${t}\\cdot ${rT}`))
+      .map((t) => (t === '\\dots' ? t : `${rT}\\cdot ${t}`))
       .join(' + ');
   }
   const n = k.n;
-  const term = (j: number) => `${j === 1 ? fr(`${n}S`, n) : dolya(n - j + 1, n)}\\cdot ${rT}`;
+  const term = (j: number) => `${rT}\\cdot ${j === 1 ? fr(`${n}S`, n) : dolya(n - j + 1, n)}`;
   const js = n <= 4 ? Array.from({ length: n }, (_, i) => i + 1) : [1, 2, 0, n];
   return js.map((j) => (j === 0 ? '\\dots' : term(j))).join(' + ');
 }

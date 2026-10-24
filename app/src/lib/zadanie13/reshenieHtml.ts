@@ -63,7 +63,7 @@ export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
     t.itog === null
       ? ''
       : `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
-        `<td>${stroka(t.itog[0])}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
+        `<td>${t.itog[0] ? stroka(t.itog[0]) : ''}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
   return (
     `<figure class="z13-r-tab">` +
     (t.podpis ? `<figcaption>${typeset(t.podpis)}</figcaption>` : '') +
