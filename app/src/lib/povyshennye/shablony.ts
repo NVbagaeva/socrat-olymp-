@@ -273,6 +273,27 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
   };
 }
 
+/* ── №6 ─────────────────────────────────────────────────────────── */
+
+/** Задача №6 прототипа раздела: условие и разбор — генератора раздела. */
+function z06(proto: string, p: Params6, klyuch: string): Gotovaya {
+  const u = prototype6(proto).uslovie(p);
+  return bezPoley(
+    build06({
+      ...kand,
+      prototypeId: proto,
+      z: {
+        id: klyuch,
+        prototypeId: proto,
+        source: 'analog',
+        text: u.text,
+        ...(u.posle === undefined ? {} : { posle: u.posle }),
+        params: p,
+      },
+    }),
+  );
+}
+
 /* ── №7 ─────────────────────────────────────────────────────────── */
 
 function z07(p: Params7, proto: Proto7 = PV7_KOREN): Gotovaya {
@@ -556,20 +577,19 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 6,
     prototip: 'Случайные величины, группа III: частоты «из 100 покупателей» → ожидание (P08)',
     otkuda: 'razdel',
-    zadacha: (p: Params6, klyuch: string) =>
-      bezPoley(
-        build06({
-          ...kand,
-          prototypeId: 'P08',
-          z: {
-            id: klyuch,
-            prototypeId: 'P08',
-            source: 'analog',
-            text: prototype6('P08').uslovie(p).text,
-            params: p,
-          },
-        }),
-      ),
+    zadacha: (p: Params6, klyuch: string) => z06('P08', p, klyuch),
+  },
+  'z06.dispersiya': {
+    ege: 6,
+    prototip: 'Случайные величины, группа V: дисперсия по распределению (P14)',
+    otkuda: 'razdel',
+    zadacha: (p: Params6, klyuch: string) => z06('P14', p, klyuch),
+  },
+  'z06.otklonenie': {
+    ege: 6,
+    prototip: 'Случайные величины, группа V: стандартное отклонение (P15)',
+    otkuda: 'razdel',
+    zadacha: (p: Params6, klyuch: string) => z06('P15', p, klyuch),
   },
   'z07.koren': {
     ege: 7,
