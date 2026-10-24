@@ -96,6 +96,8 @@ const ALL_PAGES = [
   '/zadaniya/5/teoriya/',
   '/zadaniya/8/',
   '/zadaniya/9/',
+  '/zadaniya/13/',
+  '/zadaniya/13/teoriya/',
   '/zadaniya/16/',
   '/zadaniya/16/teoriya/',
   '/zadaniya/16/opornye-zadachi/',
