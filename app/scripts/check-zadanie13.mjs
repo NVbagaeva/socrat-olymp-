@@ -647,6 +647,83 @@ for (const [n, extra, want] of tables) {
     problems.push('evenEnds');
 }
 
+/* ── Теория: правила с примерами, «Важно» не одно, формулы собираются ── */
+{
+  const katex = require('katex');
+  const { findPlainMath, findRawTex, stripDollarMath } = await import('./lib/math-markup.mjs');
+  const { GLAVY_13, PRIZNAKI } = requireSrc('content/teoriya13');
+  const { generate: gen13 } = requireSrc('lib/zadanie13/generate');
+  const tx = (t, where) => {
+    try {
+      katex.renderToString(t, { throwOnError: true, strict: 'error' });
+    } catch (e) {
+      problems.push(`теория ${where}: KaTeX «${t.slice(0, 50)}»: ${e.message.slice(0, 100)}`);
+    }
+  };
+  const txt = (t, where) => {
+    for (const m of t.matchAll(/\$([^$]+)\$/g)) tx(m[1], where);
+    const plain = stripDollarMath(t).replace(/\*\*/g, '');
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) problems.push(`теория ${where}: вне KaTeX (${f.rule}): «${f.match}»`);
+  };
+  const ids = new Set();
+  for (const g of GLAVY_13) {
+    checks += 1;
+    if (ids.has(g.id)) problems.push(`теория: повтор id ${g.id}`);
+    ids.add(g.id);
+    txt(g.lead, g.id);
+    if (/\$/.test(g.title)) problems.push(`теория ${g.id}: в названии главы формула — содержание её не наберёт`);
+    for (const p of g.podrazdely) {
+      if (ids.has(p.id)) problems.push(`теория: повтор id ${p.id}`);
+      ids.add(p.id);
+      for (const b of p.bloki) {
+        const w = `${p.id}/${b.vid}${b.title ? ' «' + b.title.slice(0, 30) + '»' : ''}`;
+        checks += 1;
+        if (b.title) txt(b.title, w);
+        if (b.vid === 'kartochka') {
+          txt(b.text, w);
+          if (b.tex) tx(b.tex, w);
+          (b.spisok ?? []).forEach((x) => txt(x, w));
+          if (b.pochemu) txt(b.pochemu, w);
+          if ((b.rol === 'pravilo' || b.rol === 'vazhno') && !b.primer) problems.push(`теория ${w}: у правила и «Важно» нужен пример`);
+          if (b.rol === 'vazhno' && !b.pochemu) problems.push(`теория ${w}: «Важно» без «Почему это работает»`);
+          if (b.primer) {
+            txt(b.primer.uslovie, w);
+            for (const st of b.primer.shagi) {
+              txt(st.title + ' ' + st.text, w);
+              if (st.tex) tx(st.tex, w);
+            }
+            if (b.primer.otvet) txt(b.primer.otvet, w);
+          }
+        }
+        if (b.vid === 'tablitsa') {
+          b.tablitsa.rows.flat().forEach((c) => tx(c, w));
+          b.tablitsa.labels.forEach((c) => tx(c, w));
+          (b.tablitsa.itog ?? []).filter(Boolean).forEach((c) => tx(c, w));
+          if (b.tablitsa.podpis) txt(b.tablitsa.podpis, w);
+        }
+        if (b.vid === 'proporciya') {
+          b.stroki.flat().forEach((c) => tx(c, w));
+          tx(b.vyvod, w);
+        }
+        if (b.vid === 'risunok') txt(b.podpis, w);
+        if (b.vid === 'razbor') {
+          try {
+            const t = gen13(b.prototypeId, b.seed);
+            if (!t.solution.length) problems.push(`теория ${w}: разбор без решения`);
+          } catch (e) {
+            problems.push(`теория ${w}: разбор не собрался: ${e.message}`);
+          }
+        }
+        if (b.vid === 'opredeli') b.zadachi.forEach((z) => (txt(z.text, w), txt(z.priznak, w)));
+      }
+    }
+  }
+  PRIZNAKI.forEach((p) => (txt(p.vizhu, 'признаки'), txt(p.pochemu, 'признаки')));
+  /* Типы называются словами, без букв: «тип А» в тексте теории недопустим. */
+  const all = JSON.stringify(GLAVY_13);
+  if (/тип\s+[АБВГ]\b/.test(all)) problems.push('теория: типы должны называться словами, без букв');
+}
+
 /* ── Банк: 10 вариантов на прототип ────────────────────────────── */
 {
   const bankFile = new URL('../src/lib/zadanie13/bank.ts', import.meta.url);

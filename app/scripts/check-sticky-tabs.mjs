@@ -71,6 +71,8 @@ const PAGES = [
   '/zadaniya/11/generator/',
   '/zadaniya/11/dlya-repetitorov/',
   '/zadaniya/2/teoriya/',
+  '/zadaniya/13/',
+  '/zadaniya/13/teoriya/',
   '/zadaniya/16/',
   '/zadaniya/16/teoriya/',
   '/zadaniya/16/opornye-zadachi/',

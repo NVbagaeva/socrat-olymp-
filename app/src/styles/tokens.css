@@ -230,6 +230,10 @@
   --color-spr-vaz-soft: var(--rust-50);
   --color-spr-primer: var(--slate-600);
   --color-spr-primer-soft: var(--grey-50);
+  /* Карточки теории задания №13 (docs/13-economics/02-design.md, § 2.1):
+     роль «Признак» — фиолетовая пара; остальные роли берут общие токены. */
+  --color-z13-priznak: var(--violet-700);
+  --color-z13-priznak-soft: var(--violet-50);
   --color-spr-primenenie: var(--navy-700);
   --color-spr-primenenie-soft: var(--grey-50);
   --color-spr-klyuch: var(--gold-500);
