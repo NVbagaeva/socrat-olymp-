@@ -10,7 +10,7 @@
   "uniqueAnswers": true,
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 8
+    "count": 10
   },
   "tasks": [
     {
@@ -92,6 +92,28 @@
     },
     {
       "id": "P12R-1-08",
+      "question": "График функции $f(x) = k/x$ изображён на рисунке. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "negative"
+      }
+    },
+    {
+      "id": "P12R-1-09",
+      "question": "На рисунке изображён график функции вида $f(x) = k/x$. Найдите $k$.",
+      "answerRule": "coef-k",
+      "answerType": "number",
+      "hint": "Точка графика $y = k/x$ даёт $k$ сразу: $k = x \\cdot y$. Возьми отмеченную точку и перемножь её координаты.",
+      "form": "basic",
+      "constraints": {
+        "mSign": "positive"
+      }
+    },
+    {
+      "id": "P12R-1-10",
       "question": "График функции $f(x) = k/x$ изображён на рисунке. Найдите $k$.",
       "answerRule": "coef-k",
       "answerType": "number",
